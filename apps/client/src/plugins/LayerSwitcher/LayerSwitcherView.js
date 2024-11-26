@@ -654,7 +654,6 @@ class LayersSwitcherView extends React.PureComponent {
             />
             {this.state.treeData.map((group, i) => (
               <LayerGroup
-                filterChangeIndicator={group.changeIndicator}
                 key={i}
                 group={group}
                 localObserver={this.localObserver}

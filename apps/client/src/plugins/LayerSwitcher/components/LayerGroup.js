@@ -1,5 +1,4 @@
-import React from "react";
-import propTypes from "prop-types";
+import React, { useState, useEffect, useRef } from "react";
 import LayerItem from "./LayerItem";
 import GroupLayer from "./GroupLayer";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
@@ -13,12 +12,7 @@ import HajkToolTip from "components/HajkToolTip";
 /**
  * If Group has "toggleable" property enabled, render the toggle all checkbox.
  */
-const ToggleAllComponent = ({
-  toggleable,
-  toggled,
-  semiToggled,
-  clickHandler,
-}) => {
+const ToggleAllComponent = ({ toggleable, toggleState, clickHandler }) => {
   if (!toggleable) {
     return null;
   }
@@ -31,13 +25,13 @@ const ToggleAllComponent = ({
       }}
     >
       <IconButton sx={{ pl: 0 }} disableRipple size="small">
-        {toggled ? (
-          <CheckBoxIcon />
-        ) : semiToggled ? (
-          <CheckBoxIcon sx={{ color: "gray" }} />
-        ) : (
-          <CheckBoxOutlineBlankIcon />
-        )}
+        {
+          {
+            checked: <CheckBoxIcon />,
+            semichecked: <CheckBoxIcon sx={{ color: "gray" }} />,
+            unchecked: <CheckBoxOutlineBlankIcon />,
+          }[toggleState]
+        }
       </IconButton>
     </div>
   );
@@ -132,80 +126,61 @@ const GroupInfoToggler = ({
   );
 };
 
-class LayerGroup extends React.PureComponent {
-  // expanded
-  // isExpanded
-  // infoVisible
-  state = {
-    expanded: false,
-    groups: [],
-    layers: [],
-    name: "",
-    parent: "-1",
-    toggled: false,
+const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
+  const { name, groups } = group;
 
-    chapters: [],
-    infogrouptitle: "",
-    infogrouptext: "",
-    infogroupurl: "",
-    infogroupurltext: "",
-    infogroupopendatalink: "",
-    infogroupowner: "",
-    infoVisible: false,
-  };
+  const infogrouptitle = group.infogrouptitle;
+  const infogrouptext = group.infogrouptext;
+  const infogroupurl = group.infogroupurl;
+  const infogroupurltext = group.infogroupurltext;
+  const infogroupopendatalink = group.infogroupopendatalink;
+  const infogroupowner = group.infogroupowner;
 
-  static defaultProps = {
-    expanded: false,
-  };
+  const [infoVisible, setInfoVisible] = useState(false);
 
-  static propTypes = {
-    app: propTypes.object.isRequired,
-    expanded: propTypes.bool.isRequired,
-    group: propTypes.object.isRequired,
-    localObserver: propTypes.object.isRequired,
-    layerMap: propTypes.object.isRequired,
-  };
+  // Openlayers functions does not use any of our props, so this is safe
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allLayers = useRef(app.getMap().getAllLayers(), [app]);
 
-  constructor(props) {
-    super(props);
-    this.bindVisibleChangeForLayersInGroup();
-    console.log(this.props.group);
-  }
+  useEffect(() => {
+    bindVisibleChangeForLayersInGroup();
+    return () => {
+      //LayerGroup is never unmounted atm but we remove listener in case this changes in the future
+      unbindVisibleChangeForLayersInGroup();
+    };
+    // This useEffect corresponds to `componentDidMount` in the previous
+    // version. It should never re-run.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  componentDidMount() {
-    this.setState({
-      ...this.props.group,
-      expanded: this.props.group.isExpanded,
-    });
-    this.allLayers = this.props.app.getMap().getAllLayers();
-  }
-
-  componentWillUnmount() {
-    //LayerGroup is never unmounted atm but we remove listener in case this changes in the future
-    this.unbindVisibleChangeForLayersInGroup();
-  }
-
+  // eslint-disable-next-line no-unused-vars
+  const [_, forceUpdate] = useState(null);
   //We force update when a layer in this group has changed visibility to
   //be able to sync togglebuttons in GUI
-  layerVisibilityChanged = (_) => {
-    this.forceUpdate();
+  const layerVisibilityChanged = (_) => {
+    forceUpdate();
+    // setExpanded(expanded);
   };
 
-  getAllLayersInGroupAndSubGroups = (groups) => {
+  const hasLayers = (group) => {
+    return group.layers && group.layers.length > 0;
+  };
+
+  const hasSubGroups = (group) => {
+    return group.groups && group.groups.length > 0;
+  };
+
+  const getAllLayersInGroupAndSubGroups = (groups) => {
     return groups.reduce((layers, group) => {
-      if (this.hasSubGroups(group)) {
-        layers = [
-          ...layers,
-          ...this.getAllLayersInGroupAndSubGroups(group.groups),
-        ];
+      if (hasSubGroups(group)) {
+        layers = [...layers, ...getAllLayersInGroupAndSubGroups(group.groups)];
       }
       return [...layers, ...group.layers];
     }, []);
   };
 
-  getAllMapLayersReferencedByGroup = () => {
-    const { app, group } = this.props;
-    const allLayersInGroup = this.getAllLayersInGroupAndSubGroups([group]);
+  const getAllMapLayersReferencedByGroup = () => {
+    const allLayersInGroup = getAllLayersInGroupAndSubGroups([group]);
     return app
       .getMap()
       .getLayers()
@@ -217,37 +192,20 @@ class LayerGroup extends React.PureComponent {
       });
   };
 
-  bindVisibleChangeForLayersInGroup = () => {
-    this.getAllMapLayersReferencedByGroup().forEach((layer) => {
-      layer.on("change:visible", this.layerVisibilityChanged);
+  const bindVisibleChangeForLayersInGroup = () => {
+    getAllMapLayersReferencedByGroup().forEach((layer) => {
+      layer.on("change:visible", layerVisibilityChanged);
     });
   };
 
-  unbindVisibleChangeForLayersInGroup = () => {
-    this.getAllMapLayersReferencedByGroup().forEach((layer) => {
-      layer.un("change:visible", this.layerVisibilityChanged);
+  const unbindVisibleChangeForLayersInGroup = () => {
+    getAllMapLayersReferencedByGroup().forEach((layer) => {
+      layer.un("change:visible", layerVisibilityChanged);
     });
   };
 
-  handleChange = (panel) => (_, isExpanded) => {
-    this.setState({
-      expanded: isExpanded ? panel : false,
-      isExpanded: isExpanded,
-    });
-  };
-
-  isToggled() {
-    const { group } = this.props;
-    return this.areAllGroupsAndSubGroupsToggled(group);
-  }
-
-  isSemiToggled() {
-    const { group } = this.props;
-    return this.areSubGroupsAndLayersSemiToggled(group);
-  }
-
-  layerInMap = (layer) => {
-    const layers = this.props.app.getMap().getLayers().getArray();
+  const layerInMap = (layer) => {
+    const layers = app.getMap().getLayers().getArray();
     let foundMapLayer = layers.find((mapLayer) => {
       return mapLayer.get("name") === layer.id;
     });
@@ -259,44 +217,36 @@ class LayerGroup extends React.PureComponent {
     }
   };
 
-  areSubGroupsAndLayersSemiToggled = (group) => {
+  const areSubGroupsAndLayersSemiToggled = (group) => {
     let someSubItemToggled = false;
-    if (this.hasLayers(group)) {
+    if (hasLayers(group)) {
       someSubItemToggled = group.layers.some((layer) => {
-        return this.layerInMap(layer);
+        return layerInMap(layer);
       });
     }
 
-    if (this.hasSubGroups(group) && !someSubItemToggled) {
+    if (hasSubGroups(group) && !someSubItemToggled) {
       someSubItemToggled = group.groups.some((g) => {
-        return this.areSubGroupsAndLayersSemiToggled(g);
+        return areSubGroupsAndLayersSemiToggled(g);
       });
     }
     return someSubItemToggled;
   };
 
-  areAllGroupsAndSubGroupsToggled = (group) => {
+  const areAllGroupsAndSubGroupsToggled = (group) => {
     let allGroupsToggled = true;
     let allLayersToggled = true;
-    if (this.hasSubGroups(group)) {
+    if (hasSubGroups(group)) {
       allGroupsToggled = group.groups.every((g) => {
-        return this.areAllGroupsAndSubGroupsToggled(g);
+        return areAllGroupsAndSubGroupsToggled(g);
       });
     }
-    if (this.hasLayers(group)) {
+    if (hasLayers(group)) {
       allLayersToggled = group.layers.every((layer) => {
-        return this.layerInMap(layer);
+        return layerInMap(layer);
       });
     }
     return allGroupsToggled && allLayersToggled;
-  };
-
-  hasLayers = (group) => {
-    return group.layers && group.layers.length > 0;
-  };
-
-  hasSubGroups = (group) => {
-    return group.groups && group.groups.length > 0;
   };
   /**
    * @summary Loops through groups of objects and changes visibility for all layers within group.
@@ -305,182 +255,172 @@ class LayerGroup extends React.PureComponent {
    * @param {array|object} groupsArray
    * @memberof LayerGroup
    */
-  toggleGroups(visibility, groupsArray) {
+  const toggleGroups = (visibility, groupsArray) => {
     // Sometimes groupsArray is an array of objects:
     Array.isArray(groupsArray) &&
       groupsArray.forEach((group) => {
         // First call this function on all groups that might be inside this group
         group.groups.length &&
           group.groups.forEach((g) => {
-            this.toggleGroups(visibility, g);
+            toggleGroups(visibility, g);
           });
 
         // Next, call toggleLayers on all layers in group
-        this.toggleLayers(visibility, group.layers);
+        toggleLayers(visibility, group.layers);
       });
 
     // … but sometimes it's not an array but rather an object:
     typeof groupsArray === "object" &&
       groupsArray !== null &&
       groupsArray.hasOwnProperty("groups") &&
-      this.toggleGroups(visibility, groupsArray.groups);
+      toggleGroups(visibility, groupsArray.groups);
 
     typeof groupsArray === "object" &&
       groupsArray !== null &&
       groupsArray.hasOwnProperty("layers") &&
-      this.toggleLayers(visibility, groupsArray.layers);
-  }
+      toggleLayers(visibility, groupsArray.layers);
+  };
 
-  toggleLayers(visibility, layers) {
-    this.allLayers
+  const toggleLayers = (visibility, layers) => {
+    allLayers.current
       .filter((mapLayer) => {
         return layers.some((layer) => layer.id === mapLayer.get("name"));
       })
       .forEach((mapLayer) => {
         if (mapLayer.get("layerType") === "group") {
           if (visibility === true) {
-            this.props.localObserver.publish("showLayer", mapLayer);
+            localObserver.publish("showLayer", mapLayer);
           } else {
-            this.props.localObserver.publish("hideLayer", mapLayer);
+            localObserver.publish("hideLayer", mapLayer);
           }
         } else {
           mapLayer.setVisible(visibility);
         }
       });
-  }
-
-  toggleInfo = () => {
-    this.setState({
-      infoVisible: !this.state.infoVisible,
-    });
   };
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    // Check if the isExpanded property has changed
-    if (nextProps.group.isExpanded !== prevState.isExpanded) {
-      return {
-        expanded: nextProps.group.isExpanded,
-        isExpanded: nextProps.group.isExpanded, // Keep a copy of isExpanded in state for comparison
-      };
-    }
-    return null;
+  const toggleInfo = () => {
+    setInfoVisible(!infoVisible);
+  };
+
+  let groupsExpanded = false;
+  if (group.groups.length === 1 && groups[0].expanded) {
+    groupsExpanded = groups[0].id;
   }
 
-  render() {
-    const { expanded } = this.state;
-    let groupsExpanded = expanded;
-    if (this.state.groups.length === 1 && this.state.groups[0].expanded) {
-      groupsExpanded = this.state.groups[0].id;
-    }
-    return (
-      <LayerGroupAccordion
-        display={!this.props.group.isFiltered ? "none" : "block"}
-        toggleable={this.props.group.toggled}
-        expanded={expanded}
-        toggleDetails={
-          <ToggleAllComponent
-            toggleable={this.props.group.toggled}
-            toggled={this.isToggled()}
-            semiToggled={this.isSemiToggled()}
-            clickHandler={() => {
-              if (this.isToggled()) {
-                this.toggleGroups(false, this.props.group.groups);
-                this.toggleLayers(false, this.props.group.layers);
-              } else {
-                this.toggleGroups(true, this.props.group.groups);
-                this.toggleLayers(true, this.props.group.layers);
-              }
-            }}
-          />
-        }
-        layerGroupTitle={
-          <div>
-            <div style={{ display: "flex", flexDirection: "row" }}>
-              <GroupInfoToggler
-                clickHandler={() => this.toggleInfo()}
-                infoVisible={this.state.infoVisible}
-                infogrouptitle={this.state.infogrouptitle}
-                infogrouptext={this.state.infogrouptext}
-                infogroupurl={this.state.infogroupurl}
-                infogroupurltext={this.state.infogroupurltext}
-                infogroupopendatalink={this.state.infogroupopendatalink}
-                infogroupowner={this.state.infogroupowner}
-              />
-              <ListItemText
-                primaryTypographyProps={{
-                  py: this.props.group.toggled ? 0 : "3px",
-                  pl: this.props.group.toggled ? 0 : "3px",
-                  variant: "body1",
-                  fontWeight:
-                    this.isToggled() || this.isSemiToggled()
-                      ? "bold"
-                      : "inherit",
-                }}
-                primary={this.state.name}
-              />
-            </div>
-            <GroupInfoDetails
-              name={this.props.group.name}
-              infoVisible={this.state.infoVisible}
-              infogrouptitle={this.state.infogrouptitle}
-              infogrouptext={this.state.infogrouptext}
-              infogroupurl={this.state.infogroupurl}
-              infogroupurltext={this.state.infogroupurltext}
-              infogroupopendatalink={this.state.infogroupopendatalink}
-              infogroupowner={this.state.infogroupowner}
+  const isToggled = areAllGroupsAndSubGroupsToggled(group);
+  const isSemiToggled = areSubGroupsAndLayersSemiToggled(group);
+  const toggleState = isToggled
+    ? "checked"
+    : isSemiToggled
+      ? "semichecked"
+      : "unchecked";
+
+  console.log({ name, isToggled, isSemiToggled, toggleState });
+
+  return (
+    <LayerGroupAccordion
+      display={!group.isFiltered ? "none" : "block"}
+      toggleable={group.toggled}
+      expanded={group.isExpanded}
+      test={toggleState}
+      toggleDetails={
+        <ToggleAllComponent
+          toggleable={group.toggled}
+          toggleState={toggleState}
+          clickHandler={() => {
+            if (isToggled) {
+              toggleGroups(false, group.groups);
+              toggleLayers(false, group.layers);
+            } else {
+              toggleGroups(true, group.groups);
+              toggleLayers(true, group.layers);
+            }
+          }}
+        />
+      }
+      layerGroupTitle={
+        <div>
+          <div style={{ display: "flex", flexDirection: "row" }}>
+            <GroupInfoToggler
+              clickHandler={() => toggleInfo()}
+              infoVisible={infoVisible}
+              infogrouptitle={infogrouptitle}
+              infogrouptext={infogrouptext}
+              infogroupurl={infogroupurl}
+              infogroupurltext={infogroupurltext}
+              infogroupopendatalink={infogroupopendatalink}
+              infogroupowner={infogroupowner}
+            />
+            <ListItemText
+              primaryTypographyProps={{
+                py: group.toggled ? 0 : "3px",
+                pl: group.toggled ? 0 : "3px",
+                variant: "body1",
+                fontWeight: isToggled || isSemiToggled ? "bold" : "inherit",
+              }}
+              primary={name}
             />
           </div>
-        }
-      >
-        <div>
-          {this.props.group.layers.map((layer) => {
-            const mapLayer = this.props.layerMap[layer.id];
-            // If mapLayer doesn't exist, the layer shouldn't be displayed
-            if (!mapLayer) {
-              return null;
-            }
-
-            return mapLayer.get("layerType") === "group" ? (
-              <GroupLayer
-                display={!layer.isFiltered ? "none" : "block"}
-                key={mapLayer.get("name")}
-                layer={mapLayer}
-                draggable={false}
-                toggleable={true}
-                app={this.props.app}
-                localObserver={this.props.localObserver}
-                groupLayer={layer}
-              />
-            ) : (
-              <LayerItem
-                display={!layer.isFiltered ? "none" : "block"}
-                key={mapLayer.get("name")}
-                layer={mapLayer}
-                draggable={false}
-                toggleable={true}
-                app={this.props.app}
-                localObserver={this.props.localObserver}
-                groupLayer={layer}
-              />
-            );
-          })}
-          {this.state.groups.map((group, i) => (
-            <LayerGroup
-              filterChangeIndicator={group.changeIndicator}
-              expanded={groupsExpanded === group.id}
-              key={i}
-              group={group}
-              localObserver={this.props.localObserver}
-              layerMap={this.props.layerMap}
-              handleChange={this.handleChange}
-              app={this.props.app}
-              options={this.props.options}
-            />
-          ))}
+          <GroupInfoDetails
+            name={group.name}
+            infoVisible={infoVisible}
+            infogrouptitle={infogrouptitle}
+            infogrouptext={infogrouptext}
+            infogroupurl={infogroupurl}
+            infogroupurltext={infogroupurltext}
+            infogroupopendatalink={infogroupopendatalink}
+            infogroupowner={infogroupowner}
+          />
         </div>
-      </LayerGroupAccordion>
-    );
-  }
-}
+      }
+    >
+      <div>
+        {group.layers.map((layer) => {
+          const mapLayer = layerMap[layer.id];
+          // If mapLayer doesn't exist, the layer shouldn't be displayed
+          if (!mapLayer) {
+            return null;
+          }
+
+          return mapLayer.get("layerType") === "group" ? (
+            <GroupLayer
+              display={!layer.isFiltered ? "none" : "block"}
+              key={mapLayer.get("name")}
+              layer={mapLayer}
+              draggable={false}
+              toggleable={true}
+              app={app}
+              localObserver={localObserver}
+              groupLayer={layer}
+            />
+          ) : (
+            <LayerItem
+              display={!layer.isFiltered ? "none" : "block"}
+              key={mapLayer.get("name")}
+              layer={mapLayer}
+              draggable={false}
+              toggleable={true}
+              app={app}
+              localObserver={localObserver}
+              groupLayer={layer}
+            />
+          );
+        })}
+        {group.groups.map((group, i) => (
+          <LayerGroup
+            expanded={groupsExpanded === group.id}
+            key={i}
+            group={group}
+            localObserver={localObserver}
+            layerMap={layerMap}
+            app={app}
+            options={options}
+          />
+        ))}
+      </div>
+    </LayerGroupAccordion>
+  );
+};
 
 export default LayerGroup;
