@@ -131,6 +131,7 @@ export default function ServicesPage() {
         <Box component="div">Loading...</Box>
       ) : (
         <>
+          {!services && <Box component="div">No services found</Box>}
           {!!services && (
             <Button
               onClick={handleClickOpen}
@@ -176,7 +177,13 @@ export default function ServicesPage() {
                   navigate(`/services/${id}`);
                 }
               }}
-              sx={{ maxWidth: "100%", mt: 8 }}
+              sx={{
+                maxWidth: "100%",
+                mt: 8,
+                "& .MuiDataGrid-row:hover": {
+                  cursor: "pointer",
+                },
+              }}
               rows={services ?? []}
               columns={[
                 {

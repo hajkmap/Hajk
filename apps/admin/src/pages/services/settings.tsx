@@ -76,6 +76,7 @@ export default function ServiceSettings() {
   const handleUpdateService = async (serviceData: ServiceUpdateFormData) => {
     try {
       const payload = {
+        name: serviceData.name,
         url: serviceData.url,
         type: serviceData.type,
         serverType: serviceData.serverType,
