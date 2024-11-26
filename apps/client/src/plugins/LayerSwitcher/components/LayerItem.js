@@ -187,7 +187,7 @@ export default function LayerItem({
 
   useEffect(() => {
     // Handler for zoom change event.
-    const handleChange = () => {
+    const handleChange = (l) => {
       // Check if the layer is currently visible.
       if (layer.get("visible")) {
         // Trigger zoom check.

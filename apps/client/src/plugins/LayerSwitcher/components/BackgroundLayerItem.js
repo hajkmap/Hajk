@@ -63,80 +63,74 @@ export default function BackgroundLayerItem({
       style={{
         marginLeft: 0,
         borderBottom: "none",
+        display: "flex",
       }}
     >
-      <Box
+      <ListItemButton
+        disableTouchRipple
+        onClick={clickCallback}
         sx={{
-          borderBottom: "none",
-          display: "flex",
+          p: 0,
+          ml: 0,
         }}
+        dense
       >
-        <ListItemButton
-          disableTouchRipple
-          onClick={clickCallback}
+        <Box
           sx={{
-            p: 0,
-            ml: 0,
+            display: "flex",
+            position: "relative",
+            width: "100%",
+            alignItems: "center",
+            py: 0.5,
+            pr: 1,
+            borderBottom: (theme) =>
+              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
-          dense
         >
-          <Box
-            sx={{
-              display: "flex",
-              position: "relative",
-              width: "100%",
-              alignItems: "center",
-              py: 0.5,
-              pr: 1,
-              borderBottom: (theme) =>
-                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          <IconButton disableTouchRipple size="small" sx={{ pl: 0 }}>
+            {selected ? (
+              <RadioButtonChecked sx={{ ml: 2 }} />
+            ) : (
+              <RadioButtonUnchecked sx={{ ml: 2 }} />
+            )}
+          </IconButton>
+          <ListItemText
+            primary={name}
+            primaryTypographyProps={{
+              pr: 5,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              variant: "body1",
+              fontWeight: "inherit",
             }}
-          >
-            <IconButton disableTouchRipple size="small" sx={{ pl: 0 }}>
-              {selected ? (
-                <RadioButtonChecked sx={{ ml: 2 }} />
-              ) : (
-                <RadioButtonUnchecked sx={{ ml: 2 }} />
-              )}
-            </IconButton>
-            <ListItemText
-              primary={name}
-              primaryTypographyProps={{
-                pr: 5,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                variant: "body1",
-                fontWeight: "inherit",
-              }}
-            />
-            <ListItemSecondaryAction>
-              {wmsLayerLoadStatus === "loaderror" && (
-                <IconButton disableTouchRipple>
-                  <HajkToolTip
-                    disableInteractive
-                    title="Lagret kunde inte laddas in. Kartservern svarar inte."
-                  >
-                    <WarningAmberOutlinedIcon fontSize="small" />
-                  </HajkToolTip>
-                </IconButton>
-              )}
-              {layer.isFakeMapLayer !== true && (
-                <IconButton
-                  size="small"
-                  onClick={(e) => showLayerDetails(e)}
-                  disableTouchRipple
+          />
+          <ListItemSecondaryAction>
+            {wmsLayerLoadStatus === "loaderror" && (
+              <IconButton disableTouchRipple>
+                <HajkToolTip
+                  disableInteractive
+                  title="Lagret kunde inte laddas in. Kartservern svarar inte."
                 >
-                  <KeyboardArrowRightOutlinedIcon
-                    sx={{
-                      color: (theme) => theme.palette.grey[500],
-                    }}
-                  ></KeyboardArrowRightOutlinedIcon>
-                </IconButton>
-              )}
-            </ListItemSecondaryAction>
-          </Box>
-        </ListItemButton>
-      </Box>
+                  <WarningAmberOutlinedIcon fontSize="small" />
+                </HajkToolTip>
+              </IconButton>
+            )}
+            {layer.isFakeMapLayer !== true && (
+              <IconButton
+                size="small"
+                onClick={(e) => showLayerDetails(e)}
+                disableTouchRipple
+              >
+                <KeyboardArrowRightOutlinedIcon
+                  sx={{
+                    color: (theme) => theme.palette.grey[500],
+                  }}
+                ></KeyboardArrowRightOutlinedIcon>
+              </IconButton>
+            )}
+          </ListItemSecondaryAction>
+        </Box>
+      </ListItemButton>
     </div>
   );
 }
