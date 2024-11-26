@@ -1,5 +1,4 @@
-import React from "react";
-import propTypes from "prop-types";
+import React, { useRef, useEffect, useState } from "react";
 import { isValidLayerId } from "../../../utils/Validator";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
@@ -55,29 +54,25 @@ const setSpecialBackground = (id) => {
     SPECIAL_BACKGROUND_COLORS[id];
 };
 
-class BackgroundSwitcher extends React.PureComponent {
-  state = {
-    selectedLayerId: null,
-  };
+const BackgroundSwitcher = ({
+  backgroundSwitcherBlack,
+  backgroundSwitcherWhite,
+  enableOSM,
+  display,
+  layerMap,
+  layers,
+  globalObserver,
+  map,
+}) => {
+  const [selectedLayerId, setSelectedLayerId] = useState(null);
 
-  static propTypes = {
-    backgroundSwitcherBlack: propTypes.bool.isRequired,
-    backgroundSwitcherWhite: propTypes.bool.isRequired,
-    enableOSM: propTypes.bool.isRequired,
-    display: propTypes.bool.isRequired,
-    layerMap: propTypes.object.isRequired,
-    layers: propTypes.array.isRequired,
-    globalObserver: propTypes.object,
-  };
-  constructor(props) {
-    super(props);
-    if (props.enableOSM) {
-      this.osmSource = new OSM({
-        reprojectionErrorThreshold: 5,
-      });
-      this.osmLayer = new TileLayer({
+  const osmLayerRef = useRef(
+    enableOSM &&
+      new TileLayer({
         visible: false,
-        source: this.osmSource,
+        source: new OSM({
+          reprojectionErrorThreshold: 5,
+        }),
         zIndex: -1,
         layerType: "base",
         rotateMap: "n", // OpenStreetMap should be rotated to North
@@ -87,42 +82,36 @@ class BackgroundSwitcher extends React.PureComponent {
           caption: "OpenStreetMap",
           layerType: "base",
         },
-      });
-      this.osmLayer.on("change:visible", (e) => {
+      })
+  );
+
+  useEffect(() => {
+    if (enableOSM) {
+      osmLayerRef.current?.on("change:visible", (e) => {
         // Publish event to ensure DrawOrder tab is updated with osmLayer changes
-        this.props.globalObserver.publish("core.layerVisibilityChanged", e);
+        globalObserver.publish("core.layerVisibilityChanged", e);
       });
     }
+  }, [globalObserver, enableOSM]);
 
-    const initialBg = Object.entries(this.props.layerMap)
-      .find(([_, l]) => l.get("layerType") === "base" && l.get("visible"))
-      ?.get("name");
-
-    this.state.selectedLayerId = initialBg ?? OSM_BACKGROUND_LAYER_ID;
-  }
-
-  /**
-   * @summary If there's a Background layer that is visible from start, make sure that proper radio button is selected in Background Switcher.
-   * @memberof BackgroundSwitcher
-   */
-  componentDidMount() {
-    const backgroundVisibleFromStart = this.props.layers.find(
-      (layer) => layer.visible
-    );
+  useEffect(() => {
+    const backgroundVisibleFromStart = layers.find((layer) => layer.visible);
     backgroundVisibleFromStart &&
-      this.setState({
-        selectedLayerId: backgroundVisibleFromStart.name,
-      });
+      setSelectedLayerId(backgroundVisibleFromStart.name);
+  }, [layers]);
 
-    if (this.props.enableOSM) {
+  useEffect(() => {
+    if (enableOSM) {
       // Initiate our special case layer, OpenStreetMap
-      this.props.map.addLayer(this.osmLayer);
+      map.addLayer(osmLayerRef.current);
     }
+  }, [enableOSM, map]);
 
+  useEffect(() => {
     // Ensure that BackgroundSwitcher correctly selects visible layer,
     // by listening to a event that each layer will send when its visibility
     // changes.
-    this.props.globalObserver.subscribe(
+    globalObserver.subscribe(
       "core.layerVisibilityChanged",
       ({ target: layer }) => {
         const name = layer.get("name");
@@ -131,7 +120,7 @@ class BackgroundSwitcher extends React.PureComponent {
         // be found among the background layers, or if the visibility
         // was changed to 'false'.
         if (
-          this.props.layers.findIndex((l) => name === l.name) === -1 ||
+          layers.findIndex((l) => name === l.name) === -1 ||
           layer.get("visible") === false
         ) {
           return;
@@ -139,124 +128,116 @@ class BackgroundSwitcher extends React.PureComponent {
 
         // If we got this far, we have a background layer that just
         // became visible. Let's notify the radio buttons by setting state!
-        this.setState({
-          selectedLayerId: layer.get("name"),
-        });
+        setSelectedLayerId(layer.get("name"));
       }
     );
-  }
+  }, [globalObserver, layers]);
 
   /**
    * @summary Hides previously selected background and shows current selection.
    * @param {Object} e The event object, contains target's value
    */
-  onLayerClick = (newSelectedId) => {
-    const prevSelectedLayerId = this.state.selectedLayerId;
-    const { layerMap } = this.props;
+  const onLayerClick = (newSelectedId) => {
+    const prevSelectedLayerId = selectedLayerId;
 
-    this.setState({
-      selectedLayerId: newSelectedId,
-    });
+    setSelectedLayerId(newSelectedId);
 
     // Publish event to ensure all other background layers are disabled
-    this.props.globalObserver.publish(
+    globalObserver.publish(
       "layerswitcher.backgroundLayerChanged",
       newSelectedId
     );
 
-    console.log({ newSelectedId, prevSelectedLayerId });
     if (isSpecialBackgroundLayer(newSelectedId)) {
       if (isOSMLayer(newSelectedId)) {
-        const osmLayer = this.props.map
+        const osmLayer = map
           .getAllLayers()
           .find((l) => l.get("name") === "osm-layer");
         osmLayer.setVisible(true);
+        setSpecialBackground(WHITE_BACKROUND_LAYER_ID);
       } else {
         setSpecialBackground(newSelectedId);
       }
     } else {
+      // Reset the background to white
+      setSpecialBackground(WHITE_BACKROUND_LAYER_ID);
       layerMap[newSelectedId].setVisible(true);
     }
 
     if (isSpecialBackgroundLayer(prevSelectedLayerId)) {
       if (isOSMLayer(prevSelectedLayerId)) {
-        this.osmLayer.setVisible(false);
+        osmLayerRef.current.setVisible(false);
       }
     } else {
       layerMap[prevSelectedLayerId].setVisible(false);
     }
   };
 
-  render() {
-    const { backgroundSwitcherWhite, backgroundSwitcherBlack, enableOSM } =
-      this.props;
+  // TODO This filter should be moved to the core application.
+  const layersToShow = layers.filter((layer) => {
+    //Remove layers not having a valid id
+    const validLayerId = isValidLayerId(layer.name);
 
-    // TODO This filter should be moved to the core application.
-    const layers = this.props.layers.filter((layer) => {
-      //Remove layers not having a valid id
-      const validLayerId = isValidLayerId(layer.name);
+    if (!validLayerId) {
+      console.warn(`Backgroundlayer with id ${layer.id} has a non-valid id`);
+    }
+    return validLayerId;
+  });
 
-      if (!validLayerId) {
-        console.warn(`Backgroundlayer with id ${layer.id} has a non-valid id`);
-      }
-      return validLayerId;
-    });
+  return (
+    <Box sx={{ display: display ? "block" : "none" }}>
+      {backgroundSwitcherWhite && (
+        <BackgroundLayerItem
+          index={Number(WHITE_BACKROUND_LAYER_ID)}
+          key={Number(WHITE_BACKROUND_LAYER_ID)}
+          selected={selectedLayerId === WHITE_BACKROUND_LAYER_ID}
+          layer={createFakeMapLayer({
+            name: WHITE_BACKROUND_LAYER_ID,
+            caption: "Vit",
+            checked: selectedLayerId === WHITE_BACKROUND_LAYER_ID,
+          })}
+          globalObserver={globalObserver}
+          clickCallback={() => onLayerClick(WHITE_BACKROUND_LAYER_ID)}
+        />
+      )}
 
-    return (
-      <Box sx={{ display: this.props.display ? "block" : "none" }}>
-        {backgroundSwitcherWhite && (
-          <BackgroundLayerItem
-            index={Number(WHITE_BACKROUND_LAYER_ID)}
-            key={Number(WHITE_BACKROUND_LAYER_ID)}
-            selected={this.state.selectedLayerId === WHITE_BACKROUND_LAYER_ID}
-            layer={createFakeMapLayer({
-              name: WHITE_BACKROUND_LAYER_ID,
-              caption: "Vit",
-              checked: this.state.selectedLayerId === WHITE_BACKROUND_LAYER_ID,
-            })}
-            globalObserver={this.props.globalObserver}
-            clickCallback={() => this.onLayerClick(WHITE_BACKROUND_LAYER_ID)}
-          />
-        )}
+      {backgroundSwitcherBlack && (
+        <BackgroundLayerItem
+          index={Number(BLACK_BACKROUND_LAYER_ID)}
+          key={Number(BLACK_BACKROUND_LAYER_ID)}
+          selected={selectedLayerId === BLACK_BACKROUND_LAYER_ID}
+          layer={createFakeMapLayer({
+            name: BLACK_BACKROUND_LAYER_ID,
+            caption: "Svart",
+            checked: selectedLayerId === BLACK_BACKROUND_LAYER_ID,
+          })}
+          globalObserver={globalObserver}
+          clickCallback={() => onLayerClick(BLACK_BACKROUND_LAYER_ID)}
+        />
+      )}
 
-        {backgroundSwitcherBlack && (
-          <BackgroundLayerItem
-            index={Number(BLACK_BACKROUND_LAYER_ID)}
-            key={Number(BLACK_BACKROUND_LAYER_ID)}
-            selected={this.state.selectedLayerId === BLACK_BACKROUND_LAYER_ID}
-            layer={createFakeMapLayer({
-              name: BLACK_BACKROUND_LAYER_ID,
-              caption: "Svart",
-              checked: this.state.selectedLayerId === BLACK_BACKROUND_LAYER_ID,
-            })}
-            globalObserver={this.props.globalObserver}
-            clickCallback={() => this.onLayerClick(BLACK_BACKROUND_LAYER_ID)}
-          />
-        )}
-
-        {enableOSM && (
-          <BackgroundLayerItem
-            index={Number(OSM_BACKGROUND_LAYER_ID)}
-            key={Number(OSM_BACKGROUND_LAYER_ID)}
-            selected={isOSMLayer(this.state.selectedLayerId)}
-            layer={this.osmLayer}
-            globalObserver={this.props.globalObserver}
-            clickCallback={() => this.onLayerClick(OSM_BACKGROUND_LAYER_ID)}
-          />
-        )}
-        {layers.map((layerConfig, i) => (
-          <BackgroundLayerItem
-            index={i}
-            key={layerConfig.name}
-            selected={this.state.selectedLayerId === layerConfig.name}
-            layer={this.props.layerMap[layerConfig.name]}
-            globalObserver={this.props.globalObserver}
-            clickCallback={() => this.onLayerClick(layerConfig.name)}
-          />
-        ))}
-      </Box>
-    );
-  }
-}
+      {enableOSM && (
+        <BackgroundLayerItem
+          index={Number(OSM_BACKGROUND_LAYER_ID)}
+          key={Number(OSM_BACKGROUND_LAYER_ID)}
+          selected={isOSMLayer(selectedLayerId)}
+          layer={osmLayerRef.current}
+          globalObserver={globalObserver}
+          clickCallback={() => onLayerClick(OSM_BACKGROUND_LAYER_ID)}
+        />
+      )}
+      {layersToShow.map((layerConfig, i) => (
+        <BackgroundLayerItem
+          index={i}
+          key={layerConfig.name}
+          selected={selectedLayerId === layerConfig.name}
+          layer={layerMap[layerConfig.name]}
+          globalObserver={globalObserver}
+          clickCallback={() => onLayerClick(layerConfig.name)}
+        />
+      ))}
+    </Box>
+  );
+};
 
 export default BackgroundSwitcher;
