@@ -18,7 +18,7 @@
     "@tanstack/react-query": "^5.61.3",
     "@tanstack/react-query-devtools": "^5.61.3",
     "axios": "^1.7.8",
-    "i18next": "^23.16.6",
+    "i18next": "^24.0.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.2",
