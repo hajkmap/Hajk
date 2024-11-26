@@ -967,6 +967,8 @@ class App extends React.PureComponent {
       config.mapConfig.map.logo || // If neither was set, try to see if we have the legacy admin parameter.
       "logo.png"; // If we didn't have this either, fallback to hard-coded value.
 
+    const logoAltText = config.mapConfig.map.logoAltText || "Logotype";
+
     return (
       <>
         <Box
@@ -975,7 +977,7 @@ class App extends React.PureComponent {
             height: (theme) => theme.spacing(6),
           }}
         >
-          <LogoImage alt="" src={logoUrl} />
+          <LogoImage alt={logoAltText} src={logoUrl} />
         </Box>
         <Divider />
         <DrawerHeaderGrid
