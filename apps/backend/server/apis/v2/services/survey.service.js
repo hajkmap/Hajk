@@ -224,20 +224,30 @@ class SurveyService {
     // Add the survey response heading
     dynamicContent += "<h1>Svar från undersökningen</h1>";
 
+    // Define a mapping from keys to labels
+    const labelMapping = {
+      surveyId: "EnkätId",
+      surveyAnswerId: "EnkätsvarsId",
+      surveyAnswerDate: "Enkätdatum",
+    };
+
     // Build the email content from the survey response
     for (const key in body) {
       const item = body[key];
 
+      // Use the mapped label if available, else use the key
+      const displayKey = labelMapping[key] || key;
+
       if (key === "surveyId") {
         subject = item;
-        dynamicContent += `<br><b>${key}</b>: ${item}`;
+        dynamicContent += `<br><b>${displayKey}</b>: ${item}`;
       } else if (
         key === "surveyAnswerId" ||
         key === "surveyAnswerDate" ||
         key === "featureData"
       ) {
         let valueDisplay = Array.isArray(item) ? item.join(", ") : item;
-        dynamicContent += `<br><b>${key}</b>: ${valueDisplay}`;
+        dynamicContent += `<br><b>${displayKey}</b>: ${valueDisplay}`;
       } else if (key === "surveyResults" && Array.isArray(item)) {
         for (const result of item) {
           if (result.title && result.value) {
