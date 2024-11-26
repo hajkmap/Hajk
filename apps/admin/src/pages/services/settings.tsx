@@ -323,116 +323,106 @@ export default function ServiceSettings() {
   if (!service) return <div>Service not found.</div>;
 
   return (
-    <>
-      <Page title={t("common.settings")}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            textAlign: "center",
-            float: "right",
-            gap: 2,
-            p: 2,
-            ml: 3,
-            border: "1px solid",
-            borderColor: palette.grey[300],
-            borderRadius: 3,
-            maxWidth: "260px",
+    <Page title={t("common.settings")}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          textAlign: "center",
+          float: "right",
+          gap: 2,
+          p: 2,
+          ml: 3,
+          border: "1px solid",
+          borderColor: palette.grey[300],
+          borderRadius: 3,
+          maxWidth: "260px",
+        }}
+      >
+        <Button
+          onClick={handleExternalSubmit}
+          variant="contained"
+          disabled={updateStatus === "pending" || deleteStatus === "pending"}
+        >
+          {updateStatus === "pending" ? (
+            <CircularProgress color="primary" size={30} />
+          ) : (
+            t("services.dialog.saveBtn")
+          )}
+        </Button>
+
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            void handleDeleteService();
+            navigate("/services");
           }}
+          disabled={deleteStatus === "pending" || updateStatus === "pending"}
+          variant="text"
         >
-          <Button
-            onClick={handleExternalSubmit}
-            variant="contained"
-            disabled={updateStatus === "pending" || deleteStatus === "pending"}
-          >
-            {updateStatus === "pending" ? (
-              <CircularProgress color="primary" size={30} />
-            ) : (
-              t("services.dialog.saveBtn")
-            )}
-          </Button>
+          {t("services.dialog.deleteBtn")}
+        </Button>
 
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              void handleDeleteService();
-              navigate("/services");
-            }}
-            disabled={deleteStatus === "pending" || updateStatus === "pending"}
-            variant="text"
-          >
-            {t("services.dialog.deleteBtn")}
-          </Button>
+        <Typography variant="body1">
+          Senast sparad av Albin den 2023-04-11 13:37
+        </Typography>
+      </Box>
 
-          <Typography variant="body1">
-            Senast sparad av Albin den 2023-04-11 13:37
-          </Typography>
-        </Box>
+      <form ref={formRef} onSubmit={onSubmit}>
+        <FormRenderer
+          data={formServiceData}
+          register={register}
+          control={control}
+          errors={errors}
+        />
+      </form>
+      <ServicesGrid baseUrl={service?.url ?? ""} type={service?.type ?? ""} />
 
-        <form ref={formRef} onSubmit={onSubmit}>
-          <FormRenderer
-            data={formServiceData}
-            register={register}
-            control={control}
-            errors={errors}
-          />
-        </form>
-        <ServicesGrid baseUrl={service?.url ?? ""} type={service?.type ?? ""} />
-
-        <DialogWrapper
+      <DialogWrapper
+        fullWidth
+        open={isDialogOpen}
+        title={t("services.settings.dialog.title")}
+        onClose={handleDialogClose}
+        actions={
+          <>
+            <Button variant="text" onClick={handleDialogClose} color="primary">
+              {t("services.dialog.closeBtn")}
+            </Button>
+            <Button onClick={handleSaveUrl} color="primary" variant="contained">
+              {t("services.dialog.saveBtn")}
+            </Button>
+          </>
+        }
+      >
+        <TextField
+          label="Url"
+          value={dialogUrl}
           fullWidth
-          open={isDialogOpen}
-          title={t("services.settings.dialog.title")}
-          onClose={handleDialogClose}
-          actions={
-            <>
-              <Button
-                variant="text"
-                onClick={handleDialogClose}
-                color="primary"
-              >
-                {t("services.dialog.closeBtn")}
-              </Button>
-              <Button
-                onClick={handleSaveUrl}
-                color="primary"
-                variant="contained"
-              >
-                {t("services.dialog.saveBtn")}
-              </Button>
-            </>
-          }
+          variant="outlined"
+          onChange={(e) => setDialogUrl(e.target.value)}
+          error={!!errors.url}
+          margin="normal"
+        />
+        <FormControl
+          sx={{ mt: 2, width: "100%", maxWidth: "150px" }}
+          fullWidth
+          error={!!errors.type}
         >
-          <TextField
-            label="Url"
-            value={dialogUrl}
-            fullWidth
+          <InputLabel id="type">{t("common.serviceType")}</InputLabel>
+          <Select
+            label={t("common.serviceType")}
+            value={dialogServiceType}
             variant="outlined"
-            onChange={(e) => setDialogUrl(e.target.value)}
-            error={!!errors.url}
-            margin="normal"
-          />
-          <FormControl
-            sx={{ mt: 2, width: "100%", maxWidth: "150px" }}
-            fullWidth
-            error={!!errors.type}
+            onChange={(e) => setDialogServiceType(e.target.value)}
           >
-            <InputLabel id="type">{t("common.serviceType")}</InputLabel>
-            <Select
-              label={t("common.serviceType")}
-              value={dialogServiceType}
-              variant="outlined"
-              onChange={(e) => setDialogServiceType(e.target.value)}
-            >
-              {serviceTypes.map((type) => (
-                <MenuItem key={type} value={type}>
-                  {type}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </DialogWrapper>
-      </Page>
-    </>
+            {serviceTypes.map((type) => (
+              <MenuItem key={type} value={type}>
+                {type}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </DialogWrapper>
+    </Page>
   );
 }

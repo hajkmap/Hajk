@@ -62,8 +62,8 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
   }, [layers, searchTerm]);
 
   return (
-    <Grid container sx={{ display: "flex", flexWrap: "wrap" }}>
-      <Grid size={{ xs: 12, md: 12 }}>
+    <Grid container>
+      <Grid size={{ xs: 4, md: 8.5 }}>
         <Accordion
           disableGutters
           sx={{
@@ -72,7 +72,7 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
             mb: 3,
           }}
         >
-          <AccordionSummary sx={{ mt: 2 }} expandIcon={<ExpandMoreIcon />}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="h6">
               {t("services.settings.accordionTitle2")}
             </Typography>
@@ -141,6 +141,7 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
           </AccordionDetails>
         </Accordion>
       </Grid>
+      <Grid size={{ xs: 8, md: 3.5 }}></Grid>
     </Grid>
   );
 }

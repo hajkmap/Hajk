@@ -46,7 +46,7 @@ function ControlledAccordion({
       sx={{
         width: "100%",
         ml: 2,
-        mb: 3,
+        marginBottom: "24px !important",
         backgroundColor: backgroundColor ?? "none",
       }}
     >
