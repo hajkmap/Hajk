@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 // Material UI components
 import {
@@ -15,7 +15,7 @@ import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
-export default function LayerItem({
+export default function BackgroundLayerItem({
   layer,
   globalObserver,
   clickCallback,
@@ -47,10 +47,13 @@ export default function LayerItem({
   }, [globalObserver, layer, wmsLayerLoadStatus]);
 
   // Show layer details action
-  const showLayerDetails = (e, specificLayer = layer) => {
-    e.stopPropagation();
-    globalObserver.publish("setLayerDetails", { layer: specificLayer });
-  };
+  const showLayerDetails = useCallback(
+    (e, specificLayer = layer) => {
+      e.stopPropagation();
+      globalObserver.publish("setLayerDetails", { layer: specificLayer });
+    },
+    [globalObserver, layer]
+  );
 
   const name = layer.get("caption");
 

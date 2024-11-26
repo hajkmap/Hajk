@@ -178,6 +178,7 @@ const QuickAccessView = ({
             localObserver={localObserver}
             map={map}
             app={app}
+            globalObserver={globalObserver}
           ></QuickAccessLayers>
         </Box>
       </Collapse>

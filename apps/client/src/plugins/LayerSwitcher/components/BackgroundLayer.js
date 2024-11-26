@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import BackgroundLayerItem from "./BackgroundLayerItem";
 
-export default function BackgroundLayer({ layer, app }) {
+export default function BackgroundLayer({ layer, globalObserver }) {
   // Keep visible backgroundlayer in state
   const [backgroundVisible, setBackgroundVisible] = useState(
     layer.get("visible")
@@ -10,20 +10,17 @@ export default function BackgroundLayer({ layer, app }) {
 
   // When component is successfully mounted into the DOM.
   useEffect(() => {
-    app.globalObserver.subscribe(
+    globalObserver.subscribe(
       "layerswitcher.backgroundLayerChanged",
       (activeLayer) => {
         if (activeLayer !== layer.get("name")) {
-          if (!layer.isFakeMapLayer) {
-            layer.setVisible(false);
-          }
           setBackgroundVisible(false);
         } else {
           setBackgroundVisible(true);
         }
       }
     );
-  }, [layer, app.globalObserver]);
+  }, [layer, globalObserver]);
 
   // Handles list item click
   const handleLayerItemClick = () => {
@@ -43,16 +40,15 @@ export default function BackgroundLayer({ layer, app }) {
       layer.setVisible(true);
     }
     // Publish event to ensure all other background layers are disabled
-    app.globalObserver.publish("layerswitcher.backgroundLayerChanged", name);
+    globalObserver.publish("layerswitcher.backgroundLayerChanged", name);
   };
 
   return (
     <BackgroundLayerItem
       layer={layer}
-      app={app}
       clickCallback={handleLayerItemClick}
       selected={backgroundVisible}
-      globalObserver={app.globalObserver}
+      globalObserver={globalObserver}
     ></BackgroundLayerItem>
   );
 }

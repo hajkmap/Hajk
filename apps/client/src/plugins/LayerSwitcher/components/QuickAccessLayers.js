@@ -7,6 +7,7 @@ import { Box } from "@mui/material";
 
 export default function QuickAccessLayers({
   app,
+  globalObserver,
   map,
   localObserver,
   filterValue,
@@ -60,7 +61,7 @@ export default function QuickAccessLayers({
   useEffect(() => {
     // Register a listener: when any layer's quickaccess flag changes make sure
     // to update the list.
-    const quickAccessChangedSubscription = app.globalObserver.subscribe(
+    const quickAccessChangedSubscription = globalObserver.subscribe(
       "core.layerQuickAccessChanged",
       (l) => {
         if (l.target.get("quickAccess") === true) {
@@ -80,7 +81,7 @@ export default function QuickAccessLayers({
     return function () {
       quickAccessChangedSubscription.unsubscribe();
     };
-  }, [app.globalObserver, getQuickAccessLayers]);
+  }, [globalObserver, getQuickAccessLayers]);
 
   return (
     <Box
@@ -99,7 +100,7 @@ export default function QuickAccessLayers({
           <BackgroundLayer
             key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
             layer={l}
-            app={app}
+            globalObserver={globalObserver}
             draggable={false}
             toggleable={true}
           ></BackgroundLayer>
