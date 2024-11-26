@@ -31,6 +31,8 @@ const defaultState = {
   editableLayers: {},
   selectedSurvey: "",
   selectedMailTemplate: "",
+  responseMessage: "Tack för att du svarade på våra frågor!",
+  restartButtonText: "Vill du göra enkäten igen, klicka här!",
   tree: "",
 };
 
@@ -87,6 +89,8 @@ class ToolOptions extends Component {
           visibleAtStartMobile: tool.options.visibleAtStartMobile,
           selectedSurvey: tool.options.selectedSurvey,
           selectedMailTemplate: tool.options.selectedMailTemplate,
+          responseMessage: tool.options.responseMessage,
+          restartButtonText: tool.options.restartButtonText,
           visibleForGroups:
             tool.options.visibleForGroups || this.state.visibleForGroups,
         },
@@ -280,6 +284,8 @@ class ToolOptions extends Component {
         visibleAtStartMobile: this.state.visibleAtStartMobile,
         selectedSurvey: this.state.selectedSurvey,
         selectedMailTemplate: this.state.selectedMailTemplate,
+        responseMessage: this.state.responseMessage,
+        restartButtonText: this.state.restartButtonText,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -651,6 +657,32 @@ class ToolOptions extends Component {
           ))}
         </Select>
       </div>
+      <div>
+          <label htmlFor="responseMessage">
+                    Svarsmeddelande vid slutförd enkät
+                  </label>
+                  <input
+                    value={this.state.responseMessage}
+                    type="text"
+                    name="responseMessage"
+                    onChange={(e) => {
+                      this.handleInputChange(e);
+                    }}
+                  />
+          </div>
+          <div>
+          <label htmlFor="restartButtonText">
+                    Text på knapp vid omstart av enkät
+                  </label>
+                  <input
+                    value={this.state.restartButtonText}
+                    type="text"
+                    name="restartButtonText"
+                    onChange={(e) => {
+                      this.handleInputChange(e);
+                    }}
+                  />
+          </div>
           <div>
             <label htmlFor="instruction">
               Instruktion{" "}

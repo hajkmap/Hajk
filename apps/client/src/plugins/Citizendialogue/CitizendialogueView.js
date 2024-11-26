@@ -92,13 +92,30 @@ function CitizendialogueView(props) {
   const [currentQuestionTitle, setCurrentQuestionTitle] = useState(null);
   const [currentQuestionName, setCurrentQuestionName] = useState(null);
   const [survey, setSurvey] = useState(null);
-  /*const [isCompleted, setIsCompleted] = useState(false);
+  const [surveyJsData, setSurveyJsData] = React.useState(props.surveyJsData);
+
+  // Used for responseanswer
+  const [isCompleted, setIsCompleted] = useState(false);
   const [surveyKey, setSurveyKey] = useState(0);
+
+  //Unique ID and name on survey
+  function generateUniqueID() {
+    return (
+      new Date().getTime().toString() +
+      "-" +
+      Math.random().toString(36).substring(2, 9)
+    );
+  }
 
   const restartSurvey = () => {
     setSurveyKey((prevKey) => prevKey + 1);
     setIsCompleted(false);
-  };*/
+
+    setSurveyJsData((prevSurveyJsData) => ({
+      ...prevSurveyJsData,
+      surveyAnswerId: generateUniqueID(),
+    }));
+  };
 
   useEffect(() => {
     // an asynchronous function that runs directly inside a useEffect
@@ -150,7 +167,7 @@ function CitizendialogueView(props) {
   //Combine ID/Name and surveydata and geometry
   const handleOnComplete = React.useCallback(
     (survey) => {
-      const specificSurveyAnswerId = props.surveyJsData.surveyAnswerId;
+      const specificSurveyAnswerId = surveyJsData.surveyAnswerId;
       let featureData = [];
 
       if (
@@ -187,15 +204,15 @@ function CitizendialogueView(props) {
       const mergedResults = [...resultData, ...featureData];
 
       const combinedData = {
-        ...props.surveyJsData,
+        ...surveyJsData,
         surveyResults: mergedResults,
         mailTemplate: props.options.selectedMailTemplate,
       };
       props.model.handleOnComplete(combinedData);
-      /* setIsCompleted(true); */
+      setIsCompleted(true);
     },
     // eslint-disable-next-line
-    [props.surveyJsData, props.model]
+    [surveyJsData, props.model]
   );
 
   // Sets currentQuestionName and title after rendering question
@@ -244,7 +261,7 @@ function CitizendialogueView(props) {
         app: props.app,
         observer: props.localObserver,
         options: props.options,
-        surveyJsData: props.surveyJsData,
+        surveyJsData: surveyJsData,
       })
   );
 
@@ -270,7 +287,7 @@ function CitizendialogueView(props) {
             app={props.app}
             model={editModel}
             observer={props.localObserver}
-            surveyJsData={props.surveyJsData}
+            surveyJsData={surveyJsData}
             resetView={resetEditView}
             currentQuestionTitle={currentQuestionTitle}
             currentQuestionName={currentQuestionName}
@@ -295,13 +312,13 @@ function CitizendialogueView(props) {
     newSurvey.applyTheme(surveyTheme);
     setSurvey(newSurvey);
     return () => {};
-  }, [surveyJSON, surveyTheme /*, surveyKey */]);
+  }, [surveyJSON, surveyTheme, surveyKey]);
 
   Survey.surveyLocalization.defaultLocale = "sv";
 
   return (
     <>
-      {/*!isCompleted ? (
+      {!isCompleted ? (
         survey && (
           <Survey.Survey
             model={survey}
@@ -312,19 +329,36 @@ function CitizendialogueView(props) {
           />
         )
       ) : (
-        <div>
-          <p>Tack för att du fyllde i enkäten!</p>
-          <button onClick={restartSurvey}>Starta om från början</button>
+        <div
+          style={{
+            backgroundColor: "#f0f0f0",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "50vh",
+            textAlign: "center",
+          }}
+        >
+          <p style={{ fontSize: "1.5em", margin: "0", fontWeight: "bold" }}>
+            {props.options.responseMessage}
+          </p>
+          <button
+            onClick={restartSurvey}
+            style={{
+              marginTop: "20px",
+              padding: "10px 20px",
+              fontSize: "1em",
+              cursor: "pointer",
+              backgroundColor: "#333333",
+              color: "#fff",
+              border: "none",
+              borderRadius: "5px",
+            }}
+          >
+            {props.options.restartButtonText}
+          </button>
         </div>
-      )*/}
-      {surveyJSON && (
-        <Survey.Survey
-          model={survey}
-          onComplete={handleOnComplete}
-          onCompleting={handleOnCompleting}
-          onAfterRenderQuestion={handleAfterRenderQuestion}
-          onCurrentPageChanged={handlePageChange}
-        />
       )}
     </>
   );
