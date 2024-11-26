@@ -145,10 +145,6 @@ export default function ServiceSettings() {
     CONTAINER_TYPE.ACCORDION
   );
   const accordionNestedContainer3 = new DynamicFormContainer<FieldValues>(
-    t("services.settings.accordionTitle2"),
-    CONTAINER_TYPE.ACCORDION
-  );
-  const accordionNestedContainer4 = new DynamicFormContainer<FieldValues>(
     t("common.infobutton"),
     CONTAINER_TYPE.ACCORDION
   );
@@ -275,28 +271,13 @@ export default function ServiceSettings() {
     ],
   });
 
-  accordionNestedContainer3.addCustomInput({
-    type: INPUT_TYPE.CUSTOM,
-    kind: "CustomInputSettings",
-    name: "customInput",
-    title: `${service?.type}`,
-    gridColumns: 12,
-    defaultValue: "",
-
-    renderer: () => {
-      return (
-        <ServicesGrid baseUrl={service?.url ?? ""} type={service?.type ?? ""} />
-      );
-    },
-  });
-
-  accordionNestedContainer4.addInput({
+  accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
     name: "owner",
     title: `${t("services.owner")}`,
   });
-  accordionNestedContainer4.addInput({
+  accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 8,
     name: "layerDescription",
@@ -308,7 +289,6 @@ export default function ServiceSettings() {
     accordionNestedContainer,
     accordionNestedContainer2,
     accordionNestedContainer3,
-    accordionNestedContainer4,
   ]);
 
   useEffect(() => {
@@ -385,21 +365,19 @@ export default function ServiceSettings() {
           </Button>
 
           <Typography variant="body1">
-            Senast sparad av
-            {/* {user} */} Albin den
-            {/* {service.updatedAt} */} 2023-04-11 13:37
+            Senast sparad av Albin den 2023-04-11 13:37
           </Typography>
         </Box>
+
         <form ref={formRef} onSubmit={onSubmit}>
-          <Box>
-            <FormRenderer
-              data={formServiceData}
-              register={register}
-              control={control}
-              errors={errors}
-            />
-          </Box>
+          <FormRenderer
+            data={formServiceData}
+            register={register}
+            control={control}
+            errors={errors}
+          />
         </form>
+        <ServicesGrid baseUrl={service?.url ?? ""} type={service?.type ?? ""} />
 
         <DialogWrapper
           fullWidth
