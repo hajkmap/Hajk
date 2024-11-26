@@ -137,7 +137,7 @@ const BackgroundSwitcher = ({
    * @summary Hides previously selected background and shows current selection.
    * @param {Object} e The event object, contains target's value
    */
-  const onLayerClick = (newSelectedId) => {
+  const onLayerClick = (newSelectedId) => () => {
     const prevSelectedLayerId = selectedLayerId;
 
     setSelectedLayerId(newSelectedId);
@@ -197,7 +197,7 @@ const BackgroundSwitcher = ({
             checked: selectedLayerId === WHITE_BACKROUND_LAYER_ID,
           })}
           globalObserver={globalObserver}
-          clickCallback={() => onLayerClick(WHITE_BACKROUND_LAYER_ID)}
+          clickCallback={onLayerClick(WHITE_BACKROUND_LAYER_ID)}
         />
       )}
 
@@ -212,7 +212,7 @@ const BackgroundSwitcher = ({
             checked: selectedLayerId === BLACK_BACKROUND_LAYER_ID,
           })}
           globalObserver={globalObserver}
-          clickCallback={() => onLayerClick(BLACK_BACKROUND_LAYER_ID)}
+          clickCallback={onLayerClick(BLACK_BACKROUND_LAYER_ID)}
         />
       )}
 
@@ -223,7 +223,7 @@ const BackgroundSwitcher = ({
           selected={isOSMLayer(selectedLayerId)}
           layer={osmLayerRef.current}
           globalObserver={globalObserver}
-          clickCallback={() => onLayerClick(OSM_BACKGROUND_LAYER_ID)}
+          clickCallback={onLayerClick(OSM_BACKGROUND_LAYER_ID)}
         />
       )}
       {layersToShow.map((layerConfig, i) => (
@@ -233,7 +233,7 @@ const BackgroundSwitcher = ({
           selected={selectedLayerId === layerConfig.name}
           layer={layerMap[layerConfig.name]}
           globalObserver={globalObserver}
-          clickCallback={() => onLayerClick(layerConfig.name)}
+          clickCallback={onLayerClick(layerConfig.name)}
         />
       ))}
     </Box>
