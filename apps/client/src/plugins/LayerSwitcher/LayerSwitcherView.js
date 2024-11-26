@@ -135,6 +135,12 @@ const addLayerNames = (data, olLayerMap) => {
       type: item.type,
       layers,
       infogroupvisible: item.infogroupvisible,
+      infogrouptitle: item.infogrouptitle,
+      infogrouptext: item.infogrouptext,
+      infogroupurl: item.infogroupurl,
+      infogroupurltext: item.infogroupurltext,
+      infogroupopendatalink: item.infogroupopendatalink,
+      infogroupowner: item.infofitemowner,
       subLayers: item.sublayers,
       parent: item.parent,
       isFiltered: true,
@@ -313,15 +319,6 @@ class LayersSwitcherView extends React.PureComponent {
       }
     });
 
-    // this.globalHideLayerSubscription = props.app.globalObserver.subscribe(
-    //   "layerswitcher.hideLayer",
-    //   (la) => console.log("LSV: globalHideLayer", la.get("caption"))
-    // );
-
-    // this.globalShowLayerSubscription = props.app.globalObserver.subscribe(
-    //   "layerswitcher.showLayer",
-    //   (la) => console.log("LSV: globalShowLayer", la.get("caption"))
-    // );
     // TODO This is a work around for showing/hideing group layers which are
     // collapsed. It's also the GroupLayer component that listens for this.
     // That should be refactored.
