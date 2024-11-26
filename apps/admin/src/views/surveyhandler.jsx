@@ -4,9 +4,6 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import { Checkbox, FormControlLabel, Typography } from '@material-ui/core/';
-import { Accordion, AccordionSummary, AccordionDetails } from '@material-ui/core/';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 function SurveyHandler(props) {
 
@@ -16,13 +13,6 @@ function SurveyHandler(props) {
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
   const [filename, setFilename] = useState("");
 
-  //const initialCompletedHtmlButton = '<button type="button" onclick="window.location.reload()" style="display: block; margin: 0 auto;">Gör enkäten igen!</button>';
-  const initialCompletedHtmlText = "<h4>Tack för att du svarade på våra frågor!</h4>";
-  const [completedHtmlText, setCompletedHtmlText] = useState(initialCompletedHtmlText);
-  const [completedHtmlButton, setCompletedHtmlButton] = useState('');
-  const [buttonText, setButtonText] = useState('Gör enkäten igen!');
-  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
-
   const [survey, setSurvey] = useState({
     title: "",
     language: "sv",
@@ -31,35 +21,8 @@ function SurveyHandler(props) {
     logoHeight: 60,
     logoPosition: "left",
     showQuestionNumbers: "false",
-    completedHtml: "",
     pages: [{ questions: [] }]
   });
-
-  const removeButtonHtml = (htmlString) => {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlString;
-    const buttons = tempDiv.querySelectorAll('button');
-    buttons.forEach(button => button.remove());
-    return tempDiv.innerHTML;
-  };
-
-  const onlyButtonHtml = (htmlString) => {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlString;
-    const buttons = tempDiv.querySelectorAll('button');
-    const buttonHtml = Array.from(buttons).map(button => button.outerHTML).join('');
-    return buttonHtml;
-  };
-
-  useEffect(() => {
-    if (isButtonEnabled) {
-      setCompletedHtmlButton(
-        `<button type="button" onclick="window.location.reload()" style="display: block; margin: 0 auto;">${buttonText}</button>`
-      );
-    } else {
-      setCompletedHtmlButton('');
-    }
-  }, [isButtonEnabled, buttonText]);
 
   useEffect(() => {
     props.model.listAllAvailableSurveys((data) => {
@@ -375,9 +338,6 @@ const saveSurvey = () => {
     // Initialize a question counter
     let questionCounter = 0;
 
-    // Combine completedHtmlText and button
-    newSurvey.completedHtml = completedHtmlText + completedHtmlButton
-
     // Iterate over each page and its questions
     newSurvey.pages = newSurvey.pages.map((page) => {
         let newQuestions = page.questions.map((question) => {
@@ -448,35 +408,6 @@ const handleSurveySelection = (e) => {
     props.model.loadSurvey(selectedSurveyId, (surveyData) => {
       setSurvey(surveyData);
       setFilename(selectedSurveyId);
-
-      if (surveyData.completedHtml === undefined || surveyData.completedHtml.trim() === "") {
-        setCompletedHtmlText("");
-        setCompletedHtmlButton("");
-        setButtonText("");
-        setIsButtonEnabled(false);
-      } else {
-        const textHtml = removeButtonHtml(surveyData.completedHtml);
-        const buttonHtml = onlyButtonHtml(surveyData.completedHtml);
-
-        setCompletedHtmlText(textHtml);
-        setCompletedHtmlButton(buttonHtml);
-
-        if (buttonHtml.trim() !== "") {
-          setIsButtonEnabled(true);
-
-          const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = buttonHtml;
-          const buttonElement = tempDiv.querySelector('button');
-          if (buttonElement) {
-            setButtonText(buttonElement.textContent);
-          } else {
-            setButtonText("");
-          }
-        } else {
-          setIsButtonEnabled(false);
-          setButtonText("");
-        }
-      }
     });
   }
 };
@@ -490,7 +421,6 @@ const handleSurveySelection = (e) => {
     logoHeight: 60,
     logoPosition: "left",
     showQuestionNumbers: "false",
-    completedHtml: "",
     pages: [{ questions: [] }]
   };
 
@@ -499,10 +429,6 @@ const handleSurveySelection = (e) => {
     setFilename("");
     setSurvey(emptySurvey);
     setSelectedSurveyId("");
-    setCompletedHtmlButton("");
-    setCompletedHtmlText(initialCompletedHtmlText);
-    setIsButtonEnabled(false);
-    setButtonText("Gör enkäten igen!");
   }
 
   const GeometryWarning = ({ survey }) => {
@@ -645,84 +571,6 @@ const handleSurveySelection = (e) => {
           />
         </Grid>
       </Grid>
-      <Grid container spacing={2} style={{ marginBottom: '10px' }}>
-        <Grid item xs={5}>
-          <TextField
-            label="Svar vid färdigställd enkät (html kan användas, ej <button>)"
-            value={completedHtmlText}
-            onChange={(e) => setCompletedHtmlText(e.target.value)}
-            style={{ marginRight: '10px' }}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              style: {
-                fontSize: 12,
-              },
-            }}
-          />
-        </Grid>
-        <Grid item xs={7}>
-        <div>
-          {/* Checkbox for activate/deactivare button */}
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={isButtonEnabled}
-            onChange={(e) => setIsButtonEnabled(e.target.checked)}
-            color="primary"
-          />
-        }
-        label={
-          <Typography variant="body2" style={{ fontSize: '12px' }}>
-            Aktivera omstartsknapp
-          </Typography>
-        }
-        style={{ marginTop: '2px' }}
-      />
-      
-      {/* Textfield for button text */}
-      <TextField
-        label="Knapptext för att starta om enkäten (ej html, OBS! Aktiveras för att sparas)"
-        value={buttonText}
-        onChange={(e) => setButtonText(e.target.value)}
-        fullWidth
-        InputLabelProps={{ shrink: true }}
-        InputProps={{
-          style: {
-            fontSize: 12,
-          },
-        }}
-      />
-
-      {/* Accordion to show button HTML-string */}
-      <Accordion style={{ marginTop: '2px' }}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1a-content"
-          id="panel1a-header"
-        >
-        <Typography style={{ fontSize: '12px' }}>Visa och redigera knappens HTML-sträng</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <TextField
-            label="Knappens HTML-sträng"
-            value={completedHtmlButton}
-            onChange={(e) => setCompletedHtmlButton(e.target.value)}
-            fullWidth
-            multiline
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              style: {
-                fontSize: 12,
-              },
-            }}
-          />
-        </AccordionDetails>
-      </Accordion>
-    </div>
-        </Grid>
-      </Grid>
-
       <div style={{ marginBottom: '10px' }}>
         <Button variant="contained" color="primary" onClick={addPage}>Lägg till Sida</Button>
         <Button variant="contained" style={{ backgroundColor: 'green', color: 'white',  marginLeft: '20px' }} onClick={saveSurvey}>Spara Enkät</Button>
