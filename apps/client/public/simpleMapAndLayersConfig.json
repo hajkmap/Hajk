@@ -228,6 +228,13 @@
               "name": "Övrigt",
               "toggled": true,
               "expanded": false,
+              "infogroupvisible": true,
+              "infogrouptitle": "Info om lagergruppen Övrigt",
+              "infogrouptext": "Mera text om lagergruppen.",
+              "infogroupurl": "https://example.org/",
+              "infogroupurltext": "Länk",
+              "infogroupopendatalink": "https://example.org/opendata",
+              "infogroupowner": "Ägare av datan",
               "layers": [
                 {
                   "id": "1352",
