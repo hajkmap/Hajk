@@ -40,54 +40,6 @@ const BreadCrumbsContainer = ({ map, app }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// TODO
-// - DONE Break out filter to own component
-// - DONE Break out QuickAccess to own Component
-// - DONE Break out layer list to own Component - mayebe not
-// - DONE Remove LayerSwitcherModel and pass around `map`, `app`, `localObserver`
-// and `globalObserver` as needed.
-// - DONE remove quickaccess from LayerGroupAccordinon
-// - DONE Remove layerCount
-// - DONE Test the "Theme/quickAccessPresets" functionality
-// - DONE Fix the bug sometimes click layer in the quick access don't update
-//
-// - DONE Move `addLayerNames` to pure fn
-// - Update state managemetn and keeep in sync with OpenLayers
-//
-// - Refactor the observers to use a provider instead of prop-drilling
-// - The layer pagage dialogs should use ConfirmationDialog component
-// - Remove `show` prop from quickAccess layers
-//
-// - DONE Clean upp render* methods in BackgroundSwitcher.
-//   Should make it faster as well. - Did not make it faster,
-//   but there is still more to do. More indirection to remove
-//
-// - Refactor LayerItem into 3 separate components for each tab
-//     At least 3. Clean it up and remove indirection
-//
-//
-// - Maybe reconsider the "window-management"
-//      Redo
-//      Maybe this isn't important right now. Would be nice to fix, but it work
-//      as it is. I could move it to a own component though.
-//
-//
-
-// {
-//    id: string
-//    name: string
-//    isFiltered:
-//    isExpanded:
-//    expanded: boolean
-//    toggled: boolean
-//    type: "group" | "layer" | "subLayer" | "base"
-//    infogroupvisible: boolean
-//    subLayers: ???
-//    parent: string
-//    changeIndicator: Date
-// }
-
 // Prepare tree data for filtering
 const addLayerNames = (data, olLayerMap) => {
   const node = data.map((item) => {
@@ -165,69 +117,8 @@ const getOlLayerInfo = (olLayer) => {
     maxZoom: olLayer.get("maxZoom"),
     minZoom: olLayer.get("minZoom"),
     minMaxZoomAlertOnToggleOnly: olLayer.get("minMaxZoomAlertOnToggleOnly"),
-    // "filterAttribute"
-    // "filterComparer"
-    // "filterValue"
   };
 };
-
-const getLayerNodes = (groups, olLayerMap) =>
-  groups?.flatMap((node) => {
-    if (!node) {
-      return undefined;
-    }
-    const layers = getLayerNodes(node.layers, olLayerMap);
-    const subgroups = getLayerNodes(node.groups, olLayerMap);
-
-    const children = [...(layers ?? []), ...(subgroups ?? [])];
-
-    return [
-      {
-        id: node.id,
-        name: olLayerMap[node.id]?.get("caption") ?? node.name,
-        isFiltered: true,
-        isExpanded: false,
-        expanded: node.expanded,
-        toggled: node.toggled,
-        drawOrder: node.drawOrder,
-        infobox: node.infobox,
-        layerType: node.layerType,
-        visible: olLayerMap[node.id]?.get("visible"),
-        quickAccess: olLayerMap[node.id]?.get("quickAccess"),
-        visibleAtStart: node.visibleAtStart,
-        visibleForGroups: node.visibleForGroups,
-        changeIndicator: new Date(),
-      },
-      ...(children?.length === 0 ? [] : children),
-    ];
-  });
-
-const buildLayerMap = (groups, olLayerMap) => {
-  const nodes = getLayerNodes(groups, olLayerMap);
-
-  // console.log(nodes);
-  return nodes?.reduce((a, b) => {
-    a[b.id] = b;
-    return a;
-  }, {});
-};
-
-const buildLayerTree = (groups, olLayerMap) =>
-  groups?.map((group) => {
-    if (!group) {
-      return undefined;
-    }
-    const layers = buildLayerTree(group.layers, olLayerMap);
-    const subgroups = buildLayerTree(group.groups, olLayerMap);
-
-    const children = [...(layers ?? []), ...(subgroups ?? [])];
-
-    return {
-      id: group.id,
-      // name: olLayerMap[group.id]?.get("caption") ?? group.name,
-      children: children?.length === 0 ? undefined : children,
-    };
-  });
 
 class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
@@ -271,20 +162,6 @@ class LayersSwitcherView extends React.PureComponent {
 
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.globalObserver;
-
-    this.layerTreeData = buildLayerTree(this.options.groups, this.olLayerMap);
-    this.layerMap = buildLayerMap(this.options.groups, this.olLayerMap);
-
-    props.map.getAllLayers().forEach((l) => {
-      l.on("propertychange", (e) =>
-        console.log(
-          "layer:change",
-          l.get("caption"),
-          e,
-          getOlLayerInfo(e.target)
-        )
-      );
-    });
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
