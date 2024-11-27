@@ -13,6 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Search: Added possibility to set default search options via admin UI. PR: [#1496](https://github.com/hajkmap/Hajk/pull/1496)
 
+
+#### LayerSwitcher
+Issues: #1237, #1257, #1284, #1296, #1300, #1347, #1365, and #1380.
+
+- Filter functionality in LayerSwitcher.
+- Enhanced layer visibility indicators in LayerSwitcher.
+- Quick Access grouping in LayerSwitcher for access to frequently used layers.
+    With support for saving/recall of sets of "QuickAccess layers" to
+    LocalStorage.
+- Quick Access Layer Presets/Themes/Packages
+    Choose from ready made sets of Layers to load into the Quick Access
+    section. The Presets/Themes/Packages are set up in the map config. See
+    example in `simpleMapConfig.json`.
+- Improved DrawOrder tab functionality for managing layer drawing order.
+
+
 ## [3.14.1] - 2024-10-09
 
 ### BREAKING
