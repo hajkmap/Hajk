@@ -326,58 +326,77 @@ export default function ServiceSettings() {
     <Page title={t("common.settings")}>
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          textAlign: "center",
-          float: "right",
-          gap: 2,
-          p: 2,
-          ml: 3,
-          border: "1px solid",
-          borderColor: palette.grey[300],
-          borderRadius: 3,
-          maxWidth: "260px",
+          alignItems: "flex-start",
+          gap: 3,
+          width: "100%",
         }}
       >
-        <Button
-          onClick={handleExternalSubmit}
-          variant="contained"
-          disabled={updateStatus === "pending" || deleteStatus === "pending"}
-        >
-          {updateStatus === "pending" ? (
-            <CircularProgress color="primary" size={30} />
-          ) : (
-            t("services.dialog.saveBtn")
-          )}
-        </Button>
-
-        <Button
-          onClick={(e) => {
-            e.preventDefault();
-            void handleDeleteService();
-            navigate("/services");
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            textAlign: "center",
+            float: "right",
+            gap: 2,
+            p: 2,
+            ml: 3,
+            mb: 2,
+            border: "1px solid",
+            borderColor: palette.grey[300],
+            borderRadius: 3,
+            maxWidth: "200px",
           }}
-          disabled={deleteStatus === "pending" || updateStatus === "pending"}
-          variant="text"
         >
-          {t("services.dialog.deleteBtn")}
-        </Button>
+          <Button
+            onClick={handleExternalSubmit}
+            variant="contained"
+            disabled={updateStatus === "pending" || deleteStatus === "pending"}
+          >
+            {updateStatus === "pending" ? (
+              <CircularProgress color="primary" size={30} />
+            ) : (
+              t("services.dialog.saveBtn")
+            )}
+          </Button>
 
-        <Typography variant="body1">
-          Senast sparad av Albin den 2023-04-11 13:37
-        </Typography>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              void handleDeleteService();
+              navigate("/services");
+            }}
+            disabled={deleteStatus === "pending" || updateStatus === "pending"}
+            variant="text"
+          >
+            {t("services.dialog.deleteBtn")}
+          </Button>
+
+          <Typography variant="body1">
+            Senast sparad av Anonym den 2023-04-11 13:37
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+          }}
+        >
+          <form ref={formRef} onSubmit={onSubmit}>
+            <FormRenderer
+              data={formServiceData}
+              register={register}
+              control={control}
+              errors={errors}
+            />
+            <ServicesGrid
+              baseUrl={service?.url ?? ""}
+              type={service?.type ?? ""}
+            />
+          </form>
+        </Box>
       </Box>
-
-      <form ref={formRef} onSubmit={onSubmit}>
-        <FormRenderer
-          data={formServiceData}
-          register={register}
-          control={control}
-          errors={errors}
-        />
-      </form>
-      <ServicesGrid baseUrl={service?.url ?? ""} type={service?.type ?? ""} />
-
       <DialogWrapper
         fullWidth
         open={isDialogOpen}

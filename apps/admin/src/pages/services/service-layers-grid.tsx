@@ -63,12 +63,11 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
 
   return (
     <Grid container>
-      <Grid size={{ xs: 4, md: 8.5 }}>
+      <Grid size={{ xs: 12, md: 12 }}>
         <Accordion
           disableGutters
           sx={{
             width: "100%",
-            ml: 2,
             mb: 3,
           }}
         >
@@ -141,7 +140,6 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
           </AccordionDetails>
         </Accordion>
       </Grid>
-      <Grid size={{ xs: 8, md: 3.5 }}></Grid>
     </Grid>
   );
 }
