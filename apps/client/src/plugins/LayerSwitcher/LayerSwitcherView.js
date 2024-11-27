@@ -9,7 +9,7 @@ import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
-import LayerPackage from "./components/LayerPackage";
+import QuickAccessPresets from "./components/QuickAccessPresets.js";
 import QuickAccessView from "./components/QuickAccessView.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
 import LayerListFilter from "./components/LayerListFilter.js";
@@ -49,7 +49,7 @@ const BreadCrumbsContainer = ({ map, app }) => {
 // and `globalObserver` as needed.
 // - DONE remove quickaccess from LayerGroupAccordinon
 // - DONE Remove layerCount
-// - DONE Test the "Theme/layerPackage" functionality
+// - DONE Test the "Theme/quickAccessPresets" functionality
 // - DONE Fix the bug sometimes click layer in the quick access don't update
 //
 // - DONE Move `addLayerNames` to pure fn
@@ -59,9 +59,9 @@ const BreadCrumbsContainer = ({ map, app }) => {
 // - The layer pagage dialogs should use ConfirmationDialog component
 // - Remove `show` prop from quickAccess layers
 //
-// - DONE Clean upp render* methods in BackgroundSwitcher. Should make it faster as
-//   well. - Did not make it faster, but there is still more to do. More
-//   indirection to remove
+// - DONE Clean upp render* methods in BackgroundSwitcher.
+//   Should make it faster as well. - Did not make it faster,
+//   but there is still more to do. More indirection to remove
 //
 // - Refactor LayerItem into 3 separate components for each tab
 //     At least 3. Clean it up and remove indirection
@@ -258,7 +258,7 @@ class LayersSwitcherView extends React.PureComponent {
     this.state = {
       chapters: [],
       activeTab: 0,
-      displayContentOverlay: null, // 'layerPackage' | 'favorites' | 'layerItemDetails'
+      displayContentOverlay: null, // 'quickAccessPresets' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
       filterValue: "",
       treeData: this.layerTree,
@@ -338,15 +338,15 @@ class LayersSwitcherView extends React.PureComponent {
   }
 
   // Handles click on Layerpackage button and backbutton
-  handleLayerPackageToggle = (layerPackageState) => {
-    layerPackageState?.event?.stopPropagation();
+  handleQuickAccessPresetsToggle = (quickAccessPresetsState) => {
+    quickAccessPresetsState?.event?.stopPropagation();
     // Set scroll position state when layer package is opened
     const currentScrollPosition = this.getScrollPosition();
     this.setState((prevState) => ({
       displayContentOverlay:
-        this.state.displayContentOverlay === "layerPackage"
+        this.state.displayContentOverlay === "quickAccessPresets"
           ? null
-          : "layerPackage",
+          : "quickAccessPresets",
       scrollPositions: {
         ...prevState.scrollPositions,
         [`tab${prevState.activeTab}`]: currentScrollPosition,
@@ -437,8 +437,8 @@ class LayersSwitcherView extends React.PureComponent {
   };
 
   // Handles click on Favorites button and backbutton
-  handleFavoritesViewToggle = (layerPackageState) => {
-    layerPackageState?.event?.stopPropagation();
+  handleFavoritesViewToggle = (quickAccessPresetsState) => {
+    quickAccessPresetsState?.event?.stopPropagation();
     // Set scroll position state when favorites view is opened
     const currentScrollPosition = this.getScrollPosition();
     this.setState((prevState) => ({
@@ -505,7 +505,7 @@ class LayersSwitcherView extends React.PureComponent {
    * other shows background layers (as radio buttons, one-at-at-time).
    * And the DrawOrder tab
    *
-   * This method controls which of the two Tabs is visible and hides LayerPackage view.
+   * This method controls which of the two Tabs is visible and hides QuickAccessPresets view.
    *
    * @memberof LayersSwitcherView
    */
@@ -632,8 +632,8 @@ class LayersSwitcherView extends React.PureComponent {
               enableUserQuickAccessFavorites={
                 this.props.options.enableUserQuickAccessFavorites
               }
-              handleLayerPackageToggle={(e) =>
-                this.handleLayerPackageToggle({ event: e })
+              handleQuickAccessPresetsToggle={(e) =>
+                this.handleQuickAccessPresetsToggle({ event: e })
               }
               favoritesViewDisplay={
                 this.state.displayContentOverlay === "favorites"
@@ -655,14 +655,18 @@ class LayersSwitcherView extends React.PureComponent {
             ))}
           </Box>
           {this.props.options.enableQuickAccessTopics && (
-            <LayerPackage
-              quickLayerPresets={this.options.quickLayersPresets}
-              display={this.state.displayContentOverlay === "layerPackage"}
-              backButtonCallback={this.handleLayerPackageToggle}
+            <QuickAccessPresets
+              quickAccessPresets={this.options.quickAccessPresets}
+              display={
+                this.state.displayContentOverlay === "quickAccessPresets"
+              }
+              backButtonCallback={this.handleQuickAccessPresetsToggle}
               map={this.props.map}
               globalObserver={this.globalObserver}
-              layerPackageInfoText={this.options.quickAccessTopicsInfoText}
-            ></LayerPackage>
+              quickAccessPresetsInfoText={
+                this.options.quickAccessTopicsInfoText
+              }
+            ></QuickAccessPresets>
           )}
           <LayerItemDetails
             display={this.state.displayContentOverlay === "layerItemDetails"}

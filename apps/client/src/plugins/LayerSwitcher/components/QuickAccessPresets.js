@@ -32,13 +32,13 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
 
-function LayerPackage({
+function QuickAccessPresets({
   display,
   backButtonCallback,
-  quickLayerPresets,
+  quickAccessPresets,
   map,
   globalObserver,
-  layerPackageInfoText,
+  quickAccessPresetsInfoText,
 }) {
   const { enqueueSnackbar } = useSnackbar();
   // State that toggles info collapse
@@ -54,12 +54,12 @@ function LayerPackage({
   // TODO: Needs a better way to handle this
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
-  const quickLayerPresetsArray = quickLayerPresets || [];
+  const quickAccessPresetsArray = quickAccessPresets || [];
 
   // Filter state
   const [filter, setFilter] = useState({
     query: "",
-    list: quickLayerPresetsArray,
+    list: quickAccessPresetsArray,
   });
 
   // Handles click on back button in header
@@ -84,7 +84,7 @@ function LayerPackage({
 
   // Handles filter functionality
   const handleFilterChange = (value) => {
-    const results = quickLayerPresetsArray.filter((data) => {
+    const results = quickAccessPresetsArray.filter((data) => {
       if (value === "") return data;
       return (
         data.title.toLowerCase().includes(value.toLowerCase()) ||
@@ -190,7 +190,7 @@ function LayerPackage({
       anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
 
-    // Close layerPackage view on load
+    // Close quickAccessPresets view on load
     handleBackButtonClick(true);
   };
 
@@ -482,7 +482,7 @@ function LayerPackage({
               }}
             >
               <Typography variant="subtitle2">
-                {layerPackageInfoText}
+                {quickAccessPresetsInfoText}
               </Typography>
             </Box>
           </Collapse>
@@ -518,7 +518,7 @@ function LayerPackage({
           <List dense sx={{ p: 0 }}>
             {!filter.list.length ? (
               <Typography sx={{ p: 2 }}>
-                {quickLayerPresetsArray.length === 0 ? (
+                {quickAccessPresetsArray.length === 0 ? (
                   <span>Inga lagerpaket är konfigurerade</span>
                 ) : (
                   <span>Din filtrering gav inga resultat</span>
@@ -564,4 +564,4 @@ function LayerPackage({
   );
 }
 
-export default LayerPackage;
+export default QuickAccessPresets;

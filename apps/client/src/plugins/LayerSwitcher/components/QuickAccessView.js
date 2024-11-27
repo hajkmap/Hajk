@@ -30,7 +30,7 @@ const QuickAccessView = ({
   globalObserver,
   enableQuickAccessTopics, // : boolean
   enableUserQuickAccessFavorites,
-  handleLayerPackageToggle,
+  handleQuickAccessPresetsToggle,
   favoritesViewDisplay,
   handleFavoritesViewToggle,
   favoritesInfoText,
@@ -145,7 +145,7 @@ const QuickAccessView = ({
           <ListItemSecondaryAction>
             {enableQuickAccessTopics && (
               <HajkTooltip title="Teman">
-                <IconButton onClick={handleLayerPackageToggle}>
+                <IconButton onClick={handleQuickAccessPresetsToggle}>
                   <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
                 </IconButton>
               </HajkTooltip>
