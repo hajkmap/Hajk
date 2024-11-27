@@ -73,11 +73,6 @@ const BreadCrumbsContainer = ({ map, app }) => {
 //      as it is. I could move it to a own component though.
 //
 //
-// FEATURES to add
-// - When applying a theme open the QuickAccess
-// - Don't show the arrow on empty QA
-// - Better dialogs
-// - Don't require confirm if quick access is empty?
 
 // {
 //    id: string
@@ -92,7 +87,7 @@ const BreadCrumbsContainer = ({ map, app }) => {
 //    parent: string
 //    changeIndicator: Date
 // }
-//
+
 // Prepare tree data for filtering
 const addLayerNames = (data, olLayerMap) => {
   const node = data.map((item) => {
@@ -170,7 +165,6 @@ const getOlLayerInfo = (olLayer) => {
     maxZoom: olLayer.get("maxZoom"),
     minZoom: olLayer.get("minZoom"),
     minMaxZoomAlertOnToggleOnly: olLayer.get("minMaxZoomAlertOnToggleOnly"),
-
     // "filterAttribute"
     // "filterComparer"
     // "filterValue"
@@ -515,7 +509,7 @@ class LayersSwitcherView extends React.PureComponent {
    *
    * @memberof LayersSwitcherView
    */
-  handleChangeTabs = (event, activeTab) => {
+  handleChangeTabs = (_, activeTab) => {
     // Set scroll position state when tab is changed
     const currentScrollPosition = this.getScrollPosition();
     this.setState((prevState) => ({
@@ -534,7 +528,7 @@ class LayersSwitcherView extends React.PureComponent {
    *
    * @memberof LayersSwitcherView
    */
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(_, prevState) {
     if (
       prevState.activeTab !== this.state.activeTab ||
       prevState.displayContentOverlay !== this.state.displayContentOverlay

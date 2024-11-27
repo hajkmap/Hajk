@@ -145,7 +145,8 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
   useEffect(() => {
     bindVisibleChangeForLayersInGroup();
     return () => {
-      //LayerGroup is never unmounted atm but we remove listener in case this changes in the future
+      //LayerGroup is never unmounted atm but we remove listener in case this
+      //changes in the future
       unbindVisibleChangeForLayersInGroup();
     };
     // This useEffect corresponds to `componentDidMount` in the previous
@@ -153,12 +154,15 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // TODO This is a workaround for this component until we change the
+  // LayerSwitcher state model. Re-render whenever any layer in the group
+  // changes.
+  // We force update when a layer in this group has changed visibility to
+  // be able to sync togglebuttons in GUI
   // eslint-disable-next-line no-unused-vars
-  const [_, forceUpdate] = useState(null);
-  //We force update when a layer in this group has changed visibility to
-  //be able to sync togglebuttons in GUI
+  const [_, forceUpdate] = useState(false);
   const layerVisibilityChanged = (_) => {
-    forceUpdate();
+    forceUpdate((v) => v + 1);
     // setExpanded(expanded);
   };
 
@@ -316,14 +320,11 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
       ? "semichecked"
       : "unchecked";
 
-  console.log({ name, isToggled, isSemiToggled, toggleState });
-
   return (
     <LayerGroupAccordion
       display={!group.isFiltered ? "none" : "block"}
       toggleable={group.toggled}
       expanded={group.isExpanded}
-      test={toggleState}
       toggleDetails={
         <ToggleAllComponent
           toggleable={group.toggled}
