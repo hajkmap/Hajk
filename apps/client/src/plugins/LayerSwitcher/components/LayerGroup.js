@@ -167,11 +167,11 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
   };
 
   const hasLayers = (group) => {
-    return group.layers && group.layers.length > 0;
+    return group.layers && group.layers?.length > 0;
   };
 
   const hasSubGroups = (group) => {
-    return group.groups && group.groups.length > 0;
+    return group.groups && group.groups?.length > 0;
   };
 
   const getAllLayersInGroupAndSubGroups = (groups) => {
@@ -264,7 +264,7 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
     Array.isArray(groupsArray) &&
       groupsArray.forEach((group) => {
         // First call this function on all groups that might be inside this group
-        group.groups.length &&
+        group.groups?.length &&
           group.groups.forEach((g) => {
             toggleGroups(visibility, g);
           });
@@ -308,7 +308,7 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
   };
 
   let groupsExpanded = false;
-  if (group.groups.length === 1 && groups[0].expanded) {
+  if (group.groups?.length === 1 && groups[0].expanded) {
     groupsExpanded = groups[0].id;
   }
 
@@ -377,7 +377,7 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
       }
     >
       <div>
-        {group.layers.map((layer) => {
+        {group.layers?.map((layer) => {
           const mapLayer = layerMap[layer.id];
           // If mapLayer doesn't exist, the layer shouldn't be displayed
           if (!mapLayer) {
@@ -408,7 +408,7 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
             />
           );
         })}
-        {group.groups.map((group, i) => (
+        {group.groups?.map((group, i) => (
           <LayerGroup
             expanded={groupsExpanded === group.id}
             key={i}
