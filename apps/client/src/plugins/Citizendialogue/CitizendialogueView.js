@@ -112,7 +112,7 @@ function CitizendialogueView(props) {
 
   const closeSurvey = () => {
     if (props.baseWindowRef && props.baseWindowRef.current) {
-      props.baseWindowRef.current.closeWindow(); // Anropa metoden för att stänga fönstret
+      props.baseWindowRef.current.closeWindow();
     }
   };
 
