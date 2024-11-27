@@ -365,6 +365,7 @@ function QuickAccessPresets({
       <Dialog
         open={loadLpConfirmation ? true : false}
         onClose={handleLoadConfirmationAbort}
+        closeAfterTransition={false}
       >
         <DialogTitle>Ladda tema</DialogTitle>
         <DialogContent>
@@ -395,6 +396,7 @@ function QuickAccessPresets({
       <Dialog
         open={missingLayersConfirmation ? true : false}
         onClose={handleMissingLayersConfirmationAbort}
+        closeAfterTransition={false}
       >
         <DialogTitle>Lager saknas</DialogTitle>
         <DialogContent>
@@ -539,17 +541,17 @@ function QuickAccessPresets({
                     </ListItemIcon>
                     <ListItemText primary={l.title} secondary={l.author} />
                     <ListItemSecondaryAction>
-                      <IconButton
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleLpInfoClick(l);
-                        }}
-                      >
-                        <HajkToolTip title={"Information om " + l.title}>
+                      <HajkToolTip title={"Information om " + l.title}>
+                        <IconButton
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleLpInfoClick(l);
+                          }}
+                        >
                           <InfoOutlinedIcon fontSize="small" />
-                        </HajkToolTip>
-                      </IconButton>
+                        </IconButton>
+                      </HajkToolTip>
                     </ListItemSecondaryAction>
                   </ListItemButton>
                 );
