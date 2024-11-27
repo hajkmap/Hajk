@@ -116,6 +116,8 @@ function Citizendialogue(props) {
     );
   }
 
+  const baseWindowRef = React.useRef();
+
   const [surveyjsData] = React.useState({
     surveyId: props.options.selectedSurvey,
     surveyAnswerId: generateUniqueID(),
@@ -135,6 +137,7 @@ function Citizendialogue(props) {
   // given implementation, such as the icon to be shown, or this plugin's title.
   return (
     <BaseWindowPlugin
+      ref={baseWindowRef}
       {...props} // Pass on all the props...
       type="Citizendialogue" // Unique name - each plugin needs one. Upper-case first letter, must be valid JS variable name.
       custom={{
@@ -165,6 +168,7 @@ function Citizendialogue(props) {
         globalObserver={props.app.globalObserver} // ... and the global-observer (handling communication within the entire application).
         updateCustomProp={updateCustomProp} // We're also gonna pass a function that we can use to update the state in this (the parent) component.
         surveyJsData={surveyjsData}
+        baseWindowRef={baseWindowRef}
       />
     </BaseWindowPlugin>
   );

@@ -93,6 +93,9 @@ function CitizendialogueView(props) {
   const [currentQuestionName, setCurrentQuestionName] = useState(null);
   const [survey, setSurvey] = useState(null);
   const [surveyJsData, setSurveyJsData] = React.useState(props.surveyJsData);
+  const hasRestartButtonText =
+    props.options.restartButtonText &&
+    props.options.restartButtonText.trim() !== "";
 
   // Used for responseanswer
   const [isCompleted, setIsCompleted] = useState(false);
@@ -106,6 +109,12 @@ function CitizendialogueView(props) {
       Math.random().toString(36).substring(2, 9)
     );
   }
+
+  const closeSurvey = () => {
+    if (props.baseWindowRef && props.baseWindowRef.current) {
+      props.baseWindowRef.current.closeWindow(); // Anropa metoden för att stänga fönstret
+    }
+  };
 
   const restartSurvey = () => {
     setSurveyKey((prevKey) => prevKey + 1);
@@ -343,10 +352,27 @@ function CitizendialogueView(props) {
           <p style={{ fontSize: "1.5em", margin: "0", fontWeight: "bold" }}>
             {props.options.responseMessage}
           </p>
+          {hasRestartButtonText && (
+            <button
+              onClick={restartSurvey}
+              style={{
+                marginTop: "20px",
+                padding: "10px 20px",
+                fontSize: "1em",
+                cursor: "pointer",
+                backgroundColor: "#333333",
+                color: "#fff",
+                border: "none",
+                borderRadius: "5px",
+              }}
+            >
+              {props.options.restartButtonText}
+            </button>
+          )}
+          <br></br>
           <button
-            onClick={restartSurvey}
+            onClick={closeSurvey}
             style={{
-              marginTop: "20px",
               padding: "10px 20px",
               fontSize: "1em",
               cursor: "pointer",
@@ -356,7 +382,7 @@ function CitizendialogueView(props) {
               borderRadius: "5px",
             }}
           >
-            {props.options.restartButtonText}
+            Stäng enkätfönster
           </button>
         </div>
       )}

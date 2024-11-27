@@ -672,7 +672,13 @@ class ToolOptions extends Component {
           </div>
           <div>
           <label htmlFor="restartButtonText">
-                    Text på knapp vid omstart av enkät
+                    Text på knapp vid starta en ny enkät
+                    {" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="Lämna denna tom om du inte vill ha en knapp för att starta en ny enkät"
+                    />
                   </label>
                   <input
                     value={this.state.restartButtonText}
