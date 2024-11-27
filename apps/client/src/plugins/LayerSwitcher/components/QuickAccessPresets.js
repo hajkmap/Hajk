@@ -18,7 +18,6 @@ import {
   ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
-  Tooltip,
   Collapse,
   TextField,
   Typography,
@@ -31,6 +30,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
+
+import HajkToolTip from "../../../components/HajkToolTip";
 
 function QuickAccessPresets({
   display,
@@ -89,7 +90,7 @@ function QuickAccessPresets({
       return (
         data.title.toLowerCase().includes(value.toLowerCase()) ||
         data.author.toLowerCase().includes(value.toLowerCase()) ||
-        data.keywords.some((keyword) =>
+        data.keywords?.some((keyword) =>
           keyword.toLowerCase().includes(value.toLowerCase())
         )
       );
@@ -447,7 +448,7 @@ function QuickAccessPresets({
           }}
         >
           <Stack direction="row" alignItems="center">
-            <Tooltip
+            <HajkToolTip
               open={tooltipOpen}
               onClose={handleClose}
               onOpen={handleOpen}
@@ -457,14 +458,14 @@ function QuickAccessPresets({
               <IconButton onClick={handleBackButtonClick}>
                 <ArrowBackIcon />
               </IconButton>
-            </Tooltip>
+            </HajkToolTip>
             <Box sx={{ flexGrow: 1, textAlign: "center" }}>
               <Typography variant="subtitle1">Teman</Typography>
             </Box>
             <IconButton onClick={handleInfoButtonClick}>
-              <Tooltip title={infoIsActive ? "Dölj info" : "Visa info"}>
+              <HajkToolTip title={infoIsActive ? "Dölj info" : "Visa info"}>
                 <InfoOutlinedIcon />
-              </Tooltip>
+              </HajkToolTip>
             </IconButton>
           </Stack>
           <Collapse
@@ -545,9 +546,9 @@ function QuickAccessPresets({
                           handleLpInfoClick(l);
                         }}
                       >
-                        <Tooltip title={"Information om " + l.title}>
+                        <HajkToolTip title={"Information om " + l.title}>
                           <InfoOutlinedIcon fontSize="small" />
-                        </Tooltip>
+                        </HajkToolTip>
                       </IconButton>
                     </ListItemSecondaryAction>
                   </ListItemButton>

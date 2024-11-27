@@ -626,8 +626,8 @@ class LayersSwitcherView extends React.PureComponent {
               app={this.props.app}
               localObserver={this.localObserver}
               globalObserver={this.globalObserver}
-              enableQuickAccessTopics={
-                this.props.options.enableQuickAccessTopics
+              enableQuickAccessPresets={
+                this.props.options.enableQuickAccessPresets
               }
               enableUserQuickAccessFavorites={
                 this.props.options.enableUserQuickAccessFavorites
@@ -654,7 +654,7 @@ class LayersSwitcherView extends React.PureComponent {
               />
             ))}
           </Box>
-          {this.props.options.enableQuickAccessTopics && (
+          {this.props.options.enableQuickAccessPresets && (
             <QuickAccessPresets
               quickAccessPresets={this.options.quickAccessPresets}
               display={
@@ -664,7 +664,7 @@ class LayersSwitcherView extends React.PureComponent {
               map={this.props.map}
               globalObserver={this.globalObserver}
               quickAccessPresetsInfoText={
-                this.options.quickAccessTopicsInfoText
+                this.options.quickAccessPresetsInfoText
               }
             ></QuickAccessPresets>
           )}
