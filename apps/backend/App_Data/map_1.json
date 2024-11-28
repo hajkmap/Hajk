@@ -228,6 +228,13 @@
             "name": "Övrigt",
             "toggled": true,
             "expanded": false,
+            "infogroupvisible": true,
+            "infogrouptitle": "Info om lagergruppen Övrigt",
+            "infogrouptext": "Mera text om lagergruppen.",
+            "infogroupurl": "https://example.org/",
+            "infogroupurltext": "Länk",
+            "infogroupopendatalink": "https://example.org/opendata",
+            "infogroupowner": "Ägare av datan",
             "layers": [
               {
                 "id": "1352",
@@ -257,7 +264,39 @@
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Standardkartan",
         "instruction": "",
-        "visibleForGroups": []
+        "visibleForGroups": [],
+        "minMaxZoomAlertOnToggleOnly": false,
+        "showDrawOrderView": true,
+        "showFilter": true,
+        "showQuickAccess": true,
+        "enableSystemLayersSwitch": true,
+        "lockDrawOrderBaselayer": true,
+        "enableQuickAccessPresets": true,
+        "quickAccessPresetsInfoText": "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.", "enableUserQuickAccessFavorites": true,
+        "userQuickAccessFavoritesInfoText": "Här kan du hantera och redigera dina sparade favoriter. Observera att favoriter endast sparas tillfälligt.",
+        "quickAccessPresets": [
+          {
+            "id": "32123",
+            "layers": [
+              {
+                "id": "1",
+                "subLayers": [],
+                "opacity": 1.0,
+                "drawOrder": 1,
+                "visible": true
+              },
+              {
+                "id": "2",
+                "subLayers": [],
+                "opacity": 0.7,
+                "drawOrder": 255,
+                "visible": true
+              }
+            ],
+            "title": "Lagertema exempel 1",
+            "author": "Från utvecklarna"
+          }
+        ]
       },
       "index": 1
     },

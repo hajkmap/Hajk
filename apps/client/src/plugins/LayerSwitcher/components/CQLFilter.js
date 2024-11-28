@@ -1,21 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  InputLabel,
   OutlinedInput,
   IconButton,
   InputAdornment,
+  Stack,
+  Typography,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import HajkToolTip from "components/HajkToolTip";
 
 const CQLFilter = ({ layer }) => {
-  const source = layer.getSource();
-  const currentCqlFilterValue =
-    (typeof source.getParams === "function" &&
-      source.getParams()?.CQL_FILTER) ||
-    "";
+  const [cqlFilter, setCqlFilter] = useState("");
 
-  const [cqlFilter, setCqlFilter] = useState(currentCqlFilterValue);
+  useEffect(() => {
+    const source = layer.getSource();
+    const currentCqlFilterValue =
+      (typeof source.getParams === "function" &&
+        source.getParams()?.CQL_FILTER) ||
+      "";
+    setCqlFilter(currentCqlFilterValue);
+  }, [layer]);
 
   const updateFilter = () => {
     let filter = cqlFilter.trim();
@@ -24,11 +28,14 @@ const CQLFilter = ({ layer }) => {
   };
 
   return (
-    <>
-      <InputLabel htmlFor="cqlfilter">Ange CQL-filter</InputLabel>
+    <Stack direction="row" spacing={2} alignItems="center">
+      <Typography sx={{ flexGrow: 1, flexBasis: "25%" }} variant="subtitle2">
+        CQL-filter
+      </Typography>
       <OutlinedInput
         id="cqlfilter"
         type="text"
+        size="small"
         multiline
         fullWidth
         placeholder="foo='bar' AND fii='baz'"
@@ -36,15 +43,18 @@ const CQLFilter = ({ layer }) => {
         onChange={(e) => setCqlFilter(e.target.value)}
         endAdornment={
           <InputAdornment position="end">
-            <HajkToolTip title="Tryck för att ladda om lagret med angivet filter">
-              <IconButton edge="end" onClick={updateFilter} size="large">
+            <HajkToolTip
+              disableInteractive
+              title="Tryck för att ladda om lagret med angivet filter"
+            >
+              <IconButton edge="end" onClick={updateFilter} size="small">
                 <RefreshIcon />
               </IconButton>
             </HajkToolTip>
           </InputAdornment>
         }
       />
-    </>
+    </Stack>
   );
 };
 
