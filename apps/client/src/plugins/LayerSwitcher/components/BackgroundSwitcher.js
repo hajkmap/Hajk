@@ -169,7 +169,10 @@ const BackgroundSwitcher = ({
         osmLayerRef.current.setVisible(false);
       }
     } else {
-      layerMap[prevSelectedLayerId].setVisible(false);
+      // If the `enableAppStateInHash` setting is turned on and the page is
+      // reloaded then prevSelectedLayerId will be null. I think the best way
+      // to handle that case is to silently ignore this.
+      layerMap[prevSelectedLayerId]?.setVisible(false);
     }
   };
 
