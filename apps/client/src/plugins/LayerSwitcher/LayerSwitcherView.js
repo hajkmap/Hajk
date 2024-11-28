@@ -99,27 +99,6 @@ const addLayerNames = (data, olLayerMap) => {
   return node;
 };
 
-const getOlLayerInfo = (olLayer) => {
-  if (!olLayer) {
-    return null;
-  }
-  return {
-    id: olLayer.get("name"),
-    name: olLayer.get("caption"),
-    visible: olLayer.get("visible"),
-    opacity: olLayer.get("opacity"),
-    layerType: olLayer.get("layerType"),
-    quickAccess: olLayer.get("quickAccess"),
-    subLayers: olLayer.get("subLayers"),
-    layerInfo: olLayer.get("layerInfo"),
-    url: olLayer.get("url"),
-    zIndex: olLayer.get("zIndex"),
-    maxZoom: olLayer.get("maxZoom"),
-    minZoom: olLayer.get("minZoom"),
-    minMaxZoomAlertOnToggleOnly: olLayer.get("minMaxZoomAlertOnToggleOnly"),
-  };
-};
-
 class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
