@@ -72,6 +72,7 @@ class WMTSLayer {
 
     this.layer = new TileLayer({
       name: config.name,
+      caption: config.caption,
       visible: config.visible,
       queryable: config.queryable,
       opacity: config.opacity,
