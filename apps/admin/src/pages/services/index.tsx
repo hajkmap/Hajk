@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import Grid from "@mui/material/Grid2";
 import { Button, Box, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -199,6 +199,12 @@ export default function ServicesPage() {
                   headerName: "Version",
                 },
               ]}
+              slotProps={{
+                loadingOverlay: {
+                  variant: "skeleton",
+                  noRowsVariant: "skeleton",
+                },
+              }}
               localeText={
                 language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
               }

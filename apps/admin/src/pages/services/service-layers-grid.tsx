@@ -87,6 +87,10 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
               <Typography align="center" color={palette.error.main}>
                 {t("services.error.url")}
               </Typography>
+            ) : filteredLayers.length === 0 ? (
+              <Typography align="center" color={palette.error.main}>
+                {t("services.error.layers")}
+              </Typography>
             ) : (
               <Box
                 sx={{
@@ -123,6 +127,12 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
                         paginationModel: {
                           pageSize: 10,
                         },
+                      },
+                    }}
+                    slotProps={{
+                      loadingOverlay: {
+                        variant: "skeleton",
+                        noRowsVariant: "skeleton",
                       },
                     }}
                     hideFooterPagination={layers && layers.length < 10}

@@ -61,7 +61,7 @@
     "services.dialog.deleteBtn": "Ta bort",
     "services.dialog.saveBtn": "Spara",
     "services.dialog.title": "Ny tjänst",
-    "services.error.layers": "Hittade inga lager.",
+    "services.error.layers": "Inga lager hittades.",
     "services.error.unnamed.layer": "Lager utan namn.",
     "services.error.url": "Det gick inte att läsa in lager. Den angivna webbadressen är inte giltig.",
     "services.layerDescription": "Visningsbeskrivning av lager",
