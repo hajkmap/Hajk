@@ -2,7 +2,7 @@ import { VerticalAlignTop as ScrollToTopIcon } from "@mui/icons-material";
 import { Box, Typography, IconButton, useTheme } from "@mui/material";
 import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "react-router";
 
 interface Props {
   children: React.ReactNode;

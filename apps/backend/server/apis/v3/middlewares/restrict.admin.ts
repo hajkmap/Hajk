@@ -29,7 +29,7 @@ export default async function restrictAdmin(
     logger.error(
       "Cannot verify admin access because no admin group is specified in config. Make sure that RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS is set in .env."
     );
-    return res.sendStatus(500);
+    res.sendStatus(500);
   }
 
   // Save user name to eliminate multiple calls to the same method

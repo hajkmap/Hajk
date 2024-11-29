@@ -35,7 +35,7 @@ export default function UserTable() {
 
   const [userToDelete, setUserToDelete] = useState<{
     id: string;
-    fullName: string;
+    email: string;
   } | null>(null);
 
   const deleteUserMutation = useDeleteUser();
@@ -69,7 +69,7 @@ export default function UserTable() {
           onClick={() =>
             setUserToDelete({
               id: params.row.id,
-              fullName: params.row.fullName,
+              email: params.row.fullName,
             })
           }
         >
@@ -158,9 +158,7 @@ export default function UserTable() {
         aria-describedby="delete-user-dialog-description"
       >
         <DialogTitle id="delete-user-dialog-title">
-          {`${t("common.delete")} ${userToDelete?.fullName ?? ""}s ${t(
-            "common.account"
-          ).toLowerCase()}?`}
+          {`${t("user.deleteAccount")} ${userToDelete?.email ?? ""}?`}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-user-dialog-description">

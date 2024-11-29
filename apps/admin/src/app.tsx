@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter } from "react-router";
+import { RouterProvider } from "react-router/dom";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -88,7 +89,9 @@ const router = createBrowserRouter(
       element: <LoginPage />,
     },
   ],
-  { basename: import.meta.env.BASE_URL }
+  {
+    basename: import.meta.env.BASE_URL,
+  }
 );
 
 export default function App() {
