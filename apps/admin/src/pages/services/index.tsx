@@ -174,7 +174,7 @@ export default function ServicesPage() {
               onCellClick={(params) => {
                 const id: string = (params.row as Service).id;
                 if (id) {
-                  navigate(`/services/${id}`);
+                  void navigate(`/services/${id}`);
                 }
               }}
               sx={{

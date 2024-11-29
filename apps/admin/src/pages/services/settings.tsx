@@ -18,6 +18,7 @@ import {
   useServiceById,
   useUpdateService,
   useDeleteService,
+  useServices,
 } from "../../api/services/hooks";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
@@ -37,7 +38,9 @@ export default function ServiceSettings() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { serviceId } = useParams<{ serviceId: string }>();
-  const { data: service, isError, isLoading } = useServiceById(serviceId ?? "");
+  const { isError, isLoading } = useServiceById(serviceId ?? "");
+  const { data: services } = useServices();
+  const service = services?.find((s) => s.id === serviceId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogUrl, setDialogUrl] = useState(service?.url ?? "");
   const [dialogServiceType, setDialogServiceType] = useState(
@@ -95,7 +98,7 @@ export default function ServiceSettings() {
         }
       );
       setIsDialogOpen(false);
-      navigate("/services");
+      void navigate("/services");
     } catch (error) {
       console.error("Failed to update service:", error);
       toast.error(t("services.updateServiceFailed", { name: service?.name }), {
@@ -291,12 +294,6 @@ export default function ServiceSettings() {
     accordionNestedContainer3,
   ]);
 
-  useEffect(() => {
-    if (!service) return;
-    setFormServiceData(serviceSettingsFormContainer);
-    setDialogUrl(service.url);
-  }, [service]);
-
   const defaultValues = formServiceData.getDefaultValues();
   const {
     register,
@@ -315,6 +312,12 @@ export default function ServiceSettings() {
       void handleUpdateService(serviceData);
     },
   });
+
+  useEffect(() => {
+    if (!service) return;
+    setFormServiceData(serviceSettingsFormContainer);
+    setDialogUrl(service.url);
+  }, [service]);
 
   if (isLoading) {
     return <p>Loading...</p>;
@@ -363,7 +366,7 @@ export default function ServiceSettings() {
             onClick={(e) => {
               e.preventDefault();
               void handleDeleteService();
-              navigate("/services");
+              void navigate("/services");
             }}
             disabled={deleteStatus === "pending" || updateStatus === "pending"}
             variant="text"

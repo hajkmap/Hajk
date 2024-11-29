@@ -35,7 +35,7 @@ export const useServices = (): UseQueryResult<Service[]> => {
 // This hook uses the `getServiceById` function from the services `requests` module
 export const useServiceById = (serviceId: string): UseQueryResult<Service> => {
   return useQuery({
-    queryKey: ["services", serviceId],
+    queryKey: ["service", serviceId],
     queryFn: () => getServiceById(serviceId),
   });
 };
