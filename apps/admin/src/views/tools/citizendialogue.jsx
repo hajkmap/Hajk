@@ -31,8 +31,8 @@ const defaultState = {
   editableLayers: {},
   selectedSurvey: "",
   selectedMailTemplate: "",
-  responseMessage: "Tack för att du svarade på våra frågor!",
-  restartButtonText: "Vill du göra enkäten igen, klicka här!",
+  responseMessage: "<div style=\"font-size: 25px; font-weight: bold;\">Tack för att du svarade på våra frågor!</div>\n<div>Mera text...</div>",
+  restartButtonText: "Vill du svara på enkäten en gång till? Klicka här!",
   tree: "",
 };
 
@@ -660,8 +660,14 @@ class ToolOptions extends Component {
       <div>
           <label htmlFor="responseMessage">
                     Svarsmeddelande vid slutförd enkät
+                    {" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="Går att använda med eller utan HTML. Om du skriver utan HTML så skapas en stil automatiskt. Du kan även använda radbrytning utan HTML"
+                    />
                   </label>
-                  <input
+                  <textarea
                     value={this.state.responseMessage}
                     type="text"
                     name="responseMessage"

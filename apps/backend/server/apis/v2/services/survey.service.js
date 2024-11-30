@@ -221,6 +221,9 @@ class SurveyService {
     // Initialize the dynamic content
     let dynamicContent = "";
 
+    // Initialize the surveyAnswerId content
+    let surveyAnswerIdContent = "";
+
     // Add the survey response heading
     dynamicContent += "<h1>Svar från undersökningen</h1>";
 
@@ -241,11 +244,11 @@ class SurveyService {
       if (key === "surveyId") {
         subject = item;
         dynamicContent += `<br><b>${displayKey}</b>: ${item}`;
-      } else if (
-        key === "surveyAnswerId" ||
-        key === "surveyAnswerDate" ||
-        key === "featureData"
-      ) {
+      } else if (key === "surveyAnswerId") {
+        // Store surveyAnswerId content separately
+        let valueDisplay = Array.isArray(item) ? item.join(", ") : item;
+        surveyAnswerIdContent += `${valueDisplay}`;
+      } else if (key === "surveyAnswerDate" || key === "featureData") {
         let valueDisplay = Array.isArray(item) ? item.join(", ") : item;
         dynamicContent += `<br><b>${displayKey}</b>: ${valueDisplay}`;
       } else if (key === "surveyResults" && Array.isArray(item)) {
@@ -268,11 +271,13 @@ class SurveyService {
     let bodyHtml = "";
 
     if (templateContent) {
-      // If template content is available, replace the placeholder
-      bodyHtml = templateContent.replace("{{content}}", dynamicContent);
+      // If template content is available, replace the placeholders
+      bodyHtml = templateContent
+        .replace("{{content}}", dynamicContent)
+        .replace("{{surveyanswerid}}", surveyAnswerIdContent);
     } else {
       // If no template is used, wrap dynamic content in basic HTML structure
-      bodyHtml = `<html><body>${dynamicContent}</body></html>`;
+      bodyHtml = `<html><body>${dynamicContent}${surveyAnswerIdContent}</body></html>`;
     }
 
     // Extract the email address from the survey results
@@ -282,9 +287,11 @@ class SurveyService {
     let emailAddress = email;
 
     // Validate the email address
-    if (!(await this.isValidEmail(emailAddress))) {
-      console.error("Invalid email address: ", emailAddress);
-      emailAddress = "";
+    if (emailAddress) {
+      if (!(await this.isValidEmail(emailAddress))) {
+        console.error("Invalid email address: ", emailAddress);
+        emailAddress = "";
+      }
     }
 
     // Send the email using your mailing function

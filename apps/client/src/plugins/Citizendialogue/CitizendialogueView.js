@@ -93,6 +93,7 @@ function CitizendialogueView(props) {
   const [currentQuestionName, setCurrentQuestionName] = useState(null);
   const [survey, setSurvey] = useState(null);
   const [surveyJsData, setSurveyJsData] = React.useState(props.surveyJsData);
+  const { responseMessage, restartButtonText } = props.options;
   const hasRestartButtonText =
     props.options.restartButtonText &&
     props.options.restartButtonText.trim() !== "";
@@ -100,6 +101,10 @@ function CitizendialogueView(props) {
   // Used for responseanswer
   const [isCompleted, setIsCompleted] = useState(false);
   const [surveyKey, setSurveyKey] = useState(0);
+
+  // Checks if responseMessage contains html
+  const containsHTML = (str) => /<\/?[a-z][\s\S]*>/i.test(str);
+  const messageContainsHTML = containsHTML(responseMessage);
 
   //Unique ID and name on survey
   function generateUniqueID() {
@@ -339,6 +344,7 @@ function CitizendialogueView(props) {
         )
       ) : (
         <div
+          className="response-message-container"
           style={{
             backgroundColor: "#f0f0f0",
             display: "flex",
@@ -349,9 +355,32 @@ function CitizendialogueView(props) {
             textAlign: "center",
           }}
         >
-          <p style={{ fontSize: "1.5em", margin: "0", fontWeight: "bold" }}>
-            {props.options.responseMessage}
-          </p>
+          {messageContainsHTML ? (
+            // If content HTML render as HTML
+            <div
+              className="response-message"
+              dangerouslySetInnerHTML={{
+                __html: responseMessage,
+              }}
+            ></div>
+          ) : (
+            // If not HTML set style, render as text and manage \n
+            <p
+              style={{
+                fontSize: "1.5em",
+                margin: "0",
+                fontWeight: "bold",
+              }}
+            >
+              {responseMessage.split("\n").map((line, index) => (
+                <React.Fragment key={index}>
+                  {line}
+                  <br />
+                </React.Fragment>
+              ))}
+            </p>
+          )}
+
           {hasRestartButtonText && (
             <button
               onClick={restartSurvey}
@@ -366,10 +395,10 @@ function CitizendialogueView(props) {
                 borderRadius: "5px",
               }}
             >
-              {props.options.restartButtonText}
+              {restartButtonText}
             </button>
           )}
-          <br></br>
+          <br />
           <button
             onClick={closeSurvey}
             style={{

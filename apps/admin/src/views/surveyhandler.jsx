@@ -49,12 +49,19 @@ function SurveyHandler(props) {
     const question = survey.pages[selectedQuestion.pageIndex].questions[selectedQuestion.questionIndex];
     return (
       <div>
+        <div>
         <input
+          placeholder="Skriv din fråga här"
+          style={{ width: '100%', marginBottom: '20px' }}
           type="text"
           value={question.title}
           onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'title', e.target.value)}
         />
+        </div>
+        <div>
+          <label>Välj frågetyp:</label>{" "}
         <Select
+          style={{marginBottom: '20px', backgroundColor: 'white', width: '60%' }}
           value={question.inputType === "email" ? "email" : question.type}
           onChange={(e) => {
             const newType = e.target.value;
@@ -82,18 +89,10 @@ function SurveyHandler(props) {
         <MenuItem value="geometrypolygon">Geometriverktyget yta</MenuItem>
         <MenuItem value="geometrypointposition">Geometriverktyget punkt + min position</MenuItem>
         </Select>
-        <div>
-        <label>
-          Obligatorisk:
-            <input
-            type="checkbox"
-            checked={question.isRequired || false}
-            onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'isRequired', e.target.checked)}
-            />
-        </label>
         </div>
+        
         {question.type === "checkbox" || question.type === "radiogroup" ? (
-      <div>
+      <div style={{marginBottom: '20px' }}>
         {question.choices && question.choices.map((choice, index) => (
           <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
             <input
@@ -124,7 +123,7 @@ function SurveyHandler(props) {
 
 
       {question.type === "html" && (
-        <div><textarea
+        <div style={{marginBottom: '20px'}}><textarea
           style={{ width: '100%', height: '100px', display: 'block' }}
           value={question.html}
           onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'html', e.target.value)}
@@ -134,7 +133,7 @@ function SurveyHandler(props) {
       )}
 
       {question.type === "rating" && (
-        <div>
+        <div style={{marginBottom: '20px'}}>
           <input
             type="number"
             placeholder="Rate Min"
@@ -149,6 +148,17 @@ function SurveyHandler(props) {
           />
         </div>
       )}
+      <div>
+        <label>
+          Obligatorisk:{" "}
+            <input
+            style={{marginBottom: '20px'}}
+            type="checkbox"
+            checked={question.isRequired || false}
+            onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'isRequired', e.target.checked)}
+            />
+        </label>
+        </div>
         <Button variant="contained" color="secondary" onClick={deleteSelectedQuestion}>Ta bort Fråga</Button>
       </div>
     );
