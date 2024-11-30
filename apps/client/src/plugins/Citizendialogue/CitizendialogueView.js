@@ -116,19 +116,27 @@ function CitizendialogueView(props) {
   }
 
   const closeSurvey = () => {
-    if (props.baseWindowRef && props.baseWindowRef.current) {
-      props.baseWindowRef.current.closeWindow();
+    const userConfirmed = window.confirm(
+      "Är du säker på att du vill stänga fönstret? Enkäten är redan inskickad. Om du stänger fönstret nu kommer du att återgå till början, men inga ytterligare ändringar kan göras"
+    );
+    if (userConfirmed) {
+      if (props.baseWindowRef && props.baseWindowRef.current) {
+        restartSurvey();
+        props.baseWindowRef.current.closeWindow();
+      }
     }
   };
 
   const restartSurvey = () => {
+    let newSurveyAnswerId = generateUniqueID();
     setSurveyKey((prevKey) => prevKey + 1);
     setIsCompleted(false);
 
     setSurveyJsData((prevSurveyJsData) => ({
       ...prevSurveyJsData,
-      surveyAnswerId: generateUniqueID(),
+      surveyAnswerId: newSurveyAnswerId,
     }));
+    editModel.surveyJsData.surveyAnswerId = newSurveyAnswerId;
   };
 
   useEffect(() => {
@@ -364,7 +372,7 @@ function CitizendialogueView(props) {
               }}
             ></div>
           ) : (
-            // If not HTML set style, render as text and manage \n
+            // If not HTML, set style, render as text and manage \n
             <p
               style={{
                 fontSize: "1.5em",

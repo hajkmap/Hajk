@@ -406,7 +406,7 @@ const saveSurveyToFile = (filename, surveyJson) => {
           }
           return prevSurveys;
         });
-        setSelectedSurveyId(survey.title);
+        setSelectedSurveyId(filename);
     });
 };
 
