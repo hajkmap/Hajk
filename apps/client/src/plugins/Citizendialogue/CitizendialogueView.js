@@ -8,6 +8,13 @@ import "survey-core/defaultV2.min.css";
 import "survey-core/i18n/swedish";
 import ReactDOM from "react-dom/client";
 //import WKT from "ol/format/WKT";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 
 import EditView from "./EditView.js";
 import EditModel from "./EditModel.js";
@@ -97,6 +104,7 @@ function CitizendialogueView(props) {
   const hasRestartButtonText =
     props.options.restartButtonText &&
     props.options.restartButtonText.trim() !== "";
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Used for responseanswer
   const [isCompleted, setIsCompleted] = useState(false);
@@ -115,15 +123,23 @@ function CitizendialogueView(props) {
     );
   }
 
+  const handleAction = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const handleDialogClose = () => {
+    setShowConfirmDialog(false);
+    closeSurvey();
+  };
+
+  const handleDialogAbort = () => {
+    setShowConfirmDialog(false);
+  };
+
   const closeSurvey = () => {
-    const userConfirmed = window.confirm(
-      "Är du säker på att du vill stänga fönstret? Enkäten är redan inskickad. Om du stänger fönstret nu kommer du att återgå till början, men inga ytterligare ändringar kan göras"
-    );
-    if (userConfirmed) {
-      if (props.baseWindowRef && props.baseWindowRef.current) {
-        restartSurvey();
-        props.baseWindowRef.current.closeWindow();
-      }
+    if (props.baseWindowRef && props.baseWindowRef.current) {
+      restartSurvey();
+      props.baseWindowRef.current.closeWindow();
     }
   };
 
@@ -408,7 +424,7 @@ function CitizendialogueView(props) {
           )}
           <br />
           <button
-            onClick={closeSurvey}
+            onClick={handleAction}
             style={{
               padding: "10px 20px",
               fontSize: "1em",
@@ -421,6 +437,26 @@ function CitizendialogueView(props) {
           >
             Stäng enkätfönster
           </button>
+        </div>
+      )}
+      {showConfirmDialog && (
+        <div>
+          <Dialog open={showConfirmDialog} onClose={handleDialogAbort}>
+            <DialogTitle>Är du säker?</DialogTitle>
+            <DialogContent>
+              Är du säker på att du vill stänga fönstret? Enkäten är redan
+              inskickad. Om du stänger fönstret nu kommer du att återgå till
+              början, men inga ytterligare ändringar kan göras.
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleDialogAbort} color="primary">
+                Avbryt
+              </Button>
+              <Button onClick={handleDialogClose} color="primary" autoFocus>
+                Stäng fönstret
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
       )}
     </>

@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@material-ui/core/";
 
 function SurveyHandler(props) {
 
@@ -12,6 +18,12 @@ function SurveyHandler(props) {
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
   const [filename, setFilename] = useState("");
+  const [showConfirmDialogValid, setShowConfirmDialogValid] = useState(false);
+  const [showConfirmDialogOverwrite, setShowConfirmDialogOverwrite] = useState(false);
+  const [overwriteFilename, setOverwriteFilename] = useState('');
+  const [surveyJsonToSave, setSurveyJsonToSave] = useState(null);
+  const [showAlertDialog, setShowAlertDialog] = useState(false);
+  const [alertDialogMessage, setAlertDialogMessage] = useState('');
 
   const [survey, setSurvey] = useState({
     title: "",
@@ -36,7 +48,35 @@ function SurveyHandler(props) {
     setSelectedPageIndex(pageIndex);
   };
 
+  const handleDialogCloseValid = () => {
+    setShowConfirmDialogValid(false);
+  };
 
+  const handleDialogAbortValid = () => {
+    setShowConfirmDialogValid(false);
+  };
+
+  const handleConfirmOverwrite = () => {
+    // User confirms overwrite
+    setShowConfirmDialogOverwrite(false);
+    saveSurveyToFile(overwriteFilename, surveyJsonToSave);
+    // Clean temporary data
+    setOverwriteFilename('');
+    setSurveyJsonToSave(null);
+  };
+  
+  const handleCancelOverwrite = () => {
+    // User aborted
+    setShowConfirmDialogOverwrite(false);
+    // Clean temporary data
+    setOverwriteFilename('');
+    setSurveyJsonToSave(null);
+  };
+
+  const handleCloseAlertDialog = () => {
+    setShowAlertDialog(false);
+    setAlertDialogMessage('');
+  };
 
   const handlePageSelection = (pageIndex) => {
     setSelectedPageIndex(pageIndex);
@@ -367,19 +407,17 @@ const saveSurvey = () => {
 
     // Validate the filename
     if (!validateNewSurveyName(filename)) {
-        alert('Ogiltigt filnamn. Endast bokstäver och siffror är tillåtna.');
-        return;
+      setShowConfirmDialogValid(true);
+      return;
     }
 
     // Check if the filename already exists
     if (availableSurveys.includes(filename)) {
-        if (window.confirm(`Enkät "${filename}" finns redan. Vill du skriva över den?`)) {
-            // User confirmed overwrite, proceed to save
-            saveSurveyToFile(filename, surveyJson);
-        } else {
-            // User cancelled overwrite, do nothing
-            return;
-        }
+      setOverwriteFilename(filename);
+      // User confirmed overwrite, proceed to save
+      setSurveyJsonToSave(surveyJson);
+      setShowConfirmDialogOverwrite(true);
+      return;
     } else {
         // Filename is new, proceed to save
         saveSurveyToFile(filename, surveyJson);
@@ -388,26 +426,28 @@ const saveSurvey = () => {
 
 // Helper function to save the survey
 const saveSurveyToFile = (filename, surveyJson) => {
-    props.model.saveSurvey(filename, surveyJson, (response) => {
-        if (typeof response === 'object' && response !== null) {
-            let responseString = '';
-            for (const [key, value] of Object.entries(response)) {
-                responseString += `${key}: ${value}\n`;
-            }
-            alert(responseString);
-        } else {
-            alert(response);
-        }
-        
-        setAvailableSurveys((prevSurveys) => {
-          // Avoid duplicates
-          if (!prevSurveys.includes(filename)) {
-            return [...prevSurveys, filename];
-          }
-          return prevSurveys;
-        });
-        setSelectedSurveyId(filename);
+  props.model.saveSurvey(filename, surveyJson, (response) => {
+    let responseMessage = '';
+    if (typeof response === 'object' && response !== null) {
+      for (const [key, value] of Object.entries(response)) {
+        responseMessage += `${key}: ${value}\n`;
+      }
+    } else {
+      responseMessage = response;
+    }
+    // Visa meddelandet i en dialog
+    setAlertDialogMessage(responseMessage);
+    setShowAlertDialog(true);
+    
+    setAvailableSurveys((prevSurveys) => {
+      // Avoid duplicates
+      if (!prevSurveys.includes(filename)) {
+        return [...prevSurveys, filename];
+      }
+      return prevSurveys;
     });
+    setSelectedSurveyId(filename);
+  });
 };
 
 const handleSurveySelection = (e) => {
@@ -631,8 +671,49 @@ const handleSurveySelection = (e) => {
     </div>
   </Grid>
 </Grid>
+{showConfirmDialogValid && (
+        <Dialog open={showConfirmDialogValid} onClose={handleDialogAbortValid}>
+          <DialogTitle>Fel i filnamn?</DialogTitle>
+          <DialogContent>
+          Ogiltigt filnamn. Endast bokstäver, siffror och understreck är tillåtet.
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogCloseValid} color="primary" autoFocus>
+              Stäng dialogruta
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+      {showConfirmDialogOverwrite && (
+        <Dialog open={showConfirmDialogOverwrite} onClose={handleCancelOverwrite}>
+          <DialogTitle>Spara enkät</DialogTitle>
+          <DialogContent>
+            {`Enkät "${overwriteFilename}" finns redan. Vill du skriva över den?`}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancelOverwrite} color="primary">
+              Avbryt
+            </Button>
+            <Button onClick={handleConfirmOverwrite} color="primary" autoFocus>
+              Spara
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+      {showAlertDialog && (
+        <Dialog open={showAlertDialog} onClose={handleCloseAlertDialog}>
+          <DialogTitle>Meddelande</DialogTitle>
+          <DialogContent>
+            {alertDialogMessage}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseAlertDialog} color="primary" autoFocus>
+              Stäng
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </div>
-    
   );
 }
 
