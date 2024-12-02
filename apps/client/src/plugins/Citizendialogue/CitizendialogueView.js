@@ -184,19 +184,22 @@ function CitizendialogueView(props) {
   const editViewRef = useRef(null);
 
   React.useEffect(() => {
-    const snackbarEvent = localObserver.subscribe("showSnackbar", (message) => {
+    const snackbarHandler = (message) => {
       enqueueSnackbar(message, { variant: "info" });
 
       // Check that editViewRef is defined first
       if (editViewRef?.current?.onSaveClicked) {
         editViewRef.current.onSaveClicked();
       }
-    });
+    };
+
+    localObserver.subscribe("showSnackbar", snackbarHandler);
+
     // Clean prenumeration
     return () => {
-      localObserver.unsubscribe(snackbarEvent);
+      localObserver.unsubscribe("showSnackbar", snackbarHandler);
     };
-  }, [localObserver, enqueueSnackbar, editViewRef]);
+  }, [localObserver, enqueueSnackbar]);
 
   const handleOnCompleting = () => {
     if (showEditView.show) {
@@ -252,7 +255,7 @@ function CitizendialogueView(props) {
       setIsCompleted(true);
     },
     // eslint-disable-next-line
-    [surveyJsData, props.model]
+    [surveyJsData.surveyAnswerId, props.model]
   );
 
   // Sets currentQuestionName and title after rendering question
