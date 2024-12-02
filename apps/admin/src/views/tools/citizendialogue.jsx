@@ -619,7 +619,7 @@ class ToolOptions extends Component {
               checked={this.state.visibleAtStartMobile}
             />
             &nbsp;
-            <label htmlFor="visibleAtStart">Synlig vid start(mobil)</label>
+            <label htmlFor="visibleAtStartMobile">Synlig vid start(mobil)</label>
           </div>
           <div>
         <label>Välj enkät:</label>

@@ -105,6 +105,7 @@ function CitizendialogueView(props) {
     props.options.restartButtonText &&
     props.options.restartButtonText.trim() !== "";
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const rootMap = useRef(new Map());
 
   // Used for responseanswer
   const [isCompleted, setIsCompleted] = useState(false);
@@ -229,8 +230,6 @@ function CitizendialogueView(props) {
           }));
       }
 
-      setShowEditView({ show: false });
-
       const resultData = [];
       for (const [key, question] of Object.entries(survey.data)) {
         const surveyQuestion = survey.getQuestionByName(key);
@@ -253,6 +252,7 @@ function CitizendialogueView(props) {
       };
       props.model.handleOnComplete(combinedData);
       setIsCompleted(true);
+      setShowEditView({ show: false });
     },
     // eslint-disable-next-line
     [surveyJsData.surveyAnswerId, props.model]
@@ -311,7 +311,6 @@ function CitizendialogueView(props) {
   editModel.currentQuestionName = currentQuestionName;
   editModel.currentQuestionTitle = currentQuestionTitle;
 
-  const rootMap = useRef(new Map());
   React.useEffect(() => {
     const containers = document.querySelectorAll(".editViewContainer");
 
@@ -344,7 +343,8 @@ function CitizendialogueView(props) {
       containers.forEach((container) => {
         const root = rootMap.current.get(container);
         if (root) {
-          root.render(null);
+          root.unmount();
+          rootMap.current.delete(container);
         }
       });
     }
