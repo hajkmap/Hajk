@@ -153,6 +153,8 @@ function CitizendialogueView(props) {
       surveyAnswerId: newSurveyAnswerId,
     }));
     editModel.surveyJsData.surveyAnswerId = newSurveyAnswerId;
+    editModel.reset();
+    editModel.newMapData = [];
   };
 
   useEffect(() => {

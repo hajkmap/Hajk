@@ -16,6 +16,7 @@ class EditView extends React.PureComponent {
       surveyname: this.props.surveyJsData,
       isHidden: true,
     };
+    this.subscriptions = [];
     this.bindSubscriptions();
   }
 
@@ -44,16 +45,25 @@ class EditView extends React.PureComponent {
     this.setState({ activeStep: 0 });
   }
 
+  componentWillUnmount() {
+    // Remove all subscriptions
+    this.subscriptions.forEach((unsubscribe) => unsubscribe());
+  }
+
   bindSubscriptions = () => {
-    this.props.observer.subscribe("editFeature", (feature) => {
+    const editFeatureHandler = (feature) => {
       this.props.observer.publish("feature-to-update-view", feature);
       this.setState({
         editFeature: feature,
         editSource: this.props.model.editSource,
       });
+    };
+    this.props.observer.subscribe("editFeature", editFeatureHandler);
+    this.subscriptions.push(() => {
+      this.props.observer.unsubscribe("editFeature", editFeatureHandler);
     });
 
-    this.props.observer.subscribe("resetView", () => {
+    const resetViewHandler = () => {
       this.props.observer.publish("feature-to-update-view", undefined);
       this.setState({
         editFeature: undefined,
@@ -61,9 +71,23 @@ class EditView extends React.PureComponent {
         activeStep: 0,
         activeTool: undefined,
       });
+    };
+    this.props.observer.subscribe("resetView", resetViewHandler);
+    this.subscriptions.push(() => {
+      this.props.observer.unsubscribe("resetView", resetViewHandler);
     });
-    this.props.observer.subscribe("deactivateEditInteraction", () => {
+    const deactivateEditInteractionHandler = () => {
       this.toggleActiveTool("");
+    };
+    this.props.observer.subscribe(
+      "deactivateEditInteraction",
+      deactivateEditInteractionHandler
+    );
+    this.subscriptions.push(() => {
+      this.props.observer.unsubscribe(
+        "deactivateEditInteraction",
+        deactivateEditInteractionHandler
+      );
     });
   };
 
