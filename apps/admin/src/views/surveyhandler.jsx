@@ -425,17 +425,19 @@ const saveSurvey = () => {
 };
 
 // Helper function to save the survey
-const saveSurveyToFile = (filename, surveyJson) => {
+const saveSurveyToFile = (filename, surveyJson) => { 
   props.model.saveSurvey(filename, surveyJson, (response) => {
     let responseMessage = '';
     if (typeof response === 'object' && response !== null) {
-      for (const [key, value] of Object.entries(response)) {
-        responseMessage += `${key}: ${value}\n`;
+      if (response.error) {
+        responseMessage = `Fel: ${response.error}`;
+      } else {
+        responseMessage = 'Fil sparad';
       }
     } else {
       responseMessage = response;
     }
-    // Visa meddelandet i en dialog
+    
     setAlertDialogMessage(responseMessage);
     setShowAlertDialog(true);
     

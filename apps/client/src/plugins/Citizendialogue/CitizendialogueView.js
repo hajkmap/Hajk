@@ -105,6 +105,7 @@ function CitizendialogueView(props) {
     props.options.restartButtonText &&
     props.options.restartButtonText.trim() !== "";
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
   const rootMap = useRef(new Map());
 
   // Used for responseanswer
@@ -210,7 +211,7 @@ function CitizendialogueView(props) {
 
   //Combine ID/Name and surveydata and geometry
   const handleOnComplete = React.useCallback(
-    (survey) => {
+    async (survey) => {
       const specificSurveyAnswerId = surveyJsData.surveyAnswerId;
       let featureData = [];
 
@@ -250,7 +251,13 @@ function CitizendialogueView(props) {
         surveyResults: mergedResults,
         mailTemplate: props.options.selectedMailTemplate,
       };
-      props.model.handleOnComplete(combinedData);
+      try {
+        await props.model.handleOnComplete(combinedData);
+      } catch (error) {
+        setShowErrorMessage(
+          "Ett fel uppstod vid inlämning av enkät" //+ error.message
+        );
+      }
       setIsCompleted(true);
       setShowEditView({ show: false });
     },
@@ -440,7 +447,7 @@ function CitizendialogueView(props) {
               borderRadius: "5px",
             }}
           >
-            Stäng enkätfönster
+            Stäng enkätfönster och förbered för nytt enkätsvar
           </button>
         </div>
       )}
@@ -462,6 +469,25 @@ function CitizendialogueView(props) {
               </Button>
             </DialogActions>
           </Dialog>
+        </div>
+      )}
+      {showErrorMessage && (
+        <div
+          className="error-message"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "10px 20px",
+            fontSize: "1em",
+            cursor: "pointer",
+            backgroundColor: "#990000",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+          }}
+        >
+          {showErrorMessage}
         </div>
       )}
     </>

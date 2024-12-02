@@ -98,6 +98,7 @@ export default class CitizendialogueModel {
       console.log("Enkät svarad och sparad:", saveResult);
     } catch (error) {
       console.error("Kunde inte spara enkätsvaret:", error);
+      throw error;
     }
   };
 
