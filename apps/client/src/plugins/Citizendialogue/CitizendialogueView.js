@@ -147,7 +147,6 @@ function CitizendialogueView(props) {
 
   const restartSurvey = () => {
     let newSurveyAnswerId = generateUniqueID();
-    setSurveyKey((prevKey) => prevKey + 1);
     setIsCompleted(false);
 
     setSurveyJsData((prevSurveyJsData) => ({
@@ -157,6 +156,15 @@ function CitizendialogueView(props) {
     editModel.surveyJsData.surveyAnswerId = newSurveyAnswerId;
     editModel.reset();
     editModel.newMapData = [];
+
+    rootMap.current.forEach((root, container) => {
+      if (root) {
+        root.unmount(); // Unmount component from root
+        rootMap.current.delete(container); // Remove from rootMap
+      }
+    });
+
+    setSurveyKey((prevKey) => prevKey + 1);
   };
 
   useEffect(() => {
@@ -319,43 +327,70 @@ function CitizendialogueView(props) {
   editModel.currentQuestionTitle = currentQuestionTitle;
 
   React.useEffect(() => {
-    const containers = document.querySelectorAll(".editViewContainer");
+    const containers = Array.from(
+      document.querySelectorAll(".editViewContainer")
+    );
 
     if (showEditView.show) {
+      // Creating new root if missing
       containers.forEach((container) => {
-        let root = rootMap.current.get(container);
-
-        if (!root) {
-          root = ReactDOM.createRoot(container);
+        if (!rootMap.current.has(container)) {
+          const root = ReactDOM.createRoot(container);
           rootMap.current.set(container, root);
-        }
 
-        root.render(
-          <EditView
-            key={editViewKey}
-            app={props.app}
-            model={editModel}
-            observer={props.localObserver}
-            surveyJsData={surveyJsData}
-            resetView={resetEditView}
-            currentQuestionTitle={currentQuestionTitle}
-            currentQuestionName={currentQuestionName}
-            onSaveCallback={handleOnComplete}
-            ref={editViewRef}
-            toolbarOptions={showEditView.toolbarOptions}
-          />
-        );
+          root.render(
+            <EditView
+              key={editViewKey}
+              app={props.app}
+              model={editModel}
+              observer={props.localObserver}
+              surveyJsData={surveyJsData}
+              resetView={resetEditView}
+              currentQuestionTitle={currentQuestionTitle}
+              currentQuestionName={currentQuestionName}
+              onSaveCallback={handleOnComplete}
+              ref={editViewRef}
+              toolbarOptions={showEditView.toolbarOptions}
+            />
+          );
+        }
       });
-    } else {
-      containers.forEach((container) => {
-        const root = rootMap.current.get(container);
-        if (root) {
-          root.unmount();
-          rootMap.current.delete(container);
+
+      // REnder existing root
+      rootMap.current.forEach((root, container) => {
+        if (containers.includes(container)) {
+          root.render(
+            <EditView
+              key={editViewKey}
+              app={props.app}
+              model={editModel}
+              observer={props.localObserver}
+              surveyJsData={surveyJsData}
+              resetView={resetEditView}
+              currentQuestionTitle={currentQuestionTitle}
+              currentQuestionName={currentQuestionName}
+              onSaveCallback={handleOnComplete}
+              ref={editViewRef}
+              toolbarOptions={showEditView.toolbarOptions}
+            />
+          );
         }
       });
     }
-  });
+  }, [
+    showEditView,
+    editViewKey,
+    props.app,
+    editModel,
+    props.localObserver,
+    surveyJsData,
+    //resetEditView,
+    currentQuestionTitle,
+    currentQuestionName,
+    handleOnComplete,
+    editViewRef,
+    showEditView.toolbarOptions,
+  ]);
 
   useEffect(() => {
     const newSurvey = new Model(surveyJSON);
@@ -447,7 +482,7 @@ function CitizendialogueView(props) {
               borderRadius: "5px",
             }}
           >
-            Stäng enkätfönster och förbered för nytt enkätsvar
+            Stäng enkätfönster
           </button>
         </div>
       )}
