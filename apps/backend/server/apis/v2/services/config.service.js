@@ -203,28 +203,28 @@ class ConfigServiceV2 {
       }
     }
 
-    // Grab layers from Citizendialogue
-    const editOptionsCitizendialogue = mapConfig.tools.find(
-      (t) => t.type === "citizendialogue"
+    // Grab layers from Survey
+    const editOptionsSurvey = mapConfig.tools.find(
+      (t) => t.type === "survey"
     )?.options;
-    let editLayerIdsCitizendialogue = [];
+    let editLayerIdsSurvey = [];
 
-    if (editOptionsCitizendialogue !== undefined) {
+    if (editOptionsSurvey !== undefined) {
       if (
-        editOptionsCitizendialogue.activeServices &&
-        editOptionsCitizendialogue.activeServices.length !== 0
+        editOptionsSurvey.activeServices &&
+        editOptionsSurvey.activeServices.length !== 0
       ) {
         if (
-          typeof editOptionsCitizendialogue.activeServices[0]
-            .visibleForGroups === "undefined"
+          typeof editOptionsSurvey.activeServices[0].visibleForGroups ===
+          "undefined"
         ) {
           // if visibleForGroups is undefined the activeServices is an array of id's
-          editLayerIdsCitizendialogue =
-            editOptionsCitizendialogue?.activeServices.map((as) => as) || [];
+          editLayerIdsSurvey =
+            editOptionsSurvey?.activeServices.map((as) => as) || [];
         } else {
           // else the activeServices is an array of objects with "id" and "visibleForGroups"
-          editLayerIdsCitizendialogue =
-            editOptionsCitizendialogue?.activeServices.map((as) => as.id) || [];
+          editLayerIdsSurvey =
+            editOptionsSurvey?.activeServices.map((as) => as.id) || [];
         }
       }
     }
@@ -243,7 +243,7 @@ class ConfigServiceV2 {
       ...layerIds,
       ...searchLayerIds,
       ...editLayerIds,
-      ...editLayerIdsCitizendialogue,
+      ...editLayerIdsSurvey,
       ...(collectorToolsServiceId ? [collectorToolsServiceId] : []), // Conditional spread to avoid undefined inside the Set
     ]);
 
@@ -405,7 +405,7 @@ class ConfigServiceV2 {
    *  - Part 2: groups and layers (in LayerSwitcher's options)
    *  - Part 3: WFS search services (in Search's options)
    *  - Part 4: WFST edit services (in Edit's options)
-   *  - Part 4.1: WFST edit services (in Citizendialogue's options)
+   *  - Part 4.1: WFST edit services (in Survey's options)
    *
    * @param {*} mapConfig
    * @param {*} user
@@ -553,14 +553,13 @@ class ConfigServiceV2 {
       mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
     }
 
-    // Part 4.1: Wash WFST citizendialogue services
-    const editIndexInToolsCitizendialogue = mapConfig.tools.findIndex(
-      (t) => t.type === "citizendialogue"
+    // Part 4.1: Wash WFST survey services
+    const editIndexInToolsSurvey = mapConfig.tools.findIndex(
+      (t) => t.type === "survey"
     );
 
-    if (editIndexInToolsCitizendialogue !== -1) {
-      let { activeServices } =
-        mapConfig.tools[editIndexInToolsCitizendialogue].options;
+    if (editIndexInToolsSurvey !== -1) {
+      let { activeServices } = mapConfig.tools[editIndexInToolsSurvey].options;
       // Wash WFST edit layers
       activeServices = await asyncFilter(
         activeServices, // layers in edit tool are named activeServices
@@ -571,7 +570,7 @@ class ConfigServiceV2 {
             `WFST edit layer "${layer.id}"`
           )
       );
-      mapConfig.tools[editIndexInToolsCitizendialogue].options.activeServices =
+      mapConfig.tools[editIndexInToolsSurvey].options.activeServices =
         activeServices;
     }
 

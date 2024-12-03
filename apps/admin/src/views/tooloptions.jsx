@@ -23,7 +23,7 @@ import Measurer from "./tools/measurer.jsx";
 import Routing from "./tools/routing.jsx";
 import Collector from "./tools/collector.jsx";
 import Dummy from "./tools/dummy.jsx";
-import Citizendialogue from "./tools/citizendialogue.jsx";
+import Survey from "./tools/survey.jsx";
 import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 import TimeSlider from "./tools/timeslider.jsx";
 // import GeosuiteExport from "./tools/geosuiteExport.jsx";
@@ -100,8 +100,8 @@ class ToolOptions extends Component {
       //   return <Informative parent={this} model={this.props.model} />;
       case "dummy":
         return <Dummy parent={this} model={this.props.model} />;
-      case "citizendialogue":
-        return <Citizendialogue parent={this} model={this.props.model} />;
+      case "survey":
+        return <Survey parent={this} model={this.props.model} />;
       case "location":
         return <Location parent={this} model={this.props.model} />;
       case "search":
@@ -186,7 +186,7 @@ class ToolOptions extends Component {
       sketch: "Rita",
       preset: "Snabbval",
       search: "Sök",
-      citizendialogue: "Medborgardialog",
+      survey: "Enkätverktyg",
       timeslider: "Tidslinje",
       collector: "Tyck till",
       print: "Utskrift",

@@ -841,8 +841,8 @@ class AppModel {
     return editLayers;
   }
 
-  overrideGlobalEditConfigCitizen(citizendialogueTool, wfstlayers) {
-    const configSpecificEditLayers = citizendialogueTool.options.activeServices;
+  overrideGlobalEditConfigSurvey(surveyTool, wfstlayers) {
+    const configSpecificEditLayers = surveyTool.options.activeServices;
     const editLayers = wfstlayers.filter((layer) => {
       if (configSpecificEditLayers.find((x) => x.id === layer.id)) {
         return layer;
@@ -873,14 +873,14 @@ class AppModel {
       return tool.type === "edit";
     });
 
-    const citizendialogueTool = this.config.mapConfig.tools.find((tool) => {
-      return tool.type === "citizendialogue";
+    const surveyTool = this.config.mapConfig.tools.find((tool) => {
+      return tool.type === "survey";
     });
 
     let layers = {};
 
     let editWfstLayers = [];
-    let citizenWfstLayers = [];
+    let surveyWfstLayers = [];
 
     if (layerSwitcherTool) {
       layers.wmslayers = this.config.layersConfig.wmslayers || [];
@@ -900,9 +900,9 @@ class AppModel {
         ...l,
         type: "edit",
       }));
-      citizenWfstLayers = layers.wfstlayers.map((l) => ({
+      surveyWfstLayers = layers.wfstlayers.map((l) => ({
         ...l,
-        type: "citizendialogue",
+        type: "survey",
       }));
 
       let allLayers = [
@@ -910,7 +910,7 @@ class AppModel {
         ...layers.wmtslayers,
         ...layers.vectorlayers,
         ...editWfstLayers,
-        ...citizenWfstLayers,
+        ...surveyWfstLayers,
         ...layers.arcgislayers,
       ];
 
@@ -1031,43 +1031,38 @@ class AppModel {
 
     // This is for backwards compatibility prior to adding locking WFST edit layers with AD.
     // This code handles if activeServices does not have an object with "id", "visibleForGroups"
-    if (citizendialogueTool) {
-      if (citizendialogueTool.options.activeServices === null) {
-        citizendialogueTool.options.sources = [];
+    if (surveyTool) {
+      if (surveyTool.options.activeServices === null) {
+        surveyTool.options.sources = [];
       } else {
         if (
-          citizendialogueTool.options.activeServices &&
-          citizendialogueTool.options.activeServices.length !== 0
+          surveyTool.options.activeServices &&
+          surveyTool.options.activeServices.length !== 0
         ) {
           if (
-            typeof citizendialogueTool.options.activeServices[0]
-              .visibleForGroups === "undefined"
+            typeof surveyTool.options.activeServices[0].visibleForGroups ===
+            "undefined"
           ) {
             // If activeService does not have an object with "id", "visibleForGroups", add it
             let as = [];
-            for (
-              let i = 0;
-              i < citizendialogueTool.options.activeServices.length;
-              i++
-            ) {
+            for (let i = 0; i < surveyTool.options.activeServices.length; i++) {
               let service = {
-                id: citizendialogueTool.options.activeServices[i],
+                id: surveyTool.options.activeServices[i],
                 visibleForGroups: [],
               };
               as.push(service);
             }
-            citizendialogueTool.options.activeServices = as;
+            surveyTool.options.activeServices = as;
           }
 
-          const filteredCitizenWfstLayers =
-            this.overrideGlobalEditConfigCitizen(
-              citizendialogueTool,
-              citizenWfstLayers
-            );
-          citizendialogueTool.options.sources = filteredCitizenWfstLayers;
+          const filteredSurveyWfstLayers = this.overrideGlobalEditConfigSurvey(
+            surveyTool,
+            surveyWfstLayers
+          );
+          surveyTool.options.sources = filteredSurveyWfstLayers;
           //layers.wfstlayers = wfstlayers;
         } else {
-          citizendialogueTool.options.sources = [];
+          surveyTool.options.sources = [];
         }
       }
     }

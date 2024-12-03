@@ -86,7 +86,7 @@ ComponentCollection.Instance.add({
   },
 });
 
-function CitizendialogueView(props) {
+function SurveyView(props) {
   // We're gonna need to use the event observers. Let's destruct them so that we can
   // get a hold of them easily. The observers can be accessed directly via the props:
   const { localObserver } = props;
@@ -529,4 +529,4 @@ function CitizendialogueView(props) {
   );
 }
 
-export default CitizendialogueView;
+export default SurveyView;

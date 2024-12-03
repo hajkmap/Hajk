@@ -21,7 +21,7 @@
     "Sketch",
     "StreetView",
     "TimeSlider",
-    "Citizendialogue"
+    "Survey"
   ],
   "allTools": [
     "Anchor",
@@ -51,6 +51,6 @@
     "Sketch",
     "StreetView",
     "TimeSlider",
-    "Citizendialogue"
+    "Survey"
   ]
 }

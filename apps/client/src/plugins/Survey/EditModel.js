@@ -699,8 +699,8 @@ class EditModel {
     if (isSimulated) {
       this.source = {
         id: "simulated",
-        caption: "Simulerad Medborgardialog",
-        internalLayerName: "Simulerad Medborgardialog",
+        caption: "Simulerad Enkätverktyg",
+        internalLayerName: "Simulerad Enkätverktyg",
         url: "http://localhost:3002/simulated",
         uri: "http://www.opengis.net/wfs",
         projection: this.map.getView().getProjection().getCode(),

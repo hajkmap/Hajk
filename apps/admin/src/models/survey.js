@@ -5,7 +5,7 @@ import { prepareProxyUrl } from "../utils/ProxyHelper";
 
 const x2js = new X2JS({ attributePrefix: "" });
 
-var citizendialogue = Model.extend({
+var survey = Model.extend({
   defaults: {
     layers: [],
   },
@@ -151,4 +151,4 @@ var citizendialogue = Model.extend({
   },
 });
 
-export default citizendialogue;
+export default survey;

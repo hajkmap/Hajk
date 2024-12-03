@@ -2,22 +2,22 @@ import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 // Plugin-specific imports. Most plugins will need a Model, View and Observer but make sure to only create and import whatever you need.
-import CitizendialogueModel from "./CitizendialogueModel";
-import CitizendialogueView from "./CitizendialogueView";
+import SurveyModel from "./SurveyModel";
+import SurveyView from "./SurveyView";
 import Observer from "react-event-observer";
 
 // All plugins will need to display an icon. Make sure to pick a relevant one from MUI Icons.
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 
 /**
- * @summary Main component for the Citizendialogue-plugin.
- * @description The purpose of having a Citizendialogue plugin is to exemplify
+ * @summary Main component for the Survey-plugin.
+ * @description The purpose of having a Survey plugin is to exemplify
  * and document how plugins should be constructed in Hajk.
  */
-function Citizendialogue(props) {
+function Survey(props) {
   // We're gonna want to keep track of some state... Let's use the State hook.
   // If you want to read up on how state is managed in functional components, see: https://reactjs.org/docs/hooks-state.html
-  // There is a more thorough explanation regarding state in ./CitizendialogueView.js
+  // There is a more thorough explanation regarding state in ./SurveyView.js
   // Here is an example where we keep track of a state object (kind of like class-based components).
   const [state, setState] = React.useState({
     title: props.options.title,
@@ -57,9 +57,9 @@ function Citizendialogue(props) {
   // I hope that the explanation will help you. Anyways, let's initiate the local observer in the following, recommended fashion:
   const [localObserver] = React.useState(Observer());
   // We're also gonna initiate the plugin-model (which should/could hold the plugin's logic, to avoid bloating the components).
-  const [citizendialogueModel] = React.useState(
+  const [surveyModel] = React.useState(
     () =>
-      new CitizendialogueModel({
+      new SurveyModel({
         localObserver: localObserver,
         app: props.app,
         map: props.map,
@@ -68,23 +68,20 @@ function Citizendialogue(props) {
 
   // Subscriptions to events etc. should be done in the useEffect hooks. Pay attention to the
   // return (cleanup) function which makes sure to unsubscribe from the event when the component unmounts.
-  // More information regarding the useEffect hook can be found in ./CitizendialogueView.js
+  // More information regarding the useEffect hook can be found in ./SurveyView.js
   React.useEffect(() => {
-    const citizendialogueEvent = localObserver.subscribe(
-      "citizendialogueEvent",
-      (message) => {
-        console.log(message);
-      }
-    );
+    const surveyEvent = localObserver.subscribe("surveyEvent", (message) => {
+      console.log(message);
+    });
     // Cleanup function can be created as follows:
     return () => {
-      localObserver.unsubscribe(citizendialogueEvent);
+      localObserver.unsubscribe(surveyEvent);
     };
   }, [localObserver]); // <-- Dependency array, specifies which objects changes will trigger the effect to run
 
   // Used to update title/color (or any other state variable…). Title and color are passed on to BaseWindowPlugin as props,
-  // and will result in updating the Window's color/title. Note that we put this method here, in Citizendialogue.js, and then pass it on
-  // to CitizendialogueView as a prop. It is then called in CitizendialogueView when user clicks a button. This is just made for illustrating
+  // and will result in updating the Window's color/title. Note that we put this method here, in Survey.js, and then pass it on
+  // to SurveyView as a prop. It is then called in SurveyView when user clicks a button. This is just made for illustrating
   // the concept of passing on props to BaseWindowPlugin from a plugin's view.
   const updateCustomProp = (prop, value) => {
     console.log(`Setting ${prop} to:`, value);
@@ -139,10 +136,10 @@ function Citizendialogue(props) {
     <BaseWindowPlugin
       ref={baseWindowRef}
       {...props} // Pass on all the props...
-      type="Citizendialogue" // Unique name - each plugin needs one. Upper-case first letter, must be valid JS variable name.
+      type="Survey" // Unique name - each plugin needs one. Upper-case first letter, must be valid JS variable name.
       custom={{
         icon: <AppRegistrationIcon />, // Custom icon for this plugin
-        title: state.title, // By keeping title and color in Citizendialogue's state we can pass on
+        title: state.title, // By keeping title and color in Survey's state we can pass on
         color: state.color, // the changes to BaseWindowPlugin which will update internal state too.
         description: props.options.description, // Shown on Widget button
         // Do you want to add buttons to the plugin-header? That can be done as follows:
@@ -158,11 +155,11 @@ function Citizendialogue(props) {
         onWindowShow: onWindowShow, // Handler for when user shows window.
       }}
     >
-      <CitizendialogueView
+      <SurveyView
         {...props}
         // Here we send some props to the plugin's View.
         // Make sure to ONLY include props that are ACTUALLY USED in the View.
-        model={citizendialogueModel} // We can supply our model
+        model={surveyModel} // We can supply our model
         app={props.app} // Or even the whole App
         localObserver={localObserver} // And also the local-observer (handling communication within the plugin)...
         globalObserver={props.app.globalObserver} // ... and the global-observer (handling communication within the entire application).
@@ -174,4 +171,4 @@ function Citizendialogue(props) {
   );
 }
 
-export default Citizendialogue;
+export default Survey;

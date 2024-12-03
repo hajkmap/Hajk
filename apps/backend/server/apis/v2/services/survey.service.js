@@ -171,7 +171,7 @@ class SurveyService {
       await fs.promises.writeFile(pathToFile, jsonString);
 
       // Check if email notifications are enabled
-      if (process.env.CITIZEN_DIALOGUE_MAIL_ENABLED === "true") {
+      if (process.env.SURVEY_MAIL_ENABLED === "true") {
         await this.sendSurveyEmail(body);
       }
 
@@ -335,22 +335,19 @@ class SurveyService {
   async mailNodemailer(emailAddress, body, subject) {
     try {
       let transporterOptions = {
-        host: process.env.CITIZEN_DIALOGUE_MAIL_HOST,
-        port: process.env.CITIZEN_DIALOGUE_MAIL_PORT,
-        secure: process.env.CITIZEN_DIALOGUE_MAIL_SECURE === "true",
+        host: process.env.SURVEY_MAIL_HOST,
+        port: process.env.SURVEY_MAIL_PORT,
+        secure: process.env.SURVEY_MAIL_SECURE === "true",
         tls: {
           rejectUnauthorized: false,
         },
       };
 
       // Check user and pass
-      if (
-        process.env.CITIZEN_DIALOGUE_MAIL_USER &&
-        process.env.CITIZEN_DIALOGUE_MAIL_PASSWORD
-      ) {
+      if (process.env.SURVEY_MAIL_USER && process.env.SURVEY_MAIL_PASSWORD) {
         transporterOptions.auth = {
-          user: process.env.CITIZEN_DIALOGUE_MAIL_USER,
-          pass: process.env.CITIZEN_DIALOGUE_MAIL_PASSWORD,
+          user: process.env.SURVEY_MAIL_USER,
+          pass: process.env.SURVEY_MAIL_PASSWORD,
         };
       }
 
@@ -359,15 +356,15 @@ class SurveyService {
 
       let recipients;
       if (emailAddress) {
-        recipients = `${emailAddress}, ${process.env.CITIZEN_DIALOGUE_MAIL_TO}`;
+        recipients = `${emailAddress}, ${process.env.SURVEY_MAIL_TO}`;
       } else {
-        recipients = process.env.CITIZEN_DIALOGUE_MAIL_TO;
+        recipients = process.env.SURVEY_MAIL_TO;
       }
 
-      const emailSubject = process.env.CITIZEN_DIALOGUE_MAIL_SUBJECT || subject;
+      const emailSubject = process.env.SURVEY_MAIL_SUBJECT || subject;
 
       const options = {
-        from: process.env.CITIZEN_DIALOGUE_MAIL_FROM,
+        from: process.env.SURVEY_MAIL_FROM,
         to: recipients,
         subject: emailSubject,
         html: body,

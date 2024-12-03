@@ -1,6 +1,6 @@
 import React from "react";
 import { Component } from "react";
-import EditModel from "./../../models/citizendialogue.js";
+import EditModel from "./../../models/survey.js";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
@@ -43,7 +43,7 @@ class ToolOptions extends Component {
   constructor(props) {
     super(props);
     this.state = defaultState;
-    this.type = "citizendialogue";
+    this.type = "survey";
     this.editModel = new EditModel();
 
     this.handleAddEditableLayer = this.handleAddEditableLayer.bind(this);
