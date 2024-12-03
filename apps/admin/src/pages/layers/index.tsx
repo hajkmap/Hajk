@@ -1,19 +1,20 @@
-import { Typography, Button } from "@mui/material";
+import { Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { useLayers } from "../../api/layers";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
-import HajkDataGrid from "../../components/hajk-data-grid";
+import CustomDataGrid from "../../components/custom-data-grid";
 import dataGridLocaleTextSV from "../../i18n/translations/datagrid-sv.json";
 import dataGridLocaleTextEN from "../../i18n/translations/datagrid-en.json";
 import useAppStateStore from "../../store/use-app-state-store";
 import ThemeSwitcher from "../../components/theme-switcher";
 import LanguageSwitcher from "../../components/language-switcher";
-import getLayerColumns, { mapLayerRows } from "./grid-data";
+import mapLayerColumns, { mapLayerRows } from "./grid-data";
 
 export default function LayersPage() {
   const { t } = useTranslation();
   const { data: layers, isLoading, error } = useLayers();
+  // const [dialogOpen, setDialogOpen] = useState(false);
   const language = useAppStateStore((state) => state.language);
 
   if (isLoading) {
@@ -29,29 +30,17 @@ export default function LayersPage() {
       ? dataGridLocaleTextSV.translation
       : dataGridLocaleTextEN.translation;
 
-  const columns = getLayerColumns(currentTranslation);
+  const columns = mapLayerColumns(currentTranslation);
   const rows = layers ? mapLayerRows(layers) : [];
-  const onRowClick = () => {
-    console.log("onRowClick");
-  };
 
   return (
     <Page title={t("common.layers")}>
       <Grid size={12}>
-        <Grid size={12} container justifyContent={"end"}>
-          <Button
-            variant="contained"
-            sx={{ backgroundColor: "black", height: "35px", width: "180px" }}
-          >
-            {t("common.layers")}
-          </Button>
-        </Grid>
-        <HajkDataGrid
+        <CustomDataGrid
           rows={rows}
           columns={columns}
-          // searchFields={searchFields}
           localeText={currentTranslation}
-          onRowClick={onRowClick}
+          buttonText={t("common.layers")}
         />
         <Grid container gap={2} size={12} sx={{ mt: 2 }}>
           <ThemeSwitcher />

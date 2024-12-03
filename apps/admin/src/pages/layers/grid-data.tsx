@@ -1,10 +1,8 @@
 import { Tooltip, IconButton } from "@mui/material";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { grey } from "@mui/material/colors";
 
-// Function to return the columns for the DataGrid
-export default function getLayerColumns(localeText: Record<string, string>) {
+export default function mapLayerColumns(localeText: Record<string, string>) {
   return [
     {
       field: "serviceType",
@@ -54,15 +52,7 @@ export default function getLayerColumns(localeText: Record<string, string>) {
       searchable: false,
 
       renderCell: () => (
-        <IconButton
-          size="small"
-          // sx={{
-          //   backgroundColor: grey[300],
-          //   width: "24px",
-          //   minWidth: "10px",
-          //   height: "28px",
-          // }}
-        >
+        <IconButton size="small">
           <MoreVertIcon sx={{ color: "black", maxWidth: "fit-content" }} />
         </IconButton>
       ),

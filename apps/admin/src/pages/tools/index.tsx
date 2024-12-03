@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useTools } from "../../api/tools";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { grey } from "@mui/material/colors";
-import HajkDataGrid from "../../components/hajk-data-grid";
+import CustomDataGrid from "../../components/custom-data-grid";
 import Page from "../../layouts/root/components/page";
 import dataGridLocaleTextSV from "../../i18n/translations/datagrid-sv.json";
 import dataGridLocaleTextEN from "../../i18n/translations/datagrid-en.json";
@@ -98,7 +98,7 @@ export default function ToolsPage() {
             {t("common.layers")}
           </Button>
         </Grid>
-        <HajkDataGrid
+        <CustomDataGrid
           rows={rows}
           columns={columns}
           localeText={GRID_LOCALE_TEXT}
