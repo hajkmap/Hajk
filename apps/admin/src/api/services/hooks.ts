@@ -18,7 +18,7 @@ import {
   ServiceUpdateFormData,
   UseServiceCapabilitiesProps,
 } from "./types";
-import { Layer } from "../layers";
+import { LayersApiResponse } from "../layers";
 import { Map } from "../maps";
 import { fetchCapabilities } from "./requests";
 
@@ -44,7 +44,7 @@ export const useServiceById = (serviceId: string): UseQueryResult<Service> => {
 // This hook uses the `getLayersByServiceId` function from the services `requests` module
 export const useLayersByServiceId = (
   serviceId: string
-): UseQueryResult<Layer[]> => {
+): UseQueryResult<LayersApiResponse> => {
   return useQuery({
     queryKey: ["layersByServiceId", serviceId],
     queryFn: () => getLayersByServiceId(serviceId),

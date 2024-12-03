@@ -76,6 +76,7 @@
     "services.updateServiceFailed": "Misslyckades att uppdatera tjänsten {{name}}.",
     "services.deleteServiceSuccess": "Tjänsten {{name}} är nu borttagen!",
     "services.deleteServiceFailed": "Misslyckades att ta bort tjänsten {{name}}.",
+    "services.affectedLayers": "Om du byter url kan det leda till att andra inställningar slutar att fungera. Ändringen kommer att <strong>påverka {{count}} lager.</strong>",
     "services.workspace": "Arbetsområde",
     "user.confirmPassword": "Bekräfta lösenord",
     "user.createLocalUser": "Skapa användare",

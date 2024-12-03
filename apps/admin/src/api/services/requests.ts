@@ -7,7 +7,7 @@ import {
   ServiceUpdateFormData,
   ServiceCapabilities,
 } from "./types";
-import { Layer, LayersApiResponse } from "../layers";
+import { LayersApiResponse } from "../layers";
 import { Map } from "../maps";
 import { GlobalMapsApiResponse } from "../tools";
 
@@ -74,7 +74,7 @@ export const getServiceById = async (serviceId: string): Promise<Service> => {
 
 export const getLayersByServiceId = async (
   serviceId: string
-): Promise<Layer[]> => {
+): Promise<LayersApiResponse> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<LayersApiResponse>(
@@ -83,7 +83,7 @@ export const getLayersByServiceId = async (
     if (!response.data) {
       throw new Error("No layers data found");
     }
-    return response.data.layers;
+    return response.data;
   } catch (error) {
     const axiosError = error as InternalApiError;
     if (axiosError.response) {

@@ -77,6 +77,7 @@
     "services.updateServiceFailed": "Failed to update service {{name}}.",
     "services.deleteServiceSuccess": "Service {{name}} deleted!",
     "services.deleteServiceFailed": "Failed to delete service {{name}}.",
+    "services.affectedLayers": "If you change the url, it may cause other settings to stop working. The change will <strong>affect {{count}} layers.</strong>",
     "user.confirmPassword": "Confirm password",
     "user.createLocalUser": "Create user",
     "user.createUserDescription": "Create a user who can log into Hajk. Remember to save the password in a secure place — you will never be able to view it here again.",

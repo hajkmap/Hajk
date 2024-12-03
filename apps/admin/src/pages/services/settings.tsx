@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router";
 import { useState, useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { FieldValues } from "react-hook-form";
 import {
@@ -19,6 +19,7 @@ import {
   useUpdateService,
   useDeleteService,
   useServices,
+  useLayersByServiceId,
 } from "../../api/services/hooks";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
@@ -28,7 +29,7 @@ import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 import { ServiceUpdateFormData, serviceTypes } from "../../api/services";
 import DialogWrapper from "../../components/flexible-dialog";
-import ServicesGrid from "./service-layers-grid";
+import LayersGrid from "./layers-grid";
 import CircularProgress from "../../components/progress/circular-progress";
 import { toast } from "react-toastify";
 
@@ -50,6 +51,7 @@ export default function ServiceSettings() {
     useUpdateService();
   const { mutateAsync: deleteService, status: deleteStatus } =
     useDeleteService();
+  const { data: layersByServiceId } = useLayersByServiceId(serviceId ?? "");
 
   const [formServiceData, setFormServiceData] = useState<
     DynamicFormContainer<FieldValues>
@@ -393,7 +395,7 @@ export default function ServiceSettings() {
               control={control}
               errors={errors}
             />
-            <ServicesGrid
+            <LayersGrid
               baseUrl={service?.url ?? ""}
               type={service?.type ?? ""}
             />
@@ -416,6 +418,11 @@ export default function ServiceSettings() {
           </>
         }
       >
+        <Trans
+          i18nKey="services.affectedLayers"
+          values={{ count: layersByServiceId?.count }}
+          components={{ strong: <strong /> }}
+        />
         <TextField
           label="Url"
           value={dialogUrl}

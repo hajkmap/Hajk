@@ -22,14 +22,14 @@ import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import useAppStateStore from "../../store/use-app-state-store";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
+function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
   const { palette } = useTheme();
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const language = useAppStateStore((state) => state.language);
 
   const {
-    layers,
+    layers: getCapLayers,
     isError: layersError,
     isLoading: layersLoading,
   } = useServiceCapabilities({
@@ -49,8 +49,8 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
   ];
 
   const filteredLayers = useMemo(() => {
-    if (!layers) return [];
-    return layers
+    if (!getCapLayers) return [];
+    return getCapLayers
       .filter((layer) => layer.toLowerCase().includes(searchTerm.toLowerCase()))
       .map((layer, index) => ({
         id: index,
@@ -59,7 +59,7 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
         publications: "",
         actions: "",
       }));
-  }, [layers, searchTerm]);
+  }, [getCapLayers, searchTerm]);
 
   return (
     <Grid container>
@@ -135,13 +135,17 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
                         noRowsVariant: "skeleton",
                       },
                     }}
-                    hideFooterPagination={layers && layers.length < 10}
+                    hideFooterPagination={
+                      getCapLayers && getCapLayers.length < 10
+                    }
                     pageSizeOptions={[10, 25, 50, 100]}
                     pagination
                     loading={layersLoading}
                     localeText={
                       language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
                     }
+                    checkboxSelection
+                    disableMultipleRowSelection
                     disableRowSelectionOnClick
                   />
                 </Scrollbar>
@@ -154,4 +158,4 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
   );
 }
 
-export default ServicesGrid;
+export default LayersGrid;
