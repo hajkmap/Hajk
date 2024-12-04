@@ -52,6 +52,7 @@ export default function ServiceSettings() {
   const { mutateAsync: deleteService, status: deleteStatus } =
     useDeleteService();
   const { data: layersByServiceId } = useLayersByServiceId(serviceId ?? "");
+  const count = layersByServiceId?.count ?? 0;
 
   const [formServiceData, setFormServiceData] = useState<
     DynamicFormContainer<FieldValues>
@@ -418,11 +419,13 @@ export default function ServiceSettings() {
           </>
         }
       >
-        <Trans
-          i18nKey="services.affectedLayers"
-          values={{ count: layersByServiceId?.count }}
-          components={{ strong: <strong /> }}
-        />
+        {count >= 1 && (
+          <Trans
+            i18nKey="services.affectedLayers"
+            values={{ count: layersByServiceId?.count }}
+            components={{ strong: <strong /> }}
+          />
+        )}
         <TextField
           label="Url"
           value={dialogUrl}
