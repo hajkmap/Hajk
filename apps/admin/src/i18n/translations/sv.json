@@ -18,6 +18,8 @@
     "common.tools": "Verktyg",
     "common.you": "Du",
     "dark": "Mörkt",
-    "light": "Ljust"
+    "light": "Ljust",
+
+    "layers.newLayer": "Nytt lager"
   }
 }

@@ -50,7 +50,6 @@ export default function mapLayerColumns(localeText: Record<string, string>) {
       minWidth: 110,
       flex: 0.1,
       searchable: false,
-
       renderCell: () => (
         <IconButton size="small">
           <MoreVertIcon sx={{ color: "black", maxWidth: "fit-content" }} />
@@ -58,27 +57,4 @@ export default function mapLayerColumns(localeText: Record<string, string>) {
       ),
     },
   ];
-}
-
-interface LayerItem {
-  id: string;
-  options: {
-    content: string;
-    caption: string;
-    infoUrl: string;
-    opacity: string;
-    isBroken: boolean;
-  };
-}
-
-export function mapLayerRows(data: LayerItem[]) {
-  return data.map((layer) => ({
-    id: layer.id,
-    serviceType: layer.options.content,
-    name: layer.options.caption,
-    url: layer.options.infoUrl,
-    usedBy: layer.options.opacity,
-    isBroken: layer.options.isBroken,
-    actions: "",
-  }));
 }

@@ -18,6 +18,8 @@
     "common.tools": "Tools",
     "common.you": "You",
     "dark": "Dark",
-    "light": "Light"
+    "light": "Light",
+
+    "layers.newLayer": "New layer"
   }
 }

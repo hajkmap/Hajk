@@ -9,7 +9,8 @@ import dataGridLocaleTextEN from "../../i18n/translations/datagrid-en.json";
 import useAppStateStore from "../../store/use-app-state-store";
 import ThemeSwitcher from "../../components/theme-switcher";
 import LanguageSwitcher from "../../components/language-switcher";
-import mapLayerColumns, { mapLayerRows } from "./grid-data";
+import mapLayerColumns from "./map-columns";
+import mapLayerRows from "./map-rows";
 
 export default function LayersPage() {
   const { t } = useTranslation();
