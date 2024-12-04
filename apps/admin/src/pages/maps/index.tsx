@@ -1,8 +1,8 @@
-import Grid from "@mui/material/Grid2";
-import { Button, List, ListItem, Paper, Typography } from "@mui/material";
+import { Button } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useMaps } from "../../api/maps";
 import Page from "../../layouts/root/components/page";
+import MapsTable from "./components/maps-table";
 
 export default function MapsPage() {
   const { t } = useTranslation();
@@ -14,29 +14,16 @@ export default function MapsPage() {
       actionButtons={
         <>
           <Button color="primary" variant="contained">
-            {t("maps.createMap")}
+            {t("map.createMap")}
           </Button>
         </>
       }
     >
       {isLoading ? (
-        <div>Loading...</div>
+        <div>{t("common.loading")}</div>
       ) : (
         <>
-          <Grid size={12}>
-            <List>
-              {maps?.map((map) => (
-                <ListItem key={map} sx={{ padding: "10px 10px 10px 0" }}>
-                  <Paper sx={{ width: "100%", p: 2 }} elevation={4}>
-                    <Typography>{map}</Typography>
-                  </Paper>
-                </ListItem>
-              ))}
-            </List>
-            <Grid container gap={2} size={12}>
-              Additional stuff...
-            </Grid>
-          </Grid>
+          <MapsTable />
         </>
       )}
     </Page>
