@@ -59,6 +59,7 @@
     "user.passwordRequired": "Password is required",
     "user.pleaseConfirmPassword": "Please confirm password",
     "user.roles": "Roles",
-    "user.searchTitle": "Search users"
+    "user.searchTitle": "Search users",
+    "maps.createMap": "Create a new map"
   }
 }

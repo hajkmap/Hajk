@@ -1,11 +1,18 @@
 import { VerticalAlignTop as ScrollToTopIcon } from "@mui/icons-material";
-import { Box, Typography, IconButton, useTheme } from "@mui/material";
+import {
+  Box,
+  Typography,
+  IconButton,
+  useTheme,
+  Grid2 as Grid,
+} from "@mui/material";
 import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 
 interface Props {
   children: React.ReactNode;
+  actionButtons?: React.ReactNode;
   title: string;
 }
 const Page = (props: Props) => {
@@ -54,12 +61,18 @@ const Page = (props: Props) => {
         paddingRight: theme.spacing(4),
         maxWidth: "2048px",
         width: "100%",
-        // margin: "0 auto",
       }}
     >
-      <Typography variant="h3" sx={{ fontWeight: "300", mb: 2 }}>
-        {props.title}
-      </Typography>
+      <Grid container spacing={2}>
+        <Grid container size="auto">
+          <Typography variant="h3" sx={{ fontWeight: "300" }}>
+            {props.title}
+          </Typography>
+        </Grid>
+        <Grid container size="grow" alignContent="center" justifyContent="end">
+          {props.actionButtons}
+        </Grid>
+      </Grid>
 
       {props.children}
 

@@ -59,6 +59,7 @@
     "user.passwordRequired": "Lösenord är obligatoriskt",
     "user.pleaseConfirmPassword": "Vänligen bekräfta lösenord",
     "user.roles": "Roller",
-    "user.searchTitle": "Sök användare"
+    "user.searchTitle": "Sök användare",
+    "maps.createMap": "Skapa ny karta"
   }
 }
