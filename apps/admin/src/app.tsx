@@ -13,6 +13,7 @@ import RootLayout from "./layouts/root/index.tsx";
 import IndexPage from "./pages/index.tsx";
 import ErrorPage from "./pages/error/index.tsx";
 import LayersPage from "./pages/layers/index.tsx";
+import LayerSettings from "./pages/layers/settings.tsx";
 import MapsPage from "./pages/maps/index.tsx";
 import ToolsPage from "./pages/tools/index.tsx";
 
@@ -43,6 +44,10 @@ const router = createBrowserRouter(
         {
           path: "layers",
           element: <LayersPage />,
+        },
+        {
+          path: "layers/:layerId",
+          element: <LayerSettings />,
         },
         {
           path: "maps",
