@@ -37,6 +37,10 @@ export interface ServiceUpdateFormData {
 }
 
 export const serviceTypes = ["ARCGIS", "VECTOR", "WFS", "WFST", "WMS", "WMTS"];
+export const serverTypes = [
+  { title: "Geoserver", value: "GEOSERVER" },
+  { title: "QGIS Server", value: "QGIS_SERVER" },
+];
 
 export interface ServiceCapabilities {
   layers: string[];

@@ -20,14 +20,16 @@ import {
   useDeleteService,
   useServices,
   useLayersByServiceId,
-} from "../../api/services/hooks";
+  serviceTypes,
+  ServiceUpdateFormData,
+  serverTypes,
+} from "../../api/services";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
 import INPUT_TYPE from "../../components/form-factory/types/input-type";
 import FormRenderer from "../../components/form-factory/form-renderer";
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
-import { ServiceUpdateFormData, serviceTypes } from "../../api/services";
 import DialogWrapper from "../../components/flexible-dialog";
 import LayersGrid from "./layers-grid";
 import CircularProgress from "../../components/progress/circular-progress";
@@ -191,10 +193,10 @@ export default function ServiceSettings() {
     title: `${t("common.serverType")}`,
     defaultValue: service?.serverType,
     registerOptions: { required: `${t("common.required")}` },
-    optionList: [
-      { title: "Geoserver", value: "GEOSERVER" },
-      { title: "QGIS Server", value: "QGIS_SERVER" },
-    ],
+    optionList: serverTypes.map((serverType) => ({
+      title: serverType.title,
+      value: serverType.value,
+    })),
   });
   accordionNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
