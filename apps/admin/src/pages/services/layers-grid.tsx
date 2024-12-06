@@ -85,7 +85,7 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
     };
 
     return (
-      <>
+      <Box component="div" sx={{ textAlign: "center" }}>
         <IconButton onClick={handleClick}>
           <MoreHorizIcon />
         </IconButton>
@@ -112,7 +112,7 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
             Delete
           </MenuItem>
         </Menu>
-      </>
+      </Box>
     );
   };
 
