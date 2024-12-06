@@ -15,6 +15,7 @@ function SurveyHandler(props) {
 
   const [availableSurveys, setAvailableSurveys] = useState([]);
   const [selectedSurveyId, setSelectedSurveyId] = useState("");
+  const [selectedSurveyIdOld, setSelectedSurveyIdOld] = useState("");
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
   const [filename, setFilename] = useState("");
@@ -23,7 +24,11 @@ function SurveyHandler(props) {
   const [overwriteFilename, setOverwriteFilename] = useState('');
   const [surveyJsonToSave, setSurveyJsonToSave] = useState(null);
   const [showAlertDialog, setShowAlertDialog] = useState(false);
+  const [showAlertDialogNotSaved, setShowAlertDialogNotSaved] = useState(false);
   const [alertDialogMessage, setAlertDialogMessage] = useState('');
+  const [alertDialogMessageNotSaved, setAlertDialogMessageNotSaved] = useState('');
+  const [isSurveyDirty, setIsSurveyDirty] = useState(false);
+  const [SelectionNotSaved, setSelectionNotSaved] = useState("");
 
   const [survey, setSurvey] = useState({
     title: "",
@@ -76,6 +81,37 @@ function SurveyHandler(props) {
   const handleCloseAlertDialog = () => {
     setShowAlertDialog(false);
     setAlertDialogMessage('');
+  };
+
+  const handleCloseAlertDialogNotSaved = () => {
+    setShowAlertDialogNotSaved(false);
+    setAlertDialogMessageNotSaved('');
+    if(selectedSurveyIdOld)
+    {
+      setSelectedSurveyId(selectedSurveyIdOld);
+    }
+  };
+
+  const handleContinueAlertDialogNotSaved = () => {
+    setShowAlertDialogNotSaved(false);
+    setAlertDialogMessageNotSaved('');
+    setIsSurveyDirty(false);
+    if(SelectionNotSaved==="emptyButton")
+    {
+      setSelectedQuestion(null);
+      setFilename("");
+      setSurvey(emptySurvey);
+      setSelectedSurveyId("");
+    }
+    else if(SelectionNotSaved==="chooseSurvey")
+    {
+      if (selectedSurveyId) {
+        props.model.loadSurvey(selectedSurveyId, (surveyData) => {
+          setSurvey(surveyData);
+          setFilename(selectedSurveyId);
+        });
+      }
+    }
   };
 
   const handlePageSelection = (pageIndex) => {
@@ -249,6 +285,7 @@ function SurveyHandler(props) {
   };  
 
 const updateQuestion = (pageIndex, questionIndex, field, value) => {
+  setIsSurveyDirty(true);
   const newPages = survey.pages.map((page, pIndex) => {
     if (pIndex === pageIndex) {
       const newQuestions = page.questions.map((question, qIndex) => {
@@ -433,6 +470,7 @@ const saveSurveyToFile = (filename, surveyJson) => {
         responseMessage = `Fel: ${response.error}`;
       } else {
         responseMessage = 'Fil sparad';
+        setIsSurveyDirty(false);
       }
     } else {
       responseMessage = response;
@@ -453,14 +491,29 @@ const saveSurveyToFile = (filename, surveyJson) => {
 };
 
 const handleSurveySelection = (e) => {
-  newSurvey();
-  const selectedSurveyId = e.target.value;
-  setSelectedSurveyId(selectedSurveyId);
-  if (selectedSurveyId) {
-    props.model.loadSurvey(selectedSurveyId, (surveyData) => {
-      setSurvey(surveyData);
-      setFilename(selectedSurveyId);
-    });
+  setSelectionNotSaved("chooseSurvey");
+  if(!isSurveyDirty)
+  {
+    setSelectedQuestion(null);
+    setFilename("");
+    setSurvey(emptySurvey);
+    setSelectedSurveyId("");
+    const selectedSurveyId = e.target.value;
+    setSelectedSurveyId(selectedSurveyId);
+    setSelectedSurveyIdOld(selectedSurveyId);
+    if (selectedSurveyId) {
+      props.model.loadSurvey(selectedSurveyId, (surveyData) => {
+        setSurvey(surveyData);
+        setFilename(selectedSurveyId);
+      });
+    }
+  }
+  else
+  {
+    setAlertDialogMessageNotSaved("Du har gjort ändringar men inte sparat.")
+    setShowAlertDialogNotSaved(true);
+    const selectedSurveyId = e.target.value;
+    setSelectedSurveyId(selectedSurveyId);
   }
 };
 
@@ -477,10 +530,19 @@ const handleSurveySelection = (e) => {
   };
 
   const newSurvey = () => {
-    setSelectedQuestion(null);
-    setFilename("");
-    setSurvey(emptySurvey);
-    setSelectedSurveyId("");
+    setSelectionNotSaved("emptyButton");
+    if(!isSurveyDirty)
+    {
+      setSelectedQuestion(null);
+      setFilename("");
+      setSurvey(emptySurvey);
+      setSelectedSurveyId("");
+    }
+    else
+    {
+      setAlertDialogMessageNotSaved("Du har gjort ändringar men inte sparat.");
+      setShowAlertDialogNotSaved(true);
+    }
   }
 
   const GeometryWarning = ({ survey }) => {
@@ -711,6 +773,22 @@ const handleSurveySelection = (e) => {
           <DialogActions>
             <Button onClick={handleCloseAlertDialog} color="primary" autoFocus>
               Stäng
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+      {showAlertDialogNotSaved && (
+        <Dialog open={showAlertDialogNotSaved} onClose={handleCloseAlertDialogNotSaved}>
+          <DialogTitle>Meddelande</DialogTitle>
+          <DialogContent>
+            {alertDialogMessageNotSaved}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseAlertDialogNotSaved} color="primary" autoFocus>
+              Avbryt för att spara
+            </Button>
+            <Button onClick={handleContinueAlertDialogNotSaved} color="primary" autoFocus>
+              Fortsätt utan att spara
             </Button>
           </DialogActions>
         </Dialog>
