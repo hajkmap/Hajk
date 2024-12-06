@@ -8,6 +8,9 @@ import {
   AccordionSummary,
   AccordionDetails,
   Grid2 as Grid,
+  IconButton,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import CircularProgress from "../../components/progress/circular-progress";
 import Scrollbar from "../../components/scrollbar";
@@ -21,6 +24,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import useAppStateStore from "../../store/use-app-state-store";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 
 function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
   const { palette } = useTheme();
@@ -45,7 +49,14 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
     { field: "layer", headerName: t("common.layerName"), flex: 1 },
     { field: "infoClick", headerName: t("common.infoclick"), flex: 0.3 },
     { field: "publications", headerName: t("common.publications"), flex: 1 },
-    { field: "actions", headerName: t("common.actions"), flex: 0.3 },
+    {
+      field: "actions",
+      headerName: t("common.actions"),
+      flex: 0.2,
+      renderCell: (params: { row: { layer: string } }) => (
+        <RowMenu {...params} />
+      ),
+    },
   ];
 
   const filteredLayers = useMemo(() => {
@@ -60,6 +71,50 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
         actions: "",
       }));
   }, [getCapLayers, searchTerm]);
+
+  const RowMenu = (params: { row: { layer: string } }) => {
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const open = Boolean(anchorEl);
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+      setAnchorEl(event.currentTarget as HTMLElement | null);
+    };
+
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
+
+    return (
+      <>
+        <IconButton onClick={handleClick}>
+          <MoreHorizIcon />
+        </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "left",
+          }}
+        >
+          <MenuItem onClick={() => alert(`View ${params.row.layer}`)}>
+            View
+          </MenuItem>
+          <MenuItem onClick={() => alert(`Edit ${params.row.layer}`)}>
+            Edit
+          </MenuItem>
+          <MenuItem onClick={() => alert(`Delete ${params.row.layer}`)}>
+            Delete
+          </MenuItem>
+        </Menu>
+      </>
+    );
+  };
 
   return (
     <Grid container>
