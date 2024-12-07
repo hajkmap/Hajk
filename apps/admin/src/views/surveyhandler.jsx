@@ -330,6 +330,7 @@ function SurveyHandler(props) {
   };
 
   const addPage = () => {
+    setIsSurveyDirty(true);
     setSurvey((prevSurvey) => ({
       ...prevSurvey,
       pages: [...prevSurvey.pages, { questions: [] }],
@@ -337,6 +338,7 @@ function SurveyHandler(props) {
   };
 
   const addQuestion = (pageIndex, type = "text") => {
+    setIsSurveyDirty(true);
     const questionIndex = survey.pages[pageIndex].questions.length;
     const newQuestion = {
       name: `qid${questionIndex}`,
@@ -413,6 +415,7 @@ function SurveyHandler(props) {
   };
 
   const addChoice = (pageIndex, questionIndex) => {
+    setIsSurveyDirty(true);
     const newPages = survey.pages.map((page, pIndex) => {
       if (pIndex === pageIndex) {
         const newQuestions = page.questions.map((question, qIndex) => {
@@ -453,6 +456,7 @@ function SurveyHandler(props) {
   };
 
   const updateChoice = (pageIndex, questionIndex, choiceIndex, value) => {
+    setIsSurveyDirty(true);
     const newPages = survey.pages.map((page, pIndex) => {
       if (pIndex === pageIndex) {
         const newQuestions = page.questions.map((question, qIndex) => {
@@ -476,6 +480,7 @@ function SurveyHandler(props) {
   };
 
   const deleteQuestion = (pageIndex, questionIndex) => {
+    setIsSurveyDirty(true);
     const newPages = survey.pages.map((page, pIndex) => {
       if (pIndex === pageIndex) {
         const newQuestions = page.questions.filter(
@@ -496,6 +501,7 @@ function SurveyHandler(props) {
   };
 
   const deletePage = (pageIndex) => {
+    setIsSurveyDirty(true);
     const newPages = survey.pages.filter((_, index) => index !== pageIndex);
     setSurvey({ ...survey, pages: newPages });
     if (selectedQuestion && selectedQuestion.pageIndex === pageIndex) {
@@ -697,7 +703,10 @@ function SurveyHandler(props) {
           <TextField
             label="Enkätens Filnamn"
             value={filename}
-            onChange={(e) => setFilename(e.target.value)}
+            onChange={(e) => {
+              setFilename(e.target.value);
+              setIsSurveyDirty(true);
+            }}
             style={{ marginRight: "10px" }}
             InputProps={{
               style: {
@@ -717,7 +726,10 @@ function SurveyHandler(props) {
           <TextField
             label="Enkätens Titel"
             value={survey.title}
-            onChange={(e) => setSurvey({ ...survey, title: e.target.value })}
+            onChange={(e) => {
+              setSurvey({ ...survey, title: e.target.value });
+              setIsSurveyDirty(true);
+            }}
             style={{ marginRight: "10px" }}
             InputProps={{
               style: {
@@ -735,7 +747,10 @@ function SurveyHandler(props) {
           <TextField
             label="Logo URL"
             value={survey.logo}
-            onChange={(e) => setSurvey({ ...survey, logo: e.target.value })}
+            onChange={(e) => {
+              setSurvey({ ...survey, logo: e.target.value });
+              setIsSurveyDirty(true);
+            }}
             style={{ marginRight: "10px" }}
             InputProps={{
               style: {
@@ -754,9 +769,10 @@ function SurveyHandler(props) {
             label="Logo Bredd"
             type="number"
             value={survey.logoWidth}
-            onChange={(e) =>
-              setSurvey({ ...survey, logoWidth: parseInt(e.target.value, 10) })
-            }
+            onChange={(e) => {
+              setSurvey({ ...survey, logoWidth: parseInt(e.target.value, 10) });
+              setIsSurveyDirty(true);
+            }}
             style={{ marginRight: "10px" }}
             InputProps={{
               style: {
@@ -775,9 +791,13 @@ function SurveyHandler(props) {
             label="Logo Höjd"
             type="number"
             value={survey.logoHeight}
-            onChange={(e) =>
-              setSurvey({ ...survey, logoHeight: parseInt(e.target.value, 10) })
-            }
+            onChange={(e) => {
+              setSurvey({
+                ...survey,
+                logoHeight: parseInt(e.target.value, 10),
+              });
+              setIsSurveyDirty(true);
+            }}
             InputProps={{
               style: {
                 fontSize: 12,
