@@ -96,6 +96,7 @@ function SurveyHandler(props) {
     if (SelectionNotSaved === "emptyButton") {
       zeroSurvey();
     } else if (SelectionNotSaved === "chooseSurvey") {
+      zeroSurvey();
       loadSurvey(selectedSurveyIdOld);
     }
   };
@@ -602,6 +603,7 @@ function SurveyHandler(props) {
     setFilename("");
     setSurvey(emptySurvey);
     setSelectedSurveyId("");
+    setSelectedPageIndex(0);
   };
 
   const handleSurveySelection = (e) => {
