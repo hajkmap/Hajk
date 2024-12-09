@@ -52,14 +52,24 @@ const addLayerNames = (data, olLayerMap) => {
 
       const subLayers =
         mapLayer.get("layerType") === "group" &&
-        mapLayer.get("subLayers").map((subLayer) => {
-          return {
-            id: subLayer,
-            name: mapLayer.layersInfo[subLayer].caption,
-            isFiltered: true,
-            changeIndicator: new Date(),
-          };
-        });
+        mapLayer
+          .get("subLayers")
+          .map((subLayer) => {
+            // If the `layerInfo` is missing from a sublayer we ignore it
+            // completely.
+            const subLayerInfo = mapLayer.layersInfo[subLayer];
+            if (!subLayerInfo) {
+              return null;
+            }
+
+            return {
+              id: subLayer,
+              name: subLayerInfo.caption,
+              isFiltered: true,
+              changeIndicator: new Date(),
+            };
+          })
+          .filter((sl) => !!sl);
 
       return {
         drawOrder: layer.drawOrder,
