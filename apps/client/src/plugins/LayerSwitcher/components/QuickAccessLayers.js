@@ -109,7 +109,7 @@ export default function QuickAccessLayers({
             key={l.ol_uid}
             layer={l}
             app={app}
-            observer={localObserver}
+            localObserver={localObserver}
             toggleable={true}
             draggable={false}
             groupLayer={findLayerById(treeData, l.get("name"))}
