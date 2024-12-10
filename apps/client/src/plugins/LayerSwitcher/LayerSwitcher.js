@@ -4,7 +4,7 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 
 import LayersIcon from "@mui/icons-material/Layers";
 
-import LayerSwitcherView from "./LayerSwitcherView.js";
+import LayerSwitcherProvider from "./LayerSwitcherProvider.js";
 import Observer from "react-event-observer";
 
 export default class LayerSwitcher extends React.PureComponent {
@@ -35,7 +35,7 @@ export default class LayerSwitcher extends React.PureComponent {
           disablePadding: true,
         }}
       >
-        <LayerSwitcherView
+        <LayerSwitcherProvider
           app={this.props.app}
           map={this.props.map}
           localObserver={this.localObserver}

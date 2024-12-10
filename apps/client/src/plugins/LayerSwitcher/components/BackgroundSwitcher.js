@@ -5,6 +5,8 @@ import TileLayer from "ol/layer/Tile";
 import BackgroundLayerItem from "./BackgroundLayerItem";
 import Box from "@mui/material/Box";
 
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+
 const WHITE_BACKROUND_LAYER_ID = "-1";
 const BLACK_BACKROUND_LAYER_ID = "-2";
 const OSM_BACKGROUND_LAYER_ID = "-3";
@@ -64,7 +66,10 @@ const BackgroundSwitcher = ({
   globalObserver,
   map,
 }) => {
+  // TODO Read the selectedLayerId from the `appStateInHash`
   const [selectedLayerId, setSelectedLayerId] = useState(null);
+
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   const osmLayerRef = useRef(
     enableOSM &&
@@ -138,8 +143,6 @@ const BackgroundSwitcher = ({
    * @param {Object} e The event object, contains target's value
    */
   const onLayerClick = (newSelectedId) => () => {
-    const prevSelectedLayerId = selectedLayerId;
-
     setSelectedLayerId(newSelectedId);
 
     // Publish event to ensure all other background layers are disabled
@@ -148,12 +151,15 @@ const BackgroundSwitcher = ({
       newSelectedId
     );
 
+    // Reset to no layer showing
+    osmLayerRef.current.setVisible(false);
+
     if (isSpecialBackgroundLayer(newSelectedId)) {
+      // Undefined means Set all layers to invisible.
+      layerSwitcherDispatch.setBackgroundLayer(undefined);
+
       if (isOSMLayer(newSelectedId)) {
-        const osmLayer = map
-          .getAllLayers()
-          .find((l) => l.get("name") === "osm-layer");
-        osmLayer.setVisible(true);
+        osmLayerRef.current?.setVisible(true);
         setSpecialBackground(WHITE_BACKROUND_LAYER_ID);
       } else {
         setSpecialBackground(newSelectedId);
@@ -161,18 +167,8 @@ const BackgroundSwitcher = ({
     } else {
       // Reset the background to white
       setSpecialBackground(WHITE_BACKROUND_LAYER_ID);
-      layerMap[newSelectedId].setVisible(true);
-    }
-
-    if (isSpecialBackgroundLayer(prevSelectedLayerId)) {
-      if (isOSMLayer(prevSelectedLayerId)) {
-        osmLayerRef.current.setVisible(false);
-      }
-    } else {
-      // If the `enableAppStateInHash` setting is turned on and the page is
-      // reloaded then prevSelectedLayerId will be null. I think the best way
-      // to handle that case is to silently ignore this.
-      layerMap[prevSelectedLayerId]?.setVisible(false);
+      // layerMap[newSelectedId].setVisible(true);
+      layerSwitcherDispatch.setBackgroundLayer(newSelectedId);
     }
   };
 

@@ -18,6 +18,8 @@ import QuickAccessLayers from "./QuickAccessLayers.js";
 import QuickAccessOptions from "./QuickAccessOptions.js";
 import Favorites from "./Favorites/Favorites.js";
 
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
@@ -59,25 +61,28 @@ const QuickAccessView = ({
   // Handles click on confirm clear quickAccess button
   const handleClearQuickAccessLayers = () => {
     setShowDeleteConfirmation(false);
-    map
-      .getAllLayers()
-      .filter((l) => l.get("quickAccess") === true)
-      .map((l) => l.set("quickAccess", false));
+    // map
+    //   .getAllLayers()
+    //   .filter((l) => l.get("quickAccess") === true)
+    //   .map((l) => l.set("quickAccess", false));
+    layerSwitcherDispatch.clearQuickAccess();
   };
 
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
   // Handles click on AddLayersToQuickAccess menu item
   const handleAddLayersToQuickAccess = (e) => {
     e.stopPropagation();
     // Add visible layers to quickAccess section
-    map
-      .getAllLayers()
-      .filter(
-        (l) =>
-          l.get("visible") === true &&
-          l.get("layerType") !== "base" &&
-          l.get("layerType") !== "system"
-      )
-      .map((l) => l.set("quickAccess", true));
+    // map
+    //   .getAllLayers()
+    //   .filter(
+    //     (l) =>
+    //       l.get("visible") === true &&
+    //       l.get("layerType") !== "base" &&
+    //       l.get("layerType") !== "system"
+    //   )
+    //   .map((l) => l.set("quickAccess", true));
+    layerSwitcherDispatch.addVisibleLayersToQuickAccess();
 
     // Show snackbar
     enqueueSnackbar &&

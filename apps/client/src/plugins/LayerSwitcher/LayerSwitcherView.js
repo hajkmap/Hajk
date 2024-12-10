@@ -40,6 +40,144 @@ const BreadCrumbsContainer = ({ map, app }) => {
   );
 };
 
+// ---------------------------------------------------------------------------
+// TODO
+// - DONE Break out filter to own component
+// - DONE Break out QuickAccess to own Component
+// - DONE Break out layer list to own Component - mayebe not
+// - DONE Remove LayerSwitcherModel and pass around `map`, `app`, `localObserver`
+// and `globalObserver` as needed.
+// - DONE remove quickaccess from LayerGroupAccordinon
+// - DONE Remove layerCount
+// - DONE Test the "Theme/quickAccessPresets" functionality
+// - DONE Fix the bug sometimes click layer in the quick access don't update
+//
+// - DONE Move `addLayerNames` to pure fn
+// - Update state managemetn and keeep in sync with OpenLayers
+//
+// - Refactor the observers to use a provider instead of prop-drilling
+// - The layer pagage dialogs should use ConfirmationDialog component
+// - Remove `show` prop from quickAccess layers
+//
+// - DONE Clean upp render* methods in BackgroundSwitcher.
+//   Should make it faster as well. - Did not make it faster,
+//   but there is still more to do. More indirection to remove
+//
+// - Refactor LayerItem into 3 separate components for each tab
+//     At least 3. Clean it up and remove indirection
+//
+// - Move ZoomCheck into core code
+//
+//
+// - Maybe reconsider the "window-management"
+//      Redo
+//      Maybe this isn't important right now. Would be nice to fix, but it work
+//      as it is. I could move it to a own component though.
+//
+//
+
+// {
+//    id: string
+//    name: string
+//    isFiltered:
+//    isExpanded:
+//    expanded: boolean
+//    toggled: boolean
+//    type: "group" | "layer" | "subLayer" | "base"
+//    infogroupvisible: boolean
+//    subLayers: ???
+//    parent: string
+//    changeIndicator: Date
+// }
+const getOlLayerInfo = (olLayer) => {
+  if (!olLayer) {
+    return null;
+  }
+  return {
+    id: olLayer.get("name"),
+    name: olLayer.get("caption"),
+    visible: olLayer.get("visible"),
+    opacity: olLayer.get("opacity"),
+    layerType: olLayer.get("layerType"),
+    quickAccess: olLayer.get("quickAccess"),
+    subLayers: olLayer.get("subLayers"),
+    layerInfo: olLayer.get("layerInfo"),
+    url: olLayer.get("url"),
+    zIndex: olLayer.get("zIndex"),
+    maxZoom: olLayer.get("maxZoom"),
+    minZoom: olLayer.get("minZoom"),
+    minMaxZoomAlertOnToggleOnly: olLayer.get("minMaxZoomAlertOnToggleOnly"),
+  };
+};
+
+const getLayerNodes = (groups, olLayerMap) =>
+  groups?.flatMap((node) => {
+    if (!node) {
+      return undefined;
+    }
+    const layers = getLayerNodes(node.layers, olLayerMap);
+    const subgroups = getLayerNodes(node.groups, olLayerMap);
+
+    const children = [...(layers ?? []), ...(subgroups ?? [])];
+
+    // A group should have both defined
+    const isGroup = !!(node.groups && node.layers);
+
+    return [
+      {
+        id: node.id,
+        name: olLayerMap[node.id]?.get("caption") ?? node.name,
+        isFiltered: true,
+        isExpanded: false,
+        expanded: node.expanded,
+        toggled: node.toggled,
+        drawOrder: node.drawOrder,
+        infobox: node.infobox,
+        isGroup,
+        layerType: isGroup ? "group" : node.layerType,
+        visible: olLayerMap[node.id]?.get("visible"),
+        quickAccess: olLayerMap[node.id]?.get("quickAccess"),
+        visibleAtStart: node.visibleAtStart,
+        visibleForGroups: node.visibleForGroups,
+        changeIndicator: new Date(),
+        infogroupvisible: node.infogroupvisible,
+        infogrouptitle: node.infogrouptitle,
+        infogrouptext: node.infogrouptext,
+        infogroupurl: node.infogroupurl,
+        infogroupurltext: node.infogroupurltext,
+        infogroupopendatalink: node.infogroupopendatalink,
+        infogroupowner: node.infofnodeowner,
+      },
+      ...(children?.length === 0 ? [] : children),
+    ];
+  });
+
+const buildLayerMap = (groups, olLayerMap) => {
+  const nodes = getLayerNodes(groups, olLayerMap);
+
+  return nodes?.reduce((a, b) => {
+    a[b.id] = b;
+    return a;
+  }, {});
+};
+
+const buildLayerTree = (groups, olLayerMap) =>
+  groups?.map((group) => {
+    if (!group) {
+      return undefined;
+    }
+    const layers = buildLayerTree(group.layers, olLayerMap);
+    const subgroups = buildLayerTree(group.groups, olLayerMap);
+
+    const children = [...(layers ?? []), ...(subgroups ?? [])];
+
+    return {
+      id: group.id,
+      // name: olLayerMap[group.id]?.get("caption") ?? group.name,
+      children: children?.length === 0 ? undefined : children,
+    };
+  });
+
 // Prepare tree data for filtering
 const addLayerNames = (data, olLayerMap) => {
   const node = data.map((item) => {
@@ -147,10 +285,46 @@ class LayersSwitcherView extends React.PureComponent {
         tab1: 0,
         tab2: 0,
       },
+      // layerMap:
     };
 
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.globalObserver;
+
+    this.layerTreeData = buildLayerTree(this.options.groups, this.olLayerMap);
+    this.layerMap = buildLayerMap(this.options.groups, this.olLayerMap);
+
+    console.log(this.layerTreeData);
+    console.log(this.layerMap);
+    console.log(this.olLayerMap);
+
+    // this.backgroundLayerMap = Object.fromEntries(
+    //   Object.entries(this.layerMap).filter(([_, v]) => v.layerType !== "base")
+    // );
+
+    this.backgroundLayerMap = this.baseLayers.map((l) => ({
+      id: l["name"],
+      name: l["caption"],
+      visible: l["visible"],
+      zIndex: l["zIndex"],
+    }));
+
+    // TODO Unsubscribe
+    // props.map.getAllLayers().forEach((l) => {
+    //   l.on("propertychange", (e) => {
+    //     this.setState({
+    //       layerMap: buildLayerMap(this.options.groups, this.olLayerMap),
+    //     });
+
+    //     console.log(
+    //       "layer:change",
+    //       l.get("caption"),
+    //       e,
+    //       getOlLayerInfo(e.target),
+    //       this.layerMap
+    //     );
+    //   });
+    // });
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
@@ -471,7 +645,7 @@ class LayersSwitcherView extends React.PureComponent {
           style={{ position: "relative", height: "100%", overflowY: "auto" }}
         >
           <Box
-            sx={{
+            style={{
               display:
                 this.state.activeTab === 0 &&
                 this.state.displayContentOverlay === null
