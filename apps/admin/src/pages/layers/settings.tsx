@@ -11,6 +11,7 @@ import { createOnSubmitHandler } from "../../components/form-factory/form-utils"
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { RenderProps } from "../../components/form-factory/types/render";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import UsedInMapsGrid from "./used-in-maps-grid";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
@@ -513,6 +514,7 @@ export default function LayerSettings() {
             control={control}
             errors={errors}
           />
+          <UsedInMapsGrid />
         </form>
       </Box>
     </Page>
