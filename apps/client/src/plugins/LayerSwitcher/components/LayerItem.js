@@ -29,6 +29,49 @@ import LegendImage from "./LegendImage";
 
 // Custom hooks
 import useSnackbar from "../../../hooks/useSnackbar";
+import { useMapZoom } from "../LayerSwitcherProvider";
+
+const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
+  if (!isToggled) {
+    return "unchecked";
+  }
+  if (!isVisibleAtZoom) {
+    return "checkedWithWarning";
+  }
+  if (isSemiToggled) {
+    return "semichecked";
+  }
+  if (isToggled) {
+    return "checked";
+  }
+  return "unchecked";
+};
+
+const LayerToggleComponent = ({ toggleIcon, toggleState }) => {
+  if (toggleIcon) {
+    return (
+      <IconButton disableRipple size="small" sx={{ pl: 0 }}>
+        {toggleIcon}
+      </IconButton>
+    );
+  }
+  return (
+    <IconButton disableRipple size="small" sx={{ pl: 0 }}>
+      {
+        {
+          checked: <CheckBoxIcon />,
+          semichecked: <CheckBoxIcon sx={{ fill: "gray" }} />,
+          unchecked: <CheckBoxOutlineBlankIcon />,
+          checkedWithWarning: (
+            <CheckBoxIcon
+              sx={{ fill: (theme) => theme.palette.warning.dark }}
+            />
+          ),
+        }[toggleState]
+      }
+    </IconButton>
+  );
+};
 
 export default function LayerItem({
   layer,
@@ -65,6 +108,8 @@ export default function LayerItem({
   const layerSwitcherConfig = app.config.mapConfig.tools.find(
     (tool) => tool.type === "layerswitcher"
   );
+
+  const mapZoom = useMapZoom();
 
   const minMaxZoomAlertOnToggleOnly =
     layerSwitcherConfig?.options?.minMaxZoomAlertOnToggleOnly ?? false;
@@ -107,11 +152,13 @@ export default function LayerItem({
    * @returns {boolean} - True if the layer is visible at the current zoom level, false otherwise.
    */
   const zoomEndHandler = useCallback(
-    (click) => {
+    (_) => {
       const zoom = app.map.getView().getZoom();
       const lprops = layer.getProperties();
       const layerIsZoomVisible =
         zoom > lprops.minZoom && zoom <= lprops.maxZoom;
+
+      // console.log("zoomEndHandler", layer.get("caption"), zoom, lprops.maxZoom, lprops.minZoom);
 
       const prevVisibleMinMaxZoomLayers =
         prevVisibleMinMaxZoomLayersRef.current;
@@ -187,7 +234,7 @@ export default function LayerItem({
 
   useEffect(() => {
     // Handler for zoom change event.
-    const handleChange = (l) => {
+    const handleChange = (_) => {
       // Check if the layer is currently visible.
       if (layer.get("visible")) {
         // Trigger zoom check.
@@ -355,27 +402,21 @@ export default function LayerItem({
     );
   };
 
-  // Render method for checkbox icon
-  const getLayerToggleIcon = () => {
-    if (toggleIcon) {
-      return toggleIcon;
-    }
-    return !layer.get("visible") ? (
-      <CheckBoxOutlineBlankIcon />
-    ) : layer.get("layerType") === "group" &&
-      visibleSubLayers.length !== layer.subLayers.length ? (
-      <CheckBoxIcon sx={{ fill: "gray" }} />
-    ) : (
-      <CheckBoxIcon
-        sx={{
-          fill: (theme) =>
-            !zoomVisible && layer.get("visible") && !visibleSubLayers
-              ? theme.palette.warning.dark
-              : "",
-        }}
-      />
-    );
-  };
+  const layerIsToggled = layer.get("visible");
+  const layerIsSemiToggled =
+    layer.get("layerType") === "group" &&
+    visibleSubLayers.length !== layer.subLayers.length;
+
+  const layerMinZoom = layer.get("minZoom");
+  const layerMaxZoom = layer.get("maxZoom");
+  const layerIsVisibleAtZoom =
+    mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;
+
+  const toggleState = getLayerToggleState(
+    layerIsToggled,
+    layerIsSemiToggled,
+    layerIsVisibleAtZoom
+  );
 
   /**
    * Render the load information component.
@@ -487,9 +528,10 @@ export default function LayerItem({
             }}
           >
             {toggleable && (
-              <IconButton disableRipple size="small" sx={{ pl: 0 }}>
-                {getLayerToggleIcon()}
-              </IconButton>
+              <LayerToggleComponent
+                toggleIcon={toggleIcon}
+                toggleState={toggleState}
+              />
             )}
             {isBackgroundLayer && !toggleable ? (
               layer.isFakeMapLayer ? (

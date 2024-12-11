@@ -4,9 +4,41 @@ import React, {
   useContext,
   useRef,
   useSyncExternalStore,
+  useState,
 } from "react";
 
 import LayerSwitcherView from "./LayerSwitcherView.js";
+
+const MapZoomContext = createContext(null);
+export const useMapZoom = () => useContext(MapZoomContext);
+const MapZoomProvider = ({ map, children }) => {
+  const [zoom, setZoom] = useState(map.getView().getZoom());
+
+  useEffect(() => {
+    const handler = (_) => {
+      // using moveend to create a throttled zoomEnd event
+      // instead of using change:resolution to minimize events being fired.
+      const newZoom = map.getView().getZoom();
+      if (zoom !== newZoom) {
+        setZoom(newZoom);
+      }
+    };
+
+    map.on("moveend", handler);
+
+    return () => {
+      map.un("moveend", handler);
+    };
+  }, [map, zoom]);
+
+  return (
+    <MapZoomContext.Provider value={zoom}>{children}</MapZoomContext.Provider>
+  );
+};
+// export const useMapZoom = (map) => {
+//   const [zoom, setZoom] = useState(null)
+//   useEffect
+// };
 
 // TODO Set up OSM/black/white here?
 
@@ -201,15 +233,17 @@ const LayerSwitcherProvider = ({
 
   return (
     <LayerSwitcherDispatchContext.Provider value={dispatcher.current}>
-      <LayerSwitcherView
-        app={app}
-        map={map}
-        localObserver={localObserver}
-        globalObserver={globalObserver}
-        options={options}
-        windowVisible={windowVisible}
-        layersState={olState}
-      />
+      <MapZoomProvider map={map}>
+        <LayerSwitcherView
+          app={app}
+          map={map}
+          localObserver={localObserver}
+          globalObserver={globalObserver}
+          options={options}
+          windowVisible={windowVisible}
+          layersState={olState}
+        />
+      </MapZoomProvider>
     </LayerSwitcherDispatchContext.Provider>
   );
 };
