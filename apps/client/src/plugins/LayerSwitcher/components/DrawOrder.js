@@ -275,7 +275,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
                     <GroupLayer
                       key={l.ol_uid}
                       layer={l}
-                      app={app}
+                      globalObserver={app.globalObserver}
                       localObserver={localObserver}
                       toggleable={false}
                       draggable={true}
@@ -286,7 +286,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
                       layer={l}
                       draggable={true}
                       toggleable={false}
-                      app={app}
+                      globalObserver={app.globalObserver}
                     />
                   )}
                 </Draggable>

@@ -673,6 +673,7 @@ class LayersSwitcherView extends React.PureComponent {
                 localObserver={this.localObserver}
                 layerMap={this.olLayerMap}
                 app={this.props.app}
+                globalObserver={this.globalObserver}
                 options={this.props.options}
               />
             ))}

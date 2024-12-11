@@ -176,7 +176,6 @@ const QuickAccessView = ({
             filterValue={filterValue}
             localObserver={localObserver}
             map={map}
-            app={app}
             globalObserver={globalObserver}
           ></QuickAccessLayers>
         </Box>

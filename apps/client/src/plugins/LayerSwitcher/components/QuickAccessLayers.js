@@ -6,7 +6,6 @@ import GroupLayer from "./GroupLayer";
 import { Box } from "@mui/material";
 
 export default function QuickAccessLayers({
-  app,
   globalObserver,
   map,
   localObserver,
@@ -108,7 +107,7 @@ export default function QuickAccessLayers({
           <GroupLayer
             key={l.ol_uid}
             layer={l}
-            app={app}
+            globalObserver={globalObserver}
             localObserver={localObserver}
             toggleable={true}
             draggable={false}
@@ -121,7 +120,7 @@ export default function QuickAccessLayers({
             layer={l}
             draggable={false}
             toggleable={true}
-            app={app}
+            globalObserver={globalObserver}
           />
         );
       })}

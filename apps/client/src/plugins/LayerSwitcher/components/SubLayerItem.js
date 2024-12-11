@@ -19,7 +19,7 @@ export default function SubLayerItem({
   layer,
   subLayer,
   toggleable,
-  app,
+  globalObserver,
   display,
   visible,
   toggleSubLayer,
@@ -45,7 +45,7 @@ export default function SubLayerItem({
   // Show layer details action
   const showLayerDetails = (e) => {
     e.stopPropagation();
-    app.globalObserver.publish("setLayerDetails", {
+    globalObserver.publish("setLayerDetails", {
       layer: layer,
       subLayerIndex: subLayerIndex,
     });

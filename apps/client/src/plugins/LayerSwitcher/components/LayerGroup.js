@@ -126,7 +126,14 @@ const GroupInfoToggler = ({
   );
 };
 
-const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
+const LayerGroup = ({
+  app,
+  group,
+  globalObserver,
+  localObserver,
+  layerMap,
+  options,
+}) => {
   const { name, groups } = group;
 
   const infogrouptitle = group.infogrouptitle;
@@ -391,7 +398,7 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
               layer={mapLayer}
               draggable={false}
               toggleable={true}
-              app={app}
+              globalObserver={globalObserver}
               localObserver={localObserver}
               groupLayer={layer}
             />
@@ -402,9 +409,8 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
               layer={mapLayer}
               draggable={false}
               toggleable={true}
-              app={app}
+              globalObserver={globalObserver}
               localObserver={localObserver}
-              groupLayer={layer}
             />
           );
         })}
@@ -416,6 +422,7 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
             localObserver={localObserver}
             layerMap={layerMap}
             app={app}
+            globalObserver={globalObserver}
             options={options}
           />
         ))}

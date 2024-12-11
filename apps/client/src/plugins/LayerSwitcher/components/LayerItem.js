@@ -121,7 +121,7 @@ export default function LayerItem({
   isBackgroundLayer,
   draggable,
   toggleable,
-  app,
+  globalObserver,
   display,
   subLayersSection,
   visibleSubLayers,
@@ -149,18 +149,18 @@ export default function LayerItem({
     };
 
     // Subscribe to layer load status.
-    const loadStatusSubscription = app.globalObserver.subscribe(
+    const loadStatusSubscription = globalObserver.subscribe(
       "layerswitcher.wmsLayerLoadStatus",
       handleLoadStatusChange
     );
 
     // Cleanup function to unsubscribe when the component unmounts or if the relevant dependencies change.
     return () =>
-      app.globalObserver.unsubscribe(
+      globalObserver.unsubscribe(
         "layerswitcher.wmsLayerLoadStatus",
         loadStatusSubscription
       );
-  }, [app.globalObserver, layerId, wmsLayerLoadStatus]);
+  }, [globalObserver, layerId, wmsLayerLoadStatus]);
 
   // Handles list item click
   const handleLayerItemClick = (e) => {
@@ -227,7 +227,7 @@ export default function LayerItem({
   // Show layer details action
   const showLayerDetails = (e, specificLayer = layer) => {
     e.stopPropagation();
-    app.globalObserver.publish("setLayerDetails", { layer: specificLayer });
+    globalObserver.publish("setLayerDetails", { layer: specificLayer });
   };
 
   const drawOrderItem = () => {

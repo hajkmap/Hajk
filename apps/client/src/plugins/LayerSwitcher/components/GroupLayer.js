@@ -13,7 +13,7 @@ import { useMapZoom } from "../LayerSwitcherProvider";
 
 export default function GroupLayer({
   layer,
-  app,
+  globalObserver,
   localObserver,
   toggleable,
   draggable,
@@ -125,14 +125,14 @@ export default function GroupLayer({
 
   // Register subscriptions for groupLayer.
   useEffect(() => {
-    app.globalObserver.subscribe("core.layerSubLayersChanged", (l) => {
+    globalObserver.subscribe("core.layerSubLayersChanged", (l) => {
       if (l.target.get("name") === layer.get("name")) {
         setVisibleSubLayers(l.target.get("subLayers"));
       }
     });
 
-    app.globalObserver.subscribe("layerswitcher.hideLayer", setGroupHidden);
-    const layerswitcherShowLayerSubscription = app.globalObserver.subscribe(
+    globalObserver.subscribe("layerswitcher.hideLayer", setGroupHidden);
+    const layerswitcherShowLayerSubscription = globalObserver.subscribe(
       "layerswitcher.showLayer",
       setGroupVisible
     );
@@ -152,7 +152,7 @@ export default function GroupLayer({
       showLayerSubscription.unsubscribe();
     };
   }, [
-    app.globalObserver,
+    globalObserver,
     localObserver,
     setGroupHidden,
     setGroupVisible,
@@ -246,7 +246,7 @@ export default function GroupLayer({
     <LayerItem
       display={display}
       layer={layer}
-      app={app}
+      globalObserver={globalObserver}
       showSublayers={showSublayers}
       draggable={draggable}
       toggleable={toggleable}
@@ -288,7 +288,7 @@ export default function GroupLayer({
                 subLayerIndex={index}
                 layer={layer}
                 toggleable={toggleable}
-                app={app}
+                globalObserver={globalObserver}
                 visible={visibleSubLayers.some((s) => s === subLayer)}
                 toggleSubLayer={toggleSubLayer}
                 zoomVisible={layerIsVisibleAtZoom}
