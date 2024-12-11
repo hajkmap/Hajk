@@ -13,7 +13,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import CircularProgress from "../../components/progress/circular-progress";
-import Scrollbar from "../../components/scrollbar";
+import Scrollbar from "../../components/scrollbar/scrollbar";
 import { DataGrid } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
 import {
