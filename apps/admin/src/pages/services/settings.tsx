@@ -341,6 +341,7 @@ export default function ServiceSettings() {
         lastSavedDate="2023-04-11 13:37"
         saveButtonText="Spara"
         deleteButtonText="Ta bort"
+        navigateTo="/services"
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer

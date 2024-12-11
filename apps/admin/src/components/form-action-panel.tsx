@@ -15,6 +15,7 @@ interface FormActionProps {
   saveButtonText?: string;
   deleteButtonText?: string;
   children?: React.ReactNode;
+  navigateTo?: string;
 }
 
 const FormActionPanel: React.FC<FormActionProps> = ({
@@ -27,6 +28,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   saveButtonText = "",
   deleteButtonText = "",
   children,
+  navigateTo,
 }) => {
   const navigate = useNavigate();
   return (
@@ -72,7 +74,9 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           onClick={(e) => {
             e.preventDefault();
             void onDelete();
-            void navigate("/services");
+            if (navigateTo) {
+              void navigate(navigateTo);
+            }
           }}
           disabled={deleteStatus === "pending" || updateStatus === "pending"}
           variant="text"
