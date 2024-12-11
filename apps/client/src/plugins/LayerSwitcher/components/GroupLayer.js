@@ -213,12 +213,6 @@ export default function GroupLayer({
     }
   };
 
-  // Toggles sublayers section
-  const toggleShowSublayers = (e) => {
-    e.stopPropagation();
-    setShowSublayers(!showSublayers);
-  };
-
   // Determines visibility of subLayer
   // If the groupLayer is not toggleable
   // then the sublayer should only be visible if it's included in visibleSubLayers
@@ -252,7 +246,6 @@ export default function GroupLayer({
       toggleable={toggleable}
       clickCallback={handleLayerItemClick}
       visibleSubLayers={visibleSubLayers}
-      toggleSubLayer={toggleSubLayer}
       expandableSection={
         layer.get("layerInfo").hideExpandArrow !== true && (
           <Box>
@@ -265,7 +258,7 @@ export default function GroupLayer({
                 mr: draggable ? "5px" : 0,
               }}
               size="small"
-              onClick={(e) => toggleShowSublayers(e)}
+              onClick={(_) => setShowSublayers(!showSublayers)}
             >
               <KeyboardArrowRightOutlinedIcon
                 sx={{

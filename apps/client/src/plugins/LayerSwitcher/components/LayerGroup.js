@@ -410,7 +410,6 @@ const LayerGroup = ({
               draggable={false}
               toggleable={true}
               globalObserver={globalObserver}
-              localObserver={localObserver}
             />
           );
         })}

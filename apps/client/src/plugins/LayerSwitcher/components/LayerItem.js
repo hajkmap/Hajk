@@ -13,8 +13,6 @@ import {
 import HajkToolTip from "components/HajkToolTip";
 
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
-import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
-import WallpaperIcon from "@mui/icons-material/Wallpaper";
 import BuildOutlinedIcon from "@mui/icons-material/BuildOutlined";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
@@ -45,14 +43,7 @@ const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
   return "unchecked";
 };
 
-const LayerToggleComponent = ({ toggleIcon, toggleState }) => {
-  if (toggleIcon) {
-    return (
-      <IconButton disableRipple size="small" sx={{ pl: 0 }}>
-        {toggleIcon}
-      </IconButton>
-    );
-  }
+const LayerToggleComponent = ({ toggleState }) => {
   return (
     <IconButton disableRipple size="small" sx={{ pl: 0 }}>
       {
@@ -116,17 +107,15 @@ const LayerLegendIcon = ({
 
 export default function LayerItem({
   layer,
-  toggleIcon,
   clickCallback,
-  isBackgroundLayer,
   draggable,
   toggleable,
   globalObserver,
   display,
-  subLayersSection,
   visibleSubLayers,
   expandableSection,
   showSublayers,
+  subLayersSection,
 }) {
   // WmsLayer load status, shows warning icon if !ok
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
@@ -165,7 +154,6 @@ export default function LayerItem({
   // Handles list item click
   const handleLayerItemClick = (e) => {
     // If a clickCallback is defined, call it.
-    console.log("handleClick", {clickCallback, layerType });
     if (clickCallback) {
       clickCallback();
       return;
@@ -190,8 +178,7 @@ export default function LayerItem({
 
   const layerIsToggled = layer.get("visible");
   const layerIsSemiToggled =
-    layerType === "group" &&
-    visibleSubLayers.length !== layer.subLayers.length;
+    layerType === "group" && visibleSubLayers.length !== layer.subLayers.length;
 
   const layerMinZoom = layer.get("minZoom");
   const layerMaxZoom = layer.get("maxZoom");
@@ -234,9 +221,6 @@ export default function LayerItem({
     if (draggable) {
       return true;
     }
-    if (isBackgroundLayer && !toggleable) {
-      return true;
-    }
     return false;
   };
 
@@ -255,8 +239,7 @@ export default function LayerItem({
       className="layer-item"
       style={{
         display: display,
-        marginLeft:
-          expandableSection || isBackgroundLayer || draggable ? 0 : "31px",
+        marginLeft: expandableSection || draggable ? 0 : "31px",
         borderBottom:
           legendIsActive || (drawOrderItem() && showSublayers)
             ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
@@ -298,7 +281,7 @@ export default function LayerItem({
           onClick={toggleable ? handleLayerItemClick : null}
           sx={{
             p: 0,
-            ml: isBackgroundLayer && !toggleable ? (draggable ? 0 : "20px") : 0,
+            ml: 0,
           }}
           dense
         >
@@ -313,27 +296,14 @@ export default function LayerItem({
               borderBottom: (theme) => renderBorder(theme),
             }}
           >
-            {toggleable && (
-              <LayerToggleComponent
-                toggleIcon={toggleIcon}
-                toggleState={toggleState}
-              />
-            )}
-            {isBackgroundLayer && !toggleable ? (
-              layer.isFakeMapLayer ? (
-                <WallpaperIcon sx={{ mr: "5px", ml: 0 }} />
-              ) : (
-                <PublicOutlinedIcon sx={{ mr: "5px", ml: 0 }} />
-              )
-            ) : (
-              <LayerLegendIcon
-                legendIcon={legendIcon}
-                layerType={layerType}
-                isFakeMapLayer={layerIsFakeMapLayer}
-                legendIsActive={legendIsActive}
-                toggleLegend={() => setLegendIsActive(!legendIsActive)}
-              />
-            )}
+            {toggleable && <LayerToggleComponent toggleState={toggleState} />}
+            <LayerLegendIcon
+              legendIcon={legendIcon}
+              layerType={layerType}
+              isFakeMapLayer={layerIsFakeMapLayer}
+              legendIsActive={legendIsActive}
+              toggleLegend={() => setLegendIsActive(!legendIsActive)}
+            />
             <ListItemText
               primary={layerCaption}
               primaryTypographyProps={{
@@ -341,15 +311,12 @@ export default function LayerItem({
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 variant: "body1",
-                fontWeight:
-                  layerIsToggled && !draggable && !isBackgroundLayer
-                    ? "bold"
-                    : "inherit",
+                fontWeight: layerIsToggled && !draggable ? "bold" : "inherit",
               }}
             />
             <ListItemSecondaryAction>
               {renderStatusIcon()}
-              {isBackgroundLayer && !toggleable && !draggable ? (
+              {!toggleable && !draggable ? (
                 <IconButton
                   size="small"
                   disableTouchRipple
