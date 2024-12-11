@@ -64,17 +64,11 @@ const LayerZoomVisibleSnackbarProvider = ({
   children,
   layerState,
   options,
-  layers
+  layers,
 }) => {
   // const mapZoom = useMapZoom();
   // const { addToSnackbar, removeFromSnackbar } = useSnackbar();
-  //
-  // "minMaxZoomAlertOnToggleOnly": false,
-  //
-  // If zoom change
-  // or layer visibility change
-  //
-  // if `minMaxZoomAlet` then only on layervisibilitychanged
+  // Object.values(layerState).map((l) => console.log(l.caption));
 
   return (
     <>

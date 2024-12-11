@@ -28,7 +28,6 @@ import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
 
 import { useMapZoom } from "../LayerSwitcherProvider";
-import { useLayerZoomWarningSnackbar } from "../useLayerZoomWarningSnackbar";
 
 const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
   if (!isToggled) {
@@ -72,6 +71,49 @@ const LayerToggleComponent = ({ toggleIcon, toggleState }) => {
   );
 };
 
+const layerShouldShowLegendIcon = (layerType, isFakeMapLayer) =>
+  layerType === "group" ||
+  layerType === "base" ||
+  isFakeMapLayer ||
+  layerType === "system";
+
+const LayerLegendIcon = ({
+  legendIcon,
+  layerType,
+  isFakeMapLayer,
+  legendIsActive,
+  toggleLegend,
+}) => {
+  const layerLegendIcon = legendIcon;
+  if (layerLegendIcon !== undefined) {
+    return <LegendIcon url={layerLegendIcon} />;
+  } else if (layerType === "system") {
+    return <BuildOutlinedIcon sx={{ mr: "5px" }} />;
+  }
+
+  if (layerShouldShowLegendIcon(layerType, isFakeMapLayer)) {
+    return null;
+  }
+
+  return (
+    <Tooltip
+      placement="left"
+      title={legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"}
+    >
+      <IconButton
+        sx={{ p: 0.25, mr: "5px" }}
+        size="small"
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleLegend();
+        }}
+      >
+        <FormatListBulletedOutlinedIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  );
+};
+
 export default function LayerItem({
   layer,
   toggleIcon,
@@ -95,11 +137,13 @@ export default function LayerItem({
   const mapZoom = useMapZoom();
 
   const layerId = layer.get("name");
-  const caption = layer.get("caption");
+  const layerCaption = layer.get("caption");
+  const layerType = layer.get("layerType");
+  const layerIsFakeMapLayer = layer.isFakeMapLayer;
 
   useEffect(() => {
     const handleLoadStatusChange = (d) => {
-      if (wmsLayerLoadStatus !== "loaderror" && layer.get("name") === d.id) {
+      if (wmsLayerLoadStatus !== "loaderror" && layerId === d.id) {
         setWmsLayerLoadStatus(d.status);
       }
     };
@@ -116,74 +160,37 @@ export default function LayerItem({
         "layerswitcher.wmsLayerLoadStatus",
         loadStatusSubscription
       );
-  }, [app.globalObserver, layer, wmsLayerLoadStatus]);
+  }, [app.globalObserver, layerId, wmsLayerLoadStatus]);
 
   // Handles list item click
   const handleLayerItemClick = (e) => {
     // If a clickCallback is defined, call it.
+    console.log("handleClick", {clickCallback, layerType });
     if (clickCallback) {
       clickCallback();
       return;
     }
 
     // Handle system layers by showing layer details directly
-    if (layer.get("layerType") === "system") {
+    if (layerType === "system") {
       showLayerDetails(e);
       return;
     }
 
     // Toggle visibility for non-system layers
-    if (layer.get("layerType") !== "system") {
+    if (layerType !== "system") {
       // This check is technically redundant now but left for clarity
       layer.set("visible", !layer.get("visible"));
+      // TODO Use dispatcher
     }
   };
 
-  // Render method for legend icon
-  const getIconFromLayer = () => {
-    const layerLegendIcon =
-      layer.get("layerInfo")?.legendIcon || layer.get("legendIcon");
-    if (layerLegendIcon !== undefined) {
-      return <LegendIcon url={layerLegendIcon} />;
-    } else if (layer.get("layerType") === "system") {
-      return <BuildOutlinedIcon sx={{ mr: "5px" }} />;
-    }
-    return renderLegendIcon();
-  };
-
-  const renderLegendIcon = () => {
-    if (
-      layer.get("layerType") === "group" ||
-      layer.get("layerType") === "base" ||
-      layer.isFakeMapLayer ||
-      layer.get("layerType") === "system"
-    ) {
-      return null;
-    }
-    return (
-      <Tooltip
-        placement="left"
-        title={
-          legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"
-        }
-      >
-        <IconButton
-          sx={{ p: 0.25, mr: "5px" }}
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            setLegendIsActive(!legendIsActive);
-          }}
-        >
-          <FormatListBulletedOutlinedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    );
-  };
+  const layerInfo = layer.get("layerInfo");
+  const legendIcon = layerInfo?.legendIcon || layer.get("legendIcon");
 
   const layerIsToggled = layer.get("visible");
   const layerIsSemiToggled =
-    layer.get("layerType") === "group" &&
+    layerType === "group" &&
     visibleSubLayers.length !== layer.subLayers.length;
 
   const layerMinZoom = layer.get("minZoom");
@@ -196,18 +203,6 @@ export default function LayerItem({
     layerIsSemiToggled,
     layerIsVisibleAtZoom
   );
-
-  const layerMinMaxZoomAlertOnToggleOnly = layer.get(
-    "minMaxZoomAlertOnToggleOnly"
-  );
-  // useLayerZoomWarningSnackbar(
-  //   layerMinZoom,
-  //   layerMaxZoom,
-  //   layerIsToggled,
-  //   layerMinMaxZoomAlertOnToggleOnly,
-  //   layerId,
-  //   caption
-  // );
 
   /**
    * Render the load information component.
@@ -331,17 +326,23 @@ export default function LayerItem({
                 <PublicOutlinedIcon sx={{ mr: "5px", ml: 0 }} />
               )
             ) : (
-              getIconFromLayer()
+              <LayerLegendIcon
+                legendIcon={legendIcon}
+                layerType={layerType}
+                isFakeMapLayer={layerIsFakeMapLayer}
+                legendIsActive={legendIsActive}
+                toggleLegend={() => setLegendIsActive(!legendIsActive)}
+              />
             )}
             <ListItemText
-              primary={layer.get("caption")}
+              primary={layerCaption}
               primaryTypographyProps={{
                 pr: 5,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 variant: "body1",
                 fontWeight:
-                  layer.get("visible") && !draggable && !isBackgroundLayer
+                  layerIsToggled && !draggable && !isBackgroundLayer
                     ? "bold"
                     : "inherit",
               }}
@@ -360,7 +361,7 @@ export default function LayerItem({
                   </Tooltip>
                 </IconButton>
               ) : null}
-              {layer.isFakeMapLayer !== true && (
+              {layerIsFakeMapLayer !== true && (
                 <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
                   <KeyboardArrowRightOutlinedIcon
                     sx={{
@@ -373,10 +374,7 @@ export default function LayerItem({
           </Box>
         </ListItemButton>
       </Box>
-      {layer.get("layerType") === "group" ||
-      layer.get("layerType") === "base" ||
-      layer.isFakeMapLayer ||
-      layer.get("layerType") === "system" ? null : (
+      {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
         <LegendImage
           layerItemDetails={{ layer: layer }}
           open={legendIsActive}
