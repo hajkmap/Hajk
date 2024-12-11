@@ -9,6 +9,7 @@ import React, {
 
 import LayerSwitcherView from "./LayerSwitcherView.js";
 import useSnackbar from "../../hooks/useSnackbar";
+import { useLayerZoomWarningSnackbar } from "./useLayerZoomWarningSnackbar";
 
 const MapZoomContext = createContext(null);
 export const useMapZoom = () => useContext(MapZoomContext);
@@ -37,9 +38,37 @@ const MapZoomProvider = ({ map, children }) => {
   );
 };
 
-const LayerZoomVisibleSnackbarProvider = ({ children, layerState, options }) => {
-  const mapZoom = useMapZoom();
-  const { addToSnackbar, removeFromSnackbar } = useSnackbar();
+// TODO This is a fix to listen on all layers with zoom check
+const LayerZoomListener = ({ layer }) => {
+  const layerMinZoom = layer.get("minZoom");
+  const layerMaxZoom = layer.get("maxZoom");
+  const layerIsToggled = layer.get("visible");
+  const layerMinMaxZoomAlertOnToggleOnly = layer.get(
+    "minMaxZoomAlertOnToggleOnly"
+  );
+  const layerId = layer.get("name");
+  const caption = layer.get("caption");
+
+  useLayerZoomWarningSnackbar(
+    layerMinZoom,
+    layerMaxZoom,
+    layerIsToggled,
+    layerMinMaxZoomAlertOnToggleOnly,
+    layerId,
+    caption
+  );
+  return <></>;
+};
+
+const LayerZoomVisibleSnackbarProvider = ({
+  children,
+  layerState,
+  options,
+  layers
+}) => {
+  // const mapZoom = useMapZoom();
+  // const { addToSnackbar, removeFromSnackbar } = useSnackbar();
+  //
   // "minMaxZoomAlertOnToggleOnly": false,
   //
   // If zoom change
@@ -47,7 +76,14 @@ const LayerZoomVisibleSnackbarProvider = ({ children, layerState, options }) => 
   //
   // if `minMaxZoomAlet` then only on layervisibilitychanged
 
-  return children;
+  return (
+    <>
+      {layers.map((l) => (
+        <LayerZoomListener key={l.get("name")} layer={l} />
+      ))}
+      {children}
+    </>
+  );
 };
 
 // TODO Set up OSM/black/white here?
@@ -198,7 +234,7 @@ const LayerSwitcherProvider = ({
             a[l.get("name")] = {
               // opacity: l.get("opacity"),
               id: l.get("name"),
-              name: l.get("caption"),
+              caption: l.get("caption"),
               visible: l.get("visible"),
               quickAccess: l.get("quickAccess"),
               // subLayers: l.get("subLayers"),
@@ -247,6 +283,7 @@ const LayerSwitcherProvider = ({
         <LayerZoomVisibleSnackbarProvider
           layerState={olState}
           options={options}
+          layers={map.getAllLayers()}
         >
           <LayerSwitcherView
             app={app}

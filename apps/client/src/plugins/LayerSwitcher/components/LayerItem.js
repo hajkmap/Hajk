@@ -200,15 +200,14 @@ export default function LayerItem({
   const layerMinMaxZoomAlertOnToggleOnly = layer.get(
     "minMaxZoomAlertOnToggleOnly"
   );
-  useLayerZoomWarningSnackbar(
-    layerMinZoom,
-    layerMaxZoom,
-    layerIsToggled,
-    layerIsVisibleAtZoom,
-    layerMinMaxZoomAlertOnToggleOnly,
-    layerId,
-    caption
-  );
+  // useLayerZoomWarningSnackbar(
+  //   layerMinZoom,
+  //   layerMaxZoom,
+  //   layerIsToggled,
+  //   layerMinMaxZoomAlertOnToggleOnly,
+  //   layerId,
+  //   caption
+  // );
 
   /**
    * Render the load information component.

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import useSnackbar from "../../hooks/useSnackbar";
+import { useMapZoom } from "./LayerSwitcherProvider";
 
 const layerUsesMinMaxZoom = (minZoom, maxZoom) => {
   const minZ = minZoom ?? 0;
@@ -8,27 +9,46 @@ const layerUsesMinMaxZoom = (minZoom, maxZoom) => {
   return (maxZ > 0 && maxZ < Infinity) || (minZ > 0 && minZ < Infinity);
 };
 
+// const layerIsVisibleAtZoom =
+//   mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;
+
+// const toggleState = getLayerToggleState(
+//   layerIsToggled,
+//   layerIsSemiToggled,
+//   layerIsVisibleAtZoom
+// );
+
+// const layerMinMaxZoomAlertOnToggleOnly = layer.get(
+//   "minMaxZoomAlertOnToggleOnly"
+// );
+
+// TODO
+// move to Higher order component
+
 export const useLayerZoomWarningSnackbar = (
   layerMinZoom,
   layerMaxZoom,
   toggled,
-  visible,
   minMaxZoomAlertOnToggleOnly,
   layerId,
   caption
 ) => {
+  const mapZoom = useMapZoom();
+  const visible = mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;
+
   const { addToSnackbar, removeFromSnackbar } = useSnackbar();
   const [prevVisible, setPrevVisible] = useState(visible);
   const [prevToggled, setPrevToggled] = useState(toggled);
 
-  console.log("useLayerZoom", {
-    layerMinZoom,
-    layerMaxZoom,
-    visible,
-    layerId,
-    caption,
-  });
+  // console.log("useLayerZoom", {
+  //   layerMinZoom,
+  //   layerMaxZoom,
+  //   visible,
+  //   layerId,
+  //   caption,
+  // });
 
+  // TODO Move to higher order component
   // TODO Sublayers
   // TODO Hide snackbar if zoom such that the layer is visible again
   useEffect(() => {
