@@ -39,13 +39,19 @@ const QuickAccessView = ({
   treeData,
   filterValue,
   enqueueSnackbar,
+  layersState,
 }) => {
   // TODO This iterates on all OL layers every render, that can be optimized
-  const hasVisibleLayers =
-    map
-      .getAllLayers()
-      .filter((l) => l.get("quickAccess") === true && l.get("visible") === true)
-      .length > 0;
+  // const hasVisibleLayers =
+  //   map
+  //     .getAllLayers()
+  //     .filter((l) => l.get("quickAccess") === true && l.get("visible") === true)
+  //     .length > 0;
+
+  const qaLayers = Object.values(layersState).filter((obj) => obj.quickAccess);
+  const hasVisibleLayers = qaLayers.some((l) => l.visible);
+
+  console.log(qaLayers);
 
   const [quickAccessSectionExpanded, setQuickAccessSectionExpanded] =
     useState(false);
@@ -58,30 +64,18 @@ const QuickAccessView = ({
     setShowDeleteConfirmation(true);
   };
 
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
+
   // Handles click on confirm clear quickAccess button
   const handleClearQuickAccessLayers = () => {
     setShowDeleteConfirmation(false);
-    // map
-    //   .getAllLayers()
-    //   .filter((l) => l.get("quickAccess") === true)
-    //   .map((l) => l.set("quickAccess", false));
     layerSwitcherDispatch.clearQuickAccess();
   };
 
-  const layerSwitcherDispatch = useLayerSwitcherDispatch();
   // Handles click on AddLayersToQuickAccess menu item
   const handleAddLayersToQuickAccess = (e) => {
     e.stopPropagation();
     // Add visible layers to quickAccess section
-    // map
-    //   .getAllLayers()
-    //   .filter(
-    //     (l) =>
-    //       l.get("visible") === true &&
-    //       l.get("layerType") !== "base" &&
-    //       l.get("layerType") !== "system"
-    //   )
-    //   .map((l) => l.set("quickAccess", true));
     layerSwitcherDispatch.addVisibleLayersToQuickAccess();
 
     // Show snackbar
@@ -107,7 +101,7 @@ const QuickAccessView = ({
         onClick={() =>
           setQuickAccessSectionExpanded(!quickAccessSectionExpanded)
         }
-        sx={{
+        style={{
           p: 0,
         }}
         dense
@@ -118,7 +112,7 @@ const QuickAccessView = ({
           disableRipple
         >
           <KeyboardArrowRightOutlinedIcon
-            sx={{
+            style={{
               transform: quickAccessSectionExpanded ? "rotate(90deg)" : "",
               transition: "transform 300ms ease",
             }}

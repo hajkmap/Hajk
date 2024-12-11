@@ -1,4 +1,10 @@
-import React, { useEffect, createContext, useContext, useRef } from "react";
+import React, {
+  useEffect,
+  createContext,
+  useContext,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 
 import LayerSwitcherView from "./LayerSwitcherView.js";
 
@@ -85,6 +91,23 @@ const LayerSwitcherDispatchContext = createContext(null);
 export const useLayerSwitcherDispatch = () =>
   useContext(LayerSwitcherDispatchContext);
 
+const buildLayerTree = (groups, olLayerMap) =>
+  groups?.map((group) => {
+    if (!group) {
+      return undefined;
+    }
+    const layers = buildLayerTree(group.layers, olLayerMap);
+    const subgroups = buildLayerTree(group.groups, olLayerMap);
+
+    const children = [...(layers ?? []), ...(subgroups ?? [])];
+
+    return {
+      id: group.id,
+      // name: olLayerMap[group.id]?.get("caption") ?? group.name,
+      children: children?.length === 0 ? undefined : children,
+    };
+  });
+
 const LayerSwitcherProvider = ({
   app,
   map,
@@ -93,6 +116,65 @@ const LayerSwitcherProvider = ({
   options,
   windowVisible,
 }) => {
+  // const olLayerMap = map
+  //   .getLayers()
+  //   .getArray()
+  //   .reduce((a, b) => {
+  //     a[b.get("name")] = b;
+  //     return a;
+  //   }, {});
+  // const layerTreeData = buildLayerTree(options.groups, olLayerMap);
+
+  const olState = useSyncExternalStore(
+    (callback) => {
+      const fn = (_) => (_) => {
+        callback();
+      };
+
+      const listeners = map.getAllLayers().map((l) => {
+        const layerFn = fn(l);
+        l.on("propertychange", layerFn);
+        return layerFn;
+      });
+
+      return () => {
+        map.getAllLayers().forEach((l, i) => {
+          const fn = listeners[i];
+          if (fn) {
+            l.un("propertychange", fn);
+          }
+        });
+      };
+    },
+    (() => {
+      let cache = null;
+      return () => {
+        const olLayers = map
+          .getLayers()
+          .getArray()
+          .reduce((a, l) => {
+            a[l.get("name")] = {
+              // opacity: l.get("opacity"),
+              id: l.get("name"),
+              name: l.get("caption"),
+              visible: l.get("visible"),
+              quickAccess: l.get("quickAccess"),
+              // subLayers: l.get("subLayers"),
+              // zIndex: l.get("zIndex"),
+            };
+            return a;
+          }, {});
+
+        if (JSON.stringify(olLayers) !== JSON.stringify(cache)) {
+          cache = olLayers;
+          return olLayers;
+        }
+        return cache;
+      };
+    })()
+  );
+  // console.log(olState);
+
   useEffect(() => {
     const fn = (l) => (e) => {
       // TODO
@@ -126,6 +208,7 @@ const LayerSwitcherProvider = ({
         globalObserver={globalObserver}
         options={options}
         windowVisible={windowVisible}
+        layersState={olState}
       />
     </LayerSwitcherDispatchContext.Provider>
   );

@@ -161,23 +161,6 @@ const buildLayerMap = (groups, olLayerMap) => {
   }, {});
 };
 
-const buildLayerTree = (groups, olLayerMap) =>
-  groups?.map((group) => {
-    if (!group) {
-      return undefined;
-    }
-    const layers = buildLayerTree(group.layers, olLayerMap);
-    const subgroups = buildLayerTree(group.groups, olLayerMap);
-
-    const children = [...(layers ?? []), ...(subgroups ?? [])];
-
-    return {
-      id: group.id,
-      // name: olLayerMap[group.id]?.get("caption") ?? group.name,
-      children: children?.length === 0 ? undefined : children,
-    };
-  });
-
 // Prepare tree data for filtering
 const addLayerNames = (data, olLayerMap) => {
   const node = data.map((item) => {
@@ -291,12 +274,11 @@ class LayersSwitcherView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.globalObserver;
 
-    this.layerTreeData = buildLayerTree(this.options.groups, this.olLayerMap);
     this.layerMap = buildLayerMap(this.options.groups, this.olLayerMap);
 
-    console.log(this.layerTreeData);
-    console.log(this.layerMap);
-    console.log(this.olLayerMap);
+    // console.log(this.layerTreeData);
+    // console.log(this.layerMap);
+    // console.log(this.olLayerMap);
 
     // this.backgroundLayerMap = Object.fromEntries(
     //   Object.entries(this.layerMap).filter(([_, v]) => v.layerType !== "base")
@@ -612,7 +594,7 @@ class LayersSwitcherView extends React.PureComponent {
   };
 
   render() {
-    const { windowVisible } = this.props;
+    const { windowVisible, layersState } = this.props;
     return (
       <div
         style={{
@@ -682,6 +664,7 @@ class LayersSwitcherView extends React.PureComponent {
               favoritesInfoText={this.options.userQuickAccessFavoritesInfoText}
               treeData={this.state.treeData}
               filterValue={this.state.filterValue}
+              layersState={layersState}
             />
             {this.state.treeData.map((group, i) => (
               <LayerGroup
