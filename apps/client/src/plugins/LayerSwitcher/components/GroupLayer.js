@@ -7,8 +7,7 @@ import SubLayerItem from "./SubLayerItem";
 
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
-// Custom hooks
-import useSnackbar from "../../../hooks/useSnackbar";
+import { useMapZoom } from "../LayerSwitcherProvider";
 
 /* A grouplayer is a layer configured with multiple layers in admin, NOT a group in layerswitcher */
 
@@ -34,22 +33,6 @@ export default function GroupLayer({
           : layer.subLayers
       : []
   );
-  const [zoomVisible, setZoomVisible] = useState(true);
-  const [subLayerClicked, setSubLayerClicked] = useState(false);
-
-  const { removeFromSnackbar } = useSnackbar();
-
-  // Special case for removing layer captions from snackbar message when being toggled
-  // through the LayerGroup component.
-  useEffect(() => {
-    if (visibleSubLayers.length === 0) {
-      const removeLayerCaptions = layer.subLayers.map(
-        (subLayer) => layer.layersInfo[subLayer]?.caption || ""
-      );
-      // Remove layer caption from snackbar message.
-      removeFromSnackbar(removeLayerCaptions);
-    }
-  }, [visibleSubLayers, layer.layersInfo, layer.subLayers, removeFromSnackbar]);
 
   const setGroupHidden = useCallback(
     (l) => {
@@ -213,12 +196,6 @@ export default function GroupLayer({
   // Handles list item click
   const handleLayerItemClick = () => {
     if (layer.get("visible")) {
-      const removeLayerCaptions = layer.subLayers.map(
-        (subLayer) => layer.layersInfo[subLayer]?.caption || ""
-      );
-
-      // Remove layer caption from snackbar message.
-      removeFromSnackbar(removeLayerCaptions);
       // Hide the layer.
       setGroupHidden(layer);
     } else {
@@ -234,7 +211,6 @@ export default function GroupLayer({
     } else {
       setSubLayerVisible(subLayer);
     }
-    setSubLayerClicked(!visible);
   };
 
   // Toggles sublayers section
@@ -260,6 +236,12 @@ export default function GroupLayer({
     return foundSubLayer ? foundSubLayer.isFiltered : false;
   };
 
+  const mapZoom = useMapZoom();
+  const layerMinZoom = layer.get("minZoom");
+  const layerMaxZoom = layer.get("maxZoom");
+  const layerIsVisibleAtZoom =
+    mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;
+
   return (
     <LayerItem
       display={display}
@@ -270,11 +252,6 @@ export default function GroupLayer({
       toggleable={toggleable}
       clickCallback={handleLayerItemClick}
       visibleSubLayers={visibleSubLayers}
-      visibleSubLayersCaption={visibleSubLayers.map(
-        (subLayer) => layer.layersInfo[subLayer]?.caption || ""
-      )}
-      onSetZoomVisible={setZoomVisible}
-      subLayerClicked={subLayerClicked}
       toggleSubLayer={toggleSubLayer}
       expandableSection={
         layer.get("layerInfo").hideExpandArrow !== true && (
@@ -314,7 +291,7 @@ export default function GroupLayer({
                 app={app}
                 visible={visibleSubLayers.some((s) => s === subLayer)}
                 toggleSubLayer={toggleSubLayer}
-                zoomVisible={zoomVisible}
+                zoomVisible={layerIsVisibleAtZoom}
               ></SubLayerItem>
             ))}
           </Box>

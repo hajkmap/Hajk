@@ -8,6 +8,7 @@ import React, {
 } from "react";
 
 import LayerSwitcherView from "./LayerSwitcherView.js";
+import useSnackbar from "../../hooks/useSnackbar";
 
 const MapZoomContext = createContext(null);
 export const useMapZoom = () => useContext(MapZoomContext);
@@ -35,10 +36,19 @@ const MapZoomProvider = ({ map, children }) => {
     <MapZoomContext.Provider value={zoom}>{children}</MapZoomContext.Provider>
   );
 };
-// export const useMapZoom = (map) => {
-//   const [zoom, setZoom] = useState(null)
-//   useEffect
-// };
+
+const LayerZoomVisibleSnackbarProvider = ({ children, layerState, options }) => {
+  const mapZoom = useMapZoom();
+  const { addToSnackbar, removeFromSnackbar } = useSnackbar();
+  // "minMaxZoomAlertOnToggleOnly": false,
+  //
+  // If zoom change
+  // or layer visibility change
+  //
+  // if `minMaxZoomAlet` then only on layervisibilitychanged
+
+  return children;
+};
 
 // TODO Set up OSM/black/white here?
 
@@ -234,15 +244,20 @@ const LayerSwitcherProvider = ({
   return (
     <LayerSwitcherDispatchContext.Provider value={dispatcher.current}>
       <MapZoomProvider map={map}>
-        <LayerSwitcherView
-          app={app}
-          map={map}
-          localObserver={localObserver}
-          globalObserver={globalObserver}
+        <LayerZoomVisibleSnackbarProvider
+          layerState={olState}
           options={options}
-          windowVisible={windowVisible}
-          layersState={olState}
-        />
+        >
+          <LayerSwitcherView
+            app={app}
+            map={map}
+            localObserver={localObserver}
+            globalObserver={globalObserver}
+            options={options}
+            windowVisible={windowVisible}
+            layersState={olState}
+          />
+        </LayerZoomVisibleSnackbarProvider>
       </MapZoomProvider>
     </LayerSwitcherDispatchContext.Provider>
   );
