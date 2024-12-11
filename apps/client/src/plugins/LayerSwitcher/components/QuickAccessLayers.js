@@ -130,7 +130,6 @@ export default function QuickAccessLayers({
             localObserver={localObserver}
             toggleable={true}
             draggable={false}
-            groupLayer={findLayerById(treeData, l.get("name"))}
             quickAccessLayer={true}
           ></GroupLayer>
         ) : (

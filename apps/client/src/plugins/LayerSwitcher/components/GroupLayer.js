@@ -24,7 +24,7 @@ export default function GroupLayer({
   groupLayer,
 }) {
   const subLayers = layer.subLayers;
-  const filterSubLayers = groupLayer.subLayers;
+  const filterSubLayers = groupLayer?.subLayers;
 
   const { layerIsToggled } = layerState;
 
@@ -245,7 +245,7 @@ export default function GroupLayer({
   };
 
   const isSubLayerFiltered = (subLayer) => {
-    const foundSubLayer = filterSubLayers.find((sl) => sl.id === subLayer);
+    const foundSubLayer = filterSubLayers?.find((sl) => sl.id === subLayer);
     return foundSubLayer ? foundSubLayer.isFiltered : false;
   };
 
