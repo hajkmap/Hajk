@@ -23,34 +23,51 @@ export default function GroupLayer({
   display,
   groupLayer,
 }) {
+  const subLayers = layer.subLayers;
+  const filterSubLayers = groupLayer.subLayers;
+
+  const { layerIsToggled } = layerState;
+
+  const {
+    layerId,
+    // layerCaption,
+    // layerType,
+
+    layerMinZoom,
+    layerMaxZoom,
+    // numberOfSubLayers,
+    layerInfo,
+    // layerLegendIcon,
+  } = layerConfig;
+
   // Keep the subLayers area active in state
   const [showSublayers, setShowSublayers] = useState(false);
   // Keep visible sublayers in state
   const [visibleSubLayers, setVisibleSubLayers] = useState(
-    layer.get("visible")
+    layerIsToggled
       ? quickAccessLayer || draggable
-        ? layer.get("subLayers")
+        ? subLayers
         : layer.visibleAtStartSubLayers?.length > 0
           ? layer.visibleAtStartSubLayers
-          : layer.subLayers
+          : subLayers
       : []
   );
 
   const setGroupHidden = useCallback(
     (l) => {
-      if (l.get("name") === layer.get("name")) {
+      if (l.get("name") === layerId) {
         // Update OL layer sublayers property
         layer.set("subLayers", []);
         // Update visibleSubLayers state
         setVisibleSubLayers([]);
       }
     },
-    [layer]
+    [layer, layerId]
   );
 
   const setSubLayers = (visibleSubLayersArray) => {
     // Check if layer is visible
-    let layerVisibility = layer.get("visible");
+    let layerVisibility = layerIsToggled;
     // If layer is not visible and remaining visible subLayers exists, layer should turn visible
     if (!layerVisibility && visibleSubLayersArray.length > 0) {
       layerVisibility = true;
@@ -104,7 +121,7 @@ export default function GroupLayer({
         // In this case the incoming parameter is the actual OL Layer and there is
         // no need to further filter. Just set subLayers to everything that's in this
         // layer, and the incoming object itself as the working 'l' variable.
-        subLayersToShow = layer.subLayers;
+        subLayersToShow = subLayers;
         l = la;
       }
 
@@ -122,13 +139,13 @@ export default function GroupLayer({
         setVisibleSubLayers(subLayersToShow);
       }
     },
-    [layer]
+    [layer, subLayers]
   );
 
   // Register subscriptions for groupLayer.
   useEffect(() => {
     globalObserver.subscribe("core.layerSubLayersChanged", (l) => {
-      if (l.target.get("name") === layer.get("name")) {
+      if (l.target.get("name") === layerId) {
         setVisibleSubLayers(l.target.get("subLayers"));
       }
     });
@@ -197,7 +214,7 @@ export default function GroupLayer({
 
   // Handles list item click
   const handleLayerItemClick = () => {
-    if (layer.get("visible")) {
+    if (layerIsToggled) {
       // Hide the layer.
       setGroupHidden(layer);
     } else {
@@ -228,13 +245,12 @@ export default function GroupLayer({
   };
 
   const isSubLayerFiltered = (subLayer) => {
-    const foundSubLayer = groupLayer.subLayers.find((sl) => sl.id === subLayer);
+    const foundSubLayer = filterSubLayers.find((sl) => sl.id === subLayer);
     return foundSubLayer ? foundSubLayer.isFiltered : false;
   };
 
   const mapZoom = useMapZoom();
-  const layerMinZoom = layer.get("minZoom");
-  const layerMaxZoom = layer.get("maxZoom");
+
   const layerIsVisibleAtZoom =
     mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;
 
@@ -267,7 +283,7 @@ export default function GroupLayer({
       clickCallback={handleLayerItemClick}
       visibleSubLayers={visibleSubLayers}
       expandableSection={
-        layer.get("layerInfo").hideExpandArrow !== true && (
+        layerInfo.hideExpandArrow !== true && (
           <Box>
             <IconButton
               sx={{
@@ -293,13 +309,14 @@ export default function GroupLayer({
       subLayersSection={
         <Collapse in={showSublayers} unmountOnExit>
           <Box sx={{ marginLeft: 3 }}>
-            {layer.subLayers.map((subLayer, index) => (
+            {subLayers.map((subLayer, index) => (
               <SubLayerItem
                 display={showSublayer(subLayer) ? "block" : "none"}
                 key={subLayer}
                 subLayer={subLayer}
                 subLayerIndex={index}
-                layer={layer}
+                layerId={layerConfig.layerId}
+                layersInfo={layerConfig.layerInfo.layersInfo}
                 toggleable={toggleable}
                 globalObserver={globalObserver}
                 visible={visibleSubLayers.some((s) => s === subLayer)}

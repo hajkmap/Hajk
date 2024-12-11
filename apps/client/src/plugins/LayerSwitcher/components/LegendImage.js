@@ -1,21 +1,7 @@
 import { Collapse } from "@mui/material";
 
-export default function LegendImage({
-  layerItemDetails,
-  layerInfo,
-  open,
-  subLayerIndex,
-}) {
-  const layerInfoObj =
-    layerItemDetails?.layer?.get("layerInfo") || layerInfo || {};
-  const index = subLayerIndex ? subLayerIndex : 0;
-
-  // Check if layerInfo.legend is an array and has the required index
-  const src =
-    Array.isArray(layerInfoObj.legend) && layerInfoObj.legend.length > index
-      ? layerInfoObj.legend[index].url || ""
-      : "";
-
+// TODO Handle collapse state inside this component
+export default function LegendImage({ open, src }) {
   return src ? (
     <Collapse
       sx={{ pt: open ? 1 : 0, ml: 4 }}

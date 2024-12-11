@@ -189,7 +189,7 @@ export default function LayerItem({
   };
 
   const layerIsSemiToggled =
-    layerType === "group" && visibleSubLayers.length !== numberOfSubLayers
+    layerType === "group" && visibleSubLayers.length !== numberOfSubLayers;
 
   const layerIsVisibleAtZoom =
     mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;
@@ -352,9 +352,9 @@ export default function LayerItem({
       </Box>
       {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
         <LegendImage
-          layerInfo={layerInfo}
+          comment="TODO Fix the mess below"
+          src={Array.isArray(layerInfo.legend) && layerInfo.legend[0]?.url}
           open={legendIsActive}
-          subLayerIndex={null}
         ></LegendImage>
       )}
       {subLayersSection && subLayersSection}
