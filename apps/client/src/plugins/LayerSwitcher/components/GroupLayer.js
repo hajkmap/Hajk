@@ -13,6 +13,8 @@ import { useMapZoom } from "../LayerSwitcherProvider";
 
 export default function GroupLayer({
   layer,
+  layerState,
+  layerConfig,
   globalObserver,
   localObserver,
   toggleable,
@@ -236,10 +238,28 @@ export default function GroupLayer({
   const layerIsVisibleAtZoom =
     mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;
 
+  // const layerState = {
+  //   layerIsToggled: layer.get("visible"),
+  // };
+
+  // const layerConfig = {
+  //   layerId: layer.get("name"),
+  //   layerCaption: layer.get("caption"),
+  //   layerType: layer.get("layerType"),
+
+  //   layerIsFakeMapLayer: layer.isFakeMapLayer,
+  //   layerMinZoom: layer.get("minZoom"),
+  //   layerMaxZoom: layer.get("maxZoom"),
+  //   numberOfSubLayers: layer.subLayers.length,
+  //   layerInfo: layer.get("layerInfo"),
+  //   layerLegendIcon: layer.get("legendIcon"),
+  // };
+
   return (
     <LayerItem
       display={display}
-      layer={layer}
+      layerState={layerState}
+      layerConfig={layerConfig}
       globalObserver={globalObserver}
       showSublayers={showSublayers}
       draggable={draggable}

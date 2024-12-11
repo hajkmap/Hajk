@@ -48,9 +48,9 @@ export default function BackgroundLayerItem({
 
   // Show layer details action
   const showLayerDetails = useCallback(
-    (e, specificLayer = layer) => {
+    (e) => {
       e.stopPropagation();
-      globalObserver.publish("setLayerDetails", { layer: specificLayer });
+      globalObserver.publish("setLayerDetails", { layerId: layer.get("name") });
     },
     [globalObserver, layer]
   );

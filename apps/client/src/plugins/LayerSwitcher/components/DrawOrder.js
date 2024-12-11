@@ -261,6 +261,23 @@ function DrawOrder({ display, app, map, localObserver, options }) {
             ) {
               return null;
             } else {
+              const layerState = {
+                layerIsToggled: l.get("visible"),
+              };
+
+              const layerConfig = {
+                layerId: l.get("name"),
+                layerCaption: l.get("caption"),
+                layerType: l.get("layerType"),
+
+                layerIsFakeMapLayer: l.isFakeMapLayer,
+                layerMinZoom: l.get("minZoom"),
+                layerMaxZoom: l.get("maxZoom"),
+                numberOfSubLayers: l.subLayers.length,
+                layerInfo: l.get("layerInfo"),
+                layerLegendIcon: l.get("legendIcon"),
+              };
+
               return (
                 <Draggable key={"draggable" + l.ol_uid}>
                   {l.get("layerType") === "base" ? (
@@ -275,6 +292,8 @@ function DrawOrder({ display, app, map, localObserver, options }) {
                     <GroupLayer
                       key={l.ol_uid}
                       layer={l}
+                      layerState={layerState}
+                      layerConfig={layerConfig}
                       globalObserver={app.globalObserver}
                       localObserver={localObserver}
                       toggleable={false}
@@ -283,7 +302,8 @@ function DrawOrder({ display, app, map, localObserver, options }) {
                   ) : (
                     <LayerItem
                       key={l.ol_uid}
-                      layer={l}
+                      layerState={layerState}
+                      layerConfig={layerConfig}
                       draggable={true}
                       toggleable={false}
                       globalObserver={app.globalObserver}

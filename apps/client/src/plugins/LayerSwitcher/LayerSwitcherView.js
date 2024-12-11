@@ -316,9 +316,19 @@ class LayersSwitcherView extends React.PureComponent {
       }
     });
 
-    props.app.globalObserver.subscribe("setLayerDetails", (details) => {
-      if (details) {
+    props.app.globalObserver.subscribe("setLayerDetails", (payload) => {
+      if (payload) {
+        const layerId = payload.layerId;
+        if (!layerId) {
+          return;
+        }
+        const layer = this.olLayerMap[layerId];
+
         // Set scroll position state when layer details is opened
+        const details = {
+          layer,
+          subLayerIndex: payload.subLayerIndex,
+        };
         const currentScrollPosition = this.getScrollPosition();
         this.setState((prevState) => ({
           layerItemDetails: details,

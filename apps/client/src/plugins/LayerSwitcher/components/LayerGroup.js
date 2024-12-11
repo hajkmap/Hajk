@@ -391,11 +391,30 @@ const LayerGroup = ({
             return null;
           }
 
+          const layerState = {
+            layerIsToggled: mapLayer.get("visible"),
+          };
+
+          const layerConfig = {
+            layerId: mapLayer.get("name"),
+            layerCaption: mapLayer.get("caption"),
+            layerType: mapLayer.get("layerType"),
+
+            layerIsFakeMapLayer: mapLayer.isFakeMapLayer,
+            layerMinZoom: mapLayer.get("minZoom"),
+            layerMaxZoom: mapLayer.get("maxZoom"),
+            numberOfSubLayers: mapLayer.subLayers.length,
+            layerInfo: mapLayer.get("layerInfo"),
+            layerLegendIcon: mapLayer.get("legendIcon"),
+          };
+
           return mapLayer.get("layerType") === "group" ? (
             <GroupLayer
               display={!layer.isFiltered ? "none" : "block"}
               key={mapLayer.get("name")}
               layer={mapLayer}
+              layerState={layerState}
+              layerConfig={layerConfig}
               draggable={false}
               toggleable={true}
               globalObserver={globalObserver}
@@ -406,7 +425,8 @@ const LayerGroup = ({
             <LayerItem
               display={!layer.isFiltered ? "none" : "block"}
               key={mapLayer.get("name")}
-              layer={mapLayer}
+              layerState={layerState}
+              layerConfig={layerConfig}
               draggable={false}
               toggleable={true}
               globalObserver={globalObserver}

@@ -1,13 +1,19 @@
 import { Collapse } from "@mui/material";
 
-export default function LegendImage({ layerItemDetails, open, subLayerIndex }) {
-  const layerInfo = layerItemDetails.layer.get("layerInfo") || {};
+export default function LegendImage({
+  layerItemDetails,
+  layerInfo,
+  open,
+  subLayerIndex,
+}) {
+  const layerInfoObj =
+    layerItemDetails?.layer?.get("layerInfo") || layerInfo || {};
   const index = subLayerIndex ? subLayerIndex : 0;
 
   // Check if layerInfo.legend is an array and has the required index
   const src =
-    Array.isArray(layerInfo.legend) && layerInfo.legend.length > index
-      ? layerInfo.legend[index].url || ""
+    Array.isArray(layerInfoObj.legend) && layerInfoObj.legend.length > index
+      ? layerInfoObj.legend[index].url || ""
       : "";
 
   return src ? (

@@ -26,6 +26,7 @@ import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
 
 import { useMapZoom } from "../LayerSwitcherProvider";
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
 const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
   if (!isToggled) {
@@ -106,7 +107,8 @@ const LayerLegendIcon = ({
 };
 
 export default function LayerItem({
-  layer,
+  layerState,
+  layerConfig,
   clickCallback,
   draggable,
   toggleable,
@@ -125,10 +127,22 @@ export default function LayerItem({
   const theme = useTheme();
   const mapZoom = useMapZoom();
 
-  const layerId = layer.get("name");
-  const layerCaption = layer.get("caption");
-  const layerType = layer.get("layerType");
-  const layerIsFakeMapLayer = layer.isFakeMapLayer;
+  const { layerIsToggled } = layerState;
+
+  const {
+    layerId,
+    layerCaption,
+    layerType,
+
+    layerIsFakeMapLayer,
+    layerMinZoom,
+    layerMaxZoom,
+    numberOfSubLayers,
+    layerInfo,
+    layerLegendIcon,
+  } = layerConfig;
+
+  const legendIcon = layerInfo?.legendIcon || layerLegendIcon;
 
   useEffect(() => {
     const handleLoadStatusChange = (d) => {
@@ -151,6 +165,8 @@ export default function LayerItem({
       );
   }, [globalObserver, layerId, wmsLayerLoadStatus]);
 
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
+
   // Handles list item click
   const handleLayerItemClick = (e) => {
     // If a clickCallback is defined, call it.
@@ -166,22 +182,15 @@ export default function LayerItem({
     }
 
     // Toggle visibility for non-system layers
+    // This check is technically redundant now but left for clarity
     if (layerType !== "system") {
-      // This check is technically redundant now but left for clarity
-      layer.set("visible", !layer.get("visible"));
-      // TODO Use dispatcher
+      layerSwitcherDispatch.setLayerVisibility(layerId, !layerIsToggled);
     }
   };
 
-  const layerInfo = layer.get("layerInfo");
-  const legendIcon = layerInfo?.legendIcon || layer.get("legendIcon");
-
-  const layerIsToggled = layer.get("visible");
   const layerIsSemiToggled =
-    layerType === "group" && visibleSubLayers.length !== layer.subLayers.length;
+    layerType === "group" && visibleSubLayers.length !== numberOfSubLayers
 
-  const layerMinZoom = layer.get("minZoom");
-  const layerMaxZoom = layer.get("maxZoom");
   const layerIsVisibleAtZoom =
     mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;
 
@@ -212,9 +221,9 @@ export default function LayerItem({
   };
 
   // Show layer details action
-  const showLayerDetails = (e, specificLayer = layer) => {
+  const showLayerDetails = (e) => {
     e.stopPropagation();
-    globalObserver.publish("setLayerDetails", { layer: specificLayer });
+    globalObserver.publish("setLayerDetails", { layerId });
   };
 
   const drawOrderItem = () => {
@@ -343,7 +352,7 @@ export default function LayerItem({
       </Box>
       {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
         <LegendImage
-          layerItemDetails={{ layer: layer }}
+          layerInfo={layerInfo}
           open={legendIsActive}
           subLayerIndex={null}
         ></LegendImage>

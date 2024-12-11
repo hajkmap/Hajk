@@ -46,7 +46,7 @@ export default function SubLayerItem({
   const showLayerDetails = (e) => {
     e.stopPropagation();
     globalObserver.publish("setLayerDetails", {
-      layer: layer,
+      layerId: layer.get("name"),
       subLayerIndex: subLayerIndex,
     });
   };

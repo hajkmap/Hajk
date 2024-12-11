@@ -95,6 +95,23 @@ export default function QuickAccessLayers({
       }}
     >
       {quickAccessLayers.map((l) => {
+        const layerState = {
+          layerIsToggled: l.get("visible"),
+        };
+
+        const layerConfig = {
+          layerId: l.get("name"),
+          layerCaption: l.get("caption"),
+          layerType: l.get("layerType"),
+
+          layerIsFakeMapLayer: l.isFakeMapLayer,
+          layerMinZoom: l.get("minZoom"),
+          layerMaxZoom: l.get("maxZoom"),
+          numberOfSubLayers: l.subLayers.length,
+          layerInfo: l.get("layerInfo"),
+          layerLegendIcon: l.get("legendIcon"),
+        };
+
         return l.get("layerType") === "base" ? (
           <BackgroundLayer
             key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
@@ -107,6 +124,8 @@ export default function QuickAccessLayers({
           <GroupLayer
             key={l.ol_uid}
             layer={l}
+            layerState={layerState}
+            layerConfig={layerConfig}
             globalObserver={globalObserver}
             localObserver={localObserver}
             toggleable={true}
@@ -117,7 +136,8 @@ export default function QuickAccessLayers({
         ) : (
           <LayerItem
             key={l.ol_uid}
-            layer={l}
+            layerState={layerState}
+            layerConfig={layerConfig}
             draggable={false}
             toggleable={true}
             globalObserver={globalObserver}
