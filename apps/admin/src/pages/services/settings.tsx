@@ -4,11 +4,9 @@ import { useTranslation, Trans } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { FieldValues } from "react-hook-form";
 import {
-  Box,
   useTheme,
   Button,
   TextField,
-  Typography,
   Select,
   MenuItem,
   InputLabel,
@@ -32,8 +30,9 @@ import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 import DialogWrapper from "../../components/flexible-dialog";
 import LayersGrid from "./layers-grid";
-import CircularProgress from "../../components/progress/circular-progress";
 import { toast } from "react-toastify";
+
+import FormActionPanel from "../../components/form-action-panel";
 
 export default function ServiceSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -81,6 +80,7 @@ export default function ServiceSettings() {
       formRef.current.requestSubmit();
     }
   };
+
   const handleUpdateService = async (serviceData: ServiceUpdateFormData) => {
     try {
       const payload = {
@@ -332,79 +332,26 @@ export default function ServiceSettings() {
 
   return (
     <Page title={t("common.settings")}>
-      <Box
-        sx={{
-          alignItems: "flex-start",
-          gap: 3,
-          width: "100%",
-        }}
+      <FormActionPanel
+        updateStatus={updateStatus}
+        deleteStatus={deleteStatus}
+        onUpdate={handleExternalSubmit}
+        onDelete={handleDeleteService}
+        lastSavedBy="Anonym"
+        lastSavedDate="2023-04-11 13:37"
+        saveButtonText="Spara"
+        deleteButtonText="Ta bort"
       >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            textAlign: "center",
-            float: "right",
-            gap: 2,
-            p: 2,
-            ml: 3,
-            mb: 2,
-            border: "1px solid",
-            borderColor: palette.grey[300],
-            borderRadius: 3,
-            maxWidth: "200px",
-          }}
-        >
-          <Button
-            onClick={handleExternalSubmit}
-            variant="contained"
-            disabled={updateStatus === "pending" || deleteStatus === "pending"}
-          >
-            {updateStatus === "pending" ? (
-              <CircularProgress color="primary" size={30} />
-            ) : (
-              t("services.dialog.saveBtn")
-            )}
-          </Button>
-
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              void handleDeleteService();
-              void navigate("/services");
-            }}
-            disabled={deleteStatus === "pending" || updateStatus === "pending"}
-            variant="text"
-          >
-            {t("services.dialog.deleteBtn")}
-          </Button>
-
-          <Typography variant="body1">
-            Senast sparad av Anonym den 2023-04-11 13:37
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
-        >
-          <form ref={formRef} onSubmit={onSubmit}>
-            <FormRenderer
-              data={formServiceData}
-              register={register}
-              control={control}
-              errors={errors}
-            />
-            <LayersGrid
-              baseUrl={service?.url ?? ""}
-              type={service?.type ?? ""}
-            />
-          </form>
-        </Box>
-      </Box>
+        <form ref={formRef} onSubmit={onSubmit}>
+          <FormRenderer
+            data={formServiceData}
+            register={register}
+            control={control}
+            errors={errors}
+          />
+          <LayersGrid baseUrl={service?.url ?? ""} type={service?.type ?? ""} />
+        </form>
+      </FormActionPanel>
       <DialogWrapper
         fullWidth
         open={isDialogOpen}
