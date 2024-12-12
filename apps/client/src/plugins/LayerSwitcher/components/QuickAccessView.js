@@ -51,8 +51,6 @@ const QuickAccessView = ({
   const qaLayers = Object.values(layersState).filter((obj) => obj.quickAccess);
   const hasVisibleLayers = qaLayers.some((l) => l.visible);
 
-  console.log(qaLayers);
-
   const [quickAccessSectionExpanded, setQuickAccessSectionExpanded] =
     useState(false);
 

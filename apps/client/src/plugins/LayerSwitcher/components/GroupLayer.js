@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Box, Collapse, IconButton } from "@mui/material";
 
@@ -15,6 +15,7 @@ import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 export default function GroupLayer({
   // TODO Remove OL Layer
   layer,
+  groupLayer,
   layerState,
   layerConfig,
   globalObserver,
@@ -23,7 +24,6 @@ export default function GroupLayer({
   draggable,
   // quickAccessLayer,
   display,
-  groupLayer,
 }) {
   const subLayers = layer.subLayers;
   const filterSubLayers = groupLayer?.subLayers;
@@ -46,6 +46,7 @@ export default function GroupLayer({
   useEffect(() => {
     layer.set("allSubLayers", subLayers);
     // This is a `onMount` should be empty deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keep the subLayers area active in state
@@ -156,7 +157,7 @@ export default function GroupLayer({
           <Box sx={{ marginLeft: 3 }}>
             {subLayers.map((subLayer, index) => (
               <SubLayerItem
-                display={showSublayer(subLayer) ? "block" : "none"}
+                style={{ displaye: showSublayer(subLayer) ? "block" : "none" }}
                 key={subLayer}
                 subLayer={subLayer}
                 subLayerIndex={index}

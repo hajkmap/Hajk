@@ -5,6 +5,7 @@ import React, {
   useRef,
   useSyncExternalStore,
   useState,
+  useMemo,
 } from "react";
 
 import LayerSwitcherView from "./LayerSwitcherView.js";
@@ -254,7 +255,8 @@ const buildLayerTree = (groups, olLayerMap) =>
 
     return {
       id: group.id,
-      // name: olLayerMap[group.id]?.get("caption") ?? group.name,
+      name: olLayerMap[group.id]?.get("caption") ?? group.name,
+      subLayers: olLayerMap[group.id]?.get("subLayers"),
       children: children?.length === 0 ? undefined : children,
     };
   });
@@ -267,14 +269,21 @@ const LayerSwitcherProvider = ({
   options,
   windowVisible,
 }) => {
-  // const olLayerMap = map
-  //   .getLayers()
-  //   .getArray()
-  //   .reduce((a, b) => {
-  //     a[b.get("name")] = b;
-  //     return a;
-  //   }, {});
-  // const layerTreeData = buildLayerTree(options.groups, olLayerMap);
+  const olLayerMap = useRef(
+    map
+      .getLayers()
+      .getArray()
+      .reduce((a, b) => {
+        a[b.get("name")] = b;
+        return a;
+      }, {})
+  );
+
+  const layerTreeData = useMemo(
+    () => buildLayerTree(options.groups, olLayerMap.current),
+    [options]
+  );
+  useEffect(() => console.log(layerTreeData), [layerTreeData]);
 
   const olState = useSyncExternalStore(
     (callback) => {
@@ -310,7 +319,7 @@ const LayerSwitcherProvider = ({
               caption: l.get("caption"),
               visible: l.get("visible"),
               quickAccess: l.get("quickAccess"),
-              // subLayers: l.get("subLayers"),
+              visibleSubLayers: l.get("subLayers"),
               // zIndex: l.get("zIndex"),
             };
             return a;
@@ -326,27 +335,27 @@ const LayerSwitcherProvider = ({
   );
   // console.log(olState);
 
-  useEffect(() => {
-    const fn = (l) => (e) => {
-      // TODO
-      console.log("layer:change", l.get("caption"), e);
-    };
+  // useEffect(() => {
+  //   const fn = (l) => (e) => {
+  //     // TODO
+  //     console.log("layer:change", l.get("caption"), e);
+  //   };
 
-    const listeners = map.getAllLayers().map((l) => {
-      const layerFn = fn(l);
-      l.on("propertychange", layerFn);
-      return layerFn;
-    });
+  //   const listeners = map.getAllLayers().map((l) => {
+  //     const layerFn = fn(l);
+  //     l.on("propertychange", layerFn);
+  //     return layerFn;
+  //   });
 
-    return () => {
-      map.getAllLayers().forEach((l, i) => {
-        const fn = listeners[i];
-        if (fn) {
-          l.un("propertychange", fn);
-        }
-      });
-    };
-  }, [map]);
+  //   return () => {
+  //     map.getAllLayers().forEach((l, i) => {
+  //       const fn = listeners[i];
+  //       if (fn) {
+  //         l.un("propertychange", fn);
+  //       }
+  //     });
+  //   };
+  // }, [map]);
 
   const dispatcher = useRef(createDispatch(map));
 
@@ -366,6 +375,7 @@ const LayerSwitcherProvider = ({
             options={options}
             windowVisible={windowVisible}
             layersState={olState}
+            staticLayerTree={layerTreeData}
           />
         </LayerZoomVisibleSnackbarProvider>
       </MapZoomProvider>

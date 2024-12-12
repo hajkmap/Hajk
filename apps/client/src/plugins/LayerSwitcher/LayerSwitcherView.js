@@ -276,6 +276,8 @@ class LayersSwitcherView extends React.PureComponent {
 
     this.layerMap = buildLayerMap(this.options.groups, this.olLayerMap);
 
+    this.staticLayerTree = this.props.staticLayerTree;
+
     // console.log(this.layerTreeData);
     // console.log(this.layerMap);
     // console.log(this.olLayerMap);
@@ -679,6 +681,10 @@ class LayersSwitcherView extends React.PureComponent {
             {this.state.treeData.map((group, i) => (
               <LayerGroup
                 key={i}
+                staticGroupTree={this.staticLayerTree.find(
+                  (g) => g.id === group.id
+                )}
+                layersState={layersState}
                 group={group}
                 localObserver={this.localObserver}
                 layerMap={this.olLayerMap}

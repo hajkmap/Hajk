@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import LayerItem from "./LayerItem";
 import GroupLayer from "./GroupLayer";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
@@ -126,6 +126,20 @@ const GroupInfoToggler = ({
   );
 };
 
+const getAllLayerIdsInGroup = (group) => {
+  if (!group) {
+    return [];
+  }
+
+  if (!group.children) {
+    return [group.id];
+  } else {
+    return group.children.flatMap((c) => {
+      return getAllLayerIdsInGroup(c);
+    });
+  }
+};
+
 const LayerGroup = ({
   app,
   group,
@@ -133,6 +147,8 @@ const LayerGroup = ({
   localObserver,
   layerMap,
   options,
+  staticGroupTree,
+  layersState,
 }) => {
   const { name, groups } = group;
 
@@ -145,120 +161,38 @@ const LayerGroup = ({
 
   const [infoVisible, setInfoVisible] = useState(false);
 
+  const allLeafLayersInGroup = getAllLayerIdsInGroup(staticGroupTree);
+
+  const hasVisibleLayer = allLeafLayersInGroup.some(
+    (id) => layersState[id]?.visible
+  );
+  const hasAllLayersVisible = allLeafLayersInGroup.every(
+    (id) => layersState[id]?.visible
+  );
+
+  const isToggled = hasAllLayersVisible;
+  const isSemiToggled = hasVisibleLayer && !hasAllLayersVisible;
+
+  // console.log({
+  //   n: group.name,
+  //   ids: allLeafLayersInGroup,
+  //   static: staticGroupTree,
+  //   has: hasVisibleLayer,
+  //   all: hasAllLayersVisible,
+  // });
+
   // Openlayers functions does not use any of our props, so this is safe
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const allLayers = useRef(app.getMap().getAllLayers(), [app]);
 
-  useEffect(() => {
-    bindVisibleChangeForLayersInGroup();
-    return () => {
-      //LayerGroup is never unmounted atm but we remove listener in case this
-      //changes in the future
-      unbindVisibleChangeForLayersInGroup();
-    };
-    // This useEffect corresponds to `componentDidMount` in the previous
-    // version. It should never re-run.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // const hasLayers = (group) => {
+  //   return group.layers && group.layers?.length > 0;
+  // };
 
-  // TODO This is a workaround for this component until we change the
-  // LayerSwitcher state model. Re-render whenever any layer in the group
-  // changes.
-  // We force update when a layer in this group has changed visibility to
-  // be able to sync togglebuttons in GUI
-  // eslint-disable-next-line no-unused-vars
-  const [_, forceUpdate] = useState(false);
-  const layerVisibilityChanged = (_) => {
-    forceUpdate((v) => v + 1);
-    // setExpanded(expanded);
-  };
+  // const hasSubGroups = (group) => {
+  //   return group.groups && group.groups?.length > 0;
+  // };
 
-  const hasLayers = (group) => {
-    return group.layers && group.layers?.length > 0;
-  };
-
-  const hasSubGroups = (group) => {
-    return group.groups && group.groups?.length > 0;
-  };
-
-  const getAllLayersInGroupAndSubGroups = (groups) => {
-    return groups.reduce((layers, group) => {
-      if (hasSubGroups(group)) {
-        layers = [...layers, ...getAllLayersInGroupAndSubGroups(group.groups)];
-      }
-      return [...layers, ...group.layers];
-    }, []);
-  };
-
-  const getAllMapLayersReferencedByGroup = () => {
-    const allLayersInGroup = getAllLayersInGroupAndSubGroups([group]);
-    return app
-      .getMap()
-      .getLayers()
-      .getArray()
-      .filter((mapLayer) => {
-        return allLayersInGroup.find((layer) => {
-          return layer.id === mapLayer.get("name");
-        });
-      });
-  };
-
-  const bindVisibleChangeForLayersInGroup = () => {
-    getAllMapLayersReferencedByGroup().forEach((layer) => {
-      layer.on("change:visible", layerVisibilityChanged);
-    });
-  };
-
-  const unbindVisibleChangeForLayersInGroup = () => {
-    getAllMapLayersReferencedByGroup().forEach((layer) => {
-      layer.un("change:visible", layerVisibilityChanged);
-    });
-  };
-
-  const layerInMap = (layer) => {
-    const layers = app.getMap().getLayers().getArray();
-    let foundMapLayer = layers.find((mapLayer) => {
-      return mapLayer.get("name") === layer.id;
-    });
-
-    if (foundMapLayer && foundMapLayer.getVisible()) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  const areSubGroupsAndLayersSemiToggled = (group) => {
-    let someSubItemToggled = false;
-    if (hasLayers(group)) {
-      someSubItemToggled = group.layers.some((layer) => {
-        return layerInMap(layer);
-      });
-    }
-
-    if (hasSubGroups(group) && !someSubItemToggled) {
-      someSubItemToggled = group.groups.some((g) => {
-        return areSubGroupsAndLayersSemiToggled(g);
-      });
-    }
-    return someSubItemToggled;
-  };
-
-  const areAllGroupsAndSubGroupsToggled = (group) => {
-    let allGroupsToggled = true;
-    let allLayersToggled = true;
-    if (hasSubGroups(group)) {
-      allGroupsToggled = group.groups.every((g) => {
-        return areAllGroupsAndSubGroupsToggled(g);
-      });
-    }
-    if (hasLayers(group)) {
-      allLayersToggled = group.layers.every((layer) => {
-        return layerInMap(layer);
-      });
-    }
-    return allGroupsToggled && allLayersToggled;
-  };
   /**
    * @summary Loops through groups of objects and changes visibility for all layers within group.
    *
@@ -319,8 +253,6 @@ const LayerGroup = ({
     groupsExpanded = groups[0].id;
   }
 
-  const isToggled = areAllGroupsAndSubGroupsToggled(group);
-  const isSemiToggled = areSubGroupsAndLayersSemiToggled(group);
   const toggleState = isToggled
     ? "checked"
     : isSemiToggled
@@ -392,8 +324,10 @@ const LayerGroup = ({
           }
 
           const layerState = {
-            layerIsToggled: mapLayer.get("visible"),
-            visibleSubLayers: mapLayer.get("subLayers"),
+            // layerIsToggled: mapLayer.get("visible"),
+            layerIsToggled: layersState[layer.id]?.visible,
+            // visibleSubLayers: mapLayer.get("subLayers"),
+            visibleSubLayers: layersState[layer.id]?.visibleSubLayers,
           };
 
           const layerConfig = {
@@ -444,6 +378,10 @@ const LayerGroup = ({
             app={app}
             globalObserver={globalObserver}
             options={options}
+            staticGroupTree={staticGroupTree.children?.find(
+              (g) => g.id === group.id
+            )}
+            layersState={layersState}
           />
         ))}
       </div>
