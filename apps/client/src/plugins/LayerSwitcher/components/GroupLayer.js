@@ -19,10 +19,8 @@ export default function GroupLayer({
   layerState,
   layerConfig,
   globalObserver,
-  // localObserver,
   toggleable,
   draggable,
-  // quickAccessLayer,
   display,
 }) {
   const subLayers = layer.subLayers;
@@ -92,22 +90,6 @@ export default function GroupLayer({
   const layerIsVisibleAtZoom =
     mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;
 
-  // const layerState = {
-  //   layerIsToggled: layer.get("visible"),
-  // };
-
-  // const layerConfig = {
-  //   layerId: layer.get("name"),
-  //   layerCaption: layer.get("caption"),
-  //   layerType: layer.get("layerType"),
-
-  //   layerIsFakeMapLayer: layer.isFakeMapLayer,
-  //   layerMinZoom: layer.get("minZoom"),
-  //   layerMaxZoom: layer.get("maxZoom"),
-  //   numberOfSubLayers: layer.subLayers.length,
-  //   layerInfo: layer.get("layerInfo"),
-  //   layerLegendIcon: layer.get("legendIcon"),
-  // };
   return (
     <LayerItem
       display={display}

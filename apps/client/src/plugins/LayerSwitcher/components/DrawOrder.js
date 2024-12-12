@@ -296,7 +296,6 @@ function DrawOrder({ display, app, map, localObserver, options }) {
                       layerState={layerState}
                       layerConfig={layerConfig}
                       globalObserver={app.globalObserver}
-                      localObserver={localObserver}
                       toggleable={false}
                       draggable={true}
                     />

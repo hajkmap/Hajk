@@ -50,27 +50,24 @@ export const useLayerZoomWarningSnackbar = (
 
   // TODO Move to higher order component
   // TODO Sublayers
-  // TODO Hide snackbar if zoom such that the layer is visible again
   useEffect(() => {
     if (layerUsesMinMaxZoom(layerMinZoom, layerMaxZoom)) {
       // show warning on layer toggle
       if (toggled !== prevToggled) {
-        if (visible) {
+        if (toggled && !visible) {
+          addToSnackbar(layerId, caption);
+        } else if (!toggled) {
           removeFromSnackbar(layerId, caption);
-        } else {
-          if (toggled) {
-            addToSnackbar(layerId, caption);
-          }
         }
         setPrevToggled(toggled);
       }
 
       // Show warning on zoom in/out
       if (visible !== prevVisible) {
-        if (visible) {
+        if (visible || !toggled) {
           removeFromSnackbar(layerId, caption);
         } else {
-          if (!minMaxZoomAlertOnToggleOnly) {
+          if (toggled && !minMaxZoomAlertOnToggleOnly) {
             addToSnackbar(layerId, caption);
           }
         }

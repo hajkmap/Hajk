@@ -8,9 +8,7 @@ import { Box } from "@mui/material";
 export default function QuickAccessLayers({
   globalObserver,
   map,
-  localObserver,
   filterValue,
-  treeData,
 }) {
   // State that contains the layers that are currently visible
   const [quickAccessLayers, setQuickAccessLayers] = useState([]);
@@ -128,10 +126,8 @@ export default function QuickAccessLayers({
             layerState={layerState}
             layerConfig={layerConfig}
             globalObserver={globalObserver}
-            localObserver={localObserver}
             toggleable={true}
             draggable={false}
-            quickAccessLayer={true}
           ></GroupLayer>
         ) : (
           <LayerItem

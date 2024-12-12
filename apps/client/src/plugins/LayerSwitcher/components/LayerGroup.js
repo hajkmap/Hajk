@@ -144,12 +144,9 @@ const getAllLayerIdsInGroup = (group) => {
 };
 
 const LayerGroup = ({
-  app,
   group,
   globalObserver,
-  localObserver,
   layerMap,
-  options,
   staticGroupTree,
   staticLayerConfig,
   layersState,
@@ -263,6 +260,8 @@ const LayerGroup = ({
             visibleSubLayers: layersState[layer.id]?.visibleSubLayers,
           };
 
+          const layerSettings = staticLayerConfig[layer.id];
+
           // TODO Get config from static and send to layeritem/grouplayer
           const layerConfig = {
             layerId: mapLayer.get("name"),
@@ -287,7 +286,6 @@ const LayerGroup = ({
               draggable={false}
               toggleable={true}
               globalObserver={globalObserver}
-              localObserver={localObserver}
               groupLayer={layer}
             />
           ) : (
@@ -307,11 +305,8 @@ const LayerGroup = ({
             expanded={groupsExpanded === group.id}
             key={i}
             group={group}
-            localObserver={localObserver}
             layerMap={layerMap}
-            app={app}
             globalObserver={globalObserver}
-            options={options}
             staticLayerConfig={staticLayerConfig}
             staticGroupTree={staticGroupTree.children?.find(
               (g) => g.id === group.id

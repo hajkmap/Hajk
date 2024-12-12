@@ -28,7 +28,6 @@ const QuickAccessView = ({
   show,
   map, // A OpenLayers map instance
   app,
-  localObserver,
   globalObserver,
   enableQuickAccessPresets, // : boolean
   enableUserQuickAccessFavorites,
@@ -36,7 +35,6 @@ const QuickAccessView = ({
   favoritesViewDisplay,
   handleFavoritesViewToggle,
   favoritesInfoText,
-  treeData,
   filterValue,
   enqueueSnackbar,
   layersState,
@@ -170,9 +168,7 @@ const QuickAccessView = ({
       <Collapse in={quickAccessSectionExpanded}>
         <Box sx={{ marginLeft: "31px" }}>
           <QuickAccessLayers
-            treeData={treeData}
             filterValue={filterValue}
-            localObserver={localObserver}
             map={map}
             globalObserver={globalObserver}
           ></QuickAccessLayers>

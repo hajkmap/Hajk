@@ -227,33 +227,12 @@ class LayersSwitcherView extends React.PureComponent {
     this.staticLayerConfig = this.props.staticLayerConfig;
     this.staticLayerTree = this.props.staticLayerTree;
 
-    // this.backgroundLayerMap = Object.fromEntries(
-    //   Object.entries(this.layerMap).filter(([_, v]) => v.layerType !== "base")
-    // );
-
     this.backgroundLayerMap = this.baseLayers.map((l) => ({
       id: l["name"],
       name: l["caption"],
       visible: l["visible"],
       zIndex: l["zIndex"],
     }));
-
-    // TODO Unsubscribe
-    // props.map.getAllLayers().forEach((l) => {
-    //   l.on("propertychange", (e) => {
-    //     this.setState({
-    //       layerMap: buildLayerMap(this.options.groups, this.olLayerMap),
-    //     });
-
-    //     console.log(
-    //       "layer:change",
-    //       l.get("caption"),
-    //       e,
-    //       getOlLayerInfo(e.target),
-    //       this.layerMap
-    //     );
-    //   });
-    // });
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
@@ -291,29 +270,6 @@ class LayersSwitcherView extends React.PureComponent {
         });
       }
     });
-
-    // TODO This is a work around for showing/hideing group layers which are
-    // collapsed. It's also the GroupLayer component that listens for this.
-    // That should be refactored.
-    // TODO Unsubscribe
-    this.localHideLayerSubscription = this.localObserver.subscribe(
-      "hideLayer",
-      (la) => {
-        // TODO Make sure QuickAccess updates
-        // Send some event
-        la.setVisible(false);
-        // this.setState({ treeData: [...this.layerTree] });
-      }
-    );
-    this.localShowLayerSubscription = this.localObserver.subscribe(
-      "showLayer",
-      (la) => {
-        la.setVisible(true);
-        // TODO Make sure QuickAccess updates
-        // Send some event
-        // this.setState({ treeData: [...this.layerTree] });
-      }
-    );
   }
 
   // Handles click on Layerpackage button and backbutton
@@ -603,7 +559,6 @@ class LayersSwitcherView extends React.PureComponent {
               show={this.props.options.showQuickAccess}
               map={this.props.map}
               app={this.props.app}
-              localObserver={this.localObserver}
               globalObserver={this.globalObserver}
               enableQuickAccessPresets={
                 this.props.options.enableQuickAccessPresets
@@ -619,7 +574,6 @@ class LayersSwitcherView extends React.PureComponent {
               }
               handleFavoritesViewToggle={this.handleFavoritesViewToggle}
               favoritesInfoText={this.options.userQuickAccessFavoritesInfoText}
-              treeData={this.state.treeData}
               filterValue={this.state.filterValue}
               layersState={layersState}
             />
@@ -632,11 +586,8 @@ class LayersSwitcherView extends React.PureComponent {
                 )}
                 layersState={layersState}
                 group={group}
-                localObserver={this.localObserver}
                 layerMap={this.olLayerMap}
-                app={this.props.app}
                 globalObserver={this.globalObserver}
-                options={this.props.options}
               />
             ))}
           </Box>
