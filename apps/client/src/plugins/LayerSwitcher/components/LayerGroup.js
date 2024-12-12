@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import LayerItem from "./LayerItem";
 import GroupLayer from "./GroupLayer";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
@@ -8,6 +8,8 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import InfoIcon from "@mui/icons-material/Info";
 import HajkToolTip from "components/HajkToolTip";
+
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
 /**
  * If Group has "toggleable" property enabled, render the toggle all checkbox.
@@ -126,6 +128,7 @@ const GroupInfoToggler = ({
   );
 };
 
+// TODO move to common file
 const getAllLayerIdsInGroup = (group) => {
   if (!group) {
     return [];
@@ -148,6 +151,7 @@ const LayerGroup = ({
   layerMap,
   options,
   staticGroupTree,
+  staticLayerConfig,
   layersState,
 }) => {
   const { name, groups } = group;
@@ -173,76 +177,7 @@ const LayerGroup = ({
   const isToggled = hasAllLayersVisible;
   const isSemiToggled = hasVisibleLayer && !hasAllLayersVisible;
 
-  // console.log({
-  //   n: group.name,
-  //   ids: allLeafLayersInGroup,
-  //   static: staticGroupTree,
-  //   has: hasVisibleLayer,
-  //   all: hasAllLayersVisible,
-  // });
-
-  // Openlayers functions does not use any of our props, so this is safe
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const allLayers = useRef(app.getMap().getAllLayers(), [app]);
-
-  // const hasLayers = (group) => {
-  //   return group.layers && group.layers?.length > 0;
-  // };
-
-  // const hasSubGroups = (group) => {
-  //   return group.groups && group.groups?.length > 0;
-  // };
-
-  /**
-   * @summary Loops through groups of objects and changes visibility for all layers within group.
-   *
-   * @param {boolean} visibility
-   * @param {array|object} groupsArray
-   * @memberof LayerGroup
-   */
-  const toggleGroups = (visibility, groupsArray) => {
-    // Sometimes groupsArray is an array of objects:
-    Array.isArray(groupsArray) &&
-      groupsArray.forEach((group) => {
-        // First call this function on all groups that might be inside this group
-        group.groups?.length &&
-          group.groups.forEach((g) => {
-            toggleGroups(visibility, g);
-          });
-
-        // Next, call toggleLayers on all layers in group
-        toggleLayers(visibility, group.layers);
-      });
-
-    // … but sometimes it's not an array but rather an object:
-    typeof groupsArray === "object" &&
-      groupsArray !== null &&
-      groupsArray.hasOwnProperty("groups") &&
-      toggleGroups(visibility, groupsArray.groups);
-
-    typeof groupsArray === "object" &&
-      groupsArray !== null &&
-      groupsArray.hasOwnProperty("layers") &&
-      toggleLayers(visibility, groupsArray.layers);
-  };
-
-  const toggleLayers = (visibility, layers) => {
-    allLayers.current
-      .filter((mapLayer) => {
-        return layers.some((layer) => layer.id === mapLayer.get("name"));
-      })
-      .forEach((mapLayer) => {
-        if (mapLayer.get("layerType") === "group") {
-          if (visibility === true) {
-            localObserver.publish("showLayer", mapLayer);
-          } else {
-            localObserver.publish("hideLayer", mapLayer);
-          }
-        } else {
-          mapLayer.setVisible(visibility);
-        }
-      });
-  };
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   const toggleInfo = () => {
     setInfoVisible(!infoVisible);
@@ -270,11 +205,9 @@ const LayerGroup = ({
           toggleState={toggleState}
           clickHandler={() => {
             if (isToggled) {
-              toggleGroups(false, group.groups);
-              toggleLayers(false, group.layers);
+              layerSwitcherDispatch.setGroupVisibility(group.id, false);
             } else {
-              toggleGroups(true, group.groups);
-              toggleLayers(true, group.layers);
+              layerSwitcherDispatch.setGroupVisibility(group.id, true);
             }
           }}
         />
@@ -330,6 +263,7 @@ const LayerGroup = ({
             visibleSubLayers: layersState[layer.id]?.visibleSubLayers,
           };
 
+          // TODO Get config from static and send to layeritem/grouplayer
           const layerConfig = {
             layerId: mapLayer.get("name"),
             layerCaption: mapLayer.get("caption"),
@@ -378,6 +312,7 @@ const LayerGroup = ({
             app={app}
             globalObserver={globalObserver}
             options={options}
+            staticLayerConfig={staticLayerConfig}
             staticGroupTree={staticGroupTree.children?.find(
               (g) => g.id === group.id
             )}

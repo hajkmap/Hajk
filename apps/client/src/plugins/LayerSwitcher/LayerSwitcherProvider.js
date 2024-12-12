@@ -113,9 +113,48 @@ const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
   }
 };
 
+// TODO move to common. Copied from LayerGroup.js
+const getAllLayerIdsInGroup = (group) => {
+  if (!group) {
+    return [];
+  }
+
+  if (!group.children) {
+    return [group.id];
+  } else {
+    return group.children.flatMap((c) => {
+      return getAllLayerIdsInGroup(c);
+    });
+  }
+};
+
+const getGroupConfigById = (tree, groupId) => {
+  if (!tree) {
+    return null;
+  }
+  if (Array.isArray(tree)) {
+    const parent = tree.find((c) => getGroupConfigById(c, groupId));
+    if (parent) {
+      return getGroupConfigById(parent, groupId);
+    }
+  }
+  if (tree.id === groupId) {
+    return tree;
+  }
+
+  if (tree.children) {
+    const parent = tree.children.find((c) => getGroupConfigById(c, groupId));
+    if (parent) {
+      return getGroupConfigById(parent, groupId);
+    }
+  } else {
+    return null;
+  }
+};
+
 // TODO Set up OSM/black/white here?
 
-const createDispatch = (map, staticLayerConfig) => {
+const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
   const olBackgroundLayers = map
     .getLayers()
     .getArray()
@@ -159,6 +198,17 @@ const createDispatch = (map, staticLayerConfig) => {
       const currentSubLayersArray = Array.from(currentSubLayers);
       olLayer.set("subLayers", currentSubLayersArray);
       setOLSubLayers(olLayer, currentSubLayersArray);
+    },
+    setGroupVisibility(groupId, visible) {
+      console.log("LS Dispatcher:", "setGroupVisibility", groupId, visible);
+
+      const groupTree = getGroupConfigById(staticLayerTree, groupId);
+      const allLayerIdsInGroup = getAllLayerIdsInGroup(groupTree);
+
+      allLayerIdsInGroup.forEach((id) => {
+        const olLayer = map.getAllLayers().find((l) => l.get("name") === id);
+        olLayer.setVisible(visible);
+      });
     },
     setGroupLayerVisibility(layerId, visible) {
       console.log("LS Dispatcher:", "setGroupLayerVisibility", layerId);
@@ -384,6 +434,9 @@ const LayerSwitcherProvider = ({
               quickAccess: l.get("quickAccess"),
               visibleSubLayers: l.get("subLayers"),
               // zIndex: l.get("zIndex"),
+              // "filterAttribute"
+              // "filterComparer"
+              // "filterValue"
             };
             return a;
           }, {});
@@ -396,31 +449,10 @@ const LayerSwitcherProvider = ({
       };
     })()
   );
-  // console.log(olState);
 
-  // useEffect(() => {
-  //   const fn = (l) => (e) => {
-  //     // TODO
-  //     console.log("layer:change", l.get("caption"), e);
-  //   };
-
-  //   const listeners = map.getAllLayers().map((l) => {
-  //     const layerFn = fn(l);
-  //     l.on("propertychange", layerFn);
-  //     return layerFn;
-  //   });
-
-  //   return () => {
-  //     map.getAllLayers().forEach((l, i) => {
-  //       const fn = listeners[i];
-  //       if (fn) {
-  //         l.un("propertychange", fn);
-  //       }
-  //     });
-  //   };
-  // }, [map]);
-
-  const dispatcher = useRef(createDispatch(map, staticLayerConfigMap));
+  const dispatcher = useRef(
+    createDispatch(map, staticLayerConfigMap, layerTreeData)
+  );
 
   return (
     <LayerSwitcherDispatchContext.Provider value={dispatcher.current}>
@@ -439,7 +471,7 @@ const LayerSwitcherProvider = ({
             windowVisible={windowVisible}
             layersState={olState}
             staticLayerTree={layerTreeData}
-            staticLayerConfigMap={staticLayerConfigMap}
+            staticLayerConfig={staticLayerConfigMap}
           />
         </LayerZoomVisibleSnackbarProvider>
       </MapZoomProvider>

@@ -790,6 +790,7 @@ class App extends React.PureComponent {
       .getArray()
       .forEach((layer) => {
         layer.on("change:visible", (e) => {
+          // console.log("change layer visible", layer.get("caption"));
           // If the Analytics object exists, let's track layer visibility
           if (this.analytics && e.target.get("visible") === true) {
             const opts = {

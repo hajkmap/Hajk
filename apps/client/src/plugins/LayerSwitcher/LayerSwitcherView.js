@@ -89,77 +89,27 @@ const BreadCrumbsContainer = ({ map, app }) => {
 //    parent: string
 //    changeIndicator: Date
 // }
-const getOlLayerInfo = (olLayer) => {
-  if (!olLayer) {
-    return null;
-  }
-  return {
-    id: olLayer.get("name"),
-    name: olLayer.get("caption"),
-    visible: olLayer.get("visible"),
-    opacity: olLayer.get("opacity"),
-    layerType: olLayer.get("layerType"),
-    quickAccess: olLayer.get("quickAccess"),
-    subLayers: olLayer.get("subLayers"),
-    layerInfo: olLayer.get("layerInfo"),
-    url: olLayer.get("url"),
-    zIndex: olLayer.get("zIndex"),
-    maxZoom: olLayer.get("maxZoom"),
-    minZoom: olLayer.get("minZoom"),
-    minMaxZoomAlertOnToggleOnly: olLayer.get("minMaxZoomAlertOnToggleOnly"),
-  };
-};
 
-const getLayerNodes = (groups, olLayerMap) =>
-  groups?.flatMap((node) => {
-    if (!node) {
-      return undefined;
-    }
-    const layers = getLayerNodes(node.layers, olLayerMap);
-    const subgroups = getLayerNodes(node.groups, olLayerMap);
-
-    const children = [...(layers ?? []), ...(subgroups ?? [])];
-
-    // A group should have both defined
-    const isGroup = !!(node.groups && node.layers);
-
-    return [
-      {
-        id: node.id,
-        name: olLayerMap[node.id]?.get("caption") ?? node.name,
-        isFiltered: true,
-        isExpanded: false,
-        expanded: node.expanded,
-        toggled: node.toggled,
-        drawOrder: node.drawOrder,
-        infobox: node.infobox,
-        isGroup,
-        layerType: isGroup ? "group" : node.layerType,
-        visible: olLayerMap[node.id]?.get("visible"),
-        quickAccess: olLayerMap[node.id]?.get("quickAccess"),
-        visibleAtStart: node.visibleAtStart,
-        visibleForGroups: node.visibleForGroups,
-        changeIndicator: new Date(),
-        infogroupvisible: node.infogroupvisible,
-        infogrouptitle: node.infogrouptitle,
-        infogrouptext: node.infogrouptext,
-        infogroupurl: node.infogroupurl,
-        infogroupurltext: node.infogroupurltext,
-        infogroupopendatalink: node.infogroupopendatalink,
-        infogroupowner: node.infofnodeowner,
-      },
-      ...(children?.length === 0 ? [] : children),
-    ];
-  });
-
-const buildLayerMap = (groups, olLayerMap) => {
-  const nodes = getLayerNodes(groups, olLayerMap);
-
-  return nodes?.reduce((a, b) => {
-    a[b.id] = b;
-    return a;
-  }, {});
-};
+// const getOlLayerInfo = (olLayer) => {
+//   if (!olLayer) {
+//     return null;
+//   }
+//   return {
+//     id: olLayer.get("name"),
+//     name: olLayer.get("caption"),
+//     visible: olLayer.get("visible"),
+//     opacity: olLayer.get("opacity"),
+//     layerType: olLayer.get("layerType"),
+//     quickAccess: olLayer.get("quickAccess"),
+//     subLayers: olLayer.get("subLayers"),
+//     layerInfo: olLayer.get("layerInfo"),
+//     url: olLayer.get("url"),
+//     zIndex: olLayer.get("zIndex"),
+//     maxZoom: olLayer.get("maxZoom"),
+//     minZoom: olLayer.get("minZoom"),
+//     minMaxZoomAlertOnToggleOnly: olLayer.get("minMaxZoomAlertOnToggleOnly"),
+//   };
+// };
 
 // Prepare tree data for filtering
 const addLayerNames = (data, olLayerMap) => {
@@ -274,13 +224,8 @@ class LayersSwitcherView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.globalObserver;
 
-    this.layerMap = buildLayerMap(this.options.groups, this.olLayerMap);
-
+    this.staticLayerConfig = this.props.staticLayerConfig;
     this.staticLayerTree = this.props.staticLayerTree;
-
-    // console.log(this.layerTreeData);
-    // console.log(this.layerMap);
-    // console.log(this.olLayerMap);
 
     // this.backgroundLayerMap = Object.fromEntries(
     //   Object.entries(this.layerMap).filter(([_, v]) => v.layerType !== "base")
@@ -681,6 +626,7 @@ class LayersSwitcherView extends React.PureComponent {
             {this.state.treeData.map((group, i) => (
               <LayerGroup
                 key={i}
+                staticLayerConfig={this.staticLayerConfig}
                 staticGroupTree={this.staticLayerTree.find(
                   (g) => g.id === group.id
                 )}
