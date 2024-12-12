@@ -80,6 +80,38 @@ const LayerZoomVisibleSnackbarProvider = ({
   );
 };
 
+const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
+  if (visibleSubLayersArray.length === 0) {
+    // Fix underlying source
+    olLayer.getSource().updateParams({
+      // Ensure that the list of sublayers is emptied (otherwise they'd be
+      // "remembered" the next time user toggles group)
+      LAYERS: "",
+      // Remove any filters
+      CQL_FILTER: null,
+    });
+
+    // Hide the layer in OL
+    olLayer.setVisible(false);
+  } else {
+    olLayer.setVisible(true);
+    // Set LAYERS and STYLES so that the exact sublayers that are needed
+    // will be visible
+    olLayer.getSource().updateParams({
+      // join(), so we always provide a string as value to LAYERS
+      LAYERS: visibleSubLayersArray.join(),
+      // Filter STYLES to only contain styles for currently visible layers,
+      // and maintain the order from layersInfo (it's crucial that the order
+      // of STYLES corresponds exactly to the order of LAYERS!)
+      STYLES: Object.entries(olLayer.layersInfo)
+        .filter((k) => visibleSubLayersArray.indexOf(k[0]) !== -1)
+        .map((l) => l[1].style)
+        .join(","),
+      CQL_FILTER: null,
+    });
+  }
+};
+
 // TODO Set up OSM/black/white here?
 
 const createDispatch = (map) => {
@@ -91,8 +123,55 @@ const createDispatch = (map) => {
   return {
     setLayerVisibility(layerId, visible) {
       console.log("LS Dispatcher:", "setLayerVisibility", layerId);
-      const layer = map.getAllLayers().find((l) => l.get("name") === layerId);
-      layer.setVisible(visible);
+      const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
+      olLayer.setVisible(visible);
+
+      // For GroupLayers:
+      const allSubLayers = olLayer.get("allSubLayers");
+      console.log(allSubLayers);
+      if (allSubLayers) {
+        if (visible) {
+          olLayer.set("subLayers", allSubLayers);
+          setOLSubLayers(olLayer, allSubLayers);
+        } else {
+          olLayer.set("subLayers", []);
+          setOLSubLayers(olLayer, []);
+        }
+      }
+    },
+    setSubLayerVisibility(layerId, subLayerId, visible) {
+      console.log(
+        "LS Dispatcher:",
+        "setSubLayerVisibility",
+        layerId,
+        subLayerId,
+        visible
+      );
+      const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
+      const currentSubLayers = new Set(olLayer.get("subLayers"));
+
+      if (visible) {
+        currentSubLayers.add(subLayerId);
+      } else {
+        currentSubLayers.delete(subLayerId);
+      }
+
+      const currentSubLayersArray = Array.from(currentSubLayers);
+      olLayer.set("subLayers", currentSubLayersArray);
+      setOLSubLayers(olLayer, currentSubLayersArray);
+    },
+    setGroupLayerVisibility(layerId, visible) {
+      console.log("LS Dispatcher:", "setGroupLayerVisibility", layerId);
+      const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
+      const allSubLayers = new Set(olLayer.get("subLayers"));
+
+      if (visible) {
+        olLayer.set("subLayers", allSubLayers);
+        setOLSubLayers(olLayer, allSubLayers);
+      } else {
+        olLayer.set("subLayers", []);
+        setOLSubLayers(olLayer, []);
+      }
     },
     setBackgroundLayer(layerId) {
       console.log("LS Dispatcher:", "setBackgroundLayer", layerId);

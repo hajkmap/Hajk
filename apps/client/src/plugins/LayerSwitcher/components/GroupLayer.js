@@ -8,25 +8,27 @@ import SubLayerItem from "./SubLayerItem";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
 import { useMapZoom } from "../LayerSwitcherProvider";
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
 /* A grouplayer is a layer configured with multiple layers in admin, NOT a group in layerswitcher */
 
 export default function GroupLayer({
+  // TODO Remove OL Layer
   layer,
   layerState,
   layerConfig,
   globalObserver,
-  localObserver,
+  // localObserver,
   toggleable,
   draggable,
-  quickAccessLayer,
+  // quickAccessLayer,
   display,
   groupLayer,
 }) {
   const subLayers = layer.subLayers;
   const filterSubLayers = groupLayer?.subLayers;
 
-  const { layerIsToggled } = layerState;
+  const { layerIsToggled, visibleSubLayers } = layerState;
 
   const {
     layerId,
@@ -40,190 +42,34 @@ export default function GroupLayer({
     // layerLegendIcon,
   } = layerConfig;
 
+  // TODO Temporary fix util the data model in LayerSwitcherProvider is fixed.
+  useEffect(() => {
+    layer.set("allSubLayers", subLayers);
+    // This is a `onMount` should be empty deps
+  }, []);
+
   // Keep the subLayers area active in state
   const [showSublayers, setShowSublayers] = useState(false);
   // Keep visible sublayers in state
-  const [visibleSubLayers, setVisibleSubLayers] = useState(
-    layerIsToggled
-      ? quickAccessLayer || draggable
-        ? subLayers
-        : layer.visibleAtStartSubLayers?.length > 0
-          ? layer.visibleAtStartSubLayers
-          : subLayers
-      : []
-  );
 
-  const setGroupHidden = useCallback(
-    (l) => {
-      if (l.get("name") === layerId) {
-        // Update OL layer sublayers property
-        layer.set("subLayers", []);
-        // Update visibleSubLayers state
-        setVisibleSubLayers([]);
-      }
-    },
-    [layer, layerId]
-  );
-
-  const setSubLayers = (visibleSubLayersArray) => {
-    // Check if layer is visible
-    let layerVisibility = layerIsToggled;
-    // If layer is not visible and remaining visible subLayers exists, layer should turn visible
-    if (!layerVisibility && visibleSubLayersArray.length > 0) {
-      layerVisibility = true;
-    }
-
-    // If remaining visible subLayers are zero, layer should turn not visible
-    if (visibleSubLayersArray.length === 0) {
-      layerVisibility = false;
-    }
-
-    // If remaining visible subLayers exists, set layer visibility and set visibleSubLayers state
-    if (visibleSubLayersArray.length >= 1) {
-      layer.setVisible(layerVisibility);
-      layer.set("subLayers", visibleSubLayersArray);
-    } else {
-      // Otherwise, set OL layer subLayers property to empty array
-      layer.set("subLayers", []);
-    }
-  };
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   const setSubLayerVisible = (subLayer) => {
-    // Clone visibleSubLayers state
-    let visibleSubLayersArray = [...visibleSubLayers];
-    // Push subLayer to visibleSubLayersArray and set component state
-    visibleSubLayersArray.push(subLayer);
-    setSubLayers(visibleSubLayersArray);
+    layerSwitcherDispatch.setSubLayerVisibility(layerId, subLayer, true);
   };
 
-  // Gets added subLayers and removes the one that user clicked on, then passes the array to setSubLayers
   const setSubLayerHidden = (subLayer) => {
-    // Clone visibleSubLayers state
-    let visibleSubLayersArray = [...visibleSubLayers];
-    // Get remaining visible subLayers
-    visibleSubLayersArray = visibleSubLayersArray.filter(
-      (visibleSubLayer) => visibleSubLayer !== subLayer
-    );
-    setSubLayers(visibleSubLayersArray);
+    layerSwitcherDispatch.setSubLayerVisibility(layerId, subLayer, false);
   };
 
-  const setGroupVisible = useCallback(
-    (la) => {
-      let l,
-        subLayersToShow = null;
-
-      // If the incoming parameter is an object that contains additional subLayersToShow,
-      // let's filter out the necessary objects from it
-      if (la.hasOwnProperty("layer") && la.hasOwnProperty("subLayersToShow")) {
-        subLayersToShow = la.subLayersToShow;
-        l = la.layer;
-      } else {
-        // In this case the incoming parameter is the actual OL Layer and there is
-        // no need to further filter. Just set subLayers to everything that's in this
-        // layer, and the incoming object itself as the working 'l' variable.
-        subLayersToShow = subLayers;
-        l = la;
-      }
-
-      // Now we can be sure that we have the working 'l' variable and can compare
-      // it to the 'layer' object in current props. Note that this is necessary, as
-      // every single LayerGroupItem is subscribing to the event that calls this method,
-      // so without this check we'd end up running this for every LayerGroupItem, which
-      // is not intended.
-      if (l === layer) {
-        // Show the OL layer
-        layer.setVisible(true);
-        // Update OL layer subLayers property
-        layer.set("subLayers", subLayersToShow);
-        // Update visibleSubLayers state
-        setVisibleSubLayers(subLayersToShow);
-      }
-    },
-    [layer, subLayers]
-  );
-
-  // Register subscriptions for groupLayer.
-  useEffect(() => {
-    globalObserver.subscribe("core.layerSubLayersChanged", (l) => {
-      if (l.target.get("name") === layerId) {
-        setVisibleSubLayers(l.target.get("subLayers"));
-      }
-    });
-
-    globalObserver.subscribe("layerswitcher.hideLayer", setGroupHidden);
-    const layerswitcherShowLayerSubscription = globalObserver.subscribe(
-      "layerswitcher.showLayer",
-      setGroupVisible
-    );
-    const hideLayerSubscription = localObserver.subscribe(
-      "hideLayer",
-      setGroupHidden
-    );
-    const showLayerSubscription = localObserver.subscribe(
-      "showLayer",
-      setGroupVisible
-    );
-
-    // Unsubscribe when component unmounts
-    return () => {
-      layerswitcherShowLayerSubscription.unsubscribe();
-      hideLayerSubscription.unsubscribe();
-      showLayerSubscription.unsubscribe();
-    };
-  }, [
-    globalObserver,
-    localObserver,
-    setGroupHidden,
-    setGroupVisible,
-    layer,
-  ]);
-
-  // When visibleSubLayers state changes, update layer params
-  useEffect(() => {
-    const visibleSubLayersArray = [...visibleSubLayers];
-    if (visibleSubLayersArray.length === 0) {
-      // Fix underlying source
-      layer.getSource().updateParams({
-        // Ensure that the list of sublayers is emptied (otherwise they'd be
-        // "remembered" the next time user toggles group)
-        LAYERS: "",
-        // Remove any filters
-        CQL_FILTER: null,
-      });
-
-      // Hide the layer in OL
-      layer.setVisible(false);
-      // layer.set("subLayers", []);
-    } else {
-      // Set LAYERS and STYLES so that the exact sublayers that are needed
-      // will be visible
-      layer.getSource().updateParams({
-        // join(), so we always provide a string as value to LAYERS
-        LAYERS: visibleSubLayersArray.join(),
-        // Filter STYLES to only contain styles for currently visible layers,
-        // and maintain the order from layersInfo (it's crucial that the order
-        // of STYLES corresponds exactly to the order of LAYERS!)
-        STYLES: Object.entries(layer.layersInfo)
-          .filter((k) => visibleSubLayersArray.indexOf(k[0]) !== -1)
-          .map((l) => l[1].style)
-          .join(","),
-        CQL_FILTER: null,
-      });
-    }
-  }, [visibleSubLayers, layer]);
-
-  // Handles list item click
   const handleLayerItemClick = () => {
     if (layerIsToggled) {
-      // Hide the layer.
-      setGroupHidden(layer);
+      layerSwitcherDispatch.setLayerVisibility(layerId, false);
     } else {
-      // Show the layer.
-      setGroupVisible(layer);
+      layerSwitcherDispatch.setLayerVisibility(layerId, false);
     }
   };
 
-  // Toggles a subLayer
   const toggleSubLayer = (subLayer, visible) => {
     if (visible) {
       setSubLayerHidden(subLayer);
@@ -270,7 +116,6 @@ export default function GroupLayer({
   //   layerInfo: layer.get("layerInfo"),
   //   layerLegendIcon: layer.get("legendIcon"),
   // };
-
   return (
     <LayerItem
       display={display}

@@ -97,6 +97,7 @@ export default function QuickAccessLayers({
       {quickAccessLayers.map((l) => {
         const layerState = {
           layerIsToggled: l.get("visible"),
+          visibleSubLayers: l.get("subLayers"),
         };
 
         const layerConfig = {

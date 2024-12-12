@@ -393,6 +393,7 @@ const LayerGroup = ({
 
           const layerState = {
             layerIsToggled: mapLayer.get("visible"),
+            visibleSubLayers: mapLayer.get("subLayers"),
           };
 
           const layerConfig = {

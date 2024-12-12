@@ -222,7 +222,7 @@ const addLayerNames = (data, olLayerMap) => {
       subLayers: item.sublayers,
       parent: item.parent,
       isFiltered: true,
-      isExpanded: false,
+      isExpanded: item.expanded,
       changeIndicator: new Date(),
       groups: item.groups ? addLayerNames(item.groups, olLayerMap) : undefined,
     };

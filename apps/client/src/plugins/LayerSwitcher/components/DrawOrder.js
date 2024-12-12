@@ -263,6 +263,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
             } else {
               const layerState = {
                 layerIsToggled: l.get("visible"),
+                visibleSubLayers: l.get("subLayers"),
               };
 
               const layerConfig = {
