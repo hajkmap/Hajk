@@ -9,7 +9,7 @@ import React, {
 } from "react";
 
 import LayerSwitcherView from "./LayerSwitcherView.js";
-import useSnackbar from "../../hooks/useSnackbar";
+// import useSnackbar from "../../hooks/useSnackbar";
 import { useLayerZoomWarningSnackbar } from "./useLayerZoomWarningSnackbar";
 
 const MapZoomContext = createContext(null);
@@ -115,7 +115,7 @@ const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
 
 // TODO Set up OSM/black/white here?
 
-const createDispatch = (map) => {
+const createDispatch = (map, staticLayerConfig) => {
   const olBackgroundLayers = map
     .getLayers()
     .getArray()
@@ -123,21 +123,20 @@ const createDispatch = (map) => {
 
   return {
     setLayerVisibility(layerId, visible) {
-      console.log("LS Dispatcher:", "setLayerVisibility", layerId);
+      console.log("LS Dispatcher:", "setLayerVisibility", layerId, visible);
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
       olLayer.setVisible(visible);
 
-      // For GroupLayers:
-      const allSubLayers = olLayer.get("allSubLayers");
-      console.log(allSubLayers);
-      if (allSubLayers) {
-        if (visible) {
+      if (visible) {
+        // For GroupLayers:
+        const allSubLayers = staticLayerConfig[layerId]?.allSubLayers;
+        if (allSubLayers) {
           olLayer.set("subLayers", allSubLayers);
           setOLSubLayers(olLayer, allSubLayers);
-        } else {
-          olLayer.set("subLayers", []);
-          setOLSubLayers(olLayer, []);
         }
+      } else {
+        olLayer.set("subLayers", []);
+        setOLSubLayers(olLayer, []);
       }
     },
     setSubLayerVisibility(layerId, subLayerId, visible) {
@@ -238,6 +237,64 @@ const createDispatch = (map) => {
   };
 };
 
+const getLayerNodes = (groups, olLayerMap) =>
+  groups?.flatMap((node) => {
+    if (!node) {
+      return undefined;
+    }
+    const layers = getLayerNodes(node.layers, olLayerMap);
+    const subgroups = getLayerNodes(node.groups, olLayerMap);
+
+    const children = [...(layers ?? []), ...(subgroups ?? [])];
+
+    // A group should have both defined
+    const isGroup = !!(node.groups && node.layers);
+
+    // TODO refactor/cleanup
+    const olLayer = olLayerMap[node.id];
+    const isGroupLayer = olLayer?.get("subLayers");
+
+    let layerType = node.layerType;
+    if (isGroupLayer) {
+      layerType = "groupLayer";
+    }
+    if (isGroup) {
+      layerType = "group";
+    }
+
+    return [
+      {
+        id: node.id,
+        name: olLayerMap[node.id]?.get("caption") ?? node.name,
+        allSubLayers: olLayerMap[node.id]?.get("subLayers"),
+        initiallyExpanded: node.expanded,
+        initiallyToggled: node.toggled,
+        initialDrawOrder: node.drawOrder,
+        infobox: node.infobox,
+        isGroup,
+        layerType,
+        visibleAtStart: node.visibleAtStart,
+        visibleForGroups: node.visibleForGroups,
+        infogroupvisible: node.infogroupvisible,
+        infogrouptitle: node.infogrouptitle,
+        infogrouptext: node.infogrouptext,
+        infogroupurl: node.infogroupurl,
+        infogroupurltext: node.infogroupurltext,
+        infogroupopendatalink: node.infogroupopendatalink,
+        infogroupowner: node.infofnodeowner,
+      },
+      ...(children?.length === 0 ? [] : children),
+    ];
+  });
+
+const buildStaticLayerConfigMap = (groups, olLayerMap) => {
+  const nodes = getLayerNodes(groups, olLayerMap);
+
+  return nodes?.reduce((a, b) => {
+    a[b.id] = b;
+    return a;
+  }, {});
+};
 const LayerSwitcherDispatchContext = createContext(null);
 
 export const useLayerSwitcherDispatch = () =>
@@ -283,7 +340,13 @@ const LayerSwitcherProvider = ({
     () => buildLayerTree(options.groups, olLayerMap.current),
     [options]
   );
-  useEffect(() => console.log(layerTreeData), [layerTreeData]);
+  // useEffect(() => console.log(layerTreeData), [layerTreeData]);
+
+  const staticLayerConfigMap = useMemo(
+    () => buildStaticLayerConfigMap(options.groups, olLayerMap.current),
+    [options]
+  );
+  // useEffect(() => console.log(staticLayerConfigMap), [staticLayerConfigMap]);
 
   const olState = useSyncExternalStore(
     (callback) => {
@@ -357,7 +420,7 @@ const LayerSwitcherProvider = ({
   //   };
   // }, [map]);
 
-  const dispatcher = useRef(createDispatch(map));
+  const dispatcher = useRef(createDispatch(map, staticLayerConfigMap));
 
   return (
     <LayerSwitcherDispatchContext.Provider value={dispatcher.current}>
@@ -376,6 +439,7 @@ const LayerSwitcherProvider = ({
             windowVisible={windowVisible}
             layersState={olState}
             staticLayerTree={layerTreeData}
+            staticLayerConfigMap={staticLayerConfigMap}
           />
         </LayerZoomVisibleSnackbarProvider>
       </MapZoomProvider>

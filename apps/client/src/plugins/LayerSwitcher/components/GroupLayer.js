@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { Box, Collapse, IconButton } from "@mui/material";
 
@@ -42,16 +42,7 @@ export default function GroupLayer({
     // layerLegendIcon,
   } = layerConfig;
 
-  // TODO Temporary fix util the data model in LayerSwitcherProvider is fixed.
-  useEffect(() => {
-    layer.set("allSubLayers", subLayers);
-    // This is a `onMount` should be empty deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Keep the subLayers area active in state
   const [showSublayers, setShowSublayers] = useState(false);
-  // Keep visible sublayers in state
 
   const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
@@ -67,7 +58,7 @@ export default function GroupLayer({
     if (layerIsToggled) {
       layerSwitcherDispatch.setLayerVisibility(layerId, false);
     } else {
-      layerSwitcherDispatch.setLayerVisibility(layerId, false);
+      layerSwitcherDispatch.setLayerVisibility(layerId, true);
     }
   };
 
