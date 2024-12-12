@@ -1,21 +1,14 @@
 import { memo } from "react";
 import { Box } from "@mui/material";
-import { Props } from "simplebar-react";
+import SimpleBar, { Props } from "simplebar-react";
 import { Theme, alpha, styled } from "@mui/material/styles";
 import { SxProps } from "@mui/material";
-import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 
 interface ScrollbarProps extends Props {
   children?: React.ReactNode;
   sx?: SxProps<Theme>;
 }
-
-const StyledRootScrollbar = styled("div")(() => ({
-  flexGrow: 1,
-  height: "100%",
-  overflow: "hidden",
-}));
 
 const StyledScrollbar = styled(SimpleBar)(({ theme }) => ({
   maxHeight: "100%",
@@ -33,12 +26,9 @@ const StyledScrollbar = styled(SimpleBar)(({ theme }) => ({
 }));
 
 function Scrollbar({ children, sx, ...other }: ScrollbarProps) {
-  const testDevice =
-    typeof navigator === "undefined" ? "SSR" : navigator.userAgent;
-
   const isMobileDevice =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      testDevice
+      navigator.userAgent
     );
 
   if (isMobileDevice) {
@@ -55,11 +45,14 @@ function Scrollbar({ children, sx, ...other }: ScrollbarProps) {
   }
 
   return (
-    <StyledRootScrollbar>
+    <Box
+      component="div"
+      sx={{ flexGrow: 1, height: "100%", overflow: "hidden" }}
+    >
       <StyledScrollbar clickOnTrack={false} sx={sx} {...other}>
         {children}
       </StyledScrollbar>
-    </StyledRootScrollbar>
+    </Box>
   );
 }
 
