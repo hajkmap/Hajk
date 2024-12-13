@@ -66,6 +66,13 @@
     "map.name": "Namn",
     "map.description": "Beskrivning",
     "map.title": "Titel",
-    "map.locked": "Låst"
+    "map.locked": "Låst",
+    "error.forbidden": "403 - Sida förbjuden",
+    "error.forbidden.description": "Du har inte behörighet att komma åt den här sidan",
+    "error.notFound": "404 - Sidan hittades inte",
+    "error.notFound.description": "Vi kunde inte hitta sidan du letar efter. Vänligen kontrollera URL:en. <br /> Var noga med att kontrollera din stavning.",
+    "error.serverError": "500 - Serverfel",
+    "error.serverError.description": "Servern stötte på ett oväntat problem som hindrade den från att uppfylla begäran.",
+    "error.notFound.homeBtn": "Tillbaka till startsidan"
   }
 }

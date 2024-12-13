@@ -66,6 +66,13 @@
     "map.name": "Name",
     "map.description": "Description",
     "map.title": "Title",
-    "map.locked": "Locked"
+    "map.locked": "Locked",
+    "error.forbidden": "403 - Forbidden",
+    "error.forbidden.description": "You don't have permission to access this page.",
+    "error.notFound": "404 - Not found",
+    "error.notFound.description": "Sorry, we couldn't find the page you're looking for. Please check the URL. <br /> Be sure to check your spelling.",
+    "error.serverError": "500 - Internal server error",
+    "error.serverError.description": "The server encountered an unexpected problem that prevented it from fulfilling the request.",
+    "error.notFound.homeBtn": "Back to homepage"
   }
 }
