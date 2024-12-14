@@ -14,6 +14,7 @@ const LayerComparer = (props) => {
 
   const [layers, setLayers] = useState([]);
   const [baseLayers, setBaseLayers] = useState([]);
+  const [chosenLayers, setChosenLayers] = useState([]);
 
   // Prepare a ref that will hold our map control
   const sds = useRef();
@@ -41,23 +42,72 @@ const LayerComparer = (props) => {
   // an expensive operation.
   useEffect(() => {
     const allLayers = props.map.getAllLayers();
-    const baseLayers = allLayers
-      .filter((l) => l.get("layerType") === "base")
-      .map((l) => {
-        return { id: l.ol_uid, label: l.get("caption") };
-      });
 
-    if (props.options.showNonBaseLayersInSelect) {
-      const layers = allLayers
-        .filter((l) => ["layer", "group"].includes(l.get("layerType")))
+    if (props.options.selectChosenLayers) {
+      const finalChosenLayers = (props.options.chosenLayers || []).map(
+        (chosen) => {
+          let realLayer = allLayers.find((al) => al.ol_uid === chosen.id);
+
+          if (!realLayer && chosen.caption) {
+            realLayer = allLayers.find(
+              (al) => al.get("caption") === chosen.caption
+            );
+          }
+
+          if (realLayer) {
+            return {
+              id: realLayer.ol_uid,
+              label: realLayer.get("caption"),
+              layerType: realLayer.get("layerType"),
+            };
+          } else {
+            return {
+              id: chosen.id,
+              label: chosen.caption,
+              layerType: "unknown",
+            };
+          }
+        }
+      );
+
+      setChosenLayers(finalChosenLayers);
+      setLayers([]);
+      setBaseLayers([]);
+    } else {
+      const baseLayers = allLayers
+        .filter((l) => l.get("layerType") === "base")
         .map((l) => {
-          return { id: l.ol_uid, label: l.get("caption") };
+          return {
+            id: l.ol_uid,
+            label: l.get("caption"),
+            layerType: l.get("layerType"),
+          };
         });
-      setLayers(layers);
-    }
+      setBaseLayers(baseLayers);
 
-    setBaseLayers(baseLayers);
-  }, [props.map, props.options.showNonBaseLayersInSelect]);
+      if (props.options.showNonBaseLayersInSelect) {
+        const layers = allLayers
+          .filter((l) => ["layer", "group"].includes(l.get("layerType")))
+          .map((l) => {
+            return {
+              id: l.ol_uid,
+              label: l.get("caption"),
+              layerType: l.get("layerType"),
+            };
+          });
+        setLayers(layers);
+      } else {
+        setLayers([]);
+      }
+
+      setChosenLayers([]);
+    }
+  }, [
+    props.map,
+    props.options.showNonBaseLayersInSelect,
+    props.options.selectChosenLayers,
+    props.options.chosenLayers,
+  ]);
 
   // Create a new SDSControl, add to a ref and add the ref to our map.
   useEffect(() => {
@@ -215,6 +265,7 @@ const LayerComparer = (props) => {
           value={layerId1}
           counterValue={layerId2}
           baseLayers={baseLayers}
+          chosenLayers={chosenLayers}
           layers={layers}
           label="Vänster sida"
         />
@@ -223,6 +274,7 @@ const LayerComparer = (props) => {
           value={layerId2}
           counterValue={layerId1}
           baseLayers={baseLayers}
+          chosenLayers={chosenLayers}
           layers={layers}
           label="Höger sida"
         />

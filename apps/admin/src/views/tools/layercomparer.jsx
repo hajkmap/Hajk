@@ -24,6 +24,8 @@ const defaultState = {
   instruction: "",
   visibleAtStart: false,
   visibleForGroups: [],
+  chosenLayers: [],
+  selectChosenLayers: false,
 };
 
 class LayerComparer extends Component {
@@ -34,6 +36,7 @@ class LayerComparer extends Component {
     super();
     this.state = defaultState;
     this.type = "layercomparer";
+    this.handleLayerToggle = this.handleLayerToggle.bind(this);
   }
 
   componentDidMount() {
@@ -49,12 +52,71 @@ class LayerComparer extends Component {
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
+        chosenLayers: tool.options.chosenLayers
+          ? tool.options.chosenLayers
+          : [],
+        selectChosenLayers: tool.options.selectChosenLayers,
       });
     } else {
       this.setState({
         active: false,
       });
     }
+  }
+
+  handleLayerToggle(layer) {
+    this.setState((prevState) => {
+      const { chosenLayers } = prevState;
+      const exists = chosenLayers.some(
+        (chosenLayer) => chosenLayer.id === layer.id
+      );
+
+      if (exists) {
+        return { chosenLayers: chosenLayers.filter((l) => l.id !== layer.id) };
+      } else {
+        return {
+          chosenLayers: [
+            ...chosenLayers,
+            { id: layer.id, caption: layer.caption },
+          ],
+        };
+      }
+    });
+  }
+
+  renderLayersList() {
+    const allLayers = this.props.model.get("layers");
+    const { chosenLayers, selectChosenLayers } = this.state;
+
+    if (!allLayers || !Array.isArray(allLayers)) {
+      return <div>Inga lager tillgängliga.</div>;
+    }
+
+    return (
+      <>
+        <h3>Välj lager:</h3>
+        <ul>
+          {allLayers.map((layer) => {
+            const isChecked = chosenLayers.some(
+              (chosenLayer) => chosenLayer.id === layer.id
+            );
+            return (
+              <li key={layer.id}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    disabled={!selectChosenLayers}
+                    onChange={() => this.handleLayerToggle(layer)}
+                  />
+                  {layer.caption || layer.name || layer.id}
+                </label>
+              </li>
+            );
+          })}
+        </ul>
+      </>
+    );
   }
 
   /**
@@ -118,6 +180,8 @@ class LayerComparer extends Component {
           Function.prototype.call,
           String.prototype.trim
         ),
+        chosenLayers: this.state.chosenLayers,
+        selectChosenLayers: this.state.selectChosenLayers,
       },
     };
 
@@ -315,6 +379,24 @@ class LayerComparer extends Component {
               value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
+          <div>
+            <label>
+              <input
+                type="checkbox"
+                checked={this.state.selectChosenLayers}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  this.setState((prevState) => ({
+                    selectChosenLayers: checked,
+                    chosenLayers: checked ? prevState.chosenLayers : [],
+                  }));
+                }}
+              />
+              Aktivera "Välj lager"
+            </label>
+            {this.renderLayersList()}
+          </div>
+
           {this.renderVisibleForGroups()}
         </form>
       </div>
