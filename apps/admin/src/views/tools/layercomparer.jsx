@@ -367,7 +367,6 @@ class LayerComparer extends Component {
             </label>
           </div>
           <div>
-            <label>Välj lager</label>
             {this.state.selectChosenLayers && (
               <LayerComparerLayerList
                 allLayers={allLayers}

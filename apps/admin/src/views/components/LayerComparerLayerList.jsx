@@ -123,12 +123,15 @@ class LayerComparerLayerList extends React.Component {
             style={{ marginRight: "10px", width: "80%" }}
           />
           <button
+            type="button"
             onClick={this.handleSortToggle}
             style={{ marginRight: "10px" }}
           >
             Sortera {sortAsc ? "A-Ö" : "Ö-A"}
           </button>
-          <button onClick={this.selectAllLayers}>Välj alla</button>
+          <button type="button" onClick={this.selectAllLayers}>
+            Välj alla
+          </button>
         </div>
 
         <div style={listContainerStyle}>
