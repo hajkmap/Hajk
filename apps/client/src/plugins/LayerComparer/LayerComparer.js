@@ -46,13 +46,9 @@ const LayerComparer = (props) => {
     if (props.options.selectChosenLayers) {
       const finalChosenLayers = (props.options.chosenLayers || []).map(
         (chosen) => {
-          let realLayer = allLayers.find((al) => al.ol_uid === chosen.id);
-
-          if (!realLayer && chosen.caption) {
-            realLayer = allLayers.find(
-              (al) => al.get("caption") === chosen.caption
-            );
-          }
+          const realLayer = allLayers.find(
+            (al) => al.get("name") === chosen.id
+          );
 
           if (realLayer) {
             return {
@@ -61,6 +57,10 @@ const LayerComparer = (props) => {
               layerType: realLayer.get("layerType"),
             };
           } else {
+            console.warn(
+              `Ingen matchning för lager med ID "${chosen.id}". Kontrollera om lagret existerar i allLayers.`
+            );
+
             return {
               id: chosen.id,
               label: chosen.caption,
