@@ -4,6 +4,7 @@ import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
 import { blue } from "@material-ui/core/colors";
+import LayerComparerLayerList from "../components/LayerComparerLayerList";
 
 const ColorButtonBlue = withStyles((theme) => ({
   root: {
@@ -82,41 +83,6 @@ class LayerComparer extends Component {
         };
       }
     });
-  }
-
-  renderLayersList() {
-    const allLayers = this.props.model.get("layers");
-    const { chosenLayers, selectChosenLayers } = this.state;
-
-    if (!allLayers || !Array.isArray(allLayers)) {
-      return <div>Inga lager tillgängliga.</div>;
-    }
-
-    return (
-      <>
-        <h3>Välj lager:</h3>
-        <ul>
-          {allLayers.map((layer) => {
-            const isChecked = chosenLayers.some(
-              (chosenLayer) => chosenLayer.id === layer.id
-            );
-            return (
-              <li key={layer.id}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    disabled={!selectChosenLayers}
-                    onChange={() => this.handleLayerToggle(layer)}
-                  />
-                  {layer.caption || layer.name || layer.id}
-                </label>
-              </li>
-            );
-          })}
-        </ul>
-      </>
-    );
   }
 
   /**
@@ -266,6 +232,7 @@ class LayerComparer extends Component {
    *
    */
   render() {
+    const allLayers = this.props.model.get("layers");
     return (
       <div>
         <form>
@@ -350,6 +317,7 @@ class LayerComparer extends Component {
                 this.handleInputChange(e);
               }}
               checked={this.state.showNonBaseLayersInSelect}
+              disabled={this.state.selectChosenLayers}
             />
             &nbsp;
             <label
@@ -389,12 +357,26 @@ class LayerComparer extends Component {
                   this.setState((prevState) => ({
                     selectChosenLayers: checked,
                     chosenLayers: checked ? prevState.chosenLayers : [],
+                    showNonBaseLayersInSelect: checked
+                      ? false
+                      : prevState.showNonBaseLayersInSelect,
                   }));
                 }}
               />
               Aktivera "Välj lager"
             </label>
-            {this.renderLayersList()}
+          </div>
+          <div>
+            <label>Välj lager</label>
+            {this.state.selectChosenLayers && (
+              <LayerComparerLayerList
+                allLayers={allLayers}
+                chosenLayers={this.state.chosenLayers}
+                onChosenLayersChange={(updatedLayers) =>
+                  this.setState({ chosenLayers: updatedLayers })
+                }
+              />
+            )}
           </div>
 
           {this.renderVisibleForGroups()}
