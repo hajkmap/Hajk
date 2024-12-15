@@ -71,8 +71,6 @@ const LayerComparer = (props) => {
       );
 
       setChosenLayers(finalChosenLayers);
-      setLayers([]);
-      setBaseLayers([]);
     } else {
       const baseLayers = allLayers
         .filter((l) => l.get("layerType") === "base")
