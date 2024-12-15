@@ -27,6 +27,7 @@ const defaultState = {
   visibleForGroups: [],
   chosenLayers: [],
   selectChosenLayers: false,
+  layers: [],
 };
 
 class LayerComparer extends Component {
@@ -37,7 +38,6 @@ class LayerComparer extends Component {
     super();
     this.state = defaultState;
     this.type = "layercomparer";
-    this.handleLayerToggle = this.handleLayerToggle.bind(this);
   }
 
   componentDidMount() {
@@ -58,6 +58,7 @@ class LayerComparer extends Component {
           : [],
         selectChosenLayers: tool.options.selectChosenLayers,
       });
+      this.loadLayers();
     } else {
       this.setState({
         active: false,
@@ -65,24 +66,81 @@ class LayerComparer extends Component {
     }
   }
 
-  handleLayerToggle(layer) {
-    this.setState((prevState) => {
-      const { chosenLayers } = prevState;
-      const exists = chosenLayers.some(
-        (chosenLayer) => chosenLayer.id === layer.id
-      );
+  handleSelectChosenLayersChange = (checked) => {
+    this.setState((prevState) => ({
+      selectChosenLayers: checked,
+      chosenLayers: checked ? prevState.chosenLayers : [],
+      showNonBaseLayersInSelect: checked
+        ? false
+        : prevState.showNonBaseLayersInSelect,
+    }));
 
-      if (exists) {
-        return { chosenLayers: chosenLayers.filter((l) => l.id !== layer.id) };
+    if (checked) {
+      this.loadLayers();
+    }
+  };
+
+  getLayersFromGroupsAndBaselayers(options) {
+    const layers = [];
+
+    function collectLayersFromGroup(group) {
+      if (group.layers) {
+        layers.push(...group.layers);
+      }
+      if (group.groups) {
+        group.groups.forEach(collectLayersFromGroup);
+      }
+    }
+
+    if (options.groups) {
+      options.groups.forEach(collectLayersFromGroup);
+    }
+
+    if (options.baselayers) {
+      layers.push(...options.baselayers);
+    }
+
+    return layers;
+  }
+
+  loadLayers() {
+    const toolConfig = this.props.model.get("toolConfig");
+    const layerswitcherTool = toolConfig.find(
+      (tool) => tool.type === "layerswitcher"
+    );
+
+    if (!layerswitcherTool) {
+      console.error("LayerSwitcher not found in toolConfig.");
+      return;
+    }
+
+    const layerSwitcherLayers = this.getLayersFromGroupsAndBaselayers(
+      layerswitcherTool.options
+    );
+
+    const allLayers = this.props.model.get("layers");
+
+    const comparedLayers = layerSwitcherLayers.map((lsLayer) => {
+      const realLayer = allLayers.find((al) => al.id === lsLayer.id);
+
+      if (realLayer) {
+        return {
+          id: realLayer.id,
+          caption: realLayer.caption || "Okänt lager",
+          layerType: realLayer.type || "unknown",
+          visibleAtStart: lsLayer.visibleAtStart,
+        };
       } else {
         return {
-          chosenLayers: [
-            ...chosenLayers,
-            { id: layer.id, caption: layer.caption },
-          ],
+          id: lsLayer.id,
+          caption: "Inaktivt lager",
+          layerType: "unknown",
+          visibleAtStart: lsLayer.visibleAtStart,
         };
       }
     });
+
+    this.setState({ layers: comparedLayers });
   }
 
   /**
@@ -232,7 +290,7 @@ class LayerComparer extends Component {
    *
    */
   render() {
-    const allLayers = this.props.model.get("layers");
+    const { layers } = this.state;
     return (
       <div>
         <form>
@@ -348,20 +406,13 @@ class LayerComparer extends Component {
             />
           </div>
           <div>
-            <label>
+            <label style={{ paddingBottom: "20px" }}>
               <input
                 type="checkbox"
                 checked={this.state.selectChosenLayers}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  this.setState((prevState) => ({
-                    selectChosenLayers: checked,
-                    chosenLayers: checked ? prevState.chosenLayers : [],
-                    showNonBaseLayersInSelect: checked
-                      ? false
-                      : prevState.showNonBaseLayersInSelect,
-                  }));
-                }}
+                onChange={(e) =>
+                  this.handleSelectChosenLayersChange(e.target.checked)
+                }
               />
               Aktivera "Välj lager"
             </label>
@@ -369,7 +420,7 @@ class LayerComparer extends Component {
           <div>
             {this.state.selectChosenLayers && (
               <LayerComparerLayerList
-                allLayers={allLayers}
+                allLayers={layers}
                 chosenLayers={this.state.chosenLayers}
                 onChosenLayersChange={(updatedLayers) =>
                   this.setState({ chosenLayers: updatedLayers })
