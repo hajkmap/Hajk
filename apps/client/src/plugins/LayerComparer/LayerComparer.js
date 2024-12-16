@@ -44,8 +44,8 @@ const LayerComparer = (props) => {
     const allLayers = props.map.getAllLayers();
 
     if (props.options.selectChosenLayers) {
-      const finalChosenLayers = (props.options.chosenLayers || []).map(
-        (chosen) => {
+      const finalChosenLayers = (props.options.chosenLayers || [])
+        .map((chosen) => {
           const realLayer = allLayers.find(
             (al) => al.get("name") === chosen.id
           );
@@ -61,14 +61,10 @@ const LayerComparer = (props) => {
               `Ingen matchning för lager med ID "${chosen.id}". Kontrollera om lagret existerar i allLayers.`
             );
 
-            return {
-              id: chosen.id,
-              label: chosen.caption,
-              layerType: "unknown",
-            };
+            return null;
           }
-        }
-      );
+        })
+        .filter((layer) => layer !== null);
 
       setChosenLayers(finalChosenLayers);
     } else {

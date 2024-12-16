@@ -130,7 +130,7 @@ class LayerComparerLayerList extends React.Component {
             Sortera {sortAsc ? "A-Ö" : "Ö-A"}
           </button>
           <button type="button" onClick={this.selectAllLayers}>
-            Välj alla
+            Välj alla / rensa alla
           </button>
         </div>
 
@@ -145,7 +145,7 @@ class LayerComparerLayerList extends React.Component {
                     checked={isChecked}
                     onChange={() => this.handleLayerToggle(layer)}
                   />{" "}
-                  {layer.caption || layer.name || layer.id}
+                  {layer.caption || layer.id}
                 </li>
               );
             })}
