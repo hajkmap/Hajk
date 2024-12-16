@@ -31,6 +31,12 @@ For some real-life examples, see the following solutions:
 - [Varberg municipality's map](https://karta.varberg.se)
 - [Uddevalla municipality's map](https://karta.uddevalla.se)
 
+## Community extensions
+
+Community extensions are additions developed by the community outside the scope of the core Hajk distribution. These can include anything from rewrites in other programming languages to customized integrations with specific business systems.
+
+For a list of community extensions, please refer to [this page](https://github.com/hajkmap/Hajk/blob/master/docs/community-extensions.md).
+
 ## Quick start (for admins)
 
 Please refer to Hajk's official [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29).
