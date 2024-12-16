@@ -1,8 +1,8 @@
-import { Helmet } from "react-helmet";
 import { LazyMotion, m, domAnimation } from "framer-motion";
 import { useNavigate } from "react-router";
 import { Box, useTheme } from "@mui/material";
 import { useTranslation, Trans } from "react-i18next";
+import PageTitle from "../../layouts/root/components/page-title";
 
 export default function NotFound() {
   const navigate = useNavigate();
@@ -34,9 +34,7 @@ export default function NotFound() {
   return (
     <LazyMotion features={domAnimation}>
       <Box component="div">
-        <Helmet>
-          <title>404 - Not Found | Hajk</title>
-        </Helmet>
+        <PageTitle title={"404 - Not Found | Hajk"} />
 
         <m.div
           variants={imgVariants}

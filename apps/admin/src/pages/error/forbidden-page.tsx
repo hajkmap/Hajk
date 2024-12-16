@@ -1,8 +1,8 @@
-import { Helmet } from "react-helmet";
 import { LazyMotion, m, domAnimation } from "framer-motion";
 import { Box, useTheme } from "@mui/material";
 import DoNotTouchIcon from "@mui/icons-material/DoNotTouch";
 import { useTranslation } from "react-i18next";
+import PageTitle from "../../layouts/root/components/page-title";
 
 export default function Forbidden() {
   const { palette } = useTheme();
@@ -33,9 +33,7 @@ export default function Forbidden() {
   return (
     <LazyMotion features={domAnimation}>
       <Box component="div">
-        <Helmet>
-          <title>403 - Forbidden | Hajk</title>
-        </Helmet>
+        <PageTitle title={"403 - Forbidden | Hajk"} />
 
         <m.div
           variants={imgVariants}

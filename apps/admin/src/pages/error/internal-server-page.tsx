@@ -1,8 +1,8 @@
-import { Helmet } from "react-helmet";
 import { LazyMotion, m, domAnimation } from "framer-motion";
 import { Box, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import "./error.css";
+import PageTitle from "../../layouts/root/components/page-title";
 
 export default function InternalServerPage() {
   const { palette } = useTheme();
@@ -31,9 +31,7 @@ export default function InternalServerPage() {
   return (
     <LazyMotion features={domAnimation}>
       <Box component="div">
-        <Helmet>
-          <title>500 - Internal Server Error | Hajk</title>
-        </Helmet>
+        <PageTitle title={"500 - Internal Server Error | Hajk"} />
 
         <m.div
           variants={imgVariants}
