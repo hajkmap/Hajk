@@ -43,7 +43,7 @@ const SelectDropdown = (props) => {
 
           {chosenBaseLayers.length > 0 && [
             <ListSubheader key="chosen-base-header">
-              Valda Bakgrundslager
+              Bakgrundslager
             </ListSubheader>,
             ...chosenBaseLayers.map((l, i) => (
               <MenuItem
@@ -57,9 +57,7 @@ const SelectDropdown = (props) => {
           ]}
 
           {chosenRegularLayers.length > 0 && [
-            <ListSubheader key="chosen-layer-header">
-              Valda Lager
-            </ListSubheader>,
+            <ListSubheader key="chosen-layer-header">Lager</ListSubheader>,
             ...chosenRegularLayers.map((l, i) => (
               <MenuItem
                 key={`chosen-layer-${i}`}
