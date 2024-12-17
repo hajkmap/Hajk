@@ -112,73 +112,76 @@ const BreadCrumbsContainer = ({ map, app }) => {
 // };
 
 // Prepare tree data for filtering
-const addLayerNames = (data, olLayerMap) => {
-  const node = data.map((item) => {
-    const layers = item.layers?.map((layer) => {
-      const mapLayer = olLayerMap[layer.id];
-      if (!mapLayer) {
-        console.warn(`Maplayer with id ${layer.id} not found`);
-        return undefined;
-      }
+// const addLayerNames = (data, olLayerMap) => {
+//   const node = data.map((item) => {
+//     const layers = item.layers?.map((layer) => {
+//       const mapLayer = olLayerMap[layer.id];
+//       if (!mapLayer) {
+//         console.warn(`Maplayer with id ${layer.id} not found`);
+//         return undefined;
+//       }
 
-      const subLayers =
-        mapLayer.get("layerType") === "group" &&
-        mapLayer
-          .get("subLayers")
-          .map((subLayer) => {
-            // If the `layerInfo` is missing from a sublayer we ignore it
-            // completely.
-            const subLayerInfo = mapLayer.layersInfo[subLayer];
-            if (!subLayerInfo) {
-              return null;
-            }
+//       const subLayers =
+//         mapLayer.get("layerType") === "group" &&
+//         mapLayer
+//           .get("subLayers")
+//           .map((subLayer) => {
+//             // If the `layerInfo` is missing from a sublayer we ignore it
+//             // completely.
+//             const subLayerInfo = mapLayer.layersInfo[subLayer];
+//             if (!subLayerInfo) {
+//               return null;
+//             }
 
-            return {
-              id: subLayer,
-              name: subLayerInfo.caption,
-              isFiltered: true,
-              changeIndicator: new Date(),
-            };
-          })
-          .filter((sl) => !!sl);
+//             return {
+//               id: subLayer,
+//               name: subLayerInfo.caption,
+//               isFiltered: true,
+//               changeIndicator: new Date(),
+//             };
+//           })
+//           .filter((sl) => !!sl);
 
-      return {
-        drawOrder: layer.drawOrder,
-        infobox: layer.infobox,
-        layerType: layer.layerType,
-        visibleAtStart: layer.visibleAtStart,
-        visibleForGroups: layer.visibleForGroups,
-        id: layer.id,
-        name: mapLayer.get("caption"),
-        isFiltered: true,
-        subLayers: subLayers,
-      };
-    });
+//       return {
+//         drawOrder: layer.drawOrder,
+//         infobox: layer.infobox,
+//         layerType: layer.layerType,
+//         visibleAtStart: layer.visibleAtStart,
+//         visibleForGroups: layer.visibleForGroups,
+//         id: layer.id,
+//         name: mapLayer.get("caption"),
+//         isFiltered: true,
+//         subLayers: subLayers,
+//       };
+//     });
 
-    return {
-      id: item.id,
-      name: item.name,
-      expanded: item.expanded,
-      toggled: item.toggled,
-      type: item.type,
-      layers,
-      infogroupvisible: item.infogroupvisible,
-      infogrouptitle: item.infogrouptitle,
-      infogrouptext: item.infogrouptext,
-      infogroupurl: item.infogroupurl,
-      infogroupurltext: item.infogroupurltext,
-      infogroupopendatalink: item.infogroupopendatalink,
-      infogroupowner: item.infofitemowner,
-      subLayers: item.sublayers,
-      parent: item.parent,
-      isFiltered: true,
-      isExpanded: item.expanded,
-      changeIndicator: new Date(),
-      groups: item.groups ? addLayerNames(item.groups, olLayerMap) : undefined,
-    };
-  });
-  return node;
-};
+//     return {
+//       id: item.id,
+//       name: item.name,
+//       expanded: item.expanded,
+//       toggled: item.toggled,
+//       type: item.type,
+//       layers,
+//       infogroupvisible: item.infogroupvisible,
+//       infogrouptitle: item.infogrouptitle,
+//       infogrouptext: item.infogrouptext,
+//       infogroupurl: item.infogroupurl,
+//       infogroupurltext: item.infogroupurltext,
+//       infogroupopendatalink: item.infogroupopendatalink,
+//       infogroupowner: item.infofitemowner,
+//       subLayers: item.sublayers,
+//       parent: item.parent,
+//       isFiltered: true,
+//       isExpanded: item.expanded,
+//       changeIndicator: new Date(),
+//       groups: item.groups ? addLayerNames(item.groups, olLayerMap) : undefined,
+//       // "filterAttribute"
+//       // "filterComparer"
+//       // "filterValue"
+//     };
+//   });
+//   return node;
+// };
 
 class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
@@ -199,7 +202,7 @@ class LayersSwitcherView extends React.PureComponent {
         a[b.get("name")] = b;
         return a;
       }, {});
-    this.layerTree = addLayerNames(this.options.groups, this.olLayerMap);
+    // this.layerTree = addLayerNames(this.options.groups, this.olLayerMap);
     this.baseLayers = props.map
       .getLayers()
       .getArray()
@@ -212,7 +215,7 @@ class LayersSwitcherView extends React.PureComponent {
       displayContentOverlay: null, // 'quickAccessPresets' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
       filterValue: "",
-      treeData: this.layerTree,
+      // treeData: this.layerTree,
       scrollPositions: {
         tab0: 0,
         tab1: 0,
@@ -386,17 +389,18 @@ class LayersSwitcherView extends React.PureComponent {
     }));
   };
 
+  // TODO Use this function
   collapseAllGroups = () => {
-    const collapseGroups = (groups) => {
-      groups.forEach((group) => {
-        group.isExpanded = false;
-        if (group.groups && group.groups.length > 0) {
-          collapseGroups(group.groups);
-        }
-      });
-    };
+    // const collapseGroups = (groups) => {
+    //   groups.forEach((group) => {
+    //     group.isExpanded = false;
+    //     if (group.groups && group.groups.length > 0) {
+    //       collapseGroups(group.groups);
+    //     }
+    //   });
+    // };
 
-    collapseGroups(this.layerTree);
+    // collapseGroups(this.layerTree);
   };
 
   // Call this method for each root node in the tree when the filter is cleared
@@ -424,14 +428,17 @@ class LayersSwitcherView extends React.PureComponent {
 
     if (filterCleared) {
       // Reset filter status when filter is cleared
-      this.layerTree.forEach((node) => this.resetFilterStatus(node));
+      // this.layerTree.forEach((node) => this.resetFilterStatus(node));
     } else {
       // Apply filter and propagate matches
-      this.layerTree.forEach((node) => this.filterTree(node, value));
+      // this.layerTree.forEach((node) => this.filterTree(node, value));
     }
 
+    // TODO Redo Filtering
+
     // Trigger re-render
-    this.setState({ treeData: [...this.layerTree] });
+    // this.setState({ treeData: [...this.layerTree] });
+    // TODO Filtering
   }, 100);
 
   /**
@@ -577,16 +584,12 @@ class LayersSwitcherView extends React.PureComponent {
               filterValue={this.state.filterValue}
               layersState={layersState}
             />
-            {this.state.treeData.map((group, i) => (
+            {this.staticLayerTree.map((group) => (
               <LayerGroup
-                key={i}
+                key={group.id}
                 staticLayerConfig={this.staticLayerConfig}
-                staticGroupTree={this.staticLayerTree.find(
-                  (g) => g.id === group.id
-                )}
+                staticGroupTree={group}
                 layersState={layersState}
-                group={group}
-                layerMap={this.olLayerMap}
                 globalObserver={this.globalObserver}
               />
             ))}

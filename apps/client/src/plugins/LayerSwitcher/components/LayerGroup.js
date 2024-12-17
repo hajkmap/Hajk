@@ -144,29 +144,28 @@ const getAllLayerIdsInGroup = (group) => {
 };
 
 const LayerGroup = ({
-  group,
   globalObserver,
-  layerMap,
   staticGroupTree,
   staticLayerConfig,
   layersState,
 }) => {
-  const { name, groups } = group;
+  const children = staticGroupTree.children;
 
-  const groupId = group.id;
-  const groupName = group.Name;
-  const groupIsFiltered = group.isFiltered;
-  const groupIsExpanded = group.isExpanded;
-  const groupIsToggable = group.toggled;
-  // const groupId = group.id;
-  const subGroups = group.groups;
+  const groupId = staticGroupTree.id;
+  const groupConfig = staticLayerConfig[groupId];
 
-  const infogrouptitle = group.infogrouptitle;
-  const infogrouptext = group.infogrouptext;
-  const infogroupurl = group.infogroupurl;
-  const infogroupurltext = group.infogroupurltext;
-  const infogroupopendatalink = group.infogroupopendatalink;
-  const infogroupowner = group.infogroupowner;
+  const groupName = groupConfig.caption;
+  const name = groupConfig.caption;
+  const groupIsFiltered = groupConfig.isFiltered;
+  const groupIsExpanded = groupConfig.isExpanded;
+  const groupIsToggable = groupConfig.toggled;
+
+  const infogrouptitle = groupConfig.infogrouptitle;
+  const infogrouptext = groupConfig.infogrouptext;
+  const infogroupurl = groupConfig.infogroupurl;
+  const infogroupurltext = groupConfig.infogroupurltext;
+  const infogroupopendatalink = groupConfig.infogroupopendatalink;
+  const infogroupowner = groupConfig.infogroupowner;
 
   const [infoVisible, setInfoVisible] = useState(false);
 
@@ -190,9 +189,9 @@ const LayerGroup = ({
 
   // TODO Refactor the expand close to state
   let groupsExpanded = false;
-  if (subGroups?.length === 1 && subGroups[0].expanded) {
-    groupsExpanded = subGroups[0].id;
-  }
+  // if (subGroups?.length === 1 && subGroups[0].expanded) {
+  //   groupsExpanded = subGroups[0].id;
+  // }
 
   const toggleState = isToggled
     ? "checked"
@@ -202,7 +201,7 @@ const LayerGroup = ({
 
   return (
     <LayerGroupAccordion
-      display={!groupIsFiltered ? "none" : "block"}
+      display={groupIsFiltered ? "none" : "block"}
       toggleable={groupIsToggable}
       expanded={groupIsExpanded}
       toggleDetails={
@@ -255,22 +254,28 @@ const LayerGroup = ({
       }
     >
       <div>
-        {group.layers?.map((layer) => {
-          const mapLayer = layerMap[layer.id];
-          // If mapLayer doesn't exist, the layer shouldn't be displayed
-          if (!mapLayer) {
+        {children?.map((child) => {
+          // TODO Fix the about to use static info.
+
+          const layerId = child.id;
+          // const mapLayer = layerMap[layer.id];
+          // // If mapLayer doesn't exist, the layer shouldn't be displayed
+          // if (!mapLayer) {
+          //   return null;
+          // }
+
+          const layerState = {
+            layerIsToggled: layersState[layerId]?.visible,
+            visibleSubLayers: layersState[layerId]?.visibleSubLayers,
+          };
+
+          const layerSettings = staticLayerConfig[layerId];
+          if (!layerSettings) {
             return null;
           }
 
-          const layerState = {
-            layerIsToggled: layersState[layer.id]?.visible,
-            visibleSubLayers: layersState[layer.id]?.visibleSubLayers,
-          };
-
-          const layerSettings = staticLayerConfig[layer.id];
-
           const layerConfig = {
-            layerId: layerSettings.id,
+            layerId: layerId,
             layerCaption: layerSettings.caption,
             layerType: layerSettings.layerType,
 
@@ -282,11 +287,25 @@ const LayerGroup = ({
             layerLegendIcon: layerSettings.layerLegendIcon,
           };
           const filterSubLayers = layerConfig.allSubLayers; // TODO Filter
+          const layerIsFiltered = false;
+
+          if (layerSettings.layerType === "group") {
+            return (
+              <LayerGroup
+                expanded={groupsExpanded === layerId}
+                key={layerId}
+                globalObserver={globalObserver}
+                staticLayerConfig={staticLayerConfig}
+                staticGroupTree={children?.find((g) => g?.id === layerId)}
+                layersState={layersState}
+              />
+            );
+          }
 
           return layerSettings.layerType === "groupLayer" ? (
             <GroupLayer
-              display={!layer.isFiltered ? "none" : "block"}
-              key={layerSettings.id}
+              display={layerIsFiltered ? "none" : "block"}
+              key={layerId}
               layerState={layerState}
               layerConfig={layerConfig}
               draggable={false}
@@ -296,8 +315,8 @@ const LayerGroup = ({
             />
           ) : (
             <LayerItem
-              display={!layer.isFiltered ? "none" : "block"}
-              key={layerSettings.id}
+              display={layerIsFiltered ? "none" : "block"}
+              key={layerId}
               layerState={layerState}
               layerConfig={layerConfig}
               draggable={false}
@@ -306,20 +325,6 @@ const LayerGroup = ({
             />
           );
         })}
-        {group.groups?.map((group, i) => (
-          <LayerGroup
-            expanded={groupsExpanded === group.id}
-            key={group.id ?? i}
-            group={group}
-            layerMap={layerMap}
-            globalObserver={globalObserver}
-            staticLayerConfig={staticLayerConfig}
-            staticGroupTree={staticGroupTree.children?.find(
-              (g) => g.id === group.id
-            )}
-            layersState={layersState}
-          />
-        ))}
       </div>
     </LayerGroupAccordion>
   );
