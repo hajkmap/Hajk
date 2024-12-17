@@ -128,8 +128,6 @@ class LayerComparer extends Component {
           return {
             id: realLayer.id,
             caption: realLayer.caption || "Okänt lager",
-            layerType: realLayer.type || "unknown",
-            visibleAtStart: lsLayer.visibleAtStart,
           };
         } else {
           return null;

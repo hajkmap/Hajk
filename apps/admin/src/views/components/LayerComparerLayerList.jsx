@@ -49,13 +49,13 @@ class LayerComparerLayerList extends React.Component {
 
     const filteredLayers = allLayers
       .filter((layer) =>
-        (layer.caption || layer.name || layer.id || "")
+        (layer.caption || layer.id || "")
           .toLowerCase()
           .includes(filterText.toLowerCase())
       )
       .sort((a, b) => {
-        const aVal = (a.caption || a.name || a.id || "").toLowerCase();
-        const bVal = (b.caption || b.name || b.id || "").toLowerCase();
+        const aVal = (a.caption || a.id || "").toLowerCase();
+        const bVal = (b.caption || b.id || "").toLowerCase();
         if (aVal < bVal) return sortAsc ? -1 : 1;
         if (aVal > bVal) return sortAsc ? 1 : -1;
         return 0;
