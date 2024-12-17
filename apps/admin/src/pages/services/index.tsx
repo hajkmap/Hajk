@@ -126,103 +126,105 @@ export default function ServicesPage() {
   });
 
   return (
-    <Page title={t("common.services")}>
+    <>
       {isLoading ? (
         <Box component="div">Loading...</Box>
       ) : (
         <>
           {!services && <Box component="div">No services found</Box>}
-          {!!services && (
-            <Button
-              onClick={handleClickOpen}
-              variant="contained"
-              sx={{
-                float: "right",
-                mr: 2,
-                mb: 1,
-              }}
-            >
-              {t("services.dialog.addBtn")}
-            </Button>
-          )}
-          <DialogWrapper
-            fullWidth
-            open={open}
-            title={t("services.dialog.title")}
-            onClose={handleClose}
-            onSubmit={onSubmit}
-            actions={
+          <Page
+            title={t("common.services")}
+            actionButtons={
               <>
-                <Button variant="text" onClick={handleClose} color="primary">
-                  {t("services.dialog.closeBtn")}
-                </Button>
-                <Button type="submit" color="primary" variant="contained">
-                  {t("services.dialog.saveBtn")}
+                <Button
+                  onClick={handleClickOpen}
+                  color="primary"
+                  variant="contained"
+                >
+                  {t("services.dialog.addBtn")}
                 </Button>
               </>
             }
           >
-            <FormRenderer
-              data={service}
-              register={register}
-              control={control}
-              errors={errors}
-            />
-          </DialogWrapper>
-          <Grid size={12}>
-            <DataGrid
-              onCellClick={(params) => {
-                const id: string = (params.row as Service).id;
-                if (id) {
-                  void navigate(`/services/${id}`);
-                }
-              }}
-              sx={{
-                maxWidth: "100%",
-                mt: 8,
-                "& .MuiDataGrid-row:hover": {
-                  cursor: "pointer",
-                },
-              }}
-              rows={services ?? []}
-              columns={[
-                {
-                  field: "type",
-                  flex: 0.3,
-                  headerName: t("common.serviceType"),
-                },
-                { field: "name", flex: 1, headerName: t("common.name") },
-                { field: "url", flex: 1, headerName: "Url" },
-                {
-                  field: "version",
-                  flex: 0.3,
-                  headerName: "Version",
-                },
-              ]}
-              slotProps={{
-                loadingOverlay: {
-                  variant: "skeleton",
-                  noRowsVariant: "skeleton",
-                },
-              }}
-              localeText={
-                language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
+            <DialogWrapper
+              fullWidth
+              open={open}
+              title={t("services.dialog.title")}
+              onClose={handleClose}
+              onSubmit={onSubmit}
+              actions={
+                <>
+                  <Button variant="text" onClick={handleClose} color="primary">
+                    {t("services.dialog.closeBtn")}
+                  </Button>
+                  <Button type="submit" color="primary" variant="contained">
+                    {t("services.dialog.saveBtn")}
+                  </Button>
+                </>
               }
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 10,
+            >
+              <FormRenderer
+                data={service}
+                register={register}
+                control={control}
+                errors={errors}
+              />
+            </DialogWrapper>
+            <Grid size={12}>
+              <DataGrid
+                onCellClick={(params) => {
+                  const id: string = (params.row as Service).id;
+                  if (id) {
+                    void navigate(`/services/${id}`);
+                  }
+                }}
+                sx={{
+                  maxWidth: "100%",
+                  mt: 8,
+                  "& .MuiDataGrid-row:hover": {
+                    cursor: "pointer",
                   },
-                },
-              }}
-              getRowId={(row) => row.id}
-              hideFooterPagination={services && services.length < 10}
-              pageSizeOptions={[10, 25, 50, 100]}
-              disableRowSelectionOnClick
-            />
-          </Grid>
+                }}
+                rows={services ?? []}
+                columns={[
+                  {
+                    field: "type",
+                    flex: 0.3,
+                    headerName: t("common.serviceType"),
+                  },
+                  { field: "name", flex: 1, headerName: t("common.name") },
+                  { field: "url", flex: 1, headerName: "Url" },
+                  {
+                    field: "version",
+                    flex: 0.3,
+                    headerName: "Version",
+                  },
+                ]}
+                slotProps={{
+                  loadingOverlay: {
+                    variant: "skeleton",
+                    noRowsVariant: "skeleton",
+                  },
+                }}
+                localeText={
+                  language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
+                }
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      pageSize: 10,
+                    },
+                  },
+                }}
+                getRowId={(row) => row.id}
+                hideFooterPagination={services && services.length < 10}
+                pageSizeOptions={[10, 25, 50, 100]}
+                disableRowSelectionOnClick
+              />
+            </Grid>
+          </Page>
         </>
       )}
-    </Page>
+    </>
   );
 }
