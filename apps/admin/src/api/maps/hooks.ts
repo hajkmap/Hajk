@@ -26,7 +26,7 @@ import { ToolsApiResponse } from "../tools/types";
 
 // React Query hook to fetch all maps
 // This hook uses the `getMaps` function from the `requests` module
-export const useMaps = (): UseQueryResult<string[]> => {
+export const useMaps = (): UseQueryResult<Map[]> => {
   return useQuery({
     queryKey: ["maps"],
     queryFn: getMaps,

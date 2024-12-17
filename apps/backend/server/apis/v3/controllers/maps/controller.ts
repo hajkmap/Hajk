@@ -5,7 +5,7 @@ import type { Request, Response } from "express";
 
 class MapsController {
   async getMaps(_: Request, res: Response) {
-    const maps = await MapService.getMapNames();
+    const maps = await MapService.getMaps();
     res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
   }
 

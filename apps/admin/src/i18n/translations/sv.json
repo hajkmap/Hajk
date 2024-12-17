@@ -1,6 +1,6 @@
 {
   "translation": {
-    "circularProgress.loadingLayers": "Laddar lager...",
+    "common.loading": "Laddar...",
     "common.account": "Konto",
     "common.actions": "Åtgärder",
     "common.all": "Alla",
@@ -77,6 +77,7 @@
     "services.deleteServiceSuccess": "Tjänsten {{name}} är nu borttagen!",
     "services.deleteServiceFailed": "Misslyckades att ta bort tjänsten {{name}}.",
     "services.affectedLayers": "Om du byter url kan det leda till att andra inställningar slutar att fungera. Ändringen kommer att <strong>påverka {{count}} lager.</strong>",
+    "services.loadingLayers": "Laddar lager...",
     "services.workspace": "Arbetsområde",
     "user.confirmPassword": "Bekräfta lösenord",
     "user.createLocalUser": "Skapa användare",
@@ -97,6 +98,12 @@
     "user.passwordRequired": "Lösenord är obligatoriskt",
     "user.pleaseConfirmPassword": "Vänligen bekräfta lösenord",
     "user.roles": "Roller",
-    "user.searchTitle": "Sök användare"
+    "user.searchTitle": "Sök användare",
+    "map.createMap": "Skapa ny karta",
+    "map.searchTitle": "Sök bland kartor...",
+    "map.name": "Namn",
+    "map.description": "Beskrivning",
+    "map.title": "Titel",
+    "map.locked": "Låst"
   }
 }

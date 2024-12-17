@@ -1,6 +1,7 @@
 export interface Map {
   id: string;
   name: string;
+  locked: boolean;
   options?: Record<string, string>;
 }
 
@@ -16,7 +17,7 @@ export interface Projection {
   code: string;
 }
 export interface MapsApiResponse {
-  maps: string[];
+  maps: Map[];
   count: number;
   error: string;
   errorId: string;
