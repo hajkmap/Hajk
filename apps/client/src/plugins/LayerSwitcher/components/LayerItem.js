@@ -140,10 +140,12 @@ export default function LayerItem({
     numberOfSubLayers,
     layerInfo,
     layerLegendIcon,
+    wmsLoadError,
   } = layerConfig;
 
   const legendIcon = layerInfo?.legendIcon || layerLegendIcon;
 
+  // console.log("loadStatus", layerCaption, wmsLoadError);
   useEffect(() => {
     const handleLoadStatusChange = (d) => {
       if (wmsLayerLoadStatus !== "loaderror" && layerId === d.id) {

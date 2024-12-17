@@ -153,6 +153,14 @@ const LayerGroup = ({
 }) => {
   const { name, groups } = group;
 
+  const groupId = group.id;
+  const groupName = group.Name;
+  const groupIsFiltered = group.isFiltered;
+  const groupIsExpanded = group.isExpanded;
+  const groupIsToggable = group.toggled;
+  // const groupId = group.id;
+  const subGroups = group.groups;
+
   const infogrouptitle = group.infogrouptitle;
   const infogrouptext = group.infogrouptext;
   const infogroupurl = group.infogroupurl;
@@ -180,9 +188,10 @@ const LayerGroup = ({
     setInfoVisible(!infoVisible);
   };
 
+  // TODO Refactor the expand close to state
   let groupsExpanded = false;
-  if (group.groups?.length === 1 && groups[0].expanded) {
-    groupsExpanded = groups[0].id;
+  if (subGroups?.length === 1 && subGroups[0].expanded) {
+    groupsExpanded = subGroups[0].id;
   }
 
   const toggleState = isToggled
@@ -193,18 +202,18 @@ const LayerGroup = ({
 
   return (
     <LayerGroupAccordion
-      display={!group.isFiltered ? "none" : "block"}
-      toggleable={group.toggled}
-      expanded={group.isExpanded}
+      display={!groupIsFiltered ? "none" : "block"}
+      toggleable={groupIsToggable}
+      expanded={groupIsExpanded}
       toggleDetails={
         <ToggleAllComponent
-          toggleable={group.toggled}
+          toggleable={groupIsToggable}
           toggleState={toggleState}
           clickHandler={() => {
             if (isToggled) {
-              layerSwitcherDispatch.setGroupVisibility(group.id, false);
+              layerSwitcherDispatch.setGroupVisibility(groupId, false);
             } else {
-              layerSwitcherDispatch.setGroupVisibility(group.id, true);
+              layerSwitcherDispatch.setGroupVisibility(groupId, true);
             }
           }}
         />
@@ -224,8 +233,8 @@ const LayerGroup = ({
             />
             <ListItemText
               primaryTypographyProps={{
-                py: group.toggled ? 0 : "3px",
-                pl: group.toggled ? 0 : "3px",
+                py: groupIsToggable ? 0 : "3px",
+                pl: groupIsToggable ? 0 : "3px",
                 variant: "body1",
                 fontWeight: isToggled || isSemiToggled ? "bold" : "inherit",
               }}
@@ -233,7 +242,7 @@ const LayerGroup = ({
             />
           </div>
           <GroupInfoDetails
-            name={group.name}
+            name={groupName}
             infoVisible={infoVisible}
             infogrouptitle={infogrouptitle}
             infogrouptext={infogrouptext}
@@ -263,23 +272,38 @@ const LayerGroup = ({
           const layerSettings = staticLayerConfig[layer.id];
 
           // TODO Get config from static and send to layeritem/grouplayer
+          // console.log(layerSettings);
           const layerConfig = {
-            layerId: mapLayer.get("name"),
-            layerCaption: mapLayer.get("caption"),
-            layerType: mapLayer.get("layerType"),
+            layerId: layerSettings.id,
+            layerCaption: layerSettings.caption,
+            layerType: layerSettings.layerType,
 
-            layerIsFakeMapLayer: mapLayer.isFakeMapLayer,
-            layerMinZoom: mapLayer.get("minZoom"),
-            layerMaxZoom: mapLayer.get("maxZoom"),
-            numberOfSubLayers: mapLayer.subLayers.length,
-            layerInfo: mapLayer.get("layerInfo"),
-            layerLegendIcon: mapLayer.get("legendIcon"),
+            layerIsFakeMapLayer: false, // TODO Check this mapLayer.isFakeMapLayer,
+            layerMinZoom: layerSettings.layerMinZoom,
+            layerMaxZoom: layerSettings.layerMaxZoom,
+            numberOfSubLayers: layerSettings.numberOfSubLayers,
+            layerInfo: layerSettings.layerInfo,
+            layerLegendIcon: layerSettings.layerLegendIcon,
+
+            // layerIsFakeMapLayer: mapLayer.isFakeMapLayer,
+            // layerMinZoom: mapLayer.get("minZoom"),
+            // layerMaxZoom: mapLayer.get("maxZoom"),
+            // numberOfSubLayers: mapLayer.subLayers.length,
+            // layerInfo: mapLayer.get("layerInfo"),
+            // layerLegendIcon: mapLayer.get("legendIcon"),
           };
+          // console.log("MapLayer", layerConfig);
 
-          return mapLayer.get("layerType") === "group" ? (
+          // console.log(
+          //   layerSettings.caption,
+          //   layerSettings.layerType,
+          //   mapLayer.get("layerType")
+          // );
+          // return mapLayer.get("layerType") === "group" ? (
+          return layerSettings.layerType === "groupLayer" ? (
             <GroupLayer
               display={!layer.isFiltered ? "none" : "block"}
-              key={mapLayer.get("name")}
+              key={layerSettings.id}
               layer={mapLayer}
               layerState={layerState}
               layerConfig={layerConfig}
@@ -291,7 +315,7 @@ const LayerGroup = ({
           ) : (
             <LayerItem
               display={!layer.isFiltered ? "none" : "block"}
-              key={mapLayer.get("name")}
+              key={layerSettings.id}
               layerState={layerState}
               layerConfig={layerConfig}
               draggable={false}
@@ -303,7 +327,7 @@ const LayerGroup = ({
         {group.groups?.map((group, i) => (
           <LayerGroup
             expanded={groupsExpanded === group.id}
-            key={i}
+            key={group.id ?? i}
             group={group}
             layerMap={layerMap}
             globalObserver={globalObserver}

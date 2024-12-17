@@ -302,7 +302,8 @@ const getLayerNodes = (groups, olLayerMap) =>
 
     // TODO refactor/cleanup
     const olLayer = olLayerMap[node.id];
-    const isGroupLayer = olLayer?.get("subLayers");
+    // const isGroupLayer = olLayer?.get("subLayers")?.length > 1;
+    const isGroupLayer = olLayer?.get("layerType") === "group";
 
     let layerType = node.layerType;
     if (isGroupLayer) {
@@ -315,7 +316,7 @@ const getLayerNodes = (groups, olLayerMap) =>
     return [
       {
         id: node.id,
-        name: olLayerMap[node.id]?.get("caption") ?? node.name,
+        caption: olLayerMap[node.id]?.get("caption") ?? node.name,
         allSubLayers: olLayerMap[node.id]?.get("subLayers"),
         initiallyExpanded: node.expanded,
         initiallyToggled: node.toggled,
@@ -327,8 +328,9 @@ const getLayerNodes = (groups, olLayerMap) =>
         visibleForGroups: node.visibleForGroups,
         layerMinZoom: olLayer?.get("minZoom"),
         layerMaxZoom: olLayer?.get("maxZoom"),
-        layerInfo: node.layerInfo,
+        layerInfo: olLayer?.get("layerInfo"),
         layerLegendIcon: olLayer?.get("legendIcon"),
+        numberOfSubLayers: node.subLayers?.length,
         infogroupvisible: node.infogroupvisible,
         infogrouptitle: node.infogrouptitle,
         infogrouptext: node.infogrouptext,
@@ -437,7 +439,8 @@ const LayerSwitcherProvider = ({
               visible: l.get("visible"),
               quickAccess: l.get("quickAccess"),
               visibleSubLayers: l.get("subLayers"),
-              // zIndex: l.get("zIndex"),
+              wmsLoadError: l.get("wmsLoadStatus") ?? undefined,
+              zIndex: l.get("zIndex"),
               // "filterAttribute"
               // "filterComparer"
               // "filterValue"
