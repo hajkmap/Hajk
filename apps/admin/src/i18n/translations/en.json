@@ -66,6 +66,7 @@
     "map.name": "Name",
     "map.description": "Description",
     "map.title": "Title",
-    "map.locked": "Locked"
+    "map.locked": "Locked",
+    "layers.dialog.addBtn": "Add layer"
   }
 }

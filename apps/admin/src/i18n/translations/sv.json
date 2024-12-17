@@ -66,6 +66,7 @@
     "map.name": "Namn",
     "map.description": "Beskrivning",
     "map.title": "Titel",
-    "map.locked": "Låst"
+    "map.locked": "Låst",
+    "layers.dialog.addBtn": "Lägg till lager"
   }
 }
