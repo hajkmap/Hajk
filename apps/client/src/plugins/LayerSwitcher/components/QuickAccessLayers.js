@@ -122,7 +122,6 @@ export default function QuickAccessLayers({
         ) : l.get("layerType") === "group" ? (
           <GroupLayer
             key={l.ol_uid}
-            layer={l}
             layerState={layerState}
             layerConfig={layerConfig}
             globalObserver={globalObserver}

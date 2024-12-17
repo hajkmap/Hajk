@@ -271,7 +271,9 @@ function DrawOrder({ display, app, map, localObserver, options }) {
                 layerCaption: l.get("caption"),
                 layerType: l.get("layerType"),
 
-                layerIsFakeMapLayer: l.isFakeMapLayer,
+                // layerIsFakeMapLayer: l.isFakeMapLayer,
+                layerIsFakeMapLayer: false, // TODO Check this mapLayer.isFakeMapLayer,
+                allSubLayers: l.get("subLayers"),
                 layerMinZoom: l.get("minZoom"),
                 layerMaxZoom: l.get("maxZoom"),
                 numberOfSubLayers: l.subLayers.length,
@@ -292,7 +294,6 @@ function DrawOrder({ display, app, map, localObserver, options }) {
                   ) : l.get("layerType") === "group" ? (
                     <GroupLayer
                       key={l.ol_uid}
-                      layer={l}
                       layerState={layerState}
                       layerConfig={layerConfig}
                       globalObserver={app.globalObserver}

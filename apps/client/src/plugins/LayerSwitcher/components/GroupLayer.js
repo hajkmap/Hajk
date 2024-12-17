@@ -13,31 +13,26 @@ import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 /* A grouplayer is a layer configured with multiple layers in admin, NOT a group in layerswitcher */
 
 export default function GroupLayer({
-  // TODO Remove OL Layer
-  layer,
-  groupLayer,
   layerState,
   layerConfig,
   globalObserver,
   toggleable,
   draggable,
   display,
+  filterSubLayers,
 }) {
-  const subLayers = layer.subLayers;
-  const filterSubLayers = groupLayer?.subLayers;
-
   const { layerIsToggled, visibleSubLayers } = layerState;
 
   const {
     layerId,
     // layerCaption,
     // layerType,
-
     layerMinZoom,
     layerMaxZoom,
     // numberOfSubLayers,
     layerInfo,
     // layerLegendIcon,
+    allSubLayers,
   } = layerConfig;
 
   const [showSublayers, setShowSublayers] = useState(false);
@@ -128,7 +123,7 @@ export default function GroupLayer({
       subLayersSection={
         <Collapse in={showSublayers} unmountOnExit>
           <Box sx={{ marginLeft: 3 }}>
-            {subLayers.map((subLayer, index) => (
+            {allSubLayers?.map((subLayer, index) => (
               <SubLayerItem
                 style={{ displaye: showSublayer(subLayer) ? "block" : "none" }}
                 key={subLayer}

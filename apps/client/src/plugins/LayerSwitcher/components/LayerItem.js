@@ -137,7 +137,7 @@ export default function LayerItem({
     layerIsFakeMapLayer,
     layerMinZoom,
     layerMaxZoom,
-    numberOfSubLayers,
+    allSubLayers,
     layerInfo,
     layerLegendIcon,
     wmsLoadError,
@@ -191,7 +191,8 @@ export default function LayerItem({
   };
 
   const layerIsSemiToggled =
-    layerType === "group" && visibleSubLayers.length !== numberOfSubLayers;
+    layerType === "groupLayer" &&
+    visibleSubLayers.length !== allSubLayers.length;
 
   const layerIsVisibleAtZoom =
     mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;

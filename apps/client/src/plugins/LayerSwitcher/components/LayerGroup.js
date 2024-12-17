@@ -263,54 +263,36 @@ const LayerGroup = ({
           }
 
           const layerState = {
-            // layerIsToggled: mapLayer.get("visible"),
             layerIsToggled: layersState[layer.id]?.visible,
-            // visibleSubLayers: mapLayer.get("subLayers"),
             visibleSubLayers: layersState[layer.id]?.visibleSubLayers,
           };
 
           const layerSettings = staticLayerConfig[layer.id];
 
-          // TODO Get config from static and send to layeritem/grouplayer
-          // console.log(layerSettings);
           const layerConfig = {
             layerId: layerSettings.id,
             layerCaption: layerSettings.caption,
             layerType: layerSettings.layerType,
 
             layerIsFakeMapLayer: false, // TODO Check this mapLayer.isFakeMapLayer,
+            allSubLayers: layerSettings.allSubLayers,
             layerMinZoom: layerSettings.layerMinZoom,
             layerMaxZoom: layerSettings.layerMaxZoom,
-            numberOfSubLayers: layerSettings.numberOfSubLayers,
             layerInfo: layerSettings.layerInfo,
             layerLegendIcon: layerSettings.layerLegendIcon,
-
-            // layerIsFakeMapLayer: mapLayer.isFakeMapLayer,
-            // layerMinZoom: mapLayer.get("minZoom"),
-            // layerMaxZoom: mapLayer.get("maxZoom"),
-            // numberOfSubLayers: mapLayer.subLayers.length,
-            // layerInfo: mapLayer.get("layerInfo"),
-            // layerLegendIcon: mapLayer.get("legendIcon"),
           };
-          // console.log("MapLayer", layerConfig);
+          const filterSubLayers = layerConfig.allSubLayers; // TODO Filter
 
-          // console.log(
-          //   layerSettings.caption,
-          //   layerSettings.layerType,
-          //   mapLayer.get("layerType")
-          // );
-          // return mapLayer.get("layerType") === "group" ? (
           return layerSettings.layerType === "groupLayer" ? (
             <GroupLayer
               display={!layer.isFiltered ? "none" : "block"}
               key={layerSettings.id}
-              layer={mapLayer}
               layerState={layerState}
               layerConfig={layerConfig}
               draggable={false}
               toggleable={true}
               globalObserver={globalObserver}
-              groupLayer={layer}
+              filterSubLayers={filterSubLayers}
             />
           ) : (
             <LayerItem
