@@ -15,6 +15,12 @@ class MapService {
     logger.debug("Initiating Map Service");
   }
 
+  async getMaps() {
+    const maps = await prisma.map.findMany();
+
+    return maps;
+  }
+
   async getMapNames() {
     const maps = await prisma.map.findMany({ select: { name: true } });
 

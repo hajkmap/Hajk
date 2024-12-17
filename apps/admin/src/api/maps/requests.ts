@@ -28,7 +28,7 @@ import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
  * All functions return a Promise with the expected data format or throw an error in case of failure.
  *
  */
-export const getMaps = async (): Promise<string[]> => {
+export const getMaps = async (): Promise<Map[]> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<MapsApiResponse>("/maps");

@@ -1,5 +1,6 @@
 {
   "translation": {
+    "common.loading": "Laddar...",
     "common.account": "Konto",
     "common.cancel": "Avbryt",
     "common.clickableLogo": "Klickbar logga",
@@ -59,6 +60,12 @@
     "user.passwordRequired": "Lösenord är obligatoriskt",
     "user.pleaseConfirmPassword": "Vänligen bekräfta lösenord",
     "user.roles": "Roller",
-    "user.searchTitle": "Sök användare"
+    "user.searchTitle": "Sök användare",
+    "map.createMap": "Skapa ny karta",
+    "map.searchTitle": "Sök bland kartor...",
+    "map.name": "Namn",
+    "map.description": "Beskrivning",
+    "map.title": "Titel",
+    "map.locked": "Låst"
   }
 }

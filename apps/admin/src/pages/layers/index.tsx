@@ -13,7 +13,7 @@ export default function LayersPage() {
   return (
     <Page title={t("common.layers")}>
       {isLoading ? (
-        <div>Loading...</div>
+        <div>{t("common.loading")}</div>
       ) : (
         <Grid size={12}>
           <p>layers.length = {layers && ` (${layers.length})`}</p>

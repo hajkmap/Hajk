@@ -1,5 +1,6 @@
 {
   "translation": {
+    "common.loading": "Loading...",
     "common.account": "Account",
     "common.cancel": "Cancel",
     "common.clickableLogo": "Clickable Logo",
@@ -59,6 +60,12 @@
     "user.passwordRequired": "Password is required",
     "user.pleaseConfirmPassword": "Please confirm password",
     "user.roles": "Roles",
-    "user.searchTitle": "Search users"
+    "user.searchTitle": "Search users",
+    "map.createMap": "Create a new map",
+    "map.searchTitle": "Search maps...",
+    "map.name": "Name",
+    "map.description": "Description",
+    "map.title": "Title",
+    "map.locked": "Locked"
   }
 }
