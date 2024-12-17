@@ -136,7 +136,7 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
               <CircularProgress
                 color="primary"
                 size={40}
-                typographyText={t("circularProgress.loadingLayers")}
+                typographyText={t("services.loadingLayers")}
               />
             ) : layersError ? (
               <Typography align="center" color={palette.error.main}>
