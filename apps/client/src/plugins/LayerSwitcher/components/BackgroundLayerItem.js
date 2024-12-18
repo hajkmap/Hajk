@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, memo } from "react";
 
 // Material UI components
 import {
@@ -15,15 +15,19 @@ import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
-export default function BackgroundLayerItem({
+// TODO Remove all isfakemaplayer
+function BackgroundLayerItem({
   layer,
   globalObserver,
   clickCallback,
+  layerId,
   selected,
+  isFakeMapLayer,
 }) {
   // WmsLayer load status, shows warning icon if !ok
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
 
+  // console.log("loadStatus", layer.get("wmsLoadStatus"));
   useEffect(() => {
     const handleLoadStatusChange = (d) => {
       if (wmsLayerLoadStatus !== "loaderror" && layer.get("name") === d.id) {
@@ -68,7 +72,7 @@ export default function BackgroundLayerItem({
     >
       <ListItemButton
         disableTouchRipple
-        onClick={clickCallback}
+        onClick={() => clickCallback(layerId)}
         sx={{
           p: 0,
           ml: 0,
@@ -115,7 +119,7 @@ export default function BackgroundLayerItem({
                 </HajkToolTip>
               </IconButton>
             )}
-            {layer.isFakeMapLayer !== true && (
+            {isFakeMapLayer !== true && (
               <IconButton
                 size="small"
                 onClick={(e) => showLayerDetails(e)}
@@ -134,3 +138,5 @@ export default function BackgroundLayerItem({
     </div>
   );
 }
+
+export default memo(BackgroundLayerItem);

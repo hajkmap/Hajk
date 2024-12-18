@@ -143,7 +143,7 @@ const BackgroundSwitcher = ({
    * @param {Object} e The event object, contains target's value
    */
   const onLayerClick = useCallback(
-    (newSelectedId) => () => {
+    (newSelectedId) => {
       setSelectedLayerId(newSelectedId);
 
       // Publish event to ensure all other background layers are disabled
@@ -199,7 +199,9 @@ const BackgroundSwitcher = ({
             checked: selectedLayerId === WHITE_BACKROUND_LAYER_ID,
           })}
           globalObserver={globalObserver}
-          clickCallback={onLayerClick(WHITE_BACKROUND_LAYER_ID)}
+          clickCallback={onLayerClick}
+          layerId={WHITE_BACKROUND_LAYER_ID}
+          isFakeMapLayer={true}
         />
       )}
 
@@ -214,7 +216,9 @@ const BackgroundSwitcher = ({
             checked: selectedLayerId === BLACK_BACKROUND_LAYER_ID,
           })}
           globalObserver={globalObserver}
-          clickCallback={onLayerClick(BLACK_BACKROUND_LAYER_ID)}
+          clickCallback={onLayerClick}
+          layerID={BLACK_BACKROUND_LAYER_ID}
+          isFakeMapLayer={true}
         />
       )}
 
@@ -225,7 +229,9 @@ const BackgroundSwitcher = ({
           selected={isOSMLayer(selectedLayerId)}
           layer={osmLayerRef.current}
           globalObserver={globalObserver}
-          clickCallback={onLayerClick(OSM_BACKGROUND_LAYER_ID)}
+          clickCallback={onLayerClick}
+          layerId={OSM_BACKGROUND_LAYER_ID}
+          isFakeMapLayer={false}
         />
       )}
       {layersToShow.map((layerConfig, i) => (
@@ -235,7 +241,9 @@ const BackgroundSwitcher = ({
           selected={selectedLayerId === layerConfig.name}
           layer={layerMap[layerConfig.name]}
           globalObserver={globalObserver}
-          clickCallback={onLayerClick(layerConfig.name)}
+          clickCallback={onLayerClick}
+          layerId={layerConfig.name}
+          isFakeMapLayer={false}
         />
       ))}
     </Box>
