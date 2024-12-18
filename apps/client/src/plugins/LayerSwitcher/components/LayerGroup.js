@@ -148,6 +148,8 @@ const LayerGroup = ({
   staticGroupTree,
   staticLayerConfig,
   layersState,
+  filterHits,
+  filterValue,
 }) => {
   const children = staticGroupTree.children;
 
@@ -169,7 +171,19 @@ const LayerGroup = ({
 
   const [infoVisible, setInfoVisible] = useState(false);
 
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
+
   const allLeafLayersInGroup = getAllLayerIdsInGroup(staticGroupTree);
+
+  const filterHitsInGroup =
+    filterHits && filterHits.intersection(new Set(allLeafLayersInGroup));
+  // hasFilterHits === null means that the filter isn't active
+  const hasNoFilterHits = filterHitsInGroup && filterHitsInGroup?.size === 0;
+  const filterActiveAndHasHits = filterHits && !hasNoFilterHits;
+  // console.log({ name, hasNoFilterHits, filterHitsInGroup, filterHits });
+  if (hasNoFilterHits) {
+    return null;
+  }
 
   const hasVisibleLayer = allLeafLayersInGroup.some(
     (id) => layersState[id]?.visible
@@ -180,8 +194,6 @@ const LayerGroup = ({
 
   const isToggled = hasAllLayersVisible;
   const isSemiToggled = hasVisibleLayer && !hasAllLayersVisible;
-
-  const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   const toggleInfo = () => {
     setInfoVisible(!infoVisible);
@@ -203,7 +215,7 @@ const LayerGroup = ({
     <LayerGroupAccordion
       display={groupIsFiltered ? "none" : "block"}
       toggleable={groupIsToggable}
-      expanded={groupIsExpanded}
+      expanded={filterActiveAndHasHits || groupIsExpanded}
       toggleDetails={
         <ToggleAllComponent
           toggleable={groupIsToggable}
@@ -257,15 +269,17 @@ const LayerGroup = ({
         {children?.map((child) => {
           const layerId = child.id;
 
+          if (filterHits && !filterHits.has(layerId)) {
+            // The filter is active and this layer is not a hit.
+            return null;
+          }
+
           const layerState = layersState[layerId];
 
           const layerSettings = staticLayerConfig[layerId];
           if (!layerSettings) {
             return null;
           }
-
-          const filterSubLayers = layerSettings.allSubLayers; // TODO Filter
-          const layerIsFiltered = false;
 
           if (layerSettings.layerType === "group") {
             return (
@@ -276,30 +290,32 @@ const LayerGroup = ({
                 staticLayerConfig={staticLayerConfig}
                 staticGroupTree={children?.find((g) => g?.id === layerId)}
                 layersState={layersState}
+                filterHits={filterHits}
+                filterValue={filterValue}
               />
             );
           }
 
           return layerSettings.layerType === "groupLayer" ? (
             <GroupLayer
-              display={layerIsFiltered ? "none" : "block"}
               key={layerId}
               layerState={layerState}
               layerConfig={layerSettings}
               draggable={false}
               toggleable={true}
               globalObserver={globalObserver}
-              filterSubLayers={filterSubLayers}
+              filterHits={filterHits}
+              filterValue={filterValue}
             />
           ) : (
             <LayerItem
-              display={layerIsFiltered ? "none" : "block"}
               key={layerId}
               layerState={layerState}
               layerConfig={layerSettings}
               draggable={false}
               toggleable={true}
               globalObserver={globalObserver}
+              filterValue={filterValue}
             />
           );
         })}

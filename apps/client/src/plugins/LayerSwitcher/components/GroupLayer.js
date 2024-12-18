@@ -19,21 +19,13 @@ export default function GroupLayer({
   toggleable,
   draggable,
   display,
-  filterSubLayers,
+  filterHits,
+  filterValue,
 }) {
   const { layerIsToggled, visibleSubLayers } = layerState;
 
-  const {
-    layerId,
-    // layerCaption,
-    // layerType,
-    layerMinZoom,
-    layerMaxZoom,
-    // numberOfSubLayers,
-    layerInfo,
-    // layerLegendIcon,
-    allSubLayers,
-  } = layerConfig;
+  const { layerId, layerMinZoom, layerMaxZoom, layerInfo, allSubLayers } =
+    layerConfig;
 
   const [showSublayers, setShowSublayers] = useState(false);
 
@@ -46,6 +38,20 @@ export default function GroupLayer({
   const setSubLayerHidden = (subLayer) => {
     layerSwitcherDispatch.setSubLayerVisibility(layerId, subLayer, false);
   };
+
+  const lowercaseFilterValue = filterValue?.toLocaleLowerCase();
+  // Find out which (if any) sublayer is the filter hit
+  const subLayersToShow = filterHits
+    ? allSubLayers.filter((sl) => {
+        const subLayerCaption = layerInfo?.layersInfo[sl]?.caption;
+        return subLayerCaption
+          ?.toLocaleLowerCase()
+          ?.includes(lowercaseFilterValue);
+      })
+    : allSubLayers;
+
+  // Is the filter hit on a sub layer or on the GroupLayer Captions?
+  const isSubLayerFilterHit = filterHits && subLayersToShow.length > 0;
 
   const handleLayerItemClick = () => {
     if (layerIsToggled) {
@@ -61,23 +67,6 @@ export default function GroupLayer({
     } else {
       setSubLayerVisible(subLayer);
     }
-  };
-
-  // Determines visibility of subLayer
-  // If the groupLayer is not toggleable
-  // then the sublayer should only be visible if it's included in visibleSubLayers
-  const showSublayer = (subLayer) => {
-    if (toggleable) {
-      return isSubLayerFiltered(subLayer);
-    } else if (visibleSubLayers.includes(subLayer)) {
-      return true;
-    }
-    return false;
-  };
-
-  const isSubLayerFiltered = (subLayer) => {
-    const foundSubLayer = filterSubLayers?.find((sl) => sl.id === subLayer);
-    return foundSubLayer ? foundSubLayer.isFiltered : false;
   };
 
   const mapZoom = useMapZoom();
@@ -121,11 +110,10 @@ export default function GroupLayer({
         )
       }
       subLayersSection={
-        <Collapse in={showSublayers} unmountOnExit>
+        <Collapse in={showSublayers || isSubLayerFilterHit} unmountOnExit>
           <Box sx={{ marginLeft: 3 }}>
-            {allSubLayers?.map((subLayer, index) => (
+            {subLayersToShow?.map((subLayer, index) => (
               <SubLayerItem
-                style={{ displaye: showSublayer(subLayer) ? "block" : "none" }}
                 key={subLayer}
                 subLayer={subLayer}
                 subLayerIndex={index}

@@ -292,88 +292,6 @@ class LayersSwitcherView extends React.PureComponent {
     }));
   };
 
-  // Filter tree data
-  filterTree = (node, filterText, parentMatch = false) => {
-    let foundInChild = false;
-
-    // Determine if the current node matches the filter
-    const selfMatch =
-      filterText === "" ||
-      node.name.toLocaleLowerCase().includes(filterText.toLocaleLowerCase());
-
-    // If the current node matches the filter criteria or if there is a parent match, mark it as filtered
-    if (parentMatch || selfMatch) {
-      this.updateNode(node, true, true); // Update node to be visible
-      foundInChild = true;
-    }
-
-    // Process child layers
-    if (node.layers) {
-      node.layers.forEach((layer) => {
-        // Pass true if either parent matches, or this node itself matches
-        foundInChild =
-          this.filterTree(layer, filterText, parentMatch || selfMatch) ||
-          foundInChild;
-      });
-    }
-
-    // Process child groups
-    if (node.groups) {
-      node.groups.forEach((group) => {
-        // Pass true if either parent matches, or this node itself matches
-        foundInChild =
-          this.filterTree(group, filterText, parentMatch || selfMatch) ||
-          foundInChild;
-      });
-    }
-
-    // Update the current node based on child findings or its own match status
-    this.updateNode(node, foundInChild || selfMatch, false);
-
-    // If a parentMatch exists or the current node itself is a match, check the expandFilteredResults setting to determine if the node should be expanded
-    if (foundInChild || selfMatch) {
-      if (this.options.expandFilteredResults) {
-        node.isExpanded = true; // Expand the node if expandFilteredResults is true
-      }
-    }
-
-    return foundInChild || selfMatch;
-  };
-
-  updateNode = (node, isFiltered, compare) => {
-    if (!compare) {
-      // Indicate that node has changed
-      node.changeIndicator = new Date();
-    } else if (node.isFiltered !== isFiltered) {
-      // Indicate that node has changed
-      node.changeIndicator = new Date();
-    }
-    node.isFiltered = isFiltered;
-  };
-
-  setChildrenFiltered = (node, value) => {
-    if (node.layers) {
-      node.layers.forEach((layer) => {
-        this.updateNode(layer, value, true);
-        this.setChildrenFiltered(layer, value);
-      });
-    }
-
-    if (node.groups) {
-      node.groups.forEach((group) => {
-        this.updateNode(group, value, true);
-        this.setChildrenFiltered(group, value);
-      });
-    }
-
-    if (node.subLayers) {
-      node.subLayers.forEach((subLayer) => {
-        this.updateNode(subLayer, value, true);
-        subLayer.isFiltered = value;
-      });
-    }
-  };
-
   // Handles click on Favorites button and backbutton
   handleFavoritesViewToggle = (quickAccessPresetsState) => {
     quickAccessPresetsState?.event?.stopPropagation();
@@ -402,42 +320,10 @@ class LayersSwitcherView extends React.PureComponent {
     // collapseGroups(this.layerTree);
   };
 
-  // Call this method for each root node in the tree when the filter is cleared
-  resetFilterStatus = (node) => {
-    node.isFiltered = true; // Mark node as filtered
-    node.isExpanded = false; // Collapse all groups by default
-    node.changeIndicator = new Date(); // Update change indicator
-
-    // Recursively reset status for layers, groups, and subLayers
-    if (node.layers) {
-      node.layers.forEach((layer) => this.resetFilterStatus(layer));
-    }
-    if (node.groups) {
-      node.groups.forEach((group) => this.resetFilterStatus(group));
-    }
-    if (node.subLayers) {
-      node.subLayers.forEach((subLayer) => this.resetFilterStatus(subLayer));
-    }
-  };
-
   // Handles filter functionality
   handleFilterValueChange = debounce((value) => {
-    const filterCleared = value === "" && this.state.filterValue !== "";
-    this.setState({ filterValue: value });
-
-    if (filterCleared) {
-      // Reset filter status when filter is cleared
-      // this.layerTree.forEach((node) => this.resetFilterStatus(node));
-    } else {
-      // Apply filter and propagate matches
-      // this.layerTree.forEach((node) => this.filterTree(node, value));
-    }
-
-    // TODO Redo Filtering
-
-    // Trigger re-render
-    // this.setState({ treeData: [...this.layerTree] });
-    // TODO Filtering
+    const filterValue = value === "" ? null : value;
+    this.setState({ filterValue });
   }, 100);
 
   /**
@@ -514,6 +400,32 @@ class LayersSwitcherView extends React.PureComponent {
 
   render() {
     const { windowVisible, layersState } = this.props;
+
+    const filterValue = this.state.filterValue;
+    let filterHits = null;
+
+    const searchIndex = Object.values(this.staticLayerConfig).flatMap((l) => {
+      let subLayerIndex = [];
+      if (l.allSubLayers?.length > 1) {
+        subLayerIndex = l.allSubLayers.map((sl) => {
+          const subLayerInfo = l.layerInfo.layersInfo[sl];
+          return [subLayerInfo.caption, l.id];
+        });
+      }
+
+      return [...subLayerIndex, [l.caption, l.id]];
+    });
+
+    if (filterValue) {
+      const lowercaseFilterValue = filterValue.toLocaleLowerCase();
+      const hits = searchIndex
+        ?.filter(([name, _]) =>
+          name.toLocaleLowerCase().includes(lowercaseFilterValue)
+        )
+        ?.map(([_, id]) => id);
+      filterHits = new Set(hits);
+    }
+
     return (
       <div
         style={{
@@ -590,6 +502,8 @@ class LayersSwitcherView extends React.PureComponent {
                 staticGroupTree={group}
                 layersState={layersState}
                 globalObserver={this.globalObserver}
+                filterHits={filterHits}
+                filterValue={this.state.filterValue}
               />
             ))}
           </Box>

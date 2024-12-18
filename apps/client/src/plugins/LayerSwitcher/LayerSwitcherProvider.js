@@ -447,7 +447,7 @@ const LayerSwitcherProvider = ({
               layerIsToggled: l.get("visible"),
               visible: l.get("visible"),
               quickAccess: l.get("quickAccess"),
-              visibleSubLayers: l.get("subLayers"),
+              visibleSubLayers: l.get("visible") ? l.get("subLayers") : [],
               wmsLoadError: l.get("wmsLoadStatus") ?? undefined,
               zIndex: l.get("zIndex"),
               // "filterAttribute"

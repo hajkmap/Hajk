@@ -141,6 +141,7 @@ export default function LayerItem({
     layerInfo,
     layerLegendIcon,
     wmsLoadError,
+    filterValue,
   } = layerConfig;
 
   const legendIcon = layerInfo?.legendIcon || layerLegendIcon;
