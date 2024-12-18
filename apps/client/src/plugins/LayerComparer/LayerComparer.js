@@ -45,26 +45,19 @@ const LayerComparer = (props) => {
 
     if (props.options.selectChosenLayers) {
       const finalChosenLayers = (props.options.chosenLayers || [])
+        .filter((chosen) =>
+          allLayers.some((al) => al.get("name") === chosen.id)
+        )
         .map((chosen) => {
           const realLayer = allLayers.find(
             (al) => al.get("name") === chosen.id
           );
-
-          if (realLayer) {
-            return {
-              id: realLayer.ol_uid,
-              label: realLayer.get("caption"),
-              layerType: realLayer.get("layerType"),
-            };
-          } else {
-            console.warn(
-              `Ingen matchning för lager med ID "${chosen.id}". Kontrollera om lagret existerar i allLayers.`
-            );
-
-            return null;
-          }
-        })
-        .filter((layer) => layer !== null);
+          return {
+            id: realLayer.ol_uid,
+            label: realLayer.get("caption"),
+            layerType: realLayer.get("layerType"),
+          };
+        });
 
       setChosenLayers(finalChosenLayers);
     } else {

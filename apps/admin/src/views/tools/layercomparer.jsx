@@ -121,19 +121,14 @@ class LayerComparer extends Component {
     const allLayers = this.props.model.get("layers");
 
     const comparedLayers = layerSwitcherLayers
+      .filter((lsLayer) => allLayers.some((al) => al.id === lsLayer.id))
       .map((lsLayer) => {
         const realLayer = allLayers.find((al) => al.id === lsLayer.id);
-
-        if (realLayer) {
-          return {
-            id: realLayer.id,
-            caption: realLayer.caption || "Okänt lager",
-          };
-        } else {
-          return null;
-        }
-      })
-      .filter((layer) => layer !== null);
+        return {
+          id: realLayer.id,
+          caption: realLayer.caption || "Okänt lager",
+        };
+      });
 
     this.setState({ layers: comparedLayers });
   }
