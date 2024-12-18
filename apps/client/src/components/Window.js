@@ -141,6 +141,7 @@ class Window extends React.PureComponent {
     position: propTypes.string.isRequired,
     title: propTypes.string.isRequired,
     width: propTypes.number.isRequired,
+    componentId: propTypes.string,
   };
 
   static defaultProps = {
@@ -168,16 +169,21 @@ class Window extends React.PureComponent {
         this.updatePosition();
       }
     });
+    this.#bindSubscriptions();
   }
 
-  componentDidUpdate = (prevProps, prevState) => {
-    if (prevProps.open === false && this.props.open === true) {
-      //This is ugly but there is a timing problem further down somewhere (i suppose?).
-      //componentDidUpdate is run before the render is actually fully completed and the DOM is ready
-      setTimeout(() => {
-        this.windowRef.current.focus();
-      }, 200);
+  #bindSubscriptions = () => {
+    const { globalObserver } = this.props;
+    if (globalObserver) {
+      globalObserver.subscribe("core.focusWindow", (elementId) =>
+        this.focusWindow(elementId)
+      );
     }
+  };
+
+  focusWindow = (elementId) => {
+    let element = document.getElementById(elementId);
+    if (element) element.focus();
   };
 
   componentDidMount() {
@@ -538,7 +544,6 @@ class Window extends React.PureComponent {
         }}
       >
         <PanelContent
-          tabIndex="0"
           ref={this.windowRef}
           sx={{
             display: this.props.height === "dynamic" ? "contents" : "flex",
@@ -557,6 +562,8 @@ class Window extends React.PureComponent {
             title={title}
           />
           <StyledSection
+            id={this.props.componentId}
+            tabIndex={-1}
             sx={{
               overflowY: this.props.scrollable ? "auto" : "hidden",
               padding:
