@@ -316,7 +316,9 @@ const getLayerNodes = (groups, olLayerMap) =>
     return [
       {
         id: node.id,
+        layerId: node.id,
         caption: olLayerMap[node.id]?.get("caption") ?? node.name,
+        layerCaption: olLayerMap[node.id]?.get("caption") ?? node.name,
         allSubLayers: olLayerMap[node.id]?.get("subLayers"),
         initiallyExpanded: node.expanded,
         initiallyToggled: node.toggled,
@@ -331,6 +333,7 @@ const getLayerNodes = (groups, olLayerMap) =>
         layerInfo: olLayer?.get("layerInfo"),
         layerLegendIcon: olLayer?.get("legendIcon"),
         numberOfSubLayers: node.subLayers?.length,
+        layerIsFakeMapLayer: false,
         infogroupvisible: node.infogroupvisible,
         infogrouptitle: node.infogrouptitle,
         infogrouptext: node.infogrouptext,
@@ -404,6 +407,9 @@ const LayerSwitcherProvider = ({
   );
   // useEffect(() => console.log(staticLayerConfigMap), [staticLayerConfigMap]);
 
+  // TODO Use useState and useEffect combo instead. It will make it more
+  // performant, only update the specific layer state, and don't re-render
+  // everything.
   const olState = useSyncExternalStore(
     (callback) => {
       const fn = (_) => (_) => {
@@ -433,9 +439,12 @@ const LayerSwitcherProvider = ({
           .getArray()
           .reduce((a, l) => {
             a[l.get("name")] = {
-              // opacity: l.get("opacity"),
+              opacity: l.get("opacity"),
               id: l.get("name"),
+              layerId: l.get("name"),
+              layerCaption: l.get("caption"),
               caption: l.get("caption"),
+              layerIsToggled: l.get("visible"),
               visible: l.get("visible"),
               quickAccess: l.get("quickAccess"),
               visibleSubLayers: l.get("subLayers"),
@@ -447,6 +456,7 @@ const LayerSwitcherProvider = ({
             };
             return a;
           }, {});
+        // TODO maybe optimize
 
         if (JSON.stringify(olLayers) !== JSON.stringify(cache)) {
           cache = olLayers;

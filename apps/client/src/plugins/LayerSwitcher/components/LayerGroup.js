@@ -255,38 +255,16 @@ const LayerGroup = ({
     >
       <div>
         {children?.map((child) => {
-          // TODO Fix the about to use static info.
-
           const layerId = child.id;
-          // const mapLayer = layerMap[layer.id];
-          // // If mapLayer doesn't exist, the layer shouldn't be displayed
-          // if (!mapLayer) {
-          //   return null;
-          // }
 
-          const layerState = {
-            layerIsToggled: layersState[layerId]?.visible,
-            visibleSubLayers: layersState[layerId]?.visibleSubLayers,
-          };
+          const layerState = layersState[layerId];
 
           const layerSettings = staticLayerConfig[layerId];
           if (!layerSettings) {
             return null;
           }
 
-          const layerConfig = {
-            layerId: layerId,
-            layerCaption: layerSettings.caption,
-            layerType: layerSettings.layerType,
-
-            layerIsFakeMapLayer: false, // TODO Check this mapLayer.isFakeMapLayer,
-            allSubLayers: layerSettings.allSubLayers,
-            layerMinZoom: layerSettings.layerMinZoom,
-            layerMaxZoom: layerSettings.layerMaxZoom,
-            layerInfo: layerSettings.layerInfo,
-            layerLegendIcon: layerSettings.layerLegendIcon,
-          };
-          const filterSubLayers = layerConfig.allSubLayers; // TODO Filter
+          const filterSubLayers = layerSettings.allSubLayers; // TODO Filter
           const layerIsFiltered = false;
 
           if (layerSettings.layerType === "group") {
@@ -307,7 +285,7 @@ const LayerGroup = ({
               display={layerIsFiltered ? "none" : "block"}
               key={layerId}
               layerState={layerState}
-              layerConfig={layerConfig}
+              layerConfig={layerSettings}
               draggable={false}
               toggleable={true}
               globalObserver={globalObserver}
@@ -318,7 +296,7 @@ const LayerGroup = ({
               display={layerIsFiltered ? "none" : "block"}
               key={layerId}
               layerState={layerState}
-              layerConfig={layerConfig}
+              layerConfig={layerSettings}
               draggable={false}
               toggleable={true}
               globalObserver={globalObserver}

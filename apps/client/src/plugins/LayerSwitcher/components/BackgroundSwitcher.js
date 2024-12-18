@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { isValidLayerId } from "../../../utils/Validator";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
@@ -142,35 +142,38 @@ const BackgroundSwitcher = ({
    * @summary Hides previously selected background and shows current selection.
    * @param {Object} e The event object, contains target's value
    */
-  const onLayerClick = (newSelectedId) => () => {
-    setSelectedLayerId(newSelectedId);
+  const onLayerClick = useCallback(
+    (newSelectedId) => () => {
+      setSelectedLayerId(newSelectedId);
 
-    // Publish event to ensure all other background layers are disabled
-    globalObserver.publish(
-      "layerswitcher.backgroundLayerChanged",
-      newSelectedId
-    );
+      // Publish event to ensure all other background layers are disabled
+      globalObserver.publish(
+        "layerswitcher.backgroundLayerChanged",
+        newSelectedId
+      );
 
-    // Reset to no layer showing
-    osmLayerRef.current.setVisible(false);
+      // Reset to no layer showing
+      osmLayerRef.current.setVisible(false);
 
-    if (isSpecialBackgroundLayer(newSelectedId)) {
-      // Undefined means Set all layers to invisible.
-      layerSwitcherDispatch.setBackgroundLayer(undefined);
+      if (isSpecialBackgroundLayer(newSelectedId)) {
+        // Undefined means Set all layers to invisible.
+        layerSwitcherDispatch.setBackgroundLayer(undefined);
 
-      if (isOSMLayer(newSelectedId)) {
-        osmLayerRef.current?.setVisible(true);
-        setSpecialBackground(WHITE_BACKROUND_LAYER_ID);
+        if (isOSMLayer(newSelectedId)) {
+          osmLayerRef.current?.setVisible(true);
+          setSpecialBackground(WHITE_BACKROUND_LAYER_ID);
+        } else {
+          setSpecialBackground(newSelectedId);
+        }
       } else {
-        setSpecialBackground(newSelectedId);
+        // Reset the background to white
+        setSpecialBackground(WHITE_BACKROUND_LAYER_ID);
+        // layerMap[newSelectedId].setVisible(true);
+        layerSwitcherDispatch.setBackgroundLayer(newSelectedId);
       }
-    } else {
-      // Reset the background to white
-      setSpecialBackground(WHITE_BACKROUND_LAYER_ID);
-      // layerMap[newSelectedId].setVisible(true);
-      layerSwitcherDispatch.setBackgroundLayer(newSelectedId);
-    }
-  };
+    },
+    [globalObserver, layerSwitcherDispatch]
+  );
 
   // TODO This filter should be moved to the core application.
   const layersToShow = layers.filter((layer) => {

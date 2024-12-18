@@ -399,7 +399,6 @@ class LayersSwitcherView extends React.PureComponent {
     //     }
     //   });
     // };
-
     // collapseGroups(this.layerTree);
   };
 
