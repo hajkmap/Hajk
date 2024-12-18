@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import { AppBar, Tab, Tabs, Box } from "@mui/material";
+import { AppBar, Tab, Tabs, Box, ListItemText } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
@@ -473,28 +473,32 @@ class LayersSwitcherView extends React.PureComponent {
                 }
               />
             )}
-            <QuickAccessView
-              show={this.props.options.showQuickAccess}
-              map={this.props.map}
-              app={this.props.app}
-              globalObserver={this.globalObserver}
-              enableQuickAccessPresets={
-                this.props.options.enableQuickAccessPresets
-              }
-              enableUserQuickAccessFavorites={
-                this.props.options.enableUserQuickAccessFavorites
-              }
-              handleQuickAccessPresetsToggle={(e) =>
-                this.handleQuickAccessPresetsToggle({ event: e })
-              }
-              favoritesViewDisplay={
-                this.state.displayContentOverlay === "favorites"
-              }
-              handleFavoritesViewToggle={this.handleFavoritesViewToggle}
-              favoritesInfoText={this.options.userQuickAccessFavoritesInfoText}
-              filterValue={this.state.filterValue}
-              layersState={layersState}
-            />
+            {filterHits === null && (
+              <QuickAccessView
+                show={this.props.options.showQuickAccess}
+                map={this.props.map}
+                app={this.props.app}
+                globalObserver={this.globalObserver}
+                enableQuickAccessPresets={
+                  this.props.options.enableQuickAccessPresets
+                }
+                enableUserQuickAccessFavorites={
+                  this.props.options.enableUserQuickAccessFavorites
+                }
+                handleQuickAccessPresetsToggle={(e) =>
+                  this.handleQuickAccessPresetsToggle({ event: e })
+                }
+                favoritesViewDisplay={
+                  this.state.displayContentOverlay === "favorites"
+                }
+                handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+                favoritesInfoText={
+                  this.options.userQuickAccessFavoritesInfoText
+                }
+                filterValue={this.state.filterValue}
+                layersState={layersState}
+              />
+            )}
             {this.staticLayerTree.map((group) => (
               <LayerGroup
                 key={group.id}
@@ -506,6 +510,21 @@ class LayersSwitcherView extends React.PureComponent {
                 filterValue={this.state.filterValue}
               />
             ))}
+            {filterHits !== null && filterHits.size === 0 && (
+              <ListItemText
+                sx={{
+                  py: 1,
+                  px: 4,
+                }}
+                primary="Inga resultat"
+                primaryTypographyProps={{
+                  pr: 5,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  variant: "body1",
+                }}
+              />
+            )}
           </Box>
           {this.props.options.enableQuickAccessPresets && (
             <QuickAccessPresets
