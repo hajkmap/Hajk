@@ -53,7 +53,7 @@ const BreadCrumbsContainer = ({ map, app }) => {
 // - DONE Fix the bug sometimes click layer in the quick access don't update
 //
 // - DONE Move `addLayerNames` to pure fn
-// - Update state managemetn and keeep in sync with OpenLayers
+// - DONE Update state managemetn and keeep in sync with OpenLayers
 //
 // - Refactor the observers to use a provider instead of prop-drilling
 // - The layer pagage dialogs should use ConfirmationDialog component
@@ -63,10 +63,11 @@ const BreadCrumbsContainer = ({ map, app }) => {
 //   Should make it faster as well. - Did not make it faster,
 //   but there is still more to do. More indirection to remove
 //
-// - Refactor LayerItem into 3 separate components for each tab
+// - DONE Refactor LayerItem into 3 separate components for each tab
 //     At least 3. Clean it up and remove indirection
 //
 // - Move ZoomCheck into core code
+//    Partly DONE, moved to separat compontnt
 //
 //
 // - Maybe reconsider the "window-management"
@@ -75,113 +76,6 @@ const BreadCrumbsContainer = ({ map, app }) => {
 //      as it is. I could move it to a own component though.
 //
 //
-
-// {
-//    id: string
-//    name: string
-//    isFiltered:
-//    isExpanded:
-//    expanded: boolean
-//    toggled: boolean
-//    type: "group" | "layer" | "subLayer" | "base"
-//    infogroupvisible: boolean
-//    subLayers: ???
-//    parent: string
-//    changeIndicator: Date
-// }
-
-// const getOlLayerInfo = (olLayer) => {
-//   if (!olLayer) {
-//     return null;
-//   }
-//   return {
-//     id: olLayer.get("name"),
-//     name: olLayer.get("caption"),
-//     visible: olLayer.get("visible"),
-//     opacity: olLayer.get("opacity"),
-//     layerType: olLayer.get("layerType"),
-//     quickAccess: olLayer.get("quickAccess"),
-//     subLayers: olLayer.get("subLayers"),
-//     layerInfo: olLayer.get("layerInfo"),
-//     url: olLayer.get("url"),
-//     zIndex: olLayer.get("zIndex"),
-//     maxZoom: olLayer.get("maxZoom"),
-//     minZoom: olLayer.get("minZoom"),
-//     minMaxZoomAlertOnToggleOnly: olLayer.get("minMaxZoomAlertOnToggleOnly"),
-//   };
-// };
-
-// Prepare tree data for filtering
-// const addLayerNames = (data, olLayerMap) => {
-//   const node = data.map((item) => {
-//     const layers = item.layers?.map((layer) => {
-//       const mapLayer = olLayerMap[layer.id];
-//       if (!mapLayer) {
-//         console.warn(`Maplayer with id ${layer.id} not found`);
-//         return undefined;
-//       }
-
-//       const subLayers =
-//         mapLayer.get("layerType") === "group" &&
-//         mapLayer
-//           .get("subLayers")
-//           .map((subLayer) => {
-//             // If the `layerInfo` is missing from a sublayer we ignore it
-//             // completely.
-//             const subLayerInfo = mapLayer.layersInfo[subLayer];
-//             if (!subLayerInfo) {
-//               return null;
-//             }
-
-//             return {
-//               id: subLayer,
-//               name: subLayerInfo.caption,
-//               isFiltered: true,
-//               changeIndicator: new Date(),
-//             };
-//           })
-//           .filter((sl) => !!sl);
-
-//       return {
-//         drawOrder: layer.drawOrder,
-//         infobox: layer.infobox,
-//         layerType: layer.layerType,
-//         visibleAtStart: layer.visibleAtStart,
-//         visibleForGroups: layer.visibleForGroups,
-//         id: layer.id,
-//         name: mapLayer.get("caption"),
-//         isFiltered: true,
-//         subLayers: subLayers,
-//       };
-//     });
-
-//     return {
-//       id: item.id,
-//       name: item.name,
-//       expanded: item.expanded,
-//       toggled: item.toggled,
-//       type: item.type,
-//       layers,
-//       infogroupvisible: item.infogroupvisible,
-//       infogrouptitle: item.infogrouptitle,
-//       infogrouptext: item.infogrouptext,
-//       infogroupurl: item.infogroupurl,
-//       infogroupurltext: item.infogroupurltext,
-//       infogroupopendatalink: item.infogroupopendatalink,
-//       infogroupowner: item.infofitemowner,
-//       subLayers: item.sublayers,
-//       parent: item.parent,
-//       isFiltered: true,
-//       isExpanded: item.expanded,
-//       changeIndicator: new Date(),
-//       groups: item.groups ? addLayerNames(item.groups, olLayerMap) : undefined,
-//       // "filterAttribute"
-//       // "filterComparer"
-//       // "filterValue"
-//     };
-//   });
-//   return node;
-// };
 
 class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
@@ -202,7 +96,6 @@ class LayersSwitcherView extends React.PureComponent {
         a[b.get("name")] = b;
         return a;
       }, {});
-    // this.layerTree = addLayerNames(this.options.groups, this.olLayerMap);
     this.baseLayers = props.map
       .getLayers()
       .getArray()
@@ -215,7 +108,6 @@ class LayersSwitcherView extends React.PureComponent {
       displayContentOverlay: null, // 'quickAccessPresets' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
       filterValue: "",
-      // treeData: this.layerTree,
       scrollPositions: {
         tab0: 0,
         tab1: 0,
