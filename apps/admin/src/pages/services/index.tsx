@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import { DataGrid } from "@mui/x-data-grid";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import useAppStateStore from "../../store/use-app-state-store";
+import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 
 export default function ServicesPage() {
   const navigate = useNavigate();
@@ -128,7 +129,7 @@ export default function ServicesPage() {
   return (
     <>
       {isLoading ? (
-        <Box component="div">Loading...</Box>
+        <SquareSpinnerComponent />
       ) : (
         <>
           {!services && <Box component="div">No services found</Box>}
