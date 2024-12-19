@@ -3,14 +3,29 @@ import React, {
   createContext,
   useContext,
   useRef,
-  useSyncExternalStore,
   useState,
   useMemo,
 } from "react";
 
 import LayerSwitcherView from "./LayerSwitcherView.js";
-// import useSnackbar from "../../hooks/useSnackbar";
 import { useLayerZoomWarningSnackbar } from "./useLayerZoomWarningSnackbar";
+
+const getOlLayerState = (l) => ({
+  opacity: l.get("opacity"),
+  id: l.get("name"),
+  layerId: l.get("name"),
+  layerCaption: l.get("caption"),
+  caption: l.get("caption"),
+  layerIsToggled: l.get("visible"),
+  visible: l.get("visible"),
+  quickAccess: l.get("quickAccess"),
+  visibleSubLayers: l.get("visible") ? l.get("subLayers") : [],
+  wmsLoadError: l.get("wmsLoadStatus") ?? undefined,
+  zIndex: l.get("zIndex"),
+  // "filterAttribute"
+  // "filterComparer"
+  // "filterValue"
+});
 
 const MapZoomContext = createContext(null);
 export const useMapZoom = () => useContext(MapZoomContext);
@@ -61,16 +76,7 @@ const LayerZoomListener = ({ layer }) => {
   return <></>;
 };
 
-const LayerZoomVisibleSnackbarProvider = ({
-  children,
-  layerState,
-  options,
-  layers,
-}) => {
-  // const mapZoom = useMapZoom();
-  // const { addToSnackbar, removeFromSnackbar } = useSnackbar();
-  // Object.values(layerState).map((l) => console.log(l.caption));
-
+const LayerZoomVisibleSnackbarProvider = ({ children, layers }) => {
   return (
     <>
       {layers.map((l) => (
@@ -151,8 +157,6 @@ const getGroupConfigById = (tree, groupId) => {
     return null;
   }
 };
-
-// TODO Set up OSM/black/white here?
 
 const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
   const olBackgroundLayers = map
@@ -399,73 +403,50 @@ const LayerSwitcherProvider = ({
     () => buildLayerTree(options.groups, olLayerMap.current),
     [options]
   );
-  // useEffect(() => console.log(layerTreeData), [layerTreeData]);
 
   const staticLayerConfigMap = useMemo(
     () => buildStaticLayerConfigMap(options.groups, olLayerMap.current),
     [options]
   );
-  // useEffect(() => console.log(staticLayerConfigMap), [staticLayerConfigMap]);
 
-  // TODO Use useState and useEffect combo instead. It will make it more
-  // performant, only update the specific layer state, and don't re-render
-  // everything.
-  const olState = useSyncExternalStore(
-    (callback) => {
-      const fn = (_) => (_) => {
-        callback();
-      };
-
-      const listeners = map.getAllLayers().map((l) => {
-        const layerFn = fn(l);
-        l.on("propertychange", layerFn);
-        return layerFn;
-      });
-
-      return () => {
-        map.getAllLayers().forEach((l, i) => {
-          const fn = listeners[i];
-          if (fn) {
-            l.un("propertychange", fn);
-          }
-        });
-      };
-    },
-    (() => {
-      let cache = null;
-      return () => {
-        const olLayers = map
-          .getLayers()
-          .getArray()
-          .reduce((a, l) => {
-            a[l.get("name")] = {
-              opacity: l.get("opacity"),
-              id: l.get("name"),
-              layerId: l.get("name"),
-              layerCaption: l.get("caption"),
-              caption: l.get("caption"),
-              layerIsToggled: l.get("visible"),
-              visible: l.get("visible"),
-              quickAccess: l.get("quickAccess"),
-              visibleSubLayers: l.get("visible") ? l.get("subLayers") : [],
-              wmsLoadError: l.get("wmsLoadStatus") ?? undefined,
-              zIndex: l.get("zIndex"),
-              // "filterAttribute"
-              // "filterComparer"
-              // "filterValue"
-            };
-            return a;
-          }, {});
-        // TODO maybe optimize
-
-        if (JSON.stringify(olLayers) !== JSON.stringify(cache)) {
-          cache = olLayers;
-          return olLayers;
-        }
-        return cache;
-      };
-    })()
+  // Another solution would be to use Reacts `useSyncExternalStore` hook. This
+  // combination of useState and useEffect has the same result but gives us the
+  // possibility to only change the specific layer-specific state object that
+  // actually changes. All the other object are still the same refernce. That
+  // means that only the specific LayerItem and releated components that
+  // changes re-render. With `useSyncExternalStore` everything would re-render.
+  const [olState, setOlState] = useState(
+    map
+      .getLayers()
+      .getArray()
+      .reduce((a, l) => {
+        a[l.get("name")] = getOlLayerState(l);
+        return a;
+      }, {})
   );
+
+  useEffect(() => {
+    const fn = (l) => (_) => {
+      const changedLayer = l;
+      const layerState = getOlLayerState(changedLayer);
+      setOlState((s) => ({ ...s, [layerState.id]: layerState }));
+    };
+
+    const listeners = map.getAllLayers().map((l) => {
+      const layerFn = fn(l);
+      l.on("propertychange", layerFn);
+      return layerFn;
+    });
+
+    return () => {
+      map.getAllLayers().forEach((l, i) => {
+        const fn = listeners[i];
+        if (fn) {
+          l.un("propertychange", fn);
+        }
+      });
+    };
+  }, [map]);
 
   const dispatcher = useRef(
     createDispatch(map, staticLayerConfigMap, layerTreeData)

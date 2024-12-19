@@ -9,19 +9,6 @@ const layerUsesMinMaxZoom = (minZoom, maxZoom) => {
   return (maxZ > 0 && maxZ < Infinity) || (minZ > 0 && minZ < Infinity);
 };
 
-// const layerIsVisibleAtZoom =
-//   mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;
-
-// const toggleState = getLayerToggleState(
-//   layerIsToggled,
-//   layerIsSemiToggled,
-//   layerIsVisibleAtZoom
-// );
-
-// const layerMinMaxZoomAlertOnToggleOnly = layer.get(
-//   "minMaxZoomAlertOnToggleOnly"
-// );
-
 // TODO
 // move to Higher order component
 
@@ -40,16 +27,6 @@ export const useLayerZoomWarningSnackbar = (
   const [prevVisible, setPrevVisible] = useState(visible);
   const [prevToggled, setPrevToggled] = useState(toggled);
 
-  // console.log("useLayerZoom", {
-  //   layerMinZoom,
-  //   layerMaxZoom,
-  //   visible,
-  //   layerId,
-  //   caption,
-  // });
-
-  // TODO Move to higher order component
-  // TODO Sublayers
   useEffect(() => {
     if (layerUsesMinMaxZoom(layerMinZoom, layerMaxZoom)) {
       // show warning on layer toggle

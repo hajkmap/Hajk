@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 
 import { Box, Collapse, IconButton } from "@mui/material";
 
@@ -12,7 +12,7 @@ import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
 /* A grouplayer is a layer configured with multiple layers in admin, NOT a group in layerswitcher */
 
-export default function GroupLayer({
+function GroupLayer({
   layerState,
   layerConfig,
   globalObserver,
@@ -132,3 +132,5 @@ export default function GroupLayer({
     ></LayerItem>
   );
 }
+
+export default memo(GroupLayer);

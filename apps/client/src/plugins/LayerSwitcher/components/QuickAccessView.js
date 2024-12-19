@@ -39,13 +39,6 @@ const QuickAccessView = ({
   enqueueSnackbar,
   layersState,
 }) => {
-  // TODO This iterates on all OL layers every render, that can be optimized
-  // const hasVisibleLayers =
-  //   map
-  //     .getAllLayers()
-  //     .filter((l) => l.get("quickAccess") === true && l.get("visible") === true)
-  //     .length > 0;
-
   const qaLayers = Object.values(layersState).filter((obj) => obj.quickAccess);
   const hasVisibleLayers = qaLayers.some((l) => l.visible);
 

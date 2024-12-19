@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 
 // Material UI components
 import {
@@ -106,7 +106,7 @@ const LayerLegendIcon = ({
   );
 };
 
-export default function LayerItem({
+function LayerItem({
   layerState,
   layerConfig,
   clickCallback,
@@ -365,3 +365,5 @@ export default function LayerItem({
     </div>
   );
 }
+
+export default memo(LayerItem);
