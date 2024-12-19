@@ -48,6 +48,7 @@
     "common.userSettings": "User settings",
     "common.welcome": "Welcome!",
     "common.you": "You",
+    "common.lastSavedBy": "Last saved by {{lastSavedBy}} {{lastSavedDate, on {{lastSavedDate}}",
     "dark": "Dark",
     "light": "Light",
     "roles.adminDescription": "Users that are allowed to use Hajks admin interface",

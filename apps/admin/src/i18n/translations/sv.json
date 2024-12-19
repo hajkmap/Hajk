@@ -48,6 +48,7 @@
     "common.userSettings": "Användarinställningar",
     "common.welcome": "Välkommen!",
     "common.you": "Du",
+    "common.lastSavedBy": "Senast sparad av {{lastSavedBy}} {{lastSavedDate,  {{lastSavedDate}}",
     "dark": "Mörkt",
     "light": "Ljust",
     "roles.adminDescription": "Användare som är tillåtna att använda Hajk-admin.",

@@ -33,6 +33,7 @@ import LayersGrid from "./layers-grid";
 import { toast } from "react-toastify";
 
 import FormActionPanel from "../../components/form-action-panel";
+import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 
 export default function ServiceSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -95,7 +96,7 @@ export default function ServiceSettings() {
         data: payload,
       });
       toast.success(
-        t("services.updateServiceSuccess", { name: service?.name }),
+        t("services.updateServiceSuccess", { name: serviceData.name }),
         {
           position: "bottom-left",
           theme: palette.mode,
@@ -306,6 +307,7 @@ export default function ServiceSettings() {
     control,
     setValue,
     getValues,
+    watch,
     formState: { errors, dirtyFields },
   } = DefaultUseForm(defaultValues);
 
@@ -318,6 +320,16 @@ export default function ServiceSettings() {
     },
   });
 
+  const currentValues = watch();
+
+  const hasChanges = Object.keys(currentValues).some(
+    (key) =>
+      currentValues[key as keyof ServiceUpdateFormData] !==
+      defaultValues[key as keyof ServiceUpdateFormData]
+  );
+
+  const isChanged = hasChanges && Object.keys(dirtyFields).length > 0;
+
   useEffect(() => {
     if (!service) return;
     setFormServiceData(serviceSettingsFormContainer);
@@ -325,7 +337,7 @@ export default function ServiceSettings() {
   }, [service]);
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <SquareSpinnerComponent />;
   }
   if (isError) return <div>Error fetching service details.</div>;
   if (!service) return <div>Service not found.</div>;
@@ -342,6 +354,7 @@ export default function ServiceSettings() {
         saveButtonText="Spara"
         deleteButtonText="Ta bort"
         navigateTo="/services"
+        isChangedFields={isChanged}
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer

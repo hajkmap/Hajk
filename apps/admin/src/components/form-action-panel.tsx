@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Button, Typography } from "@mui/material";
 import CircularProgress from "../components/progress/circular-progress";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 
 // This custom component will replace the save/delete panel-buttons on all the forms
 
@@ -16,6 +17,7 @@ interface FormActionProps {
   deleteButtonText?: string;
   children?: React.ReactNode;
   navigateTo?: string;
+  isChangedFields?: boolean;
 }
 
 const FormActionPanel: React.FC<FormActionProps> = ({
@@ -29,8 +31,11 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   deleteButtonText = "",
   children,
   navigateTo,
+  isChangedFields,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   return (
     <Box
       sx={{
@@ -61,12 +66,16 @@ const FormActionPanel: React.FC<FormActionProps> = ({
             void onUpdate();
           }}
           variant="contained"
-          disabled={updateStatus === "pending" || deleteStatus === "pending"}
+          disabled={
+            !isChangedFields ||
+            updateStatus === "pending" ||
+            deleteStatus === "pending"
+          }
         >
           {updateStatus === "pending" ? (
             <CircularProgress color="primary" size={30} />
           ) : (
-            saveButtonText
+            t("services.dialog.saveBtn", saveButtonText)
           )}
         </Button>
 
@@ -81,12 +90,11 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           disabled={deleteStatus === "pending" || updateStatus === "pending"}
           variant="text"
         >
-          {deleteButtonText}
+          {t("services.dialog.deleteBtn", deleteButtonText)}
         </Button>
 
         <Typography variant="body1">
-          Last saved by {lastSavedBy}
-          {lastSavedDate ? ` on ${lastSavedDate}` : ""}
+          {t("common.lastSavedBy", { lastSavedBy, lastSavedDate })}
         </Typography>
       </Box>
       <Box
