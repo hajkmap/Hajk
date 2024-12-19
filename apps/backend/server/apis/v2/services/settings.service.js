@@ -196,6 +196,24 @@ class SettingsService {
       return group;
     };
 
+    const removeLayerIdFromLayerComparer = (layerComparerOptions) => {
+      // Remove the layerId from the chosenLayers array
+      if (Array.isArray(layerComparerOptions.chosenLayers)) {
+        const initialLength = layerComparerOptions.chosenLayers.length;
+        layerComparerOptions.chosenLayers =
+          layerComparerOptions.chosenLayers.filter(
+            (layer) => layer.id !== layerId
+          );
+
+        // If any layers were removed, mark as modified
+        if (layerComparerOptions.chosenLayers.length !== initialLength) {
+          modified = true;
+        }
+      }
+
+      return layerComparerOptions;
+    };
+
     // Helper function, used to remove references to a layer from Search tool's options
     const removeLayerIdFromSearchSources = (searchSources) => {
       const index = searchSources.findIndex((l) => l === layerId);
@@ -249,6 +267,17 @@ class SettingsService {
       searchOptions.selectedSources = removeLayerIdFromSearchSources(
         searchOptions.selectedSources
       );
+    }
+
+    // LayerComparer processing
+    const layerComparerToolIndex = json.tools.findIndex(
+      (t) => t.type === "layercomparer"
+    );
+    const layerComparerOptions = json.tools[layerComparerToolIndex]?.options;
+
+    if (layerComparerOptions) {
+      json.tools[layerComparerToolIndex].options =
+        removeLayerIdFromLayerComparer(layerComparerOptions);
     }
 
     // If any of the above resulted in modified file, write the changes.
