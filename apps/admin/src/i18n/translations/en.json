@@ -49,6 +49,9 @@
     "common.welcome": "Welcome!",
     "common.you": "You",
     "common.lastSavedBy": "Last saved by {{lastSavedBy}} {{lastSavedDate, on {{lastSavedDate}}",
+    "common.dialog.closeBtn": "Close",
+    "common.dialog.deleteBtn": "Delete",
+    "common.dialog.saveBtn": "Save",
     "dark": "Dark",
     "light": "Light",
     "roles.adminDescription": "Users that are allowed to use Hajks admin interface",
@@ -58,9 +61,6 @@
     "services.coordinateSystem": "Coordinate system",
     "services.description": "Internal description of the service",
     "services.dialog.addBtn": "Add a new service",
-    "services.dialog.closeBtn": "Close",
-    "services.dialog.deleteBtn": "Delete",
-    "services.dialog.saveBtn": "Save",
     "services.dialog.title": "New service",
     "services.error.layers": "No layers found.",
     "services.error.unnamed.layer": "Unnamed layer",
@@ -106,6 +106,7 @@
     "map.description": "Description",
     "map.title": "Title",
     "map.locked": "Locked",
-    "layers.dialog.addBtn": "Add layer"
+    "layers.dialog.addBtn": "Add layer",
+    "layers.dialog.title": "New layer"
   }
 }

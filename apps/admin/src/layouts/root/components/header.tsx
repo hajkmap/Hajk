@@ -20,6 +20,7 @@ import HajkTooltip from "../../../components/hajk-tooltip";
 import useUserStore, { User } from "../../../store/use-user-store";
 import useAuth from "../../../hooks/use-auth";
 import { useServices } from "../../../api/services/hooks";
+import { useLayers } from "../../../api/layers/hooks";
 
 const getUserInitials = (user: User): string => {
   const words: string[] = user.fullName.split(" ");
@@ -32,13 +33,14 @@ export default function Header() {
   const [userList, setUserList] = useState<User[]>([]);
   const [activeUser, setActiveUser] = useState<User | null>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { serviceId } = useParams();
+  const { serviceId, layerId } = useParams();
   const { data: services } = useServices();
-
+  const { data: layers } = useLayers();
   const location = useLocation();
   const pathParts = location.pathname.split("/").filter(Boolean);
 
   const serviceName = services?.find((s) => s.id === serviceId)?.name;
+  const layerName = layers?.find((l) => l.id === layerId)?.name;
 
   const { user } = useUserStore.getState();
   const { logout } = useAuth();
@@ -75,8 +77,8 @@ export default function Header() {
 
             let displayName;
 
-            if (part === serviceId) {
-              displayName = serviceName ?? serviceId;
+            if (part === serviceId || part === layerId) {
+              displayName = serviceName ?? layerName ?? serviceId;
             } else {
               const translationKey = `common.${part.toLowerCase()}`;
               displayName = t(

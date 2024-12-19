@@ -90,7 +90,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           disabled={deleteStatus === "pending" || updateStatus === "pending"}
           variant="text"
         >
-          {t("services.dialog.deleteBtn", deleteButtonText)}
+          {t("common.dialog.deleteBtn", deleteButtonText)}
         </Button>
 
         <Typography variant="body1">

@@ -11,8 +11,7 @@ import {
   Menu,
   MenuItem,
 } from "@mui/material";
-// import CircularProgress from "../../components/progress/circular-progress";
-// import Scrollbar from "../../components/scrollbar";
+import Scrollbar from "../../components/scrollbar/scrollbar";
 import { DataGrid } from "@mui/x-data-grid";
 
 import SearchIcon from "@mui/icons-material/Search";
@@ -137,33 +136,34 @@ function UsedInMapsGrid() {
                   },
                 }}
               />
-
-              <DataGrid
-                sx={{ maxWidth: "100%", mb: 2, mt: 1 }}
-                rows={rows}
-                columns={columns}
-                initialState={{
-                  pagination: {
-                    paginationModel: {
-                      pageSize: 10,
+              <Scrollbar sx={{ maxHeight: "400px" }}>
+                <DataGrid
+                  sx={{ maxWidth: "100%", mb: 2, mt: 1 }}
+                  rows={rows}
+                  columns={columns}
+                  initialState={{
+                    pagination: {
+                      paginationModel: {
+                        pageSize: 10,
+                      },
                     },
-                  },
-                }}
-                slotProps={{
-                  loadingOverlay: {
-                    variant: "skeleton",
-                    noRowsVariant: "skeleton",
-                  },
-                }}
-                pageSizeOptions={[10, 25, 50, 100]}
-                pagination
-                localeText={
-                  language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
-                }
-                checkboxSelection
-                disableMultipleRowSelection
-                disableRowSelectionOnClick
-              />
+                  }}
+                  slotProps={{
+                    loadingOverlay: {
+                      variant: "skeleton",
+                      noRowsVariant: "skeleton",
+                    },
+                  }}
+                  pageSizeOptions={[10, 25, 50, 100]}
+                  pagination
+                  localeText={
+                    language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
+                  }
+                  checkboxSelection
+                  disableMultipleRowSelection
+                  disableRowSelectionOnClick
+                />
+              </Scrollbar>
             </Box>
           </AccordionDetails>
         </Accordion>

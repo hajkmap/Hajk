@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
-import { Box, Button, Stack, TextField } from "@mui/material";
+import { Button, Stack, TextField } from "@mui/material";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import { FieldValues } from "react-hook-form";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
@@ -12,9 +13,16 @@ import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { RenderProps } from "../../components/form-factory/types/render";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import UsedInMapsGrid from "./used-in-maps-grid";
+import { useLayers, useLayerById } from "../../api/layers";
+import { SquareSpinnerComponent } from "../../components/progress/square-progress";
+import FormActionPanel from "../../components/form-action-panel";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
+  const { layerId } = useParams<{ layerId: string }>();
+  const { isLoading, isError } = useLayerById(layerId ?? "");
+  const { data: layers } = useLayers();
+  const layer = layers?.find((l) => l.id === layerId);
 
   const [formLayerData, setFormLayerData] = useState<
     DynamicFormContainer<FieldValues>
@@ -59,7 +67,7 @@ export default function LayerSettings() {
     gridColumns: 12,
     name: "name",
     title: `${t("common.name")}`,
-    defaultValue: "",
+    defaultValue: layer?.name,
   });
 
   panelNestedContainer.addInput({
@@ -475,14 +483,16 @@ export default function LayerSettings() {
     ],
   });
 
-  layerSettingsFormContainer.addContainer(panelNestedContainer);
-  layerSettingsFormContainer.addContainer(accordionNestedContainer);
-  layerSettingsFormContainer.addContainer(accordionNestedContainer2);
-  layerSettingsFormContainer.addContainer(accordionNestedContainer3);
-  layerSettingsFormContainer.addContainer(accordionNestedContainer4);
-  layerSettingsFormContainer.addContainer(accordionNestedContainer5);
-  layerSettingsFormContainer.addContainer(accordionNestedContainer6);
-  layerSettingsFormContainer.addContainer(accordionNestedContainer7);
+  layerSettingsFormContainer.addContainer([
+    panelNestedContainer,
+    accordionNestedContainer,
+    accordionNestedContainer2,
+    accordionNestedContainer3,
+    accordionNestedContainer4,
+    accordionNestedContainer5,
+    accordionNestedContainer6,
+    accordionNestedContainer7,
+  ]);
 
   const defaultValues = formLayerData.getDefaultValues();
   const {
@@ -502,11 +512,31 @@ export default function LayerSettings() {
 
   useEffect(() => {
     setFormLayerData(layerSettingsFormContainer);
-  }, []);
+  }, [layer]);
 
+  if (isLoading) {
+    return <SquareSpinnerComponent />;
+  }
+  if (isError) return <div>Error fetching layer details.</div>;
+  if (!layers) return <div>Layers not found.</div>;
   return (
     <Page title={t("common.settings")}>
-      <Box>
+      <FormActionPanel
+        updateStatus={"error"}
+        deleteStatus={"error"}
+        onUpdate={() => {
+          console.log("");
+        }}
+        onDelete={() => {
+          console.log("");
+        }}
+        lastSavedBy="Anonym"
+        lastSavedDate="2023-04-11 13:37"
+        saveButtonText="Spara"
+        deleteButtonText="Ta bort"
+        navigateTo="/layers"
+        isChangedFields={true}
+      >
         <form onSubmit={onSubmit}>
           <FormRenderer
             data={formLayerData}
@@ -516,7 +546,7 @@ export default function LayerSettings() {
           />
           <UsedInMapsGrid />
         </form>
-      </Box>
+      </FormActionPanel>
     </Page>
   );
 }

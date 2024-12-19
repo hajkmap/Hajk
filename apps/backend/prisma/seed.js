@@ -233,6 +233,7 @@ async function readAndPopulateLayers() {
 
         data.push({
           id,
+          name: generateNames(),
           serviceId: service.id,
           options: { ...rest },
         });

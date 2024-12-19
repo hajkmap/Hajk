@@ -52,5 +52,10 @@ class LayersController {
 
     res.status(HttpStatusCodes.OK).json({ count: layers.length, layers });
   }
+
+  async createLayer(req: Request, res: Response) {
+    const layer = await LayerService.createLayer(req.body);
+    res.status(HttpStatusCodes.CREATED).json(layer);
+  }
 }
 export default new LayersController();

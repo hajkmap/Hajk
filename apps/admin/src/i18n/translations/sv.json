@@ -49,6 +49,9 @@
     "common.welcome": "Välkommen!",
     "common.you": "Du",
     "common.lastSavedBy": "Senast sparad av {{lastSavedBy}} {{lastSavedDate,  {{lastSavedDate}}",
+    "common.dialog.closeBtn": "Stäng",
+    "common.dialog.saveBtn": "Spara",
+    "common.dialog.deleteBtn": "Ta bort",
     "dark": "Mörkt",
     "light": "Ljust",
     "roles.adminDescription": "Användare som är tillåtna att använda Hajk-admin.",
@@ -58,9 +61,6 @@
     "services.coordinateSystem": "Koordinatsystem",
     "services.description": "Intern adminbeskrivning av tjänst",
     "services.dialog.addBtn": "Lägg till ny tjänst",
-    "services.dialog.closeBtn": "Stäng",
-    "services.dialog.deleteBtn": "Ta bort",
-    "services.dialog.saveBtn": "Spara",
     "services.dialog.title": "Ny tjänst",
     "services.error.layers": "Inga lager hittades.",
     "services.error.unnamed.layer": "Lager utan namn.",
@@ -106,6 +106,7 @@
     "map.description": "Beskrivning",
     "map.title": "Titel",
     "map.locked": "Låst",
-    "layers.dialog.addBtn": "Lägg till lager"
+    "layers.dialog.addBtn": "Lägg till lager",
+    "layers.dialog.title": "Nytt lager"
   }
 }
