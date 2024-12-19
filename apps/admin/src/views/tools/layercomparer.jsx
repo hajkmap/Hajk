@@ -80,6 +80,14 @@ class LayerComparer extends Component {
     }
   };
 
+  /* Extracts all layers from the provided options, including both grouped layers and baselayers.
+ Initializes an empty array to store the collected layers.
+ Defines a helper function to recursively collect layers from each group.
+ If a group contains layers, those layers are added to the layers array.
+ If a group contains subgroups, the helper function is called recursively for each subgroup.
+ Iterates over each group in options.groups and collects their layers using the helper function.
+ Adds all baselayers from options.baselayers to the layers array.
+ Returns the complete array of collected layers.*/
   getLayersFromGroupsAndBaselayers(options) {
     const layers = [];
 
@@ -103,24 +111,29 @@ class LayerComparer extends Component {
     return layers;
   }
 
+  /*
+   * Loads layers based on the current map configuration.
+   * 1. Retrieves the layer menu configuration from the model.
+   * 2. Logs an error and exits if the configuration is missing.
+   * 3. Extracts layers from groups and baselayers using a helper method.
+   * 4. Retrieves all available layers from the model.
+   * 5. Filters and maps the extracted layers to match the available layers.
+   * 6. Updates the component's state with the filtered layers.
+   */
   loadLayers() {
-    const toolConfig = this.props.model.get("toolConfig");
-    const layerswitcherTool = toolConfig.find(
-      (tool) => tool.type === "layerswitcher"
-    );
+    const mapConfig = this.props.model.get("layerMenuConfig");
 
-    if (!layerswitcherTool) {
-      console.error("LayerSwitcher not found in toolConfig.");
+    if (!mapConfig) {
+      console.error("Map configuration could not be loaded.");
       return;
     }
 
-    const layerSwitcherLayers = this.getLayersFromGroupsAndBaselayers(
-      layerswitcherTool.options
-    );
+    const layerMenuConfigLayers =
+      this.getLayersFromGroupsAndBaselayers(mapConfig);
 
     const allLayers = this.props.model.get("layers");
 
-    const comparedLayers = layerSwitcherLayers
+    const comparedLayers = layerMenuConfigLayers
       .filter((lsLayer) => allLayers.some((al) => al.id === lsLayer.id))
       .map((lsLayer) => {
         const realLayer = allLayers.find((al) => al.id === lsLayer.id);
