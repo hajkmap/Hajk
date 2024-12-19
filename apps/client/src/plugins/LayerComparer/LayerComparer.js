@@ -40,6 +40,20 @@ const LayerComparer = (props) => {
   // By doing it in this useEffect, we do it once and for all,
   // which is a good idea, as such filter/map can be considered
   // an expensive operation.
+  /* useEffect hook to manage layer selection based on component props.
+   * 1. Retrieves all layers from the map.
+   * 2. Checks if selecting chosen layers is enabled.
+   *    a. Filters and maps the chosen layers to match available layers.
+   *    b. Updates the state with the final chosen layers.
+   * 3. If selecting chosen layers is not enabled:
+   *    a. Filters and maps base layers and updates the baseLayers state.
+   *    b. If showing non-base layers in the selection is enabled:
+   *       i. Filters and maps non-base layers and updates the layers state.
+   *    c. Otherwise, clears the layers state.
+   *    d. Clears the chosenLayers state.
+   * 4. The effect runs whenever the map or relevant options change.
+   */
+
   useEffect(() => {
     const allLayers = props.map.getAllLayers();
 
