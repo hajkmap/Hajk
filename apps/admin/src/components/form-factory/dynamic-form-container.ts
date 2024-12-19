@@ -1,7 +1,7 @@
 import { FieldValues } from "react-hook-form";
 import DynamicInputSettings from "./types/dynamic-input-settings";
 import StaticElement from "./static-element";
-import CustomInputSettings from "./types/custom-input-settings"; 
+import CustomInputSettings from "./types/custom-input-settings";
 import CONTAINER_TYPE from "./types/container-types";
 
 // Union type combining DynamicInputSettings, StaticElement, and nested DynamicFormContainer
@@ -9,14 +9,14 @@ export type FormElement<TFieldValues extends FieldValues> =
   | DynamicInputSettings<TFieldValues>
   | StaticElement
   | DynamicFormContainer<TFieldValues>
-  | CustomInputSettings<TFieldValues>; 
+  | CustomInputSettings<TFieldValues>;
 
 // Define the kinds for all form elements
 type FormElementKind =
   | "DynamicInputSettings"
   | "StaticElement"
   | "DynamicFormContainer"
-  | "CustomInputSettings"; 
+  | "CustomInputSettings";
 
 class DynamicFormContainer<TFieldValues extends FieldValues> {
   kind: FormElementKind;
@@ -38,9 +38,19 @@ class DynamicFormContainer<TFieldValues extends FieldValues> {
     this.props = props;
   }
 
-  addContainer(container: DynamicFormContainer<TFieldValues>): void {
-    container.kind = "DynamicFormContainer";
-    this.formItems.push(container);
+  addContainer(
+    containers:
+      | DynamicFormContainer<TFieldValues>
+      | DynamicFormContainer<TFieldValues>[]
+  ): void {
+    const containerArray = Array.isArray(containers)
+      ? containers
+      : [containers];
+
+    containerArray.forEach((container) => {
+      container.kind = "DynamicFormContainer";
+      this.formItems.push(container);
+    });
   }
 
   addInput(input: DynamicInputSettings<TFieldValues>): void {
@@ -59,8 +69,8 @@ class DynamicFormContainer<TFieldValues extends FieldValues> {
   }
 
   addCustomInput(input: CustomInputSettings<TFieldValues>): void {
-    input.kind = "CustomInputSettings"; 
-    this.formItems.push(input); 
+    input.kind = "CustomInputSettings";
+    this.formItems.push(input);
   }
 
   getElements(): FormElement<TFieldValues>[] {

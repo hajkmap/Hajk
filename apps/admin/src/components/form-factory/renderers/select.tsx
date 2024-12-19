@@ -8,7 +8,9 @@ const renderSelect: RenderFunction<FieldValues> = ({
   optionList,
   title,
   name,
+  slotProps,
 }) => {
+  const inputSlotProps = slotProps?.input ?? {};
   return (
     <FormControl fullWidth error={!!errorMessage}>
       {title && <InputLabel id={name}>{title}</InputLabel>}
@@ -16,6 +18,7 @@ const renderSelect: RenderFunction<FieldValues> = ({
         labelId={name}
         {...field}
         {...inputProps}
+        {...inputSlotProps}
         label={title}
         inputRef={field?.ref}
         displayEmpty

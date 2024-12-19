@@ -1,5 +1,5 @@
 import Grid from "@mui/material/Grid2";
-import { Link } from "react-router";
+import { Link, useLocation, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   Avatar,
@@ -19,6 +19,7 @@ import { HEADER_HEIGHT, HEADER_Z_INDEX } from "../constants";
 import HajkTooltip from "../../../components/hajk-tooltip";
 import useUserStore, { User } from "../../../store/use-user-store";
 import useAuth from "../../../hooks/use-auth";
+import { useServices } from "../../../api/services/hooks";
 
 const getUserInitials = (user: User): string => {
   const words: string[] = user.fullName.split(" ");
@@ -31,6 +32,13 @@ export default function Header() {
   const [userList, setUserList] = useState<User[]>([]);
   const [activeUser, setActiveUser] = useState<User | null>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { serviceId } = useParams();
+  const { data: services } = useServices();
+
+  const location = useLocation();
+  const pathParts = location.pathname.split("/").filter(Boolean);
+
+  const serviceName = services?.find((s) => s.id === serviceId)?.name;
 
   const { user } = useUserStore.getState();
   const { logout } = useAuth();
@@ -48,6 +56,59 @@ export default function Header() {
 
     setUserList(dummyUserList);
   }, [setActiveUser, setUserList, user]);
+
+  const breadcrumbLinks =
+    pathParts.length > 0
+      ? [
+          <Box
+            sx={{ color: palette.text.secondary }}
+            mr={1}
+            component="span"
+            key="home"
+          >
+            <Link to="/">Start</Link>
+            {pathParts.length > 0 && " / "}
+          </Box>,
+          ...pathParts.map((part, index) => {
+            const path = `/${pathParts.slice(0, index + 1).join("/")}`;
+            const isCurrentPath = path === location.pathname;
+
+            let displayName;
+
+            if (part === serviceId) {
+              displayName = serviceName ?? serviceId;
+            } else {
+              const translationKey = `common.${part.toLowerCase()}`;
+              displayName = t(
+                translationKey,
+                part.charAt(0).toUpperCase() + part.slice(1)
+              );
+            }
+
+            return (
+              <Box
+                sx={{ color: palette.text.secondary }}
+                mr={1}
+                component="span"
+                key={path}
+              >
+                <Link
+                  style={{
+                    color: isCurrentPath ? palette.text.primary : "",
+                  }}
+                  to={path}
+                >
+                  {displayName}
+                </Link>
+
+                {index < pathParts.length - 1 && (
+                  <Box component="span"> / </Box>
+                )}
+              </Box>
+            );
+          }),
+        ]
+      : [];
 
   return !user ? null : (
     <Paper
@@ -69,7 +130,15 @@ export default function Header() {
         direction={"row"}
         sx={{ width: "100%", height: `${HEADER_HEIGHT}px` }}
       >
-        <Grid size={{ xs: 8, sm: 4 }} sx={{ fontSize: "0" }}>
+        <Grid
+          size={{ xs: 8, sm: 8 }}
+          container
+          alignItems="center"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           <Link
             to="/"
             style={{
@@ -79,7 +148,7 @@ export default function Header() {
             }}
           >
             <img
-              src="hajk-admin-logo.svg"
+              src="/hajk-admin-logo.svg"
               alt={t("common.clickableLogo")}
               style={{
                 height: "32px",
@@ -89,10 +158,22 @@ export default function Header() {
               }}
             />
           </Link>
+
+          <Box
+            sx={{
+              display: "inline-flex",
+              fontSize: "0.8rem",
+              fontWeight: 700,
+              ml: 8,
+            }}
+          >
+            {breadcrumbLinks}
+          </Box>
         </Grid>
+
         <Grid
           container
-          size={{ xs: 4, sm: 8 }}
+          size={{ xs: 4, sm: 4 }}
           justifyContent="flex-end"
           alignSelf="center"
           alignItems="center"

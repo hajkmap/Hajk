@@ -12,7 +12,7 @@ export interface ToolsApiResponse {
 }
 
 export interface GlobalMapsApiResponse {
-  maps: { name: string; id: string }[];
+  maps: { name: string; id: string; locked: boolean }[];
   count: number;
   error: string;
   errorId: string;

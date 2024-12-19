@@ -7,13 +7,15 @@ const renderTextArea: RenderFunction<FieldValues> = ({
   inputProps,
   errorMessage,
   title,
+  slotProps,
 }) => {
   const { rows = 4, ...restInputProps } = inputProps ?? {};
-
+  const inputSlotProps = slotProps?.input ?? {};
   return (
     <TextField
       {...field}
       {...restInputProps}
+      {...inputSlotProps}
       fullWidth
       label={title}
       multiline

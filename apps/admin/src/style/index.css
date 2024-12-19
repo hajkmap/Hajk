@@ -1,5 +1,5 @@
 /* move tanstack devtools a bit to make room for scrolltop button */
-body div.tsqd-open-btn-container{
+body div.tsqd-open-btn-container {
   right: 64px;
 }
 
