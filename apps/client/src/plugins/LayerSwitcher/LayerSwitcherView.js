@@ -40,42 +40,7 @@ const BreadCrumbsContainer = ({ map, app }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// TODO
-// - DONE Break out filter to own component
-// - DONE Break out QuickAccess to own Component
-// - DONE Break out layer list to own Component - mayebe not
-// - DONE Remove LayerSwitcherModel and pass around `map`, `app`, `localObserver`
-// and `globalObserver` as needed.
-// - DONE remove quickaccess from LayerGroupAccordinon
-// - DONE Remove layerCount
-// - DONE Test the "Theme/quickAccessPresets" functionality
-// - DONE Fix the bug sometimes click layer in the quick access don't update
-//
-// - DONE Move `addLayerNames` to pure fn
-// - DONE Update state managemetn and keeep in sync with OpenLayers
-//
-// - Refactor the observers to use a provider instead of prop-drilling
-// - The layer pagage dialogs should use ConfirmationDialog component
-// - Remove `show` prop from quickAccess layers
-//
-// - DONE Clean upp render* methods in BackgroundSwitcher.
-//   Should make it faster as well. - Did not make it faster,
-//   but there is still more to do. More indirection to remove
-//
-// - DONE Refactor LayerItem into 3 separate components for each tab
-//     At least 3. Clean it up and remove indirection
-//
-// - Move ZoomCheck into core code
-//    Partly DONE, moved to separat compontnt
-//
-//
-// - Maybe reconsider the "window-management"
-//      Redo
-//      Maybe this isn't important right now. Would be nice to fix, but it work
-//      as it is. I could move it to a own component though.
-//
-//
+// TODO Turn this to Functional component
 
 class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
@@ -113,7 +78,6 @@ class LayersSwitcherView extends React.PureComponent {
         tab1: 0,
         tab2: 0,
       },
-      // layerMap:
     };
 
     this.localObserver = this.props.localObserver;
