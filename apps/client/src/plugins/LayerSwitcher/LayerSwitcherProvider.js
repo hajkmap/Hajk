@@ -27,6 +27,7 @@ const getOlLayerState = (l) => ({
   // "filterValue"
 });
 
+// Provide the current map zoom as a hook.
 const MapZoomContext = createContext(null);
 export const useMapZoom = () => useContext(MapZoomContext);
 const MapZoomProvider = ({ map, children }) => {
@@ -168,7 +169,6 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
 
   return {
     setLayerVisibility(layerId, visible) {
-      console.log("LS Dispatcher:", "setLayerVisibility", layerId, visible);
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
       olLayer.setVisible(visible);
 
@@ -185,13 +185,6 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
       }
     },
     setSubLayerVisibility(layerId, subLayerId, visible) {
-      console.log(
-        "LS Dispatcher:",
-        "setSubLayerVisibility",
-        layerId,
-        subLayerId,
-        visible
-      );
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
       const currentSubLayers = new Set(olLayer.get("subLayers"));
 
@@ -206,8 +199,6 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
       setOLSubLayers(olLayer, currentSubLayersArray);
     },
     setGroupVisibility(groupId, visible) {
-      console.log("LS Dispatcher:", "setGroupVisibility", groupId, visible);
-
       const groupTree = getGroupConfigById(staticLayerTree, groupId);
       const allLayerIdsInGroup = getAllLayerIdsInGroup(groupTree);
 
@@ -217,7 +208,6 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
       });
     },
     setGroupLayerVisibility(layerId, visible) {
-      console.log("LS Dispatcher:", "setGroupLayerVisibility", layerId);
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
       const allSubLayers = new Set(olLayer.get("subLayers"));
 
@@ -230,27 +220,19 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
       }
     },
     setBackgroundLayer(layerId) {
-      console.log("LS Dispatcher:", "setBackgroundLayer", layerId);
       olBackgroundLayers.forEach((l) => l?.setVisible(false));
 
       const layer = map.getAllLayers().find((l) => l.get("name") === layerId);
-      console.log(layerId, layer, olBackgroundLayers);
       layer?.setVisible(true);
     },
     setLayerOpacity(layerId, visible) {
-      console.log("LS Dispatcher:", "setLayerOpacity", layerId);
       const layer = map.getAllLayers().find((l) => l.get("name") === layerId);
       layer.setVisible(visible);
     },
     setLayerQuickAccess(layerId, partOfQuickAccess) {
-      console.log("LS Dispatcher:", "setLayerQuickAccess", layerId);
-      console.log(partOfQuickAccess);
-      // const layer = map.getAllLayers().filter((l) => l.get("name") === layerId);
-      // layer.setVisible(visible);
       // set all other background layers to not visible
     },
     addVisibleLayersToQuickAccess() {
-      console.log("LS Dispatcher:", "setLayerQuickAccess");
       const visibleLayers = map
         .getAllLayers()
         .filter(
@@ -259,16 +241,10 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
             l.get("layerType") !== "base" &&
             l.get("layerType") !== "system"
         );
-      // enqueueSnackbar &&
-      //   enqueueSnackbar(`Tända lager har nu lagts till i snabbåtkomst.`, {
-      //     variant: "success",
-      //     anchorOrigin: { vertical: "bottom", horizontal: "center" },
-      //   });
       const QUICK_ACCESS_KEY = "quickAccess";
       visibleLayers.forEach((l) => l.set(QUICK_ACCESS_KEY, true));
     },
     clearQuickAccess() {
-      console.log("LS Dispatcher:", "setLayerQuickAccess");
       const QUICK_ACCESS_KEY = "quickAccess";
       map
         .getAllLayers()
@@ -279,17 +255,8 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
             l.get("layerType") !== "system"
         )
         .map((l) => l.set(QUICK_ACCESS_KEY, false));
-
-      // enqueueSnackbar &&
-      //   enqueueSnackbar(`Tända lager har nu lagts till i snabbåtkomst.`, {
-      //     variant: "success",
-      //     anchorOrigin: { vertical: "bottom", horizontal: "center" },
-      //   });
     },
-    // set sublayers
-    // set quickAccess
     // set ZIndex
-    // set sublayers
   };
 };
 
@@ -306,9 +273,8 @@ const getLayerNodes = (groups, olLayerMap) =>
     // A group should have both defined
     const isGroup = !!(node.groups && node.layers);
 
-    // TODO refactor/cleanup
     const olLayer = olLayerMap[node.id];
-    // const isGroupLayer = olLayer?.get("subLayers")?.length > 1;
+
     const isGroupLayer = olLayer?.get("layerType") === "group";
 
     let layerType = node.layerType;
