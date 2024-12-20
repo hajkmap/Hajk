@@ -90,7 +90,7 @@ const QuickAccessView = ({
         onClick={() =>
           setQuickAccessSectionExpanded(!quickAccessSectionExpanded)
         }
-        style={{
+        sx={{
           p: 0,
         }}
         dense
@@ -98,9 +98,7 @@ const QuickAccessView = ({
         <IconButton
           size="small"
           sx={{
-            pl: "3px",
-            pr: "4px",
-            py: 0,
+            pr: 0,
             visibility: qaLayers?.length > 0 ? "visibile" : "hidden",
           }}
           disableRipple

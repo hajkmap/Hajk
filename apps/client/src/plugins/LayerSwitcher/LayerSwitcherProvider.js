@@ -54,7 +54,9 @@ const MapZoomProvider = ({ map, children }) => {
   );
 };
 
-// TODO This is a fix to listen on all layers with zoom check
+// This is a hack to listen on all layers with zoom check
+// This could be moved to the core code or another plugin. It's not really the
+// responsibility of the LayerSwitcher
 const LayerZoomListener = ({ layer }) => {
   const layerMinZoom = layer.get("minZoom");
   const layerMaxZoom = layer.get("maxZoom");
