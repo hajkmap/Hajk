@@ -226,6 +226,7 @@ class WMSLayer {
    * @instance
    */
   onTileLoadError = () => {
+    this.layer.set("wmsLoadStatus", "failure");
     this.globalObserver.publish("layerswitcher.wmsLayerLoadStatus", {
       id: this.layer.get("name"),
       status: "loaderror",

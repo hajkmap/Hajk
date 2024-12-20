@@ -18,6 +18,8 @@ import QuickAccessLayers from "./QuickAccessLayers.js";
 import QuickAccessOptions from "./QuickAccessOptions.js";
 import Favorites from "./Favorites/Favorites.js";
 
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
@@ -26,7 +28,6 @@ const QuickAccessView = ({
   show,
   map, // A OpenLayers map instance
   app,
-  localObserver,
   globalObserver,
   enableQuickAccessPresets, // : boolean
   enableUserQuickAccessFavorites,
@@ -34,16 +35,12 @@ const QuickAccessView = ({
   favoritesViewDisplay,
   handleFavoritesViewToggle,
   favoritesInfoText,
-  treeData,
   filterValue,
   enqueueSnackbar,
+  layersState,
 }) => {
-  // TODO This iterates on all OL layers every render, that can be optimized
-  const hasVisibleLayers =
-    map
-      .getAllLayers()
-      .filter((l) => l.get("quickAccess") === true && l.get("visible") === true)
-      .length > 0;
+  const qaLayers = Object.values(layersState).filter((obj) => obj.quickAccess);
+  const hasVisibleLayers = qaLayers.some((l) => l.visible);
 
   const [quickAccessSectionExpanded, setQuickAccessSectionExpanded] =
     useState(false);
@@ -56,28 +53,19 @@ const QuickAccessView = ({
     setShowDeleteConfirmation(true);
   };
 
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
+
   // Handles click on confirm clear quickAccess button
   const handleClearQuickAccessLayers = () => {
     setShowDeleteConfirmation(false);
-    map
-      .getAllLayers()
-      .filter((l) => l.get("quickAccess") === true)
-      .map((l) => l.set("quickAccess", false));
+    layerSwitcherDispatch.clearQuickAccess();
   };
 
   // Handles click on AddLayersToQuickAccess menu item
   const handleAddLayersToQuickAccess = (e) => {
     e.stopPropagation();
     // Add visible layers to quickAccess section
-    map
-      .getAllLayers()
-      .filter(
-        (l) =>
-          l.get("visible") === true &&
-          l.get("layerType") !== "base" &&
-          l.get("layerType") !== "system"
-      )
-      .map((l) => l.set("quickAccess", true));
+    layerSwitcherDispatch.addVisibleLayersToQuickAccess();
 
     // Show snackbar
     enqueueSnackbar &&
@@ -109,11 +97,14 @@ const QuickAccessView = ({
       >
         <IconButton
           size="small"
-          sx={{ pl: "3px", pr: "4px", py: 0 }}
+          sx={{
+            pr: 0,
+            visibility: qaLayers?.length > 0 ? "visibile" : "hidden",
+          }}
           disableRipple
         >
           <KeyboardArrowRightOutlinedIcon
-            sx={{
+            style={{
               transform: quickAccessSectionExpanded ? "rotate(90deg)" : "",
               transition: "transform 300ms ease",
             }}
@@ -173,11 +164,8 @@ const QuickAccessView = ({
       <Collapse in={quickAccessSectionExpanded}>
         <Box sx={{ marginLeft: "31px" }}>
           <QuickAccessLayers
-            treeData={treeData}
             filterValue={filterValue}
-            localObserver={localObserver}
             map={map}
-            app={app}
             globalObserver={globalObserver}
           ></QuickAccessLayers>
         </Box>
