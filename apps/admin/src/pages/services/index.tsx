@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import Grid from "@mui/material/Grid2";
-import { Button, Box, useTheme } from "@mui/material";
+import {
+  Button,
+  Box,
+  useTheme,
+  IconButton,
+  Menu,
+  MenuItem,
+} from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -22,6 +29,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import useAppStateStore from "../../store/use-app-state-store";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 
 export default function ServicesPage() {
   const navigate = useNavigate();
@@ -126,6 +134,50 @@ export default function ServicesPage() {
     },
   });
 
+  const RowMenu = (params: { row: { id: string } }) => {
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const open = Boolean(anchorEl);
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+      setAnchorEl(event.currentTarget as HTMLElement | null);
+    };
+
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
+
+    return (
+      <Box component="div" sx={{ textAlign: "center" }}>
+        <IconButton onClick={handleClick}>
+          <MoreHorizIcon />
+        </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "left",
+          }}
+        >
+          <MenuItem onClick={() => alert(`View ${params.row.id}`)}>
+            View
+          </MenuItem>
+          <MenuItem onClick={() => alert(`Edit ${params.row.id}`)}>
+            Edit
+          </MenuItem>
+          <MenuItem onClick={() => alert(`Delete ${params.row.id}`)}>
+            Delete
+          </MenuItem>
+        </Menu>
+      </Box>
+    );
+  };
+
   return (
     <>
       {isLoading ? (
@@ -174,6 +226,9 @@ export default function ServicesPage() {
             <Grid size={12}>
               <DataGrid
                 onCellClick={(params) => {
+                  if (params.field === "actions") {
+                    return;
+                  }
                   const id: string = (params.row as Service).id;
                   if (id) {
                     void navigate(`/services/${id}`);
@@ -199,6 +254,19 @@ export default function ServicesPage() {
                     field: "version",
                     flex: 0.3,
                     headerName: "Version",
+                  },
+                  {
+                    field: "brokenService",
+                    flex: 0.3,
+                    headerName: t("common.brokenService"),
+                  },
+                  {
+                    field: "actions",
+                    headerName: t("common.actions"),
+                    flex: 0.2,
+                    renderCell: (params: { row: { id: string } }) => (
+                      <RowMenu {...params} />
+                    ),
                   },
                 ]}
                 slotProps={{

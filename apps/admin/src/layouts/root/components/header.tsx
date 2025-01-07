@@ -78,7 +78,7 @@ export default function Header() {
             let displayName;
 
             if (part === serviceId || part === layerId) {
-              displayName = serviceName ?? layerName ?? serviceId;
+              displayName = serviceName ?? layerName;
             } else {
               const translationKey = `common.${part.toLowerCase()}`;
               displayName = t(

@@ -52,6 +52,8 @@
     "common.dialog.closeBtn": "Close",
     "common.dialog.deleteBtn": "Delete",
     "common.dialog.saveBtn": "Save",
+    "common.brokenService": "Broken service",
+    "common.usedInMaps": "Used in maps",
     "dark": "Dark",
     "light": "Light",
     "roles.adminDescription": "Users that are allowed to use Hajks admin interface",

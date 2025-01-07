@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import Scrollbar from "../../components/scrollbar/scrollbar";
 import { DataGrid } from "@mui/x-data-grid";
-
+import { useTranslation } from "react-i18next";
 import SearchIcon from "@mui/icons-material/Search";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import useAppStateStore from "../../store/use-app-state-store";
@@ -21,6 +21,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 
 function UsedInMapsGrid() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const language = useAppStateStore((state) => state.language);
 
@@ -109,7 +110,7 @@ function UsedInMapsGrid() {
           }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="h6">Används i kartor</Typography>
+            <Typography variant="h6">{t("common.usedInMaps")}</Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 2 }}>
             <Box

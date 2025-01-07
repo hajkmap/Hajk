@@ -52,6 +52,8 @@
     "common.dialog.closeBtn": "Stäng",
     "common.dialog.saveBtn": "Spara",
     "common.dialog.deleteBtn": "Ta bort",
+    "common.brokenService": "Trasig tjänst",
+    "common.usedInMaps": "Används i kartor",
     "dark": "Mörkt",
     "light": "Ljust",
     "roles.adminDescription": "Användare som är tillåtna att använda Hajk-admin.",
