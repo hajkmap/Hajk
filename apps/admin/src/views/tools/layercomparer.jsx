@@ -4,6 +4,7 @@ import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
 import { blue } from "@material-ui/core/colors";
+import LayerComparerLayerList from "../components/LayerComparerLayerList";
 
 const ColorButtonBlue = withStyles((theme) => ({
   root: {
@@ -24,6 +25,9 @@ const defaultState = {
   instruction: "",
   visibleAtStart: false,
   visibleForGroups: [],
+  chosenLayers: [],
+  selectChosenLayers: false,
+  layers: [],
 };
 
 class LayerComparer extends Component {
@@ -49,12 +53,97 @@ class LayerComparer extends Component {
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
+        chosenLayers: tool.options.chosenLayers
+          ? tool.options.chosenLayers
+          : [],
+        selectChosenLayers: tool.options.selectChosenLayers,
       });
+      this.loadLayers();
     } else {
       this.setState({
         active: false,
       });
     }
+  }
+
+  handleSelectChosenLayersChange = (checked) => {
+    this.setState((prevState) => ({
+      selectChosenLayers: checked,
+      chosenLayers: checked ? prevState.chosenLayers : [],
+      showNonBaseLayersInSelect: checked
+        ? false
+        : prevState.showNonBaseLayersInSelect,
+    }));
+
+    if (checked) {
+      this.loadLayers();
+    }
+  };
+
+  /* Extracts all layers from the provided options, including both grouped layers and baselayers.
+ Initializes an empty array to store the collected layers.
+ Defines a helper function to recursively collect layers from each group.
+ If a group contains layers, those layers are added to the layers array.
+ If a group contains subgroups, the helper function is called recursively for each subgroup.
+ Iterates over each group in options.groups and collects their layers using the helper function.
+ Adds all baselayers from options.baselayers to the layers array.
+ Returns the complete array of collected layers.*/
+  getLayersFromGroupsAndBaselayers(options) {
+    const layers = [];
+
+    function collectLayersFromGroup(group) {
+      if (group.layers) {
+        layers.push(...group.layers);
+      }
+      if (group.groups) {
+        group.groups.forEach(collectLayersFromGroup);
+      }
+    }
+
+    if (options.groups) {
+      options.groups.forEach(collectLayersFromGroup);
+    }
+
+    if (options.baselayers) {
+      layers.push(...options.baselayers);
+    }
+
+    return layers;
+  }
+
+  /*
+   * Loads layers based on the current map configuration.
+   * 1. Retrieves the layer menu configuration from the model.
+   * 2. Logs an error and exits if the configuration is missing.
+   * 3. Extracts layers from groups and baselayers using a helper method.
+   * 4. Retrieves all available layers from the model.
+   * 5. Filters and maps the extracted layers to match the available layers.
+   * 6. Updates the component's state with the filtered layers.
+   */
+  loadLayers() {
+    const mapConfig = this.props.model.get("layerMenuConfig");
+
+    if (!mapConfig) {
+      console.error("Map configuration could not be loaded.");
+      return;
+    }
+
+    const layerMenuConfigLayers =
+      this.getLayersFromGroupsAndBaselayers(mapConfig);
+
+    const allLayers = this.props.model.get("layers");
+
+    const comparedLayers = layerMenuConfigLayers
+      .filter((lsLayer) => allLayers.some((al) => al.id === lsLayer.id))
+      .map((lsLayer) => {
+        const realLayer = allLayers.find((al) => al.id === lsLayer.id);
+        return {
+          id: realLayer.id,
+          caption: realLayer.caption || "Okänt lager",
+        };
+      });
+
+    this.setState({ layers: comparedLayers });
   }
 
   /**
@@ -118,6 +207,8 @@ class LayerComparer extends Component {
           Function.prototype.call,
           String.prototype.trim
         ),
+        chosenLayers: this.state.chosenLayers,
+        selectChosenLayers: this.state.selectChosenLayers,
       },
     };
 
@@ -202,6 +293,7 @@ class LayerComparer extends Component {
    *
    */
   render() {
+    const { layers } = this.state;
     return (
       <div>
         <form>
@@ -286,6 +378,7 @@ class LayerComparer extends Component {
                 this.handleInputChange(e);
               }}
               checked={this.state.showNonBaseLayersInSelect}
+              disabled={this.state.selectChosenLayers}
             />
             &nbsp;
             <label
@@ -315,6 +408,30 @@ class LayerComparer extends Component {
               value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
+          <div>
+            <label style={{ paddingBottom: "20px" }}>
+              <input
+                type="checkbox"
+                checked={this.state.selectChosenLayers}
+                onChange={(e) =>
+                  this.handleSelectChosenLayersChange(e.target.checked)
+                }
+              />
+              Aktivera "Välj lager"
+            </label>
+          </div>
+          <div>
+            {this.state.selectChosenLayers && (
+              <LayerComparerLayerList
+                allLayers={layers}
+                chosenLayers={this.state.chosenLayers}
+                onChosenLayersChange={(updatedLayers) =>
+                  this.setState({ chosenLayers: updatedLayers })
+                }
+              />
+            )}
+          </div>
+
           {this.renderVisibleForGroups()}
         </form>
       </div>
