@@ -14,6 +14,7 @@ const LayerComparer = (props) => {
 
   const [layers, setLayers] = useState([]);
   const [baseLayers, setBaseLayers] = useState([]);
+  const [chosenLayers, setChosenLayers] = useState([]);
 
   // Prepare a ref that will hold our map control
   const sds = useRef();
@@ -39,25 +40,75 @@ const LayerComparer = (props) => {
   // By doing it in this useEffect, we do it once and for all,
   // which is a good idea, as such filter/map can be considered
   // an expensive operation.
+  /* useEffect hook to manage layer selection based on component props.
+   * 1. Retrieves all layers from the map.
+   * 2. Checks if selecting chosen layers is enabled.
+   *    a. Filters and maps the chosen layers to match available layers.
+   *    b. Updates the state with the final chosen layers.
+   * 3. If selecting chosen layers is not enabled:
+   *    a. Filters and maps base layers and updates the baseLayers state.
+   *    b. If showing non-base layers in the selection is enabled:
+   *       i. Filters and maps non-base layers and updates the layers state.
+   *    c. Otherwise, clears the layers state.
+   *    d. Clears the chosenLayers state.
+   * 4. The effect runs whenever the map or relevant options change.
+   */
+
   useEffect(() => {
     const allLayers = props.map.getAllLayers();
-    const baseLayers = allLayers
-      .filter((l) => l.get("layerType") === "base")
-      .map((l) => {
-        return { id: l.ol_uid, label: l.get("caption") };
-      });
 
-    if (props.options.showNonBaseLayersInSelect) {
-      const layers = allLayers
-        .filter((l) => ["layer", "group"].includes(l.get("layerType")))
-        .map((l) => {
-          return { id: l.ol_uid, label: l.get("caption") };
+    if (props.options.selectChosenLayers) {
+      const finalChosenLayers = (props.options.chosenLayers || [])
+        .filter((chosen) =>
+          allLayers.some((al) => al.get("name") === chosen.id)
+        )
+        .map((chosen) => {
+          const realLayer = allLayers.find(
+            (al) => al.get("name") === chosen.id
+          );
+          return {
+            id: realLayer.ol_uid,
+            label: realLayer.get("caption"),
+            layerType: realLayer.get("layerType"),
+          };
         });
-      setLayers(layers);
-    }
 
-    setBaseLayers(baseLayers);
-  }, [props.map, props.options.showNonBaseLayersInSelect]);
+      setChosenLayers(finalChosenLayers);
+    } else {
+      const baseLayers = allLayers
+        .filter((l) => l.get("layerType") === "base")
+        .map((l) => {
+          return {
+            id: l.ol_uid,
+            label: l.get("caption"),
+            layerType: l.get("layerType"),
+          };
+        });
+      setBaseLayers(baseLayers);
+
+      if (props.options.showNonBaseLayersInSelect) {
+        const layers = allLayers
+          .filter((l) => ["layer", "group"].includes(l.get("layerType")))
+          .map((l) => {
+            return {
+              id: l.ol_uid,
+              label: l.get("caption"),
+              layerType: l.get("layerType"),
+            };
+          });
+        setLayers(layers);
+      } else {
+        setLayers([]);
+      }
+
+      setChosenLayers([]);
+    }
+  }, [
+    props.map,
+    props.options.showNonBaseLayersInSelect,
+    props.options.selectChosenLayers,
+    props.options.chosenLayers,
+  ]);
 
   // Create a new SDSControl, add to a ref and add the ref to our map.
   useEffect(() => {
@@ -215,6 +266,7 @@ const LayerComparer = (props) => {
           value={layerId1}
           counterValue={layerId2}
           baseLayers={baseLayers}
+          chosenLayers={chosenLayers}
           layers={layers}
           label="Vänster sida"
         />
@@ -223,6 +275,7 @@ const LayerComparer = (props) => {
           value={layerId2}
           counterValue={layerId1}
           baseLayers={baseLayers}
+          chosenLayers={chosenLayers}
           layers={layers}
           label="Höger sida"
         />
