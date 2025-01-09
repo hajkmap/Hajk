@@ -1,5 +1,5 @@
 import Grid from "@mui/material/Grid2";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   Avatar,
@@ -12,59 +12,107 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useEffect, useState } from "react";
 import { HEADER_HEIGHT, HEADER_Z_INDEX } from "../constants";
 import HajkTooltip from "../../../components/hajk-tooltip";
+import useUserStore, { User } from "../../../store/use-user-store";
+import useAuth from "../../../hooks/use-auth";
+import { useServices } from "../../../api/services/hooks";
+import { useLayers } from "../../../api/layers/hooks";
 
-class DummyUser {
-  public id: string;
-  public name: string;
-  public url: string;
-  public email: string;
-
-  constructor(id: string, name: string, url: string, email: string) {
-    this.id = id;
-    this.name = name;
-    this.url = url;
-    this.email = email;
-  }
-}
-
-const getUserInitials = (user: DummyUser): string => {
-  const words: string[] = user.name.split(" ");
-  return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+const getUserInitials = (user: User): string => {
+  const words: string[] = user.fullName.split(" ");
+  return (words[0].charAt(0) + words[1]?.charAt(0)).toUpperCase() || "";
 };
 
 export default function Header() {
   const { t } = useTranslation();
   const { palette } = useTheme();
-  const [userList, setUserList] = useState<DummyUser[]>([]);
-  const [activeUser, setActiveUser] = useState<DummyUser>();
+  const [userList, setUserList] = useState<User[]>([]);
+  const [activeUser, setActiveUser] = useState<User | null>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { serviceId, layerId } = useParams();
+  const { data: services } = useServices();
+  const { data: layers } = useLayers();
+  const location = useLocation();
+  const pathParts = location.pathname.split("/").filter(Boolean);
+
+  const serviceName = services?.find((s) => s.id === serviceId)?.name;
+  const layerName = layers?.find((l) => l.id === layerId)?.name;
+
+  const { user } = useUserStore.getState();
+  const { logout } = useAuth();
 
   useEffect(() => {
-    const testActiveUser: DummyUser = new DummyUser(
-      "u55555",
-      "Jesper Adddddd",
-      "",
-      "jesade-vbg@gmail.com"
-    );
+    setActiveUser(user);
 
-    setActiveUser(testActiveUser);
+    const dummyUserList = [
+      { id: "u11111", fullName: "Henrik Hallberg", email: "hh___@gmail.com" },
+      { id: "u22222", fullName: "Jacob Wodzynski", email: "jw___@gmail.com" },
+      { id: "u33333", fullName: "Olof Svahn", email: "os___@gmail.com" },
+      { id: "u44444", fullName: "Albin Ahmetaj", email: "aa___@gmail.com" },
+      { id: "u55555", fullName: "Jesper Adeborn", email: "ja___@gmail.com" },
+    ].filter((u) => u.fullName !== user?.fullName);
 
-    setUserList(
-      [
-        new DummyUser("u11111", "Henrik H", "", "hh___@gmail.com"),
-        new DummyUser("u22222", "Jacob W", "", "jw___@gmail.com"),
-        new DummyUser("u33333", "Olof S", "", "os___@gmail.com"),
-        new DummyUser("u44444", "Albin A", "", "aa___@gmail.com"),
-        testActiveUser,
-      ].filter((user) => user.id !== testActiveUser.id)
-    );
-  }, [setActiveUser, setUserList]);
+    setUserList(dummyUserList);
+  }, [setActiveUser, setUserList, user]);
 
-  return (
+  const breadcrumbLinks =
+    pathParts.length > 0
+      ? [
+          <Box
+            sx={{ color: palette.text.secondary }}
+            mr={1}
+            component="span"
+            key="home"
+          >
+            <Link to="/">Start</Link>
+            {pathParts.length > 0 && " / "}
+          </Box>,
+          ...pathParts.map((part, index) => {
+            const path = `/${pathParts.slice(0, index + 1).join("/")}`;
+            const isCurrentPath = path === location.pathname;
+
+            let displayName;
+
+            if (part === serviceId || part === layerId) {
+              displayName = serviceName ?? layerName;
+            } else {
+              const translationKey = `common.${part.toLowerCase()}`;
+              displayName = t(
+                translationKey,
+                part.charAt(0).toUpperCase() + part.slice(1)
+              );
+            }
+
+            return (
+              <Box
+                sx={{ color: palette.text.secondary }}
+                mr={1}
+                component="span"
+                key={path}
+              >
+                <Link
+                  style={{
+                    color: isCurrentPath ? palette.text.primary : "",
+                  }}
+                  to={path}
+                >
+                  {displayName}
+                </Link>
+
+                {index < pathParts.length - 1 && (
+                  <Box component="span"> / </Box>
+                )}
+              </Box>
+            );
+          }),
+        ]
+      : [];
+
+  return !user ? null : (
     <Paper
       component="header"
       elevation={2}
@@ -84,7 +132,15 @@ export default function Header() {
         direction={"row"}
         sx={{ width: "100%", height: `${HEADER_HEIGHT}px` }}
       >
-        <Grid size={{ xs: 8, sm: 4 }} sx={{ fontSize: "0" }}>
+        <Grid
+          size={{ xs: 8, sm: 8 }}
+          container
+          alignItems="center"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           <Link
             to="/"
             style={{
@@ -94,7 +150,7 @@ export default function Header() {
             }}
           >
             <img
-              src="hajk-admin-logo.svg"
+              src="/hajk-admin-logo.svg"
               alt={t("common.clickableLogo")}
               style={{
                 height: "32px",
@@ -104,25 +160,37 @@ export default function Header() {
               }}
             />
           </Link>
+
+          <Box
+            sx={{
+              display: "inline-flex",
+              fontSize: "0.8rem",
+              fontWeight: 700,
+              ml: 8,
+            }}
+          >
+            {breadcrumbLinks}
+          </Box>
         </Grid>
+
         <Grid
           container
-          size={{ xs: 4, sm: 8 }}
+          size={{ xs: 4, sm: 4 }}
           justifyContent="flex-end"
           alignSelf="center"
           alignItems="center"
         >
-          <AvatarGroup max={4} sx={{ display: { xs: "none", sm: "flex" } }}>
+          <AvatarGroup max={6} sx={{ display: { xs: "none", sm: "flex" } }}>
             {userList.map((user) => {
               return (
                 <HajkTooltip
                   key={user.id}
-                  title={user.name}
+                  title={user.fullName}
                   placement="bottom-end"
                 >
                   <Avatar
                     key={user.id + "avatar"}
-                    alt={user.name}
+                    alt={user.fullName}
                     sx={{
                       width: "30px",
                       height: "30px",
@@ -145,7 +213,7 @@ export default function Header() {
           {activeUser && (
             <HajkTooltip
               key={activeUser.id}
-              title={activeUser.name + ` (${t("common.you")})`}
+              title={activeUser.fullName + ` (${t("common.you")})`}
               placement="bottom-end"
             >
               <Avatar
@@ -194,13 +262,20 @@ export default function Header() {
               <Grid size={12}>
                 <Box>
                   <Typography sx={{ fontWeight: "bold" }}>
-                    {activeUser?.name}
+                    {activeUser?.fullName}
                   </Typography>
                 </Box>
                 <Box>{activeUser?.email}</Box>
                 <Divider sx={{ mb: 1, mt: 1 }} />
               </Grid>
-              <Grid size={12} sx={{ textAlign: "right" }}>
+              <Grid container size={12} justifyContent="space-between">
+                <Button
+                  startIcon={<LogoutIcon />}
+                  color="error"
+                  onClick={() => void logout()}
+                >
+                  {t("common.logout")}
+                </Button>
                 <Button startIcon={<SettingsIcon />}>
                   {t("common.settings")}
                 </Button>

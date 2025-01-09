@@ -18,7 +18,7 @@ export const validatePayload = (
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
           ...error,
         });
       }

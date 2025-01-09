@@ -1,10 +1,11 @@
-import { Box, useTheme } from "@mui/material";
+import { Box, List, useTheme } from "@mui/material";
 import { SIDEBAR_MENU, SIDEBAR_MINI_WIDTH } from "../../constants";
 import LockButton from "./lock-button";
 import NavItem from "./nav-item";
+import CollapsibleNavItem from "./collapsible-nav-item";
 import SquareIconButton from "./square-icon-button";
 import SettingsIcon from "@mui/icons-material/Settings";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import HajkTooltip from "../../../../components/hajk-tooltip";
 import { useTranslation } from "react-i18next";
 
@@ -36,19 +37,29 @@ const NavList = (props: Props) => {
             : "",
       }}
     >
-      {SIDEBAR_MENU.map((link, index) => {
-        return (
-          <NavItem
-            key={index + link.to}
-            to={link.to}
-            titleKey={link.titleKey}
-            icon={link.icon}
-            onClick={() => {
-              closeSidebarIfNeeded();
-            }}
-          />
-        );
-      })}
+      <List sx={{ p: 0 }}>
+        {SIDEBAR_MENU.map((menuItem, index) => {
+          return menuItem.collapsible ? (
+            <CollapsibleNavItem
+              key={index}
+              titleKey={menuItem.titleKey}
+              subItems={menuItem.subItems}
+              closeSidebarIfNeeded={closeSidebarIfNeeded}
+            />
+          ) : (
+            <NavItem
+              key={index + menuItem.to}
+              to={menuItem.to}
+              titleKey={menuItem.titleKey}
+              icon={menuItem.icon}
+              onClick={() => {
+                closeSidebarIfNeeded();
+              }}
+              isSubItem={false}
+            />
+          );
+        })}
+      </List>
 
       <Box
         sx={{
@@ -66,7 +77,7 @@ const NavList = (props: Props) => {
               alignSelf: "flex-start",
             }}
             onClick={() => {
-              navigate("/settings");
+              void navigate("/settings");
               closeSidebarIfNeeded();
             }}
           >

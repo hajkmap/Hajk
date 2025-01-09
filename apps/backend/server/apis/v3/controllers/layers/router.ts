@@ -6,4 +6,5 @@ export default express
   .get("/", controller.getLayers)
   .get("/types", controller.getLayerTypes)
   .get("/types/:type", controller.getLayersByType)
-  .get("/:id", controller.getLayerById);
+  .get("/:id", controller.getLayerById)
+  .post("/", controller.createLayer);

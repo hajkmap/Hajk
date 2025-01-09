@@ -10,7 +10,7 @@ export default function GroupsPage() {
   const { data: groups, isLoading } = useGroups();
 
   return (
-    <Page title={t("common.groups")}>
+    <Page title={t("common.layerGroups")}>
       {isLoading ? (
         <div>Loading...</div>
       ) : (

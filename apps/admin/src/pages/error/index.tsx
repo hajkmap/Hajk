@@ -1,23 +1,31 @@
-import { useRouteError, isRouteErrorResponse } from "react-router-dom";
-import Page from "../../layouts/root/components/page";
+import { useRouteError, isRouteErrorResponse } from "react-router";
+import { Box } from "@mui/material";
+import Forbidden from "./forbidden-page";
+import NotFound from "./not-found-page";
+import InternalServerPage from "./internal-server-page";
 
 export default function ErrorPage() {
   const error = useRouteError();
-  console.error(error);
-
-  let errorMessage = "";
-  if (isRouteErrorResponse(error)) {
-    errorMessage = error.statusText;
-  } else if (error instanceof Error) {
-    errorMessage = error.message;
-  }
 
   return (
-    <Page title="Oops!">
-      <p>Sorry, an unexpected error has occurred.</p>
-      <p>
-        <i>{errorMessage}</i>
-      </p>
-    </Page>
+    <Box
+      sx={{
+        textAlign: "center",
+        alignItems: "center",
+        display: "flex",
+        justifyContent: "center",
+        minHeight: "100vh",
+      }}
+    >
+      {isRouteErrorResponse(error) ? (
+        error.status === 403 ? (
+          <Forbidden />
+        ) : error.status === 404 ? (
+          <NotFound />
+        ) : error.status === 500 ? (
+          <InternalServerPage />
+        ) : null
+      ) : null}
+    </Box>
   );
 }

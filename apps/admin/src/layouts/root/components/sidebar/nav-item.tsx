@@ -1,13 +1,14 @@
-import { Button, useTheme } from "@mui/material";
+import { Button, ListItem, Typography, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ReactNode } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router";
 
 interface Props {
   to: string;
   titleKey: string;
   icon: ReactNode;
   onClick: () => void;
+  isSubItem: boolean;
 }
 
 const NavItem = (props: Props) => {
@@ -17,30 +18,38 @@ const NavItem = (props: Props) => {
   const active: boolean = path === props.to;
 
   return (
-    <Button
-      onClick={props.onClick}
-      component={NavLink}
-      to={props.to}
-      size="large"
-      startIcon={props.icon}
+    <ListItem
+      disablePadding
+      disableGutters
       sx={{
-        width: "100%",
-        borderRadius: 0,
-        justifyContent: "flex-start",
-        color: palette.text.primary,
-        paddingTop: 2,
-        paddingBottom: 2,
-        paddingLeft: 2,
         borderBottom: `1px solid ${palette.divider}`,
         "&:first-of-type": {
           borderTop: `1px solid ${palette.divider}`,
         },
-        borderLeft: (active ? "8" : "0") + `px solid ${palette.primary.main}`,
-        transition: "border 200ms ease",
       }}
     >
-      {t(props.titleKey)}
-    </Button>
+      <Button
+        onClick={props.onClick}
+        component={NavLink}
+        to={props.to}
+        size={props.isSubItem ? undefined : "large"}
+        startIcon={props.icon}
+        sx={{
+          textTransform: "none",
+          width: "100%",
+          borderRadius: 0,
+          justifyContent: "flex-start",
+          color: palette.text.primary,
+          paddingTop: 2,
+          paddingBottom: 2,
+          paddingLeft: props.isSubItem ? 3 : 2,
+          borderLeft: (active ? "8" : "0") + `px solid ${palette.primary.main}`,
+          transition: "border 200ms ease",
+        }}
+      >
+        <Typography>{t(props.titleKey)}</Typography>
+      </Button>
+    </ListItem>
   );
 };
 

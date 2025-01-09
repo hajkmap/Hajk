@@ -35,6 +35,8 @@ COPY ./apps/admin ./
 RUN rm ./public/config.json
 RUN mv ./public/config.docker.json ./public/config.json
 
+ENV BASE_URL="/admin"
+
 RUN npm run build
 
 

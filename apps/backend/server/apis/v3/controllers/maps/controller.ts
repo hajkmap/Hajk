@@ -1,5 +1,3 @@
-import { HajkError } from "../../../../common/classes.ts";
-import HajkStatusCodes from "../../../../common/hajk-status-codes.ts";
 import HttpStatusCodes from "../../../../common/http-status-codes.ts";
 import MapService from "../../services/map.service.ts";
 
@@ -7,67 +5,56 @@ import type { Request, Response } from "express";
 
 class MapsController {
   async getMaps(_: Request, res: Response) {
-    const maps = await MapService.getMapNames();
-    return res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
+    const maps = await MapService.getMaps();
+    res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
   }
 
   async getMapByName(req: Request, res: Response) {
-    const mapConfig = await MapService.getMapByName(req.params.mapName);
+    const mapConfig = await MapService.getMapByName(
+      req.params.mapName,
+      req.user
+    );
 
-    // If map is null, it's because the supplied map name doesn't exist.
-    // Let's throw an error.
-    if (mapConfig === null) {
-      throw new HajkError(
-        HttpStatusCodes.NOT_FOUND,
-        `"${req.params.mapName}" is not a valid map`,
-        HajkStatusCodes.UNKNOWN_MAP_NAME
-      );
-    }
-
-    return res.status(HttpStatusCodes.OK).json(mapConfig);
+    res.status(HttpStatusCodes.OK).json(mapConfig);
   }
 
   async getGroupsForMap(req: Request, res: Response) {
     const groups = await MapService.getGroupsForMap(req.params.mapName);
-    return res
-      .status(HttpStatusCodes.OK)
-      .json({ count: groups.length, groups });
+    res.status(HttpStatusCodes.OK).json({ count: groups.length, groups });
   }
 
   async getLayersForMap(req: Request, res: Response) {
     const layers = await MapService.getLayersForMap(req.params.mapName);
-    return res
-      .status(HttpStatusCodes.OK)
-      .json({ count: layers.length, layers });
+    res.status(HttpStatusCodes.OK).json({ count: layers.length, layers });
   }
 
   async getProjectionsForMap(req: Request, res: Response) {
     const projections = await MapService.getProjectionsForMap(
       req.params.mapName
     );
-    return res
+    res
       .status(HttpStatusCodes.OK)
       .json({ count: projections.length, projections });
   }
 
   async getToolsForMap(req: Request, res: Response) {
     const tools = await MapService.getToolsForMap(req.params.mapName);
-    return res.status(HttpStatusCodes.OK).json({ count: tools.length, tools });
+    res.status(HttpStatusCodes.OK).json({ count: tools.length, tools });
   }
 
   async createMap(req: Request, res: Response) {
     const map = await MapService.createMap(req.body);
-    return res.status(HttpStatusCodes.CREATED).json(map);
+    res.status(HttpStatusCodes.CREATED).json(map);
   }
 
   async updateMap(req: Request, res: Response) {
     const map = await MapService.updateMap(req.params.mapName, req.body);
-    return res.status(HttpStatusCodes.OK).json(map);
+    res.status(HttpStatusCodes.OK).json(map);
   }
 
   async deleteMap(req: Request, res: Response) {
     await MapService.deleteMap(req.params.mapName);
-    return res.status(HttpStatusCodes.NO_CONTENT).send();
+    res.status(HttpStatusCodes.NO_CONTENT).send();
   }
 }
 export default new MapsController();

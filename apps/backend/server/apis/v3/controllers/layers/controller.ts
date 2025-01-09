@@ -9,9 +9,7 @@ import HajkStatusCodes from "../../../../common/hajk-status-codes.ts";
 class LayersController {
   async getLayers(_: Request, res: Response) {
     const layers = await LayerService.getLayers();
-    return res
-      .status(HttpStatusCodes.OK)
-      .json({ count: layers.length, layers });
+    res.status(HttpStatusCodes.OK).json({ count: layers.length, layers });
   }
 
   async getLayerById(req: Request, res: Response) {
@@ -24,13 +22,13 @@ class LayersController {
       );
     }
 
-    return res.status(HttpStatusCodes.OK).json(layer);
+    res.status(HttpStatusCodes.OK).json(layer);
   }
 
   async getLayerTypes(_: Request, res: Response) {
     const layerTypes = await LayerService.getLayerTypes();
 
-    return res
+    res
       .status(HttpStatusCodes.OK)
       .json({ count: layerTypes.length, layerTypes });
   }
@@ -52,9 +50,12 @@ class LayersController {
       req.params.type as ServiceType
     );
 
-    return res
-      .status(HttpStatusCodes.OK)
-      .json({ count: layers.length, layers });
+    res.status(HttpStatusCodes.OK).json({ count: layers.length, layers });
+  }
+
+  async createLayer(req: Request, res: Response) {
+    const layer = await LayerService.createLayer(req.body);
+    res.status(HttpStatusCodes.CREATED).json(layer);
   }
 }
 export default new LayersController();

@@ -8,9 +8,7 @@ import HajkStatusCodes from "../../../../common/hajk-status-codes.ts";
 class GroupsController {
   async getGroups(_: Request, res: Response) {
     const groups = await GroupsService.getGroups();
-    return res
-      .status(HttpStatusCodes.OK)
-      .json({ count: groups.length, groups });
+    res.status(HttpStatusCodes.OK).json({ count: groups.length, groups });
   }
 
   async getGroupById(req: Request, res: Response) {
@@ -23,19 +21,17 @@ class GroupsController {
       );
     }
 
-    return res.status(HttpStatusCodes.OK).json(group);
+    res.status(HttpStatusCodes.OK).json(group);
   }
 
   async getLayersByGroupId(req: Request, res: Response) {
     const layers = await GroupsService.getLayersByGroupId(req.params.id);
-    return res
-      .status(HttpStatusCodes.OK)
-      .json({ count: layers.length, layers });
+    res.status(HttpStatusCodes.OK).json({ count: layers.length, layers });
   }
 
   async getMapsByGroupId(req: Request, res: Response) {
     const maps = await GroupsService.getMapsByGroupId(req.params.id);
-    return res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
+    res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
   }
 }
 export default new GroupsController();
