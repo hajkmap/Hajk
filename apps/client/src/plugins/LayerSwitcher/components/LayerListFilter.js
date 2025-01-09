@@ -1,12 +1,22 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 
 import { Box, IconButton, InputAdornment, TextField } from "@mui/material";
 
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 
-const LayerListFilter = ({ filterValue, handleFilterValueChange }) => {
+const LayerListFilter = ({ handleFilterValueChange, handleFilterSubmit }) => {
   const inputRef = useRef(null);
+
+  const DEFAULT_MIN_FILTER_LENGTH = 3;
+  const [helperText, setHelperTextState] = useState(null);
+  const setHelperText = (value) => {
+    if (value?.length > 0 && value?.length < DEFAULT_MIN_FILTER_LENGTH) {
+      setHelperTextState("Skriv minst 3 tecken eller tryck enter");
+    } else {
+      setHelperTextState(null);
+    }
+  };
 
   return (
     <Box
@@ -33,6 +43,7 @@ const LayerListFilter = ({ filterValue, handleFilterValueChange }) => {
                     if (inputRef.current) {
                       inputRef.current.value = "";
                       handleFilterValueChange("");
+                      setHelperText("");
                     }
                   }}
                   size="small"
@@ -44,9 +55,21 @@ const LayerListFilter = ({ filterValue, handleFilterValueChange }) => {
           ),
         }}
         size="small"
-        onChange={(event) => handleFilterValueChange(event.target.value)}
+        onChange={(event) => {
+          handleFilterValueChange(event.target.value);
+          setHelperText(event.target.value);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            handleFilterSubmit(event.target.value);
+          }
+        }}
         fullWidth
         placeholder="Sök lager och grupper"
+        helperText={helperText}
+        FormHelperTextProps={{
+          color: "red",
+        }}
         inputRef={inputRef}
         variant="outlined"
         sx={{

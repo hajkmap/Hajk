@@ -176,10 +176,25 @@ class LayersSwitcherView extends React.PureComponent {
     // collapseGroups(this.layerTree);
   };
 
+  handleFilterSubmit = (value) => {
+    const filterValue = value === "" ? null : value;
+    if (filterValue?.length > 0) {
+      this.setState({ filterValue });
+    }
+  };
+
   // Handles filter functionality
   handleFilterValueChange = debounce((value) => {
+    const DEFAULT_MIN_FILTER_LENGTH = 3;
+    const minFilterLength =
+      this.options?.layerFilterMinLength ?? DEFAULT_MIN_FILTER_LENGTH;
     const filterValue = value === "" ? null : value;
-    this.setState({ filterValue });
+
+    if (value === "") {
+      this.setState({ filterValue: null });
+    } else if (filterValue.length >= minFilterLength) {
+      this.setState({ filterValue });
+    }
   }, 100);
 
   /**
@@ -324,6 +339,7 @@ class LayersSwitcherView extends React.PureComponent {
           >
             {this.props.options.showFilter && (
               <LayerListFilter
+                handleFilterSubmit={(value) => this.handleFilterSubmit(value)}
                 handleFilterValueChange={(value) =>
                   this.handleFilterValueChange(value)
                 }

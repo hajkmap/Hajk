@@ -140,8 +140,6 @@ function LayerItem({
     allSubLayers,
     layerInfo,
     layerLegendIcon,
-    wmsLoadError,
-    filterValue,
   } = layerConfig;
 
   const legendIcon = layerInfo?.legendIcon || layerLegendIcon;
