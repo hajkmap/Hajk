@@ -6,7 +6,7 @@ import CustomGrid from "./data-grid";
 import CustomDialog from "./custom-dialog";
 import { GridColDef, GridLocaleText } from "@mui/x-data-grid";
 
-interface HajkDataGridProps {
+interface DataGridProps {
   rows: Record<string, unknown>[];
   columns: GridColDef[];
   searchPlaceholder?: string;
@@ -16,7 +16,7 @@ interface HajkDataGridProps {
   buttonText: string;
 }
 
-export const CustomDataGrid: React.FC<HajkDataGridProps> = ({
+export const CustomDataGrid: React.FC<DataGridProps> = ({
   rows,
   columns,
   searchPlaceholder,
@@ -25,6 +25,12 @@ export const CustomDataGrid: React.FC<HajkDataGridProps> = ({
   onRowClick,
   buttonText,
 }) => {
+  if (!rows || !Array.isArray(rows)) {
+    throw new Error(
+      "The 'rows' prop is required and must be an array of objects."
+    );
+  }
+
   const [searchQuery, setSearchQuery] = useState<string>(""); // Search query state
   const [dialogOpen, setDialogOpen] = useState<boolean>(false); // Dialog state
 

@@ -38,7 +38,7 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
       </Grid>
       <Grid size={12} sx={{ width: "350px", m: 2, mt: 0 }}>
         <DialogTitle sx={{ p: 0, mb: 1, fontSize: "35px" }}>
-          {"Nytt Lager"}
+          {"Nytt shit"}
         </DialogTitle>
         <Grid>
           <FormControl fullWidth>
