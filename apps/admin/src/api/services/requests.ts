@@ -1,6 +1,13 @@
+import axios from "axios";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
-import { Service, ServicesApiResponse } from "./types";
-import { Layer, LayersApiResponse } from "../layers";
+import {
+  Service,
+  ServicesApiResponse,
+  ServiceCreateFormData,
+  ServiceUpdateFormData,
+  ServiceCapabilities,
+} from "./types";
+import { LayersApiResponse } from "../layers";
 import { Map } from "../maps";
 import { GlobalMapsApiResponse } from "../tools";
 
@@ -67,7 +74,7 @@ export const getServiceById = async (serviceId: string): Promise<Service> => {
 
 export const getLayersByServiceId = async (
   serviceId: string
-): Promise<Layer[]> => {
+): Promise<LayersApiResponse> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<LayersApiResponse>(
@@ -76,7 +83,7 @@ export const getLayersByServiceId = async (
     if (!response.data) {
       throw new Error("No layers data found");
     }
-    return response.data.layers;
+    return response.data;
   } catch (error) {
     const axiosError = error as InternalApiError;
     if (axiosError.response) {
@@ -113,10 +120,12 @@ export const getMapsByServiceId = async (serviceId: string): Promise<Map[]> => {
   }
 };
 
-export const createService = async (newService: Service): Promise<Service> => {
+export const createService = async (
+  newService: ServiceCreateFormData
+): Promise<ServiceCreateFormData> => {
   const internalApiClient = getApiClient();
   try {
-    const response = await internalApiClient.post<Service>(
+    const response = await internalApiClient.post<ServiceCreateFormData>(
       "/services",
       newService
     );
@@ -138,11 +147,11 @@ export const createService = async (newService: Service): Promise<Service> => {
 
 export const updateService = async (
   serviceId: string,
-  data: Partial<Service>
-): Promise<Service> => {
+  data: Partial<ServiceUpdateFormData>
+): Promise<ServiceUpdateFormData> => {
   const internalApiClient = getApiClient();
   try {
-    const response = await internalApiClient.patch<Service>(
+    const response = await internalApiClient.patch<ServiceUpdateFormData>(
       `/services/${serviceId}`,
       data
     );
@@ -176,4 +185,30 @@ export const deleteService = async (serviceId: string): Promise<void> => {
       throw new Error("Failed to delete service");
     }
   }
+};
+
+const parseLayersFromXML = (xmlString: string): string[] => {
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+
+  const layerNames: string[] = [];
+  const layerElements = xmlDoc.getElementsByTagName("Name");
+
+  for (const layerElement of layerElements) {
+    const layerName = layerElement.textContent;
+    if (layerName) {
+      layerNames.push(layerName);
+    }
+  }
+
+  return layerNames;
+};
+
+export const fetchCapabilities = async (
+  url: string
+): Promise<ServiceCapabilities> => {
+  const response = await axios.get(url, { responseType: "text" });
+  const xmlData: string = response.data as string;
+  const layers = parseLayersFromXML(xmlData);
+  return { layers };
 };

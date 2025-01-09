@@ -48,11 +48,13 @@ export const DynamicInputComponent = <TFieldValues extends FieldValues>({
         return (
           renderer({
             field,
+            slotProps: settings.slotProps,
             inputProps: settings.inputProps,
             errorMessage,
             optionList: settings.optionList,
             title: settings.title,
             name: settings.name,
+            disabled: settings.disabled,
           }) ?? <div />
         );
       }}
