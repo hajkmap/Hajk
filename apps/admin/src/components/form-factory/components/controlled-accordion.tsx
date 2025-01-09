@@ -11,12 +11,14 @@ interface ControlledAccordionProps {
   title: string;
   triggerExpanded?: boolean;
   children: React.ReactNode;
+  backgroundColor?: string;
 }
 
 function ControlledAccordion({
   title,
   triggerExpanded = false,
   children,
+  backgroundColor,
 }: ControlledAccordionProps) {
   // triggerExpanded is used in the ControlledAccordion to programmatically
   // control whether the accordion is expanded or collapsed. When triggerExpanded
@@ -44,7 +46,8 @@ function ControlledAccordion({
       sx={{
         width: "100%",
         ml: 2,
-        mb: 3,
+        marginBottom: "24px !important",
+        backgroundColor: backgroundColor ?? "none",
       }}
     >
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>

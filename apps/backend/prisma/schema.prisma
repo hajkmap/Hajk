@@ -161,10 +161,12 @@ model Group {
 
 model Service {
   id         String      @id @default(cuid())
+  name       String
   locked     Boolean     @default(false)
   url        String
+  version    String?
   type       ServiceType
-  serverType ServerType
+  serverType ServerType?
   comment    String?
   layers     Layer[]
 
@@ -173,6 +175,7 @@ model Service {
 
 model Layer {
   id                String          @id @default(cuid())
+  name              String
   locked            Boolean         @default(false)
   service           Service         @relation(fields: [serviceId], references: [id])
   serviceId         String

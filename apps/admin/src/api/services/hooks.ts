@@ -13,9 +13,14 @@ import {
   updateService,
   deleteService,
 } from "./requests";
-import { Service } from "./types";
-import { Layer } from "../layers";
+import {
+  Service,
+  ServiceUpdateFormData,
+  UseServiceCapabilitiesProps,
+} from "./types";
+import { LayersApiResponse } from "../layers";
 import { Map } from "../maps";
+import { fetchCapabilities } from "./requests";
 
 // React Query hook to fetch all services
 // This hook uses the `getServices` function from the services `requests` module
@@ -39,7 +44,7 @@ export const useServiceById = (serviceId: string): UseQueryResult<Service> => {
 // This hook uses the `getLayersByServiceId` function from the services `requests` module
 export const useLayersByServiceId = (
   serviceId: string
-): UseQueryResult<Layer[]> => {
+): UseQueryResult<LayersApiResponse> => {
   return useQuery({
     queryKey: ["layersByServiceId", serviceId],
     queryFn: () => getLayersByServiceId(serviceId),
@@ -82,7 +87,7 @@ export const useUpdateService = () => {
       data,
     }: {
       serviceId: string;
-      data: Partial<Service>;
+      data: ServiceUpdateFormData;
     }) => updateService(serviceId, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["services"] });
@@ -106,4 +111,22 @@ export const useDeleteService = () => {
       console.error(error);
     },
   });
+};
+
+export const useServiceCapabilities = ({
+  baseUrl,
+  type,
+}: UseServiceCapabilitiesProps) => {
+  const urlWithParams = `${baseUrl}?service=${type}&request=GetCapabilities`;
+
+  const { data, isError, isLoading } = useQuery({
+    queryKey: ["serviceCapabilities", urlWithParams],
+    queryFn: () => fetchCapabilities(urlWithParams),
+  });
+
+  return {
+    layers: data?.layers ?? [],
+    isError,
+    isLoading,
+  };
 };

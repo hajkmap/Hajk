@@ -13,17 +13,20 @@ import RootLayout from "./layouts/root/index.tsx";
 import IndexPage from "./pages/index.tsx";
 import ErrorPage from "./pages/error/index.tsx";
 import LayersPage from "./pages/layers/index.tsx";
+import LayerSettings from "./pages/layers/settings.tsx";
 import MapsPage from "./pages/maps/index.tsx";
 import ToolsPage from "./pages/tools/index.tsx";
 
 import useAppStateStore from "./store/use-app-state-store.ts";
 import SettingsPage from "./pages/settings/index.tsx";
 import ServicesPage from "./pages/services/index.tsx";
+import ServiceSettings from "./pages/services/settings.tsx";
 import GroupsPage from "./pages/groups/index.tsx";
 import FormFactoryPage from "./pages/form-factory/index.tsx";
 import LoginPage from "./pages/login/index.tsx";
 import UsersPage from "./pages/users/index.tsx";
 import UserRolesPage from "./pages/user-roles/index.tsx";
+import { SquareSpinnerComponent } from "./components/progress/square-progress.jsx";
 
 const queryClient = new QueryClient({
   defaultOptions: queryConfig,
@@ -45,6 +48,10 @@ const router = createBrowserRouter(
           element: <LayersPage />,
         },
         {
+          path: "layers/:layerId",
+          element: <LayerSettings />,
+        },
+        {
           path: "maps",
           element: <MapsPage />,
         },
@@ -57,6 +64,10 @@ const router = createBrowserRouter(
           element: <ServicesPage />,
         },
         {
+          path: "services/:serviceId",
+          element: <ServiceSettings />,
+        },
+        {
           path: "groups",
           element: <GroupsPage />,
         },
@@ -64,6 +75,7 @@ const router = createBrowserRouter(
           path: "settings",
           element: <SettingsPage />,
         },
+
         {
           path: "users",
           element: <UsersPage />,
@@ -102,6 +114,6 @@ export default function App() {
       <ToastContainer />
     </QueryClientProvider>
   ) : (
-    <div>Loading...</div>
+    <SquareSpinnerComponent />
   );
 }
