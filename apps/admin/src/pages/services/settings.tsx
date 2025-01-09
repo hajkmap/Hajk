@@ -374,10 +374,10 @@ export default function ServiceSettings() {
         actions={
           <>
             <Button variant="text" onClick={handleDialogClose} color="primary">
-              {t("services.dialog.closeBtn")}
+              {t("common.dialog.closeBtn")}
             </Button>
             <Button onClick={handleSaveUrl} color="primary" variant="contained">
-              {t("services.dialog.saveBtn")}
+              {t("common.dialog.saveBtn")}
             </Button>
           </>
         }

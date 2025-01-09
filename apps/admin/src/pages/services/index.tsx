@@ -208,10 +208,10 @@ export default function ServicesPage() {
               actions={
                 <>
                   <Button variant="text" onClick={handleClose} color="primary">
-                    {t("services.dialog.closeBtn")}
+                    {t("common.dialog.closeBtn")}
                   </Button>
                   <Button type="submit" color="primary" variant="contained">
-                    {t("services.dialog.saveBtn")}
+                    {t("common.dialog.saveBtn")}
                   </Button>
                 </>
               }
