@@ -185,6 +185,7 @@ export default function ServiceSettings() {
     gridColumns: 10,
     name: "description",
     title: `${t("services.description")}`,
+    defaultValue: "",
   });
 
   accordionNestedContainer.addInput({
@@ -251,6 +252,7 @@ export default function ServiceSettings() {
     gridColumns: 8,
     name: "getMapUrl",
     title: `GetMap-url`,
+    defaultValue: "",
   });
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.SELECT,
@@ -285,12 +287,14 @@ export default function ServiceSettings() {
     gridColumns: 8,
     name: "owner",
     title: `${t("services.owner")}`,
+    defaultValue: "",
   });
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 8,
     name: "layerDescription",
     title: `${t("services.layerDescription")}`,
+    defaultValue: "",
   });
 
   serviceSettingsFormContainer.addContainer([
