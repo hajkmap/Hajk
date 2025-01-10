@@ -1,22 +1,13 @@
 import React from "react";
-import {
-  Collapse,
-  ListItemSecondaryAction,
-  Box,
-  IconButton,
-  ListItemButton,
-} from "@mui/material";
+import { Collapse, Box, IconButton, ListItemButton } from "@mui/material";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
 export default function LayerGroupAccordion({
   expanded,
-  setExpandedCallback,
   toggleable,
   children,
   layerGroupTitle,
   toggleDetails,
-  layerGroupDetails,
-  quickAccess,
   display,
 }) {
   const [state, setState] = React.useState({ expanded: expanded });
@@ -25,19 +16,11 @@ export default function LayerGroupAccordion({
     setState({ expanded: expanded });
   }, [expanded]);
 
-  const updateCustomProp = (prop, value) => {
-    if (setExpandedCallback) {
-      setExpandedCallback(value);
-    } else {
-      setState((prevState) => ({ ...prevState, [prop]: value }));
-    }
-  };
-
   return (
     <div style={{ display: display }}>
       <ListItemButton
         disableRipple
-        onClick={() => updateCustomProp("expanded", !state.expanded)}
+        onClick={() => setState({ expanded: !state.expanded })}
         sx={{
           p: 0,
         }}
@@ -64,23 +47,15 @@ export default function LayerGroupAccordion({
             py: 0.5,
             pr: 1,
             borderBottom: (theme) =>
-              quickAccess
-                ? `${theme.spacing(0.2)} solid transparent`
-                : `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
         >
           {toggleable && toggleDetails}
-          {quickAccess && quickAccess}
           {layerGroupTitle}
-          {layerGroupDetails && (
-            <ListItemSecondaryAction>
-              {layerGroupDetails}
-            </ListItemSecondaryAction>
-          )}
         </Box>
       </ListItemButton>
-      <Collapse in={state.expanded}>
-        <Box sx={{ marginLeft: quickAccess ? "31px" : "26px" }}>{children}</Box>
+      <Collapse in={state.expanded} unmountOnExit>
+        <Box sx={{ marginLeft: "26px" }}>{children}</Box>
       </Collapse>
     </div>
   );

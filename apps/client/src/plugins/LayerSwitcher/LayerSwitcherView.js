@@ -1,76 +1,156 @@
-import React, { createRef } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
-import {
-  AppBar,
-  Tab,
-  Tabs,
-  Box,
-  IconButton,
-  InputAdornment,
-  ListItemText,
-  TextField,
-  Tooltip,
-} from "@mui/material";
+import { AppBar, Tab, Tabs, Box } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
-import LayerPackage from "./components/LayerPackage";
-import LayerGroupAccordion from "./components/LayerGroupAccordion.js";
-import ConfirmationDialog from "../../components/ConfirmationDialog.js";
-import QuickAccessLayers from "./components/QuickAccessLayers.js";
-import QuickAccessOptions from "./components/QuickAccessOptions.js";
+import QuickAccessPresets from "./components/QuickAccessPresets.js";
+import QuickAccessView from "./components/QuickAccessView.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
-import Favorites from "./components/Favorites/Favorites.js";
+import LayerListFilter from "./components/LayerListFilter.js";
 import { debounce } from "utils/debounce";
-
-import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
-import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
 
 const StyledAppBar = styled(AppBar)(() => ({
   top: -10,
 }));
 
+/**
+ * BreadCrumbs are a feature used to "link" content between LayerSwitcher
+ * and Informative plugins. They get rendered directly to #map, as they
+ * are not part of LayerSwitcher plugin, at least not visually. To achieve
+ * that we use createPortal().
+ *
+ * @returns
+ * @memberof LayersSwitcherView
+ */
+const BreadCrumbsContainer = ({ map, app }) => {
+  return createPortal(
+    // We must wrap the component in a div, on which we can catch
+    // events. This is done to prevent event bubbling to the
+    // layerSwitcher component.
+    <div onMouseDown={(e) => e.stopPropagation()}>
+      <BreadCrumbs map={map} app={app} />
+    </div>,
+    document.getElementById("breadcrumbs-container")
+  );
+};
+
+// Prepare tree data for filtering
+const addLayerNames = (data, olLayerMap) => {
+  const node = data.map((item) => {
+    const layers = item.layers?.map((layer) => {
+      const mapLayer = olLayerMap[layer.id];
+      if (!mapLayer) {
+        console.warn(`Maplayer with id ${layer.id} not found`);
+        return undefined;
+      }
+
+      const subLayers =
+        mapLayer.get("layerType") === "group" &&
+        mapLayer
+          .get("subLayers")
+          .map((subLayer) => {
+            // If the `layerInfo` is missing from a sublayer we ignore it
+            // completely.
+            const subLayerInfo = mapLayer.layersInfo[subLayer];
+            if (!subLayerInfo) {
+              return null;
+            }
+
+            return {
+              id: subLayer,
+              name: subLayerInfo.caption,
+              isFiltered: true,
+              changeIndicator: new Date(),
+            };
+          })
+          .filter((sl) => !!sl);
+
+      return {
+        drawOrder: layer.drawOrder,
+        infobox: layer.infobox,
+        layerType: layer.layerType,
+        visibleAtStart: layer.visibleAtStart,
+        visibleForGroups: layer.visibleForGroups,
+        id: layer.id,
+        name: mapLayer.get("caption"),
+        isFiltered: true,
+        subLayers: subLayers,
+      };
+    });
+
+    return {
+      id: item.id,
+      name: item.name,
+      expanded: item.expanded,
+      toggled: item.toggled,
+      type: item.type,
+      layers,
+      infogroupvisible: item.infogroupvisible,
+      infogrouptitle: item.infogrouptitle,
+      infogrouptext: item.infogrouptext,
+      infogroupurl: item.infogroupurl,
+      infogroupurltext: item.infogroupurltext,
+      infogroupopendatalink: item.infogroupopendatalink,
+      infogroupowner: item.infofitemowner,
+      subLayers: item.sublayers,
+      parent: item.parent,
+      isFiltered: true,
+      isExpanded: false,
+      changeIndicator: new Date(),
+      groups: item.groups ? addLayerNames(item.groups, olLayerMap) : undefined,
+    };
+  });
+  return node;
+};
+
 class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
     map: propTypes.object.isRequired,
-    model: propTypes.object.isRequired,
-    observer: propTypes.object.isRequired,
+    localObserver: propTypes.object.isRequired,
+    globalObserver: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
-    enqueueSnackbar: propTypes.func.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.options = props.options;
-    this.layerTree = this.addLayerNames(this.options.groups);
-    // Create a ref to store a reference to the search layer input element
-    this.inputRef = createRef();
+    this.olLayerMap = props.map
+      .getLayers()
+      .getArray()
+      .reduce((a, b) => {
+        a[b.get("name")] = b;
+        return a;
+      }, {});
+    this.layerTree = addLayerNames(this.options.groups, this.olLayerMap);
+    this.baseLayers = props.map
+      .getLayers()
+      .getArray()
+      .filter((l) => l.get("layerType") === "base")
+      .map((l) => l.getProperties());
+
     this.state = {
       chapters: [],
-      baseLayers: props.model.getBaseLayers(),
       activeTab: 0,
-      activeLayersCount: 0,
-      displayContentOverlay: null, // 'layerPackage' | 'favorites' | 'layerItemDetails'
+      displayContentOverlay: null, // 'quickAccessPresets' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
-      quickAccessSectionExpanded: false,
       filterValue: "",
       treeData: this.layerTree,
-      showDeleteConfirmation: false,
       scrollPositions: {
         tab0: 0,
         tab1: 0,
         tab2: 0,
       },
     };
+
+    this.localObserver = this.props.localObserver;
+    this.globalObserver = this.props.globalObserver;
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
@@ -98,65 +178,46 @@ class LayersSwitcherView extends React.PureComponent {
         });
       }
     });
+
+    // TODO This is a work around for showing/hideing group layers which are
+    // collapsed. It's also the GroupLayer component that listens for this.
+    // That should be refactored.
+    // TODO Unsubscribe
+    this.localHideLayerSubscription = this.localObserver.subscribe(
+      "hideLayer",
+      (la) => {
+        // TODO Make sure QuickAccess updates
+        // Send some event
+        la.setVisible(false);
+        // this.setState({ treeData: [...this.layerTree] });
+      }
+    );
+    this.localShowLayerSubscription = this.localObserver.subscribe(
+      "showLayer",
+      (la) => {
+        la.setVisible(true);
+        // TODO Make sure QuickAccess updates
+        // Send some event
+        // this.setState({ treeData: [...this.layerTree] });
+      }
+    );
   }
 
-  // Prepare tree data for filtering
-  addLayerNames = (data) => {
-    data.forEach((item) => {
-      item.isFiltered = true;
-      item.isExpanded = false;
-      item.changeIndicator = new Date();
-      if (item.layers) {
-        item.layers.forEach((layer) => {
-          const mapLayer = this.props.model.layerMap[layer.id];
-          layer.name = mapLayer.get("caption");
-          layer.isFiltered = true;
-          item.changeIndicator = new Date();
-          // Check if layer is a group
-          if (mapLayer.get("layerType") === "group") {
-            layer.subLayers = [];
-            const subLayers = mapLayer.get("subLayers");
-            subLayers.forEach((subLayer) => {
-              const subLayerMapLayer = mapLayer.layersInfo[subLayer].caption;
-              layer.subLayers.push({
-                id: subLayer,
-                name: subLayerMapLayer,
-                isFiltered: true,
-                changeIndicator: new Date(),
-              });
-            });
-          }
-        });
-      }
-
-      if (item.groups) {
-        // Call recursevly for subgroups
-        this.addLayerNames(item.groups);
-      }
-    });
-    return data;
-  };
-
   // Handles click on Layerpackage button and backbutton
-  handleLayerPackageToggle = (layerPackageState) => {
-    layerPackageState?.event?.stopPropagation();
+  handleQuickAccessPresetsToggle = (quickAccessPresetsState) => {
+    quickAccessPresetsState?.event?.stopPropagation();
     // Set scroll position state when layer package is opened
     const currentScrollPosition = this.getScrollPosition();
     this.setState((prevState) => ({
       displayContentOverlay:
-        this.state.displayContentOverlay === "layerPackage"
+        this.state.displayContentOverlay === "quickAccessPresets"
           ? null
-          : "layerPackage",
+          : "quickAccessPresets",
       scrollPositions: {
         ...prevState.scrollPositions,
         [`tab${prevState.activeTab}`]: currentScrollPosition,
       },
     }));
-    if (layerPackageState?.setQuickAccessSectionExpanded) {
-      this.setState({
-        quickAccessSectionExpanded: true,
-      });
-    }
   };
 
   // Filter tree data
@@ -242,8 +303,8 @@ class LayersSwitcherView extends React.PureComponent {
   };
 
   // Handles click on Favorites button and backbutton
-  handleFavoritesViewToggle = (layerPackageState) => {
-    layerPackageState?.event?.stopPropagation();
+  handleFavoritesViewToggle = (quickAccessPresetsState) => {
+    quickAccessPresetsState?.event?.stopPropagation();
     // Set scroll position state when favorites view is opened
     const currentScrollPosition = this.getScrollPosition();
     this.setState((prevState) => ({
@@ -254,66 +315,6 @@ class LayersSwitcherView extends React.PureComponent {
         [`tab${prevState.activeTab}`]: currentScrollPosition,
       },
     }));
-    if (layerPackageState?.setQuickAccessSectionExpanded) {
-      this.setState({
-        quickAccessSectionExpanded: true,
-      });
-    }
-  };
-
-  // Handles click on AddLayersToQuickAccess menu item
-  handleAddLayersToQuickAccess = (e) => {
-    e.stopPropagation();
-    // Add visible layers to quickAccess section
-    this.props.map
-      .getAllLayers()
-      .filter(
-        (l) =>
-          l.get("visible") === true &&
-          l.get("layerType") !== "base" &&
-          l.get("layerType") !== "system"
-      )
-      .map((l) => l.set("quickAccess", true));
-    // Force update
-    this.forceUpdate();
-    // Show snackbar
-    this.props.enqueueSnackbar(
-      `Tända lager har nu lagts till i snabbåtkomst.`,
-      {
-        variant: "success",
-        anchorOrigin: { vertical: "bottom", horizontal: "center" },
-      }
-    );
-    // Expand quickAccess section
-    this.setState({
-      quickAccessSectionExpanded: true,
-    });
-  };
-
-  // Handles click on clear quickAccess menu item
-  handleShowDeleteConfirmation = (e) => {
-    e.stopPropagation();
-    this.setState({ showDeleteConfirmation: true });
-  };
-
-  // Handles click on confirm clear quickAccess button
-  handleClearQuickAccessLayers = () => {
-    this.setState({ showDeleteConfirmation: false });
-    this.props.map
-      .getAllLayers()
-      .filter((l) => l.get("quickAccess") === true)
-      .map((l) => l.set("quickAccess", false));
-  };
-
-  // Checks if quickAccess section has visible layers
-  hasVisibleLayers = () => {
-    return (
-      this.props.map
-        .getAllLayers()
-        .filter(
-          (l) => l.get("quickAccess") === true && l.get("visible") === true
-        ).length > 0
-    );
   };
 
   collapseAllGroups = () => {
@@ -362,39 +363,19 @@ class LayersSwitcherView extends React.PureComponent {
 
     // Trigger re-render
     this.setState({ treeData: [...this.layerTree] });
-  }, 200);
-
-  // Reset input value
-  resetInput = () => {
-    // Access the input element using the ref and set its value to an empty string
-    if (this.inputRef.current) {
-      this.inputRef.current.value = "";
-      this.handleFilterValueChange("");
-    }
-  };
-
-  /**
-   * This method handles layerupdates from DrawOrder component,
-   * sets activeLayersCount state
-   *
-   * @memberof LayersSwitcherView
-   */
-  handleLayerChange = (activeLayers) => {
-    this.setState({
-      activeLayersCount: activeLayers,
-    });
-  };
+  }, 100);
 
   /**
    * LayerSwitcher consists of two Tabs: one shows
    * "regular" layers (as checkboxes, multi select), and the
    * other shows background layers (as radio buttons, one-at-at-time).
+   * And the DrawOrder tab
    *
-   * This method controls which of the two Tabs is visible and hides LayerPackage view.
+   * This method controls which of the two Tabs is visible and hides QuickAccessPresets view.
    *
    * @memberof LayersSwitcherView
    */
-  handleChangeTabs = (event, activeTab) => {
+  handleChangeTabs = (_, activeTab) => {
     // Set scroll position state when tab is changed
     const currentScrollPosition = this.getScrollPosition();
     this.setState((prevState) => ({
@@ -413,7 +394,7 @@ class LayersSwitcherView extends React.PureComponent {
    *
    * @memberof LayersSwitcherView
    */
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(_, prevState) {
     if (
       prevState.activeTab !== this.state.activeTab ||
       prevState.displayContentOverlay !== this.state.displayContentOverlay
@@ -456,215 +437,12 @@ class LayersSwitcherView extends React.PureComponent {
     }, 1);
   };
 
-  /**
-   * @summary Loops through map configuration and
-   * renders all groups. Visible only if @param shouldRender is true.
-   *
-   * @param {boolean} [shouldRender=true]
-   * @returns {<div>}
-   */
-  renderLayerGroups = (shouldRender = true) => {
-    return (
-      <Box
-        sx={{
-          mb: "48px",
-          display:
-            shouldRender === true && this.state.displayContentOverlay === null
-              ? "block"
-              : "none",
-        }}
-      >
-        {this.props.options.showFilter && (
-          <Box
-            sx={{
-              p: 1,
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "#373737"
-                  : theme.palette.grey[100],
-              borderBottom: (theme) =>
-                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-            }}
-          >
-            <Box
-              sx={{
-                width: 500,
-                maxWidth: "100%",
-                p: 1,
-              }}
-            >
-              <TextField
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {this.state.filterValue && (
-                        <IconButton
-                          onClick={() => this.resetInput()}
-                          size="small"
-                        >
-                          <ClearIcon />
-                        </IconButton>
-                      )}
-                    </InputAdornment>
-                  ),
-                }}
-                size="small"
-                onChange={(event) =>
-                  this.handleFilterValueChange(event.target.value)
-                }
-                fullWidth
-                placeholder="Sök lager och grupper"
-                inputRef={this.inputRef}
-                variant="outlined"
-                sx={{
-                  background: (theme) =>
-                    theme.palette.mode === "dark" ? "inherit" : "#fff",
-                }}
-              />
-            </Box>
-          </Box>
-        )}
-        {this.props.options.showQuickAccess && (
-          <Box
-            sx={{
-              borderBottom: (theme) =>
-                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-            }}
-          >
-            <LayerGroupAccordion
-              display={"block"}
-              expanded={this.state.quickAccessSectionExpanded}
-              setExpandedCallback={(value) => {
-                this.setState({ quickAccessSectionExpanded: value });
-              }}
-              layerGroupTitle={
-                <ListItemText
-                  primaryTypographyProps={{
-                    fontWeight: this.hasVisibleLayers() ? "bold" : "inherit",
-                  }}
-                  primary={"Snabbåtkomst"}
-                />
-              }
-              quickAccess={
-                <IconButton sx={{ pl: 0 }} disableRipple size="small">
-                  <StarOutlineOutlinedIcon />
-                </IconButton>
-              }
-              layerGroupDetails={
-                <>
-                  {this.props.options.enableQuickAccessTopics ? (
-                    <Tooltip title="Teman">
-                      <IconButton
-                        onClick={(e) =>
-                          this.handleLayerPackageToggle({ event: e })
-                        }
-                      >
-                        <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
-                      </IconButton>
-                    </Tooltip>
-                  ) : (
-                    <div style={{ display: "none" }}>
-                      <IconButton>
-                        <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
-                      </IconButton>
-                    </div>
-                  )}
-                  {this.props.options.enableUserQuickAccessFavorites && (
-                    <Favorites
-                      favoriteViewDisplay={
-                        this.state.displayContentOverlay === "favorites"
-                      }
-                      app={this.props.app}
-                      map={this.props.map}
-                      handleFavoritesViewToggle={this.handleFavoritesViewToggle}
-                      globalObserver={this.props.model.globalObserver}
-                      favoritesInfoText={
-                        this.options.userQuickAccessFavoritesInfoText
-                      }
-                      handleQuickAccessSectionExpanded={() =>
-                        this.setState({ quickAccessSectionExpanded: true })
-                      }
-                    ></Favorites>
-                  )}
-                  <QuickAccessOptions
-                    handleAddLayersToQuickAccess={
-                      this.handleAddLayersToQuickAccess
-                    }
-                    handleClearQuickAccessLayers={
-                      this.handleShowDeleteConfirmation
-                    }
-                  ></QuickAccessOptions>
-                </>
-              }
-              children={
-                <QuickAccessLayers
-                  treeData={this.state.treeData}
-                  filterValue={this.state.filterValue}
-                  model={this.props.model}
-                  map={this.props.map}
-                  app={this.props.app}
-                ></QuickAccessLayers>
-              }
-            ></LayerGroupAccordion>
-          </Box>
-        )}
-        {this.state.treeData.map((group, i) => {
-          return (
-            <LayerGroup
-              filterChangeIndicator={group.changeIndicator}
-              key={i}
-              group={group}
-              model={this.props.model}
-              app={this.props.app}
-              options={this.props.options}
-            />
-          );
-        })}
-      </Box>
-    );
-  };
-
-  /**
-   * BreadCrumbs are a feature used to "link" content between LayerSwitcher
-   * and Informative plugins. They get rendered directly to #map, as they
-   * are not part of LayerSwitcher plugin, at least not visually. To achieve
-   * that we use createPortal().
-   *
-   * @returns
-   * @memberof LayersSwitcherView
-   */
-  renderBreadCrumbs = () => {
-    return (
-      this.options.showBreadcrumbs &&
-      createPortal(
-        // We must wrap the component in a div, on which we can catch
-        // events. This is done to prevent event bubbling to the
-        // layerSwitcher component.
-        <div onMouseDown={(e) => e.stopPropagation()}>
-          <BreadCrumbs
-            map={this.props.map}
-            model={this.props.model}
-            app={this.props.app}
-          />
-        </div>,
-        document.getElementById("breadcrumbs-container")
-      )
-    );
-  };
-
   render() {
     const { windowVisible } = this.props;
     return (
       <div
         style={{
           display: windowVisible ? "block" : "none",
-          height: "100%",
-          paddingBottom: "48px",
         }}
       >
         <StyledAppBar
@@ -684,16 +462,7 @@ class LayersSwitcherView extends React.PureComponent {
             <Tab label="Kartlager" />
             <Tab label="Bakgrund" />
             {this.options.showDrawOrderView === true && (
-              <Tab
-                label={
-                  // <Badge
-                  //   badgeContent={this.state.activeLayersCount}
-                  //   color="primary"
-                  // >
-                  "Ritordning"
-                  // </Badge>
-                }
-              />
+              <Tab label={"Ritordning"} />
             )}
           </Tabs>
         </StyledAppBar>
@@ -701,16 +470,69 @@ class LayersSwitcherView extends React.PureComponent {
           id="scroll-container"
           style={{ position: "relative", height: "100%", overflowY: "auto" }}
         >
-          {this.renderLayerGroups(this.state.activeTab === 0)}
-          {this.props.options.enableQuickAccessTopics && (
-            <LayerPackage
-              quickLayerPresets={this.options.quickLayersPresets}
-              display={this.state.displayContentOverlay === "layerPackage"}
-              backButtonCallback={this.handleLayerPackageToggle}
+          <Box
+            sx={{
+              display:
+                this.state.activeTab === 0 &&
+                this.state.displayContentOverlay === null
+                  ? "block"
+                  : "none",
+            }}
+          >
+            {this.props.options.showFilter && (
+              <LayerListFilter
+                handleFilterValueChange={(value) =>
+                  this.handleFilterValueChange(value)
+                }
+              />
+            )}
+            <QuickAccessView
+              show={this.props.options.showQuickAccess}
               map={this.props.map}
-              globalObserver={this.props.model.globalObserver}
-              layerPackageInfoText={this.options.quickAccessTopicsInfoText}
-            ></LayerPackage>
+              app={this.props.app}
+              localObserver={this.localObserver}
+              globalObserver={this.globalObserver}
+              enableQuickAccessPresets={
+                this.props.options.enableQuickAccessPresets
+              }
+              enableUserQuickAccessFavorites={
+                this.props.options.enableUserQuickAccessFavorites
+              }
+              handleQuickAccessPresetsToggle={(e) =>
+                this.handleQuickAccessPresetsToggle({ event: e })
+              }
+              favoritesViewDisplay={
+                this.state.displayContentOverlay === "favorites"
+              }
+              handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+              favoritesInfoText={this.options.userQuickAccessFavoritesInfoText}
+              treeData={this.state.treeData}
+              filterValue={this.state.filterValue}
+            />
+            {this.state.treeData.map((group, i) => (
+              <LayerGroup
+                key={i}
+                group={group}
+                localObserver={this.localObserver}
+                layerMap={this.olLayerMap}
+                app={this.props.app}
+                options={this.props.options}
+              />
+            ))}
+          </Box>
+          {this.props.options.enableQuickAccessPresets && (
+            <QuickAccessPresets
+              quickAccessPresets={this.options.quickAccessPresets}
+              display={
+                this.state.displayContentOverlay === "quickAccessPresets"
+              }
+              backButtonCallback={this.handleQuickAccessPresetsToggle}
+              map={this.props.map}
+              globalObserver={this.globalObserver}
+              quickAccessPresetsInfoText={
+                this.options.quickAccessPresetsInfoText
+              }
+            ></QuickAccessPresets>
           )}
           <LayerItemDetails
             display={this.state.displayContentOverlay === "layerItemDetails"}
@@ -725,17 +547,17 @@ class LayersSwitcherView extends React.PureComponent {
               this.state.activeTab === 1 &&
               this.state.displayContentOverlay === null
             }
-            layers={this.state.baseLayers}
-            layerMap={this.props.model.layerMap}
+            layers={this.baseLayers}
+            layerMap={this.olLayerMap}
             backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
             backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
             enableOSM={this.options.enableOSM}
             map={this.props.map}
-            app={this.props.app}
+            globalObserver={this.props.globalObserver}
           />
           {this.options.showDrawOrderView === true && (
             <DrawOrder
-              model={this.props.model}
+              localObserver={this.localObserver}
               display={
                 this.state.activeTab === 2 &&
                 this.state.displayContentOverlay === null
@@ -743,27 +565,15 @@ class LayersSwitcherView extends React.PureComponent {
               map={this.props.map}
               app={this.props.app}
               options={this.props.options}
-              onLayerChange={this.handleLayerChange}
             ></DrawOrder>
           )}
-          {this.renderBreadCrumbs()}
-          <ConfirmationDialog
-            open={this.state.showDeleteConfirmation === true}
-            titleName={"Rensa allt"}
-            contentDescription={
-              "Alla lager i snabbåtkomst kommer nu att tas bort."
-            }
-            cancel={"Avbryt"}
-            confirm={"Rensa"}
-            handleConfirm={this.handleClearQuickAccessLayers}
-            handleAbort={() => {
-              this.setState({ showDeleteConfirmation: false });
-            }}
-          />
+          {this.options.showBreadcrumbs && (
+            <BreadCrumbsContainer map={this.props.map} app={this.props.app} />
+          )}
         </div>
       </div>
     );
   }
 }
 
-export default withSnackbar(LayersSwitcherView);
+export default LayersSwitcherView;

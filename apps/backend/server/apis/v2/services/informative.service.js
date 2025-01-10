@@ -134,13 +134,18 @@ class InformativeService {
         file
       );
 
-      // Simple way to verify we've got valid JSON: try parsing it.
-      const json = JSON.parse(body); // Ensure body is valid JSON
+      // Handle both string and object inputs
+      let json;
+      if (typeof body === "string") {
+        json = JSON.parse(body); // Ensure body is valid JSON
+      } else {
+        json = body; // Use the provided object directly if already parsed
+      }
 
-      // If parsing was successful, convert back to string with indentation
+      // Convert back to string with indentation
       const jsonString = JSON.stringify(json, null, 2);
 
-      // Write to file
+      // Write the formatted JSON string to the specified file
       await fs.promises.writeFile(pathToFile, jsonString);
 
       // Return the JSON string

@@ -9,6 +9,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Search: Added possibility to set default search options via admin UI. PR: [#1496](https://github.com/hajkmap/Hajk/pull/1496)
+- LayerComparer: It is now possible for to select specific layers (in Admin) that will be visible in the tool. Previously only all background layer and/or all regular layers could be selected. [#1570](https://github.com/hajkmap/Hajk/issues/1570)
+
+#### LayerSwitcher
+
+Issues: #1237, #1257, #1284, #1296, #1300, #1347, #1365, and #1380.
+
+- Filter functionality in LayerSwitcher.
+- Enhanced layer visibility indicators in LayerSwitcher.
+- Quick Access grouping in LayerSwitcher for access to frequently used layers.
+  With support for saving/recall of sets of "QuickAccess layers" to
+  LocalStorage.
+- Quick Access Layer Presets/Themes/Packages
+  Choose from ready made sets of Layers to load into the Quick Access
+  section. The Presets/Themes/Packages are set up in the map config. See
+  example in `simpleMapConfig.json`.
+- Improved DrawOrder tab functionality for managing layer drawing order.
+
+## [3.14.1] - 2024-10-09
+
+### BREAKING
+
+- PropertyChecker: The configuration field `digitalPlanItemDescriptionAttribute` has been renamed to `digitalPlanItemDescriptionAttributes` and holds now an array of objects rather than a string. For details, refer to [example configuration in the plugin's README](https://github.com/hajkmap/Hajk/blob/master/apps/client/src/plugins/PropertyChecker/readme.md#example-configuration).
+
+### Added
+
+- Backend (Node): Added (very) limited userDetails to response when using the AD Header approach (for example NodeHoster). [#1534](https://github.com/hajkmap/Hajk/pull/1534)
+- LayerComparer: Made it easier to change which layers are being compared. [#1543](https://github.com/hajkmap/Hajk/pull/1543)
+- Measurer: The measurer now allows for selecting objects by clicking them to get measurement information (area and circumference). PR: [#1532](https://github.com/hajkmap/Hajk/pull/1532).
+
+### Fixed
+
+- Bug fix associated to the issue #1310 and PR #1460. [#1536](https://github.com/hajkmap/Hajk/pull/1536)
+
+### Changed
+
+- Replaced the module used by the Plausible tracker in order to support some new features and fix bugs with the official tracker. See discussion in [#1535](https://github.com/hajkmap/Hajk/issues/1535).
+
+## [3.14.0] - 2024-09-01
+
 ### BREAKING
 
 - This release marks the removal of the legacy V1 API (`/api/v1`) in both the NodeJS backend and the old .NET 4.5 backend (refer to the _Removed_ section below). Client UI is now V2-compatible only, as it requires the consolidated loading method. This means that you need to review and update your configuration, both regarding Client and Admin. Please refer to `docs/migrate-to-v2-api.md` for details.
@@ -296,7 +338,9 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.24...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.14.1...develop
+[3.14.1]: https://github.com/hajkmap/Hajk/compare/v3.14.0...v3.14.1
+[3.14.0]: https://github.com/hajkmap/Hajk/compare/v3.13.25...v3.14.0
 [3.13.25]: https://github.com/hajkmap/Hajk/compare/v3.13.24...v3.13.25
 [3.13.24]: https://github.com/hajkmap/Hajk/compare/v3.13.23...v3.13.24
 [3.13.23]: https://github.com/hajkmap/Hajk/compare/v3.13.22...v3.13.23

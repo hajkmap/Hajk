@@ -4,10 +4,10 @@ import {
   IconButton,
   InputAdornment,
   Stack,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import HajkToolTip from "components/HajkToolTip";
 
 const CQLFilter = ({ layer }) => {
   const [cqlFilter, setCqlFilter] = useState("");
@@ -43,14 +43,14 @@ const CQLFilter = ({ layer }) => {
         onChange={(e) => setCqlFilter(e.target.value)}
         endAdornment={
           <InputAdornment position="end">
-            <Tooltip
+            <HajkToolTip
               disableInteractive
               title="Tryck för att ladda om lagret med angivet filter"
             >
               <IconButton edge="end" onClick={updateFilter} size="small">
                 <RefreshIcon />
               </IconButton>
-            </Tooltip>
+            </HajkToolTip>
           </InputAdornment>
         }
       />

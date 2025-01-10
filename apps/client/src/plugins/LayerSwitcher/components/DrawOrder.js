@@ -20,7 +20,7 @@ import GroupLayer from "./GroupLayer";
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
-function DrawOrder({ display, app, map, onLayerChange, model, options }) {
+function DrawOrder({ display, app, map, localObserver, options }) {
   // A Set that will hold type of OL layers that should be shown.
   // This is a user setting, changed by toggling a switch control.
   const [filterList, setFilterList] = useState(
@@ -63,30 +63,6 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
         .sort((a, b) => b.getZIndex() - a.getZIndex())
     );
   }, [filterList, map]);
-
-  // When values of the sortedLayers set changes, let's update the counter for visible layers.
-  useEffect(() => {
-    onLayerChange(
-      sortedLayers.filter((l) => {
-        return l.get("layerType") !== "base";
-      }).length
-    );
-
-    // const checkVisibilityCount = () => {
-    //   const visibleLayers = sortedLayers.filter((l) => {
-    //     return (
-    //       l.get("visible") === true &&
-    //       l.get("layerType") !== "system" &&
-    //       l.get("layerType") !== "base"
-    //     );
-    //   });
-
-    //   const visibleSystemLayers = sortedLayers.filter((l) => {
-    //     return l.get("opacity") !== 0 && l.get("layerType") === "system";
-    //   });
-    //   return visibleSystemLayers.length + visibleLayers.length;
-    // };
-  }, [sortedLayers, onLayerChange]);
 
   // When values of display changes to true, let's update the list
   useEffect(() => {
@@ -215,6 +191,7 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
         key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
         layer={l}
         app={app}
+        globalObserver={app.globalObserver}
         draggable={!options.lockDrawOrderBaselayer}
         toggleable={false}
       />
@@ -299,7 +276,7 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
                       key={l.ol_uid}
                       layer={l}
                       app={app}
-                      observer={model.observer}
+                      localObserver={localObserver}
                       toggleable={false}
                       draggable={true}
                     />

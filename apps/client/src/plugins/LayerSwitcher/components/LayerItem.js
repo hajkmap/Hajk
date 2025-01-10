@@ -10,6 +10,7 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
+import HajkToolTip from "components/HajkToolTip";
 
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
@@ -186,7 +187,7 @@ export default function LayerItem({
 
   useEffect(() => {
     // Handler for zoom change event.
-    const handleChange = () => {
+    const handleChange = (l) => {
       // Check if the layer is currently visible.
       if (layer.get("visible")) {
         // Trigger zoom check.
@@ -385,12 +386,12 @@ export default function LayerItem({
     return (
       wmsLayerLoadStatus === "loaderror" && (
         <IconButton disableRipple>
-          <Tooltip
+          <HajkToolTip
             disableInteractive
             title="Lagret kunde inte laddas in. Kartservern svarar inte."
           >
             <WarningAmberOutlinedIcon fontSize="small" />
-          </Tooltip>
+          </HajkToolTip>
         </IconButton>
       )
     );
@@ -441,8 +442,8 @@ export default function LayerItem({
             drawOrderItem() && showSublayers
               ? "none"
               : drawOrderItem() && !legendIsActive
-              ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
-              : "none",
+                ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
+                : "none",
           display: "flex",
           "&:hover .dragInidcatorIcon": {
             opacity: draggable ? 1 : 0,
@@ -505,6 +506,7 @@ export default function LayerItem({
                 pr: 5,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
+                variant: "body1",
                 fontWeight:
                   layer.get("visible") && !draggable && !isBackgroundLayer
                     ? "bold"

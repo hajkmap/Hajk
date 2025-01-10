@@ -159,6 +159,40 @@ class DrawModel {
     this.#createDrawTooltip();
   }
 
+  // Generates a random string that can be used as an ID.
+  generateRandomString = () => {
+    return Math.random().toString(36).slice(2, 9);
+  };
+
+  createHighlightStyle = () => {
+    return new Style({
+      stroke: new Stroke({
+        color: "rgba(255, 0, 0, 1)",
+        width: 3,
+      }),
+      fill: new Fill({
+        color: "rgba(255, 0, 0, 0.1)",
+      }),
+    });
+  };
+
+  // Creates a new feature with the same geometry as the supplied one. The new
+  // feature can be used an an highlight, to show where the supplied feature is.
+  createHighlightFeature = (feature) => {
+    // If no feature (or a feature with no get-geometry) is supplied, we abort.
+    if (feature && feature.getGeometry()) {
+      // Otherwise we create a new feature...
+      const highlightFeature = new Feature({
+        geometry: feature.getGeometry().clone(),
+      });
+      // ...set an id and a highlight-style...
+      highlightFeature.setId(this.generateRandomString());
+      highlightFeature.setStyle(this.createHighlightStyle());
+      // Finally we return the feature so that we can add it to the map etc.
+      return highlightFeature;
+    }
+  };
+
   // Returns the supplied observerPrefix from the supplied settings or null if none was supplied.
   #getObserverPrefix = (settings) => {
     return typeof settings.observerPrefix === "string"
@@ -2206,6 +2240,27 @@ class DrawModel {
         subject: "drawModel.featureRemoved",
         payLoad: feature,
       });
+    }
+
+    // Check if we have used Segments.
+    // If the feature has the MEASUREMENT_ID, find and remove the referenced segment measure points too.
+    const userDrawnFeatures = this.#drawSource
+      .getFeatures()
+      .filter((f) => f.get("USER_DRAWN"));
+    if (feature.get("MEASUREMENT_ID")) {
+      const parentId = feature.get("MEASUREMENT_ID");
+      const referencedFeatures = userDrawnFeatures.filter((f) => {
+        const fId = f.get("MEASUREMENT_ID");
+        // We remove the segment points if they contain the parent id, but the parent should not be removed here.
+        if (fId) {
+          if (fId.includes(parentId) && !f.get("MEASUREMENT_PARENT")) {
+            // Return matching feature, in this case labels for this segment.
+            return f;
+          }
+        }
+        return null;
+      });
+      referencedFeatures.forEach((f) => this.#drawSource.removeFeature(f));
     }
   };
 

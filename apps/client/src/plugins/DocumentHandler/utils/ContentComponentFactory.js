@@ -498,6 +498,7 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
     position: imgTag.dataset.imagePosition,
     source: imgTag.dataset.source,
     url: imgTag.src,
+    altValue: imgTag.alt,
     id: `video_${componentId}`,
   };
 
@@ -540,6 +541,7 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
     <React.Fragment key={videoAttributes.id}>
       <Box sx={getMediaPositionStyle(videoAttributes.position)}>
         <video
+          aria-label={videoAttributes.altValue || ""}
           height={videoAttributes.height}
           width={videoAttributes.width}
           controls={"controls"}
@@ -565,6 +567,7 @@ export const Audio = ({ imgTag, componentId, baseUrl }) => {
     url: imgTag.attributes.getNamedItem("src")?.value,
     width: imgTag.attributes.getNamedItem("data-image-width")?.value,
     id: `audio_${componentId}`,
+    altValue: imgTag.attributes.getNamedItem("alt")?.value,
   };
 
   const getAudioDescription = (audioAttributes) => {
@@ -605,9 +608,9 @@ export const Audio = ({ imgTag, componentId, baseUrl }) => {
   return (
     <Box
       key={audioAttributes.id}
-      sx={this.getMediaPositionStyle(audioAttributes.position)}
+      sx={getMediaPositionStyle(audioAttributes.position)}
     >
-      <audio controls={"controls"}>
+      <audio controls={"controls"} aria-label={audioAttributes.altValue || ""}>
         <source src={imgTag.src} type="audio/mpeg"></source>
       </audio>
       {getAudioDescription(audioAttributes)}
@@ -759,6 +762,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       <Button
         startIcon={
           <OpenInNewIcon
+            titleAccess="Länk som öppnas i ett annat fönster"
             sx={{
               verticalAlign: "middle",
             }}
@@ -799,6 +803,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       <Button
         startIcon={
           <MapIcon
+            titleAccess="Länk som applicerar ändringar på kartan"
             sx={{
               verticalAlign: "middle",
             }}
@@ -826,10 +831,15 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
   };
 
   const getDocumentLink = (headerIdentifier, documentLink, isPrintMode) => {
+    const titleAccess = headerIdentifier
+      ? "Länk till ett visst kapitel i ett dokument"
+      : "Länk till ett dokument";
+
     return (
       <Button
         startIcon={
           <DescriptionIcon
+            titleAccess={titleAccess}
             sx={{
               verticalAlign: "middle",
             }}

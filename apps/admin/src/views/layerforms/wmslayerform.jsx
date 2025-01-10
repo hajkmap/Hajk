@@ -2,8 +2,21 @@ import React from "react";
 import { Component } from "react";
 import $ from "jquery";
 import { hfetch } from "utils/FetchWrapper";
+import { WMS_VERSION_1_1_0, WMS_VERSION_1_1_1, WMS_VERSION_1_3_0 } from "models/layermanager";
 
 var solpop;
+
+// Suported Hajk WMS Server types, in the client is this re-mapped to support OpenLayers server types:
+//  GeoServer
+const SERVERTYPE_GEOSERVER = "geoserver";
+//  GeoWebCache, #1469: Stand-Alone, without GeoServer's REST API, i.e. no automatic workspace listing. (client --> GeoServer)
+const SERVERTYPE_GWC_STANDALONE = "geowebcache-standalone";
+//  QGIS Server
+const SERVERTYPE_QGIS = "qgis";
+//  MapServer
+const SERVERTYPE_MAPSERVER = "mapserver";
+//  ESRI ArcGIS Server (client --> MapServer)
+const SERVERTYPE_ARCGIS = "arcgis";
 
 const defaultState = {
   load: false,
@@ -27,6 +40,7 @@ const defaultState = {
   opacity: 1.0,
   maxZoom: -1,
   minZoom: -1,
+  minMaxZoomAlertOnToggleOnly: false,
   tiled: false,
   showAttributeTableButton: false,
   singleTile: false,
@@ -38,7 +52,8 @@ const defaultState = {
   ],
   customRatio: 0,
   imageFormat: "",
-  serverType: "geoserver",
+  serverType: "", // #1469: Don't use a default, trigger state change in componentDidMount (for the now optional workspace selector)
+  workspaceSelectorVisible: false,
   drawOrder: 1,
   layerType: "WMS",
   attribution: "",
@@ -54,13 +69,14 @@ const defaultState = {
   timeSliderEnd: "",
   solpopup: solpop,
   capabilitiesList: [],
-  version: "1.1.0",
+  version: WMS_VERSION_1_1_0,
   projection: "",
   infoFormat: "",
   infoClickSortProperty: "",
   infoClickSortType: "string",
   infoClickSortDesc: true,
   infoclickIcon: "",
+  rotateMap: "n",
   hideExpandArrow: false,
   style: [],
   workspaceList: [],
@@ -81,8 +97,11 @@ const supportedProjections = [
   "EPSG:3017",
   "EPSG:3018",
   "EPSG:3021",
+  "EPSG:3035",
   "EPSG:4326",
   "EPSG:3857",
+  "EPSG:5847",
+  "EPSG:900913",
   "CRS:84",
 ];
 
@@ -110,6 +129,7 @@ class WMSLayerForm extends Component {
   componentDidMount() {
     let _state = { ...defaultState };
     _state.url = this.props.url;
+    _state.serverType = this.props.serverType || SERVERTYPE_GEOSERVER;
     this.setState(_state);
 
     this.props.model.on("change:select-image", () => {
@@ -124,6 +144,16 @@ class WMSLayerForm extends Component {
       });
       this.validateField("select-legend-icon");
     });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.serverType !== this.state.serverType) {
+      let newState = {
+        workspaceSelectorVisible: this.state.serverType === SERVERTYPE_GEOSERVER
+      };
+      newState.tiled = this.state.serverType === SERVERTYPE_GWC_STANDALONE ? true : defaultState.tiled;
+      this.setState(newState);
+    }
   }
 
   componentWillUnmount() {
@@ -197,11 +227,10 @@ class WMSLayerForm extends Component {
       let addedLayersInfo = { ...this.state.addedLayersInfo };
 
       // Let's find checked layers projection and pre-select it
-      const foundCrs = this.state.capabilitiesList[
-        "0"
-      ].Capability.Layer.Layer.find((l) => {
-        return l.Name === checkedLayer;
-      });
+      const foundCrs =
+        this.state.capabilitiesList["0"].Capability.Layer.Layer?.find((l) => {
+          return l.Name === checkedLayer;
+        }) || this.state.capabilitiesList["0"].Capability.Layer;
       // Proceed only if this is the first layer to be added (else we risk overwriting existing user selection of projection).
       // Also, make sure that CRS property really exists before proceeding.
       if (
@@ -297,8 +326,12 @@ class WMSLayerForm extends Component {
    */
   findInCapabilities(
     layerName,
-    arrayToSearchIn = this.state.capabilities.Capability.Layer.Layer
+    arrayToSearchIn = this.state.capabilities?.Capability?.Layer?.Layer
+      ? this.state.capabilities.Capability.Layer.Layer
+      : [this.state.capabilities?.Capability?.Layer]
   ) {
+    if (!arrayToSearchIn) return null;
+
     let match = null;
     match = arrayToSearchIn.find((l) => {
       if (l.hasOwnProperty("Layer")) {
@@ -326,13 +359,14 @@ class WMSLayerForm extends Component {
       addedLayersInfo: addedLayersInfo,
     });
 
-    let styles = layerInfo.styles
-      ? layerInfo.styles.map((style, i) => (
-          <option key={`style_${style.Name}_${i}`} value={style.Name}>
-            {style.Name}
-          </option>
-        ))
-      : null;
+    let styles =
+      layerInfo.styles && Array.isArray(layerInfo.styles)
+        ? layerInfo.styles.map((style, i) => (
+            <option key={`style_${style.Name}_${i}`} value={style.Name}>
+              {style.Name}
+            </option>
+          ))
+        : null;
 
     return (
       <div className="layerDialog">
@@ -467,7 +501,7 @@ class WMSLayerForm extends Component {
           </div>
         </div>
 
-        <div className="separator">Infoclick</div>
+        <div className="separator">Infoklick</div>
 
         <div className="form-row split0">
           <div>
@@ -495,7 +529,7 @@ class WMSLayerForm extends Component {
         </div>
         <div className="form-row split0">
           <div>
-            <label>Infoclick-ikon</label> (
+            <label>Infoklick-ikon</label> (
             <a
               href="https://fonts.google.com/icons?selected=Material+Icons"
               target="_blank"
@@ -503,7 +537,10 @@ class WMSLayerForm extends Component {
             >
               lista
             </a>
-            )
+            ){" "}
+            <abbr title="Använd namnet på en material-icon eller ange url:en till en svg-ikon. Svg-ikonen ska vara kvadratisk.">
+              (?)
+            </abbr>
           </div>
           <div>
             <input
@@ -526,7 +563,7 @@ class WMSLayerForm extends Component {
           </div>
         </div>
 
-        <div className="separator">Infoclick och sökning</div>
+        <div className="separator">Infoklick och sökning</div>
 
         <div className="form-row split50">
           <div>
@@ -916,8 +953,10 @@ class WMSLayerForm extends Component {
         }
       };
 
-      if (this.state.capabilities?.Capability?.Layer?.Layer) {
-        this.state.capabilities.Capability.Layer.Layer.forEach((layer) => {
+      if (this.state.capabilities?.Capability?.Layer) {
+        const layersToProcess = this.state.capabilities.Capability.Layer
+          .Layer || [this.state.capabilities.Capability.Layer];
+        layersToProcess.forEach((layer) => {
           recursivePushLayer(layer);
         });
       }
@@ -934,7 +973,7 @@ class WMSLayerForm extends Component {
       // previous implementation of WMS in Hajk2 assumed it was "1.1.1"
       // and did not add "version" property.
 
-      layer.version = layer.version || "1.1.1";
+      layer.version = layer.version || WMS_VERSION_1_1_1;
 
       var addedLayersInfo = {};
       var capabilities = this.state.capabilitiesList.find(
@@ -969,11 +1008,14 @@ class WMSLayerForm extends Component {
           addedLayersInfo: addedLayersInfo,
           capabilities,
           projection: layer.projection,
-          version: capabilities.version,
+          version: capabilities?.version,
           infoFormat: layer.infoFormat,
           infoClickSortProperty: layer.infoClickSortProperty ?? "",
           infoClickSortType: layer.infoClickSortType ?? "string",
+          rotateMap: layer.rotateMap ?? "n",
           hideExpandArrow: layer.hideExpandArrow ?? false,
+          minMaxZoomAlertOnToggleOnly:
+            layer.minMaxZoomAlertOnToggleOnly ?? false,
           useCustomDpiList: layer.useCustomDpiList ?? false,
           customDpiList:
             layer.customDpiList?.length > 0
@@ -998,7 +1040,20 @@ class WMSLayerForm extends Component {
     // Previously this was done while rendering.
 
     let layerOpts = {};
-    capabilities.Capability.Layer.Layer.forEach((_layer) => {
+
+    if (
+      !capabilities ||
+      !capabilities.Capability ||
+      !capabilities.Capability.Layer
+    ) {
+      return;
+    }
+
+    const layers = capabilities.Capability.Layer.Layer || [
+      capabilities.Capability.Layer,
+    ];
+
+    layers.forEach((_layer) => {
       let trueTitle = _layer.hasOwnProperty("Title") ? _layer.Title : "";
       let abstract = _layer.hasOwnProperty("Abstract") ? _layer.Abstract : "";
       let opts = {
@@ -1038,8 +1093,11 @@ class WMSLayerForm extends Component {
         });
     }
 
+    // #1469: Stand-Alone GeoWebCache only support v1.1.1 but will (confusingly) answer when called with e.g. ?VERSION=1.3.0,
+    // avoiding parsing such version-inconsistent replies by narrowing down WMS versions used for querying server to specifically v1.1.1
+    var versions = this.state.serverType === SERVERTYPE_GWC_STANDALONE ? [ WMS_VERSION_1_1_1 ] : undefined;
     var capabilitiesPromise = this.props.model.getAllWMSCapabilities(
-      this.state.url
+      this.state.url, versions
     );
 
     capabilitiesPromise
@@ -1069,10 +1127,14 @@ class WMSLayerForm extends Component {
         );
       })
       .catch((err) => {
-        if (this.props.parentView) {
-          this.props.parentView.setState({
+        this.setState({
+          load: false,
+          capabilitiesList: []
+        });
+        if (this.props.parent) {
+          this.props.parent.setState({
             alert: true,
-            alertMessage: "Servern svarar inte. Försök med en annan URL.",
+            alertMessage: "Servern svarar inte eller blockeras av CORS.\nFörsök med en annan URL.",
           });
         }
       });
@@ -1131,45 +1193,54 @@ class WMSLayerForm extends Component {
         this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
     }
     if (formats && formats.indexOf("application/geojson") > -1) {
-      this.setState({ serverType: "arcgis" });
+      this.setState({ serverType: SERVERTYPE_ARCGIS });
     }
   }
 
   setProjections() {
     let projections;
-    if (
-      this.state.capabilities &&
-      this.state.capabilities.Capability &&
-      this.state.capabilities.Capability.Layer
-    ) {
-      var RS = this.state.version === "1.3.0" ? "CRS" : "SRS";
-      projections = this.state.capabilities.Capability.Layer[RS];
+    const RS = this.state.version === WMS_VERSION_1_3_0 ? "CRS" : "SRS";  
+    const capabilities = this.state.capabilities;
+    if (capabilities && capabilities.Capability && capabilities.Capability.Layer) {
+      // #1469: Projection metadata can be present on the parent or child Layer element of GetCapabilities
+      // both are valid for e.g. OGC WMS v1.1.1 DTD.
+      const layers = capabilities.Capability.Layer.Layer;
+      if (capabilities.Capability.Layer[RS]) {
+        // If there is a direct RS property on the Layer, use it (assuming it's an array)
+        projections = [...new Set(capabilities.Capability.Layer[RS])];
+      } else if (layers) {
+        // Otherwise, iterate over the child layers
+        projections = layers.flatMap((layer) => {
+          // Ensure we always return an array from flatMap by concatenating the layer[RS] if it exists or returning an empty array if not
+          return layer[RS] ? [].concat(layer[RS]) : [];
+        });      
+        // Create a Set from the array to remove duplicates, convert it back to an array, and filter out any falsy values (like undefined or null)
+        projections = [...new Set(projections)].filter(Boolean);      
+        // If there are no projections left after filtering, set to null
+        if (!projections.length) {
+          projections = null;
+        }
+      }
     }
 
-    // We expect projections to be an array,
-    // but are also ready for a string (see below).
+    // Handle projections, if existing, as either string (single CRS/SRS) or array of strings
     if (projections) {
-      // First, ensure we have an array, see #1352
+      // Ensure we always have an internal array, see #1352
       if (!Array.isArray(projections)) {
         projections = [projections];
       }
 
-      projections = projections.map((projection) => {
-        return projection.toUpperCase();
-      });
+      projections = projections.map(projection => projection ? projection.toUpperCase() : null);
     }
 
-    let projEles = projections
-      ? supportedProjections.map((proj, i) => {
-          if (projections.indexOf(proj) > -1) {
-            return <option key={i}>{proj}</option>;
-          } else {
-            return "";
-          }
-        })
-      : "";
-
-    return projEles;
+    return projections ? projections.map((proj, i) => {
+      if (supportedProjections.includes(proj)) {
+        return <option key={i}>{proj}</option>;
+      } else {
+        console.log("Unsupported spatial reference system found in WMS capabilities document, ignoring:", proj);
+        return null;
+      }
+    }) : null;
   }
 
   setInfoFormats() {
@@ -1264,6 +1335,7 @@ class WMSLayerForm extends Component {
       opacity: this.getValue("opacity"),
       maxZoom: this.getValue("maxZoom"),
       minZoom: this.getValue("minZoom"),
+      minMaxZoomAlertOnToggleOnly: this.getValue("minMaxZoomAlertOnToggleOnly"),
       singleTile: this.getValue("singleTile"),
       hidpi: this.getValue("hidpi"),
       useCustomDpiList: this.state.useCustomDpiList,
@@ -1298,6 +1370,7 @@ class WMSLayerForm extends Component {
       infoClickSortProperty: this.getValue("infoClickSortProperty"),
       infoClickSortDesc: this.getValue("infoClickSortDesc"),
       infoClickSortType: this.getValue("infoClickSortType"),
+      rotateMap: this.getValue("rotateMap"),
       // infoclickIcon: this.getValue("infoclickIcon"),
       hideExpandArrow: this.getValue("hideExpandArrow"),
       // style: this.getValue("style"),
@@ -1330,6 +1403,7 @@ class WMSLayerForm extends Component {
       value = Number(value || -1);
       return value === 0 ? -1 : value;
     }
+    if (fieldName === "minMaxZoomAlertOnToggleOnly") value = input.checked;
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
     if (fieldName === "hidpi") value = input.checked;
@@ -1445,28 +1519,41 @@ class WMSLayerForm extends Component {
   }
 
   getWorkspaces = async (url) => {
-    //
-    url = url.substring(0, url.lastIndexOf("/")) + "/rest/workspaces";
-    //
-    const res = await hfetch(url);
-    //
-    const json = await res.json();
-    //
-    //this.setState({ workspaceList: json.workspaces.workspace });
-    //
-    var sortedWorksapes = json.workspaces.workspace.sort(GetSortOrder("name")); //Pass the attribute to be sorted on
+    try {
+      if (url.endsWith("/")) {
+        url = url.slice(0, -1);
+      }
+      url = url.substring(0, url.lastIndexOf("/")) + "/rest/workspaces";
+      const res = await hfetch(url);
+      if (!res.ok) {
+        // Handle non-successful responses, e.g. HTTP/404 when REST API is not exposed
+        throw new Error('Failed to fetch workspaces: ' + res.status);
+      }
+      const json = await res.json();
+      var sortedWorkspaces = json.workspaces.workspace.sort(GetSortOrder("name")); //Pass the attribute to be sorted on
 
-    function GetSortOrder(prop) {
-      return function (a, b) {
-        if (a[prop] > b[prop]) {
-          return 1;
-        } else if (a[prop] < b[prop]) {
-          return -1;
-        }
-        return 0;
-      };
+      function GetSortOrder(prop) {
+        return function (a, b) {
+          if (a[prop] > b[prop]) {
+            return 1;
+          } else if (a[prop] < b[prop]) {
+            return -1;
+          }
+          return 0;
+        };
+      }
+      this.setState({ workspaceList: sortedWorkspaces });
+    } catch (error) {
+      if (this.props.parent) {
+        this.props.parent.setState({
+          alert: true,
+          alertMessage: "Workspace-listan kan inte hämtas från denna server, välj \"Alla\".",
+        });
+      } else {
+        console.warn("Workspace fetch from REST API failed.");
+      }
+      this.setState({ workspaceList: [] });
     }
-    this.setState({ workspaceList: sortedWorksapes });
   };
 
   updateDpiList(e, kv, key) {
@@ -1512,7 +1599,7 @@ class WMSLayerForm extends Component {
       ? "tooltip-timeSlider"
       : "hidden";
 
-    const version = this.state.version || "1.1.1";
+    const version = this.state.version || WMS_VERSION_1_1_1;
     const infoFormat = this.state.infoFormat || "";
 
     return (
@@ -1527,21 +1614,13 @@ class WMSLayerForm extends Component {
             value={this.state.serverType}
             onChange={(e) => {
               this.setState({ serverType: e.target.value });
-              if (
-                e.target.value === "geoserver"
-                  ? (document.getElementById(
-                      "availableWorkspaces"
-                    ).style.display = "unset")
-                  : (document.getElementById(
-                      "availableWorkspaces"
-                    ).style.display = "none")
-              );
             }}
           >
-            <option>geoserver</option>
-            <option>mapserver</option>
-            <option>qgis</option>
-            <option>arcgis</option>
+            <option>{SERVERTYPE_GEOSERVER}</option>
+            <option>{SERVERTYPE_MAPSERVER}</option>
+            <option>{SERVERTYPE_QGIS}</option>
+            <option>{SERVERTYPE_GWC_STANDALONE}</option>
+            <option>{SERVERTYPE_ARCGIS}</option>
           </select>
         </div>
         <div>
@@ -1556,7 +1635,7 @@ class WMSLayerForm extends Component {
             }}
             className={this.getValidationClass("url")}
           />
-          {this.state.serverType === "geoserver" ? (
+          {this.state.workspaceSelectorVisible ? (
             <span
               onClick={(e) => {
                 this.getWorkspaces(this.state.url);
@@ -1577,46 +1656,48 @@ class WMSLayerForm extends Component {
           )}
         </div>
 
-        <div id="availableWorkspaces">
-          <label>Välj workspace</label>
-          <select
-            className="control-fixed-width"
-            ref="input_workspaceName"
-            value={this.state.workspaceName}
-            onChange={(e) =>
-              this.setState({
-                url:
-                  this.state.url.substring(
-                    0,
-                    this.state.url.lastIndexOf("geoserver/") + 10
-                  ) + e.target.value,
-              })
-            }
-          >
-            <option key="wms" value="wms">
-              Alla
-            </option>
-            {this.state.workspaceList.map((workspace) => {
-              return (
-                <option
-                  key={workspace.name + "/wms"}
-                  value={workspace.name + "/wms"}
-                >
-                  {workspace.name}
-                </option>
-              );
-            })}
-          </select>
-          &nbsp;
-          <span
-            onClick={(e) => {
-              this.loadWMSCapabilities(e);
-            }}
-            className="btn btn-default"
-          >
-            Hämta lager {loader}
-          </span>
-        </div>
+        {this.state.workspaceSelectorVisible && (
+          <div id="availableWorkspaces">
+            <label>Välj workspace</label>
+            <select
+              className="control-fixed-width"
+              ref="input_workspaceName"
+              value={this.state.workspaceName}
+              onChange={(e) =>
+                this.setState({
+                  url:
+                    this.state.url.substring(
+                      0,
+                      this.state.url.lastIndexOf("geoserver/") + 10
+                    ) + e.target.value,
+                })
+              }
+            >
+              <option key="wms" value="wms">
+                Alla
+              </option>
+              {this.state.workspaceList.map((workspace) => {
+                return (
+                  <option
+                    key={workspace.name + "/wms"}
+                    value={workspace.name + "/wms"}
+                  >
+                    {workspace.name}
+                  </option>
+                );
+              })}
+            </select>
+            &nbsp;
+            <span
+              onClick={(e) => {
+                this.loadWMSCapabilities(e);
+              }}
+              className="btn btn-default"
+            >
+              Hämta lager {loader}
+            </span>
+          </div>
+        )}
 
         <div className="separator">Inställningar för request</div>
         <div>
@@ -1823,7 +1904,7 @@ class WMSLayerForm extends Component {
             checked={this.state.tiled}
           />
           &nbsp;
-          <label htmlFor="input_tiled">GeoWebCache</label>
+          <label htmlFor="input_tiled">Rutindelad (tiled)</label>
         </div>
         <div>
           <input
@@ -1862,7 +1943,7 @@ class WMSLayerForm extends Component {
                 <td>Titel</td>
                 <td>Namn</td>
                 <td>Grupp</td>
-                <td>Infoclick</td>
+                <td>Infoklick</td>
               </tr>
             </thead>
             {this.renderLayerList()}
@@ -2071,6 +2152,38 @@ class WMSLayerForm extends Component {
               );
             }}
           />
+        </div>
+        <div>
+          <label>
+            Visa endast Min/Max varningsruta vid klick.
+            <abbr title="Som standard visas även varningsruta vid start samt när lagret blir dolt pga zoombegränsningen (Min zoom och Max zoom).">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="checkbox"
+            ref="input_minMaxZoomAlertOnToggleOnly"
+            onChange={(e) =>
+              this.setState({ minMaxZoomAlertOnToggleOnly: e.target.checked })
+            }
+            checked={this.state.minMaxZoomAlertOnToggleOnly}
+          />
+        </div>
+        <div>
+          <label>Uppåt i kartan är:</label>
+          <select
+            className="control-fixed-width"
+            ref="input_rotateMap"
+            value={this.state.rotateMap}
+            onChange={(e) => {
+              this.setState({ rotateMap: e.target.value });
+            }}
+          >
+            <option value="n">Norr</option>
+            <option value="e">Öst</option>
+            <option value="s">Syd</option>
+            <option value="w">Väst</option>
+          </select>
         </div>
         <div className="separator">Metadata</div>
         <div>
