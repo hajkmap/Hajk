@@ -41,7 +41,7 @@ export default function QuickAccessLayers({
     const layers = map.getAllLayers().filter((l) => {
       return l.get("quickAccess") === true;
     });
-    if (filterValue === "") {
+    if (filterValue === "" || filterValue === null) {
       return layers;
     } else {
       // If filter is applied, only show layers that match the filter
