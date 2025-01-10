@@ -1,348 +1,379 @@
-import React from "react";
-import { withSnackbar } from "notistack";
-import { styled } from "@mui/material/styles";
-import { Button, Typography, Grid, Link } from "@mui/material";
-import IconWarning from "@mui/icons-material/Warning";
-import CallMadeIcon from "@mui/icons-material/CallMade";
-import InfoIcon from "@mui/icons-material/Info";
-import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import RadioButtonChecked from "@mui/icons-material/RadioButtonChecked";
-import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+
+// Material UI components
+import {
+  Box,
+  IconButton,
+  ListItemButton,
+  ListItemSecondaryAction,
+  ListItemText,
+  Tooltip,
+  useTheme,
+} from "@mui/material";
+
+import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
+import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
+import WallpaperIcon from "@mui/icons-material/Wallpaper";
+import BuildOutlinedIcon from "@mui/icons-material/BuildOutlined";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import CloseIcon from "@mui/icons-material/Close";
-import TableViewIcon from "@mui/icons-material/TableView";
-import LayerGroupItem from "./LayerGroupItem.js";
-import LayerSettings from "./LayerSettings.js";
-import DownloadLink from "./DownloadLink.js";
-import HajkToolTip from "components/HajkToolTip";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 
-const LayerItemContainer = styled("div")(({ theme }) => ({
-  paddingLeft: "0",
-  borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-}));
+// Custom components
+import LegendIcon from "./LegendIcon";
+import LegendImage from "./LegendImage";
 
-const LayerItemWrapper = styled("div")(({ theme }) => ({
-  display: "flex",
-  justifyContent: "space-between",
-  marginTop: "0",
-}));
+// Custom hooks
+import useSnackbar from "../../../hooks/useSnackbar";
 
-const LayerTogglerButtonWrapper = styled("div")(() => ({
-  display: "flex",
-  alignItems: "center",
-  cursor: "pointer",
-  float: "left",
-  marginRight: "5px",
-}));
+export default function LayerItem({
+  layer,
+  toggleIcon,
+  clickCallback,
+  isBackgroundLayer,
+  draggable,
+  toggleable,
+  app,
+  display,
+  subLayersSection,
+  visibleSubLayers,
+  expandableSection,
+  visibleSubLayersCaption,
+  onSetZoomVisible,
+  subLayerClicked,
+  showSublayers,
+}) {
+  // WmsLayer load status, shows warning icon if !ok
+  const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
+  // State for layer zoom visibility
+  const [zoomVisible, setZoomVisible] = useState(true);
+  // State that toggles legend collapse
+  const [legendIsActive, setLegendIsActive] = useState(false);
+  const [visibleMinMaxZoomLayers, setVisibleMinMaxZoomLayers] = useState([]);
+  const prevVisibleMinMaxZoomLayersRef = useRef([]);
+  const prevLayerIsZoomVisible = useRef(null);
+  const [isGroupHidden, setIsGroupHidden] = useState(false);
+  const [showSnackbarOnClick, setShowSnackbarOnClick] = useState(false);
 
-const InfoTextContainer = styled("div")(({ theme }) => ({
-  margin: "10px 45px",
-}));
+  const { addToSnackbar, removeFromSnackbar } = useSnackbar();
+  const theme = useTheme();
 
-const Caption = styled(Typography)(({ theme }) => ({
-  cursor: "pointer",
-  fontSize: theme.typography.pxToRem(15),
-}));
+  const layerSwitcherConfig = app.config.mapConfig.tools.find(
+    (tool) => tool.type === "layerswitcher"
+  );
 
-const LegendIcon = styled("img")(({ theme }) => ({
-  width: theme.typography.pxToRem(18),
-  height: theme.typography.pxToRem(18),
-  marginRight: "5px",
-}));
+  const minMaxZoomAlertOnToggleOnly =
+    layerSwitcherConfig?.options?.minMaxZoomAlertOnToggleOnly ?? false;
 
-const LayerButtonsContainer = styled("div")(() => ({
-  display: "flex",
-  alignItems: "center",
-}));
-
-const LayerButtonWrapper = styled("div")(() => ({
-  display: "flex",
-  alignItems: "center",
-  width: 35,
-  height: 35,
-  cursor: "pointer",
-}));
-
-const StyledList = styled("ul")(() => ({
-  padding: 0,
-  margin: 0,
-  listStyle: "none",
-}));
-
-class LayerItem extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    const { layer } = props;
-    const layerInfo = layer.get("layerInfo");
-
-    this.isBackgroundLayer = layerInfo.layerType === "base";
-    this.rotateMap = layer.get("rotateMap");
-    this.caption = layerInfo.caption;
-    this.name = layer.get("name");
-    this.legend = layerInfo.legend;
-    this.legendIcon = layerInfo.legendIcon;
-    this.infoTitle = layerInfo.infoTitle;
-    this.infoText = layerInfo.infoText;
-    this.infoUrl = layerInfo.infoUrl;
-    this.infoUrlText = layerInfo.infoUrlText;
-    this.infoOpenDataLink = layerInfo.infoOpenDataLink;
-    this.infoOwner = layerInfo.infoOwner;
-    this.localObserver = layer.localObserver;
-    this.showAttributeTableButton = layerInfo.showAttributeTableButton || false;
-    this.usesMinMaxZoom = this.layerUsesMinMaxZoom();
-    this.minMaxZoomAlertOnToggleOnly = layer.get("minMaxZoomAlertOnToggleOnly");
-
-    this.state = {
-      visible: layer.get("visible"),
-      status: "ok",
-      zoomVisible: true,
-      open: false,
-      toggleSettings: false,
-      infoVisible: false,
-    };
-
-    // Subscribe to events sent when another background layer is clicked and
-    // disable all other layers to implement the RadioButton behaviour
-    if (this.isBackgroundLayer) {
-      layer.localObserver.subscribe("backgroundLayerChanged", (activeLayer) => {
-        if (activeLayer !== this.name) {
-          if (!layer.isFakeMapLayer) {
-            layer.setVisible(false);
-          }
-          this.setState({
-            visible: false,
-          });
-        }
-      });
-    }
-  }
-
-  /**
-   * Triggered when the component is successfully mounted into the DOM.
-   * @instance
-   */
-  componentDidMount() {
-    // Setup some listeners triggered whenever the layer visibility changes:
-    this.props.layer.on?.("change:visible", (e) => {
-      // Grab the new value…
-      const visible = !e.oldValue;
-
-      // …and update the radio button state.
-      this.setState({
-        visible,
-      });
-
-      this.listenToZoomChange(visible);
-
-      // Also, check if we need to auto-rotate the map
-      if (visible === true && this.isBackgroundLayer) {
-        this.changeRotation();
-      }
-    });
-
-    // Check if we should display a zoom warning at start
-    if (this.state.visible) {
-      this.triggerZoomCheck(null, this.state.visible);
-    }
-
-    // Check if we should auto-rotate the map at start
-    if (this.state.visible === true && this.isBackgroundLayer === true) {
-      this.changeRotation();
-    }
-
-    this.listenToZoomChange(this.state.visible);
-
-    // Set load status by subscribing to a global event. Expect ID (int) of layer
-    // and status (string "ok"|"loaderror"). Also, once status was set to "loaderror",
-    // don't change it back to "ok": we'll get a response for each tile, so most of
-    // the tiles might be "ok", but if only one of the tiles has "loaderror", we
-    // consider that the layer has failed loading and want to inform the user.
-    this.props.app.globalObserver.subscribe(
-      "layerswitcher.wmsLayerLoadStatus",
-      (d) => {
-        this.state.status !== "loaderror" &&
-          this.name === d.id &&
-          this.setState({
-            status: d.status,
-          });
-      }
-    );
-  }
-
-  changeRotation() {
-    // Retrieve the current rotation in a standardized manner
-    const newRotation = this.rotateMap?.toLowerCase();
-
-    // Determine rotation in radians
-    if (["n", "e", "s", "w"].includes(newRotation)) {
-      let radians = 0;
-      switch (newRotation) {
-        case "n":
-          radians = 0;
-          break;
-        case "e":
-          radians = -(Math.PI / 2);
-          break;
-        case "s":
-          radians = Math.PI;
-          break;
-        case "w":
-          radians = Math.PI / 2;
-          break;
-        default:
-          break;
-      }
-
-      // Grab the OL View
-      const View = this.props.app.map.getView();
-
-      // Rotate the map if current rotation differs from the new rotation
-      if (View.getRotation() !== radians) {
-        View.animate({
-          rotation: radians,
-        });
-      }
-    }
-  }
-
-  layerUsesMinMaxZoom() {
-    const lprops = this.props.layer.getProperties();
+  const layerUsesMinMaxZoom = useCallback(() => {
+    const lprops = layer.getProperties();
     const maxZ = lprops.maxZoom ?? 0;
     const minZ = lprops.minZoom ?? 0;
-    // When reading min/max-Zoom from layer, its not consistent with the
-    // initial values from config. Suddenly Infinity is used.
     return (maxZ > 0 && maxZ < Infinity) || (minZ > 0 && minZ < Infinity);
-  }
+  }, [layer]);
 
-  zoomEndHandler = (e) => {
-    const zoom = this.props.model.olMap.getView().getZoom();
-    const lprops = this.props.layer.getProperties();
+  const addValue = useCallback(
+    (value) => {
+      if (minMaxZoomAlertOnToggleOnly) {
+        if (showSnackbarOnClick) {
+          // Add layer caption and show snackbar message on click.
+          addToSnackbar(layer.get("name"), value);
+        } else {
+          // Add layer caption to snackbar message, but don't show it.
+          addToSnackbar(layer.get("name"), value, true);
+        }
+        setShowSnackbarOnClick(false);
+      } else {
+        addToSnackbar(layer.get("name"), value);
+      }
+    },
+    [minMaxZoomAlertOnToggleOnly, showSnackbarOnClick, addToSnackbar, layer]
+  );
+
+  const removeValue = useCallback(
+    (value) => {
+      removeFromSnackbar(layer.get("name"), value);
+    },
+    [removeFromSnackbar, layer]
+  );
+
+  /**
+   * Handles the zoom end event and determines if the layer should be visible at the current zoom level.
+   * @param {boolean} wasClicked - True if the zoom button was clicked, false otherwise.
+   * @returns {boolean} - True if the layer is visible at the current zoom level, false otherwise.
+   */
+  const zoomEndHandler = useCallback(
+    (click) => {
+      const zoom = app.map.getView().getZoom();
+      const lprops = layer.getProperties();
+      const layerIsZoomVisible =
+        zoom > lprops.minZoom && zoom <= lprops.maxZoom;
+
+      const prevVisibleMinMaxZoomLayers =
+        prevVisibleMinMaxZoomLayersRef.current;
+      const isGroupLayer = Array.isArray(visibleSubLayersCaption);
+
+      const arraysAreEqual = (a, b) => {
+        if (a.length !== b.length) {
+          return false;
+        }
+        for (let i = 0; i < a.length; i++) {
+          if (a[i] !== b[i]) {
+            return false;
+          }
+        }
+        return true;
+      };
+
+      if (
+        layerIsZoomVisible !== prevLayerIsZoomVisible.current ||
+        isGroupLayer
+      ) {
+        if (!layerIsZoomVisible && (zoomVisible || !layer.get("visible"))) {
+          setVisibleMinMaxZoomLayers(
+            isGroupLayer ? visibleSubLayersCaption : [layer.get("caption")]
+          );
+        } else if (
+          !layerIsZoomVisible &&
+          layer.get("visible") &&
+          isGroupLayer
+        ) {
+          setVisibleMinMaxZoomLayers(
+            isGroupLayer ? visibleSubLayersCaption : [layer.get("caption")]
+          );
+        } else if (
+          !arraysAreEqual(visibleMinMaxZoomLayers, prevVisibleMinMaxZoomLayers)
+        ) {
+          setVisibleMinMaxZoomLayers([]);
+        } else {
+          setVisibleMinMaxZoomLayers([]);
+        }
+
+        if (isGroupLayer) {
+          onSetZoomVisible(layerIsZoomVisible);
+        }
+        prevLayerIsZoomVisible.current = layerIsZoomVisible;
+      }
+
+      setZoomVisible(layerIsZoomVisible);
+      return layerIsZoomVisible;
+    },
+    [
+      app.map,
+      layer,
+      zoomVisible,
+      visibleMinMaxZoomLayers,
+      visibleSubLayersCaption,
+      onSetZoomVisible,
+    ]
+  );
+
+  const triggerZoomCheck = useCallback(
+    (click, visible) => {
+      if (!layerUsesMinMaxZoom()) return;
+
+      zoomEndHandler(click, visible);
+
+      if (visible === false) {
+        removeValue(layer.get("caption"));
+      }
+    },
+    [layer, layerUsesMinMaxZoom, zoomEndHandler, removeValue]
+  );
+
+  useEffect(() => {
+    // Handler for zoom change event.
+    const handleChange = () => {
+      // Check if the layer is currently visible.
+      if (layer.get("visible")) {
+        // Trigger zoom check.
+        triggerZoomCheck(false, true);
+      }
+    };
+
+    // Subscribe to zoom changes.
+    const zoomChangeSubscription = app.globalObserver.subscribe(
+      "core.zoomEnd",
+      handleChange
+    );
+
+    // Call handleChange immediately to ensure initial state is correct.
+    handleChange();
+
+    // Cleanup function to unsubscribe when the component unmounts or dependencies change.
+    return () =>
+      app.globalObserver.unsubscribe("core.zoomEnd", zoomChangeSubscription);
+  }, [app.globalObserver, layer, triggerZoomCheck]);
+
+  useEffect(() => {
+    const zoom = app.map.getView().getZoom();
+    const lprops = layer.getProperties();
     const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
 
-    let showSnack = false;
-
-    if (this.minMaxZoomAlertOnToggleOnly === true) {
-      if (!this.state.visible && !layerIsZoomVisible && e?.type === "click") {
-        showSnack = true;
-      }
-    } else {
-      if (
-        !layerIsZoomVisible &&
-        (this.state.zoomVisible || !this.state.visible)
-      ) {
-        showSnack = true;
-      }
+    if (
+      !layerIsZoomVisible &&
+      minMaxZoomAlertOnToggleOnly &&
+      (subLayerClicked || layer.get("visible"))
+    ) {
+      setShowSnackbarOnClick(true);
     }
 
-    if (showSnack === true) {
-      this.showZoomSnack();
+    if (
+      (visibleSubLayers !== undefined &&
+        !visibleSubLayers &&
+        visibleMinMaxZoomLayers.length > 0) ||
+      (!layer.get("visible") && visibleMinMaxZoomLayers.length > 0)
+    ) {
+      setIsGroupHidden(true);
     }
+  }, [
+    app.map,
+    layer,
+    minMaxZoomAlertOnToggleOnly,
+    subLayerClicked,
+    visibleSubLayers,
+    visibleMinMaxZoomLayers.length,
+  ]);
 
-    this.setState({
-      zoomVisible: layerIsZoomVisible,
-    });
-    return layerIsZoomVisible;
-  };
+  useEffect(() => {
+    const handleLoadStatusChange = (d) => {
+      if (wmsLayerLoadStatus !== "loaderror" && layer.get("name") === d.id) {
+        setWmsLayerLoadStatus(d.status);
+      }
+    };
 
-  listenToZoomChange(bListen) {
-    if (!this.usesMinMaxZoom) return;
+    // Subscribe to layer load status.
+    const loadStatusSubscription = app.globalObserver.subscribe(
+      "layerswitcher.wmsLayerLoadStatus",
+      handleLoadStatusChange
+    );
 
-    const eventName = "core.zoomEnd";
-    if (bListen && !this.zoomEndListener) {
-      this.zoomEndListener = this.props.app.globalObserver.subscribe(
-        eventName,
-        this.zoomEndHandler
+    // Cleanup function to unsubscribe when the component unmounts or if the relevant dependencies change.
+    return () =>
+      app.globalObserver.unsubscribe(
+        "layerswitcher.wmsLayerLoadStatus",
+        loadStatusSubscription
       );
-    } else {
-      if (this.zoomEndListener) {
-        this.props.app.globalObserver.unsubscribe(
-          eventName,
-          this.zoomEndListener
-        );
-        this.zoomEndListener = null;
-      }
+  }, [app.globalObserver, layer, wmsLayerLoadStatus]);
+
+  useEffect(() => {
+    if (isGroupHidden) {
+      visibleMinMaxZoomLayers.forEach((value) => {
+        removeValue(value);
+      });
+      setIsGroupHidden(false);
     }
-  }
 
-  showZoomSnack() {
-    if (this.zoomWarningSnack) return;
+    const prevVisibleMinMaxZoomLayers = prevVisibleMinMaxZoomLayersRef.current;
 
-    // We're fetching layerInfo object from the layer object.
-    const layerInfo = this.props.layer.get("layerInfo");
+    const addedValues = visibleMinMaxZoomLayers.filter(
+      (value) => !prevVisibleMinMaxZoomLayers.includes(value)
+    );
 
-    // If layerInfo is defined, we get layersInfo from it.
-    // Otherwise, layersInfo is set as undefined.
-    const layersInfo = layerInfo ? layerInfo.layersInfo : undefined;
+    const removedValues = prevVisibleMinMaxZoomLayers.filter(
+      (value) => !visibleMinMaxZoomLayers.includes(value)
+    );
 
-    // If the layer is a LayerGroupItem (meaning it contains more than one object in the "layersInfo" array),
-    // then no message should be displayed.
-    // Here we also ensure that layersInfo is defined and contains more than one layer
-    // before trying to access its keys. This prevents a TypeError when layersInfo
-    // is undefined.
-    if (layersInfo && Object.keys(layersInfo).length > 1) {
+    addedValues.forEach((value) => {
+      addValue(value);
+    });
+
+    removedValues.forEach((value) => {
+      removeValue(value);
+    });
+
+    prevVisibleMinMaxZoomLayersRef.current = visibleMinMaxZoomLayers;
+  }, [visibleMinMaxZoomLayers, isGroupHidden, addValue, removeValue]);
+
+  // Handles list item click
+  const handleLayerItemClick = (e) => {
+    // If a clickCallback is defined, call it.
+    if (clickCallback) {
+      clickCallback();
       return;
     }
 
-    this.zoomWarningSnack = this.props.enqueueSnackbar(
-      `Lagret "${this.caption}"  är inte synligt vid aktuell zoomnivå.`,
-      {
-        variant: "warning",
-        preventDuplicate: true,
-        onClose: () => {
-          this.zoomWarningSnack = null;
-        },
-      }
-    );
-  }
-
-  triggerZoomCheck(e, visible) {
-    if (!this.usesMinMaxZoom) return;
-
-    this.zoomEndHandler(e);
-
-    if (visible === false) {
-      if (!this.zoomWarningSnack) return;
-      this.props.closeSnackbar(this.zoomWarningSnack);
-      this.zoomWarningSnack = null;
+    // Handle system layers by showing layer details directly
+    if (layer.get("layerType") === "system") {
+      showLayerDetails(e);
+      return;
     }
-  }
 
-  /**
-   * Toggle visibility of this layer item.
-   * Also, if layer is being hidden, reset "status" (if layer loading failed,
-   * "status" is "loaderror", and it should be reset if user unchecks layer).
-   * @instance
-   */
-  toggleVisible = (e) => {
-    const layer = this.props.layer;
-    if (this.isBackgroundLayer) {
-      document.getElementById("map").style.backgroundColor = "#FFF"; // sets the default background color to white
-      if (layer.isFakeMapLayer) {
-        switch (this.name) {
-          case "-2":
-            document.getElementById("map").style.backgroundColor = "#000";
-            break;
-          case "-1":
-          default:
-            document.getElementById("map").style.backgroundColor = "#FFF";
-            break;
+    // Continue with existing functionality for non-system layers
+    triggerZoomCheck(true, !layer.get("visible"));
+
+    // Toggle visibility for non-system layers
+    if (layer.get("layerType") !== "system") {
+      // This check is technically redundant now but left for clarity
+      layer.set("visible", !layer.get("visible"));
+    }
+  };
+
+  // Render method for legend icon
+  const getIconFromLayer = () => {
+    const layerLegendIcon =
+      layer.get("layerInfo")?.legendIcon || layer.get("legendIcon");
+    if (layerLegendIcon !== undefined) {
+      return <LegendIcon url={layerLegendIcon} />;
+    } else if (layer.get("layerType") === "system") {
+      return <BuildOutlinedIcon sx={{ mr: "5px" }} />;
+    }
+    return renderLegendIcon();
+  };
+
+  const renderLegendIcon = () => {
+    if (
+      layer.get("layerType") === "group" ||
+      layer.get("layerType") === "base" ||
+      layer.isFakeMapLayer ||
+      layer.get("layerType") === "system"
+    ) {
+      return null;
+    }
+    return (
+      <Tooltip
+        placement="left"
+        title={
+          legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"
         }
-      } else {
-        layer.setVisible(true);
-      }
-      this.setState({ visible: true });
-      // Publish event to ensure all other background layers are disabled
-      layer.localObserver.publish("backgroundLayerChanged", this.name);
-    } else {
-      const visible = !this.state.visible;
-      this.setState({
-        visible,
-      });
-      this.props.layer.setVisible(visible);
-      this.triggerZoomCheck(e, visible);
+      >
+        <IconButton
+          sx={{ p: 0.25, mr: "5px" }}
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            setLegendIsActive(!legendIsActive);
+          }}
+        >
+          <FormatListBulletedOutlinedIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    );
+  };
+
+  // Render method for checkbox icon
+  const getLayerToggleIcon = () => {
+    if (toggleIcon) {
+      return toggleIcon;
     }
+    return !layer.get("visible") ? (
+      <CheckBoxOutlineBlankIcon />
+    ) : layer.get("layerType") === "group" &&
+      visibleSubLayers.length !== layer.subLayers.length ? (
+      <CheckBoxIcon sx={{ fill: "gray" }} />
+    ) : (
+      <CheckBoxIcon
+        sx={{
+          fill: (theme) =>
+            !zoomVisible && layer.get("visible") && !visibleSubLayers
+              ? theme.palette.warning.dark
+              : "",
+        }}
+      />
+    );
   };
 
   /**
@@ -350,398 +381,174 @@ class LayerItem extends React.PureComponent {
    * @instance
    * @return {external:ReactElement}
    */
-  renderStatusButton() {
+  const renderStatusIcon = () => {
     return (
-      this.state.status === "loaderror" && (
-        <HajkToolTip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
-          <LayerButtonWrapper>
-            <IconWarning />
-          </LayerButtonWrapper>
-        </HajkToolTip>
+      wmsLayerLoadStatus === "loaderror" && (
+        <IconButton disableRipple>
+          <Tooltip
+            disableInteractive
+            title="Lagret kunde inte laddas in. Kartservern svarar inte."
+          >
+            <WarningAmberOutlinedIcon fontSize="small" />
+          </Tooltip>
+        </IconButton>
       )
     );
-  }
+  };
 
-  renderInfoButton = () => {
-    return this.isInfoEmpty() ? null : (
-      <HajkToolTip title="Mer information om lagret">
-        <LayerButtonWrapper>
-          {this.state.infoVisible ? (
-            <RemoveCircleIcon onClick={this.toggleInfo} />
-          ) : (
-            <InfoIcon
-              onClick={this.toggleInfo}
-              sx={{
-                boxShadow: this.state.infoVisible
-                  ? "rgb(204, 204, 204) 2px 3px 1px"
-                  : "inherit",
-                borderRadius: "100%",
+  // Show layer details action
+  const showLayerDetails = (e, specificLayer = layer) => {
+    e.stopPropagation();
+    app.globalObserver.publish("setLayerDetails", { layer: specificLayer });
+  };
+
+  const drawOrderItem = () => {
+    if (draggable) {
+      return true;
+    }
+    if (isBackgroundLayer && !toggleable) {
+      return true;
+    }
+    return false;
+  };
+
+  const renderBorder = (theme) => {
+    if (drawOrderItem()) {
+      return "none";
+    }
+    if (legendIsActive) {
+      return `${theme.spacing(0.2)} solid transparent`;
+    }
+    return `${theme.spacing(0.2)} solid ${theme.palette.divider}`;
+  };
+
+  return (
+    <div
+      className="layer-item"
+      style={{
+        display: display,
+        marginLeft:
+          expandableSection || isBackgroundLayer || draggable ? 0 : "31px",
+        borderBottom:
+          legendIsActive || (drawOrderItem() && showSublayers)
+            ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
+            : "none",
+      }}
+    >
+      <Box
+        sx={{
+          borderBottom: (theme) =>
+            drawOrderItem() && showSublayers
+              ? "none"
+              : drawOrderItem() && !legendIsActive
+              ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
+              : "none",
+          display: "flex",
+          "&:hover .dragInidcatorIcon": {
+            opacity: draggable ? 1 : 0,
+          },
+        }}
+      >
+        {draggable && (
+          <IconButton
+            disableRipple
+            sx={{
+              px: 0,
+              opacity: 0,
+              transition: "opacity 200ms",
+            }}
+            className="dragInidcatorIcon"
+          >
+            <Tooltip placement="left" title="Dra för att ändra ritordning">
+              <DragIndicatorOutlinedIcon fontSize={"small"} />
+            </Tooltip>
+          </IconButton>
+        )}
+        {expandableSection && expandableSection}
+        <ListItemButton
+          disableRipple
+          onClick={toggleable ? handleLayerItemClick : null}
+          sx={{
+            p: 0,
+            ml: isBackgroundLayer && !toggleable ? (draggable ? 0 : "20px") : 0,
+          }}
+          dense
+        >
+          <Box
+            sx={{
+              display: "flex",
+              position: "relative",
+              width: "100%",
+              alignItems: "center",
+              py: 0.5,
+              pr: 1,
+              borderBottom: (theme) => renderBorder(theme),
+            }}
+          >
+            {toggleable && (
+              <IconButton disableRipple size="small" sx={{ pl: 0 }}>
+                {getLayerToggleIcon()}
+              </IconButton>
+            )}
+            {isBackgroundLayer && !toggleable ? (
+              layer.isFakeMapLayer ? (
+                <WallpaperIcon sx={{ mr: "5px", ml: 0 }} />
+              ) : (
+                <PublicOutlinedIcon sx={{ mr: "5px", ml: 0 }} />
+              )
+            ) : (
+              getIconFromLayer()
+            )}
+            <ListItemText
+              primary={layer.get("caption")}
+              primaryTypographyProps={{
+                pr: 5,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                fontWeight:
+                  layer.get("visible") && !draggable && !isBackgroundLayer
+                    ? "bold"
+                    : "inherit",
               }}
             />
-          )}
-        </LayerButtonWrapper>
-      </HajkToolTip>
-    );
-  };
-
-  renderMoreButton = () => {
-    return (
-      <HajkToolTip title="Fler inställningar">
-        <LayerButtonWrapper>
-          {this.state.toggleSettings ? (
-            <CloseIcon onClick={this.toggleSettings} />
-          ) : (
-            <MoreHorizIcon onClick={this.toggleSettings} />
-          )}
-        </LayerButtonWrapper>
-      </HajkToolTip>
-    );
-  };
-
-  isInfoEmpty() {
-    let chaptersWithLayer = this.findChapters(this.name, this.props.chapters);
-    return !(
-      this.infoCaption ||
-      this.infoUrl ||
-      this.infoOwner ||
-      this.infoText ||
-      chaptersWithLayer.length > 0
-    );
-  }
-
-  openInformative = (chapter) => (e) => {
-    this.props.onOpenChapter(chapter);
-  };
-
-  findChapters(id, chapters) {
-    let result = [];
-    if (Array.isArray(chapters)) {
-      result = chapters.reduce((chaptersWithLayer, chapter) => {
-        if (Array.isArray(chapter.layers)) {
-          if (chapter.layers.some((layerId) => layerId === id)) {
-            chaptersWithLayer = [...chaptersWithLayer, chapter];
-          }
-          if (chapter.chapters.length > 0) {
-            chaptersWithLayer = [
-              ...chaptersWithLayer,
-              ...this.findChapters(id, chapter.chapters),
-            ];
-          }
-        }
-        return chaptersWithLayer;
-      }, []);
-    }
-    return result;
-  }
-
-  renderChapterLinks(chapters) {
-    if (chapters && chapters.length > 0) {
-      let chaptersWithLayer = this.findChapters(this.name, chapters);
-      if (chaptersWithLayer.length > 0) {
-        return (
-          <InfoTextContainer>
-            <Typography>
-              Innehåll från denna kategori finns benämnt i följande kapitel i
-              översiktsplanen:
-            </Typography>
-            <StyledList>
-              {chaptersWithLayer.map((chapter, i) => {
-                return (
-                  <li key={i}>
-                    <Button
-                      size="small"
-                      onClick={this.openInformative(chapter)}
-                    >
-                      {chapter.header}
-                      <CallMadeIcon sx={{ marginLeft: 1, fontSize: "16px" }} />
-                    </Button>
-                  </li>
-                );
-              })}
-            </StyledList>
-          </InfoTextContainer>
-        );
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
-  }
-
-  toggle() {
-    this.setState({
-      open: !this.state.open,
-    });
-  }
-
-  renderInfo() {
-    if (this.infoText) {
-      return (
-        <InfoTextContainer>
-          <Typography variant="subtitle2">{this.infoTitle}</Typography>
-          <Typography
-            variant="body2"
-            dangerouslySetInnerHTML={{
-              __html: this.infoText,
-            }}
-          />
-        </InfoTextContainer>
-      );
-    } else {
-      return null;
-    }
-  }
-
-  renderMetadataLink() {
-    if (this.infoUrl) {
-      return (
-        <InfoTextContainer>
-          <Typography variant="body2" component="div" sx={{ fontWeight: 500 }}>
-            <Link href={this.infoUrl} target="_blank" rel="noopener noreferrer">
-              {this.infoUrlText || this.infoUrl}
-            </Link>
-          </Typography>
-        </InfoTextContainer>
-      );
-    } else {
-      return null;
-    }
-  }
-
-  renderOpenDataLink() {
-    if (this.infoOpenDataLink) {
-      return (
-        <InfoTextContainer>
-          <Typography variant="body2" component="div" sx={{ fontWeight: 500 }}>
-            <Link
-              href={this.infoOpenDataLink}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Öppna data: {this.caption}
-            </Link>
-          </Typography>
-        </InfoTextContainer>
-      );
-    } else {
-      return null;
-    }
-  }
-
-  renderOwner() {
-    if (this.infoOwner) {
-      return (
-        <InfoTextContainer>
-          <Typography
-            variant="body2"
-            dangerouslySetInnerHTML={{ __html: this.infoOwner }}
-          />
-        </InfoTextContainer>
-      );
-    } else {
-      return null;
-    }
-  }
-
-  renderDetails() {
-    if (this.state.infoVisible) {
-      return (
-        <div>
-          {this.renderInfo()}
-          {this.renderMetadataLink()}
-          {this.renderOpenDataLink()}
-          {this.renderOwner()}
-          <div>{this.renderChapterLinks(this.props.chapters || [])}</div>
-        </div>
-      );
-    }
-  }
-
-  toggleSettings = () => {
-    this.setState({
-      toggleSettings: !this.state.toggleSettings,
-    });
-  };
-
-  toggleInfo = () => {
-    this.setState({
-      infoVisible: !this.state.infoVisible,
-    });
-  };
-
-  renderLegendIcon() {
-    return <LegendIcon alt="Teckenförklaring" src={this.legendIcon} />;
-  }
-
-  getLayerToggler = () => {
-    const { visible } = this.state;
-    const icon = visible ? (
-      this.isBackgroundLayer ? (
-        <RadioButtonChecked />
-      ) : (
-        <CheckBoxIcon
-          sx={{
-            fill: (theme) =>
-              !this.state.zoomVisible && this.state.visible
-                ? theme.palette.warning.dark
-                : "",
-          }}
-        />
-      )
-    ) : this.isBackgroundLayer ? (
-      <RadioButtonUnchecked />
-    ) : (
-      <CheckBoxOutlineBlankIcon />
-    );
-    return (
-      <LayerTogglerButtonWrapper className="hajk-layerswitcher-layer-toggle">
-        {icon}
-      </LayerTogglerButtonWrapper>
-    );
-  };
-
-  #showAttributeTable = async () => {
-    try {
-      const url = this.props.layer.getSource().get("url").replace("wms", "wfs");
-      const { LAYERS } = this.props.layer.getSource().getParams();
-      // If URL already contains a query string part, we want to glue them together.
-      const glue = url.includes("?") ? "&" : "?";
-      const getFeatureUrl = `${url}${glue}service=WFS&version=1.0.0&request=GetFeature&typeName=${LAYERS}&maxFeatures=5000&outputFormat=application%2Fjson`;
-      const describeFeatureTypeUrl = `${url}${glue}service=WFS&version=1.0.0&request=DescribeFeatureType&typeName=${LAYERS}&outputFormat=application%2Fjson`;
-      // TODO: QGIS Server doesn't support JSON response for DescribeFeatureType. We must
-      // fetch the result as GML2 and then parse it accordingly. This will require
-      // some more work than the current approach.
-      // const describeFeatureTypeUrl = `${url}${glue}service=WFS&version=1.0.0&request=DescribeFeatureType&typeName=${LAYERS}`;
-      const r1 = await fetch(getFeatureUrl);
-      const features = await r1.json();
-      const r2 = await fetch(describeFeatureTypeUrl);
-      const description = await r2.json();
-
-      const columns = description.featureTypes
-        .find((f) => f.typeName === LAYERS) // featureTypes contains an object, where typeName will be the same as the layer name we requested
-        .properties.filter((c) => !c.type.toLowerCase().includes("gml")) // Best guess to try to filter out the geometry column, we don't want to show it
-        .map((c) => {
-          // Prepare an object that has the format of 'columns' prop for MUI's DataGrid
-          return {
-            field: c.name,
-            headerName: c.name,
-            type: c.localType === "int" ? "number" : c.localType, // DataGrid wants 'number', not 'int', see https://mui.com/components/data-grid/columns/#column-types
-            flex: 1,
-          };
-        });
-
-      const rows = features.features.map((r, i) => {
-        return { ...r.properties, id: i };
-      });
-
-      this.props.app.globalObserver.publish("core.showAttributeTable", {
-        title: `${this.caption} (${LAYERS})`,
-        content: { columns, rows },
-      });
-    } catch (error) {
-      console.error(error);
-      console.log(this);
-      this.props.enqueueSnackbar(
-        `Serverfel: attributtabellen för lagret "${this.caption}" kunde inte visas`,
-        { variant: "error" }
-      );
-    }
-  };
-
-  render() {
-    const { layer, model, app, chapters } = this.props;
-
-    const cqlFilterVisible =
-      this.props.app.config.mapConfig.map?.cqlFilterVisible || false;
-
-    if (!this.caption) {
-      return null;
-    }
-
-    if (layer.get("layerType") === "group") {
-      return (
-        <LayerGroupItem
-          appConfig={app.config.appConfig}
-          mapConfig={app.config.mapConfig}
-          layer={layer}
-          model={model}
-          options={this.props.options}
-          chapters={chapters}
-          cqlFilterVisible={cqlFilterVisible}
-          onOpenChapter={(chapter) => {
-            const informativeWindow = app.windows.find(
-              (window) => window.type === "informative"
-            );
-            informativeWindow.props.custom.open(chapter);
-          }}
-        />
-      );
-    }
-
-    return (
-      <LayerItemContainer
-        sx={{ marginLeft: this.isBackgroundLayer ? "0px" : "45px" }}
-      >
-        <LayerItemWrapper>
-          <Grid
-            wrap="nowrap"
-            alignItems="center"
-            alignContent="center"
-            container
-            onClick={this.toggleVisible.bind(this)}
-          >
-            <Grid item>{this.getLayerToggler()}</Grid>
-            {this.legendIcon && this.renderLegendIcon()}
-            <Caption
-              sx={{ fontWeight: this.state.visible ? "bold" : "normal" }}
-            >
-              {this.caption}
-            </Caption>
-          </Grid>
-          <LayerButtonsContainer className="hajk-layerswitcher-layer-buttons">
-            {layer.isFakeMapLayer ? null : (
-              <DownloadLink
-                layer={this.props.layer}
-                enableDownloadLink={
-                  this.props.app.config.mapConfig.map.enableDownloadLink
-                }
-              />
-            )}
-            {this.renderStatusButton()}
-            {this.renderInfoButton()}
-
-            {this.showAttributeTableButton && (
-              <HajkToolTip title="Visa lagrets attributtabell">
-                <LayerButtonWrapper>
-                  <TableViewIcon onClick={this.#showAttributeTable} />
-                </LayerButtonWrapper>
-              </HajkToolTip>
-            )}
-            {this.renderMoreButton()}
-          </LayerButtonsContainer>
-        </LayerItemWrapper>
-        <div>
-          {this.renderDetails()}
-          {this.state.toggleSettings &&
-          this.state.infoVisible &&
-          !this.isInfoEmpty() ? (
-            <hr />
-          ) : null}
-          {layer.isFakeMapLayer ? null : (
-            <LayerSettings
-              options={this.props.options}
-              layer={layer}
-              toggled={this.state.toggleSettings}
-              showOpacity={true}
-              showLegend={true}
-              cqlFilterVisible={cqlFilterVisible}
-            />
-          )}
-        </div>
-      </LayerItemContainer>
-    );
-  }
+            <ListItemSecondaryAction>
+              {renderStatusIcon()}
+              {isBackgroundLayer && !toggleable && !draggable ? (
+                <IconButton
+                  size="small"
+                  disableTouchRipple
+                  disableFocusRipple
+                  disableRipple
+                >
+                  <Tooltip title="Bakgrundskartan ligger låst längst ner i ritordningen">
+                    <LockOutlinedIcon />
+                  </Tooltip>
+                </IconButton>
+              ) : null}
+              {layer.isFakeMapLayer !== true && (
+                <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
+                  <KeyboardArrowRightOutlinedIcon
+                    sx={{
+                      color: (theme) => theme.palette.grey[500],
+                    }}
+                  ></KeyboardArrowRightOutlinedIcon>
+                </IconButton>
+              )}
+            </ListItemSecondaryAction>
+          </Box>
+        </ListItemButton>
+      </Box>
+      {layer.get("layerType") === "group" ||
+      layer.get("layerType") === "base" ||
+      layer.isFakeMapLayer ||
+      layer.get("layerType") === "system" ? null : (
+        <LegendImage
+          layerItemDetails={{ layer: layer }}
+          open={legendIsActive}
+          subLayerIndex={null}
+        ></LegendImage>
+      )}
+      {subLayersSection && subLayersSection}
+    </div>
+  );
 }
-
-export default withSnackbar(LayerItem);

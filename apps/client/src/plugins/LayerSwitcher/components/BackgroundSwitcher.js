@@ -3,8 +3,7 @@ import propTypes from "prop-types";
 import { isValidLayerId } from "../../../utils/Validator";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
-import LayerItem from "./LayerItem.js";
-import Observer from "react-event-observer";
+import BackgroundLayer from "./BackgroundLayer";
 import Box from "@mui/material/Box";
 
 const WHITE_BACKROUND_LAYER_ID = "-1";
@@ -31,7 +30,6 @@ class BackgroundSwitcher extends React.PureComponent {
   };
   constructor(props) {
     super(props);
-    this.localObserver = Observer();
     if (props.enableOSM) {
       this.osmSource = new OSM({
         reprojectionErrorThreshold: 5,
@@ -48,6 +46,10 @@ class BackgroundSwitcher extends React.PureComponent {
           caption: "OpenStreetMap",
           layerType: "base",
         },
+      });
+      this.osmLayer.on("change:visible", (e) => {
+        // Publish event to ensure DrawOrder tab is updated with osmLayer changes
+        this.props.app.globalObserver.publish("core.layerVisibilityChanged", e);
       });
     }
   }
@@ -169,6 +171,7 @@ class BackgroundSwitcher extends React.PureComponent {
         properties: {
           name: config.name,
           visible: checked,
+          caption: config.caption,
           layerInfo: {
             caption: config.caption,
             name: config.name,
@@ -188,19 +191,16 @@ class BackgroundSwitcher extends React.PureComponent {
       };
     }
 
-    // No matter the type of 'mapLayer', we want to append these
-    // properties:
-    mapLayer["localObserver"] = this.localObserver;
-
     // Finally, let's render the component
     return (
-      <LayerItem
+      <BackgroundLayer
         key={index}
         layer={mapLayer}
         model={this.props.model}
-        options={this.props.options}
         app={this.props.app}
-      />
+        draggable={false}
+        toggleable={true}
+      ></BackgroundLayer>
     );
   }
 

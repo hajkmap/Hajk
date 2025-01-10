@@ -1,43 +1,31 @@
-import React from "react";
-import { styled } from "@mui/material/styles";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
-import Input from "@mui/material/Input";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import { Vector as VectorLayer } from "ol/layer";
-import { hfetch } from "../../../utils/FetchWrapper";
+import React, { useState, useEffect, useCallback } from "react";
 
-const StyledFormControl = styled(FormControl)(({ theme }) => ({
-  margin: theme.spacing(1),
-  minWidth: 120,
-}));
+import {
+  Button,
+  Chip,
+  Input,
+  MenuItem,
+  Select,
+  Typography,
+  Stack,
+} from "@mui/material";
 
-const StyledTypography = styled(Typography)(({ theme }) => ({
-  fontWeight: 500,
-}));
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
-class VectorFilter extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      filterAttribute: props.layer.get("filterAttribute") || "",
-      filterValue: props.layer.get("filterValue") || "",
-      filterComparer: props.layer.get("filterComparer") || "",
-      layerProperties: [],
-    };
-    this.loadFeatureInfo();
-  }
+import { hfetch } from "utils/FetchWrapper";
+
+function VectorFilter({ layer }) {
+  const [filterAttribute, setFilterAttribute] = useState("");
+  const [filterValue, setFilterValue] = useState("");
+  const [filterComparer, setFilterComparer] = useState("");
+  const [currentFilter, setCurrentFilter] = useState("");
+  const [layerProperties, setLayerProperties] = useState([]);
 
   /**
-   * @summary Prepare entries for dropdown, will contain possible values for filterAttribute.
-   *
-   * @memberof VectorFilter
+   * Prepare entries for dropdown, will contain possible values for filterAttribute.
    */
-  loadFeatureInfo = () => {
-    const { url, featureType } = this.props.layer.getProperties();
+  const loadFeatureInfo = useCallback(() => {
+    const { url, featureType } = layer.getProperties();
     hfetch(
       url +
         `?service=WFS&request=describeFeatureType&outputFormat=application/json&typename=${featureType}`
@@ -50,74 +38,156 @@ class VectorFilter extends React.PureComponent {
           const layerProperties = featureTypeInfo.properties
             .filter((property) => property.type !== "gml:Geometry")
             .map((property) => property.name);
-          this.setState({
-            layerProperties,
-          });
+          setLayerProperties(layerProperties);
         }
       });
     });
-  };
+  }, [layer, setLayerProperties]);
 
-  handleChange = (e) => {
-    this.setState({
-      [e.target.name]: e.target.value,
-    });
+  /**
+   * Load filter options from layer and set state.
+   */
+  useEffect(() => {
+    setFilterAttribute(layer.get("filterAttribute") || "");
+    setFilterValue(layer.get("filterValue") || "");
+    setFilterComparer(layer.get("filterComparer") || "");
+    if (
+      layer.get("filterAttribute") &&
+      layer.get("filterComparer") &&
+      layer.get("filterValue")
+    ) {
+      setCurrentFilter(
+        `${layer.get("filterAttribute")} ${translateComparer(
+          layer.get("filterComparer")
+        )} ${layer.get("filterValue")}`
+      );
+    } else {
+      setCurrentFilter("");
+    }
+    loadFeatureInfo();
+  }, [layer, loadFeatureInfo]);
+
+  /**
+   * Translates the comparer to a more human readable format
+   **/
+  const translateComparer = (comparer) => {
+    switch (comparer) {
+      case "gt":
+        return ">";
+      case "lt":
+        return "<";
+      case "eq":
+        return "=";
+      case "not":
+        return "≠";
+      default:
+        return comparer;
+    }
   };
 
   /**
-   * @summary Reads filter options from state, applies them on layer and refreshes the source.
-   *
-   * @memberof VectorFilter
+   * Handles change of filter options
    */
-  setFilter = (e) => {
-    this.props.layer.set("filterAttribute", this.state.filterAttribute);
-    this.props.layer.set("filterComparer", this.state.filterComparer);
-    this.props.layer.set("filterValue", this.state.filterValue);
-
-    this.props.layer.getSource().refresh();
+  const handleChange = (e, type) => {
+    switch (type) {
+      case "attribute":
+        setFilterAttribute(e.target.value);
+        break;
+      case "comparer":
+        setFilterComparer(e.target.value);
+        break;
+      case "value":
+        setFilterValue(e.target.value);
+        break;
+      default:
+        break;
+    }
   };
 
   /**
-   * @ Resets the UI to no filter and reloads the source
-   *
-   * @memberof VectorFilter
+   * Reads filter options from state, applies them on layer and refreshes the source.
    */
-  resetFilter = (e) => {
+  const setFilter = () => {
+    layer.set("filterAttribute", filterAttribute);
+    layer.set("filterComparer", filterComparer);
+    layer.set("filterValue", filterValue);
+
+    setCurrentFilter(
+      `${filterAttribute} ${translateComparer(filterComparer)} ${filterValue}`
+    );
+
+    layer.getSource().refresh();
+  };
+
+  /**
+   * Resets the UI to no filter and reloads the source
+   */
+  const resetFilter = () => {
     // Reset the UI
-    this.setState({
-      filterAttribute: "",
-      filterValue: "",
-      filterComparer: "",
-    });
+    setCurrentFilter("");
+    setFilterAttribute("");
+    setFilterComparer("");
+    setFilterValue("");
 
     // Reset filter options on layer
-    this.props.layer.set("filterAttribute", "");
-    this.props.layer.set("filterComparer", "");
-    this.props.layer.set("filterValue", "");
+    layer.set("filterAttribute", "");
+    layer.set("filterComparer", "");
+    layer.set("filterValue", "");
 
     // Refresh source
-    this.props.layer.getSource().refresh();
+    layer.getSource().refresh();
   };
 
-  render() {
-    const { layer } = this.props;
-    if (layer instanceof VectorLayer) {
-      return (
+  /**
+   * Enables the activate button if both attribute and comparer are set.
+   */
+  const enableActivateButton = () => {
+    if (filterAttribute !== "" && filterComparer !== "") {
+      return true;
+    }
+    return false;
+  };
+
+  return (
+    <>
+      {currentFilter ? (
+        <Chip
+          label={currentFilter}
+          variant="outlined"
+          size="large"
+          sx={{
+            width: "100%",
+            justifyContent: "space-between",
+          }}
+          onDelete={() => setCurrentFilter("")}
+          deleteIcon={<EditOutlinedIcon />}
+        />
+      ) : (
         <>
-          <StyledTypography variant="subtitle2">
-            Filtrera innehåll baserat på attribut
-          </StyledTypography>
-          <StyledFormControl>
-            <InputLabel htmlFor="attribute">Attribut</InputLabel>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Typography
+              sx={{ flexGrow: 1, flexBasis: "25%" }}
+              variant="subtitle2"
+            >
+              Attribut
+            </Typography>
             <Select
-              value={this.state.filterAttribute}
-              onChange={this.handleChange}
+              value={filterAttribute}
+              onChange={(e) => handleChange(e, "attribute")}
+              placeholder="Välj attribut"
+              size="small"
+              displayEmpty
+              fullWidth
               inputProps={{
                 name: "filterAttribute",
+                placeholder: "Välj attributet",
                 id: "attribute",
               }}
             >
-              {this.state.layerProperties.map((property, i) => {
+              <MenuItem key={-1} value={""}>
+                Välj attribut
+              </MenuItem>
+              {layerProperties.map((property, i) => {
                 return (
                   <MenuItem key={i} value={property}>
                     {property}
@@ -125,45 +195,71 @@ class VectorFilter extends React.PureComponent {
                 );
               })}
             </Select>
-          </StyledFormControl>
-          <StyledFormControl>
-            <InputLabel htmlFor="comparer">Jämförare</InputLabel>
+          </Stack>
+          <Stack direction="row" spacing={2} alignItems="center" sx={{ pt: 1 }}>
+            <Typography
+              sx={{ flexGrow: 1, flexBasis: "25%" }}
+              variant="subtitle2"
+            >
+              Operator
+            </Typography>
             <Select
-              value={this.state.filterComparer}
-              onChange={this.handleChange}
+              value={filterComparer}
+              onChange={(e) => handleChange(e, "comparer")}
+              displayEmpty
+              size="small"
+              fullWidth
               inputProps={{
                 name: "filterComparer",
                 id: "comparer",
               }}
             >
+              <MenuItem value={""}>Välj operator</MenuItem>
               <MenuItem value="gt">Större än</MenuItem>
               <MenuItem value="lt">Mindre än</MenuItem>
               <MenuItem value="eq">Lika med</MenuItem>
               <MenuItem value="not">Skilt från</MenuItem>
             </Select>
-          </StyledFormControl>
-          <StyledFormControl>
+          </Stack>
+          <Stack direction="row" spacing={2} alignItems="center" sx={{ pt: 1 }}>
+            <Typography
+              sx={{ flexGrow: 1, flexBasis: "25%" }}
+              variant="subtitle2"
+            >
+              Värde
+            </Typography>
             <Input
-              value={this.state.filterValue}
-              onChange={this.handleChange}
+              value={filterValue}
+              onChange={(e) => handleChange(e, "value")}
               placeholder="Filtervärde"
+              fullWidth
+              size="small"
               inputProps={{
                 name: "filterValue",
                 "aria-label": "Värde",
               }}
             />
-          </StyledFormControl>
-
-          <Button variant="contained" color="primary" onClick={this.setFilter}>
-            Aktivera
-          </Button>
-          <Button onClick={this.resetFilter}>Återställ</Button>
+          </Stack>
+          <Stack
+            direction="row"
+            spacing={2}
+            justifyContent="end"
+            sx={{ pt: 2 }}
+          >
+            <Button onClick={resetFilter}>Återställ</Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={setFilter}
+              disabled={!enableActivateButton()}
+            >
+              Aktivera
+            </Button>
+          </Stack>
         </>
-      );
-    } else {
-      return null;
-    }
-  }
+      )}
+    </>
+  );
 }
 
 export default VectorFilter;
