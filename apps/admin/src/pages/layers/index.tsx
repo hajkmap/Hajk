@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Grid from "@mui/material/Grid2";
 import { Button, IconButton, Menu, MenuItem, Box } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { Layer, useLayers } from "../../api/layers";
+import { useServices } from "../../api/services";
 import { useNavigate } from "react-router";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import useAppStateStore from "../../store/use-app-state-store";
@@ -24,7 +25,21 @@ export default function LayersPage() {
   const navigate = useNavigate();
   const language = useAppStateStore((state) => state.language);
   const [open, setOpen] = useState<boolean>(false);
+  const { data: services } = useServices();
 
+  const processedLayers = useMemo(() => {
+    if (!layers || !services) return [];
+    return layers.map((layer) => {
+      const service = services.find(
+        (service) => service.id === layer.serviceId
+      );
+      return {
+        ...layer,
+        type: service?.type ?? "",
+        url: service?.url ?? "",
+      };
+    });
+  }, [layers, services]);
   const handleClose = () => {
     setOpen(false);
   };
@@ -180,19 +195,20 @@ export default function LayersPage() {
                   cursor: "pointer",
                 },
               }}
-              rows={layers ?? []}
+              rows={processedLayers ?? []}
+              getRowId={(row) => row.id}
               columns={[
                 {
-                  field: "serviceType",
+                  field: "type",
                   flex: 0.3,
                   headerName: t("common.serviceType"),
                 },
                 {
                   field: "name",
-                  flex: 1,
+                  flex: 0.3,
                   headerName: t("common.name"),
                 },
-                { field: "url", flex: 0.3, headerName: "Url" },
+                { field: "url", flex: 1, headerName: "Url" },
                 {
                   field: "usedInMaps",
                   flex: 0.3,
@@ -229,7 +245,6 @@ export default function LayersPage() {
                   },
                 },
               }}
-              getRowId={(row) => row.id}
               hideFooterPagination={layers && layers.length < 10}
               pageSizeOptions={[10, 25, 50, 100]}
               disableRowSelectionOnClick

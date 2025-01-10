@@ -1,6 +1,8 @@
 export interface Layer {
   id: string;
   name: string;
+  locked: boolean;
+  serviceId: string;
   options: Record<string, string>;
 }
 
