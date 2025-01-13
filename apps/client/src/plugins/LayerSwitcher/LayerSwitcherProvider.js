@@ -254,9 +254,7 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
         .getAllLayers()
         .filter(
           (l) =>
-            l.get("visible") === true &&
-            l.get("layerType") !== "base" &&
-            l.get("layerType") !== "system"
+            l.get("layerType") !== "base" && l.get("layerType") !== "system"
         )
         .map((l) => l.set(QUICK_ACCESS_KEY, false));
     },

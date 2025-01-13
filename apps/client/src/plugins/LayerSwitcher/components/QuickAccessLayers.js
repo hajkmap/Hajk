@@ -35,6 +35,11 @@ export default function QuickAccessLayers({
     return null;
   }, []);
 
+  // Should the search affect QuickAccess? It's simpler without.
+  // Kind of defeat the purpose of quick access if you have so many layers in
+  // it that you have to search.
+  // So for now the search hides quick access.
+  //
   // A helper that grabs all OL layers with state quickAccess
   const getQuickAccessLayers = useCallback(() => {
     // Get all quickaccess layers
