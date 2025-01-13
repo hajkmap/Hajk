@@ -7,6 +7,7 @@ import React, {
   useMemo,
 } from "react";
 
+import { Vector as VectorLayer } from "ol/layer";
 import LayerSwitcherView from "./LayerSwitcherView.js";
 import { useLayerZoomWarningSnackbar } from "./useLayerZoomWarningSnackbar";
 
@@ -172,16 +173,19 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
       olLayer.setVisible(visible);
 
-      if (visible) {
-        // For GroupLayers:
-        const allSubLayers = staticLayerConfig[layerId]?.allSubLayers;
-        if (allSubLayers) {
-          olLayer.set("subLayers", allSubLayers);
-          setOLSubLayers(olLayer, allSubLayers);
+      // VectorLayers have no sublayers.
+      if (!(olLayer instanceof VectorLayer)) {
+        if (visible) {
+          // For GroupLayers:
+          const allSubLayers = staticLayerConfig[layerId]?.allSubLayers;
+          if (allSubLayers) {
+            olLayer.set("subLayers", allSubLayers);
+            setOLSubLayers(olLayer, allSubLayers);
+          }
+        } else {
+          olLayer.set("subLayers", []);
+          setOLSubLayers(olLayer, []);
         }
-      } else {
-        olLayer.set("subLayers", []);
-        setOLSubLayers(olLayer, []);
       }
     },
     setSubLayerVisibility(layerId, subLayerId, visible) {
