@@ -72,22 +72,23 @@ const BackgroundSwitcher = ({
   const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   const osmLayerRef = useRef(
-    enableOSM &&
-      new TileLayer({
-        visible: false,
-        source: new OSM({
-          reprojectionErrorThreshold: 5,
-        }),
-        zIndex: -1,
-        layerType: "base",
-        rotateMap: "n", // OpenStreetMap should be rotated to North
-        name: "osm-layer",
-        caption: "OpenStreetMap",
-        layerInfo: {
-          caption: "OpenStreetMap",
+    enableOSM
+      ? new TileLayer({
+          visible: false,
+          source: new OSM({
+            reprojectionErrorThreshold: 5,
+          }),
+          zIndex: -1,
           layerType: "base",
-        },
-      })
+          rotateMap: "n", // OpenStreetMap should be rotated to North
+          name: "osm-layer",
+          caption: "OpenStreetMap",
+          layerInfo: {
+            caption: "OpenStreetMap",
+            layerType: "base",
+          },
+        })
+      : null
   );
 
   useEffect(() => {
@@ -153,7 +154,7 @@ const BackgroundSwitcher = ({
       );
 
       // Reset to no layer showing
-      osmLayerRef.current.setVisible(false);
+      osmLayerRef?.current?.setVisible(false);
 
       if (isSpecialBackgroundLayer(newSelectedId)) {
         // Undefined means Set all layers to invisible.
