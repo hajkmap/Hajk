@@ -269,11 +269,6 @@ const LayerGroup = ({
         {children?.map((child) => {
           const layerId = child.id;
 
-          if (filterHits && !filterHits.has(layerId)) {
-            // The filter is active and this layer is not a hit.
-            return null;
-          }
-
           const layerState = layersState[layerId];
 
           const layerSettings = staticLayerConfig[layerId];
@@ -282,6 +277,9 @@ const LayerGroup = ({
           }
 
           if (layerSettings.layerType === "group") {
+            // The LayerGroup components check the filter to see if it should
+            // display itself or not. So we always have to render it regardless
+            // of the filter.
             return (
               <LayerGroup
                 expanded={groupsExpanded === layerId}
@@ -294,6 +292,11 @@ const LayerGroup = ({
                 filterValue={filterValue}
               />
             );
+          }
+
+          if (filterHits && !filterHits.has(layerId)) {
+            // The filter is active and this layer is not a hit.
+            return null;
           }
 
           return layerSettings.layerType === "groupLayer" ? (
