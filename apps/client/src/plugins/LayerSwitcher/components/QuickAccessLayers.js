@@ -106,7 +106,7 @@ export default function QuickAccessLayers({
           layerIsFakeMapLayer: l.isFakeMapLayer,
           layerMinZoom: l.get("minZoom"),
           layerMaxZoom: l.get("maxZoom"),
-          numberOfSubLayers: l.subLayers.length,
+          numberOfSubLayers: l.subLayers?.length || 0,
           layerInfo: l.get("layerInfo"),
           layerLegendIcon: l.get("legendIcon"),
         };
