@@ -276,7 +276,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
                 allSubLayers: l.get("subLayers"),
                 layerMinZoom: l.get("minZoom"),
                 layerMaxZoom: l.get("maxZoom"),
-                numberOfSubLayers: l.subLayers.length,
+                numberOfSubLayers: l.subLayers?.length,
                 layerInfo: l.get("layerInfo"),
                 layerLegendIcon: l.get("legendIcon"),
               };
