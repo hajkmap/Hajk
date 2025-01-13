@@ -158,9 +158,10 @@ const LayerGroup = ({
 
   const groupName = groupConfig.caption;
   const name = groupConfig.caption;
+
   const groupIsFiltered = groupConfig.isFiltered;
-  const groupIsExpanded = groupConfig.isExpanded;
-  const groupIsToggable = groupConfig.toggled;
+  const groupIsExpanded = staticGroupTree.defaultExpanded;
+  const groupIsToggable = staticGroupTree.groupIsToggable;
 
   const infogrouptitle = groupConfig.infogrouptitle;
   const infogrouptext = groupConfig.infogrouptext;
@@ -180,7 +181,6 @@ const LayerGroup = ({
   // hasFilterHits === null means that the filter isn't active
   const hasNoFilterHits = filterHitsInGroup && filterHitsInGroup?.size === 0;
   const filterActiveAndHasHits = filterHits && !hasNoFilterHits;
-  // console.log({ name, hasNoFilterHits, filterHitsInGroup, filterHits });
   if (hasNoFilterHits) {
     return null;
   }

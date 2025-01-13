@@ -348,6 +348,9 @@ const buildLayerTree = (groups, olLayerMap) =>
       name: olLayerMap[group.id]?.get("caption") ?? group.name,
       subLayers: olLayerMap[group.id]?.get("subLayers"),
       children: children?.length === 0 ? undefined : children,
+      groupIsToggable: group.toggled,
+      defaultExpanded: group.expanded,
+      parent: group.parent,
     };
   });
 
