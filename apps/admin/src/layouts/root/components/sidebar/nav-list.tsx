@@ -1,5 +1,10 @@
 import { Box, List, useTheme } from "@mui/material";
-import { SIDEBAR_MENU, SIDEBAR_MINI_WIDTH } from "../../constants";
+import {
+  SIDEBAR_MENU,
+  SIDEBAR_MINI_WIDTH,
+  HEADER_HEIGHT,
+  SIDEBAR_WIDTH,
+} from "../../constants";
 import LockButton from "./lock-button";
 import NavItem from "./nav-item";
 import CollapsibleNavItem from "./collapsible-nav-item";
@@ -30,14 +35,20 @@ const NavList = (props: Props) => {
       component="nav"
       sx={{
         position: "relative",
-        height: "100vh",
+        height: `calc(100vh - ${HEADER_HEIGHT}px)`,
         backgroundColor:
           theme.palette.mode === "light"
             ? theme.palette.background.default
             : "",
       }}
     >
-      <List sx={{ p: 0 }}>
+      <List
+        sx={{
+          p: 0,
+          maxHeight: `calc(100vh - ${HEADER_HEIGHT}px - ${SIDEBAR_MINI_WIDTH}px)`,
+          overflowY: "auto",
+        }}
+      >
         {SIDEBAR_MENU.map((menuItem, index) => {
           return menuItem.collapsible ? (
             <CollapsibleNavItem
@@ -65,8 +76,8 @@ const NavList = (props: Props) => {
         sx={{
           position: "absolute",
           left: "0px",
-          bottom: `${SIDEBAR_MINI_WIDTH}px`,
-          width: "100%",
+          bottom: "0px",
+          width: `${SIDEBAR_WIDTH}px`,
           display: "flex",
         }}
       >
