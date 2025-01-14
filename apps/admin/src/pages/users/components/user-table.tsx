@@ -8,11 +8,9 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  useTheme,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { useDebounce } from "use-debounce";
 
@@ -21,13 +19,20 @@ import { useDeleteUser, useUsers } from "../../../api/users/hooks";
 import useAppStateStore from "../../../store/use-app-state-store";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../../i18n/translations/datagrid/sv";
 import UserListFilterPanel from "./user-list-filter-panel";
+import { useToastifyOptions } from "../../../lib/toastify-helper";
 
 const PAGE_SIZE = 5;
 
 export default function UserTable() {
   const language = useAppStateStore((state) => state.language);
   const { t } = useTranslation();
-  const { palette } = useTheme();
+
+  const getToastifyOptions = useToastifyOptions();
+  const toastifyOptions = getToastifyOptions(
+    "user.deleteUserFailed",
+    "user.deleteUserSuccess"
+  );
+
   const { data: users, isLoading: usersLoading } = useUsers();
 
   const [searchString, setSearchString] = useState("");
@@ -80,21 +85,7 @@ export default function UserTable() {
   ];
 
   const handleDeleteUserConfirmationClick = () => {
-    deleteUserMutation.mutate(userToDelete?.id ?? "", {
-      onError: () =>
-        toast.error(t("user.deleteUserFailed"), {
-          position: "bottom-left",
-          theme: palette.mode,
-          hideProgressBar: true,
-        }),
-      onSuccess: () => {
-        toast.success(t("user.deleteUserSuccess"), {
-          position: "bottom-left",
-          theme: palette.mode,
-          hideProgressBar: true,
-        });
-      },
-    });
+    deleteUserMutation.mutate(userToDelete?.id ?? "", toastifyOptions);
     setUserToDelete(null);
   };
 
