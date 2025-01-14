@@ -51,7 +51,7 @@ function ControlledAccordion({
       }}
     >
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="h6">{title}</Typography>
+        <Typography>{title}</Typography>
       </AccordionSummary>
       <AccordionDetails sx={{ pl: 0, pb: 0 }}>{children}</AccordionDetails>
     </Accordion>

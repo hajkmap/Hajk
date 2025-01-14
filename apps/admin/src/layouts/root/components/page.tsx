@@ -63,11 +63,9 @@ const Page = (props: Props) => {
         width: "100%",
       }}
     >
-      <Grid container spacing={2}>
+      <Grid container spacing={2} sx={{ mb: "1.8rem" }}>
         <Grid container size="auto">
-          <Typography variant="h3" sx={{ fontWeight: "300" }}>
-            {props.title}
-          </Typography>
+          <Typography variant="h1">{props.title}</Typography>
         </Grid>
         <Grid container size="grow" alignContent="center" justifyContent="end">
           {props.actionButtons}
