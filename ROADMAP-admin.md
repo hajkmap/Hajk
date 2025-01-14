@@ -1,5 +1,9 @@
 # ROADMAP admin
 
+## List of sprints
+
+- [2025-01-31](#2025-01-31)
+
 ## 2025-01-31
 
 - [ ] Authentication and authorization
@@ -30,10 +34,10 @@
   - [ ] Use page width better. 1024? 2048?
 - [ ] Upgrade npm packages
 
-### [Roles]
+### Roles
 
-We have blabla roles
+_TODO: Document roles used in Hajk._
 
-### For test after 2025-01-31
+### Ready for testing after [2025-01-31](#2025-01-31)
 
-- [ ] (Example) Test authentication blabla
+- [ ] (Example) Test authentication
