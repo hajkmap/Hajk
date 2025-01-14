@@ -13,17 +13,17 @@
 - [ ] Services API
   - [ ] Update prisma schema
   - [ ] Update seed script
-  - [ ] Update zod parsers
+  - [ ] Update zod parsers(AA)
   - [ ] Update API methods
 - [ ] Layers API
   - [ ] Update prisma schema
   - [ ] Update seed script
   - [ ] Update zod parsers
-  - [ ] Update API methods
+  - [ ] Update API methods (AA)
 - [ ] Services page
-  - [ ] Add service
-  - [ ] Alter service
-  - [ ] Remove service
+  - [x] Add service (AA)
+  - [x] Alter service (AA)
+  - [x] Remove service (AA)
 - [ ] Layers page
   - [ ] Add layer
   - [ ] Alter layer
@@ -41,3 +41,4 @@ _TODO: Document roles used in Hajk._
 ### Ready for testing after [2025-01-31](#2025-01-31)
 
 - [ ] (Example) Test authentication
+- [ ] Test adding, updating and deleting a new service
