@@ -7,13 +7,12 @@ import {
   Paper,
   TextField,
   Typography,
-  useTheme,
 } from "@mui/material";
-import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 
 import { useCreateLocalUser } from "../../../api/users/hooks";
+import { useToastifyOptions } from "../../../lib/toastify-helper";
 
 interface CreateUserInput {
   email: string;
@@ -24,7 +23,12 @@ interface CreateUserInput {
 
 export default function CreateUserForm() {
   const { t } = useTranslation();
-  const { palette } = useTheme();
+
+  const getToastifyOptions = useToastifyOptions();
+  const toastifyOptions = getToastifyOptions(
+    "user.createUserFailed",
+    "user.createUserSuccess"
+  );
 
   const createUserMutation = useCreateLocalUser();
 
@@ -45,18 +49,9 @@ export default function CreateUserForm() {
         user: {},
       },
       {
-        onError: () =>
-          toast.error(t("user.createUserFailed"), {
-            position: "bottom-left",
-            theme: palette.mode,
-            hideProgressBar: true,
-          }),
+        onError: toastifyOptions.onError,
         onSuccess: () => {
-          toast.success(t("user.createUserSuccess"), {
-            position: "bottom-left",
-            theme: palette.mode,
-            hideProgressBar: true,
-          });
+          toastifyOptions.onSuccess();
           reset();
         },
       }
