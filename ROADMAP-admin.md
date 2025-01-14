@@ -24,7 +24,7 @@
   - [ ] Add layer
   - [ ] Alter layer
   - [ ] Remove layer
-- [ ] General UI improvements
+- [ ] General UI improvements (JA)
   - [ ] Add form container (group)
   - [ ] Improve accordion contrast
   - [ ] Use page width better. 1024? 2048?
