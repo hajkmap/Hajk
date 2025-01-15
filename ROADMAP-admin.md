@@ -32,7 +32,7 @@
   - [ ] Add form container (group)
   - [ ] Improve accordion contrast
   - [ ] Use page width better. 1024? 2048?
-- [ ] Upgrade npm packages
+- [ ] Upgrade npm packages (JW)
 
 ### Roles
 
