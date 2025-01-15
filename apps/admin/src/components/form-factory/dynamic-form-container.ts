@@ -77,7 +77,20 @@ class DynamicFormContainer<TFieldValues extends FieldValues> {
     return this.formItems;
   }
 
+  getFormInputs(): FormElement<TFieldValues>[] {
+    return this.formItems.reduce((acc, element) => {
+      if (
+        element.kind === "DynamicInputSettings" ||
+        element.kind === "CustomInputSettings"
+      ) {
+        acc.push(element); // Push the element to the acc array
+      }
+      return acc; // Return the updated acc array
+    }, [] as FormElement<TFieldValues>[]);
+  }
+
   getDefaultValues(): Record<string, unknown> {
+    // console.log(this.getFormInputs());
     return this.formItems.reduce((acc, element) => {
       if (element instanceof DynamicFormContainer) {
         // If the element is a nested container, recursively get its default values

@@ -15,16 +15,19 @@ import CONTAINER_TYPE from "./types/container-types";
 import STATIC_TYPE from "./types/static-type";
 import HelpIcon from "@mui/icons-material/Help";
 import HajkTooltip from "../hajk-tooltip";
+import CustomInputSettings from "./types/custom-input-settings";
 
 interface FormRenderProps<TFieldValues extends FieldValues> {
-  data: DynamicFormContainer<TFieldValues>;
+  formControls: DynamicFormContainer<TFieldValues>;
+  formFields: Record<string, unknown>;
   register: UseFormRegister<TFieldValues>;
   control: Control<TFieldValues>;
   errors: FieldErrors<TFieldValues>;
 }
 
 const FormRenderer = <TFieldValues extends FieldValues>({
-  data,
+  formControls,
+  formFields,
   register,
   control,
   errors,
@@ -70,6 +73,12 @@ const FormRenderer = <TFieldValues extends FieldValues>({
       item.kind === "DynamicInputSettings" ||
       item.kind === "CustomInputSettings"
     ) {
+      const castedItem = item as
+        | DynamicInputSettings<TFieldValues>
+        | CustomInputSettings<TFieldValues>;
+      if (castedItem.visibleIf) {
+        // console.log("Hej", item);
+      }
       return wrapInGrid(item, index, {}, renderDynamicInputComponent);
     } else if (item.kind === "StaticElement") {
       return renderStaticElement(item as StaticElement, index);
@@ -126,15 +135,43 @@ const FormRenderer = <TFieldValues extends FieldValues>({
       </Box>
     );
   };
+  const getValuesString = (
+    container: DynamicFormContainer<TFieldValues>
+  ): string => {
+    if (!formFields) {
+      return "";
+    }
+    const values: string[] = [];
+
+    container.getFormInputs().forEach((item) => {
+      if (
+        item.kind === "DynamicInputSettings" ||
+        item.kind === "CustomInputSettings"
+      ) {
+        const castedItem = item as
+          | DynamicInputSettings<TFieldValues>
+          | CustomInputSettings<TFieldValues>;
+
+        const value = formFields[castedItem.name];
+        if (value) {
+          values.push(value as string);
+        }
+      }
+    });
+
+    return values.join(", ");
+  };
 
   const renderContainerAccordion = (
     container: DynamicFormContainer<TFieldValues>,
     index: number
   ) => {
     const key = getKey(index);
+    const valuesAsString = getValuesString(container);
 
     return (
       <ControlledAccordion
+        values={valuesAsString}
         title={container.title}
         key={key + "-accordion"}
         triggerExpanded={!!container.props?.triggerExpanded}
@@ -193,6 +230,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     if (type === CONTAINER_TYPE.PANEL) {
       return renderContainerPanel(container, index);
     } else if (type === CONTAINER_TYPE.ACCORDION) {
+      // If the Accordion contains a required field, add a * to the title.
       const containsRequiredFields =
         container.getElements().filter((item) => {
           if (item.kind === "DynamicInputSettings") {
@@ -235,16 +273,11 @@ const FormRenderer = <TFieldValues extends FieldValues>({
       container
       sx={{
         ml: -2,
-        "& .MuiInputBase-root": {
-          backgroundColor: "background.default",
-        },
-        "& .MuiRadio-root > span:first-of-type": {
-          backgroundColor: "background.default",
-          borderRadius: "50%",
-        },
       }}
     >
-      {data?.getElements().map((item, index) => renderFormElement(item, index))}
+      {formControls
+        ?.getElements()
+        .map((item, index) => renderFormElement(item, index))}
     </Grid>
   );
 };

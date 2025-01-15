@@ -89,8 +89,11 @@ export default function SettingsForm() {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors, dirtyFields },
   } = DefaultUseForm(defaultValues);
+
+  const formFields = watch();
 
   const onSubmit = createOnSubmitHandler({
     handleSubmit,
@@ -107,7 +110,8 @@ export default function SettingsForm() {
   return (
     <form onSubmit={onSubmit}>
       <FormRenderer
-        data={settingsContainerData}
+        formControls={settingsContainerData}
+        formFields={formFields}
         register={register}
         control={control}
         errors={errors}

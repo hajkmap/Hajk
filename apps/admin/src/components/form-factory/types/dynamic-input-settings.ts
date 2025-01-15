@@ -18,6 +18,7 @@ class DynamicInputSettings<TFieldValues extends FieldValues> {
   public optionList?: { title: string; value: unknown }[];
   public kind? = "DynamicInputSettings";
   public disabled? = false;
+  public visibleIf?: { name: string; value: string };
 }
 
 new DynamicInputSettings();

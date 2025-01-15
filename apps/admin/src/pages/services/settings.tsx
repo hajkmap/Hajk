@@ -362,7 +362,8 @@ export default function ServiceSettings() {
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer
-            data={formServiceData}
+            formControls={serviceSettingsFormContainer}
+            formFields={currentValues}
             register={register}
             control={control}
             errors={errors}

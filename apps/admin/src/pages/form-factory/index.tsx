@@ -132,6 +132,15 @@ export default function FormFactoryPage() {
     ],
   });
 
+  formContainer.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 6,
+    name: "visibleIfSelectTestHasValue3",
+    title: "Option 3 textfield",
+    defaultValue: "",
+    visibleIf: { name: "selectTest", value: "3" },
+  });
+
   formContainer.addStaticElement({
     type: STATIC_TYPE.SPACER,
     gridColumns: 6,
@@ -295,7 +304,8 @@ export default function FormFactoryPage() {
     <Page title={"Form factory"}>
       <form onSubmit={onSubmit}>
         <FormRenderer
-          data={formContainerData}
+          formControls={formContainerData}
+          formFields={formFields}
           register={register}
           control={control}
           errors={errors}
