@@ -9,7 +9,7 @@
 - [ ] Authentication and authorization
   - [x] Basic authentication (local user and pass)
   - [ ] Authentication against Azure Entra (HH)
-  - [ ] [Roles](#Roles)
+  - [ ] [Roles](#roles)
 - [ ] Services API
   - [ ] Update prisma schema
   - [ ] Update seed script
