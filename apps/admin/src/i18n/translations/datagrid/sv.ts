@@ -41,6 +41,7 @@ export const GRID_SWEDISH_LOCALE_TEXT: GridLocaleText = {
   columnsManagementNoColumns: "Inga kolumner",
   columnsManagementShowHideAllText: "Visa/Dölj alla",
   columnsManagementReset: "Återställ",
+  columnsManagementDeleteIconLabel: "Ta bort",
 
   // Filter panel text
   filterPanelAddFilter: "Lägg till filter",
