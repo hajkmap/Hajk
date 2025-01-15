@@ -27,7 +27,6 @@ function BackgroundLayerItem({
   // WmsLayer load status, shows warning icon if !ok
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
 
-  // console.log("loadStatus", layer.get("wmsLoadStatus"));
   useEffect(() => {
     const handleLoadStatusChange = (d) => {
       if (wmsLayerLoadStatus !== "loaderror" && layer.get("name") === d.id) {

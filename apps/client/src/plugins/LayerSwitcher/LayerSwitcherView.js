@@ -19,6 +19,8 @@ const StyledAppBar = styled(AppBar)(() => ({
   top: -10,
 }));
 
+const DEFAULT_MIN_FILTER_LENGTH = 3;
+
 /**
  * BreadCrumbs are a feature used to "link" content between LayerSwitcher
  * and Informative plugins. They get rendered directly to #map, as they
@@ -92,6 +94,9 @@ class LayersSwitcherView extends React.PureComponent {
       visible: l["visible"],
       zIndex: l["zIndex"],
     }));
+
+    this.minFilterLength =
+      this.options?.layerFilterMinLength ?? DEFAULT_MIN_FILTER_LENGTH;
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
@@ -185,14 +190,11 @@ class LayersSwitcherView extends React.PureComponent {
 
   // Handles filter functionality
   handleFilterValueChange = debounce((value) => {
-    const DEFAULT_MIN_FILTER_LENGTH = 3;
-    const minFilterLength =
-      this.options?.layerFilterMinLength ?? DEFAULT_MIN_FILTER_LENGTH;
     const filterValue = value === "" ? null : value;
 
     if (value === "") {
       this.setState({ filterValue: null });
-    } else if (filterValue.length >= minFilterLength) {
+    } else if (filterValue.length >= this.minFilterLength) {
       this.setState({ filterValue });
     }
   }, 100);
@@ -339,6 +341,7 @@ class LayersSwitcherView extends React.PureComponent {
           >
             {this.props.options.showFilter && (
               <LayerListFilter
+                minFilterLength={this.minFilterLength}
                 handleFilterSubmit={(value) => this.handleFilterSubmit(value)}
                 handleFilterValueChange={(value) =>
                   this.handleFilterValueChange(value)

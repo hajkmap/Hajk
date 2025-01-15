@@ -9,14 +9,17 @@ import HajkToolTip from "components/HajkToolTip";
 
 const MIN_FILTER_TOOLTIP_DELAY = 1000;
 
-const LayerListFilter = ({ handleFilterValueChange, handleFilterSubmit }) => {
+const LayerListFilter = ({
+  minFilterLength = 3,
+  handleFilterValueChange,
+  handleFilterSubmit
+}) => {
   const inputRef = useRef(null);
 
-  const DEFAULT_MIN_FILTER_LENGTH = 3;
   const [showToolTip, setShowToolTip] = useState(false);
 
   const updateTooltip = (value) => {
-    if (value?.length > 0 && value?.length < DEFAULT_MIN_FILTER_LENGTH) {
+    if (value?.length > 0 && value?.length < minFilterLength) {
       setShowToolTip(true);
     } else {
       setShowToolTip(false);
@@ -34,7 +37,7 @@ const LayerListFilter = ({ handleFilterValueChange, handleFilterSubmit }) => {
       }}
     >
       <HajkToolTip
-        title="Skriv minst 3 tecken eller tryck enter"
+        title={`Skriv minst ${minFilterLength} tecken eller tryck enter`}
         placement="right"
         enterDelay={MIN_FILTER_TOOLTIP_DELAY}
         open={showToolTip}
