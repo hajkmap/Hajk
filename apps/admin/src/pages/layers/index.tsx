@@ -1,7 +1,21 @@
 import { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid2";
-import { Button, IconButton, Menu, MenuItem, Box } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import {
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Box,
+  TextField,
+} from "@mui/material";
+import {
+  DataGrid,
+  GridToolbarContainer,
+  GridToolbarDensitySelector,
+  GridToolbarFilterButton,
+  GridToolbarColumnsButton,
+  GridRowHeightParams,
+} from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { Layer, useLayers } from "../../api/layers";
@@ -24,6 +38,7 @@ export default function LayersPage() {
   const navigate = useNavigate();
   const language = useAppStateStore((state) => state.language);
   const [open, setOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const handleClose = () => {
     setOpen(false);
@@ -75,6 +90,16 @@ export default function LayersPage() {
     },
   });
 
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
+        <GridToolbarDensitySelector />
+      </GridToolbarContainer>
+    );
+  }
+
   const RowMenu = (params: { row: { id: string } }) => {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const open = Boolean(anchorEl);
@@ -119,6 +144,14 @@ export default function LayersPage() {
     );
   };
 
+  // Filter rows based on search query
+  const filteredLayers = layers?.filter((layer) =>
+    Object.values(layer)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
   return (
     <>
       {isLoading ? (
@@ -162,78 +195,95 @@ export default function LayersPage() {
               errors={errors}
             />
           </DialogWrapper>
-          <Grid size={12}>
-            <DataGrid
-              onCellClick={(params) => {
-                if (params.field === "actions") {
-                  return;
-                }
-                const id: string = (params.row as Layer).id;
-                if (id) {
-                  void navigate(`/layers/${id}`);
-                }
-              }}
-              sx={{
-                maxWidth: "100%",
-                mt: 8,
-                "& .MuiDataGrid-row:hover": {
-                  cursor: "pointer",
-                },
-              }}
-              rows={layers ?? []}
-              columns={[
-                {
-                  field: "serviceType",
-                  flex: 0.3,
-                  headerName: t("common.serviceType"),
-                },
-                {
-                  field: "name",
-                  flex: 1,
-                  headerName: t("common.name"),
-                },
-                { field: "url", flex: 0.3, headerName: "Url" },
-                {
-                  field: "usedInMaps",
-                  flex: 0.3,
-                  headerName: t("common.usedInMaps"),
-                },
-                {
-                  field: "brokenService",
-                  flex: 0.3,
-                  headerName: t("common.brokenService"),
-                },
-
-                {
-                  field: "actions",
-                  headerName: t("common.actions"),
-                  flex: 0.2,
-                  renderCell: (params: { row: { id: string } }) => (
-                    <RowMenu {...params} />
-                  ),
-                },
-              ]}
-              slotProps={{
-                loadingOverlay: {
-                  variant: "skeleton",
-                  noRowsVariant: "skeleton",
-                },
-              }}
-              localeText={
-                language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
-              }
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 10,
+          <Grid container direction="column" spacing={2} marginTop={3}>
+            <Grid>
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                label={t("common.searchLayer")}
+              />
+            </Grid>
+            <Grid>
+              <DataGrid
+                onCellClick={(params) => {
+                  if (params.field === "actions") {
+                    return;
+                  }
+                  const id: string = (params.row as Layer).id;
+                  if (id) {
+                    void navigate(`/layers/${id}`);
+                  }
+                }}
+                sx={{
+                  maxWidth: "100%",
+                  mt: 2,
+                  "& .MuiDataGrid-row:hover": {
+                    cursor: "pointer",
                   },
-                },
-              }}
-              getRowId={(row) => row.id}
-              hideFooterPagination={layers && layers.length < 10}
-              pageSizeOptions={[10, 25, 50, 100]}
-              disableRowSelectionOnClick
-            />
+                }}
+                rows={filteredLayers ?? []}
+                columns={[
+                  {
+                    field: "serviceType",
+                    flex: 0.3,
+                    headerName: t("common.serviceType"),
+                  },
+                  {
+                    field: "name",
+                    flex: 1,
+                    headerName: t("common.name"),
+                  },
+                  { field: "url", flex: 0.3, headerName: "Url" },
+                  {
+                    field: "usedInMaps",
+                    flex: 0.3,
+                    headerName: t("common.usedInMaps"),
+                  },
+                  {
+                    field: "brokenService",
+                    flex: 0.3,
+                    headerName: t("common.brokenService"),
+                  },
+                  {
+                    field: "actions",
+                    headerName: t("common.actions"),
+                    flex: 0.2,
+                    renderCell: (params: { row: { id: string } }) => (
+                      <RowMenu {...params} />
+                    ),
+                  },
+                ]}
+                slots={{
+                  toolbar: CustomToolbar,
+                }}
+                slotProps={{
+                  loadingOverlay: {
+                    variant: "skeleton",
+                    noRowsVariant: "skeleton",
+                  },
+                }}
+                getRowHeight={({ densityFactor }: GridRowHeightParams) =>
+                  50 * densityFactor
+                }
+                localeText={
+                  language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
+                }
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      pageSize: 10,
+                    },
+                  },
+                }}
+                hideFooterPagination={
+                  filteredLayers && filteredLayers.length < 10
+                }
+                pageSizeOptions={[10, 25, 50, 100]}
+                disableRowSelectionOnClick
+              />
+            </Grid>
           </Grid>
         </Page>
       )}
