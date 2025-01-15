@@ -14,15 +14,16 @@
   - [ ] Update prisma schema
   - [ ] Update seed script
   - [ ] Update zod parsers(AA)
-  - [ ] Update API methods
+  - [ ] Update API methods - POST, PATCH, DELETE are added
 - [ ] Layers API
   - [ ] Update prisma schema
   - [ ] Update seed script
   - [ ] Update zod parsers
-  - [ ] Update API methods (AA)
+  - [ ] Update API methods (AA) - POST, PATCH, DELETE are added
 - [ ] Services page
   - [x] Add service (AA)
   - [x] Alter service (AA)
+    - ⚠️ Note: Some fields in the request payload for both adding and updating a service are mocked or incomplete due to missing data in the current data model. Once the data model is finalized, ensure that the missing fields are updated and validated in both the payload and the backend schema.
   - [x] Remove service (AA)
 - [ ] Layers page
   - [ ] Add layer
