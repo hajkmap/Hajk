@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=22.7"
+    "node": ">=22.11"
   },
   "type": "module",
   "exports": null,
@@ -27,7 +27,7 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "^6.2.1",
     "@quixo3/prisma-session-store": "^3.1.13",
     "activedirectory2": "^2.2.0",
     "bcrypt": "^5.1.1",
@@ -65,7 +65,7 @@
     "eslint-plugin-check-file": "^2.8.0",
     "globals": "^15.14.0",
     "prettier": "^3.4.2",
-    "prisma": "^5.22.0",
+    "prisma": "^6.2.1",
     "shx": "^0.3.4",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
