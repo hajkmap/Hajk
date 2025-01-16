@@ -57,6 +57,8 @@
     "common.usedInMaps": "Används i kartor",
     "dark": "Mörkt",
     "light": "Ljust",
+
+    "layers.newLayer": "Nytt lager",
     "roles.adminDescription": "Användare som är tillåtna att använda Hajk-admin.",
     "roles.adminTitle": "Administratör",
     "roles.superuserDescription": "Användare som får skapa nya administratörer",

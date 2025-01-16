@@ -491,7 +491,7 @@ async function createLocalDummyAccounts() {
     {
       email: "olof@svahn.se",
       fullName: "Olof Svahn",
-      password: "Olof",
+      password: "Olof1",
     },
     {
       email: "albin@ahmetaj.se",

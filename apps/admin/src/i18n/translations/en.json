@@ -57,6 +57,8 @@
     "common.usedInMaps": "Used in maps",
     "dark": "Dark",
     "light": "Light",
+
+    "layers.newLayer": "New layer",
     "roles.adminDescription": "Users that are allowed to use Hajks admin interface",
     "roles.adminTitle": "Administrator",
     "roles.superuserDescription": "Users that are allowed to create new admin users",
