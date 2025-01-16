@@ -739,7 +739,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     return { mapLink, headerIdentifier, documentLink, externalLink, hoverLink };
   };
 
-  const getHoverLink = (hoverLink, tagText) => {
+  const HoverLink = ({ hoverLink, tagText }) => {
     return (
       <HajkToolTip title={hoverLink}>
         <abbr
@@ -754,7 +754,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     );
   };
 
-  const GetExternalLink = (externalLink) => {
+  const ExternalLink = ({ externalLink }) => {
     // Grab the theme to determine current light/dark mode
     const theme = useTheme();
 
@@ -788,7 +788,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     );
   };
 
-  const GetMapLink = (aTag, mapLinkOrg) => {
+  const MapLink = ({ aTag, mapLinkOrg, localObserver }) => {
     // Grab the theme to determine current light/dark mode
     const theme = useTheme();
 
@@ -837,7 +837,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     );
   };
 
-  const GetDocumentLink = (headerIdentifier, documentLink, isPrintMode) => {
+  const DocumentLink = ({ headerIdentifier, documentLink, isPrintMode }) => {
     // Grab the theme to determine current light/dark mode
     const theme = useTheme();
 
@@ -881,20 +881,28 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
 
   if (documentLink) {
     const isPrintMode = Boolean(aTag.attributes.printMode);
-    return GetDocumentLink(headerIdentifier, documentLink, isPrintMode);
+    return (
+      <DocumentLink
+        headerIdentifier={headerIdentifier}
+        documentLink={documentLink}
+        isPrintMode={isPrintMode}
+      />
+    );
   }
 
   if (mapLink) {
-    return GetMapLink(aTag, mapLink, localObserver);
+    return (
+      <MapLink aTag={aTag} mapLinkOrg={mapLink} localObserver={localObserver} />
+    );
   }
 
   if (externalLink) {
-    return GetExternalLink(externalLink);
+    return <ExternalLink externalLink={externalLink} />;
   }
 
   if (hoverLink) {
     const tagText = aTag.text;
-    return getHoverLink(hoverLink, tagText);
+    return <HoverLink hoverLink={hoverLink} tagText={tagText} />;
   }
 
   // If we got this far it seems that _we've been trying to parse an A tag that didn't
