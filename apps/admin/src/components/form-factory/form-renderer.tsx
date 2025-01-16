@@ -135,13 +135,14 @@ const FormRenderer = <TFieldValues extends FieldValues>({
       </Box>
     );
   };
-  const getValuesString = (
+
+  const getKeyValueArray = (
     container: DynamicFormContainer<TFieldValues>
-  ): string => {
+  ): { key: string; value: string; title: string }[] => {
     if (!formFields) {
-      return "";
+      return [];
     }
-    const values: string[] = [];
+    const keyValuePairs: { key: string; value: string; title: string }[] = [];
 
     container.getFormInputs().forEach((item) => {
       if (
@@ -154,12 +155,16 @@ const FormRenderer = <TFieldValues extends FieldValues>({
 
         const value = formFields[castedItem.name];
         if (value) {
-          values.push(value as string);
+          keyValuePairs.push({
+            key: castedItem.name,
+            value: value as string,
+            title: castedItem.title,
+          });
         }
       }
     });
 
-    return values.join(", ");
+    return keyValuePairs;
   };
 
   const renderContainerAccordion = (
@@ -167,11 +172,11 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     index: number
   ) => {
     const key = getKey(index);
-    const valuesAsString = getValuesString(container);
+    const keyValues = getKeyValueArray(container);
 
     return (
       <ControlledAccordion
-        values={valuesAsString}
+        keyValues={keyValues}
         title={container.title}
         key={key + "-accordion"}
         triggerExpanded={!!container.props?.triggerExpanded}
@@ -230,6 +235,8 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     if (type === CONTAINER_TYPE.PANEL) {
       return renderContainerPanel(container, index);
     } else if (type === CONTAINER_TYPE.ACCORDION) {
+      // Please refactor the ugly * thing below
+
       // If the Accordion contains a required field, add a * to the title.
       const containsRequiredFields =
         container.getElements().filter((item) => {
@@ -242,6 +249,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
         }).length > 0;
 
       if (containsRequiredFields) {
+        // Please refactor the ugly * thing below
         if (!container.title?.includes("*") /* Prevents doubles in DEV env.*/) {
           container.title = `${container.title} *`;
         }
@@ -268,9 +276,12 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     );
   };
 
+  // Note the className below.
+  // This is the root of the form and the class is used in the global styles.
   return (
     <Grid
       container
+      className="form-factory"
       sx={{
         ml: -2,
       }}

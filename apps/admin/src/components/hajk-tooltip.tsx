@@ -1,8 +1,8 @@
 import Tooltip from "@mui/material/Tooltip";
-import { ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 
 interface Props {
-  title?: string;
+  title?: ReactNode; // Allow both string and Elements
   children?: ReactElement;
   [key: string]: unknown; // To allow any additional props
 }
@@ -13,7 +13,7 @@ const HajkTooltip = ({ title, children, ...rest }: Props) => {
       enterDelay={500}
       leaveDelay={50}
       disableInteractive={true}
-      title={title ? title : ""}
+      title={title}
       {...rest}
     >
       {children ?? <></>}

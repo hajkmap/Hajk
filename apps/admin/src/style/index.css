@@ -3,6 +3,12 @@ body div.tsqd-open-btn-container {
   right: 64px;
 }
 
+.truncate-overflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Box sizing rules */
 *,
 *::before,
