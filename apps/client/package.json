@@ -1,6 +1,6 @@
 {
   "name": "hajk-client",
-  "version": "3.14.0",
+  "version": "3.14.1",
   "description": "Hajk Client UI",
   "homepage": ".",
   "repository": {
@@ -83,6 +83,7 @@
     "react-number-format": "^5.3.3",
     "react-rnd": "^10.4.1",
     "react-scroll": "^1.9.0",
+    "react-smooth-dnd": "^0.11.1",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.0",
     "uuid": "^9.0.1",

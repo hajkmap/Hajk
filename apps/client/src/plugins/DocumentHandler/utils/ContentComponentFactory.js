@@ -243,7 +243,7 @@ export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
       const bgColorItem = blockQuoteTag.attributes.getNamedItem(
         "data-background-color"
       );
-      if (bgColorItem) {
+      if (bgColorItem.value) {
         const textColor = theme.palette.getContrastText(bgColorItem.value);
         blockQuoteTag.setAttribute("data-text-color", textColor);
       }
@@ -347,7 +347,7 @@ export const AccordionSection = ({ blockQuoteTag, defaultColors }) => {
     const bgColorItem = blockQuoteTag.attributes.getNamedItem(
       "data-background-color"
     );
-    if (bgColorItem) {
+    if (bgColorItem.value) {
       const textColor = theme.palette.getContrastText(bgColorItem.value);
       blockQuoteTag.setAttribute("data-text-color", textColor);
     }
@@ -498,6 +498,7 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
     position: imgTag.dataset.imagePosition,
     source: imgTag.dataset.source,
     url: imgTag.src,
+    altValue: imgTag.alt,
     id: `video_${componentId}`,
   };
 
@@ -540,6 +541,7 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
     <React.Fragment key={videoAttributes.id}>
       <Box sx={getMediaPositionStyle(videoAttributes.position)}>
         <video
+          aria-label={videoAttributes.altValue || ""}
           height={videoAttributes.height}
           width={videoAttributes.width}
           controls={"controls"}
@@ -565,6 +567,7 @@ export const Audio = ({ imgTag, componentId, baseUrl }) => {
     url: imgTag.attributes.getNamedItem("src")?.value,
     width: imgTag.attributes.getNamedItem("data-image-width")?.value,
     id: `audio_${componentId}`,
+    altValue: imgTag.attributes.getNamedItem("alt")?.value,
   };
 
   const getAudioDescription = (audioAttributes) => {
@@ -605,9 +608,9 @@ export const Audio = ({ imgTag, componentId, baseUrl }) => {
   return (
     <Box
       key={audioAttributes.id}
-      sx={this.getMediaPositionStyle(audioAttributes.position)}
+      sx={getMediaPositionStyle(audioAttributes.position)}
     >
-      <audio controls={"controls"}>
+      <audio controls={"controls"} aria-label={audioAttributes.altValue || ""}>
         <source src={imgTag.src} type="audio/mpeg"></source>
       </audio>
       {getAudioDescription(audioAttributes)}
@@ -739,7 +742,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     return { mapLink, headerIdentifier, documentLink, externalLink, hoverLink };
   };
 
-  const getHoverLink = (hoverLink, tagText) => {
+  const HoverLink = ({ hoverLink, tagText }) => {
     return (
       <HajkToolTip title={hoverLink}>
         <abbr
@@ -754,11 +757,15 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     );
   };
 
-  const getExternalLink = (externalLink) => {
+  const ExternalLink = ({ externalLink }) => {
+    // Grab the theme to determine current light/dark mode
+    const theme = useTheme();
+
     return (
       <Button
         startIcon={
           <OpenInNewIcon
+            titleAccess="Länk som öppnas i ett annat fönster"
             sx={{
               verticalAlign: "middle",
             }}
@@ -766,7 +773,10 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         }
         sx={{
           padding: 0,
-          color: "info.main",
+          color:
+            theme.palette.mode === "dark"
+              ? theme.palette.info.dark
+              : theme.palette.info.main,
           ".MuiButton-startIcon": {
             marginLeft: 0,
           },
@@ -782,7 +792,10 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     );
   };
 
-  const getMapLink = (aTag, mapLinkOrg) => {
+  const MapLink = ({ aTag, mapLinkOrg, localObserver }) => {
+    // Grab the theme to determine current light/dark mode
+    const theme = useTheme();
+
     // Attempt to safely URI Decode the supplied string. If
     // it fails, use it as-is.
     // The reason we want probably want to decode is that the
@@ -799,6 +812,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       <Button
         startIcon={
           <MapIcon
+            titleAccess="Länk som applicerar ändringar på kartan"
             sx={{
               verticalAlign: "middle",
             }}
@@ -806,7 +820,10 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         }
         sx={{
           padding: 0,
-          color: "info.main",
+          color:
+            theme.palette.mode === "dark"
+              ? theme.palette.info.dark
+              : theme.palette.info.main,
           ...(bottomMargin && { marginBottom: 1 }),
           ".MuiButton-startIcon": {
             marginLeft: 0,
@@ -825,11 +842,19 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     );
   };
 
-  const getDocumentLink = (headerIdentifier, documentLink, isPrintMode) => {
+  const DocumentLink = ({ headerIdentifier, documentLink, isPrintMode }) => {
+    // Grab the theme to determine current light/dark mode
+    const theme = useTheme();
+
+    const titleAccess = headerIdentifier
+      ? "Länk till ett visst kapitel i ett dokument"
+      : "Länk till ett dokument";
+
     return (
       <Button
         startIcon={
           <DescriptionIcon
+            titleAccess={titleAccess}
             sx={{
               verticalAlign: "middle",
             }}
@@ -837,7 +862,10 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         }
         sx={{
           padding: 0,
-          color: "info.main",
+          color:
+            theme.palette.mode === "dark"
+              ? theme.palette.info.dark
+              : theme.palette.info.main,
           ".MuiButton-startIcon": {
             marginLeft: 0,
           },
@@ -863,20 +891,28 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
 
   if (documentLink) {
     const isPrintMode = Boolean(aTag.attributes.printMode);
-    return getDocumentLink(headerIdentifier, documentLink, isPrintMode);
+    return (
+      <DocumentLink
+        headerIdentifier={headerIdentifier}
+        documentLink={documentLink}
+        isPrintMode={isPrintMode}
+      />
+    );
   }
 
   if (mapLink) {
-    return getMapLink(aTag, mapLink, localObserver);
+    return (
+      <MapLink aTag={aTag} mapLinkOrg={mapLink} localObserver={localObserver} />
+    );
   }
 
   if (externalLink) {
-    return getExternalLink(externalLink);
+    return <ExternalLink externalLink={externalLink} />;
   }
 
   if (hoverLink) {
     const tagText = aTag.text;
-    return getHoverLink(hoverLink, tagText);
+    return <HoverLink hoverLink={hoverLink} tagText={tagText} />;
   }
 
   // If we got this far it seems that _we've been trying to parse an A tag that didn't

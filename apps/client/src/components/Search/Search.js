@@ -1082,6 +1082,7 @@ class Search extends React.PureComponent {
           searchModel={this.searchModel}
           searchOptions={searchOptions}
           updateSearchOptions={this.updateSearchOptions}
+          enabledSearchOptions={this.props.options.enabledSearchOptions}
           setSearchSources={this.setSearchSources}
           loading={loading}
           searchSources={searchSources}
