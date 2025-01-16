@@ -42,6 +42,18 @@ class LayerService {
     const newLayer = await prisma.layer.create({ data });
     return newLayer;
   }
+
+  async updateLayer(id: string, data: Prisma.LayerUpdateInput) {
+    const updatedLayer = await prisma.layer.update({
+      where: { id },
+      data,
+    });
+    return updatedLayer;
+  }
+
+  async deleteLayer(id: string) {
+    await prisma.layer.delete({ where: { id } });
+  }
 }
 
 export default new LayerService();

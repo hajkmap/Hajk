@@ -57,5 +57,15 @@ class LayersController {
     const layer = await LayerService.createLayer(req.body);
     res.status(HttpStatusCodes.CREATED).json(layer);
   }
+
+  async updateLayer(req: Request, res: Response) {
+    const layer = await LayerService.updateLayer(req.params.id, req.body);
+    res.status(HttpStatusCodes.OK).json(layer);
+  }
+
+  async deleteLayer(req: Request, res: Response) {
+    await LayerService.deleteLayer(req.params.id);
+    res.status(HttpStatusCodes.NO_CONTENT).send();
+  }
 }
 export default new LayersController();

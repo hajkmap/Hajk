@@ -44,7 +44,7 @@ export default function MapsTable() {
       field: "more",
       headerName: "",
       flex: 0.2,
-      renderCell: (params: GridRenderCellParams<Map, string>) => (
+      renderCell: (_params: GridRenderCellParams<Map, string>) => (
         <Button
           color="info"
           size="small"
