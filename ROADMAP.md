@@ -1,6 +1,6 @@
 # ROADMAP
 
-Last updated: 2024-09-03
+_Last updated: 2024-11-13_
 
 The following is a high-level overview of the planned development for Hajk and its various components (Backend, Client UI, Admin UI).
 
@@ -12,11 +12,9 @@ Also, this will be the last release in the 3.x branch.
 
 ## 4.0
 
-This release marks the removal of the .NET backend, leaving NodeJS as the sole official backend solution. Other than that, no major changes are expected; for example, the backend will continue to use a file-based JSON structure for configuration.
+This release marks the removal of the .NET backend, leaving NodeJS as the sole official backend solution.
 
-## 4.x
-
-Includes major fixes to the Client UI, such as revamped window management.
+In addition, Client UI sees significant updates to the Layer Switcher tool as well as the application's window management.
 
 ## 5.0
 
