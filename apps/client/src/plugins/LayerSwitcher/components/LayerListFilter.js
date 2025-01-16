@@ -12,7 +12,7 @@ const MIN_FILTER_TOOLTIP_DELAY = 1000;
 const LayerListFilter = ({
   minFilterLength = 3,
   handleFilterValueChange,
-  handleFilterSubmit
+  handleFilterSubmit,
 }) => {
   const inputRef = useRef(null);
 

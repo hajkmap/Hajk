@@ -71,7 +71,7 @@ function LayerItemDetails({
   const legendUrl = legendInfo?.url;
 
   // Handle opacity slider changes
-  const handleOpacitySliderChange = (e, newValue) => {
+  const handleOpacitySliderChange = (_, newValue) => {
     layerItemDetails.layer.set("opacity", newValue);
   };
 
@@ -275,10 +275,7 @@ function LayerItemDetails({
                 app={app}
                 layer={layerItemDetails.layer}
               ></LayerItemInfo>
-              <LegendImage
-                src={legendUrl}
-                open={legendIsActive}
-              ></LegendImage>
+              <LegendImage src={legendUrl} open={legendIsActive}></LegendImage>
             </Box>
             <Stack direction="row" alignItems="center">
               <IconButton
