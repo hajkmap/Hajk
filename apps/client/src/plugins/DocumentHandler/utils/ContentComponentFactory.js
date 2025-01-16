@@ -243,7 +243,7 @@ export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
       const bgColorItem = blockQuoteTag.attributes.getNamedItem(
         "data-background-color"
       );
-      if (bgColorItem) {
+      if (bgColorItem.value) {
         const textColor = theme.palette.getContrastText(bgColorItem.value);
         blockQuoteTag.setAttribute("data-text-color", textColor);
       }
@@ -347,7 +347,7 @@ export const AccordionSection = ({ blockQuoteTag, defaultColors }) => {
     const bgColorItem = blockQuoteTag.attributes.getNamedItem(
       "data-background-color"
     );
-    if (bgColorItem) {
+    if (bgColorItem.value) {
       const textColor = theme.palette.getContrastText(bgColorItem.value);
       blockQuoteTag.setAttribute("data-text-color", textColor);
     }
