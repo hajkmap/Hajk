@@ -926,7 +926,7 @@ class App extends React.PureComponent {
   };
 
   renderSearchComponent() {
-    // FIXME: We should get config from somewhere else now when Search is part of Core
+    // FIXME: We should get the search config from somewhere else (not from plugin options) now when Search is part of Core...
     if (
       this.appModel.plugins.search &&
       this.appModel.plugins.search.options.renderElsewhere !== true
@@ -938,7 +938,6 @@ class App extends React.PureComponent {
           options={this.appModel.plugins.search.options}
           headerHasFocus={this.state.headerHasFocus}
           handleHeaderFocus={this.handleHeaderFocus}
-          // FIXME: We should get config from somewhere else now when Search is part of Core
         />
       );
     } else {
