@@ -6,6 +6,8 @@ The following is a high-level overview of the planned development for Hajk and i
 
 ## 3.14
 
+_Update: 3.14 has been released on Sep 16th. See [release notes](https://github.com/hajkmap/Hajk/releases/tag/v3.14.0)._
+
 The final release to include both .NET and NodeJS backends as official solutions.
 
 Also, this will be the last release in the 3.x branch.
