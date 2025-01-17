@@ -14,12 +14,14 @@
   - [ ] Update prisma schema
   - [ ] Update seed script
   - [ ] Update zod parsers(AA)
-  - [ ] Update API methods - POST, PATCH, DELETE are added
+    - [x] Services (field validators are missing)
+    - [ ] Users
+  - [ ] Update API methods
 - [ ] Layers API
   - [ ] Update prisma schema
   - [ ] Update seed script
   - [ ] Update zod parsers
-  - [ ] Update API methods (AA) - POST, PATCH, DELETE are added
+  - [ ] Update API methods
 - [ ] Services page
   - [x] Add service (AA)
   - [x] Alter service (AA)
