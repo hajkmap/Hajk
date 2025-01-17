@@ -218,6 +218,7 @@ class DocumentViewer extends React.PureComponent {
           )}
 
           <ContentContainer
+            id="documentViewerContentContainer"
             tabIndex="0" //Focus grid to be able to use onKeyDown
             onKeyDown={(e) => {
               //If ctrl-a or command-a is pressed
