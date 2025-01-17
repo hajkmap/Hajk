@@ -31,6 +31,11 @@ export function GlobalStylesComponent({ mode }: { mode: PaletteMode }) {
             opacity: 0.5,
           },
         },
+        ".form-factory .MuiPaper-root .MuiGrid2-root > .MuiGrid2-root > .MuiGrid2-root":
+          {
+            // Fix for nested grids which i generated when helpText is added.
+            width: "100%",
+          },
       }}
     />
   );

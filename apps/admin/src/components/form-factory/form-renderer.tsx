@@ -268,7 +268,10 @@ const FormRenderer = <TFieldValues extends FieldValues>({
       <Grid
         key={getKey(index) + "-grid"}
         size={{ xs: 12, md: item?.gridColumns ?? 12 }}
-        sx={{ pb: 2, pl: 2 }}
+        sx={{
+          pb: 2,
+          pl: 2,
+        }}
         {...propsToSpread}
       >
         {renderFn(item, index)}
@@ -276,6 +279,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     );
   };
 
+  // Form container
   // Note the className below.
   // This is the root of the form and the class is used in the global styles.
   return (
@@ -286,9 +290,10 @@ const FormRenderer = <TFieldValues extends FieldValues>({
         ml: -2,
       }}
     >
-      {formControls
-        ?.getElements()
-        .map((item, index) => renderFormElement(item, index))}
+      {formControls?.getElements().map((item, index) => {
+        // will add stuff here
+        return renderFormElement(item, index);
+      })}
     </Grid>
   );
 };
