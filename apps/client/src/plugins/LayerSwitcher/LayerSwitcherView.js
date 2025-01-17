@@ -3,73 +3,100 @@ import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import { AppBar, Tab, Tabs } from "@mui/material";
+import { AppBar, Tab, Tabs, Box, ListItemText } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
-
-// The styled-component below might seem unnecessary since we are using the sx-prop
-// on it as well. However, since we cannot use the sx-prop on a non-MUI-component
-// (which would force us to change the <div> to a <Box>) this felt OK in this
-// particular occasion.
-const Root = styled("div")(() => ({
-  margin: -10, // special case, we need to "unset" the padding for Window content that's set in Window.js
-}));
+import QuickAccessPresets from "./components/QuickAccessPresets.js";
+import QuickAccessView from "./components/QuickAccessView.js";
+import LayerItemDetails from "./components/LayerItemDetails.js";
+import LayerListFilter from "./components/LayerListFilter.js";
+import { debounce } from "utils/debounce";
 
 const StyledAppBar = styled(AppBar)(() => ({
   top: -10,
 }));
 
-const ContentWrapper = styled("div")(() => ({
-  padding: 10,
-}));
+const DEFAULT_MIN_FILTER_LENGTH = 3;
+
+/**
+ * BreadCrumbs are a feature used to "link" content between LayerSwitcher
+ * and Informative plugins. They get rendered directly to #map, as they
+ * are not part of LayerSwitcher plugin, at least not visually. To achieve
+ * that we use createPortal().
+ *
+ * @returns
+ * @memberof LayersSwitcherView
+ */
+const BreadCrumbsContainer = ({ map, app }) => {
+  return createPortal(
+    // We must wrap the component in a div, on which we can catch
+    // events. This is done to prevent event bubbling to the
+    // layerSwitcher component.
+    <div onMouseDown={(e) => e.stopPropagation()}>
+      <BreadCrumbs map={map} app={app} />
+    </div>,
+    document.getElementById("breadcrumbs-container")
+  );
+};
+
+// TODO Turn this to Functional component
 
 class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
     map: propTypes.object.isRequired,
-    model: propTypes.object.isRequired,
-    observer: propTypes.object.isRequired,
+    localObserver: propTypes.object.isRequired,
+    globalObserver: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
   };
-
-  // Static members to determine which Tabs should be rendered.
-  #renderRegularLayersView;
-  #renderBackgroundLayersView;
-  #renderActiveLayersView;
 
   constructor(props) {
     super(props);
     this.options = props.options;
-
-    // Let's prepare some constants that will be used to determine which
-    // tabs should be rendered.
-
-    // Regular layers are straightforward.
-    this.#renderRegularLayersView = this.options.groups.length > 0;
-
-    // The Backgrounds tab should be visible if there are baselayers in
-    // config or if any of the special layers is enabled.
-    this.#renderBackgroundLayersView =
-      this.options.baselayers.length > 0 ||
-      this.options.enableOSM === true ||
-      this.options.backgroundSwitcherBlack ||
-      this.options.backgroundSwitcherWhite;
-
-    // The Active layers tab is straightforward too.
-    this.#renderActiveLayersView = this.options.showActiveLayersView ?? false;
+    this.olLayerMap = props.map
+      .getLayers()
+      .getArray()
+      .reduce((a, b) => {
+        a[b.get("name")] = b;
+        return a;
+      }, {});
+    this.baseLayers = props.map
+      .getLayers()
+      .getArray()
+      .filter((l) => l.get("layerType") === "base")
+      .map((l) => l.getProperties());
 
     this.state = {
       chapters: [],
-      baseLayers: props.model.getBaseLayers(),
-      activeTab: this.#renderRegularLayersView // Let's calculate which
-        ? "regularLayers" // view should be visible on start, given
-        : this.#renderBackgroundLayersView // that we must find out which
-          ? "backgroundLayers" // tabs are available.
-          : false,
+      activeTab: 0,
+      displayContentOverlay: null, // 'quickAccessPresets' | 'favorites' | 'layerItemDetails'
+      layerItemDetails: null,
+      filterValue: "",
+      scrollPositions: {
+        tab0: 0,
+        tab1: 0,
+        tab2: 0,
+      },
     };
+
+    this.localObserver = this.props.localObserver;
+    this.globalObserver = this.props.globalObserver;
+
+    this.staticLayerConfig = this.props.staticLayerConfig;
+    this.staticLayerTree = this.props.staticLayerTree;
+
+    this.backgroundLayerMap = this.baseLayers.map((l) => ({
+      id: l["name"],
+      name: l["caption"],
+      visible: l["visible"],
+      zIndex: l["zIndex"],
+    }));
+
+    this.minFilterLength =
+      this.options?.layerFilterMinLength ?? DEFAULT_MIN_FILTER_LENGTH;
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
@@ -78,20 +105,153 @@ class LayersSwitcherView extends React.PureComponent {
         });
       }
     });
+
+    props.app.globalObserver.subscribe("setLayerDetails", (payload) => {
+      if (payload) {
+        const layerId = payload.layerId;
+        if (!layerId) {
+          return;
+        }
+        const layer = this.olLayerMap[layerId];
+
+        // Set scroll position state when layer details is opened
+        const details = {
+          layer,
+          subLayerIndex: payload.subLayerIndex,
+        };
+        const currentScrollPosition = this.getScrollPosition();
+        this.setState((prevState) => ({
+          layerItemDetails: details,
+          displayContentOverlay: "layerItemDetails",
+          scrollPositions: {
+            ...prevState.scrollPositions,
+            [`tab${prevState.activeTab}`]: currentScrollPosition,
+          },
+        }));
+      } else {
+        this.setState({
+          displayContentOverlay: null,
+        });
+      }
+    });
   }
 
+  // Handles click on Layerpackage button and backbutton
+  handleQuickAccessPresetsToggle = (quickAccessPresetsState) => {
+    quickAccessPresetsState?.event?.stopPropagation();
+    // Set scroll position state when layer package is opened
+    const currentScrollPosition = this.getScrollPosition();
+    this.setState((prevState) => ({
+      displayContentOverlay:
+        this.state.displayContentOverlay === "quickAccessPresets"
+          ? null
+          : "quickAccessPresets",
+      scrollPositions: {
+        ...prevState.scrollPositions,
+        [`tab${prevState.activeTab}`]: currentScrollPosition,
+      },
+    }));
+  };
+
+  // Handles click on Favorites button and backbutton
+  handleFavoritesViewToggle = (quickAccessPresetsState) => {
+    quickAccessPresetsState?.event?.stopPropagation();
+    // Set scroll position state when favorites view is opened
+    const currentScrollPosition = this.getScrollPosition();
+    this.setState((prevState) => ({
+      displayContentOverlay:
+        this.state.displayContentOverlay === "favorites" ? null : "favorites",
+      scrollPositions: {
+        ...prevState.scrollPositions,
+        [`tab${prevState.activeTab}`]: currentScrollPosition,
+      },
+    }));
+  };
+
+  // TODO Use this function
+  collapseAllGroups = () => {
+    // const collapseGroups = (groups) => {
+    //   groups.forEach((group) => {
+    //     group.isExpanded = false;
+    //     if (group.groups && group.groups.length > 0) {
+    //       collapseGroups(group.groups);
+    //     }
+    //   });
+    // };
+    // collapseGroups(this.layerTree);
+  };
+
+  handleFilterSubmit = (value) => {
+    const filterValue = value === "" ? null : value;
+    if (filterValue?.length > 0) {
+      this.setState({ filterValue });
+    }
+  };
+
+  // Handles filter functionality
+  handleFilterValueChange = debounce((value) => {
+    const filterValue = value === "" ? null : value;
+
+    if (value === "") {
+      this.setState({ filterValue: null });
+    } else if (filterValue.length >= this.minFilterLength) {
+      this.setState({ filterValue });
+    }
+  }, 100);
+
   /**
-   * LayerSwitcher consists of one to three Tabs:
-   * - one shows regular layers (as checkboxes, multi select)
-   * - one show the background layers (as radio buttons, one-at-at-time)
-   * - there's also an option to show a tab with active layers only.
+   * LayerSwitcher consists of two Tabs: one shows
+   * "regular" layers (as checkboxes, multi select), and the
+   * other shows background layers (as radio buttons, one-at-at-time).
+   * And the DrawOrder tab
    *
-   * This method handles switching to the selected tab's content.
+   * This method controls which of the two Tabs is visible and hides QuickAccessPresets view.
    *
    * @memberof LayersSwitcherView
    */
-  handleChangeTabs = (event, activeTab) => {
-    this.setState({ activeTab });
+  handleChangeTabs = (_, activeTab) => {
+    // Set scroll position state when tab is changed
+    const currentScrollPosition = this.getScrollPosition();
+    this.setState((prevState) => ({
+      activeTab,
+      displayContentOverlay: null,
+      scrollPositions: {
+        ...prevState.scrollPositions,
+        [`tab${prevState.activeTab}`]: currentScrollPosition,
+      },
+    }));
+  };
+
+  /**
+   * This method resets scrollposition when component updates,
+   * but only when tab is changed or content overlay is opened.
+   *
+   * @memberof LayersSwitcherView
+   */
+  componentDidUpdate(_, prevState) {
+    if (
+      prevState.activeTab !== this.state.activeTab ||
+      prevState.displayContentOverlay !== this.state.displayContentOverlay
+    ) {
+      // Reset scroll position when tab is changed, or when content overlay is opened
+      const { scrollPositions } = this.state;
+      const currentScrollPosition =
+        scrollPositions[`tab${this.state.activeTab}`];
+      if (currentScrollPosition !== undefined) {
+        const scrollContainer = document.getElementById("scroll-container");
+        scrollContainer.scrollTop = currentScrollPosition;
+      }
+    }
+  }
+
+  /**
+   * This method gets scrollposition of container
+   *
+   * @memberof LayersSwitcherView
+   */
+  getScrollPosition = () => {
+    const scrollContainer = document.getElementById("scroll-container"); // Byt ut mot din scroll-container ID
+    return scrollContainer.scrollTop;
   };
 
   /**
@@ -111,68 +271,40 @@ class LayersSwitcherView extends React.PureComponent {
     }, 1);
   };
 
-  /**
-   * @summary Loops through map configuration and
-   * renders all groups. Visible only if @param shouldRender is true.
-   *
-   * @param {boolean} [shouldRender=true]
-   * @returns {<div>}
-   */
-  renderLayerGroups = (shouldRender = true) => {
+  render() {
+    const { windowVisible, layersState } = this.props;
+
+    const filterValue = this.state.filterValue;
+    let filterHits = null;
+
+    const searchIndex = Object.values(this.staticLayerConfig).flatMap((l) => {
+      let subLayerIndex = [];
+      if (l.allSubLayers?.length > 1) {
+        subLayerIndex = l.allSubLayers.map((sl) => {
+          const subLayerInfo = l.layerInfo.layersInfo[sl];
+          return [subLayerInfo.caption, l.id];
+        });
+      }
+
+      return [...subLayerIndex, [l.caption, l.id]];
+    });
+
+    if (filterValue) {
+      const lowercaseFilterValue = filterValue.toLocaleLowerCase();
+      const hits = searchIndex
+        ?.filter(([name, _]) =>
+          name.toLocaleLowerCase().includes(lowercaseFilterValue)
+        )
+        ?.map(([_, id]) => id);
+      filterHits = new Set(hits);
+    }
+
     return (
       <div
         style={{
-          display: shouldRender === true ? "block" : "none",
+          display: windowVisible ? "block" : "none",
         }}
       >
-        {this.options.groups.map((group, i) => {
-          return (
-            <LayerGroup
-              key={i}
-              group={group}
-              model={this.props.model}
-              chapters={this.state.chapters}
-              app={this.props.app}
-              options={this.props.options}
-            />
-          );
-        })}
-      </div>
-    );
-  };
-
-  /**
-   * BreadCrumbs are a feature used to "link" content between LayerSwitcher
-   * and Informative plugins. They get rendered directly to #map, as they
-   * are not part of LayerSwitcher plugin, at least not visually. To achieve
-   * that we use createPortal().
-   *
-   * @returns
-   * @memberof LayersSwitcherView
-   */
-  renderBreadCrumbs = () => {
-    return (
-      this.options.showBreadcrumbs &&
-      createPortal(
-        // We must wrap the component in a div, on which we can catch
-        // events. This is done to prevent event bubbling to the
-        // layerSwitcher component.
-        <div onMouseDown={(e) => e.stopPropagation()}>
-          <BreadCrumbs
-            map={this.props.map}
-            model={this.props.model}
-            app={this.props.app}
-          />
-        </div>,
-        document.getElementById("breadcrumbs-container")
-      )
-    );
-  };
-
-  render() {
-    const { windowVisible } = this.props;
-    return (
-      <Root sx={{ display: windowVisible ? "block" : "none" }}>
         <StyledAppBar
           position="sticky" // Does not work in IE11
           color="default"
@@ -185,40 +317,142 @@ class LayersSwitcherView extends React.PureComponent {
             // false is OK though, apparently.
             variant="fullWidth"
             textColor="inherit"
+            sx={{ "& .MuiBadge-badge": { right: -16, top: 8 } }}
           >
-            {this.#renderRegularLayersView && (
-              <Tab label="Kartlager" value="regularLayers" />
-            )}
-            {this.#renderBackgroundLayersView && (
-              <Tab label="Bakgrund" value="backgroundLayers" />
-            )}
-            {this.#renderActiveLayersView && (
-              <Tab label="Aktiva lager" value="activeLayers" />
+            <Tab label="Kartlager" />
+            <Tab label="Bakgrund" />
+            {this.options.showDrawOrderView === true && (
+              <Tab label={"Ritordning"} />
             )}
           </Tabs>
         </StyledAppBar>
-        <ContentWrapper>
-          {this.#renderRegularLayersView &&
-            this.renderLayerGroups(this.state.activeTab === "regularLayers")}
-          {this.#renderBackgroundLayersView && (
-            <BackgroundSwitcher
-              display={this.state.activeTab === "backgroundLayers"}
-              layers={this.state.baseLayers}
-              layerMap={this.props.model.layerMap}
-              backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
-              backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
-              enableOSM={this.options.enableOSM}
+        <div
+          id="scroll-container"
+          style={{ position: "relative", height: "100%", overflowY: "auto" }}
+        >
+          <Box
+            style={{
+              display:
+                this.state.activeTab === 0 &&
+                this.state.displayContentOverlay === null
+                  ? "block"
+                  : "none",
+            }}
+          >
+            {this.props.options.showFilter && (
+              <LayerListFilter
+                minFilterLength={this.minFilterLength}
+                handleFilterSubmit={(value) => this.handleFilterSubmit(value)}
+                handleFilterValueChange={(value) =>
+                  this.handleFilterValueChange(value)
+                }
+              />
+            )}
+            {filterHits === null && (
+              <QuickAccessView
+                show={this.props.options.showQuickAccess}
+                map={this.props.map}
+                app={this.props.app}
+                globalObserver={this.globalObserver}
+                enableQuickAccessPresets={
+                  this.props.options.enableQuickAccessPresets
+                }
+                enableUserQuickAccessFavorites={
+                  this.props.options.enableUserQuickAccessFavorites
+                }
+                handleQuickAccessPresetsToggle={(e) =>
+                  this.handleQuickAccessPresetsToggle({ event: e })
+                }
+                favoritesViewDisplay={
+                  this.state.displayContentOverlay === "favorites"
+                }
+                handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+                favoritesInfoText={
+                  this.options.userQuickAccessFavoritesInfoText
+                }
+                filterValue={this.state.filterValue}
+                layersState={layersState}
+              />
+            )}
+            {this.staticLayerTree.map((group) => (
+              <LayerGroup
+                key={group.id}
+                staticLayerConfig={this.staticLayerConfig}
+                staticGroupTree={group}
+                layersState={layersState}
+                globalObserver={this.globalObserver}
+                filterHits={filterHits}
+                filterValue={this.state.filterValue}
+              />
+            ))}
+            {filterHits !== null && filterHits.size === 0 && (
+              <ListItemText
+                sx={{
+                  py: 1,
+                  px: 4,
+                }}
+                primary="Inga resultat"
+                primaryTypographyProps={{
+                  pr: 5,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  variant: "body1",
+                }}
+              />
+            )}
+          </Box>
+          {this.props.options.enableQuickAccessPresets && (
+            <QuickAccessPresets
+              quickAccessPresets={this.options.quickAccessPresets}
+              display={
+                this.state.displayContentOverlay === "quickAccessPresets"
+              }
+              backButtonCallback={this.handleQuickAccessPresetsToggle}
+              map={this.props.map}
+              globalObserver={this.globalObserver}
+              quickAccessPresetsInfoText={
+                this.options.quickAccessPresetsInfoText
+              }
+            ></QuickAccessPresets>
+          )}
+          <LayerItemDetails
+            display={this.state.displayContentOverlay === "layerItemDetails"}
+            layerItemDetails={this.state.layerItemDetails}
+            app={this.props.app}
+            chapters={this.state.chapters}
+            showOpacitySlider={this.props.options.enableTransparencySlider}
+            showQuickAccess={this.props.options.showQuickAccess}
+          ></LayerItemDetails>
+          <BackgroundSwitcher
+            display={
+              this.state.activeTab === 1 &&
+              this.state.displayContentOverlay === null
+            }
+            layers={this.baseLayers}
+            layerMap={this.olLayerMap}
+            backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+            backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+            enableOSM={this.options.enableOSM}
+            map={this.props.map}
+            globalObserver={this.props.globalObserver}
+          />
+          {this.options.showDrawOrderView === true && (
+            <DrawOrder
+              localObserver={this.localObserver}
+              display={
+                this.state.activeTab === 2 &&
+                this.state.displayContentOverlay === null
+              }
               map={this.props.map}
               app={this.props.app}
-            />
+              options={this.props.options}
+            ></DrawOrder>
           )}
-          {this.#renderActiveLayersView &&
-            this.state.activeTab === "activeLayers" && (
-              <DrawOrder map={this.props.map} app={this.props.app} />
-            )}
-        </ContentWrapper>
-        {this.renderBreadCrumbs()}
-      </Root>
+          {this.options.showBreadcrumbs && (
+            <BreadCrumbsContainer map={this.props.map} app={this.props.app} />
+          )}
+        </div>
+      </div>
     );
   }
 }

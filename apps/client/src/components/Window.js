@@ -99,8 +99,9 @@ Rnd.prototype.onDragStart = function (e, data) {
     return;
   }
   const boundaryRect = boundary.getBoundingClientRect();
+  const headerRect = document.getElementById("header").getBoundingClientRect();
   const boundaryLeft = boundaryRect.left;
-  const boundaryTop = boundaryRect.top;
+  const boundaryTop = boundaryRect.top + headerRect.top + headerRect.height;
   const parentRect = parent.getBoundingClientRect();
   const parentLeft = parentRect.left;
   const parentTop = parentRect.top;
@@ -406,6 +407,8 @@ class Window extends React.PureComponent {
   };
 
   bringToFront() {
+    this.props.globalObserver.publish("core.handleHeaderBlur");
+
     document.windows
       .sort((a, b) => (a === this ? 1 : b === this ? -1 : 0))
       .forEach((w, i) => {
@@ -483,7 +486,6 @@ class Window extends React.PureComponent {
       }
     }
 
-    this.bringToFront();
     return (
       <StyledRnd
         className="hajk-window"

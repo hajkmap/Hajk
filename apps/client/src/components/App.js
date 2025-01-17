@@ -4,7 +4,6 @@ import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "constants";
 
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
 import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
@@ -24,6 +23,7 @@ import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 import SimpleDialog from "./SimpleDialog";
 import MapClickViewer from "./MapClickViewer/MapClickViewer";
+import SnackbarProvider from "./SnackbarProvider";
 
 import Search from "./Search/Search.js";
 
@@ -68,8 +68,8 @@ const DRAWER_WIDTH = 250;
 
 // A bunch of styled components to get the Hajk feel! Remember that some
 // components are styled with the sx-prop instead/as well.
-const StyledHeader = styled("header")(({ theme }) => ({
-  zIndex: theme.zIndex.appBar,
+const StyledHeader = styled("header")(({ theme, headerHasFocus }) => ({
+  zIndex: headerHasFocus ? theme.zIndex.appBar : theme.zIndex.appBar - 100,
   maxHeight: theme.spacing(8),
   display: "flex",
   justifyContent: "space-between",
@@ -375,6 +375,7 @@ class App extends React.PureComponent {
       drawerStatic: drawerStatic,
       activeDrawerContent: activeDrawerContentState,
       drawerMouseOverLock: false,
+      headerHasFocus: false,
     };
 
     // If the drawer is set to be visible at start - ensure the activeDrawerContent
@@ -490,6 +491,9 @@ class App extends React.PureComponent {
       .loadPlugins(this.props.activeTools);
 
     Promise.all(promises).then(() => {
+      this.globalObserver.subscribe("core.handleHeaderBlur", () => {
+        this.setState({ headerHasFocus: false });
+      });
       // Track the page view
       this.globalObserver.publish("analytics.trackPageView");
 
@@ -818,6 +822,18 @@ class App extends React.PureComponent {
           // to anyone wanting to act on layer visibility change.
           this.globalObserver.publish("core.layerVisibilityChanged", e);
         });
+        // Listener for "quickAccess" changes
+        layer.on("change:quickAccess", (e) => {
+          // Send an event on the global observer
+          // to anyone wanting to act on layer quickAccess change.
+          this.globalObserver.publish("core.layerQuickAccessChanged", e);
+        });
+        // Listener for "subLayers" changes
+        layer.on("change:subLayers", (e) => {
+          // Send an event on the global observer
+          // to anyone wanting to act on layer subLayers change.
+          this.globalObserver.publish("core.layerSubLayersChanged", e);
+        });
       });
   }
 
@@ -925,7 +941,7 @@ class App extends React.PureComponent {
   };
 
   renderSearchComponent() {
-    // FIXME: We should get config from somewhere else now when Search is part of Core
+    // FIXME: We should get the search config from somewhere else (not from plugin options) now when Search is part of Core...
     if (
       this.appModel.plugins.search &&
       this.appModel.plugins.search.options.renderElsewhere !== true
@@ -934,7 +950,9 @@ class App extends React.PureComponent {
         <Search
           map={this.appModel.getMap()}
           app={this}
-          options={this.appModel.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core
+          options={this.appModel.plugins.search.options}
+          headerHasFocus={this.state.headerHasFocus}
+          handleHeaderFocus={this.handleHeaderFocus}
         />
       );
     } else {
@@ -1162,6 +1180,14 @@ class App extends React.PureComponent {
     );
   }
 
+  handleHeaderFocus = () => {
+    this.setState({ headerHasFocus: true });
+  };
+
+  handleHeaderBlur = () => {
+    this.setState({ headerHasFocus: false });
+  };
+
   render() {
     const { config } = this.props;
 
@@ -1229,6 +1255,8 @@ class App extends React.PureComponent {
                   pointerEvents: "auto",
                 },
               }}
+              headerHasFocus={this.state.headerHasFocus}
+              onFocus={this.handleHeaderFocus}
             >
               {clean === false && this.showDrawerButtons() && (
                 <DrawerToggleButtons
@@ -1245,7 +1273,10 @@ class App extends React.PureComponent {
               {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
               {this.renderSearchComponent()}
             </StyledHeader>
-            <WindowsContainer id="windows-container">
+            <WindowsContainer
+              id="windows-container"
+              onClick={this.handleHeaderBlur}
+            >
               {useNewInfoclick === false && this.renderInfoclickWindow()}
               {useNewInfoclick && (
                 <MapClickViewer
