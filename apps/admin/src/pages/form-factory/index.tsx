@@ -10,6 +10,7 @@ import CONTAINER_TYPE from "../../components/form-factory/types/container-types"
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { RenderProps } from "../../components/form-factory/types/render";
 import {
+  Box,
   Button,
   Grid2 as Grid,
   InputAdornment,
@@ -183,12 +184,28 @@ export default function FormFactoryPage() {
 
   formContainer.addStaticElement({
     type: STATIC_TYPE.DIVIDER,
-    title: "Divider with text",
+    title: "Divider with text 1",
   });
+
+  formContainer.addElement(
+    <div>
+      Hello 1, this is simply a way to add anything you want, something other
+      than a form input. Something not managed by form-factory.
+    </div>,
+    6
+  );
+
+  formContainer.addElement(
+    <Box>
+      Hello 2, this is simply a way to add anything you want, something other
+      than a form input. Something not managed by form-factory.
+    </Box>,
+    6
+  );
 
   formContainer.addStaticElement({
     type: STATIC_TYPE.DIVIDER,
-    title: "",
+    title: "Divider with text 2",
   });
 
   formContainer.addInput({

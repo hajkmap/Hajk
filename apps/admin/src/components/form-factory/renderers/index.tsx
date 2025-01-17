@@ -11,6 +11,7 @@ import renderHeader from "./header";
 import renderDivider from "./divider";
 import renderSpacer from "./spacer";
 import renderTextArea from "./text-area";
+import renderUnmanagedElement from "./unmanaged-element";
 
 // When a new renderer is added, add it here
 // and add the correct type in
@@ -27,6 +28,7 @@ const renderFunctions = {
   [STATIC_TYPE.HEADER]: renderHeader,
   [STATIC_TYPE.SPACER]: renderSpacer,
   [STATIC_TYPE.DIVIDER]: renderDivider,
+  [STATIC_TYPE.UNMANAGED]: renderUnmanagedElement,
 };
 
 export const getRenderer = (type: string) => {
