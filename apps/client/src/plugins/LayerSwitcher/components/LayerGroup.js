@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import LayerItem from "./LayerItem";
 import GroupLayer from "./GroupLayer";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
@@ -8,6 +8,8 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import InfoIcon from "@mui/icons-material/Info";
 import HajkToolTip from "components/HajkToolTip";
+
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
 /**
  * If Group has "toggleable" property enabled, render the toggle all checkbox.
@@ -126,194 +128,83 @@ const GroupInfoToggler = ({
   );
 };
 
-const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
-  const { name, groups } = group;
+// TODO move to common file
+const getAllLayerIdsInGroup = (group) => {
+  if (!group) {
+    return [];
+  }
 
-  const infogrouptitle = group.infogrouptitle;
-  const infogrouptext = group.infogrouptext;
-  const infogroupurl = group.infogroupurl;
-  const infogroupurltext = group.infogroupurltext;
-  const infogroupopendatalink = group.infogroupopendatalink;
-  const infogroupowner = group.infogroupowner;
+  if (!group.children) {
+    return [group.id];
+  } else {
+    return group.children.flatMap((c) => {
+      return getAllLayerIdsInGroup(c);
+    });
+  }
+};
+
+const LayerGroup = ({
+  globalObserver,
+  staticGroupTree,
+  staticLayerConfig,
+  layersState,
+  filterHits,
+  filterValue,
+}) => {
+  const children = staticGroupTree.children;
+
+  const groupId = staticGroupTree.id;
+  const groupConfig = staticLayerConfig[groupId];
+
+  const groupName = groupConfig.caption;
+  const name = groupConfig.caption;
+
+  const groupIsFiltered = groupConfig.isFiltered;
+  const groupIsExpanded = staticGroupTree.defaultExpanded;
+  const groupIsToggable = staticGroupTree.groupIsToggable;
+
+  const infogrouptitle = groupConfig.infogrouptitle;
+  const infogrouptext = groupConfig.infogrouptext;
+  const infogroupurl = groupConfig.infogroupurl;
+  const infogroupurltext = groupConfig.infogroupurltext;
+  const infogroupopendatalink = groupConfig.infogroupopendatalink;
+  const infogroupowner = groupConfig.infogroupowner;
 
   const [infoVisible, setInfoVisible] = useState(false);
 
-  // Openlayers functions does not use any of our props, so this is safe
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const allLayers = useRef(app.getMap().getAllLayers(), [app]);
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
-  useEffect(() => {
-    bindVisibleChangeForLayersInGroup();
-    return () => {
-      //LayerGroup is never unmounted atm but we remove listener in case this
-      //changes in the future
-      unbindVisibleChangeForLayersInGroup();
-    };
-    // This useEffect corresponds to `componentDidMount` in the previous
-    // version. It should never re-run.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const allLeafLayersInGroup = getAllLayerIdsInGroup(staticGroupTree);
 
-  // TODO This is a workaround for this component until we change the
-  // LayerSwitcher state model. Re-render whenever any layer in the group
-  // changes.
-  // We force update when a layer in this group has changed visibility to
-  // be able to sync togglebuttons in GUI
-  // eslint-disable-next-line no-unused-vars
-  const [_, forceUpdate] = useState(false);
-  const layerVisibilityChanged = (_) => {
-    forceUpdate((v) => v + 1);
-    // setExpanded(expanded);
-  };
+  const filterHitsInGroup =
+    filterHits && filterHits.intersection(new Set(allLeafLayersInGroup));
+  // hasFilterHits === null means that the filter isn't active
+  const hasNoFilterHits = filterHitsInGroup && filterHitsInGroup?.size === 0;
+  const filterActiveAndHasHits = filterHits && !hasNoFilterHits;
+  if (hasNoFilterHits) {
+    return null;
+  }
 
-  const hasLayers = (group) => {
-    return group.layers && group.layers?.length > 0;
-  };
+  const hasVisibleLayer = allLeafLayersInGroup.some(
+    (id) => layersState[id]?.visible
+  );
+  const hasAllLayersVisible = allLeafLayersInGroup.every(
+    (id) => layersState[id]?.visible
+  );
 
-  const hasSubGroups = (group) => {
-    return group.groups && group.groups?.length > 0;
-  };
-
-  const getAllLayersInGroupAndSubGroups = (groups) => {
-    return groups.reduce((layers, group) => {
-      if (hasSubGroups(group)) {
-        layers = [...layers, ...getAllLayersInGroupAndSubGroups(group.groups)];
-      }
-      return [...layers, ...group.layers];
-    }, []);
-  };
-
-  const getAllMapLayersReferencedByGroup = () => {
-    const allLayersInGroup = getAllLayersInGroupAndSubGroups([group]);
-    return app
-      .getMap()
-      .getLayers()
-      .getArray()
-      .filter((mapLayer) => {
-        return allLayersInGroup.find((layer) => {
-          return layer.id === mapLayer.get("name");
-        });
-      });
-  };
-
-  const bindVisibleChangeForLayersInGroup = () => {
-    getAllMapLayersReferencedByGroup().forEach((layer) => {
-      layer.on("change:visible", layerVisibilityChanged);
-    });
-  };
-
-  const unbindVisibleChangeForLayersInGroup = () => {
-    getAllMapLayersReferencedByGroup().forEach((layer) => {
-      layer.un("change:visible", layerVisibilityChanged);
-    });
-  };
-
-  const layerInMap = (layer) => {
-    const layers = app.getMap().getLayers().getArray();
-    let foundMapLayer = layers.find((mapLayer) => {
-      return mapLayer.get("name") === layer.id;
-    });
-
-    if (foundMapLayer && foundMapLayer.getVisible()) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  const areSubGroupsAndLayersSemiToggled = (group) => {
-    let someSubItemToggled = false;
-    if (hasLayers(group)) {
-      someSubItemToggled = group.layers.some((layer) => {
-        return layerInMap(layer);
-      });
-    }
-
-    if (hasSubGroups(group) && !someSubItemToggled) {
-      someSubItemToggled = group.groups.some((g) => {
-        return areSubGroupsAndLayersSemiToggled(g);
-      });
-    }
-    return someSubItemToggled;
-  };
-
-  const areAllGroupsAndSubGroupsToggled = (group) => {
-    let allGroupsToggled = true;
-    let allLayersToggled = true;
-    if (hasSubGroups(group)) {
-      allGroupsToggled = group.groups.every((g) => {
-        return areAllGroupsAndSubGroupsToggled(g);
-      });
-    }
-    if (hasLayers(group)) {
-      allLayersToggled = group.layers.every((layer) => {
-        return layerInMap(layer);
-      });
-    }
-    return allGroupsToggled && allLayersToggled;
-  };
-  /**
-   * @summary Loops through groups of objects and changes visibility for all layers within group.
-   *
-   * @param {boolean} visibility
-   * @param {array|object} groupsArray
-   * @memberof LayerGroup
-   */
-  const toggleGroups = (visibility, groupsArray) => {
-    // Sometimes groupsArray is an array of objects:
-    Array.isArray(groupsArray) &&
-      groupsArray.forEach((group) => {
-        // First call this function on all groups that might be inside this group
-        group.groups?.length &&
-          group.groups.forEach((g) => {
-            toggleGroups(visibility, g);
-          });
-
-        // Next, call toggleLayers on all layers in group
-        toggleLayers(visibility, group.layers);
-      });
-
-    // … but sometimes it's not an array but rather an object:
-    typeof groupsArray === "object" &&
-      groupsArray !== null &&
-      groupsArray.hasOwnProperty("groups") &&
-      toggleGroups(visibility, groupsArray.groups);
-
-    typeof groupsArray === "object" &&
-      groupsArray !== null &&
-      groupsArray.hasOwnProperty("layers") &&
-      toggleLayers(visibility, groupsArray.layers);
-  };
-
-  const toggleLayers = (visibility, layers) => {
-    allLayers.current
-      .filter((mapLayer) => {
-        return layers.some((layer) => layer.id === mapLayer.get("name"));
-      })
-      .forEach((mapLayer) => {
-        if (mapLayer.get("layerType") === "group") {
-          if (visibility === true) {
-            localObserver.publish("showLayer", mapLayer);
-          } else {
-            localObserver.publish("hideLayer", mapLayer);
-          }
-        } else {
-          mapLayer.setVisible(visibility);
-        }
-      });
-  };
+  const isToggled = hasAllLayersVisible;
+  const isSemiToggled = hasVisibleLayer && !hasAllLayersVisible;
 
   const toggleInfo = () => {
     setInfoVisible(!infoVisible);
   };
 
+  // TODO Refactor the expand close to state
   let groupsExpanded = false;
-  if (group.groups?.length === 1 && groups[0].expanded) {
-    groupsExpanded = groups[0].id;
-  }
+  // if (subGroups?.length === 1 && subGroups[0].expanded) {
+  //   groupsExpanded = subGroups[0].id;
+  // }
 
-  const isToggled = areAllGroupsAndSubGroupsToggled(group);
-  const isSemiToggled = areSubGroupsAndLayersSemiToggled(group);
   const toggleState = isToggled
     ? "checked"
     : isSemiToggled
@@ -322,20 +213,18 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
 
   return (
     <LayerGroupAccordion
-      display={!group.isFiltered ? "none" : "block"}
-      toggleable={group.toggled}
-      expanded={group.isExpanded}
+      display={groupIsFiltered ? "none" : "block"}
+      toggleable={groupIsToggable}
+      expanded={filterActiveAndHasHits || groupIsExpanded}
       toggleDetails={
         <ToggleAllComponent
-          toggleable={group.toggled}
+          toggleable={groupIsToggable}
           toggleState={toggleState}
           clickHandler={() => {
             if (isToggled) {
-              toggleGroups(false, group.groups);
-              toggleLayers(false, group.layers);
+              layerSwitcherDispatch.setGroupVisibility(groupId, false);
             } else {
-              toggleGroups(true, group.groups);
-              toggleLayers(true, group.layers);
+              layerSwitcherDispatch.setGroupVisibility(groupId, true);
             }
           }}
         />
@@ -355,8 +244,8 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
             />
             <ListItemText
               primaryTypographyProps={{
-                py: group.toggled ? 0 : "3px",
-                pl: group.toggled ? 0 : "3px",
+                py: groupIsToggable ? 0 : "3px",
+                pl: groupIsToggable ? 0 : "3px",
                 variant: "body1",
                 fontWeight: isToggled || isSemiToggled ? "bold" : "inherit",
               }}
@@ -364,7 +253,7 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
             />
           </div>
           <GroupInfoDetails
-            name={group.name}
+            name={groupName}
             infoVisible={infoVisible}
             infogrouptitle={infogrouptitle}
             infogrouptext={infogrouptext}
@@ -377,48 +266,62 @@ const LayerGroup = ({ app, group, localObserver, layerMap, options }) => {
       }
     >
       <div>
-        {group.layers?.map((layer) => {
-          const mapLayer = layerMap[layer.id];
-          // If mapLayer doesn't exist, the layer shouldn't be displayed
-          if (!mapLayer) {
+        {children?.map((child) => {
+          const layerId = child.id;
+
+          const layerState = layersState[layerId];
+
+          const layerSettings = staticLayerConfig[layerId];
+          if (!layerSettings) {
             return null;
           }
 
-          return mapLayer.get("layerType") === "group" ? (
+          if (layerSettings.layerType === "group") {
+            // The LayerGroup components check the filter to see if it should
+            // display itself or not. So we always have to render it regardless
+            // of the filter.
+            return (
+              <LayerGroup
+                expanded={groupsExpanded === layerId}
+                key={layerId}
+                globalObserver={globalObserver}
+                staticLayerConfig={staticLayerConfig}
+                staticGroupTree={children?.find((g) => g?.id === layerId)}
+                layersState={layersState}
+                filterHits={filterHits}
+                filterValue={filterValue}
+              />
+            );
+          }
+
+          if (filterHits && !filterHits.has(layerId)) {
+            // The filter is active and this layer is not a hit.
+            return null;
+          }
+
+          return layerSettings.layerType === "groupLayer" ? (
             <GroupLayer
-              display={!layer.isFiltered ? "none" : "block"}
-              key={mapLayer.get("name")}
-              layer={mapLayer}
+              key={layerId}
+              layerState={layerState}
+              layerConfig={layerSettings}
               draggable={false}
               toggleable={true}
-              app={app}
-              localObserver={localObserver}
-              groupLayer={layer}
+              globalObserver={globalObserver}
+              filterHits={filterHits}
+              filterValue={filterValue}
             />
           ) : (
             <LayerItem
-              display={!layer.isFiltered ? "none" : "block"}
-              key={mapLayer.get("name")}
-              layer={mapLayer}
+              key={layerId}
+              layerState={layerState}
+              layerConfig={layerSettings}
               draggable={false}
               toggleable={true}
-              app={app}
-              localObserver={localObserver}
-              groupLayer={layer}
+              globalObserver={globalObserver}
+              filterValue={filterValue}
             />
           );
         })}
-        {group.groups?.map((group, i) => (
-          <LayerGroup
-            expanded={groupsExpanded === group.id}
-            key={i}
-            group={group}
-            localObserver={localObserver}
-            layerMap={layerMap}
-            app={app}
-            options={options}
-          />
-        ))}
       </div>
     </LayerGroupAccordion>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, memo } from "react";
 
 // Material UI components
 import {
@@ -13,8 +13,6 @@ import {
 import HajkToolTip from "components/HajkToolTip";
 
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
-import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
-import WallpaperIcon from "@mui/icons-material/Wallpaper";
 import BuildOutlinedIcon from "@mui/icons-material/BuildOutlined";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
@@ -27,267 +25,147 @@ import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBullet
 import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
 
-// Custom hooks
-import useSnackbar from "../../../hooks/useSnackbar";
+import { useMapZoom } from "../LayerSwitcherProvider";
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
-export default function LayerItem({
-  layer,
-  toggleIcon,
+const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
+  if (!isToggled) {
+    return "unchecked";
+  }
+  if (!isVisibleAtZoom) {
+    return "checkedWithWarning";
+  }
+  if (isSemiToggled) {
+    return "semichecked";
+  }
+  if (isToggled) {
+    return "checked";
+  }
+  return "unchecked";
+};
+
+const LayerToggleComponent = ({ toggleState }) => {
+  return (
+    <IconButton disableRipple size="small" sx={{ pl: 0 }}>
+      {
+        {
+          checked: <CheckBoxIcon />,
+          semichecked: <CheckBoxIcon sx={{ fill: "gray" }} />,
+          unchecked: <CheckBoxOutlineBlankIcon />,
+          checkedWithWarning: (
+            <CheckBoxIcon
+              sx={{ fill: (theme) => theme.palette.warning.dark }}
+            />
+          ),
+        }[toggleState]
+      }
+    </IconButton>
+  );
+};
+
+const layerShouldShowLegendIcon = (layerType, isFakeMapLayer) =>
+  layerType === "group" ||
+  layerType === "base" ||
+  isFakeMapLayer ||
+  layerType === "system";
+
+const LayerLegendIcon = ({
+  legendIcon,
+  layerType,
+  isFakeMapLayer,
+  legendIsActive,
+  toggleLegend,
+}) => {
+  const layerLegendIcon = legendIcon;
+  if (layerLegendIcon !== undefined) {
+    return <LegendIcon url={layerLegendIcon} />;
+  } else if (layerType === "system") {
+    return <BuildOutlinedIcon sx={{ mr: "5px" }} />;
+  }
+
+  if (layerShouldShowLegendIcon(layerType, isFakeMapLayer)) {
+    return null;
+  }
+
+  return (
+    <Tooltip
+      placement="left"
+      title={legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"}
+    >
+      <IconButton
+        sx={{ p: 0.25, mr: "5px" }}
+        size="small"
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleLegend();
+        }}
+      >
+        <FormatListBulletedOutlinedIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  );
+};
+
+function LayerItem({
+  layerState,
+  layerConfig,
   clickCallback,
-  isBackgroundLayer,
   draggable,
   toggleable,
-  app,
+  globalObserver,
   display,
-  subLayersSection,
   visibleSubLayers,
   expandableSection,
-  visibleSubLayersCaption,
-  onSetZoomVisible,
-  subLayerClicked,
   showSublayers,
+  subLayersSection,
 }) {
   // WmsLayer load status, shows warning icon if !ok
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
-  // State for layer zoom visibility
-  const [zoomVisible, setZoomVisible] = useState(true);
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
-  const [visibleMinMaxZoomLayers, setVisibleMinMaxZoomLayers] = useState([]);
-  const prevVisibleMinMaxZoomLayersRef = useRef([]);
-  const prevLayerIsZoomVisible = useRef(null);
-  const [isGroupHidden, setIsGroupHidden] = useState(false);
-  const [showSnackbarOnClick, setShowSnackbarOnClick] = useState(false);
 
-  const { addToSnackbar, removeFromSnackbar } = useSnackbar();
   const theme = useTheme();
+  const mapZoom = useMapZoom();
 
-  const layerSwitcherConfig = app.config.mapConfig.tools.find(
-    (tool) => tool.type === "layerswitcher"
-  );
+  const { layerIsToggled } = layerState;
 
-  const minMaxZoomAlertOnToggleOnly =
-    layerSwitcherConfig?.options?.minMaxZoomAlertOnToggleOnly ?? false;
+  const {
+    layerId,
+    layerCaption,
+    layerType,
 
-  const layerUsesMinMaxZoom = useCallback(() => {
-    const lprops = layer.getProperties();
-    const maxZ = lprops.maxZoom ?? 0;
-    const minZ = lprops.minZoom ?? 0;
-    return (maxZ > 0 && maxZ < Infinity) || (minZ > 0 && minZ < Infinity);
-  }, [layer]);
+    layerIsFakeMapLayer,
+    layerMinZoom,
+    layerMaxZoom,
+    allSubLayers,
+    layerInfo,
+    layerLegendIcon,
+  } = layerConfig;
 
-  const addValue = useCallback(
-    (value) => {
-      if (minMaxZoomAlertOnToggleOnly) {
-        if (showSnackbarOnClick) {
-          // Add layer caption and show snackbar message on click.
-          addToSnackbar(layer.get("name"), value);
-        } else {
-          // Add layer caption to snackbar message, but don't show it.
-          addToSnackbar(layer.get("name"), value, true);
-        }
-        setShowSnackbarOnClick(false);
-      } else {
-        addToSnackbar(layer.get("name"), value);
-      }
-    },
-    [minMaxZoomAlertOnToggleOnly, showSnackbarOnClick, addToSnackbar, layer]
-  );
-
-  const removeValue = useCallback(
-    (value) => {
-      removeFromSnackbar(layer.get("name"), value);
-    },
-    [removeFromSnackbar, layer]
-  );
-
-  /**
-   * Handles the zoom end event and determines if the layer should be visible at the current zoom level.
-   * @param {boolean} wasClicked - True if the zoom button was clicked, false otherwise.
-   * @returns {boolean} - True if the layer is visible at the current zoom level, false otherwise.
-   */
-  const zoomEndHandler = useCallback(
-    (click) => {
-      const zoom = app.map.getView().getZoom();
-      const lprops = layer.getProperties();
-      const layerIsZoomVisible =
-        zoom > lprops.minZoom && zoom <= lprops.maxZoom;
-
-      const prevVisibleMinMaxZoomLayers =
-        prevVisibleMinMaxZoomLayersRef.current;
-      const isGroupLayer = Array.isArray(visibleSubLayersCaption);
-
-      const arraysAreEqual = (a, b) => {
-        if (a.length !== b.length) {
-          return false;
-        }
-        for (let i = 0; i < a.length; i++) {
-          if (a[i] !== b[i]) {
-            return false;
-          }
-        }
-        return true;
-      };
-
-      if (
-        layerIsZoomVisible !== prevLayerIsZoomVisible.current ||
-        isGroupLayer
-      ) {
-        if (!layerIsZoomVisible && (zoomVisible || !layer.get("visible"))) {
-          setVisibleMinMaxZoomLayers(
-            isGroupLayer ? visibleSubLayersCaption : [layer.get("caption")]
-          );
-        } else if (
-          !layerIsZoomVisible &&
-          layer.get("visible") &&
-          isGroupLayer
-        ) {
-          setVisibleMinMaxZoomLayers(
-            isGroupLayer ? visibleSubLayersCaption : [layer.get("caption")]
-          );
-        } else if (
-          !arraysAreEqual(visibleMinMaxZoomLayers, prevVisibleMinMaxZoomLayers)
-        ) {
-          setVisibleMinMaxZoomLayers([]);
-        } else {
-          setVisibleMinMaxZoomLayers([]);
-        }
-
-        if (isGroupLayer) {
-          onSetZoomVisible(layerIsZoomVisible);
-        }
-        prevLayerIsZoomVisible.current = layerIsZoomVisible;
-      }
-
-      setZoomVisible(layerIsZoomVisible);
-      return layerIsZoomVisible;
-    },
-    [
-      app.map,
-      layer,
-      zoomVisible,
-      visibleMinMaxZoomLayers,
-      visibleSubLayersCaption,
-      onSetZoomVisible,
-    ]
-  );
-
-  const triggerZoomCheck = useCallback(
-    (click, visible) => {
-      if (!layerUsesMinMaxZoom()) return;
-
-      zoomEndHandler(click, visible);
-
-      if (visible === false) {
-        removeValue(layer.get("caption"));
-      }
-    },
-    [layer, layerUsesMinMaxZoom, zoomEndHandler, removeValue]
-  );
-
-  useEffect(() => {
-    // Handler for zoom change event.
-    const handleChange = (l) => {
-      // Check if the layer is currently visible.
-      if (layer.get("visible")) {
-        // Trigger zoom check.
-        triggerZoomCheck(false, true);
-      }
-    };
-
-    // Subscribe to zoom changes.
-    const zoomChangeSubscription = app.globalObserver.subscribe(
-      "core.zoomEnd",
-      handleChange
-    );
-
-    // Call handleChange immediately to ensure initial state is correct.
-    handleChange();
-
-    // Cleanup function to unsubscribe when the component unmounts or dependencies change.
-    return () =>
-      app.globalObserver.unsubscribe("core.zoomEnd", zoomChangeSubscription);
-  }, [app.globalObserver, layer, triggerZoomCheck]);
-
-  useEffect(() => {
-    const zoom = app.map.getView().getZoom();
-    const lprops = layer.getProperties();
-    const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
-
-    if (
-      !layerIsZoomVisible &&
-      minMaxZoomAlertOnToggleOnly &&
-      (subLayerClicked || layer.get("visible"))
-    ) {
-      setShowSnackbarOnClick(true);
-    }
-
-    if (
-      (visibleSubLayers !== undefined &&
-        !visibleSubLayers &&
-        visibleMinMaxZoomLayers.length > 0) ||
-      (!layer.get("visible") && visibleMinMaxZoomLayers.length > 0)
-    ) {
-      setIsGroupHidden(true);
-    }
-  }, [
-    app.map,
-    layer,
-    minMaxZoomAlertOnToggleOnly,
-    subLayerClicked,
-    visibleSubLayers,
-    visibleMinMaxZoomLayers.length,
-  ]);
+  const legendIcon = layerInfo?.legendIcon || layerLegendIcon;
 
   useEffect(() => {
     const handleLoadStatusChange = (d) => {
-      if (wmsLayerLoadStatus !== "loaderror" && layer.get("name") === d.id) {
+      if (wmsLayerLoadStatus !== "loaderror" && layerId === d.id) {
         setWmsLayerLoadStatus(d.status);
       }
     };
 
     // Subscribe to layer load status.
-    const loadStatusSubscription = app.globalObserver.subscribe(
+    const loadStatusSubscription = globalObserver.subscribe(
       "layerswitcher.wmsLayerLoadStatus",
       handleLoadStatusChange
     );
 
     // Cleanup function to unsubscribe when the component unmounts or if the relevant dependencies change.
     return () =>
-      app.globalObserver.unsubscribe(
+      globalObserver.unsubscribe(
         "layerswitcher.wmsLayerLoadStatus",
         loadStatusSubscription
       );
-  }, [app.globalObserver, layer, wmsLayerLoadStatus]);
+  }, [globalObserver, layerId, wmsLayerLoadStatus]);
 
-  useEffect(() => {
-    if (isGroupHidden) {
-      visibleMinMaxZoomLayers.forEach((value) => {
-        removeValue(value);
-      });
-      setIsGroupHidden(false);
-    }
-
-    const prevVisibleMinMaxZoomLayers = prevVisibleMinMaxZoomLayersRef.current;
-
-    const addedValues = visibleMinMaxZoomLayers.filter(
-      (value) => !prevVisibleMinMaxZoomLayers.includes(value)
-    );
-
-    const removedValues = prevVisibleMinMaxZoomLayers.filter(
-      (value) => !visibleMinMaxZoomLayers.includes(value)
-    );
-
-    addedValues.forEach((value) => {
-      addValue(value);
-    });
-
-    removedValues.forEach((value) => {
-      removeValue(value);
-    });
-
-    prevVisibleMinMaxZoomLayersRef.current = visibleMinMaxZoomLayers;
-  }, [visibleMinMaxZoomLayers, isGroupHidden, addValue, removeValue]);
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   // Handles list item click
   const handleLayerItemClick = (e) => {
@@ -298,84 +176,30 @@ export default function LayerItem({
     }
 
     // Handle system layers by showing layer details directly
-    if (layer.get("layerType") === "system") {
+    if (layerType === "system") {
       showLayerDetails(e);
       return;
     }
 
-    // Continue with existing functionality for non-system layers
-    triggerZoomCheck(true, !layer.get("visible"));
-
     // Toggle visibility for non-system layers
-    if (layer.get("layerType") !== "system") {
-      // This check is technically redundant now but left for clarity
-      layer.set("visible", !layer.get("visible"));
+    // This check is technically redundant now but left for clarity
+    if (layerType !== "system") {
+      layerSwitcherDispatch.setLayerVisibility(layerId, !layerIsToggled);
     }
   };
 
-  // Render method for legend icon
-  const getIconFromLayer = () => {
-    const layerLegendIcon =
-      layer.get("layerInfo")?.legendIcon || layer.get("legendIcon");
-    if (layerLegendIcon !== undefined) {
-      return <LegendIcon url={layerLegendIcon} />;
-    } else if (layer.get("layerType") === "system") {
-      return <BuildOutlinedIcon sx={{ mr: "5px" }} />;
-    }
-    return renderLegendIcon();
-  };
+  const layerIsSemiToggled =
+    layerType === "groupLayer" &&
+    visibleSubLayers.length !== allSubLayers.length;
 
-  const renderLegendIcon = () => {
-    if (
-      layer.get("layerType") === "group" ||
-      layer.get("layerType") === "base" ||
-      layer.isFakeMapLayer ||
-      layer.get("layerType") === "system"
-    ) {
-      return null;
-    }
-    return (
-      <Tooltip
-        placement="left"
-        title={
-          legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"
-        }
-      >
-        <IconButton
-          sx={{ p: 0.25, mr: "5px" }}
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            setLegendIsActive(!legendIsActive);
-          }}
-        >
-          <FormatListBulletedOutlinedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    );
-  };
+  const layerIsVisibleAtZoom =
+    mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;
 
-  // Render method for checkbox icon
-  const getLayerToggleIcon = () => {
-    if (toggleIcon) {
-      return toggleIcon;
-    }
-    return !layer.get("visible") ? (
-      <CheckBoxOutlineBlankIcon />
-    ) : layer.get("layerType") === "group" &&
-      visibleSubLayers.length !== layer.subLayers.length ? (
-      <CheckBoxIcon sx={{ fill: "gray" }} />
-    ) : (
-      <CheckBoxIcon
-        sx={{
-          fill: (theme) =>
-            !zoomVisible && layer.get("visible") && !visibleSubLayers
-              ? theme.palette.warning.dark
-              : "",
-        }}
-      />
-    );
-  };
+  const toggleState = getLayerToggleState(
+    layerIsToggled,
+    layerIsSemiToggled,
+    layerIsVisibleAtZoom
+  );
 
   /**
    * Render the load information component.
@@ -398,16 +222,13 @@ export default function LayerItem({
   };
 
   // Show layer details action
-  const showLayerDetails = (e, specificLayer = layer) => {
+  const showLayerDetails = (e) => {
     e.stopPropagation();
-    app.globalObserver.publish("setLayerDetails", { layer: specificLayer });
+    globalObserver.publish("setLayerDetails", { layerId });
   };
 
   const drawOrderItem = () => {
     if (draggable) {
-      return true;
-    }
-    if (isBackgroundLayer && !toggleable) {
       return true;
     }
     return false;
@@ -428,8 +249,7 @@ export default function LayerItem({
       className="layer-item"
       style={{
         display: display,
-        marginLeft:
-          expandableSection || isBackgroundLayer || draggable ? 0 : "31px",
+        marginLeft: expandableSection || draggable ? 0 : "31px",
         borderBottom:
           legendIsActive || (drawOrderItem() && showSublayers)
             ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
@@ -471,7 +291,7 @@ export default function LayerItem({
           onClick={toggleable ? handleLayerItemClick : null}
           sx={{
             p: 0,
-            ml: isBackgroundLayer && !toggleable ? (draggable ? 0 : "20px") : 0,
+            ml: 0,
           }}
           dense
         >
@@ -486,36 +306,27 @@ export default function LayerItem({
               borderBottom: (theme) => renderBorder(theme),
             }}
           >
-            {toggleable && (
-              <IconButton disableRipple size="small" sx={{ pl: 0 }}>
-                {getLayerToggleIcon()}
-              </IconButton>
-            )}
-            {isBackgroundLayer && !toggleable ? (
-              layer.isFakeMapLayer ? (
-                <WallpaperIcon sx={{ mr: "5px", ml: 0 }} />
-              ) : (
-                <PublicOutlinedIcon sx={{ mr: "5px", ml: 0 }} />
-              )
-            ) : (
-              getIconFromLayer()
-            )}
+            {toggleable && <LayerToggleComponent toggleState={toggleState} />}
+            <LayerLegendIcon
+              legendIcon={legendIcon}
+              layerType={layerType}
+              isFakeMapLayer={layerIsFakeMapLayer}
+              legendIsActive={legendIsActive}
+              toggleLegend={() => setLegendIsActive(!legendIsActive)}
+            />
             <ListItemText
-              primary={layer.get("caption")}
+              primary={layerCaption}
               primaryTypographyProps={{
                 pr: 5,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 variant: "body1",
-                fontWeight:
-                  layer.get("visible") && !draggable && !isBackgroundLayer
-                    ? "bold"
-                    : "inherit",
+                fontWeight: layerIsToggled && !draggable ? "bold" : "inherit",
               }}
             />
             <ListItemSecondaryAction>
               {renderStatusIcon()}
-              {isBackgroundLayer && !toggleable && !draggable ? (
+              {!toggleable && !draggable ? (
                 <IconButton
                   size="small"
                   disableTouchRipple
@@ -527,7 +338,7 @@ export default function LayerItem({
                   </Tooltip>
                 </IconButton>
               ) : null}
-              {layer.isFakeMapLayer !== true && (
+              {layerIsFakeMapLayer !== true && (
                 <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
                   <KeyboardArrowRightOutlinedIcon
                     sx={{
@@ -540,17 +351,16 @@ export default function LayerItem({
           </Box>
         </ListItemButton>
       </Box>
-      {layer.get("layerType") === "group" ||
-      layer.get("layerType") === "base" ||
-      layer.isFakeMapLayer ||
-      layer.get("layerType") === "system" ? null : (
+      {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
         <LegendImage
-          layerItemDetails={{ layer: layer }}
+          comment="TODO Fix the mess below"
+          src={Array.isArray(layerInfo.legend) && layerInfo.legend[0]?.url}
           open={legendIsActive}
-          subLayerIndex={null}
         ></LegendImage>
       )}
       {subLayersSection && subLayersSection}
     </div>
   );
 }
+
+export default memo(LayerItem);

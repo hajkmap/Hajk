@@ -57,14 +57,21 @@ function LayerItemDetails({
       ? null
       : layerItemDetails?.subLayerIndex;
   const showOpacity = subLayerIndex !== null ? false : true;
+
+  // TODO Is this correct? Should it not be shown for group layers?
   const showLegend =
     layerItemDetails?.layer.get("layerType") === "group" &&
     subLayerIndex === null
       ? false
       : true;
 
+  const layerInfo = layerItemDetails?.layer?.get("layerInfo");
+  const legendInfo =
+    layerInfo?.legend?.length > 0 && layerInfo?.legend[subLayerIndex ?? 0];
+  const legendUrl = legendInfo?.url;
+
   // Handle opacity slider changes
-  const handleOpacitySliderChange = (e, newValue) => {
+  const handleOpacitySliderChange = (_, newValue) => {
     layerItemDetails.layer.set("opacity", newValue);
   };
 
@@ -268,11 +275,7 @@ function LayerItemDetails({
                 app={app}
                 layer={layerItemDetails.layer}
               ></LayerItemInfo>
-              <LegendImage
-                layerItemDetails={layerItemDetails}
-                open={legendIsActive}
-                subLayerIndex={subLayerIndex}
-              ></LegendImage>
+              <LegendImage src={legendUrl} open={legendIsActive}></LegendImage>
             </Box>
             <Stack direction="row" alignItems="center">
               <IconButton

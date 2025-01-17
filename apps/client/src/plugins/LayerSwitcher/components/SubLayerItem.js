@@ -16,16 +16,18 @@ import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRig
 import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 
 export default function SubLayerItem({
-  layer,
+  layerId,
+  layersInfo,
   subLayer,
   toggleable,
-  app,
-  display,
+  globalObserver,
   visible,
   toggleSubLayer,
   subLayerIndex,
   zoomVisible,
 }) {
+  const subLayerInfo = layersInfo[subLayer];
+
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
   // Render method for checkbox icon
@@ -45,16 +47,16 @@ export default function SubLayerItem({
   // Show layer details action
   const showLayerDetails = (e) => {
     e.stopPropagation();
-    app.globalObserver.publish("setLayerDetails", {
-      layer: layer,
+    globalObserver.publish("setLayerDetails", {
+      layerId,
       subLayerIndex: subLayerIndex,
     });
   };
 
   // Render method for legend icon
   const getIconFromLayer = () => {
-    if (layer.layersInfo[subLayer].legendIcon) {
-      return <LegendIcon url={layer.layersInfo[subLayer].legendIcon} />;
+    if (subLayerInfo.legendIcon) {
+      return <LegendIcon url={subLayerInfo.legendIcon} />;
     }
     return renderLegendIcon();
   };
@@ -81,8 +83,11 @@ export default function SubLayerItem({
     );
   };
 
+  if (!subLayerInfo) {
+    return null;
+  }
   return (
-    <div style={{ display: display, marginLeft: "32px" }}>
+    <div style={{ marginLeft: "32px" }}>
       <ListItemButton
         disableRipple
         onClick={() => (toggleable ? toggleSubLayer(subLayer, visible) : null)}
@@ -108,7 +113,7 @@ export default function SubLayerItem({
         )}
         {getIconFromLayer()}
         <ListItemText
-          primary={layer.layersInfo[subLayer].caption}
+          primary={subLayerInfo.caption}
           primaryTypographyProps={{
             pr: 5,
             overflow: "hidden",
@@ -126,11 +131,10 @@ export default function SubLayerItem({
           </IconButton>
         </ListItemSecondaryAction>
       </ListItemButton>
-      {layer.layersInfo[subLayer].legendIcon ? null : (
+      {subLayerInfo.legendIcon ? null : (
         <LegendImage
-          layerItemDetails={{ layer: layer }}
+          src={subLayerInfo.legend}
           open={legendIsActive}
-          subLayerIndex={subLayerIndex}
         ></LegendImage>
       )}
     </div>

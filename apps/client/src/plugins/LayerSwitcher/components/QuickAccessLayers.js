@@ -6,12 +6,9 @@ import GroupLayer from "./GroupLayer";
 import { Box } from "@mui/material";
 
 export default function QuickAccessLayers({
-  app,
   globalObserver,
   map,
-  localObserver,
   filterValue,
-  treeData,
 }) {
   // State that contains the layers that are currently visible
   const [quickAccessLayers, setQuickAccessLayers] = useState([]);
@@ -38,13 +35,18 @@ export default function QuickAccessLayers({
     return null;
   }, []);
 
+  // Should the search affect QuickAccess? It's simpler without.
+  // Kind of defeat the purpose of quick access if you have so many layers in
+  // it that you have to search.
+  // So for now the search hides quick access.
+  //
   // A helper that grabs all OL layers with state quickAccess
   const getQuickAccessLayers = useCallback(() => {
     // Get all quickaccess layers
     const layers = map.getAllLayers().filter((l) => {
       return l.get("quickAccess") === true;
     });
-    if (filterValue === "") {
+    if (filterValue === "" || filterValue === null) {
       return layers;
     } else {
       // If filter is applied, only show layers that match the filter
@@ -96,6 +98,24 @@ export default function QuickAccessLayers({
       }}
     >
       {quickAccessLayers.map((l) => {
+        const layerState = {
+          layerIsToggled: l.get("visible"),
+          visibleSubLayers: l.get("subLayers"),
+        };
+
+        const layerConfig = {
+          layerId: l.get("name"),
+          layerCaption: l.get("caption"),
+          layerType: l.get("layerType"),
+
+          layerIsFakeMapLayer: l.isFakeMapLayer,
+          layerMinZoom: l.get("minZoom"),
+          layerMaxZoom: l.get("maxZoom"),
+          numberOfSubLayers: l.subLayers?.length,
+          layerInfo: l.get("layerInfo"),
+          layerLegendIcon: l.get("legendIcon"),
+        };
+
         return l.get("layerType") === "base" ? (
           <BackgroundLayer
             key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
@@ -107,21 +127,20 @@ export default function QuickAccessLayers({
         ) : l.get("layerType") === "group" ? (
           <GroupLayer
             key={l.ol_uid}
-            layer={l}
-            app={app}
-            localObserver={localObserver}
+            layerState={layerState}
+            layerConfig={layerConfig}
+            globalObserver={globalObserver}
             toggleable={true}
             draggable={false}
-            groupLayer={findLayerById(treeData, l.get("name"))}
-            quickAccessLayer={true}
           ></GroupLayer>
         ) : (
           <LayerItem
             key={l.ol_uid}
-            layer={l}
+            layerState={layerState}
+            layerConfig={layerConfig}
             draggable={false}
             toggleable={true}
-            app={app}
+            globalObserver={globalObserver}
           />
         );
       })}

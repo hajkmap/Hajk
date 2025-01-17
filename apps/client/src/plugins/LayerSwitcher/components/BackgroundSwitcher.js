@@ -1,9 +1,11 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { isValidLayerId } from "../../../utils/Validator";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
 import BackgroundLayerItem from "./BackgroundLayerItem";
 import Box from "@mui/material/Box";
+
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
 const WHITE_BACKROUND_LAYER_ID = "-1";
 const BLACK_BACKROUND_LAYER_ID = "-2";
@@ -64,25 +66,29 @@ const BackgroundSwitcher = ({
   globalObserver,
   map,
 }) => {
+  // TODO Read the selectedLayerId from the `appStateInHash`
   const [selectedLayerId, setSelectedLayerId] = useState(null);
 
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
+
   const osmLayerRef = useRef(
-    enableOSM &&
-      new TileLayer({
-        visible: false,
-        source: new OSM({
-          reprojectionErrorThreshold: 5,
-        }),
-        zIndex: -1,
-        layerType: "base",
-        rotateMap: "n", // OpenStreetMap should be rotated to North
-        name: "osm-layer",
-        caption: "OpenStreetMap",
-        layerInfo: {
-          caption: "OpenStreetMap",
+    enableOSM
+      ? new TileLayer({
+          visible: false,
+          source: new OSM({
+            reprojectionErrorThreshold: 5,
+          }),
+          zIndex: -1,
           layerType: "base",
-        },
-      })
+          rotateMap: "n", // OpenStreetMap should be rotated to North
+          name: "osm-layer",
+          caption: "OpenStreetMap",
+          layerInfo: {
+            caption: "OpenStreetMap",
+            layerType: "base",
+          },
+        })
+      : null
   );
 
   useEffect(() => {
@@ -137,44 +143,38 @@ const BackgroundSwitcher = ({
    * @summary Hides previously selected background and shows current selection.
    * @param {Object} e The event object, contains target's value
    */
-  const onLayerClick = (newSelectedId) => () => {
-    const prevSelectedLayerId = selectedLayerId;
+  const onLayerClick = useCallback(
+    (newSelectedId) => {
+      setSelectedLayerId(newSelectedId);
 
-    setSelectedLayerId(newSelectedId);
+      // Publish event to ensure all other background layers are disabled
+      globalObserver.publish(
+        "layerswitcher.backgroundLayerChanged",
+        newSelectedId
+      );
 
-    // Publish event to ensure all other background layers are disabled
-    globalObserver.publish(
-      "layerswitcher.backgroundLayerChanged",
-      newSelectedId
-    );
+      // Reset to no layer showing
+      osmLayerRef?.current?.setVisible(false);
 
-    if (isSpecialBackgroundLayer(newSelectedId)) {
-      if (isOSMLayer(newSelectedId)) {
-        const osmLayer = map
-          .getAllLayers()
-          .find((l) => l.get("name") === "osm-layer");
-        osmLayer.setVisible(true);
-        setSpecialBackground(WHITE_BACKROUND_LAYER_ID);
+      if (isSpecialBackgroundLayer(newSelectedId)) {
+        // Undefined means Set all layers to invisible.
+        layerSwitcherDispatch.setBackgroundLayer(undefined);
+
+        if (isOSMLayer(newSelectedId)) {
+          osmLayerRef.current?.setVisible(true);
+          setSpecialBackground(WHITE_BACKROUND_LAYER_ID);
+        } else {
+          setSpecialBackground(newSelectedId);
+        }
       } else {
-        setSpecialBackground(newSelectedId);
+        // Reset the background to white
+        setSpecialBackground(WHITE_BACKROUND_LAYER_ID);
+        // layerMap[newSelectedId].setVisible(true);
+        layerSwitcherDispatch.setBackgroundLayer(newSelectedId);
       }
-    } else {
-      // Reset the background to white
-      setSpecialBackground(WHITE_BACKROUND_LAYER_ID);
-      layerMap[newSelectedId].setVisible(true);
-    }
-
-    if (isSpecialBackgroundLayer(prevSelectedLayerId)) {
-      if (isOSMLayer(prevSelectedLayerId)) {
-        osmLayerRef.current.setVisible(false);
-      }
-    } else {
-      // If the `enableAppStateInHash` setting is turned on and the page is
-      // reloaded then prevSelectedLayerId will be null. I think the best way
-      // to handle that case is to silently ignore this.
-      layerMap[prevSelectedLayerId]?.setVisible(false);
-    }
-  };
+    },
+    [globalObserver, layerSwitcherDispatch]
+  );
 
   // TODO This filter should be moved to the core application.
   const layersToShow = layers.filter((layer) => {
@@ -200,7 +200,9 @@ const BackgroundSwitcher = ({
             checked: selectedLayerId === WHITE_BACKROUND_LAYER_ID,
           })}
           globalObserver={globalObserver}
-          clickCallback={onLayerClick(WHITE_BACKROUND_LAYER_ID)}
+          clickCallback={onLayerClick}
+          layerId={WHITE_BACKROUND_LAYER_ID}
+          isFakeMapLayer={true}
         />
       )}
 
@@ -215,7 +217,9 @@ const BackgroundSwitcher = ({
             checked: selectedLayerId === BLACK_BACKROUND_LAYER_ID,
           })}
           globalObserver={globalObserver}
-          clickCallback={onLayerClick(BLACK_BACKROUND_LAYER_ID)}
+          clickCallback={onLayerClick}
+          layerID={BLACK_BACKROUND_LAYER_ID}
+          isFakeMapLayer={true}
         />
       )}
 
@@ -226,7 +230,9 @@ const BackgroundSwitcher = ({
           selected={isOSMLayer(selectedLayerId)}
           layer={osmLayerRef.current}
           globalObserver={globalObserver}
-          clickCallback={onLayerClick(OSM_BACKGROUND_LAYER_ID)}
+          clickCallback={onLayerClick}
+          layerId={OSM_BACKGROUND_LAYER_ID}
+          isFakeMapLayer={false}
         />
       )}
       {layersToShow.map((layerConfig, i) => (
@@ -236,7 +242,9 @@ const BackgroundSwitcher = ({
           selected={selectedLayerId === layerConfig.name}
           layer={layerMap[layerConfig.name]}
           globalObserver={globalObserver}
-          clickCallback={onLayerClick(layerConfig.name)}
+          clickCallback={onLayerClick}
+          layerId={layerConfig.name}
+          isFakeMapLayer={false}
         />
       ))}
     </Box>

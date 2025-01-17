@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import { AppBar, Tab, Tabs, Box } from "@mui/material";
+import { AppBar, Tab, Tabs, Box, ListItemText } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
@@ -18,6 +18,8 @@ import { debounce } from "utils/debounce";
 const StyledAppBar = styled(AppBar)(() => ({
   top: -10,
 }));
+
+const DEFAULT_MIN_FILTER_LENGTH = 3;
 
 /**
  * BreadCrumbs are a feature used to "link" content between LayerSwitcher
@@ -40,74 +42,7 @@ const BreadCrumbsContainer = ({ map, app }) => {
   );
 };
 
-// Prepare tree data for filtering
-const addLayerNames = (data, olLayerMap) => {
-  const node = data.map((item) => {
-    const layers = item.layers?.map((layer) => {
-      const mapLayer = olLayerMap[layer.id];
-      if (!mapLayer) {
-        console.warn(`Maplayer with id ${layer.id} not found`);
-        return undefined;
-      }
-
-      const subLayers =
-        mapLayer.get("layerType") === "group" &&
-        mapLayer
-          .get("subLayers")
-          .map((subLayer) => {
-            // If the `layerInfo` is missing from a sublayer we ignore it
-            // completely.
-            const subLayerInfo = mapLayer.layersInfo[subLayer];
-            if (!subLayerInfo) {
-              return null;
-            }
-
-            return {
-              id: subLayer,
-              name: subLayerInfo.caption,
-              isFiltered: true,
-              changeIndicator: new Date(),
-            };
-          })
-          .filter((sl) => !!sl);
-
-      return {
-        drawOrder: layer.drawOrder,
-        infobox: layer.infobox,
-        layerType: layer.layerType,
-        visibleAtStart: layer.visibleAtStart,
-        visibleForGroups: layer.visibleForGroups,
-        id: layer.id,
-        name: mapLayer.get("caption"),
-        isFiltered: true,
-        subLayers: subLayers,
-      };
-    });
-
-    return {
-      id: item.id,
-      name: item.name,
-      expanded: item.expanded,
-      toggled: item.toggled,
-      type: item.type,
-      layers,
-      infogroupvisible: item.infogroupvisible,
-      infogrouptitle: item.infogrouptitle,
-      infogrouptext: item.infogrouptext,
-      infogroupurl: item.infogroupurl,
-      infogroupurltext: item.infogroupurltext,
-      infogroupopendatalink: item.infogroupopendatalink,
-      infogroupowner: item.infofitemowner,
-      subLayers: item.sublayers,
-      parent: item.parent,
-      isFiltered: true,
-      isExpanded: false,
-      changeIndicator: new Date(),
-      groups: item.groups ? addLayerNames(item.groups, olLayerMap) : undefined,
-    };
-  });
-  return node;
-};
+// TODO Turn this to Functional component
 
 class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
@@ -128,7 +63,6 @@ class LayersSwitcherView extends React.PureComponent {
         a[b.get("name")] = b;
         return a;
       }, {});
-    this.layerTree = addLayerNames(this.options.groups, this.olLayerMap);
     this.baseLayers = props.map
       .getLayers()
       .getArray()
@@ -141,7 +75,6 @@ class LayersSwitcherView extends React.PureComponent {
       displayContentOverlay: null, // 'quickAccessPresets' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
       filterValue: "",
-      treeData: this.layerTree,
       scrollPositions: {
         tab0: 0,
         tab1: 0,
@@ -152,6 +85,19 @@ class LayersSwitcherView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.globalObserver;
 
+    this.staticLayerConfig = this.props.staticLayerConfig;
+    this.staticLayerTree = this.props.staticLayerTree;
+
+    this.backgroundLayerMap = this.baseLayers.map((l) => ({
+      id: l["name"],
+      name: l["caption"],
+      visible: l["visible"],
+      zIndex: l["zIndex"],
+    }));
+
+    this.minFilterLength =
+      this.options?.layerFilterMinLength ?? DEFAULT_MIN_FILTER_LENGTH;
+
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
         this.setState({
@@ -160,9 +106,19 @@ class LayersSwitcherView extends React.PureComponent {
       }
     });
 
-    props.app.globalObserver.subscribe("setLayerDetails", (details) => {
-      if (details) {
+    props.app.globalObserver.subscribe("setLayerDetails", (payload) => {
+      if (payload) {
+        const layerId = payload.layerId;
+        if (!layerId) {
+          return;
+        }
+        const layer = this.olLayerMap[layerId];
+
         // Set scroll position state when layer details is opened
+        const details = {
+          layer,
+          subLayerIndex: payload.subLayerIndex,
+        };
         const currentScrollPosition = this.getScrollPosition();
         this.setState((prevState) => ({
           layerItemDetails: details,
@@ -178,29 +134,6 @@ class LayersSwitcherView extends React.PureComponent {
         });
       }
     });
-
-    // TODO This is a work around for showing/hideing group layers which are
-    // collapsed. It's also the GroupLayer component that listens for this.
-    // That should be refactored.
-    // TODO Unsubscribe
-    this.localHideLayerSubscription = this.localObserver.subscribe(
-      "hideLayer",
-      (la) => {
-        // TODO Make sure QuickAccess updates
-        // Send some event
-        la.setVisible(false);
-        // this.setState({ treeData: [...this.layerTree] });
-      }
-    );
-    this.localShowLayerSubscription = this.localObserver.subscribe(
-      "showLayer",
-      (la) => {
-        la.setVisible(true);
-        // TODO Make sure QuickAccess updates
-        // Send some event
-        // this.setState({ treeData: [...this.layerTree] });
-      }
-    );
   }
 
   // Handles click on Layerpackage button and backbutton
@@ -220,88 +153,6 @@ class LayersSwitcherView extends React.PureComponent {
     }));
   };
 
-  // Filter tree data
-  filterTree = (node, filterText, parentMatch = false) => {
-    let foundInChild = false;
-
-    // Determine if the current node matches the filter
-    const selfMatch =
-      filterText === "" ||
-      node.name.toLocaleLowerCase().includes(filterText.toLocaleLowerCase());
-
-    // If the current node matches the filter criteria or if there is a parent match, mark it as filtered
-    if (parentMatch || selfMatch) {
-      this.updateNode(node, true, true); // Update node to be visible
-      foundInChild = true;
-    }
-
-    // Process child layers
-    if (node.layers) {
-      node.layers.forEach((layer) => {
-        // Pass true if either parent matches, or this node itself matches
-        foundInChild =
-          this.filterTree(layer, filterText, parentMatch || selfMatch) ||
-          foundInChild;
-      });
-    }
-
-    // Process child groups
-    if (node.groups) {
-      node.groups.forEach((group) => {
-        // Pass true if either parent matches, or this node itself matches
-        foundInChild =
-          this.filterTree(group, filterText, parentMatch || selfMatch) ||
-          foundInChild;
-      });
-    }
-
-    // Update the current node based on child findings or its own match status
-    this.updateNode(node, foundInChild || selfMatch, false);
-
-    // If a parentMatch exists or the current node itself is a match, check the expandFilteredResults setting to determine if the node should be expanded
-    if (foundInChild || selfMatch) {
-      if (this.options.expandFilteredResults) {
-        node.isExpanded = true; // Expand the node if expandFilteredResults is true
-      }
-    }
-
-    return foundInChild || selfMatch;
-  };
-
-  updateNode = (node, isFiltered, compare) => {
-    if (!compare) {
-      // Indicate that node has changed
-      node.changeIndicator = new Date();
-    } else if (node.isFiltered !== isFiltered) {
-      // Indicate that node has changed
-      node.changeIndicator = new Date();
-    }
-    node.isFiltered = isFiltered;
-  };
-
-  setChildrenFiltered = (node, value) => {
-    if (node.layers) {
-      node.layers.forEach((layer) => {
-        this.updateNode(layer, value, true);
-        this.setChildrenFiltered(layer, value);
-      });
-    }
-
-    if (node.groups) {
-      node.groups.forEach((group) => {
-        this.updateNode(group, value, true);
-        this.setChildrenFiltered(group, value);
-      });
-    }
-
-    if (node.subLayers) {
-      node.subLayers.forEach((subLayer) => {
-        this.updateNode(subLayer, value, true);
-        subLayer.isFiltered = value;
-      });
-    }
-  };
-
   // Handles click on Favorites button and backbutton
   handleFavoritesViewToggle = (quickAccessPresetsState) => {
     quickAccessPresetsState?.event?.stopPropagation();
@@ -317,52 +168,35 @@ class LayersSwitcherView extends React.PureComponent {
     }));
   };
 
+  // TODO Use this function
   collapseAllGroups = () => {
-    const collapseGroups = (groups) => {
-      groups.forEach((group) => {
-        group.isExpanded = false;
-        if (group.groups && group.groups.length > 0) {
-          collapseGroups(group.groups);
-        }
-      });
-    };
-
-    collapseGroups(this.layerTree);
+    // const collapseGroups = (groups) => {
+    //   groups.forEach((group) => {
+    //     group.isExpanded = false;
+    //     if (group.groups && group.groups.length > 0) {
+    //       collapseGroups(group.groups);
+    //     }
+    //   });
+    // };
+    // collapseGroups(this.layerTree);
   };
 
-  // Call this method for each root node in the tree when the filter is cleared
-  resetFilterStatus = (node) => {
-    node.isFiltered = true; // Mark node as filtered
-    node.isExpanded = false; // Collapse all groups by default
-    node.changeIndicator = new Date(); // Update change indicator
-
-    // Recursively reset status for layers, groups, and subLayers
-    if (node.layers) {
-      node.layers.forEach((layer) => this.resetFilterStatus(layer));
-    }
-    if (node.groups) {
-      node.groups.forEach((group) => this.resetFilterStatus(group));
-    }
-    if (node.subLayers) {
-      node.subLayers.forEach((subLayer) => this.resetFilterStatus(subLayer));
+  handleFilterSubmit = (value) => {
+    const filterValue = value === "" ? null : value;
+    if (filterValue?.length > 0) {
+      this.setState({ filterValue });
     }
   };
 
   // Handles filter functionality
   handleFilterValueChange = debounce((value) => {
-    const filterCleared = value === "" && this.state.filterValue !== "";
-    this.setState({ filterValue: value });
+    const filterValue = value === "" ? null : value;
 
-    if (filterCleared) {
-      // Reset filter status when filter is cleared
-      this.layerTree.forEach((node) => this.resetFilterStatus(node));
-    } else {
-      // Apply filter and propagate matches
-      this.layerTree.forEach((node) => this.filterTree(node, value));
+    if (value === "") {
+      this.setState({ filterValue: null });
+    } else if (filterValue.length >= this.minFilterLength) {
+      this.setState({ filterValue });
     }
-
-    // Trigger re-render
-    this.setState({ treeData: [...this.layerTree] });
   }, 100);
 
   /**
@@ -438,7 +272,33 @@ class LayersSwitcherView extends React.PureComponent {
   };
 
   render() {
-    const { windowVisible } = this.props;
+    const { windowVisible, layersState } = this.props;
+
+    const filterValue = this.state.filterValue;
+    let filterHits = null;
+
+    const searchIndex = Object.values(this.staticLayerConfig).flatMap((l) => {
+      let subLayerIndex = [];
+      if (l.allSubLayers?.length > 1) {
+        subLayerIndex = l.allSubLayers.map((sl) => {
+          const subLayerInfo = l.layerInfo.layersInfo[sl];
+          return [subLayerInfo.caption, l.id];
+        });
+      }
+
+      return [...subLayerIndex, [l.caption, l.id]];
+    });
+
+    if (filterValue) {
+      const lowercaseFilterValue = filterValue.toLocaleLowerCase();
+      const hits = searchIndex
+        ?.filter(([name, _]) =>
+          name.toLocaleLowerCase().includes(lowercaseFilterValue)
+        )
+        ?.map(([_, id]) => id);
+      filterHits = new Set(hits);
+    }
+
     return (
       <div
         style={{
@@ -471,7 +331,7 @@ class LayersSwitcherView extends React.PureComponent {
           style={{ position: "relative", height: "100%", overflowY: "auto" }}
         >
           <Box
-            sx={{
+            style={{
               display:
                 this.state.activeTab === 0 &&
                 this.state.displayContentOverlay === null
@@ -481,44 +341,65 @@ class LayersSwitcherView extends React.PureComponent {
           >
             {this.props.options.showFilter && (
               <LayerListFilter
+                minFilterLength={this.minFilterLength}
+                handleFilterSubmit={(value) => this.handleFilterSubmit(value)}
                 handleFilterValueChange={(value) =>
                   this.handleFilterValueChange(value)
                 }
               />
             )}
-            <QuickAccessView
-              show={this.props.options.showQuickAccess}
-              map={this.props.map}
-              app={this.props.app}
-              localObserver={this.localObserver}
-              globalObserver={this.globalObserver}
-              enableQuickAccessPresets={
-                this.props.options.enableQuickAccessPresets
-              }
-              enableUserQuickAccessFavorites={
-                this.props.options.enableUserQuickAccessFavorites
-              }
-              handleQuickAccessPresetsToggle={(e) =>
-                this.handleQuickAccessPresetsToggle({ event: e })
-              }
-              favoritesViewDisplay={
-                this.state.displayContentOverlay === "favorites"
-              }
-              handleFavoritesViewToggle={this.handleFavoritesViewToggle}
-              favoritesInfoText={this.options.userQuickAccessFavoritesInfoText}
-              treeData={this.state.treeData}
-              filterValue={this.state.filterValue}
-            />
-            {this.state.treeData.map((group, i) => (
-              <LayerGroup
-                key={i}
-                group={group}
-                localObserver={this.localObserver}
-                layerMap={this.olLayerMap}
+            {filterHits === null && (
+              <QuickAccessView
+                show={this.props.options.showQuickAccess}
+                map={this.props.map}
                 app={this.props.app}
-                options={this.props.options}
+                globalObserver={this.globalObserver}
+                enableQuickAccessPresets={
+                  this.props.options.enableQuickAccessPresets
+                }
+                enableUserQuickAccessFavorites={
+                  this.props.options.enableUserQuickAccessFavorites
+                }
+                handleQuickAccessPresetsToggle={(e) =>
+                  this.handleQuickAccessPresetsToggle({ event: e })
+                }
+                favoritesViewDisplay={
+                  this.state.displayContentOverlay === "favorites"
+                }
+                handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+                favoritesInfoText={
+                  this.options.userQuickAccessFavoritesInfoText
+                }
+                filterValue={this.state.filterValue}
+                layersState={layersState}
+              />
+            )}
+            {this.staticLayerTree.map((group) => (
+              <LayerGroup
+                key={group.id}
+                staticLayerConfig={this.staticLayerConfig}
+                staticGroupTree={group}
+                layersState={layersState}
+                globalObserver={this.globalObserver}
+                filterHits={filterHits}
+                filterValue={this.state.filterValue}
               />
             ))}
+            {filterHits !== null && filterHits.size === 0 && (
+              <ListItemText
+                sx={{
+                  py: 1,
+                  px: 4,
+                }}
+                primary="Inga resultat"
+                primaryTypographyProps={{
+                  pr: 5,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  variant: "body1",
+                }}
+              />
+            )}
           </Box>
           {this.props.options.enableQuickAccessPresets && (
             <QuickAccessPresets
