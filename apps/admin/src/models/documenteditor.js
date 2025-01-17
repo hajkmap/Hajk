@@ -58,12 +58,27 @@ var documentEditor = Model.extend({
         .replaceAll("&gt;", ">");
     });
 
+    const method = url.includes("/api/v2/") ? "put" : "post";
+
     hfetch(url, {
-      method: "post",
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(data),
     })
-      .then((response) => response.text())
-      .then(callback);
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Request failed with status: ${response.status}`);
+        }
+        return response.text();
+      })
+      .then(() => {
+        callback("File saved");
+      })
+      .catch((error) => {
+        callback(`Error: ${error.message}`);
+      });
   },
 
   loadDocuments: async function (folder, callback) {

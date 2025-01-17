@@ -51,6 +51,14 @@ const defaultState = {
   matchCase: false,
   activeSpatialFilter: "intersects",
   enableLabelOnHighlight: true,
+  enabledSearchOptions: [
+    "enableLabelOnHighlight",
+    "activeSpatialFilter",
+    "matchCase",
+    "wildcardAtEnd",
+    "wildcardAtStart",
+    "searchInVisibleLayers",
+  ],
   showResultsLimitReachedWarning: true,
   enableFeatureToggler: true,
   fitToResultMaxZoom: -1,
@@ -207,6 +215,9 @@ class ToolOptions extends Component {
           matchCase: tool.options.matchCase ?? this.state.matchCase,
           activeSpatialFilter:
             tool.options.activeSpatialFilter ?? this.state.activeSpatialFilter,
+          enabledSearchOptions:
+            tool.options.enabledSearchOptions ??
+            this.state.enabledSearchOptions,
           showResultsLimitReachedWarning:
             tool.options.showResultsLimitReachedWarning ??
             this.state.showResultsLimitReachedWarning,
@@ -397,6 +408,7 @@ class ToolOptions extends Component {
         wildcardAtEnd: this.state.wildcardAtEnd,
         matchCase: this.state.matchCase,
         activeSpatialFilter: this.state.activeSpatialFilter,
+        enabledSearchOptions: this.state.enabledSearchOptions,
         showResultsLimitReachedWarning:
           this.state.showResultsLimitReachedWarning,
         enableFeatureToggler: this.state.enableFeatureToggler,
@@ -658,6 +670,21 @@ class ToolOptions extends Component {
    */
   handleColorChange = (target, color) => {
     this.setState({ [target]: RGBA.toString(color.rgb) });
+  };
+
+  handleOnChange = (searchOption) => (e) => {
+    const { checked } = e.target;
+    this.setState((prevState) => {
+      const enabledSearchOptions = new Set(prevState.enabledSearchOptions);
+      if (checked) {
+        enabledSearchOptions.add(searchOption);
+      } else {
+        enabledSearchOptions.delete(searchOption);
+      }
+      return {
+        enabledSearchOptions: Array.from(enabledSearchOptions),
+      };
+    });
   };
 
   /**
@@ -959,15 +986,35 @@ class ToolOptions extends Component {
             />
           </div>
 
-          <div className="separator">Förvalda användarinställningar</div>
+          <div className="separator">
+            Aktiverade och förvalda användarinställningar
+          </div>
 
           <p>
-            De här inställningarna påverkar endast <i>förval</i> i användarens
-            sökinställningar. Användaren kommer kunna anpassa dessa utifrån sina
-            önskemål under pågående session.
+            Välj vilka sökinställningar som ska vara tillgängliga för användaren
+            och vilka som ska vara förvalda. Användaren kommer kunna anpassa
+            dessa utifrån sina önskemål under pågående session.
           </p>
 
           <div>
+            <input
+              id="searchInVisibleLayersEnabled"
+              name="searchInVisibleLayersEnabled"
+              type="checkbox"
+              onChange={this.handleOnChange("searchInVisibleLayers")}
+              checked={this.state.enabledSearchOptions.includes(
+                "searchInVisibleLayers"
+              )}
+            />
+            &nbsp;
+            <label
+              className="long-label"
+              htmlFor="searchInVisibleLayersEnabled"
+            >
+              Sök endast i synliga lager
+            </label>
+          </div>
+          <div style={{ marginLeft: "20px" }}>
             <input
               id="searchInVisibleLayers"
               value={this.state.searchInVisibleLayers}
@@ -977,14 +1024,34 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               checked={this.state.searchInVisibleLayers}
+              disabled={
+                !this.state.enabledSearchOptions.includes(
+                  "searchInVisibleLayers"
+                )
+              }
             />
             &nbsp;
             <label className="long-label" htmlFor="searchInVisibleLayers">
-              Sök endast i synliga lager
+              Förvald
             </label>
           </div>
 
           <div>
+            <input
+              id="wildcardAtStartEnabled"
+              name="wildcardAtStartEnabled"
+              type="checkbox"
+              onChange={this.handleOnChange("wildcardAtStart")}
+              checked={this.state.enabledSearchOptions.includes(
+                "wildcardAtStart"
+              )}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="wildcardAtStartEnabled">
+              Använd wildcard före sökord
+            </label>
+          </div>
+          <div style={{ marginLeft: "20px" }}>
             <input
               id="wildcardAtStart"
               value={this.state.wildcardAtStart}
@@ -994,14 +1061,32 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               checked={this.state.wildcardAtStart}
+              disabled={
+                !this.state.enabledSearchOptions.includes("wildcardAtStart")
+              }
             />
             &nbsp;
             <label className="long-label" htmlFor="wildcardAtStart">
-              Wildcard före
+              Förvald
             </label>
           </div>
 
           <div>
+            <input
+              id="wildcardAtEndEnabled"
+              name="wildcardAtEndEnabled"
+              type="checkbox"
+              onChange={this.handleOnChange("wildcardAtEnd")}
+              checked={this.state.enabledSearchOptions.includes(
+                "wildcardAtEnd"
+              )}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="wildcardAtEndEnabled">
+              Använd wildcard efter sökord
+            </label>
+          </div>
+          <div style={{ marginLeft: "20px" }}>
             <input
               id="wildcardAtEnd"
               value={this.state.wildcardAtEnd}
@@ -1011,14 +1096,30 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               checked={this.state.wildcardAtEnd}
+              disabled={
+                !this.state.enabledSearchOptions.includes("wildcardAtEnd")
+              }
             />
             &nbsp;
             <label className="long-label" htmlFor="wildcardAtEnd">
-              Wildcard efter
+              Förvald
             </label>
           </div>
 
           <div>
+            <input
+              id="matchCaseEnabled"
+              name="matchCaseEnabled"
+              type="checkbox"
+              onChange={this.handleOnChange("matchCase")}
+              checked={this.state.enabledSearchOptions.includes("matchCase")}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="matchCaseEnabled">
+              Skiftlägeskänslig sökning
+            </label>
+          </div>
+          <div style={{ marginLeft: "20px" }}>
             <input
               id="matchCase"
               value={this.state.matchCase}
@@ -1028,14 +1129,30 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               checked={this.state.matchCase}
+              disabled={!this.state.enabledSearchOptions.includes("matchCase")}
             />
             &nbsp;
             <label className="long-label" htmlFor="matchCase">
-              Skiftlägeskänslighet
+              Förvald
             </label>
           </div>
 
           <div>
+            <input
+              id="activeSpatialFilterEnabled"
+              name="activeSpatialFilterEnabled"
+              type="checkbox"
+              onChange={this.handleOnChange("activeSpatialFilter")}
+              checked={this.state.enabledSearchOptions.includes(
+                "activeSpatialFilter"
+              )}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="activeSpatialFilterEnabled">
+              Kräv att hela objektet ryms inom sökområde
+            </label>
+          </div>
+          <div style={{ marginLeft: "20px" }}>
             <input
               id="activeSpatialFilter"
               value={this.state.activeSpatialFilter === "within"}
@@ -1045,14 +1162,35 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               checked={this.state.activeSpatialFilter === "within"}
+              disabled={
+                !this.state.enabledSearchOptions.includes("activeSpatialFilter")
+              }
             />
             &nbsp;
             <label className="long-label" htmlFor="activeSpatialFilter">
-              Kräv att hela objektet ryms inom sökområde
+              Förvald
             </label>
           </div>
 
           <div>
+            <input
+              id="enableLabelOnHighlightEnabled"
+              name="enableLabelOnHighlightEnabled"
+              type="checkbox"
+              onChange={this.handleOnChange("enableLabelOnHighlight")}
+              checked={this.state.enabledSearchOptions.includes(
+                "enableLabelOnHighlight"
+              )}
+            />
+            &nbsp;
+            <label
+              className="long-label"
+              htmlFor="enableLabelOnHighlightEnabled"
+            >
+              Visa etikett för valda resultat i kartan
+            </label>
+          </div>
+          <div style={{ marginLeft: "20px" }}>
             <input
               id="enableLabelOnHighlight"
               value={this.state.enableLabelOnHighlight}
@@ -1062,10 +1200,15 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               checked={this.state.enableLabelOnHighlight}
+              disabled={
+                !this.state.enabledSearchOptions.includes(
+                  "enableLabelOnHighlight"
+                )
+              }
             />
             &nbsp;
             <label className="long-label" htmlFor="enableLabelOnHighlight">
-              Visa etikett för valda resultat i kartan
+              Förvald
             </label>
           </div>
 

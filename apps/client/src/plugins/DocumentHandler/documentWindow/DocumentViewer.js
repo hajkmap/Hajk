@@ -21,6 +21,13 @@ const ContentContainer = styled(Grid)(({ theme }) => ({
   paddingLeft: theme.spacing(2),
   paddingRight: theme.spacing(2),
   outline: "none",
+  "&:focus": {
+    backgroundColor: theme.palette.action.focus,
+  },
+  "&.fade-out": {
+    backgroundColor: "initial",
+    transition: "background-color 0.4s ease",
+  },
 }));
 
 const TocGridWrapper = styled(Grid)(({ theme }) => ({
@@ -211,6 +218,7 @@ class DocumentViewer extends React.PureComponent {
           )}
 
           <ContentContainer
+            id="documentViewerContentContainer"
             tabIndex="0" //Focus grid to be able to use onKeyDown
             onKeyDown={(e) => {
               //If ctrl-a or command-a is pressed

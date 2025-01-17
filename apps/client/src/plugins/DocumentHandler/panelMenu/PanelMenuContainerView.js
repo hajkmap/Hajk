@@ -95,6 +95,10 @@ class PanelMenuView extends React.PureComponent {
       this.#setDocument(document, null);
       this.#setItemStateProperties(id).then(() => {
         app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+        app.globalObserver.publish(
+          "core.focusWindow",
+          "documentViewerContentContainer"
+        );
       });
     }
   };

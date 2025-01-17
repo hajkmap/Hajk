@@ -4,7 +4,6 @@ import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "constants";
 
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
 import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
@@ -24,6 +23,7 @@ import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 import SimpleDialog from "./SimpleDialog";
 import MapClickViewer from "./MapClickViewer/MapClickViewer";
+import SnackbarProvider from "./SnackbarProvider";
 
 import Search from "./Search/Search.js";
 
@@ -68,8 +68,8 @@ const DRAWER_WIDTH = 250;
 
 // A bunch of styled components to get the Hajk feel! Remember that some
 // components are styled with the sx-prop instead/as well.
-const StyledHeader = styled("header")(({ theme }) => ({
-  zIndex: theme.zIndex.appBar,
+const StyledHeader = styled("header")(({ theme, headerHasFocus }) => ({
+  zIndex: headerHasFocus ? theme.zIndex.appBar : theme.zIndex.appBar - 100,
   maxHeight: theme.spacing(8),
   display: "flex",
   justifyContent: "space-between",
@@ -375,6 +375,7 @@ class App extends React.PureComponent {
       drawerStatic: drawerStatic,
       activeDrawerContent: activeDrawerContentState,
       drawerMouseOverLock: false,
+      headerHasFocus: false,
     };
 
     // If the drawer is set to be visible at start - ensure the activeDrawerContent
@@ -387,6 +388,10 @@ class App extends React.PureComponent {
         );
       }
     }
+
+    this.setToggleDrawerPermanentRef = (element) => {
+      this.buttonToggleDrawerPermanentRef = element;
+    };
 
     this.globalObserver = new Observer();
 
@@ -486,6 +491,9 @@ class App extends React.PureComponent {
       .loadPlugins(this.props.activeTools);
 
     Promise.all(promises).then(() => {
+      this.globalObserver.subscribe("core.handleHeaderBlur", () => {
+        this.setState({ headerHasFocus: false });
+      });
       // Track the page view
       this.globalObserver.publish("analytics.trackPageView");
 
@@ -754,6 +762,14 @@ class App extends React.PureComponent {
       this.setState((prevState) => ({
         drawerButtons: [...prevState.drawerButtons, button],
       }));
+
+      this.globalObserver.subscribe("core.drawerToggled", () => {
+        if (this.state.drawerPermanent) {
+          if (this.buttonToggleDrawerPermanentRef) {
+            this.buttonToggleDrawerPermanentRef.focus();
+          }
+        }
+      });
     });
 
     /**
@@ -805,6 +821,18 @@ class App extends React.PureComponent {
           // Not related to Analytics: send an event on the global observer
           // to anyone wanting to act on layer visibility change.
           this.globalObserver.publish("core.layerVisibilityChanged", e);
+        });
+        // Listener for "quickAccess" changes
+        layer.on("change:quickAccess", (e) => {
+          // Send an event on the global observer
+          // to anyone wanting to act on layer quickAccess change.
+          this.globalObserver.publish("core.layerQuickAccessChanged", e);
+        });
+        // Listener for "subLayers" changes
+        layer.on("change:subLayers", (e) => {
+          // Send an event on the global observer
+          // to anyone wanting to act on layer subLayers change.
+          this.globalObserver.publish("core.layerSubLayersChanged", e);
         });
       });
   }
@@ -898,6 +926,9 @@ class App extends React.PureComponent {
       // just "un-permanent" the Drawer, but it would still be visible).
       this.state.drawerPermanent === false &&
         this.globalObserver.publish("core.hideDrawer");
+
+      // Publish the event to notify plugins to re-render
+      this.globalObserver.publish("core.pluginsRerender");
     });
   };
 
@@ -910,7 +941,7 @@ class App extends React.PureComponent {
   };
 
   renderSearchComponent() {
-    // FIXME: We should get config from somewhere else now when Search is part of Core
+    // FIXME: We should get the search config from somewhere else (not from plugin options) now when Search is part of Core...
     if (
       this.appModel.plugins.search &&
       this.appModel.plugins.search.options.renderElsewhere !== true
@@ -919,7 +950,9 @@ class App extends React.PureComponent {
         <Search
           map={this.appModel.getMap()}
           app={this}
-          options={this.appModel.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core
+          options={this.appModel.plugins.search.options}
+          headerHasFocus={this.state.headerHasFocus}
+          handleHeaderFocus={this.handleHeaderFocus}
         />
       );
     } else {
@@ -967,6 +1000,8 @@ class App extends React.PureComponent {
       config.mapConfig.map.logo || // If neither was set, try to see if we have the legacy admin parameter.
       "logo.png"; // If we didn't have this either, fallback to hard-coded value.
 
+    const logoAltText = config.mapConfig.map.logoAltText || "Logotype";
+
     return (
       <>
         <Box
@@ -975,7 +1010,7 @@ class App extends React.PureComponent {
             height: (theme) => theme.spacing(6),
           }}
         >
-          <LogoImage alt="" src={logoUrl} />
+          <LogoImage alt={logoAltText} src={logoUrl} />
         </Box>
         <Divider />
         <DrawerHeaderGrid
@@ -1001,6 +1036,7 @@ class App extends React.PureComponent {
                   }
                 >
                   <IconButton
+                    ref={this.setToggleDrawerPermanentRef}
                     sx={{ margin: "-12px" }} // Ugh... However, it tightens everything up
                     onClick={this.togglePermanent}
                     onMouseEnter={this.handleMouseEnter}
@@ -1080,6 +1116,78 @@ class App extends React.PureComponent {
     return this.state.drawerStatic && isOnlyOneButtonVisible ? false : true;
   }
 
+  renderDrawer() {
+    const { config } = this.props;
+    const clean = config.mapConfig.map.clean;
+
+    return (
+      <>
+        {clean !== true && ( // NB: Special case here, important with !== true, because there is an edge-case where clean===undefined, and we don't want to match on that!
+          <Drawer
+            open={this.state.drawerVisible}
+            ModalProps={{
+              hideBackdrop: this.state.drawerPermanent, //Don't show backdrop if drawer is permanent
+              disableEnforceFocus: true, //Dont enforce focus to be able to handle elements underneath modal
+              onClose: () => {
+                this.globalObserver.publish("core.hideDrawer");
+              },
+              style: {
+                //Needs to be set to be able to handle elements underneath modal
+                position: this.state.drawerPermanent ? "initial" : "fixed",
+              },
+              keepMounted: true, //Ensure we dont have to render plugins more than once - UnMounting every time is slow
+            }}
+            variant={this.state.drawerPermanent ? "permanent" : "temporary"}
+            sx={{
+              "& .MuiPaper-root": {
+                width: DRAWER_WIDTH,
+                backgroundColor: (theme) => theme.palette.background.default,
+                backgroundImage: "unset", // To match the new (darker) black theme.
+              },
+            }}
+          >
+            {this.renderDrawerHeader()}
+            <Divider />
+            {this.renderAllDrawerContent()}
+            {
+              // See #1336
+              config.mapConfig.map.linkInDrawer &&
+                typeof config.mapConfig.map.linkInDrawer?.text === "string" &&
+                typeof config.mapConfig.map.linkInDrawer?.href === "string" && (
+                  <>
+                    <Divider />
+                    <Link
+                      align="center"
+                      variant="button"
+                      href={config.mapConfig.map.linkInDrawer.href}
+                      target={
+                        config.mapConfig.map.linkInDrawer.newWindow === true
+                          ? "_blank"
+                          : "_self"
+                      }
+                      sx={{
+                        p: 1,
+                      }}
+                    >
+                      {config.mapConfig.map.linkInDrawer.text}
+                    </Link>
+                  </>
+                )
+            }
+          </Drawer>
+        )}
+      </>
+    );
+  }
+
+  handleHeaderFocus = () => {
+    this.setState({ headerHasFocus: true });
+  };
+
+  handleHeaderBlur = () => {
+    this.setState({ headerHasFocus: false });
+  };
+
   render() {
     const { config } = this.props;
 
@@ -1130,6 +1238,7 @@ class App extends React.PureComponent {
             title="Meddelande"
           />
           <SrShortcuts globalObserver={this.globalObserver}></SrShortcuts>
+          {this.renderDrawer()}
           <AppBox
             id="appBox"
             sx={{
@@ -1146,6 +1255,8 @@ class App extends React.PureComponent {
                   pointerEvents: "auto",
                 },
               }}
+              headerHasFocus={this.state.headerHasFocus}
+              onFocus={this.handleHeaderFocus}
             >
               {clean === false && this.showDrawerButtons() && (
                 <DrawerToggleButtons
@@ -1162,6 +1273,23 @@ class App extends React.PureComponent {
               {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
               {this.renderSearchComponent()}
             </StyledHeader>
+            <WindowsContainer
+              id="windows-container"
+              onClick={this.handleHeaderBlur}
+            >
+              {useNewInfoclick === false && this.renderInfoclickWindow()}
+              {useNewInfoclick && (
+                <MapClickViewer
+                  appModel={this.appModel}
+                  globalObserver={this.globalObserver}
+                  infoclickOptions={this.infoclickOptions}
+                />
+              )}
+              <PluginWindows
+                plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
+              />
+              <SimpleDialog globalObserver={this.globalObserver} />
+            </WindowsContainer>
             <StyledMain>
               <Box
                 id="left-column"
@@ -1237,6 +1365,7 @@ class App extends React.PureComponent {
               </Box>
             </StyledMain>
             <StyledFooter
+              id="footer"
               sx={{
                 "& > *": {
                   pointerEvents: "auto",
@@ -1258,83 +1387,6 @@ class App extends React.PureComponent {
               left: this.drawerIsLocked() ? DRAWER_WIDTH : 0,
             }}
           ></MapContainer>
-          <WindowsContainer
-            id="windows-container"
-            sx={{
-              left: this.drawerIsLocked() ? DRAWER_WIDTH : 0,
-              "& > *": {
-                pointerEvents: "auto",
-              },
-            }}
-          >
-            {useNewInfoclick === false && this.renderInfoclickWindow()}
-            {useNewInfoclick && (
-              <MapClickViewer
-                appModel={this.appModel}
-                globalObserver={this.globalObserver}
-                infoclickOptions={this.infoclickOptions}
-              />
-            )}
-            <PluginWindows
-              plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
-            />
-            <SimpleDialog globalObserver={this.globalObserver} />
-          </WindowsContainer>
-          {clean !== true && ( // NB: Special case here, important with !== true, because there is an edge-case where clean===undefined, and we don't want to match on that!
-            <Drawer
-              open={this.state.drawerVisible}
-              ModalProps={{
-                hideBackdrop: this.state.drawerPermanent, //Don't show backdrop if drawer is permanent
-                disableEnforceFocus: true, //Dont enforce focus to be able to handle elements underneath modal
-                onClose: () => {
-                  this.globalObserver.publish("core.hideDrawer");
-                },
-                style: {
-                  //Needs to be set to be able to handle elements underneath modal
-                  position: this.state.drawerPermanent ? "initial" : "fixed",
-                },
-                keepMounted: true, //Ensure we dont have to render plugins more than once - UnMounting every time is slow
-              }}
-              variant="temporary"
-              sx={{
-                "& .MuiPaper-root": {
-                  width: DRAWER_WIDTH,
-                  backgroundColor: (theme) => theme.palette.background.default,
-                  backgroundImage: "unset", // To match the new (darker) black theme.
-                },
-              }}
-            >
-              {this.renderDrawerHeader()}
-              <Divider />
-              {this.renderAllDrawerContent()}
-              {
-                // See #1336
-                config.mapConfig.map.linkInDrawer &&
-                  typeof config.mapConfig.map.linkInDrawer?.text === "string" &&
-                  typeof config.mapConfig.map.linkInDrawer?.href ===
-                    "string" && (
-                    <>
-                      <Divider />
-                      <Link
-                        align="center"
-                        variant="button"
-                        href={config.mapConfig.map.linkInDrawer.href}
-                        target={
-                          config.mapConfig.map.linkInDrawer.newWindow === true
-                            ? "_blank"
-                            : "_self"
-                        }
-                        sx={{
-                          p: 1,
-                        }}
-                      >
-                        {config.mapConfig.map.linkInDrawer.text}
-                      </Link>
-                    </>
-                  )
-              }
-            </Drawer>
-          )}
           {clean === false && (
             <Introduction
               introductionEnabled={

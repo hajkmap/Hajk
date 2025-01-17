@@ -158,7 +158,7 @@ class DocumentHandler extends React.PureComponent {
   addDrawerToggleButton = () => {
     const { app, options } = this.props;
     app.globalObserver.publish("core.addSrShortcuts", [
-      { title: "Till huvudmeny för webbplatsen", link: "#panelmenu" },
+      { title: "Till huvudmeny för webbplatsen", link: "#documenthandler" },
     ]);
     app.globalObserver.publish("core.addDrawerToggleButton", {
       value: "documenthandler",

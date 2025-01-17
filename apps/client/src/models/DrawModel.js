@@ -1760,7 +1760,13 @@ class DrawModel {
       featureCopy.setId(Math.random().toString(36).substring(2, 15));
       // Then we'll set some draw-properties from the original feature.
       featureCopy.set("USER_DRAWN", true);
-      featureCopy.set("DRAW_METHOD", feature.get("DRAW_METHOD"));
+      // Here we'll add DRAW_METHOD. DRAW_METHOD can be missing from the original feature.
+      // This can and will happen if you click on an existing feature witch hasn't been drawn.
+      // So let's set it to the geometry type of the original feature if it's missing.
+      featureCopy.set(
+        "DRAW_METHOD",
+        feature.get("DRAW_METHOD") || feature.getGeometry().getType()
+      );
       featureCopy.set("TEXT_SETTINGS", feature.get("TEXT_SETTINGS"));
       // We're gonna need to set some styling on the feature as-well. Let's use the same
       // styling as on the supplied feature.
@@ -2234,6 +2240,27 @@ class DrawModel {
         subject: "drawModel.featureRemoved",
         payLoad: feature,
       });
+    }
+
+    // Check if we have used Segments.
+    // If the feature has the MEASUREMENT_ID, find and remove the referenced segment measure points too.
+    const userDrawnFeatures = this.#drawSource
+      .getFeatures()
+      .filter((f) => f.get("USER_DRAWN"));
+    if (feature.get("MEASUREMENT_ID")) {
+      const parentId = feature.get("MEASUREMENT_ID");
+      const referencedFeatures = userDrawnFeatures.filter((f) => {
+        const fId = f.get("MEASUREMENT_ID");
+        // We remove the segment points if they contain the parent id, but the parent should not be removed here.
+        if (fId) {
+          if (fId.includes(parentId) && !f.get("MEASUREMENT_PARENT")) {
+            // Return matching feature, in this case labels for this segment.
+            return f;
+          }
+        }
+        return null;
+      });
+      referencedFeatures.forEach((f) => this.#drawSource.removeFeature(f));
     }
   };
 
