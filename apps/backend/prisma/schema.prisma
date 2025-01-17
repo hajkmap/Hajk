@@ -3,8 +3,9 @@ generator client {
 }
 
 generator zod {
-  provider = "zod-prisma-types"
-  output   = "../server/generated/zod"
+  provider           = "zod-prisma-types"
+  output             = "../server/generated/zod"
+  createPartialTypes = true
 }
 
 datasource db {

@@ -14,16 +14,15 @@ export const validatePayload = (
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       schema.parse(req[source]);
-
       next();
     } catch (error) {
       if (error instanceof ZodError) {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
           ...error,
         });
+      } else {
+        next(error);
       }
-
-      next(error);
     }
   };
 };
