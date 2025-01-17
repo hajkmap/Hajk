@@ -32,9 +32,16 @@
   - [ ] Alter layer
   - [ ] Remove layer
 - [ ] General UI improvements (JA)
-  - [ ] Add form container (group)
-  - [ ] Improve accordion contrast
   - [ ] Use page width better. 1024? 2048?
+  - [x] Handle menu overflow and bottom settings/lock better. v0.1 WIP
+  - [x] Split up theme into multiple parts. Prepared typography to be able to adjust easier.
+  - [x] Force default size to small of some Mui components to make it more compact.
+  - [x] Add GlobalStyles to ba able to modify FormFactory styles separately.
+  - [x] Adjust header sizes for Page etc. v0.1 WIP
+  - [x] Fix FormFactory styles for Accordion/Paper/inputs etc. v0.1 WIP
+  - [x] FormFactory Accordion should show some existing data when collapsed, and more data in tooltip.
+  - [x] Fix nested Grids in form factory (when adding help icon etc).
+  - [x] Add the possibility to add unmanaged elements to a FormFactory form.
 - [x] Upgrade npm packages (JW)
 
 ### Roles
