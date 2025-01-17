@@ -32,7 +32,7 @@ Issues: #1237, #1257, #1284, #1296, #1300, #1347, #1365, and #1380.
 ### Fixed
 
 - Improved how overlapping plugins are handled. PR: [#1546](https://github.com/hajkmap/Hajk/pull/1546)
-- Several accessability improvements. PRs: [#1561](https://github.com/hajkmap/Hajk/pull/1561), [#1562](https://github.com/hajkmap/Hajk/pull/1562), [#1563](https://github.com/hajkmap/Hajk/pull/1563), [#1565](https://github.com/hajkmap/Hajk/pull/1565), [#1566](https://github.com/hajkmap/Hajk/pull/1566), [#1567](https://github.com/hajkmap/Hajk/pull/1567)
+- Several accessability improvements. PRs: [#1561](https://github.com/hajkmap/Hajk/pull/1561), [#1562](https://github.com/hajkmap/Hajk/pull/1562), [#1563](https://github.com/hajkmap/Hajk/pull/1563), [#1565](https://github.com/hajkmap/Hajk/pull/1565), [#1566](https://github.com/hajkmap/Hajk/pull/1566), [#1567](https://github.com/hajkmap/Hajk/pull/1567), [#1569](https://github.com/hajkmap/Hajk/pull/1569)
 
 ## [3.14.1] - 2024-10-09
 
