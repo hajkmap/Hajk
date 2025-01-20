@@ -4,7 +4,6 @@ import { ServiceType } from "@prisma/client";
 import log4js from "log4js";
 
 import prisma from "../../../common/prisma.ts";
-import { generateNames } from "./services.service.ts";
 
 const logger = log4js.getLogger("service.v3.layer");
 
@@ -36,9 +35,6 @@ class LayerService {
   }
 
   async createLayer(data: Prisma.LayerCreateInput) {
-    if (!data.name) {
-      data.name = generateNames();
-    }
     const newLayer = await prisma.layer.create({ data });
     return newLayer;
   }

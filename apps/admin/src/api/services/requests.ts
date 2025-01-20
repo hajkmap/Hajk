@@ -10,6 +10,7 @@ import {
 import { LayersApiResponse } from "../layers";
 import { Map } from "../maps";
 import { GlobalMapsApiResponse } from "../tools";
+import { generateNames } from "../generated/names";
 
 /**
  * This module provides API request functions to interact with the backend
@@ -124,6 +125,9 @@ export const createService = async (
   newService: ServiceCreateFormData
 ): Promise<ServiceCreateFormData> => {
   const internalApiClient = getApiClient();
+  if (!newService.name) {
+    newService.name = generateNames();
+  }
   try {
     const response = await internalApiClient.post<ServiceCreateFormData>(
       "/services",
