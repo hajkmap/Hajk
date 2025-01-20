@@ -17,16 +17,20 @@ import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBullet
 
 export default function SubLayerItem({
   layerId,
-  layersInfo,
+  layerConfig,
   subLayer,
   toggleable,
   globalObserver,
   visible,
   toggleSubLayer,
-  subLayerIndex,
   zoomVisible,
 }) {
+  const layersInfo = layerConfig.layerInfo.layersInfo;
   const subLayerInfo = layersInfo[subLayer];
+
+  const subLayerIndex = layerConfig.allSubLayers.findIndex(
+    (sl) => sl === subLayer
+  );
 
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);

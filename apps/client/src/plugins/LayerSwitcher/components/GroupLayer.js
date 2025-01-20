@@ -112,13 +112,12 @@ function GroupLayer({
       subLayersSection={
         <Collapse in={showSublayers || isSubLayerFilterHit} unmountOnExit>
           <Box sx={{ marginLeft: 3 }}>
-            {subLayersToShow?.map((subLayer, index) => (
+            {subLayersToShow?.map((subLayer) => (
               <SubLayerItem
                 key={subLayer}
                 subLayer={subLayer}
-                subLayerIndex={index}
                 layerId={layerConfig.layerId}
-                layersInfo={layerConfig.layerInfo.layersInfo}
+                layerConfig={layerConfig}
                 toggleable={toggleable}
                 globalObserver={globalObserver}
                 visible={visibleSubLayers.some((s) => s === subLayer)}
