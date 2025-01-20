@@ -13,9 +13,7 @@
 - [ ] Services API
   - [ ] Update prisma schema
   - [ ] Update seed script
-  - [ ] Update zod parsers(AA)
-    - [x] Services (field validators are missing)
-    - [ ] Users
+  - [x] Update zod parsers(AA, field validators are missing)
   - [ ] Update API methods
 - [ ] Layers API
   - [ ] Update prisma schema
