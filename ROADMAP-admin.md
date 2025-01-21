@@ -18,7 +18,7 @@
 - [ ] Layers API
   - [ ] Update prisma schema
   - [ ] Update seed script
-  - [x] Update zod parsers (OS)
+  - [ ] Update zod parsers (OS)
   - [ ] Update API methods
 - [x] Services page
   - [x] Add service (AA)
@@ -30,9 +30,9 @@
   - [x] Alter layer (AA)
     - ⚠️ Incomplete due to missing data in the current data model.
   - [x] Remove layer (AA)
-- [x] Optimizing input fields performance/state. (OS)
-  - [x] Services page (OS)
-  - [x] Layers page (OS)
+- [ ] Optimizing input fields performance/state. (OS)
+  - [ ] Services page (OS)
+  - [ ] Layers page (OS)
 - [ ] General UI improvements (JA)
   - [ ] Use page width better. 1024? 2048?
   - [x] Handle menu overflow and bottom settings/lock better. v0.1 WIP
