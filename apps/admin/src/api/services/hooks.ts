@@ -15,7 +15,7 @@ import {
 } from "./requests";
 import {
   Service,
-  ServiceUpdateFormData,
+  ServiceUpdateInput,
   UseServiceCapabilitiesProps,
 } from "./types";
 import { LayersApiResponse } from "../layers";
@@ -87,7 +87,7 @@ export const useUpdateService = () => {
       data,
     }: {
       serviceId: string;
-      data: ServiceUpdateFormData;
+      data: ServiceUpdateInput;
     }) => updateService(serviceId, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["services"] });

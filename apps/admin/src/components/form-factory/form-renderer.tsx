@@ -15,16 +15,19 @@ import CONTAINER_TYPE from "./types/container-types";
 import STATIC_TYPE from "./types/static-type";
 import HelpIcon from "@mui/icons-material/Help";
 import HajkTooltip from "../hajk-tooltip";
+import CustomInputSettings from "./types/custom-input-settings";
 
 interface FormRenderProps<TFieldValues extends FieldValues> {
-  data: DynamicFormContainer<TFieldValues>;
+  formControls: DynamicFormContainer<TFieldValues>;
+  formFields: Record<string, unknown>;
   register: UseFormRegister<TFieldValues>;
   control: Control<TFieldValues>;
   errors: FieldErrors<TFieldValues>;
 }
 
 const FormRenderer = <TFieldValues extends FieldValues>({
-  data,
+  formControls,
+  formFields,
   register,
   control,
   errors,
@@ -70,6 +73,12 @@ const FormRenderer = <TFieldValues extends FieldValues>({
       item.kind === "DynamicInputSettings" ||
       item.kind === "CustomInputSettings"
     ) {
+      const castedItem = item as
+        | DynamicInputSettings<TFieldValues>
+        | CustomInputSettings<TFieldValues>;
+      if (castedItem.visibleIf) {
+        // console.log("Hej", item);
+      }
       return wrapInGrid(item, index, {}, renderDynamicInputComponent);
     } else if (item.kind === "StaticElement") {
       return renderStaticElement(item as StaticElement, index);
@@ -127,14 +136,47 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     );
   };
 
+  const getKeyValueArray = (
+    container: DynamicFormContainer<TFieldValues>
+  ): { key: string; value: string; title: string }[] => {
+    if (!formFields) {
+      return [];
+    }
+    const keyValuePairs: { key: string; value: string; title: string }[] = [];
+
+    container.getFormInputs().forEach((item) => {
+      if (
+        item.kind === "DynamicInputSettings" ||
+        item.kind === "CustomInputSettings"
+      ) {
+        const castedItem = item as
+          | DynamicInputSettings<TFieldValues>
+          | CustomInputSettings<TFieldValues>;
+
+        const value = formFields[castedItem.name];
+        if (value) {
+          keyValuePairs.push({
+            key: castedItem.name,
+            value: value as string,
+            title: castedItem.title,
+          });
+        }
+      }
+    });
+
+    return keyValuePairs;
+  };
+
   const renderContainerAccordion = (
     container: DynamicFormContainer<TFieldValues>,
     index: number
   ) => {
     const key = getKey(index);
+    const keyValues = getKeyValueArray(container);
 
     return (
       <ControlledAccordion
+        keyValues={keyValues}
         title={container.title}
         key={key + "-accordion"}
         triggerExpanded={!!container.props?.triggerExpanded}
@@ -193,6 +235,9 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     if (type === CONTAINER_TYPE.PANEL) {
       return renderContainerPanel(container, index);
     } else if (type === CONTAINER_TYPE.ACCORDION) {
+      // Please refactor the ugly * thing below
+
+      // If the Accordion contains a required field, add a * to the title.
       const containsRequiredFields =
         container.getElements().filter((item) => {
           if (item.kind === "DynamicInputSettings") {
@@ -204,6 +249,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
         }).length > 0;
 
       if (containsRequiredFields) {
+        // Please refactor the ugly * thing below
         if (!container.title?.includes("*") /* Prevents doubles in DEV env.*/) {
           container.title = `${container.title} *`;
         }
@@ -222,7 +268,10 @@ const FormRenderer = <TFieldValues extends FieldValues>({
       <Grid
         key={getKey(index) + "-grid"}
         size={{ xs: 12, md: item?.gridColumns ?? 12 }}
-        sx={{ pb: 2, pl: 2 }}
+        sx={{
+          pb: 2,
+          pl: 2,
+        }}
         {...propsToSpread}
       >
         {renderFn(item, index)}
@@ -230,21 +279,21 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     );
   };
 
+  // Form container
+  // Note the className below.
+  // This is the root of the form and the class is used in the global styles.
   return (
     <Grid
       container
+      className="form-factory"
       sx={{
         ml: -2,
-        "& .MuiInputBase-root": {
-          backgroundColor: "background.default",
-        },
-        "& .MuiRadio-root > span:first-of-type": {
-          backgroundColor: "background.default",
-          borderRadius: "50%",
-        },
       }}
     >
-      {data?.getElements().map((item, index) => renderFormElement(item, index))}
+      {formControls?.getElements().map((item, index) => {
+        // will add stuff here
+        return renderFormElement(item, index);
+      })}
     </Grid>
   );
 };

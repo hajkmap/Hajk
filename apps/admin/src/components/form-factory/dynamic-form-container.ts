@@ -3,6 +3,8 @@ import DynamicInputSettings from "./types/dynamic-input-settings";
 import StaticElement from "./static-element";
 import CustomInputSettings from "./types/custom-input-settings";
 import CONTAINER_TYPE from "./types/container-types";
+import { ReactElement } from "react";
+import STATIC_TYPE from "./types/static-type";
 
 // Union type combining DynamicInputSettings, StaticElement, and nested DynamicFormContainer
 export type FormElement<TFieldValues extends FieldValues> =
@@ -68,6 +70,15 @@ class DynamicFormContainer<TFieldValues extends FieldValues> {
     this.formItems.push(element);
   }
 
+  addElement(element: ReactElement, gridColumns = 12): void {
+    // A shortcut to simply add JSX to the form.
+    this.addStaticElement({
+      type: STATIC_TYPE.UNMANAGED,
+      element: element,
+      gridColumns: gridColumns,
+    });
+  }
+
   addCustomInput(input: CustomInputSettings<TFieldValues>): void {
     input.kind = "CustomInputSettings";
     this.formItems.push(input);
@@ -75,6 +86,18 @@ class DynamicFormContainer<TFieldValues extends FieldValues> {
 
   getElements(): FormElement<TFieldValues>[] {
     return this.formItems;
+  }
+
+  getFormInputs(): FormElement<TFieldValues>[] {
+    return this.formItems.reduce((acc, element) => {
+      if (
+        element.kind === "DynamicInputSettings" ||
+        element.kind === "CustomInputSettings"
+      ) {
+        acc.push(element); // Push the element to the acc array
+      }
+      return acc; // Return the updated acc array
+    }, [] as FormElement<TFieldValues>[]);
   }
 
   getDefaultValues(): Record<string, unknown> {

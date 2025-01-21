@@ -36,6 +36,10 @@ export default {
     // letterSpacing: '0em',
   },
   h6: {
+    fontWeight: 500,
+    fontSize: "1rem",
+    lineHeight: 1.75,
+    letterSpacing: "0.00938em",
     // Default values for h6:
     // fontWeight: 500,
     // fontSize: '1.25rem',

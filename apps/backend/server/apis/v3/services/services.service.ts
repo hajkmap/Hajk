@@ -5,37 +5,6 @@ import prisma from "../../../common/prisma.ts";
 
 const logger = log4js.getLogger("service.v3.layer");
 
-export const generateNames = () => {
-  const adjectives = [
-    "Buggy",
-    "Snappy",
-    "Binary",
-    "Async",
-    "Dynamic",
-    "Hacky",
-    "Recursive",
-    "Faulty",
-    "Refactored",
-    "Lazy",
-  ];
-  const nouns = [
-    "Compiler",
-    "Debugger",
-    "Function",
-    "Closure",
-    "Variable",
-    "Exception",
-    "Promise",
-    "Algorithm",
-    "Object",
-    "Framework",
-  ];
-
-  return `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${
-    nouns[Math.floor(Math.random() * nouns.length)]
-  }`;
-};
-
 class ServicesService {
   constructor() {
     logger.debug("Initiating Services Service");
@@ -116,9 +85,6 @@ class ServicesService {
   }
 
   async createService(data: Prisma.ServiceCreateInput) {
-    if (!data.name) {
-      data.name = generateNames();
-    }
     const newService = await prisma.service.create({ data });
     return newService;
   }

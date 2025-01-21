@@ -13,26 +13,37 @@
 - [ ] Services API
   - [ ] Update prisma schema
   - [ ] Update seed script
-  - [ ] Update zod parsers(AA)
-  - [ ] Update API methods - POST, PATCH, DELETE are added
+  - [x] Update zod parsers(AA, field validators are missing)
+  - [ ] Update API methods
 - [ ] Layers API
   - [ ] Update prisma schema
   - [ ] Update seed script
   - [ ] Update zod parsers
-  - [ ] Update API methods (AA) - POST, PATCH, DELETE are added
-- [ ] Services page
+  - [ ] Update API methods
+- [x] Services page
   - [x] Add service (AA)
   - [x] Alter service (AA)
     - ⚠️ Note: Some fields in the request payload for both adding and updating a service are mocked or incomplete due to missing data in the current data model. Once the data model is finalized, ensure that the missing fields are updated and validated in both the payload and the backend schema.
   - [x] Remove service (AA)
-- [ ] Layers page
-  - [ ] Add layer
-  - [ ] Alter layer
-  - [ ] Remove layer
+- [x] Layers page
+  - [x] Add layer (AA)
+  - [x] Alter layer (AA)
+    - ⚠️ Incomplete due to missing data in the current data model.
+  - [x] Remove layer (AA)
+- [ ] Optimizing input fields performance/state.
+  - [ ] Services page
+  - [ ] Layers page
 - [ ] General UI improvements (JA)
-  - [ ] Add form container (group)
-  - [ ] Improve accordion contrast
   - [ ] Use page width better. 1024? 2048?
+  - [x] Handle menu overflow and bottom settings/lock better. v0.1 WIP
+  - [x] Split up theme into multiple parts. Prepared typography to be able to adjust easier.
+  - [x] Force default size to small of some Mui components to make it more compact.
+  - [x] Add GlobalStyles to ba able to modify FormFactory styles separately.
+  - [x] Adjust header sizes for Page etc. v0.1 WIP
+  - [x] Fix FormFactory styles for Accordion/Paper/inputs etc. v0.1 WIP
+  - [x] FormFactory Accordion should show some existing data when collapsed, and more data in tooltip.
+  - [x] Fix nested Grids in form factory (when adding help icon etc).
+  - [x] Add the possibility to add unmanaged elements to a FormFactory form.
 - [x] Upgrade npm packages (JW)
 
 ### Roles
@@ -43,3 +54,4 @@ _TODO: Document roles used in Hajk._
 
 - [ ] (Example) Test authentication
 - [ ] Test adding, updating and deleting a new service
+- [ ] Test adding, updating and deleting a new layer

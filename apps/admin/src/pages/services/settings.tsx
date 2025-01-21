@@ -19,7 +19,7 @@ import {
   useServices,
   useLayersByServiceId,
   serviceTypes,
-  ServiceUpdateFormData,
+  ServiceUpdateInput,
   serverTypes,
 } from "../../api/services";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -82,7 +82,7 @@ export default function ServiceSettings() {
     }
   };
 
-  const handleUpdateService = async (serviceData: ServiceUpdateFormData) => {
+  const handleUpdateService = async (serviceData: ServiceUpdateInput) => {
     try {
       const payload = {
         name: serviceData.name,
@@ -90,6 +90,7 @@ export default function ServiceSettings() {
         type: serviceData.type,
         serverType: serviceData.serverType,
         version: serviceData.version,
+        comment: serviceData.comment,
       };
       await updateService({
         serviceId: service?.id ?? "",
@@ -103,7 +104,6 @@ export default function ServiceSettings() {
           hideProgressBar: true,
         }
       );
-      setIsDialogOpen(false);
       void navigate("/services");
     } catch (error) {
       console.error("Failed to update service:", error);
@@ -183,9 +183,9 @@ export default function ServiceSettings() {
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 10,
-    name: "description",
+    name: "comment",
     title: `${t("services.description")}`,
-    defaultValue: "",
+    defaultValue: service?.comment,
   });
 
   accordionNestedContainer.addInput({
@@ -319,7 +319,7 @@ export default function ServiceSettings() {
     handleSubmit,
     dirtyFields,
     onValid: (data: FieldValues) => {
-      const serviceData = data as ServiceUpdateFormData;
+      const serviceData = data as ServiceUpdateInput;
       void handleUpdateService(serviceData);
     },
   });
@@ -328,11 +328,14 @@ export default function ServiceSettings() {
 
   const hasChanges = Object.keys(currentValues).some(
     (key) =>
-      currentValues[key as keyof ServiceUpdateFormData] !==
-      defaultValues[key as keyof ServiceUpdateFormData]
+      currentValues[key as keyof ServiceUpdateInput] !==
+      defaultValues[key as keyof ServiceUpdateInput]
   );
 
-  const isChanged = hasChanges && Object.keys(dirtyFields).length > 0;
+  const isChanged =
+    (hasChanges && Object.keys(dirtyFields).length > 0) ||
+    currentValues.url !== service?.url ||
+    currentValues.type !== service?.type;
 
   useEffect(() => {
     if (!service) return;
@@ -362,7 +365,8 @@ export default function ServiceSettings() {
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer
-            data={formServiceData}
+            formControls={serviceSettingsFormContainer}
+            formFields={currentValues}
             register={register}
             control={control}
             errors={errors}

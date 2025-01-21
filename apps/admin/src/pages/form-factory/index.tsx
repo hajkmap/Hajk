@@ -10,6 +10,7 @@ import CONTAINER_TYPE from "../../components/form-factory/types/container-types"
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { RenderProps } from "../../components/form-factory/types/render";
 import {
+  Box,
   Button,
   Grid2 as Grid,
   InputAdornment,
@@ -132,6 +133,15 @@ export default function FormFactoryPage() {
     ],
   });
 
+  formContainer.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 6,
+    name: "visibleIfSelectTestHasValue3",
+    title: "Option 3 textfield",
+    defaultValue: "",
+    visibleIf: { name: "selectTest", value: "3" },
+  });
+
   formContainer.addStaticElement({
     type: STATIC_TYPE.SPACER,
     gridColumns: 6,
@@ -174,12 +184,28 @@ export default function FormFactoryPage() {
 
   formContainer.addStaticElement({
     type: STATIC_TYPE.DIVIDER,
-    title: "Divider with text",
+    title: "Divider with text 1",
   });
+
+  formContainer.addElement(
+    <div>
+      Hello 1, this is simply a way to add anything you want, something other
+      than a form input. Something not managed by form-factory.
+    </div>,
+    6
+  );
+
+  formContainer.addElement(
+    <Box>
+      Hello 2, this is simply a way to add anything you want, something other
+      than a form input. Something not managed by form-factory.
+    </Box>,
+    6
+  );
 
   formContainer.addStaticElement({
     type: STATIC_TYPE.DIVIDER,
-    title: "",
+    title: "Divider with text 2",
   });
 
   formContainer.addInput({
@@ -295,7 +321,8 @@ export default function FormFactoryPage() {
     <Page title={"Form factory"}>
       <form onSubmit={onSubmit}>
         <FormRenderer
-          data={formContainerData}
+          formControls={formContainerData}
+          formFields={formFields}
           register={register}
           control={control}
           errors={errors}

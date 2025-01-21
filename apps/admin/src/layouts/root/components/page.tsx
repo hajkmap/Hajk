@@ -63,7 +63,7 @@ const Page = (props: Props) => {
         width: "100%",
       }}
     >
-      <Grid container spacing={2} sx={{ mb: "1.8rem" }}>
+      <Grid container spacing={2} sx={{ mb: "1.8rem", mt: "0.625rem" }}>
         <Grid container size="auto">
           <Typography variant="h1">{props.title}</Typography>
         </Grid>

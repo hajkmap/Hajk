@@ -4,6 +4,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import getTheme from "./theme/theme";
 import { PaletteMode } from "@mui/material";
 import useAppStateStore from "../store/use-app-state-store";
+import { GlobalStylesComponent } from "./theme/global-styles";
 
 export interface ThemeContextType {
   mode: PaletteMode;
@@ -29,6 +30,7 @@ export default function ThemeRegistry(props: { children: React.ReactNode }) {
     >
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        <GlobalStylesComponent mode={themeMode} />
         {children}
       </ThemeProvider>
     </ThemeContext.Provider>

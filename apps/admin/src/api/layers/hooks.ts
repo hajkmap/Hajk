@@ -1,10 +1,23 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { Layer, LayersApiResponse, LayerTypesApiResponse } from "./types";
+import {
+  useQuery,
+  UseQueryResult,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
+  Layer,
+  LayersApiResponse,
+  LayerTypesApiResponse,
+  LayerUpdateInput,
+} from "./types";
 import {
   getLayers,
   getLayerById,
   getLayerTypes,
   getLayersByType,
+  createLayer,
+  deleteLayer,
+  updateLayer,
 } from "./requests";
 
 // A React Query hook to fetch all layers
@@ -42,5 +55,56 @@ export const useLayerTypes = (): UseQueryResult<LayerTypesApiResponse[]> => {
   return useQuery({
     queryKey: ["layerTypes"],
     queryFn: getLayerTypes,
+  });
+};
+
+// React mutation hook to create a layer
+// This hook uses the `createLayer` function from the layers `requests` module
+export const useCreateLayer = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createLayer,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["layers"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+// React mutation hook to update a layer
+// This hook uses the `updateLayer` function from the layers `requests` module
+export const useUpdateLayer = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      layerId,
+      data,
+    }: {
+      layerId: string;
+      data: LayerUpdateInput;
+    }) => updateLayer(layerId, data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["layers"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+// React mutation hook to delete a layer
+// This hook uses the `deleteLayer` function from the layers `requests` module
+export const useDeleteLayer = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (layerId: string) => deleteLayer(layerId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["layers"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 };
