@@ -19,3 +19,10 @@ export interface LayerTypesApiResponse {
   error: string;
   errorId: string;
 }
+
+export interface LayerCreateInput {
+  name?: string;
+  serviceId: string;
+  locked?: boolean;
+  options?: Record<string, string>;
+}

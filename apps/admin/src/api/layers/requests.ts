@@ -1,5 +1,11 @@
-import { Layer, LayersApiResponse, LayerTypesApiResponse } from "./types";
+import {
+  Layer,
+  LayersApiResponse,
+  LayerTypesApiResponse,
+  LayerCreateInput,
+} from "./types";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
+import { generateNames } from "../generated/names";
 
 /**
  * This module provides API request functions to interact with the backend
@@ -106,6 +112,51 @@ export const getLayerTypes = async (): Promise<string[]> => {
       );
     } else {
       throw new Error(`Failed to fetch layer types`);
+    }
+  }
+};
+
+export const createLayer = async (
+  newLayer: LayerCreateInput
+): Promise<LayerCreateInput> => {
+  const internalApiClient = getApiClient();
+  if (!newLayer.name) {
+    newLayer.name = generateNames();
+  }
+  try {
+    const response = await internalApiClient.post<LayerCreateInput>(
+      "/layers",
+      newLayer
+    );
+    if (!response.data) {
+      throw new Error("No layer data found");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to create layer. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to create layer`);
+    }
+  }
+};
+
+export const deleteLayer = async (layerId: string): Promise<void> => {
+  const internalApiClient = getApiClient();
+  try {
+    await internalApiClient.delete(`/layers/${layerId}`);
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to delete layer. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error("Failed to delete layer");
     }
   }
 };

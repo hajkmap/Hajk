@@ -74,7 +74,7 @@
     "services.settings.accordionTitle2": "Tillgängliga lager i tjänsten",
     "services.settings.dialog.title": "Redigera url",
     "services.url.btnLabel": "Ändra url",
-    "services.createServiceSuccess": "Tjänsten {{name}} skapad!",
+    "services.createServiceSuccess": "Tjänsten {{name}} skapades!",
     "services.createServiceFailed": "Misslyckades att skapa tjänsten.",
     "services.updateServiceSuccess": "Tjänsten {{name}} har uppdaterats!",
     "services.updateServiceFailed": "Misslyckades att uppdatera tjänsten {{name}}.",
@@ -125,6 +125,10 @@
     "settings.available.coordinateSystem": "Tillgängliga koordinatsystem",
     "settings.preSelected.coordinateSystem": "Förvalt koordinatsystem",
     "layers.dialog.addBtn": "Lägg till lager",
-    "layers.dialog.title": "Nytt lager"
+    "layers.dialog.title": "Nytt lager",
+    "layers.createLayerSuccess": "Lagret {{name}} skapades!",
+    "layers.createLayerFailed": "Misslyckades att skapa lagret.",
+    "layers.deleteLayerSuccess": "Lagret {{name}} är nu borttagen!",
+    "layers.deleteLayerFailed": "Misslyckades att ta bort lagret {{name}}"
   }
 }

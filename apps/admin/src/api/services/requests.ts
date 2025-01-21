@@ -3,8 +3,8 @@ import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 import {
   Service,
   ServicesApiResponse,
-  ServiceCreateFormData,
-  ServiceUpdateFormData,
+  ServiceCreateInput,
+  ServiceUpdateInput,
   ServiceCapabilities,
 } from "./types";
 import { LayersApiResponse } from "../layers";
@@ -122,14 +122,14 @@ export const getMapsByServiceId = async (serviceId: string): Promise<Map[]> => {
 };
 
 export const createService = async (
-  newService: ServiceCreateFormData
-): Promise<ServiceCreateFormData> => {
+  newService: ServiceCreateInput
+): Promise<ServiceCreateInput> => {
   const internalApiClient = getApiClient();
   if (!newService.name) {
     newService.name = generateNames();
   }
   try {
-    const response = await internalApiClient.post<ServiceCreateFormData>(
+    const response = await internalApiClient.post<ServiceCreateInput>(
       "/services",
       newService
     );
@@ -151,11 +151,11 @@ export const createService = async (
 
 export const updateService = async (
   serviceId: string,
-  data: Partial<ServiceUpdateFormData>
-): Promise<ServiceUpdateFormData> => {
+  data: Partial<ServiceUpdateInput>
+): Promise<ServiceUpdateInput> => {
   const internalApiClient = getApiClient();
   try {
-    const response = await internalApiClient.patch<ServiceUpdateFormData>(
+    const response = await internalApiClient.patch<ServiceUpdateInput>(
       `/services/${serviceId}`,
       data
     );

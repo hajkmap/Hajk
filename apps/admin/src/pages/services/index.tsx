@@ -20,7 +20,7 @@ import { createOnSubmitHandler } from "../../components/form-factory/form-utils"
 import { useServices, useCreateService } from "../../api/services";
 import {
   Service,
-  ServiceCreateFormData,
+  ServiceCreateInput,
   serviceTypes,
 } from "../../api/services/types";
 import DialogWrapper from "../../components/flexible-dialog";
@@ -96,7 +96,7 @@ export default function ServicesPage() {
 
   const formFields = watch();
 
-  const handleServiceSubmit = async (serviceData: ServiceCreateFormData) => {
+  const handleServiceSubmit = async (serviceData: ServiceCreateInput) => {
     try {
       const payload = {
         type: serviceData.type,
@@ -129,7 +129,7 @@ export default function ServicesPage() {
     dirtyFields,
 
     onValid: (data: FieldValues) => {
-      const serviceData = data as ServiceCreateFormData;
+      const serviceData = data as ServiceCreateInput;
       void handleServiceSubmit(serviceData);
     },
     onInvalid: (errors) => {

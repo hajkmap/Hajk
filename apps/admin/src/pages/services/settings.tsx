@@ -19,7 +19,7 @@ import {
   useServices,
   useLayersByServiceId,
   serviceTypes,
-  ServiceUpdateFormData,
+  ServiceUpdateInput,
   serverTypes,
 } from "../../api/services";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -82,7 +82,7 @@ export default function ServiceSettings() {
     }
   };
 
-  const handleUpdateService = async (serviceData: ServiceUpdateFormData) => {
+  const handleUpdateService = async (serviceData: ServiceUpdateInput) => {
     try {
       const payload = {
         name: serviceData.name,
@@ -319,7 +319,7 @@ export default function ServiceSettings() {
     handleSubmit,
     dirtyFields,
     onValid: (data: FieldValues) => {
-      const serviceData = data as ServiceUpdateFormData;
+      const serviceData = data as ServiceUpdateInput;
       void handleUpdateService(serviceData);
     },
   });
@@ -328,8 +328,8 @@ export default function ServiceSettings() {
 
   const hasChanges = Object.keys(currentValues).some(
     (key) =>
-      currentValues[key as keyof ServiceUpdateFormData] !==
-      defaultValues[key as keyof ServiceUpdateFormData]
+      currentValues[key as keyof ServiceUpdateInput] !==
+      defaultValues[key as keyof ServiceUpdateInput]
   );
 
   const isChanged = hasChanges && Object.keys(dirtyFields).length > 0;

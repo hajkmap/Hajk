@@ -26,9 +26,9 @@
     - ⚠️ Note: Some fields in the request payload for both adding and updating a service are mocked or incomplete due to missing data in the current data model. Once the data model is finalized, ensure that the missing fields are updated and validated in both the payload and the backend schema.
   - [x] Remove service (AA)
 - [ ] Layers page
-  - [ ] Add layer (AA)
+  - [x] Add layer (AA)
   - [ ] Alter layer (AA)
-  - [ ] Remove layer (AA)
+  - [x] Remove layer (AA)
 - [ ] General UI improvements (JA)
   - [ ] Use page width better. 1024? 2048?
   - [x] Handle menu overflow and bottom settings/lock better. v0.1 WIP

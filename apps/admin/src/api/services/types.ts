@@ -16,7 +16,7 @@ export interface ServicesApiResponse {
   errorId: string;
 }
 
-export interface ServiceCreateFormData {
+export interface ServiceCreateInput {
   url: string;
   name?: string;
   version?: string;
@@ -26,7 +26,7 @@ export interface ServiceCreateFormData {
   comment?: string;
 }
 
-export interface ServiceUpdateFormData {
+export interface ServiceUpdateInput {
   name?: string;
   url?: string;
   version?: string;

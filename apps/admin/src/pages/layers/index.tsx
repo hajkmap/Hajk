@@ -1,10 +1,22 @@
 import { useState, useEffect, useMemo } from "react";
 import Grid from "@mui/material/Grid2";
-import { Button, IconButton, Menu, MenuItem, Box } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Box,
+  useTheme,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
-import { Layer, useLayers } from "../../api/layers";
+import {
+  Layer,
+  useLayers,
+  LayerCreateInput,
+  useCreateLayer,
+} from "../../api/layers";
 import { useServices } from "../../api/services";
 import { useNavigate } from "react-router";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
@@ -18,6 +30,7 @@ import DynamicFormContainer from "../../components/form-factory/dynamic-form-con
 import { FieldValues } from "react-hook-form";
 import INPUT_TYPE from "../../components/form-factory/types/input-type";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import { toast } from "react-toastify";
 
 export default function LayersPage() {
   const { t } = useTranslation();
@@ -26,6 +39,8 @@ export default function LayersPage() {
   const language = useAppStateStore((state) => state.language);
   const [open, setOpen] = useState<boolean>(false);
   const { data: services } = useServices();
+  const { mutateAsync: createLayer } = useCreateLayer();
+  const { palette } = useTheme();
 
   const processedLayers = useMemo(() => {
     if (!layers || !services) return [];
@@ -55,11 +70,15 @@ export default function LayersPage() {
   const layerContainer = new DynamicFormContainer<FieldValues>();
 
   layerContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.SELECT,
     gridColumns: 12,
-    name: "url",
-    title: "N/A",
+    name: "serviceId",
+    title: "Tjänst",
     defaultValue: "",
+    optionList: services?.map((service) => ({
+      title: service.name + `(${service.type})`,
+      value: service.id,
+    })),
     registerOptions: {
       required: `${t("common.required")}`,
     },
@@ -76,17 +95,42 @@ export default function LayersPage() {
     handleSubmit,
     control,
     watch,
+    reset,
     formState: { errors, dirtyFields },
   } = DefaultUseForm(defaultValues);
 
   const formFields = watch();
+
+  const handleLayerSubmit = async (layerData: LayerCreateInput) => {
+    try {
+      const payload = {
+        serviceId: layerData.serviceId,
+      };
+      const response = await createLayer(payload);
+      toast.success(t("layers.createLayerSuccess", { name: response?.name }), {
+        position: "bottom-left",
+        theme: palette.mode,
+        hideProgressBar: true,
+      });
+      reset();
+      handleClose();
+    } catch (error) {
+      console.error("Failed to submit service:", error);
+      toast.error(t("layers.createLayerFailed"), {
+        position: "bottom-left",
+        theme: palette.mode,
+        hideProgressBar: true,
+      });
+    }
+  };
 
   const onSubmit = createOnSubmitHandler({
     handleSubmit,
     dirtyFields,
 
     onValid: (data: FieldValues) => {
-      console.log("Data: ", data);
+      const layerData = data as LayerCreateInput;
+      void handleLayerSubmit(layerData);
     },
     onInvalid: (errors) => {
       console.log("Errors: ", errors);

@@ -125,6 +125,10 @@
     "settings.available.coordinateSystem": "Available coordinate system",
     "settings.preSelected.coordinateSystem": "Pre-selected coordinate system",
     "layers.dialog.addBtn": "Add layer",
-    "layers.dialog.title": "New layer"
+    "layers.dialog.title": "New layer",
+    "layers.createLayerSuccess": "Layer {{name}} created!",
+    "layers.createLayerFailed": "Failed to create layer.",
+    "layers.deleteLayerSuccess": "Layer {{name}} deleted!",
+    "layers.deleteLayerFailed": "Failed to delete layer {{name}}"
   }
 }

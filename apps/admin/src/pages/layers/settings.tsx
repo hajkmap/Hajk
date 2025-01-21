@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
-import { Button, Stack, TextField } from "@mui/material";
+import { Button, Stack, TextField, useTheme } from "@mui/material";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import { FieldValues } from "react-hook-form";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
@@ -13,9 +13,10 @@ import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { RenderProps } from "../../components/form-factory/types/render";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import UsedInMapsGrid from "./used-in-maps-grid";
-import { useLayers, useLayerById } from "../../api/layers";
+import { useLayers, useLayerById, useDeleteLayer } from "../../api/layers";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import FormActionPanel from "../../components/form-action-panel";
+import { toast } from "react-toastify";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
@@ -23,6 +24,8 @@ export default function LayerSettings() {
   const { isLoading, isError } = useLayerById(layerId ?? "");
   const { data: layers } = useLayers();
   const layer = layers?.find((l) => l.id === layerId);
+  const { mutateAsync: deleteLayer, status: deleteStatus } = useDeleteLayer();
+  const { palette } = useTheme();
 
   const [formLayerData, setFormLayerData] = useState<
     DynamicFormContainer<FieldValues>
@@ -517,6 +520,28 @@ export default function LayerSettings() {
     setFormLayerData(layerSettingsFormContainer);
   }, [layer]);
 
+  const handleDeleteLayer = async () => {
+    if (!isLoading && layer?.id) {
+      try {
+        await deleteLayer(layer.id);
+        toast.success(t("layers.deleteLayerSuccess", { name: layer?.name }), {
+          position: "bottom-left",
+          theme: palette.mode,
+          hideProgressBar: true,
+        });
+      } catch (error) {
+        console.log(error);
+        toast.error(t("layers.deleteLayerFailed", { name: layer?.name }), {
+          position: "bottom-left",
+          theme: palette.mode,
+          hideProgressBar: true,
+        });
+      }
+    } else {
+      console.log("Layer data is still loading or unavailable.");
+    }
+  };
+
   if (isLoading) {
     return <SquareSpinnerComponent />;
   }
@@ -526,13 +551,11 @@ export default function LayerSettings() {
     <Page title={t("common.settings")}>
       <FormActionPanel
         updateStatus={"error"}
-        deleteStatus={"error"}
+        deleteStatus={deleteStatus}
         onUpdate={() => {
           console.log("");
         }}
-        onDelete={() => {
-          console.log("");
-        }}
+        onDelete={handleDeleteLayer}
         lastSavedBy="Anonym"
         lastSavedDate="2023-04-11 13:37"
         saveButtonText="Spara"
