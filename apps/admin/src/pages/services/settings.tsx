@@ -332,7 +332,6 @@ export default function ServiceSettings() {
       defaultValues[key as keyof ServiceUpdateInput]
   );
 
-  // check if dialogUrl and dialogServiceType has changed
   const isChanged =
     (hasChanges && Object.keys(dirtyFields).length > 0) ||
     currentValues.url !== service?.url ||
