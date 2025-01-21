@@ -90,6 +90,7 @@ export default function ServiceSettings() {
         type: serviceData.type,
         serverType: serviceData.serverType,
         version: serviceData.version,
+        comment: serviceData.comment,
       };
       await updateService({
         serviceId: service?.id ?? "",
@@ -103,7 +104,6 @@ export default function ServiceSettings() {
           hideProgressBar: true,
         }
       );
-      setIsDialogOpen(false);
       void navigate("/services");
     } catch (error) {
       console.error("Failed to update service:", error);
@@ -183,9 +183,9 @@ export default function ServiceSettings() {
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 10,
-    name: "description",
+    name: "comment",
     title: `${t("services.description")}`,
-    defaultValue: "",
+    defaultValue: service?.comment,
   });
 
   accordionNestedContainer.addInput({
@@ -332,7 +332,11 @@ export default function ServiceSettings() {
       defaultValues[key as keyof ServiceUpdateInput]
   );
 
-  const isChanged = hasChanges && Object.keys(dirtyFields).length > 0;
+  // check if dialogUrl and dialogServiceType has changed
+  const isChanged =
+    (hasChanges && Object.keys(dirtyFields).length > 0) ||
+    currentValues.url !== service?.url ||
+    currentValues.type !== service?.type;
 
   useEffect(() => {
     if (!service) return;

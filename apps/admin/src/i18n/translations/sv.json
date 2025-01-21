@@ -129,6 +129,8 @@
     "layers.createLayerSuccess": "Lagret {{name}} skapades!",
     "layers.createLayerFailed": "Misslyckades att skapa lagret.",
     "layers.deleteLayerSuccess": "Lagret {{name}} är nu borttagen!",
-    "layers.deleteLayerFailed": "Misslyckades att ta bort lagret {{name}}"
+    "layers.deleteLayerFailed": "Misslyckades att ta bort lagret {{name}}",
+    "layers.updateLayerSuccess": "Lagret {{name}} uppdaterades!",
+    "layers.updateLayerFailed": "Misslyckades att uppdatera lagret {{name}}"
   }
 }

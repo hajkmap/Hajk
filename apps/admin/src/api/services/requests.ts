@@ -23,6 +23,8 @@ import { generateNames } from "../generated/names";
  * - The ´createService` function creates a new service.
  * - The `updateService` function updates a service.
  * - The `deleteService` function deletes a service.
+ * - The parseLayersFromXML function parses layer names from an XML string.
+ * - The fetchCapabilities function fetches getCapabilities for a given URL.
  *
  * These functions utilize a custom Axios instance and throw appropriate error messages for failures.
  *

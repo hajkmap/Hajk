@@ -4,7 +4,12 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Layer, LayersApiResponse, LayerTypesApiResponse } from "./types";
+import {
+  Layer,
+  LayersApiResponse,
+  LayerTypesApiResponse,
+  LayerUpdateInput,
+} from "./types";
 import {
   getLayers,
   getLayerById,
@@ -12,6 +17,7 @@ import {
   getLayersByType,
   createLayer,
   deleteLayer,
+  updateLayer,
 } from "./requests";
 
 // A React Query hook to fetch all layers
@@ -58,6 +64,27 @@ export const useCreateLayer = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createLayer,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["layers"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+// React mutation hook to update a layer
+// This hook uses the `updateLayer` function from the layers `requests` module
+export const useUpdateLayer = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      layerId,
+      data,
+    }: {
+      layerId: string;
+      data: LayerUpdateInput;
+    }) => updateLayer(layerId, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["layers"] });
     },

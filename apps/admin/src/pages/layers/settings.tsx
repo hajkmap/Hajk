@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router";
+import { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
 import { Button, Stack, TextField, useTheme } from "@mui/material";
@@ -13,10 +13,17 @@ import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { RenderProps } from "../../components/form-factory/types/render";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import UsedInMapsGrid from "./used-in-maps-grid";
-import { useLayers, useLayerById, useDeleteLayer } from "../../api/layers";
+import {
+  useLayers,
+  useLayerById,
+  useDeleteLayer,
+  LayerUpdateInput,
+  useUpdateLayer,
+} from "../../api/layers";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import FormActionPanel from "../../components/form-action-panel";
 import { toast } from "react-toastify";
+import { useServices } from "../../api/services";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
@@ -24,8 +31,18 @@ export default function LayerSettings() {
   const { isLoading, isError } = useLayerById(layerId ?? "");
   const { data: layers } = useLayers();
   const layer = layers?.find((l) => l.id === layerId);
+  const { mutateAsync: updateLayer, status: updateStatus } = useUpdateLayer();
   const { mutateAsync: deleteLayer, status: deleteStatus } = useDeleteLayer();
   const { palette } = useTheme();
+  const { data: services } = useServices();
+  const navigate = useNavigate();
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  const handleExternalSubmit = () => {
+    if (formRef.current) {
+      formRef.current.requestSubmit();
+    }
+  };
 
   const [formLayerData, setFormLayerData] = useState<
     DynamicFormContainer<FieldValues>
@@ -76,10 +93,16 @@ export default function LayerSettings() {
   panelNestedContainer.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
-    name: "service",
-    title: `Tjänst`,
-    defaultValue: "Byggnader v3 WMS",
-    optionList: [{ title: "Byggnader v3 WMS", value: "Byggnader v3 WMS" }],
+    name: "serviceId",
+    title: "Tjänst",
+    defaultValue: layer?.serviceId,
+    optionList: services?.map((service) => ({
+      title: service.name + `(${service.type})`,
+      value: service.id,
+    })),
+    registerOptions: {
+      required: `${t("common.required")}`,
+    },
   });
 
   panelNestedContainer.addInput({
@@ -497,28 +520,31 @@ export default function LayerSettings() {
     accordionNestedContainer7,
   ]);
 
-  const defaultValues = formLayerData.getDefaultValues();
-  const {
-    register,
-    handleSubmit,
-    control,
-    watch,
-    formState: { errors, dirtyFields },
-  } = DefaultUseForm(defaultValues);
-
-  const formFields = watch();
-
-  const onSubmit = createOnSubmitHandler({
-    handleSubmit,
-    dirtyFields,
-    onValid: (data: FieldValues) => {
-      console.log("Data: ", data);
-    },
-  });
-
-  useEffect(() => {
-    setFormLayerData(layerSettingsFormContainer);
-  }, [layer]);
+  const handleUpdateLayer = async (layerData: LayerUpdateInput) => {
+    try {
+      const payload = {
+        name: layerData.name,
+        serviceId: layerData.serviceId,
+      };
+      await updateLayer({
+        layerId: layer?.id ?? "",
+        data: payload,
+      });
+      toast.success(t("layers.updateLayerSuccess", { name: layerData.name }), {
+        position: "bottom-left",
+        theme: palette.mode,
+        hideProgressBar: true,
+      });
+      void navigate("/layers");
+    } catch (error) {
+      console.error("Failed to update layer:", error);
+      toast.error(t("layers.updateLayerFailed", { name: layer?.name }), {
+        position: "bottom-left",
+        theme: palette.mode,
+        hideProgressBar: true,
+      });
+    }
+  };
 
   const handleDeleteLayer = async () => {
     if (!isLoading && layer?.id) {
@@ -542,6 +568,30 @@ export default function LayerSettings() {
     }
   };
 
+  const defaultValues = formLayerData.getDefaultValues();
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors, dirtyFields },
+  } = DefaultUseForm(defaultValues);
+
+  const formFields = watch();
+
+  const onSubmit = createOnSubmitHandler({
+    handleSubmit,
+    dirtyFields,
+    onValid: (data: FieldValues) => {
+      const layerData = data as LayerUpdateInput;
+      void handleUpdateLayer(layerData);
+    },
+  });
+
+  useEffect(() => {
+    setFormLayerData(layerSettingsFormContainer);
+  }, [layer]);
+
   if (isLoading) {
     return <SquareSpinnerComponent />;
   }
@@ -550,11 +600,9 @@ export default function LayerSettings() {
   return (
     <Page title={t("common.settings")}>
       <FormActionPanel
-        updateStatus={"error"}
+        updateStatus={updateStatus}
         deleteStatus={deleteStatus}
-        onUpdate={() => {
-          console.log("");
-        }}
+        onUpdate={handleExternalSubmit}
         onDelete={handleDeleteLayer}
         lastSavedBy="Anonym"
         lastSavedDate="2023-04-11 13:37"
@@ -563,7 +611,7 @@ export default function LayerSettings() {
         navigateTo="/layers"
         isChangedFields={true}
       >
-        <form onSubmit={onSubmit}>
+        <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer
             formControls={layerSettingsFormContainer}
             formFields={formFields}
