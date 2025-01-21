@@ -190,7 +190,13 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
     },
     setSubLayerVisibility(layerId, subLayerId, visible) {
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
-      const currentSubLayers = new Set(olLayer.get("subLayers"));
+
+      let currentSubLayers;
+      if (olLayer.get("visible")) {
+        currentSubLayers = new Set(olLayer.get("subLayers"));
+      } else {
+        currentSubLayers = new Set();
+      }
 
       if (visible) {
         currentSubLayers.add(subLayerId);
