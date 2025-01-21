@@ -4,9 +4,17 @@ import log4js from "log4js";
 // First, see if Hajk is running in a clustered environment, if so, we want unique log file
 // names for each instance
 const uniqueInstance =
-  process.env.HAJK_INSTANCE_ID.length > 0
+  process.env.HAJK_INSTANCE_ID?.length > 0
     ? `_${process.env.HAJK_INSTANCE_ID}`
     : "";
+
+const defaultAppenders = process.env.LOG_DEBUG_TO
+  ? process.env.LOG_DEBUG_TO.trim().split(",")
+  : ["console", "file"];
+
+const httpAppenders = process.env.LOG_ACCESS_LOG_TO
+  ? process.env.LOG_ACCESS_LOG_TO.trim().split(",")
+  : null;
 
 const commonDateFileOptions = {
   compress: process.env.LOG_COMPRESS_BACKUPS === "true", // Should the backups be gzipped?
@@ -56,9 +64,9 @@ log4js.configure({
   categories: {
     default: {
       // Use settings from .env to decide which appenders (defined above) will be active
-      appenders: process.env.LOG_DEBUG_TO.split(","),
+      appenders: defaultAppenders,
       // Use settings from .env to determine which log level should be used
-      level: process.env.LOG_LEVEL,
+      level: process.env.LOG_LEVEL || "all",
     },
     // Separate category to log admin UI events (requests to endpoints that modify the layers/maps)
     ...(process.env.LOG_ADMIN_EVENTS === "true" && {
@@ -68,9 +76,9 @@ log4js.configure({
       },
     }),
     // If activated in .env, write access log to the configured appenders
-    ...(process.env.LOG_ACCESS_LOG_TO.trim().length !== 0 && {
+    ...(httpAppenders && {
       http: {
-        appenders: process.env.LOG_ACCESS_LOG_TO.split(","),
+        appenders: httpAppenders,
         level: "all",
       },
     }),
