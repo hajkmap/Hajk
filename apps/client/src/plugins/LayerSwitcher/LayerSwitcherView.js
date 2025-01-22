@@ -14,6 +14,7 @@ import QuickAccessView from "./components/QuickAccessView.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
 import LayerListFilter from "./components/LayerListFilter.js";
 import { debounce } from "utils/debounce";
+import { OSM_LAYER_ID } from "./components/BackgroundSwitcher";
 
 const StyledAppBar = styled(AppBar)(() => ({
   top: -10,
@@ -108,18 +109,35 @@ class LayersSwitcherView extends React.PureComponent {
 
     props.app.globalObserver.subscribe("setLayerDetails", (payload) => {
       if (payload) {
+        const currentScrollPosition = this.getScrollPosition();
+
         const layerId = payload.layerId;
         if (!layerId) {
           return;
         }
-        const layer = this.olLayerMap[layerId];
+
+        let layer;
+
+        if (layerId === OSM_LAYER_ID) {
+          // The Open street map layer is set up by the `BackgroundSwitcher`
+          // component. So it does not exist when the `olLayerMap` is created.
+          // code below is an ugly workaround. The best solution would be if
+          // the `LayerItemDetails` does not need the actual OpenLayers object
+          // at all. Or if the OSM layer is configured in the actual map
+          // config.
+          layer = this.props.app.map
+            .getLayers()
+            .getArray()
+            .find((layer) => layer.get("name") === OSM_LAYER_ID);
+        } else {
+          layer = this.olLayerMap[layerId];
+        }
 
         // Set scroll position state when layer details is opened
         const details = {
           layer,
           subLayerIndex: payload.subLayerIndex,
         };
-        const currentScrollPosition = this.getScrollPosition();
         this.setState((prevState) => ({
           layerItemDetails: details,
           displayContentOverlay: "layerItemDetails",
