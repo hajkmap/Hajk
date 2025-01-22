@@ -10,6 +10,8 @@ import React, {
 import { Vector as VectorLayer } from "ol/layer";
 import LayerSwitcherView from "./LayerSwitcherView.js";
 import { useLayerZoomWarningSnackbar } from "./useLayerZoomWarningSnackbar";
+import { functionalOk as functionalCookieOk } from "../../models/Cookie";
+import LocalStorageHelper from "../../utils/LocalStorageHelper";
 
 const getOlLayerState = (l) => ({
   opacity: l.get("opacity"),
@@ -163,6 +165,18 @@ const getGroupConfigById = (tree, groupId) => {
 };
 
 const QUICK_ACCESS_KEY = "quickAccess";
+const QUICK_ACCESS_LS_KEY = "quickAccessLayers";
+
+const setQuickAccessStateInLocalStorage = (map) => {
+  if (functionalCookieOk()) {
+    const qaLayers = map
+      .getAllLayers()
+      .filter((l) => l.get(QUICK_ACCESS_KEY) === true)
+      .map((l) => l.get("name"));
+    console.log({ qaLayers });
+    LocalStorageHelper.set(QUICK_ACCESS_LS_KEY, qaLayers);
+  }
+};
 
 const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
   const olBackgroundLayers = map
@@ -244,6 +258,7 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
     setLayerQuickAccess(layerId, partOfQuickAccess) {
       const layer = map.getAllLayers().find((l) => l.get("name") === layerId);
       layer.set(QUICK_ACCESS_KEY, partOfQuickAccess);
+      setQuickAccessStateInLocalStorage(map);
     },
     addVisibleLayersToQuickAccess() {
       const visibleLayers = map
@@ -255,6 +270,7 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
             l.get("layerType") !== "system"
         );
       visibleLayers.forEach((l) => l.set(QUICK_ACCESS_KEY, true));
+      setQuickAccessStateInLocalStorage(map);
     },
     clearQuickAccess() {
       map
@@ -264,6 +280,7 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
             l.get("layerType") !== "base" && l.get("layerType") !== "system"
         )
         .map((l) => l.set(QUICK_ACCESS_KEY, false));
+      setQuickAccessStateInLocalStorage(map);
     },
     // set ZIndex
   };
@@ -426,6 +443,26 @@ const LayerSwitcherProvider = ({
         }
       });
     };
+  }, [map]);
+
+  // Load any saved QuickAccess layers from local storage
+  // It's important that this effect is after the previous one that sets up the
+  // OpenLayers listeners. So that the application realizes that some new
+  // layers might have been added to QuickAccess.
+  useEffect(() => {
+    const ls = LocalStorageHelper.get(QUICK_ACCESS_LS_KEY);
+    if (!(typeof ls === "object" && ls !== null)) {
+      return;
+    }
+    const qaLayersSet = new Set(Object.values(ls));
+    map
+      .getLayers()
+      .getArray()
+      .forEach((l) => {
+        if (qaLayersSet.has(l.get("name"))) {
+          l.set(QUICK_ACCESS_KEY, true);
+        }
+      });
   }, [map]);
 
   const dispatcher = useRef(
