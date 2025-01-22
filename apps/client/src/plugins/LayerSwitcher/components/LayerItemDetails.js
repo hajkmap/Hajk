@@ -4,6 +4,7 @@ import { useSnackbar } from "notistack";
 import LayerItemOptions from "./LayerItemOptions";
 import VectorFilter from "./VectorFilter";
 import CQLFilter from "./CQLFilter";
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
 import {
   Button,
@@ -46,6 +47,8 @@ function LayerItemDetails({
   // When a user clicks back, the tooltip of the button needs to be closed before this view hides.
   // TODO: Needs a better way to handle this
   const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   const layerSwitcherConfig = app.config.mapConfig.tools.find(
     (tool) => tool.type === "layerswitcher"
@@ -158,11 +161,10 @@ function LayerItemDetails({
       anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
     setQuickAccess(!quickAccess);
+
     // Set quicklayer access flag
-    layerItemDetails.layer.set(
-      "quickAccess",
-      !layerItemDetails.layer.get("quickAccess")
-    );
+    const layerId = layerItemDetails?.layer?.get("name");
+    layerSwitcherDispatch.setLayerQuickAccess(layerId, !quickAccess);
   };
 
   // Render title

@@ -162,6 +162,8 @@ const getGroupConfigById = (tree, groupId) => {
   }
 };
 
+const QUICK_ACCESS_KEY = "quickAccess";
+
 const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
   const olBackgroundLayers = map
     .getLayers()
@@ -240,7 +242,8 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
       layer.setVisible(visible);
     },
     setLayerQuickAccess(layerId, partOfQuickAccess) {
-      // set all other background layers to not visible
+      const layer = map.getAllLayers().find((l) => l.get("name") === layerId);
+      layer.set(QUICK_ACCESS_KEY, partOfQuickAccess);
     },
     addVisibleLayersToQuickAccess() {
       const visibleLayers = map
@@ -251,11 +254,9 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
             l.get("layerType") !== "base" &&
             l.get("layerType") !== "system"
         );
-      const QUICK_ACCESS_KEY = "quickAccess";
       visibleLayers.forEach((l) => l.set(QUICK_ACCESS_KEY, true));
     },
     clearQuickAccess() {
-      const QUICK_ACCESS_KEY = "quickAccess";
       map
         .getAllLayers()
         .filter(
