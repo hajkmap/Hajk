@@ -26,7 +26,7 @@ const ToggleAllComponent = ({ toggleable, toggleState, clickHandler }) => {
         clickHandler();
       }}
     >
-      <IconButton sx={{ pl: 0 }} disableRipple size="small">
+      <IconButton disableTouchRipple size="small">
         {
           {
             checked: <CheckBoxIcon />,

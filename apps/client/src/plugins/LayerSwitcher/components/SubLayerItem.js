@@ -93,7 +93,7 @@ export default function SubLayerItem({
   return (
     <div style={{ marginLeft: "32px" }}>
       <ListItemButton
-        disableRipple
+        disableTouchRipple
         onClick={() => (toggleable ? toggleSubLayer(subLayer, visible) : null)}
         sx={{
           pl: 0,
@@ -106,7 +106,7 @@ export default function SubLayerItem({
       >
         {toggleable && (
           <IconButton
-            disableRipple
+            disableTouchRipple
             size="small"
             sx={{
               pl: 0,

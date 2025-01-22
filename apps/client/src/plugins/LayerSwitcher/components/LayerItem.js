@@ -46,7 +46,7 @@ const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
 
 const LayerToggleComponent = ({ toggleState }) => {
   return (
-    <IconButton disableRipple size="small" sx={{ pl: 0 }}>
+    <IconButton disableTouchRipple size="small">
       {
         {
           checked: <CheckBoxIcon />,
@@ -272,7 +272,7 @@ function LayerItem({
       >
         {draggable && (
           <IconButton
-            disableRipple
+            disableTouchRipple
             sx={{
               px: 0,
               opacity: 0,
@@ -287,7 +287,7 @@ function LayerItem({
         )}
         {expandableSection && expandableSection}
         <ListItemButton
-          disableRipple
+          disableTouchRipple
           onClick={toggleable ? handleLayerItemClick : null}
           sx={{
             p: 0,
@@ -330,8 +330,6 @@ function LayerItem({
                 <IconButton
                   size="small"
                   disableTouchRipple
-                  disableFocusRipple
-                  disableRipple
                 >
                   <Tooltip title="Bakgrundskartan ligger låst längst ner i ritordningen">
                     <LockOutlinedIcon />
