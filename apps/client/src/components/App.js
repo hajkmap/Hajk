@@ -1199,7 +1199,7 @@ class App extends React.PureComponent {
     const showMapResetter = clean === true || config.mapConfig.map.mapresetter;
 
     const showMapSwitcher =
-      clean === false && config.activeMap !== "simpleMapConfig";
+      clean === false && config.activeMap !== "simpleMapAndLayersConfig";
 
     const useNewInfoclick = this.infoclickOptions?.useNewInfoclick === true;
 
