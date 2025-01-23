@@ -220,7 +220,7 @@ const BackgroundSwitcher = ({
           })}
           globalObserver={globalObserver}
           clickCallback={onLayerClick}
-          layerID={BLACK_BACKROUND_LAYER_ID}
+          layerId={BLACK_BACKROUND_LAYER_ID}
           isFakeMapLayer={true}
         />
       )}
