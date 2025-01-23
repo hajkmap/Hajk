@@ -3,24 +3,19 @@ import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import { AppBar, Tab, Tabs, Box, ListItemText } from "@mui/material";
+import { AppBar, Tab, Tabs } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
-import LayerGroup from "./components/LayerGroup.js";
+import LayersTab from "./components/LayersTab.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
 import QuickAccessPresets from "./components/QuickAccessPresets.js";
-import QuickAccessView from "./components/QuickAccessView.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
-import LayerListFilter from "./components/LayerListFilter.js";
-import { debounce } from "utils/debounce";
 import { OSM_LAYER_ID } from "./components/BackgroundSwitcher";
 
 const StyledAppBar = styled(AppBar)(() => ({
   top: -10,
 }));
-
-const DEFAULT_MIN_FILTER_LENGTH = 3;
 
 /**
  * BreadCrumbs are a feature used to "link" content between LayerSwitcher
@@ -96,9 +91,6 @@ class LayersSwitcherView extends React.PureComponent {
       zIndex: l["zIndex"],
     }));
 
-    this.minFilterLength =
-      this.options?.layerFilterMinLength ?? DEFAULT_MIN_FILTER_LENGTH;
-
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
         this.setState({
@@ -123,8 +115,7 @@ class LayersSwitcherView extends React.PureComponent {
           // component. So it does not exist when the `olLayerMap` is created.
           // code below is an ugly workaround. The best solution would be if
           // the `LayerItemDetails` does not need the actual OpenLayers object
-          // at all. Or if the OSM layer is configured in the actual map
-          // config.
+          // at all.
           layer = this.props.app.map
             .getLayers()
             .getArray()
@@ -186,44 +177,13 @@ class LayersSwitcherView extends React.PureComponent {
     }));
   };
 
-  // TODO Use this function
-  collapseAllGroups = () => {
-    // const collapseGroups = (groups) => {
-    //   groups.forEach((group) => {
-    //     group.isExpanded = false;
-    //     if (group.groups && group.groups.length > 0) {
-    //       collapseGroups(group.groups);
-    //     }
-    //   });
-    // };
-    // collapseGroups(this.layerTree);
-  };
-
-  handleFilterSubmit = (value) => {
-    const filterValue = value === "" ? null : value;
-    if (filterValue?.length > 0) {
-      this.setState({ filterValue });
-    }
-  };
-
-  // Handles filter functionality
-  handleFilterValueChange = debounce((value) => {
-    const filterValue = value === "" ? null : value;
-
-    if (value === "") {
-      this.setState({ filterValue: null });
-    } else if (filterValue.length >= this.minFilterLength) {
-      this.setState({ filterValue });
-    }
-  }, 100);
-
   /**
-   * LayerSwitcher consists of two Tabs: one shows
-   * "regular" layers (as checkboxes, multi select), and the
-   * other shows background layers (as radio buttons, one-at-at-time).
-   * And the DrawOrder tab
+   * LayerSwitcher consists of thrre Tabs: one shows
+   * "regular" layers (as checkboxes, multi select).
+   * The * other shows background layers (as radio buttons, one-at-at-time).
+   * The third is the DrawOrder tab
    *
-   * This method controls which of the two Tabs is visible and hides QuickAccessPresets view.
+   * This method controls which of the Tabs is visible and hides QuickAccessPresets view.
    *
    * @memberof LayersSwitcherView
    */
@@ -268,7 +228,7 @@ class LayersSwitcherView extends React.PureComponent {
    * @memberof LayersSwitcherView
    */
   getScrollPosition = () => {
-    const scrollContainer = document.getElementById("scroll-container"); // Byt ut mot din scroll-container ID
+    const scrollContainer = document.getElementById("scroll-container");
     return scrollContainer.scrollTop;
   };
 
@@ -291,31 +251,6 @@ class LayersSwitcherView extends React.PureComponent {
 
   render() {
     const { windowVisible, layersState } = this.props;
-
-    const filterValue = this.state.filterValue;
-    let filterHits = null;
-
-    const searchIndex = Object.values(this.staticLayerConfig).flatMap((l) => {
-      let subLayerIndex = [];
-      if (l.allSubLayers?.length > 1) {
-        subLayerIndex = l.allSubLayers.map((sl) => {
-          const subLayerInfo = l.layerInfo.layersInfo[sl];
-          return [subLayerInfo.caption, l.id];
-        });
-      }
-
-      return [...subLayerIndex, [l.caption, l.id]];
-    });
-
-    if (filterValue) {
-      const lowercaseFilterValue = filterValue.toLocaleLowerCase();
-      const hits = searchIndex
-        ?.filter(([name, _]) =>
-          name.toLocaleLowerCase().includes(lowercaseFilterValue)
-        )
-        ?.map(([_, id]) => id);
-      filterHits = new Set(hits);
-    }
 
     return (
       <div
@@ -348,7 +283,7 @@ class LayersSwitcherView extends React.PureComponent {
           id="scroll-container"
           style={{ position: "relative", height: "100%", overflowY: "auto" }}
         >
-          <Box
+          <LayersTab
             style={{
               display:
                 this.state.activeTab === 0 &&
@@ -356,69 +291,28 @@ class LayersSwitcherView extends React.PureComponent {
                   ? "block"
                   : "none",
             }}
-          >
-            {this.props.options.showFilter && (
-              <LayerListFilter
-                minFilterLength={this.minFilterLength}
-                handleFilterSubmit={(value) => this.handleFilterSubmit(value)}
-                handleFilterValueChange={(value) =>
-                  this.handleFilterValueChange(value)
-                }
-              />
-            )}
-            {filterHits === null && (
-              <QuickAccessView
-                show={this.props.options.showQuickAccess}
-                map={this.props.map}
-                app={this.props.app}
-                globalObserver={this.globalObserver}
-                enableQuickAccessPresets={
-                  this.props.options.enableQuickAccessPresets
-                }
-                enableUserQuickAccessFavorites={
-                  this.props.options.enableUserQuickAccessFavorites
-                }
-                handleQuickAccessPresetsToggle={(e) =>
-                  this.handleQuickAccessPresetsToggle({ event: e })
-                }
-                favoritesViewDisplay={
-                  this.state.displayContentOverlay === "favorites"
-                }
-                handleFavoritesViewToggle={this.handleFavoritesViewToggle}
-                favoritesInfoText={
-                  this.options.userQuickAccessFavoritesInfoText
-                }
-                filterValue={this.state.filterValue}
-                layersState={layersState}
-              />
-            )}
-            {this.staticLayerTree.map((group) => (
-              <LayerGroup
-                key={group.id}
-                staticLayerConfig={this.staticLayerConfig}
-                staticGroupTree={group}
-                layersState={layersState}
-                globalObserver={this.globalObserver}
-                filterHits={filterHits}
-                filterValue={this.state.filterValue}
-              />
-            ))}
-            {filterHits !== null && filterHits.size === 0 && (
-              <ListItemText
-                sx={{
-                  py: 1,
-                  px: 4,
-                }}
-                primary="Inga resultat"
-                primaryTypographyProps={{
-                  pr: 5,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  variant: "body1",
-                }}
-              />
-            )}
-          </Box>
+            layersState={layersState}
+            staticLayerConfig={this.staticLayerConfig}
+            staticLayerTree={this.staticLayerTree}
+            displayContentOverlay={this.state.displayContentOverlay}
+            layersTabOptions={{
+              showFilter: this.options.showFilter,
+              showQuickAccess: this.options.showQuickAccess,
+              enableQuickAccessPresets: this.options.enableQuickAccessPresets,
+              enableUserQuickAccessFavorites:
+                this.options.enableUserQuickAccessFavorites,
+              userQuickAccessFavoritesInfoText:
+                this.options.userQuickAccessFavoritesInfoText,
+              layerFilterMinLength: this.options.layerFilterMinLength,
+            }}
+            handleQuickAccessPresetsToggle={(e) =>
+              this.handleQuickAccessPresetsToggle({ event: e })
+            }
+            handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+            globalObserver={this.globalObserver}
+            map={this.props.map}
+            app={this.app}
+          />
           {this.props.options.enableQuickAccessPresets && (
             <QuickAccessPresets
               quickAccessPresets={this.options.quickAccessPresets}
