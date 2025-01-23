@@ -573,11 +573,9 @@ export default function LayerSettings() {
     register,
     handleSubmit,
     control,
-    watch,
+    getValues,
     formState: { errors, dirtyFields },
   } = DefaultUseForm(defaultValues);
-
-  const formFields = watch();
 
   const onSubmit = createOnSubmitHandler({
     handleSubmit,
@@ -614,7 +612,7 @@ export default function LayerSettings() {
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer
             formControls={layerSettingsFormContainer}
-            formFields={formFields}
+            formGetValues={getValues}
             register={register}
             control={control}
             errors={errors}

@@ -324,6 +324,7 @@ export default function ServiceSettings() {
     },
   });
 
+  // todo: only watch fields that we need! Or use getValues() to get current values
   const currentValues = watch();
 
   const hasChanges = Object.keys(currentValues).some(

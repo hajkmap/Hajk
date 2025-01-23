@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Accordion,
   AccordionSummary,
@@ -8,10 +8,16 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HajkTooltip from "../../hajk-tooltip";
+import { FormElement } from "../dynamic-form-container";
+import { FieldValues as TFieldValues } from "react-hook-form";
+import DynamicInputSettings from "../types/dynamic-input-settings";
+
+import CustomInputSettings from "../types/custom-input-settings";
 
 interface ControlledAccordionProps {
   title: string;
-  keyValues: { key: string; value: string; title: string }[];
+  formInputs: FormElement<TFieldValues>[];
+  formGetValues: () => Record<string, unknown>;
   triggerExpanded?: boolean;
   children: React.ReactNode;
   backgroundColor?: string;
@@ -19,7 +25,8 @@ interface ControlledAccordionProps {
 
 function ControlledAccordion({
   title,
-  keyValues,
+  formInputs,
+  formGetValues,
   triggerExpanded = false,
   children,
   backgroundColor,
@@ -30,10 +37,48 @@ function ControlledAccordion({
   // This allows external components to trigger changes to the accordion's expansion state.
 
   const [expanded, setExpanded] = useState(triggerExpanded);
+  const [keyValues, setKeyValues] = useState<
+    { key: string; value: string; title: string }[]
+  >([]);
+
+  const refreshKeyValues = useCallback(() => {
+    const kv = formGetValues();
+
+    const newKv: { key: string; value: string; title: string }[] = [];
+
+    formInputs.map((input) => {
+      if (
+        input.kind === "DynamicInputSettings" ||
+        input.kind === "CustomInputSettings"
+      ) {
+        const castedInput = input as
+          | DynamicInputSettings<TFieldValues>
+          | CustomInputSettings<TFieldValues>;
+
+        const value = kv[castedInput.name];
+
+        if (value) {
+          newKv.push({
+            key: castedInput.name,
+            value: value as string,
+            title: castedInput.title,
+          });
+        }
+      }
+    });
+
+    setKeyValues(newKv);
+  }, [formGetValues, formInputs, setKeyValues]);
 
   useEffect(() => {
     setExpanded(triggerExpanded);
   }, [triggerExpanded]);
+
+  useEffect(() => {
+    if (!expanded) {
+      refreshKeyValues();
+    }
+  }, [expanded, refreshKeyValues]);
 
   const handleAccordionChange = (
     _event: React.SyntheticEvent,
@@ -53,7 +98,8 @@ function ControlledAccordion({
             sx={{ width: "100%", maxWidth: "100%" }}
           >
             {/* Please refactor the ugly * thing below */}
-            {keyValue.title.replace("*", "").trim()}: {keyValue.value.trim()}
+            {keyValue.title.replace("*", "").trim()}:{" "}
+            {keyValue?.value + "".trim()}
           </Box>
         ))}
       </Box>
@@ -62,7 +108,7 @@ function ControlledAccordion({
 
   const controlledAccordion = () => {
     const valuesAsString = keyValues
-      .map((keyValue) => `${keyValue.value.trim()}`)
+      .map((keyValue) => `${keyValue?.value + "".trim()}`)
       .join(", ");
 
     return (

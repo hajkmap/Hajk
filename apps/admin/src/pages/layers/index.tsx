@@ -94,12 +94,10 @@ export default function LayersPage() {
     register,
     handleSubmit,
     control,
-    watch,
+    getValues,
     reset,
     formState: { errors, dirtyFields },
   } = DefaultUseForm(defaultValues);
-
-  const formFields = watch();
 
   const handleLayerSubmit = async (layerData: LayerCreateInput) => {
     try {
@@ -219,7 +217,7 @@ export default function LayersPage() {
           >
             <FormRenderer
               formControls={layer}
-              formFields={formFields}
+              formGetValues={getValues}
               register={register}
               control={control}
               errors={errors}

@@ -19,7 +19,7 @@ import CustomInputSettings from "./types/custom-input-settings";
 
 interface FormRenderProps<TFieldValues extends FieldValues> {
   formControls: DynamicFormContainer<TFieldValues>;
-  formFields: Record<string, unknown>;
+  formGetValues: () => Record<string, unknown>;
   register: UseFormRegister<TFieldValues>;
   control: Control<TFieldValues>;
   errors: FieldErrors<TFieldValues>;
@@ -27,7 +27,7 @@ interface FormRenderProps<TFieldValues extends FieldValues> {
 
 const FormRenderer = <TFieldValues extends FieldValues>({
   formControls,
-  formFields,
+  formGetValues,
   register,
   control,
   errors,
@@ -136,49 +136,18 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     );
   };
 
-  const getKeyValueArray = (
-    container: DynamicFormContainer<TFieldValues>
-  ): { key: string; value: string; title: string }[] => {
-    if (!formFields) {
-      return [];
-    }
-    const keyValuePairs: { key: string; value: string; title: string }[] = [];
-
-    container.getFormInputs().forEach((item) => {
-      if (
-        item.kind === "DynamicInputSettings" ||
-        item.kind === "CustomInputSettings"
-      ) {
-        const castedItem = item as
-          | DynamicInputSettings<TFieldValues>
-          | CustomInputSettings<TFieldValues>;
-
-        const value = formFields[castedItem.name];
-        if (value) {
-          keyValuePairs.push({
-            key: castedItem.name,
-            value: value as string,
-            title: castedItem.title,
-          });
-        }
-      }
-    });
-
-    return keyValuePairs;
-  };
-
   const renderContainerAccordion = (
     container: DynamicFormContainer<TFieldValues>,
     index: number
   ) => {
     const key = getKey(index);
-    const keyValues = getKeyValueArray(container);
 
     return (
       <ControlledAccordion
-        keyValues={keyValues}
+        key={key + "-accordion-"}
+        formInputs={container.getFormInputs() as FormElement<FieldValues>[]}
+        formGetValues={formGetValues}
         title={container.title}
-        key={key + "-accordion"}
         triggerExpanded={!!container.props?.triggerExpanded}
         backgroundColor={container.props?.backgroundColor as string}
       >

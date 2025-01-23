@@ -19,6 +19,7 @@ import {
 import { AccountCircle } from "@mui/icons-material";
 import FormInspector from "../../components/form-factory/components/form-inspector";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
+import { getValidRowHeight } from "@mui/x-data-grid/hooks/features/rows/gridRowsUtils";
 
 export default function FormFactoryPage() {
   const [formContainerData, setFormContainerData] = React.useState<
@@ -299,7 +300,7 @@ export default function FormFactoryPage() {
     handleSubmit,
     control,
     formState: { errors, dirtyFields, isDirty },
-    watch,
+    getValues,
   } = DefaultUseForm(defaultValues);
 
   const onSubmit = createOnSubmitHandler({
@@ -315,14 +316,14 @@ export default function FormFactoryPage() {
     },
   });
 
-  const formFields = watch();
+  // const formFields = watch();
 
   return (
     <Page title={"Form factory"}>
       <form onSubmit={onSubmit}>
         <FormRenderer
           formControls={formContainerData}
-          formFields={formFields}
+          formGetValues={getValues}
           register={register}
           control={control}
           errors={errors}
@@ -336,7 +337,7 @@ export default function FormFactoryPage() {
           </Grid>
         </Grid>
 
-        <FormInspector formFields={formFields} dirtyFields={dirtyFields} />
+        {/* <FormInspector formFields={formFields} dirtyFields={dirtyFields} /> */}
       </form>
     </Page>
   );
