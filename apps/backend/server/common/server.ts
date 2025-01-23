@@ -150,8 +150,10 @@ class Server {
     // setup **before** any routes, so that they can be parsed properly.
     this.setupParsers();
 
-    // Setup express-session. We use the PrismaSessionStore for session storage.
-    this.setupSession();
+    // Sessions are only available if API version 3 or higher is enabled.
+    if (this.apiVersions.some((v) => v >= 3)) {
+      this.setupSession();
+    }
 
     // If .env tells that we should use authentication, let's
     // initiate PassportJS with all its strategies.
