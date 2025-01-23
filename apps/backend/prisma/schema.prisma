@@ -149,6 +149,7 @@ model Projection {
   extent     Decimal[]
   units      String?
   maps       Map[]
+  service    Service[]
 }
 
 model Group {
@@ -161,28 +162,105 @@ model Group {
 }
 
 model Service {
-  id         String      @id @default(cuid())
-  name       String
-  locked     Boolean     @default(false)
-  url        String
-  version    String?
-  type       ServiceType
-  serverType ServerType?
-  comment    String?
-  layers     Layer[]
+  id           String      @id @default(cuid())
+  metadataId   String      @unique
+  projectionId Int
+  name         String
+  locked       Boolean     @default(false)
+  url          String
+  version      String      @default("1.3.0")
+  imageFormat  String      @default("image/png")
+  type         ServiceType
+  serverType   ServerType  @default(GEOSERVER)
+  projection   Projection  @relation(fields: [projectionId], references: [id])
+  comment      String?
+  layers       Layer[]
+  metadata     Metadata    @relation(fields: [metadataId], references: [id])
 
   @@unique([url, type])
 }
 
+model Metadata {
+  id          String   @id @default(cuid())
+  title       String?
+  description String?
+  owner       String?
+  url         String?
+  urlTitle    String?
+  created     DateTime
+  updated     DateTime @updatedAt
+  service     Service?
+  layer       Layer?
+}
+
+model InfoClickSettings {
+  id              String  @id @default(cuid())
+  layerId         String?
+  layerInstanceId String?
+  definition      String?
+  format          String  @default("application/json")
+  sortProperty    String?
+  sortMethod      String  @default("text") // number or text
+  sortDescending  Boolean @default(false)
+  layers          Layer[]
+}
+
+enum SearchOutputFormat {
+  GML2
+  GML3
+  GML32
+}
+
+// Hopefully these can be used for all layer types
+model SearchSettings {
+  id                     String             @id @default(cuid())
+  active                 Boolean            @default(false)
+  url                    String?
+  searchFields           String? // searchPropertyName should map to this
+  primaryDisplayFields   String?
+  secondaryDisplayFields String?
+  shortDisplayFields     String?
+  outputFormat           SearchOutputFormat @default(GML3)
+  geometryField          String?
+  layers                 Layer[]
+}
+
 model Layer {
-  id                String          @id @default(cuid())
-  name              String
-  locked            Boolean         @default(false)
-  service           Service         @relation(fields: [serviceId], references: [id])
-  serviceId         String
-  options           Json            @default("{}")
-  restrictedToRoles RoleOnLayer[]
-  instances         LayerInstance[]
+  id                          String            @id @default(cuid())
+  serviceId                   String
+  metadataId                  String            @unique
+  searchSettingsId            String            @unique
+  infoClickSettingsId         String            @unique
+  // Locked is used to avoid multiple people messing with the same layer at the same time
+  locked                      Boolean           @default(false)
+  name                        String
+  internalName                String            @unique
+  service                     Service           @relation(fields: [serviceId], references: [id])
+  metadata                    Metadata          @relation(fields: [metadataId], references: [id])
+  infoClickSettings           InfoClickSettings @relation(fields: [infoClickSettingsId], references: [id])
+  searchSettings              SearchSettings    @relation(fields: [searchSettingsId], references: [id])
+  opacity                     Int               @default(1)
+  maxZoom                     Int               @default(-1)
+  minZoom                     Int               @default(-1)
+  minMaxZoomAlertOnToggleOnly Boolean           @default(false)
+  tiled                       Boolean           @default(false)
+  singleTile                  Boolean           @default(false)
+  hidpi                       Boolean           @default(false)
+  customDpiList               String[]
+  useCustomDpiList            Boolean           @default(false)
+  legendUrl                   String?
+  legendIconUrl               String?
+  customRatio                 Int               @default(0)
+  showMetadata                Boolean           @default(false)
+  infoClickActive             Boolean           @default(true)
+  timeSliderVisible           Boolean           @default(false)
+  timeSliderStart             String?
+  timeSliderEnd               String?
+  hideExpandArrow             Boolean           @default(false)
+  zIndex                      Int               @default(0)
+  restrictedToRoles           RoleOnLayer[]
+  instances                   LayerInstance[]
+  options                     Json              @default("{}")
 }
 
 model LayerInstance {
@@ -195,6 +273,9 @@ model LayerInstance {
   group             Group?                @relation(fields: [groupId], references: [id])
   usage             UseType
   restrictedToRoles RoleOnLayerInstance[]
+  infoClickActive   Boolean               @default(true)
+  visibleAtStart    Boolean               @default(false)
+  zIndex            Int                   @default(0)
   options           Json                  @default("{}")
 }
 

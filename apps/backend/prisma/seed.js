@@ -6,33 +6,51 @@ import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
-const generateNames = () => {
+const DEFAULT_PROJECTION_CODE = "EPSG:3006";
+
+const generateRandomName = () => {
   const adjectives = [
-    "Buggy",
-    "Snappy",
-    "Binary",
-    "Async",
-    "Dynamic",
-    "Hacky",
-    "Recursive",
-    "Faulty",
-    "Refactored",
-    "Lazy",
-  ];
-  const nouns = [
-    "Compiler",
-    "Debugger",
-    "Function",
-    "Closure",
-    "Variable",
-    "Exception",
-    "Promise",
-    "Algorithm",
-    "Object",
-    "Framework",
+    "hidden",
+    "ancient",
+    "vast",
+    "mysterious",
+    "uncharted",
+    "remote",
+    "scenic",
+    "explored",
+    "rugged",
+    "legendary",
+    "charted",
+    "fabled",
+    "enigmatic",
+    "wild",
+    "endless",
   ];
 
-  return `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${
+  const nouns = [
+    "path",
+    "trail",
+    "route",
+    "compass",
+    "ridge",
+    "valley",
+    "summit",
+    "waypoint",
+    "island",
+    "horizon",
+    "landmark",
+    "canyon",
+    "terrain",
+    "district",
+    "region",
+    "atlas",
+    "globe",
+    "map",
+    "boundary",
+    "zone",
+  ];
+
+  return `${adjectives[Math.floor(Math.random() * adjectives.length)]}-${
     nouns[Math.floor(Math.random() * nouns.length)]
   }`;
 };
@@ -180,6 +198,7 @@ async function readAndPopulateLayers() {
     const servicesCollection = [];
 
     for (const [key, layers] of Object.entries(layersCollection)) {
+      console.log("layersCollection: ", layersCollection);
       const type = extractServiceTypeFromKey(key);
 
       // Extract unique `url` values from the layers
@@ -191,7 +210,9 @@ async function readAndPopulateLayers() {
               layer.serverType === "qgis" ? "QGIS_SERVER" : "GEOSERVER",
             url: layer.url,
             version: layer.version,
-            name: generateNames(),
+            projection: layer.projection || DEFAULT_PROJECTION_CODE,
+            owner: layer.owner || layer.infoOwner,
+            name: generateRandomName(),
           };
         }),
       ];
@@ -205,42 +226,23 @@ async function readAndPopulateLayers() {
       servicesCollection.push(...uniqueServices);
     }
 
-    const servicesInDB = await prisma.service.createMany({
-      data: servicesCollection,
-    });
+    for (const { owner, projection, ...service } of servicesCollection) {
+      await prisma.service.create({
+        data: {
+          ...service,
+          metadata: { create: { owner: owner, created: new Date() } },
+          projection: { connect: { code: projection } },
+        },
+      });
+    }
 
-    console.log(`Created ${servicesInDB.count} services`);
+    const servicesInDB = await prisma.service.findMany();
+    console.log(`Created ${servicesInDB.length} services`);
 
     // Loop through each layer and create them in the database
     for (const [key, layers] of Object.entries(layersCollection)) {
-      // We'll need the layer's type, to select the correct service from the database
-      const type = extractServiceTypeFromKey(key);
-
-      const data = [];
-
-      // Loop through layers, but do it asynchronously as we'll
-      // need to await for each layer's service to be inserted into the database
-
-      for (const layer of layers) {
-        const { id, url, ...rest } = layer;
-        const service = await prisma.service.findFirst({
-          where: { url, type },
-        });
-
-        console.log(
-          `Layer ${id} has service ${service.id} and URL ${service.url}`
-        );
-
-        data.push({
-          id,
-          name: generateNames(),
-          serviceId: service.id,
-          options: { ...rest },
-        });
-      }
-
       // Look out for duplicates!
-      const dupes = data
+      const dupes = layers
         .map((e) => e.id)
         .filter((e, i, a) => a.indexOf(e) !== i);
       // Abort if found (we can't continue because we
@@ -251,21 +253,90 @@ async function readAndPopulateLayers() {
         );
       }
 
-      console.log("Creating layers from data: ", data);
+      // We'll need the layer's type, to select the correct service from the database
+      const type = extractServiceTypeFromKey(key);
 
-      const layersInDB = await prisma.layer.createMany({
-        data,
-      });
+      const data = [];
 
-      console.log(`Created ${layersInDB.count} ${type} layers`);
+      // Loop through layers, but do it asynchronously as we'll
+      // need to await for each layer's service to be inserted into the database
 
-      // Add potential role restrictions on the layers
-      for await (const layer of data) {
-        await updateRolesFromVisibleForGroups(
-          layer.options.visibleForGroups || [],
-          layer.id,
-          "layer"
+      for (const layer of layers) {
+        const service = await prisma.service.findFirst({
+          where: { url: layer.url, type },
+        });
+
+        console.log(
+          `Layer ${layer.id} has service ${service.id} and URL ${service.url}`
         );
+
+        await prisma.layer.create({
+          data: {
+            id: layer.id,
+            name: layer.caption,
+            internalName: layer.internalLayerName || generateRandomName(),
+            legendUrl: layer.legend,
+            legendIconUrl: layer.legendIcon,
+            opacity: layer.opacity,
+            minZoom: layer.minZoom,
+            maxZoom: layer.maxZoom,
+            minMaxZoomAlertOnToggleOnly: layer.minMaxZoomAlertOnToggleOnly,
+            useCustomDpiList: layer.useCustomDpiList,
+            customDpiList: layer.customDpiList,
+            customRatio: layer.customRatio,
+            timeSliderVisible: layer.timeSliderVisible,
+            timeSliderStart: layer.timeSliderStart,
+            timeSliderEnd: layer.timeSliderEnd,
+            singleTile: layer.singleTile,
+            tiled: layer.tiled,
+            hidpi: layer.hidpi,
+            service: { connect: { id: service.id } },
+            metadata: {
+              create: {
+                title: layer.infoTitle,
+                description: layer.infoText,
+                url: layer.infoUrl,
+                urlTitle: layer.infoUrlText,
+                created: new Date(),
+              },
+            },
+            infoClickSettings: {
+              create: {
+                format: layer.infoFormat,
+                sortProperty: layer.infoClickSortProperty,
+                sortMethod: layer.infoClickSortType,
+                sortDescending: layer.infoClickSortDesc,
+              },
+            },
+            searchSettings: {
+              create: {
+                active: Boolean(layer.searchUrl),
+                url: layer.searchUrl,
+                searchFields: layer.searchPropertyName,
+                primaryDisplayFields: layer.searchDisplayName,
+                secondaryDisplayFields: layer.secondaryLabelFields,
+                shortDisplayFields: layer.searchShortDisplayName,
+                outputFormat: layer.searchOutputFormat || undefined,
+                geometryField: layer.searchGeometryField,
+              },
+            },
+          },
+        });
+
+        console.log("Creating layers from data: ", data);
+
+        const layersInDB = await prisma.layer.findMany();
+
+        console.log(`Created ${layersInDB.length} ${type} layers`);
+
+        // Add potential role restrictions on the layers
+        for await (const layer of layers) {
+          await updateRolesFromVisibleForGroups(
+            layer.visibleForGroups || [],
+            layer.id,
+            "layer"
+          );
+        }
       }
     }
   } catch (error) {
@@ -615,14 +686,14 @@ async function updateRolesFromVisibleForGroups(
 }
 
 async function main() {
-  // Get all layers from layers.json and insert them into the layers table.
-  await readAndPopulateLayers();
   // Get all available map-config files...
   const mapConfigs = await getAvailableMaps();
   // ... and add the map configurations to the database.
   for (const mapConfig of mapConfigs) {
     await readMapConfigAndPopulateMap(mapConfig);
   }
+  // Get all layers from layers.json and insert them into the layers table.
+  await readAndPopulateLayers();
   // Finally we extract the layer switcher config from all maps and add all groups etc. with their connections to the database.
   // We're gonna want to keep crucial information such as the map layer structure separated from specific plugins such as the layer switcher.
   await populateLayerStructure();
