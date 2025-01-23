@@ -56,6 +56,8 @@ const setSpecialBackground = (id) => {
     SPECIAL_BACKGROUND_COLORS[id];
 };
 
+export const OSM_LAYER_ID = "osm-layer";
+
 const BackgroundSwitcher = ({
   backgroundSwitcherBlack,
   backgroundSwitcherWhite,
@@ -81,7 +83,7 @@ const BackgroundSwitcher = ({
           zIndex: -1,
           layerType: "base",
           rotateMap: "n", // OpenStreetMap should be rotated to North
-          name: "osm-layer",
+          name: OSM_LAYER_ID,
           caption: "OpenStreetMap",
           layerInfo: {
             caption: "OpenStreetMap",
