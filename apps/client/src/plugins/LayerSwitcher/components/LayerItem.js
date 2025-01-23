@@ -327,10 +327,7 @@ function LayerItem({
             <ListItemSecondaryAction>
               {renderStatusIcon()}
               {!toggleable && !draggable ? (
-                <IconButton
-                  size="small"
-                  disableTouchRipple
-                >
+                <IconButton size="small" disableTouchRipple>
                   <Tooltip title="Bakgrundskartan ligger låst längst ner i ritordningen">
                     <LockOutlinedIcon />
                   </Tooltip>
