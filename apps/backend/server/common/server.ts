@@ -608,7 +608,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         }
 
         // Send error response, include the error ID for reference
-        return res.status(status).json({
+        res.status(status).json({
           errorId,
           error: message,
           ...(hajkCode && { hajkCode }),
