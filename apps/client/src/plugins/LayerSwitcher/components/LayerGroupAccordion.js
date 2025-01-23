@@ -19,7 +19,7 @@ export default function LayerGroupAccordion({
   return (
     <div style={{ display: display }}>
       <ListItemButton
-        disableRipple
+        disableTouchRipple
         onClick={() => setState({ expanded: !state.expanded })}
         sx={{
           p: 0,
@@ -29,7 +29,7 @@ export default function LayerGroupAccordion({
         <IconButton
           size="small"
           sx={{ pl: "3px", pr: "4px", py: 0 }}
-          disableRipple
+          disableTouchRipple
         >
           <KeyboardArrowRightOutlinedIcon
             sx={{
