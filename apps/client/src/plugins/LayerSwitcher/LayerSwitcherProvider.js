@@ -245,6 +245,14 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
         setOLSubLayers(olLayer, []);
       }
     },
+    setAllLayersInvisible() {
+      map.getAllLayers().forEach((l) => {
+        const layerType = l.get("layerType");
+        if (layerType !== "base" && layerType !== "system") {
+          l.setVisible(false);
+        }
+      });
+    },
     setBackgroundLayer(layerId) {
       olBackgroundLayers.forEach((l) => l?.setVisible(false));
 

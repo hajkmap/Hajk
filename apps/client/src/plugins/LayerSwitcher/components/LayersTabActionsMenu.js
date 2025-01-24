@@ -12,6 +12,9 @@ import {
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import KeyboardDoubleArrowUpIcon from "@mui/icons-material/KeyboardDoubleArrowUp";
+import FlashOffIcon from "@mui/icons-material/FlashOff";
+
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
 const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
   // Element that we will anchor the options menu to is
@@ -37,6 +40,8 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
     setMenuIsOpen(false);
   };
 
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
+
   return (
     <>
       <IconButton
@@ -56,6 +61,19 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
         onClose={onOptionsMenuClose}
         variant={"menu"}
       >
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            setAnchorEl(null);
+            setMenuIsOpen(false);
+            layerSwitcherDispatch.setAllLayersInvisible();
+          }}
+        >
+          <ListItemIcon>
+            <FlashOffIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Släck alla lager</ListItemText>
+        </MenuItem>
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();
