@@ -70,7 +70,6 @@ class LayersSwitcherView extends React.PureComponent {
       activeTab: 0,
       displayContentOverlay: null, // 'quickAccessPresets' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
-      filterValue: "",
       scrollPositions: {
         tab0: 0,
         tab1: 0,
@@ -143,6 +142,8 @@ class LayersSwitcherView extends React.PureComponent {
         });
       }
     });
+
+    this.scrollContainerRef = React.createRef();
   }
 
   // Handles click on Layerpackage button and backbutton
@@ -282,6 +283,7 @@ class LayersSwitcherView extends React.PureComponent {
         <div
           id="scroll-container"
           style={{ position: "relative", height: "100%", overflowY: "auto" }}
+          ref={this.scrollContainerRef}
         >
           <LayersTab
             style={{
@@ -312,6 +314,7 @@ class LayersSwitcherView extends React.PureComponent {
             globalObserver={this.globalObserver}
             map={this.props.map}
             app={this.app}
+            scrollContainerRef={this.scrollContainerRef}
           />
           {this.props.options.enableQuickAccessPresets && (
             <QuickAccessPresets

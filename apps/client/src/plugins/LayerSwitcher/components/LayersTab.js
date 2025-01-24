@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 
 import { ListItemText } from "@mui/material";
 
@@ -36,6 +36,7 @@ const LayersTab = ({
   map,
   app,
   style,
+  // scrollContainerRef,
 }) => {
   const {
     showFilter,
@@ -91,7 +92,20 @@ const LayersTab = ({
     filterHits = new Set(hits);
   }
 
-  console.log({ displayContentOverlay });
+  const scrollContainerRef = useRef(null);
+
+  const scrollToBottom = useCallback(() => {
+    // scrollContainerRef.current.scroll(10000000, 0);
+    // scrollContainerRef.current.scrollBy(10000000, 0);
+    scrollContainerRef.current?.scrollIntoView({ block: "end" });
+  }, [scrollContainerRef]);
+
+  const scrollToTop = useCallback(() => {
+    // scrollContainerRef.current.scroll(0, 0);
+    // scrollContainerRef.current.scrollBy(0, 0);
+    scrollContainerRef.current?.scrollIntoView({ block: "start" });
+  }, [scrollContainerRef]);
+
   return (
     <div style={style}>
       {showFilter && (
@@ -99,35 +113,42 @@ const LayersTab = ({
           minFilterLength={minFilterLength}
           handleFilterSubmit={(value) => handleFilterSubmit(value)}
           handleFilterValueChange={(value) => handleFilterValueChange(value)}
+          scrollToTop={scrollToTop}
+          scrollToBottom={scrollToBottom}
         />
       )}
-      {filterHits === null && (
-        <QuickAccessView
-          show={showQuickAccess}
-          map={map}
-          app={app}
-          globalObserver={globalObserver}
-          enableQuickAccessPresets={enableQuickAccessPresets}
-          enableUserQuickAccessFavorites={enableUserQuickAccessFavorites}
-          handleQuickAccessPresetsToggle={handleQuickAccessPresetsToggle}
-          favoritesViewDisplay={displayContentOverlay === "favorites"}
-          handleFavoritesViewToggle={handleFavoritesViewToggle}
-          favoritesInfoText={userQuickAccessFavoritesInfoText}
-          filterValue={filterValue}
-          layersState={layersState}
-        />
-      )}
-      {staticLayerTree.map((group) => (
-        <LayerGroup
-          key={group.id}
-          staticLayerConfig={staticLayerConfig}
-          staticGroupTree={group}
-          layersState={layersState}
-          globalObserver={globalObserver}
-          filterHits={filterHits}
-          filterValue={filterValue}
-        />
-      ))}
+      <div
+        ref={scrollContainerRef}
+        style={{ position: "relative", height: "100%", overflowY: "auto" }}
+      >
+        {filterHits === null && (
+          <QuickAccessView
+            show={showQuickAccess}
+            map={map}
+            app={app}
+            globalObserver={globalObserver}
+            enableQuickAccessPresets={enableQuickAccessPresets}
+            enableUserQuickAccessFavorites={enableUserQuickAccessFavorites}
+            handleQuickAccessPresetsToggle={handleQuickAccessPresetsToggle}
+            favoritesViewDisplay={displayContentOverlay === "favorites"}
+            handleFavoritesViewToggle={handleFavoritesViewToggle}
+            favoritesInfoText={userQuickAccessFavoritesInfoText}
+            filterValue={filterValue}
+            layersState={layersState}
+          />
+        )}
+        {staticLayerTree.map((group) => (
+          <LayerGroup
+            key={group.id}
+            staticLayerConfig={staticLayerConfig}
+            staticGroupTree={group}
+            layersState={layersState}
+            globalObserver={globalObserver}
+            filterHits={filterHits}
+            filterValue={filterValue}
+          />
+        ))}
+      </div>
       {filterHits !== null && filterHits.size === 0 && (
         <ListItemText
           sx={{
