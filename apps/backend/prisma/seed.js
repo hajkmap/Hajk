@@ -52,8 +52,19 @@ const generateRandomName = () => {
 
   return `${adjectives[Math.floor(Math.random() * adjectives.length)]}-${
     nouns[Math.floor(Math.random() * nouns.length)]
-  }`;
+  }-${(Math.floor(Math.random() * 9999) + 1).toString().padStart(4, "0")}`;
 };
+
+function replaceNullWithUndefined(arr) {
+  return arr.map((layer) => {
+    return Object.fromEntries(
+      Object.entries(layer).map(([key, value]) => [
+        key,
+        value === null ? undefined : value,
+      ])
+    );
+  });
+}
 
 async function getAvailableMaps() {
   try {
@@ -198,18 +209,20 @@ async function readAndPopulateLayers() {
     const servicesCollection = [];
 
     for (const [key, layers] of Object.entries(layersCollection)) {
-      console.log("layersCollection: ", layersCollection);
+      // Prisma behaves better (uses default values) if the supplied value is undefined instead of null.. Let's do some cleanup.
+      const cleanedLayers = replaceNullWithUndefined(layers);
+
       const type = extractServiceTypeFromKey(key);
 
       // Extract unique `url` values from the layers
       const services = [
-        ...layers.map((layer) => {
+        ...cleanedLayers.map((layer) => {
           return {
             type,
             serverType:
               layer.serverType === "qgis" ? "QGIS_SERVER" : "GEOSERVER",
             url: layer.url,
-            version: layer.version,
+            version: layer.version || undefined,
             projection: layer.projection || DEFAULT_PROJECTION_CODE,
             owner: layer.owner || layer.infoOwner,
             name: generateRandomName(),
@@ -231,7 +244,9 @@ async function readAndPopulateLayers() {
         data: {
           ...service,
           metadata: { create: { owner: owner, created: new Date() } },
-          projection: { connect: { code: projection } },
+          projection: {
+            connect: { code: projection || DEFAULT_PROJECTION_CODE },
+          },
         },
       });
     }
@@ -241,8 +256,11 @@ async function readAndPopulateLayers() {
 
     // Loop through each layer and create them in the database
     for (const [key, layers] of Object.entries(layersCollection)) {
+      // Prisma behaves better (uses default values) if the supplied value is undefined instead of null.. Let's do some cleanup.
+      const cleanedLayers = replaceNullWithUndefined(layers);
+
       // Look out for duplicates!
-      const dupes = layers
+      const dupes = cleanedLayers
         .map((e) => e.id)
         .filter((e, i, a) => a.indexOf(e) !== i);
       // Abort if found (we can't continue because we
@@ -256,25 +274,21 @@ async function readAndPopulateLayers() {
       // We'll need the layer's type, to select the correct service from the database
       const type = extractServiceTypeFromKey(key);
 
-      const data = [];
-
       // Loop through layers, but do it asynchronously as we'll
       // need to await for each layer's service to be inserted into the database
 
-      for (const layer of layers) {
+      for (const layer of cleanedLayers) {
         const service = await prisma.service.findFirst({
           where: { url: layer.url, type },
         });
 
-        console.log(
-          `Layer ${layer.id} has service ${service.id} and URL ${service.url}`
-        );
-
         await prisma.layer.create({
           data: {
-            id: layer.id,
+            idFromSource: layer.id,
             name: layer.caption,
-            internalName: layer.internalLayerName || generateRandomName(),
+            internalName: !layer.internalLayerName
+              ? generateRandomName()
+              : layer.internalLayerName,
             legendUrl: layer.legend,
             legendIconUrl: layer.legendIcon,
             opacity: layer.opacity,
@@ -282,7 +296,7 @@ async function readAndPopulateLayers() {
             maxZoom: layer.maxZoom,
             minMaxZoomAlertOnToggleOnly: layer.minMaxZoomAlertOnToggleOnly,
             useCustomDpiList: layer.useCustomDpiList,
-            customDpiList: layer.customDpiList,
+            customDpiList: layer.customDpiList || [],
             customRatio: layer.customRatio,
             timeSliderVisible: layer.timeSliderVisible,
             timeSliderStart: layer.timeSliderStart,
@@ -312,31 +326,43 @@ async function readAndPopulateLayers() {
               create: {
                 active: Boolean(layer.searchUrl),
                 url: layer.searchUrl,
-                searchFields: layer.searchPropertyName,
-                primaryDisplayFields: layer.searchDisplayName,
-                secondaryDisplayFields: layer.secondaryLabelFields,
-                shortDisplayFields: layer.searchShortDisplayName,
+                searchFields:
+                  typeof layer.searchPropertyName === "string"
+                    ? layer.searchPropertyName.split(",")
+                    : layer.searchPropertyName || [],
+                primaryDisplayFields:
+                  typeof layer.searchDisplayName === "string"
+                    ? layer.searchDisplayName.split(",")
+                    : layer.searchDisplayName || [],
+                secondaryDisplayFields:
+                  typeof layer.secondaryLabelFields === "string"
+                    ? layer.secondaryLabelFields.split(",")
+                    : layer.secondaryLabelFields || [],
+                shortDisplayFields:
+                  typeof layer.searchShortDisplayName === "string"
+                    ? layer.searchShortDisplayName.split(",")
+                    : layer.searchShortDisplayName || [],
                 outputFormat: layer.searchOutputFormat || undefined,
                 geometryField: layer.searchGeometryField,
               },
             },
           },
         });
+      }
 
-        console.log("Creating layers from data: ", data);
+      const layersInDB = await prisma.layer.findMany({
+        where: { service: { type } },
+      });
 
-        const layersInDB = await prisma.layer.findMany();
+      console.log(`Created ${layersInDB.length} ${type} layers`);
 
-        console.log(`Created ${layersInDB.length} ${type} layers`);
-
-        // Add potential role restrictions on the layers
-        for await (const layer of layers) {
-          await updateRolesFromVisibleForGroups(
-            layer.visibleForGroups || [],
-            layer.id,
-            "layer"
-          );
-        }
+      // Add potential role restrictions on the layers
+      for await (const layer of cleanedLayers) {
+        await updateRolesFromVisibleForGroups(
+          layer.visibleForGroups || [],
+          layer.id,
+          "layer"
+        );
       }
     }
   } catch (error) {

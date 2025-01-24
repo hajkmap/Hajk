@@ -216,10 +216,10 @@ model SearchSettings {
   id                     String             @id @default(cuid())
   active                 Boolean            @default(false)
   url                    String?
-  searchFields           String? // searchPropertyName should map to this
-  primaryDisplayFields   String?
-  secondaryDisplayFields String?
-  shortDisplayFields     String?
+  searchFields           String[] // searchPropertyName should map to this
+  primaryDisplayFields   String[]
+  secondaryDisplayFields String[]
+  shortDisplayFields     String[]
   outputFormat           SearchOutputFormat @default(GML3)
   geometryField          String?
   layers                 Layer[]
@@ -227,6 +227,7 @@ model SearchSettings {
 
 model Layer {
   id                          String            @id @default(cuid())
+  idFromSource                String
   serviceId                   String
   metadataId                  String            @unique
   searchSettingsId            String            @unique
@@ -234,7 +235,7 @@ model Layer {
   // Locked is used to avoid multiple people messing with the same layer at the same time
   locked                      Boolean           @default(false)
   name                        String
-  internalName                String            @unique
+  internalName                String
   service                     Service           @relation(fields: [serviceId], references: [id])
   metadata                    Metadata          @relation(fields: [metadataId], references: [id])
   infoClickSettings           InfoClickSettings @relation(fields: [infoClickSettingsId], references: [id])
