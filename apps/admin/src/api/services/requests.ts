@@ -223,13 +223,23 @@ export const deleteService = async (serviceId: string): Promise<void> => {
   }
 };
 
-const parseLayersFromXML = (xmlString: string): string[] => {
+const parseLayersFromXML = (xmlString: string): ServiceCapabilities => {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlString, "application/xml");
 
   const layerNames: string[] = [];
   const layerElements = xmlDoc.getElementsByTagName("Name");
 
+  const layers = xmlDoc.getElementsByTagName("Layer");
+  const workspaces: Set<string> = new Set<string>();
+
+  for (const layer of layers) {
+    const name = layer.getElementsByTagName("Name")[0]?.textContent;
+    if (name?.includes(":")) {
+      const workspace = name.split(":")[0];
+      workspaces.add(workspace);
+    }
+  }
   for (const layerElement of layerElements) {
     const layerName = layerElement.textContent;
     if (layerName) {
@@ -237,7 +247,10 @@ const parseLayersFromXML = (xmlString: string): string[] => {
     }
   }
 
-  return layerNames;
+  return {
+    layers: layerNames,
+    workspaces: Array.from(workspaces),
+  };
 };
 
 export const fetchCapabilities = async (
@@ -246,5 +259,5 @@ export const fetchCapabilities = async (
   const response = await axios.get(url, { responseType: "text" });
   const xmlData: string = response.data as string;
   const layers = parseLayersFromXML(xmlData);
-  return { layers };
+  return { ...layers };
 };

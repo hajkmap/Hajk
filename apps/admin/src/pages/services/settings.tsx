@@ -23,6 +23,7 @@ import {
   serverTypes,
   versions,
   useProjections,
+  useServiceCapabilities,
 } from "../../api/services";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
@@ -56,11 +57,10 @@ export default function ServiceSettings() {
   const epsgProjections = projections?.filter((projection) =>
     projection.code.startsWith("EPSG:")
   );
-  const epsgProjectionsWithCode = epsgProjections?.map((projection) => ({
+  const epsgProjectionsMap = epsgProjections?.map((projection) => ({
     title: projection.code,
     value: projection.code,
   }));
-
   const { mutateAsync: updateService, status: updateStatus } =
     useUpdateService();
   const { mutateAsync: deleteService, status: deleteStatus } =
@@ -68,6 +68,15 @@ export default function ServiceSettings() {
   const { data: layersByServiceId } = useLayersByServiceId(serviceId ?? "");
   const count = layersByServiceId?.count ?? 0;
   const { defaultCoordinates } = useAppStateStore.getState();
+  const {
+    layers: getCapLayers,
+    workspaces: getCapWorkspaces,
+    isError: layersError,
+    isLoading: layersLoading,
+  } = useServiceCapabilities({
+    baseUrl: service?.url ?? "",
+    type: service?.type ?? "",
+  });
   const [formServiceData, setFormServiceData] = useState<
     DynamicFormContainer<FieldValues>
   >(new DynamicFormContainer<FieldValues>());
@@ -109,6 +118,7 @@ export default function ServiceSettings() {
           code: serviceData.projection?.code,
         },
         metadata: {
+          description: serviceData.metadata?.description,
           owner: serviceData.metadata?.owner,
         },
       };
@@ -261,8 +271,14 @@ export default function ServiceSettings() {
     gridColumns: 8,
     name: "workSpace",
     title: `${t("services.workspace")}`,
-    defaultValue: "WORKSPACE_1",
-    optionList: [{ title: "Workspace 1", value: "WORKSPACE_1" }],
+    defaultValue: service?.workspace ?? "Alla",
+    optionList:
+      getCapWorkspaces.length > 0
+        ? getCapWorkspaces.map((workspace) => ({
+            title: workspace,
+            value: workspace,
+          }))
+        : [{ title: "Alla", value: "Alla" }],
   });
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.TEXTFIELD,
@@ -294,7 +310,7 @@ export default function ServiceSettings() {
     defaultValue: service?.projection.code,
     optionList: defaultCoordinates.map(
       (value) =>
-        epsgProjectionsWithCode?.find((item) => item.value === value) ?? {
+        epsgProjectionsMap?.find((item) => item.value === value) ?? {
           title: "",
           value: "",
         }
@@ -311,7 +327,7 @@ export default function ServiceSettings() {
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 8,
-    name: "layerDescription",
+    name: "metadata.description",
     title: `${t("services.layerDescription")}`,
     defaultValue: "",
   });
@@ -390,7 +406,11 @@ export default function ServiceSettings() {
             control={control}
             errors={errors}
           />
-          <LayersGrid baseUrl={service?.url ?? ""} type={service?.type ?? ""} />
+          <LayersGrid
+            layers={getCapLayers}
+            isError={layersError}
+            isLoading={layersLoading}
+          />
         </form>
       </FormActionPanel>
       <DialogWrapper

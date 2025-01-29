@@ -16,32 +16,20 @@ import CircularProgress from "../../components/progress/circular-progress";
 import Scrollbar from "../../components/scrollbar/scrollbar";
 import { DataGrid } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
-import {
-  useServiceCapabilities,
-  UseServiceCapabilitiesProps,
-} from "../../api/services";
+import { LayersGridProps } from "../../api/services";
 import SearchIcon from "@mui/icons-material/Search";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import useAppStateStore from "../../store/use-app-state-store";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 
-function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
+function LayersGrid({ layers, isError, isLoading }: LayersGridProps) {
   const { palette } = useTheme();
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const language = useAppStateStore((state) => state.language);
   const themeMode = useAppStateStore((state) => state.themeMode);
   const isDarkMode = themeMode === "dark";
-
-  const {
-    layers: getCapLayers,
-    isError: layersError,
-    isLoading: layersLoading,
-  } = useServiceCapabilities({
-    baseUrl: url,
-    type: type,
-  });
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -62,8 +50,8 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
   ];
 
   const filteredLayers = useMemo(() => {
-    if (!getCapLayers) return [];
-    return getCapLayers
+    if (!layers) return [];
+    return layers
       .filter((layer) => layer.toLowerCase().includes(searchTerm.toLowerCase()))
       .map((layer, index) => ({
         id: index,
@@ -72,7 +60,7 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
         publications: "",
         actions: "",
       }));
-  }, [getCapLayers, searchTerm]);
+  }, [layers, searchTerm]);
 
   const RowMenu = (params: { row: { layer: string } }) => {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -138,13 +126,31 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 2 }}>
-            {layersLoading ? (
+            <TextField
+              sx={{
+                mb: 2,
+                mt: 1,
+                width: "100%",
+                maxWidth: "400px",
+                backgroundColor: isDarkMode ? "#3b3b3b" : "#fbfbfb",
+              }}
+              label={t("common.searchLayer")}
+              variant="outlined"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              slotProps={{
+                input: {
+                  endAdornment: <SearchIcon />,
+                },
+              }}
+            />
+            {isLoading ? (
               <CircularProgress
                 color="primary"
                 size={40}
                 typographyText={t("services.loadingLayers")}
               />
-            ) : layersError ? (
+            ) : isError ? (
               <Typography align="center" color={palette.error.main}>
                 {t("services.error.url")}
               </Typography>
@@ -160,25 +166,6 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
                   gap: 2,
                 }}
               >
-                <TextField
-                  sx={{
-                    mb: 4,
-                    mt: 1,
-                    width: "100%",
-                    maxWidth: "400px",
-                    backgroundColor: isDarkMode ? "#3b3b3b" : "#fbfbfb",
-                  }}
-                  label={t("common.searchLayer")}
-                  variant="outlined"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  slotProps={{
-                    input: {
-                      endAdornment: <SearchIcon />,
-                    },
-                  }}
-                />
-
                 <Scrollbar sx={{ maxHeight: "400px" }}>
                   <DataGrid
                     sx={{
@@ -202,12 +189,10 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
                         noRowsVariant: "skeleton",
                       },
                     }}
-                    hideFooterPagination={
-                      getCapLayers && getCapLayers.length < 10
-                    }
+                    hideFooterPagination={layers && layers.length < 10}
                     pageSizeOptions={[10, 25, 50, 100]}
                     pagination
-                    loading={layersLoading}
+                    loading={isLoading}
                     localeText={
                       language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
                     }

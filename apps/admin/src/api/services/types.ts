@@ -60,6 +60,7 @@ export interface ServiceUpdateInput {
     code?: string;
   };
   metadata?: {
+    description?: string;
     owner?: string;
   };
 }
@@ -76,8 +77,14 @@ export const versions = [
 
 export interface ServiceCapabilities {
   layers: string[];
+  workspaces?: string[];
 }
 
+export interface LayersGridProps {
+  layers: string[];
+  isError: boolean;
+  isLoading: boolean;
+}
 export interface UseServiceCapabilitiesProps {
   baseUrl: string;
   type: string;
