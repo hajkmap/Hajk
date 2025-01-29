@@ -65,13 +65,3 @@ export interface UseServiceCapabilitiesProps {
   baseUrl: string;
   type: string;
 }
-
-export interface ServiceConfig {
-  version: string;
-  imageFormat: string;
-  type: string;
-  serverType: string;
-  projection: {
-    code: string;
-  };
-}
