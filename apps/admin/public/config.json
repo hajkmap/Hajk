@@ -11,6 +11,13 @@
       "withCredentials": true
     }
   },
+  "defaultCoordinates": [
+    "EPSG:3006",
+    "EPSG:3007",
+    "EPSG:3008",
+    "EPSG:3009",
+    "EPSG:3010"
+  ],
   "servicesDefault": {
     "version": "1.1.1",
     "imageFormat": "image/jpeg",

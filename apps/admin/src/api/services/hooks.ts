@@ -12,11 +12,13 @@ import {
   createService,
   updateService,
   deleteService,
+  getAllProjections,
 } from "./requests";
 import {
   Service,
   ServiceUpdateInput,
   UseServiceCapabilitiesProps,
+  Projection,
 } from "./types";
 import { LayersApiResponse } from "../layers";
 import { Map } from "../maps";
@@ -62,6 +64,12 @@ export const useMapsByServiceId = (
   });
 };
 
+export const useProjections = (): UseQueryResult<Projection[]> => {
+  return useQuery({
+    queryKey: ["projections"],
+    queryFn: () => getAllProjections(),
+  });
+};
 // React mutation hook to create a service
 // This hook uses the `createService` function from the services `requests` module
 export const useCreateService = () => {

@@ -9,6 +9,8 @@ export interface Service {
   imageFormat: string;
   type: string;
   serverType: string;
+  workspace: string;
+  getMapUrl: string;
   comment: string;
   metadata: {
     id: string;
@@ -18,6 +20,15 @@ export interface Service {
   projection: {
     code: string;
   };
+}
+
+export interface Projection {
+  id: number;
+  locked: boolean;
+  code: string;
+  definition: string;
+  extent: [number, number, number, number];
+  units: string;
 }
 
 export interface ServicesApiResponse {
@@ -30,22 +41,24 @@ export interface ServicesApiResponse {
 export interface ServiceCreateInput {
   id?: string;
   url: string;
-  name?: string;
-  version?: string;
-  locked?: boolean;
+  name: string;
   type: string;
-  serverType?: string;
-  comment?: string;
 }
 
 export interface ServiceUpdateInput {
   name?: string;
   url?: string;
-  version?: string;
-  locked?: boolean;
   type?: string;
+  version?: string;
   serverType?: string;
+  imageFormat?: string;
+  locked?: boolean;
+  workspace?: string;
+  getMapUrl?: string;
   comment?: string;
+  projection?: {
+    code?: string;
+  };
   metadata?: {
     owner?: string;
   };
@@ -55,6 +68,10 @@ export const serviceTypes = ["ARCGIS", "VECTOR", "WFS", "WFST", "WMS", "WMTS"];
 export const serverTypes = [
   { title: "Geoserver", value: "GEOSERVER" },
   { title: "QGIS Server", value: "QGIS_SERVER" },
+];
+export const versions = [
+  { title: "1.1.1", value: "1.1.1" },
+  { title: "1.3.0", value: "1.3.0" },
 ];
 
 export interface ServiceCapabilities {

@@ -30,7 +30,6 @@ class ServicesService {
   }
 
   async getServiceById(id: string) {
-    // Get service by id and include the foreign keys to get the metadata row and the projection
     const service = await prisma.service.findUnique({
       where: { id },
     });
@@ -87,6 +86,12 @@ class ServicesService {
     return maps;
   }
 
+  async getAllProjections() {
+    const projections = await prisma.projection.findMany();
+
+    return projections;
+  }
+
   async createService(data: Prisma.ServiceCreateInput) {
     const projectionCode = data?.projection?.code || DEFAULT_PROJECTION_CODE;
     const existingProjection = await prisma.projection.findUnique({
@@ -126,6 +131,9 @@ class ServicesService {
             update: { ...data.metadata },
             create: { ...data.metadata },
           },
+        },
+        projection: {
+          connect: { code: data.projection?.code },
         },
       },
       include: {

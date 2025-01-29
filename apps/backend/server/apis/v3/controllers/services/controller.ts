@@ -34,6 +34,13 @@ class ServicesController {
     res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
   }
 
+  async getAllProjections(req: Request, res: Response) {
+    const projections = await ServicesService.getAllProjections();
+    res
+      .status(HttpStatusCodes.OK)
+      .json({ count: projections.length, projections });
+  }
+
   async createService(req: Request, res: Response) {
     const service = await ServicesService.createService(req.body);
     res.status(HttpStatusCodes.CREATED).json(service);

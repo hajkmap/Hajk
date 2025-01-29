@@ -9,6 +9,7 @@ interface AppState {
   apiBaseUrl: string;
   axiosConfigOverrides: Record<string, unknown>;
   servicesDefault: Record<string, unknown>;
+  defaultCoordinates: string[];
   loading: boolean;
   setLanguage: (lang: Language) => void;
   setThemeMode: (theme: PaletteMode) => void;
@@ -44,6 +45,7 @@ const useAppStateStore = create<AppState>((set) => ({
   apiBaseUrl: "",
   axiosConfigOverrides: {},
   servicesDefault: {},
+  defaultCoordinates: [],
   loading: true,
 
   setLanguage: (lang: string) => {
@@ -81,6 +83,10 @@ const useAppStateStore = create<AppState>((set) => ({
 
       set({
         servicesDefault: config.servicesDefault as Record<string, unknown>,
+      });
+
+      set({
+        defaultCoordinates: config.defaultCoordinates as string[],
       });
     } catch (error) {
       console.error("Failed to load config:", error);

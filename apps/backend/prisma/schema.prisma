@@ -145,8 +145,8 @@ model ToolsOnMaps {
 model Projection {
   id         Int       @id @default(autoincrement())
   locked     Boolean   @default(false)
-  code       String?   @unique
-  definition String?
+  code       String    @unique
+  definition String
   extent     Decimal[] @default([])
   units      String?
   maps       Map[]
@@ -164,8 +164,8 @@ model Group {
 
 model Service {
   id           String      @id @default(cuid())
-  metadataId   String?     @unique
-  projectionId Int?
+  metadataId   String      @unique
+  projectionId Int
   name         String
   locked       Boolean     @default(false)
   url          String
@@ -173,11 +173,12 @@ model Service {
   imageFormat  String      @default("image/png")
   type         ServiceType
   serverType   ServerType  @default(GEOSERVER)
-  projection   Projection? @relation(fields: [projectionId], references: [id])
+  projection   Projection  @relation(fields: [projectionId], references: [id])
+  workspace    String?
   getMapUrl    String?
   comment      String?
   layers       Layer[]
-  metadata     Metadata?   @relation(fields: [metadataId], references: [id])
+  metadata     Metadata    @relation(fields: [metadataId], references: [id])
 
   @@unique([url, type])
 }

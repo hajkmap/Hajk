@@ -124,6 +124,28 @@ export const getMapsByServiceId = async (serviceId: string): Promise<Map[]> => {
   }
 };
 
+export const getAllProjections = async (): Promise<string[]> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.get<{ projections: string[] }>(
+      "/services/projections"
+    );
+    if (!response.data) {
+      throw new Error("No projections data found");
+    }
+    return response.data.projections;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to fetch projections. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error("Failed to fetch projections");
+    }
+  }
+};
+
 export const createService = async (
   newService: ServiceCreateInput
 ): Promise<ServiceCreateInput> => {

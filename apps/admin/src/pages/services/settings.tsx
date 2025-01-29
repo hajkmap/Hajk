@@ -21,6 +21,8 @@ import {
   serviceTypes,
   ServiceUpdateInput,
   serverTypes,
+  versions,
+  useProjections,
 } from "../../api/services";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
@@ -34,6 +36,7 @@ import { toast } from "react-toastify";
 
 import FormActionPanel from "../../components/form-action-panel";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
+import useAppStateStore from "../../store/use-app-state-store";
 
 export default function ServiceSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -49,15 +52,22 @@ export default function ServiceSettings() {
   const [dialogServiceType, setDialogServiceType] = useState(
     service?.type ?? ""
   );
+  const { data: projections } = useProjections();
+  const epsgProjections = projections?.filter((projection) =>
+    projection.code.startsWith("EPSG:")
+  );
+  const epsgProjectionsWithCode = epsgProjections?.map((projection) => ({
+    title: projection.code,
+    value: projection.code,
+  }));
+
   const { mutateAsync: updateService, status: updateStatus } =
     useUpdateService();
   const { mutateAsync: deleteService, status: deleteStatus } =
     useDeleteService();
   const { data: layersByServiceId } = useLayersByServiceId(serviceId ?? "");
   const count = layersByServiceId?.count ?? 0;
-
-  console.log("service", service);
-
+  const { defaultCoordinates } = useAppStateStore.getState();
   const [formServiceData, setFormServiceData] = useState<
     DynamicFormContainer<FieldValues>
   >(new DynamicFormContainer<FieldValues>());
@@ -92,7 +102,12 @@ export default function ServiceSettings() {
         type: serviceData.type,
         serverType: serviceData.serverType,
         version: serviceData.version,
+        workspace: serviceData.workspace,
+        getMapUrl: serviceData.getMapUrl,
         comment: serviceData.comment,
+        projection: {
+          code: serviceData.projection?.code,
+        },
         metadata: {
           owner: serviceData.metadata?.owner,
         },
@@ -247,17 +262,14 @@ export default function ServiceSettings() {
     name: "workSpace",
     title: `${t("services.workspace")}`,
     defaultValue: "WORKSPACE_1",
-    optionList: [
-      { title: "Workspace 1", value: "WORKSPACE_1" },
-      { title: "Workspace 2", value: "WORKSPACE_2" },
-    ],
+    optionList: [{ title: "Workspace 1", value: "WORKSPACE_1" }],
   });
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
     name: "getMapUrl",
     title: `GetMap-url`,
-    defaultValue: "",
+    defaultValue: service?.getMapUrl,
   });
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.SELECT,
@@ -265,10 +277,10 @@ export default function ServiceSettings() {
     name: "version",
     title: "Version",
     defaultValue: service?.version,
-    optionList: [
-      { title: "1.1.1", value: "1.1.1" },
-      { title: "1.3.0", value: "1.3.0" },
-    ],
+    optionList: versions.map((version) => ({
+      title: version.title,
+      value: version.value,
+    })),
     registerOptions: {
       required: `${t("common.required")}`,
     },
@@ -277,14 +289,16 @@ export default function ServiceSettings() {
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
-    name: "coordinateSystem",
+    name: "projection.code",
     title: `${t("services.coordinateSystem")}`,
     defaultValue: service?.projection.code,
-    optionList: [
-      { title: "EPSG:3006", value: "EPSG:3006" },
-      { title: "EPSG:3007", value: "EPSG:3007" },
-      { title: "EPSG:4326", value: "EPSG:4326" },
-    ],
+    optionList: defaultCoordinates.map(
+      (value) =>
+        epsgProjectionsWithCode?.find((item) => item.value === value) ?? {
+          title: "",
+          value: "",
+        }
+    ),
   });
 
   accordionNestedContainer3.addInput({
