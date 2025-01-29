@@ -8,6 +8,7 @@ interface AppState {
   sidebarLocked: boolean;
   apiBaseUrl: string;
   axiosConfigOverrides: Record<string, unknown>;
+  servicesDefault: Record<string, unknown>;
   loading: boolean;
   setLanguage: (lang: Language) => void;
   setThemeMode: (theme: PaletteMode) => void;
@@ -42,6 +43,7 @@ const useAppStateStore = create<AppState>((set) => ({
   sidebarLocked: getDefaultSidebarLocked(),
   apiBaseUrl: "",
   axiosConfigOverrides: {},
+  servicesDefault: {},
   loading: true,
 
   setLanguage: (lang: string) => {
@@ -75,6 +77,10 @@ const useAppStateStore = create<AppState>((set) => ({
         axiosConfigOverrides: config.axiosConfigOverrides as
           | Record<string, unknown>
           | undefined,
+      });
+
+      set({
+        servicesDefault: config.servicesDefault as Record<string, unknown>,
       });
     } catch (error) {
       console.error("Failed to load config:", error);

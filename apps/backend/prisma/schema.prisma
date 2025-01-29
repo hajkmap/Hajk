@@ -3,9 +3,10 @@ generator client {
 }
 
 generator zod {
-  provider           = "zod-prisma-types"
-  output             = "../server/generated/zod"
-  createPartialTypes = true
+  provider                         = "zod-prisma-types"
+  output                           = "../server/generated/zod"
+  createOptionalDefaultValuesTypes = true
+  createRelationValuesTypes        = true
 }
 
 datasource db {
@@ -144,9 +145,9 @@ model ToolsOnMaps {
 model Projection {
   id         Int       @id @default(autoincrement())
   locked     Boolean   @default(false)
-  code       String    @unique
-  definition String
-  extent     Decimal[]
+  code       String?   @unique
+  definition String?
+  extent     Decimal[] @default([])
   units      String?
   maps       Map[]
   service    Service[]
@@ -163,8 +164,8 @@ model Group {
 
 model Service {
   id           String      @id @default(cuid())
-  metadataId   String      @unique
-  projectionId Int
+  metadataId   String?     @unique
+  projectionId Int?
   name         String
   locked       Boolean     @default(false)
   url          String
@@ -172,10 +173,11 @@ model Service {
   imageFormat  String      @default("image/png")
   type         ServiceType
   serverType   ServerType  @default(GEOSERVER)
-  projection   Projection  @relation(fields: [projectionId], references: [id])
+  projection   Projection? @relation(fields: [projectionId], references: [id])
+  getMapUrl    String?
   comment      String?
   layers       Layer[]
-  metadata     Metadata    @relation(fields: [metadataId], references: [id])
+  metadata     Metadata?   @relation(fields: [metadataId], references: [id])
 
   @@unique([url, type])
 }
@@ -187,7 +189,7 @@ model Metadata {
   owner       String?
   url         String?
   urlTitle    String?
-  created     DateTime
+  created     DateTime @default(now())
   updated     DateTime @updatedAt
   service     Service?
   layer       Layer?
@@ -232,6 +234,7 @@ model Layer {
   metadataId                  String            @unique
   searchSettingsId            String            @unique
   infoClickSettingsId         String            @unique
+  selectedLayers              String[]
   // Locked is used to avoid multiple people messing with the same layer at the same time
   locked                      Boolean           @default(false)
   name                        String

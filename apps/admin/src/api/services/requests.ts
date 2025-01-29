@@ -10,7 +10,8 @@ import {
 import { LayersApiResponse } from "../layers";
 import { Map } from "../maps";
 import { GlobalMapsApiResponse } from "../tools";
-import { generateNames } from "../generated/names";
+import { generateRandomName } from "../generated/names";
+import useAppStateStore from "../../store/use-app-state-store";
 
 /**
  * This module provides API request functions to interact with the backend
@@ -127,13 +128,20 @@ export const createService = async (
   newService: ServiceCreateInput
 ): Promise<ServiceCreateInput> => {
   const internalApiClient = getApiClient();
+  const { servicesDefault } = useAppStateStore.getState();
+
   if (!newService.name) {
-    newService.name = generateNames();
+    newService.name = generateRandomName();
   }
+
+  const serviceData: ServiceCreateInput = {
+    ...servicesDefault,
+    ...newService,
+  };
   try {
     const response = await internalApiClient.post<ServiceCreateInput>(
       "/services",
-      newService
+      serviceData
     );
     if (!response.data) {
       throw new Error("No service data found");

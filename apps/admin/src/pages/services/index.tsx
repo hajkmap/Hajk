@@ -49,6 +49,14 @@ export default function ServicesPage() {
   serviceContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 12,
+    name: "name",
+    title: `${t("common.name")}`,
+    defaultValue: "",
+  });
+
+  serviceContainer.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 12,
     name: "url",
     title: "Url",
     defaultValue: "",
@@ -99,8 +107,9 @@ export default function ServicesPage() {
   const handleServiceSubmit = async (serviceData: ServiceCreateInput) => {
     try {
       const payload = {
-        type: serviceData.type,
+        name: serviceData.name,
         url: serviceData.url,
+        type: serviceData.type,
       };
 
       const response = await createService(payload);
@@ -112,6 +121,7 @@ export default function ServicesPage() {
           hideProgressBar: true,
         }
       );
+      void navigate(`/services/${response?.id}`);
       reset({ url: "" });
       handleClose();
     } catch (error) {

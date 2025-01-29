@@ -1,12 +1,23 @@
 export interface Service {
   id: string;
+  metadataId: string;
+  projectionId: number;
   name: string;
-  version: string;
   locked: boolean;
   url: string;
+  version: string;
+  imageFormat: string;
   type: string;
   serverType: string;
   comment: string;
+  metadata: {
+    id: string;
+    owner: string;
+    description: string;
+  };
+  projection: {
+    code: string;
+  };
 }
 
 export interface ServicesApiResponse {
@@ -17,6 +28,7 @@ export interface ServicesApiResponse {
 }
 
 export interface ServiceCreateInput {
+  id?: string;
   url: string;
   name?: string;
   version?: string;
@@ -34,6 +46,9 @@ export interface ServiceUpdateInput {
   type?: string;
   serverType?: string;
   comment?: string;
+  metadata?: {
+    owner?: string;
+  };
 }
 
 export const serviceTypes = ["ARCGIS", "VECTOR", "WFS", "WFST", "WMS", "WMTS"];
@@ -49,4 +64,14 @@ export interface ServiceCapabilities {
 export interface UseServiceCapabilitiesProps {
   baseUrl: string;
   type: string;
+}
+
+export interface ServiceConfig {
+  version: string;
+  imageFormat: string;
+  type: string;
+  serverType: string;
+  projection: {
+    code: string;
+  };
 }

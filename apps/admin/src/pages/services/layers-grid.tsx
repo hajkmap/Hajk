@@ -31,6 +31,8 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const language = useAppStateStore((state) => state.language);
+  const themeMode = useAppStateStore((state) => state.themeMode);
+  const isDarkMode = themeMode === "dark";
 
   const {
     layers: getCapLayers,
@@ -124,6 +126,10 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
           sx={{
             width: "100%",
             mb: 3,
+            backgroundColor: isDarkMode ? "#121212" : "#efefef",
+            border: 0,
+            boxShadow: "none",
+            borderRadius: "8px",
           }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -160,6 +166,7 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
                     mt: 1,
                     width: "100%",
                     maxWidth: "400px",
+                    backgroundColor: isDarkMode ? "#3b3b3b" : "#fbfbfb",
                   }}
                   label={t("common.searchLayer")}
                   variant="outlined"
@@ -174,7 +181,12 @@ function LayersGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
 
                 <Scrollbar sx={{ maxHeight: "400px" }}>
                   <DataGrid
-                    sx={{ maxWidth: "100%", mb: 2, mt: 1 }}
+                    sx={{
+                      maxWidth: "100%",
+                      mb: 2,
+                      mt: 1,
+                      backgroundColor: isDarkMode ? "#3b3b3b" : "#fbfbfb",
+                    }}
                     rows={filteredLayers}
                     columns={columns}
                     initialState={{

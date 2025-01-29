@@ -4,7 +4,7 @@ import log4js from "log4js";
 import prisma from "../../../common/prisma.ts";
 
 const logger = log4js.getLogger("service.v3.layer");
-
+const DEFAULT_PROJECTION_CODE = "EPSG:3006";
 class ServicesService {
   constructor() {
     logger.debug("Initiating Services Service");
@@ -15,6 +15,8 @@ class ServicesService {
     // per each service
     const services = await prisma.service.findMany({
       include: {
+        metadata: true,
+        projection: true,
         // select all columns in the service table
         _count: {
           select: {
@@ -28,6 +30,7 @@ class ServicesService {
   }
 
   async getServiceById(id: string) {
+    // Get service by id and include the foreign keys to get the metadata row and the projection
     const service = await prisma.service.findUnique({
       where: { id },
     });
@@ -85,20 +88,69 @@ class ServicesService {
   }
 
   async createService(data: Prisma.ServiceCreateInput) {
-    const newService = await prisma.service.create({ data });
+    const projectionCode = data?.projection?.code || DEFAULT_PROJECTION_CODE;
+    const existingProjection = await prisma.projection.findUnique({
+      where: { code: projectionCode },
+    });
+
+    if (!existingProjection) {
+      throw new Error(`Projection with code ${projectionCode} not found`);
+    }
+
+    const newService = await prisma.service.create({
+      data: {
+        ...data,
+        metadata: {
+          create: { ...data.metadata },
+        },
+        projection: {
+          connect: { id: existingProjection.id },
+        },
+      },
+      include: {
+        metadata: true,
+        projection: true,
+      },
+    });
+
     return newService;
   }
 
   async updateService(id: string, data: Prisma.ServiceUpdateInput) {
     const updatedService = await prisma.service.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        metadata: {
+          upsert: {
+            update: { ...data.metadata },
+            create: { ...data.metadata },
+          },
+        },
+      },
+      include: {
+        metadata: true,
+        projection: true,
+      },
     });
     return updatedService;
   }
 
   async deleteService(id: string) {
-    await prisma.service.delete({ where: { id } });
+    await prisma.$transaction(async (transaction) => {
+      const service = await transaction.service.findUnique({
+        where: { id },
+        select: { metadata: true },
+      });
+
+      if (service?.metadata) {
+        await transaction.metadata.delete({
+          where: { id: service.metadata.id },
+        });
+      }
+
+      await transaction.service.delete({ where: { id } });
+    });
   }
 }
 

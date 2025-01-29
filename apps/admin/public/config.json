@@ -10,5 +10,13 @@
     "https://x3.varberg.se/util/geoserver/*": {
       "withCredentials": true
     }
+  },
+  "servicesDefault": {
+    "version": "1.1.1",
+    "imageFormat": "image/jpeg",
+    "serverType": "QGIS_SERVER",
+    "projection": {
+      "code": "EPSG:3007"
+    }
   }
 }

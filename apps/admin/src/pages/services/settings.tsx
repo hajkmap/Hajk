@@ -56,6 +56,8 @@ export default function ServiceSettings() {
   const { data: layersByServiceId } = useLayersByServiceId(serviceId ?? "");
   const count = layersByServiceId?.count ?? 0;
 
+  console.log("service", service);
+
   const [formServiceData, setFormServiceData] = useState<
     DynamicFormContainer<FieldValues>
   >(new DynamicFormContainer<FieldValues>());
@@ -91,6 +93,9 @@ export default function ServiceSettings() {
         serverType: serviceData.serverType,
         version: serviceData.version,
         comment: serviceData.comment,
+        metadata: {
+          owner: serviceData.metadata?.owner,
+        },
       };
       await updateService({
         serviceId: service?.id ?? "",
@@ -274,7 +279,7 @@ export default function ServiceSettings() {
     gridColumns: 8,
     name: "coordinateSystem",
     title: `${t("services.coordinateSystem")}`,
-    defaultValue: "EPSG:3006",
+    defaultValue: service?.projection.code,
     optionList: [
       { title: "EPSG:3006", value: "EPSG:3006" },
       { title: "EPSG:3007", value: "EPSG:3007" },
@@ -285,9 +290,9 @@ export default function ServiceSettings() {
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
-    name: "owner",
+    name: "metadata.owner",
     title: `${t("services.owner")}`,
-    defaultValue: "",
+    defaultValue: service?.metadata?.owner,
   });
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTAREA,

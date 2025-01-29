@@ -6,7 +6,7 @@ import {
   LayerUpdateInput,
 } from "./types";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
-import { generateNames } from "../generated/names";
+import { generateRandomName } from "../generated/names";
 
 /**
  * This module provides API request functions to interact with the backend
@@ -125,7 +125,7 @@ export const createLayer = async (
 ): Promise<LayerCreateInput> => {
   const internalApiClient = getApiClient();
   if (!newLayer.name) {
-    newLayer.name = generateNames();
+    newLayer.name = generateRandomName();
   }
   try {
     const response = await internalApiClient.post<LayerCreateInput>(
