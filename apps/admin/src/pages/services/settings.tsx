@@ -269,9 +269,9 @@ export default function ServiceSettings() {
   accordionNestedContainer.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
-    name: "workSpace",
+    name: "workspace",
     title: `${t("services.workspace")}`,
-    defaultValue: service?.workspace ?? "Alla",
+    defaultValue: service?.workspace,
     optionList:
       getCapWorkspaces.length > 0
         ? getCapWorkspaces.map((workspace) => ({
@@ -329,7 +329,7 @@ export default function ServiceSettings() {
     gridColumns: 8,
     name: "metadata.description",
     title: `${t("services.layerDescription")}`,
-    defaultValue: "",
+    defaultValue: service?.metadata?.description,
   });
 
   serviceSettingsFormContainer.addContainer([
