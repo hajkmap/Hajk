@@ -17,9 +17,7 @@ import {
   TextField,
 } from "@mui/material";
 import { AccountCircle } from "@mui/icons-material";
-import FormInspector from "../../components/form-factory/components/form-inspector";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
-import { getValidRowHeight } from "@mui/x-data-grid/hooks/features/rows/gridRowsUtils";
 
 export default function FormFactoryPage() {
   const [formContainerData, setFormContainerData] = React.useState<
