@@ -88,6 +88,15 @@ function ControlledAccordion({
     setExpanded(isExpanded);
   };
 
+  const getValue = (value: unknown) => {
+    if (typeof value === "object") {
+      return JSON.stringify(value);
+    } else if (typeof value === "string") {
+      return value + "".trim();
+    }
+    return String(value);
+  };
+
   const tooltipContent = () => {
     if (keyValues.length === 0) return "";
     return (
@@ -100,7 +109,7 @@ function ControlledAccordion({
           >
             {/* Please refactor the ugly * thing below */}
             {keyValue.title.replace("*", "").trim()}:{" "}
-            {keyValue?.value + "".trim()}
+            {getValue(keyValue?.value)}
           </Box>
         ))}
       </Box>
@@ -109,7 +118,9 @@ function ControlledAccordion({
 
   const controlledAccordion = () => {
     const valuesAsString = keyValues
-      .map((keyValue) => `${keyValue?.value + "".trim()}`)
+      .map((keyValue) => {
+        return getValue(keyValue?.value);
+      })
       .join(", ");
 
     return (
