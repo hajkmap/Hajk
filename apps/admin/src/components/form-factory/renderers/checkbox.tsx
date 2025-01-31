@@ -11,6 +11,7 @@ const renderCheckbox: RenderFunction<FieldValues> = ({
     <FormControlLabel
       control={
         <Checkbox
+          sx={{ flexShrink: 0, alignSelf: "flex-start" }}
           {...inputProps}
           checked={!!field?.value}
           onChange={(e) => field?.onChange(e.target.checked)}
