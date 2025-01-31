@@ -34,8 +34,19 @@ class LayerService {
     });
   }
 
-  async createLayer(data: Prisma.LayerCreateInput) {
-    const newLayer = await prisma.layer.create({ data });
+  async createLayer(data: Prisma.LayerCreateInput & { serviceId: string }) {
+    const { serviceId, ...layerData } = data;
+
+    const newLayer = await prisma.layer.create({
+      data: {
+        ...layerData,
+        service: { connect: { id: serviceId } },
+        metadata: { create: { ...layerData.metadata } },
+        infoClickSettings: { create: { ...layerData.infoClickSettings } },
+        searchSettings: { create: { ...layerData.searchSettings } },
+      },
+    });
+
     return newLayer;
   }
 

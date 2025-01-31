@@ -7,6 +7,7 @@ import {
 } from "./types";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 import { generateRandomName } from "../generated/names";
+import useAppStateStore from "../../store/use-app-state-store";
 
 /**
  * This module provides API request functions to interact with the backend
@@ -124,13 +125,19 @@ export const createLayer = async (
   newLayer: LayerCreateInput
 ): Promise<LayerCreateInput> => {
   const internalApiClient = getApiClient();
+  const { layersDefault } = useAppStateStore.getState();
+
   if (!newLayer.name) {
     newLayer.name = generateRandomName();
   }
+  const layerData: LayerCreateInput = {
+    ...newLayer,
+    ...layersDefault,
+  };
   try {
     const response = await internalApiClient.post<LayerCreateInput>(
       "/layers",
-      newLayer
+      layerData
     );
     if (!response.data) {
       throw new Error("No layer data found");

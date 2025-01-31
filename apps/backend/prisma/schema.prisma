@@ -230,16 +230,16 @@ model SearchSettings {
 
 model Layer {
   id                          String            @id @default(cuid())
-  idFromSource                String
+  idFromSource                String?
   serviceId                   String
   metadataId                  String            @unique
   searchSettingsId            String            @unique
   infoClickSettingsId         String            @unique
-  selectedLayers              String[]
+  selectedLayers              String[]          @default([])
   // Locked is used to avoid multiple people messing with the same layer at the same time
   locked                      Boolean           @default(false)
   name                        String
-  internalName                String
+  internalName                String?
   service                     Service           @relation(fields: [serviceId], references: [id])
   metadata                    Metadata          @relation(fields: [metadataId], references: [id])
   infoClickSettings           InfoClickSettings @relation(fields: [infoClickSettingsId], references: [id])
@@ -251,7 +251,7 @@ model Layer {
   tiled                       Boolean           @default(false)
   singleTile                  Boolean           @default(false)
   hidpi                       Boolean           @default(false)
-  customDpiList               String[]
+  customDpiList               String[]          @default([])
   useCustomDpiList            Boolean           @default(false)
   legendUrl                   String?
   legendIconUrl               String?

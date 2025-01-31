@@ -25,5 +25,9 @@
     "projection": {
       "code": "EPSG:3007"
     }
+  },
+  "layersDefault": {
+    "timeSliderVisible": true,
+    "internalName": "test"
   }
 }

@@ -70,6 +70,14 @@ export default function LayersPage() {
   const layerContainer = new DynamicFormContainer<FieldValues>();
 
   layerContainer.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 12,
+    name: "name",
+    title: `${t("common.name")}`,
+    defaultValue: "",
+  });
+
+  layerContainer.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 12,
     name: "serviceId",
@@ -104,6 +112,7 @@ export default function LayersPage() {
   const handleLayerSubmit = async (layerData: LayerCreateInput) => {
     try {
       const payload = {
+        name: layerData.name,
         serviceId: layerData.serviceId,
       };
       const response = await createLayer(payload);

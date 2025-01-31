@@ -93,7 +93,7 @@ function LayersGrid({ layers, isError, isLoading }: LayersGridProps) {
           }}
         >
           <MenuItem onClick={() => alert(`View ${params.row.layer}`)}>
-            View
+            Skapa
           </MenuItem>
           <MenuItem onClick={() => alert(`Edit ${params.row.layer}`)}>
             Edit

@@ -9,6 +9,7 @@ interface AppState {
   apiBaseUrl: string;
   axiosConfigOverrides: Record<string, unknown>;
   servicesDefault: Record<string, unknown>;
+  layersDefault: Record<string, unknown>;
   defaultCoordinates: string[];
   loading: boolean;
   setLanguage: (lang: Language) => void;
@@ -45,6 +46,7 @@ const useAppStateStore = create<AppState>((set) => ({
   apiBaseUrl: "",
   axiosConfigOverrides: {},
   servicesDefault: {},
+  layersDefault: {},
   defaultCoordinates: [],
   loading: true,
 
@@ -83,6 +85,10 @@ const useAppStateStore = create<AppState>((set) => ({
 
       set({
         servicesDefault: config.servicesDefault as Record<string, unknown>,
+      });
+
+      set({
+        layersDefault: config.layersDefault as Record<string, unknown>,
       });
 
       set({
