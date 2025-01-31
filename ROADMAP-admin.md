@@ -47,6 +47,7 @@
   - [x] Fix nested Grids in form factory (when adding help icon etc).
   - [x] Add the possibility to add unmanaged elements to a FormFactory form.
   - [x] Find cause and fix sluggish form updates.
+  - [x] Add a color picker component to FormFactory. v0.1 WIP
 - [x] Upgrade npm packages (JW)
 
 ### Roles
