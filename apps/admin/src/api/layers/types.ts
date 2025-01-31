@@ -21,8 +21,10 @@ export interface LayerTypesApiResponse {
 }
 
 export interface LayerCreateInput {
+  id?: string;
   name?: string;
   serviceId: string;
+  selectedLayers?: string[];
   locked?: boolean;
   options?: Record<string, string>;
 }

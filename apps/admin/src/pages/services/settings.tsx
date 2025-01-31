@@ -408,6 +408,7 @@ export default function ServiceSettings() {
           />
           <LayersGrid
             layers={getCapLayers}
+            serviceId={service.id}
             isError={layersError}
             isLoading={layersLoading}
           />

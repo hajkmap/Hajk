@@ -82,6 +82,7 @@ export interface ServiceCapabilities {
 
 export interface LayersGridProps {
   layers: string[];
+  serviceId: string;
   isError: boolean;
   isLoading: boolean;
 }

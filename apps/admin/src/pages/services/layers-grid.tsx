@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router";
 import {
   Box,
   TextField,
@@ -22,14 +23,22 @@ import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import useAppStateStore from "../../store/use-app-state-store";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-
-function LayersGrid({ layers, isError, isLoading }: LayersGridProps) {
+import { useCreateLayer, LayerCreateInput } from "../../api/layers";
+function LayersGrid({
+  layers,
+  serviceId,
+  isError,
+  isLoading,
+}: LayersGridProps) {
   const { palette } = useTheme();
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const language = useAppStateStore((state) => state.language);
   const themeMode = useAppStateStore((state) => state.themeMode);
   const isDarkMode = themeMode === "dark";
+  const { mutateAsync: createLayer } = useCreateLayer();
+
+  const navigate = useNavigate();
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -49,6 +58,8 @@ function LayersGrid({ layers, isError, isLoading }: LayersGridProps) {
     },
   ];
 
+  console.log("serviceId", serviceId);
+
   const filteredLayers = useMemo(() => {
     if (!layers) return [];
     return layers
@@ -61,6 +72,20 @@ function LayersGrid({ layers, isError, isLoading }: LayersGridProps) {
         actions: "",
       }));
   }, [layers, searchTerm]);
+
+  const handleCreateLayer = async (layer: LayerCreateInput) => {
+    try {
+      const payload = {
+        serviceId,
+        selectedLayers: layer.selectedLayers ?? [],
+      };
+
+      const response = await createLayer(payload);
+      void navigate("/layers/" + response?.id);
+    } catch (error) {
+      console.error("Failed to create layer:", error);
+    }
+  };
 
   const RowMenu = (params: { row: { layer: string } }) => {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -92,7 +117,12 @@ function LayersGrid({ layers, isError, isLoading }: LayersGridProps) {
             horizontal: "left",
           }}
         >
-          <MenuItem onClick={() => alert(`View ${params.row.layer}`)}>
+          {/* Lint error needs fix */}
+          <MenuItem
+            onClick={() =>
+              handleCreateLayer({ selectedLayers: [params.row.layer] })
+            }
+          >
             Skapa
           </MenuItem>
           <MenuItem onClick={() => alert(`Edit ${params.row.layer}`)}>
