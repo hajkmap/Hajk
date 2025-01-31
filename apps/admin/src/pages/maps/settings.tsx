@@ -606,7 +606,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.COLOR_PICKER,
     name: "secondaryColor",
     title: "Komplementfärg",
-    defaultValue: "#00ff00",
+    defaultValue: { r: 0, g: 255, b: 0, a: 1 },
     gridColumns: 6,
   });
 
