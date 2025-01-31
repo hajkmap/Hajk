@@ -30,6 +30,8 @@
   - [x] Alter layer (AA)
     - ⚠️ Incomplete due to missing data in the current data model.
   - [x] Remove layer (AA)
+- [ ] Map settings page
+  - [ ] Step 1: Create form with formfactory, UI only [JA]
 - [ ] Optimizing input fields performance/state.
   - [ ] Services page
   - [ ] Layers page
