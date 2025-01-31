@@ -5,6 +5,7 @@ import {
   AccordionDetails,
   Typography,
   Box,
+  alpha,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HajkTooltip from "../../hajk-tooltip";
@@ -128,7 +129,15 @@ function ControlledAccordion({
           placement="bottom-end"
           enterDelay={1000}
         >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            sx={(theme) => ({
+              transition: "border-bottom 250ms ease-in-out",
+              borderBottom: expanded
+                ? `1px solid ${theme.palette.divider}`
+                : `1px solid ${alpha(theme.palette.divider, 0.0)}`,
+            })}
+          >
             <Box
               sx={{ width: "calc(100% - 20px)", maxWidth: "calc(100% - 20px)" }}
               display="flex"
@@ -164,7 +173,9 @@ function ControlledAccordion({
             </Box>
           </AccordionSummary>
         </HajkTooltip>
-        <AccordionDetails sx={{ pl: 0, pb: 0 }}>{children}</AccordionDetails>
+        <AccordionDetails sx={{ pl: 0, pb: 0, pt: "1.5rem" }}>
+          {children}
+        </AccordionDetails>
       </Accordion>
     );
   };
