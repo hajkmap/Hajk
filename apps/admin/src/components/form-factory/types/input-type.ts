@@ -1,5 +1,3 @@
-
-
 enum INPUT_TYPE {
   TEXTFIELD = "textfield",
   SELECT = "select",
@@ -9,10 +7,8 @@ enum INPUT_TYPE {
   SWITCH = "switch",
   NUMBER = "number",
   TEXTAREA = "textarea",
+  COLOR_PICKER = "colorPicker",
   CUSTOM = "custom",
 }
 
-
 export default INPUT_TYPE;
-
-

@@ -595,18 +595,18 @@ export default function CustomForm() {
   });
 
   mapColorContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.COLOR_PICKER,
     name: "primaryColor",
     title: "Huvudfärg",
-    defaultValue: "",
+    defaultValue: "#ff0000",
     gridColumns: 6,
   });
 
   mapColorContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.COLOR_PICKER,
     name: "secondaryColor",
     title: "Komplementfärg",
-    defaultValue: "",
+    defaultValue: "#00ff00",
     gridColumns: 6,
   });
 

@@ -247,6 +247,14 @@ export default function FormFactoryPage() {
     },
   });
 
+  formContainer.addInput({
+    type: INPUT_TYPE.COLOR_PICKER,
+    name: "colorTest",
+    title: "Color test",
+    defaultValue: "#ff0000",
+    gridColumns: 12,
+  });
+
   // A custom input needs CustomInputSettings with a renderer attached.
   formContainer.addCustomInput({
     type: INPUT_TYPE.CUSTOM,
