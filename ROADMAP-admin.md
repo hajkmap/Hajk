@@ -44,6 +44,7 @@
   - [x] FormFactory Accordion should show some existing data when collapsed, and more data in tooltip.
   - [x] Fix nested Grids in form factory (when adding help icon etc).
   - [x] Add the possibility to add unmanaged elements to a FormFactory form.
+  - [x] Find cause and fix sluggish form updates.
 - [x] Upgrade npm packages (JW)
 
 ### Roles
