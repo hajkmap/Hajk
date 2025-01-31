@@ -7,7 +7,7 @@ enum INPUT_TYPE {
   SWITCH = "switch",
   NUMBER = "number",
   TEXTAREA = "textarea",
-  COLOR_PICKER = "colorPicker",
+  COLOR_PICKER = "color_picker",
   CUSTOM = "custom",
 }
 
