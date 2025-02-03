@@ -285,6 +285,11 @@ async function readAndPopulateLayers() {
           where: { url: layer.url, type },
         });
 
+        const options = {
+          useCustomDpiList: layer.useCustomDpiList,
+          customDpiList: layer.customDpiList,
+        };
+
         const createdLayer = await prisma.layer.create({
           data: {
             name: layer.caption,
@@ -297,8 +302,6 @@ async function readAndPopulateLayers() {
             minZoom: layer.minZoom,
             maxZoom: layer.maxZoom,
             minMaxZoomAlertOnToggleOnly: layer.minMaxZoomAlertOnToggleOnly,
-            useCustomDpiList: layer.useCustomDpiList,
-            customDpiList: layer.customDpiList || [],
             customRatio: layer.customRatio,
             timeSliderVisible: layer.timeSliderVisible,
             timeSliderStart: layer.timeSliderStart,
@@ -348,6 +351,7 @@ async function readAndPopulateLayers() {
                 geometryField: layer.searchGeometryField,
               },
             },
+            options,
           },
         });
 
@@ -366,7 +370,7 @@ async function readAndPopulateLayers() {
       for await (const layer of cleanedLayers) {
         await updateRolesFromVisibleForGroups(
           layer.visibleForGroups || [],
-          layer.id,
+          jsonToPrisma.get(layer.id),
           "layer"
         );
       }

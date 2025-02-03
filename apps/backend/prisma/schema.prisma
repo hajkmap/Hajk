@@ -250,8 +250,6 @@ model Layer {
   tiled                       Boolean           @default(false)
   singleTile                  Boolean           @default(false)
   hidpi                       Boolean           @default(false)
-  customDpiList               String[]          @default([])
-  useCustomDpiList            Boolean           @default(false)
   legendUrl                   String?
   legendIconUrl               String?
   customRatio                 Int               @default(0)
