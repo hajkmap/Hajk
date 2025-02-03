@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
-import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridRenderCellParams,
+  GridToolbar,
+} from "@mui/x-data-grid";
 import { Button } from "@mui/material";
 import MoreIcon from "@mui/icons-material/More";
 
@@ -11,6 +16,7 @@ import { useMaps } from "../../../api/maps/hooks";
 import useAppStateStore from "../../../store/use-app-state-store";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../../i18n/translations/datagrid/sv";
 import MapListFilterPanel from "./map-list-filter-panel";
+import { useNavigate } from "react-router";
 
 const PAGE_SIZE = 10;
 
@@ -21,6 +27,8 @@ export default function MapsTable() {
 
   const [searchString, setSearchString] = useState("");
   const [debouncedSearchString] = useDebounce(searchString, 200);
+
+  const navigate = useNavigate();
 
   const columns: GridColDef<Map>[] = [
     { field: "name", flex: 1, headerName: t("map.name") },
@@ -102,6 +110,9 @@ export default function MapsTable() {
         setSearchString={setSearchString}
       />
       <DataGrid<Map>
+        onRowClick={() => {
+          void navigate(`/maps/just-dummy-right-now`);
+        }}
         rows={filteredMaps}
         columns={columns}
         loading={mapsLoading}
@@ -120,6 +131,7 @@ export default function MapsTable() {
             showLastButton: true,
           },
         }}
+        slots={{ toolbar: GridToolbar }}
       />
     </>
   );

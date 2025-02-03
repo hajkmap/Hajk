@@ -7,8 +7,9 @@ import {
   MenuItem,
   Box,
   useTheme,
+  TextField,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import {
@@ -41,10 +42,26 @@ export default function LayersPage() {
   const { data: services } = useServices();
   const { mutateAsync: createLayer } = useCreateLayer();
   const { palette } = useTheme();
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const processedLayers = useMemo(() => {
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredLayers = useMemo(() => {
     if (!layers || !services) return [];
-    return layers.map((layer) => {
+
+    const searchFilter = (layer: Layer) => {
+      const service = services.find(
+        (service) => service.id === layer.serviceId
+      );
+      const combinedText = `${layer.name} ${service?.type ?? ""} ${
+        service?.url ?? ""
+      }`.toLowerCase();
+      return combinedText.includes(searchTerm.toLowerCase());
+    };
+
+    return layers.filter(searchFilter).map((layer) => {
       const service = services.find(
         (service) => service.id === layer.serviceId
       );
@@ -54,7 +71,8 @@ export default function LayersPage() {
         url: service?.url ?? "",
       };
     });
-  }, [layers, services]);
+  }, [layers, services, searchTerm]);
+
   const handleClose = () => {
     setOpen(false);
   };
@@ -102,12 +120,10 @@ export default function LayersPage() {
     register,
     handleSubmit,
     control,
-    watch,
+    getValues,
     reset,
     formState: { errors, dirtyFields },
   } = DefaultUseForm(defaultValues);
-
-  const formFields = watch();
 
   const handleLayerSubmit = async (layerData: LayerCreateInput) => {
     try {
@@ -159,7 +175,7 @@ export default function LayersPage() {
     };
 
     return (
-      <Box component="div" sx={{ textAlign: "center" }}>
+      <Box component="div" sx={{ textAlign: "start" }}>
         <IconButton onClick={handleClick}>
           <MoreHorizIcon />
         </IconButton>
@@ -176,7 +192,14 @@ export default function LayersPage() {
             horizontal: "left",
           }}
         >
-          <MenuItem onClick={() => alert(`View ${params.row.id}`)}>
+          <MenuItem
+            onClick={() => {
+              const id: string = (params.row as Layer).id;
+              if (id) {
+                void navigate(`/layers/${id}`);
+              }
+            }}
+          >
             View
           </MenuItem>
           <MenuItem onClick={() => alert(`Edit ${params.row.id}`)}>
@@ -228,12 +251,23 @@ export default function LayersPage() {
           >
             <FormRenderer
               formControls={layer}
-              formFields={formFields}
+              formGetValues={getValues}
               register={register}
               control={control}
               errors={errors}
             />
           </DialogWrapper>
+
+          <Grid size={12} container sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              label={t("layers.searchTitle")}
+              variant="outlined"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </Grid>
+
           <Grid size={12}>
             <DataGrid
               onCellClick={(params) => {
@@ -247,17 +281,25 @@ export default function LayersPage() {
               }}
               sx={{
                 maxWidth: "100%",
-                mt: 8,
                 "& .MuiDataGrid-row:hover": {
                   cursor: "pointer",
                 },
+                "& .MuiDataGrid-row.Mui-selected": {
+                  backgroundColor: "inherit",
+                },
+                "& .MuiDataGrid-cell:focus": {
+                  outline: "none",
+                },
+                "& .MuiDataGrid-cell.Mui-selected": {
+                  backgroundColor: "inherit",
+                },
               }}
-              rows={processedLayers ?? []}
+              rows={filteredLayers ?? []}
               getRowId={(row) => row.id}
               columns={[
                 {
                   field: "type",
-                  flex: 0.3,
+                  flex: 0.2,
                   headerName: t("common.serviceType"),
                 },
                 {
@@ -265,7 +307,11 @@ export default function LayersPage() {
                   flex: 0.3,
                   headerName: t("common.name"),
                 },
-                { field: "url", flex: 1, headerName: "Url" },
+                {
+                  field: "url",
+                  flex: 0.6,
+                  headerName: "Url",
+                },
                 {
                   field: "usedInMaps",
                   flex: 0.3,
@@ -276,7 +322,6 @@ export default function LayersPage() {
                   flex: 0.3,
                   headerName: t("common.brokenService"),
                 },
-
                 {
                   field: "actions",
                   headerName: t("common.actions"),
@@ -304,7 +349,7 @@ export default function LayersPage() {
               }}
               hideFooterPagination={layers && layers.length < 10}
               pageSizeOptions={[10, 25, 50, 100]}
-              disableRowSelectionOnClick
+              slots={{ toolbar: GridToolbar }}
             />
           </Grid>
         </Page>

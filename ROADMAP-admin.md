@@ -30,6 +30,8 @@
   - [x] Alter layer (AA)
     - ⚠️ Incomplete due to missing data in the current data model.
   - [x] Remove layer (AA)
+- [ ] Map settings page
+  - [ ] Step 1: Create form with formfactory, UI only [JA]
 - [ ] Optimizing input fields performance/state.
   - [ ] Services page
   - [ ] Layers page
@@ -44,6 +46,8 @@
   - [x] FormFactory Accordion should show some existing data when collapsed, and more data in tooltip.
   - [x] Fix nested Grids in form factory (when adding help icon etc).
   - [x] Add the possibility to add unmanaged elements to a FormFactory form.
+  - [x] Find cause and fix sluggish form updates.
+  - [x] Add a color picker component to FormFactory. v0.1 WIP
 - [x] Upgrade npm packages (JW)
 
 ### Roles

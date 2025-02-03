@@ -14,6 +14,7 @@ import ErrorPage from "./pages/error/index.tsx";
 import LayersPage from "./pages/layers/index.tsx";
 import LayerSettings from "./pages/layers/settings.tsx";
 import MapsPage from "./pages/maps/index.tsx";
+import MapSettings from "./pages/maps/settings.tsx";
 import ToolsPage from "./pages/tools/index.tsx";
 
 import useAppStateStore from "./store/use-app-state-store.ts";
@@ -53,6 +54,10 @@ const router = createBrowserRouter(
         {
           path: "maps",
           element: <MapsPage />,
+        },
+        {
+          path: "maps/:mapId",
+          element: <MapSettings />,
         },
         {
           path: "tools",

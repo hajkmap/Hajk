@@ -1,17 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
   Typography,
   Box,
+  alpha,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HajkTooltip from "../../hajk-tooltip";
+import { FormElement } from "../dynamic-form-container";
+import { FieldValues as TFieldValues } from "react-hook-form";
+import DynamicInputSettings from "../types/dynamic-input-settings";
+
+import CustomInputSettings from "../types/custom-input-settings";
 
 interface ControlledAccordionProps {
   title: string;
-  keyValues: { key: string; value: string; title: string }[];
+  formInputs: FormElement<TFieldValues>[];
+  formGetValues: () => Record<string, unknown>;
   triggerExpanded?: boolean;
   children: React.ReactNode;
   backgroundColor?: string;
@@ -19,7 +26,8 @@ interface ControlledAccordionProps {
 
 function ControlledAccordion({
   title,
-  keyValues,
+  formInputs,
+  formGetValues,
   triggerExpanded = false,
   children,
   backgroundColor,
@@ -30,16 +38,63 @@ function ControlledAccordion({
   // This allows external components to trigger changes to the accordion's expansion state.
 
   const [expanded, setExpanded] = useState(triggerExpanded);
+  const [keyValues, setKeyValues] = useState<
+    { key: string; value: string; title: string }[]
+  >([]);
+
+  const refreshKeyValues = useCallback(() => {
+    const kv = formGetValues();
+
+    const newKv: { key: string; value: string; title: string }[] = [];
+
+    formInputs.map((input) => {
+      if (
+        input.kind === "DynamicInputSettings" ||
+        input.kind === "CustomInputSettings"
+      ) {
+        const castedInput = input as
+          | DynamicInputSettings<TFieldValues>
+          | CustomInputSettings<TFieldValues>;
+
+        const value = kv[castedInput.name];
+
+        if (value) {
+          newKv.push({
+            key: castedInput.name,
+            value: value as string,
+            title: castedInput.title,
+          });
+        }
+      }
+    });
+
+    setKeyValues(newKv);
+  }, [formGetValues, formInputs, setKeyValues]);
 
   useEffect(() => {
     setExpanded(triggerExpanded);
   }, [triggerExpanded]);
+
+  useEffect(() => {
+    if (!expanded) {
+      refreshKeyValues();
+    }
+  }, [expanded, refreshKeyValues]);
 
   const handleAccordionChange = (
     _event: React.SyntheticEvent,
     isExpanded: boolean
   ) => {
     setExpanded(isExpanded);
+  };
+
+  const getValue = (value: unknown) => {
+    if (typeof value === "object") {
+      return JSON.stringify(value);
+    } else if (typeof value === "string") {
+      return value + "".trim();
+    }
+    return String(value);
   };
 
   const tooltipContent = () => {
@@ -53,7 +108,8 @@ function ControlledAccordion({
             sx={{ width: "100%", maxWidth: "100%" }}
           >
             {/* Please refactor the ugly * thing below */}
-            {keyValue.title.replace("*", "").trim()}: {keyValue.value.trim()}
+            {keyValue.title.replace("*", "").trim()}:{" "}
+            {getValue(keyValue?.value)}
           </Box>
         ))}
       </Box>
@@ -62,7 +118,9 @@ function ControlledAccordion({
 
   const controlledAccordion = () => {
     const valuesAsString = keyValues
-      .map((keyValue) => `${keyValue.value.trim()}`)
+      .map((keyValue) => {
+        return getValue(keyValue?.value);
+      })
       .join(", ");
 
     return (
@@ -82,7 +140,15 @@ function ControlledAccordion({
           placement="bottom-end"
           enterDelay={1000}
         >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            sx={(theme) => ({
+              transition: "border-bottom 250ms ease-in-out",
+              borderBottom: expanded
+                ? `1px solid ${theme.palette.divider}`
+                : `1px solid ${alpha(theme.palette.divider, 0.0)}`,
+            })}
+          >
             <Box
               sx={{ width: "calc(100% - 20px)", maxWidth: "calc(100% - 20px)" }}
               display="flex"
@@ -118,7 +184,9 @@ function ControlledAccordion({
             </Box>
           </AccordionSummary>
         </HajkTooltip>
-        <AccordionDetails sx={{ pl: 0, pb: 0 }}>{children}</AccordionDetails>
+        <AccordionDetails sx={{ pl: 0, pb: 0, pt: "1.5rem" }}>
+          {children}
+        </AccordionDetails>
       </Accordion>
     );
   };

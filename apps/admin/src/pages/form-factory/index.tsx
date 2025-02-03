@@ -17,7 +17,6 @@ import {
   TextField,
 } from "@mui/material";
 import { AccountCircle } from "@mui/icons-material";
-import FormInspector from "../../components/form-factory/components/form-inspector";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 
 export default function FormFactoryPage() {
@@ -248,6 +247,14 @@ export default function FormFactoryPage() {
     },
   });
 
+  formContainer.addInput({
+    type: INPUT_TYPE.COLOR_PICKER,
+    name: "colorTest",
+    title: "Color test",
+    defaultValue: "#ff0000",
+    gridColumns: 12,
+  });
+
   // A custom input needs CustomInputSettings with a renderer attached.
   formContainer.addCustomInput({
     type: INPUT_TYPE.CUSTOM,
@@ -299,7 +306,7 @@ export default function FormFactoryPage() {
     handleSubmit,
     control,
     formState: { errors, dirtyFields, isDirty },
-    watch,
+    getValues,
   } = DefaultUseForm(defaultValues);
 
   const onSubmit = createOnSubmitHandler({
@@ -315,14 +322,14 @@ export default function FormFactoryPage() {
     },
   });
 
-  const formFields = watch();
+  // const formFields = watch();
 
   return (
     <Page title={"Form factory"}>
       <form onSubmit={onSubmit}>
         <FormRenderer
           formControls={formContainerData}
-          formFields={formFields}
+          formGetValues={getValues}
           register={register}
           control={control}
           errors={errors}
@@ -336,7 +343,7 @@ export default function FormFactoryPage() {
           </Grid>
         </Grid>
 
-        <FormInspector formFields={formFields} dirtyFields={dirtyFields} />
+        {/* <FormInspector formFields={formFields} dirtyFields={dirtyFields} /> */}
       </form>
     </Page>
   );

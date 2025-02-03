@@ -99,10 +99,8 @@ export default function ServicesPage() {
     control,
     formState: { errors, dirtyFields },
     reset,
-    watch,
+    getValues,
   } = DefaultUseForm(defaultValues);
-
-  const formFields = watch();
 
   const handleServiceSubmit = async (serviceData: ServiceCreateInput) => {
     try {
@@ -231,7 +229,7 @@ export default function ServicesPage() {
             >
               <FormRenderer
                 formControls={service}
-                formFields={formFields}
+                formGetValues={getValues}
                 register={register}
                 control={control}
                 errors={errors}

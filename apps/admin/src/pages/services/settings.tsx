@@ -346,7 +346,6 @@ export default function ServiceSettings() {
     control,
     setValue,
     getValues,
-    watch,
     formState: { errors, dirtyFields },
   } = DefaultUseForm(defaultValues);
 
@@ -359,7 +358,7 @@ export default function ServiceSettings() {
     },
   });
 
-  const currentValues = watch();
+  const currentValues = getValues();
 
   const hasChanges = Object.keys(currentValues).some(
     (key) =>
@@ -401,7 +400,7 @@ export default function ServiceSettings() {
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer
             formControls={serviceSettingsFormContainer}
-            formFields={currentValues}
+            formGetValues={getValues}
             register={register}
             control={control}
             errors={errors}

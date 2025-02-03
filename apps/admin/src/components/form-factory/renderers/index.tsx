@@ -12,6 +12,7 @@ import renderDivider from "./divider";
 import renderSpacer from "./spacer";
 import renderTextArea from "./text-area";
 import renderUnmanagedElement from "./unmanaged-element";
+import renderColorPicker from "./color-picker";
 
 // When a new renderer is added, add it here
 // and add the correct type in
@@ -25,6 +26,7 @@ const renderFunctions = {
   [INPUT_TYPE.SWITCH]: renderSwitch,
   [INPUT_TYPE.NUMBER]: renderNumberField,
   [INPUT_TYPE.TEXTAREA]: renderTextArea,
+  [INPUT_TYPE.COLOR_PICKER]: renderColorPicker,
   [STATIC_TYPE.HEADER]: renderHeader,
   [STATIC_TYPE.SPACER]: renderSpacer,
   [STATIC_TYPE.DIVIDER]: renderDivider,

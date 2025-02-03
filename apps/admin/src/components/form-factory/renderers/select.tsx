@@ -21,7 +21,6 @@ const renderSelect: RenderFunction<FieldValues> = ({
         {...inputSlotProps}
         label={title}
         inputRef={field?.ref}
-        displayEmpty
         value={(field?.value as string) ?? ""}
       >
         {optionList?.map((option, index) => (
