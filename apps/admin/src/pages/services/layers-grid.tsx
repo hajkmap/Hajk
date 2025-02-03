@@ -24,6 +24,7 @@ import useAppStateStore from "../../store/use-app-state-store";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { useCreateLayer, LayerCreateInput } from "../../api/layers";
+
 function LayersGrid({
   layers,
   serviceId,
@@ -37,9 +38,9 @@ function LayersGrid({
   const themeMode = useAppStateStore((state) => state.themeMode);
   const isDarkMode = themeMode === "dark";
   const { mutateAsync: createLayer } = useCreateLayer();
+  const [selectedRowObjects, setSelectedRowObjects] = useState<string[]>();
 
   const navigate = useNavigate();
-
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
@@ -47,18 +48,16 @@ function LayersGrid({
   const columns = [
     { field: "layer", headerName: t("common.layerName"), flex: 1 },
     { field: "infoClick", headerName: t("common.infoclick"), flex: 0.3 },
-    { field: "publications", headerName: t("common.publications"), flex: 1 },
+    { field: "publications", headerName: t("common.publications"), flex: 0.5 },
     {
       field: "actions",
       headerName: t("common.actions"),
-      flex: 0.2,
+      flex: 0.3,
       renderCell: (params: { row: { layer: string } }) => (
         <RowMenu {...params} />
       ),
     },
   ];
-
-  console.log("serviceId", serviceId);
 
   const filteredLayers = useMemo(() => {
     if (!layers) return [];
@@ -117,19 +116,15 @@ function LayersGrid({
             horizontal: "left",
           }}
         >
-          {/* Lint error needs fix */}
           <MenuItem
             onClick={() =>
-              handleCreateLayer({ selectedLayers: [params.row.layer] })
+              void handleCreateLayer({
+                serviceId,
+                selectedLayers: selectedRowObjects ?? [params.row.layer],
+              })
             }
           >
-            Skapa
-          </MenuItem>
-          <MenuItem onClick={() => alert(`Edit ${params.row.layer}`)}>
-            Edit
-          </MenuItem>
-          <MenuItem onClick={() => alert(`Delete ${params.row.layer}`)}>
-            Delete
+            {t("common.create")}
           </MenuItem>
         </Menu>
       </Box>
@@ -198,6 +193,14 @@ function LayersGrid({
               >
                 <Scrollbar sx={{ maxHeight: "400px" }}>
                   <DataGrid
+                    onRowSelectionModelChange={(ids) => {
+                      const selectedRowsData = ids.map((id) =>
+                        filteredLayers.find((row) => row.id === id)
+                      );
+                      setSelectedRowObjects(
+                        selectedRowsData.map((row) => row?.layer ?? "")
+                      );
+                    }}
                     sx={{
                       maxWidth: "100%",
                       mb: 2,
@@ -227,7 +230,6 @@ function LayersGrid({
                       language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
                     }
                     checkboxSelection
-                    disableMultipleRowSelection
                     disableRowSelectionOnClick
                   />
                 </Scrollbar>
