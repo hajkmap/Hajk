@@ -230,7 +230,6 @@ model SearchSettings {
 
 model Layer {
   id                          String            @id @default(cuid())
-  idFromSource                String?
   serviceId                   String
   metadataId                  String            @unique
   searchSettingsId            String            @unique

@@ -8,6 +8,9 @@ const prisma = new PrismaClient();
 
 const DEFAULT_PROJECTION_CODE = "EPSG:3006";
 
+const jsonToPrisma = new Map();
+const prismaToJson = new Map();
+
 const generateRandomName = () => {
   const adjectives = [
     "hidden",
@@ -282,9 +285,8 @@ async function readAndPopulateLayers() {
           where: { url: layer.url, type },
         });
 
-        await prisma.layer.create({
+        const createdLayer = await prisma.layer.create({
           data: {
-            idFromSource: layer.id,
             name: layer.caption,
             internalName: !layer.internalLayerName
               ? generateRandomName()
@@ -348,6 +350,10 @@ async function readAndPopulateLayers() {
             },
           },
         });
+
+        // Store the mapping between layer ID and layer ID from DB to simplify seeding of layer groups etc.
+        jsonToPrisma.set(layer.id, createdLayer.id);
+        prismaToJson.set(createdLayer.id, layer.id);
       }
 
       const layersInDB = await prisma.layer.findMany({
@@ -479,16 +485,16 @@ async function populateMapLayerStructure(mapName) {
   // the Layer model now either). If we'd try to connect such a layer
   // to a map or group, we'd get a foreign key error. So let's wash the
   // layers so only valid entries remain.
-  let layersInDB = await prisma.layer.findMany({
+  const layersInDB = await prisma.layer.findMany({
     select: { id: true },
   });
 
-  layersInDB = layersInDB.map((l) => l.id);
+  const layerIdsInDB = layersInDB.map((l) => l.id);
 
   // Helper: used as a filter predicate to remove layers
   // that did not exist in database.
   const removeUnknownLayers = (l) => {
-    return layersInDB.indexOf(l.layerId) !== -1;
+    return layerIdsInDB.indexOf(jsonToPrisma.get(l.layerId)) !== -1;
   };
 
   const validLayersOnMaps = layersOnMaps.filter(removeUnknownLayers);
@@ -507,7 +513,7 @@ async function populateMapLayerStructure(mapName) {
   for await (const layer of validLayers) {
     const layerInstance = await prisma.layerInstance.create({
       data: {
-        layerId: layer.layerId,
+        layerId: jsonToPrisma.get(layer.layerId),
         mapId: layer.mapId || undefined,
         groupId: layer.groupId || undefined,
         usage: layer.usage,
