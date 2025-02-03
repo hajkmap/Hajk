@@ -92,7 +92,7 @@ export default function LayerSettings() {
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "serviceId",
     title: "Tjänst",
     defaultValue: layer?.serviceId,
@@ -107,16 +107,16 @@ export default function LayerSettings() {
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "layerService",
-    title: `Lagernamn i tjänsten`,
+    title: "Lagernamn i tjänsten",
     defaultValue: "",
     optionList: [{ title: "Testlayer", value: "Testlayer" }],
   });
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "adminName",
     title: `Internt adminnamn`,
     defaultValue: "",
@@ -124,7 +124,7 @@ export default function LayerSettings() {
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "copyRight",
     title: `Upphovsrätt`,
     defaultValue: "",
@@ -132,7 +132,7 @@ export default function LayerSettings() {
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTAREA,
-    gridColumns: 8,
+    gridColumns: 12,
     name: "descriptionLayer",
     title: `Beskrivning av lagret`,
     defaultValue: "",
@@ -140,7 +140,7 @@ export default function LayerSettings() {
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "keyWord",
     title: `Nyckelord`,
     defaultValue: "",
@@ -148,7 +148,7 @@ export default function LayerSettings() {
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "category",
     title: `Kategori`,
     defaultValue: "",
@@ -156,7 +156,7 @@ export default function LayerSettings() {
 
   accordionNestedContainer.addInput({
     type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "imageFormat",
     title: `Bildformat`,
     defaultValue: "",
@@ -165,11 +165,19 @@ export default function LayerSettings() {
 
   accordionNestedContainer.addInput({
     type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "coordinateSystem",
     title: `Koordinatsystem`,
     defaultValue: "",
     optionList: [{ title: "Testlayer", value: "Testlayer" }],
+  });
+
+  accordionNestedContainer.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 12,
+    name: "customRatio",
+    title: `Custom ratio`,
+    defaultValue: "",
   });
 
   accordionNestedContainer.addInput({
@@ -187,14 +195,6 @@ export default function LayerSettings() {
   });
 
   accordionNestedContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
-    name: "customRatio",
-    title: `Custom ratio`,
-    defaultValue: "",
-  });
-
-  accordionNestedContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "gwc",
     title: "GeoWebCache",
@@ -203,11 +203,19 @@ export default function LayerSettings() {
 
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "style",
     title: `Stil`,
     defaultValue: "",
     optionList: [{ title: "<default>", value: "default" }],
+  });
+
+  accordionNestedContainer2.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 6,
+    name: "opacity",
+    title: `Opacitet`,
+    defaultValue: "",
   });
 
   accordionNestedContainer2.addCustomInput({
@@ -215,7 +223,7 @@ export default function LayerSettings() {
     kind: "CustomInputSettings",
     name: "teckenForklaring",
     title: "Teckenförklaring",
-    gridColumns: 8,
+    gridColumns: 12,
     defaultValue: "",
 
     renderer: (props: RenderProps<FieldValues>) => {
@@ -265,7 +273,7 @@ export default function LayerSettings() {
     kind: "CustomInputSettings",
     name: "teckenForklaringIkon",
     title: "Teckenförklaringsikon",
-    gridColumns: 8,
+    gridColumns: 12,
     defaultValue: "",
 
     renderer: (props: RenderProps<FieldValues>) => {
@@ -319,30 +327,6 @@ export default function LayerSettings() {
   });
 
   accordionNestedContainer2.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
-    name: "opacity",
-    title: `Opacitet`,
-    defaultValue: "",
-  });
-
-  accordionNestedContainer2.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
-    name: "minZoom",
-    title: `Minsta zoom`,
-    defaultValue: "",
-  });
-
-  accordionNestedContainer2.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
-    name: "maxZoom",
-    title: `Maximal zoom`,
-    defaultValue: "",
-  });
-
-  accordionNestedContainer2.addInput({
     type: INPUT_TYPE.CHECKBOX,
     gridColumns: 8,
     name: "warningZoom",
@@ -350,9 +334,25 @@ export default function LayerSettings() {
     defaultValue: false,
   });
 
+  accordionNestedContainer2.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 6,
+    name: "minZoom",
+    title: `Minsta zoom`,
+    defaultValue: "",
+  });
+
+  accordionNestedContainer2.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 6,
+    name: "maxZoom",
+    title: `Maximal zoom`,
+    defaultValue: "",
+  });
+
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 12,
     name: "displayField",
     title: `Visningsfält`,
     defaultValue: "",
@@ -360,7 +360,7 @@ export default function LayerSettings() {
 
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "secondaryDisplayField",
     title: `Sekundära visnigsfält`,
     defaultValue: "",
@@ -368,40 +368,31 @@ export default function LayerSettings() {
 
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "shortDisplayField",
     title: `Kort visningsfält`,
     defaultValue: "",
   });
 
-  accordionNestedContainer4.addCustomInput({
-    type: INPUT_TYPE.CUSTOM,
-    kind: "CustomInputSettings",
-    name: "infoClickPreview",
-    title: "Förhandsvisa infoklick",
-    gridColumns: 4,
-    defaultValue: "",
-
-    renderer: () => {
-      return (
-        <Button sx={{ minWidth: "120px" }} variant="contained" component="span">
-          Förhandsvisa infoklick
-        </Button>
-      );
-    },
-  });
-
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.CHECKBOX,
-    gridColumns: 10,
+    gridColumns: 6,
     name: "infoClick",
     title: `Infoklick`,
     defaultValue: false,
   });
 
   accordionNestedContainer4.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    gridColumns: 12,
+    name: "infoClickSortByDesc",
+    title: `Infoklick sortera fallande`,
+    defaultValue: false,
+  });
+
+  accordionNestedContainer4.addInput({
     type: INPUT_TYPE.TEXTAREA,
-    gridColumns: 8,
+    gridColumns: 12,
     name: "infoBox",
     title: `Inforuta`,
     defaultValue: "",
@@ -409,42 +400,57 @@ export default function LayerSettings() {
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "infoClickIcon",
     title: `Infoklick ikon (lista)`,
     defaultValue: "",
   });
 
   accordionNestedContainer4.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
-    name: "infoClickFormat",
-    title: `Infoclick-format`,
-    defaultValue: "",
-    optionList: [{ title: "Testformat", value: "Testformat" }],
-  });
-  accordionNestedContainer4.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "infoClickSortByAttribute",
     title: `Infoklick sortera på attribut`,
     defaultValue: "",
   });
 
   accordionNestedContainer4.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    gridColumns: 10,
-    name: "infoClickSortByDesc",
-    title: `Infoklick sortera fallande`,
-    defaultValue: false,
+    type: INPUT_TYPE.SELECT,
+    gridColumns: 6,
+    name: "infoClickFormat",
+    title: `Infoclick-format`,
+    defaultValue: "",
+    optionList: [{ title: "Testformat", value: "Testformat" }],
   });
+
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "infoClickSortType",
     title: `Infoklick soteringstyp`,
     defaultValue: "",
     optionList: [{ title: "String", value: "String" }],
+  });
+
+  accordionNestedContainer4.addCustomInput({
+    type: INPUT_TYPE.CUSTOM,
+    kind: "CustomInputSettings",
+    name: "infoClickPreview",
+    title: "Förhandsvisa infoklick",
+    gridColumns: 12,
+    defaultValue: "",
+
+    renderer: () => {
+      return (
+        <Button
+          sx={{ minWidth: "120px", width: "100%" }}
+          variant="contained"
+          component="span"
+        >
+          Förhandsvisa infoklick
+        </Button>
+      );
+    },
   });
 
   accordionNestedContainer5.addInput({
@@ -456,28 +462,28 @@ export default function LayerSettings() {
   });
   accordionNestedContainer5.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 12,
     name: "url",
     title: `Url`,
     defaultValue: "",
   });
   accordionNestedContainer5.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 12,
     name: "searchField",
     title: `Sökfält`,
     defaultValue: "",
   });
   accordionNestedContainer5.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "outDataFormat",
     title: `Utdataformat`,
     defaultValue: "",
   });
   accordionNestedContainer5.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 6,
     name: "geometryField",
     title: `Geometrifält`,
     defaultValue: "",
@@ -491,7 +497,7 @@ export default function LayerSettings() {
   });
   accordionNestedContainer6.addInput({
     type: INPUT_TYPE.TEXTAREA,
-    gridColumns: 8,
+    gridColumns: 12,
     name: "layerDescription",
     title: `Visningsbeskrivning av lager`,
     defaultValue: "",

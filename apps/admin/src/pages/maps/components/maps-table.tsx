@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
-import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridRenderCellParams,
+  GridToolbar,
+} from "@mui/x-data-grid";
 import { Button } from "@mui/material";
 import MoreIcon from "@mui/icons-material/More";
 
@@ -126,6 +131,7 @@ export default function MapsTable() {
             showLastButton: true,
           },
         }}
+        slots={{ toolbar: GridToolbar }}
       />
     </>
   );
