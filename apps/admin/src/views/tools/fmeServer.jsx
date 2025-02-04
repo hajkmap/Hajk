@@ -106,7 +106,7 @@ class ToolOptions extends Component {
   constructor(props) {
     super(props);
     this.state = defaultState;
-    this.type = "fmeServer";
+    this.type = "fmeserver";
     this.fmeServerUrl = this.props.model?.attributes?.config.url_base
       ? `${this.props.model.attributes.config.url_base}/fmeproxy`
       : "";
