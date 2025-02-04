@@ -613,7 +613,6 @@ export default function LayerSettings() {
         saveButtonText="Spara"
         deleteButtonText="Ta bort"
         navigateTo="/layers"
-        isChangedFields={true}
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer
