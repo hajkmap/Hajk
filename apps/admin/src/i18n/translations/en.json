@@ -127,6 +127,7 @@
     "settings.preSelected.coordinateSystem": "Pre-selected coordinate system",
     "layers.dialog.addBtn": "Add layer",
     "layers.dialog.title": "New layer",
+    "layers.searchTitle": "Search layers...",
     "layers.createLayerSuccess": "Layer {{name}} created!",
     "layers.createLayerFailed": "Failed to create layer.",
     "layers.deleteLayerSuccess": "Layer {{name}} deleted!",

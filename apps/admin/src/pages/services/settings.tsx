@@ -358,19 +358,6 @@ export default function ServiceSettings() {
     },
   });
 
-  const currentValues = getValues();
-
-  const hasChanges = Object.keys(currentValues).some(
-    (key) =>
-      currentValues[key as keyof ServiceUpdateInput] !==
-      defaultValues[key as keyof ServiceUpdateInput]
-  );
-
-  const isChanged =
-    (hasChanges && Object.keys(dirtyFields).length > 0) ||
-    currentValues.url !== service?.url ||
-    currentValues.type !== service?.type;
-
   useEffect(() => {
     if (!service) return;
     setFormServiceData(serviceSettingsFormContainer);
@@ -395,7 +382,6 @@ export default function ServiceSettings() {
         saveButtonText="Spara"
         deleteButtonText="Ta bort"
         navigateTo="/services"
-        isChangedFields={isChanged}
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer

@@ -159,7 +159,7 @@ function LayersGrid({
                 maxWidth: "400px",
                 backgroundColor: isDarkMode ? "#3b3b3b" : "#fbfbfb",
               }}
-              label={t("common.searchLayer")}
+              label={t("layers.searchTitle")}
               variant="outlined"
               value={searchTerm}
               onChange={handleSearchChange}
