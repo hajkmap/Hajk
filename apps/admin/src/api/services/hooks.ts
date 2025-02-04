@@ -50,6 +50,7 @@ export const useLayersByServiceId = (
   return useQuery({
     queryKey: ["layersByServiceId", serviceId],
     queryFn: () => getLayersByServiceId(serviceId),
+    refetchInterval: 100,
   });
 };
 
