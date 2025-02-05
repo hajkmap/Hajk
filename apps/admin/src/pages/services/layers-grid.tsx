@@ -115,46 +115,67 @@ function LayersGrid({
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 2 }}>
-            <Typography sx={{ textAlign: "center", fontSize: "large" }}>
-              Hajk-lager som använder denna tjänsten
-            </Typography>
-
             {layersByService?.layers?.length === 0 && (
               <Typography
                 sx={{ textAlign: "center", fontSize: "large", mt: 1 }}
               >
-                Inga lager att visa
+                Det finns inga Hajk-lager som använder denna tjänsten
               </Typography>
             )}
 
             {layersByService?.layers && layersByService?.layers?.length > 0 && (
-              <TableContainer>
-                <Table aria-label="simple table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontSize: "medium" }}>Namn</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {layersByService?.layers.map((data) => (
-                      <TableRow
-                        key={data.id}
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell component="th" scope="row">
-                          {data.name}
-                        </TableCell>
+              <>
+                <Typography sx={{ textAlign: "center", fontSize: "large" }}>
+                  Hajk-lager som använder denna tjänsten
+                </Typography>
+                <TableContainer>
+                  <Table aria-label="simple table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontSize: "medium" }}>Namn</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {layersByService?.layers.map((data) => (
+                        <TableRow
+                          key={data.id}
+                          sx={{
+                            "&:last-child td, &:last-child th": { border: 0 },
+                          }}
+                        >
+                          <TableCell component="th" scope="row">
+                            {data.name}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </>
             )}
-            <Button onClick={handleClickOpen} sx={{ float: "right", mt: 1 }}>
-              Öppna
-            </Button>
+            {layersByService?.layers?.length === 0 ? (
+              <Button
+                variant="contained"
+                onClick={handleClickOpen}
+                sx={{
+                  mt: 2,
+                  mb: 1,
+                  mx: "auto",
+                  display: "block",
+                }}
+              >
+                Publicera ditt första lager
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                onClick={handleClickOpen}
+                sx={{ float: "right", mt: 1, mb: 2 }}
+              >
+                Skapa nytt lager
+              </Button>
+            )}
+
             <Dialog
               open={open}
               fullWidth
@@ -193,13 +214,14 @@ function LayersGrid({
                   <CloseIcon />
                 </IconButton>
                 <Button
+                  variant="contained"
                   onClick={() =>
                     void handleCreateLayer({
                       serviceId,
                       selectedLayers: selectedRowObjects,
                     })
                   }
-                  sx={{ display: "block" }}
+                  sx={{ display: "block", mb: 1 }}
                 >
                   Skapa
                 </Button>
