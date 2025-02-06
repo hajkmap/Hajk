@@ -10,12 +10,6 @@ import {
   AccordionDetails,
   Grid2 as Grid,
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Button,
   Dialog,
   DialogContent,
@@ -46,7 +40,8 @@ function LayersGrid({
   const isDarkMode = themeMode === "dark";
   const { mutateAsync: createLayer } = useCreateLayer();
   const [selectedRowObjects, setSelectedRowObjects] = useState<string[]>();
-  const { data: layersByService } = useLayersByServiceId(serviceId);
+  const { data: layersByService, isLoading: isLoadingLayersByService } =
+    useLayersByServiceId(serviceId);
   const [open, setOpen] = React.useState(false);
 
   const handleClose = () => {
@@ -80,6 +75,14 @@ function LayersGrid({
         actions: "",
       }));
   }, [layers, searchTerm]);
+
+  const filteredLayersByService = useMemo(() => {
+    if (!layersByService?.layers) return [];
+    return layersByService.layers.map((layer, index) => ({
+      id: index,
+      name: layer.name,
+    }));
+  }, [layersByService?.layers]);
 
   const handleCreateLayer = async (layer: LayerCreateInput) => {
     try {
@@ -126,31 +129,48 @@ function LayersGrid({
             {layersByService?.layers && layersByService?.layers?.length > 0 && (
               <>
                 <Typography sx={{ textAlign: "center", fontSize: "large" }}>
-                  Hajk-lager som använder denna tjänsten
+                  Hajk-lager som använder den här tjänsten
                 </Typography>
-                <TableContainer>
-                  <Table aria-label="simple table">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{ fontSize: "medium" }}>Namn</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {layersByService?.layers.map((data) => (
-                        <TableRow
-                          key={data.id}
-                          sx={{
-                            "&:last-child td, &:last-child th": { border: 0 },
-                          }}
-                        >
-                          <TableCell component="th" scope="row">
-                            {data.name}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                <Scrollbar sx={{ maxHeight: "400px" }}>
+                  <DataGrid
+                    sx={{
+                      maxWidth: "100%",
+                      mb: 2,
+                      mt: 2,
+                      backgroundColor: isDarkMode ? "#3b3b3b" : "#fbfbfb",
+                    }}
+                    rows={filteredLayersByService}
+                    columns={[
+                      {
+                        field: "name",
+                        headerName: "Namn",
+                        flex: 1,
+                      },
+                    ]}
+                    initialState={{
+                      pagination: {
+                        paginationModel: {
+                          pageSize: 10,
+                        },
+                      },
+                    }}
+                    slotProps={{
+                      loadingOverlay: {
+                        variant: "skeleton",
+                        noRowsVariant: "skeleton",
+                      },
+                    }}
+                    hideFooterPagination={layers && layers.length < 10}
+                    pageSizeOptions={[10, 25, 50, 100]}
+                    pagination
+                    loading={isLoadingLayersByService}
+                    localeText={
+                      language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
+                    }
+                    disableMultipleRowSelection
+                    disableRowSelectionOnClick
+                  />
+                </Scrollbar>
               </>
             )}
             {layersByService?.layers?.length === 0 ? (
