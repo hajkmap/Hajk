@@ -2,9 +2,9 @@
 
 ## List of sprints
 
-- [2025-01-31](#2025-01-31)
+- [2025-02-21](#2025-02-21)
 
-## 2025-01-31
+## 2025-02-21
 
 - [ ] Authentication and authorization
   - [x] Basic authentication (local user and pass)
@@ -21,14 +21,14 @@
   - [ ] Update zod parsers
   - [ ] Update API methods
 - [ ] FormActionPanel component
-  - [ ] Make the submit panel sticky
+  - [ ] Make the panel sticky
   - [ ] Feed it with relevant data
 - [x] Services page
   - [x] Add service (AA)
   - [x] Alter service (AA)
   - [x] Remove service (AA)
   - [ ] Bugfix: MUI Data Grid checkbox selection issue with separate search field (OS)
-  - [ ] TBD: Define usage/proper handling for the "Workspace" field
+  - [ ] TBD: Define proper implementation for the "Workspace" input field
 - [x] Layers page
   - [x] Add layer (AA)
   - [ ] Alter layer (AA)
@@ -57,7 +57,7 @@
 
 _TODO: Document roles used in Hajk._
 
-### Ready for testing after [2025-01-31](#2025-01-31)
+### Ready for testing after [2025-02-21](#2025-02-21)
 
 - [ ] (Example) Test authentication
 - [ ] Test adding, updating and deleting a new service
