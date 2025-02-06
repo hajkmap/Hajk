@@ -13,28 +13,31 @@
 - [ ] Services API
   - [ ] Update prisma schema
   - [ ] Update seed script
-  - [x] Update zod parsers(AA, field validators are missing)
+  - [ ] Update zod parsers
   - [ ] Update API methods
 - [ ] Layers API
   - [ ] Update prisma schema
   - [ ] Update seed script
   - [ ] Update zod parsers
   - [ ] Update API methods
+- [ ] FormActionPanel component
+  - [ ] Make the submit panel sticky
+  - [ ] Feed it with relevant data
 - [x] Services page
   - [x] Add service (AA)
   - [x] Alter service (AA)
-    - ⚠️ Note: Some fields in the request payload for both adding and updating a service are mocked or incomplete due to missing data in the current data model. Once the data model is finalized, ensure that the missing fields are updated and validated in both the payload and the backend schema.
   - [x] Remove service (AA)
+  - [ ] Bugfix: MUI Data Grid checkbox selection issue with separate search field (OS)
+  - [ ] TBD: Define usage/proper handling for the "Workspace" field
 - [x] Layers page
   - [x] Add layer (AA)
-  - [x] Alter layer (AA)
-    - ⚠️ Incomplete due to missing data in the current data model.
+  - [ ] Alter layer (AA)
   - [x] Remove layer (AA)
 - [ ] Map settings page
   - [ ] Step 1: Create form with formfactory, UI only [JA]
 - [ ] Optimizing input fields performance/state.
-  - [ ] Services page
-  - [ ] Layers page
+  - [x] Services page (JA)
+  - [x] Layers page (JA)
 - [ ] General UI improvements (JA)
   - [ ] Use page width better. 1024? 2048?
   - [x] Handle menu overflow and bottom settings/lock better. v0.1 WIP
