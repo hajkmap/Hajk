@@ -44,6 +44,10 @@ For details see the following issues:
 - Several accessability improvements. PRs: [#1561](https://github.com/hajkmap/Hajk/pull/1561), [#1562](https://github.com/hajkmap/Hajk/pull/1562), [#1563](https://github.com/hajkmap/Hajk/pull/1563), [#1565](https://github.com/hajkmap/Hajk/pull/1565), [#1566](https://github.com/hajkmap/Hajk/pull/1566), [#1567](https://github.com/hajkmap/Hajk/pull/1567), [#1569](https://github.com/hajkmap/Hajk/pull/1569)
 - Admin: Fixed issue with naming of the FME Server configuration property ([commit](https://github.com/hajkmap/Hajk/commit/98b9280b56a05eaa2a037359341329ed5fc46f8e)
 
+### Removed
+
+- In accordance with [the roadmap](https://github.com/hajkmap/Hajk/blob/master/ROADMAP.md) the .NET backend was removed in the 4.0 release. ([commit](https://github.com/hajkmap/Hajk/commit/5c50105cc3fa957967196f7fc321bf5827772e7c))
+
 ## [3.14.1] - 2024-10-09
 
 ### BREAKING
