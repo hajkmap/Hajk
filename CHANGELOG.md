@@ -14,11 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Search: Added possibility to set default search options via admin UI. PR: [#1496](https://github.com/hajkmap/Hajk/pull/1496)
 - LayerComparer: It is now possible for to select specific layers (in Admin) that will be visible in the tool. Previously only all background layer and/or all regular layers could be selected. [#1570](https://github.com/hajkmap/Hajk/issues/1570)
 
-#### LayerSwitcher
+#### Major LayerSwitcher changes
 
-Issues: #1237, #1257, #1284, #1296, #1300, #1347, #1365, and #1380.
-
-- Filter functionality in LayerSwitcher.
+- 🚀 Filter functionality in LayerSwitcher.
 - Enhanced layer visibility indicators in LayerSwitcher.
 - Quick Access grouping in LayerSwitcher for access to frequently used layers.
   With support for saving/recall of sets of "QuickAccess layers" to
@@ -29,10 +27,22 @@ Issues: #1237, #1257, #1284, #1296, #1300, #1347, #1365, and #1380.
   example in `simpleMapConfig.json`.
 - Improved DrawOrder tab functionality for managing layer drawing order.
 
+For details see the following issues:
+
+- [#1237](https://github.com/hajkmap/Hajk/issues/1237)
+- [#1275](https://github.com/hajkmap/Hajk/issues/1275)
+- [#1284](https://github.com/hajkmap/Hajk/issues/1284)
+- [#1296](https://github.com/hajkmap/Hajk/issues/1296)
+- [#1300](https://github.com/hajkmap/Hajk/issues/1300)
+- [#1347](https://github.com/hajkmap/Hajk/issues/1347)
+- [#1365](https://github.com/hajkmap/Hajk/issues/1365)
+- [#1380](https://github.com/hajkmap/Hajk/issues/1380)
+
 ### Fixed
 
 - Improved how overlapping plugins are handled. PR: [#1546](https://github.com/hajkmap/Hajk/pull/1546)
 - Several accessability improvements. PRs: [#1561](https://github.com/hajkmap/Hajk/pull/1561), [#1562](https://github.com/hajkmap/Hajk/pull/1562), [#1563](https://github.com/hajkmap/Hajk/pull/1563), [#1565](https://github.com/hajkmap/Hajk/pull/1565), [#1566](https://github.com/hajkmap/Hajk/pull/1566), [#1567](https://github.com/hajkmap/Hajk/pull/1567), [#1569](https://github.com/hajkmap/Hajk/pull/1569)
+- Admin: Fixed issue with naming of the FME Server configuration property ([commit](https://github.com/hajkmap/Hajk/commit/98b9280b56a05eaa2a037359341329ed5fc46f8e)
 
 ## [3.14.1] - 2024-10-09
 
