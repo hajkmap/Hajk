@@ -1,6 +1,7 @@
 export interface Layer {
   id: string;
   name: string;
+  selectedLayers: string[];
   locked: boolean;
   serviceId: string;
   options: Record<string, string>;

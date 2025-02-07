@@ -53,6 +53,11 @@ class LayersController {
     res.status(HttpStatusCodes.OK).json({ count: layers.length, layers });
   }
 
+  async getServiceByLayerId(req: Request, res: Response) {
+    const service = await LayerService.getServiceByLayerId(req.params.id);
+    res.status(HttpStatusCodes.OK).json(service);
+  }
+
   async createLayer(req: Request, res: Response) {
     const layer = await LayerService.createLayer(req.body);
     res.status(HttpStatusCodes.CREATED).json(layer);

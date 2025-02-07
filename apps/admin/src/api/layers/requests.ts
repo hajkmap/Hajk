@@ -5,6 +5,7 @@ import {
   LayerCreateInput,
   LayerUpdateInput,
 } from "./types";
+import { Service } from "../services";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 import { generateRandomName } from "../generated/names";
 import useAppStateStore from "../../store/use-app-state-store";
@@ -20,6 +21,7 @@ import useAppStateStore from "../../store/use-app-state-store";
  * - The `createLayer` function creates a new layer.
  * - The `updateLayer` function updates a layer.
  * - The `deleteLayer` function deletes a layer.
+ * - The `getServicesByLayerId` function fetches a service associated with a layer by its ID.
  *
  * These functions utilize a custom Axios instance and throw appropriate error messages for failures.
  *
@@ -117,6 +119,31 @@ export const getLayerTypes = async (): Promise<string[]> => {
       );
     } else {
       throw new Error(`Failed to fetch layer types`);
+    }
+  }
+};
+
+export const getServiceByLayerId = async (
+  layerId: string
+): Promise<Service> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.get<Service>(
+      `/layers/${layerId}/service`
+    );
+    if (!response.data) {
+      throw new Error("No service data found");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to fetch service. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to fetch service`);
     }
   }
 };

@@ -18,7 +18,9 @@ import {
   createLayer,
   deleteLayer,
   updateLayer,
+  getServiceByLayerId,
 } from "./requests";
+import { Service } from "../services/types";
 
 // A React Query hook to fetch all layers
 // This hook uses the `getLayers` function from the layers `requests` module
@@ -55,6 +57,17 @@ export const useLayerTypes = (): UseQueryResult<LayerTypesApiResponse[]> => {
   return useQuery({
     queryKey: ["layerTypes"],
     queryFn: getLayerTypes,
+  });
+};
+
+// A React Query hook to fetch a service by its layer ID
+// This hook uses the `getServiceByLayerId` function from the layers `requests` module
+export const useServiceByLayerId = (
+  layerId: string
+): UseQueryResult<Service> => {
+  return useQuery({
+    queryKey: ["serviceByLayerId", layerId],
+    queryFn: () => getServiceByLayerId(layerId),
   });
 };
 

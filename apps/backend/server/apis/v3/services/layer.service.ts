@@ -34,6 +34,15 @@ class LayerService {
     });
   }
 
+  async getServiceByLayerId(id: string) {
+    const service = await prisma.layer.findUnique({
+      where: { id },
+      include: { service: true },
+    });
+
+    return service?.service;
+  }
+
   async createLayer(data: Prisma.LayerCreateInput & { serviceId: string }) {
     const { serviceId, ...layerData } = data;
 

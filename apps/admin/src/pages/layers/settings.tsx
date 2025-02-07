@@ -24,6 +24,7 @@ import { SquareSpinnerComponent } from "../../components/progress/square-progres
 import FormActionPanel from "../../components/form-action-panel";
 import { toast } from "react-toastify";
 import { useServices } from "../../api/services";
+import AvailableLayersGrid from "./available-layers-grid";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
@@ -57,6 +58,7 @@ export default function LayerSettings() {
     t("Inställningar för request"),
     CONTAINER_TYPE.ACCORDION
   );
+
   const accordionNestedContainer2 = new DynamicFormContainer<FieldValues>(
     "Inställningar för lager",
     CONTAINER_TYPE.ACCORDION
@@ -622,6 +624,7 @@ export default function LayerSettings() {
             control={control}
             errors={errors}
           />
+          {layer && <AvailableLayersGrid layerId={layer.id} layer={layer} />}
           <UsedInMapsGrid />
         </form>
       </FormActionPanel>
