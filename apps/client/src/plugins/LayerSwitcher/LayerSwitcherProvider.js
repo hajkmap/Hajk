@@ -107,7 +107,6 @@ const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
     // Hide the layer in OL
     olLayer.setVisible(false);
   } else {
-    olLayer.setVisible(true);
     // Set LAYERS and STYLES so that the exact sublayers that are needed
     // will be visible
     olLayer.getSource().updateParams({
@@ -122,6 +121,7 @@ const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
         .join(","),
       CQL_FILTER: null,
     });
+    olLayer.setVisible(true);
   }
 };
 
@@ -220,9 +220,15 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
         currentSubLayers.delete(subLayerId);
       }
 
-      const currentSubLayersArray = Array.from(currentSubLayers);
-      olLayer.set("subLayers", currentSubLayersArray);
-      setOLSubLayers(olLayer, currentSubLayersArray);
+      const currentSubLayersSet = new Set(currentSubLayers);
+      // Sort the sublayers in the order they are defined. So that the order is
+      // consistent regardless of the order the sublayers are toggled in.
+      const allSubLayers = staticLayerConfig[layerId]?.allSubLayers;
+      const sortedCurrentSubLayers = allSubLayers.filter((l) =>
+        currentSubLayersSet.has(l)
+      );
+      olLayer.set("subLayers", sortedCurrentSubLayers);
+      setOLSubLayers(olLayer, sortedCurrentSubLayers);
     },
     setGroupVisibility(groupId, visible) {
       const groupTree = getGroupConfigById(staticLayerTree, groupId);
