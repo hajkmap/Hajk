@@ -190,7 +190,15 @@ const BackgroundSwitcher = ({
   });
 
   return (
-    <Box sx={{ display: display ? "block" : "none" }}>
+    <Box
+      sx={{
+        display: display ? "block" : "none",
+        position: "relative",
+        height: "inherit",
+        maxHeight: "inherit",
+        overflowY: "auto",
+      }}
+    >
       {backgroundSwitcherWhite && (
         <BackgroundLayerItem
           index={Number(WHITE_BACKROUND_LAYER_ID)}

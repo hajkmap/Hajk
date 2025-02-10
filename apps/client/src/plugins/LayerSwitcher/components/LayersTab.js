@@ -95,19 +95,29 @@ const LayersTab = ({
   const scrollContainerRef = useRef(null);
 
   const scrollToBottom = useCallback(() => {
-    // scrollContainerRef.current.scroll(10000000, 0);
+    scrollContainerRef.current.scroll(0, Number.MAX_SAFE_INTEGER, {
+      behavior: "smooth",
+    });
     // scrollContainerRef.current.scrollBy(10000000, 0);
     scrollContainerRef.current?.scrollIntoView({ block: "end" });
   }, [scrollContainerRef]);
 
   const scrollToTop = useCallback(() => {
-    // scrollContainerRef.current.scroll(0, 0);
+    scrollContainerRef.current.scroll(0, 0, { behavior: "smooth" });
     // scrollContainerRef.current.scrollBy(0, 0);
-    scrollContainerRef.current?.scrollIntoView({ block: "start" });
+    // scrollContainerRef.current?.scrollIntoView({ block: "start" });
   }, [scrollContainerRef]);
 
   return (
-    <div style={style}>
+    <div
+      style={{
+        ...style,
+        height: "inherit",
+        maxHeight: "inherit",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {showFilter && (
         <LayerListFilter
           minFilterLength={minFilterLength}
@@ -118,8 +128,15 @@ const LayersTab = ({
         />
       )}
       <div
+        id="sc-test"
         ref={scrollContainerRef}
-        style={{ position: "relative", height: "100%", overflowY: "auto" }}
+        style={{
+          // position: "relative",
+          height: "inherit",
+          maxHeight: "calc(inherit - 3em)",
+          overflowY: "auto",
+          flex: 1,
+        }}
       >
         {filterHits === null && (
           <QuickAccessView

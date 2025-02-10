@@ -257,6 +257,9 @@ class LayersSwitcherView extends React.PureComponent {
       <div
         style={{
           display: windowVisible ? "block" : "none",
+          height: "inherit",
+          maxHeight: "inherit",
+          flex: 1,
         }}
       >
         <StyledAppBar
@@ -282,8 +285,8 @@ class LayersSwitcherView extends React.PureComponent {
         </StyledAppBar>
         <div
           id="scroll-container"
-          style={{ position: "relative", height: "100%", overflowY: "auto" }}
           ref={this.scrollContainerRef}
+          style={{ height: "inherit", maxHeight: "inherit" }}
         >
           <LayersTab
             style={{
