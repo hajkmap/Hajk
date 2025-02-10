@@ -533,6 +533,9 @@ export default function LayerSettings() {
       const payload = {
         name: layerData.name,
         serviceId: layerData.serviceId,
+        metadata: {},
+        searchSettings: {},
+        infoClickSettings: {},
       };
       await updateLayer({
         layerId: layer?.id ?? "",
