@@ -14,8 +14,8 @@ export interface Service {
   comment: string;
   metadata: {
     id: string;
-    owner: string;
-    description: string;
+    owner?: string;
+    description?: string;
   };
   projection: {
     code: string;

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Paper, Grid2 as Grid, Typography, TextField } from "@mui/material";
 import Scrollbar from "../../components/scrollbar/scrollbar";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridRowSelectionModel } from "@mui/x-data-grid";
 import useAppStateStore from "../../store/use-app-state-store";
 import { useServiceByLayerId } from "../../api/layers";
 import { useServiceCapabilities } from "../../api/services";
@@ -57,10 +57,8 @@ function AvailableLayersGrid({
     .filter((layer) => selectedLayers?.includes(layer.layer))
     .map((layer) => layer.id.toString());
 
-  console.log("selectedRowIds", selectedRowIds);
-
   const [selectionModel, setSelectionModel] =
-    useState<string[]>(selectedRowIds);
+    useState<GridRowSelectionModel>(selectedRowIds);
 
   return (
     <Paper
@@ -123,12 +121,10 @@ function AvailableLayersGrid({
             localeText={
               language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
             }
-            rowSelectionModel={selectedRowIds}
-            onRowSelectionModelChange={(ids) =>
-              setSelectionModel(ids.map((id) => id.toString()))
-            }
+            rowSelectionModel={selectionModel}
+            onRowSelectionModelChange={(ids) => setSelectionModel(ids)}
+            keepNonExistentRowsSelected
             checkboxSelection
-            disableRowSelectionOnClick
           />
         </Scrollbar>
       </Grid>

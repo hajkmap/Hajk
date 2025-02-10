@@ -62,7 +62,32 @@ class LayerService {
   async updateLayer(id: string, data: Prisma.LayerUpdateInput) {
     const updatedLayer = await prisma.layer.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        metadata: {
+          upsert: {
+            update: { ...data.metadata },
+            create: { ...data.metadata },
+          },
+        },
+        searchSettings: {
+          upsert: {
+            update: { ...data.searchSettings },
+            create: { ...data.searchSettings },
+          },
+        },
+        infoClickSettings: {
+          upsert: {
+            update: { ...data.infoClickSettings },
+            create: { ...data.infoClickSettings },
+          },
+        },
+      },
+      include: {
+        metadata: true,
+        searchSettings: true,
+        infoClickSettings: true,
+      },
     });
     return updatedLayer;
   }
