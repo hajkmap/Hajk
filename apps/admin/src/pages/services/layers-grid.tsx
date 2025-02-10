@@ -65,16 +65,28 @@ function LayersGrid({
 
   const filteredLayers = useMemo(() => {
     if (!layers) return [];
-    return layers
-      .filter((layer) => layer.toLowerCase().includes(searchTerm.toLowerCase()))
-      .map((layer, index) => ({
-        id: index,
-        layer,
-        infoClick: "",
-        publications: "",
-        actions: "",
-      }));
-  }, [layers, searchTerm]);
+
+    const searchAndSelectedFilteredLayers = layers
+      .map((layer, index) => {
+        const isSelected = selectedRowObjects?.some(
+          (selectedLayer) => selectedLayer.toLowerCase() === layer.toLowerCase()
+        );
+        return {
+          id: index,
+          layer,
+          infoClick: "",
+          publications: "",
+          actions: "",
+          selected: isSelected,
+        };
+      })
+      .filter(
+        (layer) =>
+          layer?.selected ||
+          layer.layer.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    return searchAndSelectedFilteredLayers;
+  }, [layers, searchTerm, selectedRowObjects]);
 
   const filteredLayersByService = useMemo(() => {
     if (!layersByService?.layers) return [];
