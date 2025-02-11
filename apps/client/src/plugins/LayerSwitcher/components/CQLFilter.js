@@ -13,10 +13,10 @@ const CQLFilter = ({ layer }) => {
   const [cqlFilter, setCqlFilter] = useState("");
 
   useEffect(() => {
-    const source = layer.getSource();
+    const source = layer?.getSource();
     const currentCqlFilterValue =
-      (typeof source.getParams === "function" &&
-        source.getParams()?.CQL_FILTER) ||
+      (typeof source?.getParams === "function" &&
+        source?.getParams()?.CQL_FILTER) ||
       "";
     setCqlFilter(currentCqlFilterValue);
   }, [layer]);
@@ -24,7 +24,7 @@ const CQLFilter = ({ layer }) => {
   const updateFilter = () => {
     let filter = cqlFilter.trim();
     if (filter.length === 0) filter = undefined; // If length === 0, unset filter.
-    layer.getSource().updateParams({ CQL_FILTER: filter });
+    layer?.getSource().updateParams({ CQL_FILTER: filter });
   };
 
   return (
