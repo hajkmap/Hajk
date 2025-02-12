@@ -333,7 +333,7 @@ function LayerItem({
                   </Tooltip>
                 </IconButton>
               ) : null}
-              {layerIsFakeMapLayer !== true && (
+              {layerIsFakeMapLayer !== true && layerType !== "system" && (
                 <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
                   <KeyboardArrowRightOutlinedIcon
                     sx={{

@@ -25,7 +25,7 @@ export default function LayerItemOptions({
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const optionsMenuIsOpen = Boolean(anchorEl);
-  const layerInfo = layer.get("layerInfo");
+  const layerInfo = layer?.get("layerInfo");
 
   // Show the options menu by setting an anchor element
   const handleShowMoreOptionsClick = (e) => {
@@ -120,7 +120,7 @@ export default function LayerItemOptions({
     }
   };
 
-  return !layerInfo.showAttributeTableButton && !isDownloadable() ? null : (
+  return !layerInfo?.showAttributeTableButton && !isDownloadable() ? null : (
     <>
       <IconButton
         size="small"

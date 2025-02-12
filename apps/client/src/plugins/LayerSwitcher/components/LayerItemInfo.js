@@ -5,18 +5,18 @@ import { Box, Button, List, Typography } from "@mui/material";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 
 export default function LayerItemInfo({ layer, app, chapters }) {
-  const layerInfo = layer.get("layerInfo") || {};
+  const layerInfo = layer?.get("layerInfo") || {};
 
   const hasInfo = () => {
-    const chaptersWithLayer = findChapters(layer.get("name"), chapters);
+    const chaptersWithLayer = findChapters(layer?.get("name"), chapters);
     return (
-      layerInfo.infoCaption ||
+      layerInfo?.infoCaption ||
       "" ||
-      layerInfo.infoUrl ||
+      layerInfo?.infoUrl ||
       "" ||
-      layerInfo.infoOwner ||
+      layerInfo?.infoOwner ||
       "" ||
-      layerInfo.infoText ||
+      layerInfo?.infoText ||
       "" ||
       chaptersWithLayer.length > 0
     );
