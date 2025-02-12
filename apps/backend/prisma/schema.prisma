@@ -190,6 +190,7 @@ model Metadata {
   owner       String?
   url         String?
   urlTitle    String?
+  attribution String?
   created     DateTime @default(now())
   updated     DateTime @updatedAt
   service     Service?
@@ -239,6 +240,7 @@ model Layer {
   locked                      Boolean           @default(false)
   name                        String
   internalName                String?
+  description                 String?
   service                     Service           @relation(fields: [serviceId], references: [id])
   metadata                    Metadata          @relation(fields: [metadataId], references: [id])
   infoClickSettings           InfoClickSettings @relation(fields: [infoClickSettingsId], references: [id])
@@ -252,6 +254,7 @@ model Layer {
   hidpi                       Boolean           @default(false)
   legendUrl                   String?
   legendIconUrl               String?
+  style                       String?
   customRatio                 Int               @default(0)
   showMetadata                Boolean           @default(false)
   infoClickActive             Boolean           @default(true)

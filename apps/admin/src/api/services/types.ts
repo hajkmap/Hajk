@@ -78,6 +78,7 @@ export const versions = [
 export interface ServiceCapabilities {
   layers: string[];
   workspaces?: string[];
+  styles?: Record<string, string[]>;
 }
 
 export interface LayersGridProps {

@@ -133,6 +133,16 @@
     "layers.deleteLayerSuccess": "Layer {{name}} deleted!",
     "layers.deleteLayerFailed": "Failed to delete layer {{name}}",
     "layers.updateLayerSuccess": "Layer {{name}} updated!",
-    "layers.updateLayerFailed": "Failed to update layer {{name}}."
+    "layers.updateLayerFailed": "Failed to update layer {{name}}.",
+    "layers.common.service": "Service",
+    "layers.common.layerNameInService": "Lagernamn i tjänsten",
+    "layers.internalName": "Internal adminname",
+    "layers.copyRight": "Copyright",
+    "layers.keyword": "Keyword",
+    "layers.category": "Category",
+    "layers.hidpi": "Request high DPI",
+    "layers.customRatio": "Custom ratio (Leave as 0 for OL-default)",
+    "layers.style": "Style",
+    "layers.opacity": "Opacity"
   }
 }

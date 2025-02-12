@@ -3,32 +3,24 @@ import { Paper, Grid2 as Grid, Typography, TextField } from "@mui/material";
 import Scrollbar from "../../components/scrollbar/scrollbar";
 import { DataGrid, GridRowSelectionModel } from "@mui/x-data-grid";
 import useAppStateStore from "../../store/use-app-state-store";
-import { useServiceByLayerId } from "../../api/layers";
-import { useServiceCapabilities } from "../../api/services";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import { useTranslation } from "react-i18next";
 import SearchIcon from "@mui/icons-material/Search";
-import { Layer } from "../../api/layers";
 
 function AvailableLayersGrid({
-  layerId,
-  layer,
+  isLoading,
+  getCapLayers,
+  selectedLayers,
 }: {
-  layerId: string;
-  layer: Layer;
+  isLoading: boolean;
+  getCapLayers: string[];
+  selectedLayers: string[];
 }) {
   const themeMode = useAppStateStore((state) => state.themeMode);
   const language = useAppStateStore((state) => state.language);
   const isDarkMode = themeMode === "dark";
-  const { data: service, isLoading } = useServiceByLayerId(layerId);
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
-  const { selectedLayers } = layer;
-
-  const { layers: getCapLayers } = useServiceCapabilities({
-    baseUrl: service?.url ?? "",
-    type: service?.type ?? "",
-  });
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);

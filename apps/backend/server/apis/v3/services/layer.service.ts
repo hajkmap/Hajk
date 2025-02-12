@@ -59,31 +59,50 @@ class LayerService {
     return newLayer;
   }
 
-  async updateLayer(id: string, data: Prisma.LayerUpdateInput) {
+  async updateLayer(
+    id: string,
+    data: Prisma.LayerUpdateInput & { serviceId: string }
+  ) {
+    const { serviceId, options, ...layerData } = data;
+
+    const existingLayer = await prisma.layer.findUnique({
+      where: { id },
+      select: { options: true },
+    });
+
+    const existingOptions = (existingLayer?.options as object) || {};
+    const updatedOptions = {
+      ...(existingOptions as object),
+      ...(options as object),
+    };
     const updatedLayer = await prisma.layer.update({
       where: { id },
       data: {
-        ...data,
+        ...layerData,
+        options: updatedOptions,
+        service: { connect: { id: serviceId } },
         metadata: {
           upsert: {
-            update: { ...data.metadata },
-            create: { ...data.metadata },
+            update: { ...layerData.metadata },
+            create: { ...layerData.metadata },
           },
         },
         searchSettings: {
           upsert: {
-            update: { ...data.searchSettings },
-            create: { ...data.searchSettings },
+            update: { ...layerData.searchSettings },
+            create: { ...layerData.searchSettings },
           },
         },
         infoClickSettings: {
           upsert: {
-            update: { ...data.infoClickSettings },
-            create: { ...data.infoClickSettings },
+            update: { ...layerData.infoClickSettings },
+            create: { ...layerData.infoClickSettings },
           },
         },
       },
+
       include: {
+        service: true,
         metadata: true,
         searchSettings: true,
         infoClickSettings: true,

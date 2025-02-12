@@ -232,12 +232,26 @@ const parseLayersFromXML = (xmlString: string): ServiceCapabilities => {
 
   const layers = xmlDoc.getElementsByTagName("Layer");
   const workspaces: Set<string> = new Set<string>();
+  const styles: Record<string, string[]> = {};
 
   for (const layer of layers) {
     const name = layer.getElementsByTagName("Name")[0]?.textContent;
     if (name?.includes(":")) {
       const workspace = name.split(":")[0];
       workspaces.add(workspace);
+    }
+    const styleElements = layer.getElementsByTagName("Style");
+    const styleNames: string[] = [];
+
+    for (const styleElement of styleElements) {
+      const styleName =
+        styleElement.getElementsByTagName("Name")[0]?.textContent;
+      if (styleName) {
+        styleNames.push(styleName);
+      }
+    }
+    if (name) {
+      styles[name] = styleNames;
     }
   }
   for (const layerElement of layerElements) {
@@ -250,6 +264,7 @@ const parseLayersFromXML = (xmlString: string): ServiceCapabilities => {
   return {
     layers: layerNames,
     workspaces: Array.from(workspaces),
+    styles,
   };
 };
 

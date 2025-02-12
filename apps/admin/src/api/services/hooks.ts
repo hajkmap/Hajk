@@ -136,6 +136,7 @@ export const useServiceCapabilities = ({
   return {
     layers: data?.layers ?? [],
     workspaces: data?.workspaces ?? [],
+    styles: data?.styles ?? {},
     isError,
     isLoading,
   };

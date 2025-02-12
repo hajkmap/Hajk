@@ -25,6 +25,8 @@ import FormActionPanel from "../../components/form-action-panel";
 import { toast } from "react-toastify";
 import { useServices } from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
+import { useServiceCapabilities } from "../../api/services";
+import { useServiceByLayerId } from "../../api/layers";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
@@ -38,6 +40,19 @@ export default function LayerSettings() {
   const { data: services } = useServices();
   const navigate = useNavigate();
   const formRef = useRef<HTMLFormElement | null>(null);
+  const { data: service, isLoading: serviceLoading } = useServiceByLayerId(
+    layer?.id ?? ""
+  );
+
+  const { layers: getCapLayers, styles: getCapStyles } = useServiceCapabilities(
+    {
+      baseUrl: service?.url ?? "",
+      type: service?.type ?? "",
+    }
+  );
+  const styles = layer?.selectedLayers.flatMap(
+    (key) => getCapStyles[key] || []
+  );
 
   const handleExternalSubmit = () => {
     if (formRef.current) {
@@ -48,6 +63,17 @@ export default function LayerSettings() {
   const [formLayerData, setFormLayerData] = useState<
     DynamicFormContainer<FieldValues>
   >(new DynamicFormContainer<FieldValues>());
+  const defaultValues = formLayerData.getDefaultValues();
+  const {
+    register,
+    handleSubmit,
+    control,
+    getValues,
+    watch,
+    formState: { errors, dirtyFields },
+  } = DefaultUseForm(defaultValues);
+
+  const watchSingleTile = watch("singleTile");
 
   const layerSettingsFormContainer = new DynamicFormContainer<FieldValues>();
   const panelNestedContainer = new DynamicFormContainer<FieldValues>(
@@ -96,7 +122,7 @@ export default function LayerSettings() {
     type: INPUT_TYPE.SELECT,
     gridColumns: 6,
     name: "serviceId",
-    title: "Tjänst",
+    title: `${t("layers.common.service")}`,
     defaultValue: layer?.serviceId,
     optionList: services?.map((service) => ({
       title: service.name + `(${service.type})`,
@@ -111,7 +137,7 @@ export default function LayerSettings() {
     type: INPUT_TYPE.SELECT,
     gridColumns: 6,
     name: "layerService",
-    title: "Lagernamn i tjänsten",
+    title: `${t("layers.common.layerNameInService")}`,
     defaultValue: "",
     optionList: [{ title: "Testlayer", value: "Testlayer" }],
   });
@@ -119,104 +145,93 @@ export default function LayerSettings() {
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "adminName",
-    title: `Internt adminnamn`,
-    defaultValue: "",
+    name: "internalName",
+    title: `${t("layers.internalName")}`,
+    defaultValue: layer?.internalName,
   });
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "copyRight",
-    title: `Upphovsrätt`,
-    defaultValue: "",
+    name: "attribution",
+    title: `${t("layers.copyRight")}`,
+    defaultValue: layer?.metadata?.attribution,
   });
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 12,
-    name: "descriptionLayer",
-    title: `Beskrivning av lagret`,
-    defaultValue: "",
+    name: "description",
+    title: `${t("map.description")}`,
+    defaultValue: layer?.description,
   });
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "keyWord",
-    title: `Nyckelord`,
-    defaultValue: "",
+    name: "options.keyword",
+    title: `${t("layers.keyword")}`,
+    defaultValue: layer?.options?.keyword,
   });
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "category",
-    title: `Kategori`,
-    defaultValue: "",
-  });
-
-  accordionNestedContainer.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 6,
-    name: "imageFormat",
-    title: `Bildformat`,
-    defaultValue: "",
-    optionList: [{ title: "Testlayer", value: "Testlayer" }],
-  });
-
-  accordionNestedContainer.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 6,
-    name: "coordinateSystem",
-    title: `Koordinatsystem`,
-    defaultValue: "",
-    optionList: [{ title: "Testlayer", value: "Testlayer" }],
-  });
-
-  accordionNestedContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 12,
-    name: "customRatio",
-    title: `Custom ratio`,
-    defaultValue: "",
+    name: "options.category",
+    title: `${t("layers.category")}`,
+    defaultValue: layer?.options?.category,
   });
 
   accordionNestedContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
-    name: "dpi",
-    title: "Efterfråga hög DPI",
-    defaultValue: false,
+    name: "hidpi",
+    title: `${t("layers.hidpi")}`,
+    defaultValue: layer?.hidpi,
   });
 
   accordionNestedContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "singleTile",
     title: "Single tile",
-    defaultValue: false,
+    defaultValue: layer?.singleTile,
+  });
+
+  accordionNestedContainer.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 3,
+    name: "customRatio",
+    title: `${t("layers.customRatio")}`,
+    defaultValue: "",
+    disabled: watchSingleTile === false,
   });
 
   accordionNestedContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
-    name: "gwc",
+    name: "options.geoWebCache",
     title: "GeoWebCache",
-    defaultValue: false,
+    defaultValue: layer?.options?.geoWebCache,
   });
 
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 6,
     name: "style",
-    title: `Stil`,
+    title: `${t("layers.style")}`,
     defaultValue: "",
-    optionList: [{ title: "<default>", value: "default" }],
+    optionList: [
+      { title: "<default>", value: "<default>" },
+      ...(styles?.map((style) => ({
+        title: style,
+        value: style,
+      })) ?? []),
+    ],
   });
 
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
     name: "opacity",
-    title: `Opacitet`,
+    title: `${t("layers.opacity")}`,
     defaultValue: "",
   });
 
@@ -533,7 +548,19 @@ export default function LayerSettings() {
       const payload = {
         name: layerData.name,
         serviceId: layerData.serviceId,
-        metadata: {},
+        internalName: layerData.internalName,
+        description: layerData.description,
+        hidpi: layerData.hidpi,
+        singleTile: layerData.singleTile,
+        customRatio: layerData.customRatio,
+        options: {
+          keyword: layerData?.options?.keyword,
+          category: layerData?.options?.category,
+          geoWebCache: layerData?.options?.geoWebCache,
+        },
+        metadata: {
+          attribution: layerData?.metadata?.attribution,
+        },
         searchSettings: {},
         infoClickSettings: {},
       };
@@ -579,15 +606,6 @@ export default function LayerSettings() {
     }
   };
 
-  const defaultValues = formLayerData.getDefaultValues();
-  const {
-    register,
-    handleSubmit,
-    control,
-    getValues,
-    formState: { errors, dirtyFields },
-  } = DefaultUseForm(defaultValues);
-
   const onSubmit = createOnSubmitHandler({
     handleSubmit,
     dirtyFields,
@@ -627,7 +645,13 @@ export default function LayerSettings() {
             control={control}
             errors={errors}
           />
-          {layer && <AvailableLayersGrid layerId={layer.id} layer={layer} />}
+          {layer && (
+            <AvailableLayersGrid
+              isLoading={serviceLoading}
+              getCapLayers={getCapLayers}
+              selectedLayers={layer?.selectedLayers ?? []}
+            />
+          )}
           <UsedInMapsGrid />
         </form>
       </FormActionPanel>

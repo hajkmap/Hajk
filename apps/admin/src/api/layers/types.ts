@@ -8,6 +8,7 @@ export interface Layer {
   locked: boolean;
   name: string;
   internalName?: string;
+  description?: string;
   opacity: number;
   maxZoom: number;
   minZoom: number;
@@ -29,6 +30,7 @@ export interface Layer {
     id: string;
     url?: string;
     urlTitle?: string;
+    attribution?: string;
   };
   searchSettings: {
     id: string;
@@ -50,7 +52,7 @@ export interface Layer {
     sortMethod?: string;
     sortDescending?: boolean;
   };
-  options: Record<string, string>;
+  options: Record<string, unknown>;
 }
 
 export interface LayersApiResponse {
@@ -82,6 +84,7 @@ export interface LayerUpdateInput {
   selectedLayers?: string[];
   locked?: boolean;
   internalName?: string;
+  description?: string;
   opacity?: number;
   maxZoom?: number;
   minZoom?: number;
@@ -102,6 +105,7 @@ export interface LayerUpdateInput {
   metadata: {
     url?: string;
     urlTitle?: string;
+    attribution?: string;
   };
   searchSettings: {
     active?: boolean;
@@ -121,5 +125,5 @@ export interface LayerUpdateInput {
     sortMethod?: string;
     sortDescending?: boolean;
   };
-  options?: Record<string, string>;
+  options?: Record<string, unknown>;
 }

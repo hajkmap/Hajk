@@ -132,6 +132,16 @@
     "layers.deleteLayerSuccess": "Lagret {{name}} är nu borttagen!",
     "layers.deleteLayerFailed": "Misslyckades att ta bort lagret {{name}}",
     "layers.updateLayerSuccess": "Lagret {{name}} uppdaterades!",
-    "layers.updateLayerFailed": "Misslyckades att uppdatera lagret {{name}}"
+    "layers.updateLayerFailed": "Misslyckades att uppdatera lagret {{name}}",
+    "layers.common.service": "Tjänst",
+    "layers.common.layerNameInService": "Lagernamn i tjänsten",
+    "layers.internalName": "Internt adminnamn",
+    "layers.copyRight": "Upphovsrätt",
+    "layers.keyword": "Nyckelord",
+    "layers.category": "Kategori",
+    "layers.hidpi": "Efterfråga hög DPI",
+    "layers.customRatio": "Anpassad ratio (Lämna som 0 för OL-default)",
+    "layers.style": "Stil",
+    "layers.opacity": "Opacitet"
   }
 }
