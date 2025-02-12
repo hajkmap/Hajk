@@ -143,6 +143,18 @@
     "layers.hidpi": "Request high DPI",
     "layers.customRatio": "Custom ratio (Leave as 0 for OL-default)",
     "layers.style": "Style",
-    "layers.opacity": "Opacity"
+    "layers.opacity": "Opacity",
+    "layers.legend": "Legend",
+    "layers.legendIcon": "Legend icon",
+    "layers.uploadFile": "Upload file",
+    "layers.showAttributeTableButton": "Show button for attribute table",
+    "layers.minMaxZoomAlertOnToggleOnly": "Only show min/max alert box on click",
+    "layers.minZoom": "Minimum zoom",
+    "layers.maxZoom": "Maximal zoom",
+    "layers.primaryDisplayFields": "Display field",
+    "layers.secondaryDisplayFields": "Secondary display field",
+    "layers.shortDisplayFields": "Short display field",
+    "layers.infoClickDesc": "Infoclick sort descending",
+    "layers.infobox": "Infobox"
   }
 }

@@ -24,6 +24,8 @@ function UsedInMapsGrid() {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const language = useAppStateStore((state) => state.language);
+  const themeMode = useAppStateStore((state) => state.themeMode);
+  const isDarkMode = themeMode === "dark";
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -107,6 +109,7 @@ function UsedInMapsGrid() {
           sx={{
             width: "100%",
             mb: 3,
+            backgroundColor: isDarkMode ? "#121212" : "#efefef",
           }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -126,6 +129,7 @@ function UsedInMapsGrid() {
                   mt: 1,
                   width: "100%",
                   maxWidth: "400px",
+                  backgroundColor: isDarkMode ? "#3b3b3b" : "#fbfbfb",
                 }}
                 label="Sök i kartor"
                 variant="outlined"
@@ -139,7 +143,12 @@ function UsedInMapsGrid() {
               />
               <Scrollbar sx={{ maxHeight: "400px" }}>
                 <DataGrid
-                  sx={{ maxWidth: "100%", mb: 2, mt: 1 }}
+                  sx={{
+                    maxWidth: "100%",
+                    mb: 2,
+                    mt: 1,
+                    backgroundColor: isDarkMode ? "#3b3b3b" : "#fbfbfb",
+                  }}
                   rows={rows}
                   columns={columns}
                   initialState={{

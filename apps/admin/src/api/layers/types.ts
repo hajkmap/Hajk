@@ -26,6 +26,7 @@ export interface Layer {
   timeSliderEnd?: string;
   hideExpandArrow: boolean;
   zIndex: number;
+  style?: string;
   metadata: {
     id: string;
     url?: string;
@@ -102,6 +103,7 @@ export interface LayerUpdateInput {
   timeSliderEnd?: string;
   hideExpandArrow?: boolean;
   zIndex?: number;
+  style?: string;
   metadata: {
     url?: string;
     urlTitle?: string;

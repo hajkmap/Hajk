@@ -142,6 +142,18 @@
     "layers.hidpi": "Efterfråga hög DPI",
     "layers.customRatio": "Anpassad ratio (Lämna som 0 för OL-default)",
     "layers.style": "Stil",
-    "layers.opacity": "Opacitet"
+    "layers.opacity": "Opacitet",
+    "layers.legend": "Teckenförklaring",
+    "layers.legendIcon": "Teckenförklaringsikon",
+    "layers.uploadFile": "Välj fil",
+    "layers.showAttributeTableButton": "Visa knapp för attributtabell",
+    "layers.minMaxZoomAlertOnToggleOnly": "Visa endast varningruta för min/max vid klick",
+    "layers.minZoom": "Minsta zoom",
+    "layers.maxZoom": "Maximal zoom",
+    "layers.primaryDisplayFields": "Visningsfält",
+    "layers.secondaryDisplayFields": "Sekundära visningsfält",
+    "layers.shortDisplayFields": "Kort visningsfält",
+    "layers.infoClickDesc": "Infoklick sortera fallande",
+    "layers.infobox": "Inforuta"
   }
 }

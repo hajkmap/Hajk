@@ -82,7 +82,7 @@ function LayersGrid({
       })
       .filter(
         (layer) =>
-          layer?.selected ||
+          layer?.selected ??
           layer.layer.toLowerCase().includes(searchTerm.toLowerCase())
       );
     return searchAndSelectedFilteredLayers;

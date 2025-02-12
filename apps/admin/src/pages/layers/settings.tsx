@@ -197,11 +197,11 @@ export default function LayerSettings() {
   });
 
   accordionNestedContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.NUMBER,
     gridColumns: 3,
     name: "customRatio",
     title: `${t("layers.customRatio")}`,
-    defaultValue: "",
+    defaultValue: layer?.customRatio,
     disabled: watchSingleTile === false,
   });
 
@@ -232,14 +232,14 @@ export default function LayerSettings() {
     gridColumns: 6,
     name: "opacity",
     title: `${t("layers.opacity")}`,
-    defaultValue: "",
+    defaultValue: layer?.opacity,
   });
 
   accordionNestedContainer2.addCustomInput({
     type: INPUT_TYPE.CUSTOM,
     kind: "CustomInputSettings",
-    name: "teckenForklaring",
-    title: "Teckenförklaring",
+    name: "legendUrl",
+    title: `${t("layers.legend")}`,
     gridColumns: 12,
     defaultValue: "",
 
@@ -273,12 +273,12 @@ export default function LayerSettings() {
 
           <label htmlFor="teckenForklaring-file-upload">
             <Button
-              sx={{ minWidth: "120px" }}
+              sx={{ minWidth: "140px" }}
               variant="contained"
               component="span"
               startIcon={<CloudUploadIcon />}
             >
-              Välj fil
+              {t("layers.uploadFile")}
             </Button>
           </label>
         </Stack>
@@ -288,8 +288,8 @@ export default function LayerSettings() {
   accordionNestedContainer2.addCustomInput({
     type: INPUT_TYPE.CUSTOM,
     kind: "CustomInputSettings",
-    name: "teckenForklaringIkon",
-    title: "Teckenförklaringsikon",
+    name: "legendIconUrl",
+    title: `${t("layers.legendIcon")}`,
     gridColumns: 12,
     defaultValue: "",
 
@@ -323,12 +323,12 @@ export default function LayerSettings() {
 
           <label htmlFor="teckenForklaringIkon-file-upload">
             <Button
-              sx={{ minWidth: "120px" }}
+              sx={{ minWidth: "140px" }}
               variant="contained"
               component="span"
               startIcon={<CloudUploadIcon />}
             >
-              Välj fil
+              {t("layers.uploadFile")}
             </Button>
           </label>
         </Stack>
@@ -338,81 +338,81 @@ export default function LayerSettings() {
 
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.CHECKBOX,
-    name: "attributes",
-    title: "Visa kanpp för attributtabell",
-    defaultValue: false,
+    name: "options.showAttributeTableButton",
+    title: `${t("layers.showAttributeTableButton")}`,
+    defaultValue: layer?.options?.showAttributeTableButton,
   });
 
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.CHECKBOX,
     gridColumns: 8,
-    name: "warningZoom",
-    title: `Visa endast varningruta för min/max vid klick`,
-    defaultValue: false,
+    name: "minMaxZoomAlertOnToggleOnly",
+    title: `${t("layers.minMaxZoomAlertOnToggleOnly")}`,
+    defaultValue: layer?.minMaxZoomAlertOnToggleOnly,
   });
 
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
     name: "minZoom",
-    title: `Minsta zoom`,
-    defaultValue: "",
+    title: `${t("layers.minZoom")}`,
+    defaultValue: layer?.minZoom,
   });
 
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
     name: "maxZoom",
-    title: `Maximal zoom`,
-    defaultValue: "",
+    title: `${t("layers.maxZoom")}`,
+    defaultValue: layer?.maxZoom,
   });
 
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 12,
-    name: "displayField",
-    title: `Visningsfält`,
-    defaultValue: "",
+    name: "primaryDisplayFields",
+    title: `${t("layers.primaryDisplayFields")}`,
+    defaultValue: layer?.searchSettings?.primaryDisplayFields,
   });
 
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "secondaryDisplayField",
-    title: `Sekundära visnigsfält`,
-    defaultValue: "",
+    name: "secondaryDisplayFields",
+    title: `${t("layers.secondaryDisplayFields")}`,
+    defaultValue: layer?.searchSettings?.secondaryDisplayFields,
   });
 
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "shortDisplayField",
-    title: `Kort visningsfält`,
-    defaultValue: "",
+    name: "shortDisplayFields",
+    title: `${t("layers.shortDisplayFields")}`,
+    defaultValue: layer?.searchSettings?.shortDisplayFields,
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.CHECKBOX,
     gridColumns: 6,
-    name: "infoClick",
-    title: `Infoklick`,
-    defaultValue: false,
+    name: "infoClickActive",
+    title: `${t("common.infoclick")}`,
+    defaultValue: layer?.infoClickActive,
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.CHECKBOX,
     gridColumns: 12,
-    name: "infoClickSortByDesc",
-    title: `Infoklick sortera fallande`,
-    defaultValue: false,
+    name: "infoClickSettings.sortDescending",
+    title: `${t("layers.infoClickDesc")}`,
+    defaultValue: layer?.infoClickSettings?.sortDescending,
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 12,
-    name: "infoBox",
-    title: `Inforuta`,
-    defaultValue: "",
+    name: "infoClickSettings.definition",
+    title: `${t("layers.infobox")}`,
+    defaultValue: layer?.infoClickSettings?.definition,
   });
 
   accordionNestedContainer4.addInput({
@@ -553,16 +553,32 @@ export default function LayerSettings() {
         hidpi: layerData.hidpi,
         singleTile: layerData.singleTile,
         customRatio: layerData.customRatio,
+        style: layerData.style,
+        opacity: layerData.opacity,
+        minMaxZoomAlertOnToggleOnly: layerData.minMaxZoomAlertOnToggleOnly,
+        minZoom: layerData.minZoom,
+        maxZoom: layerData.maxZoom,
         options: {
           keyword: layerData?.options?.keyword,
           category: layerData?.options?.category,
           geoWebCache: layerData?.options?.geoWebCache,
+          showAttributeTableButton:
+            layerData?.options?.showAttributeTableButton,
+          infoClickActive: layerData?.infoClickActive,
         },
         metadata: {
           attribution: layerData?.metadata?.attribution,
         },
-        searchSettings: {},
-        infoClickSettings: {},
+        searchSettings: {
+          primaryDisplayFields: layerData?.searchSettings?.primaryDisplayFields,
+          secondaryDisplayFields:
+            layerData?.searchSettings?.secondaryDisplayFields,
+          shortDisplayFields: layerData?.searchSettings?.shortDisplayFields,
+        },
+        infoClickSettings: {
+          sortDescending: layerData?.infoClickSettings?.sortDescending,
+          definition: layerData?.infoClickSettings?.definition,
+        },
       };
       await updateLayer({
         layerId: layer?.id ?? "",
