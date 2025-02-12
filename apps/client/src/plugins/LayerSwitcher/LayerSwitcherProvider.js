@@ -302,8 +302,7 @@ const getLayerNodes = (groups, olLayerMap) =>
 
     const children = [...(layers ?? []), ...(subgroups ?? [])];
 
-    // A group should have both defined
-    const isGroup = !!(node.groups && node.layers);
+    const isGroup = !!(node.groups || node.layers);
 
     const olLayer = olLayerMap[node.id];
 
