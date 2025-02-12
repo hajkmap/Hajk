@@ -43,7 +43,6 @@ const GridGridContainer = styled(Grid)(({ theme }) => ({
 }));
 
 const GridMiddleContainer = styled(Grid)(({ theme }) => ({
-  marginTop: theme.spacing(2),
   overflowX: "auto",
   "&::-webkit-scrollbar": {
     width: "0.4em",
@@ -135,6 +134,9 @@ class PrintWindow extends React.PureComponent {
     selectedPdfIndex: null,
     isModalOpen: false,
     pdfLinks: this.checkPdfLinks(this.props.options.pdfLinks),
+    includeFrontPageSelect: this.props.options.enableFrontPage,
+    frontPage: null,
+    frontPageSelected: false,
   };
 
   internalId = 0;
@@ -283,17 +285,54 @@ class PrintWindow extends React.PureComponent {
     );
   };
 
+  renderFrontPage = () => {
+    this.frontPageElement = this.createPrintElement("frontPage");
+    return this.customRender(
+      <Grid container direction="column" sx={{ pageBreakAfter: "always" }}>
+        <Grid item textAlign="center" sx={{ paddingBottom: "60px" }}>
+          <Typography
+            variant="h1"
+            gutterBottom={true}
+            sx={{ fontSize: "46px" }}
+          >
+            {this.state.frontPage.title}
+          </Typography>
+        </Grid>
+        <Grid item textAlign="center">
+          <img
+            src={this.state.frontPage.img}
+            alt=""
+            style={{ margin: "auto", maxWidth: "100%" }} // Add this style to center align the image
+          />
+        </Grid>
+      </Grid>,
+      this.frontPageElement
+    );
+  };
+
   renderContent = () => {
     this.content = this.createPrintElement("content");
     return this.customRender(this.state.printContent, this.content);
   };
 
   areAllImagesLoaded = () => {
-    return Promise.allSettled(
-      [...this.content.getElementsByTagName("img")].map((img) => {
+    // Get all img elements inside this.content and create promises for each
+    const imgPromises = [...this.content.getElementsByTagName("img")].map(
+      (img) => {
         return this.loadImage(img);
-      })
+      }
     );
+
+    // Add frontPageImgPromise to the array of promises
+    // And loads the front page image
+    if (this.state.frontPageSelected) {
+      const frontPageImgElement = this.frontPageElement.querySelector("img");
+      const frontPageImgPromise = this.loadImage(frontPageImgElement);
+      imgPromises.push(frontPageImgPromise);
+    }
+
+    // Use Promise.allSettled to wait for all promises to resolve
+    return Promise.allSettled(imgPromises);
   };
 
   handleNewWindowBlocked = () => {
@@ -438,6 +477,7 @@ class PrintWindow extends React.PureComponent {
   printContents = () => {
     // We're gonna want to make sure everything is rendered...
     Promise.all([
+      this.state.frontPageSelected === true && this.renderFrontPage(),
       this.state.tocPrintMode !== "none" && this.renderToc(),
       this.renderContent(),
     ]).then(() => {
@@ -445,6 +485,10 @@ class PrintWindow extends React.PureComponent {
       this.areAllImagesLoaded().then(() => {
         // Then we can create an element that will hold our TOC and print-content...
         const printContent = document.createElement("div");
+        // Append frontPage only if its included
+        this.state.frontPageSelected &&
+          this.frontPageElement &&
+          printContent.appendChild(this.frontPageElement);
         // ...append the TOC to the element (only if applicable)...
         this.toc && printContent.appendChild(this.toc);
         // ...and append the actual content.
@@ -703,6 +747,38 @@ class PrintWindow extends React.PureComponent {
     this.setState({ menuInformation: updatedMenuState }, () => {
       this.setIsAnyDocumentSelected();
     });
+
+    if (this.state.frontPageSelected) {
+      this.setState({ frontPage: this.createFrontPage(current) });
+    }
+  };
+
+  createFrontPage = (documents) => {
+    //We get drawer Title from options
+    const { drawerTitle } = this.props.options;
+    // And html from the first document
+    const firstDocumentHtml = Object.values(documents).find(
+      (doc) => doc.level === 1
+    )?.chapters[0]?.html;
+
+    // Exit if firstDocument is undefined
+    if (!firstDocumentHtml) {
+      return null;
+    }
+    // We create an temporary element and set the img html
+    const tempElement = document.createElement("div");
+    tempElement.innerHTML = firstDocumentHtml;
+    const firstDocumentImage = tempElement
+      .querySelector("img")
+      ?.getAttribute("src");
+
+    console.log("firstDocumentImage", firstDocumentImage);
+
+    return {
+      title: drawerTitle,
+      img: "https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg",
+      id: 1,
+    };
   };
 
   toggleAllDocuments = (toggled) => {
@@ -721,6 +797,10 @@ class PrintWindow extends React.PureComponent {
       menuInformation: menuState,
       isAnyDocumentSelected: toggled,
     });
+
+    if (this.state.frontPageSelected) {
+      this.setState({ frontPage: this.createFrontPage(menuState) });
+    }
   };
 
   removeTagsNotSelectedForPrint = (chapter) => {
@@ -917,17 +997,40 @@ class PrintWindow extends React.PureComponent {
     }));
   };
 
+  toggleSelectFrontPage = () => {
+    this.setState((prevState) => ({
+      frontPageSelected: !prevState.frontPageSelected,
+    }));
+  };
+
   renderPrintDocuments = () => {
     const { localObserver, documentWindowMaximized } = this.props;
-    const { menuInformation } = this.state;
+    const { menuInformation, includeFrontPageSelect } = this.state;
     return (
       <>
         <Typography align="center" variant="h6">
           Skapa PDF
         </Typography>
-        <GridSettingsContainer container item>
-          <Typography variant="h6">Inställningar</Typography>
-
+        {includeFrontPageSelect && (
+          <GridSettingsContainer container item>
+            <Typography variant="h6">Inställningar</Typography>
+            <Grid xs={12} item>
+              <FormControlLabel
+                value="Inkludera framsida"
+                control={
+                  <Checkbox
+                    color="primary"
+                    onChange={() => this.toggleSelectFrontPage()}
+                  />
+                }
+                label="Inkludera framsida"
+                labelPlacement="end"
+              />
+            </Grid>
+          </GridSettingsContainer>
+        )}
+        <Typography variant="h6">Valt innehåll</Typography>
+        <GridSettingsContainer>
           <Grid xs={12} item>
             <FormControlLabel
               value="Välj alla dokument"
@@ -945,18 +1048,16 @@ class PrintWindow extends React.PureComponent {
             />
           </Grid>
         </GridSettingsContainer>
-
-        <Typography variant="h6">Valt innehåll</Typography>
-
         <GridMiddleContainer item container>
-          <PrintList
-            localObserver={localObserver}
-            documentMenu={menuInformation}
-            level={0}
-            handleTogglePrint={this.toggleChosenForPrint}
-          />
+          <Grid xs={12} item>
+            <PrintList
+              localObserver={localObserver}
+              documentMenu={menuInformation}
+              level={0}
+              handleTogglePrint={this.toggleChosenForPrint}
+            />
+          </Grid>
         </GridMiddleContainer>
-
         {documentWindowMaximized && this.renderCreatePDFButton()}
         {this.renderLoadingDialog()}
       </>

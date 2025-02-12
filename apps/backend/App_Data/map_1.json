@@ -528,6 +528,7 @@
         "height": "90vh",
         "searchImplemented": true,
         "enablePrint": true,
+        "enableFrontPage": false,
         "closePanelOnMapLinkOpen": false,
         "displayLoadingOnMapLinkOpen": false,
         "documentOnStart": "",
