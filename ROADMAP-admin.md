@@ -20,8 +20,8 @@
   - [ ] Update seed script
   - [ ] Update zod parsers
   - [ ] Update API methods
-- [ ] FormActionPanel component
-  - [ ] Make the panel sticky
+- [ ] FormActionPanel component (OS)
+  - [ ] Make the panel sticky (OS)
   - [ ] Feed it with relevant data
 - [x] Services page
   - [x] Add service (AA)
