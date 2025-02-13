@@ -156,19 +156,19 @@ const LayerGroup = ({
   const groupId = staticGroupTree.id;
   const groupConfig = staticLayerConfig[groupId];
 
-  const groupName = groupConfig.caption;
-  const name = groupConfig.caption;
+  const groupName = groupConfig?.caption;
+  const name = groupConfig?.caption;
 
-  const groupIsFiltered = groupConfig.isFiltered;
+  const groupIsFiltered = groupConfig?.isFiltered;
   const groupIsExpanded = staticGroupTree.defaultExpanded;
   const groupIsToggable = staticGroupTree.groupIsToggable;
 
-  const infogrouptitle = groupConfig.infogrouptitle;
-  const infogrouptext = groupConfig.infogrouptext;
-  const infogroupurl = groupConfig.infogroupurl;
-  const infogroupurltext = groupConfig.infogroupurltext;
-  const infogroupopendatalink = groupConfig.infogroupopendatalink;
-  const infogroupowner = groupConfig.infogroupowner;
+  const infogrouptitle = groupConfig?.infogrouptitle;
+  const infogrouptext = groupConfig?.infogrouptext;
+  const infogroupurl = groupConfig?.infogroupurl;
+  const infogroupurltext = groupConfig?.infogroupurltext;
+  const infogroupopendatalink = groupConfig?.infogroupopendatalink;
+  const infogroupowner = groupConfig?.infogroupowner;
 
   const [infoVisible, setInfoVisible] = useState(false);
 

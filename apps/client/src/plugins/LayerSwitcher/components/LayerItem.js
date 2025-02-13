@@ -127,7 +127,7 @@ function LayerItem({
   const theme = useTheme();
   const mapZoom = useMapZoom();
 
-  const { layerIsToggled } = layerState;
+  const { layerIsToggled } = layerState ?? {};
 
   const {
     layerId,
@@ -140,7 +140,7 @@ function LayerItem({
     allSubLayers,
     layerInfo,
     layerLegendIcon,
-  } = layerConfig;
+  } = layerConfig ?? {};
 
   const legendIcon = layerInfo?.legendIcon || layerLegendIcon;
 
@@ -349,7 +349,7 @@ function LayerItem({
       {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
         <LegendImage
           comment="TODO Fix the mess below"
-          src={Array.isArray(layerInfo.legend) && layerInfo.legend[0]?.url}
+          src={Array.isArray(layerInfo?.legend) && layerInfo?.legend[0]?.url}
           open={legendIsActive}
         ></LegendImage>
       )}

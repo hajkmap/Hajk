@@ -302,10 +302,20 @@ const getLayerNodes = (groups, olLayerMap) =>
 
     const children = [...(layers ?? []), ...(subgroups ?? [])];
 
-    // A group should have both defined
-    const isGroup = !!(node.groups && node.layers);
+    const isGroup = !!(node.groups || node.layers);
 
     const olLayer = olLayerMap[node.id];
+
+    // If we're looking at a "normal layer" (not a group) and the OpenLayers
+    // object is missing that means that the layer configured in the
+    // LayerSwitcher options but is missing or misconfigured in the
+    // `layersConfig`. In that case we should ignore the layer and don't show
+    // it in the LayerSwitcher
+    if (!isGroup && olLayer === undefined) {
+      // A non group layer should not have any children so it's okay to return
+      // the empty array here.
+      return [];
+    }
 
     const isGroupLayer = olLayer?.get("layerType") === "group";
 
@@ -321,9 +331,9 @@ const getLayerNodes = (groups, olLayerMap) =>
       {
         id: node.id,
         layerId: node.id,
-        caption: olLayerMap[node.id]?.get("caption") ?? node.name,
-        layerCaption: olLayerMap[node.id]?.get("caption") ?? node.name,
-        allSubLayers: olLayerMap[node.id]?.get("subLayers"),
+        caption: olLayer?.get("caption") ?? node.name,
+        layerCaption: olLayer?.get("caption") ?? node.name,
+        allSubLayers: olLayer?.get("subLayers"),
         initiallyExpanded: node.expanded,
         initiallyToggled: node.toggled,
         initialDrawOrder: node.drawOrder,
