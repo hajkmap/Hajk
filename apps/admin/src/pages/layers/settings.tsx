@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
-import { Button, Stack, TextField, useTheme } from "@mui/material";
+import { Button, Stack, TextField, useTheme, Link } from "@mui/material";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import { FieldValues } from "react-hook-form";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
@@ -19,6 +19,8 @@ import {
   useDeleteLayer,
   LayerUpdateInput,
   useUpdateLayer,
+  infoClickFormat,
+  sortType,
 } from "../../api/layers";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import FormActionPanel from "../../components/form-action-panel";
@@ -53,7 +55,6 @@ export default function LayerSettings() {
   const styles = layer?.selectedLayers.flatMap(
     (key) => getCapStyles[key] || []
   );
-
   const handleExternalSubmit = () => {
     if (formRef.current) {
       formRef.current.requestSubmit();
@@ -370,7 +371,7 @@ export default function LayerSettings() {
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 12,
-    name: "primaryDisplayFields",
+    name: "searchSettings.primaryDisplayFields",
     title: `${t("layers.primaryDisplayFields")}`,
     defaultValue: layer?.searchSettings?.primaryDisplayFields,
   });
@@ -378,7 +379,7 @@ export default function LayerSettings() {
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "secondaryDisplayFields",
+    name: "searchSettings.secondaryDisplayFields",
     title: `${t("layers.secondaryDisplayFields")}`,
     defaultValue: layer?.searchSettings?.secondaryDisplayFields,
   });
@@ -386,7 +387,7 @@ export default function LayerSettings() {
   accordionNestedContainer3.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "shortDisplayFields",
+    name: "searchSettings.shortDisplayFields",
     title: `${t("layers.shortDisplayFields")}`,
     defaultValue: layer?.searchSettings?.shortDisplayFields,
   });
@@ -418,35 +419,54 @@ export default function LayerSettings() {
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "infoClickIcon",
-    title: `Infoklick ikon (lista)`,
-    defaultValue: "",
+    name: "infoClickSettings.icon",
+    title: `${t("layers.infoClickIcon")}`,
+    slotProps: {
+      input: {
+        endAdornment: (
+          <Link
+            sx={{ ml: 1 }}
+            href="https://fonts.google.com/icons"
+            target="_blank"
+          >
+            {t("layers.listLink")}
+          </Link>
+        ),
+      },
+    },
+    defaultValue: layer?.infoClickSettings?.icon,
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "infoClickSortByAttribute",
-    title: `Infoklick sortera på attribut`,
-    defaultValue: "",
+    name: "infoClickSettings.sortProperty",
+    title: `${t("layers.sortByAttribute")}`,
+    defaultValue: layer?.infoClickSettings?.sortProperty,
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 6,
-    name: "infoClickFormat",
-    title: `Infoclick-format`,
-    defaultValue: "",
-    optionList: [{ title: "Testformat", value: "Testformat" }],
+    name: "infoClickSettings.format",
+    title: `${t("layers.infoClickFormat")}`,
+    defaultValue: layer?.infoClickSettings?.format,
+    optionList: infoClickFormat.map((format) => ({
+      title: format.title,
+      value: format.value,
+    })),
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 6,
-    name: "infoClickSortType",
-    title: `Infoklick soteringstyp`,
-    defaultValue: "",
-    optionList: [{ title: "String", value: "String" }],
+    name: "infoClickSettings.sortMethod",
+    title: `${t("layers.infoClickSortMethod")}`,
+    defaultValue: layer?.infoClickSettings?.sortMethod,
+    optionList: sortType.map((type) => ({
+      title: type.title,
+      value: type.value,
+    })),
   });
 
   accordionNestedContainer4.addCustomInput({
@@ -558,13 +578,13 @@ export default function LayerSettings() {
         minMaxZoomAlertOnToggleOnly: layerData.minMaxZoomAlertOnToggleOnly,
         minZoom: layerData.minZoom,
         maxZoom: layerData.maxZoom,
+        infoClickActive: layerData?.infoClickActive,
         options: {
           keyword: layerData?.options?.keyword,
           category: layerData?.options?.category,
           geoWebCache: layerData?.options?.geoWebCache,
           showAttributeTableButton:
             layerData?.options?.showAttributeTableButton,
-          infoClickActive: layerData?.infoClickActive,
         },
         metadata: {
           attribution: layerData?.metadata?.attribution,
@@ -578,6 +598,10 @@ export default function LayerSettings() {
         infoClickSettings: {
           sortDescending: layerData?.infoClickSettings?.sortDescending,
           definition: layerData?.infoClickSettings?.definition,
+          icon: layerData?.infoClickSettings?.icon,
+          sortProperty: layerData?.infoClickSettings?.sortProperty,
+          format: layerData?.infoClickSettings?.format,
+          sortMethod: layerData?.infoClickSettings?.sortMethod,
         },
       };
       await updateLayer({

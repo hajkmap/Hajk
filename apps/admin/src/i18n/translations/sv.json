@@ -83,6 +83,7 @@
     "services.affectedLayers": "Om du byter url kan det leda till att andra inställningar slutar att fungera. Ändringen kommer att <strong>påverka {{count}} lager.</strong>",
     "services.loadingLayers": "Laddar lager...",
     "services.workspace": "Arbetsområde",
+    "services.imageFormats": "Bildformat",
     "user.confirmPassword": "Bekräfta lösenord",
     "user.createLocalUser": "Skapa användare",
     "user.createUserDescription": "Skapa en användare som kan logga in i Hajk. Kom ihåg att spara undan lösenordet på ett säkert ställe - du kommer aldrig kunna se det här igen.",
@@ -154,6 +155,11 @@
     "layers.secondaryDisplayFields": "Sekundära visningsfält",
     "layers.shortDisplayFields": "Kort visningsfält",
     "layers.infoClickDesc": "Infoklick sortera fallande",
-    "layers.infobox": "Inforuta"
+    "layers.infobox": "Inforuta",
+    "layers.infoClickIcon": "Infoklick ikon",
+    "layers.listLink": "(lista)",
+    "layers.sortByAttribute": "Infoklick sortera på attribut",
+    "layers.infoClickFormat": "Infoklick format",
+    "layers.infoClickSortMethod": "Infoklick sorteringstyp"
   }
 }

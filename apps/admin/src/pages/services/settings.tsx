@@ -22,6 +22,7 @@ import {
   ServiceUpdateInput,
   serverTypes,
   versions,
+  imageFormats,
   useProjections,
   useServiceCapabilities,
 } from "../../api/services";
@@ -53,6 +54,7 @@ export default function ServiceSettings() {
   const [dialogServiceType, setDialogServiceType] = useState(
     service?.type ?? ""
   );
+
   const { data: projections } = useProjections();
   const epsgProjections = projections?.filter((projection) =>
     projection.code.startsWith("EPSG:")
@@ -111,6 +113,7 @@ export default function ServiceSettings() {
         type: serviceData.type,
         serverType: serviceData.serverType,
         version: serviceData.version,
+        imageFormat: serviceData.imageFormat,
         workspace: serviceData.workspace,
         getMapUrl: serviceData.getMapUrl,
         comment: serviceData.comment,
@@ -271,15 +274,16 @@ export default function ServiceSettings() {
     gridColumns: 8,
     name: "workspace",
     title: `${t("services.workspace")}`,
-    defaultValue: service?.workspace,
-    optionList:
-      getCapWorkspaces.length > 0
-        ? getCapWorkspaces.map((workspace) => ({
-            title: workspace,
-            value: workspace,
-          }))
-        : [{ title: "Alla", value: "Alla" }],
+    defaultValue: service?.workspace ?? "All",
+    optionList: [
+      { title: `${t("common.all")}`, value: "All" },
+      ...(getCapWorkspaces?.map((workspace) => ({
+        title: workspace,
+        value: workspace,
+      })) ?? []),
+    ],
   });
+
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
@@ -300,6 +304,18 @@ export default function ServiceSettings() {
     registerOptions: {
       required: `${t("common.required")}`,
     },
+  });
+
+  accordionNestedContainer2.addInput({
+    type: INPUT_TYPE.SELECT,
+    gridColumns: 8,
+    name: "imageFormat",
+    title: `${t("services.imageFormats")}`,
+    defaultValue: service?.imageFormat,
+    optionList: imageFormats.map((formats) => ({
+      title: formats.title,
+      value: formats.value,
+    })),
   });
 
   accordionNestedContainer2.addInput({

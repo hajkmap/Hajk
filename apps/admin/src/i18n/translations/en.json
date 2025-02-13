@@ -84,6 +84,7 @@
     "services.deleteServiceFailed": "Failed to delete service {{name}}.",
     "services.affectedLayers": "If you change the url, it may cause other settings to stop working. The change will <strong>affect {{count}} layers.</strong>",
     "services.loadingLayers": "Loading layers...",
+    "services.imageFormats": "Image formats",
     "user.confirmPassword": "Confirm password",
     "user.createLocalUser": "Create user",
     "user.createUserDescription": "Create a user who can log into Hajk. Remember to save the password in a secure place — you will never be able to view it here again.",
@@ -155,6 +156,11 @@
     "layers.secondaryDisplayFields": "Secondary display field",
     "layers.shortDisplayFields": "Short display field",
     "layers.infoClickDesc": "Infoclick sort descending",
-    "layers.infobox": "Infobox"
+    "layers.infobox": "Infobox",
+    "layers.infoClickIcon": "Infoclick icon",
+    "layers.listLink": "(list)",
+    "layers.sortByAttribute": "Infoclick sort by attribute",
+    "layers.infoClickFormat": "Infoclick format",
+    "layers.infoClickSortMethod": "Infoclick sort-type"
   }
 }

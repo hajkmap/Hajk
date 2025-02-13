@@ -59,6 +59,7 @@ function AvailableLayersGrid({
         width: "100%",
         p: 2,
         mb: 3,
+        backgroundColor: isDarkMode ? "#121212" : "#efefef",
       }}
     >
       <Typography variant="h6" sx={{ mt: -0.5, mb: 1.5 }}>

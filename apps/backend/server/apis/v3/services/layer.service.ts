@@ -13,7 +13,13 @@ class LayerService {
   }
 
   async getLayers() {
-    return await prisma.layer.findMany();
+    return await prisma.layer.findMany({
+      include: {
+        metadata: true,
+        infoClickSettings: true,
+        searchSettings: true,
+      },
+    });
   }
 
   async getLayerById(id: string) {

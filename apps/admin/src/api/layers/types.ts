@@ -48,6 +48,7 @@ export interface Layer {
     layerId?: string;
     layerInstanceId?: string;
     definition?: string;
+    icon?: string;
     format?: string;
     sortProperty?: string;
     sortMethod?: string;
@@ -122,6 +123,7 @@ export interface LayerUpdateInput {
     layerId?: string;
     layerInstanceId?: string;
     definition?: string;
+    icon?: string;
     format?: string;
     sortProperty?: string;
     sortMethod?: string;
@@ -129,3 +131,13 @@ export interface LayerUpdateInput {
   };
   options?: Record<string, unknown>;
 }
+export const infoClickFormat = [
+  { title: "application/json", value: "application/json" },
+  { title: "application/vnd.ogc.gml", value: "application/vnd.ogc.gml" },
+  { title: "text/xml", value: "text/xml" },
+];
+
+export const sortType = [
+  { title: "text", value: "text" },
+  { title: "number", value: "number" },
+];

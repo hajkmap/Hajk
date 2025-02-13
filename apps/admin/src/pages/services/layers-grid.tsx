@@ -76,13 +76,13 @@ function LayersGrid({
           layer,
           infoClick: "",
           publications: "",
-          actions: "",
           selected: isSelected,
         };
       })
       .filter(
         (layer) =>
-          layer?.selected ??
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+          layer?.selected || // Disable lint here since ?? is messing with the data-grid search logic
           layer.layer.toLowerCase().includes(searchTerm.toLowerCase())
       );
     return searchAndSelectedFilteredLayers;

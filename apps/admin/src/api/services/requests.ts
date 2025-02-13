@@ -223,7 +223,7 @@ export const deleteService = async (serviceId: string): Promise<void> => {
   }
 };
 
-const parseLayersFromXML = (xmlString: string): ServiceCapabilities => {
+const parseCapabilitiesFromXML = (xmlString: string): ServiceCapabilities => {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlString, "application/xml");
 
@@ -273,6 +273,6 @@ export const fetchCapabilities = async (
 ): Promise<ServiceCapabilities> => {
   const response = await axios.get(url, { responseType: "text" });
   const xmlData: string = response.data as string;
-  const layers = parseLayersFromXML(xmlData);
+  const layers = parseCapabilitiesFromXML(xmlData);
   return { ...layers };
 };
