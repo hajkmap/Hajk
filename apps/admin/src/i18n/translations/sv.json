@@ -123,7 +123,6 @@
     "map.cookieLink": "Cookies-länk",
     "map.cookieLinkHelp": "Valfri URL som öppnas med knappen 'Mer information'.",
     "map.cookieMessage": "Cookies-meddelande",
-    "map.cookieMessageDefault": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan.",
     "map.cookieMessageHelp": "Ange meddelande för cookies.",
     "map.cookies": "Cookies",
     "map.cookieUse3dPart": "Visa alternativ för 3:e part cookies",

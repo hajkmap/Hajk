@@ -124,7 +124,6 @@
     "map.cookieLink": "Cookie link",
     "map.cookieLinkHelp": "Optional URL opened with the 'More information' button.",
     "map.cookieMessage": "Cookie message",
-    "map.cookieMessageDefault": "We use cookies to monitor usage and provide a good experience of the map.",
     "map.cookieMessageHelp": "Enter the message shown for cookies.",
     "map.cookies": "Cookies",
     "map.cookieUse3dPart": "Show option for third-party cookies",

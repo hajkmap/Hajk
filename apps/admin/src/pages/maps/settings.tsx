@@ -27,7 +27,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.TEXTFIELD,
     name: "projection",
     title: t("map.projection"),
-    defaultValue: "EPSG:3007",
+    defaultValue: "EPSG:3006",
     gridColumns: 6,
     helpText: t("map.projectionHelp"),
   });
@@ -36,7 +36,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.NUMBER,
     name: "startZoom",
     title: t("map.startZoom"),
-    defaultValue: 0,
+    defaultValue: 1.33,
     gridColumns: 2,
     helpText: t("map.startZoomHelp"),
   });
@@ -45,7 +45,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.NUMBER,
     name: "maxZoom",
     title: t("map.maxZoom"),
-    defaultValue: 10,
+    defaultValue: 8,
     gridColumns: 2,
     helpText: t("map.maxZoomHelp"),
   });
@@ -63,7 +63,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.TEXTFIELD,
     name: "centerCoordinate",
     title: t("map.centerCoordinate"),
-    defaultValue: "172586,6340107",
+    defaultValue: "576357, 6386049",
     gridColumns: 6,
     helpText: t("map.centerCoordinateHelp"),
   });
@@ -72,7 +72,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.TEXTFIELD,
     name: "origin",
     title: t("map.origin"),
-    defaultValue: "150000,6315000",
+    defaultValue: "0,0",
     gridColumns: 6,
     helpText: t("map.originHelp"),
   });
@@ -81,7 +81,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.TEXTFIELD,
     name: "extent",
     title: t("map.extent"),
-    defaultValue: "150000,6315000,200000,6360000",
+    defaultValue: "-1200000, 4700000, 2600000, 8500000",
     gridColumns: 6,
     helpText: t("map.extentHelp"),
   });
@@ -90,7 +90,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.TEXTFIELD,
     name: "resolutions",
     title: t("map.resolutions"),
-    defaultValue: "84.0001,56,28,14,5.6,2.8,1.4,0.56,0.28,0.14,0.056",
+    defaultValue: "2048, 1024, 512, 256, 128, 64, 32, 16, 8",
     gridColumns: 6,
     helpText: t("map.resolutionsHelp"),
   });
@@ -99,7 +99,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.TEXTFIELD,
     name: "printResolutions",
     title: t("map.printResolutions"),
-    defaultValue: "0.028",
+    defaultValue: "",
     gridColumns: 6,
     helpText: t("map.printResolutionsHelp"),
   });
@@ -108,7 +108,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.CHECKBOX,
     name: "constrainOnlyCenter",
     title: t("map.constrainOnlyCenter"),
-    defaultValue: true,
+    defaultValue: false,
     gridColumns: 6,
     helpText: t("map.constrainOnlyCenterHelp"),
   });
@@ -117,7 +117,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.CHECKBOX,
     name: "constrainResolution",
     title: t("map.constrainResolution"),
-    defaultValue: true,
+    defaultValue: false,
     gridColumns: 6,
     helpText: t("map.constrainResolutionHelp"),
   });
@@ -265,7 +265,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.TEXTFIELD,
     name: "logoLight",
     title: t("map.logoLight"),
-    defaultValue: "/assets/varbergs-kommun-logo.svg",
+    defaultValue: "/logoLight.png",
     gridColumns: 6,
     helpText: t("map.logoLightHelp"),
   });
@@ -273,8 +273,7 @@ export default function CustomForm() {
   extraSettingsContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "logoDark",
-    title: t("map.logoDark"),
-    defaultValue: "/assets/varbergs-kommun-logo-vit.svg",
+    title: "",
     gridColumns: 6,
     helpText: t("map.logoDarkHelp"),
   });
@@ -283,7 +282,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.TEXTFIELD,
     name: "legendOptions",
     title: t("map.legendOptions"),
-    defaultValue: "dummy:1&WIDTH=32&HEIGHT=32",
+    defaultValue: "",
     gridColumns: 6,
     helpText: t("map.legendOptionsHelp"),
   });
@@ -334,7 +333,8 @@ export default function CustomForm() {
     type: INPUT_TYPE.TEXTFIELD,
     name: "cookieLink",
     title: t("map.cookieLink"),
-    defaultValue: "/cookies",
+    defaultValue:
+      "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
     gridColumns: 6,
     helpText: t("map.cookieLinkHelp"),
   });
@@ -343,7 +343,8 @@ export default function CustomForm() {
     type: INPUT_TYPE.TEXTAREA,
     name: "cookieMessage",
     title: t("map.cookieMessage"),
-    defaultValue: t("map.cookieMessageDefault"),
+    defaultValue:
+      "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
     gridColumns: 12,
     helpText: t("map.cookieMessageHelp"),
   });
@@ -367,7 +368,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.CHECKBOX,
     name: "mapcleaner",
     title: t("map.mapcleaner"),
-    defaultValue: true,
+    defaultValue: false,
     gridColumns: 6,
     helpText: t("map.mapcleanerHelp"),
   });
@@ -548,7 +549,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.COLOR_PICKER,
     name: "primaryColor",
     title: t("map.primaryColor"),
-    defaultValue: "#ff0000",
+    defaultValue: "#333333",
     gridColumns: 6,
   });
 
@@ -556,7 +557,7 @@ export default function CustomForm() {
     type: INPUT_TYPE.COLOR_PICKER,
     name: "secondaryColor",
     title: t("map.secondaryColor"),
-    defaultValue: { r: 0, g: 255, b: 0, a: 1 },
+    defaultValue: "#ffa000",
     gridColumns: 6,
   });
 
