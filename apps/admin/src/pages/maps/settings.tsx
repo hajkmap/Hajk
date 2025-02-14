@@ -12,6 +12,7 @@ import MapIcon from "@mui/icons-material/Map";
 import MenuIcon from "@mui/icons-material/Menu";
 
 import { useTranslation } from "react-i18next";
+import { OpenInNew } from "@mui/icons-material";
 
 export default function CustomForm() {
   const { t } = useTranslation();
@@ -238,6 +239,20 @@ export default function CustomForm() {
     gridColumns: 6,
   });
 
+  mapInteractionsContainer.addElement(
+    <div>
+      <Button
+        size="small"
+        href="https://openlayers.org/en/latest/apidoc/module-ol_interaction_Interaction-Interaction.html"
+        target="_blank"
+        startIcon={<OpenInNew />}
+      >
+        {t("map.mapInteractionsHelpButtonText")}
+      </Button>
+    </div>,
+    12
+  );
+
   mapInteractionsContainer.addStaticElement({
     type: STATIC_TYPE.DIVIDER,
   });
@@ -443,6 +458,20 @@ export default function CustomForm() {
     inputProps: { rows: 8 },
     helpText: t("map.introductionStepsHelp"),
   });
+
+  introGuideContainer.addElement(
+    <div>
+      <Button
+        size="small"
+        href="https://github.com/HiDeoo/intro.js-react#step"
+        target="_blank"
+        startIcon={<OpenInNew />}
+      >
+        {t("map.introJsHelpButtonText")}
+      </Button>
+    </div>,
+    12
+  );
 
   const sidepanelContainer = new DynamicFormContainer(
     t("map.sidepanel"),
