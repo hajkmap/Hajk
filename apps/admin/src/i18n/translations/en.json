@@ -161,6 +161,12 @@
     "layers.listLink": "(list)",
     "layers.sortByAttribute": "Infoclick sort by attribute",
     "layers.infoClickFormat": "Infoclick format",
-    "layers.infoClickSortMethod": "Infoclick sort-type"
+    "layers.infoClickSortMethod": "Infoclick sort-type",
+    "layers.searchSettings.active": "Activate search",
+    "layers.searchSettings.searchFields": "Searchfield",
+    "layers.searchSettings.outputFormat": "Output format",
+    "layers.searchSettings.geometryField": "Geometry field",
+    "layers.showMetadata": "Infobutton visible to layer",
+    "layers.layerDisplayDescription": "Display description of the layer"
   }
 }

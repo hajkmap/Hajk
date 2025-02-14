@@ -21,6 +21,7 @@ import {
   useUpdateLayer,
   infoClickFormat,
   sortType,
+  searchOutputFormat,
 } from "../../api/layers";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import FormActionPanel from "../../components/form-action-panel";
@@ -45,6 +46,8 @@ export default function LayerSettings() {
   const { data: service, isLoading: serviceLoading } = useServiceByLayerId(
     layer?.id ?? ""
   );
+
+  console.log("layer", layer);
 
   const { layers: getCapLayers, styles: getCapStyles } = useServiceCapabilities(
     {
@@ -493,51 +496,55 @@ export default function LayerSettings() {
   accordionNestedContainer5.addInput({
     type: INPUT_TYPE.CHECKBOX,
     gridColumns: 10,
-    name: "activateSearch",
-    title: `Aktivera sökning`,
-    defaultValue: false,
+    name: "searchSettings.active",
+    title: `${t("layers.searchSettings.active")}`,
+    defaultValue: layer?.searchSettings?.active,
   });
   accordionNestedContainer5.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 12,
-    name: "url",
+    name: "searchSettings.url",
     title: `Url`,
-    defaultValue: "",
+    defaultValue: layer?.searchSettings?.url,
   });
   accordionNestedContainer5.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 12,
-    name: "searchField",
-    title: `Sökfält`,
-    defaultValue: "",
+    name: "searchSettings.searchFields",
+    title: `${t("layers.searchSettings.searchFields")}`,
+    defaultValue: layer?.searchSettings?.searchFields,
+  });
+  accordionNestedContainer5.addInput({
+    type: INPUT_TYPE.SELECT,
+    gridColumns: 6,
+    name: "searchSettings.outputFormat",
+    title: `${t("layers.searchSettings.searchFields")}`,
+    defaultValue: layer?.searchSettings?.outputFormat,
+    optionList: searchOutputFormat.map((format) => ({
+      title: format,
+      value: format,
+    })),
   });
   accordionNestedContainer5.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "outDataFormat",
-    title: `Utdataformat`,
-    defaultValue: "",
-  });
-  accordionNestedContainer5.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "geometryField",
-    title: `Geometrifält`,
-    defaultValue: "",
+    name: "searchSettings.geometryField",
+    title: `${t("layers.searchSettings.geometryField")}`,
+    defaultValue: layer?.searchSettings?.geometryField,
   });
   accordionNestedContainer6.addInput({
     type: INPUT_TYPE.CHECKBOX,
     gridColumns: 10,
-    name: "infoButtonActiveLayer",
-    title: `Infoknapp synlig för lager`,
-    defaultValue: false,
+    name: "showMetadata",
+    title: `${t("layers.showMetadata")}`,
+    defaultValue: layer?.showMetadata,
   });
   accordionNestedContainer6.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 12,
-    name: "layerDescription",
-    title: `Visningsbeskrivning av lager`,
-    defaultValue: "",
+    name: "options.layerDisplayDescription",
+    title: `${t("layers.layerDisplayDescription")}`,
+    defaultValue: layer?.options?.layerDisplayDescription,
   });
   accordionNestedContainer7.addInput({
     type: INPUT_TYPE.SELECT,
@@ -579,17 +586,24 @@ export default function LayerSettings() {
         minZoom: layerData.minZoom,
         maxZoom: layerData.maxZoom,
         infoClickActive: layerData?.infoClickActive,
+        showMetadata: layerData?.showMetadata,
         options: {
           keyword: layerData?.options?.keyword,
           category: layerData?.options?.category,
           geoWebCache: layerData?.options?.geoWebCache,
           showAttributeTableButton:
             layerData?.options?.showAttributeTableButton,
+          layerDisplayDescription: layerData?.options?.layerDisplayDescription,
         },
         metadata: {
           attribution: layerData?.metadata?.attribution,
         },
         searchSettings: {
+          active: layerData?.searchSettings?.active,
+          url: layerData?.searchSettings?.url,
+          searchFields: layerData?.searchSettings?.searchFields,
+          outputFormat: layerData?.searchSettings?.outputFormat,
+          geometryField: layerData?.searchSettings?.geometryField,
           primaryDisplayFields: layerData?.searchSettings?.primaryDisplayFields,
           secondaryDisplayFields:
             layerData?.searchSettings?.secondaryDisplayFields,

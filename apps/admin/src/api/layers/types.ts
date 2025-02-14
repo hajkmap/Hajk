@@ -19,7 +19,7 @@ export interface Layer {
   legendUrl?: string;
   legendIconUrl?: string;
   customRatio: number;
-  showMetaData: boolean;
+  showMetadata: boolean;
   infoClickActive: boolean;
   timeSliderVisible: boolean;
   timeSliderStart?: string;
@@ -37,11 +37,12 @@ export interface Layer {
     id: string;
     active: boolean;
     url?: string;
-    searchFields?: string[];
-    primaryDisplayFields?: string[];
-    secondaryDisplayFields?: string[];
-    shortDisplayFields?: string[];
+    searchFields: string[];
+    primaryDisplayFields: string[];
+    secondaryDisplayFields: string[];
+    shortDisplayFields: string[];
     geometryField?: string;
+    outputFormat: string;
   };
   infoClickSettings: {
     id: string;
@@ -49,10 +50,10 @@ export interface Layer {
     layerInstanceId?: string;
     definition?: string;
     icon?: string;
-    format?: string;
+    format: string;
     sortProperty?: string;
-    sortMethod?: string;
-    sortDescending?: boolean;
+    sortMethod: string;
+    sortDescending: boolean;
   };
   options: Record<string, unknown>;
 }
@@ -97,7 +98,7 @@ export interface LayerUpdateInput {
   legendUrl?: string;
   legendIconUrl?: string;
   customRatio?: number;
-  showMetaData?: boolean;
+  showMetadata?: boolean;
   infoClickActive?: boolean;
   timeSliderVisible?: boolean;
   timeSliderStart?: string;
@@ -118,6 +119,7 @@ export interface LayerUpdateInput {
     secondaryDisplayFields?: string[];
     shortDisplayFields?: string[];
     geometryField?: string;
+    outputFormat?: string;
   };
   infoClickSettings: {
     layerId?: string;
@@ -141,3 +143,5 @@ export const sortType = [
   { title: "text", value: "text" },
   { title: "number", value: "number" },
 ];
+
+export const searchOutputFormat = ["GML2", "GML3", "GML32"];

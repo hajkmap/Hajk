@@ -160,6 +160,12 @@
     "layers.listLink": "(lista)",
     "layers.sortByAttribute": "Infoklick sortera på attribut",
     "layers.infoClickFormat": "Infoklick format",
-    "layers.infoClickSortMethod": "Infoklick sorteringstyp"
+    "layers.infoClickSortMethod": "Infoklick sorteringstyp",
+    "layers.searchSettings.active": "Aktivera sökning",
+    "layers.searchSettings.searchFields": "Sökfält",
+    "layers.searchSettings.outputFormat": "Utdataformat",
+    "layers.searchSettings.geometryField": "Geometrifält",
+    "layers.showMetadata": "Infoknapp synlig för lager",
+    "layers.layerDisplayDescription": "Visningsbeskrivning av lager"
   }
 }
