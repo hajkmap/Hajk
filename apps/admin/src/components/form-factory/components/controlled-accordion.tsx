@@ -109,7 +109,7 @@ function ControlledAccordion({
           >
             {/* Please refactor the ugly * thing below */}
             {keyValue.title.replace("*", "").trim()}:{" "}
-            {getValue(keyValue?.value)}
+            {String(getValue(keyValue?.value))}
           </Box>
         ))}
       </Box>
