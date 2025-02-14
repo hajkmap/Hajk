@@ -58,7 +58,7 @@ function ControlledAccordion({
 
         const value = kv[castedInput.name];
 
-        if (value) {
+        if (value || typeof value === "boolean") {
           newKv.push({
             key: castedInput.name,
             value: value as string,
