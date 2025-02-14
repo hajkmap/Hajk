@@ -10,11 +10,15 @@ import INPUT_TYPE from "../../components/form-factory/types/input-type";
 import STATIC_TYPE from "../../components/form-factory/types/static-type";
 import { OpenInNew as OpenInNewIcon } from "@mui/icons-material";
 
+import { useTranslation } from "react-i18next";
+
 export default function CustomForm() {
+  const { t } = useTranslation();
+
   const rootContainer = new DynamicFormContainer();
 
   const baseSettingsContainer = new DynamicFormContainer(
-    "Grundinställningar för kartvisning",
+    t("map.baseSettings"),
     CONTAINER_TYPE.ACCORDION
   );
   rootContainer.addContainer(baseSettingsContainer);
@@ -22,159 +26,140 @@ export default function CustomForm() {
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "projection",
-    title: "Projektion",
+    title: t("map.projection"),
     defaultValue: "EPSG:3007",
     gridColumns: 6,
-    helpText:
-      "Används som OpenLayers View 'projection'-parameter, ex 'EPSG:3008'",
+    helpText: t("map.projectionHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.NUMBER,
     name: "startZoom",
-    title: "Startzoom",
+    title: t("map.startZoom"),
     defaultValue: 0,
     gridColumns: 2,
-    helpText: "Används som OpenLayers View 'zoom'-parameter, ex '2'",
+    helpText: t("map.startZoomHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.NUMBER,
     name: "maxZoom",
-    title: "Max-zoomnivå",
+    title: t("map.maxZoom"),
     defaultValue: 10,
     gridColumns: 2,
-    helpText: "Används som OpenLayers View 'maxZoom'-parameter, ex '20'",
+    helpText: t("map.maxZoomHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.NUMBER,
     name: "minZoom",
-    title: "Min-zoomnivå",
+    title: t("map.minZoom"),
     defaultValue: 0,
     gridColumns: 2,
-    helpText: "Används som OpenLayers View 'minZoom'-parameter, ex '0'",
+    helpText: t("map.minZoomHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "centerCoordinate",
-    title: "Centrumkoordinat",
+    title: t("map.centerCoordinate"),
     defaultValue: "172586,6340107",
     gridColumns: 6,
-    helpText:
-      "Används som OpenLayers View 'center'-parameter, ex '110600,6283796'",
+    helpText: t("map.centerCoordinateHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "origin",
-    title: "Origin",
+    title: t("map.origin"),
     defaultValue: "150000,6315000",
     gridColumns: 6,
-    helpText: "Används som OpenLayers View 'origin'-parameter, ex '0,0'",
+    helpText: t("map.originHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "extent",
-    title: "Extent",
+    title: t("map.extent"),
     defaultValue: "150000,6315000,200000,6360000",
     gridColumns: 6,
-    helpText: "Används som OpenLayers View 'extent'-parameter, ex '1,2,3,4'",
-  });
-
-  baseSettingsContainer.addStaticElement({
-    type: STATIC_TYPE.SPACER,
-    gridColumns: 6,
+    helpText: t("map.extentHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "resolutions",
-    title: "Upplösningar",
+    title: t("map.resolutions"),
     defaultValue: "84.0001,56,28,14,5.6,2.8,1.4,0.56,0.28,0.14,0.056",
     gridColumns: 6,
-    helpText:
-      "Används som OpenLayers View 'resolutions'-parameter, ex '4096,2048,1024,512'",
+    helpText: t("map.resolutionsHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "printResolutions",
-    title: "Upplösningar (Extra för utskrift)",
+    title: t("map.printResolutions"),
     defaultValue: "0.028",
     gridColumns: 6,
-    helpText:
-      "Extra upplösningar som läggs på befintliga upplösningar vid utskrift",
-  });
-
-  baseSettingsContainer.addStaticElement({
-    type: STATIC_TYPE.DIVIDER,
+    helpText: t("map.printResolutionsHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "constrainOnlyCenter",
-    title: "Lätta på extent",
+    title: t("map.constrainOnlyCenter"),
     defaultValue: true,
     gridColumns: 6,
-    helpText:
-      "Styr ol.Views 'constrainOnlyCenter'-parameter. Om sant kommer endast centrumkoordinaten att begränsas till extent.",
+    helpText: t("map.constrainOnlyCenterHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "constrainResolution",
-    title: "Lås zoom till satta upplösningar för datorer",
+    title: t("map.constrainResolution"),
     defaultValue: true,
     gridColumns: 6,
-    helpText:
-      "Styr ol.Views 'constrainResolution'-parameter. Om sant kommer det endast gå att zooma mellan satta resolutions.",
+    helpText: t("map.constrainResolutionHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "constrainResolutionMobile",
-    title: "Lås zoom till satta upplösningar för mobiltelefoner",
+    title: t("map.constrainResolutionMobile"),
     defaultValue: false,
     gridColumns: 6,
-    helpText:
-      "Styr ol.Views 'constrainResolution'-parameter. Om sant kommer det endast gå att zooma mellan satta resolutions.",
+    helpText: t("map.constrainResolutionMobileHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "enableDownloadLink",
-    title: "Tillåt nedladdning av WMS-lager",
+    title: t("map.enableDownloadLink"),
     defaultValue: false,
     gridColumns: 6,
-    helpText:
-      "Om aktivt kommer en nedladdningsknapp att visas bredvid varje lager i Lagerhanteraren.",
+    helpText: t("map.enableDownloadLinkHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "enableAppStateInHash",
-    title: "Beta: aktivera liveuppdatering av hashparametrar i URL-fältet",
+    title: t("map.enableAppStateInHash"),
     defaultValue: true,
     gridColumns: 6,
-    helpText:
-      "Kartans status hålls ständigt uppdaterad, som en del av URL:ens #-parametrar.",
+    helpText: t("map.enableAppStateInHashHelp"),
   });
 
   baseSettingsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "confirmOnWindowClose",
-    title: "Beta: fråga användaren om Hajk verkligen ska stängas",
+    title: t("map.confirmOnWindowClose"),
     defaultValue: true,
     gridColumns: 6,
-    helpText:
-      "Om aktivt kommer en konfirmationsruta att visas om ändringar i Hajk finns (ex. pågående ritning eller mätning).",
+    helpText: t("map.confirmOnWindowCloseHelp"),
   });
 
   const mapInteractionsContainer = new DynamicFormContainer(
-    "Kartinteraktioner",
+    t("map.interactions"),
     CONTAINER_TYPE.ACCORDION
   );
   rootContainer.addContainer(mapInteractionsContainer);
@@ -182,7 +167,7 @@ export default function CustomForm() {
   mapInteractionsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "altShiftDragRotate",
-    title: "Whether Alt-Shift-drag rotate is desired",
+    title: t("map.altShiftDragRotate"),
     defaultValue: true,
     gridColumns: 6,
   });
@@ -190,17 +175,16 @@ export default function CustomForm() {
   mapInteractionsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "onFocusOnly",
-    title: "Interact only when the map has the focus",
+    title: t("map.onFocusOnly"),
     defaultValue: false,
     gridColumns: 6,
-    helpText:
-      "This affects the MouseWheelZoom and DragPan interactions and is useful when page scroll is desired for maps that do not have the browsers focus.",
+    helpText: t("map.onFocusOnlyHelp"),
   });
 
   mapInteractionsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "doubleClickZoom",
-    title: "Whether double click zoom is desired",
+    title: t("map.doubleClickZoom"),
     defaultValue: true,
     gridColumns: 6,
   });
@@ -208,7 +192,7 @@ export default function CustomForm() {
   mapInteractionsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "keyboard",
-    title: "Whether keyboard interaction is desired",
+    title: t("map.keyboard"),
     defaultValue: true,
     gridColumns: 6,
   });
@@ -216,7 +200,7 @@ export default function CustomForm() {
   mapInteractionsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "mouseWheelZoom",
-    title: "Whether mousewheel zoom is desired",
+    title: t("map.mouseWheelZoom"),
     defaultValue: true,
     gridColumns: 6,
   });
@@ -224,7 +208,7 @@ export default function CustomForm() {
   mapInteractionsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "shiftDragZoom",
-    title: "Whether Shift-drag zoom is desired",
+    title: t("map.shiftDragZoom"),
     defaultValue: true,
     gridColumns: 6,
   });
@@ -232,7 +216,7 @@ export default function CustomForm() {
   mapInteractionsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "dragPan",
-    title: "Whether drag pan is desired",
+    title: t("map.dragPan"),
     defaultValue: true,
     gridColumns: 6,
   });
@@ -240,7 +224,7 @@ export default function CustomForm() {
   mapInteractionsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "pinchRotate",
-    title: "Whether pinch rotate is desired",
+    title: t("map.pinchRotate"),
     defaultValue: true,
     gridColumns: 6,
   });
@@ -248,7 +232,7 @@ export default function CustomForm() {
   mapInteractionsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "pinchZoom",
-    title: "Whether pinch zoom is desired",
+    title: t("map.pinchZoom"),
     defaultValue: true,
     gridColumns: 6,
   });
@@ -260,19 +244,19 @@ export default function CustomForm() {
   mapInteractionsContainer.addInput({
     type: INPUT_TYPE.NUMBER,
     name: "zoomLevelDelta",
-    title: "Zoom level delta when using keyboard or double click zoom",
+    title: t("map.zoomLevelDelta"),
     gridColumns: 6,
   });
 
   mapInteractionsContainer.addInput({
     type: INPUT_TYPE.NUMBER,
     name: "zoomAnimationDuration",
-    title: "Duration of the zoom animation in milliseconds",
+    title: t("map.zoomAnimationDuration"),
     gridColumns: 6,
   });
 
   const extraSettingsContainer = new DynamicFormContainer(
-    "Extra inställningar",
+    t("map.extraSettings"),
     CONTAINER_TYPE.ACCORDION
   );
   rootContainer.addContainer(extraSettingsContainer);
@@ -280,45 +264,41 @@ export default function CustomForm() {
   extraSettingsContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "logoLight",
-    title: "Logo för ljust tema",
+    title: t("map.logoLight"),
     defaultValue: "/assets/varbergs-kommun-logo.svg",
     gridColumns: 6,
-    helpText:
-      "Sökväg till logga att använda i <img>-taggen. Kan vara relativ Hajk-root eller absolut.",
+    helpText: t("map.logoLightHelp"),
   });
 
   extraSettingsContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "logoDark",
-    title: "Logo för mörkt tema",
+    title: t("map.logoDark"),
     defaultValue: "/assets/varbergs-kommun-logo-vit.svg",
     gridColumns: 6,
-    helpText:
-      "Sökväg till logga att använda i <img>-taggen. Kan vara relativ Hajk-root eller absolut.",
+    helpText: t("map.logoDarkHelp"),
   });
 
   extraSettingsContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "legendOptions",
-    title: "Legend options",
+    title: t("map.legendOptions"),
     defaultValue: "dummy:1&WIDTH=32&HEIGHT=32",
     gridColumns: 6,
-    helpText:
-      "Lägg till på legend requests. Exempel: 'dummy:1&WIDTH=32&HEIGHT=32'",
+    helpText: t("map.legendOptionsHelp"),
   });
 
   extraSettingsContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "crossOrigin",
-    title: "Cross origin-parameter",
+    title: t("map.crossOrigin"),
     defaultValue: "anonymous",
     gridColumns: 6,
-    helpText:
-      "Ställer in vilket värde som används för 'crossOrigin'. Om osäker, används 'anonymous'.",
+    helpText: t("map.crossOriginHelp"),
   });
 
   const cookiesContainer = new DynamicFormContainer(
-    "Cookies",
+    t("map.cookies"),
     CONTAINER_TYPE.ACCORDION
   );
   rootContainer.addContainer(cookiesContainer);
@@ -326,54 +306,50 @@ export default function CustomForm() {
   cookiesContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "showCookieNotice",
-    title: "Visa cookies-meddelande",
+    title: t("map.showCookieNotice"),
     defaultValue: true,
     gridColumns: 6,
-    helpText:
-      "Om aktivt kommer ett meddelande angående hantering av cookies visas för nya användare.",
+    helpText: t("map.showCookieNoticeHelp"),
   });
 
   cookiesContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "cookieUse3dPart",
-    title: "Visa alternativ för 3:e part cookies",
+    title: t("map.cookieUse3dPart"),
     defaultValue: false,
     gridColumns: 6,
-    helpText:
-      "Om aktiv kommer en checkbox angående 3:e part cookies visas för nya användare.",
+    helpText: t("map.cookieUse3dPartHelp"),
   });
 
   cookiesContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "showCookieNoticeButton",
-    title: "Visa knapp för cookies-meddelande",
+    title: t("map.showCookieNoticeButton"),
     defaultValue: true,
     gridColumns: 6,
-    helpText:
-      "Om aktivt kommer en knapp som visar cookies-meddelande att visas under zoom-knapparna.",
+    helpText: t("map.showCookieNoticeButtonHelp"),
   });
 
   cookiesContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "cookieLink",
-    title: "Cookies-länk",
+    title: t("map.cookieLink"),
     defaultValue: "/cookies",
     gridColumns: 6,
-    helpText: "Valfri URL som öppnas med knappen 'Mer information'.",
+    helpText: t("map.cookieLinkHelp"),
   });
 
   cookiesContainer.addInput({
     type: INPUT_TYPE.TEXTAREA,
     name: "cookieMessage",
-    title: "Cookies-meddelande",
-    defaultValue:
-      "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan.",
+    title: t("map.cookieMessage"),
+    defaultValue: t("map.cookieMessageDefault"),
     gridColumns: 12,
-    helpText: "Ange meddelande för cookies.",
+    helpText: t("map.cookieMessageHelp"),
   });
 
   const extraMapControlsContainer = new DynamicFormContainer(
-    "Extra kontroller/knappar",
+    t("map.extraMapControls"),
     CONTAINER_TYPE.ACCORDION
   );
   rootContainer.addContainer(extraMapControlsContainer);
@@ -381,64 +357,59 @@ export default function CustomForm() {
   extraMapControlsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "mapselector",
-    title: "Visa kartväljare",
+    title: t("map.mapselector"),
     defaultValue: false,
     gridColumns: 6,
-    helpText:
-      "Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren.",
+    helpText: t("map.mapselectorHelp"),
   });
 
   extraMapControlsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "mapcleaner",
-    title: "Visa knapp för att rensa kartan",
+    title: t("map.mapcleaner"),
     defaultValue: true,
     gridColumns: 6,
-    helpText:
-      "Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren.",
+    helpText: t("map.mapcleanerHelp"),
   });
 
   extraMapControlsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "mapresetter",
-    title: "Visa en hemknapp som återställer kartans innehåll till startläge",
+    title: t("map.mapresetter"),
     defaultValue: false,
     gridColumns: 6,
-    helpText:
-      "Om aktiv kommer en hemknapp som återställer kartan att visas för användaren.",
+    helpText: t("map.mapresetterHelp"),
   });
 
   extraMapControlsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "showThemeToggler",
-    title: "Visa knapp för att byta mellan ljust och mörkt tema",
+    title: t("map.showThemeToggler"),
     defaultValue: true,
     gridColumns: 6,
-    helpText: "Om aktiv kommer en knapp som möjliggör temaväxling att visas.",
+    helpText: t("map.showThemeTogglerHelp"),
   });
 
   extraMapControlsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "showUserAvatar",
-    title: "Visa en knapp med användarens initialer intill zoomknapparna",
+    title: t("map.showUserAvatar"),
     defaultValue: false,
     gridColumns: 6,
-    helpText:
-      "Om AD-kopplingen är aktiv kommer en avatar-ikon bestående av användarens initialer att visas bland kartkontrollerna.",
+    helpText: t("map.showUserAvatarHelp"),
   });
 
   extraMapControlsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "showRecentlyUsedPlugins",
-    title: "Visa en snabbväljare med de senast använda verktygen",
+    title: t("map.showRecentlyUsedPlugins"),
     defaultValue: false,
     gridColumns: 6,
-    helpText:
-      "En liten knapp som vid hover/touch visar de senast använda verktygen och låter användaren aktivera dessa.",
+    helpText: t("map.showRecentlyUsedPluginsHelp"),
   });
 
   const introGuideContainer = new DynamicFormContainer(
-    "Introduktionsguide",
+    t("map.introGuide"),
     CONTAINER_TYPE.ACCORDION
   );
   rootContainer.addContainer(introGuideContainer);
@@ -446,51 +417,33 @@ export default function CustomForm() {
   introGuideContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "introductionEnabled",
-    title:
-      "Starta introduktionsguiden automatiskt första gången användaren besöker kartan",
+    title: t("map.introductionEnabled"),
     defaultValue: false,
     gridColumns: 6,
-    helpText:
-      "Om aktivt kommer en introduktionsguide att visas för användaren vid första besöket.",
+    helpText: t("map.introductionEnabledHelp"),
   });
 
   introGuideContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "introductionShowControlButton",
-    title:
-      "Visa en knapp i kartan som låter användaren att starta guiden manuellt",
+    title: t("map.introductionShowControlButton"),
     defaultValue: false,
     gridColumns: 6,
-    helpText: "Om aktivt kommer en knapp att visas intill zoom-knapparna.",
+    helpText: t("map.introductionShowControlButtonHelp"),
   });
 
   introGuideContainer.addInput({
     type: INPUT_TYPE.TEXTAREA,
     name: "introductionSteps",
-    title: "Steg som visas i introduktionsguiden",
+    title: t("map.introductionSteps"),
     defaultValue: "[]",
     gridColumns: 12,
     inputProps: { rows: 8 },
-    helpText:
-      "JSON-objekt som specificerar vilka element som highlightas i introduktionsguiden. Kan lämnas tomt för att highlighta standardobjekt.",
+    helpText: t("map.introductionStepsHelp"),
   });
 
-  introGuideContainer.addElement(
-    <div>
-      <Button
-        size="small"
-        href="https://github.com/HiDeoo/intro.js-react#step"
-        target="_blank"
-        startIcon={<OpenInNewIcon />}
-      >
-        Se exempel på hur man skapar steg.
-      </Button>
-    </div>,
-    12
-  );
-
   const sidepanelContainer = new DynamicFormContainer(
-    "Sidopanel",
+    t("map.sidepanel"),
     CONTAINER_TYPE.ACCORDION
   );
   rootContainer.addContainer(sidepanelContainer);
@@ -498,80 +451,77 @@ export default function CustomForm() {
   sidepanelContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "drawerStatic",
-    title: "Låt sidopanelen vara permanent synlig och låst",
+    title: t("map.drawerStatic"),
     defaultValue: false,
     gridColumns: 6,
-    helpText: "Om aktiv kommer sidopanelen vara permanent synlig och låst.",
+    helpText: t("map.drawerStaticHelp"),
   });
 
   sidepanelContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "drawerVisible",
-    title: "Starta med sidopanelen synlig",
+    title: t("map.drawerVisible"),
     defaultValue: true,
     gridColumns: 6,
-    helpText: "Om aktiv kommer sidopanelen att vara synlig när kartan laddat.",
+    helpText: t("map.drawerVisibleHelp"),
   });
 
   sidepanelContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "drawerVisibleMobile",
-    title: "Starta med sidopanelen synlig i mobilläge",
+    title: t("map.drawerVisibleMobile"),
     defaultValue: false,
     gridColumns: 6,
-    helpText:
-      "Om aktiv kommer sidopanelen att vara öppen men inte låst vid skärmens kant vid start.",
+    helpText: t("map.drawerVisibleMobileHelp"),
   });
 
   sidepanelContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "drawerPermanent",
-    title: "Låt sidopanelen vara låst vid start",
+    title: t("map.drawerPermanent"),
     defaultValue: true,
     gridColumns: 6,
-    helpText:
-      "Om aktiv kommer sidopanelen att vara låst vid skärmens kant vid start (gäller ej mobila enheter).",
+    helpText: t("map.drawerPermanentHelp"),
   });
 
   sidepanelContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "drawerContent",
-    title: "Aktiv drawer innehåll",
+    title: t("map.drawerContent"),
     defaultValue: "plugins",
     gridColumns: 6,
-    helpText: "Styr vilket drawer-innehåll som ska vara aktivt vid start.",
+    helpText: t("map.drawerContentHelp"),
   });
 
   sidepanelContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "drawerTitle",
-    title: "Titel sidopanel",
+    title: t("map.drawerTitle"),
     defaultValue: "Kartverktyg",
     gridColumns: 6,
-    helpText: "Titel på verktygets panel som visas högst upp i sidopanelen.",
+    helpText: t("map.drawerTitleHelp"),
   });
 
   sidepanelContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "drawerButtonTitle",
-    title: "Titel aktiveringsknapp",
+    title: t("map.drawerButtonTitle"),
     defaultValue: "Kartverktyg",
     gridColumns: 6,
-    helpText: "Text på knappen som öppnar verktyget.",
+    helpText: t("map.drawerButtonTitleHelp"),
   });
 
   sidepanelContainer.addInput({
     type: INPUT_TYPE.RADIO,
     name: "drawerButtonIcon",
-    title: "Ikon aktiveringsknapp",
+    title: t("map.drawerButtonIcon"),
     defaultValue: "MapIcon",
     gridColumns: 6,
-    helpText:
-      "Ikon på knappen som öppnar verktyget. Välj mellan fördefinierade alternativ.",
+    helpText: t("map.drawerButtonIconHelp"),
   });
 
   const mapColorContainer = new DynamicFormContainer(
-    "Färger",
+    t("map.colors"),
     CONTAINER_TYPE.ACCORDION
   );
   rootContainer.addContainer(mapColorContainer);
@@ -579,15 +529,15 @@ export default function CustomForm() {
   mapColorContainer.addInput({
     type: INPUT_TYPE.SELECT,
     name: "preferredColorScheme",
-    title: "Ljus/mörkt färgtema",
+    title: t("map.preferredColorScheme"),
     defaultValue: "user",
     gridColumns: 6,
     optionList: [
-      { title: "Låt användaren bestämma (default)", value: "user" },
-      { title: "Ljust", value: "light" },
-      { title: "Mörkt", value: "dark" },
+      { title: t("map.colorSchemeUser"), value: "user" },
+      { title: t("map.colorSchemeLight"), value: "light" },
+      { title: t("map.colorSchemeDark"), value: "dark" },
     ],
-    helpText: "Avgör om användarens preferenser gällande färgtema följs.",
+    helpText: t("map.preferredColorSchemeHelp"),
   });
 
   mapColorContainer.addStaticElement({
@@ -597,7 +547,7 @@ export default function CustomForm() {
   mapColorContainer.addInput({
     type: INPUT_TYPE.COLOR_PICKER,
     name: "primaryColor",
-    title: "Huvudfärg",
+    title: t("map.primaryColor"),
     defaultValue: "#ff0000",
     gridColumns: 6,
   });
@@ -605,7 +555,7 @@ export default function CustomForm() {
   mapColorContainer.addInput({
     type: INPUT_TYPE.COLOR_PICKER,
     name: "secondaryColor",
-    title: "Komplementfärg",
+    title: t("map.secondaryColor"),
     defaultValue: { r: 0, g: 255, b: 0, a: 1 },
     gridColumns: 6,
   });
@@ -634,7 +584,7 @@ export default function CustomForm() {
   });
 
   return (
-    <Page title="Kartinställningar">
+    <Page title={t("map.pageTitle")}>
       <form onSubmit={onSubmit}>
         <FormRenderer
           formControls={formContainerData}
@@ -646,7 +596,7 @@ export default function CustomForm() {
         <Grid container>
           <Grid sx={{ ml: "auto" }}>
             <Button type="submit" variant="contained" disabled={!isDirty}>
-              Submit
+              {t("map.submitButton")}
             </Button>
           </Grid>
         </Grid>

@@ -94,7 +94,7 @@ function ControlledAccordion({
     } else if (typeof value === "string") {
       return value + "".trim();
     }
-    return String(value);
+    return (value as string) ?? "";
   };
 
   const tooltipContent = () => {
