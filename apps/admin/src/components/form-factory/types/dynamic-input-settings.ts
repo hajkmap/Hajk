@@ -15,7 +15,7 @@ class DynamicInputSettings<TFieldValues extends FieldValues> {
   };
   public inputProps?: Record<string, unknown>;
   public defaultValue?: TFieldValues[Path<TFieldValues>];
-  public optionList?: { title: string; value: unknown }[];
+  public optionList?: { title: string | React.ReactNode; value: unknown }[];
   public kind? = "DynamicInputSettings";
   public disabled? = false;
   public visibleIf?: { name: string; value: string };

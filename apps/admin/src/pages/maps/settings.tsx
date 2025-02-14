@@ -8,7 +8,8 @@ import { useState } from "react";
 import Page from "../../layouts/root/components/page";
 import INPUT_TYPE from "../../components/form-factory/types/input-type";
 import STATIC_TYPE from "../../components/form-factory/types/static-type";
-import { OpenInNew as OpenInNewIcon } from "@mui/icons-material";
+import MapIcon from "@mui/icons-material/Map";
+import MenuIcon from "@mui/icons-material/Menu";
 
 import { useTranslation } from "react-i18next";
 
@@ -519,6 +520,19 @@ export default function CustomForm() {
     defaultValue: "MapIcon",
     gridColumns: 6,
     helpText: t("map.drawerButtonIconHelp"),
+    inputProps: {
+      row: true,
+    },
+    optionList: [
+      {
+        title: <MapIcon style={{ verticalAlign: "middle" }} />,
+        value: "MapIcon",
+      },
+      {
+        title: <MenuIcon style={{ verticalAlign: "middle" }} />,
+        value: "MenuIcon",
+      },
+    ],
   });
 
   const mapColorContainer = new DynamicFormContainer(
