@@ -12,6 +12,7 @@ import Create from "@material-ui/icons/Create";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import TocIcon from "@material-ui/icons/Toc";
 import AddBoxIcon from "@material-ui/icons/AddBox";
+import WarningIcon from "@material-ui/icons/Warning";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { withStyles } from "@material-ui/core/styles";
 import {
@@ -770,8 +771,8 @@ class DocumentEditor extends Component {
     return (
       <>
         {!isValid && this.state.newDocumentName !== "" && (
-          <div style={{ color: "white", backgroundColor: "orange", marginTop: 8 }}>
-            Dokumentnamn innehåller otillåtna tecken!
+          <div style={{ color: "white", backgroundColor: "orange", marginTop: 8, padding: 8 }}>
+            <WarningIcon /> Dokumentnamnet innehåller otillåtna tecken och kan därför inte sparas!
             <br />
             Endast A-Z, a-z, 0-9 och _ är tillåtet.
           </div>
@@ -840,8 +841,8 @@ class DocumentEditor extends Component {
     return (
       <>
         {!isValid && this.state.newFolderName !== "" && (
-          <div style={{ color: "white", backgroundColor: "orange", marginTop: 8 }}>
-            Mappnamn innehåller otillåtna tecken!
+          <div style={{ color: "white", backgroundColor: "orange", marginTop: 8, padding: 8 }}>
+            <WarningIcon /> Mappnamnet innehåller otillåtna tecken och kan därför inte sparas!
             <br />
             Endast A-Z, a-z, 0-9 och _ är tillåtet.
           </div>
