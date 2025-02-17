@@ -1,3 +1,4 @@
+import React from "react";
 import Tooltip from "@mui/material/Tooltip";
 
 const HajkToolTip = ({ title, children, ...props }) => {
@@ -6,10 +7,10 @@ const HajkToolTip = ({ title, children, ...props }) => {
       enterDelay={500}
       leaveDelay={50}
       disableInteractive={true}
-      title={title ? title : ""}
+      title={title || ""}
       {...props}
     >
-      {children ? children : <></>}
+      {children || <></>}
     </Tooltip>
   );
 };

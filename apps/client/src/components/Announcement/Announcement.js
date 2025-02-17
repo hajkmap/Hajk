@@ -170,7 +170,7 @@ function Announcement({ announcements = [], currentMap }) {
               a: ({ children, href, title }) => {
                 return children ? (
                   <Link
-                    href={href}
+                    href={href || null}
                     title={title}
                     target="_blank"
                     color="inherit"

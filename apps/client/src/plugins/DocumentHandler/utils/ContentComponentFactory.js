@@ -785,7 +785,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         target="_blank"
         component="a"
         key="external-link"
-        href={externalLink}
+        href={externalLink || null}
       >
         <Box component="span">{getFormattedComponentFromTag(aTag)}</Box>
       </Button>
@@ -830,7 +830,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
           },
         }}
         target="_blank"
-        href={externalLink}
+        href={externalLink || null}
         key="map-link"
         component="button"
         onClick={() => {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 // import { createPortal } from "react-dom";
 
 // import { styled } from "@mui/material/styles";

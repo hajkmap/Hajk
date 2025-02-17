@@ -226,7 +226,7 @@ class BreadCrumbs extends Component {
     ));
     return (
       <BreadCrumbsContainer>
-        <ScrollMenu ref="scrollMenu" data={breadCrumbs} alignCenter={false} />
+        <ScrollMenu data={breadCrumbs} alignCenter={false} />
       </BreadCrumbsContainer>
     );
   }

@@ -9,7 +9,8 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import ToggleButton from "@mui/material/ToggleButton";
 import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
-import { withSnackbar, useSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import HajkToolTip from "components/HajkToolTip";
 
 const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
