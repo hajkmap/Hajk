@@ -98,23 +98,22 @@ const LayersTab = ({
     scrollContainerRef.current.scroll(0, Number.MAX_SAFE_INTEGER, {
       behavior: "smooth",
     });
-    // scrollContainerRef.current.scrollBy(10000000, 0);
     scrollContainerRef.current?.scrollIntoView({ block: "end" });
   }, [scrollContainerRef]);
 
   const scrollToTop = useCallback(() => {
     scrollContainerRef.current.scroll(0, 0, { behavior: "smooth" });
-    // scrollContainerRef.current.scrollBy(0, 0);
-    // scrollContainerRef.current?.scrollIntoView({ block: "start" });
   }, [scrollContainerRef]);
 
   return (
     <div
       style={{
         ...style,
+        position: "relative",
+        overflowY: "auto",
+        flexGrow: "1",
         height: "inherit",
         maxHeight: "inherit",
-        display: "flex",
         flexDirection: "column",
       }}
     >
@@ -131,11 +130,11 @@ const LayersTab = ({
         id="sc-test"
         ref={scrollContainerRef}
         style={{
-          // position: "relative",
           height: "inherit",
-          maxHeight: "calc(inherit - 3em)",
           overflowY: "auto",
-          flex: 1,
+          flexBasis: "100%",
+          flexGrow: "1",
+          flexShrink: "1",
         }}
       >
         {filterHits === null && (

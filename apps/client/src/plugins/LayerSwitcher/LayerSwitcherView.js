@@ -14,7 +14,7 @@ import LayerItemDetails from "./components/LayerItemDetails.js";
 import { OSM_LAYER_ID } from "./components/BackgroundSwitcher";
 
 const StyledAppBar = styled(AppBar)(() => ({
-  top: -10,
+  zIndex: "1",
 }));
 
 /**
@@ -217,8 +217,8 @@ class LayersSwitcherView extends React.PureComponent {
       const currentScrollPosition =
         scrollPositions[`tab${this.state.activeTab}`];
       if (currentScrollPosition !== undefined) {
-        const scrollContainer = document.getElementById("scroll-container");
-        scrollContainer.scrollTop = currentScrollPosition;
+        // const scrollContainer = document.getElementById("scroll-container");
+        // scrollContainer.scrollTop = currentScrollPosition;
       }
     }
   }
@@ -229,8 +229,8 @@ class LayersSwitcherView extends React.PureComponent {
    * @memberof LayersSwitcherView
    */
   getScrollPosition = () => {
-    const scrollContainer = document.getElementById("scroll-container");
-    return scrollContainer.scrollTop;
+    // const scrollContainer = document.getElementById("scroll-container");
+    // return scrollContainer.scrollTop;
   };
 
   /**
@@ -255,15 +255,17 @@ class LayersSwitcherView extends React.PureComponent {
 
     return (
       <div
+        id="layer-switcher-view-root"
         style={{
-          display: windowVisible ? "block" : "none",
-          height: "inherit",
+          display: windowVisible ? "flex" : "none",
+          flexDirection: "column",
+          height: "100%",
           maxHeight: "inherit",
           flex: 1,
         }}
       >
         <StyledAppBar
-          position="sticky" // Does not work in IE11
+          position="relative" // Does not work in IE11
           color="default"
         >
           <Tabs
@@ -283,93 +285,88 @@ class LayersSwitcherView extends React.PureComponent {
             )}
           </Tabs>
         </StyledAppBar>
-        <div
-          id="scroll-container"
-          ref={this.scrollContainerRef}
-          style={{ height: "inherit", maxHeight: "inherit" }}
-        >
-          <LayersTab
-            style={{
-              display:
-                this.state.activeTab === 0 &&
-                this.state.displayContentOverlay === null
-                  ? "block"
-                  : "none",
-            }}
-            layersState={layersState}
-            staticLayerConfig={this.staticLayerConfig}
-            staticLayerTree={this.staticLayerTree}
-            displayContentOverlay={this.state.displayContentOverlay}
-            layersTabOptions={{
-              showFilter: this.options.showFilter,
-              showQuickAccess: this.options.showQuickAccess,
-              enableQuickAccessPresets: this.options.enableQuickAccessPresets,
-              enableUserQuickAccessFavorites:
-                this.options.enableUserQuickAccessFavorites,
-              userQuickAccessFavoritesInfoText:
-                this.options.userQuickAccessFavoritesInfoText,
-              layerFilterMinLength: this.options.layerFilterMinLength,
-            }}
-            handleQuickAccessPresetsToggle={(e) =>
-              this.handleQuickAccessPresetsToggle({ event: e })
-            }
-            handleFavoritesViewToggle={this.handleFavoritesViewToggle}
-            globalObserver={this.globalObserver}
-            map={this.props.map}
-            app={this.app}
-            scrollContainerRef={this.scrollContainerRef}
-          />
-          {this.props.options.enableQuickAccessPresets && (
-            <QuickAccessPresets
-              quickAccessPresets={this.options.quickAccessPresets}
-              display={
-                this.state.displayContentOverlay === "quickAccessPresets"
-              }
-              backButtonCallback={this.handleQuickAccessPresetsToggle}
-              map={this.props.map}
-              globalObserver={this.globalObserver}
-              quickAccessPresetsInfoText={
-                this.options.quickAccessPresetsInfoText
-              }
-            ></QuickAccessPresets>
-          )}
-          <LayerItemDetails
-            display={this.state.displayContentOverlay === "layerItemDetails"}
-            layerItemDetails={this.state.layerItemDetails}
-            app={this.props.app}
-            chapters={this.state.chapters}
-            showOpacitySlider={this.props.options.enableTransparencySlider}
-            showQuickAccess={this.props.options.showQuickAccess}
-          ></LayerItemDetails>
-          <BackgroundSwitcher
+        <LayersTab
+          style={{
+            flexGrow: "1",
+            display:
+              this.state.activeTab === 0 &&
+              this.state.displayContentOverlay === null
+                ? "flex"
+                : "none",
+          }}
+          layersState={layersState}
+          staticLayerConfig={this.staticLayerConfig}
+          staticLayerTree={this.staticLayerTree}
+          displayContentOverlay={this.state.displayContentOverlay}
+          layersTabOptions={{
+            showFilter: this.options.showFilter,
+            showQuickAccess: this.options.showQuickAccess,
+            enableQuickAccessPresets: this.options.enableQuickAccessPresets,
+            enableUserQuickAccessFavorites:
+              this.options.enableUserQuickAccessFavorites,
+            userQuickAccessFavoritesInfoText:
+              this.options.userQuickAccessFavoritesInfoText,
+            layerFilterMinLength: this.options.layerFilterMinLength,
+          }}
+          handleQuickAccessPresetsToggle={(e) =>
+            this.handleQuickAccessPresetsToggle({ event: e })
+          }
+          handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+          globalObserver={this.globalObserver}
+          map={this.props.map}
+          app={this.app}
+          scrollContainerRef={this.scrollContainerRef}
+        />
+        {this.props.options.enableQuickAccessPresets && (
+          <QuickAccessPresets
+            quickAccessPresets={this.options.quickAccessPresets}
             display={
-              this.state.activeTab === 1 &&
+              this.state.displayContentOverlay === "quickAccessPresets"
+            }
+            backButtonCallback={this.handleQuickAccessPresetsToggle}
+            map={this.props.map}
+            globalObserver={this.globalObserver}
+            quickAccessPresetsInfoText={
+              this.options.quickAccessPresetsInfoText
+            }
+          ></QuickAccessPresets>
+        )}
+        <LayerItemDetails
+          display={this.state.displayContentOverlay === "layerItemDetails"}
+          layerItemDetails={this.state.layerItemDetails}
+          app={this.props.app}
+          chapters={this.state.chapters}
+          showOpacitySlider={this.props.options.enableTransparencySlider}
+          showQuickAccess={this.props.options.showQuickAccess}
+        ></LayerItemDetails>
+        <BackgroundSwitcher
+          display={
+            this.state.activeTab === 1 &&
+            this.state.displayContentOverlay === null
+          }
+          layers={this.baseLayers}
+          layerMap={this.olLayerMap}
+          backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+          backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+          enableOSM={this.options.enableOSM}
+          map={this.props.map}
+          globalObserver={this.props.globalObserver}
+        />
+        {this.options.showDrawOrderView === true && (
+          <DrawOrder
+            localObserver={this.localObserver}
+            display={
+              this.state.activeTab === 2 &&
               this.state.displayContentOverlay === null
             }
-            layers={this.baseLayers}
-            layerMap={this.olLayerMap}
-            backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
-            backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
-            enableOSM={this.options.enableOSM}
             map={this.props.map}
-            globalObserver={this.props.globalObserver}
-          />
-          {this.options.showDrawOrderView === true && (
-            <DrawOrder
-              localObserver={this.localObserver}
-              display={
-                this.state.activeTab === 2 &&
-                this.state.displayContentOverlay === null
-              }
-              map={this.props.map}
-              app={this.props.app}
-              options={this.props.options}
-            ></DrawOrder>
-          )}
-          {this.options.showBreadcrumbs && (
-            <BreadCrumbsContainer map={this.props.map} app={this.props.app} />
-          )}
-        </div>
+            app={this.props.app}
+            options={this.props.options}
+          ></DrawOrder>
+        )}
+        {this.options.showBreadcrumbs && (
+          <BreadCrumbsContainer map={this.props.map} app={this.props.app} />
+        )}
       </div>
     );
   }
