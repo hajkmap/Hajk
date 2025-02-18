@@ -16,7 +16,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Slide from "@mui/material/Slide";
 import Toolbar from "./Toolbar.js";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 
 const PageContent = styled("div")(() => ({
   height: "calc(100% - 60px)",
@@ -39,6 +39,8 @@ class Page extends Component {
       };
       this.formErrors = {};
     }
+
+    this.toolbarRef = React.createRef();
   }
 
   getError(field) {
@@ -329,7 +331,7 @@ class Page extends Component {
       if (attr.type && attr.type === "toolbar") {
         return (
           <Toolbar
-            ref="toolbar"
+            ref={this.toolbarRef}
             field={attr.field}
             geotype={attr.geotype}
             serviceConfig={this.props.serviceConfig}
@@ -415,7 +417,7 @@ class Page extends Component {
               return (
                 <a
                   key={i}
-                  href={child.attr["href"]}
+                  href={child.attr["href"] || null}
                   rel="noopener noreferrer"
                   target="_blank"
                 >
@@ -508,8 +510,8 @@ class Page extends Component {
         variant="contained"
         sx={{ float: "left", margin: 1 }}
         onClick={() => {
-          if (typeof this.refs.toolbar !== "undefined") {
-            this.refs.toolbar.storeValues();
+          if (this.toolbarRef.current !== null) {
+            this.toolbarRef.current.storeValues();
           }
           onPrevPage();
         }}
@@ -523,8 +525,8 @@ class Page extends Component {
         variant="contained"
         sx={{ float: "right", margin: 1 }}
         onClick={() => {
-          if (typeof this.refs.toolbar !== "undefined") {
-            this.refs.toolbar.storeValues();
+          if (this.toolbarRef.current !== null) {
+            this.toolbarRef.current.storeValues();
           }
           onNextPage();
         }}

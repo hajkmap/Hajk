@@ -65,14 +65,18 @@ const GroupInfoDetails = ({
       )}
       {infogroupurl && (
         <Typography variant="body2" sx={{ fontWeight: 500, mt: 1, mb: 1 }}>
-          <Link href={infogroupurl} target="_blank" rel="noreferrer">
+          <Link href={infogroupurl || null} target="_blank" rel="noreferrer">
             {infogroupurltext}
           </Link>
         </Typography>
       )}
       {infogroupopendatalink && (
         <Typography variant="body2" sx={{ fontWeight: 500, mt: 1, mb: 1 }}>
-          <Link href={infogroupopendatalink} target="_blank" rel="noreferrer">
+          <Link
+            href={infogroupopendatalink || null}
+            target="_blank"
+            rel="noreferrer"
+          >
             Öppna data: {name}
           </Link>
         </Typography>

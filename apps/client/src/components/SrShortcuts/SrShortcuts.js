@@ -27,7 +27,7 @@ const SrShortcuts = ({ globalObserver }) => {
       {shortcuts.map((shortcut) => {
         return (
           <ListItem key={shortcut.link}>
-            <Link href={shortcut.link}>{shortcut.title}</Link>
+            <Link href={shortcut.link || null}>{shortcut.title}</Link>
           </ListItem>
         );
       })}

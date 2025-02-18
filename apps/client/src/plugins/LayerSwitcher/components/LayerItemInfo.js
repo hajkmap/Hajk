@@ -105,7 +105,7 @@ export default function LayerItemInfo({ layer, app, chapters }) {
           {/* MetadataLink */}
           {layerInfo.infoUrl && (
             <a
-              href={layerInfo.infoUrl}
+              href={layerInfo.infoUrl || null}
               target="_blank"
               rel="noopener noreferrer"
             >

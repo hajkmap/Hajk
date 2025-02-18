@@ -1,6 +1,6 @@
 import React from "react";
 import SearchBar from "./SearchBar";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import Observer from "react-event-observer";
 import EditIcon from "@mui/icons-material/Edit";
 import Crop54Icon from "@mui/icons-material/Crop54";

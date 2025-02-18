@@ -389,9 +389,7 @@ class App extends React.PureComponent {
       }
     }
 
-    this.setToggleDrawerPermanentRef = (element) => {
-      this.buttonToggleDrawerPermanentRef = element;
-    };
+    this.buttonToggleDrawerPermanentRef = React.createRef();
 
     this.globalObserver = new Observer();
 
@@ -1036,7 +1034,7 @@ class App extends React.PureComponent {
                   }
                 >
                   <IconButton
-                    ref={this.setToggleDrawerPermanentRef}
+                    ref={this.buttonToggleDrawerPermanentRef}
                     sx={{ margin: "-12px" }} // Ugh... However, it tightens everything up
                     onClick={this.togglePermanent}
                     onMouseEnter={this.handleMouseEnter}
@@ -1159,7 +1157,7 @@ class App extends React.PureComponent {
                     <Link
                       align="center"
                       variant="button"
-                      href={config.mapConfig.map.linkInDrawer.href}
+                      href={config.mapConfig.map.linkInDrawer.href || null}
                       target={
                         config.mapConfig.map.linkInDrawer.newWindow === true
                           ? "_blank"

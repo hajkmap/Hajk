@@ -1,6 +1,6 @@
 import React from "react";
 
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";

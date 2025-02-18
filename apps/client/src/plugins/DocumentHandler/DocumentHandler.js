@@ -128,7 +128,7 @@ class DocumentHandler extends React.PureComponent {
         <link
           rel="stylesheet"
           type="text/css"
-          href={dynamicImportUrls.customFont}
+          href={dynamicImportUrls.customFont || null}
         />
       );
     } else return null;
@@ -137,7 +137,9 @@ class DocumentHandler extends React.PureComponent {
   dynamicallyImportIconFonts = () => {
     const { dynamicImportUrls } = this.props.options;
     if (dynamicImportUrls.iconFonts) {
-      return <link rel="stylesheet" href={dynamicImportUrls.iconFonts} />;
+      return (
+        <link rel="stylesheet" href={dynamicImportUrls.iconFonts || null} />
+      );
     } else return null;
   };
 
