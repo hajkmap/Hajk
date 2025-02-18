@@ -106,12 +106,12 @@ export interface LayerUpdateInput {
   hideExpandArrow?: boolean;
   zIndex?: number;
   style?: string;
-  metadata: {
+  metadata?: {
     url?: string;
     urlTitle?: string;
     attribution?: string;
   };
-  searchSettings: {
+  searchSettings?: {
     active?: boolean;
     url?: string;
     searchFields?: string[];
@@ -121,7 +121,7 @@ export interface LayerUpdateInput {
     geometryField?: string;
     outputFormat?: string;
   };
-  infoClickSettings: {
+  infoClickSettings?: {
     layerId?: string;
     layerInstanceId?: string;
     definition?: string;

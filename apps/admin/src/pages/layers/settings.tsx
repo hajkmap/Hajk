@@ -47,8 +47,6 @@ export default function LayerSettings() {
     layer?.id ?? ""
   );
 
-  console.log("layer", layer);
-
   const { layers: getCapLayers, styles: getCapStyles } = useServiceCapabilities(
     {
       baseUrl: service?.url ?? "",
@@ -157,7 +155,7 @@ export default function LayerSettings() {
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "attribution",
+    name: "metadata.attribution",
     title: `${t("layers.copyRight")}`,
     defaultValue: layer?.metadata?.attribution,
   });
@@ -575,6 +573,7 @@ export default function LayerSettings() {
       const payload = {
         name: layerData.name,
         serviceId: layerData.serviceId,
+        selectedLayers: layerData.selectedLayers,
         internalName: layerData.internalName,
         description: layerData.description,
         hidpi: layerData.hidpi,
@@ -704,6 +703,8 @@ export default function LayerSettings() {
               isLoading={serviceLoading}
               getCapLayers={getCapLayers}
               selectedLayers={layer?.selectedLayers ?? []}
+              serviceId={service?.id ?? ""}
+              layerId={layer?.id ?? ""}
             />
           )}
           <UsedInMapsGrid />

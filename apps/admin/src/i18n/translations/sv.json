@@ -279,6 +279,8 @@
     "layers.searchSettings.outputFormat": "Utdataformat",
     "layers.searchSettings.geometryField": "Geometrifält",
     "layers.showMetadata": "Infoknapp synlig för lager",
-    "layers.layerDisplayDescription": "Visningsbeskrivning av lager"
+    "layers.layerDisplayDescription": "Visningsbeskrivning av lager",
+    "layers.updateLayersSuccess": "Valda lager uppdaterades!",
+    "layers.updateLayersFailed": "Misslyckades att uppdatera valda lager"
   }
 }

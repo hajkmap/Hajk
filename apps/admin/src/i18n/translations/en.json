@@ -280,6 +280,8 @@
     "layers.searchSettings.outputFormat": "Output format",
     "layers.searchSettings.geometryField": "Geometry field",
     "layers.showMetadata": "Infobutton visible to layer",
-    "layers.layerDisplayDescription": "Display description of the layer"
+    "layers.layerDisplayDescription": "Display description of the layer",
+    "layers.updateLayersSuccess": "Selected layers updated!",
+    "layers.updateLayersFailed": "Failed to update selected layers."
   }
 }
