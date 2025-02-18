@@ -38,13 +38,13 @@ class Card extends React.PureComponent {
     title: propTypes.string.isRequired,
   };
 
-  static defaultProps = {
-    abstract: "Beskrivning saknas",
-    title: "Titel saknas",
-  };
-
   render() {
-    const { abstract, icon, onClick, title } = this.props;
+    const {
+      abstract = "Beskrivning saknas",
+      icon,
+      onClick,
+      title = "Titel saknas",
+    } = this.props;
 
     return (
       <StyledCard onClick={onClick}>

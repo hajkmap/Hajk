@@ -107,7 +107,6 @@ const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
     // Hide the layer in OL
     olLayer.setVisible(false);
   } else {
-    olLayer.setVisible(true);
     // Set LAYERS and STYLES so that the exact sublayers that are needed
     // will be visible
     olLayer.getSource().updateParams({
@@ -122,6 +121,7 @@ const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
         .join(","),
       CQL_FILTER: null,
     });
+    olLayer.setVisible(true);
   }
 };
 
@@ -220,9 +220,15 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
         currentSubLayers.delete(subLayerId);
       }
 
-      const currentSubLayersArray = Array.from(currentSubLayers);
-      olLayer.set("subLayers", currentSubLayersArray);
-      setOLSubLayers(olLayer, currentSubLayersArray);
+      const currentSubLayersSet = new Set(currentSubLayers);
+      // Sort the sublayers in the order they are defined. So that the order is
+      // consistent regardless of the order the sublayers are toggled in.
+      const allSubLayers = staticLayerConfig[layerId]?.allSubLayers;
+      const sortedCurrentSubLayers = allSubLayers.filter((l) =>
+        currentSubLayersSet.has(l)
+      );
+      olLayer.set("subLayers", sortedCurrentSubLayers);
+      setOLSubLayers(olLayer, sortedCurrentSubLayers);
     },
     setGroupVisibility(groupId, visible) {
       const groupTree = getGroupConfigById(staticLayerTree, groupId);
@@ -304,10 +310,20 @@ const getLayerNodes = (groups, olLayerMap) =>
 
     const children = [...(layers ?? []), ...(subgroups ?? [])];
 
-    // A group should have both defined
-    const isGroup = !!(node.groups && node.layers);
+    const isGroup = !!(node.groups || node.layers);
 
     const olLayer = olLayerMap[node.id];
+
+    // If we're looking at a "normal layer" (not a group) and the OpenLayers
+    // object is missing that means that the layer configured in the
+    // LayerSwitcher options but is missing or misconfigured in the
+    // `layersConfig`. In that case we should ignore the layer and don't show
+    // it in the LayerSwitcher
+    if (!isGroup && olLayer === undefined) {
+      // A non group layer should not have any children so it's okay to return
+      // the empty array here.
+      return [];
+    }
 
     const isGroupLayer = olLayer?.get("layerType") === "group";
 
@@ -323,9 +339,9 @@ const getLayerNodes = (groups, olLayerMap) =>
       {
         id: node.id,
         layerId: node.id,
-        caption: olLayerMap[node.id]?.get("caption") ?? node.name,
-        layerCaption: olLayerMap[node.id]?.get("caption") ?? node.name,
-        allSubLayers: olLayerMap[node.id]?.get("subLayers"),
+        caption: olLayer?.get("caption") ?? node.name,
+        layerCaption: olLayer?.get("caption") ?? node.name,
+        allSubLayers: olLayer?.get("subLayers"),
         initiallyExpanded: node.expanded,
         initiallyToggled: node.toggled,
         initialDrawOrder: node.drawOrder,

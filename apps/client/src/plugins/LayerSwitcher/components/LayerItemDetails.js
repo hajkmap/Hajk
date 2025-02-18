@@ -63,7 +63,7 @@ function LayerItemDetails({
 
   // TODO Is this correct? Should it not be shown for group layers?
   const showLegend =
-    layerItemDetails?.layer.get("layerType") === "group" &&
+    layerItemDetails?.layer?.get("layerType") === "group" &&
     subLayerIndex === null
       ? false
       : true;
@@ -88,14 +88,14 @@ function LayerItemDetails({
     if (layerItemDetails?.layer) {
       // Register a listener: when layer's opacity changes make sure
       // to update opacity state. Not applicable for fakeMapLayers
-      if (!layerItemDetails.layer.isFakeMapLayer) {
-        setOpacity(layerItemDetails.layer.get("opacity"));
-        setQuickAccess(layerItemDetails.layer.get("quickAccess"));
-        layerItemDetails.layer.on("change:opacity", setOpacityCallback);
+      if (!layerItemDetails?.layer?.isFakeMapLayer) {
+        setOpacity(layerItemDetails?.layer?.get("opacity"));
+        setQuickAccess(layerItemDetails?.layer?.get("quickAccess"));
+        layerItemDetails?.layer?.on("change:opacity", setOpacityCallback);
       }
     }
     return function () {
-      layerItemDetails?.layer.un("change:opacity", setOpacityCallback);
+      layerItemDetails?.layer?.un("change:opacity", setOpacityCallback);
     };
   }, [layerItemDetails]);
 
@@ -126,16 +126,16 @@ function LayerItemDetails({
   // Checks if layer is enabled for options
   const hasListItemOptions = () => {
     return (
-      layerItemDetails.layer.get("layerType") !== "system" &&
-      layerItemDetails.layer.isFakeMapLayer !== true
+      layerItemDetails?.layer?.get("layerType") !== "system" &&
+      layerItemDetails?.layer?.isFakeMapLayer !== true
     );
   };
 
   // Check that layer is elligible for quickAccess option
   const isQuickAccessEnabled = () => {
     return (
-      layerItemDetails.layer.get("layerType") !== "base" &&
-      layerItemDetails.layer.get("layerType") !== "system" && // Exclude system layers
+      layerItemDetails?.layer?.get("layerType") !== "base" &&
+      layerItemDetails?.layer?.get("layerType") !== "system" && // Exclude system layers
       subLayerIndex === null &&
       showQuickAccess
     );
@@ -144,7 +144,7 @@ function LayerItemDetails({
   // Add a check for CQL filter visibility and exclude system layers
   const isCqlFilterEnabled = () => {
     return (
-      cqlFilterVisible && layerItemDetails.layer.get("layerType") !== "system" // Exclude system layers
+      cqlFilterVisible && layerItemDetails?.layer?.get("layerType") !== "system" // Exclude system layers
     );
   };
 
@@ -174,7 +174,7 @@ function LayerItemDetails({
         layerItemDetails.layer.subLayers[subLayerIndex]
       ].caption;
     } else {
-      return layerItemDetails.layer.get("caption");
+      return layerItemDetails?.layer?.get("caption");
     }
   };
 
@@ -332,7 +332,7 @@ function LayerItemDetails({
                 <CQLFilter layer={layerItemDetails.layer} />
               </Box>
             )}
-            {layerItemDetails.layer.getProperties().filterable && (
+            {layerItemDetails?.layer?.getProperties().filterable && (
               <>
                 <Divider />
                 <Stack direction="row" alignItems="center">

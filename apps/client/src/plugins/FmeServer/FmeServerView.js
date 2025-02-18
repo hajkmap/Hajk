@@ -684,7 +684,7 @@ const FmeServerView = (props) => {
                             <InputAdornment position="start">
                               <IconButton
                                 aria-label="Open information page"
-                                href={infoUrl}
+                                href={infoUrl || null}
                                 target="_blank"
                                 edge="start"
                               >

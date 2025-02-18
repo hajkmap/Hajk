@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { createPortal } from "react-dom";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import {
   styled,
   StyledEngineProvider,
@@ -1057,7 +1057,7 @@ class PrintWindow extends React.PureComponent {
             </Typography>
             {hasLink && (
               <Button
-                href={pdfLink.link}
+                href={pdfLink.link || null}
                 target="_blank"
                 sx={{ height: "28px", padding: "10px", minWidth: "auto" }}
                 color={linkColor}

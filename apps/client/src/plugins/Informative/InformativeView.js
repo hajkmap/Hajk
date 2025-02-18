@@ -14,7 +14,7 @@ import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import Typography from "@mui/material/Typography";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import Alert from "../../components/Alert.js";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import { styled } from "@mui/material/styles";
 
 const homeHeader = "";
@@ -426,8 +426,7 @@ class Informative extends React.PureComponent {
         <div>
           {this.state.url && (
             <Button
-              ref="anchor"
-              href={this.state.url}
+              href={this.state.url || null}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => {

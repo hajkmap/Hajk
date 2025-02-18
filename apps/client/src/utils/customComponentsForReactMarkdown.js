@@ -153,7 +153,7 @@ export const customComponentsForReactMarkdown = {
       infoclickOptions || {};
     return children ? (
       <Link
-        href={href}
+        href={href || null}
         title={title}
         target={target || "_blank"}
         color={linksColor}

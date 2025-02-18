@@ -156,6 +156,7 @@ class Window extends React.PureComponent {
     super(props);
     document.windows.push(this);
     this.windowRef = React.createRef();
+    this.rnd = React.createRef();
     this.state = {
       left: 0,
       top: 0,
@@ -197,7 +198,7 @@ class Window extends React.PureComponent {
         this.updatePosition();
       });
       globalObserver.subscribe("core.dialogOpen", (open) => {
-        this.rnd.setState({
+        this.rnd.current.setState({
           disableDrag: open,
         });
       });
@@ -226,8 +227,8 @@ class Window extends React.PureComponent {
   }
 
   getMaxWindowHeight() {
-    if (this.rnd === undefined) return 400;
-    const parent = this.rnd.getSelfElement().parentElement;
+    if (this.rnd.current === null) return 400;
+    const parent = this.rnd.current.getSelfElement().parentElement;
     const spaceForBreadcrumbs = this.areBreadcrumbsActivated() ? 42 : 0;
     const h =
       parent.clientHeight - // Maximum height of parent element
@@ -239,8 +240,9 @@ class Window extends React.PureComponent {
   }
 
   updatePosition() {
+    if (this.rnd.current === null) return;
     const { width, height, position } = this.props;
-    const parent = this.rnd.getSelfElement().parentElement;
+    const parent = this.rnd.current.getSelfElement().parentElement;
 
     //FIXME: JW - Not the best solution for parent resize to set top/left to 0/0, but it ensures we don't get a window outside of the parent
     this.left = 16; // Make sure we respect padding
@@ -277,7 +279,7 @@ class Window extends React.PureComponent {
         mode: "window",
       },
       () => {
-        this.rnd.updatePosition({
+        this.rnd.current.updatePosition({
           y: Math.round(this.top),
           x: Math.round(this.left),
         });
@@ -287,18 +289,18 @@ class Window extends React.PureComponent {
 
   close = (e) => {
     const { onClose, globalObserver, title } = this.props;
-    this.latestWidth = this.rnd.getSelfElement().clientWidth;
+    this.latestWidth = this.rnd.current.getSelfElement().clientWidth;
     if (onClose) onClose();
 
     globalObserver.publish("core.closeWindow", title);
   };
 
   fit = (target) => {
-    this.rnd.updatePosition({
+    this.rnd.current.updatePosition({
       x: Math.round(target.getBoundingClientRect().left),
       y: Math.round(target.getBoundingClientRect().top),
     });
-    this.rnd.setState({
+    this.rnd.current.setState({
       disableDrag: true,
     });
     this.setState({
@@ -309,11 +311,11 @@ class Window extends React.PureComponent {
   };
 
   reset = () => {
-    this.rnd.updatePosition({
+    this.rnd.current.updatePosition({
       y: Math.round(this.top),
       x: Math.round(this.left),
     });
-    this.rnd.setState({
+    this.rnd.current.setState({
       disableDrag: false,
     });
     this.setState({
@@ -326,17 +328,19 @@ class Window extends React.PureComponent {
   enlarge = () => {
     let t = parseFloat(this.top);
     let h = parseFloat(this.height);
-    let c = this.rnd.getSelfElement().parentElement.getBoundingClientRect();
+    let c = this.rnd.current
+      .getSelfElement()
+      .parentElement.getBoundingClientRect();
     let o = t + h;
 
     if (o > c.bottom) {
       this.top = this.top - o + c.bottom;
     }
 
-    this.rnd.updatePosition({
+    this.rnd.current.updatePosition({
       y: Math.round(this.top),
     });
-    this.rnd.setState({
+    this.rnd.current.setState({
       disableDrag: false,
     });
     this.setState({
@@ -354,7 +358,7 @@ class Window extends React.PureComponent {
       title,
     } = this.props;
 
-    getIsMobile() && this.rnd.updatePosition({ y: 0 });
+    getIsMobile() && this.rnd.current.updatePosition({ y: 0 });
 
     switch (this.state.mode) {
       case "minimized":
@@ -388,7 +392,7 @@ class Window extends React.PureComponent {
     const { globalObserver, onMinimize, onResize, title } = this.props;
 
     getIsMobile() &&
-      this.rnd.updatePosition({
+      this.rnd.current.updatePosition({
         y: Math.round(window.innerHeight - 42),
       });
 
@@ -412,8 +416,8 @@ class Window extends React.PureComponent {
     document.windows
       .sort((a, b) => (a === this ? 1 : b === this ? -1 : 0))
       .forEach((w, i) => {
-        if (w.rnd) {
-          w.rnd.getSelfElement().style.zIndex = zIndexStart + i;
+        if (w.rnd.current) {
+          w.rnd.current.getSelfElement().style.zIndex = zIndexStart + i;
         }
       });
   }
@@ -493,14 +497,12 @@ class Window extends React.PureComponent {
           this.bringToFront();
         }}
         onMouseOver={(e) => e.stopPropagation()} // If this bubbles, we'll have Tooltip show up even when we're only on Window. FIXME: Not needed when we change the rendering order.
-        ref={(c) => {
-          this.rnd = c;
-        }}
+        ref={this.rnd}
         style={{
           display: open ? "block" : "none",
         }}
         onDragStop={(e, d) => {
-          const rect = this.rnd.getSelfElement().getClientRects()[0];
+          const rect = this.rnd.current.getSelfElement().getClientRects()[0];
           if (rect) {
             this.left = rect.left;
             this.top = rect.top;
