@@ -4,7 +4,7 @@
 
 _Hajk is an open source web GIS solution based on React, Material UI and OpenLayers. It is developed in Sweden and used by various municipalities and government agencies, as well as by public and private enterprises._
 
-![alt text](https://user-images.githubusercontent.com/110222/96265856-42960000-0fc6-11eb-805e-9e41ec5d77f9.png "Hajk 3 with all tools visible")
+![Hajk 4 client UI example](https://github.com/user-attachments/assets/a221eb84-1b8c-440c-84ad-52b57f85b1d0)
 
 ## Want to contribute?
 
