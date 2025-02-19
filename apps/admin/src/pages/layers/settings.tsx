@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
 import { Button, Stack, TextField, useTheme, Link } from "@mui/material";
+import { GridRowSelectionModel } from "@mui/x-data-grid";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import { FieldValues } from "react-hook-form";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
@@ -46,7 +47,8 @@ export default function LayerSettings() {
   const { data: service, isLoading: serviceLoading } = useServiceByLayerId(
     layer?.id ?? ""
   );
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>();
   const { layers: getCapLayers, styles: getCapStyles } = useServiceCapabilities(
     {
       baseUrl: service?.url ?? "",
@@ -76,6 +78,9 @@ export default function LayerSettings() {
   } = DefaultUseForm(defaultValues);
 
   const watchSingleTile = watch("singleTile");
+
+  console.log("watchminZoom", watch("minZoom"));
+  console.log("watchMaxzoom", watch("maxZoom"));
 
   const layerSettingsFormContainer = new DynamicFormContainer<FieldValues>();
   const panelNestedContainer = new DynamicFormContainer<FieldValues>(
@@ -136,15 +141,6 @@ export default function LayerSettings() {
   });
 
   panelNestedContainer.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 6,
-    name: "layerService",
-    title: `${t("layers.common.layerNameInService")}`,
-    defaultValue: "",
-    optionList: [{ title: "Testlayer", value: "Testlayer" }],
-  });
-
-  panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
     name: "internalName",
@@ -154,7 +150,7 @@ export default function LayerSettings() {
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
+    gridColumns: 12,
     name: "metadata.attribution",
     title: `${t("layers.copyRight")}`,
     defaultValue: layer?.metadata?.attribution,
@@ -219,7 +215,7 @@ export default function LayerSettings() {
     gridColumns: 6,
     name: "style",
     title: `${t("layers.style")}`,
-    defaultValue: "",
+    defaultValue: layer?.style,
     optionList: [
       { title: "<default>", value: "<default>" },
       ...(styles?.map((style) => ({
@@ -354,7 +350,7 @@ export default function LayerSettings() {
   });
 
   accordionNestedContainer2.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.NUMBER,
     gridColumns: 6,
     name: "minZoom",
     title: `${t("layers.minZoom")}`,
@@ -362,7 +358,7 @@ export default function LayerSettings() {
   });
 
   accordionNestedContainer2.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.NUMBER,
     gridColumns: 6,
     name: "maxZoom",
     title: `${t("layers.maxZoom")}`,
@@ -370,7 +366,7 @@ export default function LayerSettings() {
   });
 
   accordionNestedContainer3.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.TEXTFIELD_ARRAY,
     gridColumns: 12,
     name: "searchSettings.primaryDisplayFields",
     title: `${t("layers.primaryDisplayFields")}`,
@@ -378,7 +374,7 @@ export default function LayerSettings() {
   });
 
   accordionNestedContainer3.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.TEXTFIELD_ARRAY,
     gridColumns: 6,
     name: "searchSettings.secondaryDisplayFields",
     title: `${t("layers.secondaryDisplayFields")}`,
@@ -386,7 +382,7 @@ export default function LayerSettings() {
   });
 
   accordionNestedContainer3.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.TEXTFIELD_ARRAY,
     gridColumns: 6,
     name: "searchSettings.shortDisplayFields",
     title: `${t("layers.shortDisplayFields")}`,
@@ -506,7 +502,7 @@ export default function LayerSettings() {
     defaultValue: layer?.searchSettings?.url,
   });
   accordionNestedContainer5.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.TEXTFIELD_ARRAY,
     gridColumns: 12,
     name: "searchSettings.searchFields",
     title: `${t("layers.searchSettings.searchFields")}`,
@@ -516,7 +512,7 @@ export default function LayerSettings() {
     type: INPUT_TYPE.SELECT,
     gridColumns: 6,
     name: "searchSettings.outputFormat",
-    title: `${t("layers.searchSettings.searchFields")}`,
+    title: `${t("layers.searchSettings.outputFormat")}`,
     defaultValue: layer?.searchSettings?.outputFormat,
     optionList: searchOutputFormat.map((format) => ({
       title: format,
@@ -536,6 +532,27 @@ export default function LayerSettings() {
     name: "showMetadata",
     title: `${t("layers.showMetadata")}`,
     defaultValue: layer?.showMetadata,
+  });
+  accordionNestedContainer6.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 6,
+    name: "metadata.title",
+    title: `${t("layers.metadata.title")}`,
+    defaultValue: layer?.metadata?.title,
+  });
+  accordionNestedContainer6.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 6,
+    name: "metadata.urlTitle",
+    title: `${t("layers.metadata.urlTitle")}`,
+    defaultValue: layer?.metadata?.urlTitle,
+  });
+  accordionNestedContainer6.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 12,
+    name: "metadata.url",
+    title: "Url",
+    defaultValue: layer?.metadata?.url,
   });
   accordionNestedContainer6.addInput({
     type: INPUT_TYPE.TEXTAREA,
@@ -568,6 +585,52 @@ export default function LayerSettings() {
     accordionNestedContainer7,
   ]);
 
+  const filteredLayers = useMemo(() => {
+    if (!getCapLayers) return [];
+
+    const searchAndSelectedFilteredLayers = getCapLayers
+      .map((layer, index) => {
+        const isSelected = selectionModel?.includes(index);
+        return {
+          id: index,
+          layer,
+          infoClick: "",
+          publications: "",
+          selected: isSelected,
+        };
+      })
+      .filter(
+        (layer) =>
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+          layer?.selected || // Disable lint here since ?? is messing with the data-grid search logic
+          layer.layer.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        const aMatches = a.layer
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const bMatches = b.layer
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+
+        if (aMatches && !bMatches) return -1;
+        if (!aMatches && bMatches) return 1;
+        return 0;
+      });
+    return searchAndSelectedFilteredLayers;
+  }, [getCapLayers, searchTerm]);
+
+  const selectedRowsData = useMemo(
+    () =>
+      selectionModel?.map((id) => filteredLayers.find((row) => row.id === id)),
+    [selectionModel, filteredLayers]
+  );
+
+  const selectedRowObjects = useMemo(
+    () => selectedRowsData?.map((row) => row?.layer ?? ""),
+    [selectedRowsData]
+  );
+
   const handleUpdateLayer = async (layerData: LayerUpdateInput) => {
     try {
       const payload = {
@@ -595,6 +658,9 @@ export default function LayerSettings() {
           layerDisplayDescription: layerData?.options?.layerDisplayDescription,
         },
         metadata: {
+          title: layerData?.metadata?.title,
+          url: layerData?.metadata?.url,
+          urlTitle: layerData?.metadata?.urlTitle,
           attribution: layerData?.metadata?.attribution,
         },
         searchSettings: {
@@ -664,7 +730,10 @@ export default function LayerSettings() {
     dirtyFields,
     onValid: (data: FieldValues) => {
       const layerData = data as LayerUpdateInput;
-      void handleUpdateLayer(layerData);
+      void handleUpdateLayer({
+        ...layerData,
+        selectedLayers: selectedRowObjects,
+      });
     },
   });
 
@@ -703,8 +772,11 @@ export default function LayerSettings() {
               isLoading={serviceLoading}
               getCapLayers={getCapLayers}
               selectedLayers={layer?.selectedLayers ?? []}
-              serviceId={service?.id ?? ""}
-              layerId={layer?.id ?? ""}
+              filteredLayers={filteredLayers}
+              setSearchTerm={setSearchTerm}
+              setSelectionModel={setSelectionModel}
+              searchTerm={searchTerm}
+              selectionModel={selectionModel}
             />
           )}
           <UsedInMapsGrid />

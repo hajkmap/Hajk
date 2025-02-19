@@ -13,12 +13,14 @@ import renderSpacer from "./spacer";
 import renderTextArea from "./text-area";
 import renderUnmanagedElement from "./unmanaged-element";
 import renderColorPicker from "./color-picker";
+import renderTextFieldArray from "./text-field-array";
 
 // When a new renderer is added, add it here
 // and add the correct type in
 // ../types/input-type or ../types/static-type or ../types/container-types
 const renderFunctions = {
   [INPUT_TYPE.TEXTFIELD]: renderTextField,
+  [INPUT_TYPE.TEXTFIELD_ARRAY]: renderTextFieldArray,
   [INPUT_TYPE.SELECT]: renderSelect,
   [INPUT_TYPE.SLIDER]: renderSlider,
   [INPUT_TYPE.RADIO]: renderRadioGroup,

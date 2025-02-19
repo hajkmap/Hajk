@@ -249,7 +249,6 @@
     "layers.updateLayerSuccess": "Layer {{name}} updated!",
     "layers.updateLayerFailed": "Failed to update layer {{name}}.",
     "layers.common.service": "Service",
-    "layers.common.layerNameInService": "Lagernamn i tjänsten",
     "layers.internalName": "Internal adminname",
     "layers.copyRight": "Copyright",
     "layers.keyword": "Keyword",
@@ -282,6 +281,8 @@
     "layers.showMetadata": "Infobutton visible to layer",
     "layers.layerDisplayDescription": "Display description of the layer",
     "layers.updateLayersSuccess": "Selected layers updated!",
-    "layers.updateLayersFailed": "Failed to update selected layers."
+    "layers.updateLayersFailed": "Failed to update selected layers.",
+    "layers.metadata.urlTitle": "Url-title",
+    "layers.metadata.title": "Title"
   }
 }

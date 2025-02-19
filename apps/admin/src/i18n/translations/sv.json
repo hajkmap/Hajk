@@ -248,7 +248,6 @@
     "layers.updateLayerSuccess": "Lagret {{name}} uppdaterades!",
     "layers.updateLayerFailed": "Misslyckades att uppdatera lagret {{name}}",
     "layers.common.service": "Tjänst",
-    "layers.common.layerNameInService": "Lagernamn i tjänsten",
     "layers.internalName": "Internt adminnamn",
     "layers.copyRight": "Upphovsrätt",
     "layers.keyword": "Nyckelord",
@@ -281,6 +280,8 @@
     "layers.showMetadata": "Infoknapp synlig för lager",
     "layers.layerDisplayDescription": "Visningsbeskrivning av lager",
     "layers.updateLayersSuccess": "Valda lager uppdaterades!",
-    "layers.updateLayersFailed": "Misslyckades att uppdatera valda lager"
+    "layers.updateLayersFailed": "Misslyckades att uppdatera valda lager",
+    "layers.metadata.urlTitle": "Url-titel",
+    "layers.metadata.title": "Titel"
   }
 }
