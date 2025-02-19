@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   section. The Presets/Themes/Packages are set up in the map config. See
   example in `simpleMapConfig.json`.
 - Improved DrawOrder tab functionality for managing layer drawing order.
+- LayerSwitcher Actions Menu (including scrolling actions).
 
 For details see the following issues:
 
@@ -51,6 +52,7 @@ For details see the following issues:
 - [#1347](https://github.com/hajkmap/Hajk/issues/1347)
 - [#1365](https://github.com/hajkmap/Hajk/issues/1365)
 - [#1380](https://github.com/hajkmap/Hajk/issues/1380)
+- [#1594](https://github.com/hajkmap/Hajk/pull/1594)
 
 ### Fixed
 
