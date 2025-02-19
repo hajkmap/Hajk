@@ -137,6 +137,7 @@ export default function LayersPage() {
         theme: palette.mode,
         hideProgressBar: true,
       });
+      void navigate(`/layers/${response?.id}`);
       reset();
       handleClose();
     } catch (error) {

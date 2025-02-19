@@ -118,7 +118,36 @@ class LayerService {
   }
 
   async deleteLayer(id: string) {
-    await prisma.layer.delete({ where: { id } });
+    await prisma.$transaction(async (transaction) => {
+      const layer = await transaction.layer.findUnique({
+        where: { id },
+        select: {
+          metadata: true,
+          searchSettings: true,
+          infoClickSettings: true,
+        },
+      });
+
+      if (layer?.metadata) {
+        await transaction.metadata.delete({
+          where: { id: layer.metadata.id },
+        });
+      }
+
+      if (layer?.searchSettings) {
+        await transaction.searchSettings.delete({
+          where: { id: layer.searchSettings.id },
+        });
+      }
+
+      if (layer?.infoClickSettings) {
+        await transaction.infoClickSettings.delete({
+          where: { id: layer.infoClickSettings.id },
+        });
+      }
+
+      await transaction.layer.delete({ where: { id } });
+    });
   }
 }
 

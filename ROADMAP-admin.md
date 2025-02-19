@@ -11,15 +11,15 @@
   - [ ] Authentication against Azure Entra (HH)
   - [ ] [Roles](#roles)
 - [ ] Services API
-  - [ ] Update prisma schema
-  - [ ] Update seed script
+  - [x] Update prisma schema (HH)
+  - [x] Update seed script (HH)
   - [ ] Update zod parsers
-  - [ ] Update API methods
+  - [x] Update API methods (AA)
 - [ ] Layers API
-  - [ ] Update prisma schema
-  - [ ] Update seed script
+  - [x] Update prisma schema (HH)
+  - [x] Update seed script (HH)
   - [ ] Update zod parsers
-  - [ ] Update API methods
+  - [x] Update API methods (AA)
 - [ ] FormActionPanel component (OS)
   - [ ] Make the panel sticky (OS)
   - [ ] Feed it with relevant data
@@ -27,12 +27,13 @@
   - [x] Add service (AA)
   - [x] Alter service (AA)
   - [x] Remove service (AA)
-  - [ ] Bugfix: MUI Data Grid checkbox selection issue with separate search field (OS)
+  - [x] Bugfix: MUI Data Grid checkbox selection issue with separate search field (OS/AA)
   - [ ] TBD: Define proper implementation for the "Workspace" input field
 - [x] Layers page
   - [x] Add layer (AA)
-  - [ ] Alter layer (AA)
+  - [x] Alter layer (AA)
   - [x] Remove layer (AA)
+    - ⚠️ Note: legend and legendUrl fields are incomplete. The permission accordion and used in maps data-grid are also incomplete and needs to be updated.
 - [ ] Map settings page
   - [ ] Step 1: Create form with formfactory, UI only [JA]
 - [ ] Optimizing input fields performance/state.
