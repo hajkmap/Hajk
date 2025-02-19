@@ -11,12 +11,12 @@
   - [ ] Authentication against Azure Entra (HH)
   - [ ] [Roles](#roles)
 - [ ] Services API
-  - [x] Update prisma schema (HH)
+  - [x] Update prisma schema (ALL)
   - [x] Update seed script (HH)
   - [ ] Update zod parsers
   - [x] Update API methods (AA)
 - [ ] Layers API
-  - [x] Update prisma schema (HH)
+  - [x] Update prisma schema (ALL)
   - [x] Update seed script (HH)
   - [ ] Update zod parsers
   - [x] Update API methods (AA)
@@ -32,8 +32,8 @@
 - [x] Layers page
   - [x] Add layer (AA)
   - [x] Alter layer (AA)
+  - ⚠️ Note: legend and legendUrl fields are incomplete. The permission accordion and used in maps data-grid are also incomplete and needs to be updated.
   - [x] Remove layer (AA)
-    - ⚠️ Note: legend and legendUrl fields are incomplete. The permission accordion and used in maps data-grid are also incomplete and needs to be updated.
 - [ ] Map settings page
   - [ ] Step 1: Create form with formfactory, UI only [JA]
 - [ ] Optimizing input fields performance/state.
