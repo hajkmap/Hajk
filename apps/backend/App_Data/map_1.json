@@ -3,169 +3,309 @@
     {
       "code": "EPSG:3006",
       "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [181896.33, 6101648.07, 864416, 7689478.3],
+      "extent": [
+        181896.33,
+        6101648.07,
+        864416,
+        7689478.3
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3006",
       "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [181896.33, 6101648.07, 864416, 7689478.3],
+      "extent": [
+        181896.33,
+        6101648.07,
+        864416,
+        7689478.3
+      ],
       "units": null
     },
     {
       "code": "EPSG:3007",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
+      "extent": [
+        60436.5084,
+        6192389.565,
+        217643.4713,
+        6682784.4276
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3007",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
+      "extent": [
+        60436.5084,
+        6192389.565,
+        217643.4713,
+        6682784.4276
+      ],
       "units": null
     },
     {
       "code": "EPSG:3008",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=13.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
-      "extent": [60857.4994, 6120098.8505, 223225.0217, 6906693.7888],
+      "extent": [
+        60857.4994,
+        6120098.8505,
+        223225.0217,
+        6906693.7888
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3008",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=13.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
-      "extent": [60857.4994, 6120098.8505, 223225.0217, 6906693.7888],
+      "extent": [
+        60857.4994,
+        6120098.8505,
+        223225.0217,
+        6906693.7888
+      ],
       "units": null
     },
     {
       "code": "EPSG:3009",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [56294.0365, 6203542.5282, 218719.0581, 6835499.2391],
+      "extent": [
+        56294.0365,
+        6203542.5282,
+        218719.0581,
+        6835499.2391
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3009",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [56294.0365, 6203542.5282, 218719.0581, 6835499.2391],
+      "extent": [
+        56294.0365,
+        6203542.5282,
+        218719.0581,
+        6835499.2391
+      ],
       "units": null
     },
     {
       "code": "EPSG:3010",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [97213.6352, 6228930.1419, 225141.8681, 6916524.0785],
+      "extent": [
+        97213.6352,
+        6228930.1419,
+        225141.8681,
+        6916524.0785
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3010",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [97213.6352, 6228930.1419, 225141.8681, 6916524.0785],
+      "extent": [
+        97213.6352,
+        6228930.1419,
+        225141.8681,
+        6916524.0785
+      ],
       "units": null
     },
     {
       "code": "EPSG:3011",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [96664.5565, 6509617.2232, 220146.6914, 6727103.5879],
+      "extent": [
+        96664.5565,
+        6509617.2232,
+        220146.6914,
+        6727103.5879
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3011",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [96664.5565, 6509617.2232, 220146.6914, 6727103.5879],
+      "extent": [
+        96664.5565,
+        6509617.2232,
+        220146.6914,
+        6727103.5879
+      ],
       "units": null
     },
     {
       "code": "EPSG:3012",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=14.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [30462.5263, 6829647.9842, 216416.1584, 7154168.0208],
+      "extent": [
+        30462.5263,
+        6829647.9842,
+        216416.1584,
+        7154168.0208
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3012",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=14.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [30462.5263, 6829647.9842, 216416.1584, 7154168.0208],
+      "extent": [
+        30462.5263,
+        6829647.9842,
+        216416.1584,
+        7154168.0208
+      ],
       "units": null
     },
     {
       "code": "EPSG:3013",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=15.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
-      "extent": [34056.6264, 6710433.2884, 218692.0214, 7224144.732],
+      "extent": [
+        34056.6264,
+        6710433.2884,
+        218692.0214,
+        7224144.732
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3013",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=15.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
-      "extent": [34056.6264, 6710433.2884, 218692.0214, 7224144.732],
+      "extent": [
+        34056.6264,
+        6710433.2884,
+        218692.0214,
+        7224144.732
+      ],
       "units": null
     },
     {
       "code": "EPSG:3014",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=17.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [-1420.28, 6888655.5779, 212669.1333, 7459585.3378],
+      "extent": [
+        -1420.28,
+        6888655.5779,
+        212669.1333,
+        7459585.3378
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3014",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=17.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [-1420.28, 6888655.5779, 212669.1333, 7459585.3378],
+      "extent": [
+        -1420.28,
+        6888655.5779,
+        212669.1333,
+        7459585.3378
+      ],
       "units": null
     },
     {
       "code": "EPSG:3015",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=18.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [58479.4774, 6304213.2147, 241520.5226, 7276832.4419],
+      "extent": [
+        58479.4774,
+        6304213.2147,
+        241520.5226,
+        7276832.4419
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3015",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=18.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [58479.4774, 6304213.2147, 241520.5226, 7276832.4419],
+      "extent": [
+        58479.4774,
+        6304213.2147,
+        241520.5226,
+        7276832.4419
+      ],
       "units": null
     },
     {
       "code": "EPSG:3016",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=20.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [-93218.3385, 7034909.8738, 261434.6246, 7676279.8691],
+      "extent": [
+        -93218.3385,
+        7034909.8738,
+        261434.6246,
+        7676279.8691
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3016",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=20.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [-93218.3385, 7034909.8738, 261434.6246, 7676279.8691],
+      "extent": [
+        -93218.3385,
+        7034909.8738,
+        261434.6246,
+        7676279.8691
+      ],
       "units": null
     },
     {
       "code": "EPSG:3017",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=21.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [67451.0699, 7211342.8483, 145349.5699, 7254837.254],
+      "extent": [
+        67451.0699,
+        7211342.8483,
+        145349.5699,
+        7254837.254
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3017",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=21.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [67451.0699, 7211342.8483, 145349.5699, 7254837.254],
+      "extent": [
+        67451.0699,
+        7211342.8483,
+        145349.5699,
+        7254837.254
+      ],
       "units": null
     },
     {
       "code": "EPSG:3018",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=23.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [38920.7048, 7267405.2323, 193050.246, 7597992.2419],
+      "extent": [
+        38920.7048,
+        7267405.2323,
+        193050.246,
+        7597992.2419
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3018",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=23.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [38920.7048, 7267405.2323, 193050.246, 7597992.2419],
+      "extent": [
+        38920.7048,
+        7267405.2323,
+        193050.246,
+        7597992.2419
+      ],
       "units": null
     },
     {
       "code": "EPSG:3021",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +units=m +no_defs",
-      "extent": [1392811.0743, 6208496.7665, 1570600.8906, 7546077.6984],
+      "extent": [
+        1392811.0743,
+        6208496.7665,
+        1570600.8906,
+        7546077.6984
+      ],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3021",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +units=m +no_defs",
-      "extent": [1392811.0743, 6208496.7665, 1570600.8906, 7546077.6984],
+      "extent": [
+        1392811.0743,
+        6208496.7665,
+        1570600.8906,
+        7546077.6984
+      ],
       "units": null
     }
   ],
@@ -173,79 +313,359 @@
     {
       "type": "layerswitcher",
       "options": {
+        "groups": [
+          {
+            "id": "f1728430-c0b8-cbd2-0183-3d3e64124329",
+            "type": "group",
+            "name": "Naturvårdsverket",
+            "toggled": false,
+            "expanded": false,
+            "infogroupvisible": false,
+            "infogrouptitle": "",
+            "infogrouptext": "",
+            "infogroupurl": "",
+            "infogroupurltext": "",
+            "infogroupopendatalink": "",
+            "infogroupowner": "",
+            "parent": "-1",
+            "layers": [],
+            "groups": [
+              {
+                "id": "07865379-b945-1842-e35f-80e639585606",
+                "type": "group",
+                "name": "Arters utbredning",
+                "toggled": true,
+                "expanded": false,
+                "infogroupvisible": false,
+                "infogrouptitle": "",
+                "infogrouptext": "",
+                "infogroupurl": "",
+                "infogroupurltext": "",
+                "infogroupopendatalink": "",
+                "infogroupowner": "",
+                "parent": "f1728430-c0b8-cbd2-0183-3d3e64124329",
+                "layers": [
+                  {
+                    "id": "6j0lgq",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "toimzo",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "a44fa9cb-cd34-e6a7-7efa-22f904919098",
+                "type": "group",
+                "name": "Avlopp",
+                "toggled": true,
+                "expanded": false,
+                "infogroupvisible": false,
+                "infogrouptitle": "",
+                "infogrouptext": "",
+                "infogroupurl": "",
+                "infogroupurltext": "",
+                "infogroupopendatalink": "",
+                "infogroupowner": "",
+                "parent": "f1728430-c0b8-cbd2-0183-3d3e64124329",
+                "layers": [],
+                "groups": [
+                  {
+                    "id": "afc8ae04-b44c-8616-8b5f-f7a10c764fe4",
+                    "type": "group",
+                    "name": "Avloppsreningsanläggningar",
+                    "toggled": true,
+                    "expanded": false,
+                    "infogroupvisible": false,
+                    "infogrouptitle": "",
+                    "infogrouptext": "",
+                    "infogroupurl": "",
+                    "infogroupurltext": "",
+                    "infogroupopendatalink": "",
+                    "infogroupowner": "",
+                    "parent": "a44fa9cb-cd34-e6a7-7efa-22f904919098",
+                    "layers": [
+                      {
+                        "id": "2kzj0u",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "f1yh1g",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  },
+                  {
+                    "id": "312327cc-c694-ffca-89e5-34d20a8411b2",
+                    "type": "group",
+                    "name": "Områden med särskilda restriktioner",
+                    "toggled": true,
+                    "expanded": false,
+                    "infogroupvisible": false,
+                    "infogrouptitle": "",
+                    "infogrouptext": "",
+                    "infogroupurl": "",
+                    "infogroupurltext": "",
+                    "infogroupopendatalink": "",
+                    "infogroupowner": "",
+                    "parent": "a44fa9cb-cd34-e6a7-7efa-22f904919098",
+                    "layers": [
+                      {
+                        "id": "kt1125",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  }
+                ]
+              },
+              {
+                "id": "575e501d-ccdc-5c98-c5c7-7344ad08b979",
+                "type": "group",
+                "name": "Skyddade områden",
+                "toggled": true,
+                "expanded": false,
+                "infogroupvisible": false,
+                "infogrouptitle": "",
+                "infogrouptext": "",
+                "infogroupurl": "",
+                "infogroupurltext": "",
+                "infogroupopendatalink": "",
+                "infogroupowner": "",
+                "parent": "f1728430-c0b8-cbd2-0183-3d3e64124329",
+                "layers": [
+                  {
+                    "id": "0si2ys",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "dxy624",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "027x4i",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "yp97e0",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "4y2nnu",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          },
+          {
+            "id": "7870fd01-2bc0-2277-8f1c-e4cdb52e12b0",
+            "type": "group",
+            "name": "Riksantikvarieämbetet",
+            "toggled": false,
+            "expanded": false,
+            "infogroupvisible": false,
+            "infogrouptitle": "",
+            "infogrouptext": "",
+            "infogroupurl": "",
+            "infogroupurltext": "",
+            "infogroupopendatalink": "",
+            "infogroupowner": "",
+            "parent": "-1",
+            "layers": [],
+            "groups": [
+              {
+                "id": "b2dc339a-a826-bd30-8c5f-f02b81c02720",
+                "type": "group",
+                "name": "Byggnader",
+                "toggled": true,
+                "expanded": false,
+                "infogroupvisible": false,
+                "infogrouptitle": "",
+                "infogrouptext": "",
+                "infogroupurl": "",
+                "infogroupurltext": "",
+                "infogroupopendatalink": "",
+                "infogroupowner": "",
+                "parent": "7870fd01-2bc0-2277-8f1c-e4cdb52e12b0",
+                "layers": [
+                  {
+                    "id": "p5w1tn",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "40zayx",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "96a959ee-2ea7-9346-acaa-ee92e0c1e816",
+                "type": "group",
+                "name": "Skyddade områden",
+                "toggled": true,
+                "expanded": false,
+                "infogroupvisible": false,
+                "infogrouptitle": "",
+                "infogrouptext": "",
+                "infogroupurl": "",
+                "infogroupurltext": "",
+                "infogroupopendatalink": "",
+                "infogroupowner": "",
+                "parent": "7870fd01-2bc0-2277-8f1c-e4cdb52e12b0",
+                "layers": [
+                  {
+                    "id": "w4yufj",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "oiik9k",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "vvbo7h",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          },
+          {
+            "id": "79a660c8-e939-d447-0835-166523cbd527",
+            "type": "group",
+            "name": "SCB",
+            "toggled": false,
+            "expanded": false,
+            "infogroupvisible": true,
+            "infogrouptitle": "Proxy krävs",
+            "infogrouptext": "Observera att informationen från SCB måste hämtas genom en proxy. Om lagren inte fungerar, kontrollera att url:erna pekar mot en aktuell Hajk-backend.",
+            "infogroupurl": "",
+            "infogroupurltext": "",
+            "infogroupopendatalink": "",
+            "infogroupowner": "",
+            "parent": "-1",
+            "layers": [],
+            "groups": [
+              {
+                "id": "7e0a7d7c-6972-456a-c002-b016598f7d6f",
+                "type": "group",
+                "name": "Befolkning",
+                "toggled": false,
+                "expanded": false,
+                "infogroupvisible": false,
+                "infogrouptitle": "",
+                "infogrouptext": "",
+                "infogroupurl": "",
+                "infogroupurltext": "",
+                "infogroupopendatalink": "",
+                "infogroupowner": "",
+                "parent": "79a660c8-e939-d447-0835-166523cbd527",
+                "layers": [
+                  {
+                    "id": "vzjhpz",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "d2fxdy",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "uzevpj",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          },
+          {
+            "id": "9938c969-590c-8683-435c-1ecaca271096",
+            "type": "group",
+            "name": "Övrigt",
+            "toggled": false,
+            "expanded": false,
+            "infogroupvisible": false,
+            "infogrouptitle": "",
+            "infogrouptext": "",
+            "infogroupurl": "",
+            "infogroupurltext": "",
+            "infogroupopendatalink": "",
+            "infogroupowner": "",
+            "parent": "-1",
+            "layers": [
+              {
+                "id": "1352",
+                "drawOrder": 4,
+                "visibleAtStart": false,
+                "infobox": ""
+              }
+            ],
+            "groups": []
+          }
+        ],
         "baselayers": [
           {
             "id": "1",
             "visibleAtStart": true,
             "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
+            "infobox": ""
           },
           {
             "id": "2",
             "visibleAtStart": false,
             "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
+            "infobox": ""
           },
           {
             "id": "3",
             "visibleAtStart": false,
             "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
+            "infobox": ""
           }
         ],
-        "groups": [
-          {
-            "id": "8838c969-590c-8683-435c-1ecaca271096",
-            "parent": "-1",
-            "name": "Länsstyrelsen",
-            "toggled": true,
-            "expanded": false,
-            "layers": [
-              {
-                "id": "7",
-                "visibleAtStart": false,
-                "drawOrder": 3,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "8",
-                "visibleAtStart": false,
-                "drawOrder": 3,
-                "visibleForGroups": null,
-                "infobox": null
-              }
-            ],
-            "groups": []
-          },
-          {
-            "id": "9938c969-590c-8683-435c-1ecaca271096",
-            "parent": "-1",
-            "name": "Övrigt",
-            "toggled": true,
-            "expanded": false,
-            "infogroupvisible": true,
-            "infogrouptitle": "Info om lagergruppen Övrigt",
-            "infogrouptext": "Mera text om lagergruppen.",
-            "infogroupurl": "https://example.org/",
-            "infogroupurltext": "Länk",
-            "infogroupopendatalink": "https://example.org/opendata",
-            "infogroupowner": "Ägare av datan",
-            "layers": [
-              {
-                "id": "1352",
-                "visibleAtStart": true,
-                "drawOrder": 4,
-                "visibleForGroups": null,
-                "infobox": null
-              }
-            ],
-            "groups": []
-          }
-        ],
+        "quickLayersPresets": [],
         "active": true,
         "visibleAtStart": false,
         "visibleAtStartMobile": false,
@@ -253,62 +673,59 @@
         "backgroundSwitcherWhite": true,
         "enableOSM": true,
         "showBreadcrumbs": true,
-        "target": "left",
-        "position": "left",
-        "width": 0,
-        "height": 0,
-        "title": "Lagerhanterare",
-        "description": "Välj vad du vill visa i kartan.",
-        "enableTransparencySlider": true,
-        "dropdownThemeMaps": true,
-        "themeMapHeaderCaption": "Standardkartan",
-        "instruction": "",
-        "visibleForGroups": [],
-        "minMaxZoomAlertOnToggleOnly": false,
         "showDrawOrderView": true,
         "showFilter": true,
         "showQuickAccess": true,
         "enableSystemLayersSwitch": true,
         "lockDrawOrderBaselayer": true,
-        "enableQuickAccessPresets": true,
-        "quickAccessPresetsInfoText": "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
+        "drawOrderViewInfoText": "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
+        "enableQuickAccessTopics": false,
+        "quickAccessTopicsInfoText": "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
         "enableUserQuickAccessFavorites": true,
         "userQuickAccessFavoritesInfoText": "Här kan du hantera och redigera dina sparade favoriter. Observera att favoriter endast sparas tillfälligt.",
-        "quickAccessPresets": [
-          {
-            "id": "32123",
-            "layers": [
-              {
-                "id": "1",
-                "subLayers": [],
-                "opacity": 1.0,
-                "drawOrder": 1,
-                "visible": true
-              },
-              {
-                "id": "2",
-                "subLayers": [],
-                "opacity": 0.7,
-                "drawOrder": 255,
-                "visible": true
-              }
-            ],
-            "title": "Lagertema exempel 1",
-            "author": "Från utvecklarna"
-          }
-        ]
+        "enableTransparencySlider": true,
+        "instruction": "",
+        "minMaxZoomAlertOnToggleOnly": false,
+        "cqlFilterVisible": false,
+        "dropdownThemeMaps": true,
+        "themeMapHeaderCaption": "Standardkartan",
+        "visibleForGroups": [],
+        "target": "left",
+        "position": "left",
+        "width": "",
+        "height": "",
+        "title": "Lagerhanterare",
+        "description": "Välj vad du vill visa i kartan."
       },
       "index": 1
     },
     {
       "type": "infoclick",
       "options": {
-        "target": "",
-        "displayPopup": false,
-        "markerImg": "/marker.png",
-        "anchor": [0.5, 1],
-        "imgSize": [32, 32],
-        "popupOffsetY": 0,
+        "height": "dynamic",
+        "anchor": [
+          0.5,
+          1
+        ],
+        "scale": 0.15,
+        "strokeColor": {
+          "r": 200,
+          "b": 0,
+          "g": 0,
+          "a": 0.7
+        },
+        "strokeWidth": 4,
+        "fillColor": {
+          "r": 255,
+          "b": 0,
+          "g": 0,
+          "a": 0.1
+        },
+        "allowDangerousHtml": true,
+        "useNewInfoclick": false,
+        "useNewPlaceholderMatching": false,
+        "useLevel1FeatureHighlight": false,
+        "transformLinkUri": true,
         "visibleForGroups": []
       },
       "index": 2
@@ -346,8 +763,8 @@
     {
       "type": "anchor",
       "options": {
-        "target": "left",
-        "position": "left",
+        "target": "control",
+        "position": "right",
         "instruction": "",
         "visibleForGroups": []
       },
@@ -364,7 +781,10 @@
         ],
         "visibleForGroups": [],
         "maxResultsPerDataset": 100,
-        "anchor": ["", ""],
+        "anchor": [
+          "",
+          ""
+        ],
         "scale": "",
         "markerImg": "",
         "delayBeforeAutoSearch": 300,
@@ -478,7 +898,8 @@
     {
       "type": "bookmarks",
       "options": {
-        "target": "toolbar",
+        "target": "control",
+        "position": "right",
         "instruction": "",
         "visibleForGroups": []
       },
@@ -499,17 +920,38 @@
     {
       "type": "print",
       "options": {
-        "date": "Utskriftsdatum: {date}",
         "target": "left",
         "position": "left",
+        "copyright": "",
+        "disclaimer": "",
+        "date": "Utskriftsdatum: {date}",
         "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000, 800000, 1000000, 5000000, 10000000",
+        "scaleMeters": "10, 10, 20, 40, 60, 100, 100, 300, 600, 2000, 4000, 8000, 10000, 160000",
         "logo": "/logoLight.png",
+        "logoMaxWidth": 40,
+        "northArrowMaxWidth": 10,
+        "dpis": "72, 150, 300",
+        "paperFormats": "A2, A3, A4",
         "northArrow": "/north_arrow.png",
+        "useMargin": false,
+        "useTextIconsInMargin": false,
+        "mapTextColor": "#000000",
         "instruction": "",
         "visibleAtStart": false,
-        "visibleForGroups": []
+        "visibleForGroups": [],
+        "includeLogo": true,
+        "logoPlacement": "topRight",
+        "includeQrCode": false,
+        "qrCodePlacement": "topRight",
+        "includeScaleBar": true,
+        "scaleBarPlacement": "bottomLeft",
+        "includeNorthArrow": true,
+        "northArrowPlacement": "topLeft",
+        "includeImageBorder": false,
+        "useCustomTileLoaders": true,
+        "maxTileSize": 4096
       },
-      "index": 2
+      "index": 5
     },
     {
       "type": "documenthandler",
@@ -608,19 +1050,148 @@
           "visibleForGroups": []
         }
       ]
+    },
+    {
+      "type": "layercomparer",
+      "index": 2,
+      "options": {
+        "target": "left",
+        "showNonBaseLayersInSelect": false,
+        "instruction": "",
+        "visibleAtStart": false,
+        "visibleForGroups": [],
+        "chosenLayers": [
+          {
+            "id": "vvbo7h",
+            "caption": "Världsarv"
+          },
+          {
+            "id": "6j0lgq",
+            "caption": "Arters utbredning i Sverige 2013"
+          },
+          {
+            "id": "toimzo",
+            "caption": "Arters utbredning i Sverige 2019"
+          },
+          {
+            "id": "2kzj0u",
+            "caption": "Avloppsreningsanläggningar, mittpunkt"
+          },
+          {
+            "id": "f1yh1g",
+            "caption": "Avloppsreningsanläggningar, utsläppspunkter"
+          },
+          {
+            "id": "uzevpj",
+            "caption": "Befolkning 2021"
+          },
+          {
+            "id": "d2fxdy",
+            "caption": "Befolkning 2022"
+          },
+          {
+            "id": "vzjhpz",
+            "caption": "Befolkning 2023"
+          },
+          {
+            "id": "0si2ys",
+            "caption": "Biosfärområden"
+          },
+          {
+            "id": "p5w1tn",
+            "caption": "Byggnadsminnen och kyrkliga kulturminnen"
+          },
+          {
+            "id": "w4yufj",
+            "caption": "Byggnadsminnen och kyrkliga kulturminnen"
+          },
+          {
+            "id": "oiik9k",
+            "caption": "Fornlämningar"
+          },
+          {
+            "id": "dxy624",
+            "caption": "HELCOM"
+          },
+          {
+            "id": "kt1125",
+            "caption": "Känsliga områden"
+          },
+          {
+            "id": "1352",
+            "caption": "Medlemmar HAJK-samverkan"
+          },
+          {
+            "id": "2",
+            "caption": "Nedtonad stadskarta, Göteborg"
+          },
+          {
+            "id": "3",
+            "caption": "Ortofoto, Göteborg"
+          },
+          {
+            "id": "027x4i",
+            "caption": "OSPAR"
+          },
+          {
+            "id": "yp97e0",
+            "caption": "Ramsar"
+          },
+          {
+            "id": "40zayx",
+            "caption": "Ruiner"
+          },
+          {
+            "id": "1",
+            "caption": "Topografiska webbkartan, öppna data"
+          }
+        ],
+        "selectChosenLayers": true
+      }
+    },
+    {
+      "type": "measurer",
+      "index": 4,
+      "options": {
+        "target": "left",
+        "position": "left",
+        "visibleAtStart": false,
+        "icons": ""
+      }
     }
   ],
   "map": {
     "target": "map",
-    "center": [576357, 6386049],
+    "center": [
+      576357,
+      6386049
+    ],
     "title": "Hajk 4",
     "projection": "EPSG:3006",
-    "zoom": 1.33,
+    "zoom": 1,
     "maxZoom": 8,
     "minZoom": 0,
-    "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
-    "origin": [0, 0],
-    "extent": [-1200000, 4700000, 2600000, 8500000],
+    "resolutions": [
+      2048,
+      1024,
+      512,
+      256,
+      128,
+      64,
+      32,
+      16,
+      8
+    ],
+    "origin": [
+      0,
+      0
+    ],
+    "extent": [
+      -1200000,
+      4700000,
+      2600000,
+      8500000
+    ],
     "constrainOnlyCenter": false,
     "constrainResolution": false,
     "logo": "/logoLight.png",
@@ -634,13 +1205,42 @@
     "activeDrawerOnStart": "plugins",
     "showThemeToggler": true,
     "colors": {
-      "primaryColor": "#333333",
+      "primaryColor": "#1976d2",
       "secondaryColor": "#ffa000",
       "preferredColorScheme": "user"
     },
     "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
     "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
     "crossOrigin": "anonymous",
-    "showRecentlyUsedPlugins": false
+    "showRecentlyUsedPlugins": true,
+    "logoLight": "logoLight.png",
+    "logoDark": "logoDark.png",
+    "extraPrintResolutions": [],
+    "constrainResolutionMobile": false,
+    "enableDownloadLink": false,
+    "enableAppStateInHash": true,
+    "confirmOnWindowClose": true,
+    "altShiftDragRotate": true,
+    "onFocusOnly": false,
+    "doubleClickZoom": true,
+    "keyboard": true,
+    "mouseWheelZoom": true,
+    "shiftDragZoom": true,
+    "dragPan": true,
+    "pinchRotate": true,
+    "pinchZoom": true,
+    "zoomDelta": null,
+    "zoomDuration": null,
+    "mapresetter": false,
+    "introductionEnabled": false,
+    "introductionShowControlButton": false,
+    "introductionSteps": [],
+    "drawerStatic": false,
+    "drawerTitle": "Kartverktyg",
+    "drawerButtonTitle": "Kartverktyg",
+    "drawerButtonIcon": "MapIcon",
+    "showCookieNotice": true,
+    "showCookieNoticeButton": true,
+    "cookieUse3dPart": false
   }
 }
