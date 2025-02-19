@@ -65,6 +65,9 @@ COPY /apps/backend/.env .
 COPY /apps/backend/App_Data ./App_Data
 COPY /apps/backend/static ./static
 
+# We have to clean up the layers.json file so that we don't try to access the backend on localhost
+RUN sed -i 's|http://localhost:3002||g' ./App_Data/layers.json
+
 # Move the built Client and Admin dirs into static
 COPY --from=buildImage /tmp/build/client/build ./static/client
 COPY --from=buildImage /tmp/build/admin/build ./static/admin
