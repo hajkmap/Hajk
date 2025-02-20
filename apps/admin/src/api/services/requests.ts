@@ -6,6 +6,7 @@ import {
   ServiceCreateInput,
   ServiceUpdateInput,
   ServiceCapabilities,
+  SERVICE_STATUS,
 } from "./types";
 import { LayersApiResponse } from "../layers";
 import { Map } from "../maps";
@@ -275,4 +276,25 @@ export const fetchCapabilities = async (
   const xmlData: string = response.data as string;
   const layers = parseCapabilitiesFromXML(xmlData);
   return { ...layers };
+};
+
+export const checkServiceHealth = async (
+  service: Service,
+  updateCache: (id: string, status: SERVICE_STATUS) => void
+) => {
+  try {
+    const healthUrl = ["WMS", "WMTS"].includes(service.type)
+      ? `${service.url}?service=${service.type}`
+      : `${service.url}?service=WFS&request=GetFeature&maxFeatures=1`;
+    const response = await fetch(healthUrl, {
+      method: "GET",
+      signal: AbortSignal.timeout(5000),
+    });
+    const status = response.ok
+      ? SERVICE_STATUS.HEALTHY
+      : SERVICE_STATUS.UNHEALTHY;
+    updateCache(service.id, status);
+  } catch {
+    updateCache(service.id, SERVICE_STATUS.UNHEALTHY);
+  }
 };

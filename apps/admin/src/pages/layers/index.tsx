@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Grid from "@mui/material/Grid2";
 import {
   Button,
@@ -81,10 +81,6 @@ export default function LayersPage() {
     setOpen(true);
   };
 
-  const [layer, setLayer] = useState<DynamicFormContainer<FieldValues>>(
-    new DynamicFormContainer<FieldValues>()
-  );
-
   const layerContainer = new DynamicFormContainer<FieldValues>();
 
   layerContainer.addInput({
@@ -110,11 +106,8 @@ export default function LayersPage() {
     },
   });
 
-  useEffect(() => {
-    setLayer(layerContainer);
-  }, []);
-
-  const defaultValues = layer.getDefaultValues();
+  const [layerContainerData] = useState(layerContainer);
+  const defaultValues = layerContainerData.getDefaultValues();
 
   const {
     register,
@@ -251,7 +244,7 @@ export default function LayersPage() {
             }
           >
             <FormRenderer
-              formControls={layer}
+              formControls={layerContainerData}
               formGetValues={getValues}
               register={register}
               control={control}

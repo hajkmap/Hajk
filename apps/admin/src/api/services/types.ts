@@ -7,7 +7,7 @@ export interface Service {
   url: string;
   version: string;
   imageFormat: string;
-  type: string;
+  type: SERVICE_TYPE;
   serverType: string;
   workspace: string;
   getMapUrl: string;
@@ -20,6 +20,7 @@ export interface Service {
   projection: {
     code: string;
   };
+  status?: SERVICE_STATUS;
 }
 
 export interface Projection {
@@ -82,7 +83,6 @@ export interface UseServiceCapabilitiesProps {
   type: string;
 }
 
-export const serviceTypes = ["ARCGIS", "VECTOR", "WFS", "WFST", "WMS", "WMTS"];
 export const serverTypes = [
   { title: "Geoserver", value: "GEOSERVER" },
   { title: "QGIS Server", value: "QGIS_SERVER" },
@@ -99,3 +99,18 @@ export const imageFormats = [
   { title: "image/vnd.jpeg-png", value: "image/vnd.jpeg-png" },
   { title: "image/vnd.jpeg-png8", value: "image/vnd.jpeg-png8" },
 ];
+
+export enum SERVICE_TYPE {
+  ARCGIS = "ARCGIS",
+  VECTOR = "VECTOR",
+  WFS = "WFS",
+  WFST = "WFST",
+  WMS = "WMS",
+  WMTS = "WMTS",
+}
+
+export enum SERVICE_STATUS {
+  UNKNOWN,
+  HEALTHY,
+  UNHEALTHY,
+}

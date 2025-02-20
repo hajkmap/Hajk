@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useTranslation, Trans } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { FieldValues } from "react-hook-form";
@@ -16,9 +16,8 @@ import {
   useServiceById,
   useUpdateService,
   useDeleteService,
-  useServices,
   useLayersByServiceId,
-  serviceTypes,
+  SERVICE_TYPE,
   ServiceUpdateInput,
   serverTypes,
   versions,
@@ -46,9 +45,7 @@ export default function ServiceSettings() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { serviceId } = useParams<{ serviceId: string }>();
-  const { isError, isLoading } = useServiceById(serviceId ?? "");
-  const { data: services } = useServices();
-  const service = services?.find((s) => s.id === serviceId);
+  const { data: service, isError, isLoading } = useServiceById(serviceId ?? "");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogUrl, setDialogUrl] = useState(service?.url ?? "");
   const [dialogServiceType, setDialogServiceType] = useState(
@@ -56,9 +53,9 @@ export default function ServiceSettings() {
   );
 
   const { data: projections } = useProjections();
-  const epsgProjections = projections?.filter((projection) =>
-    projection.code.startsWith("EPSG:")
-  );
+  const epsgProjections =
+    projections?.filter((projection) => projection.code.startsWith("EPSG:")) ??
+    [];
   const epsgProjectionsMap = epsgProjections?.map((projection) => ({
     title: projection.code,
     value: projection.code,
@@ -79,9 +76,9 @@ export default function ServiceSettings() {
     baseUrl: service?.url ?? "",
     type: service?.type ?? "",
   });
-  const [formServiceData, setFormServiceData] = useState<
-    DynamicFormContainer<FieldValues>
-  >(new DynamicFormContainer<FieldValues>());
+  const [formServiceData] = useState<DynamicFormContainer<FieldValues>>(
+    new DynamicFormContainer<FieldValues>()
+  );
 
   const handleDialogOpen = () => {
     setIsDialogOpen(true);
@@ -174,6 +171,7 @@ export default function ServiceSettings() {
   };
 
   const serviceSettingsFormContainer = new DynamicFormContainer<FieldValues>();
+
   const panelNestedContainer = new DynamicFormContainer<FieldValues>(
     "",
     CONTAINER_TYPE.PANEL
@@ -374,12 +372,6 @@ export default function ServiceSettings() {
     },
   });
 
-  useEffect(() => {
-    if (!service) return;
-    setFormServiceData(serviceSettingsFormContainer);
-    setDialogUrl(service.url);
-  }, [service]);
-
   if (isLoading) {
     return <SquareSpinnerComponent />;
   }
@@ -459,7 +451,7 @@ export default function ServiceSettings() {
             variant="outlined"
             onChange={(e) => setDialogServiceType(e.target.value)}
           >
-            {serviceTypes.map((type) => (
+            {Object.keys(SERVICE_TYPE).map((type) => (
               <MenuItem key={type} value={type}>
                 {type}
               </MenuItem>

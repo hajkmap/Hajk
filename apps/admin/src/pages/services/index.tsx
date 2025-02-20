@@ -1,14 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import Grid from "@mui/material/Grid2";
-import {
-  Button,
-  Box,
-  useTheme,
-  IconButton,
-  Menu,
-  MenuItem,
-} from "@mui/material";
+import { Button, Box, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -20,8 +13,9 @@ import { createOnSubmitHandler } from "../../components/form-factory/form-utils"
 import { useServices, useCreateService } from "../../api/services";
 import {
   Service,
+  SERVICE_STATUS,
+  SERVICE_TYPE,
   ServiceCreateInput,
-  serviceTypes,
 } from "../../api/services/types";
 import DialogWrapper from "../../components/flexible-dialog";
 import { toast } from "react-toastify";
@@ -29,7 +23,8 @@ import { DataGrid } from "@mui/x-data-grid";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import useAppStateStore from "../../store/use-app-state-store";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import ServiceStatusIndicator from "./components/service-status-indicator";
+import ServiceTypeBadge from "./components/service-type-badge";
 
 export default function ServicesPage() {
   const navigate = useNavigate();
@@ -39,10 +34,6 @@ export default function ServicesPage() {
   const [open, setOpen] = useState<boolean>(false);
   const { palette } = useTheme();
   const language = useAppStateStore((state) => state.language);
-
-  const [service, setService] = useState<DynamicFormContainer<FieldValues>>(
-    new DynamicFormContainer<FieldValues>()
-  );
 
   const serviceContainer = new DynamicFormContainer<FieldValues>();
 
@@ -70,8 +61,8 @@ export default function ServicesPage() {
     gridColumns: 4,
     name: "type",
     title: `${t("common.serviceType")}`,
-    defaultValue: serviceTypes[4],
-    optionList: serviceTypes.map((type) => ({
+    defaultValue: SERVICE_TYPE.WMS,
+    optionList: Object.keys(SERVICE_TYPE).map((type) => ({
       title: type,
       value: type,
     })),
@@ -80,11 +71,8 @@ export default function ServicesPage() {
     },
   });
 
-  useEffect(() => {
-    setService(serviceContainer);
-  }, []);
-
-  const defaultValues = service.getDefaultValues();
+  const [serviceContainerData] = useState(serviceContainer);
+  const defaultValues = serviceContainerData.getDefaultValues();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -145,50 +133,6 @@ export default function ServicesPage() {
     },
   });
 
-  const RowMenu = (params: { row: { id: string } }) => {
-    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-    const open = Boolean(anchorEl);
-
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-      setAnchorEl(event.currentTarget as HTMLElement | null);
-    };
-
-    const handleClose = () => {
-      setAnchorEl(null);
-    };
-
-    return (
-      <Box component="div" sx={{ textAlign: "center" }}>
-        <IconButton onClick={handleClick}>
-          <MoreHorizIcon />
-        </IconButton>
-        <Menu
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "left",
-          }}
-        >
-          <MenuItem onClick={() => alert(`View ${params.row.id}`)}>
-            View
-          </MenuItem>
-          <MenuItem onClick={() => alert(`Edit ${params.row.id}`)}>
-            Edit
-          </MenuItem>
-          <MenuItem onClick={() => alert(`Delete ${params.row.id}`)}>
-            Delete
-          </MenuItem>
-        </Menu>
-      </Box>
-    );
-  };
-
   return (
     <>
       {isLoading ? (
@@ -228,7 +172,7 @@ export default function ServicesPage() {
               }
             >
               <FormRenderer
-                formControls={service}
+                formControls={serviceContainerData}
                 formGetValues={getValues}
                 register={register}
                 control={control}
@@ -257,28 +201,32 @@ export default function ServicesPage() {
                 columns={[
                   {
                     field: "type",
-                    flex: 0.3,
+                    width: 130,
                     headerName: t("common.serviceType"),
+                    renderCell: (params: { row: { id: string } }) => {
+                      const type: SERVICE_TYPE = (params.row as Service).type;
+                      return <ServiceTypeBadge type={type} />;
+                    },
                   },
-                  { field: "name", flex: 1, headerName: t("common.name") },
+                  { field: "name", flex: 0.4, headerName: t("common.name") },
                   { field: "url", flex: 1, headerName: "Url" },
                   {
                     field: "version",
-                    flex: 0.3,
+                    flex: 0.2,
                     headerName: "Version",
                   },
                   {
-                    field: "brokenService",
-                    flex: 0.3,
-                    headerName: t("common.brokenService"),
-                  },
-                  {
-                    field: "actions",
-                    headerName: t("common.actions"),
+                    field: "status",
+                    disableColumnMenu: true,
+                    headerAlign: "center",
                     flex: 0.2,
-                    renderCell: (params: { row: { id: string } }) => (
-                      <RowMenu {...params} />
-                    ),
+                    headerName: "Status",
+                    renderCell: (params: { row: { id: string } }) => {
+                      const status: SERVICE_STATUS =
+                        (params.row as Service)?.status ??
+                        SERVICE_STATUS.UNKNOWN;
+                      return <ServiceStatusIndicator status={status} />;
+                    },
                   },
                 ]}
                 slotProps={{
