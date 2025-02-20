@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import Grid from "@mui/material/Grid2";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { TextField, Typography, Paper } from "@mui/material";
+import { TextField, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { useTools } from "../../api/tools";
