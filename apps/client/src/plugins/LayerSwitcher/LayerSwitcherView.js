@@ -264,10 +264,7 @@ class LayersSwitcherView extends React.PureComponent {
           flex: 1,
         }}
       >
-        <StyledAppBar
-          position="relative" // Does not work in IE11
-          color="default"
-        >
+        <StyledAppBar position="relative" color="default">
           <Tabs
             action={this.handleTabsMounted}
             onChange={this.handleChangeTabs}
@@ -314,7 +311,7 @@ class LayersSwitcherView extends React.PureComponent {
           handleFavoritesViewToggle={this.handleFavoritesViewToggle}
           globalObserver={this.globalObserver}
           map={this.props.map}
-          app={this.app}
+          app={this.props.app}
           scrollContainerRef={this.scrollContainerRef}
         />
         {this.props.options.enableQuickAccessPresets && (
