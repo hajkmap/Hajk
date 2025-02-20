@@ -126,6 +126,21 @@ const LayersTab = ({
           scrollToBottom={scrollToBottom}
         />
       )}
+      {filterHits !== null && filterHits.size === 0 && (
+        <ListItemText
+          sx={{
+            py: 1,
+            px: 4,
+          }}
+          primary="Inga resultat"
+          primaryTypographyProps={{
+            pr: 5,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            variant: "body1",
+          }}
+        />
+      )}
       <div
         id="sc-test"
         ref={scrollContainerRef}
@@ -165,21 +180,6 @@ const LayersTab = ({
           />
         ))}
       </div>
-      {filterHits !== null && filterHits.size === 0 && (
-        <ListItemText
-          sx={{
-            py: 1,
-            px: 4,
-          }}
-          primary="Inga resultat"
-          primaryTypographyProps={{
-            pr: 5,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            variant: "body1",
-          }}
-        />
-      )}
     </div>
   );
 };
