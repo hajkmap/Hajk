@@ -14,14 +14,14 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { useTranslation } from "react-i18next";
 import { OpenInNew } from "@mui/icons-material";
 
-export default function CustomForm() {
+export default function MapSettingsForm() {
   const { t } = useTranslation();
 
   const rootContainer = new DynamicFormContainer();
 
   const baseSettingsContainer = new DynamicFormContainer(
-    t("map.baseSettings"),
-    CONTAINER_TYPE.ACCORDION
+    "", //t("map.baseSettings"),
+    CONTAINER_TYPE.PANEL
   );
   rootContainer.addContainer(baseSettingsContainer);
 
@@ -106,16 +106,13 @@ export default function CustomForm() {
     helpText: t("map.printResolutionsHelp"),
   });
 
-  baseSettingsContainer.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "constrainOnlyCenter",
-    title: t("map.constrainOnlyCenter"),
-    defaultValue: false,
-    gridColumns: 6,
-    helpText: t("map.constrainOnlyCenterHelp"),
-  });
+  const extraSettingsContainer = new DynamicFormContainer(
+    t("map.extraSettings"),
+    CONTAINER_TYPE.ACCORDION
+  );
+  rootContainer.addContainer(extraSettingsContainer);
 
-  baseSettingsContainer.addInput({
+  extraSettingsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "constrainResolution",
     title: t("map.constrainResolution"),
@@ -124,7 +121,16 @@ export default function CustomForm() {
     helpText: t("map.constrainResolutionHelp"),
   });
 
-  baseSettingsContainer.addInput({
+  extraSettingsContainer.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    name: "constrainOnlyCenter",
+    title: t("map.constrainOnlyCenter"),
+    defaultValue: false,
+    gridColumns: 6,
+    helpText: t("map.constrainOnlyCenterHelp"),
+  });
+
+  extraSettingsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "constrainResolutionMobile",
     title: t("map.constrainResolutionMobile"),
@@ -133,7 +139,7 @@ export default function CustomForm() {
     helpText: t("map.constrainResolutionMobileHelp"),
   });
 
-  baseSettingsContainer.addInput({
+  extraSettingsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "enableDownloadLink",
     title: t("map.enableDownloadLink"),
@@ -142,7 +148,7 @@ export default function CustomForm() {
     helpText: t("map.enableDownloadLinkHelp"),
   });
 
-  baseSettingsContainer.addInput({
+  extraSettingsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "enableAppStateInHash",
     title: t("map.enableAppStateInHash"),
@@ -151,13 +157,108 @@ export default function CustomForm() {
     helpText: t("map.enableAppStateInHashHelp"),
   });
 
-  baseSettingsContainer.addInput({
+  extraSettingsContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "confirmOnWindowClose",
     title: t("map.confirmOnWindowClose"),
     defaultValue: true,
     gridColumns: 6,
     helpText: t("map.confirmOnWindowCloseHelp"),
+  });
+
+  extraSettingsContainer.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    name: "logoLight",
+    title: t("map.logoLight"),
+    defaultValue: "/logoLight.png",
+    gridColumns: 6,
+    helpText: t("map.logoLightHelp"),
+  });
+
+  extraSettingsContainer.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    name: "logoDark",
+    title: t("map.logoDark"),
+    gridColumns: 6,
+    helpText: t("map.logoDarkHelp"),
+  });
+
+  extraSettingsContainer.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    name: "legendOptions",
+    title: t("map.legendOptions"),
+    defaultValue: "",
+    gridColumns: 6,
+    helpText: t("map.legendOptionsHelp"),
+  });
+
+  extraSettingsContainer.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    name: "crossOrigin",
+    title: t("map.crossOrigin"),
+    defaultValue: "anonymous",
+    gridColumns: 6,
+    helpText: t("map.crossOriginHelp"),
+  });
+
+  const extraMapControlsContainer = new DynamicFormContainer(
+    t("map.extraMapControls"),
+    CONTAINER_TYPE.ACCORDION
+  );
+  rootContainer.addContainer(extraMapControlsContainer);
+
+  extraMapControlsContainer.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    name: "mapselector",
+    title: t("map.mapselector"),
+    defaultValue: false,
+    gridColumns: 6,
+    helpText: t("map.mapselectorHelp"),
+  });
+
+  extraMapControlsContainer.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    name: "mapcleaner",
+    title: t("map.mapcleaner"),
+    defaultValue: false,
+    gridColumns: 6,
+    helpText: t("map.mapcleanerHelp"),
+  });
+
+  extraMapControlsContainer.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    name: "mapresetter",
+    title: t("map.mapresetter"),
+    defaultValue: false,
+    gridColumns: 6,
+    helpText: t("map.mapresetterHelp"),
+  });
+
+  extraMapControlsContainer.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    name: "showThemeToggler",
+    title: t("map.showThemeToggler"),
+    defaultValue: true,
+    gridColumns: 6,
+    helpText: t("map.showThemeTogglerHelp"),
+  });
+
+  extraMapControlsContainer.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    name: "showUserAvatar",
+    title: t("map.showUserAvatar"),
+    defaultValue: false,
+    gridColumns: 6,
+    helpText: t("map.showUserAvatarHelp"),
+  });
+
+  extraMapControlsContainer.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    name: "showRecentlyUsedPlugins",
+    title: t("map.showRecentlyUsedPlugins"),
+    defaultValue: false,
+    gridColumns: 6,
+    helpText: t("map.showRecentlyUsedPluginsHelp"),
   });
 
   const mapInteractionsContainer = new DynamicFormContainer(
@@ -271,207 +372,45 @@ export default function CustomForm() {
     gridColumns: 6,
   });
 
-  const extraSettingsContainer = new DynamicFormContainer(
-    t("map.extraSettings"),
+  const mapColorContainer = new DynamicFormContainer(
+    t("map.colors"),
     CONTAINER_TYPE.ACCORDION
   );
-  rootContainer.addContainer(extraSettingsContainer);
+  rootContainer.addContainer(mapColorContainer);
 
-  extraSettingsContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    name: "logoLight",
-    title: t("map.logoLight"),
-    defaultValue: "/logoLight.png",
+  mapColorContainer.addInput({
+    type: INPUT_TYPE.SELECT,
+    name: "preferredColorScheme",
+    title: t("map.preferredColorScheme"),
+    defaultValue: "user",
     gridColumns: 6,
-    helpText: t("map.logoLightHelp"),
+    optionList: [
+      { title: t("map.colorSchemeUser"), value: "user" },
+      { title: t("map.colorSchemeLight"), value: "light" },
+      { title: t("map.colorSchemeDark"), value: "dark" },
+    ],
+    helpText: t("map.preferredColorSchemeHelp"),
   });
 
-  extraSettingsContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    name: "logoDark",
-    title: "",
+  mapColorContainer.addStaticElement({
+    type: STATIC_TYPE.DIVIDER,
+  });
+
+  mapColorContainer.addInput({
+    type: INPUT_TYPE.COLOR_PICKER,
+    name: "primaryColor",
+    title: t("map.primaryColor"),
+    defaultValue: "#333333",
     gridColumns: 6,
-    helpText: t("map.logoDarkHelp"),
   });
 
-  extraSettingsContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    name: "legendOptions",
-    title: t("map.legendOptions"),
-    defaultValue: "",
+  mapColorContainer.addInput({
+    type: INPUT_TYPE.COLOR_PICKER,
+    name: "secondaryColor",
+    title: t("map.secondaryColor"),
+    defaultValue: "#ffa000",
     gridColumns: 6,
-    helpText: t("map.legendOptionsHelp"),
   });
-
-  extraSettingsContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    name: "crossOrigin",
-    title: t("map.crossOrigin"),
-    defaultValue: "anonymous",
-    gridColumns: 6,
-    helpText: t("map.crossOriginHelp"),
-  });
-
-  const cookiesContainer = new DynamicFormContainer(
-    t("map.cookies"),
-    CONTAINER_TYPE.ACCORDION
-  );
-  rootContainer.addContainer(cookiesContainer);
-
-  cookiesContainer.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "showCookieNotice",
-    title: t("map.showCookieNotice"),
-    defaultValue: true,
-    gridColumns: 6,
-    helpText: t("map.showCookieNoticeHelp"),
-  });
-
-  cookiesContainer.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "cookieUse3dPart",
-    title: t("map.cookieUse3dPart"),
-    defaultValue: false,
-    gridColumns: 6,
-    helpText: t("map.cookieUse3dPartHelp"),
-  });
-
-  cookiesContainer.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "showCookieNoticeButton",
-    title: t("map.showCookieNoticeButton"),
-    defaultValue: true,
-    gridColumns: 6,
-    helpText: t("map.showCookieNoticeButtonHelp"),
-  });
-
-  cookiesContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    name: "cookieLink",
-    title: t("map.cookieLink"),
-    defaultValue:
-      "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
-    gridColumns: 6,
-    helpText: t("map.cookieLinkHelp"),
-  });
-
-  cookiesContainer.addInput({
-    type: INPUT_TYPE.TEXTAREA,
-    name: "cookieMessage",
-    title: t("map.cookieMessage"),
-    defaultValue:
-      "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
-    gridColumns: 12,
-    helpText: t("map.cookieMessageHelp"),
-  });
-
-  const extraMapControlsContainer = new DynamicFormContainer(
-    t("map.extraMapControls"),
-    CONTAINER_TYPE.ACCORDION
-  );
-  rootContainer.addContainer(extraMapControlsContainer);
-
-  extraMapControlsContainer.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "mapselector",
-    title: t("map.mapselector"),
-    defaultValue: false,
-    gridColumns: 6,
-    helpText: t("map.mapselectorHelp"),
-  });
-
-  extraMapControlsContainer.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "mapcleaner",
-    title: t("map.mapcleaner"),
-    defaultValue: false,
-    gridColumns: 6,
-    helpText: t("map.mapcleanerHelp"),
-  });
-
-  extraMapControlsContainer.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "mapresetter",
-    title: t("map.mapresetter"),
-    defaultValue: false,
-    gridColumns: 6,
-    helpText: t("map.mapresetterHelp"),
-  });
-
-  extraMapControlsContainer.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "showThemeToggler",
-    title: t("map.showThemeToggler"),
-    defaultValue: true,
-    gridColumns: 6,
-    helpText: t("map.showThemeTogglerHelp"),
-  });
-
-  extraMapControlsContainer.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "showUserAvatar",
-    title: t("map.showUserAvatar"),
-    defaultValue: false,
-    gridColumns: 6,
-    helpText: t("map.showUserAvatarHelp"),
-  });
-
-  extraMapControlsContainer.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "showRecentlyUsedPlugins",
-    title: t("map.showRecentlyUsedPlugins"),
-    defaultValue: false,
-    gridColumns: 6,
-    helpText: t("map.showRecentlyUsedPluginsHelp"),
-  });
-
-  const introGuideContainer = new DynamicFormContainer(
-    t("map.introGuide"),
-    CONTAINER_TYPE.ACCORDION
-  );
-  rootContainer.addContainer(introGuideContainer);
-
-  introGuideContainer.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "introductionEnabled",
-    title: t("map.introductionEnabled"),
-    defaultValue: false,
-    gridColumns: 6,
-    helpText: t("map.introductionEnabledHelp"),
-  });
-
-  introGuideContainer.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "introductionShowControlButton",
-    title: t("map.introductionShowControlButton"),
-    defaultValue: false,
-    gridColumns: 6,
-    helpText: t("map.introductionShowControlButtonHelp"),
-  });
-
-  introGuideContainer.addInput({
-    type: INPUT_TYPE.TEXTAREA,
-    name: "introductionSteps",
-    title: t("map.introductionSteps"),
-    defaultValue: "[]",
-    gridColumns: 12,
-    inputProps: { rows: 8 },
-    helpText: t("map.introductionStepsHelp"),
-  });
-
-  introGuideContainer.addElement(
-    <div>
-      <Button
-        size="small"
-        href="https://github.com/HiDeoo/intro.js-react#step"
-        target="_blank"
-        startIcon={<OpenInNew />}
-      >
-        {t("map.introJsHelpButtonText")}
-      </Button>
-    </div>,
-    12
-  );
 
   const sidepanelContainer = new DynamicFormContainer(
     t("map.sidepanel"),
@@ -564,45 +503,106 @@ export default function CustomForm() {
     ],
   });
 
-  const mapColorContainer = new DynamicFormContainer(
-    t("map.colors"),
+  const cookiesContainer = new DynamicFormContainer(
+    t("map.cookies"),
     CONTAINER_TYPE.ACCORDION
   );
-  rootContainer.addContainer(mapColorContainer);
+  rootContainer.addContainer(cookiesContainer);
 
-  mapColorContainer.addInput({
-    type: INPUT_TYPE.SELECT,
-    name: "preferredColorScheme",
-    title: t("map.preferredColorScheme"),
-    defaultValue: "user",
+  cookiesContainer.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    name: "showCookieNotice",
+    title: t("map.showCookieNotice"),
+    defaultValue: true,
     gridColumns: 6,
-    optionList: [
-      { title: t("map.colorSchemeUser"), value: "user" },
-      { title: t("map.colorSchemeLight"), value: "light" },
-      { title: t("map.colorSchemeDark"), value: "dark" },
-    ],
-    helpText: t("map.preferredColorSchemeHelp"),
+    helpText: t("map.showCookieNoticeHelp"),
   });
 
-  mapColorContainer.addStaticElement({
-    type: STATIC_TYPE.DIVIDER,
-  });
-
-  mapColorContainer.addInput({
-    type: INPUT_TYPE.COLOR_PICKER,
-    name: "primaryColor",
-    title: t("map.primaryColor"),
-    defaultValue: "#333333",
+  cookiesContainer.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    name: "cookieUse3dPart",
+    title: t("map.cookieUse3dPart"),
+    defaultValue: false,
     gridColumns: 6,
+    helpText: t("map.cookieUse3dPartHelp"),
   });
 
-  mapColorContainer.addInput({
-    type: INPUT_TYPE.COLOR_PICKER,
-    name: "secondaryColor",
-    title: t("map.secondaryColor"),
-    defaultValue: "#ffa000",
+  cookiesContainer.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    name: "showCookieNoticeButton",
+    title: t("map.showCookieNoticeButton"),
+    defaultValue: true,
     gridColumns: 6,
+    helpText: t("map.showCookieNoticeButtonHelp"),
   });
+
+  cookiesContainer.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    name: "cookieLink",
+    title: t("map.cookieLink"),
+    defaultValue:
+      "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
+    gridColumns: 6,
+    helpText: t("map.cookieLinkHelp"),
+  });
+
+  cookiesContainer.addInput({
+    type: INPUT_TYPE.TEXTAREA,
+    name: "cookieMessage",
+    title: t("map.cookieMessage"),
+    defaultValue:
+      "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+    gridColumns: 12,
+    helpText: t("map.cookieMessageHelp"),
+  });
+
+  const introGuideContainer = new DynamicFormContainer(
+    t("map.introGuide"),
+    CONTAINER_TYPE.ACCORDION
+  );
+  rootContainer.addContainer(introGuideContainer);
+
+  introGuideContainer.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    name: "introductionEnabled",
+    title: t("map.introductionEnabled"),
+    defaultValue: false,
+    gridColumns: 6,
+    helpText: t("map.introductionEnabledHelp"),
+  });
+
+  introGuideContainer.addInput({
+    type: INPUT_TYPE.CHECKBOX,
+    name: "introductionShowControlButton",
+    title: t("map.introductionShowControlButton"),
+    defaultValue: false,
+    gridColumns: 6,
+    helpText: t("map.introductionShowControlButtonHelp"),
+  });
+
+  introGuideContainer.addInput({
+    type: INPUT_TYPE.TEXTAREA,
+    name: "introductionSteps",
+    title: t("map.introductionSteps"),
+    defaultValue: "[]",
+    gridColumns: 12,
+    inputProps: { rows: 8 },
+    helpText: t("map.introductionStepsHelp"),
+  });
+
+  introGuideContainer.addElement(
+    <div>
+      <Button
+        size="small"
+        href="https://github.com/HiDeoo/intro.js-react#step"
+        target="_blank"
+        startIcon={<OpenInNew />}
+      >
+        {t("map.introJsHelpButtonText")}
+      </Button>
+    </div>,
+    12
+  );
 
   const [formContainerData] = useState(rootContainer);
   const defaultValues = formContainerData.getDefaultValues();

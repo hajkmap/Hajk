@@ -35,7 +35,7 @@
   - ⚠️ Note: legend and legendUrl fields are incomplete. The permission accordion and used in maps data-grid are also incomplete and needs to be updated.
   - [x] Remove layer (AA)
 - [ ] Map settings page
-  - [ ] Step 1: Create form with formfactory, UI only [JA]
+  - [x] Step 1: Create form with formfactory, UI only, incl translations [JA]
 - [ ] Optimizing input fields performance/state.
   - [x] Services page (JA)
   - [x] Layers page (JA)
@@ -52,6 +52,7 @@
   - [x] Add the possibility to add unmanaged elements to a FormFactory form.
   - [x] Find cause and fix sluggish form updates.
   - [x] Add a color picker component to FormFactory. v0.1 WIP
+  - [x] Fix RadioButtonGroup in FormFactory
 - [x] Upgrade npm packages (JW)
 
 ### Roles
