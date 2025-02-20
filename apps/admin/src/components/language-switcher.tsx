@@ -41,13 +41,27 @@ export default function LanguageSwitcher() {
             <MenuItem value={LANGUAGES.EN}>
               <Box display="flex">
                 {t("common.english")}
-                <Box component="img" src="/en.logo.svg" sx={{ ml: 1 }} />
+                <Box
+                  component="img"
+                  src={`${import.meta.env.BASE_URL.replace(
+                    /\/$/,
+                    ""
+                  )}/en.logo.svg`}
+                  sx={{ ml: 1 }}
+                />
               </Box>
             </MenuItem>
             <MenuItem value={LANGUAGES.SV}>
               <Box display="flex">
                 {t("common.swedish")}
-                <Box component="img" src="/sv.logo.svg" sx={{ ml: 1 }} />
+                <Box
+                  component="img"
+                  src={`${import.meta.env.BASE_URL.replace(
+                    /\/$/,
+                    ""
+                  )}/sv.logo.svg`}
+                  sx={{ ml: 1 }}
+                />
               </Box>
             </MenuItem>
           </Select>

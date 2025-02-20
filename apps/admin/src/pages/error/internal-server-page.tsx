@@ -47,7 +47,10 @@ export default function InternalServerPage() {
         >
           <Box
             component="img"
-            src="/forbidden-logo.svg"
+            src={`${import.meta.env.BASE_URL.replace(
+              /\/$/,
+              ""
+            )}/forbidden-logo.svg`}
             alt="Forbidden Icon"
             style={{
               width: "100%",

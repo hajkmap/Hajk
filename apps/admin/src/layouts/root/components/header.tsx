@@ -150,7 +150,10 @@ export default function Header() {
             }}
           >
             <img
-              src="/hajk-admin-logo.svg"
+              src={`${import.meta.env.BASE_URL.replace(
+                /\/$/,
+                ""
+              )}/hajk-admin-logo.svg`}
               alt={t("common.clickableLogo")}
               style={{
                 height: "32px",
