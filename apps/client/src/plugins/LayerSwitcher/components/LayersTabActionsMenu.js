@@ -10,9 +10,9 @@ import {
 } from "@mui/material";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import KeyboardDoubleArrowUpIcon from "@mui/icons-material/KeyboardDoubleArrowUp";
-import FlashOffIcon from "@mui/icons-material/FlashOff";
 
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
@@ -70,7 +70,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
           }}
         >
           <ListItemIcon>
-            <FlashOffIcon fontSize="small" />
+            <VisibilityOffIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>Släck alla lager</ListItemText>
         </MenuItem>
