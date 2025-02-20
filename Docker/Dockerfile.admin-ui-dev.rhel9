@@ -49,7 +49,7 @@ RUN command -v curl || yum install -y curl && \
 WORKDIR /opt/app-root/src
 COPY /apps/backend/package*.json ./
 COPY --from=backendBuilder /opt/app-root/src/dist ./
-COPY /apps/backend/.env .
+COPY /apps/backend/.env.example .env
 COPY /apps/backend/prisma ./prisma
 COPY /apps/backend/static ./static
 RUN mkdir logs
