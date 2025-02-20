@@ -1063,8 +1063,14 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   render() {
-    const { app, getOriginBasedIcon, localObserver, panelCollapsed, options } =
-      this.props;
+    const {
+      app,
+      getOriginBasedIcon,
+      localObserver,
+      panelCollapsed,
+      options,
+      handleFocus,
+    } = this.props;
     const {
       sumOfResults,
       activeFeatureCollection,
@@ -1098,17 +1104,18 @@ class SearchResultsContainer extends React.PureComponent {
     return (
       <Collapse in={!panelCollapsed}>
         {sumOfResults === null ? null : sumOfResults === 0 ? (
-          <StyledPaper>
+          <StyledPaper onMouseDown={handleFocus}>
             <Alert severity="warning">Sökningen gav inget resultat.</Alert>
           </StyledPaper>
         ) : (
-          <StyledPaper>
+          <StyledPaper onMouseDown={handleFocus}>
             <ResultListWrapper container>
               {this.renderSearchResultsHeader()}
               {filterInputFieldOpen && this.renderFilterInputField()}
               {this.renderSortingMenu()}
               <Grid item xs={12}>
                 <SearchResultsList
+                  onClick={handleFocus}
                   localObserver={localObserver}
                   getOriginBasedIcon={getOriginBasedIcon}
                   featureCollections={collectionsToRender}

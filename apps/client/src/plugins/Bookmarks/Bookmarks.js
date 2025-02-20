@@ -61,8 +61,4 @@ Bookmarks.propTypes = {
   options: PropTypes.object,
 };
 
-Bookmarks.defaultProps = {
-  options: {},
-};
-
 export default Bookmarks;

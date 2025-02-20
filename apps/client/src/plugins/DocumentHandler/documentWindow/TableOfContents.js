@@ -71,11 +71,6 @@ class TableOfContents extends React.PureComponent {
     expanded: this.props.expanded,
   };
 
-  static defaultProps = {
-    expanded: true,
-    title: "Innehåll",
-  };
-
   linkClick = (chapter) => {
     const { localObserver } = this.props;
     localObserver.publish("scroll-to-chapter", chapter);
@@ -146,7 +141,12 @@ class TableOfContents extends React.PureComponent {
   };
 
   render() {
-    const { activeDocument, title, expanded, toggleCollapse } = this.props;
+    const {
+      activeDocument,
+      title = "Innehåll",
+      expanded = true,
+      toggleCollapse,
+    } = this.props;
 
     return (
       <GridTableOfContents container>

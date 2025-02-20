@@ -10,15 +10,8 @@ class AlertView extends React.PureComponent {
   state = {};
 
   static propTypes = {
-    message: propTypes.any.isRequired,
     open: propTypes.bool.isRequired,
     parent: propTypes.object.isRequired,
-    title: propTypes.string.isRequired,
-  };
-
-  static defaultProps = {
-    message: "Meddelande saknas",
-    title: "Titel saknas",
   };
 
   handleClose = (e) => {
@@ -28,7 +21,11 @@ class AlertView extends React.PureComponent {
   };
 
   render() {
-    const { open, dialogTitle, message } = this.props;
+    const {
+      open,
+      dialogTitle = "Meddelande",
+      message = "Meddelande saknas",
+    } = this.props;
     return (
       <Dialog
         open={open}
@@ -36,9 +33,7 @@ class AlertView extends React.PureComponent {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">
-          {dialogTitle || "Meddelande"}
-        </DialogTitle>
+        <DialogTitle id="alert-dialog-title">{dialogTitle}</DialogTitle>
         <DialogContent>{message}</DialogContent>
         <DialogActions>
           <Button onClick={this.handleClose} color="primary" autoFocus>

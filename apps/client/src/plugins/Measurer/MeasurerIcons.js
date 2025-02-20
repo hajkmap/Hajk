@@ -84,3 +84,18 @@ export function IconCircle() {
 
   return svg2Base64(svg);
 }
+
+export function IconSegment() {
+  const svg = `<svg width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g>
+      <rect x="0" y="-0" width="24" height="24" style="fill:#f00;fill-opacity:0;" />
+      <g>
+        <path d="M5.278,18.804l13.438,-13.438" style="fill:none;stroke:#000;stroke-width:1.4px;" />
+              <polygon points="10,11, 7,10 9,8" style="fill:#000;stroke:#000;stroke-width:1.4px;" />
+      </g>
+    </g>
+  </svg>
+  `;
+
+  return svg2Base64(svg);
+}

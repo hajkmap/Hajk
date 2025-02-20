@@ -17,7 +17,7 @@ import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 
 class RoutingView extends React.PureComponent {
   state = {

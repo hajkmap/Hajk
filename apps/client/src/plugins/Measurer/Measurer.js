@@ -12,11 +12,13 @@ import DrawModel from "../../models/DrawModel";
 import { Circle, Fill, RegularShape, Stroke, Style } from "ol/style";
 import HelpIcon from "@mui/icons-material/Help";
 import AngleSnapping from "./AngleSnapping";
+import Segment from "./Segment";
 
 function Measurer(props) {
   const { map, app } = props;
   const [state] = React.useState({});
   const currentHoverFeature = useRef(null);
+  const [segmentsEnabled, setSegmentsEnabled] = useState(false);
   const [localObserver] = React.useState(Observer());
   const [drawType, setDrawType] = useState("LineString"); // default to LineString as previous Measure tool
   const [pluginShown, setPluginShown] = React.useState(
@@ -59,14 +61,21 @@ function Measurer(props) {
     return new AngleSnapping(drawModel, map);
   }, [drawModel, map]);
 
+  const segments = useMemo(() => {
+    return new Segment(drawModel, map);
+  }, [drawModel, map]);
+
   angleSnapping.setActive(true);
+  segments.setEnabled(segmentsEnabled);
 
   const handleDrawStart = useCallback(
     (e) => {
       // Forward drawstart event etc. to angle snapper.
       angleSnapping.handleDrawStartEvent(e, map, drawModel);
+      // And forward events to segments
+      segments.handleDrawStartEvent(e, map, drawModel);
     },
-    [angleSnapping, map, drawModel]
+    [angleSnapping, segments, map, drawModel]
   );
 
   const handleAddFeature = useCallback(
@@ -93,8 +102,19 @@ function Measurer(props) {
       if (remove) {
         drawModel.removeFeature(feature);
       }
+
+      // If the measurer creates a LineString or a polygon give it an ID so we can
+      // check in the drawmodel later if it's being removed, and remove the segment points aswell
+      if (type === "LineString" || type === "Polygon") {
+        const addedFeatureId = Math.random().toString(36).substring(2, 15);
+        feature.set("MEASUREMENT_ID", addedFeatureId);
+        // Indicate that this feature is a parent to the measurement points
+        feature.set("MEASUREMENT_PARENT", true);
+        // Update the Segment instance tracker of this id
+        segments.setLastPlacedFeatureId(addedFeatureId);
+      }
     },
-    [drawModel]
+    [drawModel, segments]
   );
 
   const handleDrawEnd = useCallback(
@@ -131,8 +151,9 @@ function Measurer(props) {
       }
 
       feature.setStyle(style);
+      segments.handleDrawEndEvent(e, map, drawModel);
     },
-    [angleSnapping]
+    [drawModel, map, angleSnapping, segments]
   );
 
   const startInteractionWithDrawType = useCallback(
@@ -263,7 +284,10 @@ function Measurer(props) {
     },
   ];
 
-  //
+  const toggleSegmentsEnabled = (enabled) => {
+    setSegmentsEnabled(enabled);
+  };
+
   return (
     <BaseWindowPlugin
       {...props}
@@ -273,7 +297,7 @@ function Measurer(props) {
         title: state.title || "Mät",
         description: "Mät längder och ytor",
         height: "dynamic",
-        width: 400,
+        width: 500,
         customPanelHeaderButtons: customHeaderButtons,
 
         onWindowHide: onWindowHide,
@@ -285,6 +309,8 @@ function Measurer(props) {
         localObserver={localObserver}
         drawType={drawType}
         drawModel={drawModel}
+        segmentsEnabled={segmentsEnabled}
+        toggleSegmentsEnabled={(enabled) => toggleSegmentsEnabled(enabled)}
         handleDrawTypeChange={handleDrawTypeChange}
       />
     </BaseWindowPlugin>

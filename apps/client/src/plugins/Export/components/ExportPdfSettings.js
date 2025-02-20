@@ -1,7 +1,7 @@
 import React from "react";
 import propTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import { Paper, FormControl, Button, Input } from "@mui/material";
 import { Grid, InputLabel, NativeSelect, LinearProgress } from "@mui/material";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
@@ -407,7 +407,7 @@ class ExportPdfSettings extends React.PureComponent {
               variant="contained"
               fullWidth={true}
               target="_blank"
-              href={this.state.url}
+              href={this.state.url || null}
             >
               <ArrowDownward sx={{ marginRight: 1 }} /> Ladda ner
             </Button>

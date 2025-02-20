@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 
 import {
   Button,

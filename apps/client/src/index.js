@@ -108,7 +108,7 @@ try {
   const customTheme = await customThemeResponse.json();
 
   const config = {
-    activeMap: useBackend ? activeMap : "simpleMapConfig", // If we are not utilizing mapService, we know that the active map must be "simpleMapConfig".
+    activeMap: useBackend ? activeMap : "simpleMapAndLayersConfig", // If we are not utilizing mapService, we know that the active map must be "simpleMapAndLayersConfig".
     appConfig: appConfig,
     layersConfig: mapConfig.layersConfig,
     mapConfig: mapConfig.mapConfig,

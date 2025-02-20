@@ -78,8 +78,6 @@ class FirSearchView extends React.PureComponent {
     localObserver: PropTypes.object.isRequired,
   };
 
-  static defaultProps = {};
-
   constructor(props) {
     super(props);
     this.model = this.props.model;

@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import QRCode from "qrcode";
 import HajkToolTip from "components/HajkToolTip";
 
@@ -172,7 +172,7 @@ class AnchorView extends React.PureComponent {
                     variant="contained"
                     color="primary"
                     endIcon={<OpenInNewIcon />}
-                    href={this.state.anchor}
+                    href={this.state.anchor || null}
                     target="_blank"
                   >
                     Öppna länk

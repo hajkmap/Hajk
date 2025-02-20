@@ -55,7 +55,13 @@ const IconWrapper = styled("div")(({ theme }) => ({
 const CustomPopper = (props) => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const style = smallScreen ? { width: "100%" } : { width: 400 };
+
+  const headerHasFocusZIndex = props.headerhasfocus === "true" ? 1300 : 1000;
+
+  const style = smallScreen
+    ? { width: "100%", zIndex: headerHasFocusZIndex }
+    : { width: 400, zIndex: headerHasFocusZIndex };
+
   return (
     <Popper
       {...props}
@@ -260,6 +266,8 @@ class SearchBar extends React.PureComponent {
       resultPanelCollapsed,
       toggleCollapseSearchResults,
       options,
+      headerHasFocus,
+      handleHeaderFocus,
     } = this.props;
 
     return (
@@ -273,6 +281,8 @@ class SearchBar extends React.PureComponent {
         panelCollapsed={resultPanelCollapsed}
         toggleCollapseSearchResults={toggleCollapseSearchResults}
         options={options}
+        headerHasFocus={headerHasFocus}
+        handleHeaderFocus={handleHeaderFocus}
       />
     );
   };
@@ -286,13 +296,19 @@ class SearchBar extends React.PureComponent {
       loading,
       handleOnAutocompleteInputChange,
       handleSearchInput,
+      handleHeaderFocus,
     } = this.props;
     return (
       <StyledAutocomplete
         id="searchInputField"
         freeSolo
         size={"small"}
-        PopperComponent={CustomPopper}
+        PopperComponent={(popperProps) => (
+          <CustomPopper
+            {...popperProps}
+            headerhasfocus={this.props.headerHasFocus.toString()}
+          />
+        )}
         PaperComponent={CustomPaper}
         clearOnEscape
         disabled={
@@ -317,7 +333,20 @@ class SearchBar extends React.PureComponent {
               // Important: the `key` prop must be set last, so we override the
               // one that gets there when we spread props (there is already a key
               // there, which can become duplicated under some circumstances).
-              <Grid container alignItems="center" {...props} key={props.id}>
+              <Grid
+                container
+                alignItems="center"
+                {...props}
+                key={props.id}
+                onClick={(e) => {
+                  if (handleHeaderFocus) {
+                    handleHeaderFocus();
+                  }
+                  if (props.onClick) {
+                    props.onClick(e);
+                  }
+                }}
+              >
                 <Grid item xs={1}>
                   {this.getOriginBasedIcon(option.origin)}
                 </Grid>
@@ -373,11 +402,14 @@ class SearchBar extends React.PureComponent {
       searchOptions,
       searchSources,
       updateSearchOptions,
+      enabledSearchOptions,
       searchModel,
       handleOnClickOrKeyboardSearch,
       setSearchSources,
       failedWFSFetchMessage,
       isMobile,
+      handleHeaderFocus,
+      handleHeaderBlur,
     } = this.props;
     const disableUnderline = isMobile ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
@@ -394,6 +426,7 @@ class SearchBar extends React.PureComponent {
     const placeholder = this.getPlaceholder();
     return (
       <TextField
+        onBlur={handleHeaderBlur}
         {...params}
         label={<span style={visuallyHidden}>Sök i webbplatsens innehåll</span>}
         variant={isMobile ? "standard" : "outlined"}
@@ -429,6 +462,9 @@ class SearchBar extends React.PureComponent {
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleCollapseSearchResults();
+                        if (handleHeaderFocus) {
+                          handleHeaderFocus();
+                        }
                       }}
                       size="small"
                     >
@@ -445,6 +481,9 @@ class SearchBar extends React.PureComponent {
                       onClick={(e) => {
                         e.stopPropagation();
                         this.toggleResultsLayerVisibility();
+                        if (handleHeaderFocus) {
+                          handleHeaderFocus();
+                        }
                       }}
                       size="small"
                     >
@@ -479,6 +518,7 @@ class SearchBar extends React.PureComponent {
                   searchTools={this.props.searchTools}
                   searchModel={searchModel}
                   updateSearchOptions={updateSearchOptions}
+                  enabledSearchOptions={enabledSearchOptions}
                 />
               )}
             </>

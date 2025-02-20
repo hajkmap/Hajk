@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import ReplayIcon from "@mui/icons-material/Replay";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
@@ -509,7 +509,7 @@ class GeosuiteExportView extends React.PureComponent {
           alignItems="center"
           style={{ marginTop: "24px", marginBottom: "24px" }}
         >
-          <Link href={termsAndConditionsLink} target="_blank">
+          <Link href={termsAndConditionsLink || null} target="_blank">
             <Box display="flex" alignItems="center" gridColumnGap="4px">
               {"Villkor för nyttjande"}
               <LaunchIcon fontSize="small" />
@@ -678,7 +678,7 @@ class GeosuiteExportView extends React.PureComponent {
                   {deliveryInformationLink.linkText && (
                     <Grid item xs={12}>
                       <Link
-                        href={deliveryInformationLink.linkHref}
+                        href={deliveryInformationLink.linkHref || null}
                         target="_blank"
                       >
                         <Typography>
@@ -719,7 +719,7 @@ class GeosuiteExportView extends React.PureComponent {
             direction="row"
             alignItems="center"
           >
-            <Link href={termsAndConditionsLink} target="_blank">
+            <Link href={termsAndConditionsLink || null} target="_blank">
               <Box display="flex" alignItems="center" gridColumnGap="4px">
                 {"Villkor för nyttjande"}
                 <LaunchIcon fontSize="small" />

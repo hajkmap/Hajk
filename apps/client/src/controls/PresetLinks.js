@@ -2,7 +2,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 
 import { IconButton, Paper, Menu, MenuItem } from "@mui/material";
 import FolderSpecial from "@mui/icons-material/FolderSpecial";

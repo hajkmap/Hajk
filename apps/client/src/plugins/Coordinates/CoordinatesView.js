@@ -5,7 +5,7 @@ import Grid from "@mui/material/Grid";
 import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
 import { Divider } from "@mui/material";
 
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import HajkToolTip from "components/HajkToolTip";
 
 import {
