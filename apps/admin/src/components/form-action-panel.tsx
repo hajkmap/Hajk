@@ -56,6 +56,8 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           borderColor: "grey.300",
           borderRadius: 3,
           maxWidth: "200px",
+          top: "100px",
+          position: "sticky",
         }}
       >
         <Button
