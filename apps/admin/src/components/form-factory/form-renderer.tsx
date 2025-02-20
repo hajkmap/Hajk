@@ -111,7 +111,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
             control={control}
             settings={castedSettings}
             errorMessage={
-              errors[castedSettings.name]?.message?.toString() ?? null
+              errors[castedSettings.name]?.message!.toString() ?? null
             }
           />
         </Box>
