@@ -21,7 +21,7 @@ import {
   updateLayer,
   getServiceByLayerId,
 } from "./requests";
-import { Service, useServiceCapabilities } from "../services";
+import { Service, useServiceCapabilities, SERVICE_TYPE } from "../services";
 
 // A React Query hook to fetch all layers
 // This hook uses the `getLayers` function from the layers `requests` module
@@ -127,11 +127,17 @@ export const useLayersLegends = ({
   baseUrl,
   layers,
   styles = {},
+  type,
+  format,
+  version,
   geoServerLegendOptions,
 }: {
   baseUrl: string;
   layers: string[];
   styles?: Record<string, string>;
+  type: SERVICE_TYPE;
+  format: string;
+  version: string;
   geoServerLegendOptions: string;
 }) => {
   const {
@@ -141,6 +147,7 @@ export const useLayersLegends = ({
     isError,
   } = useServiceCapabilities({
     baseUrl,
+    type,
   });
 
   const legendUrls = useMemo(() => {
@@ -157,7 +164,7 @@ export const useLayersLegends = ({
 
       return {
         layer,
-        legendUrl: `${baseUrl}?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${encodeURIComponent(
+        legendUrl: `${baseUrl}?SERVICE=${type}&REQUEST=GetLegendGraphic&VERSION=${version}&FORMAT=${format}&LAYER=${encodeURIComponent(
           layer
         )}&STYLE=${encodeURIComponent(style) || ""}&LEGEND_OPTIONS=${
           geoServerLegendOptions || ""
@@ -171,6 +178,9 @@ export const useLayersLegends = ({
     availableStyles,
     baseUrl,
     geoServerLegendOptions,
+    format,
+    type,
+    version,
   ]);
 
   return { legendUrls, isLoading, isError };

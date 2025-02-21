@@ -28,14 +28,13 @@ import FormActionPanel from "../../components/form-action-panel";
 import { toast } from "react-toastify";
 import { useServices } from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
-import { useServiceCapabilities } from "../../api/services";
+import { useServiceCapabilities, SERVICE_TYPE } from "../../api/services";
 import { useServiceByLayerId, useLayersLegends } from "../../api/layers";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
   const { layerId } = useParams<{ layerId: string }>();
   const { data: layer, isLoading, isError } = useLayerById(layerId ?? "");
-  console.log("layer", layer);
   const { mutateAsync: updateLayer, status: updateStatus } = useUpdateLayer();
   const { mutateAsync: deleteLayer, status: deleteStatus } = useDeleteLayer();
   const { palette } = useTheme();
@@ -56,6 +55,9 @@ export default function LayerSettings() {
   const { legendUrls: legends } = useLayersLegends({
     baseUrl: service?.url ?? "",
     layers: layer?.selectedLayers ?? [],
+    type: service?.type ?? SERVICE_TYPE.WMS,
+    format: service?.imageFormat ?? "",
+    version: service?.version ?? "",
     geoServerLegendOptions: layer?.legendOptions ?? "",
   });
 
@@ -82,9 +84,6 @@ export default function LayerSettings() {
   } = DefaultUseForm(defaultValues);
 
   const watchSingleTile = watch("singleTile");
-
-  console.log("watchminZoom", watch("minZoom"));
-  console.log("watchMaxzoom", watch("maxZoom"));
 
   const layerSettingsFormContainer = new DynamicFormContainer<FieldValues>();
   const panelNestedContainer = new DynamicFormContainer<FieldValues>(
