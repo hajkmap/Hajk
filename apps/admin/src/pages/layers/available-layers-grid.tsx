@@ -124,6 +124,7 @@ function AvailableLayersGrid({
             rowSelectionModel={selectionModel}
             onRowSelectionModelChange={(ids) => setSelectionModel(ids)}
             checkboxSelection
+            disableRowSelectionOnClick
           />
         </Scrollbar>
       </Grid>

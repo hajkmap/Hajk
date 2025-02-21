@@ -69,7 +69,7 @@ export interface ServiceUpdateInput {
 export interface ServiceCapabilities {
   layers: string[];
   workspaces?: string[];
-  styles?: Record<string, string[]>;
+  styles?: Record<string, { name: string; legendUrl?: string | undefined }[]>;
 }
 
 export interface LayersGridProps {
@@ -80,7 +80,7 @@ export interface LayersGridProps {
 }
 export interface UseServiceCapabilitiesProps {
   baseUrl: string;
-  type: string;
+  type?: string;
 }
 
 export const serverTypes = [

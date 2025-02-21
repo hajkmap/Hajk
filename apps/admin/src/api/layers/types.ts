@@ -16,6 +16,8 @@ export interface Layer {
   tiled: boolean;
   singleTile: boolean;
   hidpi: boolean;
+  legendActive: boolean;
+  legendOptions?: string;
   legendUrl?: string;
   legendIconUrl?: string;
   customRatio: number;
@@ -96,6 +98,8 @@ export interface LayerUpdateInput {
   tiled?: boolean;
   singleTile?: boolean;
   hidpi?: boolean;
+  legendActive?: boolean;
+  legendOptions?: string;
   legendUrl?: string;
   legendIconUrl?: string;
   customRatio?: number;

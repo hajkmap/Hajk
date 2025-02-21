@@ -253,6 +253,8 @@ model Layer {
   tiled                       Boolean            @default(false)
   singleTile                  Boolean            @default(false)
   hidpi                       Boolean            @default(false)
+  legendActive                Boolean            @default(false)
+  legendOptions               String?
   legendUrl                   String?
   legendIconUrl               String?
   style                       String?

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   useQuery,
   UseQueryResult,
@@ -20,7 +21,7 @@ import {
   updateLayer,
   getServiceByLayerId,
 } from "./requests";
-import { Service } from "../services/types";
+import { Service, useServiceCapabilities } from "../services";
 
 // A React Query hook to fetch all layers
 // This hook uses the `getLayers` function from the layers `requests` module
@@ -120,4 +121,57 @@ export const useDeleteLayer = () => {
       console.error(error);
     },
   });
+};
+
+export const useLayersLegends = ({
+  baseUrl,
+  layers,
+  styles = {},
+  geoServerLegendOptions,
+}: {
+  baseUrl: string;
+  layers: string[];
+  styles?: Record<string, string>;
+  geoServerLegendOptions: string;
+}) => {
+  const {
+    layers: availableLayers,
+    styles: availableStyles,
+    isLoading,
+    isError,
+  } = useServiceCapabilities({
+    baseUrl,
+  });
+
+  const legendUrls = useMemo(() => {
+    if (!Array.isArray(availableLayers) || availableLayers.length === 0)
+      return [];
+
+    return layers.map((layer) => {
+      const style = styles[layer] || "";
+      const foundStyle = availableStyles[layer]?.find((s) => s.name === style);
+
+      if (foundStyle?.legendUrl) {
+        return { layer, legendUrl: foundStyle.legendUrl };
+      }
+
+      return {
+        layer,
+        legendUrl: `${baseUrl}?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${encodeURIComponent(
+          layer
+        )}&STYLE=${encodeURIComponent(style) || ""}&LEGEND_OPTIONS=${
+          geoServerLegendOptions || ""
+        }`,
+      };
+    });
+  }, [
+    layers,
+    styles,
+    availableLayers,
+    availableStyles,
+    baseUrl,
+    geoServerLegendOptions,
+  ]);
+
+  return { legendUrls, isLoading, isError };
 };

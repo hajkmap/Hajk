@@ -233,7 +233,7 @@ const parseCapabilitiesFromXML = (xmlString: string): ServiceCapabilities => {
 
   const layers = xmlDoc.getElementsByTagName("Layer");
   const workspaces: Set<string> = new Set<string>();
-  const styles: Record<string, string[]> = {};
+  const styles: Record<string, { name: string; legendUrl?: string }[]> = {};
 
   for (const layer of layers) {
     const name = layer.getElementsByTagName("Name")[0]?.textContent;
@@ -242,17 +242,21 @@ const parseCapabilitiesFromXML = (xmlString: string): ServiceCapabilities => {
       workspaces.add(workspace);
     }
     const styleElements = layer.getElementsByTagName("Style");
-    const styleNames: string[] = [];
+    const styleData: { name: string; legendUrl?: string }[] = [];
 
     for (const styleElement of styleElements) {
       const styleName =
         styleElement.getElementsByTagName("Name")[0]?.textContent;
+      const legendElement = styleElement.getElementsByTagName("LegendURL")[0];
+      const legendUrl = legendElement
+        ?.getElementsByTagName("OnlineResource")[0]
+        ?.getAttribute("xlink:href");
       if (styleName) {
-        styleNames.push(styleName);
+        styleData.push({ name: styleName, legendUrl: legendUrl ?? undefined });
       }
     }
     if (name) {
-      styles[name] = styleNames;
+      styles[name] = styleData;
     }
   }
   for (const layerElement of layerElements) {

@@ -15,7 +15,6 @@ import { RenderProps } from "../../components/form-factory/types/render";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import UsedInMapsGrid from "./used-in-maps-grid";
 import {
-  useLayers,
   useLayerById,
   useDeleteLayer,
   LayerUpdateInput,
@@ -30,14 +29,13 @@ import { toast } from "react-toastify";
 import { useServices } from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
 import { useServiceCapabilities } from "../../api/services";
-import { useServiceByLayerId } from "../../api/layers";
+import { useServiceByLayerId, useLayersLegends } from "../../api/layers";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
   const { layerId } = useParams<{ layerId: string }>();
-  const { isLoading, isError } = useLayerById(layerId ?? "");
-  const { data: layers } = useLayers();
-  const layer = layers?.find((l) => l.id === layerId);
+  const { data: layer, isLoading, isError } = useLayerById(layerId ?? "");
+  console.log("layer", layer);
   const { mutateAsync: updateLayer, status: updateStatus } = useUpdateLayer();
   const { mutateAsync: deleteLayer, status: deleteStatus } = useDeleteLayer();
   const { palette } = useTheme();
@@ -55,6 +53,12 @@ export default function LayerSettings() {
       type: service?.type ?? "",
     }
   );
+  const { legendUrls: legends } = useLayersLegends({
+    baseUrl: service?.url ?? "",
+    layers: layer?.selectedLayers ?? [],
+    geoServerLegendOptions: layer?.legendOptions ?? "",
+  });
+
   const styles = layer?.selectedLayers.flatMap(
     (key) => getCapStyles[key] || []
   );
@@ -217,10 +221,10 @@ export default function LayerSettings() {
     title: `${t("layers.style")}`,
     defaultValue: layer?.style,
     optionList: [
-      { title: "<default>", value: "<default>" },
+      { title: "<default>", value: "" },
       ...(styles?.map((style) => ({
-        title: style,
-        value: style,
+        title: style.name,
+        value: style.name,
       })) ?? []),
     ],
   });
@@ -745,7 +749,7 @@ export default function LayerSettings() {
     return <SquareSpinnerComponent />;
   }
   if (isError) return <div>Error fetching layer details.</div>;
-  if (!layers) return <div>Layers not found.</div>;
+  if (!layer) return <div>Layer not found.</div>;
   return (
     <Page title={t("common.settings")}>
       <FormActionPanel
