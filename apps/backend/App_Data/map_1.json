@@ -665,7 +665,36 @@
             "infobox": ""
           }
         ],
-        "quickLayersPresets": [],
+        "enableQuickAccessPresets": true,
+        "quickAccessPresets": [
+          {
+            "id": "sensate-data",
+            "title": "Senaste data",
+            "author": "Hajks kodgrupp",
+            "Description": "Det här är en grupp av den senaste datan där vi har flera olika år.",
+            "keywords": ["naturvårdsverket", "2019", "scb", "2023" ],
+            "layers": [
+              {
+                "id": "1",
+                "drawOrder": 3,
+                "visible": true,
+                "opacity": 1
+              },
+              {
+                "id": "toimzo",
+                "drawOrder": 3,
+                "visible": true,
+                "opacity": 1
+              },
+              {
+                "id": "vzjhpz",
+                "drawOrder": 3,
+                "visible": true,
+                "opacity": 1
+              }
+            ]
+          }
+        ],
         "active": true,
         "visibleAtStart": false,
         "visibleAtStartMobile": false,
