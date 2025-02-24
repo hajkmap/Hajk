@@ -226,9 +226,17 @@ const LayerGroup = ({
           toggleState={toggleState}
           clickHandler={() => {
             if (isToggled) {
-              layerSwitcherDispatch.setGroupVisibility(groupId, false);
+              layerSwitcherDispatch.setGroupVisibility(
+                groupId,
+                false,
+                filterHits
+              );
             } else {
-              layerSwitcherDispatch.setGroupVisibility(groupId, true);
+              layerSwitcherDispatch.setGroupVisibility(
+                groupId,
+                true,
+                filterHits
+              );
             }
           }}
         />
