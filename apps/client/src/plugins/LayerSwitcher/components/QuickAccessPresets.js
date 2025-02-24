@@ -139,14 +139,18 @@ function QuickAccessPresets({
     layers.forEach((l) => {
       const layer = allMapLayers.find((la) => la.get("name") === l.id);
       if (layer) {
+        const opacity = l?.opacity ?? 1;
+        const drawOrder = l?.drawOrder ?? 1;
+        const visible = l?.visible ?? true;
+
         // Set quickaccess property
         if (layer.get("layerType") !== "base") {
           layer.set("quickAccess", true);
         }
         // Set drawOrder (zIndex)
-        layer.setZIndex(l.drawOrder);
+        layer.setZIndex(drawOrder);
         // Set opacity
-        layer.setOpacity(l.opacity);
+        layer.setOpacity(opacity);
         // Special handling for layerGroups and baselayers
         if (layer.get("layerType") === "group") {
           if (l.visible === true) {
@@ -165,9 +169,9 @@ function QuickAccessPresets({
             layer.get("name")
           );
           // Set visibility
-          layer.set("visible", l.visible);
+          layer.set("visible", visible);
         } else {
-          layer.set("visible", l.visible);
+          layer.set("visible", visible);
         }
       } else if (l.id < 0) {
         // A fake maplayer is in the package
