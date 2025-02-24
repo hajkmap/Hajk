@@ -285,6 +285,19 @@ function QuickAccessPresets({
     return backgroundLayerName;
   };
 
+  const getLayerNames = (layers) => {
+    const layerNames = [];
+    layers?.forEach((layer) => {
+      const mapLayer = map
+        .getAllLayers()
+        .find((l) => l.get("name") === layer.id);
+      if (mapLayer && mapLayer.get("layerType") !== "base") {
+        layerNames.push(mapLayer.get("caption"));
+      }
+    });
+    return layerNames;
+  };
+
   // Render layerpackage keywords
   const renderKeywords = (keywords) => {
     // Check if keywords is an array and if it contains any items
@@ -339,8 +352,15 @@ function QuickAccessPresets({
             <PublicOutlinedIcon fontSize="small"></PublicOutlinedIcon>
             <Typography>
               {loadLpInfoConfirmation &&
-                getBaseLayerName(loadLpInfoConfirmation.layers)}
+                getBaseLayerName(loadLpInfoConfirmation?.layers)}
             </Typography>
+          </Stack>
+          <DialogContentText sx={{ mt: 2, mb: 1 }}>Lager</DialogContentText>
+          <Stack direction="row" useFlexGap spacing={2}>
+            {loadLpInfoConfirmation &&
+              getLayerNames(loadLpInfoConfirmation?.layers).map((n) => (
+                <Typography>{n}</Typography>
+              ))}
           </Stack>
           <Divider sx={{ mt: 2 }} />
           <Typography sx={{ mt: 2, mb: 1 }}>
