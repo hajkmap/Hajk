@@ -1,5 +1,6 @@
 enum INPUT_TYPE {
   TEXTFIELD = "textfield",
+  TEXTFIELD_ARRAY = "textfield-array",
   SELECT = "select",
   SLIDER = "slider",
   RADIO = "radio",

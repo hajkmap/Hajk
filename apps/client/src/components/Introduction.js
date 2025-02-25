@@ -1,7 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { Steps } from "intro.js-react";
-import PropTypes from "prop-types";
 
 import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
 import PluginControlButton from "../components/PluginControlButton";
@@ -24,20 +23,6 @@ class Introduction extends React.PureComponent {
     initialStep: 0,
     stepsEnabled: true,
     steps: [],
-  };
-
-  static propTypes = {
-    introductionEnabled: PropTypes.bool.isRequired,
-    introductionShowControlButton: PropTypes.bool.isRequired,
-    introductionSteps: PropTypes.array,
-    globalObserver: PropTypes.object.isRequired,
-  };
-
-  static defaultProps = {
-    introductionEnabled: false,
-    introductionShowControlButton: false,
-    introductionSteps: [],
-    globalObserver: {},
   };
 
   predefinedSteps = [
@@ -95,7 +80,7 @@ class Introduction extends React.PureComponent {
       // Allow a short wait so that everything renders first
       setTimeout(() => {
         // First check if we have any steps in our config
-        const { introductionSteps } = this.props;
+        const { introductionSteps = [] } = this.props;
         // We must have at least 2 elements in the array in order to properly show intro guide
         const steps =
           introductionSteps.length >= 2

@@ -7,19 +7,20 @@ export interface Service {
   url: string;
   version: string;
   imageFormat: string;
-  type: string;
+  type: SERVICE_TYPE;
   serverType: string;
   workspace: string;
   getMapUrl: string;
   comment: string;
   metadata: {
     id: string;
-    owner: string;
-    description: string;
+    owner?: string;
+    description?: string;
   };
   projection: {
     code: string;
   };
+  status?: SERVICE_STATUS;
 }
 
 export interface Projection {
@@ -65,19 +66,10 @@ export interface ServiceUpdateInput {
   };
 }
 
-export const serviceTypes = ["ARCGIS", "VECTOR", "WFS", "WFST", "WMS", "WMTS"];
-export const serverTypes = [
-  { title: "Geoserver", value: "GEOSERVER" },
-  { title: "QGIS Server", value: "QGIS_SERVER" },
-];
-export const versions = [
-  { title: "1.1.1", value: "1.1.1" },
-  { title: "1.3.0", value: "1.3.0" },
-];
-
 export interface ServiceCapabilities {
   layers: string[];
   workspaces?: string[];
+  styles?: Record<string, { name: string; legendUrl?: string | undefined }[]>;
 }
 
 export interface LayersGridProps {
@@ -88,5 +80,37 @@ export interface LayersGridProps {
 }
 export interface UseServiceCapabilitiesProps {
   baseUrl: string;
-  type: string;
+  type?: string;
+}
+
+export const serverTypes = [
+  { title: "Geoserver", value: "GEOSERVER" },
+  { title: "QGIS Server", value: "QGIS_SERVER" },
+];
+export const versions = [
+  { title: "1.1.1", value: "1.1.1" },
+  { title: "1.3.0", value: "1.3.0" },
+];
+
+export const imageFormats = [
+  { title: "image/png", value: "image/png" },
+  { title: "image/png; mode=8bit", value: "image/png; mode=8bit" },
+  { title: "image/jpeg", value: "image/jpeg" },
+  { title: "image/vnd.jpeg-png", value: "image/vnd.jpeg-png" },
+  { title: "image/vnd.jpeg-png8", value: "image/vnd.jpeg-png8" },
+];
+
+export enum SERVICE_TYPE {
+  ARCGIS = "ARCGIS",
+  VECTOR = "VECTOR",
+  WFS = "WFS",
+  WFST = "WFST",
+  WMS = "WMS",
+  WMTS = "WMTS",
+}
+
+export enum SERVICE_STATUS {
+  UNKNOWN,
+  HEALTHY,
+  UNHEALTHY,
 }

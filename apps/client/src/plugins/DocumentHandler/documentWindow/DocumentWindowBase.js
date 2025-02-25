@@ -6,7 +6,7 @@ import PrintWindow from "../printMenu/PrintWindow";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import Progress from "./Progress";
 import { CustomLink } from "../utils/ContentComponentFactory";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import PrintIcon from "@mui/icons-material/Print";
 
 class DocumentWindowBase extends React.PureComponent {

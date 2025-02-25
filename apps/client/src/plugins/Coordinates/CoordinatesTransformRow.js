@@ -3,7 +3,7 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import { NumericFormat } from "react-number-format";
 import { transform } from "ol/proj";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import { Grid, IconButton } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { styled } from "@mui/material/styles";

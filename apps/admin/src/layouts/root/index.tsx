@@ -53,8 +53,8 @@ export default function RootLayout() {
               ? `${SIDEBAR_WIDTH}px`
               : `${SIDEBAR_MINI_WIDTH}px`,
           minHeight: "100vh",
-          overflowY: "auto",
-          overflowX: "hidden",
+          overflowY: "clip",
+          overflowX: "clip",
           transition: "margin-left 250ms ease",
         }}
       >

@@ -6,6 +6,7 @@ import {
   ServiceCreateInput,
   ServiceUpdateInput,
   ServiceCapabilities,
+  SERVICE_STATUS,
 } from "./types";
 import { LayersApiResponse } from "../layers";
 import { Map } from "../maps";
@@ -223,7 +224,7 @@ export const deleteService = async (serviceId: string): Promise<void> => {
   }
 };
 
-const parseLayersFromXML = (xmlString: string): ServiceCapabilities => {
+const parseCapabilitiesFromXML = (xmlString: string): ServiceCapabilities => {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlString, "application/xml");
 
@@ -232,12 +233,30 @@ const parseLayersFromXML = (xmlString: string): ServiceCapabilities => {
 
   const layers = xmlDoc.getElementsByTagName("Layer");
   const workspaces: Set<string> = new Set<string>();
+  const styles: Record<string, { name: string; legendUrl?: string }[]> = {};
 
   for (const layer of layers) {
     const name = layer.getElementsByTagName("Name")[0]?.textContent;
     if (name?.includes(":")) {
       const workspace = name.split(":")[0];
       workspaces.add(workspace);
+    }
+    const styleElements = layer.getElementsByTagName("Style");
+    const styleData: { name: string; legendUrl?: string }[] = [];
+
+    for (const styleElement of styleElements) {
+      const styleName =
+        styleElement.getElementsByTagName("Name")[0]?.textContent;
+      const legendElement = styleElement.getElementsByTagName("LegendURL")[0];
+      const legendUrl = legendElement
+        ?.getElementsByTagName("OnlineResource")[0]
+        ?.getAttribute("xlink:href");
+      if (styleName) {
+        styleData.push({ name: styleName, legendUrl: legendUrl ?? undefined });
+      }
+    }
+    if (name) {
+      styles[name] = styleData;
     }
   }
   for (const layerElement of layerElements) {
@@ -250,6 +269,7 @@ const parseLayersFromXML = (xmlString: string): ServiceCapabilities => {
   return {
     layers: layerNames,
     workspaces: Array.from(workspaces),
+    styles,
   };
 };
 
@@ -258,6 +278,27 @@ export const fetchCapabilities = async (
 ): Promise<ServiceCapabilities> => {
   const response = await axios.get(url, { responseType: "text" });
   const xmlData: string = response.data as string;
-  const layers = parseLayersFromXML(xmlData);
+  const layers = parseCapabilitiesFromXML(xmlData);
   return { ...layers };
+};
+
+export const checkServiceHealth = async (
+  service: Service,
+  updateCache: (id: string, status: SERVICE_STATUS) => void
+) => {
+  try {
+    const healthUrl = ["WMS", "WMTS"].includes(service.type)
+      ? `${service.url}?service=${service.type}`
+      : `${service.url}?service=WFS&request=GetFeature&maxFeatures=1`;
+    const response = await fetch(healthUrl, {
+      method: "GET",
+      signal: AbortSignal.timeout(5000),
+    });
+    const status = response.ok
+      ? SERVICE_STATUS.HEALTHY
+      : SERVICE_STATUS.UNHEALTHY;
+    updateCache(service.id, status);
+  } catch {
+    updateCache(service.id, SERVICE_STATUS.UNHEALTHY);
+  }
 };

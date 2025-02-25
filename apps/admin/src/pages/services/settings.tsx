@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useTranslation, Trans } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { FieldValues } from "react-hook-form";
@@ -16,12 +16,12 @@ import {
   useServiceById,
   useUpdateService,
   useDeleteService,
-  useServices,
   useLayersByServiceId,
-  serviceTypes,
+  SERVICE_TYPE,
   ServiceUpdateInput,
   serverTypes,
   versions,
+  imageFormats,
   useProjections,
   useServiceCapabilities,
 } from "../../api/services";
@@ -45,18 +45,17 @@ export default function ServiceSettings() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { serviceId } = useParams<{ serviceId: string }>();
-  const { isError, isLoading } = useServiceById(serviceId ?? "");
-  const { data: services } = useServices();
-  const service = services?.find((s) => s.id === serviceId);
+  const { data: service, isError, isLoading } = useServiceById(serviceId ?? "");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogUrl, setDialogUrl] = useState(service?.url ?? "");
   const [dialogServiceType, setDialogServiceType] = useState(
     service?.type ?? ""
   );
+
   const { data: projections } = useProjections();
-  const epsgProjections = projections?.filter((projection) =>
-    projection.code.startsWith("EPSG:")
-  );
+  const epsgProjections =
+    projections?.filter((projection) => projection.code.startsWith("EPSG:")) ??
+    [];
   const epsgProjectionsMap = epsgProjections?.map((projection) => ({
     title: projection.code,
     value: projection.code,
@@ -77,9 +76,9 @@ export default function ServiceSettings() {
     baseUrl: service?.url ?? "",
     type: service?.type ?? "",
   });
-  const [formServiceData, setFormServiceData] = useState<
-    DynamicFormContainer<FieldValues>
-  >(new DynamicFormContainer<FieldValues>());
+  const [formServiceData] = useState<DynamicFormContainer<FieldValues>>(
+    new DynamicFormContainer<FieldValues>()
+  );
 
   const handleDialogOpen = () => {
     setIsDialogOpen(true);
@@ -111,6 +110,7 @@ export default function ServiceSettings() {
         type: serviceData.type,
         serverType: serviceData.serverType,
         version: serviceData.version,
+        imageFormat: serviceData.imageFormat,
         workspace: serviceData.workspace,
         getMapUrl: serviceData.getMapUrl,
         comment: serviceData.comment,
@@ -171,6 +171,7 @@ export default function ServiceSettings() {
   };
 
   const serviceSettingsFormContainer = new DynamicFormContainer<FieldValues>();
+
   const panelNestedContainer = new DynamicFormContainer<FieldValues>(
     "",
     CONTAINER_TYPE.PANEL
@@ -271,15 +272,16 @@ export default function ServiceSettings() {
     gridColumns: 8,
     name: "workspace",
     title: `${t("services.workspace")}`,
-    defaultValue: service?.workspace,
-    optionList:
-      getCapWorkspaces.length > 0
-        ? getCapWorkspaces.map((workspace) => ({
-            title: workspace,
-            value: workspace,
-          }))
-        : [{ title: "Alla", value: "Alla" }],
+    defaultValue: service?.workspace ?? "All",
+    optionList: [
+      { title: `${t("common.all")}`, value: "All" },
+      ...(getCapWorkspaces?.map((workspace) => ({
+        title: workspace,
+        value: workspace,
+      })) ?? []),
+    ],
   });
+
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
@@ -300,6 +302,18 @@ export default function ServiceSettings() {
     registerOptions: {
       required: `${t("common.required")}`,
     },
+  });
+
+  accordionNestedContainer2.addInput({
+    type: INPUT_TYPE.SELECT,
+    gridColumns: 8,
+    name: "imageFormat",
+    title: `${t("services.imageFormats")}`,
+    defaultValue: service?.imageFormat,
+    optionList: imageFormats.map((formats) => ({
+      title: formats.title,
+      value: formats.value,
+    })),
   });
 
   accordionNestedContainer2.addInput({
@@ -358,25 +372,6 @@ export default function ServiceSettings() {
     },
   });
 
-  const currentValues = getValues();
-
-  const hasChanges = Object.keys(currentValues).some(
-    (key) =>
-      currentValues[key as keyof ServiceUpdateInput] !==
-      defaultValues[key as keyof ServiceUpdateInput]
-  );
-
-  const isChanged =
-    (hasChanges && Object.keys(dirtyFields).length > 0) ||
-    currentValues.url !== service?.url ||
-    currentValues.type !== service?.type;
-
-  useEffect(() => {
-    if (!service) return;
-    setFormServiceData(serviceSettingsFormContainer);
-    setDialogUrl(service.url);
-  }, [service]);
-
   if (isLoading) {
     return <SquareSpinnerComponent />;
   }
@@ -395,7 +390,6 @@ export default function ServiceSettings() {
         saveButtonText="Spara"
         deleteButtonText="Ta bort"
         navigateTo="/services"
-        isChangedFields={isChanged}
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer
@@ -457,7 +451,7 @@ export default function ServiceSettings() {
             variant="outlined"
             onChange={(e) => setDialogServiceType(e.target.value)}
           >
-            {serviceTypes.map((type) => (
+            {Object.keys(SERVICE_TYPE).map((type) => (
               <MenuItem key={type} value={type}>
                 {type}
               </MenuItem>

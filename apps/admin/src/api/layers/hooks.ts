@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   useQuery,
   UseQueryResult,
@@ -18,7 +19,9 @@ import {
   createLayer,
   deleteLayer,
   updateLayer,
+  getServiceByLayerId,
 } from "./requests";
+import { Service, useServiceCapabilities, SERVICE_TYPE } from "../services";
 
 // A React Query hook to fetch all layers
 // This hook uses the `getLayers` function from the layers `requests` module
@@ -55,6 +58,17 @@ export const useLayerTypes = (): UseQueryResult<LayerTypesApiResponse[]> => {
   return useQuery({
     queryKey: ["layerTypes"],
     queryFn: getLayerTypes,
+  });
+};
+
+// A React Query hook to fetch a service by its layer ID
+// This hook uses the `getServiceByLayerId` function from the layers `requests` module
+export const useServiceByLayerId = (
+  layerId: string
+): UseQueryResult<Service> => {
+  return useQuery({
+    queryKey: ["serviceByLayerId", layerId],
+    queryFn: () => getServiceByLayerId(layerId),
   });
 };
 
@@ -107,4 +121,67 @@ export const useDeleteLayer = () => {
       console.error(error);
     },
   });
+};
+
+export const useLayersLegends = ({
+  baseUrl,
+  layers,
+  styles = {},
+  type,
+  format,
+  version,
+  geoServerLegendOptions,
+}: {
+  baseUrl: string;
+  layers: string[];
+  styles?: Record<string, string>;
+  type: SERVICE_TYPE;
+  format: string;
+  version: string;
+  geoServerLegendOptions: string;
+}) => {
+  const {
+    layers: availableLayers,
+    styles: availableStyles,
+    isLoading,
+    isError,
+  } = useServiceCapabilities({
+    baseUrl,
+    type,
+  });
+
+  const legendUrls = useMemo(() => {
+    if (!Array.isArray(availableLayers) || availableLayers.length === 0)
+      return [];
+
+    return layers.map((layer) => {
+      const style = styles[layer] || "";
+      const foundStyle = availableStyles[layer]?.find((s) => s.name === style);
+
+      if (foundStyle?.legendUrl) {
+        return { layer, legendUrl: foundStyle.legendUrl };
+      }
+
+      return {
+        layer,
+        legendUrl: `${baseUrl}?SERVICE=${type}&REQUEST=GetLegendGraphic&VERSION=${version}&FORMAT=${format}&LAYER=${encodeURIComponent(
+          layer
+        )}&STYLE=${encodeURIComponent(style) || ""}&LEGEND_OPTIONS=${
+          geoServerLegendOptions || ""
+        }`,
+      };
+    });
+  }, [
+    layers,
+    styles,
+    availableLayers,
+    availableStyles,
+    baseUrl,
+    geoServerLegendOptions,
+    format,
+    type,
+    version,
+  ]);
+
+  return { legendUrls, isLoading, isError };
 };

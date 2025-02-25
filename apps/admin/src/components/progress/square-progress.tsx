@@ -80,7 +80,10 @@ export const SquareSpinnerComponent = () => {
             borderRadius: "4px",
             filter: `invert(${palette.mode === "light" ? 0 : 1})`,
           }}
-          src="/hajk-spinner-logo.svg"
+          src={`${import.meta.env.BASE_URL.replace(
+            /\/$/,
+            ""
+          )}/hajk-spinner-logo.svg`}
         />
       </SpinnerContainer>
     </FullScreenContainer>

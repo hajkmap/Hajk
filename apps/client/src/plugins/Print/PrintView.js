@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import PrintDialog from "./PrintDialog";
 import { AppBar, Tab, Tabs } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
@@ -43,8 +43,6 @@ class PrintView extends React.PureComponent {
     enqueueSnackbar: PropTypes.func.isRequired,
     closeSnackbar: PropTypes.func.isRequired,
   };
-
-  static defaultProps = {};
 
   state = {
     format: "a4", // a0-a5

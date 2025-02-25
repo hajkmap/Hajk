@@ -42,8 +42,6 @@ class FirSearchResultItemView extends React.PureComponent {
     classes: PropTypes.object,
   };
 
-  static defaultProps = {};
-
   constructor(props) {
     super(props);
     this.model = this.props.model;

@@ -190,6 +190,7 @@ model Metadata {
   owner       String?
   url         String?
   urlTitle    String?
+  attribution String?
   created     DateTime @default(now())
   updated     DateTime @updatedAt
   service     Service?
@@ -201,6 +202,7 @@ model InfoClickSettings {
   layerId         String?
   layerInstanceId String?
   definition      String?
+  icon            String?
   format          String  @default("application/json")
   sortProperty    String?
   sortMethod      String  @default("text") // number or text
@@ -229,40 +231,44 @@ model SearchSettings {
 }
 
 model Layer {
-  id                          String            @id @default(cuid())
+  id                          String             @id @default(cuid())
   serviceId                   String
-  metadataId                  String            @unique
-  searchSettingsId            String            @unique
-  infoClickSettingsId         String            @unique
-  selectedLayers              String[]          @default([])
+  metadataId                  String?            @unique
+  searchSettingsId            String?            @unique
+  infoClickSettingsId         String?            @unique
+  selectedLayers              String[]           @default([])
   // Locked is used to avoid multiple people messing with the same layer at the same time
-  locked                      Boolean           @default(false)
+  locked                      Boolean            @default(false)
   name                        String
   internalName                String?
-  service                     Service           @relation(fields: [serviceId], references: [id])
-  metadata                    Metadata          @relation(fields: [metadataId], references: [id])
-  infoClickSettings           InfoClickSettings @relation(fields: [infoClickSettingsId], references: [id])
-  searchSettings              SearchSettings    @relation(fields: [searchSettingsId], references: [id])
-  opacity                     Int               @default(1)
-  maxZoom                     Int               @default(-1)
-  minZoom                     Int               @default(-1)
-  minMaxZoomAlertOnToggleOnly Boolean           @default(false)
-  tiled                       Boolean           @default(false)
-  singleTile                  Boolean           @default(false)
-  hidpi                       Boolean           @default(false)
+  description                 String?
+  service                     Service            @relation(fields: [serviceId], references: [id])
+  metadata                    Metadata?          @relation(fields: [metadataId], references: [id])
+  infoClickSettings           InfoClickSettings? @relation(fields: [infoClickSettingsId], references: [id])
+  searchSettings              SearchSettings?    @relation(fields: [searchSettingsId], references: [id])
+  opacity                     Int                @default(1)
+  maxZoom                     Int                @default(-1)
+  minZoom                     Int                @default(-1)
+  minMaxZoomAlertOnToggleOnly Boolean            @default(false)
+  tiled                       Boolean            @default(false)
+  singleTile                  Boolean            @default(false)
+  hidpi                       Boolean            @default(false)
+  legendActive                Boolean            @default(false)
+  legendOptions               String?
   legendUrl                   String?
   legendIconUrl               String?
-  customRatio                 Int               @default(0)
-  showMetadata                Boolean           @default(false)
-  infoClickActive             Boolean           @default(true)
-  timeSliderVisible           Boolean           @default(false)
+  style                       String?
+  customRatio                 Int                @default(0)
+  showMetadata                Boolean            @default(false)
+  infoClickActive             Boolean            @default(true)
+  timeSliderVisible           Boolean            @default(false)
   timeSliderStart             String?
   timeSliderEnd               String?
-  hideExpandArrow             Boolean           @default(false)
-  zIndex                      Int               @default(0)
+  hideExpandArrow             Boolean            @default(false)
+  zIndex                      Int                @default(0)
   restrictedToRoles           RoleOnLayer[]
   instances                   LayerInstance[]
-  options                     Json              @default("{}")
+  options                     Json               @default("{}")
 }
 
 model LayerInstance {

@@ -8,7 +8,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import ToggleButton from "@mui/material/ToggleButton";
 import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import HajkToolTip from "components/HajkToolTip";
 
 const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({

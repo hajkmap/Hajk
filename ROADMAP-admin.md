@@ -2,39 +2,43 @@
 
 ## List of sprints
 
-- [2025-01-31](#2025-01-31)
+- [2025-02-21](#2025-02-21)
 
-## 2025-01-31
+## 2025-02-21
 
 - [ ] Authentication and authorization
   - [x] Basic authentication (local user and pass)
   - [ ] Authentication against Azure Entra (HH)
   - [ ] [Roles](#roles)
 - [ ] Services API
-  - [ ] Update prisma schema
-  - [ ] Update seed script
-  - [x] Update zod parsers(AA, field validators are missing)
-  - [ ] Update API methods
-- [ ] Layers API
-  - [ ] Update prisma schema
-  - [ ] Update seed script
+  - [x] Update prisma schema (ALL)
+  - [x] Update seed script (HH)
   - [ ] Update zod parsers
-  - [ ] Update API methods
+  - [x] Update API methods (AA)
+- [ ] Layers API
+  - [x] Update prisma schema (ALL)
+  - [x] Update seed script (HH)
+  - [ ] Update zod parsers
+  - [x] Update API methods (AA)
+- [ ] FormActionPanel component (OS)
+  - [ ] Make the panel sticky (OS)
+  - [ ] Feed it with relevant data
 - [x] Services page
   - [x] Add service (AA)
   - [x] Alter service (AA)
-    - ⚠️ Note: Some fields in the request payload for both adding and updating a service are mocked or incomplete due to missing data in the current data model. Once the data model is finalized, ensure that the missing fields are updated and validated in both the payload and the backend schema.
   - [x] Remove service (AA)
+  - [x] Bugfix: MUI Data Grid checkbox selection issue with separate search field (OS/AA)
+  - [ ] TBD: Define proper implementation for the "Workspace" input field
 - [x] Layers page
   - [x] Add layer (AA)
   - [x] Alter layer (AA)
-    - ⚠️ Incomplete due to missing data in the current data model.
+  - ⚠️ Note: legend and legendUrl fields are incomplete. The permission accordion and used in maps data-grid are also incomplete and needs to be updated.
   - [x] Remove layer (AA)
 - [ ] Map settings page
-  - [ ] Step 1: Create form with formfactory, UI only [JA]
+  - [x] Step 1: Create form with formfactory, UI only, incl translations [JA]
 - [ ] Optimizing input fields performance/state.
-  - [ ] Services page
-  - [ ] Layers page
+  - [x] Services page (JA)
+  - [x] Layers page (JA)
 - [ ] General UI improvements (JA)
   - [ ] Use page width better. 1024? 2048?
   - [x] Handle menu overflow and bottom settings/lock better. v0.1 WIP
@@ -48,13 +52,14 @@
   - [x] Add the possibility to add unmanaged elements to a FormFactory form.
   - [x] Find cause and fix sluggish form updates.
   - [x] Add a color picker component to FormFactory. v0.1 WIP
+  - [x] Fix RadioButtonGroup in FormFactory
 - [x] Upgrade npm packages (JW)
 
 ### Roles
 
 _TODO: Document roles used in Hajk._
 
-### Ready for testing after [2025-01-31](#2025-01-31)
+### Ready for testing after [2025-02-21](#2025-02-21)
 
 - [ ] (Example) Test authentication
 - [ ] Test adding, updating and deleting a new service

@@ -13,7 +13,13 @@ class LayerService {
   }
 
   async getLayers() {
-    return await prisma.layer.findMany();
+    return await prisma.layer.findMany({
+      include: {
+        metadata: true,
+        infoClickSettings: true,
+        searchSettings: true,
+      },
+    });
   }
 
   async getLayerById(id: string) {
@@ -34,6 +40,15 @@ class LayerService {
     });
   }
 
+  async getServiceByLayerId(id: string) {
+    const service = await prisma.layer.findUnique({
+      where: { id },
+      include: { service: true },
+    });
+
+    return service?.service;
+  }
+
   async createLayer(data: Prisma.LayerCreateInput & { serviceId: string }) {
     const { serviceId, ...layerData } = data;
 
@@ -50,16 +65,89 @@ class LayerService {
     return newLayer;
   }
 
-  async updateLayer(id: string, data: Prisma.LayerUpdateInput) {
+  async updateLayer(
+    id: string,
+    data: Prisma.LayerUpdateInput & { serviceId: string }
+  ) {
+    const { serviceId, options, ...layerData } = data;
+
+    const existingLayer = await prisma.layer.findUnique({
+      where: { id },
+      select: { options: true },
+    });
+
+    const existingOptions = (existingLayer?.options as object) || {};
+    const updatedOptions = {
+      ...(existingOptions as object),
+      ...(options as object),
+    };
     const updatedLayer = await prisma.layer.update({
       where: { id },
-      data,
+      data: {
+        ...layerData,
+        options: updatedOptions,
+        service: { connect: { id: serviceId } },
+        metadata: {
+          upsert: {
+            update: { ...layerData.metadata },
+            create: { ...layerData.metadata },
+          },
+        },
+        searchSettings: {
+          upsert: {
+            update: { ...layerData.searchSettings },
+            create: { ...layerData.searchSettings },
+          },
+        },
+        infoClickSettings: {
+          upsert: {
+            update: { ...layerData.infoClickSettings },
+            create: { ...layerData.infoClickSettings },
+          },
+        },
+      },
+
+      include: {
+        service: true,
+        metadata: true,
+        searchSettings: true,
+        infoClickSettings: true,
+      },
     });
     return updatedLayer;
   }
 
   async deleteLayer(id: string) {
-    await prisma.layer.delete({ where: { id } });
+    await prisma.$transaction(async (transaction) => {
+      const layer = await transaction.layer.findUnique({
+        where: { id },
+        select: {
+          metadata: true,
+          searchSettings: true,
+          infoClickSettings: true,
+        },
+      });
+
+      if (layer?.metadata) {
+        await transaction.metadata.delete({
+          where: { id: layer.metadata.id },
+        });
+      }
+
+      if (layer?.searchSettings) {
+        await transaction.searchSettings.delete({
+          where: { id: layer.searchSettings.id },
+        });
+      }
+
+      if (layer?.infoClickSettings) {
+        await transaction.infoClickSettings.delete({
+          where: { id: layer.infoClickSettings.id },
+        });
+      }
+
+      await transaction.layer.delete({ where: { id } });
+    });
   }
 }
 

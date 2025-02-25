@@ -7,7 +7,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+<!-- ## [Unreleased]
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security -->
+
+## [4.0.0-rc.1] - 2025-02-19
+
+### Added
+
+- Search: Added possibility to set default search options via admin UI. PR: [#1496](https://github.com/hajkmap/Hajk/pull/1496)
+- LayerComparer: It is now possible for to select specific layers (in Admin) that will be visible in the tool. Previously only all background layer and/or all regular layers could be selected. [#1570](https://github.com/hajkmap/Hajk/issues/1570)
+
+#### Major LayerSwitcher changes
+
+- 🚀 Filter functionality in LayerSwitcher.
+- Enhanced layer visibility indicators in LayerSwitcher.
+- Quick Access grouping in LayerSwitcher for access to frequently used layers.
+  With support for saving/recall of sets of "QuickAccess layers" to
+  LocalStorage.
+- Quick Access Layer Presets/Themes/Packages
+  Choose from ready made sets of Layers to load into the Quick Access
+  section. The Presets/Themes/Packages are set up in the map config. See
+  example in `simpleMapConfig.json`.
+- Improved DrawOrder tab functionality for managing layer drawing order.
+
+For details see the following issues:
+
+- [#1237](https://github.com/hajkmap/Hajk/issues/1237)
+- [#1275](https://github.com/hajkmap/Hajk/issues/1275)
+- [#1284](https://github.com/hajkmap/Hajk/issues/1284)
+- [#1296](https://github.com/hajkmap/Hajk/issues/1296)
+- [#1300](https://github.com/hajkmap/Hajk/issues/1300)
+- [#1347](https://github.com/hajkmap/Hajk/issues/1347)
+- [#1365](https://github.com/hajkmap/Hajk/issues/1365)
+- [#1380](https://github.com/hajkmap/Hajk/issues/1380)
+
+### Fixed
+
+- Improved how overlapping plugins are handled. PR: [#1546](https://github.com/hajkmap/Hajk/pull/1546)
+- Several accessability improvements. PRs: [#1561](https://github.com/hajkmap/Hajk/pull/1561), [#1562](https://github.com/hajkmap/Hajk/pull/1562), [#1563](https://github.com/hajkmap/Hajk/pull/1563), [#1565](https://github.com/hajkmap/Hajk/pull/1565), [#1566](https://github.com/hajkmap/Hajk/pull/1566), [#1567](https://github.com/hajkmap/Hajk/pull/1567), [#1569](https://github.com/hajkmap/Hajk/pull/1569)
+- Admin: Fixed issue with naming of the FME Server configuration property ([commit](https://github.com/hajkmap/Hajk/commit/98b9280b56a05eaa2a037359341329ed5fc46f8e)
+
+### Removed
+
+- In accordance with [the roadmap](https://github.com/hajkmap/Hajk/blob/master/ROADMAP.md) the .NET backend was removed in the 4.0 release. ([commit](https://github.com/hajkmap/Hajk/commit/5c50105cc3fa957967196f7fc321bf5827772e7c))
+
+## [3.14.1] - 2024-10-09
+
+### BREAKING
+
+- PropertyChecker: The configuration field `digitalPlanItemDescriptionAttribute` has been renamed to `digitalPlanItemDescriptionAttributes` and holds now an array of objects rather than a string. For details, refer to [example configuration in the plugin's README](https://github.com/hajkmap/Hajk/blob/master/apps/client/src/plugins/PropertyChecker/readme.md#example-configuration).
 
 ### Added
 
@@ -312,7 +371,9 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.14.0...develop
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.14.1...develop
+[4.0.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v3.14.1...v4.0.0-rc.1
+[3.14.1]: https://github.com/hajkmap/Hajk/compare/v3.14.0...v3.14.1
 [3.14.0]: https://github.com/hajkmap/Hajk/compare/v3.13.25...v3.14.0
 [3.13.25]: https://github.com/hajkmap/Hajk/compare/v3.13.24...v3.13.25
 [3.13.24]: https://github.com/hajkmap/Hajk/compare/v3.13.23...v3.13.24

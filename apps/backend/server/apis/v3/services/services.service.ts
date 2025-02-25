@@ -32,6 +32,7 @@ class ServicesService {
   async getServiceById(id: string) {
     const service = await prisma.service.findUnique({
       where: { id },
+      include: { metadata: true, projection: true },
     });
 
     return service;

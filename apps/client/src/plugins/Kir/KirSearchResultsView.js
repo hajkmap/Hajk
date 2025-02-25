@@ -114,8 +114,6 @@ class KirSearchResultsView extends React.PureComponent {
     localObserver: PropTypes.object.isRequired,
   };
 
-  static defaultProps = {};
-
   componentDidMount() {
     this.clearResults();
   }

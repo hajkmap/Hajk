@@ -7,6 +7,7 @@ const renderNumberField: RenderFunction<FieldValues> = ({
   inputProps,
   errorMessage,
   title,
+  disabled,
 }) => {
   return (
     <TextField
@@ -14,11 +15,16 @@ const renderNumberField: RenderFunction<FieldValues> = ({
       {...inputProps}
       fullWidth
       label={title}
+      disabled={disabled ?? false}
       type="number"
       inputRef={field?.ref}
       error={!!errorMessage}
       helperText={errorMessage}
       value={(field?.value as string) ?? ""}
+      onChange={(e) => {
+        const newValue = e.target.value === "" ? "" : Number(e.target.value);
+        field?.onChange(newValue);
+      }}
       slotProps={{
         htmlInput: {
           ...inputProps,

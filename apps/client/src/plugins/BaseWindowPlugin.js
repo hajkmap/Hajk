@@ -40,6 +40,7 @@ class BaseWindowPlugin extends React.PureComponent {
       this.props.app.globalObserver.publish("analytics.trackEvent", {
         eventName: "pluginShown",
         pluginName: this.type,
+        pluginLocaleName: this.title,
         activeMap: this.props.app.config.activeMap,
       });
     }
@@ -80,6 +81,10 @@ class BaseWindowPlugin extends React.PureComponent {
     props.app.globalObserver.subscribe(closeEventName, () => {
       this.closeWindow();
     });
+
+    props.app.globalObserver.subscribe("core.pluginsRerender", () => {
+      this.forceUpdate();
+    });
   }
 
   // Does not run on initial render, but runs on subsequential re-renders.
@@ -103,6 +108,7 @@ class BaseWindowPlugin extends React.PureComponent {
       runCallback: true,
     });
     this.props.app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    this.props.app.globalObserver.publish("core.focusWindow", this.type);
   };
 
   showWindow = (opts = {}) => {
@@ -115,6 +121,7 @@ class BaseWindowPlugin extends React.PureComponent {
     this.props.app.globalObserver.publish("analytics.trackEvent", {
       eventName: "pluginShown",
       pluginName: this.type,
+      pluginLocaleName: this.title,
       activeMap: this.props.app.config.activeMap,
     });
 
@@ -147,6 +154,16 @@ class BaseWindowPlugin extends React.PureComponent {
           this.props.custom.onWindowShow();
       }
     );
+  };
+
+  closeWindowClick = () => {
+    this.props.app.globalObserver.publish("analytics.trackEvent", {
+      eventName: "pluginHides",
+      pluginName: this.type,
+      pluginLocaleName: this.title,
+      activeMap: this.props.app.config.activeMap,
+    });
+    this.closeWindow();
   };
 
   closeWindow = () => {
@@ -188,10 +205,11 @@ class BaseWindowPlugin extends React.PureComponent {
       // button (that will trigger opening of the plugin Window).
       <>
         <Window
+          componentId={this.type}
           globalObserver={this.props.app.globalObserver}
           title={this.state.title}
           color={this.state.color}
-          onClose={this.closeWindow}
+          onClose={this.closeWindowClick}
           open={this.state.windowVisible}
           onResize={this.props.custom.onResize}
           onMaximize={this.props.custom.onMaximize}

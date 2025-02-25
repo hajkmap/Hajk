@@ -97,9 +97,11 @@ const supportedProjections = [
   "EPSG:3017",
   "EPSG:3018",
   "EPSG:3021",
+  "EPSG:3035",
   "EPSG:4326",
   "EPSG:3857",
   "EPSG:5847",
+  "EPSG:900913",
   "CRS:84",
 ];
 
@@ -225,11 +227,10 @@ class WMSLayerForm extends Component {
       let addedLayersInfo = { ...this.state.addedLayersInfo };
 
       // Let's find checked layers projection and pre-select it
-      const foundCrs = this.state.capabilitiesList[
-        "0"
-      ].Capability.Layer.Layer.find((l) => {
-        return l.Name === checkedLayer;
-      });
+      const foundCrs =
+        this.state.capabilitiesList["0"].Capability.Layer.Layer?.find((l) => {
+          return l.Name === checkedLayer;
+        }) || this.state.capabilitiesList["0"].Capability.Layer;
       // Proceed only if this is the first layer to be added (else we risk overwriting existing user selection of projection).
       // Also, make sure that CRS property really exists before proceeding.
       if (
@@ -325,8 +326,12 @@ class WMSLayerForm extends Component {
    */
   findInCapabilities(
     layerName,
-    arrayToSearchIn = this.state.capabilities.Capability.Layer.Layer
+    arrayToSearchIn = this.state.capabilities?.Capability?.Layer?.Layer
+      ? this.state.capabilities.Capability.Layer.Layer
+      : [this.state.capabilities?.Capability?.Layer]
   ) {
+    if (!arrayToSearchIn) return null;
+
     let match = null;
     match = arrayToSearchIn.find((l) => {
       if (l.hasOwnProperty("Layer")) {
@@ -354,13 +359,14 @@ class WMSLayerForm extends Component {
       addedLayersInfo: addedLayersInfo,
     });
 
-    let styles = layerInfo.styles
-      ? layerInfo.styles.map((style, i) => (
-          <option key={`style_${style.Name}_${i}`} value={style.Name}>
-            {style.Name}
-          </option>
-        ))
-      : null;
+    let styles =
+      layerInfo.styles && Array.isArray(layerInfo.styles)
+        ? layerInfo.styles.map((style, i) => (
+            <option key={`style_${style.Name}_${i}`} value={style.Name}>
+              {style.Name}
+            </option>
+          ))
+        : null;
 
     return (
       <div className="layerDialog">
@@ -947,8 +953,10 @@ class WMSLayerForm extends Component {
         }
       };
 
-      if (this.state.capabilities?.Capability?.Layer?.Layer) {
-        this.state.capabilities.Capability.Layer.Layer.forEach((layer) => {
+      if (this.state.capabilities?.Capability?.Layer) {
+        const layersToProcess = this.state.capabilities.Capability.Layer
+          .Layer || [this.state.capabilities.Capability.Layer];
+        layersToProcess.forEach((layer) => {
           recursivePushLayer(layer);
         });
       }
@@ -1032,10 +1040,20 @@ class WMSLayerForm extends Component {
     // Previously this was done while rendering.
 
     let layerOpts = {};
-    if (!capabilities || !capabilities.Capability) {
+
+    if (
+      !capabilities ||
+      !capabilities.Capability ||
+      !capabilities.Capability.Layer
+    ) {
       return;
     }
-    capabilities.Capability.Layer.Layer.forEach((_layer) => {
+
+    const layers = capabilities.Capability.Layer.Layer || [
+      capabilities.Capability.Layer,
+    ];
+
+    layers.forEach((_layer) => {
       let trueTitle = _layer.hasOwnProperty("Title") ? _layer.Title : "";
       let abstract = _layer.hasOwnProperty("Abstract") ? _layer.Abstract : "";
       let opts = {

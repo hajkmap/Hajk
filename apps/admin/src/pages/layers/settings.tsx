@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
-import { Button, Stack, TextField, useTheme } from "@mui/material";
+import { Button, Stack, TextField, useTheme, Link } from "@mui/material";
+import { GridRowSelectionModel } from "@mui/x-data-grid";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import { FieldValues } from "react-hook-form";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
@@ -14,30 +15,55 @@ import { RenderProps } from "../../components/form-factory/types/render";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import UsedInMapsGrid from "./used-in-maps-grid";
 import {
-  useLayers,
   useLayerById,
   useDeleteLayer,
   LayerUpdateInput,
   useUpdateLayer,
+  infoClickFormat,
+  sortType,
+  searchOutputFormat,
 } from "../../api/layers";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import FormActionPanel from "../../components/form-action-panel";
 import { toast } from "react-toastify";
 import { useServices } from "../../api/services";
+import AvailableLayersGrid from "./available-layers-grid";
+import { useServiceCapabilities, SERVICE_TYPE } from "../../api/services";
+import { useServiceByLayerId, useLayersLegends } from "../../api/layers";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
   const { layerId } = useParams<{ layerId: string }>();
-  const { isLoading, isError } = useLayerById(layerId ?? "");
-  const { data: layers } = useLayers();
-  const layer = layers?.find((l) => l.id === layerId);
+  const { data: layer, isLoading, isError } = useLayerById(layerId ?? "");
   const { mutateAsync: updateLayer, status: updateStatus } = useUpdateLayer();
   const { mutateAsync: deleteLayer, status: deleteStatus } = useDeleteLayer();
   const { palette } = useTheme();
   const { data: services } = useServices();
   const navigate = useNavigate();
   const formRef = useRef<HTMLFormElement | null>(null);
+  const { data: service, isLoading: serviceLoading } = useServiceByLayerId(
+    layer?.id ?? ""
+  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>();
+  const { layers: getCapLayers, styles: getCapStyles } = useServiceCapabilities(
+    {
+      baseUrl: service?.url ?? "",
+      type: service?.type ?? "",
+    }
+  );
+  const { legendUrls: legends } = useLayersLegends({
+    baseUrl: service?.url ?? "",
+    layers: layer?.selectedLayers ?? [],
+    type: service?.type ?? SERVICE_TYPE.WMS,
+    format: service?.imageFormat ?? "",
+    version: service?.version ?? "",
+    geoServerLegendOptions: layer?.legendOptions ?? "",
+  });
 
+  const styles = layer?.selectedLayers.flatMap(
+    (key) => getCapStyles[key] || []
+  );
   const handleExternalSubmit = () => {
     if (formRef.current) {
       formRef.current.requestSubmit();
@@ -47,6 +73,17 @@ export default function LayerSettings() {
   const [formLayerData, setFormLayerData] = useState<
     DynamicFormContainer<FieldValues>
   >(new DynamicFormContainer<FieldValues>());
+  const defaultValues = formLayerData.getDefaultValues();
+  const {
+    register,
+    handleSubmit,
+    control,
+    getValues,
+    watch,
+    formState: { errors, dirtyFields },
+  } = DefaultUseForm(defaultValues);
+
+  const watchSingleTile = watch("singleTile");
 
   const layerSettingsFormContainer = new DynamicFormContainer<FieldValues>();
   const panelNestedContainer = new DynamicFormContainer<FieldValues>(
@@ -57,6 +94,7 @@ export default function LayerSettings() {
     t("Inställningar för request"),
     CONTAINER_TYPE.ACCORDION
   );
+
   const accordionNestedContainer2 = new DynamicFormContainer<FieldValues>(
     "Inställningar för lager",
     CONTAINER_TYPE.ACCORDION
@@ -94,7 +132,7 @@ export default function LayerSettings() {
     type: INPUT_TYPE.SELECT,
     gridColumns: 6,
     name: "serviceId",
-    title: "Tjänst",
+    title: `${t("layers.common.service")}`,
     defaultValue: layer?.serviceId,
     optionList: services?.map((service) => ({
       title: service.name + `(${service.type})`,
@@ -106,123 +144,103 @@ export default function LayerSettings() {
   });
 
   panelNestedContainer.addInput({
-    type: INPUT_TYPE.SELECT,
+    type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "layerService",
-    title: "Lagernamn i tjänsten",
-    defaultValue: "",
-    optionList: [{ title: "Testlayer", value: "Testlayer" }],
+    name: "internalName",
+    title: `${t("layers.internalName")}`,
+    defaultValue: layer?.internalName,
   });
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "adminName",
-    title: `Internt adminnamn`,
-    defaultValue: "",
-  });
-
-  panelNestedContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "copyRight",
-    title: `Upphovsrätt`,
-    defaultValue: "",
+    gridColumns: 12,
+    name: "metadata.attribution",
+    title: `${t("layers.copyRight")}`,
+    defaultValue: layer?.metadata?.attribution,
   });
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 12,
-    name: "descriptionLayer",
-    title: `Beskrivning av lagret`,
-    defaultValue: "",
+    name: "description",
+    title: `${t("map.description")}`,
+    defaultValue: layer?.description,
   });
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "keyWord",
-    title: `Nyckelord`,
-    defaultValue: "",
+    name: "options.keyword",
+    title: `${t("layers.keyword")}`,
+    defaultValue: layer?.options?.keyword,
   });
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "category",
-    title: `Kategori`,
-    defaultValue: "",
-  });
-
-  accordionNestedContainer.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 6,
-    name: "imageFormat",
-    title: `Bildformat`,
-    defaultValue: "",
-    optionList: [{ title: "Testlayer", value: "Testlayer" }],
-  });
-
-  accordionNestedContainer.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 6,
-    name: "coordinateSystem",
-    title: `Koordinatsystem`,
-    defaultValue: "",
-    optionList: [{ title: "Testlayer", value: "Testlayer" }],
-  });
-
-  accordionNestedContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 12,
-    name: "customRatio",
-    title: `Custom ratio`,
-    defaultValue: "",
+    name: "options.category",
+    title: `${t("layers.category")}`,
+    defaultValue: layer?.options?.category,
   });
 
   accordionNestedContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
-    name: "dpi",
-    title: "Efterfråga hög DPI",
-    defaultValue: false,
+    name: "hidpi",
+    title: `${t("layers.hidpi")}`,
+    defaultValue: layer?.hidpi,
   });
 
   accordionNestedContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
     name: "singleTile",
     title: "Single tile",
-    defaultValue: false,
+    defaultValue: layer?.singleTile,
+  });
+
+  accordionNestedContainer.addInput({
+    type: INPUT_TYPE.NUMBER,
+    gridColumns: 3,
+    name: "customRatio",
+    title: `${t("layers.customRatio")}`,
+    defaultValue: layer?.customRatio,
+    disabled: watchSingleTile === false,
   });
 
   accordionNestedContainer.addInput({
     type: INPUT_TYPE.CHECKBOX,
-    name: "gwc",
+    name: "options.geoWebCache",
     title: "GeoWebCache",
-    defaultValue: false,
+    defaultValue: layer?.options?.geoWebCache,
   });
 
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 6,
     name: "style",
-    title: `Stil`,
-    defaultValue: "",
-    optionList: [{ title: "<default>", value: "default" }],
+    title: `${t("layers.style")}`,
+    defaultValue: layer?.style,
+    optionList: [
+      { title: "<default>", value: "" },
+      ...(styles?.map((style) => ({
+        title: style.name,
+        value: style.name,
+      })) ?? []),
+    ],
   });
 
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
     name: "opacity",
-    title: `Opacitet`,
-    defaultValue: "",
+    title: `${t("layers.opacity")}`,
+    defaultValue: layer?.opacity,
   });
 
   accordionNestedContainer2.addCustomInput({
     type: INPUT_TYPE.CUSTOM,
     kind: "CustomInputSettings",
-    name: "teckenForklaring",
-    title: "Teckenförklaring",
+    name: "legendUrl",
+    title: `${t("layers.legend")}`,
     gridColumns: 12,
     defaultValue: "",
 
@@ -256,12 +274,12 @@ export default function LayerSettings() {
 
           <label htmlFor="teckenForklaring-file-upload">
             <Button
-              sx={{ minWidth: "120px" }}
+              sx={{ minWidth: "140px" }}
               variant="contained"
               component="span"
               startIcon={<CloudUploadIcon />}
             >
-              Välj fil
+              {t("layers.uploadFile")}
             </Button>
           </label>
         </Stack>
@@ -271,8 +289,8 @@ export default function LayerSettings() {
   accordionNestedContainer2.addCustomInput({
     type: INPUT_TYPE.CUSTOM,
     kind: "CustomInputSettings",
-    name: "teckenForklaringIkon",
-    title: "Teckenförklaringsikon",
+    name: "legendIconUrl",
+    title: `${t("layers.legendIcon")}`,
     gridColumns: 12,
     defaultValue: "",
 
@@ -306,12 +324,12 @@ export default function LayerSettings() {
 
           <label htmlFor="teckenForklaringIkon-file-upload">
             <Button
-              sx={{ minWidth: "120px" }}
+              sx={{ minWidth: "140px" }}
               variant="contained"
               component="span"
               startIcon={<CloudUploadIcon />}
             >
-              Välj fil
+              {t("layers.uploadFile")}
             </Button>
           </label>
         </Stack>
@@ -321,115 +339,134 @@ export default function LayerSettings() {
 
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.CHECKBOX,
-    name: "attributes",
-    title: "Visa kanpp för attributtabell",
-    defaultValue: false,
+    name: "options.showAttributeTableButton",
+    title: `${t("layers.showAttributeTableButton")}`,
+    defaultValue: layer?.options?.showAttributeTableButton,
   });
 
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.CHECKBOX,
     gridColumns: 8,
-    name: "warningZoom",
-    title: `Visa endast varningruta för min/max vid klick`,
-    defaultValue: false,
+    name: "minMaxZoomAlertOnToggleOnly",
+    title: `${t("layers.minMaxZoomAlertOnToggleOnly")}`,
+    defaultValue: layer?.minMaxZoomAlertOnToggleOnly,
   });
 
   accordionNestedContainer2.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.NUMBER,
     gridColumns: 6,
     name: "minZoom",
-    title: `Minsta zoom`,
-    defaultValue: "",
+    title: `${t("layers.minZoom")}`,
+    defaultValue: layer?.minZoom,
   });
 
   accordionNestedContainer2.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.NUMBER,
     gridColumns: 6,
     name: "maxZoom",
-    title: `Maximal zoom`,
-    defaultValue: "",
+    title: `${t("layers.maxZoom")}`,
+    defaultValue: layer?.maxZoom,
   });
 
   accordionNestedContainer3.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.TEXTFIELD_ARRAY,
     gridColumns: 12,
-    name: "displayField",
-    title: `Visningsfält`,
-    defaultValue: "",
+    name: "searchSettings.primaryDisplayFields",
+    title: `${t("layers.primaryDisplayFields")}`,
+    defaultValue: layer?.searchSettings?.primaryDisplayFields,
   });
 
   accordionNestedContainer3.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.TEXTFIELD_ARRAY,
     gridColumns: 6,
-    name: "secondaryDisplayField",
-    title: `Sekundära visnigsfält`,
-    defaultValue: "",
+    name: "searchSettings.secondaryDisplayFields",
+    title: `${t("layers.secondaryDisplayFields")}`,
+    defaultValue: layer?.searchSettings?.secondaryDisplayFields,
   });
 
   accordionNestedContainer3.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.TEXTFIELD_ARRAY,
     gridColumns: 6,
-    name: "shortDisplayField",
-    title: `Kort visningsfält`,
-    defaultValue: "",
+    name: "searchSettings.shortDisplayFields",
+    title: `${t("layers.shortDisplayFields")}`,
+    defaultValue: layer?.searchSettings?.shortDisplayFields,
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.CHECKBOX,
     gridColumns: 6,
-    name: "infoClick",
-    title: `Infoklick`,
-    defaultValue: false,
+    name: "infoClickActive",
+    title: `${t("common.infoclick")}`,
+    defaultValue: layer?.infoClickActive,
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.CHECKBOX,
     gridColumns: 12,
-    name: "infoClickSortByDesc",
-    title: `Infoklick sortera fallande`,
-    defaultValue: false,
+    name: "infoClickSettings.sortDescending",
+    title: `${t("layers.infoClickDesc")}`,
+    defaultValue: layer?.infoClickSettings?.sortDescending,
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 12,
-    name: "infoBox",
-    title: `Inforuta`,
-    defaultValue: "",
+    name: "infoClickSettings.definition",
+    title: `${t("layers.infobox")}`,
+    defaultValue: layer?.infoClickSettings?.definition,
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "infoClickIcon",
-    title: `Infoklick ikon (lista)`,
-    defaultValue: "",
+    name: "infoClickSettings.icon",
+    title: `${t("layers.infoClickIcon")}`,
+    slotProps: {
+      input: {
+        endAdornment: (
+          <Link
+            sx={{ ml: 1 }}
+            href="https://fonts.google.com/icons"
+            target="_blank"
+          >
+            {t("layers.listLink")}
+          </Link>
+        ),
+      },
+    },
+    defaultValue: layer?.infoClickSettings?.icon,
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "infoClickSortByAttribute",
-    title: `Infoklick sortera på attribut`,
-    defaultValue: "",
+    name: "infoClickSettings.sortProperty",
+    title: `${t("layers.sortByAttribute")}`,
+    defaultValue: layer?.infoClickSettings?.sortProperty,
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 6,
-    name: "infoClickFormat",
-    title: `Infoclick-format`,
-    defaultValue: "",
-    optionList: [{ title: "Testformat", value: "Testformat" }],
+    name: "infoClickSettings.format",
+    title: `${t("layers.infoClickFormat")}`,
+    defaultValue: layer?.infoClickSettings?.format,
+    optionList: infoClickFormat.map((format) => ({
+      title: format.title,
+      value: format.value,
+    })),
   });
 
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 6,
-    name: "infoClickSortType",
-    title: `Infoklick soteringstyp`,
-    defaultValue: "",
-    optionList: [{ title: "String", value: "String" }],
+    name: "infoClickSettings.sortMethod",
+    title: `${t("layers.infoClickSortMethod")}`,
+    defaultValue: layer?.infoClickSettings?.sortMethod,
+    optionList: sortType.map((type) => ({
+      title: type.title,
+      value: type.value,
+    })),
   });
 
   accordionNestedContainer4.addCustomInput({
@@ -456,51 +493,76 @@ export default function LayerSettings() {
   accordionNestedContainer5.addInput({
     type: INPUT_TYPE.CHECKBOX,
     gridColumns: 10,
-    name: "activateSearch",
-    title: `Aktivera sökning`,
-    defaultValue: false,
+    name: "searchSettings.active",
+    title: `${t("layers.searchSettings.active")}`,
+    defaultValue: layer?.searchSettings?.active,
   });
   accordionNestedContainer5.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 12,
-    name: "url",
+    name: "searchSettings.url",
     title: `Url`,
-    defaultValue: "",
+    defaultValue: layer?.searchSettings?.url,
   });
   accordionNestedContainer5.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
+    type: INPUT_TYPE.TEXTFIELD_ARRAY,
     gridColumns: 12,
-    name: "searchField",
-    title: `Sökfält`,
-    defaultValue: "",
+    name: "searchSettings.searchFields",
+    title: `${t("layers.searchSettings.searchFields")}`,
+    defaultValue: layer?.searchSettings?.searchFields,
+  });
+  accordionNestedContainer5.addInput({
+    type: INPUT_TYPE.SELECT,
+    gridColumns: 6,
+    name: "searchSettings.outputFormat",
+    title: `${t("layers.searchSettings.outputFormat")}`,
+    defaultValue: layer?.searchSettings?.outputFormat,
+    optionList: searchOutputFormat.map((format) => ({
+      title: format,
+      value: format,
+    })),
   });
   accordionNestedContainer5.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 6,
-    name: "outDataFormat",
-    title: `Utdataformat`,
-    defaultValue: "",
-  });
-  accordionNestedContainer5.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "geometryField",
-    title: `Geometrifält`,
-    defaultValue: "",
+    name: "searchSettings.geometryField",
+    title: `${t("layers.searchSettings.geometryField")}`,
+    defaultValue: layer?.searchSettings?.geometryField,
   });
   accordionNestedContainer6.addInput({
     type: INPUT_TYPE.CHECKBOX,
     gridColumns: 10,
-    name: "infoButtonActiveLayer",
-    title: `Infoknapp synlig för lager`,
-    defaultValue: false,
+    name: "showMetadata",
+    title: `${t("layers.showMetadata")}`,
+    defaultValue: layer?.showMetadata,
+  });
+  accordionNestedContainer6.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 6,
+    name: "metadata.title",
+    title: `${t("layers.metadata.title")}`,
+    defaultValue: layer?.metadata?.title,
+  });
+  accordionNestedContainer6.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 6,
+    name: "metadata.urlTitle",
+    title: `${t("layers.metadata.urlTitle")}`,
+    defaultValue: layer?.metadata?.urlTitle,
+  });
+  accordionNestedContainer6.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 12,
+    name: "metadata.url",
+    title: "Url",
+    defaultValue: layer?.metadata?.url,
   });
   accordionNestedContainer6.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 12,
-    name: "layerDescription",
-    title: `Visningsbeskrivning av lager`,
-    defaultValue: "",
+    name: "options.layerDisplayDescription",
+    title: `${t("layers.layerDisplayDescription")}`,
+    defaultValue: layer?.options?.layerDisplayDescription,
   });
   accordionNestedContainer7.addInput({
     type: INPUT_TYPE.SELECT,
@@ -526,11 +588,103 @@ export default function LayerSettings() {
     accordionNestedContainer7,
   ]);
 
+  const filteredLayers = useMemo(() => {
+    if (!getCapLayers) return [];
+
+    const searchAndSelectedFilteredLayers = getCapLayers
+      .map((layer, index) => {
+        const isSelected = selectionModel?.includes(index);
+        return {
+          id: index,
+          layer,
+          infoClick: "",
+          publications: "",
+          selected: isSelected,
+        };
+      })
+      .filter(
+        (layer) =>
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+          layer?.selected || // Disable lint here since ?? is messing with the data-grid search logic
+          layer.layer.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        const aMatches = a.layer
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const bMatches = b.layer
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+
+        if (aMatches && !bMatches) return -1;
+        if (!aMatches && bMatches) return 1;
+        return 0;
+      });
+    return searchAndSelectedFilteredLayers;
+  }, [getCapLayers, searchTerm]);
+
+  const selectedRowsData = useMemo(
+    () =>
+      selectionModel?.map((id) => filteredLayers.find((row) => row.id === id)),
+    [selectionModel, filteredLayers]
+  );
+
+  const selectedRowObjects = useMemo(
+    () => selectedRowsData?.map((row) => row?.layer ?? ""),
+    [selectedRowsData]
+  );
+
   const handleUpdateLayer = async (layerData: LayerUpdateInput) => {
     try {
       const payload = {
         name: layerData.name,
         serviceId: layerData.serviceId,
+        selectedLayers: layerData.selectedLayers,
+        internalName: layerData.internalName,
+        description: layerData.description,
+        hidpi: layerData.hidpi,
+        singleTile: layerData.singleTile,
+        customRatio: layerData.customRatio,
+        style: layerData.style,
+        opacity: layerData.opacity,
+        minMaxZoomAlertOnToggleOnly: layerData.minMaxZoomAlertOnToggleOnly,
+        minZoom: layerData.minZoom,
+        maxZoom: layerData.maxZoom,
+        infoClickActive: layerData?.infoClickActive,
+        showMetadata: layerData?.showMetadata,
+        options: {
+          keyword: layerData?.options?.keyword,
+          category: layerData?.options?.category,
+          geoWebCache: layerData?.options?.geoWebCache,
+          showAttributeTableButton:
+            layerData?.options?.showAttributeTableButton,
+          layerDisplayDescription: layerData?.options?.layerDisplayDescription,
+        },
+        metadata: {
+          title: layerData?.metadata?.title,
+          url: layerData?.metadata?.url,
+          urlTitle: layerData?.metadata?.urlTitle,
+          attribution: layerData?.metadata?.attribution,
+        },
+        searchSettings: {
+          active: layerData?.searchSettings?.active,
+          url: layerData?.searchSettings?.url,
+          searchFields: layerData?.searchSettings?.searchFields,
+          outputFormat: layerData?.searchSettings?.outputFormat,
+          geometryField: layerData?.searchSettings?.geometryField,
+          primaryDisplayFields: layerData?.searchSettings?.primaryDisplayFields,
+          secondaryDisplayFields:
+            layerData?.searchSettings?.secondaryDisplayFields,
+          shortDisplayFields: layerData?.searchSettings?.shortDisplayFields,
+        },
+        infoClickSettings: {
+          sortDescending: layerData?.infoClickSettings?.sortDescending,
+          definition: layerData?.infoClickSettings?.definition,
+          icon: layerData?.infoClickSettings?.icon,
+          sortProperty: layerData?.infoClickSettings?.sortProperty,
+          format: layerData?.infoClickSettings?.format,
+          sortMethod: layerData?.infoClickSettings?.sortMethod,
+        },
       };
       await updateLayer({
         layerId: layer?.id ?? "",
@@ -574,21 +728,15 @@ export default function LayerSettings() {
     }
   };
 
-  const defaultValues = formLayerData.getDefaultValues();
-  const {
-    register,
-    handleSubmit,
-    control,
-    getValues,
-    formState: { errors, dirtyFields },
-  } = DefaultUseForm(defaultValues);
-
   const onSubmit = createOnSubmitHandler({
     handleSubmit,
     dirtyFields,
     onValid: (data: FieldValues) => {
       const layerData = data as LayerUpdateInput;
-      void handleUpdateLayer(layerData);
+      void handleUpdateLayer({
+        ...layerData,
+        selectedLayers: selectedRowObjects,
+      });
     },
   });
 
@@ -600,7 +748,7 @@ export default function LayerSettings() {
     return <SquareSpinnerComponent />;
   }
   if (isError) return <div>Error fetching layer details.</div>;
-  if (!layers) return <div>Layers not found.</div>;
+  if (!layer) return <div>Layer not found.</div>;
   return (
     <Page title={t("common.settings")}>
       <FormActionPanel
@@ -613,7 +761,6 @@ export default function LayerSettings() {
         saveButtonText="Spara"
         deleteButtonText="Ta bort"
         navigateTo="/layers"
-        isChangedFields={true}
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer
@@ -623,6 +770,18 @@ export default function LayerSettings() {
             control={control}
             errors={errors}
           />
+          {layer && (
+            <AvailableLayersGrid
+              isLoading={serviceLoading}
+              getCapLayers={getCapLayers}
+              selectedLayers={layer?.selectedLayers ?? []}
+              filteredLayers={filteredLayers}
+              setSearchTerm={setSearchTerm}
+              setSelectionModel={setSelectionModel}
+              searchTerm={searchTerm}
+              selectionModel={selectionModel}
+            />
+          )}
           <UsedInMapsGrid />
         </form>
       </FormActionPanel>

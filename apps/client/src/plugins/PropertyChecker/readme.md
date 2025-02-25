@@ -51,7 +51,19 @@ So, here is a brief specification of this required WMS layer.
           "Egenskapsbestämmelse"    // in `groupDigitalPlansLayerSecondLevelByAttribute`.
         ],
         "digitalPlanItemTitleAttribute": "label_text", // Each plan consists of regulations. This is the field that holds a regulation's unique name. Used as caption.
-        "digitalPlanItemDescriptionAttribute": "formulering", // This field holds a longer description of a regulation. Used as subcaption.
+        "digitalPlanItemDescriptionAttributes": [ // Each regulation can have multiple descriptions, with corresponding labels. These are defined in the array below:
+          {
+            "label": "Formulering", // Label of the description, will be shown as "Label: ".
+            "column": "formulering" // The column in the WMS layer that holds the description, its value is shown after the label
+          },
+          {
+            "label": "Ursprunglig formulering",
+            "column": "ursprungligformulering",
+            "fallbackValue": "-" // An optional fallback value in case the attribute is not present in the
+            // layer. `null` is a special value that this option can hold. When set to `null` and if the value
+            // is falsy, nothing will be shown for this given field - not even its label.
+          }
+        ],
 
         /* QuickButtons defintion */
         "buildingsLayerIds": "1328", // ID(s) of layers to toggle when user clicks the buildings shortcut button.

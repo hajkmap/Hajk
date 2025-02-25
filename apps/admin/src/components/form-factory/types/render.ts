@@ -13,7 +13,7 @@ export interface RenderProps<TFieldValues extends FieldValues> {
     inputLabel?: { style?: React.CSSProperties };
   };
   errorMessage?: string | null;
-  optionList?: { title: string; value: unknown }[];
+  optionList?: { title: string | React.ReactNode; value: unknown }[];
   title?: string;
   element?: React.ReactNode;
   name?: string;

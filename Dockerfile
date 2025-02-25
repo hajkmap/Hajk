@@ -1,4 +1,4 @@
-FROM node:20-alpine AS buildImage
+FROM node:22-alpine AS buildImage
 
 # --- BACKEND --- #
 # Start with Backend
@@ -48,7 +48,7 @@ RUN npm run build
 
 # --- FINAL ASSEMBLY --- #
 # Finally, let's assembly it all into another image
-FROM node:20-alpine
+FROM node:22-alpine
 WORKDIR /usr/app
 
 # Copy NPM package files from Backend
@@ -64,6 +64,9 @@ COPY --from=buildImage /tmp/build/backend/dist ./
 COPY /apps/backend/.env .
 COPY /apps/backend/App_Data ./App_Data
 COPY /apps/backend/static ./static
+
+# We have to clean up the layers.json file so that we don't try to access the backend on localhost
+RUN sed -i 's|http://localhost:3002||g' ./App_Data/layers.json
 
 # Move the built Client and Admin dirs into static
 COPY --from=buildImage /tmp/build/client/build ./static/client

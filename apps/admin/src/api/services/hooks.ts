@@ -13,16 +13,19 @@ import {
   updateService,
   deleteService,
   getAllProjections,
+  checkServiceHealth,
 } from "./requests";
 import {
   Service,
   ServiceUpdateInput,
   UseServiceCapabilitiesProps,
   Projection,
+  SERVICE_STATUS,
 } from "./types";
 import { LayersApiResponse } from "../layers";
 import { Map } from "../maps";
 import { fetchCapabilities } from "./requests";
+import { useEffect } from "react";
 
 // React Query hook to fetch all services
 // This hook uses the `getServices` function from the services `requests` module
@@ -135,7 +138,35 @@ export const useServiceCapabilities = ({
   return {
     layers: data?.layers ?? [],
     workspaces: data?.workspaces ?? [],
+    styles: data?.styles ?? {},
     isError,
     isLoading,
   };
+};
+
+export const useServicesHealthCheck = (services: Service[]) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!services.length) return;
+
+    const updateCache = (id: string, status: SERVICE_STATUS) => {
+      queryClient.setQueryData(["services"], (oldServices: Service[]) =>
+        oldServices?.map((service: Service) =>
+          service.id === id ? { ...service, status: status } : service
+        )
+      );
+    };
+
+    const runChecks = () => {
+      for (const service of services) {
+        void checkServiceHealth(service, updateCache);
+      }
+    };
+
+    void runChecks();
+
+    const interval = setInterval(runChecks, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [services, queryClient]);
 };

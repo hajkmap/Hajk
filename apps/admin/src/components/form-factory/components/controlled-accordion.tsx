@@ -58,7 +58,7 @@ function ControlledAccordion({
 
         const value = kv[castedInput.name];
 
-        if (value) {
+        if (value || typeof value === "boolean") {
           newKv.push({
             key: castedInput.name,
             value: value as string,
@@ -94,7 +94,7 @@ function ControlledAccordion({
     } else if (typeof value === "string") {
       return value + "".trim();
     }
-    return String(value);
+    return (value as string) ?? "";
   };
 
   const tooltipContent = () => {
@@ -109,7 +109,7 @@ function ControlledAccordion({
           >
             {/* Please refactor the ugly * thing below */}
             {keyValue.title.replace("*", "").trim()}:{" "}
-            {getValue(keyValue?.value)}
+            {String(getValue(keyValue?.value))}
           </Box>
         ))}
       </Box>

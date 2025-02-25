@@ -50,7 +50,10 @@ export default function NotFound() {
         >
           <Box
             component="img"
-            src="/not-found-logo.svg"
+            src={`${import.meta.env.BASE_URL.replace(
+              /\/$/,
+              ""
+            )}/not-found-logo.svg`}
             alt="Forbidden Icon"
             style={{
               width: "100%",

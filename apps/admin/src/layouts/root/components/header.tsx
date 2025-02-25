@@ -19,7 +19,10 @@ import { HEADER_HEIGHT, HEADER_Z_INDEX } from "../constants";
 import HajkTooltip from "../../../components/hajk-tooltip";
 import useUserStore, { User } from "../../../store/use-user-store";
 import useAuth from "../../../hooks/use-auth";
-import { useServices } from "../../../api/services/hooks";
+import {
+  useServices,
+  useServicesHealthCheck,
+} from "../../../api/services/hooks";
 import { useLayers } from "../../../api/layers/hooks";
 
 const getUserInitials = (user: User): string => {
@@ -41,6 +44,8 @@ export default function Header() {
 
   const serviceName = services?.find((s) => s.id === serviceId)?.name;
   const layerName = layers?.find((l) => l.id === layerId)?.name;
+
+  useServicesHealthCheck(services ?? []);
 
   const { user } = useUserStore.getState();
   const { logout } = useAuth();
@@ -150,7 +155,10 @@ export default function Header() {
             }}
           >
             <img
-              src="/hajk-admin-logo.svg"
+              src={`${import.meta.env.BASE_URL.replace(
+                /\/$/,
+                ""
+              )}/hajk-admin-logo.svg`}
               alt={t("common.clickableLogo")}
               style={{
                 height: "32px",

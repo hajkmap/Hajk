@@ -15,7 +15,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const submitButtonDisabled =
-    credentials.email.length < 5 || credentials.password.length < 5 || loading;
+    credentials.email.length < 5 || credentials.password.length < 4 || loading;
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" && !submitButtonDisabled) {

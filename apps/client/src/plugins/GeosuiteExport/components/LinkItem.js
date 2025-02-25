@@ -28,7 +28,7 @@ class LinkItem extends React.PureComponent {
         <DivListItemContainer key={link.id}>
           <DivListItem>
             <Link
-              href={link.link}
+              href={link.link || null}
               target="_blank"
               rel="noreferrer"
             >{`${link.title}`}</Link>

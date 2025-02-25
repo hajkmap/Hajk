@@ -1,3 +1,4 @@
+import React from "react";
 import { Box, Grid2 as Grid, Paper, Typography } from "@mui/material";
 import {
   FieldValues,
@@ -110,7 +111,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
             control={control}
             settings={castedSettings}
             errorMessage={
-              errors[castedSettings.name]?.message?.toString() ?? null
+              errors[castedSettings.name]?.message!.toString() ?? null
             }
           />
         </Box>
@@ -231,7 +232,10 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     item: FormElement<TFieldValues>,
     index: number,
     propsToSpread: object = {},
-    renderFn: (item: FormElement<TFieldValues>, index: number) => JSX.Element
+    renderFn: (
+      item: FormElement<TFieldValues>,
+      index: number
+    ) => React.ReactNode
   ) => {
     return (
       <Grid

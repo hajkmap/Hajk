@@ -17,7 +17,6 @@ interface FormActionProps {
   deleteButtonText?: string;
   children?: React.ReactNode;
   navigateTo?: string;
-  isChangedFields?: boolean;
 }
 
 const FormActionPanel: React.FC<FormActionProps> = ({
@@ -31,7 +30,6 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   deleteButtonText = "",
   children,
   navigateTo,
-  isChangedFields,
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -58,6 +56,8 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           borderColor: "grey.300",
           borderRadius: 3,
           maxWidth: "200px",
+          top: "100px",
+          position: "sticky",
         }}
       >
         <Button
@@ -66,11 +66,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
             void onUpdate();
           }}
           variant="contained"
-          disabled={
-            !isChangedFields ||
-            updateStatus === "pending" ||
-            deleteStatus === "pending"
-          }
+          disabled={updateStatus === "pending" || deleteStatus === "pending"}
         >
           {updateStatus === "pending" ? (
             <CircularProgress color="primary" size={30} />
