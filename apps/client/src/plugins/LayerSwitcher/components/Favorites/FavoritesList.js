@@ -134,6 +134,19 @@ function FavoritesList({
     return backgroundLayerName;
   };
 
+  const getLayerNames = (layers) => {
+    const layerNames = [];
+    layers?.forEach((layer) => {
+      const mapLayer = map
+        .getAllLayers()
+        .find((l) => l.get("name") === layer.id);
+      if (mapLayer && mapLayer.get("layerType") !== "base") {
+        layerNames.push(mapLayer.get("caption"));
+      }
+    });
+    return layerNames;
+  };
+
   // Render dialog with layerpackage information
   const renderInfoDialog = () => {
     return createPortal(
@@ -164,6 +177,13 @@ function FavoritesList({
             <Typography>
               {selectedItem && getBaseLayerName(selectedItem.layers)}
             </Typography>
+          </Stack>
+          <DialogContentText sx={{ mt: 2, mb: 1 }}>Lager</DialogContentText>
+          <Stack direction="row" useFlexGap spacing={2}>
+            {selectedItem &&
+              getLayerNames(selectedItem?.layers).map((n) => (
+                <Typography>{n}</Typography>
+              ))}
           </Stack>
           <Divider sx={{ mt: 2 }} />
           <Typography sx={{ mt: 2, mb: 1 }}>
@@ -297,6 +317,7 @@ function FavoritesList({
                   dense
                   key={`lp${favorite.metadata.title}-${index}`}
                   divider
+                  primary={favorite.metadata.title}
                   onClick={(e) => {
                     e.stopPropagation();
                     loadFavoriteCallback(favorite, true, true);
