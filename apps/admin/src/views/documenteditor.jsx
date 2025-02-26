@@ -160,21 +160,37 @@ class DocumentEditor extends Component {
               selectedDocument: document || "",
               selectedFolder: folder,
               tableOfContents: {
-                expanded: data.tableOfContents ? data.tableOfContents.expanded : true,
-                active: data.tableOfContents ? data.tableOfContents.active : true,
-                chapterLevelsToShow: data.tableOfContents ? data.tableOfContents.chapterLevelsToShow : 100,
+                expanded: data.tableOfContents
+                  ? data.tableOfContents.expanded
+                  : true,
+                active: data.tableOfContents
+                  ? data.tableOfContents.active
+                  : true,
+                chapterLevelsToShow: data.tableOfContents
+                  ? data.tableOfContents.chapterLevelsToShow
+                  : 100,
                 chapterLevelsToShowForPrint: data.tableOfContents
                   ? data.tableOfContents.chapterLevelsToShowForPrint
                   : 100,
-                title: data.tableOfContents ? data.tableOfContents.title : "Innehållsförteckning",
+                title: data.tableOfContents
+                  ? data.tableOfContents.title
+                  : "Innehållsförteckning",
               },
-              newTableOfContentsExpanded: data.tableOfContents ? data.tableOfContents.expanded : true,
-              newTableOfContentsActive: data.tableOfContents ? data.tableOfContents.active : true,
-              newTableOfContentsLevels: data.tableOfContents ? data.tableOfContents.chapterLevelsToShow : 100,
+              newTableOfContentsExpanded: data.tableOfContents
+                ? data.tableOfContents.expanded
+                : true,
+              newTableOfContentsActive: data.tableOfContents
+                ? data.tableOfContents.active
+                : true,
+              newTableOfContentsLevels: data.tableOfContents
+                ? data.tableOfContents.chapterLevelsToShow
+                : 100,
               newTableOfContentsLevelsForPrint: data.tableOfContents
                 ? data.tableOfContents.chapterLevelsToShowForPrint
                 : 100,
-              newTableOfContentsTitle: data.tableOfContents ? data.tableOfContents.title : "Innehållsförteckning",
+              newTableOfContentsTitle: data.tableOfContents
+                ? data.tableOfContents.title
+                : "Innehållsförteckning",
             },
             () => {
               this.props.model.loadMaps((maps) => {
@@ -250,34 +266,48 @@ class DocumentEditor extends Component {
   }
 
   save() {
-    this.props.model.save(this.state.selectedFolder, this.state.selectedDocument, this.state.data, (result) => {
-      if (result === "File saved") {
-        result = "Filen sparades utan problem.";
+    this.props.model.save(
+      this.state.selectedFolder,
+      this.state.selectedDocument,
+      this.state.data,
+      (result) => {
+        if (result === "File saved") {
+          result = "Filen sparades utan problem.";
+        }
+        this.setState({
+          showModal: true,
+          modalTitle: result,
+          modalContent: "",
+          showAbortButton: false,
+          modalConfirmCallback: () => {
+            this.hideModal();
+          },
+        });
       }
-      this.setState({
-        showModal: true,
-        modalTitle: result,
-        modalContent: "",
-        showAbortButton: false,
-        modalConfirmCallback: () => {
-          this.hideModal();
-        },
-      });
-    });
+    );
   }
 
   delete() {
     this.setState({
       showModal: true,
-      modalContent: <div>Hela dokumentet kommer att raderas, detta kan inte ångras. Vill du fortsätta?</div>,
+      modalContent: (
+        <div>
+          Hela dokumentet kommer att raderas, detta kan inte ångras. Vill du
+          fortsätta?
+        </div>
+      ),
       showAbortButton: true,
       modalConfirmCallback: () => {
-        this.props.model.delete(this.state.selectedFolder, this.state.selectedDocument, (result) => {
-          this.load();
-          this.setState({
-            selectedFolder: "",
-          });
-        });
+        this.props.model.delete(
+          this.state.selectedFolder,
+          this.state.selectedDocument,
+          (result) => {
+            this.load();
+            this.setState({
+              selectedFolder: "",
+            });
+          }
+        );
         this.hideModal();
       },
     });
@@ -338,7 +368,9 @@ class DocumentEditor extends Component {
               >
                 {chapter.header}
               </Button>
-              {chapter.chapters.length > 0 ? renderChapters(chapter.chapters) : null}
+              {chapter.chapters.length > 0
+                ? renderChapters(chapter.chapters)
+                : null}
             </div>
           );
         } else {
@@ -375,7 +407,12 @@ class DocumentEditor extends Component {
     this.setState({
       showModal: true,
       showAbortButton: true,
-      modalContent: this.renderToc(chapter, this.state.data.chapters, parentChapters, index),
+      modalContent: this.renderToc(
+        chapter,
+        this.state.data.chapters,
+        parentChapters,
+        index
+      ),
       modalConfirmCallback: () => {
         this.hideModal();
       },
@@ -478,12 +515,16 @@ class DocumentEditor extends Component {
   renderChapter(parentChapters, chapter, index, headChapter) {
     const { classes } = this.props;
 
-    var arrowStyle = !!chapter.expanded ? "fa fa-chevron-up pointer" : "fa fa-chevron-down pointer";
+    var arrowStyle = !!chapter.expanded
+      ? "fa fa-chevron-up pointer"
+      : "fa fa-chevron-down pointer";
 
     return (
       <Grid
         className={
-          headChapter ? `${classes.chapterWrapper}` : `${classes.chapterWrapper} ${classes.chapterWrapperBoarder}`
+          headChapter
+            ? `${classes.chapterWrapper}`
+            : `${classes.chapterWrapper} ${classes.chapterWrapperBoarder}`
         }
         container
         alignItems="center"
@@ -528,7 +569,13 @@ class DocumentEditor extends Component {
               </Tooltip>
             </Grid>
             <Grid item>
-              <Tooltip title={chapter.expanded ? "Fäll ihop underliggande kapitel" : "Expandera underliggande kapitel"}>
+              <Tooltip
+                title={
+                  chapter.expanded
+                    ? "Fäll ihop underliggande kapitel"
+                    : "Expandera underliggande kapitel"
+                }
+              >
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -596,7 +643,12 @@ class DocumentEditor extends Component {
         </Grid>
         <Grid xs={6} item container></Grid>
 
-        <Grid alignItems="center" container item className={classes.gridItemContainer}>
+        <Grid
+          alignItems="center"
+          container
+          item
+          className={classes.gridItemContainer}
+        >
           <Typography className={classes.gridItem}>Nyckelord</Typography>
           {chapter.keywords
             ? chapter.keywords.map((keyword, i) => (
@@ -654,7 +706,12 @@ class DocumentEditor extends Component {
         >
           {chapter.expanded
             ? chapter.chapters.map((innerChapter, innerIndex) => {
-                return this.renderChapter(chapter.chapters, innerChapter, innerIndex, false);
+                return this.renderChapter(
+                  chapter.chapters,
+                  innerChapter,
+                  innerIndex,
+                  false
+                );
               })
             : null}
         </Grid>
@@ -697,7 +754,9 @@ class DocumentEditor extends Component {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{this.state.modalTitle}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">
+          {this.state.modalTitle}
+        </DialogTitle>
         <DialogContent>{this.state.modalContent}</DialogContent>
         <DialogActions>
           {this.state.showAbortButton && (
@@ -746,7 +805,9 @@ class DocumentEditor extends Component {
   }
 
   renderFolders() {
-    return this.state.folders.map((folder, i) => <option key={i}>{folder}</option>);
+    return this.state.folders.map((folder, i) => (
+      <option key={i}>{folder}</option>
+    ));
   }
 
   validateNewDocumentName(value) {
@@ -771,8 +832,16 @@ class DocumentEditor extends Component {
     return (
       <>
         {!isValid && this.state.newDocumentName !== "" && (
-          <div style={{ color: "white", backgroundColor: "orange", marginTop: 8, padding: 8 }}>
-            <WarningIcon /> Dokumentnamnet innehåller otillåtna tecken och kan därför inte sparas!
+          <div
+            style={{
+              color: "white",
+              backgroundColor: "orange",
+              marginTop: 8,
+              padding: 8,
+            }}
+          >
+            <WarningIcon /> Dokumentnamnet innehåller otillåtna tecken och kan
+            därför inte sparas!
             <br />
             Endast A-Z, a-z, 0-9 och _ är tillåtet.
           </div>
@@ -804,7 +873,10 @@ class DocumentEditor extends Component {
         {this.useDocumentFolders ? (
           <FormControl fullWidth>
             <InputLabel shrink>Välj mapp</InputLabel>
-            <NativeSelect onChange={(event) => this.handleFolderChangeNew(event)} value={this.state.newFolderName}>
+            <NativeSelect
+              onChange={(event) => this.handleFolderChangeNew(event)}
+              value={this.state.newFolderName}
+            >
               <option value="">Välj en mapp</option>
               {this.renderFolders()}
             </NativeSelect>
@@ -841,8 +913,16 @@ class DocumentEditor extends Component {
     return (
       <>
         {!isValid && this.state.newFolderName !== "" && (
-          <div style={{ color: "white", backgroundColor: "orange", marginTop: 8, padding: 8 }}>
-            <WarningIcon /> Mappnamnet innehåller otillåtna tecken och kan därför inte sparas!
+          <div
+            style={{
+              color: "white",
+              backgroundColor: "orange",
+              marginTop: 8,
+              padding: 8,
+            }}
+          >
+            <WarningIcon /> Mappnamnet innehåller otillåtna tecken och kan
+            därför inte sparas!
             <br />
             Endast A-Z, a-z, 0-9 och _ är tillåtet.
           </div>
@@ -1088,22 +1168,33 @@ class DocumentEditor extends Component {
                 <strong>Hantera mappar</strong>
               </Typography>
               <Typography style={{ fontStyle: "italic", fontSize: "smaller" }}>
-                Enskilda dokument till ”Dokumenthanteraren” kan sparas direkt i rot-katalogen ”documents” eller sparas i
-                en undermapp till ”documents”. Observera att det endast går att gruppera undermappar i ett (1) steg.
-                Vill du spara dokumenten i en undermapp till ”documents” väljer du vilken undermapp det är som du vill
-                spara dokumenten i under ”Välj en mapp” nedan. Vill du skapa en ny undermapp under ”documents” klickar
-                du på den gröna knappen ”NY MAPP”
+                Enskilda dokument till ”Dokumenthanteraren” kan sparas direkt i
+                rot-katalogen ”documents” eller sparas i en undermapp till
+                ”documents”. Observera att det endast går att gruppera
+                undermappar i ett (1) steg. Vill du spara dokumenten i en
+                undermapp till ”documents” väljer du vilken undermapp det är som
+                du vill spara dokumenten i under ”Välj en mapp” nedan. Vill du
+                skapa en ny undermapp under ”documents” klickar du på den gröna
+                knappen ”NY MAPP”
               </Typography>
             </Grid>
           ) : null}
 
           {this.renderModal()}
 
-          <Grid className={classes.gridItemContainer} alignContent="center" container item>
+          <Grid
+            className={classes.gridItemContainer}
+            alignContent="center"
+            container
+            item
+          >
             <Grid className={classes.gridItem} item xs={12}>
               {this.useDocumentFolders ? (
                 <FormControl>
-                  <NativeSelect onChange={(event) => this.handleFolderChange(event)} value={selectedFolder}>
+                  <NativeSelect
+                    onChange={(event) => this.handleFolderChange(event)}
+                    value={selectedFolder}
+                  >
                     <option value="">Välj en mapp</option>
                     {this.renderFolders()}
                   </NativeSelect>
@@ -1132,11 +1223,16 @@ class DocumentEditor extends Component {
             </Grid>
             <Grid>
               {this.useDocumentFolders ? (
-                <Typography style={{ fontStyle: "italic", fontSize: "smaller" }}>
-                  För att editera eller granska ett redan befintligt dokument väljer du ett dokument i rullgardinslistan
-                  ”Välj ett dokument”. Observera att de dokument som visas i listan är endast de dokument som finns
-                  sparade under den undermapp du valt ovan till i rot-katalogen ”documents”. Har ingen undermapp valts
-                  visas de dokument som finns sparade direkt i rot-katalogen ”documents”.
+                <Typography
+                  style={{ fontStyle: "italic", fontSize: "smaller" }}
+                >
+                  För att editera eller granska ett redan befintligt dokument
+                  väljer du ett dokument i rullgardinslistan ”Välj ett
+                  dokument”. Observera att de dokument som visas i listan är
+                  endast de dokument som finns sparade under den undermapp du
+                  valt ovan till i rot-katalogen ”documents”. Har ingen
+                  undermapp valts visas de dokument som finns sparade direkt i
+                  rot-katalogen ”documents”.
                 </Typography>
               ) : null}
             </Grid>
