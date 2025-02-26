@@ -166,6 +166,7 @@ const LayersTab = ({
             favoritesInfoText={userQuickAccessFavoritesInfoText}
             filterValue={filterValue}
             layersState={layersState}
+            staticLayerConfig={staticLayerConfig}
           />
         )}
         {staticLayerTree.map((group) => (
