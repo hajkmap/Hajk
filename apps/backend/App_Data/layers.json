@@ -1760,6 +1760,355 @@
       "rotateMap": "n",
       "hideExpandArrow": false,
       "zIndex": null
+    },
+    {
+      "id": "n0ehiv",
+      "caption": "Vägar (Grupplager)",
+      "internalLayerName": "",
+      "url": "https://geo-netinfo.trafikverket.se/MapService/wms.axd/NetInfo_1_5",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1740646587437",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": [
+        "Motorvag",
+        "Motortrafikled",
+        "Stamvag",
+        "Storstadsvag",
+        "Gastvag",
+        "GangfartsOmrade",
+        "Provisoriskvag"
+      ],
+      "layersInfo": [
+        {
+          "id": "Motorvag",
+          "caption": "Motorväg",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Motorvag&width=89&height=38"
+                },
+                "width": "89",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Motorvag&width=89&height=38&styles=Kartprofil"
+                },
+                "width": "89",
+                "height": "38"
+              }
+            }
+          ]
+        },
+        {
+          "id": "Motortrafikled",
+          "caption": "Motortrafikled",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Motortrafikled&width=113&height=38"
+                },
+                "width": "113",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Motortrafikled&width=113&height=38&styles=Kartprofil"
+                },
+                "width": "113",
+                "height": "38"
+              }
+            }
+          ]
+        },
+        {
+          "id": "Stamvag",
+          "caption": "Stamväg",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Stamvag&width=88&height=38"
+                },
+                "width": "88",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Stamvag&width=88&height=38&styles=Kartprofil"
+                },
+                "width": "88",
+                "height": "38"
+              }
+            }
+          ]
+        },
+        {
+          "id": "Storstadsvag",
+          "caption": "Storstadsväg",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Storstadsvag&width=112&height=38"
+                },
+                "width": "112",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Storstadsvag&width=112&height=38&styles=Kartprofil"
+                },
+                "width": "112",
+                "height": "38"
+              }
+            }
+          ]
+        },
+        {
+          "id": "Gastvag",
+          "caption": "Gästväg",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": false,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Gastvag&width=85&height=38"
+                },
+                "width": "85",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Gastvag&width=85&height=38&styles=Kartprofil"
+                },
+                "width": "85",
+                "height": "38"
+              }
+            }
+          ]
+        },
+        {
+          "id": "GangfartsOmrade",
+          "caption": "Gångfartsområde",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=GangfartsOmrade&width=137&height=38"
+                },
+                "width": "137",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=GangfartsOmrade&width=137&height=38&styles=Kartprofil"
+                },
+                "width": "137",
+                "height": "38"
+              }
+            }
+          ]
+        },
+        {
+          "id": "Provisoriskvag",
+          "caption": "Provisorisk väg",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Provisoriskvag&width=123&height=38"
+                },
+                "width": "123",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Provisoriskvag&width=123&height=38&styles=Kartprofil"
+                },
+                "width": "123",
+                "height": "38"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": true,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.1.1",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
     }
   ],
   "wfslayers": [
