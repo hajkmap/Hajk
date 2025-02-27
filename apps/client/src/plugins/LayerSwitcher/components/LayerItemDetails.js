@@ -61,17 +61,19 @@ function LayerItemDetails({
       : layerItemDetails?.subLayerIndex;
   const showOpacity = subLayerIndex !== null ? false : true;
 
-  // TODO Is this correct? Should it not be shown for group layers?
-  const showLegend =
-    layerItemDetails?.layer?.get("layerType") === "group" &&
-    subLayerIndex === null
-      ? false
-      : true;
-
   const layerInfo = layerItemDetails?.layer?.get("layerInfo");
-  const legendInfo =
-    layerInfo?.legend?.length > 0 && layerInfo?.legend[subLayerIndex ?? 0];
-  const legendUrl = legendInfo?.url;
+
+  // Only show legend for actual OL layers.
+  // This check is probably not needed but LayerItemDetails can be passed
+  // several different things and we don't want to crash in any case.
+  // Proper typing of the props would remove the need for this check.
+  const showLegend = layerItemDetails?.layer?.get("layerType");
+
+  const legendInfo = layerInfo?.legend;
+  const legendUrl =
+    showLegend && subLayerIndex === null
+      ? legendInfo?.map((l) => l?.url)
+      : Array.isArray(legendInfo) && legendInfo[subLayerIndex]?.url;
 
   // Handle opacity slider changes
   const handleOpacitySliderChange = (_, newValue) => {
