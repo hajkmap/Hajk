@@ -186,13 +186,17 @@ function LayerItemDetails({
         <Box
           sx={{
             display: display ? "block" : "none",
-            minHeight: "15em",
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
             backgroundColor: (theme) =>
               theme.palette.mode === "dark" ? "rgb(18,18,18)" : "#fff",
+            position: "relative",
+            overflowY: "auto",
+            height: "inherit",
+            minHeight: "15em",
+            maxHeight: "inherit",
           }}
         >
           <Box

@@ -51,7 +51,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
         aria-expanded={menuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <Tooltip title="Fler val för snabbåtkomst">
+        <Tooltip title="Fler funktioner för Lagerhanteraren">
           <MoreVertOutlinedIcon />
         </Tooltip>
       </IconButton>
