@@ -1,22 +1,36 @@
 import { Collapse } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
-// TODO Handle collapse state inside this component
+const ColumnContainer = styled("div")(() => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "start",
+  gap: "0.25em",
+}));
+
+const Image = styled("img")(() => ({
+  objectFit: "none",
+  maxWidth: "250px",
+}));
+
 export default function LegendImage({ open, src }) {
-  return src ? (
+  if (!src) {
+    return null;
+  }
+
+  const urlArray = Array.isArray(src) ? src : [src];
+  return (
     <Collapse
-      sx={{ pt: open ? 1 : 0, ml: 4 }}
+      sx={{ py: open ? 1 : 0, ml: 4 }}
       in={open}
       timeout={50}
       unmountOnExit
     >
-      <div>
-        <img
-          loading="lazy"
-          style={{ maxWidth: "250px" }}
-          alt="Teckenförklaring"
-          src={src}
-        />
-      </div>
+      <ColumnContainer>
+        {urlArray.map((url) => (
+          <Image key={url} loading="lazy" alt="Teckenförklaring" src={url} />
+        ))}
+      </ColumnContainer>
     </Collapse>
-  ) : null;
+  );
 }
