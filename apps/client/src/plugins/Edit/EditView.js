@@ -225,7 +225,6 @@ class EditView extends React.PureComponent {
   renderToolbar = () => {
     return (
       <Toolbar
-        ref="toolbar"
         editSource={this.state.editSource}
         model={this.props.model}
         observer={this.props.observer}
@@ -241,7 +240,6 @@ class EditView extends React.PureComponent {
     const { model, observer } = this.props;
     return (
       <AttributeEditor
-        ref="attributeEditor"
         editSource={editSource}
         model={model}
         observer={observer}
