@@ -139,14 +139,18 @@ function QuickAccessPresets({
     layers.forEach((l) => {
       const layer = allMapLayers.find((la) => la.get("name") === l.id);
       if (layer) {
+        const opacity = l?.opacity ?? 1;
+        const drawOrder = l?.drawOrder ?? 1;
+        const visible = l?.visible ?? true;
+
         // Set quickaccess property
         if (layer.get("layerType") !== "base") {
           layer.set("quickAccess", true);
         }
         // Set drawOrder (zIndex)
-        layer.setZIndex(l.drawOrder);
+        layer.setZIndex(drawOrder);
         // Set opacity
-        layer.setOpacity(l.opacity);
+        layer.setOpacity(opacity);
         // Special handling for layerGroups and baselayers
         if (layer.get("layerType") === "group") {
           if (l.visible === true) {
@@ -165,9 +169,9 @@ function QuickAccessPresets({
             layer.get("name")
           );
           // Set visibility
-          layer.set("visible", l.visible);
+          layer.set("visible", visible);
         } else {
-          layer.set("visible", l.visible);
+          layer.set("visible", visible);
         }
       } else if (l.id < 0) {
         // A fake maplayer is in the package
@@ -281,6 +285,19 @@ function QuickAccessPresets({
     return backgroundLayerName;
   };
 
+  const getLayerNames = (layers) => {
+    const layerNames = [];
+    layers?.forEach((layer) => {
+      const mapLayer = map
+        .getAllLayers()
+        .find((l) => l.get("name") === layer.id);
+      if (mapLayer && mapLayer.get("layerType") !== "base") {
+        layerNames.push(mapLayer.get("caption"));
+      }
+    });
+    return layerNames;
+  };
+
   // Render layerpackage keywords
   const renderKeywords = (keywords) => {
     // Check if keywords is an array and if it contains any items
@@ -338,8 +355,15 @@ function QuickAccessPresets({
             <PublicOutlinedIcon fontSize="small"></PublicOutlinedIcon>
             <Typography>
               {loadLpInfoConfirmation &&
-                getBaseLayerName(loadLpInfoConfirmation.layers)}
+                getBaseLayerName(loadLpInfoConfirmation?.layers)}
             </Typography>
+          </Stack>
+          <DialogContentText sx={{ mt: 2, mb: 1 }}>Lager</DialogContentText>
+          <Stack direction="row" useFlexGap spacing={2}>
+            {loadLpInfoConfirmation &&
+              getLayerNames(loadLpInfoConfirmation?.layers).map((n) => (
+                <Typography>{n}</Typography>
+              ))}
           </Stack>
           <Divider sx={{ mt: 2 }} />
           <Typography sx={{ mt: 2, mb: 1 }}>
