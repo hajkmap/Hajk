@@ -38,6 +38,7 @@ const QuickAccessView = ({
   filterValue,
   enqueueSnackbar,
   layersState,
+  staticLayerConfig,
 }) => {
   const qaLayers = Object.values(layersState).filter((obj) => obj.quickAccess);
   const hasVisibleLayers = qaLayers.some((l) => l.visible);
@@ -167,6 +168,8 @@ const QuickAccessView = ({
             filterValue={filterValue}
             map={map}
             globalObserver={globalObserver}
+            layersState={layersState}
+            staticLayerConfig={staticLayerConfig}
           ></QuickAccessLayers>
         </Box>
       </Collapse>
