@@ -199,7 +199,14 @@ function DrawOrder({ display, app, map, localObserver, options }) {
   };
 
   return (
-    <Box sx={{ display: display ? "block" : "none" }}>
+    <Box
+      sx={{
+        display: display ? "block" : "none",
+        height: "inherit",
+        maxHeight: "inherit",
+        overflowY: "auto",
+      }}
+    >
       <Box
         sx={{
           pr: 2,
@@ -288,6 +295,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
                       key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
                       layer={l}
                       app={app}
+                      globalObserver={app.globalObserver}
                       draggable={!options.lockDrawOrderBaselayer}
                       toggleable={false}
                     />

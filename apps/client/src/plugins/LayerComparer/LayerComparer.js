@@ -193,7 +193,7 @@ const LayerComparer = (props) => {
   const onClose = () => {
     // Ensure that there are real layers to compare
     if (l1.current instanceof BaseLayer && l2.current instanceof BaseLayer) {
-      helperSnack.current = enqueueSnackbar(null, {
+      helperSnack.current = enqueueSnackbar("", {
         variant: "default",
         persist: true,
         anchorOrigin: { vertical: "bottom", horizontal: "center" },

@@ -2,7 +2,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 
 import { IconButton, Paper, Menu, MenuItem } from "@mui/material";
 import FolderSpecial from "@mui/icons-material/FolderSpecial";
@@ -78,7 +78,9 @@ class Preset extends React.PureComponent {
     const z = queryParams.get("z");
     const l = queryParams.get("l");
 
-    const location = x && y ? [x, y] : null;
+    // If the animate method on the view class is called with x and y as integers the app completely hangs without any error thrown from OL.
+    // the '* 1.0' is a workaround until OL has fixed the issue.
+    const location = x && y ? [x * 1.0, y * 1.0] : null;
     const zoom = location ? z : null; // no need to zoom if we don't have a position.
     return { location, zoom, layers: l };
   };

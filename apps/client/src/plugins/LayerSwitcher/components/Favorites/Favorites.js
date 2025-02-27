@@ -403,7 +403,7 @@ function Favorites({
           ></FavoritesList>
         </Box>
       </Box>,
-      document.getElementById("scroll-container")
+      document.getElementById("layer-switcher-view-root")
     );
   };
 

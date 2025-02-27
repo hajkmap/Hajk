@@ -38,8 +38,6 @@ class KirView extends React.PureComponent {
     localObserver: PropTypes.object.isRequired,
   };
 
-  static defaultProps = {};
-
   constructor(props) {
     super(props);
 

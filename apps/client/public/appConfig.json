@@ -9,7 +9,7 @@
       "id": 1,
       "active": true,
       "text": "Hi, this is **Hajk**! 😃 \n\nWe hope you enjoy it. 🚀💯",
-      "showOnlyOnce": false,
+      "showOnlyOnce": true,
       "maps": ["map_1", "simpleMapAndLayersConfig"],
       "timeout": 5000,
       "startTime": "2020-06-29",

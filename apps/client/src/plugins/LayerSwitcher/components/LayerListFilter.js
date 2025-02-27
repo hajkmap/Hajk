@@ -6,6 +6,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 
 import HajkToolTip from "components/HajkToolTip";
+import LayersTabActionsMenu from "./LayersTabActionsMenu.js";
 
 const MIN_FILTER_TOOLTIP_DELAY = 1000;
 
@@ -13,6 +14,8 @@ const LayerListFilter = ({
   minFilterLength = 3,
   handleFilterValueChange,
   handleFilterSubmit,
+  scrollToTop,
+  scrollToBottom,
 }) => {
   const inputRef = useRef(null);
 
@@ -34,6 +37,8 @@ const LayerListFilter = ({
           theme.palette.mode === "dark" ? "#373737" : theme.palette.grey[100],
         borderBottom: (theme) =>
           `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+        display: "flex",
+        flexDirection: "row",
       }}
     >
       <HajkToolTip
@@ -93,6 +98,10 @@ const LayerListFilter = ({
           }}
         />
       </HajkToolTip>
+      <LayersTabActionsMenu
+        scrollToTop={scrollToTop}
+        scrollToBottom={scrollToBottom}
+      />
     </Box>
   );
 };

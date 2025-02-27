@@ -65,14 +65,18 @@ const GroupInfoDetails = ({
       )}
       {infogroupurl && (
         <Typography variant="body2" sx={{ fontWeight: 500, mt: 1, mb: 1 }}>
-          <Link href={infogroupurl} target="_blank" rel="noreferrer">
+          <Link href={infogroupurl || null} target="_blank" rel="noreferrer">
             {infogroupurltext}
           </Link>
         </Typography>
       )}
       {infogroupopendatalink && (
         <Typography variant="body2" sx={{ fontWeight: 500, mt: 1, mb: 1 }}>
-          <Link href={infogroupopendatalink} target="_blank" rel="noreferrer">
+          <Link
+            href={infogroupopendatalink || null}
+            target="_blank"
+            rel="noreferrer"
+          >
             Öppna data: {name}
           </Link>
         </Typography>
@@ -156,19 +160,19 @@ const LayerGroup = ({
   const groupId = staticGroupTree.id;
   const groupConfig = staticLayerConfig[groupId];
 
-  const groupName = groupConfig.caption;
-  const name = groupConfig.caption;
+  const groupName = groupConfig?.caption;
+  const name = groupConfig?.caption;
 
-  const groupIsFiltered = groupConfig.isFiltered;
+  const groupIsFiltered = groupConfig?.isFiltered;
   const groupIsExpanded = staticGroupTree.defaultExpanded;
   const groupIsToggable = staticGroupTree.groupIsToggable;
 
-  const infogrouptitle = groupConfig.infogrouptitle;
-  const infogrouptext = groupConfig.infogrouptext;
-  const infogroupurl = groupConfig.infogroupurl;
-  const infogroupurltext = groupConfig.infogroupurltext;
-  const infogroupopendatalink = groupConfig.infogroupopendatalink;
-  const infogroupowner = groupConfig.infogroupowner;
+  const infogrouptitle = groupConfig?.infogrouptitle;
+  const infogrouptext = groupConfig?.infogrouptext;
+  const infogroupurl = groupConfig?.infogroupurl;
+  const infogroupurltext = groupConfig?.infogroupurltext;
+  const infogroupopendatalink = groupConfig?.infogroupopendatalink;
+  const infogroupowner = groupConfig?.infogroupowner;
 
   const [infoVisible, setInfoVisible] = useState(false);
 

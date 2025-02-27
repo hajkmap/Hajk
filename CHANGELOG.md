@@ -7,7 +7,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+<!-- ## [Unreleased]
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security -->
+
+## [4.0.0-rc.2] - 2025-02-xx
+
+### Fixed
+
+- LayerSwitcher: Multiple hotfixes.
+  ([commit](https://github.com/hajkmap/Hajk/commit/4d9b0ace9cbf029423e4ac836316a5272acfcf84))
+  ([commit](https://github.com/hajkmap/Hajk/commit/5371fa8fda0bba13191bccfbaf5f78a2f2c502b3))
+  ([commit](https://github.com/hajkmap/Hajk/commit/7576d013852a2e9850ee6b4f05477a742a331be8))
+  ([commit](https://github.com/hajkmap/Hajk/commit/46d1034b01a060dc5c2efc512de9b6c30d005198))
+- Updates to RHEL Dockerfile. ([commit](https://github.com/hajkmap/Hajk/commit/afe44edd51452035d660d9f3ae99a298550ccabb))
+
+## [4.0.0-rc.1] - 2025-02-19
 
 ### Added
 
@@ -26,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   section. The Presets/Themes/Packages are set up in the map config. See
   example in `simpleMapConfig.json`.
 - Improved DrawOrder tab functionality for managing layer drawing order.
+- LayerSwitcher Actions Menu (including scrolling actions).
 
 For details see the following issues:
 
@@ -37,6 +63,7 @@ For details see the following issues:
 - [#1347](https://github.com/hajkmap/Hajk/issues/1347)
 - [#1365](https://github.com/hajkmap/Hajk/issues/1365)
 - [#1380](https://github.com/hajkmap/Hajk/issues/1380)
+- [#1594](https://github.com/hajkmap/Hajk/pull/1594)
 
 ### Fixed
 
@@ -357,7 +384,9 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.14.1...develop
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v4.0.0-rc.2...develop
+[4.0.0-rc.2]: https://github.com/hajkmap/Hajk/compare/v4.0.0-rc.1...v4.0.0-rc.2
+[4.0.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v3.14.1...v4.0.0-rc.1
 [3.14.1]: https://github.com/hajkmap/Hajk/compare/v3.14.0...v3.14.1
 [3.14.0]: https://github.com/hajkmap/Hajk/compare/v3.13.25...v3.14.0
 [3.13.25]: https://github.com/hajkmap/Hajk/compare/v3.13.24...v3.13.25
