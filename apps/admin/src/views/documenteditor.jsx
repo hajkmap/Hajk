@@ -838,6 +838,7 @@ class DocumentEditor extends Component {
               backgroundColor: "orange",
               marginTop: 8,
               padding: 8,
+              fontSize: "11px",
             }}
           >
             <WarningIcon /> Dokumentnamnet innehåller otillåtna tecken och kan
@@ -919,6 +920,7 @@ class DocumentEditor extends Component {
               backgroundColor: "orange",
               marginTop: 8,
               padding: 8,
+              fontSize: "11px",
             }}
           >
             <WarningIcon /> Mappnamnet innehåller otillåtna tecken och kan
