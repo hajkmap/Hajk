@@ -280,7 +280,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
 
                 // layerIsFakeMapLayer: l.isFakeMapLayer,
                 layerIsFakeMapLayer: false, // TODO Check this mapLayer.isFakeMapLayer,
-                allSubLayers: l.get("subLayers"),
+                allSubLayers: l.get("allSubLayers"),
                 layerMinZoom: l.get("minZoom"),
                 layerMaxZoom: l.get("maxZoom"),
                 numberOfSubLayers: l.subLayers?.length,
