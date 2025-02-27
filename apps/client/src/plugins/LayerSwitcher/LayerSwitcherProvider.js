@@ -341,7 +341,7 @@ const getLayerNodes = (groups, olLayerMap) =>
         layerId: node.id,
         caption: olLayer?.get("caption") ?? node.name,
         layerCaption: olLayer?.get("caption") ?? node.name,
-        allSubLayers: olLayer?.get("subLayers"),
+        allSubLayers: olLayer?.get("allSubLayers"),
         initiallyExpanded: node.expanded,
         initiallyToggled: node.toggled,
         initialDrawOrder: node.drawOrder,
