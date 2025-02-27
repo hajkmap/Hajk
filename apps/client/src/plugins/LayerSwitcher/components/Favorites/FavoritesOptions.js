@@ -102,10 +102,10 @@ export default function FavoritesOptions({
           <ListItemText>Redigera favoriter</ListItemText>
         </MenuItem>
         {favorites.length > 0 && <Divider />}
-        {favorites.map((favorite) => {
+        {favorites.map((favorite, i) => {
           return (
             <MenuItem
-              key={favorite.metadata.title}
+              key={`${favorite.metadata.title}-${i}`}
               onClick={(e) => handleLoad(e, favorite)}
             >
               <ListItemIcon>
