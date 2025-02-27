@@ -244,6 +244,9 @@ function LayerItem({
     return `${theme.spacing(0.2)} solid ${theme.palette.divider}`;
   };
 
+  const legendUrls =
+    Array.isArray(layerInfo?.legend) && layerInfo?.legend.map((l) => l?.url);
+
   return (
     <div
       className="layer-item"
@@ -347,11 +350,7 @@ function LayerItem({
         </ListItemButton>
       </Box>
       {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
-        <LegendImage
-          comment="TODO Fix the mess below"
-          src={Array.isArray(layerInfo?.legend) && layerInfo?.legend[0]?.url}
-          open={legendIsActive}
-        ></LegendImage>
+        <LegendImage src={legendUrls} open={legendIsActive}></LegendImage>
       )}
       {subLayersSection && subLayersSection}
     </div>

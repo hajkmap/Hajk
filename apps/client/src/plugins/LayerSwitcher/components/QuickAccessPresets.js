@@ -333,6 +333,9 @@ function QuickAccessPresets({
       <Dialog
         open={loadLpInfoConfirmation ? true : false}
         onClose={handleLoadConfirmationAbort}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
       >
         <DialogTitle sx={{ pb: 0 }}>
           {loadLpInfoConfirmation ? loadLpInfoConfirmation.title : ""}
@@ -379,7 +382,7 @@ function QuickAccessPresets({
           </Button>
         </DialogActions>
       </Dialog>,
-      document.getElementById("windows-container")
+      document.getElementById("map")
     );
   };
 
@@ -390,6 +393,9 @@ function QuickAccessPresets({
         open={loadLpConfirmation ? true : false}
         onClose={handleLoadConfirmationAbort}
         closeAfterTransition={false}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
       >
         <DialogTitle>Ladda tema</DialogTitle>
         <DialogContent>
@@ -410,7 +416,7 @@ function QuickAccessPresets({
           </Button>
         </DialogActions>
       </Dialog>,
-      document.getElementById("windows-container")
+      document.getElementById("map")
     );
   };
 
@@ -421,6 +427,9 @@ function QuickAccessPresets({
         open={missingLayersConfirmation ? true : false}
         onClose={handleMissingLayersConfirmationAbort}
         closeAfterTransition={false}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
       >
         <DialogTitle>Lager saknas</DialogTitle>
         <DialogContent>
@@ -455,7 +464,7 @@ function QuickAccessPresets({
           </Button>
         </DialogActions>
       </Dialog>,
-      document.getElementById("windows-container")
+      document.getElementById("map")
     );
   };
 
