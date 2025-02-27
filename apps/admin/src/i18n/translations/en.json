@@ -259,6 +259,7 @@
     "layers.opacity": "Opacity",
     "layers.legend": "Legend",
     "layers.legendIcon": "Legend icon",
+    "layers.legendOptions": "Legend options",
     "layers.uploadFile": "Upload file",
     "layers.showAttributeTableButton": "Show button for attribute table",
     "layers.minMaxZoomAlertOnToggleOnly": "Only show min/max alert box on click",

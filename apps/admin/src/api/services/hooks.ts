@@ -100,7 +100,9 @@ export const useUpdateService = () => {
       serviceId: string;
       data: ServiceUpdateInput;
     }) => updateService(serviceId, data),
-    onSuccess: () => {
+    onSuccess: (updatedService, { serviceId }) => {
+      queryClient.setQueryData(["service", serviceId], updatedService);
+
       void queryClient.invalidateQueries({ queryKey: ["services"] });
     },
     onError: (error) => {

@@ -258,6 +258,7 @@
     "layers.opacity": "Opacitet",
     "layers.legend": "Teckenförklaring",
     "layers.legendIcon": "Teckenförklaringsikon",
+    "layers.legendOptions": "Teckenförklaringsinställningar",
     "layers.uploadFile": "Välj fil",
     "layers.showAttributeTableButton": "Visa knapp för attributtabell",
     "layers.minMaxZoomAlertOnToggleOnly": "Visa endast varningruta för min/max vid klick",

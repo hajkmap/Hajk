@@ -38,7 +38,7 @@ function LayersGrid({
   const language = useAppStateStore((state) => state.language);
   const themeMode = useAppStateStore((state) => state.themeMode);
   const isDarkMode = themeMode === "dark";
-  const { mutateAsync: createLayer } = useCreateLayer();
+  const { mutateAsync: createLayer } = useCreateLayer(serviceId ?? "");
   const [selectedRowObjects, setSelectedRowObjects] = useState<string[]>();
   const { data: layersByService, isLoading: isLoadingLayersByService } =
     useLayersByServiceId(serviceId);

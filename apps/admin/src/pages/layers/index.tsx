@@ -40,7 +40,7 @@ export default function LayersPage() {
   const language = useAppStateStore((state) => state.language);
   const [open, setOpen] = useState<boolean>(false);
   const { data: services } = useServices();
-  const { mutateAsync: createLayer } = useCreateLayer();
+
   const { palette } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -81,9 +81,9 @@ export default function LayersPage() {
     setOpen(true);
   };
 
-  const layerContainer = new DynamicFormContainer<FieldValues>();
+  const createLayerContainer = new DynamicFormContainer<FieldValues>();
 
-  layerContainer.addInput({
+  createLayerContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 12,
     name: "name",
@@ -91,7 +91,7 @@ export default function LayersPage() {
     defaultValue: "",
   });
 
-  layerContainer.addInput({
+  createLayerContainer.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 12,
     name: "serviceId",
@@ -106,8 +106,8 @@ export default function LayersPage() {
     },
   });
 
-  const [layerContainerData] = useState(layerContainer);
-  const defaultValues = layerContainerData.getDefaultValues();
+  const [createLayerContainerData] = useState(createLayerContainer);
+  const defaultValues = createLayerContainerData.getDefaultValues();
 
   const {
     register,
@@ -115,8 +115,11 @@ export default function LayersPage() {
     control,
     getValues,
     reset,
+    watch,
     formState: { errors, dirtyFields },
   } = DefaultUseForm(defaultValues);
+  const watchServiceId = watch("serviceId");
+  const { mutateAsync: createLayer } = useCreateLayer(watchServiceId as string);
 
   const handleLayerSubmit = async (layerData: LayerCreateInput) => {
     try {
@@ -244,7 +247,7 @@ export default function LayersPage() {
             }
           >
             <FormRenderer
-              formControls={layerContainerData}
+              formControls={createLayerContainerData}
               formGetValues={getValues}
               register={register}
               control={control}

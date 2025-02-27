@@ -13,7 +13,11 @@ const renderSelect: RenderFunction<FieldValues> = ({
   const inputSlotProps = slotProps?.input ?? {};
   return (
     <FormControl fullWidth error={!!errorMessage}>
-      {title && <InputLabel id={name}>{title}</InputLabel>}
+      {title && (
+        <InputLabel id={name} shrink={!!field?.value || field?.value === ""}>
+          {title}
+        </InputLabel>
+      )}{" "}
       <Select
         labelId={name}
         {...field}
@@ -22,6 +26,7 @@ const renderSelect: RenderFunction<FieldValues> = ({
         label={title}
         inputRef={field?.ref}
         value={(field?.value as string) ?? ""}
+        displayEmpty
       >
         {optionList?.map((option, index) => (
           <MenuItem key={index} value={String(option.value)}>

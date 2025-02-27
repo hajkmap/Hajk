@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
 import { Button, Stack, TextField, useTheme, Link } from "@mui/material";
@@ -28,21 +28,22 @@ import FormActionPanel from "../../components/form-action-panel";
 import { toast } from "react-toastify";
 import { useServices } from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
-import { useServiceCapabilities, SERVICE_TYPE } from "../../api/services";
-import { useServiceByLayerId, useLayersLegends } from "../../api/layers";
+import { useServiceCapabilities } from "../../api/services";
+import { useServiceByLayerId } from "../../api/layers";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
   const { layerId } = useParams<{ layerId: string }>();
   const { data: layer, isLoading, isError } = useLayerById(layerId ?? "");
   const { mutateAsync: updateLayer, status: updateStatus } = useUpdateLayer();
-  const { mutateAsync: deleteLayer, status: deleteStatus } = useDeleteLayer();
   const { palette } = useTheme();
   const { data: services } = useServices();
-  const navigate = useNavigate();
   const formRef = useRef<HTMLFormElement | null>(null);
   const { data: service, isLoading: serviceLoading } = useServiceByLayerId(
     layer?.id ?? ""
+  );
+  const { mutateAsync: deleteLayer, status: deleteStatus } = useDeleteLayer(
+    service?.id ?? ""
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>();
@@ -52,14 +53,6 @@ export default function LayerSettings() {
       type: service?.type ?? "",
     }
   );
-  const { legendUrls: legends } = useLayersLegends({
-    baseUrl: service?.url ?? "",
-    layers: layer?.selectedLayers ?? [],
-    type: service?.type ?? SERVICE_TYPE.WMS,
-    format: service?.imageFormat ?? "",
-    version: service?.version ?? "",
-    geoServerLegendOptions: layer?.legendOptions ?? "",
-  });
 
   const styles = layer?.selectedLayers.flatMap(
     (key) => getCapStyles[key] || []
@@ -218,7 +211,7 @@ export default function LayerSettings() {
     gridColumns: 6,
     name: "style",
     title: `${t("layers.style")}`,
-    defaultValue: layer?.style,
+    defaultValue: layer?.style ?? "",
     optionList: [
       { title: "<default>", value: "" },
       ...(styles?.map((style) => ({
@@ -335,6 +328,14 @@ export default function LayerSettings() {
         </Stack>
       );
     },
+  });
+
+  accordionNestedContainer2.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    gridColumns: 12,
+    name: "legendOptions",
+    title: `${t("layers.legendOptions")}`,
+    defaultValue: layer?.legendOptions,
   });
 
   accordionNestedContainer2.addInput({
@@ -652,6 +653,9 @@ export default function LayerSettings() {
         maxZoom: layerData.maxZoom,
         infoClickActive: layerData?.infoClickActive,
         showMetadata: layerData?.showMetadata,
+        legendUrl: layerData?.legendUrl,
+        legendIconUrl: layerData?.legendIconUrl,
+        legendOptions: layerData?.legendOptions,
         options: {
           keyword: layerData?.options?.keyword,
           category: layerData?.options?.category,
@@ -695,7 +699,6 @@ export default function LayerSettings() {
         theme: palette.mode,
         hideProgressBar: true,
       });
-      void navigate("/layers");
     } catch (error) {
       console.error("Failed to update layer:", error);
       toast.error(t("layers.updateLayerFailed", { name: layer?.name }), {

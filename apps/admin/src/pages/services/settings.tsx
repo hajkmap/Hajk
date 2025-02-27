@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router";
+import { useParams } from "react-router";
 import { useState, useRef } from "react";
 import { useTranslation, Trans } from "react-i18next";
 import Page from "../../layouts/root/components/page";
@@ -42,7 +42,6 @@ import useAppStateStore from "../../store/use-app-state-store";
 export default function ServiceSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const { palette } = useTheme();
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { serviceId } = useParams<{ serviceId: string }>();
   const { data: service, isError, isLoading } = useServiceById(serviceId ?? "");
@@ -134,7 +133,6 @@ export default function ServiceSettings() {
           hideProgressBar: true,
         }
       );
-      void navigate("/services");
     } catch (error) {
       console.error("Failed to update service:", error);
       toast.error(t("services.updateServiceFailed", { name: service?.name }), {

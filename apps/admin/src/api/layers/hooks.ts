@@ -74,12 +74,15 @@ export const useServiceByLayerId = (
 
 // React mutation hook to create a layer
 // This hook uses the `createLayer` function from the layers `requests` module
-export const useCreateLayer = () => {
+export const useCreateLayer = (serviceId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createLayer,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["layers"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["layersByServiceId", serviceId],
+      });
     },
     onError: (error) => {
       console.error(error);
@@ -99,7 +102,9 @@ export const useUpdateLayer = () => {
       layerId: string;
       data: LayerUpdateInput;
     }) => updateLayer(layerId, data),
-    onSuccess: () => {
+    onSuccess: (updatedLayer, { layerId }) => {
+      queryClient.setQueryData(["layer", layerId], updatedLayer);
+
       void queryClient.invalidateQueries({ queryKey: ["layers"] });
     },
     onError: (error) => {
@@ -110,12 +115,16 @@ export const useUpdateLayer = () => {
 
 // React mutation hook to delete a layer
 // This hook uses the `deleteLayer` function from the layers `requests` module
-export const useDeleteLayer = () => {
+export const useDeleteLayer = (serviceId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (layerId: string) => deleteLayer(layerId),
     onSuccess: () => {
+      // Invalidate both general "layers" and the specific service's layers
       void queryClient.invalidateQueries({ queryKey: ["layers"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["layersByServiceId", serviceId],
+      });
     },
     onError: (error) => {
       console.error(error);
