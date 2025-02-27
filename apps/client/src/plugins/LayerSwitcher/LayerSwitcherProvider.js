@@ -185,18 +185,27 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
     .filter((l) => l.get("layerType") === "base");
 
   return {
-    setLayerVisibility(layerId, visible) {
+    setLayerVisibility(layerId, visible, filteredSubLayers) {
+      // `filteredSubLayers` is an array if there is an active filter/search in
+      // the LayerSwitcher. In that case we only wants to toggle the layers
+      // that are shown in the UI, the filter hits.
+
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
       olLayer.setVisible(visible);
 
       // VectorLayers have no sublayers.
       if (!(olLayer instanceof VectorLayer)) {
         if (visible) {
-          // For GroupLayers:
-          const allSubLayers = staticLayerConfig[layerId]?.allSubLayers;
-          if (allSubLayers) {
-            olLayer.set("subLayers", allSubLayers);
-            setOLSubLayers(olLayer, allSubLayers);
+          if (filteredSubLayers instanceof Array) {
+            olLayer.set("subLayers", filteredSubLayers);
+            setOLSubLayers(olLayer, filteredSubLayers);
+          } else {
+            // For GroupLayers:
+            const allSubLayers = staticLayerConfig[layerId]?.allSubLayers;
+            if (allSubLayers) {
+              olLayer.set("subLayers", allSubLayers);
+              setOLSubLayers(olLayer, allSubLayers);
+            }
           }
         } else {
           olLayer.set("subLayers", []);
@@ -230,15 +239,28 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
       olLayer.set("subLayers", sortedCurrentSubLayers);
       setOLSubLayers(olLayer, sortedCurrentSubLayers);
     },
-    setGroupVisibility(groupId, visible) {
+    // A Group is the grouping defined in the LayerSwitcherSettings
+    setGroupVisibility(groupId, visible, filterHits) {
+      // `filterHits` is a set if there is an active filter/search in the
+      // LayerSwitcher. In that case we only wants to toggle the layers that
+      // are shown in the UI, the filter hits.
+
       const groupTree = getGroupConfigById(staticLayerTree, groupId);
       const allLayerIdsInGroup = getAllLayerIdsInGroup(groupTree);
 
-      allLayerIdsInGroup.forEach((id) => {
-        const olLayer = map.getAllLayers().find((l) => l.get("name") === id);
-        olLayer.setVisible(visible);
-      });
+      if (filterHits instanceof Set) {
+        Array.from(filterHits).forEach((id) => {
+          const olLayer = map.getAllLayers().find((l) => l.get("name") === id);
+          olLayer.setVisible(visible);
+        });
+      } else {
+        allLayerIdsInGroup.forEach((id) => {
+          const olLayer = map.getAllLayers().find((l) => l.get("name") === id);
+          olLayer.setVisible(visible);
+        });
+      }
     },
+    // A GroupLayer here is a layer with Sublayers.
     setGroupLayerVisibility(layerId, visible) {
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
       const allSubLayers = new Set(olLayer.get("subLayers"));
