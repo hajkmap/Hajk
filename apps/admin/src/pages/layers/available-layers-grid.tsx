@@ -10,6 +10,7 @@ import useAppStateStore from "../../store/use-app-state-store";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import { useTranslation } from "react-i18next";
 import SearchIcon from "@mui/icons-material/Search";
+import DataGridBadge from "./components/data-grid-badge";
 
 function AvailableLayersGrid({
   isLoading,
@@ -73,7 +74,7 @@ function AvailableLayersGrid({
       </Typography>
       <TextField
         sx={{
-          mb: 2,
+          mb: 3,
           mt: 1,
           width: "100%",
           maxWidth: "400px",
@@ -89,7 +90,7 @@ function AvailableLayersGrid({
           },
         }}
       />
-
+      <DataGridBadge selectedLayers={selectedLayers} />
       <Grid container>
         <Scrollbar sx={{ maxHeight: "400px" }}>
           <DataGrid

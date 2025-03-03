@@ -162,21 +162,27 @@ class LayerService {
   async createAndUpdateRoleOnLayer(
     data: Prisma.RoleOnLayerCreateInput & { layerId: string; roleId: string }
   ) {
-    const updated = await prisma.roleOnLayer.updateMany({
+    const existingEntry = await prisma.roleOnLayer.findFirst({
       where: { layerId: data.layerId },
-      data: { roleId: data.roleId },
     });
 
-    if (updated.count === 0) {
-      return await prisma.roleOnLayer.create({
-        data: {
+    if (existingEntry) {
+      return await prisma.roleOnLayer.update({
+        where: {
           layerId: data.layerId,
+        },
+        data: {
           roleId: data.roleId,
         },
       });
     }
 
-    return updated;
+    return await prisma.roleOnLayer.create({
+      data: {
+        layerId: data.layerId,
+        roleId: data.roleId,
+      },
+    });
   }
 }
 

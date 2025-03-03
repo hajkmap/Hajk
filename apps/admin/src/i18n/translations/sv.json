@@ -284,6 +284,7 @@
     "layers.updateLayersFailed": "Misslyckades att uppdatera valda lager",
     "layers.metadata.urlTitle": "Url-titel",
     "layers.metadata.title": "Titel",
-    "layers.permission": "Behörighet"
+    "layers.permission": "Behörighet",
+    "layers.selected": "Valda lager"
   }
 }
