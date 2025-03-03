@@ -44,8 +44,6 @@ export default function LayerSettings() {
   const { data: roles } = useRoles();
   const { data: roleOnLayer } = useGetRoleOnLayerByLayerId(layerId ?? "");
 
-  console.log("", roleOnLayer?.role?.title);
-
   const formRef = useRef<HTMLFormElement | null>(null);
   const { data: service, isLoading: serviceLoading } = useServiceByLayerId(
     layer?.id ?? ""
