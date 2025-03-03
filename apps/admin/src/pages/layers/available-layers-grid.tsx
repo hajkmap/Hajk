@@ -90,7 +90,9 @@ function AvailableLayersGrid({
           },
         }}
       />
-      <DataGridBadge selectedLayers={selectedLayers} />
+      {selectedLayers.length !== 0 && (
+        <DataGridBadge selectedLayers={selectedLayers} />
+      )}
       <Grid container>
         <Scrollbar sx={{ maxHeight: "400px" }}>
           <DataGrid
