@@ -74,11 +74,11 @@ model RoleOnMap {
 
 model RoleOnLayer {
   layerId String
-  roleId  String
-  layer   Layer  @relation(fields: [layerId], references: [id], onDelete: Cascade)
-  role    Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId  String?
+  layer   Layer   @relation(fields: [layerId], references: [id], onDelete: Cascade)
+  role    Role?   @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  @@id([layerId, roleId])
+  @@id([layerId])
 }
 
 model RoleOnLayerInstance {

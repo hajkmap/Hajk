@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useParams } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
@@ -22,22 +22,30 @@ import {
   infoClickFormat,
   sortType,
   searchOutputFormat,
+  useServiceByLayerId,
+  useCreateAndUpdateRoleOnLayer,
+  useGetRoleOnLayerByLayerId,
 } from "../../api/layers";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import FormActionPanel from "../../components/form-action-panel";
 import { toast } from "react-toastify";
-import { useServices } from "../../api/services";
+import { useServices, useServiceCapabilities } from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
-import { useServiceCapabilities } from "../../api/services";
-import { useServiceByLayerId } from "../../api/layers";
+import { useRoles } from "../../api/users";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
   const { layerId } = useParams<{ layerId: string }>();
   const { data: layer, isLoading, isError } = useLayerById(layerId ?? "");
   const { mutateAsync: updateLayer, status: updateStatus } = useUpdateLayer();
+  const { mutateAsync: createRoleOnLayer } = useCreateAndUpdateRoleOnLayer();
   const { palette } = useTheme();
   const { data: services } = useServices();
+  const { data: roles } = useRoles();
+  const { data: roleOnLayer } = useGetRoleOnLayerByLayerId(layerId ?? "");
+
+  console.log("", roleOnLayer?.role?.title);
+
   const formRef = useRef<HTMLFormElement | null>(null);
   const { data: service, isLoading: serviceLoading } = useServiceByLayerId(
     layer?.id ?? ""
@@ -63,9 +71,9 @@ export default function LayerSettings() {
     }
   };
 
-  const [formLayerData, setFormLayerData] = useState<
-    DynamicFormContainer<FieldValues>
-  >(new DynamicFormContainer<FieldValues>());
+  const [formLayerData] = useState<DynamicFormContainer<FieldValues>>(
+    new DynamicFormContainer<FieldValues>()
+  );
   const defaultValues = formLayerData.getDefaultValues();
   const {
     register,
@@ -77,6 +85,7 @@ export default function LayerSettings() {
   } = DefaultUseForm(defaultValues);
 
   const watchSingleTile = watch("singleTile");
+  const watchRoleId = watch("roleId");
 
   const layerSettingsFormContainer = new DynamicFormContainer<FieldValues>();
   const panelNestedContainer = new DynamicFormContainer<FieldValues>(
@@ -567,15 +576,14 @@ export default function LayerSettings() {
   });
   accordionNestedContainer7.addInput({
     type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
-    name: "competence",
-    title: `Behörighet`,
-    defaultValue: "",
-    optionList: [
-      { title: "BYGGLOV_PERSONAL_ADM", value: "BYGGLOV_PERSONAL_ADM" },
-      { title: "IT_PERSONAL_ADM", value: "IT_PERSONAL_ADM" },
-      { title: "String", value: "String" },
-    ],
+    gridColumns: 6,
+    name: "roleId",
+    title: `${t("layers.permission")}`,
+    defaultValue: roleOnLayer?.roleId,
+    optionList: roles?.map((role) => ({
+      title: role.title,
+      value: role.id,
+    })),
   });
 
   layerSettingsFormContainer.addContainer([
@@ -690,6 +698,7 @@ export default function LayerSettings() {
           sortMethod: layerData?.infoClickSettings?.sortMethod,
         },
       };
+
       await updateLayer({
         layerId: layer?.id ?? "",
         data: payload,
@@ -698,6 +707,11 @@ export default function LayerSettings() {
         position: "bottom-left",
         theme: palette.mode,
         hideProgressBar: true,
+      });
+
+      await createRoleOnLayer({
+        layerId: layer?.id ?? "",
+        roleId: watchRoleId as string,
       });
     } catch (error) {
       console.error("Failed to update layer:", error);
@@ -730,7 +744,6 @@ export default function LayerSettings() {
       console.log("Layer data is still loading or unavailable.");
     }
   };
-
   const onSubmit = createOnSubmitHandler({
     handleSubmit,
     dirtyFields,
@@ -742,10 +755,6 @@ export default function LayerSettings() {
       });
     },
   });
-
-  useEffect(() => {
-    setFormLayerData(layerSettingsFormContainer);
-  }, [layer]);
 
   if (isLoading) {
     return <SquareSpinnerComponent />;

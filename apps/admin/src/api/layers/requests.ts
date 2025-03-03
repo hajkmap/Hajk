@@ -4,6 +4,8 @@ import {
   LayerTypesApiResponse,
   LayerCreateInput,
   LayerUpdateInput,
+  RoleOnLayerCreateAndUpdateInput,
+  RoleOnLayer,
 } from "./types";
 import { Service } from "../services";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
@@ -221,6 +223,55 @@ export const deleteLayer = async (layerId: string): Promise<void> => {
       );
     } else {
       throw new Error("Failed to delete layer");
+    }
+  }
+};
+
+export const getRoleOnLayerByLayerId = async (layerId: string) => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.get<RoleOnLayer>(
+      `/layers/role/${layerId}`
+    );
+    if (!response.data) {
+      throw new Error("No data found");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to fetch layer role. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to fetch layer role`);
+    }
+  }
+};
+
+export const createAndUpdateRoleOnLayer = async (
+  newLayerRole: RoleOnLayerCreateAndUpdateInput
+): Promise<RoleOnLayerCreateAndUpdateInput> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response =
+      await internalApiClient.post<RoleOnLayerCreateAndUpdateInput>(
+        "/layers/role",
+        newLayerRole
+      );
+    if (!response.data) {
+      throw new Error("No data found");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to create layer role. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to create layer role`);
     }
   }
 };

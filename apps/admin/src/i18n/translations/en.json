@@ -284,6 +284,7 @@
     "layers.updateLayersSuccess": "Selected layers updated!",
     "layers.updateLayersFailed": "Failed to update selected layers.",
     "layers.metadata.urlTitle": "Url-title",
-    "layers.metadata.title": "Title"
+    "layers.metadata.title": "Title",
+    "layers.permission": "Permission"
   }
 }

@@ -10,4 +10,6 @@ export default express
   .get("/:id", controller.getLayerById)
   .post("/", controller.createLayer)
   .patch("/:id", controller.updateLayer)
-  .delete("/:id", controller.deleteLayer);
+  .delete("/:id", controller.deleteLayer)
+  .get("/role/:id", controller.getRoleOnLayerByLayerId)
+  .post("/role", controller.createAndUpdateRoleOnLayer);

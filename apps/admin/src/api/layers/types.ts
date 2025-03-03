@@ -1,3 +1,5 @@
+import { Role } from "../users";
+
 export interface Layer {
   id: string;
   serviceId: string;
@@ -136,6 +138,16 @@ export interface LayerUpdateInput {
     sortDescending?: boolean;
   };
   options?: Record<string, unknown>;
+}
+
+export interface RoleOnLayer {
+  layerId: string;
+  roleId: string;
+  role: Role;
+}
+export interface RoleOnLayerCreateAndUpdateInput {
+  layerId: string;
+  roleId: string;
 }
 export const infoClickFormat = [
   { title: "application/json", value: "application/json" },

@@ -149,6 +149,35 @@ class LayerService {
       await transaction.layer.delete({ where: { id } });
     });
   }
+
+  async getRoleOnLayerByLayerId(layerId: string) {
+    return prisma.roleOnLayer.findFirst({
+      where: { layerId },
+      include: {
+        role: true,
+      },
+    });
+  }
+
+  async createAndUpdateRoleOnLayer(
+    data: Prisma.RoleOnLayerCreateInput & { layerId: string; roleId: string }
+  ) {
+    const updated = await prisma.roleOnLayer.updateMany({
+      where: { layerId: data.layerId },
+      data: { roleId: data.roleId },
+    });
+
+    if (updated.count === 0) {
+      return await prisma.roleOnLayer.create({
+        data: {
+          layerId: data.layerId,
+          roleId: data.roleId,
+        },
+      });
+    }
+
+    return updated;
+  }
 }
 
 export default new LayerService();

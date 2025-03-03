@@ -10,6 +10,7 @@ import {
   LayersApiResponse,
   LayerTypesApiResponse,
   LayerUpdateInput,
+  RoleOnLayer,
 } from "./types";
 import {
   getLayers,
@@ -20,6 +21,8 @@ import {
   deleteLayer,
   updateLayer,
   getServiceByLayerId,
+  createAndUpdateRoleOnLayer,
+  getRoleOnLayerByLayerId,
 } from "./requests";
 import { Service, useServiceCapabilities, SERVICE_TYPE } from "../services";
 
@@ -104,7 +107,6 @@ export const useUpdateLayer = () => {
     }) => updateLayer(layerId, data),
     onSuccess: (updatedLayer, { layerId }) => {
       queryClient.setQueryData(["layer", layerId], updatedLayer);
-
       void queryClient.invalidateQueries({ queryKey: ["layers"] });
     },
     onError: (error) => {
@@ -125,6 +127,28 @@ export const useDeleteLayer = (serviceId: string) => {
       void queryClient.invalidateQueries({
         queryKey: ["layersByServiceId", serviceId],
       });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+export const useGetRoleOnLayerByLayerId = (
+  layerId: string
+): UseQueryResult<RoleOnLayer> => {
+  return useQuery({
+    queryKey: ["roleOnLayer", layerId],
+    queryFn: () => getRoleOnLayerByLayerId(layerId),
+  });
+};
+
+export const useCreateAndUpdateRoleOnLayer = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createAndUpdateRoleOnLayer,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["roleOnLayer"] });
     },
     onError: (error) => {
       console.error(error);

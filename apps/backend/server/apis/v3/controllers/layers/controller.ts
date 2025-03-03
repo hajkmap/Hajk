@@ -72,5 +72,15 @@ class LayersController {
     await LayerService.deleteLayer(req.params.id);
     res.status(HttpStatusCodes.NO_CONTENT).send();
   }
+
+  async getRoleOnLayerByLayerId(req: Request, res: Response) {
+    const role = await LayerService.getRoleOnLayerByLayerId(req.params.id);
+    res.status(HttpStatusCodes.OK).json(role);
+  }
+
+  async createAndUpdateRoleOnLayer(req: Request, res: Response) {
+    const role = await LayerService.createAndUpdateRoleOnLayer(req.body);
+    res.status(HttpStatusCodes.CREATED).json(role);
+  }
 }
 export default new LayersController();
