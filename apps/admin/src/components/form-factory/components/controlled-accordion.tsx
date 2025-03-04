@@ -12,7 +12,7 @@ import HajkTooltip from "../../hajk-tooltip";
 import { FormElement } from "../dynamic-form-container";
 import { FieldValues as TFieldValues } from "react-hook-form";
 import DynamicInputSettings from "../types/dynamic-input-settings";
-
+import InfoIcon from "@mui/icons-material/Info";
 import CustomInputSettings from "../types/custom-input-settings";
 
 interface ControlledAccordionProps {
@@ -117,12 +117,6 @@ function ControlledAccordion({
   };
 
   const controlledAccordion = () => {
-    const valuesAsString = keyValues
-      .map((keyValue) => {
-        return getValue(keyValue?.value);
-      })
-      .join(", ");
-
     return (
       <Accordion
         disableGutters
@@ -135,55 +129,45 @@ function ControlledAccordion({
           backgroundColor: backgroundColor ?? "none",
         }}
       >
-        <HajkTooltip
-          title={tooltipContent()}
-          placement="bottom-end"
-          enterDelay={1000}
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={(theme) => ({
+            transition: "border-bottom 250ms ease-in-out",
+            borderBottom: expanded
+              ? `1px solid ${theme.palette.divider}`
+              : `1px solid ${alpha(theme.palette.divider, 0.0)}`,
+          })}
         >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            sx={(theme) => ({
-              transition: "border-bottom 250ms ease-in-out",
-              borderBottom: expanded
-                ? `1px solid ${theme.palette.divider}`
-                : `1px solid ${alpha(theme.palette.divider, 0.0)}`,
-            })}
+          <Box
+            sx={{ width: "calc(100% - 20px)", maxWidth: "calc(100% - 20px)" }}
+            display="flex"
+            alignItems="center"
+            overflow="hidden"
           >
-            <Box
-              sx={{ width: "calc(100% - 20px)", maxWidth: "calc(100% - 20px)" }}
-              display="flex"
-              alignItems="center"
-              overflow="hidden"
+            <Typography variant="h6" sx={{ flexShrink: 0, paddingRight: 2 }}>
+              {title}
+            </Typography>
+
+            <Typography
+              noWrap
+              sx={{
+                display: "flex",
+                flexGrow: 1,
+                alignItems: "flex-end",
+                flexDirection: "column",
+                transition: "opacity 250ms ease-in-out",
+                opacity: expanded ? 0.0 : 1.0,
+                pointerEvents: expanded ? "none" : "all",
+              }}
             >
-              <Typography variant="h6" sx={{ flexShrink: 0, paddingRight: 2 }}>
-                {title}
-              </Typography>
-              {!expanded && (
-                <Typography
-                  variant="caption"
-                  noWrap
-                  sx={{
-                    flexGrow: 1,
-                    textAlign: "right",
-                  }}
-                >
-                  {keyValues && keyValues.length > 0 && (
-                    <Box
-                      className="truncate-overflow"
-                      sx={{
-                        width: "100%",
-                        maxWidth: "100%",
-                        opacity: 0.7,
-                      }}
-                    >
-                      {valuesAsString}
-                    </Box>
-                  )}
-                </Typography>
-              )}
-            </Box>
-          </AccordionSummary>
-        </HajkTooltip>
+              <HajkTooltip title={tooltipContent()} placement="bottom-end">
+                <div style={{ display: "inline-block", fontSize: 0 }}>
+                  <InfoIcon />
+                </div>
+              </HajkTooltip>
+            </Typography>
+          </Box>
+        </AccordionSummary>
         <AccordionDetails sx={{ pl: 0, pb: 0, pt: "1.5rem" }}>
           {children}
         </AccordionDetails>
