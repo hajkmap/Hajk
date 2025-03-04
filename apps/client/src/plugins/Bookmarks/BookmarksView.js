@@ -240,6 +240,7 @@ const BookmarksView = (props) => {
           size="small"
           startIcon={error ? null : <AddCircleOutlineIcon />}
           onClick={addBookmark}
+          disabled={!name.trim()}
         >
           {error ? "Ersätt" : "Lägg till"}
         </AddButton>
