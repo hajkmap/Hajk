@@ -636,6 +636,7 @@ export default function MapSettingsForm() {
           register={register}
           control={control}
           errors={errors}
+          showSearch={true}
         />
         <Grid container>
           <Grid sx={{ ml: "auto" }}>

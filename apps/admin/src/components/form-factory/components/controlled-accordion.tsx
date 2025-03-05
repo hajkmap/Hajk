@@ -14,6 +14,7 @@ import { FieldValues as TFieldValues } from "react-hook-form";
 import DynamicInputSettings from "../types/dynamic-input-settings";
 import InfoIcon from "@mui/icons-material/Info";
 import CustomInputSettings from "../types/custom-input-settings";
+import { isFormElementInput } from "../form-utils";
 
 interface ControlledAccordionProps {
   title: string;
@@ -48,10 +49,7 @@ function ControlledAccordion({
     const newKv: { key: string; value: string; title: string }[] = [];
 
     formInputs.map((input) => {
-      if (
-        input.kind === "DynamicInputSettings" ||
-        input.kind === "CustomInputSettings"
-      ) {
+      if (isFormElementInput(input)) {
         const castedInput = input as
           | DynamicInputSettings<TFieldValues>
           | CustomInputSettings<TFieldValues>;
@@ -161,9 +159,9 @@ function ControlledAccordion({
               }}
             >
               <HajkTooltip title={tooltipContent()} placement="bottom-end">
-                <div style={{ display: "inline-block", fontSize: 0 }}>
+                <span style={{ display: "inline-block", fontSize: 0 }}>
                   <InfoIcon />
-                </div>
+                </span>
               </HajkTooltip>
             </Typography>
           </Box>

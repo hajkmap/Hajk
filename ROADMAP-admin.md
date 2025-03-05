@@ -35,24 +35,25 @@
   - ⚠️ Note: legend and legendUrl fields are incomplete. The permission accordion and used in maps data-grid are also incomplete and needs to be updated.
   - [x] Remove layer (AA)
 - [ ] Map settings page
-  - [x] Step 1: Create form with formfactory, UI only, incl translations [JA]
+  - [x] Step 1: Create form with formfactory, UI only, incl translations (JA)
 - [ ] Optimizing input fields performance/state.
   - [x] Services page (JA)
   - [x] Layers page (JA)
-- [ ] General UI improvements (JA)
+- [ ] General UI improvements
   - [ ] Use page width better. 1024? 2048?
-  - [x] Handle menu overflow and bottom settings/lock better. v0.1 WIP
-  - [x] Split up theme into multiple parts. Prepared typography to be able to adjust easier.
-  - [x] Force default size to small of some Mui components to make it more compact.
-  - [x] Add GlobalStyles to ba able to modify FormFactory styles separately.
-  - [x] Adjust header sizes for Page etc. v0.1 WIP
-  - [x] Fix FormFactory styles for Accordion/Paper/inputs etc. v0.1 WIP
-  - [x] FormFactory Accordion should show some existing data when collapsed, and more data in tooltip.
-  - [x] Fix nested Grids in form factory (when adding help icon etc).
-  - [x] Add the possibility to add unmanaged elements to a FormFactory form.
-  - [x] Find cause and fix sluggish form updates.
-  - [x] Add a color picker component to FormFactory. v0.1 WIP
-  - [x] Fix RadioButtonGroup in FormFactory
+  - [x] Handle menu overflow and bottom settings/lock better. v0.1 WIP (JA)
+  - [x] Split up theme into multiple parts. Prepared typography to be able to adjust easier. (JA)
+  - [x] Force default size to small of some Mui components to make it more compact. (JA)
+  - [x] Add GlobalStyles to ba able to modify FormFactory styles separately. (JA)
+  - [x] Adjust header sizes for Page etc. v0.1 WIP (JA)
+  - [x] Fix FormFactory styles for Accordion/Paper/inputs etc. v0.1 WIP (JA)
+  - [x] FormFactory Accordion should show some existing data when collapsed, and more data in tooltip. (JA)
+  - [x] Fix nested Grids in form factory (when adding help icon etc). (JA)
+  - [x] Add the possibility to add unmanaged elements to a FormFactory form. (JA)
+  - [x] Find cause and fix sluggish form updates. (JA)
+  - [x] Add a color picker component to FormFactory. v0.1 WIP (JA)
+  - [x] Fix RadioButtonGroup in FormFactory (JA)
+  - [x] Add search to FormFactory and some refactoring (Massive changes) (JA)
 - [x] Upgrade npm packages (JW)
 
 ### Roles

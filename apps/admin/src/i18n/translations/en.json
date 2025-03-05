@@ -231,6 +231,7 @@
     "error.serverError": "500 - Internal server error",
     "error.serverError.description": "The server encountered an unexpected problem that prevented it from fulfilling the request.",
     "error.notFound.homeBtn": "Back to homepage",
+    "form.search.placeholder": "Search (minimum {{minChars}} chars)",
     "settings.common.title": "General settings",
     "settings.service.title": "Servicesettings",
     "settings.layer.title": "Layersettings",

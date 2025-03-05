@@ -1,5 +1,11 @@
 import React from "react";
-import { Box, Grid2 as Grid, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Grid2 as Grid,
+  Paper,
+  TextField,
+  Typography,
+} from "@mui/material";
 import {
   FieldValues,
   UseFormRegister,
@@ -16,7 +22,66 @@ import CONTAINER_TYPE from "./types/container-types";
 import STATIC_TYPE from "./types/static-type";
 import HelpIcon from "@mui/icons-material/Help";
 import HajkTooltip from "../hajk-tooltip";
-import CustomInputSettings from "./types/custom-input-settings";
+import { useDebounce } from "use-debounce";
+import HighlightIndicator, {
+  highlightColor,
+} from "./components/highlight-indicator";
+import {
+  isFormElementContainer,
+  isFormElementInput,
+  isFormElementStatic,
+} from "./form-utils";
+import { t } from "i18next";
+import SearchAdornment from "./components/search-adornment";
+
+const minimumSearchLength = 3;
+
+const searchFormElements = <TFieldValues extends FieldValues>(
+  elements: FormElement<TFieldValues>[],
+  searchTerm: string
+): number => {
+  let hitCount = 0;
+
+  if (!searchTerm || searchTerm.length < 3) {
+    elements.forEach((item) => {
+      if (isFormElementInput(item)) {
+        (item as DynamicInputSettings<TFieldValues>).highlight = false;
+      } else if (isFormElementContainer(item)) {
+        (item as DynamicFormContainer<TFieldValues>).highlight = false;
+        searchFormElements(
+          (item as DynamicFormContainer<TFieldValues>).getElements(),
+          searchTerm
+        );
+      }
+    });
+    return 0;
+  }
+
+  elements.forEach((item) => {
+    if (isFormElementContainer(item)) {
+      const container = item as DynamicFormContainer<TFieldValues>;
+      const hitsInContainer = searchFormElements(
+        container.getElements(),
+        searchTerm
+      );
+
+      container.highlight = hitsInContainer > 0;
+      if (hitsInContainer > 0) hitCount += hitsInContainer;
+    } else if (isFormElementInput(item)) {
+      const inputItem = item as DynamicInputSettings<TFieldValues>;
+
+      // Lets search for stuff.
+      if (inputItem.title?.toLowerCase().includes(searchTerm.toLowerCase())) {
+        inputItem.highlight = true;
+        hitCount++;
+      } else {
+        inputItem.highlight = false;
+      }
+    }
+  });
+
+  return hitCount;
+};
 
 interface FormRenderProps<TFieldValues extends FieldValues> {
   formControls: DynamicFormContainer<TFieldValues>;
@@ -24,6 +89,7 @@ interface FormRenderProps<TFieldValues extends FieldValues> {
   register: UseFormRegister<TFieldValues>;
   control: Control<TFieldValues>;
   errors: FieldErrors<TFieldValues>;
+  showSearch?: boolean;
 }
 
 const FormRenderer = <TFieldValues extends FieldValues>({
@@ -32,8 +98,30 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   register,
   control,
   errors,
+  showSearch = false,
 }: FormRenderProps<TFieldValues>) => {
   let c = 0;
+
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+  const [hitCount, setHitCount] = React.useState(0);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+  };
+
+  const getElements = React.useMemo(() => {
+    const hits = searchFormElements(
+      formControls.getElements(),
+      debouncedSearchTerm
+    );
+    setHitCount(hits);
+    return formControls.getElements();
+  }, [formControls, debouncedSearchTerm]);
 
   const getKey = (index: number) => {
     c++;
@@ -68,20 +156,18 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     item: FormElement<TFieldValues>,
     index: number
   ) => {
-    if (item.kind === "DynamicFormContainer") {
+    if (isFormElementContainer(item)) {
       return renderContainer(item as DynamicFormContainer<TFieldValues>, index);
-    } else if (
-      item.kind === "DynamicInputSettings" ||
-      item.kind === "CustomInputSettings"
-    ) {
-      const castedItem = item as
-        | DynamicInputSettings<TFieldValues>
-        | CustomInputSettings<TFieldValues>;
-      if (castedItem.visibleIf) {
-        // console.log("Hej", item);
-      }
+    } else if (isFormElementInput(item)) {
+      // Keep these comments here for now, will be useful later on.
+      // const castedItem = item as
+      //   | DynamicInputSettings<TFieldValues>
+      //   | CustomInputSettings<TFieldValues>;
+      // if (castedItem.visibleIf) {
+      //   // console.log("test", item);
+      // }
       return wrapInGrid(item, index, {}, renderDynamicInputComponent);
-    } else if (item.kind === "StaticElement") {
+    } else if (isFormElementStatic(item)) {
       return renderStaticElement(item as StaticElement, index);
     }
 
@@ -102,8 +188,12 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     }
 
     return (
-      // Using Box here as there seem to be issues when nesting too many Grids
-      <Box sx={{ display: "flex" }}>
+      <Box
+        sx={{
+          display: "flex",
+          position: "relative",
+        }}
+      >
         <Box sx={{ flex: "1 1 auto" }}>
           <DynamicInputComponent
             key={`${index}`}
@@ -111,7 +201,9 @@ const FormRenderer = <TFieldValues extends FieldValues>({
             control={control}
             settings={castedSettings}
             errorMessage={
-              errors[castedSettings.name]?.message!.toString() ?? null
+              // At this point I really really care if I get [Object, Object]
+              // eslint-disable-next-line @typescript-eslint/no-base-to-string
+              errors[castedSettings.name]?.message?.toString() ?? null
             }
           />
         </Box>
@@ -133,6 +225,10 @@ const FormRenderer = <TFieldValues extends FieldValues>({
             </HajkTooltip>
           </Box>
         )}
+        <HighlightIndicator
+          highlight={castedSettings.highlight ?? false}
+          animate={true}
+        />
       </Box>
     );
   };
@@ -142,6 +238,8 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     index: number
   ) => {
     const key = getKey(index);
+    const shouldExpand =
+      !!container.props?.triggerExpanded || container.highlight;
 
     return (
       <ControlledAccordion
@@ -149,7 +247,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
         formInputs={container.getFormInputs() as FormElement<FieldValues>[]}
         formGetValues={formGetValues}
         title={container.title}
-        triggerExpanded={!!container.props?.triggerExpanded}
+        triggerExpanded={shouldExpand}
         backgroundColor={container.props?.backgroundColor as string}
       >
         <Grid container>
@@ -210,7 +308,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
       // If the Accordion contains a required field, add a * to the title.
       const containsRequiredFields =
         container.getElements().filter((item) => {
-          if (item.kind === "DynamicInputSettings") {
+          if (isFormElementInput(item)) {
             const castedSettings = item as DynamicInputSettings<TFieldValues>;
             if (castedSettings.registerOptions?.required) {
               return true;
@@ -256,17 +354,38 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   // Note the className below.
   // This is the root of the form and the class is used in the global styles.
   return (
-    <Grid
-      container
-      className="form-factory"
-      sx={{
-        ml: -2,
-      }}
-    >
-      {formControls?.getElements().map((item, index) => {
-        // will add stuff here
-        return renderFormElement(item, index);
-      })}
+    <Grid container className="form-factory" sx={{ ml: -2 }}>
+      {showSearch && (
+        <Grid container size={{ xs: 12 }} justifyContent="flex-end">
+          <Grid size={{ xs: 12, md: 4 }} sx={{ pb: 2, pl: 2 }}>
+            <TextField
+              size="small"
+              fullWidth
+              label={t("form.search.placeholder", {
+                minChars: minimumSearchLength,
+              })}
+              variant="outlined"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <SearchAdornment
+                      searchTerm={searchTerm}
+                      hitCount={hitCount}
+                      highlightColor={highlightColor}
+                      handleClearSearch={handleClearSearch}
+                      minimumSearchLength={minimumSearchLength}
+                    />
+                  ),
+                },
+              }}
+            />
+          </Grid>
+        </Grid>
+      )}
+
+      {getElements.map((item, index) => renderFormElement(item, index))}
     </Grid>
   );
 };

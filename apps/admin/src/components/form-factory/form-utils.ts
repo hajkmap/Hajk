@@ -5,6 +5,7 @@ import {
   FieldValues,
   UseFormHandleSubmit,
 } from "react-hook-form";
+import { FormElement } from "./dynamic-form-container";
 
 /*
 
@@ -69,4 +70,26 @@ export const createOnSubmitHandler = ({
       }
     )();
   };
+};
+
+// helper functions for form elements
+
+export const isFormElementInput = <TFieldValues extends FieldValues>(
+  item: FormElement<TFieldValues>
+): boolean => {
+  return (
+    item.kind === "DynamicInputSettings" || item.kind === "CustomInputSettings"
+  );
+};
+
+export const isFormElementContainer = <TFieldValues extends FieldValues>(
+  item: FormElement<TFieldValues>
+): boolean => {
+  return item.kind === "DynamicFormContainer";
+};
+
+export const isFormElementStatic = <TFieldValues extends FieldValues>(
+  item: FormElement<TFieldValues>
+): boolean => {
+  return item.kind === "StaticElement";
 };

@@ -5,6 +5,7 @@ import CustomInputSettings from "./types/custom-input-settings";
 import CONTAINER_TYPE from "./types/container-types";
 import { ReactElement } from "react";
 import STATIC_TYPE from "./types/static-type";
+import { isFormElementInput } from "./form-utils";
 
 // Union type combining DynamicInputSettings, StaticElement, and nested DynamicFormContainer
 export type FormElement<TFieldValues extends FieldValues> =
@@ -21,6 +22,7 @@ type FormElementKind =
   | "CustomInputSettings";
 
 class DynamicFormContainer<TFieldValues extends FieldValues> {
+  public highlight? = false;
   kind: FormElementKind;
   gridColumns = 12;
   private formItems: FormElement<TFieldValues>[];
@@ -90,10 +92,7 @@ class DynamicFormContainer<TFieldValues extends FieldValues> {
 
   getFormInputs(): FormElement<TFieldValues>[] {
     return this.formItems.reduce((acc, element) => {
-      if (
-        element.kind === "DynamicInputSettings" ||
-        element.kind === "CustomInputSettings"
-      ) {
+      if (isFormElementInput(element)) {
         acc.push(element); // Push the element to the acc array
       }
       return acc; // Return the updated acc array

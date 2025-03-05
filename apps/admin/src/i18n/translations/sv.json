@@ -230,6 +230,7 @@
     "error.serverError": "500 - Serverfel",
     "error.serverError.description": "Servern stötte på ett oväntat problem som hindrade den från att uppfylla begäran.",
     "error.notFound.homeBtn": "Tillbaka till startsidan",
+    "form.search.placeholder": "Sök (minst {{minChars}} tecken)",
     "settings.common.title": "Generella inställningar",
     "settings.service.title": "Tjänstinställningar",
     "settings.layer.title": "Lagerinställning",
