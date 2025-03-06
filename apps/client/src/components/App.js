@@ -818,15 +818,16 @@ class App extends React.PureComponent {
             this.globalObserver.publish("analytics.trackEvent", opts);
           }
 
-          // If the layer becomes visible, set the map rotation to match
-          if (olLayer.get("visible")) {
+          // If a base layer becomes visible, set the map rotation to match.
+          // When this runs the OpenStreetMap layer (if enable) don't exist
+          // yet. As a workaround this code is duplicated in:
+          // `plugins/LayerSwitcher/components/BackgroundSwitcher.js`
+          if (olLayer.get("visible") && olLayer.get("layerType") === "base") {
             const map = this.appModel.getMap();
             const direction = olLayer.get("rotateMap");
 
             const angle = mapDirectionToAngle(direction);
-            if (angle !== null) {
-              map.getView().setRotation(angle);
-            }
+            map.getView().setRotation(angle);
           }
           // Not related to Analytics: send an event on the global observer
           // to anyone wanting to act on layer visibility change.

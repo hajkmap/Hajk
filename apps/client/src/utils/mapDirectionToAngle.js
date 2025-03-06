@@ -1,26 +1,24 @@
 export const mapDirectionToAngle = (direction) => {
-  if (!direction) {
-    return null;
-  }
-
+  // the return is given in radians.
   switch (direction) {
     case "n":
       return 0;
     case "ne":
-      return Math.PI / 8;
-    case "e":
       return Math.PI / 4;
-    case "se":
-      return 3 * (Math.PI / 8);
-    case "s":
+    case "e":
       return Math.PI / 2;
-    case "sw":
-      return 5 * (Math.PI / 8);
-    case "w":
+    case "se":
       return 3 * (Math.PI / 4);
+    case "s":
+      return Math.PI;
+    case "sw":
+      return 5 * (Math.PI / 4);
+    case "w":
+      return 3 * (Math.PI / 2);
     case "nw":
-      return 7 * (Math.PI / 8);
+      return 7 * (Math.PI / 4);
     default:
+      // If the direction is unset we rotate the map to north
       return 0;
   }
 };
