@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
+import { mapDirectionToAngle } from "../utils/mapDirectionToAngle";
 import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import Analytics from "../models/Analytics";
@@ -804,18 +805,29 @@ class App extends React.PureComponent {
       .getArray()
       .forEach((layer) => {
         layer.on("change:visible", (e) => {
+          const olLayer = e.target;
           // If the Analytics object exists, let's track layer visibility
-          if (this.analytics && e.target.get("visible") === true) {
+          if (this.analytics && olLayer.get("visible") === true) {
             const opts = {
               eventName: "layerShown",
               activeMap: this.props.config.activeMap,
-              layerId: e.target.get("name"),
-              layerName: e.target.get("caption"),
+              layerId: olLayer.get("name"),
+              layerName: olLayer.get("caption"),
             };
             // Send a custom event to the Analytics model
             this.globalObserver.publish("analytics.trackEvent", opts);
           }
 
+          // If the layer becomes visible, set the map rotation to match
+          if (olLayer.get("visible")) {
+            const map = this.appModel.getMap();
+            const direction = olLayer.get("rotateMap");
+
+            const angle = mapDirectionToAngle(direction);
+            if (angle !== null) {
+              map.getView().setRotation(angle);
+            }
+          }
           // Not related to Analytics: send an event on the global observer
           // to anyone wanting to act on layer visibility change.
           this.globalObserver.publish("core.layerVisibilityChanged", e);
