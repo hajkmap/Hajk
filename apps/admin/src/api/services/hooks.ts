@@ -40,7 +40,7 @@ export const useServices = (): UseQueryResult<Service[]> => {
 // This hook uses the `getServiceById` function from the services `requests` module
 export const useServiceById = (serviceId: string): UseQueryResult<Service> => {
   return useQuery({
-    queryKey: ["service", serviceId],
+    queryKey: ["services", serviceId],
     queryFn: () => getServiceById(serviceId),
   });
 };
@@ -51,7 +51,7 @@ export const useLayersByServiceId = (
   serviceId: string
 ): UseQueryResult<LayersApiResponse> => {
   return useQuery({
-    queryKey: ["layersByServiceId", serviceId],
+    queryKey: ["services", "layers", serviceId],
     queryFn: () => getLayersByServiceId(serviceId),
   });
 };
@@ -100,9 +100,8 @@ export const useUpdateService = () => {
       serviceId: string;
       data: ServiceUpdateInput;
     }) => updateService(serviceId, data),
-    onSuccess: (updatedService, { serviceId }) => {
-      queryClient.setQueryData(["service", serviceId], updatedService);
-
+    onSuccess: (data, { serviceId }) => {
+      queryClient.setQueryData(["services", serviceId], data);
       void queryClient.invalidateQueries({ queryKey: ["services"] });
     },
     onError: (error) => {

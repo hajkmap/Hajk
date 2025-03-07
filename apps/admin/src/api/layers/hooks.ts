@@ -39,7 +39,7 @@ export const useLayers = (): UseQueryResult<Layer[]> => {
 // This hook uses the `getLayerById` function from the layers `requests` module
 export const useLayerById = (layerId: string): UseQueryResult<Layer> => {
   return useQuery({
-    queryKey: ["layer", layerId],
+    queryKey: ["layers", layerId],
     queryFn: () => getLayerById(layerId),
   });
 };
@@ -67,11 +67,13 @@ export const useLayerTypes = (): UseQueryResult<LayerTypesApiResponse[]> => {
 // A React Query hook to fetch a service by its layer ID
 // This hook uses the `getServiceByLayerId` function from the layers `requests` module
 export const useServiceByLayerId = (
-  layerId: string
+  layerId: string,
+  enabled: boolean
 ): UseQueryResult<Service> => {
   return useQuery({
     queryKey: ["serviceByLayerId", layerId],
     queryFn: () => getServiceByLayerId(layerId),
+    enabled: enabled && Boolean(layerId),
   });
 };
 
@@ -84,7 +86,7 @@ export const useCreateLayer = (serviceId: string) => {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["layers"] });
       void queryClient.invalidateQueries({
-        queryKey: ["layersByServiceId", serviceId],
+        queryKey: ["services", "layers", serviceId],
       });
     },
     onError: (error) => {
@@ -105,8 +107,8 @@ export const useUpdateLayer = () => {
       layerId: string;
       data: LayerUpdateInput;
     }) => updateLayer(layerId, data),
-    onSuccess: (updatedLayer, { layerId }) => {
-      queryClient.setQueryData(["layer", layerId], updatedLayer);
+    onSuccess: (data, { layerId }) => {
+      queryClient.setQueryData(["layers", layerId], data);
       void queryClient.invalidateQueries({ queryKey: ["layers"] });
     },
     onError: (error) => {
@@ -122,10 +124,9 @@ export const useDeleteLayer = (serviceId: string) => {
   return useMutation({
     mutationFn: (layerId: string) => deleteLayer(layerId),
     onSuccess: () => {
-      // Invalidate both general "layers" and the specific service's layers
       void queryClient.invalidateQueries({ queryKey: ["layers"] });
       void queryClient.invalidateQueries({
-        queryKey: ["layersByServiceId", serviceId],
+        queryKey: ["services", "layers", serviceId],
       });
     },
     onError: (error) => {

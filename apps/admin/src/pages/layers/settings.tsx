@@ -46,7 +46,8 @@ export default function LayerSettings() {
 
   const formRef = useRef<HTMLFormElement | null>(null);
   const { data: service, isLoading: serviceLoading } = useServiceByLayerId(
-    layer?.id ?? ""
+    layer?.id ?? "",
+    !!layer?.id
   );
   const { mutateAsync: deleteLayer, status: deleteStatus } = useDeleteLayer(
     service?.id ?? ""
@@ -724,7 +725,7 @@ export default function LayerSettings() {
   const handleDeleteLayer = async () => {
     if (!isLoading && layer?.id) {
       try {
-        await deleteLayer(layer.id);
+        await deleteLayer(layer.id ?? "");
         toast.success(t("layers.deleteLayerSuccess", { name: layer?.name }), {
           position: "bottom-left",
           theme: palette.mode,

@@ -35,7 +35,7 @@ function AvailableLayersGrid({
   const language = useAppStateStore((state) => state.language);
   const isDarkMode = themeMode === "dark";
   const { t } = useTranslation();
-
+  const isDataLoading = isLoading || filteredLayers.length === 0;
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
@@ -120,7 +120,7 @@ function AvailableLayersGrid({
             hideFooterPagination={getCapLayers && getCapLayers.length < 10}
             pageSizeOptions={[10, 25, 50, 100]}
             pagination
-            loading={isLoading}
+            loading={isDataLoading}
             localeText={
               language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
             }
