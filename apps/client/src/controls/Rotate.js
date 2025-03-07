@@ -43,23 +43,15 @@ const RotateControl = React.memo((props) => {
 
   // onClick handler that resets the map (north at top)
   function rotateNorth() {
-    // TODO: This could be an option in admin
-    const duration = 400;
+    const duration = 1000;
 
     if (!view.current) return;
 
-    if (rotation !== undefined) {
-      // If 'duration' will be an option, we must see if user wants to animate or not
-      if (duration > 0) {
-        view.current.animate({
-          rotation: 0,
-          duration: duration,
-          easing: easeOut,
-        });
-      } else {
-        view.current.setRotation(0);
-      }
-    }
+    view.current.animate({
+      rotation: 0,
+      duration: duration,
+      easing: easeOut,
+    });
   }
 
   return (

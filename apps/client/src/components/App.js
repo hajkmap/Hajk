@@ -44,6 +44,8 @@ import RecentlyUsedPlugins from "../controls/RecentlyUsedPlugins";
 
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
+import { easeOut } from "ol/easing";
+
 import {
   Box,
   Divider,
@@ -825,9 +827,14 @@ class App extends React.PureComponent {
           if (olLayer.get("visible") && olLayer.get("layerType") === "base") {
             const map = this.appModel.getMap();
             const direction = olLayer.get("rotateMap");
+            const duration = 1000;
 
             const angle = mapDirectionToAngle(direction);
-            map.getView().setRotation(angle);
+            map.getView().animate({
+              rotation: angle,
+              duration: duration,
+              easing: easeOut,
+            });
           }
           // Not related to Analytics: send an event on the global observer
           // to anyone wanting to act on layer visibility change.

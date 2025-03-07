@@ -3,6 +3,7 @@ import { isValidLayerId } from "../../../utils/Validator";
 import { mapDirectionToAngle } from "../../../utils/mapDirectionToAngle";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
+import { easeOut } from "ol/easing";
 import BackgroundLayerItem from "./BackgroundLayerItem";
 import Box from "@mui/material/Box";
 
@@ -86,9 +87,14 @@ const createOSMLayer = (map) => {
     // If the layer becomes visible, set the map rotation to match
     if (olLayer.get("visible")) {
       const direction = olLayer.get("rotateMap");
+      const duration = 1000;
 
       const angle = mapDirectionToAngle(direction);
-      map.getView().setRotation(angle);
+      map.getView().animate({
+        rotation: angle,
+        duration: duration,
+        easing: easeOut,
+      });
     }
   });
 
