@@ -1,7 +1,3 @@
-import { hash } from "ol/tilecoord";
-import { getMergedSearchAndHashParams } from "../../utils/getMergedSearchAndHashParams";
-import { toStringHDMS } from "ol/coordinate";
-import { TileArcGISRest } from "ol/source";
 export default class MapViewModel {
   constructor(settings) {
     this.appModel = settings.appModel;
@@ -39,24 +35,35 @@ export default class MapViewModel {
     }
   };
 
+  showPlugins = (url) => {
+    try {
+      // This code opens the plugin windows that are supplied via the url
+      // if we have an appState in the hash, show the windows
+      const params = new URLSearchParams(url.replaceAll("#", ""))
+        .getAll("p")
+        .flatMap((p) => p.split(","));
+
+      const windows = this.appModel.windows;
+
+      // and open the corresponding windows
+      windows.forEach((w) => {
+        if (params.includes(w.type)) {
+          w.showWindow();
+        }
+      });
+    } catch (error) {
+      console.error("Error processing window parameters:", error);
+    }
+  };
+
   bindSubscriptions = () => {
     this.localObserver.subscribe("fly-to", (url) => {
       this.globalObserver.publish("core.minimizeWindow");
       const mapSettings = this.convertMapSettingsUrlToOlSettings(url);
       const { enableAppStateInHash } = this.appModel.config.mapConfig.map;
 
-      // This code opens the plugin windows that are supplied via the url
-      // if we have an appState in the hash, show the windows
       if (enableAppStateInHash) {
-        // We get the windows to be opened from url
-        const params = new URLSearchParams(url.replaceAll("#", ""))
-          .getAll("p")
-          .flatMap((p) => p.split(","));
-
-        // and open the corresponding windows
-        this.appModel.windows.forEach((w) => {
-          params.includes(w.type) ? w.showWindow() : w.closeWindow();
-        });
+        this.showPlugins(url);
       }
 
       if (mapSettings.layers !== null) {
