@@ -55,9 +55,9 @@ function GroupLayer({
 
   const handleLayerItemClick = () => {
     if (layerIsToggled) {
-      layerSwitcherDispatch.setLayerVisibility(layerId, false);
+      layerSwitcherDispatch.setLayerVisibility(layerId, false, subLayersToShow);
     } else {
-      layerSwitcherDispatch.setLayerVisibility(layerId, true);
+      layerSwitcherDispatch.setLayerVisibility(layerId, true, subLayersToShow);
     }
   };
 
