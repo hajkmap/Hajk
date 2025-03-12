@@ -24,6 +24,7 @@ export default function ResponsiveDialog(props) {
     children,
     onAbort,
     onClose,
+    onVisibilityChanged,
     open,
     options: {
       abortText,
@@ -51,66 +52,78 @@ export default function ResponsiveDialog(props) {
     onClose(promptText);
   };
 
-  return (
-    <Dialog
-      aria-labelledby="responsive-dialog-title"
-      fullScreen={fullScreen}
-      onClose={handleClose}
-      open={open}
-      // Must stop event-bubbling. Otherwise the parent element in react can be dragged etc.
-      onMouseDown={(e) => {
-        e.stopPropagation();
-      }}
-    >
-      {headerText && (
-        <DialogTitle id="responsive-dialog-title">{headerText}</DialogTitle>
-      )}
-      <DialogContent>
-        {children}
-        {useLegacyNonMarkdownRenderer === true ? (
-          <LegacyNonMarkdownRenderer text={text} />
-        ) : (
-          <ReactMarkdown
-            remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
-            rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
-            components={customComponentsForReactMarkdown} // Custom renderers for components, see definition in components
-            children={text} // Our MD, as a text string
-          />
-        )}
+  // This mechanism allows us to propagate the current
+  // visibility state of the dialog and send back, using a callback
+  // function, to parent component.
+  typeof onVisibilityChanged === "function" && onVisibilityChanged(open);
 
-        {prompt && (
-          <form
-            noValidate
-            autoComplete="off"
-            onSubmit={(e) => {
-              e.preventDefault();
-              props.onClose(promptText);
-              return false;
-            }}
-          >
-            <TextField
-              id="prompt-text"
-              label=""
-              value={promptText}
-              onChange={(e) => {
-                setPromptText(e.target.value);
-              }}
-              margin="normal"
-              autoFocus={true}
+  return (
+    open && (
+      <Dialog
+        aria-labelledby="responsive-dialog-title"
+        aria-describedby="responsive-dialog-content"
+        fullScreen={fullScreen}
+        onClose={handleClose}
+        open={open}
+        // Must stop event-bubbling. Otherwise the parent element in react can be dragged etc.
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {headerText && (
+          <DialogTitle id="responsive-dialog-title">{headerText}</DialogTitle>
+        )}
+        <DialogContent id="responsive-dialog-content">
+          {children}
+          {useLegacyNonMarkdownRenderer === true ? (
+            <LegacyNonMarkdownRenderer text={text} />
+          ) : (
+            <ReactMarkdown
+              remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
+              rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
+              components={customComponentsForReactMarkdown} // Custom renderers for components, see definition in components
+              children={text} // Our MD, as a text string
             />
-          </form>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} variant={primaryButtonVariant || "text"}>
-          {buttonText}
-        </Button>
-        {abortText && (
-          <Button onClick={handleAbort} sx={{ color: "text.primary" }}>
-            {abortText}
+          )}
+
+          {prompt && (
+            <form
+              noValidate
+              autoComplete="off"
+              onSubmit={(e) => {
+                e.preventDefault();
+                props.onClose(promptText);
+                return false;
+              }}
+            >
+              <TextField
+                id="prompt-text"
+                label=""
+                value={promptText}
+                onChange={(e) => {
+                  setPromptText(e.target.value);
+                }}
+                margin="normal"
+                autoFocus={true}
+              />
+            </form>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleClose}
+            variant={primaryButtonVariant || "text"}
+            sx={{ color: "text.primary" }}
+          >
+            {buttonText}
           </Button>
-        )}
-      </DialogActions>
-    </Dialog>
+          {abortText && (
+            <Button onClick={handleAbort} sx={{ color: "text.primary" }}>
+              {abortText}
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+    )
   );
 }

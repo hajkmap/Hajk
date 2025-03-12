@@ -8,11 +8,24 @@ class AdGroupHeaderService extends AdBaseService {
   }
 
   init() {
+    // Other overrides are located in initEnvOverrides (in AdBaseService) but this email override
+    // is only applicable in the Header based AD case.
+    this.overrideUserEmail = this.getEnv(
+      process.env.AD_OVERRIDE_USER_EMAIL_WITH_VALUE
+    );
+    if (this.overrideUserEmail) {
+      this.logger.warn(
+        'AD_OVERRIDE_USER_EMAIL_WITH_VALUE is set in .env! Will use "%s" as email. DON\'T USE THIS IN PRODUCTION!',
+        this.overrideUserEmail
+      );
+    }
+
     this.users = {};
   }
 
   postRequestHandler(request, user) {
     let groups = [];
+    let email = "";
     if (user) {
       // Use override groups or get groups from header.
       if (this.overrideUserGroups) {
@@ -20,8 +33,7 @@ class AdGroupHeaderService extends AdBaseService {
       } else {
         const xControlGroupHeader =
           process.env.AD_TRUSTED_GROUP_HEADER || "X-Control-Group-Header";
-        const groupString =
-          this.overrideUserGroups || request.get(xControlGroupHeader);
+        const groupString = request.get(xControlGroupHeader);
         if (groupString) {
           groups = groupString.split(",").map((group) => group.trim());
         }
@@ -31,16 +43,45 @@ class AdGroupHeaderService extends AdBaseService {
         process.env.AD_TRUSTED_GROUP_HEADER,
         groups
       );
+
+      // Use override email or get email from header.
+      if (this.overrideUserEmail) {
+        email = this.overrideUserEmail;
+      } else {
+        const xControlEmailHeader =
+          process.env.AD_TRUSTED_EMAIL_HEADER || "X-Control-Email-Header";
+        const emailString = request.get(xControlEmailHeader);
+        if (emailString) {
+          email = emailString.trim();
+        }
+      }
     }
 
+    // Create user if it doesn't exist
+    if (user && !this.users[user]) {
+      this.users[user] = {
+        groups: [],
+        email: "",
+      };
+    }
+
+    // Set user groups and email
     this.#setUserGroups(user, groups);
+    this.#setUserEmail(user, email);
   }
 
   #setUserGroups(userName, groups) {
     if (!this.getUser(userName)) {
       return;
     }
-    this.users[userName] = groups;
+    this.users[userName].groups = groups;
+  }
+
+  #setUserEmail(userName, email) {
+    if (!this.getUser(userName)) {
+      return;
+    }
+    this.users[userName].email = email;
   }
 
   validUserName(userName) {
@@ -69,7 +110,15 @@ class AdGroupHeaderService extends AdBaseService {
       return [];
     }
 
-    return this.users[userName];
+    return this.users[userName].groups;
+  }
+
+  getUserEmail(userName) {
+    if (!this.getUser(userName)) {
+      return "";
+    }
+
+    return this.users[userName].email;
   }
 
   async isUserValid(userName) {
@@ -78,6 +127,16 @@ class AdGroupHeaderService extends AdBaseService {
 
   async findUser(userName) {
     return this.getUser(userName) ? {} : null;
+  }
+
+  async getUserDetails(userName) {
+    // This functionality is somewhat limited.
+    // We only return user name, groups and email because thats all we have for now.
+    return {
+      user: userName,
+      groups: this.getUserGroups(userName),
+      mail: this.getUserEmail(userName),
+    };
   }
 
   async getGroupMembershipForUser(userName) {

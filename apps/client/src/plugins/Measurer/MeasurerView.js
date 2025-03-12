@@ -9,13 +9,22 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Zoom,
 } from "@mui/material";
 
-import { IconPolygon, IconPoint, IconLine, IconCircle } from "./MeasurerIcons";
+import {
+  IconPolygon,
+  IconPoint,
+  IconLine,
+  IconCircle,
+  IconSegment,
+} from "./MeasurerIcons";
 import DeleteIcon from "@mui/icons-material/Delete";
+import TouchAppIcon from "@mui/icons-material/TouchApp";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { useEffect, useState } from "react";
 import HajkToolTip from "components/HajkToolTip";
+import SelectFeaturesDialog from "utils/SelectFeaturesDialog";
 
 const SvgImg = styled("img")(({ theme }) => ({
   height: "24px",
@@ -32,6 +41,13 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
     },
     borderBottom: `3px solid ${theme.palette.primary.main}`,
   },
+}));
+
+const StyledSingleToggleButton = styled(StyledToggleButton)(({ theme }) => ({
+  border: "2px solid white",
+  borderColor: theme.palette.divider,
+  marginLeft: "4px",
+  marginRight: "4px",
 }));
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
@@ -99,14 +115,29 @@ function HelpDialog(props) {
 }
 
 function MeasurerView(props) {
-  const { handleDrawTypeChange, drawType, drawModel } = props;
+  const {
+    handleDrawTypeChange,
+    drawType,
+    drawModel,
+    segmentsEnabled,
+    toggleSegmentsEnabled,
+  } = props;
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showSegmentButton, setShowSegmentButton] = useState(true);
 
   const deleteAll = () => {
     setShowDeleteConfirmation(false);
     drawModel.removeDrawnFeatures();
   };
+
+  useEffect(() => {
+    if (drawType === "LineString" || drawType === "Polygon") {
+      setShowSegmentButton(true);
+    } else {
+      setShowSegmentButton(false);
+    }
+  }, [drawType]);
 
   useEffect(() => {
     props.localObserver.subscribe("show-help", () => {
@@ -117,10 +148,14 @@ function MeasurerView(props) {
     };
   }, [props.localObserver]);
 
+  const handleSegmentsToggle = () => {
+    toggleSegmentsEnabled(!segmentsEnabled);
+  };
+
   return (
     <>
       <Grid container spacing={1} alignItems="center">
-        <Grid item xs={9}>
+        <Grid item xs={7}>
           <StyledToggleButtonGroup
             exclusive
             value={drawType}
@@ -149,12 +184,30 @@ function MeasurerView(props) {
                 <SvgImg src={IconCircle()} />
               </StyledToggleButton>
             </HajkToolTip>
+            <HajkToolTip title="Välj på kartan">
+              <StyledToggleButton value="Select">
+                <TouchAppIcon />
+              </StyledToggleButton>
+            </HajkToolTip>
             <HajkToolTip title="Ta bort enskild mätning">
               <StyledToggleButton value="Delete">
                 <DeleteIcon />
               </StyledToggleButton>
             </HajkToolTip>
           </StyledToggleButtonGroup>
+        </Grid>
+        <Grid item xs={2}>
+          <HajkToolTip title="Rita del-längder av mätningar">
+            <Zoom in={showSegmentButton}>
+              <StyledSingleToggleButton
+                value="Segments"
+                selected={segmentsEnabled}
+                onClick={() => handleSegmentsToggle()}
+              >
+                <SvgImg src={IconSegment()} />
+              </StyledSingleToggleButton>
+            </Zoom>
+          </HajkToolTip>
         </Grid>
         <Grid item xs={3}>
           <HajkToolTip title="Rensa bort alla mätningar">
@@ -184,6 +237,10 @@ function MeasurerView(props) {
         }}
       />
       <HelpDialog open={showHelp} setShowHelp={setShowHelp} />
+      <SelectFeaturesDialog
+        localObserver={props.localObserver}
+        drawModel={drawModel}
+      />
     </>
   );
 }

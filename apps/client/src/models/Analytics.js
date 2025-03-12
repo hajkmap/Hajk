@@ -1,5 +1,11 @@
-import Plausible from "plausible-tracker";
 import MatomoTracker from "@jonkoops/matomo-tracker";
+
+import { createPlausibleTracker } from "@barbapapazes/plausible-tracker";
+import {
+  useAutoOutboundTracking,
+  useAutoFileDownloadsTracking,
+  defaultFileTypes,
+} from "@barbapapazes/plausible-tracker/extensions";
 
 /**
  * @description Each of the provided analytics services must subscribe to two
@@ -34,14 +40,32 @@ export default class Analytics {
     switch (config?.type) {
       case "plausible":
         const { domain, apiHost, trackLocalhost } = config.options;
-        const plausible = Plausible({
+
+        // Setup the minimal Plausible tracker
+        const plausible = createPlausibleTracker({
           domain,
           apiHost,
-          trackLocalhost,
+          // Note that `trackLocalhost` is a string, not a boolean
+          ignoredHostnames: trackLocalhost === "true" ? [] : ["localhost"],
         });
 
-        // These events should be called like this and subscribed to by
-        // any analytics service. Below we define two events:
+        // Extend the minimal tracker with auto tracking of outbound links.
+        const { install: installAutoOutboundTracking } =
+          // Since the function we want to call now starts with "use",
+          // but is not a React hook and we don't want ESlint to complain, we must:
+          // eslint-disable-next-line
+          useAutoOutboundTracking(plausible);
+        installAutoOutboundTracking();
+
+        // Extend the minimal tracker with auto tracking of file downloads.
+        const { install: installAutoFileDownloadsTracking } =
+          // eslint-disable-next-line
+          useAutoFileDownloadsTracking(plausible, {
+            fileTypes: ["gpkg", ...defaultFileTypes], // Track GeoPackage files, in addition to defaults
+          });
+        installAutoFileDownloadsTracking();
+
+        // Link our internal tracking events to the Plausible tracker.
         globalObserver.subscribe("analytics.trackPageView", () =>
           plausible.trackPageview()
         );

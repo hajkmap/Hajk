@@ -1,6 +1,6 @@
 import React from "react";
 import SearchBar from "./SearchBar";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import Observer from "react-event-observer";
 import EditIcon from "@mui/icons-material/Edit";
 import Crop54Icon from "@mui/icons-material/Crop54";
@@ -119,6 +119,8 @@ class Search extends React.PureComponent {
     this.initMapViewModel();
     this.initExportHandlers();
     this.bindSubscriptions();
+    this.headerHasFocus = props.headerHasFocus;
+    this.handleHeaderFocus = props.handleHeaderFocus;
   }
 
   initMapViewModel = () => {
@@ -1080,6 +1082,7 @@ class Search extends React.PureComponent {
           searchModel={this.searchModel}
           searchOptions={searchOptions}
           updateSearchOptions={this.updateSearchOptions}
+          enabledSearchOptions={this.props.options.enabledSearchOptions}
           setSearchSources={this.setSearchSources}
           loading={loading}
           searchSources={searchSources}
@@ -1087,6 +1090,8 @@ class Search extends React.PureComponent {
           getArrayWithSearchWords={this.getArrayWithSearchWords}
           failedWFSFetchMessage={failedWFSFetchMessage}
           mapViewModel={this.mapViewModel}
+          headerHasFocus={this.headerHasFocus}
+          handleHeaderFocus={this.handleHeaderFocus}
           {...this.props}
         />
       )

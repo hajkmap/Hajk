@@ -299,7 +299,16 @@ class ConfigServiceV2 {
       // some user details to the client.
       let userDetails = undefined;
       if (user !== undefined && process.env.AD_EXPOSE_USER_OBJECT === "true") {
-        userDetails = await ad.findUser(user);
+        if (
+          process.env.AD_USE_GROUPS_FROM_HEADER === "true" &&
+          ad.getUserDetails
+        ) {
+          // This is the Header based approach which has support for user, group and email.
+          userDetails = await ad.getUserDetails(user);
+        } else {
+          // This is the default behavior with the ldap approach.
+          userDetails = await ad.findUser(user);
+        }
       }
 
       return { mapConfig, layersConfig, userSpecificMaps, userDetails };

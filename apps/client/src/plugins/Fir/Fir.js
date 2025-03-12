@@ -23,10 +23,6 @@ class Fir extends React.PureComponent {
     options: PropTypes.object.isRequired,
   };
 
-  static defaultProps = {
-    options: {},
-  };
-
   constructor(props) {
     super(props);
 

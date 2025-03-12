@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import FirSearchView from "./FirSearchView";
 import FirExportView from "./FirExportView";
 import FirSearchNeighborView from "./FirSearchNeighborView";
@@ -39,8 +39,6 @@ class FirView extends React.PureComponent {
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
   };
-
-  static defaultProps = {};
 
   constructor(props) {
     super(props);

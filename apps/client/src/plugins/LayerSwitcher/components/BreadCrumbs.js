@@ -122,16 +122,10 @@ class BreadCrumbs extends Component {
         this.#resetLayerBuffers();
       }, 0);
 
-      if (this.props.model.clearing) {
-        this.setState({
-          visibleLayers: [],
-        });
+      if (changedLayer.get("visible")) {
+        this.addedLayerBuffer.push(changedLayer);
       } else {
-        if (changedLayer.get("visible")) {
-          this.addedLayerBuffer.push(changedLayer);
-        } else {
-          this.removedLayerBuffer.push(changedLayer);
-        }
+        this.removedLayerBuffer.push(changedLayer);
       }
     });
   };
@@ -232,7 +226,7 @@ class BreadCrumbs extends Component {
     ));
     return (
       <BreadCrumbsContainer>
-        <ScrollMenu ref="scrollMenu" data={breadCrumbs} alignCenter={false} />
+        <ScrollMenu data={breadCrumbs} alignCenter={false} />
       </BreadCrumbsContainer>
     );
   }

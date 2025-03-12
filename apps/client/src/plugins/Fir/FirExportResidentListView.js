@@ -2,7 +2,7 @@ import React from "react";
 import { IconExcel } from "./FirIcons";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
+import withSnackbar from "components/WithSnackbar";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -88,8 +88,6 @@ class FirExportResidentListView extends React.PureComponent {
     localObserver: PropTypes.object.isRequired,
     type: PropTypes.string,
   };
-
-  static defaultProps = {};
 
   constructor(props) {
     super(props);

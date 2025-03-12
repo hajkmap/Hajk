@@ -61,7 +61,7 @@
       "displayFields": null,
       "visibleAtStart": false,
       "tiled": true,
-      "opacity": 1.0,
+      "opacity": 1,
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
@@ -105,7 +105,7 @@
       "displayFields": null,
       "visibleAtStart": false,
       "tiled": true,
-      "opacity": 1.0,
+      "opacity": 1,
       "singleTile": false,
       "imageFormat": "image/jpeg",
       "serverType": "geoserver",
@@ -123,105 +123,6 @@
       "infoOwner": "",
       "version": "1.3.0",
       "infoFormat": "application/json",
-      "zIndex": null
-    },
-    {
-      "id": "7",
-      "caption": "Riksintresse Kulturmiljövård",
-      "url": "https://ext-geodata.lansstyrelsen.se/arcgis/services/WMS/LST_WMS_riksintressen_3_6_raa/mapserver/wmsserver?",
-      "owner": "",
-      "date": "1582210968096",
-      "content": "",
-      "legend": "",
-      "projection": "EPSG:3006",
-      "layers": ["RAA_Riksintresse_Kulturmiljovard_MB3kap6"],
-      "layersInfo": [
-        {
-          "id": "RAA_Riksintresse_Kulturmiljovard_MB3kap6",
-          "caption": "",
-          "legend": "",
-          "infobox": "<b>Namn:</b>\n{NAMN}\n<p>\n<b>Beskrivning:</b>\n{BESKRIVNIN}\n<p>\n<a href=\"{OBJEKTLANK}\" target=\"_blank\">Länk till mer information</a>",
-          "style": "",
-          "queryable": true
-        }
-      ],
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "tiled": false,
-      "opacity": 1.0,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "arcgis",
-      "attribution": "",
-      "searchUrl": "",
-      "searchPropertyName": "",
-      "searchDisplayName": "",
-      "searchOutputFormat": "",
-      "searchGeometryField": "",
-      "infoVisible": true,
-      "infoTitle": "Information",
-      "infoText": "Text om Kulturmiljövård kan finnas här.",
-      "infoUrl": "https://ext-geodatakatalog.lansstyrelsen.se/GeodataKatalogen/GetMetaDataById?id=378391e2-f11e-495c-930d-2ddbcbfebb23",
-      "infoUrlText": "Länk till metadata",
-      "infoOwner": "",
-      "version": "1.3.0",
-      "infoFormat": "application/geojson",
-      "zIndex": null
-    },
-    {
-      "id": "8",
-      "caption": "Riksintresse Natura2000",
-      "url": "https://ext-geodata.lansstyrelsen.se/arcgis/services/WMS/LST_WMS_riksintressen_4_nv/mapserver/wmsserver",
-      "owner": "",
-      "date": "1582210010534",
-      "content": "",
-      "legend": "",
-      "projection": "EPSG:3006",
-      "layers": [
-        "NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Habitatdirektivet_SCI_MB4",
-        "NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Fageldirektivet_SPA_MB4"
-      ],
-      "layersInfo": [
-        {
-          "id": "NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Habitatdirektivet_SCI_MB4",
-          "caption": "Habitatdirektivet",
-          "legend": "",
-          "infobox": "",
-          "style": "",
-          "queryable": true
-        },
-        {
-          "id": "NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Fageldirektivet_SPA_MB4",
-          "caption": "Fågeldirektivet",
-          "legend": "",
-          "infobox": "",
-          "style": "",
-          "queryable": true
-        }
-      ],
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "tiled": false,
-      "opacity": 1.0,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "arcgis",
-      "attribution": "",
-      "searchUrl": "",
-      "searchPropertyName": "",
-      "searchDisplayName": "",
-      "searchOutputFormat": "",
-      "searchGeometryField": "",
-      "infoVisible": true,
-      "infoTitle": "Information",
-      "infoText": "Text om Kulturmiljövård kan finnas här.",
-      "infoUrl": "https://ext-geodatakatalog.lansstyrelsen.se/GeodataKatalogen/GetMetaDataById?id=5f5fa2f8-1d43-4f98-9e4f-d5be4fdf83a7",
-      "infoUrlText": "Länk till metadata",
-      "infoOwner": "",
-      "version": "1.3.0",
-      "infoFormat": "application/geojson",
       "zIndex": null
     },
     {
@@ -250,7 +151,7 @@
       "displayFields": null,
       "visibleAtStart": false,
       "tiled": false,
-      "opacity": 1.0,
+      "opacity": 1,
       "maxZoom": -1,
       "minZoom": -1,
       "infoClickSortType": "string",
@@ -273,6 +174,1940 @@
       "infoOwner": "Källa: Stadsbyggnadskontoret Varberg",
       "version": "1.1.1",
       "infoFormat": "application/json",
+      "zIndex": null
+    },
+    {
+      "id": "vzjhpz",
+      "caption": "Befolkning 2023",
+      "internalLayerName": "",
+      "url": "http://localhost:3002/api/v2/proxy/scb/wms",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739950342498",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["befolkning_1km_2023"],
+      "layersInfo": [
+        {
+          "id": "befolkning_1km_2023",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "#### Allmänt:\n - **Befolkning totalt:** {beftotalt}\n - **Rutstorlek:** 1x1 km\n - **Referenstid:** {referenstid}\n\n#### Könsfördelning:\n - **Män:** {man}\n - **Kvinnor:** {kvinna}\n\n#### Åldersfördelning:\n - **0-5:** {ald0_5}\n - **5-10:** {ald5_10}\n - **10-15:** {ald10_15}\n - **15-20:** {ald15_20}\n - **20-25:** {ald20_25}\n - **25-30:** {ald25_30}\n - **30-35:** {ald30_35}\n - **35-40:** {ald35_40}\n - **40-45:** {ald40_45}\n - **45-50:** {ald45_50}\n - **50-55:** {ald50_55}\n - **55-60:** {ald55_60}\n - **60-65:** {ald60_65}\n - **65-70:** {ald65_70}\n - **70-75:** {ald70_75}\n - **75-80:** {ald75_80}\n - **80-85:** {ald80_85}\n - **85-90:** {ald85_90}\n - **90-95:** {ald90_95}\n - **95-100:** {ald95_100}\n - **100- :** {ald100w}\n",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "default-style-BefolkningPer1kmRuta",
+              "Title": "BefolkningPer1kmRuta style",
+              "Abstract": "Default style for BefolkningPer1kmRuta layer",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "http://geodata.scb.se/geoserver/stat/wms?request=GetLegendGraphic&version=1.1.1&format=image%2Fpng&width=20&height=20&layer=BefolkningPer1kmRuta"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": true,
+      "hidpi": false,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.1.1",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "d2fxdy",
+      "caption": "Befolkning 2022",
+      "internalLayerName": "",
+      "url": "http://localhost:3002/api/v2/proxy/scb/wms",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739950471445",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["befolkning_1km_2022"],
+      "layersInfo": [
+        {
+          "id": "befolkning_1km_2022",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "#### Allmänt:\n - **Befolkning totalt:** {beftotalt}\n - **Rutstorlek:** 1x1 km\n - **Referenstid:** {referenstid}\n\n#### Könsfördelning:\n - **Män:** {man}\n - **Kvinnor:** {kvinna}\n\n#### Åldersfördelning:\n - **0-5:** {ald0_5}\n - **5-10:** {ald5_10}\n - **10-15:** {ald10_15}\n - **15-20:** {ald15_20}\n - **20-25:** {ald20_25}\n - **25-30:** {ald25_30}\n - **30-35:** {ald30_35}\n - **35-40:** {ald35_40}\n - **40-45:** {ald40_45}\n - **45-50:** {ald45_50}\n - **50-55:** {ald50_55}\n - **55-60:** {ald55_60}\n - **60-65:** {ald60_65}\n - **65-70:** {ald65_70}\n - **70-75:** {ald70_75}\n - **75-80:** {ald75_80}\n - **80-85:** {ald80_85}\n - **85-90:** {ald85_90}\n - **90-95:** {ald90_95}\n - **95-100:** {ald95_100}\n - **100- :** {ald100w}",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "default-style-BefolkningPer1kmRuta",
+              "Title": "BefolkningPer1kmRuta style",
+              "Abstract": "Default style for BefolkningPer1kmRuta layer",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "http://geodata.scb.se/geoserver/stat/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=BefolkningPer1kmRuta"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": true,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "dxy624",
+      "caption": "HELCOM",
+      "internalLayerName": "",
+      "url": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739956213132",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["PS.ProtectedSites.Helcom"],
+      "layersInfo": [
+        {
+          "id": "PS.ProtectedSites.Helcom",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "### {name}",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "SkyddadeOmradenICHELCOM",
+              "Title": "SkyddadeOmradenICHELCOM",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSites.Helcom"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            },
+            {
+              "Name": "PS.ProtectedSite.Default",
+              "Title": "PS.ProtectedSite.Default",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSites.Helcom&style=PS.ProtectedSite.Default"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "HELCOM (Helsingforskommissionen) är en regional organisation som arbetar för att skydda Östersjöns marina miljö genom samarbete mellan kuststater och EU.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "0si2ys",
+      "caption": "Biosfärområden",
+      "internalLayerName": "",
+      "url": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739956255517",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["PS.ProtectedSites.Bio"],
+      "layersInfo": [
+        {
+          "id": "PS.ProtectedSites.Bio",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "### {namn}\nLäs mer på [{link}]({link})",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "SkyddadeOmradenICBiosfar",
+              "Title": "SkyddadeOmradenICBiosfar",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSites.Bio"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            },
+            {
+              "Name": "PS.ProtectedSite.Default",
+              "Title": "PS.ProtectedSite.Default",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSites.Bio&style=PS.ProtectedSite.Default"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Biosfärområden är områden utsedda av UNESCO som modellområden för hållbar utveckling, där naturvård och mänsklig verksamhet balanseras för att bevara biologisk mångfald.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "yp97e0",
+      "caption": "Ramsar",
+      "internalLayerName": "",
+      "url": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739956560080",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["PS.ProtectedSites.Ramsar"],
+      "layersInfo": [
+        {
+          "id": "PS.ProtectedSites.Ramsar",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "### {namn}\nLäs mer på [{link}]({link})",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "SkyddadeOmradenICRamsar",
+              "Title": "SkyddadeOmradenICRamsar",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSites.Ramsar"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            },
+            {
+              "Name": "PS.ProtectedSite.Default",
+              "Title": "PS.ProtectedSite.Default",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSites.Ramsar&style=PS.ProtectedSite.Default"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Ramsarområden är våtmarker av internationell betydelse som skyddas enligt Ramsarkonventionen för att bevara biologisk mångfald och ekosystemtjänster.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "027x4i",
+      "caption": "OSPAR",
+      "internalLayerName": "",
+      "url": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739956789404",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["PS.ProtectedSites.Ospar"],
+      "layersInfo": [
+        {
+          "id": "PS.ProtectedSites.Ospar",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "#### MPA-namn: {mpa_namn}\n#### N2000-namn: {namn_n2000}\n#### N2000-site: {n2000_site}",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "SkyddadeOmradenICOspar",
+              "Title": "SkyddadeOmradenICOspar",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSites.Ospar"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            },
+            {
+              "Name": "PS.ProtectedSite.Default",
+              "Title": "PS.ProtectedSite.Default",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSites.Ospar&style=PS.ProtectedSite.Default"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "OSPAR är ett internationellt samarbete mellan länder runt Nordostatlanten för att skydda och bevara den marina miljön genom gemensamma överenskommelser och åtgärder.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "4y2nnu",
+      "caption": "Världsarv",
+      "internalLayerName": "",
+      "url": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739957000185",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["PS.ProtectedSites.WorldHeritage"],
+      "layersInfo": [
+        {
+          "id": "PS.ProtectedSites.WorldHeritage",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "SkyddadeOmradenICVarldsarv",
+              "Title": "SkyddadeOmradenICVarldsarv",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSites.WorldHeritage"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            },
+            {
+              "Name": "PS.ProtectedSite.Default",
+              "Title": "PS.ProtectedSite.Default",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/ps-ic/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSites.WorldHeritage&style=PS.ProtectedSite.Default"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Världsarv är kultur- eller naturmiljöer av exceptionellt värde som skyddas under UNESCO:s världsarvskonvention för att bevaras för framtida generationer.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "6j0lgq",
+      "caption": "Arters utbredning i Sverige 2013",
+      "internalLayerName": "",
+      "url": "https://geodata.naturvardsverket.se/inspire/sd-arter/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739957632324",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["SD.ArtersUtbredning.2013"],
+      "layersInfo": [
+        {
+          "id": "SD.ArtersUtbredning.2013",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "### {localspeciesname}",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "SD.SpeciesDistribution.Default",
+              "Title": "Species Distribution",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/sd-arter/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=SD.ArtersUtbredning.2013"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Species Distribution beskriver förekomsten av arter listade i habitatdirektivet (EEG 92/443 annex 2, 4 och 5). Förekomsten är representerad i ett rutnät om 10 X 10 km och datasetet motsvarar det som rapporteras enligt Artikel 17 i Art- och habitatdirektivet.\n\nDatamängder avser rapportering år 2013. Observations perioden 2008-2012.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "toimzo",
+      "caption": "Arters utbredning i Sverige 2019",
+      "internalLayerName": "",
+      "url": "https://geodata.naturvardsverket.se/inspire/sd-arter/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739957727057",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["SD.ArtersUtbredning.2019"],
+      "layersInfo": [
+        {
+          "id": "SD.ArtersUtbredning.2019",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "### {localspeciesname}",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "SD.SpeciesDistribution.Default",
+              "Title": "Species Distribution",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/sd-arter/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=SD.ArtersUtbredning.2019"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Species Distribution beskriver förekomsten av arter listade i habitatdirektivet (EEG 92/443 annex 2, 4 och 5). Förekomsten är representerad i ett rutnät om 10 X 10 km och datasetet motsvarar det som rapporteras enligt Artikel 17 i Art- och habitatdirektivet.\n\nDatamängder avser rapportering år 2019, observations perioden är 2013-2018.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "2kzj0u",
+      "caption": "Avloppsreningsanläggningar, mittpunkt",
+      "internalLayerName": "",
+      "url": "https://geodata.naturvardsverket.se/inspire/us/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739958126220",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["US.EnvironmentalManagementFacility.WaterTreatmentPlants"],
+      "layersInfo": [
+        {
+          "id": "US.EnvironmentalManagementFacility.WaterTreatmentPlants",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "### {uwwname}",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "US.EnvironmentalManagementInstallation.Default",
+              "Title": "Environmental Management Facility Installation Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/us/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=US.EnvironmentalManagementFacility.WaterTreatmentPlants"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Avloppsreningsanläggningens mittpunkt (91/271/EEG)",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "f1yh1g",
+      "caption": "Avloppsreningsanläggningar, utsläppspunkter",
+      "internalLayerName": "",
+      "url": "https://geodata.naturvardsverket.se/inspire/us/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739958165077",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["US.EnvironmentalManagementFacility.DischargePoints"],
+      "layersInfo": [
+        {
+          "id": "US.EnvironmentalManagementFacility.DischargePoints",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "### {dcpname}",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "US.EnvironmentalManagementInstallation.Default",
+              "Title": "Environmental Management Facility Installation Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/us/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=US.EnvironmentalManagementFacility.DischargePoints"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Avloppsreningsanläggningens utsläppspunkter (91/271/EEG)",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "kt1125",
+      "caption": "Känsliga områden",
+      "internalLayerName": "",
+      "url": "https://geodata.naturvardsverket.se/inspire/am-uwwtd/ows?",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739958258172",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["AM.sensitiveArea"],
+      "layersInfo": [
+        {
+          "id": "AM.sensitiveArea",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "AM.SensitiveArea.Default.Area",
+              "Title": "AM.SensitiveArea.Default.Area",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geodata.naturvardsverket.se/inspire/am-uwwtd/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=AM.sensitiveArea"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Visningstjänsten exponerar geodatamängder som ingår i Naturvårdsverkets arbete med avloppsvattendirektivet.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "p5w1tn",
+      "caption": "Byggnadsminnen och kyrkliga kulturminnen",
+      "internalLayerName": "",
+      "url": "https://inspire-raa.metria.se/geoserver/Byggnader/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739958840807",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["BU.Building"],
+      "layersInfo": [
+        {
+          "id": "BU.Building",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "### {namn}\n{lagskydd_benamning}  \nLäs mer [här]({url})",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "BU.Building.default",
+              "Title": "Buildings Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://inspire-raa.metria.se/geoserver/Byggnader/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=BU.Building"
+                },
+                "width": "74",
+                "height": "60"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Byggnadsminnen är kulturhistoriskt värdefulla byggnader som skyddas enligt kulturmiljölagen för att bevaras för framtida generationer.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "40zayx",
+      "caption": "Ruiner",
+      "internalLayerName": "",
+      "url": "https://inspire-raa.metria.se/geoserver/ByggnaderRuiner/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739958993442",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["BU.Building"],
+      "layersInfo": [
+        {
+          "id": "BU.Building",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "### {namn}  \n\nLäs mer [här]({url})",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "BU.Building.default",
+              "Title": "Buildings Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://inspire-raa.metria.se/geoserver/ByggnaderRuiner/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=BU.Building"
+                },
+                "width": "74",
+                "height": "60"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Ruiner är lämningar av historiska byggnader eller anläggningar som bevaras för sitt kulturhistoriska värde och vittnar om tidigare bebyggelse och verksamheter.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "w4yufj",
+      "caption": "Byggnadsminnen och kyrkliga kulturminnen",
+      "internalLayerName": "",
+      "url": "https://inspire-raa.metria.se/geoserver/Kulturarv/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739959176245",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["PS.ProtectedSite"],
+      "layersInfo": [
+        {
+          "id": "PS.ProtectedSite",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "### {namn}\n{lagskydd_benamning}  \nLäs mer [här]({url})",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "PS.ProtectedSite.Default",
+              "Title": "Protected Sites Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://inspire-raa.metria.se/geoserver/Kulturarv/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSite"
+                },
+                "width": "74",
+                "height": "60"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Omfattar kulturhistoriskt värdefulla byggnader och miljöer som skyddas enligt kulturmiljölagen för att bevaras för framtida generationer.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "oiik9k",
+      "caption": "Fornlämningar",
+      "internalLayerName": "",
+      "url": "https://inspire-raa.metria.se/geoserver/Fornlamningar/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739959347876",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["PS.ProtectedSite"],
+      "layersInfo": [
+        {
+          "id": "PS.ProtectedSite",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "### {namn}  \n\nLäs mer [här]({url})",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "PS.ProtectedSite.Default",
+              "Title": "Protected Sites Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://inspire-raa.metria.se/geoserver/Fornlamningar/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSite"
+                },
+                "width": "74",
+                "height": "60"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Omfattar lämningar efter mänsklig aktivitet från förhistorisk och historisk tid som skyddas enligt kulturmiljölagen för att bevaras som en del av vårt gemensamma kulturarv.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "vvbo7h",
+      "caption": "Världsarv",
+      "internalLayerName": "",
+      "url": "https://inspire-raa.metria.se/geoserver/Varldsarv/ows",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739959632143",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["PS.ProtectedSite"],
+      "layersInfo": [
+        {
+          "id": "PS.ProtectedSite",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "### {sitename_sve}  \n\n\nLäs mer hos [UNESCO]({unesco_href})  \n\n[Laglig grundhandling]({legalfoundationdocument})",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "PS.ProtectedSite.Default",
+              "Title": "Protected Sites Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://inspire-raa.metria.se/geoserver/Varldsarv/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=PS.ProtectedSite"
+                },
+                "width": "74",
+                "height": "60"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Omfattar kultur- och naturmiljöer av exceptionellt värde som skyddas under UNESCO:s världsarvskonvention för att bevaras för framtida generationer.",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "uzevpj",
+      "caption": "Befolkning 2021",
+      "internalLayerName": "",
+      "url": "http://localhost:3002/api/v2/proxy/scb/wms",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1739960132921",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": ["befolkning_1km_2021"],
+      "layersInfo": [
+        {
+          "id": "befolkning_1km_2021",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "#### Allmänt:\n - **Befolkning totalt:** {beftotalt}\n - **Rutstorlek:** 1x1 km\n - **Referenstid:** {referenstid}\n\n#### Könsfördelning:\n - **Män:** {man}\n - **Kvinnor:** {kvinna}\n\n#### Åldersfördelning:\n - **0-5:** {ald0_5}\n - **5-10:** {ald5_10}\n - **10-15:** {ald10_15}\n - **15-20:** {ald15_20}\n - **20-25:** {ald20_25}\n - **25-30:** {ald25_30}\n - **30-35:** {ald30_35}\n - **35-40:** {ald35_40}\n - **40-45:** {ald40_45}\n - **45-50:** {ald45_50}\n - **50-55:** {ald50_55}\n - **55-60:** {ald55_60}\n - **60-65:** {ald60_65}\n - **65-70:** {ald65_70}\n - **70-75:** {ald70_75}\n - **75-80:** {ald75_80}\n - **80-85:** {ald80_85}\n - **85-90:** {ald85_90}\n - **90-95:** {ald90_95}\n - **95-100:** {ald95_100}\n - **100- :** {ald100w}",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "default-style-BefolkningPer1kmRuta",
+              "Title": "BefolkningPer1kmRuta style",
+              "Abstract": "Default style for BefolkningPer1kmRuta layer",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "http://geodata.scb.se/geoserver/stat/ows?service=WMS&version=1.3.0&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=BefolkningPer1kmRuta"
+                },
+                "width": "20",
+                "height": "20"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": true,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.3.0",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "n0ehiv",
+      "caption": "Vägar (Grupplager)",
+      "internalLayerName": "",
+      "url": "https://geo-netinfo.trafikverket.se/MapService/wms.axd/NetInfo_1_5",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1740646587437",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3006",
+      "layers": [
+        "Motorvag",
+        "Motortrafikled",
+        "Stamvag",
+        "Storstadsvag",
+        "Gastvag",
+        "GangfartsOmrade",
+        "Provisoriskvag"
+      ],
+      "layersInfo": [
+        {
+          "id": "Motorvag",
+          "caption": "Motorväg",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Motorvag&width=89&height=38"
+                },
+                "width": "89",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Motorvag&width=89&height=38&styles=Kartprofil"
+                },
+                "width": "89",
+                "height": "38"
+              }
+            }
+          ]
+        },
+        {
+          "id": "Motortrafikled",
+          "caption": "Motortrafikled",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Motortrafikled&width=113&height=38"
+                },
+                "width": "113",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Motortrafikled&width=113&height=38&styles=Kartprofil"
+                },
+                "width": "113",
+                "height": "38"
+              }
+            }
+          ]
+        },
+        {
+          "id": "Stamvag",
+          "caption": "Stamväg",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Stamvag&width=88&height=38"
+                },
+                "width": "88",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Stamvag&width=88&height=38&styles=Kartprofil"
+                },
+                "width": "88",
+                "height": "38"
+              }
+            }
+          ]
+        },
+        {
+          "id": "Storstadsvag",
+          "caption": "Storstadsväg",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Storstadsvag&width=112&height=38"
+                },
+                "width": "112",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Storstadsvag&width=112&height=38&styles=Kartprofil"
+                },
+                "width": "112",
+                "height": "38"
+              }
+            }
+          ]
+        },
+        {
+          "id": "Gastvag",
+          "caption": "Gästväg",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": false,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Gastvag&width=85&height=38"
+                },
+                "width": "85",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Gastvag&width=85&height=38&styles=Kartprofil"
+                },
+                "width": "85",
+                "height": "38"
+              }
+            }
+          ]
+        },
+        {
+          "id": "GangfartsOmrade",
+          "caption": "Gångfartsområde",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=GangfartsOmrade&width=137&height=38"
+                },
+                "width": "137",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=GangfartsOmrade&width=137&height=38&styles=Kartprofil"
+                },
+                "width": "137",
+                "height": "38"
+              }
+            }
+          ]
+        },
+        {
+          "id": "Provisoriskvag",
+          "caption": "Provisorisk väg",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": true,
+          "infoclickIcon": "",
+          "styles": [
+            {
+              "Name": "Default",
+              "Title": "Default Style",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Provisoriskvag&width=123&height=38"
+                },
+                "width": "123",
+                "height": "38"
+              }
+            },
+            {
+              "Name": "Kartprofil",
+              "Title": "Kartprofil",
+              "Abstract": "Stil enligt kartografisk profil",
+              "LegendURL": {
+                "Format": "image/png",
+                "OnlineResource": {
+                  "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                  "xlink:type": "simple",
+                  "xlink:href": "https://geo-netinfo.trafikverket.se/mapservice/wms.axd/NetInfo_1_5?service=WMS&request=GetLegendGraphic&version=1.3.0&sld_version=1.1.0&format=image/png&layer=Provisoriskvag&width=123&height=38&styles=Kartprofil"
+                },
+                "width": "123",
+                "height": "38"
+              }
+            }
+          ]
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": true,
+      "hidpi": true,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOpenDataLink": "",
+      "infoOwner": "",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.1.1",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
       "zIndex": null
     }
   ],

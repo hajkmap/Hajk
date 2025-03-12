@@ -54,7 +54,7 @@ const getTooltipString = (userDetails) => {
  */
 const User = React.memo(({ userDetails }) => {
   return (
-    (userDetails && (
+    (userDetails?.displayName && (
       <HajkToolTip title={getTooltipString(userDetails)}>
         <StyledPaper>
           <StyledIconButton aria-label={userDetails.displayName}>

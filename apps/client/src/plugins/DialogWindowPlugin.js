@@ -128,7 +128,7 @@ class DialogWindowPlugin extends React.PureComponent {
   };
 
   #onClose = () => {
-    typeof this.opts.onClose === "function" && this.opts.onAClose();
+    typeof this.opts.onClose === "function" && this.opts.onClose();
     this.setState({
       dialogOpen: false,
     });
@@ -148,6 +148,7 @@ class DialogWindowPlugin extends React.PureComponent {
         open={this.state.dialogOpen}
         onClose={this.#onClose}
         onAbort={this.#onAbort}
+        onVisibilityChanged={this.opts.onVisibilityChanged}
       >
         {this.props.children}
       </Dialog>,

@@ -4,7 +4,7 @@
 
 _Hajk is an open source web GIS solution based on React, Material UI and OpenLayers. It is developed in Sweden and used by various municipalities and government agencies, as well as by public and private enterprises._
 
-![alt text](https://user-images.githubusercontent.com/110222/96265856-42960000-0fc6-11eb-805e-9e41ec5d77f9.png "Hajk 3 with all tools visible")
+![Hajk 4 client UI example](https://github.com/user-attachments/assets/a221eb84-1b8c-440c-84ad-52b57f85b1d0)
 
 ## Want to contribute?
 
@@ -31,6 +31,12 @@ For some real-life examples, see the following solutions:
 - [Varberg municipality's map](https://karta.varberg.se)
 - [Uddevalla municipality's map](https://karta.uddevalla.se)
 
+## Community extensions
+
+Community extensions are additions developed by the community outside the scope of the core Hajk distribution. These can include anything from rewrites in other programming languages to customized integrations with specific business systems.
+
+For a list of community extensions, please refer to [this page](https://github.com/hajkmap/Hajk/blob/master/docs/community-extensions.md).
+
 ## Quick start (for admins)
 
 Please refer to Hajk's official [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29).
@@ -45,18 +51,9 @@ Clone the repository: `git clone https://github.com/hajkmap/Hajk.git`.
 
 ### Get the Backend up and running
 
-Note: There are currently two available backends for Hajk - you need to pick only one:
-
-- NodeJS backend - platform agnostic and container-friendly. Can be deployed on any platform supported by NodeJS.
-- NET backend - a re-implementation of the original (now deprecated) .NET backend, intended to implement the same API specification as the NodeJS API. Requires Windows and IIS.
-
-> If unsure on which backend to pick, it is **recommended to choose the NodeJS solution**. It is easier to setup because it only requires NodeJS (which you already have if you want to develop for Hajk anyway).
-
-#### Alternative 1: NodeJS backend
-
 1. In `hajk` repo dir, go to `apps/backend` and install dependencies:
 
-```
+```sh
 cd apps/backend
 npm install
 ```
@@ -64,20 +61,13 @@ npm install
 2. Review the settings in `.env`. It's fine to leave the defaults. Note which `PORT` is specified, by default it is `3002`.
 3. Start the backend in development mode:
 
-```
+```sh
 npm run dev
 ```
 
 4. Verify that the server is up and running by navigating to `http://localhost:3002`. There's also a nice API explorer available on `http://localhost:3002/api-explorer/`.
 
-#### Alternative 2: .NET backend
-
-1. Make sure that you have a recent, supported version of Visual Studio and IIS installed.
-1. Open the SLN-files in `backend-dotnet`
-1. Build and publish.
-1. Deploy to IIS.
-
-#### Alternative 3: NodeJS backend using Docker
+#### Alternative approach: NodeJS backend in Docker
 
 See Docker [README](Docker/README.md) for more information.
 
