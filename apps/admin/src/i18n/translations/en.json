@@ -37,6 +37,7 @@
     "common.searchLayer": "Search layer",
     "common.serverType": "Server type",
     "common.services": "Services",
+    "common.service": "Service",
     "common.serviceType": "Service type",
     "common.settings": "Settings",
     "common.sidebar.lock": "Lock sidebar",
@@ -56,6 +57,7 @@
     "common.brokenService": "Broken service",
     "common.usedInMaps": "Used in maps",
     "common.create": "Create",
+    "common.information": "Basic information",
     "dark": "Dark",
     "light": "Light",
     "roles.adminDescription": "Users that are allowed to use Hajks admin interface",
@@ -71,8 +73,8 @@
     "services.error.url": " Error loading layers. The provided url is not valid.",
     "services.layerDescription": "Description of the displayed layer",
     "services.owner": "Owner",
-    "services.settings.accordionTitle1": "Settings for request",
-    "services.settings.accordionTitle2": "Available layers in the service",
+    "services.settings.request": "Settings for request",
+    "services.settings.availableLayers": "Available layers in the service",
     "services.settings.dialog.title": "Edit url",
     "services.url.btnLabel": "Change url",
     "services.workspace": "Workspace",
@@ -287,6 +289,11 @@
     "layers.metadata.urlTitle": "Url-title",
     "layers.metadata.title": "Title",
     "layers.permission": "Permission",
-    "layers.selected": "Selected layers"
+    "layers.permissions": "Permissions",
+    "layers.selected": "Selected layers",
+    "layers.availableLayers": "Available layers",
+    "layers.settings": "Layer settings",
+    "layers.settings.displayFields": "Presentation of results",
+    "layers.settings.searchSettings": "Search settings"
   }
 }

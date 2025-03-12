@@ -36,6 +36,7 @@
     "common.scrolltotop": "Till toppen",
     "common.serverType": "Servertyp",
     "common.services": "Tjänster",
+    "common.service": "Tjänst",
     "common.serviceType": "Tjänsttyp",
     "common.settings": "Inställningar",
     "common.sidebar.lock": "Lås sidopanel",
@@ -55,6 +56,7 @@
     "common.brokenService": "Trasig tjänst",
     "common.usedInMaps": "Används i kartor",
     "common.create": "Skapa",
+    "common.information": "Grundläggande information",
     "dark": "Mörkt",
     "light": "Ljust",
     "roles.adminDescription": "Användare som är tillåtna att använda Hajk-admin.",
@@ -70,8 +72,8 @@
     "services.error.url": "Det gick inte att läsa in lager. Den angivna webbadressen är inte giltig.",
     "services.layerDescription": "Visningsbeskrivning av lager",
     "services.owner": "Ägare",
-    "services.settings.accordionTitle1": "Inställningar för request",
-    "services.settings.accordionTitle2": "Tillgängliga lager i tjänsten",
+    "services.settings.request": "Inställningar för request",
+    "services.settings.availableLayers": "Tillgängliga lager i tjänsten",
     "services.settings.dialog.title": "Redigera url",
     "services.url.btnLabel": "Ändra url",
     "services.createServiceSuccess": "Tjänsten {{name}} skapades!",
@@ -286,6 +288,11 @@
     "layers.metadata.urlTitle": "Url-titel",
     "layers.metadata.title": "Titel",
     "layers.permission": "Behörighet",
-    "layers.selected": "Valda lager"
+    "layers.permissions": "Behörigheter",
+    "layers.selected": "Valda lager",
+    "layers.availableLayers": "Tillgängliga lager",
+    "layers.settings": "Inställningar för lager",
+    "layers.settings.displayFields": "Presentation vid resultat",
+    "layers.settings.searchSettings": "Sökinställningar"
   }
 }

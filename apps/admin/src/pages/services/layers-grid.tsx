@@ -126,7 +126,7 @@ function LayersGrid({
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="h6">
-              {t("services.settings.accordionTitle2")}
+              {t("services.settings.availableLayers")}
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 2 }}>

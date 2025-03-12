@@ -95,7 +95,7 @@ export default function LayersPage() {
     type: INPUT_TYPE.SELECT,
     gridColumns: 12,
     name: "serviceId",
-    title: "Tjänst",
+    title: `${t("common.service")}`,
     defaultValue: "",
     optionList: services?.map((service) => ({
       title: service.name + `(${service.type})`,

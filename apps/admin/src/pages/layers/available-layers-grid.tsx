@@ -18,9 +18,9 @@ function AvailableLayersGrid({
   selectedLayers,
   filteredLayers,
   setSearchTerm,
-  setSelectionModel,
+  setSelectGridId,
   searchTerm,
-  selectionModel,
+  selectGridId,
   selectedRowObjects,
 }: {
   isLoading: boolean;
@@ -28,9 +28,9 @@ function AvailableLayersGrid({
   selectedLayers: string[];
   filteredLayers: GridValidRowModel[];
   setSearchTerm: (term: string) => void;
-  setSelectionModel: (ids: GridRowSelectionModel) => void;
+  setSelectGridId: (ids: GridRowSelectionModel) => void;
   searchTerm: string;
-  selectionModel?: GridRowSelectionModel;
+  selectGridId?: GridRowSelectionModel;
   selectedRowObjects?: string[];
 }) {
   const themeMode = useAppStateStore((state) => state.themeMode);
@@ -56,9 +56,9 @@ function AvailableLayersGrid({
   );
   useEffect(() => {
     if (selectedRowIds.length > 0) {
-      setSelectionModel(selectedRowIds);
+      setSelectGridId(selectedRowIds);
     }
-  }, [selectedRowIds, setSelectionModel]);
+  }, [selectedRowIds, setSelectGridId]);
 
   const preSelectedLayers =
     selectedRowObjects?.filter((item) => !selectedLayers.includes(item)) ?? [];
@@ -74,7 +74,7 @@ function AvailableLayersGrid({
       }}
     >
       <Typography variant="h6" sx={{ mt: -0.5, mb: 1.5 }}>
-        Tillgängliga lager
+        {t("layers.availableLayers")}
       </Typography>
       <TextField
         sx={{
@@ -131,8 +131,8 @@ function AvailableLayersGrid({
             localeText={
               language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
             }
-            rowSelectionModel={selectionModel}
-            onRowSelectionModelChange={(ids) => setSelectionModel(ids)}
+            rowSelectionModel={selectGridId}
+            onRowSelectionModelChange={(ids) => setSelectGridId(ids)}
             checkboxSelection
             disableRowSelectionOnClick
           />

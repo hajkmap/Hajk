@@ -75,9 +75,9 @@ export default function ServiceSettings() {
     baseUrl: service?.url ?? "",
     type: service?.type ?? "",
   });
-  const [formServiceData] = useState<DynamicFormContainer<FieldValues>>(
-    new DynamicFormContainer<FieldValues>()
-  );
+  const [updateServiceDefaultData] = useState<
+    DynamicFormContainer<FieldValues>
+  >(new DynamicFormContainer<FieldValues>());
 
   const handleDialogOpen = () => {
     setIsDialogOpen(true);
@@ -168,26 +168,26 @@ export default function ServiceSettings() {
     }
   };
 
-  const serviceSettingsFormContainer = new DynamicFormContainer<FieldValues>();
+  const updateServiceContainer = new DynamicFormContainer<FieldValues>();
 
-  const panelNestedContainer = new DynamicFormContainer<FieldValues>(
-    "",
+  const serviceInformationSettings = new DynamicFormContainer<FieldValues>(
+    t("common.information"),
     CONTAINER_TYPE.PANEL
   );
-  const accordionNestedContainer = new DynamicFormContainer<FieldValues>(
+  const connectionSettings = new DynamicFormContainer<FieldValues>(
     t("common.connection"),
     CONTAINER_TYPE.ACCORDION
   );
-  const accordionNestedContainer2 = new DynamicFormContainer<FieldValues>(
-    t("services.settings.accordionTitle1"),
+  const requestSettings = new DynamicFormContainer<FieldValues>(
+    t("services.settings.request"),
     CONTAINER_TYPE.ACCORDION
   );
-  const accordionNestedContainer3 = new DynamicFormContainer<FieldValues>(
+  const infoButtonSettings = new DynamicFormContainer<FieldValues>(
     t("common.infobutton"),
     CONTAINER_TYPE.ACCORDION
   );
 
-  panelNestedContainer.addInput({
+  serviceInformationSettings.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 12,
     name: "name",
@@ -198,7 +198,7 @@ export default function ServiceSettings() {
     },
   });
 
-  panelNestedContainer.addInput({
+  serviceInformationSettings.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "type",
     title: `${t("common.serviceType")}`,
@@ -209,7 +209,7 @@ export default function ServiceSettings() {
       required: `${t("common.required")}`,
     },
   });
-  panelNestedContainer.addInput({
+  serviceInformationSettings.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 10,
     name: "comment",
@@ -217,7 +217,7 @@ export default function ServiceSettings() {
     defaultValue: service?.comment,
   });
 
-  accordionNestedContainer.addInput({
+  connectionSettings.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
     name: "serverType",
@@ -229,7 +229,7 @@ export default function ServiceSettings() {
       value: serverType.value,
     })),
   });
-  accordionNestedContainer.addInput({
+  connectionSettings.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
     name: "url",
@@ -265,7 +265,7 @@ export default function ServiceSettings() {
       },
     },
   });
-  accordionNestedContainer.addInput({
+  connectionSettings.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
     name: "workspace",
@@ -280,14 +280,14 @@ export default function ServiceSettings() {
     ],
   });
 
-  accordionNestedContainer2.addInput({
+  requestSettings.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
     name: "getMapUrl",
     title: `GetMap-url`,
     defaultValue: service?.getMapUrl,
   });
-  accordionNestedContainer2.addInput({
+  requestSettings.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
     name: "version",
@@ -302,7 +302,7 @@ export default function ServiceSettings() {
     },
   });
 
-  accordionNestedContainer2.addInput({
+  requestSettings.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
     name: "imageFormat",
@@ -314,7 +314,7 @@ export default function ServiceSettings() {
     })),
   });
 
-  accordionNestedContainer2.addInput({
+  requestSettings.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
     name: "projection.code",
@@ -329,14 +329,14 @@ export default function ServiceSettings() {
     ),
   });
 
-  accordionNestedContainer3.addInput({
+  infoButtonSettings.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
     name: "metadata.owner",
     title: `${t("services.owner")}`,
     defaultValue: service?.metadata?.owner,
   });
-  accordionNestedContainer3.addInput({
+  infoButtonSettings.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 8,
     name: "metadata.description",
@@ -344,14 +344,14 @@ export default function ServiceSettings() {
     defaultValue: service?.metadata?.description,
   });
 
-  serviceSettingsFormContainer.addContainer([
-    panelNestedContainer,
-    accordionNestedContainer,
-    accordionNestedContainer2,
-    accordionNestedContainer3,
+  updateServiceContainer.addContainer([
+    serviceInformationSettings,
+    connectionSettings,
+    requestSettings,
+    infoButtonSettings,
   ]);
 
-  const defaultValues = formServiceData.getDefaultValues();
+  const defaultValues = updateServiceDefaultData.getDefaultValues();
   const {
     register,
     handleSubmit,
@@ -391,7 +391,7 @@ export default function ServiceSettings() {
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer
-            formControls={serviceSettingsFormContainer}
+            formControls={updateServiceContainer}
             formGetValues={getValues}
             register={register}
             control={control}

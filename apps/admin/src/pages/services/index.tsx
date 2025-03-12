@@ -35,9 +35,9 @@ export default function ServicesPage() {
   const { palette } = useTheme();
   const language = useAppStateStore((state) => state.language);
 
-  const serviceContainer = new DynamicFormContainer<FieldValues>();
+  const createServiceContainer = new DynamicFormContainer<FieldValues>();
 
-  serviceContainer.addInput({
+  createServiceContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 12,
     name: "name",
@@ -45,7 +45,7 @@ export default function ServicesPage() {
     defaultValue: "",
   });
 
-  serviceContainer.addInput({
+  createServiceContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 12,
     name: "url",
@@ -56,7 +56,7 @@ export default function ServicesPage() {
     },
   });
 
-  serviceContainer.addInput({
+  createServiceContainer.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 4,
     name: "type",
@@ -71,8 +71,8 @@ export default function ServicesPage() {
     },
   });
 
-  const [serviceContainerData] = useState(serviceContainer);
-  const defaultValues = serviceContainerData.getDefaultValues();
+  const [createServiceContainerData] = useState(createServiceContainer);
+  const defaultValues = createServiceContainerData.getDefaultValues();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -172,7 +172,7 @@ export default function ServicesPage() {
               }
             >
               <FormRenderer
-                formControls={serviceContainerData}
+                formControls={createServiceContainerData}
                 formGetValues={getValues}
                 register={register}
                 control={control}
