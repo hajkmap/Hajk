@@ -78,7 +78,6 @@ const SketchSaver = (props) => {
 
   // Handles text-input on the sketch-name
   const handleInputChange = (e) => {
-    // const trimmedValue = e.target.value.replace(/^\s+/, "").replace(/\s+$/, "");
     props.setSketchName(e.target.value);
     getSaveButtonState();
   };
