@@ -35,22 +35,24 @@ export default class MapViewModel {
     }
   };
 
-  showPlugins = (url) => {
+  showPluginsFromUrlParams = (url) => {
     try {
-      // This code opens the plugin windows that are supplied via the url
-      // if we have an appState in the hash, show the windows
-      const params = new URLSearchParams(url.replaceAll("#", ""))
-        .getAll("p")
-        .flatMap((p) => p.split(","));
+      //We check for plugin parameters in url
+      const params = new Set(
+        new URLSearchParams(url.replaceAll("#", ""))
+          .getAll("p")
+          .flatMap((p) => p.split(","))
+      );
 
-      const windows = this.appModel.windows;
+      // Open matching windows
+      this.appModel.windows
+        .filter((w) => params.has(w.type))
+        .forEach((w) => w.showWindow());
 
-      // and open the corresponding windows
-      windows.forEach((w) => {
-        if (params.includes(w.type)) {
-          w.showWindow();
-        }
-      });
+      // Close windows that are not in params, except "documentviewer"
+      this.appModel.windows
+        .filter((w) => !params.has(w.type) && w.type !== "documentviewer")
+        .forEach((w) => w.closeWindow());
     } catch (error) {
       console.error("Error processing window parameters:", error);
     }
@@ -63,7 +65,7 @@ export default class MapViewModel {
       const { enableAppStateInHash } = this.appModel.config.mapConfig.map;
 
       if (enableAppStateInHash) {
-        this.showPlugins(url);
+        this.showPluginsFromUrlParams(url);
       }
 
       if (mapSettings.layers !== null) {
