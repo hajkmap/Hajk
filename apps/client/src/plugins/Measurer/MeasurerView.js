@@ -46,8 +46,9 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
 const StyledSingleToggleButton = styled(StyledToggleButton)(({ theme }) => ({
   border: "2px solid white",
   borderColor: theme.palette.divider,
-  marginLeft: "4px",
-  marginRight: "4px",
+  [theme.breakpoints.only("xs")]: {
+    marginTop: "2px",
+  },
 }));
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
@@ -154,64 +155,69 @@ function MeasurerView(props) {
 
   return (
     <>
-      <Grid container spacing={1} alignItems="center">
-        <Grid item xs={7}>
-          <StyledToggleButtonGroup
-            exclusive
-            value={drawType}
-            onChange={handleDrawTypeChange}
-            orientation="horizontal"
-            variant="contained"
-            aria-label="outlined button group"
-          >
-            <HajkToolTip title="Punkt (Visar koordinat)">
-              <StyledToggleButton value="Point">
-                <SvgImg src={IconPoint()} />
-              </StyledToggleButton>
-            </HajkToolTip>
-            <HajkToolTip title="Sträcka">
-              <StyledToggleButton value="LineString">
-                <SvgImg src={IconLine()} />
-              </StyledToggleButton>
-            </HajkToolTip>
-            <HajkToolTip title="Areal">
-              <StyledToggleButton value="Polygon">
-                <SvgImg src={IconPolygon()} />
-              </StyledToggleButton>
-            </HajkToolTip>
-            <HajkToolTip title="Cirkel">
-              <StyledToggleButton value="Circle">
-                <SvgImg src={IconCircle()} />
-              </StyledToggleButton>
-            </HajkToolTip>
-            <HajkToolTip title="Välj på kartan">
-              <StyledToggleButton value="Select">
-                <TouchAppIcon />
-              </StyledToggleButton>
-            </HajkToolTip>
-            <HajkToolTip title="Ta bort enskild mätning">
-              <StyledToggleButton value="Delete">
-                <DeleteIcon />
-              </StyledToggleButton>
-            </HajkToolTip>
-          </StyledToggleButtonGroup>
-        </Grid>
-        <Grid item xs={2}>
-          <HajkToolTip title="Rita del-längder av mätningar">
-            <Zoom in={showSegmentButton}>
-              <StyledSingleToggleButton
-                value="Segments"
-                selected={segmentsEnabled}
-                onClick={() => handleSegmentsToggle()}
+      <Grid container spacing={1} alignItems="flex-start">
+        <Grid item xs={9}>
+          <Grid container spacing={0} alignItems="center">
+            <Grid item xs={12} md={10}>
+              <StyledToggleButtonGroup
+                exclusive
+                value={drawType}
+                onChange={handleDrawTypeChange}
+                orientation="horizontal"
+                variant="contained"
+                aria-label="outlined button group"
               >
-                <SvgImg src={IconSegment()} />
-              </StyledSingleToggleButton>
-            </Zoom>
-          </HajkToolTip>
+                <HajkToolTip title="Punkt (Visar koordinat)">
+                  <StyledToggleButton value="Point">
+                    <SvgImg src={IconPoint()} />
+                  </StyledToggleButton>
+                </HajkToolTip>
+                <HajkToolTip title="Sträcka">
+                  <StyledToggleButton value="LineString">
+                    <SvgImg src={IconLine()} />
+                  </StyledToggleButton>
+                </HajkToolTip>
+                <HajkToolTip title="Areal">
+                  <StyledToggleButton value="Polygon">
+                    <SvgImg src={IconPolygon()} />
+                  </StyledToggleButton>
+                </HajkToolTip>
+                <HajkToolTip title="Cirkel">
+                  <StyledToggleButton value="Circle">
+                    <SvgImg src={IconCircle()} />
+                  </StyledToggleButton>
+                </HajkToolTip>
+                <HajkToolTip title="Välj på kartan">
+                  <StyledToggleButton value="Select">
+                    <TouchAppIcon />
+                  </StyledToggleButton>
+                </HajkToolTip>
+                <HajkToolTip title="Ta bort enskild mätning">
+                  <StyledToggleButton value="Delete">
+                    <DeleteIcon />
+                  </StyledToggleButton>
+                </HajkToolTip>
+              </StyledToggleButtonGroup>
+            </Grid>
+            <Grid item xs={12} md={2} spacing={2}>
+              <HajkToolTip title="Rita del-längder av mätningar">
+                <Zoom in={showSegmentButton}>
+                  <StyledSingleToggleButton
+                    value="Segments"
+                    selected={segmentsEnabled}
+                    onClick={() => handleSegmentsToggle()}
+                  >
+                    <SvgImg src={IconSegment()} />
+                  </StyledSingleToggleButton>
+                </Zoom>
+              </HajkToolTip>
+            </Grid>
+          </Grid>
         </Grid>
         <Grid item xs={3}>
           <HajkToolTip title="Rensa bort alla mätningar">
             <Button
+              sx={{ marginTop: "6px" }}
               variant="contained"
               fullWidth
               onClick={() => {
