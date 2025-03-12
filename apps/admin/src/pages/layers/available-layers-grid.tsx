@@ -21,6 +21,7 @@ function AvailableLayersGrid({
   setSelectionModel,
   searchTerm,
   selectionModel,
+  selectedRowObjects,
 }: {
   isLoading: boolean;
   getCapLayers: string[];
@@ -30,6 +31,7 @@ function AvailableLayersGrid({
   setSelectionModel: (ids: GridRowSelectionModel) => void;
   searchTerm: string;
   selectionModel?: GridRowSelectionModel;
+  selectedRowObjects?: string[];
 }) {
   const themeMode = useAppStateStore((state) => state.themeMode);
   const language = useAppStateStore((state) => state.language);
@@ -39,7 +41,6 @@ function AvailableLayersGrid({
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
-
   const columns = [
     { field: "layer", headerName: t("common.layerName"), flex: 1 },
     { field: "infoClick", headerName: t("common.infoclick"), flex: 0.3 },
@@ -58,6 +59,9 @@ function AvailableLayersGrid({
       setSelectionModel(selectedRowIds);
     }
   }, [selectedRowIds, setSelectionModel]);
+
+  const preSelectedLayers =
+    selectedRowObjects?.filter((item) => !selectedLayers.includes(item)) ?? [];
 
   return (
     <Paper
@@ -90,8 +94,11 @@ function AvailableLayersGrid({
           },
         }}
       />
-      {selectedLayers.length !== 0 && (
-        <DataGridBadge selectedLayers={selectedLayers} />
+      {(selectedLayers.length !== 0 || preSelectedLayers.length !== 0) && (
+        <DataGridBadge
+          selectedLayers={selectedLayers}
+          preSelectedLayers={preSelectedLayers}
+        />
       )}
       <Grid container>
         <Scrollbar sx={{ maxHeight: "400px" }}>

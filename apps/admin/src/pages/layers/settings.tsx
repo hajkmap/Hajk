@@ -791,6 +791,7 @@ export default function LayerSettings() {
               setSelectionModel={setSelectionModel}
               searchTerm={searchTerm}
               selectionModel={selectionModel}
+              selectedRowObjects={selectedRowObjects}
             />
           )}
           <UsedInMapsGrid />

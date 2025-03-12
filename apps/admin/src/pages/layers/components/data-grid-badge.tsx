@@ -3,9 +3,13 @@ import { useTranslation } from "react-i18next";
 
 interface Props {
   selectedLayers: string[];
+  preSelectedLayers: string[];
 }
 
-export default function DataGridBadge(props: Props) {
+export default function DataGridBadge({
+  selectedLayers,
+  preSelectedLayers,
+}: Props) {
   const { t } = useTranslation();
 
   return (
@@ -13,11 +17,23 @@ export default function DataGridBadge(props: Props) {
       <Typography variant="body2" sx={{ mb: 1, ml: 1 }}>
         {t("layers.selected")}
       </Typography>
-      {props.selectedLayers.map((item, index) => (
+
+      {selectedLayers.map((item, index) => (
         <Chip
           sx={{ ml: 0.5, mb: 0.5 }}
           size="small"
-          key={index}
+          key={`selected-${index}`}
+          label={item}
+          color="success"
+          variant="filled"
+        />
+      ))}
+
+      {preSelectedLayers.map((item, index) => (
+        <Chip
+          sx={{ ml: 0.5, mb: 0.5 }}
+          size="small"
+          key={`preselected-${index}`}
           label={item}
           color="success"
           variant="outlined"
