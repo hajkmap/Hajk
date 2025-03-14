@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LayerSwitcher: Restored automatic layer rotation functionality. ([issue](https://github.com/hajkmap/Hajk/issues/1614))
 - LayerSwitcher: ensure to respect the `hideExpandArrow` setting. ([issue](https://github.com/hajkmap/Hajk/issues/1617))
 - Buffer and Measurer bug fixes. ([commit](https://github.com/hajkmap/Hajk/commit/44ea3549b9f79c47baf3d6be41036d5f8435ce82) and [commit](https://github.com/hajkmap/Hajk/commit/c4e1827b7dffe5f93d554670a2751ef10bc883d8))
+- LayerSwitcher: hotfix to synchronize key naming between Admin and Client, effectively enabling the Quick Access Presets functionality. ([PR](https://github.com/hajkmap/Hajk/pull/1621))
 
 ## [4.0.0-rc.1] - 2025-02-19
 
