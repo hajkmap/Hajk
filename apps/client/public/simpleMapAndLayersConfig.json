@@ -496,7 +496,7 @@
               "infobox": ""
             }
           ],
-          "quickLayersPresets": [],
+          "quickAccessPresets": [],
           "active": true,
           "visibleAtStart": false,
           "visibleAtStartMobile": false,
@@ -510,7 +510,7 @@
           "enableSystemLayersSwitch": true,
           "lockDrawOrderBaselayer": true,
           "drawOrderViewInfoText": "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
-          "enableQuickAccessTopics": false,
+          "enableQuickAccessPresets": false,
           "quickAccessTopicsInfoText": "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
           "enableUserQuickAccessFavorites": true,
           "userQuickAccessFavoritesInfoText": "Här kan du hantera och redigera dina sparade favoriter. Observera att favoriter endast sparas tillfälligt.",
