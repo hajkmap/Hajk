@@ -249,18 +249,6 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
         olLayer.setVisible(visible);
       });
     },
-    setGroupLayerVisibility(layerId, visible) {
-      const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
-      const allSubLayers = new Set(olLayer.get("subLayers"));
-
-      if (visible) {
-        olLayer.set("subLayers", allSubLayers);
-        setOLSubLayers(olLayer, allSubLayers);
-      } else {
-        olLayer.set("subLayers", []);
-        setOLSubLayers(olLayer, []);
-      }
-    },
     setAllLayersInvisible() {
       map.getAllLayers().forEach((l) => {
         const layerType = l.get("layerType");

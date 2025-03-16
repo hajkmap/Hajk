@@ -155,13 +155,6 @@ function QuickAccessPresets({
         if (layer.get("layerType") === "group") {
           if (l.visible === true) {
             layerSwitcherDispatch.setSubLayersVisible(l.id, l.subLayers);
-
-            globalObserver.publish("layerswitcher.showLayer", {
-              layer,
-              subLayersToShow: l.subLayers,
-            });
-          } else {
-            globalObserver.publish("layerswitcher.hideLayer", layer);
           }
         } else if (layer.get("layerType") === "base") {
           // Hide all other background layers
