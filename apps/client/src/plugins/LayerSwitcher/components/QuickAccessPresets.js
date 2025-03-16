@@ -32,6 +32,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
 
 import HajkToolTip from "../../../components/HajkToolTip";
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
 function QuickAccessPresets({
   display,
@@ -54,6 +55,8 @@ function QuickAccessPresets({
   // When a user clicks back, the tooltip of the button needs to be closed before this view hides.
   // TODO: Needs a better way to handle this
   const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   const quickAccessPresetsArray = quickAccessPresets || [];
 
@@ -147,13 +150,15 @@ function QuickAccessPresets({
         layer.setZIndex(l.drawOrder);
         // Set opacity
         layer.setOpacity(l.opacity);
+
         // Special handling for layerGroups and baselayers
         if (layer.get("layerType") === "group") {
           if (l.visible === true) {
-            const subLayersToShow = l.subLayers ? l.subLayers : [];
+            layerSwitcherDispatch.setSubLayersVisible(l.id, l.subLayers);
+
             globalObserver.publish("layerswitcher.showLayer", {
               layer,
-              subLayersToShow,
+              subLayersToShow: l.subLayers,
             });
           } else {
             globalObserver.publish("layerswitcher.hideLayer", layer);
