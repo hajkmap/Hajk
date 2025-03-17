@@ -551,6 +551,8 @@
         ],
         "quickAccessPresets": [
           {
+            "title": "Test-grupp",
+            "description": "Ett preset med vanliga lager och ett grupplager",
             "layers": [
               {
                 "id": "0si2ys",
@@ -589,8 +591,12 @@
                 "drawOrder": 0
               }
             ],
-            "title": "Test-grupp",
-            "description": "Ett preset med vanliga lager och ett grupplager"
+            "metadata": {
+              "savedAt": "2025-03-17T06:22:16.974Z",
+              "numberOfLayers": 3,
+              "title": "Test-grupp",
+              "description": "Ett preset med vanliga lager och ett grupplager"
+            }
           }
         ],
         "active": true,

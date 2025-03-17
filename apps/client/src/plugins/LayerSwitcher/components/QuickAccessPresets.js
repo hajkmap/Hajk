@@ -535,11 +535,11 @@ function QuickAccessPresets({
                 )}
               </Typography>
             ) : (
-              filter.list.map((l) => {
+              filter.list.map((l, index) => {
                 return (
                   <ListItemButton
                     dense
-                    key={l.id}
+                    key={l.metadata?.savedAt || index}
                     divider
                     onClick={() => handleLpClick(l)}
                   >
