@@ -84,7 +84,7 @@ const LayerListFilter = ({
             }
           }}
           fullWidth
-          placeholder="Sök lager och grupper"
+          placeholder="Sök lager"
           FormHelperTextProps={{
             color: "red",
           }}
