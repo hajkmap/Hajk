@@ -271,13 +271,16 @@ class DocumentEditor extends Component {
       this.state.selectedDocument,
       this.state.data,
       (result) => {
+        // Update the result message if needed
         if (result === "File saved") {
           result = "Filen sparades utan problem.";
         }
+
+        // Set the modal state based on the result
         this.setState({
           showModal: true,
           modalTitle: result,
-          modalContent: "",
+          modalType: "SAVE_DOC",
           showAbortButton: false,
           modalConfirmCallback: () => {
             this.hideModal();
@@ -290,12 +293,8 @@ class DocumentEditor extends Component {
   delete() {
     this.setState({
       showModal: true,
-      modalContent: (
-        <div>
-          Hela dokumentet kommer att raderas, detta kan inte ångras. Vill du
-          fortsätta?
-        </div>
-      ),
+      modalTitle: "Radera dokument",
+      modalType: "DELETE_DOC",
       showAbortButton: true,
       modalConfirmCallback: () => {
         this.props.model.delete(
@@ -305,12 +304,22 @@ class DocumentEditor extends Component {
             this.load();
             this.setState({
               selectedFolder: "",
+              selectedDocument: "",
             });
           }
         );
         this.hideModal();
       },
     });
+  }
+
+  renderDeleteDialog() {
+    return (
+      <div>
+        Hela dokumentet kommer att raderas, detta kan inte ångras. Vill du
+        fortsätta?
+      </div>
+    );
   }
 
   addChapter(title, titleID) {
@@ -329,8 +338,9 @@ class DocumentEditor extends Component {
     this.setState({
       showModal: true,
       modalTitle: "Ta bort kapitel",
-      modalContent:
-        "Detta kapitel och dess underkapitel kommer att tas bort, det går inte att ångra ditt val. Vill du verkställa ändringen?",
+      modalType: "DELETE_CHAPTER",
+      // modalContent:
+      //   "Detta kapitel och dess underkapitel kommer att tas bort, det går inte att ångra ditt val. Vill du verkställa ändringen?",
       showAbortButton: true,
       modalConfirmCallback: () => {
         parentChapters.splice(index, 1);
@@ -338,6 +348,15 @@ class DocumentEditor extends Component {
         this.hideModal();
       },
     });
+  }
+
+  renderDeleteChapterDialog() {
+    return (
+      <div>
+        Detta kapitel och dess underkapitel kommer att tas bort, det går inte
+        att ångra ditt val. Vill du verkställa ändringen?
+      </div>
+    );
   }
 
   hideModal() {
@@ -407,12 +426,12 @@ class DocumentEditor extends Component {
     this.setState({
       showModal: true,
       showAbortButton: true,
-      modalContent: this.renderToc(
-        chapter,
-        this.state.data.chapters,
-        parentChapters,
-        index
-      ),
+      modalType: "TOC_CHAPTER",
+      chapter: chapter,
+      chapters: this.state.data.chapters,
+      parentChapters: parentChapters,
+      index: index,
+
       modalConfirmCallback: () => {
         this.hideModal();
       },
@@ -481,7 +500,8 @@ class DocumentEditor extends Component {
           showModal: true,
           showAbortButton: true,
           modalTitle: "Ändra titel",
-          modalContent: this.renderNameInput(),
+          modalType: "CHANGE_NAME",
+          // modalContent: this.renderNameInput(),
           modalConfirmCallback: () => {
             chapter.header = this.state.newChapterName;
             chapter.headerIdentifier = this.state.newHeaderIdentifier;
@@ -757,14 +777,29 @@ class DocumentEditor extends Component {
         <DialogTitle id="alert-dialog-title">
           {this.state.modalTitle}
         </DialogTitle>
-        <DialogContent>{this.state.modalContent}</DialogContent>
+        <DialogContent>
+          {this.state.modalType === "TOC" && this.renderTableOfContentsInput()}
+          {this.state.modalType === "CREATE_DOC" && this.renderCreateForm()}
+          {this.state.modalType === "CREATE_FOLDER" &&
+            this.renderCreateFormFolder()}
+          {this.state.modalType === "TOC_CHAPTER" &&
+            this.renderToc(
+              this.state.chapter,
+              this.state.chapters,
+              this.state.parentChapters,
+              this.state.index
+            )}
+          {this.state.modalType === "DELETE_DOC" && this.renderDeleteDialog()}
+          {this.state.modalType === "CHANGE_NAME" && this.renderNameInput()}
+          {this.state.modalType === "DELETE_CHAPTER" &&
+            this.renderDeleteChapterDialog()}
+        </DialogContent>
         <DialogActions>
           {this.state.showAbortButton && (
             <Button onClick={() => this.hideModal()} color="primary">
               Avbryt
             </Button>
           )}
-
           <ColorButtonGreen
             variant="contained"
             className="btn"
@@ -956,31 +991,29 @@ class DocumentEditor extends Component {
     );
   }
 
-  renderCreateDialog(chapter, parentChapters, index) {
+  renderCreateDialog() {
     this.setState({
       showModal: true,
       showAbortButton: true,
       modalTitle: "Skapa nytt dokument",
-      modalContent: this.renderCreateForm(),
+      modalType: "CREATE_DOC",
       okButtonText: "Spara",
       modalConfirmCallback: () => {
-        var data = {
+        const data = {
           folderName: this.state.newFolderName,
           documentName: this.state.newDocumentName,
           mapName: this.state.newDocumentMap,
         };
-        const isValid = this.validateNewDocumentName(data.documentName);
-
-        if (!isValid || data.documentName === "") {
+        if (
+          !this.validateNewDocumentName(data.documentName) ||
+          data.documentName === ""
+        ) {
           return;
         }
-
-        if (data.documentName !== "") {
-          this.props.model.createDocument(data, (response) => {
-            this.load(data.folderName, data.documentName);
-          });
+        this.props.model.createDocument(data, () => {
+          this.load(data.folderName, data.documentName);
           this.hideModal();
-        }
+        });
       },
     });
   }
@@ -990,19 +1023,17 @@ class DocumentEditor extends Component {
       showModal: true,
       showAbortButton: true,
       modalTitle: "Skapa ny mapp",
-      modalContent: this.renderCreateFormFolder(),
+      modalType: "CREATE_FOLDER",
       okButtonText: "Spara",
       modalConfirmCallback: () => {
         const folderName = this.state.newFolderName;
-        const isValid = this.validateNewFolderName(folderName);
-
-        if (!isValid || folderName === "") {
+        if (!this.validateNewFolderName(folderName) || folderName === "") {
           return;
         }
-
-        this.props.model.createFolder({ folderName }, (response) => {});
-        this.loadFolderList();
-        this.hideModal();
+        this.props.model.createFolder({ folderName }, () => {
+          this.loadFolderList();
+          this.hideModal();
+        });
       },
     });
   }
@@ -1016,23 +1047,23 @@ class DocumentEditor extends Component {
       title: this.state.newTableOfContentsTitle,
     };
 
-    this.setState({
+    this.setState((prevState) => ({
       data: {
-        ...this.state.data,
+        ...prevState.data,
         tableOfContents: tableOfContents,
       },
       tableOfContentsModal: false,
-    });
+    }));
   }
 
   renderTableOfContentsModal() {
     this.setState({
       showModal: true,
       modalTitle: "Innehållsförteckning",
-      modalContent: this.renderTableOfContentsInput(),
       showAbortButton: true,
-
+      modalType: "TOC",
       modalConfirmCallback: () => {
+        this.saveTableOfContents();
         this.hideModal();
       },
     });
@@ -1060,10 +1091,11 @@ class DocumentEditor extends Component {
           control={
             <Switch
               checked={this.state.newTableOfContentsExpanded}
-              onChange={(e) => {
-                this.setState({
-                  [e.target.name]: e.target.checked,
-                });
+              onChange={() => {
+                this.setState((prevState) => ({
+                  newTableOfContentsExpanded:
+                    !prevState.newTableOfContentsExpanded,
+                }));
               }}
               name="newTableOfContentsExpanded"
               color="primary"
