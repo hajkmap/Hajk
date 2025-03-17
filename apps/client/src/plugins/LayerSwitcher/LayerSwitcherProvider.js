@@ -230,6 +230,16 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
       olLayer.set("subLayers", sortedCurrentSubLayers);
       setOLSubLayers(olLayer, sortedCurrentSubLayers);
     },
+    setSubLayersVisible(layerId, subLayers) {
+      const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
+      const allSubLayers = olLayer.get("allSublayers");
+
+      const subLayersToShow = Array.isArray(subLayers)
+        ? subLayers
+        : allSubLayers;
+
+      setOLSubLayers(olLayer, subLayersToShow);
+    },
     setGroupVisibility(groupId, visible) {
       const groupTree = getGroupConfigById(staticLayerTree, groupId);
       const allLayerIdsInGroup = getAllLayerIdsInGroup(groupTree);
@@ -238,18 +248,6 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
         const olLayer = map.getAllLayers().find((l) => l.get("name") === id);
         olLayer.setVisible(visible);
       });
-    },
-    setGroupLayerVisibility(layerId, visible) {
-      const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
-      const allSubLayers = new Set(olLayer.get("subLayers"));
-
-      if (visible) {
-        olLayer.set("subLayers", allSubLayers);
-        setOLSubLayers(olLayer, allSubLayers);
-      } else {
-        olLayer.set("subLayers", []);
-        setOLSubLayers(olLayer, []);
-      }
     },
     setAllLayersInvisible() {
       map.getAllLayers().forEach((l) => {

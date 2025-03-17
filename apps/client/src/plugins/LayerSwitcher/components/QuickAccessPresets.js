@@ -32,6 +32,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
 
 import HajkToolTip from "../../../components/HajkToolTip";
+import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
 function QuickAccessPresets({
   display,
@@ -54,6 +55,8 @@ function QuickAccessPresets({
   // When a user clicks back, the tooltip of the button needs to be closed before this view hides.
   // TODO: Needs a better way to handle this
   const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   const quickAccessPresetsArray = quickAccessPresets || [];
 
@@ -147,16 +150,11 @@ function QuickAccessPresets({
         layer.setZIndex(l.drawOrder);
         // Set opacity
         layer.setOpacity(l.opacity);
+
         // Special handling for layerGroups and baselayers
         if (layer.get("layerType") === "group") {
           if (l.visible === true) {
-            const subLayersToShow = l.subLayers ? l.subLayers : [];
-            globalObserver.publish("layerswitcher.showLayer", {
-              layer,
-              subLayersToShow,
-            });
-          } else {
-            globalObserver.publish("layerswitcher.hideLayer", layer);
+            layerSwitcherDispatch.setSubLayersVisible(l.id, l.subLayers);
           }
         } else if (layer.get("layerType") === "base") {
           // Hide all other background layers
@@ -537,11 +535,11 @@ function QuickAccessPresets({
                 )}
               </Typography>
             ) : (
-              filter.list.map((l) => {
+              filter.list.map((l, index) => {
                 return (
                   <ListItemButton
                     dense
-                    key={l.id}
+                    key={l.metadata?.savedAt || index}
                     divider
                     onClick={() => handleLpClick(l)}
                   >
