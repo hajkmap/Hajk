@@ -971,6 +971,7 @@ class App extends React.PureComponent {
           options={this.appModel.plugins.search.options}
           headerHasFocus={this.state.headerHasFocus}
           handleHeaderFocus={this.handleHeaderFocus}
+          handleHeaderBlur={this.handleHeaderBlur}
         />
       );
     } else {
@@ -1275,6 +1276,7 @@ class App extends React.PureComponent {
               }}
               headerHasFocus={this.state.headerHasFocus}
               onFocus={this.handleHeaderFocus}
+              onBlur={this.handleHeaderBlur}
             >
               {clean === false && this.showDrawerButtons() && (
                 <DrawerToggleButtons

@@ -411,8 +411,6 @@ class Window extends React.PureComponent {
   };
 
   bringToFront() {
-    this.props.globalObserver.publish("core.handleHeaderBlur");
-
     document.windows
       .sort((a, b) => (a === this ? 1 : b === this ? -1 : 0))
       .forEach((w, i) => {
@@ -489,6 +487,8 @@ class Window extends React.PureComponent {
             false;
       }
     }
+
+    this.bringToFront();
 
     return (
       <StyledRnd
