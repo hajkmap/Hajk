@@ -337,8 +337,6 @@ class DocumentEditor extends Component {
       showModal: true,
       modalTitle: "Ta bort kapitel",
       modalType: "DELETE_CHAPTER",
-      // modalContent:
-      //   "Detta kapitel och dess underkapitel kommer att tas bort, det går inte att ångra ditt val. Vill du verkställa ändringen?",
       showAbortButton: true,
       modalConfirmCallback: () => {
         parentChapters.splice(index, 1);
