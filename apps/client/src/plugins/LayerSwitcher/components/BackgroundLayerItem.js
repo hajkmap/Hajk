@@ -62,7 +62,7 @@ function BackgroundLayerItem({
 
   return (
     <div
-      className="layer-item"
+      className="layer-item layer-item-background"
       style={{
         marginLeft: 0,
         borderBottom: "none",

@@ -91,12 +91,12 @@ export default function SubLayerItem({
     return null;
   }
   return (
-    <div style={{ marginLeft: "32px" }}>
+    <div style={{ marginLeft: "7px" }}>
       <ListItemButton
         disableTouchRipple
         onClick={() => (toggleable ? toggleSubLayer(subLayer, visible) : null)}
         sx={{
-          pl: 0,
+          pl: "calc(2px + 10px)",
           borderBottom: (theme) =>
             toggleable
               ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
@@ -105,13 +105,7 @@ export default function SubLayerItem({
         dense
       >
         {toggleable && (
-          <IconButton
-            disableTouchRipple
-            size="small"
-            sx={{
-              pl: 0,
-            }}
-          >
+          <IconButton disableTouchRipple size="small">
             {getLayerToggleIcon()}
           </IconButton>
         )}
@@ -125,10 +119,27 @@ export default function SubLayerItem({
             fontWeight: visible ? (toggleable ? "bold" : "inherit") : "inherit",
           }}
         />
-        <ListItemSecondaryAction>
-          <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
+        <ListItemSecondaryAction
+          sx={{
+            position: "absolute",
+            right: "4px",
+            top: "1px",
+            transform: "none",
+          }}
+        >
+          <IconButton
+            size="small"
+            onClick={(e) => showLayerDetails(e)}
+            sx={{
+              "&:hover .ls-arrow": {
+                transform: "translateX(3px)",
+              },
+            }}
+          >
             <KeyboardArrowRightOutlinedIcon
+              className="ls-arrow"
               sx={{
+                transition: "transform 300ms ease",
                 color: (theme) => theme.palette.grey[500],
               }}
             ></KeyboardArrowRightOutlinedIcon>

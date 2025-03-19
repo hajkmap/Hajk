@@ -20,7 +20,7 @@ export default function LegendImage({ open, src }) {
   const urlArray = Array.isArray(src) ? src : [src];
   return (
     <Collapse
-      sx={{ py: open ? 1 : 0, ml: 4 }}
+      sx={{ py: open ? 1 : 0, ml: "1px" }}
       in={open}
       timeout={50}
       unmountOnExit

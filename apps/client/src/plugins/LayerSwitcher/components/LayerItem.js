@@ -46,19 +46,34 @@ const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
 
 const LayerToggleComponent = ({ toggleState }) => {
   return (
-    <IconButton disableTouchRipple size="small">
-      {
-        {
-          checked: <CheckBoxIcon />,
-          semichecked: <CheckBoxIcon sx={{ fill: "gray" }} />,
-          unchecked: <CheckBoxOutlineBlankIcon />,
-          checkedWithWarning: (
-            <CheckBoxIcon
-              sx={{ fill: (theme) => theme.palette.warning.dark }}
-            />
-          ),
-        }[toggleState]
-      }
+    <IconButton disableTouchRipple size="small" className="BUTTON333" sx={{}}>
+      <CheckBoxOutlineBlankIcon />
+      <Box
+        sx={{
+          position: "absolute",
+          top: "calc(50%)",
+          left: "50%",
+          transition: "transform 200ms ease, opacity 200ms ease",
+          transform:
+            toggleState !== "unchecked"
+              ? "translate(-50%, -50%)  scale(1.05)"
+              : "translate(-50%, -50%) scale(0.0)",
+          opacity: toggleState !== "unchecked" ? 1.0 : 0.0,
+          lineHeight: 0,
+        }}
+      >
+        <CheckBoxIcon
+          sx={
+            {
+              semichecked: { fill: "gray" },
+              checkedWithWarning: {
+                fill: (theme) => theme.palette.warning.dark,
+              },
+            }[toggleState]
+          }
+        />
+        {}
+      </Box>
     </IconButton>
   );
 };
@@ -89,11 +104,13 @@ const LayerLegendIcon = ({
 
   return (
     <Tooltip
+      sx={{ pointerEvents: "none" }}
       placement="left"
       title={legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"}
     >
       <IconButton
-        sx={{ p: 0.25, mr: "5px" }}
+        className="BUTTON444"
+        sx={{ p: 0.25, mt: 0.5, mr: "5px" }}
         size="small"
         onClick={(e) => {
           e.stopPropagation();
@@ -209,7 +226,7 @@ function LayerItem({
   const renderStatusIcon = () => {
     return (
       wmsLayerLoadStatus === "loaderror" && (
-        <IconButton disableRipple>
+        <IconButton disableRipple className="BUTTON555">
           <HajkToolTip
             disableInteractive
             title="Lagret kunde inte laddas in. Kartservern svarar inte."
@@ -249,7 +266,7 @@ function LayerItem({
 
   return (
     <div
-      className="layer-item"
+      className="layer-item DIV111"
       style={{
         display: display,
         marginLeft: expandableSection || draggable ? 0 : "31px",
@@ -260,7 +277,11 @@ function LayerItem({
       }}
     >
       <Box
+        className="BOX111"
         sx={{
+          position: "relative",
+          alignItems: "flex-start",
+
           borderBottom: (theme) =>
             drawOrderItem() && showSublayers
               ? "none"
@@ -281,7 +302,7 @@ function LayerItem({
               opacity: 0,
               transition: "opacity 200ms",
             }}
-            className="dragInidcatorIcon"
+            className="dragInidcatorIcon BUTTON777"
           >
             <Tooltip placement="left" title="Dra för att ändra ritordning">
               <DragIndicatorOutlinedIcon fontSize={"small"} />
@@ -290,6 +311,7 @@ function LayerItem({
         )}
         {expandableSection && expandableSection}
         <ListItemButton
+          className="layer-item-button ListItemButton11111 BUTTON777"
           disableTouchRipple
           onClick={toggleable ? handleLayerItemClick : null}
           sx={{
@@ -299,13 +321,15 @@ function LayerItem({
           dense
         >
           <Box
+            className="BOX222"
             sx={{
               display: "flex",
               position: "relative",
               width: "100%",
-              alignItems: "center",
-              py: 0.5,
+              alignItems: "flex-start",
+              py: 0.25, // jesade-vbg compact mode
               pr: 1,
+              pl: "2px",
               borderBottom: (theme) => renderBorder(theme),
             }}
           >
@@ -327,19 +351,42 @@ function LayerItem({
                 fontWeight: layerIsToggled && !draggable ? "bold" : "inherit",
               }}
             />
-            <ListItemSecondaryAction>
+            <ListItemSecondaryAction
+              className="ListItemSecondaryAction"
+              sx={{
+                position: "absolute",
+                right: "4px",
+                top: "1px",
+                transform: "none",
+              }}
+            >
               {renderStatusIcon()}
               {!toggleable && !draggable ? (
-                <IconButton size="small" disableTouchRipple>
+                <IconButton
+                  size="small"
+                  disableTouchRipple
+                  className="BUTTON111"
+                >
                   <Tooltip title="Bakgrundskartan ligger låst längst ner i ritordningen">
                     <LockOutlinedIcon />
                   </Tooltip>
                 </IconButton>
               ) : null}
               {layerIsFakeMapLayer !== true && layerType !== "system" && (
-                <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
+                <IconButton
+                  size="small"
+                  onClick={(e) => showLayerDetails(e)}
+                  className="BUTTON222"
+                  sx={{
+                    "&:hover .ls-arrow": {
+                      transform: "translateX(3px)",
+                    },
+                  }}
+                >
                   <KeyboardArrowRightOutlinedIcon
+                    className="ls-arrow"
                     sx={{
+                      transition: "transform 300ms ease",
                       color: (theme) => theme.palette.grey[500],
                     }}
                   ></KeyboardArrowRightOutlinedIcon>

@@ -150,6 +150,7 @@ const LayersTab = ({
           flexBasis: "100%",
           flexGrow: "1",
           flexShrink: "1",
+          transform: "translateZ(1px)", // Force layer into 3D space to prevent flickering
         }}
       >
         {filterHits === null && (

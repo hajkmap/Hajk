@@ -3,7 +3,12 @@ export default function LegendIcon({ url }) {
     <img
       alt="Teckenförklaringsikon"
       src={url}
-      style={{ width: "24px", height: "24px", marginRight: "5px" }}
+      style={{
+        width: "24px",
+        height: "24px",
+        marginRight: "5px",
+        marginTop: "4px",
+      }}
     ></img>
   );
 }
