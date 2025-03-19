@@ -13,6 +13,9 @@ import { useLayerZoomWarningSnackbar } from "./useLayerZoomWarningSnackbar";
 import { functionalOk as functionalCookieOk } from "../../models/Cookie";
 import LocalStorageHelper from "../../utils/LocalStorageHelper";
 
+export const QUICK_ACCESS_KEY = "quickAccess";
+export const QUICK_ACCESS_LS_KEY = "quickAccessLayers";
+
 const getOlLayerState = (l) => ({
   opacity: l.get("opacity"),
   id: l.get("name"),
@@ -121,6 +124,7 @@ const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
         .join(","),
       CQL_FILTER: null,
     });
+    olLayer.set("subLayers", visibleSubLayersArray);
     olLayer.setVisible(true);
   }
 };
@@ -164,16 +168,12 @@ const getGroupConfigById = (tree, groupId) => {
   }
 };
 
-const QUICK_ACCESS_KEY = "quickAccess";
-const QUICK_ACCESS_LS_KEY = "quickAccessLayers";
-
 const setQuickAccessStateInLocalStorage = (map) => {
   if (functionalCookieOk()) {
     const qaLayers = map
       .getAllLayers()
       .filter((l) => l.get(QUICK_ACCESS_KEY) === true)
       .map((l) => l.get("name"));
-    console.log({ qaLayers });
     LocalStorageHelper.set(QUICK_ACCESS_LS_KEY, qaLayers);
   }
 };
@@ -227,6 +227,7 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
       const sortedCurrentSubLayers = allSubLayers.filter((l) =>
         currentSubLayersSet.has(l)
       );
+
       olLayer.set("subLayers", sortedCurrentSubLayers);
       setOLSubLayers(olLayer, sortedCurrentSubLayers);
     },
@@ -237,7 +238,6 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
       const subLayersToShow = Array.isArray(subLayers)
         ? subLayers
         : allSubLayers;
-
       setOLSubLayers(olLayer, subLayersToShow);
     },
     setGroupVisibility(groupId, visible) {
@@ -473,6 +473,7 @@ const LayerSwitcherProvider = ({
   // layers might have been added to QuickAccess.
   useEffect(() => {
     const ls = LocalStorageHelper.get(QUICK_ACCESS_LS_KEY);
+
     if (!(typeof ls === "object" && ls !== null)) {
       return;
     }
