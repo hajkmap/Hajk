@@ -271,12 +271,10 @@ class DocumentEditor extends Component {
       this.state.selectedDocument,
       this.state.data,
       (result) => {
-        // Update the result message if needed
         if (result === "File saved") {
           result = "Filen sparades utan problem.";
         }
 
-        // Set the modal state based on the result
         this.setState({
           showModal: true,
           modalTitle: result,
@@ -364,7 +362,7 @@ class DocumentEditor extends Component {
       showModal: false,
       modalStyle: {},
       okButtonText: "OK",
-      modalConfirmCallback: () => {},
+      modalConfirmCallback: () => { },
     });
   }
 
@@ -672,20 +670,20 @@ class DocumentEditor extends Component {
           <Typography className={classes.gridItem}>Nyckelord</Typography>
           {chapter.keywords
             ? chapter.keywords.map((keyword, i) => (
-                <Chip
-                  key={i}
-                  label={keyword}
-                  onDelete={(i) => {
-                    const index = chapter.keywords.indexOf(keyword);
-                    if (index > -1) {
-                      chapter.keywords.splice(index, 1);
-                    }
-                    this.setState({
-                      keywords: chapter.keywords,
-                    });
-                  }}
-                />
-              ))
+              <Chip
+                key={i}
+                label={keyword}
+                onDelete={(i) => {
+                  const index = chapter.keywords.indexOf(keyword);
+                  if (index > -1) {
+                    chapter.keywords.splice(index, 1);
+                  }
+                  this.setState({
+                    keywords: chapter.keywords,
+                  });
+                }}
+              />
+            ))
             : null}
           <Grid item>
             <AddKeyword
@@ -726,13 +724,13 @@ class DocumentEditor extends Component {
         >
           {chapter.expanded
             ? chapter.chapters.map((innerChapter, innerIndex) => {
-                return this.renderChapter(
-                  chapter.chapters,
-                  innerChapter,
-                  innerIndex,
-                  false
-                );
-              })
+              return this.renderChapter(
+                chapter.chapters,
+                innerChapter,
+                innerIndex,
+                false
+              );
+            })
             : null}
         </Grid>
       </Grid>
