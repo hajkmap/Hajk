@@ -63,6 +63,9 @@ function AvailableLayersGrid({
   const preSelectedLayers =
     selectedRowObjects?.filter((item) => !selectedLayers.includes(item)) ?? [];
 
+  const removedSelectedLayers =
+    selectedRowObjects?.filter((item) => selectedLayers.includes(item)) ?? [];
+
   return (
     <Paper
       key=""
@@ -98,6 +101,7 @@ function AvailableLayersGrid({
         <DataGridBadge
           selectedLayers={selectedLayers}
           preSelectedLayers={preSelectedLayers}
+          removedSelectedLayers={removedSelectedLayers}
         />
       )}
       <Grid container>

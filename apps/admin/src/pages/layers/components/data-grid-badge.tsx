@@ -4,11 +4,13 @@ import { useTranslation } from "react-i18next";
 interface Props {
   selectedLayers: string[];
   preSelectedLayers: string[];
+  removedSelectedLayers: string[];
 }
 
 export default function DataGridBadge({
   selectedLayers,
   preSelectedLayers,
+  removedSelectedLayers,
 }: Props) {
   const { t } = useTranslation();
 
@@ -18,16 +20,19 @@ export default function DataGridBadge({
         {t("layers.selected")}
       </Typography>
 
-      {selectedLayers.map((item, index) => (
-        <Chip
-          sx={{ ml: 0.5, mb: 0.5 }}
-          size="small"
-          key={`selected-${index}`}
-          label={item}
-          color="success"
-          variant="filled"
-        />
-      ))}
+      {selectedLayers.map((item, index) => {
+        const isRemoved = removedSelectedLayers.includes(item);
+        return (
+          <Chip
+            sx={{ ml: 0.5, mb: 0.5 }}
+            size="small"
+            key={`selected-${index}`}
+            label={item}
+            color={!isRemoved ? "error" : "success"}
+            variant={!isRemoved ? "outlined" : "filled"}
+          />
+        );
+      })}
 
       {preSelectedLayers.map((item, index) => (
         <Chip
