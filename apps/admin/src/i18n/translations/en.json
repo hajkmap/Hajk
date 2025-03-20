@@ -294,6 +294,9 @@
     "layers.availableLayers": "Available layers",
     "layers.settings": "Layer settings",
     "layers.settings.displayFields": "Presentation of results",
-    "layers.settings.searchSettings": "Search settings"
+    "layers.settings.searchSettings": "Search settings",
+    "availableLayers.legend.stored": "Stored in database",
+    "availableLayers.legend.newlySelected": "Newly selected",
+    "availableLayers.legend.removal": "Marked for Removal"
   }
 }

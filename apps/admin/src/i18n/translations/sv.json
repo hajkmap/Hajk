@@ -293,6 +293,9 @@
     "layers.availableLayers": "Tillgängliga lager",
     "layers.settings": "Inställningar för lager",
     "layers.settings.displayFields": "Presentation vid resultat",
-    "layers.settings.searchSettings": "Sökinställningar"
+    "layers.settings.searchSettings": "Sökinställningar",
+    "availableLayers.legend.stored": "Lagrad i databasen",
+    "availableLayers.legend.newlySelected": "Nyvalt lager",
+    "availableLayers.legend.removal": "Märkt för borttagning"
   }
 }

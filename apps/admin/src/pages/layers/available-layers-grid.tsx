@@ -97,13 +97,15 @@ function AvailableLayersGrid({
           },
         }}
       />
-      {(selectedLayers.length !== 0 || preSelectedLayers.length !== 0) && (
-        <DataGridBadge
-          selectedLayers={selectedLayers}
-          preSelectedLayers={preSelectedLayers}
-          removedSelectedLayers={removedSelectedLayers}
-        />
-      )}
+      {(selectedLayers.length !== 0 || preSelectedLayers.length !== 0) &&
+        !isDataLoading && (
+          <DataGridBadge
+            selectedLayers={selectedLayers}
+            preSelectedLayers={preSelectedLayers}
+            removedSelectedLayers={removedSelectedLayers}
+            isDarkMode={isDarkMode}
+          />
+        )}
       <Grid container>
         <Scrollbar sx={{ maxHeight: "400px" }}>
           <DataGrid
