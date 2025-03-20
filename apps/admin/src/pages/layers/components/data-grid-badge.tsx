@@ -61,7 +61,7 @@ export default function DataGridBadge({
           }
           arrow
         >
-          <InfoIcon sx={{ cursor: "pointer" }} />
+          <InfoIcon />
         </Tooltip>
       </Box>
       <Typography variant="body2" sx={{ mb: 1.5, ml: 1 }}>
