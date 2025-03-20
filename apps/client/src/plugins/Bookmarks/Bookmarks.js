@@ -41,7 +41,8 @@ const Bookmarks = (props) => {
       custom={{
         icon: <BookmarksIcon />,
         title: "Bokmärken",
-        description: "Användarens bokmärken",
+        description:
+          atob(props.options?.instruction) || "Användarens bokmärken",
         height: 450,
         width: 400,
       }}

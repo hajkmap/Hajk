@@ -17,6 +17,8 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 // Hooks
 import useUpdateEffect from "../../hooks/useUpdateEffect";
 import useCookieStatus from "../../hooks/useCookieStatus";
+import HajkToolTip from "components/HajkToolTip";
+import { Grid } from "@mui/material";
 
 const List = styled("div")(() => ({
   display: "flex",
@@ -221,28 +223,57 @@ const BookmarksView = (props) => {
           display: "flex",
           flexFlow: "row nowrap",
           alignItems: "flex-end",
+          width: "100%",
+          gap: 2,
         }}
       >
-        <TextField
-          placeholder="Skriv bokmärkets namn"
-          label="Namn"
-          value={name}
-          onChange={handleChange}
-          onKeyUp={handleKeyUp}
-          error={error}
-          helperText={helperText}
-          sx={{ flex: "0 1 100%", height: "0%" }}
-          variant="standard"
-        ></TextField>
-        <AddButton
-          variant="contained"
-          color="primary"
-          size="small"
-          startIcon={error ? null : <AddCircleOutlineIcon />}
-          onClick={addBookmark}
-        >
-          {error ? "Ersätt" : "Lägg till"}
-        </AddButton>
+        <Grid container alignItems="flex-end" justifyContent="space-between">
+          <Grid item xs={8}>
+            <HajkToolTip
+              title="Ange ett namn för bokmärket."
+              PopperProps={{
+                modifiers: [{ name: "offset", options: { offset: [0, 8] } }],
+              }}
+            >
+              <TextField
+                placeholder="Skriv bokmärkets namn"
+                label="Namn"
+                value={name}
+                onChange={handleChange}
+                onKeyUp={handleKeyUp}
+                error={error}
+                helperText={helperText}
+                sx={{ flexGrow: 1, width: "100%" }}
+                variant="standard"
+                fullWidth
+              ></TextField>
+            </HajkToolTip>
+          </Grid>
+          <Grid
+            item
+            xs={3}
+            display="flex"
+            justifyContent="flex-end"
+            alignItems="center"
+          >
+            <HajkToolTip
+              title="Klicka för att spara bokmärket."
+              PopperProps={{
+                modifiers: [{ name: "offset", options: { offset: [0, -40] } }],
+              }}
+            >
+              <AddButton
+                variant="contained"
+                color="primary"
+                size="small"
+                startIcon={error ? null : <AddCircleOutlineIcon />}
+                onClick={addBookmark}
+              >
+                {error ? "Ersätt" : "Lägg till"}
+              </AddButton>
+            </HajkToolTip>
+          </Grid>
+        </Grid>
       </Box>
 
       <List>
