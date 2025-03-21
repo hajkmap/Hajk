@@ -1,13 +1,15 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router";
 import Grid from "@mui/material/Grid2";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { TextField, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
-import { useGroups } from "../../api/groups";
+import { useGroups, Group } from "../../api/groups";
 
 export default function GroupsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: groups, isLoading } = useGroups();
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -42,6 +44,12 @@ export default function GroupsPage() {
 
           <Grid size={12}>
             <DataGrid
+              onCellClick={(params) => {
+                const id: string = (params.row as Group).id;
+                if (id) {
+                  void navigate(`/groups/${id}`);
+                }
+              }}
               rows={filteredGroups}
               getRowId={(row) => row.id}
               columns={[

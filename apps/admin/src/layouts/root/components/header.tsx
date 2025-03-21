@@ -21,9 +21,12 @@ import useUserStore, { User } from "../../../store/use-user-store";
 import useAuth from "../../../hooks/use-auth";
 import {
   useServices,
+  useServiceById,
   useServicesHealthCheck,
 } from "../../../api/services/hooks";
-import { useLayers } from "../../../api/layers/hooks";
+import { useLayerById } from "../../../api/layers/hooks";
+import { useGroupById } from "../../../api/groups/hooks";
+import { useMaps } from "../../../api/maps/hooks";
 
 const getUserInitials = (user: User): string => {
   const words: string[] = user.fullName.split(" ");
@@ -36,14 +39,16 @@ export default function Header() {
   const [userList, setUserList] = useState<User[]>([]);
   const [activeUser, setActiveUser] = useState<User | null>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { serviceId, layerId } = useParams();
+  const { serviceId, layerId, groupId, mapId } = useParams();
+  const { data: service } = useServiceById(serviceId ?? "");
+  const { data: layer } = useLayerById(layerId ?? "");
+  const { data: group } = useGroupById(groupId ?? "");
   const { data: services } = useServices();
-  const { data: layers } = useLayers();
+  const { data: maps } = useMaps();
   const location = useLocation();
   const pathParts = location.pathname.split("/").filter(Boolean);
 
-  const serviceName = services?.find((s) => s.id === serviceId)?.name;
-  const layerName = layers?.find((l) => l.id === layerId)?.name;
+  const mapName = maps?.find((m) => m.id == mapId)?.name;
 
   useServicesHealthCheck(services ?? []);
 
@@ -82,8 +87,14 @@ export default function Header() {
 
             let displayName;
 
-            if (part === serviceId || part === layerId) {
-              displayName = serviceName ?? layerName;
+            if (
+              part === serviceId ||
+              part === layerId ||
+              part === groupId ||
+              part === mapId
+            ) {
+              displayName =
+                service?.name ?? layer?.name ?? group?.name ?? mapName;
             } else {
               const translationKey = `common.${part.toLowerCase()}`;
               displayName = t(

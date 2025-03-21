@@ -37,7 +37,7 @@ export const useMaps = (): UseQueryResult<Map[]> => {
 // This hook uses the `getMapByName` function from the `requests` module
 export const useMapByName = (mapName: string): UseQueryResult<Map> => {
   return useQuery({
-    queryKey: ["map", mapName],
+    queryKey: ["maps", mapName],
     queryFn: () => getMapByName(mapName),
   });
 };

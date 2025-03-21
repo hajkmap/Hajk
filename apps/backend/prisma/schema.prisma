@@ -157,6 +157,8 @@ model Group {
   id                String          @id @default(cuid())
   locked            Boolean         @default(false)
   name              String
+  internalName      String?
+  type              GroupType       @default(Layer)
   layers            LayerInstance[]
   maps              GroupsOnMaps[]
   restrictedToRoles RoleOnGroup[]
@@ -325,4 +327,9 @@ enum AuthStrategy {
   LOCAL
   AZURE_AD
   GITHUB
+}
+
+enum GroupType {
+  Layer
+  Search
 }

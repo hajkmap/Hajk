@@ -22,7 +22,7 @@ export const useGroups = (): UseQueryResult<Group[]> => {
 // This hook uses the `getGroupById` function from the groups `requests` module
 export const useGroupById = (groupId: string): UseQueryResult<Group> => {
   return useQuery({
-    queryKey: ["group", groupId],
+    queryKey: ["groups", groupId],
     queryFn: () => getGroupById(groupId),
   });
 };

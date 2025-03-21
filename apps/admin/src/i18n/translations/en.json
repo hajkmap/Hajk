@@ -246,7 +246,7 @@
     "settings.authorization.title": "Authorization",
     "settings.available.coordinateSystem": "Available coordinate system",
     "settings.preSelected.coordinateSystem": "Pre-selected coordinate system",
-    "layers.dialog.addBtn": "Add layer",
+    "layers.dialog.addBtn": "Add a new layer",
     "layers.dialog.title": "New layer",
     "layers.searchTitle": "Search layers...",
     "layers.createLayerSuccess": "Layer {{name}} created!",

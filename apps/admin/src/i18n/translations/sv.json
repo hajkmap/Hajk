@@ -245,7 +245,7 @@
     "settings.authorization.title": "Behörighet",
     "settings.available.coordinateSystem": "Tillgängliga koordinatsystem",
     "settings.preSelected.coordinateSystem": "Förvalt koordinatsystem",
-    "layers.dialog.addBtn": "Lägg till lager",
+    "layers.dialog.addBtn": "Lägg till nytt lager",
     "layers.dialog.title": "Nytt lager",
     "layers.searchTitle": "Sök bland lager...",
     "layers.createLayerSuccess": "Lagret {{name}} skapades!",

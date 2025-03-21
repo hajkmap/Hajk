@@ -110,8 +110,11 @@ export default function MapsTable() {
         setSearchString={setSearchString}
       />
       <DataGrid<Map>
-        onRowClick={() => {
-          void navigate(`/maps/just-dummy-right-now`);
+        onRowClick={(params) => {
+          const id: string = (params.row as Map).id;
+          if (id) {
+            void navigate(`/maps/${id}`);
+          }
         }}
         rows={filteredMaps}
         columns={columns}
