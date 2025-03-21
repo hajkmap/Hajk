@@ -6,12 +6,12 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@mui/material";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import HajkToolTip from "components/HajkToolTip";
 
 export default function QuickAccessOptions({
   handleAddLayersToQuickAccess,
@@ -47,9 +47,9 @@ export default function QuickAccessOptions({
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <Tooltip title="Fler val för snabbåtkomst">
+        <HajkToolTip title="Fler val för snabbåtkomst">
           <MoreVertOutlinedIcon />
-        </Tooltip>
+        </HajkToolTip>
       </IconButton>
       <Menu
         anchorEl={anchorEl}

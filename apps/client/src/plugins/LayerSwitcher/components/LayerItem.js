@@ -7,7 +7,6 @@ import {
   ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
-  Tooltip,
   useTheme,
 } from "@mui/material";
 import HajkToolTip from "components/HajkToolTip";
@@ -103,7 +102,7 @@ const LayerLegendIcon = ({
   }
 
   return (
-    <Tooltip
+    <HajkToolTip
       sx={{ pointerEvents: "none" }}
       placement="left"
       title={legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"}
@@ -119,7 +118,7 @@ const LayerLegendIcon = ({
       >
         <FormatListBulletedOutlinedIcon fontSize="small" />
       </IconButton>
-    </Tooltip>
+    </HajkToolTip>
   );
 };
 
@@ -304,9 +303,9 @@ function LayerItem({
             }}
             className="dragInidcatorIcon BUTTON777"
           >
-            <Tooltip placement="left" title="Dra för att ändra ritordning">
+            <HajkToolTip placement="left" title="Dra för att ändra ritordning">
               <DragIndicatorOutlinedIcon fontSize={"small"} />
-            </Tooltip>
+            </HajkToolTip>
           </IconButton>
         )}
         {expandableSection && expandableSection}
@@ -367,9 +366,9 @@ function LayerItem({
                   disableTouchRipple
                   className="BUTTON111"
                 >
-                  <Tooltip title="Bakgrundskartan ligger låst längst ner i ritordningen">
+                  <HajkToolTip title="Bakgrundskartan ligger låst längst ner i ritordningen">
                     <LockOutlinedIcon />
-                  </Tooltip>
+                  </HajkToolTip>
                 </IconButton>
               ) : null}
               {layerIsFakeMapLayer !== true && layerType !== "system" && (

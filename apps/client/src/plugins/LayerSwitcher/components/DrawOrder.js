@@ -8,7 +8,6 @@ import {
   FormControlLabel,
   List,
   Switch,
-  Tooltip,
   Collapse,
   Typography,
   Stack,
@@ -19,6 +18,7 @@ import BackgroundLayer from "./BackgroundLayer";
 import GroupLayer from "./GroupLayer";
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import HajkToolTip from "components/HajkToolTip";
 
 function DrawOrder({ display, app, map, localObserver, options }) {
   // A Set that will hold type of OL layers that should be shown.
@@ -234,9 +234,9 @@ function DrawOrder({ display, app, map, localObserver, options }) {
           )}
           <Box sx={{ flexGrow: 1 }} />
           <IconButton onClick={handleInfoButtonClick}>
-            <Tooltip title={infoIsActive ? "Dölj info" : "Visa info"}>
+            <HajkToolTip title={infoIsActive ? "Dölj info" : "Visa info"}>
               <InfoOutlinedIcon />
-            </Tooltip>
+            </HajkToolTip>
           </IconButton>
         </Stack>
         <Collapse

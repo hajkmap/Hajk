@@ -6,7 +6,6 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@mui/material";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
@@ -15,6 +14,7 @@ import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrow
 import KeyboardDoubleArrowUpIcon from "@mui/icons-material/KeyboardDoubleArrowUp";
 
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+import HajkToolTip from "components/HajkToolTip";
 
 const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
   // Element that we will anchor the options menu to is
@@ -51,9 +51,9 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
         aria-expanded={menuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <Tooltip title="Fler funktioner för Lagerhanteraren">
+        <HajkToolTip title="Fler funktioner för Lagerhanteraren">
           <MoreVertOutlinedIcon />
-        </Tooltip>
+        </HajkToolTip>
       </IconButton>
       <Menu
         anchorEl={anchorEl}

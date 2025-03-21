@@ -6,7 +6,6 @@ import {
   ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
-  Tooltip,
 } from "@mui/material";
 
 import LegendIcon from "./LegendIcon";
@@ -15,6 +14,7 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
+import HajkToolTip from "components/HajkToolTip";
 
 export default function SubLayerItem({
   layerId,
@@ -68,7 +68,7 @@ export default function SubLayerItem({
 
   const renderLegendIcon = () => {
     return (
-      <Tooltip
+      <HajkToolTip
         placement="left"
         title={
           legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"
@@ -84,7 +84,7 @@ export default function SubLayerItem({
         >
           <FormatListBulletedOutlinedIcon fontSize="small" />
         </IconButton>
-      </Tooltip>
+      </HajkToolTip>
     );
   };
 

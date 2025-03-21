@@ -7,7 +7,6 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@mui/material";
 
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
@@ -76,9 +75,7 @@ export default function FavoritesOptions({
           functionalCookiesOk ? handleShowMoreOptionsClick : handleEditFavorites
         }
       >
-        <Tooltip title="Mina favoriter">
-          <PersonOutlinedIcon />
-        </Tooltip>
+        <PersonOutlinedIcon />
       </IconButton>
       <Menu
         anchorEl={anchorEl}

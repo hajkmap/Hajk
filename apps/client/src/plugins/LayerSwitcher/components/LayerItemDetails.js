@@ -12,7 +12,6 @@ import {
   IconButton,
   Divider,
   Slider,
-  Tooltip,
   Typography,
   Stack,
 } from "@mui/material";
@@ -26,6 +25,7 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import LayerItemInfo from "./LayerItemInfo";
 import LegendImage from "./LegendImage";
+import HajkToolTip from "components/HajkToolTip";
 
 function LayerItemDetails({
   display,
@@ -211,7 +211,7 @@ function LayerItemDetails({
             }}
           >
             <Stack direction="row" alignItems="center">
-              <Tooltip
+              <HajkToolTip
                 open={tooltipOpen}
                 onClose={handleClose}
                 onOpen={handleOpen}
@@ -221,7 +221,7 @@ function LayerItemDetails({
                 <IconButton onClick={handleBackButtonClick}>
                   <ArrowBackIcon />
                 </IconButton>
-              </Tooltip>
+              </HajkToolTip>
               <Box sx={{ flexGrow: 1, textAlign: "center" }}>
                 <Typography variant="subtitle1">
                   {renderDetailTitle()}
@@ -255,7 +255,7 @@ function LayerItemDetails({
                 <Typography variant="subtitle1">Info</Typography>
               </Box>
               {showLegend && (
-                <Tooltip
+                <HajkToolTip
                   title={
                     legendIsActive
                       ? "Dölj teckenförklaring"
@@ -267,7 +267,7 @@ function LayerItemDetails({
                   >
                     <FormatListBulletedOutlinedIcon fontSize="small" />
                   </IconButton>
-                </Tooltip>
+                </HajkToolTip>
               )}
             </Stack>
             <Box

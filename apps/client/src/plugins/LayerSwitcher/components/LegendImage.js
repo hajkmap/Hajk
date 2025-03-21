@@ -62,6 +62,9 @@ const getThemedUrl = (url, isDarkMode) => {
   const params = parsedUrl.searchParams;
 
   if (params.get("REQUEST")?.toLowerCase() === "getlegendgraphic") {
+    // Note that fontColor only works in GeoServer, not in QGIS Server.
+    // TRANSPARENT is supported in both.
+
     params.set("TRANSPARENT", "true");
 
     const legendOptions = params.get("LEGEND_OPTIONS") || "";
@@ -99,9 +102,11 @@ export default function LegendImage({ open, src }) {
       unmountOnExit
     >
       <ColumnContainer>
-        {urlArray.map((url) => {
+        {urlArray.map((url, index) => {
           const themedUrl = getThemedUrl(url, isDarkMode);
-          return <ImageWithLoading key={themedUrl} src={themedUrl} />;
+          return (
+            <ImageWithLoading key={index + "-" + themedUrl} src={themedUrl} />
+          );
         })}
       </ColumnContainer>
     </Collapse>

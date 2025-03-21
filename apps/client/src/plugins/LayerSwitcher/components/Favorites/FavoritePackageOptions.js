@@ -7,7 +7,6 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@mui/material";
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -81,9 +80,7 @@ export default function FavoritePackageOptions({
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <Tooltip title="Hantera">
-          <MoreVertOutlinedIcon />
-        </Tooltip>
+        <MoreVertOutlinedIcon />
       </IconButton>
       <Menu
         anchorEl={anchorEl}
