@@ -86,6 +86,10 @@ class PanelMenuView extends React.PureComponent {
     this.#setItemStateProperties(itemClicked.id).then(() => {
       this.#scrollToMenuItem(itemClicked.itemRef.current.offsetTop);
     });
+    this.props.app.globalObserver.publish(
+      "core.focusWindow",
+      "documentViewerContentContainer"
+    );
   };
 
   #handleOpenDocumentFromPanelMenu = (id) => {

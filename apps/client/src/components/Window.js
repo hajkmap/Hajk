@@ -184,6 +184,7 @@ class Window extends React.PureComponent {
   };
 
   focusWindow = (elementId) => {
+    this.bringToFront();
     let element = document.getElementById(elementId);
     if (element) element.focus();
   };
