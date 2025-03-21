@@ -38,6 +38,7 @@ import { toast } from "react-toastify";
 import FormActionPanel from "../../components/form-action-panel";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import useAppStateStore from "../../store/use-app-state-store";
+import { HttpError } from "../../lib/http-error";
 
 export default function ServiceSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -373,8 +374,11 @@ export default function ServiceSettings() {
   if (isLoading) {
     return <SquareSpinnerComponent />;
   }
+  if (!service) {
+    throw new HttpError(404, "Service not found");
+  }
+
   if (isError) return <div>Error fetching service details.</div>;
-  if (!service) return <div>Service not found.</div>;
 
   return (
     <Page title={t("common.settings")}>

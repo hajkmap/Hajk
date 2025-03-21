@@ -10,6 +10,7 @@ import {
   SIDEBAR_Z_INDEX,
 } from "./constants";
 import useAppStateStore from "../../store/use-app-state-store";
+import PageTitle from "./components/page-title";
 
 export default function RootLayout() {
   const sidebarLocked = useAppStateStore((state) => state.sidebarLocked);
@@ -36,6 +37,7 @@ export default function RootLayout() {
       }}
       square
     >
+      <PageTitle title={"Hajk - admin"} />
       <Header />
       <Sidebar
         open={sidebarOpen}

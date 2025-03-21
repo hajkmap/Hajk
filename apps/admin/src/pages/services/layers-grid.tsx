@@ -134,14 +134,14 @@ function LayersGrid({
               <Typography
                 sx={{ textAlign: "center", fontSize: "large", mt: 1 }}
               >
-                Det finns inga Hajk-lager som använder denna tjänsten
+                {t("services.layerInServiceNone")}
               </Typography>
             )}
 
             {layersByService?.layers && layersByService?.layers?.length > 0 && (
               <>
                 <Typography sx={{ textAlign: "center", fontSize: "large" }}>
-                  Hajk-lager som använder den här tjänsten
+                  {t("services.layerInService")}
                 </Typography>
                 <Scrollbar sx={{ maxHeight: "400px" }}>
                   <DataGrid
@@ -204,7 +204,7 @@ function LayersGrid({
                 onClick={handleClickOpen}
                 sx={{ float: "right", mt: 1, mb: 2 }}
               >
-                Skapa nytt lager
+                {t("layers.createNewLayer")}
               </Button>
             )}
 
@@ -255,7 +255,7 @@ function LayersGrid({
                   }
                   sx={{ display: "block", mb: 1 }}
                 >
-                  Skapa
+                  {t("common.create")}
                 </Button>
                 {isLoading ? (
                   <CircularProgress

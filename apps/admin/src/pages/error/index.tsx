@@ -3,9 +3,18 @@ import { Box } from "@mui/material";
 import Forbidden from "./forbidden-page";
 import NotFound from "./not-found-page";
 import InternalServerPage from "./internal-server-page";
+import { HttpError } from "../../lib/http-error";
+import { useTranslation } from "react-i18next";
 
 export default function ErrorPage() {
   const error = useRouteError();
+  const { t } = useTranslation();
+
+  const status = isRouteErrorResponse(error)
+    ? error.status
+    : error instanceof HttpError
+    ? error.status
+    : 500;
 
   return (
     <Box
@@ -17,15 +26,15 @@ export default function ErrorPage() {
         minHeight: "100vh",
       }}
     >
-      {isRouteErrorResponse(error) ? (
-        error.status === 403 ? (
-          <Forbidden />
-        ) : error.status === 404 ? (
-          <NotFound />
-        ) : error.status === 500 ? (
-          <InternalServerPage />
-        ) : null
-      ) : null}
+      {status === 403 ? (
+        <Forbidden />
+      ) : status === 404 ? (
+        <NotFound />
+      ) : status === 500 ? (
+        <InternalServerPage />
+      ) : (
+        <Box>{t("error.unknown")}</Box>
+      )}
     </Box>
   );
 }

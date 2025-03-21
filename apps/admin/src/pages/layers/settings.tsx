@@ -32,6 +32,7 @@ import { toast } from "react-toastify";
 import { useServices, useServiceCapabilities } from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
 import { useRoles } from "../../api/users";
+import { HttpError } from "../../lib/http-error";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
@@ -758,8 +759,10 @@ export default function LayerSettings() {
   if (isLoading) {
     return <SquareSpinnerComponent />;
   }
+  if (!layer) {
+    throw new HttpError(404, "Layer not found");
+  }
   if (isError) return <div>Error fetching layer details.</div>;
-  if (!layer) return <div>Layer not found.</div>;
   return (
     <Page title={t("common.settings")}>
       <FormActionPanel
