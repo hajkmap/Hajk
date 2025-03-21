@@ -64,32 +64,19 @@ const getThemedUrl = (url, isDarkMode) => {
   if (params.get("REQUEST")?.toLowerCase() === "getlegendgraphic") {
     params.set("TRANSPARENT", "true");
 
-    if (params.has("LEGEND_OPTIONS")) {
-      // All this work just to add fontColor safely.......
+    const legendOptions = params.get("LEGEND_OPTIONS") || "";
+    const optionsArray = legendOptions.split(";").filter(Boolean);
+    const optionsObj = Object.fromEntries(
+      optionsArray.map((option) => option.split(":").map((str) => str.trim()))
+    );
 
-      const optionsArray = params
-        .get("LEGEND_OPTIONS")
-        .split(";")
-        .filter((option) => option.trim() !== "");
+    optionsObj.fontColor = fontColor;
 
-      const optionsObj = {};
-      optionsArray.forEach((option) => {
-        const [key, value] = option.split(":");
-        if (key && value !== undefined) {
-          optionsObj[key.trim()] = value.trim();
-        }
-      });
+    const newLegendOptions = Object.entries(optionsObj)
+      .map(([key, value]) => `${key}:${value}`)
+      .join(";");
 
-      optionsObj.fontColor = fontColor;
-
-      const legendOptions = Object.entries(optionsObj)
-        .map(([key, value]) => `${key}:${value}`)
-        .join(";");
-
-      params.set("LEGEND_OPTIONS", legendOptions + ";");
-    } else {
-      params.set("LEGEND_OPTIONS", `fontColor:${fontColor};`);
-    }
+    params.set("LEGEND_OPTIONS", newLegendOptions + ";");
   }
 
   return parsedUrl.toString();
