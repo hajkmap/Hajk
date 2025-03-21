@@ -46,7 +46,10 @@ const ImageWithLoading = ({ src }) => {
           setLoading(false);
           setError(true);
         }}
-        sx={{ display: loading || error ? "none" : "block" }}
+        sx={{
+          display: loading || error ? "none" : "block",
+          borderRadius: "2px",
+        }}
         alt="Teckenförklaring"
       />
     </div>
@@ -54,23 +57,42 @@ const ImageWithLoading = ({ src }) => {
 };
 
 const getThemedUrl = (url, isDarkMode) => {
-  let themedUrl = url;
   const fontColor = isDarkMode ? "0xFFFFFF" : "0x000000";
+  const parsedUrl = new URL(url);
+  const params = parsedUrl.searchParams;
 
-  if (themedUrl.includes("GetLegendGraphic")) {
-    const extraOptions = `LEGEND_OPTIONS=fontColor:${fontColor}&TRANSPARENT=true&`;
+  if (params.get("REQUEST")?.toLowerCase() === "getlegendgraphic") {
+    params.set("TRANSPARENT", "true");
 
-    if (themedUrl.includes("LEGEND_OPTIONS=")) {
-      themedUrl = themedUrl.replace("LEGEND_OPTIONS=", extraOptions);
+    if (params.has("LEGEND_OPTIONS")) {
+      // All this work just to add fontColor safely.......
+
+      const optionsArray = params
+        .get("LEGEND_OPTIONS")
+        .split(";")
+        .filter((option) => option.trim() !== "");
+
+      const optionsObj = {};
+      optionsArray.forEach((option) => {
+        const [key, value] = option.split(":");
+        if (key && value !== undefined) {
+          optionsObj[key.trim()] = value.trim();
+        }
+      });
+
+      optionsObj.fontColor = fontColor;
+
+      const legendOptions = Object.entries(optionsObj)
+        .map(([key, value]) => `${key}:${value}`)
+        .join(";");
+
+      params.set("LEGEND_OPTIONS", legendOptions + ";");
     } else {
-      themedUrl = themedUrl.replace(
-        "GetLegendGraphic",
-        "GetLegendGraphic&" + extraOptions
-      );
+      params.set("LEGEND_OPTIONS", `fontColor:${fontColor};`);
     }
   }
 
-  return themedUrl;
+  return parsedUrl.toString();
 };
 
 export default function LegendImage({ open, src }) {
