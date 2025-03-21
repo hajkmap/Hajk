@@ -396,9 +396,17 @@ function LayerItem({
           </Box>
         </ListItemButton>
       </Box>
-      {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
-        <LegendImage src={legendUrls} open={legendIsActive}></LegendImage>
-      )}
+      <Box
+        sx={{
+          paddingLeft: expandableSection ? 3.75 : 0,
+          // backgroundColor: "red",
+        }}
+      >
+        {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
+          <LegendImage src={legendUrls} open={legendIsActive}></LegendImage>
+        )}
+      </Box>
+
       {subLayersSection && subLayersSection}
     </div>
   );

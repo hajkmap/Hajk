@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import {
+  Box,
   IconButton,
   ListItemButton,
   ListItemSecondaryAction,
@@ -147,10 +148,12 @@ export default function SubLayerItem({
         </ListItemSecondaryAction>
       </ListItemButton>
       {subLayerInfo.legendIcon ? null : (
-        <LegendImage
-          src={subLayerInfo.legend}
-          open={legendIsActive}
-        ></LegendImage>
+        <Box sx={{ pl: 0, ml: "-1px" }}>
+          <LegendImage
+            src={subLayerInfo.legend}
+            open={legendIsActive}
+          ></LegendImage>
+        </Box>
       )}
     </div>
   );
