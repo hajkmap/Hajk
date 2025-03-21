@@ -225,14 +225,27 @@ function LayerItem({
   const renderStatusIcon = () => {
     return (
       wmsLayerLoadStatus === "loaderror" && (
-        <IconButton disableRipple className="BUTTON555">
-          <HajkToolTip
-            disableInteractive
-            title="Lagret kunde inte laddas in. Kartservern svarar inte."
+        <HajkToolTip
+          disableInteractive
+          title="Lagret kunde inte laddas in. Kartservern svarar inte."
+        >
+          <IconButton
+            disableRipple
+            className="BUTTON555"
+            sx={{
+              p: "3px",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[800]
+                  : theme.palette.grey[200],
+            }}
           >
-            <WarningAmberOutlinedIcon fontSize="small" />
-          </HajkToolTip>
-        </IconButton>
+            <WarningAmberOutlinedIcon
+              fontSize="small"
+              sx={{ marginTop: "-1px", color: theme.palette.warning.main }}
+            />
+          </IconButton>
+        </HajkToolTip>
       )
     );
   };

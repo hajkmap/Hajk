@@ -115,10 +115,13 @@ const GroupInfoToggler = ({
   }
   // Render icons only if one of the states above has a value
   return (
-    <HajkToolTip title="Mer information om gruppen">
+    <HajkToolTip title="Mer information om gruppen" placement="left">
       <IconButton
+        size="small"
         sx={{
-          padding: "0px",
+          p: 0.25,
+          mt: "1px",
+          mr: "5px",
           "& .MuiTouchRipple-root": { display: "none" },
         }}
         onClick={(e) => {
@@ -126,7 +129,11 @@ const GroupInfoToggler = ({
           clickHandler();
         }}
       >
-        {infoVisible ? <RemoveCircleIcon /> : <InfoIcon />}
+        {infoVisible ? (
+          <RemoveCircleIcon fontSize="small" />
+        ) : (
+          <InfoIcon fontSize="small" />
+        )}
       </IconButton>
     </HajkToolTip>
   );

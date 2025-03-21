@@ -23,6 +23,8 @@ export default function LayerGroupAccordion({
         disableTouchRipple
         onClick={() => setState({ expanded: !state.expanded })}
         sx={{
+          alignItems: "flex-start",
+
           p: 0,
           pl: "2px",
           "& .ls-arrow": {
@@ -40,6 +42,7 @@ export default function LayerGroupAccordion({
         <IconButton
           size="small"
           sx={{
+            mt: "2px",
             pl: "3px",
             pr: "4px",
             "&:hover": {
@@ -55,11 +58,12 @@ export default function LayerGroupAccordion({
           ></KeyboardArrowRightOutlinedIcon>
         </IconButton>
         <Box
+          className="FINDME999"
           sx={{
             display: "flex",
             position: "relative",
             width: "100%",
-            alignItems: "center",
+            alignItems: "flex-start",
             py: 0.25,
             pr: 1,
             borderBottom: (theme) =>

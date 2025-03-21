@@ -61,7 +61,10 @@ const getThemedUrl = (url, isDarkMode) => {
   const parsedUrl = new URL(url);
   const params = parsedUrl.searchParams;
 
-  if (params.get("REQUEST")?.toLowerCase() === "getlegendgraphic") {
+  const requestParam = (
+    params.get("REQUEST") || params.get("request")
+  )?.toLowerCase();
+  if (requestParam === "getlegendgraphic") {
     // Note that fontColor only works in GeoServer, not in QGIS Server.
     // TRANSPARENT is supported in both.
 
