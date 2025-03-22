@@ -17,26 +17,41 @@ class InformativeService {
    */
   async getByName(folder = "", file) {
     try {
-      file += ".json"; // Add file extension
-
-      // Construct the path depending on whether a folder was provided
-      const pathToFile = path.join(
+      const folderPath = path.join(
         process.cwd(),
         "App_Data",
         "documents",
-        folder,
-        file
+        folder
       );
 
-      const text = await fs.promises.readFile(pathToFile, "utf-8");
-      const json = JSON.parse(text);
-      return json;
+      // 1) Check if there is a file "file.json"
+      let pathToFile = path.join(folderPath, file + ".json");
+      if (fs.existsSync(pathToFile)) {
+        const text = await fs.promises.readFile(pathToFile, "utf-8");
+        const json = JSON.parse(text);
+        return {
+          type: "json",
+          data: json,
+        };
+      }
+
+      // 2) Else test if there is a file "file.pdf"
+      pathToFile = path.join(folderPath, file + ".pdf");
+      if (fs.existsSync(pathToFile)) {
+        return {
+          type: "pdf",
+          filePath: pathToFile,
+        };
+      }
+
+      // 3) Non of the files found
+      return { error: "File not found" };
     } catch (error) {
       logger.warn(
-        `Error while opening informative document "${file}". Sent 404 Not Found as response. Original error below.`
+        `Error while opening document "${file}". Sent 404 Not Found as response. Original error below.`
       );
       logger.warn(error);
-      return { error };
+      return { error: error.message };
     }
   }
 
@@ -203,12 +218,19 @@ class InformativeService {
         .filter(
           (entry) =>
             // Filter out only files (we're not interested in directories).
-            entry.isFile() &&
-            // Only JSON files
-            entry.name.endsWith(".json")
+            (entry.isFile() &&
+              // Only JSON files
+              entry.name.endsWith(".json")) ||
+            entry.name.endsWith(".pdf")
         )
         // Create an array using name of each Dirent object, remove file extension
-        .map((entry) => entry.name.replace(".json", ""));
+        .map((entry) => {
+          if (entry.name.endsWith(".json")) {
+            return entry.name.replace(".json", "");
+          } else if (entry.name.endsWith(".pdf")) {
+            return entry.name.replace(".pdf", "");
+          }
+        });
       return availableDocuments;
     } catch (error) {
       return { error };

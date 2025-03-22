@@ -33,14 +33,31 @@ export class Controller {
 
   getByName(req, res) {
     const { folder, name } = req.params;
-    InformativeService.getByName(folder, name).then((r) => {
-      if (r && !r.error) {
-        res.json(r);
-      } else {
-        const errorMessage = `${folder && `${folder}/`}${name}`;
-        res.status(404).send(errorMessage);
-      }
-    });
+
+    InformativeService.getByName(folder, name)
+      .then((result) => {
+        if (!result || result.error) {
+          const errorMessage = `${folder ? folder + "/" : ""}${name}`;
+          return res.status(404).send(errorMessage);
+        }
+
+        if (result.type === "json") {
+          return res.json(result.data);
+        } else if (result.type === "pdf") {
+          res.setHeader("Content-Type", "application/pdf");
+          return res.sendFile(result.filePath, (err) => {
+            if (err) {
+              res.status(404).send("File not found");
+            }
+          });
+        }
+
+        return res.status(400).send("Unsupported file type");
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Server error");
+      });
   }
 
   saveByName(req, res) {

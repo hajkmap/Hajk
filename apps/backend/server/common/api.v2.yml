@@ -39,6 +39,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DocumentBody"
+            application/pdf:
+              schema:
+                type: string
+                format: binary
         5XX:
           description: Example not found
           content:
@@ -63,6 +67,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DocumentBody"
+            application/pdf:
+              schema:
+                type: string
+                format: binary
         5XX:
           description: Example not found
           content:
@@ -136,6 +144,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DocumentsList"
+            application/pdf:
+              schema:
+                type: string
+                format: binary
         5XX:
           description: Internal server error
           content:
@@ -153,6 +165,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Informativedocumentfolderlist"
+            application/pdf:
+              schema:
+                type: string
+                format: binary
         5XX:
           description: Internal server error
           content:
