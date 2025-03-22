@@ -53,9 +53,14 @@ export default class DocumentHandlerModel {
   init = () => {
     return this.getAllDocumentsContainedInMenu()
       .then((allDocuments) => {
-        this.allDocuments = allDocuments;
+        // Filter out documents that don't have a 'chapters' array (e.g. PDF documents)
+        const filteredDocuments = allDocuments.filter((doc) =>
+          Array.isArray(doc.chapters)
+        );
+        this.allDocuments = filteredDocuments;
+
         this.documentSearchmodel = new DocumentSearchModel({
-          allDocuments: allDocuments,
+          allDocuments: filteredDocuments, // Använd den filtrerade listan här
           globalSearchModel: this.app.searchModel,
           app: this.app,
           localObserver: this.localObserver,
@@ -113,27 +118,35 @@ export default class DocumentHandlerModel {
 
       Promise.all(
         menuItemsWithDocumentConnection.map((menuItem) => {
-          return this.fetchJsonDocument(
-            menuItem.folder,
-            menuItem.document
-          ).then((doc) => {
-            if (!doc.title) {
-              console.warn(
-                `The document ${menuItem.document} is missing a title`
-              );
+          return this.fetchDocument(menuItem.folder, menuItem.document).then(
+            (doc) => {
+              let docObject = doc;
+              if (doc instanceof Blob) {
+                docObject = {
+                  type: "pdf",
+                  blob: doc,
+                  title: menuItem.document, // fallback-titel
+                  chapters: [], // dummy-chapters så att modellen kan hantera det
+                };
+              }
+              if (!docObject.title) {
+                console.warn(
+                  `The document ${menuItem.document} is missing a title`
+                );
+              }
+              return {
+                ...docObject,
+                documentColor: menuItem.color,
+                documentFileName: menuItem.document,
+                documentTitle: docObject.title || menuItem.document,
+                menuItemId: menuItem.id,
+              };
             }
-
-            return {
-              ...doc,
-              documentColor: menuItem.color,
-              documentFileName: menuItem.document,
-              documentTitle: doc.title,
-              menuItemId: menuItem.id,
-            };
-          });
+          );
         })
       )
         .then((documents) => {
+          console.log("Loaded documents:", documents);
           resolve(documents);
         })
         .catch((err) => {
@@ -238,22 +251,30 @@ export default class DocumentHandlerModel {
     }
   }
 
-  async fetchJsonDocument(folder = "", title) {
-    try {
-      const url = `${this.mapServiceUrl}/informative/load${
-        folder && `/${folder}`
-      }/${title}`;
+  async fetchDocument(folder = "", title) {
+    const url = `${this.mapServiceUrl}/informative/load${folder ? `/${folder}` : ""}/${title}`;
+    const response = await hfetch(url);
 
-      const response = await hfetch(url);
+    // Check if the request was successful
+    if (!response.ok) {
+      throw new Error(`Could not fetch document: ${response.statusText}`);
+    }
+
+    // Check the content type
+    const contentType = response.headers.get("content-type");
+
+    if (contentType && contentType.includes("application/pdf")) {
+      // Handle PDF
+      const blob = await response.blob();
+      return blob;
+    } else if (contentType && contentType.includes("application/json")) {
+      // Use existing logic for JSON
       const text = await response.text();
-
       if (text === "File not found") {
-        throw new Error(
-          `Could not find document with title ${title} in folder with documents`
-        );
+        throw new Error(`Could not find document with title ${title}`);
       }
-
       const document = await JSON.parse(text);
+      // Process chapters with existing dependencies
       this.internalId = 0;
       document.chapters.forEach((chapter) => {
         this.setParentChapter(chapter, undefined);
@@ -262,13 +283,9 @@ export default class DocumentHandlerModel {
         this.appendComponentsToChapter(chapter);
         this.internalId = this.internalId + 1;
       });
-
       return document;
-    } catch (err) {
-      console.warn(
-        `Kunde inte parsa JSON-dokumentet ${title}, kontrollera så att filen finns och är en .json-fil `
-      );
-      throw new Error(err);
+    } else {
+      throw new Error("Okänt filformat");
     }
   }
 
