@@ -125,8 +125,8 @@ export default class DocumentHandlerModel {
                 docObject = {
                   type: "pdf",
                   blob: doc,
-                  title: menuItem.document, // fallback-titel
-                  chapters: [], // dummy-chapters så att modellen kan hantera det
+                  title: menuItem.document, // fallback-title
+                  chapters: [], // dummy-chapters so the model can handle it
                 };
               }
               if (!docObject.title) {
