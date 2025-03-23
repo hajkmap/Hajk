@@ -146,7 +146,6 @@ export default class DocumentHandlerModel {
         })
       )
         .then((documents) => {
-          console.log("Loaded documents:", documents);
           resolve(documents);
         })
         .catch((err) => {

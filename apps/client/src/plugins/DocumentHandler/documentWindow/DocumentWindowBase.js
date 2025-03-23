@@ -8,12 +8,7 @@ import Progress from "./Progress";
 import { CustomLink } from "../utils/ContentComponentFactory";
 import withSnackbar from "components/WithSnackbar";
 import PrintIcon from "@mui/icons-material/Print";
-
-class PdfViewer extends React.Component {
-  render() {
-    return <div>PDF-vy inte implementerad än</div>;
-  }
-}
+import PdfViewer from "../pdfViewer/PdfViewer";
 
 class DocumentWindowBase extends React.PureComponent {
   snackbarKey = null;
@@ -197,8 +192,11 @@ class DocumentWindowBase extends React.PureComponent {
         }}
       >
         {document != null && modelReady ? (
-          document instanceof Blob ? (
-            <PdfViewer blob={document} />
+          document?.type === "pdf" ? (
+            <PdfViewer
+              blob={document.blob}
+              maximized={documentWindowMaximized}
+            />
           ) : !showPrintWindow ? (
             customTheme ? (
               <StyledEngineProvider injectFirst>
