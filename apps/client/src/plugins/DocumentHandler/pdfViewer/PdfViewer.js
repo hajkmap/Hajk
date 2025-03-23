@@ -11,7 +11,7 @@ pdfjs.GlobalWorkerOptions.workerSrc =
   process.env.PUBLIC_URL + "/pdf.worker.min.mjs";
 
 const PdfContainer = styled("div")(() => ({
-  maxHeight: "200vh",
+  maxHeight: "100%",
   overflowY: "auto",
   overflowX: "hidden",
   padding: "1rem",
