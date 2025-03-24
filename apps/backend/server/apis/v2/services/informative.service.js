@@ -219,7 +219,7 @@ class InformativeService {
           (entry) =>
             // Filter out only files (we're not interested in directories).
             (entry.isFile() &&
-              // Only JSON files
+              // JSON files and PDF files
               entry.name.endsWith(".json")) ||
             entry.name.endsWith(".pdf")
         )

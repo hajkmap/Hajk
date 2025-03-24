@@ -14,6 +14,7 @@ const PdfContainer = styled("div")(() => ({
   maxHeight: "100%",
   overflowY: "auto",
   overflowX: "hidden",
+  userSelect: "text",
   padding: "1rem",
 }));
 
