@@ -4,6 +4,7 @@ import SearchModel from "./SearchModel";
 import Plugin from "./Plugin";
 import SnapHelper from "./SnapHelper";
 import { bindMapClickEvent } from "./Click";
+import WindowZModel from "./WindowZModel";
 
 import ConfigMapper from "../utils/ConfigMapper";
 import CoordinateSystemLoader from "../utils/CoordinateSystemLoader";
@@ -53,6 +54,7 @@ class AppModel {
     this.cqlFiltersFromParams = {};
     this.hfetch = hfetch;
     this.pluginHistory = new Map();
+    this.windowZModel = WindowZModel;
 
     // We store the click location data here for later use.
     // Right now this is only used in the new infoClick but it will most likely be used in other parts of the program.
@@ -81,6 +83,7 @@ class AppModel {
     this.globalObserver = globalObserver;
     register(this.coordinateSystemLoader.getProj4());
     this.refreshMUITheme = refreshMUITheme;
+    this.windowZModel.init(globalObserver);
   }
 
   decorateConfig() {

@@ -1291,10 +1291,7 @@ class App extends React.PureComponent {
               {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
               {this.renderSearchComponent()}
             </StyledHeader>
-            <WindowsContainer
-              id="windows-container"
-              onClick={this.handleHeaderBlur}
-            >
+            <WindowsContainer id="windows-container">
               {useNewInfoclick === false && this.renderInfoclickWindow()}
               {useNewInfoclick && (
                 <MapClickViewer
