@@ -61,8 +61,25 @@ class WindowZModel {
 
       const isHajkWindow = windowElement.classList.contains("hajk-window");
       const hajkWindowContainer = document.getElementById("windows-container");
-      // We need to get past Header on zIndex 1100 and Popper on 1500.
+
+      // We need to get past Header on zIndex 1100 and Popper on 1400.
+
       hajkWindowContainer.style.zIndex = isHajkWindow ? 1500 : null;
+
+      /**
+       * The structure is like this:
+       *
+       * Header z 1100
+       * ---- Search and Search list, z 1000 + dynamic
+       *
+       * Window container z null or z 1500 when active
+       * ---- Hajk window 1, z 1000 + dynamic
+       * ---- Hajk window 2, z 1000 + dynamic
+       * ---- Hajk window 3, z 1000 + dynamic
+       * ---- etc etc.
+       *
+       * Popper z 1400
+       */
     });
   }
 }
