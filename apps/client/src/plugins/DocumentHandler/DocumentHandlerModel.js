@@ -60,7 +60,7 @@ export default class DocumentHandlerModel {
         this.allDocuments = filteredDocuments;
 
         this.documentSearchmodel = new DocumentSearchModel({
-          allDocuments: filteredDocuments, // Använd den filtrerade listan här
+          allDocuments: filteredDocuments,
           globalSearchModel: this.app.searchModel,
           app: this.app,
           localObserver: this.localObserver,
