@@ -194,8 +194,9 @@ class DocumentWindowBase extends React.PureComponent {
         {document != null && modelReady ? (
           document?.type === "pdf" ? (
             <PdfViewer
-              blob={document.blob}
+              document={document}
               maximized={documentWindowMaximized}
+              customTheme={customTheme}
             />
           ) : !showPrintWindow ? (
             customTheme ? (
