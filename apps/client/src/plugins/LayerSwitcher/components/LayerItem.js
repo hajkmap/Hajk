@@ -293,6 +293,13 @@ function LayerItem({
         sx={{
           position: "relative",
           alignItems: "flex-start",
+          ".FIND-LAYERITEM-SECONDARY-ACTION": {
+            transition: "all 300ms ease",
+            transform: "translateX(100%) translateZ(1px)",
+          },
+          "&:hover .FIND-LAYERITEM-SECONDARY-ACTION": {
+            transform: "translateX(0%) translateZ(1px)",
+          },
 
           borderBottom: (theme) =>
             drawOrderItem() && showSublayers
@@ -364,7 +371,7 @@ function LayerItem({
               }}
             />
             <ListItemSecondaryAction
-              className="ListItemSecondaryAction"
+              className="FIND-LAYERITEM-SECONDARY-ACTION"
               sx={{
                 position: "absolute",
                 right: "4px",

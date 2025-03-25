@@ -134,7 +134,7 @@ const QuickAccessView = ({
             primary="Snabbåtkomst"
           />
 
-          <ListItemSecondaryAction>
+          <ListItemSecondaryAction className="FIND-QUICKACCERSSVIEW-SECONDARY-ACTION">
             {enableQuickAccessPresets && (
               <HajkTooltip title="Teman">
                 <IconButton onClick={handleQuickAccessPresetsToggle}>

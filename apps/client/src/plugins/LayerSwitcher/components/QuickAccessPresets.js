@@ -556,7 +556,7 @@ function QuickAccessPresets({
                       <TopicOutlinedIcon fontSize="small" />
                     </ListItemIcon>
                     <ListItemText primary={l.title} secondary={l.author} />
-                    <ListItemSecondaryAction>
+                    <ListItemSecondaryAction className="FIND-QUICKACCTESSSPRESETS-SECONDARY-ACTION">
                       <HajkToolTip title={"Information om " + l.title}>
                         <IconButton
                           onClick={(e) => {

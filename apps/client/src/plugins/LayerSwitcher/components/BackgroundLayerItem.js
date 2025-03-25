@@ -107,7 +107,7 @@ function BackgroundLayerItem({
               fontWeight: "inherit",
             }}
           />
-          <ListItemSecondaryAction>
+          <ListItemSecondaryAction className="FIND-BACKGROUNDLAYERITEM-SECONDARY-ACTION">
             {wmsLayerLoadStatus === "loaderror" && (
               <IconButton disableTouchRipple>
                 <HajkToolTip
