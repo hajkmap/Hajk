@@ -143,6 +143,7 @@ class Window extends React.PureComponent {
     title: propTypes.string.isRequired,
     width: propTypes.number.isRequired,
     componentId: propTypes.string,
+    forceBringToFrontOnEvent: propTypes.string,
   };
 
   static defaultProps = {
@@ -150,11 +151,13 @@ class Window extends React.PureComponent {
     resizingEnabled: true,
     allowMaximizedWindow: false,
     scrollable: true,
+    forceBringToFrontOnEvent: null,
   };
 
   constructor(props) {
     super(props);
     document.windows.push(this);
+
     this.windowRef = React.createRef();
     this.rnd = React.createRef();
     this.state = {
@@ -162,6 +165,7 @@ class Window extends React.PureComponent {
       top: 0,
       width: 300,
       height: this.props.height === "dynamic" ? "auto" : 400,
+      open: this.props.open,
     };
 
     window.addEventListener("resize", () => {
@@ -189,7 +193,7 @@ class Window extends React.PureComponent {
   };
 
   componentDidMount() {
-    const { globalObserver } = this.props;
+    const { globalObserver, forceBringToFrontOnEvent } = this.props;
     if (globalObserver) {
       globalObserver.subscribe("core.appLoaded", () => {
         this.updatePosition();
@@ -202,6 +206,31 @@ class Window extends React.PureComponent {
           disableDrag: open,
         });
       });
+      globalObserver.publish(
+        "core.window.add",
+        this.rnd.current.getSelfElement()
+      );
+      if (forceBringToFrontOnEvent) {
+        // This is not perfect in any way, but it's a quick fix to ensure that
+        // a window is brought to front when a specific event is triggered.
+        globalObserver.subscribe(forceBringToFrontOnEvent, () => {
+          this.bringToFront();
+        });
+      }
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.open !== this.props.open) {
+      this.setState({ open: this.props.open }, () => {
+        this.#onOpenChange(this.state.open);
+      });
+    }
+  }
+
+  #onOpenChange(open) {
+    if (open) {
+      this.bringToFront();
     }
   }
 
@@ -411,15 +440,10 @@ class Window extends React.PureComponent {
   };
 
   bringToFront() {
-    this.props.globalObserver.publish("core.handleHeaderBlur");
-
-    document.windows
-      .sort((a, b) => (a === this ? 1 : b === this ? -1 : 0))
-      .forEach((w, i) => {
-        if (w.rnd.current) {
-          w.rnd.current.getSelfElement().style.zIndex = zIndexStart + i;
-        }
-      });
+    this.props.globalObserver.publish(
+      "core.window.bringtofront",
+      this.rnd.current.getSelfElement()
+    );
   }
 
   render() {
@@ -427,14 +451,13 @@ class Window extends React.PureComponent {
       children,
       color,
       features,
-      open,
       title,
       resizingEnabled,
       draggingEnabled,
       allowMaximizedWindow,
       customPanelHeaderButtons,
     } = this.props;
-    const { left, top, width, height } = this.state;
+    const { left, top, width, height, open } = this.state;
 
     let resizeBottom = true,
       resizeBottomLeft = true,

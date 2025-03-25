@@ -32,7 +32,12 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
 
 import HajkToolTip from "../../../components/HajkToolTip";
-import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+import {
+  QUICK_ACCESS_KEY,
+  QUICK_ACCESS_LS_KEY,
+  useLayerSwitcherDispatch,
+} from "../LayerSwitcherProvider";
+import LocalStorageHelper from "../../../utils/LocalStorageHelper";
 
 function QuickAccessPresets({
   display,
@@ -114,12 +119,12 @@ function QuickAccessPresets({
     let lpInfo = infoType
       ? { ...loadLpInfoConfirmation }
       : { ...loadLpConfirmation };
-
     setLoadLpConfirmation(null);
     setLoadLpInfoConfirmation(null);
 
     // Check if layers from layerpackage exists in map
     const missingLayers = checkForMissingLayers(lpInfo.layers);
+
     if (missingLayers.length > 0) {
       // Show missing layers dialog
       setMissingLayersConfirmation({
@@ -141,6 +146,10 @@ function QuickAccessPresets({
     const allMapLayers = map.getAllLayers();
     layers.forEach((l) => {
       const layer = allMapLayers.find((la) => la.get("name") === l.id);
+      const loadedLayerIds = allMapLayers
+        .filter((l) => l.get(QUICK_ACCESS_KEY) === true)
+        .map((l) => l.get("name"));
+      LocalStorageHelper.set(QUICK_ACCESS_LS_KEY, loadedLayerIds);
       if (layer) {
         // Set quickaccess property
         if (layer.get("layerType") !== "base") {
