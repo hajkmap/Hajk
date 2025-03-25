@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([commit](https://github.com/hajkmap/Hajk/commit/7576d013852a2e9850ee6b4f05477a742a331be8))
   ([commit](https://github.com/hajkmap/Hajk/commit/46d1034b01a060dc5c2efc512de9b6c30d005198))
   ([commit](https://github.com/hajkmap/Hajk/commit/4d9b0ace9cbf029423e4ac836316a5272acfcf84))
+  ([commit](https://github.com/hajkmap/Hajk/commit/337b950fcf82e55bfa181fb379a0bb1e1ce2cd69))
 - LayerSwitcher: Dialog click-and-drags moves LayerSwitcher's window below. ([issue](https://github.com/hajkmap/Hajk/issues/1600))
 - Updates to RHEL Dockerfile. ([commit](https://github.com/hajkmap/Hajk/commit/afe44edd51452035d660d9f3ae99a298550ccabb))
 - Presets: Bugfix ([commit](https://github.com/hajkmap/Hajk/commit/e296c10fca9383819ac5b46810ce55db25c8ff6a))
@@ -43,6 +44,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LayerSwitcher: ensure to respect the `hideExpandArrow` setting. ([issue](https://github.com/hajkmap/Hajk/issues/1617))
 - Buffer and Measurer bug fixes. ([commit](https://github.com/hajkmap/Hajk/commit/44ea3549b9f79c47baf3d6be41036d5f8435ce82) and [commit](https://github.com/hajkmap/Hajk/commit/c4e1827b7dffe5f93d554670a2751ef10bc883d8))
 - LayerSwitcher: hotfix to synchronize key naming between Admin and Client, effectively enabling the Quick Access Presets functionality. ([PR](https://github.com/hajkmap/Hajk/pull/1621))
+- LayerSwitcher: Toggle sublayers when loading Quick Access presets. ([PR](https://github.com/hajkmap/Hajk/pull/1623))
+- LayerSwitcher: Fix for fitting the legend graphics. ([commit](https://github.com/hajkmap/Hajk/commit/432fe3ba528154f553d771527aab301d0666dfe9)
+- LayerSwitcher: Fix for storing the Theme Presets in LocalStorage. ([PR](https://github.com/hajkmap/Hajk/pull/1625))
+- Client/General: Refinement of Window management . ([PR](https://github.com/hajkmap/Hajk/pull/1629))
 
 ## [4.0.0-rc.1] - 2025-02-19
 
