@@ -83,7 +83,7 @@ const QuickAccessView = ({
       sx={{
         display: show ? "block" : "none",
         borderBottom: (theme) =>
-          `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          `${theme.spacing(quickAccessSectionExpanded ? 0.2 : 0.0)} solid ${theme.palette.divider}`,
       }}
     >
       <ListItemButton
@@ -93,6 +93,8 @@ const QuickAccessView = ({
         }
         sx={{
           p: 0,
+          borderBottom: (theme) =>
+            `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
         }}
         dense
       >
@@ -119,7 +121,7 @@ const QuickAccessView = ({
             alignItems: "center",
             py: 0.5,
             pr: 1,
-            borderBottom: (theme) => `${theme.spacing(0.2)} solid transparent`,
+            // borderBottom: (theme) => `${theme.spacing(0.2)} solid transparent`,
           }}
         >
           <IconButton sx={{ pl: 0 }} disableRipple size="small">

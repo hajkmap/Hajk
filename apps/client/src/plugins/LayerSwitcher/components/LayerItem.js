@@ -3,7 +3,6 @@ import React, { useEffect, useState, memo } from "react";
 // Material UI components
 import {
   Box,
-  IconButton,
   ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
@@ -17,12 +16,13 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+import ShowDetailsIcon from "@mui/icons-material/MoreOutlined";
 import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 
 // Custom components
 import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
+import LsIconButton from "./LsIconButton";
 
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
@@ -45,7 +45,7 @@ const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
 
 const LayerToggleComponent = ({ toggleState }) => {
   return (
-    <IconButton disableTouchRipple size="small" className="BUTTON333" sx={{}}>
+    <LsIconButton size="small" className="BUTTON333" sx={{}}>
       <CheckBoxOutlineBlankIcon />
       <Box
         sx={{
@@ -73,7 +73,7 @@ const LayerToggleComponent = ({ toggleState }) => {
         />
         {}
       </Box>
-    </IconButton>
+    </LsIconButton>
   );
 };
 
@@ -107,7 +107,7 @@ const LayerLegendIcon = ({
       placement="left"
       title={legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"}
     >
-      <IconButton
+      <LsIconButton
         className="BUTTON444"
         sx={{ p: 0.25, mt: 0.5, mr: "5px" }}
         size="small"
@@ -117,7 +117,7 @@ const LayerLegendIcon = ({
         }}
       >
         <FormatListBulletedOutlinedIcon fontSize="small" />
-      </IconButton>
+      </LsIconButton>
     </HajkToolTip>
   );
 };
@@ -229,8 +229,7 @@ function LayerItem({
           disableInteractive
           title="Lagret kunde inte laddas in. Kartservern svarar inte."
         >
-          <IconButton
-            disableRipple
+          <LsIconButton
             className="BUTTON555"
             sx={{
               p: "3px",
@@ -244,7 +243,7 @@ function LayerItem({
               fontSize="small"
               sx={{ marginTop: "-1px", color: theme.palette.warning.main }}
             />
-          </IconButton>
+          </LsIconButton>
         </HajkToolTip>
       )
     );
@@ -293,13 +292,13 @@ function LayerItem({
         sx={{
           position: "relative",
           alignItems: "flex-start",
-          ".FIND-LAYERITEM-SECONDARY-ACTION": {
-            transition: "all 300ms ease",
-            transform: "translateX(100%) translateZ(1px)",
-          },
-          "&:hover .FIND-LAYERITEM-SECONDARY-ACTION": {
-            transform: "translateX(0%) translateZ(1px)",
-          },
+          // ".FIND-LAYERITEM-SECONDARY-ACTION": {
+          //   transition: "all 300ms ease",
+          //   transform: "translateX(100%) translateZ(0)",
+          // },
+          // "&:hover .FIND-LAYERITEM-SECONDARY-ACTION": {
+          //   transform: "translateX(0%) translateZ(0)",
+          // },
 
           borderBottom: (theme) =>
             drawOrderItem() && showSublayers
@@ -314,8 +313,7 @@ function LayerItem({
         }}
       >
         {draggable && (
-          <IconButton
-            disableTouchRipple
+          <LsIconButton
             sx={{
               px: 0,
               opacity: 0,
@@ -326,7 +324,7 @@ function LayerItem({
             <HajkToolTip placement="left" title="Dra för att ändra ritordning">
               <DragIndicatorOutlinedIcon fontSize={"small"} />
             </HajkToolTip>
-          </IconButton>
+          </LsIconButton>
         )}
         {expandableSection && expandableSection}
         <ListItemButton
@@ -346,7 +344,7 @@ function LayerItem({
               position: "relative",
               width: "100%",
               alignItems: "flex-start",
-              py: 0.25, // jesade-vbg compact mode
+              py: 0.25, // jesade-vbg compact mode, changed from py: 0.5
               pr: 1,
               pl: "2px",
               borderBottom: (theme) => renderBorder(theme),
@@ -381,35 +379,34 @@ function LayerItem({
             >
               {renderStatusIcon()}
               {!toggleable && !draggable ? (
-                <IconButton
-                  size="small"
-                  disableTouchRipple
-                  className="BUTTON111"
-                >
+                <LsIconButton size="small" className="BUTTON111">
                   <HajkToolTip title="Bakgrundskartan ligger låst längst ner i ritordningen">
                     <LockOutlinedIcon />
                   </HajkToolTip>
-                </IconButton>
+                </LsIconButton>
               ) : null}
               {layerIsFakeMapLayer !== true && layerType !== "system" && (
-                <IconButton
+                <LsIconButton
                   size="small"
                   onClick={(e) => showLayerDetails(e)}
                   className="BUTTON222"
                   sx={{
+                    marginTop: "3px",
                     "&:hover .ls-arrow": {
-                      transform: "translateX(3px)",
+                      color: "#fff",
                     },
                   }}
                 >
-                  <KeyboardArrowRightOutlinedIcon
+                  <ShowDetailsIcon
                     className="ls-arrow"
                     sx={{
-                      transition: "transform 300ms ease",
+                      width: "0.7em",
+                      height: "0.7em",
+                      transform: "rotate(180deg)",
                       color: (theme) => theme.palette.grey[500],
                     }}
-                  ></KeyboardArrowRightOutlinedIcon>
-                </IconButton>
+                  ></ShowDetailsIcon>
+                </LsIconButton>
               )}
             </ListItemSecondaryAction>
           </Box>

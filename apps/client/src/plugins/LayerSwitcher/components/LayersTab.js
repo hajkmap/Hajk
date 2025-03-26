@@ -147,10 +147,11 @@ const LayersTab = ({
         style={{
           height: "inherit",
           overflowY: "auto",
+          overflowX: "hidden",
           flexBasis: "100%",
           flexGrow: "1",
           flexShrink: "1",
-          transform: "translateZ(1px)", // Force layer into 3D space to prevent flickering
+          transform: "translateZ(0)", // Force layer into 3D space to prevent flickering
         }}
       >
         {filterHits === null && (

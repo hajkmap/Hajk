@@ -57,6 +57,10 @@ const ImageWithLoading = ({ src }) => {
 };
 
 const getThemedUrl = (url, isDarkMode) => {
+  if (!url) {
+    // Nothing to do here, move on.
+    return;
+  }
   const fontColor = isDarkMode ? "0xFFFFFF" : "0x000000";
   const parsedUrl = new URL(url);
   const params = parsedUrl.searchParams;
@@ -97,6 +101,7 @@ export default function LegendImage({ open, src }) {
   }
 
   const urlArray = Array.isArray(src) ? src : [src];
+
   return (
     <Collapse
       sx={{ py: open ? 1 : 0, ml: "1px" }}
@@ -105,12 +110,14 @@ export default function LegendImage({ open, src }) {
       unmountOnExit
     >
       <ColumnContainer>
-        {urlArray.map((url, index) => {
-          const themedUrl = getThemedUrl(url, isDarkMode);
-          return (
-            <ImageWithLoading key={index + "-" + themedUrl} src={themedUrl} />
-          );
-        })}
+        {urlArray
+          .filter((url) => url)
+          .map((url, index) => {
+            const themedUrl = getThemedUrl(url, isDarkMode);
+            return (
+              <ImageWithLoading key={index + "-" + themedUrl} src={themedUrl} />
+            );
+          })}
       </ColumnContainer>
     </Collapse>
   );

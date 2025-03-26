@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import {
   Box,
-  IconButton,
   ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
@@ -12,9 +11,10 @@ import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+import ShowDetailsIcon from "@mui/icons-material/MoreOutlined";
 import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 import HajkToolTip from "components/HajkToolTip";
+import LsIconButton from "@mui/material/IconButton"; // Updated import
 
 export default function SubLayerItem({
   layerId,
@@ -74,7 +74,7 @@ export default function SubLayerItem({
           legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"
         }
       >
-        <IconButton
+        <LsIconButton // Updated component
           sx={{ p: 0.25, mr: "5px" }}
           size="small"
           onClick={(e) => {
@@ -83,7 +83,7 @@ export default function SubLayerItem({
           }}
         >
           <FormatListBulletedOutlinedIcon fontSize="small" />
-        </IconButton>
+        </LsIconButton>
       </HajkToolTip>
     );
   };
@@ -106,9 +106,12 @@ export default function SubLayerItem({
         dense
       >
         {toggleable && (
-          <IconButton disableTouchRipple size="small">
+          <LsIconButton // Updated component
+            disableTouchRipple
+            size="small"
+          >
             {getLayerToggleIcon()}
-          </IconButton>
+          </LsIconButton>
         )}
         {getIconFromLayer()}
         <ListItemText
@@ -129,23 +132,26 @@ export default function SubLayerItem({
             transform: "none",
           }}
         >
-          <IconButton
+          <LsIconButton
             size="small"
             onClick={(e) => showLayerDetails(e)}
             sx={{
+              marginTop: "3px",
               "&:hover .ls-arrow": {
-                transform: "translateX(3px)",
+                color: "#fff",
               },
             }}
           >
-            <KeyboardArrowRightOutlinedIcon
+            <ShowDetailsIcon
               className="ls-arrow"
               sx={{
-                transition: "transform 300ms ease",
+                width: "0.7em",
+                height: "0.7em",
+                transform: "rotate(180deg)",
                 color: (theme) => theme.palette.grey[500],
               }}
-            ></KeyboardArrowRightOutlinedIcon>
-          </IconButton>
+            ></ShowDetailsIcon>
+          </LsIconButton>
         </ListItemSecondaryAction>
       </ListItemButton>
       {subLayerInfo.legendIcon ? null : (

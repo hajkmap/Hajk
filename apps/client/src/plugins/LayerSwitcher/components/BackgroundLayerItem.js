@@ -13,7 +13,7 @@ import HajkToolTip from "components/HajkToolTip";
 import RadioButtonChecked from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
-import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+import ShowDetailsIcon from "@mui/icons-material/MoreOutlined";
 
 // TODO Remove all isfakemaplayer
 function BackgroundLayerItem({
@@ -124,11 +124,11 @@ function BackgroundLayerItem({
                 onClick={(e) => showLayerDetails(e)}
                 disableTouchRipple
               >
-                <KeyboardArrowRightOutlinedIcon
+                <ShowDetailsIcon
                   sx={{
                     color: (theme) => theme.palette.grey[500],
                   }}
-                ></KeyboardArrowRightOutlinedIcon>
+                ></ShowDetailsIcon>
               </IconButton>
             )}
           </ListItemSecondaryAction>

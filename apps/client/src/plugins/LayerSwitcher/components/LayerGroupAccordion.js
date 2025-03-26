@@ -24,7 +24,8 @@ export default function LayerGroupAccordion({
         onClick={() => setState({ expanded: !state.expanded })}
         sx={{
           alignItems: "flex-start",
-
+          borderBottom: (theme) =>
+            `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           p: 0,
           pl: "2px",
           "& .ls-arrow": {
@@ -66,8 +67,8 @@ export default function LayerGroupAccordion({
             alignItems: "flex-start",
             py: 0.25,
             pr: 1,
-            borderBottom: (theme) =>
-              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+            // borderBottom: (theme) =>
+            //   `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
         >
           {toggleable && toggleDetails}
@@ -75,7 +76,13 @@ export default function LayerGroupAccordion({
         </Box>
       </ListItemButton>
       <Collapse in={state.expanded} unmountOnExit>
-        <Box sx={{ marginLeft: "26px" }}>{children}</Box>
+        <Box
+          sx={{
+            marginLeft: "20px" /* jesade-vbg compact mode, changed from 26px */,
+          }}
+        >
+          {children}
+        </Box>
       </Collapse>
     </div>
   );

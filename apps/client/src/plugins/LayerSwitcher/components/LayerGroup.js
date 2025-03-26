@@ -255,7 +255,8 @@ const LayerGroup = ({
             />
             <ListItemText
               primaryTypographyProps={{
-                py: groupIsToggable ? 0 : "3px",
+                pb: "2px", // jesade-vbg compact mode, added line.
+                // py: groupIsToggable ? 0 : "3px", // jesade-vbg compact mode, commented out.
                 pl: groupIsToggable ? 0 : "3px",
                 variant: "body1",
                 fontWeight: isToggled || isSemiToggled ? "bold" : "inherit",
