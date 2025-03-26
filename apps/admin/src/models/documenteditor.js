@@ -86,11 +86,34 @@ var documentEditor = Model.extend({
     if (folder) {
       url += "/" + folder;
     }
+
     try {
       const response = await hfetch(url);
       const text = await response.text();
       const data = JSON.parse(text);
-      callback(data);
+
+      // Filter out PDF files by checking Content-Type
+      const filteredDocs = [];
+      for (const docName of data) {
+        // Build URL for each file
+        const docUrl =
+          this.get("config").url_load +
+          (folder ? "/" + folder : "") +
+          "/" +
+          docName;
+
+        // Make a HEAD request
+        const headResponse = await hfetch(docUrl, { method: "HEAD" });
+        const contentType = headResponse.headers.get("Content-Type") || "";
+
+        // If it has JSON-like content, keep the file in the list
+        if (contentType.toLowerCase().includes("application/json")) {
+          filteredDocs.push(docName);
+        }
+      }
+
+      // Return (via callback) only the files that are actually JSON
+      callback(filteredDocs);
     } catch (err) {
       alert(
         "Kunde inte ladda mappen med dokument. Verifiera att uppsättningen är korrekt utförd."

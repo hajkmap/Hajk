@@ -61,7 +61,7 @@ function PdfViewerWithTOC({ document, customTheme }) {
   const [numPages, setNumPages] = useState(null);
   const [topLevel, setTopLevel] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [menuOpen, setMenuOpen] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const [showScrollButton, setShowScrollButton] = useState(false);
   const scrollLimit = 400;
@@ -174,8 +174,15 @@ function PdfViewerWithTOC({ document, customTheme }) {
 
   return (
     <>
-      {/* Upper section: Zoom + menu button */}
-      <div style={{ marginBottom: "0.5rem", margin: "0 1rem 1rem 1rem" }}>
+      {/* Upper section: Zoom + toggler for TOC */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          margin: "0 0.1rem 0.1rem 0.1rem",
+          // flexWrap: "wrap",
+        }}
+      >
         <IconButton onClick={zoomOut} style={{ marginRight: "5px" }}>
           <ZoomOutIcon />
         </IconButton>
@@ -184,23 +191,30 @@ function PdfViewerWithTOC({ document, customTheme }) {
           <ZoomInIcon />
         </IconButton>
 
-        <span style={{ marginLeft: "10px" }}>{Math.round(scale * 100)}%</span>
+        <span style={{ marginLeft: "10px", fontSize: "12px" }}>
+          {Math.round(scale * 100)}%
+        </span>
 
-        {/* Button to show/hide menu */}
-        <button
+        {/* Toggle menu via a clickable bold text */}
+        <div
           onClick={() => setMenuOpen((prev) => !prev)}
-          style={{ marginLeft: "1rem" }}
+          style={{
+            marginLeft: "1rem",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
         >
-          {menuOpen ? "Dölj meny" : "Visa meny"}
-        </button>
-
-        {menuOpen && (
-          <div style={{ marginTop: "0.1rem" }}>
-            <b>Innehållsförteckning:</b>
-            {renderTOC()}
-          </div>
-        )}
+          {menuOpen ? "Dölj innehållsförteckning" : "Visa innehållsförteckning"}
+        </div>
       </div>
+
+      {/* The actual menu (TOC) below row 1 */}
+      {menuOpen && (
+        <div style={{ marginTop: "0.1rem", marginLeft: "1rem" }}>
+          <b>Innehållsförteckning:</b>
+          {renderTOC()}
+        </div>
+      )}
 
       {/* PDF-container */}
       <PdfContainer id="pdfViewer" ref={containerRef} onScroll={onScroll}>
