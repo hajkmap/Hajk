@@ -62,9 +62,29 @@ class WindowZModel {
       const isHajkWindow = windowElement.classList.contains("hajk-window");
       const hajkWindowContainer = document.getElementById("windows-container");
 
-      // We need to get past Header on zIndex 1100 and Popper on 1400.
+      // We need to get:
+      // Over Header (AppBar) on zIndex 1100 and
+      // under Drawer on 1200
 
-      hajkWindowContainer.style.zIndex = isHajkWindow ? 1500 : null;
+      // So 1101 is a good number for zIndex on the window container.
+      // If we need to handle more windows than 99 we will need to
+      // configure MUI using a theme to change all default zIndexes.
+
+      // Default zIndexes is found here
+      // https://mui.com/material-ui/customization/z-index/
+
+      // Below is from the MUI documentation 2025-03-25
+      // ---------------------------------------------
+      // mobile stepper:  1000
+      // fab:             1050
+      // speed dial:      1050
+      // app bar:         1100
+      // drawer:          1200
+      // modal:           1300
+      // snackbar:        1400
+      // tooltip:         1500
+
+      hajkWindowContainer.style.zIndex = isHajkWindow ? 1101 : null;
 
       /**
        * The structure is like this:
@@ -72,13 +92,13 @@ class WindowZModel {
        * Header z 1100
        * ---- Search and Search list, z 1000 + dynamic
        *
-       * Window container z null or z 1500 when active
+       * Window container z null or z 1101 when active
        * ---- Hajk window 1, z 1000 + dynamic
        * ---- Hajk window 2, z 1000 + dynamic
        * ---- Hajk window 3, z 1000 + dynamic
        * ---- etc etc.
        *
-       * Popper z 1400
+       * Popovers z 1300
        */
     });
   }

@@ -447,7 +447,6 @@ class SearchBar extends React.PureComponent {
                   <HajkToolTip title={expandMessage}>
                     <IconButton
                       onClick={(e) => {
-                        e.stopPropagation();
                         toggleCollapseSearchResults();
                       }}
                       size="small"
@@ -463,7 +462,6 @@ class SearchBar extends React.PureComponent {
                   <HajkToolTip title={toggleResultsLayerVisibilityMessage}>
                     <IconButton
                       onClick={(e) => {
-                        e.stopPropagation();
                         this.toggleResultsLayerVisibility();
                       }}
                       size="small"

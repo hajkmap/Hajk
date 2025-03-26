@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## [4.0.0-rc.2] - 2025-03-xx
+## [4.0.0-rc.2] - 2025-03-26
 
 ### Fixed
 
@@ -47,7 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LayerSwitcher: Toggle sublayers when loading Quick Access presets. ([PR](https://github.com/hajkmap/Hajk/pull/1623))
 - LayerSwitcher: Fix for fitting the legend graphics. ([commit](https://github.com/hajkmap/Hajk/commit/432fe3ba528154f553d771527aab301d0666dfe9)
 - LayerSwitcher: Fix for storing the Theme Presets in LocalStorage. ([PR](https://github.com/hajkmap/Hajk/pull/1625))
-- Client/General: Refinement of Window management . ([PR](https://github.com/hajkmap/Hajk/pull/1629))
+- Client/General: Refinement of Window management. ([PR](https://github.com/hajkmap/Hajk/pull/1629))
+- DocumentHandler/Admin: Now possible to edit TOC on document level. ([PR](https://github.com/hajkmap/Hajk/pull/1626))
 
 ## [4.0.0-rc.1] - 2025-02-19
 
