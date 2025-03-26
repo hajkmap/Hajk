@@ -8,7 +8,8 @@ import Progress from "./Progress";
 import { CustomLink } from "../utils/ContentComponentFactory";
 import withSnackbar from "components/WithSnackbar";
 import PrintIcon from "@mui/icons-material/Print";
-import PdfViewer from "../pdfViewer/PdfViewer";
+//import PdfViewer from "../pdfViewer/PdfViewer";
+import PdfViewerWithTOC from "../pdfViewer/PdfViewerWithTOC";
 
 class DocumentWindowBase extends React.PureComponent {
   snackbarKey = null;
@@ -193,7 +194,7 @@ class DocumentWindowBase extends React.PureComponent {
       >
         {document != null && modelReady ? (
           document?.type === "pdf" ? (
-            <PdfViewer
+            <PdfViewerWithTOC
               document={document}
               maximized={documentWindowMaximized}
               customTheme={customTheme}

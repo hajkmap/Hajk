@@ -37,7 +37,7 @@ function PdfViewer(props) {
 
   const scrollToTop = () => {
     scroll.scrollTo(0, {
-      containerId: "pdfViewer", // matchar ID på den container vi vill skrolla i
+      containerId: "pdfViewer",
       smooth: false,
       duration: 0,
       delay: 100,
