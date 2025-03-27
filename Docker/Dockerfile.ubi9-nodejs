@@ -27,7 +27,7 @@ RUN mv ./public/config.docker.json ./public/config.json
 RUN npm run build --ignore-scripts
 
 # Stage 4 - Combine everything and fire it up
-FROM registry.access.redhat.com/ubi9/nodejs-22-minimal
+FROM registry.access.redhat.com/ubi9/nodejs-22
 COPY /apps/backend/package*.json ./
 USER root
 RUN npm install --production
