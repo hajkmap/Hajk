@@ -3,17 +3,17 @@ import React, { useEffect, useState, useCallback, memo } from "react";
 // Material UI components
 import {
   Box,
-  IconButton,
   ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
 } from "@mui/material";
-import HajkToolTip from "components/HajkToolTip";
 
 import RadioButtonChecked from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
-import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
-import ShowDetailsIcon from "@mui/icons-material/MoreOutlined";
+
+import LsIconButton from "./LsIconButton";
+import BtnShowDetails from "./BtnShowDetails";
+import BtnLayerWarning from "./BtnLayerWarning";
 
 // TODO Remove all isfakemaplayer
 function BackgroundLayerItem({
@@ -90,13 +90,13 @@ function BackgroundLayerItem({
               `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
         >
-          <IconButton disableTouchRipple size="small" sx={{ pl: 0 }}>
+          <LsIconButton size="small" sx={{ pl: 0 }}>
             {selected ? (
               <RadioButtonChecked sx={{ ml: 2 }} />
             ) : (
               <RadioButtonUnchecked sx={{ ml: 2 }} />
             )}
-          </IconButton>
+          </LsIconButton>
           <ListItemText
             primary={name}
             primaryTypographyProps={{
@@ -108,28 +108,9 @@ function BackgroundLayerItem({
             }}
           />
           <ListItemSecondaryAction className="FIND-BACKGROUNDLAYERITEM-SECONDARY-ACTION">
-            {wmsLayerLoadStatus === "loaderror" && (
-              <IconButton disableTouchRipple>
-                <HajkToolTip
-                  disableInteractive
-                  title="Lagret kunde inte laddas in. Kartservern svarar inte."
-                >
-                  <WarningAmberOutlinedIcon fontSize="small" />
-                </HajkToolTip>
-              </IconButton>
-            )}
+            {wmsLayerLoadStatus === "loaderror" && <BtnLayerWarning />}
             {isFakeMapLayer !== true && (
-              <IconButton
-                size="small"
-                onClick={(e) => showLayerDetails(e)}
-                disableTouchRipple
-              >
-                <ShowDetailsIcon
-                  sx={{
-                    color: (theme) => theme.palette.grey[500],
-                  }}
-                ></ShowDetailsIcon>
-              </IconButton>
+              <BtnShowDetails onClick={(e) => showLayerDetails(e)} />
             )}
           </ListItemSecondaryAction>
         </Box>

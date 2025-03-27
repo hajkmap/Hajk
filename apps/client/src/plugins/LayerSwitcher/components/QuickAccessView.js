@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import withSnackbar from "components/WithSnackbar";
+import LsIconButton from "./LsIconButton";
 // import { createPortal } from "react-dom";
 
 // import { styled } from "@mui/material/styles";
 import {
   Box,
-  IconButton,
   ListItemText,
   ListItemButton,
   ListItemSecondaryAction,
@@ -88,9 +88,12 @@ const QuickAccessView = ({
     >
       <ListItemButton
         disableRipple
-        onClick={() =>
-          setQuickAccessSectionExpanded(!quickAccessSectionExpanded)
-        }
+        onClick={() => {
+          if (!quickAccessSectionExpanded && qaLayers?.length === 0) {
+            return;
+          }
+          setQuickAccessSectionExpanded(!quickAccessSectionExpanded);
+        }}
         sx={{
           p: 0,
           borderBottom: (theme) =>
@@ -98,11 +101,11 @@ const QuickAccessView = ({
         }}
         dense
       >
-        <IconButton
+        <LsIconButton
           size="small"
           sx={{
             pr: 0,
-            visibility: qaLayers?.length > 0 ? "visibile" : "hidden",
+            visibility: qaLayers?.length > 0 ? "visible" : "hidden",
           }}
           disableRipple
         >
@@ -112,7 +115,7 @@ const QuickAccessView = ({
               transition: "transform 300ms ease",
             }}
           ></KeyboardArrowRightOutlinedIcon>
-        </IconButton>
+        </LsIconButton>
         <Box
           sx={{
             display: "flex",
@@ -124,9 +127,9 @@ const QuickAccessView = ({
             // borderBottom: (theme) => `${theme.spacing(0.2)} solid transparent`,
           }}
         >
-          <IconButton sx={{ pl: 0 }} disableRipple size="small">
+          <LsIconButton sx={{ pl: 0 }} disableRipple size="small">
             <StarOutlineOutlinedIcon />
-          </IconButton>
+          </LsIconButton>
 
           <ListItemText
             primaryTypographyProps={{
@@ -139,9 +142,9 @@ const QuickAccessView = ({
           <ListItemSecondaryAction className="FIND-QUICKACCERSSVIEW-SECONDARY-ACTION">
             {enableQuickAccessPresets && (
               <HajkTooltip title="Teman">
-                <IconButton onClick={handleQuickAccessPresetsToggle}>
+                <LsIconButton onClick={handleQuickAccessPresetsToggle}>
                   <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
-                </IconButton>
+                </LsIconButton>
               </HajkTooltip>
             )}
             {enableUserQuickAccessFavorites && (

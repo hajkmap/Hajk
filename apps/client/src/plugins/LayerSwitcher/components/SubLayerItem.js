@@ -11,10 +11,11 @@ import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import ShowDetailsIcon from "@mui/icons-material/MoreOutlined";
+
 import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 import HajkToolTip from "components/HajkToolTip";
-import LsIconButton from "@mui/material/IconButton"; // Updated import
+import LsIconButton from "./LsIconButton";
+import BtnShowDetails from "./BtnShowDetails";
 
 export default function SubLayerItem({
   layerId,
@@ -74,7 +75,7 @@ export default function SubLayerItem({
           legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"
         }
       >
-        <LsIconButton // Updated component
+        <LsIconButton
           sx={{ p: 0.25, mr: "5px" }}
           size="small"
           onClick={(e) => {
@@ -106,12 +107,7 @@ export default function SubLayerItem({
         dense
       >
         {toggleable && (
-          <LsIconButton // Updated component
-            disableTouchRipple
-            size="small"
-          >
-            {getLayerToggleIcon()}
-          </LsIconButton>
+          <LsIconButton size="small">{getLayerToggleIcon()}</LsIconButton>
         )}
         {getIconFromLayer()}
         <ListItemText
@@ -132,26 +128,7 @@ export default function SubLayerItem({
             transform: "none",
           }}
         >
-          <LsIconButton
-            size="small"
-            onClick={(e) => showLayerDetails(e)}
-            sx={{
-              marginTop: "3px",
-              "&:hover .ls-arrow": {
-                color: "#fff",
-              },
-            }}
-          >
-            <ShowDetailsIcon
-              className="ls-arrow"
-              sx={{
-                width: "0.7em",
-                height: "0.7em",
-                transform: "rotate(180deg)",
-                color: (theme) => theme.palette.grey[500],
-              }}
-            ></ShowDetailsIcon>
-          </LsIconButton>
+          <BtnShowDetails onClick={(e) => showLayerDetails(e)} />
         </ListItemSecondaryAction>
       </ListItemButton>
       {subLayerInfo.legendIcon ? null : (

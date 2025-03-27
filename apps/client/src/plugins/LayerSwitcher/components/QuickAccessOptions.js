@@ -1,17 +1,12 @@
 import * as React from "react";
 
-import {
-  IconButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-} from "@mui/material";
+import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import HajkToolTip from "components/HajkToolTip";
+import LsIconButton from "./LsIconButton";
 
 export default function QuickAccessOptions({
   handleAddLayersToQuickAccess,
@@ -40,7 +35,7 @@ export default function QuickAccessOptions({
 
   return (
     <>
-      <IconButton
+      <LsIconButton
         size="small"
         aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
@@ -50,7 +45,7 @@ export default function QuickAccessOptions({
         <HajkToolTip title="Fler val för snabbåtkomst">
           <MoreVertOutlinedIcon />
         </HajkToolTip>
-      </IconButton>
+      </LsIconButton>
       <Menu
         anchorEl={anchorEl}
         open={optionsMenuIsOpen}

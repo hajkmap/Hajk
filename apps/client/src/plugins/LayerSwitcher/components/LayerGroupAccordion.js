@@ -1,6 +1,7 @@
 import React from "react";
-import { Collapse, Box, IconButton, ListItemButton } from "@mui/material";
+import { Collapse, Box, ListItemButton } from "@mui/material";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+import LsIconButton from "./LsIconButton";
 
 export default function LayerGroupAccordion({
   expanded,
@@ -40,7 +41,7 @@ export default function LayerGroupAccordion({
         }}
         dense
       >
-        <IconButton
+        <LsIconButton
           size="small"
           sx={{
             mt: "2px",
@@ -51,13 +52,12 @@ export default function LayerGroupAccordion({
               boxShadow: "none",
             },
           }}
-          disableTouchRipple
         >
           <KeyboardArrowRightOutlinedIcon
             className="ls-arrow"
             sx={{}}
           ></KeyboardArrowRightOutlinedIcon>
-        </IconButton>
+        </LsIconButton>
         <Box
           className="FINDME999"
           sx={{

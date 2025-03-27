@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import LayerItem from "./LayerItem";
 import GroupLayer from "./GroupLayer";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
-import { Typography, IconButton, ListItemText, Link } from "@mui/material";
+import { Typography, ListItemText, Link } from "@mui/material";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import InfoIcon from "@mui/icons-material/Info";
 import HajkToolTip from "components/HajkToolTip";
+import LsIconButton from "./LsIconButton";
 
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
@@ -26,7 +27,7 @@ const ToggleAllComponent = ({ toggleable, toggleState, clickHandler }) => {
         clickHandler();
       }}
     >
-      <IconButton disableTouchRipple size="small">
+      <LsIconButton size="small">
         {
           {
             checked: <CheckBoxIcon />,
@@ -34,7 +35,7 @@ const ToggleAllComponent = ({ toggleable, toggleState, clickHandler }) => {
             unchecked: <CheckBoxOutlineBlankIcon />,
           }[toggleState]
         }
-      </IconButton>
+      </LsIconButton>
     </div>
   );
 };
@@ -116,7 +117,7 @@ const GroupInfoToggler = ({
   // Render icons only if one of the states above has a value
   return (
     <HajkToolTip title="Mer information om gruppen" placement="left">
-      <IconButton
+      <LsIconButton
         size="small"
         sx={{
           p: 0.25,
@@ -134,7 +135,7 @@ const GroupInfoToggler = ({
         ) : (
           <InfoIcon fontSize="small" />
         )}
-      </IconButton>
+      </LsIconButton>
     </HajkToolTip>
   );
 };

@@ -14,15 +14,15 @@ import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined
 import BuildOutlinedIcon from "@mui/icons-material/BuildOutlined";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import ShowDetailsIcon from "@mui/icons-material/MoreOutlined";
-import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 
 // Custom components
 import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
 import LsIconButton from "./LsIconButton";
+import BtnShowDetails from "./BtnShowDetails";
+import BtnLayerWarning from "./BtnLayerWarning";
+import BtnShowLegend from "./BtnShowLegend";
 
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
@@ -102,23 +102,10 @@ const LayerLegendIcon = ({
   }
 
   return (
-    <HajkToolTip
-      sx={{ pointerEvents: "none" }}
-      placement="left"
-      title={legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"}
-    >
-      <LsIconButton
-        className="BUTTON444"
-        sx={{ p: 0.25, mt: 0.5, mr: "5px" }}
-        size="small"
-        onClick={(e) => {
-          e.stopPropagation();
-          toggleLegend();
-        }}
-      >
-        <FormatListBulletedOutlinedIcon fontSize="small" />
-      </LsIconButton>
-    </HajkToolTip>
+    <BtnShowLegend
+      legendIsActive={legendIsActive}
+      onClick={() => toggleLegend()} // Fixed: Use toggleLegend instead of setLegendIsActive
+    />
   );
 };
 
@@ -223,30 +210,7 @@ function LayerItem({
    * @return {external:ReactElement}
    */
   const renderStatusIcon = () => {
-    return (
-      wmsLayerLoadStatus === "loaderror" && (
-        <HajkToolTip
-          disableInteractive
-          title="Lagret kunde inte laddas in. Kartservern svarar inte."
-        >
-          <LsIconButton
-            className="BUTTON555"
-            sx={{
-              p: "3px",
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[800]
-                  : theme.palette.grey[200],
-            }}
-          >
-            <WarningAmberOutlinedIcon
-              fontSize="small"
-              sx={{ marginTop: "-1px", color: theme.palette.warning.main }}
-            />
-          </LsIconButton>
-        </HajkToolTip>
-      )
-    );
+    return wmsLayerLoadStatus === "loaderror" && <BtnLayerWarning />;
   };
 
   // Show layer details action
@@ -386,27 +350,7 @@ function LayerItem({
                 </LsIconButton>
               ) : null}
               {layerIsFakeMapLayer !== true && layerType !== "system" && (
-                <LsIconButton
-                  size="small"
-                  onClick={(e) => showLayerDetails(e)}
-                  className="BUTTON222"
-                  sx={{
-                    marginTop: "3px",
-                    "&:hover .ls-arrow": {
-                      color: "#fff",
-                    },
-                  }}
-                >
-                  <ShowDetailsIcon
-                    className="ls-arrow"
-                    sx={{
-                      width: "0.7em",
-                      height: "0.7em",
-                      transform: "rotate(180deg)",
-                      color: (theme) => theme.palette.grey[500],
-                    }}
-                  ></ShowDetailsIcon>
-                </LsIconButton>
+                <BtnShowDetails onClick={(e) => showLayerDetails(e)} />
               )}
             </ListItemSecondaryAction>
           </Box>
@@ -415,7 +359,6 @@ function LayerItem({
       <Box
         sx={{
           paddingLeft: expandableSection ? 3.75 : 0,
-          // backgroundColor: "red",
         }}
       >
         {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
