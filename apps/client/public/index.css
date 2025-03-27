@@ -1,0 +1,114 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+html {
+  position: fixed;
+  height: 100%;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  width: 100vw;
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* prevent pinch-zoom on Android */
+  touch-action: pan-y;
+}
+
+#map {
+  /* restore pinch-zoom for map */
+  touch-action: auto;
+}
+
+.app-start {
+  font-family: Helvetica, Arial, sans-serif;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  color: black !important;
+  line-height: 1.4 !important;
+  font-weight: 300 !important;
+  font-size: 2rem !important;
+  justify-content: center;
+  align-items: center;
+  background: rgb(63, 63, 63);
+  color: white !important;
+  fill: white;
+}
+
+.sr-only {
+  /*Same style attributes as MaterialUI SrOnly*/
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+}
+
+.compass {
+  animation: compass 1.2s cubic-bezier(0.51, 0.41, 0.17, 1.1) infinite;
+  height: 80px;
+}
+
+@keyframes compass {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.app-name {
+  font-size: 5rem;
+  font-variant-caps: all-small-caps;
+  font-style: italic;
+  text-align: center;
+}
+
+.app-version {
+  font-size: 0.8rem;
+  line-height: 5rem;
+}
+
+.introjs-tooltip {
+  min-width: 280px !important;
+}
+
+/* Z-index override for draggable listitem in layerswitcher */
+.smooth-dnd-ghost.vertical.smooth-dnd-draggable-wrapper {
+  z-index: 99999 !important;
+}
+.material-icons {
+  font-family: "Material Icons";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px; /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;
+  /* Support for Safari and Chrome. */
+  text-rendering: optimizeLegibility;
+
+  /* Support for Firefox. */
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Support for IE. */
+  font-feature-settings: "liga";
+}

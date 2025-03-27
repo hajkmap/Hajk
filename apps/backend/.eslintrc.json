@@ -1,0 +1,11 @@
+{
+  "env": {
+    "es2022": true,
+    "node": true,
+    "mocha": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "sourceType": "module"
+  }
+}

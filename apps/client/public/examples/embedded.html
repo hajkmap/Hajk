@@ -1,0 +1,189 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Example: Hajk Embedded</title>
+    <style>
+      p {
+        max-width: 660px;
+      }
+    </style>
+  </head>
+
+  <body style="max-width: 1280px">
+    <h1>How to embed and control Hajk</h1>
+
+    <form>
+      <fieldset>
+        <legend>Full control:</legend>
+        <input id="hashField" type="text" size="140" />
+        <button id="updateButton">Update IFRAME</button>
+      </fieldset>
+      <fieldset>
+        <legend>Quick buttons:</legend>
+        <button id="increaseButton">Increase zoom</button>
+        <button id="decreaseButton">Decrease zoom</button>
+      </fieldset>
+    </form>
+    <iframe id="iframe" src="/" width="1280" height="768"></iframe>
+
+    <p>
+      This example shows how an embedded Hajk instance can be controlled from
+      the embedding website.
+    </p>
+    <p>
+      <b
+        >It highlights the two-way interaction between the <i>embedded</i> Hajk
+        application and the <i>embedding</i> (parent) page.
+      </b>
+    </p>
+    <p>
+      You can use the <i>Quick buttons</i> to modify the <code>z</code> (zoom)
+      parameter, or use the <i>Full control</i> input field to freely set any
+      parameter.
+    </p>
+    <p>Currently the following parameters are supported by the API:</p>
+    <ul>
+      <li><code>x</code> and <code>y</code> - map's center coordinates</li>
+      <li><code>z</code> - map's zoom level</li>
+      <li><code>p</code> - visible plugins</li>
+      <li><code>l</code> - visible layers</li>
+      <li><code>gl</code> - visible sublayers of group layers</li>
+      <li><code>q</code> - search query string</li>
+    </ul>
+    <p>
+      Hajk listens to changes to the hash parameters and acts accordingly, e.g.
+      by changing the map's zoom level. The input field's value (above) is being
+      kept up-to-date with Hajk's current value, so that
+      <b
+        >you can easily see how the hash parameters change as you do things in
+        the application</b
+      >.
+    </p>
+
+    <p>
+      <i>
+        This example is accessible from
+        http://localhost:3000/examples/embedded.html when running Hajk in
+        development mode.</i
+      >
+    </p>
+
+    <p>
+      <i>
+        For more info on background and development, see issue
+        <a href="https://github.com/hajkmap/Hajk/issues/1252" target="_blank"
+          >#1252</a
+        >.</i
+      >
+    </p>
+    <script type="module">
+      // We start off with an empty hash
+      // const currentHash = new URLSearchParams("/");
+
+      // Grab some elements we want to access
+      const iframe = document.getElementById("iframe");
+      const hashField = document.getElementById("hashField");
+      const updateButton = document.getElementById("updateButton");
+      const increaseButton = document.getElementById("increaseButton");
+      const decreaseButton = document.getElementById("decreaseButton");
+
+      let hajkPublicApi = {
+        minZoom: 2,
+        maxZoom: 20,
+      };
+
+      const changeZoom = (increaseBy = 1) => {
+        const url = new URL(iframe.src);
+
+        // Extract hash params
+        const hash = new URLSearchParams(url.hash.replaceAll("#", ""));
+
+        // Try to grab current zoom level from hash params, default to "2"
+        const currentZ = parseInt(hash.get("z")) || 2;
+
+        let newZ = currentZ + increaseBy;
+        if (newZ < hajkPublicApi.minZoom) {
+          alert(`Can't zoom below level ${hajkPublicApi.minZoom}`);
+          newZ = hajkPublicApi.minZoom;
+        }
+
+        if (newZ > hajkPublicApi.maxZoom) {
+          alert(`Can't zoom above level ${hajkPublicApi.maxZoom}`);
+          newZ = hajkPublicApi.maxZoom;
+        }
+
+        // Set the property of the URLSearchParams object. This will either
+        // add "z", or update if already exists
+        hash.set("z", newZ);
+
+        // Transform the URLSearchParams object to a valid hash string…
+        const newHash = "#" + hash.toString();
+
+        // …and add to our URL.
+        url.hash = newHash;
+
+        // Finally, let's update the IFRAME's SRC attribute
+        iframe.src = url.toString();
+
+        // For the purpose of this test, let's update hash text field
+        hashField.value = hash.toString();
+      };
+
+      // Bind the listeners
+
+      iframe.contentWindow.addEventListener("hashchange", (e) => {
+        hashField.value = iframe.contentDocument.location.hash.replaceAll(
+          "#",
+          ""
+        );
+      });
+
+      iframe.addEventListener("load", (e) => {
+        // Wait a second to ensure that JS is processed after Hajk is loaded in
+        // the IFRAME.
+        setTimeout(() => {
+          // Retrieve some data from public API
+          hajkPublicApi = {
+            ...hajkPublicApi,
+            ...iframe.contentWindow.hajkPublicApi,
+          };
+
+          // Ensure that the hash text field here corresponds to the actual from
+          // the embedded document (Hajk will change its hash string on init)
+          hashField.value = iframe.contentDocument.location.hash.replaceAll(
+            "#",
+            ""
+          );
+        }, 700);
+      });
+
+      updateButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        // Create the new hash value by taking the current hash field value
+        // and parse it into an params object
+        const newHash = new URLSearchParams(hashField.value).toString();
+
+        // Grab the URL (will be used to replace the SRC param of the IFRAME soon)
+        const url = new URL(iframe.src);
+        url.hash = "#" + newHash;
+
+        // Update IFRAME's SRC attribute
+        iframe.src = url.toString();
+
+        // Finally, let's ensure our hash field has correctly formatted
+        // params string too, with encoded values, e.g. ","->"%2C"
+        hashField.value = newHash;
+      });
+
+      increaseButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        changeZoom(1);
+      });
+
+      decreaseButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        changeZoom(-1);
+      });
+    </script>
+  </body>
+</html>

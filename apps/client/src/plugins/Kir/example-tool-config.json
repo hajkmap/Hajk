@@ -1,0 +1,56 @@
+{
+  "type": "kir",
+  "index": 4009,
+  "options": {
+    "target": "toolbar",
+    "visibleAtStart": true,
+    "wfsLayers": [
+      {
+        "id": "1247",
+        "caption": "Kommuninvånare",
+        "url": "https://x",
+        "layers": ["ext_skv_v1:kir_folk"],
+        "searchFields": ["tillnamn"],
+        "aliasDict": "",
+        "displayFields": ["tillnamn"],
+        "geometryField": "geom",
+        "visibleForGroups": []
+      }
+    ],
+    "wfsId": "1247",
+    "genderField": "koen",
+    "genderMale": "M",
+    "genderFemale": "K",
+    "ageField": "alder",
+    "maxFeatures": 10000,
+    "resultsList": {
+      "sortByField": "ageField",
+      "textField": "tillnamn",
+      "template": "<div>\n  <table>\n    <tbody>\n      <tr>\n        <td>Namn</td>\n        <td>{tillnamn}</td>\n      </tr>\n      <tr>\n        <td>Adress</td>\n        <td>{adress}<br/>{postnr}<br/>{ort}</td>\n      </tr>\n      <tr>\n        <td>Födelsedatum</td>\n        <td>{fodelsedat|date}</td>\n      </tr>\n    </tbody>\n  </table>\n</div>"
+    },
+    "residentList": {
+      "mappings": {
+        "addressDisplayName": "Adress",
+        "addressFieldName": "adress",
+        "ageDisplayName": "Ålder",
+        "ageFieldName": "alder",
+        "ssnDisplayName": "Personnummer",
+        "ssnFieldName": "personnr",
+        "birthDateDisplayName": "Födelsedatum",
+        "birthDateFieldName": "personnr",
+        "genderDisplayName": "Kön",
+        "genderFieldName": "koen",
+        "nameDisplayName": "Namn",
+        "nameFieldName": "tillnamn",
+        "postalCodeDisplayName": "Postnummer",
+        "postalCodeFieldName": "postnr",
+        "cityDisplayName": "Postort",
+        "cityFieldName": "ort"
+      },
+      "id": "9247",
+      "excelExportUrl": "https://x/mapservice/fir/residentlist",
+      "minAge": 0,
+      "visibleForGroups": []
+    }
+  }
+}
