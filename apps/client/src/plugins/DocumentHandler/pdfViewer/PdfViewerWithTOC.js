@@ -10,6 +10,7 @@ import { Element } from "react-scroll";
 import ScrollToTop from "../documentWindow/ScrollToTop";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
+import "./style.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -122,24 +123,13 @@ function PdfViewerWithTOC({ document, customTheme }) {
   const renderTOC = () => {
     if (topLevel.length === 0) return null;
     return (
-      <ul
-        style={{
-          listStyle: "none",
-          margin: 0,
-          padding: 0,
-          fontSize: "12px",
-          lineHeight: 0.9,
-        }}
-      >
+      <ul className="toc-list">
         {topLevel.map((item, i) => (
           <li
             key={item.id}
-            style={{
-              cursor: "pointer",
-              margin: 0,
-              padding: "2px 0",
-              backgroundColor: i === selectedIndex ? "#ddd" : "transparent",
-            }}
+            className={
+              "toc-list-item " + (i === selectedIndex ? "selected-item" : "")
+            }
             onClick={() => handleTOCClick(item.page, i)}
           >
             {item.title} {item.page ? `(sid ${item.page})` : ""}
@@ -157,7 +147,7 @@ function PdfViewerWithTOC({ document, customTheme }) {
         <Element
           name={`page-${pageNumber}`}
           key={`page_${pageNumber}`}
-          style={{ marginBottom: "1rem" }}
+          className="page-element"
         >
           <Page
             pageNumber={pageNumber}
@@ -174,64 +164,46 @@ function PdfViewerWithTOC({ document, customTheme }) {
 
   return (
     <>
-      {/* Upper section: Zoom + toggler for TOC */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          margin: "0 0.1rem 0.1rem 0.1rem",
-          // flexWrap: "wrap",
-        }}
-      >
-        <IconButton onClick={zoomOut} style={{ marginRight: "5px" }}>
+      {/* Upper section: Zoom + toggle for table of contents */}
+      <div className="upper-section">
+        <IconButton onClick={zoomOut} className="icon-button">
           <ZoomOutIcon />
         </IconButton>
 
-        <IconButton onClick={zoomIn} style={{ marginRight: "5px" }}>
+        <IconButton onClick={zoomIn} className="icon-button">
           <ZoomInIcon />
         </IconButton>
 
-        <span style={{ marginLeft: "10px", fontSize: "12px" }}>
-          {Math.round(scale * 100)}%
-        </span>
+        <span className="zoom-percentage">{Math.round(scale * 100)}%</span>
 
-        {/* Toggle menu via a clickable bold text */}
+        {/* Clickable, bold text to toggle menu */}
         <div
           onClick={() => setMenuOpen((prev) => !prev)}
-          style={{
-            marginLeft: "1rem",
-            fontWeight: "bold",
-            cursor: "pointer",
-          }}
+          className="toggle-menu"
         >
           {menuOpen ? "Dölj innehållsförteckning" : "Visa innehållsförteckning"}
         </div>
       </div>
 
-      {/* The actual menu (TOC) below row 1 */}
+      {/* TOC */}
       {menuOpen && (
-        <div style={{ marginTop: "0.1rem", marginLeft: "1rem" }}>
+        <div className="toc-container">
           <b>Innehållsförteckning:</b>
           {renderTOC()}
         </div>
       )}
 
       {/* PDF-container */}
-      <PdfContainer id="pdfViewer" ref={containerRef} onScroll={onScroll}>
-        {customTheme?.palette?.mode === "dark" && (
-          <style>
-            {`
-              .react-pdf__Page__canvas {
-                filter: invert(1);
-              }
-            `}
-          </style>
-        )}
-
+      <PdfContainer
+        id="pdfViewer"
+        ref={containerRef}
+        onScroll={onScroll}
+        className={customTheme?.palette?.mode === "dark" ? "dark-theme" : ""}
+      >
         <Document
           file={document.blob}
           onLoadSuccess={onDocumentLoadSuccess}
-          // To force links to open in a new tab
+          // To open links in a new tab
           externalLinkTarget="_blank"
         >
           {renderAllPages()}

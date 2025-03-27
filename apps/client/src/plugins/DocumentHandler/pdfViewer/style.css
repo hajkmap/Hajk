@@ -1,0 +1,61 @@
+/* style.css */
+.toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    line-height: 0.9;
+  }
+  
+  .toc-list-item {
+    cursor: pointer;
+    margin: 0;
+    padding: 2px 0;
+  }
+  
+  /* Class to highlight the selected item */
+  .selected-item {
+    background-color: #ddd;
+  }
+
+  .page-element {
+    margin-bottom: 1rem;
+  }
+
+/* Upper section with zoom and TOC toggle */
+.upper-section {
+    display: flex;
+    align-items: center;
+    margin: 0 0.1rem 0.1rem 0.1rem;
+  }
+  
+  /* For IconButton components */
+  .icon-button {
+    margin-right: 5px;
+  }
+  
+  /* For percentage display */
+  .zoom-percentage {
+    margin-left: 10px;
+    font-size: 12px;
+  }
+  
+  /* For the toggle text */
+  .toggle-menu {
+    margin-left: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  /* Container for the table of contents */
+  .toc-container {
+    margin-top: 0.1rem;
+    margin-left: 1rem;
+  }
+  
+  /* Dark mode: invert PDF page canvas */
+  .dark-theme .react-pdf__Page__canvas {
+    filter: invert(1);
+  }
+  
+  
