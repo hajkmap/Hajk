@@ -10,7 +10,6 @@ import withSnackbar from "components/WithSnackbar";
 import PrintIcon from "@mui/icons-material/Print";
 import DownloadIcon from "@mui/icons-material/Download";
 import PdfViewerWithTOC from "../pdfViewer/PdfViewerWithTOC";
-import PdfDownloadDialog from "../pdfViewer/PdfDownloadDialog";
 
 class DocumentWindowBase extends React.PureComponent {
   snackbarKey = null;
@@ -211,18 +210,15 @@ class DocumentWindowBase extends React.PureComponent {
       >
         {document != null && modelReady ? (
           document?.type === "pdf" ? (
-            <div>
-              <PdfViewerWithTOC
-                document={document}
-                maximized={documentWindowMaximized}
-                customTheme={customTheme}
-              />
-              <PdfDownloadDialog
-                open={showDownloadWindow}
-                onClose={toggleDownloadWindow}
-                model={model}
-              />
-            </div>
+            <PdfViewerWithTOC
+              document={document}
+              maximized={documentWindowMaximized}
+              customTheme={customTheme}
+              showDownloadWindow={showDownloadWindow}
+              toggleDownloadWindow={toggleDownloadWindow}
+              model={model}
+              options={options}
+            />
           ) : !showPrintWindow ? (
             customTheme ? (
               <StyledEngineProvider injectFirst>

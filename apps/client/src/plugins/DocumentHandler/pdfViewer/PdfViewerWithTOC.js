@@ -8,6 +8,7 @@ import IconButton from "@mui/material/IconButton";
 import { scroller, animateScroll as scroll } from "react-scroll";
 import { Element } from "react-scroll";
 import ScrollToTop from "../documentWindow/ScrollToTop";
+import PdfDownloadDialog from "./PdfDownloadDialog";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import "./style.css";
@@ -58,7 +59,15 @@ async function flattenOutlineAsync(outlineArray, pdf, prefix = "", level = 0) {
   return result;
 }
 
-function PdfViewerWithTOC({ document, customTheme }) {
+function PdfViewerWithTOC({
+  document,
+  maximized,
+  customTheme,
+  showDownloadWindow,
+  toggleDownloadWindow,
+  model,
+  options,
+}) {
   const [numPages, setNumPages] = useState(null);
   const [topLevel, setTopLevel] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -213,6 +222,14 @@ function PdfViewerWithTOC({ document, customTheme }) {
           <ScrollToTop color={document.documentColor} onClick={scrollToTop} />
         )}
       </PdfContainer>
+      {showDownloadWindow && (
+        <PdfDownloadDialog
+          open={showDownloadWindow}
+          onClose={toggleDownloadWindow}
+          model={model}
+          options={options}
+        />
+      )}
     </>
   );
 }

@@ -7,7 +7,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import PdfDownloadList from "./PdfDownloadList";
 import CircularProgress from "@mui/material/CircularProgress";
 
-const PdfDownloadDialog = ({ open, onClose, model }) => {
+const PdfDownloadDialog = ({ open, onClose, model, options }) => {
   const [pdfFiles, setPdfFiles] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -50,7 +50,7 @@ const PdfDownloadDialog = ({ open, onClose, model }) => {
         {loading ? (
           <CircularProgress />
         ) : (
-          <PdfDownloadList pdfFiles={pdfFiles} />
+          <PdfDownloadList pdfFiles={pdfFiles} options={options} />
         )}
       </DialogContent>
     </Dialog>
