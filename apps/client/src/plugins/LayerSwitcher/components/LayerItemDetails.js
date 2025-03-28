@@ -34,6 +34,7 @@ function LayerItemDetails({
   app,
   showOpacitySlider,
   showQuickAccess,
+  staticLayerConfig,
 }) {
   const { enqueueSnackbar } = useSnackbar();
   // State that toggles legend collapse
@@ -63,11 +64,18 @@ function LayerItemDetails({
 
   const layerInfo = layerItemDetails?.layer?.get("layerInfo");
 
-  // Only show legend for actual OL layers.
-  // This check is probably not needed but LayerItemDetails can be passed
-  // several different things and we don't want to crash in any case.
-  // Proper typing of the props would remove the need for this check.
-  const showLegend = layerItemDetails?.layer?.get("layerType");
+  const layerId = layerItemDetails?.layer?.get("name");
+  const layerConfig = staticLayerConfig[layerId ?? null];
+
+  const { layerType, layerIsFakeMapLayer, hideLayerLegend } = layerConfig ?? {};
+
+  const showLegend = !(
+    hideLayerLegend ||
+    layerType === "group" ||
+    layerType === "base" ||
+    layerIsFakeMapLayer ||
+    layerType === "system"
+  );
 
   const legendInfo = layerInfo?.legend;
   const legendUrl =
