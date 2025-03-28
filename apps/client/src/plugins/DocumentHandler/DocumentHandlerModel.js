@@ -53,14 +53,9 @@ export default class DocumentHandlerModel {
   init = () => {
     return this.getAllDocumentsContainedInMenu()
       .then((allDocuments) => {
-        // Filter out documents that don't have a 'chapters' array (e.g. PDF documents)
-        const filteredDocuments = allDocuments.filter((doc) =>
-          Array.isArray(doc.chapters)
-        );
-        this.allDocuments = filteredDocuments;
-
+        this.allDocuments = allDocuments;
         this.documentSearchmodel = new DocumentSearchModel({
-          allDocuments: filteredDocuments,
+          allDocuments: allDocuments,
           globalSearchModel: this.app.searchModel,
           app: this.app,
           localObserver: this.localObserver,
