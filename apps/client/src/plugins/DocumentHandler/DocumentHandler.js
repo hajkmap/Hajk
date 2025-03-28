@@ -31,6 +31,7 @@ class DocumentHandler extends React.PureComponent {
     document: null,
     documentWindowMaximized: true,
     showPrintWindow: false,
+    showDownloadWindow: false,
     chapters: [],
     documentColor: null,
     model: null,
@@ -213,6 +214,7 @@ class DocumentHandler extends React.PureComponent {
           {
             document: document,
             showPrintWindow: false,
+            showDownloadWindow: false,
           },
           resolve
         );
@@ -225,6 +227,12 @@ class DocumentHandler extends React.PureComponent {
   togglePrintWindow = () => {
     this.setState({
       showPrintWindow: !this.state.showPrintWindow,
+    });
+  };
+
+  toggleDownloadWindow = () => {
+    this.setState({
+      showDownloadWindow: !this.state.showDownloadWindow,
     });
   };
 
@@ -256,10 +264,12 @@ class DocumentHandler extends React.PureComponent {
           customTheme={this.state.customTheme}
           onWindowHide={this.onWindowHide}
           togglePrintWindow={this.togglePrintWindow}
+          toggleDownloadWindow={this.toggleDownloadWindow}
           document={this.state.document}
           documentColor={this.state.documentColor}
           documentWindowMaximized={this.state.documentWindowMaximized}
           showPrintWindow={this.state.showPrintWindow}
+          showDownloadWindow={this.state.showDownloadWindow}
           chapters={this.state.chapters}
           model={this.state.model}
           localObserver={this.localObserver}

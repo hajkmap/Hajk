@@ -8,8 +8,9 @@ import Progress from "./Progress";
 import { CustomLink } from "../utils/ContentComponentFactory";
 import withSnackbar from "components/WithSnackbar";
 import PrintIcon from "@mui/icons-material/Print";
-//import PdfViewer from "../pdfViewer/PdfViewer";
+import DownloadIcon from "@mui/icons-material/Download";
 import PdfViewerWithTOC from "../pdfViewer/PdfViewerWithTOC";
+import PdfDownloadDialog from "../pdfViewer/PdfDownloadDialog";
 
 class DocumentWindowBase extends React.PureComponent {
   snackbarKey = null;
@@ -74,6 +75,12 @@ class DocumentWindowBase extends React.PureComponent {
   togglePrintWindow = () => {
     this.setState({
       showPrintWindow: !this.state.showPrintWindow,
+    });
+  };
+
+  toggleDownloadWindow = () => {
+    this.setState({
+      showDownloadWindow: !this.state.showDownloadWindow,
     });
   };
 
@@ -155,22 +162,32 @@ class DocumentWindowBase extends React.PureComponent {
       documentWindowMaximized,
       document,
       togglePrintWindow,
+      toggleDownloadWindow,
       onWindowHide,
       showPrintWindow,
+      showDownloadWindow,
       customTheme,
       onMinimize,
       onMaximize,
+      model,
     } = this.props;
     const modelReady = this.isModelReady();
     const customHeaderButtons = options.enablePrint
       ? [
-          {
-            icon: <PrintIcon />,
-            description: "Öppna utskrift",
-            onClickCallback: togglePrintWindow,
-          },
+          document?.type === "pdf"
+            ? {
+                icon: <DownloadIcon />,
+                description: "Ladda ner PDF",
+                onClickCallback: toggleDownloadWindow,
+              }
+            : {
+                icon: <PrintIcon />,
+                description: "Öppna utskrift",
+                onClickCallback: togglePrintWindow,
+              },
         ]
       : [];
+
     return (
       <BaseWindowPlugin
         {...this.props}
@@ -194,11 +211,18 @@ class DocumentWindowBase extends React.PureComponent {
       >
         {document != null && modelReady ? (
           document?.type === "pdf" ? (
-            <PdfViewerWithTOC
-              document={document}
-              maximized={documentWindowMaximized}
-              customTheme={customTheme}
-            />
+            <div>
+              <PdfViewerWithTOC
+                document={document}
+                maximized={documentWindowMaximized}
+                customTheme={customTheme}
+              />
+              <PdfDownloadDialog
+                open={showDownloadWindow}
+                onClose={toggleDownloadWindow}
+                model={model}
+              />
+            </div>
           ) : !showPrintWindow ? (
             customTheme ? (
               <StyledEngineProvider injectFirst>
