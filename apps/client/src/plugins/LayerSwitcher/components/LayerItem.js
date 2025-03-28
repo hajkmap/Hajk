@@ -63,7 +63,7 @@ const LayerToggleComponent = ({ toggleState }) => {
   );
 };
 
-const layerShouldShowLegendIcon = (layerType, isFakeMapLayer) =>
+const layerShouldNotShowLegendIcon = (layerType, isFakeMapLayer) =>
   layerType === "group" ||
   layerType === "base" ||
   isFakeMapLayer ||
@@ -72,7 +72,7 @@ const layerShouldShowLegendIcon = (layerType, isFakeMapLayer) =>
 const LayerLegendIcon = ({
   legendIcon,
   layerType,
-  isFakeMapLayer,
+  layerShouldNotShowLegendIcon,
   legendIsActive,
   toggleLegend,
 }) => {
@@ -83,7 +83,7 @@ const LayerLegendIcon = ({
     return <BuildOutlinedIcon sx={{ mr: "5px" }} />;
   }
 
-  if (layerShouldShowLegendIcon(layerType, isFakeMapLayer)) {
+  if (layerShouldNotShowLegendIcon) {
     return null;
   }
 
@@ -140,7 +140,17 @@ function LayerItem({
     allSubLayers,
     layerInfo,
     layerLegendIcon,
+    hideLayerLegend,
   } = layerConfig ?? {};
+
+  const hideLegend = hideLayerLegend ?? false;
+
+  const layerShouldNotShowLegendIcon =
+    hideLegend ||
+    layerType === "group" ||
+    layerType === "base" ||
+    layerIsFakeMapLayer ||
+    layerType === "system";
 
   const legendIcon = layerInfo?.legendIcon || layerLegendIcon;
 
@@ -313,7 +323,7 @@ function LayerItem({
             <LayerLegendIcon
               legendIcon={legendIcon}
               layerType={layerType}
-              isFakeMapLayer={layerIsFakeMapLayer}
+              layerShouldNotShowLegendIcon={layerShouldNotShowLegendIcon}
               legendIsActive={legendIsActive}
               toggleLegend={() => setLegendIsActive(!legendIsActive)}
             />
@@ -349,7 +359,7 @@ function LayerItem({
           </Box>
         </ListItemButton>
       </Box>
-      {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
+      {layerShouldNotShowLegendIcon ? null : (
         <LegendImage src={legendUrls} open={legendIsActive}></LegendImage>
       )}
       {subLayersSection && subLayersSection}
