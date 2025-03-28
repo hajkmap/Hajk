@@ -301,6 +301,21 @@
     "layers.createNewLayer": "Skapa nytt lager",
     "availableLayers.legend.stored": "Lagrad i databasen",
     "availableLayers.legend.newlySelected": "Nyvalt lager",
-    "availableLayers.legend.removal": "Märkt för borttagning"
+    "availableLayers.legend.removal": "Märkt för borttagning",
+    "groups.internalName": "Internt namn",
+    "groups.type": "Typ av grupp",
+    "groups.search": "Sök bland grupper...",
+    "groupType": {
+      "LAYER": "Lager",
+      "SEARCH": "Sök"
+    },
+    "groups.create": "Lägg till ny grupp",
+    "groups.dialog.title": "Ny grupp",
+    "groups.createGroupSuccess": "Gruppen {{name}} skapades!",
+    "groups.createGroupFailed": "Misslyckades att skapa gruppen.",
+    "groups.updateGroupSuccess": "Gruppen {{name}} har uppdaterats!",
+    "groups.updateGroupFailed": "Misslyckades att uppdatera gruppen {{name}}.",
+    "groups.deleteGroupSuccess": "Gruppen {{name}} är nu borttagen!",
+    "groups.deleteGroupFailed": "Misslyckades att ta bort gruppen {{name}}."
   }
 }
