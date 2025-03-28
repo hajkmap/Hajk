@@ -15,13 +15,13 @@
   - [x] Update seed script (HH)
   - [ ] Update zod parsers
   - [x] Update API methods (AA)
-  - [ ] Try getting onDelete cascade to work as intended inside the prisma schema
+  - [ ] Try getting onDelete cascade to work for relations as intended inside the prisma schema
 - [ ] Layers API
   - [x] Update prisma schema (ALL)
   - [x] Update seed script (HH)
   - [ ] Update zod parsers
   - [x] Update API methods (AA)
-  - [ ] Try getting onDelete cascade to work as intended inside the prisma schema
+  - [ ] Try getting onDelete cascade to work for relations as intended inside the prisma schema
 - [ ] Groups API
   - [x] Update prisma schema (AA)
   - [x] Update seed script (HH)
@@ -39,10 +39,10 @@
 - [x] Layers page
   - [x] Add layer (AA)
   - [x] Alter layer (AA)
-  - ⚠️ Note: Used in maps data-grid are incomplete and needs to be updated.
+    - ⚠️ Note: Used in maps data-grid are incomplete and needs to be updated.
   - [ ] TBD: Infoclick preview
   - [x] Remove layer (AA)
-  - [x] MUI chip component and legend to showcase affected layers in the available layers data-grid
+  - [x] MUI chip component and legend to showcase affected layers in the available layers data-grid (AA)
 - [ ] Groups page
   - [x] Add group (AA)
   - [x] Alter group (AA)
