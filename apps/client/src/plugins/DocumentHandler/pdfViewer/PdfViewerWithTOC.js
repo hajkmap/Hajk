@@ -85,6 +85,7 @@ function PdfViewerWithTOC({
     const outlineData = await pdf.getOutline();
     if (!outlineData) {
       setTopLevel([]);
+      setSelectedIndex(-1); // Reset selected index
       return;
     }
 
@@ -95,6 +96,7 @@ function PdfViewerWithTOC({
       (item) => item.level === 0 && item.page !== null
     );
     setTopLevel(h1Items);
+    setSelectedIndex(-1); // Reset selected index for new document
   };
 
   const onScroll = (e) => {

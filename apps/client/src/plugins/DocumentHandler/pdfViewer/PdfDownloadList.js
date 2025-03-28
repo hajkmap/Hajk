@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
 const PdfDownloadList = ({ pdfFiles, options }) => {
-  console.log(options.menuConfig.menu);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -69,17 +68,23 @@ const PdfDownloadList = ({ pdfFiles, options }) => {
         <button onClick={handleClearSelection}>Rensa val</button>
       </div>
       <ul>
-        {filteredFiles.map((file) => (
-          <li key={file.title}>
-            <input
-              type="checkbox"
-              checked={selectedFiles.includes(file.title)}
-              onChange={() => handleCheckboxChange(file.title)}
-            />
-            {file.title}
-          </li>
-        ))}
+        {filteredFiles.map((file) => {
+          const menuEntry = options.menuConfig.menu.find(
+            (entry) => entry.document === file.title
+          );
+          return (
+            <li key={file.title}>
+              <input
+                type="checkbox"
+                checked={selectedFiles.includes(file.title)}
+                onChange={() => handleCheckboxChange(file.title)}
+              />
+              {file.title} {menuEntry ? `(${menuEntry.title})` : ""}
+            </li>
+          );
+        })}
       </ul>
+
       <button onClick={handleDownload} disabled={selectedFiles.length === 0}>
         Ladda ner markerade filer
       </button>
