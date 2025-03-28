@@ -1,5 +1,5 @@
 import { useTheme } from "@mui/material/styles";
-import { getThemedLegendGraphicUrl } from "../LayerswitcherUtils";
+import { getThemedLegendGraphicUrl } from "../LayerSwitcherUtils";
 
 export default function LegendIcon({ url }) {
   const theme = useTheme();
@@ -14,6 +14,7 @@ export default function LegendIcon({ url }) {
         height: "18px",
         marginRight: "5px",
         marginTop: "8px",
+        visibility: url ? "visible" : "hidden",
       }}
     ></img>
   );

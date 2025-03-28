@@ -1,7 +1,7 @@
 import { Collapse, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
-import { getThemedLegendGraphicUrl } from "../LayerswitcherUtils";
+import { getThemedLegendGraphicUrl } from "../LayerSwitcherUtils";
 
 const ColumnContainer = styled("div")(({ theme }) => ({
   display: "inline-flex",
