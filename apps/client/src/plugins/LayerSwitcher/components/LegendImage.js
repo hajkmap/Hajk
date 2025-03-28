@@ -1,6 +1,7 @@
 import { Collapse, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
+import { getThemedLegendGraphicUrl } from "../LayerswitcherUtils";
 
 const ColumnContainer = styled("div")(({ theme }) => ({
   display: "inline-flex",
@@ -56,42 +57,6 @@ const ImageWithLoading = ({ src }) => {
   );
 };
 
-const getThemedUrl = (url, isDarkMode) => {
-  if (!url) {
-    // Nothing to do here, move on.
-    return;
-  }
-  const fontColor = isDarkMode ? "0xFFFFFF" : "0x000000";
-  const parsedUrl = new URL(url);
-  const params = parsedUrl.searchParams;
-
-  const requestParam = (
-    params.get("REQUEST") || params.get("request")
-  )?.toLowerCase();
-  if (requestParam === "getlegendgraphic") {
-    // Note that fontColor only works in GeoServer, not in QGIS Server.
-    // TRANSPARENT is supported in both.
-
-    params.set("TRANSPARENT", "true");
-
-    const legendOptions = params.get("LEGEND_OPTIONS") || "";
-    const optionsArray = legendOptions.split(";").filter(Boolean);
-    const optionsObj = Object.fromEntries(
-      optionsArray.map((option) => option.split(":").map((str) => str.trim()))
-    );
-
-    optionsObj.fontColor = fontColor;
-
-    const newLegendOptions = Object.entries(optionsObj)
-      .map(([key, value]) => `${key}:${value}`)
-      .join(";");
-
-    params.set("LEGEND_OPTIONS", newLegendOptions + ";");
-  }
-
-  return parsedUrl.toString();
-};
-
 export default function LegendImage({ open, src }) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -113,7 +78,7 @@ export default function LegendImage({ open, src }) {
         {urlArray
           .filter((url) => url)
           .map((url, index) => {
-            const themedUrl = getThemedUrl(url, isDarkMode);
+            const themedUrl = getThemedLegendGraphicUrl(url, isDarkMode);
             return (
               <ImageWithLoading key={index + "-" + themedUrl} src={themedUrl} />
             );

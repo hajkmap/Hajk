@@ -125,6 +125,7 @@ export default function SubLayerItem({
             position: "absolute",
             right: "4px",
             top: "1px",
+            paddingTop: "3px",
             transform: "none",
           }}
         >
