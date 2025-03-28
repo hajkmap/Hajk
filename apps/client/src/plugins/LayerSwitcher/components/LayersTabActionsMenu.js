@@ -50,6 +50,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
         aria-haspopup="true"
         aria-expanded={menuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
+        sx={{ my: "3px", ml: "2px" }}
       >
         <HajkToolTip title="Fler funktioner för Lagerhanteraren">
           <MoreVertOutlinedIcon />

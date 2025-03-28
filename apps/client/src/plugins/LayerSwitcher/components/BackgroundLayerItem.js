@@ -84,13 +84,13 @@ function BackgroundLayerItem({
             position: "relative",
             width: "100%",
             alignItems: "center",
-            py: 0.5,
+            py: 0.25, // jesade-vbg compact mode, changed from 0.5
             pr: 1,
             borderBottom: (theme) =>
               `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
         >
-          <LsIconButton size="small" sx={{ pl: 0 }}>
+          <LsIconButton disableRipple size="small" sx={{ pl: 0 }}>
             {selected ? (
               <RadioButtonChecked sx={{ ml: 2 }} />
             ) : (
@@ -107,7 +107,15 @@ function BackgroundLayerItem({
               fontWeight: "inherit",
             }}
           />
-          <ListItemSecondaryAction className="FIND-BACKGROUNDLAYERITEM-SECONDARY-ACTION">
+          <ListItemSecondaryAction
+            sx={{
+              position: "absolute",
+              right: "4px",
+              top: "1px",
+              transform: "none",
+            }}
+            className="FIND-BACKGROUNDLAYERITEM-SECONDARY-ACTION"
+          >
             {wmsLayerLoadStatus === "loaderror" && <BtnLayerWarning />}
             {isFakeMapLayer !== true && (
               <BtnShowDetails onClick={(e) => showLayerDetails(e)} />

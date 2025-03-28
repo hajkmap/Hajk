@@ -107,6 +107,9 @@ const LayersTab = ({
 
   return (
     <div
+      // This class is used to style specific elements when the tab is active
+      // If you search for this class in the codebase, you can find related style-fixes.
+      className={"ls-layers-tab-view"}
       style={{
         ...style,
         position: "relative",
@@ -142,7 +145,6 @@ const LayersTab = ({
         />
       )}
       <div
-        id="sc-test"
         ref={scrollContainerRef}
         style={{
           height: "inherit",

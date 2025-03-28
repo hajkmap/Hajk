@@ -94,7 +94,17 @@ const LayerLegendIcon = ({
   if (layerLegendIcon !== undefined) {
     return <LegendIcon url={layerLegendIcon} />;
   } else if (layerType === "system") {
-    return <BuildOutlinedIcon sx={{ mr: "5px" }} />;
+    return (
+      <BuildOutlinedIcon
+        sx={{
+          display: "block",
+          mr: "5px",
+          mt: "6px",
+          width: "18px",
+          height: "18px",
+        }}
+      />
+    );
   }
 
   if (layerShouldShowLegendIcon(layerType, isFakeMapLayer)) {
@@ -104,7 +114,7 @@ const LayerLegendIcon = ({
   return (
     <BtnShowLegend
       legendIsActive={legendIsActive}
-      onClick={() => toggleLegend()} // Fixed: Use toggleLegend instead of setLegendIsActive
+      onClick={() => toggleLegend()}
     />
   );
 };
@@ -278,6 +288,7 @@ function LayerItem({
       >
         {draggable && (
           <LsIconButton
+            disableRipple
             sx={{
               px: 0,
               opacity: 0,
@@ -358,7 +369,11 @@ function LayerItem({
       </Box>
       <Box
         sx={{
-          paddingLeft: expandableSection ? 3.75 : 0,
+          paddingLeft: expandableSection ? "30px" : 0,
+          ".ls-draworder-tab-view &": {
+            // special styling for draw order tab
+            paddingLeft: expandableSection ? "30px" : "20px",
+          },
         }}
       >
         {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (

@@ -200,6 +200,9 @@ function DrawOrder({ display, app, map, localObserver, options }) {
 
   return (
     <Box
+      // This class is used to style specific elements when the tab is active
+      // If you search for this class in the codebase, you can find related style-fixes.
+      className={"ls-draworder-tab-view"}
       sx={{
         display: display ? "block" : "none",
         height: "inherit",
