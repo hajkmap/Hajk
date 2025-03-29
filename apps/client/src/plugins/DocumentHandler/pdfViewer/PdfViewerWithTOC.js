@@ -163,8 +163,6 @@ function PdfViewerWithTOC({
           <Page
             pageNumber={pageNumber}
             scale={scale}
-            // Alternative: No links clickable in the PDF,
-            // set renderAnnotationLayer={false}
             renderAnnotationLayer
             renderTextLayer
           />

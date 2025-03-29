@@ -61,7 +61,7 @@ const PdfDownloadList = ({ pdfFiles, options }) => {
         padding: 10,
         margin: 0,
         fontWeight: "bold",
-        color: disabled ? "gray" : "inherit", // Grå färg när disabled
+        color: disabled ? "gray" : "inherit",
         cursor: disabled ? "default" : "pointer",
         opacity: disabled ? 0.5 : 1,
       }}
