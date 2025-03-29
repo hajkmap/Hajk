@@ -110,8 +110,8 @@ function PdfViewerWithTOC({
   const scrollToTop = () => {
     scroll.scrollTo(0, {
       containerId: "pdfViewer",
-      smooth: false,
-      duration: 0,
+      smooth: true,
+      duration: 500,
       delay: 100,
     });
   };
@@ -215,7 +215,7 @@ function PdfViewerWithTOC({
           file={document.blob}
           onLoadSuccess={onDocumentLoadSuccess}
           // To open links in a new tab
-          externalLinkTarget="_blank"
+          externalLinkTarget="_self"
         >
           {renderAllPages()}
         </Document>

@@ -51,6 +51,25 @@ const PdfDownloadList = ({ pdfFiles, options }) => {
     setSelectedFiles([]);
   };
 
+  const BoldTextButton = ({ text, onClick, disabled }) => (
+    <button
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      style={{
+        background: "none",
+        border: "none",
+        padding: 10,
+        margin: 0,
+        fontWeight: "bold",
+        color: disabled ? "gray" : "inherit", // Grå färg när disabled
+        cursor: disabled ? "default" : "pointer",
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      {text}
+    </button>
+  );
+
   return (
     <div>
       <h3>PDF-filer att ladda ner</h3>
@@ -62,10 +81,12 @@ const PdfDownloadList = ({ pdfFiles, options }) => {
         style={{ marginBottom: "10px", width: "50%", padding: "8px" }}
       />
       <div style={{ marginBottom: "10px" }}>
-        <button onClick={handleSelectAll} style={{ marginRight: "10px" }}>
-          Välj alla
-        </button>
-        <button onClick={handleClearSelection}>Rensa val</button>
+        <BoldTextButton
+          text="Välj alla"
+          onClick={handleSelectAll}
+          style={{ marginRight: "10px" }}
+        />
+        <BoldTextButton text="Rensa val" onClick={handleClearSelection} />
       </div>
       <ul>
         {filteredFiles.map((file) => {
@@ -84,10 +105,11 @@ const PdfDownloadList = ({ pdfFiles, options }) => {
           );
         })}
       </ul>
-
-      <button onClick={handleDownload} disabled={selectedFiles.length === 0}>
-        Ladda ner markerade filer
-      </button>
+      <BoldTextButton
+        text="Ladda ner markerade filer"
+        onClick={handleDownload}
+        disabled={selectedFiles.length === 0}
+      />
     </div>
   );
 };
