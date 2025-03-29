@@ -173,35 +173,6 @@ function PdfViewerWithTOC({
 
   return (
     <>
-      {/* Upper section: Zoom + toggle for table of contents */}
-      <div className="upper-section">
-        <IconButton onClick={zoomOut} className="icon-button">
-          <ZoomOutIcon />
-        </IconButton>
-
-        <IconButton onClick={zoomIn} className="icon-button">
-          <ZoomInIcon />
-        </IconButton>
-
-        <span className="zoom-percentage">{Math.round(scale * 100)}%</span>
-
-        {/* Clickable, bold text to toggle menu */}
-        <div
-          onClick={() => setMenuOpen((prev) => !prev)}
-          className="toggle-menu"
-        >
-          {menuOpen ? "Dölj innehållsförteckning" : "Visa innehållsförteckning"}
-        </div>
-      </div>
-
-      {/* TOC */}
-      {menuOpen && (
-        <div className="toc-container">
-          <b>Innehållsförteckning:</b>
-          {renderTOC()}
-        </div>
-      )}
-
       {/* PDF-container */}
       <PdfContainer
         id="pdfViewer"
@@ -209,6 +180,48 @@ function PdfViewerWithTOC({
         onScroll={onScroll}
         className={customTheme?.palette?.mode === "dark" ? "dark-theme" : ""}
       >
+        {/* Upper section: Zoom + toggle for table of contents */}
+        <div
+          className="upper-section"
+          style={{
+            background: customTheme.palette.mode === "dark" ? "#000" : "white",
+          }}
+        >
+          <IconButton onClick={zoomOut} className="icon-button">
+            <ZoomOutIcon />
+          </IconButton>
+
+          <IconButton onClick={zoomIn} className="icon-button">
+            <ZoomInIcon />
+          </IconButton>
+
+          <span className="zoom-percentage">{Math.round(scale * 100)}%</span>
+
+          {/* Clickable, bold text to toggle menu */}
+          <div
+            onClick={() => setMenuOpen((prev) => !prev)}
+            className="toggle-menu"
+          >
+            {menuOpen
+              ? "Dölj innehållsförteckning"
+              : "Visa innehållsförteckning"}
+          </div>
+        </div>
+
+        {/* TOC */}
+        {menuOpen && (
+          <div
+            className="toc-container"
+            style={{
+              background:
+                customTheme.palette.mode === "dark" ? "#000" : "white",
+            }}
+          >
+            <b>Innehållsförteckning:</b>
+            {renderTOC()}
+          </div>
+        )}
+
         <Document
           file={document.blob}
           onLoadSuccess={onDocumentLoadSuccess}

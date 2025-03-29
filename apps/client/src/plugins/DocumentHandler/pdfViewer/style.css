@@ -21,13 +21,6 @@
   .page-element {
     margin-bottom: 1rem;
   }
-
-/* Upper section with zoom and TOC toggle */
-.upper-section {
-    display: flex;
-    align-items: center;
-    margin: 0 0.1rem 0.1rem 0.1rem;
-  }
   
   /* For IconButton components */
   .icon-button {
@@ -47,10 +40,25 @@
     cursor: pointer;
   }
   
+  /* Upper section with zoom and TOC toggle */
+  .upper-section {
+    background: white;
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    margin: 0rem 0.1rem 0.1rem 0.1rem;
+    z-index: 1000;
+  }
+
   /* Container for the table of contents */
   .toc-container {
-    margin-top: 0.1rem;
+    margin-top: 0rem;
     margin-left: 1rem;
+    position: sticky;
+    top: 40px;
+    background: white;
+    z-index: 1000;
   }
   
   /* Dark mode: invert PDF page canvas */
