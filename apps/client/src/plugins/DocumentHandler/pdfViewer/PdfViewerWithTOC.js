@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Document, Page } from "react-pdf";
 import { pdfjs } from "react-pdf";
 import { styled } from "@mui/material/styles";
@@ -18,7 +18,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 const PdfContainer = styled("div")(() => ({
   maxHeight: "100%",
   overflowY: "auto",
-  overflowX: "hidden",
+  overflowX: "auto",
   userSelect: "text",
   padding: "0rem",
 }));
@@ -78,6 +78,32 @@ function PdfViewerWithTOC({
   const containerRef = useRef(null);
 
   const [scale, setScale] = useState(1.0);
+  const [containerWidth, setContainerWidth] = useState(580);
+
+  useEffect(() => {
+    const updateContainerWidth = () => {
+      if (containerRef.current) {
+        const width = containerRef.current.clientWidth - 10;
+        setContainerWidth(width > 0 ? width : 0);
+      }
+    };
+
+    // Run initially
+    updateContainerWidth();
+
+    // Create an observer to listen for size changes
+    const resizeObserver = new ResizeObserver(() => {
+      updateContainerWidth();
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   const onDocumentLoadSuccess = async (pdf) => {
     setNumPages(pdf.numPages);
@@ -163,6 +189,7 @@ function PdfViewerWithTOC({
           <Page
             pageNumber={pageNumber}
             scale={scale}
+            width={containerWidth}
             renderAnnotationLayer
             renderTextLayer
           />
