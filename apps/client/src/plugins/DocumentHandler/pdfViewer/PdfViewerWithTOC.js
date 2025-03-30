@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Document, Page } from "react-pdf";
 import { pdfjs } from "react-pdf";
 import { styled } from "@mui/material/styles";
@@ -78,32 +78,6 @@ function PdfViewerWithTOC({
   const containerRef = useRef(null);
 
   const [scale, setScale] = useState(1.0);
-  const [containerWidth, setContainerWidth] = useState(580);
-
-  useEffect(() => {
-    const updateContainerWidth = () => {
-      if (containerRef.current) {
-        const width = containerRef.current.clientWidth - 10;
-        setContainerWidth(width > 0 ? width : 0);
-      }
-    };
-
-    // Run initially
-    updateContainerWidth();
-
-    // Create an observer to listen for size changes
-    const resizeObserver = new ResizeObserver(() => {
-      updateContainerWidth();
-    });
-
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
 
   const onDocumentLoadSuccess = async (pdf) => {
     setNumPages(pdf.numPages);
@@ -189,7 +163,7 @@ function PdfViewerWithTOC({
           <Page
             pageNumber={pageNumber}
             scale={scale}
-            width={containerWidth}
+            width={options.width - 19}
             renderAnnotationLayer
             renderTextLayer
           />
