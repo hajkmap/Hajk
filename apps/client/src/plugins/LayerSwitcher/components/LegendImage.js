@@ -1,7 +1,10 @@
 import { Collapse, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
-import { getThemedLegendGraphicUrl } from "../LayerSwitcherUtils";
+import {
+  getDpiFromLegendGraphicUrl,
+  getThemedLegendGraphicUrl,
+} from "../LayerSwitcherUtils";
 
 const ColumnContainer = styled("div")(({ theme }) => ({
   display: "inline-flex",
@@ -25,7 +28,25 @@ const Image = styled("img")(() => ({
 const ImageWithLoading = ({ src }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [imageWidth, setImageWidth] = useState(null);
   const theme = useTheme();
+
+  const handleLoad = (e) => {
+    const img = e.currentTarget;
+    const dpi = getDpiFromLegendGraphicUrl(src);
+    if (dpi > 90 && img.naturalWidth) {
+      const width = (img.naturalWidth / dpi) * 96;
+      setImageWidth(width);
+    }
+
+    setLoading(false);
+  };
+
+  const handleError = () => {
+    setLoading(false);
+    setError(true);
+  };
+
   return (
     <div>
       <div
@@ -42,14 +63,12 @@ const ImageWithLoading = ({ src }) => {
       </div>
       <Image
         src={src}
-        onLoad={() => setLoading(false)}
-        onError={() => {
-          setLoading(false);
-          setError(true);
-        }}
+        onLoad={handleLoad}
+        onError={handleError}
         sx={{
           display: loading || error ? "none" : "block",
           borderRadius: "2px",
+          width: imageWidth ? `${imageWidth}px` : "auto",
         }}
         alt="Teckenförklaring"
       />

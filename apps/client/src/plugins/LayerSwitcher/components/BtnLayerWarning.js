@@ -11,6 +11,7 @@ const BtnLayerWarning = ({ ...props }) => (
     <LsIconButton
       sx={{
         marginTop: "5px",
+        marginRight: "2px",
         p: "3px",
         backgroundColor: (theme) =>
           theme.palette.mode === "dark"

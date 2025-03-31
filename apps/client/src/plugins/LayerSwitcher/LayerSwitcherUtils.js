@@ -1,3 +1,21 @@
+export const getDpiFromLegendGraphicUrl = (url) => {
+  if (!url) {
+    // Nothing to do here, return default and move on.
+    return 90;
+  }
+
+  url = decodeURIComponent(url).toLowerCase();
+
+  if (url.includes("request=getlegendgraphic")) {
+    const dpiMatch = url.match(/dpi:(\d+)/);
+    if (dpiMatch) {
+      return dpiMatch[1];
+    }
+  }
+
+  return 90;
+};
+
 export const getThemedLegendGraphicUrl = (url, isDarkMode) => {
   if (!url) {
     // Nothing to do here, move on.
@@ -23,6 +41,12 @@ export const getThemedLegendGraphicUrl = (url, isDarkMode) => {
     );
 
     optionsObj.fontColor = fontColor;
+
+    // Here we try to set the DPI to 180 so we can get nicer legends.
+    // We shrink it back to 96 (using px in css) in the LegendImage component.
+    if (!optionsObj.dpi || parseInt(optionsObj.dpi) < 180) {
+      optionsObj.dpi = 180;
+    }
 
     const newLegendOptions = Object.entries(optionsObj)
       .map(([key, value]) => `${key}:${value}`)
