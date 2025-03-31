@@ -127,7 +127,7 @@ class PrintWindow extends React.PureComponent {
     printMaps: false,
     allDocumentsToggled: false,
     tocPrintMode: this.props.options?.tableOfContents?.printMode ?? "none",
-    menuInformation: this.createMenu(),
+    menuInformation: {},
     printContent: undefined,
     pdfLoading: false,
     isAnyDocumentSelected: false,
@@ -135,6 +135,7 @@ class PrintWindow extends React.PureComponent {
     selectedPdfIndex: null,
     isModalOpen: false,
     pdfLinks: this.checkPdfLinks(this.props.options.pdfLinks),
+    jsonDocuments: [],
   };
 
   internalId = 0;
@@ -209,6 +210,14 @@ class PrintWindow extends React.PureComponent {
 
     this.props.localObserver.subscribe("print-submenu-clicked", (id) => {
       this.#handleSubMenuClicked(id);
+    });
+
+    this.props.model.getAllDocumentsContainedInMenu().then((documents) => {
+      const jsonDocuments = documents.filter((doc) => doc.type !== "pdf");
+      this.setState({ jsonDocuments }, () => {
+        const menuInformation = this.createMenu();
+        this.setState({ menuInformation });
+      });
     });
   };
 
@@ -567,16 +576,28 @@ class PrintWindow extends React.PureComponent {
     const { options } = this.props;
 
     const newOptions = { ...options };
-    const menuConfig = { ...newOptions }.menuConfig;
+    const menuConfig = newOptions.menuConfig;
     const menuConfigClone = JSON.parse(JSON.stringify(menuConfig));
     const menuStructure = getNormalizedMenuState(menuConfigClone.menu);
     let chapterInformation = this.props.model.getAllChapterInfo();
 
-    const keys = Object.keys(menuStructure);
-    const idOffset = keys.length + 1; //used to give new ids, so printMenu items do not get the same id as panelMenu items
+    // Filter out the menu items in menuStructure whose document file name matches any item in this.state.jsonDocuments
+    const filteredMenuStructure = Object.entries(menuStructure)
+      .filter(([key, value]) =>
+        this.state.jsonDocuments.some(
+          (doc) => doc.documentFileName === value.document
+        )
+      )
+      .reduce((acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+      }, {});
+
+    const keys = Object.keys(filteredMenuStructure);
+    const idOffset = keys.length + 1;
 
     keys.forEach((key) => {
-      let document = menuStructure[key];
+      let document = filteredMenuStructure[key];
       const offsetChildren = document.allChildren.map((id) => (id += idOffset));
       const offsetParents = document.allParents.map((id) => (id += idOffset));
       const offsetMenuItemIds = document.menuItemIds.map(
@@ -599,8 +620,6 @@ class PrintWindow extends React.PureComponent {
         document.tocChapterLevels =
           this.props.options?.tableOfContents?.chapterLevelsToShowForPrint ??
           100;
-      }
-      if (document.document) {
         document.chapters = [];
         let documentChapters = chapterInformation.filter(
           (chapter) => chapter.documentFileName === document.document
@@ -612,7 +631,7 @@ class PrintWindow extends React.PureComponent {
     let menuWithOffset = {};
     keys.forEach((key) => {
       let keyOffset = parseInt(key) + idOffset;
-      menuWithOffset[keyOffset] = menuStructure[key];
+      menuWithOffset[keyOffset] = filteredMenuStructure[key];
     });
 
     this.removeNonPrintableDocuments(menuWithOffset);
