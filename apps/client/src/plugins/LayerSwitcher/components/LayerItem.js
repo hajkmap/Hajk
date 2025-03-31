@@ -12,8 +12,6 @@ import HajkToolTip from "components/HajkToolTip";
 
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
 import BuildOutlinedIcon from "@mui/icons-material/BuildOutlined";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
 // Custom components
@@ -23,6 +21,7 @@ import LsIconButton from "./LsIconButton";
 import BtnShowDetails from "./BtnShowDetails";
 import BtnLayerWarning from "./BtnLayerWarning";
 import BtnShowLegend from "./BtnShowLegend";
+import LsCheckBox from "./LsCheckBox";
 
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
@@ -41,40 +40,6 @@ const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
     return "checked";
   }
   return "unchecked";
-};
-
-const LayerToggleComponent = ({ toggleState }) => {
-  return (
-    <LsIconButton size="small" className="BUTTON333" sx={{}}>
-      <CheckBoxOutlineBlankIcon />
-      <Box
-        sx={{
-          position: "absolute",
-          top: "calc(50%)",
-          left: "50%",
-          transition: "transform 200ms ease, opacity 200ms ease",
-          transform:
-            toggleState !== "unchecked"
-              ? "translate(-50%, -50%)  scale(1.05)"
-              : "translate(-50%, -50%) scale(0.0)",
-          opacity: toggleState !== "unchecked" ? 1.0 : 0.0,
-          lineHeight: 0,
-        }}
-      >
-        <CheckBoxIcon
-          sx={
-            {
-              semichecked: { fill: "gray" },
-              checkedWithWarning: {
-                fill: (theme) => theme.palette.warning.dark,
-              },
-            }[toggleState]
-          }
-        />
-        {}
-      </Box>
-    </LsIconButton>
-  );
 };
 
 const layerShouldShowLegendIcon = (layerType, isFakeMapLayer) =>
@@ -325,7 +290,7 @@ function LayerItem({
               borderBottom: (theme) => renderBorder(theme),
             }}
           >
-            {toggleable && <LayerToggleComponent toggleState={toggleState} />}
+            {toggleable && <LsCheckBox toggleState={toggleState} />}
             <LayerLegendIcon
               legendIcon={legendIcon}
               layerType={layerType}

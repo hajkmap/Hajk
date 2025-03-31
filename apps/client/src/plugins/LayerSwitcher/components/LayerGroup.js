@@ -3,12 +3,11 @@ import LayerItem from "./LayerItem";
 import GroupLayer from "./GroupLayer";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
 import { Typography, ListItemText, Link } from "@mui/material";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import InfoIcon from "@mui/icons-material/Info";
 import HajkToolTip from "components/HajkToolTip";
 import LsIconButton from "./LsIconButton";
+import LsCheckBox from "./LsCheckBox";
 
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
@@ -27,15 +26,7 @@ const ToggleAllComponent = ({ toggleable, toggleState, clickHandler }) => {
         clickHandler();
       }}
     >
-      <LsIconButton size="small">
-        {
-          {
-            checked: <CheckBoxIcon />,
-            semichecked: <CheckBoxIcon sx={{ color: "gray" }} />,
-            unchecked: <CheckBoxOutlineBlankIcon />,
-          }[toggleState]
-        }
-      </LsIconButton>
+      <LsCheckBox toggleState={toggleState} />
     </div>
   );
 };

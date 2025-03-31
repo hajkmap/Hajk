@@ -9,13 +9,12 @@ import {
 
 import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
 
 import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 import HajkToolTip from "components/HajkToolTip";
 import LsIconButton from "./LsIconButton";
 import BtnShowDetails from "./BtnShowDetails";
+import LsCheckBox from "./LsCheckBox";
 
 export default function SubLayerItem({
   layerId,
@@ -36,19 +35,6 @@ export default function SubLayerItem({
 
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
-  // Render method for checkbox icon
-  const getLayerToggleIcon = () => {
-    return visible ? (
-      <CheckBoxIcon
-        sx={{
-          fill: (theme) =>
-            !zoomVisible ? theme.palette.warning.dark : theme.palette.primary,
-        }}
-      />
-    ) : (
-      <CheckBoxOutlineBlankIcon />
-    );
-  };
 
   // Show layer details action
   const showLayerDetails = (e) => {
@@ -107,8 +93,17 @@ export default function SubLayerItem({
         dense
       >
         {toggleable && (
-          <LsIconButton size="small">{getLayerToggleIcon()}</LsIconButton>
+          <LsCheckBox
+            toggleState={
+              visible
+                ? zoomVisible
+                  ? "checked"
+                  : "checkedWithWarning"
+                : "unchecked"
+            }
+          />
         )}
+
         {getIconFromLayer()}
         <ListItemText
           primary={subLayerInfo.caption}
