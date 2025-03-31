@@ -9,24 +9,28 @@ import {
   Grid2 as Grid,
   Paper,
   Box,
+  IconButton,
 } from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import useAppStateStore from "../../../store/use-app-state-store";
 import { useLayers } from "../../../api/layers";
 import { useGroups } from "../../../api/groups";
 
-const ItemType = "ITEM";
+const ItemType = {
+  ITEM: "ITEM",
+  REORDER: "REORDER_LAYER",
+};
 
 interface DraggableItemProps {
   item: { id: string; name: string };
-  onDrop?: (item: { id: string; name: string }) => void;
 }
 
 const DraggableItem: React.FC<DraggableItemProps> = ({ item }) => {
   const [{ isDragging }, dragRef] = useDrag({
-    type: ItemType,
-    item: { item },
+    type: ItemType.ITEM,
+    item,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -45,39 +49,119 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ item }) => {
   );
 };
 
-const DropZone = ({
-  items,
-  onItemDrop,
+const ReorderableListItem = ({
+  layer,
+  index,
+  moveLayer,
+  onRemove,
 }: {
-  items: { id: string; name: string }[];
-  onItemDrop: (item: { id: string; name: string }) => void;
+  layer: { id: string; name: string };
+  index: number;
+  moveLayer: (dragIndex: number, hoverIndex: number) => void;
+  groupId: string;
+  onRemove: () => void;
 }) => {
-  const [{ canDrop, isOver }, drop] = useDrop({
-    accept: ItemType,
-    drop: (item: { item: { id: string; name: string } }) =>
-      onItemDrop(item.item),
+  const ref = React.useRef<HTMLLIElement>(null);
+
+  const [, drop] = useDrop({
+    accept: ItemType.REORDER,
+    hover(item: { index: number }) {
+      if (!ref.current) return;
+      const dragIndex = item.index;
+      const hoverIndex = index;
+      if (dragIndex === hoverIndex) return;
+      moveLayer(dragIndex, hoverIndex);
+      item.index = hoverIndex;
+    },
+  });
+
+  const [{ isDragging }, drag] = useDrag({
+    type: ItemType.REORDER,
+    item: { index },
     collect: (monitor) => ({
-      isOver: monitor.isOver(),
-      canDrop: monitor.canDrop(),
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  drag(drop(ref));
+
+  return (
+    <ListItem
+      ref={ref}
+      sx={{
+        opacity: isDragging ? 0.5 : 1,
+        cursor: "move",
+        backgroundColor: isDragging ? "#f0f0f0" : "transparent",
+      }}
+      secondaryAction={
+        <IconButton edge="end" onClick={onRemove}>
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      }
+    >
+      {layer.name}
+    </ListItem>
+  );
+};
+
+const GroupDropZone = ({
+  group,
+  layers,
+  onDropLayerToGroup,
+  onRemoveLayerFromGroup,
+  onReorderLayer,
+}: {
+  group: { id: string; name: string };
+  layers: { id: string; name: string }[];
+  onDropLayerToGroup: (
+    groupId: string,
+    layer: { id: string; name: string }
+  ) => void;
+  onRemoveLayerFromGroup: (groupId: string, layerId: string) => void;
+  onReorderLayer: (
+    groupId: string,
+    dragIndex: number,
+    hoverIndex: number
+  ) => void;
+}) => {
+  const [{ isOverCurrent }, drop] = useDrop({
+    accept: ItemType.ITEM,
+    drop: (item: { id: string; name: string }, monitor) => {
+      if (monitor.isOver({ shallow: true })) {
+        onDropLayerToGroup(group.id, item);
+      }
+    },
+    collect: (monitor) => ({
+      isOverCurrent: monitor.isOver({ shallow: true }),
     }),
   });
 
   return (
     <Paper
-      ref={drop as unknown as React.Ref<HTMLDivElement> | undefined}
+      ref={drop as unknown as React.Ref<HTMLDivElement>}
       sx={{
         p: 2,
-        border: "1px dashed",
-        borderColor: isOver ? "#000" : "#ccc",
-        backgroundColor: canDrop ? "#f0f0f0" : "transparent",
-        minHeight: 400,
-        mt: "auto",
+        mb: 2,
+        border: "2px dashed",
+        borderColor: isOverCurrent ? "#000" : "#ccc",
+        backgroundColor: isOverCurrent ? "#f9f9f9" : "transparent",
       }}
     >
-      <Typography variant="body2">Dra och släpp lager här</Typography>
+      <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+        {group.name}
+      </Typography>
       <List>
-        {items.map((item) => (
-          <ListItem key={item.id}>{item.name}</ListItem>
+        {layers.map((layer, index) => (
+          <ReorderableListItem
+            key={layer.id}
+            layer={layer}
+            index={index}
+            moveLayer={(dragIndex, hoverIndex) =>
+              onReorderLayer(group.id, dragIndex, hoverIndex)
+            }
+            groupId={group.id}
+            onRemove={() => onRemoveLayerFromGroup(group.id, layer.id)}
+          />
         ))}
       </List>
     </Paper>
@@ -91,22 +175,66 @@ function LayerSwitcherOrderList() {
   const [leftTab, setLeftTab] = useState(0);
   const [rightTab, setRightTab] = useState(0);
   const [search, setSearch] = useState("");
-  const [selectedItems, setSelectedItems] = useState<
-    { id: string; name: string }[]
-  >([]);
+  const [groupedLayers, setGroupedLayers] = useState<
+    Record<string, { id: string; name: string }[]>
+  >({});
 
   const { data: layers = [] } = useLayers();
   const { data: groups = [] } = useGroups();
 
-  const handleItemDrop = (item: { id: string; name: string }) => {
-    setSelectedItems((prev) =>
-      prev.find((i) => i.id === item.id) ? prev : [...prev, item]
-    );
+  const handleDropToGroup = (
+    groupId: string,
+    layer: { id: string; name: string }
+  ) => {
+    setGroupedLayers((prev) => {
+      const current = prev[groupId] || [];
+      if (current.find((l) => l.id === layer.id)) return prev;
+      return {
+        ...prev,
+        [groupId]: [...current, layer],
+      };
+    });
   };
 
+  const handleRemoveLayer = (groupId: string, layerId: string) => {
+    setGroupedLayers((prev) => {
+      const updatedGroup = (prev[groupId] || []).filter(
+        (layer) => layer.id !== layerId
+      );
+      return {
+        ...prev,
+        [groupId]: updatedGroup,
+      };
+    });
+  };
+
+  const handleReorderLayer = (
+    groupId: string,
+    dragIndex: number,
+    hoverIndex: number
+  ) => {
+    setGroupedLayers((prev) => {
+      const layers = [...(prev[groupId] || [])];
+      const [removed] = layers.splice(dragIndex, 1);
+      layers.splice(hoverIndex, 0, removed);
+      return {
+        ...prev,
+        [groupId]: layers,
+      };
+    });
+  };
+
+  const assignedLayerIds = new Set(
+    Object.values(groupedLayers)
+      .flat()
+      .map((layer) => layer.id)
+  );
+
   const listItems = leftTab === 0 ? layers : groups;
-  const filteredItems = listItems.filter((item) =>
-    item.name.toLowerCase().includes(search.toLowerCase())
+  const filteredItems = listItems.filter(
+    (item) =>
+      item.name.toLowerCase().includes(search.toLowerCase()) &&
+      (leftTab === 1 || !assignedLayerIds.has(item.id))
   );
 
   return (
@@ -173,11 +301,19 @@ function LayerSwitcherOrderList() {
                   display: "flex",
                   flexDirection: "column",
                   height: "500px",
-                  justifyContent: "center",
-                  mt: "auto",
+                  overflowY: "auto",
                 }}
               >
-                <DropZone items={selectedItems} onItemDrop={handleItemDrop} />
+                {groups.map((group) => (
+                  <GroupDropZone
+                    key={group.id}
+                    group={group}
+                    layers={groupedLayers[group.id] || []}
+                    onDropLayerToGroup={handleDropToGroup}
+                    onRemoveLayerFromGroup={handleRemoveLayer}
+                    onReorderLayer={handleReorderLayer}
+                  />
+                ))}
               </Box>
             </Grid>
           </Grid>
