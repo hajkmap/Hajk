@@ -33,6 +33,7 @@ import { useServices, useServiceCapabilities } from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
 import { useRoles } from "../../api/users";
 import { HttpError } from "../../lib/http-error";
+// import useUserStore, { User } from "../../store/use-user-store";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
@@ -44,7 +45,7 @@ export default function LayerSettings() {
   const { data: services } = useServices();
   const { data: roles } = useRoles();
   const { data: roleOnLayer } = useGetRoleOnLayerByLayerId(layerId ?? "");
-
+  
   const formRef = useRef<HTMLFormElement | null>(null);
   const { data: service, isLoading: serviceLoading } = useServiceByLayerId(
     layer?.id ?? "",
@@ -61,6 +62,12 @@ export default function LayerSettings() {
       type: service?.type ?? "",
     }
   );
+
+  // const [activeUser, setActiveUser] = useState<User | null>();
+  // const { user } = useUserStore.getState();
+  // useEffect(() => {
+  //   setActiveUser(user);
+  // });
 
   const styles = layer?.selectedLayers.flatMap(
     (key) => getCapStyles[key] || []
@@ -677,6 +684,8 @@ export default function LayerSettings() {
           url: layerData?.metadata?.url,
           urlTitle: layerData?.metadata?.urlTitle,
           attribution: layerData?.metadata?.attribution,
+          updated: layerData?.metadata?.updated,
+          userId: layerData?.metadata?.userId,
         },
         searchSettings: {
           active: layerData?.searchSettings?.active,
@@ -749,13 +758,33 @@ export default function LayerSettings() {
     dirtyFields,
     onValid: (data: FieldValues) => {
       const layerData = data as LayerUpdateInput;
-      void handleUpdateLayer({
-        ...layerData,
-        selectedLayers: selectedRowObjects,
-      });
+      void handleUpdateLayer(
+        {
+          ...layerData,
+          selectedLayers: selectedRowObjects,
+        }
+      );
     },
   });
+  
+  const updatedByUser =
+    typeof layer?.metadata?.updatedBy === "object" &&
+    layer.metadata.updatedBy &&
+    "fullName" in (layer.metadata.updatedBy as { fullName?: string })
+      ? (layer.metadata.updatedBy as { fullName: string }).fullName
+      : "";
 
+  const formatedLastSavedDate =
+    typeof layer?.metadata?.updated === "string"
+      ? new Date(layer.metadata.updated).toLocaleString(undefined, {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "";
+  
   if (isLoading) {
     return <SquareSpinnerComponent />;
   }
@@ -763,6 +792,7 @@ export default function LayerSettings() {
     throw new HttpError(404, "Layer not found");
   }
   if (isError) return <div>Error fetching layer details.</div>;
+
   return (
     <Page title={t("common.settings")}>
       <FormActionPanel
@@ -770,8 +800,8 @@ export default function LayerSettings() {
         deleteStatus={deleteStatus}
         onUpdate={handleExternalSubmit}
         onDelete={handleDeleteLayer}
-        lastSavedBy="Anonym"
-        lastSavedDate="2023-04-11 13:37"
+        lastSavedBy={updatedByUser}
+        lastSavedDate={formatedLastSavedDate}
         saveButtonText="Spara"
         deleteButtonText="Ta bort"
         navigateTo="/layers"

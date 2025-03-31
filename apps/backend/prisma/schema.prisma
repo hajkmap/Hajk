@@ -32,12 +32,13 @@ model LocalAccount {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  email        String        @unique
-  fullName     String
-  strategy     AuthStrategy
-  localAccount LocalAccount?
-  roles        RoleOnUser[]
+  id              String        @id @default(cuid())
+  email           String        @unique
+  fullName        String
+  strategy        AuthStrategy
+  localAccount    LocalAccount?
+  roles           RoleOnUser[]
+  updatedMetaData Metadata[]
 }
 
 model Role {
@@ -187,6 +188,7 @@ model Service {
 
 model Metadata {
   id          String   @id @default(cuid())
+  userId      String?
   title       String?
   description String?
   owner       String?
@@ -195,6 +197,7 @@ model Metadata {
   attribution String?
   created     DateTime @default(now())
   updated     DateTime @updatedAt
+  updatedBy   User?    @relation(fields: [userId], references: [id])
   service     Service?
   layer       Layer?
 }

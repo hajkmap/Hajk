@@ -31,6 +31,8 @@ export interface Layer {
   zIndex: number;
   style?: string;
   metadata: {
+    updated?: string;
+    userId?: string;
     id: string;
     title?: string;
     url?: string;
@@ -112,6 +114,8 @@ export interface LayerUpdateInput {
   zIndex?: number;
   style?: string;
   metadata?: {
+    updated?: string;
+    userId?: string;
     title?: string;
     url?: string;
     urlTitle?: string;

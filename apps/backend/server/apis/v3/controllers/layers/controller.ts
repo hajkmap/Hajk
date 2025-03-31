@@ -5,6 +5,7 @@ import LayerService from "../../services/layer.service.ts";
 import HttpStatusCodes from "../../../../common/http-status-codes.ts";
 import { HajkError } from "../../../../common/classes.ts";
 import HajkStatusCodes from "../../../../common/hajk-status-codes.ts";
+import { getActiveUserId } from "../../../../common/auth/get-active-user-id.ts";
 
 class LayersController {
   async getLayers(_: Request, res: Response) {
@@ -59,12 +60,14 @@ class LayersController {
   }
 
   async createLayer(req: Request, res: Response) {
-    const layer = await LayerService.createLayer(req.body);
+    const userId = getActiveUserId(req);
+    const layer = await LayerService.createLayer(req.body, userId);
     res.status(HttpStatusCodes.CREATED).json(layer);
-  }
+}
 
   async updateLayer(req: Request, res: Response) {
-    const layer = await LayerService.updateLayer(req.params.id, req.body);
+    const userId = getActiveUserId(req);
+    const layer = await LayerService.updateLayer(req.params.id, req.body, userId);
     res.status(HttpStatusCodes.OK).json(layer);
   }
 
