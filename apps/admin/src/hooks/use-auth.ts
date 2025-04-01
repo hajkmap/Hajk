@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import useUserStore, { User } from "../store/use-user-store";
 import useAppStateStore from "../store/use-app-state-store";
+import { logger as l } from "../lib/logger";
 
 const useAuth = () => {
   const { apiBaseUrl } = useAppStateStore.getState();
@@ -26,6 +27,7 @@ const useAuth = () => {
         };
 
         if (response.status === 200) {
+          l.log("User loaded successfully with data: ", data.user);
           userStore.setUser(data.user);
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
