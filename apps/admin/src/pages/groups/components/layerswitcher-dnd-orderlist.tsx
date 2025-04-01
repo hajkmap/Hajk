@@ -17,6 +17,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import useAppStateStore from "../../../store/use-app-state-store";
 import { useLayers } from "../../../api/layers";
 import { useGroups } from "../../../api/groups";
+import type { XYCoord } from "dnd-core";
 
 const ItemType = {
   ITEM: "ITEM",
@@ -63,13 +64,31 @@ const DraggableGroup = ({
 }) => {
   const ref = React.useRef<HTMLDivElement>(null);
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<
+    { id: string; index: number; type: string },
+    void,
+    unknown
+  >({
     accept: ItemType.GROUP,
-    hover(item: { index: number }) {
+    hover(item, monitor) {
       if (!ref.current) return;
+
       const dragIndex = item.index;
       const hoverIndex = index;
       if (dragIndex === hoverIndex) return;
+
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+
+      const clientOffset = monitor.getClientOffset();
+      if (!clientOffset) return;
+
+      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
+
       moveGroup(dragIndex, hoverIndex);
       item.index = hoverIndex;
     },
@@ -77,7 +96,7 @@ const DraggableGroup = ({
 
   const [{ isDragging }, drag] = useDrag({
     type: ItemType.GROUP,
-    item: { id: group.id, index },
+    item: { id: group.id, index, type: ItemType.GROUP },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -92,6 +111,7 @@ const DraggableGroup = ({
         opacity: isDragging ? 0.5 : 1,
         cursor: "move",
         mb: 2,
+        transition: "opacity 0.2s ease",
       }}
     >
       {children}
@@ -113,15 +133,39 @@ const ReorderableListItem = ({
   onRemove: () => void;
 }) => {
   const ref = React.useRef<HTMLLIElement>(null);
+  const [isHovered, setIsHovered] = React.useState(false);
 
-  const [, drop] = useDrop({
+  const [{ isOver, handlerId }, drop] = useDrop<
+    { id: string; name: string; index: number; groupId: string },
+    void,
+    { isOver: boolean; handlerId: string | symbol | null }
+  >({
     accept: ItemType.ITEM,
-    hover(item: { id: string; index: number; groupId: string }) {
-      if (!ref.current || item.groupId !== groupId) return;
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+      handlerId: monitor.getHandlerId(),
+    }),
+    hover(item, monitor) {
+      if (!ref.current) return;
+      if (item.groupId !== groupId) return;
 
       const dragIndex = item.index;
       const hoverIndex = index;
+
       if (dragIndex === hoverIndex) return;
+
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+
+      const clientOffset = monitor.getClientOffset();
+      if (!clientOffset) return;
+
+      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
+
       moveLayer(dragIndex, hoverIndex);
       item.index = hoverIndex;
     },
@@ -135,15 +179,25 @@ const ReorderableListItem = ({
     }),
   });
 
+  useEffect(() => {
+    setIsHovered(isOver);
+  }, [isOver]);
+
   drag(drop(ref));
 
   return (
     <ListItem
       ref={ref}
+      data-handler-id={handlerId}
       sx={{
         opacity: isDragging ? 0.5 : 1,
         cursor: "move",
-        backgroundColor: isDragging ? "#f0f0f0" : "transparent",
+        backgroundColor: isHovered
+          ? "#e0f7fa"
+          : isDragging
+          ? "#f0f0f0"
+          : "transparent",
+        transition: "background-color 0.2s ease",
       }}
       secondaryAction={
         <IconButton edge="end" onClick={onRemove}>
@@ -176,6 +230,8 @@ const GroupDropZone = ({
     hoverIndex: number
   ) => void;
 }) => {
+  const listRef = React.useRef<HTMLUListElement>(null);
+
   const [{ isOverCurrent, isExternalDrag }, drop] = useDrop<
     { id: string; name: string; groupId?: string; index?: number },
     void,
@@ -192,6 +248,25 @@ const GroupDropZone = ({
           }
           onDropLayerToGroup(group.id, { id: item.id, name: item.name });
         }
+      }
+    },
+    hover: (_, monitor) => {
+      const el = listRef.current;
+      if (!el) return;
+
+      const scrollThreshold = 40;
+      const scrollSpeed = 10;
+      const rect = el.getBoundingClientRect();
+
+      const clientOffset = monitor.getClientOffset();
+      if (!clientOffset) return;
+
+      const pointerY = clientOffset.y;
+
+      if (pointerY < rect.top + scrollThreshold) {
+        el.scrollBy({ top: -scrollSpeed, behavior: "smooth" });
+      } else if (pointerY > rect.bottom - scrollThreshold) {
+        el.scrollBy({ top: scrollSpeed, behavior: "smooth" });
       }
     },
     collect: (monitor) => {
@@ -241,7 +316,14 @@ const GroupDropZone = ({
         </Box>
       )}
 
-      <List sx={{ opacity: isOverCurrent ? 0.3 : 1 }}>
+      <List
+        ref={listRef}
+        sx={{
+          opacity: isOverCurrent ? 0.3 : 1,
+          maxHeight: 400,
+          overflowY: "auto",
+        }}
+      >
         {layers.map((layer, index) => (
           <ReorderableListItem
             key={layer.id}
@@ -275,7 +357,11 @@ function LayerSwitcherOrderList() {
   const [orderedGroups, setOrderedGroups] = useState(groups || []);
 
   useEffect(() => {
-    setOrderedGroups(groups || []);
+    setOrderedGroups((prev) => {
+      const prevIds = prev.map((g) => g.id).join(",");
+      const newIds = groups.map((g) => g.id).join(",");
+      return prevIds === newIds ? prev : groups;
+    });
   }, [groups]);
 
   const handleMoveGroup = (dragIndex: number, hoverIndex: number) => {
