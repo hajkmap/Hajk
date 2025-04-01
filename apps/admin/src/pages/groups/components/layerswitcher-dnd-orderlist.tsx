@@ -53,6 +53,7 @@ const ReorderableListItem = ({
   layer,
   index,
   moveLayer,
+  groupId,
   onRemove,
 }: {
   layer: { id: string; name: string };
@@ -64,9 +65,10 @@ const ReorderableListItem = ({
   const ref = React.useRef<HTMLLIElement>(null);
 
   const [, drop] = useDrop({
-    accept: ItemType.REORDER,
-    hover(item: { index: number }) {
-      if (!ref.current) return;
+    accept: ItemType.ITEM,
+    hover(item: { id: string; index: number; groupId: string }) {
+      if (!ref.current || item.groupId !== groupId) return;
+
       const dragIndex = item.index;
       const hoverIndex = index;
       if (dragIndex === hoverIndex) return;
@@ -76,8 +78,8 @@ const ReorderableListItem = ({
   });
 
   const [{ isDragging }, drag] = useDrag({
-    type: ItemType.REORDER,
-    item: { index },
+    type: ItemType.ITEM,
+    item: { ...layer, index, groupId },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -126,9 +128,20 @@ const GroupDropZone = ({
 }) => {
   const [{ isOverCurrent }, drop] = useDrop({
     accept: ItemType.ITEM,
-    drop: (item: { id: string; name: string }, monitor) => {
+    drop: (
+      item: { id: string; name: string; groupId?: string; index?: number },
+      monitor
+    ) => {
       if (monitor.isOver({ shallow: true })) {
-        onDropLayerToGroup(group.id, item);
+        if (item.groupId === group.id) {
+          // It's from the same group: do nothing here — reorder is handled in hover
+        } else {
+          // Moved from another group or ungrouped
+          if (item.groupId) {
+            onRemoveLayerFromGroup(item.groupId, item.id);
+          }
+          onDropLayerToGroup(group.id, { id: item.id, name: item.name });
+        }
       }
     },
     collect: (monitor) => ({
