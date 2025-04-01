@@ -155,15 +155,36 @@ const GroupDropZone = ({
       sx={{
         p: 2,
         mb: 2,
+        mr: 1,
         border: "2px dashed",
         borderColor: isOverCurrent ? "#000" : "#ccc",
         backgroundColor: isOverCurrent ? "#f9f9f9" : "transparent",
+        position: "relative",
       }}
     >
       <Typography variant="subtitle1" fontWeight={700} gutterBottom>
         {group.name}
       </Typography>
-      <List>
+
+      {isOverCurrent && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            textAlign: "center",
+            pointerEvents: "none",
+            zIndex: 10,
+            fontWeight: "bold",
+            color: "#888",
+          }}
+        >
+          Släpp här
+        </Box>
+      )}
+
+      <List sx={{ opacity: isOverCurrent ? 0.3 : 1 }}>
         {layers.map((layer, index) => (
           <ReorderableListItem
             key={layer.id}
