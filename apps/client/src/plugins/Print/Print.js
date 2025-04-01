@@ -131,7 +131,8 @@ class Print extends React.PureComponent {
         custom={{
           icon: <PrintIcon />,
           title: "Skriv ut",
-          description: "Skapa en PDF av kartan",
+          description:
+            atob(this.props.options?.instruction) || "Skapa en PDF av kartan",
           height: "dynamic",
           width: 350,
           onWindowShow: this.onWindowShow,

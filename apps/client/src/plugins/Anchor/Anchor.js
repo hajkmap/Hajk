@@ -26,7 +26,9 @@ class Anchor extends React.PureComponent {
         custom={{
           icon: <ShareIcon />,
           title: "Dela",
-          description: "Skapa en länk och dela det du ser i kartan med andra",
+          description:
+            atob(this.props.options?.instruction) ||
+            "Skapa en länk och dela det du ser i kartan med andra",
           height: "dynamic",
           width: 512,
           top: undefined,

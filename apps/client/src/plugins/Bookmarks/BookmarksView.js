@@ -232,7 +232,7 @@ const BookmarksView = (props) => {
             <HajkToolTip
               title="Ange ett namn för bokmärket."
               PopperProps={{
-                modifiers: [{ name: "offset", options: { offset: [0, 8] } }],
+                modifiers: [{ name: "offset", options: { offset: [0, -40] } }],
               }}
             >
               <TextField
@@ -259,7 +259,7 @@ const BookmarksView = (props) => {
             <HajkToolTip
               title="Klicka för att spara bokmärket."
               PopperProps={{
-                modifiers: [{ name: "offset", options: { offset: [0, -40] } }],
+                modifiers: [{ name: "offset", options: { offset: [0, -18] } }],
               }}
             >
               <AddButton

@@ -208,7 +208,9 @@ const Sketch = (props) => {
       custom={{
         icon: <EditIcon />,
         title: "Rita",
-        description: "Skapa dina helt egna geometrier!",
+        description:
+          atob(props.options?.instruction) ||
+          "Skapa dina helt egna geometrier!",
         height: "dynamic",
         width: 350,
         onWindowHide: onWindowHide,
