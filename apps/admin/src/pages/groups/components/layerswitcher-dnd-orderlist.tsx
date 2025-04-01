@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Tabs,
   Tab,
@@ -21,6 +21,7 @@ import { useGroups } from "../../../api/groups";
 const ItemType = {
   ITEM: "ITEM",
   REORDER: "REORDER_LAYER",
+  GROUP: "GROUP",
 };
 
 interface DraggableItemProps {
@@ -46,6 +47,55 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ item }) => {
     >
       {item.name}
     </ListItem>
+  );
+};
+
+const DraggableGroup = ({
+  group,
+  index,
+  moveGroup,
+  children,
+}: {
+  group: { id: string; name: string };
+  index: number;
+  moveGroup: (dragIndex: number, hoverIndex: number) => void;
+  children: React.ReactNode;
+}) => {
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  const [, drop] = useDrop({
+    accept: ItemType.GROUP,
+    hover(item: { index: number }) {
+      if (!ref.current) return;
+      const dragIndex = item.index;
+      const hoverIndex = index;
+      if (dragIndex === hoverIndex) return;
+      moveGroup(dragIndex, hoverIndex);
+      item.index = hoverIndex;
+    },
+  });
+
+  const [{ isDragging }, drag] = useDrag({
+    type: ItemType.GROUP,
+    item: { id: group.id, index },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  drag(drop(ref));
+
+  return (
+    <Box
+      ref={ref}
+      sx={{
+        opacity: isDragging ? 0.5 : 1,
+        cursor: "move",
+        mb: 2,
+      }}
+    >
+      {children}
+    </Box>
   );
 };
 
@@ -222,6 +272,20 @@ function LayerSwitcherOrderList() {
 
   const { data: layers = [] } = useLayers();
   const { data: groups = [] } = useGroups();
+  const [orderedGroups, setOrderedGroups] = useState(groups || []);
+
+  useEffect(() => {
+    setOrderedGroups(groups || []);
+  }, [groups]);
+
+  const handleMoveGroup = (dragIndex: number, hoverIndex: number) => {
+    setOrderedGroups((prev) => {
+      const updated = [...prev];
+      const [moved] = updated.splice(dragIndex, 1);
+      updated.splice(hoverIndex, 0, moved);
+      return updated;
+    });
+  };
 
   const handleDropToGroup = (
     groupId: string,
@@ -345,15 +409,21 @@ function LayerSwitcherOrderList() {
                   overflowY: "auto",
                 }}
               >
-                {groups.map((group) => (
-                  <GroupDropZone
+                {orderedGroups.map((group, index) => (
+                  <DraggableGroup
                     key={group.id}
                     group={group}
-                    layers={groupedLayers[group.id] || []}
-                    onDropLayerToGroup={handleDropToGroup}
-                    onRemoveLayerFromGroup={handleRemoveLayer}
-                    onReorderLayer={handleReorderLayer}
-                  />
+                    index={index}
+                    moveGroup={handleMoveGroup}
+                  >
+                    <GroupDropZone
+                      group={group}
+                      layers={groupedLayers[group.id] || []}
+                      onDropLayerToGroup={handleDropToGroup}
+                      onRemoveLayerFromGroup={handleRemoveLayer}
+                      onReorderLayer={handleReorderLayer}
+                    />
+                  </DraggableGroup>
                 ))}
               </Box>
             </Grid>
