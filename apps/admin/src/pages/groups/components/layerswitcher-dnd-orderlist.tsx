@@ -126,17 +126,17 @@ const GroupDropZone = ({
     hoverIndex: number
   ) => void;
 }) => {
-  const [{ isOverCurrent }, drop] = useDrop({
+  const [{ isOverCurrent, isExternalDrag }, drop] = useDrop<
+    { id: string; name: string; groupId?: string; index?: number },
+    void,
+    { isOverCurrent: boolean; isExternalDrag: boolean }
+  >({
     accept: ItemType.ITEM,
-    drop: (
-      item: { id: string; name: string; groupId?: string; index?: number },
-      monitor
-    ) => {
+    drop: (item, monitor) => {
       if (monitor.isOver({ shallow: true })) {
         if (item.groupId === group.id) {
-          // It's from the same group: do nothing here — reorder is handled in hover
+          // Same group: reordering handled in hover
         } else {
-          // Moved from another group or ungrouped
           if (item.groupId) {
             onRemoveLayerFromGroup(item.groupId, item.id);
           }
@@ -144,9 +144,15 @@ const GroupDropZone = ({
         }
       }
     },
-    collect: (monitor) => ({
-      isOverCurrent: monitor.isOver({ shallow: true }),
-    }),
+    collect: (monitor) => {
+      const item = monitor.getItem();
+      const isOver = monitor.isOver({ shallow: true });
+      const isExternal = !!item && item.groupId !== group.id;
+      return {
+        isOverCurrent: isOver,
+        isExternalDrag: isExternal,
+      };
+    },
   });
 
   return (
@@ -157,8 +163,9 @@ const GroupDropZone = ({
         mb: 2,
         mr: 1,
         border: "2px dashed",
-        borderColor: isOverCurrent ? "#000" : "#ccc",
-        backgroundColor: isOverCurrent ? "#f9f9f9" : "transparent",
+        borderColor: isOverCurrent && isExternalDrag ? "#000" : "#ccc",
+        backgroundColor:
+          isOverCurrent && isExternalDrag ? "#f9f9f9" : "transparent",
         position: "relative",
       }}
     >
@@ -166,7 +173,7 @@ const GroupDropZone = ({
         {group.name}
       </Typography>
 
-      {isOverCurrent && (
+      {isOverCurrent && isExternalDrag && (
         <Box
           sx={{
             position: "absolute",
