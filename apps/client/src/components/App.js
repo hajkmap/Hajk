@@ -633,7 +633,9 @@ class App extends React.PureComponent {
               mergedParams.get("y") !== y.toString()
             ) {
               this.appModel.map.getView().animate({
-                center: [mergedParams.get("x"), mergedParams.get("y")],
+                center: [mergedParams.get("x"), mergedParams.get("y")].map(
+                  (coord) => coord * 1.0
+                ),
               });
             }
           }
