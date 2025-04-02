@@ -6,4 +6,7 @@ export default express
   .get("/", controller.getGroups)
   .get("/:id", controller.getGroupById)
   .get("/:id/layers", controller.getLayersByGroupId)
-  .get("/:id/maps", controller.getMapsByGroupId);
+  .get("/:id/maps", controller.getMapsByGroupId)
+  .post("/", controller.createGroup)
+  .patch("/:id", controller.updateGroup)
+  .delete("/:id", controller.deleteGroup);

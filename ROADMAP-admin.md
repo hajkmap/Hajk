@@ -2,9 +2,9 @@
 
 ## List of sprints
 
-- [2025-02-21](#2025-02-21)
+- [2025-03-28](#2025-03-28)
 
-## 2025-02-21
+## 2025-03-28
 
 - [ ] Authentication and authorization
   - [x] Basic authentication (local user and pass)
@@ -15,13 +15,20 @@
   - [x] Update seed script (HH)
   - [ ] Update zod parsers
   - [x] Update API methods (AA)
+  - [ ] Try getting onDelete cascade to work for relations as intended inside the prisma schema
 - [ ] Layers API
   - [x] Update prisma schema (ALL)
   - [x] Update seed script (HH)
   - [ ] Update zod parsers
   - [x] Update API methods (AA)
+  - [ ] Try getting onDelete cascade to work for relations as intended inside the prisma schema
+- [ ] Groups API
+  - [x] Update prisma schema (AA)
+  - [x] Update seed script (HH)
+  - [ ] Update zod parsers
+  - [x] Update API methods (AA)
 - [ ] FormActionPanel component (OS)
-  - [ ] Make the panel sticky (OS)
+  - [x] Make the panel sticky (OS)
   - [ ] Feed it with relevant data
 - [x] Services page
   - [x] Add service (AA)
@@ -32,8 +39,16 @@
 - [x] Layers page
   - [x] Add layer (AA)
   - [x] Alter layer (AA)
-  - ⚠️ Note: legend and legendUrl fields are incomplete. The permission accordion and used in maps data-grid are also incomplete and needs to be updated.
+    - ⚠️ Note: Used in maps data-grid are incomplete and needs to be updated.
+  - [ ] TBD: Infoclick preview
   - [x] Remove layer (AA)
+  - [x] MUI chip component and legend to showcase affected layers in the available layers data-grid (AA)
+- [ ] Groups page
+  - [x] Add group (AA)
+  - [x] Alter group (AA)
+  - [x] Delete group (AA)
+  - [ ] TBD/TBI: Drag-and-drop functionality for ordering the layers in the layerswitcher.
+  - [x] react-dnd dependency with a simple dnd component (dummy) (AA)
 - [ ] Map settings page
   - [x] Step 1: Create form with formfactory, UI only, incl translations (JA)
 - [ ] Optimizing input fields performance/state.
@@ -60,7 +75,7 @@
 
 _TODO: Document roles used in Hajk._
 
-### Ready for testing after [2025-02-21](#2025-02-21)
+### Ready for testing after [2025-03-28](#2025-03-28)
 
 - [ ] (Example) Test authentication
 - [ ] Test adding, updating and deleting a new service

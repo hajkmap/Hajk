@@ -1,11 +1,19 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import {
+  useQuery,
+  UseQueryResult,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   getGroups,
   getGroupById,
   getLayersByGroupId,
   getMapsByGroupId,
+  createGroup,
+  updateGroup,
+  deleteGroup,
 } from "./requests";
-import { Group } from "./types";
+import { Group, GroupUpdateInput } from "./types";
 import { Map } from "../maps";
 import { Layer } from "../layers";
 
@@ -44,5 +52,54 @@ export const useMapsByGroupId = (groupId: string): UseQueryResult<Map[]> => {
   return useQuery({
     queryKey: ["mapsByGroupId", groupId],
     queryFn: () => getMapsByGroupId(groupId),
+  });
+};
+
+export const useCreateGroup = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createGroup,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["groups"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+export const useUpdateGroup = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      groupId,
+      data,
+    }: {
+      groupId: string;
+      data: GroupUpdateInput;
+    }) => updateGroup(groupId, data),
+    onSuccess: (data, { groupId }) => {
+      queryClient.setQueryData(["groups", groupId], data);
+      void queryClient.invalidateQueries({ queryKey: ["groups"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+export const useDeleteGroup = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (groupId: string) => deleteGroup(groupId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["groups"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 };

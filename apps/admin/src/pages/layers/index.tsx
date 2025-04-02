@@ -44,6 +44,8 @@ export default function LayersPage() {
   const { palette } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
 
+  console.log("layers", layers);
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };

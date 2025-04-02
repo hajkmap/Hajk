@@ -13,6 +13,19 @@ export interface GroupsApiResponse {
   errorId: string;
 }
 
+export interface GroupCreateInput {
+  id?: string;
+  name: string;
+  internalName?: string;
+  type: string;
+}
+
+export interface GroupUpdateInput {
+  name?: string;
+  internalName?: string;
+  type?: string;
+}
+
 export enum GroupType {
   LAYER = "Layer",
   SEARCH = "Search",

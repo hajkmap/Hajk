@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 import log4js from "log4js";
 import prisma from "../../../common/prisma.ts";
 
@@ -38,6 +40,22 @@ class GroupsService {
     });
 
     return maps;
+  }
+  async createGroup(data: Prisma.GroupCreateInput) {
+    return await prisma.group.create({
+      data,
+    });
+  }
+  async updateGroup(id: string, data: Prisma.GroupUpdateInput) {
+    return await prisma.group.update({
+      where: { id },
+      data,
+    });
+  }
+  async deleteGroup(id: string) {
+    return await prisma.group.delete({
+      where: { id },
+    });
   }
 }
 

@@ -302,6 +302,21 @@
     "layers.createNewLayer": "Create new layer",
     "availableLayers.legend.stored": "Stored in database",
     "availableLayers.legend.newlySelected": "Newly selected",
-    "availableLayers.legend.removal": "Marked for Removal"
+    "availableLayers.legend.removal": "Marked for Removal",
+    "groups.internalName": "Internal name",
+    "groups.type": "Type of group",
+    "groups.search": "Search groups...",
+    "groupType": {
+      "LAYER": "Layer",
+      "SEARCH": "Search"
+    },
+    "groups.create": "Create new group",
+    "groups.dialog.title": "New group",
+    "groups.createGroupSuccess": "Group {{name}} created!",
+    "groups.createGroupFailed": "Failed to create group.",
+    "groups.updateGroupSuccess": "Group {{name}} updated!",
+    "groups.updateGroupFailed": "Failed to update group {{name}}.",
+    "groups.deleteGroupSuccess": "Group {{name}} deleted!",
+    "groups.deleteGroupFailed": "Failed to delete group {{name}}."
   }
 }
