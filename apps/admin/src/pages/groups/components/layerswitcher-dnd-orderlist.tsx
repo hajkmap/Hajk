@@ -30,6 +30,7 @@ interface DraggableItemProps {
 }
 
 const DraggableItem: React.FC<DraggableItemProps> = ({ item }) => {
+  const themeMode = useAppStateStore((state) => state.themeMode);
   const [{ isDragging }, dragRef] = useDrag({
     type: ItemType.ITEM,
     item,
@@ -42,8 +43,19 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ item }) => {
     <ListItem
       ref={dragRef as unknown as React.Ref<HTMLLIElement>}
       sx={{
-        backgroundColor: isDragging ? "#f0f0f0" : "transparent",
+        backgroundColor: isDragging
+          ? "#f0f0f0"
+          : themeMode === "dark"
+          ? "#121212"
+          : "white",
         cursor: "move",
+        border: "1px solid #ddd",
+        borderRadius: 2,
+        boxShadow: isDragging ? "0px 2px 10px rgba(0, 0, 0, 0.1)" : "none",
+        mb: 1,
+        px: 2,
+        py: 1.5,
+        transition: "box-shadow 0.2s ease, background-color 0.2s ease",
       }}
     >
       {item.name}
@@ -125,15 +137,19 @@ const ReorderableListItem = ({
   moveLayer,
   groupId,
   onRemove,
+  dimmed,
 }: {
   layer: { id: string; name: string };
   index: number;
   moveLayer: (dragIndex: number, hoverIndex: number) => void;
   groupId: string;
   onRemove: () => void;
+  dimmed?: boolean;
 }) => {
   const ref = React.useRef<HTMLLIElement>(null);
   const [isHovered, setIsHovered] = React.useState(false);
+  const themeMode = useAppStateStore((state) => state.themeMode);
+  const isDarkMode = themeMode === "dark";
 
   const [{ isOver, handlerId }, drop] = useDrop<
     { id: string; name: string; index: number; groupId: string },
@@ -190,14 +206,29 @@ const ReorderableListItem = ({
       ref={ref}
       data-handler-id={handlerId}
       sx={{
-        opacity: isDragging ? 0.5 : 1,
+        opacity: isDragging ? 0.5 : dimmed ? 0.25 : 1,
         cursor: "move",
-        backgroundColor: isHovered
-          ? "#e0f7fa"
+        backgroundColor: dimmed
+          ? "transparent"
+          : isHovered
+          ? isDarkMode
+            ? "#1e293b"
+            : "#e0f7fa"
           : isDragging
-          ? "#f0f0f0"
-          : "transparent",
-        transition: "background-color 0.2s ease",
+          ? isDarkMode
+            ? "#263238"
+            : "#f0f0f0"
+          : isDarkMode
+          ? "#121212"
+          : "white",
+        border: "1px solid #ddd",
+        borderRadius: 2,
+        boxShadow:
+          isHovered || isDragging ? "0px 2px 10px rgba(0, 0, 0, 0.1)" : "none",
+        mb: 1,
+        px: 2,
+        py: 1.5,
+        transition: "all 0.2s ease",
       }}
       secondaryAction={
         <IconButton edge="end" onClick={onRemove}>
@@ -212,12 +243,14 @@ const ReorderableListItem = ({
 
 const GroupDropZone = ({
   group,
+  groupIndex,
   layers,
   onDropLayerToGroup,
   onRemoveLayerFromGroup,
   onReorderLayer,
 }: {
   group: { id: string; name: string };
+  groupIndex: number;
   layers: { id: string; name: string }[];
   onDropLayerToGroup: (
     groupId: string,
@@ -282,8 +315,8 @@ const GroupDropZone = ({
 
   return (
     <Paper
-      ref={drop as unknown as React.Ref<HTMLDivElement>}
       sx={{
+        position: "relative",
         p: 2,
         mb: 2,
         mr: 1,
@@ -291,11 +324,20 @@ const GroupDropZone = ({
         borderColor: isOverCurrent && isExternalDrag ? "#000" : "#ccc",
         backgroundColor:
           isOverCurrent && isExternalDrag ? "#f9f9f9" : "transparent",
-        position: "relative",
       }}
     >
+      <Box
+        ref={drop as unknown as React.Ref<HTMLDivElement>}
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 5,
+          pointerEvents: isExternalDrag ? "auto" : "none",
+        }}
+      />
+
       <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-        {group.name}
+        {groupIndex + 1}. {group.name}
       </Typography>
 
       {isOverCurrent && isExternalDrag && (
@@ -319,7 +361,9 @@ const GroupDropZone = ({
       <List
         ref={listRef}
         sx={{
-          opacity: isOverCurrent ? 0.3 : 1,
+          position: "relative",
+          zIndex: 1,
+          opacity: isOverCurrent && isExternalDrag ? 0.3 : 1,
           maxHeight: 400,
           overflowY: "auto",
         }}
@@ -334,6 +378,7 @@ const GroupDropZone = ({
             }
             groupId={group.id}
             onRemove={() => onRemoveLayerFromGroup(group.id, layer.id)}
+            dimmed={isOverCurrent && isExternalDrag}
           />
         ))}
       </List>
@@ -483,7 +528,7 @@ function LayerSwitcherOrderList() {
                 <Tab label="Lagerordning" />
                 <Tab label="Ritordning" />
               </Tabs>
-              <Typography variant="body2" mt={2}>
+              <Typography variant="body2" mt={2} mb={2}>
                 Här listas lager i den ordning som de visas för besökaren i
                 lagerhanteraren.
               </Typography>
@@ -504,6 +549,7 @@ function LayerSwitcherOrderList() {
                   >
                     <GroupDropZone
                       group={group}
+                      groupIndex={index}
                       layers={groupedLayers[group.id] || []}
                       onDropLayerToGroup={handleDropToGroup}
                       onRemoveLayerFromGroup={handleRemoveLayer}
