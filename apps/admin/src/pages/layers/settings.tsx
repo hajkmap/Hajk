@@ -33,7 +33,6 @@ import { useServices, useServiceCapabilities } from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
 import { useRoles } from "../../api/users";
 import { HttpError } from "../../lib/http-error";
-// import useUserStore, { User } from "../../store/use-user-store";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
@@ -63,12 +62,6 @@ export default function LayerSettings() {
     }
   );
 
-  // const [activeUser, setActiveUser] = useState<User | null>();
-  // const { user } = useUserStore.getState();
-  // useEffect(() => {
-  //   setActiveUser(user);
-  // });
-
   const styles = layer?.selectedLayers.flatMap(
     (key) => getCapStyles[key] || []
   );
@@ -78,10 +71,8 @@ export default function LayerSettings() {
     }
   };
 
-  const [updateLayerDefaultData] = useState<DynamicFormContainer<FieldValues>>(
-    new DynamicFormContainer<FieldValues>()
-  );
-  const defaultValues = updateLayerDefaultData.getDefaultValues();
+  const updateLayerContainer = new DynamicFormContainer<FieldValues>();
+  const defaultValues = updateLayerContainer.getDefaultValues();
   const {
     register,
     handleSubmit,
@@ -94,7 +85,6 @@ export default function LayerSettings() {
   const watchSingleTileInput = watch("singleTile");
   const watchRoleIdInput = watch("roleId");
 
-  const updateLayerContainer = new DynamicFormContainer<FieldValues>();
   const layerInformationSettings = new DynamicFormContainer<FieldValues>(
     t("common.information"),
     CONTAINER_TYPE.PANEL
@@ -796,16 +786,15 @@ export default function LayerSettings() {
   return (
     <Page title={t("common.settings")}>
       <FormActionPanel
+        name={layer?.name}
         updateStatus={updateStatus}
         deleteStatus={deleteStatus}
         onUpdate={handleExternalSubmit}
         onDelete={handleDeleteLayer}
         lastSavedBy={updatedByUser}
         lastSavedDate={formatedLastSavedDate}
-        saveButtonText="Spara"
-        deleteButtonText="Ta bort"
-        navigateTo="/layers"
-      >
+        dirtyFields={dirtyFields}
+        >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer
             formControls={updateLayerContainer}

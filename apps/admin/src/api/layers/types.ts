@@ -32,6 +32,7 @@ export interface Layer {
   style?: string;
   metadata: {
     updated?: string;
+    updatedBy?: string;
     userId?: string;
     id: string;
     title?: string;
@@ -115,6 +116,7 @@ export interface LayerUpdateInput {
   style?: string;
   metadata?: {
     updated?: string;
+    updatedBy?: string;
     userId?: string;
     title?: string;
     url?: string;
