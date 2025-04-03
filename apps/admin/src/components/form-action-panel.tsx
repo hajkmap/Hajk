@@ -1,38 +1,37 @@
-import React from "react";
+import React, {useState} from "react";
 import { Box, Button, Typography } from "@mui/material";
 import CircularProgress from "../components/progress/circular-progress";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-
-// This custom component will replace the save/delete panel-buttons on all the forms
+import DialogWrapper from "../components/flexible-dialog";
 
 interface FormActionProps {
+  name?: string;
   updateStatus: "idle" | "pending" | "success" | "error";
   deleteStatus: "idle" | "pending" | "success" | "error";
   onUpdate: () => void | Promise<void>;
   onDelete: () => void | Promise<void>;
   lastSavedBy?: string;
   lastSavedDate?: string;
-  saveButtonText?: string;
-  deleteButtonText?: string;
   children?: React.ReactNode;
-  navigateTo?: string;
+  dirtyFields?: Partial<Readonly<Record<string, boolean>>>;
 }
 
 const FormActionPanel: React.FC<FormActionProps> = ({
+  name = "",
   updateStatus,
   deleteStatus,
   onUpdate,
   onDelete,
   lastSavedBy = "",
   lastSavedDate = "",
-  saveButtonText = "",
-  deleteButtonText = "",
   children,
-  navigateTo,
+  dirtyFields,
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const saveButtonDisabled = !dirtyFields || Object.keys(dirtyFields).length === 0;
+  const [open, setOpen] = useState<boolean>(false);
 
   return (
     <Box
@@ -60,33 +59,43 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           position: "sticky",
         }}
       >
+        {/* Save Button */}
         <Button
           onClick={(e) => {
             e.preventDefault();
             void onUpdate();
           }}
           variant="contained"
-          disabled={updateStatus === "pending" || deleteStatus === "pending"}
+          disabled={updateStatus === "pending" || deleteStatus === "pending" || saveButtonDisabled}
         >
           {updateStatus === "pending" ? (
-            <CircularProgress color="primary" size={30} />
+            <CircularProgress color="primary" size={12} />
           ) : (
-            t("services.dialog.saveBtn", saveButtonText)
+            t("common.dialog.saveBtn")
           )}
         </Button>
 
+        {/* Cancel Button */}
         <Button
-          onClick={(e) => {
-            e.preventDefault();
-            void onDelete();
-            if (navigateTo) {
-              void navigate(navigateTo);
-            }
+          onClick={() => {
+            void navigate("/layers");
+          }}
+          variant="contained"
+          color="warning"
+        >
+          {t("common.cancel")}
+        </Button>
+
+        {/* Delete Button */}
+        <Button
+          onClick={() => {
+            setOpen(true);
           }}
           disabled={deleteStatus === "pending" || updateStatus === "pending"}
-          variant="text"
+          variant="contained"
+          color="error"
         >
-          {t("common.dialog.deleteBtn", deleteButtonText)}
+          {t("common.dialog.deleteBtn")}
         </Button>
 
         <Typography variant="body1">
@@ -103,6 +112,42 @@ const FormActionPanel: React.FC<FormActionProps> = ({
       >
         {children}
       </Box>
+              {/* Delete Dialog */}
+      <DialogWrapper
+        open={open}
+        title={t("common.dialog.deleteConfirmation", { name })}
+        onClose={() => setOpen(false)}
+        actions={(
+          <>
+            <Button onClick={() => setOpen(false)} variant="contained" color="secondary">
+              {t("common.cancel")}
+            </Button>
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                setOpen(false);
+                void onDelete();
+                void navigate("/layers");
+              }}
+              type="submit"
+              variant="contained"
+              color="error"
+              disabled={deleteStatus === "pending"}
+            >
+              {deleteStatus === "pending" ? (
+                <CircularProgress color="primary" size={12} />
+              ) : (
+                t("common.dialog.deleteBtn")
+              )}
+            </Button>
+          </>
+        )}
+        fullWidth={true}
+      >
+        <Typography variant="body2" color="text.secondary">
+          {t("common.dialog.deleteWarning")}
+        </Typography>
+      </DialogWrapper>
     </Box>
   );
 };
