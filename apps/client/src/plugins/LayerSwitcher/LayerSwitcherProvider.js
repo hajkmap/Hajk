@@ -96,7 +96,7 @@ const LayerZoomVisibleSnackbarProvider = ({ children, layers }) => {
   );
 };
 
-const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
+export const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
   if (visibleSubLayersArray.length === 0) {
     // Fix underlying source
     olLayer.getSource().updateParams({
