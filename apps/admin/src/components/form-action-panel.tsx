@@ -178,22 +178,19 @@ const FormActionPanel: React.FC<FormActionProps> = ({
     </Button>
   );
 
-  const renderStyledPaper = () => (
+  const renderSavedInformation = () => (
     <StyledPaper>
       <Typography
         variant="h5"
         sx={{ fontSize: "1.2rem", fontWeight: "bold", mb: 2 }}
       >
-        {t("common.lastSaved", {
-          lastSavedBy,
-          lastSavedDate: getTimeAgo(lastSavedDate),
-        })}
+        {t("common.lastSaved")}
       </Typography>
       <Typography variant="subtitle1" sx={{ fontSize: "1rem" }}>
         {getTimeAgo(lastSavedDate)}
       </Typography>
       <Typography variant="body1">{t("common.of")}</Typography>
-      <Typography variant="body1">{lastSavedBy}</Typography>
+      <Typography variant="body1">{lastSavedBy ? lastSavedBy : t("formControl.unknown")}</Typography>
     </StyledPaper>
   );
 
@@ -219,7 +216,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
         {renderSaveButton()}
         {renderCancelButton()}
         {renderDeleteButton()}
-        {renderStyledPaper()}
+        {renderSavedInformation()}
       </ActionContainer>
       <Box
         sx={{
