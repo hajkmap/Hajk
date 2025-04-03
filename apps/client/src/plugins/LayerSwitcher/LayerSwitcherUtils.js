@@ -22,17 +22,8 @@ export const getThemedLegendGraphicUrl = (url, isDarkMode) => {
     return;
   }
 
-  if (!url.startsWith("http://") && !url.startsWith("https://")) {
-    // Sometimes the URL is relative, e.g. "/geoserver/wms?..."
-    // This needs to be converted to an absolute URL, otherwise URL object creation will fail.
-    const { protocol, host } = window.location;
-    url = url.startsWith("/")
-      ? `${protocol}//${host}${url}`
-      : `${protocol}//${url}`;
-  }
-
   const fontColor = isDarkMode ? "0xFFFFFF" : "0x000000";
-  const parsedUrl = new URL(url);
+  const parsedUrl = new URL(url, window.location.href);
   const params = parsedUrl.searchParams;
 
   const requestParam = (
