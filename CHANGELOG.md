@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## [4.0.0] - 2025-04-03
+## [4.0.0] - 2025-04-04
 
 ### Fixed
 
@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Config: fixes in naming of the demo config's DocumentHandler section, [commit](https://github.com/hajkmap/Hajk/commit/d2109c5dc6a68e2fa4018123fae50cdd4e02c132).
 - Client: Hotfix for loading with malformed coordinates. [commit](https://github.com/hajkmap/Hajk/commit/1ab25f09d23aee1608ba240be3888d3450cb9735)
 - LayerSwitcher: Fix to ensure consistent labeling. [PR#1632](https://github.com/hajkmap/Hajk/pull/1632)
+- LayerSwitcher: Hotfix for tooltip getting stuck. [commit](https://github.com/hajkmap/Hajk/commit/dd220226d238a428562a1fb4b808a9e96b259994)
+- Client: Enable hash control over individual sub-layers. [PR#1635](https://github.com/hajkmap/Hajk/pull/1635)
 
 ## [4.0.0-rc.2] - 2025-03-26
 
