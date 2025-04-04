@@ -38,7 +38,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style";
 
-import { setOLSubLayers } from "../plugins/LayerSwitcher/LayerSwitcherProvider.js";
+import { setOLSubLayers } from "../utils/groupLayers";
 
 class AppModel {
   /**
