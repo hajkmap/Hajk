@@ -331,6 +331,7 @@ class LayersSwitcherView extends React.PureComponent {
           chapters={this.state.chapters}
           showOpacitySlider={this.props.options.enableTransparencySlider}
           showQuickAccess={this.props.options.showQuickAccess}
+          staticLayerConfig={this.staticLayerConfig}
         ></LayerItemDetails>
         <BackgroundSwitcher
           display={

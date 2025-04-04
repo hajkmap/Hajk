@@ -299,6 +299,7 @@ const getLayerNodes = (groups, olLayerMap) =>
         infobox: node.infobox,
         isGroup,
         layerType,
+        hideLayerLegend: node.hideLayerLegend,
         visibleAtStart: node.visibleAtStart,
         visibleForGroups: node.visibleForGroups,
         layerMinZoom: olLayer?.get("minZoom"),
