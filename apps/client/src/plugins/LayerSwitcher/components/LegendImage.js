@@ -9,8 +9,7 @@ const ColumnContainer = styled("div")(() => ({
 }));
 
 const Image = styled("img")(() => ({
-  objectFit: "none",
-  maxWidth: "250px",
+  maxWidth: "100%",
 }));
 
 export default function LegendImage({ open, src }) {

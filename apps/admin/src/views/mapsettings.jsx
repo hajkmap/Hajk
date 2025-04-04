@@ -480,7 +480,7 @@ class Menu extends Component {
       lockDrawOrderBaselayer: false,
       drawOrderViewInfoText:
         "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
-      enableQuickAccessTopics: false,
+      enableQuickAccessPresets: false,
       quickAccessTopicsInfoText:
         "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
       enableUserQuickAccessFavorites: false,
@@ -498,7 +498,7 @@ class Menu extends Component {
       height: "",
       title: "Innehåll",
       description: "Välj innehåll att visa i kartan",
-      quickLayersPresets: [],
+      quickAccessPresets: [],
       importedLayers: [],
       importedMetadata: {},
       minMaxZoomAlertOnToggleOnly: false,
@@ -559,9 +559,9 @@ class Menu extends Component {
           drawOrderViewInfoText:
             existingConfig.drawOrderViewInfoText ||
             "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
-          enableQuickAccessTopics:
-            existingConfig.enableQuickAccessTopics ??
-            this.state.enableQuickAccessTopics,
+          enableQuickAccessPresets:
+            existingConfig.enableQuickAccessPresets ??
+            this.state.enableQuickAccessPresets,
           quickAccessTopicsInfoText:
             existingConfig.quickAccessTopicsInfoText ||
             "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
@@ -587,7 +587,7 @@ class Menu extends Component {
           height: existingConfig.height || "",
           title: existingConfig.title || "",
           description: existingConfig.description || "",
-          quickLayersPresets: existingConfig.quickLayersPresets || [],
+          quickAccessPresets: existingConfig.quickAccessPresets || [],
           minMaxZoomAlertOnToggleOnly:
             existingConfig.minMaxZoomAlertOnToggleOnly ??
             this.state.minMaxZoomAlertOnToggleOnly,
@@ -793,7 +793,7 @@ class Menu extends Component {
     var settings = {
       groups: [],
       baselayers: [],
-      quickLayersPresets: this.state.quickLayersPresets,
+      quickAccessPresets: this.state.quickAccessPresets,
       active: this.state.active,
       visibleAtStart: this.state.visibleAtStart,
       visibleAtStartMobile: this.state.visibleAtStartMobile,
@@ -807,7 +807,7 @@ class Menu extends Component {
       enableSystemLayersSwitch: this.state.enableSystemLayersSwitch,
       lockDrawOrderBaselayer: this.state.lockDrawOrderBaselayer,
       drawOrderViewInfoText: this.state.drawOrderViewInfoText,
-      enableQuickAccessTopics: this.state.enableQuickAccessTopics,
+      enableQuickAccessPresets: this.state.enableQuickAccessPresets,
       quickAccessTopicsInfoText: this.state.quickAccessTopicsInfoText,
       enableUserQuickAccessFavorites: this.state.enableUserQuickAccessFavorites,
       userQuickAccessFavoritesInfoText:
@@ -1043,12 +1043,12 @@ class Menu extends Component {
   /**
    *
    */
-  saveQuickLayersPresets() {
+  saveQuickAccessPresets() {
     // Get the current configuration.
     var config = this.props.model.get("layerMenuConfig");
 
-    // Update the quickLayersPresets property in the configuration.
-    config.quickLayersPresets = this.state.quickLayersPresets;
+    // Update the quickAccessPresets property in the configuration.
+    config.quickAccessPresets = this.state.quickAccessPresets;
 
     // Save the updated configuration.
     this.props.model.updateConfig(config, (success) => {
@@ -1079,7 +1079,7 @@ class Menu extends Component {
 
     this.setState(
       (prevState) => {
-        const updatedLayers = prevState.quickLayersPresets.map((layer) => {
+        const updatedLayers = prevState.quickAccessPresets.map((layer) => {
           if (layer.id === currentEditingLayer.id) {
             return {
               ...layer,
@@ -1092,10 +1092,10 @@ class Menu extends Component {
           return layer;
         });
 
-        return { quickLayersPresets: updatedLayers, mode: "add" };
+        return { quickAccessPresets: updatedLayers, mode: "add" };
       },
       () => {
-        this.saveQuickLayersPresets(); // Save the configuration after the update.
+        this.saveQuickAccessPresets(); // Save the configuration after the update.
         this.cancelInput(); // Clear the input fields and reset the state.
       }
     );
@@ -1677,7 +1677,7 @@ class Menu extends Component {
    * Renders method for adding and removing quick layers.
    */
   renderQuickLayers() {
-    let filteredLayers = this.state.quickLayersPresets;
+    let filteredLayers = this.state.quickAccessPresets;
 
     // Apply filter only when filterString is not empty.
     if (this.state.filterString) {
@@ -1762,13 +1762,13 @@ class Menu extends Component {
   deleteQuickLayerFromList(id) {
     this.setState(
       (prevState) => ({
-        quickLayersPresets: prevState.quickLayersPresets.filter(
+        quickAccessPresets: prevState.quickAccessPresets.filter(
           (layer) => layer.id !== id
         ),
       }),
       () => {
         // After state is updated, save the configuration.
-        this.saveQuickLayersPresets();
+        this.saveQuickAccessPresets();
         this.hideConfirmation();
       }
     );
@@ -1826,14 +1826,14 @@ class Menu extends Component {
 
     this.setState(
       (prevState) => ({
-        quickLayersPresets: [...prevState.quickLayersPresets, newLayer],
+        quickAccessPresets: [...prevState.quickAccessPresets, newLayer],
         importedLayers: [],
         importedMetadata: {},
         importStatus: false,
         importMessage: "",
       }),
       () => {
-        this.saveQuickLayersPresets();
+        this.saveQuickAccessPresets();
       }
     );
 
@@ -2384,14 +2384,17 @@ class Menu extends Component {
               </div>
               <div>
                 <input
-                  id="enableQuickAccessTopics"
-                  name="enableQuickAccessTopics"
+                  id="enableQuickAccessPresets"
+                  name="enableQuickAccessPresets"
                   type="checkbox"
                   onChange={this.handleInputChange}
-                  checked={this.state.enableQuickAccessTopics}
+                  checked={this.state.enableQuickAccessPresets}
                 />
                 &nbsp;
-                <label className="long-label" htmlFor="enableQuickAccessTopics">
+                <label
+                  className="long-label"
+                  htmlFor="enableQuickAccessPresets"
+                >
                   Ladda tema{" "}
                   <i
                     className="fa fa-question-circle"

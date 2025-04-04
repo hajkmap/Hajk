@@ -12,6 +12,10 @@ import LayerSwitcherView from "./LayerSwitcherView.js";
 import { useLayerZoomWarningSnackbar } from "./useLayerZoomWarningSnackbar";
 import { functionalOk as functionalCookieOk } from "../../models/Cookie";
 import LocalStorageHelper from "../../utils/LocalStorageHelper";
+import { setOLSubLayers, getAllLayerIdsInGroup } from "../../utils/groupLayers";
+
+export const QUICK_ACCESS_KEY = "quickAccess";
+export const QUICK_ACCESS_LS_KEY = "quickAccessLayers";
 
 const getOlLayerState = (l) => ({
   opacity: l.get("opacity"),
@@ -93,53 +97,6 @@ const LayerZoomVisibleSnackbarProvider = ({ children, layers }) => {
   );
 };
 
-const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
-  if (visibleSubLayersArray.length === 0) {
-    // Fix underlying source
-    olLayer.getSource().updateParams({
-      // Ensure that the list of sublayers is emptied (otherwise they'd be
-      // "remembered" the next time user toggles group)
-      LAYERS: "",
-      // Remove any filters
-      CQL_FILTER: null,
-    });
-
-    // Hide the layer in OL
-    olLayer.setVisible(false);
-  } else {
-    // Set LAYERS and STYLES so that the exact sublayers that are needed
-    // will be visible
-    olLayer.getSource().updateParams({
-      // join(), so we always provide a string as value to LAYERS
-      LAYERS: visibleSubLayersArray.join(),
-      // Filter STYLES to only contain styles for currently visible layers,
-      // and maintain the order from layersInfo (it's crucial that the order
-      // of STYLES corresponds exactly to the order of LAYERS!)
-      STYLES: Object.entries(olLayer.layersInfo)
-        .filter((k) => visibleSubLayersArray.indexOf(k[0]) !== -1)
-        .map((l) => l[1].style)
-        .join(","),
-      CQL_FILTER: null,
-    });
-    olLayer.setVisible(true);
-  }
-};
-
-// TODO move to common. Copied from LayerGroup.js
-const getAllLayerIdsInGroup = (group) => {
-  if (!group) {
-    return [];
-  }
-
-  if (!group.children) {
-    return [group.id];
-  } else {
-    return group.children.flatMap((c) => {
-      return getAllLayerIdsInGroup(c);
-    });
-  }
-};
-
 const getGroupConfigById = (tree, groupId) => {
   if (!tree) {
     return null;
@@ -164,16 +121,12 @@ const getGroupConfigById = (tree, groupId) => {
   }
 };
 
-const QUICK_ACCESS_KEY = "quickAccess";
-const QUICK_ACCESS_LS_KEY = "quickAccessLayers";
-
 const setQuickAccessStateInLocalStorage = (map) => {
   if (functionalCookieOk()) {
     const qaLayers = map
       .getAllLayers()
       .filter((l) => l.get(QUICK_ACCESS_KEY) === true)
       .map((l) => l.get("name"));
-    console.log({ qaLayers });
     LocalStorageHelper.set(QUICK_ACCESS_LS_KEY, qaLayers);
   }
 };
@@ -227,8 +180,18 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
       const sortedCurrentSubLayers = allSubLayers.filter((l) =>
         currentSubLayersSet.has(l)
       );
+
       olLayer.set("subLayers", sortedCurrentSubLayers);
       setOLSubLayers(olLayer, sortedCurrentSubLayers);
+    },
+    setSubLayersVisible(layerId, subLayers) {
+      const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
+      const allSubLayers = olLayer.get("allSublayers");
+
+      const subLayersToShow = Array.isArray(subLayers)
+        ? subLayers
+        : allSubLayers;
+      setOLSubLayers(olLayer, subLayersToShow);
     },
     setGroupVisibility(groupId, visible) {
       const groupTree = getGroupConfigById(staticLayerTree, groupId);
@@ -238,18 +201,6 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
         const olLayer = map.getAllLayers().find((l) => l.get("name") === id);
         olLayer.setVisible(visible);
       });
-    },
-    setGroupLayerVisibility(layerId, visible) {
-      const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
-      const allSubLayers = new Set(olLayer.get("subLayers"));
-
-      if (visible) {
-        olLayer.set("subLayers", allSubLayers);
-        setOLSubLayers(olLayer, allSubLayers);
-      } else {
-        olLayer.set("subLayers", []);
-        setOLSubLayers(olLayer, []);
-      }
     },
     setAllLayersInvisible() {
       map.getAllLayers().forEach((l) => {
@@ -475,6 +426,7 @@ const LayerSwitcherProvider = ({
   // layers might have been added to QuickAccess.
   useEffect(() => {
     const ls = LocalStorageHelper.get(QUICK_ACCESS_LS_KEY);
+
     if (!(typeof ls === "object" && ls !== null)) {
       return;
     }

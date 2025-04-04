@@ -56,11 +56,7 @@ const CustomPopper = (props) => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const headerHasFocusZIndex = props.headerhasfocus === "true" ? 1300 : 1000;
-
-  const style = smallScreen
-    ? { width: "100%", zIndex: headerHasFocusZIndex }
-    : { width: 400, zIndex: headerHasFocusZIndex };
+  const style = smallScreen ? { width: "100%" } : { width: 400 };
 
   return (
     <Popper
@@ -107,6 +103,8 @@ class SearchBar extends React.PureComponent {
     resultsLayerVisible: true,
   };
 
+  gridRef = React.createRef();
+
   componentDidMount() {
     // The OL layer that holds the result features. We grab
     // it here so we can control its visibility using a button
@@ -118,6 +116,11 @@ class SearchBar extends React.PureComponent {
     if (this.resultsLayer.getVisible() !== true) {
       this.setState({ resultsLayer: false });
     }
+
+    this.props.app.globalObserver.publish(
+      "core.window.add",
+      this.gridRef.current
+    );
   }
 
   toggleResultsLayerVisibility = () => {
@@ -266,8 +269,6 @@ class SearchBar extends React.PureComponent {
       resultPanelCollapsed,
       toggleCollapseSearchResults,
       options,
-      headerHasFocus,
-      handleHeaderFocus,
     } = this.props;
 
     return (
@@ -281,8 +282,6 @@ class SearchBar extends React.PureComponent {
         panelCollapsed={resultPanelCollapsed}
         toggleCollapseSearchResults={toggleCollapseSearchResults}
         options={options}
-        headerHasFocus={headerHasFocus}
-        handleHeaderFocus={handleHeaderFocus}
       />
     );
   };
@@ -296,19 +295,13 @@ class SearchBar extends React.PureComponent {
       loading,
       handleOnAutocompleteInputChange,
       handleSearchInput,
-      handleHeaderFocus,
     } = this.props;
     return (
       <StyledAutocomplete
         id="searchInputField"
         freeSolo
         size={"small"}
-        PopperComponent={(popperProps) => (
-          <CustomPopper
-            {...popperProps}
-            headerhasfocus={this.props.headerHasFocus.toString()}
-          />
-        )}
+        PopperComponent={(popperProps) => <CustomPopper {...popperProps} />}
         PaperComponent={CustomPaper}
         clearOnEscape
         disabled={
@@ -339,9 +332,6 @@ class SearchBar extends React.PureComponent {
                 {...props}
                 key={props.id}
                 onClick={(e) => {
-                  if (handleHeaderFocus) {
-                    handleHeaderFocus();
-                  }
                   if (props.onClick) {
                     props.onClick(e);
                   }
@@ -408,8 +398,6 @@ class SearchBar extends React.PureComponent {
       setSearchSources,
       failedWFSFetchMessage,
       isMobile,
-      handleHeaderFocus,
-      handleHeaderBlur,
     } = this.props;
     const disableUnderline = isMobile ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
@@ -426,7 +414,6 @@ class SearchBar extends React.PureComponent {
     const placeholder = this.getPlaceholder();
     return (
       <TextField
-        onBlur={handleHeaderBlur}
         {...params}
         label={<span style={visuallyHidden}>Sök i webbplatsens innehåll</span>}
         variant={isMobile ? "standard" : "outlined"}
@@ -460,11 +447,7 @@ class SearchBar extends React.PureComponent {
                   <HajkToolTip title={expandMessage}>
                     <IconButton
                       onClick={(e) => {
-                        e.stopPropagation();
                         toggleCollapseSearchResults();
-                        if (handleHeaderFocus) {
-                          handleHeaderFocus();
-                        }
                       }}
                       size="small"
                     >
@@ -479,11 +462,7 @@ class SearchBar extends React.PureComponent {
                   <HajkToolTip title={toggleResultsLayerVisibilityMessage}>
                     <IconButton
                       onClick={(e) => {
-                        e.stopPropagation();
                         this.toggleResultsLayerVisibility();
-                        if (handleHeaderFocus) {
-                          handleHeaderFocus();
-                        }
                       }}
                       size="small"
                     >
@@ -534,6 +513,14 @@ class SearchBar extends React.PureComponent {
 
     return (
       <Grid
+        ref={this.gridRef}
+        onClick={() => {
+          // This click will be captured by both search input and search result list.
+          this.props.app.globalObserver.publish(
+            "core.window.bringtofront",
+            this.gridRef.current
+          );
+        }}
         sx={{
           width: 400,
           height: (theme) => (renderElsewhere ? "auto" : theme.spacing(6)),

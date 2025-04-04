@@ -549,7 +549,56 @@
             "infobox": ""
           }
         ],
-        "quickLayersPresets": [],
+        "quickAccessPresets": [
+          {
+            "title": "Test-grupp",
+            "description": "Ett preset med vanliga lager och ett grupplager",
+            "layers": [
+              {
+                "id": "0si2ys",
+                "visible": true,
+                "subLayers": [],
+                "opacity": 1,
+                "drawOrder": 1000
+              },
+              {
+                "id": "4y2nnu",
+                "visible": true,
+                "subLayers": [],
+                "opacity": 1,
+                "drawOrder": 1000
+              },
+              {
+                "id": "n0ehiv",
+                "visible": true,
+                "subLayers": [
+                  "Motorvag",
+                  "Motortrafikled",
+                  "Stamvag",
+                  "Storstadsvag",
+                  "Gastvag",
+                  "GangfartsOmrade",
+                  "Provisoriskvag"
+                ],
+                "opacity": 1,
+                "drawOrder": 1000
+              },
+              {
+                "id": "1",
+                "visible": true,
+                "subLayers": [],
+                "opacity": 1,
+                "drawOrder": 0
+              }
+            ],
+            "metadata": {
+              "savedAt": "2025-03-17T06:22:16.974Z",
+              "numberOfLayers": 3,
+              "title": "Test-grupp",
+              "description": "Ett preset med vanliga lager och ett grupplager"
+            }
+          }
+        ],
         "active": true,
         "visibleAtStart": false,
         "visibleAtStartMobile": false,
@@ -563,7 +612,7 @@
         "enableSystemLayersSwitch": true,
         "lockDrawOrderBaselayer": true,
         "drawOrderViewInfoText": "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
-        "enableQuickAccessTopics": false,
+        "enableQuickAccessPresets": true,
         "quickAccessTopicsInfoText": "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
         "enableUserQuickAccessFavorites": true,
         "userQuickAccessFavoritesInfoText": "Här kan du hantera och redigera dina sparade favoriter. Observera att favoriter endast sparas tillfälligt.",
