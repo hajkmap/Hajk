@@ -14,6 +14,8 @@ Also, this will be the last release in the 3.x branch.
 
 ## 4.0
 
+_Update: 4.0 has been release on Apr 4th. See [release notes](https://github.com/hajkmap/Hajk/releases/tag/v4.0.0)._
+
 This release marks the removal of the .NET backend, leaving NodeJS as the sole official backend solution.
 
 In addition, Client UI sees significant updates to the Layer Switcher tool as well as the application's window management.
