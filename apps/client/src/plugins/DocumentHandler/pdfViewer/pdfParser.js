@@ -19,19 +19,45 @@ export async function parsePdf(pdfBlob) {
 async function buildChaptersPerPage(pdf) {
   const numPages = pdf.numPages;
   const chapters = [];
+
   for (let i = 1; i <= numPages; i++) {
     const page = await pdf.getPage(i);
     const textContent = await page.getTextContent();
-    const pageText = textContent.items.map((item) => item.str).join(" ");
+
+    let pageText = "";
+    // Define a threshold for how large the gap should be before a space is inserted.
+    const threshold = 5; // This value may need adjustment depending on the PDF layout.
+
+    for (let j = 0; j < textContent.items.length; j++) {
+      const item = textContent.items[j];
+
+      if (j > 0) {
+        const prevItem = textContent.items[j - 1];
+        // Retrieves x-coordinates from the transform array (index 4 is usually the x value)
+        const prevX = prevItem.transform[4];
+        const currX = item.transform[4];
+        const prevWidth = prevItem.width; // approximate width of the text item
+
+        // If the gap between the previous text item's right edge and the current text item's left edge is larger than threshold,
+        // insert a space.
+        if (currX - (prevX + prevWidth) > threshold) {
+          pageText += " ";
+        }
+      }
+
+      pageText += item.str;
+    }
+
+    // Remove redundant whitespace from the text.
     const cleanedText = pageText.replace(/\s+/g, " ").trim();
 
     chapters.push({
-      // This is the "PDF version" of the chapter...
       title: `Sida ${i}`,
       content: cleanedText,
       chapters: [],
     });
   }
+
   return chapters;
 }
 

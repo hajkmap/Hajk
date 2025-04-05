@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Document, Page } from "react-pdf";
 import { pdfjs } from "react-pdf";
 import { styled } from "@mui/material/styles";
@@ -67,6 +67,7 @@ function PdfViewerWithTOC({
   toggleDownloadWindow,
   model,
   options,
+  localObserver,
 }) {
   const [numPages, setNumPages] = useState(null);
   const [topLevel, setTopLevel] = useState([]);
@@ -78,6 +79,40 @@ function PdfViewerWithTOC({
   const containerRef = useRef(null);
 
   const [scale, setScale] = useState(1.0);
+
+  useEffect(() => {
+    // Define a callback for "scroll-to-chapter"
+    const scrollToChapterHandler = async (chapter) => {
+      // 1) Example: wait 100 ms if you want, as in DocumentViewer
+      await new Promise((r) => setTimeout(r, 100));
+
+      // 2) Parse out the page number from chapter.header, ex: "Page 15"
+      const match = /Sida\s+(\d+)/i.exec(chapter.header);
+      if (match) {
+        const pageNumber = parseInt(match[1], 10);
+        // 3) Scroll there with React Scroll
+        scroller.scrollTo(`page-${pageNumber}`, {
+          containerId: "pdfViewer",
+          smooth: true,
+          duration: 600,
+          offset: -5,
+        });
+      } else {
+        console.warn("Kunde inte hitta sidnummer i chapter.header:", chapter);
+      }
+    };
+
+    // Subscribe
+    localObserver.subscribe("pdf-scroll-to-chapter", scrollToChapterHandler);
+
+    // Unsubscribe when the component unmounts
+    return () => {
+      localObserver.unsubscribe(
+        "pdf-scroll-to-chapter",
+        scrollToChapterHandler
+      );
+    };
+  }, [localObserver, document]);
 
   const onDocumentLoadSuccess = async (pdf) => {
     setNumPages(pdf.numPages);

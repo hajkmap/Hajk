@@ -52,6 +52,7 @@ class DocumentViewer extends React.PureComponent {
     this.documentViewerRef = React.createRef();
     this.setScrollButtonLimit();
     this.bindSubscriptions();
+    this.document = this.props.document;
   }
 
   setScrollButtonLimit = () => {
@@ -66,7 +67,7 @@ class DocumentViewer extends React.PureComponent {
   bindSubscriptions = () => {
     const { localObserver } = this.props;
 
-    localObserver.subscribe("scroll-to-chapter", async (chapter) => {
+    localObserver.subscribe("json-scroll-to-chapter", async (chapter) => {
       /*scrollIntoView is buggy without dirty fix - 
       tried using react life cycle methods but is, for some reason, not working*/
       await delay(100);

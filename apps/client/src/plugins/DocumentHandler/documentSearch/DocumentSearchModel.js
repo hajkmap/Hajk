@@ -104,6 +104,11 @@ export default class DocumentSearchModel {
     if (chapter.keywords && chapter.keywords.length > 0) {
       searchValues = [...searchValues, ...chapter.keywords];
     }
+    if (chapter.html) {
+      const strippedHtml = chapter.html.replace(/<[^>]*>/g, "");
+      const maxLength = 2500;
+      searchValues.push(strippedHtml.substring(0, maxLength));
+    }
 
     const properties = {
       header: chapter.header,

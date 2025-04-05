@@ -21,17 +21,22 @@ class DocumentWindowBase extends React.PureComponent {
 
   scrollInDocument = (headerIdentifier) => {
     const { localObserver, model, document } = this.props;
+    const headerRef = model.getHeaderRef(document, headerIdentifier);
 
     if (headerIdentifier) {
-      localObserver.publish(
-        "scroll-to-chapter",
-        model.getHeaderRef(document, headerIdentifier)
-      );
+      // Determine which topic to use based on document type
+      const topic =
+        document.type === "pdf"
+          ? "pdf-scroll-to-chapter"
+          : document.type === "json"
+            ? "json-scroll-to-chapter"
+            : null;
+
+      if (topic) {
+        localObserver.publish(topic, headerRef);
+      }
     } else {
-      localObserver.publish(
-        "scroll-to-top",
-        model.getHeaderRef(document, headerIdentifier)
-      );
+      localObserver.publish("scroll-to-top", headerRef);
     }
   };
 
@@ -218,6 +223,7 @@ class DocumentWindowBase extends React.PureComponent {
               toggleDownloadWindow={toggleDownloadWindow}
               model={model}
               options={options}
+              localObserver={localObserver}
             />
           ) : !showPrintWindow ? (
             customTheme ? (

@@ -21,6 +21,7 @@ import {
 } from "./utils/ContentComponentFactory";
 
 import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
+import { parsePdf } from "./pdfViewer/pdfParser";
 import { hfetch } from "../../utils/FetchWrapper";
 
 /**
@@ -114,16 +115,25 @@ export default class DocumentHandlerModel {
       Promise.all(
         menuItemsWithDocumentConnection.map((menuItem) => {
           return this.fetchDocument(menuItem.folder, menuItem.document).then(
-            (doc) => {
+            async (doc) => {
               let docObject = doc;
               if (doc instanceof Blob) {
+                const pdfChapters = await parsePdf(doc);
+
                 docObject = {
                   type: "pdf",
                   blob: doc,
                   title: menuItem.document, // fallback-title
-                  chapters: [], // dummy-chapters so the model can handle it
+                  chapters: pdfChapters, // pdfChapters so the model can handle it
+                };
+              } else {
+                // JSON document – ensure the type is set to "json"
+                docObject = {
+                  ...doc,
+                  type: "json",
                 };
               }
+
               if (!docObject.title) {
                 console.warn(
                   `The document ${menuItem.document} is missing a title`
