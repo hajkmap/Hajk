@@ -25,22 +25,27 @@ async function buildChaptersPerPage(pdf) {
     const textContent = await page.getTextContent();
 
     let pageText = "";
-    // Define a threshold for how large the gap should be before a space is inserted.
-    const threshold = 5; // This value may need adjustment depending on the PDF layout.
+    // Define thresholds for horizontal and vertical distances
+    const xThreshold = 2; // Adjust based on PDF layout
+    const yThreshold = 2; // Adjust to detect new lines
 
     for (let j = 0; j < textContent.items.length; j++) {
       const item = textContent.items[j];
 
       if (j > 0) {
         const prevItem = textContent.items[j - 1];
-        // Retrieves x-coordinates from the transform array (index 4 is usually the x value)
         const prevX = prevItem.transform[4];
         const currX = item.transform[4];
-        const prevWidth = prevItem.width; // approximate width of the text item
+        const prevWidth = prevItem.width;
+        const prevY = prevItem.transform[5];
+        const currY = item.transform[5];
 
-        // If the gap between the previous text item's right edge and the current text item's left edge is larger than threshold,
-        // insert a space.
-        if (currX - (prevX + prevWidth) > threshold) {
+        // If the vertical difference is greater than yThreshold, insert a space instead of a line break.
+        if (Math.abs(currY - prevY) > yThreshold) {
+          pageText += " ";
+        }
+        // If we are on the same line but there is a large horizontal gap, insert a space.
+        else if (currX - (prevX + prevWidth) > xThreshold) {
           pageText += " ";
         }
       }
@@ -48,7 +53,7 @@ async function buildChaptersPerPage(pdf) {
       pageText += item.str;
     }
 
-    // Remove redundant whitespace from the text.
+    // Remove excess whitespace.
     const cleanedText = pageText.replace(/\s+/g, " ").trim();
 
     chapters.push({
