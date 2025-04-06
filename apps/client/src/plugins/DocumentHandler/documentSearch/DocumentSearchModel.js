@@ -106,7 +106,8 @@ export default class DocumentSearchModel {
     }
     if (chapter.html) {
       const strippedHtml = chapter.html.replace(/<[^>]*>/g, "");
-      searchValues.push(strippedHtml);
+      const maxLenth = 1600;
+      searchValues.push(strippedHtml.substring(0, maxLenth));
     }
 
     const properties = {

@@ -52,7 +52,6 @@ class DocumentViewer extends React.PureComponent {
     this.documentViewerRef = React.createRef();
     this.setScrollButtonLimit();
     this.bindSubscriptions();
-    this.document = this.props.document;
   }
 
   setScrollButtonLimit = () => {
