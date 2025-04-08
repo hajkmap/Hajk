@@ -33,7 +33,7 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ item }) => {
   const themeMode = useAppStateStore((state) => state.themeMode);
   const [{ isDragging }, dragRef] = useDrag({
     type: ItemType.ITEM,
-    item,
+    item: { ...item, type: ItemType.ITEM },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -41,6 +41,7 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ item }) => {
 
   return (
     <ListItem
+      key={item.id}
       ref={dragRef as unknown as React.Ref<HTMLLIElement>}
       sx={{
         backgroundColor: isDragging
@@ -189,7 +190,7 @@ const ReorderableListItem = ({
 
   const [{ isDragging }, drag] = useDrag({
     type: ItemType.ITEM,
-    item: { ...layer, index, groupId },
+    item: { ...layer, index, groupId, type: ItemType.ITEM },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -203,6 +204,7 @@ const ReorderableListItem = ({
 
   return (
     <ListItem
+      key={layer.id}
       ref={ref}
       data-handler-id={handlerId}
       sx={{
@@ -243,14 +245,16 @@ const ReorderableListItem = ({
 
 const GroupDropZone = ({
   group,
-  groupIndex,
   layers,
   onDropLayerToGroup,
   onRemoveLayerFromGroup,
   onReorderLayer,
+  onMoveGroupToGroup,
+  onDeleteGroup,
+  showDeleteGroupButton = true,
+  pathIndex,
 }: {
   group: { id: string; name: string };
-  groupIndex: number;
   layers: { id: string; name: string }[];
   onDropLayerToGroup: (
     groupId: string,
@@ -262,25 +266,38 @@ const GroupDropZone = ({
     dragIndex: number,
     hoverIndex: number
   ) => void;
+  onMoveGroupToGroup: (childGroupId: string, parentGroupId: string) => void;
+  onDeleteGroup?: () => void;
+  showDeleteGroupButton?: boolean;
+  pathIndex?: string;
 }) => {
   const listRef = React.useRef<HTMLUListElement>(null);
 
   const [{ isOverCurrent, isExternalDrag }, drop] = useDrop<
-    { id: string; name: string; groupId?: string; index?: number },
+    {
+      id: string;
+      name: string;
+      groupId?: string;
+      index?: number;
+      type: string;
+    },
     void,
     { isOverCurrent: boolean; isExternalDrag: boolean }
   >({
-    accept: ItemType.ITEM,
+    accept: [ItemType.ITEM, ItemType.GROUP],
+
     drop: (item, monitor) => {
-      if (monitor.isOver({ shallow: true })) {
-        if (item.groupId === group.id) {
-          // Same group: reordering handled in hover
-        } else {
-          if (item.groupId) {
-            onRemoveLayerFromGroup(item.groupId, item.id);
-          }
-          onDropLayerToGroup(group.id, { id: item.id, name: item.name });
+      if (!monitor.isOver({ shallow: true })) return;
+
+      if (item.type === ItemType.ITEM) {
+        if (item.groupId) {
+          onRemoveLayerFromGroup(item.groupId, item.id);
         }
+        onDropLayerToGroup(group.id, { id: item.id, name: item.name });
+      }
+
+      if (item.type === ItemType.GROUP) {
+        onMoveGroupToGroup(item.id, group.id);
       }
     },
     hover: (_, monitor) => {
@@ -336,9 +353,23 @@ const GroupDropZone = ({
         }}
       />
 
-      <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-        {groupIndex + 1}. {group.name}
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="subtitle1" fontWeight={700}>
+          {pathIndex ? `${pathIndex}.` : ""} {group.name}
+        </Typography>
+
+        {showDeleteGroupButton && onDeleteGroup && (
+          <IconButton onClick={onDeleteGroup} size="small">
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        )}
+      </Box>
 
       {isOverCurrent && isExternalDrag && (
         <Box
@@ -359,6 +390,7 @@ const GroupDropZone = ({
       )}
 
       <List
+        key={group.id}
         ref={listRef}
         sx={{
           position: "relative",
@@ -393,8 +425,12 @@ function LayerSwitcherOrderList() {
   const [leftTab, setLeftTab] = useState(0);
   const [rightTab, setRightTab] = useState(0);
   const [search, setSearch] = useState("");
+  const [groupSearch, setGroupSearch] = useState("");
   const [groupedLayers, setGroupedLayers] = useState<
     Record<string, { id: string; name: string }[]>
+  >({});
+  const [groupHierarchy, setGroupHierarchy] = useState<
+    Record<string, string[]>
   >({});
 
   const { data: layers = [] } = useLayers();
@@ -473,6 +509,154 @@ function LayerSwitcherOrderList() {
       (leftTab === 1 || !assignedLayerIds.has(item.id))
   );
 
+  const onMoveGroupToGroup = (childGroupId: string, parentGroupId: string) => {
+    setGroupHierarchy((prevHierarchy) => {
+      const isCircular = (id: string, target: string): boolean => {
+        if (id === target) return true;
+        const children = prevHierarchy[id] || [];
+        return children.some((childId) => isCircular(childId, target));
+      };
+      if (isCircular(childGroupId, parentGroupId)) return prevHierarchy;
+
+      const newHierarchy: Record<string, string[]> = {};
+      for (const [parentId, children] of Object.entries(prevHierarchy)) {
+        newHierarchy[parentId] = children.filter((id) => id !== childGroupId);
+      }
+
+      if (!newHierarchy[parentGroupId]) {
+        newHierarchy[parentGroupId] = [];
+      }
+      newHierarchy[parentGroupId].push(childGroupId);
+
+      return newHierarchy;
+    });
+  };
+
+  const handleDeleteGroup = (groupId: string) => {
+    setGroupHierarchy((prev) => {
+      const newHierarchy: Record<string, string[]> = {};
+
+      for (const [parentId, children] of Object.entries(prev)) {
+        newHierarchy[parentId] = children.filter((id) => id !== groupId);
+      }
+
+      return newHierarchy;
+    });
+
+    setOrderedGroups((prev) => {
+      if (prev.find((g) => g.id === groupId)) return prev;
+
+      const groupToAdd = groups.find((g) => g.id === groupId);
+      if (!groupToAdd) return prev;
+
+      return [...prev, groupToAdd];
+    });
+  };
+
+  const groupMatchesSearch = (groupId: string, query: string): boolean => {
+    const group = groups.find((g) => g.id === groupId);
+    if (!group) return false;
+
+    const nameMatches = group.name.toLowerCase().includes(query.toLowerCase());
+    const children = groupHierarchy[groupId] || [];
+
+    return (
+      nameMatches ||
+      children.some((childId) => groupMatchesSearch(childId, query))
+    );
+  };
+
+  const rootGroups = orderedGroups.filter(
+    (group) => !Object.values(groupHierarchy).flat().includes(group.id)
+  );
+
+  const visibleRootGroups = rootGroups.filter((group) =>
+    groupMatchesSearch(group.id, groupSearch)
+  );
+
+  const renderGroupTree = (
+    group: { id: string; name: string },
+    depth = 0,
+    index?: number,
+    pathIndex?: string
+  ): React.ReactNode => {
+    const children = groupHierarchy[group.id] || [];
+    const hasChildren = children.length > 0;
+
+    const groupBlock = (
+      <Box
+        key={group.id}
+        sx={{
+          pl: depth * 2,
+          ml: depth * 2,
+          borderLeft: depth > 0 ? "3px solid #ddd" : "none",
+          mt: 2,
+        }}
+      >
+        <DraggableGroup
+          group={group}
+          index={index ?? 0}
+          moveGroup={handleMoveGroup}
+        >
+          <GroupDropZone
+            group={group}
+            pathIndex={pathIndex}
+            layers={groupedLayers[group.id] || []}
+            onDropLayerToGroup={handleDropToGroup}
+            onRemoveLayerFromGroup={handleRemoveLayer}
+            onReorderLayer={handleReorderLayer}
+            onMoveGroupToGroup={onMoveGroupToGroup}
+            showDeleteGroupButton={depth > 0}
+            onDeleteGroup={() => handleDeleteGroup(group.id)}
+          />
+        </DraggableGroup>
+      </Box>
+    );
+
+    if (hasChildren && depth === 0) {
+      return (
+        <Paper
+          key={group.id}
+          elevation={2}
+          sx={{
+            p: 2,
+            mt: 2,
+            border: "1px solid #ccc",
+            borderRadius: 2,
+            backgroundColor: isDarkMode ? "#1e1e1e" : "#fafafa",
+          }}
+        >
+          {groupBlock}
+
+          {children.map((childId, idx) => {
+            const childGroup = groups.find((g) => g.id === childId);
+            const childPathIndex =
+              depth === 0 ? `${pathIndex}.${idx + 1}` : undefined;
+
+            return childGroup
+              ? renderGroupTree(childGroup, depth + 1, idx, childPathIndex)
+              : null;
+          })}
+        </Paper>
+      );
+    }
+
+    return (
+      <>
+        {groupBlock}
+        {children.map((childId, idx) => {
+          const childGroup = groups.find((g) => g.id === childId);
+          const childPathIndex =
+            depth === 0 ? `${pathIndex}.${idx + 1}` : undefined;
+
+          return childGroup
+            ? renderGroupTree(childGroup, depth + 1, idx, childPathIndex)
+            : null;
+        })}
+      </>
+    );
+  };
+
   return (
     <Paper
       sx={{
@@ -485,80 +669,78 @@ function LayerSwitcherOrderList() {
       <Typography variant="h6" sx={{ mt: -0.5, mb: 1.5 }}>
         Välj lager och justera ordning
       </Typography>
-      <Grid container>
-        <DndProvider backend={HTML5Backend}>
-          <Grid container spacing={2}>
-            <Grid size={6}>
-              <Tabs
-                value={leftTab}
-                onChange={(_, newValue: number) => setLeftTab(newValue)}
-              >
-                <Tab label="Alla lager" />
-                <Tab label="Alla grupper" />
-              </Tabs>
-              <Typography variant="body2" mt={2}>
-                Här listas alla tillgängliga lager och grupper. Flytta eller dra
-                ett lager till ytan för lagerordning för att de ska visas i
-                kartan för användaren.
-              </Typography>
-              <TextField
-                fullWidth
-                placeholder="Sök"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                sx={{ my: 2 }}
-              />
-              <Paper
-                variant="outlined"
-                sx={{ p: 1, maxHeight: 410, overflow: "auto" }}
-              >
-                <List>
-                  {filteredItems.map((item) => (
-                    <DraggableItem key={item.id} item={item} />
-                  ))}
-                </List>
-              </Paper>
-            </Grid>
 
-            <Grid size={6}>
-              <Tabs
-                value={rightTab}
-                onChange={(_, newValue) => setRightTab(newValue as number)}
-              >
-                <Tab label="Lagerordning" />
-                <Tab label="Ritordning" />
-              </Tabs>
-              <Typography variant="body2" mt={2} mb={2}>
-                Här listas lager i den ordning som de visas för besökaren i
-                lagerhanteraren.
-              </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "500px",
-                  overflowY: "auto",
-                }}
-              >
-                {orderedGroups.map((group, index) => (
-                  <DraggableGroup
-                    key={group.id}
-                    group={group}
-                    index={index}
-                    moveGroup={handleMoveGroup}
-                  >
-                    <GroupDropZone
-                      group={group}
-                      groupIndex={index}
-                      layers={groupedLayers[group.id] || []}
-                      onDropLayerToGroup={handleDropToGroup}
-                      onRemoveLayerFromGroup={handleRemoveLayer}
-                      onReorderLayer={handleReorderLayer}
-                    />
-                  </DraggableGroup>
+      <Grid container spacing={4}>
+        <DndProvider backend={HTML5Backend}>
+          <Grid size={5}>
+            <Tabs
+              value={leftTab}
+              onChange={(_, newValue: number) => setLeftTab(newValue)}
+            >
+              <Tab label="Alla lager" />
+              <Tab label="Alla grupper" />
+            </Tabs>
+            <Typography variant="body2" mt={2}>
+              Här listas alla tillgängliga lager och grupper. Flytta eller dra
+              ett lager till ytan för lagerordning för att de ska visas i kartan
+              för användaren.
+            </Typography>
+            <TextField
+              placeholder="Sök"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              sx={{ my: 2 }}
+            />
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 1,
+                maxHeight: 600,
+                overflowY: "auto",
+                backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
+              }}
+            >
+              <List>
+                {filteredItems.map((item) => (
+                  <DraggableItem key={item.id} item={item} />
                 ))}
+              </List>
+            </Paper>
+          </Grid>
+
+          <Grid size={7}>
+            <Tabs
+              value={rightTab}
+              onChange={(_, newValue) => setRightTab(newValue as number)}
+            >
+              <Tab label="Lagerordning" />
+              <Tab label="Ritordning" />
+            </Tabs>
+            <Typography variant="body2" mt={2} mb={2}>
+              Här listas lager i den ordning som de visas för besökaren i
+              lagerhanteraren.
+            </Typography>
+            <TextField
+              placeholder="Sök grupper"
+              value={groupSearch}
+              onChange={(e) => setGroupSearch(e.target.value)}
+              sx={{ my: 2 }}
+            />
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
+                height: 600,
+                overflowY: "auto",
+                backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
+              }}
+            >
+              <Box sx={{ display: "flex", flexDirection: "column" }}>
+                {visibleRootGroups.map((group, i) =>
+                  renderGroupTree(group, 0, i, `${i + 1}`)
+                )}
               </Box>
-            </Grid>
+            </Paper>
           </Grid>
         </DndProvider>
       </Grid>
