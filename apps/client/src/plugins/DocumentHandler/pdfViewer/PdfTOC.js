@@ -92,7 +92,7 @@ function TOCItem({
       <span
         className={`node-label ${node.id === selectedNodeId ? "selected-item" : ""}`}
         onClick={handleNavigation}
-        style={{ paddingLeft: `${node.level * 10}px` }} // TODO: Check left padding!
+        style={{ paddingLeft: `${node.level * 2}px` }} // TODO: Check left padding!
       >
         {node.title} {node.page ? `(sid ${node.page})` : ""}
       </span>
@@ -124,6 +124,7 @@ function PdfTOC({
   setCollapsedItems,
   selectedNodeId,
   setSelectedNodeId,
+  customTheme,
 }) {
   const tocDepth = options.tableOfContents.chapterLevelsToShow || 3;
   const [outlineItems, setOutlineItems] = useState([]);
@@ -190,7 +191,11 @@ function PdfTOC({
   };
 
   return (
-    <div className="toc-container">
+    <div
+      className={`toc-container ${
+        customTheme?.palette?.mode === "dark" ? "dark-theme" : ""
+      }`}
+    >
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
         <span style={{ cursor: "pointer" }} onClick={handleCollapseAll}>
           -

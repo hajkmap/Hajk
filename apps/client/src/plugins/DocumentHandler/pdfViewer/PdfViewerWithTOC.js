@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Document, Page } from "react-pdf";
-import { pdfjs } from "react-pdf";
 import { styled } from "@mui/material/styles";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import ZoomOutIcon from "@mui/icons-material/ZoomOut";
@@ -13,8 +12,6 @@ import PdfTOC from "./PdfTOC";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import "./style.css";
-
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const PdfContainer = styled("div")(() => ({
   maxHeight: "100%",
@@ -36,13 +33,15 @@ function PdfViewerWithTOC({
 }) {
   const [numPages, setNumPages] = useState(null);
   const [pdfInstance, setPdfInstance] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [collapsedItems, setCollapsedItems] = useState({});
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const scrollLimit = 400;
   const containerRef = useRef(null);
   const [scale, setScale] = useState(1.0);
+  const [menuOpen, setMenuOpen] = useState(
+    options.tableOfContents.expanded || false
+  );
 
   useEffect(() => {
     const scrollToChapterHandler = async (chapter) => {
@@ -150,14 +149,16 @@ function PdfViewerWithTOC({
             <ZoomInIcon />
           </IconButton>
           <span className="zoom-percentage">{Math.round(scale * 100)}%</span>
-          <div
-            onClick={() => setMenuOpen((prev) => !prev)}
-            className="toggle-menu"
-          >
-            {menuOpen
-              ? "Dölj innehållsförteckning"
-              : "Visa innehållsförteckning"}
-          </div>
+          {options.tableOfContents.active && (
+            <div
+              onClick={() => setMenuOpen((prev) => !prev)}
+              className="toggle-menu"
+            >
+              {menuOpen
+                ? "Dölj innehållsförteckning"
+                : "Visa innehållsförteckning"}
+            </div>
+          )}
         </div>
 
         {menuOpen && pdfInstance && (
@@ -169,6 +170,7 @@ function PdfViewerWithTOC({
             setCollapsedItems={setCollapsedItems}
             selectedNodeId={selectedNodeId}
             setSelectedNodeId={setSelectedNodeId}
+            customTheme={customTheme}
           />
         )}
 

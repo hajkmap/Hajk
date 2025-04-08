@@ -1,22 +1,33 @@
 import { pdfjs } from "react-pdf";
 import { flattenOutlineAsync } from "./PdfTOC";
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-
+/**
+ * Parses a PDF from a blob object and returns a list of chapters.
+ * @param {Blob} pdfBlob - The PDF file as a Blob.
+ * @returns {Promise<Array<Object>>} - A list of JSON-structured chapters.
+ */
 export async function parsePdf(pdfBlob) {
-  const arrayBuffer = await pdfBlob.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+  try {
+    const arrayBuffer = await pdfBlob.arrayBuffer();
+    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
 
-  // Build chapters per page with headings (e.g. "Sida 1") and add outline data as keywords
-  const pdfChapters = await buildChaptersPerPage(pdf);
-  const mappedChapters = pdfChapters.map((chapter) =>
-    transformPdfChapterToJsonChapter(chapter)
-  );
-  return mappedChapters;
+    // Build chapters per page with headings (e.g. "Sida 1") and add outline data as keywords
+    const pdfChapters = await buildChaptersPerPage(pdf);
+    const mappedChapters = pdfChapters.map((chapter) =>
+      transformPdfChapterToJsonChapter(chapter)
+    );
+    return mappedChapters;
+  } catch (error) {
+    console.error("Fel vid parsning av PDF:", error);
+    throw error;
+  }
 }
 
-// Global counter for unique IDs
-let uniqueIdCounter = 0;
+// Helper function for unique IDs
+const createUniqueIdGenerator = () => {
+  let counter = 0;
+  return () => counter++;
+};
 
 async function buildChaptersPerPage(pdf) {
   const numPages = pdf.numPages;
@@ -49,9 +60,11 @@ async function buildChaptersPerPage(pdf) {
   return chapters;
 }
 
+const getUniqueId = createUniqueIdGenerator();
+
 // Function to map each PDF chapter to a JSON structure with a unique headerIdentifier
 function transformPdfChapterToJsonChapter(pdfChapter) {
-  const currentId = uniqueIdCounter++;
+  const currentId = getUniqueId();
   return {
     header: pdfChapter.title,
     headerIdentifier: `pdf_chapter_${currentId}`,

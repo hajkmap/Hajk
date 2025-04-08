@@ -22,7 +22,11 @@ import {
 
 import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
 import { parsePdf } from "./pdfViewer/pdfParser";
+import { pdfjs } from "react-pdf";
 import { hfetch } from "../../utils/FetchWrapper";
+
+// Set the path to the PDF.js worker that is used to parse PDFs and to show them in the viewer components
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 /**
  * @summary  DocumentHandler model that doesn't do much.

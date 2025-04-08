@@ -67,4 +67,18 @@
     filter: invert(1);
   }
   
+  /* Dark mode: invert TOC container */
+  .dark-theme .toc-container {
+    background-color: #000;
+    color: #fff;           
+  }
+  
+  /* Make sure list items also get the right color */
+  .dark-theme .toc-list-item {
+    color: inherit;
+  }
+  
+  .dark-theme .selected-item {
+    background-color: #555;  
+  }
   
