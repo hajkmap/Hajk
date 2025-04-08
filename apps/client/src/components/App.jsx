@@ -1,6 +1,6 @@
 import React from "react";
 
-import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "constants";
+import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "../constants";
 
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
