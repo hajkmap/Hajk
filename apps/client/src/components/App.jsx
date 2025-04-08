@@ -16,7 +16,7 @@ import {
   functionalOk as functionalCookieOk,
 } from "../models/Cookie";
 
-import Window from "./Window.js";
+import Window from "./Window";
 import CookieNotice from "./CookieNotice";
 import Introduction from "./Introduction";
 import Announcement from "./Announcement/Announcement";
@@ -33,7 +33,7 @@ import Zoom from "../controls/Zoom";
 import User from "../controls/User";
 import Rotate from "../controls/Rotate";
 import ScaleLine from "../controls/ScaleLine";
-import Attribution from "../controls/Attribution.js";
+import Attribution from "../controls/Attribution";
 import MapCleaner from "../controls/MapCleaner";
 import MapResetter from "../controls/MapResetter";
 import MapSwitcher from "../controls/MapSwitcher";

@@ -10,10 +10,10 @@
   "license": "MIT",
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "start": "vite dev",
+    "dev": "vite dev",
+    "build": "tsc && vite build",
+    "build-preview": "vite build && vite preview",
     "prestart": "node prebuild.js",
     "prebuild": "node prebuild.js"
   },
@@ -31,16 +31,15 @@
     "ios > 12"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "vite": "^6.2.5",
+    "@vitejs/plugin-react-swc": "^3.8.1",
+    "vite-tsconfig-paths":  "5.1.4",
     "eslint-config-prettier": "^10.0.1",
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-prettier": "^5.2.3",
     "prettier": "^3.2.5",
     "prop-types": "^15.8.1",
-    "react-app-rewired": "^2.2.1",
-    "react-scripts": "5.0.1",
-    "source-map-explorer": "^2.5.3",
-    "webpack": "^5.97.1"
+    "source-map-explorer": "^2.5.3"
   },
   "dependencies": {
     "@barbapapazes/plausible-tracker": "^0.5.6",

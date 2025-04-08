@@ -21,20 +21,21 @@
 
     <link
       rel="manifest"
-      href="%PUBLIC_URL%/manifest.json"
+      href="/manifest.json"
       crossorigin="use-credentials"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="stylesheet" type="text/css" href="%PUBLIC_URL%/index.css" />
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    <link rel="stylesheet" type="text/css" href="/index.css" />
     <title>Hajk - open source webGIS</title>
   </head>
 
   <body>
+    <script type="module" src="src/index.jsx"></script>
     <noscript> You need to enable JavaScript to run this app. </noscript>
     <div id="root">
       <div class="app-start">
         <span class="sr-only">Sidan laddas</span>
-        <img class="compass" src="compass.svg" />
+        <img class="compass" src="/compass.svg" alt="Hajks logga"/>
         <div class="app-name">Hajk</div>
         <div class="app-version">version %REACT_APP_VERSION%</div>
       </div>
