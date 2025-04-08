@@ -3,8 +3,8 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 
 import FormatShapesIcon from "@mui/icons-material/FormatShapes";
 
-import EditView from "./EditView.js";
-import EditModel from "./EditModel.js";
+import EditView from "./EditView";
+import EditModel from "./EditModel";
 import Observer from "react-event-observer";
 
 class Edit extends React.PureComponent {

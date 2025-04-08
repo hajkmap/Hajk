@@ -10,7 +10,7 @@ import { mapDirectionToAngle } from "../utils/mapDirectionToAngle";
 import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import Analytics from "../models/Analytics";
-import AppModel from "../models/AppModel.js";
+import AppModel from "../models/AppModel";
 import {
   setConfig as setCookieConfig,
   functionalOk as functionalCookieOk,
@@ -26,7 +26,7 @@ import SimpleDialog from "./SimpleDialog";
 import MapClickViewer from "./MapClickViewer/MapClickViewer";
 import SnackbarProvider from "./SnackbarProvider";
 
-import Search from "./Search/Search.js";
+import Search from "./Search/Search";
 
 import CookieNoticeButton from "../controls/CookieNoticeButton";
 import Zoom from "../controls/Zoom";

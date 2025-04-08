@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { saveAs } from "file-saver";
 
-import FavoritePackageOptions from "./FavoritePackageOptions.js";
-import ConfirmationDialog from "../../../../components/ConfirmationDialog.js";
+import FavoritePackageOptions from "./FavoritePackageOptions";
+import ConfirmationDialog from "../../../../components/ConfirmationDialog";
 
 import {
   Button,

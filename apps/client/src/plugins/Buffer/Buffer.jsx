@@ -4,8 +4,8 @@ import Observer from "react-event-observer";
 
 import BufferIcon from "@mui/icons-material/Adjust";
 
-import BufferView from "./BufferView.js";
-import BufferModel from "./BufferModel.js";
+import BufferView from "./BufferView";
+import BufferModel from "./BufferModel";
 
 class Buffer extends React.PureComponent {
   constructor(props) {

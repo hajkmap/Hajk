@@ -3,8 +3,8 @@ import propTypes from "prop-types";
 import { isMobile } from "./../utils/IsMobile";
 import { createPortal } from "react-dom";
 import { Hidden, ListItem, ListItemIcon, ListItemText } from "@mui/material";
-import Window from "../components/Window.js";
-import Card from "../components/Card.js";
+import Window from "../components/Window";
+import Card from "../components/Card";
 import PluginControlButton from "../components/PluginControlButton";
 
 class BaseWindowPlugin extends React.PureComponent {

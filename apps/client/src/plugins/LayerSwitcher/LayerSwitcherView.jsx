@@ -5,12 +5,12 @@ import propTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import { AppBar, Tab, Tabs } from "@mui/material";
 
-import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
-import LayersTab from "./components/LayersTab.js";
-import BreadCrumbs from "./components/BreadCrumbs.js";
-import DrawOrder from "./components/DrawOrder.js";
-import QuickAccessPresets from "./components/QuickAccessPresets.js";
-import LayerItemDetails from "./components/LayerItemDetails.js";
+import BackgroundSwitcher from "./components/BackgroundSwitcher";
+import LayersTab from "./components/LayersTab";
+import BreadCrumbs from "./components/BreadCrumbs";
+import DrawOrder from "./components/DrawOrder";
+import QuickAccessPresets from "./components/QuickAccessPresets";
+import LayerItemDetails from "./components/LayerItemDetails";
 import { OSM_LAYER_ID } from "./components/BackgroundSwitcher";
 
 const StyledAppBar = styled(AppBar)(() => ({

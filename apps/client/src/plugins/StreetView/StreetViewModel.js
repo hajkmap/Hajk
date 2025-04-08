@@ -1,10 +1,10 @@
-import { transform } from "ol/proj.js";
-import Style from "ol/style/Style.js";
-import Icon from "ol/style/Icon.js";
-import Feature from "ol/Feature.js";
-import Point from "ol/geom/Point.js";
-import Vector from "ol/layer/Vector.js";
-import VectorSource from "ol/source/Vector.js";
+import { transform } from "ol/proj";
+import Style from "ol/style/Style";
+import Icon from "ol/style/Icon";
+import Feature from "ol/Feature";
+import Point from "ol/geom/Point";
+import Vector from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
 
 const loadGoogleMapsApi = require("load-google-maps-api");
 

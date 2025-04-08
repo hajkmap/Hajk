@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import CollectorForm from "./components/CollectorForm.js";
+import CollectorForm from "./components/CollectorForm";
 import "./style.css";
 
 class CollectorView extends Component {

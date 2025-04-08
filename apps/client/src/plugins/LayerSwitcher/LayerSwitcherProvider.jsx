@@ -8,7 +8,7 @@ import React, {
 } from "react";
 
 import { Vector as VectorLayer } from "ol/layer";
-import LayerSwitcherView from "./LayerSwitcherView.js";
+import LayerSwitcherView from "./LayerSwitcherView";
 import { useLayerZoomWarningSnackbar } from "./useLayerZoomWarningSnackbar";
 import { functionalOk as functionalCookieOk } from "../../models/Cookie";
 import LocalStorageHelper from "../../utils/LocalStorageHelper";

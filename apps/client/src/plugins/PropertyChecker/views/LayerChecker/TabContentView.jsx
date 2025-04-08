@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import FeatureItem from "./FeatureItem.js";
-import ReportDialog from "./ReportDialog.js";
+import FeatureItem from "./FeatureItem";
+import ReportDialog from "./ReportDialog";
 
 import { Button } from "@mui/material";
 

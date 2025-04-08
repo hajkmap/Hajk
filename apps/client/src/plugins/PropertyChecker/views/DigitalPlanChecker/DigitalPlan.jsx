@@ -10,8 +10,8 @@ import {
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-import DigitalPlanItem from "./DigitalPlanItem.js";
-import ReportDialog from "./ReportDialog.js";
+import DigitalPlanItem from "./DigitalPlanItem";
+import ReportDialog from "./ReportDialog";
 
 function DigitalPlan(props) {
   const { digitalPlanKey, plan, options, userDetails } = props;

@@ -1,7 +1,7 @@
 // Make sure to only import the hooks you intend to use
 import React, { useEffect, useRef, useState } from "react";
 
-import useUpdateEffect from "../../hooks/useUpdateEffect.js";
+import useUpdateEffect from "../../hooks/useUpdateEffect";
 
 import {
   Button,
@@ -19,9 +19,9 @@ import { useSnackbar } from "notistack";
 
 // import useCookieStatus from "hooks/useCookieStatus";
 
-import InfoDialog from "./views/InfoDialog.js";
-import PropertyItem from "./views/PropertyItem.js";
-import QuickLayerToggleButtons from "./views/QuickLayerToggleButtons.js";
+import InfoDialog from "./views/InfoDialog";
+import PropertyItem from "./views/PropertyItem";
+import QuickLayerToggleButtons from "./views/QuickLayerToggleButtons";
 
 const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(2),

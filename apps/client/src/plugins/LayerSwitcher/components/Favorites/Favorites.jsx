@@ -4,10 +4,10 @@ import { useSnackbar } from "notistack";
 import useCookieStatus from "hooks/useCookieStatus";
 
 import LocalStorageHelper from "utils/LocalStorageHelper";
-import FavoritesList from "./FavoritesList.js";
-import FavoritesOptions from "./FavoritesOptions.js";
-import FavoritesViewHeader from "./FavoritesViewHeader.js";
-import ConfirmationDialog from "components/ConfirmationDialog.js";
+import FavoritesList from "./FavoritesList";
+import FavoritesOptions from "./FavoritesOptions";
+import FavoritesViewHeader from "./FavoritesViewHeader";
+import ConfirmationDialog from "components/ConfirmationDialog";
 
 import {
   Box,

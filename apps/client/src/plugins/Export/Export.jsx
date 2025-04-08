@@ -5,7 +5,7 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 
 import PrintIcon from "@mui/icons-material/Print";
 
-import ExportPdfSettings from "./components/ExportPdfSettings.js";
+import ExportPdfSettings from "./components/ExportPdfSettings";
 import ExportModel from "./ExportModel";
 import Observer from "react-event-observer";
 

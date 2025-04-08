@@ -12,11 +12,11 @@ import {
   Collapse,
 } from "@mui/material";
 
-import ConfirmationDialog from "../../../components/ConfirmationDialog.js";
-import HajkTooltip from "../../../components/HajkToolTip.js";
-import QuickAccessLayers from "./QuickAccessLayers.js";
-import QuickAccessOptions from "./QuickAccessOptions.js";
-import Favorites from "./Favorites/Favorites.js";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
+import HajkTooltip from "../../../components/HajkToolTip";
+import QuickAccessLayers from "./QuickAccessLayers";
+import QuickAccessOptions from "./QuickAccessOptions";
+import Favorites from "./Favorites/Favorites";
 
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 

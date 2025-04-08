@@ -11,11 +11,11 @@ import CoordinateSystemLoader from "../utils/CoordinateSystemLoader";
 import { hfetch } from "../utils/FetchWrapper";
 import { isMobile } from "../utils/IsMobile";
 import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
-// import ArcGISLayer from "./layers/ArcGISLayer.js";
-// import DataLayer from "./layers/DataLayer.js";
-import WMSLayer from "./layers/WMSLayer.js";
-import WMTSLayer from "./layers/WMTSLayer.js";
-import WFSVectorLayer from "./layers/VectorLayer.js";
+// import ArcGISLayer from "./layers/ArcGISLayer";
+// import DataLayer from "./layers/DataLayer";
+import WMSLayer from "./layers/WMSLayer";
+import WMTSLayer from "./layers/WMTSLayer";
+import WFSVectorLayer from "./layers/VectorLayer";
 // TODO: Uncomment and ensure they show as expected
 // import {
 // defaults as defaultControls,

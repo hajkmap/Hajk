@@ -10,7 +10,7 @@ import { Typography } from "@mui/material";
 import Collapse from "@mui/material/Collapse";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
-import Draw, { createBox } from "ol/interaction/Draw.js";
+import Draw, { createBox } from "ol/interaction/Draw";
 import FirStyles from "./FirStyles";
 
 const ContainerTopPadded = styled("div")(({ theme }) => ({

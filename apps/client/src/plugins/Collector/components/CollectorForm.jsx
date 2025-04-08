@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { styled } from "@mui/material/styles";
-import Page from "./Page.js";
+import Page from "./Page";
 import Typography from "@mui/material/Typography";
 
 const SaveErrorTextWrapper = styled("div")(({ theme }) => ({

@@ -4,8 +4,8 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 import RateReviewIcon from "@mui/icons-material/RateReview";
 
 import Observer from "react-event-observer";
-import CollectorView from "./CollectorView.js";
-import CollectorModel from "./CollectorModel.js";
+import CollectorView from "./CollectorView";
+import CollectorModel from "./CollectorModel";
 
 class Collector extends React.Component {
   constructor(props) {

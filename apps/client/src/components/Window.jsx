@@ -3,8 +3,8 @@ import propTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import PanelHeader from "./PanelHeader";
 import { Rnd } from "react-rnd";
-import { isMobile, getIsMobile } from "../utils/IsMobile.js";
-import FeatureInfoContainer from "./FeatureInfo/FeatureInfoContainer.js";
+import { isMobile, getIsMobile } from "../utils/IsMobile";
+import FeatureInfoContainer from "./FeatureInfo/FeatureInfoContainer";
 
 const StyledRnd = styled(Rnd)(({ theme }) => ({
   zIndex: zIndexStart + document.windows.length,

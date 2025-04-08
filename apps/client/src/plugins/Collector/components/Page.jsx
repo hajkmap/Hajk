@@ -15,7 +15,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Slide from "@mui/material/Slide";
-import Toolbar from "./Toolbar.js";
+import Toolbar from "./Toolbar";
 import withSnackbar from "components/WithSnackbar";
 
 const PageContent = styled("div")(() => ({

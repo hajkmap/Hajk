@@ -5,9 +5,9 @@ import { Vector as VectorLayer } from "ol/layer";
 
 import Dialog from "../../components/Dialog/Dialog";
 
-import TimeSliderSettings from "./components/TimeSliderSettings.js";
-import PlayerView from "./PlayerView.js";
-import PrintView from "./PrintView.js";
+import TimeSliderSettings from "./components/TimeSliderSettings";
+import PlayerView from "./PlayerView";
+import PrintView from "./PrintView";
 
 class TimeSliderView extends React.PureComponent {
   static propTypes = {

@@ -7,7 +7,7 @@ import { Grid, InputLabel, NativeSelect, LinearProgress } from "@mui/material";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import PictureAsPdf from "@mui/icons-material/PictureAsPdf";
 
-import { getCenter } from "ol/extent.js";
+import { getCenter } from "ol/extent";
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
   marginBottom: theme.spacing(2),

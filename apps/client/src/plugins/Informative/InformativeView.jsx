@@ -12,8 +12,8 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import TocIcon from "@mui/icons-material/Toc";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import Typography from "@mui/material/Typography";
-import BreadCrumbs from "./components/BreadCrumbs.js";
-import Alert from "../../components/Alert.js";
+import BreadCrumbs from "./components/BreadCrumbs";
+import Alert from "../../components/Alert";
 import withSnackbar from "components/WithSnackbar";
 import { styled } from "@mui/material/styles";
 

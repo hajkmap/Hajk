@@ -5,8 +5,8 @@ import CompareIcon from "@mui/icons-material/Compare";
 import { useSnackbar } from "notistack";
 
 import DialogWindowPlugin from "../../plugins/DialogWindowPlugin";
-import SelectDropdown from "./SelectDropdown.js";
-import SDSControl from "./CustomOLControl.js";
+import SelectDropdown from "./SelectDropdown";
+import SDSControl from "./CustomOLControl";
 
 const LayerComparer = (props) => {
   const [layerId1, setLayerId1] = useState("");

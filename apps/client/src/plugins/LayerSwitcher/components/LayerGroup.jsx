@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import LayerItem from "./LayerItem";
 import GroupLayer from "./GroupLayer";
-import LayerGroupAccordion from "./LayerGroupAccordion.js";
+import LayerGroupAccordion from "./LayerGroupAccordion";
 import { Typography, IconButton, ListItemText, Link } from "@mui/material";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";

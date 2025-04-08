@@ -6,7 +6,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 
 import HajkToolTip from "components/HajkToolTip";
-import LayersTabActionsMenu from "./LayersTabActionsMenu.js";
+import LayersTabActionsMenu from "./LayersTabActionsMenu";
 
 const MIN_FILTER_TOOLTIP_DELAY = 1000;
 

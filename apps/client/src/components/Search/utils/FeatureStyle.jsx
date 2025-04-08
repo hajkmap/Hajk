@@ -1,5 +1,5 @@
 import { Stroke, Style, Circle, Fill, Text, Icon } from "ol/style";
-import { Point } from "ol/geom.js";
+import { Point } from "ol/geom";
 
 export default class FeatureStyle {
   #options;

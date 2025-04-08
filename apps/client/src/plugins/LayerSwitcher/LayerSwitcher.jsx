@@ -4,7 +4,7 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 
 import LayersIcon from "@mui/icons-material/Layers";
 
-import LayerSwitcherProvider from "./LayerSwitcherProvider.js";
+import LayerSwitcherProvider from "./LayerSwitcherProvider";
 import Observer from "react-event-observer";
 
 export default class LayerSwitcher extends React.PureComponent {

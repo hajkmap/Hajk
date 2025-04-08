@@ -2,8 +2,8 @@ import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 // Plugin-specific imports. Most plugins will need a Model, View and Observer but make sure to only create and import whatever you need.
-import PropertyCheckerModel from "./PropertyCheckerModel.js";
-import PropertyCheckerView from "./PropertyCheckerView.js";
+import PropertyCheckerModel from "./PropertyCheckerModel";
+import PropertyCheckerView from "./PropertyCheckerView";
 import Observer from "react-event-observer";
 
 import ChecklistIcon from "@mui/icons-material/Checklist";
@@ -11,7 +11,7 @@ import HelpIcon from "@mui/icons-material/Help";
 
 // We might want to import some other classes or constants etc.
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
-import DrawModel from "../../models/DrawModel.js";
+import DrawModel from "../../models/DrawModel";
 
 /**
  * @summary Main component for the Dummy-plugin.

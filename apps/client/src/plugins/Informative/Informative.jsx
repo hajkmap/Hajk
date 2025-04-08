@@ -3,8 +3,8 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 
 import SatelliteIcon from "@mui/icons-material/Satellite";
 
-import InformativeView from "./InformativeView.js";
-import InformativeModel from "./InformativeModel.js";
+import InformativeView from "./InformativeView";
+import InformativeModel from "./InformativeModel";
 import Observer from "react-event-observer";
 
 class Informative extends React.PureComponent {

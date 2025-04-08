@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography } from "@mui/material";
 
-import DigitalPlan from "./DigitalPlan.js";
+import DigitalPlan from "./DigitalPlan";
 
 function DigitalPlanList({ digitalPlanFeatures, options, userDetails }) {
   return Object.entries(digitalPlanFeatures).length > 0 ? (

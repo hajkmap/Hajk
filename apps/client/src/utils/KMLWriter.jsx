@@ -1,5 +1,5 @@
-import WKT from "ol/format/WKT.js";
-import { Icon, Stroke, Fill } from "ol/style.js";
+import WKT from "ol/format/WKT";
+import { Icon, Stroke, Fill } from "ol/style";
 import {
   Point,
   MultiPoint,

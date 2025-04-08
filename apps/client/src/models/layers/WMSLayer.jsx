@@ -4,7 +4,7 @@ import TileLayer from "ol/layer/Tile";
 import ImageWMS from "ol/source/ImageWMS";
 import TileWMS from "ol/source/TileWMS";
 import GeoJSON from "ol/format/GeoJSON";
-import LayerInfo from "./LayerInfo.js";
+import LayerInfo from "./LayerInfo";
 import { equals } from "ol/extent";
 import { delay } from "../../utils/Delay";
 import { hfetch, overrideLayerSourceParams } from "../../utils/FetchWrapper";

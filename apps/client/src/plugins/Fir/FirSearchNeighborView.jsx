@@ -13,7 +13,7 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import Collapse from "@mui/material/Collapse";
 import Button from "@mui/material/Button";
-import Feature from "ol/Feature.js";
+import Feature from "ol/Feature";
 import HajkTransformer from "../../utils/HajkTransformer";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";

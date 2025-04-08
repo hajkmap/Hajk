@@ -2,9 +2,9 @@ import React, { useState, useCallback, useRef } from "react";
 
 import { ListItemText } from "@mui/material";
 
-import LayerGroup from "./LayerGroup.js";
-import QuickAccessView from "./QuickAccessView.js";
-import LayerListFilter from "./LayerListFilter.js";
+import LayerGroup from "./LayerGroup";
+import QuickAccessView from "./QuickAccessView";
+import LayerListFilter from "./LayerListFilter";
 import { debounce } from "utils/debounce";
 
 // Layers Tab in the LayerSwitcher

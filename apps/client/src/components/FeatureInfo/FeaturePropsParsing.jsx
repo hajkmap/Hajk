@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
-import AppModel from "../../models/AppModel.js";
+import AppModel from "../../models/AppModel";
 
 import {
   customComponentsForReactMarkdown, // the object with all custom components

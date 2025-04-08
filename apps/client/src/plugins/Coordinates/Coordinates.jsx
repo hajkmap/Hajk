@@ -3,8 +3,8 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 
 import ExploreIcon from "@mui/icons-material/Explore";
 
-import CoordinatesView from "./CoordinatesView.js";
-import CoordinatesModel from "./CoordinatesModel.js";
+import CoordinatesView from "./CoordinatesView";
+import CoordinatesModel from "./CoordinatesModel";
 import Observer from "react-event-observer";
 
 class Coordinates extends React.PureComponent {

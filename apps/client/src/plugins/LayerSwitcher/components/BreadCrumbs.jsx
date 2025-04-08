@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import BreadCrumb from "./BreadCrumb.js";
+import BreadCrumb from "./BreadCrumb";
 import { styled } from "@mui/material/styles";
 import { useTheme } from "@mui/material";
 import { useMediaQuery } from "@mui/material";

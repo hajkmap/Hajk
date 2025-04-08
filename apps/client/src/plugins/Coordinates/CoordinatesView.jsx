@@ -2,7 +2,7 @@ import React from "react";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
-import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
+import CoordinatesTransformRow from "./CoordinatesTransformRow";
 import { Divider } from "@mui/material";
 
 import withSnackbar from "components/WithSnackbar";

@@ -12,8 +12,8 @@ import {
 
 import { Box } from "@mui/system";
 
-import TabContentLayerChecker from "./LayerChecker/TabContentView.js";
-import TabContentDigitalPlanChecker from "./DigitalPlanChecker/TabContentView.js";
+import TabContentLayerChecker from "./LayerChecker/TabContentView";
+import TabContentDigitalPlanChecker from "./DigitalPlanChecker/TabContentView";
 
 function PropertyItem({
   clickedPointsCoordinates,
