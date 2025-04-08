@@ -19,6 +19,28 @@ const PdfContainer = styled("div")(() => ({
   overflowX: "auto",
   userSelect: "text",
   padding: "0rem",
+  position: "relative",
+}));
+
+const StickyTopBar = styled("div")(() => ({
+  position: "sticky",
+  top: 0,
+  zIndex: 1000,
+  display: "flex",
+  alignItems: "center",
+  padding: "0rem",
+}));
+
+const TOCContainer = styled("div")(() => ({
+  maxHeight: "300px",
+  overflowY: "auto",
+}));
+
+const StickyTOCWrapper = styled("div")(() => ({
+  position: "sticky",
+  top: 40,
+  zIndex: 1000,
+  padding: "0rem",
 }));
 
 function PdfViewerWithTOC({
@@ -136,10 +158,12 @@ function PdfViewerWithTOC({
         onScroll={onScroll}
         className={customTheme?.palette?.mode === "dark" ? "dark-theme" : ""}
       >
-        <div
+        <StickyTopBar
           className="upper-section"
           style={{
-            background: customTheme.palette.mode === "dark" ? "#000" : "white",
+            background:
+              customTheme?.palette?.mode === "dark" ? "#000" : "#ffffff",
+            color: customTheme?.palette?.mode === "dark" ? "#fff" : "#000",
           }}
         >
           <IconButton onClick={zoomOut} className="icon-button">
@@ -159,19 +183,22 @@ function PdfViewerWithTOC({
                 : "Visa innehållsförteckning"}
             </div>
           )}
-        </div>
-
+        </StickyTopBar>
         {menuOpen && pdfInstance && (
-          <PdfTOC
-            pdf={pdfInstance}
-            options={options}
-            customScrollToPage={customScrollToPage}
-            collapsedItems={collapsedItems}
-            setCollapsedItems={setCollapsedItems}
-            selectedNodeId={selectedNodeId}
-            setSelectedNodeId={setSelectedNodeId}
-            customTheme={customTheme}
-          />
+          <StickyTOCWrapper>
+            <TOCContainer>
+              <PdfTOC
+                pdf={pdfInstance}
+                options={options}
+                customScrollToPage={customScrollToPage}
+                collapsedItems={collapsedItems}
+                setCollapsedItems={setCollapsedItems}
+                selectedNodeId={selectedNodeId}
+                setSelectedNodeId={setSelectedNodeId}
+                customTheme={customTheme}
+              />
+            </TOCContainer>
+          </StickyTOCWrapper>
         )}
 
         <Document

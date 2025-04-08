@@ -113,19 +113,22 @@ class ToolOptions extends Component {
     this.type = "documenthandler";
     this.mapSettingsModel = props.model;
     this.menuEditorModel = this.getMenuEditorModel();
-    this.menuEditorModel.listAllAvailableDocuments(this.state.folder).then((list) => {
-      this.setState({
-        availableDocuments: list,
-      })
-    });
-    
-    this.useDocumentFolders = this.menuEditorModel.config.use_document_folders ?? false;
+    this.menuEditorModel
+      .listAllAvailableDocuments(this.state.folder)
+      .then((list) => {
+        this.setState({
+          availableDocuments: list,
+        });
+      });
+
+    this.useDocumentFolders =
+      this.menuEditorModel.config.use_document_folders ?? false;
 
     if (this.useDocumentFolders) {
       this.menuEditorModel.loadFolders().then((list) => {
         this.setState({
           folders: list,
-        })
+        });
       });
     }
   }
@@ -907,7 +910,7 @@ class ToolOptions extends Component {
               checked={this.state.enablePrint}
             />
             &nbsp;
-            <label htmlFor="enablePrint">Utskrift aktiverad</label>
+            <label htmlFor="enablePrint">Utskrift aktiverad (JSON)</label>
           </div>
           <div>
             {this.state.pdfLinks &&
@@ -1101,7 +1104,7 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="chapterLevelsToShowForPrint">
-              Antal kapitelnivår för utskrift{" "}
+              Antal kapitelnivår för utskrift (JSON){" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
@@ -1128,7 +1131,7 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="tocPrintMode" style={{ width: "400px" }}>
-              Välj hur innehållsförteckningen skall skivas ut{" "}
+              Välj hur innehållsförteckningen skall skivas ut (JSON){" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"

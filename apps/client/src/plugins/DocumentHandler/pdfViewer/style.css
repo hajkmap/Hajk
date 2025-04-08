@@ -40,17 +40,6 @@
     font-weight: bold;
     cursor: pointer;
   }
-  
-  /* Upper section with zoom and TOC toggle */
-  .upper-section {
-    background: white;
-    position: sticky;
-    top: 0;
-    display: flex;
-    align-items: center;
-    margin: 0rem 0.1rem 0.1rem 0.1rem;
-    z-index: 1000;
-  }
 
   /* Container for the table of contents */
   .toc-container {
