@@ -12,6 +12,8 @@ import {
   IconButton,
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import useAppStateStore from "../../../store/use-app-state-store";
@@ -253,6 +255,11 @@ const GroupDropZone = ({
   onDeleteGroup,
   showDeleteGroupButton = true,
   pathIndex,
+  isRootGroup,
+  index,
+  lastIndex,
+  onMoveUp,
+  onMoveDown,
 }: {
   group: { id: string; name: string };
   layers: { id: string; name: string }[];
@@ -270,6 +277,11 @@ const GroupDropZone = ({
   onDeleteGroup?: () => void;
   showDeleteGroupButton?: boolean;
   pathIndex?: string;
+  isRootGroup?: boolean;
+  index?: number;
+  lastIndex?: number;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 }) => {
   const listRef = React.useRef<HTMLUListElement>(null);
 
@@ -363,6 +375,27 @@ const GroupDropZone = ({
         <Typography variant="subtitle1" fontWeight={700}>
           {pathIndex ? `${pathIndex}.` : ""} {group.name}
         </Typography>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {isRootGroup && (
+            <>
+              <IconButton
+                size="small"
+                onClick={onMoveUp}
+                disabled={index === 0}
+              >
+                <ArrowUpwardIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={onMoveDown}
+                disabled={index === lastIndex}
+              >
+                <ArrowDownwardIcon fontSize="small" />
+              </IconButton>
+            </>
+          )}
+        </Box>
 
         {showDeleteGroupButton && onDeleteGroup && (
           <IconButton onClick={onDeleteGroup} size="small">
@@ -578,10 +611,12 @@ function LayerSwitcherOrderList() {
     group: { id: string; name: string },
     depth = 0,
     index?: number,
-    pathIndex?: string
+    pathIndex?: string,
+    totalRootGroups?: number
   ): React.ReactNode => {
     const children = groupHierarchy[group.id] || [];
     const hasChildren = children.length > 0;
+    const isRootGroup = depth === 0;
 
     const groupBlock = (
       <Box
@@ -608,6 +643,18 @@ function LayerSwitcherOrderList() {
             onMoveGroupToGroup={onMoveGroupToGroup}
             showDeleteGroupButton={depth > 0}
             onDeleteGroup={() => handleDeleteGroup(group.id)}
+            isRootGroup={isRootGroup}
+            index={index ?? 0}
+            lastIndex={(totalRootGroups ?? 1) - 1}
+            onMoveUp={() =>
+              handleMoveGroup(index ?? 0, Math.max(0, (index ?? 0) - 1))
+            }
+            onMoveDown={() =>
+              handleMoveGroup(
+                index ?? 0,
+                Math.min((totalRootGroups ?? 1) - 1, (index ?? 0) + 1)
+              )
+            }
           />
         </DraggableGroup>
       </Box>
@@ -672,7 +719,7 @@ function LayerSwitcherOrderList() {
 
       <Grid container spacing={4}>
         <DndProvider backend={HTML5Backend}>
-          <Grid size={5}>
+          <Grid size={4}>
             <Tabs
               value={leftTab}
               onChange={(_, newValue: number) => setLeftTab(newValue)}
@@ -708,7 +755,7 @@ function LayerSwitcherOrderList() {
             </Paper>
           </Grid>
 
-          <Grid size={7}>
+          <Grid size={8}>
             <Tabs
               value={rightTab}
               onChange={(_, newValue) => setRightTab(newValue as number)}
@@ -724,7 +771,7 @@ function LayerSwitcherOrderList() {
               placeholder="Sök grupper"
               value={groupSearch}
               onChange={(e) => setGroupSearch(e.target.value)}
-              sx={{ my: 2 }}
+              sx={{ my: 2, width: "50%" }}
             />
             <Paper
               variant="outlined"
@@ -737,7 +784,13 @@ function LayerSwitcherOrderList() {
             >
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 {visibleRootGroups.map((group, i) =>
-                  renderGroupTree(group, 0, i, `${i + 1}`)
+                  renderGroupTree(
+                    group,
+                    0,
+                    i,
+                    `${i + 1}`,
+                    visibleRootGroups.length
+                  )
                 )}
               </Box>
             </Paper>
