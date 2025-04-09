@@ -115,7 +115,6 @@ export default function SubLayerItem({
           }}
         />
         <ListItemSecondaryAction
-          className="FIND-SUBLAYERITEM-SECONDARY-ACTION"
           sx={{
             position: "absolute",
             right: "4px",

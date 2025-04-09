@@ -216,7 +216,7 @@ function LayerItem({
 
   return (
     <div
-      className="layer-item DIV111"
+      className="layer-item"
       style={{
         display: display,
         marginLeft: expandableSection || draggable ? 0 : "31px",
@@ -227,18 +227,9 @@ function LayerItem({
       }}
     >
       <Box
-        className="BOX111"
         sx={{
           position: "relative",
           alignItems: "flex-start",
-          // ".FIND-LAYERITEM-SECONDARY-ACTION": {
-          //   transition: "all 300ms ease",
-          //   transform: "translateX(100%) translateZ(0)",
-          // },
-          // "&:hover .FIND-LAYERITEM-SECONDARY-ACTION": {
-          //   transform: "translateX(0%) translateZ(0)",
-          // },
-
           borderBottom: (theme) =>
             drawOrderItem() && showSublayers
               ? "none"
@@ -256,10 +247,11 @@ function LayerItem({
             disableRipple
             sx={{
               px: 0,
+              pt: "7px",
               opacity: 0,
               transition: "opacity 200ms",
             }}
-            className="dragInidcatorIcon BUTTON777"
+            className="dragInidcatorIcon"
           >
             <HajkToolTip placement="left" title="Dra för att ändra ritordning">
               <DragIndicatorOutlinedIcon fontSize={"small"} />
@@ -268,7 +260,6 @@ function LayerItem({
         )}
         {expandableSection && expandableSection}
         <ListItemButton
-          className="layer-item-button ListItemButton11111 BUTTON777"
           disableTouchRipple
           onClick={toggleable ? handleLayerItemClick : null}
           sx={{
@@ -278,7 +269,6 @@ function LayerItem({
           dense
         >
           <Box
-            className="BOX222"
             sx={{
               display: "flex",
               position: "relative",
@@ -309,7 +299,6 @@ function LayerItem({
               }}
             />
             <ListItemSecondaryAction
-              className="FIND-LAYERITEM-SECONDARY-ACTION"
               sx={{
                 position: "absolute",
                 right: "4px",
@@ -319,7 +308,7 @@ function LayerItem({
             >
               {renderStatusIcon()}
               {!toggleable && !draggable ? (
-                <LsIconButton size="small" className="BUTTON111">
+                <LsIconButton size="small">
                   <HajkToolTip title="Bakgrundskartan ligger låst längst ner i ritordningen">
                     <LockOutlinedIcon />
                   </HajkToolTip>

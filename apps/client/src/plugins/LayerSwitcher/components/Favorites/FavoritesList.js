@@ -309,7 +309,7 @@ function FavoritesList({
                     primary={favorite.metadata.title}
                     secondary={parseDate(favorite.metadata.savedAt)}
                   />
-                  <ListItemSecondaryAction className="FIND-FAVORITESLIST-SECONDARY-ACTION">
+                  <ListItemSecondaryAction>
                     <FavoritePackageOptions
                       infoCallback={handleInfo}
                       deleteCallback={handleDelete}

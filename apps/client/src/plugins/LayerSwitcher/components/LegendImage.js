@@ -54,6 +54,7 @@ const ImageWithLoading = ({ src }) => {
           fontSize: theme.typography.caption.fontSize,
         }}
       >
+        {/* Maybe add a spinner here instead of Loading text.. */}
         {loading && !error && <span>Laddar...</span>}
         {error && (
           <span title={src} style={{ color: theme.palette.warning.main }}>

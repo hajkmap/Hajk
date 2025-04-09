@@ -20,7 +20,6 @@ export default function LayerGroupAccordion({
   return (
     <div style={{ display: display }}>
       <ListItemButton
-        className="FINDME111"
         disableTouchRipple
         onClick={() => setState({ expanded: !state.expanded })}
         sx={{
@@ -59,7 +58,6 @@ export default function LayerGroupAccordion({
           ></KeyboardArrowRightOutlinedIcon>
         </LsIconButton>
         <Box
-          className="FINDME999"
           sx={{
             display: "flex",
             position: "relative",
@@ -67,8 +65,6 @@ export default function LayerGroupAccordion({
             alignItems: "flex-start",
             py: 0.25,
             pr: 1,
-            // borderBottom: (theme) =>
-            //   `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
         >
           {toggleable && toggleDetails}

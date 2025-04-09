@@ -62,7 +62,7 @@ function BackgroundLayerItem({
 
   return (
     <div
-      className="layer-item layer-item-background"
+      className="layer-item"
       style={{
         marginLeft: 0,
         borderBottom: "none",
@@ -114,7 +114,6 @@ function BackgroundLayerItem({
               top: "1px",
               transform: "none",
             }}
-            className="FIND-BACKGROUNDLAYERITEM-SECONDARY-ACTION"
           >
             {wmsLayerLoadStatus === "loaderror" && <BtnLayerWarning />}
             {isFakeMapLayer !== true && (

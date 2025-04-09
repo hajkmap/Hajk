@@ -18,7 +18,7 @@ import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import LayerItemInfo from "./LayerItemInfo";
 import LegendImage from "./LegendImage";
 import HajkToolTip from "components/HajkToolTip";
-import LsIconButton from "./LsIconButton"; // Corrected import
+import LsIconButton from "./LsIconButton";
 
 function LayerItemDetails({
   display,

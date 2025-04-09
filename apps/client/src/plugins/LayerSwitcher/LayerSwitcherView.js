@@ -179,7 +179,7 @@ class LayersSwitcherView extends React.PureComponent {
   };
 
   /**
-   * LayerSwitcher consists of thrre Tabs: one shows
+   * LayerSwitcher consists of three Tabs: one shows
    * "regular" layers (as checkboxes, multi select).
    * The * other shows background layers (as radio buttons, one-at-at-time).
    * The third is the DrawOrder tab

@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import withSnackbar from "components/WithSnackbar";
 import LsIconButton from "./LsIconButton";
-// import { createPortal } from "react-dom";
 
-// import { styled } from "@mui/material/styles";
 import {
   Box,
   ListItemText,
@@ -124,7 +122,6 @@ const QuickAccessView = ({
             alignItems: "center",
             py: 0.5,
             pr: 1,
-            // borderBottom: (theme) => `${theme.spacing(0.2)} solid transparent`,
           }}
         >
           <LsIconButton sx={{ pl: 0 }} disableRipple size="small">

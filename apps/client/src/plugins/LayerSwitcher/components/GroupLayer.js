@@ -100,7 +100,6 @@ function GroupLayer({
       expandableSection={
         showExpandArrow && (
           <Box
-            className="BUTTON999"
             sx={{
               position: "relative",
               display: "flex",
@@ -113,7 +112,7 @@ function GroupLayer({
                 p: draggable ? 0 : "3px",
                 pr: draggable ? 0 : "4px",
                 mr: draggable ? "5px" : 0,
-                mt: "3px",
+                mt: draggable ? "5px" : "3px",
                 "& .ls-arrow": {
                   transform: showSublayers ? "rotate(90deg)" : "",
                   transition: "transform 300ms ease",
