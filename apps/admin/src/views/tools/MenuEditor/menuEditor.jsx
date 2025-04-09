@@ -90,12 +90,13 @@ class ToolOptions extends Component {
     closePanelOnMapLinkOpen: false,
     displayLoadingOnMapLinkOpen: false,
     tableOfContents: {
-      active: false,
+      active: true,
       expanded: false,
       printMode: "none",
       chapterLevelsToShow: 2,
       chapterLevelsToShowForPrint: 2,
       title: "Innehållsförteckning",
+      height: "300",
     },
     defaultDocumentColorSettings: {
       textAreaBackgroundColor: "",
@@ -1070,6 +1071,31 @@ class ToolOptions extends Component {
                   tableOfContents: {
                     ...prevState.tableOfContents,
                     title: value,
+                  },
+                }));
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="tableOfContentsHeight">
+              Höjd (PDF){" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Innehållsförteckning höjd i pixlar"
+              />
+            </label>
+            <input
+              id="tableOfContentsHeight"
+              value={this.state.tableOfContents.height}
+              type="text"
+              name="tableOfContentsHeight"
+              onChange={(e) => {
+                const value = e.target.value;
+                this.setState((prevState) => ({
+                  tableOfContents: {
+                    ...prevState.tableOfContents,
+                    height: value,
                   },
                 }));
               }}

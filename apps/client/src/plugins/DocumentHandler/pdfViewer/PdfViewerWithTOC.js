@@ -32,7 +32,6 @@ const StickyTopBar = styled("div")(() => ({
 }));
 
 const TOCContainer = styled("div")(() => ({
-  maxHeight: "300px",
   overflowY: "auto",
 }));
 
@@ -179,14 +178,18 @@ function PdfViewerWithTOC({
               className="toggle-menu"
             >
               {menuOpen
-                ? "Dölj innehållsförteckning"
-                : "Visa innehållsförteckning"}
+                ? "Dölj " + options.tableOfContents.title
+                : "Visa " + options.tableOfContents.title}
             </div>
           )}
         </StickyTopBar>
         {menuOpen && pdfInstance && (
           <StickyTOCWrapper>
-            <TOCContainer>
+            <TOCContainer
+              style={{
+                maxHeight: Number(options.tableOfContents.height) || 300,
+              }}
+            >
               <PdfTOC
                 pdf={pdfInstance}
                 options={options}

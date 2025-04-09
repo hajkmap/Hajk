@@ -203,7 +203,7 @@ function PdfTOC({
         <span style={{ cursor: "pointer" }} onClick={handleExpandAll}>
           +
         </span>
-        <b>Innehållsförteckning:</b>
+        <b>{options.tableOfContents.title}:</b>
       </div>
       {renderTOCTree(tocTree)}
     </div>
