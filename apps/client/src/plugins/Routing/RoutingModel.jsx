@@ -6,7 +6,10 @@ import { Feature } from "ol";
 import { transform } from "ol/proj";
 import { Polyline } from "ol/format";
 
-const loadGoogleMapsApi = require("load-google-maps-api");
+let loadGoogleMapsApi;
+import("load-google-maps-api").then((mod) => {
+  loadGoogleMapsApi = mod.default;
+});
 
 class RouteModel {
   constructor(settings) {

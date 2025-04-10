@@ -41,24 +41,40 @@ class Print extends React.PureComponent {
     super(props);
 
     // Prepare scales from admin options, fallback to default if needed
-    if (props?.options?.scales?.split(",").length > 1) {
-      props.options.scales = props.options.scales.replace(/\s/g, "").split(",");
+    const propScales =  props?.options?.scales;
+    if (Array.isArray(propScales)) {
+      props.options.scales = propScales;
+    } else if (
+      typeof propScales === "string" &&
+      propScales?.split(",").length > 1
+    ) {
+      props.options.scales = propScales.replace(/\s/g, "").split(",");
     } else {
       props.options.scales = this.scales;
     }
 
     // Prepare scaleMeters from admin options, fallback to default if needed
-    if (props?.options?.scaleMeters?.split(",").length > 1) {
-      props.options.scaleMeters = props.options.scaleMeters
-        .replace(/\s/g, "")
-        .split(",");
+    const propScaleMeters = props?.options?.scaleMeters;
+    if (Array.isArray(propScaleMeters)) {
+      props.options.scaleMeters = propScaleMeters;
+    } else if (
+      typeof propScaleMeters === "string" &&
+      propScaleMeters?.split(",").length > 1
+    ) {
+      props.options.scaleMeters = propScaleMeters.replace(/\s/g, "").split(",");
     } else {
       props.options.scaleMeters = this.scaleMeters;
     }
 
     // Prepare dpis from admin options, fallback to default if needed
-    if (props?.options?.dpis?.split(",").length > 1) {
-      props.options.dpis = props.options.dpis
+    const propDpis = props?.options?.dpis;
+    if (Array.isArray(propDpis)) {
+      props.options.dpis = propDpis;
+    } else if (
+      typeof propDpis === "string" &&
+      propDpis?.split(",").length > 1
+    ) {
+      props.options.dpis = propDpis
         .replace(/\s/g, "")
         .split(",")
         .map((el) => {
@@ -69,8 +85,14 @@ class Print extends React.PureComponent {
     }
 
     // Prepare paperFormats from admin options, fallback to default if needed
-    if (props?.options?.paperFormats?.split(",").length > 1) {
-      props.options.paperFormats = props.options.paperFormats
+    const propPaperFormats = props?.options?.paperFormats;
+    if (Array.isArray(propPaperFormats)) {
+      props.options.paperFormats = propPaperFormats;
+    } else if (
+      typeof propPaperFormats === "string" &&
+      propPaperFormats?.split(",").length > 1
+    ) {
+      props.options.paperFormats = propPaperFormats
         .replace(/\s/g, "")
         .split(",")
         .map((el) => {

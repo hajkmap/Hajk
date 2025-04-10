@@ -248,14 +248,12 @@ class AppModel {
       "../components/Search/*.j*",
       "../plugins/*/*.j*",
     ]);
-    console.log({ modules });
     plugins.forEach((plugin) => {
       const dir = ["Search"].includes(plugin) ? "components" : "plugins";
 
       // const prom = import(`../${dir}/${plugin}/${plugin}.js`)
       const prom = modules[`../${dir}/${plugin}/${plugin}.jsx`]()
         ?.then((module) => {
-          console.log({ module });
           const toolConfig =
             this.config.mapConfig.tools.find(
               (plug) => plug.type.toLowerCase() === plugin.toLowerCase()

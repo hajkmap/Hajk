@@ -89,9 +89,14 @@ const LayerZoomListener = ({ layer }) => {
 const LayerZoomVisibleSnackbarProvider = ({ children, layers }) => {
   return (
     <>
-      {layers.map((l) => (
-        <LayerZoomListener key={l.get("name")} layer={l} />
-      ))}
+      {layers.map((l) => {
+        const id = l.get("name");
+        if (!id.includes("plugin")) {
+          return <LayerZoomListener key={l.get("name")} layer={l} />;
+        } else {
+          return null;
+        }
+      })}
       {children}
     </>
   );
