@@ -21,6 +21,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## [4.0.0] - 2025-04-04
+
+### Fixed
+
+- Client: Hotfix for [Window management fix](https://github.com/hajkmap/Hajk/pull/1629), see
+  [commit](https://github.com/hajkmap/Hajk/commit/d96bda0091358c25164918e4f14a159aad543d41).
+- Docker: Minor fixes to the Dockerfile, [commit](https://github.com/hajkmap/Hajk/commit/2cc601008296edbbedaa985b7411334d2766fe32).
+- Config: fixes in naming of the demo config's DocumentHandler section, [commit](https://github.com/hajkmap/Hajk/commit/d2109c5dc6a68e2fa4018123fae50cdd4e02c132).
+- Client: Hotfix for loading with malformed coordinates. [commit](https://github.com/hajkmap/Hajk/commit/1ab25f09d23aee1608ba240be3888d3450cb9735)
+- LayerSwitcher: Fix to ensure consistent labeling. [PR#1632](https://github.com/hajkmap/Hajk/pull/1632)
+- LayerSwitcher: Hotfix for tooltip getting stuck. [commit](https://github.com/hajkmap/Hajk/commit/dd220226d238a428562a1fb4b808a9e96b259994)
+- Client: Enable hash control over individual sub-layers. [PR#1635](https://github.com/hajkmap/Hajk/pull/1635)
+
 ## [4.0.0-rc.2] - 2025-03-26
 
 ### Fixed
@@ -402,7 +415,8 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v4.0.0-rc.2...develop
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v4.0.0...develop
+[4.0.0]: https://github.com/hajkmap/Hajk/compare/v4.0.0-rc.2...v4.0.0
 [4.0.0-rc.2]: https://github.com/hajkmap/Hajk/compare/v4.0.0-rc.1...v4.0.0-rc.2
 [4.0.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v3.14.1...v4.0.0-rc.1
 [3.14.1]: https://github.com/hajkmap/Hajk/compare/v3.14.0...v3.14.1

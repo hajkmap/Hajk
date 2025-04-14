@@ -72,7 +72,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
           <ListItemIcon>
             <VisibilityOffIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Släck alla lager</ListItemText>
+          <ListItemText>Dölj alla aktiva lager</ListItemText>
         </MenuItem>
         <MenuItem
           onClick={(e) => {
@@ -85,7 +85,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
           <ListItemIcon>
             <KeyboardDoubleArrowUpIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Skrolla till toppen</ListItemText>
+          <ListItemText>Scrolla till toppen</ListItemText>
         </MenuItem>
         <MenuItem
           onClick={(e) => {

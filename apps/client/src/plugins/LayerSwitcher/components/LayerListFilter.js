@@ -78,6 +78,14 @@ const LayerListFilter = ({
             handleFilterValueChange(event.target.value);
             updateTooltip(event.target.value);
           }}
+          onFocus={(event) => {
+            if (event.target.value?.length > 0) {
+              updateTooltip(event.target.value);
+            }
+          }}
+          onBlur={(event) => {
+            updateTooltip("");
+          }}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               handleFilterSubmit(event.target.value);
