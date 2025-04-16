@@ -1,5 +1,25 @@
+import AppModel from "models/AppModel";
+
+const options = AppModel.config.mapConfig.tools.find(
+  (tool) => tool.type.toLowerCase() === "layerswitcher"
+).options;
+
+// TODO: Put settings in Admin UI
+options.legendForceTransparency = true;
+options.legendTryHiDPI = true;
+
+export const getLegendBackgroundColor = (theme) => {
+  if (!options.legendForceTransparency) {
+    return "#fff";
+  }
+
+  return theme.palette.mode === "dark"
+    ? theme.palette.grey[800]
+    : theme.palette.grey[200];
+};
+
 export const getDpiFromLegendGraphicUrl = (url) => {
-  if (!url) {
+  if (!url || !options.legendTryHiDPI) {
     // Nothing to do here, return default and move on.
     return 90;
   }
@@ -22,18 +42,20 @@ export const getThemedLegendGraphicUrl = (url, isDarkMode) => {
     return;
   }
 
-  const fontColor = isDarkMode ? "0xFFFFFF" : "0x000000";
   const parsedUrl = new URL(url, window.location.href);
   const params = parsedUrl.searchParams;
 
   const requestParam = (
     params.get("REQUEST") || params.get("request")
   )?.toLowerCase();
+
   if (requestParam === "getlegendgraphic") {
     // Note that fontColor only works in GeoServer, not in QGIS Server.
     // TRANSPARENT is supported in both.
 
-    params.set("TRANSPARENT", "true");
+    if (options.legendForceTransparency === true) {
+      params.set("TRANSPARENT", "true");
+    }
 
     const legendOptions = params.get("LEGEND_OPTIONS") || "";
     const optionsArray = legendOptions.split(";").filter(Boolean);
@@ -41,12 +63,17 @@ export const getThemedLegendGraphicUrl = (url, isDarkMode) => {
       optionsArray.map((option) => option.split(":").map((str) => str.trim()))
     );
 
-    optionsObj.fontColor = fontColor;
+    if (options.legendForceTransparency === true) {
+      const fontColor = isDarkMode ? "0xFFFFFF" : "0x000000";
+      optionsObj.fontColor = fontColor;
+    }
 
-    // Here we try to set the DPI to 180 so we can get nicer legends.
-    // We shrink it back to 96 (using px in css) in the LegendImage component.
-    if (!optionsObj.dpi || parseInt(optionsObj.dpi) < 180) {
-      optionsObj.dpi = 180;
+    if (options.legendTryHiDPI === true) {
+      // Here we try to set the DPI to 180 so we can get nicer legends.
+      // We shrink it back to 96 (using px in css) in the LegendImage component.
+      if (!optionsObj.dpi || parseInt(optionsObj.dpi) < 180) {
+        optionsObj.dpi = 180;
+      }
     }
 
     const newLegendOptions = Object.entries(optionsObj)

@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   getDpiFromLegendGraphicUrl,
   getThemedLegendGraphicUrl,
+  getLegendBackgroundColor,
 } from "../LayerSwitcherUtils";
 
 const ColumnContainer = styled("div")(({ theme }) => ({
@@ -11,12 +12,9 @@ const ColumnContainer = styled("div")(({ theme }) => ({
   flexDirection: "column",
   alignItems: "start",
   gap: "0.25em",
-  backgroundColor:
-    theme.palette.mode === "dark"
-      ? theme.palette.grey[800]
-      : theme.palette.grey[200],
+  backgroundColor: getLegendBackgroundColor(theme),
   borderRadius: "2px",
-  padding: "4px",
+  padding: "2px",
   maxWidth: "100%",
 }));
 
@@ -58,7 +56,7 @@ const ImageWithLoading = ({ src }) => {
         {loading && !error && <span>Laddar...</span>}
         {error && (
           <span title={src} style={{ color: theme.palette.warning.main }}>
-            Kunde inte ladda legenden
+            Kunde inte ladda teckenförklaring
           </span>
         )}
       </div>
