@@ -254,7 +254,10 @@ function LayerItem({
             className="dragInidcatorIcon"
           >
             <HajkToolTip placement="left" title="Dra för att ändra ritordning">
-              <DragIndicatorOutlinedIcon fontSize={"small"} />
+              <DragIndicatorOutlinedIcon
+                sx={{ pt: "1px" }}
+                fontSize={"small"}
+              />
             </HajkToolTip>
           </LsIconButton>
         )}

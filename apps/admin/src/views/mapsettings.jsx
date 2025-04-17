@@ -476,6 +476,8 @@ class Menu extends Component {
       showDrawOrderView: false,
       showFilter: false,
       showQuickAccess: false,
+      legendForceTransparency: false,
+      legendTryHiDPI: false,
       enableSystemLayersSwitch: false,
       lockDrawOrderBaselayer: false,
       drawOrderViewInfoText:
@@ -550,6 +552,11 @@ class Menu extends Component {
           showFilter: existingConfig.showFilter ?? this.state.showFilter,
           showQuickAccess:
             existingConfig.showQuickAccess ?? this.state.showQuickAccess,
+          legendForceTransparency:
+            existingConfig.legendForceTransparency ??
+            this.state.legendForceTransparency,
+          legendTryHiDPI:
+            existingConfig.legendTryHiDPI ?? this.state.legendTryHiDPI,
           enableSystemLayersSwitch:
             existingConfig.enableSystemLayersSwitch ??
             this.state.enableSystemLayersSwitch,
@@ -804,6 +811,8 @@ class Menu extends Component {
       showDrawOrderView: this.state.showDrawOrderView,
       showFilter: this.state.showFilter,
       showQuickAccess: this.state.showQuickAccess,
+      legendForceTransparency: this.state.legendForceTransparency,
+      legendTryHiDPI: this.state.legendTryHiDPI,
       enableSystemLayersSwitch: this.state.enableSystemLayersSwitch,
       lockDrawOrderBaselayer: this.state.lockDrawOrderBaselayer,
       drawOrderViewInfoText: this.state.drawOrderViewInfoText,
@@ -2264,6 +2273,42 @@ class Menu extends Component {
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
                     title="När rutan är ikryssad visas en grupp för snabbåtkomst i lagerhanteraren."
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="legendForceTransparency"
+                  name="legendForceTransparency"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.legendForceTransparency}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="legendForceTransparency">
+                  Försök att göra teckenförteckning transparent (Experimentell){" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Lagerhanteraren kommer försöka att göra GetLegendGraphics transparenta och lägga till en bakgrund för att fungera bättre visuellt i vissa lägen. I GeoServer kommer även texten bli vit istället i dark mode"
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="legendTryHiDPI"
+                  name="legendTryHiDPI"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.legendTryHiDPI}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="legendTryHiDPI">
+                  Försök att hämta teckenförklaring i 180dpi (Experimentell){" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Lagerhanteraren kommer försöka hämta GetLegendGraphics i högre upplösning. 180dpi."
                   />
                 </label>
               </div>
