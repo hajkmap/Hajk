@@ -14,6 +14,7 @@ import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
 import LsIconButton from "./LsIconButton";
 import BtnShowDetails from "./BtnShowDetails";
 import BtnLayerWarning from "./BtnLayerWarning";
+import { getIsMobile } from "../LayerSwitcherUtils";
 
 // TODO Remove all isfakemaplayer
 function BackgroundLayerItem({
@@ -84,7 +85,7 @@ function BackgroundLayerItem({
             position: "relative",
             width: "100%",
             alignItems: "center",
-            py: 0.25, // jesade-vbg compact mode, changed from 0.5
+            py: getIsMobile() ? 0.5 : 0.25, // jesade-vbg compact mode, changed from 0.5
             pr: 1,
             borderBottom: (theme) =>
               `${theme.spacing(0.2)} solid ${theme.palette.divider}`,

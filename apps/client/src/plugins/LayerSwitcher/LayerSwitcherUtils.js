@@ -4,6 +4,8 @@ const { options } = AppModel.config.mapConfig.tools.find(
   (tool) => tool.type.toLowerCase() === "layerswitcher"
 );
 
+const isMobile = window.matchMedia("(max-width: 600px)").matches;
+
 export const getLegendBackgroundColor = (theme) => {
   if (!options.legendForceTransparency) {
     return "#fff";
@@ -80,4 +82,8 @@ export const getThemedLegendGraphicUrl = (url, isDarkMode) => {
   }
 
   return parsedUrl.toString();
+};
+
+export const getIsMobile = () => {
+  return isMobile;
 };

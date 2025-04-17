@@ -25,6 +25,7 @@ import LsCheckBox from "./LsCheckBox";
 
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+import { getIsMobile } from "../LayerSwitcherUtils";
 
 const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
   if (!isToggled) {
@@ -101,8 +102,8 @@ function LayerItem({
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
-
   const theme = useTheme();
+
   const mapZoom = useMapZoom();
 
   const { layerIsToggled } = layerState ?? {};
@@ -277,7 +278,7 @@ function LayerItem({
               position: "relative",
               width: "100%",
               alignItems: "flex-start",
-              py: 0.25, // jesade-vbg compact mode, changed from py: 0.5
+              py: getIsMobile() ? 0.5 : 0.25, // jesade-vbg compact mode, changed from py: 0.5
               pr: 1,
               pl: "2px",
               borderBottom: (theme) => renderBorder(theme),

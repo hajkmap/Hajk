@@ -10,6 +10,7 @@ import LsIconButton from "./LsIconButton";
 import LsCheckBox from "./LsCheckBox";
 
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+import { getIsMobile } from "../LayerSwitcherUtils";
 
 /**
  * If Group has "toggleable" property enabled, render the toggle all checkbox.
@@ -248,7 +249,7 @@ const LayerGroup = ({
             <ListItemText
               primaryTypographyProps={{
                 pb: "2px", // jesade-vbg compact mode, added line.
-                // py: groupIsToggable ? 0 : "3px", // jesade-vbg compact mode, commented out.
+                py: groupIsToggable ? 0 : getIsMobile() ? "3px" : "1px", // jesade-vbg compact mode
                 pl: groupIsToggable ? 0 : "3px",
                 variant: "body1",
                 fontWeight: isToggled || isSemiToggled ? "bold" : "inherit",

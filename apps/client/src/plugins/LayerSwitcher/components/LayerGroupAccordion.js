@@ -52,10 +52,7 @@ export default function LayerGroupAccordion({
             },
           }}
         >
-          <KeyboardArrowRightOutlinedIcon
-            className="ls-arrow"
-            sx={{}}
-          ></KeyboardArrowRightOutlinedIcon>
+          <KeyboardArrowRightOutlinedIcon className="ls-arrow"></KeyboardArrowRightOutlinedIcon>
         </LsIconButton>
         <Box
           sx={{

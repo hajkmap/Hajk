@@ -9,6 +9,7 @@ import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRig
 
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+import { getIsMobile } from "../LayerSwitcherUtils";
 
 /* A grouplayer is a layer configured with multiple layers in admin, NOT a group in layerswitcher */
 
@@ -126,7 +127,12 @@ function GroupLayer({
               size="small"
               onClick={(_) => setShowSublayers(!showSublayers)}
             >
-              <KeyboardArrowRightOutlinedIcon className="ls-arrow"></KeyboardArrowRightOutlinedIcon>
+              <KeyboardArrowRightOutlinedIcon
+                sx={{
+                  mt: getIsMobile() ? "2px" : "0px", // jesade-vbg compact mode
+                }}
+                className="ls-arrow"
+              ></KeyboardArrowRightOutlinedIcon>
             </IconButton>
           </Box>
         )
