@@ -16,6 +16,9 @@ export default defineConfig({
       plugins: path.resolve(__dirname, "./src/plugins"),
     },
   },
+  build: {
+    target: "ES2022",
+  },
   esbuild: {
     loader: "jsx",
     include: /src\/.*\.jsx?$/,
