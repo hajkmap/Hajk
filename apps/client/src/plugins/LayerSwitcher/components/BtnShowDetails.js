@@ -20,6 +20,7 @@ const BtnShowDetails = ({ children, ...props }) => (
         width: "0.7em",
         height: "0.7em",
         transform: "rotate(180deg)",
+        mt: "1px",
         color: (theme) => theme.palette.grey[500],
       }}
     />

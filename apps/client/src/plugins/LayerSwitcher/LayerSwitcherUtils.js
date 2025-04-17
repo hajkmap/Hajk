@@ -1,12 +1,8 @@
 import AppModel from "models/AppModel";
 
-const options = AppModel.config.mapConfig.tools.find(
+const { options } = AppModel.config.mapConfig.tools.find(
   (tool) => tool.type.toLowerCase() === "layerswitcher"
-).options;
-
-// TODO: Put settings in Admin UI
-options.legendForceTransparency = true;
-options.legendTryHiDPI = true;
+);
 
 export const getLegendBackgroundColor = (theme) => {
   if (!options.legendForceTransparency) {
