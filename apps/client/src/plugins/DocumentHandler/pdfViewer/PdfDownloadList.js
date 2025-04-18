@@ -1,116 +1,124 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
+import {
+  Box,
+  TextField,
+  List,
+  ListItem,
+  ListItemText,
+  Checkbox,
+  Button,
+  Typography,
+} from "@mui/material";
 
-const PdfDownloadList = ({ pdfFiles, options }) => {
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+const PdfDownloadList = ({ pdfFiles = [], options = {} }) => {
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState(() => new Set());
 
-  // Filter pdfFiles based on the search term
-  const filteredFiles = pdfFiles.filter((file) =>
-    file.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Handle checkbox: add/remove file.title from state
-  const handleCheckboxChange = (fileTitle) => {
-    if (selectedFiles.includes(fileTitle)) {
-      setSelectedFiles(selectedFiles.filter((title) => title !== fileTitle));
-    } else {
-      setSelectedFiles([...selectedFiles, fileTitle]);
-    }
-  };
-
-  // Function to download a file from blob
-  const downloadFile = (blob, fileName) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  // When clicking "Ladda ner markerade filer", the marked files are downloaded
-  const handleDownload = () => {
-    const filesToDownload = pdfFiles.filter((file) =>
-      selectedFiles.includes(file.title)
-    );
-    filesToDownload.forEach((file) => {
-      downloadFile(file.blob, `${file.title}.pdf`);
+  const menuLookup = useMemo(() => {
+    const lookup = {};
+    options?.menuConfig?.menu?.forEach((m) => {
+      lookup[m.document] = m.title;
     });
-  };
+    return lookup;
+  }, [options]);
 
-  // Select all files in the filtered list
-  const handleSelectAll = () => {
-    const allTitles = filteredFiles.map((file) => file.title);
-    setSelectedFiles(allTitles);
-  };
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return pdfFiles;
+    return pdfFiles.filter((f) => {
+      const titleMatch = f.title.toLowerCase().includes(term);
+      const menuMatch = (menuLookup[f.title]?.toLowerCase() || "").includes(
+        term
+      );
+      return titleMatch || menuMatch;
+    });
+  }, [pdfFiles, search, menuLookup]);
 
-  // Clear all file selections
-  const handleClearSelection = () => {
-    setSelectedFiles([]);
-  };
+  // --------------------------- Handlers ---------------------------
+  const toggleOne = useCallback((title) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(title) ? next.delete(title) : next.add(title);
+      return next;
+    });
+  }, []);
 
-  const BoldTextButton = ({ text, onClick, disabled }) => (
-    <button
-      onClick={disabled ? undefined : onClick}
-      disabled={disabled}
-      style={{
-        background: "none",
-        border: "none",
-        padding: 10,
-        margin: 0,
-        fontWeight: "bold",
-        color: disabled ? "gray" : "inherit",
-        cursor: disabled ? "default" : "pointer",
-        opacity: disabled ? 0.5 : 1,
-      }}
-    >
-      {text}
-    </button>
+  const selectAllFiltered = useCallback(() => {
+    setSelected((prev) => new Set([...prev, ...filtered.map((f) => f.title)]));
+  }, [filtered]);
+
+  const clearSelection = useCallback(() => setSelected(new Set()), []);
+
+  const downloadSelected = useCallback(() => {
+    pdfFiles.forEach((file) => {
+      if (selected.has(file.title)) {
+        const url = URL.createObjectURL(file.blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${file.title}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    });
+  }, [pdfFiles, selected]);
+
+  // --------------------------- Helper ---------------------------
+  const toolBtn = (label, onClick, disabled = false) => (
+    <Button variant="text" onClick={onClick} disabled={disabled} sx={{ mr: 1 }}>
+      <Typography fontWeight="bold" textTransform="none">
+        {label}
+      </Typography>
+    </Button>
   );
 
   return (
-    <div>
-      <h3>PDF-filer att ladda ner</h3>
-      <input
-        type="text"
-        placeholder="Sök..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ marginBottom: "10px", width: "50%", padding: "8px" }}
+    <Box>
+      <TextField
+        size="small"
+        placeholder="Sök…"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        fullWidth
+        sx={{ mb: 2 }}
       />
-      <div style={{ marginBottom: "10px" }}>
-        <BoldTextButton
-          text="Välj alla"
-          onClick={handleSelectAll}
-          style={{ marginRight: "10px" }}
-        />
-        <BoldTextButton text="Rensa val" onClick={handleClearSelection} />
-      </div>
-      <ul>
-        {filteredFiles.map((file) => {
-          const menuEntry = options.menuConfig.menu.find(
-            (entry) => entry.document === file.title
-          );
-          return (
-            <li key={file.title}>
-              <input
-                type="checkbox"
-                checked={selectedFiles.includes(file.title)}
-                onChange={() => handleCheckboxChange(file.title)}
-              />
-              {file.title} {menuEntry ? `(${menuEntry.title})` : ""}
-            </li>
-          );
-        })}
-      </ul>
-      <BoldTextButton
-        text="Ladda ner markerade filer"
-        onClick={handleDownload}
-        disabled={selectedFiles.length === 0}
-      />
-    </div>
+
+      <Box sx={{ mb: 2 }}>
+        {toolBtn("Välj alla", selectAllFiltered, filtered.length === 0)}
+        {toolBtn("Rensa val", clearSelection, selected.size === 0)}
+      </Box>
+
+      <List dense>
+        {filtered.length === 0 && (
+          <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+            Inga filer matchar sökningen.
+          </Typography>
+        )}
+        {filtered.map((file) => (
+          <ListItem key={file.title} disableGutters dense sx={{ py: 0 }}>
+            <Checkbox
+              edge="start"
+              checked={selected.has(file.title)}
+              onChange={() => toggleOne(file.title)}
+              sx={{ mr: 1 }}
+            />
+            <ListItemText
+              primary={`${file.title}${menuLookup[file.title] ? ` (${menuLookup[file.title]})` : ""}`}
+            />
+          </ListItem>
+        ))}
+      </List>
+
+      <Button
+        variant="contained"
+        onClick={downloadSelected}
+        disabled={selected.size === 0}
+        sx={{ mt: 2 }}
+      >
+        Ladda ner markerade filer
+      </Button>
+    </Box>
   );
 };
 

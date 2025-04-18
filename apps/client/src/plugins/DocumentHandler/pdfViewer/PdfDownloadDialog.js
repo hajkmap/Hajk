@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import IconButton from "@mui/material/IconButton";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PdfDownloadList from "./PdfDownloadList";
-import CircularProgress from "@mui/material/CircularProgress";
 
 const PdfDownloadDialog = ({ open, onClose, model, options }) => {
   const [pdfFiles, setPdfFiles] = useState([]);
@@ -39,7 +41,7 @@ const PdfDownloadDialog = ({ open, onClose, model, options }) => {
       <DialogTitle>
         Ladda ner PDF
         <IconButton
-          aria-label="stäng"
+          aria-label="Stäng"
           onClick={onClose}
           sx={{ position: "absolute", right: 8, top: 8 }}
         >
