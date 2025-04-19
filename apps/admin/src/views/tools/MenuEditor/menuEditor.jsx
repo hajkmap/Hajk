@@ -97,6 +97,8 @@ class ToolOptions extends Component {
       chapterLevelsToShowForPrint: 2,
       title: "Innehållsförteckning",
       height: "300",
+      lineHeight: "0.9",
+      fontSize: "12",
     },
     defaultDocumentColorSettings: {
       textAreaBackgroundColor: "",
@@ -1078,11 +1080,11 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="tableOfContentsHeight">
-              Höjd (PDF){" "}
+              Fönsterstorlek (PDF){" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Innehållsförteckning höjd i pixlar"
+                title="Innehållsförteckningens fönsterstorlek i pixlar"
               />
             </label>
             <input
@@ -1096,6 +1098,56 @@ class ToolOptions extends Component {
                   tableOfContents: {
                     ...prevState.tableOfContents,
                     height: value,
+                  },
+                }));
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="tableOfContentsLineHeight">
+              Radhöjd (PDF){" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Innehållsförteckningens radhöjd, exempel 0.9"
+              />
+            </label>
+            <input
+              id="tableOfContentsLineHeight"
+              value={this.state.tableOfContents.lineHeight}
+              type="text"
+              name="tableOfContentsLineHeight"
+              onChange={(e) => {
+                const value = e.target.value;
+                this.setState((prevState) => ({
+                  tableOfContents: {
+                    ...prevState.tableOfContents,
+                    lineHeight: value,
+                  },
+                }));
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="tableOfContentsFontSize">
+              Teckenstorlek (PDF){" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Innehållsförteckningens teckenstorlek i pixlar, skriv endast tal i fältet"
+              />
+            </label>
+            <input
+              id="tableOfContentsFontSize"
+              value={this.state.tableOfContents.fontSize}
+              type="text"
+              name="tableOfContentsFontSize"
+              onChange={(e) => {
+                const value = e.target.value;
+                this.setState((prevState) => ({
+                  tableOfContents: {
+                    ...prevState.tableOfContents,
+                    fontSize: value,
                   },
                 }));
               }}

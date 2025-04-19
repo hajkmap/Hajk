@@ -174,7 +174,13 @@ function PdfTOC({
 
   const renderTOCTree = (nodes) => {
     return (
-      <ul className="toc-list">
+      <ul
+        className="toc-list"
+        style={{
+          lineHeight: options.tableOfContents.lineHeight,
+          fontSize: `${options.tableOfContents.fontSize}px`,
+        }}
+      >
         {nodes.map((node) => (
           <TOCItem
             key={node.id}
@@ -196,7 +202,14 @@ function PdfTOC({
         customTheme?.palette?.mode === "dark" ? "dark-theme" : ""
       }`}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          fontSize: `${Number(options.tableOfContents.fontSize) + 2}px`,
+        }}
+      >
         <span style={{ cursor: "pointer" }} onClick={handleCollapseAll}>
           -
         </span>
