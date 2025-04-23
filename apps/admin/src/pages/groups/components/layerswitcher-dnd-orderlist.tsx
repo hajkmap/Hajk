@@ -78,42 +78,54 @@ const DraggableGroup = ({
   children: React.ReactNode;
 }) => {
   const ref = React.useRef<HTMLDivElement>(null);
-
-  const [, drop] = useDrop<
-    { id: string; index: number; type: string },
-    void,
-    unknown
-  >({
-    accept: ItemType.GROUP,
-    hover(item, monitor) {
-      if (!ref.current) return;
-
-      const dragIndex = item.index;
-      const hoverIndex = index;
-      if (dragIndex === hoverIndex) return;
-
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-
-      const clientOffset = monitor.getClientOffset();
-      if (!clientOffset) return;
-
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
-
-      moveGroup(dragIndex, hoverIndex);
-      item.index = hoverIndex;
-    },
-  });
+  const themeMode = useAppStateStore((state) => state.themeMode);
+  const isDarkMode = themeMode === "dark";
 
   const [{ isDragging }, drag] = useDrag({
     type: ItemType.GROUP,
     item: { id: group.id, index, type: ItemType.GROUP },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
+    }),
+  });
+
+  const [{ isOver }, drop] = useDrop<
+    { id: string; index: number; type: string },
+    void,
+    { isOver: boolean }
+  >({
+    accept: ItemType.GROUP,
+    hover(item, monitor) {
+      if (!ref.current) return;
+      if (item.id === group.id) return;
+
+      const dragIndex = item.index;
+      const hoverIndex = index;
+
+      if (dragIndex === hoverIndex) return;
+
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const clientOffset = monitor.getClientOffset();
+      if (!clientOffset) return;
+
+      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+
+      // Only perform the move when the mouse has crossed half of the items height
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
+
+      // Timeout to prevent rapid reordering
+      const timeoutId = setTimeout(() => {
+        moveGroup(dragIndex, hoverIndex);
+        item.index = hoverIndex;
+      }, 50);
+
+      return () => clearTimeout(timeoutId);
+    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
     }),
   });
 
@@ -126,7 +138,16 @@ const DraggableGroup = ({
         opacity: isDragging ? 0.5 : 1,
         cursor: "move",
         mb: 2,
-        transition: "opacity 0.2s ease",
+        transition: "all 0.2s ease",
+        backgroundColor: isOver
+          ? isDarkMode
+            ? "#1e293b"
+            : "#e0f7fa"
+          : "transparent",
+        borderRadius: 2,
+        p: 0.5,
+        transform: isDragging ? "scale(1.02)" : "scale(1)",
+        boxShadow: isDragging ? "0px 2px 8px rgba(0,0,0,0.1)" : "none",
       }}
     >
       {children}
@@ -478,14 +499,55 @@ function LayerSwitcherOrderList() {
     });
   }, [groups]);
 
-  const handleMoveGroup = (dragIndex: number, hoverIndex: number) => {
-    setOrderedGroups((prev) => {
-      const updated = [...prev];
-      const [moved] = updated.splice(dragIndex, 1);
-      updated.splice(hoverIndex, 0, moved);
-      return updated;
-    });
-  };
+  const handleMoveGroup = React.useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      setOrderedGroups((prev) => {
+        if (dragIndex === hoverIndex) return prev;
+
+        const movedGroup = prev[dragIndex];
+
+        const getAllChildren = (groupId: string): string[] => {
+          const directChildren = groupHierarchy[groupId] || [];
+          return directChildren.reduce((acc, childId) => {
+            return [...acc, childId, ...getAllChildren(childId)];
+          }, [] as string[]);
+        };
+
+        const allChildren = getAllChildren(movedGroup.id);
+        const childrenSet = new Set(allChildren);
+
+        const filteredGroups = prev.filter(
+          (group) => group.id !== movedGroup.id && !childrenSet.has(group.id)
+        );
+
+        const safeHoverIndex = Math.max(
+          0,
+          Math.min(hoverIndex, filteredGroups.length)
+        );
+        filteredGroups.splice(safeHoverIndex, 0, movedGroup);
+
+        return filteredGroups;
+      });
+    },
+    [groupHierarchy]
+  );
+
+  // Add a memoized version of the move handler for the icon buttons
+  const handleMoveUp = React.useCallback(
+    (index: number) => {
+      if (index > 0) {
+        handleMoveGroup(index, index - 1);
+      }
+    },
+    [handleMoveGroup]
+  );
+
+  const handleMoveDown = React.useCallback(
+    (index: number) => {
+      handleMoveGroup(index, index + 1);
+    },
+    [handleMoveGroup]
+  );
 
   const handleDropToGroup = (
     groupId: string,
@@ -646,15 +708,8 @@ function LayerSwitcherOrderList() {
             isRootGroup={isRootGroup}
             index={index ?? 0}
             lastIndex={(totalRootGroups ?? 1) - 1}
-            onMoveUp={() =>
-              handleMoveGroup(index ?? 0, Math.max(0, (index ?? 0) - 1))
-            }
-            onMoveDown={() =>
-              handleMoveGroup(
-                index ?? 0,
-                Math.min((totalRootGroups ?? 1) - 1, (index ?? 0) + 1)
-              )
-            }
+            onMoveUp={() => handleMoveUp(index ?? 0)}
+            onMoveDown={() => handleMoveDown(index ?? 0)}
           />
         </DraggableGroup>
       </Box>
