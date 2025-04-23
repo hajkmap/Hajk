@@ -49,10 +49,12 @@
     "common.welcome": "Välkommen!",
     "common.you": "Du",
     "common.theme": "Tema",
-    "common.lastSavedBy": "Senast sparad av {{lastSavedBy}} {{lastSavedDate,  {{lastSavedDate}}",
+    "common.lastSaved": "Senast sparad:",
     "common.dialog.closeBtn": "Stäng",
     "common.dialog.saveBtn": "Spara",
     "common.dialog.deleteBtn": "Ta bort",
+    "common.dialog.deleteConfirmation": "Är du säker på att du vill ta bort {{name}}?",
+    "common.dialog.deleteWarning": "Detta kan inte ångras.",
     "common.brokenService": "Trasig tjänst",
     "common.usedInMaps": "Används i kartor",
     "common.create": "Skapa",
@@ -316,6 +318,14 @@
     "groups.updateGroupSuccess": "Gruppen {{name}} har uppdaterats!",
     "groups.updateGroupFailed": "Misslyckades att uppdatera gruppen {{name}}.",
     "groups.deleteGroupSuccess": "Gruppen {{name}} är nu borttagen!",
-    "groups.deleteGroupFailed": "Misslyckades att ta bort gruppen {{name}}."
+    "groups.deleteGroupFailed": "Misslyckades att ta bort gruppen {{name}}.",
+    "formControl.unknown": "Okänd",
+    "formControl.time.today": "Idag",
+    "formControl.time.yesterday": "Igår",
+    "formControl.time.daysAgo": "dagar sedan",
+    "formControl.time.weeksAgo": "veckor sedan",
+    "formControl.time.monthsAgo": "månader sedan",
+    "formControl.time.yearsAgo": "år sedan"
+    
   }
 }

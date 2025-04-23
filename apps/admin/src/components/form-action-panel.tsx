@@ -60,40 +60,26 @@ const FormActionPanel: React.FC<FormActionProps> = ({
 
   const getTimeAgo = (dateString?: string): string => {
     if (!dateString) return "Unknown";
-
+  
     const date = new Date(dateString);
     const now = new Date();
-
-    const startOfDay = new Date(now);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const startOfDate = new Date(date);
-    startOfDate.setHours(0, 0, 0, 0);
-
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    const secondsInWeek = 7 * 86400;
-    const secondsInMonth = 30 * 86400;
-    const secondsInYear = 365 * 86400;
-
     const time = date.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
-
-    if (startOfDate.getTime() === startOfDay.getTime())
-      return `${t("formControl.time.today")} ${time}`;
-    if (startOfDate.getTime() === startOfDay.getTime() - 86400000)
-      return `${t("formControl.time.yesterday")} ${time}`;
-
-    if (diffInSeconds < secondsInWeek)
-      return `${Math.floor(diffInSeconds / 86400)} ${t("formControl.time.daysAgo")} ${time}`;
-    if (diffInSeconds < secondsInMonth)
-      return `${Math.floor(diffInSeconds / 86400 / 7)} ${t("formControl.time.weekAago")} ${time}`;
-    if (diffInSeconds < secondsInYear)
-      return `${Math.floor(diffInSeconds / secondsInMonth)} ${t("formControl.time.monthsAgo")} ${time}`;
-
-    return `${Math.floor(diffInSeconds / secondsInYear)} ${t("formControl.time.yearsAgo")} ${time}`;
+  
+    const today = new Date(now.setHours(0, 0, 0, 0));
+    const savedDate = new Date(date.setHours(0, 0, 0, 0));
+  
+    const diffInDays = Math.floor((today.getTime() - savedDate.getTime()) / (1000 * 60 * 60 * 24));
+  
+    if (diffInDays === 0) return `${t("formControl.time.today")} ${time}`;
+    if (diffInDays === 1) return `${t("formControl.time.yesterday")} ${time}`;
+    if (diffInDays < 7) return `${diffInDays} ${t("formControl.time.daysAgo")}`;
+    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} ${t("formControl.time.weeksAgo")}`;
+    if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} ${t("formControl.time.monthsAgo")}`;
+    
+    return `${Math.floor(diffInDays / 365)} ${t("formControl.time.yearsAgo")}`;
   };
 
   const renderSaveButton = () => (
@@ -182,7 +168,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
     <StyledPaper>
       <Typography
         variant="h5"
-        sx={{ fontSize: "1.2rem", fontWeight: "bold", mb: 2 }}
+        sx={{ fontSize: "1.20rem", fontWeight: "bold", mb: 1 }}
       >
         {t("common.lastSaved")}
       </Typography>

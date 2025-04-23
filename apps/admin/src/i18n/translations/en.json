@@ -50,10 +50,12 @@
     "common.welcome": "Welcome!",
     "common.you": "You",
     "common.theme": "Theme",
-    "common.lastSavedBy": "Last saved by {{lastSavedBy}} {{lastSavedDate, on {{lastSavedDate}}",
+    "common.lastSaved": "Last saved: ",
     "common.dialog.closeBtn": "Close",
     "common.dialog.deleteBtn": "Delete",
     "common.dialog.saveBtn": "Save",
+    "common.dialog.deleteConfirmation": "Are you sure you want to delete {{name}}?",
+    "common.dialog.deleteWarning": "This action cannot be undone.",
     "common.brokenService": "Broken service",
     "common.usedInMaps": "Used in maps",
     "common.create": "Create",
@@ -317,6 +319,13 @@
     "groups.updateGroupSuccess": "Group {{name}} updated!",
     "groups.updateGroupFailed": "Failed to update group {{name}}.",
     "groups.deleteGroupSuccess": "Group {{name}} deleted!",
-    "groups.deleteGroupFailed": "Failed to delete group {{name}}."
+    "groups.deleteGroupFailed": "Failed to delete group {{name}}.",
+    "formControl.unknown": "Unknown",
+    "formControl.time.today": "Today",
+    "formControl.time.yesterday": "Yesterday",
+    "formControl.time.daysAgo": "days ago",
+    "formControl.time.weekAago": "weeks ago",
+    "formControl.time.monthsAgo": "months ago",
+    "formControl.time.yearsAgo": "years ago"
   }
 }
