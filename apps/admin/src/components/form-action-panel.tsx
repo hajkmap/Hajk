@@ -43,19 +43,23 @@ const FormActionPanel: React.FC<FormActionProps> = ({
     padding: theme.spacing(2),
     marginLeft: theme.spacing(3),
     marginBottom: theme.spacing(2),
-    border: `1px solid ${theme.palette.grey[300]}`,
+    border: `1px solid ${theme.palette.divider}`,
     borderRadius: theme.shape.borderRadius,
     minWidth: "220px",
     maxWidth: "300px",
     top: "100px",
     position: "sticky",
+    backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.paper : theme.palette.background.default,
+    color: theme.palette.text.primary
   }));
 
   const StyledPaper = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(2),
     marginTop: theme.spacing(2),
-    backgroundColor: theme.palette.grey[100],
+    backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.paper : theme.palette.background.default,
     textAlign: "center",
+    color: theme.palette.text.primary,
+    border: `1px solid ${theme.palette.divider}`
   }));
 
   const getTimeAgo = (dateString?: string): string => {

@@ -4,7 +4,6 @@ import {
   Grid2 as Grid,
   Paper,
   TextField,
-  Typography,
 } from "@mui/material";
 import {
   FieldValues,
@@ -90,6 +89,8 @@ interface FormRenderProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
   errors: FieldErrors<TFieldValues>;
   showSearch?: boolean;
+  expandedAccordions?: Record<string, boolean>;
+  onAccordionChange?: (id: string, expanded: boolean) => void;
 }
 
 const FormRenderer = <TFieldValues extends FieldValues>({
@@ -99,6 +100,8 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   control,
   errors,
   showSearch = false,
+  expandedAccordions = {},
+  onAccordionChange,
 }: FormRenderProps<TFieldValues>) => {
   let c = 0;
 
@@ -233,13 +236,25 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     );
   };
 
+  const renderContainer = (
+    container: DynamicFormContainer<TFieldValues>,
+    index: number
+  ) => {
+    if (container.containerType === CONTAINER_TYPE.ACCORDION) {
+      return renderContainerAccordion(container, index);
+    } else if (container.containerType === CONTAINER_TYPE.PANEL) {
+      return renderContainerPanel(container, index);
+    }
+
+    return null;
+  };
+
   const renderContainerAccordion = (
     container: DynamicFormContainer<TFieldValues>,
     index: number
   ) => {
     const key = getKey(index);
-    const shouldExpand =
-      !!container.props?.triggerExpanded || container.highlight;
+    const shouldExpand = expandedAccordions[container.title] ?? true;
 
     return (
       <ControlledAccordion
@@ -248,7 +263,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
         formGetValues={formGetValues}
         title={container.title}
         triggerExpanded={shouldExpand}
-        backgroundColor={container.props?.backgroundColor as string}
+        onAccordionChange={(expanded: boolean) => onAccordionChange?.(container.title, expanded)}
       >
         <Grid container>
           {container
@@ -263,67 +278,28 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     container: DynamicFormContainer<TFieldValues>,
     index: number
   ) => {
+    const key = getKey(index);
+
     return (
       <Paper
-        key={getKey(index)}
+        key={key + "-panel-"}
         sx={{
+          p: 3,
           backgroundColor: container.props?.backgroundColor ?? "none",
-          width: "100%",
-          p: 2,
-          pb: 0,
-          pl: 0,
-          mb: 3,
           ml: 2,
+          boxShadow: "none",
+          borderRadius: "8px",
+          border: "1px solid",
+          borderColor: "divider"
         }}
       >
-        <Typography variant="h6" sx={{ mt: -0.5, ml: 2, mb: 1.5 }}>
-          {container.title}
-        </Typography>
-        <Grid container>
+        <Grid container spacing={2}>
           {container
             .getElements()
-            .map((item, _index) =>
-              wrapInGrid(
-                item,
-                _index,
-                { sx: { pb: 0, pl: 0 } },
-                () => renderFormElement(item, _index) ?? <div />
-              )
-            )}
+            .map((item, _index) => renderFormElement(item, _index))}
         </Grid>
       </Paper>
     );
-  };
-
-  const renderContainer = (
-    container: DynamicFormContainer<TFieldValues>,
-    index: number
-  ) => {
-    const type = container.containerType;
-    if (type === CONTAINER_TYPE.PANEL) {
-      return renderContainerPanel(container, index);
-    } else if (type === CONTAINER_TYPE.ACCORDION) {
-      // Please refactor the ugly * thing below
-
-      // If the Accordion contains a required field, add a * to the title.
-      const containsRequiredFields =
-        container.getElements().filter((item) => {
-          if (isFormElementInput(item)) {
-            const castedSettings = item as DynamicInputSettings<TFieldValues>;
-            if (castedSettings.registerOptions?.required) {
-              return true;
-            }
-          }
-        }).length > 0;
-
-      if (containsRequiredFields) {
-        // Please refactor the ugly * thing below
-        if (!container.title?.includes("*") /* Prevents doubles in DEV env.*/) {
-          container.title = `${container.title} *`;
-        }
-      }
-      return renderContainerAccordion(container, index);
-    }
   };
 
   const wrapInGrid = (
@@ -354,7 +330,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   // Note the className below.
   // This is the root of the form and the class is used in the global styles.
   return (
-    <Grid container className="form-factory" sx={{ ml: -2 }}>
+    <Grid container className="form-factory" sx={{ ml: -2, "& > *": { mb: 2 } }}>
       {showSearch && (
         <Grid container size={{ xs: 12 }} justifyContent="flex-end">
           <Grid size={{ xs: 12, md: 4 }} sx={{ pb: 2, pl: 2 }}>

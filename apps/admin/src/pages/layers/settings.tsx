@@ -2,7 +2,7 @@ import { useState, useRef, useMemo } from "react";
 import { useParams } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
-import { Button, Stack, TextField, useTheme, Link } from "@mui/material";
+import { Button, Stack, TextField, useTheme, Link, Box } from "@mui/material";
 import { GridRowSelectionModel } from "@mui/x-data-grid";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import { FieldValues } from "react-hook-form";
@@ -33,6 +33,8 @@ import { useServices, useServiceCapabilities } from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
 import { useRoles } from "../../api/users";
 import { HttpError } from "../../lib/http-error";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 export default function LayerSettings() {
   const { t } = useTranslation();
@@ -118,6 +120,17 @@ export default function LayerSettings() {
     t("layers.permissions"),
     CONTAINER_TYPE.ACCORDION
   );
+
+  const [expandedAccordions, setExpandedAccordions] = useState<Record<string, boolean>>({
+    [t("common.information")]: false,
+    [t("services.settings.request")]: false,
+    [t("layers.settings")]: false,
+    [t("layers.settings.displayFields")]: false,
+    [t("common.infoclick")]: false,
+    [t("layers.settings.searchSettings")]: false,
+    [t("common.infobutton")]: false,
+    [t("layers.permissions")]: false
+  });
 
   layerInformationSettings.addInput({
     type: INPUT_TYPE.TEXTFIELD,
@@ -775,6 +788,15 @@ export default function LayerSettings() {
         })
       : "";
   
+  const handleToggleAll = () => {
+    const allExpanded = Object.values(expandedAccordions).every(Boolean);
+    const newState = Object.keys(expandedAccordions).reduce((acc, key) => {
+      acc[key] = !allExpanded;
+      return acc;
+    }, {} as Record<string, boolean>);
+    setExpandedAccordions(newState);
+  };
+
   if (isLoading) {
     return <SquareSpinnerComponent />;
   }
@@ -794,7 +816,16 @@ export default function LayerSettings() {
         lastSavedBy={updatedByUser}
         lastSavedDate={formatedLastSavedDate}
         dirtyFields={dirtyFields}
-        >
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <Button
+            onClick={handleToggleAll}
+            startIcon={Object.values(expandedAccordions).every(Boolean) ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            variant="outlined"
+          >
+            {Object.values(expandedAccordions).every(Boolean) ? t('common.collapseAll') : t('common.expandAll')}
+          </Button>
+        </Box>
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer
             formControls={updateLayerContainer}
@@ -802,6 +833,13 @@ export default function LayerSettings() {
             register={register}
             control={control}
             errors={errors}
+            expandedAccordions={expandedAccordions}
+            onAccordionChange={(id: string, expanded: boolean) => {
+              setExpandedAccordions(prev => ({
+                ...prev,
+                [id]: expanded
+              }));
+            }}
           />
           {layer && (
             <AvailableLayersGrid
