@@ -11,7 +11,6 @@ import {
   DialogContent,
   DialogActions,
   DialogContentText,
-  IconButton,
   InputAdornment,
   List,
   ListItemButton,
@@ -38,6 +37,7 @@ import {
   useLayerSwitcherDispatch,
 } from "../LayerSwitcherProvider";
 import LocalStorageHelper from "../../../utils/LocalStorageHelper";
+import LsIconButton from "./LsIconButton";
 
 function QuickAccessPresets({
   display,
@@ -473,18 +473,18 @@ function QuickAccessPresets({
               title="Tillbaka"
               TransitionProps={{ timeout: 0 }}
             >
-              <IconButton onClick={handleBackButtonClick}>
+              <LsIconButton onClick={handleBackButtonClick}>
                 <ArrowBackIcon />
-              </IconButton>
+              </LsIconButton>
             </HajkToolTip>
             <Box sx={{ flexGrow: 1, textAlign: "center" }}>
               <Typography variant="subtitle1">Teman</Typography>
             </Box>
-            <IconButton onClick={handleInfoButtonClick}>
+            <LsIconButton onClick={handleInfoButtonClick}>
               <HajkToolTip title={infoIsActive ? "Dölj info" : "Visa info"}>
                 <InfoOutlinedIcon />
               </HajkToolTip>
-            </IconButton>
+            </LsIconButton>
           </Stack>
           <Collapse
             in={infoIsActive}
@@ -558,7 +558,7 @@ function QuickAccessPresets({
                     <ListItemText primary={l.title} secondary={l.author} />
                     <ListItemSecondaryAction>
                       <HajkToolTip title={"Information om " + l.title}>
-                        <IconButton
+                        <LsIconButton
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -566,7 +566,7 @@ function QuickAccessPresets({
                           }}
                         >
                           <InfoOutlinedIcon fontSize="small" />
-                        </IconButton>
+                        </LsIconButton>
                       </HajkToolTip>
                     </ListItemSecondaryAction>
                   </ListItemButton>

@@ -7,13 +7,13 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@mui/material";
 
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import LibraryAddOutlinedIcon from "@mui/icons-material/LibraryAddOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+import HajkToolTip from "components/HajkToolTip";
 
 export default function FavoritesOptions({
   handleFavoritesViewToggle,
@@ -76,9 +76,9 @@ export default function FavoritesOptions({
           functionalCookiesOk ? handleShowMoreOptionsClick : handleEditFavorites
         }
       >
-        <Tooltip title="Mina favoriter">
+        <HajkToolTip title="Mina favoriter">
           <PersonOutlinedIcon />
-        </Tooltip>
+        </HajkToolTip>
       </IconButton>
       <Menu
         anchorEl={anchorEl}

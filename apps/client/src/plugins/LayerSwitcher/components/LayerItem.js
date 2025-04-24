@@ -3,30 +3,29 @@ import React, { useEffect, useState, memo } from "react";
 // Material UI components
 import {
   Box,
-  IconButton,
   ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
-  Tooltip,
   useTheme,
 } from "@mui/material";
 import HajkToolTip from "components/HajkToolTip";
 
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
 import BuildOutlinedIcon from "@mui/icons-material/BuildOutlined";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
-import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 
 // Custom components
 import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
+import LsIconButton from "./LsIconButton";
+import BtnShowDetails from "./BtnShowDetails";
+import BtnLayerWarning from "./BtnLayerWarning";
+import BtnShowLegend from "./BtnShowLegend";
+import LsCheckBox from "./LsCheckBox";
 
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+import { getIsMobile } from "../LayerSwitcherUtils";
 
 const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
   if (!isToggled) {
@@ -42,25 +41,6 @@ const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
     return "checked";
   }
   return "unchecked";
-};
-
-const LayerToggleComponent = ({ toggleState }) => {
-  return (
-    <IconButton disableTouchRipple size="small">
-      {
-        {
-          checked: <CheckBoxIcon />,
-          semichecked: <CheckBoxIcon sx={{ fill: "gray" }} />,
-          unchecked: <CheckBoxOutlineBlankIcon />,
-          checkedWithWarning: (
-            <CheckBoxIcon
-              sx={{ fill: (theme) => theme.palette.warning.dark }}
-            />
-          ),
-        }[toggleState]
-      }
-    </IconButton>
-  );
 };
 
 const layerShouldShowLegendIcon = (layerType, isFakeMapLayer) =>
@@ -80,7 +60,17 @@ const LayerLegendIcon = ({
   if (layerLegendIcon !== undefined) {
     return <LegendIcon url={layerLegendIcon} />;
   } else if (layerType === "system") {
-    return <BuildOutlinedIcon sx={{ mr: "5px" }} />;
+    return (
+      <BuildOutlinedIcon
+        sx={{
+          display: "block",
+          mr: "5px",
+          mt: "6px",
+          width: "18px",
+          height: "18px",
+        }}
+      />
+    );
   }
 
   if (layerShouldShowLegendIcon(layerType, isFakeMapLayer)) {
@@ -88,21 +78,10 @@ const LayerLegendIcon = ({
   }
 
   return (
-    <Tooltip
-      placement="left"
-      title={legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"}
-    >
-      <IconButton
-        sx={{ p: 0.25, mr: "5px" }}
-        size="small"
-        onClick={(e) => {
-          e.stopPropagation();
-          toggleLegend();
-        }}
-      >
-        <FormatListBulletedOutlinedIcon fontSize="small" />
-      </IconButton>
-    </Tooltip>
+    <BtnShowLegend
+      legendIsActive={legendIsActive}
+      onClick={() => toggleLegend()}
+    />
   );
 };
 
@@ -123,8 +102,8 @@ function LayerItem({
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
-
   const theme = useTheme();
+
   const mapZoom = useMapZoom();
 
   const { layerIsToggled } = layerState ?? {};
@@ -207,18 +186,7 @@ function LayerItem({
    * @return {external:ReactElement}
    */
   const renderStatusIcon = () => {
-    return (
-      wmsLayerLoadStatus === "loaderror" && (
-        <IconButton disableRipple>
-          <HajkToolTip
-            disableInteractive
-            title="Lagret kunde inte laddas in. Kartservern svarar inte."
-          >
-            <WarningAmberOutlinedIcon fontSize="small" />
-          </HajkToolTip>
-        </IconButton>
-      )
-    );
+    return wmsLayerLoadStatus === "loaderror" && <BtnLayerWarning />;
   };
 
   // Show layer details action
@@ -261,6 +229,8 @@ function LayerItem({
     >
       <Box
         sx={{
+          position: "relative",
+          alignItems: "flex-start",
           borderBottom: (theme) =>
             drawOrderItem() && showSublayers
               ? "none"
@@ -274,19 +244,23 @@ function LayerItem({
         }}
       >
         {draggable && (
-          <IconButton
-            disableTouchRipple
+          <LsIconButton
+            disableRipple
             sx={{
               px: 0,
+              pt: "7px",
               opacity: 0,
               transition: "opacity 200ms",
             }}
             className="dragInidcatorIcon"
           >
-            <Tooltip placement="left" title="Dra för att ändra ritordning">
-              <DragIndicatorOutlinedIcon fontSize={"small"} />
-            </Tooltip>
-          </IconButton>
+            <HajkToolTip placement="left" title="Dra för att ändra ritordning">
+              <DragIndicatorOutlinedIcon
+                sx={{ pt: "1px" }}
+                fontSize={"small"}
+              />
+            </HajkToolTip>
+          </LsIconButton>
         )}
         {expandableSection && expandableSection}
         <ListItemButton
@@ -303,13 +277,14 @@ function LayerItem({
               display: "flex",
               position: "relative",
               width: "100%",
-              alignItems: "center",
-              py: 0.5,
+              alignItems: "flex-start",
+              py: getIsMobile() ? 0.5 : 0.25, // jesade-vbg compact mode, changed from py: 0.5
               pr: 1,
+              pl: "2px",
               borderBottom: (theme) => renderBorder(theme),
             }}
           >
-            {toggleable && <LayerToggleComponent toggleState={toggleState} />}
+            {toggleable && <LsCheckBox toggleState={toggleState} />}
             <LayerLegendIcon
               legendIcon={legendIcon}
               layerType={layerType}
@@ -327,31 +302,43 @@ function LayerItem({
                 fontWeight: layerIsToggled && !draggable ? "bold" : "inherit",
               }}
             />
-            <ListItemSecondaryAction>
+            <ListItemSecondaryAction
+              sx={{
+                position: "absolute",
+                right: "4px",
+                top: "1px",
+                transform: "none",
+              }}
+            >
               {renderStatusIcon()}
               {!toggleable && !draggable ? (
-                <IconButton size="small" disableTouchRipple>
-                  <Tooltip title="Bakgrundskartan ligger låst längst ner i ritordningen">
+                <LsIconButton size="small">
+                  <HajkToolTip title="Bakgrundskartan ligger låst längst ner i ritordningen">
                     <LockOutlinedIcon />
-                  </Tooltip>
-                </IconButton>
+                  </HajkToolTip>
+                </LsIconButton>
               ) : null}
               {layerIsFakeMapLayer !== true && layerType !== "system" && (
-                <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
-                  <KeyboardArrowRightOutlinedIcon
-                    sx={{
-                      color: (theme) => theme.palette.grey[500],
-                    }}
-                  ></KeyboardArrowRightOutlinedIcon>
-                </IconButton>
+                <BtnShowDetails onClick={(e) => showLayerDetails(e)} />
               )}
             </ListItemSecondaryAction>
           </Box>
         </ListItemButton>
       </Box>
-      {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
-        <LegendImage src={legendUrls} open={legendIsActive}></LegendImage>
-      )}
+      <Box
+        sx={{
+          paddingLeft: expandableSection ? "30px" : 0,
+          ".ls-draworder-tab-view &": {
+            // special styling for draw order tab
+            paddingLeft: expandableSection ? "30px" : "20px",
+          },
+        }}
+      >
+        {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
+          <LegendImage src={legendUrls} open={legendIsActive}></LegendImage>
+        )}
+      </Box>
+
       {subLayersSection && subLayersSection}
     </div>
   );

@@ -5,6 +5,8 @@ import propFilters from "../../components/FeatureInfo/FeaturePropsFilters";
 
 const Container = styled("div")(({ theme }) => ({
   "& table": {
+    userSelect: "text",
+    cursor: "auto",
     borderSpacing: 0,
     width: "100%",
     marginBottom: theme.spacing(2),

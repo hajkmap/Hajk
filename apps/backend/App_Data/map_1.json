@@ -610,6 +610,8 @@
         "showFilter": true,
         "showQuickAccess": true,
         "enableSystemLayersSwitch": true,
+        "legendForceTransparency": false,
+        "legendTryHiDPI": false,
         "lockDrawOrderBaselayer": true,
         "drawOrderViewInfoText": "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
         "enableQuickAccessPresets": true,

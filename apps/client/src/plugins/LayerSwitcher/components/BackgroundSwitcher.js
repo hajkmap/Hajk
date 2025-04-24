@@ -216,6 +216,9 @@ const BackgroundSwitcher = ({
 
   return (
     <Box
+      // This class is used to style specific elements when the tab is active
+      // If you search for this class in the codebase, you can find related style-fixes.
+      className={"ls-backgrounds-tab-view"}
       sx={{
         display: display ? "block" : "none",
         position: "relative",

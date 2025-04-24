@@ -6,16 +6,7 @@ import VectorFilter from "./VectorFilter";
 import CQLFilter from "./CQLFilter";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
-import {
-  Button,
-  Box,
-  IconButton,
-  Divider,
-  Slider,
-  Tooltip,
-  Typography,
-  Stack,
-} from "@mui/material";
+import { Button, Box, Divider, Slider, Typography, Stack } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -26,6 +17,8 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import LayerItemInfo from "./LayerItemInfo";
 import LegendImage from "./LegendImage";
+import HajkToolTip from "components/HajkToolTip";
+import LsIconButton from "./LsIconButton";
 
 function LayerItemDetails({
   display,
@@ -211,17 +204,17 @@ function LayerItemDetails({
             }}
           >
             <Stack direction="row" alignItems="center">
-              <Tooltip
+              <HajkToolTip
                 open={tooltipOpen}
                 onClose={handleClose}
                 onOpen={handleOpen}
                 title="Tillbaka"
                 TransitionProps={{ timeout: 0 }}
               >
-                <IconButton onClick={handleBackButtonClick}>
+                <LsIconButton onClick={handleBackButtonClick}>
                   <ArrowBackIcon />
-                </IconButton>
-              </Tooltip>
+                </LsIconButton>
+              </HajkToolTip>
               <Box sx={{ flexGrow: 1, textAlign: "center" }}>
                 <Typography variant="subtitle1">
                   {renderDetailTitle()}
@@ -243,31 +236,30 @@ function LayerItemDetails({
             }}
           >
             <Stack direction="row" alignItems="center">
-              <IconButton
+              <LsIconButton
                 sx={{ cursor: "default" }}
                 disableFocusRipple
                 disableRipple
-                disableTouchRipple
               >
                 <InfoOutlinedIcon />
-              </IconButton>
+              </LsIconButton>
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="subtitle1">Info</Typography>
               </Box>
               {showLegend && (
-                <Tooltip
+                <HajkToolTip
                   title={
                     legendIsActive
                       ? "Dölj teckenförklaring"
                       : "Visa teckenförklaring"
                   }
                 >
-                  <IconButton
+                  <LsIconButton
                     onClick={() => setLegendIsActive(!legendIsActive)}
                   >
                     <FormatListBulletedOutlinedIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                  </LsIconButton>
+                </HajkToolTip>
               )}
             </Stack>
             <Box
@@ -286,14 +278,13 @@ function LayerItemDetails({
               <LegendImage src={legendUrl} open={legendIsActive}></LegendImage>
             </Box>
             <Stack direction="row" alignItems="center">
-              <IconButton
+              <LsIconButton
                 sx={{ cursor: "default" }}
                 disableFocusRipple
                 disableRipple
-                disableTouchRipple
               >
                 <SettingsOutlinedIcon />
-              </IconButton>
+              </LsIconButton>
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="subtitle1">Inställningar</Typography>
               </Box>
@@ -342,14 +333,13 @@ function LayerItemDetails({
               <>
                 <Divider />
                 <Stack direction="row" alignItems="center">
-                  <IconButton
+                  <LsIconButton
                     sx={{ cursor: "default" }}
                     disableFocusRipple
                     disableRipple
-                    disableTouchRipple
                   >
                     <FilterAltOutlinedIcon />
-                  </IconButton>
+                  </LsIconButton>
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="subtitle1">Filter</Typography>
                   </Box>
