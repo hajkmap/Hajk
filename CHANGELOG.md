@@ -21,6 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## [4.1.0] - 2025-04-25
+
+### Fixed
+
+- LayerSwitcher: UX Improvements ([issue](https://github.com/hajkmap/Hajk/issues/1637))
+
+### Added
+
+- Sketch/Measurer: Disable snapping temporarily on keyDown (Space) ([issue](https://github.com/hajkmap/Hajk/issues/1616))
+
 ## [4.0.0] - 2025-04-04
 
 ### Fixed
