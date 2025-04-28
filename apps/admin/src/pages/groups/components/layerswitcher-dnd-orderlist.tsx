@@ -69,12 +69,10 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ item }) => {
 const DraggableGroup = ({
   group,
   index,
-  moveGroup,
   children,
 }: {
   group: { id: string; name: string };
   index: number;
-  moveGroup: (dragIndex: number, hoverIndex: number) => void;
   children: React.ReactNode;
 }) => {
   const ref = React.useRef<HTMLDivElement>(null);
@@ -95,35 +93,6 @@ const DraggableGroup = ({
     { isOver: boolean }
   >({
     accept: ItemType.GROUP,
-    hover(item, monitor) {
-      if (!ref.current) return;
-      if (item.id === group.id) return;
-
-      const dragIndex = item.index;
-      const hoverIndex = index;
-
-      if (dragIndex === hoverIndex) return;
-
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      if (!clientOffset) return;
-
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-
-      // Only perform the move when the mouse has crossed half of the items height
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
-
-      // Timeout to prevent rapid reordering
-      const timeoutId = setTimeout(() => {
-        moveGroup(dragIndex, hoverIndex);
-        item.index = hoverIndex;
-      }, 50);
-
-      return () => clearTimeout(timeoutId);
-    },
     collect: (monitor) => ({
       isOver: monitor.isOver(),
     }),
@@ -506,6 +475,7 @@ function LayerSwitcherOrderList() {
 
         const movedGroup = prev[dragIndex];
 
+        // Get all children of the moved group
         const getAllChildren = (groupId: string): string[] => {
           const directChildren = groupHierarchy[groupId] || [];
           return directChildren.reduce((acc, childId) => {
@@ -516,17 +486,27 @@ function LayerSwitcherOrderList() {
         const allChildren = getAllChildren(movedGroup.id);
         const childrenSet = new Set(allChildren);
 
+        // Create a new array without the moved group and its children
         const filteredGroups = prev.filter(
           (group) => group.id !== movedGroup.id && !childrenSet.has(group.id)
         );
 
+        // Insert the moved group at the new position
         const safeHoverIndex = Math.max(
           0,
           Math.min(hoverIndex, filteredGroups.length)
         );
         filteredGroups.splice(safeHoverIndex, 0, movedGroup);
 
-        return filteredGroups;
+        // Add back all child groups in their original order
+        const result = [...filteredGroups];
+        prev.forEach((group) => {
+          if (childrenSet.has(group.id)) {
+            result.push(group);
+          }
+        });
+
+        return result;
       });
     },
     [groupHierarchy]
@@ -690,11 +670,7 @@ function LayerSwitcherOrderList() {
           mt: 2,
         }}
       >
-        <DraggableGroup
-          group={group}
-          index={index ?? 0}
-          moveGroup={handleMoveGroup}
-        >
+        <DraggableGroup group={group} index={index ?? 0}>
           <GroupDropZone
             group={group}
             pathIndex={pathIndex}
