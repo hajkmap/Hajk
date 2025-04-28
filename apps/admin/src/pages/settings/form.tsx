@@ -7,6 +7,7 @@ import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import FormRenderer from "../../components/form-factory/form-renderer";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 import { useTranslation } from "react-i18next";
+import { Box, Button } from "@mui/material";
 
 export default function SettingsForm() {
   const { t, i18n } = useTranslation();
@@ -14,6 +15,15 @@ export default function SettingsForm() {
   const [settingsContainerData, setSettingsContainerData] = useState<
     DynamicFormContainer<FieldValues>
   >(new DynamicFormContainer<FieldValues>());
+
+  const [expandedAccordions, setExpandedAccordions] = useState<Record<string, boolean>>({
+    [t("settings.common.title")]: false,
+    [t("settings.service.title")]: false,
+    [t("settings.layer.title")]: false,
+    [t("settings.map.title")]: false,
+    [t("settings.tools.title")]: false,
+    [t("settings.authorization.title")]: false
+  });
 
   const createTranslatedSettingsContainer = () => {
     const settingsContainer = new DynamicFormContainer<FieldValues>();
@@ -105,14 +115,43 @@ export default function SettingsForm() {
     },
   });
 
+  const handleToggleAllAccordions = () => {
+    const newExpandedState = !Object.values(expandedAccordions).some((isExpanded) => isExpanded);
+    Object.keys(expandedAccordions).forEach((title) => {
+      setExpandedAccordions(prev => ({
+        ...prev,
+        [title]: newExpandedState
+      }));
+    });
+  };
+
   return (
     <form onSubmit={onSubmit}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={handleToggleAllAccordions}
+          sx={{ whiteSpace: 'nowrap' }}
+        >
+          {Object.values(expandedAccordions).some((isExpanded) => isExpanded) 
+            ? t("form.collapseAll") 
+            : t("form.expandAll")}
+        </Button>
+      </Box>
       <FormRenderer
         formControls={settingsContainerData}
         formGetValues={getValues}
         register={register}
         control={control}
         errors={errors}
+        expandedAccordions={expandedAccordions}
+        onAccordionChange={(id: string, expanded: boolean) => {
+          setExpandedAccordions(prev => ({
+            ...prev,
+            [id]: expanded
+          }));
+        }}
       />
     </form>
   );

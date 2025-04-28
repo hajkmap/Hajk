@@ -32,6 +32,7 @@ import {
 } from "./form-utils";
 import { t } from "i18next";
 import SearchAdornment from "./components/search-adornment";
+import ExpandCollapseButton from "./components/expand-collapse-button";
 
 const minimumSearchLength = 3;
 
@@ -284,7 +285,8 @@ const FormRenderer = <TFieldValues extends FieldValues>({
       <Paper
         key={key + "-panel-"}
         sx={{
-          p: 3,
+          pt: 2,
+          pr: 2,
           backgroundColor: container.props?.backgroundColor ?? "none",
           ml: 2,
           boxShadow: "none",
@@ -293,7 +295,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
           borderColor: "divider"
         }}
       >
-        <Grid container spacing={2}>
+        <Grid container>
           {container
             .getElements()
             .map((item, _index) => renderFormElement(item, _index))}
@@ -326,36 +328,53 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     );
   };
 
+  const handleToggleAll = () => {
+    const anyExpanded = Object.values(expandedAccordions).some(Boolean);
+    const newState = Object.keys(expandedAccordions).reduce((acc, key) => {
+      acc[key] = !anyExpanded;
+      return acc;
+    }, {} as Record<string, boolean>);
+    Object.entries(newState).forEach(([key, value]) => onAccordionChange?.(key, value));
+  };
+
   // Form container
   // Note the className below.
   // This is the root of the form and the class is used in the global styles.
   return (
     <Grid container className="form-factory" sx={{ ml: -2, "& > *": { mb: 2 } }}>
       {showSearch && (
-        <Grid container size={{ xs: 12 }} justifyContent="flex-end">
-          <Grid size={{ xs: 12, md: 4 }} sx={{ pb: 2, pl: 2 }}>
-            <TextField
-              size="small"
-              fullWidth
-              label={t("form.search.placeholder", {
-                minChars: minimumSearchLength,
-              })}
-              variant="outlined"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <SearchAdornment
-                      searchTerm={searchTerm}
-                      hitCount={hitCount}
-                      highlightColor={highlightColor}
-                      handleClearSearch={handleClearSearch}
-                      minimumSearchLength={minimumSearchLength}
-                    />
-                  ),
-                },
-              }}
+        <Grid container size={{ xs: 12 }}>
+          <Grid size={{ xs: 12, md: 6 }} sx={{ pb: 2, pl: 2 }}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <TextField
+                size="small"
+                fullWidth
+                label={t("form.search.placeholder", {
+                  minChars: minimumSearchLength,
+                })}
+                variant="outlined"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <SearchAdornment
+                        searchTerm={searchTerm}
+                        hitCount={hitCount}
+                        highlightColor={highlightColor}
+                        handleClearSearch={handleClearSearch}
+                        minimumSearchLength={minimumSearchLength}
+                      />
+                    ),
+                  },
+                }}
+              />
+            </Box>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }} sx={{ pb: 2, pl: 2, textAlign: 'right' }}>
+            <ExpandCollapseButton
+              isExpanded={Object.values(expandedAccordions).some(Boolean)}
+              onToggle={handleToggleAll}
             />
           </Grid>
         </Grid>

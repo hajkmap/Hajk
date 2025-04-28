@@ -174,7 +174,7 @@ function ControlledAccordion({
             </Typography>
           </Box>
         </AccordionSummary>
-        <AccordionDetails sx={{ pl: 2, pb: 2, pt: "1.5rem" }}>
+        <AccordionDetails sx={{ pl: 0, pb: 0, pt: "1.5rem" }}>
           {children}
         </AccordionDetails>
       </Accordion>

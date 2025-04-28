@@ -2,7 +2,7 @@ import { useState, useRef, useMemo } from "react";
 import { useParams } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
-import { Button, Stack, TextField, useTheme, Link, Box } from "@mui/material";
+import { Button, Stack, TextField, useTheme, Link } from "@mui/material";
 import { GridRowSelectionModel } from "@mui/x-data-grid";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import { FieldValues } from "react-hook-form";
@@ -788,15 +788,6 @@ export default function LayerSettings() {
         })
       : "";
   
-  const handleToggleAll = () => {
-    const allExpanded = Object.values(expandedAccordions).every(Boolean);
-    const newState = Object.keys(expandedAccordions).reduce((acc, key) => {
-      acc[key] = !allExpanded;
-      return acc;
-    }, {} as Record<string, boolean>);
-    setExpandedAccordions(newState);
-  };
-
   if (isLoading) {
     return <SquareSpinnerComponent />;
   }
@@ -817,15 +808,6 @@ export default function LayerSettings() {
         lastSavedDate={formatedLastSavedDate}
         dirtyFields={dirtyFields}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-          <Button
-            onClick={handleToggleAll}
-            startIcon={Object.values(expandedAccordions).every(Boolean) ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-            variant="outlined"
-          >
-            {Object.values(expandedAccordions).every(Boolean) ? t('common.collapseAll') : t('common.expandAll')}
-          </Button>
-        </Box>
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer
             formControls={updateLayerContainer}
@@ -840,6 +822,7 @@ export default function LayerSettings() {
                 [id]: expanded
               }));
             }}
+            showSearch={true}
           />
           {layer && (
             <AvailableLayersGrid
