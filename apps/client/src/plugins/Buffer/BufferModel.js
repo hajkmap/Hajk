@@ -164,10 +164,14 @@ class BufferModel {
   bufferFeatures = (distance) => {
     const arr = [];
 
+    // Make sure to convert to correct number format.
+    const normalizedDistance = distance.toString().replace(/,/g, ".");
+    const distanceNumber = parseFloat(normalizedDistance);
+
     // Grab all selected features from highlight source…
     for (const f of this.highlightSource.getFeatures()) {
       // …use HajkTransformer utility to create a buffered feature…
-      const bufferedFeature = this.#HT.getBuffered(f, distance);
+      const bufferedFeature = this.#HT.getBuffered(f, distanceNumber);
       arr.push(bufferedFeature);
     }
     // …that finally gets added to the buffer zone features source.

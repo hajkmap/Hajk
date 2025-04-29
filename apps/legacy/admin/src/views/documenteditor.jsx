@@ -12,6 +12,7 @@ import Create from "@material-ui/icons/Create";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import TocIcon from "@material-ui/icons/Toc";
 import AddBoxIcon from "@material-ui/icons/AddBox";
+import WarningIcon from "@material-ui/icons/Warning";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { withStyles } from "@material-ui/core/styles";
 import {
@@ -126,8 +127,8 @@ class DocumentEditor extends Component {
       newFolderName: "",
       newDocumentMap: "",
       newHeaderIdentifier: "",
-      selectedFolder: '',
-      selectedDocument: '',
+      selectedFolder: "",
+      selectedDocument: "",
       documents: [],
       folders: [],
       keywords: [],
@@ -213,18 +214,17 @@ class DocumentEditor extends Component {
     });
   }
 
-  changeDoc(event)
-  {
+  changeDoc(event) {
     this.props.model.loadDocuments(event.target.value, (documents) => {
-      this.setState({ 
+      this.setState({
         documents: documents,
       });
-    })
+    });
   }
 
   loadFolderList() {
     this.props.model.loadFolders((data) => {
-      this.setState({ 
+      this.setState({
         folders: data,
       });
     });
@@ -260,7 +260,7 @@ class DocumentEditor extends Component {
     this.loadImageList();
     this.loadVideoList();
     this.loadAudioList();
-    if(this.useDocumentFolders){
+    if (this.useDocumentFolders) {
       this.loadFolderList();
     }
   }
@@ -274,12 +274,15 @@ class DocumentEditor extends Component {
         if (result === "File saved") {
           result = "Filen sparades utan problem.";
         }
+
         this.setState({
           showModal: true,
           modalTitle: result,
-          modalContent: "",
+          modalType: "SAVE_DOC",
           showAbortButton: false,
-          modalConfirmCallback: () => {},
+          modalConfirmCallback: () => {
+            this.hideModal();
+          },
         });
       }
     );
@@ -288,22 +291,33 @@ class DocumentEditor extends Component {
   delete() {
     this.setState({
       showModal: true,
-      modalContent: (
-        <div>
-          Hela dokumentet kommer att raderas, detta kan inte ångras. Vill du
-          fortsätta?
-        </div>
-      ),
+      modalTitle: "Radera dokument",
+      modalType: "DELETE_DOC",
       showAbortButton: true,
       modalConfirmCallback: () => {
-        this.props.model.delete(this.state.selectedFolder, this.state.selectedDocument, (result) => {
-          this.load();
-          this.setState({
-            selectedFolder: '',
-          })
-        });
+        this.props.model.delete(
+          this.state.selectedFolder,
+          this.state.selectedDocument,
+          (result) => {
+            this.load();
+            this.setState({
+              selectedFolder: "",
+              selectedDocument: "",
+            });
+          }
+        );
+        this.hideModal();
       },
     });
+  }
+
+  renderDeleteDialog() {
+    return (
+      <div>
+        Hela dokumentet kommer att raderas, detta kan inte ångras. Vill du
+        fortsätta?
+      </div>
+    );
   }
 
   addChapter(title, titleID) {
@@ -322,14 +336,23 @@ class DocumentEditor extends Component {
     this.setState({
       showModal: true,
       modalTitle: "Ta bort kapitel",
-      modalContent:
-        "Detta kapitel och dess underkapitel kommer att tas bort, det går inte att ångra ditt val. Vill du verkställa ändringen?",
+      modalType: "DELETE_CHAPTER",
       showAbortButton: true,
       modalConfirmCallback: () => {
         parentChapters.splice(index, 1);
         this.forceUpdate();
+        this.hideModal();
       },
     });
+  }
+
+  renderDeleteChapterDialog() {
+    return (
+      <div>
+        Detta kapitel och dess underkapitel kommer att tas bort, det går inte
+        att ångra ditt val. Vill du verkställa ändringen?
+      </div>
+    );
   }
 
   hideModal() {
@@ -337,7 +360,7 @@ class DocumentEditor extends Component {
       showModal: false,
       modalStyle: {},
       okButtonText: "OK",
-      modalConfirmCallback: () => {},
+      modalConfirmCallback: () => { },
     });
   }
 
@@ -399,12 +422,12 @@ class DocumentEditor extends Component {
     this.setState({
       showModal: true,
       showAbortButton: true,
-      modalContent: this.renderToc(
-        chapter,
-        this.state.data.chapters,
-        parentChapters,
-        index
-      ),
+      modalType: "TOC_CHAPTER",
+      chapter: chapter,
+      chapters: this.state.data.chapters,
+      parentChapters: parentChapters,
+      index: index,
+
       modalConfirmCallback: () => {
         this.hideModal();
       },
@@ -473,7 +496,8 @@ class DocumentEditor extends Component {
           showModal: true,
           showAbortButton: true,
           modalTitle: "Ändra titel",
-          modalContent: this.renderNameInput(),
+          modalType: "CHANGE_NAME",
+          // modalContent: this.renderNameInput(),
           modalConfirmCallback: () => {
             chapter.header = this.state.newChapterName;
             chapter.headerIdentifier = this.state.newHeaderIdentifier;
@@ -644,20 +668,20 @@ class DocumentEditor extends Component {
           <Typography className={classes.gridItem}>Nyckelord</Typography>
           {chapter.keywords
             ? chapter.keywords.map((keyword, i) => (
-                <Chip
-                  key={i}
-                  label={keyword}
-                  onDelete={(i) => {
-                    const index = chapter.keywords.indexOf(keyword);
-                    if (index > -1) {
-                      chapter.keywords.splice(index, 1);
-                    }
-                    this.setState({
-                      keywords: chapter.keywords,
-                    });
-                  }}
-                />
-              ))
+              <Chip
+                key={i}
+                label={keyword}
+                onDelete={(i) => {
+                  const index = chapter.keywords.indexOf(keyword);
+                  if (index > -1) {
+                    chapter.keywords.splice(index, 1);
+                  }
+                  this.setState({
+                    keywords: chapter.keywords,
+                  });
+                }}
+              />
+            ))
             : null}
           <Grid item>
             <AddKeyword
@@ -698,13 +722,13 @@ class DocumentEditor extends Component {
         >
           {chapter.expanded
             ? chapter.chapters.map((innerChapter, innerIndex) => {
-                return this.renderChapter(
-                  chapter.chapters,
-                  innerChapter,
-                  innerIndex,
-                  false
-                );
-              })
+              return this.renderChapter(
+                chapter.chapters,
+                innerChapter,
+                innerIndex,
+                false
+              );
+            })
             : null}
         </Grid>
       </Grid>
@@ -740,37 +764,54 @@ class DocumentEditor extends Component {
 
   renderModal() {
     return (
-      <div>
-        <Dialog
-          open={this.state.showModal}
-          onClose={() => this.hideModal()}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">
-            {this.state.modalTitle}
-          </DialogTitle>
-          <DialogContent>{this.state.modalContent}</DialogContent>
-          <DialogActions>
+      <Dialog
+        open={this.state.showModal}
+        onClose={() => this.hideModal()}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {this.state.modalTitle}
+        </DialogTitle>
+        <DialogContent>
+          {this.state.modalType === "TOC" && this.renderTableOfContentsInput()}
+          {this.state.modalType === "CREATE_DOC" && this.renderCreateForm()}
+          {this.state.modalType === "CREATE_FOLDER" &&
+            this.renderCreateFormFolder()}
+          {this.state.modalType === "TOC_CHAPTER" &&
+            this.renderToc(
+              this.state.chapter,
+              this.state.chapters,
+              this.state.parentChapters,
+              this.state.index
+            )}
+          {this.state.modalType === "DELETE_DOC" && this.renderDeleteDialog()}
+          {this.state.modalType === "CHANGE_NAME" && this.renderNameInput()}
+          {this.state.modalType === "DELETE_CHAPTER" &&
+            this.renderDeleteChapterDialog()}
+        </DialogContent>
+        <DialogActions>
+          {this.state.showAbortButton && (
             <Button onClick={() => this.hideModal()} color="primary">
               Avbryt
             </Button>
-            <ColorButtonGreen
-              variant="contained"
-              className="btn"
-              onClick={(e) => {
-                if (this.state.modalConfirmCallback) {
-                  this.state.modalConfirmCallback();
-                }
+          )}
+          <ColorButtonGreen
+            variant="contained"
+            className="btn"
+            onClick={() => {
+              if (this.state.modalConfirmCallback) {
+                this.state.modalConfirmCallback();
+              } else {
                 this.hideModal();
-              }}
-              startIcon={<DoneIcon />}
-            >
-              {this.state.okButtonText || "OK"}
-            </ColorButtonGreen>
-          </DialogActions>
-        </Dialog>
-      </div>
+              }
+            }}
+            startIcon={<DoneIcon />}
+          >
+            {this.state.okButtonText || "OK"}
+          </ColorButtonGreen>
+        </DialogActions>
+      </Dialog>
     );
   }
 
@@ -790,11 +831,11 @@ class DocumentEditor extends Component {
 
   renderDocuments(folder) {
     return this.state.documents
-    .filter(document => document.folder === folder)
-    .map((document, i) => (<option key={i}>{document}</option>));
+      .filter((document) => document.folder === folder)
+      .map((document, i) => <option key={i}>{document}</option>);
   }
 
-   renderFolders() {
+  renderFolders() {
     return this.state.folders.map((folder, i) => (
       <option key={i}>{folder}</option>
     ));
@@ -811,6 +852,8 @@ class DocumentEditor extends Component {
   }
 
   renderCreateForm() {
+    const isValid = this.validateNewDocumentName(this.state.newDocumentName);
+
     setTimeout(() => {
       var i = document.getElementById("new-document-name");
       if (i) {
@@ -819,6 +862,22 @@ class DocumentEditor extends Component {
     }, 50);
     return (
       <>
+        {!isValid && this.state.newDocumentName !== "" && (
+          <div
+            style={{
+              color: "white",
+              backgroundColor: "orange",
+              marginTop: 8,
+              padding: 8,
+              fontSize: "11px",
+            }}
+          >
+            <WarningIcon /> Dokumentnamnet innehåller otillåtna tecken och kan
+            därför inte sparas!
+            <br />
+            Endast A-Z, a-z, 0-9 och _ är tillåtet.
+          </div>
+        )}
         <TextField
           autoFocus
           id="new-document-name"
@@ -828,37 +887,33 @@ class DocumentEditor extends Component {
             shrink: true,
           }}
           type="text"
-          defaultValue={this.state.newDocumentName}
+          value={this.state.newDocumentName}
           fullWidth
           onChange={(e) => {
-            if (this.validateNewDocumentName(e.target.value)) {
-              this.setState(
-                {
-                  newDocumentName: e.target.value,
-                },
-                () => {
-                  this.setState({
-                    modalContent: this.renderCreateForm(),
-                  });
-                }
-              );
-            }
+            this.setState(
+              {
+                newDocumentName: e.target.value,
+              },
+              () => {
+                this.setState({
+                  modalContent: this.renderCreateForm(),
+                });
+              }
+            );
           }}
         />
         {this.useDocumentFolders ? (
-        <FormControl fullWidth>
-          <InputLabel shrink>Välj mapp</InputLabel>
-          <NativeSelect
-            onChange={(event) => this.handleFolderChangeNew(event)}
-            value={this.state.newFolderName}
-          >
-            <option value="">
-            Välj en mapp
-            </option>
-            {this.renderFolders()}
-          </NativeSelect>
-        </FormControl>
-        ):null}
+          <FormControl fullWidth>
+            <InputLabel shrink>Välj mapp</InputLabel>
+            <NativeSelect
+              onChange={(event) => this.handleFolderChangeNew(event)}
+              value={this.state.newFolderName}
+            >
+              <option value="">Välj en mapp</option>
+              {this.renderFolders()}
+            </NativeSelect>
+          </FormControl>
+        ) : null}
 
         <FormControl fullWidth>
           <InputLabel shrink>Välj Karta</InputLabel>
@@ -878,63 +933,83 @@ class DocumentEditor extends Component {
   }
 
   renderCreateFormFolder() {
+    const isValid = this.validateNewFolderName(this.state.newFolderName);
+
     setTimeout(() => {
       let i = document.getElementById("new-folder-name");
       if (i) {
         i.focus();
       }
     }, 50);
+
     return (
       <>
+        {!isValid && this.state.newFolderName !== "" && (
+          <div
+            style={{
+              color: "white",
+              backgroundColor: "orange",
+              marginTop: 8,
+              padding: 8,
+              fontSize: "11px",
+            }}
+          >
+            <WarningIcon /> Mappnamnet innehåller otillåtna tecken och kan
+            därför inte sparas!
+            <br />
+            Endast A-Z, a-z, 0-9 och _ är tillåtet.
+          </div>
+        )}
+
         <TextField
           autoFocus
           id="new-folder-name"
           label="Mappnamn"
           margin="normal"
-          InputLabelProps={{
-            shrink: true,
-          }}
+          InputLabelProps={{ shrink: true }}
           type="text"
-          defaultValue={this.state.newFolderName}
+          value={this.state.newFolderName}
           fullWidth
           onChange={(e) => {
-            if (this.validateNewFolderName(e.target.value)) {
-              this.setState(
-                {
-                  newFolderName: e.target.value,
-                },
-                () => {
-                  this.setState({
-                    modalContent: this.renderCreateFormFolder(),
-                  });
-                }
-              );
-            }
+            this.setState(
+              {
+                newFolderName: e.target.value,
+              },
+              () => {
+                this.setState({
+                  modalContent: this.renderCreateFormFolder(),
+                });
+              }
+            );
           }}
         />
       </>
     );
   }
 
-  renderCreateDialog(chapter, parentChapters, index) {
+  renderCreateDialog() {
     this.setState({
       showModal: true,
       showAbortButton: true,
       modalTitle: "Skapa nytt dokument",
-      modalContent: this.renderCreateForm(),
+      modalType: "CREATE_DOC",
       okButtonText: "Spara",
       modalConfirmCallback: () => {
-        var data = {
+        const data = {
           folderName: this.state.newFolderName,
           documentName: this.state.newDocumentName,
           mapName: this.state.newDocumentMap,
         };
-        if (data.documentName !== "") {
-          this.props.model.createDocument(data, (response) => {
-            this.load(data.folderName, data.documentName);
-          });
-          this.hideModal();
+        if (
+          !this.validateNewDocumentName(data.documentName) ||
+          data.documentName === ""
+        ) {
+          return;
         }
+        this.props.model.createDocument(data, () => {
+          this.load(data.folderName, data.documentName);
+          this.hideModal();
+        });
       },
     });
   }
@@ -944,19 +1019,17 @@ class DocumentEditor extends Component {
       showModal: true,
       showAbortButton: true,
       modalTitle: "Skapa ny mapp",
-      modalContent: this.renderCreateFormFolder(),
+      modalType: "CREATE_FOLDER",
       okButtonText: "Spara",
       modalConfirmCallback: () => {
-        var data = {
-          folderName: this.state.newFolderName,
-        };
-        if (data.folderName !== "") {
-          this.props.model.createFolder(data, (response) => {
-            
-          });
+        const folderName = this.state.newFolderName;
+        if (!this.validateNewFolderName(folderName) || folderName === "") {
+          return;
+        }
+        this.props.model.createFolder({ folderName }, () => {
           this.loadFolderList();
           this.hideModal();
-        }
+        });
       },
     });
   }
@@ -970,23 +1043,25 @@ class DocumentEditor extends Component {
       title: this.state.newTableOfContentsTitle,
     };
 
-    this.setState({
+    this.setState((prevState) => ({
       data: {
-        ...this.state.data,
+        ...prevState.data,
         tableOfContents: tableOfContents,
       },
       tableOfContentsModal: false,
-    });
+    }));
   }
 
   renderTableOfContentsModal() {
     this.setState({
       showModal: true,
       modalTitle: "Innehållsförteckning",
-      modalContent: this.renderTableOfContentsInput(),
       showAbortButton: true,
-
-      modalConfirmCallback: () => {},
+      modalType: "TOC",
+      modalConfirmCallback: () => {
+        this.saveTableOfContents();
+        this.hideModal();
+      },
     });
   }
 
@@ -1012,10 +1087,11 @@ class DocumentEditor extends Component {
           control={
             <Switch
               checked={this.state.newTableOfContentsExpanded}
-              onChange={(e) => {
-                this.setState({
-                  [e.target.name]: e.target.checked,
-                });
+              onChange={() => {
+                this.setState((prevState) => ({
+                  newTableOfContentsExpanded:
+                    !prevState.newTableOfContentsExpanded,
+                }));
               }}
               name="newTableOfContentsExpanded"
               color="primary"
@@ -1084,20 +1160,23 @@ class DocumentEditor extends Component {
 
   handleFolderChange = (event) => {
     this.setState({
-     selectedFolder: event.target.value
+      selectedFolder: event.target.value,
     });
     this.changeDoc(event);
- }
+  };
 
   handleFolderChangeNew = (event) => {
-    this.setState({
-      newFolderName: event.target.value
-  }, () => {
-      this.setState({
-          modalContent: this.renderCreateForm()
-      });
-  });
-  }
+    this.setState(
+      {
+        newFolderName: event.target.value,
+      },
+      () => {
+        this.setState({
+          modalContent: this.renderCreateForm(),
+        });
+      }
+    );
+  };
 
   render() {
     const { classes } = this.props;
@@ -1107,23 +1186,32 @@ class DocumentEditor extends Component {
     return (
       <Grid className={classes.root} id="documentEditor" container xs={7}>
         <Grid className="inset-form" item container>
-          <Grid><Typography>
-            <strong>Generella dokumentinställningar</strong>
-          </Typography>
+          <Grid>
+            <Typography>
+              <strong>Generella dokumentinställningar</strong>
+            </Typography>
           </Grid>
 
           {this.useDocumentFolders ? (
-          <Grid><Typography><strong>Hantera mappar</strong></Typography>
-              <Typography style={{ fontStyle: 'italic', fontSize: 'smaller' }}>Enskilda dokument till ”Dokumenthanteraren” kan sparas direkt i rot-katalogen ”documents” eller sparas i en undermapp till ”documents”. Observera att det endast går att gruppera undermappar i ett (1) steg.
-                          Vill du spara dokumenten i en undermapp till ”documents” väljer du vilken undermapp det är som du vill spara dokumenten i under ”Välj en mapp” nedan.
-                          Vill du skapa en ny undermapp under ”documents” klickar du på den gröna knappen ”NY MAPP”
+            <Grid>
+              <Typography>
+                <strong>Hantera mappar</strong>
               </Typography>
-          </Grid>
-          ):null}
+              <Typography style={{ fontStyle: "italic", fontSize: "smaller" }}>
+                Enskilda dokument till ”Dokumenthanteraren” kan sparas direkt i
+                rot-katalogen ”documents” eller sparas i en undermapp till
+                ”documents”. Observera att det endast går att gruppera
+                undermappar i ett (1) steg. Vill du spara dokumenten i en
+                undermapp till ”documents” väljer du vilken undermapp det är som
+                du vill spara dokumenten i under ”Välj en mapp” nedan. Vill du
+                skapa en ny undermapp under ”documents” klickar du på den gröna
+                knappen ”NY MAPP”
+              </Typography>
+            </Grid>
+          ) : null}
 
           {this.renderModal()}
-          
-          
+
           <Grid
             className={classes.gridItemContainer}
             alignContent="center"
@@ -1132,47 +1220,54 @@ class DocumentEditor extends Component {
           >
             <Grid className={classes.gridItem} item xs={12}>
               {this.useDocumentFolders ? (
-              <FormControl>
-                <NativeSelect
-                  onChange={(event) => this.handleFolderChange(event)}
-                  value={selectedFolder}
-                >
-                  <option value="">
-                  Välj en mapp
-                  </option>
-                  {this.renderFolders()}
-                </NativeSelect>
-                <FormHelperText>Välj en befintlig mapp</FormHelperText>
-              </FormControl>
-              ):null}
-              </Grid>
-              <Grid>
-              {this.useDocumentFolders ? (
-              <ColorButtonGreen
-                variant="contained"
-                className="btn"
-                onClick={() => this.renderCreateDialogFolder()}
-                startIcon={<AddBoxIcon />}
-              >
-                Ny mapp
-              </ColorButtonGreen>
-              ):null}
+                <FormControl>
+                  <NativeSelect
+                    onChange={(event) => this.handleFolderChange(event)}
+                    value={selectedFolder}
+                  >
+                    <option value="">Välj en mapp</option>
+                    {this.renderFolders()}
+                  </NativeSelect>
+                  <FormHelperText>Välj en befintlig mapp</FormHelperText>
+                </FormControl>
+              ) : null}
             </Grid>
-
-            
+            <Grid>
+              {this.useDocumentFolders ? (
+                <ColorButtonGreen
+                  variant="contained"
+                  className="btn"
+                  onClick={() => this.renderCreateDialogFolder()}
+                  startIcon={<AddBoxIcon />}
+                >
+                  Ny mapp
+                </ColorButtonGreen>
+              ) : null}
+            </Grid>
 
             <Grid xs={12}>
               <br></br>
-              <Typography><strong>Hantera dokument</strong></Typography>
-            </Grid>
-            <Grid>
-            {this.useDocumentFolders ? (
-              <Typography style={{ fontStyle: 'italic', fontSize: 'smaller' }}>För att editera eller granska ett redan befintligt dokument väljer du ett dokument i rullgardinslistan ”Välj ett dokument”. Observera att de dokument som visas i listan är endast de dokument som finns sparade under den undermapp du valt ovan till i rot-katalogen ”documents”. Har ingen undermapp valts visas de dokument som finns sparade direkt i rot-katalogen ”documents”.
+              <Typography>
+                <strong>Hantera dokument</strong>
               </Typography>
-            ):null}
-            </Grid>
             </Grid>
             <Grid>
+              {this.useDocumentFolders ? (
+                <Typography
+                  style={{ fontStyle: "italic", fontSize: "smaller" }}
+                >
+                  För att editera eller granska ett redan befintligt dokument
+                  väljer du ett dokument i rullgardinslistan ”Välj ett
+                  dokument”. Observera att de dokument som visas i listan är
+                  endast de dokument som finns sparade under den undermapp du
+                  valt ovan till i rot-katalogen ”documents”. Har ingen
+                  undermapp valts visas de dokument som finns sparade direkt i
+                  rot-katalogen ”documents”.
+                </Typography>
+              ) : null}
+            </Grid>
+          </Grid>
+          <Grid>
             <Grid className={classes.gridItem} item>
               <FormControl>
                 <NativeSelect
@@ -1210,7 +1305,7 @@ class DocumentEditor extends Component {
                 Nytt dokument
               </ColorButtonGreen>
             </Grid>
-            
+
             {selectedDocument && (
               <Grid className={classes.gridItem}>
                 <ColorButtonRed

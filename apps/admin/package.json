@@ -1,8 +1,13 @@
 {
-  "name": "admin",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "hajk-admin",
+  "version": "4.0.0",
+  "description": "Hajk Admin UI",
+  "homepage": ".",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hajkmap/Hajk.git"
+  },
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build --base=/admin",

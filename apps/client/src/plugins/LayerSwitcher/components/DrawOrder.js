@@ -280,7 +280,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
 
                 // layerIsFakeMapLayer: l.isFakeMapLayer,
                 layerIsFakeMapLayer: false, // TODO Check this mapLayer.isFakeMapLayer,
-                allSubLayers: l.get("subLayers"),
+                allSubLayers: l.get("allSubLayers"),
                 layerMinZoom: l.get("minZoom"),
                 layerMaxZoom: l.get("maxZoom"),
                 numberOfSubLayers: l.subLayers?.length,
@@ -295,6 +295,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
                       key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
                       layer={l}
                       app={app}
+                      globalObserver={app.globalObserver}
                       draggable={!options.lockDrawOrderBaselayer}
                       toggleable={false}
                     />
