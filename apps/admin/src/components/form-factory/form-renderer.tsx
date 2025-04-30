@@ -4,6 +4,7 @@ import {
   Grid2 as Grid,
   Paper,
   TextField,
+  Typography,
 } from "@mui/material";
 import {
   FieldValues,
@@ -32,7 +33,6 @@ import {
 } from "./form-utils";
 import { t } from "i18next";
 import SearchAdornment from "./components/search-adornment";
-import ExpandCollapseButton from "./components/expand-collapse-button";
 
 const minimumSearchLength = 3;
 
@@ -90,8 +90,6 @@ interface FormRenderProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
   errors: FieldErrors<TFieldValues>;
   showSearch?: boolean;
-  expandedAccordions?: Record<string, boolean>;
-  onAccordionChange?: (id: string, expanded: boolean) => void;
 }
 
 const FormRenderer = <TFieldValues extends FieldValues>({
@@ -101,8 +99,6 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   control,
   errors,
   showSearch = false,
-  expandedAccordions = {},
-  onAccordionChange,
 }: FormRenderProps<TFieldValues>) => {
   let c = 0;
 
@@ -237,25 +233,13 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     );
   };
 
-  const renderContainer = (
-    container: DynamicFormContainer<TFieldValues>,
-    index: number
-  ) => {
-    if (container.containerType === CONTAINER_TYPE.ACCORDION) {
-      return renderContainerAccordion(container, index);
-    } else if (container.containerType === CONTAINER_TYPE.PANEL) {
-      return renderContainerPanel(container, index);
-    }
-
-    return null;
-  };
-
   const renderContainerAccordion = (
     container: DynamicFormContainer<TFieldValues>,
     index: number
   ) => {
     const key = getKey(index);
-    const shouldExpand = expandedAccordions[container.title] ?? true;
+    const shouldExpand =
+    !!container.props?.triggerExpanded || container.highlight;
 
     return (
       <ControlledAccordion
@@ -264,7 +248,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
         formGetValues={formGetValues}
         title={container.title}
         triggerExpanded={shouldExpand}
-        onAccordionChange={(expanded: boolean) => onAccordionChange?.(container.title, expanded)}
+        backgroundColor={container.props?.backgroundColor as string}
       >
         <Grid container>
           {container
@@ -285,24 +269,65 @@ const FormRenderer = <TFieldValues extends FieldValues>({
       <Paper
         key={key + "-panel-"}
         sx={{
-          pt: 2,
-          pr: 2,
           backgroundColor: container.props?.backgroundColor ?? "none",
           ml: 2,
-          boxShadow: "none",
-          borderRadius: "8px",
-          border: "1px solid",
-          borderColor: "divider"
+          width: "100%",
+          p: 2,
+          pb: 0,
+          pl: 0,
+          mb: 3,
         }}
       >
+        <Typography variant="h6" sx={{ mt: -0.5, ml: 2, mb: 1.5 }}>
+          {container.title}
+        </Typography>
         <Grid container>
           {container
             .getElements()
-            .map((item, _index) => renderFormElement(item, _index))}
+            .map((item, _index) =>
+              wrapInGrid(
+                item,
+                _index,
+                { sx: { pb: 0, pl: 0 } },
+                () => renderFormElement(item, _index) ?? <div />
+              )
+            )}
         </Grid>
       </Paper>
     );
   };
+
+  const renderContainer = (
+    container: DynamicFormContainer<TFieldValues>,
+    index: number
+  ) => {
+    const type = container.containerType;
+    if (type === CONTAINER_TYPE.PANEL) {
+      return renderContainerPanel(container, index);
+    } else if (type === CONTAINER_TYPE.ACCORDION) {
+      // Please refactor the ugly * thing below
+
+      // If the Accordion contains a required field, add a * to the title.
+      const containsRequiredFields =
+        container.getElements().filter((item) => {
+          if (isFormElementInput(item)) {
+            const castedSettings = item as DynamicInputSettings<TFieldValues>;
+            if (castedSettings.registerOptions?.required) {
+              return true;
+            }
+          }
+        }).length > 0;
+
+      if (containsRequiredFields) {
+        // Please refactor the ugly * thing below
+        if (!container.title?.includes("*") /* Prevents doubles in DEV env.*/) {
+          container.title = `${container.title} *`;
+        }
+      }
+      return renderContainerAccordion(container, index);
+    }
+  };
+
 
   const wrapInGrid = (
     item: FormElement<TFieldValues>,
@@ -328,54 +353,37 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     );
   };
 
-  const handleToggleAll = () => {
-    const anyExpanded = Object.values(expandedAccordions).some(Boolean);
-    const newState = Object.keys(expandedAccordions).reduce((acc, key) => {
-      acc[key] = !anyExpanded;
-      return acc;
-    }, {} as Record<string, boolean>);
-    Object.entries(newState).forEach(([key, value]) => onAccordionChange?.(key, value));
-  };
-
   // Form container
   // Note the className below.
   // This is the root of the form and the class is used in the global styles.
   return (
-    <Grid container className="form-factory" sx={{ ml: -2, "& > *": { mb: 2 } }}>
+    <Grid container className="form-factory" sx={{ ml: -2 }}>
       {showSearch && (
-        <Grid container size={{ xs: 12 }}>
-          <Grid size={{ xs: 12, md: 6 }} sx={{ pb: 2, pl: 2 }}>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <TextField
-                size="small"
-                fullWidth
-                label={t("form.search.placeholder", {
-                  minChars: minimumSearchLength,
-                })}
-                variant="outlined"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <SearchAdornment
-                        searchTerm={searchTerm}
-                        hitCount={hitCount}
-                        highlightColor={highlightColor}
-                        handleClearSearch={handleClearSearch}
-                        minimumSearchLength={minimumSearchLength}
-                      />
-                    ),
-                  },
-                }}
+       <Grid container size={{ xs: 12 }} justifyContent="flex-end">
+       <Grid size={{ xs: 12, md: 4 }} sx={{ pb: 2, pl: 2 }}>
+         <TextField
+           size="small"
+           fullWidth
+           label={t("form.search.placeholder", {
+             minChars: minimumSearchLength,
+           })}
+           variant="outlined"
+           value={searchTerm}
+           onChange={handleSearchChange}
+           slotProps={{
+             input: {
+               endAdornment: (
+                 <SearchAdornment
+                   searchTerm={searchTerm}
+                   hitCount={hitCount}
+                   highlightColor={highlightColor}
+                   handleClearSearch={handleClearSearch}
+                   minimumSearchLength={minimumSearchLength}
+                 />
+               ),
+             },
+           }}
               />
-            </Box>
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }} sx={{ pb: 2, pl: 2, textAlign: 'right' }}>
-            <ExpandCollapseButton
-              isExpanded={Object.values(expandedAccordions).some(Boolean)}
-              onToggle={handleToggleAll}
-            />
           </Grid>
         </Grid>
       )}

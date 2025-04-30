@@ -33,8 +33,6 @@ import { useServices, useServiceCapabilities } from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
 import { useRoles } from "../../api/users";
 import { HttpError } from "../../lib/http-error";
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 export default function LayerSettings() {
   const { t } = useTranslation();

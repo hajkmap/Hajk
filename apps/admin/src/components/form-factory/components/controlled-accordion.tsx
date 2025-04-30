@@ -21,9 +21,8 @@ interface ControlledAccordionProps {
   formInputs: FormElement<TFieldValues>[];
   formGetValues: () => Record<string, unknown>;
   triggerExpanded?: boolean;
-  children?: React.ReactNode;
+  children: React.ReactNode;
   backgroundColor?: string;
-  onAccordionChange?: (expanded: boolean) => void;
 }
 
 function ControlledAccordion({
@@ -31,16 +30,15 @@ function ControlledAccordion({
   formInputs,
   formGetValues,
   triggerExpanded = false,
-  children = null,
+  children,
   backgroundColor,
-  onAccordionChange,
 }: ControlledAccordionProps) {
   // triggerExpanded is used in the ControlledAccordion to programmatically
   // control whether the accordion is expanded or collapsed. When triggerExpanded
   // is set to true, the accordion expands, and when set to false, it collapses.
   // This allows external components to trigger changes to the accordion's expansion state.
 
-  const expanded = triggerExpanded;
+  const [expanded, setExpanded] = useState(triggerExpanded);
   const [keyValues, setKeyValues] = useState<
     { key: string; value: string; title: string }[]
   >([]);
@@ -72,6 +70,10 @@ function ControlledAccordion({
   }, [formGetValues, formInputs, setKeyValues]);
 
   useEffect(() => {
+    setExpanded(triggerExpanded);
+  }, [triggerExpanded]);
+
+  useEffect(() => {
     if (!expanded) {
       refreshKeyValues();
     }
@@ -81,7 +83,7 @@ function ControlledAccordion({
     _event: React.SyntheticEvent,
     isExpanded: boolean
   ) => {
-    onAccordionChange?.(isExpanded);
+    setExpanded(isExpanded);
   };
 
   const getValue = (value: unknown) => {
@@ -121,11 +123,8 @@ function ControlledAccordion({
         sx={{
           width: "100%",
           ml: 2,
+          marginBottom: "24px !important",
           backgroundColor: backgroundColor ?? "none",
-          boxShadow: "none",
-          "&:before": {
-            display: "none"
-          }
         }}
       >
         <AccordionSummary
@@ -135,13 +134,6 @@ function ControlledAccordion({
             borderBottom: expanded
               ? `1px solid ${theme.palette.divider}`
               : `1px solid ${alpha(theme.palette.divider, 0.0)}`,
-            minHeight: "48px",
-            "&.Mui-expanded": {
-              minHeight: "48px"
-            },
-            "& .MuiAccordionSummary-content": {
-              margin: "12px 0"
-            }
           })}
         >
           <Box
