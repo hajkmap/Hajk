@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { Document, Page } from "react-pdf";
 import { styled } from "@mui/material/styles";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
@@ -59,10 +59,42 @@ function PdfViewerWithTOC({
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const scrollLimit = 400;
   const containerRef = useRef(null);
+  const timerRef = useRef(null);
   const [scale, setScale] = useState(1.0);
   const [menuOpen, setMenuOpen] = useState(
     options.tableOfContents.expanded || false
   );
+  const [pageWidth, setPageWidth] = useState(0);
+
+  useLayoutEffect(() => {
+    // If the dialog is open, there is no PdfContainer in the DOM → skip.
+    if (showDownloadWindow) return;
+
+    if (!containerRef.current) return;
+
+    const updateWidth = () => {
+      const el = containerRef.current;
+      if (!el) return; // säkerhetsbälte
+      setPageWidth(el.getBoundingClientRect().width - 19);
+    };
+
+    // Debounce-wrap
+    const debouncedUpdate = () => {
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(updateWidth, 300);
+    };
+
+    // Init + observer
+    updateWidth();
+    const ro = new ResizeObserver(debouncedUpdate);
+    ro.observe(containerRef.current);
+
+    // Cleanup
+    return () => {
+      ro.disconnect();
+      clearTimeout(timerRef.current); // avbryt ev. väntande timeout
+    };
+  }, [showDownloadWindow]);
 
   useEffect(() => {
     const scrollToChapterHandler = async (chapter) => {
@@ -140,7 +172,7 @@ function PdfViewerWithTOC({
           <Page
             pageNumber={pageNumber}
             scale={scale}
-            width={options.width - 19}
+            width={pageWidth - 19}
             renderAnnotationLayer
             renderTextLayer
           />
@@ -151,71 +183,73 @@ function PdfViewerWithTOC({
 
   return (
     <>
-      <PdfContainer
-        id="pdfViewer"
-        ref={containerRef}
-        onScroll={onScroll}
-        className={customTheme?.palette?.mode === "dark" ? "dark-theme" : ""}
-      >
-        <StickyTopBar
-          className="upper-section"
-          style={{
-            background:
-              customTheme?.palette?.mode === "dark" ? "#000" : "#ffffff",
-            color: customTheme?.palette?.mode === "dark" ? "#fff" : "#000",
-          }}
+      {!showDownloadWindow && (
+        <PdfContainer
+          id="pdfViewer"
+          ref={containerRef}
+          onScroll={onScroll}
+          className={customTheme?.palette?.mode === "dark" ? "dark-theme" : ""}
         >
-          <IconButton onClick={zoomOut} className="icon-button">
-            <ZoomOutIcon />
-          </IconButton>
-          <IconButton onClick={zoomIn} className="icon-button">
-            <ZoomInIcon />
-          </IconButton>
-          <span className="zoom-percentage">{Math.round(scale * 100)}%</span>
-          {options.tableOfContents.active && (
-            <div
-              onClick={() => setMenuOpen((prev) => !prev)}
-              className="toggle-menu"
-            >
-              {menuOpen
-                ? "Dölj " + options.tableOfContents.title
-                : "Visa " + options.tableOfContents.title}
-            </div>
+          <StickyTopBar
+            className="upper-section"
+            style={{
+              background:
+                customTheme?.palette?.mode === "dark" ? "#000" : "#ffffff",
+              color: customTheme?.palette?.mode === "dark" ? "#fff" : "#000",
+            }}
+          >
+            <IconButton onClick={zoomOut} className="icon-button">
+              <ZoomOutIcon />
+            </IconButton>
+            <IconButton onClick={zoomIn} className="icon-button">
+              <ZoomInIcon />
+            </IconButton>
+            <span className="zoom-percentage">{Math.round(scale * 100)}%</span>
+            {options.tableOfContents.active && (
+              <div
+                onClick={() => setMenuOpen((prev) => !prev)}
+                className="toggle-menu"
+              >
+                {menuOpen
+                  ? "Dölj " + options.tableOfContents.title
+                  : "Visa " + options.tableOfContents.title}
+              </div>
+            )}
+          </StickyTopBar>
+          {menuOpen && pdfInstance && (
+            <StickyTOCWrapper>
+              <TOCContainer
+                style={{
+                  maxHeight: Number(options.tableOfContents.height) || 300,
+                }}
+              >
+                <PdfTOC
+                  pdf={pdfInstance}
+                  options={options}
+                  customScrollToPage={customScrollToPage}
+                  collapsedItems={collapsedItems}
+                  setCollapsedItems={setCollapsedItems}
+                  selectedNodeId={selectedNodeId}
+                  setSelectedNodeId={setSelectedNodeId}
+                  customTheme={customTheme}
+                />
+              </TOCContainer>
+            </StickyTOCWrapper>
           )}
-        </StickyTopBar>
-        {menuOpen && pdfInstance && (
-          <StickyTOCWrapper>
-            <TOCContainer
-              style={{
-                maxHeight: Number(options.tableOfContents.height) || 300,
-              }}
-            >
-              <PdfTOC
-                pdf={pdfInstance}
-                options={options}
-                customScrollToPage={customScrollToPage}
-                collapsedItems={collapsedItems}
-                setCollapsedItems={setCollapsedItems}
-                selectedNodeId={selectedNodeId}
-                setSelectedNodeId={setSelectedNodeId}
-                customTheme={customTheme}
-              />
-            </TOCContainer>
-          </StickyTOCWrapper>
-        )}
 
-        <Document
-          file={document.blob}
-          onLoadSuccess={onDocumentLoadSuccess}
-          externalLinkTarget="_self"
-        >
-          {renderAllPages()}
-        </Document>
+          <Document
+            file={document.blob}
+            onLoadSuccess={onDocumentLoadSuccess}
+            externalLinkTarget="_self"
+          >
+            {renderAllPages()}
+          </Document>
 
-        {showScrollButton && (
-          <ScrollToTop color={document.documentColor} onClick={scrollToTop} />
-        )}
-      </PdfContainer>
+          {showScrollButton && (
+            <ScrollToTop color={document.documentColor} onClick={scrollToTop} />
+          )}
+        </PdfContainer>
+      )}
       {showDownloadWindow && (
         <PdfDownloadDialog
           open={showDownloadWindow}
