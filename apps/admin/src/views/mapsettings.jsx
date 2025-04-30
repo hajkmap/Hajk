@@ -507,6 +507,7 @@ class Menu extends Component {
       keywords: [],
       keywordInput: "",
       cqlFilterVisible: false,
+      renderSpecialBackgroundsAtBottom: false,
     };
     this.titleRef = React.createRef();
     this.authorRef = React.createRef();
@@ -600,6 +601,9 @@ class Menu extends Component {
             this.state.minMaxZoomAlertOnToggleOnly,
           cqlFilterVisible:
             existingConfig.cqlFilterVisible ?? this.state.cqlFilterVisible,
+          renderSpecialBackgroundsAtBottom:
+            existingConfig.renderSpecialBackgroundsAtBottom ??
+            this.state.renderSpecialBackgroundsAtBottom,
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -2565,6 +2569,19 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label htmlFor="enableOSM">OpenStreetMap</label>
+              </div>
+              <div>
+                <input
+                  id="renderSpecialBackgroundsAtBottom"
+                  name="renderSpecialBackgroundsAtBottom"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.renderSpecialBackgroundsAtBottom}
+                />
+                &nbsp;
+                <label htmlFor="renderSpecialBackgroundsAtBottom">
+                  Visa lagren "Vit", "Svart" och "OSM" längst ner i listan.
+                </label>
               </div>
               <div className="separator">Justera lagerhanteraren</div>
               <div className="margined">
