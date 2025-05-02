@@ -253,8 +253,6 @@ class LayersSwitcherView extends React.PureComponent {
   render() {
     const { windowVisible, layersState } = this.props;
 
-    console.log(this.options.renderSpecialBackgroundsAtBottom);
-
     return (
       <div
         id="layer-switcher-view-root"
