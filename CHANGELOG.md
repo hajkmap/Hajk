@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - LayerSwitcher: UX Improvements ([issue](https://github.com/hajkmap/Hajk/issues/1637))
+- LayerSwitcher: Now possible to render special layers at the bottom [PR#1648](https://github.com/hajkmap/Hajk/pull/1648)
 
 ### Added
 
