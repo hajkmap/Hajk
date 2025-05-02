@@ -520,6 +520,7 @@
           "instruction": "",
           "minMaxZoomAlertOnToggleOnly": false,
           "cqlFilterVisible": false,
+          "renderSpecialBackgroundsAtBottom": false,
           "dropdownThemeMaps": true,
           "themeMapHeaderCaption": "Standardkartan",
           "visibleForGroups": [],

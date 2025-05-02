@@ -342,6 +342,9 @@ class LayersSwitcherView extends React.PureComponent {
           backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
           backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
           enableOSM={this.options.enableOSM}
+          renderSpecialBackgroundsAtBottom={
+            this.options.renderSpecialBackgroundsAtBottom
+          }
           map={this.props.map}
           globalObserver={this.props.globalObserver}
         />
