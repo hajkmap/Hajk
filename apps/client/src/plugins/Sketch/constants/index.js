@@ -46,7 +46,7 @@ export const ACTIVITIES = [
     id: "UPLOAD",
     tooltip: "Ladda ned eller ladda upp ritade objekt.",
     information:
-      "Importera eller exportera ritobjekt i .kml-format. Använd knapparna nedan, eller dra in en .KML-fil direkt till kartan.",
+      "Importera eller exportera ritobjekt i .kml/.gpx-format. Använd knapparna nedan, eller dra in en fil direkt till kartan.",
     icon: <ImportExportIcon />,
   },
   {

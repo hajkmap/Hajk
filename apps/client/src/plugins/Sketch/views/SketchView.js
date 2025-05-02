@@ -32,7 +32,7 @@ const SketchView = (props) => {
   // is rendered (left or right). Let's grab the prop stating where it is rendered!
   const pluginPosition = props.options?.position ?? "left";
   // We are going to be using the sketch-, kml-, and draw-model. Let's destruct them.
-  const { model, drawModel, kmlModel } = props;
+  const { model, drawModel, kmlModel, gpxModel } = props;
   // We are gonna need the local- and global-observer
   const { localObserver, globalObserver } = props;
   // The current draw-type is also required, along with it's set:er.
@@ -397,6 +397,7 @@ const SketchView = (props) => {
             model={model}
             drawModel={drawModel}
             kmlModel={kmlModel}
+            gpxModel={gpxModel}
             uploadedFiles={uploadedFiles}
             setUploadedFiles={setUploadedFiles}
           />
