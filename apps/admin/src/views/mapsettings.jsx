@@ -829,6 +829,8 @@ class Menu extends Component {
       instruction: this.state.instruction,
       minMaxZoomAlertOnToggleOnly: this.state.minMaxZoomAlertOnToggleOnly,
       cqlFilterVisible: this.state.cqlFilterVisible,
+      renderSpecialBackgroundsAtBottom:
+        this.state.renderSpecialBackgroundsAtBottom,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
       themeMapHeaderCaption: this.state.themeMapHeaderCaption,
       visibleForGroups: this.state.visibleForGroups.map(
