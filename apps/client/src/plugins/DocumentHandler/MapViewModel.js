@@ -62,11 +62,8 @@ export default class MapViewModel {
     this.localObserver.subscribe("fly-to", (url) => {
       this.globalObserver.publish("core.minimizeWindow");
       const mapSettings = this.convertMapSettingsUrlToOlSettings(url);
-      const { enableAppStateInHash } = this.appModel.config.mapConfig.map;
 
-      if (enableAppStateInHash) {
-        this.showPluginsFromUrlParams(url);
-      }
+      this.showPluginsFromUrlParams(url);
 
       if (mapSettings.layers !== null) {
         // Let's use Hajk's generic layer visibility
