@@ -123,11 +123,11 @@ export default function FeatureStyleSelector(props) {
 
   const renderStrokeTypeSelector = () => {
     return (
-      <Grid item xs={12} style={{ marginTop: 16 }}>
-        <Grid item xs={12} style={{ marginBottom: 4 }}>
+      <Grid style={{ marginTop: 16 }} size={12}>
+        <Grid style={{ marginBottom: 4 }} size={12}>
           <Typography align="center">Variant</Typography>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <StrokeTypeSelector
             handleStrokeTypeChange={handleStrokeTypeChange}
             strokeType={props.drawStyle.strokeType}
@@ -140,11 +140,11 @@ export default function FeatureStyleSelector(props) {
 
   const renderTextSizeSelector = () => {
     return (
-      <Grid item xs={12} style={{ marginTop: 16 }}>
-        <Grid item xs={12} style={{ marginBottom: 4 }}>
+      <Grid style={{ marginTop: 16 }} size={12}>
+        <Grid style={{ marginBottom: 4 }} size={12}>
           <Typography align="center">Textstorlek</Typography>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <TextField
             variant="outlined"
             type="number"
@@ -162,7 +162,7 @@ export default function FeatureStyleSelector(props) {
   const renderFillStyleSettings = () => {
     return (
       <Grid container>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <FeatureStyleAccordion
             title="Fyllnad"
             showOpacitySlider
@@ -172,7 +172,7 @@ export default function FeatureStyleSelector(props) {
             drawModel={props.drawModel}
           />
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <FeatureStyleAccordion
             title="Linje"
             showStrokeWidthSlider
@@ -200,7 +200,7 @@ export default function FeatureStyleSelector(props) {
     }
     return (
       <Grid container>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <FeaturePointSizeAccordion
             title="Storlek"
             showPointSizeSlider
@@ -216,7 +216,7 @@ export default function FeatureStyleSelector(props) {
   const renderTextStyleSettings = () => {
     return (
       <Grid container>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <FeatureStyleAccordion
             title="Färg - förgrund"
             color={props.textStyle.foregroundColor}
@@ -224,7 +224,7 @@ export default function FeatureStyleSelector(props) {
             drawModel={props.drawModel}
           />
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <FeatureStyleAccordion
             title="Färg - bakgrund"
             color={props.textStyle.backgroundColor}
@@ -304,11 +304,11 @@ export default function FeatureStyleSelector(props) {
       return null;
     }
     return (
-      <Grid item xs={12} style={{ marginTop: 16 }}>
-        <Grid item xs={12} style={{ marginBottom: 4 }}>
+      <Grid style={{ marginTop: 16 }} size={12}>
+        <Grid style={{ marginBottom: 4 }} size={12}>
           <Typography align="center">Radie (m)</Typography>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <TextField
             variant="outlined"
             type="number"
@@ -327,7 +327,7 @@ export default function FeatureStyleSelector(props) {
   // We want to display a reset-button for the user to reset the style to default values.
   const renderResetButton = () => {
     return (
-      <Grid item xs={12} sx={{ marginBottom: 1 }}>
+      <Grid sx={{ marginBottom: 1 }} size={12}>
         <Box
           sx={{
             display: "flex",
@@ -366,9 +366,9 @@ export default function FeatureStyleSelector(props) {
       {props.activeDrawType === "LineString" && renderStrokeTypeSelector()}
       {props.activeDrawType === "Text" && renderTextSizeSelector()}
       {props.activeDrawType === "Circle" && renderCircleRadiusSelector()}
-      <Grid item xs={12} style={{ marginTop: 16 }}>
+      <Grid style={{ marginTop: 16 }} size={12}>
         {renderResetButton()}
-        <Grid item xs={12}>
+        <Grid size={12}>
           {renderColorSelectors()}
           {props.activeDrawType === "Point" && renderPointStyleSettings()}
           {props.activityId === "ADD" &&

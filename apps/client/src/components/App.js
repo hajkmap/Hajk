@@ -51,7 +51,6 @@ import {
   Divider,
   Drawer,
   Grid,
-  Hidden,
   IconButton,
   Link,
   Typography,
@@ -1019,10 +1018,10 @@ class App extends React.PureComponent {
     return (
       <>
         <Box
-          sx={{
-            padding: (theme) => theme.spacing(1, 2),
-            height: (theme) => theme.spacing(6),
-          }}
+          sx={(theme) => ({
+            padding: theme.spacing(1, 2),
+            height: theme.spacing(6),
+          })}
         >
           <LogoImage alt={logoAltText} src={logoUrl} />
         </Box>
@@ -1035,14 +1034,14 @@ class App extends React.PureComponent {
           justifyContent="space-between"
           alignItems="center"
         >
-          <Grid item>
+          <Grid>
             <DrawerTitle variant="button">{drawerTitle}</DrawerTitle>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
           {/** Hide Lock button if user has chosen static drawer*/}
           {!this.state.drawerStatic && (
-            <Grid item>
-              <Hidden mdDown>
+            <Grid>
+              <Box sx={{ display: { xs: "none", md: "block" } }}>
                 <HajkToolTip
                   title={
                     (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
@@ -1070,7 +1069,7 @@ class App extends React.PureComponent {
                     )}
                   </IconButton>
                 </HajkToolTip>
-              </Hidden>
+              </Box>
             </Grid>
           )}
         </DrawerHeaderGrid>
@@ -1083,11 +1082,18 @@ class App extends React.PureComponent {
       <DrawerContentContainer id="drawer-content">
         <Box
           key="plugins"
-          sx={{
-            height: "inherit",
-            display:
-              this.state.activeDrawerContent === "plugins" ? "unset" : "none",
-          }}
+          sx={[
+            {
+              height: "inherit",
+            },
+            this.state.activeDrawerContent === "plugins"
+              ? {
+                  display: "unset",
+                }
+              : {
+                  display: "none",
+                },
+          ]}
         >
           <nav role="navigation" id="plugin-buttons" />
         </Box>
@@ -1095,13 +1101,18 @@ class App extends React.PureComponent {
           return (
             <Box
               key={db.value}
-              sx={{
-                height: "inherit",
-                display:
-                  this.state.activeDrawerContent === db.value
-                    ? "unset"
-                    : "none",
-              }}
+              sx={[
+                {
+                  height: "inherit",
+                },
+                this.state.activeDrawerContent === db.value
+                  ? {
+                      display: "unset",
+                    }
+                  : {
+                      display: "none",
+                    },
+              ]}
             >
               {db.renderDrawerContent()}
             </Box>
@@ -1152,13 +1163,13 @@ class App extends React.PureComponent {
               keepMounted: true, //Ensure we dont have to render plugins more than once - UnMounting every time is slow
             }}
             variant={this.state.drawerPermanent ? "permanent" : "temporary"}
-            sx={{
+            sx={(theme) => ({
               "& .MuiPaper-root": {
                 width: DRAWER_WIDTH,
-                backgroundColor: (theme) => theme.palette.background.default,
+                backgroundColor: theme.palette.background.default,
                 backgroundImage: "unset", // To match the new (darker) black theme.
               },
-            }}
+            })}
           >
             {this.renderDrawerHeader()}
             <Divider />

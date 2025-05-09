@@ -2,10 +2,12 @@ import React from "react";
 import propTypes from "prop-types";
 import { isMobile } from "./../utils/IsMobile";
 import { createPortal } from "react-dom";
-import { Hidden, ListItem, ListItemIcon, ListItemText } from "@mui/material";
+import { ListItemIcon, ListItemText } from "@mui/material";
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
 import PluginControlButton from "../components/PluginControlButton";
+
+import ListItemButton from "@mui/material/ListItemButton";
 
 class BaseWindowPlugin extends React.PureComponent {
   static propTypes = {
@@ -264,22 +266,24 @@ class BaseWindowPlugin extends React.PureComponent {
    */
   renderDrawerButton() {
     return createPortal(
-      <Hidden
-        mdUp={
-          this.pluginIsWidget(this.props.options.target) ||
-          this.props.options.target === "control"
-        }
+      <div
+        style={{
+          display:
+            this.pluginIsWidget(this.props.options.target) ||
+            this.props.options.target === "control"
+              ? { md: "none", xs: "block" }
+              : "block",
+        }}
       >
-        <ListItem
-          button
+        <ListItemButton
           divider={true}
           selected={this.state.windowVisible}
           onClick={this.handleButtonClick}
         >
           <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
           <ListItemText primary={this.title} />
-        </ListItem>
-      </Hidden>,
+        </ListItemButton>
+      </div>,
       document.getElementById("plugin-buttons")
     );
   }
@@ -287,14 +291,14 @@ class BaseWindowPlugin extends React.PureComponent {
   renderWidgetButton(id) {
     return createPortal(
       // Hide Widget button on small screens, see renderDrawerButton too
-      <Hidden mdDown>
+      <div style={{ display: { xs: "none", md: "block" } }}>
         <Card
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      </Hidden>,
+      </div>,
       document.getElementById(id)
     );
   }
@@ -307,14 +311,18 @@ class BaseWindowPlugin extends React.PureComponent {
 
     return createPortal(
       // Hide Control button on small screens, see renderDrawerButton too
-      <Hidden mdDown={hasToolbarTarget.length > 0}>
+      <div
+        style={{
+          display: hasToolbarTarget.length > 0 ? { md: "none" } : "block",
+        }}
+      >
         <PluginControlButton
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      </Hidden>,
+      </div>,
       document.getElementById("plugin-control-buttons")
     );
   }

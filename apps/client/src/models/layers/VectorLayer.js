@@ -113,6 +113,7 @@ class WFSVectorLayer {
   }
 
   applySldTextOnLayer = (text) => {
+    console.log("text: ", text);
     const sldObject = SLDReader.Reader(text);
     const sldLayer = SLDReader.getLayer(sldObject);
     const style = SLDReader.getStyle(sldLayer, this.sldStyle);

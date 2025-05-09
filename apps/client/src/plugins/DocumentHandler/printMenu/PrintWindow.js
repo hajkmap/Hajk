@@ -928,7 +928,7 @@ class PrintWindow extends React.PureComponent {
         <GridSettingsContainer container item>
           <Typography variant="h6">Inställningar</Typography>
 
-          <Grid xs={12} item>
+          <Grid size={12}>
             <FormControlLabel
               value="Välj alla dokument"
               control={
@@ -945,9 +945,7 @@ class PrintWindow extends React.PureComponent {
             />
           </Grid>
         </GridSettingsContainer>
-
         <Typography variant="h6">Valt innehåll</Typography>
-
         <GridMiddleContainer item container>
           <PrintList
             localObserver={localObserver}
@@ -956,7 +954,6 @@ class PrintWindow extends React.PureComponent {
             handleTogglePrint={this.toggleChosenForPrint}
           />
         </GridMiddleContainer>
-
         {documentWindowMaximized && this.renderCreatePDFButton()}
         {this.renderLoadingDialog()}
       </>
@@ -1106,7 +1103,7 @@ class PrintWindow extends React.PureComponent {
               item
               container
             >
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Button
                   color="primary"
                   style={{ paddingLeft: 0 }}
@@ -1139,7 +1136,7 @@ class PrintWindow extends React.PureComponent {
               item
               container
             >
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Button
                   color="primary"
                   style={{ paddingLeft: 0 }}

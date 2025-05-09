@@ -373,8 +373,10 @@ class AttributeEditor extends React.Component {
               this.checkDate(field.name, e.target.value);
               field.initialRender = false;
             }}
-            InputLabelProps={{
-              shrink: true,
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
             }}
           />
         );
@@ -400,8 +402,10 @@ class AttributeEditor extends React.Component {
               this.checkDate(field.name, e.target.value);
               field.initialRender = false;
             }}
-            InputLabelProps={{
-              shrink: true,
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
             }}
           />
         );
@@ -624,7 +628,7 @@ class AttributeEditor extends React.Component {
     const markup = this.props.editSource?.editableFields?.map((field, i) => {
       const valueMarkup = this.getValueMarkup(field, true);
       return (
-        <Grid item xs={12} key={i} sx={{ textAlign: "left" }}>
+        <Grid key={i} sx={{ textAlign: "left" }} size={12}>
           {valueMarkup}
         </Grid>
       );
@@ -635,7 +639,7 @@ class AttributeEditor extends React.Component {
       .map((field, i) => {
         const valueMarkup = this.getValueMarkup(field, false);
         return (
-          <Grid item xs={12} key={i}>
+          <Grid key={i} size={12}>
             {valueMarkup}
           </Grid>
         );

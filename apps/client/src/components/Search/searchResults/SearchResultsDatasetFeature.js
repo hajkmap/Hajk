@@ -76,7 +76,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     if (feature.featureTitle.length > 0) {
       return (
         <GridRoot container alignItems="center">
-          <Grid item xs={1} align="center">
+          <Grid align="center" size={1}>
             {shouldRenderCheckbox
               ? this.renderShowInMapCheckbox()
               : this.renderOriginBasedIcon()}
@@ -94,7 +94,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
               {feature.secondaryLabelFields}
             </StyledTypography>
           </GridLabel>
-          <Grid item xs={1} />
+          <Grid size={1} />
         </GridRoot>
       );
     } else {

@@ -18,7 +18,6 @@ import Slider from "@mui/material/Slider";
 
 const GridAgeInputContainer = styled(Grid)(({ theme }) => ({
   paddingLeft: theme.spacing(2),
-
   "& input": {
     paddingRight: "8px",
     paddingLeft: "8px",
@@ -255,7 +254,7 @@ class KirSearchView extends React.PureComponent {
                 Ålder (från, till):
               </TypographySubtitleShallow>
               <Grid container spacing={0} alignItems="center">
-                <Grid item xs={6}>
+                <Grid size={6}>
                   <StyledSlider
                     value={this.state.ageValues}
                     onChange={this.handleAgeChange}

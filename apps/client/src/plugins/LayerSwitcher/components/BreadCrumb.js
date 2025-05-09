@@ -187,7 +187,7 @@ class BreadCrumb extends Component {
           justifyContent="space-between"
           alignItems="center"
         >
-          <Grid item>
+          <Grid>
             <IconButton
               size="small"
               onClick={this.setLayerOpacity(layer)}
@@ -201,12 +201,20 @@ class BreadCrumb extends Component {
             <Typography
               variant="body2"
               noWrap
-              sx={{ fontWeight: hidden ? "normal" : "bold" }}
+              sx={[
+                hidden
+                  ? {
+                      fontWeight: "normal",
+                    }
+                  : {
+                      fontWeight: "bold",
+                    },
+              ]}
             >
               {title}
             </Typography>
           </TitleGridContainer>
-          <Grid item>
+          <Grid>
             <IconButton
               size="small"
               onClick={this.setLayerVisibility(layer)}

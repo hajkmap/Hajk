@@ -89,7 +89,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
                 <MenuItemIconWrapper item>
                   {downloadOption.icon}
                 </MenuItemIconWrapper>
-                <Grid item>{downloadOption.name}</Grid>
+                <Grid>{downloadOption.name}</Grid>
               </Grid>
             </MenuItem>
           );

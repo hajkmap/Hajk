@@ -220,7 +220,15 @@ class DocumentViewer extends React.PureComponent {
                 e.preventDefault();
               }
             }}
-            sx={{ marginTop: showTableOfContents ? 0 : 2 }}
+            sx={[
+              showTableOfContents
+                ? {
+                    marginTop: 0,
+                  }
+                : {
+                    marginTop: 2,
+                  },
+            ]}
             container
             item
           >
