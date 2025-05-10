@@ -82,58 +82,65 @@ var documentEditor = Model.extend({
   },
 
   loadDocuments: async function (folder, callback) {
-    let url = this.get("config").url_document_list;
-    if (folder) {
-      url += "/" + folder;
-    }
+    const baseList = this.get("config").url_document_list;
+    const baseLoad = this.get("config").url_load;
+    const url = folder ? `${baseList}/${folder}` : baseList;
 
     try {
-      const response = await hfetch(url);
-      const text = await response.text();
-      const data = JSON.parse(text);
+      const docNames = await (await hfetch(url)).json();
 
       // Filter out PDF files by checking Content-Type
-      const filteredDocs = [];
-      for (const docName of data) {
-        // Build URL for each file
-        const docUrl =
-          this.get("config").url_load +
-          (folder ? "/" + folder : "") +
-          "/" +
-          docName;
+      const filteredDocs = (
+        await Promise.all(
+          // Build URL for each file
+          docNames.map(async (name) => {
+            const docUrl = `${baseLoad}${folder ? "/" + folder : ""}/${name}`;
+            // Make a HEAD request
+            const head = await hfetch(docUrl, { method: "HEAD" });
+            const type = head.headers.get("Content-Type") || "";
+            // If it has JSON-like content, keep the file in the list
+            return type.toLowerCase().includes("application/json")
+              ? name
+              : null;
+          })
+        )
+      ).filter(Boolean);
 
-        // Make a HEAD request
-        const headResponse = await hfetch(docUrl, { method: "HEAD" });
-        const contentType = headResponse.headers.get("Content-Type") || "";
-
-        // If it has JSON-like content, keep the file in the list
-        if (contentType.toLowerCase().includes("application/json")) {
-          filteredDocs.push(docName);
-        }
+      if (typeof callback === "function") {
+        callback(filteredDocs); // Callback
+        return;
       }
 
-      // Return (via callback) only the files that are actually JSON
-      callback(filteredDocs);
+      return filteredDocs; // Promise
     } catch (err) {
-      alert(
-        "Kunde inte ladda mappen med dokument. Verifiera att uppsättningen är korrekt utförd."
-      );
-      console.error(err);
+      if (typeof callback === "function") {
+        callback([]);
+        return;
+      }
+      throw err;
     }
   },
 
   loadFolders: async function (callback) {
-    var url = this.get("config").url_folder_list;
+    const url = this.get("config").url_folder_list;
+
     try {
-      const response = await hfetch(url);
-      const text = await response.text();
-      const data = JSON.parse(text);
-      callback(data);
+      const data = await (await hfetch(url)).json();
+
+      // Callback
+      if (typeof callback === "function") {
+        callback(data);
+        return;
+      }
+
+      // Promise
+      return data;
     } catch (err) {
-      alert(
-        "Kunde inte ladda mappen med mappar. Verifiera att uppsättningen är korrekt utförd."
-      );
-      console.error(err);
+      if (typeof callback === "function") {
+        callback([]);
+        return;
+      }
+      throw err;
     }
   },
 
