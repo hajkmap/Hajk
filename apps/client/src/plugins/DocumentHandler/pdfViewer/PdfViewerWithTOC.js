@@ -9,6 +9,7 @@ import { Element } from "react-scroll";
 import ScrollToTop from "../documentWindow/ScrollToTop";
 import PdfDownloadDialog from "./PdfDownloadDialog";
 import PdfTOC from "./PdfTOC";
+import { observeLinks } from "./PdfLink";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import "./style.css";
@@ -65,6 +66,8 @@ function PdfViewerWithTOC({
     options.tableOfContents.expanded || false
   );
   const [pageWidth, setPageWidth] = useState(0);
+  const pageRefs = useRef({});
+  const disconnectors = useRef({});
 
   useLayoutEffect(() => {
     // If the dialog is open, there is no PdfContainer in the DOM → skip.
@@ -161,12 +164,14 @@ function PdfViewerWithTOC({
 
   const renderAllPages = () => {
     if (!numPages) return null;
-    return Array.from({ length: numPages }, (_, index) => {
-      const pageNumber = index + 1;
+
+    return Array.from({ length: numPages }, (_, i) => {
+      const pageNumber = i + 1;
+
       return (
         <Element
           name={`page-${pageNumber}`}
-          key={`page_${pageNumber}`}
+          key={pageNumber}
           className="page-element"
         >
           <Page
@@ -175,6 +180,13 @@ function PdfViewerWithTOC({
             width={pageWidth - 19}
             renderAnnotationLayer
             renderTextLayer
+            inputRef={(ref) => {
+              pageRefs.current[pageNumber] = ref;
+              disconnectors.current[pageNumber]?.();
+              if (ref) {
+                disconnectors.current[pageNumber] = observeLinks(ref);
+              }
+            }}
           />
         </Element>
       );
@@ -240,7 +252,7 @@ function PdfViewerWithTOC({
           <Document
             file={document.blob}
             onLoadSuccess={onDocumentLoadSuccess}
-            externalLinkTarget="_self"
+            externalLinkTarget="_blank"
           >
             {renderAllPages()}
           </Document>
