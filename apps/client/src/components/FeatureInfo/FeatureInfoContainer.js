@@ -22,6 +22,7 @@ const InfoContainer = styled(Grid)(() => ({
   height: "100%",
   cursor: "auto",
   userSelect: "text",
+  alignContent: "flex-start",
 }));
 
 const StyledTableContainer = styled(TableContainer)(() => ({
@@ -95,7 +96,7 @@ class FeatureInfoContainer extends React.PureComponent {
         sx={{ backgroundColor: "primary.main" }}
         container
       >
-        <TogglerButtonRightContainer item>
+        <TogglerButtonRightContainer>
           <Button
             fullWidth
             disabled={this.state.selectedIndex - 1 < 0}
@@ -115,7 +116,7 @@ class FeatureInfoContainer extends React.PureComponent {
             {this.state.selectedIndex + 1} av {features.length}
           </Typography>
         </Grid>
-        <TogglerButtonLeftContainer item>
+        <TogglerButtonLeftContainer>
           <Button
             fullWidth
             disabled={this.state.selectedIndex + 1 >= features.length}
@@ -230,12 +231,7 @@ class FeatureInfoContainer extends React.PureComponent {
     const { features } = this.props;
     const featureInfoLoaded = this.isReadyToShowInfo();
     return (
-      <InfoContainer
-        className="hajk-featureinfo-body"
-        alignContent="flex-start"
-        container
-        spacing={1}
-      >
+      <InfoContainer className="hajk-featureinfo-body" container spacing={1}>
         {features.length > 1 && (
           <Grid className="hajk-featureinfo-navigation" size={12}>
             {this.getToggler()}

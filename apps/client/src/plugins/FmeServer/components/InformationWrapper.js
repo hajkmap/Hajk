@@ -36,7 +36,7 @@ const StyledGrid = styled(Grid)(({ type, theme }) => ({
 // Supports "error", "warning", and "info". Default to "info".
 const InformationWrapper = ({ children, type }) => {
   return (
-    <StyledGrid container item xs={12} type={type}>
+    <StyledGrid container size={12} type={type}>
       {children}
     </StyledGrid>
   );

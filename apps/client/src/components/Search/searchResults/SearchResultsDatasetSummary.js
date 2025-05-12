@@ -7,6 +7,7 @@ const SummaryContainer = styled(Grid)(({ theme }) => ({
   minHeight: 42,
   paddingRight: theme.spacing(1),
   paddingLeft: theme.spacing(1),
+  alignItems: "center",
 }));
 
 const StyledTypography = styled(Typography)(() => ({
@@ -59,7 +60,7 @@ class SearchResultsDatasetSummary extends React.PureComponent {
 
     return (
       <>
-        <SummaryContainer alignItems="center" container>
+        <SummaryContainer container>
           <Grid size={1}>{getOriginBasedIcon(featureCollection.origin)}</Grid>
           <Grid size={9}>
             <StyledTypography

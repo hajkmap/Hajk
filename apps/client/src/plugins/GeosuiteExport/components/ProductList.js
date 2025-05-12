@@ -26,6 +26,7 @@ const DivProductList = styled("div")(({ theme }) => ({
 const GridListItemContainer = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(1),
   borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+  alignContent: "center",
 }));
 
 const StyledChip = styled(Chip)(() => ({
@@ -110,11 +111,7 @@ class ProductList extends React.PureComponent {
             <DivProductList>
               {projects.map((project) => {
                 return (
-                  <GridListItemContainer
-                    key={project.id}
-                    container
-                    alignContent="center"
-                  >
+                  <GridListItemContainer key={project.id} container>
                     <Grid size={12}>
                       <Box
                         display="flex"

@@ -145,6 +145,8 @@ const DrawerHeaderGrid = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(1, 2),
   backgroundColor: theme.palette.background.paper,
   minHeight: theme.spacing(6),
+  justifyContent: "space-between",
+  alignItems: "center",
 }));
 
 const DrawerContentContainer = styled("div")(({ theme }) => ({
@@ -1026,14 +1028,7 @@ class App extends React.PureComponent {
           <LogoImage alt={logoAltText} src={logoUrl} />
         </Box>
         <Divider />
-        <DrawerHeaderGrid
-          item
-          container
-          wrap="nowrap"
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
+        <DrawerHeaderGrid container wrap="nowrap">
           <Grid>
             <DrawerTitle variant="button">{drawerTitle}</DrawerTitle>
           </Grid>

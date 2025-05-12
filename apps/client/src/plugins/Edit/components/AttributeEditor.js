@@ -647,20 +647,20 @@ class AttributeEditor extends React.Component {
 
     return (
       <>
-        <StyledGrid item xs={12}>
+        <StyledGrid size={12}>
           <Chip
             variant="outlined"
             color="primary"
             label="Ange objektets attribut:"
           />
         </StyledGrid>
-        <StyledGrid item xs={12}>
+        <StyledGrid size={12}>
           <p>Editerbara fält:</p>
           {markup}
           {markupNonEdit?.length > 2 ? "Icke-editerbara fält:" : ""}
           {markupNonEdit}
         </StyledGrid>
-        <StyledGrid item xs={12}>
+        <StyledGrid size={12}>
           <Button
             color="primary"
             sx={{ width: "100px" }}

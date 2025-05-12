@@ -36,16 +36,15 @@ class TextArea extends React.PureComponent {
     return (
       <GridContainer id="text-area-content" justifyContent="center" container>
         <GridContainerContent
-          xs={12}
+          size={12}
           sx={{
             backgroundColor: backgroundColor,
             color: textColor,
           }}
-          item
         >
           <StyledDivider sx={{ backgroundColor: dividerColor }} />
           <Grid justifyContent="center" container>
-            <GridTypographyContainer component="blockquote" xs={12} item>
+            <GridTypographyContainer component="blockquote" size={12}>
               {textAreaContentArray}
             </GridTypographyContainer>
           </Grid>

@@ -86,9 +86,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
           return (
             <MenuItem key={index} onClick={downloadOption.onClick}>
               <Grid container>
-                <MenuItemIconWrapper item>
-                  {downloadOption.icon}
-                </MenuItemIconWrapper>
+                <MenuItemIconWrapper>{downloadOption.icon}</MenuItemIconWrapper>
                 <Grid>{downloadOption.name}</Grid>
               </Grid>
             </MenuItem>

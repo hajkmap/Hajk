@@ -265,7 +265,7 @@ class KirSearchView extends React.PureComponent {
                     max={this.state.maxAge}
                   />
                 </Grid>
-                <GridAgeInputContainer item xs={3}>
+                <GridAgeInputContainer size={3}>
                   <TextFieldInput
                     fullWidth
                     size="small"
@@ -280,7 +280,7 @@ class KirSearchView extends React.PureComponent {
                     }}
                   />
                 </GridAgeInputContainer>
-                <GridAgeInputContainer item xs={3}>
+                <GridAgeInputContainer size={3}>
                   <TextFieldInput
                     fullWidth
                     size="small"

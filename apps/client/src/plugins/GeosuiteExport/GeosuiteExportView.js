@@ -590,7 +590,7 @@ class GeosuiteExportView extends React.PureComponent {
             .sort((a, b) => (a.title > b.title ? 1 : -1))
             .map((document) => {
               return (
-                <GridCheckBoxItem item key={document.id}>
+                <GridCheckBoxItem key={document.id}>
                   <FormControlLabel
                     control={
                       <Checkbox

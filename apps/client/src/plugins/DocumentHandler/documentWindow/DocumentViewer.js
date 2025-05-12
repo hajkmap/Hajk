@@ -205,7 +205,7 @@ class DocumentViewer extends React.PureComponent {
           container
         >
           {showTableOfContents && (
-            <TocGridWrapper xs={12} item>
+            <TocGridWrapper size={12}>
               {this.getTableOfContents()}
             </TocGridWrapper>
           )}

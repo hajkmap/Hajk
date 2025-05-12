@@ -29,6 +29,7 @@ const FeatureDetailsContainer = styled(Grid)(({ theme }) => ({
 
 const HeaderContainer = styled(Grid)(({ theme }) => ({
   paddingTop: theme.spacing(1),
+  alignItems: "center",
 }));
 
 const HeaderTypography = styled(Typography)(() => ({
@@ -242,7 +243,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       (enableFeatureToggler ?? true) && features?.length > 1;
     return (
       <FeatureDetailsContainer container>
-        <HeaderContainer container alignItems="center">
+        <HeaderContainer container>
           <Grid
             size={{
               xs: shouldRenderToggler ? 9 : 12,

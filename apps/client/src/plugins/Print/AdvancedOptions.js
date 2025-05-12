@@ -182,7 +182,7 @@ class AdvancedOptions extends React.PureComponent {
     return (
       <>
         <Root>
-          <FormControlContainer item xs={12}>
+          <FormControlContainer size={12}>
             <FormControl fullWidth={true}>
               <TextField
                 value={mapTitle}
@@ -225,7 +225,7 @@ class AdvancedOptions extends React.PureComponent {
               />
             </FormControl>
           </FormControlContainer>
-          <FormControlContainer item xs={12}>
+          <FormControlContainer size={12}>
             <FormControl fullWidth={true}>
               <TextField
                 value={printComment}
@@ -243,7 +243,7 @@ class AdvancedOptions extends React.PureComponent {
               />
             </FormControl>
           </FormControlContainer>
-          <FormControlContainer item xs={12}>
+          <FormControlContainer size={12}>
             <FormControl fullWidth={true} error={!printOptionsOk}>
               <InputLabel variant="standard" htmlFor="resolution">
                 Upplösning (DPI)
@@ -273,7 +273,7 @@ class AdvancedOptions extends React.PureComponent {
               )}
             </FormControl>
           </FormControlContainer>
-          <FormControlContainer container item>
+          <FormControlContainer container>
             <Grid sx={{ paddingRight: "10px" }} size={6}>
               <FormControl fullWidth={true}>
                 <InputLabel variant="standard" htmlFor="includeNorthArrow">
@@ -303,7 +303,7 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
           </FormControlContainer>
-          <FormControlContainer container item>
+          <FormControlContainer container>
             <Grid sx={{ paddingRight: "10px" }} size={6}>
               <FormControl fullWidth={true}>
                 <InputLabel variant="standard" htmlFor="includeScaleBar">
@@ -333,7 +333,7 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
           </FormControlContainer>
-          <FormControlContainer container item>
+          <FormControlContainer container>
             <Grid sx={{ paddingRight: "10px" }} size={6}>
               <FormControl fullWidth={true}>
                 <InputLabel variant="standard" htmlFor="includeLogo">
@@ -365,7 +365,7 @@ class AdvancedOptions extends React.PureComponent {
             <Grid size={12}></Grid>
           </FormControlContainer>
           {this.props.enableAppStateInHash && (
-            <FormControlContainer container item>
+            <FormControlContainer container>
               <Grid sx={{ paddingRight: "10px" }} size={6}>
                 <FormControl fullWidth={true}>
                   <InputLabel variant="standard" htmlFor="includeQrCode">
