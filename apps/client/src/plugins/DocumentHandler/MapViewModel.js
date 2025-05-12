@@ -60,20 +60,18 @@ export default class MapViewModel {
 
   updateUrl = (url) => {
     try {
-      const tempUrl = new URL(window.location.href);
-      tempUrl.searchParams.set("m", this.appModel.config.activeMap);
-
-      const pluginParams = new URLSearchParams(url.replaceAll("#", ""))
+      const params = new URLSearchParams(url.replaceAll("#", "&"));
+      const pluginParams = params
         .getAll("p")
         .flatMap((p) => p.split(","))
         .filter(Boolean)
         .join(",");
 
       if (pluginParams) {
-        tempUrl.searchParams.set("p", pluginParams);
+        params.set("p", pluginParams);
       }
 
-      const newHash = "#" + tempUrl.searchParams.toString();
+      const newHash = "#" + params.toString();
       if (newHash !== window.location.hash) {
         window.location.hash = newHash;
       }
