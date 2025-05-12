@@ -58,12 +58,40 @@ export default class MapViewModel {
     }
   };
 
+  updateUrl = (url) => {
+    try {
+      const tempUrl = new URL(window.location.href);
+      tempUrl.searchParams.set("m", this.appModel.config.activeMap);
+
+      const pluginParams = new URLSearchParams(url.replaceAll("#", ""))
+        .getAll("p")
+        .flatMap((p) => p.split(","))
+        .filter(Boolean)
+        .join(",");
+
+      if (pluginParams) {
+        tempUrl.searchParams.set("p", pluginParams);
+      }
+
+      const newHash = "#" + tempUrl.searchParams.toString();
+      if (newHash !== window.location.hash) {
+        window.location.hash = newHash;
+      }
+    } catch (error) {
+      console.error("Error updating URL:", error);
+    }
+  };
+
   bindSubscriptions = () => {
     this.localObserver.subscribe("fly-to", (url) => {
       this.globalObserver.publish("core.minimizeWindow");
       const mapSettings = this.convertMapSettingsUrlToOlSettings(url);
 
-      this.showPluginsFromUrlParams(url);
+      if (this.appModel.config.mapConfig.map.enableAppStateInHash === true) {
+        this.updateUrl(url);
+      } else {
+        this.showPluginsFromUrlParams(url);
+      }
 
       if (mapSettings.layers !== null) {
         // Let's use Hajk's generic layer visibility
