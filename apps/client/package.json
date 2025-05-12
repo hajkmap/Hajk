@@ -71,7 +71,7 @@
     "notistack": "^3.0.2",
     "ol": "^10.5.0",
     "pdfjs-dist": "^3.11.174",
-    "proj4": "^2.15.0",
+    "proj4": "^2.16.2",
     "qrcode": "^1.5.4",
     "react": "^19.1.0",
     "react-app-polyfill": "^3.0.0",
