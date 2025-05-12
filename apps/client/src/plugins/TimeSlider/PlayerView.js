@@ -34,22 +34,23 @@ export default function PlayerView(props) {
   return props.currentUnixTime ? (
     <Grid container sx={{ padding: 2 }}>
       <Grid
-        item
-        xs={12}
-        sx={{
-          paddingLeft:
-            props.markResolution === "years"
-              ? 2
-              : props.markResolution === "months"
-                ? 4
-                : 6,
-          paddingRight:
-            props.markResolution === "years"
-              ? 2
-              : props.markResolution === "months"
-                ? 4
-                : 6,
-        }}
+        sx={[
+          props.markResolution === "years"
+            ? {
+                paddingLeft: 2,
+              }
+            : {
+                paddingLeft: props.markResolution === "months" ? 4 : 6,
+              },
+          props.markResolution === "years"
+            ? {
+                paddingRight: 2,
+              }
+            : {
+                paddingRight: props.markResolution === "months" ? 4 : 6,
+              },
+        ]}
+        size={12}
       >
         <Slider
           size="small"
@@ -72,14 +73,14 @@ export default function PlayerView(props) {
         alignItems="center"
         spacing={2}
       >
-        <Grid item align="center" xs={2}>
+        <Grid align="center" size={2}>
           <HajkToolTip title="Återställ tidslinjen">
             <Button variant="contained" onClick={props.resetTimeSlider}>
               <RotateLeftOutlinedIcon />
             </Button>
           </HajkToolTip>
         </Grid>
-        <Grid item align="center" xs={2}>
+        <Grid align="center" size={2}>
           <HajkToolTip
             title={
               props.playing
@@ -100,7 +101,7 @@ export default function PlayerView(props) {
             </span>
           </HajkToolTip>
         </Grid>
-        <Grid item align="center" xs={2}>
+        <Grid align="center" size={2}>
           <HajkToolTip
             title={props.playing ? "Stoppa tidslinjen" : "Starta tidslinjen"}
           >
@@ -114,7 +115,7 @@ export default function PlayerView(props) {
             </Button>
           </HajkToolTip>
         </Grid>
-        <Grid item align="center" xs={2}>
+        <Grid align="center" size={2}>
           <HajkToolTip
             title={
               props.playing
@@ -135,7 +136,7 @@ export default function PlayerView(props) {
             </span>
           </HajkToolTip>
         </Grid>
-        <Grid item align="center" xs={2}>
+        <Grid align="center" size={2}>
           <SettingsButton
             layerStatus={props.layerStatus}
             open={props.settingsDialog}
@@ -151,7 +152,7 @@ export default function PlayerView(props) {
       justifyContent="center"
       sx={{ width: "100%", height: "100%" }}
     >
-      <Grid item>
+      <Grid>
         <SettingsButton
           layerStatus={props.layerStatus}
           open={props.settingsDialog}

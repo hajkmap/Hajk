@@ -22,10 +22,9 @@ export default function LayerGroupAccordion({
       <ListItemButton
         disableTouchRipple
         onClick={() => setState({ expanded: !state.expanded })}
-        sx={{
+        sx={(theme) => ({
           alignItems: "flex-start",
-          borderBottom: (theme) =>
-            `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           p: 0,
           pl: "2px",
           "& .ls-arrow": {
@@ -37,7 +36,7 @@ export default function LayerGroupAccordion({
               ? "rotate(90deg) translateX(-3px)"
               : "translateX(3px)",
           },
-        }}
+        })}
         dense
       >
         <LsIconButton

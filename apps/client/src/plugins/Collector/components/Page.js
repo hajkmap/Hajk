@@ -194,8 +194,10 @@ class Page extends Component {
               this.checkDate(field.name, e.target.value);
               field.initialRender = false;
             }}
-            InputLabelProps={{
-              shrink: true,
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
             }}
           />
         );

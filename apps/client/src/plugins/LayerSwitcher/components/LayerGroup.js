@@ -247,14 +247,16 @@ const LayerGroup = ({
               infogroupowner={infogroupowner}
             />
             <ListItemText
-              primaryTypographyProps={{
-                pb: "2px", // jesade-vbg compact mode, added line.
-                py: groupIsToggable ? 0 : getIsMobile() ? "3px" : "1px", // jesade-vbg compact mode
-                pl: groupIsToggable ? 0 : "3px",
-                variant: "body1",
-                fontWeight: isToggled || isSemiToggled ? "bold" : "inherit",
-              }}
               primary={name}
+              slotProps={{
+                primary: {
+                  pb: "2px", // jesade-vbg compact mode, added line.
+                  py: groupIsToggable ? 0 : getIsMobile() ? "3px" : "1px", // jesade-vbg compact mode
+                  pl: groupIsToggable ? 0 : "3px",
+                  variant: "body1",
+                  fontWeight: isToggled || isSemiToggled ? "bold" : "inherit",
+                },
+              }}
             />
           </div>
           <GroupInfoDetails
