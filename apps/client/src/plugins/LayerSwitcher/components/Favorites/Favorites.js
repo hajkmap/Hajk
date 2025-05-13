@@ -285,7 +285,7 @@ function Favorites({
     // First, we try to get the map's name. We can't be certain that this exists (not
     // all maps have the userSpecificMaps property), so we must be careful.
     const mapName =
-      Array.isArray(app.config.userSpecificMaps) &&
+      Array.isArray(app?.config?.userSpecificMaps) &&
       app.config.userSpecificMaps.find(
         (m) => m.mapConfigurationName === app.config.activeMap
       )?.mapConfigurationTitle;

@@ -21,16 +21,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## [4.0.0-rc.2] - 2025-02-xx
+## [4.0.0-rc.2] - 2025-03-xx
 
 ### Fixed
 
-- LayerSwitcher: Multiple hotfixes.
+- LayerSwitcher: Multiple hotfixes:
   ([commit](https://github.com/hajkmap/Hajk/commit/4d9b0ace9cbf029423e4ac836316a5272acfcf84))
   ([commit](https://github.com/hajkmap/Hajk/commit/5371fa8fda0bba13191bccfbaf5f78a2f2c502b3))
   ([commit](https://github.com/hajkmap/Hajk/commit/7576d013852a2e9850ee6b4f05477a742a331be8))
   ([commit](https://github.com/hajkmap/Hajk/commit/46d1034b01a060dc5c2efc512de9b6c30d005198))
+  ([commit](https://github.com/hajkmap/Hajk/commit/4d9b0ace9cbf029423e4ac836316a5272acfcf84))
+- LayerSwitcher: Dialog click-and-drags moves LayerSwitcher's window below. ([issue](https://github.com/hajkmap/Hajk/issues/1600))
 - Updates to RHEL Dockerfile. ([commit](https://github.com/hajkmap/Hajk/commit/afe44edd51452035d660d9f3ae99a298550ccabb))
+- Presets: Bugfix ([commit](https://github.com/hajkmap/Hajk/commit/e296c10fca9383819ac5b46810ce55db25c8ff6a))
+- LayerSwitcher: Sublayers in hash (app state). ([issue](https://github.com/hajkmap/Hajk/issues/1603))
+- LayerSwitcher: Fixed scrolling issue. ([issue](https://github.com/hajkmap/Hajk/issues/1604))
+- LayerSwitcher: Sublayers visible among Quick Access layers. ([issue](https://github.com/hajkmap/Hajk/issues/1605))
+- Admin: Bugfix for warning when editing in Document Handler editor. ([issue](https://github.com/hajkmap/Hajk/issues/1606))
+- LayerSwitcher: Fix for missing sublayers' legend. ([issue](https://github.com/hajkmap/Hajk/issues/1607))
+- LayerSwitcher: Restored automatic layer rotation functionality. ([issue](https://github.com/hajkmap/Hajk/issues/1614))
+- LayerSwitcher: ensure to respect the `hideExpandArrow` setting. ([issue](https://github.com/hajkmap/Hajk/issues/1617))
+- Buffer and Measurer bug fixes. ([commit](https://github.com/hajkmap/Hajk/commit/44ea3549b9f79c47baf3d6be41036d5f8435ce82) and [commit](https://github.com/hajkmap/Hajk/commit/c4e1827b7dffe5f93d554670a2751ef10bc883d8))
+- LayerSwitcher: hotfix to synchronize key naming between Admin and Client, effectively enabling the Quick Access Presets functionality. ([PR](https://github.com/hajkmap/Hajk/pull/1621))
 
 ## [4.0.0-rc.1] - 2025-02-19
 

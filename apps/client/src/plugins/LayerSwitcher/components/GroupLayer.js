@@ -74,6 +74,18 @@ function GroupLayer({
   const layerIsVisibleAtZoom =
     mapZoom >= layerMinZoom && mapZoom <= layerMaxZoom;
 
+  // if `hideExpandArrow` option is set then no sublayers should be shown when
+  // searching.
+  const subLayerSectionOpen =
+    layerInfo?.hideExpandArrow === true
+      ? false
+      : showSublayers || isSubLayerFilterHit;
+
+  // If there is an active search we don't want to show the expand arrow since
+  // it does not do anything.
+  const showExpandArrow =
+    layerInfo.hideExpandArrow !== true && !isSubLayerFilterHit;
+
   return (
     <LayerItem
       display={display}
@@ -86,7 +98,7 @@ function GroupLayer({
       clickCallback={handleLayerItemClick}
       visibleSubLayers={visibleSubLayers}
       expandableSection={
-        layerInfo.hideExpandArrow !== true && (
+        showExpandArrow && (
           <Box>
             <IconButton
               sx={{
@@ -110,7 +122,7 @@ function GroupLayer({
         )
       }
       subLayersSection={
-        <Collapse in={showSublayers || isSubLayerFilterHit} unmountOnExit>
+        <Collapse in={subLayerSectionOpen} unmountOnExit>
           <Box sx={{ marginLeft: 3 }}>
             {subLayersToShow?.map((subLayer) => (
               <SubLayerItem

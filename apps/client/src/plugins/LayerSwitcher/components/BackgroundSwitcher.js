@@ -1,7 +1,9 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { isValidLayerId } from "../../../utils/Validator";
+import { mapDirectionToAngle } from "../../../utils/mapDirectionToAngle";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
+import { easeOut } from "ol/easing";
 import BackgroundLayerItem from "./BackgroundLayerItem";
 import Box from "@mui/material/Box";
 
@@ -58,6 +60,47 @@ const setSpecialBackground = (id) => {
 
 export const OSM_LAYER_ID = "osm-layer";
 
+const createOSMLayer = (map) => {
+  const osmLayer = new TileLayer({
+    visible: false,
+    source: new OSM({
+      reprojectionErrorThreshold: 5,
+    }),
+    zIndex: -1,
+    layerType: "base",
+    rotateMap: "n", // OpenStreetMap should be rotated to North
+    name: OSM_LAYER_ID,
+    caption: "OpenStreetMap",
+    layerInfo: {
+      caption: "OpenStreetMap",
+      layerType: "base",
+    },
+  });
+
+  // This layer does not exist on the map when we setup the listener that
+  // rotates the map when a base layer is activated. The listener in
+  // `src/components/App.js`.
+  // Therefore we need to setup the same check here.
+  osmLayer.on("change:visible", (e) => {
+    const olLayer = e.target;
+
+    // If the layer becomes visible, set the map rotation to match
+    if (olLayer.get("visible")) {
+      const direction = olLayer.get("rotateMap");
+      const duration = 1000;
+
+      const angle = mapDirectionToAngle(direction);
+      map.getView().animate({
+        rotation: angle,
+        duration: duration,
+        easing: easeOut,
+      });
+    }
+  });
+
+  return osmLayer;
+};
+
 const BackgroundSwitcher = ({
   backgroundSwitcherBlack,
   backgroundSwitcherWhite,
@@ -73,25 +116,7 @@ const BackgroundSwitcher = ({
 
   const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
-  const osmLayerRef = useRef(
-    enableOSM
-      ? new TileLayer({
-          visible: false,
-          source: new OSM({
-            reprojectionErrorThreshold: 5,
-          }),
-          zIndex: -1,
-          layerType: "base",
-          rotateMap: "n", // OpenStreetMap should be rotated to North
-          name: OSM_LAYER_ID,
-          caption: "OpenStreetMap",
-          layerInfo: {
-            caption: "OpenStreetMap",
-            layerType: "base",
-          },
-        })
-      : null
-  );
+  const osmLayerRef = useRef(enableOSM ? createOSMLayer(map) : null);
 
   useEffect(() => {
     if (enableOSM) {
