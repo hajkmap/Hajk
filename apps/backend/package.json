@@ -18,8 +18,6 @@
     "compile": "shx rm -rf dist && shx cp -r server dist",
     "dev": "nodemon server --config .nodemonrc.json",
     "dev:debug": "nodemon server --config .nodemonrc.json --inspect",
-    "test": "mocha --exit",
-    "test:debug": "mocha --inspect-brk --exit",
     "lint": "eslint ./server",
     "lint:fix": "eslint --fix ."
   },
@@ -41,13 +39,11 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "chai": "^4.3.10",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.1.3",
-    "mocha": "^11.1.0",
     "nodemon": "^3.0.3",
     "prettier": "^3.2.5",
     "shx": "^0.3.4",
