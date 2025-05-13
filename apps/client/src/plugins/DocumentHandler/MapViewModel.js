@@ -43,6 +43,7 @@ export default class MapViewModel {
           .getAll("p")
           .flatMap((p) => p.split(","))
       );
+      console.log("params", params);
 
       // Open matching windows
       this.appModel.windows
