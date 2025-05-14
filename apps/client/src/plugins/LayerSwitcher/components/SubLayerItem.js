@@ -78,18 +78,18 @@ export default function SubLayerItem({
   if (!subLayerInfo) {
     return null;
   }
-
   return (
     <div style={{ marginLeft: "7px" }}>
       <ListItemButton
         disableTouchRipple
         onClick={() => (toggleable ? toggleSubLayer(subLayer, visible) : null)}
-        sx={(theme) => ({
+        sx={{
           pl: "calc(2px + 10px)",
-          borderBottom: toggleable
-            ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
-            : "none",
-        })}
+          borderBottom: (theme) =>
+            toggleable
+              ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
+              : "none",
+        }}
         dense
       >
         {toggleable && (
@@ -107,18 +107,11 @@ export default function SubLayerItem({
         {getIconFromLayer()}
         <ListItemText
           primary={subLayerInfo.caption}
-          slotProps={{
-            primary: {
-              pr: 5,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              fontWeight: (theme) =>
-                visible
-                  ? toggleable
-                    ? theme.typography.fontWeightBold
-                    : "inherit"
-                  : "inherit",
-            },
+          primaryTypographyProps={{
+            pr: 5,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            fontWeight: visible ? (toggleable ? "bold" : "inherit") : "inherit",
           }}
         />
         <ListItemSecondaryAction

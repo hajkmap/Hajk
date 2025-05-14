@@ -257,7 +257,7 @@ class EditView extends React.PureComponent {
             <StepLabel>Välj datamängd att redigera</StepLabel>
             <StepContent>
               <Grid container spacing={2} direction="row">
-                <Grid size={12}>
+                <Grid item xs={12}>
                   {loading ? <CircularProgress /> : this.renderSources()}
                 </Grid>
               </Grid>
@@ -271,7 +271,7 @@ class EditView extends React.PureComponent {
             </StepLabel>
             <StepContent>
               <Grid container spacing={2} direction="row">
-                <Grid size={12}>
+                <Grid item xs={12}>
                   {editSource?.simpleEditWorkflow !== true && (
                     <>
                       {this.renderAttributeEditor()}
@@ -283,7 +283,7 @@ class EditView extends React.PureComponent {
                 </Grid>
                 {!editFeature && (
                   <>
-                    <Grid size={6}>
+                    <Grid item xs={6}>
                       <Button
                         fullWidth
                         onClick={this.handlePrev}
@@ -292,7 +292,7 @@ class EditView extends React.PureComponent {
                         Bakåt
                       </Button>
                     </Grid>
-                    <Grid size={6}>
+                    <Grid item xs={6}>
                       <Button
                         fullWidth
                         variant="contained"
@@ -313,7 +313,7 @@ class EditView extends React.PureComponent {
             <StepLabel>Klart!</StepLabel>
             <StepContent>
               <Grid container spacing={2} direction="row">
-                <Grid size={12}>
+                <Grid item xs={12}>
                   <Button
                     fullWidth
                     variant="contained"

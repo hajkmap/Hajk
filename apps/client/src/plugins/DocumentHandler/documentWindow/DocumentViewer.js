@@ -205,7 +205,7 @@ class DocumentViewer extends React.PureComponent {
           container
         >
           {showTableOfContents && (
-            <TocGridWrapper size={12}>
+            <TocGridWrapper xs={12} item>
               {this.getTableOfContents()}
             </TocGridWrapper>
           )}
@@ -220,15 +220,7 @@ class DocumentViewer extends React.PureComponent {
                 e.preventDefault();
               }
             }}
-            sx={[
-              showTableOfContents
-                ? {
-                    marginTop: 0,
-                  }
-                : {
-                    marginTop: 2,
-                  },
-            ]}
+            sx={{ marginTop: showTableOfContents ? 0 : 2 }}
             container
             item
           >

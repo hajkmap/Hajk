@@ -343,12 +343,13 @@ class SearchResultsContainer extends React.PureComponent {
       featureFilter.length > 0 || featureCollectionFilter.length > 0;
     return (
       <Grid
+        item
         sx={{
           padding: 1,
           borderBottom: 0.8,
           borderBottomColor: "divider",
         }}
-        size={12}
+        xs={12}
       >
         <span style={visuallyHidden}>Textfält för att filtrera resultatet</span>
         <TextField
@@ -361,17 +362,15 @@ class SearchResultsContainer extends React.PureComponent {
           size="small"
           variant="outlined"
           label="Filtrera sökresultaten"
-          slotProps={{
-            input: {
-              endAdornment: showClearFilterButton && (
-                <HajkToolTip title="Rensa filtret">
-                  <IconButton onClick={this.clearViewFilters} size="small">
-                    <span style={visuallyHidden}>Rensa filtret</span>
-                    <ClearIcon />
-                  </IconButton>
-                </HajkToolTip>
-              ),
-            },
+          InputProps={{
+            endAdornment: showClearFilterButton && (
+              <HajkToolTip title="Rensa filtret">
+                <IconButton onClick={this.clearViewFilters} size="small">
+                  <span style={visuallyHidden}>Rensa filtret</span>
+                  <ClearIcon />
+                </IconButton>
+              </HajkToolTip>
+            ),
           }}
         ></TextField>
       </Grid>
@@ -626,9 +625,9 @@ class SearchResultsContainer extends React.PureComponent {
       return null;
     } else {
       return (
-        <Grid container align="center" justifyContent="flex-end">
+        <Grid item container align="center" justifyContent="flex-end">
           <Grow in={this.state.showTools} timeout={800}>
-            <Grid sx={!this.state.showTools ? { display: "none" } : null}>
+            <Grid item sx={!this.state.showTools ? { display: "none" } : null}>
               {this.searchResultTools.map((tool, index) => {
                 return (
                   tool.enabled && (
@@ -638,7 +637,7 @@ class SearchResultsContainer extends React.PureComponent {
               })}
             </Grid>
           </Grow>
-          <Grid>
+          <Grid item>
             <HajkToolTip
               title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
             >
@@ -659,15 +658,18 @@ class SearchResultsContainer extends React.PureComponent {
       );
     }
   };
+
   setActiveFeature = (feature) => {
     const { activeFeatureCollection } = this.state;
     this.handleActiveFeatureChange(feature, activeFeatureCollection);
   };
+
   handleActiveFeatureChange = (nextFeature, nextCollection, initiator) => {
     const { localObserver } = this.props;
     const { activeFeature } = this.state;
     const selectedFeatures = [...this.state.selectedFeatures];
     const shouldZoomToFeature = initiator !== "infoClick";
+
     if (activeFeature) {
       const featureIndex = selectedFeatures.findIndex((featureInfo) => {
         return (
@@ -678,6 +680,7 @@ class SearchResultsContainer extends React.PureComponent {
       featureIndex !== -1 && selectedFeatures.splice(featureIndex, 1);
       localObserver.publish("map.setSelectedStyle", selectedFeatures);
     }
+
     if (nextFeature) {
       const nextFeatureSelected = this.featureIsSelected(nextFeature);
       !nextFeatureSelected &&
@@ -706,22 +709,26 @@ class SearchResultsContainer extends React.PureComponent {
       localObserver.publish("map.setSelectedStyle", selectedFeatures);
     }
   };
+
   featureIsSelected = (feature) => {
     const { selectedFeatures } = this.state;
     return selectedFeatures.some((featureInfo) => {
       return featureInfo.feature.getId() === feature.getId();
     });
   };
+
   getNextFeatureInfo = (nextFeature, nextCollection, initiator) => {
     if (!nextFeature.source) {
       nextFeature.source = nextCollection.source;
     }
+
     return {
       feature: nextFeature,
       sourceId: nextFeature.source ?? nextCollection.source.id,
       initiator: initiator,
     };
   };
+
   setActiveFeatureCollection = (featureCollection) => {
     this.setState(
       {
@@ -738,15 +745,20 @@ class SearchResultsContainer extends React.PureComponent {
       }
     );
   };
+
   #showCorrespondingWMSLayers = (featureCollection) => {
     // Respect the setting from admin
     if (this.props.options.showCorrespondingWMSLayers !== true) return;
+
     const layer = this.#getLayerById(featureCollection.source.pid);
+
     // There is a possibility that no layer was found, if so, quit early
     if (layer === undefined) return;
+
     if (layer.get("layerType") === "group") {
       // Group layers will publish an event to LayerSwitcher that will take
       // care of the somewhat complicated toggling.
+
       // N.B. We don't want to hide any sublayers, only ensure that new ones are shown.
       // So the first step is to find out which sublayers are already visible.
       const alreadyVisibleSubLayers = layer
@@ -754,6 +766,7 @@ class SearchResultsContainer extends React.PureComponent {
         .getParams()
         ["LAYERS"].split(",")
         .filter((e) => e.length !== 0);
+
       // Next, prepare an array of the already visible layers, plus the new one.
       // Make sure NOT TO CHANGE THE ORDER of sublayers. Hence no push or spread,
       // only a filter on the admin-specified order that we have in the 'subLayers'
@@ -764,6 +777,7 @@ class SearchResultsContainer extends React.PureComponent {
           l === featureCollection.source.id
         );
       });
+
       // Finally, let's publish the event so that LayerSwitcher can take care of the rest
       this.props.app.globalObserver.publish("layerswitcher.showLayer", {
         layer,
@@ -775,6 +789,7 @@ class SearchResultsContainer extends React.PureComponent {
       layer.setVisible(true);
     }
   };
+
   #getLayerById = (layerId) => {
     return this.props.map
       .getLayers()
@@ -783,6 +798,7 @@ class SearchResultsContainer extends React.PureComponent {
         return layerId === layer.values_.name;
       });
   };
+
   handleFeatureCollectionClick = (featureCollection) => {
     const { app } = this.props;
     const onClickName = featureCollection?.source?.onClickName;
@@ -795,11 +811,14 @@ class SearchResultsContainer extends React.PureComponent {
       this.setActiveFeatureCollection(featureCollection);
     }
   };
+
   sortFeatureCollections = (featureCollections) => {
     const { featureCollectionSortingStrategy } = this.state;
+
     const featureCollectionsAtoZSorted = featureCollections.sort((a, b) =>
       a.source.caption.localeCompare(b.source.caption)
     );
+
     switch (featureCollectionSortingStrategy) {
       case "numHits":
         return featureCollections.sort((a, b) =>
@@ -812,9 +831,11 @@ class SearchResultsContainer extends React.PureComponent {
         return featureCollectionsAtoZSorted;
     }
   };
+
   keyPressIsEnter = (event) => {
     return event.which === 13 || event.keyCode === 13;
   };
+
   getFilteredFeatures = (featureCollections) => {
     const { activeFeatureCollection, featureFilter } = this.state;
     return featureCollections
@@ -832,15 +853,18 @@ class SearchResultsContainer extends React.PureComponent {
       })
       .flat();
   };
+
   handleFilterUpdate = () => {
     const { featureCollectionFilter, featureFilter } = this.state;
     const { localObserver, featureCollections } = this.props;
+
     if (
       this.lastFeatureFilter === featureFilter &&
       this.lastFeatureCollectionFilter === featureCollectionFilter
     ) {
       return;
     }
+
     const filteredFeatureCollections =
       this.getFilteredFeatureCollections(featureCollections);
     const filteredFeatures = this.getFilteredFeatures(
@@ -849,17 +873,21 @@ class SearchResultsContainer extends React.PureComponent {
     const currentFeatureIds = filteredFeatures.map((feature) => {
       return feature.getId();
     });
+
     this.setState({
       filteredFeatureCollections: filteredFeatureCollections,
       filteredFeatures: filteredFeatures,
     });
+
     this.lastFeatureFilter = featureFilter;
     this.lastFeatureCollectionFilter = featureCollectionFilter;
+
     localObserver.publish("map.updateFeaturesAfterFilterChange", {
       features: filteredFeatures,
       featureIds: currentFeatureIds,
     });
   };
+
   renderBreadCrumbs = (featureCollectionTitle, featureTitle) => {
     const { activeFeatureCollection, activeFeature } = this.state;
     const shouldRenderFeatureCollectionDetails =
@@ -956,16 +984,18 @@ class SearchResultsContainer extends React.PureComponent {
     return (
       <Grid
         container
+        item
         justifyContent="space-between"
         alignItems="center"
         wrap="nowrap"
-        size={12}
+        xs={12}
       >
         <Grid
           container
+          item
           wrap="nowrap"
           alignItems="center"
-          size={this.state.showTools ? 5 : 11}
+          xs={this.state.showTools ? 5 : 11}
         >
           <HajkToolTip
             title={
@@ -986,8 +1016,9 @@ class SearchResultsContainer extends React.PureComponent {
         </Grid>
         <Grid
           container
+          item
           justifyContent="flex-end"
-          size={this.state.showTools ? 7 : 1}
+          xs={this.state.showTools ? 7 : 1}
         >
           {this.renderSearchResultListTools()}
         </Grid>
@@ -1019,9 +1050,10 @@ class SearchResultsContainer extends React.PureComponent {
             : { paddingRight: 1, paddingLeft: 1 }
         }
         container
-        size={12}
+        item
+        xs={12}
       >
-        <Grid size={12}>
+        <Grid item xs={12}>
           {this.renderBreadCrumbs(featureCollectionTitle, featureTitle)}
         </Grid>
         {shouldRenderHeaderInfoBar &&
@@ -1081,7 +1113,7 @@ class SearchResultsContainer extends React.PureComponent {
               {this.renderSearchResultsHeader()}
               {filterInputFieldOpen && this.renderFilterInputField()}
               {this.renderSortingMenu()}
-              <Grid size={12}>
+              <Grid item xs={12}>
                 <SearchResultsList
                   onClick={handleFocus}
                   localObserver={localObserver}

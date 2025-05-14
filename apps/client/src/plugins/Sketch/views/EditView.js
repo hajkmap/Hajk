@@ -1,6 +1,7 @@
 import React from "react";
 import {
   Button,
+  Grid,
   Paper,
   Menu,
   MenuItem,
@@ -8,7 +9,6 @@ import {
   Switch,
   ListItemIcon,
   ListItemText,
-  Grid,
 } from "@mui/material";
 
 import {
@@ -17,7 +17,7 @@ import {
   ArrowDropDown,
   ArrowDropUp,
   ContentCopy,
-} from "@mui/icons-material";
+} from "@mui/icons-material/";
 import HajkToolTip from "components/HajkToolTip";
 
 import Information from "../components/Information";
@@ -70,24 +70,24 @@ const EditView = (props) => {
       style={{ height: "100%" }}
     >
       <Grid container>
-        <Grid size={12}>
+        <Grid item xs={12}>
           <Information text={activity.information} />
         </Grid>
-        <Grid size={12}>
+        <Grid item xs={12}>
           <ModifyNodeToggler
             drawModel={props.drawModel}
             modifyEnabled={props.modifyEnabled}
             setModifyEnabled={props.setModifyEnabled}
           />
         </Grid>
-        <Grid size={12}>
+        <Grid item xs={12}>
           {props.editFeature === null ? (
             <Typography align="center" style={{ marginTop: 24 }}>
               Klicka på ett objekt i kartan för att ändra dess utseende eller
               för att byta dess ritordning.
             </Typography>
           ) : (
-            <Grid size={12}>
+            <Grid item xs={12}>
               <FeatureTitleEditor
                 feature={props.editFeature}
                 model={props.model}
@@ -106,7 +106,7 @@ const EditView = (props) => {
       </Grid>
       {props.editFeature && (
         <Grid container style={{ marginTop: 8 }} spacing={2}>
-          <Grid size={7}>
+          <Grid item xs={7}>
             <HajkToolTip title="Klicka för att duplicera det markerade objektet.">
               <Button
                 variant="contained"
@@ -122,7 +122,7 @@ const EditView = (props) => {
               </Button>
             </HajkToolTip>
           </Grid>
-          <Grid size={5}>
+          <Grid item xs={5}>
             <Button
               id="zIndexMenuButton"
               variant="contained"
@@ -139,10 +139,8 @@ const EditView = (props) => {
               anchorEl={zIndexAnchor}
               open={zIndexMenuOpen}
               onClose={handleZIndexMenuClose}
-              slotProps={{
-                list: {
-                  "aria-labelledby": "zIndexMenuButton",
-                },
+              MenuListProps={{
+                "aria-labelledby": "zIndexMenuButton",
               }}
             >
               <MenuItem

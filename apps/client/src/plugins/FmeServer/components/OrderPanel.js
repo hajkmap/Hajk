@@ -43,10 +43,10 @@ const OrderPanel = (props) => {
   function renderOrderLoadingInformation() {
     return (
       <Grid container>
-        <Grid size={12}>
+        <Grid item xs={12}>
           <Typography>Din beställning bearbetas...</Typography>
         </Grid>
-        <Grid size={12}>
+        <Grid item xs={12}>
           <LinearProgress />
         </Grid>
       </Grid>
@@ -56,8 +56,8 @@ const OrderPanel = (props) => {
   // Renders information to the user before the order is sent.
   function renderOrderNotSentInformation() {
     return (
-      <Grid container size={12}>
-        <Grid sx={{ marginBottom: 1 }} size={12}>
+      <Grid container item xs={12}>
+        <Grid item xs={12} sx={{ marginBottom: 1 }}>
           <Typography>{informationText}</Typography>
         </Grid>
         {shouldPromptForEmail && renderEmailTextField()}
@@ -68,7 +68,7 @@ const OrderPanel = (props) => {
   // Renders an input to the user where they can input their email.
   function renderEmailTextField() {
     return (
-      <Grid size={12}>
+      <Grid item xs={12}>
         <TextField
           id={`fme-user-email`}
           size="small"
@@ -82,7 +82,7 @@ const OrderPanel = (props) => {
   }
 
   return (
-    <Grid container size={12}>
+    <Grid container item xs={12}>
       {orderIsLoading && renderOrderLoadingInformation()}
       {orderIsCompleted && renderOrderCompletedInformation()}
       {!orderIsLoading && !orderIsCompleted && renderOrderNotSentInformation()}

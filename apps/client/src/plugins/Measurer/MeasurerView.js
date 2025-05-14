@@ -33,10 +33,7 @@ const SvgImg = styled("img")(({ theme }) => ({
 
 const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   img: {
-    filter: "",
-    ...theme.applyStyles("dark", {
-      filter: "invert(1)",
-    }),
+    filter: theme.palette.mode === "dark" ? "invert(1)" : "",
   },
   "&.Mui-selected, &.Mui-selected:hover": {
     "img, svg": {
@@ -165,14 +162,9 @@ function MeasurerView(props) {
   return (
     <>
       <Grid container spacing={1} alignItems="flex-start">
-        <Grid size={9}>
+        <Grid item xs={9}>
           <Grid container spacing={0} alignItems="center">
-            <Grid
-              size={{
-                xs: 12,
-                md: 10,
-              }}
-            >
+            <Grid item xs={12} md={10}>
               <StyledToggleButtonGroup
                 exclusive
                 value={drawType}
@@ -213,13 +205,7 @@ function MeasurerView(props) {
                 </HajkToolTip>
               </StyledToggleButtonGroup>
             </Grid>
-            <Grid
-              spacing={2}
-              size={{
-                xs: 12,
-                md: 2,
-              }}
-            >
+            <Grid item xs={12} md={2} spacing={2}>
               <HajkToolTip title="Rita del-längder av mätningar">
                 <Zoom in={showSegmentButton}>
                   <StyledSingleToggleButton
@@ -234,7 +220,7 @@ function MeasurerView(props) {
             </Grid>
           </Grid>
         </Grid>
-        <Grid size={3}>
+        <Grid item xs={3}>
           <HajkToolTip title="Rensa bort alla mätningar">
             <Button
               sx={{ marginTop: "6px" }}

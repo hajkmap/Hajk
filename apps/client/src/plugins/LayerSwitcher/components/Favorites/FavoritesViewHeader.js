@@ -88,14 +88,13 @@ function FavoritesViewHeader({
 
   return (
     <Box
-      sx={(theme) => ({
+      sx={{
         p: 1,
-        backgroundColor: theme.palette.grey[100],
-        borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-        ...theme.applyStyles("dark", {
-          backgroundColor: "#373737",
-        }),
-      })}
+        backgroundColor: (theme) =>
+          theme.palette.mode === "dark" ? "#373737" : theme.palette.grey[100],
+        borderBottom: (theme) =>
+          `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+      }}
       onClick={(e) => e.stopPropagation()}
     >
       <Stack direction="row" alignItems="center">
@@ -141,11 +140,12 @@ function FavoritesViewHeader({
         className="infoCollapse"
       >
         <Box
-          sx={(theme) => ({
+          sx={{
             px: 1,
             pt: 1,
-            borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-          })}
+            borderTop: (theme) =>
+              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          }}
         >
           <Typography variant="subtitle2">{favoritesInfoText}</Typography>
         </Box>

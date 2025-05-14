@@ -373,10 +373,8 @@ class AttributeEditor extends React.Component {
               this.checkDate(field.name, e.target.value);
               field.initialRender = false;
             }}
-            slotProps={{
-              inputLabel: {
-                shrink: true,
-              },
+            InputLabelProps={{
+              shrink: true,
             }}
           />
         );
@@ -402,10 +400,8 @@ class AttributeEditor extends React.Component {
               this.checkDate(field.name, e.target.value);
               field.initialRender = false;
             }}
-            slotProps={{
-              inputLabel: {
-                shrink: true,
-              },
+            InputLabelProps={{
+              shrink: true,
             }}
           />
         );
@@ -628,7 +624,7 @@ class AttributeEditor extends React.Component {
     const markup = this.props.editSource?.editableFields?.map((field, i) => {
       const valueMarkup = this.getValueMarkup(field, true);
       return (
-        <Grid key={i} sx={{ textAlign: "left" }} size={12}>
+        <Grid item xs={12} key={i} sx={{ textAlign: "left" }}>
           {valueMarkup}
         </Grid>
       );
@@ -639,7 +635,7 @@ class AttributeEditor extends React.Component {
       .map((field, i) => {
         const valueMarkup = this.getValueMarkup(field, false);
         return (
-          <Grid key={i} size={12}>
+          <Grid item xs={12} key={i}>
             {valueMarkup}
           </Grid>
         );
@@ -647,20 +643,20 @@ class AttributeEditor extends React.Component {
 
     return (
       <>
-        <StyledGrid size={12}>
+        <StyledGrid item xs={12}>
           <Chip
             variant="outlined"
             color="primary"
             label="Ange objektets attribut:"
           />
         </StyledGrid>
-        <StyledGrid size={12}>
+        <StyledGrid item xs={12}>
           <p>Editerbara fält:</p>
           {markup}
           {markupNonEdit?.length > 2 ? "Icke-editerbara fält:" : ""}
           {markupNonEdit}
         </StyledGrid>
-        <StyledGrid size={12}>
+        <StyledGrid item xs={12}>
           <Button
             color="primary"
             sx={{ width: "100px" }}

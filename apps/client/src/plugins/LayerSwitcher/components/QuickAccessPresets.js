@@ -453,26 +453,17 @@ function QuickAccessPresets({
 
   return (
     <>
-      <Box
-        sx={[
-          display
-            ? {
-                display: "block",
-              }
-            : {
-                display: "none",
-              },
-        ]}
-      >
+      <Box sx={{ display: display ? "block" : "none" }}>
         <Box
-          sx={(theme) => ({
+          sx={{
             p: 1,
-            backgroundColor: theme.palette.grey[100],
-            borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-            ...theme.applyStyles("dark", {
-              backgroundColor: "#373737",
-            }),
-          })}
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark"
+                ? "#373737"
+                : theme.palette.grey[100],
+            borderBottom: (theme) =>
+              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          }}
         >
           <Stack direction="row" alignItems="center">
             <HajkToolTip
@@ -502,11 +493,12 @@ function QuickAccessPresets({
             className="infoCollapse"
           >
             <Box
-              sx={(theme) => ({
+              sx={{
                 px: 1,
                 pt: 1,
-                borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-              })}
+                borderTop: (theme) =>
+                  `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+              }}
             >
               <Typography variant="subtitle2">
                 {quickAccessPresetsInfoText}
@@ -521,26 +513,22 @@ function QuickAccessPresets({
             }}
           >
             <TextField
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
               size="small"
               value={filter.query}
               onChange={(event) => handleFilterChange(event.target.value)}
               fullWidth
               placeholder="Filtrera"
               variant="outlined"
-              sx={(theme) => ({
-                background: "#fff",
-                ...theme.applyStyles("dark", {
-                  background: "inherit",
-                }),
-              })}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                },
+              sx={{
+                background: (theme) =>
+                  theme.palette.mode === "dark" ? "inherit" : "#fff",
               }}
             />
           </Box>

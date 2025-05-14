@@ -32,7 +32,7 @@ const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
 // divider color. (borderColor would be a more fitting name, but
 // since this is a custom prop it must be all lowerCase, hence border will have
 // to do!)
-const ButtonWithBorder = styled(Button)(({ theme }) => ({
+const ButtonWithBorder = styled(Button)(({ border, theme }) => ({
   border: `${theme.spacing(0.5)} solid ${border ?? theme.palette.divider}`,
 }));
 

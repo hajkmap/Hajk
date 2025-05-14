@@ -293,13 +293,7 @@ class CoordinatesTransformRow extends React.PureComponent {
           marginLeft={"-7px"}
           paddingTop={1}
         >
-          <Grid
-            alignSelf={"end"}
-            size={{
-              xs: 10,
-              md: 8,
-            }}
-          >
+          <Grid item xs={10} md={8} alignSelf={"end"}>
             <Typography variant="body2" style={{ fontWeight: 600 }}>
               {this.transformation
                 ? this.transformation.title +
@@ -309,14 +303,7 @@ class CoordinatesTransformRow extends React.PureComponent {
                 : ""}
             </Typography>
           </Grid>
-          <Grid
-            container
-            justifyContent={"end"}
-            size={{
-              xs: 2,
-              md: 4,
-            }}
-          >
+          <Grid container item xs={2} md={4} justifyContent={"end"}>
             <HajkToolTip title="Kopiera till urklipp">
               <StyledIconButton
                 onClick={() => {
@@ -327,12 +314,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               </StyledIconButton>
             </HajkToolTip>
           </Grid>
-          <Grid
-            size={{
-              xs: 12,
-              md: 6,
-            }}
-          >
+          <Grid item xs={12} md={6}>
             <NumericFormat
               label={this.props.transformation.xtitle}
               margin="dense"
@@ -355,12 +337,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               }}
             />
           </Grid>
-          <Grid
-            size={{
-              xs: 12,
-              md: 6,
-            }}
-          >
+          <Grid item xs={12} md={6}>
             <NumericFormat
               label={this.props.transformation.ytitle}
               margin="dense"

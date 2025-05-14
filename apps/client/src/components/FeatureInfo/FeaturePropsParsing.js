@@ -169,12 +169,11 @@ export default class FeaturePropsParsing {
         // What you see on the next line is what we call "hängslen och livrem" in Sweden.
         // (The truth is it's all needed - this.properties may not be an Array, it may not have a key named
         // "placeholder", but if it does, we can't be sure that it will have the replace() method (as only Strings have it).)
-        // If not a string, return the value as-is…
-        // …unless it's undefined or null - in that case, return an empty string.
         this.properties?.[placeholder]?.replace?.(/=/g, "&equal;") || // If replace() exists, it's a string, so we can revert our equal signs.
           this.properties[placeholder] != null
           ? this.properties[placeholder]
-          : ""
+          : "" // If not a string, return the value as-is…
+        // …unless it's undefined or null - in that case, return an empty string.
       );
     }
   };

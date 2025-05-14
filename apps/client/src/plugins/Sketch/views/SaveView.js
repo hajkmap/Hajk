@@ -38,13 +38,13 @@ const NotSupportedView = ({ globalObserver }) => {
   };
   return (
     <Grid container spacing={2}>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <Information
           text="Det ser ut som att du har valt att inte tillåta funktionella kakor. På grund av
         detta så kan du inte spara dina rit-objekt. Klicka nedan för att ändra inställningarna."
         />
       </Grid>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <Button
           fullWidth
           variant="contained"
@@ -177,7 +177,7 @@ const SketchSaver = (props) => {
   return (
     <Paper style={{ padding: 8 }}>
       <Grid container alignItems="center" justifyContent="space-between">
-        <Grid size={8}>
+        <Grid item xs={8}>
           <HajkToolTip title="Ange att namn så att arbetsytan kan identifieras senare.">
             <TextField
               size="small"
@@ -190,7 +190,7 @@ const SketchSaver = (props) => {
             />
           </HajkToolTip>
         </Grid>
-        <Grid container justifyContent="flex-end" size={3}>
+        <Grid container item xs={3} justifyContent="flex-end">
           <HajkToolTip title={saveButtonStateTest.message}>
             <span>
               <Button
@@ -222,18 +222,19 @@ const SavedSketch = ({
     <Zoom in appear>
       <StyledPaper>
         <Grid container justifyContent="space-between" alignItems="center">
-          <Grid size={8}>
+          <Grid item xs={8}>
             <HajkToolTip title={sketchInfo.title}>
               <Grid
+                item
+                xs={12}
                 sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
-                size={12}
               >
                 <Typography variant="button" noWrap>
                   {sketchInfo.title}
                 </Typography>
               </Grid>
             </HajkToolTip>
-            <Grid size={12}>
+            <Grid item xs={12}>
               <HajkToolTip
                 title={`Arbetsytan uppdaterades senast ${sketchInfo.date}`}
               >
@@ -244,7 +245,7 @@ const SavedSketch = ({
             </Grid>
           </Grid>
 
-          <Grid container justifyContent="flex-end" size={4}>
+          <Grid container item xs={4} justifyContent="flex-end">
             <HajkToolTip title="Klicka för att radera arbetsytan.">
               <IconButton size="small" onClick={handleRemoveClick}>
                 <DeleteIcon />
@@ -293,14 +294,14 @@ const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
   };
   return (
     <Grid container>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <Typography variant="caption">
           {savedSketches.length === 0
             ? "Inga sparade arbetsytor hittades."
             : "Sparade arbetsytor:"}
         </Typography>
       </Grid>
-      <Grid size={12}>
+      <Grid item xs={12}>
         {savedSketches.map((sketch) => {
           return (
             <SavedSketch
@@ -345,10 +346,10 @@ const SaveView = ({ globalObserver, model, id, functionalCookiesOk }) => {
     <NotSupportedView globalObserver={globalObserver} />
   ) : (
     <Grid container spacing={2}>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <Information text={activity.information} />
       </Grid>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <SketchSaver
           model={model}
           sketchName={sketchName}
@@ -357,7 +358,7 @@ const SaveView = ({ globalObserver, model, id, functionalCookiesOk }) => {
           setSavedSketches={setSavedSketches}
         />
       </Grid>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <SavedSketchList
           model={model}
           savedSketches={savedSketches}

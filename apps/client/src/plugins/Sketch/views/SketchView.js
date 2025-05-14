@@ -424,14 +424,16 @@ const SketchView = (props) => {
       // of 10 set. In this plugin we want to render the <ActivityMenu /> at the
       // border of the window, hence we must set a negative margin-left of 10.
       <Grid container>
-        <Grid style={{ marginLeft: -PLUGIN_MARGIN }} size={3}>
+        <Grid item xs={3} style={{ marginLeft: -PLUGIN_MARGIN }}>
           <ActivityMenu
             pluginPosition={pluginPosition}
             activityId={activityId}
             setActivityId={setActivityId}
           />
         </Grid>
-        <Grid size={9}>{renderCurrentView()}</Grid>
+        <Grid item xs={9}>
+          {renderCurrentView()}
+        </Grid>
       </Grid>
     );
   };
@@ -442,8 +444,10 @@ const SketchView = (props) => {
       // of 10 set. In this plugin we want to render the <ActivityMenu /> at the
       // border of the window, hence we must set a negative margin-right of 10.
       <Grid container justifyContent="flex-end">
-        <Grid size={9}>{renderCurrentView()}</Grid>
-        <Grid style={{ marginRight: -PLUGIN_MARGIN }} size={3}>
+        <Grid item xs={9}>
+          {renderCurrentView()}
+        </Grid>
+        <Grid item xs={3} style={{ marginRight: -PLUGIN_MARGIN }}>
           <ActivityMenu
             pluginPosition={pluginPosition}
             activityId={activityId}

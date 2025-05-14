@@ -115,7 +115,7 @@ const BufferView = (props) => {
 
   const renderPrevButton = () => {
     return (
-      <Grid size={6}>
+      <Grid item xs={6}>
         <Button
           fullWidth
           disabled={contextValue.state.activeStep === 0}
@@ -133,7 +133,7 @@ const BufferView = (props) => {
         drawModel
           ?.getAllDrawnFeatures()
           ?.filter((f) => f?.get("bufferedFeature")).length !== 0) && (
-        <Grid size={12}>
+        <Grid item xs={12}>
           <Button
             fullWidth
             onClick={() => {
@@ -159,7 +159,7 @@ const BufferView = (props) => {
           <StepContent>
             <Grid container spacing={2} direction="row">
               {renderClearButton()}
-              <Grid size={12}>
+              <Grid item xs={12}>
                 <HajkToolTip
                   title={
                     !toggleBufferBtn.toggle
@@ -187,7 +187,7 @@ const BufferView = (props) => {
                 </HajkToolTip>
               </Grid>
               {renderPrevButton()}
-              <Grid size={6}>
+              <Grid item xs={6}>
                 <Button
                   fullWidth
                   variant="contained"
@@ -204,7 +204,7 @@ const BufferView = (props) => {
           <StepLabel>Ange bufferavstånd</StepLabel>
           <StepContent>
             <Grid container spacing={2} direction="row">
-              <Grid size={12}>
+              <Grid item xs={12}>
                 <TextField
                   variant="outlined"
                   fullWidth
@@ -214,7 +214,7 @@ const BufferView = (props) => {
                 />
               </Grid>
               {renderPrevButton()}
-              <Grid size={6}>
+              <Grid item xs={6}>
                 <Button
                   fullWidth
                   variant="contained"
@@ -236,7 +236,7 @@ const BufferView = (props) => {
           <StepContent>
             <Grid container spacing={2} direction="row">
               {renderPrevButton()}
-              <Grid size={6}>
+              <Grid item xs={6}>
                 <Button
                   fullWidth
                   variant="contained"
@@ -252,7 +252,7 @@ const BufferView = (props) => {
                   Rensa
                 </Button>
               </Grid>
-              <Grid size={12}>
+              <Grid item xs={12}>
                 <Button
                   fullWidth
                   variant="contained"

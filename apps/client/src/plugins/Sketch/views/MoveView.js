@@ -85,13 +85,13 @@ const FeatureMoveSelector = (props) => {
 
   return (
     <Paper sx={{ p: 1, mt: 1 }}>
-      <Grid container justifyContent="center" alignItems="center">
-        <Grid sx={{ mb: 2 }} size={12}>
+      <Grid container item justifyContent="center" alignItems="center">
+        <Grid item xs={12} sx={{ mb: 2 }}>
           <Typography variant="body2" align="center">
             Fast förflyttning
           </Typography>
         </Grid>
-        <Grid sx={{ mb: 2 }} size={12}>
+        <Grid item xs={12} sx={{ mb: 2 }}>
           <HajkToolTip title="Ange hur många meter du vill flytta objekten.">
             <TextField
               label="Förflyttningsavstånd (meter)"
@@ -104,7 +104,7 @@ const FeatureMoveSelector = (props) => {
             />
           </HajkToolTip>
         </Grid>
-        <Grid size={12}>
+        <Grid item xs={12}>
           <HajkToolTip title="Ange i vilken riktning du vill flytta objekten. 0 grader är rakt norrut, 90 grader är rakt åt öster, osv.">
             <TextField
               label="Förflyttningsriktning (grader)"
@@ -118,7 +118,7 @@ const FeatureMoveSelector = (props) => {
           </HajkToolTip>
         </Grid>
         <Grid container spacing={1} sx={{ mt: 1 }}>
-          <Grid size={6}>
+          <Grid item xs={6}>
             <Button
               variant="contained"
               fullWidth
@@ -129,7 +129,7 @@ const FeatureMoveSelector = (props) => {
               Ångra
             </Button>
           </Grid>
-          <Grid size={6}>
+          <Grid item xs={6}>
             <Button
               variant="contained"
               fullWidth
@@ -194,14 +194,14 @@ const FeatureRotateSelector = (props) => {
         pointerEvents: props.disabled ? "none" : "auto",
       }}
     >
-      <Grid container justifyContent="center" alignItems="center">
-        <Grid sx={{ mb: 1 }} size={12}>
+      <Grid container item justifyContent="center" alignItems="center">
+        <Grid item xs={12} sx={{ mb: 1 }}>
           <Typography variant="body2" align="center">
             Rotera
           </Typography>
         </Grid>
 
-        <Grid sx={{ pr: 1 }} size={6}>
+        <Grid item xs={6} sx={{ pr: 1 }}>
           <HajkToolTip title="Ange hur många grader du ska rotera objekten.">
             <OutlinedInput
               variant="outlined"
@@ -214,7 +214,7 @@ const FeatureRotateSelector = (props) => {
             />
           </HajkToolTip>
         </Grid>
-        <Grid sx={{ pr: 1 / 4 }} size={3}>
+        <Grid item xs={3} sx={{ pr: 1 / 4 }}>
           <Button
             disabled={props.disabled}
             variant="contained"
@@ -231,7 +231,7 @@ const FeatureRotateSelector = (props) => {
             <RotateLeftIcon />
           </Button>
         </Grid>
-        <Grid sx={{ pl: 1 / 4 }} size={3}>
+        <Grid item xs={3} sx={{ pl: 1 / 4 }}>
           <Button
             disabled={props.disabled}
             variant="contained"
@@ -290,10 +290,10 @@ const MoveView = (props) => {
   const activity = props.model.getActivityFromId(props.id);
   return (
     <Grid container>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <Information text={activity.information} />
       </Grid>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <TranslateToggler
           translateEnabled={translateEnabled}
           setTranslateEnabled={setTranslateEnabled}

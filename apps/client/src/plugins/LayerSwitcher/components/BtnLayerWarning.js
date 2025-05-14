@@ -9,23 +9,20 @@ const BtnLayerWarning = ({ ...props }) => (
     title="Lagret kunde inte laddas in. Kartservern svarar inte."
   >
     <LsIconButton
-      sx={(theme) => ({
+      sx={{
         marginTop: "5px",
         marginRight: "2px",
         p: "3px",
-        backgroundColor: theme.palette.grey[200],
-        ...theme.applyStyles("dark", {
-          backgroundColor: theme.palette.grey[800],
-        }),
-      })}
+        backgroundColor: (theme) =>
+          theme.palette.mode === "dark"
+            ? theme.palette.grey[800]
+            : theme.palette.grey[200],
+      }}
       {...props}
     >
       <WarningAmberOutlinedIcon
         fontSize="small"
-        sx={(theme) => ({
-          marginTop: "-1px",
-          color: theme.palette.warning.main,
-        })}
+        sx={{ marginTop: "-1px", color: (theme) => theme.palette.warning.main }}
       />
     </LsIconButton>
   </HajkToolTip>

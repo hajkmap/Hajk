@@ -481,7 +481,7 @@ class GeosuiteExportView extends React.PureComponent {
             padding: "0px 0px 0px 0px",
           }}
         >
-          <Grid>
+          <Grid item>
             <Button
               variant="text"
               aria-label="Rensa"
@@ -491,7 +491,7 @@ class GeosuiteExportView extends React.PureComponent {
               {"Rensa"}
             </Button>
           </Grid>
-          <Grid>
+          <Grid item>
             <Button
               variant="text"
               aria-label="Välj Alla"
@@ -525,12 +525,12 @@ class GeosuiteExportView extends React.PureComponent {
   renderPending(displayText) {
     return (
       <Grid container direction="row" justify="center">
-        <Grid size={12}>
+        <Grid item xs={12}>
           <Box display="flex" justifyContent="center">
             <CircularProgress variant="indeterminate" size={30} />
           </Box>
         </Grid>
-        <Grid>
+        <Grid item>
           <Typography>{displayText}</Typography>
         </Grid>
       </Grid>
@@ -590,7 +590,7 @@ class GeosuiteExportView extends React.PureComponent {
             .sort((a, b) => (a.title > b.title ? 1 : -1))
             .map((document) => {
               return (
-                <GridCheckBoxItem key={document.id}>
+                <GridCheckBoxItem item key={document.id}>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -644,23 +644,11 @@ class GeosuiteExportView extends React.PureComponent {
               {"Borrhålsdata i GeoSuite-format"}
             </TypographySubheading>
           </Grid>
-          <Typography
-            sx={{
-              marginBottom: "16px",
-            }}
-          >
-            {boreholeIntro}
-          </Typography>
-          <Typography
-            sx={{
-              marginBottom: "16px",
-            }}
-          >
-            {boreholeDescription}
-          </Typography>
+          <Typography paragraph>{boreholeIntro}</Typography>
+          <Typography paragraph>{boreholeDescription}</Typography>
           {this.renderBoreholeOrderResult()}
 
-          <Grid style={{ marginTop: "20px" }} size={12}>
+          <Grid item xs={12} style={{ marginTop: "20px" }}>
             <Accordion
               elevation={0}
               style={{ paddingLeft: "0px", marginLeft: "0px" }}
@@ -684,11 +672,11 @@ class GeosuiteExportView extends React.PureComponent {
               </AccordionSummary>
               <AccordionDetails style={{ padding: "0px" }}>
                 <Grid container>
-                  <Grid size={12}>
+                  <Grid item xs={12}>
                     <Typography>{deliveryInformationText}</Typography>
                   </Grid>
                   {deliveryInformationLink.linkText && (
-                    <Grid size={12}>
+                    <Grid item xs={12}>
                       <Link
                         href={deliveryInformationLink.linkHref || null}
                         target="_blank"
@@ -704,7 +692,7 @@ class GeosuiteExportView extends React.PureComponent {
             </Accordion>
           </Grid>
 
-          <Grid style={{ marginTop: "16px" }} size={12}>
+          <Grid item xs={12} style={{ marginTop: "16px" }}>
             <FormControl fullWidth>
               <FormLabel style={{ padding: "4px 0px" }}>
                 Din e-postadress
@@ -1018,12 +1006,7 @@ class GeosuiteExportView extends React.PureComponent {
               <StepLabel>Markera område</StepLabel>
               <StepContent>
                 <div>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      marginBottom: "16px",
-                    }}
-                  >
+                  <Typography variant="caption" paragraph>
                     {description}
                   </Typography>
                   {this.renderNextAndBackButtons()}

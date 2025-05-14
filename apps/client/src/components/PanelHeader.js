@@ -5,29 +5,19 @@ import CloseIcon from "@mui/icons-material/Close";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import AspectRatioIcon from "@mui/icons-material/AspectRatio";
-import { Typography, IconButton, Box } from "@mui/material";
+import { Hidden, Typography, IconButton, Box } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 
-const StyledHeader = styled("header")(({ theme }) => ({
-  padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
+const StyledHeader = styled("header")(({ mode, theme }) => ({
+  padding: `${
+    mode === "minimized" ? theme.spacing(0) : theme.spacing(1)
+  } ${theme.spacing(2)}`,
   borderBottom: `4px solid ${theme.palette.primary.main}`,
   userSelect: "none",
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   minHeight: 46,
-  variants: [
-    {
-      props: {
-        mode: "minimized",
-      },
-      style: {
-        padding: {
-          padding: theme.spacing(0),
-        },
-      },
-    },
-  ],
 }));
 
 class PanelHeader extends Component {
@@ -91,7 +81,7 @@ class PanelHeader extends Component {
                 <FullscreenExitIcon />
               </IconButton>
             ))}
-          <div style={{ display: { xs: "none", sm: "block" } }}>
+          <Hidden smDown>
             {allowMaximizedWindow && ( // If we're not on mobile and config allows fit-to-screen…
               <IconButton size="small" onClick={this.props.onMaximize}>
                 <span style={visuallyHidden}>Maximera fönster</span>
@@ -99,7 +89,7 @@ class PanelHeader extends Component {
                 />
               </IconButton>
             )}
-          </div>
+          </Hidden>
           <IconButton size="small" onClick={this.props.onClose}>
             <span style={visuallyHidden}>Stäng fönster</span>
             <CloseIcon />

@@ -48,6 +48,7 @@ const SliderContainer = styled("div")(({ theme }) => ({
   display: "flex",
   paddingRight: theme.spacing(1),
   alignItems: "center",
+
   "& > div:first-of-type": {
     flex: "0 0 35%",
     marginRight: theme.spacing(2),
@@ -242,14 +243,12 @@ class FirSearchNeighborView extends React.PureComponent {
                       }
                     }}
                     size="small"
-                    variant="outlined"
-                    slotProps={{
-                      input: {
-                        endAdornment: (
-                          <InputAdornment position="end">meter</InputAdornment>
-                        ),
-                      },
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">meter</InputAdornment>
+                      ),
                     }}
+                    variant="outlined"
                   />
                   <Slider
                     value={

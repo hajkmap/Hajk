@@ -9,6 +9,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Typography } from "@mui/material";
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
+import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Collapse from "@mui/material/Collapse";
 import KirSearchResultItemView from "./KirSearchResultItemView";
@@ -17,7 +18,6 @@ import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CircularProgress from "@mui/material/CircularProgress";
-import ListItemButton from "@mui/material/ListItemButton";
 
 const LoaderContainer = styled("div")(({ theme }) => ({
   paddingLeft: theme.spacing(2),
@@ -369,7 +369,8 @@ class KirSearchResultsView extends React.PureComponent {
                     className={data.open ? "isopen" : "isclosed"}
                   >
                     {index > 0 ? <Divider /> : ""}
-                    <ListItemButton
+                    <ListItem
+                      button
                       onClick={(e) => {
                         this.handleItemClick(e, data);
                       }}
@@ -394,7 +395,7 @@ class KirSearchResultsView extends React.PureComponent {
                           <DeleteIcon />
                         </StyledIconButton>
                       </ListItemSecondaryAction>
-                    </ListItemButton>
+                    </ListItem>
                     <Collapse in={data.open} timeout="auto" unmountOnExit>
                       <Divider />
                       <ResultItemData>

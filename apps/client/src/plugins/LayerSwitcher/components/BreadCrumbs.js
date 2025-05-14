@@ -11,7 +11,7 @@ import IconButton from "@mui/material/IconButton";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { ScrollMenu } from "react-horizontal-scrolling-menu";
+import ScrollMenu from "react-horizontal-scrolling-menu";
 
 // A HOC that pipes isMobile to the children. See this as a proposed
 // solution. It is not pretty, but if we move this to a separate file
@@ -182,9 +182,10 @@ class BreadCrumbs extends Component {
             {layers.length > 0 ? (
               <Grid
                 container
+                item
+                xs={12}
                 justifyContent="center"
                 sx={{ marginTop: 1, marginBottom: 1 }}
-                size={12}
               >
                 <Button variant="contained" onClick={this.clear}>
                   Ta bort allt innehåll

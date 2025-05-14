@@ -16,11 +16,11 @@ const FeatureTitleEditor = ({ feature, model, drawModel }) => {
   // We don't want to provide an opportunity to set a title on a text-feature.
   // (Since these already consist of only text, and the title might confuse the users).
   return feature.get("DRAW_METHOD") !== "Text" ? (
-    <Grid style={{ marginTop: 16 }} size={12}>
-      <Grid style={{ marginBottom: 4 }} size={12}>
+    <Grid item xs={12} style={{ marginTop: 16 }}>
+      <Grid item xs={12} style={{ marginBottom: 4 }}>
         <Typography align="center">Titel</Typography>
       </Grid>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <HajkToolTip title="Angle en titel som kan användas för att identifiera objektet.">
           <TextField
             fullWidth

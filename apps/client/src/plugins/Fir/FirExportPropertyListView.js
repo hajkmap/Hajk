@@ -17,22 +17,10 @@ import Collapse from "@mui/material/Collapse";
 import CircularProgress from "@mui/material/CircularProgress";
 import { hfetch } from "../../utils/FetchWrapper";
 
-const ButtonWithLoader = styled(Button)(({ theme }) => ({
+const ButtonWithLoader = styled(Button)(({ theme, loading }) => ({
   "& img": {
-    opacity: 1.0,
+    opacity: loading === "true" ? 0.3 : 1.0,
   },
-  variants: [
-    {
-      props: {
-        loading: "true",
-      },
-      style: {
-        "& img": {
-          opacity: 0.3,
-        },
-      },
-    },
-  ],
 }));
 
 const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({

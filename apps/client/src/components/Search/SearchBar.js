@@ -337,15 +337,17 @@ class SearchBar extends React.PureComponent {
                   }
                 }}
               >
-                <Grid size={1}>{this.getOriginBasedIcon(option.origin)}</Grid>
-                <Grid container size={11}>
-                  <Grid size={12}>
+                <Grid item xs={1}>
+                  {this.getOriginBasedIcon(option.origin)}
+                </Grid>
+                <Grid container item xs={11}>
+                  <Grid item xs={12}>
                     {this.getHighlightedACE(
                       searchString,
                       decodeCommas(option.autocompleteEntry)
                     )}
                   </Grid>
-                  <Grid size={12}>
+                  <Grid item xs={12}>
                     <FormHelperText>{option.dataset}</FormHelperText>
                   </Grid>
                 </Grid>
@@ -418,93 +420,88 @@ class SearchBar extends React.PureComponent {
         placeholder={placeholder}
         autoFocus={this.props.options?.autofocusOnStart ?? false}
         onKeyPress={handleSearchBarKeyPress}
-        slotProps={{
-          input: {
-            ...params.InputProps,
-            ...disableUnderline,
-            style: { margin: 0 },
-            notched: isMobile ? null : false,
-            endAdornment: (
-              <>
-                {loading ? (
-                  <CircularProgress color="inherit" size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-                {showFailedWFSMessage &&
-                  this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
-                {!showSearchResults ? (
-                  <HajkToolTip title="Utför sökning">
+        InputLabelProps={{ shrink: true }}
+        InputProps={{
+          ...params.InputProps,
+          ...disableUnderline,
+          style: { margin: 0 },
+          notched: isMobile ? null : false,
+          endAdornment: (
+            <>
+              {loading ? <CircularProgress color="inherit" size={20} /> : null}
+              {params.InputProps.endAdornment}
+              {showFailedWFSMessage &&
+                this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
+              {!showSearchResults ? (
+                <HajkToolTip title="Utför sökning">
+                  <IconButton
+                    size="small"
+                    onClick={handleOnClickOrKeyboardSearch}
+                  >
+                    <span style={visuallyHidden}>Utför sökning</span>
+                    <SearchIcon />
+                  </IconButton>
+                </HajkToolTip>
+              ) : (
+                <>
+                  <HajkToolTip title={expandMessage}>
                     <IconButton
+                      onClick={(e) => {
+                        toggleCollapseSearchResults();
+                      }}
                       size="small"
-                      onClick={handleOnClickOrKeyboardSearch}
                     >
-                      <span style={visuallyHidden}>Utför sökning</span>
-                      <SearchIcon />
+                      <span style={visuallyHidden}>{expandMessage}</span>
+                      {resultPanelCollapsed ? (
+                        <ExpandMoreIcon />
+                      ) : (
+                        <ExpandLessIcon />
+                      )}
                     </IconButton>
                   </HajkToolTip>
-                ) : (
-                  <>
-                    <HajkToolTip title={expandMessage}>
-                      <IconButton
-                        onClick={(e) => {
-                          toggleCollapseSearchResults();
-                        }}
-                        size="small"
-                      >
-                        <span style={visuallyHidden}>{expandMessage}</span>
-                        {resultPanelCollapsed ? (
-                          <ExpandMoreIcon />
-                        ) : (
-                          <ExpandLessIcon />
-                        )}
-                      </IconButton>
-                    </HajkToolTip>
-                    <HajkToolTip title={toggleResultsLayerVisibilityMessage}>
-                      <IconButton
-                        onClick={(e) => {
-                          this.toggleResultsLayerVisibility();
-                        }}
-                        size="small"
-                      >
-                        <span style={visuallyHidden}>
-                          {toggleResultsLayerVisibilityMessage}
-                        </span>
-                        {this.state.resultsLayerVisible ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </IconButton>
-                    </HajkToolTip>
-                  </>
-                )}
-                {searchString.length > 0 ||
-                showSearchResults ||
-                searchActive !== "" ? (
-                  <HajkToolTip title="Rensa sökning">
-                    <IconButton onClick={handleOnClear} size="small">
-                      <span style={visuallyHidden}>Rensa sökning</span>
-                      <ClearIcon />
+                  <HajkToolTip title={toggleResultsLayerVisibilityMessage}>
+                    <IconButton
+                      onClick={(e) => {
+                        this.toggleResultsLayerVisibility();
+                      }}
+                      size="small"
+                    >
+                      <span style={visuallyHidden}>
+                        {toggleResultsLayerVisibilityMessage}
+                      </span>
+                      {this.state.resultsLayerVisible ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
                     </IconButton>
                   </HajkToolTip>
-                ) : (
-                  <SearchTools
-                    map={map}
-                    searchSources={searchSources}
-                    setSearchSources={setSearchSources}
-                    app={app}
-                    searchOptions={searchOptions}
-                    searchTools={this.props.searchTools}
-                    searchModel={searchModel}
-                    updateSearchOptions={updateSearchOptions}
-                    enabledSearchOptions={enabledSearchOptions}
-                  />
-                )}
-              </>
-            ),
-          },
-
-          inputLabel: { shrink: true },
+                </>
+              )}
+              {searchString.length > 0 ||
+              showSearchResults ||
+              searchActive !== "" ? (
+                <HajkToolTip title="Rensa sökning">
+                  <IconButton onClick={handleOnClear} size="small">
+                    <span style={visuallyHidden}>Rensa sökning</span>
+                    <ClearIcon />
+                  </IconButton>
+                </HajkToolTip>
+              ) : (
+                <SearchTools
+                  map={map}
+                  searchSources={searchSources}
+                  setSearchSources={setSearchSources}
+                  app={app}
+                  searchOptions={searchOptions}
+                  searchTools={this.props.searchTools}
+                  searchModel={searchModel}
+                  updateSearchOptions={updateSearchOptions}
+                  enabledSearchOptions={enabledSearchOptions}
+                />
+              )}
+            </>
+          ),
         }}
       />
     );
@@ -524,20 +521,12 @@ class SearchBar extends React.PureComponent {
             this.gridRef.current
           );
         }}
-        sx={[
-          {
-            width: 400,
-          },
-          renderElsewhere
-            ? {
-                height: "auto",
-              }
-            : {
-                height: 6,
-              },
-        ]}
+        sx={{
+          width: 400,
+          height: (theme) => (renderElsewhere ? "auto" : theme.spacing(6)),
+        }}
       >
-        <Grid>
+        <Grid item>
           <Paper elevation={isMobile ? 0 : 1}>
             {this.renderAutoComplete()}
           </Paper>

@@ -203,32 +203,23 @@ function DrawOrder({ display, app, map, localObserver, options }) {
       // This class is used to style specific elements when the tab is active
       // If you search for this class in the codebase, you can find related style-fixes.
       className={"ls-draworder-tab-view"}
-      sx={[
-        {
-          height: "inherit",
-          maxHeight: "inherit",
-          overflowY: "auto",
-        },
-        display
-          ? {
-              display: "block",
-            }
-          : {
-              display: "none",
-            },
-      ]}
+      sx={{
+        display: display ? "block" : "none",
+        height: "inherit",
+        maxHeight: "inherit",
+        overflowY: "auto",
+      }}
     >
       <Box
-        sx={(theme) => ({
+        sx={{
           pr: 2,
           pl: 2,
           py: 1,
-          backgroundColor: theme.palette.grey[100],
-          borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-          ...theme.applyStyles("dark", {
-            backgroundColor: "#373737",
-          }),
-        })}
+          backgroundColor: (theme) =>
+            theme.palette.mode === "dark" ? "#373737" : theme.palette.grey[100],
+          borderBottom: (theme) =>
+            `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+        }}
       >
         <Stack direction="row" alignItems="center">
           {options.enableSystemLayersSwitch && (

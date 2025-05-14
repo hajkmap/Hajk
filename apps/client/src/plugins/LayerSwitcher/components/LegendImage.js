@@ -64,19 +64,11 @@ const ImageWithLoading = ({ src }) => {
         src={src}
         onLoad={handleLoad}
         onError={handleError}
-        sx={[
-          {
-            display: loading || error ? "none" : "block",
-            borderRadius: "2px",
-          },
-          imageWidth
-            ? {
-                width: `${imageWidth}px`,
-              }
-            : {
-                width: "auto",
-              },
-        ]}
+        sx={{
+          display: loading || error ? "none" : "block",
+          borderRadius: "2px",
+          width: imageWidth ? `${imageWidth}px` : "auto",
+        }}
         alt="Teckenförklaring"
       />
     </div>
@@ -95,18 +87,7 @@ export default function LegendImage({ open, src }) {
 
   return (
     <Collapse
-      sx={[
-        {
-          ml: "1px",
-        },
-        open
-          ? {
-              py: 1,
-            }
-          : {
-              py: 0,
-            },
-      ]}
+      sx={{ py: open ? 1 : 0, ml: "1px" }}
       in={open}
       timeout={50}
       unmountOnExit

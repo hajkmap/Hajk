@@ -10,23 +10,22 @@ const ScrollToTop = (props) => {
     <Fab
       size="small"
       onClick={props.onClick}
-      sx={[
-        (theme) => ({
-          position: "fixed",
-          bottom: theme.spacing(2),
-          right: theme.spacing(3),
-        }),
-        props.color && {
+      sx={{
+        position: "fixed",
+        bottom: (theme) => theme.spacing(2),
+        right: (theme) => theme.spacing(3),
+        ...(props.color && {
           backgroundColor: props.color,
           "&:hover": {
             backgroundColor: darken(props.color, 0.3),
           },
-        },
-      ]}
+        }),
+      }}
     >
       <Box sx={visuallyHidden}>Scrolla till toppen av dokumentet</Box>
       <NavigationIcon />
     </Fab>
   );
 };
+
 export default ScrollToTop;

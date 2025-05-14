@@ -228,30 +228,20 @@ function LayerItem({
       }}
     >
       <Box
-        sx={[
-          {
-            position: "relative",
-            alignItems: "flex-start",
-            borderBottom: (theme) =>
-              drawOrderItem() && showSublayers
-                ? "none"
-                : drawOrderItem() && !legendIsActive
-                  ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
-                  : "none",
-            display: "flex",
+        sx={{
+          position: "relative",
+          alignItems: "flex-start",
+          borderBottom: (theme) =>
+            drawOrderItem() && showSublayers
+              ? "none"
+              : drawOrderItem() && !legendIsActive
+                ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
+                : "none",
+          display: "flex",
+          "&:hover .dragInidcatorIcon": {
+            opacity: draggable ? 1 : 0,
           },
-          draggable
-            ? {
-                "&:hover .dragInidcatorIcon": {
-                  opacity: 1,
-                },
-              }
-            : {
-                "&:hover .dragInidcatorIcon": {
-                  opacity: 0,
-                },
-              },
-        ]}
+        }}
       >
         {draggable && (
           <LsIconButton
@@ -304,14 +294,12 @@ function LayerItem({
             />
             <ListItemText
               primary={layerCaption}
-              slotProps={{
-                primary: {
-                  pr: 5,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  variant: "body1",
-                  fontWeight: layerIsToggled && !draggable ? "bold" : "inherit",
-                },
+              primaryTypographyProps={{
+                pr: 5,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                variant: "body1",
+                fontWeight: layerIsToggled && !draggable ? "bold" : "inherit",
               }}
             />
             <ListItemSecondaryAction
@@ -338,31 +326,19 @@ function LayerItem({
         </ListItemButton>
       </Box>
       <Box
-        sx={[
-          expandableSection
-            ? {
-                paddingLeft: "30px",
-              }
-            : {
-                paddingLeft: 0,
-              },
-          expandableSection
-            ? {
-                ".ls-draworder-tab-view &": {
-                  paddingLeft: "30px",
-                },
-              }
-            : {
-                ".ls-draworder-tab-view &": {
-                  paddingLeft: "20px",
-                },
-              },
-        ]}
+        sx={{
+          paddingLeft: expandableSection ? "30px" : 0,
+          ".ls-draworder-tab-view &": {
+            // special styling for draw order tab
+            paddingLeft: expandableSection ? "30px" : "20px",
+          },
+        }}
       >
         {layerShouldShowLegendIcon(layerType, layerIsFakeMapLayer) ? null : (
           <LegendImage src={legendUrls} open={legendIsActive}></LegendImage>
         )}
       </Box>
+
       {subLayersSection && subLayersSection}
     </div>
   );

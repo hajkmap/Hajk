@@ -45,7 +45,7 @@ const ListBoxSelector = (props) => {
   }
 
   return (
-    <Grid container sx={{ padding: 1 }} size={12}>
+    <Grid container item xs={12} sx={{ padding: 1 }}>
       <FormControl size="small" fullWidth required={!parameter.optional}>
         <InputLabel variant="outlined" id={`fme-listbox-label-${index}`}>
           {parameter.description}

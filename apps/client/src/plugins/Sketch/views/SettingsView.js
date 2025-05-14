@@ -58,7 +58,7 @@ const SettingsView = (props) => {
 
   return (
     <Grid container>
-      <Grid sx={{ marginTop: 2 }} size={12}>
+      <Grid item xs={12} sx={{ marginTop: 2 }}>
         <FormControl component="fieldset">
           <FormLabel focused={false} component="legend">
             Generella inställningar
@@ -104,7 +104,7 @@ const SettingsView = (props) => {
           </HajkToolTip>
         </FormControl>
       </Grid>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <FormControl component="fieldset">
           <FormLabel focused={false} component="legend">
             Mätinställningar

@@ -69,7 +69,11 @@ const FeaturesListView = (props) => {
                 component="li"
               >
                 <ListItemAvatar>
-                  <Avatar sx={[iconBgColor && { bgcolor: iconBgColor }]}>
+                  <Avatar
+                    sx={{
+                      ...(iconBgColor && { bgcolor: iconBgColor }),
+                    }}
+                  >
                     <FeatureIcon
                       iconNameOrUrl={featureCollection.infoclickIcon}
                     />
@@ -100,4 +104,5 @@ const FeaturesListView = (props) => {
     )
   ) : null;
 };
+
 export default FeaturesListView;

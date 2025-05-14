@@ -99,7 +99,7 @@ class AnchorView extends React.PureComponent {
     return (
       <Box sx={{ width: "100%", height: "100%" }}>
         <Grid container spacing={2} columns={12}>
-          <Grid size={12}>
+          <Grid item xs={12}>
             <Typography>
               Skapa en länk med kartans synliga lager, aktuella zoomnivå och
               utbredning.
@@ -109,7 +109,7 @@ class AnchorView extends React.PureComponent {
         {allowCreatingCleanUrls && (
           <Box sx={{ ml: { xs: 0, sm: 3 } }}>
             <Grid container spacing={2} columns={12}>
-              <Grid size={12}>
+              <Grid item xs={12}>
                 <RadioGroup
                   aria-label="copy-url"
                   name="copy-url"
@@ -134,7 +134,7 @@ class AnchorView extends React.PureComponent {
         )}
         <Box sx={{ ml: { xs: 0, sm: 7 }, mr: { xs: 0, sm: 7 } }}>
           <Grid container spacing={2} columns={12}>
-            <Grid size={12}>
+            <Grid item xs={12}>
               <StyledTextField
                 fullWidth={true}
                 id="anchorUrl"
@@ -151,7 +151,7 @@ class AnchorView extends React.PureComponent {
         {document.queryCommandSupported("copy") && (
           <Box sx={{ ml: { xs: 0, sm: 7 }, mr: { xs: 0, sm: 7 } }}>
             <Grid container spacing={2} columns={12}>
-              <Grid size={6}>
+              <Grid item xs={6}>
                 <HajkToolTip title="Kopiera länk till urklipp">
                   <Button
                     fullWidth
@@ -165,7 +165,7 @@ class AnchorView extends React.PureComponent {
                   </Button>
                 </HajkToolTip>
               </Grid>
-              <Grid size={6}>
+              <Grid item xs={6}>
                 <HajkToolTip title="Öppna länk i nytt fönster">
                   <Button
                     fullWidth
@@ -191,7 +191,7 @@ class AnchorView extends React.PureComponent {
             }}
           >
             <Grid container spacing={2} columns={12}>
-              <Grid size={12}>
+              <Grid item xs={12}>
                 <Paper sx={{ p: 1, mb: 2 }}>
                   <Grid
                     container
@@ -199,8 +199,10 @@ class AnchorView extends React.PureComponent {
                     alignItems="center"
                     justifyContent="space-between"
                   >
-                    <Grid size={6}>Slå på QR-kod</Grid>
-                    <Grid textAlign="end" size={6}>
+                    <Grid item xs={6}>
+                      Slå på QR-kod
+                    </Grid>
+                    <Grid item xs={6} textAlign="end">
                       <HajkToolTip title="Slå på QR-kod">
                         <Switch
                           variant="contained"
@@ -210,7 +212,7 @@ class AnchorView extends React.PureComponent {
                       </HajkToolTip>
                     </Grid>
                     {this.state.showQr && (
-                      <Grid size={12}>
+                      <Grid item xs={12}>
                         <Box
                           sx={{
                             ml: { xs: 0, sm: 7 },

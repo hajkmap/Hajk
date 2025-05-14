@@ -1,13 +1,18 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withTheme } from "@emotion/react";
-import { Icon, ListItemIcon, ListItemText } from "@mui/material";
+
+import {
+  Hidden,
+  Icon,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
 
 import Card from "../components/Card";
 import Dialog from "../components/Dialog/Dialog";
 import PluginControlButton from "../components/PluginControlButton";
-
-import ListItemButton from "@mui/material/ListItemButton";
 
 class DialogWindowPlugin extends React.PureComponent {
   state = {
@@ -161,54 +166,52 @@ class DialogWindowPlugin extends React.PureComponent {
    */
   renderDrawerButton() {
     return createPortal(
-      <div
-        style={{
-          display:
-            this.#pluginIsWidget(this.opts.target) ||
-            this.opts.target === "control"
-              ? "none"
-              : "block",
-        }}
+      <Hidden
+        mdUp={
+          this.#pluginIsWidget(this.opts.target) ||
+          this.opts.target === "control"
+        }
       >
-        <ListItemButton
+        <ListItem
+          button
           divider={true}
           selected={this.state.dialogOpen}
           onClick={this.#handleButtonClick}
         >
           <ListItemIcon>{this.icon}</ListItemIcon>
           <ListItemText primary={this.title} />
-        </ListItemButton>
-      </div>,
+        </ListItem>
+      </Hidden>,
       document.getElementById("plugin-buttons")
     );
   }
 
   renderWidgetButton(id) {
-    const isMdDown = window.matchMedia("(max-width: 960px)").matches; // Replace Hidden with media query
     return createPortal(
-      !isMdDown && ( // Conditionally render based on screen size
+      // Hide Widget button on small screens, see renderDrawerButton too
+      <Hidden mdDown>
         <Card
           icon={this.icon}
           onClick={this.#handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      ),
+      </Hidden>,
       document.getElementById(id)
     );
   }
 
   renderControlButton() {
-    const isMdDown = window.matchMedia("(max-width: 960px)").matches; // Replace Hidden with media query
     return createPortal(
-      !isMdDown && ( // Conditionally render based on screen size
+      // Hide Control button on small screens, see renderDrawerButton too
+      <Hidden mdDown>
         <PluginControlButton
           icon={this.icon}
           onClick={this.#handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      ),
+      </Hidden>,
       document.getElementById("plugin-control-buttons")
     );
   }
@@ -221,9 +224,9 @@ class DialogWindowPlugin extends React.PureComponent {
         <>
           {this.renderDialog()}
           {/* Always render a Drawer button unless its target is "hidden". 
-          It's a backup for plugins render elsewhere: we hide 
-          Widget and Control buttons on small screens and fall 
-          back to Drawer button). */}
+              It's a backup for plugins render elsewhere: we hide 
+              Widget and Control buttons on small screens and fall 
+              back to Drawer button). */}
           {target !== "hidden" && this.renderDrawerButton()}
           {/* Widget buttons must also render a Widget */}
           {this.#pluginIsWidget(target) &&

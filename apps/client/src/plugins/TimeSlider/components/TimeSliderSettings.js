@@ -37,7 +37,18 @@ class TimeSliderSettings extends React.PureComponent {
               errorType = layer.layerError;
             });
           return (
-            <ListItem key={index} sx={(theme) => ({})} disabled={!visible}>
+            <ListItem
+              key={index}
+              sx={{
+                borderLeft: (theme) =>
+                  `${theme.spacing(0.5)} solid ${
+                    error
+                      ? theme.palette.error.main
+                      : theme.palette.success.main
+                  }`,
+              }}
+              disabled={!visible}
+            >
               {error && (
                 <HajkToolTip
                   key={`tt_${index}`}
@@ -54,7 +65,9 @@ class TimeSliderSettings extends React.PureComponent {
                   </ListItemIcon>
                 </HajkToolTip>
               )}
+
               <ListItemText primary={layer.get("caption")} />
+
               <ListItemSecondaryAction>
                 <HajkToolTip title={visible ? "Dölj lager" : "Visa lager"}>
                   <Switch
@@ -84,7 +97,7 @@ class TimeSliderSettings extends React.PureComponent {
     } = this.props;
     return (
       <Grid container spacing={2}>
-        <Grid size={6}>
+        <Grid item xs={6}>
           <FormControl fullWidth>
             <Select
               variant="standard"
@@ -102,7 +115,7 @@ class TimeSliderSettings extends React.PureComponent {
             <FormHelperText>Ändra tidslinjens hastighet</FormHelperText>
           </FormControl>
         </Grid>
-        <Grid size={6}>
+        <Grid item xs={6}>
           <FormControl fullWidth>
             <Select
               variant="standard"
@@ -139,14 +152,18 @@ class TimeSliderSettings extends React.PureComponent {
     } else {
       return (
         <Grid container>
-          <Grid size={12}>
+          <Grid item xs={12}>
             <Typography>Lagerstatus: </Typography>
           </Grid>
-          <Grid size={12}>{this.renderLayerList()}</Grid>
-          <Grid size={12}>
+          <Grid item xs={12}>
+            {this.renderLayerList()}
+          </Grid>
+          <Grid item xs={12}>
             <Typography>Inställningar: </Typography>
           </Grid>
-          <Grid size={12}>{this.renderSettingsContainer()}</Grid>
+          <Grid item xs={12}>
+            {this.renderSettingsContainer()}
+          </Grid>
         </Grid>
       );
     }

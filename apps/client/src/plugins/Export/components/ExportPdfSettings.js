@@ -311,13 +311,13 @@ class ExportPdfSettings extends React.PureComponent {
     return (
       <Grid container>
         {this.state.loading && (
-          <Grid size={12}>
+          <Grid item xs={12}>
             <StyledPaper>
               <LinearProgress />
             </StyledPaper>
           </Grid>
         )}
-        <Grid size={12}>
+        <Grid item xs={12}>
           <StyledFormControl fullWidth>
             <InputLabel variant="standard" htmlFor="paper-size-native-helper">
               Pappersstorlek
@@ -331,7 +331,7 @@ class ExportPdfSettings extends React.PureComponent {
             </NativeSelect>
           </StyledFormControl>
         </Grid>
-        <Grid size={12}>
+        <Grid item xs={12}>
           <StyledFormControl fullWidth>
             <InputLabel variant="standard" htmlFor="orientation-native-helper">
               Orientering
@@ -348,7 +348,7 @@ class ExportPdfSettings extends React.PureComponent {
             </NativeSelect>
           </StyledFormControl>
         </Grid>
-        <Grid size={12}>
+        <Grid item xs={12}>
           <StyledFormControl fullWidth>
             <InputLabel variant="standard" htmlFor="scale-native-helper">
               Skala
@@ -366,7 +366,7 @@ class ExportPdfSettings extends React.PureComponent {
           </StyledFormControl>
         </Grid>
         {this.state.selectScale === "other" && (
-          <Grid size={12}>
+          <Grid item xs={12}>
             <StyledFormControl fullWidth>
               <Input
                 type="text"
@@ -376,7 +376,7 @@ class ExportPdfSettings extends React.PureComponent {
             </StyledFormControl>
           </Grid>
         )}
-        <Grid size={12}>
+        <Grid item xs={12}>
           <StyledFormControl fullWidth>
             <InputLabel variant="standard" htmlFor="resolution-native-helper">
               Upplösning
@@ -390,6 +390,7 @@ class ExportPdfSettings extends React.PureComponent {
             </NativeSelect>
           </StyledFormControl>
         </Grid>
+
         <StyledFormControl fullWidth>
           <Button
             variant="contained"

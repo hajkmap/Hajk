@@ -15,8 +15,6 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 
 const ContentGridContainer = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(1),
-  justifyContent: "space-between",
-  alignItems: "center",
 }));
 
 const TitleGridContainer = styled(Grid)(({ theme }) => ({
@@ -183,8 +181,13 @@ class BreadCrumb extends Component {
     const { hidden } = this.state;
     return (
       <StyledPaper square={type === "flat"} elevation={0}>
-        <ContentGridContainer container data-type="bread-crumb">
-          <Grid>
+        <ContentGridContainer
+          container
+          data-type="bread-crumb"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Grid item>
             <IconButton
               size="small"
               onClick={this.setLayerOpacity(layer)}
@@ -194,24 +197,16 @@ class BreadCrumb extends Component {
             </IconButton>
           </Grid>
           {this.renderInformativeIcon()}
-          <TitleGridContainer>
+          <TitleGridContainer item>
             <Typography
               variant="body2"
               noWrap
-              sx={[
-                hidden
-                  ? {
-                      fontWeight: "normal",
-                    }
-                  : {
-                      fontWeight: "bold",
-                    },
-              ]}
+              sx={{ fontWeight: hidden ? "normal" : "bold" }}
             >
               {title}
             </Typography>
           </TitleGridContainer>
-          <Grid>
+          <Grid item>
             <IconButton
               size="small"
               onClick={this.setLayerVisibility(layer)}

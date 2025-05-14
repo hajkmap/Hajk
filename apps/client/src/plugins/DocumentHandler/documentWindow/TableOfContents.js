@@ -3,14 +3,20 @@ import { styled } from "@mui/material/styles";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { withTheme } from "@emotion/react";
-import { Grid, List, ListItemText, Button, Collapse } from "@mui/material";
-
-import ListItemButton from "@mui/material/ListItemButton";
+import {
+  Grid,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
+  Collapse,
+} from "@mui/material";
 
 function NestedListItemRaw(props) {
   return (
-    <ListItemButton
+    <ListItem
       component="li"
+      button
       size="small"
       dense
       onClick={props.onCLick}
@@ -21,7 +27,7 @@ function NestedListItemRaw(props) {
       }}
     >
       <ListItemText>{props.children}</ListItemText>
-    </ListItemButton>
+    </ListItem>
   );
 }
 

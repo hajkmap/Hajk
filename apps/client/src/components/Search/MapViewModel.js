@@ -62,14 +62,13 @@ class MapViewModel {
       .getArray()
       .filter((layer) => {
         return (
-          // …has a specified name property…
           (layer instanceof TileLayer || layer instanceof ImageLayer) &&
           layer.layersInfo !== undefined &&
           // We consider a layer to be visible only if…
           layer.getVisible() && // …it's visible…
           layer.getSource().getParams()["LAYERS"] &&
           layer.getProperties().name &&
-          isValidLayerId(layer.getProperties().name)
+          isValidLayerId(layer.getProperties().name) // …has a specified name property…
         );
       })
       .map((layer) => layer.getSource().getParams()["LAYERS"])
@@ -90,7 +89,7 @@ class MapViewModel {
     this.resultSource = this.getNewVectorSource();
     this.resultsLayer = this.getNewVectorLayer(
       this.resultSource,
-      (this.options.showResultFeaturesInMap ?? true)
+      this.options.showResultFeaturesInMap ?? true
         ? this.featureStyle.getDefaultSearchResultStyle
         : null,
       {

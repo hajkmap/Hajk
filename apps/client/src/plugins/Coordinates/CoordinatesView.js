@@ -100,16 +100,12 @@ class CoordinatesView extends React.PureComponent {
     return (
       <Grid
         container
+        item
         spacing={2}
         rowSpacing={1}
         sx={{ mb: { xs: 6, sm: 0, md: 0 } }}
       >
-        <Grid
-          size={{
-            xs: 12,
-            md: 6,
-          }}
-        >
+        <Grid item xs={12} md={6}>
           <HajkToolTip title="Rensa fält">
             <Button
               fullWidth={true}
@@ -123,12 +119,7 @@ class CoordinatesView extends React.PureComponent {
             </Button>
           </HajkToolTip>
         </Grid>
-        <Grid
-          size={{
-            xs: 12,
-            md: 6,
-          }}
-        >
+        <Grid item xs={12} md={6}>
           <HajkToolTip title="Min position">
             <Button
               fullWidth={true}
@@ -142,13 +133,7 @@ class CoordinatesView extends React.PureComponent {
             </Button>
           </HajkToolTip>
         </Grid>
-        <Grid
-          size={{
-            xs: 12,
-            sm: 6,
-            md: 6,
-          }}
-        >
+        <Grid item xs={12} sm={6} md={6}>
           <HajkToolTip title="Panorera till markering">
             <Button
               fullWidth={true}
@@ -162,13 +147,7 @@ class CoordinatesView extends React.PureComponent {
             </Button>
           </HajkToolTip>
         </Grid>
-        <Grid
-          size={{
-            xs: 12,
-            sm: 6,
-            md: 6,
-          }}
-        >
+        <Grid item xs={12} sm={6} md={6}>
           <HajkToolTip title="Zooma in till markering">
             <Button
               fullWidth={true}
@@ -185,13 +164,14 @@ class CoordinatesView extends React.PureComponent {
       </Grid>
     );
   }
+
   render() {
     return (
       <Grid container>
         <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
           {this.renderProjections()}
         </StyledGridContainer>
-        <Grid size={12}>
+        <Grid item xs={12}>
           <Divider />
         </Grid>
         <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
@@ -201,4 +181,5 @@ class CoordinatesView extends React.PureComponent {
     );
   }
 }
+
 export default withSnackbar(CoordinatesView);

@@ -169,8 +169,8 @@ export default function PrintView(props) {
         step={stepSize}
         marks={props.marks}
       />
-      <Grid container sx={{ p: 2 }} spacing={2} size={12}>
-        <Grid size={6}>
+      <Grid container item xs={12} sx={{ p: 2 }} spacing={2}>
+        <Grid item xs={6}>
           <FormControl fullWidth={true}>
             <InputLabel variant="standard" htmlFor="resolution">
               Upplösning
@@ -187,7 +187,7 @@ export default function PrintView(props) {
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={6}>
+        <Grid item xs={6}>
           <FormControl fullWidth={true}>
             <InputLabel variant="standard" htmlFor="scale">
               Skala

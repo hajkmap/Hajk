@@ -55,7 +55,7 @@ class SearchSettings extends React.PureComponent {
 
     return (
       <Grid container spacing={2} direction="column">
-        <Grid size="grow">
+        <Grid item xs>
           <FormControl component="fieldset">
             <FormLabel component="legend">Generella sökinställningar</FormLabel>
             <FormGroup>
@@ -86,7 +86,7 @@ class SearchSettings extends React.PureComponent {
               </HajkToolTip>
               {this.state.showSearchSourcesFilter && (
                 <Grid container spacing={2}>
-                  <Grid size="grow">
+                  <Grid item xs>
                     <Select
                       fullWidth
                       labelId="demo-mutiple-chip-label"
@@ -144,7 +144,8 @@ class SearchSettings extends React.PureComponent {
             )}
           </FormControl>
         </Grid>
-        <Grid size="grow">
+
+        <Grid item xs>
           <FormControl component="fieldset">
             <FormLabel component="legend">
               Inställningar för textsökning
@@ -217,7 +218,7 @@ class SearchSettings extends React.PureComponent {
                 </HajkToolTip>
               )}
               {showActiveSpatialFilter && (
-                <Grid size="grow">
+                <Grid item xs>
                   <FormControl component="fieldset">
                     <FormLabel component="legend">
                       Spatiala sökinställningar
@@ -253,7 +254,7 @@ class SearchSettings extends React.PureComponent {
                 </Grid>
               )}
               {showEnableLabelOnHighlight && (
-                <Grid size="grow">
+                <Grid item xs>
                   <FormControl component="fieldset">
                     <FormLabel component="legend">
                       Visning av resultat

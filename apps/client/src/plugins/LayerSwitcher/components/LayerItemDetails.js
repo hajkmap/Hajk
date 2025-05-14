@@ -139,8 +139,7 @@ function LayerItemDetails({
   // Add a check for CQL filter visibility and exclude system layers
   const isCqlFilterEnabled = () => {
     return (
-      // Exclude system layers
-      cqlFilterVisible && layerItemDetails?.layer?.get("layerType") !== "system"
+      cqlFilterVisible && layerItemDetails?.layer?.get("layerType") !== "system" // Exclude system layers
     );
   };
 
@@ -178,31 +177,31 @@ function LayerItemDetails({
     <>
       {layerItemDetails && (
         <Box
-          sx={(theme) => ({
+          sx={{
+            display: display ? "block" : "none",
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "#fff",
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark" ? "rgb(18,18,18)" : "#fff",
             position: "relative",
             overflowY: "auto",
             height: "inherit",
             minHeight: "15em",
             maxHeight: "inherit",
-            ...theme.applyStyles("dark", {
-              backgroundColor: "rgb(18,18,18)",
-            }),
-          })}
+          }}
         >
           <Box
-            sx={(theme) => ({
+            sx={{
               p: 1,
-              backgroundColor: theme.palette.grey[100],
-              borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-              ...theme.applyStyles("dark", {
-                backgroundColor: "#373737",
-              }),
-            })}
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "#373737"
+                  : theme.palette.grey[100],
+              borderBottom: (theme) =>
+                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+            }}
           >
             <Stack direction="row" alignItems="center">
               <HajkToolTip
@@ -264,11 +263,12 @@ function LayerItemDetails({
               )}
             </Stack>
             <Box
-              sx={(theme) => ({
+              sx={{
                 py: 1,
                 px: 2,
-                borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-              })}
+                borderBottom: (theme) =>
+                  `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+              }}
             >
               <LayerItemInfo
                 chapters={chapters}
@@ -357,10 +357,11 @@ function LayerItemDetails({
             )}
             {isQuickAccessEnabled() && (
               <Box
-                sx={(theme) => ({
-                  borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+                sx={{
+                  borderTop: (theme) =>
+                    `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
                   p: 2,
-                })}
+                }}
               >
                 <Button
                   fullWidth

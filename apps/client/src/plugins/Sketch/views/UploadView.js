@@ -26,7 +26,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 const ButtonPanel = ({ kmlModel, gpxModel, setDialogOpen }) => {
   return (
     <Grid container spacing={1}>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <HajkToolTip title="Klicka för att öppna en dialog där du kan välja en .kml eller .gpx-fil från din dator.">
           <Button
             fullWidth
@@ -38,7 +38,7 @@ const ButtonPanel = ({ kmlModel, gpxModel, setDialogOpen }) => {
           </Button>
         </HajkToolTip>
       </Grid>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .kml-fil. KML stödjer alla typer av geometrier inklusive polygoner, linjer, punkter och text.">
           <Button
             fullWidth
@@ -50,7 +50,7 @@ const ButtonPanel = ({ kmlModel, gpxModel, setDialogOpen }) => {
           </Button>
         </HajkToolTip>
       </Grid>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .gpx-fil. GPX stödjer endast punkter (waypoints) och linjer (tracks/routes). Polygoner och andra komplexa geometrier kommer att exkluderas.">
           <Button
             fullWidth
@@ -71,18 +71,18 @@ const UploadedFile = (props) => {
     <Zoom in appear>
       <StyledPaper>
         <Grid container justifyContent="space-between" alignItems="center">
-          <Grid size={4}>
+          <Grid item xs={4}>
             <Typography variant="button">{props.title}</Typography>
           </Grid>
-          <Grid container justifyContent="flex-end" spacing={1} size={8}>
-            <Grid>
+          <Grid container item xs={8} justifyContent="flex-end" spacing={1}>
+            <Grid item>
               <HajkToolTip title="Klicka för att ta bort de importerade objekten.">
                 <IconButton size="small" onClick={props.onRemoveClick}>
                   <DeleteIcon />
                 </IconButton>
               </HajkToolTip>
             </Grid>
-            <Grid>
+            <Grid item>
               <HajkToolTip
                 title={`Klicka för att ${
                   props.hidden ? "visa" : "dölja"
@@ -96,7 +96,7 @@ const UploadedFile = (props) => {
                 </IconButton>
               </HajkToolTip>
             </Grid>
-            <Grid>
+            <Grid item>
               <HajkToolTip
                 title={`Klicka här för att ${
                   props.textShown ? "dölja" : "visa"
@@ -121,10 +121,10 @@ const UploadedFile = (props) => {
 const UploadedFileList = (props) => {
   return (
     <Grid container style={{ maxHeight: 240, overflowY: "auto" }}>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <Typography variant="caption">Uppladdade filer</Typography>
       </Grid>
-      <Grid size={12}>
+      <Grid item xs={12}>
         {props.uploadedFiles.map((file) => {
           return (
             <UploadedFile
@@ -228,17 +228,17 @@ const UploadView = (props) => {
   const activity = props.model.getActivityFromId(props.id);
   return (
     <Grid container spacing={2}>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <Information text={activity.information} />
       </Grid>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <ButtonPanel
           kmlModel={props.kmlModel}
           gpxModel={props.gpxModel}
           setDialogOpen={setDialogOpen}
         />
       </Grid>
-      <Grid size={12}>
+      <Grid item xs={12}>
         {props.uploadedFiles.length > 0 && (
           <UploadedFileList
             uploadedFiles={props.uploadedFiles}

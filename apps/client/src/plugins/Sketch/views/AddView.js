@@ -15,14 +15,14 @@ const AddView = (props) => {
   const activity = model.getActivityFromId(props.id);
   return (
     <Grid container>
-      <Grid size={12}>
+      <Grid item xs={12}>
         <Information text={activity.information} />
       </Grid>
-      <Grid style={{ marginTop: 16 }} size={12}>
-        <Grid style={{ marginBottom: 4 }} size={12}>
+      <Grid item xs={12} style={{ marginTop: 16 }}>
+        <Grid item xs={12} style={{ marginBottom: 4 }}>
           <Typography align="center">Typ</Typography>
         </Grid>
-        <Grid size={12}>
+        <Grid item xs={12}>
           <DrawTypeSelector
             activeDrawType={activeDrawType}
             setActiveDrawType={setActiveDrawType}

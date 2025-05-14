@@ -273,21 +273,13 @@ const BackgroundSwitcher = ({
       // This class is used to style specific elements when the tab is active
       // If you search for this class in the codebase, you can find related style-fixes.
       className={"ls-backgrounds-tab-view"}
-      sx={[
-        {
-          position: "relative",
-          height: "inherit",
-          maxHeight: "inherit",
-          overflowY: "auto",
-        },
-        display
-          ? {
-              display: "block",
-            }
-          : {
-              display: "none",
-            },
-      ]}
+      sx={{
+        display: display ? "block" : "none",
+        position: "relative",
+        height: "inherit",
+        maxHeight: "inherit",
+        overflowY: "auto",
+      }}
     >
       {!renderSpecialBackgroundsAtBottom && <RenderSpecialBackgrounds />}
       {layersToShow.map((layerConfig, i) => (

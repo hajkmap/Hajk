@@ -100,10 +100,9 @@ class AnchorModel {
       .filter((layer) => {
         return (
           // We consider a layer to be visible only if…
-          // …has a specified name property…
           layer.getVisible() && // …it's visible…
           layer.getProperties().name &&
-          isValidLayerId(layer.getProperties().name)
+          isValidLayerId(layer.getProperties().name) // …has a specified name property…
         );
       })
       .map((layer) => layer.getProperties().name)
@@ -118,14 +117,13 @@ class AnchorModel {
       .filter((layer) => {
         return (
           // We consider a layer to be visible only if…
-          // …and it is a group layer.
-          // Now, find out how many sublayers there are in this group layer and
-          // compare it with the amount of sublayer that are active right now.
-          // Include this group layers _only_ if a subset of sublayers is selected.
           layer.getVisible() && // …it's visible…
           layer.getProperties().name &&
           isValidLayerId(layer.getProperties().name) && // …has a specified name property…
-          layer.getProperties().layerType === "group" &&
+          layer.getProperties().layerType === "group" && // …and it is a group layer.
+          // Now, find out how many sublayers there are in this group layer and
+          // compare it with the amount of sublayer that are active right now.
+          // Include this group layers _only_ if a subset of sublayers is selected.
           layer.subLayers?.length !==
             layer.getSource().getParams?.().LAYERS?.split(",").length
         );

@@ -86,66 +86,36 @@ export const StyledPaper = styled(Paper)(({ theme }) => ({
   },
 }));
 
-export const StyledTypography = styled(Typography)({
-  variants: [
-    {
-      props: {
-        variant: "h1",
-      },
-      style: {
-        fontSize: "1.6rem",
-        fontWeight: "500",
-        marginBottom: "0.375rem",
-      },
-    },
-    {
-      props: {
-        variant: "h2",
-      },
-      style: {
-        fontSize: "1.4rem",
-        fontWeight: "500",
-        marginBottom: "0.018rem",
-      },
-    },
-    {
-      props: {
-        variant: "h3",
-      },
-      style: {
-        fontSize: "1.2rem",
-        fontWeight: "500",
-      },
-    },
-    {
-      props: {
-        variant: "h4",
-      },
-      style: {
-        fontSize: "1rem",
-        fontWeight: "500",
-      },
-    },
-    {
-      props: {
-        variant: "h5",
-      },
-      style: {
-        fontSize: "0.875rem",
-        fontWeight: "500",
-      },
-    },
-    {
-      props: {
-        variant: "h6",
-      },
-      style: {
-        fontSize: "0.875rem",
-        fontWeight: "400",
-        fontStyle: "italic",
-      },
-    },
-  ],
+export const StyledTypography = styled(Typography)(({ variant }) => {
+  return {
+    ...(variant === "h1" && {
+      fontSize: "1.6rem",
+      fontWeight: "500",
+      marginBottom: "0.375rem",
+    }),
+    ...(variant === "h2" && {
+      fontSize: "1.4rem",
+      fontWeight: "500",
+      marginBottom: "0.018rem",
+    }),
+    ...(variant === "h3" && {
+      fontSize: "1.2rem",
+      fontWeight: "500",
+    }),
+    ...(variant === "h4" && {
+      fontSize: "1rem",
+      fontWeight: "500",
+    }),
+    ...(variant === "h5" && {
+      fontSize: "0.875rem",
+      fontWeight: "500",
+    }),
+    ...(variant === "h6" && {
+      fontSize: "0.875rem",
+      fontWeight: "400",
+      fontStyle: "italic",
+    }),
+  };
 });
 
 export const MarkdownHeaderComponent = (props) => {

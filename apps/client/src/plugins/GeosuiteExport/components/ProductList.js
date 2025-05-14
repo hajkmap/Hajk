@@ -26,7 +26,6 @@ const DivProductList = styled("div")(({ theme }) => ({
 const GridListItemContainer = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(1),
   borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  alignContent: "center",
 }));
 
 const StyledChip = styled(Chip)(() => ({
@@ -75,7 +74,7 @@ class ProductList extends React.PureComponent {
     if (projects.length > 0) {
       return (
         <Grid container style={{ marginTop: "10px" }}>
-          <Grid size={12}>
+          <Grid item xs={12}>
             <Box display="flex" justifyContent="start" gridColumnGap="8px">
               <StyledChip
                 onClick={() => {
@@ -107,12 +106,16 @@ class ProductList extends React.PureComponent {
               />
             </Box>
           </Grid>
-          <Grid style={{ marginTop: "10px" }} size={12}>
+          <Grid item xs={12} style={{ marginTop: "10px" }}>
             <DivProductList>
               {projects.map((project) => {
                 return (
-                  <GridListItemContainer key={project.id} container>
-                    <Grid size={12}>
+                  <GridListItemContainer
+                    key={project.id}
+                    container
+                    alignContent="center"
+                  >
+                    <Grid item xs={12}>
                       <Box
                         display="flex"
                         justifyContent="space-between"
@@ -200,21 +203,10 @@ class ProductList extends React.PureComponent {
                         </Paper>
                       )}
                     </Grid>
-                    <Grid
-                      size={{
-                        xs: 9,
-                        md: 10,
-                      }}
-                    >
+                    <Grid item xs={9} md={10}>
                       <Typography>{`Id: ${project.id}`}</Typography>
                     </Grid>
-                    <Grid
-                      style={{ paddingRight: "5%" }}
-                      size={{
-                        xs: 3,
-                        md: 2,
-                      }}
-                    >
+                    <Grid item xs={3} md={2} style={{ paddingRight: "5%" }}>
                       <Box display="flex" gridColumnGap="5%">
                         {this.renderProjectDetails(project)}
                       </Box>

@@ -31,16 +31,15 @@ const LayerListFilter = ({
 
   return (
     <Box
-      sx={(theme) => ({
+      sx={{
         p: 2,
-        backgroundColor: theme.palette.grey[100],
-        borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+        backgroundColor: (theme) =>
+          theme.palette.mode === "dark" ? "#373737" : theme.palette.grey[100],
+        borderBottom: (theme) =>
+          `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
         display: "flex",
         flexDirection: "row",
-        ...theme.applyStyles("dark", {
-          backgroundColor: "#373737",
-        }),
-      })}
+      }}
     >
       <HajkToolTip
         title={`Skriv minst ${minFilterLength} tecken eller tryck enter`}
@@ -49,6 +48,31 @@ const LayerListFilter = ({
         open={showToolTip}
       >
         <TextField
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end">
+                {inputRef.current?.value && (
+                  <IconButton
+                    onClick={() => {
+                      if (inputRef.current) {
+                        inputRef.current.value = "";
+                        handleFilterValueChange("");
+                        updateTooltip("");
+                      }
+                    }}
+                    size="small"
+                  >
+                    <ClearIcon />
+                  </IconButton>
+                )}
+              </InputAdornment>
+            ),
+          }}
           size="small"
           onChange={(event) => {
             handleFilterValueChange(event.target.value);
@@ -69,46 +93,16 @@ const LayerListFilter = ({
           }}
           fullWidth
           placeholder="Sök lager"
+          FormHelperTextProps={{
+            color: "red",
+          }}
           inputRef={inputRef}
           variant="outlined"
-          sx={(theme) => ({
-            background: "#fff",
+          sx={{
+            background: (theme) =>
+              theme.palette.mode === "dark" ? theme.palette.grey[900] : "#fff",
             width: "calc(100% - 39px)",
             maxWidth: "100%",
-            ...theme.applyStyles("dark", {
-              background: theme.palette.grey[900],
-            }),
-          })}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  {inputRef.current?.value && (
-                    <IconButton
-                      onClick={() => {
-                        if (inputRef.current) {
-                          inputRef.current.value = "";
-                          handleFilterValueChange("");
-                          updateTooltip("");
-                        }
-                      }}
-                      size="small"
-                    >
-                      <ClearIcon />
-                    </IconButton>
-                  )}
-                </InputAdornment>
-              ),
-            },
-
-            formHelperText: {
-              color: "red",
-            },
           }}
         />
       </HajkToolTip>

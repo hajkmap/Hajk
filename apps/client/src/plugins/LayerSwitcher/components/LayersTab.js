@@ -136,13 +136,11 @@ const LayersTab = ({
             px: 4,
           }}
           primary="Inga resultat"
-          slotProps={{
-            primary: {
-              pr: 5,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              variant: "body1",
-            },
+          primaryTypographyProps={{
+            pr: 5,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            variant: "body1",
           }}
         />
       )}

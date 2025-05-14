@@ -48,7 +48,7 @@ const ColorBadge = ({ color }) => {
 // create a slider that can be used to change the value.
 const OpacitySlider = ({ opacity, handleOpacityChange }) => {
   return (
-    <Grid size={12}>
+    <Grid item xs={12}>
       <Paper style={{ padding: 8, marginTop: 8 }}>
         <Typography variant="caption">{`Opacitet: ${Math.floor(
           opacity * 100
@@ -72,7 +72,7 @@ const OpacitySlider = ({ opacity, handleOpacityChange }) => {
 // create a slider that can be used to change the value.
 const StrokeWidthSlider = ({ strokeWidth, handleStrokeWidthChange }) => {
   return (
-    <Grid size={12}>
+    <Grid item xs={12}>
       <Paper style={{ padding: 8, marginTop: 8 }}>
         <Typography variant="caption">{`Linjebredd: ${strokeWidth}px`}</Typography>
         <Slider
@@ -101,7 +101,7 @@ const AccordionSummaryContents = (props) => {
   return (
     <Grid container justifyContent="space-between" alignItems="center">
       <Typography variant="button">{props.title}</Typography>
-      <Grid container justifyContent="flex-end" alignItems="center" size={4}>
+      <Grid container item xs={4} justifyContent="flex-end" alignItems="center">
         {props.showOpacitySlider && (
           <Typography variant="caption">{`${
             typeof props.color === "string"
@@ -144,7 +144,7 @@ const FeatureStyleAccordion = (props) => {
       <AccordionDetails style={{ maxWidth: "100%" }}>
         <Grid container>
           {props.showStrokeTypeSelector && (
-            <Grid sx={{ mb: 1 }} size={12}>
+            <Grid item xs={12} sx={{ mb: 1 }}>
               <StrokeTypeSelector
                 handleStrokeTypeChange={props.handleStrokeTypeChange}
                 strokeType={props.strokeType}
@@ -155,7 +155,7 @@ const FeatureStyleAccordion = (props) => {
             </Grid>
           )}
           {props.strokeType !== "none" && (
-            <Grid size={12}>
+            <Grid item xs={12}>
               <TwitterPicker
                 colors={DRAW_COLORS}
                 triangle="hide"

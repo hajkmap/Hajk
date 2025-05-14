@@ -5,26 +5,24 @@ import LsIconButton from "./LsIconButton";
 const BtnShowDetails = ({ children, ...props }) => (
   <LsIconButton
     size="small"
-    sx={(theme) => ({
+    sx={{
       marginTop: "3px",
       "&:hover .ls-details-icon": {
-        color: theme.palette.grey[900],
-        ...theme.applyStyles("dark", {
-          color: "#fff",
-        }),
+        color: (theme) =>
+          theme.palette.mode === "dark" ? "#fff" : theme.palette.grey[900],
       },
-    })}
+    }}
     {...props}
   >
     <ShowDetailsIcon
       className="ls-details-icon"
-      sx={(theme) => ({
+      sx={{
         width: "0.7em",
         height: "0.7em",
         transform: "rotate(180deg)",
         mt: "1px",
-        color: theme.palette.grey[500],
-      })}
+        color: (theme) => theme.palette.grey[500],
+      }}
     />
     {children}
   </LsIconButton>

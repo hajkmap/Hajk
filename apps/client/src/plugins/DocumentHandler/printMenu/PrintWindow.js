@@ -66,8 +66,6 @@ const GridMiddleContainer = styled(Grid)(({ theme }) => ({
 
 const GridHeaderContainer = styled(Grid)(({ theme }) => ({
   marginBottom: theme.spacing(2),
-  alignItems: "center",
-  justifyContent: "space-between",
 }));
 
 const GridSettingsContainer = styled(Grid)(({ theme }) => ({
@@ -930,7 +928,7 @@ class PrintWindow extends React.PureComponent {
         <GridSettingsContainer container item>
           <Typography variant="h6">Inställningar</Typography>
 
-          <Grid size={12}>
+          <Grid xs={12} item>
             <FormControlLabel
               value="Välj alla dokument"
               control={
@@ -947,8 +945,10 @@ class PrintWindow extends React.PureComponent {
             />
           </Grid>
         </GridSettingsContainer>
+
         <Typography variant="h6">Valt innehåll</Typography>
-        <GridMiddleContainer container>
+
+        <GridMiddleContainer item container>
           <PrintList
             localObserver={localObserver}
             documentMenu={menuInformation}
@@ -956,6 +956,7 @@ class PrintWindow extends React.PureComponent {
             handleTogglePrint={this.toggleChosenForPrint}
           />
         </GridMiddleContainer>
+
         {documentWindowMaximized && this.renderCreatePDFButton()}
         {this.renderLoadingDialog()}
       </>
@@ -1099,8 +1100,13 @@ class PrintWindow extends React.PureComponent {
       <>
         {!showAttachments ? (
           <GridGridContainer container wrap="nowrap" direction="column">
-            <GridHeaderContainer container>
-              <Grid size={4}>
+            <GridHeaderContainer
+              alignItems="center"
+              justifyContent="space-between"
+              item
+              container
+            >
+              <Grid item xs={4}>
                 <Button
                   color="primary"
                   style={{ paddingLeft: 0 }}
@@ -1110,7 +1116,7 @@ class PrintWindow extends React.PureComponent {
                   <Typography justify="center">Tillbaka</Typography>
                 </Button>
               </Grid>
-              <StyledGrid size={4}>
+              <StyledGrid item xs={4}>
                 {pdfLinks?.length > 0 && (
                   <Button
                     color="primary"
@@ -1127,8 +1133,13 @@ class PrintWindow extends React.PureComponent {
           </GridGridContainer>
         ) : (
           <GridGridContainer container wrap="nowrap" direction="column">
-            <GridHeaderContainer container>
-              <Grid size={4}>
+            <GridHeaderContainer
+              alignItems="center"
+              justifyContent="space-between"
+              item
+              container
+            >
+              <Grid item xs={4}>
                 <Button
                   color="primary"
                   style={{ paddingLeft: 0 }}

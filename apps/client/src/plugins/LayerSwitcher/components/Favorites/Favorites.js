@@ -384,17 +384,7 @@ function Favorites({
 
   const renderFavoritesView = () => {
     return createPortal(
-      <Box
-        sx={[
-          favoriteViewDisplay
-            ? {
-                display: "block",
-              }
-            : {
-                display: "none",
-              },
-        ]}
-      >
+      <Box sx={{ display: favoriteViewDisplay ? "block" : "none" }}>
         <FavoritesViewHeader
           importFavoritesCallback={handleImportFavorites}
           backButtonCallback={handleFavoritesViewToggle}
@@ -416,6 +406,7 @@ function Favorites({
       document.getElementById("layer-switcher-view-root")
     );
   };
+
   // Render dialog with missing layers information
   const renderMissingLayersDialog = () => {
     return createPortal(
@@ -473,6 +464,7 @@ function Favorites({
       document.getElementById("map")
     );
   };
+
   const renderAddFavoriteDialog = () => {
     return createPortal(
       <Dialog
@@ -539,6 +531,7 @@ function Favorites({
       document.getElementById("map")
     );
   };
+
   return (
     <>
       <FavoritesOptions

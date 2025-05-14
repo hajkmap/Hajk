@@ -27,7 +27,7 @@ const StrokeTypeSelector = (props) => {
     >
       <Grid container>
         {props.includeContainer !== false ? (
-          <Grid size={12}>
+          <Grid item xs={12}>
             <Typography variant="caption">Linjetyp</Typography>
           </Grid>
         ) : null}
