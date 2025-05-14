@@ -77,7 +77,7 @@ function PdfViewerWithTOC({
 
     const updateWidth = () => {
       const el = containerRef.current;
-      if (!el) return; // säkerhetsbälte
+      if (!el) return;
       setPageWidth(el.getBoundingClientRect().width - 19);
     };
 
@@ -95,7 +95,7 @@ function PdfViewerWithTOC({
     // Cleanup
     return () => {
       ro.disconnect();
-      clearTimeout(timerRef.current); // avbryt ev. väntande timeout
+      clearTimeout(timerRef.current);
     };
   }, [showDownloadWindow]);
 
