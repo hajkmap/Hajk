@@ -6,6 +6,7 @@ import { ListItemIcon, ListItemText } from "@mui/material";
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
 import PluginControlButton from "../components/PluginControlButton";
+import { Box } from "@mui/material";
 
 import ListItemButton from "@mui/material/ListItemButton";
 
@@ -291,14 +292,19 @@ class BaseWindowPlugin extends React.PureComponent {
   renderWidgetButton(id) {
     return createPortal(
       // Hide Widget button on small screens, see renderDrawerButton too
-      <div style={{ display: { xs: "none", md: "block" } }}>
+      <Box
+        sx={{
+          display: { xs: "none", md: "flex" },
+          width: "fit-content",
+        }}
+      >
         <Card
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      </div>,
+      </Box>,
       document.getElementById(id)
     );
   }
