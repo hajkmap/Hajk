@@ -162,11 +162,14 @@ class DialogWindowPlugin extends React.PureComponent {
    */
   renderDrawerButton() {
     return createPortal(
-      <Hidden
-        mdUp={
-          this.#pluginIsWidget(this.opts.target) ||
-          this.opts.target === "control"
-        }
+      <div
+        style={{
+          display:
+            this.#pluginIsWidget(this.opts.target) ||
+            this.opts.target === "control"
+              ? "none"
+              : "block",
+        }}
       >
         <ListItemButton
           divider={true}
@@ -176,7 +179,7 @@ class DialogWindowPlugin extends React.PureComponent {
           <ListItemIcon>{this.icon}</ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItemButton>
-      </Hidden>,
+      </div>,
       document.getElementById("plugin-buttons")
     );
   }
