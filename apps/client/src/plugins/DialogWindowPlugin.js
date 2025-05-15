@@ -6,6 +6,7 @@ import { Icon, ListItemIcon, ListItemText } from "@mui/material";
 import Card from "../components/Card";
 import Dialog from "../components/Dialog/Dialog";
 import PluginControlButton from "../components/PluginControlButton";
+import Hidden from "../components/Hidden";
 
 import ListItemButton from "@mui/material/ListItemButton";
 
@@ -184,31 +185,33 @@ class DialogWindowPlugin extends React.PureComponent {
   }
 
   renderWidgetButton(id) {
-    const isMdDown = window.matchMedia("(max-width: 960px)").matches; // Replace Hidden with media query
     return createPortal(
-      !isMdDown && ( // Conditionally render based on screen size
+      <Hidden mdDown>
         <Card
           icon={this.icon}
           onClick={this.#handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      ),
+      </Hidden>,
       document.getElementById(id)
     );
   }
 
   renderControlButton() {
-    const isMdDown = window.matchMedia("(max-width: 960px)").matches; // Replace Hidden with media query
+    const hasToolbarTarget = this.props.app.config.mapConfig.tools.filter(
+      (tool) => tool.options && tool.options.target === "toolbar"
+    );
+
     return createPortal(
-      !isMdDown && ( // Conditionally render based on screen size
+      <Hidden mdDown={hasToolbarTarget.length > 0}>
         <PluginControlButton
           icon={this.icon}
           onClick={this.#handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      ),
+      </Hidden>,
       document.getElementById("plugin-control-buttons")
     );
   }
