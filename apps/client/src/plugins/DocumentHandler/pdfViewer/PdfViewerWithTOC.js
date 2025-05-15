@@ -1,4 +1,14 @@
-import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
+/*
+http://localhost:3000/#m=map_1&x=516400.01330917625&y=6569187.806518795&z=6&l=1&p=documentviewer&title=Designdokument&page=5
+http://localhost:3000/#m=map_1&x=516400.01330917625&y=6569187.806518795&z=6&l=1&p=documentviewer&folder=Test&title=Designdokument2&page=5
+*/
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import { Document, Page } from "react-pdf";
 import { styled } from "@mui/material/styles";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
@@ -43,6 +53,22 @@ const StickyTOCWrapper = styled("div")(() => ({
   padding: "0rem",
 }));
 
+function getHashParam(name) {
+  return new URLSearchParams(window.location.hash.slice(1)).get(name);
+}
+
+function stripPageParamFromHash() {
+  const params = new URLSearchParams(window.location.hash.slice(1));
+  params.delete("page");
+  window.history.replaceState(
+    null,
+    "",
+    `${window.location.pathname}${window.location.search}${
+      params.toString() ? `#${params}` : ""
+    }`
+  );
+}
+
 function PdfViewerWithTOC({
   document,
   maximized,
@@ -68,6 +94,72 @@ function PdfViewerWithTOC({
   const [pageWidth, setPageWidth] = useState(0);
   const pageRefs = useRef({});
   const disconnectors = useRef({});
+
+  const [docBlob, setDocBlob] = useState(document.blob); // start med menyvalet
+  const [pendingPage, setPendingPage] = useState(null);
+  const renderedPages = useRef(new Set());
+
+  const handlePageRender = useCallback(
+    (pageNo) => {
+      renderedPages.current.add(pageNo); // markera klar
+
+      if (pendingPage != null) {
+        // är alla sidor upp till och med pendingPage renderade?
+        const allReady = Array.from(
+          { length: pendingPage },
+          (_, i) => i + 1
+        ).every((n) => renderedPages.current.has(n));
+
+        if (allReady) {
+          // nu finns rätt offset i DOM – gör scroll
+          customScrollToPage(pendingPage);
+          setPendingPage(null);
+          stripPageParamFromHash();
+        }
+      }
+    },
+    [pendingPage] // uppdatera om mål ändras
+  );
+
+  useEffect(() => {
+    // när användaren klickar i vänstermenyn får du ett nytt document-objekt
+    setDocBlob(document.blob); // ← återställer normal meny-navigation
+    setPendingPage(null);
+  }, [document]);
+
+  useEffect(() => {
+    if (pendingPage && pdfInstance) {
+      customScrollToPage(pendingPage); // scrolla nu
+      setPendingPage(null); // nollställ
+    }
+  }, [pendingPage, pdfInstance]);
+
+  useEffect(() => {
+    /** Reagerar på hash-ändringar */
+    const handleHash = async () => {
+      const folder = getHashParam("folder"); // t.ex. "Oversiktsplan"
+      const title = getHashParam("title"); // t.ex. "Designdokument"
+      const page = Number(getHashParam("page"));
+
+      if (title) {
+        try {
+          // --- Anropa modellen i stället för egen fetch! ---
+          const blob = await model.fetchDocument(folder, title);
+          setDocBlob(blob); // Blob → React-PDF
+        } catch (err) {
+          console.error("Kunde inte hämta PDF från modellen:", err);
+        }
+      }
+
+      if (page) {
+        setPendingPage(page);
+      }
+    };
+
+    window.addEventListener("hashchange", handleHash);
+    handleHash(); // kör direkt vid mount
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, [model]);
 
   useLayoutEffect(() => {
     // If the dialog is open, there is no PdfContainer in the DOM → skip.
@@ -128,9 +220,25 @@ function PdfViewerWithTOC({
     setCollapsedItems({});
   }, [document]);
 
-  const onDocumentLoadSuccess = async (pdf) => {
-    setNumPages(pdf.numPages);
+  const onDocumentLoadSuccess = (pdf) => {
+    setNumPages(pdf.numPages); // ← DU TOG BORT DEN RADEN
     setPdfInstance(pdf);
+
+    if (pendingPage) {
+      customScrollToPage(pendingPage);
+      setPendingPage(null);
+
+      // ta bort page= ur hash
+      const params = new URLSearchParams(window.location.hash.slice(1));
+      params.delete("page");
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${window.location.search}${
+          params.toString() ? `#${params}` : ""
+        }`
+      );
+    }
   };
 
   const onScroll = (e) => {
@@ -180,6 +288,7 @@ function PdfViewerWithTOC({
             width={pageWidth - 19}
             renderAnnotationLayer
             renderTextLayer
+            onRenderSuccess={() => handlePageRender(pageNumber)}
             inputRef={(ref) => {
               pageRefs.current[pageNumber] = ref;
               disconnectors.current[pageNumber]?.();
@@ -250,7 +359,7 @@ function PdfViewerWithTOC({
           )}
 
           <Document
-            file={document.blob}
+            file={docBlob}
             onLoadSuccess={onDocumentLoadSuccess}
             externalLinkTarget="_blank"
           >
