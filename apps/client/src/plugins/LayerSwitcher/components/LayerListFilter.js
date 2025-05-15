@@ -78,13 +78,21 @@ const LayerListFilter = ({
             handleFilterValueChange(event.target.value);
             updateTooltip(event.target.value);
           }}
+          onFocus={(event) => {
+            if (event.target.value?.length > 0) {
+              updateTooltip(event.target.value);
+            }
+          }}
+          onBlur={(event) => {
+            updateTooltip("");
+          }}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               handleFilterSubmit(event.target.value);
             }
           }}
           fullWidth
-          placeholder="Sök lager och grupper"
+          placeholder="Sök lager"
           FormHelperTextProps={{
             color: "red",
           }}
@@ -92,8 +100,8 @@ const LayerListFilter = ({
           variant="outlined"
           sx={{
             background: (theme) =>
-              theme.palette.mode === "dark" ? "inherit" : "#fff",
-            width: 500,
+              theme.palette.mode === "dark" ? theme.palette.grey[900] : "#fff",
+            width: "calc(100% - 39px)",
             maxWidth: "100%",
           }}
         />

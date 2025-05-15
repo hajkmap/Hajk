@@ -105,9 +105,9 @@ export default class MapViewModel {
     });
   };
 
-  flyTo(view, center, zoom) {
+  flyTo(view, center = [], zoom) {
     view.animate({
-      center: center,
+      center: center.map((coord) => coord * 1.0),
       zoom: zoom,
       duration: 1500,
     });

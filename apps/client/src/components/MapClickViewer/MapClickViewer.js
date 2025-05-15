@@ -73,6 +73,9 @@ const MapClickViewer = (props) => {
       width={width || 400}
       position={position || "right"}
       mode="window"
+      // This is not perfect, but it will do for now.
+      // It will force window to front when features change.
+      forceBringToFrontOnEvent={"mapClick.featureCollections"}
       onClose={closeWindow}
     >
       <MapClickViewerContext.Provider
