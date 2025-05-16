@@ -45,6 +45,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
   return (
     <>
       <IconButton
+        id="layerswitcher-actions-menu"
         size="small"
         aria-controls={menuIsOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
@@ -61,6 +62,11 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
         open={menuIsOpen}
         onClose={onOptionsMenuClose}
         variant={"menu"}
+        slotProps={{
+          paper: {
+            id: "layerswitcher-actions-menu-content",
+          },
+        }}
       >
         <MenuItem
           onClick={(e) => {
