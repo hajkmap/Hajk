@@ -14,6 +14,33 @@ import PdfViewerWithTOC from "../pdfViewer/PdfViewerWithTOC";
 class DocumentWindowBase extends React.PureComponent {
   snackbarKey = null;
 
+  componentDidMount() {
+    this.handleHashChange();
+    window.addEventListener("hashchange", this.handleHashChange, false);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("hashchange", this.handleHashChange, false);
+  }
+
+  handleHashChange = () => {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const title = params.get("title");
+    const folder = params.get("folder");
+    const pageStr = params.get("page");
+
+    if (title) {
+      const { localObserver } = this.props;
+      window.pendingPage = pageStr ? Number(pageStr) : null;
+
+      localObserver.publish("set-active-document", {
+        documentName: title,
+        headerIdentifier: null,
+        folder,
+      });
+    }
+  };
+
   shouldShowDocumentOnStart = () => {
     const { options } = this.props;
     return options.documentOnStart ? true : false;
@@ -174,6 +201,7 @@ class DocumentWindowBase extends React.PureComponent {
       onMinimize,
       onMaximize,
       model,
+      app,
     } = this.props;
     const modelReady = this.isModelReady();
     const customHeaderButtons = options.enablePrint
@@ -224,6 +252,7 @@ class DocumentWindowBase extends React.PureComponent {
               model={model}
               options={options}
               localObserver={localObserver}
+              app={app}
             />
           ) : !showPrintWindow ? (
             customTheme ? (

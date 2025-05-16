@@ -1,14 +1,4 @@
-/*
-http://localhost:3000/#m=map_1&x=516400.01330917625&y=6569187.806518795&z=6&l=1&p=documentviewer&title=Designdokument&page=5
-http://localhost:3000/#m=map_1&x=516400.01330917625&y=6569187.806518795&z=6&l=1&p=documentviewer&folder=Test&title=Designdokument2&page=5
-*/
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useLayoutEffect,
-  useCallback,
-} from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { Document, Page } from "react-pdf";
 import { styled } from "@mui/material/styles";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
@@ -53,22 +43,6 @@ const StickyTOCWrapper = styled("div")(() => ({
   padding: "0rem",
 }));
 
-function getHashParam(name) {
-  return new URLSearchParams(window.location.hash.slice(1)).get(name);
-}
-
-function stripPageParamFromHash() {
-  const params = new URLSearchParams(window.location.hash.slice(1));
-  params.delete("page");
-  window.history.replaceState(
-    null,
-    "",
-    `${window.location.pathname}${window.location.search}${
-      params.toString() ? `#${params}` : ""
-    }`
-  );
-}
-
 function PdfViewerWithTOC({
   document,
   maximized,
@@ -95,66 +69,90 @@ function PdfViewerWithTOC({
   const pageRefs = useRef({});
   const disconnectors = useRef({});
 
-  const [docBlob, setDocBlob] = useState(document.blob); // start with menu selection
-  const [pendingPage, setPendingPage] = useState(null);
-  const renderedPages = useRef(new Set());
-
-  const handlePageRender = useCallback(
-    (pageNo) => {
-      renderedPages.current.add(pageNo);
-
-      if (pendingPage != null) {
-        const allReady = Array.from(
-          { length: pendingPage },
-          (_, i) => i + 1
-        ).every((n) => renderedPages.current.has(n));
-
-        if (allReady) {
-          customScrollToPage(pendingPage);
-          setPendingPage(null);
-          stripPageParamFromHash();
-        }
-      }
-    },
-    [pendingPage]
-  );
+  const [docBlob, setDocBlob] = useState(document.blob);
+  const [pendingPage, setPendingPage] = useState(document.targetPage ?? null);
+  const currentTitle = document.title ?? "";
 
   useEffect(() => {
     setDocBlob(document.blob);
-    setPendingPage(null);
+    setPendingPage(window.pendingPage ?? null);
+    window.pendingPage = null;
   }, [document]);
 
   useEffect(() => {
-    if (pendingPage && pdfInstance) {
-      customScrollToPage(pendingPage);
-      setPendingPage(null);
-    }
-  }, [pendingPage, pdfInstance]);
+    const node = containerRef.current;
+    if (!node) return;
 
-  useEffect(() => {
-    const handleHash = async () => {
-      const folder = getHashParam("folder");
-      const title = getHashParam("title");
-      const page = Number(getHashParam("page"));
+    const handlePdfLink = (e) => {
+      const a = e.target.closest("a[href]");
+      if (!a) return;
 
-      if (title) {
-        try {
-          const blob = await model.fetchDocument(folder, title);
-          setDocBlob(blob); // Blob → React-PDF
-        } catch (err) {
-          console.error("Kunde inte hämta PDF från modellen:", err);
-        }
-      }
+      const url = new URL(a.href, window.location.href);
+      const title = url.searchParams.get("title");
+      const folder = url.searchParams.get("folder");
+      const pageStr = url.searchParams.get("page");
 
-      if (page) {
-        setPendingPage(page);
+      if (!title) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Save the page number globally
+      window.pendingPage = pageStr ? Number(pageStr) : null;
+
+      if (title === currentTitle && folder == null) {
+        setPendingPage(window.pendingPage);
+      } else {
+        localObserver.publish("set-active-document", {
+          documentName: title,
+          headerIdentifier: null,
+          folder,
+        });
       }
     };
 
-    window.addEventListener("hashchange", handleHash);
-    handleHash();
-    return () => window.removeEventListener("hashchange", handleHash);
-  }, [model]);
+    node.addEventListener("click", handlePdfLink, true);
+    return () => node.removeEventListener("click", handlePdfLink, true);
+  }, [localObserver, currentTitle]);
+
+  function cleanHash() {
+    const p = new URLSearchParams(window.location.hash.slice(1));
+    if ((p.delete("page"), p.has("title"))) {
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${window.location.search}${p.toString() ? "#" + p : ""}`
+      );
+    }
+  }
+
+  useEffect(() => {
+    if (pendingPage == null) return;
+
+    const wrapper = containerRef.current;
+    const el = wrapper?.querySelector(`[name="page-${pendingPage}"]`);
+
+    if (el) {
+      customScrollToPage(pendingPage);
+      setPendingPage(null);
+      cleanHash();
+      return;
+    }
+
+    const mo = new MutationObserver(() => {
+      const elNow = wrapper.querySelector(`[name="page-${pendingPage}"]`);
+      if (elNow) {
+        customScrollToPage(pendingPage);
+        setPendingPage(null);
+        cleanHash();
+        mo.disconnect();
+      }
+    });
+    mo.observe(wrapper, { childList: true, subtree: true });
+    return () => mo.disconnect();
+  }, [pendingPage]);
+
+  //--------------------------------------------------------------------------
 
   useLayoutEffect(() => {
     // If the dialog is open, there is no PdfContainer in the DOM → skip.
@@ -220,18 +218,11 @@ function PdfViewerWithTOC({
     setPdfInstance(pdf);
 
     if (pendingPage) {
-      customScrollToPage(pendingPage);
-      setPendingPage(null);
-
-      const params = new URLSearchParams(window.location.hash.slice(1));
-      params.delete("page");
-      window.history.replaceState(
-        null,
-        "",
-        `${window.location.pathname}${window.location.search}${
-          params.toString() ? `#${params}` : ""
-        }`
-      );
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          customScrollToPage(pendingPage);
+        });
+      });
     }
   };
 
@@ -282,7 +273,13 @@ function PdfViewerWithTOC({
             width={pageWidth - 19}
             renderAnnotationLayer
             renderTextLayer
-            onRenderSuccess={() => handlePageRender(pageNumber)}
+            onRenderSuccess={() => {
+              if (pendingPage === pageNumber) {
+                customScrollToPage(pageNumber);
+                setPendingPage(null);
+                cleanHash();
+              }
+            }}
             inputRef={(ref) => {
               pageRefs.current[pageNumber] = ref;
               disconnectors.current[pageNumber]?.();
