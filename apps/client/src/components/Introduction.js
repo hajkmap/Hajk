@@ -229,6 +229,7 @@ class Introduction extends React.PureComponent {
 
   constructor(props) {
     super(props);
+    this.stepsRef = React.createRef();
 
     /**
      * When appLoaded is fired, let's filter through the provided 'steps'.
@@ -364,6 +365,32 @@ class Introduction extends React.PureComponent {
     }
   };
 
+  handleBeforeStepChange = (nextIndex) => {
+    return new Promise((resolve) => {
+      const step = this.state.steps[nextIndex];
+
+      if (step?.element === "#layerswitcher-actions-menu-content") {
+        // Simulate menu button click
+        const menuButton = document.querySelector(
+          "#layerswitcher-actions-menu"
+        );
+        if (menuButton) {
+          menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        }
+
+        // Wait for DOM to update, then re-bind the step to the new element
+        setTimeout(() => {
+          if (this.stepsRef.current) {
+            this.stepsRef.current.updateStepElement(nextIndex);
+          }
+          resolve();
+        }, 100); // allow time for menu to mount
+      } else {
+        resolve();
+      }
+    });
+  };
+
   render() {
     const { introductionEnabled, introductionShowControlButton } = this.props;
     const { initialStep, steps, stepsEnabled, showSelection } = this.state;
@@ -384,10 +411,14 @@ class Introduction extends React.PureComponent {
           (parseInt(window.localStorage.getItem("introductionShown")) !== 1 ||
             this.state.forceShow === true) && (
             <Steps
+              ref={this.stepsRef}
               enabled={stepsEnabled}
               steps={steps}
               initialStep={initialStep}
               onExit={this.disableSteps}
+              onBeforeChange={(nextStepIndex) =>
+                this.handleBeforeStepChange(nextStepIndex)
+              }
               onAfterChange={this.handleStepChange}
               options={{
                 highlightClass: "introjs-click-through",
