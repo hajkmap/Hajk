@@ -188,7 +188,8 @@ class DialogWindowPlugin extends React.PureComponent {
     return createPortal(
       <Box
         sx={{
-          display: { xs: "none", md: "block" },
+          display: { xs: "none", md: "flex" },
+          width: "fit-content",
         }}
       >
         <Card
