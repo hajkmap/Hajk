@@ -267,13 +267,13 @@ class BaseWindowPlugin extends React.PureComponent {
    */
   renderDrawerButton() {
     return createPortal(
-      <div
-        style={{
+      <Box
+        sx={{
           display:
             this.pluginIsWidget(this.props.options.target) ||
             this.props.options.target === "control"
-              ? { md: "none", xs: "block" }
-              : "block",
+              ? { xs: "block", md: "none" }
+              : "initial",
         }}
       >
         <ListItemButton
@@ -284,7 +284,7 @@ class BaseWindowPlugin extends React.PureComponent {
           <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItemButton>
-      </div>,
+      </Box>,
       document.getElementById("plugin-buttons")
     );
   }
@@ -317,9 +317,12 @@ class BaseWindowPlugin extends React.PureComponent {
 
     return createPortal(
       // Hide Control button on small screens, see renderDrawerButton too
-      <div
-        style={{
-          display: hasToolbarTarget.length > 0 ? { md: "none" } : "block",
+      <Box
+        sx={{
+          display: {
+            xs: "none",
+            lg: hasToolbarTarget.length > 0 ? "block" : "none",
+          },
         }}
       >
         <PluginControlButton
@@ -328,7 +331,7 @@ class BaseWindowPlugin extends React.PureComponent {
           title={this.title}
           abstract={this.description}
         />
-      </div>,
+      </Box>,
       document.getElementById("plugin-control-buttons")
     );
   }

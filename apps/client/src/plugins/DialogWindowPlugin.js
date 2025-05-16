@@ -2,6 +2,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { withTheme } from "@emotion/react";
 import { Icon, ListItemIcon, ListItemText } from "@mui/material";
+import { Box } from "@mui/material";
 
 import Card from "../components/Card";
 import Dialog from "../components/Dialog/Dialog";
@@ -161,13 +162,13 @@ class DialogWindowPlugin extends React.PureComponent {
    */
   renderDrawerButton() {
     return createPortal(
-      <div
-        style={{
+      <Box
+        sx={{
           display:
             this.#pluginIsWidget(this.opts.target) ||
             this.opts.target === "control"
-              ? "none"
-              : "block",
+              ? { xs: "block", md: "none" }
+              : "initial",
         }}
       >
         <ListItemButton
@@ -178,37 +179,43 @@ class DialogWindowPlugin extends React.PureComponent {
           <ListItemIcon>{this.icon}</ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItemButton>
-      </div>,
+      </Box>,
       document.getElementById("plugin-buttons")
     );
   }
 
   renderWidgetButton(id) {
-    const isMdDown = window.matchMedia("(max-width: 960px)").matches; // Replace Hidden with media query
     return createPortal(
-      !isMdDown && ( // Conditionally render based on screen size
+      <Box
+        sx={{
+          display: { xs: "none", lg: "block" },
+        }}
+      >
         <Card
           icon={this.icon}
           onClick={this.#handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      ),
+      </Box>,
       document.getElementById(id)
     );
   }
 
   renderControlButton() {
-    const isMdDown = window.matchMedia("(max-width: 960px)").matches; // Replace Hidden with media query
     return createPortal(
-      !isMdDown && ( // Conditionally render based on screen size
+      <Box
+        sx={{
+          display: { xs: "none", lg: "block" },
+        }}
+      >
         <PluginControlButton
           icon={this.icon}
           onClick={this.#handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      ),
+      </Box>,
       document.getElementById("plugin-control-buttons")
     );
   }
