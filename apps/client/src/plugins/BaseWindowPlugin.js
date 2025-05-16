@@ -321,7 +321,7 @@ class BaseWindowPlugin extends React.PureComponent {
         sx={{
           display: {
             xs: "none",
-            lg: hasToolbarTarget.length > 0 ? "block" : "none",
+            md: hasToolbarTarget.length > 0 ? "block" : "none",
           },
         }}
       >
