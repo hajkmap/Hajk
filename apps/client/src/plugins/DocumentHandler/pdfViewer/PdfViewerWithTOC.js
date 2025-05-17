@@ -138,35 +138,10 @@ function PdfViewerWithTOC({
   }
 
   useEffect(() => {
-    if (pendingPage == null) return;
-
-    const wrapper = containerRef.current;
-    const el = wrapper?.querySelector(`[name="page-${pendingPage}"]`);
-
-    if (el) {
-      customScrollToPage(pendingPage);
-      setPendingPage(null);
-      cleanHash();
-      return;
-    }
-
-    const mo = new MutationObserver(() => {
-      const elNow = wrapper.querySelector(`[name="page-${pendingPage}"]`);
-      if (elNow) {
-        customScrollToPage(pendingPage);
-        setPendingPage(null);
-        cleanHash();
-        mo.disconnect();
-      }
-    });
-    mo.observe(wrapper, { childList: true, subtree: true });
-    return () => mo.disconnect();
-  }, [pendingPage]);
-
-  useEffect(() => {
     const handlePageChange = ({ page }) => {
       if (page != null) {
         setPendingPage(page);
+        setTimeout(() => customScrollToPage(page), 300);
       }
     };
 
@@ -239,14 +214,6 @@ function PdfViewerWithTOC({
   const onDocumentLoadSuccess = (pdf) => {
     setNumPages(pdf.numPages);
     setPdfInstance(pdf);
-
-    if (pendingPage) {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          customScrollToPage(pendingPage);
-        });
-      });
-    }
   };
 
   const onScroll = (e) => {
