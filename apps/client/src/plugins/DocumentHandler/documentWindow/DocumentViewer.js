@@ -70,12 +70,18 @@ class DocumentViewer extends React.PureComponent {
       /*scrollIntoView is buggy without dirty fix - 
       tried using react life cycle methods but is, for some reason, not working*/
       await delay(100);
-      chapter.scrollRef.current.scrollIntoView();
+
+      if (chapter?.scrollRef?.current) {
+        chapter.scrollRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      } else {
+        console.warn("Kapitel saknar scrollRef – hoppar över scroll");
+      }
     });
 
-    localObserver.subscribe("scroll-to-top", () => {
-      this.scrollToTop();
-    });
+    localObserver.subscribe("scroll-to-top", () => this.scrollToTop());
   };
 
   onScroll = (e) => {

@@ -73,7 +73,7 @@ class TableOfContents extends React.PureComponent {
 
   linkClick = (chapter) => {
     const { localObserver } = this.props;
-    localObserver.publish("scroll-to-chapter", chapter);
+    localObserver.publish("json-scroll-to-chapter", chapter);
   };
   /**
    * Render all chapters of the activeDocument.
