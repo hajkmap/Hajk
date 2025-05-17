@@ -108,6 +108,11 @@ function PdfViewerWithTOC({
           headerIdentifier: null,
           folder,
         });
+        localObserver.publish("document-link-clicked", {
+          documentName: title,
+          headerIdentifier: null,
+          folder,
+        });
       }
     };
 

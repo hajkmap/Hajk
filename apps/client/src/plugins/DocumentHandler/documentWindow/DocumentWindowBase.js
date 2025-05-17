@@ -38,6 +38,11 @@ class DocumentWindowBase extends React.PureComponent {
         headerIdentifier: null,
         folder,
       });
+      localObserver.publish("document-link-clicked", {
+        documentName: title,
+        headerIdentifier: null,
+        folder,
+      });
     }
   };
 

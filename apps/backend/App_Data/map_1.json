@@ -897,16 +897,27 @@
         "height": "90vh",
         "searchImplemented": true,
         "enablePrint": true,
+        "pdfLinks": [
+          {
+            "name": "",
+            "link": ""
+          }
+        ],
         "closePanelOnMapLinkOpen": false,
         "displayLoadingOnMapLinkOpen": false,
         "documentOnStart": "",
         "drawerTitle": "",
         "drawerButtonTitle": "Meny",
+        "resizingEnabled": false,
+        "draggingEnabled": false,
         "tableOfContents": {
-          "active": false,
+          "active": true,
           "expanded": false,
-          "chapterLevelsToShow": 2,
-          "title": "Innehållsförteckning"
+          "chapterLevelsToShow": "2",
+          "title": "Innehållsförteckning",
+          "height": "300",
+          "lineHeight": "0.9",
+          "fontSize": "12"
         },
         "defaultDocumentColorSettings": {
           "textAreaBackgroundColor": "#ccc",
