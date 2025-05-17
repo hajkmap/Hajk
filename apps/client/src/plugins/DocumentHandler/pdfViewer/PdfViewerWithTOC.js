@@ -52,6 +52,7 @@ function PdfViewerWithTOC({
   model,
   options,
   localObserver,
+  app,
 }) {
   const [numPages, setNumPages] = useState(null);
   const [pdfInstance, setPdfInstance] = useState(null);
@@ -101,7 +102,9 @@ function PdfViewerWithTOC({
       window.pendingPage = pageStr ? Number(pageStr) : null;
 
       if (title === currentTitle && folder == null) {
-        setPendingPage(window.pendingPage);
+        localObserver.publish("document-page-change", {
+          page: window.pendingPage,
+        });
       } else {
         localObserver.publish("set-active-document", {
           documentName: title,
@@ -112,6 +115,9 @@ function PdfViewerWithTOC({
           documentName: title,
           headerIdentifier: null,
           folder,
+        });
+        localObserver.publish("document-page-change", {
+          page: window.pendingPage,
         });
       }
     };
@@ -156,6 +162,18 @@ function PdfViewerWithTOC({
     mo.observe(wrapper, { childList: true, subtree: true });
     return () => mo.disconnect();
   }, [pendingPage]);
+
+  useEffect(() => {
+    const handlePageChange = ({ page }) => {
+      if (page != null) {
+        setPendingPage(page);
+      }
+    };
+
+    app.globalObserver.subscribe("document-page-change", handlePageChange);
+    return () =>
+      app.globalObserver.unsubscribe("document-page-change", handlePageChange);
+  }, [app.globalObserver]);
 
   //--------------------------------------------------------------------------
 

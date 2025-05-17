@@ -30,7 +30,7 @@ class DocumentWindowBase extends React.PureComponent {
     const pageStr = params.get("page");
 
     if (title) {
-      const { localObserver } = this.props;
+      const { localObserver, app } = this.props;
       window.pendingPage = pageStr ? Number(pageStr) : null;
 
       localObserver.publish("set-active-document", {
@@ -42,6 +42,9 @@ class DocumentWindowBase extends React.PureComponent {
         documentName: title,
         headerIdentifier: null,
         folder,
+      });
+      app.globalObserver.publish("document-page-change", {
+        page: window.pendingPage,
       });
     }
   };
