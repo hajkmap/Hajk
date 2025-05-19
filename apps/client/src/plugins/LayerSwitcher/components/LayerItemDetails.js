@@ -176,7 +176,7 @@ function LayerItemDetails({
 
   return (
     <>
-      {layerItemDetails && (
+      {layerItemDetails && display && (
         <Box
           sx={(theme) => ({
             top: 0,

@@ -2,11 +2,11 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { withTheme } from "@emotion/react";
 import { Icon, ListItemIcon, ListItemText } from "@mui/material";
+import { Box } from "@mui/material";
 
 import Card from "../components/Card";
 import Dialog from "../components/Dialog/Dialog";
 import PluginControlButton from "../components/PluginControlButton";
-import Hidden from "../components/Hidden";
 
 import ListItemButton from "@mui/material/ListItemButton";
 
@@ -162,13 +162,13 @@ class DialogWindowPlugin extends React.PureComponent {
    */
   renderDrawerButton() {
     return createPortal(
-      <div
-        style={{
+      <Box
+        sx={{
           display:
             this.#pluginIsWidget(this.opts.target) ||
             this.opts.target === "control"
-              ? "none"
-              : "block",
+              ? { xs: "block", md: "none" }
+              : "initial",
         }}
       >
         <ListItemButton
@@ -179,39 +179,44 @@ class DialogWindowPlugin extends React.PureComponent {
           <ListItemIcon>{this.icon}</ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItemButton>
-      </div>,
+      </Box>,
       document.getElementById("plugin-buttons")
     );
   }
 
   renderWidgetButton(id) {
     return createPortal(
-      <Hidden mdDown>
+      <Box
+        sx={{
+          display: { xs: "none", md: "flex" },
+          width: "fit-content",
+        }}
+      >
         <Card
           icon={this.icon}
           onClick={this.#handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      </Hidden>,
+      </Box>,
       document.getElementById(id)
     );
   }
 
   renderControlButton() {
-    const hasToolbarTarget = this.props.app.config.mapConfig.tools.filter(
-      (tool) => tool.options && tool.options.target === "toolbar"
-    );
-
     return createPortal(
-      <Hidden mdDown={hasToolbarTarget.length > 0}>
+      <Box
+        sx={{
+          display: { xs: "none", md: "block" },
+        }}
+      >
         <PluginControlButton
           icon={this.icon}
           onClick={this.#handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      </Hidden>,
+      </Box>,
       document.getElementById("plugin-control-buttons")
     );
   }

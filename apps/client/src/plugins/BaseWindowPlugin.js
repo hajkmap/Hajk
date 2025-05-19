@@ -6,7 +6,7 @@ import { ListItemIcon, ListItemText } from "@mui/material";
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
 import PluginControlButton from "../components/PluginControlButton";
-import Hidden from "../components/Hidden";
+import { Box } from "@mui/material";
 
 import ListItemButton from "@mui/material/ListItemButton";
 
@@ -110,7 +110,10 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   handleButtonClick = (e) => {
-    this.showWindow({ hideOtherPluginWindows: true, runCallback: true });
+    this.showWindow({
+      hideOtherPluginWindows: true,
+      runCallback: true,
+    });
     this.props.app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
     this.props.app.globalObserver.publish("core.focusWindow", this.type);
   };
@@ -144,15 +147,20 @@ class BaseWindowPlugin extends React.PureComponent {
 
     hideOtherPluginWindows === true && this.props.app.onWindowOpen(this);
 
-    this.setState({ windowVisible: true }, () => {
-      // Notify the app that a plugin's visibility has changed
-      this.props.app.globalObserver.publish("core.pluginVisibilityChanged");
+    this.setState(
+      {
+        windowVisible: true,
+      },
+      () => {
+        // Notify the app that a plugin's visibility has changed
+        this.props.app.globalObserver.publish("core.pluginVisibilityChanged");
 
-      // If there's a callback defined in custom, run it
-      runCallback === true &&
-        typeof this.props.custom.onWindowShow === "function" &&
-        this.props.custom.onWindowShow();
-    });
+        // If there's a callback defined in custom, run it
+        runCallback === true &&
+          typeof this.props.custom.onWindowShow === "function" &&
+          this.props.custom.onWindowShow();
+      }
+    );
   };
 
   closeWindowClick = () => {
@@ -171,13 +179,18 @@ class BaseWindowPlugin extends React.PureComponent {
     if (this.type === this.props.app.activeTool)
       this.props.app.activeTool = undefined;
 
-    this.setState({ windowVisible: false }, () => {
-      // Notify the app that a plugin's visibility has changed
-      this.props.app.globalObserver.publish("core.pluginVisibilityChanged");
+    this.setState(
+      {
+        windowVisible: false,
+      },
+      () => {
+        // Notify the app that a plugin's visibility has changed
+        this.props.app.globalObserver.publish("core.pluginVisibilityChanged");
 
-      typeof this.props.custom.onWindowHide === "function" &&
-        this.props.custom.onWindowHide();
-    });
+        typeof this.props.custom.onWindowHide === "function" &&
+          this.props.custom.onWindowHide();
+      }
+    );
   };
   /**
    * @summary Render the plugin and its buttons according to settings in admin.
@@ -254,13 +267,13 @@ class BaseWindowPlugin extends React.PureComponent {
    */
   renderDrawerButton() {
     return createPortal(
-      <div
-        style={{
+      <Box
+        sx={{
           display:
             this.pluginIsWidget(this.props.options.target) ||
             this.props.options.target === "control"
-              ? { md: "none", xs: "block" }
-              : "block",
+              ? { xs: "block", md: "none" }
+              : "initial",
         }}
       >
         <ListItemButton
@@ -271,7 +284,7 @@ class BaseWindowPlugin extends React.PureComponent {
           <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItemButton>
-      </div>,
+      </Box>,
       document.getElementById("plugin-buttons")
     );
   }
@@ -279,14 +292,19 @@ class BaseWindowPlugin extends React.PureComponent {
   renderWidgetButton(id) {
     return createPortal(
       // Hide Widget button on small screens, see renderDrawerButton too
-      <Hidden mdDown>
+      <Box
+        sx={{
+          display: { xs: "none", md: "flex" },
+          width: "fit-content",
+        }}
+      >
         <Card
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      </Hidden>,
+      </Box>,
       document.getElementById(id)
     );
   }
@@ -298,14 +316,22 @@ class BaseWindowPlugin extends React.PureComponent {
     );
 
     return createPortal(
-      <Hidden mdDown={hasToolbarTarget.length > 0}>
+      // Hide Control button on small screens, see renderDrawerButton too
+      <Box
+        sx={{
+          display: {
+            xs: "none",
+            md: hasToolbarTarget.length > 0 ? "block" : "none",
+          },
+        }}
+      >
         <PluginControlButton
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      </Hidden>,
+      </Box>,
       document.getElementById("plugin-control-buttons")
     );
   }
