@@ -24,6 +24,19 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
 
   const [menuIsOpen, setMenuIsOpen] = useState(false);
 
+  // Add event listener for closing menu
+  React.useEffect(() => {
+    const handleCloseMenu = () => {
+      setAnchorEl(null);
+      setMenuIsOpen(false);
+    };
+
+    document.addEventListener("closeLayersMenu", handleCloseMenu);
+    return () => {
+      document.removeEventListener("closeLayersMenu", handleCloseMenu);
+    };
+  }, []);
+
   // Show the options menu by setting an anchor element
   const handleShowMoreOptionsClick = (e) => {
     e.stopPropagation();

@@ -354,6 +354,14 @@ class Introduction extends React.PureComponent {
 
   handleStepChange = (stepIndex) => {
     const step = this.state.steps[stepIndex];
+    const previousStep = this.state.steps[stepIndex - 1];
+
+    // Close menu if we're moving from "Meny" step to "Widget-knapp" step
+    if (previousStep?.title === "Meny" && step?.title === "Widget-knapp") {
+      // Dispatch a custom event to close the menu
+      const closeEvent = new CustomEvent("closeLayersMenu");
+      document.dispatchEvent(closeEvent);
+    }
 
     if (step?.element === "#layerswitcher-actions-menu") {
       setTimeout(() => {
@@ -368,6 +376,17 @@ class Introduction extends React.PureComponent {
   handleBeforeStepChange = (nextIndex) => {
     return new Promise((resolve) => {
       const step = this.state.steps[nextIndex];
+      const currentStep = this.state.steps[nextIndex - 1];
+
+      // Close menu if we're moving from "Meny" step to "Widget-knapp" step
+      if (currentStep?.title === "Meny" && step?.title === "Widget-knapp") {
+        const menuButton = document.querySelector(
+          "#layerswitcher-actions-menu"
+        );
+        if (menuButton) {
+          menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        }
+      }
 
       if (step?.element === "#layerswitcher-actions-menu-content") {
         // Simulate menu button click
