@@ -413,17 +413,17 @@ class SearchBar extends React.PureComponent {
     return (
       <TextField
         {...params}
-        label={<span style={visuallyHidden}>Sök i webbplatsens innehåll</span>}
         variant={isMobile ? "standard" : "outlined"}
         placeholder={placeholder}
         autoFocus={this.props.options?.autofocusOnStart ?? false}
-        onKeyPress={handleSearchBarKeyPress}
+        onKeyDown={handleSearchBarKeyPress}
         slotProps={{
           input: {
             ...params.InputProps,
             ...disableUnderline,
             style: { margin: 0 },
             notched: isMobile ? null : false,
+            "aria-label": "Sök i webbplatsens innehåll",
             endAdornment: (
               <>
                 {loading ? (
