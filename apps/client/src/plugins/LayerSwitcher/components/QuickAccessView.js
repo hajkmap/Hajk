@@ -78,6 +78,7 @@ const QuickAccessView = ({
 
   return (
     <Box
+      id="quick-access-view"
       sx={{
         display: show ? "block" : "none",
         borderBottom: (theme) =>

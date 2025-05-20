@@ -1050,6 +1050,7 @@ class App extends React.PureComponent {
                   }
                 >
                   <IconButton
+                    id="toggle-drawer-permanent"
                     ref={this.buttonToggleDrawerPermanentRef}
                     sx={{ margin: "-12px" }} // Ugh... However, it tightens everything up
                     onClick={this.togglePermanent}

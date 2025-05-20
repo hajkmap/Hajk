@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, createRef } from "react";
 import { createPortal } from "react-dom";
 import { Steps } from "intro.js-react";
 import { useTheme } from "@mui/material/styles";
@@ -18,6 +18,16 @@ import { functionalOk as functionalCookieOk } from "../models/Cookie";
 const IntroSelectionScreen = ({ onSelect, onClose }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
+  const [showHalfIntro, setShowHalfIntro] = React.useState(true);
+
+  useEffect(() => {
+    const layerSwitcher = document.getElementById("layer-switcher-view-root");
+    if (layerSwitcher) {
+      const isVisible = layerSwitcher.style.display !== "none";
+      setShowHalfIntro(isVisible);
+    }
+  }, []);
+
   const handleClose = (event, reason) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") {
       // Prevent closing if the reason is a backdrop click or escape key press
@@ -112,19 +122,21 @@ const IntroSelectionScreen = ({ onSelect, onClose }) => {
             height: "40px",
           }}
         >
-          Full introduktion
+          Hela introduktionen
         </Button>
-        <Button
-          variant="contained"
-          fullWidth
-          onClick={() => onSelect("half")}
-          sx={{
-            mb: 1,
-            height: "40px",
-          }}
-        >
-          Halv introduktion
-        </Button>
+        {showHalfIntro && (
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={() => onSelect("half")}
+            sx={{
+              mb: 1,
+              height: "40px",
+            }}
+          >
+            Hajk 4 (kortare)
+          </Button>
+        )}
       </DialogContent>
       <DialogActions sx={{ p: 1 }}>
         <Button onClick={handleClose}>Avbryt</Button>
@@ -147,11 +159,12 @@ class Introduction extends React.PureComponent {
     stepsEnabled: true,
     steps: [],
     showSelection: false,
+    currentStepIndex: 0,
   };
 
   predefinedSteps = [
     {
-      title: "Välkommen till Hajk! 👋",
+      title: "Välkommen",
       intro:
         "Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Häng med!",
     },
@@ -159,6 +172,16 @@ class Introduction extends React.PureComponent {
       title: "Verktygspanel",
       element: "header > div:first-child",
       intro: "Med hjälp av knappen här uppe tar du fram verktygspanelen.",
+    },
+    {
+      title: "Kartverktyg",
+      element: "#drawer-content",
+      intro: "Här hittar du olika verktyg för att interagera med kartan.",
+    },
+    {
+      title: "Lås fast verktygspanelen",
+      element: "#toggle-drawer-permanent",
+      intro: "Klicka på knappen för att låsa fast verktygspanelen.",
     },
     {
       title: "Sökruta",
@@ -185,7 +208,7 @@ class Introduction extends React.PureComponent {
     },
     {
       title: "Sök lager",
-      element: ".css-jmikzk", // My favorite selector. Selects the first visible Window, so if there's a plugin Window open, we can add intro text to it.
+      element: "#layer-list-filter",
       intro: "Sök på lager.",
     },
     {
@@ -198,7 +221,11 @@ class Introduction extends React.PureComponent {
       title: "Meny",
       element: "#layerswitcher-actions-menu-content",
       intro: "Olika val.",
-      position: "right",
+    },
+    {
+      title: "Snabbåtkomst",
+      element: "#quick-access-view",
+      intro: "Meny för åtkomst av sparade lager.",
     },
     {
       title: "Widget-knapp",
@@ -210,26 +237,42 @@ class Introduction extends React.PureComponent {
 
   predefinedStepsTwo = [
     {
-      title: "Halv introduktion",
-      intro: "Detta är en kortare version av introduktionen.",
+      title: "Hajk 4",
+      intro:
+        "Detta är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar.",
     },
     {
-      title: "Kartkontroller",
-      element: "#controls-column",
+      title: "Fönster",
+      element: "#layer-switcher-view-root",
       intro:
-        "Längst ut i den högra delen av skärmen finns olika kontroller som du använder för att navigera i kartan.",
+        "Här ser du lagerhanteraren. Den är uppdelad i tre delar: <br><br> - Filtrering <br> - Kategorisering <br> - Sökning",
     },
     {
-      title: "Widget-knapp",
-      element: "#left-column > div > button",
-      intro:
-        "Det här är en Widget-knapp. Genom att klicka på den öppnar du det verktyget som knappen är kopplad till.",
+      title: "Sök lager",
+      element: "#layer-list-filter",
+      intro: "Sök på lager.",
+    },
+    {
+      title: "Öppna meny",
+      element: "#layerswitcher-actions-menu",
+      intro: "Olika val.",
+      position: "top",
+    },
+    {
+      title: "Meny",
+      element: "#layerswitcher-actions-menu-content",
+      intro: "Olika val.",
+    },
+    {
+      title: "Snabbåtkomst",
+      element: "#quick-access-view",
+      intro: "Meny för åtkomst av sparade lager.",
     },
   ];
 
   constructor(props) {
     super(props);
-    this.stepsRef = React.createRef();
+    this.stepsRef = createRef();
 
     /**
      * When appLoaded is fired, let's filter through the provided 'steps'.
@@ -352,13 +395,119 @@ class Introduction extends React.PureComponent {
     );
   }
 
+  handleDrawerTransition = (currentStep, nextStep) => {
+    // Open drawer transitions
+    if (
+      (currentStep?.title === "Verktygspanel" &&
+        nextStep?.title === "Kartverktyg") ||
+      (currentStep?.title === "Kartverktyg" &&
+        nextStep?.title === "Lås fast verktygspanelen")
+    ) {
+      this.props.globalObserver.publish("core.drawerContentChanged", "plugins");
+      return true;
+    }
+
+    // Close drawer transitions
+    if (
+      (currentStep?.title === "Välkommen" &&
+        nextStep?.title === "Verktygspanel") ||
+      (currentStep?.title === "Lås fast verktygspanelen" &&
+        nextStep?.title === "Sökruta")
+    ) {
+      this.props.globalObserver.publish("core.hideDrawer");
+      return true;
+    }
+
+    return false;
+  };
+
+  handleMenuTransition = (currentStep, nextStep) => {
+    if (currentStep?.title === "Meny" && nextStep?.title === "Snabbåtkomst") {
+      const menuButton = document.querySelector("#layerswitcher-actions-menu");
+      if (menuButton) {
+        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      }
+      return true;
+    }
+    return false;
+  };
+
+  handleMenuContentTransition = (step) => {
+    if (step?.element === "#layerswitcher-actions-menu-content") {
+      const menuButton = document.querySelector("#layerswitcher-actions-menu");
+      if (menuButton) {
+        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      }
+      return true;
+    }
+    return false;
+  };
+
+  handleBeforeStepChange = (nextIndex) => {
+    return new Promise((resolve) => {
+      const step = this.state.steps[nextIndex];
+      const previousStep = this.state.steps[nextIndex - 1];
+      const nextStep = this.state.steps[nextIndex + 1];
+      const currentIndex = this.state.currentStepIndex;
+
+      const goingBackward = nextIndex < currentIndex;
+      const goingForward = nextIndex > currentIndex;
+
+      // Handle drawer transitions
+      if (this.handleDrawerTransition(previousStep, step)) {
+        if (
+          (previousStep?.title === "Verktygspanel" &&
+            step?.title === "Kartverktyg" &&
+            goingForward) ||
+          (step?.title === "Lås fast verktygspanelen" &&
+            nextStep?.title === "Sökruta" &&
+            goingBackward)
+        ) {
+          setTimeout(() => resolve(), 250);
+        } else if (
+          (step?.title === "Lås fast verktygspanelen" &&
+            nextStep?.title === "Sökruta" &&
+            goingForward) ||
+          (step?.title === "Kartverktyg" &&
+            nextStep?.title === "Lås fast verktygspanelen" &&
+            goingBackward)
+        ) {
+          resolve();
+        } else {
+          resolve();
+        }
+        return;
+      }
+
+      // Handle menu transitions
+      if (this.handleMenuTransition(previousStep, step)) {
+        resolve();
+        return;
+      }
+
+      // Handle menu content transitions
+      if (this.handleMenuContentTransition(step)) {
+        setTimeout(() => {
+          if (this.stepsRef.current) {
+            this.stepsRef.current.updateStepElement(nextIndex);
+          }
+          resolve();
+        }, 150);
+        return;
+      }
+
+      resolve();
+    });
+  };
+
   handleStepChange = (stepIndex) => {
+    this.setState({ currentStepIndex: stepIndex });
+
     const step = this.state.steps[stepIndex];
     const previousStep = this.state.steps[stepIndex - 1];
 
-    // Close menu if we're moving from "Meny" step to "Widget-knapp" step
-    if (previousStep?.title === "Meny" && step?.title === "Widget-knapp") {
-      // Dispatch a custom event to close the menu
+    // Handle menu transitions
+    if (previousStep?.title === "Meny" && step?.title === "Snabbåtkomst") {
       const closeEvent = new CustomEvent("closeLayersMenu");
       document.dispatchEvent(closeEvent);
     }
@@ -369,45 +518,8 @@ class Introduction extends React.PureComponent {
         if (realBtn) {
           realBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
         }
-      }, 100); // Delay to wait for rendering/Intro.js transitions
+      }, 100);
     }
-  };
-
-  handleBeforeStepChange = (nextIndex) => {
-    return new Promise((resolve) => {
-      const step = this.state.steps[nextIndex];
-      const currentStep = this.state.steps[nextIndex - 1];
-
-      // Close menu if we're moving from "Meny" step to "Widget-knapp" step
-      if (currentStep?.title === "Meny" && step?.title === "Widget-knapp") {
-        const menuButton = document.querySelector(
-          "#layerswitcher-actions-menu"
-        );
-        if (menuButton) {
-          menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-        }
-      }
-
-      if (step?.element === "#layerswitcher-actions-menu-content") {
-        // Simulate menu button click
-        const menuButton = document.querySelector(
-          "#layerswitcher-actions-menu"
-        );
-        if (menuButton) {
-          menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-        }
-
-        // Wait for DOM to update, then re-bind the step to the new element
-        setTimeout(() => {
-          if (this.stepsRef.current) {
-            this.stepsRef.current.updateStepElement(nextIndex);
-          }
-          resolve();
-        }, 100); // allow time for menu to mount
-      } else {
-        resolve();
-      }
-    });
   };
 
   render() {

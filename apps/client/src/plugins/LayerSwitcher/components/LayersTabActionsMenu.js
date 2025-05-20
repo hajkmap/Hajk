@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import {
   IconButton,
@@ -25,7 +25,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
   const [menuIsOpen, setMenuIsOpen] = useState(false);
 
   // Add event listener for closing menu
-  React.useEffect(() => {
+  useEffect(() => {
     const handleCloseMenu = () => {
       setAnchorEl(null);
       setMenuIsOpen(false);

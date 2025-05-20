@@ -31,6 +31,7 @@ const LayerListFilter = ({
 
   return (
     <Box
+      id="layer-list-filter"
       sx={{
         p: 2,
         backgroundColor: (theme) =>
