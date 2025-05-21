@@ -23,16 +23,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.1.0] - 2025-04-25
 
-### Fixed
-
-- LayerSwitcher: UX Improvements ([issue](https://github.com/hajkmap/Hajk/issues/1637))
-- LayerSwitcher: Now possible to render special layers at the bottom [PR#1648](https://github.com/hajkmap/Hajk/pull/1648)
-
 ### Added
 
 - Sketch: Added GPX import and export. [PR#1641](https://github.com/hajkmap/Hajk/pull/1641)
 - Sketch/Measurer: Disable snapping temporarily on keyDown (Space) ([issue](https://github.com/hajkmap/Hajk/issues/1616))
 - DocumentHandler: Now possible to add map-link that opens corresponding plugin (with/without enableAppStatInHash) ([issue](https://github.com/hajkmap/Hajk/issues/1613))
+
+### Removed
+
+- Backend: Packages related to testing were never really used. [commit](https://github.com/hajkmap/Hajk/commit/934ba9780d2e57e60cde19f8341db49bcc6103e7) and [commit](https://github.com/hajkmap/Hajk/commit/8029c0b45dd38107acca3a47607f48d504dfd716)
+
+### Fixed
+
+- LayerSwitcher: UX Improvements ([issue](https://github.com/hajkmap/Hajk/issues/1637))
+- LayerSwitcher: Now possible to render special layers at the bottom [PR#1648](https://github.com/hajkmap/Hajk/pull/1648)
+- Core: Fixed a bug where the application would crash and leave user with a blank screen in the unlikely condition of a vector layer being configured in such a way that the URL for fetching SLD for styling that layer would become unavailable. [commit](https://github.com/hajkmap/Hajk/commit/af17bc7e8e0af618d306b6c3ce4dfad660531e0a)
+
+### Security
+
+- Backend: Major upgrades of dependencies, e.g. the latest Express, HTTP Proxy Middleware, ESlint. [commit](https://github.com/hajkmap/Hajk/commit/64877fb4ed70d4a8829babc8ea126da4aee8d062)
 
 ## [4.0.0] - 2025-04-04
 
