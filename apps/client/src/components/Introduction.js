@@ -207,6 +207,24 @@ class Introduction extends React.PureComponent {
         "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
     },
     {
+      title: "Kartlager",
+      element: ".MuiTabs-flexContainer :nth-child(1)",
+      intro:
+        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+    },
+    {
+      title: "Bakgrund",
+      element: ".MuiTabs-flexContainer :nth-child(2)",
+      intro:
+        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+    },
+    {
+      title: "Ritordning",
+      element: ".MuiTabs-flexContainer :nth-child(3)",
+      intro:
+        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+    },
+    {
       title: "Sök lager",
       element: "#layer-list-filter",
       intro: "Sök på lager.",
@@ -226,6 +244,17 @@ class Introduction extends React.PureComponent {
       title: "Snabbåtkomst",
       element: "#quick-access-view",
       intro: "Meny för åtkomst av sparade lager.",
+    },
+    {
+      title: "Snabbåtkomst meny",
+      element: "#quick-access-actions-menu",
+      intro:
+        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+    },
+    {
+      title: "Fler val",
+      element: "#quick-access-actions-menu-content",
+      intro: "Olika val.",
     },
     {
       title: "Widget-knapp",
@@ -421,8 +450,8 @@ class Introduction extends React.PureComponent {
     return false;
   };
 
-  handleMenuTransition = (currentStep, nextStep) => {
-    if (currentStep?.title === "Meny" && nextStep?.title === "Snabbåtkomst") {
+  handleMenuContentTransition = (step) => {
+    if (step?.element === "#layerswitcher-actions-menu-content") {
       const menuButton = document.querySelector("#layerswitcher-actions-menu");
       if (menuButton) {
         menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -432,9 +461,9 @@ class Introduction extends React.PureComponent {
     return false;
   };
 
-  handleMenuContentTransition = (step) => {
-    if (step?.element === "#layerswitcher-actions-menu-content") {
-      const menuButton = document.querySelector("#layerswitcher-actions-menu");
+  handleQuickAccessMenuTransition = (step) => {
+    if (step?.element === "#quick-access-actions-menu-content") {
+      const menuButton = document.querySelector("#quick-access-actions-menu");
       if (menuButton) {
         menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       }
@@ -479,12 +508,6 @@ class Introduction extends React.PureComponent {
         return;
       }
 
-      // Handle menu transitions
-      if (this.handleMenuTransition(previousStep, step)) {
-        resolve();
-        return;
-      }
-
       // Handle menu content transitions
       if (this.handleMenuContentTransition(step)) {
         setTimeout(() => {
@@ -496,6 +519,15 @@ class Introduction extends React.PureComponent {
         return;
       }
 
+      if (this.handleQuickAccessMenuTransition(step)) {
+        setTimeout(() => {
+          if (this.stepsRef.current) {
+            this.stepsRef.current.updateStepElement(nextIndex);
+          }
+          resolve();
+        }, 150);
+        return;
+      }
       resolve();
     });
   };
@@ -506,19 +538,34 @@ class Introduction extends React.PureComponent {
     const step = this.state.steps[stepIndex];
     const previousStep = this.state.steps[stepIndex - 1];
 
+    const goingForward = stepIndex > this.state.currentStepIndex;
+    const goingBackward = stepIndex < this.state.currentStepIndex;
+
     // Handle menu transitions
-    if (previousStep?.title === "Meny" && step?.title === "Snabbåtkomst") {
+    if (
+      (previousStep?.title === "Meny" &&
+        step?.title === "Snabbåtkomst" &&
+        goingForward) ||
+      (previousStep?.title === "Sök lager" &&
+        step?.title === "Öppna meny" &&
+        goingBackward)
+    ) {
       const closeEvent = new CustomEvent("closeLayersMenu");
       document.dispatchEvent(closeEvent);
+      return;
     }
-
-    if (step?.element === "#layerswitcher-actions-menu") {
-      setTimeout(() => {
-        const realBtn = document.querySelector("#layerswitcher-actions-menu");
-        if (realBtn) {
-          realBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-        }
-      }, 100);
+    // Handle quick access menu transitions
+    if (
+      (previousStep?.title === "Fler val" &&
+        step?.title === "Widget-knapp" &&
+        goingForward) ||
+      (previousStep?.title === "Snabbåtkomst" &&
+        step?.title === "Snabbåtkomst meny" &&
+        goingBackward)
+    ) {
+      const closeEvent = new CustomEvent("closeQuickAccessMenu");
+      document.dispatchEvent(closeEvent);
+      return;
     }
   };
 
@@ -557,6 +604,8 @@ class Introduction extends React.PureComponent {
                 nextLabel: "Nästa",
                 prevLabel: "Föregående",
                 doneLabel: "Klart!",
+                showBullets: false,
+                showProgress: true,
               }}
             />
           )}
