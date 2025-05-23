@@ -145,6 +145,7 @@ const LayersTab = ({
         />
       )}
       <div
+        id="layerslist-container"
         ref={scrollContainerRef}
         style={{
           height: "inherit",

@@ -1,14 +1,18 @@
-import React, { useEffect, createRef } from "react";
+import React, { useEffect, createRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Steps } from "intro.js-react";
 import { useTheme } from "@mui/material/styles";
-import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import PluginControlButton from "../components/PluginControlButton";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Box,
+} from "@mui/material";
+import HajkToolTip from "components/HajkToolTip";
 
 import "intro.js/introjs.css";
 import "intro.js/themes/introjs-modern.css";
@@ -18,17 +22,16 @@ import { functionalOk as functionalCookieOk } from "../models/Cookie";
 const IntroSelectionScreen = ({ onSelect, onClose }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
-  const [showHalfIntro, setShowHalfIntro] = React.useState(true);
-
+  const [IsLayerSwitcherVisible, setIsLayerSwitcherVisible] = useState(true);
   useEffect(() => {
     const layerSwitcher = document.getElementById("layer-switcher-view-root");
     if (layerSwitcher) {
       const isVisible = layerSwitcher.style.display !== "none";
-      setShowHalfIntro(isVisible);
+      setIsLayerSwitcherVisible(isVisible);
     }
   }, []);
 
-  const handleClose = (event, reason) => {
+  const handleClose = (_, reason) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") {
       // Prevent closing if the reason is a backdrop click or escape key press
       return;
@@ -115,7 +118,7 @@ const IntroSelectionScreen = ({ onSelect, onClose }) => {
         <Button
           variant="contained"
           fullWidth
-          onClick={() => onSelect("full")}
+          onClick={() => onSelect("full", IsLayerSwitcherVisible)}
           sx={{
             mt: 2,
             mb: 1,
@@ -124,19 +127,29 @@ const IntroSelectionScreen = ({ onSelect, onClose }) => {
         >
           Hela introduktionen
         </Button>
-        {showHalfIntro && (
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => onSelect("half")}
-            sx={{
-              mb: 1,
-              height: "40px",
-            }}
-          >
-            Hajk 4 (kortare)
-          </Button>
-        )}
+        <HajkToolTip
+          title={
+            IsLayerSwitcherVisible
+              ? ""
+              : "Öppna lagerhanteraren för att visa denna introduktionen"
+          }
+          placement="right"
+        >
+          <Box component="span" sx={{ display: "inline-block", width: "100%" }}>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={() => onSelect("half", IsLayerSwitcherVisible)}
+              sx={{
+                mb: 1,
+                height: "40px",
+              }}
+              disabled={!IsLayerSwitcherVisible}
+            >
+              Nya lagerhanteraren
+            </Button>
+          </Box>
+        </HajkToolTip>
       </DialogContent>
       <DialogActions sx={{ p: 1 }}>
         <Button onClick={handleClose}>Avbryt</Button>
@@ -160,6 +173,7 @@ class Introduction extends React.PureComponent {
     steps: [],
     showSelection: false,
     currentStepIndex: 0,
+    isLayerSwitcherVisible: true,
   };
 
   predefinedSteps = [
@@ -201,28 +215,16 @@ class Introduction extends React.PureComponent {
         "Längst ut i den högra delen av skärmen finns olika kontroller som du använder för att navigera i kartan.",
     },
     {
-      title: "Fönster",
-      element: '#windows-container > div[style*="display: block"]', // My favorite selector. Selects the first visible Window, so if there's a plugin Window open, we can add intro text to it.
+      title: "Lagerlista",
+      element: "#layerslist-container",
       intro:
         "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
     },
     {
-      title: "Kartlager",
-      element: ".MuiTabs-flexContainer :nth-child(1)",
+      title: "Flikar i lagerhanteraren",
+      element: ".MuiTabs-flexContainer",
       intro:
-        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
-    },
-    {
-      title: "Bakgrund",
-      element: ".MuiTabs-flexContainer :nth-child(2)",
-      intro:
-        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
-    },
-    {
-      title: "Ritordning",
-      element: ".MuiTabs-flexContainer :nth-child(3)",
-      intro:
-        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+        "Klicka här för att växla mellan olika vyer: <br><br> - Kartlager <br> - Bakgrund <br> - Ritordning",
     },
     {
       title: "Sök lager",
@@ -257,10 +259,8 @@ class Introduction extends React.PureComponent {
       intro: "Olika val.",
     },
     {
-      title: "Widget-knapp",
-      element: "#left-column > div > button",
-      intro:
-        "Det här är en Widget-knapp. Genom att klicka på den öppnar du det verktyget som knappen är kopplad till. <br><br>Det var det hela. Hoppas du kommer tycka om att använda Hajk!",
+      title: "Slut",
+      intro: "Detta är slutet.",
     },
   ];
 
@@ -271,10 +271,16 @@ class Introduction extends React.PureComponent {
         "Detta är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar.",
     },
     {
-      title: "Fönster",
-      element: "#layer-switcher-view-root",
+      title: "Lagerlista",
+      element: "#layerslist-container",
       intro:
-        "Här ser du lagerhanteraren. Den är uppdelad i tre delar: <br><br> - Filtrering <br> - Kategorisering <br> - Sökning",
+        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+    },
+    {
+      title: "Flikar i lagerhanteraren",
+      element: ".MuiTabs-flexContainer",
+      intro:
+        "Klicka här för att växla mellan olika vyer: <br><br> - Kartlager <br> - Bakgrund <br> - Ritordning",
     },
     {
       title: "Sök lager",
@@ -296,6 +302,21 @@ class Introduction extends React.PureComponent {
       title: "Snabbåtkomst",
       element: "#quick-access-view",
       intro: "Meny för åtkomst av sparade lager.",
+    },
+    {
+      title: "Snabbåtkomst meny",
+      element: "#quick-access-actions-menu",
+      intro:
+        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+    },
+    {
+      title: "Fler val",
+      element: "#quick-access-actions-menu-content",
+      intro: "Olika val.",
+    },
+    {
+      title: "Slut",
+      intro: "Detta är slutet.",
     },
   ];
 
@@ -326,7 +347,6 @@ class Introduction extends React.PureComponent {
             document.querySelector(s?.element) !== null
           );
         });
-
         this.setState({ steps: filteredSteps });
 
         // Show selection screen if introduction hasn't been shown before
@@ -367,11 +387,32 @@ class Introduction extends React.PureComponent {
     });
   }
 
-  handleIntroSelection = (type) => {
-    this.setState({ showSelection: false });
+  handleIntroSelection = (type, isLayerSwitcherVisible) => {
+    this.setState({
+      showSelection: false,
+      isLayerSwitcherVisible,
+    });
     if (type === "full") {
+      // Filter out layer switcher steps if isLayerSwitcherVisible is false
+      const steps = this.predefinedSteps.filter((step) => {
+        if (!isLayerSwitcherVisible) {
+          // Skip steps from "Lagerlista" to "Fler val"
+          const layerSwitcherSteps = [
+            "Lagerlista",
+            "Flikar i lagerhanteraren",
+            "Sök lager",
+            "Öppna meny",
+            "Meny",
+            "Snabbåtkomst",
+            "Snabbåtkomst meny",
+            "Fler val",
+          ];
+          return !layerSwitcherSteps.includes(step.title);
+        }
+        return true;
+      });
       this.setState({
-        steps: this.predefinedSteps,
+        steps: steps,
         forceShow: true,
         stepsEnabled: true,
       });
@@ -413,7 +454,7 @@ class Introduction extends React.PureComponent {
   renderControlButton() {
     return createPortal(
       <PluginControlButton
-        icon={<InsertEmoticonIcon />}
+        icon={<AutoStoriesIcon />}
         onClick={() => {
           this.showIntroduction();
         }}
@@ -508,6 +549,12 @@ class Introduction extends React.PureComponent {
         return;
       }
 
+      // Skip layer switcher transitions if isLayerSwitcherVisible is false
+      if (!this.state.isLayerSwitcherVisible) {
+        resolve();
+        return;
+      }
+
       // Handle menu content transitions
       if (this.handleMenuContentTransition(step)) {
         setTimeout(() => {
@@ -541,6 +588,11 @@ class Introduction extends React.PureComponent {
     const goingForward = stepIndex > this.state.currentStepIndex;
     const goingBackward = stepIndex < this.state.currentStepIndex;
 
+    // Skip layer switcher transitions if isLayerSwitcherVisible is false
+    if (!this.state.isLayerSwitcherVisible) {
+      return;
+    }
+
     // Handle menu transitions
     if (
       (previousStep?.title === "Meny" &&
@@ -557,7 +609,7 @@ class Introduction extends React.PureComponent {
     // Handle quick access menu transitions
     if (
       (previousStep?.title === "Fler val" &&
-        step?.title === "Widget-knapp" &&
+        step?.title === "Slut" &&
         goingForward) ||
       (previousStep?.title === "Snabbåtkomst" &&
         step?.title === "Snabbåtkomst meny" &&
@@ -580,7 +632,6 @@ class Introduction extends React.PureComponent {
           <IntroSelectionScreen
             onSelect={this.handleIntroSelection}
             onClose={this.handleSelectionClose}
-            isDarkMode={this.props.theme?.palette?.mode === "dark"}
           />
         )}
         {!showSelection &&
