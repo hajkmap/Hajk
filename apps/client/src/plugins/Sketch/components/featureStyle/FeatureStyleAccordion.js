@@ -99,7 +99,12 @@ const AccordionSummaryContents = (props) => {
       : props.drawModel.getRGBAString(props.color);
   // Then we'll render everything!
   return (
-    <Grid container justifyContent="space-between" alignItems="center">
+    <Grid
+      container
+      justifyContent="space-between"
+      alignItems="center"
+      size={12}
+    >
       <Typography variant="button">{props.title}</Typography>
       <Grid container justifyContent="flex-end" alignItems="center" size={4}>
         {props.showOpacitySlider && (
