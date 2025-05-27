@@ -230,7 +230,6 @@ class DocumentViewer extends React.PureComponent {
                   },
             ]}
             container
-            item
           >
             <Contents
               options={options}
