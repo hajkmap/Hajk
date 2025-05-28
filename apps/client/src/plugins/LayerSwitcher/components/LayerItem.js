@@ -304,12 +304,14 @@ function LayerItem({
             />
             <ListItemText
               primary={layerCaption}
-              primaryTypographyProps={{
-                pr: 5,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                variant: "body1",
-                fontWeight: layerIsToggled && !draggable ? "bold" : "inherit",
+              slotProps={{
+                primary: {
+                  pr: 5,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  variant: "body1",
+                  fontWeight: layerIsToggled && !draggable ? "bold" : "inherit",
+                },
               }}
             />
             <ListItemSecondaryAction
