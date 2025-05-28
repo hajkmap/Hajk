@@ -67,9 +67,9 @@ const EditView = (props) => {
       container
       direction="column"
       justifyContent="space-between"
-      style={{ height: "100%" }}
+      sx={{ height: "100%" }}
     >
-      <Grid container>
+      <Grid container size={12}>
         <Grid size={12}>
           <Information text={activity.information} />
         </Grid>

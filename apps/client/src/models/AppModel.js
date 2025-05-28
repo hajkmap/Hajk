@@ -792,7 +792,9 @@ class AppModel {
       // shown at start. All others should be hidden (no matter the setting in Admin).
       else {
         mapConfig.tools.forEach((t) => {
-          t.options.visibleAtStart = pluginsToShow.includes(t.type);
+          t.options.visibleAtStart = pluginsToShow.includes(
+            t.type.toLowerCase()
+          );
         });
       }
     }

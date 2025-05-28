@@ -867,7 +867,6 @@ class PrintWindow extends React.PureComponent {
   renderCreatePDFButton() {
     return (
       <GridFooterContainer
-        item
         container
         alignContent="center"
         alignItems="center"
@@ -927,7 +926,7 @@ class PrintWindow extends React.PureComponent {
         <Typography align="center" variant="h6">
           Skapa PDF
         </Typography>
-        <GridSettingsContainer container item>
+        <GridSettingsContainer container>
           <Typography variant="h6">Inställningar</Typography>
 
           <Grid size={12}>
