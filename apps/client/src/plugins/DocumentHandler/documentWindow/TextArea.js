@@ -9,10 +9,10 @@ const GridContainer = styled(Grid)(({ theme }) => ({
 
 const GridContainerContent = styled(Grid)(({ theme }) => ({
   //Need to manually change color when switching between dark/light-mode
-  backgroundColor:
-    theme.palette.mode === "dark"
-      ? theme.palette.grey[700]
-      : theme.palette.grey[200],
+  backgroundColor: theme.palette.grey[200],
+  ...theme.applyStyles("dark", {
+    backgroundColor: theme.palette.grey[700],
+  }),
 }));
 
 const GridTypographyContainer = styled(Grid)(({ theme }) => ({
@@ -21,11 +21,11 @@ const GridTypographyContainer = styled(Grid)(({ theme }) => ({
 
 const StyledDivider = styled(Divider)(({ theme }) => ({
   //Need to manually change color when switching between dark/light-mode
-  backgroundColor:
-    theme.palette.mode === "dark"
-      ? theme.palette.grey[200]
-      : theme.palette.grey[400],
+  backgroundColor: theme.palette.grey[400],
   height: "2px",
+  ...theme.applyStyles("dark", {
+    backgroundColor: theme.palette.grey[200],
+  }),
 }));
 
 class TextArea extends React.PureComponent {
@@ -36,16 +36,15 @@ class TextArea extends React.PureComponent {
     return (
       <GridContainer id="text-area-content" justifyContent="center" container>
         <GridContainerContent
-          xs={12}
+          size={12}
           sx={{
             backgroundColor: backgroundColor,
             color: textColor,
           }}
-          item
         >
           <StyledDivider sx={{ backgroundColor: dividerColor }} />
           <Grid justifyContent="center" container>
-            <GridTypographyContainer component="blockquote" xs={12} item>
+            <GridTypographyContainer component="blockquote" size={12}>
               {textAreaContentArray}
             </GridTypographyContainer>
           </Grid>

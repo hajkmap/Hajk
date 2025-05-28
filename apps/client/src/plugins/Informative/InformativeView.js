@@ -30,7 +30,6 @@ const IconButtonButton = styled(IconButton)(({ theme }) => ({
 }));
 
 const DivChapter = styled("div")(({ theme }) => ({}));
-
 const DivTocChapter = styled("div")(({ theme }) => ({
   display: "flex",
   cursor: "pointer",
@@ -53,27 +52,21 @@ const DivMarkup = styled("div")(({ theme }) => ({
   "& h1": {
     lineHeight: "normal",
   },
-
   "& h2": {
     lineHeight: "normal",
   },
-
   "& h3": {
     lineHeight: "normal",
   },
-
   "& h4": {
     lineHeight: "normal",
   },
-
   "& h5": {
     lineHeight: "normal",
   },
-
   "& h6": {
     lineHeight: "normal",
   },
-
   "& blockquote": {
     borderLeft: "5px solid #eee",
     color: "#666",
@@ -129,11 +122,9 @@ const DivLegendItem = styled("div")(({ theme }) => ({
 const DivContent = styled("div")(({ theme }) => ({
   userSelect: "text",
   cursor: "auto",
-
   "& img": {
     maxWidth: "100%",
   },
-
   "& figure": {
     margin: 0,
   },

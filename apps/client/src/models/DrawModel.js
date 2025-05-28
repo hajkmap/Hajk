@@ -580,13 +580,13 @@ class DrawModel {
     // Let's grab the foreground (fill) and background (stroke) colors that we're supposed to use.
     // First we'll try to grab the color from the feature style, then from the current settings, and lastly from the fallback.
     const foregroundColor = featureIsTextType
-      ? feature.get("TEXT_SETTINGS")?.foregroundColor ??
-        this.#textStyleSettings.foregroundColor
+      ? (feature.get("TEXT_SETTINGS")?.foregroundColor ??
+        this.#textStyleSettings.foregroundColor)
       : "#FFF";
     // Same applies for the background
     const backgroundColor = featureIsTextType
-      ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
-        this.#textStyleSettings.backgroundColor
+      ? (feature.get("TEXT_SETTINGS")?.backgroundColor ??
+        this.#textStyleSettings.backgroundColor)
       : "rgba(0, 0, 0, 0.5)";
     // Then we can create and return the style
     return new Text({
@@ -594,13 +594,13 @@ class DrawModel {
       textBaseline: "middle",
       font: `${
         featureIsTextType
-          ? feature.get("TEXT_SETTINGS")?.size ?? this.#textStyleSettings.size
+          ? (feature.get("TEXT_SETTINGS")?.size ?? this.#textStyleSettings.size)
           : 12
       }pt sans-serif`,
       fill: new Fill({
         color: featureIsTextType
-          ? feature.get("TEXT_SETTINGS")?.foregroundColor ??
-            this.#textStyleSettings.foregroundColor
+          ? (feature.get("TEXT_SETTINGS")?.foregroundColor ??
+            this.#textStyleSettings.foregroundColor)
           : "#FFF",
       }),
       text: this.#getFeatureLabelText(feature),
@@ -610,8 +610,8 @@ class DrawModel {
         foregroundColor !== backgroundColor
           ? new Stroke({
               color: featureIsTextType
-                ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
-                  this.#textStyleSettings.backgroundColor
+                ? (feature.get("TEXT_SETTINGS")?.backgroundColor ??
+                  this.#textStyleSettings.backgroundColor)
                 : "rgba(0, 0, 0, 0.7)",
               width: 3,
             })
@@ -1903,7 +1903,7 @@ class DrawModel {
   #isFreeHandDrawing = (drawMethod, settings) => {
     return ["Circle", "Rectangle"].includes(drawMethod)
       ? true
-      : settings.freehand ?? false;
+      : (settings.freehand ?? false);
   };
 
   // Accepts a feature with "CIRCLE_RADIUS" and "CIRCLE_CENTER" properties.

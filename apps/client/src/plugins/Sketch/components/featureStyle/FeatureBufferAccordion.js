@@ -36,7 +36,7 @@ const FeatureBufferAccordion = (props) => {
       <AccordionDetails style={{ maxWidth: "100%" }}>
         <Grid container>
           {props.showBufferSlider && (
-            <Grid item xs={12} style={{ marginTop: 8 }}>
+            <Grid style={{ marginTop: 8 }} size={12}>
               <Buffer
                 drawStyle={props.drawStyle}
                 drawModel={props.drawModel}
