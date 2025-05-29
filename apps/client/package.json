@@ -70,6 +70,7 @@
     "load-google-maps-api": "^2.0.2",
     "notistack": "^3.0.2",
     "ol": "^10.4.0",
+    "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^3.11.174",
     "proj4": "^2.15.0",
     "qrcode": "^1.5.4",

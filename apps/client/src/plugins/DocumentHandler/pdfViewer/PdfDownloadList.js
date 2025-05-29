@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { PDFDocument } from "pdf-lib";
 import {
   Box,
   TextField,
@@ -64,6 +65,38 @@ const PdfDownloadList = ({ pdfFiles = [], options = {} }) => {
     });
   }, [pdfFiles, selected]);
 
+  const downloadMerged = useCallback(async () => {
+    if (selected.size === 0) return;
+
+    // Create empty PDF-file
+    const mergedPdf = await PDFDocument.create();
+
+    // Add all pages frpm selected PDF-file (list order)
+    for (const file of pdfFiles) {
+      if (selected.has(file.title)) {
+        const srcBytes = await file.blob.arrayBuffer();
+        const srcPdf = await PDFDocument.load(srcBytes);
+        const pages = await mergedPdf.copyPages(
+          srcPdf,
+          srcPdf.getPageIndices()
+        );
+        pages.forEach((p) => mergedPdf.addPage(p));
+      }
+    }
+
+    // Save and download
+    const mergedBytes = await mergedPdf.save();
+    const blob = new Blob([mergedBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sammanfogad.pdf";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [pdfFiles, selected]);
+
   // --------------------------- Helper ---------------------------
   const toolBtn = (label, onClick, disabled = false) => (
     <Button variant="text" onClick={onClick} disabled={disabled} sx={{ mr: 1 }}>
@@ -117,6 +150,14 @@ const PdfDownloadList = ({ pdfFiles = [], options = {} }) => {
         sx={{ mt: 2 }}
       >
         Ladda ner markerade filer
+      </Button>
+      <Button
+        variant="outlined"
+        onClick={downloadMerged}
+        disabled={selected.size === 0}
+        sx={{ mt: 2 }}
+      >
+        Ladda ner som sammanslagen PDF
       </Button>
     </Box>
   );
