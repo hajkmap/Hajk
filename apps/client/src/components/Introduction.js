@@ -277,6 +277,28 @@ class Introduction extends React.PureComponent {
         "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
     },
     {
+      title: "Grupplager",
+      element: "#layerGroup-accordion-arrowBtn",
+      intro:
+        "Pil indikerar grupplager. Klicka för att se underliggande lager. <br/><br/> Notera att grupplagernamn med <b>fetstil</b> innehåller tända lager.",
+    },
+    {
+      title: "Tända lager",
+      element: "#toggle-layer-item",
+      intro:
+        "Klicka för att tända/släcka lager. Lagernamn med <b>fetsil</b> visar att lagret är tänt.",
+    },
+    {
+      title: "Teckenförklaring",
+      element: "#toggle-legend-icon",
+      intro: "Klicka för att visa/dölja teckenförklaring.",
+    },
+    {
+      title: "Lagerinformation",
+      element: ".ls-details-icon",
+      intro: "Klicka för att se mer information om ett lager.",
+    },
+    {
       title: "Flikar i lagerhanteraren",
       element: ".MuiTabs-flexContainer",
       intro:
@@ -513,6 +535,20 @@ class Introduction extends React.PureComponent {
     return false;
   };
 
+  handleLayerEvents = (step) => {
+    if (
+      step?.title === "Grupplager" ||
+      step?.title === "Tända lager" ||
+      step?.title === "Teckenförklaring" ||
+      step?.title === "Lagerinformation"
+    ) {
+      document.dispatchEvent(new CustomEvent("expandFirstGroup"));
+      return true;
+    }
+
+    return false;
+  };
+
   handleBeforeStepChange = (nextIndex) => {
     return new Promise((resolve) => {
       const step = this.state.steps[nextIndex];
@@ -574,6 +610,13 @@ class Introduction extends React.PureComponent {
           resolve();
         }, 150);
         return;
+      }
+
+      if (this.handleLayerEvents(step)) {
+        if (this.stepsRef.current) {
+          this.stepsRef.current.updateStepElement(nextIndex);
+        }
+        resolve();
       }
       resolve();
     });

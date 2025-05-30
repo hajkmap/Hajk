@@ -79,6 +79,7 @@ const LayerLegendIcon = ({
 
   return (
     <BtnShowLegend
+      id="toggle-legend-icon"
       legendIsActive={legendIsActive}
       onClick={() => toggleLegend()}
     />
@@ -284,7 +285,9 @@ function LayerItem({
               borderBottom: (theme) => renderBorder(theme),
             }}
           >
-            {toggleable && <LsCheckBox toggleState={toggleState} />}
+            {toggleable && (
+              <LsCheckBox id="toggle-layer-item" toggleState={toggleState} />
+            )}
             <LayerLegendIcon
               legendIcon={legendIcon}
               layerType={layerType}

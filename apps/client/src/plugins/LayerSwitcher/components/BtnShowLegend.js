@@ -3,12 +3,13 @@ import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBullet
 import HajkToolTip from "components/HajkToolTip";
 import LsIconButton from "./LsIconButton";
 
-const BtnShowLegend = ({ legendIsActive, onClick, ...props }) => (
+const BtnShowLegend = ({ legendIsActive, onClick, id, ...props }) => (
   <HajkToolTip
     placement="left"
     title={legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"}
   >
     <LsIconButton
+      id={id}
       sx={{ p: 0.25, mt: 0.5, mr: "5px" }}
       size="small"
       onClick={(e) => {

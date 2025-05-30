@@ -154,6 +154,8 @@ const LayerGroup = ({
   layersState,
   filterHits,
   filterValue,
+  isFirstGroup,
+  isFirstChild,
 }) => {
   const children = staticGroupTree.children;
 
@@ -217,6 +219,8 @@ const LayerGroup = ({
 
   return (
     <LayerGroupAccordion
+      isFirstGroup={isFirstGroup}
+      isFirstChild={isFirstChild}
       display={groupIsFiltered ? "none" : "block"}
       toggleable={groupIsToggable}
       expanded={filterActiveAndHasHits || groupIsExpanded}
@@ -271,11 +275,11 @@ const LayerGroup = ({
       }
     >
       <div>
-        {children?.map((child) => {
+        {children?.map((child, index) => {
           const layerId = child.id;
 
           const layerState = layersState[layerId];
-
+          const isFirstChild = index === 0;
           const layerSettings = staticLayerConfig[layerId];
           if (!layerSettings) {
             return null;
@@ -295,6 +299,7 @@ const LayerGroup = ({
                 layersState={layersState}
                 filterHits={filterHits}
                 filterValue={filterValue}
+                isFirstChild={isFirstChild}
               />
             );
           }
