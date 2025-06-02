@@ -277,7 +277,6 @@ const LayerGroup = ({
       <div>
         {children?.map((child, index) => {
           const layerId = child.id;
-
           const layerState = layersState[layerId];
           const isFirstChild = index === 0;
           const layerSettings = staticLayerConfig[layerId];
@@ -329,6 +328,7 @@ const LayerGroup = ({
               toggleable={true}
               globalObserver={globalObserver}
               filterValue={filterValue}
+              children={children}
             />
           );
         })}

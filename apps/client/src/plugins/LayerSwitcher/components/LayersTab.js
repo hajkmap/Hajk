@@ -55,7 +55,7 @@ const LayersTab = ({
   const [layerTree, setLayerTree] = useState(staticLayerTree);
 
   // Listen for global DOM events dispatched by the Introduction component
-  // to expand the first grouplayer object
+  // to expand the first grouplayer object including its children
   useEffect(() => {
     function expandFirstGroupLayerObject(tree) {
       if (!Array.isArray(tree)) return [];

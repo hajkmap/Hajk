@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Steps } from "intro.js-react";
 import { useTheme } from "@mui/material/styles";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PluginControlButton from "../components/PluginControlButton";
 import {
   Button,
@@ -124,6 +125,16 @@ const IntroSelectionScreen = ({ onSelect, onClose }) => {
             mb: 1,
             height: "40px",
           }}
+          endIcon={
+            !IsLayerSwitcherVisible ? (
+              <HajkToolTip
+                title="Öppna lagerhanteraren om du vill inkludera den i hela introduktionen"
+                placement="right"
+              >
+                <InfoOutlinedIcon />
+              </HajkToolTip>
+            ) : null
+          }
         >
           Hela introduktionen
         </Button>
@@ -131,7 +142,7 @@ const IntroSelectionScreen = ({ onSelect, onClose }) => {
           title={
             IsLayerSwitcherVisible
               ? ""
-              : "Öppna lagerhanteraren för att visa denna introduktionen"
+              : `Öppna lagerhanteraren och för att visa den här introduktionen`
           }
           placement="right"
         >
@@ -283,7 +294,7 @@ class Introduction extends React.PureComponent {
         "Pil indikerar grupplager. Klicka för att se underliggande lager. <br/><br/> Notera att grupplagernamn med <b>fetstil</b> innehåller tända lager.",
     },
     {
-      title: "Tända lager",
+      title: "Tänd lagret",
       element: "#toggle-layer-item",
       intro:
         "Klicka för att tända/släcka lager. Lagernamn med <b>fetsil</b> visar att lagret är tänt.",
@@ -295,12 +306,17 @@ class Introduction extends React.PureComponent {
     },
     {
       title: "Lagerinformation",
-      element: ".ls-details-icon",
+      element: "#show-layer-details",
       intro: "Klicka för att se mer information om ett lager.",
     },
     {
+      title: "Lagerinformation vy",
+      element: "#layer-item-details-info",
+      intro: "Lagerinformation.",
+    },
+    {
       title: "Flikar i lagerhanteraren",
-      element: ".MuiTabs-flexContainer",
+      element: "#layer-switcher-tab-panel",
       intro:
         "Klicka här för att växla mellan olika vyer: <br><br> - Kartlager <br> - Bakgrund <br> - Ritordning",
     },
@@ -487,13 +503,13 @@ class Introduction extends React.PureComponent {
     );
   }
 
-  handleDrawerTransition = (currentStep, nextStep) => {
+  handleDrawerTransition = (previousStep, currentStep) => {
     // Open drawer transitions
     if (
-      (currentStep?.title === "Verktygspanel" &&
-        nextStep?.title === "Kartverktyg") ||
-      (currentStep?.title === "Kartverktyg" &&
-        nextStep?.title === "Lås fast verktygspanelen")
+      (previousStep?.title === "Verktygspanel" &&
+        currentStep?.title === "Kartverktyg") ||
+      (previousStep?.title === "Kartverktyg" &&
+        currentStep?.title === "Lås fast verktygspanelen")
     ) {
       this.props.globalObserver.publish("core.drawerContentChanged", "plugins");
       return true;
@@ -501,10 +517,10 @@ class Introduction extends React.PureComponent {
 
     // Close drawer transitions
     if (
-      (currentStep?.title === "Välkommen" &&
-        nextStep?.title === "Verktygspanel") ||
-      (currentStep?.title === "Lås fast verktygspanelen" &&
-        nextStep?.title === "Sökruta")
+      (previousStep?.title === "Välkommen" &&
+        currentStep?.title === "Verktygspanel") ||
+      (previousStep?.title === "Lås fast verktygspanelen" &&
+        currentStep?.title === "Sökruta")
     ) {
       this.props.globalObserver.publish("core.hideDrawer");
       return true;
@@ -538,7 +554,7 @@ class Introduction extends React.PureComponent {
   handleLayerEvents = (step) => {
     if (
       step?.title === "Grupplager" ||
-      step?.title === "Tända lager" ||
+      step?.title === "Tänd lagret" ||
       step?.title === "Teckenförklaring" ||
       step?.title === "Lagerinformation"
     ) {
@@ -558,6 +574,8 @@ class Introduction extends React.PureComponent {
 
       const goingBackward = nextIndex < currentIndex;
       const goingForward = nextIndex > currentIndex;
+
+      console.log("step", step);
 
       // Handle drawer transitions
       if (this.handleDrawerTransition(previousStep, step)) {
@@ -581,6 +599,42 @@ class Introduction extends React.PureComponent {
           resolve();
         } else {
           resolve();
+        }
+        return;
+      }
+
+      // Handle layer details view transition
+      if (step?.element === "#layer-item-details-info") {
+        const menuButton = document.querySelector("#show-layer-details");
+        if (menuButton) {
+          menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+          setTimeout(() => {
+            if (this.stepsRef.current) {
+              this.stepsRef.current.updateStepElement(nextIndex);
+            }
+            resolve();
+          }, 150);
+        }
+        return;
+      }
+
+      // Handle layer details view transition
+      if (
+        previousStep?.title === "Teckenförklaring" &&
+        step?.title === "Lagerinformation" &&
+        goingBackward
+      ) {
+        const menuButton = document.querySelector(
+          "#layer-item-details-backBtn"
+        );
+        if (menuButton) {
+          menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+          setTimeout(() => {
+            if (this.stepsRef.current) {
+              this.stepsRef.current.updateStepElement(nextIndex);
+            }
+            resolve();
+          }, 150);
         }
         return;
       }
@@ -617,7 +671,9 @@ class Introduction extends React.PureComponent {
           this.stepsRef.current.updateStepElement(nextIndex);
         }
         resolve();
+        return;
       }
+
       resolve();
     });
   };

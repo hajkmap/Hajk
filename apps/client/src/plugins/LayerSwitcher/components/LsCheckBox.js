@@ -23,7 +23,6 @@ const LsCheckBox = ({ toggleState, id }) => {
         }}
       >
         <CheckBoxIcon
-          slot
           sx={
             {
               semichecked: { fill: "gray" },

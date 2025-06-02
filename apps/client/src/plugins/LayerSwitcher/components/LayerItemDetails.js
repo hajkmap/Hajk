@@ -211,7 +211,10 @@ function LayerItemDetails({
                 title="Tillbaka"
                 TransitionProps={{ timeout: 0 }}
               >
-                <LsIconButton onClick={handleBackButtonClick}>
+                <LsIconButton
+                  id="layer-item-details-backBtn"
+                  onClick={handleBackButtonClick}
+                >
                   <ArrowBackIcon />
                 </LsIconButton>
               </HajkToolTip>
@@ -231,6 +234,7 @@ function LayerItemDetails({
             </Stack>
           </Box>
           <Box
+            id="layer-item-details-info"
             sx={{
               p: 1,
             }}

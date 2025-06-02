@@ -264,7 +264,11 @@ class LayersSwitcherView extends React.PureComponent {
           flex: 1,
         }}
       >
-        <StyledAppBar position="relative" color="default">
+        <StyledAppBar
+          id="layer-switcher-tab-panel"
+          position="relative"
+          color="default"
+        >
           <Tabs
             action={this.handleTabsMounted}
             onChange={this.handleChangeTabs}
