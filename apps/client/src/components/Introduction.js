@@ -142,7 +142,7 @@ const IntroSelectionScreen = ({ onSelect, onClose }) => {
           title={
             IsLayerSwitcherVisible
               ? ""
-              : `Öppna lagerhanteraren och för att visa den här introduktionen`
+              : `Öppna lagerhanteraren för att visa den här introduktionen`
           }
           placement="right"
         >
@@ -294,7 +294,7 @@ class Introduction extends React.PureComponent {
         "Pil indikerar grupplager. Klicka för att se underliggande lager. <br/><br/> Notera att grupplagernamn med <b>fetstil</b> innehåller tända lager.",
     },
     {
-      title: "Tänd lagret",
+      title: "Tänd lager",
       element: "#toggle-layer-item",
       intro:
         "Klicka för att tända/släcka lager. Lagernamn med <b>fetsil</b> visar att lagret är tänt.",
@@ -554,7 +554,7 @@ class Introduction extends React.PureComponent {
   handleLayerEvents = (step) => {
     if (
       step?.title === "Grupplager" ||
-      step?.title === "Tänd lagret" ||
+      step?.title === "Tänd lager" ||
       step?.title === "Teckenförklaring" ||
       step?.title === "Lagerinformation"
     ) {
