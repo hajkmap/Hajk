@@ -329,7 +329,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           app.use(
             `/api/v${apiVersion}/proxy/${context}`,
             createProxyMiddleware({
-              logLevel: "silent",
+              logger: l,
               target: target,
               changeOrigin: true,
               pathRewrite: {

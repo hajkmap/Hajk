@@ -113,26 +113,36 @@ class WFSVectorLayer {
   }
 
   applySldTextOnLayer = (text) => {
-    const sldObject = SLDReader.Reader(text);
-    const sldLayer = SLDReader.getLayer(sldObject);
-    const style = SLDReader.getStyle(sldLayer, this.sldStyle);
-    const featureTypeStyle = style.featuretypestyles[0];
+    try {
+      const sldObject = SLDReader.Reader(text);
+      const sldLayer = SLDReader.getLayer(sldObject);
+      const style = SLDReader.getStyle(sldLayer, this.sldStyle);
+      const featureTypeStyle = style.featuretypestyles[0];
 
-    const viewProjection = this.map.getView().getProjection();
-    const olFunction = SLDReader.createOlStyleFunction(featureTypeStyle, {
-      // Use the convertResolution option to calculate a more accurate resolution.
-      convertResolution: (viewResolution) => {
-        const viewCenter = this.map.getView().getCenter();
-        return getPointResolution(viewProjection, viewResolution, viewCenter);
-      },
-      // If you use point icons with an ExternalGraphic, you have to use imageLoadCallback to
-      // to update the vector layer when an image finishes loading.
-      // If you do not do this, the image will only become visible after the next pan/zoom of the layer.
-      imageLoadedCallback: () => {
-        this.layer.changed();
-      },
-    });
-    this.layer.setStyle(olFunction);
+      const viewProjection = this.map.getView().getProjection();
+      const olFunction = SLDReader.createOlStyleFunction(featureTypeStyle, {
+        // Use the convertResolution option to calculate a more accurate resolution.
+        convertResolution: (viewResolution) => {
+          const viewCenter = this.map.getView().getCenter();
+          return getPointResolution(viewProjection, viewResolution, viewCenter);
+        },
+        // If you use point icons with an ExternalGraphic, you have to use imageLoadCallback to
+        // to update the vector layer when an image finishes loading.
+        // If you do not do this, the image will only become visible after the next pan/zoom of the layer.
+        imageLoadedCallback: () => {
+          this.layer.changed();
+        },
+      });
+      this.layer.setStyle(olFunction);
+    } catch (error) {
+      const layerCaption = this.layer.get("caption");
+      const layerName = this.layer.get("name");
+      console.info(
+        `Error applying SLD style to layer. This is most likely due to error retrieving the SLD file. Please note that the layer ${layerCaption} (${layerName}) will only be styled with the default OpenLayers style.`
+      );
+      console.error("SLD that failed to be parsed: ", text);
+      console.error("Original error: ", error);
+    }
   };
 
   reprojectFeatures(features, from, to) {
