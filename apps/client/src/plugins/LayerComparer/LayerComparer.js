@@ -192,7 +192,7 @@ const LayerComparer = (props) => {
   // clicks the primary action button in the Dialog, i.e. "Compare".
   const onClose = () => {
     // Ensure that there are real layers to compare
-    if (l1.current instanceof BaseLayer && l2.current instanceof BaseLayer) {
+    if (l1.current.getVisible() && l2.current.getVisible()) {
       helperSnack.current = enqueueSnackbar("", {
         variant: "default",
         persist: true,
