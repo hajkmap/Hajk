@@ -79,7 +79,6 @@ const LayerLegendIcon = ({
 
   return (
     <BtnShowLegend
-      id="toggle-legend-icon"
       legendIsActive={legendIsActive}
       onClick={() => toggleLegend()}
     />

@@ -1,9 +1,8 @@
-import React, { useEffect, createRef, useState } from "react";
+import React, { createRef } from "react";
 import { createPortal } from "react-dom";
 import { Steps } from "intro.js-react";
 import { useTheme } from "@mui/material/styles";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PluginControlButton from "../components/PluginControlButton";
 import {
   Button,
@@ -13,24 +12,15 @@ import {
   DialogActions,
   Box,
 } from "@mui/material";
-import HajkToolTip from "components/HajkToolTip";
 
 import "intro.js/introjs.css";
 import "intro.js/themes/introjs-modern.css";
 
 import { functionalOk as functionalCookieOk } from "../models/Cookie";
 
-const IntroSelectionScreen = ({ onSelect, onClose }) => {
+const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherTitle }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
-  const [IsLayerSwitcherVisible, setIsLayerSwitcherVisible] = useState(true);
-  useEffect(() => {
-    const layerSwitcher = document.getElementById("layer-switcher-view-root");
-    if (layerSwitcher) {
-      const isVisible = layerSwitcher.style.display !== "none";
-      setIsLayerSwitcherVisible(isVisible);
-    }
-  }, []);
 
   const handleClose = (_, reason) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") {
@@ -119,48 +109,31 @@ const IntroSelectionScreen = ({ onSelect, onClose }) => {
         <Button
           variant="contained"
           fullWidth
-          onClick={() => onSelect("full", IsLayerSwitcherVisible)}
+          onClick={() => onSelect("full")}
           sx={{
             mt: 2,
             mb: 1,
             height: "40px",
           }}
-          endIcon={
-            !IsLayerSwitcherVisible ? (
-              <HajkToolTip
-                title="Öppna lagerhanteraren om du vill inkludera den i hela introduktionen"
-                placement="right"
-              >
-                <InfoOutlinedIcon />
-              </HajkToolTip>
-            ) : null
-          }
         >
           Hela introduktionen
         </Button>
-        <HajkToolTip
-          title={
-            IsLayerSwitcherVisible
-              ? ""
-              : `Öppna lagerhanteraren för att visa den här introduktionen`
-          }
-          placement="right"
-        >
-          <Box component="span" sx={{ display: "inline-block", width: "100%" }}>
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={() => onSelect("half", IsLayerSwitcherVisible)}
-              sx={{
-                mb: 1,
-                height: "40px",
-              }}
-              disabled={!IsLayerSwitcherVisible}
-            >
-              Nya lagerhanteraren
-            </Button>
-          </Box>
-        </HajkToolTip>
+
+        <Box component="span" sx={{ display: "inline-block", width: "100%" }}>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={() => onSelect("half")}
+            sx={{
+              mb: 1,
+              height: "40px",
+            }}
+          >
+            {layerSwitcherTitle
+              ? "Nytt i " + layerSwitcherTitle
+              : " Nytt i Visa"}
+          </Button>
+        </Box>
       </DialogContent>
       <DialogActions sx={{ p: 1 }}>
         <Button onClick={handleClose}>Avbryt</Button>
@@ -288,21 +261,16 @@ class Introduction extends React.PureComponent {
         "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
     },
     {
-      title: "Grupplager",
+      title: "Lagergrupp",
       element: "#layerGroup-accordion-arrowBtn",
       intro:
-        "Pil indikerar grupplager. Klicka för att se underliggande lager. <br/><br/> Notera att grupplagernamn med <b>fetstil</b> innehåller tända lager.",
+        "Pil indikerar lagergrupp. Klicka för att se underliggande lager. <br/><br/> Notera att lagergruppnamn med <b>fetstil</b> innehåller tända lager.",
     },
     {
       title: "Tänd lager",
       element: "#toggle-layer-item",
       intro:
         "Klicka för att tända/släcka lager. Lagernamn med <b>fetsil</b> visar att lagret är tänt.",
-    },
-    {
-      title: "Teckenförklaring",
-      element: "#toggle-legend-icon",
-      intro: "Klicka för att visa/dölja teckenförklaring.",
     },
     {
       title: "Lagerinformation",
@@ -312,7 +280,22 @@ class Introduction extends React.PureComponent {
     {
       title: "Lagerinformation vy",
       element: "#layer-item-details-info",
-      intro: "Lagerinformation.",
+      intro: "Här visas eventuell information om ett lager.",
+    },
+    {
+      title: "Teckenförklaring",
+      element: "#toggle-legend-icon",
+      intro: "Knappen visar teckenförklaring.",
+    },
+    {
+      title: "Opacitet",
+      element: "#layer-details-opacity-slider",
+      intro: "Reglage för att ändra opacitet för ett lager.",
+    },
+    {
+      title: "Snabbåtkomst",
+      element: "#layer-details-quick-access-btn",
+      intro: "Knappen lägger till/tar bort ett lager från snabbåtkomst.",
     },
     {
       title: "Flikar i lagerhanteraren",
@@ -361,6 +344,7 @@ class Introduction extends React.PureComponent {
   constructor(props) {
     super(props);
     this.stepsRef = createRef();
+    this.appModel = this.props.appModel;
 
     /**
      * When appLoaded is fired, let's filter through the provided 'steps'.
@@ -425,32 +409,16 @@ class Introduction extends React.PureComponent {
     });
   }
 
-  handleIntroSelection = (type, isLayerSwitcherVisible) => {
+  handleIntroSelection = (type) => {
+    this.props.globalObserver.publish("layerswitcher.showWindow");
+
     this.setState({
       showSelection: false,
-      isLayerSwitcherVisible,
     });
     if (type === "full") {
       // Filter out layer switcher steps if isLayerSwitcherVisible is false
-      const steps = this.predefinedSteps.filter((step) => {
-        if (!isLayerSwitcherVisible) {
-          // Skip steps from "Lagerlista" to "Fler val"
-          const layerSwitcherSteps = [
-            "Lagerlista",
-            "Flikar i lagerhanteraren",
-            "Sök lager",
-            "Öppna meny",
-            "Meny",
-            "Snabbåtkomst",
-            "Snabbåtkomst meny",
-            "Fler val",
-          ];
-          return !layerSwitcherSteps.includes(step.title);
-        }
-        return true;
-      });
       this.setState({
-        steps: steps,
+        steps: this.predefinedSteps,
         forceShow: true,
         stepsEnabled: true,
       });
@@ -553,10 +521,12 @@ class Introduction extends React.PureComponent {
 
   handleLayerEvents = (step) => {
     if (
-      step?.title === "Grupplager" ||
+      step?.title === "Lagergrupp" ||
       step?.title === "Tänd lager" ||
+      step?.title === "Lagerinformation" ||
       step?.title === "Teckenförklaring" ||
-      step?.title === "Lagerinformation"
+      step?.title === "Opacitet" ||
+      step?.title === "Snabbåtkomst"
     ) {
       document.dispatchEvent(new CustomEvent("expandFirstGroup"));
       return true;
@@ -575,7 +545,25 @@ class Introduction extends React.PureComponent {
       const goingBackward = nextIndex < currentIndex;
       const goingForward = nextIndex > currentIndex;
 
-      console.log("step", step);
+      // Check if we need to switch to Kartlager tab
+      if (step?.title === "Lagerlista") {
+        const tabs = document.querySelector(
+          "#layer-switcher-tab-panel .MuiTabs-root"
+        );
+        if (tabs) {
+          const activeTab = tabs.querySelector(".Mui-selected");
+          if (activeTab && activeTab.textContent !== "Kartlager") {
+            // Click the first tab (Kartlager)
+            const firstTab = tabs.querySelector(".MuiTab-root");
+            if (firstTab) {
+              firstTab.click();
+              // Wait for tab change animation
+              setTimeout(() => resolve(), 150);
+              return;
+            }
+          }
+        }
+      }
 
       // Handle drawer transitions
       if (this.handleDrawerTransition(previousStep, step)) {
@@ -618,9 +606,9 @@ class Introduction extends React.PureComponent {
         return;
       }
 
-      // Handle layer details view transition
+      // Handle layer information view transition
       if (
-        previousStep?.title === "Teckenförklaring" &&
+        previousStep?.title === "Tänd lager" &&
         step?.title === "Lagerinformation" &&
         goingBackward
       ) {
@@ -639,9 +627,38 @@ class Introduction extends React.PureComponent {
         return;
       }
 
-      // Skip layer switcher transitions if isLayerSwitcherVisible is false
-      if (!this.state.isLayerSwitcherVisible) {
-        resolve();
+      // Handle layer details exit transition
+      if (step?.element === "#layer-switcher-tab-panel") {
+        const menuButton = document.querySelector(
+          "#layer-item-details-backBtn"
+        );
+        if (menuButton) {
+          menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+          if (this.stepsRef.current) {
+            this.stepsRef.current.updateStepElement(nextIndex);
+          }
+          resolve();
+        }
+        return;
+      }
+
+      // Handle going back tolayer details view transition if we exited layer details view
+      if (
+        previousStep?.title === "Opacitet" &&
+        step?.title === "Snabbåtkomst" &&
+        goingBackward
+      ) {
+        const menuButton = document.querySelector("#show-layer-details");
+        if (menuButton) {
+          menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+          setTimeout(() => {
+            if (this.stepsRef.current) {
+              this.stepsRef.current.updateStepElement(nextIndex);
+            }
+            resolve();
+          }, 150);
+        }
         return;
       }
 
@@ -687,11 +704,6 @@ class Introduction extends React.PureComponent {
     const goingForward = stepIndex > this.state.currentStepIndex;
     const goingBackward = stepIndex < this.state.currentStepIndex;
 
-    // Skip layer switcher transitions if isLayerSwitcherVisible is false
-    if (!this.state.isLayerSwitcherVisible) {
-      return;
-    }
-
     // Handle menu transitions
     if (
       (previousStep?.title === "Meny" &&
@@ -731,6 +743,9 @@ class Introduction extends React.PureComponent {
           <IntroSelectionScreen
             onSelect={this.handleIntroSelection}
             onClose={this.handleSelectionClose}
+            layerSwitcherTitle={
+              this.appModel.plugins.layerswitcher.options.title
+            }
           />
         )}
         {!showSelection &&

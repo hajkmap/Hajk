@@ -259,6 +259,7 @@ function LayerItemDetails({
                   }
                 >
                   <LsIconButton
+                    id="toggle-legend-icon"
                     onClick={() => setLegendIsActive(!legendIsActive)}
                   >
                     <FormatListBulletedOutlinedIcon fontSize="small" />
@@ -295,6 +296,7 @@ function LayerItemDetails({
             </Stack>
             {showOpacitySlider !== false && showOpacity ? (
               <Box
+                id="layer-details-opacity-slider"
                 sx={{
                   px: 2,
                   pr: 3,
@@ -368,6 +370,7 @@ function LayerItemDetails({
                 }}
               >
                 <Button
+                  id="layer-details-quick-access-btn"
                   fullWidth
                   variant="outlined"
                   onClick={handleQuickAccess}

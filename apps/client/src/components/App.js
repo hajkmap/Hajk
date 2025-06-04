@@ -1401,6 +1401,7 @@ class App extends React.PureComponent {
                 this.appModel.config.mapConfig.map.introductionSteps
               }
               globalObserver={this.globalObserver}
+              appModel={this.appModel}
             />
           )}
         </>
