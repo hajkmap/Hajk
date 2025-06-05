@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import BaseLayer from "ol/layer/Base";
 import { Alert, Button, Stack } from "@mui/material";
 import CompareIcon from "@mui/icons-material/Compare";
 import { useSnackbar } from "notistack";
