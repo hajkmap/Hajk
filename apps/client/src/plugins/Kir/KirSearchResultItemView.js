@@ -10,7 +10,10 @@ const Container = styled("div")(({ theme }) => ({
     width: "100%",
     marginBottom: theme.spacing(2),
     "& tr:nth-of-type(even) td": {
-      backgroundColor: theme.palette.mode === "dark" ? "#373737" : "#ececec",
+      backgroundColor: "#ececec",
+      ...theme.applyStyles("dark", {
+        backgroundColor: "#373737",
+      }),
     },
     "& tr td:first-of-type": {
       fontWeight: 500,

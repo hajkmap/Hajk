@@ -80,16 +80,16 @@ function BackgroundLayerItem({
         dense
       >
         <Box
-          sx={{
+          sx={(theme) => ({
             display: "flex",
             position: "relative",
             width: "100%",
             alignItems: "center",
-            py: getIsMobile() ? 0.5 : 0.25, // jesade-vbg compact mode, changed from 0.5
+            // jesade-vbg compact mode, changed from 0.5
+            py: getIsMobile() ? 0.5 : 0.25,
             pr: 1,
-            borderBottom: (theme) =>
-              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-          }}
+            borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          })}
         >
           <LsIconButton disableRipple size="small" sx={{ pl: 0 }}>
             {selected ? (
@@ -100,12 +100,14 @@ function BackgroundLayerItem({
           </LsIconButton>
           <ListItemText
             primary={name}
-            primaryTypographyProps={{
-              pr: 5,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              variant: "body1",
-              fontWeight: "inherit",
+            slotProps={{
+              primary: {
+                pr: 5,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                variant: "body1",
+                fontWeight: "inherit",
+              },
             }}
           />
           <ListItemSecondaryAction

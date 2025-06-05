@@ -101,7 +101,7 @@ class BufferView extends React.PureComponent {
 
   renderPrevButton = () => {
     return (
-      <Grid item xs={6}>
+      <Grid size={6}>
         <Button
           fullWidth
           disabled={this.state.activeStep === 0}
@@ -117,7 +117,7 @@ class BufferView extends React.PureComponent {
     return (
       (this.model.highlightSource.getFeatures().length !== 0 ||
         this.model.bufferSource.getFeatures().length !== 0) && (
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Button
             fullWidth
             onClick={() => {
@@ -143,7 +143,7 @@ class BufferView extends React.PureComponent {
             <StepContent>
               <Grid container spacing={2} direction="row">
                 {this.renderClearButton()}
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <HajkToolTip title="Markera flera objekt">
                     <StyledToggleButton
                       onChange={this.setSelecting}
@@ -156,7 +156,7 @@ class BufferView extends React.PureComponent {
                   </HajkToolTip>
                 </Grid>
                 {this.renderPrevButton()}
-                <Grid item xs={6}>
+                <Grid size={6}>
                   <Button
                     fullWidth
                     variant="contained"
@@ -173,7 +173,7 @@ class BufferView extends React.PureComponent {
             <StepLabel>Ange bufferavstånd</StepLabel>
             <StepContent>
               <Grid container spacing={2} direction="row">
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <TextField
                     variant="outlined"
                     fullWidth
@@ -183,7 +183,7 @@ class BufferView extends React.PureComponent {
                   />
                 </Grid>
                 {this.renderPrevButton()}
-                <Grid item xs={6}>
+                <Grid size={6}>
                   <Button
                     fullWidth
                     variant="contained"
@@ -204,7 +204,7 @@ class BufferView extends React.PureComponent {
             <StepContent>
               <Grid container spacing={2} direction="row">
                 {this.renderPrevButton()}
-                <Grid item xs={6}>
+                <Grid size={6}>
                   <Button
                     fullWidth
                     variant="contained"

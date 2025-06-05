@@ -7,6 +7,7 @@ const SummaryContainer = styled(Grid)(({ theme }) => ({
   minHeight: 42,
   paddingRight: theme.spacing(1),
   paddingLeft: theme.spacing(1),
+  alignItems: "center",
 }));
 
 const StyledTypography = styled(Typography)(() => ({
@@ -15,10 +16,10 @@ const StyledTypography = styled(Typography)(() => ({
 
 const WarningChip = styled(Chip)(({ theme }) => ({
   color: theme.palette.warning.contrastText,
-  backgroundColor:
-    theme.palette.mode === "dark"
-      ? theme.palette.warning.dark
-      : theme.palette.warning.light,
+  backgroundColor: theme.palette.warning.light,
+  ...theme.applyStyles("dark", {
+    backgroundColor: theme.palette.warning.dark,
+  }),
 }));
 
 class SearchResultsDatasetSummary extends React.PureComponent {
@@ -59,11 +60,9 @@ class SearchResultsDatasetSummary extends React.PureComponent {
 
     return (
       <>
-        <SummaryContainer alignItems="center" container>
-          <Grid item xs={1}>
-            {getOriginBasedIcon(featureCollection.origin)}
-          </Grid>
-          <Grid item xs={9}>
+        <SummaryContainer container>
+          <Grid size={1}>{getOriginBasedIcon(featureCollection.origin)}</Grid>
+          <Grid size={9}>
             <StyledTypography
               noWrap
               variant="button"
@@ -72,7 +71,7 @@ class SearchResultsDatasetSummary extends React.PureComponent {
               {featureCollection.source.caption}
             </StyledTypography>
           </Grid>
-          <Grid container item justifyContent="flex-end" xs={2}>
+          <Grid container justifyContent="flex-end" size={2}>
             <HajkToolTip title={toolTipTitle}>
               {displayWarning ? (
                 <WarningChip

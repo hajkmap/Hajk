@@ -243,15 +243,12 @@ export default function ReportDialog(props) {
               )
             );
           })}
-
           <Typography gutterBottom variant="h5">
             Planens syfte
           </Typography>
-
           <TextParagraph>
             {markerFeature.get(options.digitalPlanDescriptionAttribute)}
           </TextParagraph>
-
           <Typography gutterBottom variant="h5">
             Om rapporten
           </Typography>

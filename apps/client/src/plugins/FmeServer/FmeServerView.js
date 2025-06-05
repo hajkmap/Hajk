@@ -380,7 +380,7 @@ const FmeServerView = (props) => {
   // Accepts: An array of objects on {type: string, disabled: bool} form.
   function renderStepperButtons(buttons) {
     return (
-      <Grid container item justifyContent="flex-end">
+      <Grid container justifyContent="flex-end">
         {buttons.map((button, index) => {
           return (
             <Button
@@ -474,10 +474,10 @@ const FmeServerView = (props) => {
     if (parametersLoading) {
       return (
         <Grid container>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Typography>Försöker hämta parametrar...</Typography>
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <LinearProgress />
           </Grid>
         </Grid>
@@ -510,20 +510,20 @@ const FmeServerView = (props) => {
   // to submit the order. It also renders information about potential errors.
   function renderGeometryHandler() {
     return (
-      <Grid container item xs={12}>
-        <Grid item xs={12}>
+      <Grid container size={12}>
+        <Grid size={12}>
           <Typography variant="caption">
             Välj ritverktyg nedan för att rita beställningens omfattning.
           </Typography>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <DrawToolbox
             activeDrawButton={activeDrawButton}
             handleDrawButtonClick={handleDrawButtonClick}
           />
         </Grid>
         {drawError && (
-          <Grid item xs={12} sx={{ marginTop: 1 }}>
+          <Grid sx={{ marginTop: 1 }} size={12}>
             <InformationWrapper type="error">
               <Typography variant="caption">
                 {`Den ritade ytan är för stor. Ta bort den och försök igen för att kunna gå vidare med beställningen! 
@@ -540,7 +540,7 @@ const FmeServerView = (props) => {
   // a geometry to move in with the product submit request.
   function renderNoGeometryNeededMessage() {
     return (
-      <Grid container item xs={12}>
+      <Grid container size={12}>
         <InformationWrapper>
           <Typography>
             Denna produkt kräver ingen geometri! Du kan fortsätta till nästa
@@ -572,7 +572,7 @@ const FmeServerView = (props) => {
   // configuration-files directly (not using the admin-ui).
   function renderPluginNotConfiguredMessage() {
     return (
-      <Grid item xs={12}>
+      <Grid size={12}>
         <InformationWrapper type="error">
           <Typography>
             Verktyget är felkonfigurerat, kontakta systemadministratören.
@@ -613,9 +613,9 @@ const FmeServerView = (props) => {
     }
 
     return (
-      <Grid container item xs={12}>
+      <Grid container size={12}>
         {groupsToRender.length > 0 ? (
-          <Grid item xs={12}>
+          <Grid size={12}>
             <FormControl fullWidth>
               <InputLabel size="small" id="fme-server-select-group-label">
                 {groupDisplayName}
@@ -641,7 +641,6 @@ const FmeServerView = (props) => {
         ) : (
           renderPluginNotConfiguredMessage()
         )}
-
         {
           // Since this is the first step, we only need a "next" button. We can't
           // go back to step -1.
@@ -665,9 +664,9 @@ const FmeServerView = (props) => {
     const infoUrl = product?.infoUrl || "";
     // Then we render!
     return (
-      <Grid container item xs={12}>
+      <Grid container size={12}>
         {productsInActiveGroup.length > 0 ? (
-          <Grid item xs={12}>
+          <Grid size={12}>
             <FormControl fullWidth>
               <TextField
                 select
@@ -676,26 +675,27 @@ const FmeServerView = (props) => {
                 size="small"
                 label="Produkt"
                 onChange={(e) => setActiveProduct(e.target.value)}
-                InputProps={
-                  infoUrl.length > 0
-                    ? {
-                        startAdornment: (
-                          <HajkToolTip title="Öppna länk till produktinformation.">
-                            <InputAdornment position="start">
-                              <IconButton
-                                aria-label="Open information page"
-                                href={infoUrl || null}
-                                target="_blank"
-                                edge="start"
-                              >
-                                <HelpIcon />
-                              </IconButton>
-                            </InputAdornment>
-                          </HajkToolTip>
-                        ),
-                      }
-                    : null
-                }
+                slotProps={{
+                  input:
+                    infoUrl.length > 0
+                      ? {
+                          startAdornment: (
+                            <HajkToolTip title="Öppna länk till produktinformation.">
+                              <InputAdornment position="start">
+                                <IconButton
+                                  aria-label="Open information page"
+                                  href={infoUrl || null}
+                                  target="_blank"
+                                  edge="start"
+                                >
+                                  <HelpIcon />
+                                </IconButton>
+                              </InputAdornment>
+                            </HajkToolTip>
+                          ),
+                        }
+                      : null,
+                }}
               >
                 {productsInActiveGroup.map((product, index) => {
                   return (
@@ -710,7 +710,6 @@ const FmeServerView = (props) => {
         ) : (
           renderPluginNotConfiguredMessage()
         )}
-
         {
           // In this step we need both a "back" and a "next" button, since the
           // user might want to change the selected group along the way
@@ -729,7 +728,7 @@ const FmeServerView = (props) => {
   // message is shown instead.)
   function renderDrawGeometryStep() {
     return (
-      <Grid container item xs={12}>
+      <Grid container size={12}>
         {geometryRequired
           ? renderGeometryHandler()
           : renderNoGeometryNeededMessage()}
@@ -753,10 +752,8 @@ const FmeServerView = (props) => {
   // for the published parameters.
   function renderEnterParametersStep() {
     return (
-      <Grid container item xs={12}>
-        <Grid item xs={12}>
-          {renderProductParameters()}
-        </Grid>
+      <Grid container size={12}>
+        <Grid size={12}>{renderProductParameters()}</Grid>
         {renderStepperButtons([
           { type: "back", disabled: false },
           { type: "next", disabled: !getContinueFromParameterStep() },
@@ -774,7 +771,7 @@ const FmeServerView = (props) => {
       activeProduct
     );
     return (
-      <Grid container item xs={12}>
+      <Grid container size={12}>
         <OrderPanel
           shouldPromptForEmail={shouldPromptForEmail}
           userEmail={userEmail}

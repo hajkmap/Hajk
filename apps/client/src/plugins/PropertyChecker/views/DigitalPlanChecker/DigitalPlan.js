@@ -59,7 +59,7 @@ function DigitalPlan(props) {
         )}
         {Object.entries(plan.features).map(([useType, type], j) => (
           <React.Fragment key={j}>
-            <Typography variant="h6" sx={{ ...(j !== 0 && { mt: 2 }) }}>
+            <Typography variant="h6" sx={[j !== 0 && { mt: 2 }]}>
               {useType}
               {}
             </Typography>
@@ -88,5 +88,4 @@ function DigitalPlan(props) {
     </Accordion>
   );
 }
-
 export default DigitalPlan;

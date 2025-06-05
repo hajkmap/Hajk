@@ -42,10 +42,10 @@ class SearchResultsPreview extends React.PureComponent {
         disableRestoreFocus
       >
         <Grid container>
-          <HeaderContainer item align="center" xs={12}>
+          <HeaderContainer align="center" size={12}>
             <Typography variant="button">Förhandsvisning</Typography>
           </HeaderContainer>
-          <ContentContainer item xs={12}>
+          <ContentContainer size={12}>
             <SearchResultsDatasetFeatureDetails
               feature={previewFeature}
               app={app}

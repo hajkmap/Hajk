@@ -23,8 +23,7 @@ const StyledList = styled(List)(() => ({
 }));
 
 const StyledListItem = styled(ListItem)(() => ({
-  width: "100%",
-  display: "flex",
+  display: "block",
   padding: 0,
   transition: "none",
 }));
@@ -32,8 +31,8 @@ const StyledListItem = styled(ListItem)(() => ({
 class SearchResultsList extends React.PureComponent {
   componentDidMount = () => {
     const { activeFeature } = this.props;
-    //If the search results in exactly one hit (meaning that activeFeature is set on first render),
-    // we activate it right a way.
+    // If the search results in exactly one hit (meaning that activeFeature is set on first render),
+    // we activate it right away.
     if (activeFeature) {
       this.handleSingleSearchResult();
     }

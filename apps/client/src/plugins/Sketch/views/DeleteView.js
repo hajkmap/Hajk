@@ -27,13 +27,13 @@ const RecentlyRemovedNotSupported = ({ globalObserver }) => {
   };
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12}>
+      <Grid size={12}>
         <Information
           text="Det ser ut som att du har valt att inte tillåta funktionella kakor. På grund av
         detta så kan du inte se dina senast borttagna objekt. Klicka nedan för att ändra inställningarna."
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid size={12}>
         <Button
           fullWidth
           variant="contained"
@@ -88,10 +88,10 @@ const DeleteView = ({
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12}>
+      <Grid size={12}>
         <Information text={activity.information} />
       </Grid>
-      <Grid item xs={12}>
+      <Grid size={12}>
         <Button
           fullWidth
           variant="contained"
@@ -101,11 +101,11 @@ const DeleteView = ({
           Ta bort alla ritobjekt
         </Button>
       </Grid>
-      <Grid container item>
-        <Grid item xs={12}>
+      <Grid container>
+        <Grid size={12}>
           <Typography variant="caption">Senast borttagna:</Typography>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={12}>
           {functionalCookiesOk ? (
             <RemovedFeaturesList
               drawModel={drawModel}

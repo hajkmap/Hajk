@@ -430,6 +430,8 @@ export default class MapClickModel {
      */
     const prepareLabelFromFields = (feature, fields, defaultValue) => {
       return (
+        // or use the provided default (?? allows for empty string!), or just use hard-coded default.
+        // Join values from specified display fields…
         fields
           .map((df) => {
             // Check if our display field starts and ends with a double quote. If yes,
@@ -441,8 +443,8 @@ export default class MapClickModel {
               : feature.get(df);
           })
           .filter((i) => i) // Get rid of all falsy values like undefined or ""
-          .join(", ") || // Join values from specified display fields…
-        (defaultValue ?? "[unknown value]") // or use the provided default (?? allows for empty string!), or just use hard-coded default.
+          .join(", ") ||
+        (defaultValue ?? "[unknown value]")
       );
     };
 

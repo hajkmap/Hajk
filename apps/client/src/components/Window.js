@@ -572,9 +572,15 @@ class Window extends React.PureComponent {
       >
         <PanelContent
           ref={this.windowRef}
-          sx={{
-            display: this.props.height === "dynamic" ? "contents" : "flex",
-          }}
+          sx={[
+            this.props.height === "dynamic"
+              ? {
+                  display: "contents",
+                }
+              : {
+                  display: "flex",
+                },
+          ]}
         >
           <PanelHeader
             allowMaximizedWindow={allowMaximizedWindow}

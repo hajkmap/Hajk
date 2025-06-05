@@ -4,11 +4,11 @@ import { Grid, TextField, Typography } from "@mui/material";
 
 const FeatureTextEditor = ({ text, onChange }) => {
   return (
-    <Grid item xs={12} style={{ marginTop: 16 }}>
-      <Grid item xs={12} style={{ marginBottom: 4 }}>
+    <Grid style={{ marginTop: 16 }} size={12}>
+      <Grid style={{ marginBottom: 4 }} size={12}>
         <Typography align="center">Text</Typography>
       </Grid>
-      <Grid item xs={12}>
+      <Grid size={12}>
         <TextField
           fullWidth
           value={text}
