@@ -98,6 +98,8 @@ function LayerItem({
   showSublayers,
   subLayersSection,
   children,
+  isGroupLayerQuickAccess,
+  isLayerQuickAccess,
 }) {
   // WmsLayer load status, shows warning icon if !ok
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
@@ -307,7 +309,14 @@ function LayerItem({
             }}
           >
             {toggleable && (
-              <LsCheckBox id="toggle-layer-item" toggleState={toggleState} />
+              <LsCheckBox
+                id={
+                  !isLayerQuickAccess && !isGroupLayerQuickAccess
+                    ? "toggle-layer-item"
+                    : undefined
+                }
+                toggleState={toggleState}
+              />
             )}
             <LayerLegendIcon
               legendIcon={legendIcon}
@@ -344,7 +353,11 @@ function LayerItem({
               ) : null}
               {layerIsFakeMapLayer !== true && layerType !== "system" && (
                 <BtnShowDetails
-                  id="show-layer-details"
+                  id={
+                    !isLayerQuickAccess && !isGroupLayerQuickAccess
+                      ? "show-layer-details"
+                      : undefined
+                  }
                   onClick={(e) => showLayerDetails(e)}
                 />
               )}
