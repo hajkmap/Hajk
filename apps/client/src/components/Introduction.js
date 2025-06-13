@@ -206,6 +206,16 @@ class Introduction extends React.PureComponent {
         "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
     },
     {
+      title: "Sök lager",
+      element: "#layer-list-filter",
+      intro:
+        "Mata in text för att söka efter lager. <br><br> Sökresultat visas i lagerlistan nedan.",
+      position: () =>
+        this.layerSwitcherPlugin.options.position === "right"
+          ? "left"
+          : "right",
+    },
+    {
       title: "Lagergrupp",
       element: "#layerGroup-accordion-arrowBtn",
       intro:
@@ -250,18 +260,31 @@ class Introduction extends React.PureComponent {
       title: "Flikar i lagerhanteraren",
       element: "#layer-switcher-tab-panel",
       intro: () =>
-        `Klicka här för att växla mellan olika vyer: <br><br> - Kartlager <br> - Bakgrund <br>${this.layerSwitcherPlugin.options.showDrawOrderView ? "- Ritordning" : ""}`,
+        `Klicka här för att växla mellan olika vyer: <br><br> - Kartlager <br> - Bakgrund <br>${this.layerSwitcherPlugin.options.showDrawOrderView ? "- Ritordning: Här kan du ändra ritordning på tända lager i kartan" : ""}`,
     },
     {
-      title: "Sök lager",
-      element: "#layer-list-filter",
+      title: "Ritordning",
+      element: "#draw-order-tab",
       intro:
-        "Mata in text för att söka efter lager. <br><br> Sökresultat visas i lagerlistan nedan.",
+        "Klicka på Ritordning-fliken för att se och ändra ritordningen för lagren.",
       position: () =>
         this.layerSwitcherPlugin.options.position === "right"
           ? "left"
           : "right",
     },
+    {
+      title: "Aktivera systemlager",
+      element: "#draw-order-switch",
+      intro:
+        "Klicka för att visa systemlager i lagerlista och ändra ritordning av lager genererade av verktyg.",
+    },
+    {
+      title: "Systemlager vy",
+      element: ".draw-order-list",
+      intro:
+        "Här kan du se och ändra ritordningen för systemlager. <br><br> Dra och släpp lager för att ändra ritordningen.",
+    },
+
     {
       title: "Öppna meny",
       element: "#layerswitcher-actions-menu",
@@ -312,6 +335,31 @@ class Introduction extends React.PureComponent {
         "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
     },
     {
+      title: "Sök lager",
+      element: "#layer-list-filter",
+      intro:
+        "Mata in text för att söka efter lager. <br><br> Sökresultat visas i lagerlistan nedan.",
+      position: () =>
+        this.layerSwitcherPlugin.options.position === "right"
+          ? "left"
+          : "right",
+    },
+    {
+      title: "Öppna meny",
+      element: "#layerswitcher-actions-menu",
+      intro: "Klicka för att öppna meny.<br> Menyen innehåller olika val.",
+      position: () =>
+        this.layerSwitcherPlugin.options.position === "right"
+          ? "left"
+          : "right",
+    },
+    {
+      title: "Meny",
+      element: "#layerswitcher-actions-menu-content",
+      intro:
+        "<b>Dölj alla aktiva lager:</b> Klicka på knappen för att dölja <b>ALLA</b> aktiva lager. <br><br> <b>Scrolla till toppen:</b> Klicka på knappen för att scrolla till toppen av lagerlistan. <br><br> <b>Scrolla till botten:</b> Klicka på knappen för att scrolla till botten av lagerlistan.",
+    },
+    {
       title: "Lagergrupp",
       element: "#layerGroup-accordion-arrowBtn",
       intro:
@@ -356,32 +404,29 @@ class Introduction extends React.PureComponent {
       title: "Flikar i lagerhanteraren",
       element: "#layer-switcher-tab-panel",
       intro: () =>
-        `Klicka här för att växla mellan olika vyer: <br><br> - Kartlager <br> - Bakgrund <br>${this.layerSwitcherPlugin.options.showDrawOrderView ? "- Ritordning" : ""}`,
+        `Klicka här för att växla mellan olika vyer: <br><br> - Kartlager <br> - Bakgrund <br>${this.layerSwitcherPlugin.options.showDrawOrderView ? "- Ritordning: Här kan du ändra ritordning på tända lager i kartan" : ""}`,
     },
     {
-      title: "Sök lager",
-      element: "#layer-list-filter",
+      title: "Ritordning",
+      element: "#draw-order-tab",
       intro:
-        "Mata in text för att söka efter lager. <br><br> Sökresultat visas i lagerlistan nedan.",
+        "Klicka på Ritordning-fliken för att se och ändra ritordningen för lagren.",
       position: () =>
         this.layerSwitcherPlugin.options.position === "right"
           ? "left"
           : "right",
     },
     {
-      title: "Öppna meny",
-      element: "#layerswitcher-actions-menu",
-      intro: "Klicka för att öppna meny.<br> Menyen innehåller olika val.",
-      position: () =>
-        this.layerSwitcherPlugin.options.position === "right"
-          ? "left"
-          : "right",
+      title: "Aktivera systemlager",
+      element: "#draw-order-switch",
+      intro:
+        "Klicka för att visa systemlager i lagerlista och ändra ritordning av lager genererade av verktyg.",
     },
     {
-      title: "Meny",
-      element: "#layerswitcher-actions-menu-content",
+      title: "Systemlager vy",
+      element: ".draw-order-list",
       intro:
-        "<b>Dölj alla aktiva lager:</b> Klicka på knappen för att dölja <b>ALLA</b> aktiva lager. <br><br> <b>Scrolla till toppen:</b> Klicka på knappen för att scrolla till toppen av lagerlistan. <br><br> <b>Scrolla till botten:</b> Klicka på knappen för att scrolla till botten av lagerlistan.",
+        "Här kan du se och ändra ritordningen för systemlager. <br><br> Dra och släpp lager för att ändra ritordningen.",
     },
     {
       title: "Snabbåtkomst",
@@ -393,6 +438,12 @@ class Introduction extends React.PureComponent {
       element: "#quick-access-actions-menu",
       intro:
         "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+    },
+    {
+      title: "Mina favoriter",
+      element: "#favorites-menu-button",
+      intro:
+        "Knappen öppnar en meny med verktyg för att gruppera och spara lager i snabbåtkomst (mina favoriter): <br><br> - Spara till favoriter: Spara ett lager i snabbåtkomst. <br> - Mina favoriter: Öppna en vy med sparade lager. <br> - Redigera favoriter: Hantera sparade lager.",
     },
     {
       title: "Fler val",
@@ -409,7 +460,8 @@ class Introduction extends React.PureComponent {
     super(props);
     this.stepsRef = createRef();
     this.layerSwitcherPlugin = this.props.layerSwitcherPlugin;
-
+    this.showDrawOrderView =
+      this.props.layerSwitcherPlugin.options.showDrawOrderView;
     /**
      * When appLoaded is fired, let's filter through the provided 'steps'.
      * We must remove any steps that don't have corresponding DOM elements.
@@ -479,19 +531,21 @@ class Introduction extends React.PureComponent {
     this.setState({
       showSelection: false,
     });
-    if (type === "full") {
-      this.setState({
-        steps: this.predefinedSteps,
-        forceShow: true,
-        stepsEnabled: true,
-      });
-    } else if (type === "half") {
-      this.setState({
-        steps: this.predefinedStepsTwo,
-        forceShow: true,
-        stepsEnabled: true,
-      });
+
+    const isDrawOrderView = this.showDrawOrderView;
+
+    let steps =
+      type === "full" ? this.predefinedSteps : this.predefinedStepsTwo;
+
+    if (!isDrawOrderView) {
+      steps = steps.filter((step) => step.title !== "Ritordning");
     }
+
+    this.setState({
+      steps: steps,
+      forceShow: true,
+      stepsEnabled: true,
+    });
   };
 
   handleSelectionClose = () => {
@@ -709,7 +763,11 @@ class Introduction extends React.PureComponent {
       }
 
       // Handle Kartlager tab switch
-      if (step?.title === "Lagerlista") {
+      if (
+        (step?.title === "Lagerlista" && goingForward) ||
+        (step?.title === "Lagerinformation" && goingBackward) ||
+        (step?.title === "Snabbåtkomst" && goingForward)
+      ) {
         const tabs = document.querySelector(
           "#layer-switcher-tab-panel .MuiTabs-root"
         );
@@ -722,6 +780,31 @@ class Introduction extends React.PureComponent {
               resolve();
               return;
             }
+          }
+        }
+      }
+
+      // Handle Ritordning tab switch
+      if (
+        (step?.title === "Ritordning" &&
+          previousStep?.title === "Flikar i lagerhanteraren" &&
+          goingForward) ||
+        (step?.title === "Systemlager vy" &&
+          previousStep?.title === "Aktivera systemlager" &&
+          goingBackward)
+      ) {
+        const tabs = document.querySelector(
+          "#layer-switcher-tab-panel .MuiTabs-root"
+        );
+        if (tabs) {
+          const tabElements = tabs.querySelectorAll(".MuiTab-root");
+          const ritordningTab = Array.from(tabElements).find(
+            (tab) => tab.textContent === "Ritordning"
+          );
+          if (ritordningTab) {
+            ritordningTab.click();
+            resolve();
+            return;
           }
         }
       }
@@ -843,7 +926,7 @@ class Introduction extends React.PureComponent {
     // Handle menu transitions
     if (
       (previousStep?.title === "Meny" &&
-        step?.title === "Snabbåtkomst" &&
+        step?.title === "Lagergrupp" &&
         goingForward) ||
       (previousStep?.title === "Sök lager" &&
         step?.title === "Öppna meny" &&

@@ -282,7 +282,7 @@ class LayersSwitcherView extends React.PureComponent {
             <Tab label="Kartlager" />
             <Tab label="Bakgrund" />
             {this.options.showDrawOrderView === true && (
-              <Tab label={"Ritordning"} />
+              <Tab id="draw-order-tab" label={"Ritordning"} />
             )}
           </Tabs>
         </StyledAppBar>

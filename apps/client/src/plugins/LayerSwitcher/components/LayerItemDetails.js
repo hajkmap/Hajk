@@ -234,7 +234,6 @@ function LayerItemDetails({
             </Stack>
           </Box>
           <Box
-            id="layer-item-details-info"
             sx={{
               p: 1,
             }}
