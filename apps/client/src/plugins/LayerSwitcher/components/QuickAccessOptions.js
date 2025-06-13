@@ -18,7 +18,7 @@ export default function QuickAccessOptions({
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const optionsMenuIsOpen = Boolean(anchorEl);
-  // Add event listener for closing menu
+  // Add event listener for closing the quickAccess menu in the introduction component.
   useEffect(() => {
     const handleCloseMenu = () => {
       setAnchorEl(null);
@@ -47,7 +47,7 @@ export default function QuickAccessOptions({
   return (
     <>
       <LsIconButton
-        id="quick-access-actions-menu"
+        id="quick-access-menu-button"
         size="small"
         aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
@@ -65,7 +65,7 @@ export default function QuickAccessOptions({
         variant={"menu"}
         slotProps={{
           paper: {
-            id: "quick-access-actions-menu-content",
+            id: "quick-access-menu-content",
           },
         }}
       >

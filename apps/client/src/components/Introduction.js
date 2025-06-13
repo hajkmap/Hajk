@@ -307,13 +307,13 @@ class Introduction extends React.PureComponent {
     },
     {
       title: "Snabbåtkomst meny",
-      element: "#quick-access-actions-menu",
+      element: "#quick-access-menu-button",
       intro:
         "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
     },
     {
       title: "Fler val",
-      element: "#quick-access-actions-menu-content",
+      element: "#quick-access-menu-content",
       intro: "Olika val.",
     },
     {
@@ -345,7 +345,7 @@ class Introduction extends React.PureComponent {
           : "right",
     },
     {
-      title: "Öppna meny",
+      title: "Öppna sök meny",
       element: "#layerswitcher-actions-menu",
       intro: "Klicka för att öppna meny.<br> Menyen innehåller olika val.",
       position: () =>
@@ -354,7 +354,7 @@ class Introduction extends React.PureComponent {
           : "right",
     },
     {
-      title: "Meny",
+      title: "Sök meny",
       element: "#layerswitcher-actions-menu-content",
       intro:
         "<b>Dölj alla aktiva lager:</b> Klicka på knappen för att dölja <b>ALLA</b> aktiva lager. <br><br> <b>Scrolla till toppen:</b> Klicka på knappen för att scrolla till toppen av lagerlistan. <br><br> <b>Scrolla till botten:</b> Klicka på knappen för att scrolla till botten av lagerlistan.",
@@ -396,9 +396,10 @@ class Introduction extends React.PureComponent {
       intro: "Reglage för att ändra opacitet för ett lager.",
     },
     {
-      title: "Snabbåtkomst",
+      title: "Lägg till/ta bort lager i snabbåtkomst",
       element: "#layer-details-quick-access-btn",
-      intro: "Knappen lägger till/tar bort ett lager från snabbåtkomst.",
+      intro:
+        "Knappen lägger till/tar bort ett lager från snabbåtkomst menyn i lagervyn.",
     },
     {
       title: "Flikar i lagerhanteraren",
@@ -435,9 +436,14 @@ class Introduction extends React.PureComponent {
     },
     {
       title: "Snabbåtkomst meny",
-      element: "#quick-access-actions-menu",
+      element: "#quick-access-menu-button",
       intro:
         "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+    },
+    {
+      title: "Fler val",
+      element: "#quick-access-menu-content",
+      intro: "Olika val.",
     },
     {
       title: "Mina favoriter",
@@ -446,9 +452,9 @@ class Introduction extends React.PureComponent {
         "Knappen öppnar en meny med verktyg för att gruppera och spara lager i snabbåtkomst (mina favoriter): <br><br> - Spara till favoriter: Spara ett lager i snabbåtkomst. <br> - Mina favoriter: Öppna en vy med sparade lager. <br> - Redigera favoriter: Hantera sparade lager.",
     },
     {
-      title: "Fler val",
-      element: "#quick-access-actions-menu-content",
-      intro: "Olika val.",
+      title: "Mina favoriter meny",
+      element: "#favorites-menu",
+      intro: "Fleraval",
     },
     {
       title: "Slut",
@@ -639,8 +645,8 @@ class Introduction extends React.PureComponent {
   };
 
   handleQuickAccessMenuTransition = (step) => {
-    if (step?.element === "#quick-access-actions-menu-content") {
-      const menuButton = document.querySelector("#quick-access-actions-menu");
+    if (step?.element === "#quick-access-menu-content") {
+      const menuButton = document.querySelector("#quick-access-menu-button");
       if (menuButton) {
         menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       }
@@ -656,12 +662,24 @@ class Introduction extends React.PureComponent {
       step?.title === "Lagerinformation" ||
       step?.title === "Teckenförklaring" ||
       step?.title === "Opacitet" ||
-      step?.title === "Snabbåtkomst"
+      step?.title === "Snabbåtkomst" ||
+      step?.title === "Lägg till/ta bort lager i snabbåtkomst"
     ) {
       document.dispatchEvent(new CustomEvent("expandFirstGroup"));
       return true;
     }
 
+    return false;
+  };
+
+  handleFavoritesMenuTransition = (step) => {
+    if (step?.element === "#favorites-menu") {
+      const menuButton = document.querySelector("#favorites-menu-button");
+      if (menuButton) {
+        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      }
+      return true;
+    }
     return false;
   };
   /* Runs before the step UI changes, and must return a promise so that we can delay transititions, perform asynchronous operations
@@ -875,7 +893,7 @@ class Introduction extends React.PureComponent {
       // Handle going back to layer details view transition
       if (
         previousStep?.title === "Opacitet" &&
-        step?.title === "Snabbåtkomst" &&
+        step?.title === "Lägg till/ta bort lager i snabbåtkomst" &&
         goingBackward
       ) {
         const menuButton = document.querySelector("#show-layer-details");
@@ -908,6 +926,11 @@ class Introduction extends React.PureComponent {
         return;
       }
 
+      if (this.handleFavoritesMenuTransition(step)) {
+        handleTransition(() => {}, 150);
+        return;
+      }
+
       // Default case - no special handling needed
       resolve();
     });
@@ -923,13 +946,13 @@ class Introduction extends React.PureComponent {
     const goingForward = stepIndex > this.state.currentStepIndex;
     const goingBackward = stepIndex < this.state.currentStepIndex;
 
-    // Handle menu transitions
+    // Handle search menu transitions
     if (
-      (previousStep?.title === "Meny" &&
+      (previousStep?.title === "Sök meny" &&
         step?.title === "Lagergrupp" &&
         goingForward) ||
       (previousStep?.title === "Sök lager" &&
-        step?.title === "Öppna meny" &&
+        step?.title === "Öppna sök meny" &&
         goingBackward)
     ) {
       const closeEvent = new CustomEvent("closeLayersMenu");
@@ -939,13 +962,26 @@ class Introduction extends React.PureComponent {
     // Handle quick access menu transitions
     if (
       (previousStep?.title === "Fler val" &&
-        step?.title === "Slut" &&
+        step?.title === "Mina favoriter" &&
         goingForward) ||
       (previousStep?.title === "Snabbåtkomst" &&
         step?.title === "Snabbåtkomst meny" &&
         goingBackward)
     ) {
       const closeEvent = new CustomEvent("closeQuickAccessMenu");
+      document.dispatchEvent(closeEvent);
+      return;
+    }
+    // Handle favorites menu transitions
+    if (
+      (previousStep?.title === "Mina favoriter meny" &&
+        step?.title === "Slut" &&
+        goingForward) ||
+      (previousStep?.title === "Fler val" &&
+        step?.title === "Mina favoriter" &&
+        goingBackward)
+    ) {
+      const closeEvent = new CustomEvent("closeFavoritesMenu");
       document.dispatchEvent(closeEvent);
       return;
     }
