@@ -2,7 +2,7 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 import { withTheme } from "@emotion/react";
 import Icon from "@mui/material/Icon";
-import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
 import Collapse from "@mui/material/Collapse";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -20,7 +20,7 @@ const StyledCollapseIcon = styled(ListItemIcon)(({ theme }) => ({
     minWidth: theme.spacing(4),
   },
 }));
-const StyledListItem = styled(ListItem)(({ theme }) => ({
+const StyledListItem = styled(ListItemButton)(({ theme }) => ({
   overflowWrap: "break-word",
   ".MuiListItem-root": {
     borderLeft: `${theme.spacing(1)} solid ${theme.palette.background.paper}`,
@@ -104,7 +104,6 @@ class PanelMenuListItem extends React.PureComponent {
         <StyledListItem
           divider
           selected={selected}
-          button
           ref={this.props.itemRef}
           size="small"
           disableGutters

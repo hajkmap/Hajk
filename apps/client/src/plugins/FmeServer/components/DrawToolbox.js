@@ -58,7 +58,7 @@ const DrawToolbox = (props) => {
   return (
     <Paper sx={{ marginTop: 1 }}>
       <Grid container>
-        <Grid container item xs={12} justifyContent="space-between">
+        <Grid container justifyContent="space-between" size={12}>
           {drawButtons.map((button, index) => {
             return renderToggleButton(button, index);
           })}

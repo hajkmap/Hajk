@@ -29,6 +29,7 @@ const FeatureDetailsContainer = styled(Grid)(({ theme }) => ({
 
 const HeaderContainer = styled(Grid)(({ theme }) => ({
   paddingTop: theme.spacing(1),
+  alignItems: "center",
 }));
 
 const HeaderTypography = styled(Typography)(() => ({
@@ -169,8 +170,8 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       currentFeatureIndex + 1 >= numFeaturesInCollection;
 
     return (
-      <Grid container item alignItems="center" justifyContent="space-between">
-        <Grid item>
+      <Grid container alignItems="center" justifyContent="space-between">
+        <Grid>
           <HajkToolTip
             title={
               !buttonLeftDisabled
@@ -197,7 +198,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
             </span>
           </HajkToolTip>
         </Grid>
-        <Grid item>
+        <Grid>
           <HajkToolTip
             title={
               !buttonRightDisabled ? "Visa nästa objekt i resultatlistan" : ""
@@ -242,25 +243,27 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       (enableFeatureToggler ?? true) && features?.length > 1;
     return (
       <FeatureDetailsContainer container>
-        <HeaderContainer container alignItems="center">
+        <HeaderContainer container>
           <Grid
-            item
-            xs={shouldRenderToggler ? 9 : 12}
-            md={shouldRenderToggler ? 10 : 12}
+            size={{
+              xs: shouldRenderToggler ? 9 : 12,
+              md: shouldRenderToggler ? 10 : 12,
+            }}
           >
             {this.renderFeatureTitle()}
           </Grid>
           {shouldRenderToggler && (
-            <Grid item xs={3} md={2}>
+            <Grid
+              size={{
+                xs: 3,
+                md: 2,
+              }}
+            >
               {this.renderFeatureToggler()}
             </Grid>
           )}
         </HeaderContainer>
-        {infoBox && (
-          <Grid item xs={12}>
-            {infoBox}
-          </Grid>
-        )}
+        {infoBox && <Grid size={12}>{infoBox}</Grid>}
       </FeatureDetailsContainer>
     );
   }

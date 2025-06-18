@@ -6,7 +6,7 @@ import { withTheme } from "@emotion/react";
 import {
   Checkbox,
   Collapse,
-  ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
@@ -23,7 +23,7 @@ const StyledCollapseIcon = styled(ListItemIcon)(({ theme }) => ({
     minWidth: theme.spacing(4),
   },
 }));
-const StyledListItem = styled(ListItem)(({ theme }) => ({
+const StyledListItem = styled(ListItemButton)(({ theme }) => ({
   overflowWrap: "break-word",
   ".MuiListItem-root": {
     borderLeft: `${theme.spacing(1)} solid ${theme.palette.background.paper}`,
@@ -103,7 +103,6 @@ class PrintListItem extends React.PureComponent {
         <StyledListItem
           divider
           selected={selected}
-          button
           ref={this.props.itemRef}
           size="small"
           disableGutters
