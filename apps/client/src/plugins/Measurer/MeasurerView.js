@@ -93,6 +93,12 @@ function HelpDialog(props) {
           när du ritar sträckor eller arealer.
           <br />
           <br />
+          <strong>Stäng av snäppning</strong>
+          <br />
+          Håll ner Mellanslags-tangenten för att temporärt stänga av
+          snäppningsfunktionen.
+          <br />
+          <br />
           <strong>Vinkelrät mätning</strong>
           <br />
           Håll ner Ctrl på Windows eller Cmd (⌘) på Mac och klicka på en linje

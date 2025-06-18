@@ -93,10 +93,6 @@ export default function QuickAccessLayers({
         ".layer-item:last-child .MuiBox-root": {
           borderBottom: "none",
         },
-        borderTop: (theme) =>
-          quickAccessLayers.length > 0
-            ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
-            : "none",
       }}
     >
       {quickAccessLayers.map((l) => {

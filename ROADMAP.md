@@ -1,6 +1,6 @@
 # ROADMAP
 
-_Last updated: 2024-11-13_
+_Last updated: 2025-06-18_
 
 The following is a high-level overview of the planned development for Hajk and its various components (Backend, Client UI, Admin UI).
 
@@ -19,6 +19,20 @@ _Update: 4.0 has been release on Apr 4th. See [release notes](https://github.com
 This release marks the removal of the .NET backend, leaving NodeJS as the sole official backend solution.
 
 In addition, Client UI sees significant updates to the Layer Switcher tool as well as the application's window management.
+
+## 4.1
+
+_Update: 4.1 has been release on Jun 18th. See [release notes](https://github.com/hajkmap/Hajk/releases/tag/v4.1.0)._
+
+This is primarily a fix release that addresses some of the issues related to the rewrite of LayerSwitcher as seen in 4.0.
+
+## 4.2
+
+This release includes a major upgrade of our UI library, MUI, to version 7.
+
+In addition, Client is migrated to Vite, leaving the CRA behind.
+
+Also, an overhaul of the Introduction Guide and the Anchor tool is included in this release.
 
 ## 5.0
 

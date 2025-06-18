@@ -100,8 +100,8 @@ const LayerListFilter = ({
           variant="outlined"
           sx={{
             background: (theme) =>
-              theme.palette.mode === "dark" ? "inherit" : "#fff",
-            width: 500,
+              theme.palette.mode === "dark" ? theme.palette.grey[900] : "#fff",
+            width: "calc(100% - 39px)",
             maxWidth: "100%",
           }}
         />

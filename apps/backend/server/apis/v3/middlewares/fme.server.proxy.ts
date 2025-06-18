@@ -7,7 +7,7 @@ const logger = log4js.getLogger("proxy.fmeServer.v3");
 export default function fmeServerProxy() {
   return createProxyMiddleware({
     target: process.env.FME_SERVER_BASE_URL,
-    logLevel: "silent", // We don't care about logLevels[process.env.LOG_LEVEL] in this case as we log success and errors ourselves
+    logger: logger,
     changeOrigin: true,
     secure: process.env.FME_SERVER_SECURE === "true", // should SSL certs be verified?
     onProxyReq: (proxyReq) => {

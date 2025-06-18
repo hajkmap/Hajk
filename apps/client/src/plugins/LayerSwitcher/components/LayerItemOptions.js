@@ -6,12 +6,12 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@mui/material";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import TableViewOutlinedIcon from "@mui/icons-material/TableViewOutlined";
+import HajkToolTip from "components/HajkToolTip";
 
 export default function LayerItemOptions({
   layer,
@@ -129,9 +129,9 @@ export default function LayerItemOptions({
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <Tooltip title="Val för lager">
+        <HajkToolTip title="Val för lager">
           <MoreVertOutlinedIcon />
-        </Tooltip>
+        </HajkToolTip>
       </IconButton>
       <Menu
         anchorEl={anchorEl}

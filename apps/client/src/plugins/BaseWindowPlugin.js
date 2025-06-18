@@ -33,18 +33,6 @@ class BaseWindowPlugin extends React.PureComponent {
           : props.options.visibleAtStart)) ||
       false;
 
-    // If plugin is shown at start, we want to register it as shown in the Analytics module too.
-    // Normally, the event would be sent when user clicks on the button that activates the plugin,
-    // but in this case there won't be any click as the window will be visible at start.
-    if (visibleAtStart) {
-      this.props.app.globalObserver.publish("analytics.trackEvent", {
-        eventName: "pluginShown",
-        pluginName: this.type,
-        pluginLocaleName: this.title,
-        activeMap: this.props.app.config.activeMap,
-      });
-    }
-
     // Title and Color are kept in state and not as class properties. Keeping them in state
     // ensures re-render when new props arrive and update the state variables (see componentDidUpdate() too).
     this.state = {
@@ -52,6 +40,22 @@ class BaseWindowPlugin extends React.PureComponent {
       color: props.options.color || props.custom.color || null,
       windowVisible: visibleAtStart,
     };
+
+    if (visibleAtStart) {
+      // If plugin is shown at start, we want to register it as shown in the Analytics module too.
+      // Normally, the event would be sent when user clicks on the button that activates the plugin,
+      // but in this case there won't be any click as the window will be visible at start.
+      this.props.app.globalObserver.publish("analytics.trackEvent", {
+        eventName: "pluginShown",
+        pluginName: this.type,
+        pluginLocaleName: this.title,
+        activeMap: this.props.app.config.activeMap,
+      });
+
+      // If plugin is shown at start, we want to run the onWindowShow callback.
+      typeof this.props.custom.onWindowShow === "function" &&
+        this.props.custom.onWindowShow();
+    }
 
     // Title is a special case: we want to use the state.title and pass on to Window in order
     // to update Window's title dynamically. At the same time, we want all other occurrences,

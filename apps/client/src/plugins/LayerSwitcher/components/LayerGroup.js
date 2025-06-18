@@ -2,14 +2,15 @@ import React, { useState } from "react";
 import LayerItem from "./LayerItem";
 import GroupLayer from "./GroupLayer";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
-import { Typography, IconButton, ListItemText, Link } from "@mui/material";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import { Typography, ListItemText, Link } from "@mui/material";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import InfoIcon from "@mui/icons-material/Info";
 import HajkToolTip from "components/HajkToolTip";
+import LsIconButton from "./LsIconButton";
+import LsCheckBox from "./LsCheckBox";
 
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+import { getIsMobile } from "../LayerSwitcherUtils";
 
 /**
  * If Group has "toggleable" property enabled, render the toggle all checkbox.
@@ -26,15 +27,7 @@ const ToggleAllComponent = ({ toggleable, toggleState, clickHandler }) => {
         clickHandler();
       }}
     >
-      <IconButton disableTouchRipple size="small">
-        {
-          {
-            checked: <CheckBoxIcon />,
-            semichecked: <CheckBoxIcon sx={{ color: "gray" }} />,
-            unchecked: <CheckBoxOutlineBlankIcon />,
-          }[toggleState]
-        }
-      </IconButton>
+      <LsCheckBox toggleState={toggleState} />
     </div>
   );
 };
@@ -115,10 +108,13 @@ const GroupInfoToggler = ({
   }
   // Render icons only if one of the states above has a value
   return (
-    <HajkToolTip title="Mer information om gruppen">
-      <IconButton
+    <HajkToolTip title="Mer information om gruppen" placement="left">
+      <LsIconButton
+        size="small"
         sx={{
-          padding: "0px",
+          p: 0.25,
+          mt: "1px",
+          mr: "5px",
           "& .MuiTouchRipple-root": { display: "none" },
         }}
         onClick={(e) => {
@@ -126,8 +122,12 @@ const GroupInfoToggler = ({
           clickHandler();
         }}
       >
-        {infoVisible ? <RemoveCircleIcon /> : <InfoIcon />}
-      </IconButton>
+        {infoVisible ? (
+          <RemoveCircleIcon fontSize="small" />
+        ) : (
+          <InfoIcon fontSize="small" />
+        )}
+      </LsIconButton>
     </HajkToolTip>
   );
 };
@@ -248,7 +248,8 @@ const LayerGroup = ({
             />
             <ListItemText
               primaryTypographyProps={{
-                py: groupIsToggable ? 0 : "3px",
+                pb: "2px", // jesade-vbg compact mode, added line.
+                py: groupIsToggable ? 0 : getIsMobile() ? "3px" : "1px", // jesade-vbg compact mode
                 pl: groupIsToggable ? 0 : "3px",
                 variant: "body1",
                 fontWeight: isToggled || isSemiToggled ? "bold" : "inherit",

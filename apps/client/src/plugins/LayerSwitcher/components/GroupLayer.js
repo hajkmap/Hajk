@@ -9,6 +9,7 @@ import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRig
 
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+import { getIsMobile } from "../LayerSwitcherUtils";
 
 /* A grouplayer is a layer configured with multiple layers in admin, NOT a group in layerswitcher */
 
@@ -99,23 +100,38 @@ function GroupLayer({
       visibleSubLayers={visibleSubLayers}
       expandableSection={
         showExpandArrow && (
-          <Box>
+          <Box
+            sx={{
+              position: "relative",
+              display: "flex",
+              alignSelf: "stretch",
+              alignItems: "flex-start",
+            }}
+          >
             <IconButton
               sx={{
                 p: draggable ? 0 : "3px",
                 pr: draggable ? 0 : "4px",
-                top: "50%",
-                mt: "-25px",
                 mr: draggable ? "5px" : 0,
+                mt: draggable ? "5px" : "3px",
+                "& .ls-arrow": {
+                  transform: showSublayers ? "rotate(90deg)" : "",
+                  transition: "transform 300ms ease",
+                },
+                "&:hover .ls-arrow": {
+                  transform: showSublayers
+                    ? "rotate(90deg) translateX(-3px)"
+                    : "translateX(3px)",
+                },
               }}
               size="small"
               onClick={(_) => setShowSublayers(!showSublayers)}
             >
               <KeyboardArrowRightOutlinedIcon
                 sx={{
-                  transform: showSublayers ? "rotate(90deg)" : "",
-                  transition: "transform 300ms ease",
+                  mt: getIsMobile() ? "2px" : "0px", // jesade-vbg compact mode
                 }}
+                className="ls-arrow"
               ></KeyboardArrowRightOutlinedIcon>
             </IconButton>
           </Box>
