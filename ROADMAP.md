@@ -22,7 +22,9 @@ In addition, Client UI sees significant updates to the Layer Switcher tool as we
 
 ## 4.1
 
-This is primarly a fix release that addresses some of the issues related to the rewrite of LayerSwitcher as seen in 4.0.
+_Update: 4.1 has been release on Jun 18th. See [release notes](https://github.com/hajkmap/Hajk/releases/tag/v4.1.0)._
+
+This is primarily a fix release that addresses some of the issues related to the rewrite of LayerSwitcher as seen in 4.0.
 
 ## 4.2
 
