@@ -1,6 +1,6 @@
 # ROADMAP
 
-_Last updated: 2025-06-05_
+_Last updated: 2025-06-18_
 
 The following is a high-level overview of the planned development for Hajk and its various components (Backend, Client UI, Admin UI).
 
@@ -32,7 +32,7 @@ This release includes a major upgrade of our UI library, MUI, to version 7.
 
 In addition, Client is migrated to Vite, leaving the CRA behind.
 
-Also, an overhaul of the Introduction Guide is included in this release.
+Also, an overhaul of the Introduction Guide and the Anchor tool is included in this release.
 
 ## 5.0
 
