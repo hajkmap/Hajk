@@ -1,6 +1,6 @@
 # ROADMAP
 
-_Last updated: 2025-06-05_
+_Last updated: 2025-06-18_
 
 The following is a high-level overview of the planned development for Hajk and its various components (Backend, Client UI, Admin UI).
 
