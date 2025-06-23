@@ -4,6 +4,8 @@ import { styled } from "@mui/material/styles";
 import withSnackbar from "components/WithSnackbar";
 import QRCode from "qrcode";
 import HajkToolTip from "components/HajkToolTip";
+import ShareIcon from "@mui/icons-material/Share";
+import Collapse from "@mui/material/Collapse";
 
 import {
   Box,
@@ -57,7 +59,11 @@ class AnchorView extends React.PureComponent {
 
     // Initiate the anchor-url on mount
     const a = await this.props.model.getAnchor();
-    this.setState({ anchor: a });
+    const qrData = await this.generateQr(a);
+    this.setState({
+      anchor: a,
+      qrCode: qrData,
+    });
   }
 
   generateQr = (url) => {
@@ -96,18 +102,26 @@ class AnchorView extends React.PureComponent {
   render() {
     const allowCreatingCleanUrls =
       this.props.options.allowCreatingCleanUrls ?? true;
+    const qrCode = this.state.qrCode;
     return (
       <Box sx={{ width: "100%", height: "100%" }}>
-        <Grid container spacing={2} columns={12}>
+        <Grid
+          container
+          columns={12}
+          sx={{ ml: { xs: 0, sm: 3 }, mr: { xs: 0, sm: 3 }, mb: 2, mt: 1 }}
+        >
           <Grid size={12}>
-            <Typography>
-              Skapa en länk med kartans synliga lager, aktuella zoomnivå och
-              utbredning.
-            </Typography>
+            <Box display="flex" alignItems="center">
+              <ShareIcon sx={{ mr: 1 }} />
+              <Typography>
+                Skapa en länk med kartans synliga lager, aktuella zoomnivå och
+                utbredning.
+              </Typography>
+            </Box>
           </Grid>
         </Grid>
         {allowCreatingCleanUrls && (
-          <Box sx={{ ml: { xs: 0, sm: 3 } }}>
+          <Box>
             <Grid container spacing={2} columns={12}>
               <Grid size={12}>
                 <RadioGroup
@@ -132,7 +146,7 @@ class AnchorView extends React.PureComponent {
             </Grid>
           </Box>
         )}
-        <Box sx={{ ml: { xs: 0, sm: 7 }, mr: { xs: 0, sm: 7 } }}>
+        <Box>
           <Grid container spacing={2} columns={12}>
             <Grid size={12}>
               <StyledTextField
@@ -149,7 +163,7 @@ class AnchorView extends React.PureComponent {
           </Grid>
         </Box>
         {document.queryCommandSupported("copy") && (
-          <Box sx={{ ml: { xs: 0, sm: 7 }, mr: { xs: 0, sm: 7 } }}>
+          <Box>
             <Grid container spacing={2} columns={12}>
               <Grid size={6}>
                 <HajkToolTip title="Kopiera länk till urklipp">
@@ -185,14 +199,12 @@ class AnchorView extends React.PureComponent {
         {this.props.enableAppStateInHash && (
           <Box
             sx={{
-              ml: { xs: 0, sm: 7 },
-              mr: { xs: 0, sm: 7 },
               mt: 2,
             }}
           >
             <Grid container spacing={2} columns={12}>
               <Grid size={12}>
-                <Paper sx={{ p: 1, mb: 2 }}>
+                <Paper sx={{ p: 1 }}>
                   <Grid
                     container
                     columns={12}
@@ -209,24 +221,21 @@ class AnchorView extends React.PureComponent {
                         ></Switch>
                       </HajkToolTip>
                     </Grid>
-                    {this.state.showQr && (
-                      <Grid size={12}>
-                        <Box
-                          sx={{
-                            ml: { xs: 0, sm: 7 },
-                            mr: { xs: 0, sm: 7 },
-                          }}
-                          textAlign={"center"}
-                        >
-                          <img
-                            src={this.state.qrCode}
-                            alt=""
-                            style={{ width: "250px" }}
-                          />
-                        </Box>
-                      </Grid>
-                    )}
                   </Grid>
+                  <Collapse in={this.state.showQr} unmountOnExit>
+                    <Box
+                      sx={{
+                        mt: 2,
+                        textAlign: "center",
+                      }}
+                    >
+                      <img
+                        src={this.state.qrCode}
+                        alt=""
+                        style={{ width: "250px" }}
+                      />
+                    </Box>
+                  </Collapse>
                 </Paper>
               </Grid>
             </Grid>
