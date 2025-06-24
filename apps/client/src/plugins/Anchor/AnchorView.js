@@ -102,13 +102,13 @@ class AnchorView extends React.PureComponent {
   render() {
     const allowCreatingCleanUrls =
       this.props.options.allowCreatingCleanUrls ?? true;
-    const qrCode = this.state.qrCode;
+
     return (
-      <Box sx={{ width: "100%", height: "100%" }}>
+      <Box sx={{ maxWidth: "500px" }}>
         <Grid
           container
           columns={12}
-          sx={{ ml: { xs: 0, sm: 3 }, mr: { xs: 0, sm: 3 }, mb: 2, mt: 1 }}
+          sx={{ ml: { xs: 0, sm: 2 }, mr: { xs: 0, sm: 2 }, mb: 2, mt: 1 }}
         >
           <Grid size={12}>
             <Box display="flex" alignItems="center">
@@ -121,7 +121,7 @@ class AnchorView extends React.PureComponent {
           </Grid>
         </Grid>
         {allowCreatingCleanUrls && (
-          <Box>
+          <Box sx={{ mb: 1.5 }}>
             <Grid container spacing={2} columns={12}>
               <Grid size={12}>
                 <RadioGroup
@@ -203,7 +203,7 @@ class AnchorView extends React.PureComponent {
             }}
           >
             <Grid container spacing={2} columns={12}>
-              <Grid size={12}>
+              <Grid size={6}>
                 <Paper sx={{ p: 1 }}>
                   <Grid
                     container
