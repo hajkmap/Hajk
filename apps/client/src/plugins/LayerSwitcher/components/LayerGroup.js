@@ -328,7 +328,6 @@ const LayerGroup = ({
               toggleable={true}
               globalObserver={globalObserver}
               filterValue={filterValue}
-              children={children}
             />
           );
         })}

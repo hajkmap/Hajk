@@ -57,7 +57,7 @@ export default function LayerGroupAccordion({
         dense
       >
         <LsIconButton
-          id="layerGroup-accordion-arrowBtn"
+          id="layerGroup-accordion-arrow-button"
           data-first={isFirstGroup ? "true" : "false"} // Pass this as a prop from LayerGroup
           data-expanded={state.expanded}
           size="small"

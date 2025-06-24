@@ -112,7 +112,7 @@ export default function FavoritesOptions({
           </ListItemIcon>
           <ListItemText>Spara till favoriter</ListItemText>
         </MenuItem>
-        <MenuItem onClick={handleEditFavorites}>
+        <MenuItem id="edit-favorites" onClick={handleEditFavorites}>
           <ListItemIcon>
             <EditOutlinedIcon fontSize="small" />
           </ListItemIcon>

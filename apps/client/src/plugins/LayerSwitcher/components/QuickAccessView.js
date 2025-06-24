@@ -32,6 +32,7 @@ const QuickAccessView = ({
   handleQuickAccessPresetsToggle,
   favoritesViewDisplay,
   handleFavoritesViewToggle,
+  hideFavoritesView,
   favoritesInfoText,
   filterValue,
   enqueueSnackbar,
@@ -151,6 +152,7 @@ const QuickAccessView = ({
                 app={app}
                 map={map}
                 handleFavoritesViewToggle={handleFavoritesViewToggle}
+                hideFavoritesView={hideFavoritesView}
                 globalObserver={globalObserver}
                 favoritesInfoText={favoritesInfoText}
                 handleQuickAccessSectionExpanded={() => {

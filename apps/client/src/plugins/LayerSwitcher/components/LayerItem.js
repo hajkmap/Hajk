@@ -97,7 +97,6 @@ function LayerItem({
   expandableSection,
   showSublayers,
   subLayersSection,
-  children,
   isGroupLayerQuickAccess,
   isLayerQuickAccess,
 }) {
@@ -197,27 +196,6 @@ function LayerItem({
     e.stopPropagation();
     globalObserver.publish("setLayerDetails", { layerId });
   };
-
-  useEffect(() => {
-    // Listen for global DOM events dispatched by the Introduction component
-    // to show layer details for the first layer
-    // This is used to ensure that the first layer details are shown when the layer switcher is opened
-    const handleShowFirstLayerDetails = (e) => {
-      e.stopPropagation();
-      globalObserver.publish("setLayerDetails", children[0]?.id);
-    };
-
-    document.addEventListener(
-      "showFirstLayerDetails",
-      handleShowFirstLayerDetails
-    );
-    return () => {
-      document.removeEventListener(
-        "showFirstLayerDetails",
-        handleShowFirstLayerDetails
-      );
-    };
-  }, [children, globalObserver]);
 
   const drawOrderItem = () => {
     if (draggable) {

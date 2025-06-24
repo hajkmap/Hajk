@@ -1,4 +1,4 @@
-import React, { createRef } from "react";
+import React, { createRef, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Steps } from "intro.js-react";
 import { useTheme } from "@mui/material/styles";
@@ -17,10 +17,23 @@ import "intro.js/introjs.css";
 import "intro.js/themes/introjs-modern.css";
 
 import { functionalOk as functionalCookieOk } from "../models/Cookie";
+import LocalStorageHelper from "utils/LocalStorageHelper";
 
 const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherPlugin }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
+  const currentLsSettings = LocalStorageHelper.get("layerswitcher");
+
+  /*
+  useEffect(() => {
+    // Set state from localstorage on component load
+    const currentLsSettings = LocalStorageHelper.get("layerswitcher");
+    if (currentLsSettings.savedLayers?.length > 0) {
+      setHandleFavorites(currentLsSettings.savedLayers);
+    }
+  }, [setHandleFavorites]);
+*/
+  console.log("handleFavorites", currentLsSettings.savedLayers?.length > 0);
 
   const handleClose = (_, reason) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") {
@@ -203,7 +216,7 @@ class Introduction extends React.PureComponent {
       title: "Lagerlista",
       element: "#layerslist-container",
       intro:
-        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+        "Här finns lagerlistan där du kan se alla lager som är tillgängliga i kartan. <br><br> Du kan söka efter lager, tända/släcka lager och se information om varje lager.",
     },
     {
       title: "Sök lager",
@@ -216,138 +229,10 @@ class Introduction extends React.PureComponent {
           : "right",
     },
     {
-      title: "Lagergrupp",
-      element: "#layerGroup-accordion-arrowBtn",
-      intro:
-        "Pil indikerar lagergrupp. Klicka för att se underliggande lager. <br/><br/> Notera att lagergruppnamn med <b>fetstil</b> innehåller tända lager.",
-    },
-    {
-      title: "Tänd lager",
-      element: "#toggle-layer-item",
-      intro:
-        "Klicka för att tända/släcka lager. Lagernamn med <b>fetsil</b> visar att lagret är tänt.",
-      position: () =>
-        this.layerSwitcherPlugin.options.position === "right"
-          ? "left"
-          : "bottom",
-    },
-    {
-      title: "Lagerinformation",
-      element: "#show-layer-details",
-      intro: "Klicka för att se mer information om ett lager.",
-    },
-    {
-      title: "Lagerinformation vy",
-      element: "#layer-item-details-info",
-      intro: "Här visas eventuell information om ett lager.",
-    },
-    {
-      title: "Teckenförklaring",
-      element: "#toggle-legend-icon",
-      intro: "Knappen visar teckenförklaring.",
-    },
-    {
-      title: "Opacitet",
-      element: "#layer-details-opacity-slider",
-      intro: "Reglage för att ändra opacitet för ett lager.",
-    },
-    {
-      title: "Snabbåtkomst",
-      element: "#layer-details-quick-access-btn",
-      intro: "Knappen lägger till/tar bort ett lager från snabbåtkomst.",
-    },
-    {
-      title: "Flikar i lagerhanteraren",
-      element: "#layer-switcher-tab-panel",
-      intro: () =>
-        `Klicka här för att växla mellan olika vyer: <br><br> - Kartlager <br> - Bakgrund <br>${this.layerSwitcherPlugin.options.showDrawOrderView ? "- Ritordning: Här kan du ändra ritordning på tända lager i kartan" : ""}`,
-    },
-    {
-      title: "Ritordning",
-      element: "#draw-order-tab",
-      intro:
-        "Klicka på Ritordning-fliken för att se och ändra ritordningen för lagren.",
-      position: () =>
-        this.layerSwitcherPlugin.options.position === "right"
-          ? "left"
-          : "right",
-    },
-    {
-      title: "Aktivera systemlager",
-      element: "#draw-order-switch",
-      intro:
-        "Klicka för att visa systemlager i lagerlista och ändra ritordning av lager genererade av verktyg.",
-    },
-    {
-      title: "Systemlager vy",
-      element: ".draw-order-list",
-      intro:
-        "Här kan du se och ändra ritordningen för systemlager. <br><br> Dra och släpp lager för att ändra ritordningen.",
-    },
-
-    {
-      title: "Öppna meny",
+      title: "Öppna meny bredvid sökfält",
       element: "#layerswitcher-actions-menu",
-      intro: "Klicka för att öppna meny.<br> Menyen innehåller olika val.",
-      position: () =>
-        this.layerSwitcherPlugin.options.position === "right"
-          ? "left"
-          : "right",
-    },
-    {
-      title: "Meny",
-      element: "#layerswitcher-actions-menu-content",
       intro:
-        "<b>Dölj alla aktiva lager:</b> Klicka på knappen för att dölja <b>ALLA</b> aktiva lager. <br><br> <b>Scrolla till toppen:</b> Klicka på knappen för att scrolla till toppen av lagerlistan. <br><br> <b>Scrolla till botten:</b> Klicka på knappen för att scrolla till botten av lagerlistan.",
-    },
-    {
-      title: "Snabbåtkomst",
-      element: "#quick-access-view",
-      intro: "Meny för åtkomst av sparade lager.",
-    },
-    {
-      title: "Snabbåtkomst meny",
-      element: "#quick-access-menu-button",
-      intro:
-        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
-    },
-    {
-      title: "Fler val",
-      element: "#quick-access-menu-content",
-      intro: "Olika val.",
-    },
-    {
-      title: "Slut",
-      intro: "Detta är slutet.",
-    },
-  ];
-
-  predefinedStepsTwo = [
-    {
-      title: "Hajk 4",
-      intro:
-        "Detta är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br> Observera att du inte kan utföra några åtgärder som att klicka på knappar under introduktionen, detta är enbart för att illustrera hur lagerhanteraren fungerar.",
-    },
-    {
-      title: "Lagerlista",
-      element: "#layerslist-container",
-      intro:
-        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
-    },
-    {
-      title: "Sök lager",
-      element: "#layer-list-filter",
-      intro:
-        "Mata in text för att söka efter lager. <br><br> Sökresultat visas i lagerlistan nedan.",
-      position: () =>
-        this.layerSwitcherPlugin.options.position === "right"
-          ? "left"
-          : "right",
-    },
-    {
-      title: "Öppna sök meny",
-      element: "#layerswitcher-actions-menu",
-      intro: "Klicka för att öppna meny.<br> Menyen innehåller olika val.",
+        "Klicka på kebabmenyn. <br><br> Menyn innehåller funktioner som: dölj alla aktiva lager, scrolla till toppen av lagerlistan, scrolla till botten av lagerlistan.",
       position: () =>
         this.layerSwitcherPlugin.options.position === "right"
           ? "left"
@@ -361,9 +246,9 @@ class Introduction extends React.PureComponent {
     },
     {
       title: "Lagergrupp",
-      element: "#layerGroup-accordion-arrowBtn",
+      element: "#layerGroup-accordion-arrow-button",
       intro:
-        "Pil indikerar lagergrupp. Klicka för att se underliggande lager. <br/><br/> Notera att lagergruppnamn med <b>fetstil</b> innehåller tända lager.",
+        "Pil indikerar lagergrupp. Klicka för att se underliggande lager. <br/><br/> Notera att lagergruppnamns med <b>fetstil</b> innehåller tända lager.",
     },
     {
       title: "Tänd lager",
@@ -381,14 +266,14 @@ class Introduction extends React.PureComponent {
       intro: "Klicka för att se mer information om ett lager.",
     },
     {
-      title: "Lagerinformation vy",
-      element: "#layer-item-details-info",
-      intro: "Här visas eventuell information om ett lager.",
-    },
-    {
       title: "Teckenförklaring",
       element: "#toggle-legend-icon",
       intro: "Knappen visar teckenförklaring.",
+    },
+    {
+      title: "Lagerinformations vy",
+      element: "#layer-item-details-info",
+      intro: "Här visas eventuell information om ett lager.",
     },
     {
       title: "Opacitet",
@@ -397,7 +282,7 @@ class Introduction extends React.PureComponent {
     },
     {
       title: "Lägg till/ta bort lager i snabbåtkomst",
-      element: "#layer-details-quick-access-btn",
+      element: "#layer-details-quick-access-button",
       intro:
         "Knappen lägger till/tar bort ett lager från snabbåtkomst menyn i lagervyn.",
     },
@@ -411,7 +296,7 @@ class Introduction extends React.PureComponent {
       title: "Ritordning",
       element: "#draw-order-tab",
       intro:
-        "Klicka på Ritordning-fliken för att se och ändra ritordningen för lagren.",
+        "Klicka på Ritordnings-fliken för att se och ändra ritordningen för lagren.",
       position: () =>
         this.layerSwitcherPlugin.options.position === "right"
           ? "left"
@@ -421,10 +306,10 @@ class Introduction extends React.PureComponent {
       title: "Aktivera systemlager",
       element: "#draw-order-switch",
       intro:
-        "Klicka för att visa systemlager i lagerlista och ändra ritordning av lager genererade av verktyg.",
+        "Klicka för att visa systemlager i lagerlistan och ändra ritordning av lager genererade av verktyg.",
     },
     {
-      title: "Systemlager vy",
+      title: "Lista över systemlager",
       element: ".draw-order-list",
       intro:
         "Här kan du se och ändra ritordningen för systemlager. <br><br> Dra och släpp lager för att ändra ritordningen.",
@@ -432,29 +317,230 @@ class Introduction extends React.PureComponent {
     {
       title: "Snabbåtkomst",
       element: "#quick-access-view",
-      intro: "Meny för åtkomst av sparade lager.",
+      intro: "Lista och menyer för åtkomst och underhåll av sparade lager.",
     },
     {
       title: "Snabbåtkomst meny",
       element: "#quick-access-menu-button",
       intro:
-        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+        "Klicka på kebabmenyn i snabbåtkomst.<br><br> Menyn innehåller funktioner som: <br> - Lägg till tända lager <br> - Rensa allt",
     },
     {
       title: "Fler val",
       element: "#quick-access-menu-content",
-      intro: "Olika val.",
+      intro:
+        "Lägg till tända lager: Klicka för att lägga till alla tända lager i snabbåtkomst. <br><br> Rensa allt: Klicka för att rensa alla lager i snabbåtkomst.",
     },
     {
       title: "Mina favoriter",
       element: "#favorites-menu-button",
       intro:
-        "Knappen öppnar en meny med verktyg för att gruppera och spara lager i snabbåtkomst (mina favoriter): <br><br> - Spara till favoriter: Spara ett lager i snabbåtkomst. <br> - Mina favoriter: Öppna en vy med sparade lager. <br> - Redigera favoriter: Hantera sparade lager.",
+        "Klicka på favoriter-knappen. <br><br> Menyn innehåller funktioner som att spara till favoriter, redigera favoriter och ladda favoriter.",
     },
     {
       title: "Mina favoriter meny",
       element: "#favorites-menu",
-      intro: "Fleraval",
+      intro:
+        "Knappen öppnar en meny med verktyg för att gruppera och spara lager i snabbåtkomst (mina favoriter): <br><br> - <b>Spara till favoriter:</b> Sparar en grupp som innehåller ett eller flera lager. Titel och beskrivning av denna grupp kan tillämpas, <i>observera att favoriter endast sparas tillfälligt och lokalt för dig</i>. <br><br> - <b>Redigera favoriter:</b> Hantera sparade lager. <br><br> - <b>Ladda favorit:</b> Vid laddning ersätts lagren i snabbåtkomst. Alla tända lager i kartan släcks och ersätts med favoritens tända lager.",
+    },
+    {
+      title: "Redigera favoriter",
+      element: "#edit-favorites",
+      intro: "Knappen öppnar en separat vy för att hantera sparade favoriter.",
+    },
+    {
+      title: "Importera favoriter",
+      element: "#import-favorites-button",
+      intro: "Klicka för att importera favoriter från en .json-fil.",
+    },
+    {
+      title: "Lista över favoriter",
+      element: ".favorites-list-view",
+      intro:
+        "Här kan du se och hantera dina sparade favoriter. Klicka för att skriva över befintliga lager med favoriterna.",
+    },
+    {
+      title: "Favoriter flerval",
+      element: "#favorites-list-options-button",
+      intro:
+        "Klicka på kebabmenyn i favoriter-listan. <br><br> Menyn innehåller funtioner som t.ex: information om favoriten, redigera favoriten, ta bort favoriten och exportera favoriten som en .json fil.",
+    },
+    {
+      title: "Favoriter flerval meny",
+      element: "#favorites-list-options-menu",
+      intro:
+        "<b> - Redigera:</b> Redigera titel och beskrivning för favoriter <br><br> <b> - Ta bort:</b> Tar bort favoriten från listan <br><br> <b> - Exportera:</b> Exporterar favoriten som en .json fil",
+    },
+    {
+      title: "Slut",
+      intro: "Detta är slutet.",
+    },
+  ];
+
+  predefinedStepsTwo = [
+    {
+      title: "Hajk 4",
+      intro:
+        "Detta är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br> Observera att du inte kan utföra några åtgärder som att klicka på knappar under introduktionen, detta är enbart för att illustrera hur den nya lagerhanteraren fungerar.",
+    },
+    {
+      title: "Lagerlista",
+      element: "#layerslist-container",
+      intro:
+        "Här finns lagerlistan där du kan se alla lager som är tillgängliga i kartan. <br><br> Du kan söka efter lager, tända/släcka lager och se information om varje lager.",
+    },
+    {
+      title: "Sök lager",
+      element: "#layer-list-filter",
+      intro:
+        "Mata in text för att söka efter lager. <br><br> Sökresultat visas i lagerlistan nedan.",
+      position: () =>
+        this.layerSwitcherPlugin.options.position === "right"
+          ? "left"
+          : "right",
+    },
+    {
+      title: "Öppna meny bredvid sökfält",
+      element: "#layerswitcher-actions-menu",
+      intro:
+        "Klicka på kebabmenyn. <br><br> Menyn innehåller funktioner som: dölj alla aktiva lager, scrolla till toppen av lagerlistan, scrolla till botten av lagerlistan.",
+      position: () =>
+        this.layerSwitcherPlugin.options.position === "right"
+          ? "left"
+          : "right",
+    },
+    {
+      title: "Sök meny",
+      element: "#layerswitcher-actions-menu-content",
+      intro:
+        "<b>Dölj alla aktiva lager:</b> Klicka på knappen för att dölja <b>ALLA</b> aktiva lager. <br><br> <b>Scrolla till toppen:</b> Klicka på knappen för att scrolla till toppen av lagerlistan. <br><br> <b>Scrolla till botten:</b> Klicka på knappen för att scrolla till botten av lagerlistan.",
+    },
+    {
+      title: "Lagergrupp",
+      element: "#layerGroup-accordion-arrow-button",
+      intro:
+        "Pil indikerar lagergrupp. Klicka för att se underliggande lager. <br/><br/> Notera att lagergruppnamns med <b>fetstil</b> innehåller tända lager.",
+    },
+    {
+      title: "Tänd lager",
+      element: "#toggle-layer-item",
+      intro:
+        "Klicka för att tända/släcka lager. Lagernamn med <b>fetsil</b> visar att lagret är tänt.",
+      position: () =>
+        this.layerSwitcherPlugin.options.position === "right"
+          ? "left"
+          : "bottom",
+    },
+    {
+      title: "Lagerinformation",
+      element: "#show-layer-details",
+      intro: "Klicka för att se mer information om ett lager.",
+    },
+    {
+      title: "Teckenförklaring",
+      element: "#toggle-legend-icon",
+      intro: "Knappen visar teckenförklaring.",
+    },
+    {
+      title: "Lagerinformations vy",
+      element: "#layer-item-details-info",
+      intro: "Här visas eventuell information om ett lager.",
+    },
+    {
+      title: "Opacitet",
+      element: "#layer-details-opacity-slider",
+      intro: "Reglage för att ändra opacitet för ett lager.",
+    },
+    {
+      title: "Lägg till/ta bort lager i snabbåtkomst",
+      element: "#layer-details-quick-access-button",
+      intro:
+        "Knappen lägger till/tar bort ett lager från snabbåtkomst menyn i lagervyn.",
+    },
+    {
+      title: "Flikar i lagerhanteraren",
+      element: "#layer-switcher-tab-panel",
+      intro: () =>
+        `Klicka här för att växla mellan olika vyer: <br><br> - Kartlager <br> - Bakgrund <br>${this.layerSwitcherPlugin.options.showDrawOrderView ? "- Ritordning: Här kan du ändra ritordning på tända lager i kartan" : ""}`,
+    },
+    {
+      title: "Ritordning",
+      element: "#draw-order-tab",
+      intro:
+        "Klicka på Ritordnings-fliken för att se och ändra ritordningen för lagren.",
+      position: () =>
+        this.layerSwitcherPlugin.options.position === "right"
+          ? "left"
+          : "right",
+    },
+    {
+      title: "Aktivera systemlager",
+      element: "#draw-order-switch",
+      intro:
+        "Klicka för att visa systemlager i lagerlistan och ändra ritordning av lager genererade av verktyg.",
+    },
+    {
+      title: "Lista över systemlager",
+      element: ".draw-order-list",
+      intro:
+        "Här kan du se och ändra ritordningen för systemlager. <br><br> Dra och släpp lager för att ändra ritordningen.",
+    },
+    {
+      title: "Snabbåtkomst",
+      element: "#quick-access-view",
+      intro: "Lista och menyer för åtkomst och underhåll av sparade lager.",
+    },
+    {
+      title: "Snabbåtkomst meny",
+      element: "#quick-access-menu-button",
+      intro:
+        "Klicka på kebabmenyn i snabbåtkomst.<br><br> Menyn innehåller funktioner som: <br> - Lägg till tända lager <br> - Rensa allt",
+    },
+    {
+      title: "Fler val",
+      element: "#quick-access-menu-content",
+      intro:
+        "Lägg till tända lager: Klicka för att lägga till alla tända lager i snabbåtkomst. <br><br> Rensa allt: Klicka för att rensa alla lager i snabbåtkomst.",
+    },
+    {
+      title: "Mina favoriter",
+      element: "#favorites-menu-button",
+      intro:
+        "Klicka på favoriter-knappen. <br><br> Menyn innehåller funktioner som att spara till favoriter, redigera favoriter och ladda favoriter.",
+    },
+    {
+      title: "Mina favoriter meny",
+      element: "#favorites-menu",
+      intro:
+        "Knappen öppnar en meny med verktyg för att gruppera och spara lager i snabbåtkomst (mina favoriter): <br><br> - <b>Spara till favoriter:</b> Sparar en grupp som innehåller ett eller flera lager. Titel och beskrivning av denna grupp kan tillämpas, <i>observera att favoriter endast sparas tillfälligt och lokalt för dig</i>. <br><br> - <b>Redigera favoriter:</b> Hantera sparade lager. <br><br> - <b>Ladda favorit:</b> Vid laddning ersätts lagren i snabbåtkomst. Alla tända lager i kartan släcks och ersätts med favoritens tända lager.",
+    },
+    {
+      title: "Redigera favoriter",
+      element: "#edit-favorites",
+      intro: "Knappen öppnar en separat vy för att hantera sparade favoriter.",
+    },
+    {
+      title: "Importera favoriter",
+      element: "#import-favorites-button",
+      intro: "Klicka för att importera favoriter från en .json-fil.",
+    },
+    {
+      title: "Lista över favoriter",
+      element: ".favorites-list-view",
+      intro:
+        "Här kan du se och hantera dina sparade favoriter. Klicka för att skriva över befintliga lager med favoriterna.",
+    },
+    {
+      title: "Favoriter flerval",
+      element: "#favorites-list-options-button",
+      intro:
+        "Klicka på kebabmenyn i favoriter-listan. <br><br> Menyn innehåller funtioner som t.ex: information om favoriten, redigera favoriten, ta bort favoriten och exportera favoriten som en .json fil.",
+    },
+    {
+      title: "Favoriter flerval meny",
+      element: "#favorites-list-options-menu",
+      intro:
+        "<b> - Redigera:</b> Redigera titel och beskrivning för favoriter <br><br> <b> - Ta bort:</b> Tar bort favoriten från listan <br><br> <b> - Exportera:</b> Exporterar favoriten som en .json fil",
     },
     {
       title: "Slut",
@@ -468,6 +554,16 @@ class Introduction extends React.PureComponent {
     this.layerSwitcherPlugin = this.props.layerSwitcherPlugin;
     this.showDrawOrderView =
       this.props.layerSwitcherPlugin.options.showDrawOrderView;
+    this.appModel = this.props.appModel;
+    console.log(
+      "enableQuickAccessPresets",
+      this.props.layerSwitcherPlugin.options.enableQuickAccessPresets
+    );
+    console.log(
+      "enableUserQuickAccessFavorites",
+      this.props.layerSwitcherPlugin.options.enableUserQuickAccessFavorites
+    );
+    console.log("this.appModel", this.appModel);
     /**
      * When appLoaded is fired, let's filter through the provided 'steps'.
      * We must remove any steps that don't have corresponding DOM elements.
@@ -655,15 +751,16 @@ class Introduction extends React.PureComponent {
     return false;
   };
 
-  handleLayerEvents = (step) => {
+  handleCustomEvents = (step) => {
     if (
       step?.title === "Lagergrupp" ||
       step?.title === "Tänd lager" ||
       step?.title === "Lagerinformation" ||
-      step?.title === "Teckenförklaring" ||
+      step?.title === "Lagerinformations vy" ||
       step?.title === "Opacitet" ||
       step?.title === "Snabbåtkomst" ||
-      step?.title === "Lägg till/ta bort lager i snabbåtkomst"
+      step?.title === "Lägg till/ta bort lager i snabbåtkomst" ||
+      step?.title === "Redigera favoriter"
     ) {
       document.dispatchEvent(new CustomEvent("expandFirstGroup"));
       return true;
@@ -673,15 +770,37 @@ class Introduction extends React.PureComponent {
   };
 
   handleFavoritesMenuTransition = (step) => {
-    if (step?.element === "#favorites-menu") {
+    // Handle going forward to "Mina favoriter meny" (element #favorites-menu)
+    if (
+      step?.element === "#favorites-menu" ||
+      step?.element === "#edit-favorites"
+    ) {
       const menuButton = document.querySelector("#favorites-menu-button");
+
       if (menuButton) {
         menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       }
       return true;
     }
+
     return false;
   };
+
+  handleFavoritesListMenuTransition = (step) => {
+    if (step?.element === "#favorites-list-options-menu") {
+      const menuButton = document.querySelector(
+        "#favorites-list-options-button"
+      );
+
+      if (menuButton) {
+        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      }
+      return true;
+    }
+
+    return false;
+  };
+
   /* Runs before the step UI changes, and must return a promise so that we can delay transititions, perform asynchronous operations
    (e.g. open menus, etc.)
    Waiting for a drawer/menu to render before moving to the next step
@@ -697,6 +816,7 @@ class Introduction extends React.PureComponent {
 
       const goingBackward = nextIndex < currentIndex;
       const goingForward = nextIndex > currentIndex;
+      let didWaitForFavoritesBack = false;
 
       // Helper function to handle element updates
       const updateStepElement = () => {
@@ -759,7 +879,6 @@ class Introduction extends React.PureComponent {
           return;
         }
       }
-
       // Clear typing interval when moving to next step
       if (
         (previousStep?.title === "Sök lager" && goingForward) ||
@@ -807,7 +926,7 @@ class Introduction extends React.PureComponent {
         (step?.title === "Ritordning" &&
           previousStep?.title === "Flikar i lagerhanteraren" &&
           goingForward) ||
-        (step?.title === "Systemlager vy" &&
+        (step?.title === "Lista över systemlager" &&
           previousStep?.title === "Aktivera systemlager" &&
           goingBackward)
       ) {
@@ -826,7 +945,6 @@ class Introduction extends React.PureComponent {
           }
         }
       }
-
       // Handle drawer transitions
       if (this.handleDrawerTransition(previousStep, step)) {
         const needsDelay =
@@ -845,8 +963,8 @@ class Introduction extends React.PureComponent {
         return;
       }
 
-      // Handle layer details view transitions
-      if (step?.element === "#layer-item-details-info") {
+      // Handle layer details view transition
+      if (step?.element === "#toggle-legend-icon") {
         const menuButton = document.querySelector("#show-layer-details");
         if (menuButton) {
           handleTransition(() => {
@@ -858,15 +976,32 @@ class Introduction extends React.PureComponent {
         }
       }
 
-      // Handle layer information view transitions
+      // Handle edit favorites transition
+      if (step?.element === "#import-favorites-button") {
+        const menuButton = document.querySelector("#edit-favorites");
+        if (menuButton) {
+          handleTransition(() => {
+            menuButton.click();
+          });
+          return;
+        }
+      }
+
+      // Handle back to layer list view transition
+      // note to myself, same logic can be used to handle going back from favorites and quickaccess (teman)
       if (
-        previousStep?.title === "Tänd lager" &&
-        step?.title === "Lagerinformation" &&
-        goingBackward
+        (previousStep?.title === "Tänd lager" &&
+          step?.title === "Lagerinformation" &&
+          goingBackward) ||
+        (step?.title === "Lagerlista" &&
+          previousStep?.title === "Hajk 4" &&
+          goingForward) ||
+        step?.element === "#layer-switcher-tab-panel"
       ) {
         const menuButton = document.querySelector(
-          "#layer-item-details-backBtn"
+          "#layer-item-details-back-button"
         );
+
         if (menuButton) {
           handleTransition(() => {
             menuButton.dispatchEvent(
@@ -877,25 +1012,53 @@ class Introduction extends React.PureComponent {
         }
       }
 
-      // Handle layer details exit transition
-      if (step?.element === "#layer-switcher-tab-panel") {
-        const menuButton = document.querySelector(
-          "#layer-item-details-backBtn"
-        );
-        if (menuButton) {
-          menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-          updateStepElement();
-          resolve();
-          return;
-        }
+      if (
+        (step?.title === "Redigera favoriter" &&
+          previousStep?.title === "Mina favoriter meny" &&
+          goingBackward) ||
+        (step?.title === "Lagerlista" &&
+          previousStep?.title === "Hajk 4" &&
+          goingForward)
+      ) {
+        document.dispatchEvent(new CustomEvent("favoritesBackButton"));
+        didWaitForFavoritesBack = true;
+
+        const waitForLagerlistaVisible = () => {
+          const el = document.querySelector("#layerslist-container");
+          return el && el.offsetParent !== null;
+        };
+
+        const maxTries = 20;
+        let tries = 0;
+
+        const waitInterval = setInterval(() => {
+          if (waitForLagerlistaVisible()) {
+            clearInterval(waitInterval);
+            updateStepElement();
+
+            // After waiting, check if other transitions apply
+            if (this.handleFavoritesMenuTransition(step)) {
+              handleTransition(() => {}, 300);
+            } else {
+              resolve();
+            }
+          } else if (++tries >= maxTries) {
+            clearInterval(waitInterval);
+            console.log("Timeout waiting for Lagerlista to render");
+            updateStepElement();
+            resolve();
+          }
+        }, 100);
+
+        return; // Delay until Lagerlista visible
       }
 
-      // Handle going back to layer details view transition
       if (
         previousStep?.title === "Opacitet" &&
         step?.title === "Lägg till/ta bort lager i snabbåtkomst" &&
         goingBackward
       ) {
+        // Handle going back to layer details view transition
         const menuButton = document.querySelector("#show-layer-details");
         if (menuButton) {
           handleTransition(() => {
@@ -909,7 +1072,7 @@ class Introduction extends React.PureComponent {
 
       // Handle menu content transitions
       if (this.handleMenuContentTransition(step)) {
-        handleTransition(() => {}, 150);
+        handleTransition(() => {}, 200);
         return;
       }
 
@@ -920,13 +1083,22 @@ class Introduction extends React.PureComponent {
       }
 
       // Handle layer events
-      if (this.handleLayerEvents(step)) {
+      if (this.handleCustomEvents(step)) {
         updateStepElement();
         resolve();
         return;
       }
 
-      if (this.handleFavoritesMenuTransition(step)) {
+      // If no custom back handling needed, proceed with favorites menu transition
+      if (
+        !didWaitForFavoritesBack &&
+        this.handleFavoritesMenuTransition(step)
+      ) {
+        handleTransition(() => {}, 300);
+        return;
+      }
+
+      if (this.handleFavoritesListMenuTransition(step)) {
         handleTransition(() => {}, 150);
         return;
       }
@@ -946,20 +1118,20 @@ class Introduction extends React.PureComponent {
     const goingForward = stepIndex > this.state.currentStepIndex;
     const goingBackward = stepIndex < this.state.currentStepIndex;
 
-    // Handle search menu transitions
+    // Handle search close menu transitions
     if (
       (previousStep?.title === "Sök meny" &&
         step?.title === "Lagergrupp" &&
         goingForward) ||
       (previousStep?.title === "Sök lager" &&
-        step?.title === "Öppna sök meny" &&
+        step?.title === "Öppna meny bredvid sökfält" &&
         goingBackward)
     ) {
       const closeEvent = new CustomEvent("closeLayersMenu");
       document.dispatchEvent(closeEvent);
       return;
     }
-    // Handle quick access menu transitions
+    // Handle quick access close menu transitions
     if (
       (previousStep?.title === "Fler val" &&
         step?.title === "Mina favoriter" &&
@@ -972,16 +1144,29 @@ class Introduction extends React.PureComponent {
       document.dispatchEvent(closeEvent);
       return;
     }
-    // Handle favorites menu transitions
+    // Handle favorites close menu transitions
     if (
-      (previousStep?.title === "Mina favoriter meny" &&
-        step?.title === "Slut" &&
+      (previousStep?.title === "Redigera favoriter" &&
+        step?.title === "Importera favoriter" &&
         goingForward) ||
       (previousStep?.title === "Fler val" &&
         step?.title === "Mina favoriter" &&
         goingBackward)
     ) {
       const closeEvent = new CustomEvent("closeFavoritesMenu");
+      document.dispatchEvent(closeEvent);
+      return;
+    }
+
+    if (
+      (previousStep?.title === "Favoriter flerval meny" &&
+        step?.title === "Slut" &&
+        goingForward) ||
+      (previousStep?.title === "Lista över favoriter" &&
+        step?.title === "Favoriter flerval" &&
+        goingBackward)
+    ) {
+      const closeEvent = new CustomEvent("closeFavoritesListMenu");
       document.dispatchEvent(closeEvent);
       return;
     }

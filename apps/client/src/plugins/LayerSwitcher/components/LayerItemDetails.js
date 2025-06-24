@@ -212,7 +212,7 @@ function LayerItemDetails({
                 TransitionProps={{ timeout: 0 }}
               >
                 <LsIconButton
-                  id="layer-item-details-backBtn"
+                  id="layer-item-details-back-button"
                   onClick={handleBackButtonClick}
                 >
                   <ArrowBackIcon />
@@ -369,7 +369,7 @@ function LayerItemDetails({
                 }}
               >
                 <Button
-                  id="layer-details-quick-access-btn"
+                  id="layer-details-quick-access-button"
                   fullWidth
                   variant="outlined"
                   onClick={handleQuickAccess}

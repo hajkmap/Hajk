@@ -177,6 +177,15 @@ class LayersSwitcherView extends React.PureComponent {
       },
     }));
   };
+  /* A separate function that is being passed to handle click on backButton in FavoritesViewHeader for the Introduction module,
+  //since handleFavoritesViewToggle in the Favorites.js component is being passed as a prop to both
+   FavoritesViewHeader and FavoritesOptions
+  */
+  hideFavoritesView = () => {
+    this.setState({
+      displayContentOverlay: null,
+    });
+  };
 
   /**
    * LayerSwitcher consists of three Tabs: one shows
@@ -313,6 +322,7 @@ class LayersSwitcherView extends React.PureComponent {
             this.handleQuickAccessPresetsToggle({ event: e })
           }
           handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+          hideFavoritesView={this.hideFavoritesView}
           globalObserver={this.globalObserver}
           map={this.props.map}
           app={this.props.app}

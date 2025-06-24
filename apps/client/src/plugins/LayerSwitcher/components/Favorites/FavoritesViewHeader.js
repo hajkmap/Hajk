@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useSnackbar } from "notistack";
 
 import { Box, Collapse, IconButton, Stack, Typography } from "@mui/material";
@@ -11,6 +11,7 @@ import HajkToolTip from "components/HajkToolTip";
 function FavoritesViewHeader({
   backButtonCallback,
   importFavoritesCallback,
+  hideFavoritesView,
   functionalCookiesOk,
   favoritesInfoText,
 }) {
@@ -31,6 +32,20 @@ function FavoritesViewHeader({
       backButtonCallback();
     }, 100);
   };
+
+  useEffect(() => {
+    const handleIntroBack = () => {
+      setTooltipOpen(false);
+
+      if (hideFavoritesView) {
+        hideFavoritesView();
+      }
+    };
+
+    document.addEventListener("favoritesBackButton", handleIntroBack);
+    return () =>
+      document.removeEventListener("favoritesBackButton", handleIntroBack);
+  }, [hideFavoritesView]);
 
   // Handles click on info button in header
   const handleInfoButtonClick = (e) => {
@@ -105,7 +120,10 @@ function FavoritesViewHeader({
           title="Tillbaka"
           TransitionProps={{ timeout: 0 }}
         >
-          <IconButton onClick={handleBackButtonClick}>
+          <IconButton
+            id="favorites-list-back-button"
+            onClick={handleBackButtonClick}
+          >
             <ArrowBackIcon />
           </IconButton>
         </HajkToolTip>
@@ -120,6 +138,7 @@ function FavoritesViewHeader({
           onChange={handleFileInputChange}
         />
         <IconButton
+          id="import-favorites-button"
           disabled={!functionalCookiesOk}
           onClick={handleImportButtonClick}
         >
