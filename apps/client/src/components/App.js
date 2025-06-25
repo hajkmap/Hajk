@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
+import { mapDirectionToAngle } from "../utils/mapDirectionToAngle";
 import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import Analytics from "../models/Analytics";
@@ -43,6 +44,8 @@ import RecentlyUsedPlugins from "../controls/RecentlyUsedPlugins";
 
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
+import { easeOut } from "ol/easing";
+
 import {
   Box,
   Divider,
@@ -68,8 +71,8 @@ const DRAWER_WIDTH = 250;
 
 // A bunch of styled components to get the Hajk feel! Remember that some
 // components are styled with the sx-prop instead/as well.
-const StyledHeader = styled("header")(({ theme, headerHasFocus }) => ({
-  zIndex: headerHasFocus ? theme.zIndex.appBar : theme.zIndex.appBar - 100,
+const StyledHeader = styled("header")(({ theme }) => ({
+  zIndex: theme.zIndex.appBar,
   maxHeight: theme.spacing(8),
   display: "flex",
   justifyContent: "space-between",
@@ -375,7 +378,6 @@ class App extends React.PureComponent {
       drawerStatic: drawerStatic,
       activeDrawerContent: activeDrawerContentState,
       drawerMouseOverLock: false,
-      headerHasFocus: false,
     };
 
     // If the drawer is set to be visible at start - ensure the activeDrawerContent
@@ -489,9 +491,6 @@ class App extends React.PureComponent {
       .loadPlugins(this.props.activeTools);
 
     Promise.all(promises).then(() => {
-      this.globalObserver.subscribe("core.handleHeaderBlur", () => {
-        this.setState({ headerHasFocus: false });
-      });
       // Track the page view
       this.globalObserver.publish("analytics.trackPageView");
 
@@ -634,7 +633,9 @@ class App extends React.PureComponent {
               mergedParams.get("y") !== y.toString()
             ) {
               this.appModel.map.getView().animate({
-                center: [mergedParams.get("x"), mergedParams.get("y")],
+                center: [mergedParams.get("x"), mergedParams.get("y")].map(
+                  (coord) => coord * 1.0
+                ),
               });
             }
           }
@@ -804,18 +805,35 @@ class App extends React.PureComponent {
       .getArray()
       .forEach((layer) => {
         layer.on("change:visible", (e) => {
+          const olLayer = e.target;
           // If the Analytics object exists, let's track layer visibility
-          if (this.analytics && e.target.get("visible") === true) {
+          if (this.analytics && olLayer.get("visible") === true) {
             const opts = {
               eventName: "layerShown",
               activeMap: this.props.config.activeMap,
-              layerId: e.target.get("name"),
-              layerName: e.target.get("caption"),
+              layerId: olLayer.get("name"),
+              layerName: olLayer.get("caption"),
             };
             // Send a custom event to the Analytics model
             this.globalObserver.publish("analytics.trackEvent", opts);
           }
 
+          // If a base layer becomes visible, set the map rotation to match.
+          // When this runs the OpenStreetMap layer (if enable) don't exist
+          // yet. As a workaround this code is duplicated in:
+          // `plugins/LayerSwitcher/components/BackgroundSwitcher.js`
+          if (olLayer.get("visible") && olLayer.get("layerType") === "base") {
+            const map = this.appModel.getMap();
+            const direction = olLayer.get("rotateMap");
+            const duration = 1000;
+
+            const angle = mapDirectionToAngle(direction);
+            map.getView().animate({
+              rotation: angle,
+              duration: duration,
+              easing: easeOut,
+            });
+          }
           // Not related to Analytics: send an event on the global observer
           // to anyone wanting to act on layer visibility change.
           this.globalObserver.publish("core.layerVisibilityChanged", e);
@@ -949,8 +967,6 @@ class App extends React.PureComponent {
           map={this.appModel.getMap()}
           app={this}
           options={this.appModel.plugins.search.options}
-          headerHasFocus={this.state.headerHasFocus}
-          handleHeaderFocus={this.handleHeaderFocus}
         />
       );
     } else {
@@ -1178,14 +1194,6 @@ class App extends React.PureComponent {
     );
   }
 
-  handleHeaderFocus = () => {
-    this.setState({ headerHasFocus: true });
-  };
-
-  handleHeaderBlur = () => {
-    this.setState({ headerHasFocus: false });
-  };
-
   render() {
     const { config } = this.props;
 
@@ -1253,8 +1261,6 @@ class App extends React.PureComponent {
                   pointerEvents: "auto",
                 },
               }}
-              headerHasFocus={this.state.headerHasFocus}
-              onFocus={this.handleHeaderFocus}
             >
               {clean === false && this.showDrawerButtons() && (
                 <DrawerToggleButtons
@@ -1271,10 +1277,7 @@ class App extends React.PureComponent {
               {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
               {this.renderSearchComponent()}
             </StyledHeader>
-            <WindowsContainer
-              id="windows-container"
-              onClick={this.handleHeaderBlur}
-            >
+            <WindowsContainer id="windows-container">
               {useNewInfoclick === false && this.renderInfoclickWindow()}
               {useNewInfoclick && (
                 <MapClickViewer

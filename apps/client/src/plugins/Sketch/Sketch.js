@@ -13,6 +13,7 @@ import SketchView from "./views/SketchView";
 import SketchModel from "./models/SketchModel";
 import DrawModel from "../../models/DrawModel";
 import KmlModel from "../../models/KmlModel";
+import GpxModel from "../../models/GpxModel";
 
 // Constants
 import { STORAGE_KEY, DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
@@ -95,6 +96,18 @@ const Sketch = (props) => {
   const [kmlModel] = React.useState(
     () =>
       new KmlModel({
+        layerName: "pluginSketch",
+        map: props.map,
+        observer: localObserver,
+        drawModel: drawModel,
+        enableDragAndDrop: true,
+      })
+  );
+
+  // We'll also need a GPX-model so that the user can import and export to/from .gpx.
+  const [gpxModel] = React.useState(
+    () =>
+      new GpxModel({
         layerName: "pluginSketch",
         map: props.map,
         observer: localObserver,
@@ -219,6 +232,7 @@ const Sketch = (props) => {
         model={sketchModel}
         drawModel={drawModel}
         kmlModel={kmlModel}
+        gpxModel={gpxModel}
         options={props.options}
         localObserver={localObserver}
         globalObserver={props.app.globalObserver}

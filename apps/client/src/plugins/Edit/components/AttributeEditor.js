@@ -624,7 +624,7 @@ class AttributeEditor extends React.Component {
     const markup = this.props.editSource?.editableFields?.map((field, i) => {
       const valueMarkup = this.getValueMarkup(field, true);
       return (
-        <Grid item xs={12} key={i} ref={field.name} sx={{ textAlign: "left" }}>
+        <Grid item xs={12} key={i} sx={{ textAlign: "left" }}>
           {valueMarkup}
         </Grid>
       );
@@ -635,7 +635,7 @@ class AttributeEditor extends React.Component {
       .map((field, i) => {
         const valueMarkup = this.getValueMarkup(field, false);
         return (
-          <Grid item xs={12} key={i} ref={field.name}>
+          <Grid item xs={12} key={i}>
             {valueMarkup}
           </Grid>
         );

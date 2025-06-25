@@ -9,6 +9,8 @@ export default function QuickAccessLayers({
   globalObserver,
   map,
   filterValue,
+  layersState,
+  staticLayerConfig,
 }) {
   // State that contains the layers that are currently visible
   const [quickAccessLayers, setQuickAccessLayers] = useState([]);
@@ -91,30 +93,16 @@ export default function QuickAccessLayers({
         ".layer-item:last-child .MuiBox-root": {
           borderBottom: "none",
         },
-        borderTop: (theme) =>
-          quickAccessLayers.length > 0
-            ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
-            : "none",
       }}
     >
       {quickAccessLayers.map((l) => {
-        const layerState = {
-          layerIsToggled: l.get("visible"),
-          visibleSubLayers: l.get("subLayers"),
-        };
+        const layerId = l.get("name");
+        const layerState = layersState[layerId];
 
-        const layerConfig = {
-          layerId: l.get("name"),
-          layerCaption: l.get("caption"),
-          layerType: l.get("layerType"),
-
-          layerIsFakeMapLayer: l.isFakeMapLayer,
-          layerMinZoom: l.get("minZoom"),
-          layerMaxZoom: l.get("maxZoom"),
-          numberOfSubLayers: l.subLayers?.length,
-          layerInfo: l.get("layerInfo"),
-          layerLegendIcon: l.get("legendIcon"),
-        };
+        const layerConfig = staticLayerConfig[layerId];
+        if (!layerConfig) {
+          return null;
+        }
 
         return l.get("layerType") === "base" ? (
           <BackgroundLayer

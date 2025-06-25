@@ -4,6 +4,7 @@ import SearchModel from "./SearchModel";
 import Plugin from "./Plugin";
 import SnapHelper from "./SnapHelper";
 import { bindMapClickEvent } from "./Click";
+import WindowZModel from "./WindowZModel";
 
 import ConfigMapper from "../utils/ConfigMapper";
 import CoordinateSystemLoader from "../utils/CoordinateSystemLoader";
@@ -37,6 +38,8 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style";
 
+import { setOLSubLayers } from "../utils/groupLayers";
+
 class AppModel {
   /**
    * Initialize new AddModel
@@ -53,6 +56,7 @@ class AppModel {
     this.cqlFiltersFromParams = {};
     this.hfetch = hfetch;
     this.pluginHistory = new Map();
+    this.windowZModel = WindowZModel;
 
     // We store the click location data here for later use.
     // Right now this is only used in the new infoClick but it will most likely be used in other parts of the program.
@@ -81,6 +85,7 @@ class AppModel {
     this.globalObserver = globalObserver;
     register(this.coordinateSystemLoader.getProj4());
     this.refreshMUITheme = refreshMUITheme;
+    this.windowZModel.init(globalObserver);
   }
 
   decorateConfig() {
@@ -787,7 +792,9 @@ class AppModel {
       // shown at start. All others should be hidden (no matter the setting in Admin).
       else {
         mapConfig.tools.forEach((t) => {
-          t.options.visibleAtStart = pluginsToShow.includes(t.type);
+          t.options.visibleAtStart = pluginsToShow.includes(
+            t.type.toLowerCase()
+          );
         });
       }
     }
@@ -1069,17 +1076,16 @@ class AppModel {
           if (wantedGl[layer]) {
             // In addition, this looks like a group layer that has
             // its sublayers specified and we should take care of that too
-            this.globalObserver.publish("layerswitcher.showLayer", {
-              layer: olLayer,
-              subLayersToShow: wantedGl[layer]?.split(","),
-            });
+            const subLayersToShow = wantedGl[layer]?.split(",");
+            setOLSubLayers(olLayer, subLayersToShow);
           }
           // On the other hand, if the layer to be shown does not exist in 'wantedGl',
           // it means that we should show ALL the sublayers.
           // For that we must publish the event slightly differently. (Also, see
           // where we subscribe to layerswitcher.showLayer for further understanding.)
           else {
-            this.globalObserver.publish("layerswitcher.showLayer", olLayer);
+            const allSubLayers = olLayer.get("allSubLayers");
+            setOLSubLayers(olLayer, allSubLayers);
           }
         }
         // That's it for group layer. The other layers, the "normal"
@@ -1104,6 +1110,7 @@ class AppModel {
         } else if (olLayer.get("layerType") === "group") {
           // Tell the LayerSwitcher about it
           this.globalObserver.publish("layerswitcher.hideLayer", olLayer);
+          olLayer.setVisible(false);
         } else {
           olLayer.setVisible(false);
         }
@@ -1121,10 +1128,9 @@ class AppModel {
           const olLayer = this.map
             .getAllLayers()
             .find((l) => l.get("name") === key);
-          this.globalObserver.publish("layerswitcher.showLayer", {
-            layer: olLayer,
-            subLayersToShow: wantedGl[key]?.split(","),
-          });
+
+          const subLayersToShow = wantedGl[key]?.split(",");
+          setOLSubLayers(olLayer, subLayersToShow);
         }
       }
 
@@ -1148,14 +1154,13 @@ class AppModel {
           // Determine how we should call the layerswitcher.showLayer event.
           // A: No sublayers specified for layer in 'wantedGl'. That means show ALL sublayers.
           // B: Sublayers found in 'wantedGl'. Set visibility accordingly.
-          const param =
-            wantedGl[layer] === undefined
-              ? olLayer
-              : {
-                  layer: olLayer,
-                  subLayersToShow: wantedGl[layer]?.split(","),
-                };
-          this.globalObserver.publish("layerswitcher.showLayer", param);
+          if (wantedGl[layer] === undefined) {
+            const allSubLayers = olLayer.get("allSubLayers");
+            setOLSubLayers(olLayer, allSubLayers);
+          } else {
+            const subLayersToShow = wantedGl[layer]?.split(",");
+            setOLSubLayers(olLayer, subLayersToShow);
+          }
         }
       });
     }

@@ -1,7 +1,8 @@
 import { FormControlLabel } from "@mui/material";
+import { lighten } from "@mui/material/styles";
 import { RenderFunction } from "../types/render";
 import { FieldValues } from "react-hook-form";
-import { ColorResult, SketchPicker } from "react-color"; // Import ColorResult
+import { ColorResult, SketchPicker } from "react-color";
 
 const renderColorPicker: RenderFunction<FieldValues> = ({ field, title }) => {
   const color: unknown = field?.value;
@@ -17,14 +18,43 @@ const renderColorPicker: RenderFunction<FieldValues> = ({ field, title }) => {
   }
 
   return (
+    // react-color does not support dark mode, so we need to override the styles.
     <FormControlLabel
       labelPlacement="top"
       label={title ?? ""}
-      sx={{
+      sx={(theme) => ({
         marginLeft: 0,
         textAlign: "left",
         "& > span": { alignSelf: "flex-start" },
-      }}
+        ...(theme.palette.mode === "dark" && {
+          "& .sketch-picker": {
+            backgroundColor: `${lighten(
+              theme.palette.background.paper,
+              0.15
+            )} !important`,
+            border: `1px solid ${lighten(
+              theme.palette.background.paper,
+              0.3
+            )} !important`,
+            boxShadow: "none !important",
+          },
+          "& .sketch-picker input": {
+            backgroundColor: `${lighten(
+              theme.palette.background.paper,
+              0.15
+            )} !important`,
+            color: `${theme.palette.text.primary} !important`,
+            border: `1px solid ${lighten(
+              theme.palette.background.paper,
+              0.5
+            )} !important`,
+            boxShadow: "none !important",
+          },
+          "& .sketch-picker label": {
+            color: `${theme.palette.text.primary} !important`,
+          },
+        }),
+      })}
       control={
         <SketchPicker
           color={(field?.value as string) || "#000"}
@@ -34,10 +64,8 @@ const renderColorPicker: RenderFunction<FieldValues> = ({ field, title }) => {
 
             // My brain currently doesn't know how to fix below.
             if (isRGBColor) {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
               field?.onChange(colorResult?.rgb || { r: 0, g: 0, b: 0 });
             } else {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
               field?.onChange(colorResult?.hex || "#000");
             }
           }}
@@ -46,4 +74,5 @@ const renderColorPicker: RenderFunction<FieldValues> = ({ field, title }) => {
     />
   );
 };
+
 export default renderColorPicker;

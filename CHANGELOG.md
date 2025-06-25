@@ -21,6 +21,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## [4.1.0] - 2025-06-18
+
+### Fixed
+
+- LayerComparer: Corrected layer comparison logic in onClose handler. [commit](https://github.com/hajkmap/Hajk/commit/7f85c143055f1648a3033588a9462a902af4dea5)
+
+## [4.1.0-rc.1] - 2025-04-25
+
+### Added
+
+- Sketch: Added GPX import and export. [PR#1641](https://github.com/hajkmap/Hajk/pull/1641)
+- Sketch/Measurer: Disable snapping temporarily on keyDown (Space) ([issue](https://github.com/hajkmap/Hajk/issues/1616))
+- DocumentHandler: Now possible to add map-link that opens corresponding plugin (with/without enableAppStatInHash) ([issue](https://github.com/hajkmap/Hajk/issues/1613))
+
+### Removed
+
+- Backend: Packages related to testing were never really used. [commit](https://github.com/hajkmap/Hajk/commit/934ba9780d2e57e60cde19f8341db49bcc6103e7) and [commit](https://github.com/hajkmap/Hajk/commit/8029c0b45dd38107acca3a47607f48d504dfd716)
+
+### Fixed
+
+- LayerSwitcher: UX Improvements ([issue](https://github.com/hajkmap/Hajk/issues/1637))
+- LayerSwitcher: Now possible to render special layers at the bottom [PR#1648](https://github.com/hajkmap/Hajk/pull/1648)
+- Core: Fixed a bug where the application would crash and leave user with a blank screen in the unlikely condition of a vector layer being configured in such a way that the URL for fetching SLD for styling that layer would become unavailable. [commit](https://github.com/hajkmap/Hajk/commit/af17bc7e8e0af618d306b6c3ce4dfad660531e0a)
+
+### Security
+
+- Backend: Major upgrades of dependencies, e.g. the latest Express, HTTP Proxy Middleware, ESlint. [commit](https://github.com/hajkmap/Hajk/commit/64877fb4ed70d4a8829babc8ea126da4aee8d062)
+
+## [4.0.0] - 2025-04-04
+
+### Fixed
+
+- Client: Hotfix for [Window management fix](https://github.com/hajkmap/Hajk/pull/1629), see
+  [commit](https://github.com/hajkmap/Hajk/commit/d96bda0091358c25164918e4f14a159aad543d41).
+- Docker: Minor fixes to the Dockerfile, [commit](https://github.com/hajkmap/Hajk/commit/2cc601008296edbbedaa985b7411334d2766fe32).
+- Config: fixes in naming of the demo config's DocumentHandler section, [commit](https://github.com/hajkmap/Hajk/commit/d2109c5dc6a68e2fa4018123fae50cdd4e02c132).
+- Client: Hotfix for loading with malformed coordinates. [commit](https://github.com/hajkmap/Hajk/commit/1ab25f09d23aee1608ba240be3888d3450cb9735)
+- LayerSwitcher: Fix to ensure consistent labeling. [PR#1632](https://github.com/hajkmap/Hajk/pull/1632)
+- LayerSwitcher: Hotfix for tooltip getting stuck. [commit](https://github.com/hajkmap/Hajk/commit/dd220226d238a428562a1fb4b808a9e96b259994)
+- Client: Enable hash control over individual sub-layers. [PR#1635](https://github.com/hajkmap/Hajk/pull/1635)
+
+## [4.0.0-rc.2] - 2025-03-26
+
+### Fixed
+
+- LayerSwitcher: Multiple hotfixes:
+  ([commit](https://github.com/hajkmap/Hajk/commit/4d9b0ace9cbf029423e4ac836316a5272acfcf84))
+  ([commit](https://github.com/hajkmap/Hajk/commit/5371fa8fda0bba13191bccfbaf5f78a2f2c502b3))
+  ([commit](https://github.com/hajkmap/Hajk/commit/7576d013852a2e9850ee6b4f05477a742a331be8))
+  ([commit](https://github.com/hajkmap/Hajk/commit/46d1034b01a060dc5c2efc512de9b6c30d005198))
+  ([commit](https://github.com/hajkmap/Hajk/commit/4d9b0ace9cbf029423e4ac836316a5272acfcf84))
+  ([commit](https://github.com/hajkmap/Hajk/commit/337b950fcf82e55bfa181fb379a0bb1e1ce2cd69))
+- LayerSwitcher: Dialog click-and-drags moves LayerSwitcher's window below. ([issue](https://github.com/hajkmap/Hajk/issues/1600))
+- Updates to RHEL Dockerfile. ([commit](https://github.com/hajkmap/Hajk/commit/afe44edd51452035d660d9f3ae99a298550ccabb))
+- Presets: Bugfix ([commit](https://github.com/hajkmap/Hajk/commit/e296c10fca9383819ac5b46810ce55db25c8ff6a))
+- LayerSwitcher: Sublayers in hash (app state). ([issue](https://github.com/hajkmap/Hajk/issues/1603))
+- LayerSwitcher: Fixed scrolling issue. ([issue](https://github.com/hajkmap/Hajk/issues/1604))
+- LayerSwitcher: Sublayers visible among Quick Access layers. ([issue](https://github.com/hajkmap/Hajk/issues/1605))
+- Admin: Bugfix for warning when editing in Document Handler editor. ([issue](https://github.com/hajkmap/Hajk/issues/1606))
+- LayerSwitcher: Fix for missing sublayers' legend. ([issue](https://github.com/hajkmap/Hajk/issues/1607))
+- LayerSwitcher: Restored automatic layer rotation functionality. ([issue](https://github.com/hajkmap/Hajk/issues/1614))
+- LayerSwitcher: ensure to respect the `hideExpandArrow` setting. ([issue](https://github.com/hajkmap/Hajk/issues/1617))
+- Buffer and Measurer bug fixes. ([commit](https://github.com/hajkmap/Hajk/commit/44ea3549b9f79c47baf3d6be41036d5f8435ce82) and [commit](https://github.com/hajkmap/Hajk/commit/c4e1827b7dffe5f93d554670a2751ef10bc883d8))
+- LayerSwitcher: hotfix to synchronize key naming between Admin and Client, effectively enabling the Quick Access Presets functionality. ([PR](https://github.com/hajkmap/Hajk/pull/1621))
+- LayerSwitcher: Toggle sublayers when loading Quick Access presets. ([PR](https://github.com/hajkmap/Hajk/pull/1623))
+- LayerSwitcher: Fix for fitting the legend graphics. ([commit](https://github.com/hajkmap/Hajk/commit/432fe3ba528154f553d771527aab301d0666dfe9)
+- LayerSwitcher: Fix for storing the Theme Presets in LocalStorage. ([PR](https://github.com/hajkmap/Hajk/pull/1625))
+- Client/General: Refinement of Window management. ([PR](https://github.com/hajkmap/Hajk/pull/1629))
+- DocumentHandler/Admin: Now possible to edit TOC on document level. ([PR](https://github.com/hajkmap/Hajk/pull/1626))
+
 ## [4.0.0-rc.1] - 2025-02-19
 
 ### Added
@@ -40,6 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   section. The Presets/Themes/Packages are set up in the map config. See
   example in `simpleMapConfig.json`.
 - Improved DrawOrder tab functionality for managing layer drawing order.
+- LayerSwitcher Actions Menu (including scrolling actions).
 
 For details see the following issues:
 
@@ -51,6 +122,7 @@ For details see the following issues:
 - [#1347](https://github.com/hajkmap/Hajk/issues/1347)
 - [#1365](https://github.com/hajkmap/Hajk/issues/1365)
 - [#1380](https://github.com/hajkmap/Hajk/issues/1380)
+- [#1594](https://github.com/hajkmap/Hajk/pull/1594)
 
 ### Fixed
 
@@ -371,7 +443,11 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.14.1...develop
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v4.0.0...develop
+[4.1.0]: https://github.com/hajkmap/Hajk/compare/v4.1.0-rc.1...v4.1.0
+[4.1.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v4.0.0...v4.1.0-rc.1
+[4.0.0]: https://github.com/hajkmap/Hajk/compare/v4.0.0-rc.2...v4.0.0
+[4.0.0-rc.2]: https://github.com/hajkmap/Hajk/compare/v4.0.0-rc.1...v4.0.0-rc.2
 [4.0.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v3.14.1...v4.0.0-rc.1
 [3.14.1]: https://github.com/hajkmap/Hajk/compare/v3.14.0...v3.14.1
 [3.14.0]: https://github.com/hajkmap/Hajk/compare/v3.13.25...v3.14.0

@@ -6,15 +6,15 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@mui/material";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import KeyboardDoubleArrowUpIcon from "@mui/icons-material/KeyboardDoubleArrowUp";
-import FlashOffIcon from "@mui/icons-material/FlashOff";
 
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+import HajkToolTip from "components/HajkToolTip";
 
 const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
   // Element that we will anchor the options menu to is
@@ -50,10 +50,11 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
         aria-haspopup="true"
         aria-expanded={menuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
+        sx={{ my: "3px", ml: "2px" }}
       >
-        <Tooltip title="Fler val för snabbåtkomst">
+        <HajkToolTip title="Fler funktioner för Lagerhanteraren">
           <MoreVertOutlinedIcon />
-        </Tooltip>
+        </HajkToolTip>
       </IconButton>
       <Menu
         anchorEl={anchorEl}
@@ -70,9 +71,9 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
           }}
         >
           <ListItemIcon>
-            <FlashOffIcon fontSize="small" />
+            <VisibilityOffIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Släck alla lager</ListItemText>
+          <ListItemText>Dölj alla aktiva lager</ListItemText>
         </MenuItem>
         <MenuItem
           onClick={(e) => {
@@ -85,7 +86,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
           <ListItemIcon>
             <KeyboardDoubleArrowUpIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Skrolla till toppen</ListItemText>
+          <ListItemText>Scrolla till toppen</ListItemText>
         </MenuItem>
         <MenuItem
           onClick={(e) => {

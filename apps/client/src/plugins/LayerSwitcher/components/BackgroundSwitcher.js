@@ -1,7 +1,9 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { isValidLayerId } from "../../../utils/Validator";
+import { mapDirectionToAngle } from "../../../utils/mapDirectionToAngle";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
+import { easeOut } from "ol/easing";
 import BackgroundLayerItem from "./BackgroundLayerItem";
 import Box from "@mui/material/Box";
 
@@ -58,6 +60,47 @@ const setSpecialBackground = (id) => {
 
 export const OSM_LAYER_ID = "osm-layer";
 
+const createOSMLayer = (map) => {
+  const osmLayer = new TileLayer({
+    visible: false,
+    source: new OSM({
+      reprojectionErrorThreshold: 5,
+    }),
+    zIndex: -1,
+    layerType: "base",
+    rotateMap: "n", // OpenStreetMap should be rotated to North
+    name: OSM_LAYER_ID,
+    caption: "OpenStreetMap",
+    layerInfo: {
+      caption: "OpenStreetMap",
+      layerType: "base",
+    },
+  });
+
+  // This layer does not exist on the map when we setup the listener that
+  // rotates the map when a base layer is activated. The listener in
+  // `src/components/App.js`.
+  // Therefore we need to setup the same check here.
+  osmLayer.on("change:visible", (e) => {
+    const olLayer = e.target;
+
+    // If the layer becomes visible, set the map rotation to match
+    if (olLayer.get("visible")) {
+      const direction = olLayer.get("rotateMap");
+      const duration = 1000;
+
+      const angle = mapDirectionToAngle(direction);
+      map.getView().animate({
+        rotation: angle,
+        duration: duration,
+        easing: easeOut,
+      });
+    }
+  });
+
+  return osmLayer;
+};
+
 const BackgroundSwitcher = ({
   backgroundSwitcherBlack,
   backgroundSwitcherWhite,
@@ -67,31 +110,14 @@ const BackgroundSwitcher = ({
   layers,
   globalObserver,
   map,
+  renderSpecialBackgroundsAtBottom = false,
 }) => {
   // TODO Read the selectedLayerId from the `appStateInHash`
   const [selectedLayerId, setSelectedLayerId] = useState(null);
 
   const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
-  const osmLayerRef = useRef(
-    enableOSM
-      ? new TileLayer({
-          visible: false,
-          source: new OSM({
-            reprojectionErrorThreshold: 5,
-          }),
-          zIndex: -1,
-          layerType: "base",
-          rotateMap: "n", // OpenStreetMap should be rotated to North
-          name: OSM_LAYER_ID,
-          caption: "OpenStreetMap",
-          layerInfo: {
-            caption: "OpenStreetMap",
-            layerType: "base",
-          },
-        })
-      : null
-  );
+  const osmLayerRef = useRef(enableOSM ? createOSMLayer(map) : null);
 
   useEffect(() => {
     if (enableOSM) {
@@ -189,8 +215,64 @@ const BackgroundSwitcher = ({
     return validLayerId;
   });
 
+  const RenderSpecialBackgrounds = () => {
+    return (
+      <>
+        {backgroundSwitcherWhite && (
+          <BackgroundLayerItem
+            index={Number(WHITE_BACKROUND_LAYER_ID)}
+            key={Number(WHITE_BACKROUND_LAYER_ID)}
+            selected={selectedLayerId === WHITE_BACKROUND_LAYER_ID}
+            layer={createFakeMapLayer({
+              name: WHITE_BACKROUND_LAYER_ID,
+              caption: "Vit",
+              checked: selectedLayerId === WHITE_BACKROUND_LAYER_ID,
+            })}
+            globalObserver={globalObserver}
+            clickCallback={onLayerClick}
+            layerId={WHITE_BACKROUND_LAYER_ID}
+            isFakeMapLayer={true}
+          />
+        )}
+
+        {backgroundSwitcherBlack && (
+          <BackgroundLayerItem
+            index={Number(BLACK_BACKROUND_LAYER_ID)}
+            key={Number(BLACK_BACKROUND_LAYER_ID)}
+            selected={selectedLayerId === BLACK_BACKROUND_LAYER_ID}
+            layer={createFakeMapLayer({
+              name: BLACK_BACKROUND_LAYER_ID,
+              caption: "Svart",
+              checked: selectedLayerId === BLACK_BACKROUND_LAYER_ID,
+            })}
+            globalObserver={globalObserver}
+            clickCallback={onLayerClick}
+            layerId={BLACK_BACKROUND_LAYER_ID}
+            isFakeMapLayer={true}
+          />
+        )}
+
+        {enableOSM && (
+          <BackgroundLayerItem
+            index={Number(OSM_BACKGROUND_LAYER_ID)}
+            key={Number(OSM_BACKGROUND_LAYER_ID)}
+            selected={isOSMLayer(selectedLayerId)}
+            layer={osmLayerRef.current}
+            globalObserver={globalObserver}
+            clickCallback={onLayerClick}
+            layerId={OSM_BACKGROUND_LAYER_ID}
+            isFakeMapLayer={false}
+          />
+        )}
+      </>
+    );
+  };
+
   return (
     <Box
+      // This class is used to style specific elements when the tab is active
+      // If you search for this class in the codebase, you can find related style-fixes.
+      className={"ls-backgrounds-tab-view"}
       sx={{
         display: display ? "block" : "none",
         position: "relative",
@@ -199,52 +281,7 @@ const BackgroundSwitcher = ({
         overflowY: "auto",
       }}
     >
-      {backgroundSwitcherWhite && (
-        <BackgroundLayerItem
-          index={Number(WHITE_BACKROUND_LAYER_ID)}
-          key={Number(WHITE_BACKROUND_LAYER_ID)}
-          selected={selectedLayerId === WHITE_BACKROUND_LAYER_ID}
-          layer={createFakeMapLayer({
-            name: WHITE_BACKROUND_LAYER_ID,
-            caption: "Vit",
-            checked: selectedLayerId === WHITE_BACKROUND_LAYER_ID,
-          })}
-          globalObserver={globalObserver}
-          clickCallback={onLayerClick}
-          layerId={WHITE_BACKROUND_LAYER_ID}
-          isFakeMapLayer={true}
-        />
-      )}
-
-      {backgroundSwitcherBlack && (
-        <BackgroundLayerItem
-          index={Number(BLACK_BACKROUND_LAYER_ID)}
-          key={Number(BLACK_BACKROUND_LAYER_ID)}
-          selected={selectedLayerId === BLACK_BACKROUND_LAYER_ID}
-          layer={createFakeMapLayer({
-            name: BLACK_BACKROUND_LAYER_ID,
-            caption: "Svart",
-            checked: selectedLayerId === BLACK_BACKROUND_LAYER_ID,
-          })}
-          globalObserver={globalObserver}
-          clickCallback={onLayerClick}
-          layerId={BLACK_BACKROUND_LAYER_ID}
-          isFakeMapLayer={true}
-        />
-      )}
-
-      {enableOSM && (
-        <BackgroundLayerItem
-          index={Number(OSM_BACKGROUND_LAYER_ID)}
-          key={Number(OSM_BACKGROUND_LAYER_ID)}
-          selected={isOSMLayer(selectedLayerId)}
-          layer={osmLayerRef.current}
-          globalObserver={globalObserver}
-          clickCallback={onLayerClick}
-          layerId={OSM_BACKGROUND_LAYER_ID}
-          isFakeMapLayer={false}
-        />
-      )}
+      {!renderSpecialBackgroundsAtBottom && <RenderSpecialBackgrounds />}
       {layersToShow.map((layerConfig, i) => (
         <BackgroundLayerItem
           index={i}
@@ -257,6 +294,7 @@ const BackgroundSwitcher = ({
           isFakeMapLayer={false}
         />
       ))}
+      {renderSpecialBackgroundsAtBottom && <RenderSpecialBackgrounds />}
     </Box>
   );
 };

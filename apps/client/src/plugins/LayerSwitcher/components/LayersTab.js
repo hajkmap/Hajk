@@ -107,6 +107,9 @@ const LayersTab = ({
 
   return (
     <div
+      // This class is used to style specific elements when the tab is active
+      // If you search for this class in the codebase, you can find related style-fixes.
+      className={"ls-layers-tab-view"}
       style={{
         ...style,
         position: "relative",
@@ -126,15 +129,31 @@ const LayersTab = ({
           scrollToBottom={scrollToBottom}
         />
       )}
+      {filterHits !== null && filterHits.size === 0 && (
+        <ListItemText
+          sx={{
+            py: 1,
+            px: 4,
+          }}
+          primary="Inga resultat"
+          primaryTypographyProps={{
+            pr: 5,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            variant: "body1",
+          }}
+        />
+      )}
       <div
-        id="sc-test"
         ref={scrollContainerRef}
         style={{
           height: "inherit",
           overflowY: "auto",
+          overflowX: "hidden",
           flexBasis: "100%",
           flexGrow: "1",
           flexShrink: "1",
+          transform: "translateZ(0)", // Force layer into 3D space to prevent flickering
         }}
       >
         {filterHits === null && (
@@ -151,6 +170,7 @@ const LayersTab = ({
             favoritesInfoText={userQuickAccessFavoritesInfoText}
             filterValue={filterValue}
             layersState={layersState}
+            staticLayerConfig={staticLayerConfig}
           />
         )}
         {staticLayerTree.map((group) => (
@@ -165,21 +185,6 @@ const LayersTab = ({
           />
         ))}
       </div>
-      {filterHits !== null && filterHits.size === 0 && (
-        <ListItemText
-          sx={{
-            py: 1,
-            px: 4,
-          }}
-          primary="Inga resultat"
-          primaryTypographyProps={{
-            pr: 5,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            variant: "body1",
-          }}
-        />
-      )}
     </div>
   );
 };

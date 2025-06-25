@@ -49,6 +49,6 @@ export default function BackgroundLayer({ layer, globalObserver }) {
       clickCallback={handleLayerItemClick}
       selected={backgroundVisible}
       globalObserver={globalObserver}
-    ></BackgroundLayerItem>
+    />
   );
 }

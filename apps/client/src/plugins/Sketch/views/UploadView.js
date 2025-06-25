@@ -23,11 +23,11 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   borderLeft: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
 }));
 
-const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
+const ButtonPanel = ({ kmlModel, gpxModel, setDialogOpen }) => {
   return (
     <Grid container spacing={1}>
       <Grid item xs={12}>
-        <HajkToolTip title="Klicka för att öppna en dialog där du kan välja en .kml-fil från din dator.">
+        <HajkToolTip title="Klicka för att öppna en dialog där du kan välja en .kml eller .gpx-fil från din dator.">
           <Button
             fullWidth
             variant="contained"
@@ -39,14 +39,26 @@ const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
         </HajkToolTip>
       </Grid>
       <Grid item xs={12}>
-        <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .kml-fil.">
+        <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .kml-fil. KML stödjer alla typer av geometrier inklusive polygoner, linjer, punkter och text.">
           <Button
             fullWidth
             variant="contained"
             onClick={() => kmlModel.export()}
             startIcon={<SaveAltIcon />}
           >
-            Exportera ritobjekt
+            Exportera till KML
+          </Button>
+        </HajkToolTip>
+      </Grid>
+      <Grid item xs={12}>
+        <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .gpx-fil. GPX stödjer endast punkter (waypoints) och linjer (tracks/routes). Polygoner och andra komplexa geometrier kommer att exkluderas.">
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={() => gpxModel.export()}
+            startIcon={<SaveAltIcon />}
+          >
+            Exportera till GPX
           </Button>
         </HajkToolTip>
       </Grid>
@@ -121,10 +133,12 @@ const UploadedFileList = (props) => {
               hidden={file.hidden}
               textShown={file.textShown}
               onVisibilityChangeClick={() =>
-                props.onVisibilityChangeClick(file.id)
+                props.onVisibilityChangeClick(file.id, file.type)
               }
-              onRemoveClick={() => props.onRemoveClick(file.id)}
-              onToggleShowTextClick={() => props.onToggleShowTextClick(file.id)}
+              onRemoveClick={() => props.onRemoveClick(file.id, file.type)}
+              onToggleShowTextClick={() =>
+                props.onToggleShowTextClick(file.id, file.type)
+              }
             />
           );
         })}
@@ -137,15 +151,15 @@ const UploadView = (props) => {
   // We're gonna need to keep track of if we should show the upload-dialog or not.
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
-  // Adds the supplied file (kml-string) to the map and updates the list
-  // of added kml-files.
-  const handleUploadedFile = (file) => {
+  // Adds the supplied file (kml/gpx string) to the map and updates the list
+  // of added files.
+  const handleUploadedFile = (file, fileType) => {
     // We're gonna need to generate an id that we can set on all the features
     // in each file. This id can then be used to find all features that belongs to
-    // a kml-upload.
+    // a file upload.
     const id = props.model.generateRandomString();
     // We're also gonna need to generate a date-time-string that can be shown in the list
-    // of uploaded kml-files.
+    // of uploaded files.
     const dateTime = props.model.getDateTimeString({
       hour: "numeric",
       minute: "numeric",
@@ -154,40 +168,59 @@ const UploadView = (props) => {
     // Let's create an object with some meta-data and add it to the list of uploaded files.
     props.setUploadedFiles((files) => [
       ...files,
-      { id, title: dateTime, hidden: false, textShown: true },
+      { id, title: dateTime, hidden: false, textShown: true, type: fileType },
     ]);
     // Then we can add the features to the map!
-    props.kmlModel.import(file, {
-      zoomToExtent: true,
-      setProperties: { KML_ID: id },
-    });
+    if (fileType === "kml") {
+      props.kmlModel.import(file, {
+        zoomToExtent: true,
+        setProperties: { KML_ID: id },
+      });
+    } else if (fileType === "gpx") {
+      props.gpxModel.import(file, {
+        zoomToExtent: true,
+        setProperties: { GPX_ID: id },
+      });
+    }
   };
 
-  const onVisibilityChangeClick = (id) => {
+  const onVisibilityChangeClick = (id, type) => {
     const updatedFiles = props.uploadedFiles.map((file) => {
       if (file.id === id) {
         return { ...file, hidden: !file.hidden };
       }
       return file;
     });
-    props.drawModel.toggleKmlFeaturesVisibility(id);
+    if (type === "kml") {
+      props.drawModel.toggleKmlFeaturesVisibility(id);
+    } else if (type === "gpx") {
+      props.drawModel.toggleGpxFeaturesVisibility(id);
+    }
     props.setUploadedFiles(updatedFiles);
   };
 
-  const onRemoveClick = (id) => {
+  const onRemoveClick = (id, type) => {
     const updatedFiles = props.uploadedFiles.filter((file) => file.id !== id);
-    props.drawModel.removeKmlFeaturesById(id);
+    if (type === "kml") {
+      props.drawModel.removeKmlFeaturesById(id);
+    } else if (type === "gpx") {
+      props.drawModel.removeGpxFeaturesById(id);
+    }
     props.setUploadedFiles(updatedFiles);
   };
 
-  const onToggleShowTextClick = (id) => {
+  const onToggleShowTextClick = (id, type) => {
     const updatedFiles = props.uploadedFiles.map((file) => {
       if (file.id === id) {
         return { ...file, textShown: !file.textShown };
       }
       return file;
     });
-    props.drawModel.toggleKmlFeaturesTextVisibility(id);
+    if (type === "kml") {
+      props.drawModel.toggleKmlFeaturesTextVisibility(id);
+    } else if (type === "gpx") {
+      props.drawModel.toggleGpxFeaturesTextVisibility(id);
+    }
     props.setUploadedFiles(updatedFiles);
   };
 
@@ -199,7 +232,11 @@ const UploadView = (props) => {
         <Information text={activity.information} />
       </Grid>
       <Grid item xs={12}>
-        <ButtonPanel kmlModel={props.kmlModel} setDialogOpen={setDialogOpen} />
+        <ButtonPanel
+          kmlModel={props.kmlModel}
+          gpxModel={props.gpxModel}
+          setDialogOpen={setDialogOpen}
+        />
       </Grid>
       <Grid item xs={12}>
         {props.uploadedFiles.length > 0 && (

@@ -8,7 +8,6 @@ import {
   FormControlLabel,
   List,
   Switch,
-  Tooltip,
   Collapse,
   Typography,
   Stack,
@@ -19,6 +18,7 @@ import BackgroundLayer from "./BackgroundLayer";
 import GroupLayer from "./GroupLayer";
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import HajkToolTip from "components/HajkToolTip";
 
 function DrawOrder({ display, app, map, localObserver, options }) {
   // A Set that will hold type of OL layers that should be shown.
@@ -200,6 +200,9 @@ function DrawOrder({ display, app, map, localObserver, options }) {
 
   return (
     <Box
+      // This class is used to style specific elements when the tab is active
+      // If you search for this class in the codebase, you can find related style-fixes.
+      className={"ls-draworder-tab-view"}
       sx={{
         display: display ? "block" : "none",
         height: "inherit",
@@ -234,9 +237,9 @@ function DrawOrder({ display, app, map, localObserver, options }) {
           )}
           <Box sx={{ flexGrow: 1 }} />
           <IconButton onClick={handleInfoButtonClick}>
-            <Tooltip title={infoIsActive ? "Dölj info" : "Visa info"}>
+            <HajkToolTip title={infoIsActive ? "Dölj info" : "Visa info"}>
               <InfoOutlinedIcon />
-            </Tooltip>
+            </HajkToolTip>
           </IconButton>
         </Stack>
         <Collapse
@@ -280,7 +283,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
 
                 // layerIsFakeMapLayer: l.isFakeMapLayer,
                 layerIsFakeMapLayer: false, // TODO Check this mapLayer.isFakeMapLayer,
-                allSubLayers: l.get("subLayers"),
+                allSubLayers: l.get("allSubLayers"),
                 layerMinZoom: l.get("minZoom"),
                 layerMaxZoom: l.get("maxZoom"),
                 numberOfSubLayers: l.subLayers?.length,
@@ -295,6 +298,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
                       key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
                       layer={l}
                       app={app}
+                      globalObserver={app.globalObserver}
                       draggable={!options.lockDrawOrderBaselayer}
                       toggleable={false}
                     />

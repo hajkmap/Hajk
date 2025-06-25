@@ -179,7 +179,7 @@ class LayersSwitcherView extends React.PureComponent {
   };
 
   /**
-   * LayerSwitcher consists of thrre Tabs: one shows
+   * LayerSwitcher consists of three Tabs: one shows
    * "regular" layers (as checkboxes, multi select).
    * The * other shows background layers (as radio buttons, one-at-at-time).
    * The third is the DrawOrder tab
@@ -264,10 +264,7 @@ class LayersSwitcherView extends React.PureComponent {
           flex: 1,
         }}
       >
-        <StyledAppBar
-          position="relative" // Does not work in IE11
-          color="default"
-        >
+        <StyledAppBar position="relative" color="default">
           <Tabs
             action={this.handleTabsMounted}
             onChange={this.handleChangeTabs}
@@ -314,7 +311,7 @@ class LayersSwitcherView extends React.PureComponent {
           handleFavoritesViewToggle={this.handleFavoritesViewToggle}
           globalObserver={this.globalObserver}
           map={this.props.map}
-          app={this.app}
+          app={this.props.app}
           scrollContainerRef={this.scrollContainerRef}
         />
         {this.props.options.enableQuickAccessPresets && (
@@ -345,6 +342,9 @@ class LayersSwitcherView extends React.PureComponent {
           backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
           backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
           enableOSM={this.options.enableOSM}
+          renderSpecialBackgroundsAtBottom={
+            this.options.renderSpecialBackgroundsAtBottom
+          }
           map={this.props.map}
           globalObserver={this.props.globalObserver}
         />

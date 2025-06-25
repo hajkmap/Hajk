@@ -6,16 +6,7 @@ import VectorFilter from "./VectorFilter";
 import CQLFilter from "./CQLFilter";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
-import {
-  Button,
-  Box,
-  IconButton,
-  Divider,
-  Slider,
-  Tooltip,
-  Typography,
-  Stack,
-} from "@mui/material";
+import { Button, Box, Divider, Slider, Typography, Stack } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -26,6 +17,8 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import LayerItemInfo from "./LayerItemInfo";
 import LegendImage from "./LegendImage";
+import HajkToolTip from "components/HajkToolTip";
+import LsIconButton from "./LsIconButton";
 
 function LayerItemDetails({
   display,
@@ -61,17 +54,19 @@ function LayerItemDetails({
       : layerItemDetails?.subLayerIndex;
   const showOpacity = subLayerIndex !== null ? false : true;
 
-  // TODO Is this correct? Should it not be shown for group layers?
-  const showLegend =
-    layerItemDetails?.layer?.get("layerType") === "group" &&
-    subLayerIndex === null
-      ? false
-      : true;
-
   const layerInfo = layerItemDetails?.layer?.get("layerInfo");
-  const legendInfo =
-    layerInfo?.legend?.length > 0 && layerInfo?.legend[subLayerIndex ?? 0];
-  const legendUrl = legendInfo?.url;
+
+  // Only show legend for actual OL layers.
+  // This check is probably not needed but LayerItemDetails can be passed
+  // several different things and we don't want to crash in any case.
+  // Proper typing of the props would remove the need for this check.
+  const showLegend = layerItemDetails?.layer?.get("layerType");
+
+  const legendInfo = layerInfo?.legend;
+  const legendUrl =
+    showLegend && subLayerIndex === null
+      ? legendInfo?.map((l) => l?.url)
+      : Array.isArray(legendInfo) && legendInfo[subLayerIndex]?.url;
 
   // Handle opacity slider changes
   const handleOpacitySliderChange = (_, newValue) => {
@@ -184,13 +179,17 @@ function LayerItemDetails({
         <Box
           sx={{
             display: display ? "block" : "none",
-            minHeight: "15em",
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
             backgroundColor: (theme) =>
               theme.palette.mode === "dark" ? "rgb(18,18,18)" : "#fff",
+            position: "relative",
+            overflowY: "auto",
+            height: "inherit",
+            minHeight: "15em",
+            maxHeight: "inherit",
           }}
         >
           <Box
@@ -205,17 +204,17 @@ function LayerItemDetails({
             }}
           >
             <Stack direction="row" alignItems="center">
-              <Tooltip
+              <HajkToolTip
                 open={tooltipOpen}
                 onClose={handleClose}
                 onOpen={handleOpen}
                 title="Tillbaka"
                 TransitionProps={{ timeout: 0 }}
               >
-                <IconButton onClick={handleBackButtonClick}>
+                <LsIconButton onClick={handleBackButtonClick}>
                   <ArrowBackIcon />
-                </IconButton>
-              </Tooltip>
+                </LsIconButton>
+              </HajkToolTip>
               <Box sx={{ flexGrow: 1, textAlign: "center" }}>
                 <Typography variant="subtitle1">
                   {renderDetailTitle()}
@@ -237,31 +236,30 @@ function LayerItemDetails({
             }}
           >
             <Stack direction="row" alignItems="center">
-              <IconButton
+              <LsIconButton
                 sx={{ cursor: "default" }}
                 disableFocusRipple
                 disableRipple
-                disableTouchRipple
               >
                 <InfoOutlinedIcon />
-              </IconButton>
+              </LsIconButton>
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="subtitle1">Info</Typography>
               </Box>
               {showLegend && (
-                <Tooltip
+                <HajkToolTip
                   title={
                     legendIsActive
                       ? "Dölj teckenförklaring"
                       : "Visa teckenförklaring"
                   }
                 >
-                  <IconButton
+                  <LsIconButton
                     onClick={() => setLegendIsActive(!legendIsActive)}
                   >
                     <FormatListBulletedOutlinedIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                  </LsIconButton>
+                </HajkToolTip>
               )}
             </Stack>
             <Box
@@ -280,14 +278,13 @@ function LayerItemDetails({
               <LegendImage src={legendUrl} open={legendIsActive}></LegendImage>
             </Box>
             <Stack direction="row" alignItems="center">
-              <IconButton
+              <LsIconButton
                 sx={{ cursor: "default" }}
                 disableFocusRipple
                 disableRipple
-                disableTouchRipple
               >
                 <SettingsOutlinedIcon />
-              </IconButton>
+              </LsIconButton>
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="subtitle1">Inställningar</Typography>
               </Box>
@@ -336,14 +333,13 @@ function LayerItemDetails({
               <>
                 <Divider />
                 <Stack direction="row" alignItems="center">
-                  <IconButton
+                  <LsIconButton
                     sx={{ cursor: "default" }}
                     disableFocusRipple
                     disableRipple
-                    disableTouchRipple
                   >
                     <FilterAltOutlinedIcon />
-                  </IconButton>
+                  </LsIconButton>
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="subtitle1">Filter</Typography>
                   </Box>

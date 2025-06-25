@@ -11,7 +11,6 @@ import {
   DialogContent,
   DialogActions,
   DialogContentText,
-  IconButton,
   InputAdornment,
   List,
   ListItemButton,
@@ -32,6 +31,13 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
 
 import HajkToolTip from "../../../components/HajkToolTip";
+import {
+  QUICK_ACCESS_KEY,
+  QUICK_ACCESS_LS_KEY,
+  useLayerSwitcherDispatch,
+} from "../LayerSwitcherProvider";
+import LocalStorageHelper from "../../../utils/LocalStorageHelper";
+import LsIconButton from "./LsIconButton";
 
 function QuickAccessPresets({
   display,
@@ -54,6 +60,8 @@ function QuickAccessPresets({
   // When a user clicks back, the tooltip of the button needs to be closed before this view hides.
   // TODO: Needs a better way to handle this
   const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   const quickAccessPresetsArray = quickAccessPresets || [];
 
@@ -111,12 +119,12 @@ function QuickAccessPresets({
     let lpInfo = infoType
       ? { ...loadLpInfoConfirmation }
       : { ...loadLpConfirmation };
-
     setLoadLpConfirmation(null);
     setLoadLpInfoConfirmation(null);
 
     // Check if layers from layerpackage exists in map
     const missingLayers = checkForMissingLayers(lpInfo.layers);
+
     if (missingLayers.length > 0) {
       // Show missing layers dialog
       setMissingLayersConfirmation({
@@ -138,6 +146,10 @@ function QuickAccessPresets({
     const allMapLayers = map.getAllLayers();
     layers.forEach((l) => {
       const layer = allMapLayers.find((la) => la.get("name") === l.id);
+      const loadedLayerIds = allMapLayers
+        .filter((l) => l.get(QUICK_ACCESS_KEY) === true)
+        .map((l) => l.get("name"));
+      LocalStorageHelper.set(QUICK_ACCESS_LS_KEY, loadedLayerIds);
       if (layer) {
         // Set quickaccess property
         if (layer.get("layerType") !== "base") {
@@ -147,16 +159,11 @@ function QuickAccessPresets({
         layer.setZIndex(l.drawOrder);
         // Set opacity
         layer.setOpacity(l.opacity);
+
         // Special handling for layerGroups and baselayers
         if (layer.get("layerType") === "group") {
           if (l.visible === true) {
-            const subLayersToShow = l.subLayers ? l.subLayers : [];
-            globalObserver.publish("layerswitcher.showLayer", {
-              layer,
-              subLayersToShow,
-            });
-          } else {
-            globalObserver.publish("layerswitcher.hideLayer", layer);
+            layerSwitcherDispatch.setSubLayersVisible(l.id, l.subLayers);
           }
         } else if (layer.get("layerType") === "base") {
           // Hide all other background layers
@@ -316,6 +323,9 @@ function QuickAccessPresets({
       <Dialog
         open={loadLpInfoConfirmation ? true : false}
         onClose={handleLoadConfirmationAbort}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
       >
         <DialogTitle sx={{ pb: 0 }}>
           {loadLpInfoConfirmation ? loadLpInfoConfirmation.title : ""}
@@ -355,7 +365,7 @@ function QuickAccessPresets({
           </Button>
         </DialogActions>
       </Dialog>,
-      document.getElementById("windows-container")
+      document.getElementById("map")
     );
   };
 
@@ -366,6 +376,9 @@ function QuickAccessPresets({
         open={loadLpConfirmation ? true : false}
         onClose={handleLoadConfirmationAbort}
         closeAfterTransition={false}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
       >
         <DialogTitle>Ladda tema</DialogTitle>
         <DialogContent>
@@ -386,7 +399,7 @@ function QuickAccessPresets({
           </Button>
         </DialogActions>
       </Dialog>,
-      document.getElementById("windows-container")
+      document.getElementById("map")
     );
   };
 
@@ -397,6 +410,9 @@ function QuickAccessPresets({
         open={missingLayersConfirmation ? true : false}
         onClose={handleMissingLayersConfirmationAbort}
         closeAfterTransition={false}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
       >
         <DialogTitle>Lager saknas</DialogTitle>
         <DialogContent>
@@ -431,7 +447,7 @@ function QuickAccessPresets({
           </Button>
         </DialogActions>
       </Dialog>,
-      document.getElementById("windows-container")
+      document.getElementById("map")
     );
   };
 
@@ -457,18 +473,18 @@ function QuickAccessPresets({
               title="Tillbaka"
               TransitionProps={{ timeout: 0 }}
             >
-              <IconButton onClick={handleBackButtonClick}>
+              <LsIconButton onClick={handleBackButtonClick}>
                 <ArrowBackIcon />
-              </IconButton>
+              </LsIconButton>
             </HajkToolTip>
             <Box sx={{ flexGrow: 1, textAlign: "center" }}>
               <Typography variant="subtitle1">Teman</Typography>
             </Box>
-            <IconButton onClick={handleInfoButtonClick}>
+            <LsIconButton onClick={handleInfoButtonClick}>
               <HajkToolTip title={infoIsActive ? "Dölj info" : "Visa info"}>
                 <InfoOutlinedIcon />
               </HajkToolTip>
-            </IconButton>
+            </LsIconButton>
           </Stack>
           <Collapse
             in={infoIsActive}
@@ -528,11 +544,11 @@ function QuickAccessPresets({
                 )}
               </Typography>
             ) : (
-              filter.list.map((l) => {
+              filter.list.map((l, index) => {
                 return (
                   <ListItemButton
                     dense
-                    key={l.id}
+                    key={l.metadata?.savedAt || index}
                     divider
                     onClick={() => handleLpClick(l)}
                   >
@@ -542,7 +558,7 @@ function QuickAccessPresets({
                     <ListItemText primary={l.title} secondary={l.author} />
                     <ListItemSecondaryAction>
                       <HajkToolTip title={"Information om " + l.title}>
-                        <IconButton
+                        <LsIconButton
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -550,7 +566,7 @@ function QuickAccessPresets({
                           }}
                         >
                           <InfoOutlinedIcon fontSize="small" />
-                        </IconButton>
+                        </LsIconButton>
                       </HajkToolTip>
                     </ListItemSecondaryAction>
                   </ListItemButton>

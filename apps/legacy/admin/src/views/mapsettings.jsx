@@ -476,11 +476,13 @@ class Menu extends Component {
       showDrawOrderView: false,
       showFilter: false,
       showQuickAccess: false,
+      legendForceTransparency: false,
+      legendTryHiDPI: false,
       enableSystemLayersSwitch: false,
       lockDrawOrderBaselayer: false,
       drawOrderViewInfoText:
         "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
-      enableQuickAccessTopics: false,
+      enableQuickAccessPresets: false,
       quickAccessTopicsInfoText:
         "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
       enableUserQuickAccessFavorites: false,
@@ -498,13 +500,14 @@ class Menu extends Component {
       height: "",
       title: "Innehåll",
       description: "Välj innehåll att visa i kartan",
-      quickLayersPresets: [],
+      quickAccessPresets: [],
       importedLayers: [],
       importedMetadata: {},
       minMaxZoomAlertOnToggleOnly: false,
       keywords: [],
       keywordInput: "",
       cqlFilterVisible: false,
+      renderSpecialBackgroundsAtBottom: false,
     };
     this.titleRef = React.createRef();
     this.authorRef = React.createRef();
@@ -550,6 +553,11 @@ class Menu extends Component {
           showFilter: existingConfig.showFilter ?? this.state.showFilter,
           showQuickAccess:
             existingConfig.showQuickAccess ?? this.state.showQuickAccess,
+          legendForceTransparency:
+            existingConfig.legendForceTransparency ??
+            this.state.legendForceTransparency,
+          legendTryHiDPI:
+            existingConfig.legendTryHiDPI ?? this.state.legendTryHiDPI,
           enableSystemLayersSwitch:
             existingConfig.enableSystemLayersSwitch ??
             this.state.enableSystemLayersSwitch,
@@ -559,9 +567,9 @@ class Menu extends Component {
           drawOrderViewInfoText:
             existingConfig.drawOrderViewInfoText ||
             "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
-          enableQuickAccessTopics:
-            existingConfig.enableQuickAccessTopics ??
-            this.state.enableQuickAccessTopics,
+          enableQuickAccessPresets:
+            existingConfig.enableQuickAccessPresets ??
+            this.state.enableQuickAccessPresets,
           quickAccessTopicsInfoText:
             existingConfig.quickAccessTopicsInfoText ||
             "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
@@ -587,12 +595,15 @@ class Menu extends Component {
           height: existingConfig.height || "",
           title: existingConfig.title || "",
           description: existingConfig.description || "",
-          quickLayersPresets: existingConfig.quickLayersPresets || [],
+          quickAccessPresets: existingConfig.quickAccessPresets || [],
           minMaxZoomAlertOnToggleOnly:
             existingConfig.minMaxZoomAlertOnToggleOnly ??
             this.state.minMaxZoomAlertOnToggleOnly,
           cqlFilterVisible:
             existingConfig.cqlFilterVisible ?? this.state.cqlFilterVisible,
+          renderSpecialBackgroundsAtBottom:
+            existingConfig.renderSpecialBackgroundsAtBottom ??
+            this.state.renderSpecialBackgroundsAtBottom,
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -793,7 +804,7 @@ class Menu extends Component {
     var settings = {
       groups: [],
       baselayers: [],
-      quickLayersPresets: this.state.quickLayersPresets,
+      quickAccessPresets: this.state.quickAccessPresets,
       active: this.state.active,
       visibleAtStart: this.state.visibleAtStart,
       visibleAtStartMobile: this.state.visibleAtStartMobile,
@@ -804,10 +815,12 @@ class Menu extends Component {
       showDrawOrderView: this.state.showDrawOrderView,
       showFilter: this.state.showFilter,
       showQuickAccess: this.state.showQuickAccess,
+      legendForceTransparency: this.state.legendForceTransparency,
+      legendTryHiDPI: this.state.legendTryHiDPI,
       enableSystemLayersSwitch: this.state.enableSystemLayersSwitch,
       lockDrawOrderBaselayer: this.state.lockDrawOrderBaselayer,
       drawOrderViewInfoText: this.state.drawOrderViewInfoText,
-      enableQuickAccessTopics: this.state.enableQuickAccessTopics,
+      enableQuickAccessPresets: this.state.enableQuickAccessPresets,
       quickAccessTopicsInfoText: this.state.quickAccessTopicsInfoText,
       enableUserQuickAccessFavorites: this.state.enableUserQuickAccessFavorites,
       userQuickAccessFavoritesInfoText:
@@ -816,6 +829,8 @@ class Menu extends Component {
       instruction: this.state.instruction,
       minMaxZoomAlertOnToggleOnly: this.state.minMaxZoomAlertOnToggleOnly,
       cqlFilterVisible: this.state.cqlFilterVisible,
+      renderSpecialBackgroundsAtBottom:
+        this.state.renderSpecialBackgroundsAtBottom,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
       themeMapHeaderCaption: this.state.themeMapHeaderCaption,
       visibleForGroups: this.state.visibleForGroups.map(
@@ -1043,12 +1058,12 @@ class Menu extends Component {
   /**
    *
    */
-  saveQuickLayersPresets() {
+  saveQuickAccessPresets() {
     // Get the current configuration.
     var config = this.props.model.get("layerMenuConfig");
 
-    // Update the quickLayersPresets property in the configuration.
-    config.quickLayersPresets = this.state.quickLayersPresets;
+    // Update the quickAccessPresets property in the configuration.
+    config.quickAccessPresets = this.state.quickAccessPresets;
 
     // Save the updated configuration.
     this.props.model.updateConfig(config, (success) => {
@@ -1079,7 +1094,7 @@ class Menu extends Component {
 
     this.setState(
       (prevState) => {
-        const updatedLayers = prevState.quickLayersPresets.map((layer) => {
+        const updatedLayers = prevState.quickAccessPresets.map((layer) => {
           if (layer.id === currentEditingLayer.id) {
             return {
               ...layer,
@@ -1092,10 +1107,10 @@ class Menu extends Component {
           return layer;
         });
 
-        return { quickLayersPresets: updatedLayers, mode: "add" };
+        return { quickAccessPresets: updatedLayers, mode: "add" };
       },
       () => {
-        this.saveQuickLayersPresets(); // Save the configuration after the update.
+        this.saveQuickAccessPresets(); // Save the configuration after the update.
         this.cancelInput(); // Clear the input fields and reset the state.
       }
     );
@@ -1677,7 +1692,7 @@ class Menu extends Component {
    * Renders method for adding and removing quick layers.
    */
   renderQuickLayers() {
-    let filteredLayers = this.state.quickLayersPresets;
+    let filteredLayers = this.state.quickAccessPresets;
 
     // Apply filter only when filterString is not empty.
     if (this.state.filterString) {
@@ -1762,13 +1777,13 @@ class Menu extends Component {
   deleteQuickLayerFromList(id) {
     this.setState(
       (prevState) => ({
-        quickLayersPresets: prevState.quickLayersPresets.filter(
+        quickAccessPresets: prevState.quickAccessPresets.filter(
           (layer) => layer.id !== id
         ),
       }),
       () => {
         // After state is updated, save the configuration.
-        this.saveQuickLayersPresets();
+        this.saveQuickAccessPresets();
         this.hideConfirmation();
       }
     );
@@ -1826,14 +1841,14 @@ class Menu extends Component {
 
     this.setState(
       (prevState) => ({
-        quickLayersPresets: [...prevState.quickLayersPresets, newLayer],
+        quickAccessPresets: [...prevState.quickAccessPresets, newLayer],
         importedLayers: [],
         importedMetadata: {},
         importStatus: false,
         importMessage: "",
       }),
       () => {
-        this.saveQuickLayersPresets();
+        this.saveQuickAccessPresets();
       }
     );
 
@@ -2269,6 +2284,42 @@ class Menu extends Component {
               </div>
               <div>
                 <input
+                  id="legendForceTransparency"
+                  name="legendForceTransparency"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.legendForceTransparency}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="legendForceTransparency">
+                  Försök att göra teckenförteckning transparent (Experimentell){" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Lagerhanteraren kommer försöka att göra GetLegendGraphics transparenta och lägga till en bakgrund för att fungera bättre visuellt i vissa lägen. I GeoServer kommer även texten bli vit istället i dark mode"
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="legendTryHiDPI"
+                  name="legendTryHiDPI"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.legendTryHiDPI}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="legendTryHiDPI">
+                  Försök att hämta teckenförklaring i 180dpi (Experimentell){" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Lagerhanteraren kommer försöka hämta GetLegendGraphics i högre upplösning. 180dpi."
+                  />
+                </label>
+              </div>
+              <div>
+                <input
                   id="enableTransparencySlider"
                   name="enableTransparencySlider"
                   type="checkbox"
@@ -2384,14 +2435,17 @@ class Menu extends Component {
               </div>
               <div>
                 <input
-                  id="enableQuickAccessTopics"
-                  name="enableQuickAccessTopics"
+                  id="enableQuickAccessPresets"
+                  name="enableQuickAccessPresets"
                   type="checkbox"
                   onChange={this.handleInputChange}
-                  checked={this.state.enableQuickAccessTopics}
+                  checked={this.state.enableQuickAccessPresets}
                 />
                 &nbsp;
-                <label className="long-label" htmlFor="enableQuickAccessTopics">
+                <label
+                  className="long-label"
+                  htmlFor="enableQuickAccessPresets"
+                >
                   Ladda tema{" "}
                   <i
                     className="fa fa-question-circle"
@@ -2517,6 +2571,19 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label htmlFor="enableOSM">OpenStreetMap</label>
+              </div>
+              <div>
+                <input
+                  id="renderSpecialBackgroundsAtBottom"
+                  name="renderSpecialBackgroundsAtBottom"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.renderSpecialBackgroundsAtBottom}
+                />
+                &nbsp;
+                <label htmlFor="renderSpecialBackgroundsAtBottom">
+                  Visa lagren "Vit", "Svart" och "OSM" längst ner i listan.
+                </label>
               </div>
               <div className="separator">Justera lagerhanteraren</div>
               <div className="margined">
