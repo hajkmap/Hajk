@@ -233,7 +233,7 @@ export default function FormFactoryPage() {
     name: "te1",
     title: "Hi! #1",
     gridColumns: 6,
-    defaultValue: false,
+    defaultValue: "Hello 1",
   });
 
   visibleFieldsPanel.addInput({
@@ -241,7 +241,7 @@ export default function FormFactoryPage() {
     name: "te2",
     title: "Hi! #2",
     gridColumns: 6,
-    defaultValue: false,
+    defaultValue: "Hello 2",
   });
 
   visibleFieldsPanel.addInput({
@@ -253,9 +253,9 @@ export default function FormFactoryPage() {
 
   visibleFieldsPanel.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    name: "te1",
+    name: "te3",
     title: "I'm visible now #3",
-    defaultValue: false,
+    defaultValue: "Hello 3",
     visibleIf: { name: "showInputBelow", value: true },
   });
 
