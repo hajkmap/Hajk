@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Grid2 as Grid,
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Grid2 as Grid, Paper, Typography } from "@mui/material";
 import {
   FieldValues,
   UseFormRegister,
@@ -22,66 +16,13 @@ import CONTAINER_TYPE from "./types/container-types";
 import STATIC_TYPE from "./types/static-type";
 import HelpIcon from "@mui/icons-material/Help";
 import HajkTooltip from "../hajk-tooltip";
-import { useDebounce } from "use-debounce";
-import HighlightIndicator, {
-  highlightColor,
-} from "./components/highlight-indicator";
+import HighlightIndicator from "./components/highlight-indicator";
 import {
   isFormElementContainer,
   isFormElementInput,
   isFormElementStatic,
 } from "./form-utils";
-import { t } from "i18next";
-import SearchAdornment from "./components/search-adornment";
-
-const minimumSearchLength = 3;
-
-const searchFormElements = <TFieldValues extends FieldValues>(
-  elements: FormElement<TFieldValues>[],
-  searchTerm: string
-): number => {
-  let hitCount = 0;
-
-  if (!searchTerm || searchTerm.length < 3) {
-    elements.forEach((item) => {
-      if (isFormElementInput(item)) {
-        (item as DynamicInputSettings<TFieldValues>).highlight = false;
-      } else if (isFormElementContainer(item)) {
-        (item as DynamicFormContainer<TFieldValues>).highlight = false;
-        searchFormElements(
-          (item as DynamicFormContainer<TFieldValues>).getElements(),
-          searchTerm
-        );
-      }
-    });
-    return 0;
-  }
-
-  elements.forEach((item) => {
-    if (isFormElementContainer(item)) {
-      const container = item as DynamicFormContainer<TFieldValues>;
-      const hitsInContainer = searchFormElements(
-        container.getElements(),
-        searchTerm
-      );
-
-      container.highlight = hitsInContainer > 0;
-      if (hitsInContainer > 0) hitCount += hitsInContainer;
-    } else if (isFormElementInput(item)) {
-      const inputItem = item as DynamicInputSettings<TFieldValues>;
-
-      // Lets search for stuff.
-      if (inputItem.title?.toLowerCase().includes(searchTerm.toLowerCase())) {
-        inputItem.highlight = true;
-        hitCount++;
-      } else {
-        inputItem.highlight = false;
-      }
-    }
-  });
-
-  return hitCount;
-};
+import FormSearch from "./components/form-search";
 
 interface FormRenderProps<TFieldValues extends FieldValues> {
   formControls: DynamicFormContainer<TFieldValues>;
@@ -100,28 +41,16 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   errors,
   showSearch = false,
 }: FormRenderProps<TFieldValues>) => {
+  const [elements, setElements] = React.useState<FormElement<TFieldValues>[]>(
+    formControls.getElements()
+  );
+
+  // Update elements when formControls changes
+  React.useEffect(() => {
+    setElements(formControls.getElements());
+  }, [formControls]);
+
   let c = 0;
-
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
-  const [hitCount, setHitCount] = React.useState(0);
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
-
-  const handleClearSearch = () => {
-    setSearchTerm("");
-  };
-
-  const getElements = React.useMemo(() => {
-    const hits = searchFormElements(
-      formControls.getElements(),
-      debouncedSearchTerm
-    );
-    setHitCount(hits);
-    return formControls.getElements();
-  }, [formControls, debouncedSearchTerm]);
 
   const getKey = (index: number) => {
     c++;
@@ -201,7 +130,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
             control={control}
             settings={castedSettings}
             errorMessage={
-              // At this point I really really care if I get [Object, Object]
+              // At this point I really really don't care if I get [Object, Object]
               // eslint-disable-next-line @typescript-eslint/no-base-to-string
               errors[castedSettings.name]?.message?.toString() ?? null
             }
@@ -357,35 +286,19 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     <Grid container className="form-factory" sx={{ ml: -2 }}>
       {showSearch && (
         <Grid container size={{ xs: 12 }} justifyContent="flex-end">
+          {/* TODO: Here we might want to add Expand/Collapse all button. */}
           <Grid size={{ xs: 12, md: 4 }} sx={{ pb: 2, pl: 2 }}>
-            <TextField
-              size="small"
-              fullWidth
-              label={t("form.search.placeholder", {
-                minChars: minimumSearchLength,
-              })}
-              variant="outlined"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <SearchAdornment
-                      searchTerm={searchTerm}
-                      hitCount={hitCount}
-                      highlightColor={highlightColor}
-                      handleClearSearch={handleClearSearch}
-                      minimumSearchLength={minimumSearchLength}
-                    />
-                  ),
-                },
+            <FormSearch
+              formControls={formControls}
+              onElementsChange={(newElements: FormElement<TFieldValues>[]) => {
+                setElements(newElements);
               }}
             />
           </Grid>
         </Grid>
       )}
 
-      {getElements.map((item, index) => renderFormElement(item, index))}
+      {elements.map((item, index) => renderFormElement(item, index))}
     </Grid>
   );
 };
