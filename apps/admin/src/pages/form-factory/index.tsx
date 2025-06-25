@@ -216,6 +216,53 @@ export default function FormFactoryPage() {
 
   formContainer.addInput({
     type: INPUT_TYPE.SWITCH,
+    name: "showStuffBelow",
+    title: "Show panel below me",
+    defaultValue: false,
+  });
+
+  // Create a panel container for the visible fields
+  const visibleFieldsPanel = new DynamicFormContainer<FieldValues>(
+    "Visible Fields Panel",
+    CONTAINER_TYPE.PANEL,
+    { visibleIf: { name: "showStuffBelow", value: true } }
+  );
+
+  visibleFieldsPanel.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    name: "te1",
+    title: "Hi! #1",
+    gridColumns: 6,
+    defaultValue: false,
+  });
+
+  visibleFieldsPanel.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    name: "te2",
+    title: "Hi! #2",
+    gridColumns: 6,
+    defaultValue: false,
+  });
+
+  visibleFieldsPanel.addInput({
+    type: INPUT_TYPE.SWITCH,
+    name: "showInputBelow",
+    title: "Show textinput below me",
+    defaultValue: false,
+  });
+
+  visibleFieldsPanel.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
+    name: "te1",
+    title: "I'm visible now #3",
+    defaultValue: false,
+    visibleIf: { name: "showInputBelow", value: true },
+  });
+
+  formContainer.addContainer(visibleFieldsPanel);
+
+  formContainer.addInput({
+    type: INPUT_TYPE.SWITCH,
     name: "notifications",
     title: "Enable Notifications",
     defaultValue: false,

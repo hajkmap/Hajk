@@ -18,6 +18,7 @@ import HelpIcon from "@mui/icons-material/Help";
 import HajkTooltip from "../hajk-tooltip";
 import HighlightIndicator from "./components/highlight-indicator";
 import {
+  getFormElementValue,
   isFormElementContainer,
   isFormElementInput,
   isFormElementStatic,
@@ -55,6 +56,20 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   const getKey = (index: number) => {
     c++;
     return `formItem-${index}-${c}`;
+  };
+
+  // Reusable function to check if an element should be visible based on visibleIf condition
+  const checkVisibility = (visibleIf?: {
+    name: string;
+    value: unknown;
+  }): boolean => {
+    if (!visibleIf) {
+      return true;
+    }
+
+    const value = getFormElementValue(visibleIf.name, elements, formGetValues);
+
+    return value === visibleIf.value;
   };
 
   const renderStaticElement = (item: StaticElement, index: number) => {
@@ -116,10 +131,13 @@ const FormRenderer = <TFieldValues extends FieldValues>({
       castedSettings.title = `${castedSettings.title} *`;
     }
 
+    // Check if the element should be visible
+    const shouldBeVisible = checkVisibility(castedSettings.visibleIf);
+
     return (
       <Box
         sx={{
-          display: "flex",
+          display: shouldBeVisible ? "flex" : "none",
           position: "relative",
         }}
       >
@@ -192,6 +210,9 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     container: DynamicFormContainer<TFieldValues>,
     index: number
   ) => {
+    // Check if the container should be visible
+    const shouldBeVisible = checkVisibility(container.visibleIf);
+
     return (
       <Paper
         key={getKey(index)}
@@ -203,6 +224,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
           pl: 0,
           mb: 3,
           ml: 2,
+          display: shouldBeVisible ? "block" : "none",
         }}
       >
         <Typography variant="h6" sx={{ mt: -0.5, ml: 2, mb: 1.5 }}>

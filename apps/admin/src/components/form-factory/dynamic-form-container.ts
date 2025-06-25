@@ -29,6 +29,7 @@ class DynamicFormContainer<TFieldValues extends FieldValues> {
   containerType: CONTAINER_TYPE;
   title: string;
   props?: Record<string, unknown>;
+  public visibleIf?: { name: string; value: unknown };
 
   constructor(
     title = "",
@@ -40,6 +41,10 @@ class DynamicFormContainer<TFieldValues extends FieldValues> {
     this.containerType = containerType;
     this.title = title;
     this.props = props;
+
+    if (props?.visibleIf) {
+      this.visibleIf = props.visibleIf as { name: string; value: unknown };
+    }
   }
 
   addContainer(
