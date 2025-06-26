@@ -8,7 +8,6 @@ import {
   FormControlLabel,
   List,
   Switch,
-  Tooltip,
   Collapse,
   Typography,
   Stack,
@@ -19,6 +18,7 @@ import BackgroundLayer from "./BackgroundLayer";
 import GroupLayer from "./GroupLayer";
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import HajkToolTip from "components/HajkToolTip";
 
 function DrawOrder({ display, app, map, localObserver, options }) {
   // A Set that will hold type of OL layers that should be shown.
@@ -200,23 +200,35 @@ function DrawOrder({ display, app, map, localObserver, options }) {
 
   return (
     <Box
-      sx={{
-        display: display ? "block" : "none",
-        height: "inherit",
-        maxHeight: "inherit",
-        overflowY: "auto",
-      }}
+      // This class is used to style specific elements when the tab is active
+      // If you search for this class in the codebase, you can find related style-fixes.
+      className={"ls-draworder-tab-view"}
+      sx={[
+        {
+          height: "inherit",
+          maxHeight: "inherit",
+          overflowY: "auto",
+        },
+        display
+          ? {
+              display: "block",
+            }
+          : {
+              display: "none",
+            },
+      ]}
     >
       <Box
-        sx={{
+        sx={(theme) => ({
           pr: 2,
           pl: 2,
           py: 1,
-          backgroundColor: (theme) =>
-            theme.palette.mode === "dark" ? "#373737" : theme.palette.grey[100],
-          borderBottom: (theme) =>
-            `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-        }}
+          backgroundColor: theme.palette.grey[100],
+          borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          ...theme.applyStyles("dark", {
+            backgroundColor: "#373737",
+          }),
+        })}
       >
         <Stack direction="row" alignItems="center">
           {options.enableSystemLayersSwitch && (
@@ -234,9 +246,9 @@ function DrawOrder({ display, app, map, localObserver, options }) {
           )}
           <Box sx={{ flexGrow: 1 }} />
           <IconButton onClick={handleInfoButtonClick}>
-            <Tooltip title={infoIsActive ? "Dölj info" : "Visa info"}>
+            <HajkToolTip title={infoIsActive ? "Dölj info" : "Visa info"}>
               <InfoOutlinedIcon />
-            </Tooltip>
+            </HajkToolTip>
           </IconButton>
         </Stack>
         <Collapse

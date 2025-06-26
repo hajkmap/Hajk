@@ -1,66 +1,83 @@
 import React from "react";
-import { createPortal } from "react-dom";
-import Dialog from "../../../components/Dialog/Dialog";
+import { styled } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  Box,
+} from "@mui/material";
 
-const UploadDialog = ({ open, setOpen, handleUploadedFile }) => {
-  const [filesChosen, setFilesChosen] = React.useState(false);
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  "& .MuiDialog-paper": {
+    width: "100%",
+    maxWidth: 500,
+  },
+}));
 
-  const handleUploadClick = React.useCallback(async () => {
-    try {
-      const fileInput = document.getElementById("kml-file-input");
-      for await (const file of fileInput.files) {
-        // The file-reader should not be re-used. Let's initialize a new for each file.
-        const reader = new FileReader();
-        reader.onload = () => {
-          try {
-            handleUploadedFile(reader.result);
-          } catch (error) {
-            console.error(`Failed to import kml-file. Error: ${error}`);
-          }
-        };
-        reader.readAsText(file);
+const StyledFileInput = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  padding: theme.spacing(3),
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius,
+  border: `1px solid ${theme.palette.divider}`,
+}));
+
+const UploadDialog = (props) => {
+  const handleFileChange = async (event) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      try {
+        for await (const file of files) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const fileType = file.name.endsWith(".kml") ? "kml" : "gpx";
+              props.handleUploadedFile(e.target.result, fileType);
+            } catch (error) {
+              console.error("Failed to import file:", error);
+            }
+          };
+          reader.readAsText(file);
+        }
+        props.setOpen(false);
+      } catch (error) {
+        console.error("Error processing files:", error);
       }
-    } catch (error) {
-      console.error(`Failed to import kml-files. Error: ${error}`);
     }
-    // When we're done we have to close the dialog and make sure we disable the upload-button
-    // by setting the filesChosen-state to false.
-    setOpen(false);
-    setFilesChosen(false);
-  }, [setOpen, handleUploadedFile]);
+  };
 
-  const handleCloseClick = React.useCallback(() => {
-    setOpen(false);
-  }, [setOpen]);
-
-  const handleFileInputChange = React.useCallback((e) => {
-    const fileInput = document.getElementById("kml-file-input");
-    setFilesChosen(fileInput.files.length > 0);
-  }, []);
-
-  return createPortal(
-    <Dialog
-      options={{
-        headerText: "Ladda upp .kml-filer",
-        buttonText: filesChosen ? "Ladda upp" : null,
-        abortText: "Avbryt",
-        text: (
+  return (
+    <StyledDialog open={props.open} onClose={() => props.setOpen(false)}>
+      <DialogTitle>Importera ritobjekt</DialogTitle>
+      <DialogContent>
+        <StyledFileInput>
           <input
             type="file"
-            name="files[]"
-            accept=".kml"
+            accept=".kml,.gpx"
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+            id="file-upload"
             multiple
-            id="kml-file-input"
-            onChange={handleFileInputChange}
           />
-        ),
-        useLegacyNonMarkdownRenderer: true,
-      }}
-      open={open}
-      onClose={handleUploadClick}
-      onAbort={handleCloseClick}
-    />,
-    document.getElementById("map")
+          <label htmlFor="file-upload">
+            <Button variant="contained" component="span">
+              Välj filer
+            </Button>
+          </label>
+          <Typography variant="body1" sx={{ mt: 2 }}>
+            Välj en eller flera .kml eller .gpx-filer
+          </Typography>
+        </StyledFileInput>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => props.setOpen(false)}>Avbryt</Button>
+      </DialogActions>
+    </StyledDialog>
   );
 };
 

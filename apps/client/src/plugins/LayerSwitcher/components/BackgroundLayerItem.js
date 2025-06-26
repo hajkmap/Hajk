@@ -3,17 +3,18 @@ import React, { useEffect, useState, useCallback, memo } from "react";
 // Material UI components
 import {
   Box,
-  IconButton,
   ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
 } from "@mui/material";
-import HajkToolTip from "components/HajkToolTip";
 
 import RadioButtonChecked from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
-import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
-import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+
+import LsIconButton from "./LsIconButton";
+import BtnShowDetails from "./BtnShowDetails";
+import BtnLayerWarning from "./BtnLayerWarning";
+import { getIsMobile } from "../LayerSwitcherUtils";
 
 // TODO Remove all isfakemaplayer
 function BackgroundLayerItem({
@@ -79,57 +80,47 @@ function BackgroundLayerItem({
         dense
       >
         <Box
-          sx={{
+          sx={(theme) => ({
             display: "flex",
             position: "relative",
             width: "100%",
             alignItems: "center",
-            py: 0.5,
+            // jesade-vbg compact mode, changed from 0.5
+            py: getIsMobile() ? 0.5 : 0.25,
             pr: 1,
-            borderBottom: (theme) =>
-              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-          }}
+            borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          })}
         >
-          <IconButton disableTouchRipple size="small" sx={{ pl: 0 }}>
+          <LsIconButton disableRipple size="small" sx={{ pl: 0 }}>
             {selected ? (
               <RadioButtonChecked sx={{ ml: 2 }} />
             ) : (
               <RadioButtonUnchecked sx={{ ml: 2 }} />
             )}
-          </IconButton>
+          </LsIconButton>
           <ListItemText
             primary={name}
-            primaryTypographyProps={{
-              pr: 5,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              variant: "body1",
-              fontWeight: "inherit",
+            slotProps={{
+              primary: {
+                pr: 5,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                variant: "body1",
+                fontWeight: "inherit",
+              },
             }}
           />
-          <ListItemSecondaryAction>
-            {wmsLayerLoadStatus === "loaderror" && (
-              <IconButton disableTouchRipple>
-                <HajkToolTip
-                  disableInteractive
-                  title="Lagret kunde inte laddas in. Kartservern svarar inte."
-                >
-                  <WarningAmberOutlinedIcon fontSize="small" />
-                </HajkToolTip>
-              </IconButton>
-            )}
+          <ListItemSecondaryAction
+            sx={{
+              position: "absolute",
+              right: "4px",
+              top: "1px",
+              transform: "none",
+            }}
+          >
+            {wmsLayerLoadStatus === "loaderror" && <BtnLayerWarning />}
             {isFakeMapLayer !== true && (
-              <IconButton
-                size="small"
-                onClick={(e) => showLayerDetails(e)}
-                disableTouchRipple
-              >
-                <KeyboardArrowRightOutlinedIcon
-                  sx={{
-                    color: (theme) => theme.palette.grey[500],
-                  }}
-                ></KeyboardArrowRightOutlinedIcon>
-              </IconButton>
+              <BtnShowDetails onClick={(e) => showLayerDetails(e)} />
             )}
           </ListItemSecondaryAction>
         </Box>

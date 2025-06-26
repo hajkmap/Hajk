@@ -1,19 +1,20 @@
 import React, { useState } from "react";
 
 import {
-  IconButton,
+  Box,
   ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
-  Tooltip,
 } from "@mui/material";
 
 import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+
 import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
+import HajkToolTip from "components/HajkToolTip";
+import LsIconButton from "./LsIconButton";
+import BtnShowDetails from "./BtnShowDetails";
+import LsCheckBox from "./LsCheckBox";
 
 export default function SubLayerItem({
   layerId,
@@ -34,19 +35,6 @@ export default function SubLayerItem({
 
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
-  // Render method for checkbox icon
-  const getLayerToggleIcon = () => {
-    return visible ? (
-      <CheckBoxIcon
-        sx={{
-          fill: (theme) =>
-            !zoomVisible ? theme.palette.warning.dark : theme.palette.primary,
-        }}
-      />
-    ) : (
-      <CheckBoxOutlineBlankIcon />
-    );
-  };
 
   // Show layer details action
   const showLayerDetails = (e) => {
@@ -67,13 +55,13 @@ export default function SubLayerItem({
 
   const renderLegendIcon = () => {
     return (
-      <Tooltip
+      <HajkToolTip
         placement="left"
         title={
           legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"
         }
       >
-        <IconButton
+        <LsIconButton
           sx={{ p: 0.25, mr: "5px" }}
           size="small"
           onClick={(e) => {
@@ -82,64 +70,76 @@ export default function SubLayerItem({
           }}
         >
           <FormatListBulletedOutlinedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+        </LsIconButton>
+      </HajkToolTip>
     );
   };
 
   if (!subLayerInfo) {
     return null;
   }
+
   return (
-    <div style={{ marginLeft: "32px" }}>
+    <div style={{ marginLeft: "7px" }}>
       <ListItemButton
         disableTouchRipple
         onClick={() => (toggleable ? toggleSubLayer(subLayer, visible) : null)}
-        sx={{
-          pl: 0,
-          borderBottom: (theme) =>
-            toggleable
-              ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
-              : "none",
-        }}
+        sx={(theme) => ({
+          pl: "calc(2px + 10px)",
+          borderBottom: toggleable
+            ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
+            : "none",
+        })}
         dense
       >
         {toggleable && (
-          <IconButton
-            disableTouchRipple
-            size="small"
-            sx={{
-              pl: 0,
-            }}
-          >
-            {getLayerToggleIcon()}
-          </IconButton>
+          <LsCheckBox
+            toggleState={
+              visible
+                ? zoomVisible
+                  ? "checked"
+                  : "checkedWithWarning"
+                : "unchecked"
+            }
+          />
         )}
+
         {getIconFromLayer()}
         <ListItemText
           primary={subLayerInfo.caption}
-          primaryTypographyProps={{
-            pr: 5,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            fontWeight: visible ? (toggleable ? "bold" : "inherit") : "inherit",
+          slotProps={{
+            primary: {
+              pr: 5,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              fontWeight: (theme) =>
+                visible
+                  ? toggleable
+                    ? theme.typography.fontWeightBold
+                    : "inherit"
+                  : "inherit",
+            },
           }}
         />
-        <ListItemSecondaryAction>
-          <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
-            <KeyboardArrowRightOutlinedIcon
-              sx={{
-                color: (theme) => theme.palette.grey[500],
-              }}
-            ></KeyboardArrowRightOutlinedIcon>
-          </IconButton>
+        <ListItemSecondaryAction
+          sx={{
+            position: "absolute",
+            right: "4px",
+            top: "1px",
+            paddingTop: "3px",
+            transform: "none",
+          }}
+        >
+          <BtnShowDetails onClick={(e) => showLayerDetails(e)} />
         </ListItemSecondaryAction>
       </ListItemButton>
       {subLayerInfo.legendIcon ? null : (
-        <LegendImage
-          src={subLayerInfo.legend}
-          open={legendIsActive}
-        ></LegendImage>
+        <Box sx={{ pl: 0, ml: "-1px" }}>
+          <LegendImage
+            src={subLayerInfo.legend}
+            open={legendIsActive}
+          ></LegendImage>
+        </Box>
       )}
     </div>
   );

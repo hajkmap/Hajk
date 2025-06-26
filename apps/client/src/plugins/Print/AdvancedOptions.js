@@ -182,7 +182,7 @@ class AdvancedOptions extends React.PureComponent {
     return (
       <>
         <Root>
-          <FormControlContainer item xs={12}>
+          <FormControlContainer size={12}>
             <FormControl fullWidth={true}>
               <TextField
                 value={mapTitle}
@@ -191,39 +191,41 @@ class AdvancedOptions extends React.PureComponent {
                 label="Valfri titel"
                 placeholder="Kan lämnas tomt"
                 variant="standard"
-                InputProps={{
-                  id: "mapTitle",
-                  name: "mapTitle",
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Badge
-                        sx={{
-                          "& .MuiBadge-dot": {
-                            backgroundColor: this.props.mapTextColor,
-                          },
-                        }}
-                        badgeContent=" "
-                        variant="dot"
-                      >
-                        <HajkToolTip title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
-                          <IconButton
-                            id="mapTextColor"
-                            onClick={this.toggleColorPicker}
-                            sx={{ marginRight: 0.5 }}
-                            edge="start"
-                            size="small"
-                          >
-                            <PaletteIcon />
-                          </IconButton>
-                        </HajkToolTip>
-                      </Badge>
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    id: "mapTitle",
+                    name: "mapTitle",
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Badge
+                          sx={{
+                            "& .MuiBadge-dot": {
+                              backgroundColor: this.props.mapTextColor,
+                            },
+                          }}
+                          badgeContent=" "
+                          variant="dot"
+                        >
+                          <HajkToolTip title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
+                            <IconButton
+                              id="mapTextColor"
+                              onClick={this.toggleColorPicker}
+                              sx={{ marginRight: 0.5 }}
+                              edge="start"
+                              size="small"
+                            >
+                              <PaletteIcon />
+                            </IconButton>
+                          </HajkToolTip>
+                        </Badge>
+                      </InputAdornment>
+                    ),
+                  },
                 }}
               />
             </FormControl>
           </FormControlContainer>
-          <FormControlContainer item xs={12}>
+          <FormControlContainer size={12}>
             <FormControl fullWidth={true}>
               <TextField
                 value={printComment}
@@ -232,14 +234,16 @@ class AdvancedOptions extends React.PureComponent {
                 label="Valfri kommentar"
                 placeholder="Kan lämnas tomt"
                 variant="standard"
-                InputProps={{
-                  id: "printComment",
-                  name: "printComment",
+                slotProps={{
+                  input: {
+                    id: "printComment",
+                    name: "printComment",
+                  },
                 }}
               />
             </FormControl>
           </FormControlContainer>
-          <FormControlContainer item xs={12}>
+          <FormControlContainer size={12}>
             <FormControl fullWidth={true} error={!printOptionsOk}>
               <InputLabel variant="standard" htmlFor="resolution">
                 Upplösning (DPI)
@@ -269,8 +273,8 @@ class AdvancedOptions extends React.PureComponent {
               )}
             </FormControl>
           </FormControlContainer>
-          <FormControlContainer container item>
-            <Grid item xs={6} sx={{ paddingRight: "10px" }}>
+          <FormControlContainer container>
+            <Grid sx={{ paddingRight: "10px" }} size={6}>
               <FormControl fullWidth={true}>
                 <InputLabel variant="standard" htmlFor="includeNorthArrow">
                   Inkludera norrpil
@@ -282,7 +286,7 @@ class AdvancedOptions extends React.PureComponent {
                 )}
               </FormControl>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <FormControl
                 fullWidth={true}
                 error={this.placementOverlaps.northArrow}
@@ -299,8 +303,8 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
           </FormControlContainer>
-          <FormControlContainer container item>
-            <Grid item xs={6} sx={{ paddingRight: "10px" }}>
+          <FormControlContainer container>
+            <Grid sx={{ paddingRight: "10px" }} size={6}>
               <FormControl fullWidth={true}>
                 <InputLabel variant="standard" htmlFor="includeScaleBar">
                   Inkludera skalstock
@@ -312,7 +316,7 @@ class AdvancedOptions extends React.PureComponent {
                 )}
               </FormControl>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <FormControl
                 fullWidth={true}
                 error={this.placementOverlaps.scaleBar}
@@ -329,8 +333,8 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
           </FormControlContainer>
-          <FormControlContainer container item>
-            <Grid item xs={6} sx={{ paddingRight: "10px" }}>
+          <FormControlContainer container>
+            <Grid sx={{ paddingRight: "10px" }} size={6}>
               <FormControl fullWidth={true}>
                 <InputLabel variant="standard" htmlFor="includeLogo">
                   Inkludera logotyp
@@ -342,7 +346,7 @@ class AdvancedOptions extends React.PureComponent {
                 )}
               </FormControl>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <FormControl
                 fullWidth={true}
                 error={this.placementOverlaps.logoType}
@@ -358,11 +362,11 @@ class AdvancedOptions extends React.PureComponent {
                 )}
               </FormControl>
             </Grid>
-            <Grid item xs={12}></Grid>
+            <Grid size={12}></Grid>
           </FormControlContainer>
           {this.props.enableAppStateInHash && (
-            <FormControlContainer container item>
-              <Grid item xs={6} sx={{ paddingRight: "10px" }}>
+            <FormControlContainer container>
+              <Grid sx={{ paddingRight: "10px" }} size={6}>
                 <FormControl fullWidth={true}>
                   <InputLabel variant="standard" htmlFor="includeQrCode">
                     Inkludera qr-kod
@@ -374,7 +378,7 @@ class AdvancedOptions extends React.PureComponent {
                   )}
                 </FormControl>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <FormControl
                   fullWidth={true}
                   error={this.placementOverlaps.qrCode}
@@ -390,7 +394,7 @@ class AdvancedOptions extends React.PureComponent {
                   )}
                 </FormControl>
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={12}>
                 {showOverlapWarning && (
                   <FormHelperText error={true}>
                     Bilden kommer inte kunna skrivas ut korrekt. Placeringsvalen

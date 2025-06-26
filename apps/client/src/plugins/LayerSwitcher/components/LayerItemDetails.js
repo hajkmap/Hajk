@@ -6,16 +6,7 @@ import VectorFilter from "./VectorFilter";
 import CQLFilter from "./CQLFilter";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 
-import {
-  Button,
-  Box,
-  IconButton,
-  Divider,
-  Slider,
-  Tooltip,
-  Typography,
-  Stack,
-} from "@mui/material";
+import { Button, Box, Divider, Slider, Typography, Stack } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -26,6 +17,8 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import LayerItemInfo from "./LayerItemInfo";
 import LegendImage from "./LegendImage";
+import HajkToolTip from "components/HajkToolTip";
+import LsIconButton from "./LsIconButton";
 
 function LayerItemDetails({
   display,
@@ -146,7 +139,8 @@ function LayerItemDetails({
   // Add a check for CQL filter visibility and exclude system layers
   const isCqlFilterEnabled = () => {
     return (
-      cqlFilterVisible && layerItemDetails?.layer?.get("layerType") !== "system" // Exclude system layers
+      // Exclude system layers
+      cqlFilterVisible && layerItemDetails?.layer?.get("layerType") !== "system"
     );
   };
 
@@ -182,46 +176,46 @@ function LayerItemDetails({
 
   return (
     <>
-      {layerItemDetails && (
+      {layerItemDetails && display && (
         <Box
-          sx={{
-            display: display ? "block" : "none",
+          sx={(theme) => ({
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: (theme) =>
-              theme.palette.mode === "dark" ? "rgb(18,18,18)" : "#fff",
+            backgroundColor: "#fff",
             position: "relative",
             overflowY: "auto",
             height: "inherit",
             minHeight: "15em",
             maxHeight: "inherit",
-          }}
+            ...theme.applyStyles("dark", {
+              backgroundColor: "rgb(18,18,18)",
+            }),
+          })}
         >
           <Box
-            sx={{
+            sx={(theme) => ({
               p: 1,
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "#373737"
-                  : theme.palette.grey[100],
-              borderBottom: (theme) =>
-                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-            }}
+              backgroundColor: theme.palette.grey[100],
+              borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+              ...theme.applyStyles("dark", {
+                backgroundColor: "#373737",
+              }),
+            })}
           >
             <Stack direction="row" alignItems="center">
-              <Tooltip
+              <HajkToolTip
                 open={tooltipOpen}
                 onClose={handleClose}
                 onOpen={handleOpen}
                 title="Tillbaka"
                 TransitionProps={{ timeout: 0 }}
               >
-                <IconButton onClick={handleBackButtonClick}>
+                <LsIconButton onClick={handleBackButtonClick}>
                   <ArrowBackIcon />
-                </IconButton>
-              </Tooltip>
+                </LsIconButton>
+              </HajkToolTip>
               <Box sx={{ flexGrow: 1, textAlign: "center" }}>
                 <Typography variant="subtitle1">
                   {renderDetailTitle()}
@@ -243,40 +237,38 @@ function LayerItemDetails({
             }}
           >
             <Stack direction="row" alignItems="center">
-              <IconButton
+              <LsIconButton
                 sx={{ cursor: "default" }}
                 disableFocusRipple
                 disableRipple
-                disableTouchRipple
               >
                 <InfoOutlinedIcon />
-              </IconButton>
+              </LsIconButton>
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="subtitle1">Info</Typography>
               </Box>
               {showLegend && (
-                <Tooltip
+                <HajkToolTip
                   title={
                     legendIsActive
                       ? "Dölj teckenförklaring"
                       : "Visa teckenförklaring"
                   }
                 >
-                  <IconButton
+                  <LsIconButton
                     onClick={() => setLegendIsActive(!legendIsActive)}
                   >
                     <FormatListBulletedOutlinedIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                  </LsIconButton>
+                </HajkToolTip>
               )}
             </Stack>
             <Box
-              sx={{
+              sx={(theme) => ({
                 py: 1,
                 px: 2,
-                borderBottom: (theme) =>
-                  `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-              }}
+                borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+              })}
             >
               <LayerItemInfo
                 chapters={chapters}
@@ -286,14 +278,13 @@ function LayerItemDetails({
               <LegendImage src={legendUrl} open={legendIsActive}></LegendImage>
             </Box>
             <Stack direction="row" alignItems="center">
-              <IconButton
+              <LsIconButton
                 sx={{ cursor: "default" }}
                 disableFocusRipple
                 disableRipple
-                disableTouchRipple
               >
                 <SettingsOutlinedIcon />
-              </IconButton>
+              </LsIconButton>
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="subtitle1">Inställningar</Typography>
               </Box>
@@ -342,14 +333,13 @@ function LayerItemDetails({
               <>
                 <Divider />
                 <Stack direction="row" alignItems="center">
-                  <IconButton
+                  <LsIconButton
                     sx={{ cursor: "default" }}
                     disableFocusRipple
                     disableRipple
-                    disableTouchRipple
                   >
                     <FilterAltOutlinedIcon />
-                  </IconButton>
+                  </LsIconButton>
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="subtitle1">Filter</Typography>
                   </Box>
@@ -367,11 +357,10 @@ function LayerItemDetails({
             )}
             {isQuickAccessEnabled() && (
               <Box
-                sx={{
-                  borderTop: (theme) =>
-                    `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+                sx={(theme) => ({
+                  borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
                   p: 2,
-                }}
+                })}
               >
                 <Button
                   fullWidth

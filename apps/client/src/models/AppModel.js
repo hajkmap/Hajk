@@ -204,8 +204,8 @@ class AppModel {
           // look for the "target" property inside that array. As soon
           // as one of the entities has a valid "target" value, we
           // consider the entire plugin to be valid and included in this list.
-          plugin.options.some?.((p) => this.#validPluginTarget(p.target)) ||
           // If "options" isn't an array, we can grab the "target" directly.
+          plugin.options.some?.((p) => this.#validPluginTarget(p.target)) ||
           this.#validPluginTarget(plugin.options.target)
         );
       })
@@ -792,7 +792,9 @@ class AppModel {
       // shown at start. All others should be hidden (no matter the setting in Admin).
       else {
         mapConfig.tools.forEach((t) => {
-          t.options.visibleAtStart = pluginsToShow.includes(t.type);
+          t.options.visibleAtStart = pluginsToShow.includes(
+            t.type.toLowerCase()
+          );
         });
       }
     }

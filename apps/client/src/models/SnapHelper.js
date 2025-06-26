@@ -1,5 +1,7 @@
 import Snap from "ol/interaction/Snap";
 
+const DISABLE_KEY = "space";
+
 export default class SnapHelper {
   constructor(app) {
     this.map = app.map;
@@ -20,6 +22,10 @@ export default class SnapHelper {
       "core.layerVisibilityChanged",
       this.#handleLayerVisibilityChanged
     );
+
+    // Add key listeners to disable/enable snapping via the spacebar
+    document.addEventListener("keydown", this.#handleKeyDown);
+    document.addEventListener("keyup", this.#handleKeyUp);
   }
   /**
    * @summary Adds a given plugin to the set of plugins interested of
@@ -93,6 +99,32 @@ export default class SnapHelper {
       // Reset the flag
       this.updatePending = false;
     }, 250);
+  };
+
+  /**
+   * @summary Handles keydown events; turns off snapping if the disable key is pressed.
+   *
+   * @param {KeyboardEvent} e
+   */
+  #handleKeyDown = (e) => {
+    if (e.code.toLowerCase() === DISABLE_KEY) {
+      if (this.snapInteractions.length > 0) {
+        this.#removeAllSnapInteractions();
+      }
+    }
+  };
+
+  /**
+   * @summary Handles keyup events; re-enables snapping on disable key release if needed.
+   *
+   * @param {KeyboardEvent} e
+   */
+  #handleKeyUp = (e) => {
+    if (e.code.toLowerCase() === DISABLE_KEY) {
+      if (this.activePlugins.size > 0 && this.snapInteractions.length === 0) {
+        this.#addSnapToAllVectorSources();
+      }
+    }
   };
 
   #addSnapToAllVectorSources = () => {

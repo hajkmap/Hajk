@@ -580,13 +580,13 @@ class DrawModel {
     // Let's grab the foreground (fill) and background (stroke) colors that we're supposed to use.
     // First we'll try to grab the color from the feature style, then from the current settings, and lastly from the fallback.
     const foregroundColor = featureIsTextType
-      ? feature.get("TEXT_SETTINGS")?.foregroundColor ??
-        this.#textStyleSettings.foregroundColor
+      ? (feature.get("TEXT_SETTINGS")?.foregroundColor ??
+        this.#textStyleSettings.foregroundColor)
       : "#FFF";
     // Same applies for the background
     const backgroundColor = featureIsTextType
-      ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
-        this.#textStyleSettings.backgroundColor
+      ? (feature.get("TEXT_SETTINGS")?.backgroundColor ??
+        this.#textStyleSettings.backgroundColor)
       : "rgba(0, 0, 0, 0.5)";
     // Then we can create and return the style
     return new Text({
@@ -594,13 +594,13 @@ class DrawModel {
       textBaseline: "middle",
       font: `${
         featureIsTextType
-          ? feature.get("TEXT_SETTINGS")?.size ?? this.#textStyleSettings.size
+          ? (feature.get("TEXT_SETTINGS")?.size ?? this.#textStyleSettings.size)
           : 12
       }pt sans-serif`,
       fill: new Fill({
         color: featureIsTextType
-          ? feature.get("TEXT_SETTINGS")?.foregroundColor ??
-            this.#textStyleSettings.foregroundColor
+          ? (feature.get("TEXT_SETTINGS")?.foregroundColor ??
+            this.#textStyleSettings.foregroundColor)
           : "#FFF",
       }),
       text: this.#getFeatureLabelText(feature),
@@ -610,8 +610,8 @@ class DrawModel {
         foregroundColor !== backgroundColor
           ? new Stroke({
               color: featureIsTextType
-                ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
-                  this.#textStyleSettings.backgroundColor
+                ? (feature.get("TEXT_SETTINGS")?.backgroundColor ??
+                  this.#textStyleSettings.backgroundColor)
                 : "rgba(0, 0, 0, 0.7)",
               width: 3,
             })
@@ -1903,7 +1903,7 @@ class DrawModel {
   #isFreeHandDrawing = (drawMethod, settings) => {
     return ["Circle", "Rectangle"].includes(drawMethod)
       ? true
-      : settings.freehand ?? false;
+      : (settings.freehand ?? false);
   };
 
   // Accepts a feature with "CIRCLE_RADIUS" and "CIRCLE_CENTER" properties.
@@ -2075,8 +2075,74 @@ class DrawModel {
     });
   };
 
-  // Clones the supplied ol-feature and adds it to the map (the added clone
-  // will be offset just a tad to the east of the supplied feature).
+  toggleGpxFeaturesVisibility = (id) => {
+    this.#drawSource.getFeatures().forEach((f) => {
+      if (f.get("GPX_ID") === id) {
+        const featureHidden = f.get("HIDDEN") ?? false;
+        f.set("HIDDEN", !featureHidden);
+        f.setStyle(this.#getFeatureStyle(f));
+      }
+    });
+  };
+
+  toggleGpxFeaturesTextVisibility = (id) => {
+    this.#drawSource.getFeatures().forEach((f) => {
+      if (f.get("GPX_ID") === id) {
+        const featureTextShown = f.get("SHOW_TEXT") ?? true;
+        f.set("SHOW_TEXT", !featureTextShown);
+        f.setStyle(this.#getFeatureStyle(f));
+      }
+    });
+  };
+
+  removeGpxFeaturesById = (id) => {
+    const features = this.#drawSource
+      .getFeatures()
+      .filter((feature) => feature.get("GPX_ID") === id);
+    features.forEach((feature) => {
+      this.#drawSource.removeFeature(feature);
+    });
+  };
+
+  addGpxFeatures = (features) => {
+    if (!features || !Array.isArray(features)) {
+      console.warn("No features supplied to addGpxFeatures");
+      return;
+    }
+
+    features.forEach((feature) => {
+      // Set necessary properties for editing
+      feature.set("USER_DRAWN", true);
+      feature.set("EDIT_ACTIVE", false);
+
+      // Set DRAW_METHOD based on geometry type
+      const geometryType = feature.getGeometry().getType();
+      switch (geometryType) {
+        case "Point":
+          feature.set("DRAW_METHOD", "Point");
+          break;
+        case "LineString":
+          feature.set("DRAW_METHOD", "Line");
+          break;
+        case "MultiLineString":
+          feature.set("DRAW_METHOD", "Line");
+          break;
+        default:
+          console.warn(
+            `Unsupported geometry type for GPX feature: ${geometryType}`
+          );
+      }
+
+      feature.setStyle(this.#getDrawStyle());
+
+      // Add to the main draw source
+      this.#drawSource.addFeature(feature);
+    });
+
+    // Refresh the layer to show changes
+    this.refreshDrawLayer();
+  };
+
   duplicateFeature = (feature) => {
     try {
       // First we'll have to get a clone of the supplied feature
