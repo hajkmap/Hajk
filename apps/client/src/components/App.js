@@ -18,7 +18,7 @@ import {
 
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
-import Introduction from "./Introduction";
+import Introduction from "./Introduction/Introduction";
 import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
