@@ -5,11 +5,13 @@
     "common.actions": "Åtgärder",
     "common.all": "Alla",
     "common.cancel": "Avbryt",
+    "common.collapseAll": "Fäll ihop alla",
     "common.clickableLogo": "Klickbar logga",
     "common.connection": "Anslutning",
     "common.delete": "Radera",
     "common.email": "Epost",
     "common.english": "Engelska",
+    "common.expandAll": "Expandera alla",
     "common.goodbye": "Hej då",
     "common.groups": "Grupper",
     "common.hello": "Hej",
@@ -28,6 +30,7 @@
     "common.mapSettings": "Kartinställningar",
     "common.name": "Namn",
     "common.of": "av",
+    "common.for": "för",
     "common.other": "Övrigt",
     "common.password": "Lösenord",
     "common.publications": "Publiceringar",
@@ -49,7 +52,7 @@
     "common.welcome": "Välkommen!",
     "common.you": "Du",
     "common.theme": "Tema",
-    "common.lastSaved": "Senast sparad:",
+    "common.lastSaved": "Senast sparad",
     "common.dialog.closeBtn": "Stäng",
     "common.dialog.saveBtn": "Spara",
     "common.dialog.deleteBtn": "Ta bort",
@@ -326,6 +329,5 @@
     "formControl.time.weeksAgo": "veckor sedan",
     "formControl.time.monthsAgo": "månader sedan",
     "formControl.time.yearsAgo": "år sedan"
-    
   }
 }
