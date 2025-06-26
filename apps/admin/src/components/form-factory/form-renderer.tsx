@@ -31,6 +31,7 @@ interface FormRenderProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
   errors: FieldErrors<TFieldValues>;
   showSearch?: boolean;
+  preserveSearchState?: boolean;
 }
 
 const FormRenderer = <TFieldValues extends FieldValues>({
@@ -40,6 +41,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   control,
   errors,
   showSearch = false,
+  preserveSearchState = false,
 }: FormRenderProps<TFieldValues>) => {
   const [elements, setElements] = React.useState<FormElement<TFieldValues>[]>(
     formControls.getElements()
@@ -47,8 +49,47 @@ const FormRenderer = <TFieldValues extends FieldValues>({
 
   // Update elements when formControls changes
   React.useEffect(() => {
-    setElements(formControls.getElements());
-  }, [formControls]);
+    const newElements = formControls.getElements();
+
+    if (preserveSearchState) {
+      // Preserve search highlighting by copying highlight properties from old elements
+      const preserveHighlights = (
+        oldElements: FormElement<TFieldValues>[],
+        newElements: FormElement<TFieldValues>[]
+      ) => {
+        newElements.forEach((newElement, index) => {
+          const oldElement = oldElements[index];
+          if (
+            oldElement &&
+            isFormElementInput(newElement) &&
+            isFormElementInput(oldElement)
+          ) {
+            // Copy highlight property from old element to new element
+            (newElement as DynamicInputSettings<TFieldValues>).highlight = (
+              oldElement as DynamicInputSettings<TFieldValues>
+            ).highlight;
+          } else if (
+            oldElement &&
+            isFormElementContainer(newElement) &&
+            isFormElementContainer(oldElement)
+          ) {
+            // For containers, recursively preserve highlights
+            preserveHighlights(
+              (oldElement as DynamicFormContainer<TFieldValues>).getElements(),
+              (newElement as DynamicFormContainer<TFieldValues>).getElements()
+            );
+            (newElement as DynamicFormContainer<TFieldValues>).highlight = (
+              oldElement as DynamicFormContainer<TFieldValues>
+            ).highlight;
+          }
+        });
+      };
+
+      preserveHighlights(elements, newElements);
+    }
+
+    setElements(newElements);
+  }, [formControls, preserveSearchState, elements]);
 
   let c = 0;
 
