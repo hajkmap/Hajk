@@ -18,12 +18,14 @@ interface DynamicInputComponentProps<TFieldValues extends FieldValues> {
     | DynamicInputSettings<TFieldValues>
     | CustomInputSettings<TFieldValues>;
   errorMessage?: string | null;
+  forceUpdate?: () => void;
 }
 
 export const DynamicInputComponent = <TFieldValues extends FieldValues>({
   control,
   settings,
   errorMessage,
+  forceUpdate,
 }: DynamicInputComponentProps<TFieldValues>) => {
   const renderer =
     (settings as CustomInputSettings<TFieldValues>).renderer ||
@@ -55,6 +57,7 @@ export const DynamicInputComponent = <TFieldValues extends FieldValues>({
             title: settings.title,
             name: settings.name,
             disabled: settings.disabled,
+            forceUpdate,
           }) ?? <div />
         );
       }}

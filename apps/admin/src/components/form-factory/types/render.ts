@@ -18,4 +18,5 @@ export interface RenderProps<TFieldValues extends FieldValues> {
   element?: React.ReactNode;
   name?: string;
   disabled?: boolean;
+  forceUpdate?: () => void;
 }

@@ -1,6 +1,7 @@
 import { Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { RenderFunction } from "../types/render";
 import { FieldValues } from "react-hook-form";
+
 const renderSelect: RenderFunction<FieldValues> = ({
   field,
   inputProps,
@@ -9,8 +10,10 @@ const renderSelect: RenderFunction<FieldValues> = ({
   title,
   name,
   slotProps,
+  forceUpdate,
 }) => {
   const inputSlotProps = slotProps?.input ?? {};
+
   return (
     <FormControl fullWidth error={!!errorMessage}>
       {title && (
@@ -25,7 +28,14 @@ const renderSelect: RenderFunction<FieldValues> = ({
         {...inputSlotProps}
         label={title}
         inputRef={field?.ref}
-        value={(field?.value as string) ?? ""}
+        value={(field?.value as string) || ""}
+        onChange={(e) => {
+          field?.onChange(e.target.value);
+          // Trigger form re-render to update visibility conditions
+          // For unknown reasons, the form only re-renders sporadically and couldn't be trusted.
+          // This is a hack to force it to re-render
+          forceUpdate?.();
+        }}
         displayEmpty
       >
         {optionList?.map((option, index) => (

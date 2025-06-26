@@ -46,6 +46,14 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     formControls.getElements()
   );
 
+  // Add a state variable to be able to force re-renders
+  const [renderKey, setRenderKey] = React.useState(0);
+
+  // Callback to force re-render when needed.
+  const forceUpdate = React.useCallback(() => {
+    setRenderKey((prev) => prev + 1);
+  }, []);
+
   // Update elements when formControls changes
   React.useEffect(() => {
     setElements(formControls.getElements());
@@ -55,7 +63,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
 
   const getKey = (index: number) => {
     c++;
-    return `formItem-${index}-${c}`;
+    return `formItem-${index}-${c}-${renderKey}`;
   };
 
   // Reusable function to check if an element should be visible based on visibleIf condition
@@ -68,7 +76,6 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     }
 
     const value = getFormElementValue(visibleIf.name, elements, formGetValues);
-
     return value === visibleIf.value;
   };
 
@@ -103,13 +110,6 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     if (isFormElementContainer(item)) {
       return renderContainer(item as DynamicFormContainer<TFieldValues>, index);
     } else if (isFormElementInput(item)) {
-      // Keep these comments here for now, will be useful later on.
-      // const castedItem = item as
-      //   | DynamicInputSettings<TFieldValues>
-      //   | CustomInputSettings<TFieldValues>;
-      // if (castedItem.visibleIf) {
-      //   // console.log("test", item);
-      // }
       return wrapInGrid(item, index, {}, renderDynamicInputComponent);
     } else if (isFormElementStatic(item)) {
       return renderStaticElement(item as StaticElement, index);
@@ -152,6 +152,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
               // eslint-disable-next-line @typescript-eslint/no-base-to-string
               errors[castedSettings.name]?.message?.toString() ?? null
             }
+            forceUpdate={forceUpdate}
           />
         </Box>
         {castedSettings.helpText && (
@@ -301,8 +302,6 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     );
   };
 
-  // Form container
-  // Note the className below.
   // This is the root of the form and the class is used in the global styles.
   return (
     <Grid container className="form-factory" sx={{ ml: -2 }}>
