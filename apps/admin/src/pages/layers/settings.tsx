@@ -57,7 +57,7 @@ export default function LayerSettings() {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectGridId, setSelectGridId] = useState<GridRowSelectionModel>();
-  const [accordionExpanded, setAccordionExpanded] = useState<boolean>(true);
+  const [accordionExpanded, setAccordionExpanded] = useState<boolean>(false);
   const { layers: getCapLayers, styles: getCapStyles } = useServiceCapabilities(
     {
       baseUrl: service?.url ?? "",
@@ -131,7 +131,7 @@ export default function LayerSettings() {
 
   layerInformationSettings.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 12,
+    gridColumns: 11,
     name: "name",
     title: `${t("common.name")}`,
     defaultValue: layer?.name,
@@ -825,6 +825,7 @@ export default function LayerSettings() {
             control={control}
             errors={errors}
             showSearch={true}
+            preserveSearchState={true}
           />
           {layer && (
             <AvailableLayersGrid
