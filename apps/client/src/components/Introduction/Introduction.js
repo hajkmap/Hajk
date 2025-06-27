@@ -20,6 +20,33 @@ import { getLayerSwitcherSteps } from "./steps/layerSwitcherSteps";
 import { functionalOk as functionalCookieOk } from "../../models/Cookie";
 import LocalStorageHelper from "utils/LocalStorageHelper";
 
+// Utility: Wait until a selector becomes visible
+const waitForElementVisible = (selector, maxTries = 20, delay = 100) =>
+  new Promise((resolve) => {
+    let tries = 0;
+    const interval = setInterval(() => {
+      const el = document.querySelector(selector);
+      if (el && el.offsetParent !== null) {
+        clearInterval(interval);
+        resolve(true);
+      } else if (++tries >= maxTries) {
+        clearInterval(interval);
+        console.warn(`Timeout waiting for ${selector}`);
+        resolve(false);
+      }
+    }, delay);
+  });
+
+// Utility: Perform action, wait for something to appear, repeat
+const chainActionsWithVisibility = async (steps) => {
+  for (const step of steps) {
+    if (step.action) step.action();
+    if (step.waitFor) await waitForElementVisible(step.waitFor);
+    if (step?.delay)
+      await new Promise((resolve) => setTimeout(resolve, step?.delay));
+  }
+};
+
 const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherPlugin }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -136,6 +163,8 @@ class Introduction extends React.PureComponent {
     this.showDrawOrderView =
       this.props.layerSwitcherPlugin.options.showDrawOrderView;
     this.appModel = this.props.appModel;
+    this.showFavorites =
+      this.props.layerSwitcherPlugin.options.enableUserQuickAccessFavorites;
     console.log(
       "enableQuickAccessPresets",
       this.props.layerSwitcherPlugin.options.enableQuickAccessPresets
@@ -214,14 +243,14 @@ class Introduction extends React.PureComponent {
       showSelection: false,
     });
 
-    const isDrawOrderView = this.showDrawOrderView;
-
+    const isDrawOrderEnabled = this.showDrawOrderView;
+    const isFavoritesEnabled = this.showFavorites;
     let steps =
       type === "full"
         ? getFullIntroductionSteps(this.layerSwitcherPlugin)
         : getLayerSwitcherSteps(this.layerSwitcherPlugin);
 
-    if (!isDrawOrderView) {
+    if (!isDrawOrderEnabled) {
       steps = steps.filter(
         (step) =>
           step.element !== "#draw-order-tab" &&
@@ -229,7 +258,18 @@ class Introduction extends React.PureComponent {
           step.element !== ".draw-order-list"
       );
     }
-
+    if (!isFavoritesEnabled) {
+      steps = steps.filter(
+        (step) =>
+          step.element !== "#favorites-menu-button" &&
+          step.element !== "#favorites-menu" &&
+          step.element !== "#edit-favorites" &&
+          step.element !== "#import-favorites-button" &&
+          step.element !== ".favorites-list-view" &&
+          step.element !== "#favorites-list-options-button" &&
+          step.element !== "#favorites-list-options-menu"
+      );
+    }
     this.setState({
       steps: steps,
       forceShow: true,
@@ -360,24 +400,10 @@ class Introduction extends React.PureComponent {
     // Handle going forward to "Mina favoriter meny" (element #favorites-menu)
     if (
       step?.element === "#favorites-menu" ||
-      step?.element === "#edit-favorites"
+      step?.element === "#edit-favorites" ||
+      step?.element === "#quick-access-theme-button"
     ) {
       const menuButton = document.querySelector("#favorites-menu-button");
-
-      if (menuButton) {
-        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      }
-      return true;
-    }
-
-    return false;
-  };
-
-  handleFavoritesListMenuTransition = (step) => {
-    if (step?.element === "#favorites-list-options-menu") {
-      const menuButton = document.querySelector(
-        "#favorites-list-options-button"
-      );
 
       if (menuButton) {
         menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -564,10 +590,37 @@ class Introduction extends React.PureComponent {
         const menuButton = document.querySelector("#edit-favorites");
         if (menuButton) {
           handleTransition(() => {
-            menuButton.click();
+            menuButton.dispatchEvent(
+              new MouseEvent("click", { bubbles: true })
+            );
           });
           return;
         }
+      }
+
+      if (step?.element === "#favorites-list-options-menu") {
+        chainActionsWithVisibility([
+          {
+            action: () =>
+              document
+                .querySelector("#edit-favorites")
+                ?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+            waitFor: "#favorites-list-options-button",
+          },
+          {
+            action: () =>
+              document
+                .querySelector("#favorites-list-options-button")
+                ?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+            waitFor: "#favorites-list-options-menu",
+            delay: 300,
+          },
+        ]).then(() => {
+          updateStepElement();
+          resolve();
+        });
+
+        return;
       }
 
       // Handle back to layer list view transition
@@ -593,39 +646,32 @@ class Introduction extends React.PureComponent {
 
       if (
         step?.element === "#edit-favorites" ||
-        step?.element === "#layerslist-container"
+        step?.element === "#layerslist-container" ||
+        step?.element === "#quick-access-theme-button"
       ) {
+        // ✅ Close the menu BEFORE navigating back
+        if (step?.element === "#quick-access-theme-button") {
+          document.dispatchEvent(new CustomEvent("closeFavoritesListMenu"));
+        }
+
         document.dispatchEvent(new CustomEvent("favoritesBackButton"));
         didWaitForFavoritesBack = true;
 
-        const waitForLagerlistaVisible = () => {
-          const el = document.querySelector("#layerslist-container");
-          return el && el.offsetParent !== null;
-        };
+        chainActionsWithVisibility([
+          {
+            waitFor: "#layerslist-container", // wait until target view is ready
+          },
+        ]).then(() => {
+          updateStepElement();
 
-        const maxTries = 20;
-        let tries = 0;
-
-        const waitInterval = setInterval(() => {
-          if (waitForLagerlistaVisible()) {
-            clearInterval(waitInterval);
-            updateStepElement();
-
-            // After waiting, check if other transitions apply
-            if (this.handleFavoritesMenuTransition(step)) {
-              handleTransition(() => {}, 300);
-            } else {
-              resolve();
-            }
-          } else if (++tries >= maxTries) {
-            clearInterval(waitInterval);
-            console.log("Timeout waiting for Lagerlista to render");
-            updateStepElement();
+          if (this.handleFavoritesMenuTransition(step)) {
+            handleTransition(() => {}, 300);
+          } else {
             resolve();
           }
-        }, 100);
+        });
 
-        return; // Delay until Lagerlista visible
+        return;
       }
 
       if (step?.element === "#layer-details-quick-access-button") {
@@ -669,11 +715,6 @@ class Introduction extends React.PureComponent {
         return;
       }
 
-      if (this.handleFavoritesListMenuTransition(step)) {
-        handleTransition(() => {}, 200);
-        return;
-      }
-
       // Default case - no special handling needed
       resolve();
     });
@@ -703,11 +744,11 @@ class Introduction extends React.PureComponent {
       (step?.element === "#favorites-menu-button" &&
         previousStep?.element === "#quick-access-menu-content" &&
         goingForward) ||
-      step?.element === "#quick-access-menu-button"
+      step?.element === "#quick-access-menu-button" ||
+      step?.title === "Slut"
     ) {
       const closeEvent = new CustomEvent("closeQuickAccessMenu");
       document.dispatchEvent(closeEvent);
-      return;
     }
     // Handle favorites close menu transitions
     if (
@@ -722,9 +763,10 @@ class Introduction extends React.PureComponent {
     }
 
     if (
-      step?.title === "Slut" ||
+      step?.element === "#quick-access-theme-button" ||
       step?.element === "#favorites-list-options-button"
     ) {
+      console.log("step?.element", step?.element);
       const closeEvent = new CustomEvent("closeFavoritesListMenu");
       document.dispatchEvent(closeEvent);
       return;

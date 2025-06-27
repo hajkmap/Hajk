@@ -141,7 +141,10 @@ const QuickAccessView = ({
           <ListItemSecondaryAction sx={{ right: "4px" }}>
             {enableQuickAccessPresets && (
               <HajkTooltip title="Teman">
-                <LsIconButton onClick={handleQuickAccessPresetsToggle}>
+                <LsIconButton
+                  id="quick-access-theme-button"
+                  onClick={handleQuickAccessPresetsToggle}
+                >
                   <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
                 </LsIconButton>
               </HajkTooltip>

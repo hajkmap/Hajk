@@ -156,6 +156,12 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
       "<b> - Redigera:</b> Redigera titel och beskrivning för favoriter <br><br> <b> - Ta bort:</b> Tar bort favoriten från listan <br><br> <b> - Exportera:</b> Exporterar favoriten som en .json fil",
   },
   {
+    title: "Teman",
+    element: "#quick-access-theme-button",
+    intro:
+      "<b> - Redigera:</b> Redigera titel och beskrivning för favoriter <br><br> <b> - Ta bort:</b> Tar bort favoriten från listan <br><br> <b> - Exportera:</b> Exporterar favoriten som en .json fil",
+  },
+  {
     title: "Slut",
     intro: "Detta är slutet.",
   },
