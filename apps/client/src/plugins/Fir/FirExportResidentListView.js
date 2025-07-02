@@ -62,10 +62,22 @@ const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
   fontWeight: "400",
 }));
 
-const ButtonWithLoader = styled(Button)(({ theme, loading }) => ({
+const ButtonWithLoader = styled(Button)(({ theme }) => ({
   "& img": {
-    opacity: loading === "true" ? 0.3 : 1.0,
+    opacity: 1.0,
   },
+  variants: [
+    {
+      props: {
+        loading: "true",
+      },
+      style: {
+        "& img": {
+          opacity: 0.3,
+        },
+      },
+    },
+  ],
 }));
 
 class FirExportResidentListView extends React.PureComponent {

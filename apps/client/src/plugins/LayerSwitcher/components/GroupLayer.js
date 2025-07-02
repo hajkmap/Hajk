@@ -110,21 +110,63 @@ function GroupLayer({
             }}
           >
             <IconButton
-              sx={{
-                p: draggable ? 0 : "3px",
-                pr: draggable ? 0 : "4px",
-                mr: draggable ? "5px" : 0,
-                mt: draggable ? "5px" : "3px",
-                "& .ls-arrow": {
-                  transform: showSublayers ? "rotate(90deg)" : "",
-                  transition: "transform 300ms ease",
+              sx={[
+                {
+                  "& .ls-arrow": {
+                    transition: "transform 300ms ease",
+                  },
                 },
-                "&:hover .ls-arrow": {
-                  transform: showSublayers
-                    ? "rotate(90deg) translateX(-3px)"
-                    : "translateX(3px)",
-                },
-              }}
+                draggable
+                  ? {
+                      p: 0,
+                    }
+                  : {
+                      p: "3px",
+                    },
+                draggable
+                  ? {
+                      pr: 0,
+                    }
+                  : {
+                      pr: "4px",
+                    },
+                draggable
+                  ? {
+                      mr: "5px",
+                    }
+                  : {
+                      mr: 0,
+                    },
+                draggable
+                  ? {
+                      mt: "5px",
+                    }
+                  : {
+                      mt: "3px",
+                    },
+                showSublayers
+                  ? {
+                      "& .ls-arrow": {
+                        transform: "rotate(90deg)",
+                      },
+                    }
+                  : {
+                      "& .ls-arrow": {
+                        transform: "",
+                      },
+                    },
+                showSublayers
+                  ? {
+                      "&:hover .ls-arrow": {
+                        transform: "rotate(90deg) translateX(-3px)",
+                      },
+                    }
+                  : {
+                      "&:hover .ls-arrow": {
+                        transform: "translateX(3px)",
+                      },
+                    },
+              ]}
               size="small"
               onClick={(_) => setShowSublayers(!showSublayers)}
             >

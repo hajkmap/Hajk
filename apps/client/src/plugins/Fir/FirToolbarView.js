@@ -27,8 +27,7 @@ const StyledButtonGroup = styled(ButtonGroup)(({ theme }) => ({
   whiteSpace: "nowrap",
 }));
 
-const IconButton = styled(Button)(({ theme, on, invert }) => ({
-  ...(on === "false" ? { backgroundColor: "#dcdcdc" } : {}),
+const IconButton = styled(Button)(({ theme }) => ({
   margin: theme.spacing(0),
   paddingLeft: 0,
   paddingRight: 0,
@@ -38,21 +37,26 @@ const IconButton = styled(Button)(({ theme, on, invert }) => ({
   "& img": {
     filter: on === "true" && invert === "true" ? "invert(1)" : "", // fixes icon-colors on geometry icons.
   },
+  variants: [
+    {
+      props: {
+        on: "false",
+      },
+      style: { backgroundColor: "#dcdcdc" },
+    },
+  ],
 }));
 
 const FileInputContainer = styled("div")(({ theme }) => ({
   position: "relative",
   display: "flex",
   alignItems: "center",
-
   "& > *": {
     display: "flex",
   },
-
   "& span": {
     whiteSpace: "nowrap",
   },
-
   "& span.filename": {
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
@@ -424,12 +428,14 @@ class FirToolbarView extends React.PureComponent {
                 }
               }}
               size="small"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">meter</InputAdornment>
-                ),
-              }}
               variant="outlined"
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">meter</InputAdornment>
+                  ),
+                },
+              }}
             />
           </ContainerTopDoublePadded>
         </Collapse>

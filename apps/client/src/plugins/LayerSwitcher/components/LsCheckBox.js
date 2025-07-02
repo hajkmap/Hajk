@@ -9,18 +9,29 @@ const LsCheckBox = ({ toggleState, id }) => {
     <LsIconButton id={id} size="small" sx={{}}>
       <CheckBoxOutlineBlankIcon />
       <Box
-        sx={{
-          position: "absolute",
-          top: "calc(50%)",
-          left: "50%",
-          transition: "transform 200ms ease, opacity 200ms ease",
-          transform:
-            toggleState !== "unchecked"
-              ? "translate(-50%, -50%)  scale(1.05)"
-              : "translate(-50%, -50%) scale(0.0)",
-          opacity: toggleState !== "unchecked" ? 1.0 : 0.0,
-          lineHeight: 0,
-        }}
+        sx={[
+          {
+            position: "absolute",
+            top: "calc(50%)",
+            left: "50%",
+            transition: "transform 200ms ease, opacity 200ms ease",
+            lineHeight: 0,
+          },
+          toggleState !== "unchecked"
+            ? {
+                transform: "translate(-50%, -50%)  scale(1.05)",
+              }
+            : {
+                transform: "translate(-50%, -50%) scale(0.0)",
+              },
+          toggleState !== "unchecked"
+            ? {
+                opacity: 1.0,
+              }
+            : {
+                opacity: 0.0,
+              },
+        ]}
       >
         <CheckBoxIcon
           sx={
