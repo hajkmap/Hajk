@@ -453,7 +453,10 @@ function QuickAccessPresets({
 
   return (
     <>
-      <Box sx={{ display: display ? "block" : "none" }}>
+      <Box
+        id="quick-access-presets-view"
+        sx={{ display: display ? "block" : "none" }}
+      >
         <Box
           sx={{
             p: 1,
@@ -473,7 +476,10 @@ function QuickAccessPresets({
               title="Tillbaka"
               TransitionProps={{ timeout: 0 }}
             >
-              <LsIconButton onClick={handleBackButtonClick}>
+              <LsIconButton
+                id="quick-access-back-button"
+                onClick={handleBackButtonClick}
+              >
                 <ArrowBackIcon />
               </LsIconButton>
             </HajkToolTip>

@@ -12,6 +12,7 @@ function FavoritesViewHeader({
   backButtonCallback,
   importFavoritesCallback,
   hideFavoritesView,
+  showFavoritesView,
   functionalCookiesOk,
   favoritesInfoText,
 }) {
@@ -36,16 +37,22 @@ function FavoritesViewHeader({
   useEffect(() => {
     const handleIntroBack = () => {
       setTooltipOpen(false);
+      if (hideFavoritesView) hideFavoritesView();
+    };
 
-      if (hideFavoritesView) {
-        hideFavoritesView();
-      }
+    const handleIntroForward = () => {
+      setTooltipOpen(false);
+      if (showFavoritesView) showFavoritesView();
     };
 
     document.addEventListener("favoritesBackButton", handleIntroBack);
-    return () =>
+    document.addEventListener("favoritesShowButton", handleIntroForward);
+
+    return () => {
       document.removeEventListener("favoritesBackButton", handleIntroBack);
-  }, [hideFavoritesView]);
+      document.removeEventListener("favoritesShowButton", handleIntroForward);
+    };
+  }, [hideFavoritesView, showFavoritesView]);
 
   // Handles click on info button in header
   const handleInfoButtonClick = (e) => {

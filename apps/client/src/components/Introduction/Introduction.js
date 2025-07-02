@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, useState } from "react";
+import React, { createRef } from "react";
 import { createPortal } from "react-dom";
 import { Steps } from "intro.js-react";
 import { useTheme } from "@mui/material/styles";
@@ -50,18 +50,6 @@ const chainActionsWithVisibility = async (steps) => {
 const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherPlugin }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
-  const currentLsSettings = LocalStorageHelper.get("layerswitcher");
-
-  /*
-  useEffect(() => {
-    // Set state from localstorage on component load
-    const currentLsSettings = LocalStorageHelper.get("layerswitcher");
-    if (currentLsSettings.savedLayers?.length > 0) {
-      setHandleFavorites(currentLsSettings.savedLayers);
-    }
-  }, [setHandleFavorites]);
-*/
-  console.log("handleFavorites", currentLsSettings.savedLayers?.length > 0);
 
   const handleClose = (_, reason) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") {
@@ -162,18 +150,13 @@ class Introduction extends React.PureComponent {
     this.layerSwitcherPlugin = this.props.layerSwitcherPlugin;
     this.showDrawOrderView =
       this.props.layerSwitcherPlugin.options.showDrawOrderView;
-    this.appModel = this.props.appModel;
     this.showFavorites =
       this.props.layerSwitcherPlugin.options.enableUserQuickAccessFavorites;
-    console.log(
-      "enableQuickAccessPresets",
-      this.props.layerSwitcherPlugin.options.enableQuickAccessPresets
-    );
-    console.log(
-      "enableUserQuickAccessFavorites",
-      this.props.layerSwitcherPlugin.options.enableUserQuickAccessFavorites
-    );
-    console.log("this.appModel", this.appModel);
+    this.showQuickAccessPresets =
+      this.props.layerSwitcherPlugin.options.enableQuickAccessPresets;
+    this.quickAccessList =
+      this.props.layerSwitcherPlugin.options.quickAccessPresets;
+
     /**
      * When appLoaded is fired, let's filter through the provided 'steps'.
      * We must remove any steps that don't have corresponding DOM elements.
@@ -243,8 +226,11 @@ class Introduction extends React.PureComponent {
       showSelection: false,
     });
 
+    // Determine which steps to show based on settings for layerswicher in admin.
     const isDrawOrderEnabled = this.showDrawOrderView;
     const isFavoritesEnabled = this.showFavorites;
+    const isFavoritesListEmpty = LocalStorageHelper.get("layerswitcher");
+    const isQuickAccessPresetsEnabled = this.showQuickAccessPresets;
     let steps =
       type === "full"
         ? getFullIntroductionSteps(this.layerSwitcherPlugin)
@@ -268,6 +254,29 @@ class Introduction extends React.PureComponent {
           step.element !== ".favorites-list-view" &&
           step.element !== "#favorites-list-options-button" &&
           step.element !== "#favorites-list-options-menu"
+      );
+    }
+    if (isFavoritesListEmpty.savedLayers?.length === 0) {
+      steps = steps.filter(
+        (step) =>
+          step.element !== "#favorites-menu" &&
+          step.element !== "#edit-favorites" &&
+          step.element !== "#import-favorites-button" &&
+          step.element !== ".favorites-list-view" &&
+          step.element !== "#favorites-list-options-button" &&
+          step.element !== "#favorites-list-options-menu"
+      );
+    }
+    if (!isQuickAccessPresetsEnabled) {
+      steps = steps.filter(
+        (step) =>
+          step.element !== "#quick-access-theme-button" &&
+          step.element !== "#quick-access-presets-view"
+      );
+    }
+    if (this.quickAccessList.length === 0) {
+      steps = steps.filter(
+        (step) => step.element !== "#quick-access-presets-view"
       );
     }
     this.setState({
@@ -356,9 +365,22 @@ class Introduction extends React.PureComponent {
     return false;
   };
 
-  handleMenuContentTransition = (step) => {
-    if (step?.element === "#layerswitcher-actions-menu-content") {
-      const menuButton = document.querySelector("#layerswitcher-actions-menu");
+  handleSearchOptionsMenuTransition = (step) => {
+    if (step?.element === "#search-tools-menu") {
+      const menuButton = document.querySelector("#search-options-button");
+      if (menuButton) {
+        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      }
+      return true;
+    }
+    return false;
+  };
+
+  handleLayerSwitcherMenuTransition = (step) => {
+    if (step?.element === "#layerswitcher-actions-menu") {
+      const menuButton = document.querySelector(
+        "#layerswitcher-actions-menu-button"
+      );
       if (menuButton) {
         menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       }
@@ -397,17 +419,61 @@ class Introduction extends React.PureComponent {
   };
 
   handleFavoritesMenuTransition = (step) => {
-    // Handle going forward to "Mina favoriter meny" (element #favorites-menu)
     if (
       step?.element === "#favorites-menu" ||
-      step?.element === "#edit-favorites" ||
-      step?.element === "#quick-access-theme-button"
+      step?.element === "#edit-favorites"
     ) {
       const menuButton = document.querySelector("#favorites-menu-button");
 
       if (menuButton) {
         menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       }
+      return true;
+    }
+
+    return false;
+  };
+
+  handleQuickAccessThemeTransition = (step, previousStep, goingForward) => {
+    if (
+      step?.element === "#quick-access-presets-view" &&
+      previousStep?.element === "#quick-access-theme-button" &&
+      goingForward
+    ) {
+      const menuButton = document.querySelector("#quick-access-theme-button");
+
+      if (menuButton) {
+        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      }
+
+      return true;
+    }
+
+    return false;
+  };
+
+  handleQuickAccessThemeBackTransition = (
+    step,
+    previousStep,
+    goingBackward
+  ) => {
+    if (
+      (step?.element === "#quick-access-theme-button" &&
+        previousStep?.element === "#favorites-list-options-menu" &&
+        goingBackward) ||
+      (step?.element === "#quick-access-theme-button" &&
+        previousStep?.element === "#quick-access-menu-content" &&
+        goingBackward) ||
+      (step?.element === "#quick-access-theme-button" &&
+        previousStep?.element === "#favorites-menu-button" &&
+        goingBackward)
+    ) {
+      const menuButton = document.querySelector("#quick-access-back-button");
+
+      if (menuButton) {
+        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      }
+
       return true;
     }
 
@@ -602,9 +668,7 @@ class Introduction extends React.PureComponent {
         chainActionsWithVisibility([
           {
             action: () =>
-              document
-                .querySelector("#edit-favorites")
-                ?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+              document.dispatchEvent(new CustomEvent("favoritesShowButton")),
             waitFor: "#favorites-list-options-button",
           },
           {
@@ -613,7 +677,7 @@ class Introduction extends React.PureComponent {
                 .querySelector("#favorites-list-options-button")
                 ?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
             waitFor: "#favorites-list-options-menu",
-            delay: 300,
+            delay: 150,
           },
         ]).then(() => {
           updateStepElement();
@@ -624,7 +688,6 @@ class Introduction extends React.PureComponent {
       }
 
       // Handle back to layer list view transition
-      // note to myself, same logic can be used to handle going back from favorites and quickaccess (teman)
       if (
         step?.element === "#show-layer-details" ||
         step?.element === "#layerslist-container" ||
@@ -647,9 +710,10 @@ class Introduction extends React.PureComponent {
       if (
         step?.element === "#edit-favorites" ||
         step?.element === "#layerslist-container" ||
-        step?.element === "#quick-access-theme-button"
+        (step?.element === "#quick-access-theme-button" &&
+          previousStep?.element === "#favorites-list-options-menu" &&
+          goingForward)
       ) {
-        // ✅ Close the menu BEFORE navigating back
         if (step?.element === "#quick-access-theme-button") {
           document.dispatchEvent(new CustomEvent("closeFavoritesListMenu"));
         }
@@ -659,7 +723,7 @@ class Introduction extends React.PureComponent {
 
         chainActionsWithVisibility([
           {
-            waitFor: "#layerslist-container", // wait until target view is ready
+            waitFor: "#layerslist-container",
           },
         ]).then(() => {
           updateStepElement();
@@ -687,8 +751,14 @@ class Introduction extends React.PureComponent {
         }
       }
 
+      // Handle search options menu transitions
+      if (this.handleSearchOptionsMenuTransition(step)) {
+        handleTransition(() => {}, 200);
+        return;
+      }
+
       // Handle menu content transitions
-      if (this.handleMenuContentTransition(step)) {
+      if (this.handleLayerSwitcherMenuTransition(step)) {
         handleTransition(() => {}, 200);
         return;
       }
@@ -715,6 +785,25 @@ class Introduction extends React.PureComponent {
         return;
       }
 
+      // Handle quick access theme menu transitions
+      if (
+        this.handleQuickAccessThemeTransition(step, previousStep, goingForward)
+      ) {
+        handleTransition(() => {}, 150);
+        return;
+      }
+
+      if (
+        this.handleQuickAccessThemeBackTransition(
+          step,
+          previousStep,
+          goingBackward
+        )
+      ) {
+        handleTransition(() => {}, 150);
+        return;
+      }
+
       // Default case - no special handling needed
       resolve();
     });
@@ -726,15 +815,25 @@ class Introduction extends React.PureComponent {
 
     const step = this.state.steps[stepIndex];
     const previousStep = this.state.steps[stepIndex - 1];
-
+    const isFavoritesEnabled = this.showFavorites;
     const goingForward = stepIndex > this.state.currentStepIndex;
     const goingBackward = stepIndex < this.state.currentStepIndex;
 
-    // Handle search close menu transitions
+    // Handle close search options menu transitions
+    if (
+      step?.element === "#controls-column" ||
+      step?.element === "#search-options-button"
+    ) {
+      const closeEvent = new CustomEvent("closeSearchOptionsMenu");
+      document.dispatchEvent(closeEvent);
+      return;
+    }
+
     if (
       step?.element === "#layerGroup-accordion-arrow-button" ||
-      step?.element === "#layerswitcher-actions-menu"
+      step?.element === "#layerswitcher-actions-menu-button"
     ) {
+      // Handle close layers menu transitions
       const closeEvent = new CustomEvent("closeLayersMenu");
       document.dispatchEvent(closeEvent);
       return;
@@ -745,6 +844,7 @@ class Introduction extends React.PureComponent {
         previousStep?.element === "#quick-access-menu-content" &&
         goingForward) ||
       step?.element === "#quick-access-menu-button" ||
+      (step?.element === "#quick-access-theme-button" && !isFavoritesEnabled) ||
       step?.title === "Slut"
     ) {
       const closeEvent = new CustomEvent("closeQuickAccessMenu");
@@ -763,10 +863,9 @@ class Introduction extends React.PureComponent {
     }
 
     if (
-      step?.element === "#quick-access-theme-button" ||
-      step?.element === "#favorites-list-options-button"
+      step?.element === "#favorites-list-options-button" ||
+      step?.title === "Slut"
     ) {
-      console.log("step?.element", step?.element);
       const closeEvent = new CustomEvent("closeFavoritesListMenu");
       document.dispatchEvent(closeEvent);
       return;

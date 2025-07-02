@@ -33,6 +33,7 @@ const LayersTab = ({
   handleQuickAccessPresetsToggle,
   handleFavoritesViewToggle,
   hideFavoritesView,
+  showFavoritesView,
   globalObserver,
   map,
   app,
@@ -200,6 +201,7 @@ const LayersTab = ({
             favoritesViewDisplay={displayContentOverlay === "favorites"}
             handleFavoritesViewToggle={handleFavoritesViewToggle}
             hideFavoritesView={hideFavoritesView}
+            showFavoritesView={showFavoritesView}
             favoritesInfoText={userQuickAccessFavoritesInfoText}
             filterValue={filterValue}
             layersState={layersState}

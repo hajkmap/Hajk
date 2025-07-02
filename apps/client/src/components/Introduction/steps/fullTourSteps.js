@@ -26,9 +26,15 @@ export const getFullIntroductionSteps = (layerSwitcherPlugin) => [
       "Sökrutan hittar du här.<br /><br /> Med hjälp av sökverktyget hittar du enkelt till rätt ställe i kartan.",
   },
   {
-    title: "Fler sökverktyg",
-    element: '[name="searchOptions"]',
+    title: "Fler sökalternativ",
+    element: "#search-options-button",
     intro: "Under den här knappen hittar du fler avancerade sökalternativ.",
+  },
+  {
+    title: "Meny för fler sökverktyg",
+    element: "#search-tools-menu",
+    intro:
+      "Här kan du välja mellan olika sökverktyg och inställningar för sökningen. <br><br> Du kan även öppna en separat meny för att hantera sökinställningar.",
   },
   {
     title: "Kartkontroller",
@@ -52,7 +58,7 @@ export const getFullIntroductionSteps = (layerSwitcherPlugin) => [
   },
   {
     title: "Öppna meny bredvid sökfält",
-    element: "#layerswitcher-actions-menu",
+    element: "#layerswitcher-actions-menu-button",
     intro:
       "Klicka på kebabmenyn. <br><br> <b>Menyn innehåller funktioner som:</b> dölj alla aktiva lager, scrolla till toppen av lagerlistan, scrolla till botten av lagerlistan.",
     position: () =>
@@ -60,7 +66,7 @@ export const getFullIntroductionSteps = (layerSwitcherPlugin) => [
   },
   {
     title: "Sök meny",
-    element: "#layerswitcher-actions-menu-content",
+    element: "#layerswitcher-actions-menu",
     intro:
       "<b>Dölj alla aktiva lager:</b> Klicka på knappen för att dölja <b>ALLA</b> aktiva lager. <br><br> <b>Scrolla till toppen:</b> Klicka på knappen för att scrolla till toppen av lagerlistan. <br><br> <b>Scrolla till botten:</b> Klicka på knappen för att scrolla till botten av lagerlistan.",
   },
@@ -154,7 +160,7 @@ export const getFullIntroductionSteps = (layerSwitcherPlugin) => [
       "Klicka på favoriter-knappen. <br><br> Menyn innehåller funktioner som att spara till favoriter, redigera favoriter och ladda favoriter.",
   },
   {
-    title: "Mina favoriter meny",
+    title: "Meny för favoriter",
     element: "#favorites-menu",
     intro:
       "Knappen öppnar en meny med verktyg för att gruppera och spara lager i snabbåtkomst (mina favoriter): <br><br> - <b>Spara till favoriter:</b> Sparar en grupp som innehåller ett eller flera lager. Titel och beskrivning av denna grupp kan tillämpas, <i>observera att favoriter endast sparas tillfälligt och lokalt för dig</i>. <br><br> - <b>Redigera favoriter:</b> Hantera sparade lager. <br><br> - <b>Ladda favorit:</b> Vid laddning ersätts lagren i snabbåtkomst. Alla tända lager i kartan släcks och ersätts med favoritens tända lager.",
@@ -186,6 +192,18 @@ export const getFullIntroductionSteps = (layerSwitcherPlugin) => [
     element: "#favorites-list-options-menu",
     intro:
       "<b> - Redigera:</b> Redigera titel och beskrivning för favoriter <br><br> <b> - Ta bort:</b> Tar bort favoriten från listan <br><br> <b> - Exportera:</b> Exporterar favoriten som en .json fil",
+  },
+  {
+    title: "Teman",
+    element: "#quick-access-theme-button",
+    intro:
+      "Klicka på knappen för att visa teman. <br> Teman är fördefinierade lagergrupper skapade av Hajk-administratörer.",
+  },
+  {
+    title: "Lista för teman",
+    element: "#quick-access-presets-view",
+    intro:
+      "Här kan du se teman som är tillgängliga i kartan. <br><br> Klicka på ett tema för att tända alla lager i det temat. <br><br> Du kan också söka efter teman i sökfältet.",
   },
   {
     title: "Slut",

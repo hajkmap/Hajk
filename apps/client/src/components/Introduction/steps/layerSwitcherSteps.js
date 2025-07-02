@@ -20,7 +20,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   },
   {
     title: "Öppna meny bredvid sökfält",
-    element: "#layerswitcher-actions-menu",
+    element: "#layerswitcher-actions-menu-button",
     intro:
       "Klicka på kebabmenyn. <br><br> <b>Menyn innehåller funktioner som:</b> dölj alla aktiva lager, scrolla till toppen av lagerlistan, scrolla till botten av lagerlistan.",
     position: () =>
@@ -28,7 +28,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   },
   {
     title: "Sök meny",
-    element: "#layerswitcher-actions-menu-content",
+    element: "#layerswitcher-actions-menu",
     intro:
       "<b>Dölj alla aktiva lager:</b> Klicka på knappen för att dölja <b>ALLA</b> aktiva lager. <br><br> <b>Scrolla till toppen:</b> Klicka på knappen för att scrolla till toppen av lagerlistan. <br><br> <b>Scrolla till botten:</b> Klicka på knappen för att scrolla till botten av lagerlistan.",
   },
@@ -122,7 +122,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
       "Klicka på favoriter-knappen. <br><br> Menyn innehåller funktioner som att spara till favoriter, redigera favoriter och ladda favoriter.",
   },
   {
-    title: "Mina favoriter meny",
+    title: "Meny för favoriter",
     element: "#favorites-menu",
     intro:
       "Knappen öppnar en meny med verktyg för att gruppera och spara lager i snabbåtkomst (mina favoriter): <br><br> - <b>Spara till favoriter:</b> Sparar en grupp som innehåller ett eller flera lager. Titel och beskrivning av denna grupp kan tillämpas, <i>observera att favoriter endast sparas tillfälligt och lokalt för dig</i>. <br><br> - <b>Redigera favoriter:</b> Hantera sparade lager. <br><br> - <b>Ladda favorit:</b> Vid laddning ersätts lagren i snabbåtkomst. Alla tända lager i kartan släcks och ersätts med favoritens tända lager.",
@@ -159,7 +159,13 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Teman",
     element: "#quick-access-theme-button",
     intro:
-      "<b> - Redigera:</b> Redigera titel och beskrivning för favoriter <br><br> <b> - Ta bort:</b> Tar bort favoriten från listan <br><br> <b> - Exportera:</b> Exporterar favoriten som en .json fil",
+      "Klicka på knappen för att visa teman. <br> Teman är fördefinierade lagergrupper skapade av Hajk-administratörer.",
+  },
+  {
+    title: "Lista för teman",
+    element: "#quick-access-presets-view",
+    intro:
+      "Här kan du se teman som är tillgängliga i kartan. <br><br> Klicka på ett tema för att tända alla lager i det temat. <br><br> Du kan också söka efter teman i sökfältet.",
   },
   {
     title: "Slut",
