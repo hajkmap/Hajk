@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-<!-- ## [Unreleased]
+## [Unreleased]
 
 ### Added
 
@@ -19,7 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-### Security -->
+### Security
+
+- Upgraded dependencies in Client and Backend. [commit](https://github.com/hajkmap/Hajk/commit/2bee79696a66413749fb70c32b5c0b1cb7d4835f) and [commit](https://github.com/hajkmap/Hajk/commit/6f8f1741cfba6cb7eb57bf65943a8af192af7bc2)
 
 ## [4.1.0] - 2025-06-18
 
