@@ -67,19 +67,21 @@ const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherPlugin }) => {
     <Dialog
       open={true}
       onClose={handleClose}
-      PaperProps={{
-        sx: {
-          "& .MuiButton-root": {
-            color: isDarkMode
-              ? theme.palette.text.primary
-              : theme.palette.grey[900],
-            backgroundColor: isDarkMode
-              ? theme.palette.grey[900]
-              : theme.palette.background.default,
-            border: `1px solid ${isDarkMode ? "#fff" : "#000"}`,
-            borderRadius: "50px",
-            "&:hover": {
-              backgroundColor: theme.palette.grey[500],
+      slotProps={{
+        paper: {
+          sx: {
+            "& .MuiButton-root": {
+              color: isDarkMode
+                ? theme.palette.text.primary
+                : theme.palette.grey[900],
+              backgroundColor: isDarkMode
+                ? theme.palette.grey[900]
+                : theme.palette.background.default,
+              border: `1px solid ${isDarkMode ? "#fff" : "#000"}`,
+              borderRadius: "50px",
+              "&:hover": {
+                backgroundColor: theme.palette.grey[500],
+              },
             },
           },
         },
@@ -156,7 +158,7 @@ class Introduction extends React.PureComponent {
       this.props.layerSwitcherPlugin.options.enableQuickAccessPresets;
     this.quickAccessList =
       this.props.layerSwitcherPlugin.options.quickAccessPresets;
-
+    this.isDarkMode = this.props.isDarkMode;
     /**
      * When appLoaded is fired, let's filter through the provided 'steps'.
      * We must remove any steps that don't have corresponding DOM elements.
@@ -340,6 +342,14 @@ class Introduction extends React.PureComponent {
   }
 
   handleDrawerTransition = (previousStep, currentStep) => {
+    const isDrawerPermanent =
+      window.localStorage.getItem("drawerPermanent") === "true";
+
+    // Skip drawer transitions if drawer is permanent
+    if (isDrawerPermanent) {
+      return false;
+    }
+
     // Open drawer transitions
     if (
       (previousStep?.element === "header > div:first-child" &&
@@ -812,6 +822,17 @@ class Introduction extends React.PureComponent {
   //Runs after intro.js has moved to the new step - the DOM is already updated and the highlight is active.
   handleStepChange = (stepIndex) => {
     this.setState({ currentStepIndex: stepIndex });
+
+    const isDarkMode = this.props.isDarkMode;
+
+    const introContainerBox = document.querySelector(".introjs-click-through");
+    if (introContainerBox) {
+      introContainerBox.style.boxShadow = isDarkMode
+        ? "rgba(255, 255, 255, 0.8) 0px 0px 1px 2px, rgba(33, 33, 33, 0.5) 0px 0px 0px 5000px"
+        : undefined;
+    } else {
+      console.log("introjs-click-through class not yet mounted");
+    }
 
     const step = this.state.steps[stepIndex];
     const previousStep = this.state.steps[stepIndex - 1];

@@ -1408,6 +1408,7 @@ class App extends React.PureComponent {
               }
               globalObserver={this.globalObserver}
               layerSwitcherPlugin={this.appModel.plugins.layerswitcher}
+              isDarkMode={this.props.theme.palette.mode === "dark"}
             />
           )}
         </>
