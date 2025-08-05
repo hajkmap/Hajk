@@ -238,6 +238,10 @@ class Introduction extends React.PureComponent {
         ? getFullIntroductionSteps(this.layerSwitcherPlugin)
         : getLayerSwitcherSteps(this.layerSwitcherPlugin);
 
+    if (type === "full") {
+      steps = steps.filter((step) => step.title !== "Hajk 4");
+    }
+
     if (!isDrawOrderEnabled) {
       steps = steps.filter(
         (step) =>
@@ -898,12 +902,26 @@ class Introduction extends React.PureComponent {
     const { initialStep, steps, stepsEnabled, showSelection } = this.state;
 
     // Process steps to evaluate position functions and intro functions
-    const processedSteps = steps.map((step) => ({
-      ...step,
-      position:
-        typeof step.position === "function" ? step.position() : step.position,
-      intro: typeof step.intro === "function" ? step.intro() : step.intro,
-    }));
+    const processedSteps = steps.map((step) => {
+      // Get the position from the step (either function or direct value)
+      let position =
+        typeof step.position === "function" ? step.position() : step.position;
+
+      // If no position is specified and this is a layer switcher step (has an element),
+      // set default position based on layerSwitcherPlugin position
+      if (!position && step.element && this.layerSwitcherPlugin) {
+        position =
+          this.layerSwitcherPlugin.options.position === "right"
+            ? "left"
+            : "right";
+      }
+
+      return {
+        ...step,
+        position: position,
+        intro: typeof step.intro === "function" ? step.intro() : step.intro,
+      };
+    });
 
     return introductionEnabled ? (
       <>

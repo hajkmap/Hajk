@@ -15,16 +15,12 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     element: "#layer-list-filter",
     intro:
       "Mata in text för att söka efter lager. <br><br> Sökresultat visas i lagerlistan nedan.",
-    position: () =>
-      layerSwitcherPlugin.options.position === "right" ? "left" : "right",
   },
   {
     title: "Öppna meny bredvid sökfält",
     element: "#layerswitcher-actions-menu-button",
     intro:
       "Klicka på kebabmenyn. <br><br> <b>Menyn innehåller funktioner som:</b> dölj alla aktiva lager, scrolla till toppen av lagerlistan, scrolla till botten av lagerlistan.",
-    position: () =>
-      layerSwitcherPlugin.options.position === "right" ? "left" : "right",
   },
   {
     title: "Sök meny",
@@ -43,8 +39,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     element: "#toggle-layer-item",
     intro:
       "Klicka för att tända/släcka lager. Lagernamn med <b>fetsil</b> visar att lagret är tänt.",
-    position: () =>
-      layerSwitcherPlugin.options.position === "right" ? "left" : "bottom",
+    position: "bottom",
   },
   {
     title: "Lagerinformation",
@@ -59,7 +54,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Lagerinformations vy",
     element: "#layer-item-details-info",
-    intro: "Här visas eventuell information oOpacitetm ett lager.",
+    intro: "Här visas eventuell information om ett lager.",
   },
   {
     title: "Opacitet",
@@ -83,8 +78,6 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     element: "#draw-order-tab",
     intro:
       "Klicka på Ritordnings-fliken för att se och ändra ritordningen för lagren.",
-    position: () =>
-      layerSwitcherPlugin.options.position === "right" ? "left" : "right",
   },
   {
     title: "Aktivera systemlager",
