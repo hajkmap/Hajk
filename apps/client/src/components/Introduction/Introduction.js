@@ -679,26 +679,57 @@ class Introduction extends React.PureComponent {
       }
 
       if (step?.element === "#favorites-list-options-menu") {
-        chainActionsWithVisibility([
-          {
-            action: () =>
-              document.dispatchEvent(new CustomEvent("favoritesShowButton")),
-            waitFor: "#favorites-list-options-button",
-          },
-          {
-            action: () =>
-              document
-                .querySelector("#favorites-list-options-button")
-                ?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
-            waitFor: "#favorites-list-options-menu",
-            delay: 150,
-          },
-        ]).then(() => {
-          updateStepElement();
-          resolve();
-        });
+        if (
+          (nextStep?.element === "#quick-access-theme-button" &&
+            goingBackward) ||
+          (step?.element === "#favorites-list-options-menu" &&
+            nextStep?.title === "Slut" &&
+            goingBackward)
+        ) {
+          chainActionsWithVisibility([
+            {
+              action: () =>
+                document.dispatchEvent(
+                  new CustomEvent("favoritesShowTransition")
+                ),
+              waitFor: "#favorites-list-options-button",
+            },
+            {
+              action: () =>
+                document
+                  .querySelector("#favorites-list-options-button")
+                  ?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+              waitFor: "#favorites-list-options-menu",
+              delay: 150,
+            },
+          ]).then(() => {
+            updateStepElement();
+            resolve();
+          });
 
-        return;
+          return;
+        }
+
+        if (
+          previousStep?.element === "#favorites-list-options-button" &&
+          goingForward
+        ) {
+          chainActionsWithVisibility([
+            {
+              action: () =>
+                document
+                  .querySelector("#favorites-list-options-button")
+                  ?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+              waitFor: "#favorites-list-options-menu",
+              delay: 150,
+            },
+          ]).then(() => {
+            updateStepElement();
+            resolve();
+          });
+
+          return;
+        }
       }
 
       // Handle back to layer list view transition
@@ -722,7 +753,7 @@ class Introduction extends React.PureComponent {
       }
 
       if (
-        step?.element === "#edit-favorites" ||
+        (step?.element === "#edit-favorites" && goingBackward) ||
         step?.element === "#layerslist-container" ||
         (step?.element === "#quick-access-theme-button" &&
           previousStep?.element === "#favorites-list-options-menu" &&
@@ -732,7 +763,7 @@ class Introduction extends React.PureComponent {
           document.dispatchEvent(new CustomEvent("closeFavoritesListMenu"));
         }
 
-        document.dispatchEvent(new CustomEvent("favoritesBackButton"));
+        document.dispatchEvent(new CustomEvent("favoritesBackTransition"));
         didWaitForFavoritesBack = true;
 
         chainActionsWithVisibility([

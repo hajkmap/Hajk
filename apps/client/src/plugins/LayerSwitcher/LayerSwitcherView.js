@@ -90,6 +90,25 @@ class LayersSwitcherView extends React.PureComponent {
       zIndex: l["zIndex"],
     }));
 
+    // Add event listener for favoritesBackTransition 'Tillbaka' button and handleFavoritesShowTransition 'Redigera Favoriter' button
+    this.handleFavoritesBackTransition = () => {
+      this.toggleHideFavoritesView();
+    };
+
+    document.addEventListener(
+      "favoritesBackTransition",
+      this.handleFavoritesBackTransition
+    );
+
+    this.handleFavoritesShowTransition = () => {
+      this.toggleShowFavoritesView();
+    };
+
+    document.addEventListener(
+      "favoritesShowTransition",
+      this.handleFavoritesShowTransition
+    );
+
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
         this.setState({
@@ -181,16 +200,23 @@ class LayersSwitcherView extends React.PureComponent {
   //since handleFavoritesViewToggle in the Favorites.js component is being passed and used as a prop in both
    FavoritesViewHeader and FavoritesOptions
   */
-  hideFavoritesView = () => {
-    this.setState({
-      displayContentOverlay: null,
-    });
+  toggleHideFavoritesView = () => {
+    if (
+      this.state.displayContentOverlay === "favorites" ||
+      this.state.displayContentOverlay === "quickAccessPresets"
+    ) {
+      this.setState({
+        displayContentOverlay: null,
+      });
+    }
   };
 
-  showFavoritesView = () => {
-    this.setState({
-      displayContentOverlay: "favorites",
-    });
+  toggleShowFavoritesView = () => {
+    if (this.state.displayContentOverlay === null) {
+      this.setState({
+        displayContentOverlay: "favorites",
+      });
+    }
   };
 
   /**
@@ -265,6 +291,18 @@ class LayersSwitcherView extends React.PureComponent {
     }, 1);
   };
 
+  componentWillUnmount() {
+    // Clean up event listener
+    document.removeEventListener(
+      "favoritesBackTransition",
+      this.handleFavoritesBackTransition
+    );
+    document.removeEventListener(
+      "favoritesShowTransition",
+      this.handleFavoritesShowTransition
+    );
+  }
+
   render() {
     const { windowVisible, layersState } = this.props;
 
@@ -328,8 +366,6 @@ class LayersSwitcherView extends React.PureComponent {
             this.handleQuickAccessPresetsToggle({ event: e })
           }
           handleFavoritesViewToggle={this.handleFavoritesViewToggle}
-          hideFavoritesView={this.hideFavoritesView}
-          showFavoritesView={this.showFavoritesView}
           globalObserver={this.globalObserver}
           map={this.props.map}
           app={this.props.app}

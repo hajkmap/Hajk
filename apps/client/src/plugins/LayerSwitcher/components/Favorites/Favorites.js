@@ -22,8 +22,6 @@ import {
 
 function Favorites({
   handleFavoritesViewToggle,
-  hideFavoritesView,
-  showFavoritesView,
   app,
   map,
   favoriteViewDisplay,
@@ -400,8 +398,6 @@ function Favorites({
         <FavoritesViewHeader
           importFavoritesCallback={handleImportFavorites}
           backButtonCallback={handleFavoritesViewToggle}
-          hideFavoritesView={hideFavoritesView}
-          showFavoritesView={showFavoritesView}
           functionalCookiesOk={functionalCookiesOk}
           favoritesInfoText={favoritesInfoText}
         ></FavoritesViewHeader>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useSnackbar } from "notistack";
 
 import { Box, Collapse, IconButton, Stack, Typography } from "@mui/material";
@@ -11,8 +11,6 @@ import HajkToolTip from "components/HajkToolTip";
 function FavoritesViewHeader({
   backButtonCallback,
   importFavoritesCallback,
-  hideFavoritesView,
-  showFavoritesView,
   functionalCookiesOk,
   favoritesInfoText,
 }) {
@@ -33,26 +31,6 @@ function FavoritesViewHeader({
       backButtonCallback();
     }, 100);
   };
-
-  useEffect(() => {
-    const handleIntroBack = () => {
-      setTooltipOpen(false);
-      if (hideFavoritesView) hideFavoritesView();
-    };
-
-    const handleIntroForward = () => {
-      setTooltipOpen(false);
-      if (showFavoritesView) showFavoritesView();
-    };
-
-    document.addEventListener("favoritesBackButton", handleIntroBack);
-    document.addEventListener("favoritesShowButton", handleIntroForward);
-
-    return () => {
-      document.removeEventListener("favoritesBackButton", handleIntroBack);
-      document.removeEventListener("favoritesShowButton", handleIntroForward);
-    };
-  }, [hideFavoritesView, showFavoritesView]);
 
   // Handles click on info button in header
   const handleInfoButtonClick = (e) => {
