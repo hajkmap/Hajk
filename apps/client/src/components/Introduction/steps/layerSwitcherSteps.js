@@ -57,9 +57,9 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     intro: "Här visas eventuell information om ett lager.",
   },
   {
-    title: "Opacitet",
+    title: "Transparens",
     element: "#layer-details-opacity-slider",
-    intro: "Reglage för att ändra opacitet för ett lager.",
+    intro: "Reglage att ändra transparens för ett lager.",
   },
   {
     title: "Lägg till/ta bort lager i snabbåtkomst",

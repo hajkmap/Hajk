@@ -149,16 +149,25 @@ class Introduction extends React.PureComponent {
   constructor(props) {
     super(props);
     this.stepsRef = createRef();
-    this.layerSwitcherPlugin = this.props.layerSwitcherPlugin;
+    this.layerSwitcherPlugin = this.props.plugins.layerswitcher;
     this.showDrawOrderView =
-      this.props.layerSwitcherPlugin.options.showDrawOrderView;
+      this.props.plugins.layerswitcher.options.showDrawOrderView;
     this.showFavorites =
-      this.props.layerSwitcherPlugin.options.enableUserQuickAccessFavorites;
+      this.props.plugins.layerswitcher.options.enableUserQuickAccessFavorites;
     this.showQuickAccessPresets =
-      this.props.layerSwitcherPlugin.options.enableQuickAccessPresets;
+      this.props.plugins.layerswitcher.options.enableQuickAccessPresets;
     this.quickAccessList =
-      this.props.layerSwitcherPlugin.options.quickAccessPresets;
+      this.props.plugins.layerswitcher.options.quickAccessPresets;
     this.isDarkMode = this.props.isDarkMode;
+    this.systemLayersSwitch =
+      this.props.plugins.layerswitcher.options.enableSystemLayersSwitch;
+    this.showQuickAccess =
+      this.props.plugins.layerswitcher.options.showQuickAccess;
+    this.searchPlugin = this.props.plugins?.search || null;
+    this.layerSwitcherSearch =
+      this.props.plugins.layerswitcher.options.showFilter;
+    this.layerSwitcherTransparencySlider =
+      this.props.plugins.layerswitcher.options.enableTransparencySlider;
     /**
      * When appLoaded is fired, let's filter through the provided 'steps'.
      * We must remove any steps that don't have corresponding DOM elements.
@@ -233,6 +242,12 @@ class Introduction extends React.PureComponent {
     const isFavoritesEnabled = this.showFavorites;
     const isFavoritesListEmpty = LocalStorageHelper.get("layerswitcher");
     const isQuickAccessPresetsEnabled = this.showQuickAccessPresets;
+    const isSystemLayersSwitchEnabled = this.systemLayersSwitch;
+    const isQuickAccessEnabled = this.showQuickAccess;
+    const searchPlugin = this.props.plugins?.search || null;
+    const isLayerSwitcherSearchEnabled = this.layerSwitcherSearch;
+    const isLayerSwitcherTransparencySliderEnabled =
+      this.layerSwitcherTransparencySlider;
     let steps =
       type === "full"
         ? getFullIntroductionSteps(this.layerSwitcherPlugin)
@@ -283,6 +298,35 @@ class Introduction extends React.PureComponent {
     if (this.quickAccessList.length === 0) {
       steps = steps.filter(
         (step) => step.element !== "#quick-access-presets-view"
+      );
+    }
+    if (!isSystemLayersSwitchEnabled) {
+      steps = steps.filter((step) => step.element !== "#draw-order-switch");
+    }
+    if (!isQuickAccessEnabled) {
+      steps = steps.filter(
+        (step) => step.element !== "#layer-details-quick-access-button"
+      );
+    }
+    if (!searchPlugin) {
+      steps = steps.filter(
+        (step) =>
+          step.element !== ".MuiAutocomplete-inputRoot" &&
+          step.element !== "#search-options-button" &&
+          step.element !== "#search-tools-menu"
+      );
+    }
+    if (!isLayerSwitcherSearchEnabled) {
+      steps = steps.filter(
+        (step) =>
+          step.element !== "#layer-list-filter" &&
+          step.element !== "#layerswitcher-actions-menu-button" &&
+          step.element !== "#layerswitcher-actions-menu"
+      );
+    }
+    if (!isLayerSwitcherTransparencySliderEnabled) {
+      steps = steps.filter(
+        (step) => step.element !== "#layer-details-opacity-slider"
       );
     }
     this.setState({
@@ -370,7 +414,12 @@ class Introduction extends React.PureComponent {
       (previousStep?.title === "Välkommen" &&
         currentStep?.element === "header > div:first-child") ||
       (previousStep?.element === "#toggle-drawer-permanent" &&
-        currentStep?.element === ".MuiAutocomplete-inputRoot")
+        currentStep?.element === ".MuiAutocomplete-inputRoot") ||
+      (previousStep?.element === "#toggle-drawer-permanent" &&
+        currentStep?.element === "#controls-column" &&
+        !this.state.steps.some(
+          (s) => s.element === ".MuiAutocomplete-inputRoot"
+        ))
     ) {
       this.props.globalObserver.publish("core.hideDrawer");
       return true;
@@ -471,6 +520,11 @@ class Introduction extends React.PureComponent {
     previousStep,
     goingBackward
   ) => {
+    // Check if the quick-access-presets-view step exists in the current steps array
+    const hasQuickAccessPresetsStep = this.state.steps.some(
+      (s) => s.element === "#quick-access-presets-view"
+    );
+
     if (
       (step?.element === "#quick-access-theme-button" &&
         previousStep?.element === "#favorites-list-options-menu" &&
@@ -482,13 +536,16 @@ class Introduction extends React.PureComponent {
         previousStep?.element === "#favorites-menu-button" &&
         goingBackward)
     ) {
-      const menuButton = document.querySelector("#quick-access-back-button");
+      // Only proceed if the quick-access-presets-view step exists
+      if (hasQuickAccessPresetsStep) {
+        const menuButton = document.querySelector("#quick-access-back-button");
 
-      if (menuButton) {
-        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        if (menuButton) {
+          menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        }
+
+        return true;
       }
-
-      return true;
     }
 
     return false;
@@ -642,6 +699,9 @@ class Introduction extends React.PureComponent {
             goingForward) ||
           (step?.element === "#toggle-drawer-permanent" &&
             nextStep?.element === ".MuiAutocomplete-inputRoot" &&
+            goingBackward) ||
+          (step?.element === "#toggle-drawer-permanent" &&
+            nextStep?.element === "#controls-column" &&
             goingBackward);
 
         if (needsDelay) {
@@ -783,7 +843,19 @@ class Introduction extends React.PureComponent {
         return;
       }
 
-      if (step?.element === "#layer-details-quick-access-button") {
+      if (
+        step?.element === "#layer-details-quick-access-button" ||
+        (step?.element === "#layer-details-opacity-slider" &&
+          !this.state.steps.some(
+            (s) => s.element === "#layer-details-quick-access-button"
+          )) ||
+        (step?.element === "#layer-item-details-info" &&
+          !this.state.steps.some(
+            (s) =>
+              s.element === "#layer-details-quick-access-button" &&
+              s.element === "#layer-details-opacity-slider"
+          ))
+      ) {
         // Handle going back to layer details view transition
         const menuButton = document.querySelector("#show-layer-details");
         if (menuButton) {
