@@ -135,6 +135,17 @@ const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherPlugin }) => {
  * @returns React.Component
  */
 class Introduction extends React.PureComponent {
+  static CONSTANTS = {
+    TYPING_INTERVAL: 200,
+    DRAWER_TRANSITION_DELAY: 250,
+    MENU_TRANSITION_DELAY: 200,
+    QUICK_ACCESS_DELAY: 150,
+    FAVORITES_DELAY: 300,
+    APP_LOADED_DELAY: 100,
+    MAX_WAIT_TRIES: 20,
+    ELEMENT_WAIT_DELAY: 100,
+  };
+
   state = {
     forceShow: false, // Used to force showing the Intro, overrides the LocalStorage value
     initialStep: 0,
@@ -149,61 +160,66 @@ class Introduction extends React.PureComponent {
   constructor(props) {
     super(props);
     this.stepsRef = createRef();
-    this.layerSwitcherPlugin = this.props.plugins.layerswitcher;
-    this.showDrawOrderView =
-      this.props.plugins.layerswitcher.options.showDrawOrderView;
+    this.initializePluginReferences(props);
+    this.initializeEventSubscriptions();
+  }
+
+  initializePluginReferences = (props) => {
+    this.layerSwitcherPlugin = props.plugins.layerswitcher;
+    this.showDrawOrderView = this.layerSwitcherPlugin.options.showDrawOrderView;
     this.showFavorites =
-      this.props.plugins.layerswitcher.options.enableUserQuickAccessFavorites;
+      this.layerSwitcherPlugin.options.enableUserQuickAccessFavorites;
     this.showQuickAccessPresets =
-      this.props.plugins.layerswitcher.options.enableQuickAccessPresets;
-    this.quickAccessList =
-      this.props.plugins.layerswitcher.options.quickAccessPresets;
-    this.isDarkMode = this.props.isDarkMode;
+      this.layerSwitcherPlugin.options.enableQuickAccessPresets;
+    this.quickAccessList = this.layerSwitcherPlugin.options.quickAccessPresets;
+    this.isDarkMode = props.isDarkMode;
     this.systemLayersSwitch =
-      this.props.plugins.layerswitcher.options.enableSystemLayersSwitch;
-    this.showQuickAccess =
-      this.props.plugins.layerswitcher.options.showQuickAccess;
-    this.searchPlugin = this.props.plugins?.search || null;
-    this.layerSwitcherSearch =
-      this.props.plugins.layerswitcher.options.showFilter;
+      this.layerSwitcherPlugin.options.enableSystemLayersSwitch;
+    this.showQuickAccess = this.layerSwitcherPlugin.options.showQuickAccess;
+    this.searchPlugin = props.plugins?.search || null;
+    this.layerSwitcherSearch = this.layerSwitcherPlugin.options.showFilter;
     this.layerSwitcherTransparencySlider =
-      this.props.plugins.layerswitcher.options.enableTransparencySlider;
+      this.layerSwitcherPlugin.options.enableTransparencySlider;
+  };
+
+  initializeEventSubscriptions = () => {
     /**
      * When appLoaded is fired, let's filter through the provided 'steps'.
      * We must remove any steps that don't have corresponding DOM elements.
      * Otherwise, we would show intro steps even for non-existing elements,
      * which wouldn't be nice.
      */
-    this.props.globalObserver.subscribe("core.appLoaded", () => {
-      // Allow a short wait so that everything renders first
-      setTimeout(() => {
-        // First check if we have any steps in our config
-        const { introductionSteps = [] } = this.props;
-        const isValidStep = (step) =>
-          step.element === undefined ||
-          document.querySelector(step.element) !== null;
-        // We must have at least 2 elements in the array in order to properly show intro guide
-        const steps =
-          introductionSteps.length >= 2
-            ? this.#tryParsingSteps(introductionSteps)
-            : getFullIntroductionSteps(this.layerSwitcherPlugin);
-
-        const filteredSteps = steps.filter(isValidStep);
-
-        this.setState({ steps: filteredSteps });
-
-        // Show selection screen if introduction hasn't been shown before
-        if (parseInt(window.localStorage.getItem("introductionShown")) !== 1) {
-          this.setState({ showSelection: true });
-        }
-      }, 100);
-    });
-
+    this.props.globalObserver.subscribe("core.appLoaded", this.handleAppLoaded);
     this.props.globalObserver.subscribe(
       "core.showIntroduction",
       this.showIntroduction
     );
-  }
+  };
+
+  handleAppLoaded = () => {
+    // Allow a short wait so that everything renders first
+    setTimeout(() => {
+      // First check if we have any steps in our config
+      const { introductionSteps = [] } = this.props;
+      const isValidStep = (step) =>
+        step.element === undefined ||
+        document.querySelector(step.element) !== null;
+      // We must have at least 2 elements in the array in order to properly show intro guide
+      const steps =
+        introductionSteps.length >= 2
+          ? this.#tryParsingSteps(introductionSteps)
+          : getFullIntroductionSteps(this.layerSwitcherPlugin);
+
+      const filteredSteps = steps.filter(isValidStep);
+
+      this.updateStepState({ steps: filteredSteps });
+
+      // Show selection screen if introduction hasn't been shown before
+      if (parseInt(window.localStorage.getItem("introductionShown")) !== 1) {
+        this.updateStepState({ showSelection: true });
+      }
+    }, Introduction.CONSTANTS.APP_LOADED_DELAY);
+  };
 
   #tryParsingSteps(steps) {
     try {
@@ -222,7 +238,7 @@ class Introduction extends React.PureComponent {
   }
 
   showIntroduction() {
-    this.setState({
+    this.updateStepState({
       initialStep: 0,
       stepsEnabled: true,
       forceShow: true,
@@ -233,21 +249,20 @@ class Introduction extends React.PureComponent {
   handleIntroSelection = (type) => {
     this.props.globalObserver.publish("layerswitcher.showWindow");
 
-    this.setState({
+    this.updateStepState({
       showSelection: false,
     });
 
-    // Determine which steps to show based on settings for layerswicher in admin.
-    const isDrawOrderEnabled = this.showDrawOrderView;
-    const isFavoritesEnabled = this.showFavorites;
-    const isFavoritesListEmpty = LocalStorageHelper.get("layerswitcher");
-    const isQuickAccessPresetsEnabled = this.showQuickAccessPresets;
-    const isSystemLayersSwitchEnabled = this.systemLayersSwitch;
-    const isQuickAccessEnabled = this.showQuickAccess;
-    const searchPlugin = this.props.plugins?.search || null;
-    const isLayerSwitcherSearchEnabled = this.layerSwitcherSearch;
-    const isLayerSwitcherTransparencySliderEnabled =
-      this.layerSwitcherTransparencySlider;
+    const steps = this.getFilteredSteps(type);
+
+    this.updateStepState({
+      steps: steps,
+      forceShow: true,
+      stepsEnabled: true,
+    });
+  };
+
+  getFilteredSteps = (type) => {
     let steps =
       type === "full"
         ? getFullIntroductionSteps(this.layerSwitcherPlugin)
@@ -257,91 +272,101 @@ class Introduction extends React.PureComponent {
       steps = steps.filter((step) => step.title !== "Hajk 4");
     }
 
-    if (!isDrawOrderEnabled) {
-      steps = steps.filter(
-        (step) =>
-          step.element !== "#draw-order-tab" &&
-          step.element !== "#draw-order-switch" &&
-          step.element !== ".draw-order-list"
-      );
-    }
-    if (!isFavoritesEnabled) {
-      steps = steps.filter(
-        (step) =>
-          step.element !== "#favorites-menu-button" &&
-          step.element !== "#favorites-menu" &&
-          step.element !== "#edit-favorites" &&
-          step.element !== "#import-favorites-button" &&
-          step.element !== ".favorites-list-view" &&
-          step.element !== "#favorites-list-options-button" &&
-          step.element !== "#favorites-list-options-menu"
-      );
-    }
-    if (isFavoritesListEmpty.savedLayers?.length === 0) {
-      steps = steps.filter(
-        (step) =>
-          step.element !== "#favorites-menu" &&
-          step.element !== "#edit-favorites" &&
-          step.element !== "#import-favorites-button" &&
-          step.element !== ".favorites-list-view" &&
-          step.element !== "#favorites-list-options-button" &&
-          step.element !== "#favorites-list-options-menu"
-      );
-    }
-    if (!isQuickAccessPresetsEnabled) {
-      steps = steps.filter(
-        (step) =>
-          step.element !== "#quick-access-theme-button" &&
-          step.element !== "#quick-access-presets-view"
-      );
-    }
-    if (this.quickAccessList.length === 0) {
-      steps = steps.filter(
-        (step) => step.element !== "#quick-access-presets-view"
-      );
-    }
-    if (!isSystemLayersSwitchEnabled) {
-      steps = steps.filter((step) => step.element !== "#draw-order-switch");
-    }
-    if (!isQuickAccessEnabled) {
-      steps = steps.filter(
-        (step) => step.element !== "#layer-details-quick-access-button"
-      );
-    }
-    if (!searchPlugin) {
-      steps = steps.filter(
-        (step) =>
-          step.element !== ".MuiAutocomplete-inputRoot" &&
-          step.element !== "#search-options-button" &&
-          step.element !== "#search-tools-menu"
-      );
-    }
-    if (!isLayerSwitcherSearchEnabled) {
-      steps = steps.filter(
-        (step) =>
-          step.element !== "#layer-list-filter" &&
-          step.element !== "#layerswitcher-actions-menu-button" &&
-          step.element !== "#layerswitcher-actions-menu"
-      );
-    }
-    if (!isLayerSwitcherTransparencySliderEnabled) {
-      steps = steps.filter(
-        (step) => step.element !== "#layer-details-opacity-slider"
-      );
-    }
-    this.setState({
-      steps: steps,
-      forceShow: true,
-      stepsEnabled: true,
-    });
+    // Apply all filters
+    steps = this.applyStepFilters(steps);
+
+    return steps;
+  };
+
+  applyStepFilters = (steps) => {
+    const filters = [
+      {
+        condition: !this.showDrawOrderView,
+        elements: ["#draw-order-tab", "#draw-order-switch", ".draw-order-list"],
+      },
+      {
+        condition: !this.showFavorites,
+        elements: [
+          "#favorites-menu-button",
+          "#favorites-menu",
+          "#edit-favorites",
+          "#import-favorites-button",
+          ".favorites-list-view",
+          "#favorites-list-options-button",
+          "#favorites-list-options-menu",
+        ],
+      },
+      {
+        condition:
+          LocalStorageHelper.get("layerswitcher").savedLayers?.length === 0,
+        elements: [
+          "#favorites-menu",
+          "#edit-favorites",
+          "#import-favorites-button",
+          ".favorites-list-view",
+          "#favorites-list-options-button",
+          "#favorites-list-options-menu",
+        ],
+      },
+      {
+        condition: !this.showQuickAccessPresets,
+        elements: ["#quick-access-theme-button", "#quick-access-presets-view"],
+      },
+      {
+        condition: this.quickAccessList.length === 0,
+        elements: ["#quick-access-presets-view"],
+      },
+      {
+        condition: !this.systemLayersSwitch,
+        elements: ["#draw-order-switch"],
+      },
+      {
+        condition: !this.showQuickAccess,
+        elements: ["#layer-details-quick-access-button"],
+      },
+      {
+        condition: !this.searchPlugin,
+        elements: [
+          ".MuiAutocomplete-inputRoot",
+          "#search-options-button",
+          "#search-tools-menu",
+        ],
+      },
+      {
+        condition: !this.layerSwitcherSearch,
+        elements: [
+          "#layer-list-filter",
+          "#layerswitcher-actions-menu-button",
+          "#layerswitcher-actions-menu",
+        ],
+      },
+      {
+        condition: !this.layerSwitcherTransparencySlider,
+        elements: ["#layer-details-opacity-slider"],
+      },
+    ];
+
+    return filters.reduce((filteredSteps, filter) => {
+      if (filter.condition) {
+        return filteredSteps.filter(
+          (step) => !filter.elements.includes(step.element)
+        );
+      }
+      return filteredSteps;
+    }, steps);
   };
 
   handleSelectionClose = () => {
-    this.setState({
+    this.updateStepState({
       showSelection: false,
       forceShow: false,
       stepsEnabled: false,
     });
+  };
+
+  // Consolidate related state updates
+  updateStepState = (updates) => {
+    this.setState(updates);
   };
 
   disableSteps = () => {
@@ -367,12 +392,51 @@ class Introduction extends React.PureComponent {
     }
 
     // Reset the state
-    this.setState({
+    this.updateStepState({
       forceShow: false,
       initialStep: 0,
       showSelection: false,
     });
   };
+
+  // Consolidate menu transition handlers
+  handleMenuTransition = (
+    step,
+    menuSelector,
+    buttonSelector,
+    delay = Introduction.CONSTANTS.MENU_TRANSITION_DELAY
+  ) => {
+    if (step?.element === menuSelector) {
+      const menuButton = document.querySelector(buttonSelector);
+      if (menuButton) {
+        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        return true;
+      }
+    }
+    return false;
+  };
+
+  handleSearchOptionsMenuTransition = (step) =>
+    this.handleMenuTransition(
+      step,
+      "#search-tools-menu",
+      "#search-options-button"
+    );
+
+  handleLayerSwitcherMenuTransition = (step) =>
+    this.handleMenuTransition(
+      step,
+      "#layerswitcher-actions-menu",
+      "#layerswitcher-actions-menu-button"
+    );
+
+  handleQuickAccessMenuTransition = (step) =>
+    this.handleMenuTransition(
+      step,
+      "#quick-access-menu-content",
+      "#quick-access-menu-button",
+      Introduction.CONSTANTS.QUICK_ACCESS_DELAY
+    );
 
   // Render a control button that allows the user to invoke the guide on demand
   renderControlButton() {
@@ -425,41 +489,6 @@ class Introduction extends React.PureComponent {
       return true;
     }
 
-    return false;
-  };
-
-  handleSearchOptionsMenuTransition = (step) => {
-    if (step?.element === "#search-tools-menu") {
-      const menuButton = document.querySelector("#search-options-button");
-      if (menuButton) {
-        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      }
-      return true;
-    }
-    return false;
-  };
-
-  handleLayerSwitcherMenuTransition = (step) => {
-    if (step?.element === "#layerswitcher-actions-menu") {
-      const menuButton = document.querySelector(
-        "#layerswitcher-actions-menu-button"
-      );
-      if (menuButton) {
-        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      }
-      return true;
-    }
-    return false;
-  };
-
-  handleQuickAccessMenuTransition = (step) => {
-    if (step?.element === "#quick-access-menu-content") {
-      const menuButton = document.querySelector("#quick-access-menu-button");
-      if (menuButton) {
-        menuButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      }
-      return true;
-    }
     return false;
   };
 
@@ -551,6 +580,186 @@ class Introduction extends React.PureComponent {
     return false;
   };
 
+  // Extract search field handling
+  handleSearchFieldTransition = (
+    step,
+    previousStep,
+    nextStep,
+    goingForward,
+    goingBackward
+  ) => {
+    if (step?.element === "#layer-list-filter") {
+      const searchField = document.querySelector("#layer-list-filter input");
+      if (searchField) {
+        // Clear any existing value and interval
+        searchField.value = "";
+        if (this.state.typingInterval) {
+          clearInterval(this.state.typingInterval);
+        }
+
+        // Function to type one character
+        const typeChar = () => {
+          const texts = [
+            "Badplatser",
+            "Lekplatser",
+            "Gymnasieskolor",
+            "Sevärdheter",
+          ];
+          let textIndex = 0;
+          let charIndex = 0;
+
+          return () => {
+            // If we've finished typing the current text
+            if (charIndex >= texts[textIndex].length) {
+              // Move to next text or back to first text
+              textIndex = (textIndex + 1) % texts.length;
+              charIndex = 0;
+              searchField.value = "";
+            }
+
+            searchField.value += texts[textIndex][charIndex];
+            searchField.dispatchEvent(new Event("input", { bubbles: true }));
+            charIndex++;
+          };
+        };
+
+        // Start the typing loop
+        const interval = setInterval(
+          typeChar(),
+          Introduction.CONSTANTS.TYPING_INTERVAL
+        );
+        this.setState({ typingInterval: interval });
+        return true;
+      }
+    }
+
+    // Clear typing interval when moving away from search field
+    if (
+      (previousStep?.element === "#layer-list-filter" && goingForward) ||
+      (nextStep?.element === "#layer-list-filter" && goingBackward)
+    ) {
+      if (this.state.typingInterval) {
+        clearInterval(this.state.typingInterval);
+        this.setState({ typingInterval: null });
+
+        const searchField = document.querySelector("#layer-list-filter input");
+        if (searchField) {
+          searchField.value = "";
+          searchField.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      }
+    }
+    return false;
+  };
+
+  // Extract tab switching logic
+  handleTabSwitching = (step, goingForward, goingBackward) => {
+    // Handle Kartlager tab switch
+    if (
+      (step?.element === "#layerslist-container" && goingForward) ||
+      (step?.element === "#show-layer-details" && goingBackward) ||
+      (step?.element === "#quick-access-view" && goingForward)
+    ) {
+      const tabs = document.querySelector(
+        "#layer-switcher-tab-panel .MuiTabs-root"
+      );
+      if (tabs) {
+        const activeTab = tabs.querySelector(".Mui-selected");
+        if (activeTab && activeTab.textContent !== "Kartlager") {
+          const firstTab = tabs.querySelector(".MuiTab-root");
+          if (firstTab) {
+            firstTab.click();
+            return true;
+          }
+        }
+      }
+    }
+
+    // Handle Ritordning tab switch
+    if (
+      step?.element === "#draw-order-tab" ||
+      step?.element === ".draw-order-list"
+    ) {
+      const tabs = document.querySelector(
+        "#layer-switcher-tab-panel .MuiTabs-root"
+      );
+      if (tabs) {
+        const tabElements = tabs.querySelectorAll(".MuiTab-root");
+        const ritordningTab = Array.from(tabElements).find(
+          (tab) => tab.textContent === "Ritordning"
+        );
+        if (ritordningTab) {
+          ritordningTab.click();
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  // Extract favorites transitions
+  handleFavoritesTransitions = (
+    step,
+    previousStep,
+    nextStep,
+    goingForward,
+    goingBackward,
+    resolve,
+    updateStepElement
+  ) => {
+    if (step?.element === "#favorites-list-options-menu") {
+      if (
+        (nextStep?.element === "#quick-access-theme-button" && goingBackward) ||
+        (step?.element === "#favorites-list-options-menu" &&
+          nextStep?.title === "Slut" &&
+          goingBackward)
+      ) {
+        chainActionsWithVisibility([
+          {
+            action: () =>
+              document.dispatchEvent(
+                new CustomEvent("favoritesShowTransition")
+              ),
+            waitFor: "#favorites-list-options-button",
+          },
+          {
+            action: () =>
+              document
+                .querySelector("#favorites-list-options-button")
+                ?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+            waitFor: "#favorites-list-options-menu",
+            delay: 150,
+          },
+        ]).then(() => {
+          updateStepElement();
+          resolve();
+        });
+        return true;
+      }
+
+      if (
+        previousStep?.element === "#favorites-list-options-button" &&
+        goingForward
+      ) {
+        chainActionsWithVisibility([
+          {
+            action: () =>
+              document
+                .querySelector("#favorites-list-options-button")
+                ?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+            waitFor: "#favorites-list-options-menu",
+            delay: 150,
+          },
+        ]).then(() => {
+          updateStepElement();
+          resolve();
+        });
+        return true;
+      }
+    }
+    return false;
+  };
+
   /* Runs before the step UI changes, and must return a promise so that we can delay transititions, perform asynchronous operations
    (e.g. open menus, etc.)
    Waiting for a drawer/menu to render before moving to the next step
@@ -585,112 +794,26 @@ class Introduction extends React.PureComponent {
       };
 
       // Handle search field demonstration
-      if (step?.element === "#layer-list-filter") {
-        const searchField = document.querySelector("#layer-list-filter input");
-        if (searchField) {
-          // Clear any existing value and interval
-          searchField.value = "";
-          if (this.state.typingInterval) {
-            clearInterval(this.state.typingInterval);
-          }
-
-          // Function to type one character
-          const typeChar = () => {
-            const texts = [
-              "Badplatser",
-              "Lekplatser",
-              "Gymnasieskolor",
-              "Sevärdheter",
-            ];
-            let textIndex = 0;
-            let charIndex = 0;
-
-            return () => {
-              // If we've finished typing the current text
-              if (charIndex >= texts[textIndex].length) {
-                // Move to next text or back to first text
-                textIndex = (textIndex + 1) % texts.length;
-                charIndex = 0;
-                searchField.value = "";
-              }
-
-              searchField.value += texts[textIndex][charIndex];
-              searchField.dispatchEvent(new Event("input", { bubbles: true }));
-              charIndex++;
-            };
-          };
-
-          // Start the typing loop
-          const interval = setInterval(typeChar(), 200);
-          this.setState({ typingInterval: interval });
-
-          updateStepElement();
-          resolve();
-          return;
-        }
-      }
-      // Clear typing interval when moving to next step
       if (
-        (previousStep?.element === "#layer-list-filter" && goingForward) ||
-        (nextStep?.element === "#layer-list-filter" && goingBackward)
+        this.handleSearchFieldTransition(
+          step,
+          previousStep,
+          nextStep,
+          goingForward,
+          goingBackward
+        )
       ) {
-        if (this.state.typingInterval) {
-          clearInterval(this.state.typingInterval);
-          this.setState({ typingInterval: null });
-
-          // Clear the search field
-          const searchField = document.querySelector(
-            "#layer-list-filter input"
-          );
-          if (searchField) {
-            searchField.value = "";
-            searchField.dispatchEvent(new Event("input", { bubbles: true }));
-          }
-        }
+        updateStepElement();
+        resolve();
+        return;
       }
 
-      // Handle Kartlager tab switch
-      if (
-        (step?.element === "#layerslist-container" && goingForward) ||
-        (step?.element === "#show-layer-details" && goingBackward) ||
-        (step?.element === "#quick-access-view" && goingForward)
-      ) {
-        const tabs = document.querySelector(
-          "#layer-switcher-tab-panel .MuiTabs-root"
-        );
-        if (tabs) {
-          const activeTab = tabs.querySelector(".Mui-selected");
-          if (activeTab && activeTab.textContent !== "Kartlager") {
-            const firstTab = tabs.querySelector(".MuiTab-root");
-            if (firstTab) {
-              firstTab.click();
-              resolve();
-              return;
-            }
-          }
-        }
+      // Handle tab switching
+      if (this.handleTabSwitching(step, goingForward, goingBackward)) {
+        resolve();
+        return;
       }
 
-      // Handle Ritordning tab switch
-      if (
-        step?.element === "#draw-order-tab" ||
-        step?.element === ".draw-order-list"
-      ) {
-        const tabs = document.querySelector(
-          "#layer-switcher-tab-panel .MuiTabs-root"
-        );
-        if (tabs) {
-          const tabElements = tabs.querySelectorAll(".MuiTab-root");
-          const ritordningTab = Array.from(tabElements).find(
-            (tab) => tab.textContent === "Ritordning"
-          );
-          if (ritordningTab) {
-            ritordningTab.click();
-            resolve();
-            return;
-          }
-        }
-      }
       // Handle drawer transitions
       if (this.handleDrawerTransition(previousStep, step)) {
         const needsDelay =
@@ -705,7 +828,7 @@ class Introduction extends React.PureComponent {
             goingBackward);
 
         if (needsDelay) {
-          setTimeout(resolve, 250);
+          setTimeout(resolve, Introduction.CONSTANTS.DRAWER_TRANSITION_DELAY);
         } else {
           resolve();
         }
@@ -738,58 +861,19 @@ class Introduction extends React.PureComponent {
         }
       }
 
-      if (step?.element === "#favorites-list-options-menu") {
-        if (
-          (nextStep?.element === "#quick-access-theme-button" &&
-            goingBackward) ||
-          (step?.element === "#favorites-list-options-menu" &&
-            nextStep?.title === "Slut" &&
-            goingBackward)
-        ) {
-          chainActionsWithVisibility([
-            {
-              action: () =>
-                document.dispatchEvent(
-                  new CustomEvent("favoritesShowTransition")
-                ),
-              waitFor: "#favorites-list-options-button",
-            },
-            {
-              action: () =>
-                document
-                  .querySelector("#favorites-list-options-button")
-                  ?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
-              waitFor: "#favorites-list-options-menu",
-              delay: 150,
-            },
-          ]).then(() => {
-            updateStepElement();
-            resolve();
-          });
-
-          return;
-        }
-
-        if (
-          previousStep?.element === "#favorites-list-options-button" &&
-          goingForward
-        ) {
-          chainActionsWithVisibility([
-            {
-              action: () =>
-                document
-                  .querySelector("#favorites-list-options-button")
-                  ?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
-              waitFor: "#favorites-list-options-menu",
-              delay: 150,
-            },
-          ]).then(() => {
-            updateStepElement();
-            resolve();
-          });
-
-          return;
-        }
+      // Handle favorites transitions
+      if (
+        this.handleFavoritesTransitions(
+          step,
+          previousStep,
+          nextStep,
+          goingForward,
+          goingBackward,
+          resolve,
+          updateStepElement
+        )
+      ) {
+        return;
       }
 
       // Handle back to layer list view transition
@@ -834,7 +918,7 @@ class Introduction extends React.PureComponent {
           updateStepElement();
 
           if (this.handleFavoritesMenuTransition(step)) {
-            handleTransition(() => {}, 300);
+            handleTransition(() => {}, Introduction.CONSTANTS.FAVORITES_DELAY);
           } else {
             resolve();
           }
@@ -870,19 +954,25 @@ class Introduction extends React.PureComponent {
 
       // Handle search options menu transitions
       if (this.handleSearchOptionsMenuTransition(step)) {
-        handleTransition(() => {}, 200);
+        handleTransition(
+          () => {},
+          Introduction.CONSTANTS.MENU_TRANSITION_DELAY
+        );
         return;
       }
 
       // Handle menu content transitions
       if (this.handleLayerSwitcherMenuTransition(step)) {
-        handleTransition(() => {}, 200);
+        handleTransition(
+          () => {},
+          Introduction.CONSTANTS.MENU_TRANSITION_DELAY
+        );
         return;
       }
 
       // Handle quick access menu transitions
       if (this.handleQuickAccessMenuTransition(step)) {
-        handleTransition(() => {}, 150);
+        handleTransition(() => {}, Introduction.CONSTANTS.QUICK_ACCESS_DELAY);
         return;
       }
 
@@ -898,7 +988,7 @@ class Introduction extends React.PureComponent {
         !didWaitForFavoritesBack &&
         this.handleFavoritesMenuTransition(step)
       ) {
-        handleTransition(() => {}, 300);
+        handleTransition(() => {}, Introduction.CONSTANTS.FAVORITES_DELAY);
         return;
       }
 
@@ -906,7 +996,7 @@ class Introduction extends React.PureComponent {
       if (
         this.handleQuickAccessThemeTransition(step, previousStep, goingForward)
       ) {
-        handleTransition(() => {}, 150);
+        handleTransition(() => {}, Introduction.CONSTANTS.QUICK_ACCESS_DELAY);
         return;
       }
 
@@ -917,7 +1007,7 @@ class Introduction extends React.PureComponent {
           goingBackward
         )
       ) {
-        handleTransition(() => {}, 150);
+        handleTransition(() => {}, Introduction.CONSTANTS.QUICK_ACCESS_DELAY);
         return;
       }
 
@@ -1004,14 +1094,42 @@ class Introduction extends React.PureComponent {
     const { introductionEnabled, introductionShowControlButton } = this.props;
     const { initialStep, steps, stepsEnabled, showSelection } = this.state;
 
-    // Process steps to evaluate position functions and intro functions
-    const processedSteps = steps.map((step) => {
-      // Get the position from the step (either function or direct value)
+    if (!introductionEnabled) return null;
+
+    const processedSteps = this.processSteps(steps);
+    const shouldShowIntro = this.shouldShowIntroduction();
+
+    return (
+      <>
+        {introductionShowControlButton && this.renderControlButton()}
+        {showSelection && (
+          <IntroSelectionScreen
+            onSelect={this.handleIntroSelection}
+            onClose={this.handleSelectionClose}
+            layerSwitcherPlugin={this.layerSwitcherPlugin}
+          />
+        )}
+        {!showSelection && shouldShowIntro && (
+          <Steps
+            ref={this.stepsRef}
+            enabled={stepsEnabled}
+            steps={processedSteps}
+            initialStep={initialStep}
+            onExit={this.disableSteps}
+            onBeforeChange={this.handleBeforeStepChange}
+            onAfterChange={this.handleStepChange}
+            options={this.getIntroOptions()}
+          />
+        )}
+      </>
+    );
+  }
+
+  processSteps = (steps) => {
+    return steps.map((step) => {
       let position =
         typeof step.position === "function" ? step.position() : step.position;
 
-      // If no position is specified and this is a layer switcher step (has an element),
-      // set default position based on layerSwitcherPlugin position
       if (!position && step.element && this.layerSwitcherPlugin) {
         position =
           this.layerSwitcherPlugin.options.position === "right"
@@ -1025,46 +1143,25 @@ class Introduction extends React.PureComponent {
         intro: typeof step.intro === "function" ? step.intro() : step.intro,
       };
     });
+  };
 
-    return introductionEnabled ? (
-      <>
-        {introductionShowControlButton && this.renderControlButton()}
-        {showSelection && (
-          <IntroSelectionScreen
-            onSelect={this.handleIntroSelection}
-            onClose={this.handleSelectionClose}
-            layerSwitcherPlugin={this.layerSwitcherPlugin}
-          />
-        )}
-        {!showSelection &&
-          steps.length >= 2 &&
-          // Show only once per browser, or override if forced by a user action.
-          (parseInt(window.localStorage.getItem("introductionShown")) !== 1 ||
-            this.state.forceShow === true) && (
-            <Steps
-              ref={this.stepsRef}
-              enabled={stepsEnabled}
-              steps={processedSteps}
-              initialStep={initialStep}
-              onExit={this.disableSteps}
-              onBeforeChange={(nextStepIndex) =>
-                this.handleBeforeStepChange(nextStepIndex)
-              }
-              onAfterChange={this.handleStepChange}
-              options={{
-                highlightClass: "introjs-click-through",
-                exitOnOverlayClick: false,
-                nextLabel: "Nästa",
-                prevLabel: "Föregående",
-                doneLabel: "Klart!",
-                showBullets: false,
-                showProgress: true,
-              }}
-            />
-          )}
-      </>
-    ) : null;
-  }
+  shouldShowIntroduction = () => {
+    return (
+      this.state.steps.length >= 2 &&
+      (parseInt(window.localStorage.getItem("introductionShown")) !== 1 ||
+        this.state.forceShow === true)
+    );
+  };
+
+  getIntroOptions = () => ({
+    highlightClass: "introjs-click-through",
+    exitOnOverlayClick: false,
+    nextLabel: "Nästa",
+    prevLabel: "Föregående",
+    doneLabel: "Klart!",
+    showBullets: false,
+    showProgress: true,
+  });
 }
 
 export default Introduction;

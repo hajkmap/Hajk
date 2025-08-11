@@ -5,7 +5,7 @@ const getInitialSteps = () => [
   {
     title: "Välkommen",
     intro:
-      "Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Häng med!",
+      "Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Följ med!",
   },
   {
     title: "Verktygspanel",
@@ -26,7 +26,7 @@ const getInitialSteps = () => [
     title: "Sökruta",
     element: ".MuiAutocomplete-inputRoot",
     intro:
-      "Sökrutan hittar du här.<br /><br /> Med hjälp av sökverktyget hittar du enkelt till rätt ställe i kartan.",
+      "Sökrutan hittar du här.<br /><br /> Med hjälp av sökverktyget hittar du enkelt till rätt plats i kartan.",
   },
   {
     title: "Fler sökalternativ",

@@ -2,19 +2,19 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Hajk 4",
     intro:
-      "Detta är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br> Observera att du inte kan utföra några åtgärder som att klicka på knappar under introduktionen, detta är enbart för att illustrera hur den nya lagerhanteraren fungerar med mera.",
+      "Detta är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br> Observera att du inte kan utföra några åtgärder som att klicka på knappar under introduktionen. Detta är endast för att illustrera hur den nya lagerhanteraren fungerar.",
   },
   {
     title: "Lagerlista",
     element: "#layerslist-container",
     intro:
-      "Här finns lagerlistan där du kan se alla lager som är tillgängliga i kartan. <br><br> Du kan söka efter lager, tända/släcka lager och se information om varje lager.",
+      "Här finns lagerlistan där du kan se alla lager som är tillgängliga i kartan. <br><br> Du kan söka efter lager, aktivera/inaktivera lager och se information om varje lager.",
   },
   {
     title: "Sök lager",
     element: "#layer-list-filter",
     intro:
-      "Mata in text för att söka efter lager. <br><br> Sökresultat visas i lagerlistan nedan.",
+      "Ange text för att söka efter lager. <br><br> Sökresultaten visas i lagerlistan nedan.",
   },
   {
     title: "Öppna meny bredvid sökfält",
@@ -32,46 +32,46 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Lagergrupp",
     element: "#layerGroup-accordion-arrow-button",
     intro:
-      "Pil indikerar lagergrupp. Klicka för att se underliggande lager. <br/><br/> Notera att lagergruppnamns med <b>fetstil</b> innehåller tända lager.",
+      "Pilen indikerar en lagergrupp. Klicka för att se underliggande lager. <br/><br/> Notera att lagergruppnamn med <b>fetstil</b> innehåller aktiverade lager.",
   },
   {
-    title: "Tänd lager",
+    title: "Aktivera lager",
     element: "#toggle-layer-item",
     intro:
-      "Klicka för att tända/släcka lager. Lagernamn med <b>fetsil</b> visar att lagret är tänt.",
+      "Klicka för att aktivera/inaktivera lager. Lagernamn med <b>fetstil</b> visar att lagret är aktiverat.",
     position: "bottom",
   },
   {
     title: "Lagerinformation",
     element: "#show-layer-details",
-    intro: "Klicka för att se mer information om ett lager.",
+    intro: "Klicka för att se mer information om lagret.",
   },
   {
     title: "Teckenförklaring",
     element: "#toggle-legend-icon",
-    intro: "Knappen visar teckenförklaring.",
+    intro: "Knappen visar teckenförklaringen.",
   },
   {
-    title: "Lagerinformations vy",
+    title: "Lagerinformationsvy",
     element: "#layer-item-details-info",
-    intro: "Här visas eventuell information om ett lager.",
+    intro: "Här visas eventuell information om lagret.",
   },
   {
     title: "Transparens",
     element: "#layer-details-opacity-slider",
-    intro: "Reglage att ändra transparens för ett lager.",
+    intro: "Reglaget används för att ändra transparensen för lagret.",
   },
   {
     title: "Lägg till/ta bort lager i snabbåtkomst",
     element: "#layer-details-quick-access-button",
     intro:
-      "Knappen lägger till/tar bort ett lager från snabbåtkomst menyn i lagervyn.",
+      "Knappen lägger till eller tar bort lagret från snabbåtkomstmenyn i lagervyn.",
   },
   {
     title: "Flikar i lagerhanteraren",
     element: "#layer-switcher-tab-panel",
     intro: () =>
-      `Klicka här för att växla mellan olika vyer: <br><br> - Kartlager <br> - Bakgrund <br>${layerSwitcherPlugin.options.showDrawOrderView ? "- Ritordning: Här kan du ändra ritordning på tända lager i kartan" : ""}`,
+      `Klicka här för att växla mellan olika vyer: <br><br> - Kartlager <br> - Bakgrund <br>${layerSwitcherPlugin.options.showDrawOrderView ? "- Ritordning: Här kan du ändra ritordningen för aktiverade lager i kartan" : ""}`,
   },
   {
     title: "Ritordning",
@@ -83,7 +83,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Aktivera systemlager",
     element: "#draw-order-switch",
     intro:
-      "Klicka för att visa systemlager i lagerlistan och ändra ritordning av lager genererade av verktyg.",
+      "Klicka för att visa systemlager i lagerlistan och ändra ritordningen för lager som genereras av verktyg.",
   },
   {
     title: "Lista över systemlager",
@@ -100,25 +100,25 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Snabbåtkomst meny",
     element: "#quick-access-menu-button",
     intro:
-      "Klicka på kebabmenyn i snabbåtkomst.<br><br> <b>Menyn innehåller funktioner som:</b> <br> - Lägg till tända lager <br> - Rensa allt",
+      "Klicka på kebabmenyn i snabbåtkomst.<br><br> <b>Menyn innehåller funktioner som:</b> <br> - Lägg till aktiverade lager <br> - Rensa allt",
   },
   {
     title: "Snabbåtkomst meny innehåll",
     element: "#quick-access-menu-content",
     intro:
-      "<b>Lägg till tända lager:</b> Klicka för att lägga till alla tända lager i snabbåtkomst. <br><br> <b>Rensa allt:</b> Klicka för att rensa alla lager i snabbåtkomst.",
+      "<b>Lägg till aktiverade lager:</b> Klicka för att lägga till alla aktiverade lager i snabbåtkomst. <br><br> <b>Rensa allt:</b> Klicka för att rensa alla lager i snabbåtkomst.",
   },
   {
     title: "Mina favoriter",
     element: "#favorites-menu-button",
     intro:
-      "Klicka på favoriter-knappen. <br><br> Menyn innehåller funktioner som att spara till favoriter, redigera favoriter och ladda favoriter.",
+      "Klicka på favoriter-knappen. <br><br> Menyn innehåller funktioner för att spara till favoriter, redigera favoriter och ladda favoriter.",
   },
   {
     title: "Meny för favoriter",
     element: "#favorites-menu",
     intro:
-      "Knappen öppnar en meny med verktyg för att gruppera och spara lager i snabbåtkomst (mina favoriter): <br><br> - <b>Spara till favoriter:</b> Sparar en grupp som innehåller ett eller flera lager. Titel och beskrivning av denna grupp kan tillämpas, <i>observera att favoriter endast sparas tillfälligt och lokalt för dig</i>. <br><br> - <b>Redigera favoriter:</b> Hantera sparade lager. <br><br> - <b>Ladda favorit:</b> Vid laddning ersätts lagren i snabbåtkomst. Alla tända lager i kartan släcks och ersätts med favoritens tända lager.",
+      "Knappen öppnar en meny med verktyg för att gruppera och spara lager i snabbåtkomst (mina favoriter): <br><br> - <b>Spara till favoriter:</b> Sparar en grupp som innehåller ett eller flera lager. Titel och beskrivning av denna grupp kan anpassas. <i>Observera att favoriter endast sparas tillfälligt och lokalt för dig</i>. <br><br> - <b>Redigera favoriter:</b> Hantera sparade lager. <br><br> - <b>Ladda favorit:</b> Vid laddning ersätts lagren i snabbåtkomst. Alla aktiverade lager i kartan inaktiveras och ersätts med favoritens aktiverade lager.",
   },
   {
     title: "Redigera favoriter",
@@ -140,13 +140,13 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Favoriter flerval",
     element: "#favorites-list-options-button",
     intro:
-      "Klicka på kebabmenyn i favoriter-listan. <br><br> <b>Menyn innehåller funtioner som t.ex:</b> information om favoriten, redigera favoriten, ta bort favoriten och exportera favoriten som en .json fil.",
+      "Klicka på kebabmenyn i favoriter-listan. <br><br> <b>Menyn innehåller funktioner som:</b> information om favoriten, redigera favoriten, ta bort favoriten och exportera favoriten som en .json-fil.",
   },
   {
     title: "Favoriter flerval meny",
     element: "#favorites-list-options-menu",
     intro:
-      "<b> - Redigera:</b> Redigera titel och beskrivning för favoriter <br><br> <b> - Ta bort:</b> Tar bort favoriten från listan <br><br> <b> - Exportera:</b> Exporterar favoriten som en .json fil",
+      "<b>Redigera:</b> Redigera titel och beskrivning för favoriter <br><br> <b>Ta bort:</b> Tar bort favoriten från listan <br><br> <b>Exportera:</b> Exporterar favoriten som en .json-fil",
   },
   {
     title: "Teman",
@@ -158,11 +158,11 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Lista för teman",
     element: "#quick-access-presets-view",
     intro:
-      "Här kan du se teman som är tillgängliga i kartan. <br><br> Klicka på ett tema för att tända alla lager i det temat. <br><br> Du kan också söka efter teman i sökfältet.",
+      "Här kan du se teman som är tillgängliga i kartan. <br><br> Klicka på ett tema för att aktivera alla lager i temat. <br><br> Du kan också söka efter teman i sökfältet.",
   },
   {
     title: "Slut",
     intro:
-      "Detta är slutet av introduktionen. <br><br> Vill du gå igenom introduktionen igen? Klicka på knappen i kontrollerpanelen för att starta om introduktionen.",
+      "Detta är slutet av introduktionen. <br><br> Vill du gå igenom introduktionen igen? Klicka på knappen i kartkontrollpanelen på höger sida för att starta om introduktionen.",
   },
 ];
