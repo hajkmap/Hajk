@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-<!-- ## [Unreleased]
+## [Unreleased]
 
 ### Added
 
@@ -19,7 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-### Security -->
+### Security
+
+- Upgraded dependencies in Client and Backend. [commit](https://github.com/hajkmap/Hajk/commit/2bee79696a66413749fb70c32b5c0b1cb7d4835f) and [commit](https://github.com/hajkmap/Hajk/commit/6f8f1741cfba6cb7eb57bf65943a8af192af7bc2)
+
+## [4.1.0] - 2025-06-18
+
+### Fixed
+
+- LayerComparer: Corrected layer comparison logic in onClose handler. [commit](https://github.com/hajkmap/Hajk/commit/7f85c143055f1648a3033588a9462a902af4dea5)
 
 ## [4.1.0-rc.1] - 2025-04-25
 
@@ -438,6 +446,7 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 ## [3.12.0-rc.2] - 2023-06-19
 
 [unreleased]: https://github.com/hajkmap/Hajk/compare/v4.0.0...develop
+[4.1.0]: https://github.com/hajkmap/Hajk/compare/v4.1.0-rc.1...v4.1.0
 [4.1.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v4.0.0...v4.1.0-rc.1
 [4.0.0]: https://github.com/hajkmap/Hajk/compare/v4.0.0-rc.2...v4.0.0
 [4.0.0-rc.2]: https://github.com/hajkmap/Hajk/compare/v4.0.0-rc.1...v4.0.0-rc.2
