@@ -216,7 +216,9 @@ class Introduction extends React.PureComponent {
               this.layerSwitcherPlugin,
               this.drawerButtonTitle,
               this.documenthandlerDrawerButtonTitle,
-              this.documenthandler
+              this.documenthandler,
+              window.localStorage.getItem("activeDrawerContent"),
+              window.localStorage.getItem("drawerPermanent") === "true"
             );
 
       const filteredSteps = steps.filter(isValidStep);
@@ -246,7 +248,9 @@ class Introduction extends React.PureComponent {
         this.layerSwitcherPlugin,
         this.drawerButtonTitle,
         this.documenthandlerDrawerButtonTitle,
-        this.documenthandler
+        this.documenthandler,
+        window.localStorage.getItem("activeDrawerContent"),
+        window.localStorage.getItem("drawerPermanent") === "true"
       );
     }
   }
@@ -283,7 +287,9 @@ class Introduction extends React.PureComponent {
             this.layerSwitcherPlugin,
             this.drawerButtonTitle,
             this.documenthandlerDrawerButtonTitle,
-            this.documenthandler
+            this.documenthandler,
+            window.localStorage.getItem("activeDrawerContent"),
+            window.localStorage.getItem("drawerPermanent") === "true"
           )
         : getLayerSwitcherSteps(this.layerSwitcherPlugin);
 
@@ -1056,6 +1062,10 @@ class Introduction extends React.PureComponent {
     const goingForward = stepIndex > this.state.currentStepIndex;
     const goingBackward = stepIndex < this.state.currentStepIndex;
 
+    if (step?.title === "Kartverktyg") {
+      window.localStorage.setItem("activeDrawerContent", "plugins");
+    }
+
     // Handle close search options menu transitions
     if (
       step?.element === "#controls-column" ||
@@ -1177,7 +1187,7 @@ class Introduction extends React.PureComponent {
     exitOnOverlayClick: false,
     nextLabel: "Nästa",
     prevLabel: "Föregående",
-    doneLabel: "Klart!",
+    doneLabel: "Avlsuta",
     showBullets: false,
     showProgress: true,
   });
