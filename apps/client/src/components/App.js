@@ -1408,6 +1408,9 @@ class App extends React.PureComponent {
               }
               globalObserver={this.globalObserver}
               plugins={this.appModel.plugins}
+              drawerButtonTitle={
+                this.appModel.config.mapConfig.map.drawerButtonTitle
+              }
               isDarkMode={this.props.theme.palette.mode === "dark"}
             />
           )}

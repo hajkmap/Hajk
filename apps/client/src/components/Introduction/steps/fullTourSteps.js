@@ -1,7 +1,11 @@
 import { getLayerSwitcherSteps } from "./layerSwitcherSteps";
 
 // Initial steps for the full tour (before layer switcher)
-const getInitialSteps = () => [
+const getInitialSteps = (
+  drawerButtonTitle,
+  documenthandlerDrawerButtonTitle,
+  documenthandler
+) => [
   {
     title: "Välkommen",
     intro:
@@ -10,12 +14,20 @@ const getInitialSteps = () => [
   {
     title: "Verktygspanel",
     element: "header > div:first-child",
-    intro: "Med hjälp av knappen här uppe tar du fram verktygspanelen.",
+    intro: () => {
+      let intro = `<b>${drawerButtonTitle || "Verktygspanel"}:</b> här hittar du olika funktioner och verktyg som hjälper dig att interagera med kartan.`;
+
+      if (documenthandler) {
+        intro += `<br /><br /><b>${documenthandlerDrawerButtonTitle || "Meny"}:</b> visar dig drawermenyn för dokumenthanteraren`;
+      }
+
+      return intro;
+    },
   },
   {
     title: "Kartverktyg",
     element: "#drawer-content",
-    intro: "Här hittar du olika verktyg för att interagera med kartan.",
+    intro: "Här listas de verktyg som har verktygsplaceringen i drawern.",
   },
   {
     title: "Lås fast verktygspanelen",
@@ -38,7 +50,7 @@ const getInitialSteps = () => [
     title: "Meny för fler sökverktyg",
     element: "#search-tools-menu",
     intro:
-      "Här kan du välja mellan olika sökverktyg och inställningar för sökningen. <br><br> Du kan även öppna en separat meny för att hantera sökinställningar.",
+      "Här kan du välja mellan olika alternativ för att genomföra din sökning. <br><br> Du kan även öppna en separat meny för att hantera sökinställningar.",
     position: "left",
   },
   {
@@ -49,7 +61,16 @@ const getInitialSteps = () => [
   },
 ];
 
-export const getFullIntroductionSteps = (layerSwitcherPlugin) => [
-  ...getInitialSteps(),
+export const getFullIntroductionSteps = (
+  layerSwitcherPlugin,
+  drawerButtonTitle,
+  documenthandlerDrawerButtonTitle,
+  documenthandler
+) => [
+  ...getInitialSteps(
+    drawerButtonTitle,
+    documenthandlerDrawerButtonTitle,
+    documenthandler
+  ),
   ...getLayerSwitcherSteps(layerSwitcherPlugin),
 ];

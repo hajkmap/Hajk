@@ -23,7 +23,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
       "Klicka på kebabmenyn. <br><br> <b>Menyn innehåller funktioner som:</b> dölj alla aktiva lager, scrolla till toppen av lagerlistan, scrolla till botten av lagerlistan.",
   },
   {
-    title: "Sök meny",
+    title: "Meny",
     element: "#layerswitcher-actions-menu",
     intro:
       "<b>Dölj alla aktiva lager:</b> Klicka på knappen för att dölja <b>ALLA</b> aktiva lager. <br><br> <b>Scrolla till toppen:</b> Klicka på knappen för att scrolla till toppen av lagerlistan. <br><br> <b>Scrolla till botten:</b> Klicka på knappen för att scrolla till botten av lagerlistan.",
@@ -49,7 +49,8 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Teckenförklaring",
     element: "#toggle-legend-icon",
-    intro: "Knappen visar teckenförklaringen.",
+    intro:
+      "Knappen expanderar en sektion med teckenförklaring. <br><br> Klicka för att visa eller dölja teckenförklaringen.",
   },
   {
     title: "Lagerinformationsvy",
@@ -137,13 +138,13 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
       "Här kan du se och hantera dina sparade favoriter. Klicka för att skriva över befintliga lager med favoriterna.",
   },
   {
-    title: "Favoriter flerval",
+    title: "Knapp för att visa flera alternativ",
     element: "#favorites-list-options-button",
     intro:
-      "Klicka på kebabmenyn i favoriter-listan. <br><br> <b>Menyn innehåller funktioner som:</b> information om favoriten, redigera favoriten, ta bort favoriten och exportera favoriten som en .json-fil.",
+      "Klicka på kebabmenyn för respektive favorit. <br><br> <b>Menyn innehåller funktioner som:</b> information om själva favoriten, redigera favoriten, ta bort favoriten och exportera favoriten som en .json-fil.",
   },
   {
-    title: "Favoriter flerval meny",
+    title: "Mina favoriter meny",
     element: "#favorites-list-options-menu",
     intro:
       "<b>Redigera:</b> Redigera titel och beskrivning för favoriter <br><br> <b>Ta bort:</b> Tar bort favoriten från listan <br><br> <b>Exportera:</b> Exporterar favoriten som en .json-fil",

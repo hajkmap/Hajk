@@ -180,6 +180,10 @@ class Introduction extends React.PureComponent {
     this.layerSwitcherSearch = this.layerSwitcherPlugin.options.showFilter;
     this.layerSwitcherTransparencySlider =
       this.layerSwitcherPlugin.options.enableTransparencySlider;
+    this.drawerButtonTitle = props.drawerButtonTitle;
+    this.documenthandler = props.plugins?.documenthandler || null;
+    this.documenthandlerDrawerButtonTitle =
+      this.documenthandler?.options?.drawerButtonTitle;
   };
 
   initializeEventSubscriptions = () => {
@@ -208,7 +212,12 @@ class Introduction extends React.PureComponent {
       const steps =
         introductionSteps.length >= 2
           ? this.#tryParsingSteps(introductionSteps)
-          : getFullIntroductionSteps(this.layerSwitcherPlugin);
+          : getFullIntroductionSteps(
+              this.layerSwitcherPlugin,
+              this.drawerButtonTitle,
+              this.documenthandlerDrawerButtonTitle,
+              this.documenthandler
+            );
 
       const filteredSteps = steps.filter(isValidStep);
 
@@ -233,7 +242,12 @@ class Introduction extends React.PureComponent {
       return steps;
     } catch (error) {
       console.error(error.message);
-      return getFullIntroductionSteps(this.layerSwitcherPlugin);
+      return getFullIntroductionSteps(
+        this.layerSwitcherPlugin,
+        this.drawerButtonTitle,
+        this.documenthandlerDrawerButtonTitle,
+        this.documenthandler
+      );
     }
   }
 
@@ -265,7 +279,12 @@ class Introduction extends React.PureComponent {
   getFilteredSteps = (type) => {
     let steps =
       type === "full"
-        ? getFullIntroductionSteps(this.layerSwitcherPlugin)
+        ? getFullIntroductionSteps(
+            this.layerSwitcherPlugin,
+            this.drawerButtonTitle,
+            this.documenthandlerDrawerButtonTitle,
+            this.documenthandler
+          )
         : getLayerSwitcherSteps(this.layerSwitcherPlugin);
 
     if (type === "full") {
