@@ -2,13 +2,13 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Hajk 4",
     intro:
-      "Detta är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br> Observera att du inte kan utföra några åtgärder som att klicka på knappar under introduktionen. Detta är endast för att illustrera hur den nya lagerhanteraren fungerar.",
+      "Detta är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br> Observera att du inte kan utföra några åtgärder som att klicka på knappar under introduktionen. Detta är endast för att illustrera ändringarna som har tillkommit i Hajk 4.",
   },
   {
     title: "Lagerlista",
     element: "#layerslist-container",
     intro:
-      "Här finns lagerlistan där du kan se alla lager som är tillgängliga i kartan. <br><br> Du kan söka efter lager, aktivera/inaktivera lager och se information om varje lager.",
+      "I lagerlistan kan du se alla lager som är tillgängliga i kartan. <br><br> Du kan söka efter lager, slå på/av lager och se information om varje lager.",
   },
   {
     title: "Sök lager",
