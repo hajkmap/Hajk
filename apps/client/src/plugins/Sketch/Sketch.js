@@ -116,6 +116,12 @@ const Sketch = (props) => {
       })
   );
 
+  // TODO: Refine!!!
+  const [pluginSettings, setPluginSettings] = React.useState({
+    title: "Rita",
+    color: "4a90e2",
+  });
+
   // This functions handles events from the draw-model that are sent
   // when we are in edit-mode and the map is clicked. A feature might be sent
   // in the payload, but if the user clicked the map where no drawn feature exists,
@@ -220,7 +226,8 @@ const Sketch = (props) => {
       type="Sketch"
       custom={{
         icon: <EditIcon />,
-        title: "Rita",
+        title: pluginSettings.title,
+        color: pluginSettings.color,
         description: "Skapa dina helt egna geometrier!",
         height: "dynamic",
         width: 350,
@@ -251,6 +258,7 @@ const Sketch = (props) => {
         pluginShown={pluginShown}
         toggleBufferBtn={toggleBufferBtn}
         setToggleBufferBtn={setToggleBufferBtn}
+        setPluginSettings={setPluginSettings}
       />
     </BaseWindowPlugin>
   );

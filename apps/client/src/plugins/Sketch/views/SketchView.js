@@ -6,6 +6,7 @@ import {
   PLUGIN_MARGIN,
   MAX_REMOVED_FEATURES,
   DEFAULT_DRAW_STYLE_SETTINGS,
+  PLUGIN_COLORS,
 } from "../constants";
 // Components
 import ActivityMenu from "../components/ActivityMenu";
@@ -56,6 +57,8 @@ const SketchView = (props) => {
   const [textStyle, setTextStyle] = React.useState(
     model.getTextStyleSettings()
   );
+
+  const [ogcSource, setOgcSource] = React.useState("");
   // We want to keep track of the last removed features so that the user can restore
   // features that they potentially removed by mistake.
   const [removedFeatures, setRemovedFeatures] = React.useState(
@@ -318,6 +321,19 @@ const SketchView = (props) => {
       }));
     }
   }, [activityId, pluginShown, memoizedSetToggleBufferBtn, activeDrawType]);
+
+  const handleOgcSourceChange = (newOgcSourceTitle) => {
+    props.setPluginSettings(
+      newOgcSourceTitle === "Ingen"
+        ? { title: "Rita", color: PLUGIN_COLORS.default }
+        : {
+            title: `Redigerar ${newOgcSourceTitle}`,
+            color: PLUGIN_COLORS.warning,
+          }
+    );
+    setOgcSource(newOgcSourceTitle);
+  };
+
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
   const renderCurrentView = () => {
@@ -411,6 +427,8 @@ const SketchView = (props) => {
             measurementSettings={props.measurementSettings}
             setMeasurementSettings={props.setMeasurementSettings}
             globalObserver={globalObserver}
+            ogcSource={ogcSource}
+            handleOgcSourceChange={handleOgcSourceChange}
           />
         );
       default:

@@ -240,3 +240,23 @@ export const DEFAULT_TEXT_STYLE_SETTINGS = {
   backgroundColor: "#000000",
   size: 14,
 };
+
+export const PLUGIN_COLORS = {
+  default: "#4a90e2",
+  warning: "#ff5420ff",
+};
+
+export const OGC_SOURCES = [
+  {
+    type: "NONE",
+    label: "Ingen",
+  },
+  {
+    type: "WFS",
+    label: "Avfallstationer",
+  },
+  {
+    type: "WFS",
+    label: "Träd",
+  },
+];
