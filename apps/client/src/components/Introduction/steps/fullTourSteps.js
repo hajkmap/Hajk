@@ -12,7 +12,7 @@ const getInitialSteps = (
     {
       title: "Välkommen",
       intro:
-        "Här kommer en kort guide som visar dig runt i applikationen. <br /><br /><b>Instruktioner:</b> Vänta tills objektet markeras (se nedan) innan du går vidare till nästa steg. Du kan inte utföra några åtgärder som att klicka på knappar under introduktionen.<br /><br />Detta är endast för att illustrera det mesta av grund funktionaliteten i applikationen. <br><br> <div style='text-align: center; margin: 15px 0;'><div class='highlight-demo' style='display: inline-block; width: 100px; height: 60px; border: 3px solid #fff; border-radius: 8px; background: rgba(0,0,0,0.9); animation: moveHighlight 3s infinite; color: #fff; text-align: center; line-height: 60px; font-size: 12px; font-weight: bold;'>Innehåll</div></div><br /><br />Följ med!",
+        "Här kommer en kort guide som visar dig runt i applikationen. <br><br/>Introduktionens syfte är att illustrera det mesta av grund funktionaliteten i applikationen. <br><br>Följ med!",
     },
     {
       title: "Verktygspanel",

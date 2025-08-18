@@ -2,7 +2,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Hajk 4",
     intro:
-      "Detta är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br> <b>Viktigt:</b> Vänta tills objektet markeras (se nedan) innan du går vidare till nästa steg. Du kan inte utföra några åtgärder under introduktionen - detta är endast för att illustrera ändringarna som har tillkommit i Hajk 4. <br><br> <div style='text-align: center; margin: 15px 0;'><div class='highlight-demo' style='display: inline-block; width: 100px; height: 60px; border: 3px solid #fff; border-radius: 8px; background: rgba(0,0,0,0.9); animation: moveHighlight 3s infinite; color: #fff; text-align: center; line-height: 60px; font-size: 12px; font-weight: bold;'>Innehåll</div></div>",
+      "Det här är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br>Introduktionens syfte är att illustrera ändringarna som har tillkommit i Hajk 4. <br><br>",
   },
   {
     title: "Lagerlista",
