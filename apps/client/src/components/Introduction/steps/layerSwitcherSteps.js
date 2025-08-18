@@ -2,7 +2,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Hajk 4",
     intro:
-      "Det här är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br>Introduktionens syfte är att illustrera ändringarna som har tillkommit i Hajk 4. <br><br>",
+      "Det här är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br>Introduktionens syfte är att illustrera ändringarna som har tillkommit i Hajk 4.",
   },
   {
     title: "Lagerlista",
