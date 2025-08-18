@@ -2,7 +2,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Hajk 4",
     intro:
-      "Detta är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br> Observera att du inte kan utföra några åtgärder som att klicka på knappar under introduktionen. Detta är endast för att illustrera ändringarna som har tillkommit i Hajk 4.",
+      "Detta är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br> <b>Viktigt:</b> Vänta tills objektet markeras (se nedan) innan du går vidare till nästa steg. Du kan inte utföra några åtgärder under introduktionen - detta är endast för att illustrera ändringarna som har tillkommit i Hajk 4. <br><br> <div style='text-align: center; margin: 15px 0;'><div class='highlight-demo' style='display: inline-block; width: 100px; height: 60px; border: 3px solid #fff; border-radius: 8px; background: rgba(0,0,0,0.9); animation: moveHighlight 3s infinite; color: #fff; text-align: center; line-height: 60px; font-size: 12px; font-weight: bold;'>Innehåll</div></div>",
   },
   {
     title: "Lagerlista",
@@ -35,16 +35,16 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
       "Pilen indikerar en lagergrupp. Klicka för att se underliggande lager. <br/><br/> Notera att lagergruppnamn med <b>fetstil</b> innehåller aktiverade lager.",
   },
   {
-    title: "Aktivera lager",
+    title: "Aktivera/inaktivera lager",
     element: "#toggle-layer-item",
     intro:
-      "Klicka för att aktivera/inaktivera lager. Lagernamn med <b>fetstil</b> visar att lagret är aktiverat.",
+      "Klicka för att växla mellan slå på/av lager. Lagernamn med <b>fetstil</b> visar att lagret är aktiverat.",
     position: "bottom",
   },
   {
-    title: "Lagerinformation",
+    title: "Knapp för mer information",
     element: "#show-layer-details",
-    intro: "Klicka för att se mer information om lagret.",
+    intro: "Klicka på knappen för att se mer information om lagret.",
   },
   {
     title: "Teckenförklaring",
@@ -53,7 +53,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
       "Knappen expanderar en sektion med teckenförklaring. <br><br> Klicka för att visa eller dölja teckenförklaringen.",
   },
   {
-    title: "Lagerinformationsvy",
+    title: "Information",
     element: "#layer-item-details-info",
     intro: "Här visas eventuell information om lagret.",
   },
@@ -63,10 +63,10 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     intro: "Reglaget används för att ändra transparensen för lagret.",
   },
   {
-    title: "Lägg till/ta bort lager i snabbåtkomst",
+    title: "Åtgärdsknapp för snabbåtkomst",
     element: "#layer-details-quick-access-button",
     intro:
-      "Knappen lägger till eller tar bort lagret från snabbåtkomstmenyn i lagervyn.",
+      "<b>Lägg till i snabbåtkomst:</b> lagret kommer att läggas till i snabbåtkomstmenyn under kartlagerfliken. <br><br> <b>Ta bort från snabbåtkomst:</b> lagret finns redan som snabbåtkomst och kommer att tas bort från snabbåtkomstmenyn under kartlagerfliken.",
   },
   {
     title: "Flikar i lagerhanteraren",
@@ -104,7 +104,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
       "Klicka på kebabmenyn i snabbåtkomst.<br><br> <b>Menyn innehåller funktioner som:</b> <br> - Lägg till aktiverade lager <br> - Rensa allt",
   },
   {
-    title: "Snabbåtkomst meny innehåll",
+    title: "Meny med alternativ för snabbåtkomst",
     element: "#quick-access-menu-content",
     intro:
       "<b>Lägg till aktiverade lager:</b> Klicka för att lägga till alla aktiverade lager i snabbåtkomst. <br><br> <b>Rensa allt:</b> Klicka för att rensa alla lager i snabbåtkomst.",
@@ -144,7 +144,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
       "Klicka på kebabmenyn för respektive favorit. <br><br> <b>Menyn innehåller funktioner som:</b> information om själva favoriten, redigera favoriten, ta bort favoriten och exportera favoriten som en .json-fil.",
   },
   {
-    title: "Mina favoriter meny",
+    title: "Meny med olika alternativ för respektive favorit",
     element: "#favorites-list-options-menu",
     intro:
       "<b>Redigera:</b> Redigera titel och beskrivning för favoriter <br><br> <b>Ta bort:</b> Tar bort favoriten från listan <br><br> <b>Exportera:</b> Exporterar favoriten som en .json-fil",
@@ -164,6 +164,6 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Slut",
     intro:
-      "Detta är slutet av introduktionen. <br><br> Vill du gå igenom introduktionen igen? Klicka på knappen i kartkontrollpanelen på höger sida för att starta om introduktionen.",
+      "Detta är slutet av introduktionen. Vill du gå igenom introduktionen igen?<br><br>Klicka på knappen i kartkontrollpanelen på höger sida för att starta om introduktionen.",
   },
 ];

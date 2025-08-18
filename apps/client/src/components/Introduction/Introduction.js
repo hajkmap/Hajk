@@ -15,37 +15,11 @@ import {
 
 import "intro.js/introjs.css";
 import "intro.js/themes/introjs-modern.css";
+import { chainActionsWithVisibility } from "./utils/introjs-helpers";
 import { getFullIntroductionSteps } from "./steps/fullTourSteps";
 import { getLayerSwitcherSteps } from "./steps/layerSwitcherSteps";
 import { functionalOk as functionalCookieOk } from "../../models/Cookie";
 import LocalStorageHelper from "utils/LocalStorageHelper";
-
-// Utility: Wait until a selector becomes visible
-const waitForElementVisible = (selector, maxTries = 20, delay = 100) =>
-  new Promise((resolve) => {
-    let tries = 0;
-    const interval = setInterval(() => {
-      const el = document.querySelector(selector);
-      if (el && el.offsetParent !== null) {
-        clearInterval(interval);
-        resolve(true);
-      } else if (++tries >= maxTries) {
-        clearInterval(interval);
-        console.warn(`Timeout waiting for ${selector}`);
-        resolve(false);
-      }
-    }, delay);
-  });
-
-// Utility: Perform action, wait for something to appear, repeat
-const chainActionsWithVisibility = async (steps) => {
-  for (const step of steps) {
-    if (step.action) step.action();
-    if (step.waitFor) await waitForElementVisible(step.waitFor);
-    if (step?.delay)
-      await new Promise((resolve) => setTimeout(resolve, step?.delay));
-  }
-};
 
 const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherPlugin }) => {
   const theme = useTheme();
@@ -641,7 +615,6 @@ class Introduction extends React.PureComponent {
               charIndex = 0;
               searchField.value = "";
             }
-
             searchField.value += texts[textIndex][charIndex];
             searchField.dispatchEvent(new Event("input", { bubbles: true }));
             charIndex++;

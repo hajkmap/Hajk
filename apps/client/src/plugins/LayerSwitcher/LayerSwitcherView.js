@@ -90,9 +90,9 @@ class LayersSwitcherView extends React.PureComponent {
       zIndex: l["zIndex"],
     }));
 
-    // Add event listener for favoritesBackTransition 'Tillbaka' button and handleFavoritesShowTransition 'Redigera Favoriter' button
+    // *Introduction Guide* Add event listener for favoritesBackTransition 'Tillbaka' button and handleFavoritesShowTransition 'Redigera Favoriter' button
     this.handleFavoritesBackTransition = () => {
-      this.toggleHideFavoritesView();
+      this.toggleFavoritesQuickAccessBackButton();
     };
 
     document.addEventListener(
@@ -196,11 +196,13 @@ class LayersSwitcherView extends React.PureComponent {
       },
     }));
   };
-  /* A separate function that is being passed to handle click on backButton in FavoritesViewHeader for the Introduction module,
-  //since handleFavoritesViewToggle in the Favorites.js component is being passed and used as a prop in both
-   FavoritesViewHeader and FavoritesOptions
+  /* 
+  *Introduction Guide* The functions are being implemented due to handleFavoritesViewToggle and handleQuickAccessPresetsToggle 
+  both being triggered when a click event is programmatically dispatched (e.g., via id="example"), 
+  causing unwanted simultaneous execution. Separate handlers ensure that depending on the step in the Introduction Guide, 
+  runs for its respective component.
   */
-  toggleHideFavoritesView = () => {
+  toggleFavoritesQuickAccessBackButton = () => {
     if (
       this.state.displayContentOverlay === "favorites" ||
       this.state.displayContentOverlay === "quickAccessPresets"
@@ -210,7 +212,8 @@ class LayersSwitcherView extends React.PureComponent {
       });
     }
   };
-
+  // quickAccessPresets was not needed here since it's being handled as a MouseEvent("click") event
+  // in the Introduction.js component instead of a custom event like here.
   toggleShowFavoritesView = () => {
     if (this.state.displayContentOverlay === null) {
       this.setState({
