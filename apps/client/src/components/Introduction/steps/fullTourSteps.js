@@ -41,7 +41,7 @@ const getInitialSteps = (
       title: "Kartverktyg",
       element: "#drawer-content",
       intro:
-        "Kartverktygen har olika funktioner som kan användas för att navigera i kartan.<br /><br />Här listas de verktyg som har verktygsplaceringen i sidomenyn. .<br /><br /> Verktygen kan placeras om av administratörerna.",
+        "Kartverktygen har olika funktioner som kan användas för att navigera i kartan.<br /><br />Här listas de verktyg som har verktygsplaceringen i sidomenyn (drawer).<br /><br /> Verktygen kan placeras om av administratörerna.",
     });
   }
 
