@@ -48,9 +48,9 @@ const getInitialSteps = (
   // Add remaining steps
   steps.push(
     {
-      title: "Lås fast verktygspanelen",
+      title: "Lås fast sidomenyn",
       element: "#toggle-drawer-permanent",
-      intro: "Klicka på knappen för att låsa fast verktygspanelen.",
+      intro: "Klicka på knappen för att låsa fast sidomenyn.",
     },
     {
       title: "Sökruta",
