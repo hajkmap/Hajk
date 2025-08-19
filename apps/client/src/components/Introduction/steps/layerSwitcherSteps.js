@@ -72,7 +72,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Flikar i lagerhanteraren",
     element: "#layer-switcher-tab-panel",
     intro: () =>
-      `Klicka här för att växla mellan olika vyer: <br><br> - Kartlager <br> - Bakgrund <br>${layerSwitcherPlugin.options.showDrawOrderView ? "- Ritordning: Här kan du ändra ritordningen för aktiverade lager i kartan" : ""}`,
+      `Klicka här för att växla mellan olika vyer: <br><br> - <b>Kartlager:</b> fliken visar dig lagerlistan med tillgängliga lager <br><br/> - <b>Bakgrund:</b> fliken visar dig alla tillgängliga bakgrundslager <br><br/>${layerSwitcherPlugin.options.showDrawOrderView ? "- <b>Ritordning:</b> Här kan du ändra ritordningen för aktiverade lager i kartan" : ""}`,
   },
   {
     title: "Ritordning",
@@ -119,7 +119,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Meny för favoriter",
     element: "#favorites-menu",
     intro:
-      "Knappen öppnar en meny med verktyg för att gruppera och spara lager i snabbåtkomst (mina favoriter): <br><br> - <b>Spara till favoriter:</b> Sparar en grupp som innehåller ett eller flera lager. Titel och beskrivning av denna grupp kan anpassas. <i>Observera att favoriter endast sparas tillfälligt och lokalt för dig</i>. <br><br> - <b>Redigera favoriter:</b> Hantera sparade lager. <br><br> - <b>Ladda favorit:</b> Vid laddning ersätts lagren i snabbåtkomst. Alla aktiverade lager i kartan inaktiveras och ersätts med favoritens aktiverade lager.",
+      "- <b>Spara till favoriter:</b> Sparar en grupp till favoriter som innehåller en eller flera lager. Titel och beskrivning av denna grupp kan anpassas. <br><br> - <b>Redigera favoriter:</b> Hantera sparade favoriter. <br><br> - <b>Ladda favorit:</b> Klicka på respektive favorit för att ladda den. Vid laddning ersätts lagren i snabbåtkomst. Alla aktiverade lager i kartan inaktiveras och ersätts med favoritens aktiverade lager. <br><br> Ser du inga favoriter under <i>Redigera favoriter</i> knappen, betyder det att du inte har några favoriter sparade.",
   },
   {
     title: "Redigera favoriter",
@@ -141,7 +141,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Knapp för att visa flera alternativ",
     element: "#favorites-list-options-button",
     intro:
-      "Klicka på kebabmenyn för respektive favorit. <br><br> <b>Menyn innehåller funktioner som:</b> information om själva favoriten, redigera favoriten, ta bort favoriten och exportera favoriten som en .json-fil.",
+      "<b>Menyn innehåller funktioner som:</b> information om själva favoriten, redigera favoriten, ta bort favoriten och exportera favoriten som en .json-fil.",
   },
   {
     title: "Meny med olika alternativ för respektive favorit",
@@ -162,8 +162,8 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
       "Här kan du se teman som är tillgängliga i kartan. <br><br> Klicka på ett tema för att aktivera alla lager i temat. <br><br> Du kan också söka efter teman i sökfältet.",
   },
   {
-    title: "Slut",
+    title: "Introduktion avslutad 🎉",
     intro:
-      "Detta är slutet av introduktionen. Vill du gå igenom introduktionen igen?<br><br>Klicka på knappen i kartkontrollpanelen på höger sida för att starta om introduktionen.",
+      "Du har nu gått igenom hela introduktionen. Vill du ta en runda till?<br><br>Klicka på knappen i kartkontrollpanelen till höger om du vill börja om från början.",
   },
 ];

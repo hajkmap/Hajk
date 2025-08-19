@@ -709,7 +709,7 @@ class Introduction extends React.PureComponent {
       if (
         (nextStep?.element === "#quick-access-theme-button" && goingBackward) ||
         (step?.element === "#favorites-list-options-menu" &&
-          nextStep?.title === "Slut" &&
+          nextStep?.title === "Introduktion avslutad 🎉" &&
           goingBackward)
       ) {
         chainActionsWithVisibility([
@@ -1065,7 +1065,7 @@ class Introduction extends React.PureComponent {
         goingForward) ||
       step?.element === "#quick-access-menu-button" ||
       (step?.element === "#quick-access-theme-button" && !isFavoritesEnabled) ||
-      step?.title === "Slut"
+      step?.title === "Introduktion avslutad 🎉"
     ) {
       const closeEvent = new CustomEvent("closeQuickAccessMenu");
       document.dispatchEvent(closeEvent);
@@ -1084,7 +1084,7 @@ class Introduction extends React.PureComponent {
 
     if (
       step?.element === "#favorites-list-options-button" ||
-      step?.title === "Slut"
+      step?.title === "Introduktion avslutad 🎉"
     ) {
       const closeEvent = new CustomEvent("closeFavoritesListMenu");
       document.dispatchEvent(closeEvent);
