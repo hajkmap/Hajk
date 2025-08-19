@@ -38,13 +38,13 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Aktivera/inaktivera lager",
     element: "#toggle-layer-item",
     intro:
-      "Klicka för att växla mellan slå på/av lager. Lagernamn med <b>fetstil</b> visar att lagret är aktiverat.",
+      "Klicka i rutan för att växla mellan slå på och slå av ett lager. Lagernamn med <b>fetstil</b> visar att ett lager är aktiverat.",
     position: "bottom",
   },
   {
     title: "Knapp för mer information",
     element: "#show-layer-details",
-    intro: "Klicka på knappen för att se mer information om lagret.",
+    intro: "Klicka på knappen för att se mer information om ett lager.",
   },
   {
     title: "Teckenförklaring",
@@ -55,12 +55,12 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Information",
     element: "#layer-item-details-info",
-    intro: "Här visas eventuell information om lagret.",
+    intro: "Här visas eventuell information om ett lager.",
   },
   {
     title: "Transparens",
     element: "#layer-details-opacity-slider",
-    intro: "Reglaget används för att ändra transparensen för lagret.",
+    intro: "Reglaget används för att ändra transparensen för ett lager.",
   },
   {
     title: "Åtgärdsknapp för snabbåtkomst",
