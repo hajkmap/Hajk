@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # Example: scan the frontend app (npm)
+  - package-ecosystem: "npm"
+    directory: "/apps/client"
+    schedule:
+      interval: "daily"
+
+  # Example: scan the backend app (npm)
+  - package-ecosystem: "npm"
+    directory: "/apps/backend"
+    schedule:
+      interval: "daily"
