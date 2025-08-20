@@ -36,7 +36,7 @@
     "log4js": "^6.9.1",
     "query-string": "^9.1.2",
     "write-excel-file": "^2.3.2",
-    "ws": "^8.18.2"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "eslint": "^9.26.0",
