@@ -7,6 +7,7 @@ import {
   MAX_REMOVED_FEATURES,
   DEFAULT_DRAW_STYLE_SETTINGS,
   PLUGIN_COLORS,
+  OGC_SOURCES,
 } from "../constants";
 // Components
 import ActivityMenu from "../components/ActivityMenu";
@@ -18,6 +19,7 @@ import DeleteView from "./DeleteView";
 import MoveView from "./MoveView";
 import EditView from "./EditView";
 import SettingsView from "./SettingsView";
+import OGCView from "./OGCView";
 // Hooks
 import useCookieStatus from "../../../hooks/useCookieStatus";
 import useUpdateEffect from "../../../hooks/useUpdateEffect";
@@ -327,9 +329,9 @@ const SketchView = (props) => {
       newOgcSourceTitle === "Ingen"
         ? { title: "Rita", color: PLUGIN_COLORS.default }
         : {
-            title: `Redigerar ${newOgcSourceTitle}`,
-            color: PLUGIN_COLORS.warning,
-          }
+          title: `Redigerar ${newOgcSourceTitle}`,
+          color: PLUGIN_COLORS.warning,
+        }
     );
     setOgcSource(newOgcSourceTitle);
   };
@@ -427,6 +429,15 @@ const SketchView = (props) => {
             measurementSettings={props.measurementSettings}
             setMeasurementSettings={props.setMeasurementSettings}
             globalObserver={globalObserver}
+            ogcSource={ogcSource}
+            handleOgcSourceChange={handleOgcSourceChange}
+          />
+        );
+      case "OGC":
+        return (
+          <OGCView
+            id={activityId}
+            model={model}
             ogcSource={ogcSource}
             handleOgcSourceChange={handleOgcSourceChange}
           />

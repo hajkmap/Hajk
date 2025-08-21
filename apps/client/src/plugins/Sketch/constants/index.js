@@ -5,6 +5,7 @@ import OpenWithIcon from "@mui/icons-material/OpenWith";
 import SaveIcon from "@mui/icons-material/Save";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import SettingsIcon from "@mui/icons-material/Settings";
+import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt";
 
 export const ACTIVITIES = [
   {
@@ -54,6 +55,12 @@ export const ACTIVITIES = [
     tooltip: "Ändra om objektens mått ska synas etc.",
     information: "Här kan du ändra verktygets inställningar.",
     icon: <SettingsIcon />,
+  },
+  {
+    id: "OGC",
+    tooltip: "Välj redigeringstjänst att spara till.",
+    information: "Här kan du välja en redigeringstjänst kopplat till en kartserver och en databas.",
+    icon: <AddLocationAltIcon />,
   },
 ];
 
@@ -205,6 +212,7 @@ export const PROMPT_TEXTS = {
   DELETEHelp: "Klicka på ett objekt för att radera det från din skiss.",
   SAVEHelp:
     "Här kan du spara en arbetsyta för att fortsätta ditt arbete senare. För att spara över en äldre arbetsyta, ange samma namn.",
+  OGCHelp: "Här kan du aktivera redigeringstjänsten att spara till.",
 };
 
 export const AREA_MEASUREMENT_UNITS = [
