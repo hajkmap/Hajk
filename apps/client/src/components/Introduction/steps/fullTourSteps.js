@@ -12,7 +12,7 @@ const getInitialSteps = (
     {
       title: "Välkommen",
       intro:
-        "Här kommer en kort guide som visar dig runt i applikationen. <br><br/>Introduktionens syfte är att illustrera det mesta av grund funktionaliteten i applikationen. <br><br>Följ med!",
+        "Här kommer en kort guide som visar dig runt i applikationen. <br><br/>Introduktionens syfte är att illustrera det mesta av grund funktionaliteten i applikationen, samt de ändringar som har tillkommit i Hajk 4.<br><br> <i>Observera att inga andra åtgärder, som att klicka på knappar eller använda andra funktioner i applikationen, är möjliga under introduktionen.</i> <br><br>Följ med!",
     },
     {
       title: "Verktygspanel",

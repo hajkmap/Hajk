@@ -2,7 +2,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Hajk 4",
     intro:
-      "Det här är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br>Introduktionens syfte är att illustrera ändringarna som har tillkommit i Hajk 4.",
+      "Det här är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br>Introduktionens syfte är att illustrera de ändringarna som har tillkommit i Hajk 4. <br></br> <i>Observera att inga andra åtgärder, som att klicka på knappar eller använda andra funktioner i applikationen, är möjliga under introduktionen.</i>. <br><br> Följ med!",
   },
   {
     title: "Lagerlista",
@@ -60,7 +60,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Transparens",
     element: "#layer-details-opacity-slider",
-    intro: "Reglaget används för att ändra transparensen för ett lager.",
+    intro: "Reglaget används för att ändra transparensen av ett lager.",
   },
   {
     title: "Åtgärdsknapp för snabbåtkomst",
