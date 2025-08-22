@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 
 import { ListItemText } from "@mui/material";
 
@@ -50,6 +50,36 @@ const LayersTab = ({
   const minFilterLength = layerFilterMinLength ?? DEFAULT_MIN_FILTER_LENGTH;
 
   const [filterValue, setFilterValue] = useState(null);
+
+  // state to store the staticLayerTree to dynamically update the status of a specific grouplayer and trigger a rerender
+  const [layerTree, setLayerTree] = useState(staticLayerTree);
+
+  // Listen for global DOM events dispatched by the Introduction component
+  // to expand the first grouplayer object including its children
+  useEffect(() => {
+    function expandFirstGroupLayerObject(tree) {
+      if (!Array.isArray(tree)) return [];
+
+      return tree.map((node, index) => ({
+        ...node,
+        defaultExpanded: index === 0,
+        children:
+          index === 0 && node.children
+            ? expandFirstGroupLayerObject(node.children)
+            : node.children,
+      }));
+    }
+
+    const handleExpand = () => {
+      const updated = expandFirstGroupLayerObject(staticLayerTree);
+      setLayerTree(updated);
+    };
+
+    document.addEventListener("expandFirstGroup", handleExpand);
+    return () => {
+      document.removeEventListener("expandFirstGroup", handleExpand);
+    };
+  }, [staticLayerTree]);
 
   const handleFilterSubmit = useCallback((value) => {
     const filterValue = value === "" ? null : value;
@@ -147,6 +177,7 @@ const LayersTab = ({
         />
       )}
       <div
+        id="layerslist-container"
         ref={scrollContainerRef}
         style={{
           height: "inherit",
@@ -175,7 +206,7 @@ const LayersTab = ({
             staticLayerConfig={staticLayerConfig}
           />
         )}
-        {staticLayerTree.map((group) => (
+        {layerTree.map((group, index) => (
           <LayerGroup
             key={group.id}
             staticLayerConfig={staticLayerConfig}
@@ -184,6 +215,7 @@ const LayersTab = ({
             globalObserver={globalObserver}
             filterHits={filterHits}
             filterValue={filterValue}
+            isFirstGroup={index === 0}
           />
         ))}
       </div>

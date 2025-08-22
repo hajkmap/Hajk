@@ -43,11 +43,9 @@ export default function ResponsiveDialog(props) {
   const [promptText, setPromptText] = useState("");
 
   const rehypePlugins = allowDangerousHtml === true ? [rehypeRaw] : [];
-
   const handleAbort = () => {
     onAbort(promptText);
   };
-
   const handleClose = () => {
     onClose(promptText);
   };
@@ -60,6 +58,9 @@ export default function ResponsiveDialog(props) {
   return (
     open && (
       <Dialog
+        sx={{
+          zIndex: props.type === "Information" ? 1301 : undefined,
+        }}
         aria-labelledby="responsive-dialog-title"
         aria-describedby="responsive-dialog-content"
         fullScreen={fullScreen}

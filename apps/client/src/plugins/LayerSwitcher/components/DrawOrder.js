@@ -232,7 +232,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
       >
         <Stack direction="row" alignItems="center">
           {options.enableSystemLayersSwitch && (
-            <FormGroup>
+            <FormGroup id="draw-order-switch">
               <FormControlLabel
                 control={
                   <Switch
@@ -265,7 +265,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
           </Box>
         </Collapse>
       </Box>
-      <List sx={{ pt: 0 }}>
+      <List className="draw-order-list" sx={{ pt: 0 }}>
         <Container
           lockAxis="y"
           getChildPayload={(i) => sortedLayers[i]}

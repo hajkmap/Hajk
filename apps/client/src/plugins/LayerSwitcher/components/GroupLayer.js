@@ -22,6 +22,7 @@ function GroupLayer({
   display,
   filterHits,
   filterValue,
+  isGroupLayerQuickAccess,
 }) {
   const { layerIsToggled, visibleSubLayers } = layerState;
 
@@ -179,6 +180,7 @@ function GroupLayer({
           </Box>
         )
       }
+      isGroupLayerQuickAccess={isGroupLayerQuickAccess}
       subLayersSection={
         <Collapse in={subLayerSectionOpen} unmountOnExit>
           <Box sx={{ marginLeft: 3 }}>

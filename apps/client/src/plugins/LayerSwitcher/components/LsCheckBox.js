@@ -4,9 +4,9 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import LsIconButton from "./LsIconButton";
 
-const LsCheckBox = ({ toggleState }) => {
+const LsCheckBox = ({ toggleState, id }) => {
   return (
-    <LsIconButton size="small" sx={{}}>
+    <LsIconButton id={id} size="small" sx={{}}>
       <CheckBoxOutlineBlankIcon />
       <Box
         sx={[

@@ -286,7 +286,7 @@ function FavoritesList({
   return (
     <>
       {functionalCookiesOk ? (
-        <List dense sx={{ p: 0 }}>
+        <List className="favorites-list-view" dense sx={{ p: 0 }}>
           {!favorites.length ? (
             <Typography sx={{ p: 2 }}>Inga favoriter finns sparade</Typography>
           ) : (

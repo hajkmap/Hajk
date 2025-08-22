@@ -120,6 +120,7 @@ export default function QuickAccessLayers({
             globalObserver={globalObserver}
             toggleable={true}
             draggable={false}
+            isGroupLayerQuickAccess={l.get("quickAccess") === true}
           ></GroupLayer>
         ) : (
           <LayerItem
@@ -129,6 +130,7 @@ export default function QuickAccessLayers({
             draggable={false}
             toggleable={true}
             globalObserver={globalObserver}
+            isLayerQuickAccess={l.get("quickAccess") === true}
           />
         );
       })}

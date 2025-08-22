@@ -29,6 +29,18 @@ export default function FavoritesOptions({
 
   const optionsMenuIsOpen = Boolean(anchorEl);
 
+  // Add event listener for closing the favorites menu in the introduction component.
+  React.useEffect(() => {
+    const handleCloseMenu = () => {
+      setAnchorEl(null);
+    };
+
+    document.addEventListener("closeFavoritesMenu", handleCloseMenu);
+    return () => {
+      document.removeEventListener("closeFavoritesMenu", handleCloseMenu);
+    };
+  }, []);
+
   // Show the options menu by setting an anchor element
   const handleShowMoreOptionsClick = (e) => {
     e.stopPropagation();
@@ -82,12 +94,17 @@ export default function FavoritesOptions({
       </IconButton>
       <Menu
         anchorEl={anchorEl}
-        id="favorites-menu"
         aria-labelledby="favorites-menu-button"
         open={optionsMenuIsOpen}
         onClose={onOptionsMenuClose}
         variant={"menu"}
         onClick={(e) => e.stopPropagation()}
+        // 'id' is not a valid prop for the MUI Menu component, it should be set inside slotProps
+        slotProps={{
+          paper: {
+            id: "favorites-menu",
+          },
+        }}
       >
         <MenuItem onClick={handleAdd}>
           <ListItemIcon>
@@ -95,7 +112,7 @@ export default function FavoritesOptions({
           </ListItemIcon>
           <ListItemText>Spara till favoriter</ListItemText>
         </MenuItem>
-        <MenuItem onClick={handleEditFavorites}>
+        <MenuItem id="edit-favorites" onClick={handleEditFavorites}>
           <ListItemIcon>
             <EditOutlinedIcon fontSize="small" />
           </ListItemIcon>

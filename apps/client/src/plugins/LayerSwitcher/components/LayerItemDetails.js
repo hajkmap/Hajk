@@ -212,7 +212,10 @@ function LayerItemDetails({
                 title="Tillbaka"
                 TransitionProps={{ timeout: 0 }}
               >
-                <LsIconButton onClick={handleBackButtonClick}>
+                <LsIconButton
+                  id="layer-item-details-back-button"
+                  onClick={handleBackButtonClick}
+                >
                   <ArrowBackIcon />
                 </LsIconButton>
               </HajkToolTip>
@@ -256,6 +259,7 @@ function LayerItemDetails({
                   }
                 >
                   <LsIconButton
+                    id="toggle-legend-icon"
                     onClick={() => setLegendIsActive(!legendIsActive)}
                   >
                     <FormatListBulletedOutlinedIcon fontSize="small" />
@@ -291,6 +295,7 @@ function LayerItemDetails({
             </Stack>
             {showOpacitySlider !== false && showOpacity ? (
               <Box
+                id="layer-details-opacity-slider"
                 sx={{
                   px: 2,
                   pr: 3,
@@ -363,6 +368,7 @@ function LayerItemDetails({
                 })}
               >
                 <Button
+                  id="layer-details-quick-access-button"
                   fullWidth
                   variant="outlined"
                   onClick={handleQuickAccess}
