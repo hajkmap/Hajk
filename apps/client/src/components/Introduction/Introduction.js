@@ -441,7 +441,7 @@ class Introduction extends React.PureComponent {
   renderControlButton() {
     return createPortal(
       <PluginControlButton
-        icon={<AutoStoriesIcon />}
+        icon={<AutoStoriesIcon id="introduction-icon" />}
         onClick={() => {
           this.showIntroduction();
         }}
@@ -709,7 +709,7 @@ class Introduction extends React.PureComponent {
       if (
         (nextStep?.element === "#quick-access-theme-button" && goingBackward) ||
         (step?.element === "#favorites-list-options-menu" &&
-          nextStep?.title === "Introduktion avslutad 🎉" &&
+          nextStep?.element === "#introduction-icon" &&
           goingBackward)
       ) {
         chainActionsWithVisibility([
@@ -1065,7 +1065,7 @@ class Introduction extends React.PureComponent {
         goingForward) ||
       step?.element === "#quick-access-menu-button" ||
       (step?.element === "#quick-access-theme-button" && !isFavoritesEnabled) ||
-      step?.title === "Introduktion avslutad 🎉"
+      step?.element === "#introduction-icon"
     ) {
       const closeEvent = new CustomEvent("closeQuickAccessMenu");
       document.dispatchEvent(closeEvent);
@@ -1084,7 +1084,7 @@ class Introduction extends React.PureComponent {
 
     if (
       step?.element === "#favorites-list-options-button" ||
-      step?.title === "Introduktion avslutad 🎉"
+      step?.element === "#introduction-icon"
     ) {
       const closeEvent = new CustomEvent("closeFavoritesListMenu");
       document.dispatchEvent(closeEvent);

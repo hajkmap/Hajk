@@ -26,7 +26,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Meny",
     element: "#layerswitcher-actions-menu",
     intro:
-      "<b>Dölj alla aktiva lager:</b> Klicka på knappen för att dölja <b>ALLA</b> aktiva lager. <br><br> <b>Scrolla till toppen:</b> Klicka på knappen för att scrolla till toppen av lagerlistan. <br><br> <b>Scrolla till botten:</b> Klicka på knappen för att scrolla till botten av lagerlistan.",
+      "<b>Släck alla aktiva lager:</b> Klicka på knappen för att släcka <b>ALLA</b> aktiva lager. <br><br> <b>Scrolla till toppen:</b> Klicka på knappen för att scrolla till toppen av lagerlistan. <br><br> <b>Scrolla till botten:</b> Klicka på knappen för att scrolla till botten av lagerlistan.",
   },
   {
     title: "Lagergrupp",
@@ -35,10 +35,10 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
       "Pilen indikerar en lagergrupp. Klicka för att se underliggande lager. <br/><br/> Notera att lagergruppnamn med <b>fetstil</b> innehåller aktiverade lager.",
   },
   {
-    title: "Aktivera/inaktivera lager",
+    title: "Tända/släcka lager",
     element: "#toggle-layer-item",
     intro:
-      "Klicka i rutan för att växla mellan slå på och slå av ett lager. Lagernamn med <b>fetstil</b> visar att ett lager är aktiverat.",
+      "Klicka i rutan för att växla mellan tända och släcka ett lager. Lagernamn med <b>fetstil</b> visar att ett lager är aktiverat.",
     position: "bottom",
   },
   {
@@ -84,7 +84,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Aktivera systemlager",
     element: "#draw-order-switch",
     intro:
-      "Klicka för att visa systemlager i lagerlistan och ändra ritordningen för lager som genereras av verktyg.",
+      "Klicka för att visa systemlager i system lagerlistan nedan.<br></br>Systemlager är lager som är genererade av verktyg exempelvis från ritaverktyget.",
   },
   {
     title: "Lista över systemlager",
@@ -113,13 +113,13 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Mina favoriter",
     element: "#favorites-menu-button",
     intro:
-      "Klicka på favoriter-knappen. <br><br> Menyn innehåller funktioner för att spara till favoriter, redigera favoriter och ladda favoriter.",
+      "Klicka på favoriter-knappen. <br><br> Menyn innehåller funktioner för att spara till favoriter, redigera favoriter och ladda favoriter.<br><br> Ser du inga favoriter under <i>Redigera favoriter</i> knappen, betyder det att du inte har några favoriter sparade.",
   },
   {
     title: "Meny för favoriter",
     element: "#favorites-menu",
     intro:
-      "- <b>Spara till favoriter:</b> Sparar en grupp till favoriter som innehåller en eller flera lager. Titel och beskrivning av denna grupp kan anpassas. <br><br> - <b>Redigera favoriter:</b> Hantera sparade favoriter. <br><br> - <b>Ladda favorit:</b> Klicka på respektive favorit för att ladda den. Vid laddning ersätts lagren i snabbåtkomst. Alla aktiverade lager i kartan inaktiveras och ersätts med favoritens aktiverade lager. <br><br> Ser du inga favoriter under <i>Redigera favoriter</i> knappen, betyder det att du inte har några favoriter sparade.",
+      "- <b>Spara till favoriter:</b> Sparar en grupp till favoriter som innehåller en eller flera lager. Titel och beskrivning av denna grupp kan anpassas. <br><br> - <b>Redigera favoriter:</b> Hantera sparade favoriter. <br><br> - <b>Ladda favorit:</b> Klicka på respektive favorit för att ladda den. Vid laddning ersätts lagren i snabbåtkomst. Alla aktiverade lager i kartan inaktiveras och ersätts med favoritens aktiverade lager.",
   },
   {
     title: "Redigera favoriter",
@@ -163,7 +163,9 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   },
   {
     title: "Introduktion avslutad 🎉",
+    element: "#introduction-icon",
     intro:
-      "Du har nu gått igenom hela introduktionen. Vill du ta en runda till?<br><br>Klicka på knappen i kartkontrollpanelen till höger om du vill börja om från början.",
+      "Du har nu gått igenom hela introduktionen. Vill du ta en runda till?<br><br>Klicka på knappen i kartkontrollpanelen om du vill börja om från början.",
+    position: "left",
   },
 ];
