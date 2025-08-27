@@ -40,7 +40,7 @@ import { setupPassport } from "./auth/passport.middleware.ts";
 const logger = log4js.getLogger("hajk");
 
 // The source of truth regarding which API versions are allowed.
-const ALLOWED_API_VERSIONS = [2, 3];
+const ALLOWED_API_VERSIONS = [3];
 
 class Server {
   private app: Application;
@@ -151,9 +151,7 @@ class Server {
     this.setupParsers();
 
     // Sessions are only available if API version 3 or higher is enabled.
-    if (this.apiVersions.some((v) => v >= 3)) {
-      this.setupSession();
-    }
+    this.setupSession();
 
     // If .env tells that we should use authentication, let's
     // initiate PassportJS with all its strategies.

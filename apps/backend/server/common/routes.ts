@@ -15,19 +15,8 @@ export async function initRoutes(app: Application): Promise<void> {
 
   for (const v of apiVersions) {
     try {
-      let versionRouter; // Will hold the actual imported module
-
-      try {
-        // Let's try grabbing the JS file
-        const { default: router } = await import(`../apis/v${v}/router.js`);
-        versionRouter = router;
-      } catch {
-        // If it fails, let's attempt to get the TS file
-        const { default: router } = await import(`../apis/v${v}/router.ts`);
-        versionRouter = router;
-      }
-
-      app.use(`/api/v${v}`, versionRouter);
+      const { default: router } = await import(`../apis/v${v}/router.ts`);
+      app.use(`/api/v${v}`, router);
       logger.info(`Loaded routes for /api/v${v}`);
     } catch (error) {
       logger.error(`Failed to loaded routes for /api/v${v}`);
