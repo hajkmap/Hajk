@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { z, ZodError } from "zod";
+import { ZodType, ZodError } from "zod";
 import HttpStatusCodes from "../../../common/http-status-codes.ts";
 /*
 Tries to parse the request data using the provided schema.
@@ -8,7 +8,7 @@ If parsing fails, returns a 400 error response with a JSON object containing val
 errors if the error is a Zod error; otherwise, passes the error to the next middleware function (next(error)).
 */
 export const validatePayload = (
-  schema: z.ZodType<unknown>,
+  schema: ZodType<unknown>,
   source: "body" | "params" | "query" = "body"
 ) => {
   return (req: Request, res: Response, next: NextFunction) => {
