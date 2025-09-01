@@ -1,3 +1,5 @@
+import LocalStorageHelper from "utils/LocalStorageHelper";
+
 export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Hajk 4",
@@ -112,8 +114,21 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Mina favoriter",
     element: "#favorites-menu-button",
-    intro:
-      "Klicka på favoriter-knappen. <br><br> Menyn innehåller funktioner för att spara till favoriter, redigera favoriter och ladda favoriter.<br><br> Ser du inga favoriter under <i>Redigera favoriter</i> knappen, betyder det att du inte har några favoriter sparade.",
+    intro: () => {
+      const savedLayers =
+        LocalStorageHelper.get("layerswitcher").savedLayers?.length || 0;
+      const baseIntro =
+        "Klicka på favoriter-knappen. <br><br> Menyn innehåller funktioner för att spara till favoriter, redigera favoriter och ladda favoriter.";
+
+      if (savedLayers === 0) {
+        return (
+          baseIntro +
+          "<br><br><i>Inga favoriter är tillgängliga för tillfället. Lägg till en favorit för att se den här delen av guiden.</i>"
+        );
+      }
+
+      return baseIntro;
+    },
   },
   {
     title: "Meny för favoriter",
@@ -152,8 +167,19 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Teman",
     element: "#quick-access-theme-button",
-    intro:
-      "Klicka på knappen för att visa teman. <br> Teman är fördefinierade lagergrupper skapade av Hajk-administratörer.",
+    intro: () => {
+      const baseIntro =
+        "Klicka på knappen för att visa teman. <br> Teman är fördefinierade lagergrupper skapade av Hajk-administratörer.";
+
+      if (layerSwitcherPlugin.options.quickAccessPresets?.length === 0) {
+        return (
+          baseIntro +
+          "<br><br><i>Inga teman är tillgängliga för tillfället. Be adminstratören att skapa teman för att se den här delen av guiden.</i>"
+        );
+      }
+
+      return baseIntro;
+    },
   },
   {
     title: "Lista för teman",
