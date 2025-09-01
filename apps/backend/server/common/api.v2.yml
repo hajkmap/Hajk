@@ -932,8 +932,8 @@ components:
         id:
           oneOf: [{ type: string }, { type: integer }]
         geometry:
-          type: object # 👈 VIKTIGT för Ajv
-          nullable: true # 👈 Tillåter null i OAS 3.0
+          type: object
+          nullable: true
           allOf:
             - $ref: "#/components/schemas/Geometry"
         properties:
