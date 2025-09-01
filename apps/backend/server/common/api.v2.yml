@@ -21,14 +21,15 @@ tags:
   - name: Specification
     description: The OpenAPI specification
 paths:
-  /api/v2/ogc/wfst:
+  /ogc/wfst:
     get:
+      tags: [Client-accessible]
       summary: List WFS-T layers
       parameters:
         - in: query
           name: fields
           schema: { type: string }
-          description: Komma-separerade fältnamn att returnera
+          description: Komma-separerade fält att returnera
       responses:
         "200":
           description: OK
@@ -42,8 +43,10 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/WFSTLayer"
-  /api/v2/ogc/wfst/{id}/features:
+
+  /ogc/wfst/{id}/features:
     get:
+      tags: [Client-accessible]
       summary: Get features for a WFST layer
       parameters:
         - in: path
@@ -54,7 +57,7 @@ paths:
           name: bbox
           schema: { type: string }
           example: "312000,6400000,320000,6408000"
-          description: minx,miny,maxx,maxy (EPSG läggs på automatiskt)
+          description: minx,miny,maxx,maxy i lagrets CRS
         - in: query
           name: limit
           schema: { type: integer, minimum: 1 }
@@ -64,11 +67,11 @@ paths:
         - in: query
           name: typeName
           schema: { type: string }
-          description: Överskrid lagrets första typeName om flera finns
+          description: Överskriv lagrets första typnamn om flera finns
         - in: query
           name: srsName
           schema: { type: string }
-          description: Överskrid lagrets projection (t.ex. EPSG:3009)
+          description: Överskriv lagrets projection (t.ex. EPSG:3009)
         - in: query
           name: version
           schema: { type: string }
@@ -76,7 +79,7 @@ paths:
         - in: query
           name: filter
           schema: { type: string }
-          description: OGC Filter XML som URL-kodas (avancerat)
+          description: OGC Filter XML (URL-koda värdet)
       responses:
         "200":
           description: GeoJSON FeatureCollection
@@ -879,6 +882,78 @@ components:
         name:
           type: string
           example: example 3
+    WFSTLayer:
+      type: object
+      properties:
+        id: { type: string }
+        caption: { type: string }
+        url: { type: string, format: uri }
+        layers:
+          type: array
+          items: { type: string }
+        projection: { type: string }
+        editableFields:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+        nonEditableFields:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+    Geometry:
+      type: object
+      required: [type, coordinates]
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          enum:
+            [
+              Point,
+              LineString,
+              Polygon,
+              MultiPoint,
+              MultiLineString,
+              MultiPolygon,
+            ]
+        coordinates:
+          type: array
+          items: {}
+    Feature:
+      type: object
+      required: [type, geometry, properties]
+      additionalProperties: true
+      properties:
+        type: { type: string, enum: [Feature] }
+        id:
+          oneOf: [{ type: string }, { type: integer }]
+        geometry:
+          type: object # 👈 VIKTIGT för Ajv
+          nullable: true # 👈 Tillåter null i OAS 3.0
+          allOf:
+            - $ref: "#/components/schemas/Geometry"
+        properties:
+          type: object
+          additionalProperties: true
+    FeatureCollection:
+      type: object
+      required: [type, features]
+      additionalProperties: true
+      properties:
+        type: { type: string, enum: [FeatureCollection] }
+        bbox:
+          type: array
+          items: { type: number }
+          minItems: 4
+          maxItems: 6
+        features:
+          type: array
+          items:
+            $ref: "#/components/schemas/Feature"
     Error:
       type: object
       properties:
@@ -946,50 +1021,3 @@ components:
           example: no_stress
     LayerSwitcherBody:
       title: LayerSwitcher body
-    Geometry:
-      type: object
-      required: [type, coordinates]
-      additionalProperties: true
-      properties:
-        type:
-          type: string
-          enum:
-            - Point
-            - LineString
-            - Polygon
-            - MultiPoint
-            - MultiLineString
-            - MultiPolygon
-        coordinates:
-          type: array # förenklat – vi validerar inte hela koordinatdjupet här
-          items: {}
-    Feature:
-      type: object
-      required: [type, geometry, properties]
-      additionalProperties: true
-      properties:
-        type:
-          type: string
-          enum: [Feature]
-        id:
-          oneOf:
-            - type: string
-            - type: integer
-        geometry:
-          nullable: true # <-- ersätter type: "null"
-          $ref: "#/components/schemas/Geometry"
-        properties:
-          type: object
-          additionalProperties: true
-    FeatureCollection:
-      type: object
-      required: [type, features]
-      additionalProperties: true
-      properties:
-        type:
-          type: string
-          enum: [FeatureCollection]
-        features:
-          type: array
-          items:
-            $ref: "#/components/schemas/Feature"

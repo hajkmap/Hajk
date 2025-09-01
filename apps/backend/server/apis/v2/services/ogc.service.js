@@ -1,5 +1,8 @@
 import SettingsService from "./settings.service.js";
 import { XMLParser } from "fast-xml-parser";
+const DEFAULT_BASE =
+  process.env.HAJK_BASE_URL || `http://localhost:${process.env.PORT || 3002}`;
+const UPSTREAM_TIMEOUT = Number(process.env.OGC_UPSTREAM_TIMEOUT_MS || 20000);
 
 export class NotFoundError extends Error {
   constructor(msg) {
@@ -7,6 +10,7 @@ export class NotFoundError extends Error {
     this.name = "NotFoundError";
   }
 }
+
 export class UpstreamError extends Error {
   constructor(msg, status) {
     super(msg);
@@ -16,10 +20,60 @@ export class UpstreamError extends Error {
 }
 
 // ---------- config ----------
-async function getWFSTStore() {
+async function getWFSTStore({ baseUrl = DEFAULT_BASE, prefer = "api" } = {}) {
+  // 1) Try via existing API
+  if (prefer === "api") {
+    try {
+      const r = await fetch(`${baseUrl}/api/v2/mapconfig/layers`, {
+        headers: { Accept: "application/json" },
+      });
+      if (r.ok) {
+        const j = await r.json();
+        if (Array.isArray(j?.wfstlayers)) return j.wfstlayers;
+      }
+    } catch (_) {
+      // Ignore and fall back to file
+    }
+  }
+
+  // 2) Fallback: read from layers.json via SettingsService
   const store = await SettingsService.readFileAsJson("layers.json");
   return store?.wfstlayers || [];
 }
+
+function isValidUrl(urlString) {
+  try {
+    const u = new URL(urlString);
+    return ["http:", "https:"].includes(u.protocol);
+  } catch {
+    return false;
+  }
+}
+
+function isValidBbox(bbox) {
+  const parts = String(bbox).split(",");
+  return (
+    parts.length >= 4 &&
+    parts.slice(0, 4).every((p) => !Number.isNaN(parseFloat(p)))
+  );
+}
+
+async function fetchWithTimeout(url, options = {}, timeout = UPSTREAM_TIMEOUT) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return res;
+  } catch (err) {
+    clearTimeout(id);
+    if (err?.name === "AbortError") {
+      throw new UpstreamError("Request timeout", 504);
+    }
+    throw err;
+  }
+}
+
 function pick(obj, fields) {
   if (!fields?.length) return obj;
   return Object.fromEntries(
@@ -38,23 +92,26 @@ function buildWfsGetFeatureUrl({
   offset,
   outputFormat,
   filter,
+  cqlFilter,
 }) {
   const params = {
     SERVICE: "WFS",
     REQUEST: "GetFeature",
     VERSION: version || "1.1.0",
-    TYPENAME: typeName, // WFS 1.1.0
+    TYPENAME: typeName,
     SRSNAME: srsName,
     OUTPUTFORMAT: outputFormat || "application/json",
   };
   if (bbox) params.BBOX = bbox.includes(",EPSG") ? bbox : `${bbox},${srsName}`;
   if (limit) params.MAXFEATURES = String(limit);
   if (offset) params.STARTINDEX = String(offset);
-  if (filter) params.FILTER = filter;
+  if (filter) params.FILTER = filter; // OGC Filter (XML)
+  if (cqlFilter) params.CQL_FILTER = cqlFilter; // GeoServer CQL filter (optional)
 
   const qs = new URLSearchParams(params).toString();
   return baseUrl + (baseUrl.includes("?") ? "&" : "?") + qs;
 }
+
 function rewriteOutputFormat(urlStr, fmt) {
   const u = new URL(urlStr, "http://dummy");
   u.searchParams.set("OUTPUTFORMAT", fmt);
@@ -103,98 +160,147 @@ function parseRing(obj) {
   return [];
 }
 
+const keyOf = (obj, localName) =>
+  Object.keys(obj).find((k) => k.endsWith(`:${localName}`));
+const hasGeomLocal = (o, name) => !!keyOf(o, name);
+
+const keyOfAny = (obj, names) => names.map((n) => keyOf(obj, n)).find(Boolean);
+function ensureClosed(ring) {
+  if (!ring || ring.length === 0) return ring || [];
+  const [fx, fy] = ring[0];
+  const [lx, ly] = ring[ring.length - 1];
+  return fx === lx && fy === ly ? ring : [...ring, ring[0]];
+}
+
 function gmlGeomToGeoJSON(g) {
   if (!g || !isObj(g)) return null;
-  if (g["gml:Point"]) {
-    const p = g["gml:Point"];
-    const coord = p["gml:pos"]
-      ? posToCoord(asText(p["gml:pos"]))
-      : coordsElToCoords(asText(p["gml:coordinates"]))[0];
-    return { type: "Point", coordinates: coord };
+
+  const pointKey = keyOf(g, "Point");
+  if (pointKey) {
+    const p = g[pointKey];
+    const pos = p["gml:pos"] || p["gml2:pos"] || p["pos"];
+    const coordsEl =
+      p["gml:coordinates"] || p["gml2:coordinates"] || p["coordinates"];
+    const coord = pos
+      ? posToCoord(asText(pos))
+      : coordsEl
+        ? coordsElToCoords(asText(coordsEl))[0]
+        : null;
+    return coord ? { type: "Point", coordinates: coord } : null;
   }
-  if (g["gml:LineString"]) {
-    const ls = g["gml:LineString"];
-    const coordinates = ls["gml:posList"]
-      ? posListToCoords(asText(ls["gml:posList"]))
-      : coordsElToCoords(asText(ls["gml:coordinates"]));
+
+  const lineKey = keyOf(g, "LineString");
+  if (lineKey) {
+    const ls = g[lineKey];
+    const posList = ls["gml:posList"] || ls["gml2:posList"] || ls["posList"];
+    const coordsEl =
+      ls["gml:coordinates"] || ls["gml2:coordinates"] || ls["coordinates"];
+    const coordinates = posList
+      ? posListToCoords(asText(posList))
+      : coordsEl
+        ? coordsElToCoords(asText(coordsEl))
+        : [];
     return { type: "LineString", coordinates };
   }
-  if (g["gml:Polygon"]) {
-    const poly = g["gml:Polygon"];
-    const exterior = parseRing(poly["gml:exterior"]?.["gml:LinearRing"]);
-    const iraw = poly["gml:interior"];
-    const interiors = Array.isArray(iraw) ? iraw : iraw ? [iraw] : [];
-    const holes = interiors.map((i) => parseRing(i["gml:LinearRing"]));
+
+  const polyKey = keyOf(g, "Polygon");
+  if (polyKey) {
+    const poly = g[polyKey];
+
+    // exterior / outerBoundaryIs
+    const exteriorKey = keyOfAny(poly, ["exterior", "outerBoundaryIs"]);
+    const exteriorObj = exteriorKey ? poly[exteriorKey] : null;
+    const linearRingKey = exteriorObj
+      ? keyOfAny(exteriorObj, ["LinearRing"])
+      : null;
+    const exteriorRing = linearRingKey
+      ? parseRing(exteriorObj[linearRingKey])
+      : [];
+    const exterior = ensureClosed(exteriorRing);
+
+    // interior(s) / innerBoundaryIs
+    const interiorKey = keyOfAny(poly, ["interior", "innerBoundaryIs"]);
+    const interiorsRaw = interiorKey ? poly[interiorKey] : undefined;
+    const interiorsArr = Array.isArray(interiorsRaw)
+      ? interiorsRaw
+      : interiorsRaw
+        ? [interiorsRaw]
+        : [];
+    const holes = interiorsArr
+      .map((i) => {
+        const lrk = keyOfAny(i, ["LinearRing"]);
+        const ring = lrk ? parseRing(i[lrk]) : [];
+        return ensureClosed(ring);
+      })
+      .filter((r) => r.length);
+
     return { type: "Polygon", coordinates: [exterior, ...holes] };
   }
-  if (g["gml:MultiPoint"]) {
-    const mp = g["gml:MultiPoint"];
-    const memb = Array.isArray(mp["gml:pointMember"])
-      ? mp["gml:pointMember"]
-      : mp["gml:pointMember"]
-        ? [mp["gml:pointMember"]]
+
+  const mpKey = keyOf(g, "MultiPoint");
+  if (mpKey) {
+    const mp = g[mpKey];
+    const memberK = keyOf(mp, "pointMember");
+    const members = Array.isArray(mp[memberK])
+      ? mp[memberK]
+      : mp[memberK]
+        ? [mp[memberK]]
         : [];
     return {
       type: "MultiPoint",
-      coordinates: memb
-        .map(
-          (m) => gmlGeomToGeoJSON({ "gml:Point": m["gml:Point"] })?.coordinates
-        )
-        .filter(Boolean),
-    };
-  }
-  if (g["gml:MultiLineString"]) {
-    const ml = g["gml:MultiLineString"];
-    const memb = Array.isArray(ml["gml:lineStringMember"])
-      ? ml["gml:lineStringMember"]
-      : ml["gml:lineStringMember"]
-        ? [ml["gml:lineStringMember"]]
-        : [];
-    return {
-      type: "MultiLineString",
-      coordinates: memb
+      coordinates: members
         .map(
           (m) =>
-            gmlGeomToGeoJSON({ "gml:LineString": m["gml:LineString"] })
+            gmlGeomToGeoJSON({ [keyOf(m, "Point")]: m[keyOf(m, "Point")] })
               ?.coordinates
         )
         .filter(Boolean),
     };
   }
-  if (g["gml:MultiPolygon"]) {
-    const mp = g["gml:MultiPolygon"];
-    const memb = Array.isArray(mp["gml:polygonMember"])
-      ? mp["gml:polygonMember"]
-      : mp["gml:polygonMember"]
-        ? [mp["gml:polygonMember"]]
+
+  const mlsKey = keyOf(g, "MultiLineString");
+  if (mlsKey) {
+    const ml = g[mlsKey];
+    const memberK = keyOf(ml, "lineStringMember");
+    const members = Array.isArray(ml[memberK])
+      ? ml[memberK]
+      : ml[memberK]
+        ? [ml[memberK]]
         : [];
     return {
-      type: "MultiPolygon",
-      coordinates: memb
+      type: "MultiLineString",
+      coordinates: members
         .map(
           (m) =>
-            gmlGeomToGeoJSON({ "gml:Polygon": m["gml:Polygon"] })?.coordinates
+            gmlGeomToGeoJSON({
+              [keyOf(m, "LineString")]: m[keyOf(m, "LineString")],
+            })?.coordinates
         )
         .filter(Boolean),
     };
   }
-  if (g["gml:MultiSurface"]) {
-    const ms = g["gml:MultiSurface"];
-    const memb = Array.isArray(ms["gml:surfaceMember"])
-      ? ms["gml:surfaceMember"]
-      : ms["gml:surfaceMember"]
-        ? [ms["gml:surfaceMember"]]
+
+  const mpolyKey = keyOf(g, "MultiPolygon");
+  const msurfKey = keyOf(g, "MultiSurface");
+  if (mpolyKey || msurfKey) {
+    const cont = g[mpolyKey || msurfKey];
+    const memberK = keyOf(cont, mpolyKey ? "polygonMember" : "surfaceMember");
+    const members = Array.isArray(cont[memberK])
+      ? cont[memberK]
+      : cont[memberK]
+        ? [cont[memberK]]
         : [];
     return {
       type: "MultiPolygon",
-      coordinates: memb
-        .map(
-          (m) =>
-            gmlGeomToGeoJSON({ "gml:Polygon": m["gml:Polygon"] })?.coordinates
-        )
+      coordinates: members
+        .map((m) => {
+          const poly = keyOf(m, "Polygon");
+          return gmlGeomToGeoJSON({ [poly]: m[poly] })?.coordinates;
+        })
         .filter(Boolean),
     };
   }
+
   return null;
 }
 
@@ -202,20 +308,22 @@ function findGeometryEntry(featureObj) {
   for (const [k, v] of Object.entries(featureObj)) {
     if (!isObj(v)) continue;
     if (
-      v["gml:Point"] ||
-      v["gml:LineString"] ||
-      v["gml:Polygon"] ||
-      v["gml:MultiPoint"] ||
-      v["gml:MultiLineString"] ||
-      v["gml:MultiPolygon"] ||
-      v["gml:MultiSurface"]
+      [
+        "Point",
+        "LineString",
+        "Polygon",
+        "MultiPoint",
+        "MultiLineString",
+        "MultiPolygon",
+        "MultiSurface",
+      ].some((n) => hasGeomLocal(v, n))
     )
       return [k, v];
     if (
       Object.values(v).some(
         (x) =>
           isObj(x) &&
-          (x["gml:Point"] || x["gml:LineString"] || x["gml:Polygon"])
+          ["Point", "LineString", "Polygon"].some((n) => hasGeomLocal(x, n))
       )
     )
       return [k, v];
@@ -286,8 +394,8 @@ function gmlToFeatureCollection(xmlText) {
 }
 
 // ---------- Public servises ----------
-export async function listWFSTLayers({ fields } = {}) {
-  const layers = await getWFSTStore();
+export async function listWFSTLayers({ fields, baseUrl } = {}) {
+  const layers = await getWFSTStore({ baseUrl, prefer: "api" });
   const pickFields = (fields || "")
     .split(",")
     .map((s) => s.trim())
@@ -304,10 +412,16 @@ export async function getWFSTFeatures({
   limit,
   offset,
   filter,
+  cqlFilter,
+  baseUrl,
 }) {
-  const layers = await getWFSTStore();
+  const layers = await getWFSTStore({ baseUrl, prefer: "api" });
   const layer = layers.find((l) => String(l.id) === String(id));
   if (!layer) throw new NotFoundError("WFST-layer not found");
+
+  if (!isValidUrl(layer.url)) throw new UpstreamError("Invalid layer URL", 400);
+  if (bbox && !isValidBbox(bbox))
+    throw new UpstreamError("Invalid bbox format", 400);
 
   const tn =
     typeName || (Array.isArray(layer.layers) ? layer.layers[0] : layer.layers);
@@ -315,7 +429,6 @@ export async function getWFSTFeatures({
 
   const crs = srsName || layer.projection || "EPSG:4326";
 
-  // 1) Try GeoJSON
   const urlJson = buildWfsGetFeatureUrl({
     baseUrl: layer.url,
     version,
@@ -326,11 +439,21 @@ export async function getWFSTFeatures({
     offset,
     outputFormat: "application/json",
     filter,
+    cqlFilter,
   });
-  let res = await fetch(urlJson, { headers: { Accept: "application/json" } });
+
+  // JSON-try
+  let res = await fetchWithTimeout(urlJson, {
+    headers: { Accept: "application/json" },
+  });
   let ctype = res.headers.get("content-type") || "";
   let text = await res.text();
 
+  if (!res.ok) {
+    log.warn(
+      `Upstream error from ${layer.url}: ${res.status} - ${text.substring(0, 200)}`
+    );
+  }
   if (
     res.ok &&
     (ctype.includes("application/json") || text.trim().startsWith("{"))
@@ -338,25 +461,25 @@ export async function getWFSTFeatures({
     try {
       return JSON.parse(text);
     } catch {
-      /* fallthrough to GML */
+      /* fall back to GML */
     }
   }
 
-  // 2) Fallback: GML3 -> GeoJSON
+  // GML3 fallback
   const urlGml3 = rewriteOutputFormat(
     urlJson,
     "application/gml+xml; version=3.2"
   );
-  res = await fetch(urlGml3, {
+  res = await fetchWithTimeout(urlGml3, {
     headers: { Accept: "application/xml,text/xml,application/gml+xml" },
   });
   text = await res.text();
   if (res.ok && text.trim().startsWith("<"))
     return gmlToFeatureCollection(text);
 
-  // 3) Fallback: GML2 -> GeoJSON
+  // GML2 fallback
   const urlGml2 = rewriteOutputFormat(urlJson, "GML2");
-  res = await fetch(urlGml2, {
+  res = await fetchWithTimeout(urlGml2, {
     headers: { Accept: "application/xml,text/xml" },
   });
   text = await res.text();
