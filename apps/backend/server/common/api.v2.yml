@@ -21,6 +21,71 @@ tags:
   - name: Specification
     description: The OpenAPI specification
 paths:
+  /api/v2/ogc/wfst:
+    get:
+      summary: List WFS-T layers
+      parameters:
+        - in: query
+          name: fields
+          schema: { type: string }
+          description: Komma-separerade fältnamn att returnera
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: { type: integer }
+                  layers:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WFSTLayer"
+  /api/v2/ogc/wfst/{id}/features:
+    get:
+      summary: Get features for a WFST layer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: query
+          name: bbox
+          schema: { type: string }
+          example: "312000,6400000,320000,6408000"
+          description: minx,miny,maxx,maxy (EPSG läggs på automatiskt)
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: offset
+          schema: { type: integer, minimum: 0 }
+        - in: query
+          name: typeName
+          schema: { type: string }
+          description: Överskrid lagrets första typeName om flera finns
+        - in: query
+          name: srsName
+          schema: { type: string }
+          description: Överskrid lagrets projection (t.ex. EPSG:3009)
+        - in: query
+          name: version
+          schema: { type: string }
+          description: WFS-version (default 1.1.0)
+        - in: query
+          name: filter
+          schema: { type: string }
+          description: OGC Filter XML som URL-kodas (avancerat)
+      responses:
+        "200":
+          description: GeoJSON FeatureCollection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeatureCollection"
+        "415":
+          description: Upstream gav inte GeoJSON
   /informative/load/{document}:
     get:
       tags:
@@ -881,3 +946,50 @@ components:
           example: no_stress
     LayerSwitcherBody:
       title: LayerSwitcher body
+    Geometry:
+      type: object
+      required: [type, coordinates]
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          enum:
+            - Point
+            - LineString
+            - Polygon
+            - MultiPoint
+            - MultiLineString
+            - MultiPolygon
+        coordinates:
+          type: array # förenklat – vi validerar inte hela koordinatdjupet här
+          items: {}
+    Feature:
+      type: object
+      required: [type, geometry, properties]
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          enum: [Feature]
+        id:
+          oneOf:
+            - type: string
+            - type: integer
+        geometry:
+          nullable: true # <-- ersätter type: "null"
+          $ref: "#/components/schemas/Geometry"
+        properties:
+          type: object
+          additionalProperties: true
+    FeatureCollection:
+      type: object
+      required: [type, features]
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          enum: [FeatureCollection]
+        features:
+          type: array
+          items:
+            $ref: "#/components/schemas/Feature"
