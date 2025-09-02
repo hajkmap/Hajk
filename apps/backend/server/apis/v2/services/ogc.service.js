@@ -1,5 +1,6 @@
 import SettingsService from "./settings.service.js";
 import { XMLParser } from "fast-xml-parser";
+
 const DEFAULT_BASE =
   process.env.HAJK_BASE_URL || `http://localhost:${process.env.PORT || 3002}`;
 const UPSTREAM_TIMEOUT = Number(process.env.OGC_UPSTREAM_TIMEOUT_MS || 20000);
@@ -81,7 +82,7 @@ function pick(obj, fields) {
   );
 }
 
-// ---------- WFS URL-helper ----------
+// ---------- WFS URL-helper (1.1.0 & 2.0.0) ----------
 function buildWfsGetFeatureUrl({
   baseUrl,
   version,
@@ -94,19 +95,44 @@ function buildWfsGetFeatureUrl({
   filter,
   cqlFilter,
 }) {
+  const v = String(version || "1.1.0");
+  const is20 = v.startsWith("2.");
+
   const params = {
     SERVICE: "WFS",
     REQUEST: "GetFeature",
-    VERSION: version || "1.1.0",
-    TYPENAME: typeName,
+    VERSION: v,
     SRSNAME: srsName,
     OUTPUTFORMAT: outputFormat || "application/json",
   };
+
+  if (is20) {
+    params.TYPENAMES = typeName;
+    if (limit != null) params.COUNT = String(limit);
+    if (offset != null) params.startIndex = String(offset); // 0-based
+  } else {
+    params.TYPENAME = typeName;
+    if (limit != null) params.MAXFEATURES = String(limit);
+    if (offset != null) params.STARTINDEX = String(offset);
+  }
+
+  // Duplicate parameters for compatibility
+  if (process.env.OGC_WFS_PARAM_COMPAT === "both") {
+    params.TYPENAME = typeName;
+    params.TYPENAMES = typeName;
+    if (limit != null) {
+      params.MAXFEATURES = String(limit);
+      params.COUNT = String(limit);
+    }
+    if (offset != null) {
+      params.STARTINDEX = String(offset);
+      params.startIndex = String(offset);
+    }
+  }
+
   if (bbox) params.BBOX = bbox.includes(",EPSG") ? bbox : `${bbox},${srsName}`;
-  if (limit) params.MAXFEATURES = String(limit);
-  if (offset) params.STARTINDEX = String(offset);
   if (filter) params.FILTER = filter; // OGC Filter (XML)
-  if (cqlFilter) params.CQL_FILTER = cqlFilter; // GeoServer CQL filter (optional)
+  if (cqlFilter) params.CQL_FILTER = cqlFilter; // GeoServer
 
   const qs = new URLSearchParams(params).toString();
   return baseUrl + (baseUrl.includes("?") ? "&" : "?") + qs;
@@ -116,10 +142,7 @@ function rewriteOutputFormat(urlStr, fmt) {
   const u = new URL(urlStr, "http://dummy");
   u.searchParams.set("OUTPUTFORMAT", fmt);
   u.searchParams.set("outputFormat", fmt);
-  return (
-    (urlStr.startsWith("http") ? "" : "") +
-    u.toString().replace("http://dummy", "")
-  );
+  return u.toString().replace("http://dummy", "");
 }
 
 // ---------- GML -> GeoJSON ----------
@@ -153,34 +176,50 @@ const coordsElToCoords = (s) =>
     .split(/\s+/)
     .map((p) => p.split(",").map(Number));
 
-function parseRing(obj) {
-  if (obj?.["gml:posList"]) return posListToCoords(asText(obj["gml:posList"]));
-  if (obj?.["gml:coordinates"])
-    return coordsElToCoords(asText(obj["gml:coordinates"]));
-  return [];
+const keyOf = (obj, localName) =>
+  Object.keys(obj || {}).find((k) => k.endsWith(`:${localName}`));
+const keyOfAny = (obj, names) =>
+  (names || []).map((n) => keyOf(obj, n)).find(Boolean);
+function getProp(obj, localNames) {
+  if (!obj) return undefined;
+  for (const name of localNames) {
+    const pref = keyOf(obj, name);
+    if (pref && obj[pref] !== undefined) return obj[pref];
+    if (obj[name] !== undefined) return obj[name];
+  }
+  return undefined;
 }
 
-const keyOf = (obj, localName) =>
-  Object.keys(obj).find((k) => k.endsWith(`:${localName}`));
-const hasGeomLocal = (o, name) => !!keyOf(o, name);
-
-const keyOfAny = (obj, names) => names.map((n) => keyOf(obj, n)).find(Boolean);
 function ensureClosed(ring) {
-  if (!ring || ring.length === 0) return ring || [];
+  if (!Array.isArray(ring) || ring.length === 0) return ring || [];
   const [fx, fy] = ring[0];
   const [lx, ly] = ring[ring.length - 1];
   return fx === lx && fy === ly ? ring : [...ring, ring[0]];
 }
 
+function parseRing(linearRingObj) {
+  if (!linearRingObj || typeof linearRingObj !== "object") return [];
+  const posList = getProp(linearRingObj, ["posList"]);
+  if (posList) return posListToCoords(asText(posList));
+  const coordsEl = getProp(linearRingObj, ["coordinates"]);
+  if (coordsEl) return coordsElToCoords(asText(coordsEl));
+  let pos = getProp(linearRingObj, ["pos"]);
+  if (pos) {
+    const arr = Array.isArray(pos) ? pos : [pos];
+    return arr.map((p) => posToCoord(asText(p)));
+  }
+  return [];
+}
+
 function gmlGeomToGeoJSON(g) {
   if (!g || !isObj(g)) return null;
 
+  // Point
   const pointKey = keyOf(g, "Point");
   if (pointKey) {
     const p = g[pointKey];
-    const pos = p["gml:pos"] || p["gml2:pos"] || p["pos"];
-    const coordsEl =
-      p["gml:coordinates"] || p["gml2:coordinates"] || p["coordinates"];
+    const pos = getProp(p, ["pos"]);
+    const coordsEl = getProp(p, ["coordinates"]);
     const coord = pos
       ? posToCoord(asText(pos))
       : coordsEl
@@ -189,12 +228,12 @@ function gmlGeomToGeoJSON(g) {
     return coord ? { type: "Point", coordinates: coord } : null;
   }
 
+  // LineString
   const lineKey = keyOf(g, "LineString");
   if (lineKey) {
     const ls = g[lineKey];
-    const posList = ls["gml:posList"] || ls["gml2:posList"] || ls["posList"];
-    const coordsEl =
-      ls["gml:coordinates"] || ls["gml2:coordinates"] || ls["coordinates"];
+    const posList = getProp(ls, ["posList"]);
+    const coordsEl = getProp(ls, ["coordinates"]);
     const coordinates = posList
       ? posListToCoords(asText(posList))
       : coordsEl
@@ -203,22 +242,21 @@ function gmlGeomToGeoJSON(g) {
     return { type: "LineString", coordinates };
   }
 
+  // Polygon (GML3: exterior/interior, GML2: outerBoundaryIs/innerBoundaryIs)
   const polyKey = keyOf(g, "Polygon");
   if (polyKey) {
     const poly = g[polyKey];
 
-    // exterior / outerBoundaryIs
     const exteriorKey = keyOfAny(poly, ["exterior", "outerBoundaryIs"]);
     const exteriorObj = exteriorKey ? poly[exteriorKey] : null;
-    const linearRingKey = exteriorObj
+    const lrExteriorKey = exteriorObj
       ? keyOfAny(exteriorObj, ["LinearRing"])
       : null;
-    const exteriorRing = linearRingKey
-      ? parseRing(exteriorObj[linearRingKey])
+    const exteriorRing = lrExteriorKey
+      ? parseRing(exteriorObj[lrExteriorKey])
       : [];
     const exterior = ensureClosed(exteriorRing);
 
-    // interior(s) / innerBoundaryIs
     const interiorKey = keyOfAny(poly, ["interior", "innerBoundaryIs"]);
     const interiorsRaw = interiorKey ? poly[interiorKey] : undefined;
     const interiorsArr = Array.isArray(interiorsRaw)
@@ -237,96 +275,86 @@ function gmlGeomToGeoJSON(g) {
     return { type: "Polygon", coordinates: [exterior, ...holes] };
   }
 
+  // MultiPoint
   const mpKey = keyOf(g, "MultiPoint");
   if (mpKey) {
     const mp = g[mpKey];
-    const memberK = keyOf(mp, "pointMember");
+    const memberK = keyOfAny(mp, ["pointMember"]);
     const members = Array.isArray(mp[memberK])
       ? mp[memberK]
       : mp[memberK]
         ? [mp[memberK]]
         : [];
-    return {
-      type: "MultiPoint",
-      coordinates: members
-        .map(
-          (m) =>
-            gmlGeomToGeoJSON({ [keyOf(m, "Point")]: m[keyOf(m, "Point")] })
-              ?.coordinates
-        )
-        .filter(Boolean),
-    };
+    const coords = members
+      .map((m) => {
+        const pk = keyOf(m, "Point");
+        return pk ? gmlGeomToGeoJSON({ [pk]: m[pk] })?.coordinates : null;
+      })
+      .filter(Boolean);
+    return { type: "MultiPoint", coordinates: coords };
   }
 
+  // MultiLineString
   const mlsKey = keyOf(g, "MultiLineString");
   if (mlsKey) {
     const ml = g[mlsKey];
-    const memberK = keyOf(ml, "lineStringMember");
+    const memberK = keyOfAny(ml, ["lineStringMember"]);
     const members = Array.isArray(ml[memberK])
       ? ml[memberK]
       : ml[memberK]
         ? [ml[memberK]]
         : [];
-    return {
-      type: "MultiLineString",
-      coordinates: members
-        .map(
-          (m) =>
-            gmlGeomToGeoJSON({
-              [keyOf(m, "LineString")]: m[keyOf(m, "LineString")],
-            })?.coordinates
-        )
-        .filter(Boolean),
-    };
+    const coords = members
+      .map((m) => {
+        const lk = keyOf(m, "LineString");
+        return lk ? gmlGeomToGeoJSON({ [lk]: m[lk] })?.coordinates : null;
+      })
+      .filter(Boolean);
+    return { type: "MultiLineString", coordinates: coords };
   }
 
+  // MultiPolygon & MultiSurface
   const mpolyKey = keyOf(g, "MultiPolygon");
   const msurfKey = keyOf(g, "MultiSurface");
   if (mpolyKey || msurfKey) {
     const cont = g[mpolyKey || msurfKey];
-    const memberK = keyOf(cont, mpolyKey ? "polygonMember" : "surfaceMember");
+    const memberK = keyOfAny(cont, [
+      mpolyKey ? "polygonMember" : "surfaceMember",
+    ]);
     const members = Array.isArray(cont[memberK])
       ? cont[memberK]
       : cont[memberK]
         ? [cont[memberK]]
         : [];
-    return {
-      type: "MultiPolygon",
-      coordinates: members
-        .map((m) => {
-          const poly = keyOf(m, "Polygon");
-          return gmlGeomToGeoJSON({ [poly]: m[poly] })?.coordinates;
-        })
-        .filter(Boolean),
-    };
+    const polys = members
+      .map((m) => {
+        const pk = keyOf(m, "Polygon");
+        const polyGeom = pk ? gmlGeomToGeoJSON({ [pk]: m[pk] }) : null;
+        return polyGeom ? polyGeom.coordinates : null;
+      })
+      .filter(Boolean);
+    return { type: "MultiPolygon", coordinates: polys };
   }
 
   return null;
 }
 
 function findGeometryEntry(featureObj) {
-  for (const [k, v] of Object.entries(featureObj)) {
+  const hasGeom = (o) =>
+    [
+      "Point",
+      "LineString",
+      "Polygon",
+      "MultiPoint",
+      "MultiLineString",
+      "MultiPolygon",
+      "MultiSurface",
+    ].some((n) => !!keyOf(o, n));
+
+  for (const [k, v] of Object.entries(featureObj || {})) {
     if (!isObj(v)) continue;
-    if (
-      [
-        "Point",
-        "LineString",
-        "Polygon",
-        "MultiPoint",
-        "MultiLineString",
-        "MultiPolygon",
-        "MultiSurface",
-      ].some((n) => hasGeomLocal(v, n))
-    )
-      return [k, v];
-    if (
-      Object.values(v).some(
-        (x) =>
-          isObj(x) &&
-          ["Point", "LineString", "Polygon"].some((n) => hasGeomLocal(x, n))
-      )
-    )
-      return [k, v];
+    if (hasGeom(v)) return [k, v];
+    if (Object.values(v).some((x) => isObj(x) && hasGeom(x))) return [k, v];
   }
   return [null, null];
 }
@@ -374,6 +402,16 @@ function gmlToFeatureCollection(xmlText) {
   const doc = xp.parse(xmlText);
   const root = doc["wfs:FeatureCollection"] || doc["FeatureCollection"] || doc;
 
+  const numberMatched =
+    root?.["@_numberMatched"] !== undefined
+      ? Number(root["@_numberMatched"])
+      : undefined;
+  const numberReturned =
+    root?.["@_numberReturned"] !== undefined
+      ? Number(root["@_numberReturned"])
+      : undefined;
+  const timeStamp = root?.["@_timeStamp"];
+
   let members = [];
   if (Array.isArray(root?.["wfs:member"])) members = root["wfs:member"];
   else if (root?.["wfs:member"]) members = [root["wfs:member"]];
@@ -390,7 +428,12 @@ function gmlToFeatureCollection(xmlText) {
     );
 
   const features = members.map((m) => memberToFeature(m)).filter(Boolean);
-  return { type: "FeatureCollection", features };
+
+  const fc = { type: "FeatureCollection", features };
+  if (Number.isFinite(numberMatched)) fc.numberMatched = numberMatched;
+  if (Number.isFinite(numberReturned)) fc.numberReturned = numberReturned;
+  if (timeStamp) fc.timeStamp = timeStamp;
+  return fc;
 }
 
 // ---------- Public servises ----------
@@ -429,6 +472,7 @@ export async function getWFSTFeatures({
 
   const crs = srsName || layer.projection || "EPSG:4326";
 
+  // 1) JSON attempt
   const urlJson = buildWfsGetFeatureUrl({
     baseUrl: layer.url,
     version,
@@ -442,7 +486,6 @@ export async function getWFSTFeatures({
     cqlFilter,
   });
 
-  // JSON-try
   let res = await fetchWithTimeout(urlJson, {
     headers: { Accept: "application/json" },
   });
@@ -450,7 +493,7 @@ export async function getWFSTFeatures({
   let text = await res.text();
 
   if (!res.ok) {
-    log.warn(
+    console.warn(
       `Upstream error from ${layer.url}: ${res.status} - ${text.substring(0, 200)}`
     );
   }
@@ -459,13 +502,19 @@ export async function getWFSTFeatures({
     (ctype.includes("application/json") || text.trim().startsWith("{"))
   ) {
     try {
-      return JSON.parse(text);
+      const fc = JSON.parse(text);
+      // GeoServer: totalFeatures; WFS 2.0 JSON: numberMatched
+      if (typeof fc.totalFeatures === "number")
+        fc.numberMatched = fc.totalFeatures;
+      if (Array.isArray(fc.features) && typeof fc.numberReturned !== "number")
+        fc.numberReturned = fc.features.length;
+      return fc;
     } catch {
-      /* fall back to GML */
+      // fall through to GML
     }
   }
 
-  // GML3 fallback
+  // 2) GML3 fallback
   const urlGml3 = rewriteOutputFormat(
     urlJson,
     "application/gml+xml; version=3.2"
@@ -477,7 +526,7 @@ export async function getWFSTFeatures({
   if (res.ok && text.trim().startsWith("<"))
     return gmlToFeatureCollection(text);
 
-  // GML2 fallback
+  // 3) GML2 fallback
   const urlGml2 = rewriteOutputFormat(urlJson, "GML2");
   res = await fetchWithTimeout(urlGml2, {
     headers: { Accept: "application/xml,text/xml" },
