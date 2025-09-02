@@ -1,156 +1,448 @@
 import SettingsService from "./settings.service.js";
 import { XMLParser } from "fast-xml-parser";
 
-const DEFAULT_BASE =
-  process.env.HAJK_BASE_URL || `http://localhost:${process.env.PORT || 3002}`;
-const UPSTREAM_TIMEOUT = Number(process.env.OGC_UPSTREAM_TIMEOUT_MS || 20000);
+const CONSTANTS = {
+  DEFAULT_BASE:
+    process.env.HAJK_BASE_URL || `http://localhost:${process.env.PORT || 3002}`,
+  UPSTREAM_TIMEOUT: Number(process.env.OGC_UPSTREAM_TIMEOUT_MS || 20000),
+  MAX_RETRIES: 3,
+  RETRY_DELAYS: [1000, 2000, 4000], // Exponential backoff, in milliseconds
+  MAX_LIMIT: 10000,
+  CACHE_TTL: 60000,
+  MAX_RESPONSE_BYTES: 50 * 1024 * 1024,
 
-export class NotFoundError extends Error {
-  constructor(msg) {
-    super(msg);
-    this.name = "NotFoundError";
+  NAMESPACES: {
+    GML: "gml:",
+    WFS: "wfs:",
+  },
+
+  GEOMETRY_TYPES: [
+    "Point",
+    "LineString",
+    "Polygon",
+    "MultiPoint",
+    "MultiLineString",
+    "MultiPolygon",
+    "MultiSurface",
+    "MultiGeometry",
+    "GeometryCollection",
+  ],
+
+  WFS_VERSIONS: {
+    V1: "1.1.0",
+    V2: "2.0.0",
+  },
+
+  // Whitelist of domains for SSRF protection (configurable via environment variable)
+  ALLOWED_HOSTS: process.env.WFS_ALLOWED_HOSTS
+    ? process.env.WFS_ALLOWED_HOSTS.split(",").map((h) => h.trim())
+    : null, // null = allow all (backward compatibility)
+};
+
+// ========== ERROR HANDLING CLASSES ==========
+export class ServiceError extends Error {
+  constructor(message, code, details = {}) {
+    super(message);
+    this.name = this.constructor.name;
+    this.code = code;
+    this.details = details;
+    this.timestamp = new Date().toISOString();
   }
 }
 
-export class UpstreamError extends Error {
-  constructor(msg, status) {
-    super(msg);
-    this.name = "UpstreamError";
+export class NotFoundError extends ServiceError {
+  constructor(message, details) {
+    super(message, 404, details);
+  }
+}
+
+export class UpstreamError extends ServiceError {
+  constructor(message, status, details) {
+    super(message, status, details);
     this.status = status;
   }
 }
 
-// ---------- config ----------
-async function getWFSTStore({ baseUrl = DEFAULT_BASE, prefer = "api" } = {}) {
-  // 1) Try via existing API
-  if (prefer === "api") {
+export class ValidationError extends ServiceError {
+  constructor(message, details) {
+    super(message, 400, details);
+  }
+}
+
+// ========== LOGGER ==========
+class Logger {
+  static log(level, message, context = {}) {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      ...context,
+    };
+    console[level](JSON.stringify(logEntry));
+  }
+
+  static error(message, error, context = {}) {
+    this.log("error", message, {
+      ...context,
+      error: error?.message,
+      stack: error?.stack,
+    });
+  }
+
+  static warn(message, context = {}) {
+    this.log("warn", message, context);
+  }
+
+  static info(message, context = {}) {
+    this.log("info", message, context);
+  }
+}
+
+// ========== VALIDATOR ==========
+class Validator {
+  static isValidId(id) {
+    if (!id) return false;
+    return /^[a-zA-Z0-9_-]+$/.test(String(id));
+  }
+
+  static isValidUrl(urlString, checkSSRF = true) {
     try {
-      const r = await fetch(`${baseUrl}/api/v2/mapconfig/layers`, {
-        headers: { Accept: "application/json" },
-      });
-      if (r.ok) {
-        const j = await r.json();
-        if (Array.isArray(j?.wfstlayers)) return j.wfstlayers;
+      const u = new URL(urlString);
+      if (!["http:", "https:"].includes(u.protocol)) return false;
+
+      if (checkSSRF && CONSTANTS.ALLOWED_HOSTS) {
+        // Whitelist hosts if configured
+        const isAllowed = CONSTANTS.ALLOWED_HOSTS.some((allowed) => {
+          if (allowed.startsWith("*.")) {
+            // Wildcard subdomain (e.g. *.orebro.se)
+            const domain = allowed.substring(2);
+            return u.hostname === domain || u.hostname.endsWith("." + domain);
+          }
+          return u.hostname === allowed;
+        });
+
+        if (!isAllowed) {
+          Logger.warn("URL blocked by SSRF protection", { url: urlString });
+          return false;
+        }
       }
-    } catch (_) {
-      // Ignore and fall back to file
+
+      // Always block private addresses (IPv4, IPv6 loopback/link-local/ULA)
+      const hostname = u.hostname;
+      const privateV4 = [
+        /^127\./,
+        /^10\./,
+        /^172\.(1[6-9]|2[0-9]|3[01])\./,
+        /^192\.168\./,
+        /^169\.254\./,
+        /^0\.0\.0\.0$/,
+      ];
+      if (privateV4.some((re) => re.test(hostname))) {
+        Logger.warn("Private IPv4 address blocked", { url: urlString });
+        return false;
+      }
+      const hnLower = hostname.toLowerCase();
+      if (
+        hnLower === "localhost" ||
+        hnLower.startsWith("::1") || // loopback
+        hnLower.startsWith("fe80:") || // link-local
+        hnLower.startsWith("fc") || // ULA (fc00::/7)
+        hnLower.startsWith("fd") // ULA (fd00::/7)
+      ) {
+        Logger.warn("Private IPv6 address blocked", { url: urlString });
+        return false;
+      }
+
+      return true;
+    } catch {
+      return false;
     }
   }
 
-  // 2) Fallback: read from layers.json via SettingsService
-  const store = await SettingsService.readFileAsJson("layers.json");
-  return store?.wfstlayers || [];
-}
+  static isValidBbox(bbox) {
+    if (!bbox) return false;
+    const parts = String(bbox).split(",");
+    if (parts.length < 4) return false;
 
-function isValidUrl(urlString) {
-  try {
-    const u = new URL(urlString);
-    return ["http:", "https:"].includes(u.protocol);
-  } catch {
-    return false;
+    const [xmin, ymin, xmax, ymax] = parts.slice(0, 4).map(Number);
+
+    // Check that all values are finite numbers (not Infinity or NaN)
+    if (![xmin, ymin, xmax, ymax].every(Number.isFinite)) return false;
+
+    // Check sort
+    return xmax > xmin && ymax > ymin;
+  }
+
+  static validateLimit(limit) {
+    if (limit == null) return null;
+    const num = parseInt(limit, 10);
+    if (isNaN(num) || num < 0) return null;
+    return Math.min(num, CONSTANTS.MAX_LIMIT);
+  }
+
+  static validateOffset(offset) {
+    if (offset == null) return null;
+    const num = parseInt(offset, 10);
+    return isNaN(num) || num < 0 ? null : num;
+  }
+
+  static sanitizeString(str) {
+    if (!str) return "";
+    // NOTE: do not use this against OGC-XML (can destroy filter). For UI/logging OK.
+    return String(str).replace(/[<>]/g, "");
   }
 }
 
-function isValidBbox(bbox) {
-  const parts = String(bbox).split(",");
-  return (
-    parts.length >= 4 &&
-    parts.slice(0, 4).every((p) => !Number.isNaN(parseFloat(p)))
-  );
-}
+// ========== CACHE ==========
+class SimpleCache {
+  constructor(ttl = CONSTANTS.CACHE_TTL) {
+    this.cache = new Map();
+    this.ttl = ttl;
+  }
 
-async function fetchWithTimeout(url, options = {}, timeout = UPSTREAM_TIMEOUT) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  try {
-    const res = await fetch(url, { ...options, signal: controller.signal });
-    clearTimeout(id);
-    return res;
-  } catch (err) {
-    clearTimeout(id);
-    if (err?.name === "AbortError") {
-      throw new UpstreamError("Request timeout", 504);
+  get(key) {
+    const item = this.cache.get(key);
+    if (!item) return null;
+
+    if (Date.now() - item.timestamp > this.ttl) {
+      this.cache.delete(key);
+      return null;
     }
-    throw err;
+
+    return item.value;
+  }
+
+  set(key, value) {
+    this.cache.set(key, {
+      value,
+      timestamp: Date.now(),
+    });
+  }
+
+  clear() {
+    this.cache.clear();
   }
 }
 
+const layerCache = new SimpleCache();
+
+// ========== HELPER FUNCTIONS ==========
 function pick(obj, fields) {
-  if (!fields?.length) return obj;
+  if (!fields?.length) return { ...obj }; // Return copy to avoid mutation
   return Object.fromEntries(
     Object.entries(obj).filter(([k]) => fields.includes(k))
   );
 }
 
-// ---------- WFS URL-helper (1.1.0 & 2.0.0) ----------
-function buildWfsGetFeatureUrl({
-  baseUrl,
-  version,
-  typeName,
-  srsName,
-  bbox,
-  limit,
-  offset,
-  outputFormat,
-  filter,
-  cqlFilter,
-}) {
-  const v = String(version || "1.1.0");
-  const is20 = v.startsWith("2.");
+async function fetchWithTimeout(
+  url,
+  options = {},
+  timeout = CONSTANTS.UPSTREAM_TIMEOUT
+) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-  const params = {
-    SERVICE: "WFS",
-    REQUEST: "GetFeature",
-    VERSION: v,
-    SRSNAME: srsName,
-    OUTPUTFORMAT: outputFormat || "application/json",
-  };
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error?.name === "AbortError") {
+      throw new UpstreamError("Request timeout", 504);
+    }
+    throw error;
+  }
+}
 
-  if (is20) {
-    params.TYPENAMES = typeName;
-    if (limit != null) params.COUNT = String(limit);
-    if (offset != null) params.startIndex = String(offset); // 0-based
-  } else {
-    params.TYPENAME = typeName;
-    if (limit != null) params.MAXFEATURES = String(limit);
-    if (offset != null) params.STARTINDEX = String(offset);
+async function fetchWithRetry(url, options = {}, retryCount = 0) {
+  try {
+    const response = await fetchWithTimeout(url, options);
+
+    // On server errors (502, 503, 504) and we have retries left
+    if (
+      [502, 503, 504].includes(response.status) &&
+      retryCount < CONSTANTS.MAX_RETRIES
+    ) {
+      const delay = CONSTANTS.RETRY_DELAYS[retryCount] || 5000;
+      Logger.warn("Retrying after server error", {
+        url,
+        status: response.status,
+        retryCount,
+        delay,
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return fetchWithRetry(url, options, retryCount + 1);
+    }
+
+    return response;
+  } catch (error) {
+    // Also retry on network errors / timeouts
+    if (retryCount < CONSTANTS.MAX_RETRIES) {
+      const delay = CONSTANTS.RETRY_DELAYS[retryCount] || 5000;
+      Logger.warn("Retrying after network/timeout error", {
+        url,
+        retryCount,
+        delay,
+        err: error?.message,
+      });
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return fetchWithRetry(url, options, retryCount + 1);
+    }
+    throw error;
+  }
+}
+
+function ensureNotTooLarge(res) {
+  const contentLength = res.headers.get("content-length");
+  if (
+    contentLength &&
+    parseInt(contentLength, 10) > CONSTANTS.MAX_RESPONSE_BYTES
+  ) {
+    throw new UpstreamError("Response too large", 413);
+  }
+}
+
+// ========== CONFIG ==========
+async function getWFSTStore({
+  baseUrl = CONSTANTS.DEFAULT_BASE,
+  prefer = "api",
+} = {}) {
+  const cacheKey = `layers_${baseUrl}_${prefer}`;
+  const cached = layerCache.get(cacheKey);
+  if (cached) return cached;
+
+  let layers = [];
+
+  if (prefer === "api") {
+    try {
+      const url = new URL("/api/v2/mapconfig/layers", baseUrl);
+      const response = await fetchWithTimeout(
+        url.toString(),
+        {
+          headers: { Accept: "application/json" },
+        },
+        5000 // Short timeout for API
+      );
+
+      if (response.ok) {
+        ensureNotTooLarge(response);
+        const data = await response.json();
+        if (Array.isArray(data?.wfstlayers)) {
+          layers = data.wfstlayers;
+        }
+      }
+    } catch (error) {
+      Logger.warn("Failed to fetch layers from API, falling back to file", {
+        error: error.message,
+        baseUrl,
+      });
+    }
   }
 
-  // Duplicate parameters for compatibility
+  // Fall back to file if API failed
+  if (!layers.length) {
+    try {
+      const store = await SettingsService.readFileAsJson("layers.json");
+      layers = store?.wfstlayers || [];
+    } catch (error) {
+      Logger.error("Failed to read layers from file", error);
+      layers = [];
+    }
+  }
+
+  layerCache.set(cacheKey, layers);
+  return layers;
+}
+
+// ========== WFS URL BUILDER ==========
+function buildWfsGetFeatureUrl(options) {
+  const {
+    baseUrl,
+    version = CONSTANTS.WFS_VERSIONS.V1,
+    typeName,
+    srsName,
+    bbox,
+    limit,
+    offset,
+    outputFormat = "application/json",
+    filter,
+    cqlFilter,
+  } = options;
+
+  if (!Validator.isValidUrl(baseUrl)) {
+    throw new ValidationError("Invalid base URL");
+  }
+
+  const url = new URL(baseUrl);
+  const isV2 = version.startsWith("2.");
+
+  // Basic WFS parameters
+  url.searchParams.set("SERVICE", "WFS");
+  url.searchParams.set("REQUEST", "GetFeature");
+  url.searchParams.set("VERSION", version);
+  if (srsName) url.searchParams.set("SRSNAME", srsName);
+
+  // Set outputformat in all possible ways for compatibility
+  url.searchParams.set("OUTPUTFORMAT", outputFormat);
+  url.searchParams.set("outputFormat", outputFormat);
+  url.searchParams.set("outputformat", outputFormat);
+
+  // Version-specific parameters
+  if (isV2) {
+    url.searchParams.set("TYPENAMES", typeName);
+    if (limit != null) url.searchParams.set("COUNT", String(limit));
+    if (offset != null) url.searchParams.set("startIndex", String(offset));
+  } else {
+    url.searchParams.set("TYPENAME", typeName);
+    if (limit != null) url.searchParams.set("MAXFEATURES", String(limit));
+    if (offset != null) url.searchParams.set("STARTINDEX", String(offset));
+  }
+
+  // Compatibility mode
   if (process.env.OGC_WFS_PARAM_COMPAT === "both") {
-    params.TYPENAME = typeName;
-    params.TYPENAMES = typeName;
+    url.searchParams.set("TYPENAME", typeName);
+    url.searchParams.set("TYPENAMES", typeName);
     if (limit != null) {
-      params.MAXFEATURES = String(limit);
-      params.COUNT = String(limit);
+      url.searchParams.set("MAXFEATURES", String(limit));
+      url.searchParams.set("COUNT", String(limit));
     }
     if (offset != null) {
-      params.STARTINDEX = String(offset);
-      params.startIndex = String(offset);
+      url.searchParams.set("STARTINDEX", String(offset));
+      url.searchParams.set("startIndex", String(offset));
     }
   }
 
-  if (bbox) params.BBOX = bbox.includes(",EPSG") ? bbox : `${bbox},${srsName}`;
-  if (filter) params.FILTER = filter; // OGC Filter (XML)
-  if (cqlFilter) params.CQL_FILTER = cqlFilter; // GeoServer
+  // Optional parameters
+  if (bbox) {
+    const bboxValue = bbox.includes(",EPSG") ? bbox : `${bbox},${srsName}`;
+    url.searchParams.set("BBOX", bboxValue);
+  }
+  if (filter) url.searchParams.set("FILTER", filter);
+  if (cqlFilter) url.searchParams.set("CQL_FILTER", cqlFilter);
 
-  const qs = new URLSearchParams(params).toString();
-  return baseUrl + (baseUrl.includes("?") ? "&" : "?") + qs;
+  return url.toString();
 }
 
 function rewriteOutputFormat(urlStr, fmt) {
-  const u = new URL(urlStr, "http://dummy");
+  const u = new URL(urlStr);
   u.searchParams.set("OUTPUTFORMAT", fmt);
   u.searchParams.set("outputFormat", fmt);
-  return u.toString().replace("http://dummy", "");
+  u.searchParams.set("outputformat", fmt);
+  return u.toString();
 }
 
-// ---------- GML -> GeoJSON ----------
-const xp = new XMLParser({
+// ========== GML PARSER ==========
+const xmlParser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: "@_",
   textNodeName: "#text",
 });
+
 const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
 const notNs = (k) => !k.startsWith("gml:") && !k.startsWith("wfs:");
 const asText = (v) => (isObj(v) ? (v["#text"] ?? "") : (v ?? ""));
@@ -176,16 +468,22 @@ const coordsElToCoords = (s) =>
     .split(/\s+/)
     .map((p) => p.split(",").map(Number));
 
+// Return only the key that actually exists in the object
 const keyOf = (obj, localName) =>
-  Object.keys(obj || {}).find((k) => k.endsWith(`:${localName}`));
+  Object.keys(obj || {}).find(
+    (k) => k === localName || k.endsWith(`:${localName}`)
+  );
+
 const keyOfAny = (obj, names) =>
-  (names || []).map((n) => keyOf(obj, n)).find(Boolean);
+  (names || [])
+    .map((n) => keyOf(obj, n))
+    .find((k) => k && obj?.[k] !== undefined);
+
 function getProp(obj, localNames) {
   if (!obj) return undefined;
   for (const name of localNames) {
     const pref = keyOf(obj, name);
     if (pref && obj[pref] !== undefined) return obj[pref];
-    if (obj[name] !== undefined) return obj[name];
   }
   return undefined;
 }
@@ -199,16 +497,42 @@ function ensureClosed(ring) {
 
 function parseRing(linearRingObj) {
   if (!linearRingObj || typeof linearRingObj !== "object") return [];
+
   const posList = getProp(linearRingObj, ["posList"]);
   if (posList) return posListToCoords(asText(posList));
+
   const coordsEl = getProp(linearRingObj, ["coordinates"]);
   if (coordsEl) return coordsElToCoords(asText(coordsEl));
-  let pos = getProp(linearRingObj, ["pos"]);
+
+  const pos = getProp(linearRingObj, ["pos"]);
   if (pos) {
     const arr = Array.isArray(pos) ? pos : [pos];
     return arr.map((p) => posToCoord(asText(p)));
   }
+
   return [];
+}
+
+// Recursive geometry search
+function findGeometryEntry(featureObj) {
+  const hasGeom = (o) =>
+    CONSTANTS.GEOMETRY_TYPES.some((n) => {
+      const k = keyOf(o, n);
+      return k && o[k] !== undefined;
+    });
+
+  function dfs(obj, depth = 0) {
+    if (depth > 10) return null; // Avoid infinite loop
+    for (const [k, v] of Object.entries(obj || {})) {
+      if (!isObj(v)) continue;
+      if (hasGeom(v)) return [k, v]; // direct hit
+      const nested = dfs(v, depth + 1); // search deeper
+      if (nested) return nested;
+    }
+    return null;
+  }
+
+  return dfs(featureObj) || [null, null];
 }
 
 function gmlGeomToGeoJSON(g) {
@@ -216,7 +540,7 @@ function gmlGeomToGeoJSON(g) {
 
   // Point
   const pointKey = keyOf(g, "Point");
-  if (pointKey) {
+  if (pointKey && g[pointKey]) {
     const p = g[pointKey];
     const pos = getProp(p, ["pos"]);
     const coordsEl = getProp(p, ["coordinates"]);
@@ -230,7 +554,7 @@ function gmlGeomToGeoJSON(g) {
 
   // LineString
   const lineKey = keyOf(g, "LineString");
-  if (lineKey) {
+  if (lineKey && g[lineKey]) {
     const ls = g[lineKey];
     const posList = getProp(ls, ["posList"]);
     const coordsEl = getProp(ls, ["coordinates"]);
@@ -242,16 +566,13 @@ function gmlGeomToGeoJSON(g) {
     return { type: "LineString", coordinates };
   }
 
-  // Polygon (GML3: exterior/interior, GML2: outerBoundaryIs/innerBoundaryIs)
+  // Polygon
   const polyKey = keyOf(g, "Polygon");
-  if (polyKey) {
+  if (polyKey && g[polyKey]) {
     const poly = g[polyKey];
-
     const exteriorKey = keyOfAny(poly, ["exterior", "outerBoundaryIs"]);
     const exteriorObj = exteriorKey ? poly[exteriorKey] : null;
-    const lrExteriorKey = exteriorObj
-      ? keyOfAny(exteriorObj, ["LinearRing"])
-      : null;
+    const lrExteriorKey = exteriorObj ? keyOf(exteriorObj, "LinearRing") : null;
     const exteriorRing = lrExteriorKey
       ? parseRing(exteriorObj[lrExteriorKey])
       : [];
@@ -266,7 +587,7 @@ function gmlGeomToGeoJSON(g) {
         : [];
     const holes = interiorsArr
       .map((i) => {
-        const lrk = keyOfAny(i, ["LinearRing"]);
+        const lrk = keyOf(i, "LinearRing");
         const ring = lrk ? parseRing(i[lrk]) : [];
         return ensureClosed(ring);
       })
@@ -275,11 +596,11 @@ function gmlGeomToGeoJSON(g) {
     return { type: "Polygon", coordinates: [exterior, ...holes] };
   }
 
-  // MultiPoint
+  // MultiPoint - support singular/plural
   const mpKey = keyOf(g, "MultiPoint");
-  if (mpKey) {
+  if (mpKey && g[mpKey]) {
     const mp = g[mpKey];
-    const memberK = keyOfAny(mp, ["pointMember"]);
+    const memberK = keyOfAny(mp, ["pointMember", "pointMembers"]);
     const members = Array.isArray(mp[memberK])
       ? mp[memberK]
       : mp[memberK]
@@ -294,11 +615,11 @@ function gmlGeomToGeoJSON(g) {
     return { type: "MultiPoint", coordinates: coords };
   }
 
-  // MultiLineString
+  // MultiLineString - support singular/plural
   const mlsKey = keyOf(g, "MultiLineString");
-  if (mlsKey) {
+  if (mlsKey && g[mlsKey]) {
     const ml = g[mlsKey];
-    const memberK = keyOfAny(ml, ["lineStringMember"]);
+    const memberK = keyOfAny(ml, ["lineStringMember", "lineStringMembers"]);
     const members = Array.isArray(ml[memberK])
       ? ml[memberK]
       : ml[memberK]
@@ -313,13 +634,16 @@ function gmlGeomToGeoJSON(g) {
     return { type: "MultiLineString", coordinates: coords };
   }
 
-  // MultiPolygon & MultiSurface
+  // MultiPolygon & MultiSurface - support singular/plural
   const mpolyKey = keyOf(g, "MultiPolygon");
   const msurfKey = keyOf(g, "MultiSurface");
-  if (mpolyKey || msurfKey) {
+  if ((mpolyKey && g[mpolyKey]) || (msurfKey && g[msurfKey])) {
     const cont = g[mpolyKey || msurfKey];
     const memberK = keyOfAny(cont, [
-      mpolyKey ? "polygonMember" : "surfaceMember",
+      "polygonMember",
+      "polygonMembers",
+      "surfaceMember",
+      "surfaceMembers",
     ]);
     const members = Array.isArray(cont[memberK])
       ? cont[memberK]
@@ -336,32 +660,34 @@ function gmlGeomToGeoJSON(g) {
     return { type: "MultiPolygon", coordinates: polys };
   }
 
+  // MultiGeometry / GeometryCollection
+  const mgKey = keyOf(g, "MultiGeometry") || keyOf(g, "GeometryCollection");
+  if (mgKey && g[mgKey]) {
+    const mg = g[mgKey];
+    const memberK = keyOfAny(mg, ["geometryMember", "geometryMembers"]);
+    const members = Array.isArray(mg[memberK])
+      ? mg[memberK]
+      : mg[memberK]
+        ? [mg[memberK]]
+        : [];
+    const geometries = members
+      .map((m) => gmlGeomToGeoJSON(m)) // m is normally an object with an underlying geometry key
+      .filter(Boolean);
+    return { type: "GeometryCollection", geometries };
+  }
+
   return null;
 }
 
-function findGeometryEntry(featureObj) {
-  const hasGeom = (o) =>
-    [
-      "Point",
-      "LineString",
-      "Polygon",
-      "MultiPoint",
-      "MultiLineString",
-      "MultiPolygon",
-      "MultiSurface",
-    ].some((n) => !!keyOf(o, n));
-
-  for (const [k, v] of Object.entries(featureObj || {})) {
-    if (!isObj(v)) continue;
-    if (hasGeom(v)) return [k, v];
-    if (Object.values(v).some((x) => isObj(x) && hasGeom(x))) return [k, v];
-  }
-  return [null, null];
+function removeNamespacePrefix(key) {
+  const parts = key.split(":");
+  return parts.length > 1 ? parts[parts.length - 1] : key;
 }
 
 function memberToFeature(member) {
   let featureNode = null;
   let featureName = null;
+
   if (isObj(member)) {
     for (const k of Object.keys(member)) {
       if (notNs(k) && isObj(member[k])) {
@@ -370,6 +696,7 @@ function memberToFeature(member) {
         break;
       }
     }
+
     if (
       !featureNode &&
       Object.keys(member).length &&
@@ -379,6 +706,7 @@ function memberToFeature(member) {
       featureNode = member[featureName];
     }
   }
+
   if (!featureNode) return null;
 
   const [geomKey, geomVal] = findGeometryEntry(featureNode);
@@ -390,153 +718,255 @@ function memberToFeature(member) {
     if (k.startsWith("gml:")) continue;
     if (isObj(v) && Object.keys(v).some((kk) => kk.startsWith("gml:")))
       continue;
-    properties[k] = isObj(v) && "#text" in v ? v["#text"] : v;
+
+    // Remove namespace prefix from property keys and resolve simple conflicts (keep first)
+    const cleanKey = removeNamespacePrefix(k);
+    const value = isObj(v) && "#text" in v ? v["#text"] : v;
+    if (!(cleanKey in properties)) properties[cleanKey] = value;
   }
 
   const id =
     featureNode?.["@_gml:id"] || featureNode?.["@_fid"] || properties?.id;
-  return { type: "Feature", id, geometry, properties };
+
+  return {
+    type: "Feature",
+    id,
+    geometry,
+    properties,
+  };
 }
 
 function gmlToFeatureCollection(xmlText) {
-  const doc = xp.parse(xmlText);
-  const root = doc["wfs:FeatureCollection"] || doc["FeatureCollection"] || doc;
+  try {
+    const doc = xmlParser.parse(xmlText);
+    const root =
+      doc["wfs:FeatureCollection"] || doc["FeatureCollection"] || doc;
 
-  const numberMatched =
-    root?.["@_numberMatched"] !== undefined
-      ? Number(root["@_numberMatched"])
-      : undefined;
-  const numberReturned =
-    root?.["@_numberReturned"] !== undefined
-      ? Number(root["@_numberReturned"])
-      : undefined;
-  const timeStamp = root?.["@_timeStamp"];
+    const numberMatched =
+      root?.["@_numberMatched"] !== undefined
+        ? Number(root["@_numberMatched"])
+        : undefined;
+    const numberReturned =
+      root?.["@_numberReturned"] !== undefined
+        ? Number(root["@_numberReturned"])
+        : undefined;
+    const timeStamp = root?.["@_timeStamp"];
 
-  let members = [];
-  if (Array.isArray(root?.["wfs:member"])) members = root["wfs:member"];
-  else if (root?.["wfs:member"]) members = [root["wfs:member"]];
-  else if (Array.isArray(root?.["gml:featureMember"]))
-    members = root["gml:featureMember"];
-  else if (root?.["gml:featureMember"]) members = [root["gml:featureMember"]];
-  else if (root?.["gml:featureMembers"])
-    members = Object.values(root["gml:featureMembers"]).flatMap((v) =>
-      Array.isArray(v) ? v : [v]
-    );
-  else
-    members = Object.values(root).filter(
-      (v) => isObj(v) && Object.keys(v).some(notNs)
-    );
+    let members = [];
+    if (Array.isArray(root?.["wfs:member"])) members = root["wfs:member"];
+    else if (root?.["wfs:member"]) members = [root["wfs:member"]];
+    else if (Array.isArray(root?.["gml:featureMember"]))
+      members = root["gml:featureMember"];
+    else if (root?.["gml:featureMember"]) members = [root["gml:featureMember"]];
+    else if (root?.["gml:featureMembers"]) {
+      members = Object.values(root["gml:featureMembers"]).flatMap((v) =>
+        Array.isArray(v) ? v : [v]
+      );
+    } else {
+      members = Object.values(root).filter(
+        (v) => isObj(v) && Object.keys(v).some(notNs)
+      );
+    }
 
-  const features = members.map((m) => memberToFeature(m)).filter(Boolean);
+    const features = members.map((m) => memberToFeature(m)).filter(Boolean);
 
-  const fc = { type: "FeatureCollection", features };
-  if (Number.isFinite(numberMatched)) fc.numberMatched = numberMatched;
-  if (Number.isFinite(numberReturned)) fc.numberReturned = numberReturned;
-  if (timeStamp) fc.timeStamp = timeStamp;
-  return fc;
+    const fc = { type: "FeatureCollection", features };
+    if (Number.isFinite(numberMatched)) fc.numberMatched = numberMatched;
+    if (Number.isFinite(numberReturned)) fc.numberReturned = numberReturned;
+    if (timeStamp) fc.timeStamp = timeStamp;
+
+    return fc;
+  } catch (error) {
+    Logger.error("Failed to parse GML", error);
+    throw new UpstreamError("Failed to parse GML response", 502);
+  }
 }
 
-// ---------- Public servises ----------
+// ========== PUBLIC API FUNCTIONS ==========
 export async function listWFSTLayers({ fields, baseUrl } = {}) {
-  const layers = await getWFSTStore({ baseUrl, prefer: "api" });
-  const pickFields = (fields || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return pickFields.length ? layers.map((l) => pick(l, pickFields)) : layers;
+  try {
+    const layers = await getWFSTStore({ baseUrl, prefer: "api" });
+
+    if (!fields) return layers;
+
+    const pickFields = fields
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    if (!pickFields.length) return layers;
+
+    return layers.map((layer) => pick(layer, pickFields));
+  } catch (error) {
+    Logger.error("Failed to list WFST layers", error);
+    throw new ServiceError("Failed to retrieve layers", 500, {
+      originalError: error.message,
+    });
+  }
 }
 
-export async function getWFSTFeatures({
-  id,
-  version,
-  typeName,
-  srsName,
-  bbox,
-  limit,
-  offset,
-  filter,
-  cqlFilter,
-  baseUrl,
-}) {
-  const layers = await getWFSTStore({ baseUrl, prefer: "api" });
-  const layer = layers.find((l) => String(l.id) === String(id));
-  if (!layer) throw new NotFoundError("WFST-layer not found");
-
-  if (!isValidUrl(layer.url)) throw new UpstreamError("Invalid layer URL", 400);
-  if (bbox && !isValidBbox(bbox))
-    throw new UpstreamError("Invalid bbox format", 400);
-
-  const tn =
-    typeName || (Array.isArray(layer.layers) ? layer.layers[0] : layer.layers);
-  if (!tn) throw new UpstreamError("Missing typeName for layer", 400);
-
-  const crs = srsName || layer.projection || "EPSG:4326";
-
-  // 1) JSON attempt
-  const urlJson = buildWfsGetFeatureUrl({
-    baseUrl: layer.url,
+export async function getWFSTFeatures(params) {
+  const {
+    id,
     version,
-    typeName: tn,
-    srsName: crs,
+    typeName,
+    srsName,
     bbox,
     limit,
     offset,
-    outputFormat: "application/json",
     filter,
     cqlFilter,
-  });
+    baseUrl,
+  } = params;
 
-  let res = await fetchWithTimeout(urlJson, {
-    headers: { Accept: "application/json" },
-  });
-  let ctype = res.headers.get("content-type") || "";
-  let text = await res.text();
+  if (!Validator.isValidId(id)) {
+    throw new ValidationError("Invalid layer ID format", { id });
+  }
 
-  if (!res.ok) {
-    console.warn(
-      `Upstream error from ${layer.url}: ${res.status} - ${text.substring(0, 200)}`
+  if (bbox && !Validator.isValidBbox(bbox)) {
+    throw new ValidationError(
+      "Invalid bbox format (must be: xmin,ymin,xmax,ymax)",
+      { bbox }
     );
   }
-  if (
-    res.ok &&
-    (ctype.includes("application/json") || text.trim().startsWith("{"))
-  ) {
-    try {
-      const fc = JSON.parse(text);
-      // GeoServer: totalFeatures; WFS 2.0 JSON: numberMatched
-      if (typeof fc.totalFeatures === "number")
-        fc.numberMatched = fc.totalFeatures;
-      if (Array.isArray(fc.features) && typeof fc.numberReturned !== "number")
-        fc.numberReturned = fc.features.length;
-      return fc;
-    } catch {
-      // fall through to GML
+
+  const validatedLimit = Validator.validateLimit(limit);
+  const validatedOffset = Validator.validateOffset(offset);
+
+  try {
+    const layers = await getWFSTStore({ baseUrl, prefer: "api" });
+    const layer = layers.find((l) => String(l.id) === String(id));
+
+    if (!layer) {
+      throw new NotFoundError("WFST layer not found", { layerId: id });
     }
+
+    if (!Validator.isValidUrl(layer.url)) {
+      throw new UpstreamError("Invalid layer URL configuration", 500);
+    }
+
+    const tn =
+      typeName ||
+      (Array.isArray(layer.layers) ? layer.layers[0] : layer.layers);
+    if (!tn) {
+      throw new ValidationError("Missing typeName for layer");
+    }
+
+    const crs = srsName || layer.projection || "EPSG:4326";
+
+    // 1) Try JSON
+    const urlJson = buildWfsGetFeatureUrl({
+      baseUrl: layer.url,
+      version,
+      typeName: tn,
+      srsName: crs,
+      bbox,
+      limit: validatedLimit,
+      offset: validatedOffset,
+      outputFormat: "application/json",
+      filter,
+      cqlFilter,
+    });
+
+    let res = await fetchWithRetry(urlJson, {
+      headers: {
+        Accept:
+          "application/json, application/geo+json, application/vnd.geo+json",
+      },
+    });
+
+    ensureNotTooLarge(res);
+    let ctype = res.headers.get("content-type") || "";
+    let text = await res.text();
+
+    // 4xx handling: abort directly for "hard" client errors, but let format errors fall through to GML
+    if (!res.ok && res.status >= 400 && res.status < 500) {
+      const snippet = text.substring(0, 500);
+      const maybeFormatIssue =
+        res.status === 406 ||
+        res.status === 415 ||
+        /output|format|json|geo\s*\+?\s*json/i.test(snippet);
+
+      if (!maybeFormatIssue) {
+        Logger.warn("Client error from WFS server (no fallback)", {
+          status: res.status,
+          url: layer.url,
+          error: snippet,
+        });
+        throw new UpstreamError(`WFS server error: ${snippet}`, res.status);
+      }
+    }
+
+    const isJsonCtype = /application\/(vnd\.geo\+json|geo\+json|json)/i.test(
+      ctype
+    );
+
+    if (res.ok && (isJsonCtype || text.trim().startsWith("{"))) {
+      try {
+        const fc = JSON.parse(text);
+
+        // Normalize various WFS implementations
+        if (typeof fc.totalFeatures === "number") {
+          fc.numberMatched = fc.totalFeatures;
+        }
+        if (
+          Array.isArray(fc.features) &&
+          typeof fc.numberReturned !== "number"
+        ) {
+          fc.numberReturned = fc.features.length;
+        }
+
+        return fc;
+      } catch (parseError) {
+        Logger.warn("Failed to parse JSON response, trying GML", {
+          error: parseError.message,
+        });
+        // Fall through to GML
+      }
+    }
+
+    // 2) Fallback to GML3
+    const urlGml3 = rewriteOutputFormat(
+      urlJson,
+      "application/gml+xml; version=3.2"
+    );
+    res = await fetchWithRetry(urlGml3, {
+      headers: { Accept: "application/xml, text/xml, application/gml+xml" },
+    });
+
+    ensureNotTooLarge(res);
+    text = await res.text();
+
+    if (res.ok && text.trim().startsWith("<")) {
+      return gmlToFeatureCollection(text);
+    }
+
+    // 3) Last try with GML2
+    const urlGml2 = rewriteOutputFormat(urlJson, "GML2");
+    res = await fetchWithRetry(urlGml2, {
+      headers: { Accept: "application/xml, text/xml" },
+    });
+
+    ensureNotTooLarge(res);
+    text = await res.text();
+
+    if (res.ok && text.trim().startsWith("<")) {
+      return gmlToFeatureCollection(text);
+    }
+
+    // No format worked
+    throw new UpstreamError(
+      "Upstream server did not return valid GeoJSON or GML",
+      res.status || 502
+    );
+  } catch (error) {
+    if (error instanceof ServiceError) {
+      throw error;
+    }
+
+    Logger.error("Unexpected error in getWFSTFeatures", error);
+    throw new ServiceError("Internal server error", 500, {
+      originalError: error.message,
+    });
   }
-
-  // 2) GML3 fallback
-  const urlGml3 = rewriteOutputFormat(
-    urlJson,
-    "application/gml+xml; version=3.2"
-  );
-  res = await fetchWithTimeout(urlGml3, {
-    headers: { Accept: "application/xml,text/xml,application/gml+xml" },
-  });
-  text = await res.text();
-  if (res.ok && text.trim().startsWith("<"))
-    return gmlToFeatureCollection(text);
-
-  // 3) GML2 fallback
-  const urlGml2 = rewriteOutputFormat(urlJson, "GML2");
-  res = await fetchWithTimeout(urlGml2, {
-    headers: { Accept: "application/xml,text/xml" },
-  });
-  text = await res.text();
-  if (res.ok && text.trim().startsWith("<"))
-    return gmlToFeatureCollection(text);
-
-  throw new UpstreamError(
-    "Upstream gav varken GeoJSON eller GML",
-    res.status || 502
-  );
 }
