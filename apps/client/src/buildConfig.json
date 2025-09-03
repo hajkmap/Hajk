@@ -1,6 +1,7 @@
 {
   "activeTools": [
     "Anchor",
+    "AttributeEditor",
     "Bookmarks",
     "Buffer",
     "Collector",
@@ -24,6 +25,7 @@
   ],
   "allTools": [
     "Anchor",
+    "AttributeEditor",
     "Bookmarks",
     "Buffer",
     "Collector",

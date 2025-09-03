@@ -7,7 +7,6 @@ import {
   MAX_REMOVED_FEATURES,
   DEFAULT_DRAW_STYLE_SETTINGS,
   PLUGIN_COLORS,
-  OGC_SOURCES,
 } from "../constants";
 // Components
 import ActivityMenu from "../components/ActivityMenu";
@@ -329,9 +328,9 @@ const SketchView = (props) => {
       newOgcSourceTitle === "Ingen"
         ? { title: "Rita", color: PLUGIN_COLORS.default }
         : {
-          title: `Redigerar ${newOgcSourceTitle}`,
-          color: PLUGIN_COLORS.warning,
-        }
+            title: `Redigerar ${newOgcSourceTitle}`,
+            color: PLUGIN_COLORS.warning,
+          }
     );
     setOgcSource(newOgcSourceTitle);
   };

@@ -835,6 +835,16 @@
       "index": 16
     },
     {
+      "type": "AttributeEditor",
+      "index": 100,
+      "options": {
+        "target": "control",
+        "position": "right",
+        "instruction": "",
+        "visibleForGroups": []
+      }
+    },
+    {
       "type": "buffer",
       "options": {
         "target": "toolbar",

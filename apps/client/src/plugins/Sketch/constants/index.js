@@ -59,7 +59,8 @@ export const ACTIVITIES = [
   {
     id: "OGC",
     tooltip: "Välj redigeringstjänst att spara till.",
-    information: "Här kan du välja en redigeringstjänst kopplat till en kartserver och en databas.",
+    information:
+      "Här kan du välja en redigeringstjänst kopplat till en kartserver och en databas.",
     icon: <AddLocationAltIcon />,
   },
 ];
