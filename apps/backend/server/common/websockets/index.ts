@@ -37,9 +37,18 @@ export default async (expressServer: Server) => {
   // Upgrade request event handler
   expressServer.on("upgrade", (request, socket, head) => {
     logger.trace(`Upgrade to WebSockets initiated by call to "${request.url}"`);
-    wss.handleUpgrade(request, socket, head, (websocket) => {
-      wss.emit("connection", websocket, request);
-    });
+
+    // Only handle upgrade requests for the WebSocket path
+    if (request.url === "/api/v3/websockets") {
+      wss.handleUpgrade(request, socket, head, (websocket) => {
+        wss.emit("connection", websocket, request);
+      });
+    } else {
+      logger.trace(
+        `Rejecting upgrade request for path "${request.url}" - not a WebSocket endpoint`
+      );
+      socket.destroy();
+    }
   });
 
   // Let's setup a broadcast channel, just for fun. Any and all
