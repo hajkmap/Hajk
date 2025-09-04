@@ -138,8 +138,8 @@ const styles = {
   },
   list: {
     overflow: "auto",
-    maxHeight: 510,
-    minHeight: 200,
+    flex: 1,
+    minHeight: 0,
   },
   listRow: (sel) => ({
     display: "grid",
@@ -343,22 +343,61 @@ export default function AttributeEditorView({ initialFeatures }) {
   function clearSelection() {
     setSelectedIds(new Set());
   }
+
   function focusPrev() {
-    if (!focusedId) return;
+    if (!focusedId) {
+      if (visibleFormList.length > 0) {
+        const lastId = visibleFormList[visibleFormList.length - 1].id;
+        setFocusedId(lastId);
+        setTimeout(() => {
+          const element = document.querySelector(`[data-row-id="${lastId}"]`);
+          element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 0);
+      }
+      return;
+    }
+
     const arr = Array.from(
       selectedIds.size ? selectedIds : new Set(features.map((f) => f.id))
     );
     const idx = arr.indexOf(focusedId);
-    if (idx > 0) setFocusedId(arr[idx - 1]);
+    if (idx > 0) {
+      const newId = arr[idx - 1];
+      setFocusedId(newId);
+      setTimeout(() => {
+        const element = document.querySelector(`[data-row-id="${newId}"]`);
+        element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 0);
+    }
   }
+
   function focusNext() {
-    if (!focusedId) return;
+    if (!focusedId) {
+      if (visibleFormList.length > 0) {
+        const firstId = visibleFormList[0].id;
+        setFocusedId(firstId);
+        setTimeout(() => {
+          const element = document.querySelector(`[data-row-id="${firstId}"]`);
+          element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 0);
+      }
+      return;
+    }
+
     const arr = Array.from(
       selectedIds.size ? selectedIds : new Set(features.map((f) => f.id))
     );
     const idx = arr.indexOf(focusedId);
-    if (idx < arr.length - 1) setFocusedId(arr[idx + 1]);
+    if (idx < arr.length - 1) {
+      const newId = arr[idx + 1];
+      setFocusedId(newId);
+      setTimeout(() => {
+        const element = document.querySelector(`[data-row-id="${newId}"]`);
+        element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 0);
+    }
   }
+
   function handleBeforeChangeFocus(targetId) {
     if (!dirty) {
       setFocusedId(targetId);
@@ -619,6 +658,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                 return (
                   <div
                     key={f.id}
+                    data-row-id={f.id}
                     style={styles.listRow(selected || isFocused)}
                     onClick={() => handleBeforeChangeFocus(f.id)}
                   >
@@ -653,6 +693,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                 display: "flex",
                 gap: 8,
                 borderTop: "1px solid #e5e7eb",
+                background: "#fafafa",
               }}
             >
               <button style={styles.btn} onClick={focusPrev}>

@@ -838,7 +838,7 @@
       "type": "AttributeEditor",
       "index": 100,
       "options": {
-        "target": "control",
+        "target": "left",
         "position": "right",
         "instruction": "",
         "visibleForGroups": []
