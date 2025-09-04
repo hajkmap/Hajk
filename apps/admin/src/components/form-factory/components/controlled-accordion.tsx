@@ -23,6 +23,9 @@ interface ControlledAccordionProps {
   triggerExpanded?: boolean;
   children: React.ReactNode;
   backgroundColor?: string;
+  onAccordionChange?: () => void;
+  onExpand?: () => void;
+  onCollapse?: () => void;
 }
 
 function ControlledAccordion({
@@ -32,6 +35,9 @@ function ControlledAccordion({
   triggerExpanded = false,
   children,
   backgroundColor,
+  onAccordionChange,
+  onExpand,
+  onCollapse,
 }: ControlledAccordionProps) {
   // triggerExpanded is used in the ControlledAccordion to programmatically
   // control whether the accordion is expanded or collapsed. When triggerExpanded
@@ -84,6 +90,12 @@ function ControlledAccordion({
     isExpanded: boolean
   ) => {
     setExpanded(isExpanded);
+    onAccordionChange?.();
+    if (isExpanded) {
+      onExpand?.();
+    } else {
+      onCollapse?.();
+    }
   };
 
   const getValue = (value: unknown) => {

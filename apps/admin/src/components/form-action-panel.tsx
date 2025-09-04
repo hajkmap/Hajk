@@ -57,15 +57,17 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   }));
 
   const StyledPaper = styled(Paper)(({ theme }) => ({
-    padding: theme.spacing(2),
-    marginTop: theme.spacing(2),
+    padding: theme.spacing(1),
     backgroundColor:
       theme.palette.mode === "dark"
         ? theme.palette.background.paper
         : theme.palette.background.default,
     textAlign: "center",
     color: theme.palette.text.primary,
-    border: `1px solid ${theme.palette.divider}`,
+    // border: `1px solid ${theme.palette.divider}`,
+    border: "none",
+    boxShadow: "none",
+    elevation: 0,
   }));
 
   const getTimeAgo = (dateString?: string): string => {
@@ -184,7 +186,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
     <StyledPaper>
       <Typography variant="body1" sx={{ fontSize: "1rem" }}>
         {t("common.lastSaved")} {t("common.of")}{" "}
-        {lastSavedBy ? lastSavedBy : t("formControl.unknown")} {t("common.for")}{" "}
+        {lastSavedBy ? lastSavedBy : t("formControl.unknown")} {" "}
         {getTimeAgo(lastSavedDate)}
       </Typography>
     </StyledPaper>
@@ -209,8 +211,8 @@ const FormActionPanel: React.FC<FormActionProps> = ({
     >
       <ActionContainer sx={{ maxWidth: "200px" }}>
         {renderSaveButton()}
-        {renderCancelButton()}
         {renderDeleteButton()}
+        {renderCancelButton()}
         {renderSavedInformation()}
       </ActionContainer>
       <Box

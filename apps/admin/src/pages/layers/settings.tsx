@@ -13,8 +13,6 @@ import { createOnSubmitHandler } from "../../components/form-factory/form-utils"
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { RenderProps } from "../../components/form-factory/types/render";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import UsedInMapsGrid from "./used-in-maps-grid";
 import {
   useLayerById,
@@ -57,7 +55,6 @@ export default function LayerSettings() {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectGridId, setSelectGridId] = useState<GridRowSelectionModel>();
-  const [accordionExpanded, setAccordionExpanded] = useState<boolean>(false);
   const { layers: getCapLayers, styles: getCapStyles } = useServiceCapabilities(
     {
       baseUrl: service?.url ?? "",
@@ -94,39 +91,32 @@ export default function LayerSettings() {
   );
   const requestSettings = new DynamicFormContainer<FieldValues>(
     t("services.settings.request"),
-    CONTAINER_TYPE.ACCORDION,
-    { triggerExpanded: accordionExpanded }
+    CONTAINER_TYPE.ACCORDION
   );
 
   const layerSettings = new DynamicFormContainer<FieldValues>(
     t("layers.settings"),
-    CONTAINER_TYPE.ACCORDION,
-    { triggerExpanded: accordionExpanded }
+    CONTAINER_TYPE.ACCORDION
   );
   const displayFieldsSearchSettings = new DynamicFormContainer<FieldValues>(
     t("layers.settings.displayFields"),
-    CONTAINER_TYPE.ACCORDION,
-    { triggerExpanded: accordionExpanded }
+    CONTAINER_TYPE.ACCORDION
   );
   const infoClickSettings = new DynamicFormContainer<FieldValues>(
     t("common.infoclick"),
-    CONTAINER_TYPE.ACCORDION,
-    { triggerExpanded: accordionExpanded }
+    CONTAINER_TYPE.ACCORDION
   );
   const searchSettings = new DynamicFormContainer<FieldValues>(
     t("layers.settings.searchSettings"),
-    CONTAINER_TYPE.ACCORDION,
-    { triggerExpanded: accordionExpanded }
+    CONTAINER_TYPE.ACCORDION
   );
   const infoButtonSettings = new DynamicFormContainer<FieldValues>(
     t("common.infobutton"),
-    CONTAINER_TYPE.ACCORDION,
-    { triggerExpanded: accordionExpanded }
+    CONTAINER_TYPE.ACCORDION
   );
   const permissionSettings = new DynamicFormContainer<FieldValues>(
     t("layers.permissions"),
-    CONTAINER_TYPE.ACCORDION,
-    { triggerExpanded: accordionExpanded }
+    CONTAINER_TYPE.ACCORDION
   );
 
   layerInformationSettings.addInput({
@@ -783,6 +773,7 @@ export default function LayerSettings() {
         })
       : "";
 
+
   if (isLoading) {
     return <SquareSpinnerComponent />;
   }
@@ -804,20 +795,6 @@ export default function LayerSettings() {
         dirtyFields={dirtyFields}
       >
         <form ref={formRef} onSubmit={onSubmit}>
-          <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
-            <Button
-              variant="outlined"
-              startIcon={
-                accordionExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />
-              }
-              onClick={() => setAccordionExpanded(!accordionExpanded)}
-              size="small"
-            >
-              {accordionExpanded
-                ? t("common.collapseAll")
-                : t("common.expandAll")}
-            </Button>
-          </Stack>
           <FormRenderer
             formControls={updateLayerContainer}
             formGetValues={getValues}
@@ -826,6 +803,7 @@ export default function LayerSettings() {
             errors={errors}
             showSearch={true}
             preserveSearchState={true}
+            showExpandCollapse={true}
           />
           {layer && (
             <AvailableLayersGrid

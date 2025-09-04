@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Grid2 as Grid, Paper, Typography } from "@mui/material";
+import { Box, Grid2 as Grid, Paper, Typography, Button } from "@mui/material";
 import {
   FieldValues,
   UseFormRegister,
@@ -23,6 +23,9 @@ import {
   isFormElementStatic,
 } from "./form-utils";
 import FormSearch from "./components/form-search";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import { useTranslation } from "react-i18next";
 
 interface FormRenderProps<TFieldValues extends FieldValues> {
   formControls: DynamicFormContainer<TFieldValues>;
@@ -32,6 +35,7 @@ interface FormRenderProps<TFieldValues extends FieldValues> {
   errors: FieldErrors<TFieldValues>;
   showSearch?: boolean;
   preserveSearchState?: boolean;
+  showExpandCollapse?: boolean;
 }
 
 const FormRenderer = <TFieldValues extends FieldValues>({
@@ -42,10 +46,14 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   errors,
   showSearch = false,
   preserveSearchState = false,
+  showExpandCollapse = false,
 }: FormRenderProps<TFieldValues>) => {
+  const { t } = useTranslation();
   const [elements, setElements] = React.useState<FormElement<TFieldValues>[]>(
     formControls.getElements()
   );
+  const [accordionExpanded, setAccordionExpanded] =
+    React.useState<boolean>(false);
 
   // Update elements when formControls changes
   React.useEffect(() => {
@@ -90,6 +98,25 @@ const FormRenderer = <TFieldValues extends FieldValues>({
 
     setElements(newElements);
   }, [formControls, preserveSearchState, elements]);
+
+  // Update accordion expansion state in all containers
+  React.useEffect(() => {
+    const updateAccordionState = (elements: FormElement<TFieldValues>[]) => {
+      elements.forEach((element) => {
+        if (isFormElementContainer(element)) {
+          const container = element as DynamicFormContainer<TFieldValues>;
+          container.props = {
+            ...container.props,
+            triggerExpanded: accordionExpanded,
+          };
+          updateAccordionState(container.getElements());
+        }
+      });
+    };
+
+    updateAccordionState(elements);
+    setElements([...elements]); // Trigger re-render
+  }, [accordionExpanded]);
 
   let c = 0;
 
@@ -327,10 +354,13 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   // This is the root of the form and the class is used in the global styles.
   return (
     <Grid container className="form-factory" sx={{ ml: -2 }}>
-      {showSearch && (
-        <Grid container size={{ xs: 12 }} justifyContent="flex-end">
-          {/* TODO: Here we might want to add Expand/Collapse all button. */}
-          <Grid size={{ xs: 12, md: 4 }} sx={{ pb: 2, pl: 2 }}>
+      <Grid container size={{ xs: 12 }} justifyContent="space-between">
+        {showSearch && (
+          <Grid
+            size={{ xs: 12, md: showExpandCollapse ? 8 : 12 }}
+            sx={{ pb: 2, pl: 2 }}
+            alignSelf="flex-end"
+          >
             <FormSearch
               formControls={formControls}
               onElementsChange={(newElements: FormElement<TFieldValues>[]) => {
@@ -338,9 +368,31 @@ const FormRenderer = <TFieldValues extends FieldValues>({
               }}
             />
           </Grid>
-        </Grid>
-      )}
-
+        )}
+        {showExpandCollapse && (
+          <Grid
+            size={{ xs: 3, md: 3 }}
+            sx={{ pb: 2, pl: 2, maxWidth: "170px" }}
+            alignSelf="flex-end"
+          >
+            <Button
+              variant="outlined"
+              startIcon={
+                accordionExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />
+              }
+              onClick={() => setAccordionExpanded(!accordionExpanded)}
+              size="small"
+              fullWidth
+            >
+              <Typography variant="body1" sx={{ fontSize: "0.8rem" }}>
+                {accordionExpanded
+                  ? t("common.collapseAll")
+                  : t("common.expandAll")}
+              </Typography>
+            </Button>
+          </Grid>
+        )}
+      </Grid>
       {elements.map((item, index) => renderFormElement(item, index))}
     </Grid>
   );

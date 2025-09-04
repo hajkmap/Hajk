@@ -100,7 +100,7 @@ const FormSearch = <TFieldValues extends FieldValues>({
 
   return (
     <TextField
-      size="small"
+      size="medium"
       fullWidth
       label={t("form.search.placeholder", {
         minChars: minimumSearchLength,
