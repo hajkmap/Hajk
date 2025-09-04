@@ -16,7 +16,7 @@ const getInitialSteps = (
     },
     {
       title: "Verktygspanel",
-      element: "header > div:first-child",
+      element: "#drawer-toggle-button-group",
       intro: () => {
         let intro = `<b>${drawerButtonTitle || "Verktygspanel"}:</b> här hittar du olika funktioner och verktyg som hjälper dig att interagera med kartan.`;
 
@@ -54,7 +54,7 @@ const getInitialSteps = (
     },
     {
       title: "Sökruta",
-      element: ".MuiAutocomplete-inputRoot",
+      element: "#search-bar",
       intro:
         "Med hjälp av sökverktyget hittar du enkelt till rätt plats i kartan.",
     },

@@ -90,7 +90,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   },
   {
     title: "Lista över systemlager",
-    element: ".draw-order-list",
+    element: "#draw-order-list",
     intro:
       "Här kan du se och ändra ritordningen för systemlager. <br><br> Dra och släpp lager för att ändra ritordningen.",
   },
@@ -148,7 +148,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   },
   {
     title: "Lista över favoriter",
-    element: ".favorites-list-view",
+    element: "#favorites-list-view",
     intro:
       "Här kan du se och hantera dina sparade favoriter. Klicka för att skriva över befintliga lager med favoriterna.",
   },

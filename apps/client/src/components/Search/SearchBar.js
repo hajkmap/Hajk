@@ -538,7 +538,7 @@ class SearchBar extends React.PureComponent {
         ]}
       >
         <Grid>
-          <Paper elevation={isMobile ? 0 : 1}>
+          <Paper id="search-bar" elevation={isMobile ? 0 : 1}>
             {this.renderAutoComplete()}
           </Paper>
         </Grid>

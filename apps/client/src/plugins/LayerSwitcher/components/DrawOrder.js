@@ -265,7 +265,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
           </Box>
         </Collapse>
       </Box>
-      <List className="draw-order-list" sx={{ pt: 0 }}>
+      <List id="draw-order-list" sx={{ pt: 0 }}>
         <Container
           lockAxis="y"
           getChildPayload={(i) => sortedLayers[i]}
