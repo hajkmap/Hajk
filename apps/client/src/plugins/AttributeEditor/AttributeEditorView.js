@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 
 /* === Field descriptions === */
 const FIELD_META = [
@@ -76,6 +82,7 @@ function createDummyFeatures() {
 }
 
 /* === Styles (simple inline) === */
+const OFFSET = 16;
 const styles = {
   shell: {
     display: "flex",
@@ -178,8 +185,13 @@ const styles = {
   tableWrap: {
     border: "1px solid #e5e7eb",
     borderRadius: 8,
+    display: "flex",
+    flexDirection: "column",
     overflow: "hidden",
+    boxSizing: "border-box",
+    height: `clamp(180px, calc(100dvh - ${OFFSET}px), 510px)`,
   },
+
   tableHeaderBar: {
     display: "flex",
     gap: 8,
@@ -187,20 +199,46 @@ const styles = {
     padding: 8,
     background: "#fafafa",
     borderBottom: "1px solid #e5e7eb",
+    flex: "0 0 auto",
   },
-  table: { width: "100%", borderCollapse: "separate", borderSpacing: 0 },
+
+  tableViewport: {
+    flex: "1 1 auto",
+    minHeight: 0,
+    minWidth: 0,
+    overflow: "auto",
+    position: "relative",
+  },
+
+  table: {
+    borderCollapse: "separate",
+    borderSpacing: 0,
+    tableLayout: "auto",
+    width: "max-content",
+    minWidth: "100%",
+  },
+
   th: {
     position: "sticky",
     top: 0,
+    zIndex: 1,
     background: "#f9fafb",
     textAlign: "left",
     fontWeight: 600,
     fontSize: 13,
-    padding: "10px 8px",
+    padding: "6px 8px",
     borderBottom: "1px solid #e5e7eb",
     cursor: "pointer",
+    whiteSpace: "nowrap",
   },
-  td: { fontSize: 13, padding: "10px 8px", borderBottom: "1px solid #f1f5f9" },
+
+  td: {
+    fontSize: 13,
+    padding: "8px 16px",
+    borderBottom: "1px solid #f1f5f9",
+    lineHeight: "20px",
+  },
+
   tr: (selected) => ({
     background: selected ? "#dbeafe" : "transparent",
     cursor: "pointer",
@@ -213,23 +251,64 @@ export default function AttributeEditorView({ initialFeatures }) {
     () => initialFeatures || createDummyFeatures()
   );
 
-  // === Table: search, sort & selection ===
+  // === Table: search, sort & selection and filter ===
   const [tableSearch, setTableSearch] = useState("");
   const [sort, setSort] = useState({ key: "geoid", dir: "asc" });
   const [tableSelectedIds, setTableSelectedIds] = useState(new Set());
   const [lastTableIndex, setLastTableIndex] = useState(null);
+  const [columnFilters, setColumnFilters] = useState({});
+  const [openFilterColumn, setOpenFilterColumn] = useState(null);
+  const filterOverlayRef = useRef(null);
+
+  useEffect(() => {
+    if (!openFilterColumn) return;
+
+    const onPointerDown = (e) => {
+      const withinOverlay = filterOverlayRef.current?.contains(e.target);
+      const btn = document.querySelector(
+        `[data-filter-btn="${openFilterColumn}"]`
+      );
+      const withinButton = btn?.contains(e.target);
+      if (!withinOverlay && !withinButton) {
+        setOpenFilterColumn(null);
+      }
+    };
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setOpenFilterColumn(null);
+    };
+
+    document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("keydown", onKeyDown, true);
+    };
+  }, [openFilterColumn]);
 
   const filteredAndSorted = useMemo(() => {
     const s = tableSearch.trim().toLowerCase();
-    let rows = features.filter((f) =>
-      !s
+
+    let rows = features.filter((f) => {
+      const matchesSearch = !s
         ? true
         : Object.values(f).some((val) =>
             String(val ?? "")
               .toLowerCase()
               .includes(s)
-          )
-    );
+          );
+
+      const matchesColumnFilters = Object.entries(columnFilters).every(
+        ([key, selectedValues]) => {
+          if (!selectedValues || selectedValues.length === 0) return true;
+          const cellValue = String(f[key] ?? "");
+          return selectedValues.includes(cellValue);
+        }
+      );
+
+      return matchesSearch && matchesColumnFilters;
+    });
+
     rows.sort((a, b) => {
       const av = a[sort.key];
       const bv = b[sort.key];
@@ -237,8 +316,21 @@ export default function AttributeEditorView({ initialFeatures }) {
       const res = av > bv ? 1 : -1;
       return sort.dir === "asc" ? res : -1 * res;
     });
+
     return rows;
-  }, [features, tableSearch, sort]);
+  }, [features, tableSearch, sort, columnFilters]);
+
+  const getUniqueColumnValues = useCallback(
+    (columnKey) => {
+      const values = new Set();
+      features.forEach((f) => {
+        const val = String(f[columnKey] ?? "");
+        if (val) values.add(val);
+      });
+      return Array.from(values).sort();
+    },
+    [features]
+  );
 
   function toggleSort(key) {
     setSort((prev) =>
@@ -499,15 +591,93 @@ export default function AttributeEditorView({ initialFeatures }) {
     const selected = new Set(tableSelectedIds);
     setSelectedIds(selected);
 
-    // Fokusera första markerade i nuvarande sorterings-/filterordning
     const first =
       filteredAndSorted.find((r) => selected.has(r.id))?.id ??
       Array.from(selected)[0];
     setFocusedId(first);
 
-    // Aktivera bulkspara direkt om det är fler än en
     setApplyToSelection(selected.size > 1);
   }
+
+  const ColumnFilter = ({ columnKey, overlayRef }) => {
+    const uniqueValues = getUniqueColumnValues(columnKey);
+    const selectedValues = columnFilters[columnKey] || [];
+
+    return (
+      <div
+        ref={overlayRef}
+        style={{
+          position: "absolute",
+          top: "calc(100% + 6px)",
+          right: 0,
+          zIndex: 1000,
+          background: "white",
+          border: "1px solid #e5e7eb",
+          borderRadius: 8,
+          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+          padding: 8,
+          minWidth: 200,
+          maxHeight: 300,
+          overflow: "auto",
+        }}
+      >
+        <div style={{ marginBottom: 8, display: "flex", gap: 4 }}>
+          <button
+            style={{ ...styles.btn, padding: "4px 8px", fontSize: 12 }}
+            onClick={() => {
+              setColumnFilters((prev) => ({ ...prev, [columnKey]: [] }));
+            }}
+          >
+            Rensa
+          </button>
+          <button
+            style={{ ...styles.btn, padding: "4px 8px", fontSize: 12 }}
+            onClick={() => {
+              setColumnFilters((prev) => ({
+                ...prev,
+                [columnKey]: uniqueValues,
+              }));
+            }}
+          >
+            Välj alla
+          </button>
+        </div>
+
+        {uniqueValues.map((value) => (
+          <label
+            key={value}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "4px 0",
+              cursor: "pointer",
+              fontSize: 13,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={selectedValues.includes(value)}
+              onChange={(e) => {
+                setColumnFilters((prev) => {
+                  const current = prev[columnKey] || [];
+                  if (e.target.checked) {
+                    return { ...prev, [columnKey]: [...current, value] };
+                  } else {
+                    return {
+                      ...prev,
+                      [columnKey]: current.filter((v) => v !== value),
+                    };
+                  }
+                });
+              }}
+            />
+            {value}
+          </label>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div style={styles.shell}>
@@ -570,7 +740,6 @@ export default function AttributeEditorView({ initialFeatures }) {
         /* ================= TABLE MODE ================= */
         <div style={styles.tableWrap}>
           <div style={styles.tableHeaderBar}>
-            {/* I div: styles.tableHeaderBar */}
             <span style={{ fontWeight: 600 }}>Alla objekt</span>
             <div style={styles.spacer} />
             <button
@@ -586,25 +755,104 @@ export default function AttributeEditorView({ initialFeatures }) {
               Redigera val i formulär
             </button>
           </div>
-          <div style={{ overflow: "auto", maxHeight: 440 }}>
+          <div style={styles.tableViewport}>
             <table style={styles.table}>
               <thead>
                 <tr>
-                  {FIELD_META.map((f) => (
-                    <th
-                      key={f.key}
-                      style={styles.th}
-                      onClick={() => toggleSort(f.key)}
-                      title="Klicka för att sortera"
-                    >
-                      {f.label}
-                      {sort.key === f.key
-                        ? sort.dir === "asc"
-                          ? " ▲"
-                          : " ▼"
-                        : ""}
-                    </th>
-                  ))}
+                  {FIELD_META.map((f) => {
+                    const hasActiveFilter = columnFilters[f.key]?.length > 0;
+                    return (
+                      <th key={f.key} style={styles.th}>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <div
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 6,
+                              position: "relative",
+                            }}
+                          >
+                            {/* Sort button LEFT of column header */}
+                            <button
+                              onClick={() => toggleSort(f.key)}
+                              title="Klicka för att sortera"
+                              style={{
+                                border: "none",
+                                background: "transparent",
+                                cursor: "pointer",
+                                padding: 0,
+                                lineHeight: 1,
+                              }}
+                            >
+                              {sort.key === f.key
+                                ? sort.dir === "asc"
+                                  ? "▲"
+                                  : "▼"
+                                : "↕"}
+                            </button>
+
+                            <span
+                              onClick={() => toggleSort(f.key)}
+                              style={{ cursor: "pointer", userSelect: "none" }}
+                            >
+                              {f.label}
+                            </span>
+
+                            {/* Filter button – directly to the right of the header */}
+                            <button
+                              data-filter-btn={f.key}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenFilterColumn(
+                                  openFilterColumn === f.key ? null : f.key
+                                );
+                              }}
+                              style={{
+                                background: hasActiveFilter
+                                  ? "#dbeafe"
+                                  : "transparent",
+                                border: "1px solid transparent",
+                                cursor: "pointer",
+                                padding: 2,
+                                borderRadius: 4,
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                              title={
+                                hasActiveFilter
+                                  ? `Filter aktivt (${(columnFilters[f.key] || []).length} val)`
+                                  : "Filtrera"
+                              }
+                              aria-pressed={openFilterColumn === f.key}
+                            >
+                              <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke={hasActiveFilter ? "#2563eb" : "#6b7280"}
+                                strokeWidth="2"
+                              >
+                                <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+                              </svg>
+                            </button>
+
+                            {openFilterColumn === f.key && (
+                              <ColumnFilter
+                                columnKey={f.key}
+                                overlayRef={(el) => {
+                                  filterOverlayRef.current = el;
+                                }}
+                                onClose={() => setOpenFilterColumn(null)}
+                              />
+                            )}
+                          </div>
+
+                          <div style={{ flex: 1 }} />
+                        </div>
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
