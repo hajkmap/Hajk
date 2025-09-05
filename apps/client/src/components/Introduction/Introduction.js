@@ -312,7 +312,7 @@ class Introduction extends React.PureComponent {
         elements: ["#quick-access-theme-button", "#quick-access-presets-view"],
       },
       {
-        condition: this.quickAccessList.length === 0,
+        condition: this.quickAccessList?.length === 0,
         elements: ["#quick-access-presets-view"],
       },
       {

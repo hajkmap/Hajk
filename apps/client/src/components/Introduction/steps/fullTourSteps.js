@@ -21,7 +21,7 @@ const getInitialSteps = (
         let intro = `<b>${drawerButtonTitle || "Verktygspanel"}:</b> här hittar du olika funktioner och verktyg som hjälper dig att interagera med kartan.`;
 
         if (documenthandler) {
-          intro += `<br /><br /><b>${documenthandlerDrawerButtonTitle || "Meny"}:</b> är ett verktyg som används för att visa större mängder text i Hajk. Primär användning idag är för översiktsplaner men det skulle kunna användas för valfri textmängd. Klicka på knappen för att visa sidomenyn.`;
+          intro += `<br /><br /><b>${documenthandlerDrawerButtonTitle || "Meny"}:</b> är ett verktyg som används för att visa större mängder text i Hajk. Klicka på knappen för att visa sidomenyn.`;
         }
 
         return intro;
@@ -34,7 +34,8 @@ const getInitialSteps = (
     steps.push({
       title: "Dokumenthanteraren",
       element: "#drawer-content",
-      intro: "Här hittar du verktyg för att hantera dokument och filer.",
+      intro:
+        "Dokumenthanterarens primära användning idag är för översiktsplaner, men det skulle kunna användas för valfri textmängd.",
     });
   } else {
     steps.push({

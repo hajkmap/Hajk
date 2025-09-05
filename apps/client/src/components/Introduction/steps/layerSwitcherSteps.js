@@ -4,7 +4,9 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
   {
     title: "Hajk 4",
     intro:
-      "Det här är en introduktion till Hajk 4, främst för att visa hur den nya lagerhanteraren fungerar. <br><br>Introduktionens syfte är att illustrera de ändringarna som har tillkommit i Hajk 4. <br></br> <i>Observera att inga andra åtgärder, som att klicka på knappar eller använda andra funktioner i applikationen, är möjliga under introduktionen.</i>. <br><br> Följ med!",
+      "Det här är en introduktion till Hajk 4, främst för att visa hur den nya " +
+      layerSwitcherPlugin.options.title +
+      " fungerar. <br><br>Introduktionens syfte är att illustrera de ändringarna som har tillkommit i Hajk 4. <br></br> <i>Observera att inga andra åtgärder, som att klicka på knappar eller använda andra funktioner i applikationen, är möjliga under introduktionen.</i>. <br><br> Följ med!",
   },
   {
     title: "Lagerlista",
@@ -71,7 +73,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
       "<b>Lägg till i snabbåtkomst:</b> lagret kommer att läggas till i snabbåtkomstmenyn under kartlagerfliken. <br><br> <b>Ta bort från snabbåtkomst:</b> lagret finns redan som snabbåtkomst och kommer att tas bort från snabbåtkomstmenyn under kartlagerfliken.",
   },
   {
-    title: "Flikar i lagerhanteraren",
+    title: "Flikar i " + layerSwitcherPlugin.options.title,
     element: "#layer-switcher-tab-panel",
     intro: () =>
       `Klicka här för att växla mellan olika vyer: <br><br> - <b>Kartlager:</b> fliken visar dig lagerlistan med tillgängliga lager <br><br/> - <b>Bakgrund:</b> fliken visar dig alla tillgängliga bakgrundslager <br><br/>${layerSwitcherPlugin.options.showDrawOrderView ? "- <b>Ritordning:</b> Här kan du ändra ritordningen för aktiverade lager i kartan" : ""}`,
