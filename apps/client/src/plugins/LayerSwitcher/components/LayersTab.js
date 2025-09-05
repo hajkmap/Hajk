@@ -81,18 +81,27 @@ const LayersTab = ({
     };
   }, [staticLayerTree]);
 
-  const handleFilterSubmit = useCallback((value) => {
-    const filterValue = value === "" ? null : value;
-    if (filterValue?.length > 0) {
-      setFilterValue(filterValue);
-    }
-  }, []);
+  const handleFilterSubmit = useCallback(
+    (value) => {
+      const filterValue = value === "" ? null : value;
+      if (filterValue?.length > 0) {
+        setFilterValue(filterValue);
+      } else {
+        setFilterValue(null);
+        // Reset layerTree to original staticLayerTree when filter is cleared
+        setLayerTree(staticLayerTree);
+      }
+    },
+    [staticLayerTree]
+  );
 
   const handleFilterValueChange = debounce((value) => {
     const filterValue = value === "" ? null : value;
 
     if (value === "") {
       setFilterValue(null);
+      // Reset layerTree to original staticLayerTree when filter is cleared
+      setLayerTree(staticLayerTree);
     } else if (filterValue.length >= minFilterLength) {
       setFilterValue(filterValue);
     }
