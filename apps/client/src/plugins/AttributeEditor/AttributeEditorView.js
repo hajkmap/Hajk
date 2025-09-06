@@ -1481,20 +1481,13 @@ export default function AttributeEditorView({ initialFeatures }) {
           }}
         >
           {/* Left: Object list */}
-          <div
-            style={{
-              ...s.pane,
-              // Remove internal height limit -> no internal vertical scroll
-              ...(mode === "form" && !isMobile ? { maxHeight: "none" } : null),
-            }}
-            aria-label="Objektlista"
-          >
+          <div style={s.pane} aria-label="Objektlista">
             <div
               style={{
                 ...s.list,
-                // Lock horizontal overflow, let text wrap
+                // Keep vertical scroll, prevent horizontal overflow
                 ...(mode === "form" && !isMobile
-                  ? { overflowX: "hidden", overflowY: "visible" }
+                  ? { overflowX: "hidden", overflowY: "auto" }
                   : null),
               }}
             >
