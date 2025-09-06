@@ -750,14 +750,17 @@ export default function AttributeEditorView({ initialFeatures }) {
     setApplyToSelection(selected.size > 1);
   }
 
-  const ColumnFilter = ({ columnKey, overlayRef, isFirstColumn }) => {
+  const ColumnFilter = ({ columnKey, overlayRef, placement = "center" }) => {
     const uniqueValues = getUniqueColumnValues(columnKey);
     const selectedValues = columnFilters[columnKey] || [];
 
-    // First column: left: 0 (as now). Other columns: right: 0 (move to the left).
-    const anchorStyle = isFirstColumn
-      ? { left: 0, right: "auto" }
-      : { left: "auto", right: 0 };
+    // Anchor: right = open to the right, left = to the left, center = centered
+    const anchorStyle =
+      placement === "right"
+        ? { left: 0, right: "auto", transform: "none" }
+        : placement === "left"
+          ? { right: 0, left: "auto", transform: "none" }
+          : { left: "50%", right: "auto", transform: "translateX(-50%)" };
 
     return (
       <div ref={overlayRef} style={{ ...styles.filterOverlay, ...anchorStyle }}>
@@ -889,6 +892,14 @@ export default function AttributeEditorView({ initialFeatures }) {
                 <tr>
                   {FIELD_META.map((f, index) => {
                     const hasActiveFilter = columnFilters[f.key]?.length > 0;
+                    const totalCols = FIELD_META.length;
+                    const placement =
+                      index < 2
+                        ? "right"
+                        : index >= totalCols - 1
+                          ? "left"
+                          : "center";
+
                     const isFirstColumn = index === 0;
                     return (
                       <th
@@ -947,11 +958,11 @@ export default function AttributeEditorView({ initialFeatures }) {
                               </svg>
                             </button>
 
-                            {/* Filter overlay positioned differently based on column */}
+                            {/* Overlay med placement */}
                             {openFilterColumn === f.key && (
                               <ColumnFilter
                                 columnKey={f.key}
-                                isFirstColumn={isFirstColumn}
+                                placement={placement}
                                 overlayRef={(el) => {
                                   filterOverlayRef.current = el;
                                 }}
