@@ -107,6 +107,9 @@ const themes = {
     warning: "#b45309",
     warningBg: "#fef3c7",
 
+    success: "#059669",
+    successBg: "#d1fae5",
+
     overlayBg: "#ffffff",
     shadow: "0 4px 6px rgba(0,0,0,0.1)",
   },
@@ -133,6 +136,9 @@ const themes = {
 
     warning: "#f59e0b",
     warningBg: "rgba(245,158,11,0.1)",
+
+    success: "#10b981",
+    successBg: "rgba(16,185,129,0.1)",
 
     overlayBg: "#0f172a",
     shadow: "0 8px 16px rgba(0,0,0,0.45)",
@@ -192,6 +198,24 @@ function makeStyles(t) {
       background: t.primarySolid,
       color: "#ffffff",
       cursor: "pointer",
+    },
+    btnPrimaryDisabled: {
+      padding: "8px 12px",
+      borderRadius: 8,
+      border: `1px solid ${t.primary}`,
+      background: t.primarySolid,
+      color: "#ffffff",
+      opacity: 0.55,
+      cursor: "default",
+    },
+    btnDisabled: {
+      padding: "8px 12px",
+      borderRadius: 8,
+      border: `1px solid ${t.border}`,
+      background: t.overlayBg,
+      color: t.text,
+      opacity: 0.55,
+      cursor: "default",
     },
     toggle: (active) => ({
       padding: "6px 10px",
@@ -437,6 +461,22 @@ function makeStyles(t) {
       background: selected ? t.rowSelected : "transparent",
       cursor: "pointer",
     }),
+
+    notification: {
+      position: "fixed",
+      bottom: 20,
+      right: 20,
+      padding: "12px 16px",
+      borderRadius: 8,
+      background: t.successBg,
+      border: `1px solid ${t.success}`,
+      color: t.text,
+      boxShadow: t.shadow,
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      animation: "slideIn 0.3s ease-out",
+    },
   };
 }
 
@@ -451,6 +491,14 @@ export default function AttributeEditorView({ initialFeatures }) {
     () => initialFeatures || createDummyFeatures()
   );
 
+  const [nextId, setNextId] = useState(
+    () =>
+      Math.max(...(initialFeatures || createDummyFeatures()).map((f) => f.id)) +
+      1
+  );
+
+  const [notification, setNotification] = useState(null);
+
   // === Table: search, sort & selection and filter ===
   const [tableSearch, setTableSearch] = useState("");
   const [sort, setSort] = useState({ key: "geoid", dir: "asc" });
@@ -460,6 +508,44 @@ export default function AttributeEditorView({ initialFeatures }) {
   const [openFilterColumn, setOpenFilterColumn] = useState(null);
   const filterOverlayRef = useRef(null);
   const firstColumnRef = useRef(null);
+
+  const showNotification = (message) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const duplicateSelectedRows = () => {
+    if (tableSelectedIds.size === 0) return;
+
+    const newFeatures = [];
+    let currentNextId = nextId;
+
+    const maxGeoid = Math.max(...features.map((f) => f.geoid));
+    let nextGeoid = maxGeoid + 1;
+
+    features.forEach((f) => {
+      if (tableSelectedIds.has(f.id)) {
+        const duplicate = {
+          ...f,
+          id: currentNextId++,
+          geoid: nextGeoid++,
+          ar_anteckning: f.ar_anteckning
+            ? `${f.ar_anteckning} (kopia)`
+            : "(kopia)",
+        };
+        newFeatures.push(duplicate);
+      }
+    });
+
+    setFeatures((prev) => [...prev, ...newFeatures]);
+    setNextId(currentNextId);
+
+    setTableSelectedIds(new Set());
+
+    showNotification(
+      `${newFeatures.length} ${newFeatures.length === 1 ? "post" : "poster"} duplicerade`
+    );
+  };
 
   useEffect(() => {
     if (!openFilterColumn) return;
@@ -913,7 +999,14 @@ export default function AttributeEditorView({ initialFeatures }) {
             <button style={s.btn} onClick={selectAllVisible}>
               Markera alla
             </button>
-            <button style={s.btn} onClick={clearSelection}>
+            <button
+              style={selectedIds.size === 0 ? s.btnDisabled : s.btn}
+              onClick={clearSelection}
+              disabled={selectedIds.size === 0}
+              title={
+                selectedIds.size === 0 ? "Inget markerat" : "Avmarkera valda"
+              }
+            >
               Avmarkera
             </button>
             <span style={s.toolbarStats}>
@@ -930,7 +1023,28 @@ export default function AttributeEditorView({ initialFeatures }) {
             <span style={s.tableHeaderTitle}>Alla objekt</span>
             <div style={s.spacer} />
             <button
-              style={s.btnPrimary}
+              style={
+                tableSelectedIds.size === 0
+                  ? s.btnPrimaryDisabled
+                  : s.btnPrimary
+              }
+              disabled={tableSelectedIds.size === 0}
+              onClick={duplicateSelectedRows}
+              title={
+                tableSelectedIds.size
+                  ? `Duplicera ${tableSelectedIds.size} markerade ${tableSelectedIds.size === 1 ? "rad" : "rader"}`
+                  : "Markera rader först"
+              }
+            >
+              Duplicera val ({tableSelectedIds.size})
+            </button>
+
+            <button
+              style={
+                tableSelectedIds.size === 0
+                  ? s.btnPrimaryDisabled
+                  : s.btnPrimary
+              }
               disabled={tableSelectedIds.size === 0}
               onClick={openSelectedInFormFromTable}
               title={
@@ -1138,11 +1252,15 @@ export default function AttributeEditorView({ initialFeatures }) {
                 />
                 Spara ändrade fält för alla markerade
               </label>
-              <button style={s.btn} onClick={resetEdits} disabled={!dirty}>
+              <button
+                style={!dirty ? s.btnDisabled : s.btn}
+                onClick={resetEdits}
+                disabled={!dirty}
+              >
                 Ångra
               </button>
               <button
-                style={s.btnPrimary}
+                style={!dirty ? s.btnPrimaryDisabled : s.btnPrimary}
                 onClick={() => saveChanges()}
                 disabled={!dirty}
               >
@@ -1183,6 +1301,23 @@ export default function AttributeEditorView({ initialFeatures }) {
               </>
             )}
           </div>
+        </div>
+      )}
+
+      {notification && (
+        <div style={s.notification}>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={theme.primary}
+            strokeWidth="2"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          {notification}
         </div>
       )}
     </div>
