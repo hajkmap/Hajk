@@ -147,8 +147,9 @@ const themes = {
 
 /* === Styles (generated from theme) === */
 const OFFSET = 16;
+const TABLE_MIN = 460;
 
-function makeStyles(t) {
+function makeStyles(t, isMobile) {
   return {
     shell: {
       display: "flex",
@@ -158,29 +159,47 @@ function makeStyles(t) {
       fontFamily: "'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial",
       color: t.text,
       background: t.appBg,
+      minWidth: 0,
     },
     toolbar: {
       display: "flex",
       alignItems: "center",
-      gap: 8,
-      padding: 8,
+      gap: isMobile ? 4 : 8,
+      padding: isMobile ? 6 : 8,
       background: t.panelBgAlt,
       border: `1px solid ${t.border}`,
       borderRadius: 8,
+      flexWrap: isMobile ? "wrap" : "nowrap",
     },
-    toolbarTitle: { fontWeight: 600 },
+    toolbarTitle: {
+      fontWeight: 600,
+      fontSize: isMobile ? 14 : 16,
+      width: isMobile ? "100%" : "auto",
+      marginBottom: isMobile ? 4 : 0,
+    },
     toolbarSpacer: { width: 10 },
-    toolbarInfo: { display: "flex", alignItems: "center", gap: 8 },
-    toolbarStats: { color: t.textMuted, fontSize: 12 },
+    toolbarInfo: {
+      display: "flex",
+      alignItems: "center",
+      gap: isMobile ? 4 : 8,
+      flexWrap: isMobile ? "wrap" : "nowrap",
+      width: isMobile ? "100%" : "auto",
+    },
+    toolbarStats: {
+      color: t.textMuted,
+      fontSize: isMobile ? 11 : 12,
+      whiteSpace: isMobile ? "nowrap" : "normal",
+    },
     spacer: { flex: 1 },
 
     btn: {
-      padding: "8px 12px",
+      padding: isMobile ? "6px 10px" : "8px 12px",
       borderRadius: 8,
       border: `1px solid ${t.border}`,
       background: t.overlayBg,
       color: t.text,
       cursor: "pointer",
+      fontSize: isMobile ? 12 : 14,
     },
     btnSmall: {
       padding: "4px 8px",
@@ -192,45 +211,85 @@ function makeStyles(t) {
       cursor: "pointer",
     },
     btnPrimary: {
-      padding: "8px 12px",
+      padding: isMobile ? "6px 10px" : "8px 12px",
       borderRadius: 8,
       border: `1px solid ${t.primary}`,
       background: t.primarySolid,
       color: "#ffffff",
       cursor: "pointer",
+      fontSize: isMobile ? 12 : 14,
     },
     btnPrimaryDisabled: {
-      padding: "8px 12px",
+      padding: isMobile ? "6px 10px" : "8px 12px",
       borderRadius: 8,
       border: `1px solid ${t.primary}`,
       background: t.primarySolid,
       color: "#ffffff",
       opacity: 0.55,
       cursor: "default",
+      fontSize: isMobile ? 12 : 14,
     },
     btnDisabled: {
-      padding: "8px 12px",
+      padding: isMobile ? "6px 10px" : "8px 12px",
       borderRadius: 8,
       border: `1px solid ${t.border}`,
       background: t.overlayBg,
       color: t.text,
       opacity: 0.55,
       cursor: "default",
+      fontSize: isMobile ? 12 : 14,
     },
     toggle: (active) => ({
-      padding: "6px 10px",
+      padding: isMobile ? "5px 8px" : "6px 10px",
       borderRadius: 999,
       border: `1px solid ${active ? t.primary : t.border}`,
       background: active ? t.primarySoft : t.overlayBg,
       color: t.text,
       cursor: "pointer",
+      fontSize: isMobile ? 12 : 14,
     }),
 
+    // Mobile-specific panel styles
+    mobileTabBar: {
+      display: "flex",
+      gap: 4,
+      padding: "8px 8px 0 8px",
+      background: t.panelBg,
+    },
+    mobileTab: (active) => ({
+      flex: 1,
+      padding: "8px 12px",
+      border: `1px solid ${t.border}`,
+      borderBottom: active ? "none" : `1px solid ${t.border}`,
+      borderRadius: "8px 8px 0 0",
+      background: active ? t.panelBg : t.panelBgAlt,
+      color: t.text,
+      cursor: "pointer",
+      fontSize: 14,
+      fontWeight: active ? 600 : 400,
+      textAlign: "center",
+    }),
+    mobilePaneContainer: {
+      flex: 1,
+      border: `1px solid ${t.border}`,
+      borderRadius: "0 0 8px 8px",
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column",
+      background: t.panelBg,
+      minHeight: 0,
+    },
+
     paneWrap: {
-      display: "grid",
-      gridTemplateColumns: "320px 1fr",
+      display: isMobile ? "flex" : "grid",
+      gridTemplateColumns: isMobile
+        ? "1fr"
+        : "minmax(320px, 1fr) minmax(260px, 2fr)",
       gap: 12,
-      height: "calc(100% - 50px)",
+      height: isMobile ? "100%" : "calc(100% - 50px)",
+      overflowX: "auto",
+      minWidth: 0,
+      flexDirection: "column",
     },
     pane: {
       border: `1px solid ${t.border}`,
@@ -238,25 +297,30 @@ function makeStyles(t) {
       overflow: "hidden",
       display: "flex",
       flexDirection: "column",
-      maxHeight: 510,
+      maxHeight: isMobile ? "none" : 510,
+      height: isMobile ? "100%" : "auto",
       background: t.panelBg,
+      minWidth: 0,
     },
     paneHeader: {
-      padding: 10,
+      padding: isMobile ? 8 : 10,
       background: t.panelBg,
       borderBottom: `1px solid ${t.border}`,
       fontWeight: 600,
       color: t.text,
+      fontSize: isMobile ? 14 : 16,
     },
     paneHeaderWithActions: {
-      padding: 10,
+      padding: isMobile ? 8 : 10,
       background: t.panelBg,
       borderBottom: `1px solid ${t.border}`,
       fontWeight: 600,
       display: "flex",
       alignItems: "center",
-      gap: 8,
+      gap: isMobile ? 4 : 8,
       color: t.text,
+      fontSize: isMobile ? 14 : 16,
+      flexWrap: isMobile ? "wrap" : "nowrap",
     },
 
     list: { overflow: "auto", flex: 1, minHeight: 0 },
@@ -265,43 +329,62 @@ function makeStyles(t) {
       gridTemplateColumns: "28px 1fr",
       alignItems: "center",
       gap: 8,
-      padding: "8px 10px",
+      padding: isMobile ? "6px 8px" : "8px 10px",
       borderBottom: `1px solid ${t.listDivider}`,
       background: sel ? t.rowHover : "transparent",
       cursor: "pointer",
+      minWidth: 0,
     }),
-    listRowTitle: { fontWeight: 600, fontSize: 13 },
-    listRowSubtitle: { fontSize: 12, color: t.textMuted },
+    listRowTitle: {
+      fontWeight: 600,
+      fontSize: isMobile ? 12 : 13,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
+    listRowSubtitle: {
+      fontSize: isMobile ? 11 : 12,
+      color: t.textMuted,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
     listEmpty: { padding: 12, color: t.textMuted },
     listFooter: {
-      padding: 10,
+      padding: isMobile ? 8 : 10,
       display: "flex",
       gap: 8,
       borderTop: `1px solid ${t.border}`,
       background: t.panelBg,
+      flexWrap: isMobile ? "wrap" : "nowrap",
     },
     listFooterInfo: { fontSize: 12, color: t.textMuted },
 
     form: {
-      padding: 12,
+      padding: isMobile ? 8 : 12,
       overflow: "auto",
       display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: 12,
+      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+      gap: isMobile ? 8 : 12,
       flex: 1,
       minHeight: 0,
       color: t.text,
+      minWidth: 0,
     },
-    formEmpty: { padding: 16, color: t.textMuted },
+    formEmpty: {
+      padding: 16,
+      color: t.textMuted,
+      textAlign: "center",
+    },
     formFooter: {
-      padding: 12,
+      padding: isMobile ? 8 : 12,
       borderTop: `1px solid ${t.border}`,
       fontSize: 12,
       color: t.textMuted,
       background: t.panelBg,
     },
     formFooterDirty: {
-      padding: 12,
+      padding: isMobile ? 8 : 12,
       borderTop: `1px solid ${t.border}`,
       fontSize: 12,
       color: t.warning,
@@ -313,7 +396,7 @@ function makeStyles(t) {
     labelChanged: { color: "#f59e0b", marginLeft: 4 },
 
     input: {
-      padding: 8,
+      padding: isMobile ? 6 : 8,
       border: `1px solid ${t.border}`,
       borderRadius: 8,
       fontSize: 14,
@@ -321,7 +404,7 @@ function makeStyles(t) {
       color: t.text,
     },
     inputChanged: {
-      padding: 8,
+      padding: isMobile ? 6 : 8,
       border: `1px solid ${t.warning}`,
       borderRadius: 8,
       fontSize: 14,
@@ -336,35 +419,51 @@ function makeStyles(t) {
       fontSize: 12,
       marginRight: 8,
       color: t.text,
+      flexShrink: 0,
     },
 
     tableWrap: {
       border: `1px solid ${t.border}`,
       borderRadius: 8,
+      background: t.panelBg,
       display: "flex",
       flexDirection: "column",
-      overflow: "hidden",
       boxSizing: "border-box",
-      height: `clamp(180px, calc(100dvh - ${OFFSET}px), 510px)`,
-      background: t.panelBg,
+      height: isMobile
+        ? "calc(100% - 60px)"
+        : `clamp(180px, calc(100dvh - ${OFFSET}px), 510px)`,
+      overflow: "hidden",
+    },
+    tableInner: {
+      display: "inline-block",
+      minWidth: `${TABLE_MIN}px`,
     },
     tableHeaderBar: {
       display: "flex",
-      gap: 8,
+      gap: isMobile ? 4 : 8,
       alignItems: "center",
-      padding: 8,
+      padding: isMobile ? 6 : 8,
       background: t.panelBg,
       borderBottom: `1px solid ${t.border}`,
-      flex: "0 0 auto",
       color: t.text,
+      flexWrap: "wrap",
+      position: "sticky",
+      top: 0,
+      zIndex: 2,
     },
-    tableHeaderTitle: { fontWeight: 600 },
+    tableHeaderTitle: {
+      fontWeight: 600,
+      fontSize: isMobile ? 14 : 16,
+      width: isMobile ? "100%" : "auto",
+    },
 
     tableViewport: {
       flex: "1 1 auto",
       minHeight: 0,
       minWidth: 0,
-      overflow: "auto",
+      overflowX: "auto",
+      overflowY: "auto",
+      WebkitOverflowScrolling: "touch",
       position: "relative",
       background: t.panelBg,
     },
@@ -373,7 +472,6 @@ function makeStyles(t) {
       borderSpacing: 0,
       tableLayout: "auto",
       width: "max-content",
-      minWidth: "100%",
       color: t.text,
     },
     th: {
@@ -383,8 +481,8 @@ function makeStyles(t) {
       background: t.thBg,
       textAlign: "left",
       fontWeight: 600,
-      fontSize: 13,
-      padding: "6px 8px",
+      fontSize: isMobile ? 12 : 13,
+      padding: isMobile ? "4px 6px" : "6px 8px",
       borderBottom: `1px solid ${t.border}`,
       cursor: "pointer",
       whiteSpace: "nowrap",
@@ -394,7 +492,7 @@ function makeStyles(t) {
     thControls: {
       display: "inline-flex",
       alignItems: "center",
-      gap: 6,
+      gap: isMobile ? 4 : 6,
       position: "relative",
     },
     sortButton: {
@@ -444,15 +542,15 @@ function makeStyles(t) {
     },
 
     td: {
-      fontSize: 13,
-      padding: "8px 16px",
+      fontSize: isMobile ? 12 : 13,
+      padding: isMobile ? "6px 8px" : "8px 16px",
       borderBottom: `1px solid ${t.borderMuted}`,
       lineHeight: "20px",
       color: t.text,
     },
     tdEmpty: {
-      fontSize: 13,
-      padding: "8px 16px",
+      fontSize: isMobile ? 12 : 13,
+      padding: isMobile ? "6px 8px" : "8px 16px",
       borderBottom: `1px solid ${t.borderMuted}`,
       lineHeight: "20px",
       color: t.textMuted,
@@ -476,16 +574,31 @@ function makeStyles(t) {
       alignItems: "center",
       gap: 8,
       animation: "slideIn 0.3s ease-out",
+      maxWidth: isMobile ? "calc(100% - 40px)" : "auto",
+      left: isMobile ? 20 : "auto",
     },
   };
 }
 
 /* === Component === */
 export default function AttributeEditorView({ initialFeatures }) {
-  const [mode, setMode] = useState("table"); // "table" | "form"
+  const [mode, setMode] = useState("table");
   const [dark, setDark] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileActiveTab, setMobileActiveTab] = useState("list"); // "list" | "form"
+
   const theme = dark ? themes.dark : themes.light;
-  const s = makeStyles(theme);
+  const s = makeStyles(theme, isMobile);
+
+  // Check for mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const [features, setFeatures] = useState(
     () => initialFeatures || createDummyFeatures()
@@ -729,13 +842,13 @@ export default function AttributeEditorView({ initialFeatures }) {
         const lastId = visibleFormList[visibleFormList.length - 1].id;
         setFocusedId(lastId);
         setTimeout(() => {
-          const element = document.querySelector(`[data-row-id="${lastId}"]`);
-          element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          document
+            .querySelector(`[data-row-id="${lastId}"]`)
+            ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }, 0);
       }
       return;
     }
-
     const arr = Array.from(
       selectedIds.size ? selectedIds : new Set(features.map((f) => f.id))
     );
@@ -744,8 +857,9 @@ export default function AttributeEditorView({ initialFeatures }) {
       const newId = arr[idx - 1];
       setFocusedId(newId);
       setTimeout(() => {
-        const element = document.querySelector(`[data-row-id="${newId}"]`);
-        element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        document
+          .querySelector(`[data-row-id="${newId}"]`)
+          ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }, 0);
     }
   }
@@ -756,13 +870,13 @@ export default function AttributeEditorView({ initialFeatures }) {
         const firstId = visibleFormList[0].id;
         setFocusedId(firstId);
         setTimeout(() => {
-          const element = document.querySelector(`[data-row-id="${firstId}"]`);
-          element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          document
+            .querySelector(`[data-row-id="${firstId}"]`)
+            ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }, 0);
       }
       return;
     }
-
     const arr = Array.from(
       selectedIds.size ? selectedIds : new Set(features.map((f) => f.id))
     );
@@ -771,8 +885,9 @@ export default function AttributeEditorView({ initialFeatures }) {
       const newId = arr[idx + 1];
       setFocusedId(newId);
       setTimeout(() => {
-        const element = document.querySelector(`[data-row-id="${newId}"]`);
-        element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        document
+          .querySelector(`[data-row-id="${newId}"]`)
+          ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }, 0);
     }
   }
@@ -785,12 +900,8 @@ export default function AttributeEditorView({ initialFeatures }) {
     const ok = window.confirm(
       "Du har osparade ändringar. Vill du spara dem först?"
     );
-    if (ok) {
-      saveChanges({ applyToSelection: false });
-      setFocusedId(targetId);
-    } else {
-      setFocusedId(targetId);
-    }
+    if (ok) saveChanges({ applyToSelection: false });
+    setFocusedId(targetId);
   }
 
   function projectToFeature(values, onlyChanged = false) {
@@ -834,6 +945,12 @@ export default function AttributeEditorView({ initialFeatures }) {
     setOriginalValues({ ...editValues });
     setChangedFields(new Set());
     setDirty(false);
+
+    showNotification(
+      applyMany && selectedIds.size > 1
+        ? `Ändringar sparade för ${idsToUpdate.length} objekt`
+        : "Ändringar sparade"
+    );
   }
 
   function resetEdits() {
@@ -939,12 +1056,155 @@ export default function AttributeEditorView({ initialFeatures }) {
     );
   };
 
+  // Mobile form component rendering
+  const renderMobileForm = () => {
+    if (!isMobile || mode !== "form") return null;
+
+    return (
+      <>
+        <div style={s.mobileTabBar}>
+          <button
+            style={s.mobileTab(mobileActiveTab === "list")}
+            onClick={() => setMobileActiveTab("list")}
+          >
+            Objekt ({visibleFormList.length})
+          </button>
+          <button
+            style={s.mobileTab(mobileActiveTab === "form")}
+            onClick={() => setMobileActiveTab("form")}
+          >
+            Redigera {focusedId ? `(#${focusedId})` : ""}
+          </button>
+        </div>
+
+        <div style={s.mobilePaneContainer}>
+          {mobileActiveTab === "list" ? (
+            <>
+              <div style={s.list}>
+                {visibleFormList.map((f) => {
+                  const selected = selectedIds.has(f.id);
+                  const isFocused = focusedId === f.id;
+                  return (
+                    <div
+                      key={f.id}
+                      data-row-id={f.id}
+                      style={s.listRow(selected || isFocused)}
+                      onClick={() => handleBeforeChangeFocus(f.id)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          toggleSelect(f.id);
+                        }}
+                      />
+                      <div>
+                        <div style={s.listRowTitle}>
+                          {f.ar_typ} — {f.ar_andamal}
+                        </div>
+                        <div style={s.listRowSubtitle}>
+                          geoid {f.geoid} • {f.ar_forman} • {f.ar_last}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {visibleFormList.length === 0 && (
+                  <div style={s.listEmpty}>Inga objekt i listan.</div>
+                )}
+              </div>
+              <div style={s.listFooter}>
+                <button style={s.btn} onClick={focusPrev}>
+                  &larr; Föreg.
+                </button>
+                <button style={s.btn} onClick={focusNext}>
+                  Nästa &rarr;
+                </button>
+                <div style={s.spacer} />
+                <span style={s.listFooterInfo}>Fokus: {focusedId ?? "—"}</span>
+              </div>
+            </>
+          ) : (
+            <>
+              {!focusedFeature ? (
+                <div style={s.formEmpty}>
+                  Markera ett objekt i listan för att börja redigera.
+                </div>
+              ) : (
+                <>
+                  <div style={s.form}>
+                    {FIELD_META.map((meta) => (
+                      <div key={meta.key} style={s.field}>
+                        <label style={s.label}>
+                          {meta.label}
+                          {changedFields.has(meta.key) && (
+                            <span style={s.labelChanged}>(ändrad)</span>
+                          )}
+                        </label>
+                        {renderInput(
+                          meta,
+                          editValues[meta.key],
+                          (v) => handleFieldChange(meta.key, v),
+                          changedFields.has(meta.key),
+                          s
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    style={{
+                      padding: 8,
+                      borderTop: `1px solid ${theme.border}`,
+                      display: "flex",
+                      gap: 4,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <label style={s.checkbox}>
+                      <input
+                        type="checkbox"
+                        checked={applyToSelection}
+                        onChange={(e) => setApplyToSelection(e.target.checked)}
+                      />
+                      Spara för alla markerade
+                    </label>
+                    <div style={s.spacer} />
+                    <button
+                      style={!dirty ? s.btnDisabled : s.btn}
+                      onClick={resetEdits}
+                      disabled={!dirty}
+                    >
+                      Ångra
+                    </button>
+                    <button
+                      style={!dirty ? s.btnPrimaryDisabled : s.btnPrimary}
+                      onClick={() => saveChanges()}
+                      disabled={!dirty}
+                    >
+                      Spara
+                    </button>
+                  </div>
+                  <div style={dirty ? s.formFooterDirty : s.formFooter}>
+                    {dirty
+                      ? `Osparade ändringar (${changedFields.size} fält)`
+                      : "Allt sparat"}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </>
+    );
+  };
+
   return (
     <div style={s.shell}>
       {/* Top toolbar */}
       <div style={s.toolbar}>
         <strong style={s.toolbarTitle}>Attributredigerare</strong>
-        <div style={s.toolbarSpacer} />
+        {!isMobile && <div style={s.toolbarSpacer} />}
         <button
           type="button"
           onClick={() => setMode("table")}
@@ -983,10 +1243,12 @@ export default function AttributeEditorView({ initialFeatures }) {
               value={tableSearch}
               onChange={(e) => setTableSearch(e.target.value)}
             />
-            <span style={s.toolbarStats}>
-              Totalt: {features.length} • Visas: {filteredAndSorted.length} •
-              Valda: {tableSelectedIds.size}
-            </span>
+            {!isMobile && (
+              <span style={s.toolbarStats}>
+                Totalt: {features.length} • Visas: {filteredAndSorted.length} •
+                Valda: {tableSelectedIds.size}
+              </span>
+            )}
           </div>
         ) : (
           <div style={s.toolbarInfo}>
@@ -996,22 +1258,28 @@ export default function AttributeEditorView({ initialFeatures }) {
               value={formSearch}
               onChange={(e) => setFormSearch(e.target.value)}
             />
-            <button style={s.btn} onClick={selectAllVisible}>
-              Markera alla
-            </button>
-            <button
-              style={selectedIds.size === 0 ? s.btnDisabled : s.btn}
-              onClick={clearSelection}
-              disabled={selectedIds.size === 0}
-              title={
-                selectedIds.size === 0 ? "Inget markerat" : "Avmarkera valda"
-              }
-            >
-              Avmarkera
-            </button>
-            <span style={s.toolbarStats}>
-              Valda: {selectedIds.size} / {features.length}
-            </span>
+            {!isMobile && (
+              <>
+                <button style={s.btn} onClick={selectAllVisible}>
+                  Markera alla
+                </button>
+                <button
+                  style={selectedIds.size === 0 ? s.btnDisabled : s.btn}
+                  onClick={clearSelection}
+                  disabled={selectedIds.size === 0}
+                  title={
+                    selectedIds.size === 0
+                      ? "Inget markerat"
+                      : "Avmarkera valda"
+                  }
+                >
+                  Avmarkera
+                </button>
+                <span style={s.toolbarStats}>
+                  Valda: {selectedIds.size} / {features.length}
+                </span>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -1022,178 +1290,217 @@ export default function AttributeEditorView({ initialFeatures }) {
           <div style={s.tableHeaderBar}>
             <span style={s.tableHeaderTitle}>Alla objekt</span>
             <div style={s.spacer} />
-            <button
-              style={
-                tableSelectedIds.size === 0
-                  ? s.btnPrimaryDisabled
-                  : s.btnPrimary
-              }
-              disabled={tableSelectedIds.size === 0}
-              onClick={duplicateSelectedRows}
-              title={
-                tableSelectedIds.size
-                  ? `Duplicera ${tableSelectedIds.size} markerade ${tableSelectedIds.size === 1 ? "rad" : "rader"}`
-                  : "Markera rader först"
-              }
-            >
-              Duplicera val ({tableSelectedIds.size})
-            </button>
 
-            <button
-              style={
-                tableSelectedIds.size === 0
-                  ? s.btnPrimaryDisabled
-                  : s.btnPrimary
-              }
-              disabled={tableSelectedIds.size === 0}
-              onClick={openSelectedInFormFromTable}
-              title={
-                tableSelectedIds.size
-                  ? "Öppna de markerade raderna i formulärläge"
-                  : "Markera rader först"
-              }
-            >
-              Redigera val i formulär
-            </button>
+            {/* ALLTID visa åtgärdsknapparna (med kortare etiketter i mobil) */}
+            <>
+              <button
+                style={
+                  tableSelectedIds.size === 0
+                    ? s.btnPrimaryDisabled
+                    : s.btnPrimary
+                }
+                disabled={tableSelectedIds.size === 0}
+                onClick={duplicateSelectedRows}
+                title={
+                  tableSelectedIds.size
+                    ? `Duplicera ${tableSelectedIds.size} markerade`
+                    : "Markera rader först"
+                }
+              >
+                {isMobile
+                  ? `Duplicera (${tableSelectedIds.size})`
+                  : `Duplicera val (${tableSelectedIds.size})`}
+              </button>
+
+              <button
+                style={
+                  tableSelectedIds.size === 0
+                    ? s.btnPrimaryDisabled
+                    : s.btnPrimary
+                }
+                disabled={tableSelectedIds.size === 0}
+                onClick={openSelectedInFormFromTable}
+                title={
+                  tableSelectedIds.size
+                    ? "Öppna de markerade raderna i formulärläge"
+                    : "Markera rader först"
+                }
+              >
+                {isMobile ? "Redigera val" : "Redigera val i formulär"}
+              </button>
+            </>
+
+            {/* Behåll gärna den lilla statistiken i mobil */}
+            {isMobile && (
+              <span style={s.toolbarStats}>
+                {filteredAndSorted.length}/{features.length}
+              </span>
+            )}
           </div>
+
           <div style={s.tableViewport}>
-            <table style={s.table}>
-              <thead>
-                <tr>
-                  {FIELD_META.map((f, index) => {
-                    const hasActiveFilter = columnFilters[f.key]?.length > 0;
-                    const totalCols = FIELD_META.length;
-                    const placement =
-                      index < 2
-                        ? "right"
-                        : index >= totalCols - 1
-                          ? "left"
-                          : "center";
+            <div style={s.tableInner}>
+              <table style={s.table}>
+                <thead>
+                  <tr>
+                    {FIELD_META.map((f, index) => {
+                      const hasActiveFilter = columnFilters[f.key]?.length > 0;
+                      const totalCols = FIELD_META.length;
+                      const placement =
+                        index < 2
+                          ? "right"
+                          : index >= totalCols - 1
+                            ? "left"
+                            : "center";
 
-                    const isFirstColumn = index === 0;
-                    return (
-                      <th
-                        key={f.key}
-                        style={s.th}
-                        ref={isFirstColumn ? firstColumnRef : null}
-                      >
-                        <div style={s.thContent}>
-                          <div style={s.thControls}>
-                            {/* Sort button LEFT of column header */}
-                            <button
-                              onClick={() => toggleSort(f.key)}
-                              title="Klicka för att sortera"
-                              style={s.sortButton}
-                            >
-                              {sort.key === f.key
-                                ? sort.dir === "asc"
-                                  ? "▲"
-                                  : "▼"
-                                : "↕"}
-                            </button>
-
-                            <span
-                              onClick={() => toggleSort(f.key)}
-                              style={s.columnHeader}
-                            >
-                              {f.label}
-                            </span>
-
-                            {/* Filter button */}
-                            <button
-                              data-filter-btn={f.key}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenFilterColumn(
-                                  openFilterColumn === f.key ? null : f.key
-                                );
-                              }}
-                              style={s.filterButton(hasActiveFilter)}
-                              title={
-                                hasActiveFilter
-                                  ? `Filter aktivt (${(columnFilters[f.key] || []).length} val)`
-                                  : "Filtrera"
-                              }
-                              aria-pressed={openFilterColumn === f.key}
-                            >
-                              <svg
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke={
-                                  hasActiveFilter
-                                    ? theme.primary
-                                    : theme.textMuted
-                                }
-                                strokeWidth="2"
+                      const isFirstColumn = index === 0;
+                      return (
+                        <th
+                          key={f.key}
+                          style={s.th}
+                          ref={isFirstColumn ? firstColumnRef : null}
+                        >
+                          <div style={s.thContent}>
+                            <div style={s.thControls}>
+                              <button
+                                onClick={() => toggleSort(f.key)}
+                                title="Klicka för att sortera"
+                                style={s.sortButton}
                               >
-                                <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-                              </svg>
-                            </button>
+                                {sort.key === f.key
+                                  ? sort.dir === "asc"
+                                    ? "▲"
+                                    : "▼"
+                                  : "↕"}
+                              </button>
 
-                            {/* Overlay med placement */}
-                            {openFilterColumn === f.key && (
-                              <ColumnFilter
-                                columnKey={f.key}
-                                placement={placement}
-                                overlayRef={(el) => {
-                                  filterOverlayRef.current = el;
+                              <span
+                                onClick={() => toggleSort(f.key)}
+                                style={s.columnHeader}
+                              >
+                                {f.label}
+                              </span>
+
+                              <button
+                                data-filter-btn={f.key}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenFilterColumn(
+                                    openFilterColumn === f.key ? null : f.key
+                                  );
                                 }}
-                                onClose={() => setOpenFilterColumn(null)}
-                              />
-                            )}
-                          </div>
+                                style={s.filterButton(hasActiveFilter)}
+                                title={
+                                  hasActiveFilter
+                                    ? `Filter aktivt (${(columnFilters[f.key] || []).length} val)`
+                                    : "Filtrera"
+                                }
+                                aria-pressed={openFilterColumn === f.key}
+                              >
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke={
+                                    hasActiveFilter
+                                      ? theme.primary
+                                      : theme.textMuted
+                                  }
+                                  strokeWidth="2"
+                                >
+                                  <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+                                </svg>
+                              </button>
 
-                          <div style={s.spacer} />
-                        </div>
-                      </th>
+                              {openFilterColumn === f.key && (
+                                <ColumnFilter
+                                  columnKey={f.key}
+                                  placement={placement}
+                                  overlayRef={(el) => {
+                                    filterOverlayRef.current = el;
+                                  }}
+                                  onClose={() => setOpenFilterColumn(null)}
+                                />
+                              )}
+                            </div>
+
+                            <div style={s.spacer} />
+                          </div>
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAndSorted.map((row, idx) => {
+                    const selected = tableSelectedIds.has(row.id);
+                    return (
+                      <tr
+                        key={row.id}
+                        style={s.tr(selected)}
+                        aria-selected={selected}
+                        onClick={(e) => handleRowClick(row.id, idx, e)}
+                        onDoubleClick={() => {
+                          if (tableSelectedIds.size > 1)
+                            openSelectedInFormFromTable();
+                          else openInFormFromTable(row.id);
+                        }}
+                        title="Klick: markera • Dubbelklick: öppna i formulär"
+                      >
+                        {FIELD_META.map((f) => (
+                          <td key={f.key} style={s.td}>
+                            {String(row[f.key] ?? "")}
+                          </td>
+                        ))}
+                      </tr>
                     );
                   })}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAndSorted.map((row, idx) => {
-                  const selected = tableSelectedIds.has(row.id);
-                  return (
-                    <tr
-                      key={row.id}
-                      style={s.tr(selected)}
-                      aria-selected={selected}
-                      onClick={(e) => handleRowClick(row.id, idx, e)}
-                      onDoubleClick={() => {
-                        if (tableSelectedIds.size > 1)
-                          openSelectedInFormFromTable();
-                        else openInFormFromTable(row.id);
-                      }}
-                      title="Klick: markera • Dubbelklick: öppna i formulär"
-                    >
-                      {FIELD_META.map((f) => (
-                        <td key={f.key} style={s.td}>
-                          {String(row[f.key] ?? "")}
-                        </td>
-                      ))}
+                  {filteredAndSorted.length === 0 && (
+                    <tr>
+                      <td style={s.tdEmpty} colSpan={FIELD_META.length}>
+                        Inga rader matchar sökningen.
+                      </td>
                     </tr>
-                  );
-                })}
-                {filteredAndSorted.length === 0 && (
-                  <tr>
-                    <td style={s.tdEmpty} colSpan={FIELD_META.length}>
-                      Inga rader matchar sökningen.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+      ) : isMobile ? (
+        /* ================= MOBILE FORM MODE ================= */
+        renderMobileForm()
       ) : (
-        /* ================= FORM MODE ================= */
-        <div style={s.paneWrap}>
-          {/* Left column: object list */}
-          <div style={s.pane} aria-label="Objektlista">
-            <div style={s.paneHeader}>Objekt</div>
-            <div style={s.list}>
+        /* ================= DESKTOP FORM MODE ================= */
+        /* ================= DESKTOP FORM MODE ================= */
+        <div
+          style={{
+            ...s.paneWrap,
+            // Låt sidan växa och stäng horisontell scroll i formulärläget (desktop)
+            ...(mode === "form" && !isMobile
+              ? { height: "auto", overflowX: "hidden" }
+              : null),
+          }}
+        >
+          {/* Vänster: Objektlista */}
+          <div
+            style={{
+              ...s.pane,
+              // Ta bort intern höjdbegränsning -> ingen intern vertikal scroll
+              ...(mode === "form" && !isMobile ? { maxHeight: "none" } : null),
+            }}
+            aria-label="Objektlista"
+          >
+            <div
+              style={{
+                ...s.list,
+                // Lås horisontellt overflow, låt text bryta rad
+                ...(mode === "form" && !isMobile
+                  ? { overflowX: "hidden", overflowY: "visible" }
+                  : null),
+              }}
+            >
               {visibleFormList.map((f) => {
                 const selected = selectedIds.has(f.id);
                 const isFocused = focusedId === f.id;
@@ -1213,10 +1520,25 @@ export default function AttributeEditorView({ initialFeatures }) {
                       }}
                     />
                     <div>
-                      <div style={s.listRowTitle}>
+                      <div
+                        style={{
+                          ...s.listRowTitle,
+                          // Radbryt långa strängar så de inte pressar layouten horisontellt
+                          ...(mode === "form" && !isMobile
+                            ? { whiteSpace: "normal", overflowWrap: "anywhere" }
+                            : null),
+                        }}
+                      >
                         {f.ar_typ} — {f.ar_andamal}
                       </div>
-                      <div style={s.listRowSubtitle}>
+                      <div
+                        style={{
+                          ...s.listRowSubtitle,
+                          ...(mode === "form" && !isMobile
+                            ? { whiteSpace: "normal", overflowWrap: "anywhere" }
+                            : null),
+                        }}
+                      >
                         geoid {f.geoid} • {f.ar_forman} • {f.ar_last}
                       </div>
                     </div>
@@ -1239,8 +1561,15 @@ export default function AttributeEditorView({ initialFeatures }) {
             </div>
           </div>
 
-          {/* Right column: form */}
-          <div style={s.pane} aria-label="Formulär">
+          {/* Höger: Formulär */}
+          <div
+            style={{
+              ...s.pane,
+              // Ta bort intern höjdbegränsning -> ingen intern vertikal scroll
+              ...(mode === "form" && !isMobile ? { maxHeight: "none" } : null),
+            }}
+            aria-label="Formulär"
+          >
             <div style={s.paneHeaderWithActions}>
               <span>Redigera attribut</span>
               <div style={s.spacer} />
@@ -1274,7 +1603,15 @@ export default function AttributeEditorView({ initialFeatures }) {
               </div>
             ) : (
               <>
-                <div style={s.form}>
+                <div
+                  style={{
+                    ...s.form,
+                    // Lås horisontellt overflow i formulärfält
+                    ...(mode === "form" && !isMobile
+                      ? { overflowX: "hidden", overflowY: "visible" }
+                      : null),
+                  }}
+                >
                   {FIELD_META.map((meta) => (
                     <div key={meta.key} style={s.field}>
                       <label style={s.label}>
