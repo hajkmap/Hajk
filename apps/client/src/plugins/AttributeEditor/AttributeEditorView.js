@@ -1,8 +1,8 @@
 import React, {
   useEffect,
-  useMemo,
   useState,
   useCallback,
+  useMemo,
   useRef,
 } from "react";
 
@@ -81,322 +81,372 @@ function createDummyFeatures() {
   return list;
 }
 
-/* === Styles (all CSS collected here) === */
-const OFFSET = 16;
-const styles = {
-  shell: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 8,
-    height: "100%",
-    fontFamily: "'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial",
+/* === THEME TOKENS === */
+const themes = {
+  light: {
+    appBg: "#ffffff",
+    panelBg: "#fafafa",
+    panelBgAlt: "#f6f7f9",
+    thBg: "#f9fafb",
+
+    border: "#e5e7eb",
+    borderMuted: "#f1f5f9",
+    listDivider: "#f0f0f0",
+
+    text: "#111827",
+    textMuted: "#6b7280",
+    label: "#374151",
+
+    primary: "#2563eb",
+    primarySolid: "#547edaff",
+    primarySoft: "#eaf1ff",
+
+    rowHover: "#eef6ff",
+    rowSelected: "#dbeafe",
+
+    warning: "#b45309",
+    warningBg: "#fef3c7",
+
+    overlayBg: "#ffffff",
+    shadow: "0 4px 6px rgba(0,0,0,0.1)",
   },
-  toolbar: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    padding: 8,
-    background: "#f6f7f9",
-    border: "1px solid #e5e7eb",
-    borderRadius: 8,
+  dark: {
+    appBg: "#0b0f16",
+    panelBg: "#0f172a",
+    panelBgAlt: "#111827",
+    thBg: "#0b1324",
+
+    border: "#263040",
+    borderMuted: "#1f2937",
+    listDivider: "#1f2937",
+
+    text: "#e5e7eb",
+    textMuted: "#9ca3af",
+    label: "#cbd5e1",
+
+    primary: "#60a5fa",
+    primarySolid: "#3b82f6",
+    primarySoft: "rgba(96,165,250,0.15)",
+
+    rowHover: "rgba(96,165,250,0.08)",
+    rowSelected: "rgba(96,165,250,0.22)",
+
+    warning: "#f59e0b",
+    warningBg: "rgba(245,158,11,0.1)",
+
+    overlayBg: "#0f172a",
+    shadow: "0 8px 16px rgba(0,0,0,0.45)",
   },
-  toolbarTitle: {
-    fontWeight: 600,
-  },
-  toolbarSpacer: {
-    width: 10,
-  },
-  toolbarInfo: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-  },
-  toolbarStats: {
-    color: "#6b7280",
-    fontSize: 12,
-  },
-  spacer: { flex: 1 },
-  btn: {
-    padding: "8px 12px",
-    borderRadius: 8,
-    border: "1px solid #e5e7eb",
-    background: "white",
-    cursor: "pointer",
-  },
-  btnSmall: {
-    padding: "4px 8px",
-    fontSize: 12,
-    borderRadius: 8,
-    border: "1px solid #e5e7eb",
-    background: "white",
-    cursor: "pointer",
-  },
-  btnPrimary: {
-    padding: "8px 12px",
-    borderRadius: 8,
-    border: "1px solid #2563eb",
-    background: "#547edaff",
-    color: "white",
-    cursor: "pointer",
-  },
-  toggle: (active) => ({
-    padding: "6px 10px",
-    borderRadius: 999,
-    border: `1px solid ${active ? "#2563eb" : "#e5e7eb"}`,
-    background: active ? "#eaf1ff" : "white",
-    cursor: "pointer",
-  }),
-  paneWrap: {
-    display: "grid",
-    gridTemplateColumns: "320px 1fr",
-    gap: 12,
-    height: "calc(100% - 50px)",
-  },
-  pane: {
-    border: "1px solid #e5e7eb",
-    borderRadius: 8,
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-    maxHeight: 510,
-  },
-  paneHeader: {
-    padding: 10,
-    background: "#fafafa",
-    borderBottom: "1px solid #e5e7eb",
-    fontWeight: 600,
-  },
-  paneHeaderWithActions: {
-    padding: 10,
-    background: "#fafafa",
-    borderBottom: "1px solid #e5e7eb",
-    fontWeight: 600,
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-  },
-  list: {
-    overflow: "auto",
-    flex: 1,
-    minHeight: 0,
-  },
-  listRow: (sel) => ({
-    display: "grid",
-    gridTemplateColumns: "28px 1fr",
-    alignItems: "center",
-    gap: 8,
-    padding: "8px 10px",
-    borderBottom: "1px solid #f0f0f0",
-    background: sel ? "#eef6ff" : "transparent",
-    cursor: "pointer",
-  }),
-  listRowTitle: {
-    fontWeight: 600,
-    fontSize: 13,
-  },
-  listRowSubtitle: {
-    fontSize: 12,
-    color: "#6b7280",
-  },
-  listEmpty: {
-    padding: 12,
-    color: "#6b7280",
-  },
-  listFooter: {
-    padding: 10,
-    display: "flex",
-    gap: 8,
-    borderTop: "1px solid #e5e7eb",
-    background: "#fafafa",
-  },
-  listFooterInfo: {
-    fontSize: 12,
-    color: "#6b7280",
-  },
-  form: {
-    padding: 12,
-    overflow: "auto",
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: 12,
-    flex: 1,
-    minHeight: 0,
-  },
-  formEmpty: {
-    padding: 16,
-    color: "#6b7280",
-  },
-  formFooter: {
-    padding: 12,
-    borderTop: "1px solid #e5e7eb",
-    fontSize: 12,
-    color: "#6b7280",
-  },
-  formFooterDirty: {
-    padding: 12,
-    borderTop: "1px solid #e5e7eb",
-    fontSize: 12,
-    color: "#b45309",
-  },
-  field: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 6,
-  },
-  label: {
-    fontSize: 12,
-    color: "#374151",
-  },
-  labelChanged: {
-    color: "#f59e0b",
-    marginLeft: 4,
-  },
-  input: {
-    padding: 8,
-    border: "1px solid #e5e7eb",
-    borderRadius: 8,
-    fontSize: 14,
-  },
-  inputChanged: {
-    padding: 8,
-    border: "1px solid #f59e0b",
-    borderRadius: 8,
-    fontSize: 14,
-    background: "#fef3c7",
-  },
-  checkbox: {
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    fontSize: 12,
-    marginRight: 8,
-  },
-  tableWrap: {
-    border: "1px solid #e5e7eb",
-    borderRadius: 8,
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",
-    boxSizing: "border-box",
-    height: `clamp(180px, calc(100dvh - ${OFFSET}px), 510px)`,
-  },
-  tableHeaderBar: {
-    display: "flex",
-    gap: 8,
-    alignItems: "center",
-    padding: 8,
-    background: "#fafafa",
-    borderBottom: "1px solid #e5e7eb",
-    flex: "0 0 auto",
-  },
-  tableHeaderTitle: {
-    fontWeight: 600,
-  },
-  tableViewport: {
-    flex: "1 1 auto",
-    minHeight: 0,
-    minWidth: 0,
-    overflow: "auto",
-    position: "relative",
-  },
-  table: {
-    borderCollapse: "separate",
-    borderSpacing: 0,
-    tableLayout: "auto",
-    width: "max-content",
-    minWidth: "100%",
-  },
-  th: {
-    position: "sticky",
-    top: 0,
-    zIndex: 1,
-    background: "#f9fafb",
-    textAlign: "left",
-    fontWeight: 600,
-    fontSize: 13,
-    padding: "6px 8px",
-    borderBottom: "1px solid #e5e7eb",
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-  },
-  thContent: {
-    display: "flex",
-    alignItems: "center",
-  },
-  thControls: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 6,
-    position: "relative",
-  },
-  sortButton: {
-    border: "none",
-    background: "transparent",
-    cursor: "pointer",
-    padding: 0,
-    lineHeight: 1,
-  },
-  columnHeader: {
-    cursor: "pointer",
-    userSelect: "none",
-  },
-  filterButton: (hasActiveFilter) => ({
-    background: hasActiveFilter ? "#dbeafe" : "transparent",
-    border: "1px solid transparent",
-    cursor: "pointer",
-    padding: 2,
-    borderRadius: 4,
-    display: "flex",
-    alignItems: "center",
-  }),
-  filterOverlay: {
-    position: "absolute",
-    top: "calc(100% + 6px)",
-    left: 0,
-    zIndex: 1000,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    borderRadius: 8,
-    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-    padding: 8,
-    minWidth: 200,
-    maxHeight: 300,
-    overflow: "auto",
-  },
-  filterOverlayButtons: {
-    marginBottom: 8,
-    display: "flex",
-    gap: 4,
-  },
-  filterCheckbox: {
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    padding: "4px 0",
-    cursor: "pointer",
-    fontSize: 13,
-  },
-  td: {
-    fontSize: 13,
-    padding: "8px 16px",
-    borderBottom: "1px solid #f1f5f9",
-    lineHeight: "20px",
-  },
-  tdEmpty: {
-    fontSize: 13,
-    padding: "8px 16px",
-    borderBottom: "1px solid #f1f5f9",
-    lineHeight: "20px",
-    color: "#6b7280",
-  },
-  tr: (selected) => ({
-    background: selected ? "#dbeafe" : "transparent",
-    cursor: "pointer",
-  }),
 };
 
+/* === Styles (generated from theme) === */
+const OFFSET = 16;
+
+function makeStyles(t) {
+  return {
+    shell: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
+      height: "100%",
+      fontFamily: "'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial",
+      color: t.text,
+      background: t.appBg,
+    },
+    toolbar: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      padding: 8,
+      background: t.panelBgAlt,
+      border: `1px solid ${t.border}`,
+      borderRadius: 8,
+    },
+    toolbarTitle: { fontWeight: 600 },
+    toolbarSpacer: { width: 10 },
+    toolbarInfo: { display: "flex", alignItems: "center", gap: 8 },
+    toolbarStats: { color: t.textMuted, fontSize: 12 },
+    spacer: { flex: 1 },
+
+    btn: {
+      padding: "8px 12px",
+      borderRadius: 8,
+      border: `1px solid ${t.border}`,
+      background: t.overlayBg,
+      color: t.text,
+      cursor: "pointer",
+    },
+    btnSmall: {
+      padding: "4px 8px",
+      fontSize: 12,
+      borderRadius: 8,
+      border: `1px solid ${t.border}`,
+      background: t.overlayBg,
+      color: t.text,
+      cursor: "pointer",
+    },
+    btnPrimary: {
+      padding: "8px 12px",
+      borderRadius: 8,
+      border: `1px solid ${t.primary}`,
+      background: t.primarySolid,
+      color: "#ffffff",
+      cursor: "pointer",
+    },
+    toggle: (active) => ({
+      padding: "6px 10px",
+      borderRadius: 999,
+      border: `1px solid ${active ? t.primary : t.border}`,
+      background: active ? t.primarySoft : t.overlayBg,
+      color: t.text,
+      cursor: "pointer",
+    }),
+
+    paneWrap: {
+      display: "grid",
+      gridTemplateColumns: "320px 1fr",
+      gap: 12,
+      height: "calc(100% - 50px)",
+    },
+    pane: {
+      border: `1px solid ${t.border}`,
+      borderRadius: 8,
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column",
+      maxHeight: 510,
+      background: t.panelBg,
+    },
+    paneHeader: {
+      padding: 10,
+      background: t.panelBg,
+      borderBottom: `1px solid ${t.border}`,
+      fontWeight: 600,
+      color: t.text,
+    },
+    paneHeaderWithActions: {
+      padding: 10,
+      background: t.panelBg,
+      borderBottom: `1px solid ${t.border}`,
+      fontWeight: 600,
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      color: t.text,
+    },
+
+    list: { overflow: "auto", flex: 1, minHeight: 0 },
+    listRow: (sel) => ({
+      display: "grid",
+      gridTemplateColumns: "28px 1fr",
+      alignItems: "center",
+      gap: 8,
+      padding: "8px 10px",
+      borderBottom: `1px solid ${t.listDivider}`,
+      background: sel ? t.rowHover : "transparent",
+      cursor: "pointer",
+    }),
+    listRowTitle: { fontWeight: 600, fontSize: 13 },
+    listRowSubtitle: { fontSize: 12, color: t.textMuted },
+    listEmpty: { padding: 12, color: t.textMuted },
+    listFooter: {
+      padding: 10,
+      display: "flex",
+      gap: 8,
+      borderTop: `1px solid ${t.border}`,
+      background: t.panelBg,
+    },
+    listFooterInfo: { fontSize: 12, color: t.textMuted },
+
+    form: {
+      padding: 12,
+      overflow: "auto",
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 12,
+      flex: 1,
+      minHeight: 0,
+      color: t.text,
+    },
+    formEmpty: { padding: 16, color: t.textMuted },
+    formFooter: {
+      padding: 12,
+      borderTop: `1px solid ${t.border}`,
+      fontSize: 12,
+      color: t.textMuted,
+      background: t.panelBg,
+    },
+    formFooterDirty: {
+      padding: 12,
+      borderTop: `1px solid ${t.border}`,
+      fontSize: 12,
+      color: t.warning,
+      background: t.panelBg,
+    },
+
+    field: { display: "flex", flexDirection: "column", gap: 6 },
+    label: { fontSize: 12, color: t.label },
+    labelChanged: { color: "#f59e0b", marginLeft: 4 },
+
+    input: {
+      padding: 8,
+      border: `1px solid ${t.border}`,
+      borderRadius: 8,
+      fontSize: 14,
+      background: t.overlayBg,
+      color: t.text,
+    },
+    inputChanged: {
+      padding: 8,
+      border: `1px solid ${t.warning}`,
+      borderRadius: 8,
+      fontSize: 14,
+      background: t.warningBg,
+      color: t.text,
+    },
+
+    checkbox: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      fontSize: 12,
+      marginRight: 8,
+      color: t.text,
+    },
+
+    tableWrap: {
+      border: `1px solid ${t.border}`,
+      borderRadius: 8,
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden",
+      boxSizing: "border-box",
+      height: `clamp(180px, calc(100dvh - ${OFFSET}px), 510px)`,
+      background: t.panelBg,
+    },
+    tableHeaderBar: {
+      display: "flex",
+      gap: 8,
+      alignItems: "center",
+      padding: 8,
+      background: t.panelBg,
+      borderBottom: `1px solid ${t.border}`,
+      flex: "0 0 auto",
+      color: t.text,
+    },
+    tableHeaderTitle: { fontWeight: 600 },
+
+    tableViewport: {
+      flex: "1 1 auto",
+      minHeight: 0,
+      minWidth: 0,
+      overflow: "auto",
+      position: "relative",
+      background: t.panelBg,
+    },
+    table: {
+      borderCollapse: "separate",
+      borderSpacing: 0,
+      tableLayout: "auto",
+      width: "max-content",
+      minWidth: "100%",
+      color: t.text,
+    },
+    th: {
+      position: "sticky",
+      top: 0,
+      zIndex: 1,
+      background: t.thBg,
+      textAlign: "left",
+      fontWeight: 600,
+      fontSize: 13,
+      padding: "6px 8px",
+      borderBottom: `1px solid ${t.border}`,
+      cursor: "pointer",
+      whiteSpace: "nowrap",
+      color: t.text,
+    },
+    thContent: { display: "flex", alignItems: "center" },
+    thControls: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      position: "relative",
+    },
+    sortButton: {
+      border: "none",
+      background: "transparent",
+      cursor: "pointer",
+      padding: 0,
+      lineHeight: 1,
+      color: t.text,
+    },
+    columnHeader: { cursor: "pointer", userSelect: "none" },
+
+    filterButton: (hasActiveFilter) => ({
+      background: hasActiveFilter ? t.rowSelected : "transparent",
+      border: "1px solid transparent",
+      cursor: "pointer",
+      padding: 2,
+      borderRadius: 4,
+      display: "flex",
+      alignItems: "center",
+      color: t.text,
+    }),
+    filterOverlay: {
+      position: "absolute",
+      top: "calc(100% + 6px)",
+      left: 0,
+      zIndex: 1000,
+      background: t.overlayBg,
+      border: `1px solid ${t.border}`,
+      borderRadius: 8,
+      boxShadow: t.shadow,
+      padding: 8,
+      minWidth: 200,
+      maxHeight: 300,
+      overflow: "auto",
+      color: t.text,
+    },
+    filterOverlayButtons: { marginBottom: 8, display: "flex", gap: 4 },
+    filterCheckbox: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      padding: "4px 0",
+      cursor: "pointer",
+      fontSize: 13,
+      color: t.text,
+    },
+
+    td: {
+      fontSize: 13,
+      padding: "8px 16px",
+      borderBottom: `1px solid ${t.borderMuted}`,
+      lineHeight: "20px",
+      color: t.text,
+    },
+    tdEmpty: {
+      fontSize: 13,
+      padding: "8px 16px",
+      borderBottom: `1px solid ${t.borderMuted}`,
+      lineHeight: "20px",
+      color: t.textMuted,
+    },
+    tr: (selected) => ({
+      background: selected ? t.rowSelected : "transparent",
+      cursor: "pointer",
+    }),
+  };
+}
+
+/* === Component === */
 export default function AttributeEditorView({ initialFeatures }) {
   const [mode, setMode] = useState("table"); // "table" | "form"
+  const [dark, setDark] = useState(false);
+  const theme = dark ? themes.dark : themes.light;
+  const s = makeStyles(theme);
+
   const [features, setFeatures] = useState(
     () => initialFeatures || createDummyFeatures()
   );
@@ -682,24 +732,19 @@ export default function AttributeEditorView({ initialFeatures }) {
         ? Array.from(selectedIds)
         : [focusedFeature.id];
 
-    // For the focused feature, save all fields
-    // For other selected features, save only changed fields
     setFeatures((prev) =>
       prev.map((f) => {
         if (!idsToUpdate.includes(f.id)) return f;
 
         if (f.id === focusedFeature.id) {
-          // For the focused feature, apply all values
           return { ...f, ...projectToFeature(editValues, false) };
         } else if (applyMany) {
-          // For other selected features, apply only changed fields
           return { ...f, ...projectToFeature(editValues, true) };
         }
         return f;
       })
     );
 
-    // Update originalValues to reflect saved changes
     setOriginalValues({ ...editValues });
     setChangedFields(new Set());
     setDirty(false);
@@ -715,7 +760,6 @@ export default function AttributeEditorView({ initialFeatures }) {
   function handleFieldChange(key, value) {
     setEditValues((prev) => ({ ...prev, [key]: value }));
 
-    // Track which fields have changed
     setChangedFields((prev) => {
       const next = new Set(prev);
       if (value !== originalValues[key]) {
@@ -754,7 +798,6 @@ export default function AttributeEditorView({ initialFeatures }) {
     const uniqueValues = getUniqueColumnValues(columnKey);
     const selectedValues = columnFilters[columnKey] || [];
 
-    // Anchor: right = open to the right, left = to the left, center = centered
     const anchorStyle =
       placement === "right"
         ? { left: 0, right: "auto", transform: "none" }
@@ -763,10 +806,10 @@ export default function AttributeEditorView({ initialFeatures }) {
           : { left: "50%", right: "auto", transform: "translateX(-50%)" };
 
     return (
-      <div ref={overlayRef} style={{ ...styles.filterOverlay, ...anchorStyle }}>
-        <div style={styles.filterOverlayButtons}>
+      <div ref={overlayRef} style={{ ...s.filterOverlay, ...anchorStyle }}>
+        <div style={s.filterOverlayButtons}>
           <button
-            style={styles.btnSmall}
+            style={s.btnSmall}
             onClick={() => {
               setColumnFilters((prev) => ({ ...prev, [columnKey]: [] }));
             }}
@@ -774,7 +817,7 @@ export default function AttributeEditorView({ initialFeatures }) {
             Rensa
           </button>
           <button
-            style={styles.btnSmall}
+            style={s.btnSmall}
             onClick={() => {
               setColumnFilters((prev) => ({
                 ...prev,
@@ -787,7 +830,7 @@ export default function AttributeEditorView({ initialFeatures }) {
         </div>
 
         {uniqueValues.map((value) => (
-          <label key={value} style={styles.filterCheckbox}>
+          <label key={value} style={s.filterCheckbox}>
             <input
               type="checkbox"
               checked={selectedValues.includes(value)}
@@ -811,15 +854,15 @@ export default function AttributeEditorView({ initialFeatures }) {
   };
 
   return (
-    <div style={styles.shell}>
+    <div style={s.shell}>
       {/* Top toolbar */}
-      <div style={styles.toolbar}>
-        <strong style={styles.toolbarTitle}>Attribute Editor</strong>
-        <div style={styles.toolbarSpacer} />
+      <div style={s.toolbar}>
+        <strong style={s.toolbarTitle}>Attributredigerare</strong>
+        <div style={s.toolbarSpacer} />
         <button
           type="button"
           onClick={() => setMode("table")}
-          style={styles.toggle(mode === "table")}
+          style={s.toggle(mode === "table")}
           aria-pressed={mode === "table"}
         >
           Tabelläge
@@ -827,40 +870,53 @@ export default function AttributeEditorView({ initialFeatures }) {
         <button
           type="button"
           onClick={() => setMode("form")}
-          style={styles.toggle(mode === "form")}
+          style={s.toggle(mode === "form")}
           aria-pressed={mode === "form"}
         >
           Formulärläge
         </button>
-        <div style={styles.spacer} />
+
+        <div style={s.spacer} />
+
+        {/* Dark / Light toggle */}
+        <button
+          type="button"
+          onClick={() => setDark((v) => !v)}
+          style={s.toggle(dark)}
+          aria-pressed={dark}
+          title="Växla dark mode"
+        >
+          {dark ? "Dark" : "Light"}
+        </button>
+
         {mode === "table" ? (
-          <div style={styles.toolbarInfo}>
+          <div style={s.toolbarInfo}>
             <input
-              style={styles.input}
+              style={s.input}
               placeholder="Sök i tabell…"
               value={tableSearch}
               onChange={(e) => setTableSearch(e.target.value)}
             />
-            <span style={styles.toolbarStats}>
+            <span style={s.toolbarStats}>
               Totalt: {features.length} • Visas: {filteredAndSorted.length} •
               Valda: {tableSelectedIds.size}
             </span>
           </div>
         ) : (
-          <div style={styles.toolbarInfo}>
+          <div style={s.toolbarInfo}>
             <input
-              style={styles.input}
+              style={s.input}
               placeholder="Filtrera listan…"
               value={formSearch}
               onChange={(e) => setFormSearch(e.target.value)}
             />
-            <button style={styles.btn} onClick={selectAllVisible}>
+            <button style={s.btn} onClick={selectAllVisible}>
               Markera alla
             </button>
-            <button style={styles.btn} onClick={clearSelection}>
+            <button style={s.btn} onClick={clearSelection}>
               Avmarkera
             </button>
-            <span style={styles.toolbarStats}>
+            <span style={s.toolbarStats}>
               Valda: {selectedIds.size} / {features.length}
             </span>
           </div>
@@ -869,12 +925,12 @@ export default function AttributeEditorView({ initialFeatures }) {
 
       {mode === "table" ? (
         /* ================= TABLE MODE ================= */
-        <div style={styles.tableWrap}>
-          <div style={styles.tableHeaderBar}>
-            <span style={styles.tableHeaderTitle}>Alla objekt</span>
-            <div style={styles.spacer} />
+        <div style={s.tableWrap}>
+          <div style={s.tableHeaderBar}>
+            <span style={s.tableHeaderTitle}>Alla objekt</span>
+            <div style={s.spacer} />
             <button
-              style={styles.btnPrimary}
+              style={s.btnPrimary}
               disabled={tableSelectedIds.size === 0}
               onClick={openSelectedInFormFromTable}
               title={
@@ -886,8 +942,8 @@ export default function AttributeEditorView({ initialFeatures }) {
               Redigera val i formulär
             </button>
           </div>
-          <div style={styles.tableViewport}>
-            <table style={styles.table}>
+          <div style={s.tableViewport}>
+            <table style={s.table}>
               <thead>
                 <tr>
                   {FIELD_META.map((f, index) => {
@@ -904,16 +960,16 @@ export default function AttributeEditorView({ initialFeatures }) {
                     return (
                       <th
                         key={f.key}
-                        style={styles.th}
+                        style={s.th}
                         ref={isFirstColumn ? firstColumnRef : null}
                       >
-                        <div style={styles.thContent}>
-                          <div style={styles.thControls}>
+                        <div style={s.thContent}>
+                          <div style={s.thControls}>
                             {/* Sort button LEFT of column header */}
                             <button
                               onClick={() => toggleSort(f.key)}
                               title="Klicka för att sortera"
-                              style={styles.sortButton}
+                              style={s.sortButton}
                             >
                               {sort.key === f.key
                                 ? sort.dir === "asc"
@@ -924,7 +980,7 @@ export default function AttributeEditorView({ initialFeatures }) {
 
                             <span
                               onClick={() => toggleSort(f.key)}
-                              style={styles.columnHeader}
+                              style={s.columnHeader}
                             >
                               {f.label}
                             </span>
@@ -938,7 +994,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                                   openFilterColumn === f.key ? null : f.key
                                 );
                               }}
-                              style={styles.filterButton(hasActiveFilter)}
+                              style={s.filterButton(hasActiveFilter)}
                               title={
                                 hasActiveFilter
                                   ? `Filter aktivt (${(columnFilters[f.key] || []).length} val)`
@@ -951,7 +1007,11 @@ export default function AttributeEditorView({ initialFeatures }) {
                                 height="14"
                                 viewBox="0 0 24 24"
                                 fill="none"
-                                stroke={hasActiveFilter ? "#2563eb" : "#6b7280"}
+                                stroke={
+                                  hasActiveFilter
+                                    ? theme.primary
+                                    : theme.textMuted
+                                }
                                 strokeWidth="2"
                               >
                                 <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
@@ -971,7 +1031,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                             )}
                           </div>
 
-                          <div style={styles.spacer} />
+                          <div style={s.spacer} />
                         </div>
                       </th>
                     );
@@ -984,7 +1044,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                   return (
                     <tr
                       key={row.id}
-                      style={styles.tr(selected)}
+                      style={s.tr(selected)}
                       aria-selected={selected}
                       onClick={(e) => handleRowClick(row.id, idx, e)}
                       onDoubleClick={() => {
@@ -995,7 +1055,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                       title="Klick: markera • Dubbelklick: öppna i formulär"
                     >
                       {FIELD_META.map((f) => (
-                        <td key={f.key} style={styles.td}>
+                        <td key={f.key} style={s.td}>
                           {String(row[f.key] ?? "")}
                         </td>
                       ))}
@@ -1004,7 +1064,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                 })}
                 {filteredAndSorted.length === 0 && (
                   <tr>
-                    <td style={styles.tdEmpty} colSpan={FIELD_META.length}>
+                    <td style={s.tdEmpty} colSpan={FIELD_META.length}>
                       Inga rader matchar sökningen.
                     </td>
                   </tr>
@@ -1015,11 +1075,11 @@ export default function AttributeEditorView({ initialFeatures }) {
         </div>
       ) : (
         /* ================= FORM MODE ================= */
-        <div style={styles.paneWrap}>
+        <div style={s.paneWrap}>
           {/* Left column: object list */}
-          <div style={styles.pane} aria-label="Objektlista">
-            <div style={styles.paneHeader}>Objekt</div>
-            <div style={styles.list}>
+          <div style={s.pane} aria-label="Objektlista">
+            <div style={s.paneHeader}>Objekt</div>
+            <div style={s.list}>
               {visibleFormList.map((f) => {
                 const selected = selectedIds.has(f.id);
                 const isFocused = focusedId === f.id;
@@ -1027,7 +1087,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                   <div
                     key={f.id}
                     data-row-id={f.id}
-                    style={styles.listRow(selected || isFocused)}
+                    style={s.listRow(selected || isFocused)}
                     onClick={() => handleBeforeChangeFocus(f.id)}
                   >
                     <input
@@ -1039,10 +1099,10 @@ export default function AttributeEditorView({ initialFeatures }) {
                       }}
                     />
                     <div>
-                      <div style={styles.listRowTitle}>
+                      <div style={s.listRowTitle}>
                         {f.ar_typ} — {f.ar_andamal}
                       </div>
-                      <div style={styles.listRowSubtitle}>
+                      <div style={s.listRowSubtitle}>
                         geoid {f.geoid} • {f.ar_forman} • {f.ar_last}
                       </div>
                     </div>
@@ -1050,29 +1110,27 @@ export default function AttributeEditorView({ initialFeatures }) {
                 );
               })}
               {visibleFormList.length === 0 && (
-                <div style={styles.listEmpty}>Inga objekt i listan.</div>
+                <div style={s.listEmpty}>Inga objekt i listan.</div>
               )}
             </div>
-            <div style={styles.listFooter}>
-              <button style={styles.btn} onClick={focusPrev}>
+            <div style={s.listFooter}>
+              <button style={s.btn} onClick={focusPrev}>
                 &larr; Föregående
               </button>
-              <button style={styles.btn} onClick={focusNext}>
+              <button style={s.btn} onClick={focusNext}>
                 Nästa &rarr;
               </button>
-              <div style={styles.spacer} />
-              <span style={styles.listFooterInfo}>
-                Fokus: {focusedId ?? "—"}
-              </span>
+              <div style={s.spacer} />
+              <span style={s.listFooterInfo}>Fokus: {focusedId ?? "—"}</span>
             </div>
           </div>
 
           {/* Right column: form */}
-          <div style={styles.pane} aria-label="Formulär">
-            <div style={styles.paneHeaderWithActions}>
+          <div style={s.pane} aria-label="Formulär">
+            <div style={s.paneHeaderWithActions}>
               <span>Redigera attribut</span>
-              <div style={styles.spacer} />
-              <label style={styles.checkbox}>
+              <div style={s.spacer} />
+              <label style={s.checkbox}>
                 <input
                   type="checkbox"
                   checked={applyToSelection}
@@ -1080,11 +1138,11 @@ export default function AttributeEditorView({ initialFeatures }) {
                 />
                 Spara ändrade fält för alla markerade
               </label>
-              <button style={styles.btn} onClick={resetEdits} disabled={!dirty}>
+              <button style={s.btn} onClick={resetEdits} disabled={!dirty}>
                 Ångra
               </button>
               <button
-                style={styles.btnPrimary}
+                style={s.btnPrimary}
                 onClick={() => saveChanges()}
                 disabled={!dirty}
               >
@@ -1093,30 +1151,31 @@ export default function AttributeEditorView({ initialFeatures }) {
             </div>
 
             {!focusedFeature ? (
-              <div style={styles.formEmpty}>
+              <div style={s.formEmpty}>
                 Markera ett objekt i listan till vänster för att börja redigera.
               </div>
             ) : (
               <>
-                <div style={styles.form}>
+                <div style={s.form}>
                   {FIELD_META.map((meta) => (
-                    <div key={meta.key} style={styles.field}>
-                      <label style={styles.label}>
+                    <div key={meta.key} style={s.field}>
+                      <label style={s.label}>
                         {meta.label}
                         {changedFields.has(meta.key) && (
-                          <span style={styles.labelChanged}>(ändrad)</span>
+                          <span style={s.labelChanged}>(ändrad)</span>
                         )}
                       </label>
                       {renderInput(
                         meta,
                         editValues[meta.key],
                         (v) => handleFieldChange(meta.key, v),
-                        changedFields.has(meta.key)
+                        changedFields.has(meta.key),
+                        s
                       )}
                     </div>
                   ))}
                 </div>
-                <div style={dirty ? styles.formFooterDirty : styles.formFooter}>
+                <div style={dirty ? s.formFooterDirty : s.formFooter}>
                   {dirty
                     ? `Osparade ändringar (${changedFields.size} fält ändrade)`
                     : "Allt sparat"}
@@ -1131,8 +1190,8 @@ export default function AttributeEditorView({ initialFeatures }) {
 }
 
 /* === Helpers === */
-function renderInput(meta, value, onChange, isChanged) {
-  const inputStyle = isChanged ? styles.inputChanged : styles.input;
+function renderInput(meta, value, onChange, isChanged, s) {
+  const inputStyle = isChanged ? s.inputChanged : s.input;
   const common = {
     style: inputStyle,
     value: value ?? "",
