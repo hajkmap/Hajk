@@ -1,5 +1,5 @@
 {
-  "mapserviceBase": "",
+  "mapserviceBase": "http://localhost:3002/api/v2",
   "defaultMap": "map_1",
   "loadErrorTitle": "Ett fel har inträffat",
   "loadErrorMessage": "Fel när applikationen skulle läsas in. Du kan försöka att återställa applikationen genom att trycka på knappen nedan. Om felet kvarstår kan du kontakta systemansvarig.",

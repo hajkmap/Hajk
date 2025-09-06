@@ -81,7 +81,7 @@ function createDummyFeatures() {
   return list;
 }
 
-/* === Styles (simple inline) === */
+/* === Styles (all CSS collected here) === */
 const OFFSET = 16;
 const styles = {
   shell: {
@@ -100,9 +100,32 @@ const styles = {
     border: "1px solid #e5e7eb",
     borderRadius: 8,
   },
+  toolbarTitle: {
+    fontWeight: 600,
+  },
+  toolbarSpacer: {
+    width: 10,
+  },
+  toolbarInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+  },
+  toolbarStats: {
+    color: "#6b7280",
+    fontSize: 12,
+  },
   spacer: { flex: 1 },
   btn: {
     padding: "8px 12px",
+    borderRadius: 8,
+    border: "1px solid #e5e7eb",
+    background: "white",
+    cursor: "pointer",
+  },
+  btnSmall: {
+    padding: "4px 8px",
+    fontSize: 12,
     borderRadius: 8,
     border: "1px solid #e5e7eb",
     background: "white",
@@ -143,6 +166,15 @@ const styles = {
     borderBottom: "1px solid #e5e7eb",
     fontWeight: 600,
   },
+  paneHeaderWithActions: {
+    padding: 10,
+    background: "#fafafa",
+    borderBottom: "1px solid #e5e7eb",
+    fontWeight: 600,
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+  },
   list: {
     overflow: "auto",
     flex: 1,
@@ -158,6 +190,29 @@ const styles = {
     background: sel ? "#eef6ff" : "transparent",
     cursor: "pointer",
   }),
+  listRowTitle: {
+    fontWeight: 600,
+    fontSize: 13,
+  },
+  listRowSubtitle: {
+    fontSize: 12,
+    color: "#6b7280",
+  },
+  listEmpty: {
+    padding: 12,
+    color: "#6b7280",
+  },
+  listFooter: {
+    padding: 10,
+    display: "flex",
+    gap: 8,
+    borderTop: "1px solid #e5e7eb",
+    background: "#fafafa",
+  },
+  listFooterInfo: {
+    fontSize: 12,
+    color: "#6b7280",
+  },
   form: {
     padding: 12,
     overflow: "auto",
@@ -167,8 +222,35 @@ const styles = {
     flex: 1,
     minHeight: 0,
   },
-  field: { display: "flex", flexDirection: "column", gap: 6 },
-  label: { fontSize: 12, color: "#374151" },
+  formEmpty: {
+    padding: 16,
+    color: "#6b7280",
+  },
+  formFooter: {
+    padding: 12,
+    borderTop: "1px solid #e5e7eb",
+    fontSize: 12,
+    color: "#6b7280",
+  },
+  formFooterDirty: {
+    padding: 12,
+    borderTop: "1px solid #e5e7eb",
+    fontSize: 12,
+    color: "#b45309",
+  },
+  field: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+  },
+  label: {
+    fontSize: 12,
+    color: "#374151",
+  },
+  labelChanged: {
+    color: "#f59e0b",
+    marginLeft: 4,
+  },
   input: {
     padding: 8,
     border: "1px solid #e5e7eb",
@@ -182,6 +264,13 @@ const styles = {
     fontSize: 14,
     background: "#fef3c7",
   },
+  checkbox: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    fontSize: 12,
+    marginRight: 8,
+  },
   tableWrap: {
     border: "1px solid #e5e7eb",
     borderRadius: 8,
@@ -191,7 +280,6 @@ const styles = {
     boxSizing: "border-box",
     height: `clamp(180px, calc(100dvh - ${OFFSET}px), 510px)`,
   },
-
   tableHeaderBar: {
     display: "flex",
     gap: 8,
@@ -201,7 +289,9 @@ const styles = {
     borderBottom: "1px solid #e5e7eb",
     flex: "0 0 auto",
   },
-
+  tableHeaderTitle: {
+    fontWeight: 600,
+  },
   tableViewport: {
     flex: "1 1 auto",
     minHeight: 0,
@@ -209,7 +299,6 @@ const styles = {
     overflow: "auto",
     position: "relative",
   },
-
   table: {
     borderCollapse: "separate",
     borderSpacing: 0,
@@ -217,7 +306,6 @@ const styles = {
     width: "max-content",
     minWidth: "100%",
   },
-
   th: {
     position: "sticky",
     top: 0,
@@ -231,14 +319,76 @@ const styles = {
     cursor: "pointer",
     whiteSpace: "nowrap",
   },
-
+  thContent: {
+    display: "flex",
+    alignItems: "center",
+  },
+  thControls: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    position: "relative",
+  },
+  sortButton: {
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    padding: 0,
+    lineHeight: 1,
+  },
+  columnHeader: {
+    cursor: "pointer",
+    userSelect: "none",
+  },
+  filterButton: (hasActiveFilter) => ({
+    background: hasActiveFilter ? "#dbeafe" : "transparent",
+    border: "1px solid transparent",
+    cursor: "pointer",
+    padding: 2,
+    borderRadius: 4,
+    display: "flex",
+    alignItems: "center",
+  }),
+  filterOverlay: {
+    position: "absolute",
+    top: "calc(100% + 6px)",
+    left: 0,
+    zIndex: 1000,
+    background: "white",
+    border: "1px solid #e5e7eb",
+    borderRadius: 8,
+    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+    padding: 8,
+    minWidth: 200,
+    maxHeight: 300,
+    overflow: "auto",
+  },
+  filterOverlayButtons: {
+    marginBottom: 8,
+    display: "flex",
+    gap: 4,
+  },
+  filterCheckbox: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "4px 0",
+    cursor: "pointer",
+    fontSize: 13,
+  },
   td: {
     fontSize: 13,
     padding: "8px 16px",
     borderBottom: "1px solid #f1f5f9",
     lineHeight: "20px",
   },
-
+  tdEmpty: {
+    fontSize: 13,
+    padding: "8px 16px",
+    borderBottom: "1px solid #f1f5f9",
+    lineHeight: "20px",
+    color: "#6b7280",
+  },
   tr: (selected) => ({
     background: selected ? "#dbeafe" : "transparent",
     cursor: "pointer",
@@ -259,6 +409,7 @@ export default function AttributeEditorView({ initialFeatures }) {
   const [columnFilters, setColumnFilters] = useState({});
   const [openFilterColumn, setOpenFilterColumn] = useState(null);
   const filterOverlayRef = useRef(null);
+  const firstColumnRef = useRef(null);
 
   useEffect(() => {
     if (!openFilterColumn) return;
@@ -599,31 +750,20 @@ export default function AttributeEditorView({ initialFeatures }) {
     setApplyToSelection(selected.size > 1);
   }
 
-  const ColumnFilter = ({ columnKey, overlayRef }) => {
+  const ColumnFilter = ({ columnKey, overlayRef, isFirstColumn }) => {
     const uniqueValues = getUniqueColumnValues(columnKey);
     const selectedValues = columnFilters[columnKey] || [];
 
+    // First column: left: 0 (as now). Other columns: right: 0 (move to the left).
+    const anchorStyle = isFirstColumn
+      ? { left: 0, right: "auto" }
+      : { left: "auto", right: 0 };
+
     return (
-      <div
-        ref={overlayRef}
-        style={{
-          position: "absolute",
-          top: "calc(100% + 6px)",
-          right: 0,
-          zIndex: 1000,
-          background: "white",
-          border: "1px solid #e5e7eb",
-          borderRadius: 8,
-          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-          padding: 8,
-          minWidth: 200,
-          maxHeight: 300,
-          overflow: "auto",
-        }}
-      >
-        <div style={{ marginBottom: 8, display: "flex", gap: 4 }}>
+      <div ref={overlayRef} style={{ ...styles.filterOverlay, ...anchorStyle }}>
+        <div style={styles.filterOverlayButtons}>
           <button
-            style={{ ...styles.btn, padding: "4px 8px", fontSize: 12 }}
+            style={styles.btnSmall}
             onClick={() => {
               setColumnFilters((prev) => ({ ...prev, [columnKey]: [] }));
             }}
@@ -631,7 +771,7 @@ export default function AttributeEditorView({ initialFeatures }) {
             Rensa
           </button>
           <button
-            style={{ ...styles.btn, padding: "4px 8px", fontSize: 12 }}
+            style={styles.btnSmall}
             onClick={() => {
               setColumnFilters((prev) => ({
                 ...prev,
@@ -644,31 +784,19 @@ export default function AttributeEditorView({ initialFeatures }) {
         </div>
 
         {uniqueValues.map((value) => (
-          <label
-            key={value}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "4px 0",
-              cursor: "pointer",
-              fontSize: 13,
-            }}
-          >
+          <label key={value} style={styles.filterCheckbox}>
             <input
               type="checkbox"
               checked={selectedValues.includes(value)}
               onChange={(e) => {
                 setColumnFilters((prev) => {
                   const current = prev[columnKey] || [];
-                  if (e.target.checked) {
-                    return { ...prev, [columnKey]: [...current, value] };
-                  } else {
-                    return {
-                      ...prev,
-                      [columnKey]: current.filter((v) => v !== value),
-                    };
-                  }
+                  return e.target.checked
+                    ? { ...prev, [columnKey]: [...current, value] }
+                    : {
+                        ...prev,
+                        [columnKey]: current.filter((v) => v !== value),
+                      };
                 });
               }}
             />
@@ -683,8 +811,8 @@ export default function AttributeEditorView({ initialFeatures }) {
     <div style={styles.shell}>
       {/* Top toolbar */}
       <div style={styles.toolbar}>
-        <strong>Attribute Editor</strong>
-        <div style={{ width: 10 }} />
+        <strong style={styles.toolbarTitle}>Attribute Editor</strong>
+        <div style={styles.toolbarSpacer} />
         <button
           type="button"
           onClick={() => setMode("table")}
@@ -703,20 +831,20 @@ export default function AttributeEditorView({ initialFeatures }) {
         </button>
         <div style={styles.spacer} />
         {mode === "table" ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={styles.toolbarInfo}>
             <input
               style={styles.input}
               placeholder="Sök i tabell…"
               value={tableSearch}
               onChange={(e) => setTableSearch(e.target.value)}
             />
-            <span style={{ color: "#6b7280", fontSize: 12 }}>
+            <span style={styles.toolbarStats}>
               Totalt: {features.length} • Visas: {filteredAndSorted.length} •
               Valda: {tableSelectedIds.size}
             </span>
           </div>
         ) : (
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={styles.toolbarInfo}>
             <input
               style={styles.input}
               placeholder="Filtrera listan…"
@@ -729,7 +857,7 @@ export default function AttributeEditorView({ initialFeatures }) {
             <button style={styles.btn} onClick={clearSelection}>
               Avmarkera
             </button>
-            <span style={{ color: "#6b7280", fontSize: 12 }}>
+            <span style={styles.toolbarStats}>
               Valda: {selectedIds.size} / {features.length}
             </span>
           </div>
@@ -740,7 +868,7 @@ export default function AttributeEditorView({ initialFeatures }) {
         /* ================= TABLE MODE ================= */
         <div style={styles.tableWrap}>
           <div style={styles.tableHeaderBar}>
-            <span style={{ fontWeight: 600 }}>Alla objekt</span>
+            <span style={styles.tableHeaderTitle}>Alla objekt</span>
             <div style={styles.spacer} />
             <button
               style={styles.btnPrimary}
@@ -759,30 +887,22 @@ export default function AttributeEditorView({ initialFeatures }) {
             <table style={styles.table}>
               <thead>
                 <tr>
-                  {FIELD_META.map((f) => {
+                  {FIELD_META.map((f, index) => {
                     const hasActiveFilter = columnFilters[f.key]?.length > 0;
+                    const isFirstColumn = index === 0;
                     return (
-                      <th key={f.key} style={styles.th}>
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                          <div
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 6,
-                              position: "relative",
-                            }}
-                          >
+                      <th
+                        key={f.key}
+                        style={styles.th}
+                        ref={isFirstColumn ? firstColumnRef : null}
+                      >
+                        <div style={styles.thContent}>
+                          <div style={styles.thControls}>
                             {/* Sort button LEFT of column header */}
                             <button
                               onClick={() => toggleSort(f.key)}
                               title="Klicka för att sortera"
-                              style={{
-                                border: "none",
-                                background: "transparent",
-                                cursor: "pointer",
-                                padding: 0,
-                                lineHeight: 1,
-                              }}
+                              style={styles.sortButton}
                             >
                               {sort.key === f.key
                                 ? sort.dir === "asc"
@@ -793,12 +913,12 @@ export default function AttributeEditorView({ initialFeatures }) {
 
                             <span
                               onClick={() => toggleSort(f.key)}
-                              style={{ cursor: "pointer", userSelect: "none" }}
+                              style={styles.columnHeader}
                             >
                               {f.label}
                             </span>
 
-                            {/* Filter button – directly to the right of the header */}
+                            {/* Filter button */}
                             <button
                               data-filter-btn={f.key}
                               onClick={(e) => {
@@ -807,17 +927,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                                   openFilterColumn === f.key ? null : f.key
                                 );
                               }}
-                              style={{
-                                background: hasActiveFilter
-                                  ? "#dbeafe"
-                                  : "transparent",
-                                border: "1px solid transparent",
-                                cursor: "pointer",
-                                padding: 2,
-                                borderRadius: 4,
-                                display: "flex",
-                                alignItems: "center",
-                              }}
+                              style={styles.filterButton(hasActiveFilter)}
                               title={
                                 hasActiveFilter
                                   ? `Filter aktivt (${(columnFilters[f.key] || []).length} val)`
@@ -837,9 +947,11 @@ export default function AttributeEditorView({ initialFeatures }) {
                               </svg>
                             </button>
 
+                            {/* Filter overlay positioned differently based on column */}
                             {openFilterColumn === f.key && (
                               <ColumnFilter
                                 columnKey={f.key}
+                                isFirstColumn={isFirstColumn}
                                 overlayRef={(el) => {
                                   filterOverlayRef.current = el;
                                 }}
@@ -848,7 +960,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                             )}
                           </div>
 
-                          <div style={{ flex: 1 }} />
+                          <div style={styles.spacer} />
                         </div>
                       </th>
                     );
@@ -881,10 +993,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                 })}
                 {filteredAndSorted.length === 0 && (
                   <tr>
-                    <td
-                      style={{ ...styles.td, color: "#6b7280" }}
-                      colSpan={FIELD_META.length}
-                    >
+                    <td style={styles.tdEmpty} colSpan={FIELD_META.length}>
                       Inga rader matchar sökningen.
                     </td>
                   </tr>
@@ -919,10 +1028,10 @@ export default function AttributeEditorView({ initialFeatures }) {
                       }}
                     />
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: 13 }}>
+                      <div style={styles.listRowTitle}>
                         {f.ar_typ} — {f.ar_andamal}
                       </div>
-                      <div style={{ fontSize: 12, color: "#6b7280" }}>
+                      <div style={styles.listRowSubtitle}>
                         geoid {f.geoid} • {f.ar_forman} • {f.ar_last}
                       </div>
                     </div>
@@ -930,20 +1039,10 @@ export default function AttributeEditorView({ initialFeatures }) {
                 );
               })}
               {visibleFormList.length === 0 && (
-                <div style={{ padding: 12, color: "#6b7280" }}>
-                  Inga objekt i listan.
-                </div>
+                <div style={styles.listEmpty}>Inga objekt i listan.</div>
               )}
             </div>
-            <div
-              style={{
-                padding: 10,
-                display: "flex",
-                gap: 8,
-                borderTop: "1px solid #e5e7eb",
-                background: "#fafafa",
-              }}
-            >
+            <div style={styles.listFooter}>
               <button style={styles.btn} onClick={focusPrev}>
                 &larr; Föregående
               </button>
@@ -951,7 +1050,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                 Nästa &rarr;
               </button>
               <div style={styles.spacer} />
-              <span style={{ fontSize: 12, color: "#6b7280" }}>
+              <span style={styles.listFooterInfo}>
                 Fokus: {focusedId ?? "—"}
               </span>
             </div>
@@ -959,25 +1058,10 @@ export default function AttributeEditorView({ initialFeatures }) {
 
           {/* Right column: form */}
           <div style={styles.pane} aria-label="Formulär">
-            <div
-              style={{
-                ...styles.paneHeader,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
+            <div style={styles.paneHeaderWithActions}>
               <span>Redigera attribut</span>
               <div style={styles.spacer} />
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  fontSize: 12,
-                  marginRight: 8,
-                }}
-              >
+              <label style={styles.checkbox}>
                 <input
                   type="checkbox"
                   checked={applyToSelection}
@@ -998,7 +1082,7 @@ export default function AttributeEditorView({ initialFeatures }) {
             </div>
 
             {!focusedFeature ? (
-              <div style={{ padding: 16, color: "#6b7280" }}>
+              <div style={styles.formEmpty}>
                 Markera ett objekt i listan till vänster för att börja redigera.
               </div>
             ) : (
@@ -1009,9 +1093,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                       <label style={styles.label}>
                         {meta.label}
                         {changedFields.has(meta.key) && (
-                          <span style={{ color: "#f59e0b", marginLeft: 4 }}>
-                            (ändrad)
-                          </span>
+                          <span style={styles.labelChanged}>(ändrad)</span>
                         )}
                       </label>
                       {renderInput(
@@ -1023,14 +1105,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                     </div>
                   ))}
                 </div>
-                <div
-                  style={{
-                    padding: 12,
-                    borderTop: "1px solid #e5e7eb",
-                    fontSize: 12,
-                    color: dirty ? "#b45309" : "#6b7280",
-                  }}
-                >
+                <div style={dirty ? styles.formFooterDirty : styles.formFooter}>
                   {dirty
                     ? `Osparade ändringar (${changedFields.size} fält ändrade)`
                     : "Allt sparat"}
