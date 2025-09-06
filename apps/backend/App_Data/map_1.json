@@ -840,6 +840,8 @@
       "options": {
         "target": "left",
         "position": "right",
+        "winheight": "600",
+        "winwidth": "1000",
         "instruction": "",
         "visibleForGroups": []
       }

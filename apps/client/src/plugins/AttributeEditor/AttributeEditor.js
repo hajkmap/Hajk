@@ -53,8 +53,8 @@ function AttributeEditor(props) {
             onClickCallback: panelHeaderButtonCallback,
           },
         ],
-        height: "dynamic",
-        width: 1000,
+        height: props.options.winheight,
+        width: props.options.winwidth,
       }}
     >
       <AttributeEditorView
@@ -63,6 +63,7 @@ function AttributeEditor(props) {
         localObserver={localObserver}
         globalObserver={props.app.globalObserver}
         updateCustomProp={updateCustomProp}
+        winheight={props.options.winheight}
       />
     </BaseWindowPlugin>
   );
