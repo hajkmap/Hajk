@@ -1291,7 +1291,7 @@ export default function AttributeEditorView({ initialFeatures }) {
             <span style={s.tableHeaderTitle}>Alla objekt</span>
             <div style={s.spacer} />
 
-            {/* ALLTID visa åtgärdsknapparna (med kortare etiketter i mobil) */}
+            {/* Always show action buttons (with shorter labels in mobile) */}
             <>
               <button
                 style={
@@ -1329,8 +1329,6 @@ export default function AttributeEditorView({ initialFeatures }) {
                 {isMobile ? "Redigera val" : "Redigera val i formulär"}
               </button>
             </>
-
-            {/* Behåll gärna den lilla statistiken i mobil */}
             {isMobile && (
               <span style={s.toolbarStats}>
                 {filteredAndSorted.length}/{features.length}
@@ -1473,21 +1471,20 @@ export default function AttributeEditorView({ initialFeatures }) {
         renderMobileForm()
       ) : (
         /* ================= DESKTOP FORM MODE ================= */
-        /* ================= DESKTOP FORM MODE ================= */
         <div
           style={{
             ...s.paneWrap,
-            // Låt sidan växa och stäng horisontell scroll i formulärläget (desktop)
+            // Allow the page to grow and remove horizontal scroll in form mode (desktop)
             ...(mode === "form" && !isMobile
               ? { height: "auto", overflowX: "hidden" }
               : null),
           }}
         >
-          {/* Vänster: Objektlista */}
+          {/* Left: Object list */}
           <div
             style={{
               ...s.pane,
-              // Ta bort intern höjdbegränsning -> ingen intern vertikal scroll
+              // Remove internal height limit -> no internal vertical scroll
               ...(mode === "form" && !isMobile ? { maxHeight: "none" } : null),
             }}
             aria-label="Objektlista"
@@ -1495,7 +1492,7 @@ export default function AttributeEditorView({ initialFeatures }) {
             <div
               style={{
                 ...s.list,
-                // Lås horisontellt overflow, låt text bryta rad
+                // Lock horizontal overflow, let text wrap
                 ...(mode === "form" && !isMobile
                   ? { overflowX: "hidden", overflowY: "visible" }
                   : null),
@@ -1523,7 +1520,7 @@ export default function AttributeEditorView({ initialFeatures }) {
                       <div
                         style={{
                           ...s.listRowTitle,
-                          // Radbryt långa strängar så de inte pressar layouten horisontellt
+                          // Break long strings so they don't press the layout horizontally
                           ...(mode === "form" && !isMobile
                             ? { whiteSpace: "normal", overflowWrap: "anywhere" }
                             : null),
@@ -1561,11 +1558,11 @@ export default function AttributeEditorView({ initialFeatures }) {
             </div>
           </div>
 
-          {/* Höger: Formulär */}
+          {/* Right: Form */}
           <div
             style={{
               ...s.pane,
-              // Ta bort intern höjdbegränsning -> ingen intern vertikal scroll
+              // Remove internal height limit -> no internal vertical scroll
               ...(mode === "form" && !isMobile ? { maxHeight: "none" } : null),
             }}
             aria-label="Formulär"
@@ -1606,7 +1603,6 @@ export default function AttributeEditorView({ initialFeatures }) {
                 <div
                   style={{
                     ...s.form,
-                    // Lås horisontellt overflow i formulärfält
                     ...(mode === "form" && !isMobile
                       ? { overflowX: "hidden", overflowY: "visible" }
                       : null),
