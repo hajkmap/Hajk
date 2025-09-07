@@ -81,7 +81,7 @@ function createDummyFeatures() {
   return list;
 }
 
-export default function AttributeEditorView({ initialFeatures, winheight }) {
+export default function AttributeEditorView({ initialFeatures }) {
   /* === THEME TOKENS === */
   const themes = {
     light: {
@@ -156,11 +156,13 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
         flexDirection: "column",
         gap: 8,
         height: "100%",
+        overflow: "hidden",
         fontFamily:
           "'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial",
         color: t.text,
         background: t.appBg,
         minWidth: 0,
+        minHeight: 0,
       },
       toolbar: {
         display: "flex",
@@ -251,6 +253,14 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
       }),
 
       // Mobile-specific panel styles
+      mobileFormActions: {
+        padding: 8,
+        borderTop: `1px solid ${t.border}`,
+        display: "flex",
+        gap: 4,
+        flexWrap: "wrap",
+        background: t.panelBg,
+      },
       mobileTabBar: {
         display: "flex",
         gap: 4,
@@ -287,7 +297,8 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
           ? "1fr"
           : "minmax(320px, 1fr) minmax(260px, 2fr)",
         gap: 12,
-        height: isMobile ? "100%" : "calc(100% - 50px)",
+        flex: "1 1 0",
+        minHeight: 0,
         overflowX: "auto",
         minWidth: 0,
         flexDirection: "column",
@@ -298,8 +309,8 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        maxHeight: isMobile ? "none" : winheight,
-        height: isMobile ? "100%" : "auto",
+        flex: "1 1 0",
+        minHeight: 0,
         background: t.panelBg,
         minWidth: 0,
       },
@@ -324,7 +335,7 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
         flexWrap: isMobile ? "wrap" : "nowrap",
       },
 
-      list: { overflow: "auto", flex: 1, minHeight: 0 },
+      list: { overflowY: "auto", overflowX: "hidden", flex: 1, minHeight: 0 },
       listRow: (sel) => ({
         display: "grid",
         gridTemplateColumns: "28px 1fr",
@@ -336,6 +347,14 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
         cursor: "pointer",
         minWidth: 0,
       }),
+      listRowText: {
+        minWidth: 0,
+      },
+      wrapText: {
+        whiteSpace: "normal",
+        overflowWrap: "anywhere",
+        wordBreak: "break-word",
+      },
       listRowTitle: {
         fontWeight: 600,
         fontSize: isMobile ? 12 : 13,
@@ -430,7 +449,8 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
         display: "flex",
         flexDirection: "column",
         boxSizing: "border-box",
-        height: isMobile ? "calc(100% - 60px)" : winheight,
+        flex: "1 1 0",
+        minHeight: 0,
         overflow: "hidden",
       },
       tableInner: {
@@ -457,7 +477,7 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
       },
 
       tableViewport: {
-        flex: "1 1 auto",
+        flex: "1 1 0",
         minHeight: 0,
         minWidth: 0,
         overflowX: "auto",
@@ -1098,11 +1118,13 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
                         }}
                       />
                       <div>
-                        <div style={s.listRowTitle}>
-                          {f.ar_typ} — {f.ar_andamal}
-                        </div>
-                        <div style={s.listRowSubtitle}>
-                          geoid {f.geoid} • {f.ar_forman} • {f.ar_last}
+                        <div style={s.listRowText}>
+                          <div style={s.listRowTitle}>
+                            {f.ar_typ} — {f.ar_andamal}
+                          </div>
+                          <div style={s.listRowSubtitle}>
+                            geoid {f.geoid} • {f.ar_forman} • {f.ar_last}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1150,15 +1172,7 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
                       </div>
                     ))}
                   </div>
-                  <div
-                    style={{
-                      padding: 8,
-                      borderTop: `1px solid ${theme.border}`,
-                      display: "flex",
-                      gap: 4,
-                      flexWrap: "wrap",
-                    }}
-                  >
+                  <div style={s.mobileFormActions}>
                     <label style={s.checkbox}>
                       <input
                         type="checkbox"
@@ -1469,26 +1483,10 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
         renderMobileForm()
       ) : (
         /* ================= DESKTOP FORM MODE ================= */
-        <div
-          style={{
-            ...s.paneWrap,
-            // Allow the page to grow and remove horizontal scroll in form mode (desktop)
-            ...(mode === "form" && !isMobile
-              ? { height: "auto", overflowX: "hidden" }
-              : null),
-          }}
-        >
+        <div style={s.paneWrap}>
           {/* Left: Object list */}
           <div style={s.pane} aria-label="Objektlista">
-            <div
-              style={{
-                ...s.list,
-                // Keep vertical scroll, prevent horizontal overflow
-                ...(mode === "form" && !isMobile
-                  ? { overflowX: "hidden", overflowY: "auto" }
-                  : null),
-              }}
-            >
+            <div style={s.list}>
               {visibleFormList.map((f) => {
                 const selected = selectedIds.has(f.id);
                 const isFocused = focusedId === f.id;
@@ -1508,26 +1506,13 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
                       }}
                     />
                     <div>
-                      <div
-                        style={{
-                          ...s.listRowTitle,
-                          // Break long strings so they don't press the layout horizontally
-                          ...(mode === "form" && !isMobile
-                            ? { whiteSpace: "normal", overflowWrap: "anywhere" }
-                            : null),
-                        }}
-                      >
-                        {f.ar_typ} — {f.ar_andamal}
-                      </div>
-                      <div
-                        style={{
-                          ...s.listRowSubtitle,
-                          ...(mode === "form" && !isMobile
-                            ? { whiteSpace: "normal", overflowWrap: "anywhere" }
-                            : null),
-                        }}
-                      >
-                        geoid {f.geoid} • {f.ar_forman} • {f.ar_last}
+                      <div style={s.listRowText}>
+                        <div style={s.listRowTitle}>
+                          {f.ar_typ} — {f.ar_andamal}
+                        </div>
+                        <div style={s.listRowSubtitle}>
+                          geoid {f.geoid} • {f.ar_forman} • {f.ar_last}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1550,14 +1535,7 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
           </div>
 
           {/* Right: Form */}
-          <div
-            style={{
-              ...s.pane,
-              // Remove internal height limit -> no internal vertical scroll
-              ...(mode === "form" && !isMobile ? { maxHeight: "none" } : null),
-            }}
-            aria-label="Formulär"
-          >
+          <div style={s.pane} aria-label="Formulär">
             <div style={s.paneHeaderWithActions}>
               <span>Redigera attribut</span>
               <div style={s.spacer} />
@@ -1591,14 +1569,7 @@ export default function AttributeEditorView({ initialFeatures, winheight }) {
               </div>
             ) : (
               <>
-                <div
-                  style={{
-                    ...s.form,
-                    ...(mode === "form" && !isMobile
-                      ? { overflowX: "hidden", overflowY: "visible" }
-                      : null),
-                  }}
-                >
+                <div style={s.form}>
                   {FIELD_META.map((meta) => (
                     <div key={meta.key} style={s.field}>
                       <label style={s.label}>
