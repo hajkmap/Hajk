@@ -377,6 +377,7 @@ export default function AttributeEditorView({ initialFeatures }) {
         borderTop: `1px solid ${t.border}`,
         background: t.panelBg,
         flexWrap: isMobile ? "wrap" : "nowrap",
+        alignItems: "center",
       },
       listFooterInfo: { fontSize: 12, color: t.textMuted },
 
@@ -397,18 +398,22 @@ export default function AttributeEditorView({ initialFeatures }) {
         textAlign: "center",
       },
       formFooter: {
-        padding: isMobile ? 8 : 12,
+        padding: isMobile ? 8 : 18,
         borderTop: `1px solid ${t.border}`,
         fontSize: 12,
         color: t.textMuted,
         background: t.panelBg,
+        display: "flex",
+        alignItems: "center",
       },
       formFooterDirty: {
-        padding: isMobile ? 8 : 12,
+        padding: isMobile ? 8 : 18,
         borderTop: `1px solid ${t.border}`,
         fontSize: 12,
         color: t.warning,
         background: t.panelBg,
+        display: "flex",
+        alignItems: "center",
       },
 
       field: { display: "flex", flexDirection: "column", gap: 6 },
@@ -1251,7 +1256,7 @@ export default function AttributeEditorView({ initialFeatures }) {
           <div style={s.toolbarInfo}>
             <input
               style={s.input}
-              placeholder="Sök i tabell…"
+              placeholder="Filtrera listan…"
               value={tableSearch}
               onChange={(e) => setTableSearch(e.target.value)}
             />
