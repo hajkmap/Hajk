@@ -90,7 +90,7 @@ export default function AttributeEditorView({ initialFeatures }) {
       panelBgAlt: "#f6f7f9",
       thBg: "#f9fafb",
 
-      border: "#e5e7eb",
+      border: "#d5d8dcff",
       borderMuted: "#f1f5f9",
       listDivider: "#f0f0f0",
 
