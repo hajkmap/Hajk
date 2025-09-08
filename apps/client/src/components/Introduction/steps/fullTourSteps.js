@@ -12,7 +12,7 @@ const getInitialSteps = (
     {
       title: "Välkommen",
       intro:
-        "Här kommer en kort guide som visar dig runt i applikationen. <br><br/>Introduktionens syfte är att illustrera det mesta av grund funktionaliteten i applikationen, samt de ändringar som har tillkommit i Hajk 4.<br><br> <i>Observera att inga andra åtgärder, som att klicka på knappar eller använda andra funktioner i applikationen, är möjliga under introduktionen.</i> <br><br>Följ med!",
+        "Här kommer en kort guide som visar dig runt i applikationen. <br><br/>Introduktionens syfte är att illustrera det mesta av grundfunktionaliteten i applikationen, samt de ändringar som har tillkommit i Hajk 4.<br><br> <i>Observera att inga andra åtgärder, som att klicka på knappar eller använda andra funktioner i applikationen, är möjliga under introduktionen.</i> <br><br>Följ med!",
     },
     {
       title: "Verktygspanel",
@@ -35,7 +35,7 @@ const getInitialSteps = (
       title: "Dokumenthanteraren",
       element: "#drawer-content",
       intro:
-        "Dokumenthanterarens primära användning idag är för översiktsplaner, men det skulle kunna användas för valfri textmängd.",
+        "Dokumenthanteraren används för att visa och hantera texter som är kopplade till kartan. Dokumenten är fristående och kan användas i flera kartor.<br><br> Med dokumenthanteraren kan du: <ul><li>Visa utförliga texter som är kopplade till kartbokmärken.<br></br></li><li>Dokumenthanteraren möjliggör samspel mellan text och karta. Där man kan lägga till kartlänkar som motsvarar kartlager i kartan</li></ul>",
     });
   } else {
     steps.push({

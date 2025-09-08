@@ -42,7 +42,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Tända/släcka lager",
     element: "#toggle-layer-item",
     intro:
-      "Klicka i rutan för att växla mellan tända och släcka ett lager. Lagernamn med <b>fetstil</b> visar att ett lager är aktiverat.",
+      "Klicka i rutan för att växla mellan att tända och släcka ett lager. Lagernamn med <b>fetstil</b> visar att ett lager är aktiverat.",
     position: "bottom",
   },
   {
@@ -88,7 +88,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Aktivera systemlager",
     element: "#draw-order-switch",
     intro:
-      "Klicka för att visa systemlager i system lagerlistan nedan.<br></br>Systemlager är lager som är genererade av verktyg exempelvis från ritaverktyget.",
+      "Klicka för att visa systemlager i lagerlistan nedan.<br></br>Systemlager är lager som är genererade av verktyg exempelvis från ritaverktyget.",
   },
   {
     title: "Lista över systemlager",
