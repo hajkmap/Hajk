@@ -6,6 +6,11 @@ import React, {
   useRef,
 } from "react";
 
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import EditNoteIcon from "@mui/icons-material/EditNote";
+import SaveIcon from "@mui/icons-material/Save";
+import UndoIcon from "@mui/icons-material/Undo";
+
 /* === Field descriptions === */
 const FIELD_META = [
   { key: "geoid", label: "geoid", readOnly: true },
@@ -151,6 +156,44 @@ export default function AttributeEditorView({ initialFeatures }) {
 
   function makeStyles(t, isMobile) {
     return {
+      iconBtn: {
+        padding: isMobile ? 6 : 8,
+        borderRadius: 999,
+        border: `1px solid ${t.border}`,
+        background: t.overlayBg,
+        color: t.text,
+        cursor: "pointer",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        lineHeight: 0,
+      },
+      iconBtnDisabled: {
+        padding: isMobile ? 6 : 8,
+        borderRadius: 999,
+        border: `1px solid ${t.border}`,
+        background: t.overlayBg,
+        color: t.text,
+        opacity: 0.55,
+        cursor: "default",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        lineHeight: 0,
+      },
+      iconToggle: (active) => ({
+        padding: isMobile ? 6 : 8,
+        borderRadius: 999,
+        border: `1px solid ${active ? t.primary : t.border}`,
+        background: active ? t.primarySoft : t.overlayBg,
+        color: t.text,
+        cursor: "pointer",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        lineHeight: 0,
+      }),
+
       shell: {
         display: "flex",
         flexDirection: "column",
@@ -565,6 +608,33 @@ export default function AttributeEditorView({ initialFeatures }) {
         color: t.text,
       },
 
+      tdEdited: {
+        fontSize: isMobile ? 12 : 13,
+        padding: isMobile ? "6px 8px" : "8px 16px",
+        borderBottom: `1px solid ${t.borderMuted}`,
+        lineHeight: "20px",
+        background: t.warningBg,
+        outline: `1px dashed ${t.warning}`,
+      },
+      tdPlaceholder: {
+        fontSize: isMobile ? 12 : 13,
+        padding: isMobile ? "6px 8px" : "8px 16px",
+        borderBottom: `1px solid ${t.borderMuted}`,
+        lineHeight: "20px",
+        color: t.textMuted,
+        fontStyle: "italic",
+      },
+      cellInput: {
+        width: "100%",
+        boxSizing: "border-box",
+        padding: isMobile ? "4px 6px" : "6px 8px",
+        borderRadius: 6,
+        border: `1px solid ${t.border}`,
+        background: t.overlayBg,
+        color: t.text,
+        fontSize: isMobile ? 12 : 13,
+        outline: "none",
+      },
       td: {
         fontSize: isMobile ? 12 : 13,
         padding: isMobile ? "6px 8px" : "8px 16px",
@@ -579,9 +649,14 @@ export default function AttributeEditorView({ initialFeatures }) {
         lineHeight: "20px",
         color: t.textMuted,
       },
-      tr: (selected) => ({
-        background: selected ? t.rowSelected : "transparent",
+      tr: (selected, pending) => ({
+        background: selected
+          ? t.rowSelected
+          : pending
+            ? t.warningBg
+            : "transparent",
         cursor: "pointer",
+        outline: pending ? `1px dashed ${t.warning}` : "none",
       }),
 
       notification: {
@@ -610,8 +685,19 @@ export default function AttributeEditorView({ initialFeatures }) {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState("list"); // "list" | "form"
 
+  const [tablePendingAdds, setTablePendingAdds] = useState([]); // rows waiting to be saved
+  const tempIdRef = useRef(-1); // temporary negative ids for drafts
+
+  // Inline cell editing state
+  const [tableEditing, setTableEditing] = useState(null); // { id: number, key: string, startValue: any } | null
+
+  // Pending cell edits for existing rows (not drafts)
+  const [tablePendingEdits, setTablePendingEdits] = useState({}); // Record<number, Record<string, any>>
+  const tableHasPending =
+    tablePendingAdds.length > 0 || Object.keys(tablePendingEdits).length > 0;
+
   const theme = dark ? themes.dark : themes.light;
-  const s = makeStyles(theme, isMobile);
+  const s = useMemo(() => makeStyles(theme, isMobile), [theme, isMobile]);
 
   // Check for mobile viewport
   useEffect(() => {
@@ -627,11 +713,11 @@ export default function AttributeEditorView({ initialFeatures }) {
     () => initialFeatures || createDummyFeatures()
   );
 
-  const [nextId, setNextId] = useState(
-    () =>
-      Math.max(...(initialFeatures || createDummyFeatures()).map((f) => f.id)) +
-      1
-  );
+  const [nextId, setNextId] = useState(() => {
+    const base = initialFeatures ?? createDummyFeatures();
+    const max = base.length ? Math.max(...base.map((f) => f.id)) : 0;
+    return max + 1;
+  });
 
   const [notification, setNotification] = useState(null);
 
@@ -653,35 +739,92 @@ export default function AttributeEditorView({ initialFeatures }) {
   const duplicateSelectedRows = () => {
     if (tableSelectedIds.size === 0) return;
 
-    const newFeatures = [];
-    let currentNextId = nextId;
-
-    const maxGeoid = Math.max(...features.map((f) => f.geoid));
-    let nextGeoid = maxGeoid + 1;
+    const newDrafts = [];
 
     features.forEach((f) => {
       if (tableSelectedIds.has(f.id)) {
-        const duplicate = {
+        const draft = {
           ...f,
-          id: currentNextId++,
-          geoid: nextGeoid++,
+          id: tempIdRef.current--, // temp negative for drafts
+          __pending: "add",
           ar_anteckning: f.ar_anteckning
             ? `${f.ar_anteckning} (kopia)`
             : "(kopia)",
         };
-        newFeatures.push(duplicate);
+
+        // Clear all read-only fields (e.g. geoid) so they are counted as missing
+        FIELD_META.forEach((m) => {
+          if (m.readOnly) draft[m.key] = null;
+        });
+
+        newDrafts.push(draft);
       }
     });
 
-    setFeatures((prev) => [...prev, ...newFeatures]);
-    setNextId(currentNextId);
+    if (newDrafts.length === 0) return;
 
-    setTableSelectedIds(new Set());
+    setTablePendingAdds((prev) => [...prev, ...newDrafts]);
+    setTableSelectedIds(new Set(newDrafts.map((d) => d.id)));
 
     showNotification(
-      `${newFeatures.length} ${newFeatures.length === 1 ? "post" : "poster"} duplicerade`
+      `${newDrafts.length} ${newDrafts.length === 1 ? "utkast" : "utkast"} skapade`
     );
   };
+
+  function commitTableEdits() {
+    if (!tableHasPending) return;
+
+    // 1) Apply cell edits to existing rows
+    const hadEdits = Object.keys(tablePendingEdits).length > 0;
+    if (hadEdits) {
+      setFeatures((prev) =>
+        prev.map((f) =>
+          tablePendingEdits[f.id] ? { ...f, ...tablePendingEdits[f.id] } : f
+        )
+      );
+    }
+
+    // 2) Commit drafts (adds)
+    const hadAdds = tablePendingAdds.length > 0;
+    if (hadAdds) {
+      let currentNextId = nextId;
+
+      let nextGeoid = getNextGeoidSeed(features);
+
+      const committedAdds = tablePendingAdds.map((p) => {
+        const needsGeoid = p.geoid == null || p.geoid === "";
+        return {
+          ...p,
+          id: currentNextId++,
+          geoid: needsGeoid ? nextGeoid++ : p.geoid,
+          __pending: undefined,
+        };
+      });
+
+      setFeatures((prev) => [...prev, ...committedAdds]);
+      setNextId(currentNextId);
+    }
+
+    // 3) Reset pending states
+    setTablePendingAdds([]);
+    setTablePendingEdits({});
+    setTableEditing(null);
+    setTableSelectedIds(new Set());
+
+    const parts = [];
+    if (hadEdits) parts.push("ändringar");
+    if (hadAdds) parts.push("utkast");
+    showNotification(`Sparade ${parts.join(" + ")}`);
+  }
+
+  function revertTableEdits() {
+    if (!tableHasPending) return;
+    setTablePendingAdds([]);
+    setTablePendingEdits({});
+    setTableEditing(null);
+    setTableSelectedIds(new Set());
+    showNotification("Osparade ändringar ångrade");
+  }
 
   useEffect(() => {
     if (!openFilterColumn) return;
@@ -709,16 +852,24 @@ export default function AttributeEditorView({ initialFeatures }) {
     };
   }, [openFilterColumn]);
 
-  const filteredAndSorted = useMemo(() => {
-    const s = tableSearch.trim().toLowerCase();
+  const allRows = useMemo(() => {
+    const editedFeatures = features.map((f) => {
+      const patch = tablePendingEdits[f.id];
+      return patch ? { ...f, ...patch } : f;
+    });
+    return [...editedFeatures, ...tablePendingAdds];
+  }, [features, tablePendingAdds, tablePendingEdits]);
 
-    let rows = features.filter((f) => {
-      const matchesSearch = !s
+  const filteredAndSorted = useMemo(() => {
+    const q = tableSearch.trim().toLowerCase();
+
+    let rows = allRows.filter((f) => {
+      const matchesSearch = !q
         ? true
         : Object.values(f).some((val) =>
             String(val ?? "")
               .toLowerCase()
-              .includes(s)
+              .includes(q)
           );
 
       const matchesColumnFilters = Object.entries(columnFilters).every(
@@ -732,27 +883,37 @@ export default function AttributeEditorView({ initialFeatures }) {
       return matchesSearch && matchesColumnFilters;
     });
 
+    const cmp = (x, y) => {
+      const ax = x ?? "";
+      const by = y ?? "";
+      const nx = Number(ax),
+        ny = Number(by);
+      const bothNum = Number.isFinite(nx) && Number.isFinite(ny);
+      return bothNum
+        ? nx - ny
+        : String(ax).localeCompare(String(by), "sv", {
+            numeric: true,
+            sensitivity: "base",
+          });
+    };
     rows.sort((a, b) => {
-      const av = a[sort.key];
-      const bv = b[sort.key];
-      if (av === bv) return 0;
-      const res = av > bv ? 1 : -1;
-      return sort.dir === "asc" ? res : -1 * res;
+      const res = cmp(a[sort.key], b[sort.key]);
+      return sort.dir === "asc" ? res : -res;
     });
 
     return rows;
-  }, [features, tableSearch, sort, columnFilters]);
+  }, [allRows, tableSearch, sort, columnFilters]);
 
   const getUniqueColumnValues = useCallback(
     (columnKey) => {
       const values = new Set();
-      features.forEach((f) => {
+      allRows.forEach((f) => {
         const val = String(f[columnKey] ?? "");
         if (val) values.add(val);
       });
       return Array.from(values).sort();
     },
-    [features]
+    [allRows]
   );
 
   function toggleSort(key) {
@@ -1006,6 +1167,12 @@ export default function AttributeEditorView({ initialFeatures }) {
   }
 
   function openSelectedInFormFromTable() {
+    if (tableHasPending) {
+      window.alert(
+        "Du har osparade ändringar i tabelläget. Spara eller ångra dem först."
+      );
+      return;
+    }
     if (tableSelectedIds.size === 0) return;
     setMode("form");
 
@@ -1188,18 +1355,22 @@ export default function AttributeEditorView({ initialFeatures }) {
                     </label>
                     <div style={s.spacer} />
                     <button
-                      style={!dirty ? s.btnDisabled : s.btn}
+                      style={!dirty ? s.iconBtnDisabled : s.iconBtn}
                       onClick={resetEdits}
                       disabled={!dirty}
+                      aria-label="Ångra"
+                      title="Ångra"
                     >
-                      Ångra
+                      <UndoIcon fontSize="small" />
                     </button>
                     <button
-                      style={!dirty ? s.btnPrimaryDisabled : s.btnPrimary}
+                      style={!dirty ? s.iconBtnDisabled : s.iconBtn}
                       onClick={() => saveChanges()}
                       disabled={!dirty}
+                      aria-label="Spara"
+                      title="Spara"
                     >
-                      Spara
+                      <SaveIcon fontSize="small" />
                     </button>
                   </div>
                   <div style={dirty ? s.formFooterDirty : s.formFooter}>
@@ -1310,11 +1481,14 @@ export default function AttributeEditorView({ initialFeatures }) {
 
             {/* Always show action buttons (with shorter labels in mobile) */}
             <>
+              {tableHasPending && (
+                <span style={{ ...s.toolbarStats, color: theme.warning }}>
+                  Osparade ändringar
+                </span>
+              )}
               <button
                 style={
-                  tableSelectedIds.size === 0
-                    ? s.btnPrimaryDisabled
-                    : s.btnPrimary
+                  tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn
                 }
                 disabled={tableSelectedIds.size === 0}
                 onClick={duplicateSelectedRows}
@@ -1323,27 +1497,45 @@ export default function AttributeEditorView({ initialFeatures }) {
                     ? `Duplicera ${tableSelectedIds.size} markerade`
                     : "Markera rader först"
                 }
+                aria-label="Duplicera val"
               >
-                {isMobile
-                  ? `Duplicera (${tableSelectedIds.size})`
-                  : `Duplicera val (${tableSelectedIds.size})`}
+                <ContentCopyIcon fontSize="small" />
               </button>
 
               <button
                 style={
-                  tableSelectedIds.size === 0
-                    ? s.btnPrimaryDisabled
-                    : s.btnPrimary
+                  tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn
                 }
                 disabled={tableSelectedIds.size === 0}
                 onClick={openSelectedInFormFromTable}
                 title={
                   tableSelectedIds.size
-                    ? "Öppna de markerade raderna i formulärläge"
+                    ? "Öppna de markerade i formulärläge"
                     : "Markera rader först"
                 }
+                aria-label="Redigera val i formulär"
               >
-                {isMobile ? "Redigera val" : "Redigera val i formulär"}
+                <EditNoteIcon fontSize="small" />
+              </button>
+
+              <button
+                style={!tableHasPending ? s.iconBtnDisabled : s.iconBtn}
+                disabled={!tableHasPending}
+                onClick={revertTableEdits}
+                title="Ångra osparade ändringar (tabell)"
+                aria-label="Ångra (tabell)"
+              >
+                <UndoIcon fontSize="small" />
+              </button>
+
+              <button
+                style={!tableHasPending ? s.iconBtnDisabled : s.iconBtn}
+                disabled={!tableHasPending}
+                onClick={commitTableEdits}
+                title="Spara osparade ändringar (tabell)"
+                aria-label="Spara (tabell)"
+              >
+                <SaveIcon fontSize="small" />
               </button>
             </>
             {isMobile && (
@@ -1453,21 +1645,184 @@ export default function AttributeEditorView({ initialFeatures }) {
                     return (
                       <tr
                         key={row.id}
-                        style={s.tr(selected)}
+                        style={s.tr(selected, !!row.__pending)}
                         aria-selected={selected}
                         onClick={(e) => handleRowClick(row.id, idx, e)}
-                        onDoubleClick={() => {
+                        onDoubleClick={(e) => {
+                          if (tableEditing) return; // inline editing in progress?
+                          const td = e.target.closest?.("td");
+                          if (td?.dataset?.editable === "true") return; // double-click on editable cell
                           if (tableSelectedIds.size > 1)
                             openSelectedInFormFromTable();
                           else openInFormFromTable(row.id);
                         }}
                         title="Klick: markera • Dubbelklick: öppna i formulär"
                       >
-                        {FIELD_META.map((f) => (
-                          <td key={f.key} style={s.td}>
-                            {String(row[f.key] ?? "")}
-                          </td>
-                        ))}
+                        {FIELD_META.map((meta) => {
+                          const patch = tablePendingEdits[row.id];
+                          const patchedValue =
+                            patch && meta.key in patch
+                              ? patch[meta.key]
+                              : undefined;
+                          const effectiveValue =
+                            patchedValue !== undefined
+                              ? patchedValue
+                              : row[meta.key];
+
+                          const isPlaceholder =
+                            row.__pending &&
+                            meta.readOnly &&
+                            isMissingValue(effectiveValue);
+                          const isEditedCell =
+                            !row.__pending && patch && meta.key in patch;
+                          const isEditing =
+                            !!tableEditing &&
+                            tableEditing.id === row.id &&
+                            tableEditing.key === meta.key;
+
+                          const tdStyle = isEditing
+                            ? s.tdEdited
+                            : isPlaceholder
+                              ? s.tdPlaceholder
+                              : isEditedCell
+                                ? s.tdEdited
+                                : s.td;
+
+                          // Handlers
+                          const beginEdit = () => {
+                            if (!isEditableField(meta)) return;
+                            setTableEditing({
+                              id: row.id,
+                              key: meta.key,
+                              startValue: effectiveValue ?? "",
+                            });
+                          };
+
+                          const applyChange = (newVal) => {
+                            if (row.__pending) {
+                              setTablePendingAdds((prev) =>
+                                prev.map((d) =>
+                                  d.id === row.id
+                                    ? { ...d, [meta.key]: newVal }
+                                    : d
+                                )
+                              );
+                            } else {
+                              // Existing row: add to pendingEdits (and clear if same as original)
+                              setTablePendingEdits((prev) => {
+                                const next = { ...prev };
+                                const current = next[row.id]
+                                  ? { ...next[row.id] }
+                                  : {};
+                                const original = features.find(
+                                  (f) => f.id === row.id
+                                )?.[meta.key];
+                                if (newVal === original) {
+                                  delete current[meta.key];
+                                } else {
+                                  current[meta.key] = newVal;
+                                }
+                                if (Object.keys(current).length)
+                                  next[row.id] = current;
+                                else delete next[row.id];
+                                return next;
+                              });
+                            }
+                          };
+
+                          const finishEdit = () => setTableEditing(null);
+                          const cancelEdit = () => {
+                            const ed = tableEditing;
+                            if (!ed) return;
+                            if (row.__pending) {
+                              setTablePendingAdds((prev) =>
+                                prev.map((d) =>
+                                  d.id === row.id
+                                    ? { ...d, [meta.key]: ed.startValue }
+                                    : d
+                                )
+                              );
+                            } else {
+                              setTablePendingEdits((prev) => {
+                                const next = { ...prev };
+                                const current = { ...(next[row.id] || {}) };
+                                const original = features.find(
+                                  (f) => f.id === row.id
+                                )?.[meta.key];
+                                const revertTo = ed.startValue;
+                                if (revertTo === original) {
+                                  delete current[meta.key];
+                                } else {
+                                  current[meta.key] = revertTo;
+                                }
+                                if (Object.keys(current).length)
+                                  next[row.id] = current;
+                                else delete next[row.id];
+                                return next;
+                              });
+                            }
+                            setTableEditing(null);
+                          };
+
+                          // Editor UI
+                          const editorProps = {
+                            className: undefined,
+                            style: s.cellInput,
+                            value: effectiveValue ?? "",
+                            autoFocus: true,
+                            onChange: (e) => applyChange(e.target.value),
+                            onClick: (e) => e.stopPropagation(),
+                            onDoubleClick: (e) => e.stopPropagation(),
+                            onKeyDown: (e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                finishEdit();
+                              } else if (e.key === "Escape") {
+                                e.preventDefault();
+                                cancelEdit();
+                              }
+                            },
+                            onBlur: finishEdit,
+                          };
+
+                          return (
+                            <td
+                              key={meta.key}
+                              data-editable={String(isEditableField(meta))}
+                              style={tdStyle}
+                              onDoubleClick={(e) => {
+                                if (!isEditableField(meta)) return; // Doubleclick form mode
+                                e.stopPropagation(); // Stop when editingg
+                                beginEdit();
+                              }}
+                              title={
+                                isEditableField(meta)
+                                  ? "Dubbelklicka för att redigera"
+                                  : "Ej redigerbar"
+                              }
+                            >
+                              {isEditing ? (
+                                meta.type === "select" ? (
+                                  <select {...editorProps}>
+                                    {(meta.options || []).map((opt) => (
+                                      <option key={opt} value={opt}>
+                                        {opt}
+                                      </option>
+                                    ))}
+                                  </select>
+                                ) : meta.type === "textarea" ? (
+                                  <textarea {...editorProps} rows={2} />
+                                ) : (
+                                  <input {...editorProps} />
+                                )
+                              ) : isPlaceholder ? (
+                                "#saknas"
+                              ) : (
+                                String(effectiveValue ?? "")
+                              )}
+                            </td>
+                          );
+                        })}
                       </tr>
                     );
                   })}
@@ -1553,18 +1908,22 @@ export default function AttributeEditorView({ initialFeatures }) {
                 Spara ändrade fält för alla markerade
               </label>
               <button
-                style={!dirty ? s.btnDisabled : s.btn}
+                style={!dirty ? s.iconBtnDisabled : s.iconBtn}
                 onClick={resetEdits}
                 disabled={!dirty}
+                aria-label="Ångra"
+                title="Ångra"
               >
-                Ångra
+                <UndoIcon fontSize="small" />
               </button>
               <button
-                style={!dirty ? s.btnPrimaryDisabled : s.btnPrimary}
+                style={!dirty ? s.iconBtnDisabled : s.iconBtn}
                 onClick={() => saveChanges()}
                 disabled={!dirty}
+                aria-label="Spara"
+                title="Spara"
               >
-                Spara
+                <SaveIcon fontSize="small" />
               </button>
             </div>
 
@@ -1625,6 +1984,19 @@ export default function AttributeEditorView({ initialFeatures }) {
 }
 
 /* === Helpers === */
+const isEditableField = (meta) => !meta.readOnly;
+
+function getNextGeoidSeed(rows) {
+  const nums = rows
+    .map((r) => Number(r.geoid))
+    .filter((n) => Number.isFinite(n));
+  return (nums.length ? Math.max(...nums) : 0) + 1;
+}
+
+function isMissingValue(v) {
+  return v == null || v === "";
+}
+
 function renderInput(meta, value, onChange, isChanged, s) {
   const inputStyle = isChanged ? s.inputChanged : s.input;
   const common = {
