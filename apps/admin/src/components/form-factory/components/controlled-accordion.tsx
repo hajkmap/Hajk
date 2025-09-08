@@ -21,6 +21,7 @@ interface ControlledAccordionProps {
   formInputs: FormElement<TFieldValues>[];
   formGetValues: () => Record<string, unknown>;
   triggerExpanded?: boolean;
+  forceExpanded?: boolean;
   children: React.ReactNode;
   backgroundColor?: string;
   onAccordionChange?: () => void;
@@ -33,6 +34,7 @@ function ControlledAccordion({
   formInputs,
   formGetValues,
   triggerExpanded = false,
+  forceExpanded,
   children,
   backgroundColor,
   onAccordionChange,
@@ -76,8 +78,8 @@ function ControlledAccordion({
   }, [formGetValues, formInputs, setKeyValues]);
 
   useEffect(() => {
-    setExpanded(triggerExpanded);
-  }, [triggerExpanded]);
+    setExpanded(triggerExpanded || !!forceExpanded);
+  }, [triggerExpanded, forceExpanded]);
 
   useEffect(() => {
     if (!expanded) {
@@ -89,6 +91,13 @@ function ControlledAccordion({
     _event: React.SyntheticEvent,
     isExpanded: boolean
   ) => {
+    // When forceExpanded is active, keep it expanded regardless of user toggle
+    if (forceExpanded) {
+      setExpanded(true);
+      onAccordionChange?.();
+      onExpand?.();
+      return;
+    }
     setExpanded(isExpanded);
     onAccordionChange?.();
     if (isExpanded) {
@@ -130,7 +139,7 @@ function ControlledAccordion({
     return (
       <Accordion
         disableGutters
-        expanded={expanded}
+        expanded={forceExpanded ? true : expanded}
         onChange={handleAccordionChange}
         sx={{
           width: "100%",

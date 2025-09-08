@@ -118,11 +118,8 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     setElements([...elements]); // Trigger re-render
   }, [accordionExpanded]);
 
-  let c = 0;
-
   const getKey = (index: number) => {
-    c++;
-    return `formItem-${index}-${c}`;
+    return `formItem-${index}`;
   };
 
   const renderStaticElement = (item: StaticElement, index: number) => {
@@ -234,17 +231,18 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     container: DynamicFormContainer<TFieldValues>,
     index: number
   ) => {
-    const key = getKey(index);
+    const key = container.title ?? getKey(index);
     const shouldExpand =
       !!container.props?.triggerExpanded || container.highlight;
 
     return (
       <ControlledAccordion
-        key={key + "-accordion-"}
+        key={`${key}-accordion`}
         formInputs={container.getFormInputs() as FormElement<FieldValues>[]}
         formGetValues={formGetValues}
         title={container.title}
         triggerExpanded={shouldExpand}
+        forceExpanded={accordionExpanded}
         backgroundColor={container.props?.backgroundColor as string}
       >
         <Grid container>
