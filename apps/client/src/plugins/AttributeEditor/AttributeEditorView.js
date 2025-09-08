@@ -6,6 +6,8 @@ import React, {
   useRef,
 } from "react";
 
+import TableRowsIcon from "@mui/icons-material/TableRows";
+import DynamicFormIcon from "@mui/icons-material/DynamicForm";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import SaveIcon from "@mui/icons-material/Save";
@@ -1398,16 +1400,21 @@ export default function AttributeEditorView({ initialFeatures }) {
           onClick={() => setMode("table")}
           style={s.toggle(mode === "table")}
           aria-pressed={mode === "table"}
+          aria-label="Tabelläge"
+          title="Tabelläge"
         >
-          Tabelläge
+          <TableRowsIcon fontSize="small" />
         </button>
+
         <button
           type="button"
           onClick={() => setMode("form")}
           style={s.toggle(mode === "form")}
           aria-pressed={mode === "form"}
+          aria-label="Formulärläge"
+          title="Formulärläge"
         >
-          Formulärläge
+          <DynamicFormIcon fontSize="small" />
         </button>
 
         <div style={s.spacer} />
