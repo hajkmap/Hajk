@@ -4,7 +4,7 @@ import SaveIcon from "@mui/icons-material/Save";
 
 export default function DesktopForm({
   s,
-  // vänster list
+  // left list
   visibleFormList,
   selectedIds,
   toggleSelect,
@@ -13,7 +13,7 @@ export default function DesktopForm({
   focusPrev,
   focusNext,
 
-  // höger formulär
+  // right form
   focusedFeature,
   FIELD_META,
   changedFields,
