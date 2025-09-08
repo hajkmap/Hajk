@@ -453,14 +453,7 @@ class Introduction extends React.PureComponent {
   }
 
   handleDrawerTransition = (previousStep, currentStep) => {
-    const isDrawerPermanent =
-      window.localStorage.getItem("drawerPermanent") === "true";
-
-    // Skip drawer transitions if drawer is permanent
-    if (isDrawerPermanent) {
-      return false;
-    }
-
+    // Always allow drawer transitions regardless of permanence
     // Open drawer transitions
     if (
       (previousStep?.element === "#drawer-toggle-button-group" &&
@@ -472,7 +465,7 @@ class Introduction extends React.PureComponent {
       return true;
     }
 
-    // Close drawer transitions
+    // Close drawer transitions (only if drawer is not permanent)
     if (
       (previousStep?.title === "Välkommen" &&
         currentStep?.element === "#drawer-toggle-button-group") ||
@@ -482,7 +475,11 @@ class Introduction extends React.PureComponent {
         currentStep?.element === "#controls-column" &&
         !this.state.steps.some((s) => s.element === "#search-bar"))
     ) {
-      this.props.globalObserver.publish("core.hideDrawer");
+      const isDrawerPermanent =
+        window.localStorage.getItem("drawerPermanent") === "true";
+      if (!isDrawerPermanent) {
+        this.props.globalObserver.publish("core.hideDrawer");
+      }
       return true;
     }
 
@@ -804,6 +801,54 @@ class Introduction extends React.PureComponent {
         return;
       }
 
+      if (
+        step?.element === "#drawer-content" &&
+        step?.title === "Kartverktyg" &&
+        previousStep?.element === "#drawer-toggle-button-group"
+      ) {
+        this.props.globalObserver.publish(
+          "core.drawerContentChanged",
+          "plugins"
+        );
+        setTimeout(() => {
+          updateStepElement();
+          resolve();
+        }, Introduction.CONSTANTS.DRAWER_TRANSITION_DELAY);
+        return;
+      }
+
+      if (
+        step?.element === "#drawer-content" &&
+        step?.title === "Dokumenthanteraren" &&
+        previousStep?.element === "#toggle-drawer-permanent"
+      ) {
+        this.props.globalObserver.publish(
+          "core.drawerContentChanged",
+          "documenthandler"
+        );
+        setTimeout(() => {
+          updateStepElement();
+          resolve();
+        }, Introduction.CONSTANTS.DRAWER_TRANSITION_DELAY);
+        return;
+      }
+
+      if (
+        step?.element === "#search-bar" &&
+        previousStep?.title === "Dokumenthanteraren"
+      ) {
+        const isDrawerPermanent =
+          window.localStorage.getItem("drawerPermanent") === "true";
+        if (!isDrawerPermanent) {
+          this.props.globalObserver.publish("core.hideDrawer");
+        }
+        setTimeout(() => {
+          updateStepElement();
+          resolve();
+        }, Introduction.CONSTANTS.DRAWER_TRANSITION_DELAY);
+        return;
+      }
+
       // Handle tab switching
       if (this.handleTabSwitching(step, goingForward, goingBackward)) {
         resolve();
@@ -1045,6 +1090,15 @@ class Introduction extends React.PureComponent {
       const closeEvent = new CustomEvent("closeSearchOptionsMenu");
       document.dispatchEvent(closeEvent);
       return;
+    }
+
+    // Ensure drawer is closed on Sökruta (only if drawer is not permanent)
+    if (step?.element === "#search-bar") {
+      const isDrawerPermanent =
+        window.localStorage.getItem("drawerPermanent") === "true";
+      if (!isDrawerPermanent) {
+        this.props.globalObserver.publish("core.hideDrawer");
+      }
     }
 
     if (

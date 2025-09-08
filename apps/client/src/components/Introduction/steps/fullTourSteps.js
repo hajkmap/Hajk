@@ -29,22 +29,13 @@ const getInitialSteps = (
     },
   ];
 
-  // Conditionally add either Kartverktyg or Dokumenthanteraren step
-  if (activeDrawerContent === "documenthandler" && isDrawerPermanent) {
-    steps.push({
-      title: "Dokumenthanteraren",
-      element: "#drawer-content",
-      intro:
-        "Dokumenthanteraren används för att visa och hantera texter som är kopplade till kartan. Dokumenten är fristående och kan användas i flera kartor.<br><br> Med dokumenthanteraren kan du: <ul><li>Visa utförliga texter som är kopplade till kartbokmärken.<br></br></li><li>Dokumenthanteraren möjliggör samspel mellan text och karta. Där man kan lägga till kartlänkar som motsvarar kartlager i kartan</li></ul>",
-    });
-  } else {
-    steps.push({
-      title: "Kartverktyg",
-      element: "#drawer-content",
-      intro:
-        "Kartverktygen har olika funktioner som kan användas för att navigera i kartan.<br /><br />Här listas de verktyg som har verktygsplaceringen i sidomenyn (drawer).<br /><br /> Verktygen kan placeras om av administratörerna.",
-    });
-  }
+  // Add Kartverktyg step
+  steps.push({
+    title: "Kartverktyg",
+    element: "#drawer-content",
+    intro:
+      "Kartverktygen har olika funktioner som kan användas för att navigera i kartan.<br /><br />Här listas de verktyg som har verktygsplaceringen i sidomenyn (drawer).<br /><br /> Verktygen kan placeras om av administratörerna.",
+  });
 
   // Add remaining steps
   steps.push(
@@ -53,6 +44,17 @@ const getInitialSteps = (
       element: "#toggle-drawer-permanent",
       intro: "Klicka på knappen för att låsa fast sidomenyn.",
     },
+    // Show the Document Handler content after locking the drawer (when available)
+    ...(documenthandler
+      ? [
+          {
+            title: "Dokumenthanteraren",
+            element: "#drawer-content",
+            intro:
+              "Dokumenthanteraren används för att visa och hantera texter som är kopplade till kartan. Dokumenten är fristående och kan användas i flera kartor.<br><br> Med dokumenthanteraren kan du: <ul><li>Visa utförliga texter som är kopplade till kartbokmärken.<br></br></li><li>Dokumenthanteraren möjliggör samspel mellan text och karta. Där man kan lägga till kartlänkar som motsvarar kartlager i kartan</li></ul>",
+          },
+        ]
+      : []),
     {
       title: "Sökruta",
       element: "#search-bar",
