@@ -1,8 +1,16 @@
 import { useState, useRef, useMemo } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
-import { Button, Stack, TextField, useTheme, Link } from "@mui/material";
+import {
+  Button,
+  Stack,
+  TextField,
+  useTheme,
+  Link,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
 import { GridRowSelectionModel } from "@mui/x-data-grid";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import { FieldValues } from "react-hook-form";
@@ -33,10 +41,12 @@ import { useServices, useServiceCapabilities } from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
 import { useRoles } from "../../api/users";
 import { HttpError } from "../../lib/http-error";
+import DialogWrapper from "../../components/flexible-dialog";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
   const { layerId } = useParams<{ layerId: string }>();
+  const navigate = useNavigate();
   const { data: layer, isLoading, isError } = useLayerById(layerId ?? "");
   const { mutateAsync: updateLayer, status: updateStatus } = useUpdateLayer();
   const { mutateAsync: createRoleOnLayer } = useCreateAndUpdateRoleOnLayer();
@@ -44,6 +54,7 @@ export default function LayerSettings() {
   const { data: services } = useServices();
   const { data: roles } = useRoles();
   const { data: roleOnLayer } = useGetRoleOnLayerByLayerId(layerId ?? "");
+  const [open, setOpen] = useState<boolean>(false);
 
   const formRef = useRef<HTMLFormElement | null>(null);
   const { data: service, isLoading: serviceLoading } = useServiceByLayerId(
@@ -773,6 +784,66 @@ export default function LayerSettings() {
         })
       : "";
 
+  const renderDialog = () => (
+    <DialogWrapper
+      open={open}
+      title={t("common.dialog.deleteConfirmation", { name: layer?.name })}
+      onClose={() => setOpen(false)}
+      actions={
+        <>
+          {renderDialogCancelButton()}
+          {renderDialogDeleteButton()}
+        </>
+      }
+      fullWidth={true}
+    >
+      <Typography variant="body2" color="text.secondary">
+        {t("common.dialog.deleteWarning")}
+      </Typography>
+    </DialogWrapper>
+  );
+
+  const renderDialogDeleteButton = () => (
+    <Button
+      onClick={(e) => {
+        e.preventDefault();
+        setOpen(false);
+        void handleDeleteLayer();
+        void navigate(-1);
+      }}
+      type="submit"
+      variant="contained"
+      color="error"
+      disabled={deleteStatus === "pending"}
+    >
+      {deleteStatus === "pending" ? (
+        <CircularProgress color="primary" size={12} />
+      ) : (
+        t("common.dialog.deleteBtn")
+      )}
+    </Button>
+  );
+
+  const renderDialogCancelButton = () => (
+    <Button
+      onClick={() => setOpen(false)}
+      variant="contained"
+      color="secondary"
+    >
+      {t("common.cancel")}
+    </Button>
+  );
+
+  const renderDeleteButton = () => (
+    <Button
+      variant="contained"
+      color="error"
+      sx={{ minWidth: "120px", width: "100%" }}
+      onClick={() => setOpen(true)}
+    >
+      {t("common.dialog.deleteBtn")} {t("common.layers")}
+    </Button>
+  );
 
   if (isLoading) {
     return <SquareSpinnerComponent />;
@@ -819,6 +890,8 @@ export default function LayerSettings() {
             />
           )}
           <UsedInMapsGrid />
+          {renderDeleteButton()}
+          {renderDialog()}
         </form>
       </FormActionPanel>
     </Page>

@@ -22,6 +22,7 @@
     "common.layerGroups": "Lagergrupper",
     "common.layerName": "Lagernamn",
     "common.layers": "Lager",
+    "common.layer": "Lager",
     "common.login": "Logga in",
     "common.loginFailed": "Inloggning misslyckades. Fel användarnamn eller lösenord.",
     "common.loginToContinue": "Du måste logga in för att komma vidare",

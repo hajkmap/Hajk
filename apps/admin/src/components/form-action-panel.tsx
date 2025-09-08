@@ -18,11 +18,9 @@ interface FormActionProps {
 }
 
 const FormActionPanel: React.FC<FormActionProps> = ({
-  name = "",
   updateStatus,
   deleteStatus,
   onUpdate,
-  onDelete,
   lastSavedBy = "",
   lastSavedDate = "",
   children,
@@ -32,7 +30,6 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   const { t } = useTranslation();
   const saveButtonDisabled =
     !dirtyFields || Object.keys(dirtyFields).length === 0;
-  const [open, setOpen] = useState<boolean>(false);
 
   const ActionContainer = styled(Box)(({ theme }) => ({
     display: "flex",
@@ -131,75 +128,14 @@ const FormActionPanel: React.FC<FormActionProps> = ({
     </Button>
   );
 
-  const renderDeleteButton = () => (
-    <Button
-      onClick={() => setOpen(true)}
-      disabled={deleteStatus === "pending" || updateStatus === "pending"}
-      variant="outlined"
-      color="error"
-    >
-      {t("common.dialog.deleteBtn")}
-    </Button>
-  );
-
-  const renderDialog = () => (
-    <DialogWrapper
-      open={open}
-      title={t("common.dialog.deleteConfirmation", { name })}
-      onClose={() => setOpen(false)}
-      actions={
-        <>
-          {renderDialogCancelButton()}
-          {renderDialogDeleteButton()}
-        </>
-      }
-      fullWidth={true}
-    >
-      <Typography variant="body2" color="text.secondary">
-        {t("common.dialog.deleteWarning")}
-      </Typography>
-    </DialogWrapper>
-  );
-
-  const renderDialogDeleteButton = () => (
-    <Button
-      onClick={(e) => {
-        e.preventDefault();
-        setOpen(false);
-        void onDelete();
-        void navigate(-1);
-      }}
-      type="submit"
-      variant="contained"
-      color="error"
-      disabled={deleteStatus === "pending"}
-    >
-      {deleteStatus === "pending" ? (
-        <CircularProgress color="primary" size={12} />
-      ) : (
-        t("common.dialog.deleteBtn")
-      )}
-    </Button>
-  );
-
   const renderSavedInformation = () => (
     <StyledPaper>
       <Typography variant="body1" sx={{ fontSize: "1rem" }}>
         {t("common.lastSaved")} {t("common.of")}{" "}
-        {lastSavedBy ? lastSavedBy : t("formControl.unknown")} {" "}
+        {lastSavedBy ? lastSavedBy : t("formControl.unknown")}{" "}
         {getTimeAgo(lastSavedDate)}
       </Typography>
     </StyledPaper>
-  );
-
-  const renderDialogCancelButton = () => (
-    <Button
-      onClick={() => setOpen(false)}
-      variant="contained"
-      color="secondary"
-    >
-      {t("common.cancel")}
-    </Button>
   );
 
   return (
@@ -211,7 +147,6 @@ const FormActionPanel: React.FC<FormActionProps> = ({
     >
       <ActionContainer sx={{ maxWidth: "200px" }}>
         {renderSaveButton()}
-        {renderDeleteButton()}
         {renderCancelButton()}
         {renderSavedInformation()}
       </ActionContainer>
@@ -225,7 +160,6 @@ const FormActionPanel: React.FC<FormActionProps> = ({
       >
         {children}
       </Box>
-      {renderDialog()}
     </Box>
   );
 };

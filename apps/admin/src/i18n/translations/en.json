@@ -22,6 +22,7 @@
     "common.layerGroups": "Layer groups",
     "common.layerName": "Layername",
     "common.layers": "Layers",
+    "common.layer": "Layer",
     "common.login": "Log in",
     "common.loginFailed": "Log in failed. Wrong email or password.",
     "common.loginToContinue": "You have to login",
