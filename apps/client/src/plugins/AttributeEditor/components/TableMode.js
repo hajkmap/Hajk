@@ -1,0 +1,479 @@
+import React from "react";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import EditNoteIcon from "@mui/icons-material/EditNote";
+import SaveIcon from "@mui/icons-material/Save";
+import UndoIcon from "@mui/icons-material/Undo";
+
+export default function TableMode(props) {
+  const {
+    s,
+    theme,
+    FIELD_META,
+    isMobile,
+    features,
+    filteredAndSorted,
+
+    // selection & pending
+    tableSelectedIds,
+    tableHasPending,
+
+    // actions (top bar)
+    duplicateSelectedRows,
+    openSelectedInFormFromTable,
+    revertTableEdits,
+    commitTableEdits,
+
+    // filters & sorting
+    columnFilters,
+    setColumnFilters,
+    openFilterColumn,
+    setOpenFilterColumn,
+    getUniqueColumnValues,
+    toggleSort,
+    sort,
+
+    // editing
+    tableEditing,
+    setTableEditing,
+    tablePendingEdits,
+    setTablePendingEdits,
+    setTablePendingAdds,
+
+    // helpers
+    isEditableField,
+    isMissingValue,
+    handleRowClick,
+    openInFormFromTable,
+
+    // refs
+    firstColumnRef,
+    filterOverlayRef,
+  } = props;
+
+  function ColumnFilter({ columnKey, placement }) {
+    const uniqueValues = getUniqueColumnValues(columnKey);
+    const selectedValues = columnFilters[columnKey] || [];
+
+    const anchorStyle =
+      placement === "right"
+        ? { left: 0, right: "auto", transform: "none" }
+        : placement === "left"
+          ? { right: 0, left: "auto", transform: "none" }
+          : { left: "50%", right: "auto", transform: "translateX(-50%)" };
+
+    return (
+      <div
+        ref={(el) => {
+          if (filterOverlayRef) filterOverlayRef.current = el;
+        }}
+        style={{ ...s.filterOverlay, ...anchorStyle }}
+      >
+        <div style={s.filterOverlayButtons}>
+          <button
+            style={s.btnSmall}
+            onClick={() =>
+              setColumnFilters((prev) => ({ ...prev, [columnKey]: [] }))
+            }
+          >
+            Rensa
+          </button>
+          <button
+            style={s.btnSmall}
+            onClick={() =>
+              setColumnFilters((prev) => ({
+                ...prev,
+                [columnKey]: uniqueValues,
+              }))
+            }
+          >
+            Välj alla
+          </button>
+        </div>
+
+        {uniqueValues.map((value) => (
+          <label key={value} style={s.filterCheckbox}>
+            <input
+              type="checkbox"
+              checked={selectedValues.includes(value)}
+              onChange={(e) => {
+                setColumnFilters((prev) => {
+                  const current = prev[columnKey] || [];
+                  return e.target.checked
+                    ? { ...prev, [columnKey]: [...current, value] }
+                    : {
+                        ...prev,
+                        [columnKey]: current.filter((v) => v !== value),
+                      };
+                });
+              }}
+            />
+            {value}
+          </label>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div style={s.tableWrap}>
+      <div style={s.tableHeaderBar}>
+        <span style={s.tableHeaderTitle}>Alla objekt</span>
+        <div style={s.spacer} />
+
+        <>
+          {tableHasPending && (
+            <span style={{ ...s.toolbarStats, color: theme.warning }}>
+              Osparade ändringar
+            </span>
+          )}
+
+          <button
+            style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
+            disabled={tableSelectedIds.size === 0}
+            onClick={duplicateSelectedRows}
+            title={
+              tableSelectedIds.size
+                ? `Duplicera ${tableSelectedIds.size} markerade`
+                : "Markera rader först"
+            }
+            aria-label="Duplicera val"
+          >
+            <ContentCopyIcon fontSize="small" />
+          </button>
+
+          <button
+            style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
+            disabled={tableSelectedIds.size === 0}
+            onClick={openSelectedInFormFromTable}
+            title={
+              tableSelectedIds.size
+                ? "Öppna de markerade i formulärläge"
+                : "Markera rader först"
+            }
+            aria-label="Redigera val i formulär"
+          >
+            <EditNoteIcon fontSize="small" />
+          </button>
+
+          <button
+            style={!tableHasPending ? s.iconBtnDisabled : s.iconBtn}
+            disabled={!tableHasPending}
+            onClick={revertTableEdits}
+            title="Ångra osparade ändringar (tabell)"
+            aria-label="Ångra (tabell)"
+          >
+            <UndoIcon fontSize="small" />
+          </button>
+
+          <button
+            style={!tableHasPending ? s.iconBtnDisabled : s.iconBtn}
+            disabled={!tableHasPending}
+            onClick={commitTableEdits}
+            title="Spara osparade ändringar (tabell)"
+            aria-label="Spara (tabell)"
+          >
+            <SaveIcon fontSize="small" />
+          </button>
+        </>
+
+        {isMobile && (
+          <span style={s.toolbarStats}>
+            {filteredAndSorted.length}/{features.length}
+          </span>
+        )}
+      </div>
+
+      <div style={s.tableViewport}>
+        <div style={s.tableInner}>
+          <table style={s.table}>
+            <thead>
+              <tr>
+                {FIELD_META.map((f, index) => {
+                  const hasActiveFilter =
+                    (columnFilters[f.key] || []).length > 0;
+                  const totalCols = FIELD_META.length;
+                  const placement =
+                    index < 2
+                      ? "right"
+                      : index >= totalCols - 1
+                        ? "left"
+                        : "center";
+
+                  const isFirstColumn = index === 0;
+
+                  return (
+                    <th
+                      key={f.key}
+                      style={s.th}
+                      ref={isFirstColumn ? firstColumnRef : null}
+                    >
+                      <div style={s.thContent}>
+                        <div style={s.thControls}>
+                          <button
+                            onClick={() => toggleSort(f.key)}
+                            title="Klicka för att sortera"
+                            style={s.sortButton}
+                          >
+                            {sort.key === f.key
+                              ? sort.dir === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "↕"}
+                          </button>
+
+                          <span
+                            onClick={() => toggleSort(f.key)}
+                            style={s.columnHeader}
+                          >
+                            {f.label}
+                          </span>
+
+                          <button
+                            data-filter-btn={f.key}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenFilterColumn(
+                                openFilterColumn === f.key ? null : f.key
+                              );
+                            }}
+                            style={s.filterButton(hasActiveFilter)}
+                            title={
+                              hasActiveFilter
+                                ? `Filter aktivt (${(columnFilters[f.key] || []).length} val)`
+                                : "Filtrera"
+                            }
+                            aria-pressed={openFilterColumn === f.key}
+                          >
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke={
+                                hasActiveFilter
+                                  ? theme.primary
+                                  : theme.textMuted
+                              }
+                              strokeWidth="2"
+                            >
+                              <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+                            </svg>
+                          </button>
+
+                          {openFilterColumn === f.key && (
+                            <ColumnFilter
+                              columnKey={f.key}
+                              placement={placement}
+                            />
+                          )}
+                        </div>
+
+                        <div style={s.spacer} />
+                      </div>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredAndSorted.map((row, idx) => {
+                const selected = tableSelectedIds.has(row.id);
+
+                return (
+                  <tr
+                    key={row.id}
+                    style={s.tr(selected, !!row.__pending)}
+                    aria-selected={selected}
+                    onClick={(e) => handleRowClick(row.id, idx, e)}
+                    onDoubleClick={(e) => {
+                      if (tableEditing) return;
+                      const td = e.target.closest?.("td");
+                      if (td?.dataset?.editable === "true") return;
+                      if (tableSelectedIds.size > 1)
+                        openSelectedInFormFromTable();
+                      else openInFormFromTable(row.id);
+                    }}
+                    title="Klick: markera • Dubbelklick: öppna i formulär"
+                  >
+                    {FIELD_META.map((meta) => {
+                      const patch = tablePendingEdits[row.id];
+                      const patchedValue =
+                        patch && meta.key in patch
+                          ? patch[meta.key]
+                          : undefined;
+                      const effectiveValue =
+                        patchedValue !== undefined
+                          ? patchedValue
+                          : row[meta.key];
+
+                      const isPlaceholder =
+                        row.__pending &&
+                        meta.readOnly &&
+                        isMissingValue(effectiveValue);
+
+                      const isEditedCell =
+                        !row.__pending && patch && meta.key in patch;
+
+                      const isEditing =
+                        !!tableEditing &&
+                        tableEditing.id === row.id &&
+                        tableEditing.key === meta.key;
+
+                      const tdStyle = isEditing
+                        ? s.tdEdited
+                        : isPlaceholder
+                          ? s.tdPlaceholder
+                          : isEditedCell
+                            ? s.tdEdited
+                            : s.td;
+
+                      const beginEdit = () => {
+                        if (!isEditableField(meta)) return;
+                        setTableEditing({
+                          id: row.id,
+                          key: meta.key,
+                          startValue: effectiveValue ?? "",
+                        });
+                      };
+
+                      const applyChange = (newVal) => {
+                        if (row.__pending) {
+                          setTablePendingAdds((prev) =>
+                            prev.map((d) =>
+                              d.id === row.id ? { ...d, [meta.key]: newVal } : d
+                            )
+                          );
+                        } else {
+                          setTablePendingEdits((prev) => {
+                            const next = { ...prev };
+                            const current = next[row.id]
+                              ? { ...next[row.id] }
+                              : {};
+                            const original = features.find(
+                              (f) => f.id === row.id
+                            )?.[meta.key];
+                            if (newVal === original) {
+                              delete current[meta.key];
+                            } else {
+                              current[meta.key] = newVal;
+                            }
+                            if (Object.keys(current).length)
+                              next[row.id] = current;
+                            else delete next[row.id];
+                            return next;
+                          });
+                        }
+                      };
+
+                      const finishEdit = () => setTableEditing(null);
+
+                      const cancelEdit = () => {
+                        const ed = tableEditing;
+                        if (!ed) return;
+                        if (row.__pending) {
+                          setTablePendingAdds((prev) =>
+                            prev.map((d) =>
+                              d.id === row.id
+                                ? { ...d, [meta.key]: ed.startValue }
+                                : d
+                            )
+                          );
+                        } else {
+                          setTablePendingEdits((prev) => {
+                            const next = { ...prev };
+                            const current = { ...(next[row.id] || {}) };
+                            const original = features.find(
+                              (f) => f.id === row.id
+                            )?.[meta.key];
+                            const revertTo = ed.startValue;
+                            if (revertTo === original) {
+                              delete current[meta.key];
+                            } else {
+                              current[meta.key] = revertTo;
+                            }
+                            if (Object.keys(current).length)
+                              next[row.id] = current;
+                            else delete next[row.id];
+                            return next;
+                          });
+                        }
+                        setTableEditing(null);
+                      };
+
+                      const editorProps = {
+                        className: undefined,
+                        style: s.cellInput,
+                        value: effectiveValue ?? "",
+                        autoFocus: true,
+                        onChange: (e) => applyChange(e.target.value),
+                        onClick: (e) => e.stopPropagation(),
+                        onDoubleClick: (e) => e.stopPropagation(),
+                        onKeyDown: (e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            finishEdit();
+                          } else if (e.key === "Escape") {
+                            e.preventDefault();
+                            cancelEdit();
+                          }
+                        },
+                        onBlur: finishEdit,
+                      };
+
+                      return (
+                        <td
+                          key={meta.key}
+                          data-editable={String(isEditableField(meta))}
+                          style={tdStyle}
+                          onDoubleClick={(e) => {
+                            if (!isEditableField(meta)) return;
+                            e.stopPropagation();
+                            beginEdit();
+                          }}
+                          title={
+                            isEditableField(meta)
+                              ? "Dubbelklicka för att redigera"
+                              : "Ej redigerbar"
+                          }
+                        >
+                          {isEditing ? (
+                            meta.type === "select" ? (
+                              <select {...editorProps}>
+                                {(meta.options || []).map((opt) => (
+                                  <option key={opt} value={opt}>
+                                    {opt}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : meta.type === "textarea" ? (
+                              <textarea {...editorProps} rows={2} />
+                            ) : (
+                              <input {...editorProps} />
+                            )
+                          ) : isPlaceholder ? (
+                            "#saknas"
+                          ) : (
+                            String(effectiveValue ?? "")
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+
+              {filteredAndSorted.length === 0 && (
+                <tr>
+                  <td style={s.tdEmpty} colSpan={FIELD_META.length}>
+                    Inga rader matchar sökningen.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
