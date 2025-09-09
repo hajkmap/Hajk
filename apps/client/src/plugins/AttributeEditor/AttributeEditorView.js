@@ -28,6 +28,14 @@ export default function AttributeEditorView({ initialFeatures }) {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState("list"); // "list" | "form"
 
+  const [tablePendingDeletes, setTablePendingDeletes] = useState(new Set());
+
+  const [tableUndoStack, setTableUndoStack] = useState([]); // [{type, ...payload}]
+  const [formUndoStack, setFormUndoStack] = useState([]); // [{key, prevValue}] (per fokus)
+  const pushTableUndo = useCallback((entry) => {
+    setTableUndoStack((prev) => [...prev, { ...entry, when: Date.now() }]);
+  }, []);
+
   const [tablePendingAdds, setTablePendingAdds] = useState([]); // rows waiting to be saved
   const tempIdRef = useRef(-1); // temporary negative ids for drafts
 
@@ -37,7 +45,9 @@ export default function AttributeEditorView({ initialFeatures }) {
   // Pending cell edits for existing rows (not drafts)
   const [tablePendingEdits, setTablePendingEdits] = useState({}); // Record<number, Record<string, any>>
   const tableHasPending =
-    tablePendingAdds.length > 0 || Object.keys(tablePendingEdits).length > 0;
+    tablePendingAdds.length > 0 ||
+    Object.keys(tablePendingEdits).length > 0 ||
+    tablePendingDeletes.size > 0;
 
   const theme = dark ? themes.dark : themes.light;
   const s = useMemo(() => makeStyles(theme, isMobile), [theme, isMobile]);
@@ -79,6 +89,148 @@ export default function AttributeEditorView({ initialFeatures }) {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  function undoLatestTableChange() {
+    setTableUndoStack((prev) => {
+      if (prev.length === 0) return prev;
+      const nextStack = prev.slice(0, -1);
+      const op = prev[prev.length - 1];
+      if (!op) return prev;
+
+      switch (op.type) {
+        case "mark_delete": {
+          const ids = new Set(op.ids);
+          // 1) remove delete marking from existing rows
+          setTablePendingDeletes((prevDel) => {
+            const out = new Set(prevDel);
+            ids.forEach((id) => out.delete(id));
+            return out;
+          });
+          // 2) drafts that were marked delete: back to "add"
+          setTablePendingAdds((prevAdds) =>
+            prevAdds.map((d) =>
+              ids.has(d.id) ? { ...d, __pending: "add" } : d
+            )
+          );
+          break;
+        }
+        case "create_drafts": {
+          const ids = new Set(op.ids);
+          setTablePendingAdds((prevAdds) =>
+            prevAdds.filter((d) => !ids.has(d.id))
+          );
+          break;
+        }
+        case "edit_cell": {
+          const { id, key, prevValue, isDraft } = op;
+          if (isDraft) {
+            setTablePendingAdds((prevAdds) =>
+              prevAdds.map((d) =>
+                d.id === id ? { ...d, [key]: prevValue } : d
+              )
+            );
+          } else {
+            setTablePendingEdits((prev) => {
+              const next = { ...prev };
+              const current = { ...(next[id] || {}) };
+              const original = features.find((f) => f.id === id)?.[key];
+              if (prevValue === original) {
+                delete current[key];
+              } else {
+                current[key] = prevValue;
+              }
+              if (Object.keys(current).length) next[id] = current;
+              else delete next[id];
+              return next;
+            });
+          }
+          break;
+        }
+        default:
+          break;
+      }
+
+      showNotification("Senaste åtgärden ångrades");
+      return nextStack;
+    });
+  }
+
+  function undoLatestFormChange() {
+    setFormUndoStack((prev) => {
+      if (prev.length === 0) return prev;
+
+      const nextStack = prev.slice(0, -1);
+      const { key, prevValue } = prev[prev.length - 1];
+
+      // Roll back a field
+      setEditValues((vals) => ({ ...vals, [key]: prevValue }));
+
+      // Update changed/dirtiness
+      setChangedFields((cf) => {
+        const next = new Set(cf);
+        if ((prevValue ?? "") !== (originalValues[key] ?? "")) next.add(key);
+        else next.delete(key);
+        setDirty(next.size > 0);
+        return next;
+      });
+
+      const label = FIELD_META.find((f) => f.key === key)?.label || key;
+      showNotification(`Ångrade fältändring: ${label}`);
+
+      return nextStack;
+    });
+  }
+
+  function markDeleteOnlyByIds(ids) {
+    if (!ids?.length) return;
+    const idsNum = ids.map((x) => Number(x)); // normalize
+
+    // Drafts: set __pending = "delete" if they exist among adds
+    setTablePendingAdds((prev) =>
+      prev.map((d) =>
+        idsNum.includes(d.id) ? { ...d, __pending: "delete" } : d
+      )
+    );
+
+    // Existing: add to pendingDeletes (no toggle, just add)
+    setTablePendingDeletes((prev) => {
+      const next = new Set(prev);
+      idsNum.forEach((id) => next.add(id));
+      return next;
+    });
+
+    // Undo step for just this deletion marking
+    pushTableUndo({ type: "mark_delete", ids: idsNum });
+  }
+
+  function toggleDeleteSelectedRows(idsOverride) {
+    const idsSet =
+      idsOverride instanceof Set
+        ? idsOverride
+        : Array.isArray(idsOverride)
+          ? new Set(idsOverride)
+          : new Set(Array.from(tableSelectedIds));
+
+    if (idsSet.size === 0) return;
+
+    setTablePendingAdds((prev) =>
+      prev.map((d) =>
+        idsSet.has(d.id)
+          ? { ...d, __pending: d.__pending === "delete" ? "add" : "delete" }
+          : d
+      )
+    );
+
+    setTablePendingDeletes((prev) => {
+      const next = new Set(prev);
+      features.forEach((f) => {
+        if (!idsSet.has(f.id)) return;
+        next.has(f.id) ? next.delete(f.id) : next.add(f.id);
+      });
+      return next;
+    });
+    pushTableUndo({ type: "mark_delete", ids: Array.from(idsSet) });
+  }
+
   const duplicateSelectedRows = () => {
     if (tableSelectedIds.size === 0) return;
 
@@ -109,6 +261,10 @@ export default function AttributeEditorView({ initialFeatures }) {
     setTablePendingAdds((prev) => [...prev, ...newDrafts]);
     setTableSelectedIds(new Set(newDrafts.map((d) => d.id)));
 
+    if (newDrafts.length) {
+      pushTableUndo({ type: "create_drafts", ids: newDrafts.map((d) => d.id) });
+    }
+
     showNotification(
       `${newDrafts.length} ${newDrafts.length === 1 ? "utkast" : "utkast"} skapade`
     );
@@ -117,56 +273,50 @@ export default function AttributeEditorView({ initialFeatures }) {
   function commitTableEdits() {
     if (!tableHasPending) return;
 
-    // 1) Apply cell edits to existing rows
-    const hadEdits = Object.keys(tablePendingEdits).length > 0;
-    if (hadEdits) {
-      setFeatures((prev) =>
-        prev.map((f) =>
-          tablePendingEdits[f.id] ? { ...f, ...tablePendingEdits[f.id] } : f
-        )
+    let currentNextId = nextId;
+
+    setFeatures((prev) => {
+      const withEdits = prev.map((f) =>
+        tablePendingEdits[f.id] ? { ...f, ...tablePendingEdits[f.id] } : f
       );
-    }
 
-    // 2) Commit drafts (adds)
-    const hadAdds = tablePendingAdds.length > 0;
-    if (hadAdds) {
-      let currentNextId = nextId;
+      const afterDeletes = withEdits.filter(
+        (f) => !tablePendingDeletes.has(f.id)
+      );
 
-      let nextGeoid = getNextGeoidSeed(features);
+      let nextGeoid = getNextGeoidSeed(afterDeletes);
 
-      const committedAdds = tablePendingAdds.map((p) => {
-        const needsGeoid = p.geoid == null || p.geoid === "";
-        return {
-          ...p,
-          id: currentNextId++,
-          geoid: needsGeoid ? nextGeoid++ : p.geoid,
-          __pending: undefined,
-        };
-      });
+      const committedAdds = tablePendingAdds
+        .filter((p) => p.__pending !== "delete")
+        .map((p) => {
+          const needsGeoid = p.geoid == null || p.geoid === "";
+          return {
+            ...p,
+            id: currentNextId++,
+            geoid: needsGeoid ? nextGeoid++ : p.geoid,
+            __pending: undefined,
+          };
+        });
 
-      setFeatures((prev) => [...prev, ...committedAdds]);
-      setNextId(currentNextId);
-    }
+      return [...afterDeletes, ...committedAdds];
+    });
 
-    // 3) Reset pending states
+    const committedAddsCount = tablePendingAdds.filter(
+      (p) => p.__pending !== "delete"
+    ).length;
+    setNextId((n) => n + committedAddsCount);
     setTablePendingAdds([]);
     setTablePendingEdits({});
+    setTablePendingDeletes(new Set());
     setTableEditing(null);
     setTableSelectedIds(new Set());
+    setTableUndoStack([]);
 
     const parts = [];
-    if (hadEdits) parts.push("ändringar");
-    if (hadAdds) parts.push("utkast");
+    if (Object.keys(tablePendingEdits).length) parts.push("ändringar");
+    if (tablePendingDeletes.size) parts.push("raderingar");
+    if (committedAddsCount) parts.push("utkast");
     showNotification(`Sparade ${parts.join(" + ")}`);
-  }
-
-  function revertTableEdits() {
-    if (!tableHasPending) return;
-    setTablePendingAdds([]);
-    setTablePendingEdits({});
-    setTableEditing(null);
-    setTableSelectedIds(new Set());
-    showNotification("Osparade ändringar ångrade");
   }
 
   useEffect(() => {
@@ -198,10 +348,14 @@ export default function AttributeEditorView({ initialFeatures }) {
   const allRows = useMemo(() => {
     const editedFeatures = features.map((f) => {
       const patch = tablePendingEdits[f.id];
-      return patch ? { ...f, ...patch } : f;
+      let row = patch ? { ...f, ...patch } : f;
+      if (tablePendingDeletes?.has(f.id)) {
+        row = { ...row, __pending: "delete" };
+      }
+      return row;
     });
     return [...editedFeatures, ...tablePendingAdds];
-  }, [features, tablePendingAdds, tablePendingEdits]);
+  }, [features, tablePendingAdds, tablePendingEdits, tablePendingDeletes]);
 
   const filteredAndSorted = useMemo(() => {
     const q = tableSearch.trim().toLowerCase();
@@ -314,11 +468,13 @@ export default function AttributeEditorView({ initialFeatures }) {
       setOriginalValues(fresh);
       setChangedFields(new Set());
       setDirty(false);
+      setFormUndoStack([]);
     } else {
       setEditValues({});
       setOriginalValues({});
       setChangedFields(new Set());
       setDirty(false);
+      setFormUndoStack([]);
     }
   }, [focusedFeature]);
 
@@ -472,6 +628,7 @@ export default function AttributeEditorView({ initialFeatures }) {
     setOriginalValues({ ...editValues });
     setChangedFields(new Set());
     setDirty(false);
+    setFormUndoStack([]);
 
     showNotification(
       applyMany && selectedIds.size > 1
@@ -488,6 +645,13 @@ export default function AttributeEditorView({ initialFeatures }) {
   }
 
   function handleFieldChange(key, value) {
+    setFormUndoStack((stack) => {
+      const prevVal = editValues[key] ?? "";
+      return value === prevVal
+        ? stack
+        : [...stack, { key, prevValue: prevVal, when: Date.now() }];
+    });
+
     setEditValues((prev) => ({ ...prev, [key]: value }));
 
     setChangedFields((prev) => {
@@ -562,7 +726,6 @@ export default function AttributeEditorView({ initialFeatures }) {
           tableHasPending={tableHasPending}
           duplicateSelectedRows={duplicateSelectedRows}
           openSelectedInFormFromTable={openSelectedInFormFromTable}
-          revertTableEdits={revertTableEdits}
           commitTableEdits={commitTableEdits}
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}
@@ -582,6 +745,12 @@ export default function AttributeEditorView({ initialFeatures }) {
           openInFormFromTable={openInFormFromTable}
           firstColumnRef={firstColumnRef}
           filterOverlayRef={filterOverlayRef}
+          toggleDeleteSelectedRows={toggleDeleteSelectedRows}
+          tablePendingDeletes={tablePendingDeletes}
+          pushTableUndo={pushTableUndo}
+          tablePendingAdds={tablePendingAdds}
+          tableUndoStack={tableUndoStack}
+          undoLatestTableChange={undoLatestTableChange}
         />
       ) : isMobile ? (
         <MobileForm
@@ -630,6 +799,14 @@ export default function AttributeEditorView({ initialFeatures }) {
           dirty={dirty}
           resetEdits={resetEdits}
           saveChanges={saveChanges}
+          tableHasPending={tableHasPending}
+          tablePendingDeletes={tablePendingDeletes}
+          commitTableEdits={commitTableEdits}
+          tableUndoStack={tableUndoStack}
+          undoLatestTableChange={undoLatestTableChange}
+          formUndoStack={formUndoStack}
+          undoLatestFormChange={undoLatestFormChange}
+          onDeleteSelected={(ids) => markDeleteOnlyByIds(ids)}
         />
       )}
       {<NotificationBar s={s} theme={theme} text={notification} />}

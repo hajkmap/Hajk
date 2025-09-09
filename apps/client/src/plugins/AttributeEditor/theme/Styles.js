@@ -29,6 +29,9 @@ export const themes = {
 
     overlayBg: "#ffffff",
     shadow: "0 4px 6px rgba(0,0,0,0.1)",
+
+    danger: "#ef4444",
+    dangerBg: "rgba(239,68,68,0.08)",
   },
   dark: {
     appBg: "#0b0f16",
@@ -59,6 +62,9 @@ export const themes = {
 
     overlayBg: "#0f172a",
     shadow: "0 8px 16px rgba(0,0,0,0.45)",
+
+    danger: "#f87171",
+    dangerBg: "rgba(248,113,113,0.12)",
   },
 };
 
@@ -289,17 +295,34 @@ export function makeStyles(t, isMobile) {
     },
 
     list: { overflowY: "auto", overflowX: "hidden", flex: 1, minHeight: 0 },
-    listRow: (sel) => ({
-      display: "grid",
-      gridTemplateColumns: "28px 1fr",
-      alignItems: "center",
-      gap: 8,
-      padding: isMobile ? "6px 8px" : "8px 10px",
-      borderBottom: `1px solid ${t.listDivider}`,
-      background: sel ? t.rowHover : "transparent",
-      cursor: "pointer",
-      minWidth: 0,
-    }),
+    // status: null | "add" | "delete"
+    listRow: (sel, status = null) => {
+      const isAdd = status === "add";
+      const isDelete = status === "delete";
+      return {
+        display: "grid",
+        gridTemplateColumns: "28px 1fr",
+        alignItems: "center",
+        gap: 8,
+        padding: isMobile ? "6px 8px" : "8px 10px",
+        borderBottom: `1px solid ${t.listDivider}`,
+        background: sel
+          ? t.rowHover
+          : isAdd
+            ? t.warningBg
+            : isDelete
+              ? t.dangerBg
+              : "transparent",
+        cursor: "pointer",
+        minWidth: 0,
+        outline:
+          isAdd || isDelete
+            ? `2px dashed ${isDelete ? t.danger || "#ef4444" : t.warning}`
+            : "none",
+        textDecoration: isDelete ? "line-through" : "none",
+        opacity: isDelete ? 0.9 : 1,
+      };
+    },
     listRowText: {
       minWidth: 0,
     },
@@ -400,6 +423,43 @@ export function makeStyles(t, isMobile) {
       flexShrink: 0,
     },
 
+    tableHeaderLeft: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      minWidth: 0,
+      flexShrink: 1,
+    },
+    tableHeaderBadges: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      minWidth: 0,
+    },
+    statusPill: {
+      fontSize: isMobile ? 10 : 12,
+      padding: isMobile ? "2px 6px" : "2px 8px",
+      borderRadius: 999,
+      whiteSpace: "nowrap",
+      lineHeight: 1.4,
+    },
+    statusPillWarn: {
+      border: `1px solid ${t.warning}`,
+      background: t.warningBg,
+      color: t.text,
+    },
+    statusPillDanger: {
+      border: `1px solid ${t.danger}`,
+      background: t.dangerBg,
+      color: t.text,
+    },
+    tableHeaderButtonsWrap: {
+      display: "flex",
+      alignItems: "center",
+      gap: isMobile ? 4 : 8,
+      flexShrink: 0,
+      flexWrap: "nowrap",
+    },
     tableWrap: {
       border: `1px solid ${t.border}`,
       borderRadius: 8,
@@ -431,7 +491,7 @@ export function makeStyles(t, isMobile) {
     tableHeaderTitle: {
       fontWeight: 600,
       fontSize: isMobile ? 14 : 16,
-      width: isMobile ? "100%" : "auto",
+      width: "auto",
     },
 
     tableViewport: {
@@ -562,11 +622,15 @@ export function makeStyles(t, isMobile) {
     tr: (selected, pending) => ({
       background: selected
         ? t.rowSelected
-        : pending
+        : pending === "add"
           ? t.warningBg
-          : "transparent",
+          : pending === "delete"
+            ? t.dangerBg
+            : "transparent",
       cursor: "pointer",
-      outline: pending ? `1px dashed ${t.warning}` : "none",
+      outline: pending
+        ? `2px dashed ${pending === "delete" ? t.danger : t.warning}`
+        : "none",
     }),
 
     notification: {

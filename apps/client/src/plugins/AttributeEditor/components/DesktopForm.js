@@ -1,6 +1,8 @@
 import React from "react";
 import UndoIcon from "@mui/icons-material/Undo";
 import SaveIcon from "@mui/icons-material/Save";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { getIdsForDeletion } from "../helpers/helpers";
 
 export default function DesktopForm({
   s,
@@ -25,7 +27,21 @@ export default function DesktopForm({
   dirty,
   resetEdits,
   saveChanges,
+  onDeleteSelected,
+  tablePendingDeletes,
+  tableHasPending,
+  commitTableEdits,
+  tableUndoStack,
+  undoLatestTableChange,
+  formUndoStack,
+  undoLatestFormChange,
 }) {
+  const handleDeleteClick = () => {
+    const ids = getIdsForDeletion(selectedIds, focusedId);
+    if (!ids.length) return;
+    onDeleteSelected(ids);
+  };
+
   return (
     <div style={s.paneWrap}>
       {/* Left: Object list */}
@@ -34,11 +50,15 @@ export default function DesktopForm({
           {visibleFormList.map((f) => {
             const selected = selectedIds.has(f.id);
             const isFocused = focusedId === f.id;
+            const isPendingDelete = tablePendingDeletes?.has?.(f.id);
             return (
               <div
                 key={f.id}
                 data-row-id={f.id}
-                style={s.listRow(selected || isFocused)}
+                style={s.listRow(
+                  selected || isFocused,
+                  isPendingDelete ? "delete" : null
+                )}
                 onClick={() => handleBeforeChangeFocus(f.id)}
               >
                 <input
@@ -92,18 +112,50 @@ export default function DesktopForm({
             Spara ändrade fält för alla markerade
           </label>
           <button
-            style={!dirty ? s.iconBtnDisabled : s.iconBtn}
-            onClick={resetEdits}
-            disabled={!dirty}
+            style={
+              selectedIds.size === 0 && focusedId == null
+                ? s.iconBtnDisabled
+                : s.iconBtn
+            }
+            disabled={selectedIds.size === 0 && focusedId == null}
+            onClick={handleDeleteClick}
+            aria-label="Markera för radering"
+            title={
+              selectedIds.size
+                ? `Markera ${selectedIds.size} objekt för radering`
+                : focusedId != null
+                  ? "Markera valt objekt för radering"
+                  : "Markera objekt först"
+            }
+          >
+            <DeleteOutlineIcon fontSize="small" />
+          </button>
+          <button
+            style={
+              !(tableUndoStack?.length || formUndoStack?.length || dirty)
+                ? s.iconBtnDisabled
+                : s.iconBtn
+            }
+            onClick={() => {
+              if (formUndoStack?.length) undoLatestFormChange();
+              else if (tableUndoStack?.length) undoLatestTableChange();
+              else if (dirty) resetEdits();
+            }}
+            disabled={
+              !(tableUndoStack?.length || formUndoStack?.length || dirty)
+            }
             aria-label="Ångra"
             title="Ångra"
           >
             <UndoIcon fontSize="small" />
           </button>
           <button
-            style={!dirty ? s.iconBtnDisabled : s.iconBtn}
-            onClick={() => saveChanges()}
-            disabled={!dirty}
+            style={!(dirty || tableHasPending) ? s.iconBtnDisabled : s.iconBtn}
+            onClick={() => {
+              if (dirty) saveChanges();
+              if (tableHasPending) commitTableEdits();
+            }}
+            disabled={!(dirty || tableHasPending)}
             aria-label="Spara"
             title="Spara"
           >

@@ -3,6 +3,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 export default function TableMode(props) {
   const {
@@ -20,8 +21,13 @@ export default function TableMode(props) {
     // actions (top bar)
     duplicateSelectedRows,
     openSelectedInFormFromTable,
-    revertTableEdits,
     commitTableEdits,
+    toggleDeleteSelectedRows,
+    tablePendingDeletes,
+    pushTableUndo,
+    tablePendingAdds,
+    tableUndoStack,
+    undoLatestTableChange,
 
     // filters & sorting
     columnFilters,
@@ -121,6 +127,11 @@ export default function TableMode(props) {
         <div style={s.spacer} />
 
         <>
+          {tablePendingDeletes.size > 0 && (
+            <span style={{ ...s.toolbarStats, color: theme.danger }}>
+              {tablePendingDeletes.size} markerade för radering
+            </span>
+          )}
           {tableHasPending && (
             <span style={{ ...s.toolbarStats, color: theme.warning }}>
               Osparade ändringar
@@ -156,11 +167,25 @@ export default function TableMode(props) {
           </button>
 
           <button
-            style={!tableHasPending ? s.iconBtnDisabled : s.iconBtn}
-            disabled={!tableHasPending}
-            onClick={revertTableEdits}
-            title="Ångra osparade ändringar (tabell)"
-            aria-label="Ångra (tabell)"
+            style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
+            disabled={tableSelectedIds.size === 0}
+            onClick={toggleDeleteSelectedRows}
+            title={
+              tableSelectedIds.size
+                ? "Markera valda för radering"
+                : "Markera rader först"
+            }
+            aria-label="Markera för radering"
+          >
+            <DeleteOutlineIcon fontSize="small" />
+          </button>
+
+          <button
+            style={!tableUndoStack?.length ? s.iconBtnDisabled : s.iconBtn}
+            disabled={!tableUndoStack?.length}
+            onClick={undoLatestTableChange}
+            title="Ångra senaste ändring"
+            aria-label="Ångra senaste"
           >
             <UndoIcon fontSize="small" />
           </button>
@@ -283,7 +308,7 @@ export default function TableMode(props) {
                 return (
                   <tr
                     key={row.id}
-                    style={s.tr(selected, !!row.__pending)}
+                    style={s.tr(selected, row.__pending)}
                     aria-selected={selected}
                     onClick={(e) => handleRowClick(row.id, idx, e)}
                     onDoubleClick={(e) => {
@@ -366,7 +391,39 @@ export default function TableMode(props) {
                         }
                       };
 
-                      const finishEdit = () => setTableEditing(null);
+                      const finishEdit = () => {
+                        const ed = tableEditing; // { id, key, startValue }
+                        setTableEditing(null);
+                        if (!ed || ed.id !== row.id || ed.key !== meta.key)
+                          return;
+
+                        let currentVal;
+                        const patch = tablePendingEdits[row.id];
+                        if (patch && meta.key in patch) {
+                          currentVal = patch[meta.key];
+                        } else {
+                          const draft = tablePendingAdds?.find?.(
+                            (d) => d.id === row.id
+                          );
+                          if (draft) currentVal = draft[meta.key];
+                          else
+                            currentVal = features.find(
+                              (f) => f.id === row.id
+                            )?.[meta.key];
+                        }
+
+                        const prevVal = ed.startValue ?? "";
+                        if (currentVal !== prevVal) {
+                          const isDraft = row.__pending === "add" || ed.id < 0;
+                          pushTableUndo({
+                            type: "edit_cell",
+                            id: ed.id,
+                            key: meta.key,
+                            prevValue: prevVal,
+                            isDraft,
+                          });
+                        }
+                      };
 
                       const cancelEdit = () => {
                         const ed = tableEditing;

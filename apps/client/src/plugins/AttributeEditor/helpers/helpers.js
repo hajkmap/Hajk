@@ -1,6 +1,25 @@
 /* === Helpers === */
 export const isEditableField = (meta) => !meta.readOnly;
 
+export function getIdsForDeletion(selectedIds, focusedId) {
+  if (selectedIds && selectedIds.size) return Array.from(selectedIds);
+  return focusedId != null ? [focusedId] : [];
+}
+
+export function computeIdsToMarkForDelete(
+  selectedIds,
+  focusedId,
+  tablePendingDeletes
+) {
+  const ids = selectedIds?.size
+    ? Array.from(selectedIds)
+    : focusedId != null
+      ? [focusedId]
+      : [];
+  if (!ids.length) return [];
+  return ids.filter((id) => !tablePendingDeletes?.has?.(id));
+}
+
 export function getNextGeoidSeed(rows) {
   const nums = rows
     .map((r) => Number(r.geoid))
