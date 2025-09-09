@@ -298,6 +298,7 @@ export function makeStyles(t, isMobile) {
     // status: null | "add" | "delete"
     listRow: (sel, status = null) => {
       const isAdd = status === "add";
+      const isEdit = status === "edit";
       const isDelete = status === "delete";
       return {
         display: "grid",
@@ -306,21 +307,26 @@ export function makeStyles(t, isMobile) {
         gap: 8,
         padding: isMobile ? "6px 8px" : "8px 10px",
         borderBottom: `1px solid ${t.listDivider}`,
-        background: sel
-          ? t.rowHover
-          : isAdd
+        background: isDelete
+          ? t.dangerBg
+          : isAdd || isEdit
             ? t.warningBg
-            : isDelete
-              ? t.dangerBg
+            : sel
+              ? t.rowHover
               : "transparent",
         cursor: "pointer",
         minWidth: 0,
         outline:
-          isAdd || isDelete
+          isAdd || isEdit || isDelete
             ? `2px dashed ${isDelete ? t.danger || "#ef4444" : t.warning}`
             : "none",
         textDecoration: isDelete ? "line-through" : "none",
         opacity: isDelete ? 0.9 : 1,
+        boxShadow: isDelete
+          ? `inset 4px 0 ${t.danger}`
+          : isAdd || isEdit
+            ? `inset 4px 0 ${t.warning}`
+            : "none",
       };
     },
     listRowText: {
@@ -394,7 +400,7 @@ export function makeStyles(t, isMobile) {
 
     field: { display: "flex", flexDirection: "column", gap: 6 },
     label: { fontSize: 12, color: t.label },
-    labelChanged: { color: "#f59e0b", marginLeft: 4 },
+    labelChanged: { color: t.warning, marginLeft: 4 },
 
     input: {
       padding: isMobile ? 6 : 8,

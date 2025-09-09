@@ -460,10 +460,13 @@ export default function AttributeEditorView({ initialFeatures }) {
 
   useEffect(() => {
     if (focusedFeature) {
+      const patch = tablePendingEdits[focusedFeature.id] || {};
       const fresh = {};
-      FIELD_META.forEach(
-        ({ key }) => (fresh[key] = normalize(focusedFeature[key]))
-      );
+      FIELD_META.forEach(({ key }) => {
+        const base = focusedFeature[key];
+        const val = key in patch ? patch[key] : base;
+        fresh[key] = normalize(val);
+      });
       setEditValues(fresh);
       setOriginalValues(fresh);
       setChangedFields(new Set());
@@ -476,7 +479,7 @@ export default function AttributeEditorView({ initialFeatures }) {
       setDirty(false);
       setFormUndoStack([]);
     }
-  }, [focusedFeature]);
+  }, [focusedFeature, tablePendingEdits]);
 
   function normalize(v) {
     return v == null ? "" : v;
@@ -538,6 +541,7 @@ export default function AttributeEditorView({ initialFeatures }) {
     const idx = arr.indexOf(focusedId);
     if (idx > 0) {
       const newId = arr[idx - 1];
+      if (dirty) saveChanges({ applyToSelection: false, toPending: true });
       setFocusedId(newId);
       setTimeout(() => {
         document
@@ -566,6 +570,7 @@ export default function AttributeEditorView({ initialFeatures }) {
     const idx = arr.indexOf(focusedId);
     if (idx < arr.length - 1) {
       const newId = arr[idx + 1];
+      if (dirty) saveChanges({ applyToSelection: false, toPending: true });
       setFocusedId(newId);
       setTimeout(() => {
         document
@@ -576,14 +581,7 @@ export default function AttributeEditorView({ initialFeatures }) {
   }
 
   function handleBeforeChangeFocus(targetId) {
-    if (!dirty) {
-      setFocusedId(targetId);
-      return;
-    }
-    const ok = window.confirm(
-      "Du har osparade ändringar. Vill du spara dem först?"
-    );
-    if (ok) saveChanges({ applyToSelection: false });
+    if (dirty) saveChanges({ applyToSelection: false, toPending: true });
     setFocusedId(targetId);
   }
 
@@ -607,10 +605,53 @@ export default function AttributeEditorView({ initialFeatures }) {
   function saveChanges(opts = {}) {
     if (!focusedFeature) return;
     const applyMany = opts.applyToSelection ?? applyToSelection;
+    const toPending = opts.toPending ?? false;
+
     const idsToUpdate =
       applyMany && selectedIds.size
         ? Array.from(selectedIds)
         : [focusedFeature.id];
+
+    if (toPending) {
+      setTablePendingEdits((prev) => {
+        const next = { ...prev };
+        idsToUpdate.forEach((id) => {
+          const base = features.find((f) => f.id === id) || {};
+          const patchCandidate = projectToFeature(editValues, true);
+          const cleaned = { ...patchCandidate };
+          Object.keys(cleaned).forEach((k) => {
+            if (cleaned[k] === base[k]) delete cleaned[k];
+          });
+          if (Object.keys(cleaned).length) {
+            next[id] = { ...(next[id] || {}), ...cleaned };
+            Object.keys(cleaned).forEach((key) => {
+              const prevValue = base[key];
+              pushTableUndo({
+                type: "edit_cell",
+                id,
+                key,
+                prevValue,
+                isDraft: false,
+              });
+            });
+          } else {
+            delete next[id];
+          }
+        });
+        return next;
+      });
+
+      setOriginalValues({ ...editValues });
+      setChangedFields(new Set());
+      setDirty(false);
+
+      showNotification(
+        applyMany && idsToUpdate.length > 1
+          ? `Ändringar buffrade för ${idsToUpdate.length} objekt`
+          : "Ändringar buffrade"
+      );
+      return;
+    }
 
     setFeatures((prev) =>
       prev.map((f) => {
@@ -755,6 +796,7 @@ export default function AttributeEditorView({ initialFeatures }) {
       ) : isMobile ? (
         <MobileForm
           s={s}
+          theme={theme}
           isMobile={isMobile}
           mode={mode}
           mobileActiveTab={mobileActiveTab}
@@ -785,10 +827,13 @@ export default function AttributeEditorView({ initialFeatures }) {
           undoLatestTableChange={undoLatestTableChange}
           formUndoStack={formUndoStack}
           undoLatestFormChange={undoLatestFormChange}
+          tablePendingEdits={tablePendingEdits}
+          tablePendingAdds={tablePendingAdds}
         />
       ) : (
         <DesktopForm
           s={s}
+          theme={theme}
           visibleFormList={visibleFormList}
           selectedIds={selectedIds}
           toggleSelect={toggleSelect}
@@ -815,6 +860,8 @@ export default function AttributeEditorView({ initialFeatures }) {
           formUndoStack={formUndoStack}
           undoLatestFormChange={undoLatestFormChange}
           onDeleteSelected={(ids) => markDeleteOnlyByIds(ids)}
+          tablePendingEdits={tablePendingEdits}
+          tablePendingAdds={tablePendingAdds}
         />
       )}
       {<NotificationBar s={s} theme={theme} text={notification} />}
