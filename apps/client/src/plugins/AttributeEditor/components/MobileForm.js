@@ -35,6 +35,9 @@ export default function MobileForm({
   undoLatestTableChange,
   formUndoStack,
   undoLatestFormChange,
+  theme,
+  tablePendingEdits,
+  tablePendingAdds,
 }) {
   if (!isMobile || mode !== "form") return null;
 
@@ -75,16 +78,24 @@ export default function MobileForm({
               {visibleFormList.map((f) => {
                 const selected = selectedIds.has(f.id);
                 const isFocused = focusedId === f.id;
-                const isPendingDelete = tablePendingDeletes?.has(f.id);
+                const isPendingDelete = tablePendingDeletes?.has?.(f.id);
+                const hasPendingEdits = !!tablePendingEdits?.[f.id];
+                const isDraftAdd = tablePendingAdds?.some?.(
+                  (d) => d.id === f.id && d.__pending !== "delete"
+                );
+                const status = isPendingDelete
+                  ? "delete"
+                  : hasPendingEdits
+                    ? "edit"
+                    : isDraftAdd
+                      ? "add"
+                      : null;
 
                 return (
                   <div
                     key={f.id}
                     data-row-id={f.id}
-                    style={s.listRow(
-                      selected || isFocused,
-                      isPendingDelete ? "delete" : null
-                    )}
+                    style={s.listRow(selected || isFocused, status)}
                     onClick={() => handleBeforeChangeFocus(f.id)}
                   >
                     <input
@@ -99,6 +110,9 @@ export default function MobileForm({
                       <div style={s.listRowText}>
                         <div style={s.listRowTitle}>
                           {f.ar_typ} — {f.ar_andamal}
+                          {hasPendingEdits && (
+                            <span style={s.labelChanged}>&nbsp;• ändrad</span>
+                          )}
                         </div>
                         <div style={s.listRowSubtitle}>
                           geoid {f.geoid} • {f.ar_forman} • {f.ar_last}
