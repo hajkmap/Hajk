@@ -777,6 +777,14 @@ export default function AttributeEditorView({ initialFeatures }) {
           dirty={dirty}
           resetEdits={resetEdits}
           saveChanges={saveChanges}
+          tablePendingDeletes={tablePendingDeletes}
+          onDeleteSelected={(ids) => markDeleteOnlyByIds(ids)}
+          tableHasPending={tableHasPending}
+          commitTableEdits={commitTableEdits}
+          tableUndoStack={tableUndoStack}
+          undoLatestTableChange={undoLatestTableChange}
+          formUndoStack={formUndoStack}
+          undoLatestFormChange={undoLatestFormChange}
         />
       ) : (
         <DesktopForm
