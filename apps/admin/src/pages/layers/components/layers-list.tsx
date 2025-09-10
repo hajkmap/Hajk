@@ -11,29 +11,41 @@ import {
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
-import Page from "../../layouts/root/components/page";
+import Page from "../../../layouts/root/components/page";
 import {
   Layer,
   useLayers,
   LayerCreateInput,
   useCreateLayer,
-} from "../../api/layers";
-import { useServices } from "../../api/services";
+} from "../../../api/layers";
+import { useServices, Service } from "../../../api/services";
 import { useNavigate } from "react-router";
-import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
-import useAppStateStore from "../../store/use-app-state-store";
-import { SquareSpinnerComponent } from "../../components/progress/square-progress";
-import DialogWrapper from "../../components/flexible-dialog";
-import FormRenderer from "../../components/form-factory/form-renderer";
-import { DefaultUseForm } from "../../components/form-factory/default-use-form";
-import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
-import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
+import { GRID_SWEDISH_LOCALE_TEXT } from "../../../i18n/translations/datagrid/sv";
+import useAppStateStore from "../../../store/use-app-state-store";
+import { SquareSpinnerComponent } from "../../../components/progress/square-progress";
+import DialogWrapper from "../../../components/flexible-dialog";
+import FormRenderer from "../../../components/form-factory/form-renderer";
+import { DefaultUseForm } from "../../../components/form-factory/default-use-form";
+import { createOnSubmitHandler } from "../../../components/form-factory/form-utils";
+import DynamicFormContainer from "../../../components/form-factory/dynamic-form-container";
 import { FieldValues } from "react-hook-form";
-import INPUT_TYPE from "../../components/form-factory/types/input-type";
+import INPUT_TYPE from "../../../components/form-factory/types/input-type";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { toast } from "react-toastify";
 
-export default function LayersPage() {
+interface LayersListProps {
+  filterLayers: (layers: Layer[], services: Service[]) => Layer[];
+  showCreateButton?: boolean;
+  pageTitleKey: string;
+  baseRoute: string;
+}
+
+export default function LayersList({
+  filterLayers,
+  showCreateButton = true,
+  pageTitleKey,
+  baseRoute,
+}: LayersListProps) {
   const { t } = useTranslation();
   const { data: layers, isLoading } = useLayers();
   const navigate = useNavigate();
@@ -44,8 +56,6 @@ export default function LayersPage() {
   const { palette } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
 
-  console.log("layers", layers);
-
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
@@ -53,6 +63,10 @@ export default function LayersPage() {
   const filteredLayers = useMemo(() => {
     if (!layers || !services) return [];
 
+    // First apply the specific filter for this page type
+    const typeFilteredLayers = filterLayers(layers, services);
+
+    // Then apply search filter
     const searchFilter = (layer: Layer) => {
       const service = services.find(
         (service) => service.id === layer.serviceId
@@ -63,7 +77,7 @@ export default function LayersPage() {
       return combinedText.includes(searchTerm.toLowerCase());
     };
 
-    return layers.filter(searchFilter).map((layer) => {
+    return typeFilteredLayers.filter(searchFilter).map((layer) => {
       const service = services.find(
         (service) => service.id === layer.serviceId
       );
@@ -73,7 +87,7 @@ export default function LayersPage() {
         url: service?.url ?? "",
       };
     });
-  }, [layers, services, searchTerm]);
+  }, [layers, services, searchTerm, filterLayers]);
 
   const handleClose = () => {
     setOpen(false);
@@ -135,7 +149,7 @@ export default function LayersPage() {
         theme: palette.mode,
         hideProgressBar: true,
       });
-      void navigate(`/layers/${response?.id}`);
+      void navigate(`${baseRoute}/${response?.id}`);
       reset();
       handleClose();
     } catch (error) {
@@ -195,7 +209,7 @@ export default function LayersPage() {
             onClick={() => {
               const id: string = (params.row as Layer).id;
               if (id) {
-                void navigate(`/layers/${id}`);
+                void navigate(`${baseRoute}/${id}`);
               }
             }}
           >
@@ -218,17 +232,19 @@ export default function LayersPage() {
         <SquareSpinnerComponent />
       ) : (
         <Page
-          title={t("common.layers")}
+          title={t(pageTitleKey)}
           actionButtons={
-            <>
-              <Button
-                onClick={handleClickOpen}
-                color="primary"
-                variant="contained"
-              >
-                {t("layers.dialog.addBtn")}
-              </Button>
-            </>
+            showCreateButton ? (
+              <>
+                <Button
+                  onClick={handleClickOpen}
+                  color="primary"
+                  variant="contained"
+                >
+                  {t("layers.dialog.addBtn")}
+                </Button>
+              </>
+            ) : undefined
           }
         >
           <DialogWrapper
@@ -275,7 +291,7 @@ export default function LayersPage() {
                 }
                 const id: string = (params.row as Layer).id;
                 if (id) {
-                  void navigate(`/layers/${id}`);
+                  void navigate(`${baseRoute}/${id}`);
                 }
               }}
               sx={{
