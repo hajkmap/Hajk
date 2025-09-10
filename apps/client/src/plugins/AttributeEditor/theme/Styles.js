@@ -296,15 +296,17 @@ export function makeStyles(t, isMobile) {
 
     list: { overflowY: "auto", overflowX: "hidden", flex: 1, minHeight: 0 },
     // status: null | "add" | "delete"
-    listRow: (sel, status = null) => {
+    listRow: (sel, status = null, hasLeading = true) => {
       const isAdd = status === "add";
       const isEdit = status === "edit";
       const isDelete = status === "delete";
       return {
         display: "grid",
-        gridTemplateColumns: "28px 1fr",
+        gridTemplateColumns: hasLeading
+          ? "28px minmax(0,1fr)"
+          : "minmax(0,1fr)",
         alignItems: "center",
-        gap: 8,
+        gap: hasLeading ? 8 : 0,
         padding: isMobile ? "6px 8px" : "8px 10px",
         borderBottom: `1px solid ${t.listDivider}`,
         background: isDelete

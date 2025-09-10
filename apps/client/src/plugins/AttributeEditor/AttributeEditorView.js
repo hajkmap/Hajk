@@ -79,6 +79,8 @@ export default function AttributeEditorView({ initialFeatures }) {
   const [sort, setSort] = useState({ key: "geoid", dir: "asc" });
   const [tableSelectedIds, setTableSelectedIds] = useState(new Set());
   const [lastTableIndex, setLastTableIndex] = useState(null);
+  const [lastFormIndex, setLastFormIndex] = useState(null);
+  const lastEditTargetIdsRef = useRef(null);
   const [columnFilters, setColumnFilters] = useState({});
   const [openFilterColumn, setOpenFilterColumn] = useState(null);
   const filterOverlayRef = useRef(null);
@@ -92,64 +94,155 @@ export default function AttributeEditorView({ initialFeatures }) {
   function undoLatestTableChange() {
     setTableUndoStack((prev) => {
       if (prev.length === 0) return prev;
-      const nextStack = prev.slice(0, -1);
-      const op = prev[prev.length - 1];
-      if (!op) return prev;
 
-      switch (op.type) {
-        case "mark_delete": {
+      const last = prev[prev.length - 1];
+
+      if (last.type === "batch_edit" && Array.isArray(last.ops)) {
+        const batchOps = last.ops; // [{id, key, prevValue, isDraft:false}, ...]
+
+        const nonDraft = batchOps.filter((o) => !o.isDraft);
+        if (nonDraft.length) {
+          setTablePendingEdits((prevEdits) => {
+            const next = { ...prevEdits };
+            nonDraft.forEach(({ id, key, prevValue }) => {
+              const baseVal = (features.find((f) => f.id === id) || {})[key];
+              const current = { ...(next[id] || {}) };
+
+              if ((prevValue ?? "") === (baseVal ?? "")) {
+                delete current[key];
+              } else {
+                current[key] = prevValue;
+              }
+
+              if (Object.keys(current).length) {
+                next[id] = current;
+              } else {
+                delete next[id];
+              }
+            });
+            return next;
+          });
+
+          if (focusedId != null) {
+            const relevantOps = nonDraft.filter((op) => op.id === focusedId);
+            if (relevantOps.length > 0) {
+              setEditValues((prev) => {
+                const updated = { ...prev };
+                relevantOps.forEach(({ key, prevValue }) => {
+                  updated[key] = prevValue ?? "";
+                });
+                return updated;
+              });
+
+              const base = features.find((f) => f.id === focusedId) || {};
+              const newChangedFields = new Set();
+
+              setChangedFields(() => {
+                relevantOps.forEach(({ key, prevValue }) => {
+                  const baseVal = base[key] ?? "";
+                  if ((prevValue ?? "") !== baseVal) {
+                    newChangedFields.add(key);
+                  }
+                });
+                return newChangedFields;
+              });
+
+              setDirty(newChangedFields.size > 0);
+            }
+          }
+        }
+
+        const draftOps = batchOps.filter((o) => o.isDraft);
+        if (draftOps.length) {
+          setTablePendingAdds((prevAdds) => {
+            const byId = new Map(prevAdds.map((d) => [d.id, d]));
+            draftOps.forEach(({ id, key, prevValue }) => {
+              const draft = byId.get(id);
+              if (draft) draft[key] = prevValue ?? null;
+            });
+            return Array.from(byId.values());
+          });
+        }
+
+        showNotification(
+          `Ångrade ${batchOps.length} ändring${batchOps.length > 1 ? "ar" : ""}`
+        );
+        return prev.slice(0, -1);
+      }
+
+      let opsToUndo = [last];
+      let removeCount = 1;
+
+      if (last.type === "edit_cell" && last.groupId) {
+        let i = prev.length - 1;
+        while (
+          i >= 0 &&
+          prev[i].type === "edit_cell" &&
+          prev[i].groupId === last.groupId
+        ) {
+          i--;
+        }
+        opsToUndo = prev.slice(i + 1);
+        removeCount = opsToUndo.length;
+      }
+
+      const editOps = opsToUndo.filter(
+        (op) => op.type === "edit_cell" && !op.isDraft
+      );
+      if (editOps.length) {
+        setTablePendingEdits((prevEdits) => {
+          const next = { ...prevEdits };
+          editOps.forEach(({ id, key, prevValue }) => {
+            const current = { ...(next[id] || {}) };
+            const original = features.find((f) => f.id === id)?.[key];
+            if (prevValue === original) delete current[key];
+            else current[key] = prevValue;
+            if (Object.keys(current).length) next[id] = current;
+            else delete next[id];
+          });
+          return next;
+        });
+      }
+
+      const draftEditOps = opsToUndo.filter(
+        (op) => op.type === "edit_cell" && op.isDraft
+      );
+      if (draftEditOps.length) {
+        setTablePendingAdds((prevAdds) => {
+          const byId = new Map(prevAdds.map((d) => [d.id, d]));
+          draftEditOps.forEach(({ id, key, prevValue }) => {
+            const draft = byId.get(id);
+            if (draft) draft[key] = prevValue;
+          });
+          return Array.from(byId.values());
+        });
+      }
+
+      if (opsToUndo.length === 1) {
+        const op = opsToUndo[0];
+        if (op.type === "mark_delete") {
           const ids = new Set(op.ids);
-          // 1) remove delete marking from existing rows
           setTablePendingDeletes((prevDel) => {
             const out = new Set(prevDel);
             ids.forEach((id) => out.delete(id));
             return out;
           });
-          // 2) drafts that were marked delete: back to "add"
           setTablePendingAdds((prevAdds) =>
             prevAdds.map((d) =>
               ids.has(d.id) ? { ...d, __pending: "add" } : d
             )
           );
-          break;
-        }
-        case "create_drafts": {
+        } else if (op.type === "create_drafts") {
           const ids = new Set(op.ids);
           setTablePendingAdds((prevAdds) =>
             prevAdds.filter((d) => !ids.has(d.id))
           );
-          break;
         }
-        case "edit_cell": {
-          const { id, key, prevValue, isDraft } = op;
-          if (isDraft) {
-            setTablePendingAdds((prevAdds) =>
-              prevAdds.map((d) =>
-                d.id === id ? { ...d, [key]: prevValue } : d
-              )
-            );
-          } else {
-            setTablePendingEdits((prev) => {
-              const next = { ...prev };
-              const current = { ...(next[id] || {}) };
-              const original = features.find((f) => f.id === id)?.[key];
-              if (prevValue === original) {
-                delete current[key];
-              } else {
-                current[key] = prevValue;
-              }
-              if (Object.keys(current).length) next[id] = current;
-              else delete next[id];
-              return next;
-            });
-          }
-          break;
-        }
-        default:
-          break;
       }
 
-      showNotification("Senaste åtgärden ångrades");
+      const nextStack = prev.slice(0, prev.length - removeCount);
+      const n = opsToUndo.length;
+      showNotification(`Ångrade ${n} ändring${n > 1 ? "ar" : ""}`);
       return nextStack;
     });
   }
@@ -161,10 +254,8 @@ export default function AttributeEditorView({ initialFeatures }) {
       const nextStack = prev.slice(0, -1);
       const { key, prevValue } = prev[prev.length - 1];
 
-      // 1) Rulla tillbaka fältet i formuläret
       setEditValues((vals) => ({ ...vals, [key]: prevValue }));
 
-      // 2) Backa även pending för fokuserad rad
       if (focusedId != null) {
         setTablePendingEdits((prevEdits) => {
           const next = { ...prevEdits };
@@ -184,7 +275,6 @@ export default function AttributeEditorView({ initialFeatures }) {
         });
       }
 
-      // 3) Uppdatera changed/dirty (dirty = lokalt osparat, inte pending)
       setChangedFields((cf) => {
         const next = new Set(cf);
         const baseVal = originalValues[key] ?? "";
@@ -192,7 +282,7 @@ export default function AttributeEditorView({ initialFeatures }) {
         else next.delete(key);
         return next;
       });
-      setDirty(nextStack.length > 0); // enkel tumregel: finns lokala ändringar kvar?
+      setDirty(nextStack.length > 0);
 
       const label = FIELD_META.find((f) => f.key === key)?.label || key;
       showNotification(`Ångrade fältändring: ${label}`);
@@ -200,7 +290,6 @@ export default function AttributeEditorView({ initialFeatures }) {
     });
   }
 
-  // I parent
   function setDeleteState(ids, mode /* 'toggle' | 'mark' | 'unmark' */) {
     const idsSet = new Set(ids.map(Number));
 
@@ -466,6 +555,47 @@ export default function AttributeEditorView({ initialFeatures }) {
   const [changedFields, setChangedFields] = useState(new Set());
   const [dirty, setDirty] = useState(false);
 
+  const visibleFormList = useMemo(() => {
+    const s = formSearch.trim().toLowerCase();
+    return features.filter((f) =>
+      !s
+        ? true
+        : [
+            f.ar_typ,
+            f.ar_andamal,
+            f.ar_forman,
+            f.ar_last,
+            f.geoid,
+            f.ar_aktbeteckning,
+          ]
+            .map((v) => String(v ?? "").toLowerCase())
+            .some((token) => token.includes(s))
+    );
+  }, [features, formSearch]);
+
+  const onFormRowClick = useCallback(
+    (rowId, rowIndex, evt) => {
+      handleBeforeChangeFocus(rowId);
+      setSelectedIds((prev) => {
+        let next = new Set(prev);
+        const anchorIndex = lastFormIndex ?? rowIndex;
+        if (evt.shiftKey && anchorIndex !== -1) {
+          const [a, b] = [anchorIndex, rowIndex].sort((x, y) => x - y);
+          next = new Set();
+          for (let i = a; i <= b; i++) next.add(visibleFormList[i].id);
+        } else if (evt.metaKey || evt.ctrlKey) {
+          if (next.has(rowId)) next.delete(rowId);
+          else next.add(rowId);
+        } else {
+          next = new Set([rowId]);
+        }
+        setLastFormIndex(rowIndex);
+        return next;
+      });
+    },
+    [visibleFormList, lastFormIndex, handleBeforeChangeFocus]
+  );
+
   useEffect(() => {
     if (!focusedId) {
       setEditValues({});
@@ -490,8 +620,8 @@ export default function AttributeEditorView({ initialFeatures }) {
       effective[key] = effVal;
     });
 
-    setOriginalValues(base); // <- jämförelse-bas (utan pending)
-    setEditValues(effective); // <- det som visas (med pending)
+    setOriginalValues(base);
+    setEditValues(effective);
 
     const changed = new Set();
     FIELD_META.forEach(({ key }) => {
@@ -536,34 +666,6 @@ export default function AttributeEditorView({ initialFeatures }) {
     return v == null ? "" : v;
   }
 
-  const visibleFormList = useMemo(() => {
-    const s = formSearch.trim().toLowerCase();
-    return features.filter((f) =>
-      !s
-        ? true
-        : [
-            f.ar_typ,
-            f.ar_andamal,
-            f.ar_forman,
-            f.ar_last,
-            f.geoid,
-            f.ar_aktbeteckning,
-          ]
-            .map((v) => String(v ?? "").toLowerCase())
-            .some((token) => token.includes(s))
-    );
-  }, [features, formSearch]);
-
-  function toggleSelect(id) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      if (!focusedId && !prev.has(id)) setFocusedId(id);
-      return next;
-    });
-  }
-
   function selectAllVisible() {
     setSelectedIds(new Set(visibleFormList.map((f) => f.id)));
     if (!focusedId && visibleFormList.length)
@@ -592,7 +694,9 @@ export default function AttributeEditorView({ initialFeatures }) {
     const idx = arr.indexOf(focusedId);
     if (idx > 0) {
       const newId = arr[idx - 1];
-      if (dirty) saveChanges({ toPending: true });
+      if (dirty && focusedId != null) {
+        saveChanges({ toPending: true, targetIds: [focusedId] });
+      }
       setFocusedId(newId);
       setTimeout(() => {
         document
@@ -621,7 +725,9 @@ export default function AttributeEditorView({ initialFeatures }) {
     const idx = arr.indexOf(focusedId);
     if (idx < arr.length - 1) {
       const newId = arr[idx + 1];
-      if (dirty) saveChanges({ toPending: true });
+      if (dirty && focusedId != null) {
+        saveChanges({ toPending: true, targetIds: [focusedId] });
+      }
       setFocusedId(newId);
       setTimeout(() => {
         document
@@ -632,92 +738,86 @@ export default function AttributeEditorView({ initialFeatures }) {
   }
 
   function handleBeforeChangeFocus(targetId) {
-    if (dirty) saveChanges({ toPending: true });
+    const prevId = focusedId;
+    if (dirty && prevId != null) {
+      setChangedFields(new Set());
+      setDirty(false);
+      setFormUndoStack([]);
+    }
+
     setFocusedId(targetId);
   }
 
-  function projectToFeature(values, onlyChanged = false) {
-    const out = {};
-    const fieldsToProcess = onlyChanged
-      ? FIELD_META.filter(({ key }) => changedFields.has(key))
-      : FIELD_META;
-
-    fieldsToProcess.forEach(({ key }) => {
-      if (
-        ["ar_utbredning", "ar_anteckning"].includes(key) &&
-        values[key] === ""
-      )
-        out[key] = null;
-      else out[key] = values[key];
-    });
-    return out;
-  }
-
   function saveChanges(opts = {}) {
-    if (!dirty) return;
     if (!focusedFeature) return;
-    const toPending = opts.toPending ?? true; // alltid via pending
-    const idsToUpdate = selectedIds.size
-      ? Array.from(selectedIds)
-      : [focusedFeature.id];
+    const override = opts.targetIds;
+    const idsToUpdate =
+      (override && override.length ? override : null) ??
+      (selectedIds.size ? Array.from(selectedIds) : [focusedFeature.id]);
 
     if (!idsToUpdate.length) return;
 
-    // Lägg ändrade fält i pending (bara changedFields)
+    const keys = FIELD_META.map((f) => f.key);
+    const norm = (v) => (v == null ? "" : v);
+    const batchOps = []; // [{ id, key, prevValue, isDraft:false }, ...]
+
     setTablePendingEdits((prev) => {
       const next = { ...prev };
-      const patchCandidate = projectToFeature(editValues, true); // endast ändrade fält
 
       idsToUpdate.forEach((id) => {
         const base = features.find((f) => f.id === id) || {};
         const current = { ...(next[id] || {}) };
+        keys.forEach((k) => {
+          if (!changedFields.has(k) && id !== focusedId) return;
+          let newVal = editValues[k];
+          if (["ar_utbredning", "ar_anteckning"].includes(k) && newVal === "") {
+            newVal = null;
+          }
 
-        Object.keys(patchCandidate).forEach((k) => {
-          const newVal = patchCandidate[k];
-          if (newVal === base[k]) delete current[k];
-          else current[k] = newVal;
+          const baseVal = base[k];
+          const previousPendingVal = prev[id]?.[k];
+          const diff = norm(newVal) !== norm(baseVal);
+
+          if (diff) {
+            const prevValue =
+              previousPendingVal !== undefined ? previousPendingVal : baseVal;
+            current[k] = newVal;
+
+            if (norm(newVal) !== norm(prevValue)) {
+              batchOps.push({ id, key: k, prevValue, isDraft: false });
+            }
+          } else {
+            delete current[k];
+          }
         });
 
-        if (Object.keys(current).length) {
-          next[id] = current;
-
-          // Push undo per fält (som tidigare)
-          Object.keys(patchCandidate).forEach((key) => {
-            const prevValue = base[key];
-            if (patchCandidate[key] !== prevValue) {
-              pushTableUndo({
-                type: "edit_cell",
-                id,
-                key,
-                prevValue,
-                isDraft: false,
-              });
-            }
-          });
-        } else {
-          delete next[id];
-        }
+        if (Object.keys(current).length) next[id] = current;
+        else delete next[id];
       });
 
       return next;
     });
 
-    // Nollställ lokala form-flaggor
-    //setOriginalValues({ ...editValues });
+    // Lägg in EN batch i undo-stack ENDAST om det faktiskt finns ändringar
+    if (batchOps.length > 0) {
+      pushTableUndo({
+        type: "batch_edit",
+        ops: batchOps,
+        when: Date.now(),
+      });
+    }
+
+    // Nollställ lokala formflaggor
     setChangedFields(new Set());
     setDirty(false);
     setFormUndoStack([]);
 
-    showNotification(
-      idsToUpdate.length > 1
-        ? `Ändringar buffrade för ${idsToUpdate.length} objekt`
-        : "Ändringar buffrade"
-    );
-
-    // Vill du omedelbart skriva till features: committa direkt här
-    // (eller låt användaren trycka Spara-knappen som kallar commitTableEdits)
-    if (toPending && tableHasPending) {
-      // inget: Desktop/Mobile-knappen kör commitTableEdits
+    if (batchOps.length > 0) {
+      showNotification(
+        idsToUpdate.length > 1
+          ? `Ändringar buffrade för ${idsToUpdate.length} objekt`
+          : "Ändringar buffrade"
+      );
     }
   }
 
@@ -729,8 +829,9 @@ export default function AttributeEditorView({ initialFeatures }) {
   }
 
   function handleFieldChange(key, value) {
-    // Lägg bara till i undo-stacken om värdet faktiskt ändras
     const currentValue = editValues[key] ?? "";
+
+    // Lägg bara till i undo-stack om värdet faktiskt ändras
     if (value !== currentValue) {
       setFormUndoStack((stack) => [
         ...stack,
@@ -752,7 +853,7 @@ export default function AttributeEditorView({ initialFeatures }) {
       } else {
         next.delete(key);
       }
-      setDirty(next.size > 0); // Uppdatera dirty direkt här
+      setDirty(next.size > 0);
       return next;
     });
 
@@ -763,6 +864,11 @@ export default function AttributeEditorView({ initialFeatures }) {
         : [];
 
     if (ids.length) {
+      lastEditTargetIdsRef.current = ids;
+    }
+
+    // Uppdatera tablePendingEdits direkt när vi ändrar
+    if (ids.length) {
       setTablePendingEdits((prev) => {
         const next = { ...prev };
         ids.forEach((id) => {
@@ -770,11 +876,26 @@ export default function AttributeEditorView({ initialFeatures }) {
           const current = { ...(next[id] || {}) };
           const baseVal = base[key];
 
-          if ((value ?? "") === (baseVal ?? "")) delete current[key];
-          else current[key] = value;
+          // Lägg till i undo-stack om detta är första gången vi ändrar detta värde
+          if (!(id in prev) || !(key in (prev[id] || {}))) {
+            pushTableUndo({
+              type: "batch_edit",
+              ops: [{ id, key, prevValue: baseVal, isDraft: false }],
+              when: Date.now(),
+            });
+          }
 
-          if (Object.keys(current).length) next[id] = current;
-          else delete next[id];
+          if ((value ?? "") === (baseVal ?? "")) {
+            delete current[key];
+          } else {
+            current[key] = value;
+          }
+
+          if (Object.keys(current).length) {
+            next[id] = current;
+          } else {
+            delete next[id];
+          }
         });
         return next;
       });
@@ -876,7 +997,7 @@ export default function AttributeEditorView({ initialFeatures }) {
           selectedIds={selectedIds}
           focusedId={focusedId}
           handleBeforeChangeFocus={handleBeforeChangeFocus}
-          toggleSelect={toggleSelect}
+          onFormRowClick={onFormRowClick}
           focusPrev={focusPrev}
           focusNext={focusNext}
           focusedFeature={focusedFeature}
@@ -898,6 +1019,7 @@ export default function AttributeEditorView({ initialFeatures }) {
           undoLatestFormChange={undoLatestFormChange}
           tablePendingEdits={tablePendingEdits}
           tablePendingAdds={tablePendingAdds}
+          lastEditTargetIdsRef={lastEditTargetIdsRef}
         />
       ) : (
         <DesktopForm
@@ -905,7 +1027,7 @@ export default function AttributeEditorView({ initialFeatures }) {
           theme={theme}
           visibleFormList={visibleFormList}
           selectedIds={selectedIds}
-          toggleSelect={toggleSelect}
+          onFormRowClick={onFormRowClick}
           focusedId={focusedId}
           handleBeforeChangeFocus={handleBeforeChangeFocus}
           focusPrev={focusPrev}
@@ -929,6 +1051,7 @@ export default function AttributeEditorView({ initialFeatures }) {
           setDeleteState={setDeleteState}
           tablePendingEdits={tablePendingEdits}
           tablePendingAdds={tablePendingAdds}
+          lastEditTargetIdsRef={lastEditTargetIdsRef}
         />
       )}
       {<NotificationBar s={s} theme={theme} text={notification} />}

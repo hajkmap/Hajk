@@ -14,7 +14,8 @@ export default function MobileForm({
   selectedIds,
   focusedId,
   handleBeforeChangeFocus,
-  toggleSelect,
+  lastEditTargetIdsRef,
+  onFormRowClick,
   focusPrev,
   focusNext,
   focusedFeature,
@@ -67,7 +68,7 @@ export default function MobileForm({
         {mobileActiveTab === "list" ? (
           <>
             <div style={s.list}>
-              {visibleFormList.map((f) => {
+              {visibleFormList.map((f, idx) => {
                 const selected = selectedIds.has(f.id);
                 const isFocused = focusedId === f.id;
                 const isPendingDelete = tablePendingDeletes?.has?.(f.id);
@@ -87,17 +88,9 @@ export default function MobileForm({
                   <div
                     key={f.id}
                     data-row-id={f.id}
-                    style={s.listRow(selected || isFocused, status)}
-                    onClick={() => handleBeforeChangeFocus(f.id)}
+                    style={s.listRow(selected || isFocused, status, false)}
+                    onClick={(e) => onFormRowClick(f.id, idx, e)}
                   >
-                    <input
-                      type="checkbox"
-                      checked={selected}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        toggleSelect(f.id);
-                      }}
-                    />
                     <div>
                       <div style={s.listRowText}>
                         <div style={s.listRowTitle}>
@@ -206,7 +199,6 @@ export default function MobileForm({
                 </div>
 
                 <div style={s.mobileFormActions}>
-                  {/* Borttagen "Spara för alla markerade" – multi-edit sker alltid */}
                   <div style={s.spacer} />
                   <button
                     style={
@@ -243,11 +235,12 @@ export default function MobileForm({
                     }
                     onClick={() => {
                       if (dirty) {
-                        // Alltid via pending för alla markerade (eller fokus)
-                        saveChanges({ toPending: true });
+                        saveChanges({
+                          toPending: true,
+                          targetIds: lastEditTargetIdsRef.current || undefined,
+                        });
                       }
                       if (tableHasPending) {
-                        // Skriv pending till features
                         commitTableEdits();
                       }
                     }}
@@ -259,10 +252,16 @@ export default function MobileForm({
                   </button>
                 </div>
 
-                <div style={dirty ? s.formFooterDirty : s.formFooter}>
+                <div
+                  style={
+                    dirty || tableHasPending ? s.formFooterDirty : s.formFooter
+                  }
+                >
                   {dirty
                     ? `Osparade ändringar (${changedFields.size} fält)`
-                    : "Allt sparat"}
+                    : tableHasPending
+                      ? "Ändringar buffrade (ej sparade)"
+                      : "Allt sparat"}
                 </div>
               </>
             )}

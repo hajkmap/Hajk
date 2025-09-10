@@ -10,9 +10,10 @@ export default function DesktopForm({
   // left list
   visibleFormList,
   selectedIds,
-  toggleSelect,
+  onFormRowClick,
   focusedId,
   handleBeforeChangeFocus,
+  lastEditTargetIdsRef,
   focusPrev,
   focusNext,
 
@@ -48,7 +49,7 @@ export default function DesktopForm({
       {/* Left: Object list */}
       <div style={s.pane} aria-label="Objektlista">
         <div style={s.list}>
-          {visibleFormList.map((f) => {
+          {visibleFormList.map((f, idx) => {
             const selected = selectedIds.has(f.id);
             const isFocused = focusedId === f.id;
             const isPendingDelete = tablePendingDeletes?.has?.(f.id);
@@ -68,17 +69,9 @@ export default function DesktopForm({
               <div
                 key={f.id}
                 data-row-id={f.id}
-                style={s.listRow(selected || isFocused, status)}
-                onClick={() => handleBeforeChangeFocus(f.id)}
+                style={s.listRow(selected || isFocused, status, false)}
+                onClick={(e) => onFormRowClick(f.id, idx, e)}
               >
-                <input
-                  type="checkbox"
-                  checked={selected}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    toggleSelect(f.id);
-                  }}
-                />
                 <div>
                   <div style={s.listRowText}>
                     <div style={s.listRowTitle}>
@@ -161,11 +154,12 @@ export default function DesktopForm({
             style={!(dirty || tableHasPending) ? s.iconBtnDisabled : s.iconBtn}
             onClick={() => {
               if (dirty) {
-                // Alltid via pending för alla markerade (eller fokus)
-                saveChanges({ toPending: true });
+                saveChanges({
+                  toPending: true,
+                  targetIds: lastEditTargetIdsRef.current || undefined,
+                });
               }
               if (tableHasPending) {
-                // Skriv pending till features
                 commitTableEdits();
               }
             }}
@@ -202,10 +196,16 @@ export default function DesktopForm({
                 </div>
               ))}
             </div>
-            <div style={dirty ? s.formFooterDirty : s.formFooter}>
+            <div
+              style={
+                dirty || tableHasPending ? s.formFooterDirty : s.formFooter
+              }
+            >
               {dirty
-                ? `Osparade ändringar (${changedFields.size} fält ändrade)`
-                : "Allt sparat"}
+                ? `Osparade ändringar (${changedFields.size} fält)`
+                : tableHasPending
+                  ? "Ändringar buffrade (ej sparade)"
+                  : "Allt sparat"}
             </div>
           </>
         )}
