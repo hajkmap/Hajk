@@ -13,7 +13,6 @@ export default function MobileForm({
   visibleFormList,
   selectedIds,
   focusedId,
-  handleBeforeChangeFocus,
   lastEditTargetIdsRef,
   onFormRowClick,
   focusPrev,

@@ -12,7 +12,6 @@ export default function DesktopForm({
   selectedIds,
   onFormRowClick,
   focusedId,
-  handleBeforeChangeFocus,
   lastEditTargetIdsRef,
   focusPrev,
   focusNext,

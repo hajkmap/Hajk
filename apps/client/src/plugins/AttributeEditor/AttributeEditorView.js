@@ -52,6 +52,50 @@ export default function AttributeEditorView({ initialFeatures }) {
   const theme = dark ? themes.dark : themes.light;
   const s = useMemo(() => makeStyles(theme, isMobile), [theme, isMobile]);
 
+  useEffect(() => {
+    console.log("🔄 Undo-stackar uppdaterade:");
+
+    console.log(`  📋 tableUndoStack: ${tableUndoStack.length} steg`);
+    tableUndoStack.forEach((item, index) => {
+      const time = new Date(item.when).toLocaleTimeString("sv-SE");
+
+      if (item.type === "batch_edit" && item.ops) {
+        const opsDesc = item.ops
+          .map((op) => `${op.key}: "${op.prevValue || "(tom)"}" → (nytt värde)`)
+          .join(", ");
+        console.log(
+          `     ${index + 1}. [${time}] Batch-ändring: ${item.ops.length} fält - ${opsDesc}`
+        );
+      } else if (item.type === "mark_delete") {
+        console.log(
+          `     ${index + 1}. [${time}] Markera för radering: objekt ${item.ids.join(", ")}`
+        );
+      } else if (item.type === "create_drafts") {
+        console.log(
+          `     ${index + 1}. [${time}] Skapa utkast: ${item.ids.length} st`
+        );
+      } else if (item.type === "edit_cell") {
+        console.log(
+          `     ${index + 1}. [${time}] Cellredigering: ${item.key} = "${item.prevValue || "(tom)"}"`
+        );
+      } else {
+        console.log(`     ${index + 1}. [${time}] ${item.type}`);
+      }
+    });
+
+    console.log(`  📝 formUndoStack: ${formUndoStack.length} steg`);
+    formUndoStack.forEach((item, index) => {
+      const time = new Date(item.when).toLocaleTimeString("sv-SE");
+      console.log(
+        `     ${index + 1}. [${time}] ${item.key}: "${item.prevValue || "(tom)"}" → (nytt värde)`
+      );
+    });
+
+    if (tableUndoStack.length === 0 && formUndoStack.length === 0) {
+      console.log("     (Inga ångrasteg tillgängliga)");
+    }
+  }, [tableUndoStack, formUndoStack]);
+
   // Check for mobile viewport
   useEffect(() => {
     const checkMobile = () => {
@@ -555,6 +599,20 @@ export default function AttributeEditorView({ initialFeatures }) {
   const [changedFields, setChangedFields] = useState(new Set());
   const [dirty, setDirty] = useState(false);
 
+  const handleBeforeChangeFocus = useCallback(
+    (targetId) => {
+      const prevId = focusedId;
+      if (dirty && prevId != null) {
+        setChangedFields(new Set());
+        setDirty(false);
+        setFormUndoStack([]);
+      }
+
+      setFocusedId(targetId);
+    },
+    [focusedId, dirty]
+  );
+
   const visibleFormList = useMemo(() => {
     const s = formSearch.trim().toLowerCase();
     return features.filter((f) =>
@@ -737,17 +795,6 @@ export default function AttributeEditorView({ initialFeatures }) {
     }
   }
 
-  function handleBeforeChangeFocus(targetId) {
-    const prevId = focusedId;
-    if (dirty && prevId != null) {
-      setChangedFields(new Set());
-      setDirty(false);
-      setFormUndoStack([]);
-    }
-
-    setFocusedId(targetId);
-  }
-
   function saveChanges(opts = {}) {
     if (!focusedFeature) return;
     const override = opts.targetIds;
@@ -798,7 +845,6 @@ export default function AttributeEditorView({ initialFeatures }) {
       return next;
     });
 
-    // Lägg in EN batch i undo-stack ENDAST om det faktiskt finns ändringar
     if (batchOps.length > 0) {
       pushTableUndo({
         type: "batch_edit",
@@ -807,7 +853,6 @@ export default function AttributeEditorView({ initialFeatures }) {
       });
     }
 
-    // Nollställ lokala formflaggor
     setChangedFields(new Set());
     setDirty(false);
     setFormUndoStack([]);
@@ -830,8 +875,6 @@ export default function AttributeEditorView({ initialFeatures }) {
 
   function handleFieldChange(key, value) {
     const currentValue = editValues[key] ?? "";
-
-    // Lägg bara till i undo-stack om värdet faktiskt ändras
     if (value !== currentValue) {
       setFormUndoStack((stack) => [
         ...stack,
@@ -867,7 +910,6 @@ export default function AttributeEditorView({ initialFeatures }) {
       lastEditTargetIdsRef.current = ids;
     }
 
-    // Uppdatera tablePendingEdits direkt när vi ändrar
     if (ids.length) {
       setTablePendingEdits((prev) => {
         const next = { ...prev };
@@ -876,7 +918,6 @@ export default function AttributeEditorView({ initialFeatures }) {
           const current = { ...(next[id] || {}) };
           const baseVal = base[key];
 
-          // Lägg till i undo-stack om detta är första gången vi ändrar detta värde
           if (!(id in prev) || !(key in (prev[id] || {}))) {
             pushTableUndo({
               type: "batch_edit",
