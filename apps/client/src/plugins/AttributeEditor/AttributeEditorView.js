@@ -1,4 +1,3 @@
-// views/AttributeEditorView.js
 import React, {
   useEffect,
   useState,
@@ -99,9 +98,6 @@ export default function AttributeEditorView({ state, controller, ui }) {
     Object.keys(pendingEdits).length > 0 ||
     (pendingDeletes?.size ?? 0) > 0;
 
-  // === Wrappers: compat för gamla TableMode/DesktopForm props ===
-
-  // 1) setTablePendingEdits: tar updater(prev) och översätter till batchEdit mot modellen
   const setTablePendingEdits = useCallback(
     (updaterOrObj) => {
       const prev = pendingEdits;
@@ -129,14 +125,12 @@ export default function AttributeEditorView({ state, controller, ui }) {
           const prevVal = hadPrev ? prevRow[key] : undefined;
 
           if (!hasNext) {
-            // Ny "next" saknar key -> vill rensa pending -> sätt till basvärde
             const baseVal = base[key];
             if (prevVal !== undefined) {
               ops.push({ id, key, value: baseVal });
             }
           } else {
             const nextVal = nextRow[key];
-            // Skriv-through (modell tar bort pending om = base)
             if (prevVal !== nextVal) {
               ops.push({ id, key, value: nextVal });
             }
@@ -149,7 +143,6 @@ export default function AttributeEditorView({ state, controller, ui }) {
     [pendingEdits, features, controller]
   );
 
-  // 2) setTablePendingAdds: uppdaterar drafts + deras __pending (delete/add)
   const setTablePendingAdds = useCallback(
     (updater) => {
       const prev = pendingAdds;
@@ -160,18 +153,16 @@ export default function AttributeEditorView({ state, controller, ui }) {
             ? updater
             : prev;
 
-      // indexera
       const byIdPrev = new Map(prev.map((d) => [d.id, d]));
       const byIdNext = new Map(next.map((d) => [d.id, d]));
 
-      // För drafts som finns i båda: jämför fält
       const editOps = [];
       const toggleIdsMark = [];
       const toggleIdsUnmark = [];
 
       byIdNext.forEach((draftNext, id) => {
         const draftPrev = byIdPrev.get(id);
-        if (!draftPrev) return; // nya drafts bör skapas via duplicateRows, inte här
+        if (!draftPrev) return;
 
         Object.keys(draftNext).forEach((key) => {
           if (key === "__pending") return;
@@ -182,7 +173,6 @@ export default function AttributeEditorView({ state, controller, ui }) {
           }
         });
 
-        // hantera __pending mark/unmark
         const prevP = draftPrev.__pending;
         const nextP = draftNext.__pending;
         if (prevP !== nextP) {
@@ -199,19 +189,16 @@ export default function AttributeEditorView({ state, controller, ui }) {
     [pendingAdds, controller]
   );
 
-  // 3) delete toggle (kompat)
   const setDeleteState = useCallback(
     (ids, mode) => controller.toggleDelete(ids, mode),
     [controller]
   );
 
-  // 4) duplicate (kompat)
   const duplicateSelectedRows = useCallback(() => {
     if (!tableSelectedIds.size) return;
     const ids = [...tableSelectedIds];
-    const start = state.nextTempId; // nya drafts blir start, start-1, ...
+    const start = state.nextTempId;
     controller.duplicateRows(ids);
-    // välj de nyskapade id:na (negativa)
     if (typeof start === "number") {
       const created = ids.map((_, i) => start - i);
       setTableSelectedIds(new Set(created));
@@ -221,9 +208,7 @@ export default function AttributeEditorView({ state, controller, ui }) {
     );
   }, [tableSelectedIds, controller, state.nextTempId, showNotification]);
 
-  // --- duplicera i formulärläget ---
   const duplicateInForm = React.useCallback(() => {
-    // vilka id:n ska dupliceras?
     const ids = selectedIds.size
       ? Array.from(selectedIds)
       : focusedId != null
@@ -232,26 +217,21 @@ export default function AttributeEditorView({ state, controller, ui }) {
 
     if (!ids.length) return;
 
-    // minnesanteckning om första genererade id:t (negativa)
     const start = state.nextTempId;
 
-    // skapa utkast i modellen
     controller.duplicateRows(ids);
 
-    // välj de nyskapade och sätt fokus – de får id: start, start-1, ...
     if (typeof start === "number") {
       const created = ids.map((_, i) => start - i);
       setSelectedIds(new Set(created));
       setFocusedId(created[0]);
     }
 
-    // stanna kvar i formulärläge och visa en notis
     showNotification(
       `${ids.length} ${ids.length === 1 ? "utkast" : "utkast"} skapade`
     );
   }, [selectedIds, focusedId, controller, state.nextTempId, showNotification]);
 
-  // === Table: filter/sort/search ===
   useEffect(() => {
     if (!openFilterColumn) return;
 
@@ -329,7 +309,7 @@ export default function AttributeEditorView({ state, controller, ui }) {
     const pri = (r) => (r.__pending === "add" ? 0 : 1);
     rows.sort((a, b) => {
       const p = pri(a) - pri(b);
-      if (p !== 0) return p; // utkast (add) först
+      if (p !== 0) return p;
       const res = cmp(a[sort.key], b[sort.key]);
       return sort.dir === "asc" ? res : -res;
     });
@@ -397,17 +377,15 @@ export default function AttributeEditorView({ state, controller, ui }) {
       setTableUndoLocal((prev) => prev.slice(0, -1));
 
       if (last.type === "edit_cell") {
-        // Återställ cellen med en batch in i modellen
         controller.batchEdit([
           { id: last.id, key: last.key, value: last.prevValue },
         ]);
         showNotification("Ångrade celländring");
       } else {
-        // Om vi i framtiden skulle lägga andra lokala steg, hantera dem här.
-        // För duplicera/radera använder vi modellens undo nedan.
+        // If we add other local undo steps in the future, handle them here.
+        // For duplicate/delete, we fall back to the model's undo below.
       }
     } else if (state.undoStack?.length) {
-      // Inga lokala steg kvar? Falla tillbaka till modellens undo (t.ex. för radera/duplicera)
       controller.undo();
     }
   }, [tableUndoLocal, controller, state.undoStack, showNotification]);
@@ -427,7 +405,6 @@ export default function AttributeEditorView({ state, controller, ui }) {
   const focusedFeature = useMemo(() => {
     if (focusedId == null) return null;
     if (focusedId < 0) {
-      // Utkast
       return pendingAdds.find((d) => d.id === focusedId) || null;
     }
     const base = features.find((f) => f.id === focusedId);
@@ -435,8 +412,6 @@ export default function AttributeEditorView({ state, controller, ui }) {
     return { ...base, ...(pendingEdits[focusedId] || {}) };
   }, [focusedId, features, pendingAdds, pendingEdits]);
 
-  // Sync form vid fokusbyte
-  // Synca formuläret ENDAST när fokus byter objekt
   useEffect(() => {
     if (!focusedId) {
       setEditValues({});
@@ -477,9 +452,8 @@ export default function AttributeEditorView({ state, controller, ui }) {
     });
     setChangedFields(changed);
     setDirty(false);
-  }, [focusedId, features, pendingAdds, pendingEdits]); // ⬅️ viktigt: enbart fokusbyten triggar
+  }, [focusedId, features, pendingAdds, pendingEdits]);
 
-  // Hålla form i sync när model-pending ändras (om inte smutsigt)
   useEffect(() => {
     if (!focusedId || dirty) return;
     const feat = features.find((f) => f.id === focusedId);
@@ -494,7 +468,7 @@ export default function AttributeEditorView({ state, controller, ui }) {
       base[key] = baseVal;
       const effVal =
         focusedId < 0
-          ? baseVal // drafts: inga pendingEdits; värdet kommer direkt från draft
+          ? baseVal
           : key in patch
             ? normalize(patch[key])
             : baseVal;
@@ -527,20 +501,15 @@ export default function AttributeEditorView({ state, controller, ui }) {
 
   const visibleFormList = useMemo(() => {
     const sTerm = formSearch.trim().toLowerCase();
-
-    // 1) Existerande + pending edits + ev. delete-markering
     const existing = features.map((f, idx) => {
       let r = { ...f, ...(pendingEdits[f.id] || {}), __idx: idx };
       if (pendingDeletes?.has?.(f.id)) r = { ...r, __pending: "delete" };
       return r;
     });
-    // 2) Drafts (pendingAdds) läggs till sist temporärt, de får egen __idx efter existing
     const startIdx = existing.length;
     const drafts = pendingAdds.map((d, i) => ({ ...d, __idx: startIdx + i }));
 
     const all = [...existing, ...drafts];
-
-    // 3) Filter
     const filtered = all.filter((f) =>
       !sTerm
         ? true
@@ -556,12 +525,11 @@ export default function AttributeEditorView({ state, controller, ui }) {
             .some((token) => token.includes(sTerm))
     );
 
-    // 4) Sortera: utkast först, annars stabilt på __idx
     filtered.sort((a, b) => {
       const ap = a.__pending === "add" ? 0 : 1;
       const bp = b.__pending === "add" ? 0 : 1;
-      if (ap !== bp) return ap - bp; // utkast överst
-      return a.__idx - b.__idx; // stabil ordning i övrigt
+      if (ap !== bp) return ap - bp;
+      return a.__idx - b.__idx;
     });
 
     return filtered;
@@ -645,9 +613,7 @@ export default function AttributeEditorView({ state, controller, ui }) {
     }
   }
 
-  // Form: använd write-through (batchEdit) men behåll lokal undo för att kunna ångra senaste fältet
   function handleFieldChange(key, value) {
-    // 1) UI: uppdatera fältet + dirty/changedFields
     setEditValues((prev) => ({ ...prev, [key]: value }));
 
     setChangedFields((prev) => {
@@ -659,7 +625,6 @@ export default function AttributeEditorView({ state, controller, ui }) {
       return next;
     });
 
-    // 2) Vilka objekt påverkas?
     const ids = selectedIds.size
       ? Array.from(selectedIds)
       : focusedId != null
@@ -667,7 +632,6 @@ export default function AttributeEditorView({ state, controller, ui }) {
         : [];
     if (!ids.length) return;
 
-    // 3) Snapshot: en gång per objekt (för objekt-undo i ett klick)
     const snapshotsToPush = [];
     ids.forEach((id) => {
       if (!formUndoSnapshotsRef.current.has(id)) {
@@ -689,8 +653,6 @@ export default function AttributeEditorView({ state, controller, ui }) {
     if (snapshotsToPush.length) {
       setFormUndoStack((prev) => [...prev, ...snapshotsToPush]);
     }
-
-    // 4) Write-through till modellen (så table-mode ser ändringen direkt)
     const ops = ids.map((id) => ({ id, key, value }));
     controller.batchEdit(ops);
   }
@@ -742,8 +704,6 @@ export default function AttributeEditorView({ state, controller, ui }) {
       if (!prev.length) return prev;
       const { id, snapshot } = prev[prev.length - 1] || {};
       if (id == null || !snapshot) return prev.slice(0, -1);
-
-      // Återställ alla fält via modellen i ett steg
       const ops = FIELD_META.map(({ key }) => ({
         id,
         key,
@@ -754,8 +714,6 @@ export default function AttributeEditorView({ state, controller, ui }) {
             : snapshot[key],
       }));
       controller.batchEdit(ops);
-
-      // Uppdatera formuläret om samma objekt är i fokus
       if (focusedId === id) {
         setEditValues({ ...snapshot });
         const nextChanged = new Set();
@@ -852,10 +810,10 @@ export default function AttributeEditorView({ state, controller, ui }) {
           filterOverlayRef={filterOverlayRef}
           setDeleteState={setDeleteState}
           tablePendingDeletes={pendingDeletes}
-          pushTableUndo={pushTableUndo} // <— ge TableMode en riktig push
+          pushTableUndo={pushTableUndo}
           tableUndoStack={
             tableUndoLocal.length ? tableUndoLocal : tableUndoStack
-          } // <— visa lokala steg om de finns, annars modellens
+          }
           undoLatestTableChange={undoLatestTableChange}
           tablePendingAdds={pendingAdds}
         />

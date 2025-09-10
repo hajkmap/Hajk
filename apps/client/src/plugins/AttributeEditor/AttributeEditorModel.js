@@ -1,8 +1,5 @@
 import LocalStorageHelper from "../../utils/LocalStorageHelper";
 
-/** -----------------------------
- * Actions (publika från modellen)
- * ----------------------------- */
 export const Action = {
   INIT: "INIT",
   EDIT: "EDIT", // { id, key, value }
@@ -11,18 +8,14 @@ export const Action = {
   SET_DELETE_STATE: "SET_DELETE_STATE", // { ids, mode: 'toggle'|'mark'|'unmark' }
   COMMIT: "COMMIT",
   UNDO: "UNDO",
-  // REDO kan läggas till senare
 };
 
 export const MAX_UNDO = 100;
 
-/** -----------------------------
- * State & helpers (privata)
- * ----------------------------- */
 const initialState = {
   features: [],
   nextId: 1,
-  nextTempId: -1, // negativa ids för utkast
+  nextTempId: -1,
 
   pendingAdds: [], // [{ id: -1, __pending: 'add'|'delete', ... }]
   pendingEdits: {}, // { [id]: { [key]: value } }
@@ -106,7 +99,6 @@ const applyInverse = (state, op) => {
     }
     case "delete_state": {
       const { ids, modeBefore, draftsBefore } = op.payload;
-      // Restore pendingDeletes (existing) och __pending (drafts)
       const nextDel = new Set(state.pendingDeletes);
       ids.forEach((id) => {
         if (id < 0) return;
@@ -133,9 +125,6 @@ const applyInverse = (state, op) => {
   }
 };
 
-/** -----------------------------
- * Reducer (privat)
- * ----------------------------- */
 const reducer = (state, action) => {
   switch (action.type) {
     case Action.INIT: {
@@ -157,15 +146,12 @@ const reducer = (state, action) => {
       let s = state;
       ops.forEach(({ id, key, value }) => {
         if (id < 0) {
-          // utkast
-          s = applyEditToDraft(s, id, key, value, true); // true = skriv utan undo
+          s = applyEditToDraft(s, id, key, value, true);
         } else {
-          // existerande
-          s = applyEditToExisting(s, id, key, value, true); // true = skriv utan undo
+          s = applyEditToExisting(s, id, key, value, true);
         }
       });
 
-      // OBS: inget pushUndo här (keystrokes hamnar inte i modellens undo)
       return s;
     }
 
@@ -243,7 +229,6 @@ const reducer = (state, action) => {
         }
       });
 
-      // Bygg inverse exakt per existing-id (mark/unmark) + draftsBefore för utkast
       const perIdInverse = [];
       ids.forEach((id) => {
         if (id < 0) return;
@@ -326,9 +311,6 @@ const reducer = (state, action) => {
   }
 };
 
-/** -----------------------------
- * Selectors (publika, rena)
- * ----------------------------- */
 export const selectors = {
   selectHasPending: (s) =>
     s.pendingAdds.length > 0 ||
@@ -356,25 +338,19 @@ export const selectors = {
     s.features.map((f) => ({ ...f, ...(s.pendingEdits[f.id] || {}) })),
 };
 
-/** -----------------------------
- * Själva Model-klassen (store)
- * ----------------------------- */
 export default class AttributeEditorModel {
   #map;
   #app;
   #localObserver;
   #storageKey;
-  #fieldMeta; // optional, för t.ex. readOnly-keys
+  #fieldMeta;
 
   constructor(settings) {
-    // Privata fält (oförändrat från din version)
     this.#map = settings.map;
     this.#app = settings.app;
     this.#localObserver = settings.localObserver;
     this.#storageKey = "AttributeEditor";
     this.#fieldMeta = settings.fieldMeta || null;
-
-    // Store-interna
     this._listeners = new Set();
     const initFeatures = settings.initialFeatures || [];
     const max = initFeatures.length
@@ -390,7 +366,6 @@ export default class AttributeEditorModel {
     this.#initSubscriptions();
   }
 
-  /** ------------ Observer-wiring (som du hade) ------------ */
   #initSubscriptions = () => {
     this.#localObserver.subscribe(
       "AttributeEditorEvent",
@@ -399,12 +374,9 @@ export default class AttributeEditorModel {
   };
 
   #handleAttributeEditorEvent = (message = "") => {
-    // Här kan du om du vill mappa event → actions:
-    // if (message?.type === "UNDO") this.dispatch({ type: Action.UNDO });
     console.log(`AttributeEditor-event caught in model! Message: ${message}`);
   };
 
-  /** ------------ LocalStorage helper (som du hade) ------------ */
   setAttributeEditorKeyInStorage = (key, value) => {
     LocalStorageHelper.set(this.#storageKey, {
       ...LocalStorageHelper.get(this.#storageKey),
@@ -412,11 +384,9 @@ export default class AttributeEditorModel {
     });
   };
 
-  /** ------------ Publika getters (som du hade) ------------ */
   getMap = () => this.#map;
   getApp = () => this.#app;
 
-  /** ------------ Meta-hjälp ------------ */
   setFieldMetadata = (meta) => {
     this.#fieldMeta = meta;
   };
@@ -425,7 +395,6 @@ export default class AttributeEditorModel {
       ? this.#fieldMeta.filter((m) => m.readOnly).map((m) => m.key)
       : [];
 
-  /** ------------ External store-API ------------ */
   getSnapshot = () => this._state;
   subscribe = (listener) => {
     this._listeners.add(listener);

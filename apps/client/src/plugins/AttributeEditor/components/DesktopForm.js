@@ -158,17 +158,14 @@ export default function DesktopForm({
                 : s.iconBtn
             }
             onClick={() => {
-              // ① ALLTID prova modellens undo först (radering/duplicering/batch etc. ångras sist-in-först-ut)
               if (tableUndoStack?.length) {
                 undoLatestTableChange();
                 return;
               }
-              // ② sedan lokalt form-undo (om du använder snapshots)
               if (formUndoStack?.length) {
                 undoLatestFormChange();
                 return;
               }
-              // ③ sist, om inget i stackarna: bara återställ osparade formulärvärden
               if (dirty) {
                 resetEdits();
               }
