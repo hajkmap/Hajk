@@ -773,6 +773,8 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     // First start the WSS, if configured to do so
     if (process.env.ENABLE_WEBSOCKETS?.toLowerCase() === "true") {
       this.wss = await websockets(this.server);
+      // Store the WebSocket server in the Express app so it can be accessed from controllers
+      this.app.set("wss", this.wss);
     }
 
     // Figure out which port the server should listen on
