@@ -27,16 +27,7 @@ const CollapsibleNavItem = (props: Props) => {
 
   return (
     <>
-      <ListItem
-        disablePadding
-        disableGutters
-        sx={{
-          borderBottom: collapsed ? `1px solid ${palette.divider}` : undefined,
-          "&:first-of-type": {
-            borderTop: `1px solid ${palette.divider}`,
-          },
-        }}
-      >
+      <ListItem disablePadding disableGutters>
         <Button
           onClick={() => setCollapsed(!collapsed)}
           size="large"
@@ -44,20 +35,27 @@ const CollapsibleNavItem = (props: Props) => {
             textTransform: "none",
             display: "flex",
             width: "100%",
-            borderRadius: 0,
+            borderRadius: 2,
             justifyContent: "space-between",
             color: palette.text.primary,
             paddingTop: 2,
             paddingBottom: 2,
-            paddingLeft: 2,
-            transition: "border 200ms ease",
-            background: palette.action.hover,
+            paddingLeft: 1,
+            paddingRight: 1,
+            transition: "all 200ms ease",
+            "&:hover": {
+              backgroundColor: palette.action.hover,
+            },
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Typography>{t(props.titleKey)}</Typography>
           </Box>
-          {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+          {collapsed ? (
+            <ExpandMoreIcon fontSize="small" />
+          ) : (
+            <ExpandLessIcon fontSize="small" />
+          )}
         </Button>
       </ListItem>
       <Collapse in={!collapsed} timeout="auto" unmountOnExit>

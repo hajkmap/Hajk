@@ -18,16 +18,7 @@ const NavItem = (props: Props) => {
   const active: boolean = path === props.to;
 
   return (
-    <ListItem
-      disablePadding
-      disableGutters
-      sx={{
-        borderBottom: `1px solid ${palette.divider}`,
-        "&:first-of-type": {
-          borderTop: `1px solid ${palette.divider}`,
-        },
-      }}
-    >
+    <ListItem disablePadding disableGutters>
       <Button
         onClick={props.onClick}
         component={NavLink}
@@ -37,14 +28,21 @@ const NavItem = (props: Props) => {
         sx={{
           textTransform: "none",
           width: "100%",
-          borderRadius: 0,
+          borderRadius: 2,
           justifyContent: "flex-start",
           color: palette.text.primary,
           paddingTop: 2,
           paddingBottom: 2,
           paddingLeft: props.isSubItem ? 3 : 2,
-          borderLeft: (active ? "8" : "0") + `px solid ${palette.primary.main}`,
-          transition: "border 200ms ease",
+          backgroundColor: active ? palette.action.hover : "transparent",
+          transition: "all 200ms ease",
+          "&:hover": active
+            ? {
+                backgroundColor: palette.action.selected,
+              }
+            : {
+                backgroundColor: palette.action.hover,
+              },
         }}
       >
         <Typography>{t(props.titleKey)}</Typography>

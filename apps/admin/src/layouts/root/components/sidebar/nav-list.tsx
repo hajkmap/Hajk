@@ -44,9 +44,13 @@ const NavList = (props: Props) => {
     >
       <List
         sx={{
-          p: 0,
+          p: 2,
           maxHeight: `calc(100vh - ${HEADER_HEIGHT}px - ${SIDEBAR_MINI_WIDTH}px)`,
           overflowY: "auto",
+          "& .MuiListItem-root": {
+            mb: 1,
+            borderRadius: 2,
+          },
         }}
       >
         {SIDEBAR_MENU.map((menuItem, index) => {
