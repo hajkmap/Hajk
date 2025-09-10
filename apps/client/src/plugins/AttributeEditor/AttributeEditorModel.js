@@ -39,7 +39,10 @@ const clampUndo = (stack) =>
 
 const pushUndo = (state, label, inverseOps) => ({
   ...state,
-  undoStack: clampUndo([...state.undoStack, { label, inverse: inverseOps }]),
+  undoStack: clampUndo([
+    ...state.undoStack,
+    { label, inverse: inverseOps, when: Date.now() },
+  ]),
   redoStack: [],
 });
 

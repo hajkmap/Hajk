@@ -372,23 +372,28 @@ export default function AttributeEditorView({ state, controller, ui }) {
   }, [controller]);
 
   const undoLatestTableChange = useCallback(() => {
-    if (tableUndoLocal.length) {
-      const last = tableUndoLocal[tableUndoLocal.length - 1];
-      setTableUndoLocal((prev) => prev.slice(0, -1));
+    const localLast = tableUndoLocal[tableUndoLocal.length - 1] ?? null;
+    const modelLast = tableUndoStack[tableUndoStack.length - 1] ?? null;
+    const localWhen = localLast?.when ?? -Infinity;
+    const modelWhen = modelLast?.when ?? -Infinity;
 
-      if (last.type === "edit_cell") {
+    if (localWhen >= modelWhen && localLast) {
+      if (localLast.type === "edit_cell") {
         controller.batchEdit([
-          { id: last.id, key: last.key, value: last.prevValue },
+          { id: localLast.id, key: localLast.key, value: localLast.prevValue },
         ]);
+        setTableUndoLocal((prev) => prev.slice(0, -1));
         showNotification("Ångrade celländring");
-      } else {
-        // If we add other local undo steps in the future, handle them here.
-        // For duplicate/delete, we fall back to the model's undo below.
+        return;
       }
-    } else if (state.undoStack?.length) {
-      controller.undo();
+      setTableUndoLocal((prev) => prev.slice(0, -1));
+      return;
     }
-  }, [tableUndoLocal, controller, state.undoStack, showNotification]);
+    if (modelLast) {
+      controller.undo();
+      return;
+    }
+  }, [tableUndoLocal, controller, tableUndoStack, showNotification]);
 
   const handleBeforeChangeFocus = useCallback(
     (targetId) => {
@@ -614,6 +619,7 @@ export default function AttributeEditorView({ state, controller, ui }) {
   }
 
   function handleFieldChange(key, value) {
+    const now = Date.now();
     setEditValues((prev) => ({ ...prev, [key]: value }));
 
     setChangedFields((prev) => {
@@ -647,7 +653,7 @@ export default function AttributeEditorView({ state, controller, ui }) {
         const snap = {};
         FIELD_META.forEach(({ key }) => (snap[key] = effective[key] ?? ""));
         formUndoSnapshotsRef.current.set(id, snap);
-        snapshotsToPush.push({ id, snapshot: snap, when: Date.now() });
+        snapshotsToPush.push({ id, snapshot: snap, when: now });
       }
     });
     if (snapshotsToPush.length) {
