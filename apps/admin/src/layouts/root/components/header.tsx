@@ -74,12 +74,23 @@ export default function Header() {
       ? [
           <Box
             sx={{ color: palette.text.secondary }}
-            mr={1}
+            mx={1}
             component="span"
             key="home"
           >
             <Link to="/">Start</Link>
-            {pathParts.length > 0 && " / "}
+            {pathParts.length > 0 && (
+              <Box
+                component="span"
+                sx={{
+                  ml: 1,
+                  color: palette.text.disabled,
+                  fontSize: "1rem",
+                }}
+              >
+                ›
+              </Box>
+            )}
           </Box>,
           ...pathParts.map((part, index) => {
             const path = `/${pathParts.slice(0, index + 1).join("/")}`;
@@ -102,17 +113,22 @@ export default function Header() {
                 part.charAt(0).toUpperCase() + part.slice(1)
               );
             }
-
             return (
               <Box
-                sx={{ color: palette.text.secondary }}
-                mr={1}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mr: 1,
+                }}
                 component="span"
                 key={path}
               >
                 <Link
                   style={{
-                    color: isCurrentPath ? palette.text.primary : "",
+                    color: isCurrentPath
+                      ? palette.text.primary
+                      : palette.text.secondary,
+                    fontWeight: isCurrentPath ? 600 : 400,
                   }}
                   to={path}
                 >
@@ -120,7 +136,16 @@ export default function Header() {
                 </Link>
 
                 {index < pathParts.length - 1 && (
-                  <Box component="span"> / </Box>
+                  <Box
+                    component="span"
+                    sx={{
+                      ml: 1,
+                      color: palette.text.disabled,
+                      fontSize: "1rem",
+                    }}
+                  >
+                    ›
+                  </Box>
                 )}
               </Box>
             );
@@ -131,13 +156,15 @@ export default function Header() {
   return !user ? null : (
     <Paper
       component="header"
-      elevation={2}
+      elevation={0}
       sx={{
         position: "fixed",
         top: 0,
         left: 0,
         right: 0,
         zIndex: HEADER_Z_INDEX,
+        backgroundColor: palette.background.paper,
+        backdropFilter: "blur(12px)",
       }}
       square
     >
@@ -146,7 +173,11 @@ export default function Header() {
         size={12}
         alignItems="center"
         direction={"row"}
-        sx={{ width: "100%", height: `${HEADER_HEIGHT}px` }}
+        sx={{
+          width: "100%",
+          height: `${HEADER_HEIGHT}px`,
+          px: 3,
+        }}
       >
         <Grid
           size={{ xs: 8, sm: 8 }}
@@ -183,9 +214,22 @@ export default function Header() {
           <Box
             sx={{
               display: "inline-flex",
-              fontSize: "0.8rem",
-              fontWeight: 700,
-              ml: 8,
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              ml: 4,
+              alignItems: "center",
+              color: palette.text.secondary,
+              "& a": {
+                textDecoration: "none",
+                color: "inherit",
+                transition: "color 0.2s ease",
+                padding: "4px 8px",
+                borderRadius: 1,
+                "&:hover": {
+                  color: palette.primary.main,
+                  backgroundColor: palette.action.hover,
+                },
+              },
             }}
           >
             {breadcrumbLinks}
@@ -198,8 +242,20 @@ export default function Header() {
           justifyContent="flex-end"
           alignSelf="center"
           alignItems="center"
+          sx={{ gap: 1 }}
         >
-          <AvatarGroup max={6} sx={{ display: { xs: "none", sm: "flex" } }}>
+          <AvatarGroup
+            max={6}
+            sx={{
+              display: { xs: "none", sm: "flex" },
+              "& .MuiAvatarGroup-avatar": {
+                border: `2px solid ${palette.background.paper}`,
+                fontSize: "0.75rem",
+                width: "28px",
+                height: "28px",
+              },
+            }}
+          >
             {userList.map((user) => {
               return (
                 <HajkTooltip
@@ -211,15 +267,17 @@ export default function Header() {
                     key={user.id + "avatar"}
                     alt={user.fullName}
                     sx={{
-                      width: "30px",
-                      height: "30px",
-                      fontSize: "0.9rem",
-                      transition:
-                        "transform 200ms ease, background-color 200ms ease",
+                      width: "28px",
+                      height: "28px",
+                      fontSize: "0.75rem",
+                      backgroundColor: palette.grey[300],
+                      color: palette.text.secondary,
+                      transition: "all 200ms ease",
                       "&:hover": {
                         backgroundColor: palette.primary.light,
-                        transform:
-                          "scale3d(1.12,1.12,1.12) translateX(3px) translateZ(0)",
+                        color: palette.primary.contrastText,
+                        transform: "scale(1.1)",
+                        zIndex: 1,
                       },
                     }}
                   >
@@ -242,18 +300,14 @@ export default function Header() {
                 key={activeUser.id}
                 sx={{
                   backgroundColor: palette.primary.main,
-                  width: "36px",
-                  height: "36px",
-                  marginLeft: "14px",
-                  marginRight: "14px",
-                  borderWidth: "2px",
-                  borderStyle: "solid",
-                  borderColor: palette.primary.light,
+                  width: "32px",
+                  height: "32px",
+                  border: `2px solid ${palette.background.paper}`,
                   cursor: "pointer",
-                  transition: "transform 200ms ease",
-                  transform: "scale3d(1.0,1.0,1.0) translateZ(0)",
+                  transition: "all 200ms ease",
                   "&:hover": {
-                    transform: "scale3d(1.12,1.12,1.12) translateZ(0)",
+                    transform: "scale(1.05)",
+                    boxShadow: `0 4px 12px ${palette.primary.main}40`,
                   },
                 }}
               >
