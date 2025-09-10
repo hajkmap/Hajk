@@ -8,10 +8,12 @@ import { ToastContainer } from "react-toastify";
 import { queryConfig } from "./lib/react-query.ts";
 
 import RootLayout from "./layouts/root/index.tsx";
-
 import IndexPage from "./pages/index.tsx";
+
 import ErrorPage from "./pages/error/index.tsx";
-import LayersPage from "./pages/layers/index.tsx";
+import SearchLayersPage from "./pages/layers/search-layers.tsx";
+import EditingLayersPage from "./pages/layers/editing-layers.tsx";
+import DisplayLayersPage from "./pages/layers/display-layers.tsx";
 import LayerSettings from "./pages/layers/settings.tsx";
 import MapsPage from "./pages/maps/index.tsx";
 import MapSettings from "./pages/maps/settings.tsx";
@@ -45,11 +47,27 @@ const router = createBrowserRouter(
           element: <IndexPage />,
         },
         {
-          path: "layers",
-          element: <LayersPage />,
+          path: "search-layers",
+          element: <SearchLayersPage />,
         },
         {
-          path: "layers/:layerId",
+          path: "search-layers/:layerId",
+          element: <LayerSettings />,
+        },
+        {
+          path: "editing-layers",
+          element: <EditingLayersPage />,
+        },
+        {
+          path: "editing-layers/:layerId",
+          element: <LayerSettings />,
+        },
+        {
+          path: "display-layers",
+          element: <DisplayLayersPage />,
+        },
+        {
+          path: "display-layers/:layerId",
           element: <LayerSettings />,
         },
         {

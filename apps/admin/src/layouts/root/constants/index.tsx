@@ -16,7 +16,7 @@ export const SIDEBAR_MINI_WIDTH = 58;
 export const SIDEBAR_MENU = [
   {
     to: "",
-    titleKey: "common.mapSettings",
+    titleKey: "navBar.general",
     collapsible: true,
     icon: <MapIcon />,
     subItems: [
@@ -31,16 +31,6 @@ export const SIDEBAR_MENU = [
         icon: <HandymanIcon />,
       },
       {
-        to: "/services",
-        titleKey: "common.services",
-        icon: <NetworkPingIcon />,
-      },
-      {
-        to: "/layers",
-        titleKey: "common.layers",
-        icon: <LayersIcon />,
-      },
-      {
         to: "/groups",
         titleKey: "common.layerGroups",
         icon: <CollectionsIcon />,
@@ -49,7 +39,35 @@ export const SIDEBAR_MENU = [
   },
   {
     to: "",
-    titleKey: "common.userSettings",
+    titleKey: "navBar.servicesAndLayers",
+    collapsible: true,
+    icon: <MapIcon />,
+    subItems: [
+      {
+        to: "/services",
+        titleKey: "navBar.servicesAndLayers.serviceDefinitions",
+        icon: <NetworkPingIcon />,
+      },
+      {
+        to: "/search-layers",
+        titleKey: "navBar.servicesAndLayers.searchLayers",
+        icon: <LayersIcon />,
+      },
+      {
+        to: "/editing-layers",
+        titleKey: "navBar.servicesAndLayers.editingLayers",
+        icon: <LayersIcon />,
+      },
+      {
+        to: "/display-layers",
+        titleKey: "navBar.servicesAndLayers.displayLayers",
+        icon: <LayersIcon />,
+      },
+    ],
+  },
+  {
+    to: "",
+    titleKey: "navBar.user",
     collapsible: true,
     icon: <MapIcon />,
     subItems: [
@@ -67,7 +85,7 @@ export const SIDEBAR_MENU = [
   },
   {
     to: "",
-    titleKey: "common.other",
+    titleKey: "navBar.other",
     collapsible: true,
     icon: <MapIcon />,
     subItems: [
