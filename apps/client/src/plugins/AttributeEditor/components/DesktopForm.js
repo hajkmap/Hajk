@@ -2,7 +2,8 @@ import React from "react";
 import UndoIcon from "@mui/icons-material/Undo";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { getIdsForDeletion } from "../helpers/helpers";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
 
 export default function DesktopForm({
   s,
@@ -36,6 +37,7 @@ export default function DesktopForm({
   undoLatestFormChange,
   tablePendingEdits,
   tablePendingAdds,
+  duplicateInForm,
 }) {
   const handleDeleteClick = () => {
     const ids = getIdsForDeletion(selectedIds, focusedId);
@@ -116,6 +118,26 @@ export default function DesktopForm({
                 : s.iconBtn
             }
             disabled={selectedIds.size === 0 && focusedId == null}
+            onClick={duplicateInForm}
+            aria-label="Duplicera"
+            title={
+              selectedIds.size
+                ? `Duplicera ${selectedIds.size} objekt`
+                : focusedId != null
+                  ? "Duplicera valt objekt"
+                  : "Välj objekt först"
+            }
+          >
+            <ContentCopyIcon fontSize="small" />
+          </button>
+
+          <button
+            style={
+              selectedIds.size === 0 && focusedId == null
+                ? s.iconBtnDisabled
+                : s.iconBtn
+            }
+            disabled={selectedIds.size === 0 && focusedId == null}
             onClick={handleDeleteClick}
             aria-label="Markera för radering"
             title={
@@ -136,9 +158,20 @@ export default function DesktopForm({
                 : s.iconBtn
             }
             onClick={() => {
-              if (formUndoStack?.length) undoLatestFormChange();
-              else if (tableUndoStack?.length) undoLatestTableChange();
-              else if (dirty) resetEdits();
+              // ① ALLTID prova modellens undo först (radering/duplicering/batch etc. ångras sist-in-först-ut)
+              if (tableUndoStack?.length) {
+                undoLatestTableChange();
+                return;
+              }
+              // ② sedan lokalt form-undo (om du använder snapshots)
+              if (formUndoStack?.length) {
+                undoLatestFormChange();
+                return;
+              }
+              // ③ sist, om inget i stackarna: bara återställ osparade formulärvärden
+              if (dirty) {
+                resetEdits();
+              }
             }}
             disabled={
               !(tableUndoStack?.length || formUndoStack?.length || dirty)
@@ -187,7 +220,9 @@ export default function DesktopForm({
                   </label>
                   {renderInput(
                     meta,
-                    editValues[meta.key],
+                    meta.readOnly && isMissingValue(editValues[meta.key])
+                      ? "#saknas"
+                      : editValues[meta.key],
                     (v) => handleFieldChange(meta.key, v),
                     changedFields.has(meta.key),
                     s

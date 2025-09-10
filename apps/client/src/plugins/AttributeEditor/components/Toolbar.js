@@ -49,7 +49,7 @@ export default function Toolbar({
 
       <button
         type="button"
-        onClick={() => setDark((v) => !v)}
+        onClick={() => setDark(!dark)}
         style={s.toggle(dark)}
         aria-pressed={dark}
         title="Växla dark mode"
