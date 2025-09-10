@@ -2,6 +2,7 @@ import React from "react";
 import UndoIcon from "@mui/icons-material/Undo";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { getIdsForDeletion } from "../helpers/helpers";
 
 export default function MobileForm({
   s,
@@ -22,13 +23,11 @@ export default function MobileForm({
   editValues,
   handleFieldChange,
   renderInput,
-  applyToSelection,
-  setApplyToSelection,
   dirty,
   resetEdits,
   saveChanges,
   tablePendingDeletes,
-  onDeleteSelected,
+  setDeleteState,
   tableHasPending,
   commitTableEdits,
   tableUndoStack,
@@ -42,16 +41,9 @@ export default function MobileForm({
   if (!isMobile || mode !== "form") return null;
 
   const handleDeleteClick = () => {
-    const idsToDelete =
-      selectedIds.size > 0
-        ? Array.from(selectedIds)
-        : focusedId
-          ? [focusedId]
-          : [];
-
-    if (idsToDelete.length > 0) {
-      onDeleteSelected(idsToDelete);
-    }
+    const ids = getIdsForDeletion(selectedIds, focusedId);
+    if (!ids.length) return;
+    setDeleteState(ids, "mark");
   };
 
   return (
@@ -163,8 +155,11 @@ export default function MobileForm({
                 onClick={() => {
                   if (tableUndoStack?.length) undoLatestTableChange();
                   else if (formUndoStack?.length) undoLatestFormChange();
+                  else if (dirty) resetEdits();
                 }}
-                disabled={!(tableUndoStack?.length || formUndoStack?.length)}
+                disabled={
+                  !(tableUndoStack?.length || formUndoStack?.length || dirty)
+                }
                 aria-label="Ångra"
                 title="Ångra"
               >
@@ -209,15 +204,9 @@ export default function MobileForm({
                     </div>
                   ))}
                 </div>
+
                 <div style={s.mobileFormActions}>
-                  <label style={s.checkbox}>
-                    <input
-                      type="checkbox"
-                      checked={applyToSelection}
-                      onChange={(e) => setApplyToSelection(e.target.checked)}
-                    />
-                    Spara för alla markerade
-                  </label>
+                  {/* Borttagen "Spara för alla markerade" – multi-edit sker alltid */}
                   <div style={s.spacer} />
                   <button
                     style={
@@ -253,8 +242,14 @@ export default function MobileForm({
                         : s.iconBtn
                     }
                     onClick={() => {
-                      if (dirty) saveChanges();
-                      if (tableHasPending) commitTableEdits();
+                      if (dirty) {
+                        // Alltid via pending för alla markerade (eller fokus)
+                        saveChanges({ toPending: true });
+                      }
+                      if (tableHasPending) {
+                        // Skriv pending till features
+                        commitTableEdits();
+                      }
                     }}
                     disabled={!(dirty || tableHasPending)}
                     aria-label="Spara"
@@ -263,6 +258,7 @@ export default function MobileForm({
                     <SaveIcon fontSize="small" />
                   </button>
                 </div>
+
                 <div style={dirty ? s.formFooterDirty : s.formFooter}>
                   {dirty
                     ? `Osparade ändringar (${changedFields.size} fält)`

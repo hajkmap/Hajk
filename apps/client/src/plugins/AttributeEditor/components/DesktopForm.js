@@ -23,12 +23,10 @@ export default function DesktopForm({
   editValues,
   handleFieldChange,
   renderInput,
-  applyToSelection,
-  setApplyToSelection,
   dirty,
   resetEdits,
   saveChanges,
-  onDeleteSelected,
+  setDeleteState,
   tablePendingDeletes,
   tableHasPending,
   commitTableEdits,
@@ -42,7 +40,7 @@ export default function DesktopForm({
   const handleDeleteClick = () => {
     const ids = getIdsForDeletion(selectedIds, focusedId);
     if (!ids.length) return;
-    onDeleteSelected(ids);
+    setDeleteState(ids, "mark");
   };
 
   return (
@@ -118,14 +116,7 @@ export default function DesktopForm({
         <div style={s.paneHeaderWithActions}>
           <span>Redigera attribut</span>
           <div style={s.spacer} />
-          <label style={s.checkbox}>
-            <input
-              type="checkbox"
-              checked={applyToSelection}
-              onChange={(e) => setApplyToSelection(e.target.checked)}
-            />
-            Spara ändrade fält för alla markerade
-          </label>
+
           <button
             style={
               selectedIds.size === 0 && focusedId == null
@@ -145,6 +136,7 @@ export default function DesktopForm({
           >
             <DeleteOutlineIcon fontSize="small" />
           </button>
+
           <button
             style={
               !(tableUndoStack?.length || formUndoStack?.length || dirty)
@@ -164,11 +156,18 @@ export default function DesktopForm({
           >
             <UndoIcon fontSize="small" />
           </button>
+
           <button
             style={!(dirty || tableHasPending) ? s.iconBtnDisabled : s.iconBtn}
             onClick={() => {
-              if (dirty) saveChanges();
-              if (tableHasPending) commitTableEdits();
+              if (dirty) {
+                // Alltid via pending för alla markerade (eller fokus)
+                saveChanges({ toPending: true });
+              }
+              if (tableHasPending) {
+                // Skriv pending till features
+                commitTableEdits();
+              }
             }}
             disabled={!(dirty || tableHasPending)}
             aria-label="Spara"

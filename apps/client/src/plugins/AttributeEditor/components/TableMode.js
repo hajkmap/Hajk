@@ -22,7 +22,7 @@ export default function TableMode(props) {
     duplicateSelectedRows,
     openSelectedInFormFromTable,
     commitTableEdits,
-    toggleDeleteSelectedRows,
+    setDeleteState,
     tablePendingDeletes,
     pushTableUndo,
     tablePendingAdds,
@@ -169,7 +169,7 @@ export default function TableMode(props) {
           <button
             style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
             disabled={tableSelectedIds.size === 0}
-            onClick={toggleDeleteSelectedRows}
+            onClick={() => setDeleteState([...tableSelectedIds], "toggle")}
             title={
               tableSelectedIds.size
                 ? "Markera valda för radering"
