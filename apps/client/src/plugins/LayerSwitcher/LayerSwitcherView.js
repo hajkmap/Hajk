@@ -11,7 +11,6 @@ import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
 import QuickAccessPresets from "./components/QuickAccessPresets.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
-import { OSM_LAYER_ID } from "./components/BackgroundSwitcher";
 
 const StyledAppBar = styled(AppBar)(() => ({
   zIndex: "1",
@@ -107,21 +106,7 @@ class LayersSwitcherView extends React.PureComponent {
           return;
         }
 
-        let layer;
-
-        if (layerId === OSM_LAYER_ID) {
-          // The Open street map layer is set up by the `BackgroundSwitcher`
-          // component. So it does not exist when the `olLayerMap` is created.
-          // code below is an ugly workaround. The best solution would be if
-          // the `LayerItemDetails` does not need the actual OpenLayers object
-          // at all.
-          layer = this.props.app.map
-            .getLayers()
-            .getArray()
-            .find((layer) => layer.get("name") === OSM_LAYER_ID);
-        } else {
-          layer = this.olLayerMap[layerId];
-        }
+        const layer = this.olLayerMap[layerId];
 
         // Set scroll position state when layer details is opened
         const details = {
@@ -339,8 +324,6 @@ class LayersSwitcherView extends React.PureComponent {
           }
           layers={this.baseLayers}
           layerMap={this.olLayerMap}
-          backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
-          backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
           enableOSM={this.options.enableOSM}
           renderSpecialBackgroundsAtBottom={
             this.options.renderSpecialBackgroundsAtBottom
