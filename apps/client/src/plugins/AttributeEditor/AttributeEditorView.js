@@ -372,28 +372,81 @@ export default function AttributeEditorView({ state, controller, ui }) {
   }, [controller]);
 
   const undoLatestTableChange = useCallback(() => {
-    const localLast = tableUndoLocal[tableUndoLocal.length - 1] ?? null;
-    const modelLast = tableUndoStack[tableUndoStack.length - 1] ?? null;
-    const localWhen = localLast?.when ?? -Infinity;
-    const modelWhen = modelLast?.when ?? -Infinity;
+    const modelLast = state.undoStack?.[state.undoStack.length - 1] ?? null;
+    const tableLast = tableUndoLocal[tableUndoLocal.length - 1] ?? null;
+    const formLast = formUndoStack[formUndoStack.length - 1] ?? null;
+    const tModel = modelLast?.when ?? -Infinity;
+    const tTable = tableLast?.when ?? -Infinity;
+    const tForm = formLast?.when ?? -Infinity;
 
-    if (localWhen >= modelWhen && localLast) {
-      if (localLast.type === "edit_cell") {
+    if (tForm >= tTable && tForm >= tModel && formLast) {
+      let k = 0;
+      for (let i = formUndoStack.length - 1; i >= 0; i--) {
+        if ((formUndoStack[i]?.when ?? -1) !== tForm) break;
+        k++;
+      }
+      const group = formUndoStack.slice(-k);
+      const ops = [];
+      group.forEach(({ id, snapshot }) => {
+        FIELD_META.forEach(({ key }) => {
+          const v = snapshot[key];
+          ops.push({
+            id,
+            key,
+            value:
+              v === "" && (key === "ar_utbredning" || key === "ar_anteckning")
+                ? null
+                : v,
+          });
+        });
+      });
+      if (ops.length) controller.batchEdit(ops);
+      const hit = group.find((g) => g.id === focusedId);
+      if (hit?.snapshot) {
+        const snap = hit.snapshot;
+        setEditValues({ ...snap });
+        const nextChanged = new Set();
+        FIELD_META.forEach(({ key }) => {
+          if ((snap[key] ?? "") !== (originalValues[key] ?? ""))
+            nextChanged.add(key);
+        });
+        setChangedFields(nextChanged);
+        setDirty(nextChanged.size > 0);
+      }
+      setFormUndoStack((prev) => prev.slice(0, prev.length - k));
+      group.forEach(({ id }) => formUndoSnapshotsRef.current.delete(id));
+      showNotification(
+        k > 1 ? `Ångrade formulärändringar (${k})` : "Ångrade formulärändring"
+      );
+      return;
+    }
+
+    if (tTable >= tModel && tableLast) {
+      if (tableLast.type === "edit_cell") {
         controller.batchEdit([
-          { id: localLast.id, key: localLast.key, value: localLast.prevValue },
+          { id: tableLast.id, key: tableLast.key, value: tableLast.prevValue },
         ]);
         setTableUndoLocal((prev) => prev.slice(0, -1));
         showNotification("Ångrade celländring");
-        return;
+      } else {
+        setTableUndoLocal((prev) => prev.slice(0, -1));
       }
-      setTableUndoLocal((prev) => prev.slice(0, -1));
       return;
     }
+
     if (modelLast) {
       controller.undo();
       return;
     }
-  }, [tableUndoLocal, controller, tableUndoStack, showNotification]);
+  }, [
+    state.undoStack,
+    tableUndoLocal,
+    formUndoStack,
+    controller,
+    focusedId,
+    originalValues,
+    showNotification,
+  ]);
 
   const handleBeforeChangeFocus = useCallback(
     (targetId) => {
@@ -705,37 +758,7 @@ export default function AttributeEditorView({ state, controller, ui }) {
     setDirty(false);
   }
 
-  function undoLatestFormChange() {
-    setFormUndoStack((prev) => {
-      if (!prev.length) return prev;
-      const { id, snapshot } = prev[prev.length - 1] || {};
-      if (id == null || !snapshot) return prev.slice(0, -1);
-      const ops = FIELD_META.map(({ key }) => ({
-        id,
-        key,
-        value:
-          snapshot[key] === "" &&
-          (key === "ar_utbredning" || key === "ar_anteckning")
-            ? null
-            : snapshot[key],
-      }));
-      controller.batchEdit(ops);
-      if (focusedId === id) {
-        setEditValues({ ...snapshot });
-        const nextChanged = new Set();
-        FIELD_META.forEach(({ key }) => {
-          if ((snapshot[key] ?? "") !== (originalValues[key] ?? "")) {
-            nextChanged.add(key);
-          }
-        });
-        setChangedFields(nextChanged);
-        setDirty(nextChanged.size > 0);
-      }
-
-      formUndoSnapshotsRef.current.delete(id);
-      return prev.slice(0, -1);
-    });
-  }
+  const undoLatestFormChange = undoLatestTableChange;
 
   function openInFormFromTable(rowId) {
     controller.setMode("form");
