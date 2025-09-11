@@ -28,6 +28,9 @@ import { useSnackbar } from "notistack";
 import { Vector as VectorSource } from "ol/source";
 import { Vector as VectorLayer } from "ol/layer";
 
+//Bus
+import { editBus } from "../../../components/Bus/editBus";
+
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
   // We want to render the ActivityMenu on the same side as the plugin
@@ -332,6 +335,19 @@ const SketchView = (props) => {
             color: PLUGIN_COLORS.warning,
           }
     );
+
+    if (newOgcSourceTitle === "Ingen") {
+      editBus.emit("edit:service-cleared", { source: "sketch" });
+    } else {
+      editBus.emit("edit:service-selected", {
+        source: "sketch",
+        id: "",
+        layerId: "",
+        title: `Redigerar ${newOgcSourceTitle}`,
+        color: PLUGIN_COLORS.warning,
+      });
+    }
+
     setOgcSource(newOgcSourceTitle);
   };
 

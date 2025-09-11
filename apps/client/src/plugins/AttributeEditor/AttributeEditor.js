@@ -5,6 +5,10 @@ import Observer from "react-event-observer";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import AttributeEditorModel, { Action } from "./AttributeEditorModel";
 import { createDummyFeatures, FIELD_META } from "./dummy/DummyData";
+import { editBus } from "../../components/Bus/editBus";
+
+const DEFAULT_TITLE = "AttributeEditor";
+const DEFAULT_COLOR = null;
 
 function AttributeEditor(props) {
   const [ui, setUi] = React.useState({
@@ -33,6 +37,29 @@ function AttributeEditor(props) {
     model.getSnapshot,
     model.getSnapshot
   );
+
+  React.useEffect(() => {
+    const offSel = editBus.on("edit:service-selected", (ev) => {
+      const { title, color, source } = ev.detail || {};
+      if (source === "attrib") return;
+      setUi((u) => ({
+        ...u,
+        title: title ?? u.title,
+        color: color ?? u.color,
+      }));
+    });
+
+    const offClr = editBus.on("edit:service-cleared", (ev) => {
+      const { source } = ev.detail || {};
+      if (source === "attrib") return;
+      setUi((u) => ({ ...u, title: DEFAULT_TITLE, color: DEFAULT_COLOR }));
+    });
+
+    return () => {
+      offSel();
+      offClr();
+    };
+  }, []);
 
   React.useEffect(() => {
     const sub = localObserver.subscribe("AttributeEditorEvent", (msg) => {

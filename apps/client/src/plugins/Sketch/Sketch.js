@@ -2,6 +2,9 @@ import React from "react";
 import Observer from "react-event-observer";
 import EditIcon from "@mui/icons-material/Edit";
 
+// Bus
+import { editBus } from "../../components/Bus/editBus";
+
 // Helpers
 import LocalStorageHelper from "../../utils/LocalStorageHelper";
 
@@ -16,7 +19,11 @@ import KmlModel from "../../models/KmlModel";
 import GpxModel from "../../models/GpxModel";
 
 // Constants
-import { STORAGE_KEY, DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
+import {
+  STORAGE_KEY,
+  DEFAULT_MEASUREMENT_SETTINGS,
+  PLUGIN_COLORS,
+} from "./constants";
 
 // Hooks
 import useCookieStatus from "../../hooks/useCookieStatus";
@@ -121,6 +128,33 @@ const Sketch = (props) => {
     title: "Rita",
     color: "4a90e2",
   });
+
+  React.useEffect(() => {
+    const offSel = editBus.on("edit:service-selected", (ev) => {
+      const { title, color, source } = ev.detail || {};
+      if (source === "sketch") return;
+      setPluginSettings((ps) => ({
+        ...ps,
+        title: title ?? ps.title,
+        color: color ?? ps.color,
+      }));
+    });
+
+    const offClr = editBus.on("edit:service-cleared", (ev) => {
+      const { source } = ev.detail || {};
+      if (source === "sketch") return;
+      setPluginSettings((ps) => ({
+        ...ps,
+        title: "Rita",
+        color: PLUGIN_COLORS.default,
+      }));
+    });
+
+    return () => {
+      offSel();
+      offClr();
+    };
+  }, []);
 
   // This functions handles events from the draw-model that are sent
   // when we are in edit-mode and the map is clicked. A feature might be sent
