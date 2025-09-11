@@ -615,59 +615,53 @@ export default function AttributeEditorView({ state, controller, ui }) {
     [visibleFormList, lastFormIndex, handleBeforeChangeFocus]
   );
 
+  function scrollToRow(id) {
+    requestAnimationFrame(() => {
+      document
+        .querySelector(`[data-row-id="${id}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  }
+
   function focusPrev() {
-    if (!focusedId) {
-      if (visibleFormList.length > 0) {
-        const lastId = visibleFormList[visibleFormList.length - 1].id;
-        setFocusedId(lastId);
-        setTimeout(() => {
-          document
-            .querySelector(`[data-row-id="${lastId}"]`)
-            ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }, 0);
-      }
+    const order = visibleFormList.map((f) => f.id);
+    if (order.length === 0) return;
+
+    if (focusedId == null) {
+      const lastId = order[order.length - 1];
+      setFocusedId(lastId);
+      setSelectedIds(new Set([lastId]));
+      scrollToRow(lastId);
       return;
     }
-    const arr = Array.from(
-      selectedIds.size ? selectedIds : new Set(features.map((f) => f.id))
-    );
-    const idx = arr.indexOf(focusedId);
+
+    const idx = order.indexOf(focusedId);
     if (idx > 0) {
-      const newId = arr[idx - 1];
+      const newId = order[idx - 1];
       setFocusedId(newId);
-      setTimeout(() => {
-        document
-          .querySelector(`[data-row-id="${newId}"]`)
-          ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 0);
+      setSelectedIds(new Set([newId]));
+      scrollToRow(newId);
     }
   }
 
   function focusNext() {
-    if (!focusedId) {
-      if (visibleFormList.length > 0) {
-        const firstId = visibleFormList[0].id;
-        setFocusedId(firstId);
-        setTimeout(() => {
-          document
-            .querySelector(`[data-row-id="${firstId}"]`)
-            ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }, 0);
-      }
+    const order = visibleFormList.map((f) => f.id);
+    if (order.length === 0) return;
+
+    if (focusedId == null) {
+      const firstId = order[0];
+      setFocusedId(firstId);
+      setSelectedIds(new Set([firstId]));
+      scrollToRow(firstId);
       return;
     }
-    const arr = Array.from(
-      selectedIds.size ? selectedIds : new Set(features.map((f) => f.id))
-    );
-    const idx = arr.indexOf(focusedId);
-    if (idx < arr.length - 1) {
-      const newId = arr[idx + 1];
+
+    const idx = order.indexOf(focusedId);
+    if (idx > -1 && idx < order.length - 1) {
+      const newId = order[idx + 1];
       setFocusedId(newId);
-      setTimeout(() => {
-        document
-          .querySelector(`[data-row-id="${newId}"]`)
-          ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 0);
+      setSelectedIds(new Set([newId]));
+      scrollToRow(newId);
     }
   }
 
@@ -767,12 +761,12 @@ export default function AttributeEditorView({ state, controller, ui }) {
   }
 
   function openSelectedInFormFromTable() {
-    if (tableHasPending) {
+    /*if (tableHasPending) {
       window.alert(
         "Du har osparade ändringar i tabelläget. Spara eller ångra dem först."
       );
       return;
-    }
+    }*/
     if (tableSelectedIds.size === 0) return;
     controller.setMode("form");
 
@@ -785,6 +779,10 @@ export default function AttributeEditorView({ state, controller, ui }) {
     setFocusedId(first);
   }
 
+  const combinedUndoStack = tableUndoLocal.length
+    ? tableUndoLocal
+    : tableUndoStack;
+  const canUndo = Boolean(combinedUndoStack?.length || formUndoStack?.length);
   return (
     <div style={s.shell}>
       <Toolbar
@@ -840,9 +838,9 @@ export default function AttributeEditorView({ state, controller, ui }) {
           setDeleteState={setDeleteState}
           tablePendingDeletes={pendingDeletes}
           pushTableUndo={pushTableUndo}
-          tableUndoStack={
-            tableUndoLocal.length ? tableUndoLocal : tableUndoStack
-          }
+          tableUndoStack={combinedUndoStack}
+          formUndoStack={formUndoStack}
+          canUndo={canUndo}
           undoLatestTableChange={undoLatestTableChange}
           tablePendingAdds={pendingAdds}
         />
@@ -905,7 +903,9 @@ export default function AttributeEditorView({ state, controller, ui }) {
           tableHasPending={tableHasPending}
           tablePendingDeletes={pendingDeletes}
           commitTableEdits={commitTableEdits}
-          tableUndoStack={tableUndoStack}
+          tableUndoStack={
+            tableUndoLocal.length ? tableUndoLocal : tableUndoStack
+          }
           undoLatestTableChange={undoLatestTableChange}
           formUndoStack={formUndoStack}
           undoLatestFormChange={undoLatestFormChange}

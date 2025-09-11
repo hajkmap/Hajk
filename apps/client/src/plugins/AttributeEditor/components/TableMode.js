@@ -28,6 +28,8 @@ export default function TableMode(props) {
     tablePendingAdds,
     tableUndoStack,
     undoLatestTableChange,
+    formUndoStack,
+    canUndo,
 
     // filters & sorting
     columnFilters,
@@ -181,8 +183,20 @@ export default function TableMode(props) {
           </button>
 
           <button
-            style={!tableUndoStack?.length ? s.iconBtnDisabled : s.iconBtn}
-            disabled={!tableUndoStack?.length}
+            disabled={
+              canUndo === undefined
+                ? !(tableUndoStack?.length || formUndoStack?.length)
+                : !canUndo
+            }
+            style={
+              (
+                canUndo === undefined
+                  ? tableUndoStack?.length || formUndoStack?.length
+                  : canUndo
+              )
+                ? s.iconBtn
+                : s.iconBtnDisabled
+            }
             onClick={undoLatestTableChange}
             title="Ångra senaste ändring"
             aria-label="Ångra senaste"
