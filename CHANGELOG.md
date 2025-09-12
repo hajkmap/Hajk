@@ -13,11 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- MUI upgraded to v7. [PR#1658](https://github.com/hajkmap/Hajk/pull/1658)
+- The OpenStreetMap background (as well as the white and black backgrounds) are now first-class citizens in LayerSwitcher, enabling e.g. loading the app with these layers visible. [PR#1680](https://github.com/hajkmap/Hajk/pull/1680)
+
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+- Bookmarks: Fixed button state. [PR#1609](https://github.com/hajkmap/Hajk/pull/1609)
+- WFS layers: Fixed how different ways of writing the WFS service URL were affecting Client's ability to load layers from that service. [PR#1677](https://github.com/hajkmap/Hajk/pull/1677)
 
 ### Security
 
@@ -28,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - LayerComparer: Corrected layer comparison logic in onClose handler. [commit](https://github.com/hajkmap/Hajk/commit/7f85c143055f1648a3033588a9462a902af4dea5)
+- The `reinstall_modules.sh` script has been fixed to resolve install problems due to outdated peer dependency in one of our dependencies. [commit](https://github.com/hajkmap/Hajk/commit/ef4940b566f39b20190fe03726dc4a6ef33aa9db)
 
 ## [4.1.0-rc.1] - 2025-04-25
 
