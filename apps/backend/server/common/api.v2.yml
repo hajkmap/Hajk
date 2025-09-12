@@ -43,7 +43,38 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/WFSTLayer"
-
+  /ogc/wfst/{id}:
+    get:
+      tags: [Client-accessible]
+      summary: Get a single WFS-T layer (optionally sparse fields)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: query
+          name: fields
+          schema: { type: string }
+          description: Komma-separerade fält att returnera (t.ex. "id,caption,url,projection")
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WFSTLayer"
+        "400":
+          description: Invalid layer ID format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: WFST layer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /ogc/wfst/{id}/features:
     get:
       tags: [Client-accessible]

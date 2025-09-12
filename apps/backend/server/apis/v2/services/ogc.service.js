@@ -1,5 +1,8 @@
-import SettingsService from "./settings.service.js";
 import { XMLParser } from "fast-xml-parser";
+import ConfigService from "./config.service.js";
+import log4js from "log4js";
+
+const logger = log4js.getLogger("service.config.v2");
 
 const CONSTANTS = {
   DEFAULT_BASE:
@@ -8,7 +11,6 @@ const CONSTANTS = {
   MAX_RETRIES: 3,
   RETRY_DELAYS: [1000, 2000, 4000], // Exponential backoff, in milliseconds
   MAX_LIMIT: 10000,
-  CACHE_TTL: 60000,
   MAX_RESPONSE_BYTES: 100 * 1024 * 1024,
 
   NAMESPACES: {
@@ -69,35 +71,6 @@ export class ValidationError extends ServiceError {
   }
 }
 
-// ========== LOGGER ==========
-class Logger {
-  static log(level, message, context = {}) {
-    const logEntry = {
-      timestamp: new Date().toISOString(),
-      level,
-      message,
-      ...context,
-    };
-    console[level](JSON.stringify(logEntry));
-  }
-
-  static error(message, error, context = {}) {
-    this.log("error", message, {
-      ...context,
-      error: error?.message,
-      stack: error?.stack,
-    });
-  }
-
-  static warn(message, context = {}) {
-    this.log("warn", message, context);
-  }
-
-  static info(message, context = {}) {
-    this.log("info", message, context);
-  }
-}
-
 // ========== VALIDATOR ==========
 class Validator {
   static isValidId(id) {
@@ -122,7 +95,7 @@ class Validator {
         });
 
         if (!isAllowed) {
-          Logger.warn("URL blocked by SSRF protection", { url: urlString });
+          logger.warn("URL blocked by SSRF protection", { url: urlString });
           return false;
         }
       }
@@ -138,7 +111,7 @@ class Validator {
         /^0\.0\.0\.0$/,
       ];
       if (privateV4.some((re) => re.test(hostname))) {
-        Logger.warn("Private IPv4 address blocked", { url: urlString });
+        logger.warn("Private IPv4 address blocked", { url: urlString });
         return false;
       }
       const hnLower = hostname.toLowerCase();
@@ -149,7 +122,7 @@ class Validator {
         hnLower.startsWith("fc") || // ULA (fc00::/7)
         hnLower.startsWith("fd") // ULA (fd00::/7)
       ) {
-        Logger.warn("Private IPv6 address blocked", { url: urlString });
+        logger.warn("Private IPv6 address blocked", { url: urlString });
         return false;
       }
 
@@ -193,39 +166,6 @@ class Validator {
   }
 }
 
-// ========== CACHE ==========
-class SimpleCache {
-  constructor(ttl = CONSTANTS.CACHE_TTL) {
-    this.cache = new Map();
-    this.ttl = ttl;
-  }
-
-  get(key) {
-    const item = this.cache.get(key);
-    if (!item) return null;
-
-    if (Date.now() - item.timestamp > this.ttl) {
-      this.cache.delete(key);
-      return null;
-    }
-
-    return item.value;
-  }
-
-  set(key, value) {
-    this.cache.set(key, {
-      value,
-      timestamp: Date.now(),
-    });
-  }
-
-  clear() {
-    this.cache.clear();
-  }
-}
-
-const layerCache = new SimpleCache();
-
 // ========== HELPER FUNCTIONS ==========
 function pick(obj, fields) {
   if (!fields?.length) return { ...obj }; // Return copy to avoid mutation
@@ -268,7 +208,7 @@ async function fetchWithRetry(url, options = {}, retryCount = 0) {
       retryCount < CONSTANTS.MAX_RETRIES
     ) {
       const delay = CONSTANTS.RETRY_DELAYS[retryCount] || 5000;
-      Logger.warn("Retrying after server error", {
+      logger.warn("Retrying after server error", {
         url,
         status: response.status,
         retryCount,
@@ -284,7 +224,7 @@ async function fetchWithRetry(url, options = {}, retryCount = 0) {
     // Also retry on network errors / timeouts
     if (retryCount < CONSTANTS.MAX_RETRIES) {
       const delay = CONSTANTS.RETRY_DELAYS[retryCount] || 5000;
-      Logger.warn("Retrying after network/timeout error", {
+      logger.warn("Retrying after network/timeout error", {
         url,
         retryCount,
         delay,
@@ -308,55 +248,16 @@ function ensureNotTooLarge(res) {
 }
 
 // ========== CONFIG ==========
-async function getWFSTStore({
-  baseUrl = CONSTANTS.DEFAULT_BASE,
-  prefer = "api",
-} = {}) {
-  const cacheKey = `layers_${baseUrl}_${prefer}`;
-  const cached = layerCache.get(cacheKey);
-  if (cached) return cached;
+async function getWFSTStore({ user = null, washContent = true } = {}) {
+  const store = await ConfigService.getLayersStore(user, washContent);
 
-  let layers = [];
-
-  if (prefer === "api") {
-    try {
-      const url = new URL("/api/v2/mapconfig/layers", baseUrl);
-      const response = await fetchWithTimeout(
-        url.toString(),
-        {
-          headers: { Accept: "application/json" },
-        },
-        5000 // Short timeout for API
-      );
-
-      if (response.ok) {
-        ensureNotTooLarge(response);
-        const data = await response.json();
-        if (Array.isArray(data?.wfstlayers)) {
-          layers = data.wfstlayers;
-        }
-      }
-    } catch (error) {
-      Logger.warn("Failed to fetch layers from API, falling back to file", {
-        error: error.message,
-        baseUrl,
-      });
-    }
+  if (store?.error) {
+    throw new ServiceError("Failed to read layers store", 500, {
+      originalError: store.error?.message || String(store.error),
+    });
   }
 
-  // Fall back to file if API failed
-  if (!layers.length) {
-    try {
-      const store = await SettingsService.readFileAsJson("layers.json");
-      layers = store?.wfstlayers || [];
-    } catch (error) {
-      Logger.error("Failed to read layers from file", error);
-      layers = [];
-    }
-  }
-
-  layerCache.set(cacheKey, layers);
-  return layers;
+  return store?.wfstlayers || [];
 }
 
 // ========== WFS URL BUILDER ==========
@@ -513,7 +414,33 @@ function parseRing(linearRingObj) {
   return [];
 }
 
-// Recursive geometry search
+// Geometry search
+function findAllGeometryEntries(featureObj) {
+  const hits = [];
+
+  const hasGeom = (o) =>
+    CONSTANTS.GEOMETRY_TYPES.some((n) => {
+      const k = keyOf(o, n);
+      return k && o[k] !== undefined;
+    });
+
+  function dfs(obj, depth = 0) {
+    if (!isObj(obj) || depth > 10) return;
+    for (const [k, v] of Object.entries(obj)) {
+      if (!isObj(v)) continue;
+
+      // hit: v contains a GML geometry type (Point/Polygon/…)
+      if (hasGeom(v)) hits.push([k, v]);
+
+      // skip duplicate (can find more)
+      dfs(v, depth + 1);
+    }
+  }
+
+  dfs(featureObj, 0);
+  return hits; // array of [field name, object containing GML geometry]
+}
+
 function findGeometryEntry(featureObj) {
   const hasGeom = (o) =>
     CONSTANTS.GEOMETRY_TYPES.some((n) => {
@@ -709,17 +636,47 @@ function memberToFeature(member) {
 
   if (!featureNode) return null;
 
-  const [geomKey, geomVal] = findGeometryEntry(featureNode);
-  const geometry = geomKey ? gmlGeomToGeoJSON(geomVal) : null;
+  // Collect all geometry nodes
+  const geomEntries = findAllGeometryEntries(featureNode);
+
+  // Build GeoJSON geometry (one or multiple)
+  let geometry = null;
+  if (geomEntries.length === 1) {
+    const [, geomVal] = geomEntries[0];
+    geometry = gmlGeomToGeoJSON(geomVal);
+  } else if (geomEntries.length > 1) {
+    const geoms = geomEntries
+      .map(([, v]) => gmlGeomToGeoJSON(v))
+      .filter(Boolean);
+
+    if (geoms.length === 1) {
+      // single geometry found, return it directly
+      geometry = geoms[0];
+    } else if (geoms.length > 1) {
+      geometry = { type: "GeometryCollection", geometries: geoms };
+      logger.trace("Multiple geometries found; returning GeometryCollection", {
+        count: geoms.length,
+      });
+    }
+  }
+
+  // Identify geometry-containing properties at top level in featureNode
+  const geomTopLevelKeys = new Set(
+    Object.keys(featureNode).filter((topK) =>
+      geomEntries.some(([hitK]) => hitK === topK)
+    )
+  );
 
   const properties = {};
   for (const [k, v] of Object.entries(featureNode)) {
-    if (k === geomKey) continue;
+    // Skip geometry properties on top level
+    if (geomTopLevelKeys.has(k)) continue;
+    // Skip pure gml: namespace properties
     if (k.startsWith("gml:")) continue;
+    // If the value contains gml: elements, skip (to avoid dumping the entire GML tree into properties)
     if (isObj(v) && Object.keys(v).some((kk) => kk.startsWith("gml:")))
       continue;
 
-    // Remove namespace prefix from property keys and resolve simple conflicts (keep first)
     const cleanKey = removeNamespacePrefix(k);
     const value = isObj(v) && "#text" in v ? v["#text"] : v;
     if (!(cleanKey in properties)) properties[cleanKey] = value;
@@ -777,28 +734,44 @@ function gmlToFeatureCollection(xmlText) {
 
     return fc;
   } catch (error) {
-    Logger.error("Failed to parse GML", error);
+    logger.error("Failed to parse GML", error);
     throw new UpstreamError("Failed to parse GML response", 502);
   }
 }
 
 // ========== PUBLIC API FUNCTIONS ==========
-export async function listWFSTLayers({ fields, baseUrl } = {}) {
+export async function getWFSTLayer({ id, fields, user, washContent } = {}) {
+  if (!Validator.isValidId(id)) {
+    throw new ValidationError("Invalid layer ID format", { id });
+  }
+
+  const layers = await getWFSTStore({ user, washContent });
+  const layer = layers.find((l) => String(l.id) === String(id));
+  if (!layer) {
+    throw new NotFoundError("WFST layer not found", { layerId: id });
+  }
+
+  if (!fields) return layer;
+
+  const pickFields = fields
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  return pickFields.length ? pick(layer, pickFields) : layer;
+}
+
+export async function listWFSTLayers({ fields, user, washContent } = {}) {
   try {
-    const layers = await getWFSTStore({ baseUrl, prefer: "api" });
-
+    const layers = await getWFSTStore({ user, washContent });
     if (!fields) return layers;
-
     const pickFields = fields
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-
-    if (!pickFields.length) return layers;
-
-    return layers.map((layer) => pick(layer, pickFields));
+    return pickFields.length ? layers.map((l) => pick(l, pickFields)) : layers;
   } catch (error) {
-    Logger.error("Failed to list WFST layers", error);
+    logger.error("Failed to list WFST layers", error);
     throw new ServiceError("Failed to retrieve layers", 500, {
       originalError: error.message,
     });
@@ -807,6 +780,8 @@ export async function listWFSTLayers({ fields, baseUrl } = {}) {
 
 export async function getWFSTFeatures(params) {
   const {
+    user,
+    washContent,
     id,
     version,
     typeName,
@@ -816,7 +791,6 @@ export async function getWFSTFeatures(params) {
     offset,
     filter,
     cqlFilter,
-    baseUrl,
   } = params;
 
   if (!Validator.isValidId(id)) {
@@ -834,7 +808,7 @@ export async function getWFSTFeatures(params) {
   const validatedOffset = Validator.validateOffset(offset);
 
   try {
-    const layers = await getWFSTStore({ baseUrl, prefer: "api" });
+    const layers = await getWFSTStore({ user, washContent });
     const layer = layers.find((l) => String(l.id) === String(id));
 
     if (!layer) {
@@ -888,7 +862,7 @@ export async function getWFSTFeatures(params) {
         /output|format|json|geo\s*\+?\s*json/i.test(snippet);
 
       if (!maybeFormatIssue) {
-        Logger.warn("Client error from WFS server (no fallback)", {
+        logger.warn("Client error from WFS server (no fallback)", {
           status: res.status,
           url: layer.url,
           error: snippet,
@@ -918,7 +892,7 @@ export async function getWFSTFeatures(params) {
 
         return fc;
       } catch (parseError) {
-        Logger.warn("Failed to parse JSON response, trying GML", {
+        logger.warn("Failed to parse JSON response, trying GML", {
           error: parseError.message,
         });
         // Fall through to GML
@@ -964,7 +938,7 @@ export async function getWFSTFeatures(params) {
       throw error;
     }
 
-    Logger.error("Unexpected error in getWFSTFeatures", error);
+    logger.error("Unexpected error in getWFSTFeatures", error);
     throw new ServiceError("Internal server error", 500, {
       originalError: error.message,
     });

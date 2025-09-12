@@ -17,6 +17,27 @@ function isValidBbox(bbox) {
 }
 
 export class Controller {
+  // GET /api/v2/ogc/wfst/:id?fields=...
+  async getWFSTLayer(req, res) {
+    try {
+      const { id } = req.params;
+      const { fields, washContent } = req.query;
+      const user = req.user ?? null; // om du har auth
+
+      const layer = await svc.getWFSTLayer({ id, fields, user, washContent });
+      // välj svarformat: för single returnerar vi bara objektet
+      return res.json(layer);
+    } catch (e) {
+      if (e.name === "ValidationError")
+        return res.status(400).json({ error: e.message, details: e.details });
+      if (e.name === "NotFoundError")
+        return res.status(404).json({ error: e.message, details: e.details });
+
+      log.error(e);
+      return res.status(500).json({ error: String(e?.message || e) });
+    }
+  }
+
   // GET /api/v2/ogc/wfst?fields=...
   async listWFSTLayers(req, res) {
     try {
