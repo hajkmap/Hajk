@@ -25,7 +25,7 @@ const BackgroundSwitcher = ({
       setSelectedLayerId(backgroundVisibleFromStart.name);
       handleMapBackgroundColor(backgroundVisibleFromStart.name);
     }
-  }, [layers]);
+  }, []);
 
   useEffect(() => {
     // Ensure that BackgroundSwitcher correctly selects visible layer,
@@ -105,7 +105,6 @@ const BackgroundSwitcher = ({
   // If the static layers b/w and osm should be shown last in the bg-layer list
   // reorder the array to accomodate that.
   if (renderSpecialBackgroundsAtBottom) {
-    console.log("rendering at bottom");
     const staticLayersRange = ["-1", "-2", "-3"];
     const staticLayersToMove = layersToShow.filter((layer) =>
       staticLayersRange.includes(layer.name)

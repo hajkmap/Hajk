@@ -502,7 +502,7 @@ class AppModel {
     // sets the real colors based on matching the name.
     const whiteLayer = new VectorLayer({
       visible: false,
-      source: null,
+      source: new VectorSource(),
       zIndex: -1,
       layerType: "base",
       rotateMap: "n",
@@ -527,7 +527,7 @@ class AppModel {
     // sets the real colors based on matching the name.
     const blackLayer = new VectorLayer({
       visible: false,
-      source: null,
+      source: new VectorSource(),
       zIndex: -1,
       layerType: "base",
       rotateMap: "n",
