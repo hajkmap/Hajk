@@ -2,7 +2,7 @@ import { XMLParser } from "fast-xml-parser";
 import ConfigService from "./config.service.js";
 import log4js from "log4js";
 
-const logger = log4js.getLogger("service.config.v2");
+const logger = log4js.getLogger("ogc.v2");
 
 const CONSTANTS = {
   DEFAULT_BASE:
