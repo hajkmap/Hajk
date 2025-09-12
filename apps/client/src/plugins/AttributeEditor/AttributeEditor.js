@@ -5,7 +5,7 @@ import Observer from "react-event-observer";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import AttributeEditorModel, { Action } from "./AttributeEditorModel";
 import { createDummyFeatures, FIELD_META } from "./dummy/DummyData";
-import { editBus } from "../../components/Bus/editBus";
+import { editBus } from "../../busses/editBus";
 
 const DEFAULT_TITLE = "AttributeEditor";
 const DEFAULT_COLOR = null;

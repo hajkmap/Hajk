@@ -9,7 +9,7 @@ const CONSTANTS = {
   RETRY_DELAYS: [1000, 2000, 4000], // Exponential backoff, in milliseconds
   MAX_LIMIT: 10000,
   CACHE_TTL: 60000,
-  MAX_RESPONSE_BYTES: 50 * 1024 * 1024,
+  MAX_RESPONSE_BYTES: 100 * 1024 * 1024,
 
   NAMESPACES: {
     GML: "gml:",

@@ -29,7 +29,7 @@ import { Vector as VectorSource } from "ol/source";
 import { Vector as VectorLayer } from "ol/layer";
 
 //Bus
-import { editBus } from "../../../components/Bus/editBus";
+import { editBus } from "../../../busses/editBus";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {

@@ -3,7 +3,7 @@ import Observer from "react-event-observer";
 import EditIcon from "@mui/icons-material/Edit";
 
 // Bus
-import { editBus } from "../../components/Bus/editBus";
+import { editBus } from "../../busses/editBus";
 
 // Helpers
 import LocalStorageHelper from "../../utils/LocalStorageHelper";
