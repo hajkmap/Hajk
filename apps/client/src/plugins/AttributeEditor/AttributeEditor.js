@@ -5,17 +5,21 @@ import Observer from "react-event-observer";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import AttributeEditorModel, { Action } from "./AttributeEditorModel";
 import { createDummyFeatures, FIELD_META } from "./dummy/DummyData";
-import { editBus } from "../../busses/editBus";
-
-const DEFAULT_TITLE = "AttributeEditor";
-const DEFAULT_COLOR = null;
+import { editBus } from "../../buses/editBus";
+import { PLUGIN_COLORS } from "./constants/index";
 
 function AttributeEditor(props) {
   const [ui, setUi] = React.useState({
-    title: "AttributeEditor",
-    color: null,
+    title: "Attributredigerare",
+    color: "4a90e2",
     mode: "table", // "table" | "form"
     dark: false,
+  });
+
+  const DEFAULT_TITLE = "Attributredigerare";
+  const [pluginSettings, setPluginSettings] = React.useState({
+    title: DEFAULT_TITLE,
+    color: PLUGIN_COLORS.default,
   });
 
   const [localObserver] = React.useState(Observer());
@@ -42,7 +46,7 @@ function AttributeEditor(props) {
     const offSel = editBus.on("edit:service-selected", (ev) => {
       const { title, color, source } = ev.detail || {};
       if (source === "attrib") return;
-      setUi((u) => ({
+      setPluginSettings((u) => ({
         ...u,
         title: title ?? u.title,
         color: color ?? u.color,
@@ -52,7 +56,11 @@ function AttributeEditor(props) {
     const offClr = editBus.on("edit:service-cleared", (ev) => {
       const { source } = ev.detail || {};
       if (source === "attrib") return;
-      setUi((u) => ({ ...u, title: DEFAULT_TITLE, color: DEFAULT_COLOR }));
+      setPluginSettings((u) => ({
+        ...u,
+        title: DEFAULT_TITLE,
+        color: PLUGIN_COLORS.default,
+      }));
     });
 
     return () => {
@@ -118,8 +126,8 @@ function AttributeEditor(props) {
       type="AttributeEditor"
       custom={{
         icon: <BugReportIcon />,
-        title: ui.title,
-        color: ui.color,
+        title: pluginSettings.title,
+        color: pluginSettings.color,
         description: "En kort beskrivning som visas i widgeten",
         customPanelHeaderButtons: [
           {
@@ -141,6 +149,7 @@ function AttributeEditor(props) {
         state={modelState}
         controller={controller}
         ui={ui}
+        setPluginSettings={setPluginSettings}
       />
     </BaseWindowPlugin>
   );

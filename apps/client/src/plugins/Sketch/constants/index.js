@@ -262,7 +262,7 @@ export const OGC_SOURCES = [
   },
   {
     type: "WFS",
-    label: "Avfallstationer",
+    label: "Avfallsstationer",
   },
   {
     type: "WFS",

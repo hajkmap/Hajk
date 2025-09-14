@@ -1,6 +1,8 @@
 import React from "react";
 import TableRowsIcon from "@mui/icons-material/TableRows";
 import DynamicFormIcon from "@mui/icons-material/DynamicForm";
+import { editBus } from "../../../buses/editBus";
+import { OGC_SOURCES, PLUGIN_COLORS } from "../constants/index";
 
 export default function Toolbar({
   s,
@@ -19,7 +21,66 @@ export default function Toolbar({
   selectedIds,
   selectAllVisible,
   clearSelection,
+  title,
+  color,
+  setPluginSettings,
 }) {
+  const [serviceId, setServiceId] = React.useState(
+    OGC_SOURCES[0]?.id ?? "none"
+  );
+
+  // Håll comboboxen i synk med andras val (t.ex. Sketch → source:"sketch")
+  const handleOgcSourceChange = (e) => {
+    const nextId = e.target.value;
+    setServiceId(nextId);
+
+    const def = OGC_SOURCES.find((o) => o.id === nextId);
+    const label = def?.label ?? "Ingen";
+
+    setPluginSettings(
+      label === "Ingen"
+        ? { title: "Attributredigerare", color: PLUGIN_COLORS.default }
+        : { title: `Redigerar ${label}`, color: PLUGIN_COLORS.warning }
+    );
+
+    if (label === "Ingen") {
+      editBus.emit("edit:service-cleared", { source: "toolbar" });
+    } else {
+      editBus.emit("edit:service-selected", {
+        source: "toolbar",
+        id: def?.id ?? "",
+        layerId: def?.layerId ?? "",
+        title: `Redigerar ${label}`,
+        color: PLUGIN_COLORS.warning,
+      });
+    }
+  };
+
+  React.useEffect(() => {
+    const offSel = editBus.on("edit:service-selected", (ev) => {
+      const { title, source } = ev.detail || {};
+      if (source === "toolbar") return; // ignorera egna
+      const raw =
+        typeof title === "string" && title.startsWith("Redigerar ")
+          ? title.replace(/^Redigerar\s+/, "")
+          : title;
+      if (!raw) return;
+      const found = OGC_SOURCES.find((o) => o.label === raw);
+      if (found) setServiceId(found.id);
+    });
+
+    const offClr = editBus.on("edit:service-cleared", (ev) => {
+      const { source } = ev.detail || {};
+      if (source === "toolbar") return;
+      setServiceId("NONE_ID");
+    });
+
+    return () => {
+      offSel();
+      offClr();
+    };
+  }, []);
+
   return (
     <div style={s.toolbar}>
       <strong style={s.toolbarTitle}>Attributredigerare</strong>
@@ -44,6 +105,20 @@ export default function Toolbar({
       >
         <DynamicFormIcon fontSize="small" />
       </button>
+
+      <select
+        value={serviceId}
+        onChange={handleOgcSourceChange}
+        style={s.input}
+        aria-label="Välj redigeringstjänst"
+        title="Välj redigeringstjänst"
+      >
+        {OGC_SOURCES.map((o) => (
+          <option key={o.id} value={o.id}>
+            {o.label}
+          </option>
+        ))}
+      </select>
 
       <div style={s.spacer} />
 

@@ -20,7 +20,12 @@ import MobileForm from "./components/MobileForm";
 import DesktopForm from "./components/DesktopForm";
 import NotificationBar from "./helpers/NotificationBar";
 
-export default function AttributeEditorView({ state, controller, ui }) {
+export default function AttributeEditorView({
+  state,
+  controller,
+  ui,
+  setPluginSettings,
+}) {
   // === UI-only ===
   const [tableEditing, setTableEditing] = useState(null); // { id, key, startValue } | null
 
@@ -791,6 +796,8 @@ export default function AttributeEditorView({ state, controller, ui }) {
         mode={ui.mode}
         setMode={controller.setMode}
         dark={ui.dark}
+        title={ui.title}
+        color={ui.color}
         setDark={controller.setDark}
         tableSearch={tableSearch}
         setTableSearch={setTableSearch}
@@ -802,6 +809,7 @@ export default function AttributeEditorView({ state, controller, ui }) {
         selectedIds={selectedIds}
         selectAllVisible={selectAllVisible}
         clearSelection={clearSelection}
+        setPluginSettings={setPluginSettings}
       />
 
       {ui.mode === "table" ? (

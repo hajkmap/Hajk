@@ -29,7 +29,7 @@ import { Vector as VectorSource } from "ol/source";
 import { Vector as VectorLayer } from "ol/layer";
 
 //Bus
-import { editBus } from "../../../busses/editBus";
+import { editBus } from "../../../buses/editBus";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
@@ -350,6 +350,29 @@ const SketchView = (props) => {
 
     setOgcSource(newOgcSourceTitle);
   };
+
+  React.useEffect(() => {
+    const offSel = editBus.on("edit:service-selected", (ev) => {
+      const { title, source } = ev.detail || {};
+      if (source === "sketch") return;
+      const raw =
+        typeof title === "string" && title.startsWith("Redigerar ")
+          ? title.replace(/^Redigerar\s+/, "")
+          : title;
+      if (raw) setOgcSource(raw);
+    });
+
+    const offClr = editBus.on("edit:service-cleared", (ev) => {
+      const { source } = ev.detail || {};
+      if (source === "sketch") return;
+      setOgcSource("Ingen");
+    });
+
+    return () => {
+      offSel();
+      offClr();
+    };
+  }, []);
 
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
