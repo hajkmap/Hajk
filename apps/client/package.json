@@ -67,7 +67,7 @@
     "load-google-maps-api": "^2.0.2",
     "notistack": "^3.0.2",
     "ol": "^10.6.1",
-    "pdfjs-dist": "^3.11.174",
+    "pdfjs-dist": "^5.4.149",
     "proj4": "^2.19.10",
     "qrcode": "^1.5.4",
     "react": "^19.1.1",
