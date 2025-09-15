@@ -35,7 +35,7 @@
     "http-proxy-middleware": "^3.0.5",
     "log4js": "^6.9.1",
     "query-string": "^9.3.0",
-    "write-excel-file": "^2.3.4",
+    "write-excel-file": "^2.3.5",
     "ws": "^8.18.3"
   },
   "devDependencies": {
