@@ -374,6 +374,9 @@ export default function AttributeEditorView({
     controller.commit();
     formUndoSnapshotsRef.current.clear();
     setFormUndoStack([]);
+    setTableUndoLocal([]);
+    setTableEditing(null);
+    setLastTableIndex(null);
   }, [controller]);
 
   const undoLatestTableChange = useCallback(() => {
