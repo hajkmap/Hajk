@@ -359,7 +359,7 @@ export default function TableMode(props) {
                         tableEditing.id === row.id &&
                         tableEditing.key === meta.key;
 
-                      const tdStyle = isEditing
+                      const tdBase = isEditing
                         ? s.tdEdited
                         : isPlaceholder
                           ? s.tdPlaceholder
@@ -472,6 +472,8 @@ export default function TableMode(props) {
                         setTableEditing(null);
                       };
 
+                      const isDeletedRow = row.__pending === "delete";
+
                       const editorProps = {
                         className: undefined,
                         style: s.cellInput,
@@ -481,22 +483,67 @@ export default function TableMode(props) {
                         onClick: (e) => e.stopPropagation(),
                         onDoubleClick: (e) => e.stopPropagation(),
                         onKeyDown: (e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            finishEdit();
-                          } else if (e.key === "Escape") {
+                          if (e.key === "Escape") {
                             e.preventDefault();
                             cancelEdit();
+                            return;
                           }
+
+                          if (e.key !== "Enter") return;
+
+                          if (e.altKey) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            const el = e.currentTarget;
+                            const start =
+                              el.selectionStart ?? el.value?.length ?? 0;
+                            const end =
+                              el.selectionEnd ?? el.value?.length ?? 0;
+
+                            const next =
+                              (el.value ?? "").slice(0, start) +
+                              "\n" +
+                              (el.value ?? "").slice(end);
+
+                            applyChange(next);
+
+                            const restore = () => {
+                              const active = document.activeElement;
+                              if (active && "selectionStart" in active) {
+                                try {
+                                  active.focus();
+                                  active.selectionStart = active.selectionEnd =
+                                    start + 1;
+                                } catch {}
+                              }
+                            };
+                            requestAnimationFrame(() => {
+                              restore();
+                              setTimeout(restore);
+                            });
+
+                            return;
+                          }
+                          e.preventDefault();
+                          finishEdit();
                         },
                         onBlur: finishEdit,
                       };
+
+                      const wrapCh =
+                        meta.wrapCh ?? (meta.type === "textarea" ? 40 : null);
+                      const flowStyle = wrapCh ? s.tdWrap(wrapCh) : s.tdNowrap;
 
                       return (
                         <td
                           key={meta.key}
                           data-editable={String(isEditableField(meta))}
-                          style={tdStyle}
+                          style={{
+                            ...tdBase,
+                            ...(isDeletedRow ? s.tdStrike : null),
+                            ...flowStyle,
+                          }}
                           onDoubleClick={(e) => {
                             if (!isEditableField(meta)) return;
                             e.stopPropagation();
@@ -517,8 +564,8 @@ export default function TableMode(props) {
                                   </option>
                                 ))}
                               </select>
-                            ) : meta.type === "textarea" ? (
-                              <textarea {...editorProps} rows={2} />
+                            ) : /\n/.test(String(effectiveValue ?? "")) ? (
+                              <textarea {...editorProps} rows={4} />
                             ) : (
                               <input {...editorProps} />
                             )

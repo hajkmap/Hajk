@@ -31,15 +31,62 @@ export function isMissingValue(v) {
   return v == null || v === "";
 }
 
-export function renderInput(meta, value, onChange, isChanged, s) {
+export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
+  const {
+    enterCommits = false,
+    multiline = false,
+    fieldKey,
+    registerTextareaRef,
+    requestFocusCaret,
+    autoFocus = false,
+  } = opts;
+
   const inputStyle = isChanged ? s.inputChanged : s.input;
+
   const common = {
     style: inputStyle,
     value: value ?? "",
     onChange: (e) => onChange(e.target.value),
+    ...(autoFocus ? { autoFocus: true } : {}),
+    onKeyDown: enterCommits
+      ? (e) => {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            e.currentTarget.blur();
+            return;
+          }
+          if (e.key !== "Enter") return;
+
+          if (e.altKey) {
+            e.preventDefault();
+            const el = e.currentTarget;
+            const start = el.selectionStart ?? el.value?.length ?? 0;
+            const end = el.selectionEnd ?? el.value?.length ?? 0;
+            const next =
+              (el.value ?? "").slice(0, start) +
+              "\n" +
+              (el.value ?? "").slice(end);
+            onChange(next);
+
+            if (el.tagName === "INPUT") {
+              requestFocusCaret?.(fieldKey, start + 1);
+            } else {
+              requestAnimationFrame(() => {
+                try {
+                  el.selectionStart = el.selectionEnd = start + 1;
+                } catch {}
+              });
+            }
+            return;
+          }
+          e.preventDefault();
+          e.currentTarget.blur();
+        }
+      : undefined,
   };
+
   if (meta.readOnly) return <input {...common} readOnly />;
-  if (meta.type === "textarea") return <textarea {...common} rows={3} />;
+
   if (meta.type === "select") {
     return (
       <select
@@ -55,5 +102,14 @@ export function renderInput(meta, value, onChange, isChanged, s) {
       </select>
     );
   }
-  return <input {...common} />;
+
+  return multiline ? (
+    <textarea
+      {...common}
+      rows={3}
+      ref={(el) => registerTextareaRef?.(fieldKey, el)}
+    />
+  ) : (
+    <input {...common} />
+  );
 }

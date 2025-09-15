@@ -270,6 +270,23 @@ export default function AttributeEditorView({
     return [...editedFeatures, ...pendingAdds];
   }, [features, pendingAdds, pendingEdits, pendingDeletes]);
 
+  const FM = useMemo(() => {
+    const keys = FIELD_META?.length
+      ? FIELD_META.map((m) => m.key)
+      : Object.keys(allRows[0] || {});
+    const traits = inferColumnTraits(allRows, keys);
+
+    return (
+      FIELD_META?.length ? FIELD_META : keys.map((key) => ({ key, label: key }))
+    ).map((m) => {
+      const para = traits[m.key]?.paragraphLike;
+      return {
+        ...m,
+        wrapCh: m.wrapCh ?? (para ? 40 : null),
+      };
+    });
+  }, [allRows]);
+
   const filteredAndSorted = useMemo(() => {
     const q = tableSearch.trim().toLowerCase();
 
@@ -556,6 +573,56 @@ export default function AttributeEditorView({
     return v == null ? "" : v;
   }
 
+  function inferColumnTraits(rows, keys, sampleSize = 200) {
+    const sample = rows.slice(0, sampleSize);
+    const traits = {}; // { [key]: { paragraphLike: boolean } }
+
+    keys.forEach((key) => {
+      let n = 0;
+      let longCount = 0;
+      let totalLen = 0;
+      let maxLen = 0;
+      let hasNewline = false;
+      let maxToken = 0;
+      let numericish = 0;
+
+      for (const r of sample) {
+        const raw = r?.[key];
+        if (raw === null || raw === undefined) continue;
+        const v = String(raw);
+        if (v === "") continue;
+
+        n++;
+        const len = v.length;
+        totalLen += len;
+        maxLen = Math.max(maxLen, len);
+        if (len >= 80) longCount++;
+        if (/\n/.test(v)) hasNewline = true;
+        if (!isNaN(Number(v)) || /^\d{4}-\d{2}-\d{2}/.test(v)) numericish++;
+
+        const tokens = v.split(/\s+/);
+        for (const t of tokens) {
+          if (t.length > maxToken) maxToken = t.length;
+        }
+      }
+
+      const avg = n ? totalLen / n : 0;
+      const numericRatio = sample.length ? numericish / sample.length : 0;
+
+      const paragraphLike =
+        hasNewline ||
+        maxToken >= 40 ||
+        maxLen >= 40 ||
+        (avg >= 40 && longCount / Math.max(n, 1) >= 0.2);
+
+      const shortLike = numericRatio > 0.7 || maxLen <= 12;
+
+      traits[key] = { paragraphLike: paragraphLike && !shortLike };
+    });
+
+    return traits;
+  }
+
   function selectAllVisible() {
     const ids = visibleFormList.map((f) => f.id);
     setSelectedIds(new Set(ids));
@@ -819,7 +886,7 @@ export default function AttributeEditorView({
         <TableMode
           s={s}
           theme={theme}
-          FIELD_META={FIELD_META}
+          FIELD_META={FM}
           isMobile={isMobile}
           features={features}
           filteredAndSorted={filteredAndSorted}
@@ -871,7 +938,7 @@ export default function AttributeEditorView({
           focusPrev={focusPrev}
           focusNext={focusNext}
           focusedFeature={focusedFeature}
-          FIELD_META={FIELD_META}
+          FIELD_META={FM}
           changedFields={changedFields}
           editValues={editValues}
           handleFieldChange={handleFieldChange}

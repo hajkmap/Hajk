@@ -300,6 +300,21 @@ export function makeStyles(t, isMobile) {
       const isAdd = status === "add";
       const isEdit = status === "edit";
       const isDelete = status === "delete";
+      const baseBg = isDelete
+        ? t.dangerBg
+        : isAdd || isEdit
+          ? t.warningBg
+          : sel
+            ? t.rowSelected
+            : "transparent";
+      const statusShadow = isDelete
+        ? `inset 4px 0 ${t.danger}`
+        : isAdd || isEdit
+          ? `inset 4px 0 ${t.warning}`
+          : "none";
+
+      const selectRing = sel ? `inset 0 0 0 2px ${t.primary}` : null;
+
       return {
         display: "grid",
         gridTemplateColumns: hasLeading
@@ -309,26 +324,12 @@ export function makeStyles(t, isMobile) {
         gap: hasLeading ? 8 : 0,
         padding: isMobile ? "6px 8px" : "8px 10px",
         borderBottom: `1px solid ${t.listDivider}`,
-        background: isDelete
-          ? t.dangerBg
-          : isAdd || isEdit
-            ? t.warningBg
-            : sel
-              ? t.rowHover
-              : "transparent",
+        background: baseBg,
         cursor: "pointer",
         minWidth: 0,
-        outline:
-          isAdd || isEdit || isDelete
-            ? `2px dashed ${isDelete ? t.danger || "#ef4444" : t.warning}`
-            : "none",
         textDecoration: isDelete ? "line-through" : "none",
         opacity: isDelete ? 0.9 : 1,
-        boxShadow: isDelete
-          ? `inset 4px 0 ${t.danger}`
-          : isAdd || isEdit
-            ? `inset 4px 0 ${t.warning}`
-            : "none",
+        boxShadow: [statusShadow, selectRing].filter(Boolean).join(", "),
       };
     },
     listRowText: {
@@ -404,6 +405,14 @@ export function makeStyles(t, isMobile) {
     label: { fontSize: 12, color: t.label },
     labelChanged: { color: t.warning, marginLeft: 4 },
 
+    inputComb: {
+      padding: isMobile ? 6 : 8,
+      border: `1px solid ${t.border}`,
+      borderRadius: 8,
+      fontSize: 14,
+      background: t.overlayBg,
+      color: t.text,
+    },
     input: {
       padding: isMobile ? 6 : 8,
       border: `1px solid ${t.border}`,
@@ -411,6 +420,9 @@ export function makeStyles(t, isMobile) {
       fontSize: 14,
       background: t.overlayBg,
       color: t.text,
+      resize: "vertical",
+      minWidth: "100%",
+      maxWidth: "100%",
     },
     inputChanged: {
       padding: isMobile ? 6 : 8,
@@ -419,6 +431,9 @@ export function makeStyles(t, isMobile) {
       fontSize: 14,
       background: t.warningBg,
       color: t.text,
+      resize: "vertical",
+      minWidth: "100%",
+      maxWidth: "100%",
     },
 
     checkbox: {
@@ -515,7 +530,7 @@ export function makeStyles(t, isMobile) {
     table: {
       borderCollapse: "separate",
       borderSpacing: 0,
-      tableLayout: "auto",
+      tableLayout: "fixed",
       width: "max-content",
       color: t.text,
     },
@@ -593,6 +608,7 @@ export function makeStyles(t, isMobile) {
       lineHeight: "20px",
       background: t.warningBg,
       outline: `1px dashed ${t.warning}`,
+      verticalAlign: "top",
     },
     tdPlaceholder: {
       fontSize: isMobile ? 12 : 13,
@@ -601,6 +617,7 @@ export function makeStyles(t, isMobile) {
       lineHeight: "20px",
       color: t.textMuted,
       fontStyle: "italic",
+      verticalAlign: "top",
     },
     cellInput: {
       width: "100%",
@@ -612,6 +629,9 @@ export function makeStyles(t, isMobile) {
       color: t.text,
       fontSize: isMobile ? 12 : 13,
       outline: "none",
+      resize: "vertical",
+      minWidth: "100%",
+      maxWidth: "100%",
     },
     td: {
       fontSize: isMobile ? 12 : 13,
@@ -619,7 +639,24 @@ export function makeStyles(t, isMobile) {
       borderBottom: `1px solid ${t.borderMuted}`,
       lineHeight: "20px",
       color: t.text,
+      verticalAlign: "top",
     },
+    tdStrike: {
+      textDecoration: "line-through",
+      opacity: 0.9,
+    },
+    tdNowrap: {
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+    },
+    tdWrap: (ch = 40) => ({
+      whiteSpace: "pre-wrap",
+      overflowWrap: "anywhere",
+      wordBreak: "break-word",
+      maxWidth: `${ch}ch`,
+      verticalAlign: "top",
+    }),
     tdEmpty: {
       fontSize: isMobile ? 12 : 13,
       padding: isMobile ? "6px 8px" : "8px 16px",
@@ -640,6 +677,18 @@ export function makeStyles(t, isMobile) {
         ? `2px dashed ${pending === "delete" ? t.danger : t.warning}`
         : "none",
     }),
+
+    bulkWarning: {
+      marginLeft: 8,
+      fontSize: isMobile ? 11 : 12,
+      color: t.warning,
+      background: t.warningBg,
+      border: `1px solid ${t.warning}`,
+      padding: isMobile ? "2px 6px" : "2px 8px",
+      borderRadius: 999,
+      whiteSpace: "nowrap",
+      fontWeight: 600,
+    },
 
     notification: {
       position: "fixed",

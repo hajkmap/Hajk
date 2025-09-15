@@ -29,7 +29,6 @@ export default function Toolbar({
     OGC_SOURCES[0]?.id ?? "none"
   );
 
-  // Håll comboboxen i synk med andras val (t.ex. Sketch → source:"sketch")
   const handleOgcSourceChange = (e) => {
     const nextId = e.target.value;
     setServiceId(nextId);
@@ -59,7 +58,7 @@ export default function Toolbar({
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
       const { title, source } = ev.detail || {};
-      if (source === "toolbar") return; // ignorera egna
+      if (source === "toolbar") return;
       const raw =
         typeof title === "string" && title.startsWith("Redigerar ")
           ? title.replace(/^Redigerar\s+/, "")
@@ -109,7 +108,7 @@ export default function Toolbar({
       <select
         value={serviceId}
         onChange={handleOgcSourceChange}
-        style={s.input}
+        style={s.inputComb}
         aria-label="Välj redigeringstjänst"
         title="Välj redigeringstjänst"
       >
@@ -135,7 +134,7 @@ export default function Toolbar({
       {mode === "table" ? (
         <div style={s.toolbarInfo}>
           <input
-            style={s.input}
+            style={s.inputComb}
             placeholder="Filtrera listan…"
             value={tableSearch}
             onChange={(e) => setTableSearch(e.target.value)}
@@ -150,7 +149,7 @@ export default function Toolbar({
       ) : (
         <div style={s.toolbarInfo}>
           <input
-            style={s.input}
+            style={s.inputComb}
             placeholder="Filtrera listan…"
             value={formSearch}
             onChange={(e) => setFormSearch(e.target.value)}

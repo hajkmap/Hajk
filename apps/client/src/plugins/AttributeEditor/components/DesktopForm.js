@@ -7,7 +7,6 @@ import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
 
 export default function DesktopForm({
   s,
-  theme,
   // left list
   visibleFormList,
   selectedIds,
@@ -39,6 +38,41 @@ export default function DesktopForm({
   tablePendingAdds,
   duplicateInForm,
 }) {
+  const textareaRefs = React.useRef({});
+  const [pendingCaret, setPendingCaret] = React.useState(null);
+
+  const registerTextareaRef = React.useCallback((key, el) => {
+    if (el) textareaRefs.current[key] = el;
+  }, []);
+
+  const requestFocusCaret = React.useCallback((key, pos) => {
+    setPendingCaret({ key, pos });
+  }, []);
+
+  React.useEffect(() => {
+    if (!pendingCaret) return;
+    const el = textareaRefs.current[pendingCaret.key];
+    if (el) {
+      try {
+        el.focus();
+        el.selectionStart = el.selectionEnd = pendingCaret.pos;
+      } catch {}
+    }
+    setPendingCaret(null);
+  }, [pendingCaret]);
+
+  function autoIsMultiline(val, meta) {
+    const s = String(val ?? "");
+    if (!s) return false;
+    if (s.includes("\n")) return true; // line break
+    const limit = meta.wrapCh ?? 80; // long text
+    if (s.length >= limit) return true;
+    const longToken = s
+      .split(/\s+/)
+      .some((tok) => tok.length >= Math.max(30, Math.floor(limit * 0.6)));
+    return longToken; // e.g. long URL
+  }
+
   const handleDeleteClick = () => {
     const ids = getIdsForDeletion(selectedIds, focusedId);
     if (!ids.length) return;
@@ -109,6 +143,11 @@ export default function DesktopForm({
       <div style={s.pane} aria-label="Formulär">
         <div style={s.paneHeaderWithActions}>
           <span>Redigera attribut</span>
+          {selectedIds.size > 1 && (
+            <span style={s.bulkWarning}>
+              OBS! Nu redigerar du {selectedIds.size} objekt samtidigt
+            </span>
+          )}
           <div style={s.spacer} />
 
           <button
@@ -207,25 +246,36 @@ export default function DesktopForm({
         ) : (
           <>
             <div style={s.form}>
-              {FIELD_META.map((meta) => (
-                <div key={meta.key} style={s.field}>
-                  <label style={s.label}>
-                    {meta.label}
-                    {changedFields.has(meta.key) && (
-                      <span style={s.labelChanged}>(ändrad)</span>
+              {FIELD_META.map((meta) => {
+                const changed = changedFields.has(meta.key);
+                const val = editValues?.[meta.key];
+                const isMultiline =
+                  meta.type === "textarea" || autoIsMultiline(val, meta);
+
+                return (
+                  <div key={meta.key} style={s.field}>
+                    <label style={s.label}>
+                      {meta.label}
+                      {changed && <span style={s.labelChanged}>(ändrad)</span>}
+                    </label>
+
+                    {renderInput(
+                      meta,
+                      meta.readOnly && isMissingValue(val) ? "#saknas" : val,
+                      (v) => handleFieldChange(meta.key, v),
+                      changed,
+                      s,
+                      {
+                        enterCommits: true,
+                        multiline: isMultiline,
+                        fieldKey: meta.key,
+                        registerTextareaRef,
+                        requestFocusCaret,
+                      }
                     )}
-                  </label>
-                  {renderInput(
-                    meta,
-                    meta.readOnly && isMissingValue(editValues[meta.key])
-                      ? "#saknas"
-                      : editValues[meta.key],
-                    (v) => handleFieldChange(meta.key, v),
-                    changedFields.has(meta.key),
-                    s
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
             <div
               style={
