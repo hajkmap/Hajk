@@ -25,7 +25,7 @@ const BackgroundSwitcher = ({
       setSelectedLayerId(backgroundVisibleFromStart.name);
       handleMapBackgroundColor(backgroundVisibleFromStart.name);
     }
-  }, []);
+  }, [layers]);
 
   useEffect(() => {
     // Ensure that BackgroundSwitcher correctly selects visible layer,
