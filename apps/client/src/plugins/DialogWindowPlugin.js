@@ -96,6 +96,11 @@ class DialogWindowPlugin extends React.PureComponent {
     this.props.app.globalObserver.subscribe(eventName, (opts = {}) => {
       this.setState({ dialogOpen: true });
     });
+
+    // If our global observers wants to re-render plugins, we want to obey.
+    this.props.app.globalObserver.subscribe("core.pluginsRerender", () => {
+      this.forceUpdate();
+    });
   }
 
   #pluginIsWidget = (target) => {
