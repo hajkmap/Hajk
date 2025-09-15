@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Container, Draggable } from "react-smooth-dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import {
   IconButton,
@@ -19,6 +19,15 @@ import GroupLayer from "./GroupLayer";
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import HajkToolTip from "components/HajkToolTip";
+import LayerItemClone from "./LayerItemClone";
+
+const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
 
 function DrawOrder({ display, app, map, localObserver, options }) {
   // A Set that will hold type of OL layers that should be shown.
@@ -98,16 +107,30 @@ function DrawOrder({ display, app, map, localObserver, options }) {
 
   // Handler that takes care of the layer zIndex ordering.
   const onDrop = (dropResult) => {
-    const layer = dropResult.payload;
-    const { removedIndex, addedIndex } = dropResult;
+    if (!dropResult.destination) {
+      return;
+    }
+
+    if (dropResult.destination.index === dropResult.source.index) {
+      return;
+    }
+
+    const rearrangeResult = reorder(
+      sortedLayers,
+      dropResult.source.index,
+      dropResult.destination.index
+    );
+
+    // We trust that the layers will be found and changed, so we update the state directly
+    setSortedLayers(rearrangeResult);
+    const layer = sortedLayers[dropResult.source.index];
+    const removedIndex = dropResult.source.index;
+    const addedIndex = dropResult.destination.index;
     // The layers original z-index
     const oldZIndex = layer.getZIndex() || 0;
     // Setup two variables that will have different values depending on
     // whether we're moving the layer up or down the list.
     let otherAffectedLayers = null;
-
-    // Fail check
-    if (addedIndex === null || removedIndex === null) return; // No reorder
 
     // Determine the direction of the reorder
     const direction = removedIndex - addedIndex;
@@ -155,17 +178,12 @@ function DrawOrder({ display, app, map, localObserver, options }) {
 
     // When we're done setting OL layers' zIndexes, we can update the state of our component,
     // so that the UI reflects the new order.
-    setSortedLayers(getSortedLayers());
+    // setSortedLayers(getSortedLayers());
   };
 
   // Handles click on info button in header
   const handleInfoButtonClick = () => {
     setInfoIsActive(!infoIsActive);
-  };
-
-  const getGhostParent = () => {
-    // Because parent element is transformed we need to render the "ghost" element in body instead of parent
-    return document.body;
   };
 
   // Sets system filter
@@ -197,6 +215,88 @@ function DrawOrder({ display, app, map, localObserver, options }) {
       />
     );
   };
+
+  const getRenderedLayer = (l, renderClone = false) => {
+    const layerState = {
+      layerIsToggled: l.get("visible"),
+      visibleSubLayers: l.get("subLayers"),
+    };
+    const layerConfig = {
+      layerId: l.get("name"),
+      layerCaption: l.get("caption"),
+      layerType: l.get("layerType"),
+      // layerIsFakeMapLayer: l.isFakeMapLayer,
+      layerIsFakeMapLayer: false, // TODO Check this mapLayer.isFakeMapLayer,
+      allSubLayers: l.get("allSubLayers"),
+      layerMinZoom: l.get("minZoom"),
+      layerMaxZoom: l.get("maxZoom"),
+      numberOfSubLayers: l.subLayers?.length,
+      layerInfo: l.get("layerInfo"),
+      layerLegendIcon: l.get("legendIcon"),
+    };
+    return l.get("layerType") === "base" ? (
+      renderClone ? (
+        <LayerItemClone key={l.ol_uid + "-clone"} layerConfig={layerConfig} />
+      ) : (
+        <BackgroundLayer
+          key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
+          layer={l}
+          app={app}
+          globalObserver={app.globalObserver}
+          draggable={!options.lockDrawOrderBaselayer}
+          toggleable={false}
+        />
+      )
+    ) : l.get("layerType") === "group" ? (
+      renderClone ? (
+        <LayerItemClone key={l.ol_uid + "-clone"} layerConfig={layerConfig} />
+      ) : (
+        <GroupLayer
+          key={l.ol_uid}
+          layerState={layerState}
+          layerConfig={layerConfig}
+          globalObserver={app.globalObserver}
+          toggleable={false}
+          draggable={true}
+        />
+      )
+    ) : renderClone ? (
+      <LayerItemClone key={l.ol_uid + "-clone"} layerConfig={layerConfig} />
+    ) : (
+      <LayerItem
+        key={l.ol_uid}
+        layerState={layerState}
+        layerConfig={layerConfig}
+        draggable={true}
+        toggleable={false}
+        globalObserver={app.globalObserver}
+      />
+    );
+  };
+
+  const LayerList = React.memo(function LayerList({ layers }) {
+    return layers.map((l, i) => {
+      if (l.get("layerType") !== "base" && options.lockDrawOrderBaselayer) {
+        return (
+          <Draggable
+            draggableId={"draggable" + l.ol_uid}
+            index={i}
+            key={"draggable" + l.ol_uid}
+          >
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.draggableProps}
+                {...provided.dragHandleProps}
+              >
+                {getRenderedLayer(l)}
+              </div>
+            )}
+          </Draggable>
+        );
+      }
+    });
+  });
 
   return (
     <Box
@@ -265,78 +365,28 @@ function DrawOrder({ display, app, map, localObserver, options }) {
           </Box>
         </Collapse>
       </Box>
-      <List sx={{ pt: 0 }}>
-        <Container
-          lockAxis="y"
-          getChildPayload={(i) => sortedLayers[i]}
-          animationDuration={500}
-          onDrop={onDrop}
-          getGhostParent={getGhostParent}
+      <DragDropContext onDragEnd={onDrop}>
+        <Droppable
+          droppableId="droppable"
+          renderClone={(provided, snapshot, rubric) => (
+            <div
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+              ref={provided.innerRef}
+            >
+              {getRenderedLayer(sortedLayers[rubric.source.index], true)}
+            </div>
+          )}
         >
-          {sortedLayers.map((l) => {
-            if (
-              l.get("layerType") === "base" &&
-              options.lockDrawOrderBaselayer
-            ) {
-              return null;
-            } else {
-              const layerState = {
-                layerIsToggled: l.get("visible"),
-                visibleSubLayers: l.get("subLayers"),
-              };
-
-              const layerConfig = {
-                layerId: l.get("name"),
-                layerCaption: l.get("caption"),
-                layerType: l.get("layerType"),
-
-                // layerIsFakeMapLayer: l.isFakeMapLayer,
-                layerIsFakeMapLayer: false, // TODO Check this mapLayer.isFakeMapLayer,
-                allSubLayers: l.get("allSubLayers"),
-                layerMinZoom: l.get("minZoom"),
-                layerMaxZoom: l.get("maxZoom"),
-                numberOfSubLayers: l.subLayers?.length,
-                layerInfo: l.get("layerInfo"),
-                layerLegendIcon: l.get("legendIcon"),
-              };
-
-              return (
-                <Draggable key={"draggable" + l.ol_uid}>
-                  {l.get("layerType") === "base" ? (
-                    <BackgroundLayer
-                      key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
-                      layer={l}
-                      app={app}
-                      globalObserver={app.globalObserver}
-                      draggable={!options.lockDrawOrderBaselayer}
-                      toggleable={false}
-                    />
-                  ) : l.get("layerType") === "group" ? (
-                    <GroupLayer
-                      key={l.ol_uid}
-                      layerState={layerState}
-                      layerConfig={layerConfig}
-                      globalObserver={app.globalObserver}
-                      toggleable={false}
-                      draggable={true}
-                    />
-                  ) : (
-                    <LayerItem
-                      key={l.ol_uid}
-                      layerState={layerState}
-                      layerConfig={layerConfig}
-                      draggable={true}
-                      toggleable={false}
-                      globalObserver={app.globalObserver}
-                    />
-                  )}
-                </Draggable>
-              );
-            }
-          })}
-        </Container>
-        {renderLockedBaseLayerItem()}
-      </List>
+          {(provided) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              <LayerList layers={sortedLayers} />
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+      {renderLockedBaseLayerItem()}
     </Box>
   );
 }
