@@ -6,11 +6,14 @@ import NetworkPingIcon from "@mui/icons-material/NetworkPing";
 import DynamicFormIcon from "@mui/icons-material/DynamicForm";
 import GroupIcon from "@mui/icons-material/Group";
 import Diversity2Icon from "@mui/icons-material/Diversity2";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import PersonIcon from "@mui/icons-material/Person";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 
 export const HEADER_HEIGHT = 64;
 export const HEADER_Z_INDEX = 1001;
 export const SIDEBAR_Z_INDEX = 1000;
-export const SIDEBAR_WIDTH = 250;
+export const SIDEBAR_WIDTH = 300;
 export const SIDEBAR_MINI_WIDTH = 58;
 
 export const SIDEBAR_MENU = [
@@ -18,7 +21,7 @@ export const SIDEBAR_MENU = [
     to: "",
     titleKey: "navBar.general",
     collapsible: true,
-    icon: <MapIcon />,
+    icon: <DashboardIcon />,
     subItems: [
       {
         to: "/maps",
@@ -41,7 +44,7 @@ export const SIDEBAR_MENU = [
     to: "",
     titleKey: "navBar.servicesAndLayers",
     collapsible: true,
-    icon: <MapIcon />,
+    icon: <LayersIcon />,
     subItems: [
       {
         to: "/services",
@@ -69,7 +72,7 @@ export const SIDEBAR_MENU = [
     to: "",
     titleKey: "navBar.user",
     collapsible: true,
-    icon: <MapIcon />,
+    icon: <PersonIcon />,
     subItems: [
       {
         to: "/users",
@@ -87,7 +90,7 @@ export const SIDEBAR_MENU = [
     to: "",
     titleKey: "navBar.other",
     collapsible: true,
-    icon: <MapIcon />,
+    icon: <MoreHorizIcon />,
     subItems: [
       {
         to: "/form-factory",

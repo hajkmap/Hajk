@@ -34,7 +34,7 @@ const NavItem = (props: Props) => {
           paddingTop: 2,
           paddingBottom: 2,
           paddingLeft: props.isSubItem ? 3 : 2,
-          backgroundColor: active ? palette.action.hover : "transparent",
+          backgroundColor: active ? palette.action.focus : "transparent",
           transition: "all 200ms ease",
           "&:hover": active
             ? {

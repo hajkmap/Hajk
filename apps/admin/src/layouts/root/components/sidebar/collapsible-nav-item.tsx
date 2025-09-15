@@ -11,10 +11,12 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
 import { ReactNode, useState } from "react";
+import { useLocation } from "react-router";
 import NavItem from "./nav-item";
 
 interface Props {
   titleKey: string;
+  icon: ReactNode;
   subItems: { to: string; titleKey: string; icon: ReactNode }[];
   closeSidebarIfNeeded: () => void;
 }
@@ -22,8 +24,14 @@ interface Props {
 const CollapsibleNavItem = (props: Props) => {
   const { t } = useTranslation();
   const { palette } = useTheme();
+  const location = useLocation();
 
   const [collapsed, setCollapsed] = useState(false);
+
+  // Check if any sub-item is currently active
+  const hasActiveSubItem = props.subItems.some(
+    (subItem) => location.pathname === subItem.to
+  );
 
   return (
     <>
@@ -31,6 +39,7 @@ const CollapsibleNavItem = (props: Props) => {
         <Button
           onClick={() => setCollapsed(!collapsed)}
           size="large"
+          startIcon={props.icon}
           sx={{
             textTransform: "none",
             display: "flex",
@@ -40,21 +49,30 @@ const CollapsibleNavItem = (props: Props) => {
             color: palette.text.primary,
             paddingTop: 2,
             paddingBottom: 2,
-            paddingLeft: 1,
+            paddingLeft: 2,
             paddingRight: 1,
             transition: "all 200ms ease",
+            backgroundColor: hasActiveSubItem
+              ? palette.action.focus
+              : "transparent",
             "&:hover": {
-              backgroundColor: palette.action.hover,
+              backgroundColor: hasActiveSubItem
+                ? palette.action.selected
+                : palette.action.hover,
+            },
+            "& .MuiButton-startIcon": {
+              fontSize: "1.25rem",
+              marginRight: 2.5,
             },
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
             <Typography>{t(props.titleKey)}</Typography>
           </Box>
           {collapsed ? (
-            <ExpandMoreIcon fontSize="small" />
+            <ExpandMoreIcon sx={{ fontSize: "1.8rem", opacity: 0.5 }} />
           ) : (
-            <ExpandLessIcon fontSize="small" />
+            <ExpandLessIcon sx={{ fontSize: "1.8rem", opacity: 0.5 }} />
           )}
         </Button>
       </ListItem>

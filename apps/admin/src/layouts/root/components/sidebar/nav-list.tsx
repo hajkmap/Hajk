@@ -58,6 +58,7 @@ const NavList = (props: Props) => {
             <CollapsibleNavItem
               key={index}
               titleKey={menuItem.titleKey}
+              icon={menuItem.icon}
               subItems={menuItem.subItems}
               closeSidebarIfNeeded={closeSidebarIfNeeded}
             />
