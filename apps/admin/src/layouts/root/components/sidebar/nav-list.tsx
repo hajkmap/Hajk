@@ -13,6 +13,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { useNavigate } from "react-router";
 import HajkTooltip from "../../../../components/hajk-tooltip";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 
 interface Props {
   setSidebarOpen: (open: boolean) => void;
@@ -24,10 +25,18 @@ const NavList = (props: Props) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  const [openCollapsibleIndex, setOpenCollapsibleIndex] = useState<
+    number | null
+  >(null);
+
   const closeSidebarIfNeeded = () => {
     if (!props.locked) {
       props.setSidebarOpen(false);
     }
+  };
+
+  const handleCollapsibleToggle = (index: number) => {
+    setOpenCollapsibleIndex(openCollapsibleIndex === index ? null : index);
   };
 
   return (
@@ -61,6 +70,8 @@ const NavList = (props: Props) => {
               icon={menuItem.icon}
               subItems={menuItem.subItems}
               closeSidebarIfNeeded={closeSidebarIfNeeded}
+              collapsed={openCollapsibleIndex !== index}
+              onToggle={() => handleCollapsibleToggle(index)}
             />
           ) : (
             <NavItem
