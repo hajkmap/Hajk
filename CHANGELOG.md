@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bookmarks: Fixed button state. [PR#1609](https://github.com/hajkmap/Hajk/pull/1609)
 - WFS layers: Fixed how different ways of writing the WFS service URL were affecting Client's ability to load layers from that service. [PR#1677](https://github.com/hajkmap/Hajk/pull/1677)
 - DialogWindowPlugin-based tools: Fixed disappearing toolbar button when toolbar state was toggled. [issue](https://github.com/hajkmap/Hajk/issues/1687)
+- LayerSwitcher: Don't show multiple legend graphics for a layer group if Admin specified one legend image. [issue](https://github.com/hajkmap/Hajk/issues/1644)
 
 ### Security
 
