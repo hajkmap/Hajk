@@ -40,6 +40,18 @@ export default function MobileForm({
 }) {
   if (!isMobile || mode !== "form") return null;
 
+  function autoIsMultiline(val, meta) {
+    const s = String(val ?? "");
+    if (!s) return false;
+    if (s.includes("\n")) return true; // has line breaks
+    const limit = meta.wrapCh ?? 60; // long text, e.g. long URL
+    if (s.length >= limit) return true;
+    const longToken = s
+      .split(/\s+/)
+      .some((tok) => tok.length >= Math.max(30, Math.floor(limit * 0.6))); // long URL, etc.
+    return longToken;
+  }
+
   const handleDeleteClick = () => {
     const ids = getIdsForDeletion(selectedIds, focusedId);
     if (!ids.length) return;
@@ -178,23 +190,39 @@ export default function MobileForm({
             ) : (
               <>
                 <div style={s.form}>
-                  {FIELD_META.map((meta) => (
-                    <div key={meta.key} style={s.field}>
-                      <label style={s.label}>
-                        {meta.label}
-                        {changedFields.has(meta.key) && (
-                          <span style={s.labelChanged}>(ändrad)</span>
+                  {FIELD_META.map((meta) => {
+                    const changed = changedFields.has(meta.key);
+                    const val = editValues?.[meta.key];
+
+                    // Backend determines the first value
+                    const forceTextarea = meta.type === "textarea";
+                    // Automatic heuristic (long texts / line breaks)
+                    const isMultiline =
+                      forceTextarea || autoIsMultiline(val, meta);
+
+                    return (
+                      <div key={meta.key} style={s.field}>
+                        <label style={s.label}>
+                          {meta.label}
+                          {changed && (
+                            <span style={s.labelChanged}>(ändrad)</span>
+                          )}
+                        </label>
+                        {renderInput(
+                          meta,
+                          val,
+                          (v) => handleFieldChange(meta.key, v),
+                          changed,
+                          s,
+                          {
+                            enterCommits: false,
+                            multiline: isMultiline,
+                            fieldKey: meta.key,
+                          }
                         )}
-                      </label>
-                      {renderInput(
-                        meta,
-                        editValues[meta.key],
-                        (v) => handleFieldChange(meta.key, v),
-                        changedFields.has(meta.key),
-                        s
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div style={s.mobileFormActions}>
