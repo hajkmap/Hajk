@@ -88,7 +88,7 @@ export const getLayerSwitcherSteps = (layerSwitcherPlugin) => [
     title: "Aktivera systemlager",
     element: "#draw-order-switch",
     intro:
-      "Klicka för att visa systemlager i lagerlistan nedan.<br></br>Systemlager är lager som är genererade av verktyg exempelvis från ritaverktyget.",
+      "Klicka för att visa systemlager i lagerlistan nedan.<br></br>Systemlager är lager som är genererade av verktyg exempelvis från Ritaverktyget.",
   },
   {
     title: "Lista över systemlager",

@@ -71,14 +71,14 @@ const getInitialSteps = (
       title: "Meny för fler sökverktyg",
       element: "#search-tools-menu",
       intro:
-        "Här kan du välja mellan olika sökverktyg för att genomföra din sökning. <br><br> Du kan även öppna en separat meny för att hantera sökinställningar.",
+        "Här kan du välja mellan olika sökverktyg för att genomföra din sökning. <br><br> Du kan även klicka på Sökinställningar för att öppna en separat meny.",
       position: "left",
     },
     {
       title: "Kartkontroller",
       element: "#controls-column",
       intro:
-        "Längst ut i den högra delen av skärmen finns olika kontroller knappar som du använder för att navigera i kartan.",
+        "Längst ut i den högra delen av skärmen finns olika kontrollknappar som du använder för att navigera i kartan.",
     }
   );
 
