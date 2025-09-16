@@ -19,6 +19,7 @@ import TableMode from "./components/TableMode";
 import MobileForm from "./components/MobileForm";
 import DesktopForm from "./components/DesktopForm";
 import NotificationBar from "./helpers/NotificationBar";
+import { editBus } from "../../buses/editBus";
 
 export default function AttributeEditorView({
   state,
@@ -26,7 +27,7 @@ export default function AttributeEditorView({
   ui,
   setPluginSettings,
 }) {
-  // === UI-only ===
+  const [serviceId, setServiceId] = React.useState("NONE_ID");
   const [tableEditing, setTableEditing] = useState(null); // { id, key, startValue } | null
 
   const [isMobile, setIsMobile] = useState(false);
@@ -66,6 +67,29 @@ export default function AttributeEditorView({
     },
     []
   );
+
+  React.useEffect(() => {
+    const offSel = editBus.on("edit:service-selected", (ev) => {
+      const id = ev?.detail?.id ?? "UNKNOWN";
+      setServiceId(id);
+    });
+    const offClr = editBus.on("edit:service-cleared", () => {
+      setServiceId("NONE_ID");
+    });
+    return () => {
+      offSel();
+      offClr();
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (serviceId !== "NONE_ID") return;
+    setTableSelectedIds(new Set());
+    setSelectedIds(new Set());
+    setFocusedId(null);
+    setOpenFilterColumn(null);
+    setTableEditing(null);
+  }, [serviceId]);
 
   // === Theme ===
   const theme = ui.dark ? themes.dark : themes.light;
@@ -271,6 +295,8 @@ export default function AttributeEditorView({
   }, [features, pendingAdds, pendingEdits, pendingDeletes]);
 
   const FM = useMemo(() => {
+    if (serviceId === "NONE_ID") return [];
+
     const keys = FIELD_META?.length
       ? FIELD_META.map((m) => m.key)
       : Object.keys(allRows[0] || {});
@@ -285,7 +311,7 @@ export default function AttributeEditorView({
         wrapCh: m.wrapCh ?? (para ? 40 : null),
       };
     });
-  }, [allRows]);
+  }, [allRows, serviceId]);
 
   const filteredAndSorted = useMemo(() => {
     const q = tableSearch.trim().toLowerCase();
@@ -858,6 +884,7 @@ export default function AttributeEditorView({
     ? tableUndoLocal
     : tableUndoStack;
   const canUndo = Boolean(combinedUndoStack?.length || formUndoStack?.length);
+
   return (
     <div style={s.shell}>
       <Toolbar
@@ -882,7 +909,13 @@ export default function AttributeEditorView({
         setPluginSettings={setPluginSettings}
       />
 
-      {ui.mode === "table" ? (
+      {serviceId === "NONE_ID" ? (
+        <div style={s.paneWrap}>
+          <div style={{ ...s.pane, gridColumn: "1 / -1" }}>
+            <div style={s.formEmpty}>Ingen redigeringstjänst vald.</div>
+          </div>
+        </div>
+      ) : ui.mode === "table" ? (
         <TableMode
           s={s}
           theme={theme}

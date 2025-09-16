@@ -21,8 +21,6 @@ export default function Toolbar({
   selectedIds,
   selectAllVisible,
   clearSelection,
-  title,
-  color,
   setPluginSettings,
 }) {
   const [serviceId, setServiceId] = React.useState(
