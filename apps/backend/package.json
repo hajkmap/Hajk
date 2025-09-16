@@ -22,6 +22,7 @@
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
+    "@babel/runtime": "^7.28.4",
     "activedirectory2": "^2.2.0",
     "clf-date": "^0.2.1",
     "compression": "^1.8.1",
