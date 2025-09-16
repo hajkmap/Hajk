@@ -1,6 +1,6 @@
 {
   "name": "hajk-backend",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "Hajk Backend",
   "homepage": ".",
   "repository": {
@@ -22,6 +22,7 @@
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
+    "@babel/runtime": "^7.28.4",
     "activedirectory2": "^2.2.0",
     "clf-date": "^0.2.1",
     "compression": "^1.8.1",
@@ -35,7 +36,7 @@
     "http-proxy-middleware": "^3.0.5",
     "log4js": "^6.9.1",
     "query-string": "^9.3.0",
-    "write-excel-file": "^2.3.4",
+    "write-excel-file": "^2.3.5",
     "ws": "^8.18.3"
   },
   "devDependencies": {
