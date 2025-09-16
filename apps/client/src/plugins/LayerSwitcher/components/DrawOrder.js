@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-
+import "../style.css";
 import {
   IconButton,
   Box,
   FormGroup,
   FormControlLabel,
-  List,
   Switch,
   Collapse,
   Typography,
@@ -19,7 +18,6 @@ import GroupLayer from "./GroupLayer";
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import HajkToolTip from "components/HajkToolTip";
-import LayerItemClone from "./LayerItemClone";
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
@@ -216,7 +214,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
     );
   };
 
-  const getRenderedLayer = (l, renderClone = false) => {
+  const getRenderedLayer = (l) => {
     const layerState = {
       layerIsToggled: l.get("visible"),
       visibleSubLayers: l.get("subLayers"),
@@ -235,33 +233,23 @@ function DrawOrder({ display, app, map, localObserver, options }) {
       layerLegendIcon: l.get("legendIcon"),
     };
     return l.get("layerType") === "base" ? (
-      renderClone ? (
-        <LayerItemClone key={l.ol_uid + "-clone"} layerConfig={layerConfig} />
-      ) : (
-        <BackgroundLayer
-          key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
-          layer={l}
-          app={app}
-          globalObserver={app.globalObserver}
-          draggable={!options.lockDrawOrderBaselayer}
-          toggleable={false}
-        />
-      )
+      <BackgroundLayer
+        key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
+        layer={l}
+        app={app}
+        globalObserver={app.globalObserver}
+        draggable={!options.lockDrawOrderBaselayer}
+        toggleable={false}
+      />
     ) : l.get("layerType") === "group" ? (
-      renderClone ? (
-        <LayerItemClone key={l.ol_uid + "-clone"} layerConfig={layerConfig} />
-      ) : (
-        <GroupLayer
-          key={l.ol_uid}
-          layerState={layerState}
-          layerConfig={layerConfig}
-          globalObserver={app.globalObserver}
-          toggleable={false}
-          draggable={true}
-        />
-      )
-    ) : renderClone ? (
-      <LayerItemClone key={l.ol_uid + "-clone"} layerConfig={layerConfig} />
+      <GroupLayer
+        key={l.ol_uid}
+        layerState={layerState}
+        layerConfig={layerConfig}
+        globalObserver={app.globalObserver}
+        toggleable={false}
+        draggable={true}
+      />
     ) : (
       <LayerItem
         key={l.ol_uid}
@@ -279,7 +267,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
       if (l.get("layerType") !== "base" && options.lockDrawOrderBaselayer) {
         return (
           <Draggable
-            draggableId={"draggable" + l.ol_uid}
+            draggableId={"draggable-draworder" + l.ol_uid}
             index={i}
             key={"draggable" + l.ol_uid}
           >
@@ -295,6 +283,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
           </Draggable>
         );
       }
+      return null;
     });
   });
 
@@ -366,18 +355,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
         </Collapse>
       </Box>
       <DragDropContext onDragEnd={onDrop}>
-        <Droppable
-          droppableId="droppable"
-          renderClone={(provided, snapshot, rubric) => (
-            <div
-              {...provided.draggableProps}
-              {...provided.dragHandleProps}
-              ref={provided.innerRef}
-            >
-              {getRenderedLayer(sortedLayers[rubric.source.index], true)}
-            </div>
-          )}
-        >
+        <Droppable droppableId="droppable">
           {(provided) => (
             <div ref={provided.innerRef} {...provided.droppableProps}>
               <LayerList layers={sortedLayers} />
