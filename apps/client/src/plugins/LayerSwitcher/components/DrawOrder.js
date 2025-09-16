@@ -1,6 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import "../style.css";
+import { DndContext } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import {
   IconButton,
   Box,
@@ -18,6 +21,7 @@ import GroupLayer from "./GroupLayer";
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import HajkToolTip from "components/HajkToolTip";
+import SortableList from "./SortableList";
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
@@ -104,79 +108,74 @@ function DrawOrder({ display, app, map, localObserver, options }) {
   }, [filterList, app.globalObserver, getSortedLayers]);
 
   // Handler that takes care of the layer zIndex ordering.
-  const onDrop = (dropResult) => {
-    if (!dropResult.destination) {
-      return;
+  const onDrop = (e) => {
+    if (!e.over) return;
+
+    // The layer "name" is used for the id we are comparing to.
+    const oldIdx = sortedLayers
+      .map((layer) => layer.get("name"))
+      .indexOf(e.active.id.toString());
+    const newIdx = sortedLayers
+      .map((layer) => layer.get("name"))
+      .indexOf(e.over.id.toString());
+
+    if (e.active.id !== e.over.id) {
+      const rearrangeResult = reorder(sortedLayers, oldIdx, newIdx);
+
+      setSortedLayers(rearrangeResult);
+      const layer = sortedLayers[oldIdx];
+      const removedIndex = oldIdx;
+      const addedIndex = newIdx;
+      // The layers original z-index
+      const oldZIndex = layer.getZIndex() || 0;
+      // Setup two variables that will have different values depending on
+      // whether we're moving the layer up or down the list.
+      let otherAffectedLayers = null;
+
+      // Determine the direction of the reorder
+      const direction = removedIndex - addedIndex;
+
+      if (direction === 0) return; // No reorder
+
+      if (direction > 0) {
+        // Increasing zIndex. We want to get every layer with higher zindex than current layer and increase it too.
+        otherAffectedLayers = getAllLayers().filter(
+          (l) => l.getZIndex() >= oldZIndex && layer !== l // Make sure to ignore current layer
+        );
+        // Get the layer that current layer need to replace zindex with
+        const layerToReplaceZindexWith = getSortedLayers()[addedIndex];
+        const newZIndex = layerToReplaceZindexWith.getZIndex() || 0;
+
+        // Remove layers from otherAffectedLayers that are not affected by the zindex change
+        otherAffectedLayers = otherAffectedLayers.filter(
+          (l) => l.getZIndex() <= newZIndex
+        );
+
+        // Decrease otherAffectedLayers with one zIndex.
+        otherAffectedLayers.forEach((l) => l.setZIndex(l.getZIndex() - 1));
+        // Finally, the layer that is to be moved must get a new zIndex.
+        layer.setZIndex(newZIndex);
+      } else {
+        // Decreasing zIndex. Grab all layers with zIndex below the current layer's.
+        otherAffectedLayers = getAllLayers().filter(
+          (l) => l.getZIndex() <= oldZIndex && layer !== l // Make sure to ignore current layer
+        );
+
+        // Get the layer that current layer need to replace zindex with
+        const layerToReplaceZindexWith = getSortedLayers()[addedIndex];
+        const newZIndex = layerToReplaceZindexWith.getZIndex() || 0;
+
+        // Remove layers from otherAffectedLayers that are not affected by the zindex change
+        otherAffectedLayers = otherAffectedLayers.filter(
+          (l) => l.getZIndex() >= newZIndex
+        );
+
+        // Increase otherAffectedLayers with one zIndex.
+        otherAffectedLayers.forEach((la) => la.setZIndex(la.getZIndex() + 1));
+        // Finally, the layer that is to be moved must get a new zIndex.
+        layer.setZIndex(newZIndex);
+      }
     }
-
-    if (dropResult.destination.index === dropResult.source.index) {
-      return;
-    }
-
-    const rearrangeResult = reorder(
-      sortedLayers,
-      dropResult.source.index,
-      dropResult.destination.index
-    );
-
-    // We trust that the layers will be found and changed, so we update the state directly
-    setSortedLayers(rearrangeResult);
-    const layer = sortedLayers[dropResult.source.index];
-    const removedIndex = dropResult.source.index;
-    const addedIndex = dropResult.destination.index;
-    // The layers original z-index
-    const oldZIndex = layer.getZIndex() || 0;
-    // Setup two variables that will have different values depending on
-    // whether we're moving the layer up or down the list.
-    let otherAffectedLayers = null;
-
-    // Determine the direction of the reorder
-    const direction = removedIndex - addedIndex;
-
-    if (direction === 0) return; // No reorder
-
-    if (direction > 0) {
-      // Increasing zIndex. We want to get every layer with higher zindex than current layer and increase it too.
-      otherAffectedLayers = getAllLayers().filter(
-        (l) => l.getZIndex() >= oldZIndex && layer !== l // Make sure to ignore current layer
-      );
-      // Get the layer that current layer need to replace zindex with
-      const layerToReplaceZindexWith = getSortedLayers()[addedIndex];
-      const newZIndex = layerToReplaceZindexWith.getZIndex() || 0;
-
-      // Remove layers from otherAffectedLayers that are not affected by the zindex change
-      otherAffectedLayers = otherAffectedLayers.filter(
-        (l) => l.getZIndex() <= newZIndex
-      );
-
-      // Decrease otherAffectedLayers with one zIndex.
-      otherAffectedLayers.forEach((l) => l.setZIndex(l.getZIndex() - 1));
-      // Finally, the layer that is to be moved must get a new zIndex.
-      layer.setZIndex(newZIndex);
-    } else {
-      // Decreasing zIndex. Grab all layers with zIndex below the current layer's.
-      otherAffectedLayers = getAllLayers().filter(
-        (l) => l.getZIndex() <= oldZIndex && layer !== l // Make sure to ignore current layer
-      );
-
-      // Get the layer that current layer need to replace zindex with
-      const layerToReplaceZindexWith = getSortedLayers()[addedIndex];
-      const newZIndex = layerToReplaceZindexWith.getZIndex() || 0;
-
-      // Remove layers from otherAffectedLayers that are not affected by the zindex change
-      otherAffectedLayers = otherAffectedLayers.filter(
-        (l) => l.getZIndex() >= newZIndex
-      );
-
-      // Increase otherAffectedLayers with one zIndex.
-      otherAffectedLayers.forEach((la) => la.setZIndex(la.getZIndex() + 1));
-      // Finally, the layer that is to be moved must get a new zIndex.
-      layer.setZIndex(newZIndex);
-    }
-
-    // When we're done setting OL layers' zIndexes, we can update the state of our component,
-    // so that the UI reflects the new order.
-    // setSortedLayers(getSortedLayers());
   };
 
   // Handles click on info button in header
@@ -262,31 +261,6 @@ function DrawOrder({ display, app, map, localObserver, options }) {
     );
   };
 
-  const LayerList = React.memo(function LayerList({ layers }) {
-    return layers.map((l, i) => {
-      if (l.get("layerType") !== "base" && options.lockDrawOrderBaselayer) {
-        return (
-          <Draggable
-            draggableId={"draggable-draworder" + l.ol_uid}
-            index={i}
-            key={"draggable" + l.ol_uid}
-          >
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-              >
-                {getRenderedLayer(l)}
-              </div>
-            )}
-          </Draggable>
-        );
-      }
-      return null;
-    });
-  });
-
   return (
     <Box
       // This class is used to style specific elements when the tab is active
@@ -354,16 +328,26 @@ function DrawOrder({ display, app, map, localObserver, options }) {
           </Box>
         </Collapse>
       </Box>
-      <DragDropContext onDragEnd={onDrop}>
-        <Droppable droppableId="droppable">
-          {(provided) => (
-            <div ref={provided.innerRef} {...provided.droppableProps}>
-              <LayerList layers={sortedLayers} />
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <DndContext onDragEnd={onDrop}>
+        <SortableContext
+          items={sortedLayers.map((x) => x.get("name"))}
+          strategy={verticalListSortingStrategy}
+        >
+          {sortedLayers.map((l) => {
+            if (
+              l.get("layerType") !== "base" &&
+              options.lockDrawOrderBaselayer
+            ) {
+              return (
+                <SortableList key={l.get("name")} id={l.get("name")}>
+                  {getRenderedLayer(l)}
+                </SortableList>
+              );
+            }
+            return null;
+          })}
+        </SortableContext>
+      </DndContext>
       {renderLockedBaseLayerItem()}
     </Box>
   );
