@@ -1,4 +1,4 @@
-import { Button, ListItem, Typography, useTheme } from "@mui/material";
+import { Button, ListItem, styled, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ReactNode } from "react";
 import { NavLink, useLocation } from "react-router";
@@ -11,42 +11,55 @@ interface Props {
   isSubItem: boolean;
 }
 
+const StyledButton = styled(Button)<{
+  isActive: boolean;
+  isSubItem: boolean;
+  component?: React.ElementType;
+  to?: string;
+}>(({ theme, isActive, isSubItem }) => ({
+  textTransform: "none",
+  width: "100%",
+  borderRadius: 14,
+  justifyContent: "flex-start",
+  color: theme.palette.text.primary,
+  paddingTop: theme.spacing(2),
+  paddingBottom: theme.spacing(2),
+  paddingLeft: theme.spacing(isSubItem ? 2 : 2),
+  paddingRight: theme.spacing(2),
+  marginLeft: theme.spacing(2),
+  marginTop: theme.spacing(0.6),
+  marginBottom: theme.spacing(0.6),
+  minHeight: 48,
+  backgroundColor: isActive ? theme.palette.action.focus : "transparent",
+  transition: "all 200ms ease",
+  "&:hover": {
+    backgroundColor: isActive
+      ? theme.palette.action.selected
+      : theme.palette.action.hover,
+  },
+  "& .MuiButton-startIcon": {
+    fontSize: "1.25rem",
+    marginRight: theme.spacing(2),
+  },
+}));
+
 const NavItem = (props: Props) => {
   const { t } = useTranslation();
-  const { palette } = useTheme();
   const path = useLocation().pathname;
   const active: boolean = path === props.to;
 
   return (
     <ListItem disablePadding disableGutters>
-      <Button
+      <StyledButton
         onClick={props.onClick}
         component={NavLink}
         to={props.to}
-        size={props.isSubItem ? undefined : "large"}
         startIcon={props.icon}
-        sx={{
-          textTransform: "none",
-          width: "100%",
-          borderRadius: 2,
-          justifyContent: "flex-start",
-          color: palette.text.primary,
-          paddingTop: 2,
-          paddingBottom: 2,
-          paddingLeft: props.isSubItem ? 3 : 2,
-          backgroundColor: active ? palette.action.focus : "transparent",
-          transition: "all 200ms ease",
-          "&:hover": active
-            ? {
-                backgroundColor: palette.action.selected,
-              }
-            : {
-                backgroundColor: palette.action.hover,
-              },
-        }}
+        isActive={active}
+        isSubItem={props.isSubItem}
       >
         <Typography>{t(props.titleKey)}</Typography>
-      </Button>
+      </StyledButton>
     </ListItem>
   );
 };
