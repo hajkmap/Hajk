@@ -6,12 +6,14 @@ import {
   KeyboardSensor,
   useSensor,
   useSensors,
+  closestCenter,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
   IconButton,
   Box,
@@ -358,7 +360,18 @@ function DrawOrder({ display, app, map, localObserver, options }) {
           </Box>
         </Collapse>
       </Box>
-      <DndContext onDragEnd={onDrop} sensors={sensors}>
+      <DndContext
+        onDragEnd={onDrop}
+        sensors={sensors}
+        modifiers={[restrictToVerticalAxis]}
+        collisionDetection={closestCenter}
+        autoScroll={{
+          threshold: {
+            x: 0,
+            y: 0.2,
+          },
+        }}
+      >
         <SortableContext
           items={sortedLayers.map((x) => x.get("name"))}
           strategy={verticalListSortingStrategy}
