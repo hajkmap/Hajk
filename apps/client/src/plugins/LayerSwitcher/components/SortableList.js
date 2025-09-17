@@ -10,7 +10,7 @@ const SortableList = (props) => {
       {...attributes}
       {...listeners}
       style={{
-        transform: CSS.Transform.toString(transform),
+        transform: CSS.Translate.toString(transform),
         transition: transition,
         // Important to have mobile touch-dragging work as expected dnd-kit handles this.
         touchAction: "none",

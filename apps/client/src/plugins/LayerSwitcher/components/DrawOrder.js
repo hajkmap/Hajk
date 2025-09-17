@@ -1,8 +1,16 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { DndContext } from "@dnd-kit/core";
+import {
+  DndContext,
+  TouchSensor,
+  MouseSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import {
   IconButton,
@@ -32,6 +40,28 @@ const reorder = (list, startIndex, endIndex) => {
 };
 
 function DrawOrder({ display, app, map, localObserver, options }) {
+  // Configurable input sensors for the draworder list
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+      activationConstraint: {
+        delay: 150,
+        tolerance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 5,
+      },
+    })
+  );
   // A Set that will hold type of OL layers that should be shown.
   // This is a user setting, changed by toggling a switch control.
   const [filterList, setFilterList] = useState(
@@ -328,7 +358,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
           </Box>
         </Collapse>
       </Box>
-      <DndContext onDragEnd={onDrop}>
+      <DndContext onDragEnd={onDrop} sensors={sensors}>
         <SortableContext
           items={sortedLayers.map((x) => x.get("name"))}
           strategy={verticalListSortingStrategy}
