@@ -13,7 +13,7 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 export const HEADER_HEIGHT = 64;
 export const HEADER_Z_INDEX = 1001;
 export const SIDEBAR_Z_INDEX = 1000;
-export const SIDEBAR_WIDTH = 300;
+export const SIDEBAR_WIDTH = 280;
 export const SIDEBAR_MINI_WIDTH = 58;
 
 export const SIDEBAR_MENU = [

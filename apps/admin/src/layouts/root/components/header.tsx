@@ -151,12 +151,26 @@ export default function Header() {
             );
           }),
         ]
-      : [];
+      : [
+          <Box
+            sx={{ color: palette.text.secondary }}
+            mx={1}
+            component="span"
+            key="home"
+          >
+            <Link
+              to="/"
+              style={{ color: palette.text.primary, fontWeight: 600 }}
+            >
+              Start
+            </Link>
+          </Box>,
+        ];
 
   return !user ? null : (
     <Paper
       component="header"
-      elevation={0}
+      elevation={1}
       sx={{
         position: "fixed",
         top: 0,
@@ -164,7 +178,6 @@ export default function Header() {
         right: 0,
         zIndex: HEADER_Z_INDEX,
         backgroundColor: palette.background.paper,
-        backdropFilter: "blur(12px)",
       }}
       square
     >
@@ -244,18 +257,7 @@ export default function Header() {
           alignItems="center"
           sx={{ gap: 1 }}
         >
-          <AvatarGroup
-            max={6}
-            sx={{
-              display: { xs: "none", sm: "flex" },
-              "& .MuiAvatarGroup-avatar": {
-                border: `2px solid ${palette.background.paper}`,
-                fontSize: "0.75rem",
-                width: "28px",
-                height: "28px",
-              },
-            }}
-          >
+          <AvatarGroup max={6} sx={{ display: { xs: "none", sm: "flex" } }}>
             {userList.map((user) => {
               return (
                 <HajkTooltip
@@ -267,12 +269,11 @@ export default function Header() {
                     key={user.id + "avatar"}
                     alt={user.fullName}
                     sx={{
-                      width: "28px",
-                      height: "28px",
-                      fontSize: "0.75rem",
-                      backgroundColor: palette.grey[300],
-                      color: palette.text.secondary,
-                      transition: "all 200ms ease",
+                      width: "30px",
+                      height: "30px",
+                      fontSize: "0.9rem",
+                      transition:
+                        "transform 200ms ease, background-color 200ms ease",
                       "&:hover": {
                         backgroundColor: palette.primary.light,
                         color: palette.primary.contrastText,
@@ -300,8 +301,8 @@ export default function Header() {
                 key={activeUser.id}
                 sx={{
                   backgroundColor: palette.primary.main,
-                  width: "32px",
-                  height: "32px",
+                  width: "40px",
+                  height: "40px",
                   border: `2px solid ${palette.background.paper}`,
                   cursor: "pointer",
                   transition: "all 200ms ease",
