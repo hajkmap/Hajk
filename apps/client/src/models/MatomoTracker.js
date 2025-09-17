@@ -28,6 +28,15 @@ export default class MatomoTracker {
   async _send(params) {
     params.set("idsite", this.siteId);
     params.set("rec", "1");
+    params.set("apiv", "1");
+    params.set("uadata", JSON.stringify(navigator.userAgentData || {}));
+
+    const url =
+      typeof window !== "undefined" ? window.location.href : undefined;
+
+    if (url) {
+      params.set("url", url);
+    }
 
     if (!this.cookieLess && this.visitorId) {
       params.set("_id", this.visitorId);
@@ -60,12 +69,9 @@ export default class MatomoTracker {
   }
 
   trackPageView() {
-    const url =
-      typeof window !== "undefined" ? window.location.href : undefined;
     const title = typeof document !== "undefined" ? document.title : undefined;
 
     const params = new URLSearchParams();
-    if (url) params.set("url", url);
     if (title) params.set("action_name", title);
     return this._send(params);
   }
