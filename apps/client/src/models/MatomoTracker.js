@@ -31,6 +31,11 @@ export default class MatomoTracker {
     params.set("apiv", "1");
     params.set("uadata", JSON.stringify(navigator.userAgentData || {}));
 
+    const now = new Date();
+    params.set("h", now.getHours());
+    params.set("m", now.getMinutes());
+    params.set("s", now.getSeconds());
+
     const url =
       typeof window !== "undefined" ? window.location.href : undefined;
 
