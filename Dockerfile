@@ -24,7 +24,7 @@ RUN apk update
 RUN apk add git
 
 # Install packages
-RUN npm ci --legacy-peer-deps
+RUN npm ci
 
 # Use a special appConfig for Docker
 RUN rm ./public/appConfig.json

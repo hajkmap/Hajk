@@ -1,12 +1,24 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Container, Draggable } from "react-smooth-dnd";
-
+import {
+  DndContext,
+  TouchSensor,
+  MouseSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
   IconButton,
   Box,
   FormGroup,
   FormControlLabel,
-  List,
   Switch,
   Collapse,
   Typography,
@@ -19,8 +31,39 @@ import GroupLayer from "./GroupLayer";
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import HajkToolTip from "components/HajkToolTip";
+import SortableList from "./SortableList";
+
+const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
 
 function DrawOrder({ display, app, map, localObserver, options }) {
+  // Configurable input sensors for the draworder list
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+      activationConstraint: {
+        delay: 150,
+        tolerance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 5,
+      },
+    })
+  );
   // A Set that will hold type of OL layers that should be shown.
   // This is a user setting, changed by toggling a switch control.
   const [filterList, setFilterList] = useState(
@@ -97,75 +140,79 @@ function DrawOrder({ display, app, map, localObserver, options }) {
   }, [filterList, app.globalObserver, getSortedLayers]);
 
   // Handler that takes care of the layer zIndex ordering.
-  const onDrop = (dropResult) => {
-    const layer = dropResult.payload;
-    const { removedIndex, addedIndex } = dropResult;
-    // The layers original z-index
-    const oldZIndex = layer.getZIndex() || 0;
-    // Setup two variables that will have different values depending on
-    // whether we're moving the layer up or down the list.
-    let otherAffectedLayers = null;
+  const onDrop = (e) => {
+    if (!e.over) return;
 
-    // Fail check
-    if (addedIndex === null || removedIndex === null) return; // No reorder
+    // The layer "name" is used for the id we are comparing to.
+    const oldIdx = sortedLayers
+      .map((layer) => layer.get("name"))
+      .indexOf(e.active.id.toString());
+    const newIdx = sortedLayers
+      .map((layer) => layer.get("name"))
+      .indexOf(e.over.id.toString());
 
-    // Determine the direction of the reorder
-    const direction = removedIndex - addedIndex;
+    if (e.active.id !== e.over.id) {
+      const rearrangeResult = reorder(sortedLayers, oldIdx, newIdx);
 
-    if (direction === 0) return; // No reorder
+      setSortedLayers(rearrangeResult);
+      const layer = sortedLayers[oldIdx];
+      const removedIndex = oldIdx;
+      const addedIndex = newIdx;
+      // The layers original z-index
+      const oldZIndex = layer.getZIndex() || 0;
+      // Setup two variables that will have different values depending on
+      // whether we're moving the layer up or down the list.
+      let otherAffectedLayers = null;
 
-    if (direction > 0) {
-      // Increasing zIndex. We want to get every layer with higher zindex than current layer and increase it too.
-      otherAffectedLayers = getAllLayers().filter(
-        (l) => l.getZIndex() >= oldZIndex && layer !== l // Make sure to ignore current layer
-      );
-      // Get the layer that current layer need to replace zindex with
-      const layerToReplaceZindexWith = getSortedLayers()[addedIndex];
-      const newZIndex = layerToReplaceZindexWith.getZIndex() || 0;
+      // Determine the direction of the reorder
+      const direction = removedIndex - addedIndex;
 
-      // Remove layers from otherAffectedLayers that are not affected by the zindex change
-      otherAffectedLayers = otherAffectedLayers.filter(
-        (l) => l.getZIndex() <= newZIndex
-      );
+      if (direction === 0) return; // No reorder
 
-      // Decrease otherAffectedLayers with one zIndex.
-      otherAffectedLayers.forEach((l) => l.setZIndex(l.getZIndex() - 1));
-      // Finally, the layer that is to be moved must get a new zIndex.
-      layer.setZIndex(newZIndex);
-    } else {
-      // Decreasing zIndex. Grab all layers with zIndex below the current layer's.
-      otherAffectedLayers = getAllLayers().filter(
-        (l) => l.getZIndex() <= oldZIndex && layer !== l // Make sure to ignore current layer
-      );
+      if (direction > 0) {
+        // Increasing zIndex. We want to get every layer with higher zindex than current layer and increase it too.
+        otherAffectedLayers = getAllLayers().filter(
+          (l) => l.getZIndex() >= oldZIndex && layer !== l // Make sure to ignore current layer
+        );
+        // Get the layer that current layer need to replace zindex with
+        const layerToReplaceZindexWith = getSortedLayers()[addedIndex];
+        const newZIndex = layerToReplaceZindexWith.getZIndex() || 0;
 
-      // Get the layer that current layer need to replace zindex with
-      const layerToReplaceZindexWith = getSortedLayers()[addedIndex];
-      const newZIndex = layerToReplaceZindexWith.getZIndex() || 0;
+        // Remove layers from otherAffectedLayers that are not affected by the zindex change
+        otherAffectedLayers = otherAffectedLayers.filter(
+          (l) => l.getZIndex() <= newZIndex
+        );
 
-      // Remove layers from otherAffectedLayers that are not affected by the zindex change
-      otherAffectedLayers = otherAffectedLayers.filter(
-        (l) => l.getZIndex() >= newZIndex
-      );
+        // Decrease otherAffectedLayers with one zIndex.
+        otherAffectedLayers.forEach((l) => l.setZIndex(l.getZIndex() - 1));
+        // Finally, the layer that is to be moved must get a new zIndex.
+        layer.setZIndex(newZIndex);
+      } else {
+        // Decreasing zIndex. Grab all layers with zIndex below the current layer's.
+        otherAffectedLayers = getAllLayers().filter(
+          (l) => l.getZIndex() <= oldZIndex && layer !== l // Make sure to ignore current layer
+        );
 
-      // Increase otherAffectedLayers with one zIndex.
-      otherAffectedLayers.forEach((la) => la.setZIndex(la.getZIndex() + 1));
-      // Finally, the layer that is to be moved must get a new zIndex.
-      layer.setZIndex(newZIndex);
+        // Get the layer that current layer need to replace zindex with
+        const layerToReplaceZindexWith = getSortedLayers()[addedIndex];
+        const newZIndex = layerToReplaceZindexWith.getZIndex() || 0;
+
+        // Remove layers from otherAffectedLayers that are not affected by the zindex change
+        otherAffectedLayers = otherAffectedLayers.filter(
+          (l) => l.getZIndex() >= newZIndex
+        );
+
+        // Increase otherAffectedLayers with one zIndex.
+        otherAffectedLayers.forEach((la) => la.setZIndex(la.getZIndex() + 1));
+        // Finally, the layer that is to be moved must get a new zIndex.
+        layer.setZIndex(newZIndex);
+      }
     }
-
-    // When we're done setting OL layers' zIndexes, we can update the state of our component,
-    // so that the UI reflects the new order.
-    setSortedLayers(getSortedLayers());
   };
 
   // Handles click on info button in header
   const handleInfoButtonClick = () => {
     setInfoIsActive(!infoIsActive);
-  };
-
-  const getGhostParent = () => {
-    // Because parent element is transformed we need to render the "ghost" element in body instead of parent
-    return document.body;
   };
 
   // Sets system filter
@@ -194,6 +241,54 @@ function DrawOrder({ display, app, map, localObserver, options }) {
         globalObserver={app.globalObserver}
         draggable={!options.lockDrawOrderBaselayer}
         toggleable={false}
+      />
+    );
+  };
+
+  const getRenderedLayer = (l) => {
+    const layerState = {
+      layerIsToggled: l.get("visible"),
+      visibleSubLayers: l.get("subLayers"),
+    };
+    const layerConfig = {
+      layerId: l.get("name"),
+      layerCaption: l.get("caption"),
+      layerType: l.get("layerType"),
+      // layerIsFakeMapLayer: l.isFakeMapLayer,
+      layerIsFakeMapLayer: false, // TODO Check this mapLayer.isFakeMapLayer,
+      allSubLayers: l.get("allSubLayers"),
+      layerMinZoom: l.get("minZoom"),
+      layerMaxZoom: l.get("maxZoom"),
+      numberOfSubLayers: l.subLayers?.length,
+      layerInfo: l.get("layerInfo"),
+      layerLegendIcon: l.get("legendIcon"),
+    };
+    return l.get("layerType") === "base" ? (
+      <BackgroundLayer
+        key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
+        layer={l}
+        app={app}
+        globalObserver={app.globalObserver}
+        draggable={!options.lockDrawOrderBaselayer}
+        toggleable={false}
+      />
+    ) : l.get("layerType") === "group" ? (
+      <GroupLayer
+        key={l.ol_uid}
+        layerState={layerState}
+        layerConfig={layerConfig}
+        globalObserver={app.globalObserver}
+        toggleable={false}
+        draggable={true}
+      />
+    ) : (
+      <LayerItem
+        key={l.ol_uid}
+        layerState={layerState}
+        layerConfig={layerConfig}
+        draggable={true}
+        toggleable={false}
+        globalObserver={app.globalObserver}
       />
     );
   };
@@ -265,78 +360,38 @@ function DrawOrder({ display, app, map, localObserver, options }) {
           </Box>
         </Collapse>
       </Box>
-      <List sx={{ pt: 0 }}>
-        <Container
-          lockAxis="y"
-          getChildPayload={(i) => sortedLayers[i]}
-          animationDuration={500}
-          onDrop={onDrop}
-          getGhostParent={getGhostParent}
+      <DndContext
+        onDragEnd={onDrop}
+        sensors={sensors}
+        modifiers={[restrictToVerticalAxis]}
+        collisionDetection={closestCenter}
+        autoScroll={{
+          threshold: {
+            x: 0,
+            y: 0.2,
+          },
+        }}
+      >
+        <SortableContext
+          items={sortedLayers.map((x) => x.get("name"))}
+          strategy={verticalListSortingStrategy}
         >
           {sortedLayers.map((l) => {
             if (
-              l.get("layerType") === "base" &&
+              l.get("layerType") !== "base" &&
               options.lockDrawOrderBaselayer
             ) {
-              return null;
-            } else {
-              const layerState = {
-                layerIsToggled: l.get("visible"),
-                visibleSubLayers: l.get("subLayers"),
-              };
-
-              const layerConfig = {
-                layerId: l.get("name"),
-                layerCaption: l.get("caption"),
-                layerType: l.get("layerType"),
-
-                // layerIsFakeMapLayer: l.isFakeMapLayer,
-                layerIsFakeMapLayer: false, // TODO Check this mapLayer.isFakeMapLayer,
-                allSubLayers: l.get("allSubLayers"),
-                layerMinZoom: l.get("minZoom"),
-                layerMaxZoom: l.get("maxZoom"),
-                numberOfSubLayers: l.subLayers?.length,
-                layerInfo: l.get("layerInfo"),
-                layerLegendIcon: l.get("legendIcon"),
-              };
-
               return (
-                <Draggable key={"draggable" + l.ol_uid}>
-                  {l.get("layerType") === "base" ? (
-                    <BackgroundLayer
-                      key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
-                      layer={l}
-                      app={app}
-                      globalObserver={app.globalObserver}
-                      draggable={!options.lockDrawOrderBaselayer}
-                      toggleable={false}
-                    />
-                  ) : l.get("layerType") === "group" ? (
-                    <GroupLayer
-                      key={l.ol_uid}
-                      layerState={layerState}
-                      layerConfig={layerConfig}
-                      globalObserver={app.globalObserver}
-                      toggleable={false}
-                      draggable={true}
-                    />
-                  ) : (
-                    <LayerItem
-                      key={l.ol_uid}
-                      layerState={layerState}
-                      layerConfig={layerConfig}
-                      draggable={true}
-                      toggleable={false}
-                      globalObserver={app.globalObserver}
-                    />
-                  )}
-                </Draggable>
+                <SortableList key={l.get("name")} id={l.get("name")}>
+                  {getRenderedLayer(l)}
+                </SortableList>
               );
             }
+            return null;
           })}
-        </Container>
-        {renderLockedBaseLayerItem()}
-      </List>
+        </SortableContext>
+      </DndContext>
+      {renderLockedBaseLayerItem()}
     </Box>
   );
 }
