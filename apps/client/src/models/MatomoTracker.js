@@ -30,6 +30,7 @@ export default class MatomoTracker {
     params.set("rec", "1");
     params.set("apiv", "1");
     params.set("uadata", JSON.stringify(navigator.userAgentData || {}));
+    params.set("r", Math.floor(Math.random() * 1000000));
 
     const now = new Date();
     params.set("h", now.getHours());
