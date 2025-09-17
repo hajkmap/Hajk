@@ -33,6 +33,14 @@ export default class MatomoTracker {
       params.set("_id", this.visitorId);
     }
 
+    // Always send referrer and screen resolution when available
+    if (typeof document !== "undefined" && document.referrer) {
+      params.set("urlref", document.referrer);
+    }
+    if (typeof window !== "undefined" && window.screen) {
+      params.set("res", `${window.screen.width}x${window.screen.height}`);
+    }
+
     try {
       const response = await fetch(`${this.url}?${params.toString()}`, {
         method: "GET",
