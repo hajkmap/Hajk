@@ -152,12 +152,13 @@ class BookmarksModel {
 
   addBookmark(name, allowReplace = false) {
     // Check if bookmark exist and if we should replace it.
-    if (this.bookmarkWithNameExists(name) && allowReplace) {
-      this.replaceBookmark(this.bookmarks[name]);
+    const trimmedName = name.trim();
+    if (this.bookmarkWithNameExists(trimmedName) && allowReplace) {
+      this.replaceBookmark(this.bookmarks[trimmedName]);
       return;
     }
 
-    this.bookmarks[name] = {
+    this.bookmarks[trimmedName] = {
       settings: btoa(JSON.stringify(this.getMapState())),
     };
     this.writeToStorage();

@@ -29,8 +29,8 @@ npm audit fix
 echo "Client…"
 cd $CLIENT_DIR
 rm -rf node_modules
-npm i
-npm audit fix
+npm i --legacy-peer-deps
+npm audit fix --legacy-peer-deps
 
 cd $ORIGINAL_DIR
 

@@ -214,8 +214,18 @@ function LayerItem({
     return `${theme.spacing(0.2)} solid ${theme.palette.divider}`;
   };
 
+  // Prepare legend urls from all sublayers, but keep only unique urls.
+  // This way we avoid duplicate legend images (which otherwise would happen
+  // when Admin sets a value to `legend` for a layer group: all sublayers would
+  // have the same legend image and we'd end up with multiple legend images).
+  // This does not affect layers with multiple styles, since each style has its own legend image,
+  // so a group layer that grabs a unique legend for each sublayer will end up with multiple legend images.
+  // See https://github.com/hajkmap/Hajk/issues/1644 for more details.
   const legendUrls =
-    Array.isArray(layerInfo?.legend) && layerInfo?.legend.map((l) => l?.url);
+    Array.isArray(layerInfo?.legend) &&
+    layerInfo?.legend
+      .map((l) => l?.url)
+      .filter((url, index, self) => self.indexOf(url) === index);
 
   return (
     <div

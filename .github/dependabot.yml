@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/apps/client"
+    target-branch: "develop"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/apps/backend"
+    target-branch: "develop"
+    schedule:
+      interval: "daily"
