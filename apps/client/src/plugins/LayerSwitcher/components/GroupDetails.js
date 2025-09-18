@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Box, Typography, Stack } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Stack,
+  Link,
+  List,
+  ListItem,
+  ListItemText,
+} from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import HajkToolTip from "components/HajkToolTip";
@@ -89,6 +97,25 @@ function GroupDetails({ display, groupDetails, app }) {
             <Typography variant="body2">
               {groupDetails.infogrouptext}
             </Typography>
+            <List>
+              <ListItem>
+                <Link href={groupDetails.infogroupurl}>
+                  {groupDetails.infogroupurltext}
+                </Link>
+              </ListItem>
+              <ListItem>
+                <Link href={groupDetails.infogroupopendatalink}>
+                  Öppna data
+                </Link>
+                {/* <ListItemText
+                    primary="Single-line item"
+                    secondary={secondary ? 'Secondary text' : null}
+                  /> */}
+              </ListItem>
+              <ListItem>
+                <ListItemText primary={groupDetails.infogroupowner} />
+              </ListItem>
+            </List>
           </Box>
         </Box>
       )}
