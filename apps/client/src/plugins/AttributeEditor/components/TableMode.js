@@ -592,6 +592,18 @@ export default function TableMode(props) {
                                   </option>
                                 ))}
                               </select>
+                            ) : meta.type === "date" ? (
+                              <input
+                                {...editorProps}
+                                type="date"
+                                value={String(effectiveValue ?? "").slice(
+                                  0,
+                                  10
+                                )} // YYYY-MM-DD
+                                onChange={(e) =>
+                                  applyChange(e.target.value || null)
+                                }
+                              />
                             ) : /\n/.test(String(effectiveValue ?? "")) ? (
                               <textarea {...editorProps} rows={4} />
                             ) : (

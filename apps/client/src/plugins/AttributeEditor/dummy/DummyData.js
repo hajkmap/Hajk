@@ -16,6 +16,7 @@ export const FIELD_META = [
   { key: "ar_aktbeteckning", label: "ar_aktbeteckning" },
   { key: "ar_anteckning", label: "ar_anteckning", type: "textarea" },
   { key: "ar_dokumentlank", label: "ar_dokumentlank" },
+  { key: "ar_datum", label: "ar_datum", type: "date" },
 ];
 
 /* === Example data === */
@@ -53,6 +54,11 @@ export function createDummyFeatures() {
     "Fastighet C 15",
   ];
 
+  const fmt = (d) => d.toISOString().slice(0, 10); // YYYY-MM-DD
+  const addDays = (d, n) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  const base = new Date(2023, 0, 15);
+
   const list = [];
   for (let i = 0; i < 17; i++) {
     list.push({
@@ -68,6 +74,7 @@ export function createDummyFeatures() {
       ar_aktbeteckning: `${12 + (i % 3)}/${22195 + i}`,
       ar_anteckning: i % 5 === 0 ? "Kontrollera dokumentation" : "",
       ar_dokumentlank: `${12 + (i % 3)}_${22195 + i}.PDF`,
+      ar_datum: i % 4 === 0 ? null : fmt(addDays(base, i * 11)),
     });
   }
   return list;

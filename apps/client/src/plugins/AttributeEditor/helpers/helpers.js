@@ -103,6 +103,17 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
     );
   }
 
+  if (meta.type === "date") {
+    return (
+      <input
+        type="date"
+        style={s.input}
+        value={String(value ?? "").slice(0, 10)}
+        onChange={(e) => onChange(e.target.value || null)}
+      />
+    );
+  }
+
   return multiline ? (
     <textarea
       {...common}

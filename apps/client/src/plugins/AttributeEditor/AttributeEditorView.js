@@ -826,7 +826,10 @@ export default function AttributeEditorView({
       keys.forEach((k) => {
         if (!changedFields.has(k) && id !== focusedId) return;
         let newVal = editValues[k];
-        if (["ar_utbredning", "ar_anteckning"].includes(k) && newVal === "") {
+        if (
+          ["ar_utbredning", "ar_anteckning", "ar_datum"].includes(k) &&
+          newVal === ""
+        ) {
           newVal = null;
         }
         ops.push({ id, key: k, value: newVal });
