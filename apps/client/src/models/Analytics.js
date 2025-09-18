@@ -1,4 +1,4 @@
-import MatomoTracker from "@jonkoops/matomo-tracker";
+import MatomoTracker from "./MatomoTracker.js";
 
 import { createPlausibleTracker } from "@barbapapazes/plausible-tracker";
 import {
@@ -6,6 +6,7 @@ import {
   useAutoFileDownloadsTracking,
   defaultFileTypes,
 } from "@barbapapazes/plausible-tracker/extensions";
+import { functionalOk as functionalCookieOk } from "./Cookie";
 
 /**
  * @description Each of the provided analytics services must subscribe to two
@@ -78,11 +79,17 @@ export default class Analytics {
         );
         break;
       case "matomo":
-        let { siteId, trackerUrl } = config.options;
+        let { siteId, trackerUrl, cookieLess } = config.options;
+
+        // If we're not in cookieless mode and functional cookies aren't allowed, do nothing.
+        if (!cookieLess && !functionalCookieOk()) {
+          return;
+        }
 
         const matomo = new MatomoTracker({
           urlBase: trackerUrl,
           siteId: siteId,
+          cookieLess: cookieLess || false,
         });
 
         // Because of the nature of Matomo and how the tracking was implemented
@@ -128,22 +135,17 @@ export default class Analytics {
 
             if (eventName.indexOf("SearchPerformed") > -1) {
               // spatial or textual
-              matomo.trackSiteSearch({
-                keyword: value,
-                category: eventName,
-                count: rest.totalHits, // always zero for spatial searches.
-              });
+              matomo.trackSiteSearch(
+                value,
+                eventName,
+                rest.totalHits // always zero for spatial searches.
+              );
               return;
             }
 
             // We send the retrieved value using the name prop which is predefined in Matomo.
             // The value prop is in useless in our cases as it only supports numbers.
-            matomo.trackEvent({
-              category: "general",
-              action: eventName,
-              name: value,
-              value: 0,
-            });
+            matomo.trackEvent("general", eventName, value, 0);
           }
         );
         break;
