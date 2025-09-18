@@ -48,7 +48,6 @@
     "@emotion/styled": "^11.14.1",
     "@fontsource/material-icons": "^5.2.5",
     "@fontsource/roboto": "^5.2.7",
-    "@jonkoops/matomo-tracker": "^0.7.0",
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
     "@mui/system": "^7.3.2",

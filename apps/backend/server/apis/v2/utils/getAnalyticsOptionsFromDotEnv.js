@@ -45,6 +45,7 @@ export default function getAnalyticsOptionsFromDotEnv() {
         options: {
           siteId: parsedOptions.option_siteid,
           trackerUrl: parsedOptions.option_trackerurl,
+          cookieLess: parsedOptions.option_cookieless === "true",
         },
       };
 
