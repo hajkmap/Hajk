@@ -694,6 +694,34 @@ export default function AttributeEditorView({
     return filtered;
   }, [features, pendingEdits, pendingAdds, pendingDeletes, formSearch]);
 
+  const ensureFormSelection = React.useCallback(() => {
+    if (ui.mode !== "form") return;
+
+    // finns fokus som fortfarande existerar?
+    const focusOk =
+      focusedId != null && visibleFormList.some((f) => f.id === focusedId);
+
+    // finns någon vald som fortfarande existerar?
+    const selOk =
+      selectedIds.size > 0 &&
+      Array.from(selectedIds).some((id) =>
+        visibleFormList.some((f) => f.id === id)
+      );
+
+    if (focusOk && selOk) return;
+
+    // välj första synliga raden som fallback
+    const cand = visibleFormList[0]?.id;
+    if (cand != null) {
+      setSelectedIds(new Set([cand]));
+      setFocusedId(cand);
+    }
+  }, [ui.mode, focusedId, selectedIds, visibleFormList]);
+
+  React.useLayoutEffect(() => {
+    ensureFormSelection();
+  }, [ensureFormSelection]);
+
   const onFormRowClick = useCallback(
     (rowId, rowIndex, evt) => {
       handleBeforeChangeFocus(rowId);

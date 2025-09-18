@@ -32,6 +32,7 @@ export function isMissingValue(v) {
 }
 
 export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
+  const baseStyle = isChanged ? { ...s.input, ...s.inputChanged } : s.input;
   const {
     enterCommits = false,
     multiline = false,
@@ -107,7 +108,11 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
     return (
       <input
         type="date"
-        style={s.input}
+        style={{
+          ...baseStyle,
+          WebkitAppearance: "none",
+          MozAppearance: "textfield",
+        }}
         value={String(value ?? "").slice(0, 10)}
         onChange={(e) => onChange(e.target.value || null)}
       />
