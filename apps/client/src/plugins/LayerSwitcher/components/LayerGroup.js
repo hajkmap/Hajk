@@ -11,6 +11,7 @@ import LsCheckBox from "./LsCheckBox";
 
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 import { getIsMobile } from "../LayerSwitcherUtils";
+import BtnShowDetails from "./BtnShowDetails";
 
 /**
  * If Group has "toggleable" property enabled, render the toggle all checkbox.
@@ -32,61 +33,9 @@ const ToggleAllComponent = ({ toggleable, toggleState, clickHandler }) => {
   );
 };
 
-const GroupInfoDetails = ({
-  name,
-  infoVisible,
-  infogrouptitle = "",
-  infogrouptext = "",
-  infogroupurl = "",
-  infogroupurltext = "",
-  infogroupopendatalink = "",
-  infogroupowner = "",
-}) => {
-  if (!infoVisible) {
-    return null;
-  }
-  return (
-    <div>
-      {infogrouptitle && (
-        <Typography variant="subtitle2">{infogrouptitle}</Typography>
-      )}
-      {infogrouptext && (
-        <Typography
-          variant="body2"
-          dangerouslySetInnerHTML={{ __html: infogrouptext }}
-        ></Typography>
-      )}
-      {infogroupurl && (
-        <Typography variant="body2" sx={{ fontWeight: 500, mt: 1, mb: 1 }}>
-          <Link href={infogroupurl || null} target="_blank" rel="noreferrer">
-            {infogroupurltext}
-          </Link>
-        </Typography>
-      )}
-      {infogroupopendatalink && (
-        <Typography variant="body2" sx={{ fontWeight: 500, mt: 1, mb: 1 }}>
-          <Link
-            href={infogroupopendatalink || null}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Öppna data: {name}
-          </Link>
-        </Typography>
-      )}
-      {infogroupowner && (
-        <Typography
-          variant="body2"
-          dangerouslySetInnerHTML={{ __html: infogroupowner }}
-        ></Typography>
-      )}
-    </div>
-  );
-};
-
 const GroupInfoToggler = ({
-  clickHandler,
-  infoVisible,
+  globalObserver,
+  infogroupname = "",
   infogrouptitle = "",
   infogrouptext = "",
   infogroupurl = "",
@@ -106,29 +55,21 @@ const GroupInfoToggler = ({
   ) {
     return null;
   }
-  // Render icons only if one of the states above has a value
+  // If any of the above variables arent mising, render the show details button
   return (
-    <HajkToolTip title="Mer information om gruppen" placement="left">
-      <LsIconButton
-        size="small"
-        sx={{
-          p: 0.25,
-          mt: "1px",
-          mr: "5px",
-          "& .MuiTouchRipple-root": { display: "none" },
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          clickHandler();
-        }}
-      >
-        {infoVisible ? (
-          <RemoveCircleIcon fontSize="small" />
-        ) : (
-          <InfoIcon fontSize="small" />
-        )}
-      </LsIconButton>
-    </HajkToolTip>
+    <BtnShowDetails
+      onClick={() => {
+        globalObserver.publish("setLayerDetails", {
+          infogroupname,
+          infogrouptitle,
+          infogrouptext,
+          infogroupurl,
+          infogroupurltext,
+          infogroupopendatalink,
+          infogroupowner,
+        });
+      }}
+    />
   );
 };
 
@@ -199,10 +140,6 @@ const LayerGroup = ({
   const isToggled = hasAllLayersVisible;
   const isSemiToggled = hasVisibleLayer && !hasAllLayersVisible;
 
-  const toggleInfo = () => {
-    setInfoVisible(!infoVisible);
-  };
-
   // TODO Refactor the expand close to state
   let groupsExpanded = false;
   // if (subGroups?.length === 1 && subGroups[0].expanded) {
@@ -216,37 +153,28 @@ const LayerGroup = ({
       : "unchecked";
 
   return (
-    <LayerGroupAccordion
-      display={groupIsFiltered ? "none" : "block"}
-      toggleable={groupIsToggable}
-      expanded={filterActiveAndHasHits || groupIsExpanded}
-      toggleDetails={
-        <ToggleAllComponent
-          toggleable={groupIsToggable}
-          toggleState={toggleState}
-          clickHandler={() => {
-            if (isToggled) {
-              layerSwitcherDispatch.setGroupVisibility(groupId, false);
-            } else {
-              layerSwitcherDispatch.setGroupVisibility(groupId, true);
-            }
-          }}
-        />
-      }
-      layerGroupTitle={
-        <div>
-          <div style={{ display: "flex", flexDirection: "row" }}>
-            <GroupInfoToggler
-              clickHandler={() => toggleInfo()}
-              infoVisible={infoVisible}
-              infogrouptitle={infogrouptitle}
-              infogrouptext={infogrouptext}
-              infogroupurl={infogroupurl}
-              infogroupurltext={infogroupurltext}
-              infogroupopendatalink={infogroupopendatalink}
-              infogroupowner={infogroupowner}
-            />
+    <div>
+      <LayerGroupAccordion
+        display={groupIsFiltered ? "none" : "block"}
+        toggleable={groupIsToggable}
+        expanded={filterActiveAndHasHits || groupIsExpanded}
+        toggleDetails={
+          <ToggleAllComponent
+            toggleable={groupIsToggable}
+            toggleState={toggleState}
+            clickHandler={() => {
+              if (isToggled) {
+                layerSwitcherDispatch.setGroupVisibility(groupId, false);
+              } else {
+                layerSwitcherDispatch.setGroupVisibility(groupId, true);
+              }
+            }}
+          />
+        }
+        layerGroupTitle={
+          <div style={{ width: "100%", display: "flex", flexDirection: "row" }}>
             <ListItemText
+              style={{ flex: 1 }}
               primary={name}
               slotProps={{
                 primary: {
@@ -258,79 +186,80 @@ const LayerGroup = ({
                 },
               }}
             />
+            <GroupInfoToggler
+              globalObserver={globalObserver}
+              infoVisible={infoVisible}
+              infogroupname={groupName}
+              infogrouptitle={infogrouptitle}
+              infogrouptext={infogrouptext}
+              infogroupurl={infogroupurl}
+              infogroupurltext={infogroupurltext}
+              infogroupopendatalink={infogroupopendatalink}
+              infogroupowner={infogroupowner}
+            />
           </div>
-          <GroupInfoDetails
-            name={groupName}
-            infoVisible={infoVisible}
-            infogrouptitle={infogrouptitle}
-            infogrouptext={infogrouptext}
-            infogroupurl={infogroupurl}
-            infogroupurltext={infogroupurltext}
-            infogroupopendatalink={infogroupopendatalink}
-            infogroupowner={infogroupowner}
-          />
-        </div>
-      }
-    >
-      <div>
-        {children?.map((child) => {
-          const layerId = child.id;
+        }
+      >
+        <div>
+          {children?.map((child) => {
+            const layerId = child.id;
 
-          const layerState = layersState[layerId];
+            const layerState = layersState[layerId];
 
-          const layerSettings = staticLayerConfig[layerId];
-          if (!layerSettings) {
-            return null;
-          }
+            const layerSettings = staticLayerConfig[layerId];
+            if (!layerSettings) {
+              return null;
+            }
 
-          if (layerSettings.layerType === "group") {
-            // The LayerGroup components check the filter to see if it should
-            // display itself or not. So we always have to render it regardless
-            // of the filter.
-            return (
-              <LayerGroup
-                expanded={groupsExpanded === layerId}
+            if (layerSettings.layerType === "group") {
+              // The LayerGroup components check the filter to see if it should
+              // display itself or not. So we always have to render it regardless
+              // of the filter.
+              return (
+                <LayerGroup
+                  expanded={groupsExpanded === layerId}
+                  key={layerId}
+                  globalObserver={globalObserver}
+                  staticLayerConfig={staticLayerConfig}
+                  staticGroupTree={children?.find((g) => g?.id === layerId)}
+                  layersState={layersState}
+                  filterHits={filterHits}
+                  filterValue={filterValue}
+                />
+              );
+            }
+
+            if (filterHits && !filterHits.has(layerId)) {
+              // The filter is active and this layer is not a hit.
+              return null;
+            }
+
+            return layerSettings.layerType === "groupLayer" ? (
+              <GroupLayer
                 key={layerId}
+                layerState={layerState}
+                layerConfig={layerSettings}
+                draggable={false}
+                toggleable={true}
                 globalObserver={globalObserver}
-                staticLayerConfig={staticLayerConfig}
-                staticGroupTree={children?.find((g) => g?.id === layerId)}
-                layersState={layersState}
                 filterHits={filterHits}
                 filterValue={filterValue}
               />
+            ) : (
+              <LayerItem
+                key={layerId}
+                layerState={layerState}
+                layerConfig={layerSettings}
+                draggable={false}
+                toggleable={true}
+                globalObserver={globalObserver}
+                filterValue={filterValue}
+              />
             );
-          }
-
-          if (filterHits && !filterHits.has(layerId)) {
-            // The filter is active and this layer is not a hit.
-            return null;
-          }
-
-          return layerSettings.layerType === "groupLayer" ? (
-            <GroupLayer
-              key={layerId}
-              layerState={layerState}
-              layerConfig={layerSettings}
-              draggable={false}
-              toggleable={true}
-              globalObserver={globalObserver}
-              filterHits={filterHits}
-              filterValue={filterValue}
-            />
-          ) : (
-            <LayerItem
-              key={layerId}
-              layerState={layerState}
-              layerConfig={layerSettings}
-              draggable={false}
-              toggleable={true}
-              globalObserver={globalObserver}
-              filterValue={filterValue}
-            />
-          );
-        })}
-      </div>
-    </LayerGroupAccordion>
+          })}
+        </div>
+      </LayerGroupAccordion>
+    </div>
   );
 };
 

@@ -11,6 +11,7 @@ import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
 import QuickAccessPresets from "./components/QuickAccessPresets.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
+import GroupDetails from "./components/GroupDetails.js";
 
 const StyledAppBar = styled(AppBar)(() => ({
   zIndex: "1",
@@ -69,6 +70,7 @@ class LayersSwitcherView extends React.PureComponent {
       activeTab: 0,
       displayContentOverlay: null, // 'quickAccessPresets' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
+      groupDetails: null,
       scrollPositions: {
         tab0: 0,
         tab1: 0,
@@ -102,25 +104,36 @@ class LayersSwitcherView extends React.PureComponent {
         const currentScrollPosition = this.getScrollPosition();
 
         const layerId = payload.layerId;
-        if (!layerId) {
+        if (layerId) {
+          const layer = this.olLayerMap[layerId];
+
+          // Set scroll position state when layer details is opened
+          const details = {
+            layer,
+            subLayerIndex: payload.subLayerIndex,
+          };
+          this.setState((prevState) => ({
+            layerItemDetails: details,
+            groupDetails: null,
+            displayContentOverlay: "layerItemDetails",
+            scrollPositions: {
+              ...prevState.scrollPositions,
+              [`tab${prevState.activeTab}`]: currentScrollPosition,
+            },
+          }));
+        } else if (payload.infogrouptitle) {
+          this.setState((prevState) => ({
+            layerItemDetails: null,
+            groupDetails: payload,
+            displayContentOverlay: "groupDetails",
+            scrollPositions: {
+              ...prevState.scrollPositions,
+              [`tab${prevState.activeTab}`]: currentScrollPosition,
+            },
+          }));
+        } else {
           return;
         }
-
-        const layer = this.olLayerMap[layerId];
-
-        // Set scroll position state when layer details is opened
-        const details = {
-          layer,
-          subLayerIndex: payload.subLayerIndex,
-        };
-        this.setState((prevState) => ({
-          layerItemDetails: details,
-          displayContentOverlay: "layerItemDetails",
-          scrollPositions: {
-            ...prevState.scrollPositions,
-            [`tab${prevState.activeTab}`]: currentScrollPosition,
-          },
-        }));
       } else {
         this.setState({
           displayContentOverlay: null,
@@ -317,6 +330,11 @@ class LayersSwitcherView extends React.PureComponent {
           showOpacitySlider={this.props.options.enableTransparencySlider}
           showQuickAccess={this.props.options.showQuickAccess}
         ></LayerItemDetails>
+        <GroupDetails
+          display={this.state.displayContentOverlay === "groupDetails"}
+          groupDetails={this.state.groupDetails}
+          app={this.props.app}
+        ></GroupDetails>
         <BackgroundSwitcher
           display={
             this.state.activeTab === 1 &&
