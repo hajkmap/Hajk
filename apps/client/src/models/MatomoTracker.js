@@ -7,7 +7,7 @@ export default class MatomoTracker {
 
     this.url = urlBase.endsWith("matomo.php")
       ? urlBase
-      : urlBase + "matomo.php";
+      : new URL("matomo.php", urlBase.replace(/\/?$/, "/")).toString();
     this.siteId = siteId;
     this.cookieLess = cookieLess;
 
@@ -57,20 +57,12 @@ export default class MatomoTracker {
     }
 
     try {
-      const response = await fetch(`${this.url}?${params.toString()}`, {
+      fetch(`${this.url}?${params.toString()}`, {
         method: "GET",
         mode: "no-cors", // Matomo tracking doesn't need CORS
       });
-
-      if (!response.ok) {
-        console.debug(
-          `Matomo tracking returned ${response.status}: ${response.statusText}`
-        );
-      }
     } catch (err) {
       console.debug("Matomo tracking failed:", err);
-      // Re-throw for optional error handling in calling code
-      throw err;
     }
   }
 
