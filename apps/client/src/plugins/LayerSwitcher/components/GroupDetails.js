@@ -7,9 +7,12 @@ import {
   List,
   ListItem,
   ListItemText,
+  ListItemIcon,
 } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import LinkIcon from "@mui/icons-material/Link";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import HajkToolTip from "components/HajkToolTip";
 import LsIconButton from "./LsIconButton";
 
@@ -98,23 +101,37 @@ function GroupDetails({ display, groupDetails, app }) {
               {groupDetails.infogrouptext}
             </Typography>
             <List>
-              <ListItem>
-                <Link href={groupDetails.infogroupurl}>
-                  {groupDetails.infogroupurltext}
-                </Link>
-              </ListItem>
-              <ListItem>
-                <Link href={groupDetails.infogroupopendatalink}>
-                  Öppna data
-                </Link>
-                {/* <ListItemText
-                    primary="Single-line item"
-                    secondary={secondary ? 'Secondary text' : null}
-                  /> */}
-              </ListItem>
-              <ListItem>
-                <ListItemText primary={groupDetails.infogroupowner} />
-              </ListItem>
+              {groupDetails.infogroupurl && (
+                <ListItem>
+                  <ListItemIcon>
+                    <LinkIcon />
+                  </ListItemIcon>
+                  <Link href={groupDetails.infogroupurl} color="inherit">
+                    {groupDetails.infogroupurltext}
+                  </Link>
+                </ListItem>
+              )}
+              {groupDetails.infogroupopendatalink && (
+                <ListItem>
+                  <ListItemIcon>
+                    <LinkIcon />
+                  </ListItemIcon>
+                  <Link
+                    href={groupDetails.infogroupopendatalink}
+                    color="inherit"
+                  >
+                    Öppna data
+                  </Link>
+                </ListItem>
+              )}
+              {groupDetails.infogroupowner && (
+                <ListItem>
+                  <ListItemIcon>
+                    <VerifiedUserIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={groupDetails.infogroupowner} />
+                </ListItem>
+              )}
             </List>
           </Box>
         </Box>
