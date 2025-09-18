@@ -3,6 +3,7 @@ import TableRowsIcon from "@mui/icons-material/TableRows";
 import DynamicFormIcon from "@mui/icons-material/DynamicForm";
 import { editBus } from "../../../buses/editBus";
 import { OGC_SOURCES, PLUGIN_COLORS } from "../constants/index";
+import ConfirmSaveDialog from "./ConfirmSaveDialog";
 
 export default function Toolbar({
   s,
@@ -22,39 +23,109 @@ export default function Toolbar({
   selectAllVisible,
   clearSelection,
   setPluginSettings,
+  dirty,
+  saveChanges,
+  lastEditTargetIdsRef,
+  commitTableEdits,
+  tablePendingAdds,
+  tablePendingEdits,
+  tablePendingDeletes,
+  changedFields,
 }) {
+  const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
+  const [savingNow, setSavingNow] = React.useState(false);
+  const pendingTargetRef = React.useRef(null);
+
   const [serviceId, setServiceId] = React.useState(
     OGC_SOURCES[0]?.id ?? "none"
   );
 
-  const handleOgcSourceChange = (e) => {
-    const nextId = e.target.value;
-    setServiceId(nextId);
+  const summary = React.useMemo(
+    () => ({
+      adds: tablePendingAdds?.length ?? 0,
+      edits:
+        (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0) +
+        (dirty ? changedFields.size : 0),
+      deletes: tablePendingDeletes?.size ?? 0,
+    }),
+    [
+      tablePendingAdds,
+      tablePendingEdits,
+      tablePendingDeletes,
+      dirty,
+      changedFields,
+    ]
+  );
 
+  const applyServiceSwitch = React.useCallback(
+    (def, label) => {
+      setPluginSettings(
+        label === "Ingen"
+          ? { title: "Attributredigerare", color: PLUGIN_COLORS.default }
+          : { title: `Redigerar ${label}`, color: PLUGIN_COLORS.warning }
+      );
+      if (label === "Ingen") {
+        editBus.emit("edit:service-cleared", { source: "toolbar" });
+        setServiceId("NONE_ID");
+      } else {
+        editBus.emit("edit:service-selected", {
+          source: "toolbar",
+          id: def?.id ?? "",
+          layerId: def?.layerId ?? "",
+          title: `Redigerar ${label}`,
+          color: PLUGIN_COLORS.warning,
+        });
+        setServiceId(def?.id ?? "none");
+      }
+    },
+    [setPluginSettings]
+  );
+
+  async function confirmSave() {
+    try {
+      setSavingNow(true);
+
+      // reset the summary of pending changes
+      if (dirty) {
+        saveChanges({
+          toPending: true,
+          targetIds: lastEditTargetIdsRef.current || undefined,
+        });
+      }
+
+      // save all pending changes (table + form) – this prop is sync; Promise.resolve makes await work seamlessly
+      await Promise.resolve(commitTableEdits());
+    } finally {
+      setSavingNow(false);
+      setSaveDialogOpen(false);
+      pendingTargetRef.current = null;
+    }
+  }
+
+  function handleOgcSourceChange(e) {
+    const nextId = e.target.value;
     const def = OGC_SOURCES.find((o) => o.id === nextId);
     const label = def?.label ?? "Ingen";
 
-    setPluginSettings(
-      label === "Ingen"
-        ? { title: "Attributredigerare", color: PLUGIN_COLORS.default }
-        : { title: `Redigerar ${label}`, color: PLUGIN_COLORS.warning }
-    );
+    const pendingCount =
+      (tablePendingAdds?.length ?? 0) +
+      (tablePendingDeletes?.size ?? 0) +
+      (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0);
 
-    if (label === "Ingen") {
-      editBus.emit("edit:service-cleared", { source: "toolbar" });
-    } else {
-      editBus.emit("edit:service-selected", {
-        source: "toolbar",
-        id: def?.id ?? "",
-        layerId: def?.layerId ?? "",
-        title: `Redigerar ${label}`,
-        color: PLUGIN_COLORS.warning,
-      });
+    const needsPrompt = dirty || pendingCount > 0;
+
+    if (!needsPrompt) {
+      applyServiceSwitch(def, label);
+      return;
     }
-  };
+
+    pendingTargetRef.current = { def, label };
+    setSaveDialogOpen(true);
+  }
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
+      // Om Sketch ändrar redigeringstjänst så måste jag känna om nåt är dirty och öppna ConfirmSaveDialog
       const { title, source } = ev.detail || {};
       if (source === "toolbar") return;
       const raw =
@@ -171,6 +242,13 @@ export default function Toolbar({
           )}
         </div>
       )}
+      <ConfirmSaveDialog
+        open={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        onConfirm={confirmSave}
+        summary={summary}
+        saving={savingNow}
+      />
     </div>
   );
 }

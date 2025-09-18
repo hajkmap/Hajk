@@ -938,6 +938,14 @@ export default function AttributeEditorView({
         selectAllVisible={selectAllVisible}
         clearSelection={clearSelection}
         setPluginSettings={setPluginSettings}
+        dirty={dirty}
+        saveChanges={saveChanges}
+        lastEditTargetIdsRef={lastEditTargetIdsRef}
+        commitTableEdits={commitTableEdits}
+        tablePendingAdds={pendingAdds}
+        tablePendingEdits={pendingEdits}
+        tablePendingDeletes={pendingDeletes}
+        changedFields={changedFields}
       />
 
       {serviceId === "NONE_ID" ? (
