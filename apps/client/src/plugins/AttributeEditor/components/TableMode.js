@@ -4,6 +4,7 @@ import EditNoteIcon from "@mui/icons-material/EditNote";
 import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import ConfirmSaveDialog from "./ConfirmSaveDialog";
 
 export default function TableMode(props) {
   const {
@@ -57,6 +58,10 @@ export default function TableMode(props) {
     firstColumnRef,
     filterOverlayRef,
   } = props;
+
+  const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
+  const [savingNow, setSavingNow] = React.useState(false);
+  const [errorMsg, setErrorMsg] = React.useState(null);
 
   function ColumnFilter({ columnKey, placement }) {
     const uniqueValues = getUniqueColumnValues(columnKey);
@@ -120,6 +125,29 @@ export default function TableMode(props) {
         ))}
       </div>
     );
+  }
+
+  const summary = React.useMemo(
+    () => ({
+      adds: tablePendingAdds?.length ?? 0,
+      // number of rows with pending edits (not number of fields)
+      edits: tablePendingEdits ? Object.keys(tablePendingEdits).length : 0,
+      deletes: tablePendingDeletes?.size ?? 0,
+    }),
+    [tablePendingAdds, tablePendingEdits, tablePendingDeletes]
+  );
+
+  async function confirmSave() {
+    try {
+      setErrorMsg(null);
+      setSavingNow(true);
+      await Promise.resolve(commitTableEdits());
+      setSaveDialogOpen(false);
+    } catch (err) {
+      setErrorMsg(err?.message || "Kunde inte spara.");
+    } finally {
+      setSavingNow(false);
+    }
   }
 
   return (
@@ -207,9 +235,9 @@ export default function TableMode(props) {
           <button
             style={!tableHasPending ? s.iconBtnDisabled : s.iconBtn}
             disabled={!tableHasPending}
-            onClick={commitTableEdits}
-            title="Spara osparade ändringar (tabell)"
-            aria-label="Spara (tabell)"
+            onClick={() => setSaveDialogOpen(true)}
+            title="Spara"
+            aria-label="Spara"
           >
             <SaveIcon fontSize="small" />
           </button>
@@ -592,6 +620,17 @@ export default function TableMode(props) {
           </table>
         </div>
       </div>
+      <ConfirmSaveDialog
+        open={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        onConfirm={confirmSave}
+        summary={summary}
+        saving={savingNow}
+        error={errorMsg}
+        title="Spara ändringar"
+        body="Det finns osparade ändringar i tabellen. Vill du spara nu?"
+        primaryLabel="Spara"
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
+import ConfirmSaveDialog from "./ConfirmSaveDialog";
 
 export default function DesktopForm({
   s,
@@ -38,6 +39,9 @@ export default function DesktopForm({
   tablePendingAdds,
   duplicateInForm,
 }) {
+  const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
+  const [savingNow, setSavingNow] = React.useState(false);
+
   const textareaRefs = React.useRef({});
   const [pendingCaret, setPendingCaret] = React.useState(null);
 
@@ -78,6 +82,43 @@ export default function DesktopForm({
     if (!ids.length) return;
     setDeleteState(ids, "mark");
   };
+
+  const summary = React.useMemo(
+    () => ({
+      adds: tablePendingAdds?.length ?? 0,
+      edits:
+        (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0) +
+        (dirty ? changedFields.size : 0),
+      deletes: tablePendingDeletes?.size ?? 0,
+    }),
+    [
+      tablePendingAdds,
+      tablePendingEdits,
+      tablePendingDeletes,
+      dirty,
+      changedFields,
+    ]
+  );
+
+  async function confirmSave() {
+    try {
+      setSavingNow(true);
+
+      // reset the summary of pending changes
+      if (dirty) {
+        saveChanges({
+          toPending: true,
+          targetIds: lastEditTargetIdsRef.current || undefined,
+        });
+      }
+
+      // save all pending changes (table + form) – this prop is sync; Promise.resolve makes await work seamlessly
+      await Promise.resolve(commitTableEdits());
+    } finally {
+      setSavingNow(false);
+      setSaveDialogOpen(false);
+    }
+  }
 
   return (
     <div style={s.paneWrap}>
@@ -220,17 +261,7 @@ export default function DesktopForm({
 
           <button
             style={!(dirty || tableHasPending) ? s.iconBtnDisabled : s.iconBtn}
-            onClick={() => {
-              if (dirty) {
-                saveChanges({
-                  toPending: true,
-                  targetIds: lastEditTargetIdsRef.current || undefined,
-                });
-              }
-              if (tableHasPending) {
-                commitTableEdits();
-              }
-            }}
+            onClick={() => setSaveDialogOpen(true)}
             disabled={!(dirty || tableHasPending)}
             aria-label="Spara"
             title="Spara"
@@ -288,6 +319,13 @@ export default function DesktopForm({
                   ? "Ändringar buffrade (ej sparade)"
                   : "Allt sparat"}
             </div>
+            <ConfirmSaveDialog
+              open={saveDialogOpen}
+              onClose={() => setSaveDialogOpen(false)}
+              onConfirm={confirmSave}
+              summary={summary}
+              saving={savingNow}
+            />
           </>
         )}
       </div>
