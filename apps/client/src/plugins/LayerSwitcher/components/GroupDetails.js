@@ -83,10 +83,12 @@ function GroupDetails({ display, groupDetails, app }) {
               p: 1,
             }}
           >
-            <Typography variant="subtitle1">
+            <Typography style={{ marginBottom: "4px" }}>
               {groupDetails.infogrouptitle}
             </Typography>
-            <Typography>{groupDetails.infogrouptext}</Typography>
+            <Typography variant="body2">
+              {groupDetails.infogrouptext}
+            </Typography>
           </Box>
         </Box>
       )}

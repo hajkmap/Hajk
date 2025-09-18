@@ -58,7 +58,8 @@ const GroupInfoToggler = ({
   // If any of the above variables arent mising, render the show details button
   return (
     <BtnShowDetails
-      onClick={() => {
+      onClick={(e) => {
+        e.stopPropagation();
         globalObserver.publish("setLayerDetails", {
           infogroupname,
           infogrouptitle,
