@@ -59,6 +59,7 @@ export default class XLSXExport {
         const exportArray = this.#getUserSelectedExportArray(
           groupedFeatures[key]
         );
+        console.log(exportArray);
         const sheet = xlsx.utils.aoa_to_sheet(exportArray);
         xlsx.utils.book_append_sheet(workBook, sheet, sheetName);
       });
@@ -80,6 +81,7 @@ export default class XLSXExport {
     const exportArray = [];
     // Keys from first feature. We assume that all features in the collections has the same keys.
     const keys = Object.keys(features[0].getProperties());
+    console.log(keys);
     exportArray.push(keys);
     features.forEach((feature) => {
       exportArray.push(Object.values(feature.getProperties()));
@@ -106,10 +108,11 @@ export default class XLSXExport {
         // Get the geometry name (since we don't want to add the geometry
         // property key). (We don't want the geometry in the export).
         const geometryName = feature.getGeometryName();
-        // Then we'll get all the value keys (all keys except for the geometry-key).
+        // Then we'll get all the value keys (all keys except for the geometry-key and the boundedBy key).
         const featureValueKeys = feature
           .getKeys()
-          .filter((key) => key !== geometryName);
+          .filter((key) => key !== geometryName)
+          .filter((key) => key !== "boundedBy");
         // Then we'll loop over the keys and add them to the set of keys if it is missing.
         featureValueKeys.forEach((key) => {
           keys.add(key);
