@@ -125,7 +125,6 @@ export default function Toolbar({
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
-      // Om Sketch ändrar redigeringstjänst så måste jag känna om nåt är dirty och öppna ConfirmSaveDialog
       const { title, source } = ev.detail || {};
       if (source === "toolbar") return;
       const raw =
@@ -147,6 +146,16 @@ export default function Toolbar({
       offSel();
       offClr();
     };
+  }, []);
+
+  React.useEffect(() => {
+    const off = editBus.on("edit:service-switch-requested", (ev) => {
+      // open ConfirmSaveDialog, save (emit "edit:saving-started"/"finished"),
+      // and after successful save: emit "edit:service-selected"/"cleared"
+      // (precisely set up earlier with pendingTargetRef)
+      setSaveDialogOpen(true);
+    });
+    return () => off();
   }, []);
 
   return (

@@ -413,6 +413,38 @@ export default function AttributeEditorView({
   const [dirty, setDirty] = useState(false);
   const [formUndoStack, setFormUndoStack] = useState([]); // [{key, prevValue, when}]
 
+  const hasUnsaved = React.useMemo(() => {
+    const pendingCount =
+      (pendingAdds?.length ?? 0) +
+      (pendingDeletes?.size ?? 0) +
+      (pendingEdits ? Object.keys(pendingEdits).length : 0);
+    return dirty || pendingCount > 0;
+  }, [dirty, pendingAdds, pendingEdits, pendingDeletes]);
+
+  const unsavedSummary = React.useMemo(
+    () => ({
+      adds: pendingAdds?.length ?? 0,
+      edits:
+        (pendingEdits ? Object.keys(pendingEdits).length : 0) +
+        (dirty ? changedFields.size : 0),
+      deletes: pendingDeletes?.size ?? 0,
+    }),
+    [pendingAdds, pendingEdits, pendingDeletes, dirty, changedFields]
+  );
+
+  // The variable that was changed, emit
+  const lastHasUnsavedRef = React.useRef(hasUnsaved);
+  React.useEffect(() => {
+    if (hasUnsaved !== lastHasUnsavedRef.current) {
+      editBus.emit("edit:unsaved-state", {
+        source: "attribute-editor",
+        hasUnsaved,
+        summary: unsavedSummary,
+      });
+      lastHasUnsavedRef.current = hasUnsaved;
+    }
+  }, [hasUnsaved, unsavedSummary]);
+
   const commitTableEdits = useCallback(() => {
     controller.commit();
     formUndoSnapshotsRef.current.clear();

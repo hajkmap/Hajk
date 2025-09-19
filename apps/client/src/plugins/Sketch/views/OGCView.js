@@ -11,6 +11,7 @@ const OGCView = ({
   handleFocus,
   focusKey = "ogc",
   labelText = "Välj redigeringstjänst att spara till",
+  uiDisabled,
 }) => {
   const activity = model?.getActivityFromId?.(id);
 
@@ -27,6 +28,8 @@ const OGCView = ({
         <FormControl size="small" variant="outlined" fullWidth>
           <InputLabel id="ogc-source-label">{labelText}</InputLabel>
           <Select
+            disabled={uiDisabled}
+            aria-busy={uiDisabled ? "true" : "false"}
             id="sketch-select-ogc-source"
             labelId="ogc-source-label"
             value={ogcSource}

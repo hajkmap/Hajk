@@ -33,6 +33,13 @@ import { editBus } from "../../../buses/editBus";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
+  const [hasUnsaved, setHasUnsaved] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const unsavedRef = React.useRef({
+    hasUnsaved: false,
+    summary: { adds: 0, edits: 0, deletes: 0 },
+  });
+
   // We want to render the ActivityMenu on the same side as the plugin
   // is rendered (left or right). Let's grab the prop stating where it is rendered!
   const pluginPosition = props.options?.position ?? "left";
@@ -326,7 +333,45 @@ const SketchView = (props) => {
     }
   }, [activityId, pluginShown, memoizedSetToggleBufferBtn, activeDrawType]);
 
+  React.useEffect(() => {
+    const offUnsaved = editBus.on("edit:unsaved-state", (ev) => {
+      const { hasUnsaved, summary } = ev.detail || {};
+      setHasUnsaved(!!hasUnsaved);
+      unsavedRef.current = {
+        hasUnsaved: !!hasUnsaved,
+        summary: summary || { adds: 0, edits: 0, deletes: 0 },
+      };
+    });
+
+    const offSaveStart = editBus.on("edit:saving-started", () => {
+      setIsSaving(true);
+    });
+    const offSaveEnd = editBus.on("edit:saving-finished", () => {
+      setIsSaving(false);
+    });
+
+    return () => {
+      offUnsaved();
+      offSaveStart();
+      offSaveEnd();
+    };
+  }, []);
+
+  const uiDisabled = isSaving;
+
   const handleOgcSourceChange = (newOgcSourceTitle) => {
+    if (uiDisabled) return; // block clicks while saving is in progress
+
+    // If unsaved changes exist: prevent editor/toolbar from handling dialog+byte shortcuts
+    if (hasUnsaved) {
+      editBus.emit("edit:service-switch-requested", {
+        source: "sketch",
+        targetLabel: newOgcSourceTitle,
+      });
+      return; // do the right thing here
+    }
+
+    // Go back directly
     props.setPluginSettings(
       newOgcSourceTitle === "Ingen"
         ? { title: "Rita", color: PLUGIN_COLORS.default }
@@ -347,7 +392,6 @@ const SketchView = (props) => {
         color: PLUGIN_COLORS.warning,
       });
     }
-
     setOgcSource(newOgcSourceTitle);
   };
 
@@ -474,6 +518,7 @@ const SketchView = (props) => {
       case "OGC":
         return (
           <OGCView
+            uiDisabled={uiDisabled}
             id={activityId}
             model={model}
             ogcSource={ogcSource}
