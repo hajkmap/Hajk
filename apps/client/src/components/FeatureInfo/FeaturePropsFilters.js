@@ -22,6 +22,13 @@ class PropFilters {
       value = key.substring(1, key.length - 1);
     } else {
       value = this.properties[key];
+
+      if (typeof value === "boolean") {
+        // We must convert to string to avoid boolean comparisons
+        // Everything should be stringified
+        value = String(value);
+      }
+
       if (!value) {
         value = "";
       }
