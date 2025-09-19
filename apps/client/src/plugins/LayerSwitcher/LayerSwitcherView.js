@@ -121,7 +121,16 @@ class LayersSwitcherView extends React.PureComponent {
               [`tab${prevState.activeTab}`]: currentScrollPosition,
             },
           }));
-        } else if (payload.infogrouptitle) {
+          // Check if any of the infogroup variables are present, in that case show the groups info
+        } else if (
+          payload.infogroupname ||
+          payload.infogrouptitle ||
+          payload.infogrouptext ||
+          payload.infogroupurl ||
+          payload.infogroupurltext ||
+          payload.infogroupopendatalink ||
+          payload.infogroupowner
+        ) {
           this.setState((prevState) => ({
             layerItemDetails: null,
             groupDetails: payload,
