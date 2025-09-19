@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- It's now possible to use Matomo tracking without cookies. [PR#1691](https://github.com/hajkmap/Hajk/pull/1691)
+
 ### Changed
 
 - MUI upgraded to v7. [PR#1658](https://github.com/hajkmap/Hajk/pull/1658)
@@ -27,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WFS layers: Fixed how different ways of writing the WFS service URL were affecting Client's ability to load layers from that service. [PR#1677](https://github.com/hajkmap/Hajk/pull/1677)
 - DialogWindowPlugin-based tools: Fixed disappearing toolbar button when toolbar state was toggled. [issue](https://github.com/hajkmap/Hajk/issues/1687)
 - LayerSwitcher: Don't show multiple legend graphics for a layer group if Admin specified one legend image. [issue](https://github.com/hajkmap/Hajk/issues/1644)
+- LayerSwitcher: Don't render Quick Access Presets if the functionality has been disabled in Admin. [PR](https://github.com/hajkmap/Hajk/pull/1693)
 
 ### Security
 
