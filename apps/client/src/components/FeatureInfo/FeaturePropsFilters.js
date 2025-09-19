@@ -11,9 +11,6 @@ class PropFilters {
   applyFilters(properties, input) {
     this.properties = properties; // Make properties available for the filters
 
-    console.log("input", input);
-    console.log("properties", properties);
-
     let filters = input.split("|");
     const key = filters.shift().trim();
 
@@ -266,7 +263,7 @@ filters.add("hasValue", function (value, trueValue = "", falseValue = "") {
   outputs: yes
 */
 filters.add("equals", function (value, test, trueValue, falseValue) {
-  return String(value) === String(test) ? trueValue : falseValue || value;
+  return value === test ? trueValue : falseValue || value;
 });
 
 /*
@@ -276,7 +273,7 @@ filters.add("equals", function (value, test, trueValue, falseValue) {
   outputs: This value is not false
 */
 filters.add("notEquals", function (value, test, falseValue, trueValue) {
-  return String(value) !== String(test) ? falseValue : trueValue || value;
+  return value !== test ? falseValue : trueValue || value;
 });
 
 /*
