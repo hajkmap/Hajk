@@ -40,7 +40,7 @@
     "ws": "^8.18.3"
   },
   "devDependencies": {
-    "eslint": "^9.35.0",
+    "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-node": "^11.1.0",
