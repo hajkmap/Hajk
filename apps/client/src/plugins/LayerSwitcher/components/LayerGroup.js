@@ -2,11 +2,7 @@ import React, { useState } from "react";
 import LayerItem from "./LayerItem";
 import GroupLayer from "./GroupLayer";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
-import { Typography, ListItemText, Link } from "@mui/material";
-import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
-import InfoIcon from "@mui/icons-material/Info";
-import HajkToolTip from "components/HajkToolTip";
-import LsIconButton from "./LsIconButton";
+import { ListItemText } from "@mui/material";
 import LsCheckBox from "./LsCheckBox";
 
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
