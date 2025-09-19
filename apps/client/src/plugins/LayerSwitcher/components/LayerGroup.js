@@ -112,8 +112,6 @@ const LayerGroup = ({
   const infogroupopendatalink = groupConfig?.infogroupopendatalink;
   const infogroupowner = groupConfig?.infogroupowner;
 
-  const [infoVisible, setInfoVisible] = useState(false);
-
   const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   const allLeafLayersInGroup = getAllLayerIdsInGroup(staticGroupTree);
@@ -185,7 +183,6 @@ const LayerGroup = ({
             />
             <GroupInfoToggler
               globalObserver={globalObserver}
-              infoVisible={infoVisible}
               infogroupname={groupName}
               infogrouptitle={infogrouptitle}
               infogrouptext={infogrouptext}
