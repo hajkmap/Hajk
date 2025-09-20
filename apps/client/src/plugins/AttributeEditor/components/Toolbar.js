@@ -2,7 +2,7 @@ import React from "react";
 import TableRowsIcon from "@mui/icons-material/TableRows";
 import DynamicFormIcon from "@mui/icons-material/DynamicForm";
 import { editBus } from "../../../buses/editBus";
-import { OGC_SOURCES, PLUGIN_COLORS } from "../constants/index";
+import { PLUGIN_COLORS } from "../constants/index";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 
 export default function Toolbar({
@@ -31,14 +31,58 @@ export default function Toolbar({
   tablePendingEdits,
   tablePendingDeletes,
   changedFields,
+  ogc,
 }) {
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
   const pendingTargetRef = React.useRef(null);
 
-  const [serviceId, setServiceId] = React.useState(
-    OGC_SOURCES[0]?.id ?? "none"
-  );
+  const [serviceId, setServiceId] = React.useState("NONE_ID");
+  const [services, setServices] = React.useState([
+    { id: "NONE_ID", label: "Ingen" },
+  ]);
+
+  React.useEffect(() => {
+    let alive = true;
+
+    (async () => {
+      try {
+        const listRaw = await ogc.fetchWfstList("id,caption");
+        if (!alive) return;
+
+        // Normalize API variables: {layers:[...]} to an array, others to a normal array
+        const list = Array.isArray(listRaw)
+          ? listRaw
+          : Array.isArray(listRaw?.layers)
+            ? listRaw.layers
+            : [];
+
+        const opts = [{ id: "NONE_ID", label: "Ingen" }].concat(
+          list
+            .map((s) => {
+              const id = s.id ?? s.uuid ?? s.wfstId ?? s.WFSTId ?? null;
+              return {
+                id,
+                label: s.caption || id || "Okänd",
+                layers: s.layers || [],
+                projection: s.projection,
+              };
+            })
+            .filter((o) => o.id)
+        );
+
+        setServices(opts);
+      } catch (e) {
+        console.warn("Kunde inte läsa WFST-lista:", e);
+        if (!alive) return;
+        setServices([{ id: "NONE_ID", label: "Ingen" }]);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [ogc]);
 
   const summary = React.useMemo(
     () => ({
@@ -71,7 +115,8 @@ export default function Toolbar({
         editBus.emit("edit:service-selected", {
           source: "toolbar",
           id: def?.id ?? "",
-          layerId: def?.layerId ?? "",
+          layerId: def?.layers?.[0]?.id ?? "",
+          projection: def?.projection,
           title: `Redigerar ${label}`,
           color: PLUGIN_COLORS.warning,
         });
@@ -104,7 +149,7 @@ export default function Toolbar({
 
   function handleOgcSourceChange(e) {
     const nextId = e.target.value;
-    const def = OGC_SOURCES.find((o) => o.id === nextId);
+    const def = services.find((o) => o.id === nextId);
     const label = def?.label ?? "Ingen";
 
     const pendingCount =
@@ -125,14 +170,23 @@ export default function Toolbar({
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
-      const { title, source } = ev.detail || {};
+      const { id, title, source } = ev.detail || {};
       if (source === "toolbar") return;
+
+      // 1) directly provided id (robust)
+      if (id) {
+        setServiceId(id);
+        return;
+      }
+
+      // 2) fallback via title -> label-match against services-list
       const raw =
         typeof title === "string" && title.startsWith("Redigerar ")
           ? title.replace(/^Redigerar\s+/, "")
           : title;
+
       if (!raw) return;
-      const found = OGC_SOURCES.find((o) => o.label === raw);
+      const found = services.find((o) => o.label === raw);
       if (found) setServiceId(found.id);
     });
 
@@ -146,7 +200,7 @@ export default function Toolbar({
       offSel();
       offClr();
     };
-  }, []);
+  }, [services]);
 
   React.useEffect(() => {
     const off = editBus.on("edit:service-switch-requested", (ev) => {
@@ -190,7 +244,7 @@ export default function Toolbar({
         aria-label="Välj redigeringstjänst"
         title="Välj redigeringstjänst"
       >
-        {OGC_SOURCES.map((o) => (
+        {services.map((o) => (
           <option key={o.id} value={o.id}>
             {o.label}
           </option>

@@ -5,6 +5,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
+import { editBus } from "../../../buses/editBus";
 
 export default function DesktopForm({
   s,
@@ -52,6 +53,29 @@ export default function DesktopForm({
   const requestFocusCaret = React.useCallback((key, pos) => {
     setPendingCaret({ key, pos });
   }, []);
+
+  const makeRowPreview = (row, FIELD_META) => {
+    const keys = FIELD_META.map((m) => m.key);
+    const contentKeys = keys.filter(
+      (k) => !["id", "geoid", "oracle_geoid"].includes(k)
+    );
+    const parts = [];
+    if (row.id != null && row.id !== "") parts.push(String(row.id));
+    for (const k of contentKeys) {
+      const v = row[k];
+      if (v != null && v !== "") {
+        parts.push(String(v));
+        if (parts.length >= 3) break;
+      }
+    }
+    return parts.join(" • ");
+  };
+
+  React.useEffect(() => {
+    if (focusedId != null) {
+      editBus.emit("attrib:focus-id", { id: focusedId });
+    }
+  }, [focusedId]);
 
   React.useEffect(() => {
     if (!pendingCaret) return;
@@ -151,13 +175,10 @@ export default function DesktopForm({
                 <div>
                   <div style={s.listRowText}>
                     <div style={s.listRowTitle}>
-                      {f.ar_typ} — {f.ar_andamal}
+                      {makeRowPreview(f, FIELD_META)}
                       {hasPendingEdits && (
                         <span style={s.labelChanged}>&nbsp;• ändrad</span>
                       )}
-                    </div>
-                    <div style={s.listRowSubtitle}>
-                      geoid {f.geoid} • {f.ar_forman} • {f.ar_last}
                     </div>
                   </div>
                 </div>
@@ -169,13 +190,6 @@ export default function DesktopForm({
           )}
         </div>
         <div style={s.listFooter}>
-          <button style={s.btn} onClick={focusPrev}>
-            &larr; Föregående
-          </button>
-          <button style={s.btn} onClick={focusNext}>
-            Nästa &rarr;
-          </button>
-          <div style={s.spacer} />
           <span style={s.listFooterInfo}>Fokus: {focusedId ?? "—"}</span>
         </div>
       </div>
@@ -313,6 +327,13 @@ export default function DesktopForm({
                 dirty || tableHasPending ? s.formFooterDirty : s.formFooter
               }
             >
+              <button style={s.btn} onClick={focusPrev}>
+                &larr; Föregående
+              </button>
+              <button style={s.btn} onClick={focusNext}>
+                Nästa &rarr;
+              </button>
+              <div style={s.spacer} />
               {dirty
                 ? `Osparade ändringar (${changedFields.size} fält)`
                 : tableHasPending

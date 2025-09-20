@@ -1,5 +1,5 @@
 /* === Helpers === */
-export const isEditableField = (meta) => !meta.readOnly;
+export const isEditableField = (meta) => !meta?.readOnly;
 
 export function getIdsForDeletion(selectedIds, focusedId) {
   if (selectedIds && selectedIds.size) return Array.from(selectedIds);

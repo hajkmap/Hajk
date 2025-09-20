@@ -49,7 +49,7 @@ export default function TableMode(props) {
     setTablePendingAdds,
 
     // helpers
-    isEditableField,
+    //isEditableField,
     isMissingValue,
     handleRowClick,
     openInFormFromTable,
@@ -387,6 +387,9 @@ export default function TableMode(props) {
                         tableEditing.id === row.id &&
                         tableEditing.key === meta.key;
 
+                      const editable =
+                        !meta.readOnly && row.__pending !== "delete";
+
                       const tdBase = isEditing
                         ? s.tdEdited
                         : isPlaceholder
@@ -396,7 +399,7 @@ export default function TableMode(props) {
                             : s.td;
 
                       const beginEdit = () => {
-                        if (!isEditableField(meta)) return;
+                        if (!editable) return;
                         setTableEditing({
                           id: row.id,
                           key: meta.key,
@@ -405,6 +408,12 @@ export default function TableMode(props) {
                       };
 
                       const applyChange = (newVal) => {
+                        console.log(
+                          "applyChange called with:",
+                          newVal,
+                          "row.id:",
+                          row.id
+                        ); // Debug log
                         if (row.__pending) {
                           setTablePendingAdds((prev) =>
                             prev.map((d) =>
@@ -413,6 +422,7 @@ export default function TableMode(props) {
                           );
                         } else {
                           setTablePendingEdits((prev) => {
+                            console.log("Current pending edits:", prev); // Debug log
                             const next = { ...prev };
                             const current = next[row.id]
                               ? { ...next[row.id] }
@@ -420,30 +430,31 @@ export default function TableMode(props) {
                             const original = features.find(
                               (f) => f.id === row.id
                             )?.[meta.key];
-                            if (newVal === original) {
+
+                            if ((newVal ?? "") === (original ?? ""))
                               delete current[meta.key];
-                            } else {
-                              current[meta.key] = newVal;
-                            }
+                            else current[meta.key] = newVal;
+
                             if (Object.keys(current).length)
                               next[row.id] = current;
                             else delete next[row.id];
+
+                            console.log("New pending edits:", next); // Debug log
                             return next;
                           });
                         }
                       };
 
                       const finishEdit = () => {
-                        const ed = tableEditing; // { id, key, startValue }
+                        const ed = tableEditing;
                         setTableEditing(null);
                         if (!ed || ed.id !== row.id || ed.key !== meta.key)
                           return;
 
                         let currentVal;
-                        const patch = tablePendingEdits[row.id];
-                        if (patch && meta.key in patch) {
-                          currentVal = patch[meta.key];
-                        } else {
+                        const p = tablePendingEdits[row.id];
+                        if (p && meta.key in p) currentVal = p[meta.key];
+                        else {
                           const draft = tablePendingAdds?.find?.(
                             (d) => d.id === row.id
                           );
@@ -486,11 +497,9 @@ export default function TableMode(props) {
                               (f) => f.id === row.id
                             )?.[meta.key];
                             const revertTo = ed.startValue;
-                            if (revertTo === original) {
+                            if ((revertTo ?? "") === (original ?? ""))
                               delete current[meta.key];
-                            } else {
-                              current[meta.key] = revertTo;
-                            }
+                            else current[meta.key] = revertTo;
                             if (Object.keys(current).length)
                               next[row.id] = current;
                             else delete next[row.id];
@@ -503,59 +512,55 @@ export default function TableMode(props) {
                       const isDeletedRow = row.__pending === "delete";
 
                       const editorProps = {
-                        className: undefined,
                         style: s.cellInput,
                         value: effectiveValue ?? "",
                         autoFocus: true,
-                        onChange: (e) => applyChange(e.target.value),
-                        onClick: (e) => e.stopPropagation(),
-                        onDoubleClick: (e) => e.stopPropagation(),
+
                         onKeyDown: (e) => {
+                          console.log("Key pressed:", e.key); // Debug log
+                          e.stopPropagation();
                           if (e.key === "Escape") {
                             e.preventDefault();
                             cancelEdit();
                             return;
                           }
-
-                          if (e.key !== "Enter") return;
-
-                          if (e.altKey) {
-                            e.preventDefault();
-                            e.stopPropagation();
-
-                            const el = e.currentTarget;
-                            const start =
-                              el.selectionStart ?? el.value?.length ?? 0;
-                            const end =
-                              el.selectionEnd ?? el.value?.length ?? 0;
-
-                            const next =
-                              (el.value ?? "").slice(0, start) +
-                              "\n" +
-                              (el.value ?? "").slice(end);
-
-                            applyChange(next);
-
-                            const restore = () => {
-                              const active = document.activeElement;
-                              if (active && "selectionStart" in active) {
+                          if (e.key === "Enter") {
+                            if (e.altKey) {
+                              e.preventDefault();
+                              const el = e.currentTarget;
+                              const start =
+                                el.selectionStart ?? el.value?.length ?? 0;
+                              const end =
+                                el.selectionEnd ?? el.value?.length ?? 0;
+                              const next =
+                                (el.value ?? "").slice(0, start) +
+                                "\n" +
+                                (el.value ?? "").slice(end);
+                              applyChange(next);
+                              requestAnimationFrame(() => {
                                 try {
-                                  active.focus();
-                                  active.selectionStart = active.selectionEnd =
+                                  el.focus();
+                                  el.selectionStart = el.selectionEnd =
                                     start + 1;
                                 } catch {}
-                              }
-                            };
-                            requestAnimationFrame(() => {
-                              restore();
-                              setTimeout(restore);
-                            });
-
-                            return;
+                              });
+                              return;
+                            }
+                            e.preventDefault();
+                            finishEdit();
                           }
-                          e.preventDefault();
-                          finishEdit();
                         },
+
+                        onChange: (e) => {
+                          console.log(
+                            "onChange triggered with value:",
+                            e.target.value
+                          ); // Debug log
+                          applyChange(e.target.value);
+                        },
+
+                        onClick: (e) => e.stopPropagation(),
+                        onDoubleClick: (e) => e.stopPropagation(),
                         onBlur: finishEdit,
                       };
 
@@ -566,19 +571,19 @@ export default function TableMode(props) {
                       return (
                         <td
                           key={meta.key}
-                          data-editable={String(isEditableField(meta))}
+                          data-editable={String(editable)}
                           style={{
                             ...tdBase,
                             ...(isDeletedRow ? s.tdStrike : null),
                             ...flowStyle,
                           }}
                           onDoubleClick={(e) => {
-                            if (!isEditableField(meta)) return;
+                            if (!editable) return;
                             e.stopPropagation();
                             beginEdit();
                           }}
                           title={
-                            isEditableField(meta)
+                            editable
                               ? "Dubbelklicka för att redigera"
                               : "Ej redigerbar"
                           }
@@ -599,15 +604,16 @@ export default function TableMode(props) {
                                 value={String(effectiveValue ?? "").slice(
                                   0,
                                   10
-                                )} // YYYY-MM-DD
+                                )}
                                 onChange={(e) =>
                                   applyChange(e.target.value || null)
                                 }
                               />
-                            ) : /\n/.test(String(effectiveValue ?? "")) ? (
+                            ) : /\n/.test(String(effectiveValue ?? "")) ||
+                              meta.type === "textarea" ? (
                               <textarea {...editorProps} rows={4} />
                             ) : (
-                              <input {...editorProps} />
+                              <input {...editorProps} type="text" />
                             )
                           ) : isPlaceholder ? (
                             "#saknas"

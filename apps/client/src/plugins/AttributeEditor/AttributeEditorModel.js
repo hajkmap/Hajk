@@ -347,8 +347,12 @@ export default class AttributeEditorModel {
   #localObserver;
   #storageKey;
   #fieldMeta;
+  #ogc;
+
+  _lastFeatureCollection = null;
 
   constructor(settings) {
+    this.#ogc = settings.ogc || null;
     this.#map = settings.map;
     this.#app = settings.app;
     this.#localObserver = settings.localObserver;
@@ -368,6 +372,112 @@ export default class AttributeEditorModel {
 
     this.#initSubscriptions();
   }
+
+  // === getters/setters ===
+  getFieldMetadata = () => this.#fieldMeta || [];
+  getFeatureCollection = () => this._lastFeatureCollection;
+
+  // === API data normalization ===
+  normalizeApiFeatures = (payload) => {
+    // payload is FeatureCollection: { type, features: [ { id, properties, geometry } ] }
+    const raw = Array.isArray(payload) ? payload : (payload?.features ?? []);
+    return raw.map((f, i) => {
+      const props = f?.properties ?? {};
+      const id = f?.id ?? props?.id ?? i + 1;
+      return { id, ...props };
+    });
+  };
+
+  // === Heuristic field metadata ===
+  inferFieldMetaFromFeatures = (rows = []) => {
+    const nRows = rows.length;
+    const keys = new Set();
+    rows.forEach((r) => Object.keys(r).forEach((k) => keys.add(k)));
+    const samples = {};
+    const nullCounts = {};
+    const maxLen = {};
+    keys.forEach((k) => {
+      samples[k] = new Set();
+      nullCounts[k] = 0;
+      maxLen[k] = 0;
+    });
+
+    rows.slice(0, 300).forEach((r) => {
+      keys.forEach((k) => {
+        const v = r[k];
+        if (v === null || v === undefined || v === "") {
+          nullCounts[k] += 1;
+          return;
+        }
+        const s = String(v);
+        if (samples[k].size < 50) samples[k].add(s);
+        if (s.length > maxLen[k]) maxLen[k] = s.length;
+      });
+    });
+
+    const isDateLike = (s) => /^\d{4}-\d{2}-\d{2}/.test(String(s || ""));
+    const isParagraphish = (k) =>
+      maxLen[k] >= 80 || // long fields (e.g. descriptions)
+      Array.from(samples[k]).some((t) => /\r\n|\n\r|\n|\r/.test(t)); // line breaks
+
+    const meta = Array.from(keys).map((k) => {
+      const arr = Array.from(samples[k]);
+      const uniq = arr.length;
+      const nullRate = nRows ? nullCounts[k] / nRows : 0;
+
+      // Date always wins
+      const isDate = arr.some(isDateLike);
+      const isPara = isParagraphish(k);
+      const enumCandidate =
+        nRows >= 50 &&
+        uniq > 0 &&
+        uniq <= 6 &&
+        uniq / Math.max(1, nRows) <= 0.1 &&
+        nullRate < 0.5 &&
+        arr.every((v) => v.length <= 24);
+
+      const m = { key: k, label: k };
+      if (isDate) {
+        m.type = "date";
+      } else if (isPara) {
+        m.type = "textarea";
+      } else if (enumCandidate) {
+        m.type = "select";
+        m.options = arr.sort((a, b) =>
+          String(a).localeCompare(String(b), "sv")
+        );
+      }
+      if (["id", "geoid", "oracle_geoid"].includes(k)) m.readOnly = true;
+      return m;
+    });
+
+    return meta;
+  };
+
+  // === Load data from service ===
+  loadFromService = async (serviceId, { limit = 10000 } = {}) => {
+    if (!this.#ogc)
+      throw new Error("Ogc API saknas (injicera via settings.ogc)");
+
+    // Fetch data (FeatureCollection) and store for map rendering
+    const payload = await this.#ogc.fetchWfstFeatures(serviceId, { limit });
+    this._lastFeatureCollection = payload;
+
+    // Normalize data to table rows + build metadata
+    const rows = this.normalizeApiFeatures(payload);
+    const fieldMeta = this.inferFieldMetaFromFeatures(rows);
+
+    // Initialize state with default values (empty pending/undo)
+    this._state = reducer(this._state, { type: Action.INIT, features: rows });
+
+    // Set field metadata in the model
+    this.setFieldMetadata(fieldMeta);
+
+    // Notify subscribers (UI updates)
+    this._emit();
+
+    return { features: rows, fieldMeta, featureCollection: payload };
+  };
 
   #initSubscriptions = () => {
     this.#localObserver.subscribe(

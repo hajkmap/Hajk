@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from "react";
 
-import { FIELD_META } from "./dummy/DummyData";
+//import { FIELD_META } from "./dummy/DummyData";
 import { themes, makeStyles } from "./theme/Styles";
 import {
   isEditableField,
@@ -26,6 +26,8 @@ export default function AttributeEditorView({
   controller,
   ui,
   setPluginSettings,
+  ogc,
+  fieldMeta,
 }) {
   const [serviceId, setServiceId] = React.useState("NONE_ID");
   const [tableEditing, setTableEditing] = useState(null); // { id, key, startValue } | null
@@ -296,22 +298,10 @@ export default function AttributeEditorView({
 
   const FM = useMemo(() => {
     if (serviceId === "NONE_ID") return [];
-
-    const keys = FIELD_META?.length
-      ? FIELD_META.map((m) => m.key)
-      : Object.keys(allRows[0] || {});
-    const traits = inferColumnTraits(allRows, keys);
-
-    return (
-      FIELD_META?.length ? FIELD_META : keys.map((key) => ({ key, label: key }))
-    ).map((m) => {
-      const para = traits[m.key]?.paragraphLike;
-      return {
-        ...m,
-        wrapCh: m.wrapCh ?? (para ? 40 : null),
-      };
-    });
-  }, [allRows, serviceId]);
+    if (Array.isArray(fieldMeta) && fieldMeta.length) return fieldMeta;
+    const keys = Object.keys(allRows[0] || {});
+    return keys.map((key) => ({ key, label: key }));
+  }, [allRows, serviceId, fieldMeta]);
 
   const filteredAndSorted = useMemo(() => {
     const q = tableSearch.trim().toLowerCase();
@@ -471,7 +461,7 @@ export default function AttributeEditorView({
       const group = formUndoStack.slice(-k);
       const ops = [];
       group.forEach(({ id, snapshot }) => {
-        FIELD_META.forEach(({ key }) => {
+        FM.forEach(({ key }) => {
           const v = snapshot[key];
           ops.push({
             id,
@@ -489,7 +479,7 @@ export default function AttributeEditorView({
         const snap = hit.snapshot;
         setEditValues({ ...snap });
         const nextChanged = new Set();
-        FIELD_META.forEach(({ key }) => {
+        FM.forEach(({ key }) => {
           if ((snap[key] ?? "") !== (originalValues[key] ?? ""))
             nextChanged.add(key);
         });
@@ -529,6 +519,7 @@ export default function AttributeEditorView({
     focusedId,
     originalValues,
     showNotification,
+    FM,
   ]);
 
   const handleBeforeChangeFocus = useCallback(
@@ -572,7 +563,7 @@ export default function AttributeEditorView({
     const effective = {};
     const patch = focusedId < 0 ? {} : pendingEdits[focusedId] || {};
 
-    FIELD_META.forEach(({ key }) => {
+    FM.forEach(({ key }) => {
       const baseVal = normalize(feat[key]);
       base[key] = baseVal;
       const effVal =
@@ -588,12 +579,12 @@ export default function AttributeEditorView({
     setEditValues(effective);
 
     const changed = new Set();
-    FIELD_META.forEach(({ key }) => {
+    FM.forEach(({ key }) => {
       if ((effective[key] ?? "") !== (base[key] ?? "")) changed.add(key);
     });
     setChangedFields(changed);
     setDirty(false);
-  }, [focusedId, features, pendingAdds, pendingEdits]);
+  }, [focusedId, features, pendingAdds, pendingEdits, FM]);
 
   useEffect(() => {
     if (!focusedId || dirty) return;
@@ -604,7 +595,7 @@ export default function AttributeEditorView({
     const effective = {};
     const patch = pendingEdits[focusedId] || {};
 
-    FIELD_META.forEach(({ key }) => {
+    FM.forEach(({ key }) => {
       const baseVal = normalize(feat[key]);
       base[key] = baseVal;
       const effVal =
@@ -620,65 +611,15 @@ export default function AttributeEditorView({
     setEditValues(effective);
 
     const changed = new Set();
-    FIELD_META.forEach(({ key }) => {
+    FM.forEach(({ key }) => {
       if ((effective[key] ?? "") !== (base[key] ?? "")) changed.add(key);
     });
     setChangedFields(changed);
     setDirty(false);
-  }, [pendingEdits, features, focusedId, dirty]);
+  }, [pendingEdits, features, focusedId, dirty, FM]);
 
   function normalize(v) {
     return v == null ? "" : v;
-  }
-
-  function inferColumnTraits(rows, keys, sampleSize = 200) {
-    const sample = rows.slice(0, sampleSize);
-    const traits = {}; // { [key]: { paragraphLike: boolean } }
-
-    keys.forEach((key) => {
-      let n = 0;
-      let longCount = 0;
-      let totalLen = 0;
-      let maxLen = 0;
-      let hasNewline = false;
-      let maxToken = 0;
-      let numericish = 0;
-
-      for (const r of sample) {
-        const raw = r?.[key];
-        if (raw === null || raw === undefined) continue;
-        const v = String(raw);
-        if (v === "") continue;
-
-        n++;
-        const len = v.length;
-        totalLen += len;
-        maxLen = Math.max(maxLen, len);
-        if (len >= 80) longCount++;
-        if (/\n/.test(v)) hasNewline = true;
-        if (!isNaN(Number(v)) || /^\d{4}-\d{2}-\d{2}/.test(v)) numericish++;
-
-        const tokens = v.split(/\s+/);
-        for (const t of tokens) {
-          if (t.length > maxToken) maxToken = t.length;
-        }
-      }
-
-      const avg = n ? totalLen / n : 0;
-      const numericRatio = sample.length ? numericish / sample.length : 0;
-
-      const paragraphLike =
-        hasNewline ||
-        maxToken >= 40 ||
-        maxLen >= 40 ||
-        (avg >= 40 && longCount / Math.max(n, 1) >= 0.2);
-
-      const shortLike = numericRatio > 0.7 || maxLen <= 12;
-
-      traits[key] = { paragraphLike: paragraphLike && !shortLike };
-    });
-
-    return traits;
   }
 
   function selectAllVisible() {
@@ -701,20 +642,19 @@ export default function AttributeEditorView({
     const drafts = pendingAdds.map((d, i) => ({ ...d, __idx: startIdx + i }));
 
     const all = [...existing, ...drafts];
-    const filtered = all.filter((f) =>
-      !sTerm
-        ? true
-        : [
-            f.ar_typ,
-            f.ar_andamal,
-            f.ar_forman,
-            f.ar_last,
-            f.geoid,
-            f.ar_aktbeteckning,
-          ]
-            .map((v) => String(v ?? "").toLowerCase())
-            .some((token) => token.includes(sTerm))
-    );
+    const fmKeys = FM.map((m) => m.key);
+    const searchKeys = fmKeys
+      .filter((k) => !["id", "geoid", "oracle_geoid"].includes(k))
+      .slice(0, 5);
+
+    const filtered = all.filter((f) => {
+      if (!sTerm) return true;
+      return searchKeys.some((k) =>
+        String(f[k] ?? "")
+          .toLowerCase()
+          .includes(sTerm)
+      );
+    });
 
     filtered.sort((a, b) => {
       const ap = a.__pending === "add" ? 0 : 1;
@@ -724,16 +664,12 @@ export default function AttributeEditorView({
     });
 
     return filtered;
-  }, [features, pendingEdits, pendingAdds, pendingDeletes, formSearch]);
+  }, [features, pendingEdits, pendingAdds, pendingDeletes, formSearch, FM]);
 
   const ensureFormSelection = React.useCallback(() => {
     if (ui.mode !== "form") return;
-
-    // finns fokus som fortfarande existerar?
     const focusOk =
       focusedId != null && visibleFormList.some((f) => f.id === focusedId);
-
-    // finns någon vald som fortfarande existerar?
     const selOk =
       selectedIds.size > 0 &&
       Array.from(selectedIds).some((id) =>
@@ -742,7 +678,7 @@ export default function AttributeEditorView({
 
     if (focusOk && selOk) return;
 
-    // välj första synliga raden som fallback
+    // select first visible row as fallback
     const cand = visibleFormList[0]?.id;
     if (cand != null) {
       setSelectedIds(new Set([cand]));
@@ -859,7 +795,7 @@ export default function AttributeEditorView({
           effective = { ...base, ...patch };
         }
         const snap = {};
-        FIELD_META.forEach(({ key }) => (snap[key] = effective[key] ?? ""));
+        FM.forEach(({ key }) => (snap[key] = effective[key] ?? ""));
         formUndoSnapshotsRef.current.set(id, snap);
         snapshotsToPush.push({ id, snapshot: snap, when: now });
       }
@@ -880,7 +816,7 @@ export default function AttributeEditorView({
 
     if (!idsToUpdate.length) return;
 
-    const keys = FIELD_META.map((f) => f.key);
+    const keys = FM.map((f) => f.key);
     const ops = [];
     idsToUpdate.forEach((id) => {
       keys.forEach((k) => {
@@ -978,6 +914,7 @@ export default function AttributeEditorView({
         tablePendingEdits={pendingEdits}
         tablePendingDeletes={pendingDeletes}
         changedFields={changedFields}
+        ogc={ogc}
       />
 
       {serviceId === "NONE_ID" ? (
@@ -1074,7 +1011,7 @@ export default function AttributeEditorView({
           focusPrev={focusPrev}
           focusNext={focusNext}
           focusedFeature={focusedFeature}
-          FIELD_META={FIELD_META}
+          FIELD_META={FM}
           changedFields={changedFields}
           editValues={editValues}
           handleFieldChange={handleFieldChange}
