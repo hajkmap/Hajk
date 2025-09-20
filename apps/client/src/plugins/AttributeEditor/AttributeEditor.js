@@ -370,7 +370,6 @@ function AttributeEditor(props) {
           type: Action.DUPLICATE_ROWS,
           ids,
           readOnlyKeys: model.readOnlyKeys(),
-          annotateField: "ar_anteckning",
         }),
       commit: () => model.dispatch({ type: Action.COMMIT }),
       undo: () => model.dispatch({ type: Action.UNDO }),

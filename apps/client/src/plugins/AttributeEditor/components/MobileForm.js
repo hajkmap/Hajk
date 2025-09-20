@@ -2,6 +2,8 @@ import React from "react";
 import UndoIcon from "@mui/icons-material/Undo";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { getIdsForDeletion } from "../helpers/helpers";
 
 export default function MobileForm({
@@ -10,13 +12,17 @@ export default function MobileForm({
   mode,
   mobileActiveTab,
   setMobileActiveTab,
+
+  // list
   visibleFormList,
   selectedIds,
-  focusedId,
-  lastEditTargetIdsRef,
   onFormRowClick,
+  focusedId,
   focusPrev,
   focusNext,
+
+  // form
+  lastEditTargetIdsRef,
   focusedFeature,
   FIELD_META,
   changedFields,
@@ -26,30 +32,53 @@ export default function MobileForm({
   dirty,
   resetEdits,
   saveChanges,
-  tablePendingDeletes,
-  setDeleteState,
+
+  // pending & commit
   tableHasPending,
   commitTableEdits,
+  tablePendingDeletes,
+  setDeleteState,
   tableUndoStack,
   undoLatestTableChange,
   formUndoStack,
   undoLatestFormChange,
-  theme,
   tablePendingEdits,
   tablePendingAdds,
+  duplicateInForm,
 }) {
-  if (!isMobile || mode !== "form") return null;
+  const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
+  const [savingNow, setSavingNow] = React.useState(false);
 
+  const isActive = isMobile && mode === "form";
+
+  // Helpers
   function autoIsMultiline(val, meta) {
-    const s = String(val ?? "");
-    if (!s) return false;
-    if (s.includes("\n")) return true; // has line breaks
-    const limit = meta.wrapCh ?? 60; // long text, e.g. long URL
-    if (s.length >= limit) return true;
-    const longToken = s
+    const sVal = String(val ?? "");
+    if (!sVal) return false;
+    if (sVal.includes("\n")) return true;
+    const limit = meta.wrapCh ?? 60;
+    if (sVal.length >= limit) return true;
+    const hasLongToken = sVal
       .split(/\s+/)
-      .some((tok) => tok.length >= Math.max(30, Math.floor(limit * 0.6))); // long URL, etc.
-    return longToken;
+      .some((tok) => tok.length >= Math.max(30, Math.floor(limit * 0.6)));
+    return hasLongToken;
+  }
+
+  function makeRowPreview(row, FIELD_META) {
+    const keys = FIELD_META.map((m) => m.key);
+    const contentKeys = keys.filter(
+      (k) => !["id", "geoid", "oracle_geoid"].includes(k)
+    );
+    const parts = [];
+    if (row.id != null && row.id !== "") parts.push(String(row.id));
+    for (const k of contentKeys) {
+      const v = row[k];
+      if (v != null && v !== "") {
+        parts.push(String(v));
+        if (parts.length >= 3) break;
+      }
+    }
+    return parts.join(" • ");
   }
 
   const handleDeleteClick = () => {
@@ -57,6 +86,30 @@ export default function MobileForm({
     if (!ids.length) return;
     setDeleteState(ids, "mark");
   };
+
+  const handleDuplicateClick = () => {
+    if (typeof duplicateInForm === "function") {
+      duplicateInForm();
+    }
+  };
+
+  async function confirmSave() {
+    try {
+      setSavingNow(true);
+      if (dirty) {
+        saveChanges({
+          toPending: true,
+          targetIds: lastEditTargetIdsRef.current || undefined,
+        });
+      }
+      await Promise.resolve(commitTableEdits());
+    } finally {
+      setSavingNow(false);
+      setSaveDialogOpen(false);
+    }
+  }
+
+  if (!isActive) return null;
 
   return (
     <>
@@ -105,13 +158,10 @@ export default function MobileForm({
                     <div>
                       <div style={s.listRowText}>
                         <div style={s.listRowTitle}>
-                          {f.ar_typ} — {f.ar_andamal}
+                          {makeRowPreview(f, FIELD_META)}
                           {hasPendingEdits && (
                             <span style={s.labelChanged}>&nbsp;• ändrad</span>
                           )}
-                        </div>
-                        <div style={s.listRowSubtitle}>
-                          geoid {f.geoid} • {f.ar_forman} • {f.ar_last}
                         </div>
                       </div>
                     </div>
@@ -122,6 +172,7 @@ export default function MobileForm({
                 <div style={s.listEmpty}>Inga objekt i listan.</div>
               )}
             </div>
+
             <div style={s.listFooter}>
               <button style={s.btn} onClick={focusPrev}>
                 &larr; Föreg.
@@ -130,6 +181,26 @@ export default function MobileForm({
                 Nästa &rarr;
               </button>
               <div style={s.spacer} />
+              <button
+                style={
+                  selectedIds.size === 0 && focusedId == null
+                    ? s.iconBtnDisabled
+                    : s.iconBtn
+                }
+                disabled={selectedIds.size === 0 && focusedId == null}
+                onClick={handleDuplicateClick}
+                aria-label="Duplicera"
+                title={
+                  selectedIds.size
+                    ? `Duplicera ${selectedIds.size} objekt`
+                    : focusedId != null
+                      ? "Duplicera valt objekt"
+                      : "Välj objekt först"
+                }
+              >
+                <ContentCopyIcon fontSize="small" />
+              </button>
+
               <button
                 style={
                   selectedIds.size === 0 && focusedId == null
@@ -152,7 +223,7 @@ export default function MobileForm({
 
               <button
                 style={
-                  !(tableUndoStack?.length || formUndoStack?.length)
+                  !(tableUndoStack?.length || formUndoStack?.length || dirty)
                     ? s.iconBtnDisabled
                     : s.iconBtn
                 }
@@ -171,9 +242,11 @@ export default function MobileForm({
               </button>
 
               <button
-                style={!tableHasPending ? s.iconBtnDisabled : s.iconBtn}
-                onClick={commitTableEdits}
-                disabled={!tableHasPending}
+                style={
+                  !(dirty || tableHasPending) ? s.iconBtnDisabled : s.iconBtn
+                }
+                onClick={() => setSaveDialogOpen(true)}
+                disabled={!(dirty || tableHasPending)}
                 aria-label="Spara"
                 title="Spara"
               >
@@ -193,11 +266,8 @@ export default function MobileForm({
                   {FIELD_META.map((meta) => {
                     const changed = changedFields.has(meta.key);
                     const val = editValues?.[meta.key];
-
-                    // Backend determines the first value
                     const forceTextarea = meta.type === "textarea";
-                    // Automatic heuristic (long texts / line breaks)
-                    const isMultiline =
+                    const multiline =
                       forceTextarea || autoIsMultiline(val, meta);
 
                     return (
@@ -216,7 +286,7 @@ export default function MobileForm({
                           s,
                           {
                             enterCommits: false,
-                            multiline: isMultiline,
+                            multiline,
                             fieldKey: meta.key,
                           }
                         )}
@@ -260,17 +330,7 @@ export default function MobileForm({
                         ? s.iconBtnDisabled
                         : s.iconBtn
                     }
-                    onClick={() => {
-                      if (dirty) {
-                        saveChanges({
-                          toPending: true,
-                          targetIds: lastEditTargetIdsRef.current || undefined,
-                        });
-                      }
-                      if (tableHasPending) {
-                        commitTableEdits();
-                      }
-                    }}
+                    onClick={() => setSaveDialogOpen(true)}
                     disabled={!(dirty || tableHasPending)}
                     aria-label="Spara"
                     title="Spara"
@@ -295,6 +355,20 @@ export default function MobileForm({
           </>
         )}
       </div>
+
+      <ConfirmSaveDialog
+        open={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        onConfirm={confirmSave}
+        summary={{
+          adds: tablePendingAdds?.length ?? 0,
+          edits:
+            (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0) +
+            (dirty ? changedFields.size : 0),
+          deletes: tablePendingDeletes?.size ?? 0,
+        }}
+        saving={savingNow}
+      />
     </>
   );
 }

@@ -39,7 +39,7 @@ export function createOgcApi(baseUrl) {
     },
 
     async fetchWfstFeatures(id, params = {}) {
-      const q = new URLSearchParams({ limit: "500", ...params }).toString();
+      const q = new URLSearchParams({ limit: "10000", ...params }).toString();
       const res = await fetch(`${base}/ogc/wfst/${id}/features?${q}`);
       if (!res.ok)
         throw new Error(`WFST features misslyckades (${res.status})`);

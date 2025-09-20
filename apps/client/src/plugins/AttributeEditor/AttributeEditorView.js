@@ -1056,6 +1056,7 @@ export default function AttributeEditorView({
           tablePendingEdits={pendingEdits}
           tablePendingAdds={pendingAdds}
           lastEditTargetIdsRef={lastEditTargetIdsRef}
+          duplicateInForm={duplicateInForm}
         />
       ) : (
         <DesktopForm
