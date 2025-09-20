@@ -59,7 +59,6 @@ export default class XLSXExport {
         const exportArray = this.#getUserSelectedExportArray(
           groupedFeatures[key]
         );
-        console.log(exportArray);
         const sheet = xlsx.utils.aoa_to_sheet(exportArray);
         xlsx.utils.book_append_sheet(workBook, sheet, sheetName);
       });
@@ -81,7 +80,6 @@ export default class XLSXExport {
     const exportArray = [];
     // Keys from first feature. We assume that all features in the collections has the same keys.
     const keys = Object.keys(features[0].getProperties());
-    console.log(keys);
     exportArray.push(keys);
     features.forEach((feature) => {
       exportArray.push(Object.values(feature.getProperties()));
