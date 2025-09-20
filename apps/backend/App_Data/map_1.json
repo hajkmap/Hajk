@@ -843,7 +843,13 @@
         "winheight": "600",
         "winwidth": "1000",
         "instruction": "",
-        "visibleForGroups": []
+        "visibleForGroups": [],
+        "activeServices": [
+          {
+            "id": "5d21c612-b28e-c3da-074d-2d94c69c8c2f",
+            "visibleForGroups": []
+          }
+        ]
       }
     },
     {

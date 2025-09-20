@@ -73,6 +73,14 @@ const TABLE_MIN = 460;
 
 export function makeStyles(t, isMobile) {
   return {
+    thWidth: (ch = 40) => ({
+      maxWidth: `${ch}ch`,
+      width: `${ch}ch`,
+    }),
+    tdWidth: (ch = 40) => ({
+      maxWidth: `${ch}ch`,
+      width: `${ch}ch`,
+    }),
     iconBtn: {
       padding: isMobile ? 6 : 8,
       borderRadius: 999,
@@ -555,6 +563,19 @@ export function makeStyles(t, isMobile) {
       gap: isMobile ? 4 : 6,
       position: "relative",
     },
+    thResizer: {
+      position: "absolute",
+      top: 0,
+      right: 0,
+      width: 6,
+      height: "100%",
+      cursor: "col-resize",
+      userSelect: "none",
+      touchAction: "none",
+    },
+    thResizerHover: {
+      background: "rgba(0,0,0,0.06)",
+    },
     sortButton: {
       border: "none",
       background: "transparent",
@@ -575,31 +596,6 @@ export function makeStyles(t, isMobile) {
       alignItems: "center",
       color: t.text,
     }),
-    filterOverlay: {
-      position: "absolute",
-      top: "calc(100% + 6px)",
-      left: 0,
-      zIndex: 1000,
-      background: t.overlayBg,
-      border: `1px solid ${t.border}`,
-      borderRadius: 8,
-      boxShadow: t.shadow,
-      padding: 8,
-      minWidth: 200,
-      maxHeight: 300,
-      overflow: "auto",
-      color: t.text,
-    },
-    filterOverlayButtons: { marginBottom: 8, display: "flex", gap: 4 },
-    filterCheckbox: {
-      display: "flex",
-      alignItems: "center",
-      gap: 6,
-      padding: "4px 0",
-      cursor: "pointer",
-      fontSize: 13,
-      color: t.text,
-    },
 
     tdEdited: {
       fontSize: isMobile ? 12 : 13,
@@ -706,6 +702,65 @@ export function makeStyles(t, isMobile) {
       animation: "slideIn 0.3s ease-out",
       maxWidth: isMobile ? "calc(100% - 40px)" : "auto",
       left: isMobile ? 20 : "auto",
+    },
+    filterOverlay: {
+      position: "absolute",
+      top: "calc(100% + 6px)",
+      left: 0,
+      zIndex: 1000,
+      background: t.overlayBg,
+      border: `1px solid ${t.border}`,
+      borderRadius: 8,
+      boxShadow: t.shadow,
+      padding: 8,
+      minWidth: 260,
+      maxWidth: 360,
+      maxHeight: 320,
+      overflow: "hidden",
+      color: t.text,
+    },
+
+    filterSearch: {
+      width: "100%",
+      boxSizing: "border-box",
+      padding: "6px 8px",
+      marginBottom: 8,
+      border: `1px solid ${t.border}`,
+      borderRadius: 6,
+      background: t.overlayBg,
+      color: t.text,
+      fontSize: 13,
+    },
+
+    filterOverlayButtons: {
+      marginBottom: 8,
+      display: "flex",
+      gap: 4,
+      flexWrap: "wrap",
+    },
+
+    filterListScroll: {
+      maxHeight: 260,
+      overflowY: "auto",
+      paddingRight: 4,
+    },
+
+    filterCheckbox: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      padding: "4px 0",
+      cursor: "pointer",
+      fontSize: 13,
+      color: t.text,
+    },
+
+    filterCheckboxText: {
+      display: "inline-block",
+      maxWidth: "100%",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
     },
   };
 }

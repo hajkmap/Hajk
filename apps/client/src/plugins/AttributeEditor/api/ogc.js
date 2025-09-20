@@ -20,6 +20,18 @@ export function createOgcApi(baseUrl) {
       return items; // ex: [{id, caption, ...}]
     },
 
+    async getServiceMeta(id) {
+      const res = await fetch(`${baseUrl}/wfst/${id}`);
+      const j = await res.json();
+      return {
+        id: j.id ?? id,
+        caption: j.caption ?? j.Caption ?? j.title ?? j.name,
+        title: j.caption ?? j.Caption ?? j.title ?? j.name,
+        projection: j.projection ?? j.crs,
+        layers: j.layers ?? j.Layers ?? [],
+      };
+    },
+
     async fetchWfst(id, fields = "id,caption,projection,layers") {
       const res = await fetch(`${base}/ogc/wfst/${id}${pickFields(fields)}`);
       if (!res.ok) throw new Error(`WFST get misslyckades (${res.status})`);

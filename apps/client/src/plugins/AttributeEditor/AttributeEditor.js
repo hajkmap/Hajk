@@ -4,7 +4,6 @@ import AttributeEditorView from "./AttributeEditorView";
 import Observer from "react-event-observer";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import AttributeEditorModel, { Action } from "./AttributeEditorModel";
-import { createDummyFeatures, FIELD_META } from "./dummy/DummyData";
 import { editBus } from "../../buses/editBus";
 import { PLUGIN_COLORS } from "./constants/index";
 import { createOgcApi } from "./api/ogc";
@@ -42,8 +41,8 @@ function AttributeEditor(props) {
       app: props.app,
       map: props.map,
       ogc,
-      initialFeatures: props.options?.initialFeatures ?? createDummyFeatures(),
-      fieldMeta: FIELD_META,
+      initialFeatures: [],
+      fieldMeta: [],
     });
   }
   const model = modelRef.current;
@@ -53,6 +52,156 @@ function AttributeEditor(props) {
     model.getSnapshot,
     model.getSnapshot
   );
+
+  const visibleIdsRef = React.useRef(new Set());
+  const selectedIdsRef = React.useRef(new Set());
+  const onlyFilteredRef = React.useRef(false);
+
+  const [serviceList, setServiceList] = React.useState([]);
+
+  const styles = React.useMemo(() => {
+    const baseStroke = new Stroke({ color: "#1976d2", width: 2 });
+    const baseFill = new Fill({ color: "rgba(25, 118, 210, 0.73)" });
+    return {
+      selected: new Style({
+        image: new CircleStyle({
+          radius: 7,
+          fill: new Fill({ color: "#ff9800" }),
+          stroke: new Stroke({ color: "#fff", width: 2 }),
+        }),
+        stroke: new Stroke({ color: "#ff9800", width: 3 }),
+        fill: new Fill({ color: "rgba(255,152,0,0.12)" }),
+        zIndex: 3,
+      }),
+      visible: new Style({
+        image: new CircleStyle({
+          radius: 6,
+          fill: baseFill,
+          stroke: new Stroke({ color: "#1024feff", width: 2 }),
+        }),
+        stroke: baseStroke,
+        fill: baseFill,
+        zIndex: 2,
+      }),
+      dimmed: new Style({
+        image: new CircleStyle({
+          radius: 5,
+          fill: new Fill({ color: "rgba(0,0,0,0.06)" }),
+        }),
+        stroke: new Stroke({ color: "rgba(0,0,0,0.25)", width: 1 }),
+        fill: new Fill({ color: "rgba(0,0,0,0.04)" }),
+        zIndex: 1,
+      }),
+    };
+  }, []);
+
+  const styleFn = React.useCallback(
+    (feature) => {
+      const id = feature.getId?.() ?? feature.get("id");
+      const selected = selectedIdsRef.current.has(id);
+      const visible = visibleIdsRef.current.has(id);
+
+      if (onlyFilteredRef.current && !visible && !selected) return null;
+      if (selected) return styles.selected;
+      if (visible) return styles.visible;
+      return styles.dimmed;
+    },
+    [styles]
+  );
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    async function loadCaptions() {
+      try {
+        // 1) Fetch the entire list at once (for fallback lookup)
+        const all = await ogc.fetchWfstList(
+          "id,caption,title,name,projection,layers"
+        );
+        const allArr = Array.isArray(all) ? all : (all?.layers ?? []);
+
+        // 2) For each active id: fetch metadata and create a robust object
+        const items = await Promise.all(
+          (props.options?.activeServices ?? []).map(async ({ id }) => {
+            try {
+              const meta = await ogc.getServiceMeta(id);
+              // coalesce: caption/title/name/label
+              const title =
+                meta?.caption?.trim() ||
+                meta?.title?.trim() ||
+                meta?.name?.trim() ||
+                // fallback: look up in the list if getServiceMeta didn't return anything
+                (
+                  allArr.find((x) => (x.id ?? x.uuid) === id)?.caption ?? ""
+                ).trim() ||
+                id;
+
+              return {
+                id,
+                title,
+                projection: meta?.projection,
+                layers: meta?.layers,
+              };
+            } catch {
+              // fallback: let's search in allArr
+              const m = allArr.find((x) => (x.id ?? x.uuid) === id);
+              return {
+                id,
+                title: m?.caption || m?.title || id,
+                projection: m?.projection,
+                layers: m?.layers,
+              };
+            }
+          })
+        );
+
+        if (!cancelled) setServiceList(items.filter(Boolean));
+      } catch (e) {
+        if (!cancelled) setServiceList([]);
+        console.warn("Kunde inte läsa captions:", e);
+      }
+    }
+
+    const active = props.options?.activeServices ?? [];
+    if (active.length) loadCaptions();
+    else setServiceList([]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ogc, props.options?.activeServices, setServiceList]);
+
+  React.useEffect(() => {
+    let alive = true;
+
+    (async () => {
+      const ids =
+        props.options?.activeServices?.map((x) => x.id).filter(Boolean) || [];
+
+      // fetch metadata per id (caption, possibly layers and projection)
+      const metas = await Promise.all(
+        ids.map(async (id) => {
+          try {
+            const m = await ogc.fetchWfstMeta(id); // see helper futher down
+            return {
+              id,
+              title: m?.caption || id,
+              projection: m?.projection,
+              layers: m?.layers || [],
+            };
+          } catch {
+            return { id, title: id };
+          }
+        })
+      );
+
+      if (alive) setServiceList(metas);
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [ogc, props.options?.activeServices]);
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", async (ev) => {
@@ -65,8 +214,11 @@ function AttributeEditor(props) {
         color: color ?? u.color,
       }));
 
+      model.dispatch({ type: Action.INIT, features: [] });
+      model.setFieldMetadata([]);
+
       try {
-        // 1) load features via model
+        // 1) load features from service via model
         const { featureCollection } = (await model.loadFromService?.(id)) || {};
 
         // 2) build/create vector layer in the map
@@ -102,7 +254,7 @@ function AttributeEditor(props) {
             fill: new Fill({ color: "rgba(25,118,210,0.1)" }),
           }),
         });
-
+        lyr.setStyle(styleFn);
         map.addLayer(lyr);
         vectorLayerRef.current = lyr;
 
@@ -141,10 +293,12 @@ function AttributeEditor(props) {
       offSel();
       offClr();
     };
-  }, [model, props.map, setPluginSettings]);
+  }, [model, props.map, setPluginSettings, styleFn]);
 
   const highlightFeatureById = React.useCallback(
     (fid) => {
+      const size = props.map.getSize() || [0, 0];
+
       const src = vectorLayerRef.current?.getSource?.();
       if (!src) return;
       let feat = src.getFeatureById(fid);
@@ -157,10 +311,17 @@ function AttributeEditor(props) {
       }
       if (!feat) return;
 
+      const top = 20,
+        bottom = 20,
+        left = 20;
+      // Make the sidebar "wide" so the object wraps around the image.
+      // 35–45% of the map width is a good breakpoint for desktop.
+      const right = Math.round(size[0] * 0.4);
+
       props.map.getView().fit(feat.getGeometry().getExtent(), {
-        maxZoom: 17,
+        maxZoom: 4,
         duration: 250,
-        padding: [20, 20, 20, 20],
+        padding: [top, right, bottom, left],
       });
     },
     [props.map]
@@ -257,6 +418,12 @@ function AttributeEditor(props) {
         ui={ui}
         setPluginSettings={setPluginSettings}
         fieldMeta={model.getFieldMetadata()}
+        vectorLayerRef={vectorLayerRef}
+        styleFn={styleFn}
+        visibleIdsRef={visibleIdsRef}
+        selectedIdsRef={selectedIdsRef}
+        onlyFilteredRef={onlyFilteredRef}
+        serviceList={serviceList}
       />
     </BaseWindowPlugin>
   );

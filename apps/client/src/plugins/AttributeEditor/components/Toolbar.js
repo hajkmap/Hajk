@@ -31,59 +31,26 @@ export default function Toolbar({
   tablePendingEdits,
   tablePendingDeletes,
   changedFields,
-  ogc,
+  serviceList, // [{ id, title }]
 }) {
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
   const pendingTargetRef = React.useRef(null);
-
   const [serviceId, setServiceId] = React.useState("NONE_ID");
-  const [services, setServices] = React.useState([
-    { id: "NONE_ID", label: "Ingen" },
-  ]);
 
-  React.useEffect(() => {
-    let alive = true;
+  // Build options: "None" + in command serviceList
+  const services = React.useMemo(() => {
+    const base = [{ id: "NONE_ID", label: "Ingen" }];
+    const fromProps = (serviceList || []).map((s) => ({
+      id: s.id,
+      label: s.title || s.id, // caption in dropdown
+      layers: s.layers,
+      projection: s.projection,
+    }));
+    return base.concat(fromProps);
+  }, [serviceList]);
 
-    (async () => {
-      try {
-        const listRaw = await ogc.fetchWfstList("id,caption");
-        if (!alive) return;
-
-        // Normalize API variables: {layers:[...]} to an array, others to a normal array
-        const list = Array.isArray(listRaw)
-          ? listRaw
-          : Array.isArray(listRaw?.layers)
-            ? listRaw.layers
-            : [];
-
-        const opts = [{ id: "NONE_ID", label: "Ingen" }].concat(
-          list
-            .map((s) => {
-              const id = s.id ?? s.uuid ?? s.wfstId ?? s.WFSTId ?? null;
-              return {
-                id,
-                label: s.caption || id || "Okänd",
-                layers: s.layers || [],
-                projection: s.projection,
-              };
-            })
-            .filter((o) => o.id)
-        );
-
-        setServices(opts);
-      } catch (e) {
-        console.warn("Kunde inte läsa WFST-lista:", e);
-        if (!alive) return;
-        setServices([{ id: "NONE_ID", label: "Ingen" }]);
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
-  }, [ogc]);
-
+  // Summarization for confirm dialog
   const summary = React.useMemo(
     () => ({
       adds: tablePendingAdds?.length ?? 0,
@@ -101,6 +68,7 @@ export default function Toolbar({
     ]
   );
 
+  // Set plugin title and color and emit value/clear
   const applyServiceSwitch = React.useCallback(
     (def, label) => {
       setPluginSettings(
@@ -108,19 +76,18 @@ export default function Toolbar({
           ? { title: "Attributredigerare", color: PLUGIN_COLORS.default }
           : { title: `Redigerar ${label}`, color: PLUGIN_COLORS.warning }
       );
-      if (label === "Ingen") {
+
+      if (!def || def.id === "NONE_ID") {
         editBus.emit("edit:service-cleared", { source: "toolbar" });
         setServiceId("NONE_ID");
       } else {
         editBus.emit("edit:service-selected", {
           source: "toolbar",
-          id: def?.id ?? "",
-          layerId: def?.layers?.[0]?.id ?? "",
-          projection: def?.projection,
+          id: def.id,
           title: `Redigerar ${label}`,
           color: PLUGIN_COLORS.warning,
         });
-        setServiceId(def?.id ?? "none");
+        setServiceId(def.id);
       }
     },
     [setPluginSettings]
@@ -130,7 +97,7 @@ export default function Toolbar({
     try {
       setSavingNow(true);
 
-      // reset the summary of pending changes
+      // Move edits to pending if needed
       if (dirty) {
         saveChanges({
           toPending: true,
@@ -138,16 +105,22 @@ export default function Toolbar({
         });
       }
 
-      // save all pending changes (table + form) – this prop is sync; Promise.resolve makes await work seamlessly
+      // Save all pending changes (table + form)
       await Promise.resolve(commitTableEdits());
     } finally {
       setSavingNow(false);
       setSaveDialogOpen(false);
-      pendingTargetRef.current = null;
+
+      // Perform save after confirmation dialog is resolved (i.e. saved or not saved)
+      if (pendingTargetRef.current) {
+        const { def, label } = pendingTargetRef.current;
+        pendingTargetRef.current = null;
+        applyServiceSwitch(def, label);
+      }
     }
   }
 
-  function handleOgcSourceChange(e) {
+  function handleServiceChange(e) {
     const nextId = e.target.value;
     const def = services.find((o) => o.id === nextId);
     const label = def?.label ?? "Ingen";
@@ -163,31 +136,15 @@ export default function Toolbar({
       applyServiceSwitch(def, label);
       return;
     }
-
     pendingTargetRef.current = { def, label };
     setSaveDialogOpen(true);
   }
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
-      const { id, title, source } = ev.detail || {};
+      const { id, source } = ev.detail || {};
       if (source === "toolbar") return;
-
-      // 1) directly provided id (robust)
-      if (id) {
-        setServiceId(id);
-        return;
-      }
-
-      // 2) fallback via title -> label-match against services-list
-      const raw =
-        typeof title === "string" && title.startsWith("Redigerar ")
-          ? title.replace(/^Redigerar\s+/, "")
-          : title;
-
-      if (!raw) return;
-      const found = services.find((o) => o.label === raw);
-      if (found) setServiceId(found.id);
+      if (id) setServiceId(id);
     });
 
     const offClr = editBus.on("edit:service-cleared", (ev) => {
@@ -200,16 +157,6 @@ export default function Toolbar({
       offSel();
       offClr();
     };
-  }, [services]);
-
-  React.useEffect(() => {
-    const off = editBus.on("edit:service-switch-requested", (ev) => {
-      // open ConfirmSaveDialog, save (emit "edit:saving-started"/"finished"),
-      // and after successful save: emit "edit:service-selected"/"cleared"
-      // (precisely set up earlier with pendingTargetRef)
-      setSaveDialogOpen(true);
-    });
-    return () => off();
   }, []);
 
   return (
@@ -239,14 +186,15 @@ export default function Toolbar({
 
       <select
         value={serviceId}
-        onChange={handleOgcSourceChange}
+        onChange={handleServiceChange}
         style={s.inputComb}
         aria-label="Välj redigeringstjänst"
         title="Välj redigeringstjänst"
       >
-        {services.map((o) => (
+        <option value="NONE_ID">Ingen</option>
+        {serviceList.map((o) => (
           <option key={o.id} value={o.id}>
-            {o.label}
+            {o.title}
           </option>
         ))}
       </select>
@@ -305,6 +253,7 @@ export default function Toolbar({
           )}
         </div>
       )}
+
       <ConfirmSaveDialog
         open={saveDialogOpen}
         onClose={() => setSaveDialogOpen(false)}

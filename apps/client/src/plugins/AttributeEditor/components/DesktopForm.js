@@ -54,6 +54,27 @@ export default function DesktopForm({
     setPendingCaret({ key, pos });
   }, []);
 
+  const prevMultilineRef = React.useRef({});
+
+  React.useEffect(() => {
+    if (!focusedFeature) return;
+
+    FIELD_META.forEach((meta) => {
+      const key = meta.key;
+      const val = editValues?.[key];
+      const nowMultiline =
+        meta.type === "textarea" || autoIsMultiline(val, meta);
+      const wasMultiline = !!prevMultilineRef.current[key];
+
+      // transition: input -> textarea
+      if (!wasMultiline && nowMultiline) {
+        const pos = String(val ?? "").length; // caret last
+        setPendingCaret({ key, pos });
+      }
+      prevMultilineRef.current[key] = nowMultiline;
+    });
+  }, [FIELD_META, editValues, focusedFeature]);
+
   const makeRowPreview = (row, FIELD_META) => {
     const keys = FIELD_META.map((m) => m.key);
     const contentKeys = keys.filter(

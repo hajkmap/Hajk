@@ -122,7 +122,7 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
   return multiline ? (
     <textarea
       {...common}
-      rows={3}
+      rows={8}
       ref={(el) => registerTextareaRef?.(fieldKey, el)}
     />
   ) : (

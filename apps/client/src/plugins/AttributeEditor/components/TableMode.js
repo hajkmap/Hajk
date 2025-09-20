@@ -47,9 +47,9 @@ export default function TableMode(props) {
     tablePendingEdits,
     setTablePendingEdits,
     setTablePendingAdds,
+    isEditableField,
 
     // helpers
-    //isEditableField,
     isMissingValue,
     handleRowClick,
     openInFormFromTable,
@@ -59,11 +59,97 @@ export default function TableMode(props) {
     filterOverlayRef,
   } = props;
 
+  const DEFAULT_WRAP_CH = 40;
+
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState(null);
+  const caretStoreRef = React.useRef(new Map());
+
+  const MIN_W = 80; // px
+  const MAX_W = 720; // px
+
+  const [colWidths, setColWidths] = React.useState(() => {
+    // read from localStorage
+    try {
+      const raw = localStorage.getItem("ae_colwidths");
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  React.useEffect(() => {
+    // save each change
+    try {
+      localStorage.setItem("ae_colwidths", JSON.stringify(colWidths));
+    } catch {}
+  }, [colWidths]);
+
+  const resizingRef = React.useRef(null); // { key, startX, startW }
+
+  React.useEffect(() => {
+    function onMove(e) {
+      const r = resizingRef.current;
+      if (!r) return;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const dx = clientX - r.startX;
+      const next = Math.max(MIN_W, Math.min(MAX_W, r.startW + dx));
+      setColWidths((prev) => ({ ...prev, [r.key]: next }));
+    }
+    function onUp() {
+      resizingRef.current = null;
+    }
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, []);
+
+  const renderCellText = (text, wrapCh) => {
+    const s = String(text ?? "");
+    const hasNl = /\n/.test(s);
+
+    // Use pre-wrap to show \n as real line breaks.
+    if (hasNl || wrapCh) {
+      return (
+        <div
+          style={{
+            display: "block",
+            whiteSpace: "pre-wrap",
+            overflowWrap: "anywhere",
+            wordBreak: "break-word",
+            ...(wrapCh ? { maxWidth: `${wrapCh}ch` } : null),
+          }}
+        >
+          {s}
+        </div>
+      );
+    }
+    return s;
+  };
+
+  const shouldUseTextarea = (meta, val) => {
+    const s = String(val ?? "");
+    const wrap =
+      meta.wrapCh ??
+      (meta.type === "textarea" ? DEFAULT_WRAP_CH : DEFAULT_WRAP_CH);
+    return (
+      meta.type === "textarea" ||
+      /\n/.test(s) ||
+      (wrap != null && s.length >= wrap)
+    );
+  };
 
   function ColumnFilter({ columnKey, placement }) {
+    const [q, setQ] = React.useState("");
     const uniqueValues = getUniqueColumnValues(columnKey);
     const selectedValues = columnFilters[columnKey] || [];
 
@@ -74,6 +160,33 @@ export default function TableMode(props) {
           ? { right: 0, left: "auto", transform: "none" }
           : { left: "50%", right: "auto", transform: "translateX(-50%)" };
 
+    const query = q.trim().toLowerCase();
+    const filtered = query
+      ? uniqueValues.filter((v) =>
+          String(v ?? "")
+            .toLowerCase()
+            .includes(query)
+        )
+      : uniqueValues;
+
+    // Initialize list initially, with "Show all" if it's long
+    const [showAll, setShowAll] = React.useState(false);
+    const MAX_SHOWN = 200;
+    const list = showAll ? filtered : filtered.slice(0, MAX_SHOWN);
+
+    const selectFiltered = () => {
+      setColumnFilters((prev) => ({
+        ...prev,
+        [columnKey]: filtered,
+      }));
+    };
+
+    const clearFilter = () => {
+      setColumnFilters((prev) => ({ ...prev, [columnKey]: [] }));
+      setQ("");
+      setShowAll(false);
+    };
+
     return (
       <div
         ref={(el) => {
@@ -81,48 +194,63 @@ export default function TableMode(props) {
         }}
         style={{ ...s.filterOverlay, ...anchorStyle }}
       >
+        {/* Search */}
+        <input
+          style={s.filterSearch}
+          placeholder="Sök i värden…"
+          value={q}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setShowAll(false);
+          }}
+          aria-label="Sök i filtervärden"
+        />
+
         <div style={s.filterOverlayButtons}>
-          <button
-            style={s.btnSmall}
-            onClick={() =>
-              setColumnFilters((prev) => ({ ...prev, [columnKey]: [] }))
-            }
-          >
+          <button style={s.btnSmall} onClick={clearFilter}>
             Rensa
           </button>
-          <button
-            style={s.btnSmall}
-            onClick={() =>
-              setColumnFilters((prev) => ({
-                ...prev,
-                [columnKey]: uniqueValues,
-              }))
-            }
-          >
-            Välj alla
+          <button style={s.btnSmall} onClick={selectFiltered}>
+            Välj filtrerade ({filtered.length})
           </button>
+          {filtered.length > MAX_SHOWN && !showAll && (
+            <button style={s.btnSmall} onClick={() => setShowAll(true)}>
+              Visa alla ({filtered.length})
+            </button>
+          )}
         </div>
 
-        {uniqueValues.map((value) => (
-          <label key={value} style={s.filterCheckbox}>
-            <input
-              type="checkbox"
-              checked={selectedValues.includes(value)}
-              onChange={(e) => {
-                setColumnFilters((prev) => {
-                  const current = prev[columnKey] || [];
-                  return e.target.checked
-                    ? { ...prev, [columnKey]: [...current, value] }
-                    : {
-                        ...prev,
-                        [columnKey]: current.filter((v) => v !== value),
-                      };
-                });
-              }}
-            />
-            {value}
-          </label>
-        ))}
+        {/* Values with ellipsis – long strings are shortened visually but still available in the title */}
+        <div style={s.filterListScroll}>
+          {list.map((value) => {
+            const str = String(value ?? "");
+            const checked = selectedValues.includes(value);
+            return (
+              <label key={str} style={s.filterCheckbox} title={str}>
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={(e) => {
+                    setColumnFilters((prev) => {
+                      const current = prev[columnKey] || [];
+                      return e.target.checked
+                        ? { ...prev, [columnKey]: [...current, value] }
+                        : {
+                            ...prev,
+                            [columnKey]: current.filter((v) => v !== value),
+                          };
+                    });
+                  }}
+                />
+                <span style={s.filterCheckboxText}>{str}</span>
+              </label>
+            );
+          })}
+
+          {filtered.length === 0 && (
+            <div style={s.listEmpty}>Inga träffar.</div>
+          )}
+        </div>
       </div>
     );
   }
@@ -253,6 +381,17 @@ export default function TableMode(props) {
       <div style={s.tableViewport}>
         <div style={s.tableInner}>
           <table style={s.table}>
+            <colgroup>
+              {FIELD_META.map((meta) => (
+                <col
+                  key={meta.key}
+                  style={{
+                    width:
+                      (colWidths[meta.key] ?? meta.initialWidth ?? 220) + "px",
+                  }}
+                />
+              ))}
+            </colgroup>
             <thead>
               <tr>
                 {FIELD_META.map((f, index) => {
@@ -271,7 +410,10 @@ export default function TableMode(props) {
                   return (
                     <th
                       key={f.key}
-                      style={s.th}
+                      style={{
+                        ...s.th,
+                        ...(f.wrapCh ? s.thWidth(f.wrapCh) : null),
+                      }}
                       ref={isFirstColumn ? firstColumnRef : null}
                     >
                       <div style={s.thContent}>
@@ -337,6 +479,33 @@ export default function TableMode(props) {
 
                         <div style={s.spacer} />
                       </div>
+                      <div
+                        style={s.thResizer}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          const w =
+                            colWidths[f.key] ??
+                            (e.currentTarget.parentElement?.offsetWidth || 220);
+                          resizingRef.current = {
+                            key: f.key,
+                            startX: e.clientX,
+                            startW: w,
+                          };
+                        }}
+                        onTouchStart={(e) => {
+                          const t = e.touches[0];
+                          const w =
+                            colWidths[f.key] ??
+                            (e.currentTarget.parentElement?.offsetWidth || 220);
+                          resizingRef.current = {
+                            key: f.key,
+                            startX: t.clientX,
+                            startW: w,
+                          };
+                        }}
+                        title="Dra för att ändra kolumnbredd"
+                        aria-label={`Ändra bredd för kolumn ${f.label}`}
+                      />
                     </th>
                   );
                 })}
@@ -408,12 +577,6 @@ export default function TableMode(props) {
                       };
 
                       const applyChange = (newVal) => {
-                        console.log(
-                          "applyChange called with:",
-                          newVal,
-                          "row.id:",
-                          row.id
-                        ); // Debug log
                         if (row.__pending) {
                           setTablePendingAdds((prev) =>
                             prev.map((d) =>
@@ -422,7 +585,6 @@ export default function TableMode(props) {
                           );
                         } else {
                           setTablePendingEdits((prev) => {
-                            console.log("Current pending edits:", prev); // Debug log
                             const next = { ...prev };
                             const current = next[row.id]
                               ? { ...next[row.id] }
@@ -430,23 +592,21 @@ export default function TableMode(props) {
                             const original = features.find(
                               (f) => f.id === row.id
                             )?.[meta.key];
-
-                            if ((newVal ?? "") === (original ?? ""))
+                            if ((newVal ?? "") === (original ?? "")) {
                               delete current[meta.key];
-                            else current[meta.key] = newVal;
-
+                            } else {
+                              current[meta.key] = newVal;
+                            }
                             if (Object.keys(current).length)
                               next[row.id] = current;
                             else delete next[row.id];
-
-                            console.log("New pending edits:", next); // Debug log
                             return next;
                           });
                         }
                       };
 
                       const finishEdit = () => {
-                        const ed = tableEditing;
+                        const ed = tableEditing; // { id, key, startValue }
                         setTableEditing(null);
                         if (!ed || ed.id !== row.id || ed.key !== meta.key)
                           return;
@@ -497,9 +657,11 @@ export default function TableMode(props) {
                               (f) => f.id === row.id
                             )?.[meta.key];
                             const revertTo = ed.startValue;
-                            if ((revertTo ?? "") === (original ?? ""))
+                            if ((revertTo ?? "") === (original ?? "")) {
                               delete current[meta.key];
-                            else current[meta.key] = revertTo;
+                            } else {
+                              current[meta.key] = revertTo;
+                            }
                             if (Object.keys(current).length)
                               next[row.id] = current;
                             else delete next[row.id];
@@ -510,71 +672,109 @@ export default function TableMode(props) {
                       };
 
                       const isDeletedRow = row.__pending === "delete";
+                      const wrapCh = meta.wrapCh ?? DEFAULT_WRAP_CH;
+                      const editingValue = effectiveValue ?? "";
+                      const useTextarea = shouldUseTextarea(meta, editingValue);
+                      const hasNl = /\n/.test(String(effectiveValue ?? ""));
+                      const cellKey = `${row.id}::${meta.key}`;
+                      const flowStyle = wrapCh
+                        ? s.tdWrap(wrapCh) // wrap to N ch if provided
+                        : hasNl
+                          ? {
+                              // show newlines even without wrapCh
+                              whiteSpace: "pre-wrap",
+                              overflowWrap: "anywhere",
+                              wordBreak: "break-word",
+                              verticalAlign: "top",
+                            }
+                          : s.tdNowrap;
+
+                      let editorNode = null;
 
                       const editorProps = {
+                        className: undefined,
                         style: s.cellInput,
                         value: effectiveValue ?? "",
                         autoFocus: true,
+                        ref: (el) => {
+                          editorNode = el;
+                          if (!el) return;
+                          const savedPos = caretStoreRef.current.get(cellKey);
+                          if (savedPos != null) {
+                            try {
+                              el.focus();
+                              el.selectionStart = el.selectionEnd = savedPos;
+                            } catch {}
+                            caretStoreRef.current.delete(cellKey);
+                          }
+                        },
+
+                        onChange: (e) => {
+                          const val = e.target.value;
+
+                          // Will we switch from input -> textarea on the next render?
+                          const willSwap =
+                            !useTextarea && shouldUseTextarea(meta, val);
+
+                          if (willSwap) {
+                            const pos = e.target.selectionEnd ?? val.length;
+                            caretStoreRef.current.set(cellKey, pos);
+                          }
+
+                          applyChange(val);
+                        },
+
+                        onClick: (e) => e.stopPropagation(),
+                        onDoubleClick: (e) => e.stopPropagation(),
 
                         onKeyDown: (e) => {
-                          console.log("Key pressed:", e.key); // Debug log
                           e.stopPropagation();
                           if (e.key === "Escape") {
                             e.preventDefault();
                             cancelEdit();
                             return;
                           }
-                          if (e.key === "Enter") {
-                            if (e.altKey) {
-                              e.preventDefault();
-                              const el = e.currentTarget;
-                              const start =
-                                el.selectionStart ?? el.value?.length ?? 0;
-                              const end =
-                                el.selectionEnd ?? el.value?.length ?? 0;
-                              const next =
-                                (el.value ?? "").slice(0, start) +
-                                "\n" +
-                                (el.value ?? "").slice(end);
-                              applyChange(next);
-                              requestAnimationFrame(() => {
-                                try {
-                                  el.focus();
-                                  el.selectionStart = el.selectionEnd =
-                                    start + 1;
-                                } catch {}
-                              });
-                              return;
-                            }
+                          if (e.key !== "Enter") return;
+
+                          if (e.altKey) {
                             e.preventDefault();
-                            finishEdit();
+                            const el = e.currentTarget;
+                            const start =
+                              el.selectionStart ?? el.value?.length ?? 0;
+                            const end =
+                              el.selectionEnd ?? el.value?.length ?? 0;
+                            const next =
+                              (el.value ?? "").slice(0, start) +
+                              "\n" +
+                              (el.value ?? "").slice(end);
+                            caretStoreRef.current.set(cellKey, start + 1);
+                            applyChange(next);
+                            requestAnimationFrame(() => {
+                              try {
+                                (editorNode ?? el).focus();
+                                (editorNode ?? el).selectionStart = (
+                                  editorNode ?? el
+                                ).selectionEnd = start + 1;
+                              } catch {}
+                            });
+                            return;
                           }
+
+                          e.preventDefault();
+                          finishEdit();
                         },
 
-                        onChange: (e) => {
-                          console.log(
-                            "onChange triggered with value:",
-                            e.target.value
-                          ); // Debug log
-                          applyChange(e.target.value);
-                        },
-
-                        onClick: (e) => e.stopPropagation(),
-                        onDoubleClick: (e) => e.stopPropagation(),
                         onBlur: finishEdit,
                       };
-
-                      const wrapCh =
-                        meta.wrapCh ?? (meta.type === "textarea" ? 40 : null);
-                      const flowStyle = wrapCh ? s.tdWrap(wrapCh) : s.tdNowrap;
 
                       return (
                         <td
                           key={meta.key}
-                          data-editable={String(editable)}
+                          data-editable={String(isEditableField(meta))}
                           style={{
                             ...tdBase,
                             ...(isDeletedRow ? s.tdStrike : null),
+                            ...(meta.wrapCh ? s.tdWidth(meta.wrapCh) : null),
                             ...flowStyle,
                           }}
                           onDoubleClick={(e) => {
@@ -601,24 +801,20 @@ export default function TableMode(props) {
                               <input
                                 {...editorProps}
                                 type="date"
-                                value={String(effectiveValue ?? "").slice(
-                                  0,
-                                  10
-                                )}
+                                value={String(editingValue).slice(0, 10)}
                                 onChange={(e) =>
                                   applyChange(e.target.value || null)
                                 }
                               />
-                            ) : /\n/.test(String(effectiveValue ?? "")) ||
-                              meta.type === "textarea" ? (
-                              <textarea {...editorProps} rows={4} />
+                            ) : useTextarea ? (
+                              <textarea {...editorProps} rows={8} />
                             ) : (
                               <input {...editorProps} type="text" />
                             )
                           ) : isPlaceholder ? (
                             "#saknas"
                           ) : (
-                            String(effectiveValue ?? "")
+                            renderCellText(String(effectiveValue ?? ""), wrapCh)
                           )}
                         </td>
                       );

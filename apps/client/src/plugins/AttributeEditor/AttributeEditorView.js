@@ -6,7 +6,6 @@ import React, {
   useRef,
 } from "react";
 
-//import { FIELD_META } from "./dummy/DummyData";
 import { themes, makeStyles } from "./theme/Styles";
 import {
   isEditableField,
@@ -28,6 +27,11 @@ export default function AttributeEditorView({
   setPluginSettings,
   ogc,
   fieldMeta,
+  vectorLayerRef,
+  styleFn,
+  visibleIdsRef,
+  selectedIdsRef,
+  serviceList,
 }) {
   const [serviceId, setServiceId] = React.useState("NONE_ID");
   const [tableEditing, setTableEditing] = useState(null); // { id, key, startValue } | null
@@ -69,6 +73,13 @@ export default function AttributeEditorView({
     },
     []
   );
+
+  React.useEffect(() => {
+    const lyr = vectorLayerRef?.current;
+    if (!lyr) return;
+    lyr.setStyle(styleFn);
+    lyr.changed(); // refresh symbols immediately
+  }, [vectorLayerRef, styleFn]);
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
@@ -135,9 +146,11 @@ export default function AttributeEditorView({
       const next =
         typeof updaterOrObj === "function" ? updaterOrObj(prev) : updaterOrObj;
 
+      // -1, 42 -> number; otherwise string
+      const parseId = (k) => (/^-?\d+$/.test(k) ? Number(k) : k);
       const ids = new Set([
-        ...Object.keys(prev).map(Number),
-        ...Object.keys(next).map(Number),
+        ...Object.keys(prev).map(parseId),
+        ...Object.keys(next).map(parseId),
       ]);
 
       const ops = [];
@@ -355,6 +368,52 @@ export default function AttributeEditorView({
     return rows;
   }, [allRows, tableSearch, sort, columnFilters]);
 
+  React.useEffect(() => {
+    // always: which rows are visible (for dim/visibility-end-filtered)
+    visibleIdsRef.current = new Set(filteredAndSorted.map((r) => r.id));
+
+    // trigger a re-render when the dependent values change
+    const tableSel = Array.from(tableSelectedIds);
+    const formSel = Array.from(selectedIds);
+
+    const activeSelected =
+      ui.mode === "table"
+        ? tableSel
+        : focusedId != null
+          ? [...new Set([...formSel, focusedId])]
+          : formSel;
+
+    selectedIdsRef.current = new Set(activeSelected);
+
+    vectorLayerRef?.current?.changed?.();
+  }, [
+    filteredAndSorted,
+    tableSelectedIds,
+    selectedIds,
+    focusedId,
+    ui.mode,
+    vectorLayerRef,
+    selectedIdsRef,
+    visibleIdsRef,
+  ]);
+
+  React.useEffect(() => {
+    if (ui.mode !== "table") return;
+    if (tableSelectedIds.size === 1) {
+      const id = Array.from(tableSelectedIds)[0];
+      editBus.emit("attrib:focus-id", { id });
+    }
+  }, [ui.mode, tableSelectedIds]);
+
+  React.useEffect(() => {
+    if (ui.mode === "form") {
+      setTableSelectedIds(new Set());
+    } else if (ui.mode === "table") {
+      setSelectedIds(new Set());
+      setFocusedId(null);
+    }
+  }, [ui.mode]);
+
   const getUniqueColumnValues = useCallback(
     (columnKey) => {
       const values = new Set();
@@ -466,10 +525,7 @@ export default function AttributeEditorView({
           ops.push({
             id,
             key,
-            value:
-              v === "" && (key === "ar_utbredning" || key === "ar_anteckning")
-                ? null
-                : v,
+            value: normalizeForCommit(key, v, FM),
           });
         });
       });
@@ -521,6 +577,14 @@ export default function AttributeEditorView({
     showNotification,
     FM,
   ]);
+
+  function normalizeForCommit(key, value, FM) {
+    if (value === "") {
+      const t = FM.find((m) => m.key === key)?.type;
+      if (t === "date" || t === "textarea") return null;
+    }
+    return value;
+  }
 
   const handleBeforeChangeFocus = useCallback(
     (targetId) => {
@@ -813,7 +877,6 @@ export default function AttributeEditorView({
     const idsToUpdate =
       (override && override.length ? override : null) ??
       (selectedIds.size ? Array.from(selectedIds) : [focusedFeature.id]);
-
     if (!idsToUpdate.length) return;
 
     const keys = FM.map((f) => f.key);
@@ -821,13 +884,7 @@ export default function AttributeEditorView({
     idsToUpdate.forEach((id) => {
       keys.forEach((k) => {
         if (!changedFields.has(k) && id !== focusedId) return;
-        let newVal = editValues[k];
-        if (
-          ["ar_utbredning", "ar_anteckning", "ar_datum"].includes(k) &&
-          newVal === ""
-        ) {
-          newVal = null;
-        }
+        const newVal = normalizeForCommit(k, editValues[k], FM);
         ops.push({ id, key: k, value: newVal });
       });
     });
@@ -915,6 +972,7 @@ export default function AttributeEditorView({
         tablePendingDeletes={pendingDeletes}
         changedFields={changedFields}
         ogc={ogc}
+        serviceList={serviceList}
       />
 
       {serviceId === "NONE_ID" ? (
