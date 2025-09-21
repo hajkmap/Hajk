@@ -21,14 +21,16 @@ export function createOgcApi(baseUrl) {
     },
 
     async getServiceMeta(id) {
-      const res = await fetch(`${baseUrl}/wfst/${id}`);
-      const j = await res.json();
+      const res = await fetch(`${baseUrl}/ogc/wfst/${id}`);
+      if (!res.ok) throw new Error(`Failed to fetch metadata (${res.status})`);
+      const layer = await res.json();
+
       return {
-        id: j.id ?? id,
-        caption: j.caption ?? j.Caption ?? j.title ?? j.name,
-        title: j.caption ?? j.Caption ?? j.title ?? j.name,
-        projection: j.projection ?? j.crs,
-        layers: j.layers ?? j.Layers ?? [],
+        id: layer.id,
+        caption: layer.caption,
+        title: layer.caption,
+        projection: layer.projection,
+        layers: layer.layers || [],
       };
     },
 

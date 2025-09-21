@@ -152,7 +152,7 @@ export default function MobileForm({
                   <div
                     key={f.id}
                     data-row-id={f.id}
-                    style={s.listRow(selected || isFocused, status, false)}
+                    style={s.listRow(selected, status, isFocused, false)}
                     onClick={(e) => onFormRowClick(f.id, idx, e)}
                   >
                     <div>

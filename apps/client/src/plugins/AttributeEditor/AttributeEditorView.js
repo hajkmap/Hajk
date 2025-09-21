@@ -51,8 +51,8 @@ export default function AttributeEditorView({
   const [formSearch, setFormSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [focusedId, setFocusedId] = useState(null);
-  const [lastFormIndex, setLastFormIndex] = useState(null);
   const lastEditTargetIdsRef = useRef(null);
+  const anchorRef = React.useRef({ id: null, index: null });
 
   const [columnFilters, setColumnFilters] = useState({});
   const [openFilterColumn, setOpenFilterColumn] = useState(null);
@@ -730,6 +730,10 @@ export default function AttributeEditorView({
     return filtered;
   }, [features, pendingEdits, pendingAdds, pendingDeletes, formSearch, FM]);
 
+  React.useEffect(() => {
+    anchorRef.current = { id: null, index: null };
+  }, [ui.mode, serviceId, visibleFormList]);
+
   const ensureFormSelection = React.useCallback(() => {
     if (ui.mode !== "form") return;
     const focusOk =
@@ -756,24 +760,74 @@ export default function AttributeEditorView({
 
   const onFormRowClick = useCallback(
     (rowId, rowIndex, evt) => {
-      handleBeforeChangeFocus(rowId);
+      const isShift = evt.shiftKey;
+      const isToggle = evt.metaKey || evt.ctrlKey || evt.altKey; // Alt = toggle only
+
+      // Ensure valid rowIndex (in case it's missing):
+      let idx = rowIndex;
+      if (idx == null || idx < 0) {
+        idx = visibleFormList.findIndex((f) => f.id === rowId);
+      }
+
       setSelectedIds((prev) => {
         let next = new Set(prev);
-        const anchorIndex = lastFormIndex ?? rowIndex;
-        if (evt.shiftKey && anchorIndex !== -1) {
-          const [a, b] = [anchorIndex, rowIndex].sort((x, y) => x - y);
+
+        if (isShift) {
+          let anchorIdx = anchorRef.current.index;
+          if (anchorIdx == null || anchorIdx < 0) {
+            const focusIdx = visibleFormList.findIndex(
+              (f) => f.id === focusedId
+            );
+            anchorIdx = focusIdx >= 0 ? focusIdx : idx;
+          }
+
+          const [a, b] = [anchorIdx, idx].sort((x, y) => x - y);
           next = new Set();
           for (let i = a; i <= b; i++) next.add(visibleFormList[i].id);
-        } else if (evt.metaKey || evt.ctrlKey) {
+
+          // Don't change focus (keep the current one), but
+          // if the current focus is no longer valid and there is a value, jump to rowId:
+          const focusStillVisible = visibleFormList.some(
+            (f) => f.id === focusedId
+          );
+          if (!focusStillVisible && next.size) {
+            handleBeforeChangeFocus(rowId);
+          }
+        }
+
+        // ---- TOGGLE (Alt/Ctrl/Cmd) ------------------------------------
+        else if (isToggle) {
           next.has(rowId) ? next.delete(rowId) : next.add(rowId);
+
+          if (rowId === focusedId && !next.has(rowId) && next.size > 0) {
+            const vis = visibleFormList.map((f) => f.id);
+            let candidate = null;
+            for (let i = idx + 1; i < vis.length; i++)
+              if (next.has(vis[i])) {
+                candidate = vis[i];
+                break;
+              }
+            if (candidate == null)
+              for (let i = idx - 1; i >= 0; i--)
+                if (next.has(vis[i])) {
+                  candidate = vis[i];
+                  break;
+                }
+            if (candidate != null && candidate !== focusedId)
+              handleBeforeChangeFocus(candidate);
+          }
+          // Note: update the anchor index on toggle
         } else {
           next = new Set([rowId]);
+          if (focusedId !== rowId) handleBeforeChangeFocus(rowId);
+          // Update the anchor
+          anchorRef.current = { id: rowId, index: idx };
         }
-        setLastFormIndex(rowIndex);
+
         return next;
       });
     },
-    [visibleFormList, lastFormIndex, handleBeforeChangeFocus]
+    [visibleFormList, focusedId, handleBeforeChangeFocus]
   );
 
   function scrollToRow(id) {
@@ -829,21 +883,23 @@ export default function AttributeEditorView({
   function handleFieldChange(key, value) {
     const now = Date.now();
     setEditValues((prev) => ({ ...prev, [key]: value }));
-
     setChangedFields((prev) => {
       const next = new Set(prev);
       const baseValue = originalValues[key] ?? "";
-      if ((value ?? "") !== baseValue) next.add(key);
-      else next.delete(key);
+      (value ?? "") !== baseValue ? next.add(key) : next.delete(key);
       setDirty(next.size > 0);
       return next;
     });
 
-    const ids = selectedIds.size
-      ? Array.from(selectedIds)
-      : focusedId != null
-        ? [focusedId]
-        : [];
+    // IMPORTANT: targetval
+    let ids;
+    if (selectedIds.size > 1) {
+      ids = Array.from(selectedIds);
+    } else if (focusedId != null) {
+      ids = [focusedId];
+    } else {
+      ids = [];
+    }
     if (!ids.length) return;
 
     const snapshotsToPush = [];
@@ -874,9 +930,15 @@ export default function AttributeEditorView({
   function saveChanges(opts = {}) {
     if (!focusedFeature) return;
     const override = opts.targetIds;
+
     const idsToUpdate =
       (override && override.length ? override : null) ??
-      (selectedIds.size ? Array.from(selectedIds) : [focusedFeature.id]);
+      (selectedIds.size > 1
+        ? Array.from(selectedIds)
+        : focusedFeature
+          ? [focusedFeature.id]
+          : []);
+
     if (!idsToUpdate.length) return;
 
     const keys = FM.map((f) => f.key);
@@ -890,7 +952,6 @@ export default function AttributeEditorView({
     });
 
     if (ops.length) controller.batchEdit(ops);
-
     setChangedFields(new Set());
     setDirty(false);
     setFormUndoStack([]);

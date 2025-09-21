@@ -303,11 +303,12 @@ export function makeStyles(t, isMobile) {
     },
 
     list: { overflowY: "auto", overflowX: "hidden", flex: 1, minHeight: 0 },
-    // status: null | "add" | "delete"
-    listRow: (sel, status = null, hasLeading = true) => {
+
+    listRow: (sel, status = null, isFocused = false, hasLeading = true) => {
       const isAdd = status === "add";
       const isEdit = status === "edit";
       const isDelete = status === "delete";
+
       const baseBg = isDelete
         ? t.dangerBg
         : isAdd || isEdit
@@ -315,6 +316,7 @@ export function makeStyles(t, isMobile) {
           : sel
             ? t.rowSelected
             : "transparent";
+
       const statusShadow = isDelete
         ? `inset 4px 0 ${t.danger}`
         : isAdd || isEdit
@@ -322,6 +324,10 @@ export function makeStyles(t, isMobile) {
           : "none";
 
       const selectRing = sel ? `inset 0 0 0 2px ${t.primary}` : null;
+      const focusRing =
+        !sel && isFocused
+          ? `inset 0 0 0 2px ${t.focusRing || t.primaryMuted}`
+          : null;
 
       return {
         display: "grid",
@@ -336,10 +342,13 @@ export function makeStyles(t, isMobile) {
         cursor: "pointer",
         minWidth: 0,
         textDecoration: isDelete ? "line-through" : "none",
-        opacity: isDelete ? 0.9 : 1,
-        boxShadow: [statusShadow, selectRing].filter(Boolean).join(", "),
+        opacity: 1,
+        boxShadow: [statusShadow, selectRing, focusRing]
+          .filter(Boolean)
+          .join(", "),
       };
     },
+
     listRowText: {
       minWidth: 0,
     },
