@@ -14,6 +14,7 @@ import VectorLayer from "ol/layer/Vector";
 import { Style, Circle as CircleStyle, Fill, Stroke } from "ol/style";
 
 function AttributeEditor(props) {
+  console.log(props);
   const vectorLayerRef = React.useRef(null);
   const apiBase =
     props.app?.config?.appConfig?.mapserviceBase ??
@@ -56,7 +57,12 @@ function AttributeEditor(props) {
   const visibleIdsRef = React.useRef(new Set());
   const selectedIdsRef = React.useRef(new Set());
   const onlyFilteredRef = React.useRef(false);
+  const deletedIdsRef = React.useRef(new Set());
+  const featureIndexRef = React.useRef(new Map());
+  const graveyardRef = React.useRef(new Map());
+  const focusedIdRef = React.useRef(null);
 
+  const currentServiceIdRef = React.useRef("NONE_ID");
   const [serviceList, setServiceList] = React.useState([]);
 
   const styles = React.useMemo(() => {
@@ -98,9 +104,13 @@ function AttributeEditor(props) {
   const styleFn = React.useCallback(
     (feature) => {
       const id = feature.getId?.() ?? feature.get("id");
+
+      if (deletedIdsRef.current.has(id)) {
+        return styles.dimmed;
+      }
+
       const selected = selectedIdsRef.current.has(id);
       const visible = visibleIdsRef.current.has(id);
-
       if (onlyFilteredRef.current && !visible && !selected) return null;
       if (selected) return styles.selected;
       if (visible) return styles.visible;
@@ -208,6 +218,8 @@ function AttributeEditor(props) {
       const { title, color, source, id, projection } = ev.detail || {};
       if (source === "attrib") return;
 
+      currentServiceIdRef.current = id || "NONE_ID";
+
       setPluginSettings((u) => ({
         ...u,
         title: title ?? u.title,
@@ -274,6 +286,8 @@ function AttributeEditor(props) {
       const { source } = ev.detail || {};
       if (source === "attrib") return;
 
+      currentServiceIdRef.current = "NONE_ID";
+
       setPluginSettings((u) => ({
         ...u,
         title: DEFAULT_TITLE,
@@ -326,6 +340,253 @@ function AttributeEditor(props) {
     },
     [props.map]
   );
+  // Find Sketch layer
+  function getSketchLayer(map) {
+    const layers = map.getLayers().getArray?.() || [];
+    // Sketch layer name: "pluginSketch"
+    return layers.find((lyr) => lyr?.get?.("name") === "pluginSketch") || null;
+  }
+
+  React.useEffect(() => {
+    const map = props.map;
+    if (!map) return;
+
+    let unbindSrc = () => {};
+    let unbindLayerHook = () => {};
+
+    const wireToCurrentSketchLayer = () => {
+      try {
+        unbindSrc();
+      } catch {}
+      try {
+        unbindLayerHook();
+      } catch {}
+
+      const sketchLayer = getSketchLayer(map);
+      if (!sketchLayer) return;
+
+      const src = sketchLayer.getSource?.();
+      if (!src) return;
+
+      // If the layer changes later → rewire again
+      const onChangeSource = () => {
+        try {
+          unbindSrc();
+        } catch {}
+        wireToCurrentSketchLayer();
+      };
+      sketchLayer.on?.("change:source", onChangeSource);
+      unbindLayerHook = () => {
+        try {
+          sketchLayer.un?.("change:source", onChangeSource);
+        } catch {}
+      };
+
+      // --- handlers ---
+      const onAdd = (e) => {
+        const f = e.feature;
+        if (!f || f.get?.("USER_DRAWN") !== true) return;
+
+        if (
+          !currentServiceIdRef.current ||
+          currentServiceIdRef.current === "NONE_ID"
+        ) {
+          return;
+        }
+
+        // avoid duplicates
+        const existingId = f.getId?.() ?? f.get?.("id");
+        if (existingId != null && featureIndexRef.current.has(existingId))
+          return;
+
+        // create draft with negative id
+        const tempId = model.addDraftFromFeature(f);
+        f.setId?.(tempId);
+        try {
+          f.set?.("id", tempId, true);
+        } catch {}
+
+        featureIndexRef.current.set(tempId, f);
+        graveyardRef.current.delete(tempId);
+
+        selectedIdsRef.current = new Set([tempId]);
+        visibleIdsRef.current.add(tempId);
+
+        vectorLayerRef.current?.changed?.();
+        editBus.emit("attrib:focus-id", { id: tempId });
+      };
+
+      const onRemove = (e) => {
+        const f = e.feature;
+        if (!f) return;
+        // Find id
+        let fid = f.getId?.() ?? f.get?.("id");
+        if (fid == null) {
+          for (const [k, v] of featureIndexRef.current.entries()) {
+            if (v === f) {
+              fid = k;
+              break;
+            }
+          }
+          if (fid == null) return;
+        }
+
+        graveyardRef.current.set(fid, f);
+        featureIndexRef.current.delete(fid);
+
+        // Is this right - Test
+        selectedIdsRef.current.delete(fid);
+        visibleIdsRef.current.delete(fid);
+
+        if (typeof fid === "number" && fid < 0) {
+          model.dispatch({ type: Action.REMOVE_DRAFTS, ids: [fid] });
+        } else {
+          model.dispatch({
+            type: Action.SET_DELETE_STATE,
+            ids: [fid],
+            mode: "mark",
+          });
+        }
+
+        // reset focus if the deleted feature was focused
+        if (focusedIdRef?.current === fid) {
+          editBus.emit("attrib:focus-id", { id: null });
+        }
+
+        vectorLayerRef.current?.changed?.();
+      };
+
+      // bind
+      src.on("addfeature", onAdd);
+      src.on("removefeature", onRemove);
+
+      unbindSrc = () => {
+        try {
+          src.un("addfeature", onAdd);
+        } catch {}
+        try {
+          src.un("removefeature", onRemove);
+        } catch {}
+      };
+    };
+
+    // initial wiring
+    wireToCurrentSketchLayer();
+
+    // rewire when a layer is added or removed
+    const layers = map.getLayers();
+    const onLayerAdd = () => wireToCurrentSketchLayer();
+    const onLayerRemove = () => wireToCurrentSketchLayer();
+    layers.on("add", onLayerAdd);
+    layers.on("remove", onLayerRemove);
+
+    return () => {
+      try {
+        layers.un("add", onLayerAdd);
+      } catch {}
+      try {
+        layers.un("remove", onLayerRemove);
+      } catch {}
+      try {
+        unbindSrc();
+      } catch {}
+      try {
+        unbindLayerHook();
+      } catch {}
+    };
+  }, [props.map, model, vectorLayerRef]);
+
+  // --- BACK-SYNC: AttributeEditor -> Sketch layer -----------------------------
+  React.useEffect(() => {
+    // We need to keep track of the previous state to get the diff
+    // (pendingAdds = drafts with negative id, __pending: 'add'|'delete')
+    const prevRef = { current: null };
+    return model.subscribe(() => {
+      const prev = prevRef.current;
+      const next = model.getSnapshot();
+      prevRef.current = next;
+      if (!prev) return;
+
+      const sketchLayer = getSketchLayer(props.map);
+      const src = sketchLayer?.getSource?.();
+      if (!src) return;
+
+      // Helperr
+      const getDraftMap = (st) => new Map(st.pendingAdds.map((d) => [d.id, d]));
+      const prevDrafts = getDraftMap(prev);
+      const nextDrafts = getDraftMap(next);
+
+      // 1) Drafts that are removed completely (REMOVE_DRAFTS, or UNDO of an add)
+      //    -> remove feature from Sketch layer if it exists
+      for (const [id] of prevDrafts) {
+        if (!nextDrafts.has(id)) {
+          const f = featureIndexRef.current.get(id);
+          if (f) {
+            try {
+              src.removeFeature(f);
+            } catch {}
+            featureIndexRef.current.delete(id);
+            graveyardRef.current.set(id, f); // så att UNDO kan återställa
+          }
+        }
+      }
+
+      // 2) Drafts that are marked for deletion (toggle/mark) -> remove from the map
+      for (const [id, draftNext] of nextDrafts) {
+        const was = prevDrafts.get(id)?.__pending;
+        const now = draftNext.__pending;
+        if (was !== "delete" && now === "delete") {
+          const f = featureIndexRef.current.get(id);
+          if (f) {
+            try {
+              src.removeFeature(f);
+            } catch {}
+            featureIndexRef.current.delete(id);
+            graveyardRef.current.set(id, f);
+          }
+        }
+      }
+
+      // 3) Drafts that are unmarked for deletion (unmark/undo) -> put back in the map
+      for (const [id, draftNext] of nextDrafts) {
+        const was = prevDrafts.get(id)?.__pending;
+        const now = draftNext.__pending;
+        if (was === "delete" && now !== "delete") {
+          const f = graveyardRef.current.get(id);
+          if (f) {
+            try {
+              src.addFeature(f);
+            } catch {}
+            featureIndexRef.current.set(id, f);
+            graveyardRef.current.delete(id);
+          }
+        }
+      }
+
+      // 4) Commit: negative IDs disappear and become real features in the model.
+      //    We want to ensure that corresponding temporary (Sketch) features are removed from the map.
+      //    What we detect here is: all negative IDs that existed before but are not present now
+      //    (and are not in the next drafts) -> remove from the map.
+      const prevNegIds = prev.pendingAdds
+        .map((d) => d.id)
+        .filter((id) => id < 0);
+      const nextNegSet = new Set(
+        next.pendingAdds.map((d) => d.id).filter((id) => id < 0)
+      );
+      prevNegIds.forEach((id) => {
+        if (!nextNegSet.has(id)) {
+          const f = featureIndexRef.current.get(id);
+          if (f) {
+            try {
+              src.removeFeature(f);
+            } catch {}
+            featureIndexRef.current.delete(id);
+            // Vi lägger inte i graveyard här – commit är “final”.
+          }
+        }
+      });
+    });
+  }, [props.map, model]);
 
   React.useEffect(() => {
     const off = editBus.on("attrib:focus-id", (ev) => {
@@ -423,6 +684,7 @@ function AttributeEditor(props) {
         selectedIdsRef={selectedIdsRef}
         onlyFilteredRef={onlyFilteredRef}
         serviceList={serviceList}
+        props={props}
       />
     </BaseWindowPlugin>
   );

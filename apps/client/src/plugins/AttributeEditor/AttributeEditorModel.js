@@ -8,6 +8,8 @@ export const Action = {
   SET_DELETE_STATE: "SET_DELETE_STATE", // { ids, mode: 'toggle'|'mark'|'unmark' }
   COMMIT: "COMMIT",
   UNDO: "UNDO",
+  CREATE_DRAFTS: "CREATE_DRAFTS",
+  REMOVE_DRAFTS: "REMOVE_DRAFTS",
 };
 
 export const MAX_UNDO = 100;
@@ -123,6 +125,15 @@ const applyInverse = (state, op) => {
         ),
       };
     }
+    case "restore_drafts": {
+      const { drafts } = op.payload;
+      const minNeg = Math.min(...drafts.map((d) => d.id), state.nextTempId);
+      return {
+        ...state,
+        nextTempId: Math.min(state.nextTempId, minNeg),
+        pendingAdds: [...state.pendingAdds, ...drafts],
+      };
+    }
     default:
       return state;
   }
@@ -132,8 +143,60 @@ const reducer = (state, action) => {
   switch (action.type) {
     case Action.INIT: {
       const features = action.features || [];
-      const max = features.length ? Math.max(...features.map((f) => f.id)) : 0;
+      const numericIds = features
+        .map((f) => Number(f.id))
+        .filter((n) => Number.isFinite(n));
+      const max = numericIds.length ? Math.max(...numericIds) : 0;
       return { ...initialState, features, nextId: max + 1 };
+    }
+
+    case Action.CREATE_DRAFTS: {
+      const { rows = [] } = action;
+      if (!rows.length) return state;
+
+      let nextTempId = state.nextTempId; // startar på -1, -2, ...
+      const drafts = rows.map((r) => {
+        const id = nextTempId--;
+        return { ...r, id, __pending: "add" };
+      });
+
+      return pushUndo(
+        {
+          ...state,
+          pendingAdds: [...state.pendingAdds, ...drafts],
+          nextTempId,
+        },
+        `Create drafts (${drafts.length})`,
+        [
+          {
+            kind: "create_drafts",
+            payload: { createdIds: drafts.map((d) => d.id) },
+          },
+        ]
+      );
+    }
+
+    case Action.REMOVE_DRAFTS: {
+      const ids = new Set(action.ids || []);
+      if (!ids.size) return state;
+
+      const removed = state.pendingAdds.filter((d) => ids.has(d.id));
+      if (!removed.length) return state;
+
+      // ta bort från pendingAdds
+      const nextAdds = state.pendingAdds.filter((d) => !ids.has(d.id));
+
+      // undo: kunna ångra borttagningen genom att återskapa utkasten
+      return pushUndo(
+        { ...state, pendingAdds: nextAdds },
+        `Remove drafts (${removed.length})`,
+        [
+          {
+            kind: "restore_drafts",
+            payload: { drafts: removed },
+          },
+        ]
+      );
     }
 
     case Action.EDIT: {
@@ -360,9 +423,10 @@ export default class AttributeEditorModel {
     this.#fieldMeta = settings.fieldMeta || null;
     this._listeners = new Set();
     const initFeatures = settings.initialFeatures || [];
-    const max = initFeatures.length
-      ? Math.max(...initFeatures.map((f) => f.id))
-      : 0;
+    const numericInit = initFeatures
+      .map((f) => Number(f.id))
+      .filter((n) => Number.isFinite(n));
+    const max = numericInit.length ? Math.max(...numericInit) : 0;
 
     this._state = {
       ...initialState,
@@ -529,5 +593,33 @@ export default class AttributeEditorModel {
       this._state = next;
       this._emit();
     }
+  };
+
+  // Plocka ut attribut från en OL Feature (utan geometry)
+  _makeDraftFromFeature = (feature, fieldMeta = []) => {
+    const props = feature?.getProperties ? feature.getProperties() : {};
+    const { geometry, ...rest } = props;
+    const fmKeys = Array.isArray(fieldMeta) ? fieldMeta.map((m) => m.key) : [];
+
+    const row = {};
+    if (fmKeys.length) {
+      fmKeys.forEach((k) => {
+        if (k === "id") return; // id sätts i reducer
+        row[k] = rest[k] ?? null; // null → visas som tomt / “#saknas” för readOnly
+      });
+    } else {
+      Object.keys(rest).forEach((k) => {
+        if (k === "id") return;
+        row[k] = rest[k] ?? null;
+      });
+    }
+    return row;
+  };
+
+  addDraftFromFeature = (feature) => {
+    const draft = this._makeDraftFromFeature(feature, this.#fieldMeta);
+    this.dispatch({ type: Action.CREATE_DRAFTS, rows: [draft] });
+    // temp-id som just skapades = nextTempId + 1 (vi dekrementerade i reducern)
+    return this._state.nextTempId + 1; // negativt id: -1, -2, ...
   };
 }

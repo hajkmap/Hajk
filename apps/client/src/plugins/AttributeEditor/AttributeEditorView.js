@@ -32,6 +32,7 @@ export default function AttributeEditorView({
   visibleIdsRef,
   selectedIdsRef,
   serviceList,
+  props,
 }) {
   const [serviceId, setServiceId] = React.useState("NONE_ID");
   const [tableEditing, setTableEditing] = useState(null); // { id, key, startValue } | null
@@ -609,6 +610,8 @@ export default function AttributeEditorView({
   }, [focusedId, features, pendingAdds, pendingEdits]);
 
   useEffect(() => {
+    if (dirty) return;
+
     if (!focusedId) {
       setEditValues({});
       setOriginalValues({});
@@ -648,7 +651,7 @@ export default function AttributeEditorView({
     });
     setChangedFields(changed);
     setDirty(false);
-  }, [focusedId, features, pendingAdds, pendingEdits, FM]);
+  }, [focusedId, features, pendingAdds, pendingEdits, dirty, FM]);
 
   useEffect(() => {
     if (!focusedId || dirty) return;
