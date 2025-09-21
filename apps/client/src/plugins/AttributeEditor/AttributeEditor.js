@@ -581,12 +581,87 @@ function AttributeEditor(props) {
               src.removeFeature(f);
             } catch {}
             featureIndexRef.current.delete(id);
-            // Vi lägger inte i graveyard här – commit är “final”.
           }
         }
       });
     });
   }, [props.map, model]);
+
+  React.useEffect(() => {
+    const map = props.map;
+    if (!map) return;
+
+    const onClick = (evt) => {
+      const targetLayer = vectorLayerRef.current;
+      if (!targetLayer) return;
+
+      let hit = null;
+      map.forEachFeatureAtPixel(
+        evt.pixel,
+        (f, lyr) => {
+          if (lyr === targetLayer) {
+            hit = f;
+            return true;
+          }
+          return false;
+        },
+        {
+          layerFilter: (lyr) => lyr === targetLayer,
+          hitTolerance: 5,
+        }
+      );
+
+      if (!hit) {
+        selectedIdsRef.current = new Set();
+        vectorLayerRef.current?.changed?.();
+        editBus.emit("attrib:select-ids", {
+          ids: [],
+          source: "map",
+          mode: "clear",
+        });
+        return;
+      }
+
+      const fid = hit.getId?.() ?? hit.get?.("id");
+      if (fid == null) return;
+
+      const multi =
+        evt.originalEvent?.ctrlKey ||
+        evt.originalEvent?.metaKey ||
+        evt.originalEvent?.shiftKey;
+
+      if (multi) {
+        const next = new Set(selectedIdsRef.current);
+        next.has(fid) ? next.delete(fid) : next.add(fid);
+        selectedIdsRef.current = next;
+        vectorLayerRef.current?.changed?.();
+
+        editBus.emit("attrib:select-ids", {
+          ids: Array.from(next),
+          source: "map",
+          mode: "toggle",
+        });
+      } else {
+        selectedIdsRef.current = new Set([fid]);
+        vectorLayerRef.current?.changed?.();
+
+        editBus.emit("attrib:focus-id", { id: fid, source: "map" });
+
+        editBus.emit("attrib:select-ids", {
+          ids: [fid],
+          source: "map",
+          mode: "replace",
+        });
+      }
+    };
+
+    map.on("singleclick", onClick);
+    return () => {
+      try {
+        map.un("singleclick", onClick);
+      } catch {}
+    };
+  }, [props.map, vectorLayerRef, selectedIdsRef]);
 
   React.useEffect(() => {
     const off = editBus.on("attrib:focus-id", (ev) => {

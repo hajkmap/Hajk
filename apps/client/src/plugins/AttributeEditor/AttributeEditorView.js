@@ -97,6 +97,40 @@ export default function AttributeEditorView({
   }, []);
 
   React.useEffect(() => {
+    const offSelIds = editBus.on("attrib:select-ids", (ev) => {
+      const ids = ev?.detail?.ids ?? [];
+      const mode = ev?.detail?.mode;
+
+      if (ids.length === 0 || mode === "clear") {
+        setTableSelectedIds(new Set());
+        setSelectedIds(new Set());
+        setFocusedId(null);
+        return;
+      }
+
+      if (ui.mode === "table") {
+        setTableSelectedIds(new Set(ids));
+        const first = ids[0];
+        requestAnimationFrame(() => {
+          document
+            .querySelector(`[data-row-id="${first}"]`)
+            ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        });
+      } else {
+        setSelectedIds(new Set(ids));
+        setFocusedId(ids[0] ?? null);
+      }
+    });
+
+    return () => offSelIds();
+  }, [
+    ui.mode,
+    setTableSelectedIds,
+    setSelectedIds,
+    setFocusedId /*, controller*/,
+  ]);
+
+  React.useEffect(() => {
     if (serviceId !== "NONE_ID") return;
     setTableSelectedIds(new Set());
     setSelectedIds(new Set());
