@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LayerSwitcher: Don't show multiple legend graphics for a layer group if Admin specified one legend image. [issue](https://github.com/hajkmap/Hajk/issues/1644)
 - LayerSwitcher: Don't render Quick Access Presets if the functionality has been disabled in Admin. [PR](https://github.com/hajkmap/Hajk/pull/1693)
 - LayerSwitcher: Info for groups now shows the same button as info for regular layers and group layers. This solution is compatible with existing configurations. [PR](https://github.com/hajkmap/Hajk/pull/1699)
+- Infoclick: Fix bug where true/false values could be switched if certain conditions in the underlying database were met. [issue](https://github.com/hajkmap/Hajk/issues/1698)
+- Client: Show an Access Denied message if Backend returns 403. Closes [issue](https://github.com/hajkmap/Hajk/issues/1705)
 
 ### Security
 
