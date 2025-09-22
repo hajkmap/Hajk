@@ -32,6 +32,7 @@ const defaultState = {
   disableAutocomplete: false,
   disableSearchCombinations: false,
   searchBarPlaceholder: "Sök...",
+  excelColumnFilter: "",
   autocompleteWildcardAtStart: false,
   autofocusOnStart: false,
   enablePolygonSearch: true,
@@ -171,6 +172,9 @@ class ToolOptions extends Component {
           searchBarPlaceholder:
             tool.options.searchBarPlaceholder ||
             this.state.searchBarPlaceholder,
+          excelColumnFilter:
+            tool.options.excelColumnFilter ||
+            this.state.excelColumnFilter,
           enablePolygonSearch:
             tool.options.enablePolygonSearch ?? this.state.enablePolygonSearch,
           showCorrespondingWMSLayers:
@@ -386,6 +390,7 @@ class ToolOptions extends Component {
         disableAutocomplete: this.state.disableAutocomplete,
         disableSearchCombinations: this.state.disableSearchCombinations,
         searchBarPlaceholder: this.state.searchBarPlaceholder,
+        excelColumnFilter: this.state.excelColumnFilter,
         autocompleteWildcardAtStart: this.state.autocompleteWildcardAtStart,
         autofocusOnStart: this.state.autofocusOnStart,
         enablePolygonSearch: this.state.enablePolygonSearch,
@@ -983,6 +988,30 @@ class ToolOptions extends Component {
               onChangeComplete={(color) =>
                 this.handleColorChange("drawStrokeColor", color)
               }
+            />
+          </div>
+          
+          <div className="separator">
+            Exportinställningar
+          </div>
+          
+          <div>
+            <label >
+              Filtrera kolumner vid excel-export{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Kommaseparerad lista med kolumnnamn"
+              />
+            </label>
+            <input
+              id="excelColumnFilter"
+              value={this.state.excelColumnFilter}
+              type="text"
+              name="excelColumnFilter"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
             />
           </div>
 
