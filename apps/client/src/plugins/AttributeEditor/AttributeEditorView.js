@@ -32,8 +32,8 @@ export default function AttributeEditorView({
   visibleIdsRef,
   selectedIdsRef,
   serviceList,
-  props,
 }) {
+  const draftBaselineRef = React.useRef(new Map());
   const [serviceId, setServiceId] = React.useState("NONE_ID");
   const [tableEditing, setTableEditing] = useState(null); // { id, key, startValue } | null
 
@@ -98,37 +98,18 @@ export default function AttributeEditorView({
 
   React.useEffect(() => {
     const offSelIds = editBus.on("attrib:select-ids", (ev) => {
-      const ids = ev?.detail?.ids ?? [];
-      const mode = ev?.detail?.mode;
+      const { ids = [], source = "view" } = ev.detail || {};
 
-      if (ids.length === 0 || mode === "clear") {
-        setTableSelectedIds(new Set());
-        setSelectedIds(new Set());
-        setFocusedId(null);
-        return;
-      }
+      setTableSelectedIds(new Set(ids));
+      setSelectedIds(new Set(ids));
+      setFocusedId(ids[0] ?? null);
 
-      if (ui.mode === "table") {
-        setTableSelectedIds(new Set(ids));
-        const first = ids[0];
-        requestAnimationFrame(() => {
-          document
-            .querySelector(`[data-row-id="${first}"]`)
-            ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        });
-      } else {
-        setSelectedIds(new Set(ids));
-        setFocusedId(ids[0] ?? null);
+      if (ids.length && source !== "map") {
+        editBus.emit("attrib:focus-id", { id: ids[0], source });
       }
     });
-
     return () => offSelIds();
-  }, [
-    ui.mode,
-    setTableSelectedIds,
-    setSelectedIds,
-    setFocusedId /*, controller*/,
-  ]);
+  }, [setTableSelectedIds, setSelectedIds, setFocusedId]);
 
   React.useEffect(() => {
     if (serviceId !== "NONE_ID") return;
@@ -433,12 +414,36 @@ export default function AttributeEditorView({
   ]);
 
   React.useEffect(() => {
-    if (ui.mode !== "table") return;
-    if (tableSelectedIds.size === 1) {
-      const id = Array.from(tableSelectedIds)[0];
-      editBus.emit("attrib:focus-id", { id });
-    }
-  }, [ui.mode, tableSelectedIds]);
+    const offSelIds = editBus.on("attrib:select-ids", (ev) => {
+      const { ids = [], source = "view", mode } = ev.detail || {};
+
+      if (!ids.length || mode === "clear") {
+        setTableSelectedIds(new Set());
+        setSelectedIds(new Set());
+        setFocusedId(null);
+        return;
+      }
+
+      if (ui.mode === "table") {
+        setTableSelectedIds(new Set(ids));
+      } else {
+        setSelectedIds(new Set(ids));
+        setFocusedId(ids[0] ?? null);
+      }
+      editBus.emit("attrib:focus-id", { id: ids[0], source });
+    });
+
+    return () => offSelIds();
+  }, [ui.mode, setTableSelectedIds, setSelectedIds, setFocusedId]);
+
+  React.useEffect(() => {
+    const off = editBus.on("attrib:toggle-delete-ids", (ev) => {
+      const ids = ev?.detail?.ids || [];
+      if (!ids.length) return;
+      controller.toggleDelete(ids, "toggle");
+    });
+    return () => off();
+  }, [controller]);
 
   React.useEffect(() => {
     if (ui.mode === "form") {
@@ -471,23 +476,31 @@ export default function AttributeEditorView({
 
   const handleRowClick = useCallback(
     (rowId, rowIndex, evt) => {
-      setTableSelectedIds((prev) => {
-        const next = new Set(prev);
-        if (evt.shiftKey && lastTableIndex !== null) {
-          const [a, b] = [lastTableIndex, rowIndex].sort((x, y) => x - y);
-          for (let i = a; i <= b; i++) next.add(filteredAndSorted[i].id);
-        } else if (evt.metaKey || evt.ctrlKey) {
-          next.has(rowId) ? next.delete(rowId) : next.add(rowId);
-          setLastTableIndex(rowIndex);
-        } else {
-          next.clear();
-          next.add(rowId);
-          setLastTableIndex(rowIndex);
-        }
-        return next;
+      const isToggle = evt.metaKey || evt.ctrlKey;
+      const isRange = evt.shiftKey;
+
+      let next = new Set(tableSelectedIds);
+      let newLast = rowIndex;
+
+      if (isRange && lastTableIndex !== null) {
+        const [a, b] = [lastTableIndex, rowIndex].sort((x, y) => x - y);
+        next = new Set();
+        for (let i = a; i <= b; i++) next.add(filteredAndSorted[i].id);
+      } else if (isToggle) {
+        next.has(rowId) ? next.delete(rowId) : next.add(rowId);
+      } else {
+        next = new Set([rowId]);
+      }
+
+      setLastTableIndex(newLast);
+
+      editBus.emit("attrib:select-ids", {
+        ids: Array.from(next),
+        source: "view",
+        mode: isRange || isToggle ? "toggle" : "replace",
       });
     },
-    [filteredAndSorted, lastTableIndex]
+    [tableSelectedIds, lastTableIndex, filteredAndSorted]
   );
 
   // === Form ===
@@ -644,8 +657,6 @@ export default function AttributeEditorView({
   }, [focusedId, features, pendingAdds, pendingEdits]);
 
   useEffect(() => {
-    if (dirty) return;
-
     if (!focusedId) {
       setEditValues({});
       setOriginalValues({});
@@ -654,41 +665,37 @@ export default function AttributeEditorView({
       return;
     }
 
-    const feat =
-      focusedId < 0
-        ? pendingAdds.find((d) => d.id === focusedId)
-        : features.find((f) => f.id === focusedId);
-    if (!feat) return;
+    // Draft (negative id)
+    if (focusedId < 0) {
+      const draft = pendingAdds.find((d) => d.id === focusedId);
+      if (!draft) return;
 
-    const base = {};
-    const effective = {};
-    const patch = focusedId < 0 ? {} : pendingEdits[focusedId] || {};
+      // Set the baseline for the last saved state of this draft-id
+      let baseline = draftBaselineRef.current.get(focusedId);
+      if (!baseline) {
+        baseline = {};
+        FM.forEach(({ key }) => (baseline[key] = normalize(draft[key])));
+        draftBaselineRef.current.set(focusedId, baseline);
+        setOriginalValues(baseline); // locked baseline
+        setEditValues(baseline); // start = baseline
+        setChangedFields(new Set());
+        setDirty(false);
+      } else {
+        // We have a baseline: compare the current draft values with the last baseline
+        const effective = {};
+        FM.forEach(({ key }) => (effective[key] = normalize(draft[key])));
+        setEditValues(effective);
+        const changed = new Set();
+        FM.forEach(({ key }) => {
+          if ((effective[key] ?? "") !== (baseline[key] ?? ""))
+            changed.add(key);
+        });
+        setChangedFields(changed);
+        setDirty(changed.size > 0);
+      }
+      return;
+    }
 
-    FM.forEach(({ key }) => {
-      const baseVal = normalize(feat[key]);
-      base[key] = baseVal;
-      const effVal =
-        focusedId < 0
-          ? baseVal
-          : key in patch
-            ? normalize(patch[key])
-            : baseVal;
-      effective[key] = effVal;
-    });
-
-    setOriginalValues(base);
-    setEditValues(effective);
-
-    const changed = new Set();
-    FM.forEach(({ key }) => {
-      if ((effective[key] ?? "") !== (base[key] ?? "")) changed.add(key);
-    });
-    setChangedFields(changed);
-    setDirty(false);
-  }, [focusedId, features, pendingAdds, pendingEdits, dirty, FM]);
-
-  useEffect(() => {
-    if (!focusedId || dirty) return;
     const feat = features.find((f) => f.id === focusedId);
     if (!feat) return;
 
@@ -699,13 +706,7 @@ export default function AttributeEditorView({
     FM.forEach(({ key }) => {
       const baseVal = normalize(feat[key]);
       base[key] = baseVal;
-      const effVal =
-        focusedId < 0
-          ? baseVal
-          : key in patch
-            ? normalize(patch[key])
-            : baseVal;
-      effective[key] = effVal;
+      effective[key] = key in patch ? normalize(patch[key]) : baseVal;
     });
 
     setOriginalValues(base);
@@ -717,7 +718,34 @@ export default function AttributeEditorView({
     });
     setChangedFields(changed);
     setDirty(false);
-  }, [pendingEdits, features, focusedId, dirty, FM]);
+  }, [focusedId, FM, features, pendingEdits, pendingAdds]);
+
+  // EXTERNAL SYNCH FOR DRAFTS: when pendingAdds changes, immediately update editValues + changedFields (using originalValues)
+  useEffect(() => {
+    if (!focusedId || focusedId >= 0) return;
+    const draft = pendingAdds.find((d) => d.id === focusedId);
+    if (!draft) return;
+    const effective = {};
+    FM.forEach(({ key }) => (effective[key] = normalize(draft[key])));
+    setEditValues(effective);
+    const baseline = draftBaselineRef.current.get(focusedId) || originalValues;
+    const changed = new Set();
+    FM.forEach(({ key }) => {
+      if ((effective[key] ?? "") !== (baseline[key] ?? "")) changed.add(key);
+    });
+    setChangedFields(changed);
+    setDirty(changed.size > 0);
+  }, [pendingAdds, focusedId, FM, originalValues]);
+
+  // CLEAN UP: remove baseline when a draft is saved (commit/undo/remove etc.)
+  useEffect(() => {
+    const existingDraftIds = new Set(pendingAdds.map((d) => d.id));
+    for (const id of draftBaselineRef.current.keys()) {
+      if (id < 0 && !existingDraftIds.has(id)) {
+        draftBaselineRef.current.delete(id);
+      }
+    }
+  }, [pendingAdds]);
 
   function normalize(v) {
     return v == null ? "" : v;

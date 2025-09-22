@@ -18,6 +18,10 @@ import DrawModel from "../../models/DrawModel";
 import KmlModel from "../../models/KmlModel";
 import GpxModel from "../../models/GpxModel";
 
+// OL
+import Select from "ol/interaction/Select";
+import Translate from "ol/interaction/Translate";
+
 // Constants
 import {
   STORAGE_KEY,
@@ -155,6 +159,160 @@ const Sketch = (props) => {
       offClr();
     };
   }, []);
+
+  React.useEffect(() => {
+    const map = props.map;
+    if (!map) return;
+
+    const LAYER_NAME = "attributeeditor";
+    const reg = new Map();
+
+    const attachForLayer = (
+      layer,
+      allow = { select: true, translate: true }
+    ) => {
+      if (!layer || reg.has(layer)) return;
+      if (layer.get?.("name") !== LAYER_NAME) return;
+
+      // 1) Select for this layer only, without any style
+      const sel = new Select({
+        layers: (lyr) => lyr === layer,
+        style: null,
+        hitTolerance: 6,
+      });
+      // 2) Translate coupled to the Select's features
+      const tr = new Translate({ features: sel.getFeatures() });
+
+      map.addInteraction(sel);
+      map.addInteraction(tr);
+
+      // mark what gets activated
+      tr.__allowTranslate = !!allow.translate;
+
+      reg.set(layer, {
+        select: sel,
+        translate: tr,
+        cleanup: () => {
+          try {
+            map.removeInteraction(sel);
+          } catch {}
+          try {
+            map.removeInteraction(tr);
+          } catch {}
+        },
+      });
+
+      tr.on("translateend", (e) => {
+        const f = e.features.item(0);
+        const id = f?.getId?.() ?? f?.get?.("id");
+        if (id != null) {
+          editBus.emit("attrib:select-ids", {
+            ids: [id],
+            source: "map",
+            mode: "replace",
+          });
+          // editBus.emit("attrib:geometry-moved", { id, geometry: f.getGeometry() });
+        }
+      });
+      applyEnablement();
+    };
+
+    const applyEnablement = () => {
+      const inMove = activityId === "MOVE";
+      for (const { select, translate } of reg.values()) {
+        try {
+          select.setActive(true);
+        } catch {}
+        try {
+          translate.setActive(inMove && translate.__allowTranslate);
+        } catch {}
+      }
+    };
+
+    // 1) Listen to AE's attach event
+    const offAttach = editBus.on("sketch.attachExternalLayer", (ev) => {
+      const { layer, allow } = ev.detail || {};
+      attachForLayer(layer, allow);
+    });
+
+    // 2) Catch layers that already exist or are added later
+    const layers = map.getLayers();
+    try {
+      const arr = layers.getArray?.() || [];
+      arr.forEach((lyr) =>
+        attachForLayer(lyr, { select: true, translate: true })
+      );
+    } catch {}
+
+    const onAdd = (e) => {
+      const lyr = e.element || e.layer || e.target;
+      attachForLayer(lyr, { select: true, translate: true });
+    };
+    layers.on?.("add", onAdd);
+
+    applyEnablement();
+
+    const onDeleteClick = (evt) => {
+      if (activityId !== "DELETE") return;
+      if (evt.dragging) return;
+      if (evt.originalEvent?.button !== 0) return;
+
+      const map = props.map;
+      const targetLayer =
+        (map.getLayers().getArray?.() || []).find(
+          (l) => l.get?.("name") === LAYER_NAME
+        ) || null;
+      if (!targetLayer) return;
+
+      let hit = null;
+      map.forEachFeatureAtPixel(
+        evt.pixel,
+        (f, lyr) => {
+          if (lyr === targetLayer) {
+            hit = f;
+            return true;
+          }
+          return false;
+        },
+        { layerFilter: (lyr) => lyr === targetLayer, hitTolerance: 6 }
+      );
+
+      if (!hit) return;
+
+      const fid = hit.getId?.() ?? hit.get?.("id");
+      if (fid == null) return;
+
+      // Mark selected features in list and toggle delete state in AE module
+      editBus.emit("attrib:select-ids", {
+        ids: [fid],
+        source: "map",
+        mode: "replace",
+      });
+      editBus.emit("attrib:toggle-delete-ids", {
+        ids: [fid],
+        source: "map",
+      });
+
+      evt.preventDefault?.();
+      evt.stopPropagation?.();
+    };
+
+    props.map.on("singleclick", onDeleteClick);
+
+    return () => {
+      try {
+        offAttach();
+      } catch {}
+      try {
+        layers.un?.("add", onAdd);
+      } catch {}
+      for (const { cleanup } of reg.values()) cleanup();
+      try {
+        props.map.un("singleclick", onDeleteClick);
+      } catch {}
+      reg.clear();
+    };
+  }, [props.map, activityId]);
 
   // This functions handles events from the draw-model that are sent
   // when we are in edit-mode and the map is clicked. A feature might be sent

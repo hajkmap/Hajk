@@ -14,7 +14,6 @@ import VectorLayer from "ol/layer/Vector";
 import { Style, Circle as CircleStyle, Fill, Stroke } from "ol/style";
 
 function AttributeEditor(props) {
-  console.log(props);
   const vectorLayerRef = React.useRef(null);
   const apiBase =
     props.app?.config?.appConfig?.mapserviceBase ??
@@ -79,6 +78,16 @@ function AttributeEditor(props) {
         fill: new Fill({ color: "rgba(255,152,0,0.12)" }),
         zIndex: 3,
       }),
+      toDelete: new Style({
+        image: new CircleStyle({
+          radius: 7,
+          fill: new Fill({ color: "rgba(229,57,53,0.25)" }),
+          stroke: new Stroke({ color: "#e53935", width: 3 }),
+        }),
+        stroke: new Stroke({ color: "#e53935", width: 3 }),
+        fill: new Fill({ color: "rgba(229,57,53,0.12)" }),
+        zIndex: 5,
+      }),
       visible: new Style({
         image: new CircleStyle({
           radius: 6,
@@ -95,7 +104,7 @@ function AttributeEditor(props) {
           fill: new Fill({ color: "rgba(0,0,0,0.06)" }),
         }),
         stroke: new Stroke({ color: "rgba(0,0,0,0.25)", width: 1 }),
-        fill: new Fill({ color: "rgba(0,0,0,0.04)" }),
+        fill: new Fill({ color: "rgba(255, 5, 5, 0.04)" }),
         zIndex: 1,
       }),
     };
@@ -105,13 +114,11 @@ function AttributeEditor(props) {
     (feature) => {
       const id = feature.getId?.() ?? feature.get("id");
 
-      if (deletedIdsRef.current.has(id)) {
-        return styles.dimmed;
-      }
-
       const selected = selectedIdsRef.current.has(id);
       const visible = visibleIdsRef.current.has(id);
-      if (onlyFilteredRef.current && !visible && !selected) return null;
+
+      if (!visible && !selected) return null;
+      if (deletedIdsRef.current.has(id)) return styles.toDelete;
       if (selected) return styles.selected;
       if (visible) return styles.visible;
       return styles.dimmed;
@@ -267,6 +274,11 @@ function AttributeEditor(props) {
           }),
         });
         lyr.setStyle(styleFn);
+        lyr.set("name", "attributeeditor");
+        editBus.emit("sketch.attachExternalLayer", {
+          layer: lyr,
+          allow: { select: true, translate: true },
+        });
         map.addLayer(lyr);
         vectorLayerRef.current = lyr;
 
@@ -311,35 +323,52 @@ function AttributeEditor(props) {
 
   const highlightFeatureById = React.useCallback(
     (fid) => {
-      const size = props.map.getSize() || [0, 0];
+      const map = props.map;
+      const view = map.getView();
+      //const mapProj = view.getProjection();
 
       const src = vectorLayerRef.current?.getSource?.();
-      if (!src) return;
-      let feat = src.getFeatureById(fid);
-      if (!feat) {
-        // fallback: find via attribute if id does not match an OL feature
-        feat = src
-          .getFeatures()
-          .find((f) => f.get("id") === fid || f.get("ID") === fid);
-        if (feat && !feat.getId()) feat.setId(fid);
+
+      // 1) Try in AE layer
+      let feat = src?.getFeatureById?.(fid);
+      if (!feat && src) {
+        // fallback via attribute (if OL-id is not set)
+        feat = src.getFeatures?.().find((f) => {
+          const id = f.getId?.() ?? f.get?.("id");
+          return id === fid;
+        });
       }
+
+      // 2) If not found: fallback to Sketch index (created externally)
+      if (!feat) {
+        feat = featureIndexRef.current?.get?.(fid) || null;
+      }
+
       if (!feat) return;
 
-      const top = 20,
-        bottom = 20,
-        left = 20;
-      // Make the sidebar "wide" so the object wraps around the image.
-      // 35–45% of the map width is a good breakpoint for desktop.
-      const right = Math.round(size[0] * 0.4);
+      // Get the extent from the geometry – note that the geometry is in the map's projection (Sketch ritar in mapProj)
+      const geom = feat.getGeometry?.();
+      if (!geom) return;
 
-      props.map.getView().fit(feat.getGeometry().getExtent(), {
-        maxZoom: 4,
+      const extent = geom.getExtent?.();
+      if (!extent) return;
+
+      // Add padding to account for the sidebar (~40% of the width)
+      const size = map.getSize() || [0, 0];
+      const padTop = 20,
+        padBottom = 20,
+        padLeft = 20,
+        padRight = Math.round(size[0] * 0.4);
+
+      view.fit(extent, {
+        padding: [padTop, padRight, padBottom, padLeft],
         duration: 250,
-        padding: [top, right, bottom, left],
+        maxZoom: 4,
       });
     },
-    [props.map]
+    [props.map, vectorLayerRef, featureIndexRef]
   );
+
   // Find Sketch layer
   function getSketchLayer(map) {
     const layers = map.getLayers().getArray?.() || [];
@@ -413,7 +442,7 @@ function AttributeEditor(props) {
         visibleIdsRef.current.add(tempId);
 
         vectorLayerRef.current?.changed?.();
-        editBus.emit("attrib:focus-id", { id: tempId });
+        editBus.emit("attrib:focus-id", { id: tempId, source: "map" });
       };
 
       const onRemove = (e) => {
@@ -495,6 +524,16 @@ function AttributeEditor(props) {
       } catch {}
     };
   }, [props.map, model, vectorLayerRef]);
+
+  React.useEffect(() => {
+    return model.subscribe(() => {
+      const st = model.getSnapshot?.() || {};
+      const del =
+        st.pendingDeletes instanceof Set ? st.pendingDeletes : new Set();
+      deletedIdsRef.current = new Set(del);
+      vectorLayerRef.current?.changed?.();
+    });
+  }, [model, vectorLayerRef]);
 
   // --- BACK-SYNC: AttributeEditor -> Sketch layer -----------------------------
   React.useEffect(() => {
@@ -592,28 +631,31 @@ function AttributeEditor(props) {
     if (!map) return;
 
     const onClick = (evt) => {
-      const targetLayer = vectorLayerRef.current;
-      if (!targetLayer) return;
+      if (evt.dragging) return;
+      if (evt.originalEvent?.detail >= 2) return;
+      if (evt.originalEvent?.button !== 0) return;
+
+      const layer = vectorLayerRef.current;
+      if (!layer) return;
 
       let hit = null;
       map.forEachFeatureAtPixel(
         evt.pixel,
         (f, lyr) => {
-          if (lyr === targetLayer) {
+          if (lyr === layer) {
             hit = f;
             return true;
           }
           return false;
         },
-        {
-          layerFilter: (lyr) => lyr === targetLayer,
-          hitTolerance: 5,
-        }
+        { layerFilter: (lyr) => lyr === layer, hitTolerance: 3 }
       );
 
       if (!hit) {
-        selectedIdsRef.current = new Set();
-        vectorLayerRef.current?.changed?.();
+        if (selectedIdsRef.current.size) {
+          selectedIdsRef.current = new Set();
+          vectorLayerRef.current?.changed?.();
+        }
         editBus.emit("attrib:select-ids", {
           ids: [],
           source: "map",
@@ -629,24 +671,21 @@ function AttributeEditor(props) {
         evt.originalEvent?.ctrlKey ||
         evt.originalEvent?.metaKey ||
         evt.originalEvent?.shiftKey;
-
       if (multi) {
         const next = new Set(selectedIdsRef.current);
         next.has(fid) ? next.delete(fid) : next.add(fid);
         selectedIdsRef.current = next;
         vectorLayerRef.current?.changed?.();
-
         editBus.emit("attrib:select-ids", {
           ids: Array.from(next),
           source: "map",
           mode: "toggle",
         });
       } else {
+        const same =
+          selectedIdsRef.current.size === 1 && selectedIdsRef.current.has(fid);
         selectedIdsRef.current = new Set([fid]);
-        vectorLayerRef.current?.changed?.();
-
-        editBus.emit("attrib:focus-id", { id: fid, source: "map" });
-
+        if (!same) vectorLayerRef.current?.changed?.();
         editBus.emit("attrib:select-ids", {
           ids: [fid],
           source: "map",
@@ -666,7 +705,10 @@ function AttributeEditor(props) {
   React.useEffect(() => {
     const off = editBus.on("attrib:focus-id", (ev) => {
       const id = ev?.detail?.id;
-      if (id) highlightFeatureById(id);
+      const from = ev?.detail?.source;
+      if (!id) return;
+      if (from === "map") return;
+      highlightFeatureById(id);
     });
     return () => off();
   }, [highlightFeatureById]);
