@@ -32,6 +32,9 @@ export default function AttributeEditorView({
   visibleIdsRef,
   selectedIdsRef,
   serviceList,
+  featureIndexRef,
+  graveyardRef,
+  model,
 }) {
   const draftBaselineRef = React.useRef(new Map());
   const [serviceId, setServiceId] = React.useState("NONE_ID");
@@ -254,44 +257,6 @@ export default function AttributeEditorView({
     [controller]
   );
 
-  const duplicateSelectedRows = useCallback(() => {
-    if (!tableSelectedIds.size) return;
-    const ids = [...tableSelectedIds];
-    const start = state.nextTempId;
-    controller.duplicateRows(ids);
-    if (typeof start === "number") {
-      const created = ids.map((_, i) => start - i);
-      setTableSelectedIds(new Set(created));
-    }
-    showNotification(
-      `${ids.length} ${ids.length === 1 ? "utkast" : "utkast"} skapade`
-    );
-  }, [tableSelectedIds, controller, state.nextTempId, showNotification]);
-
-  const duplicateInForm = React.useCallback(() => {
-    const ids = selectedIds.size
-      ? Array.from(selectedIds)
-      : focusedId != null
-        ? [focusedId]
-        : [];
-
-    if (!ids.length) return;
-
-    const start = state.nextTempId;
-
-    controller.duplicateRows(ids);
-
-    if (typeof start === "number") {
-      const created = ids.map((_, i) => start - i);
-      setSelectedIds(new Set(created));
-      setFocusedId(created[0]);
-    }
-
-    showNotification(
-      `${ids.length} ${ids.length === 1 ? "utkast" : "utkast"} skapade`
-    );
-  }, [selectedIds, focusedId, controller, state.nextTempId, showNotification]);
-
   useEffect(() => {
     if (!openFilterColumn) return;
 
@@ -383,6 +348,96 @@ export default function AttributeEditorView({
 
     return rows;
   }, [allRows, tableSearch, sort, columnFilters]);
+
+  const cloneGeometryForDuplicates = React.useCallback(
+    (sourceIds, createdIds) => {
+      const layer = vectorLayerRef.current;
+      const src = layer?.getSource?.();
+      if (!src) return;
+
+      sourceIds.forEach((fromId, i) => {
+        let f =
+          src.getFeatureById?.(fromId) || featureIndexRef.current.get(fromId);
+        if (!f) return;
+
+        const clone = f.clone();
+
+        let toId = createdIds?.[i];
+        if (toId == null) {
+          toId = model.addDraftFromFeature(clone);
+        }
+
+        const exists =
+          featureIndexRef.current.has(toId) || !!src.getFeatureById?.(toId);
+        if (exists) return;
+
+        clone.setId?.(toId);
+        try {
+          clone.set?.("id", toId, true);
+        } catch {}
+
+        src.addFeature(clone);
+        featureIndexRef.current.set(toId, clone);
+        graveyardRef.current.delete(toId);
+      });
+
+      layer?.changed?.();
+    },
+    [vectorLayerRef, featureIndexRef, graveyardRef, model]
+  );
+
+  const duplicateSelectedRows = useCallback(() => {
+    if (!tableSelectedIds.size) return;
+    const ids = [...tableSelectedIds];
+    const start = state.nextTempId;
+    controller.duplicateRows(ids);
+    if (typeof start === "number") {
+      const created = ids.map((_, i) => start - i);
+      setTableSelectedIds(new Set(created));
+      cloneGeometryForDuplicates(ids, created);
+    }
+    showNotification(
+      `${ids.length} ${ids.length === 1 ? "utkast" : "utkast"} skapade`
+    );
+  }, [
+    tableSelectedIds,
+    controller,
+    state.nextTempId,
+    showNotification,
+    cloneGeometryForDuplicates,
+  ]);
+
+  const duplicateInForm = React.useCallback(() => {
+    const ids = selectedIds.size
+      ? Array.from(selectedIds)
+      : focusedId != null
+        ? [focusedId]
+        : [];
+
+    if (!ids.length) return;
+
+    const start = state.nextTempId;
+
+    controller.duplicateRows(ids);
+
+    if (typeof start === "number") {
+      const created = ids.map((_, i) => start - i);
+      setSelectedIds(new Set(created));
+      setFocusedId(created[0]);
+      cloneGeometryForDuplicates(ids, created);
+    }
+
+    showNotification(
+      `${ids.length} ${ids.length === 1 ? "utkast" : "utkast"} skapade`
+    );
+  }, [
+    selectedIds,
+    focusedId,
+    controller,
+    state.nextTempId,
+    showNotification,
+    cloneGeometryForDuplicates,
+  ]);
 
   React.useEffect(() => {
     // always: which rows are visible (for dim/visibility-end-filtered)

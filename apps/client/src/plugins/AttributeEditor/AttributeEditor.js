@@ -414,7 +414,12 @@ function AttributeEditor(props) {
       // --- handlers ---
       const onAdd = (e) => {
         const f = e.feature;
-        if (!f || f.get?.("USER_DRAWN") !== true) return;
+        if (!f) return;
+        const isUser =
+          f.get?.("USER_DRAWN") === true ||
+          f.get?.("DUPLICATED") === true ||
+          f.get?.("__ae_capture") === true;
+        if (!isUser) return;
 
         if (
           !currentServiceIdRef.current ||
@@ -423,10 +428,18 @@ function AttributeEditor(props) {
           return;
         }
 
-        // avoid duplicates
-        const existingId = f.getId?.() ?? f.get?.("id");
-        if (existingId != null && featureIndexRef.current.has(existingId))
-          return;
+        // If the feature comes in with an id that is already in use (e.g. -1 from the original dataset),
+        // reassign the id so we can give it a new temporary id in AE.
+        let incomingId = f.getId?.() ?? f.get?.("id");
+        if (incomingId != null && featureIndexRef.current.has(incomingId)) {
+          try {
+            f.setId?.(undefined);
+          } catch {}
+          try {
+            f.unset?.("id", true);
+          } catch {}
+          incomingId = undefined;
+        }
 
         // create draft with negative id
         const tempId = model.addDraftFromFeature(f);
@@ -801,7 +814,8 @@ function AttributeEditor(props) {
         selectedIdsRef={selectedIdsRef}
         onlyFilteredRef={onlyFilteredRef}
         serviceList={serviceList}
-        props={props}
+        featureIndexRef={featureIndexRef}
+        graveyardRef={graveyardRef}
       />
     </BaseWindowPlugin>
   );
