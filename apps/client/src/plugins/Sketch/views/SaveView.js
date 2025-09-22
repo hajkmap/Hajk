@@ -89,7 +89,7 @@ const SketchSaver = (props) => {
     // First we'll try to save the sketch to the local-storage. This method
     // will return an object stating if it could be saved or not.
     const { status, message } = props.model.addCurrentSketchToStorage({
-      title: props.sketchName,
+      title: props.sketchName.trim(),
     });
     // Then we'll update the state with the new sketches and clear the text-field.
     props.setSavedSketches(props.model.getSketchesFromStorage());
@@ -107,8 +107,11 @@ const SketchSaver = (props) => {
   const checkSketchName = () => {
     // This is the original code from "nameExists" that has been moved into this functio0n.
     // Checks if input name exists in saved sketches
+
+    const trimmedSketchName = props.sketchName.trim().toLowerCase();
+
     let exists = props.savedSketches.some(
-      (sketch) => sketch.title.toLowerCase() === props.sketchName.toLowerCase()
+      (sketch) => sketch.title.trim().toLowerCase() === trimmedSketchName
     );
 
     // If "exists" returns true we set replaceWarning to true along with a text warning.
@@ -116,11 +119,11 @@ const SketchSaver = (props) => {
     setReplaceWarning({
       ...replaceWarning,
       truncatedSketchName:
-        props.sketchName.length > 15
-          ? props.sketchName.substring(0, 15) + "..."
-          : props.sketchName,
+        trimmedSketchName.length > 15
+          ? trimmedSketchName.substring(0, 15) + "..."
+          : trimmedSketchName,
       text: exists
-        ? `Namnet upptaget. Ersätt arbetsyta "${replaceWarning.truncatedSketchName}"?`
+        ? `Namnet upptaget. Ersätt arbetsyta "${replaceWarning.truncatedSketchName}" ?`
         : " ",
       show: exists ? true : false,
     });
@@ -147,7 +150,9 @@ const SketchSaver = (props) => {
   const getSaveButtonState = () => {
     // If the name consists of less than four characters, the button should be disabled.
     // We only allow workspace-names that consist of three characters or more.
-    if (props.sketchName.length < 4) {
+    const trimmedSketchName = props.sketchName.trim();
+
+    if (trimmedSketchName.length < 4) {
       return setSaveButtonStateTest({
         ...saveButtonStateTest,
         disabled: true,
@@ -158,6 +163,7 @@ const SketchSaver = (props) => {
     // If the name does not already exist, and we've already saved the maximum number of sketches,
     // the button should be disabled. (If the name does exist, it is OK to save since one
     // will be over-written).
+
     if (props.savedSketches.length >= MAX_SKETCHES && !checkSketchName()) {
       return setSaveButtonStateTest({
         ...saveButtonStateTest,

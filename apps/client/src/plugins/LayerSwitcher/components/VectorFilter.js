@@ -26,9 +26,10 @@ function VectorFilter({ layer }) {
    */
   const loadFeatureInfo = useCallback(() => {
     const { url, featureType } = layer.getProperties();
+    const glue = url.includes("?") ? "&" : "?";
     hfetch(
       url +
-        `?service=WFS&request=describeFeatureType&outputFormat=application/json&typename=${featureType}`
+        `${glue}service=WFS&request=describeFeatureType&outputFormat=application/json&typename=${featureType}`
     ).then((response) => {
       response.json().then((featureInfo) => {
         const featureTypeInfo = featureInfo.featureTypes.find(

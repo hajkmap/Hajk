@@ -135,6 +135,7 @@ const BookmarksView = (props) => {
     if (name.trim() === "") {
       return;
     }
+
     props.model.addBookmark(name, true);
 
     setName("");
@@ -151,17 +152,19 @@ const BookmarksView = (props) => {
   };
 
   const checkBookmarkName = (name) => {
-    if (name.trim() === "") {
+    const trimmedName = name.trim();
+
+    if (trimmedName === "") {
       setError(false);
       setHelperText(" ");
       return false;
     }
 
-    const exists = props.model.bookmarkWithNameExists(name);
+    const exists = props.model.bookmarkWithNameExists(trimmedName);
 
     if (exists) {
       setError(true);
-      setHelperText(`Namnet upptaget. Ersätt bokmärke "${name}"?`);
+      setHelperText(`Namnet upptaget. Ersätt bokmärke "${trimmedName}"?`);
       return false;
     } else {
       setError(false);
@@ -240,6 +243,7 @@ const BookmarksView = (props) => {
           size="small"
           startIcon={error ? null : <AddCircleOutlineIcon />}
           onClick={addBookmark}
+          disabled={!name.trim()}
         >
           {error ? "Ersätt" : "Lägg till"}
         </AddButton>

@@ -12,10 +12,15 @@ export default function handleStandardResponse(res, data, successStatus = 200) {
   // If we encountered a error…
   if (data.error) {
     // Check if it's AccessError. If so, send a 403 Forbidden.
+    // If error.code is ENOENT, send a 404 Not Found.
     // Otherwise, send a generic status 500.
-    res
-      .status(data.error.name === "AccessError" ? 403 : 500)
-      .send(data.error.toString());
+    let status = 500;
+    if (data.error.code === "ENOENT") {
+      status = 404;
+    } else if (data.error.name === "AccessError") {
+      status = 403;
+    }
+    res.status(status).send(data.error.toString());
   }
   // If there's no error, send the response
   else {

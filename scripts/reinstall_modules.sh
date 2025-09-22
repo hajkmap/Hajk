@@ -29,8 +29,8 @@ npm audit fix
 echo "Client…"
 cd $CLIENT_DIR
 rm -rf node_modules
-npm i
-npm audit fix
+npm i 
+npm audit fix 
 
 cd $ORIGINAL_DIR
 

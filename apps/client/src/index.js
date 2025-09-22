@@ -31,6 +31,7 @@ import HajkThemeProvider from "./components/HajkThemeProvider";
 import { initHFetch, hfetch, initFetchWrapper } from "./utils/FetchWrapper";
 import LocalStorageHelper from "./utils/LocalStorageHelper";
 import { getMergedSearchAndHashParams } from "./utils/getMergedSearchAndHashParams";
+import { AccessError, NotFoundError } from "./utils/CustomErrors";
 
 /**
  * Entry point to Hajk.
@@ -103,6 +104,13 @@ try {
     fetchConfig(),
     hfetch("customTheme.json", { cacheBuster: true }),
   ]);
+  // If mapConfigResponse.status is 403, throw a custom access denied error that we
+  // later catch and display Access Denied message
+  if (mapConfigResponse.status === 403) {
+    throw new AccessError("Access Denied");
+  } else if (mapConfigResponse.status === 404) {
+    throw new NotFoundError("Map Config Not Found");
+  }
 
   const mapConfig = await mapConfigResponse.json();
   const customTheme = await customThemeResponse.json();
@@ -141,14 +149,32 @@ try {
   );
 } catch (error) {
   console.error(error);
+  // Prepare some empty variables
+  let loadErrorTitle,
+    loadErrorMessage,
+    loadErrorReloadButtonText = "";
 
-  // Attempt to grab the custom error texts from appConfig, fall back to default.
-  const loadErrorTitle = appConfig?.loadErrorTitle || "Ett fel har inträffat";
-  const loadErrorMessage =
-    appConfig?.loadErrorMessage ||
-    "Fel när applikationen skulle läsas in. Du kan försöka att återställa applikationen genom att trycka på knappen nedan. Om felet kvarstår kan du kontakta systemansvarig.";
-  const loadErrorReloadButtonText =
-    appConfig?.loadErrorReloadButtonText || "Återställ applikationen";
+  if (error instanceof AccessError) {
+    loadErrorTitle = appConfig?.loadErrorAccessDeniedTitle || "Åtkomst nekad";
+    loadErrorMessage =
+      appConfig?.loadErrorAccessDeniedMessage ||
+      "Du har inte tillgång till den här kartan.";
+  } else if (error instanceof NotFoundError) {
+    loadErrorTitle = appConfig?.loadErrorNotFoundTitle || "Kartan finns inte";
+    loadErrorMessage =
+      appConfig?.loadErrorNotFoundMessage ||
+      "Kartan som du försöker nå finns inte.";
+    // Show the reset app button as a 404 might as well be caused by an erroneous `m` parameter
+    loadErrorReloadButtonText =
+      appConfig?.loadErrorReloadButtonText || "Återställ applikationen";
+  } else {
+    loadErrorTitle = appConfig?.loadErrorTitle || "Ett fel har inträffat";
+    loadErrorMessage =
+      appConfig?.loadErrorMessage ||
+      "Fel när applikationen skulle läsas in. Du kan försöka att återställa applikationen genom att trycka på knappen nedan. Om felet kvarstår kan du kontakta systemansvarig.";
+    loadErrorReloadButtonText =
+      appConfig?.loadErrorReloadButtonText || "Återställ applikationen";
+  }
 
   createRoot(document.getElementById("root")).render(
     <StartupError
