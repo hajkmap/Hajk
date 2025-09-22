@@ -114,7 +114,7 @@ export default function DesktopForm({
     const s = String(val ?? "");
     if (!s) return false;
     if (s.includes("\n")) return true; // line break
-    const limit = meta.wrapCh ?? 80; // long text
+    const limit = meta.wrapCh ?? 100; // long text
     if (s.length >= limit) return true;
     const longToken = s
       .split(/\s+/)

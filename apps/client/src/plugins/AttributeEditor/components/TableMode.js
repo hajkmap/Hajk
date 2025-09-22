@@ -59,7 +59,7 @@ export default function TableMode(props) {
     filterOverlayRef,
   } = props;
 
-  const DEFAULT_WRAP_CH = 40;
+  const DEFAULT_WRAP_CH = 100;
 
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
