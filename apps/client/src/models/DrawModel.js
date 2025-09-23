@@ -2196,8 +2196,13 @@ class DrawModel {
   // Moves the features currently selected via the Move-interaction.
   // The features are moved the supplied length (in meters) in the supplied
   // direction (in degrees, where north is 0 and east is 90 and so on).
-  translateSelectedFeatures = (length, angle) => {
-    this.#selectInteraction.getFeatures().forEach((f) => {
+  translateSelectedFeatures = (length, angle, opts = {}) => {
+    const selected = opts.features
+      ? Array.isArray(opts.features)
+        ? opts.features
+        : (opts.features.getArray?.() ?? [])
+      : (this.#selectInteraction.getFeatures().getArray?.() ?? []);
+    selected.forEach((f) => {
       try {
         // Since geoJSON cannot handle OL's circle-geometries, we'll have to check
         // if we're dealing with a circle before creating the geoJSON-feature...
@@ -2234,13 +2239,15 @@ class DrawModel {
   };
 
   // Rotate the currently selected features
-  rotateSelectedFeatures = (degrees, clockwise) => {
+  rotateSelectedFeatures = (degrees, clockwise, opts = {}) => {
     // Handle both CW and CCW rotation
     degrees = clockwise ? -degrees : degrees;
-
-    this.#selectInteraction
-      .getFeatures()
-      .getArray()
+    const selected = opts.features
+      ? Array.isArray(opts.features)
+        ? opts.features
+        : (opts.features.getArray?.() ?? [])
+      : (this.#selectInteraction.getFeatures().getArray?.() ?? []);
+    selected
       .filter((f) => {
         return ROTATABLE_DRAW_TYPES.indexOf(f.get("DRAW_METHOD")) > -1;
       })
