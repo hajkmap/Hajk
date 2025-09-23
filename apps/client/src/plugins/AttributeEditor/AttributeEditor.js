@@ -72,7 +72,7 @@ function AttributeEditor(props) {
         image: new CircleStyle({
           radius: 7,
           fill: new Fill({ color: "#ff9800" }),
-          stroke: new Stroke({ color: "#fff", width: 2 }),
+          stroke: new Stroke({ color: "#000000ff", width: 2 }),
         }),
         stroke: new Stroke({ color: "#ff9800", width: 3 }),
         fill: new Fill({ color: "rgba(255,152,0,0.12)" }),
@@ -244,7 +244,7 @@ function AttributeEditor(props) {
         const map = props.map;
         const mapProj = map.getView().getProjection();
         const dataProj =
-          projection || featureCollection?.crs?.properties?.name || "EPSG:3006"; // fallback – dina koordinater ser ut som 3006
+          projection || featureCollection?.crs?.properties?.name || "EPSG:3006";
 
         // rebuild vector layer
         if (vectorLayerRef.current) {

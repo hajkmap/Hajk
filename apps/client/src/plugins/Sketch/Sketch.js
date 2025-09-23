@@ -165,10 +165,85 @@ const Sketch = (props) => {
     const map = props.map;
     if (!map) return;
 
+    // ============================================================
+    // SECTION: Constants & shared refs
+    // ============================================================
     const { localObserver } = props;
     const LAYER_NAME = "attributeeditor";
-    const reg = new Map();
+    const reg = new Map(); // Map<olLayer, { select, translate, modify, cleanup }>
 
+    // ============================================================
+    // SECTION: Selection publishing (to Sketch state)
+    // ============================================================
+    const publishSelectionFromCollection = (fc) => {
+      const first = fc?.item?.(0) ?? null; // EditView wants single feature
+      localObserver?.publish("drawModel.modify.mapClick", first);
+
+      const arr = [];
+      fc?.forEach?.((feat) => arr.push(feat)); // MoveView wants list
+      localObserver?.publish("drawModel.move.select", arr);
+    };
+
+    // ============================================================
+    // SECTION: Enable/disable interactions based on UI state
+    // ============================================================
+    const applyEnablement = () => {
+      const inMove = activityId === "MOVE";
+      const inEditWithNodes = activityId === "EDIT" && modifyEnabled;
+
+      for (const { select, translate, modify } of reg.values()) {
+        try {
+          select.setActive(true);
+        } catch {}
+        try {
+          translate.setActive(
+            inMove && translate.__allowTranslate && translateEnabled
+          );
+        } catch {}
+        try {
+          modify.setActive(inEditWithNodes && modify.__allowModify);
+        } catch {}
+      }
+
+      // Ensure EditView receives a feature immediately (if any)
+      if (activityId === "EDIT") {
+        for (const { select } of reg.values()) {
+          const f = select?.getFeatures?.().item?.(0) ?? null;
+          localObserver?.publish("drawModel.modify.mapClick", f);
+          break;
+        }
+      }
+    };
+
+    // ============================================================
+    // SECTION: Helpers for AE layer/feature lookup
+    // ============================================================
+    const getAeSelected = () => {
+      const arr = [];
+      for (const { select } of reg.values()) {
+        select?.getFeatures?.().forEach((f) => arr.push(f));
+      }
+      return arr;
+    };
+
+    const findAeFeatureById = (id) => {
+      for (const lyr of reg.keys()) {
+        const src = lyr.getSource?.();
+        if (!src) continue;
+        let f = src.getFeatureById?.(id);
+        if (!f) {
+          f = src
+            .getFeatures?.()
+            .find((x) => (x.getId?.() ?? x.get?.("id")) === id);
+        }
+        if (f) return f;
+      }
+      return null;
+    };
+
+    // ============================================================
+    // SECTION: Attach interactions for a single AE layer
+    // ============================================================
     const attachForLayer = (
       layer,
       allow = { select: true, translate: true, modify: true }
@@ -176,45 +251,30 @@ const Sketch = (props) => {
       if (!layer || reg.has(layer)) return;
       if (layer.get?.("name") !== LAYER_NAME) return;
 
+      // --- Create interactions ---
       const sel = new Select({
         layers: (lyr) => lyr === layer,
         style: null,
         hitTolerance: 6,
       });
-
       const fc = sel.getFeatures();
 
-      const publishSelection = () => {
-        const first = fc?.item?.(0) ?? null;
-        localObserver?.publish("drawModel.modify.mapClick", first);
+      const tr = new Translate({ features: fc });
+      const mod = new Modify({ features: fc, pixelTolerance: 6 });
 
-        const arr = [];
-        fc?.forEach?.((feat) => arr.push(feat));
-        localObserver?.publish("drawModel.move.select", arr);
-      };
+      tr.__allowTranslate = !!allow.translate;
+      mod.__allowModify = !!allow.modify;
 
-      const onFcAdd = () => publishSelection();
-      const onFcRemove = () => publishSelection();
-      const onSelect = () => publishSelection();
+      // --- Selection handlers (stable refs for cleanup) ---
+      const onFcAdd = () => publishSelectionFromCollection(fc);
+      const onFcRemove = () => publishSelectionFromCollection(fc);
+      const onSelect = () => publishSelectionFromCollection(fc);
 
       fc?.on?.("add", onFcAdd);
       fc?.on?.("remove", onFcRemove);
       sel.on("select", onSelect);
 
-      const tr = new Translate({ features: fc });
-
-      const mod = new Modify({
-        features: fc,
-        pixelTolerance: 6,
-      });
-
-      map.addInteraction(sel);
-      map.addInteraction(tr);
-      map.addInteraction(mod);
-
-      tr.__allowTranslate = !!allow.translate;
-      mod.__allowModify = !!allow.modify;
-
+      // --- Geometry-change handlers (keep AE table focused) ---
       const onTranslateEnd = (e) => {
         const f = e?.features?.item?.(0);
         const id = f?.getId?.() ?? f?.get?.("id");
@@ -225,7 +285,7 @@ const Sketch = (props) => {
             mode: "replace",
           });
         }
-        publishSelection();
+        publishSelectionFromCollection(fc);
       };
 
       const onModifyEnd = (e) => {
@@ -238,12 +298,18 @@ const Sketch = (props) => {
             mode: "replace",
           });
         }
-        publishSelection();
+        publishSelectionFromCollection(fc);
       };
 
       tr.on("translateend", onTranslateEnd);
       mod.on("modifyend", onModifyEnd);
 
+      // --- Add interactions to map ---
+      map.addInteraction(sel);
+      map.addInteraction(tr);
+      map.addInteraction(mod);
+
+      // --- Register cleanup ---
       const cleanup = () => {
         try {
           fc?.un?.("add", onFcAdd);
@@ -273,46 +339,14 @@ const Sketch = (props) => {
 
       reg.set(layer, { select: sel, translate: tr, modify: mod, cleanup });
 
-      publishSelection();
+      // Initial publish + enablement
+      publishSelectionFromCollection(fc);
       applyEnablement();
     };
 
-    const applyEnablement = () => {
-      const inMove = activityId === "MOVE";
-      const inEditWithNodes = activityId === "EDIT" && modifyEnabled;
-
-      for (const { select, translate, modify } of reg.values()) {
-        try {
-          select.setActive(true);
-        } catch {}
-        try {
-          translate.setActive(
-            inMove && translate.__allowTranslate && translateEnabled
-          );
-        } catch {}
-        try {
-          modify.setActive(inEditWithNodes && modify.__allowModify);
-        } catch {}
-      }
-
-      if (activityId === "EDIT") {
-        for (const { select } of reg.values()) {
-          const f = select?.getFeatures?.().item?.(0) ?? null;
-          localObserver?.publish("drawModel.modify.mapClick", f);
-          break;
-        }
-      }
-    };
-
-    // Helper: get AE-selected features
-    const getAeSelected = () => {
-      const arr = [];
-      for (const { select } of reg.values()) {
-        select?.getFeatures?.().forEach((f) => arr.push(f));
-      }
-      return arr;
-    };
-
+    // ============================================================
+    // SECTION: Cross-plugin bus subscriptions (AE ↔ Sketch)
+    // ============================================================
     const offTranslateCmd = editBus.on("sketch:ae-translate", (ev) => {
       const { distance, angleDeg } = ev.detail || {};
       const feats = getAeSelected();
@@ -333,22 +367,6 @@ const Sketch = (props) => {
       }
     });
 
-    // Focus from AE tabs to Sketch edit feature
-    const findAeFeatureById = (id) => {
-      for (const lyr of reg.keys()) {
-        const src = lyr.getSource?.();
-        if (!src) continue;
-        let f = src.getFeatureById?.(id);
-        if (!f) {
-          f = src
-            .getFeatures?.()
-            .find((x) => (x.getId?.() ?? x.get?.("id")) === id);
-        }
-        if (f) return f;
-      }
-      return null;
-    };
-
     const offFocus = editBus.on("attrib:focus-id", (ev) => {
       const id = ev?.detail?.id;
       if (id == null) {
@@ -359,7 +377,9 @@ const Sketch = (props) => {
       localObserver?.publish("drawModel.modify.mapClick", f || null);
     });
 
-    // Listen for the AE layer being attached
+    // ============================================================
+    // SECTION: Wire up existing/future layers & apply enablement
+    // ============================================================
     const offAttach = editBus.on("sketch.attachExternalLayer", (ev) => {
       const { layer, allow } = ev.detail || {};
       attachForLayer(layer, allow);
@@ -373,14 +393,17 @@ const Sketch = (props) => {
       );
     } catch {}
 
-    const onAdd = (e) => {
+    const onLayerAdd = (e) => {
       const lyr = e.element || e.layer || e.target;
       attachForLayer(lyr, { select: true, translate: true, modify: true });
     };
-    layers.on?.("add", onAdd);
+    layers.on?.("add", onLayerAdd);
 
     applyEnablement();
 
+    // ============================================================
+    // SECTION: Delete-mode click handler (for AE features)
+    // ============================================================
     const onDeleteClick = (evt) => {
       if (activityId !== "DELETE") return;
       if (evt.dragging) return;
@@ -423,6 +446,9 @@ const Sketch = (props) => {
 
     map.on("singleclick", onDeleteClick);
 
+    // ============================================================
+    // SECTION: Cleanup
+    // ============================================================
     return () => {
       try {
         offAttach();
@@ -437,7 +463,7 @@ const Sketch = (props) => {
         offFocus();
       } catch {}
       try {
-        layers.un?.("add", onAdd);
+        layers.un?.("add", onLayerAdd);
       } catch {}
       for (const { cleanup } of reg.values()) {
         try {
