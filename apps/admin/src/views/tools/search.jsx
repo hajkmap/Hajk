@@ -997,7 +997,7 @@ class ToolOptions extends Component {
           
           <div>
             <label >
-              Filtrera kolumner vid excel-export{" "}
+              Exkludera följande kolumner vid Excel-export{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
