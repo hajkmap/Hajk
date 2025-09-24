@@ -22,6 +22,7 @@ import GpxModel from "../../models/GpxModel";
 import Select from "ol/interaction/Select";
 import Translate from "ol/interaction/Translate";
 import Modify from "ol/interaction/Modify";
+import { Stroke, Fill } from "ol/style";
 
 // Constants
 import {
@@ -78,6 +79,16 @@ const Sketch = (props) => {
   const { functionalCookiesOk } = useCookieStatus(props.app.globalObserver);
   // The local observer will handle the communication between models and views.
   const [localObserver] = React.useState(() => Observer());
+
+  const prevActivityRef = React.useRef(activityId);
+  React.useEffect(() => {
+    const prev = prevActivityRef.current;
+    if (prev === "EDIT" && activityId !== "EDIT") {
+      setEditFeature(null);
+      setMoveFeatures([]);
+    }
+    prevActivityRef.current = activityId;
+  }, [activityId]);
 
   // We're also gonna need a drawModel to handle all draw functionality
   const [drawModel] = React.useState(
@@ -161,6 +172,37 @@ const Sketch = (props) => {
     };
   }, []);
 
+  function materializeStyleFromLayer(layer, feature, map) {
+    if (!feature) return;
+    if (feature.get && feature.get("__ae_style_delegate")) return;
+    const lf = layer?.getStyleFunction?.();
+    if (!lf) return;
+
+    feature.set?.("__ae_style_delegate", true, true);
+
+    feature.setStyle((f, resArg) => {
+      const res = resArg ?? map?.getView?.().getResolution?.();
+      let st = lf(f, res);
+      if (Array.isArray(st)) st = st[0];
+      if (!st) return st;
+
+      const out = st.clone ? st.clone() : st;
+
+      const gt = f.getGeometry?.()?.getType?.();
+      const isPointy = gt === "Point" || gt === "MultiPoint";
+      if (!isPointy) {
+        if (out.getStroke && !out.getStroke()) {
+          out.setStroke(new Stroke({ color: "rgba(0,0,0,0)", width: 0 }));
+        }
+        if (out.getFill && !out.getFill()) {
+          out.setFill(new Fill({ color: "rgba(0,0,0,0)" }));
+        }
+      }
+
+      return out;
+    });
+  }
+
   React.useEffect(() => {
     const map = props.map;
     if (!map) return;
@@ -168,21 +210,8 @@ const Sketch = (props) => {
     // ============================================================
     // SECTION: Constants & shared refs
     // ============================================================
-    const { localObserver } = props;
     const LAYER_NAME = "attributeeditor";
     const reg = new Map(); // Map<olLayer, { select, translate, modify, cleanup }>
-
-    // ============================================================
-    // SECTION: Selection publishing (to Sketch state)
-    // ============================================================
-    const publishSelectionFromCollection = (fc) => {
-      const first = fc?.item?.(0) ?? null; // EditView wants single feature
-      localObserver?.publish("drawModel.modify.mapClick", first);
-
-      const arr = [];
-      fc?.forEach?.((feat) => arr.push(feat)); // MoveView wants list
-      localObserver?.publish("drawModel.move.select", arr);
-    };
 
     // ============================================================
     // SECTION: Enable/disable interactions based on UI state
@@ -251,21 +280,31 @@ const Sketch = (props) => {
       if (!layer || reg.has(layer)) return;
       if (layer.get?.("name") !== LAYER_NAME) return;
 
-      // --- Create interactions ---
       const sel = new Select({
         layers: (lyr) => lyr === layer,
         style: null,
         hitTolerance: 6,
       });
       const fc = sel.getFeatures();
-
       const tr = new Translate({ features: fc });
       const mod = new Modify({ features: fc, pixelTolerance: 6 });
 
       tr.__allowTranslate = !!allow.translate;
       mod.__allowModify = !!allow.modify;
 
-      // --- Selection handlers (stable refs for cleanup) ---
+      const publishSelectionFromCollection = (fc) => {
+        let first = fc?.item?.(0) ?? null;
+
+        if (first && !first.getStyle?.()) {
+          materializeStyleFromLayer(layer, first, map);
+        }
+
+        localObserver?.publish("drawModel.modify.mapClick", first);
+        const arr = [];
+        if (first) arr.push(first);
+        localObserver?.publish("drawModel.move.select", arr);
+      };
+
       const onFcAdd = () => publishSelectionFromCollection(fc);
       const onFcRemove = () => publishSelectionFromCollection(fc);
       const onSelect = () => publishSelectionFromCollection(fc);
@@ -274,7 +313,6 @@ const Sketch = (props) => {
       fc?.on?.("remove", onFcRemove);
       sel.on("select", onSelect);
 
-      // --- Geometry-change handlers (keep AE table focused) ---
       const onTranslateEnd = (e) => {
         const f = e?.features?.item?.(0);
         const id = f?.getId?.() ?? f?.get?.("id");
@@ -304,12 +342,12 @@ const Sketch = (props) => {
       tr.on("translateend", onTranslateEnd);
       mod.on("modifyend", onModifyEnd);
 
-      // --- Add interactions to map ---
       map.addInteraction(sel);
       map.addInteraction(tr);
       map.addInteraction(mod);
 
-      // --- Register cleanup ---
+      publishSelectionFromCollection(fc);
+
       const cleanup = () => {
         try {
           fc?.un?.("add", onFcAdd);
@@ -339,7 +377,6 @@ const Sketch = (props) => {
 
       reg.set(layer, { select: sel, translate: tr, modify: mod, cleanup });
 
-      // Initial publish + enablement
       publishSelectionFromCollection(fc);
       applyEnablement();
     };
@@ -374,11 +411,21 @@ const Sketch = (props) => {
         return;
       }
       const f = findAeFeatureById(id);
+      if (f && !f.getStyle?.()) {
+        const layerForF = [...reg.keys()].find((lyr) => {
+          const src = lyr.getSource?.();
+          return (
+            !!src &&
+            (src.getFeatureById?.(id) || src.getFeatures?.().includes?.(f))
+          );
+        });
+        materializeStyleFromLayer(layerForF, f, map);
+      }
       localObserver?.publish("drawModel.modify.mapClick", f || null);
     });
 
     // ============================================================
-    // SECTION: Wire up existing/future layers & apply enablement
+    // SECTION: Wire up existing layers
     // ============================================================
     const offAttach = editBus.on("sketch.attachExternalLayer", (ev) => {
       const { layer, allow } = ev.detail || {};
@@ -478,7 +525,7 @@ const Sketch = (props) => {
   }, [
     props,
     props.map,
-    props.localObserver,
+    localObserver,
     activityId,
     modifyEnabled,
     translateEnabled,

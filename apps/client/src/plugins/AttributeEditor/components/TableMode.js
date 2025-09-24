@@ -5,6 +5,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
+import { editBus } from "../../../buses/editBus";
 
 export default function TableMode(props) {
   const {
@@ -78,6 +79,27 @@ export default function TableMode(props) {
       return {};
     }
   });
+
+  React.useEffect(() => {
+    // only when the table actually shows something
+    if (!filteredAndSorted.length) return;
+
+    // is any selected id still visible in the current filtered list?
+    const selectedVisible = filteredAndSorted.some((r) =>
+      tableSelectedIds.has(r.id)
+    );
+
+    if (!selectedVisible) {
+      const firstId = filteredAndSorted[0]?.id;
+      if (firstId != null) {
+        editBus.emit("attrib:select-ids", {
+          ids: [firstId],
+          source: "view",
+          mode: "replace",
+        });
+      }
+    }
+  }, [filteredAndSorted, tableSelectedIds]);
 
   React.useEffect(() => {
     // save each change
