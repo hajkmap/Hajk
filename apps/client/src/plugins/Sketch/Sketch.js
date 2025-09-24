@@ -203,6 +203,21 @@ const Sketch = (props) => {
     });
   }
 
+  // Orchestrates Sketch ↔ AttributeEditor integration for AE layers.
+  // - Finds/attaches OpenLayers interactions (Select/Translate/Modify) for the
+  //   "attributeeditor" layer and keeps them enabled/disabled based on UI state
+  //   (current activity, translate/modify toggles).
+  // - Mirrors selection between map and panels: publishes the current AE
+  //   selection to Sketch (EditView needs a single feature; MoveView needs a list).
+  // - Listens to cross-plugin bus events:
+  //     • sketch:ae-translate / sketch:ae-rotate → apply DrawModel move/rotate
+  //     • attrib:focus-id → focus a specific AE feature and push it to EditView
+  //     • sketch.attachExternalLayer → attach interactions to newly added AE layer
+  // - In DELETE mode: handles map clicks to select the hit AE feature and toggles
+  //   its delete state in the AttributeEditor.
+  // - Ensures AE features have a materialized style before passing them to Sketch,
+  //   so edit tools render/behave consistently.
+  // - Cleans up all listeners/interactions on unmount or dependency changes.
   React.useEffect(() => {
     const map = props.map;
     if (!map) return;
