@@ -25,7 +25,7 @@ const StyledAccordionSummary = styled(AccordionSummary)(() => ({
 
 const StrokeSizeSlider = ({ radius, handleRadiusChange }) => {
   return (
-    <Grid item xs={12}>
+    <Grid size={12}>
       <Paper style={{ padding: 8, marginTop: 8 }}>
         <Typography variant="caption">{`Storlek: ${radius}px`}</Typography>
         <Slider
@@ -59,7 +59,7 @@ const AccordionSummaryContents = (props) => {
   return (
     <Grid container justifyContent="space-between" alignItems="center">
       <Typography variant="button">{props.title}</Typography>
-      <Grid container item xs={4} justifyContent="flex-end" alignItems="center">
+      <Grid container justifyContent="flex-end" alignItems="center" size={4}>
         {typeof props.radius === "number" && (
           <Typography variant="caption">{`${props.radius}px`}</Typography>
         )}

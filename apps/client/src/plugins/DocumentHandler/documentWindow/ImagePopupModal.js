@@ -11,11 +11,9 @@ const blurCss = "filter : blur(7px)";
 const CloseButton = styled(IconButton)(({ theme }) => ({
   position: "absolute",
   backgroundColor: theme.palette.grey[50],
-
   "&:hover": {
     backgroundColor: theme.palette.grey[400],
   },
-
   zIndex: 100,
   right: theme.spacing(2),
   top: theme.spacing(2),

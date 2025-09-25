@@ -31,7 +31,7 @@ const StyledAccordion = styled(Accordion)(
     borderRadius: "5px",
     position: "inherit",
     backgroundColor: backgroundcolor,
-    border: dividercolor && `solid 2px ${dividercolor}`,
+    border: dividercolor ? `solid 2px ${dividercolor}` : undefined,
   })
 );
 
@@ -59,8 +59,18 @@ const StyledAccordionSummary = styled(AccordionSummary)(
     "& .MuiAccordionSummary-content": {
       maxWidth: "90%",
     },
-    opacity: expanded === "true" ? 0.6 : 1,
+    opacity: 1,
     padding: dividercolor && "0 15px",
+    variants: [
+      {
+        props: {
+          expanded: "true",
+        },
+        style: {
+          opacity: 0.6,
+        },
+      },
+    ],
   })
 );
 
@@ -172,20 +182,27 @@ export const OLComponent = ({ olComponent }) => {
           <ListItemOlListItem disableGutters key={index}>
             <Grid wrap="nowrap" container>
               <Grid
-                item
-                sx={{
-                  marginRight: (theme) =>
-                    getIndentationValue(
-                      theme.typography.body1.fontSize,
-                      index < 9 ? 1 : 0.5
-                    ),
-                  padding: 0,
-                  marginBottom: index < 9 ? 1 : "inherit",
-                }}
+                sx={[
+                  {
+                    marginRight: (theme) =>
+                      getIndentationValue(
+                        theme.typography.body1.fontSize,
+                        index < 9 ? 1 : 0.5
+                      ),
+                    padding: 0,
+                  },
+                  index < 9
+                    ? {
+                        marginBottom: 1,
+                      }
+                    : {
+                        marginBottom: "inherit",
+                      },
+                ]}
               >
                 <Typography variant="body1">{`${index + 1}.`}</Typography>
               </Grid>
-              <Grid item>
+              <Grid>
                 <TypographyOlListItem variant="body1">
                   {getFormattedComponentFromTag(listItem)}
                 </TypographyOlListItem>
@@ -233,10 +250,7 @@ const getTextArea = (tag, defaultColors) => {
 };
 
 export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
-  // Grab the theme to determine current light/dark mode
   const theme = useTheme();
-
-  //
   if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
     if (theme.palette.mode === "dark") {
       // Lets try to get a better color for the text.
@@ -467,24 +481,25 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
         aria-describedby={getDescribedByAttribute()}
         component="img"
         image={imgUrl}
-        sx={{
-          ...getImageStyle(image),
-          ...(image.height &&
+        sx={[
+          {
+            ...getImageStyle(image),
+            ".MuiCardMedia-media": {
+              width: "auto",
+              maxWidth: "100%",
+            },
+          },
+          image.height &&
             image.width && {
               height: image.height,
               width: image.width,
-            }),
-          ".MuiCardMedia-media": {
-            width: "auto",
-            maxWidth: "100%",
-          },
-        }}
+            },
+        ]}
       />
       {getImageDescription(image)}
     </Box>
   );
 };
-
 /**
  * The render function for the video-tag as an img-tag.
  * @param {object} imgTag The video-tag as an img-tag.
@@ -501,7 +516,6 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
     altValue: imgTag.alt,
     id: `video_${componentId}`,
   };
-
   const getVideoDescription = (videoAttributes) => {
     return (
       <Box
@@ -553,7 +567,6 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
     </React.Fragment>
   );
 };
-
 /**
  * The render function for the audio-tag as an img-tag.
  * @param {object} imgTag The audio-tag as an img-tag.
@@ -569,7 +582,6 @@ export const Audio = ({ imgTag, componentId, baseUrl }) => {
     id: `audio_${componentId}`,
     altValue: imgTag.attributes.getNamedItem("alt")?.value,
   };
-
   const getAudioDescription = (audioAttributes) => {
     return (
       <Box
@@ -758,9 +770,6 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
   };
 
   const ExternalLink = ({ externalLink }) => {
-    // Grab the theme to determine current light/dark mode
-    const theme = useTheme();
-
     return (
       <Button
         startIcon={
@@ -771,17 +780,19 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
             }}
           />
         }
-        sx={{
-          padding: 0,
-          color:
-            theme.palette.mode === "dark"
-              ? theme.palette.info.dark
-              : theme.palette.info.main,
-          ".MuiButton-startIcon": {
-            marginLeft: 0,
-          },
-          ...(bottomMargin && { marginBottom: 1 }),
-        }}
+        sx={[
+          (theme) => ({
+            padding: 0,
+            color: theme.palette.info.main,
+            ".MuiButton-startIcon": {
+              marginLeft: 0,
+            },
+            ...theme.applyStyles("dark", {
+              color: theme.palette.info.dark,
+            }),
+          }),
+          bottomMargin && { marginBottom: 1 },
+        ]}
         target="_blank"
         component="a"
         key="external-link"
@@ -793,9 +804,6 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
   };
 
   const MapLink = ({ aTag, mapLinkOrg, localObserver }) => {
-    // Grab the theme to determine current light/dark mode
-    const theme = useTheme();
-
     // Attempt to safely URI Decode the supplied string. If
     // it fails, use it as-is.
     // The reason we want probably want to decode is that the
@@ -818,17 +826,19 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
             }}
           />
         }
-        sx={{
-          padding: 0,
-          color:
-            theme.palette.mode === "dark"
-              ? theme.palette.info.dark
-              : theme.palette.info.main,
-          ...(bottomMargin && { marginBottom: 1 }),
-          ".MuiButton-startIcon": {
-            marginLeft: 0,
-          },
-        }}
+        sx={[
+          (theme) => ({
+            padding: 0,
+            color: theme.palette.info.main,
+            ".MuiButton-startIcon": {
+              marginLeft: 0,
+            },
+            ...theme.applyStyles("dark", {
+              color: theme.palette.info.dark,
+            }),
+          }),
+          bottomMargin && { marginBottom: 1 },
+        ]}
         target="_blank"
         href={externalLink || null}
         key="map-link"
@@ -844,7 +854,6 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
 
   const DocumentLink = ({ headerIdentifier, documentLink, isPrintMode }) => {
     // Grab the theme to determine current light/dark mode
-    const theme = useTheme();
 
     const titleAccess = headerIdentifier
       ? "Länk till ett visst kapitel i ett dokument"
@@ -860,17 +869,19 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
             }}
           />
         }
-        sx={{
-          padding: 0,
-          color:
-            theme.palette.mode === "dark"
-              ? theme.palette.info.dark
-              : theme.palette.info.main,
-          ".MuiButton-startIcon": {
-            marginLeft: 0,
-          },
-          ...(bottomMargin && { marginBottom: 1 }),
-        }}
+        sx={[
+          (theme) => ({
+            padding: 0,
+            color: theme.palette.info.main,
+            ".MuiButton-startIcon": {
+              marginLeft: 0,
+            },
+            ...theme.applyStyles("dark", {
+              color: theme.palette.info.dark,
+            }),
+          }),
+          bottomMargin && { marginBottom: 1 },
+        ]}
         key="document-link"
         component={isPrintMode ? "span" : "a"}
         underline="hover"

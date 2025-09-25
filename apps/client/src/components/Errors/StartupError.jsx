@@ -22,9 +22,11 @@ export default function Error({
         <AlertTitle>{loadErrorTitle}</AlertTitle>
         {loadErrorMessage}
       </Alert>
-      <Button href="/" variant="contained" sx={{ mt: 3 }}>
-        {loadErrorReloadButtonText}
-      </Button>
+      {loadErrorReloadButtonText.length > 0 && (
+        <Button href="/" variant="contained" sx={{ mt: 3 }}>
+          {loadErrorReloadButtonText}
+        </Button>
+      )}
     </Box>
   );
 }

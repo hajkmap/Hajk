@@ -11,7 +11,7 @@ import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
 import QuickAccessPresets from "./components/QuickAccessPresets.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
-import { OSM_LAYER_ID } from "./components/BackgroundSwitcher";
+import GroupDetails from "./components/GroupDetails.js";
 
 const StyledAppBar = styled(AppBar)(() => ({
   zIndex: "1",
@@ -70,6 +70,7 @@ class LayersSwitcherView extends React.PureComponent {
       activeTab: 0,
       displayContentOverlay: null, // 'quickAccessPresets' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
+      groupDetails: null,
       scrollPositions: {
         tab0: 0,
         tab1: 0,
@@ -103,39 +104,45 @@ class LayersSwitcherView extends React.PureComponent {
         const currentScrollPosition = this.getScrollPosition();
 
         const layerId = payload.layerId;
-        if (!layerId) {
+        if (layerId) {
+          const layer = this.olLayerMap[layerId];
+
+          // Set scroll position state when layer details is opened
+          const details = {
+            layer,
+            subLayerIndex: payload.subLayerIndex,
+          };
+          this.setState((prevState) => ({
+            layerItemDetails: details,
+            groupDetails: null,
+            displayContentOverlay: "layerItemDetails",
+            scrollPositions: {
+              ...prevState.scrollPositions,
+              [`tab${prevState.activeTab}`]: currentScrollPosition,
+            },
+          }));
+          // Check if any of the infogroup variables are present, in that case show the groups info
+        } else if (
+          payload.infogroupname ||
+          payload.infogrouptitle ||
+          payload.infogrouptext ||
+          payload.infogroupurl ||
+          payload.infogroupurltext ||
+          payload.infogroupopendatalink ||
+          payload.infogroupowner
+        ) {
+          this.setState((prevState) => ({
+            layerItemDetails: null,
+            groupDetails: payload,
+            displayContentOverlay: "groupDetails",
+            scrollPositions: {
+              ...prevState.scrollPositions,
+              [`tab${prevState.activeTab}`]: currentScrollPosition,
+            },
+          }));
+        } else {
           return;
         }
-
-        let layer;
-
-        if (layerId === OSM_LAYER_ID) {
-          // The Open street map layer is set up by the `BackgroundSwitcher`
-          // component. So it does not exist when the `olLayerMap` is created.
-          // code below is an ugly workaround. The best solution would be if
-          // the `LayerItemDetails` does not need the actual OpenLayers object
-          // at all.
-          layer = this.props.app.map
-            .getLayers()
-            .getArray()
-            .find((layer) => layer.get("name") === OSM_LAYER_ID);
-        } else {
-          layer = this.olLayerMap[layerId];
-        }
-
-        // Set scroll position state when layer details is opened
-        const details = {
-          layer,
-          subLayerIndex: payload.subLayerIndex,
-        };
-        this.setState((prevState) => ({
-          layerItemDetails: details,
-          displayContentOverlay: "layerItemDetails",
-          scrollPositions: {
-            ...prevState.scrollPositions,
-            [`tab${prevState.activeTab}`]: currentScrollPosition,
-          },
-        }));
       } else {
         this.setState({
           displayContentOverlay: null,
@@ -332,6 +339,11 @@ class LayersSwitcherView extends React.PureComponent {
           showOpacitySlider={this.props.options.enableTransparencySlider}
           showQuickAccess={this.props.options.showQuickAccess}
         ></LayerItemDetails>
+        <GroupDetails
+          display={this.state.displayContentOverlay === "groupDetails"}
+          groupDetails={this.state.groupDetails}
+          app={this.props.app}
+        ></GroupDetails>
         <BackgroundSwitcher
           display={
             this.state.activeTab === 1 &&
@@ -339,8 +351,6 @@ class LayersSwitcherView extends React.PureComponent {
           }
           layers={this.baseLayers}
           layerMap={this.olLayerMap}
-          backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
-          backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
           enableOSM={this.options.enableOSM}
           renderSpecialBackgroundsAtBottom={
             this.options.renderSpecialBackgroundsAtBottom
