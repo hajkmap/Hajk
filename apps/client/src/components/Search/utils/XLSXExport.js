@@ -1,5 +1,6 @@
 export default class XLSXExport {
   constructor(settings) {
+    this.excelColumnFilter = settings.options.excelColumnFilter || "";
     this.localObserver = settings.localObserver;
     this.bindSubscriptions();
   }
@@ -107,9 +108,16 @@ export default class XLSXExport {
         // property key). (We don't want the geometry in the export).
         const geometryName = feature.getGeometryName();
         // Then we'll get all the value keys (all keys except for the geometry-key).
-        const featureValueKeys = feature
+        let featureValueKeys = feature
           .getKeys()
           .filter((key) => key !== geometryName);
+        // We also want to filter away the specified columns in excelColumnFilter
+        const excelColumnsToRemove = this.excelColumnFilter.split(",");
+        excelColumnsToRemove.forEach((columnToRemove) => {
+          featureValueKeys = featureValueKeys.filter(
+            (key) => key !== columnToRemove.trim()
+          );
+        });
         // Then we'll loop over the keys and add them to the set of keys if it is missing.
         featureValueKeys.forEach((key) => {
           keys.add(key);
