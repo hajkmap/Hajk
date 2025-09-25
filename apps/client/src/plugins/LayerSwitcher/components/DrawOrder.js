@@ -298,6 +298,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
       // This class is used to style specific elements when the tab is active
       // If you search for this class in the codebase, you can find related style-fixes.
       className={"ls-draworder-tab-view"}
+      id="draw-order-list"
       sx={[
         {
           height: "inherit",
@@ -361,7 +362,6 @@ function DrawOrder({ display, app, map, localObserver, options }) {
         </Collapse>
       </Box>
       <DndContext
-        id="draw-order-list"
         onDragEnd={onDrop}
         sensors={sensors}
         modifiers={[restrictToVerticalAxis]}
