@@ -229,16 +229,22 @@ function AttributeEditor(props) {
 
   const styleFn = React.useCallback(
     (feature) => {
-      const id = feature.getId?.() ?? feature.get("id");
+      // 1) use attribute id if it exists, otherwise use @_fid, and lastly OL-id
+      const keyRaw =
+        feature.get?.("id") ?? feature.get?.("@_fid") ?? feature.getId?.();
+      const keyStr = String(keyRaw);
 
-      const selected = selectedIdsRef.current.has(id);
-      const visible = visibleIdsRef.current.has(id);
+      const sel = selectedIdsRef.current;
+      const vis = visibleIdsRef.current;
+      const del = deletedIdsRef.current;
 
-      if (!visible && !selected) return null;
-      if (deletedIdsRef.current.has(id)) return styles.toDelete;
-      if (selected) return styles.selected;
-      if (visible) return styles.visible;
-      return styles.dimmed;
+      const isSelected = sel.has(keyRaw) || sel.has(keyStr);
+      const isVisible = vis.has(keyRaw) || vis.has(keyStr);
+
+      if (!isVisible && !isSelected) return null;
+      if (del.has(keyRaw) || del.has(keyStr)) return styles.toDelete;
+      if (isSelected) return styles.selected;
+      return styles.visible;
     },
     [styles]
   );
@@ -400,6 +406,15 @@ function AttributeEditor(props) {
             })
           : [];
 
+        features.forEach((f) => {
+          const fidProp = f.get?.("@_fid");
+          if (fidProp) {
+            try {
+              f.setId?.(fidProp);
+            } catch {}
+          }
+        });
+
         const src = new VectorSource({ features });
         const lyr = new VectorLayer({
           source: src,
@@ -460,54 +475,6 @@ function AttributeEditor(props) {
       offClr();
     };
   }, [model, props.map, setPluginSettings, styleFn, ogc]);
-
-  const highlightFeatureById = React.useCallback(
-    (fid) => {
-      const map = props.map;
-      const view = map.getView();
-      //const mapProj = view.getProjection();
-
-      const src = vectorLayerRef.current?.getSource?.();
-
-      // 1) Try in AE layer
-      let feat = src?.getFeatureById?.(fid);
-      if (!feat && src) {
-        // fallback via attribute (if OL-id is not set)
-        feat = src.getFeatures?.().find((f) => {
-          const id = f.getId?.() ?? f.get?.("id");
-          return id === fid;
-        });
-      }
-
-      // 2) If not found: fallback to Sketch index (created externally)
-      if (!feat) {
-        feat = featureIndexRef.current?.get?.(fid) || null;
-      }
-
-      if (!feat) return;
-
-      // Get the extent from the geometry – note that the geometry is in the map's projection (Sketch ritar in mapProj)
-      const geom = feat.getGeometry?.();
-      if (!geom) return;
-
-      const extent = geom.getExtent?.();
-      if (!extent) return;
-
-      // Add padding to account for the sidebar (~40% of the width)
-      const size = map.getSize() || [0, 0];
-      const padTop = 20,
-        padBottom = 20,
-        padLeft = 20,
-        padRight = Math.round(size[0] * 0.4);
-
-      view.fit(extent, {
-        padding: [padTop, padRight, padBottom, padLeft],
-        duration: 250,
-        maxZoom: 4,
-      });
-    },
-    [props.map, vectorLayerRef, featureIndexRef]
-  );
 
   // Find Sketch layer
   function getSketchLayer(map) {
@@ -783,6 +750,31 @@ function AttributeEditor(props) {
     const map = props.map;
     if (!map) return;
 
+    // Helper: Convert idLike to canonical id
+    const toCanonicalId = (idLike) => {
+      const rows = model.getSnapshot?.().features || [];
+      const hit = rows.find((r) => String(r.id) === String(idLike));
+      return hit ? hit.id : idLike;
+    };
+
+    // Helper: Build set of logical ids
+    const buildVizSet = (logicalIds) => {
+      const set = new Set();
+      logicalIds.forEach((x) => {
+        set.add(x);
+        set.add(String(x));
+      });
+      return set;
+    };
+
+    // Helper: Get current logical ids
+    const getCurrentLogical = () => {
+      const current = selectedIdsRef.current || new Set();
+      const uniqStr = new Set(Array.from(current).map(String));
+      const canon = new Set(Array.from(uniqStr).map(toCanonicalId));
+      return canon;
+    };
+
     const onClick = (evt) => {
       if (evt.dragging) return;
       if (evt.originalEvent?.detail >= 2) return;
@@ -817,30 +809,47 @@ function AttributeEditor(props) {
         return;
       }
 
-      const fid = hit.getId?.() ?? hit.get?.("id");
-      if (fid == null) return;
+      // 1) pick feature id
+      const rawId = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
+      const canonId = toCanonicalId(rawId);
 
       const multi =
         evt.originalEvent?.ctrlKey ||
         evt.originalEvent?.metaKey ||
         evt.originalEvent?.shiftKey;
+
+      // 2) cannonical ids
+      const logical = getCurrentLogical();
+
       if (multi) {
-        const next = new Set(selectedIdsRef.current);
-        next.has(fid) ? next.delete(fid) : next.add(fid);
-        selectedIdsRef.current = next;
+        // toggle canonId
+        if (logical.has(canonId) || logical.has(String(canonId))) {
+          logical.delete(canonId);
+          logical.delete(String(canonId));
+        } else {
+          logical.add(canonId);
+        }
+
+        selectedIdsRef.current = buildVizSet(logical);
         vectorLayerRef.current?.changed?.();
+
+        // only send canonical ids
         editBus.emit("attrib:select-ids", {
-          ids: Array.from(next),
+          ids: Array.from(logical),
           source: "map",
           mode: "toggle",
         });
       } else {
         const same =
-          selectedIdsRef.current.size === 1 && selectedIdsRef.current.has(fid);
-        selectedIdsRef.current = new Set([fid]);
+          logical.size === 1 &&
+          (logical.has(canonId) || logical.has(String(canonId)));
+
+        const next = new Set([canonId]);
+        selectedIdsRef.current = buildVizSet(next);
         if (!same) vectorLayerRef.current?.changed?.();
+
         editBus.emit("attrib:select-ids", {
-          ids: [fid],
+          ids: [canonId],
           source: "map",
           mode: "replace",
         });
@@ -853,18 +862,7 @@ function AttributeEditor(props) {
         map.un("singleclick", onClick);
       } catch {}
     };
-  }, [props.map, vectorLayerRef, selectedIdsRef]);
-
-  React.useEffect(() => {
-    const off = editBus.on("attrib:focus-id", (ev) => {
-      const id = ev?.detail?.id;
-      const from = ev?.detail?.source;
-      if (!id) return;
-      if (from === "map") return;
-      highlightFeatureById(id);
-    });
-    return () => off();
-  }, [highlightFeatureById]);
+  }, [props.map, vectorLayerRef, selectedIdsRef, model]);
 
   React.useEffect(() => {
     const sub = localObserver.subscribe("AttributeEditorEvent", (msg) => {

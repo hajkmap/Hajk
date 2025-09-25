@@ -31,6 +31,52 @@ export function isMissingValue(v) {
   return v == null || v === "";
 }
 
+export function renderTableCellDisplay({ meta, value, s }) {
+  if (meta.type === "boolean") {
+    const checked =
+      value === true || value === "true" || value === 1 || value === "1";
+    return (
+      <span
+        style={{
+          display: "inline-flex",
+          gap: 6,
+          alignItems: "center",
+          whiteSpace: "nowrap",
+        }}
+      >
+        <input type="checkbox" checked={checked} readOnly />
+        <span>{checked ? "Ja" : "Nej"}</span>
+      </span>
+    );
+  }
+
+  // DATE
+  if (meta.type === "date") {
+    return <span>{String(value ?? "").slice(0, 10)}</span>;
+  }
+
+  // DATETIME
+  if (meta.type === "datetime") {
+    const sVal = String(value ?? "");
+    return <span>{sVal ? sVal.slice(0, 16).replace("T", " ") : ""}</span>;
+  }
+
+  // MULTISELECT
+  if (meta.type === "multiselect") {
+    const arr = Array.isArray(value)
+      ? value
+      : value
+        ? String(value)
+            .split(",")
+            .map((s) => s.trim())
+        : [];
+    return <span>{arr.join(", ")}</span>;
+  }
+
+  // Standard
+  return <span>{value == null ? "" : String(value)}</span>;
+}
+
 export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
   const baseStyle = isChanged ? { ...s.input, ...s.inputChanged } : s.input;
   const {
@@ -113,7 +159,12 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
       value === true || value === "true" || value === 1 || value === "1";
     return (
       <label
-        style={{ display: "inline-flex", gap: "0.5rem", alignItems: "center" }}
+        style={{
+          display: "inline-flex",
+          gap: "0.5rem",
+          alignItems: "center",
+          whiteSpace: "nowrap",
+        }}
       >
         <input
           type="checkbox"
@@ -318,7 +369,14 @@ export function renderTableCellEditor({
       editingValue === 1 ||
       editingValue === "1";
     return (
-      <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+      <label
+        style={{
+          display: "inline-flex",
+          gap: 8,
+          alignItems: "center",
+          whiteSpace: "nowrap",
+        }}
+      >
         <input
           {...editorProps}
           type="checkbox"

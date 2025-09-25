@@ -23,6 +23,13 @@ import Select from "ol/interaction/Select";
 import Translate from "ol/interaction/Translate";
 import Modify from "ol/interaction/Modify";
 import { Stroke, Fill } from "ol/style";
+import {
+  singleClick,
+  click,
+  altKeyOnly,
+  shiftKeyOnly,
+  platformModifierKeyOnly,
+} from "ol/events/condition";
 
 // Constants
 import {
@@ -43,6 +50,7 @@ const getMeasurementSettings = () => {
 };
 
 const Sketch = (props) => {
+  const lastEditFeatureRef = React.useRef(null);
   // We're gonna need to keep track of the current chosen activity. ("ADD", "REMOVE", etc).
   const [activityId, setActivityId] = React.useState("ADD");
   // We're gonna need to keep track of the currently active draw-type. ("Polygon", "Rectangle", etc).
@@ -222,6 +230,22 @@ const Sketch = (props) => {
     const map = props.map;
     if (!map) return;
 
+    // Helper: Canonicalize feature ID
+    const toCanonicalId = (idLike) => {
+      const rows = props?.model?.getSnapshot?.().features || [];
+      const hit = rows.find((r) => String(r.id) === String(idLike));
+      return hit ? hit.id : idLike;
+    };
+
+    // Helper: Publish feature to Sketch/EditView without affecting AE selection
+    const publishToEditView = (feature) => {
+      if (feature && !feature.getStyle?.()) {
+        // TODO: Materialize style before publishing
+      }
+      localObserver?.publish("drawModel.modify.mapClick", feature || null);
+      localObserver?.publish("drawModel.move.select", feature ? [feature] : []);
+    };
+
     // ============================================================
     // SECTION: Constants & shared refs
     // ============================================================
@@ -247,15 +271,6 @@ const Sketch = (props) => {
         try {
           modify.setActive(inEditWithNodes && modify.__allowModify);
         } catch {}
-      }
-
-      // Ensure EditView receives a feature immediately (if any)
-      if (activityId === "EDIT") {
-        for (const { select } of reg.values()) {
-          const f = select?.getFeatures?.().item?.(0) ?? null;
-          localObserver?.publish("drawModel.modify.mapClick", f);
-          break;
-        }
       }
     };
 
@@ -299,6 +314,16 @@ const Sketch = (props) => {
         layers: (lyr) => lyr === layer,
         style: null,
         hitTolerance: 6,
+        multi: true,
+        condition: singleClick,
+        toggleCondition: (e) =>
+          altKeyOnly(e) || shiftKeyOnly(e) || platformModifierKeyOnly(e),
+        addCondition: (e) =>
+          click(e) &&
+          (altKeyOnly(e) || shiftKeyOnly(e) || platformModifierKeyOnly(e)),
+        removeCondition: (e) =>
+          click(e) &&
+          (altKeyOnly(e) || shiftKeyOnly(e) || platformModifierKeyOnly(e)),
       });
       const fc = sel.getFeatures();
       const tr = new Translate({ features: fc });
@@ -307,51 +332,54 @@ const Sketch = (props) => {
       tr.__allowTranslate = !!allow.translate;
       mod.__allowModify = !!allow.modify;
 
-      const publishSelectionFromCollection = (fc) => {
-        let first = fc?.item?.(0) ?? null;
+      const onSelect = (e) => {
+        const arr = fc.getArray ? fc.getArray() : [];
+        arr.forEach((f) => {
+          if (f && !f.getStyle?.()) {
+            materializeStyleFromLayer(layer, f, map);
+          }
+        });
+        publishToEditView(arr[0] ?? null);
 
-        if (first && !first.getStyle?.()) {
-          materializeStyleFromLayer(layer, first, map);
-        }
-
-        localObserver?.publish("drawModel.modify.mapClick", first);
-        const arr = [];
-        if (first) arr.push(first);
-        localObserver?.publish("drawModel.move.select", arr);
+        const ids = arr.map((f) => {
+          const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+          return toCanonicalId(raw);
+        });
+        editBus.emit("attrib:select-ids", {
+          ids,
+          source: "map",
+          mode: "replace",
+        });
       };
 
-      const onFcAdd = () => publishSelectionFromCollection(fc);
-      const onFcRemove = () => publishSelectionFromCollection(fc);
-      const onSelect = () => publishSelectionFromCollection(fc);
-
-      fc?.on?.("add", onFcAdd);
-      fc?.on?.("remove", onFcRemove);
       sel.on("select", onSelect);
 
       const onTranslateEnd = (e) => {
-        const f = e?.features?.item?.(0);
-        const id = f?.getId?.() ?? f?.get?.("id");
-        if (id != null) {
+        const f = e?.features?.item?.(0) ?? null;
+        publishToEditView(f);
+        if (f) {
+          const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+          const canon = toCanonicalId(raw);
           editBus.emit("attrib:select-ids", {
-            ids: [id],
+            ids: [canon],
             source: "map",
             mode: "replace",
           });
         }
-        publishSelectionFromCollection(fc);
       };
 
       const onModifyEnd = (e) => {
-        const f = e?.features?.item?.(0);
-        const id = f?.getId?.() ?? f?.get?.("id");
-        if (id != null) {
+        const f = e?.features?.item?.(0) ?? null;
+        publishToEditView(f);
+        if (f) {
+          const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+          const canon = toCanonicalId(raw);
           editBus.emit("attrib:select-ids", {
-            ids: [id],
+            ids: [canon],
             source: "map",
             mode: "replace",
           });
         }
-        publishSelectionFromCollection(fc);
       };
 
       tr.on("translateend", onTranslateEnd);
@@ -361,15 +389,7 @@ const Sketch = (props) => {
       map.addInteraction(tr);
       map.addInteraction(mod);
 
-      publishSelectionFromCollection(fc);
-
       const cleanup = () => {
-        try {
-          fc?.un?.("add", onFcAdd);
-        } catch {}
-        try {
-          fc?.un?.("remove", onFcRemove);
-        } catch {}
         try {
           sel.un("select", onSelect);
         } catch {}
@@ -391,8 +411,6 @@ const Sketch = (props) => {
       };
 
       reg.set(layer, { select: sel, translate: tr, modify: mod, cleanup });
-
-      publishSelectionFromCollection(fc);
       applyEnablement();
     };
 
@@ -552,6 +570,8 @@ const Sketch = (props) => {
   // in the payload, but if the user clicked the map where no drawn feature exists,
   // null is sent.
   const handleModifyMapClick = React.useCallback((clickedFeature) => {
+    if (lastEditFeatureRef.current === clickedFeature) return;
+    lastEditFeatureRef.current = clickedFeature;
     setEditFeature(clickedFeature);
   }, []);
 

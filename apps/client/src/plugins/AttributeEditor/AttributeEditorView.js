@@ -448,7 +448,9 @@ export default function AttributeEditorView({
 
   React.useEffect(() => {
     // always: which rows are visible (for dim/visibility-end-filtered)
-    visibleIdsRef.current = new Set(filteredAndSorted.map((r) => r.id));
+    visibleIdsRef.current = new Set(
+      filteredAndSorted.flatMap((r) => [r.id, String(r.id)])
+    );
 
     // trigger a re-render when the dependent values change
     const tableSel = Array.from(tableSelectedIds);
@@ -465,6 +467,7 @@ export default function AttributeEditorView({
 
     vectorLayerRef?.current?.changed?.();
   }, [
+    allRows,
     filteredAndSorted,
     tableSelectedIds,
     selectedIds,
