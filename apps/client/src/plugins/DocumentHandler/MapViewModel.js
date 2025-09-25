@@ -39,10 +39,11 @@ export default class MapViewModel {
     try {
       //We check for plugin parameters in url
       const params = new Set(
-        new URLSearchParams(url.replaceAll("#", ""))
+        new URLSearchParams(url.replaceAll("#", "?").split("?")[1])
           .getAll("p")
           .flatMap((p) => p.split(","))
       );
+
       // Open matching windows
       this.appModel.windows
         .filter((w) => params.has(w.type))
@@ -57,38 +58,12 @@ export default class MapViewModel {
     }
   };
 
-  updateUrl = (url) => {
-    try {
-      const params = new URLSearchParams(url.replaceAll("#", "&"));
-      const pluginParams = params
-        .getAll("p")
-        .flatMap((p) => p.split(","))
-        .filter(Boolean)
-        .join(",");
-
-      if (pluginParams) {
-        params.set("p", pluginParams);
-      }
-
-      const newHash = "#" + params.toString();
-      if (newHash !== window.location.hash) {
-        window.location.hash = newHash;
-      }
-    } catch (error) {
-      console.error("Error updating URL:", error);
-    }
-  };
-
   bindSubscriptions = () => {
     this.localObserver.subscribe("fly-to", (url) => {
       this.globalObserver.publish("core.minimizeWindow");
       const mapSettings = this.convertMapSettingsUrlToOlSettings(url);
 
-      if (this.appModel.config.mapConfig.map.enableAppStateInHash === true) {
-        this.updateUrl(url);
-      } else {
-        this.showPluginsFromUrlParams(url);
-      }
+      this.showPluginsFromUrlParams(url);
 
       if (mapSettings.layers !== null) {
         // Let's use Hajk's generic layer visibility
