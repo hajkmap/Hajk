@@ -1212,7 +1212,7 @@ class Introduction extends React.PureComponent {
     exitOnOverlayClick: false,
     nextLabel: "Nästa",
     prevLabel: "Föregående",
-    doneLabel: "Avlsuta",
+    doneLabel: "Avsluta",
     showBullets: false,
     showProgress: true,
   });
