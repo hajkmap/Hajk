@@ -293,8 +293,15 @@ export default function AttributeEditorView({
   const FM = useMemo(() => {
     if (serviceId === "NONE_ID") return [];
     if (Array.isArray(fieldMeta) && fieldMeta.length) return fieldMeta;
+
     const keys = Object.keys(allRows[0] || {});
-    return keys.map((key) => ({ key, label: key }));
+    return keys.map((key, i) => ({
+      key,
+      label: key,
+      readOnly: true, // <- blocks editing when meta is clear
+      type: "text",
+      initialWidth: i === 0 ? 120 : 220,
+    }));
   }, [allRows, serviceId, fieldMeta]);
 
   const filteredAndSorted = useMemo(() => {

@@ -13,6 +13,123 @@ import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import { Style, Circle as CircleStyle, Fill, Stroke } from "ol/style";
 
+function inferTypeFromSamples(samples) {
+  if (!samples.length) return "text";
+
+  const s = (v) => String(v).trim();
+
+  const allBool = samples.every(
+    (v) =>
+      v === true ||
+      v === false ||
+      ["true", "false", "0", "1"].includes(s(v).toLowerCase())
+  );
+  if (allBool) return "boolean";
+
+  const allInt = samples.every((v) => /^-?\d+$/.test(s(v)));
+  if (allInt) return "integer";
+
+  const allNum = samples.every((v) => s(v) !== "" && !isNaN(Number(s(v))));
+  if (allNum) return "number";
+
+  const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+  const allDate = samples.every((v) => isoDate.test(s(v).slice(0, 10)));
+  if (allDate) return "date";
+
+  const isoDt = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
+  const allDateTime = samples.every((v) => isoDt.test(s(v)));
+  if (allDateTime) return "datetime";
+
+  const urlLike = /^(https?:\/\/|www\.)/i;
+  const allUrl = samples.every((v) => urlLike.test(String(v || "").trim()));
+  if (allUrl) return "url";
+
+  return "text";
+}
+
+function mapDataType(dataType, textType) {
+  const dt = String(dataType || "")
+    .trim()
+    .toLowerCase();
+  const tt = String(textType || "")
+    .trim()
+    .toLowerCase();
+
+  if (tt === "lista") return "select";
+  if (tt === "flerval") return "multiselect";
+  if (tt === "url") return "url"; // <— NYTT
+
+  if (dt.includes("bool")) return "boolean";
+  if (dt.includes("int")) return "integer";
+  if (
+    dt === "numeric" ||
+    dt.includes("double") ||
+    dt.includes("float") ||
+    dt === "number"
+  )
+    return "number";
+  if (dt === "date") return "date";
+  if (dt === "datetime" || dt === "timestamp" || dt === "timestamptz")
+    return "datetime";
+
+  return "text";
+}
+
+function buildFieldMetaFromBackend(schema, sampleRows = []) {
+  const fields = schema?.editableFields || [];
+  const fm = fields
+    .filter((f) => !f.hidden)
+    .map((f) => {
+      const tt = String(f.textType || "")
+        .trim()
+        .toLowerCase();
+      let type = mapDataType(f.dataType, tt);
+
+      if (type === "text" && sampleRows.length) {
+        const colVals = sampleRows
+          .map((r) => r?.[f.name])
+          .filter((v) => v != null && v !== "");
+        if (colVals.length) type = inferTypeFromSamples(colVals) || type;
+      }
+
+      // Failsafe: if values → force select/multiselect
+      if (Array.isArray(f.values) && f.values.length) {
+        type = tt === "flerval" ? "multiselect" : "select";
+      }
+
+      return {
+        key: f.name,
+        label: f.alias || f.name,
+        readOnly: false,
+        type,
+        options: Array.isArray(f.values) ? f.values : undefined,
+        multiple: tt === "flerval" ? true : undefined,
+        step: type === "integer" ? 1 : undefined,
+      };
+    });
+
+  const sampleKeys = new Set(sampleRows[0] ? Object.keys(sampleRows[0]) : []);
+  const addRo = (key, label = key, width = 120) => {
+    if (
+      (sampleKeys.has(key) || key === "id") &&
+      !fm.some((m) => m.key === key)
+    ) {
+      fm.unshift({
+        key,
+        label,
+        readOnly: true,
+        type: "text",
+        initialWidth: width,
+      });
+    }
+  };
+  addRo("id", "ID", 90);
+  //addRo("geoid", "GEOID", 120);
+  //addRo("oracle_geoid", "ORACLE_GEOID", 140);
+
+  return fm;
+}
+
 function AttributeEditor(props) {
   const vectorLayerRef = React.useRef(null);
   const apiBase =
@@ -240,6 +357,29 @@ function AttributeEditor(props) {
         // 1) load features from service via model
         const { featureCollection } = (await model.loadFromService?.(id)) || {};
 
+        const sampleRows = (featureCollection?.features || [])
+          .slice(0, 100)
+          .map((f) => f.properties || {});
+        try {
+          const schema = await ogc.fetchWfst(
+            id,
+            "id,caption,projection,layers,editableFields,nonEditableFields,geometryField,editPoint,editLine,editPolygon,editMultiPoint,editMultiPolygon,editMultiLine"
+          );
+
+          let fm = []; // definiera outer scope
+
+          if (!schema || !Array.isArray(schema.editableFields)) {
+            console.warn("Hittade inget schema med editableFields för id", id);
+          } else {
+            fm = buildFieldMetaFromBackend(schema, sampleRows);
+          }
+
+          model.setFieldMetadata(fm);
+        } catch (e) {
+          console.warn("Kunde inte läsa/mappa fieldMeta:", e);
+          model.setFieldMetadata([]); // fallback
+        }
+
         // 2) build/create vector layer in the map
         const map = props.map;
         const mapProj = map.getView().getProjection();
@@ -319,7 +459,7 @@ function AttributeEditor(props) {
       offSel();
       offClr();
     };
-  }, [model, props.map, setPluginSettings, styleFn]);
+  }, [model, props.map, setPluginSettings, styleFn, ogc]);
 
   const highlightFeatureById = React.useCallback(
     (fid) => {

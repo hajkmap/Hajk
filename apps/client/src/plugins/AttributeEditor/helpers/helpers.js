@@ -88,7 +88,10 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
 
   if (meta.readOnly) return <input {...common} readOnly />;
 
-  if (meta.type === "select") {
+  if (
+    meta.type === "select" ||
+    (Array.isArray(meta.options) && meta.options.length && !meta?.multiple)
+  ) {
     return (
       <select
         style={inputStyle}
@@ -101,6 +104,42 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
           </option>
         ))}
       </select>
+    );
+  }
+
+  // boolean (checkbox)
+  if (meta.type === "boolean") {
+    const checked =
+      value === true || value === "true" || value === 1 || value === "1";
+    return (
+      <label
+        style={{ display: "inline-flex", gap: "0.5rem", alignItems: "center" }}
+      >
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+        />
+        <span>{checked ? "Ja" : "Nej"}</span>
+      </label>
+    );
+  }
+
+  // integer / number
+  if (meta.type === "integer" || meta.type === "number") {
+    return (
+      <input
+        type="number"
+        style={inputStyle}
+        value={value ?? ""}
+        step={meta.type === "integer" ? 1 : "any"}
+        onChange={(e) => {
+          const v = e.target.value;
+          if (v === "") return onChange("");
+          const num = meta.type === "integer" ? parseInt(v, 10) : parseFloat(v);
+          onChange(Number.isFinite(num) ? num : "");
+        }}
+      />
     );
   }
 
@@ -119,6 +158,51 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
     );
   }
 
+  // datetime/timestamp
+  if (meta.type === "datetime") {
+    const toLocal = (val) => (!val ? "" : String(val).slice(0, 16)); // YYYY-MM-DDTHH:mm
+    return (
+      <input
+        type="datetime-local"
+        style={inputStyle}
+        value={toLocal(value)}
+        onChange={(e) => onChange(e.target.value || null)}
+      />
+    );
+  }
+
+  if (
+    meta.type === "multiselect" ||
+    (meta?.multiple && Array.isArray(meta.options))
+  ) {
+    const arr = Array.isArray(value)
+      ? value
+      : value
+        ? String(value)
+            .split(",")
+            .map((s) => s.trim())
+        : [];
+    return (
+      <select
+        multiple
+        style={{ ...inputStyle, height: "8rem" }}
+        value={arr}
+        onChange={(e) => {
+          const selected = Array.from(e.target.selectedOptions).map(
+            (o) => o.value
+          );
+          onChange(selected);
+        }}
+      >
+        {(meta.options || []).map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
+    );
+  }
+
   return multiline ? (
     <textarea
       {...common}
@@ -128,4 +212,170 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
   ) : (
     <input {...common} />
   );
+}
+
+function ensureArray(val) {
+  if (Array.isArray(val)) return val;
+  if (val == null || val === "") return [];
+  return String(val)
+    .split(",")
+    .map((s) => s.trim());
+}
+
+function withUnknown(options = [], currentVals = []) {
+  const opts = Array.isArray(options) ? options : [];
+  const curr = Array.isArray(currentVals) ? currentVals : [currentVals];
+  const unknown = curr.filter((v) => v && !opts.includes(v));
+  return {
+    optionsWithUnknown: [...unknown, ...opts],
+    unknownSet: new Set(unknown),
+  };
+}
+
+/**
+ * Renders a cell editor for TableMode based on the FIELD_META type.
+ * - Handles multiselect/select (including "unknown value")
+ * - Supports date/datetime/boolean/integer/number/textarea/text
+ */
+export function renderTableCellEditor({
+  meta,
+  editingValue,
+  editorProps, // {...editorProps} from TableMode
+  applyChange, // (nextVal) => void
+  s, // styles-object
+  useTextarea,
+}) {
+  // MULTISELECT
+  if (
+    meta.type === "multiselect" ||
+    (meta?.multiple && Array.isArray(meta.options))
+  ) {
+    const current = ensureArray(editingValue);
+    const { optionsWithUnknown, unknownSet } = withUnknown(
+      meta.options,
+      current
+    );
+
+    return (
+      <select
+        {...editorProps}
+        multiple
+        value={current}
+        onChange={(e) => {
+          const selected = Array.from(e.target.selectedOptions).map(
+            (o) => o.value
+          );
+          applyChange(selected);
+        }}
+        style={{ ...s.cellInput, height: "10rem" }}
+      >
+        {optionsWithUnknown.map((opt) => (
+          <option key={opt} value={opt}>
+            {unknownSet.has(opt) ? `${opt} (okänt värde)` : opt}
+          </option>
+        ))}
+      </select>
+    );
+  }
+
+  // SINGLE SELECT
+  if (
+    meta.type === "select" ||
+    (Array.isArray(meta.options) && meta.options.length)
+  ) {
+    const val = editingValue ?? "";
+    const opts = Array.isArray(meta.options) ? meta.options : [];
+    const hasVal = val !== "" && opts.includes(String(val));
+    const optionsWithUnknown = hasVal
+      ? opts
+      : val
+        ? [String(val), ...opts]
+        : opts;
+
+    return (
+      <select
+        {...editorProps}
+        value={val}
+        onChange={(e) => applyChange(e.target.value)}
+        style={s.cellInput}
+      >
+        {optionsWithUnknown.map((opt) => (
+          <option key={opt} value={opt}>
+            {!hasVal && String(val) === String(opt)
+              ? `${opt} (okänt värde)`
+              : opt}
+          </option>
+        ))}
+      </select>
+    );
+  }
+
+  // BOOLEAN
+  if (meta.type === "boolean") {
+    const checked =
+      editingValue === true ||
+      editingValue === "true" ||
+      editingValue === 1 ||
+      editingValue === "1";
+    return (
+      <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+        <input
+          {...editorProps}
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => applyChange(e.target.checked)}
+        />
+        <span>{checked ? "Ja" : "Nej"}</span>
+      </label>
+    );
+  }
+
+  // DATE
+  if (meta.type === "date") {
+    return (
+      <input
+        {...editorProps}
+        type="date"
+        value={String(editingValue ?? "").slice(0, 10)}
+        onChange={(e) => applyChange(e.target.value || null)}
+      />
+    );
+  }
+
+  // DATETIME
+  if (meta.type === "datetime") {
+    const toLocal = (val) => (!val ? "" : String(val).slice(0, 16)); // YYYY-MM-DDTHH:mm
+    return (
+      <input
+        {...editorProps}
+        type="datetime-local"
+        value={toLocal(editingValue)}
+        onChange={(e) => applyChange(e.target.value || null)}
+      />
+    );
+  }
+
+  // NUMBER/INTEGER
+  if (meta.type === "integer" || meta.type === "number") {
+    return (
+      <input
+        {...editorProps}
+        type="number"
+        step={meta.type === "integer" ? 1 : "any"}
+        value={editingValue ?? ""}
+        onChange={(e) => {
+          const v = e.target.value;
+          if (v === "") return applyChange("");
+          const num = meta.type === "integer" ? parseInt(v, 10) : parseFloat(v);
+          applyChange(Number.isFinite(num) ? num : "");
+        }}
+      />
+    );
+  }
+
+  // TEXT / TEXTAREA
+  if (useTextarea) {
+    return <textarea {...editorProps} rows={8} />;
+  }
+  return <input {...editorProps} type="text" />;
 }

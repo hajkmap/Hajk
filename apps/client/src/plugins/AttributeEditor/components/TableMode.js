@@ -6,6 +6,7 @@ import UndoIcon from "@mui/icons-material/Undo";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { editBus } from "../../../buses/editBus";
+import { renderTableCellEditor } from "../helpers/helpers";
 
 export default function TableMode(props) {
   const {
@@ -811,32 +812,41 @@ export default function TableMode(props) {
                           }
                         >
                           {isEditing ? (
-                            meta.type === "select" ? (
-                              <select {...editorProps}>
-                                {(meta.options || []).map((opt) => (
-                                  <option key={opt} value={opt}>
-                                    {opt}
-                                  </option>
-                                ))}
-                              </select>
-                            ) : meta.type === "date" ? (
-                              <input
-                                {...editorProps}
-                                type="date"
-                                value={String(editingValue).slice(0, 10)}
-                                onChange={(e) =>
-                                  applyChange(e.target.value || null)
-                                }
-                              />
-                            ) : useTextarea ? (
-                              <textarea {...editorProps} rows={8} />
-                            ) : (
-                              <input {...editorProps} type="text" />
-                            )
+                            renderTableCellEditor({
+                              meta,
+                              editingValue,
+                              editorProps,
+                              applyChange,
+                              s,
+                              useTextarea,
+                            })
                           ) : isPlaceholder ? (
                             "#saknas"
+                          ) : meta.type === "url" && effectiveValue ? (
+                            <a
+                              href={
+                                /^(https?:)?\/\//i.test(String(effectiveValue))
+                                  ? String(effectiveValue)
+                                  : `https://${String(effectiveValue)}`
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={String(effectiveValue)}
+                              style={{ textDecoration: "underline" }}
+                            >
+                              {String(effectiveValue)}
+                            </a>
                           ) : (
-                            renderCellText(String(effectiveValue ?? ""), wrapCh)
+                            renderCellText(
+                              Array.isArray(effectiveValue)
+                                ? effectiveValue.join(", ")
+                                : meta.type === "boolean"
+                                  ? effectiveValue
+                                    ? "Ja"
+                                    : "Nej"
+                                  : String(effectiveValue ?? ""),
+                              wrapCh
+                            )
                           )}
                         </td>
                       );
