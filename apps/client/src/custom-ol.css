@@ -83,3 +83,11 @@
 .introjs-skipbutton {
   color: #fff !important;
 }
+
+.introjs-tooltiptext {
+  font-size: 14px !important;
+}
+
+.introjs-tooltip-title {
+  font-size: 16px !important;
+}
