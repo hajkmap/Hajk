@@ -13,7 +13,7 @@ const DrawToolbox = (props) => {
     {
       type: "Polygon", // Open-layers does not like all caps!
       tooltip:
-        "Rita en yta i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
+        "Rita en yta i kartan genom att klicka en gång per nod, avsluta med ett dubbelklick.",
       icon: <EditIcon />,
     },
     {

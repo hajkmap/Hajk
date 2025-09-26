@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import {
   IconButton,
@@ -24,6 +24,19 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
 
   const [menuIsOpen, setMenuIsOpen] = useState(false);
 
+  // Add event listener for closing menu
+  useEffect(() => {
+    const handleCloseMenu = () => {
+      setAnchorEl(null);
+      setMenuIsOpen(false);
+    };
+
+    document.addEventListener("closeLayersMenu", handleCloseMenu);
+    return () => {
+      document.removeEventListener("closeLayersMenu", handleCloseMenu);
+    };
+  }, []);
+
   // Show the options menu by setting an anchor element
   const handleShowMoreOptionsClick = (e) => {
     e.stopPropagation();
@@ -45,6 +58,7 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
   return (
     <>
       <IconButton
+        id="layerswitcher-actions-menu-button"
         size="small"
         aria-controls={menuIsOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
@@ -61,6 +75,11 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
         open={menuIsOpen}
         onClose={onOptionsMenuClose}
         variant={"menu"}
+        slotProps={{
+          paper: {
+            id: "layerswitcher-actions-menu",
+          },
+        }}
       >
         <MenuItem
           onClick={(e) => {

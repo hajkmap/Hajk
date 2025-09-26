@@ -18,7 +18,7 @@ import {
 
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
-import Introduction from "./Introduction";
+import Introduction from "./Introduction/Introduction";
 import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
@@ -1044,6 +1044,7 @@ class App extends React.PureComponent {
                   }
                 >
                   <IconButton
+                    id="toggle-drawer-permanent"
                     ref={this.buttonToggleDrawerPermanentRef}
                     sx={{ margin: "-12px" }} // Ugh... However, it tightens everything up
                     onClick={this.togglePermanent}
@@ -1406,6 +1407,11 @@ class App extends React.PureComponent {
                 this.appModel.config.mapConfig.map.introductionSteps
               }
               globalObserver={this.globalObserver}
+              plugins={this.appModel.plugins}
+              drawerButtonTitle={
+                this.appModel.config.mapConfig.map.drawerButtonTitle
+              }
+              isDarkMode={this.props.theme.palette.mode === "dark"}
             />
           )}
         </>
