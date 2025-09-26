@@ -15,6 +15,7 @@ import RotateRightIcon from "@mui/icons-material/RotateRight";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import Information from "../components/Information";
 import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
+import { editBus } from "../../../buses/editBus";
 
 const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
   return (
@@ -69,6 +70,7 @@ const FeatureMoveSelector = (props) => {
       props.movementLength,
       props.movementAngle
     );
+    editBus.emit("sketch:ae-translate", { distance: length, angleDeg: angle });
     // Then we'll update the last-moves-state.
     props.setLastMoves([...props.lastMoves, { length, angle }]);
   };
@@ -80,6 +82,10 @@ const FeatureMoveSelector = (props) => {
     const moves = [...props.lastMoves];
     const { length, angle } = moves.pop();
     props.drawModel.translateSelectedFeatures(length, angle - 180);
+    editBus.emit("sketch:ae-translate", {
+      distance: length,
+      angleDeg: angle - 180,
+    });
     props.setLastMoves(moves);
   };
 
@@ -159,6 +165,12 @@ const FeatureRotateSelector = (props) => {
   // Handle both single click rotation and continuous rotation
   const handleRotationClick = (clockwise = true, continuous = false) => {
     props.drawModel.rotateSelectedFeatures(props.rotationDegrees, clockwise);
+
+    editBus.emit("sketch:ae-rotate", {
+      degrees: props.rotationDegrees,
+      clockwise,
+    });
+
     if (continuous) {
       rotationTimeout = setTimeout(() => {
         handleRotationClick(clockwise, true);

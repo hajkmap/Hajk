@@ -251,45 +251,49 @@ function AttributeEditor(props) {
 
   React.useEffect(() => {
     let cancelled = false;
+    const active = props.options?.activeServices ?? [];
+    if (!active.length) {
+      setServiceList([]);
+      return;
+    }
 
-    async function loadCaptions() {
+    (async () => {
       try {
-        // 1) Fetch the entire list at once (for fallback lookup)
-        const all = await ogc.fetchWfstList(
-          "id,caption,title,name,projection,layers"
+        // Fetch full list once for fallback lookups
+        const list = await ogc.fetchWfstList(
+          "id,uuid,caption,title,name,projection,layers"
         );
-        const allArr = Array.isArray(all) ? all : (all?.layers ?? []);
+        const allArr = Array.isArray(list) ? list : (list?.layers ?? []);
 
-        // 2) For each active id: fetch metadata and create a robust object
+        const ids = active.map((x) => x.id).filter(Boolean);
         const items = await Promise.all(
-          (props.options?.activeServices ?? []).map(async ({ id }) => {
+          ids.map(async (id) => {
             try {
-              const meta = await ogc.getServiceMeta(id);
-              // coalesce: caption/title/name/label
+              // Primary source of truth
+              const meta = await ogc.fetchWfstMeta(id);
               const title =
-                meta?.caption?.trim() ||
-                meta?.title?.trim() ||
-                meta?.name?.trim() ||
-                // fallback: look up in the list if getServiceMeta didn't return anything
-                (
-                  allArr.find((x) => (x.id ?? x.uuid) === id)?.caption ?? ""
-                ).trim() ||
+                meta?.caption?.trim?.() ||
+                meta?.title?.trim?.() ||
+                meta?.name?.trim?.() ||
+                // fallback: look up in fetched list
+                (allArr.find((x) => (x.id ?? x.uuid) === id)?.caption ?? "")
+                  .toString()
+                  .trim() ||
                 id;
-
               return {
                 id,
                 title,
                 projection: meta?.projection,
-                layers: meta?.layers,
+                layers: meta?.layers || [],
               };
             } catch {
-              // fallback: let's search in allArr
+              // Hard fallback: list row or bare id
               const m = allArr.find((x) => (x.id ?? x.uuid) === id);
               return {
                 id,
-                title: m?.caption || m?.title || id,
+                title: (m?.caption || m?.title || m?.name || id)?.toString(),
                 projection: m?.projection,
-                layers: m?.layers,
+                layers: m?.layers || [],
               };
             }
           })
@@ -298,50 +302,14 @@ function AttributeEditor(props) {
         if (!cancelled) setServiceList(items.filter(Boolean));
       } catch (e) {
         if (!cancelled) setServiceList([]);
-        console.warn("Kunde inte läsa captions:", e);
+        console.warn("Kunde inte läsa serviceList:", e);
       }
-    }
-
-    const active = props.options?.activeServices ?? [];
-    if (active.length) loadCaptions();
-    else setServiceList([]);
+    })();
 
     return () => {
       cancelled = true;
     };
   }, [ogc, props.options?.activeServices, setServiceList]);
-
-  React.useEffect(() => {
-    let alive = true;
-
-    (async () => {
-      const ids =
-        props.options?.activeServices?.map((x) => x.id).filter(Boolean) || [];
-
-      // fetch metadata per id (caption, possibly layers and projection)
-      const metas = await Promise.all(
-        ids.map(async (id) => {
-          try {
-            const m = await ogc.fetchWfstMeta(id); // see helper futher down
-            return {
-              id,
-              title: m?.caption || id,
-              projection: m?.projection,
-              layers: m?.layers || [],
-            };
-          } catch {
-            return { id, title: id };
-          }
-        })
-      );
-
-      if (alive) setServiceList(metas);
-    })();
-
-    return () => {
-      alive = false;
-    };
-  }, [ogc, props.options?.activeServices]);
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", async (ev) => {
@@ -406,6 +374,13 @@ function AttributeEditor(props) {
             })
           : [];
 
+        visibleIdsRef.current = new Set(
+          features.flatMap((f) => {
+            const id = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+            return [id, String(id)];
+          })
+        );
+
         features.forEach((f) => {
           const fidProp = f.get?.("@_fid");
           if (fidProp) {
@@ -432,18 +407,10 @@ function AttributeEditor(props) {
         lyr.set("name", "attributeeditor");
         editBus.emit("sketch.attachExternalLayer", {
           layer: lyr,
-          allow: { select: true, translate: true },
+          allow: { select: true, translate: true, modify: true },
         });
         map.addLayer(lyr);
         vectorLayerRef.current = lyr;
-
-        // 3) zoom to the data - shortcut: fit the extent of the features
-        const extent = src.getExtent();
-        if (extent) {
-          map
-            .getView()
-            .fit(extent, { padding: [20, 20, 20, 20], duration: 300 });
-        }
       } catch (e) {
         console.warn("loadFromService fel:", e);
       }
@@ -522,11 +489,6 @@ function AttributeEditor(props) {
       const onAdd = (e) => {
         const f = e.feature;
         if (!f) return;
-        const isUser =
-          f.get?.("USER_DRAWN") === true ||
-          f.get?.("DUPLICATED") === true ||
-          f.get?.("__ae_capture") === true;
-        if (!isUser) return;
 
         if (
           !currentServiceIdRef.current ||

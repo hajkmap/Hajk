@@ -84,6 +84,7 @@ export default function TableMode(props) {
   React.useEffect(() => {
     // only when the table actually shows something
     if (!filteredAndSorted.length) return;
+    if (tableSelectedIds.size === 0) return;
 
     // is any selected id still visible in the current filtered list?
     const selectedVisible = filteredAndSorted.some((r) =>

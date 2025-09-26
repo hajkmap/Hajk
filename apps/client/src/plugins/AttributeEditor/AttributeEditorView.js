@@ -362,15 +362,49 @@ export default function AttributeEditorView({
       const src = layer?.getSource?.();
       if (!src) return;
 
+      // Helper: match AE-id (e.g. 5) against OL-ID/props (@_fid, id, getId)
+      const resolveSourceFeature = (fromId) => {
+        const want = String(fromId);
+
+        // 1) Directly via getFeatureById (OL-ID)
+        let f = src.getFeatureById?.(want);
+        if (f) return f;
+
+        // 2) Search all features and compare multiple id variants
+        const all = src.getFeatures?.() || [];
+        f = all.find((x) => {
+          const a = x?.getId?.(); // OL-ID (kan vara "@_fid")
+          const b = x?.get?.("@_fid");
+          const c = x?.get?.("id");
+          const A = a != null ? String(a) : null;
+          const B = b != null ? String(b) : null;
+          const C = c != null ? String(c) : null;
+
+          // exact match against any variant
+          if (A === want || B === want || C === want) return true;
+
+          // “suffix”-match: "@_fid" ending with ".<id>" (e.g. "bg_byggnader_y.5")
+          if (A && A.endsWith("." + want)) return true;
+          if (B && B.endsWith("." + want)) return true;
+
+          return false;
+        });
+
+        return f || null;
+      };
+
       sourceIds.forEach((fromId, i) => {
-        let f =
-          src.getFeatureById?.(fromId) || featureIndexRef.current.get(fromId);
-        if (!f) return;
+        const srcFeat = resolveSourceFeature(fromId);
+        if (!srcFeat) return;
 
-        const clone = f.clone();
+        const clone = srcFeat.clone();
+        const g = clone.getGeometry?.();
+        if (g && g.clone) clone.setGeometry(g.clone());
 
+        // Set goal id (temporary negative id that AE needs to replace)
         let toId = createdIds?.[i];
         if (toId == null) {
+          // fallback: create a draft in the model if it doesn't exist
           toId = model.addDraftFromFeature(clone);
         }
 
@@ -381,6 +415,17 @@ export default function AttributeEditorView({
         clone.setId?.(toId);
         try {
           clone.set?.("id", toId, true);
+        } catch {}
+
+        try {
+          const gt = clone.getGeometry?.()?.getType?.() || "Polygon";
+          const method =
+            gt.replace(/^Multi/, "") === "LinearRing"
+              ? "Polygon"
+              : gt.replace(/^Multi/, "");
+          clone.set?.("USER_DRAWN", true, true);
+          clone.set?.("DRAW_METHOD", method, true);
+          clone.set?.("EDIT_ACTIVE", false, true);
         } catch {}
 
         src.addFeature(clone);
@@ -402,6 +447,11 @@ export default function AttributeEditorView({
       const created = ids.map((_, i) => start - i);
       setTableSelectedIds(new Set(created));
       cloneGeometryForDuplicates(ids, created);
+      editBus.emit("attrib:select-ids", {
+        ids: created,
+        source: "view",
+        mode: "replace",
+      });
     }
     showNotification(
       `${ids.length} ${ids.length === 1 ? "utkast" : "utkast"} skapade`
@@ -432,6 +482,11 @@ export default function AttributeEditorView({
       setSelectedIds(new Set(created));
       setFocusedId(created[0]);
       cloneGeometryForDuplicates(ids, created);
+      editBus.emit("attrib:select-ids", {
+        ids: created,
+        source: "view",
+        mode: "replace",
+      });
     }
 
     showNotification(
@@ -477,29 +532,6 @@ export default function AttributeEditorView({
     selectedIdsRef,
     visibleIdsRef,
   ]);
-
-  React.useEffect(() => {
-    const offSelIds = editBus.on("attrib:select-ids", (ev) => {
-      const { ids = [], source = "view", mode } = ev.detail || {};
-
-      if (!ids.length || mode === "clear") {
-        setTableSelectedIds(new Set());
-        setSelectedIds(new Set());
-        setFocusedId(null);
-        return;
-      }
-
-      if (ui.mode === "table") {
-        setTableSelectedIds(new Set(ids));
-      } else {
-        setSelectedIds(new Set(ids));
-        setFocusedId(ids[0] ?? null);
-      }
-      editBus.emit("attrib:focus-id", { id: ids[0], source });
-    });
-
-    return () => offSelIds();
-  }, [ui.mode, setTableSelectedIds, setSelectedIds, setFocusedId]);
 
   React.useEffect(() => {
     const off = editBus.on("attrib:toggle-delete-ids", (ev) => {

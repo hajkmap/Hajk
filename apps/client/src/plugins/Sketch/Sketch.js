@@ -23,13 +23,6 @@ import Select from "ol/interaction/Select";
 import Translate from "ol/interaction/Translate";
 import Modify from "ol/interaction/Modify";
 import { Stroke, Fill } from "ol/style";
-import {
-  singleClick,
-  click,
-  altKeyOnly,
-  shiftKeyOnly,
-  platformModifierKeyOnly,
-} from "ol/events/condition";
 
 // Constants
 import {
@@ -229,21 +222,152 @@ const Sketch = (props) => {
   React.useEffect(() => {
     const map = props.map;
     if (!map) return;
+    const lastPublishRef = { id: null, chan: null };
+
+    //Helper
+    const matchesLogicalId = (feat, want) => {
+      const a = feat?.getId?.();
+      const b = feat?.get?.("@_fid");
+      const c = feat?.get?.("id");
+      const wantStr = String(want);
+      const A = a != null ? String(a) : null;
+      const B = b != null ? String(b) : null;
+      const C = c != null ? String(c) : null;
+
+      if (A === wantStr || B === wantStr || C === wantStr) return true;
+      if (A && A.endsWith("." + wantStr)) return true;
+      if (B && B.endsWith("." + wantStr)) return true;
+      return false;
+    };
 
     // Helper: Canonicalize feature ID
     const toCanonicalId = (idLike) => {
       const rows = props?.model?.getSnapshot?.().features || [];
-      const hit = rows.find((r) => String(r.id) === String(idLike));
-      return hit ? hit.id : idLike;
+      const s = String(idLike);
+
+      // 1) exact match of id
+      let hit = rows.find((r) => String(r.id) === s);
+      if (hit) return hit.id;
+
+      // 2) exact match against @_fid (e.g. fid)
+      hit = rows.find((r) => String(r["@_fid"] ?? r.fid ?? "") === s);
+      if (hit) return hit.id;
+
+      // 3) suffix match: "...<dot><id>"  -> extract the suffix
+      const m = s.match(/\.([^.]+)$/);
+      if (m) {
+        const tail = m[1];
+        hit = rows.find((r) => String(r.id) === String(tail));
+        if (hit) return hit.id;
+      }
+
+      // fallback (e.g. redan kanoniska negativa draft-id:n)
+      return idLike;
     };
 
     // Helper: Publish feature to Sketch/EditView without affecting AE selection
     const publishToEditView = (feature) => {
-      if (feature && !feature.getStyle?.()) {
-        // TODO: Materialize style before publishing
+      const chan = activityId === "MOVE" ? "move" : "edit";
+      const fid = feature
+        ? (feature.getId?.() ?? feature.get?.("@_fid") ?? feature.get?.("id"))
+        : null;
+
+      // avoid identical updates
+      if (lastPublishRef.id === fid && lastPublishRef.chan === chan) return;
+
+      if (feature) {
+        const gt = feature.getGeometry?.()?.getType?.() || "Polygon";
+        const method =
+          gt.replace(/^Multi/, "") === "LinearRing"
+            ? "Polygon"
+            : gt.replace(/^Multi/, "");
+        feature.set("USER_DRAWN", true, true);
+        feature.set("DRAW_METHOD", method, true);
+        feature.set("EDIT_ACTIVE", activityId === "EDIT", true);
+        if (feature.get("TEXT_SETTINGS") == null) {
+          feature.set(
+            "TEXT_SETTINGS",
+            {
+              backgroundColor: "#000000",
+              foregroundColor: "#FFFFFF",
+              size: 14,
+            },
+            true
+          );
+        }
+        if (feature.get("STYLE_BEFORE_HIDE") === undefined) {
+          feature.set("STYLE_BEFORE_HIDE", null, true);
+        }
       }
-      localObserver?.publish("drawModel.modify.mapClick", feature || null);
-      localObserver?.publish("drawModel.move.select", feature ? [feature] : []);
+
+      if (feature && !feature.getStyle?.()) {
+        const owner = [...reg.keys()].find((lyr) => {
+          const src = lyr.getSource?.();
+          return (
+            !!src &&
+            (src.getFeatureById?.(feature.getId?.()) ||
+              src.getFeatures?.().includes?.(feature))
+          );
+        });
+        materializeStyleFromLayer(owner, feature, map);
+      }
+
+      if (activityId === "EDIT") {
+        localObserver?.publish("drawModel.modify.mapClick", feature || null);
+      } else if (activityId === "MOVE") {
+        localObserver?.publish(
+          "drawModel.move.select",
+          feature ? [feature] : []
+        );
+      }
+
+      lastPublishRef.id = fid;
+      lastPublishRef.chan = chan;
+    };
+
+    // Helper: Update OL selection based on logical IDs
+    const syncOlSelection = (logicalIds) => {
+      const wanted = new Set();
+      logicalIds.forEach((id) => {
+        wanted.add(id);
+        wanted.add(String(id));
+      });
+
+      for (const [layer, rec] of reg.entries()) {
+        const select = rec?.select;
+        const fc = select?.getFeatures?.();
+        const src = layer?.getSource?.();
+        if (!fc || !src) continue;
+
+        const currentArr = fc.getArray ? fc.getArray() : [];
+
+        const haveSet = new Set();
+        currentArr.forEach((f) => {
+          if (!f || typeof f.get !== "function") return;
+          const id = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+          haveSet.add(id);
+          haveSet.add(String(id));
+        });
+
+        const srcFeatures = src.getFeatures?.() || [];
+
+        wanted.forEach((wid) => {
+          if (haveSet.has(wid)) return;
+          const f =
+            src.getFeatureById?.(wid) ||
+            srcFeatures.find((x) => matchesLogicalId(x, wid));
+          if (f) fc.push(f);
+        });
+
+        // Remove those that are no longer selected (iterate over the copy!)
+        currentArr.forEach((f) => {
+          if (!f || typeof f.get !== "function") return;
+          const id = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+          if (!(wanted.has(id) || wanted.has(String(id)))) {
+            fc.remove(f);
+          }
+        });
+      }
     };
 
     // ============================================================
@@ -291,11 +415,9 @@ const Sketch = (props) => {
         if (!src) continue;
         let f = src.getFeatureById?.(id);
         if (!f) {
-          f = src
-            .getFeatures?.()
-            .find((x) => (x.getId?.() ?? x.get?.("id")) === id);
+          f = src.getFeatures?.().find((x) => matchesLogicalId(x, id));
         }
-        if (f) return f;
+        return f || null;
       }
       return null;
     };
@@ -315,18 +437,73 @@ const Sketch = (props) => {
         style: null,
         hitTolerance: 6,
         multi: true,
-        condition: singleClick,
-        toggleCondition: (e) =>
-          altKeyOnly(e) || shiftKeyOnly(e) || platformModifierKeyOnly(e),
-        addCondition: (e) =>
-          click(e) &&
-          (altKeyOnly(e) || shiftKeyOnly(e) || platformModifierKeyOnly(e)),
-        removeCondition: (e) =>
-          click(e) &&
-          (altKeyOnly(e) || shiftKeyOnly(e) || platformModifierKeyOnly(e)),
+        // We handle selection ourselves via attrib:select-ids + syncOlSelection.
+        // Disable OL’s built-in picking to avoid conflicts (blinking on ctrl-click)
+        condition: () => false,
       });
       const fc = sel.getFeatures();
-      const tr = new Translate({ features: fc });
+      const tr = new Translate({
+        features: fc,
+        condition: (evt) => {
+          if (activityId !== "MOVE" || !translateEnabled) return false;
+
+          let hit = null;
+          map.forEachFeatureAtPixel(
+            evt.pixel,
+            (f, lyr) => {
+              if (lyr === layer) {
+                hit = f;
+                return true;
+              }
+              return false;
+            },
+            { hitTolerance: 6, layerFilter: (lyr) => lyr === layer }
+          );
+          if (!hit) return false;
+
+          // Ensure it has a materialized style (for Edit/MOVE views)
+          materializeStyleFromLayer(layer, hit, map);
+
+          // Canonical ID for AE
+          const raw = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
+          const canon = toCanonicalId(raw);
+
+          const multi =
+            evt.originalEvent?.ctrlKey ||
+            evt.originalEvent?.metaKey ||
+            evt.originalEvent?.shiftKey;
+
+          if (!multi) {
+            try {
+              fc.clear();
+            } catch {}
+            fc.push(hit);
+
+            editBus.emit("attrib:select-ids", {
+              ids: [canon],
+              source: "map",
+              mode: "replace",
+            });
+          } else {
+            const arr = fc.getArray ? fc.getArray() : [];
+            if (arr.includes(hit)) {
+              fc.remove(hit);
+            } else {
+              fc.push(hit);
+            }
+            const ids = (fc.getArray ? fc.getArray() : []).map((f) => {
+              const id = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+              return toCanonicalId(id);
+            });
+            editBus.emit("attrib:select-ids", {
+              ids,
+              source: "map",
+              mode: "toggle",
+            });
+          }
+          return true;
+        },
+      });
       const mod = new Modify({ features: fc, pixelTolerance: 6 });
 
       tr.__allowTranslate = !!allow.translate;
@@ -351,8 +528,6 @@ const Sketch = (props) => {
           mode: "replace",
         });
       };
-
-      sel.on("select", onSelect);
 
       const onTranslateEnd = (e) => {
         const f = e?.features?.item?.(0) ?? null;
@@ -417,6 +592,18 @@ const Sketch = (props) => {
     // ============================================================
     // SECTION: Cross-plugin bus subscriptions (AE ↔ Sketch)
     // ============================================================
+    const offAttribSelectIds = editBus.on("attrib:select-ids", (ev) => {
+      // Sync OL selection with logical ids from UI
+      const { ids = [] } = ev.detail || {};
+      syncOlSelection(ids);
+      if (ids.length) {
+        const f = findAeFeatureById(ids[0]);
+        publishToEditView(f || null);
+      } else {
+        publishToEditView(null);
+      }
+    });
+
     const offTranslateCmd = editBus.on("sketch:ae-translate", (ev) => {
       const { distance, angleDeg } = ev.detail || {};
       const feats = getAeSelected();
@@ -428,19 +615,66 @@ const Sketch = (props) => {
     });
 
     const offRotateCmd = editBus.on("sketch:ae-rotate", (ev) => {
-      const { degrees, clockwise } = ev.detail || {};
+      const { degrees = 0, clockwise = true } = ev.detail || {};
       const feats = getAeSelected();
-      if (feats.length) {
-        drawModel.rotateSelectedFeatures(degrees, clockwise, {
-          features: feats,
-        });
+      if (!feats.length) return;
+
+      // Compute a common anchor (center of all selected)
+      let minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity;
+      feats.forEach((f) => {
+        const g = f.getGeometry?.();
+        if (!g?.getExtent) return;
+        const e = g.getExtent();
+        if (!e) return;
+        minX = Math.min(minX, e[0]);
+        minY = Math.min(minY, e[1]);
+        maxX = Math.max(maxX, e[2]);
+        maxY = Math.max(maxY, e[3]);
+      });
+      if (!isFinite(minX)) return;
+
+      const anchor = [(minX + maxX) / 2, (minY + maxY) / 2];
+      const angleRad = (clockwise ? -1 : 1) * ((degrees * Math.PI) / 180);
+
+      feats.forEach((f) => {
+        const g = f.getGeometry?.();
+        if (!g?.rotate) return;
+        // clone to avoid shared-geometry surprises
+        if (g.clone) f.setGeometry(g.clone());
+        f.getGeometry().rotate(angleRad, anchor);
+        try {
+          f.set?.("USER_DRAWN", true, true);
+          f.set?.("EDIT_ACTIVE", false, true);
+        } catch {}
+      });
+
+      // Tell viewers/tools about the change
+      publishToEditView(feats[0] ?? null);
+
+      // Force a refresh of AE layers (no vectorLayerRef in Sketch)
+      for (const lyr of reg.keys()) {
+        try {
+          lyr.getSource()?.changed?.();
+        } catch {}
+        try {
+          lyr.changed?.();
+        } catch {}
       }
     });
 
     const offFocus = editBus.on("attrib:focus-id", (ev) => {
       const id = ev?.detail?.id;
+      // Publish to Sketch if we're in a state where it's needed
+      if (!(activityId === "EDIT" || activityId === "MOVE")) return;
       if (id == null) {
-        localObserver?.publish("drawModel.modify.mapClick", null);
+        if (activityId === "EDIT") {
+          localObserver?.publish("drawModel.modify.mapClick", null);
+        } else if (activityId === "MOVE") {
+          localObserver?.publish("drawModel.move.select", []);
+        }
         return;
       }
       const f = findAeFeatureById(id);
@@ -454,7 +688,11 @@ const Sketch = (props) => {
         });
         materializeStyleFromLayer(layerForF, f, map);
       }
-      localObserver?.publish("drawModel.modify.mapClick", f || null);
+      if (activityId === "EDIT") {
+        localObserver?.publish("drawModel.modify.mapClick", f || null);
+      } else if (activityId === "MOVE") {
+        localObserver?.publish("drawModel.move.select", f ? [f] : []);
+      }
     });
 
     // ============================================================
@@ -477,7 +715,20 @@ const Sketch = (props) => {
       const lyr = e.element || e.layer || e.target;
       attachForLayer(lyr, { select: true, translate: true, modify: true });
     };
+
+    const onLayerRemove = (e) => {
+      const lyr = e.element || e.layer || e.target;
+      const rec = reg.get(lyr);
+      if (rec) {
+        try {
+          rec.cleanup();
+        } catch {}
+        reg.delete(lyr);
+      }
+    };
+
     layers.on?.("add", onLayerAdd);
+    layers.on?.("remove", onLayerRemove);
 
     applyEnablement();
 
@@ -498,27 +749,22 @@ const Sketch = (props) => {
       let hit = null;
       map.forEachFeatureAtPixel(
         evt.pixel,
-        (f, lyr) => {
-          if (lyr === targetLayer) {
-            hit = f;
-            return true;
-          }
-          return false;
-        },
+        (f, lyr) => (lyr === targetLayer ? ((hit = f), true) : false),
         { layerFilter: (lyr) => lyr === targetLayer, hitTolerance: 6 }
       );
-
       if (!hit) return;
 
-      const fid = hit.getId?.() ?? hit.get?.("id");
-      if (fid == null) return;
+      const raw = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
+      if (raw == null) return;
+
+      const canon = toCanonicalId(raw);
 
       editBus.emit("attrib:select-ids", {
-        ids: [fid],
+        ids: [canon],
         source: "map",
         mode: "replace",
       });
-      editBus.emit("attrib:toggle-delete-ids", { ids: [fid], source: "map" });
+      editBus.emit("attrib:toggle-delete-ids", { ids: [canon], source: "map" });
 
       evt.preventDefault?.();
       evt.stopPropagation?.();
@@ -530,6 +776,12 @@ const Sketch = (props) => {
     // SECTION: Cleanup
     // ============================================================
     return () => {
+      try {
+        offAttribSelectIds();
+      } catch {}
+      try {
+        layers.un?.("remove", onLayerRemove);
+      } catch {}
       try {
         offAttach();
       } catch {}
