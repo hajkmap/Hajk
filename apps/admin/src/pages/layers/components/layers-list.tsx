@@ -1,15 +1,7 @@
 import { useState, useMemo } from "react";
 import Grid from "@mui/material/Grid2";
-import {
-  Button,
-  IconButton,
-  Menu,
-  MenuItem,
-  Box,
-  useTheme,
-  TextField,
-} from "@mui/material";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { Button, useTheme, TextField, ListItemText } from "@mui/material";
+import { GridRenderCellParams, GridColDef } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
 import Page from "../../../layouts/root/components/page";
 import {
@@ -18,10 +10,13 @@ import {
   LayerCreateInput,
   useCreateLayer,
 } from "../../../api/layers";
-import { useServices, Service } from "../../../api/services";
+import {
+  useServices,
+  Service,
+  SERVICE_TYPE,
+  SERVICE_STATUS,
+} from "../../../api/services";
 import { useNavigate } from "react-router";
-import { GRID_SWEDISH_LOCALE_TEXT } from "../../../i18n/translations/datagrid/sv";
-import useAppStateStore from "../../../store/use-app-state-store";
 import { SquareSpinnerComponent } from "../../../components/progress/square-progress";
 import DialogWrapper from "../../../components/flexible-dialog";
 import FormRenderer from "../../../components/form-factory/form-renderer";
@@ -30,8 +25,10 @@ import { createOnSubmitHandler } from "../../../components/form-factory/form-uti
 import DynamicFormContainer from "../../../components/form-factory/dynamic-form-container";
 import { FieldValues } from "react-hook-form";
 import INPUT_TYPE from "../../../components/form-factory/types/input-type";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { toast } from "react-toastify";
+import ServiceTypeBadge from "../../services/components/service-type-badge";
+import ServiceStatusIndicator from "../../services/components/service-status-indicator";
+import StyledDataGrid from "../../../components/data-grid";
 
 interface LayersListProps {
   filterLayers: (layers: Layer[], services: Service[]) => Layer[];
@@ -39,6 +36,12 @@ interface LayersListProps {
   pageTitleKey: string;
   baseRoute: string;
 }
+
+type LayersGridRow = Omit<Layer, "status"> & {
+  type: SERVICE_TYPE;
+  url: string;
+  status: SERVICE_STATUS | undefined;
+};
 
 export default function LayersList({
   filterLayers,
@@ -49,7 +52,6 @@ export default function LayersList({
   const { t } = useTranslation();
   const { data: layers, isLoading } = useLayers();
   const navigate = useNavigate();
-  const language = useAppStateStore((state) => state.language);
   const [open, setOpen] = useState<boolean>(false);
   const { data: services } = useServices();
 
@@ -60,7 +62,7 @@ export default function LayersList({
     setSearchTerm(event.target.value);
   };
 
-  const filteredLayers = useMemo(() => {
+  const filteredLayers = useMemo<LayersGridRow[]>(() => {
     if (!layers || !services) return [];
 
     // First apply the specific filter for this page type
@@ -81,10 +83,12 @@ export default function LayersList({
       const service = services.find(
         (service) => service.id === layer.serviceId
       );
+      const serviceType: SERVICE_TYPE = service?.type ?? SERVICE_TYPE.WMS;
       return {
         ...layer,
-        type: service?.type ?? "",
+        type: serviceType,
         url: service?.url ?? "",
+        status: service?.status,
       };
     });
   }, [layers, services, searchTerm, filterLayers]);
@@ -175,56 +179,56 @@ export default function LayersList({
     },
   });
 
-  const RowMenu = (params: { row: { id: string } }) => {
-    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-    const open = Boolean(anchorEl);
+  // const RowMenu = (params: { row: { id: string } }) => {
+  //   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  //   const open = Boolean(anchorEl);
 
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-      setAnchorEl(event.currentTarget as HTMLElement | null);
-    };
+  //   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  //     setAnchorEl(event.currentTarget as HTMLElement | null);
+  //   };
 
-    const handleClose = () => {
-      setAnchorEl(null);
-    };
+  //   const handleClose = () => {
+  //     setAnchorEl(null);
+  //   };
 
-    return (
-      <Box component="div" sx={{ textAlign: "start" }}>
-        <IconButton onClick={handleClick}>
-          <MoreHorizIcon />
-        </IconButton>
-        <Menu
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "left",
-          }}
-        >
-          <MenuItem
-            onClick={() => {
-              const id: string = (params.row as Layer).id;
-              if (id) {
-                void navigate(`${baseRoute}/${id}`);
-              }
-            }}
-          >
-            View
-          </MenuItem>
-          <MenuItem onClick={() => alert(`Edit ${params.row.id}`)}>
-            Edit
-          </MenuItem>
-          <MenuItem onClick={() => alert(`Delete ${params.row.id}`)}>
-            Delete
-          </MenuItem>
-        </Menu>
-      </Box>
-    );
-  };
+  //   return (
+  //     <Box component="div" sx={{ textAlign: "start" }}>
+  //       <IconButton onClick={handleClick}>
+  //         <MoreHorizIcon />
+  //       </IconButton>
+  //       <Menu
+  //         anchorEl={anchorEl}
+  //         open={open}
+  //         onClose={handleClose}
+  //         anchorOrigin={{
+  //           vertical: "bottom",
+  //           horizontal: "left",
+  //         }}
+  //         transformOrigin={{
+  //           vertical: "top",
+  //           horizontal: "left",
+  //         }}
+  //       >
+  //         <MenuItem
+  //           onClick={() => {
+  //             const id: string = (params.row as Layer).id;
+  //             if (id) {
+  //               void navigate(`${baseRoute}/${id}`);
+  //             }
+  //           }}
+  //         >
+  //           View
+  //         </MenuItem>
+  //         <MenuItem onClick={() => alert(`Edit ${params.row.id}`)}>
+  //           Edit
+  //         </MenuItem>
+  //         <MenuItem onClick={() => alert(`Delete ${params.row.id}`)}>
+  //           Delete
+  //         </MenuItem>
+  //       </Menu>
+  //     </Box>
+  //   );
+  // };
 
   return (
     <>
@@ -284,87 +288,53 @@ export default function LayersList({
           </Grid>
 
           <Grid size={12}>
-            <DataGrid
-              onCellClick={(params) => {
-                if (params.field === "actions") {
-                  return;
-                }
-                const id: string = (params.row as Layer).id;
+            <StyledDataGrid<LayersGridRow>
+              rows={filteredLayers ?? []}
+              columns={
+                [
+                  {
+                    field: "type",
+                    flex: 0.1,
+                    headerName: t("common.serviceType"),
+                    renderCell: (
+                      params: GridRenderCellParams<LayersGridRow>
+                    ) => <ServiceTypeBadge type={params.row.type} />,
+                  },
+                  {
+                    field: "name",
+                    flex: 0.5,
+                    headerName: t("common.name"),
+                    renderCell: (
+                      params: GridRenderCellParams<LayersGridRow>
+                    ) => (
+                      <ListItemText
+                        primary={params.row.name}
+                        secondary={params.row.url}
+                      />
+                    ),
+                  },
+                  {
+                    field: "usedInMaps",
+                    flex: 0.3,
+                    headerName: t("common.usedInMaps"),
+                  },
+                  {
+                    field: "brokenService",
+                    flex: 0.2,
+                    headerName: t("common.status"),
+                    headerAlign: "center",
+                    renderCell: (
+                      params: GridRenderCellParams<LayersGridRow>
+                    ) => <ServiceStatusIndicator status={params.row.status!} />,
+                  },
+                ] as GridColDef<LayersGridRow>[]
+              }
+              onRowClick={({ row }) => {
+                const id: string = row.id;
                 if (id) {
                   void navigate(`${baseRoute}/${id}`);
                 }
               }}
-              sx={{
-                maxWidth: "100%",
-                "& .MuiDataGrid-row:hover": {
-                  cursor: "pointer",
-                },
-                "& .MuiDataGrid-row.Mui-selected": {
-                  backgroundColor: "inherit",
-                },
-                "& .MuiDataGrid-cell:focus": {
-                  outline: "none",
-                },
-                "& .MuiDataGrid-cell.Mui-selected": {
-                  backgroundColor: "inherit",
-                },
-              }}
-              rows={filteredLayers ?? []}
-              getRowId={(row) => row.id}
-              columns={[
-                {
-                  field: "type",
-                  flex: 0.2,
-                  headerName: t("common.serviceType"),
-                },
-                {
-                  field: "name",
-                  flex: 0.3,
-                  headerName: t("common.name"),
-                },
-                {
-                  field: "url",
-                  flex: 0.6,
-                  headerName: "Url",
-                },
-                {
-                  field: "usedInMaps",
-                  flex: 0.3,
-                  headerName: t("common.usedInMaps"),
-                },
-                {
-                  field: "brokenService",
-                  flex: 0.3,
-                  headerName: t("common.brokenService"),
-                },
-                {
-                  field: "actions",
-                  headerName: t("common.actions"),
-                  flex: 0.2,
-                  renderCell: (params: { row: { id: string } }) => (
-                    <RowMenu {...params} />
-                  ),
-                },
-              ]}
-              slotProps={{
-                loadingOverlay: {
-                  variant: "skeleton",
-                  noRowsVariant: "skeleton",
-                },
-              }}
-              localeText={
-                language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
-              }
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 10,
-                  },
-                },
-              }}
-              hideFooterPagination={layers && layers.length < 10}
-              pageSizeOptions={[10, 25, 50, 100]}
-              slots={{ toolbar: GridToolbar }}
             />
           </Grid>
         </Page>

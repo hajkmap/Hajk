@@ -40,11 +40,12 @@
     "common.serverType": "Servertyp",
     "common.services": "Tjänster",
     "common.service": "Tjänst",
-    "common.serviceType": "Tjänsttyp",
+    "common.serviceType": "Tjänst",
     "common.settings": "Inställningar",
     "common.sidebar.lock": "Lås sidopanel",
     "common.sidebar.unlock": "Lås upp sidopanel",
     "common.swedish": "Svenska",
+    "common.status": "Status",
     "common.tools": "Verktyg",
     "common.userRoles": "Roller",
     "common.users": "Användare",
@@ -329,6 +330,7 @@
     "groups.updateGroupSuccess": "Gruppen {{name}} har uppdaterats!",
     "groups.updateGroupFailed": "Misslyckades att uppdatera gruppen {{name}}.",
     "groups.deleteGroupSuccess": "Gruppen {{name}} är nu borttagen!",
-    "groups.deleteGroupFailed": "Misslyckades att ta bort gruppen {{name}}."
+    "groups.deleteGroupFailed": "Misslyckades att ta bort gruppen {{name}}.",
+    "tools.searchTitle": "Sök bland verktyg..."
   }
 }

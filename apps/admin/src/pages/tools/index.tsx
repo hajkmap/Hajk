@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react";
 import Grid from "@mui/material/Grid2";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { TextField, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { useTools } from "../../api/tools";
+import StyledDataGrid from "../../components/data-grid";
 
 export default function ToolsPage() {
   const { t } = useTranslation();
@@ -31,7 +31,7 @@ export default function ToolsPage() {
           <Grid size={12} container sx={{ mb: 2 }}>
             <TextField
               fullWidth
-              label={t("common.search")}
+              label={t("tools.searchTitle")}
               variant="outlined"
               value={searchTerm}
               onChange={handleSearchChange}
@@ -39,16 +39,14 @@ export default function ToolsPage() {
           </Grid>
 
           <Grid size={12}>
-            <DataGrid
+            <StyledDataGrid
               rows={filteredTools}
-              getRowId={(row) => row.id}
               columns={[
                 {
                   field: "options",
                   headerName: "Titel",
                   flex: 0.3,
                   valueGetter: (params: { title: string }) => {
-                    // console.log(params);
                     return params ? params.title : null;
                   },
                 },
@@ -66,34 +64,8 @@ export default function ToolsPage() {
                   field: "actions",
                   headerName: t("common.actions"),
                   flex: 0.2,
-                  // renderCell: (params: { row: { id: string } }) => (
-                  //   <RowMenu {...params} />
-                  // ),
                 },
               ]}
-              sx={{
-                // maxWidth: "100%",
-                "& .MuiDataGrid-row:hover": {
-                  cursor: "pointer",
-                },
-                "& .MuiDataGrid-row.Mui-selected": {
-                  backgroundColor: "inherit",
-                },
-                "& .MuiDataGrid-cell:focus": {
-                  outline: "none",
-                },
-                "& .MuiDataGrid-cell.Mui-selected": {
-                  backgroundColor: "inherit",
-                },
-              }}
-              initialState={{
-                pagination: {
-                  paginationModel: { pageSize: 5 },
-                },
-              }}
-              hideFooterPagination={tools && tools.length < 5}
-              pageSizeOptions={[5, 10, 25, 50]}
-              slots={{ toolbar: GridToolbar }}
             />
           </Grid>
         </>

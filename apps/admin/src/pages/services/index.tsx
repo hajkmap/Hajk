@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import Grid from "@mui/material/Grid2";
-import { Button, Box, useTheme } from "@mui/material";
+import { Button, Box, useTheme, ListItemText, TextField } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -19,12 +19,11 @@ import {
 } from "../../api/services/types";
 import DialogWrapper from "../../components/flexible-dialog";
 import { toast } from "react-toastify";
-import { DataGrid } from "@mui/x-data-grid";
-import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
-import useAppStateStore from "../../store/use-app-state-store";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import ServiceStatusIndicator from "./components/service-status-indicator";
 import ServiceTypeBadge from "./components/service-type-badge";
+import StyledDataGrid from "../../components/data-grid";
+import { GridRenderCellParams } from "@mui/x-data-grid";
 
 export default function ServicesPage() {
   const navigate = useNavigate();
@@ -33,7 +32,23 @@ export default function ServicesPage() {
   const { mutateAsync: createService } = useCreateService();
   const [open, setOpen] = useState<boolean>(false);
   const { palette } = useTheme();
-  const language = useAppStateStore((state) => state.language);
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredServices = useMemo<Service[]>(() => {
+    if (!services) return [];
+
+    // Then apply search filter
+    const searchFilter = (service: Service) => {
+      return service.name.toLowerCase().includes(searchTerm.toLowerCase());
+    };
+
+    return services.filter(searchFilter);
+  }, [services, searchTerm]);
 
   const createServiceContainer = new DynamicFormContainer<FieldValues>();
 
@@ -179,25 +194,19 @@ export default function ServicesPage() {
                 errors={errors}
               />
             </DialogWrapper>
+
+            <Grid size={12} container sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                label={t("layers.searchTitle")}
+                variant="outlined"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </Grid>
             <Grid size={12}>
-              <DataGrid
-                onCellClick={(params) => {
-                  if (params.field === "actions") {
-                    return;
-                  }
-                  const id: string = (params.row as Service).id;
-                  if (id) {
-                    void navigate(`/services/${id}`);
-                  }
-                }}
-                sx={{
-                  maxWidth: "100%",
-                  mt: 8,
-                  "& .MuiDataGrid-row:hover": {
-                    cursor: "pointer",
-                  },
-                }}
-                rows={services ?? []}
+              <StyledDataGrid<Service>
+                rows={filteredServices ?? []}
                 columns={[
                   {
                     field: "type",
@@ -208,8 +217,26 @@ export default function ServicesPage() {
                       return <ServiceTypeBadge type={type} />;
                     },
                   },
-                  { field: "name", flex: 0.4, headerName: t("common.name") },
-                  { field: "url", flex: 1, headerName: "Url" },
+                  {
+                    field: "name",
+                    flex: 0.5,
+                    headerName: t("common.name"),
+                    renderCell: (params: GridRenderCellParams<Service>) => (
+                      <ListItemText
+                        primary={params.row.name}
+                        secondary={params.row.url}
+                        slotProps={{
+                          secondary: {
+                            sx: {
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            },
+                          },
+                        }}
+                      />
+                    ),
+                  },
                   {
                     field: "version",
                     flex: 0.2,
@@ -229,26 +256,12 @@ export default function ServicesPage() {
                     },
                   },
                 ]}
-                slotProps={{
-                  loadingOverlay: {
-                    variant: "skeleton",
-                    noRowsVariant: "skeleton",
-                  },
+                onRowClick={({ row }) => {
+                  const id: string = row.id;
+                  if (id) {
+                    void navigate(`/services/${id}`);
+                  }
                 }}
-                localeText={
-                  language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
-                }
-                initialState={{
-                  pagination: {
-                    paginationModel: {
-                      pageSize: 10,
-                    },
-                  },
-                }}
-                getRowId={(row) => row.id}
-                hideFooterPagination={services && services.length < 10}
-                pageSizeOptions={[10, 25, 50, 100]}
-                disableRowSelectionOnClick
               />
             </Grid>
           </Page>

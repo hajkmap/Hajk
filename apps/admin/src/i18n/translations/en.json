@@ -41,11 +41,12 @@
     "common.serverType": "Server type",
     "common.services": "Services",
     "common.service": "Service",
-    "common.serviceType": "Service type",
+    "common.serviceType": "Service",
     "common.settings": "Settings",
     "common.sidebar.lock": "Lock sidebar",
     "common.sidebar.unlock": "Unlock sidebar",
     "common.swedish": "Swedish",
+    "common.status": "Status",
     "common.tools": "Tools",
     "common.userRoles": "User roles",
     "common.users": "Users",
@@ -330,6 +331,7 @@
     "groups.updateGroupSuccess": "Group {{name}} updated!",
     "groups.updateGroupFailed": "Failed to update group {{name}}.",
     "groups.deleteGroupSuccess": "Group {{name}} deleted!",
-    "groups.deleteGroupFailed": "Failed to delete group {{name}}."
+    "groups.deleteGroupFailed": "Failed to delete group {{name}}.",
+    "tools.searchTitle": "Search tools..."
   }
 }

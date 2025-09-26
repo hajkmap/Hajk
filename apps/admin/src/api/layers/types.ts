@@ -25,6 +25,7 @@ export interface Layer {
   showMetadata: boolean;
   infoClickActive: boolean;
   timeSliderVisible: boolean;
+  status: string;
   timeSliderStart?: string;
   timeSliderEnd?: string;
   hideExpandArrow: boolean;

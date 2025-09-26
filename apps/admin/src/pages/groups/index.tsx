@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
 import Grid from "@mui/material/Grid2";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { Button, TextField, Typography, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
@@ -20,6 +19,7 @@ import { FieldValues } from "react-hook-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 import INPUT_TYPE from "../../components/form-factory/types/input-type";
 import { toast } from "react-toastify";
+import StyledDataGrid from "../../components/data-grid";
 
 export default function GroupsPage() {
   const { t } = useTranslation();
@@ -165,15 +165,14 @@ export default function GroupsPage() {
           </Grid>
 
           <Grid size={12}>
-            <DataGrid
-              onCellClick={(params) => {
-                const id: string = (params.row as Group).id;
+            <StyledDataGrid<Group>
+              onRowClick={({ row }) => {
+                const id: string = row.id;
                 if (id) {
                   void navigate(`/groups/${id}`);
                 }
               }}
               rows={filteredGroups}
-              getRowId={(row) => row.id}
               columns={[
                 {
                   field: "name",
@@ -191,29 +190,6 @@ export default function GroupsPage() {
                   flex: 0.3,
                 },
               ]}
-              sx={{
-                // maxWidth: "100%",
-                "& .MuiDataGrid-row:hover": {
-                  cursor: "pointer",
-                },
-                "& .MuiDataGrid-row.Mui-selected": {
-                  backgroundColor: "inherit",
-                },
-                "& .MuiDataGrid-cell:focus": {
-                  outline: "none",
-                },
-                "& .MuiDataGrid-cell.Mui-selected": {
-                  backgroundColor: "inherit",
-                },
-              }}
-              initialState={{
-                pagination: {
-                  paginationModel: { pageSize: 10 },
-                },
-              }}
-              hideFooterPagination={groups && groups.length < 10}
-              pageSizeOptions={[5, 10, 25, 50]}
-              slots={{ toolbar: GridToolbar }}
             />
           </Grid>
         </>

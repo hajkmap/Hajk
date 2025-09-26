@@ -1,10 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  DataGrid,
-  GridColDef,
-  GridRenderCellParams,
-  GridToolbar,
-} from "@mui/x-data-grid";
+import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { Button } from "@mui/material";
 import MoreIcon from "@mui/icons-material/More";
 
@@ -13,15 +8,11 @@ import { useDebounce } from "use-debounce";
 
 import { Map } from "../../../api/maps";
 import { useMaps } from "../../../api/maps/hooks";
-import useAppStateStore from "../../../store/use-app-state-store";
-import { GRID_SWEDISH_LOCALE_TEXT } from "../../../i18n/translations/datagrid/sv";
 import MapListFilterPanel from "./map-list-filter-panel";
 import { useNavigate } from "react-router";
-
-const PAGE_SIZE = 10;
+import StyledDataGrid  from "../../../components/data-grid";
 
 export default function MapsTable() {
-  const language = useAppStateStore((state) => state.language);
   const { t } = useTranslation();
   const { data: maps, isLoading: mapsLoading } = useMaps();
 
@@ -109,9 +100,9 @@ export default function MapsTable() {
         searchString={searchString}
         setSearchString={setSearchString}
       />
-      <DataGrid<Map>
-        onRowClick={(params) => {
-          const id: string = (params.row as Map).id;
+      <StyledDataGrid<Map>
+        onRowClick={({ row }) => {
+          const id: string = (row as Map).id;
           if (id) {
             void navigate(`/maps/${id}`);
           }
@@ -119,22 +110,6 @@ export default function MapsTable() {
         rows={filteredMaps}
         columns={columns}
         loading={mapsLoading}
-        localeText={language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined}
-        disableRowSelectionOnClick
-        sx={{ maxWidth: "100%" }}
-        initialState={{
-          pagination: { paginationModel: { pageSize: PAGE_SIZE } },
-        }}
-        pageSizeOptions={[5, 10, 25, 50, 100]}
-        autoHeight={true}
-        hideFooterPagination={maps && maps.length <= PAGE_SIZE}
-        slotProps={{
-          pagination: {
-            showFirstButton: true,
-            showLastButton: true,
-          },
-        }}
-        slots={{ toolbar: GridToolbar }}
       />
     </>
   );
