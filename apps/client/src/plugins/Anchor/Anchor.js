@@ -19,12 +19,10 @@ class Anchor extends React.PureComponent {
   }
 
   onAbort = () => {
-    // Called when user presses the Close button
     this.props.app.globalObserver.publish("anchor.close");
   };
 
   onVisibilityChanged = (visible) => {
-    // Called when the dialog is shown or hidden
     if (visible) {
       this.props.app.globalObserver.publish("anchor.shown");
     } else {
