@@ -13,124 +13,8 @@ import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import { Style, Circle as CircleStyle, Fill, Stroke } from "ol/style";
 
-function inferTypeFromSamples(samples) {
-  if (!samples.length) return "text";
-
-  const s = (v) => String(v).trim();
-
-  const allBool = samples.every(
-    (v) =>
-      v === true ||
-      v === false ||
-      ["true", "false", "0", "1"].includes(s(v).toLowerCase())
-  );
-  if (allBool) return "boolean";
-
-  const allInt = samples.every((v) => /^-?\d+$/.test(s(v)));
-  if (allInt) return "integer";
-
-  const allNum = samples.every((v) => s(v) !== "" && !isNaN(Number(s(v))));
-  if (allNum) return "number";
-
-  const isoDate = /^\d{4}-\d{2}-\d{2}$/;
-  const allDate = samples.every((v) => isoDate.test(s(v).slice(0, 10)));
-  if (allDate) return "date";
-
-  const isoDt = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
-  const allDateTime = samples.every((v) => isoDt.test(s(v)));
-  if (allDateTime) return "datetime";
-
-  const urlLike = /^(https?:\/\/|www\.)/i;
-  const allUrl = samples.every((v) => urlLike.test(String(v || "").trim()));
-  if (allUrl) return "url";
-
-  return "text";
-}
-
-function mapDataType(dataType, textType) {
-  const dt = String(dataType || "")
-    .trim()
-    .toLowerCase();
-  const tt = String(textType || "")
-    .trim()
-    .toLowerCase();
-
-  if (tt === "lista") return "select";
-  if (tt === "flerval") return "multiselect";
-  if (tt === "url") return "url"; // <— NYTT
-
-  if (dt.includes("bool")) return "boolean";
-  if (dt.includes("int")) return "integer";
-  if (
-    dt === "numeric" ||
-    dt.includes("double") ||
-    dt.includes("float") ||
-    dt === "number"
-  )
-    return "number";
-  if (dt === "date") return "date";
-  if (dt === "datetime" || dt === "timestamp" || dt === "timestamptz")
-    return "datetime";
-
-  return "text";
-}
-
-function buildFieldMetaFromBackend(schema, sampleRows = []) {
-  const fields = schema?.editableFields || [];
-  const fm = fields
-    .filter((f) => !f.hidden)
-    .map((f) => {
-      const tt = String(f.textType || "")
-        .trim()
-        .toLowerCase();
-      let type = mapDataType(f.dataType, tt);
-
-      if (type === "text" && sampleRows.length) {
-        const colVals = sampleRows
-          .map((r) => r?.[f.name])
-          .filter((v) => v != null && v !== "");
-        if (colVals.length) type = inferTypeFromSamples(colVals) || type;
-      }
-
-      // Failsafe: if values → force select/multiselect
-      if (Array.isArray(f.values) && f.values.length) {
-        type = tt === "flerval" ? "multiselect" : "select";
-      }
-
-      return {
-        key: f.name,
-        label: f.alias || f.name,
-        readOnly: false,
-        type,
-        options: Array.isArray(f.values) ? f.values : undefined,
-        multiple: tt === "flerval" ? true : undefined,
-        step: type === "integer" ? 1 : undefined,
-      };
-    });
-
-  const sampleKeys = new Set(sampleRows[0] ? Object.keys(sampleRows[0]) : []);
-  const addRo = (key, label = key, width = 120) => {
-    if (
-      (sampleKeys.has(key) || key === "id") &&
-      !fm.some((m) => m.key === key)
-    ) {
-      fm.unshift({
-        key,
-        label,
-        readOnly: true,
-        type: "text",
-        initialWidth: width,
-      });
-    }
-  };
-  addRo("id", "ID", 90);
-  //addRo("geoid", "GEOID", 120);
-  //addRo("oracle_geoid", "ORACLE_GEOID", 140);
-
-  return fm;
-}
-
 function AttributeEditor(props) {
+  const [fieldMetaLocal, setFieldMetaLocal] = React.useState([]);
   const vectorLayerRef = React.useRef(null);
   const apiBase =
     props.app?.config?.appConfig?.mapserviceBase ??
@@ -324,43 +208,157 @@ function AttributeEditor(props) {
         color: color ?? u.color,
       }));
 
+      // Initialize model to empty state
       model.dispatch({ type: Action.INIT, features: [] });
+      setFieldMetaLocal([]);
       model.setFieldMetadata([]);
 
       try {
-        // 1) load features from service via model
+        // 1) Fetch whole schema (no fields-param)
+        const schema = await ogc.fetchWfst(id);
+
+        const geomKey = String(
+          schema?.geometryField || "geometry"
+        ).toLowerCase();
+
+        // 2) Create FM from editableFields (schema winner)
+        const fmEditable = (schema?.editableFields || [])
+          .filter((f) => !f.hidden && String(f.name).toLowerCase() !== geomKey)
+          .map((f, i) => {
+            const tt = String(f.textType || "")
+              .trim()
+              .toLowerCase();
+            const dt = String(f.dataType || "")
+              .trim()
+              .toLowerCase();
+            const multiple =
+              tt === "flerval" || f.multiple === true || f.multiple === "true";
+
+            let type;
+            if (Array.isArray(f.values) && f.values.length) {
+              type = multiple ? "multiselect" : "select";
+            } else if (tt === "lista") {
+              type = "select";
+            } else if (dt.includes("bool")) {
+              type = "boolean";
+            } else if (dt === "int" || dt === "integer" || dt.includes("int")) {
+              type = "integer";
+            } else if (
+              dt === "number" ||
+              dt === "numeric" ||
+              dt === "decimal" ||
+              dt.includes("decim") ||
+              dt.includes("float") ||
+              dt.includes("double") ||
+              dt.includes("real")
+            ) {
+              type = "number";
+            } else if (dt === "date") {
+              type = "date";
+            } else if (
+              dt === "datetime" ||
+              dt === "timestamp" ||
+              dt === "timestamptz" ||
+              dt.includes("time")
+            ) {
+              type = "datetime";
+            } else {
+              type = "text";
+            }
+
+            return {
+              key: f.name,
+              label: f.alias || f.name,
+              readOnly: false,
+              type,
+              options: Array.isArray(f.values) ? f.values : undefined,
+              multiple,
+              step: type === "integer" ? 1 : undefined,
+              initialWidth: i === 0 ? 120 : 220,
+            };
+          });
+
+        // 3) Add nonEditableFields as read-only (excluding geometry)
+        const roFromSchema = (schema?.nonEditableFields || [])
+          .filter((f) => !f.hidden && String(f.name).toLowerCase() !== geomKey)
+          .map((f, i) => {
+            const dt = String(f.dataType || "")
+              .trim()
+              .toLowerCase();
+            let type = "text";
+            if (dt.includes("int")) type = "integer";
+            else if (
+              dt === "number" ||
+              dt === "numeric" ||
+              dt === "decimal" ||
+              dt.includes("decim") ||
+              dt.includes("float") ||
+              dt.includes("double") ||
+              dt.includes("real")
+            )
+              type = "number";
+            else if (dt === "date") type = "date";
+            else if (
+              dt === "datetime" ||
+              dt === "timestamp" ||
+              dt === "timestamptz" ||
+              dt.includes("time")
+            )
+              type = "datetime";
+
+            return {
+              key: f.name,
+              label: f.alias || f.name,
+              readOnly: true,
+              type,
+              initialWidth: i === 0 ? 120 : 220,
+            };
+          });
+
+        // 4) Merge read-only and editable fields (editable takes precedence in case of a conflict)
+        const byKey = new Map();
+        roFromSchema.forEach((m) => byKey.set(m.key, m));
+        fmEditable.forEach((m) => byKey.set(m.key, m));
+        let fmMerged = Array.from(byKey.values());
+
+        // 5) Ensure that ID is always above as a RO
+        function ensureRo(key, label = key, width = 90) {
+          if (!fmMerged.some((m) => m.key === key)) {
+            fmMerged.unshift({
+              key,
+              label,
+              readOnly: true,
+              type: "text",
+              initialWidth: width,
+            });
+          } else {
+            // if the field is found but not read-only – make it read-only and move it up
+            fmMerged = fmMerged.map((m) =>
+              m.key === key ? { ...m, readOnly: true } : m
+            );
+            // move upwards
+            const idx = fmMerged.findIndex((m) => m.key === key);
+            if (idx > 0) {
+              const [idCol] = fmMerged.splice(idx, 1);
+              fmMerged.unshift(idCol);
+            }
+          }
+        }
+        ensureRo("id", "ID", 90);
+
+        // 6) Set FM (state + model) - trigger render in View
+        setFieldMetaLocal(fmMerged);
+        model.setFieldMetadata(fmMerged);
+
+        // 7) Load data (once FM is set)
         const { featureCollection } = (await model.loadFromService?.(id)) || {};
 
-        const sampleRows = (featureCollection?.features || [])
-          .slice(0, 100)
-          .map((f) => f.properties || {});
-        try {
-          const schema = await ogc.fetchWfst(
-            id,
-            "id,caption,projection,layers,editableFields,nonEditableFields,geometryField,editPoint,editLine,editPolygon,editMultiPoint,editMultiPolygon,editMultiLine"
-          );
-
-          let fm = []; // definiera outer scope
-
-          if (!schema || !Array.isArray(schema.editableFields)) {
-            console.warn("Hittade inget schema med editableFields för id", id);
-          } else {
-            fm = buildFieldMetaFromBackend(schema, sampleRows);
-          }
-
-          model.setFieldMetadata(fm);
-        } catch (e) {
-          console.warn("Kunde inte läsa/mappa fieldMeta:", e);
-          model.setFieldMetadata([]); // fallback
-        }
-
-        // 2) build/create vector layer in the map
+        // 8) Set up the vector layer
         const map = props.map;
         const mapProj = map.getView().getProjection();
         const dataProj =
           projection || featureCollection?.crs?.properties?.name || "EPSG:3006";
 
-        // rebuild vector layer
         if (vectorLayerRef.current) {
           map.removeLayer(vectorLayerRef.current);
           vectorLayerRef.current = null;
@@ -376,8 +374,8 @@ function AttributeEditor(props) {
 
         visibleIdsRef.current = new Set(
           features.flatMap((f) => {
-            const id = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-            return [id, String(id)];
+            const fid = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+            return [fid, String(fid)];
           })
         );
 
@@ -412,7 +410,7 @@ function AttributeEditor(props) {
         map.addLayer(lyr);
         vectorLayerRef.current = lyr;
       } catch (e) {
-        console.warn("loadFromService fel:", e);
+        console.warn("Fel vid laddning av schema/data:", e);
       }
     });
 
@@ -429,6 +427,7 @@ function AttributeEditor(props) {
       }));
 
       model.dispatch({ type: Action.INIT, features: [] });
+      setFieldMetaLocal([]);
       model.setFieldMetadata([]);
 
       if (vectorLayerRef.current) {
@@ -647,7 +646,7 @@ function AttributeEditor(props) {
               src.removeFeature(f);
             } catch {}
             featureIndexRef.current.delete(id);
-            graveyardRef.current.set(id, f); // så att UNDO kan återställa
+            graveyardRef.current.set(id, f);
           }
         }
       }
@@ -907,7 +906,7 @@ function AttributeEditor(props) {
         controller={controller}
         ui={ui}
         setPluginSettings={setPluginSettings}
-        fieldMeta={model.getFieldMetadata()}
+        fieldMeta={fieldMetaLocal}
         vectorLayerRef={vectorLayerRef}
         styleFn={styleFn}
         visibleIdsRef={visibleIdsRef}
