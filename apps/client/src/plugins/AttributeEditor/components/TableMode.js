@@ -6,7 +6,10 @@ import UndoIcon from "@mui/icons-material/Undo";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { editBus } from "../../../buses/editBus";
-import { renderTableCellEditor } from "../helpers/helpers";
+import {
+  renderTableCellEditor,
+  renderTableCellDisplay,
+} from "../helpers/helpers";
 
 export default function TableMode(props) {
   const {
@@ -136,29 +139,6 @@ export default function TableMode(props) {
       window.removeEventListener("touchend", onUp);
     };
   }, []);
-
-  const renderCellText = (text, wrapCh) => {
-    const s = String(text ?? "");
-    const hasNl = /\n/.test(s);
-
-    // Use pre-wrap to show \n as real line breaks.
-    if (hasNl || wrapCh) {
-      return (
-        <div
-          style={{
-            display: "block",
-            whiteSpace: "pre-wrap",
-            overflowWrap: "anywhere",
-            wordBreak: "break-word",
-            ...(wrapCh ? { maxWidth: `${wrapCh}ch` } : null),
-          }}
-        >
-          {s}
-        </div>
-      );
-    }
-    return s;
-  };
 
   const shouldUseTextarea = (meta, val) => {
     const s = String(val ?? "");
@@ -812,43 +792,22 @@ export default function TableMode(props) {
                               : "Ej redigerbar"
                           }
                         >
-                          {isEditing ? (
-                            renderTableCellEditor({
-                              meta,
-                              editingValue,
-                              editorProps,
-                              applyChange,
-                              s,
-                              useTextarea,
-                            })
-                          ) : isPlaceholder ? (
-                            "#saknas"
-                          ) : meta.type === "url" && effectiveValue ? (
-                            <a
-                              href={
-                                /^(https?:)?\/\//i.test(String(effectiveValue))
-                                  ? String(effectiveValue)
-                                  : `https://${String(effectiveValue)}`
-                              }
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              title={String(effectiveValue)}
-                              style={{ textDecoration: "underline" }}
-                            >
-                              {String(effectiveValue)}
-                            </a>
-                          ) : (
-                            renderCellText(
-                              Array.isArray(effectiveValue)
-                                ? effectiveValue.join(", ")
-                                : meta.type === "boolean"
-                                  ? effectiveValue
-                                    ? "Ja"
-                                    : "Nej"
-                                  : String(effectiveValue ?? ""),
-                              wrapCh
-                            )
-                          )}
+                          {isEditing
+                            ? renderTableCellEditor({
+                                meta,
+                                editingValue,
+                                editorProps,
+                                applyChange,
+                                s,
+                                useTextarea,
+                              })
+                            : isPlaceholder
+                              ? "#saknas"
+                              : renderTableCellDisplay({
+                                  meta,
+                                  value: effectiveValue,
+                                  s,
+                                })}
                         </td>
                       );
                     })}

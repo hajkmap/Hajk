@@ -36,6 +36,7 @@ export default function AttributeEditorView({
   graveyardRef,
   model,
 }) {
+  const [FM, setFM] = React.useState([]);
   const draftBaselineRef = React.useRef(new Map());
   const [serviceId, setServiceId] = React.useState("NONE_ID");
   const [tableEditing, setTableEditing] = useState(null); // { id, key, startValue } | null
@@ -77,6 +78,63 @@ export default function AttributeEditorView({
     },
     []
   );
+
+  function inferOnceFromData(fieldMeta, rows) {
+    const take = rows.slice(0, 200);
+    const getVals = (key) =>
+      take.map((r) => r?.[key]).filter((v) => v != null && v !== "");
+
+    const isBool = (vals) =>
+      vals.length &&
+      vals.every((v) => {
+        const s = String(v).trim().toLowerCase();
+        return s === "true" || s === "false" || s === "1" || s === "0";
+      });
+    const isInt = (vals) =>
+      vals.length && vals.every((v) => /^-?\d+$/.test(String(v).trim()));
+    const isNum = (vals) =>
+      vals.length &&
+      vals.every((v) => {
+        const s = String(v).trim();
+        if (!s) return false;
+        const n = Number(s);
+        return Number.isFinite(n);
+      });
+
+    const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+    const isoDateOrZeroTime =
+      /^\d{4}-\d{2}-\d{2}(T00:00(:00)?(Z|[+-]\d{2}:\d{2})?)?$/;
+    const isDate = (vals) =>
+      vals.length &&
+      vals.every((v) => {
+        const s = String(v ?? "");
+        return isoDate.test(s.slice(0, 10)) || isoDateOrZeroTime.test(s);
+      });
+
+    const isoDt = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
+    const isDatetime = (vals) =>
+      vals.length && vals.every((v) => isoDt.test(String(v ?? "")));
+
+    const urlLike = /^(https?:\/\/|www\.)/i;
+    const isUrl = (vals) =>
+      vals.length && vals.every((v) => urlLike.test(String(v ?? "").trim()));
+
+    return fieldMeta.map((m) => {
+      if (m.type && m.type !== "text") return m;
+      if (Array.isArray(m.options) && m.options.length)
+        return { ...m, type: m.multiple ? "multiselect" : "select" };
+
+      const vals = getVals(m.key);
+      let t = "text";
+      if (isBool(vals)) t = "boolean";
+      else if (isInt(vals)) t = "integer";
+      else if (isNum(vals)) t = "number";
+      else if (isDate(vals)) t = "date";
+      else if (isDatetime(vals)) t = "datetime";
+      else if (isUrl(vals)) t = "url";
+      return { ...m, type: t };
+    });
+  }
 
   React.useEffect(() => {
     const lyr = vectorLayerRef?.current;
@@ -290,19 +348,128 @@ export default function AttributeEditorView({
     return [...editedFeatures, ...pendingAdds];
   }, [features, pendingAdds, pendingEdits, pendingDeletes]);
 
-  const FM = useMemo(() => {
-    if (serviceId === "NONE_ID") return [];
-    if (Array.isArray(fieldMeta) && fieldMeta.length) return fieldMeta;
+  React.useEffect(() => {
+    if (serviceId === "NONE_ID") {
+      setFM([]);
+    } else {
+      setFM([]);
+    }
+  }, [serviceId]);
 
-    const keys = Object.keys(allRows[0] || {});
-    return keys.map((key, i) => ({
+  React.useEffect(() => {
+    if (serviceId === "NONE_ID") return;
+    if (FM.length) return; // redan låst
+
+    if (Array.isArray(fieldMeta) && fieldMeta.length) {
+      setFM(
+        fieldMeta.map((m, i) => ({
+          initialWidth: i === 0 ? 120 : 220,
+          ...m,
+        }))
+      );
+      return;
+    }
+
+    if (!allRows.length) return;
+    const keySet = new Set();
+    allRows.forEach((r) => Object.keys(r || {}).forEach((k) => keySet.add(k)));
+
+    const keys = Array.from(keySet);
+    const order = (k) =>
+      k === "id"
+        ? "0"
+        : k === "geoid"
+          ? "1"
+          : k === "oracle_geoid"
+            ? "2"
+            : "9" + k.toLocaleLowerCase("sv");
+    keys.sort((a, b) => order(a).localeCompare(order(b), "sv"));
+
+    let base = keys.map((key, i) => ({
       key,
       label: key,
-      readOnly: true, // <- blocks editing when meta is clear
+      readOnly: true,
       type: "text",
       initialWidth: i === 0 ? 120 : 220,
     }));
-  }, [allRows, serviceId, fieldMeta]);
+
+    try {
+      base = inferOnceFromData(base, allRows);
+    } catch {}
+
+    setFM(base);
+  }, [serviceId, fieldMeta, allRows, FM.length]);
+
+  React.useEffect(() => {
+    if (serviceId === "NONE_ID") return;
+    if (!Array.isArray(fieldMeta) || !fieldMeta.length) return;
+    if (!FM.length) return;
+
+    const mapDataType = (dataType, textType) => {
+      const dt = String(dataType || "")
+        .trim()
+        .toLowerCase();
+      const tt = String(textType || "")
+        .trim()
+        .toLowerCase();
+      if (tt === "lista") return "select";
+      if (tt === "flerval") return "multiselect";
+      if (tt === "url") return "url";
+      if (dt.includes("bool")) return "boolean";
+      if (dt.includes("int")) return "integer";
+      if (
+        dt === "numeric" ||
+        dt.includes("double") ||
+        dt.includes("float") ||
+        dt === "number"
+      )
+        return "number";
+      if (dt === "date") return "date";
+      if (dt === "datetime" || dt === "timestamp" || dt === "timestamptz")
+        return "datetime";
+      return "text";
+    };
+
+    const normalizeMeta = (m) => {
+      if (m.key) return m;
+      const type = mapDataType(m.dataType, m.textType);
+      return {
+        key: m.name,
+        label: m.alias || m.name,
+        readOnly: false,
+        type,
+        options: Array.isArray(m.values) ? m.values : undefined,
+        multiple:
+          String(m.textType || "").toLowerCase() === "flerval"
+            ? true
+            : undefined,
+        step: type === "integer" ? 1 : undefined,
+      };
+    };
+
+    const byKey = new Map(
+      fieldMeta.map((m) => {
+        const nm = normalizeMeta(m);
+        return [String(nm.key), nm];
+      })
+    );
+
+    setFM((prev) =>
+      prev.map((old) => {
+        const fresh = byKey.get(String(old.key));
+        if (!fresh) return old;
+        return {
+          ...old,
+          label: fresh.label ?? old.label,
+          readOnly: fresh.readOnly ?? old.readOnly,
+          type: fresh.type ?? old.type,
+          options: fresh.options ?? old.options,
+          multiple: fresh.multiple ?? old.multiple,
+          step: fresh.step ?? old.step,
+        };
+      })
+    );
+  }, [serviceId, fieldMeta, FM.length]);
 
   const filteredAndSorted = useMemo(() => {
     const q = tableSearch.trim().toLowerCase();

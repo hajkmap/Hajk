@@ -32,6 +32,18 @@ export function isMissingValue(v) {
 }
 
 export function renderTableCellDisplay({ meta, value, s }) {
+  // URL (clickable in display mode)
+  if (meta.type === "url") {
+    const str = String(value ?? "");
+    if (!str) return <span />;
+    const href = /^(https?:)?\/\//i.test(str) ? str : `https://${str}`;
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" title={str}>
+        {str}
+      </a>
+    );
+  }
+
   if (meta.type === "boolean") {
     const checked =
       value === true || value === "true" || value === 1 || value === "1";
