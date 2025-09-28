@@ -44,7 +44,7 @@ export default function AttributeEditorView({
   const [mobileActiveTab, setMobileActiveTab] = useState("list");
 
   const [tableSearch, setTableSearch] = useState("");
-  const [sort, setSort] = useState({ key: "geoid", dir: "asc" });
+  const [sort, setSort] = useState({ key: null, dir: "asc" });
   const [tableSelectedIds, setTableSelectedIds] = useState(new Set());
   const [lastTableIndex, setLastTableIndex] = useState(null);
   const [tableUndoLocal, setTableUndoLocal] = useState([]);
@@ -281,19 +281,24 @@ export default function AttributeEditorView({
   }, [openFilterColumn]);
 
   const allRows = useMemo(() => {
-    const editedFeatures = features.map((f) => {
+    const editedFeatures = features.map((f, i) => {
       const patch = pendingEdits[f.id];
       let row = patch ? { ...f, ...patch } : f;
       if (pendingDeletes?.has?.(f.id)) row = { ...row, __pending: "delete" };
-      return row;
+      return { ...row, __idx: i };
     });
-    return [...editedFeatures, ...pendingAdds];
+
+    const drafts = pendingAdds.map((d, i) => ({
+      ...d,
+      __idx: features.length + i,
+    }));
+
+    return [...editedFeatures, ...drafts];
   }, [features, pendingAdds, pendingEdits, pendingDeletes]);
 
   const FM = React.useMemo(() => {
     if (serviceId === "NONE_ID") return [];
 
-    // 1) schema wins
     if (Array.isArray(fieldMeta) && fieldMeta.length) {
       return fieldMeta.map((m, i) => ({
         initialWidth: i === 0 ? 120 : 220,
@@ -301,11 +306,20 @@ export default function AttributeEditorView({
       }));
     }
 
-    // 2) fallback – if schema is missing or invalid
     if (!allRows.length) return [];
+
     const keySet = new Set();
     allRows.forEach((r) => Object.keys(r || {}).forEach((k) => keySet.add(k)));
-    return Array.from(keySet).map((key, i) => ({
+
+    // Technical/"internal" fields that should not be columns
+    const HIDE = new Set(["__idx", "__pending"]);
+    const keys = Array.from(keySet).filter(
+      (k) => !k.startsWith("__") && !HIDE.has(k)
+    );
+
+    keys.sort((a, b) => (a === "id" ? -1 : b === "id" ? 1 : 0));
+
+    return keys.map((key, i) => ({
       key,
       label: key,
       readOnly: key === "id",
@@ -359,6 +373,9 @@ export default function AttributeEditorView({
     rows.sort((a, b) => {
       const p = pri(a) - pri(b);
       if (p !== 0) return p;
+
+      if (!sort.key) return (a.__idx ?? 0) - (b.__idx ?? 0);
+
       const res = cmp(a[sort.key], b[sort.key]);
       return sort.dir === "asc" ? res : -res;
     });
@@ -574,11 +591,11 @@ export default function AttributeEditorView({
   );
 
   const toggleSort = (key) => {
-    setSort((prev) =>
-      prev.key === key
-        ? { key, dir: prev.dir === "asc" ? "desc" : "asc" }
-        : { key, dir: "asc" }
-    );
+    setSort((prev) => {
+      if (prev.key !== key) return { key, dir: "asc" };
+      if (prev.dir === "asc") return { key, dir: "desc" };
+      return { key: null, dir: "asc" };
+    });
   };
 
   const handleRowClick = useCallback(
@@ -1168,6 +1185,8 @@ export default function AttributeEditorView({
     : tableUndoStack;
   const canUndo = Boolean(combinedUndoStack?.length || formUndoStack?.length);
 
+  const [columnFilterUI, setColumnFilterUI] = useState({});
+
   return (
     <div style={s.shell}>
       <Toolbar
@@ -1247,6 +1266,8 @@ export default function AttributeEditorView({
           canUndo={canUndo}
           undoLatestTableChange={undoLatestTableChange}
           tablePendingAdds={pendingAdds}
+          columnFilterUI={columnFilterUI}
+          setColumnFilterUI={setColumnFilterUI}
         />
       ) : isMobile ? (
         <MobileForm

@@ -40,6 +40,15 @@ export default function DesktopForm({
   tablePendingAdds,
   duplicateInForm,
 }) {
+  const RESIZER_KEY = "ae_df_leftw";
+  const MIN_LEFT = 220; // px
+  const MAX_LEFT = 800; // px
+
+  const [leftW, setLeftW] = React.useState(() => {
+    const saved = Number(localStorage.getItem(RESIZER_KEY));
+    return Number.isFinite(saved) && saved >= MIN_LEFT ? saved : 360; // default
+  });
+
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
 
@@ -55,6 +64,33 @@ export default function DesktopForm({
   }, []);
 
   const prevMultilineRef = React.useRef({});
+
+  const resizeRef = React.useRef(null); // { startX, startW }
+  React.useEffect(() => {
+    function onMove(e) {
+      const r = resizeRef.current;
+      if (!r) return;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const dx = clientX - r.startX;
+      const next = Math.max(MIN_LEFT, Math.min(MAX_LEFT, r.startW + dx));
+      setLeftW(next);
+      // prevent text selection on touch
+      if (e.cancelable) e.preventDefault?.();
+    }
+    function onUp() {
+      resizeRef.current = null;
+    }
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, []);
 
   React.useEffect(() => {
     if (!focusedFeature) return;
@@ -166,7 +202,14 @@ export default function DesktopForm({
   }
 
   return (
-    <div style={s.paneWrap}>
+    <div
+      style={{
+        ...s.paneWrap,
+        display: "grid",
+        gridTemplateColumns: `${leftW}px 8px 1fr`,
+        alignItems: "stretch",
+      }}
+    >
       {/* Left: Object list */}
       <div style={s.pane} aria-label="Objektlista">
         <div style={s.list}>
@@ -214,6 +257,43 @@ export default function DesktopForm({
           <span style={s.listFooterInfo}>Fokus: {focusedId ?? "—"}</span>
         </div>
       </div>
+
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-valuemin={MIN_LEFT}
+        aria-valuemax={MAX_LEFT}
+        aria-valuenow={Math.round(leftW)}
+        tabIndex={0}
+        title="Dra för att ändra panelbredd"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          resizeRef.current = { startX: e.clientX, startW: leftW };
+        }}
+        onTouchStart={(e) => {
+          const t = e.touches[0];
+          resizeRef.current = { startX: t.clientX, startW: leftW };
+        }}
+        onKeyDown={(e) => {
+          const step = e.shiftKey ? 40 : 10;
+          if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            setLeftW((w) => Math.max(MIN_LEFT, w - step));
+          } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            setLeftW((w) => Math.min(MAX_LEFT, w + step));
+          }
+        }}
+        style={{
+          cursor: "col-resize",
+          // snappy grip: a thin vertical line
+          background:
+            "linear-gradient(to right, transparent 0, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 5px, transparent 5px)",
+          width: "8px",
+          userSelect: "none",
+          touchAction: "none",
+        }}
+      />
 
       {/* Right: Form */}
       <div style={s.pane} aria-label="Formulär">

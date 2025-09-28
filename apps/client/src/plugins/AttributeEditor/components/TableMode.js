@@ -11,6 +11,91 @@ import {
   renderTableCellDisplay,
 } from "../helpers/helpers";
 
+const ColumnFilter = React.memo(function ColumnFilter({
+  s,
+  columnKey,
+  placement,
+  uniqueValues,
+  selectedValues,
+  q,
+  setQ,
+  showAll,
+  setShowAll,
+  onToggleValue,
+  onSelectFiltered,
+  onClearFilter,
+  filterOverlayRef,
+}) {
+  const anchorStyle =
+    placement === "right"
+      ? { left: 0, right: "auto", transform: "none" }
+      : placement === "left"
+        ? { right: 0, left: "auto", transform: "none" }
+        : { left: "50%", right: "auto", transform: "translateX(-50%)" };
+
+  const query = q.trim().toLowerCase();
+  const filtered = query
+    ? uniqueValues.filter((v) =>
+        String(v ?? "")
+          .toLowerCase()
+          .includes(query)
+      )
+    : uniqueValues;
+
+  const MAX_SHOWN = 200;
+  const list = showAll ? filtered : filtered.slice(0, MAX_SHOWN);
+
+  return (
+    <div
+      ref={(el) => {
+        if (filterOverlayRef) filterOverlayRef.current = el;
+      }}
+      style={{ ...s.filterOverlay, ...anchorStyle }}
+    >
+      <input
+        style={s.filterSearch}
+        placeholder="Sök i värden…"
+        value={q}
+        onChange={(e) => {
+          setQ(e.target.value);
+          setShowAll(false);
+        }}
+        aria-label="Sök i filtervärden"
+      />
+      <div style={s.filterOverlayButtons}>
+        <button style={s.btnSmall} onClick={onClearFilter}>
+          Rensa
+        </button>
+        <button style={s.btnSmall} onClick={onSelectFiltered}>
+          Välj filtrerade ({filtered.length})
+        </button>
+        {filtered.length > MAX_SHOWN && !showAll && (
+          <button style={s.btnSmall} onClick={() => setShowAll(true)}>
+            Visa alla ({filtered.length})
+          </button>
+        )}
+      </div>
+      <div style={s.filterListScroll}>
+        {list.map((value) => {
+          const str = String(value ?? "");
+          const checked = selectedValues.includes(value);
+          return (
+            <label key={str} style={s.filterCheckbox} title={str}>
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={(e) => onToggleValue(value, e.target.checked)}
+              />
+              <span style={s.filterCheckboxText}>{str}</span>
+            </label>
+          );
+        })}
+        {filtered.length === 0 && <div style={s.listEmpty}>Inga träffar.</div>}
+      </div>
+    </div>
+  );
+});
+
 export default function TableMode(props) {
   const {
     s,
@@ -19,6 +104,8 @@ export default function TableMode(props) {
     isMobile,
     features,
     filteredAndSorted,
+    columnFilterUI,
+    setColumnFilterUI,
 
     // selection & pending
     tableSelectedIds,
@@ -70,6 +157,17 @@ export default function TableMode(props) {
   const [savingNow, setSavingNow] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState(null);
   const caretStoreRef = React.useRef(new Map());
+  const setQFor = (key, val) =>
+    setColumnFilterUI((prev) => ({
+      ...prev,
+      [key]: { ...(prev[key] || {}), q: val },
+    }));
+
+  const setShowAllFor = (key, val) =>
+    setColumnFilterUI((prev) => ({
+      ...prev,
+      [key]: { ...(prev[key] || {}), showAll: val },
+    }));
 
   const MIN_W = 80; // px
   const MAX_W = 720; // px
@@ -151,113 +249,6 @@ export default function TableMode(props) {
       (wrap != null && s.length >= wrap)
     );
   };
-
-  function ColumnFilter({ columnKey, placement }) {
-    const [q, setQ] = React.useState("");
-    const uniqueValues = getUniqueColumnValues(columnKey);
-    const selectedValues = columnFilters[columnKey] || [];
-
-    const anchorStyle =
-      placement === "right"
-        ? { left: 0, right: "auto", transform: "none" }
-        : placement === "left"
-          ? { right: 0, left: "auto", transform: "none" }
-          : { left: "50%", right: "auto", transform: "translateX(-50%)" };
-
-    const query = q.trim().toLowerCase();
-    const filtered = query
-      ? uniqueValues.filter((v) =>
-          String(v ?? "")
-            .toLowerCase()
-            .includes(query)
-        )
-      : uniqueValues;
-
-    // Initialize list initially, with "Show all" if it's long
-    const [showAll, setShowAll] = React.useState(false);
-    const MAX_SHOWN = 200;
-    const list = showAll ? filtered : filtered.slice(0, MAX_SHOWN);
-
-    const selectFiltered = () => {
-      setColumnFilters((prev) => ({
-        ...prev,
-        [columnKey]: filtered,
-      }));
-    };
-
-    const clearFilter = () => {
-      setColumnFilters((prev) => ({ ...prev, [columnKey]: [] }));
-      setQ("");
-      setShowAll(false);
-    };
-
-    return (
-      <div
-        ref={(el) => {
-          if (filterOverlayRef) filterOverlayRef.current = el;
-        }}
-        style={{ ...s.filterOverlay, ...anchorStyle }}
-      >
-        {/* Search */}
-        <input
-          style={s.filterSearch}
-          placeholder="Sök i värden…"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setShowAll(false);
-          }}
-          aria-label="Sök i filtervärden"
-        />
-
-        <div style={s.filterOverlayButtons}>
-          <button style={s.btnSmall} onClick={clearFilter}>
-            Rensa
-          </button>
-          <button style={s.btnSmall} onClick={selectFiltered}>
-            Välj filtrerade ({filtered.length})
-          </button>
-          {filtered.length > MAX_SHOWN && !showAll && (
-            <button style={s.btnSmall} onClick={() => setShowAll(true)}>
-              Visa alla ({filtered.length})
-            </button>
-          )}
-        </div>
-
-        {/* Values with ellipsis – long strings are shortened visually but still available in the title */}
-        <div style={s.filterListScroll}>
-          {list.map((value) => {
-            const str = String(value ?? "");
-            const checked = selectedValues.includes(value);
-            return (
-              <label key={str} style={s.filterCheckbox} title={str}>
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={(e) => {
-                    setColumnFilters((prev) => {
-                      const current = prev[columnKey] || [];
-                      return e.target.checked
-                        ? { ...prev, [columnKey]: [...current, value] }
-                        : {
-                            ...prev,
-                            [columnKey]: current.filter((v) => v !== value),
-                          };
-                    });
-                  }}
-                />
-                <span style={s.filterCheckboxText}>{str}</span>
-              </label>
-            );
-          })}
-
-          {filtered.length === 0 && (
-            <div style={s.listEmpty}>Inga träffar.</div>
-          )}
-        </div>
-      </div>
-    );
-  }
 
   const summary = React.useMemo(
     () => ({
@@ -475,8 +466,53 @@ export default function TableMode(props) {
 
                           {openFilterColumn === f.key && (
                             <ColumnFilter
+                              s={s}
                               columnKey={f.key}
                               placement={placement}
+                              uniqueValues={getUniqueColumnValues(f.key)}
+                              selectedValues={columnFilters[f.key] || []}
+                              q={columnFilterUI[f.key]?.q ?? ""}
+                              setQ={(val) => setQFor(f.key, val)}
+                              showAll={columnFilterUI[f.key]?.showAll ?? false}
+                              setShowAll={(val) => setShowAllFor(f.key, val)}
+                              onToggleValue={(value, checked) => {
+                                setColumnFilters((prev) => {
+                                  const current = prev[f.key] || [];
+                                  return checked
+                                    ? { ...prev, [f.key]: [...current, value] }
+                                    : {
+                                        ...prev,
+                                        [f.key]: current.filter(
+                                          (v) => v !== value
+                                        ),
+                                      };
+                                });
+                              }}
+                              onSelectFiltered={() => {
+                                const query = (columnFilterUI[f.key]?.q ?? "")
+                                  .trim()
+                                  .toLowerCase();
+                                const filtered = getUniqueColumnValues(
+                                  f.key
+                                ).filter((v) =>
+                                  String(v ?? "")
+                                    .toLowerCase()
+                                    .includes(query)
+                                );
+                                setColumnFilters((prev) => ({
+                                  ...prev,
+                                  [f.key]: filtered,
+                                }));
+                              }}
+                              onClearFilter={() => {
+                                setColumnFilters((prev) => ({
+                                  ...prev,
+                                  [f.key]: [],
+                                }));
+                                setQFor(f.key, "");
+                                setShowAllFor(f.key, false);
+                              }}
+                              filterOverlayRef={filterOverlayRef}
                             />
                           )}
                         </div>
