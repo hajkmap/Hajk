@@ -220,11 +220,15 @@ export default function DesktopForm({
           {visibleFormList.map((f, idx) => {
             const selected = selectedIds.has(f.id);
             const isFocused = focusedId === f.id;
-            const isPendingDelete = tablePendingDeletes?.has?.(f.id);
+            const isPendingDelete =
+              f.__pending === "delete" || tablePendingDeletes?.has?.(f.id);
             const hasPendingEdits = !!tablePendingEdits?.[f.id];
-            const isDraftAdd = tablePendingAdds?.some?.(
-              (d) => d.id === f.id && d.__pending !== "delete"
-            );
+            const isDraftAdd =
+              f.__pending === "add" ||
+              tablePendingAdds?.some?.(
+                (d) => d.id === f.id && d.__pending !== "delete"
+              );
+
             const status = isPendingDelete
               ? "delete"
               : hasPendingEdits

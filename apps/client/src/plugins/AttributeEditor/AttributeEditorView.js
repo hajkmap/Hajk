@@ -467,7 +467,12 @@ export default function AttributeEditorView({
 
   const duplicateSelectedRows = useCallback(() => {
     if (!tableSelectedIds.size) return;
-    const ids = [...tableSelectedIds];
+    const allIds = [...tableSelectedIds];
+    const ids = allIds.filter((id) => !(typeof id === "number" && id < 0));
+    if (!ids.length) {
+      return;
+    }
+
     const start = state.nextTempId;
     controller.duplicateRows(ids);
     if (typeof start === "number") {
@@ -492,19 +497,24 @@ export default function AttributeEditorView({
   ]);
 
   const duplicateInForm = React.useCallback(() => {
-    const ids = selectedIds.size
+    const base = selectedIds.size
       ? Array.from(selectedIds)
       : focusedId != null
         ? [focusedId]
         : [];
 
+    const isDraftId = (id) => {
+      const n = Number(id);
+      return Number.isFinite(n) && n < 0;
+    };
+    const ids = base.filter((id) => !isDraftId(id));
     if (!ids.length) return;
 
     const start = state.nextTempId;
 
     controller.duplicateRows(ids);
 
-    if (typeof start === "number") {
+    if (typeof start === "number" && ids.length) {
       const created = ids.map((_, i) => start - i);
       setSelectedIds(new Set(created));
       setFocusedId(created[0]);
