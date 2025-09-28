@@ -94,6 +94,20 @@ const applyEditToDraft = (state, id, key, value, suppressUndo = false) => {
 
 const applyInverse = (state, op) => {
   switch (op.kind) {
+    case "delete_state_batch": {
+      const { pendingDeletes, drafts } = op.payload;
+      const restoredDel = new Set(pendingDeletes);
+      const restoredAdds = state.pendingAdds.map((d) => {
+        const had = Object.prototype.hasOwnProperty.call(drafts, d.id);
+        const v = had ? drafts[d.id] : d.__pending;
+        return v === d.__pending ? d : { ...d, __pending: v };
+      });
+      return {
+        ...state,
+        pendingDeletes: restoredDel,
+        pendingAdds: restoredAdds,
+      };
+    }
     case "edit": {
       const { id, key, value } = op.payload;
       return applyEditToExisting(state, id, key, value, true);
@@ -263,13 +277,15 @@ const reducer = (state, action) => {
       const { ids = [], mode = "toggle" } = action;
       if (!ids.length) return state;
 
-      const beforeDeletes = new Set(state.pendingDeletes);
-      const draftsBefore = {};
-      state.pendingAdds.forEach((d) => {
-        draftsBefore[d.id] = d.__pending;
-      });
+      const before = {
+        pendingDeletes: new Set(state.pendingDeletes),
+        drafts: Object.fromEntries(
+          state.pendingAdds.map((d) => [d.id, d.__pending])
+        ),
+      };
 
       const idsSet = new Set(ids);
+
       const nextAdds = state.pendingAdds.map((d) => {
         if (!idsSet.has(d.id)) return d;
         const nextPending =
@@ -295,33 +311,15 @@ const reducer = (state, action) => {
         }
       });
 
-      const perIdInverse = [];
-      ids.forEach((id) => {
-        if (id < 0) return;
-        const wasMarked = beforeDeletes.has(id);
-        perIdInverse.push({
-          kind: "delete_state",
-          payload: {
-            ids: [id],
-            modeBefore: wasMarked ? "mark" : "unmark",
-            draftsBefore: {},
-          },
-        });
-      });
-
-      const inverseForDrafts = {
-        kind: "delete_state",
-        payload: {
-          ids: ids.filter((id) => id < 0),
-          modeBefore: null,
-          draftsBefore,
-        },
-      };
-
       return pushUndo(
         { ...state, pendingAdds: nextAdds, pendingDeletes: nextDel },
         "Toggle delete",
-        [...perIdInverse, inverseForDrafts]
+        [
+          {
+            kind: "delete_state_batch",
+            payload: before,
+          },
+        ]
       );
     }
 

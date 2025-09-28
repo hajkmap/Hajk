@@ -14,6 +14,7 @@ import VectorLayer from "ol/layer/Vector";
 import { Style, Circle as CircleStyle, Fill, Stroke } from "ol/style";
 
 function AttributeEditor(props) {
+  const programmaticSketchOpsRef = React.useRef(new WeakSet());
   const [fieldMetaLocal, setFieldMetaLocal] = React.useState([]);
   const vectorLayerRef = React.useRef(null);
   const apiBase =
@@ -489,6 +490,11 @@ function AttributeEditor(props) {
         const f = e.feature;
         if (!f) return;
 
+        if (programmaticSketchOpsRef.current.has(e.feature)) {
+          programmaticSketchOpsRef.current.delete(e.feature);
+          return;
+        }
+
         if (
           !currentServiceIdRef.current ||
           currentServiceIdRef.current === "NONE_ID"
@@ -529,6 +535,17 @@ function AttributeEditor(props) {
       const onRemove = (e) => {
         const f = e.feature;
         if (!f) return;
+
+        if (programmaticSketchOpsRef.current.has(e.feature)) {
+          programmaticSketchOpsRef.current.delete(e.feature);
+          return;
+        }
+
+        if (programmaticSketchOpsRef.current.has(f)) {
+          programmaticSketchOpsRef.current.delete(f);
+          return;
+        }
+
         // Find id
         let fid = f.getId?.() ?? f.get?.("id");
         if (fid == null) {
@@ -543,13 +560,15 @@ function AttributeEditor(props) {
 
         graveyardRef.current.set(fid, f);
         featureIndexRef.current.delete(fid);
-
-        // Is this right - Test
         selectedIdsRef.current.delete(fid);
         visibleIdsRef.current.delete(fid);
 
         if (typeof fid === "number" && fid < 0) {
-          model.dispatch({ type: Action.REMOVE_DRAFTS, ids: [fid] });
+          model.dispatch({
+            type: Action.SET_DELETE_STATE,
+            ids: [fid],
+            mode: "mark",
+          });
         } else {
           model.dispatch({
             type: Action.SET_DELETE_STATE,
@@ -558,7 +577,6 @@ function AttributeEditor(props) {
           });
         }
 
-        // reset focus if the deleted feature was focused
         if (focusedIdRef?.current === fid) {
           editBus.emit("attrib:focus-id", { id: null });
         }
@@ -643,6 +661,8 @@ function AttributeEditor(props) {
           const f = featureIndexRef.current.get(id);
           if (f) {
             try {
+              // PROG-GUARD: mark this remove as programmatic so onRemove ignores it
+              programmaticSketchOpsRef.current.add(f);
               src.removeFeature(f);
             } catch {}
             featureIndexRef.current.delete(id);
@@ -659,6 +679,8 @@ function AttributeEditor(props) {
           const f = featureIndexRef.current.get(id);
           if (f) {
             try {
+              // PROG-GUARD: programmatic remove to avoid re-dispatch in onRemove
+              programmaticSketchOpsRef.current.add(f);
               src.removeFeature(f);
             } catch {}
             featureIndexRef.current.delete(id);
@@ -675,6 +697,8 @@ function AttributeEditor(props) {
           const f = graveyardRef.current.get(id);
           if (f) {
             try {
+              // PROG-GUARD: programmatic add to avoid re-dispatch in onAdd
+              programmaticSketchOpsRef.current.add(f);
               src.addFeature(f);
             } catch {}
             featureIndexRef.current.set(id, f);
@@ -698,6 +722,8 @@ function AttributeEditor(props) {
           const f = featureIndexRef.current.get(id);
           if (f) {
             try {
+              // PROG-GUARD: programmatic remove to avoid onRemove loop
+              programmaticSketchOpsRef.current.add(f);
               src.removeFeature(f);
             } catch {}
             featureIndexRef.current.delete(id);
