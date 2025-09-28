@@ -161,7 +161,11 @@ export default function DesktopForm({
   const handleDeleteClick = () => {
     const ids = getIdsForDeletion(selectedIds, focusedId);
     if (!ids.length) return;
-    setDeleteState(ids, "mark");
+
+    // Mark all ids for deletion (drafts + existing)
+    // – this keeps the row (struck-through) and removes the sketch geometry
+    //   via the back-sync you already have for drafts (__pending === 'delete').
+    setDeleteState(ids, "toggle");
   };
 
   const summary = React.useMemo(

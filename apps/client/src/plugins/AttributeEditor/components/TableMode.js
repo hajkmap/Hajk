@@ -294,20 +294,6 @@ export default function TableMode(props) {
           <button
             style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
             disabled={tableSelectedIds.size === 0}
-            onClick={duplicateSelectedRows}
-            title={
-              tableSelectedIds.size
-                ? `Duplicera ${tableSelectedIds.size} markerade`
-                : "Markera rader först"
-            }
-            aria-label="Duplicera val"
-          >
-            <ContentCopyIcon fontSize="small" />
-          </button>
-
-          <button
-            style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
-            disabled={tableSelectedIds.size === 0}
             onClick={openSelectedInFormFromTable}
             title={
               tableSelectedIds.size
@@ -317,6 +303,20 @@ export default function TableMode(props) {
             aria-label="Redigera val i formulär"
           >
             <EditNoteIcon fontSize="small" />
+          </button>
+
+          <button
+            style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
+            disabled={tableSelectedIds.size === 0}
+            onClick={duplicateSelectedRows}
+            title={
+              tableSelectedIds.size
+                ? `Duplicera ${tableSelectedIds.size} markerade`
+                : "Markera rader först"
+            }
+            aria-label="Duplicera val"
+          >
+            <ContentCopyIcon fontSize="small" />
           </button>
 
           <button
