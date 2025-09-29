@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { ZodType, ZodError } from "zod";
+import { ZodType, ZodError, z } from "zod";
 import HttpStatusCodes from "../../../common/http-status-codes.ts";
 /*
 Tries to parse the request data using the provided schema.
@@ -11,15 +11,21 @@ export const validatePayload = (
   schema: ZodType<unknown>,
   source: "body" | "params" | "query" = "body"
 ) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     try {
       schema.parse(req[source]);
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        return res.status(HttpStatusCodes.BAD_REQUEST).json({
-          ...error,
+        res.status(HttpStatusCodes.BAD_REQUEST).json({
+          error: "Validation failed",
+          details: error.issues.map((err: z.core.$ZodIssue) => ({
+            field: err.path.join("."),
+            message: err.message,
+            code: err.code,
+          })),
         });
+        return;
       } else {
         next(error);
       }

@@ -88,7 +88,7 @@ class UserService {
         : undefined;
 
     await prisma.localAccount.update({
-      where: { id: id },
+      where: { userId: id },
       data: { fullName: fullName, password: p },
     });
     const user = await prisma.user.update({

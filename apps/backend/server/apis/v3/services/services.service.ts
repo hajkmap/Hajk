@@ -91,7 +91,12 @@ class ServicesService {
     return projections;
   }
 
-  async createService(data: Prisma.ServiceCreateInput) {
+  async createService(
+    data: Prisma.ServiceCreateInput & {
+      projection?: { code: string };
+      metadata?: Record<string, unknown>;
+    }
+  ) {
     const projectionCode = data?.projection?.code || DEFAULT_PROJECTION_CODE;
     const existingProjection = await prisma.projection.findUnique({
       where: { code: projectionCode },
@@ -101,12 +106,17 @@ class ServicesService {
       throw new Error(`Projection with code ${projectionCode} not found`);
     }
 
+    // Transform user input to Prisma format
+    const { metadata, ...serviceData } = data;
+
     const newService = await prisma.service.create({
       data: {
-        ...data,
-        metadata: {
-          create: { ...data.metadata },
-        },
+        ...serviceData,
+        metadata: metadata
+          ? {
+              create: metadata,
+            }
+          : undefined,
         projection: {
           connect: { id: existingProjection.id },
         },
@@ -120,21 +130,47 @@ class ServicesService {
     return newService;
   }
 
-  async updateService(id: string, data: Prisma.ServiceUpdateInput) {
+  async updateService(
+    id: string,
+    data: Prisma.ServiceUpdateInput & {
+      projection?: { code: string };
+      metadata?: Record<string, unknown>;
+    }
+  ) {
+    // Transform user input to Prisma format
+    const { projection, metadata, ...serviceData } = data;
+
+    // Build the update data object conditionally
+    const updateData: Record<string, unknown> = { ...serviceData };
+
+    // Handle projection update
+    if (projection?.code) {
+      const existingProjection = await prisma.projection.findUnique({
+        where: { code: projection.code },
+      });
+
+      if (!existingProjection) {
+        throw new Error(`Projection with code ${projection.code} not found`);
+      }
+
+      updateData.projection = {
+        connect: { id: existingProjection.id },
+      };
+    }
+
+    // Handle metadata update
+    if (metadata) {
+      updateData.metadata = {
+        upsert: {
+          update: metadata,
+          create: metadata,
+        },
+      };
+    }
+
     const updatedService = await prisma.service.update({
       where: { id },
-      data: {
-        ...data,
-        metadata: {
-          upsert: {
-            update: { ...data.metadata },
-            create: { ...data.metadata },
-          },
-        },
-        projection: {
-          connect: { code: data.projection?.code },
-        },
-      },
+      data: updateData,
       include: {
         metadata: true,
         projection: true,

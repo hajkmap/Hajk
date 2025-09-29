@@ -2,11 +2,11 @@ import * as express from "express";
 import controller from "./controller.ts";
 import { validatePayload } from "../../middlewares/payload.validation.ts";
 import {
-  LocalAccountCreateInputSchema,
-  LocalAccountUpdateInputSchema,
-  RoleCreateInputSchema,
-  RoleUpdateInputSchema,
-} from "../../../../generated/zod/index.ts";
+  LocalAccountCreateSchema,
+  LocalAccountUpdateSchema,
+  RoleCreateSchema,
+  RoleUpdateSchema,
+} from "../../schemas/user.schemas.ts";
 
 export default express
   .Router()
@@ -15,19 +15,19 @@ export default express
   .get("/:id", controller.getUserById)
   .patch(
     "/:id",
-    validatePayload(LocalAccountUpdateInputSchema),
+    validatePayload(LocalAccountUpdateSchema),
     controller.updateUserAndLocalAccount
   )
   .delete("/:id", controller.deleteUser)
   .get("/:id/roles", controller.getRolesByUserId)
   .post(
     "/",
-    validatePayload(LocalAccountCreateInputSchema),
+    validatePayload(LocalAccountCreateSchema),
     controller.createUserAndLocalAccount
   )
-  .post("/roles", validatePayload(RoleCreateInputSchema), controller.createRole)
+  .post("/roles", validatePayload(RoleCreateSchema), controller.createRole)
   .patch(
     "/roles/:id",
-    validatePayload(RoleUpdateInputSchema),
+    validatePayload(RoleUpdateSchema),
     controller.updateRole
   );
