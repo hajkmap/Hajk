@@ -37,7 +37,7 @@
     "react-app-rewired": "^2.2.1",
     "react-scripts": "5.0.1",
     "source-map-explorer": "^2.5.3",
-    "webpack": "^5.101.3"
+    "webpack": "^5.102.0"
   },
   "dependencies": {
     "@barbapapazes/plausible-tracker": "^0.5.6",
