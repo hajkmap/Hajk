@@ -835,28 +835,6 @@
       "index": 16
     },
     {
-      "type": "AttributeEditor",
-      "index": 100,
-      "options": {
-        "target": "left",
-        "position": "right",
-        "winheight": "600",
-        "winwidth": "1000",
-        "instruction": "",
-        "visibleForGroups": [],
-        "activeServices": [
-          {
-            "id": "5d21c612-b28e-c3da-074d-2d94c69c8c2f",
-            "visibleForGroups": []
-          },
-          {
-            "id": "2896dcca-73ac-cf38-0750-3037c4a894d7",
-            "visibleForGroups": []
-          }
-        ]
-      }
-    },
-    {
       "type": "buffer",
       "options": {
         "target": "toolbar",
