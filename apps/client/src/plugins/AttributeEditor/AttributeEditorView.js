@@ -330,6 +330,7 @@ export default function AttributeEditorView({
 
   const filteredAndSorted = useMemo(() => {
     const q = tableSearch.trim().toLowerCase();
+    const editingId = tableEditing?.id ?? null;
 
     let rows = allRows.filter((f) => {
       const matchesSearch = !q
@@ -340,13 +341,14 @@ export default function AttributeEditorView({
               .includes(q)
           );
 
-      const matchesColumnFilters = Object.entries(columnFilters).every(
-        ([key, selectedValues]) => {
-          if (!selectedValues || selectedValues.length === 0) return true;
-          const cellValue = String(f[key] ?? "");
-          return selectedValues.includes(cellValue);
-        }
-      );
+      const matchesColumnFilters =
+        editingId === f.id
+          ? true
+          : Object.entries(columnFilters).every(([key, selectedValues]) => {
+              if (!selectedValues || selectedValues.length === 0) return true;
+              const cellValue = String(f[key] ?? "");
+              return selectedValues.includes(cellValue);
+            });
 
       return matchesSearch && matchesColumnFilters;
     });
@@ -370,6 +372,14 @@ export default function AttributeEditorView({
     };
 
     const pri = (r) => (r.__pending === "add" ? 0 : 1);
+    if (editingId != null) {
+      rows.sort((a, b) => {
+        const p = pri(a) - pri(b);
+        if (p !== 0) return p;
+        return (a.__idx ?? 0) - (b.__idx ?? 0);
+      });
+      return rows;
+    }
     rows.sort((a, b) => {
       const p = pri(a) - pri(b);
       if (p !== 0) return p;
@@ -381,7 +391,7 @@ export default function AttributeEditorView({
     });
 
     return rows;
-  }, [allRows, tableSearch, sort, columnFilters]);
+  }, [allRows, tableSearch, sort, columnFilters, tableEditing]);
 
   const cloneGeometryForDuplicates = React.useCallback(
     (sourceIds, createdIds) => {
