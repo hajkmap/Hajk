@@ -333,13 +333,14 @@ export default function AttributeEditorView({
     const editingId = tableEditing?.id ?? null;
 
     let rows = allRows.filter((f) => {
-      const matchesSearch = !q
-        ? true
-        : Object.values(f).some((val) =>
-            String(val ?? "")
-              .toLowerCase()
-              .includes(q)
-          );
+      const matchesSearch =
+        !q ||
+        editingId === f.id ||
+        Object.values(f).some((val) =>
+          String(val ?? "")
+            .toLowerCase()
+            .includes(q)
+        );
 
       const matchesColumnFilters =
         editingId === f.id
@@ -916,17 +917,15 @@ export default function AttributeEditorView({
 
     const all = [...existing, ...drafts];
     const fmKeys = FM.map((m) => m.key);
-    const searchKeys = fmKeys
-      .filter((k) => !["id", "geoid", "oracle_geoid"].includes(k))
-      .slice(0, 5);
+    const keys = fmKeys.includes("id") ? fmKeys : ["id", ...fmKeys];
 
-    const filtered = all.filter((f) => {
+    const filtered = all.filter((row) => {
       if (!sTerm) return true;
-      return searchKeys.some((k) =>
-        String(f[k] ?? "")
-          .toLowerCase()
-          .includes(sTerm)
-      );
+      for (const k of keys) {
+        const v = row?.[k];
+        if (v != null && String(v).toLowerCase().includes(sTerm)) return true;
+      }
+      return false;
     });
 
     filtered.sort((a, b) => {

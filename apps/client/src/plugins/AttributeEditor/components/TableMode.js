@@ -675,6 +675,20 @@ export default function TableMode(props) {
                             prevValue: prevVal,
                             isDraft,
                           });
+                          const activeForCol = columnFilters?.[meta.key];
+                          if (
+                            Array.isArray(activeForCol) &&
+                            activeForCol.length > 0
+                          ) {
+                            const newValStr = String(currentVal ?? "");
+                            if (newValStr !== "") {
+                              setColumnFilters((prev) => {
+                                const cur = new Set(prev?.[meta.key] || []);
+                                cur.add(newValStr);
+                                return { ...prev, [meta.key]: Array.from(cur) };
+                              });
+                            }
+                          }
                         }
                       };
 
