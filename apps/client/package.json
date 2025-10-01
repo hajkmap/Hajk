@@ -50,7 +50,7 @@
     "@fontsource/roboto": "^5.2.8",
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
-    "@mui/system": "^7.3.2",
+    "@mui/system": "^7.3.3",
     "@mui/utils": "^7.3.2",
     "@mui/x-data-grid": "^8.11.3",
     "@nieuwlandgeo/sldreader": "^0.7.2",
