@@ -533,10 +533,16 @@ export default function TableMode(props) {
                           };
                         }}
                         onTouchStart={(e) => {
+                          if (!e.touches || !e.touches[0]) return;
                           const t = e.touches[0];
-                          const w =
-                            colWidths[f.key] ??
-                            (e.currentTarget.parentElement?.offsetWidth || 220);
+                          const parent = e.currentTarget
+                            ? e.currentTarget.parentElement
+                            : null;
+                          const ow =
+                            parent && parent.offsetWidth
+                              ? parent.offsetWidth
+                              : 220;
+                          const w = colWidths[f.key] ?? ow;
                           resizingRef.current = {
                             key: f.key,
                             startX: t.clientX,
@@ -646,7 +652,7 @@ export default function TableMode(props) {
                       };
 
                       const finishEdit = () => {
-                        const ed = tableEditing; // { id, key, startValue }
+                        const ed = tableEditing;
                         setTableEditing(null);
                         if (!ed || ed.id !== row.id || ed.key !== meta.key)
                           return;
@@ -675,20 +681,47 @@ export default function TableMode(props) {
                             prevValue: prevVal,
                             isDraft,
                           });
+
+                          // Only update filter if this column is currently filtered ***
                           const activeForCol = columnFilters?.[meta.key];
                           if (
                             Array.isArray(activeForCol) &&
                             activeForCol.length > 0
                           ) {
                             const newValStr = String(currentVal ?? "");
-                            if (newValStr !== "") {
-                              setColumnFilters((prev) => {
-                                const cur = new Set(prev?.[meta.key] || []);
-                                cur.add(newValStr);
-                                return { ...prev, [meta.key]: Array.from(cur) };
-                              });
-                            }
+                            const prevValStr = String(prevVal ?? "");
+
+                            setColumnFilters((prev) => {
+                              const before = prev?.[meta.key] || [];
+                              const nextSet = new Set(before.map(String));
+
+                              // Add new value if not empty
+                              if (newValStr !== "") {
+                                nextSet.add(newValStr);
+                              }
+
+                              // Remove old value if it's no longer used anywhere
+                              if (
+                                prevValStr !== "" &&
+                                prevValStr !== newValStr
+                              ) {
+                                // Check if any other row still uses this value
+                                const stillUsed = filteredAndSorted.some(
+                                  (r) =>
+                                    r.id !== row.id &&
+                                    String(r[meta.key] ?? "") === prevValStr
+                                );
+                                if (!stillUsed) {
+                                  nextSet.delete(prevValStr);
+                                }
+                              }
+
+                              const next = { ...(prev || {}) };
+                              next[meta.key] = Array.from(nextSet);
+                              return next;
+                            });
                           }
+                          // END FIX ***
                         }
                       };
 

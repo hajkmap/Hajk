@@ -7,6 +7,7 @@ import AttributeEditorModel, { Action } from "./AttributeEditorModel";
 import { editBus } from "../../buses/editBus";
 import { PLUGIN_COLORS } from "./constants/index";
 import { createOgcApi } from "./api/ogc";
+import { idAliases } from "./helpers/helpers";
 
 import GeoJSON from "ol/format/GeoJSON";
 import VectorSource from "ol/source/Vector";
@@ -62,6 +63,7 @@ function AttributeEditor(props) {
   const featureIndexRef = React.useRef(new Map());
   const graveyardRef = React.useRef(new Map());
   const focusedIdRef = React.useRef(null);
+  const draftBaselineRef = React.useRef(new Map());
 
   const currentServiceIdRef = React.useRef("NONE_ID");
   const [serviceList, setServiceList] = React.useState([]);
@@ -114,20 +116,20 @@ function AttributeEditor(props) {
 
   const styleFn = React.useCallback(
     (feature) => {
-      // 1) use attribute id if it exists, otherwise use @_fid, and lastly OL-id
-      const keyRaw =
+      const raw =
         feature.get?.("id") ?? feature.get?.("@_fid") ?? feature.getId?.();
-      const keyStr = String(keyRaw);
+      const aliases = idAliases(raw);
 
       const sel = selectedIdsRef.current;
       const vis = visibleIdsRef.current;
       const del = deletedIdsRef.current;
 
-      const isSelected = sel.has(keyRaw) || sel.has(keyStr);
-      const isVisible = vis.has(keyRaw) || vis.has(keyStr);
+      const isSelected = aliases.some((k) => sel.has(k));
+      const isVisible = aliases.some((k) => vis.has(k));
+      const isDeleted = aliases.some((k) => del.has(k));
 
       if (!isVisible && !isSelected) return null;
-      if (del.has(keyRaw) || del.has(keyStr)) return styles.toDelete;
+      if (isDeleted) return styles.toDelete;
       if (isSelected) return styles.selected;
       return styles.visible;
     },
@@ -135,32 +137,42 @@ function AttributeEditor(props) {
   );
 
   React.useEffect(() => {
-    let cancelled = false;
     const active = props.options?.activeServices ?? [];
     if (!active.length) {
       setServiceList([]);
       return;
     }
 
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
     (async () => {
       try {
-        // Fetch full list once for fallback lookups
+        // Fetch list with abort signal
         const list = await ogc.fetchWfstList(
-          "id,uuid,caption,title,name,projection,layers"
+          "id,uuid,caption,title,name,projection,layers",
+          { signal }
         );
-        const allArr = Array.isArray(list) ? list : (list?.layers ?? []);
 
+        // Check if aborted after first async operation
+        if (signal.aborted) return;
+
+        const allArr = Array.isArray(list) ? list : (list?.layers ?? []);
         const ids = active.map((x) => x.id).filter(Boolean);
+
+        // Fetch all metadata with same signal
         const items = await Promise.all(
           ids.map(async (id) => {
             try {
-              // Primary source of truth
-              const meta = await ogc.fetchWfstMeta(id);
+              const meta = await ogc.fetchWfstMeta(id, { signal });
+
+              // Check abort after each meta fetch
+              if (signal.aborted) return null;
+
               const title =
                 meta?.caption?.trim?.() ||
                 meta?.title?.trim?.() ||
                 meta?.name?.trim?.() ||
-                // fallback: look up in fetched list
                 (allArr.find((x) => (x.id ?? x.uuid) === id)?.caption ?? "")
                   .toString()
                   .trim() ||
@@ -171,8 +183,11 @@ function AttributeEditor(props) {
                 projection: meta?.projection,
                 layers: meta?.layers || [],
               };
-            } catch {
-              // Hard fallback: list row or bare id
+            } catch (err) {
+              // If aborted, return null immediately
+              if (signal.aborted) return null;
+
+              // Otherwise fallback to list data
               const m = allArr.find((x) => (x.id ?? x.uuid) === id);
               return {
                 id,
@@ -184,17 +199,25 @@ function AttributeEditor(props) {
           })
         );
 
-        if (!cancelled) setServiceList(items.filter(Boolean));
+        // Final abort check before setting state
+        if (signal.aborted) return;
+
+        setServiceList(items.filter(Boolean));
       } catch (e) {
-        if (!cancelled) setServiceList([]);
-        console.warn("Kunde inte läsa serviceList:", e);
+        // Ignore abort errors
+        if (e.name === "AbortError") return;
+
+        if (!signal.aborted) {
+          console.warn("Kunde inte läsa serviceList:", e);
+          setServiceList([]);
+        }
       }
     })();
 
     return () => {
-      cancelled = true;
+      abortController.abort();
     };
-  }, [ogc, props.options?.activeServices, setServiceList]);
+  }, [ogc, props.options?.activeServices]);
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", async (ev) => {
@@ -373,12 +396,11 @@ function AttributeEditor(props) {
             })
           : [];
 
-        visibleIdsRef.current = new Set(
-          features.flatMap((f) => {
-            const fid = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-            return [fid, String(fid)];
-          })
-        );
+        visibleIdsRef.current = new Set();
+        features.forEach((f) => {
+          const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+          idAliases(raw).forEach((k) => featureIndexRef.current.set(k, f));
+        });
 
         features.forEach((f) => {
           const fidProp = f.get?.("@_fid");
@@ -502,8 +524,6 @@ function AttributeEditor(props) {
           return;
         }
 
-        // If the feature comes in with an id that is already in use (e.g. -1 from the original dataset),
-        // reassign the id so we can give it a new temporary id in AE.
         let incomingId = f.getId?.() ?? f.get?.("id");
         if (incomingId != null && featureIndexRef.current.has(incomingId)) {
           try {
@@ -521,6 +541,14 @@ function AttributeEditor(props) {
         try {
           f.set?.("id", tempId, true);
         } catch {}
+
+        // Capture baseline immediately when draft is created
+        const baseline = {};
+        fieldMetaLocal.forEach(({ key }) => {
+          const val = f.get?.(key);
+          baseline[key] = val == null ? "" : val;
+        });
+        draftBaselineRef.current.set(tempId, baseline);
 
         featureIndexRef.current.set(tempId, f);
         graveyardRef.current.delete(tempId);
@@ -622,7 +650,7 @@ function AttributeEditor(props) {
         unbindLayerHook();
       } catch {}
     };
-  }, [props.map, model, vectorLayerRef]);
+  }, [props.map, model, vectorLayerRef, fieldMetaLocal]);
 
   React.useEffect(() => {
     return model.subscribe(() => {
@@ -798,6 +826,12 @@ function AttributeEditor(props) {
 
       // 1) pick feature id
       const rawId = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
+      const aliases = idAliases(rawId);
+      editBus.emit("attrib:select-ids", {
+        ids: aliases,
+        source: "map",
+        mode: "replace",
+      });
       const canonId = toCanonicalId(rawId);
 
       const multi =
@@ -941,6 +975,7 @@ function AttributeEditor(props) {
         serviceList={serviceList}
         featureIndexRef={featureIndexRef}
         graveyardRef={graveyardRef}
+        draftBaselineRef={draftBaselineRef}
       />
     </BaseWindowPlugin>
   );

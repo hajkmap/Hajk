@@ -19,6 +19,7 @@ import MobileForm from "./components/MobileForm";
 import DesktopForm from "./components/DesktopForm";
 import NotificationBar from "./helpers/NotificationBar";
 import { editBus } from "../../buses/editBus";
+import { idAliases, pickPreferredId } from "./helpers/helpers";
 
 export default function AttributeEditorView({
   state,
@@ -35,8 +36,10 @@ export default function AttributeEditorView({
   featureIndexRef,
   graveyardRef,
   model,
+  draftBaselineRef,
 }) {
-  const draftBaselineRef = React.useRef(new Map());
+  const uniqueCacheRef = React.useRef(new Map());
+  const lastSentRef = React.useRef(new Map());
   const [serviceId, setServiceId] = React.useState("NONE_ID");
   const [tableEditing, setTableEditing] = useState(null); // { id, key, startValue } | null
 
@@ -101,18 +104,66 @@ export default function AttributeEditorView({
 
   React.useEffect(() => {
     const offSelIds = editBus.on("attrib:select-ids", (ev) => {
-      const { ids = [], source = "view" } = ev.detail || {};
+      const incoming = ev.detail?.ids || [];
+      const ids = incoming.flatMap(idAliases);
+      const uniq = Array.from(new Set(ids));
 
-      setTableSelectedIds(new Set(ids));
-      setSelectedIds(new Set(ids));
-      setFocusedId(ids[0] ?? null);
+      setTableSelectedIds(new Set(uniq));
+      setSelectedIds(new Set(uniq));
 
-      if (ids.length && source !== "map") {
-        editBus.emit("attrib:focus-id", { id: ids[0], source });
+      const focus = pickPreferredId(uniq);
+      setFocusedId(focus);
+
+      if (focus != null && ev.detail?.source !== "map") {
+        editBus.emit("attrib:focus-id", {
+          id: focus,
+          source: ev.detail?.source,
+        });
       }
     });
     return () => offSelIds();
   }, [setTableSelectedIds, setSelectedIds, setFocusedId]);
+
+  const debouncedBatchRef = React.useRef(null);
+  const debouncedTimerRef = React.useRef(null);
+  const debouncedBatchEdit = React.useCallback(
+    (ops) => {
+      if (!ops?.length) return;
+      const queue = (debouncedBatchRef.current ??= []);
+      queue.push(...ops);
+
+      if (debouncedTimerRef.current) {
+        clearTimeout(debouncedTimerRef.current);
+      }
+
+      debouncedTimerRef.current = setTimeout(() => {
+        const flush = debouncedBatchRef.current || [];
+        debouncedBatchRef.current = [];
+        debouncedTimerRef.current = null;
+
+        const byKey = new Map();
+        for (const op of flush) byKey.set(`${op.id}::${op.key}`, op);
+        const merged = Array.from(byKey.values());
+        if (merged.length) controller.batchEdit(merged);
+      }, 120);
+    },
+    [controller]
+  );
+
+  // Cleanup effect
+  React.useEffect(() => {
+    return () => {
+      if (debouncedTimerRef.current) {
+        clearTimeout(debouncedTimerRef.current);
+        debouncedTimerRef.current = null;
+      }
+      debouncedBatchRef.current = [];
+    };
+  }, []);
+
+  React.useEffect(() => {
+    lastSentRef.current.clear();
+  }, [focusedId, selectedIds]);
 
   React.useEffect(() => {
     if (serviceId !== "NONE_ID") return;
@@ -601,14 +652,74 @@ export default function AttributeEditorView({
 
   const getUniqueColumnValues = useCallback(
     (columnKey) => {
-      const values = new Set();
-      allRows.forEach((f) => {
-        const val = String(f[columnKey] ?? "");
-        if (val) values.add(val);
+      // Build a cache key of the data version, search string, and all filters
+      // EXCEPT for the current columnKey (so the facet does not cache itself).
+      const editsCount = Object.keys(pendingEdits || {}).length;
+      const delSize = pendingDeletes?.size ?? 0;
+
+      const filterParts = [];
+      for (const [k, vals] of Object.entries(columnFilters || {})) {
+        if (k === columnKey) continue;
+        filterParts.push(k + "=" + (Array.isArray(vals) ? vals.join(",") : ""));
+      }
+      const cacheKey =
+        `facet::${columnKey}::` +
+        `${features.length}|${pendingAdds.length}|${editsCount}|${delSize}|` +
+        `${tableSearch.trim().toLowerCase()}|` +
+        filterParts.sort().join(";");
+
+      const hit = uniqueCacheRef.current.get(cacheKey);
+      if (hit) return hit;
+
+      const q = tableSearch.trim().toLowerCase();
+
+      // 1) Start with ALL rows (not filteredAndSorted)
+      //    and apply the search string …
+      const rowsAfterSearch = allRows.filter((r) => {
+        if (!q) return true;
+        if (tableEditing && tableEditing.id === r.id) return true;
+        return Object.values(r).some((val) =>
+          String(val ?? "")
+            .toLowerCase()
+            .includes(q)
+        );
       });
-      return Array.from(values).sort();
+
+      // 2) ...and apply all other column filters (except for the current column)
+      const rowsForFacet = rowsAfterSearch.filter((r) => {
+        return Object.entries(columnFilters || {}).every(([k, selected]) => {
+          if (k === columnKey) return true;
+          if (!selected || selected.length === 0) return true;
+          const cell = String(r[k] ?? "");
+          return selected.includes(cell);
+        });
+      });
+
+      // 3) Lock in unique values for the current column
+      const vals = new Set();
+      for (let i = 0; i < rowsForFacet.length; i++) {
+        const v = rowsForFacet[i]?.[columnKey];
+        const s = String(v ?? "");
+        if (s) vals.add(s);
+      }
+
+      const out = Array.from(vals).sort((a, b) =>
+        a.localeCompare(b, "sv", { numeric: true, sensitivity: "base" })
+      );
+
+      uniqueCacheRef.current.set(cacheKey, out);
+      return out;
     },
-    [allRows]
+    [
+      allRows,
+      features.length,
+      pendingAdds.length,
+      pendingEdits,
+      pendingDeletes,
+      tableSearch,
+      columnFilters,
+      tableEditing,
+    ]
   );
 
   const toggleSort = (key) => {
@@ -689,11 +800,14 @@ export default function AttributeEditorView({
 
   const commitTableEdits = useCallback(() => {
     controller.commit();
-    formUndoSnapshotsRef.current.clear();
-    setFormUndoStack([]);
-    setTableUndoLocal([]);
-    setTableEditing(null);
-    setLastTableIndex(null);
+    Promise.resolve().then(() => {
+      // next microtask
+      formUndoSnapshotsRef.current.clear();
+      setFormUndoStack([]);
+      setTableUndoLocal([]);
+      setTableEditing(null);
+      setLastTableIndex(null);
+    });
   }, [controller]);
 
   const undoLatestTableChange = useCallback(() => {
@@ -815,29 +929,26 @@ export default function AttributeEditorView({
       const draft = pendingAdds.find((d) => d.id === focusedId);
       if (!draft) return;
 
-      // Set the baseline for the last saved state of this draft-id
+      // Use existing baseline (created when draft was added)
       let baseline = draftBaselineRef.current.get(focusedId);
       if (!baseline) {
+        // Fallback: create empty baseline if somehow missing
         baseline = {};
-        FM.forEach(({ key }) => (baseline[key] = normalize(draft[key])));
+        FM.forEach(({ key }) => (baseline[key] = ""));
         draftBaselineRef.current.set(focusedId, baseline);
-        setOriginalValues(baseline); // locked baseline
-        setEditValues(baseline); // start = baseline
-        setChangedFields(new Set());
-        setDirty(false);
-      } else {
-        // We have a baseline: compare the current draft values with the last baseline
-        const effective = {};
-        FM.forEach(({ key }) => (effective[key] = normalize(draft[key])));
-        setEditValues(effective);
-        const changed = new Set();
-        FM.forEach(({ key }) => {
-          if ((effective[key] ?? "") !== (baseline[key] ?? ""))
-            changed.add(key);
-        });
-        setChangedFields(changed);
-        setDirty(changed.size > 0);
       }
+      setOriginalValues(baseline);
+
+      const effective = {};
+      FM.forEach(({ key }) => (effective[key] = normalize(draft[key])));
+      setEditValues(effective);
+
+      const changed = new Set();
+      FM.forEach(({ key }) => {
+        if ((effective[key] ?? "") !== (baseline[key] ?? "")) changed.add(key);
+      });
+      setChangedFields(changed);
+      setDirty(changed.size > 0);
       return;
     }
 
@@ -863,7 +974,7 @@ export default function AttributeEditorView({
     });
     setChangedFields(changed);
     setDirty(false);
-  }, [focusedId, FM, features, pendingEdits, pendingAdds]);
+  }, [focusedId, FM, features, pendingEdits, pendingAdds, draftBaselineRef]);
 
   // EXTERNAL SYNCH FOR DRAFTS: when pendingAdds changes, immediately update editValues + changedFields (using originalValues)
   useEffect(() => {
@@ -880,7 +991,7 @@ export default function AttributeEditorView({
     });
     setChangedFields(changed);
     setDirty(changed.size > 0);
-  }, [pendingAdds, focusedId, FM, originalValues]);
+  }, [pendingAdds, focusedId, FM, originalValues, draftBaselineRef]);
 
   // CLEAN UP: remove baseline when a draft is saved (commit/undo/remove etc.)
   useEffect(() => {
@@ -890,7 +1001,7 @@ export default function AttributeEditorView({
         draftBaselineRef.current.delete(id);
       }
     }
-  }, [pendingAdds]);
+  }, [pendingAdds, draftBaselineRef]);
 
   function normalize(v) {
     return v == null ? "" : v;
@@ -942,25 +1053,37 @@ export default function AttributeEditorView({
     anchorRef.current = { id: null, index: null };
   }, [ui.mode, serviceId, visibleFormList]);
 
+  const ensureFormSelectionDeps = React.useMemo(
+    () => ({
+      mode: ui.mode,
+      focusedId,
+      focusedIdValid:
+        focusedId != null && visibleFormList.some((f) => f.id === focusedId),
+      selectedIdsValid:
+        selectedIds.size > 0 &&
+        Array.from(selectedIds).some((id) =>
+          visibleFormList.some((f) => f.id === id)
+        ),
+      firstVisibleId: visibleFormList[0]?.id ?? null,
+    }),
+    [ui.mode, focusedId, selectedIds, visibleFormList]
+  );
+
   const ensureFormSelection = React.useCallback(() => {
-    if (ui.mode !== "form") return;
-    const focusOk =
-      focusedId != null && visibleFormList.some((f) => f.id === focusedId);
-    const selOk =
-      selectedIds.size > 0 &&
-      Array.from(selectedIds).some((id) =>
-        visibleFormList.some((f) => f.id === id)
-      );
+    const { mode, focusedIdValid, selectedIdsValid, firstVisibleId } =
+      ensureFormSelectionDeps;
 
-    if (focusOk && selOk) return;
+    if (mode !== "form") return;
 
-    // select first visible row as fallback
-    const cand = visibleFormList[0]?.id;
-    if (cand != null) {
-      setSelectedIds(new Set([cand]));
-      setFocusedId(cand);
+    // If both focus and selection are valid, do nothing
+    if (focusedIdValid && selectedIdsValid) return;
+
+    // Select first visible row as fallback
+    if (firstVisibleId != null) {
+      setSelectedIds(new Set([firstVisibleId]));
+      setFocusedId(firstVisibleId);
     }
-  }, [ui.mode, focusedId, selectedIds, visibleFormList]);
+  }, [ensureFormSelectionDeps]); // Only depends on the memoized object
 
   React.useLayoutEffect(() => {
     ensureFormSelection();
@@ -1090,16 +1213,20 @@ export default function AttributeEditorView({
 
   function handleFieldChange(key, value) {
     const now = Date.now();
-    setEditValues((prev) => ({ ...prev, [key]: value }));
+    const norm = value ?? "";
+
+    setEditValues((prev) =>
+      prev[key] === norm ? prev : { ...prev, [key]: norm }
+    );
+
     setChangedFields((prev) => {
       const next = new Set(prev);
       const baseValue = originalValues[key] ?? "";
-      (value ?? "") !== baseValue ? next.add(key) : next.delete(key);
+      norm !== baseValue ? next.add(key) : next.delete(key);
       setDirty(next.size > 0);
       return next;
     });
 
-    // IMPORTANT: targetval
     let ids;
     if (selectedIds.size > 1) {
       ids = Array.from(selectedIds);
@@ -1123,7 +1250,7 @@ export default function AttributeEditorView({
           effective = { ...base, ...patch };
         }
         const snap = {};
-        FM.forEach(({ key }) => (snap[key] = effective[key] ?? ""));
+        FM.forEach(({ key: k }) => (snap[k] = effective[k] ?? ""));
         formUndoSnapshotsRef.current.set(id, snap);
         snapshotsToPush.push({ id, snapshot: snap, when: now });
       }
@@ -1131,8 +1258,17 @@ export default function AttributeEditorView({
     if (snapshotsToPush.length) {
       setFormUndoStack((prev) => [...prev, ...snapshotsToPush]);
     }
-    const ops = ids.map((id) => ({ id, key, value }));
-    controller.batchEdit(ops);
+
+    const ops = [];
+    ids.forEach((id) => {
+      const lk = `${id}::${key}`;
+      const last = lastSentRef.current.get(lk);
+      if (last !== norm) {
+        lastSentRef.current.set(lk, norm);
+        ops.push({ id, key, value: norm });
+      }
+    });
+    if (ops.length) debouncedBatchEdit(ops);
   }
 
   function saveChanges(opts = {}) {

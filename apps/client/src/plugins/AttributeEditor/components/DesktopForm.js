@@ -54,6 +54,7 @@ export default function DesktopForm({
 
   const textareaRefs = React.useRef({});
   const [pendingCaret, setPendingCaret] = React.useState(null);
+  const saveLeftWTimer = React.useRef(null);
 
   const registerTextareaRef = React.useCallback((key, el) => {
     if (el) textareaRefs.current[key] = el;
@@ -93,6 +94,20 @@ export default function DesktopForm({
   }, []);
 
   React.useEffect(() => {
+    try {
+      if (saveLeftWTimer.current) clearTimeout(saveLeftWTimer.current);
+      saveLeftWTimer.current = setTimeout(() => {
+        try {
+          localStorage.setItem(RESIZER_KEY, String(Math.round(leftW)));
+        } catch {}
+      }, 150);
+    } catch {}
+    return () => {
+      if (saveLeftWTimer.current) clearTimeout(saveLeftWTimer.current);
+    };
+  }, [leftW]);
+
+  React.useEffect(() => {
     if (!focusedFeature) return;
 
     FIELD_META.forEach((meta) => {
@@ -130,7 +145,7 @@ export default function DesktopForm({
 
   React.useEffect(() => {
     if (focusedId != null) {
-      editBus.emit("attrib:focus-id", { id: focusedId });
+      editBus.emit("attrib:focus-id", { id: focusedId, source: "view" });
     }
   }, [focusedId]);
 

@@ -449,3 +449,37 @@ export function renderTableCellEditor({
   }
   return <input {...editorProps} type="text" />;
 }
+
+export function idAliases(x) {
+  if (x == null) return [];
+
+  const s = String(x);
+  const out = new Set();
+
+  // Always include the original string representation
+  out.add(s);
+
+  // If it's purely numeric, also add as number
+  if (/^-?\d+$/.test(s)) {
+    out.add(Number(s));
+  }
+
+  // If it has a dot AND the suffix is numeric, add BOTH full string and numeric suffix
+  const lastDot = s.lastIndexOf(".");
+  if (lastDot > 0) {
+    const tail = s.slice(lastDot + 1);
+    if (/^-?\d+$/.test(tail)) {
+      // Only add numeric suffix if we're confident it won't collide
+      // (i.e., only for known service patterns like "servicename.123")
+      out.add(Number(tail));
+    }
+  }
+
+  return Array.from(out);
+}
+
+export function pickPreferredId(aliases) {
+  // Prefer numbers over strings for consistency
+  const num = aliases.find((a) => typeof a === "number");
+  return num ?? aliases[0] ?? null;
+}
