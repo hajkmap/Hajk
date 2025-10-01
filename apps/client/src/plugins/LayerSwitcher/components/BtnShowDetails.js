@@ -2,8 +2,9 @@ import React from "react";
 import ShowDetailsIcon from "@mui/icons-material/MoreOutlined";
 import LsIconButton from "./LsIconButton";
 
-const BtnShowDetails = ({ children, ...props }) => (
+const BtnShowDetails = ({ children, id, ...props }) => (
   <LsIconButton
+    id={id}
     size="small"
     sx={(theme) => ({
       marginTop: "3px",

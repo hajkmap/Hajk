@@ -288,7 +288,8 @@ class WFSVectorLayer {
         ? `&bbox=${extent.join(",")},${projection}`
         : "";
 
-    const url = this.config.url + "?" + usp + bbox;
+    const glue = this.config.url.includes("?") ? "&" : "?";
+    const url = this.config.url + glue + usp + bbox;
     return url;
   }
 

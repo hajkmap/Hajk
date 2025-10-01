@@ -73,9 +73,9 @@ class Information extends React.PureComponent {
 
   renderDialog() {
     const { headerText, text, buttonText } = this.props.options;
-
     return createPortal(
       <Dialog
+        type={this.type}
         options={{
           headerText,
           text,

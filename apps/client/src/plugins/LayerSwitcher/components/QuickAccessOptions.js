@@ -1,5 +1,5 @@
 import * as React from "react";
-
+import { useEffect } from "react";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
@@ -18,6 +18,17 @@ export default function QuickAccessOptions({
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const optionsMenuIsOpen = Boolean(anchorEl);
+  // Add event listener for closing the quickAccess menu in the introduction component.
+  useEffect(() => {
+    const handleCloseMenu = () => {
+      setAnchorEl(null);
+    };
+
+    document.addEventListener("closeQuickAccessMenu", handleCloseMenu);
+    return () => {
+      document.removeEventListener("closeQuickAccessMenu", handleCloseMenu);
+    };
+  }, []);
 
   // Show the options menu by setting an anchor element
   const handleShowMoreOptionsClick = (e) => {
@@ -36,6 +47,7 @@ export default function QuickAccessOptions({
   return (
     <>
       <LsIconButton
+        id="quick-access-menu-button"
         size="small"
         aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
@@ -51,6 +63,11 @@ export default function QuickAccessOptions({
         open={optionsMenuIsOpen}
         onClose={onOptionsMenuClose}
         variant={"menu"}
+        slotProps={{
+          paper: {
+            id: "quick-access-menu-content",
+          },
+        }}
       >
         <MenuItem
           onClick={(e) => {

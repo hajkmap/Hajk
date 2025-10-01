@@ -72,9 +72,22 @@ export default function FavoritePackageOptions({
     deleteCallback(favorite);
   };
 
+  // Add event listener for closing the favorites list menu in the introduction component.
+  React.useEffect(() => {
+    const handleCloseMenu = () => {
+      setAnchorEl(null);
+    };
+
+    document.addEventListener("closeFavoritesListMenu", handleCloseMenu);
+    return () => {
+      document.removeEventListener("closeFavoritesListMenu", handleCloseMenu);
+    };
+  }, []);
+
   return (
     <>
       <IconButton
+        id="favorites-list-options-button"
         size="small"
         aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
@@ -86,6 +99,9 @@ export default function FavoritePackageOptions({
         </HajkToolTip>
       </IconButton>
       <Menu
+        slotProps={{
+          paper: { id: "favorites-list-options-menu" },
+        }}
         anchorEl={anchorEl}
         open={optionsMenuIsOpen}
         onClose={onOptionsMenuClose}
