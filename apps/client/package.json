@@ -51,7 +51,7 @@
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
     "@mui/system": "^7.3.2",
-    "@mui/utils": "^7.3.2",
+    "@mui/utils": "^7.3.3",
     "@mui/x-data-grid": "^8.11.3",
     "@nieuwlandgeo/sldreader": "^0.7.2",
     "@turf/boolean-point-on-line": "^7.2.0",
