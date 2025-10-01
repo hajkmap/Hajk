@@ -137,47 +137,58 @@ function PdfViewerWithTOC({
     }
   }
 
+  const customScrollToPage = React.useCallback((pageNumber) => {
+    if (!pageNumber) return;
+    scroller.scrollTo(`page-${pageNumber}`, {
+      containerId: "pdfViewer",
+      smooth: true,
+      duration: 600,
+      offset: -5,
+    });
+  }, []);
+
   useEffect(() => {
+    let t;
     const handlePageChange = ({ page }) => {
       if (page != null) {
         setPendingPage(page);
-        setTimeout(() => customScrollToPage(page), 300);
+        clearTimeout(t);
+        t = setTimeout(() => customScrollToPage(page), 300);
       }
     };
 
     app.globalObserver.subscribe("document-page-change", handlePageChange);
-    return () =>
+    return () => {
       app.globalObserver.unsubscribe("document-page-change", handlePageChange);
-  }, [app.globalObserver]);
+      clearTimeout(t);
+    };
+  }, [app.globalObserver, customScrollToPage]);
 
   //--------------------------------------------------------------------------
 
   useLayoutEffect(() => {
-    // If the dialog is open, there is no PdfContainer in the DOM → skip.
     if (showDownloadWindow) return;
-
-    if (!containerRef.current) return;
+    const el = containerRef.current;
+    if (!el) return;
 
     const updateWidth = () => {
-      const el = containerRef.current;
-      if (!el) return;
-      setPageWidth(el.getBoundingClientRect().width - 19);
+      if (!containerRef.current) return;
+      setPageWidth(containerRef.current.getBoundingClientRect().width - 19);
     };
 
-    // Debounce-wrap
     const debouncedUpdate = () => {
       clearTimeout(timerRef.current);
       timerRef.current = setTimeout(updateWidth, 300);
     };
 
-    // Init + observer
     updateWidth();
     const ro = new ResizeObserver(debouncedUpdate);
-    ro.observe(containerRef.current);
+    ro.observe(el);
 
-    // Cleanup
     return () => {
-      ro.disconnect();
+      try {
+        ro.disconnect();
+      } catch {}
       clearTimeout(timerRef.current);
     };
   }, [showDownloadWindow]);
@@ -233,15 +244,6 @@ function PdfViewerWithTOC({
     });
   };
 
-  const customScrollToPage = (pageNumber) => {
-    scroller.scrollTo(`page-${pageNumber}`, {
-      containerId: "pdfViewer",
-      smooth: true,
-      duration: 600,
-      offset: -5,
-    });
-  };
-
   const zoomIn = () => setScale((prev) => prev + 0.1);
   const zoomOut = () => setScale((prev) => (prev > 0.2 ? prev - 0.1 : prev));
 
@@ -271,8 +273,11 @@ function PdfViewerWithTOC({
               }
             }}
             inputRef={(ref) => {
-              pageRefs.current[pageNumber] = ref;
-              disconnectors.current[pageNumber]?.();
+              pageRefs.current[pageNumber] = ref || undefined;
+              if (disconnectors.current[pageNumber]) {
+                disconnectors.current[pageNumber]();
+                delete disconnectors.current[pageNumber];
+              }
               if (ref) {
                 disconnectors.current[pageNumber] = observeLinks(ref);
               }
@@ -300,16 +305,34 @@ function PdfViewerWithTOC({
               color: customTheme?.palette?.mode === "dark" ? "#fff" : "#000",
             }}
           >
-            <IconButton onClick={zoomOut} className="icon-button">
+            <IconButton
+              aria-label="Zooma ut"
+              onClick={zoomOut}
+              className="icon-button"
+            >
               <ZoomOutIcon />
             </IconButton>
-            <IconButton onClick={zoomIn} className="icon-button">
+            <IconButton
+              aria-label="Zooma in"
+              onClick={zoomIn}
+              className="icon-button"
+            >
               <ZoomInIcon />
             </IconButton>
             <span className="zoom-percentage">{Math.round(scale * 100)}%</span>
             {options.tableOfContents.active && (
               <div
-                onClick={() => setMenuOpen((prev) => !prev)}
+                role="button"
+                tabIndex={0}
+                aria-expanded={menuOpen}
+                aria-controls="pdf-toc"
+                onClick={() => setMenuOpen((p) => !p)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setMenuOpen((p) => !p);
+                  }
+                }}
                 className="toggle-menu"
               >
                 {menuOpen
@@ -318,9 +341,10 @@ function PdfViewerWithTOC({
               </div>
             )}
           </StickyTopBar>
-          {menuOpen && pdfInstance && (
+          {menuOpen && pdfInstance && pageWidth > 0 && (
             <StickyTOCWrapper>
               <TOCContainer
+                id="pdf-toc"
                 style={{
                   maxHeight: Number(options.tableOfContents.height) || 300,
                 }}
