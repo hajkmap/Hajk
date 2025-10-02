@@ -38,6 +38,14 @@ const StyledAlert = styled(Alert)(({ theme }) => ({
   },
 }));
 
+const StyledButton = styled(Button)(({ theme }) => ({
+  minHeight: { xs: "48px", sm: "36px" },
+  height: "auto",
+  whiteSpace: { xs: "normal", sm: "nowrap" },
+  lineHeight: { xs: 1.2, sm: 1.75 },
+  textAlign: "center",
+}));
+
 // Hide icons on small screens
 const ResponsiveIcon = styled("span")(({ theme }) => ({
   display: "inline-flex",
@@ -165,7 +173,7 @@ class AnchorView extends React.PureComponent {
             <Grid container spacing={2}>
               <Grid item size={6} sx={{ display: "flex" }}>
                 <HajkToolTip title="Kopiera länk till urklipp">
-                  <Button
+                  <StyledButton
                     fullWidth
                     variant="contained"
                     color="primary"
@@ -185,12 +193,12 @@ class AnchorView extends React.PureComponent {
                     onClick={this.handleClickOnCopyToClipboard}
                   >
                     Kopiera länk
-                  </Button>
+                  </StyledButton>
                 </HajkToolTip>
               </Grid>
               <Grid item size={6} sx={{ display: "flex" }}>
                 <HajkToolTip title="Öppna länk i nytt fönster">
-                  <Button
+                  <StyledButton
                     fullWidth
                     variant="contained"
                     color="primary"
@@ -210,7 +218,7 @@ class AnchorView extends React.PureComponent {
                     }}
                   >
                     Öppna länk
-                  </Button>
+                  </StyledButton>
                 </HajkToolTip>
               </Grid>
             </Grid>
