@@ -396,12 +396,26 @@ function AttributeEditor(props) {
             })
           : [];
 
+        // Reset index and visibility set
+        featureIndexRef.current.clear();
         visibleIdsRef.current = new Set();
+
+        // Index all features and make them visible initially (both num & str)
         features.forEach((f) => {
           const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-          idAliases(raw).forEach((k) => featureIndexRef.current.set(k, f));
+          const aliases = idAliases(raw);
+
+          // index all aliases
+          aliases.forEach((k) => featureIndexRef.current.set(k, f));
+
+          // Visible all aliases
+          aliases.forEach((k) => {
+            visibleIdsRef.current.add(k);
+            visibleIdsRef.current.add(String(k));
+          });
         });
 
+        // Set OL-ID to @_fid if it exists (for safer hit testing etc.)
         features.forEach((f) => {
           const fidProp = f.get?.("@_fid");
           if (fidProp) {
@@ -826,13 +840,14 @@ function AttributeEditor(props) {
 
       // 1) pick feature id
       const rawId = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
-      const aliases = idAliases(rawId);
+      const canonId = toCanonicalId(rawId);
+
+      // first emitted id is canonical, not an alias
       editBus.emit("attrib:select-ids", {
-        ids: aliases,
+        ids: [canonId],
         source: "map",
         mode: "replace",
       });
-      const canonId = toCanonicalId(rawId);
 
       const multi =
         evt.originalEvent?.ctrlKey ||

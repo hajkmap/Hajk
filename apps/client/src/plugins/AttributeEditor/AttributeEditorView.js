@@ -19,7 +19,7 @@ import MobileForm from "./components/MobileForm";
 import DesktopForm from "./components/DesktopForm";
 import NotificationBar from "./helpers/NotificationBar";
 import { editBus } from "../../buses/editBus";
-import { idAliases, pickPreferredId } from "./helpers/helpers";
+import { pickPreferredId } from "./helpers/helpers";
 
 export default function AttributeEditorView({
   state,
@@ -38,8 +38,8 @@ export default function AttributeEditorView({
   model,
   draftBaselineRef,
 }) {
-  const uniqueCacheRef = React.useRef(new Map());
-  const lastSentRef = React.useRef(new Map());
+  const uniqueCacheRef = useRef(new Map());
+  const lastSentRef = useRef(new Map());
   const [serviceId, setServiceId] = React.useState("NONE_ID");
   const [tableEditing, setTableEditing] = useState(null); // { id, key, startValue } | null
 
@@ -59,7 +59,7 @@ export default function AttributeEditorView({
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [focusedId, setFocusedId] = useState(null);
   const lastEditTargetIdsRef = useRef(null);
-  const anchorRef = React.useRef({ id: null, index: null });
+  const anchorRef = useRef({ id: null, index: null });
 
   const [columnFilters, setColumnFilters] = useState({});
   const [openFilterColumn, setOpenFilterColumn] = useState(null);
@@ -105,13 +105,16 @@ export default function AttributeEditorView({
   React.useEffect(() => {
     const offSelIds = editBus.on("attrib:select-ids", (ev) => {
       const incoming = ev.detail?.ids || [];
-      const ids = incoming.flatMap(idAliases);
-      const uniq = Array.from(new Set(ids));
+      const normalizeId = (id) => {
+        const s = String(id);
+        return /^-?\d+$/.test(s) ? Number(s) : s;
+      };
+      const canonical = Array.from(new Set(incoming.map(normalizeId)));
 
-      setTableSelectedIds(new Set(uniq));
-      setSelectedIds(new Set(uniq));
+      setTableSelectedIds(new Set(canonical));
+      setSelectedIds(new Set(canonical));
 
-      const focus = pickPreferredId(uniq);
+      const focus = pickPreferredId(canonical);
       setFocusedId(focus);
 
       if (focus != null && ev.detail?.source !== "map") {
@@ -643,12 +646,29 @@ export default function AttributeEditorView({
 
   React.useEffect(() => {
     if (ui.mode === "form") {
-      setTableSelectedIds(new Set());
+      // Keep the selection from the table when switching to the form
+      if (selectedIds.size === 0 && tableSelectedIds.size > 0) {
+        const next = new Set(tableSelectedIds);
+        setSelectedIds(next);
+        // Focus the first selected item if we lose focus
+        if (focusedId == null) {
+          const first = [...next][0];
+          if (first != null) setFocusedId(first);
+        }
+      }
     } else if (ui.mode === "table") {
-      setSelectedIds(new Set());
-      setFocusedId(null);
+      // Keep the selection from the form when switching to the table
+      const fromForm = selectedIds.size
+        ? selectedIds
+        : focusedId != null
+          ? new Set([focusedId])
+          : null;
+
+      if (fromForm && tableSelectedIds.size === 0) {
+        setTableSelectedIds(new Set(fromForm));
+      }
     }
-  }, [ui.mode]);
+  }, [ui.mode, tableSelectedIds, selectedIds, focusedId]);
 
   const getUniqueColumnValues = useCallback(
     (columnKey) => {
