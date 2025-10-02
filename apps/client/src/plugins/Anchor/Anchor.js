@@ -1,6 +1,6 @@
 import React from "react";
 import propTypes from "prop-types";
-import BaseWindowPlugin from "../BaseWindowPlugin";
+import DialogWindowPlugin from "../DialogWindowPlugin";
 
 import ShareIcon from "@mui/icons-material/Share";
 
@@ -18,19 +18,34 @@ class Anchor extends React.PureComponent {
     this.title = this.props.options.title || "Dela";
   }
 
+  onAbort = () => {
+    this.props.app.globalObserver.publish("anchor.close");
+  };
+
+  onVisibilityChanged = (visible) => {
+    if (visible) {
+      this.props.app.globalObserver.publish("anchor.shown");
+    } else {
+      this.props.app.globalObserver.publish("anchor.hidden");
+    }
+  };
+
   render() {
     return (
-      <BaseWindowPlugin
-        {...this.props}
+      <DialogWindowPlugin
+        options={this.props.options}
+        map={this.props.map}
+        app={this.props.app}
         type="Anchor"
-        custom={{
+        defaults={{
           icon: <ShareIcon />,
           title: "Dela",
-          description: "Skapa en länk och dela det du ser i kartan med andra",
-          height: "dynamic",
-          width: 512,
-          top: undefined,
-          left: undefined,
+          description:
+            "Skapa en länk med kartans synliga lager, aktuella zoomnivå och utbredning",
+          headerText: "Dela",
+          abortText: "Stäng",
+          onAbort: this.onAbort,
+          onVisibilityChanged: this.onVisibilityChanged,
         }}
       >
         <AnchorView
@@ -41,7 +56,7 @@ class Anchor extends React.PureComponent {
             this.props.app.config.mapConfig.map.enableAppStateInHash
           }
         />
-      </BaseWindowPlugin>
+      </DialogWindowPlugin>
     );
   }
 }
