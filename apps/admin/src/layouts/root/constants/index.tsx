@@ -1,5 +1,4 @@
-import MapIcon from "@mui/icons-material/Map";
-import LayersIcon from "@mui/icons-material/Layers";
+import MapIcon from "@mui/icons-material/Map";import LayersIcon from "@mui/icons-material/Layers";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import NetworkPingIcon from "@mui/icons-material/NetworkPing";
@@ -9,6 +8,7 @@ import Diversity2Icon from "@mui/icons-material/Diversity2";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import ExampleIcon from "@mui/icons-material/Code";
 
 export const HEADER_HEIGHT = 64;
 export const HEADER_Z_INDEX = 1001;
@@ -96,6 +96,11 @@ export const SIDEBAR_MENU = [
         to: "/form-factory",
         titleKey: "Form factory",
         icon: <DynamicFormIcon />,
+      },
+      {
+        to: "/examples",
+        titleKey: "Form examples",
+        icon: <ExampleIcon />,
       },
     ],
   },

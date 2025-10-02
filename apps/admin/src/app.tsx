@@ -29,6 +29,7 @@ import FormFactoryPage from "./pages/form-factory/index.tsx";
 import LoginPage from "./pages/login/index.tsx";
 import UsersPage from "./pages/users/index.tsx";
 import UserRolesPage from "./pages/user-roles/index.tsx";
+import FormComponentsExamplePage from "./pages/examples/index.tsx";
 import { SquareSpinnerComponent } from "./components/progress/square-progress.jsx";
 
 const queryClient = new QueryClient({
@@ -114,6 +115,10 @@ const router = createBrowserRouter(
         {
           path: "form-factory",
           element: <FormFactoryPage />,
+        },
+        {
+          path: "examples",
+          element: <FormComponentsExamplePage />,
         },
       ],
     },
