@@ -221,6 +221,13 @@ export default function DesktopForm({
     }
   }
 
+  const canUndo = !!(
+    tableUndoStack?.length ||
+    formUndoStack?.length ||
+    hasGeomUndo ||
+    dirty
+  );
+
   return (
     <div
       style={{
@@ -374,18 +381,11 @@ export default function DesktopForm({
           </button>
 
           <button
-            style={
-              !(
-                tableUndoStack?.length ||
-                formUndoStack?.length ||
-                dirty ||
-                hasGeomUndo
-              )
-                ? s.iconBtnDisabled
-                : s.iconBtn
-            }
+            style={canUndo ? s.iconBtn : s.iconBtnDisabled}
+            disabled={!canUndo}
             onClick={() => {
               if (tableUndoStack?.length) {
+                // inkluderar ev. __geom__-poster i modellens stack
                 undoLatestTableChange();
                 return;
               }
@@ -393,21 +393,16 @@ export default function DesktopForm({
                 undoLatestFormChange();
                 return;
               }
+              if (hasGeomUndo) {
+                // låt din tidsbaserade dispatcher ta geometri-undo här
+                undoLatestTableChange();
+                return;
+              }
               if (dirty) {
                 resetEdits();
-              }
-              if (hasGeomUndo) {
-                undoLatestTableChange();
+                return;
               }
             }}
-            disabled={
-              !(
-                tableUndoStack?.length ||
-                formUndoStack?.length ||
-                dirty ||
-                hasGeomUndo
-              )
-            }
             aria-label="Ångra"
             title="Ångra"
           >

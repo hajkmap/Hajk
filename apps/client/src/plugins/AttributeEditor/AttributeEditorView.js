@@ -39,6 +39,7 @@ export default function AttributeEditorView({
   draftBaselineRef,
 }) {
   const geomUndoRef = React.useRef([]);
+  const [geomUndoCount, setGeomUndoCount] = React.useState(0);
   const uniqueCacheRef = useRef(new Map());
   const lastSentRef = useRef(new Map());
   const [serviceId, setServiceId] = React.useState("NONE_ID");
@@ -135,6 +136,7 @@ export default function AttributeEditorView({
 
       // 2) add to local undo stack
       geomUndoRef.current.push({ id, before, after, when });
+      setGeomUndoCount((c) => c + 1);
     });
     return () => off();
   }, [controller]);
@@ -895,6 +897,7 @@ export default function AttributeEditorView({
       setTableEditing(null);
       setLastTableIndex(null);
       geomUndoRef.current = [];
+      setGeomUndoCount(0);
     });
   }, [controller, features, pendingAdds]);
 
@@ -983,6 +986,7 @@ export default function AttributeEditorView({
         controller.batchEdit([{ id, key: "__geom__", value: null }]);
       }
       geomUndoRef.current.pop();
+      setGeomUndoCount((c) => Math.max(0, c - 1));
       showNotification("Ångrade geometriändring");
       return;
     }
@@ -1473,13 +1477,17 @@ export default function AttributeEditorView({
     ? tableUndoLocal
     : tableUndoStack;
   const canUndo = Boolean(
-    (tableUndoLocal?.length ?? 0) ||
-      (tableUndoStack?.length ?? 0) ||
-      (formUndoStack?.length ?? 0) ||
-      (geomUndoRef.current?.length ?? 0)
+    tableUndoLocal?.length ||
+      0 ||
+      tableUndoStack?.length ||
+      0 ||
+      formUndoStack?.length ||
+      0 ||
+      geomUndoCount > 0 ||
+      dirty
   );
 
-  const hasGeomUndo = (geomUndoRef.current?.length ?? 0) > 0;
+  const hasGeomUndo = geomUndoCount > 0;
 
   const [columnFilterUI, setColumnFilterUI] = useState({});
 
