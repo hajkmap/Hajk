@@ -432,16 +432,19 @@ const Sketch = (props) => {
       if (!layer || reg.has(layer)) return;
       if (layer.get?.("name") !== LAYER_NAME) return;
 
+      const beforeGeomRef = new Map();
+
       const sel = new Select({
         layers: (lyr) => lyr === layer,
         style: null,
         hitTolerance: 6,
         multi: true,
-        // We handle selection ourselves via attrib:select-ids + syncOlSelection.
-        // Disable OL’s built-in picking to avoid conflicts (blinking on ctrl-click)
+        // We sync selection via attrib:select-ids; block OL's own picking.
         condition: () => false,
       });
+
       const fc = sel.getFeatures();
+
       const tr = new Translate({
         features: fc,
         condition: (evt) => {
@@ -461,10 +464,8 @@ const Sketch = (props) => {
           );
           if (!hit) return false;
 
-          // Ensure it has a materialized style (for Edit/MOVE views)
           materializeStyleFromLayer(layer, hit, map);
 
-          // Canonical ID for AE
           const raw = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
           const canon = toCanonicalId(raw);
 
@@ -478,7 +479,6 @@ const Sketch = (props) => {
               fc.clear();
             } catch {}
             fc.push(hit);
-
             editBus.emit("attrib:select-ids", {
               ids: [canon],
               source: "map",
@@ -486,11 +486,9 @@ const Sketch = (props) => {
             });
           } else {
             const arr = fc.getArray ? fc.getArray() : [];
-            if (arr.includes(hit)) {
-              fc.remove(hit);
-            } else {
-              fc.push(hit);
-            }
+            if (arr.includes(hit)) fc.remove(hit);
+            else fc.push(hit);
+
             const ids = (fc.getArray ? fc.getArray() : []).map((f) => {
               const id = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
               return toCanonicalId(id);
@@ -504,17 +502,17 @@ const Sketch = (props) => {
           return true;
         },
       });
+
       const mod = new Modify({ features: fc, pixelTolerance: 6 });
 
       tr.__allowTranslate = !!allow.translate;
       mod.__allowModify = !!allow.modify;
 
-      const onSelect = (e) => {
+      // ---------- named handlers (so we can bind/unbind cleanly) ----------
+      const onSelect = () => {
         const arr = fc.getArray ? fc.getArray() : [];
         arr.forEach((f) => {
-          if (f && !f.getStyle?.()) {
-            materializeStyleFromLayer(layer, f, map);
-          }
+          if (f && !f.getStyle?.()) materializeStyleFromLayer(layer, f, map);
         });
         publishToEditView(arr[0] ?? null);
 
@@ -529,35 +527,82 @@ const Sketch = (props) => {
         });
       };
 
+      const onTranslateStart = (e) => {
+        const f = e?.features?.item?.(0);
+        if (!f) return;
+        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const canon = toCanonicalId(raw);
+        const g = f.getGeometry?.();
+        beforeGeomRef.set(canon, g && g.clone ? g.clone() : null);
+      };
+
+      const onModifyStart = (e) => {
+        const f = e?.features?.item?.(0);
+        if (!f) return;
+        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const canon = toCanonicalId(raw);
+        const g = f.getGeometry?.();
+        beforeGeomRef.set(canon, g && g.clone ? g.clone() : null);
+      };
+
       const onTranslateEnd = (e) => {
         const f = e?.features?.item?.(0) ?? null;
         publishToEditView(f);
-        if (f) {
-          const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-          const canon = toCanonicalId(raw);
-          editBus.emit("attrib:select-ids", {
-            ids: [canon],
-            source: "map",
-            mode: "replace",
-          });
-        }
+        if (!f) return;
+
+        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const canon = toCanonicalId(raw);
+
+        editBus.emit("attrib:select-ids", {
+          ids: [canon],
+          source: "map",
+          mode: "replace",
+        });
+
+        const after = f.getGeometry?.();
+        const before = beforeGeomRef.get(canon) || null;
+        editBus.emit("sketch:geometry-edited", {
+          id: canon,
+          before: before && before.clone ? before.clone() : before,
+          after: after && after.clone ? after.clone() : after,
+          when: Date.now(),
+        });
+        beforeGeomRef.delete(canon);
       };
 
       const onModifyEnd = (e) => {
         const f = e?.features?.item?.(0) ?? null;
         publishToEditView(f);
-        if (f) {
-          const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-          const canon = toCanonicalId(raw);
-          editBus.emit("attrib:select-ids", {
-            ids: [canon],
-            source: "map",
-            mode: "replace",
-          });
-        }
-      };
+        if (!f) return;
 
+        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const canon = toCanonicalId(raw);
+
+        editBus.emit("attrib:select-ids", {
+          ids: [canon],
+          source: "map",
+          mode: "replace",
+        });
+
+        const after = f.getGeometry?.();
+        const before = beforeGeomRef.get(canon) || null;
+        editBus.emit("sketch:geometry-edited", {
+          id: canon,
+          before: before && before.clone ? before.clone() : before,
+          after: after && after.clone ? after.clone() : after,
+          when: Date.now(),
+        });
+        beforeGeomRef.delete(canon);
+      };
+      // --------------------------------------------------------------------
+
+      // Bind
+      // (Note: your Select uses condition: () => false, so 'select' won't fire; keep or remove.)
+      // sel.on("select", onSelect);
+
+      tr.on("translatestart", onTranslateStart);
       tr.on("translateend", onTranslateEnd);
+      mod.on("modifystart", onModifyStart);
       mod.on("modifyend", onModifyEnd);
 
       map.addInteraction(sel);
@@ -566,13 +611,19 @@ const Sketch = (props) => {
 
       const cleanup = () => {
         try {
-          sel.un("select", onSelect);
+          tr.un("translatestart", onTranslateStart);
         } catch {}
         try {
           tr.un("translateend", onTranslateEnd);
         } catch {}
         try {
+          mod.un("modifystart", onModifyStart);
+        } catch {}
+        try {
           mod.un("modifyend", onModifyEnd);
+        } catch {}
+        try {
+          sel.un("select", onSelect);
         } catch {}
         try {
           map.removeInteraction(sel);
@@ -583,6 +634,7 @@ const Sketch = (props) => {
         try {
           map.removeInteraction(mod);
         } catch {}
+        beforeGeomRef.clear();
       };
 
       reg.set(layer, { select: sel, translate: tr, modify: mod, cleanup });

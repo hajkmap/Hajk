@@ -561,11 +561,13 @@ export default function TableMode(props) {
             <tbody>
               {filteredAndSorted.map((row, idx) => {
                 const selected = tableSelectedIds.has(row.id);
+                const pendingKind =
+                  row.__pending || (row.__geom__ != null ? "geom" : null);
 
                 return (
                   <tr
                     key={row.id}
-                    style={s.tr(selected, row.__pending)}
+                    style={s.tr(selected, pendingKind)}
                     aria-selected={selected}
                     onClick={(e) => handleRowClick(row.id, idx, e)}
                     onDoubleClick={(e) => {

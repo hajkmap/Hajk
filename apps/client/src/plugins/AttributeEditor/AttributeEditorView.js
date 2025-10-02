@@ -38,6 +38,7 @@ export default function AttributeEditorView({
   model,
   draftBaselineRef,
 }) {
+  const geomUndoRef = React.useRef([]);
   const uniqueCacheRef = useRef(new Map());
   const lastSentRef = useRef(new Map());
   const [serviceId, setServiceId] = React.useState("NONE_ID");
@@ -80,6 +81,63 @@ export default function AttributeEditorView({
     },
     []
   );
+
+  const setGeometryById = React.useCallback(
+    (logicalId, targetGeometry) => {
+      const layer = vectorLayerRef?.current;
+      const src = layer?.getSource?.();
+      if (!src) return false;
+
+      const want = String(logicalId);
+      const all = src.getFeatures?.() || [];
+
+      const matches = (f) => {
+        const a = f?.getId?.();
+        const b = f?.get?.("@_fid");
+        const c = f?.get?.("id");
+        const A = a != null ? String(a) : null;
+        const B = b != null ? String(b) : null;
+        const C = c != null ? String(c) : null;
+        if (A === want || B === want || C === want) return true;
+        if ((A && A.endsWith("." + want)) || (B && B.endsWith("." + want)))
+          return true;
+        return false;
+      };
+
+      const f = src.getFeatureById?.(want) || all.find(matches);
+      if (!f) return false;
+
+      if (targetGeometry && targetGeometry.clone) {
+        f.setGeometry(targetGeometry.clone());
+      } else if (targetGeometry) {
+        f.setGeometry(targetGeometry);
+      }
+
+      try {
+        f.set?.("USER_DRAWN", true, true);
+        f.set?.("EDIT_ACTIVE", false, true);
+      } catch {}
+
+      layer?.changed?.();
+      src?.changed?.();
+      return true;
+    },
+    [vectorLayerRef]
+  );
+
+  React.useEffect(() => {
+    const off = editBus.on("sketch:geometry-edited", (ev) => {
+      const { id, before, after, when = Date.now() } = ev.detail || {};
+      if (id == null || !after) return;
+
+      // 1) mark as "geometry edited"
+      controller.batchEdit([{ id, key: "__geom__", value: when }]);
+
+      // 2) add to local undo stack
+      geomUndoRef.current.push({ id, before, after, when });
+    });
+    return () => off();
+  }, [controller]);
 
   React.useEffect(() => {
     const lyr = vectorLayerRef?.current;
@@ -820,6 +878,15 @@ export default function AttributeEditorView({
 
   const commitTableEdits = useCallback(() => {
     controller.commit();
+    const allIds = [
+      ...new Set([
+        ...features.map((f) => f.id),
+        ...pendingAdds.map((d) => d.id),
+      ]),
+    ];
+    controller.batchEdit(
+      allIds.map((id) => ({ id, key: "__geom__", value: null }))
+    );
     Promise.resolve().then(() => {
       // next microtask
       formUndoSnapshotsRef.current.clear();
@@ -827,57 +894,71 @@ export default function AttributeEditorView({
       setTableUndoLocal([]);
       setTableEditing(null);
       setLastTableIndex(null);
+      geomUndoRef.current = [];
     });
-  }, [controller]);
+  }, [controller, features, pendingAdds]);
 
   const undoLatestTableChange = useCallback(() => {
+    // Pop the latest entry from the respective stack
     const modelLast = state.undoStack?.[state.undoStack.length - 1] ?? null;
     const tableLast = tableUndoLocal[tableUndoLocal.length - 1] ?? null;
     const formLast = formUndoStack[formUndoStack.length - 1] ?? null;
+    const geomLast =
+      geomUndoRef.current[geomUndoRef.current.length - 1] ?? null;
+
     const tModel = modelLast?.when ?? -Infinity;
     const tTable = tableLast?.when ?? -Infinity;
     const tForm = formLast?.when ?? -Infinity;
+    const tGeom = geomLast?.when ?? -Infinity;
 
-    if (tForm >= tTable && tForm >= tModel && formLast) {
+    // 1) FORM UNDO: restore the same group (same timestamp)
+    if (tForm >= tTable && tForm >= tModel && tForm >= tGeom && formLast) {
+      // Get the count of entries that share the same "when" timestamp
       let k = 0;
       for (let i = formUndoStack.length - 1; i >= 0; i--) {
         if ((formUndoStack[i]?.when ?? -1) !== tForm) break;
         k++;
       }
       const group = formUndoStack.slice(-k);
+
+      // Restore all affected rows in the model
       const ops = [];
       group.forEach(({ id, snapshot }) => {
         FM.forEach(({ key }) => {
           const v = snapshot[key];
-          ops.push({
-            id,
-            key,
-            value: normalizeForCommit(key, v, FM),
-          });
+          ops.push({ id, key, value: normalizeForCommit(key, v, FM) });
         });
       });
       if (ops.length) controller.batchEdit(ops);
+
+      // If the focused row was found with: updated formula fields/dirty
       const hit = group.find((g) => g.id === focusedId);
       if (hit?.snapshot) {
         const snap = hit.snapshot;
         setEditValues({ ...snap });
+
         const nextChanged = new Set();
         FM.forEach(({ key }) => {
-          if ((snap[key] ?? "") !== (originalValues[key] ?? ""))
+          if ((snap[key] ?? "") !== (originalValues[key] ?? "")) {
             nextChanged.add(key);
+          }
         });
         setChangedFields(nextChanged);
         setDirty(nextChanged.size > 0);
       }
+
+      // Remove the group and clean up the snapshots-ref
       setFormUndoStack((prev) => prev.slice(0, prev.length - k));
       group.forEach(({ id }) => formUndoSnapshotsRef.current.delete(id));
+
       showNotification(
         k > 1 ? `Ångrade formulärändringar (${k})` : "Ångrade formulärändring"
       );
       return;
     }
 
-    if (tTable >= tModel && tableLast) {
+    // 2) TABLE UNDO: e.g. a cell edit in the table view
+    if (tTable >= tModel && tTable >= tGeom && tableLast) {
       if (tableLast.type === "edit_cell") {
         controller.batchEdit([
           { id: tableLast.id, key: tableLast.key, value: tableLast.prevValue },
@@ -885,24 +966,44 @@ export default function AttributeEditorView({
         setTableUndoLocal((prev) => prev.slice(0, -1));
         showNotification("Ångrade celländring");
       } else {
+        // other local table action – remove the post
         setTableUndoLocal((prev) => prev.slice(0, -1));
       }
       return;
     }
 
+    // 3) GEOMETRY UNDO: restore geometry and remove highlight
+    if (tGeom >= tModel && geomLast) {
+      const { id, before } = geomLast;
+      if (before) {
+        // restore geometry in OL layer
+        setGeometryById(id, before);
+
+        // remove "geometry changed"-highlight in AE
+        controller.batchEdit([{ id, key: "__geom__", value: null }]);
+      }
+      geomUndoRef.current.pop();
+      showNotification("Ångrade geometriändring");
+      return;
+    }
+
+    // 4) Fallback to model's own undo
     if (modelLast) {
       controller.undo();
-      return;
     }
   }, [
     state.undoStack,
     tableUndoLocal,
     formUndoStack,
+    FM,
     controller,
     focusedId,
     originalValues,
+    setEditValues,
+    setChangedFields,
+    setDirty,
     showNotification,
-    FM,
+    setGeometryById,
   ]);
 
   function normalizeForCommit(key, value, FM) {
@@ -1316,6 +1417,19 @@ export default function AttributeEditorView({
     });
 
     if (ops.length) controller.batchEdit(ops);
+    const clearIds =
+      opts.targetIds && opts.targetIds.length
+        ? opts.targetIds
+        : selectedIds.size > 0
+          ? Array.from(selectedIds)
+          : focusedFeature
+            ? [focusedFeature.id]
+            : [];
+    if (clearIds.length) {
+      controller.batchEdit(
+        clearIds.map((id) => ({ id, key: "__geom__", value: null }))
+      );
+    }
     setChangedFields(new Set());
     setDirty(false);
     setFormUndoStack([]);
@@ -1358,7 +1472,14 @@ export default function AttributeEditorView({
   const combinedUndoStack = tableUndoLocal.length
     ? tableUndoLocal
     : tableUndoStack;
-  const canUndo = Boolean(combinedUndoStack?.length || formUndoStack?.length);
+  const canUndo = Boolean(
+    (tableUndoLocal?.length ?? 0) ||
+      (tableUndoStack?.length ?? 0) ||
+      (formUndoStack?.length ?? 0) ||
+      (geomUndoRef.current?.length ?? 0)
+  );
+
+  const hasGeomUndo = (geomUndoRef.current?.length ?? 0) > 0;
 
   const [columnFilterUI, setColumnFilterUI] = useState({});
 
@@ -1515,6 +1636,7 @@ export default function AttributeEditorView({
           tablePendingAdds={pendingAdds}
           lastEditTargetIdsRef={lastEditTargetIdsRef}
           duplicateInForm={duplicateInForm}
+          hasGeomUndo={hasGeomUndo}
         />
       )}
       <NotificationBar s={s} theme={theme} text={notification} />

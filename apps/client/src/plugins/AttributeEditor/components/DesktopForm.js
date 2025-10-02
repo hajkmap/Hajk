@@ -39,6 +39,7 @@ export default function DesktopForm({
   tablePendingEdits,
   tablePendingAdds,
   duplicateInForm,
+  hasGeomUndo,
 }) {
   const RESIZER_KEY = "ae_df_leftw";
   const MIN_LEFT = 220; // px
@@ -238,6 +239,7 @@ export default function DesktopForm({
             const isPendingDelete =
               f.__pending === "delete" || tablePendingDeletes?.has?.(f.id);
             const hasPendingEdits = !!tablePendingEdits?.[f.id];
+            const hasGeomChange = !!tablePendingEdits?.[f.id]?.__geom__;
             const isDraftAdd =
               f.__pending === "add" ||
               tablePendingAdds?.some?.(
@@ -246,11 +248,13 @@ export default function DesktopForm({
 
             const status = isPendingDelete
               ? "delete"
-              : hasPendingEdits
-                ? "edit"
-                : isDraftAdd
-                  ? "add"
-                  : null;
+              : hasGeomChange
+                ? "geom"
+                : hasPendingEdits
+                  ? "edit"
+                  : isDraftAdd
+                    ? "add"
+                    : null;
 
             return (
               <div
@@ -371,7 +375,12 @@ export default function DesktopForm({
 
           <button
             style={
-              !(tableUndoStack?.length || formUndoStack?.length || dirty)
+              !(
+                tableUndoStack?.length ||
+                formUndoStack?.length ||
+                dirty ||
+                hasGeomUndo
+              )
                 ? s.iconBtnDisabled
                 : s.iconBtn
             }
@@ -387,9 +396,17 @@ export default function DesktopForm({
               if (dirty) {
                 resetEdits();
               }
+              if (hasGeomUndo) {
+                undoLatestTableChange();
+              }
             }}
             disabled={
-              !(tableUndoStack?.length || formUndoStack?.length || dirty)
+              !(
+                tableUndoStack?.length ||
+                formUndoStack?.length ||
+                dirty ||
+                hasGeomUndo
+              )
             }
             aria-label="Ångra"
             title="Ångra"
