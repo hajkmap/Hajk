@@ -46,7 +46,7 @@ const StyledButton = styled(Button)<{
 const NavItem = (props: Props) => {
   const { t } = useTranslation();
   const path = useLocation().pathname;
-  const active: boolean = path === props.to;
+  const active: boolean = path === props.to || path.startsWith(props.to + "/");
 
   return (
     <ListItem disablePadding disableGutters>

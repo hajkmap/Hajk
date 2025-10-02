@@ -66,9 +66,11 @@ const CollapsibleNavItem = (props: Props) => {
   const location = useLocation();
 
   // Check if any sub-item is currently active
-  const hasActiveSubItem = props.subItems.some(
-    (subItem) => location.pathname === subItem.to
-  );
+  const hasActiveSubItem =
+    props.subItems.some((subItem) => location.pathname === subItem.to) ||
+    props.subItems.some((subItem) =>
+      location.pathname.startsWith(subItem.to + "/")
+    );
 
   return (
     <>
