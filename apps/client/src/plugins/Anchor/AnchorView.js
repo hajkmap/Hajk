@@ -38,6 +38,15 @@ const StyledAlert = styled(Alert)(({ theme }) => ({
   },
 }));
 
+// Hide icons on small screens
+const ResponsiveIcon = styled("span")(({ theme }) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  [theme.breakpoints.down("sm")]: {
+    display: "none",
+  },
+}));
+
 class AnchorView extends React.PureComponent {
   static propTypes = {
     closeSnackbar: PropTypes.func.isRequired,
@@ -112,7 +121,7 @@ class AnchorView extends React.PureComponent {
       this.props.options.allowCreatingCleanUrls ?? true;
 
     return (
-      <Grid container direction="column" sx={{ maxWidth: 500 }}>
+      <Grid container direction="column" sx={{ maxWidth: 400 }}>
         <Grid item>
           <StyledAlert icon={<ShareIcon />} variant="info">
             Skapa en länk med kartans synliga lager, aktuella zoomnivå och
@@ -152,31 +161,53 @@ class AnchorView extends React.PureComponent {
           />
         </Grid>
         {document.queryCommandSupported("copy") && (
-          <Grid item>
+          <Grid item sx={{ mb: 2 }}>
             <Grid container spacing={2}>
-              <Grid item size={6}>
+              <Grid item size={6} sx={{ display: "flex" }}>
                 <HajkToolTip title="Kopiera länk till urklipp">
                   <Button
                     fullWidth
                     variant="contained"
                     color="primary"
                     component="a"
-                    endIcon={<FileCopyIcon />}
+                    endIcon={
+                      <ResponsiveIcon>
+                        <FileCopyIcon />
+                      </ResponsiveIcon>
+                    }
+                    sx={{
+                      minHeight: { xs: "48px", sm: "36px" },
+                      height: "auto",
+                      whiteSpace: { xs: "normal", sm: "nowrap" },
+                      lineHeight: { xs: 1.2, sm: 1.75 },
+                      textAlign: "center",
+                    }}
                     onClick={this.handleClickOnCopyToClipboard}
                   >
                     Kopiera länk
                   </Button>
                 </HajkToolTip>
               </Grid>
-              <Grid item size={6}>
+              <Grid item size={6} sx={{ display: "flex" }}>
                 <HajkToolTip title="Öppna länk i nytt fönster">
                   <Button
                     fullWidth
                     variant="contained"
                     color="primary"
-                    endIcon={<OpenInNewIcon />}
+                    endIcon={
+                      <ResponsiveIcon>
+                        <OpenInNewIcon />
+                      </ResponsiveIcon>
+                    }
                     href={this.state.anchor || null}
                     target="_blank"
+                    sx={{
+                      minHeight: { xs: "48px", sm: "36px" },
+                      height: "auto",
+                      whiteSpace: { xs: "normal", sm: "nowrap" },
+                      lineHeight: { xs: 1.2, sm: 1.75 },
+                      textAlign: "center",
+                    }}
                   >
                     Öppna länk
                   </Button>
