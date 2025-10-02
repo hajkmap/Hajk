@@ -237,8 +237,7 @@ export function gmlGeomToGeoJSON(g) {
         const pk = keyOf(m, "Point");
         return pk ? gmlGeomToGeoJSON({ [pk]: m[pk] })?.coordinates : null;
       })
-      .filter(Boolean)
-      .map((c) => maybeSwapXY(c, srs));
+      .filter(Boolean);
     return { type: "MultiPoint", coordinates: coords };
   }
 
@@ -257,12 +256,11 @@ export function gmlGeomToGeoJSON(g) {
         const lk = keyOf(m, "LineString");
         return lk ? gmlGeomToGeoJSON({ [lk]: m[lk] })?.coordinates : null;
       })
-      .filter(Boolean)
-      .map((line) => line.map((c) => maybeSwapXY(c, srs)));
+      .filter(Boolean);
     return { type: "MultiLineString", coordinates: coords };
   }
 
-  // MultiPolygon & MultiSurface
+  // MultiPolygon / MultiSurface
   const mpolyKey = keyOf(g, "MultiPolygon");
   const msurfKey = keyOf(g, "MultiSurface");
   if ((mpolyKey && g[mpolyKey]) || (msurfKey && g[msurfKey])) {
@@ -282,11 +280,7 @@ export function gmlGeomToGeoJSON(g) {
       .map((m) => {
         const pk = keyOf(m, "Polygon");
         const polyGeom = pk ? gmlGeomToGeoJSON({ [pk]: m[pk] }) : null;
-        return polyGeom
-          ? polyGeom.coordinates.map((ring) =>
-              ring.map((c) => maybeSwapXY(c, srs))
-            )
-          : null;
+        return polyGeom ? polyGeom.coordinates : null;
       })
       .filter(Boolean);
     return { type: "MultiPolygon", coordinates: polys };
