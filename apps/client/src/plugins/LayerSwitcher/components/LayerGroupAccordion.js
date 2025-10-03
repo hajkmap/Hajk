@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Collapse, Box, ListItemButton } from "@mui/material";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 import LsIconButton from "./LsIconButton";
@@ -10,22 +10,37 @@ export default function LayerGroupAccordion({
   layerGroupTitle,
   toggleDetails,
   display,
+  isFirstGroup,
+  isFirstChild,
 }) {
-  const [state, setState] = React.useState({ expanded: expanded });
+  const [state, setState] = useState({ expanded: expanded });
 
-  React.useEffect(() => {
+  useEffect(() => {
     setState({ expanded: expanded });
   }, [expanded]);
+
+  //Ensures that each accordion, especially the first group and first child, responds to the intro step by forcing open expanded state
+  useEffect(() => {
+    const handler = () => {
+      if (isFirstGroup) {
+        setState({ expanded: true });
+      }
+      if (isFirstChild) {
+        setState({ expanded: true });
+      }
+    };
+    document.addEventListener("expandFirstGroup", handler);
+    return () => document.removeEventListener("expandFirstGroup", handler);
+  }, [isFirstGroup, isFirstChild]);
 
   return (
     <div style={{ display: display }}>
       <ListItemButton
         disableTouchRipple
         onClick={() => setState({ expanded: !state.expanded })}
-        sx={{
+        sx={(theme) => ({
           alignItems: "flex-start",
-          borderBottom: (theme) =>
-            `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           p: 0,
           pl: "2px",
           "& .ls-arrow": {
@@ -37,10 +52,13 @@ export default function LayerGroupAccordion({
               ? "rotate(90deg) translateX(-3px)"
               : "translateX(3px)",
           },
-        }}
+        })}
         dense
       >
         <LsIconButton
+          id="layerGroup-accordion-arrow-button"
+          data-first={isFirstGroup ? "true" : "false"} // Pass this as a prop from LayerGroup
+          data-expanded={state.expanded}
           size="small"
           sx={{
             mt: "2px",

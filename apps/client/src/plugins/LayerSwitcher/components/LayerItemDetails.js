@@ -139,7 +139,8 @@ function LayerItemDetails({
   // Add a check for CQL filter visibility and exclude system layers
   const isCqlFilterEnabled = () => {
     return (
-      cqlFilterVisible && layerItemDetails?.layer?.get("layerType") !== "system" // Exclude system layers
+      // Exclude system layers
+      cqlFilterVisible && layerItemDetails?.layer?.get("layerType") !== "system"
     );
   };
 
@@ -175,33 +176,33 @@ function LayerItemDetails({
 
   return (
     <>
-      {layerItemDetails && (
+      {layerItemDetails && display && (
         <Box
-          sx={{
-            display: display ? "block" : "none",
+          sx={(theme) => ({
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: (theme) =>
-              theme.palette.mode === "dark" ? "rgb(18,18,18)" : "#fff",
+            backgroundColor: "#fff",
             position: "relative",
             overflowY: "auto",
             height: "inherit",
             minHeight: "15em",
             maxHeight: "inherit",
-          }}
+            ...theme.applyStyles("dark", {
+              backgroundColor: "rgb(18,18,18)",
+            }),
+          })}
         >
           <Box
-            sx={{
+            sx={(theme) => ({
               p: 1,
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "#373737"
-                  : theme.palette.grey[100],
-              borderBottom: (theme) =>
-                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-            }}
+              backgroundColor: theme.palette.grey[100],
+              borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+              ...theme.applyStyles("dark", {
+                backgroundColor: "#373737",
+              }),
+            })}
           >
             <Stack direction="row" alignItems="center">
               <HajkToolTip
@@ -211,7 +212,10 @@ function LayerItemDetails({
                 title="Tillbaka"
                 TransitionProps={{ timeout: 0 }}
               >
-                <LsIconButton onClick={handleBackButtonClick}>
+                <LsIconButton
+                  id="layer-item-details-back-button"
+                  onClick={handleBackButtonClick}
+                >
                   <ArrowBackIcon />
                 </LsIconButton>
               </HajkToolTip>
@@ -255,6 +259,7 @@ function LayerItemDetails({
                   }
                 >
                   <LsIconButton
+                    id="toggle-legend-icon"
                     onClick={() => setLegendIsActive(!legendIsActive)}
                   >
                     <FormatListBulletedOutlinedIcon fontSize="small" />
@@ -263,12 +268,11 @@ function LayerItemDetails({
               )}
             </Stack>
             <Box
-              sx={{
+              sx={(theme) => ({
                 py: 1,
                 px: 2,
-                borderBottom: (theme) =>
-                  `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-              }}
+                borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+              })}
             >
               <LayerItemInfo
                 chapters={chapters}
@@ -291,6 +295,7 @@ function LayerItemDetails({
             </Stack>
             {showOpacitySlider !== false && showOpacity ? (
               <Box
+                id="layer-details-opacity-slider"
                 sx={{
                   px: 2,
                   pr: 3,
@@ -357,13 +362,13 @@ function LayerItemDetails({
             )}
             {isQuickAccessEnabled() && (
               <Box
-                sx={{
-                  borderTop: (theme) =>
-                    `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+                sx={(theme) => ({
+                  borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
                   p: 2,
-                }}
+                })}
               >
                 <Button
+                  id="layer-details-quick-access-button"
                   fullWidth
                   variant="outlined"
                   onClick={handleQuickAccess}

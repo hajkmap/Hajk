@@ -14,9 +14,11 @@ const IconWrapper = styled("div")(({ theme }) => ({
 const GridRoot = styled(Grid)(() => ({
   minHeight: 42,
   width: "100%",
+  alignItems: "center",
 }));
 
 const GridLabel = styled(Grid)(({ theme }) => ({
+  alignItems: "center",
   padding: theme.spacing(1),
   paddingRight: theme.spacing(2), // We want some room after our results labels
 }));
@@ -75,13 +77,13 @@ class SearchResultsDatasetFeature extends React.PureComponent {
       feature.getGeometry() && shouldRenderSelectedCollection;
     if (feature.featureTitle.length > 0) {
       return (
-        <GridRoot container alignItems="center">
-          <Grid item xs={1} align="center">
+        <GridRoot container>
+          <Grid align="center" size={1}>
             {shouldRenderCheckbox
               ? this.renderShowInMapCheckbox()
               : this.renderOriginBasedIcon()}
           </Grid>
-          <GridLabel item xs={10} alignItems="center">
+          <GridLabel size={10}>
             <StyledTypography noWrap align="left">
               {feature.featureTitle}
             </StyledTypography>
@@ -94,7 +96,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
               {feature.secondaryLabelFields}
             </StyledTypography>
           </GridLabel>
-          <Grid item xs={1} />
+          <Grid size={1} />
         </GridRoot>
       );
     } else {

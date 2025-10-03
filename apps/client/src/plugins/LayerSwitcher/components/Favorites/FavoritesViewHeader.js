@@ -88,13 +88,14 @@ function FavoritesViewHeader({
 
   return (
     <Box
-      sx={{
+      sx={(theme) => ({
         p: 1,
-        backgroundColor: (theme) =>
-          theme.palette.mode === "dark" ? "#373737" : theme.palette.grey[100],
-        borderBottom: (theme) =>
-          `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-      }}
+        backgroundColor: theme.palette.grey[100],
+        borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+        ...theme.applyStyles("dark", {
+          backgroundColor: "#373737",
+        }),
+      })}
       onClick={(e) => e.stopPropagation()}
     >
       <Stack direction="row" alignItems="center">
@@ -105,7 +106,10 @@ function FavoritesViewHeader({
           title="Tillbaka"
           TransitionProps={{ timeout: 0 }}
         >
-          <IconButton onClick={handleBackButtonClick}>
+          <IconButton
+            id="favorites-list-back-button"
+            onClick={handleBackButtonClick}
+          >
             <ArrowBackIcon />
           </IconButton>
         </HajkToolTip>
@@ -120,6 +124,7 @@ function FavoritesViewHeader({
           onChange={handleFileInputChange}
         />
         <IconButton
+          id="import-favorites-button"
           disabled={!functionalCookiesOk}
           onClick={handleImportButtonClick}
         >
@@ -140,12 +145,11 @@ function FavoritesViewHeader({
         className="infoCollapse"
       >
         <Box
-          sx={{
+          sx={(theme) => ({
             px: 1,
             pt: 1,
-            borderTop: (theme) =>
-              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-          }}
+            borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          })}
         >
           <Typography variant="subtitle2">{favoritesInfoText}</Typography>
         </Box>

@@ -11,7 +11,7 @@ import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
 import QuickAccessPresets from "./components/QuickAccessPresets.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
-import { OSM_LAYER_ID } from "./components/BackgroundSwitcher";
+import GroupDetails from "./components/GroupDetails.js";
 
 const StyledAppBar = styled(AppBar)(() => ({
   zIndex: "1",
@@ -70,6 +70,7 @@ class LayersSwitcherView extends React.PureComponent {
       activeTab: 0,
       displayContentOverlay: null, // 'quickAccessPresets' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
+      groupDetails: null,
       scrollPositions: {
         tab0: 0,
         tab1: 0,
@@ -90,6 +91,25 @@ class LayersSwitcherView extends React.PureComponent {
       zIndex: l["zIndex"],
     }));
 
+    // *Introduction Guide* Add event listener for favoritesBackTransition 'Tillbaka' button and handleFavoritesShowTransition 'Redigera Favoriter' button
+    this.handleFavoritesBackTransition = () => {
+      this.toggleFavoritesQuickAccessBackButton();
+    };
+
+    document.addEventListener(
+      "favoritesBackTransition",
+      this.handleFavoritesBackTransition
+    );
+
+    this.handleFavoritesShowTransition = () => {
+      this.toggleShowFavoritesView();
+    };
+
+    document.addEventListener(
+      "favoritesShowTransition",
+      this.handleFavoritesShowTransition
+    );
+
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
         this.setState({
@@ -103,39 +123,45 @@ class LayersSwitcherView extends React.PureComponent {
         const currentScrollPosition = this.getScrollPosition();
 
         const layerId = payload.layerId;
-        if (!layerId) {
+        if (layerId) {
+          const layer = this.olLayerMap[layerId];
+
+          // Set scroll position state when layer details is opened
+          const details = {
+            layer,
+            subLayerIndex: payload.subLayerIndex,
+          };
+          this.setState((prevState) => ({
+            layerItemDetails: details,
+            groupDetails: null,
+            displayContentOverlay: "layerItemDetails",
+            scrollPositions: {
+              ...prevState.scrollPositions,
+              [`tab${prevState.activeTab}`]: currentScrollPosition,
+            },
+          }));
+          // Check if any of the infogroup variables are present, in that case show the groups info
+        } else if (
+          payload.infogroupname ||
+          payload.infogrouptitle ||
+          payload.infogrouptext ||
+          payload.infogroupurl ||
+          payload.infogroupurltext ||
+          payload.infogroupopendatalink ||
+          payload.infogroupowner
+        ) {
+          this.setState((prevState) => ({
+            layerItemDetails: null,
+            groupDetails: payload,
+            displayContentOverlay: "groupDetails",
+            scrollPositions: {
+              ...prevState.scrollPositions,
+              [`tab${prevState.activeTab}`]: currentScrollPosition,
+            },
+          }));
+        } else {
           return;
         }
-
-        let layer;
-
-        if (layerId === OSM_LAYER_ID) {
-          // The Open street map layer is set up by the `BackgroundSwitcher`
-          // component. So it does not exist when the `olLayerMap` is created.
-          // code below is an ugly workaround. The best solution would be if
-          // the `LayerItemDetails` does not need the actual OpenLayers object
-          // at all.
-          layer = this.props.app.map
-            .getLayers()
-            .getArray()
-            .find((layer) => layer.get("name") === OSM_LAYER_ID);
-        } else {
-          layer = this.olLayerMap[layerId];
-        }
-
-        // Set scroll position state when layer details is opened
-        const details = {
-          layer,
-          subLayerIndex: payload.subLayerIndex,
-        };
-        this.setState((prevState) => ({
-          layerItemDetails: details,
-          displayContentOverlay: "layerItemDetails",
-          scrollPositions: {
-            ...prevState.scrollPositions,
-            [`tab${prevState.activeTab}`]: currentScrollPosition,
-          },
-        }));
       } else {
         this.setState({
           displayContentOverlay: null,
@@ -176,6 +202,31 @@ class LayersSwitcherView extends React.PureComponent {
         [`tab${prevState.activeTab}`]: currentScrollPosition,
       },
     }));
+  };
+  /* 
+  *Introduction Guide* The functions are being implemented due to handleFavoritesViewToggle and handleQuickAccessPresetsToggle 
+  both being triggered when a click event is programmatically dispatched (e.g., via id="example"), 
+  causing unwanted simultaneous execution. Separate handlers ensure that depending on the step in the Introduction Guide, 
+  runs for its respective component.
+  */
+  toggleFavoritesQuickAccessBackButton = () => {
+    if (
+      this.state.displayContentOverlay === "favorites" ||
+      this.state.displayContentOverlay === "quickAccessPresets"
+    ) {
+      this.setState({
+        displayContentOverlay: null,
+      });
+    }
+  };
+  // quickAccessPresets was not needed here since it's being handled as a MouseEvent("click") event
+  // in the Introduction.js component instead of a custom event like here.
+  toggleShowFavoritesView = () => {
+    if (this.state.displayContentOverlay === null) {
+      this.setState({
+        displayContentOverlay: "favorites",
+      });
+    }
   };
 
   /**
@@ -250,6 +301,18 @@ class LayersSwitcherView extends React.PureComponent {
     }, 1);
   };
 
+  componentWillUnmount() {
+    // Clean up event listener
+    document.removeEventListener(
+      "favoritesBackTransition",
+      this.handleFavoritesBackTransition
+    );
+    document.removeEventListener(
+      "favoritesShowTransition",
+      this.handleFavoritesShowTransition
+    );
+  }
+
   render() {
     const { windowVisible, layersState } = this.props;
 
@@ -264,7 +327,11 @@ class LayersSwitcherView extends React.PureComponent {
           flex: 1,
         }}
       >
-        <StyledAppBar position="relative" color="default">
+        <StyledAppBar
+          id="layer-switcher-tab-panel"
+          position="relative"
+          color="default"
+        >
           <Tabs
             action={this.handleTabsMounted}
             onChange={this.handleChangeTabs}
@@ -278,7 +345,7 @@ class LayersSwitcherView extends React.PureComponent {
             <Tab label="Kartlager" />
             <Tab label="Bakgrund" />
             {this.options.showDrawOrderView === true && (
-              <Tab label={"Ritordning"} />
+              <Tab id="draw-order-tab" label={"Ritordning"} />
             )}
           </Tabs>
         </StyledAppBar>
@@ -332,6 +399,11 @@ class LayersSwitcherView extends React.PureComponent {
           showOpacitySlider={this.props.options.enableTransparencySlider}
           showQuickAccess={this.props.options.showQuickAccess}
         ></LayerItemDetails>
+        <GroupDetails
+          display={this.state.displayContentOverlay === "groupDetails"}
+          groupDetails={this.state.groupDetails}
+          app={this.props.app}
+        ></GroupDetails>
         <BackgroundSwitcher
           display={
             this.state.activeTab === 1 &&
@@ -339,8 +411,6 @@ class LayersSwitcherView extends React.PureComponent {
           }
           layers={this.baseLayers}
           layerMap={this.olLayerMap}
-          backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
-          backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
           enableOSM={this.options.enableOSM}
           renderSpecialBackgroundsAtBottom={
             this.options.renderSpecialBackgroundsAtBottom

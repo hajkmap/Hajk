@@ -20,6 +20,24 @@ class SearchTools extends React.PureComponent {
     this.map = props.map;
   }
 
+  handleCloseSearchOptionsMenu = () => {
+    this.setState({ anchorEl: null });
+  };
+
+  componentDidMount() {
+    document.addEventListener(
+      "closeSearchOptionsMenu",
+      this.handleCloseSearchOptionsMenu
+    );
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener(
+      "closeSearchOptionsMenu",
+      this.handleCloseSearchOptionsMenu
+    );
+  }
+
   handleMenuItemClick = (event, index, option) => {
     const type = option.type;
     if (type === "SETTINGS") {
@@ -85,6 +103,7 @@ class SearchTools extends React.PureComponent {
         {this.renderSettingsDialog()}
         <HajkToolTip title="Fler sökverktyg och inställningar">
           <IconButton
+            id="search-options-button"
             aria-haspopup="true"
             aria-controls="lock-menu"
             name="searchOptions"
@@ -103,6 +122,7 @@ class SearchTools extends React.PureComponent {
         </HajkToolTip>
         <Paper>
           <Menu
+            slotProps={{ paper: { id: "search-tools-menu" } }}
             id="lock-menu"
             autoFocus={false}
             anchorEl={anchorEl}

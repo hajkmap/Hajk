@@ -10,11 +10,17 @@ import FormatShapesIcon from "@mui/icons-material/FormatShapes";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 
-const StyledButton = styled(Button)(({ selected, theme }) => ({
+const StyledButton = styled(Button)(({ theme }) => ({
   borderTop: `${theme.spacing(0.5)} solid transparent`,
-  borderBottom: selected
-    ? `${theme.spacing(0.5)} solid ${theme.palette.secondary.main}`
-    : `${theme.spacing(0.5)} solid transparent`,
+  borderBottom: `${theme.spacing(0.5)} solid transparent`,
+  variants: [
+    {
+      props: ({ selected }) => selected,
+      style: {
+        borderBottom: `${theme.spacing(0.5)} solid ${theme.palette.secondary.main}`,
+      },
+    },
+  ],
 }));
 
 class Toolbar extends Component {
@@ -116,10 +122,10 @@ class Toolbar extends Component {
 
     return (
       <Grid container spacing={1}>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Typography>Lägg till</Typography>
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={4}>
           <StyledButton
             variant="contained"
             fullWidth
@@ -135,7 +141,7 @@ class Toolbar extends Component {
             <ScatterPlotIcon sx={{ marginLeft: 1 }} />
           </StyledButton>
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={4}>
           <StyledButton
             variant="contained"
             fullWidth
@@ -151,7 +157,7 @@ class Toolbar extends Component {
             <LinearScaleIcon sx={{ marginLeft: 1 }} />
           </StyledButton>
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={4}>
           <StyledButton
             variant="contained"
             fullWidth
@@ -167,11 +173,10 @@ class Toolbar extends Component {
             <BorderStyleIcon sx={{ marginLeft: 1 }} />
           </StyledButton>
         </Grid>
-
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Typography>Editera</Typography>
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={4}>
           <StyledButton
             variant="contained"
             fullWidth
@@ -186,7 +191,7 @@ class Toolbar extends Component {
             <ZoomOutMapIcon sx={{ marginLeft: 1 }} />
           </StyledButton>
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={4}>
           <StyledButton
             variant="contained"
             fullWidth
@@ -201,7 +206,7 @@ class Toolbar extends Component {
             <DeleteIcon sx={{ marginLeft: 1 }} />
           </StyledButton>
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={4}>
           <StyledButton
             variant="contained"
             fullWidth
