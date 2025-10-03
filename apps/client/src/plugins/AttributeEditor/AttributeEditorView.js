@@ -1290,6 +1290,12 @@ export default function AttributeEditorView({
           anchorRef.current = { id: rowId, index: idx };
         }
 
+        editBus.emit("attrib:select-ids", {
+          ids: Array.from(next),
+          source: "view",
+          mode: "replace",
+        });
+
         return next;
       });
     },
