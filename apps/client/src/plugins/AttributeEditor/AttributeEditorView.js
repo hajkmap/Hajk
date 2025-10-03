@@ -742,9 +742,17 @@ export default function AttributeEditorView({
         if (k === columnKey) continue;
         filterParts.push(k + "=" + (Array.isArray(vals) ? vals.join(",") : ""));
       }
+
+      // include a signature of the current column values so the cache
+      // invalidates whenever any value in this column changes.
+      const colValuesSignature = allRows
+        .map((r) => String(r?.[columnKey] ?? ""))
+        .join("|");
+
       const cacheKey =
         `facet::${columnKey}::` +
         `${features.length}|${pendingAdds.length}|${editsCount}|${delSize}|` +
+        `${colValuesSignature}|` +
         `${tableSearch.trim().toLowerCase()}|` +
         filterParts.sort().join(";");
 
