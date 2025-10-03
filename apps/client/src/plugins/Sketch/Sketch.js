@@ -661,10 +661,7 @@ const Sketch = (props) => {
         features: feats,
       });
 
-      // 3) Reset flag
-      //programmaticMoveRef.current = false;
-
-      // 4) Emit geometry-edited - DE-DUPLICATE per canonical ID
+      // 3) Emit geometry-edited - DE-DUPLICATE per canonical ID
       const when = Date.now();
       const emittedIds = new Set();
 
