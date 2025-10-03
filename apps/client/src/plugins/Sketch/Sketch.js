@@ -339,33 +339,16 @@ const Sketch = (props) => {
         const src = layer?.getSource?.();
         if (!fc || !src) continue;
 
-        const currentArr = fc.getArray ? fc.getArray() : [];
+        fc.clear();
 
-        const haveSet = new Set();
-        currentArr.forEach((f) => {
-          if (!f || typeof f.get !== "function") return;
-          const id = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-          haveSet.add(id);
-          haveSet.add(String(id));
-        });
+        if (wanted.size === 0) continue;
 
         const srcFeatures = src.getFeatures?.() || [];
-
         wanted.forEach((wid) => {
-          if (haveSet.has(wid)) return;
           const f =
             src.getFeatureById?.(wid) ||
             srcFeatures.find((x) => matchesLogicalId(x, wid));
           if (f) fc.push(f);
-        });
-
-        // Remove those that are no longer selected (iterate over the copy!)
-        currentArr.forEach((f) => {
-          if (!f || typeof f.get !== "function") return;
-          const id = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-          if (!(wanted.has(id) || wanted.has(String(id)))) {
-            fc.remove(f);
-          }
         });
       }
     };
@@ -647,6 +630,10 @@ const Sketch = (props) => {
     const offAttribSelectIds = editBus.on("attrib:select-ids", (ev) => {
       // Sync OL selection with logical ids from UI
       const { ids = [] } = ev.detail || {};
+
+      lastPublishRef.id = null;
+      lastPublishRef.chan = null;
+
       syncOlSelection(ids);
       if (ids.length) {
         const f = findAeFeatureById(ids[0]);
@@ -659,11 +646,46 @@ const Sketch = (props) => {
     const offTranslateCmd = editBus.on("sketch:ae-translate", (ev) => {
       const { distance, angleDeg } = ev.detail || {};
       const feats = getAeSelected();
-      if (feats.length) {
-        drawModel.translateSelectedFeatures(distance, angleDeg, {
-          features: feats,
+      if (!feats.length) return;
+
+      // 1) snapshot BEFORE
+      const before = new Map();
+      feats.forEach((f) => {
+        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const id = toCanonicalId(raw);
+        before.set(id, f.getGeometry?.()?.clone?.() ?? null);
+      });
+
+      // 2) Move
+      drawModel.translateSelectedFeatures(distance, angleDeg, {
+        features: feats,
+      });
+
+      // 3) Reset flag
+      //programmaticMoveRef.current = false;
+
+      // 4) Emit geometry-edited - DE-DUPLICATE per canonical ID
+      const when = Date.now();
+      const emittedIds = new Set();
+
+      feats.forEach((f) => {
+        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const id = toCanonicalId(raw);
+
+        // Skip if we have already emitted for this canonical ID
+        if (emittedIds.has(id)) {
+          return;
+        }
+        emittedIds.add(id);
+
+        const g = f.getGeometry?.();
+        editBus.emit("sketch:geometry-edited", {
+          id,
+          before: before.get(id),
+          after: g && g.clone ? g.clone() : g,
+          when,
         });
-      }
+      });
     });
 
     const offRotateCmd = editBus.on("sketch:ae-rotate", (ev) => {
@@ -671,50 +693,57 @@ const Sketch = (props) => {
       const feats = getAeSelected();
       if (!feats.length) return;
 
-      // Compute a common anchor (center of all selected)
+      // anchor point for rotation
       let minX = Infinity,
         minY = Infinity,
         maxX = -Infinity,
         maxY = -Infinity;
       feats.forEach((f) => {
-        const g = f.getGeometry?.();
-        if (!g?.getExtent) return;
-        const e = g.getExtent();
+        const e = f.getGeometry?.()?.getExtent?.();
         if (!e) return;
         minX = Math.min(minX, e[0]);
         minY = Math.min(minY, e[1]);
         maxX = Math.max(maxX, e[2]);
         maxY = Math.max(maxY, e[3]);
       });
-      if (!isFinite(minX)) return;
-
       const anchor = [(minX + maxX) / 2, (minY + maxY) / 2];
       const angleRad = (clockwise ? -1 : 1) * ((degrees * Math.PI) / 180);
 
+      // Snapshot before rotation
+      const before = new Map();
+      feats.forEach((f) => {
+        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const id = toCanonicalId(raw);
+        before.set(id, f.getGeometry?.()?.clone?.() ?? null);
+      });
+
+      // rotation
       feats.forEach((f) => {
         const g = f.getGeometry?.();
         if (!g?.rotate) return;
-        // clone to avoid shared-geometry surprises
         if (g.clone) f.setGeometry(g.clone());
         f.getGeometry().rotate(angleRad, anchor);
-        try {
-          f.set?.("USER_DRAWN", true, true);
-          f.set?.("EDIT_ACTIVE", false, true);
-        } catch {}
       });
 
-      // Tell viewers/tools about the change
-      publishToEditView(feats[0] ?? null);
+      // AFTER ⇒ geometry-edited (DE-DUPLICERA)
+      const when = Date.now();
+      const emittedIds = new Set();
 
-      // Force a refresh of AE layers (no vectorLayerRef in Sketch)
-      for (const lyr of reg.keys()) {
-        try {
-          lyr.getSource()?.changed?.();
-        } catch {}
-        try {
-          lyr.changed?.();
-        } catch {}
-      }
+      feats.forEach((f) => {
+        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const id = toCanonicalId(raw);
+
+        if (emittedIds.has(id)) return;
+        emittedIds.add(id);
+
+        const g = f.getGeometry?.();
+        editBus.emit("sketch:geometry-edited", {
+          id,
+          before: before.get(id),
+          after: g && g.clone ? g.clone() : g,
+          when,
+        });
+      });
     });
 
     const offFocus = editBus.on("attrib:focus-id", (ev) => {

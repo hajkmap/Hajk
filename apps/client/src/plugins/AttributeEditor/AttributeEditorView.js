@@ -979,14 +979,24 @@ export default function AttributeEditorView({
     if (tGeom >= tModel && geomLast) {
       const { id, before } = geomLast;
       if (before) {
-        // restore geometry in OL layer
+        // Restore geometry in OL layer
         setGeometryById(id, before);
 
-        // remove "geometry changed"-highlight in AE
-        controller.batchEdit([{ id, key: "__geom__", value: null }]);
+        // Remove this entry from the stack
+        geomUndoRef.current.pop();
+        setGeomUndoCount((c) => Math.max(0, c - 1));
+
+        // Check if there are MORE geometry edits for this same feature still in the stack
+        const hasMoreGeomEdits = geomUndoRef.current.some(
+          (entry) => entry.id === id
+        );
+
+        // Only clear the __geom__ marker if no more geometry edits remain for this feature
+        if (!hasMoreGeomEdits) {
+          controller.batchEdit([{ id, key: "__geom__", value: null }]);
+        }
       }
-      geomUndoRef.current.pop();
-      setGeomUndoCount((c) => Math.max(0, c - 1));
+
       showNotification("Ångrade geometriändring");
       return;
     }
