@@ -304,14 +304,16 @@ class MapViewModel {
       if (featuresWithGeom.length === 0) {
         return;
       }
-      // If we know that we are going to add a feature to the layer,
-      // we must make sure to remove the existing geometry if multiple
-      // geometries are not allowed.
-      this.#handlePotentialMultipleGeometriesException();
       // But it might also contain several features that we should add to the map.
       // However, we're only adding the first one, otherwise it might get messy if the
       // user has 15 layers active at the same time.
-      this.#drawSource.addFeature(featuresWithGeom[0]);
+      // Before adding we check whether this feature is already added
+      // and if yes we remove it. So that the user can add/remove features by
+      // clicking on them.
+      const clickedfeature = featuresWithGeom[0];
+      if (!this.#isFeaturePreviouslySelected(clickedfeature)) {
+        this.#drawSource.addFeature(clickedfeature);
+      }
     });
   };
 
@@ -336,6 +338,21 @@ class MapViewModel {
         totalArea: 0,
       });
     }
+  };
+
+  // Checks if feature geometry is already selected
+  #isFeaturePreviouslySelected = (clickedfeature) => {
+    const clickedfeaturecoords = JSON.stringify(
+      clickedfeature.getGeometry().getCoordinates()
+    );
+    for (const feature of this.#drawSource.getFeatures()) {
+      const geometry = JSON.stringify(feature.getGeometry().getCoordinates());
+      if (geometry === clickedfeaturecoords) {
+        this.#drawSource.removeFeature(feature);
+        return 1;
+      }
+    }
+    return 0;
   };
 
   // Returns the combined area of all features supplied.
