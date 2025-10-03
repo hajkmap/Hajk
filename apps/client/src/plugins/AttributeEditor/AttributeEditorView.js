@@ -229,12 +229,19 @@ export default function AttributeEditorView({
   }, [focusedId, selectedIds]);
 
   React.useEffect(() => {
-    if (serviceId !== "NONE_ID") return;
+    // Reset filter
+    setColumnFilters({});
+    setColumnFilterUI({});
+    setOpenFilterColumn(null);
+    setTableSearch("");
+    setFormSearch("");
+    uniqueCacheRef.current?.clear?.();
+
+    // End celledits
+    setTableEditing(null);
     setTableSelectedIds(new Set());
     setSelectedIds(new Set());
     setFocusedId(null);
-    setOpenFilterColumn(null);
-    setTableEditing(null);
   }, [serviceId]);
 
   // === Theme ===
