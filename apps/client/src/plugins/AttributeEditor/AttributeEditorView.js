@@ -273,6 +273,44 @@ export default function AttributeEditorView({
     Object.keys(pendingEdits).length > 0 ||
     (pendingDeletes?.size ?? 0) > 0;
 
+  const syncColumnFilterOnValueChange = React.useCallback(
+    (columnKey, fromValue, toValue, rowId) => {
+      setColumnFilters((prev) => {
+        const active = prev?.[columnKey];
+        if (!Array.isArray(active) || active.length === 0) return prev;
+
+        const fromStr = String(fromValue ?? "");
+        const toStr = String(toValue ?? "");
+
+        const effectiveAll = [
+          ...features.map((f) => ({ ...f, ...(pendingEdits?.[f.id] || {}) })),
+          ...(pendingAdds || []),
+        ].filter((r) => !pendingDeletes?.has?.(r.id));
+
+        const nextSet = new Set(active.map(String));
+
+        if (toStr !== "") nextSet.add(toStr);
+
+        if (fromStr !== "" && fromStr !== toStr) {
+          const stillUsed = effectiveAll.some(
+            (r) => r.id !== rowId && String(r?.[columnKey] ?? "") === fromStr
+          );
+          if (!stillUsed) nextSet.delete(fromStr);
+        }
+
+        const nextArr = Array.from(nextSet);
+        if (
+          nextArr.length === active.length &&
+          nextArr.every((v, i) => v === active[i])
+        ) {
+          return prev;
+        }
+        return { ...(prev || {}), [columnKey]: nextArr };
+      });
+    },
+    [setColumnFilters, features, pendingEdits, pendingAdds, pendingDeletes]
+  );
+
   const setTablePendingEdits = useCallback(
     (updaterOrObj) => {
       const prev = pendingEdits;
@@ -971,11 +1009,28 @@ export default function AttributeEditorView({
     // 2) TABLE UNDO: e.g. a cell edit in the table view
     if (tTable >= tModel && tTable >= tGeom && tableLast) {
       if (tableLast.type === "edit_cell") {
+        let currentVal;
+        const p = pendingEdits[tableLast.id];
+        if (p && tableLast.key in p) currentVal = p[tableLast.key];
+        else {
+          const draft = pendingAdds?.find?.((d) => d.id === tableLast.id);
+          if (draft) currentVal = draft[tableLast.key];
+          else
+            currentVal = features.find((f) => f.id === tableLast.id)?.[
+              tableLast.key
+            ];
+        }
         controller.batchEdit([
           { id: tableLast.id, key: tableLast.key, value: tableLast.prevValue },
         ]);
         setTableUndoLocal((prev) => prev.slice(0, -1));
         showNotification("Ångrade celländring");
+        syncColumnFilterOnValueChange(
+          tableLast.key,
+          currentVal, // from
+          tableLast.prevValue, // to
+          tableLast.id
+        );
       } else {
         // other local table action – remove the post
         setTableUndoLocal((prev) => prev.slice(0, -1));
@@ -1026,6 +1081,10 @@ export default function AttributeEditorView({
     setDirty,
     showNotification,
     setGeometryById,
+    features,
+    pendingAdds,
+    pendingEdits,
+    syncColumnFilterOnValueChange,
   ]);
 
   function normalizeForCommit(key, value, FM) {

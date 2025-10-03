@@ -182,6 +182,49 @@ export default function TableMode(props) {
     }
   });
 
+  const syncFilterOnCellChange = React.useCallback(
+    (columnKey, fromValue, toValue, rowId) => {
+      const active = columnFilters?.[columnKey];
+      if (!Array.isArray(active) || active.length === 0) return;
+
+      const fromStr = String(fromValue ?? "");
+      const toStr = String(toValue ?? "");
+
+      // Build an "effective" set of all rows (base + pending), excluding rows marked for deletion
+      const effectiveAll = [
+        ...features.map((f) => ({
+          ...f,
+          ...(tablePendingEdits?.[f.id] || {}),
+        })),
+        ...(tablePendingAdds || []),
+      ].filter((r) => !tablePendingDeletes?.has?.(r.id));
+
+      setColumnFilters((prev) => {
+        const before = prev?.[columnKey] || [];
+        const nextSet = new Set(before.map(String));
+
+        if (toStr !== "") nextSet.add(toStr);
+
+        if (fromStr !== "" && fromStr !== toStr) {
+          const stillUsed = effectiveAll.some(
+            (r) => r.id !== rowId && String(r?.[columnKey] ?? "") === fromStr
+          );
+          if (!stillUsed) nextSet.delete(fromStr);
+        }
+
+        return { ...(prev || {}), [columnKey]: Array.from(nextSet) };
+      });
+    },
+    [
+      columnFilters,
+      setColumnFilters,
+      features,
+      tablePendingEdits,
+      tablePendingAdds,
+      tablePendingDeletes,
+    ]
+  );
+
   React.useEffect(() => {
     // only when the table actually shows something
     if (!filteredAndSorted.length) return;
@@ -685,45 +728,12 @@ export default function TableMode(props) {
                           });
 
                           // Only update filter if this column is currently filtered ***
-                          const activeForCol = columnFilters?.[meta.key];
-                          if (
-                            Array.isArray(activeForCol) &&
-                            activeForCol.length > 0
-                          ) {
-                            const newValStr = String(currentVal ?? "");
-                            const prevValStr = String(prevVal ?? "");
-
-                            setColumnFilters((prev) => {
-                              const before = prev?.[meta.key] || [];
-                              const nextSet = new Set(before.map(String));
-
-                              // Add new value if not empty
-                              if (newValStr !== "") {
-                                nextSet.add(newValStr);
-                              }
-
-                              // Remove old value if it's no longer used anywhere
-                              if (
-                                prevValStr !== "" &&
-                                prevValStr !== newValStr
-                              ) {
-                                // Check if any other row still uses this value
-                                const stillUsed = filteredAndSorted.some(
-                                  (r) =>
-                                    r.id !== row.id &&
-                                    String(r[meta.key] ?? "") === prevValStr
-                                );
-                                if (!stillUsed) {
-                                  nextSet.delete(prevValStr);
-                                }
-                              }
-
-                              const next = { ...(prev || {}) };
-                              next[meta.key] = Array.from(nextSet);
-                              return next;
-                            });
-                          }
-                          // END FIX ***
+                          syncFilterOnCellChange(
+                            meta.key,
+                            prevVal,
+                            currentVal,
+                            row.id
+                          );
                         }
                       };
 
