@@ -102,13 +102,15 @@ export default function ConfirmSaveDialog({
               color={adds ? "success" : "default"}
               variant={adds ? "filled" : "outlined"}
               size="medium"
+              sx={{ flex: 1, minWidth: 0 }}
             />
             <Chip
               icon={<EditNoteRoundedIcon />}
-              label={`Redigeringar: ${edits}`}
+              label={`Ändringar: ${edits}`}
               color={edits ? "info" : "default"}
               variant={edits ? "filled" : "outlined"}
               size="medium"
+              sx={{ flex: 1, minWidth: 0 }}
             />
             <Chip
               icon={<DeleteOutlineRoundedIcon />}
@@ -116,6 +118,7 @@ export default function ConfirmSaveDialog({
               color={deletes ? "error" : "default"}
               variant={deletes ? "filled" : "outlined"}
               size="medium"
+              sx={{ flex: 1, minWidth: 0 }}
             />
           </Stack>
 

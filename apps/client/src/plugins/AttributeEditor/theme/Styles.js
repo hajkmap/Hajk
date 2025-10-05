@@ -784,5 +784,15 @@ export function makeStyles(t, isMobile) {
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
     },
+    btnActive: {
+      padding: isMobile ? "6px 10px" : "8px 12px",
+      borderRadius: 8,
+      border: `1px solid ${t.primary}`,
+      background: t.primary,
+      color: "#ffffff",
+      cursor: "pointer",
+      fontSize: isMobile ? 12 : 14,
+      fontWeight: 600,
+    },
   };
 }

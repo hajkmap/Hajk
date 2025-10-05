@@ -57,6 +57,9 @@ export default function AttributeEditorView({
     setTableUndoLocal((prev) => [...prev, { ...entry, when: Date.now() }]);
   }, []);
 
+  const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [frozenSelectedIds, setFrozenSelectedIds] = useState(new Set());
+
   const [formSearch, setFormSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [focusedId, setFocusedId] = useState(null);
@@ -492,6 +495,19 @@ export default function AttributeEditorView({
     const editingId = tableEditing?.id ?? null;
 
     let rows = allRows.filter((f) => {
+      // Always show negative IDs (new/duplicate)
+      const isNegativeId = typeof f.id === "number" && f.id < 0;
+
+      // If "show only first ID" is active, use the FIRST ID:na
+      if (
+        showOnlySelected &&
+        !isNegativeId &&
+        !frozenSelectedIds.has(f.id) &&
+        editingId !== f.id
+      ) {
+        return false;
+      }
+
       const matchesSearch =
         !q ||
         editingId === f.id ||
@@ -551,7 +567,15 @@ export default function AttributeEditorView({
     });
 
     return rows;
-  }, [allRows, tableSearch, sort, columnFilters, tableEditing]);
+  }, [
+    allRows,
+    tableSearch,
+    sort,
+    columnFilters,
+    tableEditing,
+    showOnlySelected,
+    frozenSelectedIds,
+  ]);
 
   const cloneGeometryForDuplicates = React.useCallback(
     (sourceIds, createdIds) => {
@@ -1240,6 +1264,14 @@ export default function AttributeEditorView({
     const keys = fmKeys.includes("id") ? fmKeys : ["id", ...fmKeys];
 
     const filtered = all.filter((row) => {
+      // Always show negative IDs (i.e. drafts)
+      const isNegativeId = typeof row.id === "number" && row.id < 0;
+
+      // If "Select first" is active, use the FIRST ID
+      if (showOnlySelected && !isNegativeId && !frozenSelectedIds.has(row.id)) {
+        return false;
+      }
+
       if (!sTerm) return true;
       for (const k of keys) {
         const v = row?.[k];
@@ -1256,7 +1288,16 @@ export default function AttributeEditorView({
     });
 
     return filtered;
-  }, [features, pendingEdits, pendingAdds, pendingDeletes, formSearch, FM]);
+  }, [
+    features,
+    pendingEdits,
+    pendingAdds,
+    pendingDeletes,
+    formSearch,
+    FM,
+    showOnlySelected,
+    frozenSelectedIds,
+  ]);
 
   React.useEffect(() => {
     anchorRef.current = { id: null, index: null };
@@ -1613,6 +1654,10 @@ export default function AttributeEditorView({
         changedFields={changedFields}
         ogc={ogc}
         serviceList={serviceList}
+        showOnlySelected={showOnlySelected}
+        setShowOnlySelected={setShowOnlySelected}
+        frozenSelectedIds={frozenSelectedIds}
+        setFrozenSelectedIds={setFrozenSelectedIds}
       />
 
       {serviceId === "NONE_ID" ? (

@@ -32,11 +32,18 @@ export default function Toolbar({
   tablePendingDeletes,
   changedFields,
   serviceList, // [{ id, title }]
+  showOnlySelected,
+  setShowOnlySelected,
+  frozenSelectedIds,
+  setFrozenSelectedIds,
 }) {
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
   const pendingTargetRef = React.useRef(null);
   const [serviceId, setServiceId] = React.useState("NONE_ID");
+  const selectedCount =
+    mode === "table" ? tableSelectedIds.size : selectedIds.size;
+  const frozenCount = frozenSelectedIds.size;
 
   // Build options: "None" + in command serviceList
   const services = React.useMemo(() => {
@@ -202,6 +209,35 @@ export default function Toolbar({
       <div style={s.spacer} />
 
       <button
+        style={showOnlySelected ? s.btnActive : s.btn}
+        onClick={() => {
+          if (showOnlySelected) {
+            // Disable the filter and reset frozen IDs
+            setShowOnlySelected(false);
+            setFrozenSelectedIds(new Set());
+          } else {
+            // Activate the filter and freeze the currently selected objects
+            const currentIds =
+              mode === "table" ? tableSelectedIds : selectedIds;
+            setFrozenSelectedIds(new Set(currentIds));
+            setShowOnlySelected(true);
+          }
+        }}
+        disabled={!showOnlySelected && selectedCount === 0}
+        title={
+          showOnlySelected
+            ? `Visa alla (visar ${frozenCount} frysta)`
+            : selectedCount === 0
+              ? "Markera objekt först"
+              : `Visa endast ${selectedCount} markerade`
+        }
+      >
+        {showOnlySelected
+          ? `Visa alla (${frozenCount} frysta)`
+          : `Visa markerade (${selectedCount})`}
+      </button>
+
+      {/*<button
         type="button"
         onClick={() => setDark(!dark)}
         style={s.toggle(dark)}
@@ -209,7 +245,7 @@ export default function Toolbar({
         title="Växla dark mode"
       >
         {dark ? "Dark" : "Light"}
-      </button>
+      </button>*/}
 
       {mode === "table" ? (
         <div style={s.toolbarInfo}>

@@ -4,7 +4,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
-import { getIdsForDeletion } from "../helpers/helpers";
+import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
 
 export default function MobileForm({
   s,
@@ -18,6 +18,7 @@ export default function MobileForm({
   selectedIds,
   onFormRowClick,
   focusedId,
+  handleBeforeChangeFocus,
   focusPrev,
   focusNext,
 
@@ -45,6 +46,7 @@ export default function MobileForm({
   tablePendingEdits,
   tablePendingAdds,
   duplicateInForm,
+  hasGeomUndo,
 }) {
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
@@ -84,7 +86,7 @@ export default function MobileForm({
   const handleDeleteClick = () => {
     const ids = getIdsForDeletion(selectedIds, focusedId);
     if (!ids.length) return;
-    setDeleteState(ids, "mark");
+    setDeleteState(ids, "toggle");
   };
 
   const handleDuplicateClick = () => {
@@ -92,6 +94,23 @@ export default function MobileForm({
       duplicateInForm();
     }
   };
+
+  const summary = React.useMemo(
+    () => ({
+      adds: tablePendingAdds?.length ?? 0,
+      edits:
+        (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0) +
+        (dirty ? changedFields.size : 0),
+      deletes: tablePendingDeletes?.size ?? 0,
+    }),
+    [
+      tablePendingAdds,
+      tablePendingEdits,
+      tablePendingDeletes,
+      dirty,
+      changedFields,
+    ]
+  );
 
   async function confirmSave() {
     try {
@@ -108,6 +127,13 @@ export default function MobileForm({
       setSaveDialogOpen(false);
     }
   }
+
+  const canUndo = !!(
+    tableUndoStack?.length ||
+    formUndoStack?.length ||
+    hasGeomUndo ||
+    dirty
+  );
 
   if (!isActive) return null;
 
@@ -135,18 +161,25 @@ export default function MobileForm({
               {visibleFormList.map((f, idx) => {
                 const selected = selectedIds.has(f.id);
                 const isFocused = focusedId === f.id;
-                const isPendingDelete = tablePendingDeletes?.has?.(f.id);
+                const isPendingDelete =
+                  f.__pending === "delete" || tablePendingDeletes?.has?.(f.id);
                 const hasPendingEdits = !!tablePendingEdits?.[f.id];
-                const isDraftAdd = tablePendingAdds?.some?.(
-                  (d) => d.id === f.id && d.__pending !== "delete"
-                );
+                const hasGeomChange = !!tablePendingEdits?.[f.id]?.__geom__;
+                const isDraftAdd =
+                  f.__pending === "add" ||
+                  tablePendingAdds?.some?.(
+                    (d) => d.id === f.id && d.__pending !== "delete"
+                  );
+
                 const status = isPendingDelete
                   ? "delete"
-                  : hasPendingEdits
-                    ? "edit"
-                    : isDraftAdd
-                      ? "add"
-                      : null;
+                  : hasGeomChange
+                    ? "geom"
+                    : hasPendingEdits
+                      ? "edit"
+                      : isDraftAdd
+                        ? "add"
+                        : null;
 
                 return (
                   <div
@@ -222,19 +255,26 @@ export default function MobileForm({
               </button>
 
               <button
-                style={
-                  !(tableUndoStack?.length || formUndoStack?.length || dirty)
-                    ? s.iconBtnDisabled
-                    : s.iconBtn
-                }
+                style={canUndo ? s.iconBtn : s.iconBtnDisabled}
+                disabled={!canUndo}
                 onClick={() => {
-                  if (tableUndoStack?.length) undoLatestTableChange();
-                  else if (formUndoStack?.length) undoLatestFormChange();
-                  else if (dirty) resetEdits();
+                  if (tableUndoStack?.length) {
+                    undoLatestTableChange();
+                    return;
+                  }
+                  if (formUndoStack?.length) {
+                    undoLatestFormChange();
+                    return;
+                  }
+                  if (hasGeomUndo) {
+                    undoLatestTableChange();
+                    return;
+                  }
+                  if (dirty) {
+                    resetEdits();
+                    return;
+                  }
                 }}
-                disabled={
-                  !(tableUndoStack?.length || formUndoStack?.length || dirty)
-                }
                 aria-label="Ångra"
                 title="Ångra"
               >
@@ -280,7 +320,9 @@ export default function MobileForm({
                         </label>
                         {renderInput(
                           meta,
-                          val,
+                          meta.readOnly && isMissingValue(val)
+                            ? "#saknas"
+                            : val,
                           (v) => handleFieldChange(meta.key, v),
                           changed,
                           s,
@@ -298,27 +340,26 @@ export default function MobileForm({
                 <div style={s.mobileFormActions}>
                   <div style={s.spacer} />
                   <button
-                    style={
-                      !(
-                        tableUndoStack?.length ||
-                        formUndoStack?.length ||
-                        dirty
-                      )
-                        ? s.iconBtnDisabled
-                        : s.iconBtn
-                    }
+                    style={canUndo ? s.iconBtn : s.iconBtnDisabled}
+                    disabled={!canUndo}
                     onClick={() => {
-                      if (formUndoStack?.length) undoLatestFormChange();
-                      else if (tableUndoStack?.length) undoLatestTableChange();
-                      else if (dirty) resetEdits();
+                      if (formUndoStack?.length) {
+                        undoLatestFormChange();
+                        return;
+                      }
+                      if (tableUndoStack?.length) {
+                        undoLatestTableChange();
+                        return;
+                      }
+                      if (hasGeomUndo) {
+                        undoLatestTableChange();
+                        return;
+                      }
+                      if (dirty) {
+                        resetEdits();
+                        return;
+                      }
                     }}
-                    disabled={
-                      !(
-                        tableUndoStack?.length ||
-                        formUndoStack?.length ||
-                        dirty
-                      )
-                    }
                     aria-label="Ångra"
                     title="Ångra"
                   >
@@ -360,13 +401,7 @@ export default function MobileForm({
         open={saveDialogOpen}
         onClose={() => setSaveDialogOpen(false)}
         onConfirm={confirmSave}
-        summary={{
-          adds: tablePendingAdds?.length ?? 0,
-          edits:
-            (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0) +
-            (dirty ? changedFields.size : 0),
-          deletes: tablePendingDeletes?.size ?? 0,
-        }}
+        summary={summary}
         saving={savingNow}
       />
     </>
