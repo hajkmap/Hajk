@@ -386,9 +386,20 @@ const Sketch = (props) => {
     // ============================================================
     const getAeSelected = () => {
       const arr = [];
+      const seen = new Set();
+
       for (const { select } of reg.values()) {
-        select?.getFeatures?.().forEach((f) => arr.push(f));
+        select?.getFeatures?.().forEach((f) => {
+          const id = f.getId?.() ?? f.get?.("@_fid") ?? f.get?.("id");
+          const key = String(id);
+
+          if (!seen.has(key)) {
+            seen.add(key);
+            arr.push(f);
+          }
+        });
       }
+
       return arr;
     };
 
