@@ -307,12 +307,23 @@ class MapViewModel {
       // But it might also contain several features that we should add to the map.
       // However, we're only adding the first one, otherwise it might get messy if the
       // user has 15 layers active at the same time.
-      // Before adding we check whether this feature is already added
-      // and if yes we remove it. So that the user can add/remove features by
-      // clicking on them.
+      // Before adding we check if the user wants to add/remove the feature to the current
+      // selection by using CTRL, SHIFT or COMMAND keys or create a new one.
       const clickedfeature = featuresWithGeom[0];
-      if (!this.#isFeaturePreviouslySelected(clickedfeature)) {
-        this.#drawSource.addFeature(clickedfeature);
+      if (
+        // the user wants to add to/remove from the current selection
+        event.originalEvent.ctrlKey ||
+        event.originalEvent.metaKey ||
+        event.originalEvent.shiftKey
+      ) {
+        if (!this.#isFeaturePreviouslySelected(clickedfeature)) {
+          // the feature is not in the current selection, add it
+          this.#drawSource.addFeature(clickedfeature);
+        }
+      } else {
+        //the user wants to start a new selection
+        this.#drawSource.clear();
+        this.#drawSource.addFeature(featuresWithGeom[0]);
       }
     });
   };
@@ -345,9 +356,11 @@ class MapViewModel {
     const clickedfeaturecoords = JSON.stringify(
       clickedfeature.getGeometry().getCoordinates()
     );
+    // we look into our selected items to see if the feature is already selected
     for (const feature of this.#drawSource.getFeatures()) {
       const geometry = JSON.stringify(feature.getGeometry().getCoordinates());
       if (geometry === clickedfeaturecoords) {
+        // the feature is already selected, so unselect
         this.#drawSource.removeFeature(feature);
         return 1;
       }
