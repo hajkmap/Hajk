@@ -1,21 +1,44 @@
-import { useState } from "react";
-import { useHref } from "react-router";
+import { useState, useEffect } from "react";
+import { useHref, useLocation } from "react-router";
 import axios from "axios";
 import Grid from "@mui/material/Grid2";
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography, Alert } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import useAppStateStore from "../../store/use-app-state-store";
 
 export default function LoginPage() {
   const { t } = useTranslation();
   const basename = useHref("/");
+  const location = useLocation();
   const { apiBaseUrl } = useAppStateStore.getState();
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [loginFailed, setLoginFailed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
   const submitButtonDisabled =
     credentials.email.length < 5 || credentials.password.length < 4 || loading;
+
+  // Check for message from navigation state (e.g., after database import)
+  useEffect(() => {
+    if (
+      location.state &&
+      typeof location.state === "object" &&
+      "message" in location.state
+    ) {
+      setInfoMessage((location.state as { message: string }).message);
+    }
+    // Fallback to sessionStorage
+    else {
+      const storedMessage = sessionStorage.getItem("databaseImportMessage");
+      if (storedMessage) {
+        console.log("Setting info message from sessionStorage:", storedMessage);
+        setInfoMessage(storedMessage);
+        // Clear the stored message after using it
+        sessionStorage.removeItem("databaseImportMessage");
+      }
+    }
+  }, [location.state]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" && !submitButtonDisabled) {
@@ -79,6 +102,12 @@ export default function LoginPage() {
         <Typography align="center" gutterBottom>
           {t("common.loginToContinue")}
         </Typography>
+
+        {infoMessage && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            {infoMessage}
+          </Alert>
+        )}
         <TextField
           required
           label={t("common.email")}

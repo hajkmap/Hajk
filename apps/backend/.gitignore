@@ -6,3 +6,5 @@ logs/
 .vscode
 .env
 /server/generated/zod/index.ts
+/exports/
+/imports/

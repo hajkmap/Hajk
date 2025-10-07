@@ -1,7 +1,12 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 import useAppStateStore from "../store/use-app-state-store";
 
-export type InternalApiError = AxiosError<{ errorId: string }>;
+export type InternalApiError = AxiosError<{
+  errorId: string;
+  error?: string;
+  details?: string;
+  stderr?: string;
+}>;
 
 const createApiClient = (): AxiosInstance => {
   const { apiBaseUrl, axiosConfigOverrides } = useAppStateStore.getState();

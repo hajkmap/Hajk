@@ -1,4 +1,5 @@
-import MapIcon from "@mui/icons-material/Map";import LayersIcon from "@mui/icons-material/Layers";
+import MapIcon from "@mui/icons-material/Map";
+import LayersIcon from "@mui/icons-material/Layers";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import NetworkPingIcon from "@mui/icons-material/NetworkPing";
@@ -9,6 +10,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import ExampleIcon from "@mui/icons-material/Code";
+import StorageIcon from "@mui/icons-material/Storage";
 
 export const HEADER_HEIGHT = 64;
 export const HEADER_Z_INDEX = 1001;
@@ -101,6 +103,11 @@ export const SIDEBAR_MENU = [
         to: "/examples",
         titleKey: "Form examples",
         icon: <ExampleIcon />,
+      },
+      {
+        to: "/database",
+        titleKey: "common.database",
+        icon: <StorageIcon />,
       },
     ],
   },
