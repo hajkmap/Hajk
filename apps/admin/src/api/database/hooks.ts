@@ -48,13 +48,11 @@ export const useImportDatabase = () => {
 
       if (data.requiresLogout) {
         toast.info(t("database.import.logoutToast"), {
-          autoClose: 5000,
+          autoClose: 7000,
         });
 
         setTimeout(async () => {
-          console.log("Logging out and navigating to login page...");
           const message = t("database.import.loginPageMessage");
-          console.log("Navigation message:", message);
 
           sessionStorage.setItem("databaseImportMessage", message);
 

@@ -540,14 +540,13 @@ export class DatabaseController {
     toolName: string
   ): Promise<{ found: boolean; path: string; version: string }> {
     const commonPaths = this.getCommonPostgreSQLPaths();
-    const candidates = [
-      toolName,
-      ...commonPaths.map((p) => path.join(p, toolName)),
-    ];
 
-    for (const candidate of candidates) {
+    for (const commonPath of commonPaths) {
+      const candidate = path.join(commonPath, toolName);
       try {
-        const result = await this.executeCommand(candidate, ["--version"]);
+        const result = await this.executeCommand(candidate, ["--version"], {
+          silent: true,
+        });
         if (result.success) {
           return {
             found: true,
@@ -555,9 +554,27 @@ export class DatabaseController {
             version: result.stdout.trim(),
           };
         }
-      } catch {
-        // Continue to next candidate
+      } catch (error) {
+        console.error(`Failed to find ${toolName} in ${commonPath}`, error);
       }
+    }
+
+    try {
+      const result = await this.executeCommand(toolName, ["--version"], {
+        shell: true,
+      });
+      if (result.success) {
+        return {
+          found: true,
+          path: toolName,
+          version: result.stdout.trim(),
+        };
+      }
+    } catch (error) {
+      console.error(
+        `Failed to find ${toolName} in both hardcoded paths and PATH:`,
+        error
+      );
     }
 
     return { found: false, path: "", version: "" };
@@ -794,7 +811,8 @@ export class DatabaseController {
    */
   private async executeCommand(
     command: string,
-    args: string[]
+    args: string[],
+    options: { shell?: boolean; silent?: boolean } = {}
   ): Promise<{
     success: boolean;
     stdout: string;
@@ -802,9 +820,11 @@ export class DatabaseController {
     error?: string;
   }> {
     return new Promise((resolve) => {
-      const child = spawn(command, args, {
+      const quotedCommand = command.includes(" ") ? `"${command}"` : command;
+
+      const child = spawn(quotedCommand, args, {
         stdio: ["pipe", "pipe", "pipe"],
-        shell: process.platform === "win32",
+        shell: options.shell || process.platform === "win32",
       });
 
       let stdout = "";
@@ -819,8 +839,8 @@ export class DatabaseController {
       });
 
       child.on("close", (code) => {
-        if (code !== 0) {
-          logger.error(`Command failed: ${command} ${args.join(" ")}`);
+        if (code !== 0 && !options.silent) {
+          logger.error(`Command failed: ${quotedCommand} ${args.join(" ")}`);
           logger.error(`Exit code: ${code}`);
           logger.error(`stdout: ${stdout}`);
           logger.error(`stderr: ${stderr}`);
@@ -838,7 +858,10 @@ export class DatabaseController {
       });
 
       child.on("error", (error) => {
-        logger.error(`Command error: ${command} ${args.join(" ")}`, error);
+        logger.error(
+          `Command error: ${quotedCommand} ${args.join(" ")}`,
+          error
+        );
         resolve({
           success: false,
           stdout,
