@@ -3,6 +3,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
+import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { editBus } from "../../../buses/editBus";
@@ -363,7 +364,24 @@ export default function TableMode(props) {
           >
             <EditNoteIcon fontSize="small" />
           </button>
-
+          <button
+            style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
+            disabled={tableSelectedIds.size === 0}
+            onClick={() => {
+              const ids = Array.from(tableSelectedIds);
+              if (ids.length > 0) {
+                editBus.emit("attrib:zoom-to-features", { ids });
+              }
+            }}
+            title={
+              tableSelectedIds.size
+                ? `Zooma till ${tableSelectedIds.size} objekt`
+                : "Markera rader först"
+            }
+            aria-label="Zooma till valda"
+          >
+            <CenterFocusStrongIcon fontSize="small" />
+          </button>
           <button
             style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
             disabled={tableSelectedIds.size === 0}

@@ -942,6 +942,57 @@ function AttributeEditor(props) {
     [model]
   );
 
+  React.useEffect(() => {
+    const off = editBus.on("attrib:zoom-to-features", (ev) => {
+      const ids = ev?.detail?.ids || [];
+      if (!ids.length) return;
+
+      const layer = vectorLayerRef.current;
+      if (!layer) return;
+
+      const features = [];
+      ids.forEach((id) => {
+        const f = featureIndexRef.current.get(id);
+        if (f) features.push(f);
+      });
+
+      if (!features.length) return;
+
+      const extent = features.reduce((acc, f) => {
+        const geom = f.getGeometry?.();
+        if (!geom) return acc;
+        const fExtent = geom.getExtent();
+        if (!acc) return fExtent;
+        return [
+          Math.min(acc[0], fExtent[0]),
+          Math.min(acc[1], fExtent[1]),
+          Math.max(acc[2], fExtent[2]),
+          Math.max(acc[3], fExtent[3]),
+        ];
+      }, null);
+
+      if (extent) {
+        const view = props.map.getView();
+        const windowWidth = props.options?.winwidth || 800;
+        const rightPadding = Math.floor(windowWidth * 0.5) + 160;
+        const maxZoom = Number(props.options?.maxzoom) || 6;
+
+        view.fit(extent, {
+          padding: [50, rightPadding, 50, 50],
+          duration: 500,
+          maxZoom: maxZoom,
+        });
+      }
+    });
+    return () => off();
+  }, [
+    props.map,
+    vectorLayerRef,
+    featureIndexRef,
+    props.options?.winwidth,
+    props.options?.maxzoom,
+  ]);
+
   const updateCustomProp = (prop, value) => {
     setUi((prev) => ({ ...prev, [prop]: value }));
   };

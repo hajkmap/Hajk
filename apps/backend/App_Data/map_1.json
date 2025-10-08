@@ -838,10 +838,11 @@
       "type": "AttributeEditor",
       "index": 100,
       "options": {
+        "maxzoom": 6,
         "target": "left",
         "position": "right",
         "winheight": "600",
-        "winwidth": "1100",
+        "winwidth": "1000",
         "instruction": "",
         "visibleForGroups": [],
         "activeServices": [

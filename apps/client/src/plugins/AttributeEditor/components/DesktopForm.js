@@ -3,6 +3,7 @@ import UndoIcon from "@mui/icons-material/Undo";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { editBus } from "../../../buses/editBus";
@@ -394,7 +395,35 @@ export default function DesktopForm({
             </div>
           )}
           <div style={s.spacer} />
-
+          <button
+            style={
+              selectedIds.size === 0 && focusedId == null
+                ? s.iconBtnDisabled
+                : s.iconBtn
+            }
+            disabled={selectedIds.size === 0 && focusedId == null}
+            onClick={() => {
+              const ids =
+                selectedIds.size > 0
+                  ? Array.from(selectedIds)
+                  : focusedId != null
+                    ? [focusedId]
+                    : [];
+              if (ids.length > 0) {
+                editBus.emit("attrib:zoom-to-features", { ids });
+              }
+            }}
+            aria-label="Zooma till valda"
+            title={
+              selectedIds.size > 1
+                ? `Zooma till ${selectedIds.size} objekt`
+                : selectedIds.size === 1 || focusedId != null
+                  ? "Zooma till valt objekt"
+                  : "Välj objekt först"
+            }
+          >
+            <CenterFocusStrongIcon fontSize="small" />
+          </button>
           <button
             style={
               selectedIds.size === 0 && focusedId == null
