@@ -163,7 +163,8 @@ const LayerGroup = ({
   const groupName = groupConfig?.caption;
   const name = groupConfig?.caption;
 
-  const groupIsFiltered = groupConfig?.isFiltered;
+  const groupIsFilterHit = filterHits?.has(groupId);
+
   const groupIsExpanded = staticGroupTree.defaultExpanded;
   const groupIsToggable = staticGroupTree.groupIsToggable;
 
@@ -185,7 +186,11 @@ const LayerGroup = ({
   // hasFilterHits === null means that the filter isn't active
   const hasNoFilterHits = filterHitsInGroup && filterHitsInGroup?.size === 0;
   const filterActiveAndHasHits = filterHits && !hasNoFilterHits;
-  if (hasNoFilterHits) {
+
+  const showLayerGroup =
+    filterHits === null || groupIsFilterHit || !hasNoFilterHits;
+
+  if (!showLayerGroup) {
     return null;
   }
 
@@ -217,9 +222,9 @@ const LayerGroup = ({
 
   return (
     <LayerGroupAccordion
-      display={groupIsFiltered ? "none" : "block"}
+      display={showLayerGroup ? "block" : "none"}
       toggleable={groupIsToggable}
-      expanded={filterActiveAndHasHits || groupIsExpanded}
+      expanded={filterActiveAndHasHits || groupIsFilterHit || groupIsExpanded}
       toggleDetails={
         <ToggleAllComponent
           toggleable={groupIsToggable}
@@ -299,8 +304,9 @@ const LayerGroup = ({
             );
           }
 
-          if (filterHits && !filterHits.has(layerId)) {
+          if (filterHits && !groupIsFilterHit && !filterHits.has(layerId)) {
             // The filter is active and this layer is not a hit.
+            // If the groups is a filter hit we should show all layers
             return null;
           }
 
