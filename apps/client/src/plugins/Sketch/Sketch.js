@@ -261,7 +261,7 @@ const Sketch = (props) => {
         if (hit) return hit.id;
       }
 
-      // fallback (e.g. redan kanoniska negativa draft-id:n)
+      // fallback (canonical negative draft-id)
       return idLike;
     };
 

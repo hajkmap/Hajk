@@ -40,6 +40,8 @@ export default function DesktopForm({
   tablePendingAdds,
   duplicateInForm,
   hasGeomUndo,
+  columnFilters,
+  setColumnFilters,
 }) {
   const RESIZER_KEY = "ae_df_leftw";
   const MIN_LEFT = 220; // px
@@ -68,6 +70,18 @@ export default function DesktopForm({
   const prevMultilineRef = React.useRef({});
 
   const resizeRef = React.useRef(null); // { startX, startW }
+
+  const activeFilterCount = React.useMemo(() => {
+    if (!columnFilters) return 0;
+    return Object.values(columnFilters).filter(
+      (arr) => Array.isArray(arr) && arr.length > 0
+    ).length;
+  }, [columnFilters]);
+
+  const clearColumnFilters = () => {
+    setColumnFilters({});
+  };
+
   React.useEffect(() => {
     function onMove(e) {
       const r = resizeRef.current;
@@ -331,12 +345,53 @@ export default function DesktopForm({
 
       {/* Right: Form */}
       <div style={s.pane} aria-label="Formulär">
+        {activeFilterCount > 0 && (
+          <div style={s.filterWarningBanner}>
+            <svg
+              style={s.filterWarningIcon}
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+            </svg>
+            <span style={{ flex: 1 }}>
+              Kolumnfilter från tabellläget är aktiva ({activeFilterCount}{" "}
+              filter påverkar kartan)
+            </span>
+            <button
+              style={s.btnSmall}
+              onClick={clearColumnFilters}
+              title="Rensa alla kolumnfilter"
+            >
+              Rensa filter
+            </button>
+          </div>
+        )}
         <div style={s.paneHeaderWithActions}>
           <span>Redigera attribut</span>
           {selectedIds.size > 1 && (
-            <span style={s.bulkWarning}>
-              OBS! Nu redigerar du {selectedIds.size} objekt samtidigt
-            </span>
+            <div style={s.bulkEditWarning}>
+              <svg
+                style={s.bulkEditWarningIcon}
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              <span>
+                OBS! Nu redigerar du {selectedIds.size} objekt samtidigt
+              </span>
+            </div>
           )}
           <div style={s.spacer} />
 

@@ -749,7 +749,13 @@ export default function AttributeEditorView({
           ? [...new Set([...formSel, focusedId])]
           : formSel;
 
-    selectedIdsRef.current = new Set(activeSelected);
+    // Limited to the most recently visible features
+    const visibleSelected = activeSelected.filter(
+      (id) =>
+        visibleIdsRef.current.has(id) || visibleIdsRef.current.has(String(id))
+    );
+
+    selectedIdsRef.current = new Set(visibleSelected);
 
     vectorLayerRef?.current?.changed?.();
   }, [
@@ -1707,6 +1713,7 @@ export default function AttributeEditorView({
           tablePendingAdds={pendingAdds}
           columnFilterUI={columnFilterUI}
           setColumnFilterUI={setColumnFilterUI}
+          serviceId={serviceId}
         />
       ) : isMobile ? (
         <MobileForm
@@ -1744,6 +1751,8 @@ export default function AttributeEditorView({
           tablePendingAdds={pendingAdds}
           lastEditTargetIdsRef={lastEditTargetIdsRef}
           duplicateInForm={duplicateInForm}
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
         />
       ) : (
         <DesktopForm
@@ -1780,6 +1789,8 @@ export default function AttributeEditorView({
           lastEditTargetIdsRef={lastEditTargetIdsRef}
           duplicateInForm={duplicateInForm}
           hasGeomUndo={hasGeomUndo}
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
         />
       )}
       <NotificationBar s={s} theme={theme} text={notification} />

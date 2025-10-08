@@ -696,18 +696,6 @@ export function makeStyles(t, isMobile) {
               : "none",
     }),
 
-    bulkWarning: {
-      marginLeft: 8,
-      fontSize: isMobile ? 11 : 12,
-      color: t.warning,
-      background: t.warningBg,
-      border: `1px solid ${t.warning}`,
-      padding: isMobile ? "2px 6px" : "2px 8px",
-      borderRadius: 999,
-      whiteSpace: "nowrap",
-      fontWeight: 600,
-    },
-
     notification: {
       position: "fixed",
       bottom: 20,
@@ -793,6 +781,46 @@ export function makeStyles(t, isMobile) {
       cursor: "pointer",
       fontSize: isMobile ? 12 : 14,
       fontWeight: 600,
+    },
+
+    filterWarningBanner: {
+      padding: isMobile ? "8px 10px" : "10px 12px",
+      background: t.warningBg,
+      border: `1px solid ${t.warning}`,
+      borderRadius: 8,
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      fontSize: isMobile ? 12 : 13,
+      color: t.text,
+      margin: isMobile ? 8 : 12,
+      marginBottom: 0,
+    },
+    filterWarningIcon: {
+      color: t.warning,
+      fontSize: 18,
+      flexShrink: 0,
+    },
+
+    bulkEditWarning: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      padding: isMobile ? "4px 8px" : "6px 10px",
+      background: t.warningBg,
+      border: `1px solid ${t.warning}`,
+      borderRadius: 8,
+      fontSize: isMobile ? 11 : 12,
+      color: t.text,
+      fontWeight: 600,
+      flexShrink: 0,
+    },
+    bulkEditWarningIcon: {
+      color: t.warning,
+      fontSize: 16,
+      flexShrink: 0,
+      display: "flex",
+      alignItems: "center",
     },
   };
 }

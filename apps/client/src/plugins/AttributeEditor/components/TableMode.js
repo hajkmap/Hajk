@@ -106,6 +106,7 @@ export default function TableMode(props) {
     filteredAndSorted,
     columnFilterUI,
     setColumnFilterUI,
+    serviceId,
 
     // selection & pending
     tableSelectedIds,
@@ -172,10 +173,15 @@ export default function TableMode(props) {
   const MIN_W = 80; // px
   const MAX_W = 720; // px
 
+  const STORAGE_KEY = React.useMemo(
+    () => `ae_colwidths_${serviceId}`,
+    [serviceId]
+  );
+
   const [colWidths, setColWidths] = React.useState(() => {
     // read from localStorage
     try {
-      const raw = localStorage.getItem("ae_colwidths");
+      const raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : {};
     } catch {
       return {};
@@ -248,11 +254,21 @@ export default function TableMode(props) {
   }, [filteredAndSorted, tableSelectedIds]);
 
   React.useEffect(() => {
-    // save each change
     try {
-      localStorage.setItem("ae_colwidths", JSON.stringify(colWidths));
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const saved = raw ? JSON.parse(raw) : {};
+      setColWidths(saved);
+    } catch {
+      setColWidths({});
+    }
+  }, [STORAGE_KEY]);
+
+  React.useEffect(() => {
+    // Save changes with a service-specific key
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(colWidths));
     } catch {}
-  }, [colWidths]);
+  }, [colWidths, STORAGE_KEY]);
 
   const resizingRef = React.useRef(null); // { key, startX, startW }
 

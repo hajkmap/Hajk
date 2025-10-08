@@ -156,6 +156,10 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value)}
       >
+        <option value="" disabled>
+          -- Välj {meta.label?.toLowerCase() || "värde"} --
+        </option>
+
         {(meta.options || []).map((opt) => (
           <option key={opt} value={opt}>
             {opt}
@@ -362,6 +366,10 @@ export function renderTableCellEditor({
         onChange={(e) => applyChange(e.target.value)}
         style={s.cellInput}
       >
+        <option value="" disabled>
+          -- Välj {meta.label?.toLowerCase() || "värde"} --
+        </option>
+
         {optionsWithUnknown.map((opt) => (
           <option key={opt} value={opt}>
             {!hasVal && String(val) === String(opt)
