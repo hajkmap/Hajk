@@ -12,10 +12,6 @@ export default function Toolbar({
   setMode,
   dark,
   setDark,
-  tableSearch,
-  setTableSearch,
-  formSearch,
-  setFormSearch,
   features,
   filteredAndSorted,
   tableSelectedIds,
@@ -36,6 +32,8 @@ export default function Toolbar({
   setShowOnlySelected,
   frozenSelectedIds,
   setFrozenSelectedIds,
+  searchText,
+  setSearchText,
 }) {
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
@@ -252,8 +250,8 @@ export default function Toolbar({
           <input
             style={s.inputComb}
             placeholder="Filtrera listan…"
-            value={tableSearch}
-            onChange={(e) => setTableSearch(e.target.value)}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
           />
           {!isMobile && (
             <span style={s.toolbarStats}>
@@ -267,8 +265,8 @@ export default function Toolbar({
           <input
             style={s.inputComb}
             placeholder="Filtrera listan…"
-            value={formSearch}
-            onChange={(e) => setFormSearch(e.target.value)}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
           />
           {!isMobile && (
             <>

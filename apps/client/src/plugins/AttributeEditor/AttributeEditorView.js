@@ -48,7 +48,6 @@ export default function AttributeEditorView({
   const [isMobile, setIsMobile] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState("list");
 
-  const [tableSearch, setTableSearch] = useState("");
   const [sort, setSort] = useState({ key: null, dir: "asc" });
   const [tableSelectedIds, setTableSelectedIds] = useState(new Set());
   const [lastTableIndex, setLastTableIndex] = useState(null);
@@ -60,7 +59,6 @@ export default function AttributeEditorView({
   const [showOnlySelected, setShowOnlySelected] = useState(false);
   const [frozenSelectedIds, setFrozenSelectedIds] = useState(new Set());
 
-  const [formSearch, setFormSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [focusedId, setFocusedId] = useState(null);
   const lastEditTargetIdsRef = useRef(null);
@@ -70,6 +68,7 @@ export default function AttributeEditorView({
   const [openFilterColumn, setOpenFilterColumn] = useState(null);
   const filterOverlayRef = useRef(null);
   const firstColumnRef = useRef(null);
+  const [searchText, setSearchText] = useState("");
 
   const [notification, setNotification] = useState(null);
   const notifTimerRef = useRef(null);
@@ -236,9 +235,8 @@ export default function AttributeEditorView({
     setColumnFilters({});
     setColumnFilterUI({});
     setOpenFilterColumn(null);
-    setTableSearch("");
-    setFormSearch("");
     uniqueCacheRef.current?.clear?.();
+    setSearchText("");
 
     // End celledits
     setTableEditing(null);
@@ -491,7 +489,7 @@ export default function AttributeEditorView({
   }, [serviceId, fieldMeta, allRows]);
 
   const filteredAndSorted = useMemo(() => {
-    const q = tableSearch.trim().toLowerCase();
+    const q = searchText.trim().toLowerCase();
     const editingId = tableEditing?.id ?? null;
 
     let rows = allRows.filter((f) => {
@@ -523,7 +521,13 @@ export default function AttributeEditorView({
           : Object.entries(columnFilters).every(([key, selectedValues]) => {
               if (!selectedValues || selectedValues.length === 0) return true;
               const cellValue = String(f[key] ?? "");
-              return selectedValues.includes(cellValue);
+
+              // Convert "(tom)" in filter back to "" for comparison
+              const normalizedSelected = selectedValues.map((v) =>
+                v === "(tom)" ? "" : v
+              );
+
+              return normalizedSelected.includes(cellValue);
             });
 
       return matchesSearch && matchesColumnFilters;
@@ -569,12 +573,12 @@ export default function AttributeEditorView({
     return rows;
   }, [
     allRows,
-    tableSearch,
     sort,
     columnFilters,
     tableEditing,
     showOnlySelected,
     frozenSelectedIds,
+    searchText,
   ]);
 
   const cloneGeometryForDuplicates = React.useCallback(
@@ -828,13 +832,13 @@ export default function AttributeEditorView({
         `facet::${columnKey}::` +
         `${features.length}|${pendingAdds.length}|${editsCount}|${delSize}|` +
         `${colValuesSignature}|` +
-        `${tableSearch.trim().toLowerCase()}|` +
+        `${searchText.trim().toLowerCase()}|` +
         filterParts.sort().join(";");
 
       const hit = uniqueCacheRef.current.get(cacheKey);
       if (hit) return hit;
 
-      const q = tableSearch.trim().toLowerCase();
+      const q = searchText.trim().toLowerCase();
 
       // 1) Start with ALL rows (not filteredAndSorted)
       //    and apply the search string …
@@ -863,12 +867,15 @@ export default function AttributeEditorView({
       for (let i = 0; i < rowsForFacet.length; i++) {
         const v = rowsForFacet[i]?.[columnKey];
         const s = String(v ?? "");
-        if (s) vals.add(s);
+        vals.add(s === "" ? "(tom)" : s); // Show "(tom)" empty values
       }
 
-      const out = Array.from(vals).sort((a, b) =>
-        a.localeCompare(b, "sv", { numeric: true, sensitivity: "base" })
-      );
+      const out = Array.from(vals).sort((a, b) => {
+        // Sort "(tom)" first
+        if (a === "(tom)" && b !== "(tom)") return 1;
+        if (a !== "(tom)" && b === "(tom)") return -1;
+        return a.localeCompare(b, "sv", { numeric: true, sensitivity: "base" });
+      });
 
       uniqueCacheRef.current.set(cacheKey, out);
       return out;
@@ -879,7 +886,7 @@ export default function AttributeEditorView({
       pendingAdds.length,
       pendingEdits,
       pendingDeletes,
-      tableSearch,
+      searchText,
       columnFilters,
       tableEditing,
     ]
@@ -1256,7 +1263,7 @@ export default function AttributeEditorView({
   }
 
   const visibleFormList = useMemo(() => {
-    const sTerm = formSearch.trim().toLowerCase();
+    const sTerm = searchText.trim().toLowerCase();
     const existing = features.map((f, idx) => {
       let r = { ...f, ...(pendingEdits[f.id] || {}), __idx: idx };
       if (pendingDeletes?.has?.(f.id)) r = { ...r, __pending: "delete" };
@@ -1299,10 +1306,10 @@ export default function AttributeEditorView({
     pendingEdits,
     pendingAdds,
     pendingDeletes,
-    formSearch,
     FM,
     showOnlySelected,
     frozenSelectedIds,
+    searchText,
   ]);
 
   React.useEffect(() => {
@@ -1639,10 +1646,6 @@ export default function AttributeEditorView({
         title={ui.title}
         color={ui.color}
         setDark={controller.setDark}
-        tableSearch={tableSearch}
-        setTableSearch={setTableSearch}
-        formSearch={formSearch}
-        setFormSearch={setFormSearch}
         features={features}
         filteredAndSorted={filteredAndSorted}
         tableSelectedIds={tableSelectedIds}
@@ -1664,6 +1667,8 @@ export default function AttributeEditorView({
         setShowOnlySelected={setShowOnlySelected}
         frozenSelectedIds={frozenSelectedIds}
         setFrozenSelectedIds={setFrozenSelectedIds}
+        searchText={searchText}
+        setSearchText={setSearchText}
       />
 
       {serviceId === "NONE_ID" ? (
