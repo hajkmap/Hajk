@@ -304,14 +304,27 @@ class MapViewModel {
       if (featuresWithGeom.length === 0) {
         return;
       }
-      // If we know that we are going to add a feature to the layer,
-      // we must make sure to remove the existing geometry if multiple
-      // geometries are not allowed.
-      this.#handlePotentialMultipleGeometriesException();
       // But it might also contain several features that we should add to the map.
       // However, we're only adding the first one, otherwise it might get messy if the
       // user has 15 layers active at the same time.
-      this.#drawSource.addFeature(featuresWithGeom[0]);
+      // Before adding we check if the user wants to add/remove the feature to the current
+      // selection by using CTRL or COMMAND keys or create a new one.
+      const clickedfeature = featuresWithGeom[0];
+      // is user on a Mac?
+      const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+      const isMultiSelect = isMac
+        ? event.originalEvent.metaKey
+        : event.originalEvent.ctrlKey;
+      if (isMultiSelect) {
+        if (!this.#isFeaturePreviouslySelected(clickedfeature)) {
+          // the feature is not in the current selection, add it
+          this.#drawSource.addFeature(clickedfeature);
+        }
+      } else {
+        //the user wants to start a new selection
+        this.#drawSource.clear();
+        this.#drawSource.addFeature(featuresWithGeom[0]);
+      }
     });
   };
 
@@ -336,6 +349,23 @@ class MapViewModel {
         totalArea: 0,
       });
     }
+  };
+
+  // Checks if feature geometry is already selected
+  #isFeaturePreviouslySelected = (clickedfeature) => {
+    const clickedfeaturecoords = JSON.stringify(
+      clickedfeature.getGeometry().getCoordinates()
+    );
+    // we look into our selected items to see if the feature is already selected
+    for (const feature of this.#drawSource.getFeatures()) {
+      const geometry = JSON.stringify(feature.getGeometry().getCoordinates());
+      if (geometry === clickedfeaturecoords) {
+        // the feature is already selected, so unselect
+        this.#drawSource.removeFeature(feature);
+        return 1;
+      }
+    }
+    return 0;
   };
 
   // Returns the combined area of all features supplied.

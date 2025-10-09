@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Select Tool can select/deselect several features. [PR#1708](https://github.com/hajkmap/Hajk/pull/1708) 
 - MUI upgraded to v7. [PR#1658](https://github.com/hajkmap/Hajk/pull/1658)
 - The OpenStreetMap background (as well as the white and black backgrounds) are now first-class citizens in LayerSwitcher, enabling e.g. loading the app with these layers visible. [PR#1680](https://github.com/hajkmap/Hajk/pull/1680)
 - The legacy `react-smooth-dnd` have been replaced with `dnd-kit`, [PR#1689](https://github.com/hajkmap/Hajk/pull/1689)
