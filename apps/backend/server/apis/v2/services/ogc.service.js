@@ -172,6 +172,97 @@ export async function getWFSTFeatures(params) {
         ) {
           fc.numberReturned = fc.features.length;
         }
+
+        // --- FORWARDING: CRS determination ---
+        const normalizeEpsg = (name) => {
+          if (!name) return undefined;
+          const m = String(name).match(/EPSG[:/]*[:]*([0-9]+)/i);
+          return m ? `EPSG:${m[1]}` : undefined;
+        };
+
+        // Retrieve CRS from various sources (priority ordering)
+        let finalCrs = null;
+
+        const crsFromGeojson = normalizeEpsg(
+          fc?.crs?.properties?.name || fc?.crs?.name
+        );
+        if (crsFromGeojson) {
+          finalCrs = crsFromGeojson;
+        }
+
+        if (!finalCrs) {
+          finalCrs = normalizeEpsg(crs);
+        }
+
+        if (!finalCrs && fc.crsName) {
+          finalCrs = normalizeEpsg(fc.crsName);
+        }
+
+        if (finalCrs) {
+          fc.crsName = finalCrs;
+
+          // Legacy CRS object for QGIS 3.40+ compatibility
+          // (even though it technically breaks RFC 7946, it is required for QGIS)
+          if (!fc.crs) {
+            const epsgCode = finalCrs.match(/EPSG:(\d+)/)?.[1];
+            if (epsgCode) {
+              fc.crs = {
+                type: "name",
+                properties: {
+                  name: `urn:ogc:def:crs:EPSG::${epsgCode}`,
+                },
+              };
+            }
+          }
+        }
+
+        const looksLonLatBbox = (bbox) => {
+          if (!Array.isArray(bbox) || bbox.length < 4) return false;
+          const [xmin, ymin, xmax, ymax] = bbox.map(Number);
+          const inLon = Math.abs(xmin) <= 180 && Math.abs(xmax) <= 180;
+          const inLat = Math.abs(ymin) <= 90 && Math.abs(ymax) <= 90;
+          return inLon && inLat;
+        };
+
+        const coordsLookProjected = (featureCollection) => {
+          const check = (xy) =>
+            Array.isArray(xy) && xy.length >= 2 && xy[0] > 1e5 && xy[1] > 1e6;
+
+          const scanGeom = (g) => {
+            if (!g) return false;
+            switch (g.type) {
+              case "Point":
+                return check(g.coordinates);
+              case "MultiPoint":
+                return (g.coordinates || []).some(check);
+              case "LineString":
+                return (g.coordinates || []).some(check);
+              case "MultiLineString":
+                return (g.coordinates || []).flat(1).some(check);
+              case "Polygon":
+                return (g.coordinates || []).flat(1).some(check);
+              case "MultiPolygon":
+                return (g.coordinates || []).flat(2).some(check);
+              case "GeometryCollection":
+                return (g.geometries || []).some(scanGeom);
+              default:
+                return false;
+            }
+          };
+
+          for (const f of featureCollection.features || []) {
+            if (scanGeom(f.geometry)) return true;
+          }
+          return false;
+        };
+
+        if (fc.bbox && looksLonLatBbox(fc.bbox) && coordsLookProjected(fc)) {
+          logger.debug(
+            "Removing inconsistent bbox (lon/lat bbox with projected coords)"
+          );
+          delete fc.bbox;
+        }
+
         return fc;
       } catch (parseError) {
         logger.warn("Failed to parse JSON response, trying GML", {
