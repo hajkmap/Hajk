@@ -1285,12 +1285,30 @@ export default function AttributeEditorView({
         return false;
       }
 
-      if (!sTerm) return true;
-      for (const k of keys) {
-        const v = row?.[k];
-        if (v != null && String(v).toLowerCase().includes(sTerm)) return true;
-      }
-      return false;
+      // Match search text
+      const matchesSearch =
+        !sTerm ||
+        keys.some((k) => {
+          const v = row?.[k];
+          return v != null && String(v).toLowerCase().includes(sTerm);
+        });
+
+      // Match column filters (same logic as in filteredAndSorted)
+      const matchesColumnFilters = Object.entries(columnFilters || {}).every(
+        ([key, selectedValues]) => {
+          if (!selectedValues || selectedValues.length === 0) return true;
+          const cellValue = String(row[key] ?? "");
+
+          // Convert "(tom)" in filter back to "" for comparison
+          const normalizedSelected = selectedValues.map((v) =>
+            v === "(tom)" ? "" : v
+          );
+
+          return normalizedSelected.includes(cellValue);
+        }
+      );
+
+      return matchesSearch && matchesColumnFilters;
     });
 
     filtered.sort((a, b) => {
@@ -1306,10 +1324,11 @@ export default function AttributeEditorView({
     pendingEdits,
     pendingAdds,
     pendingDeletes,
+    searchText,
     FM,
     showOnlySelected,
     frozenSelectedIds,
-    searchText,
+    columnFilters,
   ]);
 
   React.useEffect(() => {
