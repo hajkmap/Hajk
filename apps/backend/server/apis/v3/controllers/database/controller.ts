@@ -796,9 +796,6 @@ export class DatabaseController {
     // Add file input
     args.push("--file", inputPath);
 
-    // Add verbose output
-    args.push("--verbose");
-
     // Add connection string using --dbname parameter
     const cleanConnectionString = this.cleanConnectionString(connectionString);
     args.push("--dbname", cleanConnectionString);
