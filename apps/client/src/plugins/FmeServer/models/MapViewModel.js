@@ -308,14 +308,14 @@ class MapViewModel {
       // However, we're only adding the first one, otherwise it might get messy if the
       // user has 15 layers active at the same time.
       // Before adding we check if the user wants to add/remove the feature to the current
-      // selection by using CTRL, SHIFT or COMMAND keys or create a new one.
+      // selection by using CTRL or COMMAND keys or create a new one.
       const clickedfeature = featuresWithGeom[0];
-      if (
-        // the user wants to add to/remove from the current selection
-        event.originalEvent.ctrlKey ||
-        event.originalEvent.metaKey ||
-        event.originalEvent.shiftKey
-      ) {
+      // is user on a Mac?
+      const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+      const isMultiSelect = isMac
+        ? event.originalEvent.metaKey
+        : event.originalEvent.ctrlKey;
+      if (isMultiSelect) {
         if (!this.#isFeaturePreviouslySelected(clickedfeature)) {
           // the feature is not in the current selection, add it
           this.#drawSource.addFeature(clickedfeature);
