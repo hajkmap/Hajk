@@ -100,25 +100,46 @@ export default function ConfirmSaveDialog({
               icon={<AddCircleOutlineRoundedIcon />}
               label={`Utkast: ${adds}`}
               color={adds ? "success" : "default"}
-              variant={adds ? "filled" : "outlined"}
+              variant="outlined"
               size="medium"
-              sx={{ flex: 1, minWidth: 0 }}
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                ...(adds && {
+                  bgcolor: "success.50",
+                  borderWidth: 2,
+                }),
+              }}
             />
             <Chip
               icon={<EditNoteRoundedIcon />}
               label={`Ändringar: ${edits}`}
-              color={edits ? "info" : "default"}
-              variant={edits ? "filled" : "outlined"}
+              color={edits ? "warning" : "default"}
+              variant="outlined"
               size="medium"
-              sx={{ flex: 1, minWidth: 0 }}
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                ...(edits && {
+                  bgcolor: "warning.50",
+                  borderWidth: 2,
+                }),
+              }}
             />
             <Chip
               icon={<DeleteOutlineRoundedIcon />}
               label={`Raderingar: ${deletes}`}
               color={deletes ? "error" : "default"}
-              variant={deletes ? "filled" : "outlined"}
+              variant="outlined"
               size="medium"
-              sx={{ flex: 1, minWidth: 0 }}
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                ...(deletes && {
+                  bgcolor: "error.50",
+                  borderWidth: 2,
+                }),
+              }}
             />
           </Stack>
 

@@ -308,14 +308,14 @@ export function makeStyles(t, isMobile) {
       const isAdd = status === "add";
       const isEdit = status === "edit";
       const isDelete = status === "delete";
-      const isGeom = status === "geom"; // ⬅️ NY
+      const isGeom = status === "geom";
 
       // Priority: delete > geom > edit/add > selected > default
       const baseBg = isDelete
         ? t.dangerBg
-        : isGeom
-          ? t.successBg || "rgba(46,204,113,0.12)"
-          : isAdd || isEdit
+        : isAdd
+          ? t.successBg
+          : isEdit || isGeom
             ? t.warningBg
             : sel
               ? t.rowSelected
@@ -323,9 +323,9 @@ export function makeStyles(t, isMobile) {
 
       const statusShadow = isDelete
         ? `inset 4px 0 ${t.danger}`
-        : isGeom
-          ? `inset 4px 0 ${t.success || "#2ecc71"}`
-          : isAdd || isEdit
+        : isAdd
+          ? `inset 4px 0 ${t.success}`
+          : isEdit || isGeom
             ? `inset 4px 0 ${t.warning}`
             : "none";
 
@@ -679,20 +679,20 @@ export function makeStyles(t, isMobile) {
       background: selected
         ? t.rowSelected
         : pending === "add"
-          ? t.warningBg
+          ? t.successBg
           : pending === "delete"
             ? t.dangerBg
-            : pending === "geom"
-              ? t.successBg
+            : pending === "edit" || pending === "geom"
+              ? t.warningBg
               : "transparent",
       cursor: "pointer",
       outline:
         pending === "delete"
           ? `2px dashed ${t.danger}`
           : pending === "add"
-            ? `2px dashed ${t.warning}`
-            : pending === "geom"
-              ? `2px dashed ${t.success}`
+            ? `2px dashed ${t.success}`
+            : pending === "edit" || pending === "geom"
+              ? `2px dashed ${t.warning}`
               : "none",
     }),
 

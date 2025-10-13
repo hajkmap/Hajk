@@ -380,8 +380,11 @@ function AttributeEditor(props) {
         // 8) Set up the vector layer
         const map = props.map;
         const mapProj = map.getView().getProjection();
-        const dataProj =
-          projection || featureCollection?.crs?.properties?.name || "EPSG:3006";
+        //const dataProj = projection || featureCollection?.crs?.properties?.name || "EPSG:3006";
+        const dataProj = "EPSG:3006";
+
+        console.log(projection);
+        console.log(featureCollection?.crs?.properties?.name);
 
         if (vectorLayerRef.current) {
           map.removeLayer(vectorLayerRef.current);

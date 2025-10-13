@@ -243,9 +243,13 @@ const reducer = (state, action) => {
       let nextTempId = state.nextTempId;
 
       ids.forEach((id) => {
-        const src = state.features.find((f) => f.id === id);
-        if (!src) return;
-        const copy = { ...src };
+        const base = state.features.find((f) => f.id === id);
+        if (!base) return;
+
+        // Merge base row with pending edits to get the effective row
+        const effective = { ...base, ...(state.pendingEdits[id] || {}) };
+        const copy = { ...effective };
+
         readOnlyKeys.forEach((k) => {
           copy[k] = null;
         });

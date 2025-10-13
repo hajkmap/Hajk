@@ -494,12 +494,12 @@ export default function AttributeEditorView({
 
     let rows = allRows.filter((f) => {
       // Always show negative IDs (new/duplicate)
-      const isNegativeId = typeof f.id === "number" && f.id < 0;
+      //const isNegativeId = typeof f.id === "number" && f.id < 0;
 
       // If "show only first ID" is active, use the FIRST ID:na
       if (
         showOnlySelected &&
-        !isNegativeId &&
+        /*!isNegativeId &&*/
         !frozenSelectedIds.has(f.id) &&
         editingId !== f.id
       ) {
@@ -1278,10 +1278,13 @@ export default function AttributeEditorView({
 
     const filtered = all.filter((row) => {
       // Always show negative IDs (i.e. drafts)
-      const isNegativeId = typeof row.id === "number" && row.id < 0;
+      //const isNegativeId = typeof row.id === "number" && row.id < 0;
 
       // If "Select first" is active, use the FIRST ID
-      if (showOnlySelected && !isNegativeId && !frozenSelectedIds.has(row.id)) {
+      if (
+        showOnlySelected &&
+        /*!isNegativeId &&*/ !frozenSelectedIds.has(row.id)
+      ) {
         return false;
       }
 

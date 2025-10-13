@@ -41,7 +41,6 @@ export default function Toolbar({
   const [serviceId, setServiceId] = React.useState("NONE_ID");
   const selectedCount =
     mode === "table" ? tableSelectedIds.size : selectedIds.size;
-  const frozenCount = frozenSelectedIds.size;
 
   // Build options: "None" + in command serviceList
   const services = React.useMemo(() => {
@@ -224,15 +223,13 @@ export default function Toolbar({
         disabled={!showOnlySelected && selectedCount === 0}
         title={
           showOnlySelected
-            ? `Visa alla (visar ${frozenCount} frysta)`
+            ? `Visa alla`
             : selectedCount === 0
               ? "Markera objekt först"
               : `Visa endast ${selectedCount} markerade`
         }
       >
-        {showOnlySelected
-          ? `Visa alla (${frozenCount} frysta)`
-          : `Visa markerade (${selectedCount})`}
+        {showOnlySelected ? `Visa alla` : `Visa markerade (${selectedCount})`}
       </button>
 
       {/*<button
