@@ -15,5 +15,6 @@ router.post(
 );
 router.get("/status", asyncHandler(controller.getStatus.bind(controller)));
 router.get("/tools", asyncHandler(controller.checkTools.bind(controller)));
+router.get("/health", asyncHandler(controller.healthCheck.bind(controller)));
 
 export default router;

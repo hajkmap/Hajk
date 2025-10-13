@@ -57,6 +57,51 @@ export class DatabaseController {
   }
 
   /**
+   * Health check endpoint for tool availability
+   * Returns a simple status indicating if all required tools are available
+   */
+  async healthCheck(req: Request, res: Response): Promise<void> {
+    try {
+      const tools = await this.detectPostgreSQLTools();
+      const allToolsAvailable =
+        tools.pg_dump.available &&
+        tools.pg_restore.available &&
+        tools.psql.available;
+
+      const status = allToolsAvailable ? "healthy" : "unhealthy";
+      const statusCode = allToolsAvailable ? 200 : 503;
+
+      res.status(statusCode).json({
+        status,
+        timestamp: new Date().toISOString(),
+        tools: {
+          pg_dump: tools.pg_dump.available,
+          pg_restore: tools.pg_restore.available,
+          psql: tools.psql.available,
+        },
+        message: allToolsAvailable
+          ? "All PostgreSQL tools are available"
+          : "Some PostgreSQL tools are missing",
+        details: allToolsAvailable
+          ? undefined
+          : {
+              missing: Object.entries(tools)
+                .filter(([, tool]) => !tool.available)
+                .map(([name]) => name),
+            },
+      });
+    } catch (error) {
+      logger.error("Error in health check:", error);
+      res.status(500).json({
+        status: "error",
+        timestamp: new Date().toISOString(),
+        error: "Health check failed",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  /**
    * Get current database status and available exports
    */
   async getStatus(req: Request, res: Response): Promise<void> {
@@ -427,23 +472,6 @@ export class DatabaseController {
     }
   }
 
-  /** Drop database via psql (terminate connections first) */
-  private async dropDatabase(
-    psqlPath: string,
-    postgresConn: string,
-    dbName: string
-  ): Promise<void> {
-    // Terminate existing connections to allow drop
-    const terminateSql = `SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='${dbName.replace(/'/g, "''")}' AND pid <> pg_backend_pid();`;
-    await this.executePsqlSql(psqlPath, postgresConn, terminateSql);
-
-    const dropSql = `DROP DATABASE IF EXISTS "${dbName.replace(/"/g, '""')}";`;
-    const res = await this.executePsqlSql(psqlPath, postgresConn, dropSql);
-    if (!res.success) {
-      throw new Error(res.error || res.stderr || "Failed to drop database");
-    }
-  }
-
   /** Execute an SQL statement via psql using a temporary file to avoid shell quoting issues */
   private async executePsqlSql(
     psqlPath: string,
@@ -588,39 +616,88 @@ export class DatabaseController {
     const paths: string[] = [];
 
     if (platform === "win32") {
-      // Windows paths
-      paths.push(
-        "C:\\Program Files\\PostgreSQL\\16\\bin",
-        "C:\\Program Files\\PostgreSQL\\15\\bin",
-        "C:\\Program Files\\PostgreSQL\\14\\bin",
-        "C:\\Program Files\\PostgreSQL\\13\\bin",
-        "C:\\Program Files\\PostgreSQL\\12\\bin",
-        "C:\\Program Files (x86)\\PostgreSQL\\16\\bin",
-        "C:\\Program Files (x86)\\PostgreSQL\\15\\bin",
-        "C:\\Program Files (x86)\\PostgreSQL\\14\\bin",
-        "C:\\Program Files (x86)\\PostgreSQL\\13\\bin",
-        "C:\\Program Files (x86)\\PostgreSQL\\12\\bin"
-      );
-    } else if (platform === "darwin") {
-      // macOS paths (Homebrew)
-      paths.push(
-        "/usr/local/bin",
-        "/opt/homebrew/bin",
-        "/usr/local/opt/postgresql/bin",
-        "/opt/homebrew/opt/postgresql/bin"
-      );
+      const programFiles = [
+        "C:\\Program Files\\PostgreSQL",
+        "C:\\Program Files (x86)\\PostgreSQL",
+      ];
+
+      for (const basePath of programFiles) {
+        try {
+          if (fs.existsSync(basePath)) {
+            const versions = fs
+              .readdirSync(basePath, { withFileTypes: true })
+              .filter(
+                (dirent) => dirent.isDirectory() && /^\d+$/.test(dirent.name)
+              )
+              .map((dirent) => dirent.name)
+              .sort((a, b) => parseInt(b) - parseInt(a));
+
+            for (const version of versions) {
+              paths.push(path.join(basePath, version, "bin"));
+            }
+          }
+        } catch (error) {
+          console.log("Error scanning directories", error);
+        }
+      }
+    }
+    if (platform === "darwin") {
+      const macPaths = [
+        "/usr/local/opt/postgresql",
+        "/opt/homebrew/opt/postgresql",
+        "/usr/local/Cellar/postgresql",
+        "/opt/homebrew/Cellar/postgresql",
+      ];
+
+      for (const basePath of macPaths) {
+        try {
+          if (fs.existsSync(basePath)) {
+            const versions = fs
+              .readdirSync(basePath, { withFileTypes: true })
+              .filter(
+                (dirent) => dirent.isDirectory() && /^\d+/.test(dirent.name)
+              )
+              .map((dirent) => dirent.name)
+              .sort((a, b) => {
+                const aNum = parseFloat(a);
+                const bNum = parseFloat(b);
+                return bNum - aNum;
+              });
+
+            for (const version of versions) {
+              paths.push(path.join(basePath, version, "bin"));
+            }
+          }
+        } catch (error) {
+          console.log("Error scanning directories", error);
+        }
+      }
+
+      paths.push("/usr/local/bin", "/opt/homebrew/bin");
     } else {
-      // Linux paths
-      paths.push(
-        "/usr/bin",
-        "/usr/local/bin",
-        "/opt/postgresql/bin",
-        "/usr/lib/postgresql/16/bin",
-        "/usr/lib/postgresql/15/bin",
-        "/usr/lib/postgresql/14/bin",
-        "/usr/lib/postgresql/13/bin",
-        "/usr/lib/postgresql/12/bin"
-      );
+      const linuxPaths = ["/usr/lib/postgresql", "/opt/postgresql"];
+
+      for (const basePath of linuxPaths) {
+        try {
+          if (fs.existsSync(basePath)) {
+            const versions = fs
+              .readdirSync(basePath, { withFileTypes: true })
+              .filter(
+                (dirent) => dirent.isDirectory() && /^\d+$/.test(dirent.name)
+              )
+              .map((dirent) => dirent.name)
+              .sort((a, b) => parseInt(b) - parseInt(a));
+
+            for (const version of versions) {
+              paths.push(path.join(basePath, version, "bin"));
+            }
+          }
+        } catch (error) {
+          console.log("Error scanning directories", error);
+        }
+      }
+
+      paths.push("/usr/bin", "/usr/local/bin");
     }
 
     return paths;
