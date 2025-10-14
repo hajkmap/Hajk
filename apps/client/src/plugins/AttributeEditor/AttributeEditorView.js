@@ -37,6 +37,7 @@ export default function AttributeEditorView({
   graveyardRef,
   model,
   draftBaselineRef,
+  app,
 }) {
   const geomUndoRef = React.useRef([]);
   const [geomUndoCount, setGeomUndoCount] = React.useState(0);
@@ -1741,6 +1742,7 @@ export default function AttributeEditorView({
           columnFilterUI={columnFilterUI}
           setColumnFilterUI={setColumnFilterUI}
           serviceId={serviceId}
+          app={app}
         />
       ) : isMobile ? (
         <MobileForm

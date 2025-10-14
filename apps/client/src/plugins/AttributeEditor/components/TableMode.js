@@ -7,6 +7,7 @@ import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { editBus } from "../../../buses/editBus";
+import useCookieStatus from "../../../hooks/useCookieStatus";
 import {
   renderTableCellEditor,
   renderTableCellDisplay,
@@ -147,6 +148,7 @@ export default function TableMode(props) {
     isMissingValue,
     handleRowClick,
     openInFormFromTable,
+    app,
 
     // refs
     firstColumnRef,
@@ -155,6 +157,7 @@ export default function TableMode(props) {
 
   const DEFAULT_WRAP_CH = 100;
 
+  const { functionalCookiesOk } = useCookieStatus(app.globalObserver);
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState(null);
@@ -255,6 +258,10 @@ export default function TableMode(props) {
   }, [filteredAndSorted, tableSelectedIds]);
 
   React.useEffect(() => {
+    if (!functionalCookiesOk) {
+      setColWidths({});
+      return;
+    }
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       const saved = raw ? JSON.parse(raw) : {};
@@ -262,14 +269,15 @@ export default function TableMode(props) {
     } catch {
       setColWidths({});
     }
-  }, [STORAGE_KEY]);
+  }, [STORAGE_KEY, functionalCookiesOk]);
 
   React.useEffect(() => {
+    if (!functionalCookiesOk) return;
     // Save changes with a service-specific key
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(colWidths));
     } catch {}
-  }, [colWidths, STORAGE_KEY]);
+  }, [colWidths, STORAGE_KEY, functionalCookiesOk]);
 
   const resizingRef = React.useRef(null); // { key, startX, startW }
 
