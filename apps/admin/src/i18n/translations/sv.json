@@ -57,7 +57,6 @@
     "common.lastSavedBy": "Senast sparad av {{lastSavedBy}} {{lastSavedDate,  {{lastSavedDate}}",
     "common.dialog.closeBtn": "Stäng",
     "common.dialog.saveBtn": "Spara",
-    "common.dialog.deleteBtn": "Ta bort",
     "common.brokenService": "Trasig tjänst",
     "common.usedInMaps": "Används i kartor",
     "common.create": "Skapa",

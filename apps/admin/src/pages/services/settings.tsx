@@ -143,7 +143,7 @@ export default function ServiceSettings() {
       });
     }
   };
-
+  // TODO?: Add delete service
   const handleDeleteService = async () => {
     if (!isLoading && service?.id) {
       try {
@@ -384,14 +384,10 @@ export default function ServiceSettings() {
     <Page title={t("common.settings")}>
       <FormActionPanel
         updateStatus={updateStatus}
-        deleteStatus={deleteStatus}
         onUpdate={handleExternalSubmit}
-        onDelete={handleDeleteService}
         lastSavedBy="Anonym"
         lastSavedDate="2023-04-11 13:37"
         saveButtonText="Spara"
-        deleteButtonText="Ta bort"
-        navigateTo="/services"
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer

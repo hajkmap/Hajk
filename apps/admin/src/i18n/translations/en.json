@@ -57,7 +57,6 @@
     "common.database": "Database",
     "common.lastSavedBy": "Last saved by {{lastSavedBy}} {{lastSavedDate, on {{lastSavedDate}}",
     "common.dialog.closeBtn": "Close",
-    "common.dialog.deleteBtn": "Delete",
     "common.dialog.saveBtn": "Save",
     "common.brokenService": "Broken service",
     "common.usedInMaps": "Used in maps",

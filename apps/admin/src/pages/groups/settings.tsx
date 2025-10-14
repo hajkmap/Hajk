@@ -108,7 +108,7 @@ function GroupSettings() {
       });
     }
   };
-
+  // TODO?: Add delete group
   const handleDeleteGroup = async () => {
     if (!isLoading && group?.id) {
       try {
@@ -152,14 +152,10 @@ function GroupSettings() {
     <Page title={t("common.settings")}>
       <FormActionPanel
         updateStatus={updateStatus}
-        deleteStatus={deleteStatus}
         onUpdate={handleExternalSubmit}
-        onDelete={handleDeleteGroup}
         lastSavedBy="Anonym"
         lastSavedDate="2023-04-11 13:37"
         saveButtonText="Spara"
-        deleteButtonText="Ta bort"
-        navigateTo="/groups"
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer

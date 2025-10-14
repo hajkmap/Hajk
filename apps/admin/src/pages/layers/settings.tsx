@@ -722,7 +722,7 @@ export default function LayerSettings() {
       });
     }
   };
-
+  // TODO?: Add delete layer
   const handleDeleteLayer = async () => {
     if (!isLoading && layer?.id) {
       try {
@@ -767,14 +767,10 @@ export default function LayerSettings() {
     <Page title={t("common.settings")}>
       <FormActionPanel
         updateStatus={updateStatus}
-        deleteStatus={deleteStatus}
         onUpdate={handleExternalSubmit}
-        onDelete={handleDeleteLayer}
         lastSavedBy="Anonym"
         lastSavedDate="2023-04-11 13:37"
         saveButtonText="Spara"
-        deleteButtonText="Ta bort"
-        navigateTo="/layers"
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer

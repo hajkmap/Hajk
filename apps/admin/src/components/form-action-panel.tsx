@@ -8,30 +8,21 @@ import { useTranslation } from "react-i18next";
 
 interface FormActionProps {
   updateStatus: "idle" | "pending" | "success" | "error";
-  deleteStatus: "idle" | "pending" | "success" | "error";
   onUpdate: () => void | Promise<void>;
-  onDelete: () => void | Promise<void>;
   lastSavedBy?: string;
   lastSavedDate?: string;
   saveButtonText?: string;
-  deleteButtonText?: string;
   children?: React.ReactNode;
-  navigateTo?: string;
 }
 
 const FormActionPanel: React.FC<FormActionProps> = ({
   updateStatus,
-  deleteStatus,
   onUpdate,
-  onDelete,
   lastSavedBy = "",
   lastSavedDate = "",
   saveButtonText = "",
-  deleteButtonText = "",
   children,
-  navigateTo,
 }) => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
 
   return (
@@ -66,27 +57,13 @@ const FormActionPanel: React.FC<FormActionProps> = ({
             void onUpdate();
           }}
           variant="contained"
-          disabled={updateStatus === "pending" || deleteStatus === "pending"}
+          disabled={updateStatus === "pending"}
         >
           {updateStatus === "pending" ? (
             <CircularProgress color="primary" size={30} />
           ) : (
             t("services.dialog.saveBtn", saveButtonText)
           )}
-        </Button>
-
-        <Button
-          onClick={(e) => {
-            e.preventDefault();
-            void onDelete();
-            if (navigateTo) {
-              void navigate(navigateTo);
-            }
-          }}
-          disabled={deleteStatus === "pending" || updateStatus === "pending"}
-          variant="text"
-        >
-          {t("common.dialog.deleteBtn", deleteButtonText)}
         </Button>
 
         <Typography variant="body1">
