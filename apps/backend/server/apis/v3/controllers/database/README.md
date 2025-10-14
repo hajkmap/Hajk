@@ -269,29 +269,3 @@ If you get "pg_dump not available" errors:
 2. **Check PATH**: Ensure tools are in your system PATH
 3. **Check permissions**: Ensure the application can execute the tools
 4. **Docker users**: See Docker deployment section above
-
-### Permission Errors
-
-```bash
-# Ensure proper permissions
-chmod +x /usr/bin/pg_dump
-chmod +x /usr/bin/pg_restore
-chmod +x /usr/bin/psql
-```
-
-### Connection Issues
-
-```bash
-# Test connection manually
-psql "postgresql://username:password@localhost:5432/database_name"
-
-# Check if database exists
-psql -l
-```
-
-## Security Considerations
-
-- **Authentication**: All database endpoints require admin authentication
-- **File Cleanup**: Import files are automatically cleaned up after processing
-- **Connection Security**: Use SSL connections in production
-- **Access Control**: Ensure only authorized users can access database operations
