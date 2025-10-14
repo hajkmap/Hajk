@@ -32,6 +32,31 @@ The database module requires PostgreSQL client tools to be installed:
 
 PostgreSQL 12 or newer. The controller automatically detects the installed client tool versions (e.g., `pg_dump`, `pg_restore`, `psql`) at runtime and works with whatever is available, as long as they are compatible with your server.
 
+### How Tool Detection Works
+
+The controller locates PostgreSQL client tools using a two-step strategy per platform:
+
+1. Hardcoded common install paths (searched in descending version order)
+2. Fallback to your system `PATH`
+
+Platform-specific details:
+
+- Windows
+  - Scans `C:\Program Files\PostgreSQL\<version>\bin` and `C:\Program Files (x86)\PostgreSQL\<version>\bin`
+  - If not found, attempts to invoke `pg_dump`, `pg_restore`, and `psql` from the current `PATH`
+
+- macOS
+  - Scans Homebrew locations like `/opt/homebrew/opt/postgresql`, `/usr/local/opt/postgresql`, and corresponding Cellar directories
+  - Also checks common binary directories: `/opt/homebrew/bin`, `/usr/local/bin`
+  - If not found, falls back to the current `PATH`
+
+- Linux
+  - Scans typical distro locations like `/usr/lib/postgresql/<version>/bin` and `/opt/postgresql/<version>/bin`
+  - Also checks common binary directories: `/usr/bin`, `/usr/local/bin`
+  - If not found, falls back to the current `PATH`
+
+This makes the module resilient across different installation methods (package managers, official installers, Docker images) without requiring you to set explicit paths.
+
 ## Installation
 
 ### Windows
@@ -40,7 +65,7 @@ PostgreSQL client tools are typically installed with PostgreSQL server:
 
 ```bash
 # Download and install PostgreSQL from https://www.postgresql.org/download/windows/
-# Tools will be available in: C:\Program Files\PostgreSQL\16\bin\
+# Tools will typically be available in: C:\Program Files\PostgreSQL\<version>\bin\
 ```
 
 ### macOS
@@ -60,9 +85,9 @@ brew install libpq
 ```bash
 # Install PostgreSQL client tools
 sudo apt-get update
-sudo apt-get install postgresql-client-16
+sudo apt-get install postgresql-client
 
-# Or for other versions
+# Or install a specific version (examples)
 sudo apt-get install postgresql-client-15
 sudo apt-get install postgresql-client-14
 ```
@@ -74,7 +99,7 @@ sudo apt-get install postgresql-client-14
 #### Option 1: Use PostgreSQL Client Image
 
 ```dockerfile
-FROM postgres:16-alpine
+FROM postgres:alpine
 
 # Install client tools
 RUN apk add --no-cache postgresql-client
@@ -85,7 +110,7 @@ RUN apk add --no-cache postgresql-client
 #### Option 2: Multi-stage Build
 
 ```dockerfile
-FROM postgres:16-alpine AS postgres-tools
+FROM postgres:alpine AS postgres-tools
 RUN apk add --no-cache postgresql-client
 
 FROM node:18-alpine
@@ -111,14 +136,14 @@ services:
       - postgres-client
 
   db:
-    image: postgres:16
+    image: postgres:latest
     environment:
       POSTGRES_DB: database
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
 
   postgres-client:
-    image: postgres:16-alpine
+    image: postgres:alpine
     command: tail -f /dev/null
     volumes:
       - /usr/bin/pg_dump:/app/pg_dump
@@ -196,17 +221,17 @@ curl http://localhost:3002/api/v3/database/tools
     "pg_dump": {
       "available": true,
       "path": "/usr/bin/pg_dump",
-      "version": "pg_dump (PostgreSQL) 16.1"
+      "version": "pg_dump (PostgreSQL) <version>"
     },
     "pg_restore": {
       "available": true,
       "path": "/usr/bin/pg_restore",
-      "version": "pg_restore (PostgreSQL) 16.1"
+      "version": "pg_restore (PostgreSQL) <version>"
     },
     "psql": {
       "available": true,
       "path": "/usr/bin/psql",
-      "version": "psql (PostgreSQL) 16.1"
+      "version": "psql (PostgreSQL) <version>"
     }
   }
 }
