@@ -19,7 +19,6 @@ import {
   AREA_MEASUREMENT_UNITS,
   LENGTH_MEASUREMENT_UNITS,
   MEASUREMENT_PRECISIONS,
-  OGC_SOURCES,
 } from "../constants";
 
 const SettingsView = (props) => {
@@ -64,34 +63,6 @@ const SettingsView = (props) => {
           <FormLabel focused={false} component="legend">
             Generella inställningar
           </FormLabel>
-          <FormControl size="small" style={{ marginTop: 8 }}>
-            <InputLabel
-              variant="outlined"
-              id="sketch-select-area-measurement-unit-label"
-            >
-              Spara till
-            </InputLabel>
-            <Select
-              id="sketch-select-ogc-source"
-              labelId="sketch-select-ogc-source-label"
-              value={props.ogcSource}
-              label="Spara till"
-              variant="outlined"
-              onChange={(e) => {
-                props.handleOgcSourceChange(e.target.value);
-              }}
-              onFocus={() => handleFocus("select1", false)}
-              onBlur={() => handleFocus("select1", true)}
-            >
-              {OGC_SOURCES.map((source, index) => {
-                return (
-                  <MenuItem value={source.label} key={index}>
-                    {source.label}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
           <HajkToolTip
             title={`Slå ${
               measurementSettings.showText ? "av" : "på"

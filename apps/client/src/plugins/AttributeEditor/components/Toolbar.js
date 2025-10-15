@@ -30,7 +30,6 @@ export default function Toolbar({
   serviceList, // [{ id, title }]
   showOnlySelected,
   setShowOnlySelected,
-  frozenSelectedIds,
   setFrozenSelectedIds,
   searchText,
   setSearchText,
@@ -52,6 +51,14 @@ export default function Toolbar({
       projection: s.projection,
     }));
     return base.concat(fromProps);
+  }, [serviceList]);
+
+  React.useEffect(() => {
+    if (serviceList && serviceList.length > 0) {
+      editBus.emit("edit:service-list-loaded", {
+        serviceList,
+      });
+    }
   }, [serviceList]);
 
   // Summarization for confirm dialog
@@ -146,9 +153,17 @@ export default function Toolbar({
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
-      const { id, source } = ev.detail || {};
+      const { id, title, source } = ev.detail || {};
       if (source === "toolbar") return;
-      if (id) setServiceId(id);
+
+      if (id) {
+        setServiceId(id);
+      } else if (title) {
+        const matchingService = services.find((s) => s.label === title);
+        if (matchingService) {
+          setServiceId(matchingService.id);
+        }
+      }
     });
 
     const offClr = editBus.on("edit:service-cleared", (ev) => {
@@ -157,11 +172,28 @@ export default function Toolbar({
       setServiceId("NONE_ID");
     });
 
+    // When SketchView is about to be closed and has unsaved changes
+    const offSwitch = editBus.on("edit:service-switch-requested", (ev) => {
+      const { targetLabel, targetId, source } = ev.detail || {};
+      if (source === "toolbar") return;
+
+      const def = services.find(
+        (s) => s.id === targetId || s.label === targetLabel
+      );
+
+      pendingTargetRef.current = {
+        def: def || { id: "NONE_ID" },
+        label: targetLabel || "Ingen",
+      };
+      setSaveDialogOpen(true);
+    });
+
     return () => {
       offSel();
       offClr();
+      offSwitch();
     };
-  }, []);
+  }, [services]);
 
   return (
     <div style={s.toolbar}>

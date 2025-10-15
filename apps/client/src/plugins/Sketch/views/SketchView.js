@@ -70,6 +70,8 @@ const SketchView = (props) => {
   );
 
   const [ogcSource, setOgcSource] = React.useState("");
+  const [serviceList, setServiceList] = React.useState([]);
+
   // We want to keep track of the last removed features so that the user can restore
   // features that they potentially removed by mistake.
   const [removedFeatures, setRemovedFeatures] = React.useState(
@@ -81,6 +83,19 @@ const SketchView = (props) => {
   const [uploadedFiles, setUploadedFiles] = React.useState([]);
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
+
+  React.useEffect(() => {
+    const offList = editBus.on("edit:service-list-loaded", (ev) => {
+      const { serviceList } = ev.detail || {};
+      if (serviceList) {
+        setServiceList(serviceList);
+      }
+    });
+
+    return () => {
+      offList();
+    };
+  }, []);
 
   // Checks that every entry in the array of uploaded files still
   // has some features in the map. If it doesn't, the entry is removed.
@@ -360,15 +375,21 @@ const SketchView = (props) => {
   const uiDisabled = isSaving;
 
   const handleOgcSourceChange = (newOgcSourceTitle) => {
-    if (uiDisabled) return; // block clicks while saving is in progress
+    if (uiDisabled) return;
+
+    const selectedService = serviceList.find(
+      (s) => (s.title || s.id) === newOgcSourceTitle
+    );
+    const serviceId = selectedService?.id || null;
 
     // If unsaved changes exist: prevent editor/toolbar from handling dialog+byte shortcuts
     if (hasUnsaved) {
       editBus.emit("edit:service-switch-requested", {
         source: "sketch",
         targetLabel: newOgcSourceTitle,
+        targetId: serviceId,
       });
-      return; // do the right thing here
+      return;
     }
 
     // Go back directly
@@ -386,9 +407,9 @@ const SketchView = (props) => {
     } else {
       editBus.emit("edit:service-selected", {
         source: "sketch",
-        id: "",
-        layerId: "",
-        title: `Redigerar ${newOgcSourceTitle}`,
+        id: serviceId,
+        layerId: selectedService?.layers?.[0]?.id || "",
+        title: newOgcSourceTitle,
         color: PLUGIN_COLORS.warning,
       });
     }
@@ -523,6 +544,7 @@ const SketchView = (props) => {
             model={model}
             ogcSource={ogcSource}
             handleOgcSourceChange={handleOgcSourceChange}
+            serviceList={serviceList}
           />
         );
       default:

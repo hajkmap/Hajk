@@ -1,7 +1,6 @@
 import React from "react";
 import { Grid, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import Information from "../components/Information";
-import { OGC_SOURCES } from "../constants";
 
 const OGCView = ({
   id,
@@ -12,18 +11,28 @@ const OGCView = ({
   focusKey = "ogc",
   labelText = "Välj redigeringstjänst att spara till",
   uiDisabled,
+  serviceList = [],
 }) => {
   const activity = model?.getActivityFromId?.(id);
 
   const onFocus = () => handleFocus && handleFocus(focusKey, false);
   const onBlur = () => handleFocus && handleFocus(focusKey, true);
 
+  const options = React.useMemo(() => {
+    return [
+      { id: "NONE_ID", label: "Ingen" },
+      ...serviceList.map((s) => ({
+        id: s.id,
+        label: s.title || s.id,
+      })),
+    ];
+  }, [serviceList]);
+
   return (
     <Grid container spacing={2} sx={{ mt: 1 }}>
       <Grid size={12}>
         {activity?.information && <Information text={activity.information} />}
       </Grid>
-
       <Grid size={12}>
         <FormControl size="small" variant="outlined" fullWidth>
           <InputLabel id="ogc-source-label">{labelText}</InputLabel>
@@ -39,9 +48,9 @@ const OGCView = ({
             onBlur={onBlur}
             MenuProps={{ PaperProps: { sx: { maxHeight: 320 } } }}
           >
-            {OGC_SOURCES.map((source, index) => (
-              <MenuItem value={source.label} key={index}>
-                {source.label}
+            {options.map((option) => (
+              <MenuItem value={option.label} key={option.id}>
+                {option.label}
               </MenuItem>
             ))}
           </Select>
