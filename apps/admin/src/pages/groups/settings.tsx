@@ -153,8 +153,6 @@ function GroupSettings() {
       <FormActionPanel
         updateStatus={updateStatus}
         onUpdate={handleExternalSubmit}
-        lastSavedBy="Anonym"
-        lastSavedDate="2023-04-11 13:37"
         saveButtonText="Spara"
       >
         <form ref={formRef} onSubmit={onSubmit}>

@@ -165,22 +165,23 @@ model Group {
 }
 
 model Service {
-  id           String      @id @default(cuid())
-  metadataId   String?     @unique
-  projectionId Int?
-  name         String
-  locked       Boolean     @default(false)
-  url          String
-  version      String      @default("1.3.0")
-  imageFormat  String      @default("image/png")
-  type         ServiceType
-  serverType   ServerType  @default(GEOSERVER)
-  projection   Projection? @relation(fields: [projectionId], references: [id])
-  workspace    String?
-  getMapUrl    String?
-  comment      String?
-  layers       Layer[]
-  metadata     Metadata?   @relation(fields: [metadataId], references: [id])
+  id            String      @id @default(cuid())
+  metadataId    String?     @unique
+  projectionId  Int?
+  name          String
+  locked        Boolean     @default(false)
+  url           String
+  version       String      @default("1.3.0")
+  imageFormat   String      @default("image/png")
+  type          ServiceType
+  serverType    ServerType  @default(GEOSERVER)
+  projection    Projection? @relation(fields: [projectionId], references: [id])
+  workspace     String?
+  getMapUrl     String?
+  comment       String?
+  lastSavedDate DateTime?   @updatedAt @db.Timestamptz(3)
+  layers        Layer[]
+  metadata      Metadata?   @relation(fields: [metadataId], references: [id])
 
   @@unique([url, type])
 }

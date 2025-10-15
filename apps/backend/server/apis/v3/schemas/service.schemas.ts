@@ -2,12 +2,8 @@ import { z } from "zod";
 
 // Base schemas for nested objects
 const MetadataSchema = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  owner: z.string().optional(),
-  url: z.url("Valid URL is required"),
-  urlTitle: z.string().optional(),
-  attribution: z.string().optional(),
+  description: z.string().nullable().optional(),
+  owner: z.string().nullable().optional(),
 });
 
 const ProjectionSchema = z.object({
@@ -36,7 +32,7 @@ export const ServiceCreateSchema = z.object({
   imageFormat: z.string().default("image/png"),
   workspace: z.string().optional(),
   getMapUrl: z.string().optional(),
-  comment: z.string().optional(),
+  comment: z.string().nullable().optional(),
   locked: z.boolean().default(false),
   // User-friendly format for projection
   projection: ProjectionSchema,
@@ -52,8 +48,8 @@ export const ServiceUpdateSchema = z.object({
   version: z.string().optional(),
   imageFormat: z.string().optional(),
   workspace: z.string().optional(),
-  getMapUrl: z.string().optional(),
-  comment: z.string().optional(),
+  getMapUrl: z.string().nullable().optional(),
+  comment: z.string().nullable().optional(),
   locked: z.boolean().optional(),
   // User-friendly format for projection
   projection: ProjectionSchema.optional(),

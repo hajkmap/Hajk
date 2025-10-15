@@ -385,9 +385,8 @@ export default function ServiceSettings() {
       <FormActionPanel
         updateStatus={updateStatus}
         onUpdate={handleExternalSubmit}
-        lastSavedBy="Anonym"
-        lastSavedDate="2023-04-11 13:37"
         saveButtonText="Spara"
+        lastSavedDate={service?.lastSavedDate}
       >
         <form ref={formRef} onSubmit={onSubmit}>
           <FormRenderer

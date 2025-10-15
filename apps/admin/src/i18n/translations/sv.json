@@ -54,7 +54,7 @@
     "common.you": "Du",
     "common.theme": "Tema",
     "common.database": "Databas",
-    "common.lastSavedBy": "Senast sparad av {{lastSavedBy}} {{lastSavedDate,  {{lastSavedDate}}",
+    "common.lastSavedBy": "Senast sparad av {{lastSavedBy}} {{lastSavedDate, den {{lastSavedDate}}",
     "common.dialog.closeBtn": "Stäng",
     "common.dialog.saveBtn": "Spara",
     "common.brokenService": "Trasig tjänst",

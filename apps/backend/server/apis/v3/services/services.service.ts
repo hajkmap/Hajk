@@ -16,6 +16,8 @@ class ServicesService {
     const services = await prisma.service.findMany({
       include: {
         // select all columns in the service table
+        metadata: true,
+        projection: true,
         _count: {
           select: {
             layers: true,
