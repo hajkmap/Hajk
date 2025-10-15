@@ -24,7 +24,11 @@ import Information from "../components/Information";
 import FeatureTitleEditor from "../components/FeatureTitleEditor";
 import FeatureStyleEditor from "../components/featureStyle/FeatureStyleEditor";
 
-const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
+const ModifyNodeToggler = ({
+  modifyEnabled,
+  setModifyEnabled,
+  disabled = false,
+}) => {
   return (
     <Paper style={{ padding: 8, marginTop: 8 }}>
       <Grid container justifyContent="space-between" alignItems="center">
@@ -49,6 +53,7 @@ const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
 };
 
 const EditView = (props) => {
+  const { uiDisabled = false } = props;
   // We have to get some information about the current activity (view)
   const activity = props.model.getActivityFromId(props.id);
 
@@ -78,6 +83,7 @@ const EditView = (props) => {
             drawModel={props.drawModel}
             modifyEnabled={props.modifyEnabled}
             setModifyEnabled={props.setModifyEnabled}
+            disabled={uiDisabled}
           />
         </Grid>
         <Grid size={12}>
@@ -93,13 +99,22 @@ const EditView = (props) => {
                 model={props.model}
                 drawModel={props.drawModel}
               />
-              <FeatureStyleEditor
-                feature={props.editFeature}
-                model={props.model}
-                drawModel={props.drawModel}
-                bufferState={props.bufferState}
-                setBufferState={props.setBufferState}
-              />
+              <div
+                style={{
+                  pointerEvents: uiDisabled ? "none" : "auto",
+                  opacity: uiDisabled ? 0.5 : 1,
+                  transition: "opacity 0.2s ease",
+                }}
+              >
+                <FeatureStyleEditor
+                  feature={props.editFeature}
+                  model={props.model}
+                  drawModel={props.drawModel}
+                  bufferState={props.bufferState}
+                  setBufferState={props.setBufferState}
+                  disabled={uiDisabled}
+                />
+              </div>
             </Grid>
           )}
         </Grid>
@@ -113,6 +128,7 @@ const EditView = (props) => {
                 fullWidth
                 startIcon={<ContentCopy />}
                 size="small"
+                disabled={uiDisabled}
                 onClick={() => {
                   props.drawModel.duplicateFeature(props.editFeature);
                   props.drawModel.reBindFeaturePropertyListener();
@@ -130,6 +146,7 @@ const EditView = (props) => {
               onClick={handleZIndexMenu}
               endIcon={<ArrowDropDown />}
               size="small"
+              disabled={uiDisabled}
             >
               Ordna
             </Button>
@@ -146,6 +163,7 @@ const EditView = (props) => {
               }}
             >
               <MenuItem
+                disabled={uiDisabled}
                 onClick={() => {
                   props.drawModel.moveFeatureZIndexToTop(props.editFeature);
                 }}

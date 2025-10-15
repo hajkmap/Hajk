@@ -372,10 +372,10 @@ const SketchView = (props) => {
     };
   }, []);
 
-  const uiDisabled = isSaving;
+  const uiDisabled = isSaving || (ogcSource && ogcSource !== "Ingen");
 
   const handleOgcSourceChange = (newOgcSourceTitle) => {
-    if (uiDisabled) return;
+    if (isSaving) return;
 
     const selectedService = serviceList.find(
       (s) => (s.title || s.id) === newOgcSourceTitle
@@ -475,6 +475,7 @@ const SketchView = (props) => {
             removedFeatures={removedFeatures}
             globalObserver={globalObserver}
             functionalCookiesOk={functionalCookiesOk}
+            uiDisabled={uiDisabled}
           />
         );
       case "EDIT":
@@ -488,6 +489,7 @@ const SketchView = (props) => {
             setModifyEnabled={props.setModifyEnabled}
             setBufferState={setBufferState}
             bufferState={bufferState}
+            uiDisabled={uiDisabled}
           />
         );
       case "MOVE":
@@ -539,7 +541,7 @@ const SketchView = (props) => {
       case "OGC":
         return (
           <OGCView
-            uiDisabled={uiDisabled}
+            uiDisabled={isSaving}
             id={activityId}
             model={model}
             ogcSource={ogcSource}

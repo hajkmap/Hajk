@@ -82,6 +82,7 @@ const DeleteView = ({
   removedFeatures,
   globalObserver,
   functionalCookiesOk,
+  uiDisabled,
 }) => {
   // We have to get some information about the current activity (view)
   const activity = model.getActivityFromId(id);
@@ -97,6 +98,7 @@ const DeleteView = ({
           variant="contained"
           onClick={drawModel.removeDrawnFeatures}
           startIcon={<DeleteIcon />}
+          disabled={uiDisabled}
         >
           Ta bort alla ritobjekt
         </Button>
