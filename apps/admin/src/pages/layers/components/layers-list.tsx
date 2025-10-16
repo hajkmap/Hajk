@@ -19,12 +19,8 @@ import {
 import { useNavigate } from "react-router";
 import { SquareSpinnerComponent } from "../../../components/progress/square-progress";
 import DialogWrapper from "../../../components/flexible-dialog";
-import FormRenderer from "../../../components/form-factory/form-renderer";
-import { DefaultUseForm } from "../../../components/form-factory/default-use-form";
-import { createOnSubmitHandler } from "../../../components/form-factory/form-utils";
-import DynamicFormContainer from "../../../components/form-factory/dynamic-form-container";
-import { FieldValues } from "react-hook-form";
-import INPUT_TYPE from "../../../components/form-factory/types/input-type";
+import { Controller, useForm } from "react-hook-form";
+import { MenuItem, FormControl, InputLabel, Select } from "@mui/material";
 import { toast } from "react-toastify";
 import ServiceTypeBadge from "../../services/components/service-type-badge";
 import ServiceStatusIndicator from "../../services/components/service-status-indicator";
@@ -101,45 +97,24 @@ export default function LayersList({
     setOpen(true);
   };
 
-  const createLayerContainer = new DynamicFormContainer<FieldValues>();
-
-  createLayerContainer.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 12,
-    name: "name",
-    title: `${t("common.name")}`,
-    defaultValue: "",
-  });
-
-  createLayerContainer.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 12,
-    name: "serviceId",
-    title: `${t("common.service")}`,
-    defaultValue: "",
-    optionList: services?.map((service) => ({
-      title: service.name + `(${service.type})`,
-      value: service.id,
-    })),
-    registerOptions: {
-      required: `${t("common.required")}`,
-    },
-  });
-
-  const [createLayerContainerData] = useState(createLayerContainer);
-  const defaultValues = createLayerContainerData.getDefaultValues();
-
+  interface LayerCreateForm {
+    name: string;
+    serviceId: string;
+  }
   const {
     register,
     handleSubmit,
     control,
-    getValues,
     reset,
     watch,
-    formState: { errors, dirtyFields },
-  } = DefaultUseForm(defaultValues);
+    formState: { errors },
+  } = useForm<LayerCreateForm>({
+    defaultValues: { name: "", serviceId: "" },
+    mode: "onChange",
+    reValidateMode: "onChange",
+  });
   const watchServiceId = watch("serviceId");
-  const { mutateAsync: createLayer } = useCreateLayer(watchServiceId as string);
+  const { mutateAsync: createLayer } = useCreateLayer(watchServiceId);
 
   const handleLayerSubmit = async (layerData: LayerCreateInput) => {
     try {
@@ -166,18 +141,16 @@ export default function LayersList({
     }
   };
 
-  const onSubmit = createOnSubmitHandler({
-    handleSubmit,
-    dirtyFields,
-
-    onValid: (data: FieldValues) => {
-      const layerData = data as LayerCreateInput;
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    void handleSubmit((data) => {
+      const layerData: LayerCreateInput = {
+        name: data.name,
+        serviceId: data.serviceId,
+      };
       void handleLayerSubmit(layerData);
-    },
-    onInvalid: (errors) => {
-      console.log("Errors: ", errors);
-    },
-  });
+    })(e);
+  };
 
   // const RowMenu = (params: { row: { id: string } }) => {
   //   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -268,13 +241,43 @@ export default function LayersList({
               </>
             }
           >
-            <FormRenderer
-              formControls={createLayerContainerData}
-              formGetValues={getValues}
-              register={register}
-              control={control}
-              errors={errors}
-            />
+            <Grid container spacing={2}>
+              <Grid size={12}>
+                <TextField
+                  label={t("common.name")}
+                  fullWidth
+                  {...register("name", { required: `${t("common.required")}` })}
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
+                />
+              </Grid>
+              <Grid size={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="serviceId-label">
+                    {t("common.service")}
+                  </InputLabel>
+                  <Controller
+                    name="serviceId"
+                    control={control}
+                    rules={{ required: `${t("common.required")}` }}
+                    render={({ field, fieldState }) => (
+                      <Select
+                        labelId="serviceId-label"
+                        label={t("common.service")}
+                        {...field}
+                        error={!!fieldState.error}
+                      >
+                        {(services ?? []).map((service) => (
+                          <MenuItem key={service.id} value={service.id}>
+                            {service.name}({service.type})
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+            </Grid>
           </DialogWrapper>
 
           <Grid size={12} container sx={{ mb: 2 }}>

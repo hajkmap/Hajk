@@ -2,17 +2,20 @@ import { useState, useRef, useMemo } from "react";
 import { useParams } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
-import { Button, Stack, TextField, useTheme, Link } from "@mui/material";
+import {
+  Grid2 as Grid,
+  TextField,
+  useTheme,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+} from "@mui/material";
 import { GridRowSelectionModel } from "@mui/x-data-grid";
-import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
-import { FieldValues } from "react-hook-form";
-import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
-import INPUT_TYPE from "../../components/form-factory/types/input-type";
-import FormRenderer from "../../components/form-factory/form-renderer";
-import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
-import { DefaultUseForm } from "../../components/form-factory/default-use-form";
-import { RenderProps } from "../../components/form-factory/types/render";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { Controller, FieldValues, useForm } from "react-hook-form";
 import UsedInMapsGrid from "./used-in-maps-grid";
 import {
   useLayerById,
@@ -33,6 +36,9 @@ import { useServices, useServiceCapabilities } from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
 import { useRoles } from "../../api/users";
 import { HttpError } from "../../lib/http-error";
+import FormContainer from "../../components/form-components/form-container";
+import FormPanel from "../../components/form-components/form-panel";
+import FormAccordion from "../../components/form-components/form-accordion";
 
 export default function LayerSettings() {
   const { t } = useTranslation();
@@ -71,531 +77,20 @@ export default function LayerSettings() {
     }
   };
 
-  const [updateLayerDefaultData] = useState<DynamicFormContainer<FieldValues>>(
-    new DynamicFormContainer<FieldValues>()
-  );
-  const defaultValues = updateLayerDefaultData.getDefaultValues();
+  const defaultValues = {} as FieldValues;
   const {
     register,
     handleSubmit,
     control,
-    getValues,
     watch,
-    formState: { errors, dirtyFields },
-  } = DefaultUseForm(defaultValues);
-
-  const watchSingleTileInput = watch("singleTile");
-  const watchRoleIdInput = watch("roleId");
-
-  const updateLayerContainer = new DynamicFormContainer<FieldValues>();
-  const layerInformationSettings = new DynamicFormContainer<FieldValues>(
-    t("common.information"),
-    CONTAINER_TYPE.PANEL
-  );
-  const requestSettings = new DynamicFormContainer<FieldValues>(
-    t("services.settings.request"),
-    CONTAINER_TYPE.ACCORDION
-  );
-
-  const layerSettings = new DynamicFormContainer<FieldValues>(
-    t("layers.settings"),
-    CONTAINER_TYPE.ACCORDION
-  );
-  const displayFieldsSearchSettings = new DynamicFormContainer<FieldValues>(
-    t("layers.settings.displayFields"),
-    CONTAINER_TYPE.ACCORDION
-  );
-  const infoClickSettings = new DynamicFormContainer<FieldValues>(
-    t("common.infoclick"),
-    CONTAINER_TYPE.ACCORDION
-  );
-  const searchSettings = new DynamicFormContainer<FieldValues>(
-    t("layers.settings.searchSettings"),
-    CONTAINER_TYPE.ACCORDION
-  );
-  const infoButtonSettings = new DynamicFormContainer<FieldValues>(
-    t("common.infobutton"),
-    CONTAINER_TYPE.ACCORDION
-  );
-  const permissionSettings = new DynamicFormContainer<FieldValues>(
-    t("layers.permissions"),
-    CONTAINER_TYPE.ACCORDION
-  );
-
-  layerInformationSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 12,
-    name: "name",
-    title: `${t("common.name")}`,
-    defaultValue: layer?.name,
+    formState: { errors },
+  } = useForm<FieldValues>({
+    defaultValues,
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
-  layerInformationSettings.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 6,
-    name: "serviceId",
-    title: `${t("layers.common.service")}`,
-    defaultValue: layer?.serviceId,
-    optionList: services?.map((service) => ({
-      title: service.name + `(${service.type})`,
-      value: service.id,
-    })),
-    registerOptions: {
-      required: `${t("common.required")}`,
-    },
-  });
-
-  layerInformationSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "internalName",
-    title: `${t("layers.internalName")}`,
-    defaultValue: layer?.internalName,
-  });
-
-  layerInformationSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 12,
-    name: "metadata.attribution",
-    title: `${t("layers.copyRight")}`,
-    defaultValue: layer?.metadata?.attribution,
-  });
-
-  layerInformationSettings.addInput({
-    type: INPUT_TYPE.TEXTAREA,
-    gridColumns: 12,
-    name: "description",
-    title: `${t("map.description")}`,
-    defaultValue: layer?.description,
-  });
-
-  layerInformationSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "options.keyword",
-    title: `${t("layers.keyword")}`,
-    defaultValue: layer?.options?.keyword,
-  });
-
-  layerInformationSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "options.category",
-    title: `${t("layers.category")}`,
-    defaultValue: layer?.options?.category,
-  });
-
-  requestSettings.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "hidpi",
-    title: `${t("layers.hidpi")}`,
-    defaultValue: layer?.hidpi,
-  });
-
-  requestSettings.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "singleTile",
-    title: "Single tile",
-    defaultValue: layer?.singleTile,
-  });
-
-  requestSettings.addInput({
-    type: INPUT_TYPE.NUMBER,
-    gridColumns: 3,
-    name: "customRatio",
-    title: `${t("layers.customRatio")}`,
-    defaultValue: layer?.customRatio,
-    disabled: watchSingleTileInput === false,
-  });
-
-  requestSettings.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "options.geoWebCache",
-    title: "GeoWebCache",
-    defaultValue: layer?.options?.geoWebCache,
-  });
-
-  layerSettings.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 6,
-    name: "style",
-    title: `${t("layers.style")}`,
-    defaultValue: layer?.style ?? "",
-    optionList: [
-      { title: "<default>", value: "" },
-      ...(styles?.map((style) => ({
-        title: style.name,
-        value: style.name,
-      })) ?? []),
-    ],
-  });
-
-  layerSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "opacity",
-    title: `${t("layers.opacity")}`,
-    defaultValue: layer?.opacity,
-  });
-
-  layerSettings.addCustomInput({
-    type: INPUT_TYPE.CUSTOM,
-    kind: "CustomInputSettings",
-    name: "legendUrl",
-    title: `${t("layers.legend")}`,
-    gridColumns: 12,
-    defaultValue: "",
-
-    renderer: (props: RenderProps<FieldValues>) => {
-      const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-          props.field?.onChange(file.name);
-        }
-      };
-
-      return (
-        <Stack spacing={1} direction="row" alignItems="center">
-          <TextField
-            fullWidth
-            variant="filled"
-            label={props.title}
-            value={(props.field?.value as string) || ""}
-            {...props.field}
-            error={!!props.errorMessage}
-            helperText={props.errorMessage}
-          />
-
-          <input
-            accept="*"
-            type="file"
-            id="teckenForklaring-file-upload"
-            style={{ display: "none" }}
-            onChange={handleFileUpload}
-          />
-
-          <label htmlFor="teckenForklaring-file-upload">
-            <Button
-              sx={{ minWidth: "140px" }}
-              variant="contained"
-              component="span"
-              startIcon={<CloudUploadIcon />}
-            >
-              {t("layers.uploadFile")}
-            </Button>
-          </label>
-        </Stack>
-      );
-    },
-  });
-  layerSettings.addCustomInput({
-    type: INPUT_TYPE.CUSTOM,
-    kind: "CustomInputSettings",
-    name: "legendIconUrl",
-    title: `${t("layers.legendIcon")}`,
-    gridColumns: 12,
-    defaultValue: "",
-
-    renderer: (props: RenderProps<FieldValues>) => {
-      const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-          props.field?.onChange(file.name);
-        }
-      };
-
-      return (
-        <Stack spacing={1} direction="row" alignItems="center">
-          <TextField
-            fullWidth
-            variant="filled"
-            label={props.title}
-            value={(props.field?.value as string) || ""}
-            {...props.field}
-            error={!!props.errorMessage}
-            helperText={props.errorMessage}
-          />
-
-          <input
-            accept="*"
-            type="file"
-            id="teckenForklaringIkon-file-upload"
-            style={{ display: "none" }}
-            onChange={handleFileUpload}
-          />
-
-          <label htmlFor="teckenForklaringIkon-file-upload">
-            <Button
-              sx={{ minWidth: "140px" }}
-              variant="contained"
-              component="span"
-              startIcon={<CloudUploadIcon />}
-            >
-              {t("layers.uploadFile")}
-            </Button>
-          </label>
-        </Stack>
-      );
-    },
-  });
-
-  layerSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 12,
-    name: "legendOptions",
-    title: `${t("layers.legendOptions")}`,
-    defaultValue: layer?.legendOptions,
-  });
-
-  layerSettings.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    name: "options.showAttributeTableButton",
-    title: `${t("layers.showAttributeTableButton")}`,
-    defaultValue: layer?.options?.showAttributeTableButton,
-  });
-
-  layerSettings.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    gridColumns: 8,
-    name: "minMaxZoomAlertOnToggleOnly",
-    title: `${t("layers.minMaxZoomAlertOnToggleOnly")}`,
-    defaultValue: layer?.minMaxZoomAlertOnToggleOnly,
-  });
-
-  layerSettings.addInput({
-    type: INPUT_TYPE.NUMBER,
-    gridColumns: 6,
-    name: "minZoom",
-    title: `${t("layers.minZoom")}`,
-    defaultValue: layer?.minZoom,
-  });
-
-  layerSettings.addInput({
-    type: INPUT_TYPE.NUMBER,
-    gridColumns: 6,
-    name: "maxZoom",
-    title: `${t("layers.maxZoom")}`,
-    defaultValue: layer?.maxZoom,
-  });
-
-  displayFieldsSearchSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD_ARRAY,
-    gridColumns: 12,
-    name: "searchSettings.primaryDisplayFields",
-    title: `${t("layers.primaryDisplayFields")}`,
-    defaultValue: layer?.searchSettings?.primaryDisplayFields,
-  });
-
-  displayFieldsSearchSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD_ARRAY,
-    gridColumns: 6,
-    name: "searchSettings.secondaryDisplayFields",
-    title: `${t("layers.secondaryDisplayFields")}`,
-    defaultValue: layer?.searchSettings?.secondaryDisplayFields,
-  });
-
-  displayFieldsSearchSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD_ARRAY,
-    gridColumns: 6,
-    name: "searchSettings.shortDisplayFields",
-    title: `${t("layers.shortDisplayFields")}`,
-    defaultValue: layer?.searchSettings?.shortDisplayFields,
-  });
-
-  infoClickSettings.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    gridColumns: 6,
-    name: "infoClickActive",
-    title: `${t("common.infoclick")}`,
-    defaultValue: layer?.infoClickActive,
-  });
-
-  infoClickSettings.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    gridColumns: 12,
-    name: "infoClickSettings.sortDescending",
-    title: `${t("layers.infoClickDesc")}`,
-    defaultValue: layer?.infoClickSettings?.sortDescending,
-  });
-
-  infoClickSettings.addInput({
-    type: INPUT_TYPE.TEXTAREA,
-    gridColumns: 12,
-    name: "infoClickSettings.definition",
-    title: `${t("layers.infobox")}`,
-    defaultValue: layer?.infoClickSettings?.definition,
-  });
-
-  infoClickSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "infoClickSettings.icon",
-    title: `${t("layers.infoClickIcon")}`,
-    slotProps: {
-      input: {
-        endAdornment: (
-          <Link
-            sx={{ ml: 1 }}
-            href="https://fonts.google.com/icons"
-            target="_blank"
-          >
-            {t("layers.listLink")}
-          </Link>
-        ),
-      },
-    },
-    defaultValue: layer?.infoClickSettings?.icon,
-  });
-
-  infoClickSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "infoClickSettings.sortProperty",
-    title: `${t("layers.sortByAttribute")}`,
-    defaultValue: layer?.infoClickSettings?.sortProperty,
-  });
-
-  infoClickSettings.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 6,
-    name: "infoClickSettings.format",
-    title: `${t("layers.infoClickFormat")}`,
-    defaultValue: layer?.infoClickSettings?.format,
-    optionList: infoClickFormat.map((format) => ({
-      title: format.title,
-      value: format.value,
-    })),
-  });
-
-  infoClickSettings.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 6,
-    name: "infoClickSettings.sortMethod",
-    title: `${t("layers.infoClickSortMethod")}`,
-    defaultValue: layer?.infoClickSettings?.sortMethod,
-    optionList: sortType.map((type) => ({
-      title: type.title,
-      value: type.value,
-    })),
-  });
-
-  infoClickSettings.addCustomInput({
-    type: INPUT_TYPE.CUSTOM,
-    kind: "CustomInputSettings",
-    name: "infoClickPreview",
-    title: "Förhandsvisa infoklick",
-    gridColumns: 12,
-    defaultValue: "",
-
-    renderer: () => {
-      return (
-        <Button
-          sx={{ minWidth: "120px", width: "100%" }}
-          variant="contained"
-          component="span"
-        >
-          Förhandsvisa infoklick
-        </Button>
-      );
-    },
-  });
-
-  searchSettings.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    gridColumns: 10,
-    name: "searchSettings.active",
-    title: `${t("layers.searchSettings.active")}`,
-    defaultValue: layer?.searchSettings?.active,
-  });
-  searchSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 12,
-    name: "searchSettings.url",
-    title: `Url`,
-    defaultValue: layer?.searchSettings?.url,
-  });
-  searchSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD_ARRAY,
-    gridColumns: 12,
-    name: "searchSettings.searchFields",
-    title: `${t("layers.searchSettings.searchFields")}`,
-    defaultValue: layer?.searchSettings?.searchFields,
-  });
-  searchSettings.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 6,
-    name: "searchSettings.outputFormat",
-    title: `${t("layers.searchSettings.outputFormat")}`,
-    defaultValue: layer?.searchSettings?.outputFormat,
-    optionList: searchOutputFormat.map((format) => ({
-      title: format,
-      value: format,
-    })),
-  });
-  searchSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "searchSettings.geometryField",
-    title: `${t("layers.searchSettings.geometryField")}`,
-    defaultValue: layer?.searchSettings?.geometryField,
-  });
-  infoButtonSettings.addInput({
-    type: INPUT_TYPE.CHECKBOX,
-    gridColumns: 10,
-    name: "showMetadata",
-    title: `${t("layers.showMetadata")}`,
-    defaultValue: layer?.showMetadata,
-  });
-  infoButtonSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "metadata.title",
-    title: `${t("layers.metadata.title")}`,
-    defaultValue: layer?.metadata?.title,
-  });
-  infoButtonSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 6,
-    name: "metadata.urlTitle",
-    title: `${t("layers.metadata.urlTitle")}`,
-    defaultValue: layer?.metadata?.urlTitle,
-  });
-  infoButtonSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 12,
-    name: "metadata.url",
-    title: "Url",
-    defaultValue: layer?.metadata?.url,
-  });
-  infoButtonSettings.addInput({
-    type: INPUT_TYPE.TEXTAREA,
-    gridColumns: 12,
-    name: "options.layerDisplayDescription",
-    title: `${t("layers.layerDisplayDescription")}`,
-    defaultValue: layer?.options?.layerDisplayDescription,
-  });
-  permissionSettings.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 6,
-    name: "roleId",
-    title: `${t("layers.permission")}`,
-    defaultValue: roleOnLayer?.roleId,
-    optionList: roles?.map((role) => ({
-      title: role.title,
-      value: role.id,
-    })),
-  });
-
-  updateLayerContainer.addContainer([
-    layerInformationSettings,
-    requestSettings,
-    layerSettings,
-    displayFieldsSearchSettings,
-    infoClickSettings,
-    searchSettings,
-    infoButtonSettings,
-    permissionSettings,
-  ]);
+  const watchRoleIdInput = watch("roleId") as string | undefined;
 
   const filteredLayers = useMemo(() => {
     if (!getCapLayers) return [];
@@ -630,7 +125,7 @@ export default function LayerSettings() {
         return 0;
       });
     return searchAndSelectedFilteredLayers;
-  }, [getCapLayers, searchTerm]);
+  }, [getCapLayers, searchTerm, selectGridId]);
 
   const selectedRowsData = useMemo(
     () =>
@@ -709,10 +204,12 @@ export default function LayerSettings() {
         hideProgressBar: true,
       });
 
-      await createRoleOnLayer({
-        layerId: layer?.id ?? "",
-        roleId: watchRoleIdInput as string,
-      });
+      if (watchRoleIdInput) {
+        await createRoleOnLayer({
+          layerId: layer?.id ?? "",
+          roleId: watchRoleIdInput,
+        });
+      }
     } catch (error) {
       console.error("Failed to update layer:", error);
       toast.error(t("layers.updateLayerFailed", { name: layer?.name }), {
@@ -744,17 +241,7 @@ export default function LayerSettings() {
       console.log("Layer data is still loading or unavailable.");
     }
   };
-  const onSubmit = createOnSubmitHandler({
-    handleSubmit,
-    dirtyFields,
-    onValid: (data: FieldValues) => {
-      const layerData = data as LayerUpdateInput;
-      void handleUpdateLayer({
-        ...layerData,
-        selectedLayers: selectedRowObjects,
-      });
-    },
-  });
+  // removed createOnSubmitHandler; handled inline in FormContainer onSubmit
 
   if (isLoading) {
     return <SquareSpinnerComponent />;
@@ -770,14 +257,519 @@ export default function LayerSettings() {
         onUpdate={handleExternalSubmit}
         saveButtonText="Spara"
       >
-        <form ref={formRef} onSubmit={onSubmit}>
-          <FormRenderer
-            formControls={updateLayerContainer}
-            formGetValues={getValues}
-            register={register}
-            control={control}
-            errors={errors}
-          />
+        <FormContainer
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSubmit((data: FieldValues) => {
+              const toNumber = (v: unknown) =>
+                typeof v === "string" && v.trim() !== ""
+                  ? Number(v)
+                  : (v as number | undefined);
+              const toArray = (v: unknown) =>
+                Array.isArray(v)
+                  ? (v as string[])
+                  : typeof v === "string"
+                  ? v
+                      .split(",")
+                      .map((s) => s.trim())
+                      .filter((s) => s.length > 0)
+                  : undefined;
+
+              const normalized: LayerUpdateInput = {
+                name: data.name as string | undefined,
+                serviceId: data.serviceId as string | undefined,
+                internalName: data.internalName as string | undefined,
+                description: data.description as string | undefined,
+                opacity: toNumber(data.opacity),
+                minZoom: toNumber(data.minZoom),
+                maxZoom: toNumber(data.maxZoom),
+                minMaxZoomAlertOnToggleOnly:
+                  data.minMaxZoomAlertOnToggleOnly as boolean | undefined,
+                singleTile: data.singleTile as boolean | undefined,
+                hidpi: data.hidpi as boolean | undefined,
+                customRatio: toNumber(data.customRatio),
+                showMetadata: data.showMetadata as boolean | undefined,
+                infoClickActive: data.infoClickActive as boolean | undefined,
+                style: data.style as string | undefined,
+                metadata: {
+                  title: data["metadata.title"] as string | undefined,
+                  url: data["metadata.url"] as string | undefined,
+                  urlTitle: data["metadata.urlTitle"] as string | undefined,
+                  attribution: data["metadata.attribution"] as
+                    | string
+                    | undefined,
+                },
+                searchSettings: {
+                  active: data["searchSettings.active"] as boolean | undefined,
+                  url: data["searchSettings.url"] as string | undefined,
+                  searchFields: toArray(
+                    data["searchSettings.searchFields"] as unknown
+                  ),
+                  primaryDisplayFields: toArray(
+                    data["searchSettings.primaryDisplayFields"] as unknown
+                  ),
+                  secondaryDisplayFields: toArray(
+                    data["searchSettings.secondaryDisplayFields"] as unknown
+                  ),
+                  shortDisplayFields: toArray(
+                    data["searchSettings.shortDisplayFields"] as unknown
+                  ),
+                  geometryField: data["searchSettings.geometryField"] as
+                    | string
+                    | undefined,
+                  outputFormat: data["searchSettings.outputFormat"] as
+                    | string
+                    | undefined,
+                },
+                infoClickSettings: {
+                  definition: data["infoClickSettings.definition"] as
+                    | string
+                    | undefined,
+                  icon: data["infoClickSettings.icon"] as string | undefined,
+                  format: data["infoClickSettings.format"] as
+                    | string
+                    | undefined,
+                  sortProperty: data["infoClickSettings.sortProperty"] as
+                    | string
+                    | undefined,
+                  sortMethod: data["infoClickSettings.sortMethod"] as
+                    | string
+                    | undefined,
+                },
+                options: {
+                  keyword: data["options.keyword"] as string | undefined,
+                  category: data["options.category"] as string | undefined,
+                  layerDisplayDescription: data[
+                    "options.layerDisplayDescription"
+                  ] as string | undefined,
+                } as Record<string, unknown>,
+                selectedLayers: selectedRowObjects,
+              };
+
+              void handleUpdateLayer(normalized);
+            })(e);
+          }}
+          formRef={formRef}
+          noValidate={false}
+        >
+          <FormPanel title={t("common.information")}>
+            <Grid container>
+              <Grid size={12}>
+                <TextField
+                  label={t("common.name")}
+                  fullWidth
+                  defaultValue={layer?.name}
+                  {...register("name", {
+                    required: `${t("common.required")}`,
+                  })}
+                  error={!!errors.name}
+                  helperText={
+                    (errors.name as unknown as { message?: string })?.message
+                  }
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="serviceId-label">
+                    {t("layers.common.service")}
+                  </InputLabel>
+                  <Controller
+                    name="serviceId"
+                    control={control}
+                    defaultValue={layer?.serviceId}
+                    rules={{ required: `${t("common.required")}` }}
+                    render={({ field }) => (
+                      <Select
+                        labelId="serviceId-label"
+                        label={t("layers.common.service")}
+                        {...field}
+                      >
+                        {(services ?? []).map((service) => (
+                          <MenuItem key={service.id} value={service.id}>
+                            {service.name}({service.type})
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label={t("layers.internalName")}
+                  fullWidth
+                  defaultValue={layer?.internalName}
+                  {...register("internalName")}
+                />
+              </Grid>
+              <Grid size={12}>
+                <TextField
+                  label={t("layers.copyRight")}
+                  fullWidth
+                  defaultValue={layer?.metadata?.attribution}
+                  {...register("metadata.attribution")}
+                />
+              </Grid>
+              <Grid size={12}>
+                <TextField
+                  label={t("map.description")}
+                  fullWidth
+                  multiline
+                  rows={3}
+                  defaultValue={layer?.description}
+                  {...register("description")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label={t("layers.keyword")}
+                  fullWidth
+                  defaultValue={layer?.options?.keyword}
+                  {...register("options.keyword")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label={t("layers.category")}
+                  fullWidth
+                  defaultValue={layer?.options?.category}
+                  {...register("options.category")}
+                />
+              </Grid>
+            </Grid>
+          </FormPanel>
+
+          <FormAccordion title={t("services.settings.request")}>
+            <Grid container>
+              <Grid size={12}>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        defaultChecked={layer?.hidpi}
+                        {...register("hidpi")}
+                      />
+                    }
+                    label={t("layers.hidpi")}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        defaultChecked={layer?.singleTile}
+                        {...register("singleTile")}
+                      />
+                    }
+                    label="Single tile"
+                  />
+                </FormGroup>
+              </Grid>
+            </Grid>
+          </FormAccordion>
+
+          <FormAccordion title={t("layers.settings")}>
+            <Grid container spacing={2}>
+              <Grid size={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="style-label">{t("layers.style")}</InputLabel>
+                  <Controller
+                    name="style"
+                    control={control}
+                    defaultValue={layer?.style ?? ""}
+                    render={({ field }) => (
+                      <Select
+                        labelId="style-label"
+                        label={t("layers.style")}
+                        {...field}
+                      >
+                        <MenuItem value="">{"<default>"}</MenuItem>
+                        {(styles ?? []).map((s) => (
+                          <MenuItem key={s.name} value={s.name}>
+                            {s.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label={t("layers.opacity")}
+                  fullWidth
+                  type="number"
+                  defaultValue={layer?.opacity}
+                  {...register("opacity")}
+                />
+              </Grid>
+            </Grid>
+          </FormAccordion>
+
+          <FormAccordion title={t("layers.settings.displayFields")}>
+            <Grid container>
+              <Grid size={12}>
+                <TextField
+                  label={t("layers.primaryDisplayFields")}
+                  fullWidth
+                  defaultValue={(
+                    layer?.searchSettings?.primaryDisplayFields ?? []
+                  ).join(", ")}
+                  {...register("searchSettings.primaryDisplayFields")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label={t("layers.secondaryDisplayFields")}
+                  fullWidth
+                  defaultValue={(
+                    layer?.searchSettings?.secondaryDisplayFields ?? []
+                  ).join(", ")}
+                  {...register("searchSettings.secondaryDisplayFields")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label={t("layers.shortDisplayFields")}
+                  fullWidth
+                  defaultValue={(
+                    layer?.searchSettings?.shortDisplayFields ?? []
+                  ).join(", ")}
+                  {...register("searchSettings.shortDisplayFields")}
+                />
+              </Grid>
+            </Grid>
+          </FormAccordion>
+
+          <FormAccordion title={t("common.infoclick")}>
+            <Grid container>
+              <Grid size={12}>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        defaultChecked={layer?.infoClickActive}
+                        {...register("infoClickActive")}
+                      />
+                    }
+                    label={t("common.infoclick")}
+                  />
+                </FormGroup>
+              </Grid>
+              <Grid size={12}>
+                <TextField
+                  label={t("layers.infobox")}
+                  fullWidth
+                  multiline
+                  rows={3}
+                  defaultValue={layer?.infoClickSettings?.definition}
+                  {...register("infoClickSettings.definition")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label={t("layers.infoClickIcon")}
+                  fullWidth
+                  defaultValue={layer?.infoClickSettings?.icon}
+                  {...register("infoClickSettings.icon")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label={t("layers.sortByAttribute")}
+                  fullWidth
+                  defaultValue={layer?.infoClickSettings?.sortProperty}
+                  {...register("infoClickSettings.sortProperty")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="format-label">
+                    {t("layers.infoClickFormat")}
+                  </InputLabel>
+                  <Controller
+                    name="infoClickSettings.format"
+                    control={control}
+                    defaultValue={layer?.infoClickSettings?.format}
+                    render={({ field }) => (
+                      <Select
+                        labelId="format-label"
+                        label={t("layers.infoClickFormat")}
+                        {...field}
+                      >
+                        {infoClickFormat.map((format) => (
+                          <MenuItem key={format.value} value={format.value}>
+                            {format.title}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="sortMethod-label">
+                    {t("layers.infoClickSortMethod")}
+                  </InputLabel>
+                  <Controller
+                    name="infoClickSettings.sortMethod"
+                    control={control}
+                    defaultValue={layer?.infoClickSettings?.sortMethod}
+                    render={({ field }) => (
+                      <Select
+                        labelId="sortMethod-label"
+                        label={t("layers.infoClickSortMethod")}
+                        {...field}
+                      >
+                        {sortType.map((type) => (
+                          <MenuItem key={type.value} value={type.value}>
+                            {type.title}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+            </Grid>
+          </FormAccordion>
+
+          <FormAccordion title={t("layers.settings.searchSettings")}>
+            <Grid container>
+              <Grid size={12}>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        defaultChecked={layer?.searchSettings?.active}
+                        {...register("searchSettings.active")}
+                      />
+                    }
+                    label={t("layers.searchSettings.active")}
+                  />
+                </FormGroup>
+              </Grid>
+              <Grid size={12}>
+                <TextField
+                  label="Url"
+                  fullWidth
+                  defaultValue={layer?.searchSettings?.url}
+                  {...register("searchSettings.url")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="outputFormat-label">
+                    {t("layers.searchSettings.outputFormat")}
+                  </InputLabel>
+                  <Controller
+                    name="searchSettings.outputFormat"
+                    control={control}
+                    defaultValue={layer?.searchSettings?.outputFormat}
+                    render={({ field }) => (
+                      <Select
+                        labelId="outputFormat-label"
+                        label={t("layers.searchSettings.outputFormat")}
+                        {...field}
+                      >
+                        {searchOutputFormat.map((format) => (
+                          <MenuItem key={format} value={format}>
+                            {format}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label={t("layers.searchSettings.geometryField")}
+                  fullWidth
+                  defaultValue={layer?.searchSettings?.geometryField}
+                  {...register("searchSettings.geometryField")}
+                />
+              </Grid>
+            </Grid>
+          </FormAccordion>
+
+          <FormAccordion title={t("common.infobutton")}>
+            <Grid container>
+              <Grid size={12}>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        defaultChecked={layer?.showMetadata}
+                        {...register("showMetadata")}
+                      />
+                    }
+                    label={t("layers.showMetadata")}
+                  />
+                </FormGroup>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label={t("layers.metadata.title")}
+                  fullWidth
+                  defaultValue={layer?.metadata?.title}
+                  {...register("metadata.title")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label={t("layers.metadata.urlTitle")}
+                  fullWidth
+                  defaultValue={layer?.metadata?.urlTitle}
+                  {...register("metadata.urlTitle")}
+                />
+              </Grid>
+              <Grid size={12}>
+                <TextField
+                  label="Url"
+                  fullWidth
+                  defaultValue={layer?.metadata?.url}
+                  {...register("metadata.url")}
+                />
+              </Grid>
+              <Grid size={12}>
+                <TextField
+                  label={t("layers.layerDisplayDescription")}
+                  fullWidth
+                  multiline
+                  rows={3}
+                  defaultValue={layer?.options?.layerDisplayDescription}
+                  {...register("options.layerDisplayDescription")}
+                />
+              </Grid>
+            </Grid>
+          </FormAccordion>
+
+          <FormAccordion title={t("layers.permissions")}>
+            <FormControl fullWidth>
+              <InputLabel id="roleId-label">
+                {t("layers.permission")}
+              </InputLabel>
+              <Controller
+                name="roleId"
+                control={control}
+                defaultValue={roleOnLayer?.roleId}
+                render={({ field }) => (
+                  <Select
+                    labelId="roleId-label"
+                    label={t("layers.permission")}
+                    {...field}
+                  >
+                    {(roles ?? []).map((role) => (
+                      <MenuItem key={role.id} value={role.id}>
+                        {role.title}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
+            </FormControl>
+          </FormAccordion>
+
           {layer && (
             <AvailableLayersGrid
               isLoading={serviceLoading}
@@ -792,7 +784,7 @@ export default function LayerSettings() {
             />
           )}
           <UsedInMapsGrid />
-        </form>
+        </FormContainer>
       </FormActionPanel>
     </Page>
   );
