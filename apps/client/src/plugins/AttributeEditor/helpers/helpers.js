@@ -79,10 +79,10 @@ export function renderTableCellDisplay({ meta, value, s }) {
       ? value
       : value
         ? String(value)
-            .split(",")
+            .split(";")
             .map((s) => s.trim())
         : [];
-    return <span>{arr.join(", ")}</span>;
+    return <span>{arr.join(";")}</span>;
   }
 
   // Standard
@@ -246,7 +246,7 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
       ? value
       : value
         ? String(value)
-            .split(",")
+            .split(";")
             .map((s) => s.trim())
         : [];
     return (
@@ -285,7 +285,7 @@ function ensureArray(val) {
   if (Array.isArray(val)) return val;
   if (val == null || val === "") return [];
   return String(val)
-    .split(",")
+    .split(";")
     .map((s) => s.trim());
 }
 
