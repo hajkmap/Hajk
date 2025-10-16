@@ -2,7 +2,7 @@ import { useParams } from "react-router";
 import { useState, useRef } from "react";
 import { useTranslation, Trans } from "react-i18next";
 import Page from "../../layouts/root/components/page";
-import { FieldValues } from "react-hook-form";
+import { Controller, FieldValues, useForm } from "react-hook-form";
 import {
   useTheme,
   Button,
@@ -25,12 +25,10 @@ import {
   useProjections,
   useServiceCapabilities,
 } from "../../api/services";
-import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
-import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
-import INPUT_TYPE from "../../components/form-factory/types/input-type";
-import FormRenderer from "../../components/form-factory/form-renderer";
-import { DefaultUseForm } from "../../components/form-factory/default-use-form";
-import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
+import Grid from "@mui/material/Grid2";
+import FormContainer from "../../components/form-components/form-container";
+import FormPanel from "../../components/form-components/form-panel";
+import FormAccordion from "../../components/form-components/form-accordion";
 import DialogWrapper from "../../components/flexible-dialog";
 import LayersGrid from "./layers-grid";
 import { toast } from "react-toastify";
@@ -76,9 +74,31 @@ export default function ServiceSettings() {
     baseUrl: service?.url ?? "",
     type: service?.type ?? "",
   });
-  const [updateServiceDefaultData] = useState<
-    DynamicFormContainer<FieldValues>
-  >(new DynamicFormContainer<FieldValues>());
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    getValues,
+    formState: { errors },
+  } = useForm<FieldValues>({
+    defaultValues: {
+      name: service?.name ?? "",
+      type: service?.type ?? "",
+      comment: service?.comment ?? "",
+      serverType: service?.serverType ?? "",
+      url: service?.url ?? "",
+      workspace: service?.workspace ?? "All",
+      getMapUrl: service?.getMapUrl ?? "",
+      version: service?.version ?? "",
+      imageFormat: service?.imageFormat ?? "",
+      "projection.code": service?.projection?.code ?? "",
+      "metadata.owner": service?.metadata?.owner ?? "",
+      "metadata.description": service?.metadata?.description ?? "",
+    },
+    mode: "onChange",
+    reValidateMode: "onChange",
+  });
 
   const handleDialogOpen = () => {
     setIsDialogOpen(true);
@@ -169,207 +189,13 @@ export default function ServiceSettings() {
     }
   };
 
-  const updateServiceContainer = new DynamicFormContainer<FieldValues>();
-
-  const serviceInformationSettings = new DynamicFormContainer<FieldValues>(
-    t("common.information"),
-    CONTAINER_TYPE.PANEL
-  );
-  const connectionSettings = new DynamicFormContainer<FieldValues>(
-    t("common.connection"),
-    CONTAINER_TYPE.ACCORDION
-  );
-  const requestSettings = new DynamicFormContainer<FieldValues>(
-    t("services.settings.request"),
-    CONTAINER_TYPE.ACCORDION
-  );
-  const infoButtonSettings = new DynamicFormContainer<FieldValues>(
-    t("common.infobutton"),
-    CONTAINER_TYPE.ACCORDION
-  );
-
-  serviceInformationSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 12,
-    name: "name",
-    title: `${t("common.name")}`,
-    defaultValue: service?.name,
-    registerOptions: {
-      required: `${t("common.required")}`,
-    },
-  });
-
-  serviceInformationSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    name: "type",
-    title: `${t("common.serviceType")}`,
-    defaultValue: service?.type,
-    disabled: true,
-    gridColumns: 10,
-    registerOptions: {
-      required: `${t("common.required")}`,
-    },
-  });
-  serviceInformationSettings.addInput({
-    type: INPUT_TYPE.TEXTAREA,
-    gridColumns: 10,
-    name: "comment",
-    title: `${t("services.description")}`,
-    defaultValue: service?.comment,
-  });
-
-  connectionSettings.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
-    name: "serverType",
-    title: `${t("common.serverType")}`,
-    defaultValue: service?.serverType,
-    registerOptions: { required: `${t("common.required")}` },
-    optionList: serverTypes.map((serverType) => ({
-      title: serverType.title,
-      value: serverType.value,
-    })),
-  });
-  connectionSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
-    name: "url",
-    disabled: true,
-    title: "Url",
-    defaultValue: service?.url,
-    slotProps: {
-      inputLabel: {
-        style: {
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          maxWidth: "calc(100% - 120px)",
-        },
-      },
-      input: {
-        endAdornment: (
-          <>
-            <Button
-              sx={{
-                color: palette.primary.main,
-                width: "100%",
-                maxWidth: "120px",
-                fontWeight: "600",
-              }}
-              size="small"
-              onClick={handleDialogOpen}
-            >
-              {t("services.url.btnLabel")}
-            </Button>
-          </>
-        ),
-      },
-    },
-  });
-  connectionSettings.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
-    name: "workspace",
-    title: `${t("services.workspace")}`,
-    defaultValue: service?.workspace ?? "All",
-    optionList: [
-      { title: `${t("common.all")}`, value: "All" },
-      ...(getCapWorkspaces?.map((workspace) => ({
-        title: workspace,
-        value: workspace,
-      })) ?? []),
-    ],
-  });
-
-  requestSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
-    name: "getMapUrl",
-    title: `GetMap-url`,
-    defaultValue: service?.getMapUrl,
-  });
-  requestSettings.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
-    name: "version",
-    title: "Version",
-    defaultValue: service?.version,
-    optionList: versions.map((version) => ({
-      title: version.title,
-      value: version.value,
-    })),
-    registerOptions: {
-      required: `${t("common.required")}`,
-    },
-  });
-
-  requestSettings.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
-    name: "imageFormat",
-    title: `${t("services.imageFormats")}`,
-    defaultValue: service?.imageFormat,
-    optionList: imageFormats.map((formats) => ({
-      title: formats.title,
-      value: formats.value,
-    })),
-  });
-
-  requestSettings.addInput({
-    type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
-    name: "projection.code",
-    title: `${t("services.coordinateSystem")}`,
-    defaultValue: service?.projection.code,
-    optionList: defaultCoordinates.map(
-      (value) =>
-        epsgProjectionsMap?.find((item) => item.value === value) ?? {
-          title: "",
-          value: "",
-        }
-    ),
-  });
-
-  infoButtonSettings.addInput({
-    type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
-    name: "metadata.owner",
-    title: `${t("services.owner")}`,
-    defaultValue: service?.metadata?.owner,
-  });
-  infoButtonSettings.addInput({
-    type: INPUT_TYPE.TEXTAREA,
-    gridColumns: 8,
-    name: "metadata.description",
-    title: `${t("services.layerDescription")}`,
-    defaultValue: service?.metadata?.description,
-  });
-
-  updateServiceContainer.addContainer([
-    serviceInformationSettings,
-    connectionSettings,
-    requestSettings,
-    infoButtonSettings,
-  ]);
-
-  const defaultValues = updateServiceDefaultData.getDefaultValues();
-  const {
-    register,
-    handleSubmit,
-    control,
-    setValue,
-    getValues,
-    formState: { errors, dirtyFields },
-  } = DefaultUseForm(defaultValues);
-
-  const onSubmit = createOnSubmitHandler({
-    handleSubmit,
-    dirtyFields,
-    onValid: (data: FieldValues) => {
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    void handleSubmit((data: FieldValues) => {
       const serviceData = data as ServiceUpdateInput;
       void handleUpdateService(serviceData);
-    },
-  });
+    })(e);
+  };
 
   if (isLoading) {
     return <SquareSpinnerComponent />;
@@ -386,23 +212,243 @@ export default function ServiceSettings() {
         updateStatus={updateStatus}
         onUpdate={handleExternalSubmit}
         saveButtonText="Spara"
-        lastSavedDate={service?.lastSavedDate}
       >
-        <form ref={formRef} onSubmit={onSubmit}>
-          <FormRenderer
-            formControls={updateServiceContainer}
-            formGetValues={getValues}
-            register={register}
-            control={control}
-            errors={errors}
-          />
+        <FormContainer formRef={formRef} onSubmit={onSubmit} noValidate={false}>
+          <FormPanel title={t("common.information")}>
+            <Grid container>
+              <Grid size={12}>
+                <TextField
+                  label={t("common.name")}
+                  fullWidth
+                  defaultValue={service?.name}
+                  {...register("name", { required: `${t("common.required")}` })}
+                  error={!!errors.name}
+                  helperText={
+                    (errors.name as { message?: string } | undefined)?.message
+                  }
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 10 }}>
+                <TextField
+                  label={t("common.serviceType")}
+                  fullWidth
+                  defaultValue={service?.type}
+                  InputProps={{ readOnly: true }}
+                  {...register("type")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 10 }}>
+                <TextField
+                  label={t("services.description")}
+                  fullWidth
+                  multiline
+                  rows={3}
+                  defaultValue={service?.comment}
+                  {...register("comment")}
+                />
+              </Grid>
+            </Grid>
+          </FormPanel>
+
+          <FormAccordion title={t("common.connection")}>
+            <Grid container>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <FormControl fullWidth error={!!errors.serverType}>
+                  <InputLabel id="serverType-label">
+                    {t("common.serverType")}
+                  </InputLabel>
+                  <Controller
+                    name="serverType"
+                    control={control}
+                    rules={{ required: `${t("common.required")}` }}
+                    defaultValue={service?.serverType}
+                    render={({ field }) => (
+                      <Select
+                        labelId="serverType-label"
+                        label={t("common.serverType")}
+                        {...field}
+                      >
+                        {serverTypes.map((s) => (
+                          <MenuItem key={s.value} value={s.value}>
+                            {s.title}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <TextField
+                  label="Url"
+                  fullWidth
+                  disabled
+                  defaultValue={service?.url}
+                  {...register("url")}
+                  InputProps={{
+                    endAdornment: (
+                      <Button
+                        sx={{ color: palette.primary.main, fontWeight: 600 }}
+                        size="small"
+                        onClick={handleDialogOpen}
+                      >
+                        {t("services.url.btnLabel")}
+                      </Button>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="workspace-label">
+                    {t("services.workspace")}
+                  </InputLabel>
+                  <Controller
+                    name="workspace"
+                    control={control}
+                    defaultValue={service?.workspace ?? "All"}
+                    render={({ field }) => (
+                      <Select
+                        labelId="workspace-label"
+                        label={t("services.workspace")}
+                        {...field}
+                      >
+                        <MenuItem value="All">{t("common.all")}</MenuItem>
+                        {(getCapWorkspaces ?? []).map((w) => (
+                          <MenuItem key={w} value={w}>
+                            {w}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+            </Grid>
+          </FormAccordion>
+
+          <FormAccordion title={t("services.settings.request")}>
+            <Grid container>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <TextField
+                  label="GetMap-url"
+                  fullWidth
+                  defaultValue={service?.getMapUrl}
+                  {...register("getMapUrl")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <FormControl fullWidth error={!!errors.version}>
+                  <InputLabel id="version-label">Version</InputLabel>
+                  <Controller
+                    name="version"
+                    control={control}
+                    rules={{ required: `${t("common.required")}` }}
+                    defaultValue={service?.version}
+                    render={({ field }) => (
+                      <Select
+                        labelId="version-label"
+                        label="Version"
+                        {...field}
+                      >
+                        {versions.map((v) => (
+                          <MenuItem key={v.value} value={v.value}>
+                            {v.title}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="imageFormat-label">
+                    {t("services.imageFormats")}
+                  </InputLabel>
+                  <Controller
+                    name="imageFormat"
+                    control={control}
+                    defaultValue={service?.imageFormat}
+                    render={({ field }) => (
+                      <Select
+                        labelId="imageFormat-label"
+                        label={t("services.imageFormats")}
+                        {...field}
+                      >
+                        {imageFormats.map((f) => (
+                          <MenuItem key={f.value} value={f.value}>
+                            {f.title}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="projection-label">
+                    {t("services.coordinateSystem")}
+                  </InputLabel>
+                  <Controller
+                    name="projection.code"
+                    control={control}
+                    defaultValue={service?.projection?.code}
+                    render={({ field }) => (
+                      <Select
+                        labelId="projection-label"
+                        label={t("services.coordinateSystem")}
+                        {...field}
+                      >
+                        {defaultCoordinates.map((value) => {
+                          const opt = epsgProjectionsMap?.find(
+                            (p) => p.value === value
+                          );
+                          return (
+                            <MenuItem key={value} value={opt?.value ?? value}>
+                              {opt?.title ?? value}
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+            </Grid>
+          </FormAccordion>
+
+          <FormAccordion title={t("common.infobutton")}>
+            <Grid container>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <TextField
+                  label={t("services.owner")}
+                  fullWidth
+                  defaultValue={service?.metadata?.owner}
+                  {...register("metadata.owner")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <TextField
+                  label={t("services.layerDescription")}
+                  fullWidth
+                  multiline
+                  rows={3}
+                  defaultValue={service?.metadata?.description}
+                  {...register("metadata.description")}
+                />
+              </Grid>
+            </Grid>
+          </FormAccordion>
+
           <LayersGrid
             layers={getCapLayers}
             serviceId={service.id}
             isError={layersError}
             isLoading={layersLoading}
           />
-        </form>
+        </FormContainer>
       </FormActionPanel>
       <DialogWrapper
         fullWidth
