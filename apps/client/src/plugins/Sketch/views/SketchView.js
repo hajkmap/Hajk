@@ -10,6 +10,7 @@ import {
 } from "../constants";
 // Components
 import ActivityMenu from "../components/ActivityMenu";
+import ConfirmServiceSwitchWithDrawings from "../../../components/ConfirmServiceSwitchWithDrawings";
 // Views
 import AddView from "./AddView";
 import SaveView from "./SaveView";
@@ -69,7 +70,7 @@ const SketchView = (props) => {
     model.getTextStyleSettings()
   );
 
-  const [ogcSource, setOgcSource] = React.useState("");
+  const [ogcSource, setOgcSource] = React.useState("Ingen");
   const [serviceList, setServiceList] = React.useState([]);
 
   // We want to keep track of the last removed features so that the user can restore
@@ -83,6 +84,23 @@ const SketchView = (props) => {
   const [uploadedFiles, setUploadedFiles] = React.useState([]);
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
+
+  const [drawingsWarningDialog, setDrawingsWarningDialog] = React.useState({
+    open: false,
+    targetService: null,
+    drawingCount: 0,
+  });
+
+  const getDrawnFeaturesCount = React.useCallback(() => {
+    // Find sketch layer
+    const layers = props.map.getLayers().getArray?.() || [];
+    const sketchLayer =
+      layers.find((lyr) => lyr?.get?.("name") === "pluginSketch") || null;
+    const source = sketchLayer.getSource?.();
+    const features = source.getFeatures?.() || [];
+    const visibleFeatures = features.filter((f) => f.get("HIDDEN") !== true);
+    return visibleFeatures.length;
+  }, [props.map]);
 
   React.useEffect(() => {
     const offList = editBus.on("edit:service-list-loaded", (ev) => {
@@ -382,7 +400,25 @@ const SketchView = (props) => {
     );
     const serviceId = selectedService?.id || null;
 
-    // If unsaved changes exist: prevent editor/toolbar from handling dialog+byte shortcuts
+    // Check if user is trying to select a service (not "Ingen")
+    const isSelectingService = newOgcSourceTitle !== "Ingen";
+
+    // If user selects a service AND there are drawn objects, show warning
+    if (isSelectingService && ogcSource === "Ingen") {
+      const drawingCount = getDrawnFeaturesCount();
+
+      if (drawingCount > 0) {
+        // Show warning dialog instead of switching directly
+        setDrawingsWarningDialog({
+          open: true,
+          targetService: { title: newOgcSourceTitle, id: serviceId },
+          drawingCount: drawingCount,
+        });
+        return; // Cancel the switch until user confirms
+      }
+    }
+
+    // Logic for unsaved changes in AttributeEditor
     if (hasUnsaved) {
       editBus.emit("edit:service-switch-requested", {
         source: "sketch",
@@ -392,7 +428,7 @@ const SketchView = (props) => {
       return;
     }
 
-    // Go back directly
+    // Continue with switch
     props.setPluginSettings(
       newOgcSourceTitle === "Ingen"
         ? { title: "Rita", color: PLUGIN_COLORS.default }
@@ -415,6 +451,77 @@ const SketchView = (props) => {
     }
     setOgcSource(newOgcSourceTitle);
   };
+
+  // Add callback to handle user's choice in dialog
+  const handleConfirmServiceSwitchWithDrawings = React.useCallback(() => {
+    const { targetService } = drawingsWarningDialog;
+
+    if (!targetService) return;
+
+    // Close dialog
+    setDrawingsWarningDialog({
+      open: false,
+      targetService: null,
+      drawingCount: 0,
+    });
+
+    // Continue with switch
+    props.setPluginSettings({
+      title: `Redigerar ${targetService.title}`,
+      color: PLUGIN_COLORS.warning,
+    });
+
+    editBus.emit("edit:service-selected", {
+      source: "sketch",
+      id: targetService.id,
+      title: targetService.title,
+      color: PLUGIN_COLORS.warning,
+    });
+
+    setOgcSource(targetService.title);
+
+    // Show notification to user
+    enqueueSnackbar(
+      `Redigeringstjänst vald. ${drawingsWarningDialog.drawingCount} ritade objekt finns kvar i kartan.`,
+      { variant: "info" }
+    );
+  }, [drawingsWarningDialog, props, enqueueSnackbar]);
+
+  const handleClearDrawingsAndSwitch = React.useCallback(() => {
+    const { targetService } = drawingsWarningDialog;
+
+    if (!targetService) return;
+
+    // Remove all drawn objects - use the same method as DeleteView
+    drawModel.removeDrawnFeatures(); // Changed from removeAllFeatures()
+
+    // Close dialog
+    setDrawingsWarningDialog({
+      open: false,
+      targetService: null,
+      drawingCount: 0,
+    });
+
+    // Continue with switch
+    props.setPluginSettings({
+      title: `Redigerar ${targetService.title}`,
+      color: PLUGIN_COLORS.warning,
+    });
+
+    editBus.emit("edit:service-selected", {
+      source: "sketch",
+      id: targetService.id,
+      title: targetService.title,
+      color: PLUGIN_COLORS.warning,
+    });
+
+    setOgcSource(targetService.title);
+
+    // Show confirmation
+    enqueueSnackbar("Ritade objekt borttagna. Redigeringstjänst vald.", {
+      variant: "success",
+    });
+  }, [drawingsWarningDialog, drawModel, props, enqueueSnackbar]);
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
@@ -594,9 +701,28 @@ const SketchView = (props) => {
   // conflict with other user interactions. Therefore, we're rendering either
   // all the way to the left (if the plugin is rendered on the left part of the
   // screen), otherwise, we render it all the way to the right.
-  return pluginPosition === "left"
-    ? renderBaseWindowLeft()
-    : renderBaseWindowRight();
+  return (
+    <>
+      {pluginPosition === "left"
+        ? renderBaseWindowLeft()
+        : renderBaseWindowRight()}
+
+      <ConfirmServiceSwitchWithDrawings
+        open={drawingsWarningDialog.open}
+        onClose={() =>
+          setDrawingsWarningDialog({
+            open: false,
+            targetService: null,
+            drawingCount: 0,
+          })
+        }
+        onConfirm={handleConfirmServiceSwitchWithDrawings}
+        onClearDrawings={handleClearDrawingsAndSwitch}
+        drawingCount={drawingsWarningDialog.drawingCount}
+        targetServiceName={drawingsWarningDialog.targetService?.title || ""}
+      />
+    </>
+  );
 };
 
 export default SketchView;

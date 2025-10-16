@@ -1041,6 +1041,7 @@ function AttributeEditor(props) {
         featureIndexRef={featureIndexRef}
         graveyardRef={graveyardRef}
         draftBaselineRef={draftBaselineRef}
+        map={props.map}
       />
     </BaseWindowPlugin>
   );

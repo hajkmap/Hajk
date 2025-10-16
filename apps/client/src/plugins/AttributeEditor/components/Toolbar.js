@@ -4,6 +4,7 @@ import DynamicFormIcon from "@mui/icons-material/DynamicForm";
 import { editBus } from "../../../buses/editBus";
 import { PLUGIN_COLORS } from "../constants/index";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
+import ConfirmServiceSwitchWithDrawings from "../../../components/ConfirmServiceSwitchWithDrawings";
 
 export default function Toolbar({
   s,
@@ -33,6 +34,8 @@ export default function Toolbar({
   setFrozenSelectedIds,
   searchText,
   setSearchText,
+  map,
+  enqueueSnackbar,
 }) {
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
@@ -40,6 +43,31 @@ export default function Toolbar({
   const [serviceId, setServiceId] = React.useState("NONE_ID");
   const selectedCount =
     mode === "table" ? tableSelectedIds.size : selectedIds.size;
+
+  const [drawingsWarningDialog, setDrawingsWarningDialog] = React.useState({
+    open: false,
+    targetService: null,
+    drawingCount: 0,
+  });
+
+  // Helper
+  const getDrawnFeaturesCount = React.useCallback(() => {
+    if (!map) return 0;
+
+    const layers = map.getLayers().getArray?.() || [];
+    const sketchLayer =
+      layers.find((lyr) => lyr?.get?.("name") === "pluginSketch") || null;
+
+    if (!sketchLayer) return 0;
+
+    const source = sketchLayer.getSource?.();
+    if (!source) return 0;
+
+    const features = source.getFeatures?.() || [];
+    const visibleFeatures = features.filter((f) => f.get("HIDDEN") !== true);
+
+    return visibleFeatures.length;
+  }, [map]);
 
   // Build options: "None" + in command serviceList
   const services = React.useMemo(() => {
@@ -136,6 +164,25 @@ export default function Toolbar({
     const def = services.find((o) => o.id === nextId);
     const label = def?.label ?? "Ingen";
 
+    // Check if user is selecting a service (not "Ingen")
+    const isSelectingService = label !== "Ingen";
+
+    // If selecting service AND currently on "NONE", check for drawings
+    if (isSelectingService && serviceId === "NONE_ID") {
+      const drawingCount = getDrawnFeaturesCount();
+
+      if (drawingCount > 0) {
+        // Show warning dialog
+        setDrawingsWarningDialog({
+          open: true,
+          targetService: { def, label },
+          drawingCount: drawingCount,
+        });
+        return; // Stop here until user confirms
+      }
+    }
+
+    // Check AttributeEditor pending changes
     const pendingCount =
       (tablePendingAdds?.length ?? 0) +
       (tablePendingDeletes?.size ?? 0) +
@@ -147,9 +194,61 @@ export default function Toolbar({
       applyServiceSwitch(def, label);
       return;
     }
+
     pendingTargetRef.current = { def, label };
     setSaveDialogOpen(true);
   }
+
+  const handleConfirmServiceSwitchWithDrawings = React.useCallback(() => {
+    const { def, label } = drawingsWarningDialog.targetService || {};
+
+    setDrawingsWarningDialog({
+      open: false,
+      targetService: null,
+      drawingCount: 0,
+    });
+
+    if (def && label) {
+      applyServiceSwitch(def, label);
+
+      // Show notification
+      enqueueSnackbar(
+        `Redigeringstjänst vald. ${drawingsWarningDialog.drawingCount} ritade objekt finns kvar i kartan.`,
+        { variant: "info" }
+      );
+    }
+  }, [drawingsWarningDialog, applyServiceSwitch, enqueueSnackbar]);
+
+  const handleClearDrawingsAndSwitch = React.useCallback(() => {
+    const { def, label } = drawingsWarningDialog.targetService || {};
+
+    // Remove all drawn objects
+    if (map) {
+      const layers = map.getLayers().getArray?.() || [];
+      const sketchLayer = layers.find(
+        (lyr) => lyr?.get?.("name") === "pluginSketch"
+      );
+      const source = sketchLayer?.getSource?.();
+      if (source) {
+        source.clear();
+      }
+    }
+
+    setDrawingsWarningDialog({
+      open: false,
+      targetService: null,
+      drawingCount: 0,
+    });
+
+    if (def && label) {
+      applyServiceSwitch(def, label);
+
+      // Show notification
+      enqueueSnackbar("Ritade objekt borttagna. Redigeringstjänst vald.", {
+        variant: "success",
+      });
+    }
+  }, [drawingsWarningDialog, applyServiceSwitch, map, enqueueSnackbar]);
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
@@ -323,6 +422,20 @@ export default function Toolbar({
         onConfirm={confirmSave}
         summary={summary}
         saving={savingNow}
+      />
+      <ConfirmServiceSwitchWithDrawings
+        open={drawingsWarningDialog.open}
+        onClose={() =>
+          setDrawingsWarningDialog({
+            open: false,
+            targetService: null,
+            drawingCount: 0,
+          })
+        }
+        onConfirm={handleConfirmServiceSwitchWithDrawings}
+        onClearDrawings={handleClearDrawingsAndSwitch}
+        drawingCount={drawingsWarningDialog.drawingCount}
+        targetServiceName={drawingsWarningDialog.targetService?.label || ""}
       />
     </div>
   );

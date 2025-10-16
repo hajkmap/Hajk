@@ -1045,6 +1045,7 @@ const Sketch = (props) => {
         toggleBufferBtn={toggleBufferBtn}
         setToggleBufferBtn={setToggleBufferBtn}
         setPluginSettings={setPluginSettings}
+        map={props.map}
       />
     </BaseWindowPlugin>
   );

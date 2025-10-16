@@ -20,6 +20,7 @@ import DesktopForm from "./components/DesktopForm";
 import NotificationBar from "./helpers/NotificationBar";
 import { editBus } from "../../buses/editBus";
 import { pickPreferredId } from "./helpers/helpers";
+import { useSnackbar } from "notistack";
 
 export default function AttributeEditorView({
   state,
@@ -38,7 +39,9 @@ export default function AttributeEditorView({
   model,
   draftBaselineRef,
   app,
+  map,
 }) {
+  const { enqueueSnackbar } = useSnackbar();
   const geomUndoRef = React.useRef([]);
   const [geomUndoCount, setGeomUndoCount] = React.useState(0);
   const uniqueCacheRef = useRef(new Map());
@@ -1727,6 +1730,8 @@ export default function AttributeEditorView({
         setFrozenSelectedIds={setFrozenSelectedIds}
         searchText={searchText}
         setSearchText={setSearchText}
+        map={map}
+        enqueueSnackbar={enqueueSnackbar}
       />
 
       {serviceId === "NONE_ID" ? (
