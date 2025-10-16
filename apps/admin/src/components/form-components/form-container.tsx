@@ -7,17 +7,18 @@ interface FormContainerProps {
   className?: string;
   noValidate?: boolean;
   autoComplete?: string;
+  formRef?: React.Ref<HTMLFormElement>;
 }
 
 export default function FormContainer({
   children,
   onSubmit = (e) => {
     e.preventDefault();
-    console.warn("No relevant onSubmit handler provided");
   },
   className = "form-container",
   noValidate = true,
   autoComplete = "off",
+  formRef,
 }: FormContainerProps) {
   return (
     <Box
@@ -27,6 +28,7 @@ export default function FormContainer({
       onSubmit={onSubmit}
       noValidate={noValidate}
       autoComplete={autoComplete}
+      ref={formRef}
     >
       {children}
     </Box>

@@ -18,6 +18,7 @@ import LayerSettings from "./pages/layers/settings.tsx";
 import MapsPage from "./pages/maps/index.tsx";
 import MapSettings from "./pages/maps/settings.tsx";
 import ToolsPage from "./pages/tools/index.tsx";
+import ToolSettings from "./pages/tools/settings";
 
 import useAppStateStore from "./store/use-app-state-store.ts";
 import SettingsPage from "./pages/settings/index.tsx";
@@ -83,6 +84,10 @@ const router = createBrowserRouter(
         {
           path: "tools",
           element: <ToolsPage />,
+        },
+        {
+          path: "tools/:toolName",
+          element: <ToolSettings />,
         },
         {
           path: "services",
