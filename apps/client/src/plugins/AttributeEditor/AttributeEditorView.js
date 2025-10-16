@@ -495,12 +495,12 @@ export default function AttributeEditorView({
 
     let rows = allRows.filter((f) => {
       // Always show negative IDs (new/duplicate)
-      //const isNegativeId = typeof f.id === "number" && f.id < 0;
+      const isNegativeId = typeof f.id === "number" && f.id < 0;
 
       // If "show only first ID" is active, use the FIRST ID:na
       if (
         showOnlySelected &&
-        /*!isNegativeId &&*/
+        !isNegativeId &&
         !frozenSelectedIds.has(f.id) &&
         editingId !== f.id
       ) {
@@ -676,6 +676,22 @@ export default function AttributeEditorView({
     controller.duplicateRows(ids);
     if (typeof start === "number") {
       const created = ids.map((_, i) => start - i);
+
+      // Get the latest state after duplicateRows dispatch
+      const currentState = model.getSnapshot();
+
+      // Set baseline for each duplicated draft to its current values
+      created.forEach((draftId) => {
+        const draft = currentState.pendingAdds?.find?.((d) => d.id === draftId);
+        if (draft) {
+          const baseline = {};
+          fieldMeta.forEach(({ key }) => {
+            baseline[key] = draft[key] ?? "";
+          });
+          draftBaselineRef.current.set(draftId, baseline);
+        }
+      });
+
       setTableSelectedIds(new Set(created));
       cloneGeometryForDuplicates(ids, created);
       editBus.emit("attrib:select-ids", {
@@ -690,7 +706,10 @@ export default function AttributeEditorView({
   }, [
     tableSelectedIds,
     controller,
+    model,
     state.nextTempId,
+    fieldMeta,
+    draftBaselineRef,
     showNotification,
     cloneGeometryForDuplicates,
   ]);
@@ -715,6 +734,22 @@ export default function AttributeEditorView({
 
     if (typeof start === "number" && ids.length) {
       const created = ids.map((_, i) => start - i);
+
+      // Get the latest state after duplicateRows dispatch
+      const currentState = model.getSnapshot();
+
+      // Set baseline for each duplicated draft to its current values
+      created.forEach((draftId) => {
+        const draft = currentState.pendingAdds?.find?.((d) => d.id === draftId);
+        if (draft) {
+          const baseline = {};
+          fieldMeta.forEach(({ key }) => {
+            baseline[key] = draft[key] ?? "";
+          });
+          draftBaselineRef.current.set(draftId, baseline);
+        }
+      });
+
       setSelectedIds(new Set(created));
       setFocusedId(created[0]);
       cloneGeometryForDuplicates(ids, created);
@@ -732,7 +767,10 @@ export default function AttributeEditorView({
     selectedIds,
     focusedId,
     controller,
+    model,
     state.nextTempId,
+    fieldMeta,
+    draftBaselineRef,
     showNotification,
     cloneGeometryForDuplicates,
   ]);
@@ -1279,13 +1317,10 @@ export default function AttributeEditorView({
 
     const filtered = all.filter((row) => {
       // Always show negative IDs (i.e. drafts)
-      //const isNegativeId = typeof row.id === "number" && row.id < 0;
+      const isNegativeId = typeof row.id === "number" && row.id < 0;
 
       // If "Select first" is active, use the FIRST ID
-      if (
-        showOnlySelected &&
-        /*!isNegativeId &&*/ !frozenSelectedIds.has(row.id)
-      ) {
+      if (showOnlySelected && !isNegativeId && !frozenSelectedIds.has(row.id)) {
         return false;
       }
 
