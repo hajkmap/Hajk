@@ -179,11 +179,10 @@ model Service {
   workspace     String?
   getMapUrl     String?
   comment       String?
-  // Audit fields - reusable pattern for tracking creation and last saved
-  createdBy     String? // User ID who created
-  createdDate   DateTime?   @db.Timestamptz(3) // Timestamp when created
-  lastSavedBy   String? // User ID who last saved
-  lastSavedDate DateTime?   @db.Timestamptz(3) // Timestamp when last saved
+  createdBy     String?
+  createdDate   DateTime?   @db.Timestamptz(3)
+  lastSavedBy   String?
+  lastSavedDate DateTime?   @db.Timestamptz(3)
   layers        Layer[]
   metadata      Metadata?   @relation(fields: [metadataId], references: [id])
 
@@ -272,11 +271,10 @@ model Layer {
   timeSliderEnd               String?
   hideExpandArrow             Boolean            @default(false)
   zIndex                      Int                @default(0)
-  // Audit fields - reusable pattern for tracking creation and last saved
-  createdBy                   String? // User ID who created
-  createdDate                 DateTime?          @db.Timestamptz(3) // Timestamp when created
-  lastSavedBy                 String? // User ID who last saved
-  lastSavedDate               DateTime?          @db.Timestamptz(3) // Timestamp when last saved
+  createdBy                   String?
+  createdDate                 DateTime?          @db.Timestamptz(3)
+  lastSavedBy                 String?
+  lastSavedDate               DateTime?          @db.Timestamptz(3)
   restrictedToRoles           RoleOnLayer[]
   instances                   LayerInstance[]
   options                     Json               @default("{}")
