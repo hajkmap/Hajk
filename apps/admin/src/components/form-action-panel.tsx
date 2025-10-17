@@ -2,7 +2,6 @@ import React from "react";
 import { Box, Button, Typography } from "@mui/material";
 import CircularProgress from "../components/progress/circular-progress";
 import { useTranslation } from "react-i18next";
-import useUserStore from "../store/use-user-store";
 import { useUser } from "../api/users";
 
 // This custom component will replace the save/delete panel-buttons on all the forms
@@ -29,7 +28,6 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   children,
 }) => {
   const { t } = useTranslation();
-  const { user } = useUserStore.getState();
   const { data: createdUser } = useUser(createdBy ?? "");
   const { data: lastSavedUser } = useUser(lastSavedBy ?? "");
 
@@ -77,7 +75,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
         {createdBy && createdDate && (
           <Typography variant="body2" color="text.secondary">
             {t("common.createdBy", {
-              createdBy: createdUser?.fullName ?? user?.fullName,
+              createdBy: createdUser?.fullName,
               createdDate: new Date(createdDate).toLocaleString(),
             })}
           </Typography>
@@ -85,7 +83,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
         {lastSavedBy && lastSavedDate && (
           <Typography variant="body2" color="text.secondary">
             {t("common.lastSavedBy", {
-              lastSavedBy: lastSavedUser?.fullName ?? user?.fullName,
+              lastSavedBy: lastSavedUser?.fullName,
               lastSavedDate: new Date(lastSavedDate).toLocaleString(),
             })}
           </Typography>

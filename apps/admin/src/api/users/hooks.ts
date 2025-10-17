@@ -25,8 +25,9 @@ export const useUsers = (): UseQueryResult<User[]> => {
 
 export const useUser = (id: string): UseQueryResult<User> => {
   return useQuery({
-    queryKey: ["users/id"],
+    queryKey: ["users", id],
     queryFn: () => getUserById(id),
+    enabled: !!id,
   });
 };
 
