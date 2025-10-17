@@ -80,7 +80,7 @@ export default function ToolSettings() {
           >
             <FormPanel title={t("common.information")}>
               <Grid container>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="type"
                     control={control}
@@ -95,7 +95,7 @@ export default function ToolSettings() {
                     )}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="options.title"
                     control={control}
@@ -109,7 +109,7 @@ export default function ToolSettings() {
                     )}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="options.description"
                     control={control}
@@ -128,7 +128,7 @@ export default function ToolSettings() {
 
             <FormAccordion title={t("tools.usedInHajk")}>
               <Grid container>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="options.usedInHajk"
                     control={control}
@@ -142,7 +142,7 @@ export default function ToolSettings() {
                     )}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="options.drawOrderViewInfoText"
                     control={control}
@@ -513,7 +513,7 @@ export default function ToolSettings() {
 
             <FormAccordion title={t("tools.textSettings")}>
               <Grid container>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="options.instruction"
                     control={control}
@@ -529,7 +529,7 @@ export default function ToolSettings() {
                     )}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="options.quickAccessTopicsInfoText"
                     control={control}
@@ -547,7 +547,7 @@ export default function ToolSettings() {
                     )}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="options.userQuickAccessFavoritesInfoText"
                     control={control}
@@ -565,7 +565,7 @@ export default function ToolSettings() {
                     )}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="options.themeMapHeaderCaption"
                     control={control}
@@ -584,7 +584,7 @@ export default function ToolSettings() {
 
             <FormAccordion title={t("tools.layoutSettings")}>
               <Grid container>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="options.position"
                     control={control}
@@ -598,7 +598,7 @@ export default function ToolSettings() {
                     )}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="options.target"
                     control={control}
@@ -612,7 +612,7 @@ export default function ToolSettings() {
                     )}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="options.height"
                     control={control}
@@ -626,7 +626,7 @@ export default function ToolSettings() {
                     )}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 10 }}>
                   <Controller
                     name="options.width"
                     control={control}
