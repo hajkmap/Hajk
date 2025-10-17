@@ -15,7 +15,7 @@ import {
 import {
   useServiceById,
   useUpdateService,
-  useDeleteService,
+  //useDeleteService,
   useLayersByServiceId,
   SERVICE_TYPE,
   ServiceUpdateInput,
@@ -60,8 +60,8 @@ export default function ServiceSettings() {
   }));
   const { mutateAsync: updateService, status: updateStatus } =
     useUpdateService();
-  const { mutateAsync: deleteService, status: deleteStatus } =
-    useDeleteService();
+  //const { mutateAsync: deleteService, status: deleteStatus } =
+  //useDeleteService();
   const { data: layersByServiceId } = useLayersByServiceId(serviceId ?? "");
   const count = layersByServiceId?.count ?? 0;
   const { defaultCoordinates } = useAppStateStore.getState();
@@ -164,6 +164,7 @@ export default function ServiceSettings() {
     }
   };
   // TODO?: Add delete service
+  /*
   const handleDeleteService = async () => {
     if (!isLoading && service?.id) {
       try {
@@ -188,7 +189,7 @@ export default function ServiceSettings() {
       console.error("Service data is still loading or unavailable.");
     }
   };
-
+*/
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     void handleSubmit((data: FieldValues) => {
@@ -212,6 +213,10 @@ export default function ServiceSettings() {
         updateStatus={updateStatus}
         onUpdate={handleExternalSubmit}
         saveButtonText="Spara"
+        createdBy={service?.createdBy}
+        createdDate={service?.createdDate}
+        lastSavedBy={service?.lastSavedBy}
+        lastSavedDate={service?.lastSavedDate}
       >
         <FormContainer formRef={formRef} onSubmit={onSubmit} noValidate={false}>
           <FormPanel title={t("common.information")}>

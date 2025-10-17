@@ -59,12 +59,16 @@ class LayersController {
   }
 
   async createLayer(req: Request, res: Response) {
-    const layer = await LayerService.createLayer(req.body);
+    const layer = await LayerService.createLayer(req.body, req.user?.id);
     res.status(HttpStatusCodes.CREATED).json(layer);
   }
 
   async updateLayer(req: Request, res: Response) {
-    const layer = await LayerService.updateLayer(req.params.id, req.body);
+    const layer = await LayerService.updateLayer(
+      req.params.id,
+      req.body,
+      req.user?.id
+    );
     res.status(HttpStatusCodes.OK).json(layer);
   }
 

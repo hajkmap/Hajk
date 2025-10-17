@@ -19,7 +19,7 @@ import { Controller, FieldValues, useForm } from "react-hook-form";
 import UsedInMapsGrid from "./used-in-maps-grid";
 import {
   useLayerById,
-  useDeleteLayer,
+  //useDeleteLayer,
   LayerUpdateInput,
   useUpdateLayer,
   infoClickFormat,
@@ -56,9 +56,9 @@ export default function LayerSettings() {
     layer?.id ?? "",
     !!layer?.id
   );
-  const { mutateAsync: deleteLayer, status: deleteStatus } = useDeleteLayer(
-    service?.id ?? ""
-  );
+  //const { mutateAsync: deleteLayer, status: deleteStatus } = useDeleteLayer(
+  // service?.id ?? ""
+  //);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectGridId, setSelectGridId] = useState<GridRowSelectionModel>();
   const { layers: getCapLayers, styles: getCapStyles } = useServiceCapabilities(
@@ -220,6 +220,7 @@ export default function LayerSettings() {
     }
   };
   // TODO?: Add delete layer
+  /*
   const handleDeleteLayer = async () => {
     if (!isLoading && layer?.id) {
       try {
@@ -241,6 +242,7 @@ export default function LayerSettings() {
       console.log("Layer data is still loading or unavailable.");
     }
   };
+  */
   // removed createOnSubmitHandler; handled inline in FormContainer onSubmit
 
   if (isLoading) {
@@ -256,6 +258,10 @@ export default function LayerSettings() {
         updateStatus={updateStatus}
         onUpdate={handleExternalSubmit}
         saveButtonText="Spara"
+        createdBy={layer?.createdBy}
+        createdDate={layer?.createdDate}
+        lastSavedBy={layer?.lastSavedBy}
+        lastSavedDate={layer?.lastSavedDate}
       >
         <FormContainer
           onSubmit={(e) => {

@@ -31,6 +31,10 @@ export interface Layer {
   hideExpandArrow: boolean;
   zIndex: number;
   style?: string;
+  createdBy?: string;
+  createdDate?: string;
+  lastSavedBy?: string;
+  lastSavedDate?: string;
   metadata: {
     id: string;
     title?: string;
