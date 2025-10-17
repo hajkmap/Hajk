@@ -18,7 +18,10 @@ import LayerSwitcherOrderList from "./components/layerswitcher-dnd-orderlist";
 import { useGroupById } from "../../api/groups";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import { HttpError } from "../../lib/http-error";
-import { useUpdateGroup, useDeleteGroup } from "../../api/groups";
+import {
+  useUpdateGroup,
+  //useDeleteGroup
+} from "../../api/groups";
 import { toast } from "react-toastify";
 import FormContainer from "../../components/form-components/form-container";
 import FormPanel from "../../components/form-components/form-panel";
@@ -28,7 +31,7 @@ function GroupSettings() {
   const { t } = useTranslation();
   const { groupId } = useParams<{ groupId: string }>();
   const { mutateAsync: updateGroup, status: updateStatus } = useUpdateGroup();
-  const { mutateAsync: deleteGroup, status: deleteStatus } = useDeleteGroup();
+  //const { mutateAsync: deleteGroup, status: deleteStatus } = useDeleteGroup();
   const { data: group, isLoading, isError } = useGroupById(groupId ?? "");
   const { palette } = useTheme();
 
@@ -75,6 +78,7 @@ function GroupSettings() {
     }
   };
   // TODO?: Add delete group
+  /*
   const handleDeleteGroup = async () => {
     if (!isLoading && group?.id) {
       try {
@@ -96,7 +100,7 @@ function GroupSettings() {
       console.error("Group data is still loading or unavailable.");
     }
   };
-
+  */
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     void handleSubmit((data: FieldValues) => {

@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Button, Typography } from "@mui/material";
 import CircularProgress from "../components/progress/circular-progress";
 import { useTranslation } from "react-i18next";
-import useUserStore from "../store/use-user-store";
+import { useUser } from "../api/users";
 
 // This custom component will replace the save/delete panel-buttons on all the forms
 
@@ -10,6 +10,9 @@ interface FormActionProps {
   updateStatus: "idle" | "pending" | "success" | "error";
   onUpdate: () => void | Promise<void>;
   saveButtonText?: string;
+  createdBy?: string;
+  createdDate?: string;
+  lastSavedBy?: string;
   lastSavedDate?: string;
   children?: React.ReactNode;
 }
@@ -18,11 +21,15 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   updateStatus,
   onUpdate,
   saveButtonText = "",
+  createdBy,
+  createdDate,
+  lastSavedBy,
   lastSavedDate,
   children,
 }) => {
   const { t } = useTranslation();
-  const { user } = useUserStore.getState();
+  const { data: createdUser } = useUser(createdBy ?? "");
+  const { data: lastSavedUser } = useUser(lastSavedBy ?? "");
 
   return (
     <Box
@@ -65,14 +72,22 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           )}
         </Button>
 
-        <Typography variant="body1">
-          {t("common.lastSavedBy", {
-            lastSavedBy: user?.fullName,
-            lastSavedDate: lastSavedDate
-              ? new Date(lastSavedDate).toLocaleString()
-              : undefined,
-          })}
-        </Typography>
+        {createdBy && createdDate && (
+          <Typography variant="body2" color="text.secondary">
+            {t("common.createdBy", {
+              createdBy: createdUser?.fullName,
+              createdDate: new Date(createdDate).toLocaleString(),
+            })}
+          </Typography>
+        )}
+        {lastSavedBy && lastSavedDate && (
+          <Typography variant="body2" color="text.secondary">
+            {t("common.lastSavedBy", {
+              lastSavedBy: lastSavedUser?.fullName,
+              lastSavedDate: new Date(lastSavedDate).toLocaleString(),
+            })}
+          </Typography>
+        )}
       </Box>
       <Box
         sx={{

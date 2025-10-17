@@ -12,6 +12,9 @@ export interface Service {
   workspace: string;
   getMapUrl: string;
   comment: string;
+  createdBy?: string;
+  createdDate?: string;
+  lastSavedBy?: string;
   lastSavedDate?: string;
   metadata: {
     id: string;

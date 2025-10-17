@@ -48,7 +48,8 @@ class ServicesController {
 
   createService = asyncHandler(async (req: Request, res: Response) => {
     const service = await ServicesService.createService(
-      req.body as ServiceCreateInput
+      req.body as ServiceCreateInput,
+      req.user?.id
     );
     res.status(HttpStatusCodes.CREATED).json(service);
   });
@@ -56,7 +57,8 @@ class ServicesController {
   updateService = asyncHandler(async (req: Request, res: Response) => {
     const service = await ServicesService.updateService(
       req.params.id,
-      req.body as ServiceUpdateInput
+      req.body as ServiceUpdateInput,
+      req.user?.id
     );
     res.status(HttpStatusCodes.OK).json(service);
   });

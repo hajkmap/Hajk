@@ -179,7 +179,10 @@ model Service {
   workspace     String?
   getMapUrl     String?
   comment       String?
-  lastSavedDate DateTime?   @updatedAt @db.Timestamptz(3)
+  createdBy     String?
+  createdDate   DateTime?   @db.Timestamptz(3)
+  lastSavedBy   String?
+  lastSavedDate DateTime?   @db.Timestamptz(3)
   layers        Layer[]
   metadata      Metadata?   @relation(fields: [metadataId], references: [id])
 
@@ -268,6 +271,10 @@ model Layer {
   timeSliderEnd               String?
   hideExpandArrow             Boolean            @default(false)
   zIndex                      Int                @default(0)
+  createdBy                   String?
+  createdDate                 DateTime?          @db.Timestamptz(3)
+  lastSavedBy                 String?
+  lastSavedDate               DateTime?          @db.Timestamptz(3)
   restrictedToRoles           RoleOnLayer[]
   instances                   LayerInstance[]
   options                     Json               @default("{}")

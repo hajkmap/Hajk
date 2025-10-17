@@ -48,12 +48,17 @@ class LayerService {
     return service?.service;
   }
 
-  async createLayer(data: Prisma.LayerCreateInput & { serviceId: string }) {
+  async createLayer(
+    data: Prisma.LayerCreateInput & { serviceId: string },
+    userId?: string
+  ) {
     const { serviceId, ...layerData } = data;
 
     const newLayer = await prisma.layer.create({
       data: {
         ...layerData,
+        createdBy: userId,
+        createdDate: new Date(),
         service: { connect: { id: serviceId } },
         metadata: { create: { ...layerData.metadata } },
         infoClickSettings: { create: { ...layerData.infoClickSettings } },
@@ -66,7 +71,8 @@ class LayerService {
 
   async updateLayer(
     id: string,
-    data: Prisma.LayerUpdateInput & { serviceId: string }
+    data: Prisma.LayerUpdateInput & { serviceId: string },
+    userId?: string
   ) {
     const { serviceId, options, ...layerData } = data;
 
@@ -84,6 +90,8 @@ class LayerService {
       where: { id },
       data: {
         ...layerData,
+        lastSavedBy: userId,
+        lastSavedDate: new Date(),
         options: updatedOptions,
         service: { connect: { id: serviceId } },
         metadata: {

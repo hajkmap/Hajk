@@ -97,7 +97,8 @@ class ServicesService {
     data: Prisma.ServiceCreateInput & {
       projection?: { code: string };
       metadata?: Record<string, unknown>;
-    }
+    },
+    userId?: string
   ) {
     const projectionCode = data?.projection?.code || DEFAULT_PROJECTION_CODE;
     const existingProjection = await prisma.projection.findUnique({
@@ -114,6 +115,8 @@ class ServicesService {
     const newService = await prisma.service.create({
       data: {
         ...serviceData,
+        createdBy: userId,
+        createdDate: new Date(),
         metadata: metadata
           ? {
               create: metadata,
@@ -137,13 +140,18 @@ class ServicesService {
     data: Prisma.ServiceUpdateInput & {
       projection?: { code: string };
       metadata?: Record<string, unknown>;
-    }
+    },
+    userId?: string
   ) {
     // Transform user input to Prisma format
     const { projection, metadata, ...serviceData } = data;
 
     // Build the update data object conditionally
-    const updateData: Record<string, unknown> = { ...serviceData };
+    const updateData: Record<string, unknown> = {
+      ...serviceData,
+      lastSavedBy: userId,
+      lastSavedDate: new Date(),
+    };
 
     // Handle projection update
     if (projection?.code) {
