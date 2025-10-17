@@ -1,31 +1,18 @@
-import { Button } from "@mui/material";
-import { useTranslation } from "react-i18next";
-import { useMaps } from "../../api/maps";
-import Page from "../../layouts/root/components/page";
-import MapsTable from "./components/maps-table";
+import { Map } from "../../api/maps";
+import MapsList from "./components/maps-list";
+
+// Filter function for all maps
+const filterAllMaps = (maps: Map[]): Map[] => {
+  return maps;
+};
 
 export default function MapsPage() {
-  const { t } = useTranslation();
-  const { data: maps, isLoading } = useMaps();
-
   return (
-    <Page
-      title={t("common.maps") + (maps && ` (${maps.length})`)}
-      actionButtons={
-        <>
-          <Button color="primary" variant="contained">
-            {t("map.createMap")}
-          </Button>
-        </>
-      }
-    >
-      {isLoading ? (
-        <div>{t("common.loading")}</div>
-      ) : (
-        <>
-          <MapsTable />
-        </>
-      )}
-    </Page>
+    <MapsList
+      filterMaps={filterAllMaps}
+      showCreateButton={true}
+      pageTitleKey="common.maps"
+      baseRoute="/maps"
+    />
   );
 }
