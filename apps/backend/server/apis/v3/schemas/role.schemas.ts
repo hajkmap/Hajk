@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Base schemas
 const RoleOnUserSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
   roleId: z.string().min(1, "Role ID is required"),
@@ -31,7 +30,6 @@ const RoleOnGroupSchema = z.object({
   roleId: z.string().min(1, "Role ID is required"),
 });
 
-// Create schemas
 export const RoleCreateSchema = z.object({
   code: z.string().min(1, "Role code is required"),
   title: z.string().optional(),
@@ -75,7 +73,6 @@ export const RoleOnGroupCreateSchema = z.object({
   roleId: z.string().min(1, "Role ID is required"),
 });
 
-// Update schemas
 export const RoleUpdateSchema = z.object({
   code: z.string().min(1, "Role code is required").optional(),
   title: z.string().optional(),
@@ -122,7 +119,6 @@ export const RoleOnGroupUpdateSchema = z.object({
   roleId: z.string().min(1, "Role ID is required").optional(),
 });
 
-// Type exports
 export type RoleCreateInput = z.infer<typeof RoleCreateSchema>;
 export type RoleOnUserCreateInput = z.infer<typeof RoleOnUserCreateSchema>;
 export type RoleOnMapCreateInput = z.infer<typeof RoleOnMapCreateSchema>;

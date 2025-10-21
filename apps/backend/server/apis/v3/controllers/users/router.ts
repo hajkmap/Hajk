@@ -4,9 +4,11 @@ import { validatePayload } from "../../middlewares/payload.validation.ts";
 import {
   LocalAccountCreateSchema,
   LocalAccountUpdateSchema,
+} from "../../schemas/user.schemas.ts";
+import {
   RoleCreateSchema,
   RoleUpdateSchema,
-} from "../../schemas/user.schemas.ts";
+} from "../../schemas/role.schemas.ts";
 
 export default express
   .Router()

@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Base schemas for nested objects
 const MetadataSchema = z.object({
   description: z.string().nullable().optional(),
   owner: z.string().nullable().optional(),
@@ -11,7 +10,6 @@ const ProjectionSchema = z.object({
   code: z.string().min(1, "Projection code is required"),
 });
 
-// Service type and server type enums
 const ServiceTypeSchema = z.enum([
   "ARCGIS",
   "VECTOR",
@@ -22,7 +20,6 @@ const ServiceTypeSchema = z.enum([
 ]);
 const ServerTypeSchema = z.enum(["QGIS_SERVER", "GEOSERVER"]);
 
-// Main service schemas
 export const ServiceCreateSchema = z.object({
   name: z.string().min(1, "Service name is required"),
   url: z.url("Valid URL is required"),
@@ -34,9 +31,7 @@ export const ServiceCreateSchema = z.object({
   getMapUrl: z.string().optional(),
   comment: z.string().nullable().optional(),
   locked: z.boolean().default(false),
-  // User-friendly format for projection
   projection: ProjectionSchema,
-  // User-friendly format for metadata
   metadata: MetadataSchema.optional(),
 });
 
@@ -51,12 +46,9 @@ export const ServiceUpdateSchema = z.object({
   getMapUrl: z.string().nullable().optional(),
   comment: z.string().nullable().optional(),
   locked: z.boolean().optional(),
-  // User-friendly format for projection
   projection: ProjectionSchema.optional(),
-  // User-friendly format for metadata
   metadata: MetadataSchema.optional(),
 });
 
-// Type exports for TypeScript
 export type ServiceCreateInput = z.infer<typeof ServiceCreateSchema>;
 export type ServiceUpdateInput = z.infer<typeof ServiceUpdateSchema>;

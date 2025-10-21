@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Enums
 const ServiceTypeSchema = z.enum([
   "ARCGIS",
   "VECTOR",
@@ -12,9 +11,7 @@ const ServiceTypeSchema = z.enum([
 const ServerTypeSchema = z.enum(["QGIS_SERVER", "GEOSERVER"]);
 const SearchOutputFormatSchema = z.enum(["GML2", "GML3", "GML32"]);
 const UseTypeSchema = z.enum(["BACKGROUND", "FOREGROUND"]);
-const GroupTypeSchema = z.enum(["Layer", "Search"]);
 
-// Base schemas
 const MetadataSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
@@ -58,7 +55,6 @@ const SearchSettingsSchema = z.object({
   geometryField: z.string().optional(),
 });
 
-// Create schemas
 export const LayerCreateSchema = z.object({
   name: z.string().min(1, "Layer name is required"),
   internalName: z.string().optional(),
@@ -89,7 +85,6 @@ export const LayerCreateSchema = z.object({
   hideExpandArrow: z.boolean().default(false),
   zIndex: z.number().default(0),
   options: z.record(z.string(), z.unknown()).default({}),
-  // Relations
   service: ServiceSchema.optional(),
   metadata: MetadataSchema.optional(),
   infoClickSettings: InfoClickSettingsSchema.optional(),
@@ -105,13 +100,6 @@ export const LayerInstanceCreateSchema = z.object({
   visibleAtStart: z.boolean().default(false),
   zIndex: z.number().default(0),
   options: z.record(z.string(), z.unknown()).default({}),
-});
-
-export const GroupCreateSchema = z.object({
-  name: z.string().min(1, "Group name is required"),
-  internalName: z.string().optional(),
-  type: GroupTypeSchema.default("Layer"),
-  locked: z.boolean().default(false),
 });
 
 export const MetadataCreateSchema = z.object({
@@ -145,7 +133,6 @@ export const SearchSettingsCreateSchema = z.object({
   geometryField: z.string().optional(),
 });
 
-// Update schemas
 export const LayerUpdateSchema = z.object({
   name: z.string().min(1, "Layer name is required").optional(),
   internalName: z.string().optional(),
@@ -176,7 +163,6 @@ export const LayerUpdateSchema = z.object({
   hideExpandArrow: z.boolean().optional(),
   zIndex: z.number().optional(),
   options: z.record(z.string(), z.unknown()).optional(),
-  // Relations
   service: ServiceSchema.optional(),
   metadata: MetadataSchema.optional(),
   infoClickSettings: InfoClickSettingsSchema.optional(),
@@ -192,13 +178,6 @@ export const LayerInstanceUpdateSchema = z.object({
   visibleAtStart: z.boolean().optional(),
   zIndex: z.number().optional(),
   options: z.record(z.string(), z.unknown()).optional(),
-});
-
-export const GroupUpdateSchema = z.object({
-  name: z.string().min(1, "Group name is required").optional(),
-  internalName: z.string().optional(),
-  type: GroupTypeSchema.optional(),
-  locked: z.boolean().optional(),
 });
 
 export const MetadataUpdateSchema = z.object({
@@ -232,12 +211,10 @@ export const SearchSettingsUpdateSchema = z.object({
   geometryField: z.string().optional(),
 });
 
-// Type exports
 export type LayerCreateInput = z.infer<typeof LayerCreateSchema>;
 export type LayerInstanceCreateInput = z.infer<
   typeof LayerInstanceCreateSchema
 >;
-export type GroupCreateInput = z.infer<typeof GroupCreateSchema>;
 export type MetadataCreateInput = z.infer<typeof MetadataCreateSchema>;
 export type InfoClickSettingsCreateInput = z.infer<
   typeof InfoClickSettingsCreateSchema
@@ -249,7 +226,6 @@ export type LayerUpdateInput = z.infer<typeof LayerUpdateSchema>;
 export type LayerInstanceUpdateInput = z.infer<
   typeof LayerInstanceUpdateSchema
 >;
-export type GroupUpdateInput = z.infer<typeof GroupUpdateSchema>;
 export type MetadataUpdateInput = z.infer<typeof MetadataUpdateSchema>;
 export type InfoClickSettingsUpdateInput = z.infer<
   typeof InfoClickSettingsUpdateSchema
