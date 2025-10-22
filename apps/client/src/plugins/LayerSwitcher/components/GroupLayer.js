@@ -42,6 +42,9 @@ function GroupLayer({
   };
 
   const lowercaseFilterValue = filterValue?.toLocaleLowerCase();
+  // Check if the GroupLayer itself is a filter hit
+  const isGroupLayerHit = filterHits && filterHits.has(layerId);
+
   // Find out which (if any) sublayer is the filter hit
   const subLayersToShow = filterHits
     ? allSubLayers.filter((sl) => {
@@ -54,6 +57,11 @@ function GroupLayer({
 
   // Is the filter hit on a sub layer or on the GroupLayer Captions?
   const isSubLayerFilterHit = filterHits && subLayersToShow.length > 0;
+
+  // If the GroupLayer itself is a hit, show all subLayers regardless of filter
+  // But if only subLayers match the filter, show only those
+  const filterSubLayersToShow =
+    isGroupLayerHit && !isSubLayerFilterHit ? allSubLayers : subLayersToShow;
 
   const handleLayerItemClick = () => {
     if (layerIsToggled) {
@@ -83,10 +91,8 @@ function GroupLayer({
       ? false
       : showSublayers || isSubLayerFilterHit;
 
-  // If there is an active search we don't want to show the expand arrow since
-  // it does not do anything.
-  const showExpandArrow =
-    layerInfo.hideExpandArrow !== true && !isSubLayerFilterHit;
+  // Show expand arrow unless hideExpandArrow is set to true
+  const showExpandArrow = layerInfo.hideExpandArrow !== true;
 
   return (
     <LayerItem
@@ -184,7 +190,7 @@ function GroupLayer({
       subLayersSection={
         <Collapse in={subLayerSectionOpen} unmountOnExit>
           <Box sx={{ marginLeft: 3 }}>
-            {subLayersToShow?.map((subLayer) => (
+            {filterSubLayersToShow?.map((subLayer) => (
               <SubLayerItem
                 key={subLayer}
                 subLayer={subLayer}
