@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LayerSwitcher: Info for groups now shows the same button as info for regular layers and group layers. This solution is compatible with existing configurations. [PR](https://github.com/hajkmap/Hajk/pull/1699)
 - Infoclick: Fix bug where true/false values could be switched if certain conditions in the underlying database were met. [issue](https://github.com/hajkmap/Hajk/issues/1698)
 - Client: Show an Access Denied message if Backend returns 403. Closes [issue](https://github.com/hajkmap/Hajk/issues/1705)
+- LayerSwitcher: It is now possible to search on a LayerGroup name. GroupLayer search now supports expanding and showing sublayers, which was not possible before. Closes [issue](https://github.com/hajkmap/Hajk/issues/1722)
 
 ### Security
 
