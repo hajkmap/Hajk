@@ -43,12 +43,16 @@ class MapsController {
   }
 
   async createMap(req: Request, res: Response) {
-    const map = await MapService.createMap(req.body);
+    const map = await MapService.createMap(req.body, req.user?.id);
     res.status(HttpStatusCodes.CREATED).json(map);
   }
 
   async updateMap(req: Request, res: Response) {
-    const map = await MapService.updateMap(req.params.mapName, req.body);
+    const map = await MapService.updateMap(
+      req.params.mapName,
+      req.body,
+      req.user?.id
+    );
     res.status(HttpStatusCodes.OK).json(map);
   }
 

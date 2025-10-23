@@ -195,15 +195,29 @@ class MapService {
     return tools;
   }
 
-  async createMap(data: Prisma.MapCreateInput) {
-    const newMap = await prisma.map.create({ data });
+  async createMap(data: Prisma.MapCreateInput, userId?: string) {
+    const newMap = await prisma.map.create({
+      data: {
+        ...data,
+        createdBy: userId,
+        createdDate: new Date(),
+      },
+    });
     return newMap;
   }
 
-  async updateMap(mapName: string, data: Prisma.MapUpdateInput) {
+  async updateMap(
+    mapName: string,
+    data: Prisma.MapUpdateInput,
+    userId?: string
+  ) {
     const updatedMap = await prisma.map.update({
       where: { name: mapName },
-      data,
+      data: {
+        ...data,
+        lastSavedBy: userId,
+        lastSavedDate: new Date(),
+      },
     });
     return updatedMap;
   }

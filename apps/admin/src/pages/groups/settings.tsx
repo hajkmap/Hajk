@@ -127,6 +127,10 @@ function GroupSettings() {
         updateStatus={updateStatus}
         onUpdate={handleExternalSubmit}
         saveButtonText="Spara"
+        createdBy={group?.createdBy}
+        createdDate={group?.createdDate}
+        lastSavedBy={group?.lastSavedBy}
+        lastSavedDate={group?.lastSavedDate}
       >
         <FormContainer onSubmit={onSubmit} formRef={formRef} noValidate={false}>
           <FormPanel title={t("common.information")}>

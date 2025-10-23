@@ -2,6 +2,10 @@ export interface Tool {
   id: string;
   type: string;
   options: Record<string, string>;
+  createdBy?: string;
+  createdDate?: string;
+  lastSavedBy?: string;
+  lastSavedDate?: string;
 }
 
 export interface ToolsApiResponse {

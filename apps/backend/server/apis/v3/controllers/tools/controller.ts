@@ -31,5 +31,24 @@ class ToolsController {
       .status(HttpStatusCodes.OK)
       .json({ count: mapsWithTool.length, maps: mapsWithTool });
   }
+
+  async createTool(req: Request, res: Response) {
+    const tool = await ToolService.createTool(req.body, req.user?.id);
+    res.status(HttpStatusCodes.CREATED).json(tool);
+  }
+
+  async updateTool(req: Request, res: Response) {
+    const tool = await ToolService.updateTool(
+      req.params.id,
+      req.body,
+      req.user?.id
+    );
+    res.status(HttpStatusCodes.OK).json(tool);
+  }
+
+  async deleteTool(req: Request, res: Response) {
+    await ToolService.deleteTool(req.params.id);
+    res.status(HttpStatusCodes.NO_CONTENT).send();
+  }
 }
 export default new ToolsController();

@@ -3,6 +3,10 @@ export interface Map {
   name: string;
   locked: boolean;
   options?: Record<string, string>;
+  createdBy?: string;
+  createdDate?: string;
+  lastSavedBy?: string;
+  lastSavedDate?: string;
 }
 
 export interface Group {

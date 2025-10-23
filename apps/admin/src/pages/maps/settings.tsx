@@ -17,7 +17,12 @@ import {
   ButtonGroup,
 } from "@mui/material";
 import { Controller, FieldValues, useForm } from "react-hook-form";
-import { useMapByName, MapMutation, useUpdateMap } from "../../api/maps";
+import {
+  useMapByName,
+  MapMutation,
+  useUpdateMap,
+  useMaps,
+} from "../../api/maps";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import FormActionPanel from "../../components/form-action-panel";
 import { toast } from "react-toastify";
@@ -30,11 +35,12 @@ import ToolSwitcherOrderList from "./components/toolswitcher-dnd-orderlist";
 
 export default function MapSettings() {
   const { t } = useTranslation();
-  const { mapName } = useParams<{ mapName: string }>();
+  const { mapId } = useParams();
+  const { data: maps } = useMaps();
+  const mapName = maps?.find((m) => m.id == mapId)?.name;
   const { data: map, isLoading, isError } = useMapByName(mapName ?? "");
   const { mutateAsync: updateMap, status: updateStatus } = useUpdateMap();
   const { palette } = useTheme();
-
   const formRef = useRef<HTMLFormElement | null>(null);
   const [activeTab, setActiveTab] = useState<"menu" | "settings" | "tools">(
     "settings"
@@ -114,6 +120,10 @@ export default function MapSettings() {
         updateStatus={updateStatus}
         onUpdate={handleExternalSubmit}
         saveButtonText="Spara"
+        createdBy={map?.createdBy}
+        createdDate={map?.createdDate}
+        lastSavedBy={map?.lastSavedBy}
+        lastSavedDate={map?.lastSavedDate}
       >
         {activeTab === "settings" && (
           <FormContainer

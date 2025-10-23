@@ -34,6 +34,35 @@ class ToolService {
 
     return maps;
   }
+
+  async createTool(data: Prisma.ToolCreateInput, userId?: string) {
+    return await prisma.tool.create({
+      data: {
+        ...data,
+        createdBy: userId,
+        createdDate: new Date(),
+        lastSavedBy: userId,
+        lastSavedDate: new Date(),
+      },
+    });
+  }
+
+  async updateTool(id: number, data: Prisma.ToolUpdateInput, userId?: string) {
+    return await prisma.tool.update({
+      where: { id },
+      data: {
+        ...data,
+        lastSavedBy: userId,
+        lastSavedDate: new Date(),
+      },
+    });
+  }
+
+  async deleteTool(id: number) {
+    return await prisma.tool.delete({
+      where: { id },
+    });
+  }
 }
 
 export default new ToolService();

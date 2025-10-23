@@ -106,6 +106,10 @@ model Map {
   locked            Boolean         @default(false)
   name              String          @unique
   options           Json            @default("{}")
+  createdBy         String?
+  createdDate       DateTime?       @db.Timestamptz(3) // Timestamp when created
+  lastSavedBy       String?
+  lastSavedDate     DateTime?       @db.Timestamptz(3) // Timestamp when last saved
   projections       Projection[]
   tools             ToolsOnMaps[]
   layers            LayerInstance[]
@@ -118,6 +122,10 @@ model Tool {
   locked            Boolean       @default(false)
   type              String
   options           Json          @default("{}")
+  createdBy         String?
+  createdDate       DateTime?     @db.Timestamptz(3) // Timestamp when created
+  lastSavedBy       String?
+  lastSavedDate     DateTime?     @db.Timestamptz(3) // Timestamp when last saved
   maps              ToolsOnMaps[]
   restrictedToRoles RoleOnTool[]
 }
@@ -152,6 +160,10 @@ model Group {
   name              String
   internalName      String?
   type              GroupType       @default(Layer)
+  createdBy         String?
+  createdDate       DateTime?       @db.Timestamptz(3) // Timestamp when created
+  lastSavedBy       String?
+  lastSavedDate     DateTime?       @db.Timestamptz(3) // Timestamp when last saved
   layers            LayerInstance[]
   maps              GroupsOnMaps[]
   restrictedToRoles RoleOnGroup[]

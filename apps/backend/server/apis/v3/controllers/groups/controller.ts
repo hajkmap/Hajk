@@ -34,11 +34,15 @@ class GroupsController {
     res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
   }
   async createGroup(req: Request, res: Response) {
-    const group = await GroupsService.createGroup(req.body);
+    const group = await GroupsService.createGroup(req.body, req.user?.id);
     res.status(HttpStatusCodes.CREATED).json(group);
   }
   async updateGroup(req: Request, res: Response) {
-    const group = await GroupsService.updateGroup(req.params.id, req.body);
+    const group = await GroupsService.updateGroup(
+      req.params.id,
+      req.body,
+      req.user?.id
+    );
     res.status(HttpStatusCodes.OK).json(group);
   }
   async deleteGroup(req: Request, res: Response) {

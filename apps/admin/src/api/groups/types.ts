@@ -4,6 +4,10 @@ export interface Group {
   name: string;
   internalName?: string;
   type: GroupType;
+  createdBy?: string;
+  createdDate?: string;
+  lastSavedBy?: string;
+  lastSavedDate?: string;
 }
 
 export interface GroupsApiResponse {

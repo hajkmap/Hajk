@@ -41,15 +41,29 @@ class GroupsService {
 
     return maps;
   }
-  async createGroup(data: Prisma.GroupCreateInput) {
+  async createGroup(data: Prisma.GroupCreateInput, userId?: string) {
     return await prisma.group.create({
-      data,
+      data: {
+        ...data,
+        createdBy: userId,
+        createdDate: new Date(),
+        lastSavedBy: userId,
+        lastSavedDate: new Date(),
+      },
     });
   }
-  async updateGroup(id: string, data: Prisma.GroupUpdateInput) {
+  async updateGroup(
+    id: string,
+    data: Prisma.GroupUpdateInput,
+    userId?: string
+  ) {
     return await prisma.group.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        lastSavedBy: userId,
+        lastSavedDate: new Date(),
+      },
     });
   }
   async deleteGroup(id: string) {

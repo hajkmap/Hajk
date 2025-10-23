@@ -64,6 +64,10 @@ export default function ToolSettings() {
         updateStatus="idle"
         onUpdate={handleExternalSubmit}
         saveButtonText={t("common.dialog.saveBtn")}
+        createdBy={tool?.createdBy}
+        createdDate={tool?.createdDate}
+        lastSavedBy={tool?.lastSavedBy}
+        lastSavedDate={tool?.lastSavedDate}
       >
         {loading ? (
           <Typography variant="h6">{t("common.loading")}</Typography>
