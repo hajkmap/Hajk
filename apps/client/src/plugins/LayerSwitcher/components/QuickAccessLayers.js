@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import LayerItem from "./LayerItem";
 import BackgroundLayer from "./BackgroundLayer";
 import GroupLayer from "./GroupLayer";
+import LayerGroup from "./LayerGroup";
 import { Box } from "@mui/material";
 
 export default function QuickAccessLayers({
@@ -11,6 +12,7 @@ export default function QuickAccessLayers({
   filterValue,
   layersState,
   staticLayerConfig,
+  staticLayerTree,
 }) {
   // State that contains the layers that are currently visible
   const [quickAccessLayers, setQuickAccessLayers] = useState([]);
@@ -61,6 +63,27 @@ export default function QuickAccessLayers({
     }
   }, [map, filterValue]);
 
+  // Helper function to find which LayerGroup (if any) a layer belongs to
+  const findLayerGroup = useCallback((layerId, tree) => {
+    if (!tree || !Array.isArray(tree)) return null;
+
+    for (const group of tree) {
+      // Check if this layer is a direct child of this group
+      if (group.children) {
+        const hasLayer = group.children.some((child) => child.id === layerId);
+        if (hasLayer) {
+          return group;
+        }
+      }
+
+      const foundGroup = findLayerGroup(layerId, group.children);
+      if (foundGroup) {
+        return foundGroup;
+      }
+    }
+    return null;
+  }, []);
+
   // On component mount, update the list and subscribe to events
   useEffect(() => {
     // Register a listener: when any layer's quickaccess flag changes make sure
@@ -87,6 +110,111 @@ export default function QuickAccessLayers({
     };
   }, [globalObserver, getQuickAccessLayers]);
 
+  const createFilteredGroup = useCallback(
+    (group, quickAccessLayerIds) => {
+      if (!group || !group.children) {
+        return null;
+      }
+
+      const filteredChildren = group.children
+        .map((child) => {
+          if (quickAccessLayerIds.has(child.id)) {
+            return child;
+          }
+          if (staticLayerConfig[child.id]?.layerType === "group") {
+            const filteredChild = createFilteredGroup(
+              child,
+              quickAccessLayerIds
+            );
+            return filteredChild;
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      if (filteredChildren.length === 0) {
+        return null;
+      }
+
+      return {
+        ...group,
+        children: filteredChildren,
+      };
+    },
+    [staticLayerConfig]
+  );
+
+  const quickAccessLayerIds = new Set(
+    quickAccessLayers.map((l) => l.get("name"))
+  );
+
+  const isGroupContainedIn = useCallback(
+    (childGroup, parentGroup) => {
+      if (!parentGroup || !parentGroup.children) return false;
+
+      if (parentGroup.children.some((child) => child.id === childGroup.id)) {
+        return true;
+      }
+
+      for (const child of parentGroup.children) {
+        const childConfig = staticLayerConfig[child.id];
+        if (childConfig?.layerType === "group") {
+          if (isGroupContainedIn(childGroup, child)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    },
+    [staticLayerConfig]
+  );
+
+  const layersByGroup = {};
+  quickAccessLayers.forEach((l) => {
+    const layerId = l.get("name");
+    const directGroup = findLayerGroup(layerId, staticLayerTree);
+
+    if (directGroup) {
+      if (!layersByGroup[directGroup.id]) {
+        layersByGroup[directGroup.id] = {
+          group: directGroup,
+          layers: [],
+        };
+      }
+      layersByGroup[directGroup.id].layers.push(l);
+    } else {
+      if (!layersByGroup["ungrouped"]) {
+        layersByGroup["ungrouped"] = {
+          group: null,
+          layers: [],
+        };
+      }
+      layersByGroup["ungrouped"].layers.push(l);
+    }
+  });
+
+  const filteredGroupsToRender = Object.values(layersByGroup).filter(
+    (groupData) => {
+      if (!groupData.group) return true;
+
+      for (const otherGroupData of Object.values(layersByGroup)) {
+        if (
+          !otherGroupData.group ||
+          otherGroupData.group.id === groupData.group.id
+        ) {
+          continue;
+        }
+
+        if (isGroupContainedIn(groupData.group, otherGroupData.group)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+  );
+
   return (
     <Box
       sx={{
@@ -95,44 +223,70 @@ export default function QuickAccessLayers({
         },
       }}
     >
-      {quickAccessLayers.map((l) => {
-        const layerId = l.get("name");
-        const layerState = layersState[layerId];
+      {filteredGroupsToRender.map((groupData) => {
+        if (groupData.group) {
+          const filteredGroup = createFilteredGroup(
+            groupData.group,
+            quickAccessLayerIds
+          );
+          if (!filteredGroup) {
+            return null;
+          }
 
-        const layerConfig = staticLayerConfig[layerId];
-        if (!layerConfig) {
-          return null;
+          return (
+            <LayerGroup
+              key={`group-${groupData.group.id}`}
+              staticGroupTree={filteredGroup}
+              staticLayerConfig={staticLayerConfig}
+              layersState={layersState}
+              globalObserver={globalObserver}
+              filterHits={null}
+              filterValue={null}
+              isFirstGroup={false}
+              limitToggleToTree={true}
+            />
+          );
+        } else {
+          return groupData.layers.map((l) => {
+            const layerId = l.get("name");
+            const layerState = layersState[layerId];
+            const layerConfig = staticLayerConfig[layerId];
+
+            if (!layerConfig) {
+              return null;
+            }
+
+            return l.get("layerType") === "base" ? (
+              <BackgroundLayer
+                key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
+                layer={l}
+                globalObserver={globalObserver}
+                draggable={false}
+                toggleable={true}
+              ></BackgroundLayer>
+            ) : l.get("layerType") === "groupLayer" ? (
+              <GroupLayer
+                key={l.ol_uid}
+                layerState={layerState}
+                layerConfig={layerConfig}
+                globalObserver={globalObserver}
+                toggleable={true}
+                draggable={false}
+                isGroupLayerQuickAccess={l.get("quickAccess") === true}
+              ></GroupLayer>
+            ) : (
+              <LayerItem
+                key={l.ol_uid}
+                layerState={layerState}
+                layerConfig={layerConfig}
+                draggable={false}
+                toggleable={true}
+                globalObserver={globalObserver}
+                isLayerQuickAccess={l.get("quickAccess") === true}
+              />
+            );
+          });
         }
-
-        return l.get("layerType") === "base" ? (
-          <BackgroundLayer
-            key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
-            layer={l}
-            globalObserver={globalObserver}
-            draggable={false}
-            toggleable={true}
-          ></BackgroundLayer>
-        ) : l.get("layerType") === "group" ? (
-          <GroupLayer
-            key={l.ol_uid}
-            layerState={layerState}
-            layerConfig={layerConfig}
-            globalObserver={globalObserver}
-            toggleable={true}
-            draggable={false}
-            isGroupLayerQuickAccess={l.get("quickAccess") === true}
-          ></GroupLayer>
-        ) : (
-          <LayerItem
-            key={l.ol_uid}
-            layerState={layerState}
-            layerConfig={layerConfig}
-            draggable={false}
-            toggleable={true}
-            globalObserver={globalObserver}
-            isLayerQuickAccess={l.get("quickAccess") === true}
-          />
-        );
       })}
     </Box>
   );

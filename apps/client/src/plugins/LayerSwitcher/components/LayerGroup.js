@@ -106,6 +106,7 @@ const LayerGroup = ({
   isFirstGroup,
   isFirstChild,
   parentGroupHit,
+  limitToggleToTree,
 }) => {
   const children = staticGroupTree.children;
 
@@ -191,10 +192,17 @@ const LayerGroup = ({
             toggleable={groupIsToggable}
             toggleState={toggleState}
             clickHandler={() => {
-              if (isToggled) {
-                layerSwitcherDispatch.setGroupVisibility(groupId, false);
+              if (limitToggleToTree) {
+                const nextVisible = !isToggled;
+                allLeafLayersInGroup.forEach((leafId) => {
+                  layerSwitcherDispatch.setLayerVisibility(leafId, nextVisible);
+                });
               } else {
-                layerSwitcherDispatch.setGroupVisibility(groupId, true);
+                if (isToggled) {
+                  layerSwitcherDispatch.setGroupVisibility(groupId, false);
+                } else {
+                  layerSwitcherDispatch.setGroupVisibility(groupId, true);
+                }
               }
             }}
           />
