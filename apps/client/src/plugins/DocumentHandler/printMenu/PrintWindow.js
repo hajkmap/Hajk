@@ -352,6 +352,19 @@ class PrintWindow extends React.PureComponent {
             h6 {
               page-break-after: avoid;
             }
+            img {
+              max-width: 100% !important;
+              height: auto !important;
+              display: block;
+              margin: 0.5em 0 !important;
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            figure {
+              margin: 0.5em 0 !important;
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
             .MuiTypography-body1 {
               page-break-before: avoid;
             }
