@@ -17,6 +17,18 @@ import {
 import { buildWfsTransactionXml } from "./ogc/wfs/transaction-builder.js";
 import { parseTransactionResponse } from "./ogc/wfs/transaction-response.js";
 
+// Helper function to strip milliseconds from ISO date strings
+const stripMilliseconds = (value) => {
+  if (
+    typeof value === "string" &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+/.test(value)
+  ) {
+    // Remove the .xxx part (milliseconds), keep the rest
+    return value.replace(/\.\d+/, "");
+  }
+  return value;
+};
+
 /** ===== Internal function: get WFST layer from config ===== */
 async function getWFSTStore({ user = null, washContent = true } = {}) {
   const store = await ConfigService.getLayersStore(user, washContent);
@@ -398,6 +410,20 @@ export async function commitWFSTTransaction(params) {
 
   const formattedDeletes = deletes.map(formatFeatureId);
 
+  // Clean milliseconds from date fields for Oracle compatibility
+  const cleanDateFields = (feature) => ({
+    ...feature,
+    properties: Object.fromEntries(
+      Object.entries(feature.properties || {}).map(([key, value]) => [
+        key,
+        stripMilliseconds(value),
+      ])
+    ),
+  });
+
+  const cleanedInserts = inserts.map(cleanDateFields);
+  const cleanedUpdates = formattedUpdates.map(cleanDateFields);
+
   // Pass namespace and formatted IDs
   const transactionXml = buildWfsTransactionXml({
     version: layer.wfsVersion || "1.1.0",
@@ -405,10 +431,14 @@ export async function commitWFSTTransaction(params) {
     srsName: effectiveSrsName,
     geometryName: layer.geometryField || "geometry",
     namespace: layer.namespace, // Pass namespace for GeoServer
-    inserts,
-    updates: formattedUpdates,
+    inserts: cleanedInserts,
+    updates: cleanedUpdates,
     deletes: formattedDeletes,
   });
+
+  console.log("=== WFS-T XML som skickas till QGIS ===");
+  console.log(transactionXml);
+  console.log("=== Slut på XML ===");
 
   logger.debug("Sending WFS-T transaction", {
     url: layer.url,

@@ -73,7 +73,7 @@ export function renderTableCellDisplay({ meta, value, s }) {
   // DATETIME
   if (meta.type === "datetime") {
     const sVal = String(value ?? "");
-    return <span>{sVal ? sVal.slice(0, 16).replace("T", " ") : ""}</span>;
+    return <span>{sVal ? sVal.slice(0, 19).replace("T", " ") : ""}</span>;
   }
 
   // MULTISELECT
@@ -230,12 +230,13 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
 
   // datetime/timestamp
   if (meta.type === "datetime") {
-    const toLocal = (val) => (!val ? "" : String(val).slice(0, 16)); // YYYY-MM-DDTHH:mm
+    const toLocal = (val) => (!val ? "" : String(val).slice(0, 19)); // YYYY-MM-DDTHH:mm:ss
     return (
       <input
         type="datetime-local"
         style={inputStyle}
         value={toLocal(value)}
+        step="1" // seconds
         onChange={(e) => onChange(e.target.value || null)}
       />
     );
@@ -425,11 +426,12 @@ export function renderTableCellEditor({
 
   // DATETIME
   if (meta.type === "datetime") {
-    const toLocal = (val) => (!val ? "" : String(val).slice(0, 16)); // YYYY-MM-DDTHH:mm
+    const toLocal = (val) => (!val ? "" : String(val).slice(0, 19)); // YYYY-MM-DDTHH:mm:ss
     return (
       <input
         {...editorProps}
         type="datetime-local"
+        step="1" // seconds
         value={toLocal(editingValue)}
         onChange={(e) => applyChange(e.target.value || null)}
       />
