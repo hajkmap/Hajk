@@ -32,7 +32,6 @@ export function createOgcApi(baseUrl) {
       };
     },
 
-    // Default is undefined, not an empty string
     async fetchWfst(id, fields /* = undefined */) {
       const url = `${base}/ogc/wfst/${id}${pickFields(fields)}`;
       const res = await fetch(url);
@@ -41,11 +40,68 @@ export function createOgcApi(baseUrl) {
     },
 
     async fetchWfstFeatures(id, params = {}) {
-      const q = new URLSearchParams({ limit: "10000", ...params }).toString();
-      const res = await fetch(`${base}/ogc/wfst/${id}/features?${q}`);
-      if (!res.ok)
-        throw new Error(`WFST features misslyckades (${res.status})`);
-      return res.json();
+      const queryParams = {
+        limit: "10000",
+        srsName: "EPSG:3006",
+        ...params,
+        _t: Date.now(),
+        _r: Math.random().toString(36).substring(7),
+      };
+
+      const q = new URLSearchParams(queryParams).toString();
+      const url = `${base}/ogc/wfst/${id}/features?${q}`;
+
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch WFST features (${res.status})`);
+      }
+
+      const data = await res.json();
+
+      // Ensure CRS metadata is present for OpenLayers
+      if (!data.crsName && !data.crs) {
+        data.crsName = "EPSG:3006";
+        data.crs = {
+          type: "name",
+          properties: {
+            name: "urn:ogc:def:crs:EPSG::3006",
+          },
+        };
+      }
+
+      return data;
+    },
+
+    async commitWfstTransaction(layerId, transaction) {
+      const url = `${baseUrl}/ogc/wfst/${layerId}/transaction`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(transaction),
+      });
+
+      if (!response.ok) {
+        const error = await response
+          .json()
+          .catch(() => ({ error: "Unknown error" }));
+        throw new Error(error.error || "Transaction failed");
+      }
+
+      const result = await response.json();
+      return result;
     },
   };
 }

@@ -725,7 +725,7 @@ export function makeStyles(t, isMobile) {
       padding: 8,
       minWidth: 260,
       maxWidth: 360,
-      maxHeight: 320,
+      maxHeight: 380,
       overflow: "hidden",
       color: t.text,
     },

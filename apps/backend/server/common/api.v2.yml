@@ -120,6 +120,128 @@ paths:
                 $ref: "#/components/schemas/FeatureCollection"
         "415":
           description: Upstream gav inte GeoJSON
+  /ogc/wfst/{id}/transaction:
+    post:
+      tags: [Client-accessible]
+      summary: Commit WFS-T transaction (insert/update/delete features)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: WFST layer ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inserts:
+                  type: array
+                  description: Features to insert
+                  items:
+                    type: object
+                    required: [properties]
+                    properties:
+                      properties:
+                        type: object
+                        additionalProperties: true
+                        description: Feature attributes (excluding id and read-only fields)
+                      geometry:
+                        $ref: "#/components/schemas/GeoJSONGeometry"
+                updates:
+                  type: array
+                  description: Features to update
+                  items:
+                    type: object
+                    required: [id, properties]
+                    properties:
+                      id:
+                        type: string
+                        description: Feature ID to update
+                      properties:
+                        type: object
+                        additionalProperties: true
+                        description: Attributes to update
+                      geometry:
+                        $ref: "#/components/schemas/GeoJSONGeometry"
+                        description: New geometry (optional, only if changed)
+                deletes:
+                  type: array
+                  description: Feature IDs to delete
+                  items:
+                    type: string
+            example:
+              inserts:
+                - properties:
+                    name: "Ny byggnad"
+                    type: "residential"
+                  geometry:
+                    type: "Polygon"
+                    coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]
+              updates:
+                - id: "layer.123"
+                  properties:
+                    name: "Uppdaterat namn"
+                  geometry:
+                    type: "Point"
+                    coordinates: [12.5, 56.0]
+              deletes: ["layer.456", "layer.789"]
+      responses:
+        "200":
+          description: Transaction successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  inserted:
+                    type: integer
+                    description: Number of features inserted
+                    example: 1
+                  updated:
+                    type: integer
+                    description: Number of features updated
+                    example: 2
+                  deleted:
+                    type: integer
+                    description: Number of features deleted
+                    example: 3
+                  insertedIds:
+                    type: array
+                    description: Feature IDs of newly inserted features
+                    items:
+                      type: string
+                    example: ["layer.124", "layer.125"]
+        "400":
+          description: Invalid transaction or validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: WFST layer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "502":
+          description: Upstream WFS-T server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Transaction failed: Geometry constraint violation"
   /informative/load/{document}:
     get:
       tags:
@@ -994,6 +1116,13 @@ components:
         code:
           type: string
           example: ENOENT
+        error:
+          type: string
+          description: Error message
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error details
     DocumentBody:
       type: object
       properties:
@@ -1052,3 +1181,112 @@ components:
           example: no_stress
     LayerSwitcherBody:
       title: LayerSwitcher body
+
+    # ============ WFS-T Transaction schemas ============
+
+    InsertFeature:
+      type: object
+      required: [properties]
+      properties:
+        properties:
+          type: object
+          additionalProperties: true
+          description: Feature attributes (excluding id and read-only fields)
+        geometry:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/Geometry"
+      example:
+        properties:
+          name: "Ny byggnad"
+          type: "residential"
+        geometry:
+          type: "Polygon"
+          coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]
+
+    UpdateFeature:
+      type: object
+      required: [id, properties]
+      properties:
+        id:
+          type: string
+          description: Feature ID to update (e.g. "layer.123")
+        properties:
+          type: object
+          additionalProperties: true
+          description: Attributes to update
+        geometry:
+          nullable: true
+          description: New geometry (optional, only if changed)
+          allOf:
+            - $ref: "#/components/schemas/Geometry"
+      example:
+        id: "layer.123"
+        properties:
+          name: "Uppdaterat namn"
+        geometry:
+          type: "Point"
+          coordinates: [12.5, 56.0]
+
+    TransactionRequest:
+      type: object
+      properties:
+        inserts:
+          type: array
+          description: Features to insert
+          items:
+            $ref: "#/components/schemas/InsertFeature"
+        updates:
+          type: array
+          description: Features to update
+          items:
+            $ref: "#/components/schemas/UpdateFeature"
+        deletes:
+          type: array
+          description: Feature IDs to delete
+          items:
+            type: string
+      example:
+        inserts:
+          - properties:
+              name: "Ny byggnad"
+              type: "residential"
+            geometry:
+              type: "Polygon"
+              coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]
+        updates:
+          - id: "layer.123"
+            properties:
+              name: "Uppdaterat namn"
+        deletes: ["layer.456", "layer.789"]
+
+    TransactionResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          description: Whether the transaction succeeded
+        inserted:
+          type: integer
+          description: Number of features inserted
+        updated:
+          type: integer
+          description: Number of features updated
+        deleted:
+          type: integer
+          description: Number of features deleted
+        insertedIds:
+          type: array
+          description: Feature IDs of newly inserted features
+          items:
+            type: string
+        message:
+          type: string
+          description: Error message (only present if success is false)
+      example:
+        success: true
+        inserted: 1
+        updated: 2
+        deleted: 3
+        insertedIds: ["layer.124", "layer.125"]

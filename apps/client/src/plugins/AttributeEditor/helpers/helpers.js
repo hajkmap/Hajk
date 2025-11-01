@@ -1,4 +1,7 @@
 /* === Helpers === */
+const idAliasCache = new Map();
+const CACHE_MAX_SIZE = 10000;
+
 export const isEditableField = (meta) => !meta?.readOnly;
 
 export function getIdsForDeletion(selectedIds, focusedId) {
@@ -462,6 +465,12 @@ export function idAliases(x) {
   if (x == null) return [];
 
   const s = String(x);
+
+  // Check the cache first
+  if (idAliasCache.has(s)) {
+    return idAliasCache.get(s);
+  }
+
   const out = new Set();
 
   // Always include the original string representation
@@ -483,7 +492,17 @@ export function idAliases(x) {
     }
   }
 
-  return Array.from(out);
+  const result = Array.from(out);
+
+  // Store in cache (with size limit)
+  if (idAliasCache.size >= CACHE_MAX_SIZE) {
+    // Remove oldest entry (first in Map)
+    const firstKey = idAliasCache.keys().next().value;
+    idAliasCache.delete(firstKey);
+  }
+  idAliasCache.set(s, result);
+
+  return result;
 }
 
 export function pickPreferredId(aliases) {

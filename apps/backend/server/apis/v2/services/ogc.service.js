@@ -14,6 +14,8 @@ import {
   UpstreamError,
   ValidationError,
 } from "./ogc/errors.js";
+import { buildWfsTransactionXml } from "./ogc/wfs/transaction-builder.js";
+import { parseTransactionResponse } from "./ogc/wfs/transaction-response.js";
 
 /** ===== Internal function: get WFST layer from config ===== */
 async function getWFSTStore({ user = null, washContent = true } = {}) {
@@ -111,7 +113,8 @@ export async function getWFSTFeatures(params) {
       (Array.isArray(layer.layers) ? layer.layers[0] : layer.layers);
     if (!tn) throw new ValidationError("Missing typeName for layer");
 
-    const crs = srsName || layer.projection || "EPSG:4326";
+    // Determine CRS: use request param, layer config, or default to EPSG:3006
+    const crs = srsName || layer.projection || "EPSG:3006";
 
     // 1) Try GeoJSON
     const urlJson = buildWfsGetFeatureUrl({
@@ -138,7 +141,7 @@ export async function getWFSTFeatures(params) {
     let ctype = res.headers.get("content-type") || "";
     let text = await res.text();
 
-    // 4xx: abort directly if the response does not look like a valid format
+    // Handle 4xx errors - abort if not a format issue
     if (!res.ok && res.status >= 400 && res.status < 500) {
       const snippet = text.substring(0, 500);
       const maybeFormatIssue =
@@ -163,6 +166,8 @@ export async function getWFSTFeatures(params) {
     if (res.ok && (isJsonCtype || text.trim().startsWith("{"))) {
       try {
         const fc = JSON.parse(text);
+
+        // Add basic metadata
         if (typeof fc.totalFeatures === "number") {
           fc.numberMatched = fc.totalFeatures;
         }
@@ -173,49 +178,32 @@ export async function getWFSTFeatures(params) {
           fc.numberReturned = fc.features.length;
         }
 
-        // --- FORWARDING: CRS determination ---
+        // Normalize EPSG code format
         const normalizeEpsg = (name) => {
           if (!name) return undefined;
           const m = String(name).match(/EPSG[:/]*[:]*([0-9]+)/i);
           return m ? `EPSG:${m[1]}` : undefined;
         };
 
-        // Retrieve CRS from various sources (priority ordering)
-        let finalCrs = null;
+        // Set crsName to requested CRS (normalized)
+        const finalCrs = normalizeEpsg(crs) || "EPSG:3006";
+        fc.crsName = finalCrs;
 
-        const crsFromGeojson = normalizeEpsg(
-          fc?.crs?.properties?.name || fc?.crs?.name
-        );
-        if (crsFromGeojson) {
-          finalCrs = crsFromGeojson;
+        // Set crs object for OpenLayers compatibility
+        const epsgCode = finalCrs.match(/EPSG:(\d+)/)?.[1];
+        if (epsgCode) {
+          fc.crs = {
+            type: "name",
+            properties: {
+              name: `urn:ogc:def:crs:EPSG::${epsgCode}`,
+            },
+          };
         }
 
-        if (!finalCrs) {
-          finalCrs = normalizeEpsg(crs);
-        }
+        // Store layer's native projection for coordinate transformation
+        fc.layerProjection = layer.projection || "EPSG:3006";
 
-        if (!finalCrs && fc.crsName) {
-          finalCrs = normalizeEpsg(fc.crsName);
-        }
-
-        if (finalCrs) {
-          fc.crsName = finalCrs;
-
-          // Legacy CRS object for QGIS 3.40+ compatibility
-          // (even though it technically breaks RFC 7946, it is required for QGIS)
-          if (!fc.crs) {
-            const epsgCode = finalCrs.match(/EPSG:(\d+)/)?.[1];
-            if (epsgCode) {
-              fc.crs = {
-                type: "name",
-                properties: {
-                  name: `urn:ogc:def:crs:EPSG::${epsgCode}`,
-                },
-              };
-            }
-          }
-        }
-
+        // Clean up inconsistent bbox (lon/lat bbox with projected coords)
         const looksLonLatBbox = (bbox) => {
           if (!Array.isArray(bbox) || bbox.length < 4) return false;
           const [xmin, ymin, xmax, ymax] = bbox.map(Number);
@@ -272,7 +260,7 @@ export async function getWFSTFeatures(params) {
       }
     }
 
-    // 2) GML3
+    // 2) Try GML3
     const urlGml3 = rewriteOutputFormat(
       urlJson,
       "application/gml+xml; version=3.2"
@@ -283,10 +271,24 @@ export async function getWFSTFeatures(params) {
     ensureNotTooLarge(res);
     text = await res.text();
     if (res.ok && text.trim().startsWith("<")) {
-      return gmlToFeatureCollection(text);
+      const fc = gmlToFeatureCollection(text);
+
+      // Add CRS metadata for GML response
+      fc.crsName = crs;
+      fc.layerProjection = layer.projection || "EPSG:3006";
+
+      const epsgCode = crs.match(/EPSG:(\d+)/)?.[1];
+      if (epsgCode) {
+        fc.crs = {
+          type: "name",
+          properties: { name: `urn:ogc:def:crs:EPSG::${epsgCode}` },
+        };
+      }
+
+      return fc;
     }
 
-    // 3) GML2
+    // 3) Try GML2
     const urlGml2 = rewriteOutputFormat(urlJson, "GML2");
     res = await fetchWithRetry(urlGml2, {
       headers: { Accept: "application/xml, text/xml" },
@@ -294,7 +296,21 @@ export async function getWFSTFeatures(params) {
     ensureNotTooLarge(res);
     text = await res.text();
     if (res.ok && text.trim().startsWith("<")) {
-      return gmlToFeatureCollection(text);
+      const fc = gmlToFeatureCollection(text);
+
+      // Add CRS metadata for GML2 response
+      fc.crsName = crs;
+      fc.layerProjection = layer.projection || "EPSG:3006";
+
+      const epsgCode = crs.match(/EPSG:(\d+)/)?.[1];
+      if (epsgCode) {
+        fc.crs = {
+          type: "name",
+          properties: { name: `urn:ogc:def:crs:EPSG::${epsgCode}` },
+        };
+      }
+
+      return fc;
     }
 
     throw new UpstreamError(
@@ -309,4 +325,234 @@ export async function getWFSTFeatures(params) {
       originalError: error.message,
     });
   }
+}
+
+export async function commitWFSTTransaction(params) {
+  const { id, user, washContent, inserts, updates, deletes, srsName } = params;
+
+  if (!Validator.isValidId(id)) {
+    throw new ValidationError("Invalid layer ID format", { id });
+  }
+
+  // Fetch layer configuration
+  const layers = await getWFSTStore({ user, washContent });
+  const layer = layers.find((l) => String(l.id) === String(id));
+
+  if (!layer) {
+    throw new NotFoundError("WFST layer not found", { layerId: id });
+  }
+
+  if (!Validator.isValidUrl(layer.url)) {
+    throw new UpstreamError("Invalid layer URL configuration", 500);
+  }
+
+  const typeName = Array.isArray(layer.layers) ? layer.layers[0] : layer.layers;
+  if (!typeName) {
+    throw new ValidationError("Missing typeName for layer");
+  }
+
+  // Validate geometries
+  for (const feature of [...inserts, ...updates]) {
+    if (feature.geometry && !isValidGeoJSONGeometry(feature.geometry)) {
+      throw new ValidationError("Invalid geometry", {
+        featureId: feature.id,
+      });
+    }
+  }
+
+  // Determine effective CRS: prioritize frontend srsName, then layer config, then default
+  const effectiveSrsName = srsName || layer.projection || "EPSG:3006";
+
+  // Helper to format feature IDs for WFS-T
+  const formatFeatureId = (featureId) => {
+    if (featureId == null) return featureId;
+
+    const idStr = String(featureId);
+
+    // If already in native format (contains : or .), keep as-is
+    // Examples: "workspace:layer.123", "layer.123", "namespace:feature.456"
+    if (idStr.includes(":") || idStr.includes(".")) {
+      return idStr;
+    }
+
+    // Detect server type from URL or explicit flag
+    const isGeoServer =
+      layer.serverType === "geoserver" ||
+      layer.url?.toLowerCase().includes("geoserver");
+
+    if (isGeoServer) {
+      // GeoServer format: "typename.123" or keep workspace prefix if present
+      // If typeName has workspace prefix (e.g. "goteborg:buildings"), use full prefix
+      return `${typeName}.${featureId}`;
+    }
+
+    // QGIS Server or unknown - return canonical ID as-is
+    return featureId;
+  };
+
+  // Format IDs for updates and deletes
+  const formattedUpdates = updates.map((feature) => ({
+    ...feature,
+    id: formatFeatureId(feature.id),
+  }));
+
+  const formattedDeletes = deletes.map(formatFeatureId);
+
+  // Pass namespace and formatted IDs
+  const transactionXml = buildWfsTransactionXml({
+    version: layer.wfsVersion || "1.1.0",
+    typeName,
+    srsName: effectiveSrsName,
+    geometryName: layer.geometryField || "geometry",
+    namespace: layer.namespace, // Pass namespace for GeoServer
+    inserts,
+    updates: formattedUpdates,
+    deletes: formattedDeletes,
+  });
+
+  logger.debug("Sending WFS-T transaction", {
+    url: layer.url,
+    inserts: inserts.length,
+    updates: updates.length,
+    deletes: deletes.length,
+  });
+
+  // Send transaction to WFS server
+  const response = await fetchWithRetry(layer.url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/xml",
+      Accept: "application/xml, text/xml",
+    },
+    body: transactionXml,
+  });
+
+  ensureNotTooLarge(response);
+  const responseText = await response.text();
+
+  if (!response.ok) {
+    logger.error("WFS-T transaction failed", {
+      status: response.status,
+      response: responseText.substring(0, 500),
+    });
+
+    throw new UpstreamError(
+      `WFS-T transaction failed: ${response.status}`,
+      response.status
+    );
+  }
+
+  // Parse and validate transaction response
+  const result = parseTransactionResponse(responseText);
+
+  if (result.success === false) {
+    logger.error("WFS-T reported failure", result);
+    throw new UpstreamError(result.message || "Transaction failed", 400);
+  }
+
+  // Detect "silent failures" - server says success but did nothing
+
+  // Check if we expected inserts but got 0
+  if (inserts.length > 0 && result.inserted === 0) {
+    logger.warn("WFS-T returned 0 inserts when we expected some", {
+      layerId: id,
+      typeName,
+      expectedInserts: inserts.length,
+      actualInserted: result.inserted,
+      geometryTypes: inserts.map((f) => f.geometry?.type).filter(Boolean),
+      responseSnippet: responseText.substring(0, 1000),
+    });
+
+    // Check if response contains a warning message
+    if (result.warning) {
+      throw new UpstreamError(`Server warning: ${result.warning}`, 400);
+    }
+
+    // Detect geometry type from inserts to give helpful error message
+    const geomTypes = [
+      ...new Set(inserts.map((f) => f.geometry?.type).filter(Boolean)),
+    ];
+    const geomTypeStr =
+      geomTypes.length > 0 ? ` (försökte spara ${geomTypes.join(", ")})` : "";
+
+    throw new UpstreamError(
+      `Servern accepterade transaktionen men sparade 0 av ${inserts.length} objekt${geomTypeStr}. ` +
+        `Detta beror ofta på fel geometrityp (t.ex. försöker spara polygon i ett punktlager) eller datafel. ` +
+        `Kontrollera att lagret accepterar den geometrityp du försöker spara.`,
+      400
+    );
+  }
+
+  // Check if we expected updates but got 0 (could indicate ID mismatch)
+  if (formattedUpdates.length > 0 && result.updated === 0) {
+    logger.warn("WFS-T returned 0 updates when we expected some", {
+      layerId: id,
+      typeName,
+      expectedUpdates: formattedUpdates.length,
+      actualUpdated: result.updated,
+      updateIds: formattedUpdates.map((u) => u.id).slice(0, 5), // Log first 5 IDs
+    });
+
+    if (result.warning) {
+      throw new UpstreamError(`Server warning: ${result.warning}`, 400);
+    }
+
+    // This could mean feature IDs don't exist or wrong format
+    throw new UpstreamError(
+      `Servern accepterade transaktionen men uppdaterade 0 av ${formattedUpdates.length} objekt. ` +
+        `Detta kan bero på fel feature-ID-format eller att objekten inte finns i lagret.`,
+      400
+    );
+  }
+
+  // Check if we expected deletes but got 0
+  if (formattedDeletes.length > 0 && result.deleted === 0) {
+    logger.warn("WFS-T returned 0 deletes when we expected some", {
+      layerId: id,
+      typeName,
+      expectedDeletes: formattedDeletes.length,
+      actualDeleted: result.deleted,
+      deleteIds: formattedDeletes.slice(0, 5), // Log first 5 IDs
+    });
+
+    if (result.warning) {
+      throw new UpstreamError(`Server warning: ${result.warning}`, 400);
+    }
+
+    throw new UpstreamError(
+      `Servern accepterade transaktionen men raderade 0 av ${formattedDeletes.length} objekt. ` +
+        `Detta kan bero på fel feature-ID-format eller att objekten inte finns i lagret.`,
+      400
+    );
+  }
+
+  logger.info("WFS-T transaction successful", {
+    inserted: result.inserted,
+    updated: result.updated,
+    deleted: result.deleted,
+  });
+
+  return result;
+}
+
+// Helper: validate GeoJSON geometry
+function isValidGeoJSONGeometry(geom) {
+  if (!geom || typeof geom !== "object") return false;
+
+  const validTypes = [
+    "Point",
+    "LineString",
+    "Polygon",
+    "MultiPoint",
+    "MultiLineString",
+    "MultiPolygon",
+    "GeometryCollection",
+  ];
+
+  if (!validTypes.includes(geom.type)) return false;
+  if (!Array.isArray(geom.coordinates) && geom.type !== "GeometryCollection") {
+    return false;
+  }
+
+  return true;
 }

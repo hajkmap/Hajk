@@ -1,3 +1,4 @@
+// Dialog for AttributeEditor and Sketch
 import React from "react";
 import {
   Dialog,

@@ -413,6 +413,7 @@ export default class AttributeEditorModel {
   #storageKey;
   #fieldMeta;
   #ogc;
+  #layerProjection = null;
 
   _lastFeatureCollection = null;
 
@@ -439,13 +440,14 @@ export default class AttributeEditorModel {
     this.#initSubscriptions();
   }
 
-  // === getters/setters ===
+  // === Getters/setters ===
   getFieldMetadata = () => this.#fieldMeta || [];
   getFeatureCollection = () => this._lastFeatureCollection;
+  getLayerProjection = () => this.#layerProjection || "EPSG:3006";
 
   // === API data normalization ===
   normalizeApiFeatures = (payload) => {
-    // payload is FeatureCollection: { type, features: [ { id, properties, geometry } ] }
+    // Payload is FeatureCollection: { type, features: [ { id, properties, geometry } ] }
     const raw = Array.isArray(payload) ? payload : (payload?.features ?? []);
     return raw.map((f, i) => {
       const props = f?.properties ?? {};
@@ -482,17 +484,21 @@ export default class AttributeEditorModel {
     });
 
     const isDateLike = (s) => /^\d{4}-\d{2}-\d{2}/.test(String(s || ""));
+    const isDateTime = (s) =>
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(String(s || ""));
+
     const isParagraphish = (k) =>
-      maxLen[k] >= 80 || // long fields (e.g. descriptions)
-      Array.from(samples[k]).some((t) => /\r\n|\n\r|\n|\r/.test(t)); // line breaks
+      maxLen[k] >= 80 || // Long fields (e.g. descriptions)
+      Array.from(samples[k]).some((t) => /\r\n|\n\r|\n|\r/.test(t)); // Line breaks
 
     const meta = Array.from(keys).map((k) => {
       const arr = Array.from(samples[k]);
       const uniq = arr.length;
       const nullRate = nRows ? nullCounts[k] / nRows : 0;
 
-      // Date always wins
-      const isDate = arr.some(isDateLike);
+      // Detect date/datetime types
+      const hasDateTime = arr.some(isDateTime);
+      const hasDate = arr.some(isDateLike);
       const isPara = isParagraphish(k);
       const enumCandidate =
         nRows >= 50 &&
@@ -503,8 +509,11 @@ export default class AttributeEditorModel {
         arr.every((v) => v.length <= 24);
 
       const m = { key: k, label: k };
-      if (isDate) {
-        m.type = "date";
+
+      if (hasDateTime) {
+        m.type = "datetime"; // Has time component
+      } else if (hasDate) {
+        m.type = "date"; // Date only
       } else if (isPara) {
         m.type = "textarea";
       } else if (enumCandidate) {
@@ -513,6 +522,8 @@ export default class AttributeEditorModel {
           String(a).localeCompare(String(b), "sv")
         );
       }
+
+      // Mark ID fields as read-only
       if (["id", "geoid", "oracle_geoid"].includes(k)) m.readOnly = true;
       return m;
     });
@@ -521,19 +532,28 @@ export default class AttributeEditorModel {
   };
 
   // === Load data from service ===
-  loadFromService = async (serviceId, { limit = 10000 } = {}) => {
+  loadFromService = async (serviceId, extraParams = {}) => {
     if (!this.#ogc)
-      throw new Error("Ogc API saknas (injicera via settings.ogc)");
+      throw new Error("OGC API missing (inject via settings.ogc)");
 
-    // Fetch data (FeatureCollection) and store for map rendering
-    const payload = await this.#ogc.fetchWfstFeatures(serviceId, { limit });
+    // Fetch feature collection from backend
+    const payload = await this.#ogc.fetchWfstFeatures(serviceId, {
+      limit: 10000,
+      ...extraParams,
+    });
+
     this._lastFeatureCollection = payload;
 
-    // Normalize data to table rows + build metadata
+    // Store layer's native projection for coordinate transformations
+    if (payload.layerProjection) {
+      this.#layerProjection = payload.layerProjection;
+    }
+
+    // Normalize data to table rows and infer field metadata
     const rows = this.normalizeApiFeatures(payload);
     const fieldMeta = this.inferFieldMetaFromFeatures(rows);
 
-    // Initialize state with default values (empty pending/undo)
+    // Initialize state with fetched features
     this._state = reducer(this._state, { type: Action.INIT, features: rows });
 
     // Set field metadata in the model

@@ -11,6 +11,7 @@ import {
   isEditableField,
   isMissingValue,
   renderInput,
+  idAliases,
 } from "./helpers/helpers";
 
 import Toolbar from "./components/Toolbar";
@@ -21,6 +22,7 @@ import NotificationBar from "./helpers/NotificationBar";
 import { editBus } from "../../buses/editBus";
 import { pickPreferredId } from "./helpers/helpers";
 import { useSnackbar } from "notistack";
+import GeoJSON from "ol/format/GeoJSON";
 
 export default function AttributeEditorView({
   state,
@@ -1010,28 +1012,298 @@ export default function AttributeEditorView({
     }
   }, [hasUnsaved, unsavedSummary]);
 
-  const commitTableEdits = useCallback(() => {
-    controller.commit();
-    const allIds = [
-      ...new Set([
-        ...features.map((f) => f.id),
-        ...pendingAdds.map((d) => d.id),
-      ]),
-    ];
-    controller.batchEdit(
-      allIds.map((id) => ({ id, key: "__geom__", value: null }))
-    );
-    Promise.resolve().then(() => {
-      // next microtask
-      formUndoSnapshotsRef.current.clear();
-      setFormUndoStack([]);
-      setTableUndoLocal([]);
-      setTableEditing(null);
-      setLastTableIndex(null);
-      geomUndoRef.current = [];
-      setGeomUndoCount(0);
-    });
-  }, [controller, features, pendingAdds]);
+  const commitTableEdits = useCallback(async () => {
+    try {
+      const layerCRS = model.getLayerProjection();
+
+      // Helper: Get geometry from OpenLayers feature
+      const getGeometryForFeature = (id) => {
+        const feature = featureIndexRef.current.get(id);
+        if (!feature) {
+          return null;
+        }
+
+        const geom = feature.getGeometry?.();
+        if (!geom) {
+          return null;
+        }
+
+        // Transform geometry from map projection to layer's native CRS
+        const format = new GeoJSON();
+        const geojsonFeature = format.writeFeatureObject(feature, {
+          featureProjection: map.getView().getProjection(),
+          dataProjection: layerCRS,
+        });
+
+        return geojsonFeature.geometry;
+      };
+
+      // Helper: Check if geometry has changed
+      const hasGeometryChanged = (id) => {
+        const effective = features.find((f) => String(f.id) === String(id));
+        if (!effective) {
+          return false;
+        }
+        const patch = pendingEdits[id];
+        const changed =
+          patch && patch.__geom__ !== undefined && patch.__geom__ !== null;
+        return changed;
+      };
+
+      // 1. Build INSERT operations
+      const inserts = pendingAdds
+        .filter((d) => {
+          const keep = d.__pending !== "delete";
+          return keep;
+        })
+        .map((draft) => {
+          const properties = {};
+          FM.forEach(({ key, readOnly }) => {
+            if (key !== "id" && !readOnly) {
+              properties[key] = draft[key] ?? null;
+            }
+          });
+
+          const geometry = getGeometryForFeature(draft.id);
+
+          return {
+            properties,
+            geometry,
+          };
+        })
+        .filter((f) => {
+          const keep = f.geometry !== null;
+          return keep;
+        });
+
+      // 2. Build UPDATE operations
+      const updates = Object.entries(pendingEdits)
+        .filter(([id]) => {
+          const notDeleted =
+            !pendingDeletes.has(Number(id)) && !pendingDeletes.has(String(id));
+          return notDeleted;
+        })
+        .map(([id, changes]) => {
+          // Remove internal fields
+          const { __geom__, __pending, __idx, ...properties } = changes;
+
+          // Handle qualified FID (layer.123)
+          let cleanId = String(id);
+          const fidMatch = cleanId.match(/\.(\d+)$/);
+          if (fidMatch) {
+            cleanId = fidMatch[1];
+          }
+
+          const update = {
+            id: cleanId,
+            properties,
+          };
+
+          // Add geometry if changed
+          const geomChanged = hasGeometryChanged(id);
+          if (geomChanged) {
+            const geom = getGeometryForFeature(id);
+            if (geom) {
+              update.geometry = geom;
+            }
+          }
+
+          return update;
+        })
+        .filter((u) => {
+          const keep = Object.keys(u.properties).length > 0 || u.geometry;
+          return keep;
+        });
+
+      // 3. Build DELETE operations
+      const deletes = Array.from(pendingDeletes)
+        .filter((id) => {
+          // Accept both numeric IDs and qualified FIDs (layer.123)
+          if (typeof id === "number" && id > 0) {
+            return true;
+          }
+
+          // Check if it's a qualified FID string (layer.123)
+          const str = String(id);
+          const isFid = /\.\d+$/.test(str); // Ends with .NUMBER
+          return isFid;
+        })
+        .map((id) => {
+          let cleanId = String(id);
+          const fidMatch = cleanId.match(/\.(\d+)$/);
+          if (fidMatch) {
+            cleanId = fidMatch[1];
+          }
+          return cleanId;
+        });
+
+      // Check if there are any changes
+      if (!inserts.length && !updates.length && !deletes.length) {
+        showNotification("Inga ändringar att spara");
+        return;
+      }
+
+      // Build summary for user notification
+      const summary = [
+        inserts.length && `${inserts.length} nya`,
+        updates.length && `${updates.length} uppdaterade`,
+        deletes.length && `${deletes.length} borttagna`,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      enqueueSnackbar(`Sparar: ${summary}...`, { variant: "info" });
+
+      // Send transaction to backend
+      const result = await ogc.commitWfstTransaction(serviceId, {
+        inserts,
+        updates,
+        deletes,
+        srsName: layerCRS,
+      });
+
+      if (result.success) {
+        // Clear browser caches
+        if ("caches" in window) {
+          try {
+            const names = await caches.keys();
+            await Promise.all(names.map((name) => caches.delete(name)));
+          } catch (e) {
+            // Ignore cache clearing errors
+          }
+        }
+
+        enqueueSnackbar(
+          `✓ Sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${result.deleted || 0} borttagna`,
+          { variant: "success", autoHideDuration: 5000 }
+        );
+
+        // Commit changes in model
+        controller.commit();
+
+        // Clear geometry change markers
+        const allIds = [
+          ...new Set([
+            ...features.map((f) => f.id),
+            ...pendingAdds.map((d) => d.id),
+          ]),
+        ];
+        controller.batchEdit(
+          allIds.map((id) => ({ id, key: "__geom__", value: null }))
+        );
+
+        // Reset undo stacks
+        Promise.resolve().then(() => {
+          formUndoSnapshotsRef.current.clear();
+          setFormUndoStack([]);
+          setTableUndoLocal([]);
+          setTableEditing(null);
+          setLastTableIndex(null);
+          geomUndoRef.current = [];
+          setGeomUndoCount(0);
+        });
+
+        // Reload features from server
+        try {
+          const reloadId = `reload_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+          const { featureCollection } = await model.loadFromService(serviceId, {
+            _reload: reloadId,
+            _nocache: "1",
+            _bust: Date.now(),
+          });
+
+          // Update vector layer with new features
+          if (vectorLayerRef.current && featureCollection) {
+            const mapProj = map.getView().getProjection();
+            const mapProjCode = mapProj.getCode();
+
+            const fmt = new GeoJSON();
+            const newFeatures = fmt.readFeatures(featureCollection, {
+              dataProjection: mapProjCode,
+              featureProjection: mapProj,
+            });
+
+            const source = vectorLayerRef.current.getSource();
+            source.clear();
+            source.addFeatures(newFeatures);
+
+            // Rebuild feature index
+            featureIndexRef.current.clear();
+            visibleIdsRef.current = new Set();
+
+            newFeatures.forEach((f) => {
+              const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+              const aliases = idAliases(raw);
+              aliases.forEach((k) => featureIndexRef.current.set(k, f));
+              aliases.forEach((k) => {
+                visibleIdsRef.current.add(k);
+                visibleIdsRef.current.add(String(k));
+              });
+            });
+
+            // Set feature IDs from FID property
+            newFeatures.forEach((f) => {
+              const fidProp = f.get?.("@_fid");
+              if (fidProp) {
+                try {
+                  f.setId?.(fidProp);
+                } catch {}
+              }
+            });
+
+            vectorLayerRef.current.changed();
+          }
+
+          // Restore selection
+          if (result.insertedIds && result.insertedIds.length > 0) {
+            const newIds = result.insertedIds.map((fid) => {
+              const match = fid.match(/\.(\d+)$/);
+              return match ? Number(match[1]) : fid;
+            });
+            setTableSelectedIds(new Set(newIds));
+            setSelectedIds(new Set(newIds));
+            if (newIds.length > 0) setFocusedId(newIds[0]);
+          } else if (updates.length > 0) {
+            const updatedIds = updates.map((u) => {
+              const numId = Number(u.id);
+              return Number.isFinite(numId) ? numId : u.id;
+            });
+            setTableSelectedIds(new Set(updatedIds));
+            setSelectedIds(new Set(updatedIds));
+          }
+        } catch (reloadError) {
+          enqueueSnackbar("Data sparades! Tryck F5 för att se ändringarna.", {
+            variant: "warning",
+            autoHideDuration: 10000,
+          });
+        }
+      } else {
+        throw new Error(result.message || "Transaction failed");
+      }
+    } catch (error) {
+      enqueueSnackbar(`Fel vid sparande: ${error.message || "Okänt fel"}`, {
+        variant: "error",
+        autoHideDuration: 8000,
+      });
+    }
+  }, [
+    controller,
+    features,
+    pendingAdds,
+    pendingEdits,
+    pendingDeletes,
+    FM,
+    featureIndexRef,
+    map,
+    ogc,
+    serviceId,
+    model,
+    showNotification,
+    enqueueSnackbar,
+    vectorLayerRef,
+    visibleIdsRef,
+  ]);
 
   const undoLatestTableChange = useCallback(() => {
     // Pop the latest entry from the respective stack
@@ -1302,6 +1574,12 @@ export default function AttributeEditorView({
   }
   function clearSelection() {
     setSelectedIds(new Set());
+
+    editBus.emit("attrib:select-ids", {
+      ids: [],
+      source: "view",
+      mode: "clear",
+    });
   }
 
   const visibleFormList = useMemo(() => {

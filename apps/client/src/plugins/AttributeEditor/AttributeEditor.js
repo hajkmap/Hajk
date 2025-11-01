@@ -50,6 +50,8 @@ function AttributeEditor(props) {
   }
   const model = modelRef.current;
 
+  const schemaCache = React.useRef(new Map());
+
   const modelState = React.useSyncExternalStore(
     model.subscribe,
     model.getSnapshot,
@@ -239,7 +241,11 @@ function AttributeEditor(props) {
 
       try {
         // 1) Fetch whole schema (no fields-param)
-        const schema = await ogc.fetchWfst(id);
+        let schema = schemaCache.current.get(id);
+        if (!schema) {
+          schema = await ogc.fetchWfst(id);
+          schemaCache.current.set(id, schema);
+        }
 
         const geomKey = String(
           schema?.geometryField || "geometry"
@@ -470,6 +476,8 @@ function AttributeEditor(props) {
         props.map.removeLayer(vectorLayerRef.current);
         vectorLayerRef.current = null;
       }
+
+      schemaCache.current.clear();
     });
 
     return () => {

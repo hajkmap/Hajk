@@ -118,6 +118,42 @@ export class Controller {
       return res.status(500).json({ error: String(e?.message || e) });
     }
   }
+
+  async commitWFSTTransaction(req, res) {
+    try {
+      const { id } = req.params;
+      const { inserts = [], updates = [], deletes = [], srsName } = req.body;
+      const user = req.user ?? null;
+
+      // Validate that transaction contains at least one operation
+      if (!inserts.length && !updates.length && !deletes.length) {
+        return res.status(400).json({
+          error: "Transaction must contain at least one operation",
+        });
+      }
+
+      const result = await svc.commitWFSTTransaction({
+        id,
+        user,
+        inserts,
+        updates,
+        deletes,
+        srsName, // Pass srsName from frontend to service
+      });
+
+      return res.json(result);
+    } catch (e) {
+      if (e.name === "ValidationError")
+        return res.status(400).json({ error: e.message, details: e.details });
+      if (e.name === "NotFoundError")
+        return res.status(404).json({ error: e.message, details: e.details });
+      if (e.name === "UpstreamError")
+        return res.status(e.status || 502).json({ error: e.message });
+
+      log.error(e);
+      return res.status(500).json({ error: String(e?.message || e) });
+    }
+  }
 }
 
 export default new Controller();

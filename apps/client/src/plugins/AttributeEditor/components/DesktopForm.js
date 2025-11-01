@@ -7,6 +7,7 @@ import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { editBus } from "../../../buses/editBus";
+import FormListItem from "./FormListItem";
 
 export default function DesktopForm({
   s,
@@ -142,23 +143,6 @@ export default function DesktopForm({
     });
   }, [FIELD_META, editValues, focusedFeature]);
 
-  const makeRowPreview = (row, FIELD_META) => {
-    const keys = FIELD_META.map((m) => m.key);
-    const contentKeys = keys.filter(
-      (k) => !["id", "geoid", "oracle_geoid"].includes(k)
-    );
-    const parts = [];
-    if (row.id != null && row.id !== "") parts.push(String(row.id));
-    for (const k of contentKeys) {
-      const v = row[k];
-      if (v != null && v !== "") {
-        parts.push(String(v));
-        if (parts.length >= 3) break;
-      }
-    }
-    return parts.join(" • ");
-  };
-
   React.useEffect(() => {
     if (focusedId != null) {
       editBus.emit("attrib:focus-id", { id: focusedId, source: "view" });
@@ -268,34 +252,21 @@ export default function DesktopForm({
                 (d) => d.id === f.id && d.__pending !== "delete"
               );
 
-            const status = isPendingDelete
-              ? "delete"
-              : hasGeomChange
-                ? "geom"
-                : hasPendingEdits
-                  ? "edit"
-                  : isDraftAdd
-                    ? "add"
-                    : null;
-
             return (
-              <div
+              <FormListItem
                 key={f.id}
-                data-row-id={f.id}
-                style={s.listRow(selected, status, isFocused, false)}
-                onClick={(e) => onFormRowClick(f.id, idx, e)}
-              >
-                <div>
-                  <div style={s.listRowText}>
-                    <div style={s.listRowTitle}>
-                      {makeRowPreview(f, FIELD_META)}
-                      {hasPendingEdits && (
-                        <span style={s.labelChanged}>&nbsp;• ändrad</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+                row={f}
+                idx={idx}
+                FIELD_META={FIELD_META}
+                s={s}
+                selected={selected}
+                isFocused={isFocused}
+                isPendingDelete={isPendingDelete}
+                hasPendingEdits={hasPendingEdits}
+                hasGeomChange={hasGeomChange}
+                isDraftAdd={isDraftAdd}
+                onFormRowClick={onFormRowClick}
+              />
             );
           })}
           {visibleFormList.length === 0 && (
