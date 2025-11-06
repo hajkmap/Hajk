@@ -94,6 +94,7 @@
     "services.publishLayer": "Publicera ditt första lager",
     "services.layerInService": "Hajk-lager som använder den här tjänsten",
     "services.layerInServiceNone": "Det finns inga Hajk-lager som använder den här tjänsten",
+    "services.atLeastOneLayerRequired": "Minst ett lager måste väljas",
     "user.confirmPassword": "Bekräfta lösenord",
     "user.createLocalUser": "Skapa användare",
     "user.createUserDescription": "Skapa en användare som kan logga in i Hajk. Kom ihåg att spara undan lösenordet på ett säkert ställe - du kommer aldrig kunna se det här igen.",

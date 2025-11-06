@@ -95,6 +95,7 @@
     "services.publishLayer": "Publish your first layer",
     "services.layerInService": "Hajk-layers that uses this service",
     "services.layerInServiceNone": "There are no Hajk-layers that uses this service",
+    "services.atLeastOneLayerRequired": "At least one layer must be selected",
     "user.confirmPassword": "Confirm password",
     "user.createLocalUser": "Create user",
     "user.createUserDescription": "Create a user who can log into Hajk. Remember to save the password in a secure place — you will never be able to view it here again.",

@@ -48,6 +48,7 @@ function LayersGrid({
 
   const handleClose = () => {
     setOpen(false);
+    setSelectedRowObjects(undefined);
   };
 
   const handleClickOpen = () => {
@@ -258,16 +259,34 @@ function LayersGrid({
                 </IconButton>
                 <Button
                   variant="contained"
-                  onClick={() =>
+                  onClick={() => {
+                    if (
+                      !selectedRowObjects ||
+                      selectedRowObjects.length === 0
+                    ) {
+                      return;
+                    }
                     void handleCreateLayer({
                       serviceId,
                       selectedLayers: selectedRowObjects,
-                    })
+                    });
+                  }}
+                  disabled={
+                    !selectedRowObjects || selectedRowObjects.length === 0
                   }
                   sx={{ display: "block", mb: 1 }}
                 >
                   {t("common.create")}
                 </Button>
+                {(!selectedRowObjects || selectedRowObjects.length === 0) && (
+                  <Typography
+                    align="center"
+                    color={palette.error.main}
+                    sx={{ mb: 1 }}
+                  >
+                    {t("services.atLeastOneLayerRequired")}
+                  </Typography>
+                )}
                 {isLoading ? (
                   <CircularProgress
                     color="primary"
