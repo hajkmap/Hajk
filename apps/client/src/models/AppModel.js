@@ -556,8 +556,8 @@ class AppModel {
     // only if no override is provided in URLSearchParams (else we will
     // end up with multiple background layers visible at start).
     const visibleAtStart =
-      this.layersFromParams.length === 0 ??
-      layerSwitcherConf?.options?.OSMVisibleAtStart === true ??
+      (this.layersFromParams.length === 0 &&
+        layerSwitcherConf?.options?.OSMVisibleAtStart === true) ??
       false;
 
     const osmLayer = new TileLayer({
