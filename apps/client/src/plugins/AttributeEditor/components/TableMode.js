@@ -1,10 +1,13 @@
 import React from "react";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import EditNoteIcon from "@mui/icons-material/EditNote";
 import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import FirstPageIcon from "@mui/icons-material/FirstPage";
+import LastPageIcon from "@mui/icons-material/LastPage";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { editBus } from "../../../buses/editBus";
 import useCookieStatus from "../../../hooks/useCookieStatus";
@@ -159,6 +162,11 @@ export default function TableMode(props) {
   const [savingNow, setSavingNow] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState(null);
   const caretStoreRef = React.useRef(new Map());
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(20);
+
   const setQFor = (key, val) =>
     setColumnFilterUI((prev) => ({
       ...prev,
@@ -188,6 +196,27 @@ export default function TableMode(props) {
       return {};
     }
   });
+
+  // Calculate pagination
+  const totalRows = filteredAndSorted.length;
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  const startIndex = currentPage * rowsPerPage;
+  const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
+  const paginatedRows = filteredAndSorted.slice(startIndex, endIndex);
+  const showPagination = totalRows > 10;
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(0);
+  }, [columnFilters, sort]);
+
+  // Ensure current page is valid when rowsPerPage changes
+  React.useEffect(() => {
+    const maxPage = Math.max(0, Math.ceil(totalRows / rowsPerPage) - 1);
+    if (currentPage > maxPage) {
+      setCurrentPage(maxPage);
+    }
+  }, [rowsPerPage, totalRows, currentPage]);
 
   const syncFilterOnCellChange = React.useCallback(
     (columnKey, fromValue, toValue, rowId) => {
@@ -356,19 +385,6 @@ export default function TableMode(props) {
             </span>
           )}
 
-          <button
-            style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
-            disabled={tableSelectedIds.size === 0}
-            onClick={openSelectedInFormFromTable}
-            title={
-              tableSelectedIds.size
-                ? "Öppna de markerade i formulärläge"
-                : "Markera rader först"
-            }
-            aria-label="Redigera val i formulär"
-          >
-            <EditNoteIcon fontSize="small" />
-          </button>
           <button
             style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
             disabled={tableSelectedIds.size === 0}
@@ -641,7 +657,7 @@ export default function TableMode(props) {
             </thead>
 
             <tbody>
-              {filteredAndSorted.map((row, idx) => {
+              {paginatedRows.map((row, idx) => {
                 const selected = tableSelectedIds.has(row.id);
                 const pendingKind =
                   row.__pending || (row.__geom__ != null ? "geom" : null);
@@ -650,7 +666,7 @@ export default function TableMode(props) {
                   <TableRow
                     key={row.id}
                     row={row}
-                    idx={idx}
+                    idx={startIndex + idx}
                     FIELD_META={FIELD_META}
                     s={s}
                     features={features}
@@ -687,6 +703,81 @@ export default function TableMode(props) {
           </table>
         </div>
       </div>
+
+      {showPagination && (
+        <div style={s.tableFooter}>
+          <div style={s.paginationInfo}>
+            Visar {startIndex + 1}-{endIndex} av {totalRows}
+          </div>
+
+          <div style={s.spacer} />
+
+          <div style={s.paginationControls}>
+            <label style={s.rowsPerPageLabel}>
+              Rader per sida:
+              <select
+                value={rowsPerPage}
+                onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                style={s.rowsPerPageSelect}
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </label>
+
+            <button
+              style={currentPage === 0 ? s.iconBtnDisabled : s.iconBtn}
+              disabled={currentPage === 0}
+              onClick={() => setCurrentPage(0)}
+              title="Första sidan"
+              aria-label="Första sidan"
+            >
+              <FirstPageIcon fontSize="small" />
+            </button>
+
+            <button
+              style={currentPage === 0 ? s.iconBtnDisabled : s.iconBtn}
+              disabled={currentPage === 0}
+              onClick={() => setCurrentPage(currentPage - 1)}
+              title="Föregående sida"
+              aria-label="Föregående sida"
+            >
+              <NavigateBeforeIcon fontSize="small" />
+            </button>
+
+            <span style={s.pageIndicator}>
+              Sida {currentPage + 1} av {totalPages}
+            </span>
+
+            <button
+              style={
+                currentPage >= totalPages - 1 ? s.iconBtnDisabled : s.iconBtn
+              }
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => setCurrentPage(currentPage + 1)}
+              title="Nästa sida"
+              aria-label="Nästa sida"
+            >
+              <NavigateNextIcon fontSize="small" />
+            </button>
+
+            <button
+              style={
+                currentPage >= totalPages - 1 ? s.iconBtnDisabled : s.iconBtn
+              }
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => setCurrentPage(totalPages - 1)}
+              title="Sista sidan"
+              aria-label="Sista sidan"
+            >
+              <LastPageIcon fontSize="small" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <ConfirmSaveDialog
         open={saveDialogOpen}
         onClose={() => setSaveDialogOpen(false)}

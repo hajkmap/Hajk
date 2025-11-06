@@ -822,5 +822,51 @@ export function makeStyles(t, isMobile) {
       display: "flex",
       alignItems: "center",
     },
+
+    // Pagination styles
+    tableFooter: {
+      display: "flex",
+      alignItems: "center",
+      gap: isMobile ? 6 : 12,
+      padding: isMobile ? 8 : 12,
+      background: t.panelBg,
+      borderTop: `1px solid ${t.border}`,
+      flexWrap: isMobile ? "wrap" : "nowrap",
+    },
+    paginationInfo: {
+      fontSize: isMobile ? 12 : 13,
+      color: t.textMuted,
+      whiteSpace: "nowrap",
+    },
+    paginationControls: {
+      display: "flex",
+      alignItems: "center",
+      gap: isMobile ? 4 : 8,
+      flexWrap: "nowrap",
+    },
+    rowsPerPageLabel: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      fontSize: isMobile ? 12 : 13,
+      color: t.text,
+      whiteSpace: "nowrap",
+    },
+    rowsPerPageSelect: {
+      padding: isMobile ? "4px 6px" : "6px 8px",
+      border: `1px solid ${t.border}`,
+      borderRadius: 6,
+      background: t.overlayBg,
+      color: t.text,
+      fontSize: isMobile ? 12 : 13,
+      cursor: "pointer",
+      marginLeft: 4,
+    },
+    pageIndicator: {
+      fontSize: isMobile ? 12 : 13,
+      color: t.text,
+      padding: isMobile ? "0 4px" : "0 8px",
+      whiteSpace: "nowrap",
+    },
   };
 }
