@@ -45,10 +45,8 @@ export default function ServiceSettings() {
   const { serviceId } = useParams<{ serviceId: string }>();
   const { data: service, isError, isLoading } = useServiceById(serviceId ?? "");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [dialogUrl, setDialogUrl] = useState(service?.url ?? "");
-  const [dialogServiceType, setDialogServiceType] = useState(
-    service?.type ?? ""
-  );
+  const [dialogUrl, setDialogUrl] = useState("");
+  const [dialogServiceType, setDialogServiceType] = useState("");
 
   const { data: projections } = useProjections();
   const epsgProjections =
@@ -72,8 +70,21 @@ export default function ServiceSettings() {
     isLoading: layersLoading,
   } = useServiceCapabilities({
     baseUrl: service?.url ?? "",
-    type: service?.type ?? "",
+    type:
+      service?.type === SERVICE_TYPE.WMS
+        ? SERVICE_TYPE.WMS
+        : service?.type === SERVICE_TYPE.WMTS
+        ? SERVICE_TYPE.WMS
+        : service?.type === SERVICE_TYPE.WFS
+        ? SERVICE_TYPE.WFS
+        : service?.type === SERVICE_TYPE.WFST
+        ? SERVICE_TYPE.WFS
+        : service?.type === SERVICE_TYPE.VECTOR
+        ? SERVICE_TYPE.WFS
+        : service?.type,
   });
+
+  const defaultValues = {} as FieldValues;
   const {
     register,
     handleSubmit,
@@ -82,28 +93,17 @@ export default function ServiceSettings() {
     getValues,
     formState: { errors },
   } = useForm<FieldValues>({
-    defaultValues: {
-      name: service?.name ?? "",
-      type: service?.type ?? "",
-      comment: service?.comment ?? "",
-      serverType: service?.serverType ?? "",
-      url: service?.url ?? "",
-      workspace: service?.workspace ?? "All",
-      getMapUrl: service?.getMapUrl ?? "",
-      version: service?.version ?? "",
-      imageFormat: service?.imageFormat ?? "",
-      "projection.code": service?.projection?.code ?? "",
-      "metadata.owner": service?.metadata?.owner ?? "",
-      "metadata.description": service?.metadata?.description ?? "",
-    },
+    defaultValues,
     mode: "onChange",
     reValidateMode: "onChange",
   });
 
   const handleDialogOpen = () => {
     setIsDialogOpen(true);
-    setDialogUrl(getValues("url") as string);
-    setDialogServiceType(getValues("type") as string);
+    setDialogUrl((getValues("url") as string) || (service?.url ?? ""));
+    setDialogServiceType(
+      (getValues("type") as string) || (service?.type ?? "")
+    );
   };
 
   const handleDialogClose = () => {
@@ -238,7 +238,7 @@ export default function ServiceSettings() {
                   label={t("common.serviceType")}
                   fullWidth
                   defaultValue={service?.type}
-                  InputProps={{ readOnly: true }}
+                  slotProps={{ input: { readOnly: true } }}
                   {...register("type")}
                 />
               </Grid>
@@ -290,16 +290,18 @@ export default function ServiceSettings() {
                   disabled
                   defaultValue={service?.url}
                   {...register("url")}
-                  InputProps={{
-                    endAdornment: (
-                      <Button
-                        sx={{ color: palette.primary.main, fontWeight: 600 }}
-                        size="small"
-                        onClick={handleDialogOpen}
-                      >
-                        {t("services.url.btnLabel")}
-                      </Button>
-                    ),
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <Button
+                          sx={{ color: palette.primary.main, fontWeight: 600 }}
+                          size="small"
+                          onClick={handleDialogOpen}
+                        >
+                          {t("services.url.btnLabel")}
+                        </Button>
+                      ),
+                    },
                   }}
                 />
               </Grid>
@@ -452,6 +454,7 @@ export default function ServiceSettings() {
             serviceId={service.id}
             isError={layersError}
             isLoading={layersLoading}
+            type={service?.type}
           />
         </FormContainer>
       </FormActionPanel>

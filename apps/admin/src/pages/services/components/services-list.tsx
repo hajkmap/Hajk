@@ -4,7 +4,6 @@ import Grid from "@mui/material/Grid2";
 import {
   Button,
   TextField,
-  Typography,
   useTheme,
   FormControl,
   InputLabel,
@@ -53,7 +52,6 @@ export default function ServicesList({
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
-
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };

@@ -81,6 +81,7 @@ export interface LayersGridProps {
   serviceId: string;
   isError: boolean;
   isLoading: boolean;
+  type?: string;
 }
 export interface UseServiceCapabilitiesProps {
   baseUrl: string;

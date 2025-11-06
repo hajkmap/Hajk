@@ -25,12 +25,14 @@ import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import useAppStateStore from "../../store/use-app-state-store";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useCreateLayer, LayerCreateInput } from "../../api/layers";
+import { SERVICE_TYPE } from "../../api/services/types";
 
 function LayersGrid({
   layers,
   serviceId,
   isError,
   isLoading,
+  type,
 }: LayersGridProps) {
   const { palette } = useTheme();
   const { t } = useTranslation();
@@ -104,7 +106,15 @@ function LayersGrid({
       };
 
       const response = await createLayer(payload);
-      void navigate("/layers/" + response?.id);
+      void navigate(
+        type === SERVICE_TYPE.WMS
+          ? "/display-layers/" + response?.id
+          : type === SERVICE_TYPE.WFS
+          ? "/search-layers/" + response?.id
+          : type === SERVICE_TYPE.WFST
+          ? "/editing-layers/" + response?.id
+          : "/display-layers/" + response?.id
+      );
     } catch (error) {
       console.error("Failed to create layer:", error);
     }
@@ -112,7 +122,7 @@ function LayersGrid({
 
   return (
     <Grid container>
-      <Grid size={{ xs: 12, md: 12 }}>
+      <Grid size={{ xs: 12, md: 12 }} sx={{ pl: "0 !important" }}>
         <Accordion
           disableGutters
           sx={{
@@ -122,6 +132,7 @@ function LayersGrid({
             border: 0,
             boxShadow: "none",
             borderRadius: "8px",
+            ml: 2,
           }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>

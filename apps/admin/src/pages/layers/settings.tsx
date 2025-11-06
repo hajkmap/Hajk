@@ -32,7 +32,11 @@ import {
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import FormActionPanel from "../../components/form-action-panel";
 import { toast } from "react-toastify";
-import { useServices, useServiceCapabilities } from "../../api/services";
+import {
+  useServices,
+  useServiceCapabilities,
+  SERVICE_TYPE,
+} from "../../api/services";
 import AvailableLayersGrid from "./available-layers-grid";
 import { useRoles } from "../../api/users";
 import { HttpError } from "../../lib/http-error";
@@ -64,7 +68,18 @@ export default function LayerSettings() {
   const { layers: getCapLayers, styles: getCapStyles } = useServiceCapabilities(
     {
       baseUrl: service?.url ?? "",
-      type: service?.type ?? "",
+      type:
+        service?.type === SERVICE_TYPE.WMS
+          ? SERVICE_TYPE.WMS
+          : service?.type === SERVICE_TYPE.WMTS
+          ? SERVICE_TYPE.WMS
+          : service?.type === SERVICE_TYPE.WFS
+          ? SERVICE_TYPE.WFS
+          : service?.type === SERVICE_TYPE.WFST
+          ? SERVICE_TYPE.WFS
+          : service?.type === SERVICE_TYPE.VECTOR
+          ? SERVICE_TYPE.WFS
+          : service?.type,
     }
   );
 

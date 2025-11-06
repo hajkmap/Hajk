@@ -103,13 +103,14 @@ function UsedInMapsGrid() {
 
   return (
     <Grid container>
-      <Grid size={{ xs: 12, md: 12 }}>
+      <Grid size={{ xs: 12, md: 12 }} sx={{ pl: "0 !important" }}>
         <Accordion
           disableGutters
           sx={{
             width: "100%",
             mb: 3,
             backgroundColor: isDarkMode ? "#121212" : "#efefef",
+            ml: 2,
           }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
