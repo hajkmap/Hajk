@@ -12,6 +12,7 @@ const FormListItem = ({
   hasGeomChange,
   isDraftAdd,
   onFormRowClick,
+  selectedRowRefs,
 }) => {
   const makeRowPreview = (row, FIELD_META) => {
     const keys = FIELD_META.map((m) => m.key);
@@ -42,6 +43,13 @@ const FormListItem = ({
 
   return (
     <div
+      ref={(el) => {
+        if ((selected || isFocused) && selectedRowRefs) {
+          selectedRowRefs.current.set(row.id, el);
+        } else if (selectedRowRefs) {
+          selectedRowRefs.current.delete(row.id);
+        }
+      }}
       data-row-id={row.id}
       style={s.listRow(selected, status, isFocused, false)}
       onClick={(e) => onFormRowClick(row.id, idx, e)}

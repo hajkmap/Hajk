@@ -28,9 +28,17 @@ const TableRow = ({
   isEditableField,
   caretStoreRef,
   shouldUseTextarea,
+  selectedRowRefs,
 }) => {
   return (
     <tr
+      ref={(el) => {
+        if (selected && selectedRowRefs) {
+          selectedRowRefs.current.set(row.id, el);
+        } else if (selectedRowRefs) {
+          selectedRowRefs.current.delete(row.id);
+        }
+      }}
       style={s.tr(selected, pendingKind)}
       aria-selected={selected}
       onClick={(e) => handleRowClick(row.id, idx, e)}

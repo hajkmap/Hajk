@@ -4,6 +4,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { editBus } from "../../../buses/editBus";
@@ -61,6 +62,12 @@ export default function DesktopForm({
   const [pendingCaret, setPendingCaret] = React.useState(null);
   const saveLeftWTimer = React.useRef(null);
 
+  // Ref for scrolling to selected rows
+  const selectedRowRefs = React.useRef(new Map());
+
+  // Track which selected row we're currently showing (for cycling through multiple selections)
+  const [currentScrollIndex, setCurrentScrollIndex] = React.useState(0);
+
   const registerTextareaRef = React.useCallback((key, el) => {
     if (el) textareaRefs.current[key] = el;
   }, []);
@@ -83,6 +90,59 @@ export default function DesktopForm({
   const clearColumnFilters = () => {
     setColumnFilters({});
   };
+
+  // Reset scroll index when selection changes
+  React.useEffect(() => {
+    setCurrentScrollIndex(0);
+  }, [selectedIds, focusedId]);
+
+  // Scroll to selected/focused row in the list
+  // Cycles through multiple selected rows on each click
+  const scrollToSelectedRow = React.useCallback(() => {
+    // Determine target ID(s)
+    let targetId;
+
+    if (selectedIds.size > 1) {
+      // Multiple selections - cycle through them
+      const selectedArray = Array.from(selectedIds);
+      targetId = selectedArray[currentScrollIndex];
+
+      // Move to next for next click
+      setCurrentScrollIndex((prev) => (prev + 1) % selectedArray.length);
+    } else if (selectedIds.size === 1) {
+      // Single selection - always go to it
+      targetId = Array.from(selectedIds)[0];
+    } else if (focusedId != null) {
+      // No selection but have focused
+      targetId = focusedId;
+    } else {
+      return; // Nothing to scroll to
+    }
+
+    const rowElement = selectedRowRefs.current.get(targetId);
+    if (rowElement) {
+      // Find the scrollable parent (the list container)
+      const scrollParent = rowElement.closest('[style*="overflow"]');
+      if (scrollParent) {
+        const rowRect = rowElement.getBoundingClientRect();
+        const parentRect = scrollParent.getBoundingClientRect();
+        const scrollTop = scrollParent.scrollTop;
+
+        // Calculate position to center the row in the viewport
+        const targetScrollTop =
+          scrollTop +
+          (rowRect.top - parentRect.top) -
+          parentRect.height / 2 +
+          rowRect.height / 2;
+
+        // Smooth scroll to position
+        scrollParent.scrollTo({
+          top: targetScrollTop,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [focusedId, selectedIds, currentScrollIndex]);
 
   React.useEffect(() => {
     function onMove(e) {
@@ -266,6 +326,7 @@ export default function DesktopForm({
                 hasGeomChange={hasGeomChange}
                 isDraftAdd={isDraftAdd}
                 onFormRowClick={onFormRowClick}
+                selectedRowRefs={selectedRowRefs}
               />
             );
           })}
@@ -394,6 +455,25 @@ export default function DesktopForm({
             }
           >
             <CenterFocusStrongIcon fontSize="small" />
+          </button>
+          <button
+            style={
+              selectedIds.size === 0 && focusedId == null
+                ? s.iconBtnDisabled
+                : s.iconBtn
+            }
+            disabled={selectedIds.size === 0 && focusedId == null}
+            onClick={scrollToSelectedRow}
+            title={
+              selectedIds.size > 1
+                ? `Scrolla till markerad rad (${currentScrollIndex + 1}/${selectedIds.size})`
+                : selectedIds.size === 1 || focusedId != null
+                  ? "Scrolla till markerad rad i listan"
+                  : "Markera objekt först"
+            }
+            aria-label="Scrolla till markerad"
+          >
+            <VisibilityIcon fontSize="small" />
           </button>
           <button
             style={

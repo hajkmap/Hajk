@@ -4,6 +4,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
@@ -167,6 +168,12 @@ export default function TableMode(props) {
   const [currentPage, setCurrentPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(20);
 
+  // Ref for scrolling to selected rows
+  const selectedRowRefs = React.useRef(new Map());
+
+  // Track which selected row we're currently showing (for cycling through multiple selections)
+  const [currentScrollIndex, setCurrentScrollIndex] = React.useState(0);
+
   const setQFor = (key, val) =>
     setColumnFilterUI((prev) => ({
       ...prev,
@@ -217,6 +224,73 @@ export default function TableMode(props) {
       setCurrentPage(maxPage);
     }
   }, [rowsPerPage, totalRows, currentPage]);
+
+  // Reset scroll index when selection changes
+  React.useEffect(() => {
+    setCurrentScrollIndex(0);
+  }, [tableSelectedIds]);
+
+  // Navigate to page containing selected row and scroll to it (manual only)
+  // Cycles through multiple selected rows on each click
+  const scrollToSelectedRow = React.useCallback(() => {
+    if (tableSelectedIds.size === 0) return;
+
+    const selectedArray = Array.from(tableSelectedIds);
+
+    // If only one selected, always go to it
+    const targetIndex = selectedArray.length === 1 ? 0 : currentScrollIndex;
+    const targetId = selectedArray[targetIndex];
+
+    const rowIndex = filteredAndSorted.findIndex((r) => r.id === targetId);
+
+    if (rowIndex === -1) return;
+
+    // Calculate which page the row is on
+    const targetPage = Math.floor(rowIndex / rowsPerPage);
+
+    // Navigate to that page
+    if (targetPage !== currentPage) {
+      setCurrentPage(targetPage);
+    }
+
+    // Scroll to the row after a brief delay to let the page render
+    setTimeout(() => {
+      const rowElement = selectedRowRefs.current.get(targetId);
+      if (rowElement) {
+        // Find the scrollable parent (tableViewport)
+        const scrollParent = rowElement.closest('[style*="overflow"]');
+        if (scrollParent) {
+          const rowRect = rowElement.getBoundingClientRect();
+          const parentRect = scrollParent.getBoundingClientRect();
+          const scrollTop = scrollParent.scrollTop;
+
+          // Calculate position to center the row in the viewport
+          const targetScrollTop =
+            scrollTop +
+            (rowRect.top - parentRect.top) -
+            parentRect.height / 2 +
+            rowRect.height / 2;
+
+          // Smooth scroll to position
+          scrollParent.scrollTo({
+            top: targetScrollTop,
+            behavior: "smooth",
+          });
+        }
+      }
+    }, 100);
+
+    // Move to next selected row for next click (cycle back to 0 at end)
+    if (selectedArray.length > 1) {
+      setCurrentScrollIndex((prev) => (prev + 1) % selectedArray.length);
+    }
+  }, [
+    tableSelectedIds,
+    filteredAndSorted,
+    rowsPerPage,
+    currentPage,
+    currentScrollIndex,
+  ]);
 
   const syncFilterOnCellChange = React.useCallback(
     (columnKey, fromValue, toValue, rowId) => {
@@ -402,6 +476,21 @@ export default function TableMode(props) {
             aria-label="Zooma till valda"
           >
             <CenterFocusStrongIcon fontSize="small" />
+          </button>
+          <button
+            style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
+            disabled={tableSelectedIds.size === 0}
+            onClick={scrollToSelectedRow}
+            title={
+              tableSelectedIds.size > 1
+                ? `Scrolla till markerad rad (${currentScrollIndex + 1}/${tableSelectedIds.size})`
+                : tableSelectedIds.size === 1
+                  ? "Scrolla till markerad rad i tabellen"
+                  : "Markera rader först"
+            }
+            aria-label="Scrolla till markerad"
+          >
+            <VisibilityIcon fontSize="small" />
           </button>
           <button
             style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
@@ -688,6 +777,7 @@ export default function TableMode(props) {
                     isEditableField={isEditableField}
                     caretStoreRef={caretStoreRef}
                     shouldUseTextarea={shouldUseTextarea}
+                    selectedRowRefs={selectedRowRefs}
                   />
                 );
               })}

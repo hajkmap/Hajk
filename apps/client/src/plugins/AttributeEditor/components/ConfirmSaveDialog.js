@@ -98,7 +98,7 @@ export default function ConfirmSaveDialog({
           <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
             <Chip
               icon={<AddCircleOutlineRoundedIcon />}
-              label={`Utkast: ${adds}`}
+              label={`Tillagda: ${adds}`}
               color={adds ? "success" : "default"}
               variant="outlined"
               size="medium"
@@ -113,7 +113,7 @@ export default function ConfirmSaveDialog({
             />
             <Chip
               icon={<EditNoteRoundedIcon />}
-              label={`Ändringar: ${edits}`}
+              label={`Ändrade: ${edits}`}
               color={edits ? "warning" : "default"}
               variant="outlined"
               size="medium"
@@ -128,7 +128,7 @@ export default function ConfirmSaveDialog({
             />
             <Chip
               icon={<DeleteOutlineRoundedIcon />}
-              label={`Raderingar: ${deletes}`}
+              label={`Raderade: ${deletes}`}
               color={deletes ? "error" : "default"}
               variant="outlined"
               size="medium"
