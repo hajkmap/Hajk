@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - It's now possible to use Matomo tracking without cookies. [PR#1691](https://github.com/hajkmap/Hajk/pull/1691)
+- OpenStreetMap can optionally be selected as default background layer in map config. See commits e1b5f59c69b8985a498efee27aa76ea11ca4afbb and 4040c7c11367620040efc7609a56e1b3b436cc67. In addition, the Admin UI option has been added in 06c52b0cd863022f7c9a58e5103168627ac41172.
+- Changed Hajk's default projection (in `simpleMapConfig.json` and `map_1.json`) to EPSG:3857. This makes our new default OSM background look way better. [commit](https://github.com/hajkmap/Hajk/commit/6f5a5dc89a5c18d49f5af2d26353036d35945b82)
 
 ### Changed
 
