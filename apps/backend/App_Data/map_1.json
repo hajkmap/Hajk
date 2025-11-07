@@ -694,7 +694,7 @@
         "baselayers": [
           {
             "id": "1",
-            "visibleAtStart": true,
+            "visibleAtStart": false,
             "drawOrder": 0,
             "infobox": ""
           },
