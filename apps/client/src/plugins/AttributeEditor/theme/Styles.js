@@ -828,7 +828,7 @@ export function makeStyles(t, isMobile) {
       display: "flex",
       alignItems: "center",
       gap: isMobile ? 6 : 12,
-      padding: isMobile ? 8 : 12,
+      padding: isMobile ? 4 : 4,
       background: t.panelBg,
       borderTop: `1px solid ${t.border}`,
       flexWrap: isMobile ? "wrap" : "nowrap",

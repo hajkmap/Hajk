@@ -483,12 +483,12 @@ export default function TableMode(props) {
             onClick={scrollToSelectedRow}
             title={
               tableSelectedIds.size > 1
-                ? `Scrolla till markerad rad (${currentScrollIndex + 1}/${tableSelectedIds.size})`
+                ? `Skrolla till markerad rad (${currentScrollIndex + 1}/${tableSelectedIds.size})`
                 : tableSelectedIds.size === 1
-                  ? "Scrolla till markerad rad i tabellen"
+                  ? "Skrolla till markerad rad i tabellen"
                   : "Markera rader först"
             }
-            aria-label="Scrolla till markerad"
+            aria-label="Skrolla till markerad"
           >
             <VisibilityIcon fontSize="small" />
           </button>
