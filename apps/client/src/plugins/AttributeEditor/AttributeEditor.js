@@ -62,6 +62,8 @@ function AttributeEditor(props) {
   const selectedIdsRef = React.useRef(new Set());
   const onlyFilteredRef = React.useRef(false);
   const deletedIdsRef = React.useRef(new Set());
+  const pendingEditsRef = React.useRef({});
+  const pendingAddsRef = React.useRef([]);
   const featureIndexRef = React.useRef(new Map());
   const graveyardRef = React.useRef(new Map());
   const focusedIdRef = React.useRef(null);
@@ -73,27 +75,9 @@ function AttributeEditor(props) {
   const styles = React.useMemo(() => {
     const baseStroke = new Stroke({ color: "#1976d2", width: 2 });
     const baseFill = new Fill({ color: "rgba(25, 118, 210, 0.73)" });
+
     return {
-      selected: new Style({
-        image: new CircleStyle({
-          radius: 7,
-          fill: new Fill({ color: "#ff9800" }),
-          stroke: new Stroke({ color: "#000000ff", width: 2 }),
-        }),
-        stroke: new Stroke({ color: "#ff9800", width: 3 }),
-        fill: new Fill({ color: "rgba(255,152,0,0.12)" }),
-        zIndex: 3,
-      }),
-      toDelete: new Style({
-        image: new CircleStyle({
-          radius: 7,
-          fill: new Fill({ color: "rgba(229,57,53,0.25)" }),
-          stroke: new Stroke({ color: "#e53935", width: 3 }),
-        }),
-        stroke: new Stroke({ color: "#e53935", width: 3 }),
-        fill: new Fill({ color: "rgba(229,57,53,0.12)" }),
-        zIndex: 5,
-      }),
+      // DEFAULT: Unselected normal feature (original)
       visible: new Style({
         image: new CircleStyle({
           radius: 6,
@@ -104,6 +88,116 @@ function AttributeEditor(props) {
         fill: baseFill,
         zIndex: 2,
       }),
+
+      // SELECTED NORMAL: Orange solid (original)
+      visibleSelected: new Style({
+        image: new CircleStyle({
+          radius: 7,
+          fill: new Fill({ color: "#ff9800" }),
+          stroke: new Stroke({ color: "#000000ff", width: 2 }),
+        }),
+        stroke: new Stroke({ color: "#ff9800", width: 3 }),
+        fill: new Fill({ color: "rgba(255,152,0,0.12)" }),
+        zIndex: 3,
+      }),
+
+      // SELECTED: Orange (kept for backward compatibility)
+      selected: new Style({
+        image: new CircleStyle({
+          radius: 7,
+          fill: new Fill({ color: "#ff9800" }),
+          stroke: new Stroke({ color: "#000000ff", width: 2 }),
+        }),
+        stroke: new Stroke({ color: "#ff9800", width: 3 }),
+        fill: new Fill({ color: "rgba(255,152,0,0.12)" }),
+        zIndex: 3,
+      }),
+
+      // DELETION: Unselected - red solid (original)
+      toDelete: new Style({
+        image: new CircleStyle({
+          radius: 7,
+          fill: new Fill({ color: "rgba(229,57,53,0.25)" }),
+          stroke: new Stroke({ color: "#e53935", width: 3 }),
+        }),
+        stroke: new Stroke({ color: "#e53935", width: 3 }),
+        fill: new Fill({ color: "rgba(229,57,53,0.12)" }),
+        zIndex: 5,
+      }),
+
+      // DELETION + SELECTED: Orange solid
+      toDeleteSelected: new Style({
+        image: new CircleStyle({
+          radius: 7,
+          fill: new Fill({ color: "#ff9800" }),
+          stroke: new Stroke({ color: "#000000ff", width: 2 }),
+        }),
+        stroke: new Stroke({ color: "#ff9800", width: 3 }),
+        fill: new Fill({ color: "rgba(255,152,0,0.12)" }),
+        zIndex: 5,
+      }),
+
+      // NEW DRAFT: Unselected - green dashed
+      draft: new Style({
+        image: new CircleStyle({
+          radius: 6,
+          fill: new Fill({ color: "rgba(99, 251, 173, 0.8)" }), // Light green
+          stroke: new Stroke({ color: "#059669", width: 2, lineDash: [5, 5] }),
+        }),
+        stroke: new Stroke({ color: "#059669", width: 3, lineDash: [5, 5] }),
+        fill: new Fill({ color: "rgba(144, 253, 197, 0.71)" }),
+        zIndex: 4,
+      }),
+
+      // NEW DRAFT + SELECTED: Orange dashed
+      draftSelected: new Style({
+        image: new CircleStyle({
+          radius: 7,
+          fill: new Fill({ color: "#ff9800" }),
+          stroke: new Stroke({
+            color: "#000000ff",
+            width: 2,
+            lineDash: [5, 5],
+          }),
+        }),
+        stroke: new Stroke({ color: "#ff9800", width: 3, lineDash: [5, 5] }),
+        fill: new Fill({ color: "rgba(255,152,0,0.12)" }),
+        zIndex: 5,
+      }),
+
+      // EDITED: Unselected - yellow dashed
+      edited: new Style({
+        image: new CircleStyle({
+          radius: 6,
+          fill: new Fill({ color: "#ffe992ff" }), // Light yellow
+          stroke: new Stroke({
+            color: "#e45c08ff",
+            width: 2,
+            lineDash: [5, 5],
+          }),
+        }),
+        stroke: new Stroke({ color: "#e45c08ff", width: 3, lineDash: [5, 5] }),
+        fill: new Fill({ color: "#ffe992ff" }),
+        zIndex: 4,
+      }),
+
+      // EDITED + SELECTED: Orange dashed
+      editedSelected: new Style({
+        image: new CircleStyle({
+          radius: 7,
+          fill: new Fill({ color: "#ff9800" }),
+          stroke: new Stroke({
+            color: "#000000ff",
+            width: 2,
+            lineDash: [5, 5],
+          }),
+        }),
+        stroke: new Stroke({ color: "#ff9800", width: 3, lineDash: [5, 5] }),
+        fill: new Fill({ color: "rgba(255,152,0,0.12)" }),
+        zIndex: 5,
+      }),
+
+      // DIMMED (original)
       dimmed: new Style({
         image: new CircleStyle({
           radius: 5,
@@ -125,15 +219,34 @@ function AttributeEditor(props) {
       const sel = selectedIdsRef.current;
       const vis = visibleIdsRef.current;
       const del = deletedIdsRef.current;
+      const edits = pendingEditsRef.current;
+      const adds = pendingAddsRef.current;
 
       const isSelected = aliases.some((k) => sel.has(k));
       const isVisible = aliases.some((k) => vis.has(k));
       const isDeleted = aliases.some((k) => del.has(k));
 
+      const hasEdits = aliases.some(
+        (k) => edits[k] && Object.keys(edits[k]).length > 0
+      );
+
+      const isDraft = aliases.some((k) => {
+        const numId = typeof k === "number" ? k : Number(k);
+        return (
+          (Number.isFinite(numId) && numId < 0) || adds.some((d) => d.id === k)
+        );
+      });
+
       if (!isVisible && !isSelected) return null;
-      if (isDeleted) return styles.toDelete;
-      if (isSelected) return styles.selected;
-      return styles.visible;
+
+      // Determine category (priority order)
+      let category = "visible"; // default
+      if (isDeleted) category = "toDelete";
+      else if (isDraft) category = "draft";
+      else if (hasEdits) category = "edited";
+
+      // Return the appropriate variant based on selection
+      return isSelected ? styles[category + "Selected"] : styles[category];
     },
     [styles]
   );
@@ -679,6 +792,8 @@ function AttributeEditor(props) {
       const del =
         st.pendingDeletes instanceof Set ? st.pendingDeletes : new Set();
       deletedIdsRef.current = new Set(del);
+      pendingEditsRef.current = st.pendingEdits || {};
+      pendingAddsRef.current = st.pendingAdds || [];
       vectorLayerRef.current?.changed?.();
     });
   }, [model, vectorLayerRef]);
