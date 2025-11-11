@@ -12,6 +12,7 @@ export default function LayerGroupAccordion({
   display,
   isFirstGroup,
   isFirstChild,
+  disableAccordion,
 }) {
   const [state, setState] = useState({ expanded: expanded });
 
@@ -37,7 +38,11 @@ export default function LayerGroupAccordion({
     <div style={{ display: display }}>
       <ListItemButton
         disableTouchRipple
-        onClick={() => setState({ expanded: !state.expanded })}
+        onClick={
+          disableAccordion
+            ? undefined
+            : () => setState({ expanded: !state.expanded })
+        }
         sx={(theme) => ({
           alignItems: "flex-start",
           borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
@@ -55,23 +60,25 @@ export default function LayerGroupAccordion({
         })}
         dense
       >
-        <LsIconButton
-          id="layerGroup-accordion-arrow-button"
-          data-first={isFirstGroup ? "true" : "false"} // Pass this as a prop from LayerGroup
-          data-expanded={state.expanded}
-          size="small"
-          sx={{
-            mt: "2px",
-            pl: "3px",
-            pr: "4px",
-            "&:hover": {
-              backgroundColor: "transparent", // or same as default bg color
-              boxShadow: "none",
-            },
-          }}
-        >
-          <KeyboardArrowRightOutlinedIcon className="ls-arrow"></KeyboardArrowRightOutlinedIcon>
-        </LsIconButton>
+        {!disableAccordion && (
+          <LsIconButton
+            id="layerGroup-accordion-arrow-button"
+            data-first={isFirstGroup ? "true" : "false"}
+            data-expanded={state.expanded}
+            size="small"
+            sx={{
+              mt: "2px",
+              pl: "3px",
+              pr: "4px",
+              "&:hover": {
+                backgroundColor: "transparent",
+                boxShadow: "none",
+              },
+            }}
+          >
+            <KeyboardArrowRightOutlinedIcon className="ls-arrow"></KeyboardArrowRightOutlinedIcon>
+          </LsIconButton>
+        )}
         <Box
           sx={{
             display: "flex",
@@ -86,7 +93,7 @@ export default function LayerGroupAccordion({
           {layerGroupTitle}
         </Box>
       </ListItemButton>
-      <Collapse in={state.expanded} unmountOnExit>
+      {disableAccordion ? (
         <Box
           sx={{
             marginLeft: "20px" /* jesade-vbg compact mode, changed from 26px */,
@@ -94,7 +101,17 @@ export default function LayerGroupAccordion({
         >
           {children}
         </Box>
-      </Collapse>
+      ) : (
+        <Collapse in={state.expanded} unmountOnExit>
+          <Box
+            sx={{
+              marginLeft: "20px",
+            }}
+          >
+            {children}
+          </Box>
+        </Collapse>
+      )}
     </div>
   );
 }
