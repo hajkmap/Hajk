@@ -284,7 +284,7 @@ function LayersGrid({
                     color={palette.error.main}
                     sx={{ mb: 1 }}
                   >
-                    {t("services.atLeastOneLayerRequired")}
+                    {!isLoading && t("services.atLeastOneLayerRequired")}
                   </Typography>
                 )}
                 {isLoading ? (
