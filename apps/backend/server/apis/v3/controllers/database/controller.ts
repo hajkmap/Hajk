@@ -765,8 +765,8 @@ export class DatabaseController {
       args.push("--schema-only");
     }
 
-    // Add compression
-    if (options.compress && options.format !== "directory") {
+    // Add compression (only supported for custom format)
+    if (options.compress && options.format === "custom") {
       args.push("--compress=9");
     }
 

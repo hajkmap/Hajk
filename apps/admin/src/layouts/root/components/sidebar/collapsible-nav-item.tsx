@@ -82,7 +82,7 @@ const CollapsibleNavItem = (props: Props) => {
           startIcon={props.icon}
         >
           <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
-            <Typography sx={{ fontSize: "1.15rem" }}>
+            <Typography sx={{ fontSize: "1.10rem" }}>
               {t(props.titleKey)}
             </Typography>
           </Box>
