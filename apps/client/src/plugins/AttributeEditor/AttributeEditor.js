@@ -13,6 +13,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import { Style, Circle as CircleStyle, Fill, Stroke } from "ol/style";
+import Overlay from "ol/Overlay";
 
 function AttributeEditor(props) {
   const programmaticSketchOpsRef = React.useRef(new WeakSet());
@@ -72,6 +73,10 @@ function AttributeEditor(props) {
   const currentServiceIdRef = React.useRef("NONE_ID");
   const [serviceList, setServiceList] = React.useState([]);
 
+  const hoveredIdRef = React.useRef(null);
+  const tooltipOverlayRef = React.useRef(null);
+  const tooltipElementRef = React.useRef(null);
+
   const styles = React.useMemo(() => {
     const baseStroke = new Stroke({ color: "#1976d2", width: 2 });
     const baseFill = new Fill({ color: "rgba(25, 118, 210, 0.73)" });
@@ -113,15 +118,15 @@ function AttributeEditor(props) {
         zIndex: 3,
       }),
 
-      // DELETION: Unselected - red solid (original)
+      // DELETION: Unselected - red dashed (original)
       toDelete: new Style({
         image: new CircleStyle({
           radius: 7,
-          fill: new Fill({ color: "rgba(229,57,53,0.25)" }),
-          stroke: new Stroke({ color: "#e53935", width: 3 }),
+          fill: new Fill({ color: "rgba(229, 56, 53, 0.5)" }),
+          stroke: new Stroke({ color: "#e53935", width: 3, lineDash: [5, 5] }),
         }),
-        stroke: new Stroke({ color: "#e53935", width: 3 }),
-        fill: new Fill({ color: "rgba(229,57,53,0.12)" }),
+        stroke: new Stroke({ color: "#e53935", width: 3, lineDash: [5, 5] }),
+        fill: new Fill({ color: "rgba(229, 56, 53, 0.5)" }),
         zIndex: 5,
       }),
 
@@ -207,6 +212,26 @@ function AttributeEditor(props) {
         fill: new Fill({ color: "rgba(255, 5, 5, 0.04)" }),
         zIndex: 1,
       }),
+
+      // HOVERED
+      hovered: new Style({
+        image: new CircleStyle({
+          radius: 8,
+          fill: new Fill({ color: "rgba(255, 215, 0, 0.6)" }), // Gold
+          stroke: new Stroke({
+            color: "#FFD700",
+            width: 3,
+            lineDash: [8, 4],
+          }),
+        }),
+        stroke: new Stroke({
+          color: "#FFD700",
+          width: 4,
+          lineDash: [8, 4],
+        }),
+        fill: new Fill({ color: "rgba(255, 215, 0, 0.15)" }),
+        zIndex: 999, // Above all else (except selected)
+      }),
     };
   }, []);
 
@@ -221,10 +246,14 @@ function AttributeEditor(props) {
       const del = deletedIdsRef.current;
       const edits = pendingEditsRef.current;
       const adds = pendingAddsRef.current;
+      const hov = hoveredIdRef.current;
 
       const isSelected = aliases.some((k) => sel.has(k));
       const isVisible = aliases.some((k) => vis.has(k));
       const isDeleted = aliases.some((k) => del.has(k));
+      const isHovered =
+        hov != null &&
+        aliases.some((k) => k === hov || String(k) === String(hov));
 
       const hasEdits = aliases.some(
         (k) => edits[k] && Object.keys(edits[k]).length > 0
@@ -237,19 +266,140 @@ function AttributeEditor(props) {
         );
       });
 
-      if (!isVisible && !isSelected) return null;
+      if (!isVisible && !isSelected && !isHovered) return null;
+
+      // Hover has highest priority (if not selected)
+      if (isHovered && !isSelected) {
+        return styles.hovered;
+      }
 
       // Determine category (priority order)
-      let category = "visible"; // default
+      let category = "visible";
       if (isDeleted) category = "toDelete";
       else if (isDraft) category = "draft";
       else if (hasEdits) category = "edited";
 
-      // Return the appropriate variant based on selection
       return isSelected ? styles[category + "Selected"] : styles[category];
     },
     [styles]
   );
+
+  const handleRowHover = React.useCallback(
+    (id, showTooltip = false) => {
+      hoveredIdRef.current = id;
+      vectorLayerRef?.current?.changed?.();
+
+      if (!showTooltip) return;
+
+      const feature = featureIndexRef.current.get(id);
+      const overlay = tooltipOverlayRef.current;
+      const tooltipEl = tooltipElementRef.current;
+
+      if (feature && overlay && tooltipEl) {
+        const geom = feature.getGeometry();
+        if (geom) {
+          let coord;
+          const geomType = geom.getType();
+
+          if (geomType === "Point") {
+            coord = geom.getCoordinates();
+          } else if (geomType === "LineString") {
+            const coords = geom.getCoordinates();
+            coord = coords[Math.floor(coords.length / 2)];
+          } else if (geomType === "Polygon" || geomType === "MultiPolygon") {
+            const extent = geom.getExtent();
+            coord = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+          }
+
+          if (coord) {
+            const props = feature.getProperties();
+
+            // Filter out internal/technical fields and object properties
+            const excludeKeys = [
+              "geometry",
+              "USER_DRAWN",
+              "DRAW_METHOD",
+              "EDIT_ACTIVE",
+              "__geom__",
+              "__pending",
+              "__idx",
+              "__ae_style_delegate",
+              "TEXT_SETTINGS",
+              "@_fid",
+            ];
+
+            const displayProps = [];
+
+            Object.entries(props).forEach(([key, value]) => {
+              if (
+                excludeKeys.includes(key) ||
+                key.startsWith("_") ||
+                key.startsWith("__") ||
+                value == null ||
+                value === "" ||
+                (typeof value === "object" && value !== null)
+              ) {
+                return;
+              }
+
+              if (displayProps.length < 5) {
+                displayProps.push({ key, value });
+              }
+            });
+
+            const isDark = ui.dark;
+            const bgColor = isDark ? "#1e293b" : "white";
+            const textColor = isDark ? "#e5e7eb" : "#111827";
+            const mutedColor = isDark ? "#9ca3af" : "#6b7280";
+
+            if (displayProps.length === 0) {
+              tooltipEl.innerHTML = `
+            <div style="font-weight: 600; color: #FFD700; font-size: 14px;">
+              ID: ${props.id || id}
+            </div>
+            <div style="font-size: 11px; color: ${mutedColor}; font-style: italic; margin-top: 4px;">
+              Inga attribut att visa
+            </div>
+          `;
+            } else {
+              tooltipEl.innerHTML = `
+            <div style="font-weight: 600; color: #FFD700; margin-bottom: 6px; font-size: 14px;">
+              ID: ${props.id || id}
+            </div>
+            ${displayProps
+              .map(
+                ({ key, value }) => `
+              <div style="font-size: 12px; margin-bottom: 2px;">
+                <span style="color: ${mutedColor}; font-weight: 500;">${key}:</span>
+                <span style="color: ${textColor}; margin-left: 4px;">${value}</span>
+              </div>
+            `
+              )
+              .join("")}
+          `;
+            }
+
+            tooltipEl.style.background = bgColor;
+            tooltipEl.style.color = textColor;
+
+            overlay.setPosition(coord);
+            tooltipEl.style.display = "block";
+          }
+        }
+      }
+    },
+    [ui.dark]
+  );
+
+  const handleRowLeave = React.useCallback(() => {
+    hoveredIdRef.current = null;
+    vectorLayerRef?.current?.changed?.();
+
+    const tooltipEl = tooltipElementRef.current;
+    if (tooltipEl) {
+      tooltipEl.style.display = "none";
+    }
+  }, []);
 
   React.useEffect(() => {
     const active = props.options?.activeServices ?? [];
@@ -598,6 +748,45 @@ function AttributeEditor(props) {
       offClr();
     };
   }, [model, props.map, setPluginSettings, styleFn, ogc]);
+
+  React.useEffect(() => {
+    const map = props.map;
+    if (!map) return;
+
+    // Create the tooltip element
+    const tooltipEl = document.createElement("div");
+    tooltipEl.style.cssText = `
+    position: absolute;
+    background: white;
+    border: 2px solid #FFD700;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: 'Inter', system-ui, sans-serif;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1000;
+    display: none;
+  `;
+    tooltipElementRef.current = tooltipEl;
+
+    const overlay = new Overlay({
+      element: tooltipEl,
+      positioning: "center-left",
+      offset: [15, 0],
+      stopEvent: false,
+    });
+
+    map.addOverlay(overlay);
+    tooltipOverlayRef.current = overlay;
+
+    return () => {
+      map.removeOverlay(overlay);
+      tooltipElementRef.current = null;
+      tooltipOverlayRef.current = null;
+    };
+  }, [props.map]);
 
   // Find Sketch layer
   function getSketchLayer(map) {
@@ -1165,6 +1354,8 @@ function AttributeEditor(props) {
         graveyardRef={graveyardRef}
         draftBaselineRef={draftBaselineRef}
         map={props.map}
+        handleRowHover={handleRowHover}
+        handleRowLeave={handleRowLeave}
       />
     </BaseWindowPlugin>
   );

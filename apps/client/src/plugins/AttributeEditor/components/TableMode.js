@@ -154,6 +154,9 @@ export default function TableMode(props) {
     // refs
     firstColumnRef,
     filterOverlayRef,
+
+    handleRowHover,
+    handleRowLeave,
   } = props;
 
   const DEFAULT_WRAP_CH = 100;
@@ -236,42 +239,40 @@ export default function TableMode(props) {
     if (tableSelectedIds.size === 0) return;
 
     const selectedArray = Array.from(tableSelectedIds);
-
-    // If only one selected, always go to it
     const targetIndex = selectedArray.length === 1 ? 0 : currentScrollIndex;
     const targetId = selectedArray[targetIndex];
 
-    const rowIndex = filteredAndSorted.findIndex((r) => r.id === targetId);
+    if (handleRowLeave) {
+      handleRowLeave();
+    }
 
+    const rowIndex = filteredAndSorted.findIndex((r) => r.id === targetId);
     if (rowIndex === -1) return;
 
-    // Calculate which page the row is on
     const targetPage = Math.floor(rowIndex / rowsPerPage);
-
-    // Navigate to that page
     if (targetPage !== currentPage) {
       setCurrentPage(targetPage);
     }
 
-    // Scroll to the row after a brief delay to let the page render
+    if (handleRowHover) {
+      handleRowHover(targetId, true);
+    }
+
     setTimeout(() => {
       const rowElement = selectedRowRefs.current.get(targetId);
       if (rowElement) {
-        // Find the scrollable parent (tableViewport)
         const scrollParent = rowElement.closest('[style*="overflow"]');
         if (scrollParent) {
           const rowRect = rowElement.getBoundingClientRect();
           const parentRect = scrollParent.getBoundingClientRect();
           const scrollTop = scrollParent.scrollTop;
 
-          // Calculate position to center the row in the viewport
           const targetScrollTop =
             scrollTop +
             (rowRect.top - parentRect.top) -
             parentRect.height / 2 +
             rowRect.height / 2;
 
-          // Smooth scroll to position
           scrollParent.scrollTo({
             top: targetScrollTop,
             behavior: "smooth",
@@ -280,7 +281,6 @@ export default function TableMode(props) {
       }
     }, 100);
 
-    // Move to next selected row for next click (cycle back to 0 at end)
     if (selectedArray.length > 1) {
       setCurrentScrollIndex((prev) => (prev + 1) % selectedArray.length);
     }
@@ -290,6 +290,8 @@ export default function TableMode(props) {
     rowsPerPage,
     currentPage,
     currentScrollIndex,
+    handleRowHover,
+    handleRowLeave,
   ]);
 
   const syncFilterOnCellChange = React.useCallback(
@@ -778,6 +780,8 @@ export default function TableMode(props) {
                     caretStoreRef={caretStoreRef}
                     shouldUseTextarea={shouldUseTextarea}
                     selectedRowRefs={selectedRowRefs}
+                    handleRowHover={handleRowHover}
+                    handleRowLeave={handleRowLeave}
                   />
                 );
               })}

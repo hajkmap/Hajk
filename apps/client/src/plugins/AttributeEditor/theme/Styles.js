@@ -694,6 +694,7 @@ export function makeStyles(t, isMobile) {
             : pending === "edit" || pending === "geom"
               ? `2px dashed ${t.warning}`
               : "none",
+      transition: "background-color 0.15s ease",
     }),
 
     notification: {
@@ -867,6 +868,9 @@ export function makeStyles(t, isMobile) {
       color: t.text,
       padding: isMobile ? "0 4px" : "0 8px",
       whiteSpace: "nowrap",
+    },
+    trHover: {
+      backgroundColor: t.rowHover,
     },
   };
 }

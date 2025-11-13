@@ -42,6 +42,8 @@ export default function AttributeEditorView({
   draftBaselineRef,
   app,
   map,
+  handleRowHover,
+  handleRowLeave,
 }) {
   const { enqueueSnackbar } = useSnackbar();
   const geomUndoRef = React.useRef([]);
@@ -2061,6 +2063,8 @@ export default function AttributeEditorView({
           setColumnFilterUI={setColumnFilterUI}
           serviceId={serviceId}
           app={app}
+          handleRowHover={handleRowHover}
+          handleRowLeave={handleRowLeave}
         />
       ) : isMobile ? (
         <MobileForm

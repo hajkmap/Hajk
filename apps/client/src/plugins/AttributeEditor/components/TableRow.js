@@ -29,7 +29,10 @@ const TableRow = ({
   caretStoreRef,
   shouldUseTextarea,
   selectedRowRefs,
+  handleRowHover,
+  handleRowLeave,
 }) => {
+  const [isHovering, setIsHovering] = React.useState(false);
   return (
     <tr
       ref={(el) => {
@@ -39,9 +42,24 @@ const TableRow = ({
           selectedRowRefs.current.delete(row.id);
         }
       }}
-      style={s.tr(selected, pendingKind)}
+      style={{
+        ...s.tr(selected, pendingKind),
+        ...(isHovering && !selected && !pendingKind
+          ? {
+              backgroundColor: "rgba(96, 165, 250, 0.08)",
+            }
+          : {}),
+      }}
       aria-selected={selected}
       onClick={(e) => handleRowClick(row.id, idx, e)}
+      onMouseEnter={() => {
+        setIsHovering(true);
+        handleRowHover?.(row.id);
+      }}
+      onMouseLeave={() => {
+        setIsHovering(false);
+        handleRowLeave?.();
+      }}
       onDoubleClick={(e) => {
         if (tableEditing) return;
         const td = e.target.closest?.("td");
