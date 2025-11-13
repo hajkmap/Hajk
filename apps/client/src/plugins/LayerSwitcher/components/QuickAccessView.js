@@ -80,6 +80,7 @@ const QuickAccessView = ({
   return (
     showQuickAccess && (
       <Box
+        id="quick-access-view"
         sx={(theme) => ({
           borderBottom: `${theme.spacing(quickAccessSectionExpanded ? 0.2 : 0.0)} solid ${theme.palette.divider}`,
         })}
@@ -148,7 +149,10 @@ const QuickAccessView = ({
             <ListItemSecondaryAction sx={{ right: "4px" }}>
               {enableQuickAccessPresets && (
                 <HajkTooltip title="Teman">
-                  <LsIconButton onClick={handleQuickAccessPresetsToggle}>
+                  <LsIconButton
+                    id="quick-access-theme-button"
+                    onClick={handleQuickAccessPresetsToggle}
+                  >
                     <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
                   </LsIconButton>
                 </HajkTooltip>

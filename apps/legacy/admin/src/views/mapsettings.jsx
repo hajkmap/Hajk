@@ -472,6 +472,7 @@ class Menu extends Component {
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
       enableOSM: false,
+      OSMVisibleAtStart: false,
       showBreadcrumbs: false,
       showDrawOrderView: false,
       showFilter: false,
@@ -546,6 +547,8 @@ class Menu extends Component {
             existingConfig.backgroundSwitcherWhite ??
             this.state.backgroundSwitcherWhite,
           enableOSM: existingConfig.enableOSM ?? this.state.enableOSM,
+          OSMVisibleAtStart:
+            existingConfig.OSMVisibleAtStart ?? this.state.OSMVisibleAtStart,
           showBreadcrumbs:
             existingConfig.showBreadcrumbs ?? this.state.showBreadcrumbs,
           showDrawOrderView:
@@ -811,6 +814,7 @@ class Menu extends Component {
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,
+      OSMVisibleAtStart: this.state.OSMVisibleAtStart,
       showBreadcrumbs: this.state.showBreadcrumbs,
       showDrawOrderView: this.state.showDrawOrderView,
       showFilter: this.state.showFilter,
@@ -2571,6 +2575,19 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label htmlFor="enableOSM">OpenStreetMap</label>
+              </div>
+              <div>
+                <input
+                  id="OSMVisibleAtStart"
+                  name="OSMVisibleAtStart"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.OSMVisibleAtStart}
+                />
+                &nbsp;
+                <label htmlFor="OSMVisibleAtStart">
+                  Ladda kartan med OpenStreetMap synligt vid start
+                </label>
               </div>
               <div>
                 <input

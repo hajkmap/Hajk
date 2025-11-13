@@ -120,6 +120,7 @@ function DrawerToggleButtons({
     !areAllButtonsHiddenOnMdAndAbove && (
       <StyledPaper>
         <StyledToggleButtonGroup
+          id="drawer-toggle-button-group"
           value={activeButton}
           exclusive
           onChange={handleClickOnToggleButton}

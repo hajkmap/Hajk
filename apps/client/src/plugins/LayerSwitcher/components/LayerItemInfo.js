@@ -89,7 +89,7 @@ export default function LayerItemInfo({ layer, app, chapters }) {
   return (
     <>
       {hasInfo() ? (
-        <Box>
+        <Box id="layer-item-details-info">
           {/* Infotext */}
           {layerInfo.infoText && (
             <>
@@ -122,7 +122,9 @@ export default function LayerItemInfo({ layer, app, chapters }) {
           {renderChapterLinks()}
         </Box>
       ) : (
-        <Typography>Ingen information tillgänglig</Typography>
+        <Typography id="layer-item-details-info">
+          Ingen information tillgänglig
+        </Typography>
       )}
     </>
   );

@@ -106,7 +106,10 @@ function FavoritesViewHeader({
           title="Tillbaka"
           TransitionProps={{ timeout: 0 }}
         >
-          <IconButton onClick={handleBackButtonClick}>
+          <IconButton
+            id="favorites-list-back-button"
+            onClick={handleBackButtonClick}
+          >
             <ArrowBackIcon />
           </IconButton>
         </HajkToolTip>
@@ -121,6 +124,7 @@ function FavoritesViewHeader({
           onChange={handleFileInputChange}
         />
         <IconButton
+          id="import-favorites-button"
           disabled={!functionalCookiesOk}
           onClick={handleImportButtonClick}
         >

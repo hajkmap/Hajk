@@ -85,6 +85,17 @@ const getAllLayerIdsInGroup = (group) => {
   }
 };
 
+// Collect all child ids (both group and layer nodes) from a parent group
+const getAllChildIdsInGroup = (group) => {
+  if (!group) {
+    return [];
+  }
+  if (!group.children) {
+    return [group.id];
+  }
+  return [group.id, ...group.children.flatMap((c) => getAllChildIdsInGroup(c))];
+};
+
 const LayerGroup = ({
   globalObserver,
   staticGroupTree,
@@ -92,6 +103,9 @@ const LayerGroup = ({
   layersState,
   filterHits,
   filterValue,
+  isFirstGroup,
+  isFirstChild,
+  parentGroupHit,
 }) => {
   const children = staticGroupTree.children;
 
@@ -115,13 +129,30 @@ const LayerGroup = ({
   const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   const allLeafLayersInGroup = getAllLayerIdsInGroup(staticGroupTree);
+  const allChildIdsInGroup = getAllChildIdsInGroup(staticGroupTree);
 
-  const filterHitsInGroup =
-    filterHits && filterHits.intersection(new Set(allLeafLayersInGroup));
-  // hasFilterHits === null means that the filter isn't active
-  const hasNoFilterHits = filterHitsInGroup && filterHitsInGroup?.size === 0;
-  const filterActiveAndHasHits = filterHits && !hasNoFilterHits;
-  if (hasNoFilterHits) {
+  // Determine if this group itself is a direct hit and whether we should skip filtering for it and its descendants
+  const groupHit = filterHits ? filterHits.has(groupId) : false;
+  const skipFilter = parentGroupHit || groupHit;
+
+  // Compute intersection manually between filterHits and ids relevant to this group
+  // Count hits when not skipping due to an ancestor match
+  let hasNoFilterHits = false;
+  let hasFilterHits = false;
+  if (filterHits && !skipFilter) {
+    const candidateIds = new Set([
+      ...allLeafLayersInGroup,
+      ...allChildIdsInGroup,
+    ]);
+    const hitsInGroupCount = [...filterHits].reduce(
+      (count, id) => (candidateIds.has(id) ? count + 1 : count),
+      0
+    );
+    hasNoFilterHits = hitsInGroupCount === 0;
+    hasFilterHits = hitsInGroupCount > 0;
+  }
+
+  if (filterHits && !skipFilter && hasNoFilterHits) {
     return null;
   }
 
@@ -150,9 +181,11 @@ const LayerGroup = ({
   return (
     <div>
       <LayerGroupAccordion
+        isFirstGroup={isFirstGroup}
+        isFirstChild={isFirstChild}
         display={groupIsFiltered ? "none" : "block"}
         toggleable={groupIsToggable}
-        expanded={filterActiveAndHasHits || groupIsExpanded}
+        expanded={groupHit || hasFilterHits || groupIsExpanded}
         toggleDetails={
           <ToggleAllComponent
             toggleable={groupIsToggable}
@@ -195,11 +228,11 @@ const LayerGroup = ({
         }
       >
         <div>
-          {children?.map((child) => {
+          {children?.map((child, index) => {
             const layerId = child.id;
 
             const layerState = layersState[layerId];
-
+            const isFirstChild = index === 0;
             const layerSettings = staticLayerConfig[layerId];
             if (!layerSettings) {
               return null;
@@ -219,11 +252,12 @@ const LayerGroup = ({
                   layersState={layersState}
                   filterHits={filterHits}
                   filterValue={filterValue}
+                  parentGroupHit={skipFilter}
                 />
               );
             }
 
-            if (filterHits && !filterHits.has(layerId)) {
+            if (filterHits && !skipFilter && !filterHits.has(layerId)) {
               // The filter is active and this layer is not a hit.
               return null;
             }
@@ -238,6 +272,7 @@ const LayerGroup = ({
                 globalObserver={globalObserver}
                 filterHits={filterHits}
                 filterValue={filterValue}
+                isFirstChild={isFirstChild}
               />
             ) : (
               <LayerItem
