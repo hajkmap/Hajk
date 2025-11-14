@@ -130,14 +130,18 @@ function AttributeEditor(props) {
         zIndex: 5,
       }),
 
-      // DELETION + SELECTED: Orange solid
+      // DELETION + SELECTED: Orange dashed
       toDeleteSelected: new Style({
         image: new CircleStyle({
           radius: 7,
           fill: new Fill({ color: "#ff9800" }),
-          stroke: new Stroke({ color: "#000000ff", width: 2 }),
+          stroke: new Stroke({
+            color: "#000000ff",
+            width: 2,
+            lineDash: [5, 5],
+          }),
         }),
-        stroke: new Stroke({ color: "#ff9800", width: 3 }),
+        stroke: new Stroke({ color: "#ff9800", width: 3, lineDash: [5, 5] }),
         fill: new Fill({ color: "rgba(255,152,0,0.12)" }),
         zIndex: 5,
       }),
