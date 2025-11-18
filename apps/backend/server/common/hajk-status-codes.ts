@@ -34,6 +34,10 @@ enum HajkStatusCodes {
   UNKNOWN_GROUP_ID = "DB005",
 
   /**
+   * A service with this URL and type already exists.
+   */
+  SERVICE_ALREADY_EXISTS = "DB006",
+  /**
    * The requested layer type is not one of the valid ones. Valid layer
    * types are defined by the enum LayerType.
    */

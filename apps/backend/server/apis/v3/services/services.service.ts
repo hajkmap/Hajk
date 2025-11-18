@@ -2,6 +2,9 @@ import { Prisma } from "@prisma/client";
 import log4js from "log4js";
 
 import prisma from "../../../common/prisma.ts";
+import { HajkError } from "../../../common/classes.ts";
+import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
+import HttpStatusCodes from "../../../common/http-status-codes.ts";
 
 const logger = log4js.getLogger("service.v3.layer");
 const DEFAULT_PROJECTION_CODE = "EPSG:3006";
@@ -111,28 +114,41 @@ class ServicesService {
 
     // Transform user input to Prisma format
     const { metadata, ...serviceData } = data;
-
-    const newService = await prisma.service.create({
-      data: {
-        ...serviceData,
-        createdBy: userId,
-        createdDate: new Date(),
-        metadata: metadata
-          ? {
-              create: metadata,
-            }
-          : undefined,
-        projection: {
-          connect: { id: existingProjection.id },
+    try {
+      const newService = await prisma.service.create({
+        data: {
+          ...serviceData,
+          createdBy: userId,
+          createdDate: new Date(),
+          metadata: metadata
+            ? {
+                create: metadata,
+              }
+            : undefined,
+          projection: {
+            connect: { id: existingProjection.id },
+          },
         },
-      },
-      include: {
-        metadata: true,
-        projection: true,
-      },
-    });
+        include: {
+          metadata: true,
+          projection: true,
+        },
+      });
 
-    return newService;
+      return newService;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        throw new HajkError(
+          HttpStatusCodes.CONFLICT,
+          "A service with this URL and type already exists",
+          HajkStatusCodes.SERVICE_ALREADY_EXISTS
+        );
+      }
+      throw error;
+    }
   }
 
   async updateService(

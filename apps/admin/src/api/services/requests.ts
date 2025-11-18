@@ -173,9 +173,7 @@ export const createService = async (
   } catch (error) {
     const axiosError = error as InternalApiError;
     if (axiosError.response) {
-      throw new Error(
-        `Failed to create service. ErrorId: ${axiosError.response.data.errorId}.`
-      );
+      throw axiosError;
     } else {
       throw new Error("Failed to create service");
     }

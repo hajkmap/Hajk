@@ -85,6 +85,7 @@
     "services.workspace": "Workspace",
     "services.createServiceSuccess": "Service {{name}} created!",
     "services.createServiceFailed": "Failed to create service.",
+    "services.createServiceDuplicateError": "A service with this URL and type already exists",
     "services.updateServiceSuccess": "Service {{name}} updated!",
     "services.updateServiceFailed": "Failed to update service {{name}}.",
     "services.deleteServiceSuccess": "Service {{name}} deleted!",

@@ -30,6 +30,7 @@ import { GridRenderCellParams } from "@mui/x-data-grid";
 import ServiceStatusIndicator from "../components/service-status-indicator";
 import ServiceTypeBadge from "../components/service-type-badge";
 import { SquareSpinnerComponent } from "../../../components/progress/square-progress";
+import { InternalApiError } from "../../../lib/internal-api-client";
 
 interface ServicesListProps {
   filterServices: (services: Service[]) => Service[];
@@ -47,7 +48,9 @@ export default function ServicesList({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: services, isLoading } = useServices();
-  const { mutateAsync: createService } = useCreateService();
+  const { mutateAsync: createService, error: createServiceError } =
+    useCreateService();
+  console.log(createServiceError);
   const { palette } = useTheme();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -118,11 +121,24 @@ export default function ServicesList({
       handleClose();
     } catch (error) {
       console.error("Failed to submit service:", error);
-      toast.error(t("services.createServiceFailed"), {
-        position: "bottom-left",
-        theme: palette.mode,
-        hideProgressBar: true,
-      });
+      // Check if this is a unique constraint error (duplicate service)
+      const axiosError = error as InternalApiError;
+      const isDuplicateError =
+        axiosError.response?.status === 409 ||
+        axiosError.response?.data?.error?.includes(
+          "A service with this URL and type already exists"
+        );
+
+      toast.error(
+        isDuplicateError
+          ? t("services.createServiceDuplicateError")
+          : t("services.createServiceFailed"),
+        {
+          position: "bottom-left",
+          theme: palette.mode,
+          hideProgressBar: true,
+        }
+      );
     }
   };
 

@@ -83,6 +83,7 @@
     "services.url.btnLabel": "Ändra url",
     "services.createServiceSuccess": "Tjänsten {{name}} skapades!",
     "services.createServiceFailed": "Misslyckades att skapa tjänsten.",
+    "services.createServiceDuplicateError": "En tjänst med denna webbadress och typ finns redan",
     "services.updateServiceSuccess": "Tjänsten {{name}} har uppdaterats!",
     "services.updateServiceFailed": "Misslyckades att uppdatera tjänsten {{name}}.",
     "services.deleteServiceSuccess": "Tjänsten {{name}} är nu borttagen!",
