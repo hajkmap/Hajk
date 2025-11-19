@@ -18,18 +18,6 @@ class Anchor extends React.PureComponent {
     this.title = this.props.options.title || "Dela";
   }
 
-  onAbort = () => {
-    this.props.app.globalObserver.publish("anchor.close");
-  };
-
-  onVisibilityChanged = (visible) => {
-    if (visible) {
-      this.props.app.globalObserver.publish("anchor.shown");
-    } else {
-      this.props.app.globalObserver.publish("anchor.hidden");
-    }
-  };
-
   render() {
     return (
       <DialogWindowPlugin
@@ -39,13 +27,12 @@ class Anchor extends React.PureComponent {
         type="Anchor"
         defaults={{
           icon: <ShareIcon />,
-          title: "Dela",
+          title: this.title,
           description:
             "Skapa en länk med kartans synliga lager, aktuella zoomnivå och utbredning",
           headerText: "Dela",
           abortText: "Stäng",
           onAbort: this.onAbort,
-          onVisibilityChanged: this.onVisibilityChanged,
         }}
       >
         <AnchorView
@@ -53,7 +40,7 @@ class Anchor extends React.PureComponent {
           model={this.props.app.anchorModel}
           options={this.props.options}
           enableAppStateInHash={
-            this.props.app.config.mapConfig.map.enableAppStateInHash
+            this.props.app?.config?.mapConfig?.map?.enableAppStateInHash
           }
         />
       </DialogWindowPlugin>

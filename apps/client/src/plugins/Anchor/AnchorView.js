@@ -127,6 +127,7 @@ class AnchorView extends React.PureComponent {
   render() {
     const allowCreatingCleanUrls =
       this.props.options.allowCreatingCleanUrls ?? true;
+    const appStateInHashEnabled = this.props.enableAppStateInHash === true;
 
     return (
       <Grid container direction="column" sx={{ maxWidth: 400 }}>
@@ -169,7 +170,7 @@ class AnchorView extends React.PureComponent {
           />
         </Grid>
         {document.queryCommandSupported("copy") && (
-          <Grid item sx={{ mb: 2 }}>
+          <Grid item sx={{ mb: appStateInHashEnabled ? 2 : 0 }}>
             <Grid container spacing={2}>
               <Grid item size={6} sx={{ display: "flex" }}>
                 <HajkToolTip title="Kopiera länk till urklipp">
@@ -224,7 +225,7 @@ class AnchorView extends React.PureComponent {
             </Grid>
           </Grid>
         )}
-        {this.props.enableAppStateInHash && (
+        {appStateInHashEnabled && (
           <Grid item>
             <Paper sx={{ p: 1 }}>
               <Grid
