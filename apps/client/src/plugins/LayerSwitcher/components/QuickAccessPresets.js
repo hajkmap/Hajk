@@ -456,6 +456,17 @@ function QuickAccessPresets({
       <Box
         id="quick-access-presets-view"
         sx={[
+          (theme) => ({
+            position: "relative",
+            overflowY: "auto",
+            height: "inherit",
+            minHeight: "15em",
+            maxHeight: "inherit",
+            backgroundColor: "#fff",
+            ...theme.applyStyles("dark", {
+              backgroundColor: "rgb(18,18,18)",
+            }),
+          }),
           display
             ? {
                 display: "block",
@@ -519,8 +530,6 @@ function QuickAccessPresets({
           </Collapse>
           <Box
             sx={{
-              width: 500,
-              maxWidth: "100%",
               p: 1,
             }}
           >
@@ -571,7 +580,19 @@ function QuickAccessPresets({
                     <ListItemIcon sx={{ px: 0, minWidth: "34px" }}>
                       <TopicOutlinedIcon fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText primary={l.title} secondary={l.author} />
+                    <ListItemText
+                      primary={l.title}
+                      secondary={l.author}
+                      sx={{ pr: 6 }}
+                      primaryTypographyProps={{
+                        noWrap: true,
+                        sx: { overflow: "hidden", textOverflow: "ellipsis" },
+                      }}
+                      secondaryTypographyProps={{
+                        noWrap: true,
+                        sx: { overflow: "hidden", textOverflow: "ellipsis" },
+                      }}
+                    />
                     <ListItemSecondaryAction>
                       <HajkToolTip title={"Information om " + l.title}>
                         <LsIconButton
