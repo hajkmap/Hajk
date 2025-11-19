@@ -86,8 +86,12 @@ try {
         cacheBuster: true,
       });
     } else {
+      // For API < v3, use /config while for v3 and later, /public is used.
+      const endpoint = appConfig.mapserviceBase.includes("/api/v3")
+        ? "public/maps"
+        : "config";
       // Prepare the URL config string
-      const configUrl = `${appConfig.proxy}${appConfig.mapserviceBase}/config`;
+      const configUrl = `${appConfig.proxy}${appConfig.mapserviceBase}/${endpoint}`;
       try {
         // Try to fetch user-specified config. Return it if OK.
         return await hfetch(`${configUrl}/${activeMap}`);
