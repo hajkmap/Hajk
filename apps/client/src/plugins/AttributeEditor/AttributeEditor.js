@@ -862,6 +862,13 @@ function AttributeEditor(props) {
           incomingId = undefined;
         }
 
+        // Reset Sketch's style so AE's styleFn can take over
+        try {
+          f.setStyle(null);
+          // Unset Sketch's flag indicating that the feature's style is being controlled by Attribute Editor
+          f.unset?.("__ae_style_delegate", true);
+        } catch {}
+
         // create draft with negative id
         const tempId = model.addDraftFromFeature(f);
         f.setId?.(tempId);
@@ -879,6 +886,23 @@ function AttributeEditor(props) {
 
         featureIndexRef.current.set(tempId, f);
         graveyardRef.current.delete(tempId);
+
+        // Remove from Sketch layer and add to AE layer
+        try {
+          // Remove from Sketch layer
+          programmaticSketchOpsRef.current.add(f);
+          src.removeFeature(f);
+
+          // Add to AE layer
+          const aeLayer = vectorLayerRef.current;
+          const aeSrc = aeLayer?.getSource?.();
+          if (aeSrc) {
+            programmaticSketchOpsRef.current.add(f);
+            aeSrc.addFeature(f);
+          }
+        } catch (err) {
+          console.warn("Kunde inte flytta feature mellan lager:", err);
+        }
 
         selectedIdsRef.current = new Set([tempId]);
         visibleIdsRef.current.add(tempId);
