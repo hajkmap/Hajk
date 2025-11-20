@@ -4,16 +4,17 @@ import { styled } from "@mui/material/styles";
 import withSnackbar from "components/WithSnackbar";
 import QRCode from "qrcode";
 import HajkToolTip from "components/HajkToolTip";
+import ShareIcon from "@mui/icons-material/Share";
+import Collapse from "@mui/material/Collapse";
+import Alert from "@mui/material/Alert";
 
 import {
-  Box,
   Button,
   FormControlLabel,
   Grid,
   Radio,
   RadioGroup,
   TextField,
-  Typography,
   Paper,
   Switch,
 } from "@mui/material";
@@ -25,6 +26,32 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
   marginBottom: theme.spacing(2),
   "& input": {
     fontFamily: "monospace",
+  },
+}));
+
+// Add styled Alert component
+const StyledAlert = styled(Alert)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+  borderRadius: theme.spacing(1),
+  "& .MuiAlert-message": {
+    padding: 0,
+  },
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  minHeight: { xs: "48px", sm: "36px" },
+  height: "auto",
+  whiteSpace: { xs: "normal", sm: "nowrap" },
+  lineHeight: { xs: 1.2, sm: 1.75 },
+  textAlign: "center",
+}));
+
+// Hide icons on small screens
+const ResponsiveIcon = styled("span")(({ theme }) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  [theme.breakpoints.down("sm")]: {
+    display: "none",
   },
 }));
 
@@ -57,7 +84,11 @@ class AnchorView extends React.PureComponent {
 
     // Initiate the anchor-url on mount
     const a = await this.props.model.getAnchor();
-    this.setState({ anchor: a });
+    const qrData = await this.generateQr(a);
+    this.setState({
+      anchor: a,
+      qrCode: qrData,
+    });
   }
 
   generateQr = (url) => {
@@ -96,143 +127,140 @@ class AnchorView extends React.PureComponent {
   render() {
     const allowCreatingCleanUrls =
       this.props.options.allowCreatingCleanUrls ?? true;
+    const appStateInHashEnabled = this.props.enableAppStateInHash === true;
+
     return (
-      <Box sx={{ width: "100%", height: "100%" }}>
-        <Grid container spacing={2} columns={12}>
-          <Grid size={12}>
-            <Typography>
-              Skapa en länk med kartans synliga lager, aktuella zoomnivå och
-              utbredning.
-            </Typography>
-          </Grid>
+      <Grid container direction="column" sx={{ maxWidth: 400 }}>
+        <Grid item>
+          <StyledAlert icon={<ShareIcon />} variant="info">
+            Skapa en länk med kartans synliga lager, aktuella zoomnivå och
+            utbredning.
+          </StyledAlert>
         </Grid>
         {allowCreatingCleanUrls && (
-          <Box sx={{ ml: { xs: 0, sm: 3 } }}>
-            <Grid container spacing={2} columns={12}>
-              <Grid size={12}>
-                <RadioGroup
-                  aria-label="copy-url"
-                  name="copy-url"
-                  onChange={this.toggleCleanUrl}
-                >
-                  <FormControlLabel
-                    checked={!this.state.cleanUrl}
-                    value="default"
-                    control={<Radio color="primary" />}
-                    label="Skapa länk till karta"
-                  />
-                  <FormControlLabel
-                    checked={this.state.cleanUrl}
-                    value="clean"
-                    control={<Radio color="primary" />}
-                    label="Skapa länk till karta utan verktyg etc."
-                  />
-                </RadioGroup>
-              </Grid>
-            </Grid>
-          </Box>
-        )}
-        <Box sx={{ ml: { xs: 0, sm: 7 }, mr: { xs: 0, sm: 7 } }}>
-          <Grid container spacing={2} columns={12}>
-            <Grid size={12}>
-              <StyledTextField
-                fullWidth={true}
-                id="anchorUrl"
-                InputProps={{
-                  readOnly: true,
-                }}
-                value={this.state.anchor}
-                variant="outlined"
-                size="small"
+          <Grid item sx={{ mb: 1.5 }}>
+            <RadioGroup
+              aria-label="copy-url"
+              name="copy-url"
+              onChange={this.toggleCleanUrl}
+            >
+              <FormControlLabel
+                checked={!this.state.cleanUrl}
+                value="default"
+                control={<Radio color="primary" />}
+                label="Skapa länk till karta"
               />
-            </Grid>
+              <FormControlLabel
+                checked={this.state.cleanUrl}
+                value="clean"
+                control={<Radio color="primary" />}
+                label="Skapa länk till karta utan verktyg etc."
+              />
+            </RadioGroup>
           </Grid>
-        </Box>
+        )}
+        <Grid item sx={{ mb: 1 }}>
+          <StyledTextField
+            fullWidth={true}
+            id="anchorUrl"
+            InputProps={{ readOnly: true }}
+            value={this.state.anchor}
+            variant="outlined"
+            size="small"
+          />
+        </Grid>
         {document.queryCommandSupported("copy") && (
-          <Box sx={{ ml: { xs: 0, sm: 7 }, mr: { xs: 0, sm: 7 } }}>
-            <Grid container spacing={2} columns={12}>
-              <Grid size={6}>
+          <Grid item sx={{ mb: 0 }}>
+            <Grid container spacing={2}>
+              <Grid item size={6} sx={{ display: "flex" }}>
                 <HajkToolTip title="Kopiera länk till urklipp">
-                  <Button
+                  <StyledButton
                     fullWidth
                     variant="contained"
                     color="primary"
                     component="a"
-                    endIcon={<FileCopyIcon />}
+                    endIcon={
+                      <ResponsiveIcon>
+                        <FileCopyIcon />
+                      </ResponsiveIcon>
+                    }
+                    sx={{
+                      minHeight: { xs: "48px", sm: "36px" },
+                      height: "auto",
+                      whiteSpace: { xs: "normal", sm: "nowrap" },
+                      lineHeight: { xs: 1.2, sm: 1.75 },
+                      textAlign: "center",
+                    }}
                     onClick={this.handleClickOnCopyToClipboard}
                   >
                     Kopiera länk
-                  </Button>
+                  </StyledButton>
                 </HajkToolTip>
               </Grid>
-              <Grid size={6}>
+              <Grid item size={6} sx={{ display: "flex" }}>
                 <HajkToolTip title="Öppna länk i nytt fönster">
-                  <Button
+                  <StyledButton
                     fullWidth
                     variant="contained"
                     color="primary"
-                    endIcon={<OpenInNewIcon />}
+                    endIcon={
+                      <ResponsiveIcon>
+                        <OpenInNewIcon />
+                      </ResponsiveIcon>
+                    }
                     href={this.state.anchor || null}
                     target="_blank"
+                    sx={{
+                      minHeight: { xs: "48px", sm: "36px" },
+                      height: "auto",
+                      whiteSpace: { xs: "normal", sm: "nowrap" },
+                      lineHeight: { xs: 1.2, sm: 1.75 },
+                      textAlign: "center",
+                    }}
                   >
                     Öppna länk
-                  </Button>
+                  </StyledButton>
                 </HajkToolTip>
               </Grid>
             </Grid>
-          </Box>
+          </Grid>
         )}
-        {this.props.enableAppStateInHash && (
-          <Box
-            sx={{
-              ml: { xs: 0, sm: 7 },
-              mr: { xs: 0, sm: 7 },
-              mt: 2,
-            }}
-          >
-            <Grid container spacing={2} columns={12}>
-              <Grid size={12}>
-                <Paper sx={{ p: 1, mb: 2 }}>
-                  <Grid
-                    container
-                    columns={12}
-                    alignItems="center"
-                    justifyContent="space-between"
-                  >
-                    <Grid size={6}>Slå på QR-kod</Grid>
-                    <Grid textAlign="end" size={6}>
-                      <HajkToolTip title="Slå på QR-kod">
-                        <Switch
-                          variant="contained"
-                          color="primary"
-                          onClick={this.toggleShowQr}
-                        ></Switch>
-                      </HajkToolTip>
-                    </Grid>
-                    {this.state.showQr && (
-                      <Grid size={12}>
-                        <Box
-                          sx={{
-                            ml: { xs: 0, sm: 7 },
-                            mr: { xs: 0, sm: 7 },
-                          }}
-                          textAlign={"center"}
-                        >
-                          <img
-                            src={this.state.qrCode}
-                            alt=""
-                            style={{ width: "250px" }}
-                          />
-                        </Box>
-                      </Grid>
-                    )}
-                  </Grid>
-                </Paper>
+        {appStateInHashEnabled && (
+          <Grid item>
+            <Paper sx={{ p: 1, mt: 2 }}>
+              <Grid
+                container
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Grid item xs={6}>
+                  Slå på QR-kod
+                </Grid>
+                <Grid item xs={6} style={{ textAlign: "end" }}>
+                  <HajkToolTip title="Slå på QR-kod">
+                    <Switch
+                      variant="contained"
+                      color="primary"
+                      onClick={this.toggleShowQr}
+                    />
+                  </HajkToolTip>
+                </Grid>
               </Grid>
-            </Grid>
-          </Box>
+              <Collapse in={this.state.showQr} unmountOnExit>
+                <Grid container justifyContent="center">
+                  <Grid item xs={12} style={{ textAlign: "center" }}>
+                    <img
+                      src={this.state.qrCode}
+                      alt=""
+                      style={{ minHeight: "200px" }}
+                    />
+                  </Grid>
+                </Grid>
+              </Collapse>
+            </Paper>
+          </Grid>
         )}
-      </Box>
+      </Grid>
     );
   }
 }
