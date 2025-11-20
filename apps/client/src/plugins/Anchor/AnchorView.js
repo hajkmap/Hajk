@@ -170,7 +170,7 @@ class AnchorView extends React.PureComponent {
           />
         </Grid>
         {document.queryCommandSupported("copy") && (
-          <Grid item sx={{ mb: appStateInHashEnabled ? 2 : 0 }}>
+          <Grid item sx={{ mb: 0 }}>
             <Grid container spacing={2}>
               <Grid item size={6} sx={{ display: "flex" }}>
                 <HajkToolTip title="Kopiera länk till urklipp">
@@ -227,7 +227,7 @@ class AnchorView extends React.PureComponent {
         )}
         {appStateInHashEnabled && (
           <Grid item>
-            <Paper sx={{ p: 1 }}>
+            <Paper sx={{ p: 1, mt: 2 }}>
               <Grid
                 container
                 alignItems="center"
