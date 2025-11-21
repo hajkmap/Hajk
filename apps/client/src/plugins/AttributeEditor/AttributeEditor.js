@@ -8,6 +8,7 @@ import { editBus } from "../../buses/editBus";
 import { PLUGIN_COLORS } from "./constants/index";
 import { createOgcApi } from "./api/ogc";
 import { idAliases } from "./helpers/helpers";
+import FeaturePickerDialog from "./components/FeaturePickerDialog";
 
 import GeoJSON from "ol/format/GeoJSON";
 import VectorSource from "ol/source/Vector";
@@ -76,6 +77,11 @@ function AttributeEditor(props) {
   const hoveredIdRef = React.useRef(null);
   const tooltipOverlayRef = React.useRef(null);
   const tooltipElementRef = React.useRef(null);
+
+  const [featurePicker, setFeaturePicker] = React.useState({
+    open: false,
+    features: [],
+  });
 
   const styles = React.useMemo(() => {
     const baseStroke = new Stroke({ color: "#1976d2", width: 2 });
@@ -489,9 +495,21 @@ function AttributeEditor(props) {
   }, [ogc, props.options?.activeServices]);
 
   React.useEffect(() => {
+    // Track current async operation to prevent race conditions
+    let currentAbortController = null;
+
     const offSel = editBus.on("edit:service-selected", async (ev) => {
       const { title, color, source, id } = ev.detail || {};
       if (source === "attrib") return;
+
+      // Cancel any previous operation that's still running
+      if (currentAbortController) {
+        currentAbortController.abort();
+      }
+
+      // Create new AbortController for this operation
+      currentAbortController = new AbortController();
+      const signal = currentAbortController.signal;
 
       currentServiceIdRef.current = id || "NONE_ID";
 
@@ -507,12 +525,22 @@ function AttributeEditor(props) {
       model.setFieldMetadata([]);
 
       try {
+        // Check if operation was aborted before starting
+        if (signal.aborted) return;
+
         // 1) Fetch whole schema (no fields-param)
         let schema = schemaCache.current.get(id);
         if (!schema) {
           schema = await ogc.fetchWfst(id);
+
+          // Check if aborted after async operation
+          if (signal.aborted) return;
+
           schemaCache.current.set(id, schema);
         }
+
+        // Check before continuing
+        if (signal.aborted) return;
 
         const geomKey = String(
           schema?.geometryField || "geometry"
@@ -643,12 +671,21 @@ function AttributeEditor(props) {
         }
         ensureRo("id", "ID", 90);
 
+        // Check before state updates
+        if (signal.aborted) return;
+
         // 6) Set FM (state + model) - trigger render in View
         setFieldMetaLocal(fmMerged);
         model.setFieldMetadata(fmMerged);
 
+        // Check before loading data
+        if (signal.aborted) return;
+
         // 7) Load data (once FM is set)
         const { featureCollection } = (await model.loadFromService?.(id)) || {};
+
+        // Check before OpenLayers operations
+        if (signal.aborted) return;
 
         // 8) Set up the vector layer
         const map = props.map;
@@ -719,6 +756,13 @@ function AttributeEditor(props) {
         map.addLayer(lyr);
         vectorLayerRef.current = lyr;
       } catch (e) {
+        // Ignore abort errors - these are expected when user switches services quickly
+        if (e.name === "AbortError" || signal.aborted) {
+          console.log("Service loading aborted (user switched services)");
+          return;
+        }
+
+        // Log actual errors
         console.warn("Fel vid laddning av schema/data:", e);
       }
     });
@@ -726,6 +770,12 @@ function AttributeEditor(props) {
     const offClr = editBus.on("edit:service-cleared", (ev) => {
       const { source } = ev.detail || {};
       if (source === "attrib") return;
+
+      // Cancel any ongoing operation
+      if (currentAbortController) {
+        currentAbortController.abort();
+        currentAbortController = null;
+      }
 
       currentServiceIdRef.current = "NONE_ID";
 
@@ -748,6 +798,13 @@ function AttributeEditor(props) {
     });
 
     return () => {
+      // Cleanup on unmount
+      // 1. Abort any ongoing async operation
+      if (currentAbortController) {
+        currentAbortController.abort();
+      }
+
+      // 2. Remove event listeners (EventBus handles this automatically)
       offSel();
       offClr();
     };
@@ -1148,23 +1205,25 @@ function AttributeEditor(props) {
       if (evt.originalEvent?.detail >= 2) return;
       if (evt.originalEvent?.button !== 0) return;
 
+      handleRowLeave();
+
       const layer = vectorLayerRef.current;
       if (!layer) return;
 
-      let hit = null;
+      // Collect all features
+      const hits = [];
       map.forEachFeatureAtPixel(
         evt.pixel,
         (f, lyr) => {
           if (lyr === layer) {
-            hit = f;
-            return true;
+            hits.push(f);
           }
-          return false;
         },
         { layerFilter: (lyr) => lyr === layer, hitTolerance: 3 }
       );
 
-      if (!hit) {
+      // No hits → clear selection
+      if (hits.length === 0) {
         if (selectedIdsRef.current.size) {
           selectedIdsRef.current = new Set();
           vectorLayerRef.current?.changed?.();
@@ -1177,11 +1236,41 @@ function AttributeEditor(props) {
         return;
       }
 
-      // 1) pick feature id
+      // Multiple features → show picker
+      if (hits.length > 1) {
+        const pickerFeatures = hits.map((f) => {
+          const rawId = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+          const canonId = toCanonicalId(rawId);
+          return {
+            id: canonId,
+            feature: f,
+          };
+        });
+
+        // Remove duplicates
+        const uniqueFeatures = [];
+        const seenIds = new Set();
+        pickerFeatures.forEach((item) => {
+          if (!seenIds.has(item.id)) {
+            seenIds.add(item.id);
+            uniqueFeatures.push(item);
+          }
+        });
+
+        if (uniqueFeatures.length > 1) {
+          setFeaturePicker({
+            open: true,
+            features: uniqueFeatures,
+          });
+          return;
+        }
+      }
+
+      // Single feature (original logic fortsätter...)
+      const hit = hits[0];
       const rawId = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
       const canonId = toCanonicalId(rawId);
 
-      // first emitted id is canonical, not an alias
       editBus.emit("attrib:select-ids", {
         ids: [canonId],
         source: "map",
@@ -1193,11 +1282,9 @@ function AttributeEditor(props) {
         evt.originalEvent?.metaKey ||
         evt.originalEvent?.shiftKey;
 
-      // 2) cannonical ids
       const logical = getCurrentLogical();
 
       if (multi) {
-        // toggle canonId
         if (logical.has(canonId) || logical.has(String(canonId))) {
           logical.delete(canonId);
           logical.delete(String(canonId));
@@ -1208,7 +1295,6 @@ function AttributeEditor(props) {
         selectedIdsRef.current = buildVizSet(logical);
         vectorLayerRef.current?.changed?.();
 
-        // only send canonical ids
         editBus.emit("attrib:select-ids", {
           ids: Array.from(logical),
           source: "map",
@@ -1237,7 +1323,48 @@ function AttributeEditor(props) {
         map.un("singleclick", onClick);
       } catch {}
     };
-  }, [props.map, vectorLayerRef, selectedIdsRef, model]);
+  }, [props.map, vectorLayerRef, selectedIdsRef, model, handleRowLeave]);
+
+  // HANDLE FEATURE PICKER SELECTION
+  const handleFeaturePickerSelect = React.useCallback(
+    (selectedIds) => {
+      if (selectedIds.length === 0) return;
+
+      // Build viz set
+      const buildVizSet = (logicalIds) => {
+        const set = new Set();
+        logicalIds.forEach((x) => {
+          set.add(x);
+          set.add(String(x));
+        });
+        return set;
+      };
+
+      // Update selection
+      selectedIdsRef.current = buildVizSet(selectedIds);
+      vectorLayerRef.current?.changed?.();
+
+      // Emit event
+      editBus.emit("attrib:select-ids", {
+        ids: selectedIds,
+        source: "map",
+        mode: "replace",
+      });
+
+      // Focus on first selected
+      if (selectedIds.length > 0) {
+        editBus.emit("attrib:focus-id", {
+          id: selectedIds[0],
+          source: "map",
+        });
+      }
+    },
+    [vectorLayerRef, selectedIdsRef]
+  );
+
+  const handleFeaturePickerClose = React.useCallback(() => {
+    setFeaturePicker({ open: false, features: [] });
+  }, []);
 
   React.useEffect(() => {
     const sub = localObserver.subscribe("AttributeEditorEvent", (msg) => {
@@ -1341,51 +1468,64 @@ function AttributeEditor(props) {
   };
 
   return (
-    <BaseWindowPlugin
-      {...props}
-      type="AttributeEditor"
-      custom={{
-        icon: <BugReportIcon />,
-        title: pluginSettings.title,
-        color: pluginSettings.color,
-        description: "En kort beskrivning som visas i widgeten",
-        customPanelHeaderButtons: [
-          {
-            icon: <BugReportIcon />,
-            onClickCallback: panelHeaderButtonCallback,
-          },
-        ],
-        height: props.options.winheight,
-        width: props.options.winwidth,
-      }}
-    >
-      <AttributeEditorView
-        ogc={ogc}
-        model={model}
-        app={props.app}
-        localObserver={localObserver}
-        globalObserver={props.app.globalObserver}
-        updateCustomProp={updateCustomProp}
-        winheight={props.options.winheight}
-        state={modelState}
-        controller={controller}
-        ui={ui}
-        setPluginSettings={setPluginSettings}
+    <>
+      <BaseWindowPlugin
+        {...props}
+        type="AttributeEditor"
+        custom={{
+          icon: <BugReportIcon />,
+          title: pluginSettings.title,
+          color: pluginSettings.color,
+          description: "En kort beskrivning som visas i widgeten",
+          customPanelHeaderButtons: [
+            {
+              icon: <BugReportIcon />,
+              onClickCallback: panelHeaderButtonCallback,
+            },
+          ],
+          height: props.options.winheight,
+          width: props.options.winwidth,
+        }}
+      >
+        <AttributeEditorView
+          ogc={ogc}
+          model={model}
+          app={props.app}
+          localObserver={localObserver}
+          globalObserver={props.app.globalObserver}
+          updateCustomProp={updateCustomProp}
+          winheight={props.options.winheight}
+          state={modelState}
+          controller={controller}
+          ui={ui}
+          setPluginSettings={setPluginSettings}
+          fieldMeta={fieldMetaLocal}
+          vectorLayerRef={vectorLayerRef}
+          styleFn={styleFn}
+          visibleIdsRef={visibleIdsRef}
+          selectedIdsRef={selectedIdsRef}
+          onlyFilteredRef={onlyFilteredRef}
+          serviceList={serviceList}
+          featureIndexRef={featureIndexRef}
+          graveyardRef={graveyardRef}
+          draftBaselineRef={draftBaselineRef}
+          map={props.map}
+          handleRowHover={handleRowHover}
+          handleRowLeave={handleRowLeave}
+        />
+      </BaseWindowPlugin>
+
+      {/* Modal Dialog */}
+      <FeaturePickerDialog
+        open={featurePicker.open}
+        onClose={handleFeaturePickerClose}
+        onSelect={handleFeaturePickerSelect}
+        features={featurePicker.features}
         fieldMeta={fieldMetaLocal}
-        vectorLayerRef={vectorLayerRef}
-        styleFn={styleFn}
-        visibleIdsRef={visibleIdsRef}
-        selectedIdsRef={selectedIdsRef}
-        onlyFilteredRef={onlyFilteredRef}
-        serviceList={serviceList}
-        featureIndexRef={featureIndexRef}
-        graveyardRef={graveyardRef}
-        draftBaselineRef={draftBaselineRef}
-        map={props.map}
         handleRowHover={handleRowHover}
         handleRowLeave={handleRowLeave}
       />
-    </BaseWindowPlugin>
+    </>
   );
 }
 

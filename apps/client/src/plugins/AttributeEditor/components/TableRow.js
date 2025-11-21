@@ -33,6 +33,11 @@ const TableRow = ({
   handleRowLeave,
 }) => {
   const [isHovering, setIsHovering] = React.useState(false);
+  const rowHasEdits =
+    !row.__pending &&
+    tablePendingEdits[row.id] &&
+    Object.keys(tablePendingEdits[row.id]).length > 0;
+
   return (
     <tr
       ref={(el) => {
@@ -44,6 +49,9 @@ const TableRow = ({
       }}
       style={{
         ...s.tr(selected, pendingKind),
+        ...(rowHasEdits && !pendingKind
+          ? { outline: `2px dashed ${s.editOutlineColor || "#f59e0b"}` }
+          : {}),
         ...(isHovering && !selected && !pendingKind
           ? {
               backgroundColor: "rgba(96, 165, 250, 0.08)",

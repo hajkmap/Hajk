@@ -73,6 +73,7 @@ const TABLE_MIN = 460;
 
 export function makeStyles(t, isMobile) {
   return {
+    editOutlineColor: t.warning,
     thWidth: (ch = 40) => ({
       maxWidth: `${ch}ch`,
       width: `${ch}ch`,
@@ -618,7 +619,6 @@ export function makeStyles(t, isMobile) {
       borderBottom: `1px solid ${t.borderMuted}`,
       lineHeight: "20px",
       background: t.warningBg,
-      outline: `1px dashed ${t.warning}`,
       verticalAlign: "top",
     },
     tdPlaceholder: {

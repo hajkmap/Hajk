@@ -160,43 +160,58 @@ export default function Toolbar({
   }
 
   function handleServiceChange(e) {
-    const nextId = e.target.value;
-    const def = services.find((o) => o.id === nextId);
-    const label = def?.label ?? "Ingen";
+    try {
+      const nextId = e.target.value;
+      const def = services.find((o) => o.id === nextId);
+      const label = def?.label ?? "Ingen";
 
-    // Check if user is selecting a service (not "Ingen")
-    const isSelectingService = label !== "Ingen";
-
-    // If selecting service AND currently on "NONE", check for drawings
-    if (isSelectingService && serviceId === "NONE_ID") {
-      const drawingCount = getDrawnFeaturesCount();
-
-      if (drawingCount > 0) {
-        // Show warning dialog
-        setDrawingsWarningDialog({
-          open: true,
-          targetService: { def, label },
-          drawingCount: drawingCount,
-        });
-        return; // Stop here until user confirms
+      // Check for drawn objects if selecting service from "Ingen"
+      const isSelectingService = label !== "Ingen";
+      if (isSelectingService && serviceId === "NONE_ID") {
+        try {
+          const drawingCount = getDrawnFeaturesCount();
+          if (drawingCount > 0) {
+            setDrawingsWarningDialog({
+              open: true,
+              targetService: { def, label },
+              drawingCount: drawingCount,
+            });
+            return;
+          }
+        } catch (drawErr) {
+          console.warn("Kunde inte räkna ritade objekt:", drawErr);
+          // Continue anyway
+        }
       }
+
+      // Check for pending changes
+      const pendingCount =
+        (tablePendingAdds?.length ?? 0) +
+        (tablePendingDeletes?.size ?? 0) +
+        (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0);
+
+      const needsPrompt = dirty || pendingCount > 0;
+
+      if (!needsPrompt) {
+        applyServiceSwitch(def, label);
+        return;
+      }
+
+      pendingTargetRef.current = { def, label };
+      setSaveDialogOpen(true);
+    } catch (error) {
+      console.error("Fel vid byte av redigeringstjänst:", error);
+
+      if (enqueueSnackbar) {
+        enqueueSnackbar(
+          "Ett fel uppstod vid byte av redigeringstjänst. Försök igen.",
+          { variant: "error" }
+        );
+      }
+
+      // Reset to safe state
+      setServiceId("NONE_ID");
     }
-
-    // Check AttributeEditor pending changes
-    const pendingCount =
-      (tablePendingAdds?.length ?? 0) +
-      (tablePendingDeletes?.size ?? 0) +
-      (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0);
-
-    const needsPrompt = dirty || pendingCount > 0;
-
-    if (!needsPrompt) {
-      applyServiceSwitch(def, label);
-      return;
-    }
-
-    pendingTargetRef.current = { def, label };
-    setSaveDialogOpen(true);
   }
 
   const handleConfirmServiceSwitchWithDrawings = React.useCallback(() => {
