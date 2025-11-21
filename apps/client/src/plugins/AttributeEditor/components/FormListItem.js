@@ -13,7 +13,11 @@ const FormListItem = ({
   isDraftAdd,
   onFormRowClick,
   selectedRowRefs,
+  handleRowHover,
+  handleRowLeave,
 }) => {
+  const [isHovering, setIsHovering] = React.useState(false);
+
   const makeRowPreview = (row, FIELD_META) => {
     const keys = FIELD_META.map((m) => m.key);
     const contentKeys = keys.filter(
@@ -51,8 +55,26 @@ const FormListItem = ({
         }
       }}
       data-row-id={row.id}
-      style={s.listRow(selected, status, isFocused, false)}
+      style={{
+        ...s.listRow(selected, status, isFocused, false),
+        // Use hover style from theme (via trHover) ONLY when:
+        // - hovering AND not selected AND not focused AND no pending status
+        // This prevents hover from overwriting add/delete/edit colors
+        ...(isHovering && !selected && !isFocused && !status ? s.trHover : {}),
+      }}
       onClick={(e) => onFormRowClick(row.id, idx, e)}
+      onMouseEnter={() => {
+        setIsHovering(true);
+        if (handleRowHover) {
+          handleRowHover(row.id);
+        }
+      }}
+      onMouseLeave={() => {
+        setIsHovering(false);
+        if (handleRowLeave) {
+          handleRowLeave();
+        }
+      }}
     >
       <div>
         <div style={s.listRowText}>
@@ -67,40 +89,6 @@ const FormListItem = ({
     </div>
   );
 };
-/*},
-  (prevProps, nextProps) => {
-    // Re-render if relevant data changes
-
-    // Row ID changed
-    if (prevProps.row.id !== nextProps.row.id) return false;
-
-    // Selection state changed
-    if (prevProps.selected !== nextProps.selected) return false;
-
-    // Focus state changed
-    if (prevProps.isFocused !== nextProps.isFocused) return false;
-
-    // Pending states changed
-    if (prevProps.isPendingDelete !== nextProps.isPendingDelete) return false;
-    if (prevProps.hasPendingEdits !== nextProps.hasPendingEdits) return false;
-    if (prevProps.hasGeomChange !== nextProps.hasGeomChange) return false;
-    if (prevProps.isDraftAdd !== nextProps.isDraftAdd) return false;
-
-    // Check if preview data changed (first 3 non-ID fields)
-    const prevKeys = prevProps.FIELD_META.map((m) => m.key)
-      .filter((k) => !["id", "geoid", "oracle_geoid"].includes(k))
-      .slice(0, 3);
-
-    for (const key of prevKeys) {
-      if (prevProps.row[key] !== nextProps.row[key]) {
-        return false;
-      }
-    }
-
-    // Nothing changed → skip re-render
-    return true;
-  }
-);*/
 
 FormListItem.displayName = "FormListItem";
 

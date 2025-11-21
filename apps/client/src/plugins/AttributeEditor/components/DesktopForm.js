@@ -5,6 +5,10 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import FirstPageIcon from "@mui/icons-material/FirstPage";
+import LastPageIcon from "@mui/icons-material/LastPage";
 import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { editBus } from "../../../buses/editBus";
@@ -12,6 +16,7 @@ import FormListItem from "./FormListItem";
 
 export default function DesktopForm({
   s,
+  theme,
   // left list
   visibleFormList,
   selectedIds,
@@ -45,6 +50,8 @@ export default function DesktopForm({
   hasGeomUndo,
   columnFilters,
   setColumnFilters,
+  handleRowHover,
+  handleRowLeave,
 }) {
   const RESIZER_KEY = "ae_df_leftw";
   const MIN_LEFT = 220; // px
@@ -52,7 +59,7 @@ export default function DesktopForm({
 
   const [leftW, setLeftW] = React.useState(() => {
     const saved = Number(localStorage.getItem(RESIZER_KEY));
-    return Number.isFinite(saved) && saved >= MIN_LEFT ? saved : 360; // default
+    return Number.isFinite(saved) && saved >= MIN_LEFT ? saved : 370; // default
   });
 
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
@@ -61,6 +68,10 @@ export default function DesktopForm({
   const textareaRefs = React.useRef({});
   const [pendingCaret, setPendingCaret] = React.useState(null);
   const saveLeftWTimer = React.useRef(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(20);
 
   // Ref for scrolling to selected rows
   const selectedRowRefs = React.useRef(new Map());
@@ -91,12 +102,33 @@ export default function DesktopForm({
     setColumnFilters({});
   };
 
+  // Calculate pagination
+  const totalRows = visibleFormList.length;
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  const startIndex = currentPage * rowsPerPage;
+  const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
+  const paginatedRows = visibleFormList.slice(startIndex, endIndex);
+  const showPagination = totalRows > 10;
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(0);
+  }, [columnFilters]);
+
+  // Ensure current page is valid when rowsPerPage changes
+  React.useEffect(() => {
+    const maxPage = Math.max(0, Math.ceil(totalRows / rowsPerPage) - 1);
+    if (currentPage > maxPage) {
+      setCurrentPage(maxPage);
+    }
+  }, [rowsPerPage, totalRows, currentPage]);
+
   // Reset scroll index when selection changes
   React.useEffect(() => {
     setCurrentScrollIndex(0);
   }, [selectedIds, focusedId]);
 
-  // Scroll to selected/focused row in the list
+  // Scroll to selected/focused row in the list WITH TOOLTIP
   // Cycles through multiple selected rows on each click
   const scrollToSelectedRow = React.useCallback(() => {
     // Determine target ID(s)
@@ -119,30 +151,65 @@ export default function DesktopForm({
       return; // Nothing to scroll to
     }
 
-    const rowElement = selectedRowRefs.current.get(targetId);
-    if (rowElement) {
-      // Find the scrollable parent (the list container)
-      const scrollParent = rowElement.closest('[style*="overflow"]');
-      if (scrollParent) {
-        const rowRect = rowElement.getBoundingClientRect();
-        const parentRect = scrollParent.getBoundingClientRect();
-        const scrollTop = scrollParent.scrollTop;
-
-        // Calculate position to center the row in the viewport
-        const targetScrollTop =
-          scrollTop +
-          (rowRect.top - parentRect.top) -
-          parentRect.height / 2 +
-          rowRect.height / 2;
-
-        // Smooth scroll to position
-        scrollParent.scrollTo({
-          top: targetScrollTop,
-          behavior: "smooth",
-        });
-      }
+    // Clear any existing hover
+    if (handleRowLeave) {
+      handleRowLeave();
     }
-  }, [focusedId, selectedIds, currentScrollIndex]);
+
+    // Find the row in the full list (not paginated)
+    const rowIndex = visibleFormList.findIndex((r) => r.id === targetId);
+    if (rowIndex === -1) return;
+
+    // Navigate to the correct page
+    const targetPage = Math.floor(rowIndex / rowsPerPage);
+    if (targetPage !== currentPage) {
+      setCurrentPage(targetPage);
+    }
+
+    // Show tooltip on map for this feature
+    if (handleRowHover) {
+      handleRowHover(targetId, true); // true = show tooltip
+    }
+
+    // Scroll to the row in the list (with delay if page changed)
+    setTimeout(
+      () => {
+        const rowElement = selectedRowRefs.current.get(targetId);
+        if (rowElement) {
+          // Find the scrollable parent (the list container)
+          const scrollParent = rowElement.closest('[style*="overflow"]');
+          if (scrollParent) {
+            const rowRect = rowElement.getBoundingClientRect();
+            const parentRect = scrollParent.getBoundingClientRect();
+            const scrollTop = scrollParent.scrollTop;
+
+            // Calculate position to center the row in the viewport
+            const targetScrollTop =
+              scrollTop +
+              (rowRect.top - parentRect.top) -
+              parentRect.height / 2 +
+              rowRect.height / 2;
+
+            // Smooth scroll to position
+            scrollParent.scrollTo({
+              top: targetScrollTop,
+              behavior: "smooth",
+            });
+          }
+        }
+      },
+      targetPage !== currentPage ? 100 : 0
+    );
+  }, [
+    focusedId,
+    selectedIds,
+    currentScrollIndex,
+    visibleFormList,
+    rowsPerPage,
+    currentPage,
+    handleRowHover,
+    handleRowLeave,
+  ]);
 
   React.useEffect(() => {
     function onMove(e) {
@@ -299,7 +366,7 @@ export default function DesktopForm({
       {/* Left: Object list */}
       <div style={s.pane} aria-label="Objektlista">
         <div style={s.list}>
-          {visibleFormList.map((f, idx) => {
+          {paginatedRows.map((f, idx) => {
             const selected = selectedIds.has(f.id);
             const isFocused = focusedId === f.id;
             const isPendingDelete =
@@ -316,7 +383,7 @@ export default function DesktopForm({
               <FormListItem
                 key={f.id}
                 row={f}
-                idx={idx}
+                idx={startIndex + idx}
                 FIELD_META={FIELD_META}
                 s={s}
                 selected={selected}
@@ -327,6 +394,8 @@ export default function DesktopForm({
                 isDraftAdd={isDraftAdd}
                 onFormRowClick={onFormRowClick}
                 selectedRowRefs={selectedRowRefs}
+                handleRowHover={handleRowHover}
+                handleRowLeave={handleRowLeave}
               />
             );
           })}
@@ -334,8 +403,81 @@ export default function DesktopForm({
             <div style={s.listEmpty}>Inga objekt i listan.</div>
           )}
         </div>
+
+        {/* List footer with pagination */}
         <div style={s.listFooter}>
-          <span style={s.listFooterInfo}>Fokus: {focusedId ?? "—"}</span>
+          <div style={s.paginationInfo}>
+            Visar {startIndex + 1}-{endIndex} av {totalRows}
+          </div>
+          {showPagination && (
+            <>
+              <div style={s.spacer} />
+              <div style={s.paginationControls}>
+                <button
+                  style={currentPage === 0 ? s.iconBtnDisabled : s.iconBtn}
+                  disabled={currentPage === 0}
+                  onClick={() => setCurrentPage(0)}
+                  title="Första sidan"
+                  aria-label="Första sidan"
+                >
+                  <FirstPageIcon fontSize="small" />
+                </button>
+
+                <button
+                  style={currentPage === 0 ? s.iconBtnDisabled : s.iconBtn}
+                  disabled={currentPage === 0}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  title="Föregående sida"
+                  aria-label="Föregående sida"
+                >
+                  <NavigateBeforeIcon fontSize="small" />
+                </button>
+
+                <span style={s.pageIndicator}>
+                  {currentPage + 1}/{totalPages}
+                </span>
+
+                <button
+                  style={
+                    currentPage >= totalPages - 1
+                      ? s.iconBtnDisabled
+                      : s.iconBtn
+                  }
+                  disabled={currentPage >= totalPages - 1}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  title="Nästa sida"
+                  aria-label="Nästa sida"
+                >
+                  <NavigateNextIcon fontSize="small" />
+                </button>
+
+                <button
+                  style={
+                    currentPage >= totalPages - 1
+                      ? s.iconBtnDisabled
+                      : s.iconBtn
+                  }
+                  disabled={currentPage >= totalPages - 1}
+                  onClick={() => setCurrentPage(totalPages - 1)}
+                  title="Sista sidan"
+                  aria-label="Sista sidan"
+                >
+                  <LastPageIcon fontSize="small" />
+                </button>
+
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                  style={s.rowsPerPageSelect}
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -466,9 +608,9 @@ export default function DesktopForm({
             onClick={scrollToSelectedRow}
             title={
               selectedIds.size > 1
-                ? `Skrolla till markerad rad (${currentScrollIndex + 1}/${selectedIds.size})`
+                ? `Skrolla till markerad rad med tooltip (${currentScrollIndex + 1}/${selectedIds.size})`
                 : selectedIds.size === 1 || focusedId != null
-                  ? "Skrolla till markerad rad i listan"
+                  ? "Skrolla till markerad rad i listan och visa på kartan"
                   : "Markera objekt först"
             }
             aria-label="Skrolla till markerad"

@@ -2142,6 +2142,8 @@ export default function AttributeEditorView({
           hasGeomUndo={hasGeomUndo}
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}
+          handleRowHover={handleRowHover}
+          handleRowLeave={handleRowLeave}
         />
       )}
       <NotificationBar s={s} theme={theme} text={notification} />

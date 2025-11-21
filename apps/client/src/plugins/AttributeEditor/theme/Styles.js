@@ -406,7 +406,7 @@ export function makeStyles(t, isMobile) {
       textAlign: "center",
     },
     formFooter: {
-      padding: isMobile ? 8 : 18,
+      padding: isMobile ? 8 : 10,
       borderTop: `1px solid ${t.border}`,
       fontSize: 12,
       color: t.textMuted,
@@ -415,7 +415,7 @@ export function makeStyles(t, isMobile) {
       alignItems: "center",
     },
     formFooterDirty: {
-      padding: isMobile ? 8 : 18,
+      padding: isMobile ? 8 : 10,
       borderTop: `1px solid ${t.border}`,
       fontSize: 12,
       color: t.warning,
