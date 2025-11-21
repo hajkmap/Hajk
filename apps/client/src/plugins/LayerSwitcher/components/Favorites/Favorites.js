@@ -8,6 +8,7 @@ import FavoritesList from "./FavoritesList.js";
 import FavoritesOptions from "./FavoritesOptions.js";
 import FavoritesViewHeader from "./FavoritesViewHeader.js";
 import ConfirmationDialog from "components/ConfirmationDialog.js";
+import { useLayerSwitcherDispatch } from "../../LayerSwitcherProvider.js";
 
 import {
   Box,
@@ -43,6 +44,7 @@ function Favorites({
   const [openNoLayersAlert, setOpenNoLayersAlert] = useState(false);
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   useEffect(() => {
     // Set state from localstorage on component load
@@ -124,10 +126,7 @@ function Favorites({
         if (layer.get("layerType") === "group") {
           if (l.visible === true) {
             const subLayersToShow = l.subLayers ? l.subLayers : [];
-            globalObserver.publish("layerswitcher.showLayer", {
-              layer,
-              subLayersToShow,
-            });
+            layerSwitcherDispatch.setSubLayersVisible(l.id, subLayersToShow);
           } else {
             globalObserver.publish("layerswitcher.hideLayer", layer);
           }

@@ -213,6 +213,7 @@ const LayersTab = ({
             filterValue={filterValue}
             layersState={layersState}
             staticLayerConfig={staticLayerConfig}
+            staticLayerTree={staticLayerTree}
           />
         )}
         {layerTree.map((group, index) => (
