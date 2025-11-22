@@ -59,7 +59,7 @@ export default function DesktopForm({
 
   const [leftW, setLeftW] = React.useState(() => {
     const saved = Number(localStorage.getItem(RESIZER_KEY));
-    return Number.isFinite(saved) && saved >= MIN_LEFT ? saved : 370; // default
+    return Number.isFinite(saved) && saved >= MIN_LEFT ? saved : 360; // default
   });
 
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
@@ -405,14 +405,14 @@ export default function DesktopForm({
         </div>
 
         {/* List footer with pagination */}
-        <div style={s.listFooter}>
+        <div style={s.listFooterCompact}>
           <div style={s.paginationInfo}>
-            Visar {startIndex + 1}-{endIndex} av {totalRows}
+            {startIndex + 1}-{endIndex} av {totalRows}
           </div>
           {showPagination && (
             <>
               <div style={s.spacer} />
-              <div style={s.paginationControls}>
+              <div style={s.paginationControlsCompact}>
                 <button
                   style={currentPage === 0 ? s.iconBtnDisabled : s.iconBtn}
                   disabled={currentPage === 0}
@@ -433,7 +433,7 @@ export default function DesktopForm({
                   <NavigateBeforeIcon fontSize="small" />
                 </button>
 
-                <span style={s.pageIndicator}>
+                <span style={s.pageIndicatorCompact}>
                   {currentPage + 1}/{totalPages}
                 </span>
 

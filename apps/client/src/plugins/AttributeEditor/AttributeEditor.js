@@ -15,6 +15,8 @@ import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import { Style, Circle as CircleStyle, Fill, Stroke } from "ol/style";
 import Overlay from "ol/Overlay";
+import DragBox from "ol/interaction/DragBox";
+import { platformModifierKeyOnly } from "ol/events/condition";
 
 function AttributeEditor(props) {
   const programmaticSketchOpsRef = React.useRef(new WeakSet());
@@ -1365,6 +1367,88 @@ function AttributeEditor(props) {
   const handleFeaturePickerClose = React.useCallback(() => {
     setFeaturePicker({ open: false, features: [] });
   }, []);
+
+  React.useEffect(() => {
+    const map = props.map;
+    if (!map) return;
+
+    // Create DragBox interaction - activated with Ctrl+Drag
+    const dragBox = new DragBox({
+      condition: platformModifierKeyOnly, // Ctrl (Mac: Cmd) + drag
+    });
+
+    map.addInteraction(dragBox);
+
+    // When user releases box-selection
+    dragBox.on("boxend", () => {
+      const boxExtent = dragBox.getGeometry().getExtent();
+      const layer = vectorLayerRef.current;
+      if (!layer) return;
+
+      const source = layer.getSource();
+      if (!source) return;
+
+      // Find all features within the box
+      const selectedFeatures = [];
+      source.forEachFeatureInExtent(boxExtent, (feature) => {
+        // Check that the feature is actually visible
+        const raw =
+          feature.get?.("id") ?? feature.get?.("@_fid") ?? feature.getId?.();
+        const aliases = idAliases(raw);
+
+        const isVisible = aliases.some(
+          (k) =>
+            visibleIdsRef.current.has(k) || visibleIdsRef.current.has(String(k))
+        );
+
+        if (isVisible) {
+          selectedFeatures.push(feature);
+        }
+      });
+
+      if (selectedFeatures.length === 0) return;
+
+      // Convert to canonical IDs
+      const toCanonicalId = (idLike) => {
+        const rows = model.getSnapshot?.().features || [];
+        const hit = rows.find((r) => String(r.id) === String(idLike));
+        return hit ? hit.id : idLike;
+      };
+
+      const selectedIds = selectedFeatures.map((f) => {
+        const rawId = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        return toCanonicalId(rawId);
+      });
+
+      // Remove duplicates
+      const uniqueIds = Array.from(new Set(selectedIds));
+
+      // Build viz set
+      const buildVizSet = (logicalIds) => {
+        const set = new Set();
+        logicalIds.forEach((x) => {
+          set.add(x);
+          set.add(String(x));
+        });
+        return set;
+      };
+
+      // Update selection
+      selectedIdsRef.current = buildVizSet(uniqueIds);
+      vectorLayerRef.current?.changed?.();
+
+      // Emit event
+      editBus.emit("attrib:select-ids", {
+        ids: uniqueIds,
+        source: "map",
+        mode: "replace",
+      });
+    });
+
+    return () => {
+      map.removeInteraction(dragBox);
+    };
+  }, [props.map, vectorLayerRef, selectedIdsRef, visibleIdsRef, model]);
 
   React.useEffect(() => {
     const sub = localObserver.subscribe("AttributeEditorEvent", (msg) => {

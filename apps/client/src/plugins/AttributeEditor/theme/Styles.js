@@ -388,6 +388,15 @@ export function makeStyles(t, isMobile) {
       flexWrap: isMobile ? "wrap" : "nowrap",
       alignItems: "center",
     },
+    listFooterCompact: {
+      padding: isMobile ? 8 : 10,
+      display: "flex",
+      gap: 0,
+      borderTop: `1px solid ${t.border}`,
+      background: t.panelBg,
+      flexWrap: isMobile ? "wrap" : "nowrap",
+      alignItems: "center",
+    },
     listFooterInfo: { fontSize: 12, color: t.textMuted },
 
     form: {
@@ -845,6 +854,12 @@ export function makeStyles(t, isMobile) {
       gap: isMobile ? 4 : 8,
       flexWrap: "nowrap",
     },
+    paginationControlsCompact: {
+      display: "flex",
+      alignItems: "center",
+      gap: 0,
+      flexWrap: "nowrap",
+    },
     rowsPerPageLabel: {
       display: "flex",
       alignItems: "center",
@@ -867,6 +882,12 @@ export function makeStyles(t, isMobile) {
       fontSize: isMobile ? 12 : 13,
       color: t.text,
       padding: isMobile ? "0 4px" : "0 8px",
+      whiteSpace: "nowrap",
+    },
+    pageIndicatorCompact: {
+      fontSize: isMobile ? 12 : 13,
+      color: t.text,
+      padding: "0 2px",
       whiteSpace: "nowrap",
     },
     trHover: {
