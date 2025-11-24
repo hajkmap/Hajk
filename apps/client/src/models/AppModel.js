@@ -548,8 +548,20 @@ class AppModel {
   }
 
   createOSMLayer() {
+    const layerSwitcherConf = this.config.mapConfig.tools.find(
+      (tool) => tool.type === "layerswitcher"
+    );
+
+    // Respect the OSMVisibleAtStart option from layerswitcher config
+    // only if no override is provided in URLSearchParams (else we will
+    // end up with multiple background layers visible at start).
+    const visibleAtStart =
+      (this.layersFromParams.length === 0 &&
+        layerSwitcherConf?.options?.OSMVisibleAtStart === true) ??
+      false;
+
     const osmLayer = new TileLayer({
-      visible: false,
+      visible: visibleAtStart,
       source: new OSM({
         reprojectionErrorThreshold: 5,
       }),

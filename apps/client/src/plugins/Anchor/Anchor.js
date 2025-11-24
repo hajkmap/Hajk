@@ -1,6 +1,6 @@
 import React from "react";
 import propTypes from "prop-types";
-import BaseWindowPlugin from "../BaseWindowPlugin";
+import DialogWindowPlugin from "../DialogWindowPlugin";
 
 import ShareIcon from "@mui/icons-material/Share";
 
@@ -20,17 +20,19 @@ class Anchor extends React.PureComponent {
 
   render() {
     return (
-      <BaseWindowPlugin
-        {...this.props}
+      <DialogWindowPlugin
+        options={this.props.options}
+        map={this.props.map}
+        app={this.props.app}
         type="Anchor"
-        custom={{
+        defaults={{
           icon: <ShareIcon />,
-          title: "Dela",
-          description: "Skapa en länk och dela det du ser i kartan med andra",
-          height: "dynamic",
-          width: 512,
-          top: undefined,
-          left: undefined,
+          title: this.title,
+          description:
+            "Skapa en länk med kartans synliga lager, aktuella zoomnivå och utbredning",
+          headerText: "Dela",
+          abortText: "Stäng",
+          onAbort: this.onAbort,
         }}
       >
         <AnchorView
@@ -38,10 +40,10 @@ class Anchor extends React.PureComponent {
           model={this.props.app.anchorModel}
           options={this.props.options}
           enableAppStateInHash={
-            this.props.app.config.mapConfig.map.enableAppStateInHash
+            this.props.app?.config?.mapConfig?.map?.enableAppStateInHash
           }
         />
-      </BaseWindowPlugin>
+      </DialogWindowPlugin>
     );
   }
 }
