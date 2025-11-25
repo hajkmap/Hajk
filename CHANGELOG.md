@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The legacy `react-smooth-dnd` have been replaced with `dnd-kit`, [PR#1689](https://github.com/hajkmap/Hajk/pull/1689)
 - The introduction module has been updated to support Hajk 4. Two tour modes have been implemented (full tour and new layerswitcher tour). [PR#1664](https://github.com/hajkmap/Hajk/pull/1664)
 - The Anchor tool is now a dialog component. [PR#1711](https://github.com/hajkmap/Hajk/pull/1711)
+- QuickAccess: LayerGroups are now shown as breadcrumbs, with each group’s layers displayed beneath it. [PR#1726](https://github.com/hajkmap/Hajk/pull/1726)
 
 ### Deprecated
 
@@ -40,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: Show an Access Denied message if Backend returns 403. Closes [issue](https://github.com/hajkmap/Hajk/issues/1705)
 - LayerSwitcher: It is now possible to search on a LayerGroup name. GroupLayer search now supports expanding and showing sublayers, which was not possible before. Closes [issue](https://github.com/hajkmap/Hajk/issues/1722)
 - The add button in Bookmark is now only enabled when user has entered text in input. [PR#1657](https://github.com/hajkmap/Hajk/pull/1657)
+- QuickAccess: Sublayers inside a GroupLayer are now toggled correctly when using the “Ladda” button in QuickAccess. [PR#1726](https://github.com/hajkmap/Hajk/pull/1726)
 
 ### Security
 
