@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The OpenStreetMap background (as well as the white and black backgrounds) are now first-class citizens in LayerSwitcher, enabling e.g. loading the app with these layers visible. [PR#1680](https://github.com/hajkmap/Hajk/pull/1680)
 - The legacy `react-smooth-dnd` have been replaced with `dnd-kit`, [PR#1689](https://github.com/hajkmap/Hajk/pull/1689)
 - The introduction module has been updated to support Hajk 4. Two tour modes have been implemented (full tour and new layerswitcher tour). [PR#1664](https://github.com/hajkmap/Hajk/pull/1664)
+- The Anchor tool is now a dialog component. [PR#1711](https://github.com/hajkmap/Hajk/pull/1711)
 
 ### Deprecated
 
@@ -38,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Infoclick: Fix bug where true/false values could be switched if certain conditions in the underlying database were met. [issue](https://github.com/hajkmap/Hajk/issues/1698)
 - Client: Show an Access Denied message if Backend returns 403. Closes [issue](https://github.com/hajkmap/Hajk/issues/1705)
 - LayerSwitcher: It is now possible to search on a LayerGroup name. GroupLayer search now supports expanding and showing sublayers, which was not possible before. Closes [issue](https://github.com/hajkmap/Hajk/issues/1722)
+- The add button in Bookmark is now only enabled when user has entered text in input. [PR#1657](https://github.com/hajkmap/Hajk/pull/1657)
 
 ### Security
 
