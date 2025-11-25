@@ -30,9 +30,11 @@ This is primarily a fix release that addresses some of the issues related to the
 
 This release includes a major upgrade of our UI library, MUI, to version 7.
 
-In addition, Client is migrated to Vite, leaving the CRA behind.
-
 Also, an overhaul of the Introduction Guide and the Anchor tool is included in this release.
+
+## 4.3
+
+Client is migrated to Vite, leaving the CRA behind.
 
 ## 5.0
 
