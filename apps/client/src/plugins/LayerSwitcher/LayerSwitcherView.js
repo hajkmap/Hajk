@@ -76,6 +76,7 @@ class LayersSwitcherView extends React.PureComponent {
         tab1: 0,
         tab2: 0,
       },
+      shouldExpandQuickAccess: false,
     };
 
     this.localObserver = this.props.localObserver;
@@ -173,19 +174,25 @@ class LayersSwitcherView extends React.PureComponent {
   }
 
   // Handles click on Layerpackage button and backbutton
-  handleQuickAccessPresetsToggle = (quickAccessPresetsState) => {
-    quickAccessPresetsState?.event?.stopPropagation();
+  handleQuickAccessPresetsToggle = (callbackParams) => {
+    callbackParams?.event?.stopPropagation();
     // Set scroll position state when layer package is opened
     const currentScrollPosition = this.getScrollPosition();
+
+    // Check if Quick Access section should expand (when loading a preset)
+    const shouldExpandQuickAccess =
+      callbackParams?.shouldExpandQuickAccess || false;
+
+    // Determine if the overlay is closing
+    const isClosing = this.state.displayContentOverlay === "quickAccessPresets";
+
     this.setState((prevState) => ({
-      displayContentOverlay:
-        this.state.displayContentOverlay === "quickAccessPresets"
-          ? null
-          : "quickAccessPresets",
+      displayContentOverlay: isClosing ? null : "quickAccessPresets",
       scrollPositions: {
         ...prevState.scrollPositions,
         [`tab${prevState.activeTab}`]: currentScrollPosition,
       },
+      shouldExpandQuickAccess: isClosing && shouldExpandQuickAccess,
     }));
   };
 
@@ -245,6 +252,7 @@ class LayersSwitcherView extends React.PureComponent {
     this.setState((prevState) => ({
       activeTab,
       displayContentOverlay: null,
+      shouldExpandQuickAccess: false,
       scrollPositions: {
         ...prevState.scrollPositions,
         [`tab${prevState.activeTab}`]: currentScrollPosition,
@@ -380,6 +388,7 @@ class LayersSwitcherView extends React.PureComponent {
           map={this.props.map}
           app={this.props.app}
           scrollContainerRef={this.scrollContainerRef}
+          shouldExpandQuickAccess={this.state.shouldExpandQuickAccess}
         />
         {this.props.options.enableQuickAccessPresets && (
           <QuickAccessPresets

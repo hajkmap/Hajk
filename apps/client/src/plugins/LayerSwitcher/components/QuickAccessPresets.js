@@ -72,11 +72,11 @@ function QuickAccessPresets({
   });
 
   // Handles click on back button in header
-  const handleBackButtonClick = (setQuickAccessSectionExpanded) => {
+  const handleBackButtonClick = (shouldExpandQuickAccess) => {
     setTooltipOpen(false);
     setTimeout(() => {
-      setQuickAccessSectionExpanded
-        ? backButtonCallback({ setQuickAccessSectionExpanded: true })
+      shouldExpandQuickAccess === true
+        ? backButtonCallback({ shouldExpandQuickAccess: true })
         : backButtonCallback();
     }, 100);
   };

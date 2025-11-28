@@ -36,6 +36,7 @@ const LayersTab = ({
   map,
   app,
   style,
+  shouldExpandQuickAccess,
   // scrollContainerRef,
 }) => {
   const {
@@ -214,6 +215,7 @@ const LayersTab = ({
             layersState={layersState}
             staticLayerConfig={staticLayerConfig}
             staticLayerTree={staticLayerTree}
+            shouldExpandQuickAccess={shouldExpandQuickAccess}
           />
         )}
         {layerTree.map((group, index) => (

@@ -38,6 +38,7 @@ const QuickAccessView = ({
   layersState,
   staticLayerConfig,
   staticLayerTree,
+  shouldExpandQuickAccess,
 }) => {
   const qaLayers = Object.values(layersState).filter((obj) => obj.quickAccess);
   const hasVisibleLayers = qaLayers.some((l) => l.visible);
@@ -47,6 +48,13 @@ const QuickAccessView = ({
     useState(false);
 
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+
+  // Effect to expand Quick Access section when a preset is loaded
+  React.useEffect(() => {
+    if (shouldExpandQuickAccess && !quickAccessSectionExpanded) {
+      setQuickAccessSectionExpanded(true);
+    }
+  }, [shouldExpandQuickAccess, quickAccessSectionExpanded]);
 
   // Handles click on clear quickAccess menu item
   const handleShowDeleteConfirmation = (e) => {
