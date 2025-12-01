@@ -111,15 +111,12 @@ function Favorites({
     setMissingLayersConfirmation(null);
 
     const allMapLayers = map.getAllLayers();
-    const loadedLayerIds = new Set(); // Track loaded layer IDs for auto-expand
-
     layers.forEach((l) => {
       const layer = allMapLayers.find((la) => la.get("name") === l.id);
       if (layer) {
         // Set quickaccess property
         if (layer.get("layerType") !== "base") {
           layer.set("quickAccess", true);
-          loadedLayerIds.add(l.id); // Add to loaded layer IDs
         }
         // Set drawOrder (zIndex)
         layer.setZIndex(l.drawOrder);
@@ -160,13 +157,6 @@ function Favorites({
         }
       }
     });
-
-    // Publish event to auto-expand affected groups and GroupLayers
-    if (loadedLayerIds.size > 0) {
-      globalObserver.publish("layerswitcher.quickAccessLayersLoaded", {
-        layerIds: Array.from(loadedLayerIds),
-      });
-    }
 
     enqueueSnackbar(`${title} har nu laddats till snabbåtkomst.`, {
       variant: "success",
