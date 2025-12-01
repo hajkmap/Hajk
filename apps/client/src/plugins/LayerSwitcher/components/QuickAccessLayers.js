@@ -301,12 +301,31 @@ export default function QuickAccessLayers({
 
           // In QuickAccess, always render children directly (no LayerGroup component)
           // This ensures groups only appear in breadcrumbs, not as separate components
-          const hasBreadcrumb = true; // Always true in QuickAccess to render children directly
+          const hasBreadcrumb = true;
 
-          const hasToggledLayer = groupData.layers.some((l) => {
-            const layerId = l.get("name");
-            return layersState[layerId]?.visible === true;
-          });
+          const groupHasToggledLayer = (node) => {
+            if (!node) {
+              return false;
+            }
+
+            const nodeId = node.id;
+            const nodeSettings = staticLayerConfig[nodeId];
+
+            if (!nodeSettings) {
+              return false;
+            }
+
+            if (nodeSettings.layerType === "group") {
+              return (
+                Array.isArray(node.children) &&
+                node.children.some((child) => groupHasToggledLayer(child))
+              );
+            }
+
+            return layersState[nodeId]?.visible === true;
+          };
+
+          const hasToggledLayer = groupHasToggledLayer(filteredGroup);
 
           const isLastGroup = groupIndex === filteredGroupsToRender.length - 1;
           const hasUngroupedLayers = filteredGroupsToRender.some(
@@ -392,21 +411,16 @@ export default function QuickAccessLayers({
                         const nodeId = node.id;
                         const nodeSettings = staticLayerConfig[nodeId];
 
-                        // Safety check – configuration might be missing for some ids
                         if (!nodeSettings) {
                           return null;
                         }
 
-                        // If this is a pure grouping node, recurse into its children and
-                        // never render it directly.
                         if (nodeSettings.layerType === "group") {
                           if (!node.children || node.children.length === 0) {
                             return null;
                           }
 
                           return node.children.map((child, index) =>
-                            // Only the very first rendered child for this group-tree
-                            // should be treated as "first child" for styling purposes.
                             renderGroupDescendants(
                               child,
                               isFirstChild && index === 0
@@ -414,7 +428,6 @@ export default function QuickAccessLayers({
                           );
                         }
 
-                        // From here on we assume real layers (leaf nodes)
                         const nodeState = layersState[nodeId];
 
                         if (nodeSettings.layerType === "groupLayer") {
