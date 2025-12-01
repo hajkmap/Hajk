@@ -117,6 +117,34 @@ export default function QuickAccessLayers({
     [staticLayerConfig]
   );
 
+  // Helper function to find all parent groups for a given layer ID
+  const findAllParentGroups = useCallback((layerId, tree, path = []) => {
+    if (!tree || !Array.isArray(tree)) return [];
+
+    for (const group of tree) {
+      const currentPath = [...path, group.id];
+
+      // Check if this layer is a direct child of this group
+      if (group.children) {
+        const hasLayer = group.children.some((child) => child.id === layerId);
+        if (hasLayer) {
+          return currentPath;
+        }
+      }
+
+      // Recursively search in children
+      const foundPath = findAllParentGroups(
+        layerId,
+        group.children,
+        currentPath
+      );
+      if (foundPath.length > 0) {
+        return foundPath;
+      }
+    }
+    return [];
+  }, []);
+
   // On component mount, update the list and subscribe to events
   useEffect(() => {
     // Register a listener: when any layer's quickaccess flag changes make sure
@@ -135,13 +163,65 @@ export default function QuickAccessLayers({
         setQuickAccessLayers(getQuickAccessLayers());
       }
     );
+
+    // Listen for when layers are loaded from favorites to auto-expand groups
+    const layersLoadedSubscription = globalObserver.subscribe(
+      "layerswitcher.quickAccessLayersLoaded",
+      ({ layerIds }) => {
+        if (!layerIds || !Array.isArray(layerIds) || layerIds.length === 0) {
+          return;
+        }
+
+        // Find all parent groups for all loaded layers that are toggled/visible
+        const groupsToExpand = new Set();
+        layerIds.forEach((layerId) => {
+          // Only expand if the layer is toggled/visible
+          const layerState = layersState[layerId];
+          const isLayerVisible =
+            layerState?.visible === true || layerState?.layerIsToggled === true;
+
+          // Also check the actual OpenLayers layer as a fallback
+          const olLayer = map
+            .getAllLayers()
+            .find((l) => l.get("name") === layerId);
+          const isOlLayerVisible = olLayer?.get("visible") === true;
+
+          if (isLayerVisible || isOlLayerVisible) {
+            const parentGroups = findAllParentGroups(layerId, staticLayerTree);
+            parentGroups.forEach((groupId) => {
+              groupsToExpand.add(groupId);
+            });
+          }
+        });
+
+        // Expand all affected groups
+        if (groupsToExpand.size > 0) {
+          setExpandedGroups((prev) => {
+            const newExpanded = { ...prev };
+            groupsToExpand.forEach((groupId) => {
+              newExpanded[groupId] = true;
+            });
+            return newExpanded;
+          });
+        }
+      }
+    );
+
     // Update list of layers
     setQuickAccessLayers(getQuickAccessLayers());
     // Unsubscribe when component unmounts
     return function () {
       quickAccessChangedSubscription.unsubscribe();
+      layersLoadedSubscription.unsubscribe();
     };
-  }, [globalObserver, getQuickAccessLayers]);
+  }, [
+    globalObserver,
+    getQuickAccessLayers,
+    findAllParentGroups,
+    staticLayerTree,
+    layersState,
+    map,
+  ]);
 
   const createFilteredGroup = useCallback(
     (group, quickAccessLayerIds) => {
@@ -356,7 +436,7 @@ export default function QuickAccessLayers({
                       transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
                       transition: "transform 300ms ease",
                       fontSize: "1rem",
-                      mr: 0.5,
+                      mr: 1,
                     }}
                   />
                   <Typography
