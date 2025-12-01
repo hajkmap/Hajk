@@ -383,84 +383,72 @@ export default function QuickAccessLayers({
               {hasBreadcrumb ? (
                 <Collapse in={isExpanded} unmountOnExit>
                   <Box sx={{ marginLeft: "20px" }}>
-                    {filteredGroup.children?.map((child, index) => {
-                      const layerId = child.id;
-                      const layerState = layersState[layerId];
-                      const isFirstChild = index === 0;
-                      const layerSettings = staticLayerConfig[layerId];
-                      if (!layerSettings) {
-                        return null;
-                      }
-
-                      if (layerSettings.layerType === "group") {
-                        const nestedGroup = filteredGroup.children?.find(
-                          (g) => g?.id === layerId
-                        );
-                        if (!nestedGroup || !nestedGroup.children) {
+                    {(() => {
+                      const renderGroupDescendants = (node, isFirstChild) => {
+                        if (!node) {
                           return null;
                         }
+
+                        const nodeId = node.id;
+                        const nodeSettings = staticLayerConfig[nodeId];
+
+                        // Safety check – configuration might be missing for some ids
+                        if (!nodeSettings) {
+                          return null;
+                        }
+
+                        // If this is a pure grouping node, recurse into its children and
+                        // never render it directly.
+                        if (nodeSettings.layerType === "group") {
+                          if (!node.children || node.children.length === 0) {
+                            return null;
+                          }
+
+                          return node.children.map((child, index) =>
+                            // Only the very first rendered child for this group-tree
+                            // should be treated as "first child" for styling purposes.
+                            renderGroupDescendants(
+                              child,
+                              isFirstChild && index === 0
+                            )
+                          );
+                        }
+
+                        // From here on we assume real layers (leaf nodes)
+                        const nodeState = layersState[nodeId];
+
+                        if (nodeSettings.layerType === "groupLayer") {
+                          return (
+                            <GroupLayer
+                              key={nodeId}
+                              layerState={nodeState}
+                              layerConfig={nodeSettings}
+                              draggable={false}
+                              toggleable={true}
+                              globalObserver={globalObserver}
+                              filterValue={filterValue}
+                              isFirstChild={isFirstChild}
+                            />
+                          );
+                        }
+
                         return (
-                          <React.Fragment key={layerId}>
-                            {nestedGroup.children.map((nestedChild) => {
-                              const nestedLayerId = nestedChild.id;
-                              const nestedLayerState =
-                                layersState[nestedLayerId];
-                              const nestedLayerSettings =
-                                staticLayerConfig[nestedLayerId];
-                              if (!nestedLayerSettings) {
-                                return null;
-                              }
-
-                              return nestedLayerSettings.layerType ===
-                                "groupLayer" ? (
-                                <GroupLayer
-                                  key={nestedLayerId}
-                                  layerState={nestedLayerState}
-                                  layerConfig={nestedLayerSettings}
-                                  draggable={false}
-                                  toggleable={true}
-                                  globalObserver={globalObserver}
-                                  filterValue={filterValue}
-                                />
-                              ) : (
-                                <LayerItem
-                                  key={nestedLayerId}
-                                  layerState={nestedLayerState}
-                                  layerConfig={nestedLayerSettings}
-                                  draggable={false}
-                                  toggleable={true}
-                                  globalObserver={globalObserver}
-                                  filterValue={filterValue}
-                                />
-                              );
-                            })}
-                          </React.Fragment>
+                          <LayerItem
+                            key={nodeId}
+                            layerState={nodeState}
+                            layerConfig={nodeSettings}
+                            draggable={false}
+                            toggleable={true}
+                            globalObserver={globalObserver}
+                            filterValue={filterValue}
+                          />
                         );
-                      }
+                      };
 
-                      return layerSettings.layerType === "groupLayer" ? (
-                        <GroupLayer
-                          key={layerId}
-                          layerState={layerState}
-                          layerConfig={layerSettings}
-                          draggable={false}
-                          toggleable={true}
-                          globalObserver={globalObserver}
-                          filterValue={filterValue}
-                          isFirstChild={isFirstChild}
-                        />
-                      ) : (
-                        <LayerItem
-                          key={layerId}
-                          layerState={layerState}
-                          layerConfig={layerSettings}
-                          draggable={false}
-                          toggleable={true}
-                          globalObserver={globalObserver}
-                          filterValue={filterValue}
-                        />
+                      return filteredGroup.children?.map((child, index) =>
+                        renderGroupDescendants(child, index === 0)
                       );
-                    })}
+                    })()}
                   </Box>
                 </Collapse>
               ) : (
