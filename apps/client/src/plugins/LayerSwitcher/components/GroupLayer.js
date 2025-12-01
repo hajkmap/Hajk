@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, memo } from "react";
+import React, { useState, memo } from "react";
 
 import { Box, Collapse, IconButton } from "@mui/material";
 
@@ -30,38 +30,8 @@ function GroupLayer({
     layerConfig;
 
   const [showSublayers, setShowSublayers] = useState(false);
-  const wasLoadedFromFavorites = useRef(false);
 
   const layerSwitcherDispatch = useLayerSwitcherDispatch();
-
-  // Listen for when layers are loaded from favorites
-  useEffect(() => {
-    const layersLoadedSubscription = globalObserver.subscribe(
-      "layerswitcher.quickAccessLayersLoaded",
-      ({ layerIds }) => {
-        if (layerIds && Array.isArray(layerIds) && layerIds.includes(layerId)) {
-          wasLoadedFromFavorites.current = true;
-          // Check if layer is toggled and expand
-          if (layerIsToggled) {
-            setShowSublayers(true);
-          }
-        }
-      }
-    );
-
-    return () => {
-      layersLoadedSubscription.unsubscribe();
-    };
-  }, [globalObserver, layerId, layerIsToggled]);
-
-  // Expand when layer becomes toggled after being loaded from favorites
-  useEffect(() => {
-    if (wasLoadedFromFavorites.current && layerIsToggled) {
-      setShowSublayers(true);
-      // Reset the flag after expanding
-      wasLoadedFromFavorites.current = false;
-    }
-  }, [layerIsToggled]);
 
   const setSubLayerVisible = (subLayer) => {
     layerSwitcherDispatch.setSubLayerVisibility(layerId, subLayer, true);
