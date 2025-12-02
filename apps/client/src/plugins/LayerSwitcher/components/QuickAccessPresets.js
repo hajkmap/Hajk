@@ -458,10 +458,8 @@ function QuickAccessPresets({
         sx={[
           (theme) => ({
             position: "relative",
-            overflowY: "auto",
-            height: "inherit",
-            minHeight: "15em",
-            maxHeight: "inherit",
+            overflow: "hidden",
+            flexGrow: 1,
             backgroundColor: "#fff",
             ...theme.applyStyles("dark", {
               backgroundColor: "rgb(18,18,18)",
@@ -469,7 +467,8 @@ function QuickAccessPresets({
           }),
           display
             ? {
-                display: "block",
+                display: "flex",
+                flexDirection: "column",
               }
             : {
                 display: "none",
@@ -558,7 +557,12 @@ function QuickAccessPresets({
             />
           </Box>
         </Box>
-        <Box>
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflowY: "auto",
+          }}
+        >
           <List dense sx={{ p: 0 }}>
             {!filter.list.length ? (
               <Typography sx={{ p: 2 }}>
