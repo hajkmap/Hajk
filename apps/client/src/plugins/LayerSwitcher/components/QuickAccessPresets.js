@@ -587,17 +587,23 @@ function QuickAccessPresets({
                     <ListItemText
                       primary={l.title}
                       secondary={l.author}
-                      sx={{ pr: 6 }}
-                      primaryTypographyProps={{
-                        noWrap: true,
-                        sx: { overflow: "hidden", textOverflow: "ellipsis" },
-                      }}
-                      secondaryTypographyProps={{
-                        noWrap: true,
-                        sx: { overflow: "hidden", textOverflow: "ellipsis" },
+                      slotProps={{
+                        primary: {
+                          pr: 5,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        },
+                        secondary: {
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        },
                       }}
                     />
-                    <ListItemSecondaryAction>
+                    <ListItemSecondaryAction
+                      sx={{
+                        right: "4px",
+                      }}
+                    >
                       <HajkToolTip title={"Information om " + l.title}>
                         <LsIconButton
                           onClick={(e) => {
