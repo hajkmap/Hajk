@@ -386,9 +386,15 @@ function Favorites({
     return createPortal(
       <Box
         sx={[
+          {
+            height: "inherit",
+            maxHeight: "inherit",
+            flexDirection: "column",
+            overflow: "hidden",
+          },
           favoriteViewDisplay
             ? {
-                display: "block",
+                display: "flex",
               }
             : {
                 display: "none",
@@ -401,7 +407,12 @@ function Favorites({
           functionalCookiesOk={functionalCookiesOk}
           favoritesInfoText={favoritesInfoText}
         ></FavoritesViewHeader>
-        <Box>
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflowY: "auto",
+          }}
+        >
           <FavoritesList
             map={map}
             favorites={favorites}
