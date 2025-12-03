@@ -313,56 +313,61 @@ export default function LayerSettings() {
                 infoClickActive: data.infoClickActive as boolean | undefined,
                 style: data.style as string | undefined,
                 metadata: {
-                  title: data["metadata.title"] as string | undefined,
-                  url: data["metadata.url"] as string | undefined,
-                  urlTitle: data["metadata.urlTitle"] as string | undefined,
-                  attribution: data["metadata.attribution"] as
-                    | string
-                    | undefined,
+                  title: (data.metadata as { title?: string })?.title,
+                  url: (data.metadata as { url?: string })?.url,
+                  urlTitle: (data.metadata as { urlTitle?: string })?.urlTitle,
+                  attribution: (data.metadata as { attribution?: string })
+                    ?.attribution,
                 },
                 searchSettings: {
-                  active: data["searchSettings.active"] as boolean | undefined,
-                  url: data["searchSettings.url"] as string | undefined,
+                  active: (data.searchSettings as { active?: boolean })?.active,
+                  url: (data.searchSettings as { url?: string })?.url,
                   searchFields: toArray(
-                    data["searchSettings.searchFields"] as unknown
+                    (data.searchSettings as { searchFields?: unknown })
+                      ?.searchFields
                   ),
                   primaryDisplayFields: toArray(
-                    data["searchSettings.primaryDisplayFields"] as unknown
+                    (data.searchSettings as { primaryDisplayFields?: unknown })
+                      ?.primaryDisplayFields
                   ),
                   secondaryDisplayFields: toArray(
-                    data["searchSettings.secondaryDisplayFields"] as unknown
+                    (
+                      data.searchSettings as {
+                        secondaryDisplayFields?: unknown;
+                      }
+                    )?.secondaryDisplayFields
                   ),
                   shortDisplayFields: toArray(
-                    data["searchSettings.shortDisplayFields"] as unknown
+                    (data.searchSettings as { shortDisplayFields?: unknown })
+                      ?.shortDisplayFields
                   ),
-                  geometryField: data["searchSettings.geometryField"] as
-                    | string
-                    | undefined,
-                  outputFormat: data["searchSettings.outputFormat"] as
-                    | string
-                    | undefined,
+                  geometryField: (
+                    data.searchSettings as { geometryField?: string }
+                  )?.geometryField,
+                  outputFormat: (
+                    data.searchSettings as { outputFormat?: string }
+                  )?.outputFormat,
                 },
                 infoClickSettings: {
-                  definition: data["infoClickSettings.definition"] as
-                    | string
-                    | undefined,
-                  icon: data["infoClickSettings.icon"] as string | undefined,
-                  format: data["infoClickSettings.format"] as
-                    | string
-                    | undefined,
-                  sortProperty: data["infoClickSettings.sortProperty"] as
-                    | string
-                    | undefined,
-                  sortMethod: data["infoClickSettings.sortMethod"] as
-                    | string
-                    | undefined,
+                  definition: (
+                    data.infoClickSettings as { definition?: string }
+                  )?.definition,
+                  icon: (data.infoClickSettings as { icon?: string })?.icon,
+                  format: (data.infoClickSettings as { format?: string })
+                    ?.format,
+                  sortProperty: (
+                    data.infoClickSettings as { sortProperty?: string }
+                  )?.sortProperty,
+                  sortMethod: (
+                    data.infoClickSettings as { sortMethod?: string }
+                  )?.sortMethod,
                 },
                 options: {
-                  keyword: data["options.keyword"] as string | undefined,
-                  category: data["options.category"] as string | undefined,
-                  layerDisplayDescription: data[
-                    "options.layerDisplayDescription"
-                  ] as string | undefined,
+                  keyword: (data.options as { keyword?: string })?.keyword,
+                  category: (data.options as { category?: string })?.category,
+                  layerDisplayDescription: (
+                    data.options as { layerDisplayDescription?: string }
+                  )?.layerDisplayDescription,
                 } as Record<string, unknown>,
                 selectedLayers: selectedRowObjects,
               };

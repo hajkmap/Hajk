@@ -208,7 +208,7 @@ function LayersGrid({
                   display: "block",
                 }}
               >
-                Publicera ditt första lager
+                {t("services.publishLayer")}
               </Button>
             ) : (
               <Button
@@ -284,7 +284,9 @@ function LayersGrid({
                     color={palette.error.main}
                     sx={{ mb: 1 }}
                   >
-                    {!isLoading && t("services.atLeastOneLayerRequired")}
+                    {!isLoading &&
+                      !isError &&
+                      t("services.atLeastOneLayerRequired")}
                   </Typography>
                 )}
                 {isLoading ? (
