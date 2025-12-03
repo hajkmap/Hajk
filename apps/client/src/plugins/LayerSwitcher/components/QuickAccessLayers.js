@@ -303,26 +303,27 @@ export default function QuickAccessLayers({
           // This ensures groups only appear in breadcrumbs, not as separate components
           const hasBreadcrumb = true;
 
-          const groupHasToggledLayer = (node) => {
-            if (!node) {
+          const groupHasToggledLayer = (element) => {
+            if (!element) {
               return false;
             }
 
-            const nodeId = node.id;
-            const nodeSettings = staticLayerConfig[nodeId];
+            const elementId = element.id;
 
-            if (!nodeSettings) {
+            const elementSettings = staticLayerConfig[elementId];
+
+            if (!elementSettings) {
               return false;
             }
 
-            if (nodeSettings.layerType === "group") {
+            if (elementSettings.layerType === "group") {
               return (
-                Array.isArray(node.children) &&
-                node.children.some((child) => groupHasToggledLayer(child))
+                Array.isArray(element.children) &&
+                element.children.some((child) => groupHasToggledLayer(child))
               );
             }
 
-            return layersState[nodeId]?.visible === true;
+            return layersState[elementId]?.visible === true;
           };
 
           const hasToggledLayer = groupHasToggledLayer(filteredGroup);
@@ -342,6 +343,58 @@ export default function QuickAccessLayers({
               ...prev,
               [groupId]: !prev[groupId],
             }));
+          };
+
+          const groupDescendants = (element, isFirstChild = false) => {
+            if (!element) {
+              return null;
+            }
+
+            const elementId = element.id;
+            const elementConfig = staticLayerConfig[elementId];
+
+            if (!elementConfig) {
+              return null;
+            }
+
+            if (elementConfig.layerType === "group") {
+              if (!element.children || element.children.length === 0) {
+                return null;
+              }
+
+              return element.children.map((child, index) =>
+                groupDescendants(child, isFirstChild && index === 0)
+              );
+            }
+
+            const elementState = layersState[elementId];
+
+            if (elementConfig.layerType === "groupLayer") {
+              return (
+                <GroupLayer
+                  key={elementId}
+                  layerState={elementState}
+                  layerConfig={elementConfig}
+                  draggable={false}
+                  toggleable={true}
+                  globalObserver={globalObserver}
+                  filterValue={filterValue}
+                  isFirstChild={isFirstChild}
+                />
+              );
+            }
+
+            return (
+              <LayerItem
+                key={elementId}
+                layerState={elementState}
+                layerConfig={elementConfig}
+                draggable={false}
+                toggleable={true}
+                globalObserver={globalObserver}
+                filterValue={filterValue}
+              />
+            );
           };
 
           return (
@@ -401,67 +454,10 @@ export default function QuickAccessLayers({
               )}
               {hasBreadcrumb ? (
                 <Collapse in={isExpanded} unmountOnExit>
-                  <Box sx={{ marginLeft: "20px" }}>
-                    {(() => {
-                      const renderGroupDescendants = (node, isFirstChild) => {
-                        if (!node) {
-                          return null;
-                        }
-
-                        const nodeId = node.id;
-                        const nodeSettings = staticLayerConfig[nodeId];
-
-                        if (!nodeSettings) {
-                          return null;
-                        }
-
-                        if (nodeSettings.layerType === "group") {
-                          if (!node.children || node.children.length === 0) {
-                            return null;
-                          }
-
-                          return node.children.map((child, index) =>
-                            renderGroupDescendants(
-                              child,
-                              isFirstChild && index === 0
-                            )
-                          );
-                        }
-
-                        const nodeState = layersState[nodeId];
-
-                        if (nodeSettings.layerType === "groupLayer") {
-                          return (
-                            <GroupLayer
-                              key={nodeId}
-                              layerState={nodeState}
-                              layerConfig={nodeSettings}
-                              draggable={false}
-                              toggleable={true}
-                              globalObserver={globalObserver}
-                              filterValue={filterValue}
-                              isFirstChild={isFirstChild}
-                            />
-                          );
-                        }
-
-                        return (
-                          <LayerItem
-                            key={nodeId}
-                            layerState={nodeState}
-                            layerConfig={nodeSettings}
-                            draggable={false}
-                            toggleable={true}
-                            globalObserver={globalObserver}
-                            filterValue={filterValue}
-                          />
-                        );
-                      };
-
-                      return filteredGroup.children?.map((child, index) =>
-                        renderGroupDescendants(child, index === 0)
-                      );
-                    })()}
+                  <Box sx={{ ml: 2.5 }}>
+                    {filteredGroup.children?.map((child, index) =>
+                      groupDescendants(child, index === 0)
+                    )}
                   </Box>
                 </Collapse>
               ) : (
