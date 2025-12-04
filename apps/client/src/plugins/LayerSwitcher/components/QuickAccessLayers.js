@@ -413,8 +413,8 @@ export default function QuickAccessLayers({
                     display: "flex",
                     alignItems: "center",
                     cursor: "pointer",
-                    px: 2,
                     py: 0.5,
+                    minWidth: 0,
                     ...(isExpanded && {
                       borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
                     }),
@@ -429,14 +429,23 @@ export default function QuickAccessLayers({
                       transition: "transform 300ms ease",
                       fontSize: "1rem",
                       mr: 0.5,
+                      flexShrink: 0,
                     }}
                   />
+
                   <Typography
                     variant="button"
+                    noWrap
                     sx={{
                       color: hasToggledLayer,
                       fontSize: "0.9rem",
                       fontWeight: hasToggledLayer ? 700 : 400,
+                      userSelect: "none",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "block",
+                      minWidth: 0,
+                      flex: 1,
                     }}
                   >
                     {fullBreadcrumb.map((group, index) => (
@@ -452,9 +461,10 @@ export default function QuickAccessLayers({
                   </Typography>
                 </Box>
               )}
+
               {hasBreadcrumb ? (
                 <Collapse in={isExpanded} unmountOnExit>
-                  <Box sx={{ ml: 2.5 }}>
+                  <Box sx={{ ml: 1 }}>
                     {filteredGroup.children?.map((child, index) =>
                       groupDescendants(child, index === 0)
                     )}
