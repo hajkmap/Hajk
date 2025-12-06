@@ -7,6 +7,7 @@ import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
@@ -714,6 +715,16 @@ export default function DesktopForm({
                   <div key={meta.key} style={s.field}>
                     <label style={s.label}>
                       {meta.label}
+                      {meta.description && meta.description.trim() && (
+                        <button
+                          style={s.descriptionIcon}
+                          title={meta.description}
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label={`Information om ${meta.label}`}
+                        >
+                          <InfoOutlinedIcon style={{ fontSize: "16px" }} />
+                        </button>
+                      )}
                       {changed && <span style={s.labelChanged}>(ändrad)</span>}
                     </label>
 
