@@ -72,6 +72,8 @@ export default function AttributeEditorView({
   const lastEditTargetIdsRef = useRef(null);
   const anchorRef = useRef({ id: null, index: null });
 
+  const explicitClearRef = React.useRef(false);
+
   const [columnFilters, setColumnFilters] = useState({});
   const [openFilterColumn, setOpenFilterColumn] = useState(null);
   const filterOverlayRef = useRef(null);
@@ -1592,6 +1594,7 @@ export default function AttributeEditorView({
     if (!focusedId && ids.length) setFocusedId(ids[0]);
   }
   function clearSelection() {
+    explicitClearRef.current = true;
     setSelectedIds(new Set());
 
     editBus.emit("attrib:select-ids", {
@@ -1686,6 +1689,7 @@ export default function AttributeEditorView({
           visibleFormList.some((f) => f.id === id)
         ),
       firstVisibleId: visibleFormList[0]?.id ?? null,
+      explicitClear: explicitClearRef.current,
     }),
     [ui.mode, focusedId, selectedIds, visibleFormList]
   );
@@ -1695,6 +1699,9 @@ export default function AttributeEditorView({
       ensureFormSelectionDeps;
 
     if (mode !== "form") return;
+
+    // If user explicitly cleared the selection, do nothing
+    if (explicitClearRef) return;
 
     // If both focus and selection are valid, do nothing
     if (focusedIdValid && selectedIdsValid) return;
@@ -1712,6 +1719,7 @@ export default function AttributeEditorView({
 
   const onFormRowClick = useCallback(
     (rowId, rowIndex, evt) => {
+      explicitClearRef.current = false;
       const isShift = evt.shiftKey;
       const isToggle = evt.metaKey || evt.ctrlKey || evt.altKey; // Alt = toggle only
 
