@@ -7,6 +7,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
@@ -652,6 +653,17 @@ export default function TableMode(props) {
                               <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
                             </svg>
                           </button>
+
+                          {f.description && f.description.trim() && (
+                            <button
+                              style={s.descriptionIcon}
+                              title={f.description}
+                              onClick={(e) => e.stopPropagation()}
+                              aria-label={`Information om ${f.label}`}
+                            >
+                              <InfoOutlinedIcon style={{ fontSize: "16px" }} />
+                            </button>
+                          )}
 
                           {openFilterColumn === f.key && (
                             <ColumnFilter

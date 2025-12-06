@@ -596,6 +596,7 @@ function AttributeEditor(props) {
             return {
               key: f.name,
               label: f.alias || f.name,
+              description: f.description,
               readOnly: false,
               type,
               options: Array.isArray(f.values) ? f.values : undefined,

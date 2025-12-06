@@ -760,7 +760,7 @@ export function makeStyles(t, isMobile) {
     },
 
     filterListScroll: {
-      maxHeight: 260,
+      maxHeight: 200,
       overflowY: "auto",
       paddingRight: 4,
     },
@@ -892,6 +892,25 @@ export function makeStyles(t, isMobile) {
     },
     trHover: {
       backgroundColor: t.rowHover,
+    },
+    descriptionIcon: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      marginLeft: "6px",
+      padding: "2px",
+      border: "none",
+      background: "transparent",
+      cursor: "help",
+      color: t.primary || "#0077ffff",
+      opacity: 1,
+      transition: "opacity 0.2s, transform 0.2s",
+      verticalAlign: "middle",
+      lineHeight: 1,
+      "&:hover": {
+        opacity: 1,
+        transform: "scale(1.1)",
+      },
     },
   };
 }
