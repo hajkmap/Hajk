@@ -1170,15 +1170,32 @@ export default function AttributeEditorView({
           try {
             const names = await caches.keys();
             await Promise.all(names.map((name) => caches.delete(name)));
-          } catch (e) {
-            // Ignore cache clearing errors
-          }
+          } catch (e) {}
         }
 
-        enqueueSnackbar(
-          `✓ Sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${result.deleted || 0} borttagna`,
-          { variant: "success", autoHideDuration: 5000 }
-        );
+        // Check for partial failures
+        const hasPartialFailure =
+          result.partialFailures && result.partialFailures.length > 0;
+
+        if (hasPartialFailure) {
+          let message = `⚠ Delvis sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${result.deleted || 0} borttagna\n`;
+          message += `Misslyckades: ${result.partialFailures.join(", ")}`;
+
+          if (result.warning) {
+            message += `\n\nServermeddelande: ${result.warning}`;
+          }
+
+          enqueueSnackbar(message, {
+            variant: "warning",
+            autoHideDuration: 10000,
+            style: { whiteSpace: "pre-line" },
+          });
+        } else {
+          enqueueSnackbar(
+            `✓ Sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${result.deleted || 0} borttagna`,
+            { variant: "success", autoHideDuration: 5000 }
+          );
+        }
 
         // Commit changes in model
         controller.commit();

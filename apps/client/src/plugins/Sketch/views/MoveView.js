@@ -130,7 +130,7 @@ const FeatureMoveSelector = (props) => {
               fullWidth
               size="small"
               onClick={handleUndoClick}
-              disabled={props.lastMoves.length === 0}
+              disabled={props.lastMoves.length === 0 || props.uiDisabled}
             >
               Ångra
             </Button>
@@ -277,8 +277,13 @@ const MoveView = (props) => {
   // Keep track of degrees for rotation tool.
   const [rotationDegrees, setRotationDegrees] = React.useState(15);
   // Let's destruct some props
-  const { drawModel, moveFeatures, translateEnabled, setTranslateEnabled } =
-    props;
+  const {
+    drawModel,
+    moveFeatures,
+    translateEnabled,
+    setTranslateEnabled,
+    uiDisabled = false,
+  } = props;
 
   // Let's use an effect that can reset the last moves when the current
   // feature/features selected for movement changes.
@@ -320,6 +325,7 @@ const MoveView = (props) => {
               setMovementLength={setMovementLength}
               movementAngle={movementAngle}
               setMovementAngle={setMovementAngle}
+              uiDisabled={uiDisabled}
             />
             <FeatureRotateSelector
               disabled={rotationIsDisabled()}

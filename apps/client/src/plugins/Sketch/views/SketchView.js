@@ -571,6 +571,7 @@ const SketchView = (props) => {
             highlightLayer={highlightLayer}
             toggleBufferBtn={toggleBufferBtn}
             setToggleBufferBtn={setToggleBufferBtn}
+            uiDisabled={uiDisabled}
           />
         );
       case "DELETE":
@@ -608,6 +609,7 @@ const SketchView = (props) => {
             translateEnabled={props.translateEnabled}
             setTranslateEnabled={props.setTranslateEnabled}
             moveFeatures={props.moveFeatures}
+            uiDisabled={uiDisabled}
           />
         );
       case "SAVE":

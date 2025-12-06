@@ -9,10 +9,18 @@ import SelectFeaturesDialog from "utils/SelectFeaturesDialog";
 
 const AddView = (props) => {
   // Let's destruct some properties from the props
-  const { model, activeDrawType, setActiveDrawType, localObserver, drawModel } =
-    props;
+  const {
+    model,
+    activeDrawType,
+    setActiveDrawType,
+    localObserver,
+    drawModel,
+    uiDisabled = false,
+  } = props;
+
   // We have to get some information about the current activity (view)
   const activity = model.getActivityFromId(props.id);
+
   return (
     <Grid container>
       <Grid size={12}>
@@ -29,27 +37,36 @@ const AddView = (props) => {
           />
         </Grid>
       </Grid>
-      <FeatureStyleSelector
-        activityId={props.id}
-        activeDrawType={activeDrawType}
-        drawStyle={props.drawStyle}
-        drawModel={props.drawModel}
-        setDrawStyle={props.setDrawStyle}
-        textStyle={props.textStyle}
-        setTextStyle={props.setTextStyle}
-        localObserver={props.localObserver}
-        globalObserver={props.globalObserver}
-        pluginShown={props.pluginShown}
-        bufferState={props.bufferState}
-        setBufferState={props.setBufferState}
-        highlightLayer={props.highlightLayer}
-        toggleBufferBtn={props.toggleBufferBtn}
-        setToggleBufferBtn={props.setToggleBufferBtn}
-      />
-      <FeatureTextSetter
-        localObserver={props.localObserver}
-        drawModel={props.drawModel}
-      />
+      <div
+        style={{
+          pointerEvents: uiDisabled ? "none" : "auto",
+          opacity: uiDisabled ? 0.5 : 1,
+          transition: "opacity 0.2s ease",
+          width: "100%",
+        }}
+      >
+        <FeatureStyleSelector
+          activityId={props.id}
+          activeDrawType={activeDrawType}
+          drawStyle={props.drawStyle}
+          drawModel={props.drawModel}
+          setDrawStyle={props.setDrawStyle}
+          textStyle={props.textStyle}
+          setTextStyle={props.setTextStyle}
+          localObserver={props.localObserver}
+          globalObserver={props.globalObserver}
+          pluginShown={props.pluginShown}
+          bufferState={props.bufferState}
+          setBufferState={props.setBufferState}
+          highlightLayer={props.highlightLayer}
+          toggleBufferBtn={props.toggleBufferBtn}
+          setToggleBufferBtn={props.setToggleBufferBtn}
+        />
+        <FeatureTextSetter
+          localObserver={props.localObserver}
+          drawModel={props.drawModel}
+        />
+      </div>
       <SelectFeaturesDialog
         localObserver={localObserver}
         drawModel={drawModel}

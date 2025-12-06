@@ -480,89 +480,141 @@ export async function commitWFSTTransaction(params) {
     throw new UpstreamError(result.message || "Transaction failed", 400);
   }
 
-  // Detect "silent failures" - server says success but did nothing
+  // TOTAL FAILURES
 
   // Check if we expected inserts but got 0
   if (inserts.length > 0 && result.inserted === 0) {
-    logger.warn("WFS-T returned 0 inserts when we expected some", {
+    logger.error("WFS-T returned 0 inserts when we expected some", {
       layerId: id,
       typeName,
       expectedInserts: inserts.length,
-      actualInserted: result.inserted,
       geometryTypes: inserts.map((f) => f.geometry?.type).filter(Boolean),
-      responseSnippet: responseText.substring(0, 1000),
+      serverWarning: result.warning,
     });
 
-    // Check if response contains a warning message
-    if (result.warning) {
-      throw new UpstreamError(`Server warning: ${result.warning}`, 400);
-    }
-
-    // Detect geometry type from inserts to give helpful error message
+    // Detect geometry type from inserts
     const geomTypes = [
       ...new Set(inserts.map((f) => f.geometry?.type).filter(Boolean)),
     ];
     const geomTypeStr =
       geomTypes.length > 0 ? ` (försökte spara ${geomTypes.join(", ")})` : "";
 
-    throw new UpstreamError(
-      `Servern accepterade transaktionen men sparade 0 av ${inserts.length} objekt${geomTypeStr}. ` +
-        `Detta beror ofta på fel geometrityp (t.ex. försöker spara polygon i ett punktlager) eller datafel. ` +
-        `Kontrollera att lagret accepterar den geometrityp du försöker spara.`,
-      400
-    );
+    // Combine QGIS error with helpful explanation
+    let errorMessage = `Servern sparade 0 av ${inserts.length} objekt${geomTypeStr}.`;
+
+    if (result.warning) {
+      errorMessage += `\n\nServermeddelande: ${result.warning}`;
+    }
+
+    errorMessage += `\n\nDetta beror ofta på fel geometrityp (t.ex. försöker spara polygon i ett punktlager) eller datafel.`;
+
+    throw new UpstreamError(errorMessage, 400);
   }
 
   // Check if we expected updates but got 0 (could indicate ID mismatch)
   if (formattedUpdates.length > 0 && result.updated === 0) {
-    logger.warn("WFS-T returned 0 updates when we expected some", {
+    logger.error("WFS-T returned 0 updates when we expected some", {
       layerId: id,
       typeName,
       expectedUpdates: formattedUpdates.length,
-      actualUpdated: result.updated,
-      updateIds: formattedUpdates.map((u) => u.id).slice(0, 5), // Log first 5 IDs
+      updateIds: formattedUpdates.map((u) => u.id).slice(0, 5),
+      serverWarning: result.warning,
     });
 
+    // Combine QGIS error with helpful explanation
+    let errorMessage = `Servern uppdaterade 0 av ${formattedUpdates.length} objekt.`;
+
     if (result.warning) {
-      throw new UpstreamError(`Server warning: ${result.warning}`, 400);
+      errorMessage += `\n\nServermeddelande: ${result.warning}`;
     }
 
-    // This could mean feature IDs don't exist or wrong format
-    throw new UpstreamError(
-      `Servern accepterade transaktionen men uppdaterade 0 av ${formattedUpdates.length} objekt. ` +
-        `Detta kan bero på fel feature-ID-format eller att objekten inte finns i lagret.`,
-      400
-    );
+    errorMessage += `\n\nDetta kan bero på fel feature-ID-format eller att objekten inte finns i lagret.`;
+
+    throw new UpstreamError(errorMessage, 400);
   }
 
   // Check if we expected deletes but got 0
   if (formattedDeletes.length > 0 && result.deleted === 0) {
-    logger.warn("WFS-T returned 0 deletes when we expected some", {
+    logger.error("WFS-T returned 0 deletes when we expected some", {
       layerId: id,
       typeName,
       expectedDeletes: formattedDeletes.length,
-      actualDeleted: result.deleted,
-      deleteIds: formattedDeletes.slice(0, 5), // Log first 5 IDs
+      deleteIds: formattedDeletes.slice(0, 5),
+      serverWarning: result.warning,
     });
 
+    // Combine QGIS error with helpful explanation
+    let errorMessage = `Servern raderade 0 av ${formattedDeletes.length} objekt.`;
+
     if (result.warning) {
-      throw new UpstreamError(`Server warning: ${result.warning}`, 400);
+      errorMessage += `\n\nServermeddelande: ${result.warning}`;
     }
 
-    throw new UpstreamError(
-      `Servern accepterade transaktionen men raderade 0 av ${formattedDeletes.length} objekt. ` +
-        `Detta kan bero på fel feature-ID-format eller att objekten inte finns i lagret.`,
-      400
+    errorMessage += `\n\nDetta kan bero på fel feature-ID-format eller att objekten inte finns i lagret.`;
+
+    throw new UpstreamError(errorMessage, 400);
+  }
+
+  // PARTIAL FAILURES
+
+  const partialFailures = [];
+
+  if (inserts.length > 0 && result.inserted < inserts.length) {
+    const failed = inserts.length - result.inserted;
+    partialFailures.push(`${failed} av ${inserts.length} nya objekt`);
+
+    logger.warn("WFS-T partial insert failure", {
+      layerId: id,
+      typeName,
+      expected: inserts.length,
+      actual: result.inserted,
+      failed,
+      geometryTypes: inserts.map((f) => f.geometry?.type).filter(Boolean),
+    });
+  }
+
+  if (formattedUpdates.length > 0 && result.updated < formattedUpdates.length) {
+    const failed = formattedUpdates.length - result.updated;
+    partialFailures.push(
+      `${failed} av ${formattedUpdates.length} uppdateringar`
     );
+
+    logger.warn("WFS-T partial update failure", {
+      layerId: id,
+      typeName,
+      expected: formattedUpdates.length,
+      actual: result.updated,
+      failed,
+    });
+  }
+
+  if (formattedDeletes.length > 0 && result.deleted < formattedDeletes.length) {
+    const failed = formattedDeletes.length - result.deleted;
+    partialFailures.push(
+      `${failed} av ${formattedDeletes.length} borttagningar`
+    );
+
+    logger.warn("WFS-T partial delete failure", {
+      layerId: id,
+      typeName,
+      expected: formattedDeletes.length,
+      actual: result.deleted,
+      failed,
+    });
   }
 
   logger.info("WFS-T transaction successful", {
     inserted: result.inserted,
     updated: result.updated,
     deleted: result.deleted,
+    partialFailures: partialFailures.length > 0 ? partialFailures : undefined,
   });
 
-  return result;
+  return {
+    ...result,
+    partialFailures: partialFailures.length > 0 ? partialFailures : undefined,
+    warning: result.warning || undefined,
+  };
 }
 
 // Helper: validate GeoJSON geometry
