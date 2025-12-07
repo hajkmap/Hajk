@@ -54,6 +54,8 @@ const SketchView = (props) => {
   const { activityId, setActivityId } = props;
   // We're gonna need to keep track of the current plugin-shown-state and the toggle-buffer-button.
   const { pluginShown, setToggleBufferBtn, toggleBufferBtn } = props;
+  // We're gonna need to keep track of the allowed geometry types
+  const { allowedGeometryTypes } = props;
 
   // We're gonna need some snackbar functions so that we can prompt the user with information.
   const { closeSnackbar, enqueueSnackbar } = useSnackbar();
@@ -572,6 +574,7 @@ const SketchView = (props) => {
             toggleBufferBtn={toggleBufferBtn}
             setToggleBufferBtn={setToggleBufferBtn}
             uiDisabled={uiDisabled}
+            allowedGeometryTypes={allowedGeometryTypes}
           />
         );
       case "DELETE":

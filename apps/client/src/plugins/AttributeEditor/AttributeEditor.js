@@ -539,6 +539,11 @@ function AttributeEditor(props) {
           if (signal.aborted) return;
 
           schemaCache.current.set(id, schema);
+
+          editBus.emit("attrib:schema-loaded", {
+            schema: schema,
+            serviceId: id,
+          });
         }
 
         // Check before continuing

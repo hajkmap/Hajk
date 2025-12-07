@@ -64,6 +64,8 @@ const Sketch = (props) => {
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
   );
+  // Allowed geometry types when in AttributeEditor-mode
+  const [allowedGeometryTypes, setAllowedGeometryTypes] = React.useState(null);
 
   // A toggle-button that allows the user to toggle between turn off & choose-drawn-object to buffer in the new buffer sketch accordion.
   const [toggleBufferBtn, setToggleBufferBtn] = React.useState({
@@ -82,6 +84,7 @@ const Sketch = (props) => {
   const [localObserver] = React.useState(() => Observer());
 
   const prevActivityRef = React.useRef(activityId);
+
   React.useEffect(() => {
     const prev = prevActivityRef.current;
     if (prev === "EDIT" && activityId !== "EDIT") {
@@ -145,6 +148,78 @@ const Sketch = (props) => {
     title: "Rita",
     color: "4a90e2",
   });
+
+  React.useEffect(() => {
+    const offSel = editBus.on("edit:service-selected", async (ev) => {
+      const { id, source } = ev.detail || {};
+      if (source === "sketch") return;
+
+      if (!id) {
+        setAllowedGeometryTypes(null);
+        return;
+      }
+
+      try {
+        // Retrieve schema
+        // AttributeEditor emits the schema via the bus
+        editBus.emit("attrib:request-schema", { serviceId: id });
+      } catch (e) {
+        console.warn("Kunde inte hämta schema:", e);
+      }
+    });
+
+    const offSchema = editBus.on("attrib:schema-loaded", (ev) => {
+      const { schema } = ev.detail || {};
+      if (!schema) return;
+
+      // Mapping from backend flags to Sketch draw types
+      const allowed = [];
+
+      // Punkt → Point
+      if (schema.editPoint || schema.editMultiPoint) {
+        allowed.push("Point");
+      }
+
+      // Polygon → Polygon, Rectangle, Square, Select
+      if (schema.editPolygon || schema.editMultiPolygon) {
+        allowed.push("Polygon", "Rectangle", "Square", "Select");
+      }
+
+      // Linje → LineString
+      if (schema.editLine || schema.editMultiLine) {
+        allowed.push("LineString");
+      }
+
+      setAllowedGeometryTypes(allowed.length > 0 ? allowed : null);
+    });
+
+    const offClr = editBus.on("edit:service-cleared", (ev) => {
+      const { source } = ev.detail || {};
+      if (source === "sketch") return;
+      setAllowedGeometryTypes(null);
+    });
+
+    return () => {
+      offSel();
+      offSchema();
+      offClr();
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (!allowedGeometryTypes || allowedGeometryTypes.length === 0) {
+      // No service selected reset drawType to Polygon
+      if (activityId === "ADD") {
+        setActiveDrawType("Polygon");
+      }
+      return;
+    }
+
+    // Choose first allowed geometry type
+    if (!allowedGeometryTypes.includes(activeDrawType)) {
+      setActiveDrawType(allowedGeometryTypes[0]);
+    }
+  }, [allowedGeometryTypes, activeDrawType, activityId, setActiveDrawType]);
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
@@ -366,9 +441,11 @@ const Sketch = (props) => {
       const inMove = activityId === "MOVE";
       const inEditWithNodes = activityId === "EDIT" && modifyEnabled;
 
+      const shouldBeActive = pluginShown;
+
       for (const { select, translate, modify } of reg.values()) {
         try {
-          select.setActive(true);
+          select.setActive(shouldBeActive);
         } catch {}
         try {
           translate.setActive(
@@ -784,6 +861,27 @@ const Sketch = (props) => {
       }
     });
 
+    const offDisable = editBus.on("sketch:disable-ae-interactions", (ev) => {
+      const { disable } = ev.detail || {};
+      if (disable) {
+        // Shutdown all interactions
+        for (const { select, translate, modify } of reg.values()) {
+          try {
+            select.setActive(false);
+          } catch {}
+          try {
+            translate.setActive(false);
+          } catch {}
+          try {
+            modify.setActive(false);
+          } catch {}
+        }
+      } else {
+        // Reactivate all interactions according to UI state
+        applyEnablement();
+      }
+    });
+
     // ============================================================
     // SECTION: Wire up existing layers
     // ============================================================
@@ -884,6 +982,9 @@ const Sketch = (props) => {
         offFocus();
       } catch {}
       try {
+        offDisable();
+      } catch {}
+      try {
         layers.un?.("add", onLayerAdd);
       } catch {}
       for (const { cleanup } of reg.values()) {
@@ -904,7 +1005,20 @@ const Sketch = (props) => {
     modifyEnabled,
     translateEnabled,
     drawModel,
+    pluginShown,
   ]);
+
+  React.useEffect(() => {
+    const map = props.map;
+    if (!map) return;
+
+    // If Sketch is closed, disable all interactions
+    if (!pluginShown) {
+      editBus.emit("sketch:disable-ae-interactions", { disable: true });
+    } else {
+      editBus.emit("sketch:disable-ae-interactions", { disable: false });
+    }
+  }, [pluginShown, props.map]);
 
   // This functions handles events from the draw-model that are sent
   // when we are in edit-mode and the map is clicked. A feature might be sent
@@ -1046,6 +1160,7 @@ const Sketch = (props) => {
         setToggleBufferBtn={setToggleBufferBtn}
         setPluginSettings={setPluginSettings}
         map={props.map}
+        allowedGeometryTypes={allowedGeometryTypes}
       />
     </BaseWindowPlugin>
   );

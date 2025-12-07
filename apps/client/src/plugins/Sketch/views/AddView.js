@@ -16,6 +16,7 @@ const AddView = (props) => {
     localObserver,
     drawModel,
     uiDisabled = false,
+    allowedGeometryTypes,
   } = props;
 
   // We have to get some information about the current activity (view)
@@ -34,6 +35,7 @@ const AddView = (props) => {
           <DrawTypeSelector
             activeDrawType={activeDrawType}
             setActiveDrawType={setActiveDrawType}
+            allowedTypes={allowedGeometryTypes}
           />
         </Grid>
       </Grid>

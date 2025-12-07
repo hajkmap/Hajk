@@ -4,6 +4,13 @@ import { DRAW_TYPES } from "../constants";
 import HajkToolTip from "components/HajkToolTip";
 
 const DrawTypeSelector = (props) => {
+  const { allowedTypes = null } = props;
+
+  // Filter drawtypes if allowedTypes is set
+  const drawTypes = allowedTypes
+    ? DRAW_TYPES.filter((dt) => allowedTypes.includes(dt.type))
+    : DRAW_TYPES;
+
   return (
     <TextField
       fullWidth
@@ -14,7 +21,7 @@ const DrawTypeSelector = (props) => {
       value={props.activeDrawType}
       onChange={(e) => props.setActiveDrawType(e.target.value)}
     >
-      {DRAW_TYPES.map((option) => (
+      {drawTypes.map((option) => (
         <MenuItem key={option.type} value={option.type}>
           {
             <HajkToolTip title={option.tooltip}>
