@@ -381,12 +381,32 @@ export default function QuickAccessLayers({
 
           // In QuickAccess, always render children directly (no LayerGroup component)
           // This ensures groups only appear in breadcrumbs, not as separate components
-          const hasBreadcrumb = true; // Always true in QuickAccess to render children directly
+          const hasBreadcrumb = true;
 
-          const hasToggledLayer = groupData.layers.some((l) => {
-            const layerId = l.get("name");
-            return layersState[layerId]?.visible === true;
-          });
+          const groupHasToggledLayer = (element) => {
+            if (!element) {
+              return false;
+            }
+
+            const elementId = element.id;
+
+            const elementSettings = staticLayerConfig[elementId];
+
+            if (!elementSettings) {
+              return false;
+            }
+
+            if (elementSettings.layerType === "group") {
+              return (
+                Array.isArray(element.children) &&
+                element.children.some((child) => groupHasToggledLayer(child))
+              );
+            }
+
+            return layersState[elementId]?.visible === true;
+          };
+
+          const hasToggledLayer = groupHasToggledLayer(filteredGroup);
 
           const isLastGroup = groupIndex === filteredGroupsToRender.length - 1;
           const hasUngroupedLayers = filteredGroupsToRender.some(
@@ -405,6 +425,58 @@ export default function QuickAccessLayers({
             }));
           };
 
+          const groupDescendants = (element, isFirstChild = false) => {
+            if (!element) {
+              return null;
+            }
+
+            const elementId = element.id;
+            const elementConfig = staticLayerConfig[elementId];
+
+            if (!elementConfig) {
+              return null;
+            }
+
+            if (elementConfig.layerType === "group") {
+              if (!element.children || element.children.length === 0) {
+                return null;
+              }
+
+              return element.children.map((child, index) =>
+                groupDescendants(child, isFirstChild && index === 0)
+              );
+            }
+
+            const elementState = layersState[elementId];
+
+            if (elementConfig.layerType === "groupLayer") {
+              return (
+                <GroupLayer
+                  key={elementId}
+                  layerState={elementState}
+                  layerConfig={elementConfig}
+                  draggable={false}
+                  toggleable={true}
+                  globalObserver={globalObserver}
+                  filterValue={filterValue}
+                  isFirstChild={isFirstChild}
+                />
+              );
+            }
+
+            return (
+              <LayerItem
+                key={elementId}
+                layerState={elementState}
+                layerConfig={elementConfig}
+                draggable={false}
+                toggleable={true}
+                globalObserver={globalObserver}
+                filterValue={filterValue}
+              />
+            );
+          };
+
           return (
             <Box
               key={`group-${groupData.group.id}`}
@@ -421,8 +493,8 @@ export default function QuickAccessLayers({
                     display: "flex",
                     alignItems: "center",
                     cursor: "pointer",
-                    px: 2,
                     py: 0.5,
+                    minWidth: 0,
                     ...(isExpanded && {
                       borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
                     }),
@@ -439,12 +511,20 @@ export default function QuickAccessLayers({
                       mr: 1,
                     }}
                   />
+
                   <Typography
                     variant="button"
+                    noWrap
                     sx={{
                       color: hasToggledLayer,
                       fontSize: "0.9rem",
                       fontWeight: hasToggledLayer ? 700 : 400,
+                      userSelect: "none",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "block",
+                      minWidth: 0,
+                      flex: 1,
                     }}
                   >
                     {fullBreadcrumb.map((group, index) => (
@@ -460,87 +540,13 @@ export default function QuickAccessLayers({
                   </Typography>
                 </Box>
               )}
+
               {hasBreadcrumb ? (
                 <Collapse in={isExpanded} unmountOnExit>
-                  <Box sx={{ marginLeft: "20px" }}>
-                    {filteredGroup.children?.map((child, index) => {
-                      const layerId = child.id;
-                      const layerState = layersState[layerId];
-                      const isFirstChild = index === 0;
-                      const layerSettings = staticLayerConfig[layerId];
-                      if (!layerSettings) {
-                        return null;
-                      }
-
-                      if (layerSettings.layerType === "group") {
-                        const nestedGroup = filteredGroup.children?.find(
-                          (g) => g?.id === layerId
-                        );
-                        if (!nestedGroup || !nestedGroup.children) {
-                          return null;
-                        }
-                        return (
-                          <React.Fragment key={layerId}>
-                            {nestedGroup.children.map((nestedChild) => {
-                              const nestedLayerId = nestedChild.id;
-                              const nestedLayerState =
-                                layersState[nestedLayerId];
-                              const nestedLayerSettings =
-                                staticLayerConfig[nestedLayerId];
-                              if (!nestedLayerSettings) {
-                                return null;
-                              }
-
-                              return nestedLayerSettings.layerType ===
-                                "groupLayer" ? (
-                                <GroupLayer
-                                  key={nestedLayerId}
-                                  layerState={nestedLayerState}
-                                  layerConfig={nestedLayerSettings}
-                                  draggable={false}
-                                  toggleable={true}
-                                  globalObserver={globalObserver}
-                                  filterValue={filterValue}
-                                />
-                              ) : (
-                                <LayerItem
-                                  key={nestedLayerId}
-                                  layerState={nestedLayerState}
-                                  layerConfig={nestedLayerSettings}
-                                  draggable={false}
-                                  toggleable={true}
-                                  globalObserver={globalObserver}
-                                  filterValue={filterValue}
-                                />
-                              );
-                            })}
-                          </React.Fragment>
-                        );
-                      }
-
-                      return layerSettings.layerType === "groupLayer" ? (
-                        <GroupLayer
-                          key={layerId}
-                          layerState={layerState}
-                          layerConfig={layerSettings}
-                          draggable={false}
-                          toggleable={true}
-                          globalObserver={globalObserver}
-                          filterValue={filterValue}
-                          isFirstChild={isFirstChild}
-                        />
-                      ) : (
-                        <LayerItem
-                          key={layerId}
-                          layerState={layerState}
-                          layerConfig={layerSettings}
-                          draggable={false}
-                          toggleable={true}
-                          globalObserver={globalObserver}
-                          filterValue={filterValue}
-                        />
-                      );
-                    })}
+                  <Box sx={{ ml: 1 }}>
+                    {filteredGroup.children?.map((child, index) =>
+                      groupDescendants(child, index === 0)
+                    )}
                   </Box>
                 </Collapse>
               ) : (
