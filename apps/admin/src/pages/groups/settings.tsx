@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { GroupType, GroupUpdateInput } from "../../api/groups";
 import FormActionPanel from "../../components/form-action-panel";
-import LayerSwitcherOrderList from "./components/layerswitcher-dnd-orderlist";
+import LayerSwitcherDnD from "./components/layerswitcher-dnd";
 import { useGroupById } from "../../api/groups";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import { HttpError } from "../../lib/http-error";
@@ -189,7 +189,7 @@ function GroupSettings() {
             </Grid>
           </FormPanel>
         </FormContainer>
-        <LayerSwitcherOrderList />
+        <LayerSwitcherDnD />
       </FormActionPanel>
     </Page>
   );

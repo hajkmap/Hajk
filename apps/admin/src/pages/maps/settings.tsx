@@ -30,7 +30,7 @@ import { HttpError } from "../../lib/http-error";
 import FormContainer from "../../components/form-components/form-container";
 import FormPanel from "../../components/form-components/form-panel";
 import FormAccordion from "../../components/form-components/form-accordion";
-import LayerSwitcherOrderList from "../groups/components/layerswitcher-dnd-orderlist";
+import LayerSwitcherDnD from "../groups/components/layerswitcher-dnd";
 import ToolSwitcherOrderList from "./components/toolswitcher-dnd-orderlist";
 
 export default function MapSettings() {
@@ -916,10 +916,10 @@ export default function MapSettings() {
         {activeTab === "menu" && (
           <>
             <FormPanel title={t("common.layerGroups")}>
-              <LayerSwitcherOrderList />
+              <LayerSwitcherDnD />
             </FormPanel>
             <FormPanel title={t("common.layers")}>
-              <LayerSwitcherOrderList />
+              <LayerSwitcherDnD />
             </FormPanel>
           </>
         )}
