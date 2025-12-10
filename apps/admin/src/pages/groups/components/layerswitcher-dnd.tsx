@@ -198,6 +198,7 @@ const TreeItemComponent = React.forwardRef<
             cursor: "grab",
             display: "flex",
             alignItems: "center",
+            pointerEvents: "auto",
             "&:active": {
               cursor: "grabbing",
             },
@@ -944,7 +945,9 @@ export default function LayerSwitcherDnD() {
 
     setActiveId(null);
 
-    if (!over || active.id === over.id) return;
+    if (!over || active.id === over.id) {
+      return;
+    }
 
     if (typeof active.id === "string" && active.id.startsWith("source-")) {
       const parts = active.id.split("-");
@@ -996,7 +999,61 @@ export default function LayerSwitcherDnD() {
         setItems((prevItems) => enforceLayerRules([...prevItems, newItem]));
       }
     } else {
-      setItems((prevItems) => enforceLayerRules(prevItems));
+      if (over.id === "tree-drop-zone") {
+        const draggedItemId = active.id.toString();
+        setItems((prevItems) => {
+          const findAndRemoveItem = (
+            treeItems: TreeItems<TreeItemData>,
+            itemId: string
+          ): {
+            item: TreeItem<TreeItemData> | null;
+            updatedItems: TreeItems<TreeItemData>;
+          } => {
+            for (let i = 0; i < treeItems.length; i++) {
+              if (treeItems[i].id.toString() === itemId) {
+                const item = treeItems[i];
+                const updatedItems = treeItems.filter(
+                  (_, index) => index !== i
+                );
+                return { item, updatedItems };
+              }
+            }
+
+            let foundItem: TreeItem<TreeItemData> | null = null;
+            const updatedItems = treeItems.map((item) => {
+              if (foundItem) return item;
+
+              if (item.children) {
+                const result = findAndRemoveItem(item.children, itemId);
+                if (result.item) {
+                  foundItem = result.item;
+                  return {
+                    ...item,
+                    children: result.updatedItems,
+                  };
+                }
+              }
+              return item;
+            });
+
+            return { item: foundItem, updatedItems };
+          };
+
+          const { item, updatedItems } = findAndRemoveItem(
+            prevItems,
+            draggedItemId
+          );
+          if (item) {
+            const rootItem: TreeItem<TreeItemData> = {
+              ...item,
+              children: item.type === "group" ? item.children ?? [] : undefined,
+              canHaveChildren: item.type === "group",
+            };
+            return enforceLayerRules([...updatedItems, rootItem]);
+          }
+          return enforceLayerRules(prevItems);
+        });
+      }
     }
   };
 
