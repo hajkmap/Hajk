@@ -15,6 +15,9 @@ import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import ImageIcon from "@material-ui/icons/Image";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import CancelIcon from "@material-ui/icons/Cancel";
 
 const ImageComponent = (props) => {
   const classes = useStyles();
@@ -33,17 +36,74 @@ const ImageComponent = (props) => {
   const dataImagePosition = data["data-image-position"];
 
   const dataType = data["data-type"] || "image";
+  const iframeTitle = data.title || data.alt || data["data-iframe-title"] || "";
+  const iframeWidth = parseInt(data["data-iframe-width"]) || "";
+  const iframeHeight = parseInt(data["data-iframe-height"]) || "";
   const [open, setOpen] = useState(false);
-  const [alt, setAlt] = useState(imageAlt); //useState(imageAlt === undefined ? "" : imageAlt);
+  const [alt, setAlt] = useState(imageAlt);
   const [defaultWidth, setDefaultWidth] = useState();
   const [defaultHeight, setDefaultHeight] = useState();
-  const [width, setWidth] = useState(imageWidth);
-  const [height, setHeight] = useState(imageHeight);
+  const [width, setWidth] = useState(imageWidth || iframeWidth);
+  const [height, setHeight] = useState(imageHeight || iframeHeight);
   const [caption, setCaption] = useState(dataCaption);
   const [source, setSource] = useState(dataSource);
   const [popup, setPopup] = useState(dataPopup);
-  const [imagePosition, setImagePosition] = useState(dataImagePosition);
+  const [imagePosition, setImagePosition] = useState(
+    dataImagePosition || "left"
+  );
+  const [title, setTitle] = useState(iframeTitle);
   const [saveButton, showSaveButton] = useState(true);
+
+  useEffect(() => {
+    if (dataType === "iframe") {
+      if (iframeTitle !== title) {
+        setTitle(iframeTitle);
+      }
+      if (iframeWidth !== width) {
+        setWidth(iframeWidth);
+      }
+      if (iframeHeight !== height) {
+        setHeight(iframeHeight);
+      }
+      if (dataImagePosition !== imagePosition) {
+        setImagePosition(dataImagePosition || "left");
+      }
+    } else {
+      if (imageAlt !== alt) {
+        setAlt(imageAlt);
+      }
+      if (imageWidth !== width) {
+        setWidth(imageWidth);
+      }
+      if (imageHeight !== height) {
+        setHeight(imageHeight);
+      }
+      if (dataCaption !== caption) {
+        setCaption(dataCaption);
+      }
+      if (dataSource !== source) {
+        setSource(dataSource);
+      }
+      if (dataPopup !== popup) {
+        setPopup(dataPopup);
+      }
+      if (dataImagePosition !== imagePosition) {
+        setImagePosition(dataImagePosition || "left");
+      }
+    }
+  }, [
+    dataType,
+    iframeTitle,
+    iframeWidth,
+    iframeHeight,
+    dataImagePosition,
+    imageAlt,
+    imageWidth,
+    imageHeight,
+    dataCaption,
+    dataSource,
+    dataPopup,
+  ]);
 
   useEffect(() => {
     if (dataType === "image") {
@@ -80,6 +140,15 @@ const ImageComponent = (props) => {
       )
         showSaveButton(false);
       else showSaveButton(true);
+    } else if (dataType === "iframe") {
+      if (
+        iframeTitle !== title ||
+        iframeWidth !== width ||
+        iframeHeight !== height ||
+        dataImagePosition !== imagePosition
+      )
+        showSaveButton(false);
+      else showSaveButton(true);
     }
   }, [
     dataSource,
@@ -97,6 +166,10 @@ const ImageComponent = (props) => {
     dataImagePosition,
     imagePosition,
     dataType,
+    iframeTitle,
+    title,
+    iframeWidth,
+    iframeHeight,
   ]);
 
   const handleOpen = (e) => {
@@ -107,6 +180,24 @@ const ImageComponent = (props) => {
 
   const handleClose = (e) => {
     //e.preventDefault();
+    if (dataType === "iframe") {
+      handleSubmit();
+    }
+    setOpen(false);
+    readOnlyMode();
+  };
+
+  const handleSaveIframeSettings = () => {
+    const { imageData } = props.blockProps;
+    let data = {
+      src: src,
+      "data-type": "iframe",
+      title: title === undefined ? "" : title,
+      "data-iframe-width": width ? width : null,
+      "data-iframe-height": height ? height : null,
+      "data-image-position": imagePosition || "left",
+    };
+    imageData(data);
     setOpen(false);
     readOnlyMode();
   };
@@ -127,6 +218,13 @@ const ImageComponent = (props) => {
     }
     if (dataType === "video") data["data-type"] = "video";
     else if (dataType === "audio") data["data-type"] = "audio";
+    else if (dataType === "iframe") {
+      data["data-type"] = "iframe";
+      data.title = title === undefined ? "" : title;
+      data["data-iframe-width"] = width ? width : null;
+      data["data-iframe-height"] = height ? height : null;
+      data["data-image-position"] = imagePosition || "left";
+    }
 
     imageData(data);
   };
@@ -210,7 +308,13 @@ const ImageComponent = (props) => {
               <TextField
                 id="image-width"
                 value={width}
-                onChange={(e) => calculateHeight(e.target.value)}
+                onChange={(e) => {
+                  if (dataType === "iframe") {
+                    setWidth(e.target.value);
+                  } else {
+                    calculateHeight(e.target.value);
+                  }
+                }}
                 label="Bredd"
               />
             </Grid>
@@ -223,68 +327,102 @@ const ImageComponent = (props) => {
               <TextField
                 id="image-height"
                 value={height}
-                onChange={(e) => calculateWidth(e.target.value)}
+                onChange={(e) => {
+                  if (dataType === "iframe") {
+                    setHeight(e.target.value);
+                  } else {
+                    calculateWidth(e.target.value);
+                  }
+                }}
                 label="Höjd"
               />
             </Grid>
           </Grid>
-          <Grid container spacing={1} alignItems="flex-end">
-            <Grid item>
-              <ImageIcon />
-            </Grid>
-            <Grid item>
-              <TextField
-                id="image-alt"
-                value={alt}
-                onChange={(e) => setAlt(e.target.value)}
-                label="Alternativ text"
+          {dataType !== "iframe" && (
+            <>
+              <Grid container spacing={1} alignItems="flex-end">
+                <Grid item>
+                  <ImageIcon />
+                </Grid>
+                <Grid item>
+                  <TextField
+                    id="image-alt"
+                    value={alt}
+                    onChange={(e) => setAlt(e.target.value)}
+                    label="Alternativ text"
+                  />
+                </Grid>
+              </Grid>
+              <Grid container spacing={1} alignItems="flex-end">
+                <Grid item>
+                  <SubtitlesIcon />
+                </Grid>
+                <Grid item>
+                  <TextField
+                    id="image-caption"
+                    defaultValue={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    label="Bildtext"
+                  />
+                </Grid>
+              </Grid>
+              <Grid container spacing={1} alignItems="flex-end">
+                <Grid item>
+                  <LinkIcon />
+                </Grid>
+                <Grid item>
+                  <TextField
+                    id="image-source"
+                    defaultValue={source}
+                    onChange={(e) => setSource(e.target.value)}
+                    label="Källa"
+                  />
+                </Grid>
+              </Grid>
+              <Checkbox
+                id="image-popup"
+                checked={popup}
+                onChange={handlePopupChange}
+                disabled={popupDisabled}
+                inputProps={{ "aria-label": "primary checkbox" }}
               />
+              <label>Popup</label>
+            </>
+          )}
+          {dataType === "iframe" && (
+            <Grid container spacing={1} alignItems="flex-end">
+              <Grid item>
+                <SubtitlesIcon />
+              </Grid>
+              <Grid item>
+                <TextField
+                  id="iframe-title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  label="Titel"
+                  fullWidth
+                />
+              </Grid>
             </Grid>
-          </Grid>
+          )}
           <Grid container spacing={1} alignItems="flex-end">
             <Grid item>
-              <SubtitlesIcon />
-            </Grid>
-            <Grid item>
-              <TextField
-                id="image-caption"
-                defaultValue={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                label="Bildtext"
-              />
-            </Grid>
-          </Grid>
-          <Grid container spacing={1} alignItems="flex-end">
-            <Grid item>
-              <LinkIcon />
-            </Grid>
-            <Grid item>
-              <TextField
-                id="image-source"
-                defaultValue={source}
-                onChange={(e) => setSource(e.target.value)}
-                label="Källa"
-              />
-            </Grid>
-          </Grid>
-          <Checkbox
-            id="image-popup"
-            checked={popup}
-            onChange={handlePopupChange}
-            disabled={popupDisabled}
-            inputProps={{ "aria-label": "primary checkbox" }}
-          />
-          <label>Popup</label>
-          <Grid container spacing={1} alignItems="flex-end">
-            <Grid item>
-              <button
-                type="button"
+              <Button
+                startIcon={<CancelIcon />}
                 variant="contained"
-                className="btn btn-primary"
+                className="btn btn-secondary"
                 onClick={handleClose}
               >
-                <CheckIcon /> Stäng
-              </button>
+                Stäng
+              </Button>
+              <Button
+                startIcon={<CheckIcon />}
+                variant="contained"
+                className="btn btn-success"
+                onClick={handleSaveIframeSettings}
+              >
+                Spara inställningar
+              </Button>
             </Grid>
           </Grid>
         </div>
@@ -294,7 +432,7 @@ const ImageComponent = (props) => {
         <RadioGroup
           aria-label="position"
           name="position"
-          value="img-position"
+          value={imagePosition || "left"}
           onChange={handleChange}
         >
           <FormControlLabel
@@ -329,6 +467,15 @@ const ImageComponent = (props) => {
           />
         </RadioGroup>
       </FormControl>
+      {dataType === "iframe" && (
+        <FormControl className={classes.form} component="fieldset">
+          <FormLabel component="legend">Iframe-inställningar</FormLabel>
+          <Typography variant="body2" style={{ marginTop: 8 }}>
+            Redigera iframe-egenskaper här. Klicka på iframe:en för att öppna
+            denna dialog.
+          </Typography>
+        </FormControl>
+      )}
     </div>
   );
 
@@ -466,6 +613,26 @@ const ImageComponent = (props) => {
       </div>
     );
   }
+
+  if (dataType === "iframe" || data.type === "iframe") {
+    const displayTitle = title || iframeTitle || "<iframetitlehere>";
+    return (
+      <span
+        style={{
+          cursor: "pointer",
+          color: "#1976d2",
+          textDecoration: "underline",
+          fontStyle: "italic",
+        }}
+        onClick={handleOpen}
+      >
+        {displayTitle}
+        {modal}
+      </span>
+    );
+  }
+
+  return null;
 };
 
 /* CSS styling */

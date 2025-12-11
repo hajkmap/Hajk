@@ -18,6 +18,7 @@ import {
   Audio,
   Source,
   AccordionSection,
+  Iframe,
 } from "./utils/ContentComponentFactory";
 
 import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
@@ -460,6 +461,41 @@ export default class DocumentHandlerModel {
               baseUrl={this.mapServiceUrl}
             ></Audio>
           );
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "iframe",
+      callback: (e) => {
+        return <Iframe iframeTag={e} componentId={e.componentId}></Iframe>;
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "span",
+      callback: (e) => {
+        if (e.dataset && e.dataset.type === "iframe") {
+          const iframeElement = document.createElement("iframe");
+          iframeElement.setAttribute(
+            "title",
+            e.dataset.iframeTitle || "iframe"
+          );
+          iframeElement.setAttribute("src", e.dataset.iframeSrc || "");
+          iframeElement.setAttribute("width", e.dataset.iframeWidth || "600");
+          iframeElement.setAttribute(
+            "height",
+            e.dataset.iframeHeight || "373.5"
+          );
+          iframeElement.setAttribute("allowFullScreen", "true");
+          const position = e.dataset.imagePosition || "left";
+          iframeElement.setAttribute("data-image-position", position);
+          iframeElement.componentId = e.componentId;
+          return (
+            <Iframe
+              iframeTag={iframeElement}
+              componentId={e.componentId}
+            ></Iframe>
+          );
+        }
+        return null;
       },
     });
     allowedHtmlTags.push({

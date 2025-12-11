@@ -631,6 +631,47 @@ export const Audio = ({ imgTag, componentId, baseUrl }) => {
 };
 
 /**
+ * The render function for the iframe-tag.
+ * @param {object} iframeTag The iframe-tag.
+ * @returns React.Fragment
+ */
+export const Iframe = ({ iframeTag, componentId }) => {
+  const iframeAttributes = {
+    title: iframeTag.attributes.getNamedItem("title")?.value || "iframe",
+    width: iframeTag.attributes.getNamedItem("width")?.value || "",
+    height: iframeTag.attributes.getNamedItem("height")?.value || "",
+    src: iframeTag.attributes.getNamedItem("src")?.value || "",
+    id: `iframe_${componentId}`,
+    position:
+      iframeTag.attributes.getNamedItem("data-image-position")?.value || "left",
+  };
+
+  return (
+    <Box
+      key={iframeAttributes.id}
+      sx={{
+        marginBottom: 2,
+        width: "100%",
+        maxWidth: "100%",
+        ...getMediaPositionStyle(iframeAttributes.position),
+      }}
+    >
+      <iframe
+        title={iframeAttributes.title}
+        src={iframeAttributes.src}
+        width={iframeAttributes.width}
+        height={iframeAttributes.height}
+        allowFullScreen={true}
+        style={{
+          border: "0",
+          maxWidth: "100%",
+        }}
+      />
+    </Box>
+  );
+};
+
+/**
  * The render function for the source-tag.
  * @param {object} sourceTag The source-tag.
  * @returns React.Fragment

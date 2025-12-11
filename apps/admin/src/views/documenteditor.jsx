@@ -360,7 +360,7 @@ class DocumentEditor extends Component {
       showModal: false,
       modalStyle: {},
       okButtonText: "OK",
-      modalConfirmCallback: () => { },
+      modalConfirmCallback: () => {},
     });
   }
 
@@ -668,20 +668,20 @@ class DocumentEditor extends Component {
           <Typography className={classes.gridItem}>Nyckelord</Typography>
           {chapter.keywords
             ? chapter.keywords.map((keyword, i) => (
-              <Chip
-                key={i}
-                label={keyword}
-                onDelete={(i) => {
-                  const index = chapter.keywords.indexOf(keyword);
-                  if (index > -1) {
-                    chapter.keywords.splice(index, 1);
-                  }
-                  this.setState({
-                    keywords: chapter.keywords,
-                  });
-                }}
-              />
-            ))
+                <Chip
+                  key={i}
+                  label={keyword}
+                  onDelete={(i) => {
+                    const index = chapter.keywords.indexOf(keyword);
+                    if (index > -1) {
+                      chapter.keywords.splice(index, 1);
+                    }
+                    this.setState({
+                      keywords: chapter.keywords,
+                    });
+                  }}
+                />
+              ))
             : null}
           <Grid item>
             <AddKeyword
@@ -722,13 +722,13 @@ class DocumentEditor extends Component {
         >
           {chapter.expanded
             ? chapter.chapters.map((innerChapter, innerIndex) => {
-              return this.renderChapter(
-                chapter.chapters,
-                innerChapter,
-                innerIndex,
-                false
-              );
-            })
+                return this.renderChapter(
+                  chapter.chapters,
+                  innerChapter,
+                  innerIndex,
+                  false
+                );
+              })
             : null}
         </Grid>
       </Grid>
@@ -1184,7 +1184,7 @@ class DocumentEditor extends Component {
     const { selectedFolder } = this.state;
 
     return (
-      <Grid className={classes.root} id="documentEditor" container xs={7}>
+      <Grid item className={classes.root} id="documentEditor" container xs={7}>
         <Grid className="inset-form" item container>
           <Grid>
             <Typography>
@@ -1245,7 +1245,7 @@ class DocumentEditor extends Component {
               ) : null}
             </Grid>
 
-            <Grid xs={12}>
+            <Grid item xs={12}>
               <br></br>
               <Typography>
                 <strong>Hantera dokument</strong>

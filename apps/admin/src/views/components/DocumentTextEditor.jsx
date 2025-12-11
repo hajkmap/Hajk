@@ -27,6 +27,7 @@ import AudiotrackIcon from "@material-ui/icons/Audiotrack";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
 import LaunchIcon from "@material-ui/icons/Launch";
+import CodeIcon from "@material-ui/icons/Code";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
@@ -80,11 +81,14 @@ export default class DocumentTextEditor extends React.Component {
       currentImage: "",
       currentVideo: "",
       currentAudio: "",
+      currentIframe: "",
       imageData: {},
       urlValue: "",
       imageAlt: "",
       defaultWidth: null,
       defaultHeight: null,
+      iframeTitle: "",
+      iframeSrc: "",
     };
     this.plugins = [addLinkPlugin];
     this.focus = () => this.refs.editor.focus();
@@ -110,6 +114,8 @@ export default class DocumentTextEditor extends React.Component {
       this.setState({ mediaPopup: !this.state.mediaPopup });
     this.onDataPositionChange = (e) =>
       this.setState({ mediaPosition: e.target.value });
+    this.onIframeTitleChange = (e) =>
+      this.setState({ iframeTitle: e.target.value });
     this.onBlockBackgroundChange = (e) =>
       this.setState({ blockBackground: e.target.value });
     this.onBlockDividerChange = (e) =>
@@ -118,6 +124,7 @@ export default class DocumentTextEditor extends React.Component {
     this.addImage = this._addImage.bind(this);
     this.addVideo = this._addVideo.bind(this);
     this.addAudio = this._addAudio.bind(this);
+    this.addIframe = this._addIframe.bind(this);
     this.addMapLink = this._addMapLink.bind(this);
     this.addDocumentLink = this._addDocumentLink.bind(this);
     this.addWebLink = this._addWebLink.bind(this);
@@ -141,6 +148,50 @@ export default class DocumentTextEditor extends React.Component {
   }
 
   _stateFromHtmlWithOptions = (html) => {
+    if (html && typeof html === "string") {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = html;
+
+      const iframeSpans = tempDiv.querySelectorAll('span[data-type="iframe"]');
+      iframeSpans.forEach((span) => {
+        const src = span.getAttribute("data-iframe-src") || "";
+        const title = span.getAttribute("data-iframe-title") || "";
+        const width = span.getAttribute("data-iframe-width") || "";
+        const height = span.getAttribute("data-iframe-height") || "";
+        const position = span.getAttribute("data-image-position") || "left";
+
+        let spanContent = span.textContent.trim();
+        if (
+          spanContent === "<iframetitlehere>" ||
+          spanContent === "iframetitlehere"
+        ) {
+          spanContent = "";
+        }
+        const spanTitle = title || spanContent || "";
+
+        const img = document.createElement("img");
+        img.setAttribute("src", src);
+        img.setAttribute("data-type", "iframe");
+        img.setAttribute("title", spanTitle);
+        img.setAttribute("data-iframe-width", width);
+        img.setAttribute("data-iframe-height", height);
+        img.setAttribute("data-image-position", position);
+        img.setAttribute("alt", spanTitle || "iframe");
+        img.setAttribute("data-iframe-title", spanTitle);
+
+        const parent = span.parentNode;
+        if (parent.tagName === "FIGURE") {
+          parent.replaceChild(img, span);
+        } else {
+          const figure = document.createElement("figure");
+          figure.appendChild(img);
+          span.parentNode.replaceChild(figure, span);
+        }
+      });
+
+      html = tempDiv.innerHTML;
+    }
+
     const customBlockFn = (element) => {
       let { tagName } = element;
       if (tagName === "BLOCKQUOTE") {
@@ -260,6 +311,16 @@ export default class DocumentTextEditor extends React.Component {
         "data-image-position": mediaPosition,
         "data-type": "audio",
       });
+    } else if (urlType === "iframe") {
+      contentStateWithEntity = contentState.createEntity(urlType, "IMMUTABLE", {
+        src: urlValue,
+        type: "iframe",
+        title: this.state.iframeTitle,
+        "data-type": "iframe",
+        "data-iframe-width": mediaWidth ? mediaWidth : null,
+        "data-iframe-height": mediaHeight ? mediaHeight : null,
+        "data-image-position": mediaPosition || "left",
+      });
     }
 
     return contentStateWithEntity;
@@ -281,6 +342,7 @@ export default class DocumentTextEditor extends React.Component {
     let htmlText = " ";
     if (urlType === "video") htmlText = this._createVideoHtmlText();
     else if (urlType === "audio") htmlText = this._createAudioHtmlText();
+    else if (urlType === "iframe") htmlText = this._createIframeHtmlText();
 
     this.setState(
       {
@@ -299,6 +361,8 @@ export default class DocumentTextEditor extends React.Component {
         mediaCaption: "",
         mediaSource: "",
         mediaPopup: false,
+        iframeTitle: "",
+        iframeSrc: "",
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -378,6 +442,35 @@ export default class DocumentTextEditor extends React.Component {
     return htmlText;
   }
 
+  _createIframeHtmlText() {
+    let { urlValue, iframeTitle, mediaWidth, mediaHeight, mediaPosition } =
+      this.state;
+
+    iframeTitle = iframeTitle ? iframeTitle : "";
+    mediaWidth = mediaWidth ? mediaWidth : "";
+    mediaHeight = mediaHeight ? mediaHeight : "";
+    mediaPosition = mediaPosition ? mediaPosition : "left";
+
+    const displayTitle = iframeTitle || "<iframetitlehere>";
+
+    const htmlText =
+      '<figure><span data-type="iframe" data-iframe-src="' +
+      urlValue +
+      '" data-iframe-title="' +
+      iframeTitle +
+      '" data-iframe-width="' +
+      mediaWidth +
+      '" data-iframe-height="' +
+      mediaHeight +
+      '" data-image-position="' +
+      mediaPosition +
+      '">' +
+      displayTitle +
+      "</span></figure>";
+
+    return htmlText;
+  }
+
   _onURLInputKeyDown(e) {
     if (e.which === 13) {
       this._confirmMedia(e);
@@ -396,6 +489,8 @@ export default class DocumentTextEditor extends React.Component {
         mediaCaption: "",
         mediaSource: "",
         mediaPopup: false,
+        iframeTitle: "",
+        iframeSrc: "",
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -516,6 +611,8 @@ export default class DocumentTextEditor extends React.Component {
         mediaCaption: this.state.mediaCaption,
         mediaSource: this.state.mediaSource,
         mediaPopup: this.state.mediaPopup,
+        mediaPosition:
+          type === "iframe" ? "left" : this.state.mediaPosition || "left",
       },
       () => {
         setTimeout(() => this.refs.url.focus(), 0);
@@ -569,6 +666,9 @@ export default class DocumentTextEditor extends React.Component {
   }
   _addAudio() {
     this._promptForMedia("audio");
+  }
+  _addIframe() {
+    this._promptForMedia("iframe");
   }
   _addMapLink() {
     this._promptForLink("maplink");
@@ -653,7 +753,15 @@ export default class DocumentTextEditor extends React.Component {
     const contentState = getEditorState().getCurrentContent();
 
     if (blockType === "atomic") {
-      const data = contentState.getEntity(block.getEntityAt(0)).getData();
+      const entityKey = block.getEntityAt(0);
+      if (!entityKey) {
+        return null;
+      }
+      const entity = contentState.getEntity(entityKey);
+      if (!entity) {
+        return null;
+      }
+      const data = entity.getData();
       const dataType = data["data-type"] || "image";
 
       if (dataType === "image") {
@@ -733,6 +841,32 @@ export default class DocumentTextEditor extends React.Component {
           },
         };
       }
+
+      if (dataType === "iframe") {
+        const contentBlockKey = block.getKey();
+        const isFocused =
+          getEditorState().getSelection().getAnchorKey() === contentBlockKey &&
+          this.isImageBlockInSelection(getEditorState());
+
+        return {
+          component: ImageComponent,
+          editable: false,
+          props: {
+            readOnlyMode: this.toggleReadOnly,
+            imageData: (data) =>
+              this.updateSelectedImageData(
+                contentBlockKey,
+                getEditorState(),
+                data
+              ),
+            isFocused: () => isFocused,
+            onClick: () =>
+              EditorState.push(
+                this.selectImageWithBlockKey(getEditorState(), contentBlockKey)
+              ),
+          },
+        };
+      }
     }
   }
 
@@ -775,10 +909,6 @@ export default class DocumentTextEditor extends React.Component {
       updateSelection
     );
 
-    this.setState({
-      editorState: newEditorState,
-    });
-
     let newSelection = newEditorState.getSelection();
 
     if (anchorKey !== newSelection.getFocusKey()) {
@@ -790,16 +920,28 @@ export default class DocumentTextEditor extends React.Component {
 
     if (contentBlock && contentBlock.getType().toLowerCase() === "atomic") {
       const entityKey = contentBlock.getEntityAt(0);
+      if (!entityKey) {
+        return editorState;
+      }
       const entity = contentState.getEntity(entityKey);
+      if (!entity) {
+        return editorState;
+      }
 
       if (
-        entity &&
-        (entity.getType().toLowerCase() === "image" ||
-          entity.getType().toLowerCase() === "video" ||
-          entity.getType().toLowerCase() === "audio")
+        entity.getType().toLowerCase() === "image" ||
+        entity.getType().toLowerCase() === "video" ||
+        entity.getType().toLowerCase() === "audio" ||
+        entity.getType().toLowerCase() === "iframe"
       ) {
         const newContentState = contentState.replaceEntityData(entityKey, data);
-        return EditorState.push(editorState, newContentState, "apply-entity");
+        const updatedEditorState = EditorState.push(
+          editorState,
+          newContentState,
+          "apply-entity"
+        );
+        this.onChange(updatedEditorState);
+        return updatedEditorState;
       }
     }
     return editorState;
@@ -842,6 +984,85 @@ export default class DocumentTextEditor extends React.Component {
 
   applyChanges() {
     var htmlString = this.getHtml().replace(/<p><br><\/p>/gm, "");
+
+    const contentState = this.state.editorState.getCurrentContent();
+    const blocks = contentState.getBlockMap();
+
+    const iframeBlocks = [];
+    blocks.forEach((block) => {
+      if (block.getType() === "atomic") {
+        const entityKey = block.getEntityAt(0);
+        if (entityKey) {
+          const entity = contentState.getEntity(entityKey);
+          const data = entity.getData();
+          const entityType = entity.getType().toUpperCase();
+          const dataType = data["data-type"] || "";
+
+          if (
+            entityType === "IFRAME" ||
+            (entityType === "IMAGE" && dataType === "iframe")
+          ) {
+            iframeBlocks.push({
+              src: data.src || "",
+              title: data.title || data.alt || data["data-iframe-title"] || "",
+              width: data["data-iframe-width"] || "",
+              height: data["data-iframe-height"] || "",
+              position: data["data-image-position"] || "left",
+            });
+          }
+        }
+      }
+    });
+
+    if (iframeBlocks.length > 0) {
+      /*
+      const escapeHtml = (str) => {
+        if (!str) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      };
+*/
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = htmlString;
+
+      const figures = tempDiv.querySelectorAll("figure");
+      let iframeIndex = 0;
+
+      figures.forEach((figure) => {
+        const imgIframe = figure.querySelector('img[data-type="iframe"]');
+        const iframeTag = figure.querySelector("iframe");
+        const spanIframe = figure.querySelector('span[data-type="iframe"]');
+
+        if (
+          (imgIframe || iframeTag || spanIframe) &&
+          iframeIndex < iframeBlocks.length
+        ) {
+          const blockData = iframeBlocks[iframeIndex];
+          const displayTitle = blockData.title || "<iframetitlehere>";
+
+          const span = document.createElement("span");
+          span.setAttribute("data-type", "iframe");
+          span.setAttribute("data-iframe-src", blockData.src);
+          span.setAttribute("data-iframe-title", blockData.title);
+          span.setAttribute("data-iframe-width", blockData.width);
+          span.setAttribute("data-iframe-height", blockData.height);
+          span.setAttribute("data-image-position", blockData.position);
+          span.textContent = displayTitle;
+
+          figure.innerHTML = "";
+          figure.appendChild(span);
+
+          iframeIndex++;
+        }
+      });
+
+      htmlString = tempDiv.innerHTML;
+    }
+
     this.props.onUpdate(htmlString);
     this.setState({
       html: htmlString,
@@ -920,10 +1141,21 @@ export default class DocumentTextEditor extends React.Component {
   isImageBlock(contentBlock, contentState) {
     if (contentBlock && contentBlock.getType() === "atomic") {
       const entityKey = contentBlock.getEntityAt(0);
+      if (!entityKey) {
+        return false;
+      }
       const entity = contentState.getEntity(entityKey);
+      if (!entity) {
+        return false;
+      }
 
-      if (entity.getType().toUpperCase() === "IMAGE") {
-        return entity && entity.getType().toUpperCase() === "IMAGE";
+      if (
+        entity.getType().toUpperCase() === "IMAGE" ||
+        entity.getType().toUpperCase() === "VIDEO" ||
+        entity.getType().toUpperCase() === "AUDIO" ||
+        entity.getType().toUpperCase() === "IFRAME"
+      ) {
+        return true;
       }
     }
     return false;
@@ -1004,21 +1236,22 @@ export default class DocumentTextEditor extends React.Component {
             const imageUrl = "../Upload/" + image;
             return imageUrl;
           })
-        : null;
+        : [];
     if (type === "video")
       return videoList
         ? videoList.map((video, i) => {
             const videoUrl = "../Upload/" + video;
             return videoUrl;
           })
-        : null;
+        : [];
     if (type === "audio")
       return audioList
         ? audioList.map((audio, i) => {
             const audioUrl = "../Upload/" + audio;
             return audioUrl;
           })
-        : null;
+        : [];
+    return [];
   };
 
   preview = (type) => {
@@ -1042,6 +1275,16 @@ export default class DocumentTextEditor extends React.Component {
           height={this.state.mediaHeight}
         />
       ) : null;
+    if (type === "iframe")
+      return this.state.urlValue ? (
+        <iframe
+          title={this.state.iframeTitle || "iframe"}
+          src={this.state.urlValue}
+          width={this.state.mediaWidth || "600"}
+          height={this.state.mediaHeight || "373.5"}
+          style={{ border: "1px solid #ccc" }}
+        />
+      ) : null;
   };
 
   render() {
@@ -1055,9 +1298,14 @@ export default class DocumentTextEditor extends React.Component {
           ? "bild"
           : this.state.urlType === "video"
           ? "video"
-          : "ljud";
+          : this.state.urlType === "audio"
+          ? "ljud"
+          : this.state.urlType === "iframe"
+          ? "iframe"
+          : "";
       const popupDisabled = this.state.urlType === "image" ? false : true;
       const widthHeightDisable = this.state.urlType === "audio" ? true : false;
+      const showIframeFields = this.state.urlType === "iframe";
 
       urlInput = (
         <Grid style={styles.gridItemContainer} container>
@@ -1095,7 +1343,13 @@ export default class DocumentTextEditor extends React.Component {
             <Grid container item>
               <Grid style={styles.gridItem} item>
                 <input
-                  onChange={(e) => this.calculateHeight(e.target.value)}
+                  onChange={(e) => {
+                    if (showIframeFields) {
+                      this.setState({ mediaWidth: e.target.value });
+                    } else {
+                      this.calculateHeight(e.target.value);
+                    }
+                  }}
                   ref="data-image-width"
                   type="number"
                   value={this.state.mediaWidth || ""}
@@ -1106,7 +1360,13 @@ export default class DocumentTextEditor extends React.Component {
               </Grid>
               <Grid item>
                 <input
-                  onChange={(e) => this.calculateWidth(e.target.value)}
+                  onChange={(e) => {
+                    if (showIframeFields) {
+                      this.setState({ mediaHeight: e.target.value });
+                    } else {
+                      this.calculateWidth(e.target.value);
+                    }
+                  }}
                   ref="data-image-height"
                   type="number"
                   value={this.state.mediaHeight || ""}
@@ -1116,65 +1376,83 @@ export default class DocumentTextEditor extends React.Component {
                 />
               </Grid>
             </Grid>
-            <Grid item>
-              <input
-                onChange={this.onImageAltChange}
-                ref="image-alt"
-                type="text"
-                value={this.state.imageAlt || ""}
-                onKeyDown={this.onURLInputKeyDown}
-                placeholder="Alternativ text"
-              />
-            </Grid>
-            <Grid container item>
-              <Grid style={styles.gridItem} item>
-                <input
-                  onChange={this.onDataCaptionChange}
-                  ref="data-caption"
-                  type="text"
-                  value={this.state.mediaCaption || ""}
-                  onKeyDown={this.onURLInputKeyDown}
-                  placeholder="Beskrivning"
-                />
-              </Grid>
+            {!showIframeFields && (
               <Grid item>
                 <input
-                  onChange={this.onDataSourceChange}
-                  ref="data-source"
+                  onChange={this.onImageAltChange}
+                  ref="image-alt"
                   type="text"
-                  value={this.state.mediaSource || ""}
+                  value={this.state.imageAlt || ""}
                   onKeyDown={this.onURLInputKeyDown}
-                  placeholder="Källa"
+                  placeholder="Alternativ text"
                 />
               </Grid>
-            </Grid>
-            <Grid container item>
-              <Grid style={styles.gridItem} item>
-                <select
-                  value={this.state.mediaPosition}
-                  ref="data-image-position"
-                  onChange={this.onDataPositionChange}
-                >
-                  <option value="left">Vänster</option>
-                  <option value="center">Center</option>
-                  <option value="right">Höger</option>
-                  <option value="floatRight">Höger med text</option>
-                  <option value="floatLeft">Vänster med text</option>
-                </select>
-              </Grid>
+            )}
+            {showIframeFields && (
               <Grid item>
                 <input
-                  id="data-image-popup"
-                  onChange={this.onDataPopupChange}
-                  ref="data-image-popup"
-                  type="checkbox"
-                  value={this.state.mediaPopup}
-                  disabled={popupDisabled}
+                  onChange={this.onIframeTitleChange}
+                  ref="iframe-title"
+                  type="text"
+                  value={this.state.iframeTitle || ""}
                   onKeyDown={this.onURLInputKeyDown}
+                  placeholder="Titel (t.ex. 'exampletitle - Extern')"
                 />
-                <label>Popup</label>
               </Grid>
-            </Grid>
+            )}
+            {!showIframeFields && (
+              <Grid container item>
+                <Grid style={styles.gridItem} item>
+                  <input
+                    onChange={this.onDataCaptionChange}
+                    ref="data-caption"
+                    type="text"
+                    value={this.state.mediaCaption || ""}
+                    onKeyDown={this.onURLInputKeyDown}
+                    placeholder="Beskrivning"
+                  />
+                </Grid>
+                <Grid item>
+                  <input
+                    onChange={this.onDataSourceChange}
+                    ref="data-source"
+                    type="text"
+                    value={this.state.mediaSource || ""}
+                    onKeyDown={this.onURLInputKeyDown}
+                    placeholder="Källa"
+                  />
+                </Grid>
+              </Grid>
+            )}
+            {!showIframeFields && (
+              <Grid container item>
+                <Grid style={styles.gridItem} item>
+                  <select
+                    value={this.state.mediaPosition}
+                    ref="data-image-position"
+                    onChange={this.onDataPositionChange}
+                  >
+                    <option value="left">Vänster</option>
+                    <option value="center">Center</option>
+                    <option value="right">Höger</option>
+                    <option value="floatRight">Höger med text</option>
+                    <option value="floatLeft">Vänster med text</option>
+                  </select>
+                </Grid>
+                <Grid item>
+                  <input
+                    id="data-image-popup"
+                    onChange={this.onDataPopupChange}
+                    ref="data-image-popup"
+                    type="checkbox"
+                    value={this.state.mediaPopup}
+                    disabled={popupDisabled}
+                    onKeyDown={this.onURLInputKeyDown}
+                  />
+                  <label>Popup</label>
+                </Grid>
+              </Grid>
+            )}
             <Grid item>
               <ColorButtonGreen
                 style={styles.button}
@@ -1287,6 +1565,7 @@ export default class DocumentTextEditor extends React.Component {
               OnToggleImage={this.addImage}
               OnToggleVideo={this.addVideo}
               OnToggleAudio={this.addAudio}
+              OnToggleIframe={this.addIframe}
             />
 
             <StyleButton
@@ -1367,6 +1646,12 @@ const MediaStyleControls = (props) => {
         tooltip="Lägg till ett ljudklipp"
         label={<AudiotrackIcon />}
         onToggle={props.OnToggleAudio}
+      />
+
+      <StyleButton
+        tooltip="Lägg till en iframe (t.ex. PowerBI)"
+        label={<CodeIcon />}
+        onToggle={props.OnToggleIframe}
       />
     </div>
   );
