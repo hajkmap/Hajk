@@ -406,12 +406,13 @@ const ImageComponent = (props) => {
               </Grid>
             </Grid>
           )}
-          <Grid container spacing={1} alignItems="flex-end">
+          <Grid container alignItems="flex-end" style={{ margin: "24px" }}>
             <Grid item>
               <Button
+                style={{ marginBottom: "8px" }}
                 startIcon={<CancelIcon />}
                 variant="contained"
-                className="btn btn-secondary"
+                color="secondary"
                 onClick={handleClose}
               >
                 Stäng
@@ -419,7 +420,7 @@ const ImageComponent = (props) => {
               <Button
                 startIcon={<CheckIcon />}
                 variant="contained"
-                className="btn btn-success"
+                color="primary"
                 onClick={handleSaveIframeSettings}
               >
                 Spara inställningar
