@@ -91,6 +91,7 @@ const ImageComponent = (props) => {
         setImagePosition(dataImagePosition || "left");
       }
     }
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataType,
     iframeTitle,
