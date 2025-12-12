@@ -1141,20 +1141,55 @@ export default function AttributeEditorView({
           return cleanId;
         });
 
-      // Check if there are any changes
-      if (!inserts.length && !updates.length && !deletes.length) {
+      // Count deleted drafts (these don't go to server but need to be cleaned up)
+      const deletedDraftsCount = pendingAdds.filter(
+        (d) => d.__pending === "delete"
+      ).length;
+
+      // Check if there are any changes (including deleted drafts)
+      if (
+        !inserts.length &&
+        !updates.length &&
+        !deletes.length &&
+        !deletedDraftsCount
+      ) {
         showNotification("Inga ändringar att spara");
         return;
       }
 
       // Build summary for user notification
+      const totalDeletes = deletes.length + deletedDraftsCount;
       const summary = [
         inserts.length && `${inserts.length} nya`,
         updates.length && `${updates.length} uppdaterade`,
-        deletes.length && `${deletes.length} borttagna`,
+        totalDeletes && `${totalDeletes} borttagna`,
       ]
         .filter(Boolean)
         .join(", ");
+
+      // If only deleted drafts (no server operations), just commit locally
+      if (!inserts.length && !updates.length && !deletes.length) {
+        enqueueSnackbar(`✓ Sparat: ${deletedDraftsCount} borttagna`, {
+          variant: "success",
+          autoHideDuration: 3000,
+        });
+
+        // Commit changes in model (removes deleted drafts from pendingAdds)
+        controller.commit();
+
+        // Reset undo stacks
+        Promise.resolve().then(() => {
+          formUndoSnapshotsRef.current.clear();
+          setFormUndoStack([]);
+          setTableUndoLocal([]);
+          setTableEditing(null);
+          setLastTableIndex(null);
+          geomUndoRef.current = [];
+          setGeomUndoCount(0);
+        });
+
+        return;
+      }
 
       enqueueSnackbar(`Sparar: ${summary}...`, { variant: "info" });
 
@@ -1180,7 +1215,8 @@ export default function AttributeEditorView({
           result.partialFailures && result.partialFailures.length > 0;
 
         if (hasPartialFailure) {
-          let message = `⚠ Delvis sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${result.deleted || 0} borttagna\n`;
+          const totalDeletedCount = (result.deleted || 0) + deletedDraftsCount;
+          let message = `⚠ Delvis sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${totalDeletedCount} borttagna\n`;
           message += `Misslyckades: ${result.partialFailures.join(", ")}`;
 
           if (result.warning) {
@@ -1193,8 +1229,9 @@ export default function AttributeEditorView({
             style: { whiteSpace: "pre-line" },
           });
         } else {
+          const totalDeletedCount = (result.deleted || 0) + deletedDraftsCount;
           enqueueSnackbar(
-            `✓ Sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${result.deleted || 0} borttagna`,
+            `✓ Sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${totalDeletedCount} borttagna`,
             { variant: "success", autoHideDuration: 5000 }
           );
         }
@@ -2169,6 +2206,7 @@ export default function AttributeEditorView({
           setColumnFilters={setColumnFilters}
           handleRowHover={handleRowHover}
           handleRowLeave={handleRowLeave}
+          app={app}
         />
       )}
       <NotificationBar s={s} theme={theme} text={notification} />

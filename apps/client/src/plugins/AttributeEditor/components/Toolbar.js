@@ -92,11 +92,14 @@ export default function Toolbar({
   // Summarization for confirm dialog
   const summary = React.useMemo(
     () => ({
-      adds: tablePendingAdds?.length ?? 0,
+      adds:
+        tablePendingAdds?.filter((d) => d.__pending !== "delete").length ?? 0,
       edits:
         (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0) +
         (dirty ? changedFields.size : 0),
-      deletes: tablePendingDeletes?.size ?? 0,
+      deletes:
+        (tablePendingDeletes?.size ?? 0) +
+        (tablePendingAdds?.filter((d) => d.__pending === "delete").length ?? 0),
     }),
     [
       tablePendingAdds,
@@ -186,8 +189,11 @@ export default function Toolbar({
 
       // Check for pending changes
       const pendingCount =
-        (tablePendingAdds?.length ?? 0) +
+        (tablePendingAdds?.filter((d) => d.__pending !== "delete").length ??
+          0) +
         (tablePendingDeletes?.size ?? 0) +
+        (tablePendingAdds?.filter((d) => d.__pending === "delete").length ??
+          0) +
         (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0);
 
       const needsPrompt = dirty || pendingCount > 0;

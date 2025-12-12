@@ -162,6 +162,8 @@ export default function TableMode(props) {
 
   const DEFAULT_WRAP_CH = 100;
 
+  const ROWS_PER_PAGE_KEY = "ae_rows_per_page";
+
   const { functionalCookiesOk } = useCookieStatus(app.globalObserver);
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
@@ -170,7 +172,15 @@ export default function TableMode(props) {
 
   // Pagination state
   const [currentPage, setCurrentPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(20);
+  const [rowsPerPage, setRowsPerPage] = React.useState(() => {
+    if (!functionalCookiesOk) return 20;
+    try {
+      const saved = Number(localStorage.getItem(ROWS_PER_PAGE_KEY));
+      return [10, 20, 50, 100].includes(saved) ? saved : 20;
+    } catch {
+      return 20;
+    }
+  });
 
   // Ref for scrolling to selected rows
   const selectedRowRefs = React.useRef(new Map());
@@ -382,6 +392,14 @@ export default function TableMode(props) {
     } catch {}
   }, [colWidths, STORAGE_KEY, functionalCookiesOk]);
 
+  // Save rowsPerPage to localStorage when it changes
+  React.useEffect(() => {
+    if (!functionalCookiesOk) return;
+    try {
+      localStorage.setItem(ROWS_PER_PAGE_KEY, String(rowsPerPage));
+    } catch {}
+  }, [rowsPerPage, functionalCookiesOk]);
+
   const resizingRef = React.useRef(null); // { key, startX, startW }
 
   React.useEffect(() => {
@@ -423,10 +441,13 @@ export default function TableMode(props) {
 
   const summary = React.useMemo(
     () => ({
-      adds: tablePendingAdds?.length ?? 0,
+      adds:
+        tablePendingAdds?.filter((d) => d.__pending !== "delete").length ?? 0,
       // number of rows with pending edits (not number of fields)
       edits: tablePendingEdits ? Object.keys(tablePendingEdits).length : 0,
-      deletes: tablePendingDeletes?.size ?? 0,
+      deletes:
+        (tablePendingDeletes?.size ?? 0) +
+        (tablePendingAdds?.filter((d) => d.__pending === "delete").length ?? 0),
     }),
     [tablePendingAdds, tablePendingEdits, tablePendingDeletes]
   );

@@ -14,6 +14,7 @@ import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { editBus } from "../../../buses/editBus";
 import FormListItem from "./FormListItem";
+import useCookieStatus from "../../../hooks/useCookieStatus";
 
 export default function DesktopForm({
   s,
@@ -53,10 +54,14 @@ export default function DesktopForm({
   setColumnFilters,
   handleRowHover,
   handleRowLeave,
+  app,
 }) {
   const RESIZER_KEY = "ae_df_leftw";
+  const ROWS_PER_PAGE_KEY = "ae_rows_per_page";
   const MIN_LEFT = 220; // px
   const MAX_LEFT = 800; // px
+
+  const { functionalCookiesOk } = useCookieStatus(app.globalObserver);
 
   const [leftW, setLeftW] = React.useState(() => {
     const saved = Number(localStorage.getItem(RESIZER_KEY));
@@ -72,7 +77,15 @@ export default function DesktopForm({
 
   // Pagination state
   const [currentPage, setCurrentPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(20);
+  const [rowsPerPage, setRowsPerPage] = React.useState(() => {
+    if (!functionalCookiesOk) return 20;
+    try {
+      const saved = Number(localStorage.getItem(ROWS_PER_PAGE_KEY));
+      return [10, 20, 50, 100].includes(saved) ? saved : 20;
+    } catch {
+      return 20;
+    }
+  });
 
   // Ref for scrolling to selected rows
   const selectedRowRefs = React.useRef(new Map());
@@ -252,6 +265,14 @@ export default function DesktopForm({
     };
   }, [leftW]);
 
+  // Save rowsPerPage to localStorage when it changes
+  React.useEffect(() => {
+    if (!functionalCookiesOk) return;
+    try {
+      localStorage.setItem(ROWS_PER_PAGE_KEY, String(rowsPerPage));
+    } catch {}
+  }, [rowsPerPage, functionalCookiesOk]);
+
   React.useEffect(() => {
     if (!focusedFeature) return;
 
@@ -313,11 +334,14 @@ export default function DesktopForm({
 
   const summary = React.useMemo(
     () => ({
-      adds: tablePendingAdds?.length ?? 0,
+      adds:
+        tablePendingAdds?.filter((d) => d.__pending !== "delete").length ?? 0,
       edits:
         (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0) +
         (dirty ? changedFields.size : 0),
-      deletes: tablePendingDeletes?.size ?? 0,
+      deletes:
+        (tablePendingDeletes?.size ?? 0) +
+        (tablePendingAdds?.filter((d) => d.__pending === "delete").length ?? 0),
     }),
     [
       tablePendingAdds,

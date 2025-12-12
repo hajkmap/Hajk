@@ -111,11 +111,14 @@ export default function MobileForm({
 
   const summary = React.useMemo(
     () => ({
-      adds: tablePendingAdds?.length ?? 0,
+      adds:
+        tablePendingAdds?.filter((d) => d.__pending !== "delete").length ?? 0,
       edits:
         (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0) +
         (dirty ? changedFields.size : 0),
-      deletes: tablePendingDeletes?.size ?? 0,
+      deletes:
+        (tablePendingDeletes?.size ?? 0) +
+        (tablePendingAdds?.filter((d) => d.__pending === "delete").length ?? 0),
     }),
     [
       tablePendingAdds,
