@@ -539,12 +539,14 @@ function AttributeEditor(props) {
           if (signal.aborted) return;
 
           schemaCache.current.set(id, schema);
-
-          editBus.emit("attrib:schema-loaded", {
-            schema: schema,
-            serviceId: id,
-          });
         }
+
+        // Always emit schema-loaded, even if schema was cached
+        // This ensures other plugins (like Sketch) get notified when switching services
+        editBus.emit("attrib:schema-loaded", {
+          schema: schema,
+          serviceId: id,
+        });
 
         // Check before continuing
         if (signal.aborted) return;
