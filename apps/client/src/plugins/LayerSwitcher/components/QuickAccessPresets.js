@@ -456,9 +456,19 @@ function QuickAccessPresets({
       <Box
         id="quick-access-presets-view"
         sx={[
+          (theme) => ({
+            position: "relative",
+            overflow: "hidden",
+            flexGrow: 1,
+            backgroundColor: "#fff",
+            ...theme.applyStyles("dark", {
+              backgroundColor: "rgb(18,18,18)",
+            }),
+          }),
           display
             ? {
-                display: "block",
+                display: "flex",
+                flexDirection: "column",
               }
             : {
                 display: "none",
@@ -519,8 +529,6 @@ function QuickAccessPresets({
           </Collapse>
           <Box
             sx={{
-              width: 500,
-              maxWidth: "100%",
               p: 1,
             }}
           >
@@ -549,7 +557,12 @@ function QuickAccessPresets({
             />
           </Box>
         </Box>
-        <Box>
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflowY: "auto",
+          }}
+        >
           <List dense sx={{ p: 0 }}>
             {!filter.list.length ? (
               <Typography sx={{ p: 2 }}>
@@ -571,8 +584,26 @@ function QuickAccessPresets({
                     <ListItemIcon sx={{ px: 0, minWidth: "34px" }}>
                       <TopicOutlinedIcon fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText primary={l.title} secondary={l.author} />
-                    <ListItemSecondaryAction>
+                    <ListItemText
+                      primary={l.title}
+                      secondary={l.author}
+                      slotProps={{
+                        primary: {
+                          pr: 5,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        },
+                        secondary: {
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        },
+                      }}
+                    />
+                    <ListItemSecondaryAction
+                      sx={{
+                        right: "4px",
+                      }}
+                    >
                       <HajkToolTip title={"Information om " + l.title}>
                         <LsIconButton
                           onClick={(e) => {
