@@ -106,6 +106,9 @@ const LayerGroup = ({
   isFirstGroup,
   isFirstChild,
   parentGroupHit,
+  limitToggleToTree,
+  overrideToggleable,
+  disableAccordion,
 }) => {
   const children = staticGroupTree.children;
 
@@ -117,7 +120,10 @@ const LayerGroup = ({
 
   const groupIsFiltered = groupConfig?.isFiltered;
   const groupIsExpanded = staticGroupTree.defaultExpanded;
-  const groupIsToggable = staticGroupTree.groupIsToggable;
+  const groupIsToggable =
+    overrideToggleable !== undefined
+      ? overrideToggleable
+      : staticGroupTree.groupIsToggable;
 
   const infogrouptitle = groupConfig?.infogrouptitle;
   const infogrouptext = groupConfig?.infogrouptext;
@@ -185,16 +191,26 @@ const LayerGroup = ({
         isFirstChild={isFirstChild}
         display={groupIsFiltered ? "none" : "block"}
         toggleable={groupIsToggable}
-        expanded={groupHit || hasFilterHits || groupIsExpanded}
+        expanded={
+          disableAccordion ? true : groupHit || hasFilterHits || groupIsExpanded
+        }
+        disableAccordion={disableAccordion}
         toggleDetails={
           <ToggleAllComponent
             toggleable={groupIsToggable}
             toggleState={toggleState}
             clickHandler={() => {
-              if (isToggled) {
-                layerSwitcherDispatch.setGroupVisibility(groupId, false);
+              if (limitToggleToTree) {
+                const nextVisible = !isToggled;
+                allLeafLayersInGroup.forEach((leafId) => {
+                  layerSwitcherDispatch.setLayerVisibility(leafId, nextVisible);
+                });
               } else {
-                layerSwitcherDispatch.setGroupVisibility(groupId, true);
+                if (isToggled) {
+                  layerSwitcherDispatch.setGroupVisibility(groupId, false);
+                } else {
+                  layerSwitcherDispatch.setGroupVisibility(groupId, true);
+                }
               }
             }}
           />

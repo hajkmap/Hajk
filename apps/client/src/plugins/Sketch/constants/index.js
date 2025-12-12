@@ -11,7 +11,7 @@ export const ACTIVITIES = [
     id: "ADD",
     tooltip: "Lägg till nya objekt.",
     information:
-      "Lägg till objekt genom att rita i kartan. Börja med att välja vilken typ av objekt du vill rita nedan.",
+      "Lägg till objekt genom att rita i kartan. Börja med att välja vilken typ av objekt du vill rita nedan. Observera att export till GPX-format endast stödjer punkter och linjer.",
     icon: <EditIcon />,
   },
   {

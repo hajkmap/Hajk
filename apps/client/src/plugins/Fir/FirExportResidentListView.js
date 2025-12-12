@@ -62,24 +62,6 @@ const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
   fontWeight: "400",
 }));
 
-const ButtonWithLoader = styled(Button)(({ theme }) => ({
-  "& img": {
-    opacity: 1.0,
-  },
-  variants: [
-    {
-      props: {
-        loading: "true",
-      },
-      style: {
-        "& img": {
-          opacity: 0.3,
-        },
-      },
-    },
-  ],
-}));
-
 class FirExportResidentListView extends React.PureComponent {
   state = {
     accordionExpanded: false,
@@ -506,18 +488,18 @@ class FirExportResidentListView extends React.PureComponent {
                 </ContainerTopPadded>
               </CheckboxGroupContainer>
               <div>
-                <ButtonWithLoader
+                <Button
                   fullWidth={true}
                   variant="outlined"
                   color="primary"
-                  loading={"" + this.state.loading}
                   startIcon={<this.ExcelLogo />}
                   onClick={this.handleSendClick}
                   disabled={this.state.loading}
+                  sx={{ opacity: this.state.loading ? 0.3 : 1.0 }}
                 >
                   Skapa boendeförteckning
                   {this.state.loading && <CircularProgressButton size={24} />}
-                </ButtonWithLoader>
+                </Button>
               </div>
               <Collapse in={this.state.downloadUrl !== null}>
                 <DownloadContainer>

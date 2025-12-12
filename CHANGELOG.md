@@ -7,7 +7,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+<!-- ## [Unreleased] -->
+
+## [4.2.0-rc.1] - 2025-11-26
 
 ### Added
 
@@ -22,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The OpenStreetMap background (as well as the white and black backgrounds) are now first-class citizens in LayerSwitcher, enabling e.g. loading the app with these layers visible. [PR#1680](https://github.com/hajkmap/Hajk/pull/1680)
 - The legacy `react-smooth-dnd` have been replaced with `dnd-kit`, [PR#1689](https://github.com/hajkmap/Hajk/pull/1689)
 - The introduction module has been updated to support Hajk 4. Two tour modes have been implemented (full tour and new layerswitcher tour). [PR#1664](https://github.com/hajkmap/Hajk/pull/1664)
+- The Anchor tool is now a dialog component. [PR#1711](https://github.com/hajkmap/Hajk/pull/1711)
+- QuickAccess: LayerGroups are now shown as breadcrumbs, with each group’s layers displayed beneath it. [PR#1726](https://github.com/hajkmap/Hajk/pull/1726)
 
 ### Deprecated
 
@@ -38,6 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Infoclick: Fix bug where true/false values could be switched if certain conditions in the underlying database were met. [issue](https://github.com/hajkmap/Hajk/issues/1698)
 - Client: Show an Access Denied message if Backend returns 403. Closes [issue](https://github.com/hajkmap/Hajk/issues/1705)
 - LayerSwitcher: It is now possible to search on a LayerGroup name. GroupLayer search now supports expanding and showing sublayers, which was not possible before. Closes [issue](https://github.com/hajkmap/Hajk/issues/1722)
+- The add button in Bookmark is now only enabled when user has entered text in input. [PR#1657](https://github.com/hajkmap/Hajk/pull/1657)
+- QuickAccess: Sublayers inside a GroupLayer are now toggled correctly when using the “Ladda” button in QuickAccess. [PR#1726](https://github.com/hajkmap/Hajk/pull/1726)
 
 ### Security
 
@@ -466,7 +472,9 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v4.0.0...develop
+<!-- [unreleased]: https://github.com/hajkmap/Hajk/compare/v4.2.0-rc.1...develop -->
+
+[4.2.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v4.1.0...v4.2.0-rc.1
 [4.1.0]: https://github.com/hajkmap/Hajk/compare/v4.1.0-rc.1...v4.1.0
 [4.1.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v4.0.0...v4.1.0-rc.1
 [4.0.0]: https://github.com/hajkmap/Hajk/compare/v4.0.0-rc.2...v4.0.0

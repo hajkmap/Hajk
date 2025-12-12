@@ -43,9 +43,6 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         target: tool.options.target || "toolbar",
-        position: tool.options.position,
-        width: tool.options.width,
-        height: tool.options.height,
         instruction: tool.options.instruction,
         visibleAtStart: tool.options.visibleAtStart,
         allowCreatingCleanUrls: tool.options.allowCreatingCleanUrls,
@@ -113,9 +110,6 @@ class ToolOptions extends Component {
       index: this.state.index,
       options: {
         target: this.state.target,
-        position: this.state.position,
-        width: this.state.width,
-        height: this.state.height,
         instruction: this.state.instruction,
         visibleAtStart: this.state.visibleAtStart,
         allowCreatingCleanUrls: this.state.allowCreatingCleanUrls,
@@ -268,69 +262,6 @@ class ToolOptions extends Component {
               <option value="right">Widget right</option>
               <option value="control">Control button</option>
             </select>
-          </div>
-          <div>
-            <label htmlFor="position">
-              Fönsterplacering{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
-              />
-            </label>
-            <select
-              id="position"
-              name="position"
-              className="control-fixed-width"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.position}
-            >
-              <option value="left">Left</option>
-              <option value="right">Right</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="width">
-              Fönsterbredd{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Bredd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda standardbredd."
-              />
-            </label>
-            <input
-              id="width"
-              name="width"
-              type="number"
-              min="0"
-              className="control-fixed-width"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.width}
-            />
-          </div>
-          <div>
-            <label htmlFor="height">
-              Fönsterhöjd{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Höjd i pixlar på verktygets fönster. Anges antingen numeriskt (pixlar), 'dynamic' för att automatiskt anpassa höjden efter innehållet eller 'auto' att använda maximal höjd."
-              />
-            </label>
-            <input
-              id="height"
-              name="height"
-              type="text"
-              className="control-fixed-width"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.height}
-            />
           </div>
           <div className="separator">Övriga inställningar</div>
           <div>
