@@ -22,8 +22,8 @@ class PrintDialog extends React.PureComponent {
         <DialogContent>
           <DialogContentText>
             Det här kan ta en stund, speciellt om du har valt ett stort format
-            (A2-A3) och hög upplösning (>72 dpi). Men när allt är klart kommer{" "}
-            {`${saveAsType}`}-filen att laddas ner till din dator.
+            (A2-A3) och hög upplösning (&gt;72 dpi). Men när allt är klart
+            kommer {`${saveAsType}`}-filen att laddas ner till din dator.
             <br />
             <br />
             Om du inte vill vänta längre kan du avbryta utskriften genom att
