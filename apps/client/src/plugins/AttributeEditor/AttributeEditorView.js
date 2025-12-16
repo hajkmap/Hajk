@@ -1363,6 +1363,60 @@ export default function AttributeEditorView({
     visibleIdsRef,
   ]);
 
+  const exportToExcel = useCallback(
+    async (exportFeatures) => {
+      try {
+        const xlsx = await import("xlsx");
+
+        // Filter out geometry fields and prepare headers
+        const exportHeaders = FM.filter((meta) => meta.type !== "geometry").map(
+          (meta) => meta.label
+        );
+
+        // Prepare data rows
+        const exportData = exportFeatures.map((feature) => {
+          return FM.filter((meta) => meta.type !== "geometry").map((meta) => {
+            const value = feature[meta.key];
+            return value != null ? String(value) : "";
+          });
+        });
+
+        // Combine headers and data
+        const exportArray = [exportHeaders, ...exportData];
+
+        // Create worksheet and workbook
+        const worksheet = xlsx.utils.aoa_to_sheet(exportArray);
+        const workbook = xlsx.utils.book_new();
+        xlsx.utils.book_append_sheet(
+          workbook,
+          worksheet,
+          "Attributlista".slice(0, 30)
+        );
+
+        // Generate filename with timestamp
+        const timestamp = new Date().toLocaleString("sv-SE");
+        const filename = `Attributlista-${timestamp}.xlsx`;
+
+        // Write file
+        xlsx.writeFile(workbook, filename);
+
+        enqueueSnackbar(`✓ Excel-fil skapad (${exportFeatures.length} rader)`, {
+          variant: "success",
+          autoHideDuration: 5000,
+        });
+      } catch (error) {
+        enqueueSnackbar(
+          `Fel vid Excel-export: ${error.message || "Okänt fel"}`,
+          {
+            variant: "error",
+            autoHideDuration: 8000,
+          }
+        );
+      }
+    },
+    [FM, enqueueSnackbar]
+  );
+
   const undoLatestTableChange = useCallback(() => {
     // Pop the latest entry from the respective stack
     const modelLast = state.undoStack?.[state.undoStack.length - 1] ?? null;
@@ -2127,6 +2181,7 @@ export default function AttributeEditorView({
           app={app}
           handleRowHover={handleRowHover}
           handleRowLeave={handleRowLeave}
+          exportToExcel={exportToExcel}
         />
       ) : isMobile ? (
         <MobileForm
@@ -2207,6 +2262,7 @@ export default function AttributeEditorView({
           handleRowHover={handleRowHover}
           handleRowLeave={handleRowLeave}
           app={app}
+          exportToExcel={exportToExcel}
         />
       )}
       <NotificationBar s={s} theme={theme} text={notification} />

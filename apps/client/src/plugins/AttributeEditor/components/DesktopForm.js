@@ -10,6 +10,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
+import DescriptionIcon from "@mui/icons-material/Description";
 import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { editBus } from "../../../buses/editBus";
@@ -55,6 +56,7 @@ export default function DesktopForm({
   handleRowHover,
   handleRowLeave,
   app,
+  exportToExcel,
 }) {
   const RESIZER_KEY = "ae_df_leftw";
   const ROWS_PER_PAGE_KEY = "ae_rows_per_page";
@@ -719,6 +721,20 @@ export default function DesktopForm({
             title="Spara"
           >
             <SaveIcon fontSize="small" />
+          </button>
+
+          <button
+            style={visibleFormList.length === 0 ? s.iconBtnDisabled : s.iconBtn}
+            disabled={visibleFormList.length === 0}
+            onClick={() => exportToExcel(visibleFormList)}
+            aria-label="Exportera till Excel"
+            title={
+              visibleFormList.length
+                ? `Exportera till Excel (${visibleFormList.length} rader)`
+                : "Inga rader att exportera"
+            }
+          >
+            <DescriptionIcon fontSize="small" />
           </button>
         </div>
 

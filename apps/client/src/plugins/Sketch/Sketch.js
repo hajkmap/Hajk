@@ -924,6 +924,7 @@ const Sketch = (props) => {
     // ============================================================
     const onDeleteClick = (evt) => {
       if (activityId !== "DELETE") return;
+      if (!pluginShown) return;
       if (evt.dragging) return;
       if (evt.originalEvent?.button !== 0) return;
 

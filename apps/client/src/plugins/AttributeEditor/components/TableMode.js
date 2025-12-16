@@ -10,6 +10,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
+import DescriptionIcon from "@mui/icons-material/Description";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { editBus } from "../../../buses/editBus";
 import useCookieStatus from "../../../hooks/useCookieStatus";
@@ -158,6 +159,9 @@ export default function TableMode(props) {
 
     handleRowHover,
     handleRowLeave,
+
+    // export
+    exportToExcel,
   } = props;
 
   const DEFAULT_WRAP_CH = 100;
@@ -574,6 +578,22 @@ export default function TableMode(props) {
             aria-label="Spara"
           >
             <SaveIcon fontSize="small" />
+          </button>
+
+          <button
+            style={
+              filteredAndSorted.length === 0 ? s.iconBtnDisabled : s.iconBtn
+            }
+            disabled={filteredAndSorted.length === 0}
+            onClick={() => exportToExcel(filteredAndSorted)}
+            title={
+              filteredAndSorted.length
+                ? `Exportera till Excel (${filteredAndSorted.length} rader)`
+                : "Inga rader att exportera"
+            }
+            aria-label="Exportera till Excel"
+          >
+            <DescriptionIcon fontSize="small" />
           </button>
         </>
 
