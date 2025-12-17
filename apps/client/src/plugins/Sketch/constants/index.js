@@ -19,7 +19,7 @@ export const ACTIVITIES = [
     id: "EDIT",
     tooltip: "Redigera existerande objekt.",
     information:
-      "Redigera noder, byt ritordning, eller ändra färg på ritade objekt.",
+      "Redigera noder (radera nod med alt-klick), byt ritordning, eller ändra färg på ritade objekt.",
     icon: <FormatShapesIcon />,
   },
   {

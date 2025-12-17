@@ -1214,6 +1214,8 @@ function AttributeEditor(props) {
       if (evt.dragging) return;
       if (evt.originalEvent?.detail >= 2) return;
       if (evt.originalEvent?.button !== 0) return;
+      // Skip if Alt key is pressed (reserved for Modify interaction's deleteCondition)
+      if (evt.originalEvent?.altKey) return;
 
       handleRowLeave();
 

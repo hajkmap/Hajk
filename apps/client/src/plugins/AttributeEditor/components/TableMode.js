@@ -488,6 +488,22 @@ export default function TableMode(props) {
           )}
 
           <button
+            style={
+              filteredAndSorted.length === 0 ? s.iconBtnDisabled : s.iconBtn
+            }
+            disabled={filteredAndSorted.length === 0}
+            onClick={() => exportToExcel(filteredAndSorted)}
+            title={
+              filteredAndSorted.length
+                ? `Exportera till Excel (${filteredAndSorted.length} rader)`
+                : "Inga rader att exportera"
+            }
+            aria-label="Exportera till Excel"
+          >
+            <DescriptionIcon fontSize="small" />
+          </button>
+
+          <button
             style={tableSelectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
             disabled={tableSelectedIds.size === 0}
             onClick={() => {
@@ -578,22 +594,6 @@ export default function TableMode(props) {
             aria-label="Spara"
           >
             <SaveIcon fontSize="small" />
-          </button>
-
-          <button
-            style={
-              filteredAndSorted.length === 0 ? s.iconBtnDisabled : s.iconBtn
-            }
-            disabled={filteredAndSorted.length === 0}
-            onClick={() => exportToExcel(filteredAndSorted)}
-            title={
-              filteredAndSorted.length
-                ? `Exportera till Excel (${filteredAndSorted.length} rader)`
-                : "Inga rader att exportera"
-            }
-            aria-label="Exportera till Excel"
-          >
-            <DescriptionIcon fontSize="small" />
           </button>
         </>
 

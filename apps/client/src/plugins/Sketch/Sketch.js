@@ -678,7 +678,10 @@ const Sketch = (props) => {
         },
       });
 
-      const mod = new Modify({ features: fc, pixelTolerance: 6 });
+      const mod = new Modify({
+        features: fc,
+        pixelTolerance: 6,
+      });
 
       tr.__allowTranslate = !!allow.translate;
       mod.__allowModify = !!allow.modify;

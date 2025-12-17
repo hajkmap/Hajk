@@ -597,6 +597,19 @@ export default function DesktopForm({
           )}
           <div style={s.spacer} />
           <button
+            style={visibleFormList.length === 0 ? s.iconBtnDisabled : s.iconBtn}
+            disabled={visibleFormList.length === 0}
+            onClick={() => exportToExcel(visibleFormList)}
+            aria-label="Exportera till Excel"
+            title={
+              visibleFormList.length
+                ? `Exportera till Excel (${visibleFormList.length} rader)`
+                : "Inga rader att exportera"
+            }
+          >
+            <DescriptionIcon fontSize="small" />
+          </button>
+          <button
             style={
               selectedIds.size === 0 && focusedId == null
                 ? s.iconBtnDisabled
@@ -721,20 +734,6 @@ export default function DesktopForm({
             title="Spara"
           >
             <SaveIcon fontSize="small" />
-          </button>
-
-          <button
-            style={visibleFormList.length === 0 ? s.iconBtnDisabled : s.iconBtn}
-            disabled={visibleFormList.length === 0}
-            onClick={() => exportToExcel(visibleFormList)}
-            aria-label="Exportera till Excel"
-            title={
-              visibleFormList.length
-                ? `Exportera till Excel (${visibleFormList.length} rader)`
-                : "Inga rader att exportera"
-            }
-          >
-            <DescriptionIcon fontSize="small" />
           </button>
         </div>
 
