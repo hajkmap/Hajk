@@ -646,6 +646,7 @@ const SketchView = (props) => {
             measurementSettings={props.measurementSettings}
             setMeasurementSettings={props.setMeasurementSettings}
             globalObserver={globalObserver}
+            map={props.map}
             ogcSource={ogcSource}
             handleOgcSourceChange={handleOgcSourceChange}
           />

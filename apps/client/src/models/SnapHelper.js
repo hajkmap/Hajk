@@ -1,6 +1,9 @@
 import Snap from "ol/interaction/Snap";
+import LocalStorageHelper from "../utils/LocalStorageHelper";
 
 const DISABLE_KEY = "space";
+const STORAGE_KEY = "sketch";
+const DEFAULT_PIXEL_TOLERANCE = 10;
 
 export default class SnapHelper {
   constructor(app) {
@@ -15,6 +18,12 @@ export default class SnapHelper {
     // Initiate a variable that keeps track of pending updates
     this.updatePending = false;
 
+    // Read snap settings from localStorage
+    const savedSettings = LocalStorageHelper.get(STORAGE_KEY) || {};
+    this.pixelTolerance =
+      savedSettings.snapTolerance ?? DEFAULT_PIXEL_TOLERANCE;
+    this.snapEnabled = savedSettings.snapEnabled ?? true;
+
     // When layer visibility is changed, check if there was a
     // vector source. If so, refresh the snap interactions to
     // reflect the visibility change.
@@ -28,6 +37,39 @@ export default class SnapHelper {
     document.addEventListener("keyup", this.#handleKeyUp);
   }
   /**
+   * @summary Sets the pixel tolerance for snap interactions.
+   * @description Updates the pixel tolerance and refreshes all snap interactions.
+   *
+   * @param {number} tolerance - The pixel tolerance value
+   * @memberof SnapHelper
+   */
+  setPixelTolerance(tolerance) {
+    this.pixelTolerance = tolerance;
+    // Refresh snap interactions if there are active plugins
+    if (this.activePlugins.size > 0) {
+      this.#removeAllSnapInteractions();
+      this.#addSnapToAllVectorSources();
+    }
+  }
+
+  /**
+   * @summary Enables or disables snapping.
+   * @description When disabled, all snap interactions are removed.
+   * When enabled, snap interactions are added if there are active plugins.
+   *
+   * @param {boolean} enabled - Whether snapping should be enabled
+   * @memberof SnapHelper
+   */
+  setSnapEnabled(enabled) {
+    this.snapEnabled = enabled;
+    if (enabled && this.activePlugins.size > 0) {
+      this.#addSnapToAllVectorSources();
+    } else if (!enabled) {
+      this.#removeAllSnapInteractions();
+    }
+  }
+
+  /**
    * @summary Adds a given plugin to the set of plugins interested of
    * snap interaction. As long as this set isn't empty, Snap helper knows
    * that interactions should be added.
@@ -37,9 +79,11 @@ export default class SnapHelper {
    */
   add(plugin) {
     // If this is the first plugin that wants to activate Snap,
-    // ensure that we add the interactions to map. Else, they've
-    // already been added and there's no need to do it again.
-    this.activePlugins.size === 0 && this.#addSnapToAllVectorSources();
+    // ensure that we add the interactions to map (only if snap is enabled).
+    // Else, they've already been added and there's no need to do it again.
+    this.activePlugins.size === 0 &&
+      this.snapEnabled &&
+      this.#addSnapToAllVectorSources();
 
     // Add the plugin to our stack
     this.activePlugins.add(plugin);
@@ -139,6 +183,7 @@ export default class SnapHelper {
     vectorSources.forEach((source) => {
       const snap = new Snap({
         source,
+        pixelTolerance: this.pixelTolerance,
       });
       this.map.addInteraction(snap);
 

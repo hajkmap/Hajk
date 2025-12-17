@@ -19,11 +19,12 @@ import {
   AREA_MEASUREMENT_UNITS,
   LENGTH_MEASUREMENT_UNITS,
   MEASUREMENT_PRECISIONS,
+  SNAP_TOLERANCE_OPTIONS,
 } from "../constants";
 
 const SettingsView = (props) => {
   // Let's destruct some props
-  const { model, measurementSettings, setMeasurementSettings } = props;
+  const { model, measurementSettings, setMeasurementSettings, map } = props;
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(props.globalObserver);
   // We're gonna need some local state as well. For example, should we show helper-snacks?
@@ -31,10 +32,31 @@ const SettingsView = (props) => {
     model.getShowHelperSnacks()
   );
 
+  // Get snap settings from localStorage or use defaults
+  const getSnapSettings = React.useCallback(() => {
+    if (!functionalCookiesOk) {
+      return { snapEnabled: true, snapTolerance: 10 };
+    }
+    const saved = LocalStorageHelper.get(STORAGE_KEY);
+    return {
+      snapEnabled: saved?.snapEnabled ?? true,
+      snapTolerance: saved?.snapTolerance ?? 10,
+    };
+  }, [functionalCookiesOk]);
+
+  // State for snap settings
+  const [snapEnabled, setSnapEnabled] = React.useState(
+    () => getSnapSettings().snapEnabled
+  );
+  const [snapTolerance, setSnapTolerance] = React.useState(
+    () => getSnapSettings().snapTolerance
+  );
+
   const [showHajkToolTips, setShowHajkToolTips] = React.useState({
     select1: true,
     select2: true,
     select3: true,
+    select4: true,
     // Add more keys for additional Selects if needed
   });
 
@@ -55,6 +77,39 @@ const SettingsView = (props) => {
       });
     }
   }, [model, showHelperSnacks, functionalCookiesOk]);
+
+  // Effect to update snap enabled state in SnapHelper and localStorage
+  React.useEffect(() => {
+    if (map?.snapHelper) {
+      map.snapHelper.setSnapEnabled(snapEnabled);
+    }
+    if (functionalCookiesOk) {
+      LocalStorageHelper.set(STORAGE_KEY, {
+        ...LocalStorageHelper.get(STORAGE_KEY),
+        snapEnabled: snapEnabled,
+      });
+    }
+  }, [map, snapEnabled, functionalCookiesOk]);
+
+  // Effect to update snap tolerance in SnapHelper and localStorage
+  React.useEffect(() => {
+    if (map?.snapHelper) {
+      map.snapHelper.setPixelTolerance(snapTolerance);
+    }
+    if (functionalCookiesOk) {
+      LocalStorageHelper.set(STORAGE_KEY, {
+        ...LocalStorageHelper.get(STORAGE_KEY),
+        snapTolerance: snapTolerance,
+      });
+    }
+  }, [map, snapTolerance, functionalCookiesOk]);
+
+  // Effect to reload snap settings from localStorage when cookie status changes
+  React.useEffect(() => {
+    const settings = getSnapSettings();
+    setSnapEnabled(settings.snapEnabled);
+    setSnapTolerance(settings.snapTolerance);
+  }, [functionalCookiesOk, getSnapSettings]);
 
   return (
     <Grid container>
@@ -101,6 +156,58 @@ const SettingsView = (props) => {
                 />
               }
             />
+          </HajkToolTip>
+          <HajkToolTip
+            title={`Slå ${snapEnabled ? "av" : "på"} snappning. När snappning är påslaget kommer ritverktyget att automatiskt fästa vid närliggande punkter och linjer.`}
+          >
+            <FormControlLabel
+              label="Snappning aktiverad"
+              control={
+                <Switch
+                  checked={snapEnabled}
+                  onChange={() => setSnapEnabled((enabled) => !enabled)}
+                  color="primary"
+                />
+              }
+            />
+          </HajkToolTip>
+          <HajkToolTip
+            title={
+              showHajkToolTips.select4
+                ? "Välj hur känslig snappningen ska vara. Högre värde betyder att snappning aktiveras på längre avstånd."
+                : ""
+            }
+          >
+            <FormControl
+              size="small"
+              style={{ marginTop: 8 }}
+              disabled={!snapEnabled}
+            >
+              <InputLabel
+                variant="outlined"
+                id="sketch-select-snap-tolerance-label"
+              >
+                Snappningstolerans
+              </InputLabel>
+              <Select
+                id="sketch-select-snap-tolerance"
+                labelId="sketch-select-snap-tolerance-label"
+                value={snapTolerance}
+                label="Snappningstolerans"
+                variant="outlined"
+                onChange={(e) => setSnapTolerance(Number(e.target.value))}
+                onFocus={() => handleFocus("select4", false)}
+                onBlur={() => handleFocus("select4", true)}
+              >
+                {SNAP_TOLERANCE_OPTIONS.map((option, index) => {
+                  return (
+                    <MenuItem value={option.value} key={index}>
+                      {option.name}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
           </HajkToolTip>
         </FormControl>
       </Grid>

@@ -184,6 +184,20 @@ export const DEFAULT_MEASUREMENT_SETTINGS = {
   precision: 0,
 };
 
+export const SNAP_TOLERANCE_OPTIONS = [
+  { value: 4, name: "4 pixlar (låg)" },
+  { value: 6, name: "6 pixlar" },
+  { value: 8, name: "8 pixlar" },
+  { value: 10, name: "10 pixlar (standard)" },
+  { value: 12, name: "12 pixlar" },
+  { value: 15, name: "15 pixlar (hög)" },
+];
+
+export const DEFAULT_SNAP_SETTINGS = {
+  snapEnabled: true,
+  snapTolerance: 10,
+};
+
 export const STORAGE_KEY = "sketch";
 
 // How many characters we allow the user to save in LS.

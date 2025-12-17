@@ -213,19 +213,17 @@ const Sketch = (props) => {
   }, []);
 
   React.useEffect(() => {
+    // Only run logic when there are geometry type restrictions (redigerbart lager selected)
     if (!allowedGeometryTypes || allowedGeometryTypes.length === 0) {
-      // No service selected reset drawType to Polygon
-      if (activityId === "ADD") {
-        setActiveDrawType("Polygon");
-      }
+      // No restrictions - user can freely select any draw type
       return;
     }
 
-    // Choose first allowed geometry type
+    // When there are restrictions, ensure the current draw type is allowed
     if (!allowedGeometryTypes.includes(activeDrawType)) {
       setActiveDrawType(allowedGeometryTypes[0]);
     }
-  }, [allowedGeometryTypes, activeDrawType, activityId, setActiveDrawType]);
+  }, [allowedGeometryTypes, activeDrawType, setActiveDrawType]);
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
