@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import FormPanel from "../../../components/form-components/form-panel";
 import FormAccordion from "../../../components/form-components/form-accordion";
+import FormContainer from "../../../components/form-components/form-container";
 import { useTranslation } from "react-i18next";
 import { Controller, FieldValues, useForm } from "react-hook-form";
 import { SketchPicker } from "react-color";
@@ -39,7 +40,7 @@ export default function InfoClickRenderer({
   });
 
   return (
-    <>
+    <FormContainer>
       <FormPanel title={t("common.information")}>
         <Grid container>
           <Grid size={{ xs: 12, md: 12 }}>
@@ -109,7 +110,7 @@ export default function InfoClickRenderer({
           </Grid>
           <Grid size={{ xs: 12, md: 10 }}>
             <Controller
-              name="options.description"
+              name="options.instruction"
               control={control}
               defaultValue={tool?.options?.instruction ?? ""}
               render={({ field }) => (
@@ -497,6 +498,6 @@ export default function InfoClickRenderer({
           </Grid>
         </Grid>
       </FormAccordion>
-    </>
+    </FormContainer>
   );
 }

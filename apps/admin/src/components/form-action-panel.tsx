@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, Avatar, Tooltip } from "@mui/material";
 import CircularProgress from "../components/progress/circular-progress";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../api/users";
@@ -15,6 +15,7 @@ interface FormActionProps {
   lastSavedBy?: string;
   lastSavedDate?: string;
   children?: React.ReactNode;
+  isDirty?: boolean;
 }
 
 const FormActionPanel: React.FC<FormActionProps> = ({
@@ -26,10 +27,24 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   lastSavedBy,
   lastSavedDate,
   children,
+  isDirty,
 }) => {
   const { t } = useTranslation();
   const { data: createdUser } = useUser(createdBy ?? "");
   const { data: lastSavedUser } = useUser(lastSavedBy ?? "");
+
+  const formatDate = (d?: string) => (d ? new Date(d).toLocaleString() : "");
+  const initials = (name?: string) =>
+    (name ?? "")
+      .split(" ")
+      .map((p) => p.charAt(0))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+
+  const handleCancel = () => {
+    window.history.back();
+  };
 
   return (
     <Box
@@ -55,6 +70,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           maxWidth: "200px",
           top: "100px",
           position: "sticky",
+          width: "100%",
         }}
       >
         <Button
@@ -63,30 +79,58 @@ const FormActionPanel: React.FC<FormActionProps> = ({
             void onUpdate();
           }}
           variant="contained"
-          disabled={updateStatus === "pending"}
+          disabled={updateStatus === "pending" || !isDirty}
+          sx={{ height: 30 }}
         >
           {updateStatus === "pending" ? (
-            <CircularProgress color="primary" size={30} />
+            <CircularProgress color="primary" size={20} />
           ) : (
-            t("services.dialog.saveBtn", saveButtonText)
+            saveButtonText || t("common.dialog.saveBtn")
           )}
+        </Button>
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            void handleCancel();
+          }}
+        >
+          {t("common.cancel")}
         </Button>
 
         {createdBy && createdDate && (
-          <Typography variant="body2" color="text.secondary">
-            {t("common.createdBy", {
-              createdBy: createdUser?.fullName,
-              createdDate: new Date(createdDate).toLocaleString(),
-            })}
-          </Typography>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <Tooltip title={createdUser?.fullName ?? createdBy}>
+              <Avatar sx={{ width: 30, height: 30, fontSize: 13 }}>
+                {initials(createdUser?.fullName ?? createdBy)}
+              </Avatar>
+            </Tooltip>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {t("common.createdBy", {
+                  createdBy: createdUser?.fullName ?? createdBy,
+                  createdDate: formatDate(createdDate),
+                })}
+              </Typography>
+            </Box>
+          </Box>
         )}
+
         {lastSavedBy && lastSavedDate && (
-          <Typography variant="body2" color="text.secondary">
-            {t("common.lastSavedBy", {
-              lastSavedBy: lastSavedUser?.fullName,
-              lastSavedDate: new Date(lastSavedDate).toLocaleString(),
-            })}
-          </Typography>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <Tooltip title={lastSavedUser?.fullName ?? lastSavedBy}>
+              <Avatar sx={{ width: 30, height: 30, fontSize: 13 }}>
+                {initials(lastSavedUser?.fullName ?? lastSavedBy)}
+              </Avatar>
+            </Tooltip>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {t("common.lastSavedBy", {
+                  lastSavedBy: lastSavedUser?.fullName ?? lastSavedBy,
+                  lastSavedDate: formatDate(lastSavedDate),
+                })}
+              </Typography>
+            </Box>
+          </Box>
         )}
       </Box>
       <Box

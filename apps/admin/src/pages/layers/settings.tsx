@@ -98,7 +98,7 @@ export default function LayerSettings() {
     handleSubmit,
     control,
     watch,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<FieldValues>({
     defaultValues,
     mode: "onChange",
@@ -267,6 +267,7 @@ export default function LayerSettings() {
     throw new HttpError(404, "Layer not found");
   }
   if (isError) return <div>Error fetching layer details.</div>;
+
   return (
     <Page title={t("common.settings")}>
       <FormActionPanel
@@ -277,6 +278,7 @@ export default function LayerSettings() {
         createdDate={layer?.createdDate}
         lastSavedBy={layer?.lastSavedBy}
         lastSavedDate={layer?.lastSavedDate}
+        isDirty={isDirty}
       >
         <FormContainer
           onSubmit={(e) => {
@@ -394,7 +396,7 @@ export default function LayerSettings() {
                   }
                 />
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid size={{ xs: 12, md: 10 }}>
                 <FormControl fullWidth>
                   <InputLabel id="serviceId-label">
                     {t("layers.common.service")}
@@ -420,7 +422,7 @@ export default function LayerSettings() {
                   />
                 </FormControl>
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid size={{ xs: 12, md: 10 }}>
                 <TextField
                   label={t("layers.internalName")}
                   fullWidth
@@ -428,7 +430,7 @@ export default function LayerSettings() {
                   {...register("internalName")}
                 />
               </Grid>
-              <Grid size={12}>
+              <Grid size={10}>
                 <TextField
                   label={t("layers.copyRight")}
                   fullWidth
@@ -436,7 +438,7 @@ export default function LayerSettings() {
                   {...register("metadata.attribution")}
                 />
               </Grid>
-              <Grid size={12}>
+              <Grid size={10}>
                 <TextField
                   label={t("map.description")}
                   fullWidth
@@ -446,7 +448,7 @@ export default function LayerSettings() {
                   {...register("description")}
                 />
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid size={{ xs: 12, md: 10 }}>
                 <TextField
                   label={t("layers.keyword")}
                   fullWidth
@@ -454,7 +456,7 @@ export default function LayerSettings() {
                   {...register("options.keyword")}
                 />
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid size={{ xs: 12, md: 10 }}>
                 <TextField
                   label={t("layers.category")}
                   fullWidth

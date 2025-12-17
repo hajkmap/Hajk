@@ -8,7 +8,16 @@ const ProgressCircular: React.FC<CircularProgressProps> = ({
   typographyText = "",
 }) => {
   return (
-    <Box component="div" sx={{ textAlign: "center" }}>
+    <Box
+      component="div"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+      }}
+    >
       <CircularProgress color={color} size={size} thickness={5} />
       {typographyText && <Typography>{typographyText}</Typography>}
     </Box>

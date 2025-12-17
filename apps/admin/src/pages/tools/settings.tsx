@@ -1,22 +1,11 @@
-import { useParams, useNavigate } from "react-router";
+import { useParams } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
-import {
-  Typography,
-  TextField,
-  Checkbox,
-  FormGroup,
-  FormControlLabel,
-} from "@mui/material";
-import Grid from "@mui/material/Grid2";
-import StyledDataGrid from "../../components/data-grid";
+import { Typography } from "@mui/material";
+
 import { useMapsByToolName, useTools } from "../../api/tools";
-import { Map } from "../../api/maps";
-import FormActionPanel from "../../components/form-action-panel";
 import FormContainer from "../../components/form-components/form-container";
-import FormPanel from "../../components/form-components/form-panel";
-import FormAccordion from "../../components/form-components/form-accordion";
-import { Controller, FieldValues, useForm } from "react-hook-form";
+import FormActionPanel from "../../components/form-action-panel";
 import { useRef } from "react";
 import { toast } from "react-toastify";
 import RenderTool from "./renderers/render-tool";
@@ -24,7 +13,6 @@ import RenderTool from "./renderers/render-tool";
 export default function ToolSettings() {
   const { t } = useTranslation();
   const { toolName } = useParams<{ toolName: string }>();
-  const navigate = useNavigate();
   const {
     data: maps,
     isLoading: mapsLoading,
@@ -34,23 +22,6 @@ export default function ToolSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
 
   const tool = (tools ?? []).find((t) => t.type === toolName);
-
-  const { control } = useForm<FieldValues>({
-    defaultValues: {
-      type: tool?.type ?? "",
-      // Spread options into flat fields like options.key
-      ...(tool?.options
-        ? Object.fromEntries(
-            Object.entries(tool.options).map(([k, v]) => [
-              `options.${k}`,
-              String(v ?? ""),
-            ])
-          )
-        : {}),
-    },
-    mode: "onChange",
-    reValidateMode: "onChange",
-  });
 
   const loading = mapsLoading || toolsLoading;
   const handleExternalSubmit = () => {
