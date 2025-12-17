@@ -206,11 +206,11 @@ export default function Toolbar({
       pendingTargetRef.current = { def, label };
       setSaveDialogOpen(true);
     } catch (error) {
-      console.error("Fel vid byte av redigeringstjänst:", error);
+      console.error("Fel vid byte av redigeringsbargt lager:", error);
 
       if (enqueueSnackbar) {
         enqueueSnackbar(
-          "Ett fel uppstod vid byte av redigeringstjänst. Försök igen.",
+          "Ett fel uppstod vid byte av redigeringsbart lager. Försök igen.",
           { variant: "error" }
         );
       }
@@ -234,7 +234,7 @@ export default function Toolbar({
 
       // Show notification
       enqueueSnackbar(
-        `Redigeringstjänst vald. ${drawingsWarningDialog.drawingCount} ritade objekt finns kvar i kartan.`,
+        `Redigeringsbart lager valt. ${drawingsWarningDialog.drawingCount} ritade objekt finns kvar i kartan.`,
         { variant: "info" }
       );
     }
@@ -265,7 +265,7 @@ export default function Toolbar({
       applyServiceSwitch(def, label);
 
       // Show notification
-      enqueueSnackbar("Ritade objekt borttagna. Redigeringstjänst vald.", {
+      enqueueSnackbar("Ritade objekt borttagna. Redigeringsbart lager valt.", {
         variant: "success",
       });
     }
@@ -344,8 +344,8 @@ export default function Toolbar({
         value={serviceId}
         onChange={handleServiceChange}
         style={s.inputComb}
-        aria-label="Välj redigeringstjänst"
-        title="Välj redigeringstjänst"
+        aria-label="Välj redigerbart lager"
+        title="Välj redigerbart lager"
       >
         <option value="NONE_ID">Ingen</option>
         {serviceList.map((o) => (

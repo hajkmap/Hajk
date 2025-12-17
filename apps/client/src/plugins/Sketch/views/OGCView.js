@@ -9,7 +9,7 @@ const OGCView = ({
   handleOgcSourceChange,
   handleFocus,
   focusKey = "ogc",
-  labelText = "Välj redigeringstjänst att spara till",
+  labelText = "Välj redigerbart lager att spara till",
   uiDisabled,
   serviceList = [],
 }) => {

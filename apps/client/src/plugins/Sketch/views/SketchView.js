@@ -484,7 +484,7 @@ const SketchView = (props) => {
 
     // Show notification to user
     enqueueSnackbar(
-      `Redigeringstjänst vald. ${drawingsWarningDialog.drawingCount} ritade objekt finns kvar i kartan.`,
+      `Redigeringsbart lager valt. ${drawingsWarningDialog.drawingCount} ritade objekt finns kvar i kartan.`,
       { variant: "info" }
     );
   }, [drawingsWarningDialog, props, enqueueSnackbar]);
@@ -520,7 +520,7 @@ const SketchView = (props) => {
     setOgcSource(targetService.title);
 
     // Show confirmation
-    enqueueSnackbar("Ritade objekt borttagna. Redigeringstjänst vald.", {
+    enqueueSnackbar("Ritade objekt borttagna. Redigeringsbart lager valt.", {
       variant: "success",
     });
   }, [drawingsWarningDialog, drawModel, props, enqueueSnackbar]);

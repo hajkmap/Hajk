@@ -2133,7 +2133,7 @@ export default function AttributeEditorView({
       {serviceId === "NONE_ID" ? (
         <div style={s.paneWrap}>
           <div style={{ ...s.pane, gridColumn: "1 / -1" }}>
-            <div style={s.formEmpty}>Ingen redigeringstjänst vald.</div>
+            <div style={s.formEmpty}>Inget redigeringsbart lager vald.</div>
           </div>
         </div>
       ) : ui.mode === "table" ? (

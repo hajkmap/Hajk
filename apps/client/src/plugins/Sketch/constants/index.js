@@ -58,9 +58,9 @@ export const ACTIVITIES = [
   },
   {
     id: "OGC",
-    tooltip: "Välj redigeringstjänst att spara till.",
+    tooltip: "Välj redigerbart lager att spara till.",
     information:
-      "Här kan du välja en redigeringstjänst kopplat till en kartserver och en databas.",
+      "Här kan du välja ett redigeringsbart lager kopplat till en kartserver.",
     icon: <AddLocationAltIcon />,
   },
 ];
@@ -213,7 +213,7 @@ export const PROMPT_TEXTS = {
   DELETEHelp: "Klicka på ett objekt för att radera det från din skiss.",
   SAVEHelp:
     "Här kan du spara en arbetsyta för att fortsätta ditt arbete senare. För att spara över en äldre arbetsyta, ange samma namn.",
-  OGCHelp: "Här kan du aktivera redigeringstjänsten att spara till.",
+  OGCHelp: "Här kan du aktivera redigeringsbart lager att spara till.",
 };
 
 export const AREA_MEASUREMENT_UNITS = [

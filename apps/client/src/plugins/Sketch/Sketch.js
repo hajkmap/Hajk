@@ -23,6 +23,10 @@ import Select from "ol/interaction/Select";
 import Translate from "ol/interaction/Translate";
 import Modify from "ol/interaction/Modify";
 import { Stroke, Fill } from "ol/style";
+import GeoJSON from "ol/format/GeoJSON";
+
+// Turf
+import kinks from "@turf/kinks";
 
 // Constants
 import {
@@ -33,6 +37,7 @@ import {
 
 // Hooks
 import useCookieStatus from "../../hooks/useCookieStatus";
+import { useSnackbar } from "notistack";
 
 // Returns the measurement-settings-object from LS if it exists, otherwise it returns
 // the default measurement-settings. The LS might be empty since the user might have chosen
@@ -43,6 +48,7 @@ const getMeasurementSettings = () => {
 };
 
 const Sketch = (props) => {
+  const { enqueueSnackbar } = useSnackbar();
   const lastEditFeatureRef = React.useRef(null);
   // We're gonna need to keep track of the current chosen activity. ("ADD", "REMOVE", etc).
   const [activityId, setActivityId] = React.useState("ADD");
@@ -278,6 +284,106 @@ const Sketch = (props) => {
       return out;
     });
   }
+
+  // Helper function to validate geometry using turf/kinks
+  const validateGeometry = React.useCallback(
+    (feature) => {
+      // Only validate when in AttributeEditor mode (allowedGeometryTypes is set)
+      // or when Sketch is in edit mode (activityId === "EDIT")
+      const shouldValidate =
+        allowedGeometryTypes !== null || activityId === "EDIT";
+      if (!shouldValidate) return;
+
+      try {
+        const geom = feature?.getGeometry?.();
+        if (!geom) return;
+
+        const geomType = geom.getType();
+        // Only validate LineString, MultiLineString, Polygon and MultiPolygon geometries
+        const validatableTypes = [
+          "LineString",
+          "MultiLineString",
+          "Polygon",
+          "MultiPolygon",
+        ];
+        if (!validatableTypes.includes(geomType)) return;
+
+        // Convert OpenLayers geometry to GeoJSON for turf
+        const format = new GeoJSON();
+        const geojson = format.writeGeometryObject(geom);
+
+        // Check for self-intersections (kinks)
+        const kinksResult = kinks(geojson);
+
+        if (kinksResult.features && kinksResult.features.length > 0) {
+          const geometryName =
+            geomType === "Polygon" || geomType === "MultiPolygon"
+              ? "Polygonen"
+              : "Linjen";
+          enqueueSnackbar(
+            `${geometryName} har ${kinksResult.features.length} självkorsning${kinksResult.features.length > 1 ? "ar" : ""}. Var god kontrollera och rätta geometrin.`,
+            {
+              variant: "warning",
+              autoHideDuration: 8000,
+            }
+          );
+        }
+      } catch (error) {
+        console.error("Geometry validation error:", error);
+      }
+    },
+    [allowedGeometryTypes, activityId, enqueueSnackbar]
+  );
+
+  // Effect to listen for geometry draw/edit events and validate
+  React.useEffect(() => {
+    if (!drawModel) return;
+
+    // Listen for when a feature is added (drawn)
+    const handleFeatureAdded = (event) => {
+      const feature = event?.feature;
+      if (feature && feature.get("USER_DRAWN")) {
+        validateGeometry(feature);
+      }
+    };
+
+    const source = drawModel.getCurrentVectorSource?.();
+    if (source) {
+      source.on("addfeature", handleFeatureAdded);
+    }
+
+    return () => {
+      if (source) {
+        source.un("addfeature", handleFeatureAdded);
+      }
+    };
+  }, [drawModel, validateGeometry]);
+
+  // Effect to listen for modify events from AttributeEditor
+  React.useEffect(() => {
+    const offGeomEdited = editBus.on("sketch:geometry-edited", (ev) => {
+      const { id } = ev.detail || {};
+      if (id == null) return;
+
+      // Find the feature and validate it
+      const source = drawModel?.getCurrentVectorSource?.();
+      if (!source) return;
+
+      const features = source.getFeatures();
+      const feature = features.find((f) => {
+        const fid = f.getId?.() ?? f.get?.("@_fid") ?? f.get?.("id");
+        return (
+          String(fid) === String(id) || String(fid).endsWith("." + String(id))
+        );
+      });
+
+      if (feature) {
+        validateGeometry(feature);
+      }
+    });
+
+    return () => offGeomEdited();
+  }, [drawModel, validateGeometry]);
 
   // Orchestrates Sketch ↔ AttributeEditor integration for AE layers.
   // - Finds/attaches OpenLayers interactions (Select/Translate/Modify) for the

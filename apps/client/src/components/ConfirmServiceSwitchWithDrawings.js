@@ -40,16 +40,16 @@ export default function ConfirmServiceSwitchWithDrawings({
       <DialogContent>
         <Alert severity="warning" sx={{ mb: 2 }}>
           Du har {drawingCount} ritade objekt i kartan som inte är kopplade till
-          någon redigeringstjänst.
+          någon redigerbart lager.
         </Alert>
         <DialogContentText>
-          Du är på väg att välja redigeringstjänsten{" "}
+          Du är på väg att välja redigerbart lager{" "}
           <strong>{targetServiceName}</strong>.
         </DialogContentText>
         <DialogContentText sx={{ mt: 2 }}>
-          <strong>OBS:</strong> Ritade objekt och redigeringstjänster är
-          separata system. Om du behåller de ritade objekten kommer de finnas
-          kvar i kartan men kan inte sparas tillsammans med redigeringstjänsten.
+          <strong>OBS:</strong> Ritade objekt och redigerbara lager är separata
+          system. Om du behåller de ritade objekten kommer de finnas kvar i
+          kartan men kan inte sparas tillsammans med redigerbart lager.
         </DialogContentText>
         <DialogContentText sx={{ mt: 2 }}>Vad vill du göra?</DialogContentText>
       </DialogContent>

@@ -56,6 +56,7 @@
     "@nieuwlandgeo/sldreader": "^0.7.2",
     "@turf/boolean-point-on-line": "^7.2.0",
     "@turf/buffer": "^7.2.0",
+    "@turf/kinks": "^7.3.1",
     "@turf/transform-translate": "^7.2.0",
     "@turf/union": "^7.2.0",
     "core-js": "^3.45.1",
