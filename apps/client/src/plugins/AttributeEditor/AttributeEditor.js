@@ -911,6 +911,11 @@ function AttributeEditor(props) {
           return;
         }
 
+        // Ignore measurement guides from Sketch/Measurer tools
+        if (f.get?.("USER_MEASUREMENT_GUIDE")) {
+          return;
+        }
+
         if (
           !currentServiceIdRef.current ||
           currentServiceIdRef.current === "NONE_ID"

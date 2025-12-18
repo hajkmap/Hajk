@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import Observer from "react-event-observer";
 import EditIcon from "@mui/icons-material/Edit";
 
@@ -17,6 +17,7 @@ import SketchModel from "./models/SketchModel";
 import DrawModel from "../../models/DrawModel";
 import KmlModel from "../../models/KmlModel";
 import GpxModel from "../../models/GpxModel";
+import AngleSnapping from "../Measurer/AngleSnapping";
 
 // OL
 import Select from "ol/interaction/Select";
@@ -110,6 +111,11 @@ const Sketch = (props) => {
         measurementSettings: measurementSettings,
       })
   );
+
+  // We need angle snapping functionality (perpendicular to lines/polygon sides)
+  const angleSnapping = useMemo(() => {
+    return new AngleSnapping(drawModel, props.map);
+  }, [drawModel, props.map]);
 
   // We need a model used to interact with the map etc. We want to
   // keep the view free from direct interactions.
@@ -367,7 +373,10 @@ const Sketch = (props) => {
       const source = drawModel?.getCurrentVectorSource?.();
       if (!source) return;
 
-      const features = source.getFeatures();
+      const features = source.getFeatures().filter(
+        // Filter out measurement guides
+        (f) => !f.get("USER_MEASUREMENT_GUIDE")
+      );
       const feature = features.find((f) => {
         const fid = f.getId?.() ?? f.get?.("@_fid") ?? f.get?.("id");
         return (
@@ -1008,6 +1017,15 @@ const Sketch = (props) => {
     const onLayerAdd = (e) => {
       const lyr = e.element || e.layer || e.target;
       attachForLayer(lyr, { select: true, translate: true, modify: true });
+      // Refresh snap helper when a new layer is added so features can be snapped to
+      if (lyr.get?.("name") === LAYER_NAME) {
+        try {
+          map.snapHelper?.delete?.("coreDrawModel");
+          map.snapHelper?.add?.("coreDrawModel");
+        } catch (e) {
+          console.warn("Could not refresh snap helper:", e);
+        }
+      }
     };
 
     const onLayerRemove = (e) => {
@@ -1145,6 +1163,14 @@ const Sketch = (props) => {
     setMoveFeatures(selectedFeatures);
   }, []);
 
+  // Handle draw start event to enable angle snapping
+  const handleDrawStart = React.useCallback(
+    (e) => {
+      angleSnapping.handleDrawStartEvent(e, props.map, drawModel);
+    },
+    [angleSnapping, props.map, drawModel]
+  );
+
   // This effect makes sure to subscribe (and un-subscribe) to all observer-events
   // we are interested in in this view.
   React.useEffect(() => {
@@ -1168,7 +1194,9 @@ const Sketch = (props) => {
     // Otherwise, we make sure to toggle the draw-interaction to the correct one.
     switch (activityId) {
       case "ADD":
-        return drawModel.toggleDrawInteraction(activeDrawType);
+        return drawModel.toggleDrawInteraction(activeDrawType, {
+          handleDrawStart: handleDrawStart,
+        });
       case "DELETE":
         return drawModel.toggleDrawInteraction("Delete");
       case "EDIT":
@@ -1178,7 +1206,14 @@ const Sketch = (props) => {
       default:
         return drawModel.toggleDrawInteraction("");
     }
-  }, [activeDrawType, activityId, drawModel, pluginShown, toggleBufferBtn]);
+  }, [
+    activeDrawType,
+    activityId,
+    drawModel,
+    pluginShown,
+    toggleBufferBtn,
+    handleDrawStart,
+  ]);
 
   // This effect makes sure to reset the edit- and move-feature if the window is closed,
   // or if the user changes activity. (We don't want to keep the features selected
@@ -1187,6 +1222,45 @@ const Sketch = (props) => {
     setEditFeature(null);
     setMoveFeatures([]);
   }, [activityId, pluginShown]);
+
+  // Make sure angle snapping is active when the plugin is shown
+  React.useEffect(() => {
+    angleSnapping.setActive(pluginShown);
+    if (!pluginShown) {
+      angleSnapping.clearSnapGuides();
+    }
+  }, [angleSnapping, pluginShown]);
+
+  // Prevent measurement guides from being treated as user-drawn features
+  // This effect listens for features being added and immediately marks guides as non-user-drawn
+  React.useEffect(() => {
+    const source = drawModel?.getCurrentVectorSource?.();
+    if (!source) return;
+
+    const handleFeatureAdd = (event) => {
+      const feature = event?.feature;
+      if (feature && feature.get("USER_MEASUREMENT_GUIDE")) {
+        // Immediately mark as non-user-drawn to prevent AttributeEditor sync
+        feature.set("USER_DRAWN", false, true); // silent = true
+      }
+    };
+
+    source.on("addfeature", handleFeatureAdd);
+
+    return () => {
+      source.un("addfeature", handleFeatureAdd);
+    };
+  }, [drawModel]);
+
+  // Clear snap guides when activity or draw type changes
+  React.useEffect(() => {
+    // Clear guides whenever we change activity or draw type
+    try {
+      angleSnapping.clearSnapGuides();
+    } catch (error) {
+      // Ignore errors when cleaning up
+    }
+  }, [activityId, activeDrawType, angleSnapping]);
 
   // An effect that makes sure to set the modify-interaction in the model
   // when the modify-state changes.
@@ -1215,6 +1289,8 @@ const Sketch = (props) => {
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowHide = () => {
+    angleSnapping.setActive(false);
+    angleSnapping.clearSnapGuides();
     setPluginShown(false);
     setToggleBufferBtn({ ...toggleBufferBtn, toggle: false });
   };
@@ -1222,6 +1298,7 @@ const Sketch = (props) => {
   // We're gonna need to catch if the user opens the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowShow = () => {
+    angleSnapping.setActive(true);
     setPluginShown(true);
     setToggleBufferBtn({ ...toggleBufferBtn, toggle: true });
   };
