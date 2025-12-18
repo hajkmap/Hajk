@@ -91,22 +91,23 @@ function GroupDetails({ display, groupDetails, app }) {
           </Box>
           <Box
             sx={{
-              p: 1,
+              p: 2,
             }}
           >
-            <Typography style={{ marginBottom: "4px" }}>
+            <Typography sx={{ mb: 1, pl: 3 }}>
               {groupDetails.infogrouptitle}
             </Typography>
-            <Typography variant="body2">
-              {groupDetails.infogrouptext}
-            </Typography>
+            <Typography
+              variant="body2"
+              dangerouslySetInnerHTML={{ __html: groupDetails.infogrouptext }}
+            />
             <List>
               {groupDetails.infogroupurl && (
                 <ListItem>
                   <ListItemIcon>
                     <LinkIcon />
                   </ListItemIcon>
-                  <Link href={groupDetails.infogroupurl} color="inherit">
+                  <Link href={groupDetails.infogroupurl} variant="body2">
                     {groupDetails.infogroupurltext}
                   </Link>
                 </ListItem>
@@ -118,7 +119,7 @@ function GroupDetails({ display, groupDetails, app }) {
                   </ListItemIcon>
                   <Link
                     href={groupDetails.infogroupopendatalink}
-                    color="inherit"
+                    variant="body2"
                   >
                     Öppna data
                   </Link>
@@ -129,7 +130,11 @@ function GroupDetails({ display, groupDetails, app }) {
                   <ListItemIcon>
                     <VerifiedUserIcon />
                   </ListItemIcon>
-                  <ListItemText primary={groupDetails.infogroupowner} />
+                  <ListItemText>
+                    <Typography variant="body2">
+                      {groupDetails.infogroupowner}
+                    </Typography>
+                  </ListItemText>
                 </ListItem>
               )}
             </List>
