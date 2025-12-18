@@ -54,7 +54,7 @@ const TableRow = ({
           : {}),
         ...(isHovering && !selected && !pendingKind
           ? {
-              backgroundColor: "rgba(96, 165, 250, 0.08)",
+              background: "rgba(96, 165, 250, 0.08)",
             }
           : {}),
       }}
