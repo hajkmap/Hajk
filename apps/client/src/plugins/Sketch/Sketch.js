@@ -25,6 +25,7 @@ import Translate from "ol/interaction/Translate";
 import Modify from "ol/interaction/Modify";
 import { Stroke, Fill } from "ol/style";
 import GeoJSON from "ol/format/GeoJSON";
+import { altKeyOnly } from "ol/events/condition";
 
 // Turf
 import kinks from "@turf/kinks";
@@ -690,6 +691,7 @@ const Sketch = (props) => {
       const mod = new Modify({
         features: fc,
         pixelTolerance: 6,
+        deleteCondition: altKeyOnly,
       });
 
       tr.__allowTranslate = !!allow.translate;

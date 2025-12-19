@@ -12,7 +12,11 @@ import transformTranslate from "@turf/transform-translate";
 import { getArea as getExtentArea, getCenter, getWidth } from "ol/extent";
 import { Feature } from "ol";
 import { handleClick } from "./Click";
-import { noModifierKeys, platformModifierKeyOnly } from "ol/events/condition";
+import {
+  noModifierKeys,
+  platformModifierKeyOnly,
+  altKeyOnly,
+} from "ol/events/condition";
 import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
 
 /*
@@ -1607,7 +1611,10 @@ class DrawModel {
     this.#disableModifyInteraction();
     // We have to make sure to set a field so that the handlers responsible for deleting
     // all active interactions knows that there is an edit-interaction to delete.
-    this.#modifyInteraction = new Modify({ source: this.#drawSource });
+    this.#modifyInteraction = new Modify({
+      source: this.#drawSource,
+      deleteCondition: altKeyOnly,
+    });
     // We're gonna need a handler that can update the feature-style when
     // the modification is completed.
     this.#modifyInteraction.on("modifyend", this.#handleModifyEnd);
