@@ -30,8 +30,14 @@ import { HttpError } from "../../lib/http-error";
 import FormContainer from "../../components/form-components/form-container";
 import FormPanel from "../../components/form-components/form-panel";
 import FormAccordion from "../../components/form-components/form-accordion";
-import LayerSwitcherDnD from "../groups/components/layerswitcher-dnd";
-import ToolSwitcherOrderList from "./components/toolswitcher-dnd-orderlist";
+import {
+  LayerSwitcherDnD,
+  TreeItemData,
+} from "../../components/layerswitcher-dnd";
+import { useLayers } from "../../api/layers";
+import { useGroups } from "../../api/groups";
+import { useTools } from "../../api/tools";
+import { TreeItems } from "dnd-kit-sortable-tree";
 
 export default function MapSettings() {
   const { t } = useTranslation();
@@ -45,6 +51,24 @@ export default function MapSettings() {
   const [activeTab, setActiveTab] = useState<"menu" | "settings" | "tools">(
     "settings"
   );
+  const { data: layers = [] } = useLayers();
+  const { data: groups = [] } = useGroups();
+  const { data: tools = [] } = useTools();
+
+  // Drop zone states
+  const [backgroundLayersDZ, setBackgroundLayersDZ] = useState<
+    TreeItems<TreeItemData>
+  >([]);
+  const [groupLayersDZ, setGroupLayersDZ] = useState<TreeItems<TreeItemData>>(
+    []
+  );
+  const [drawerDZ, setDrawerDZ] = useState<TreeItems<TreeItemData>>([]);
+  const [controlDZ, setControlDZ] = useState<TreeItems<TreeItemData>>([]);
+  const [widgetLeftDZ, setWidgetLeftDZ] = useState<TreeItems<TreeItemData>>([]);
+  const [widgetRightDZ, setWidgetRightDZ] = useState<TreeItems<TreeItemData>>(
+    []
+  );
+  const [otherDZ, setOtherDZ] = useState<TreeItems<TreeItemData>>([]);
 
   const handleExternalSubmit = () => {
     if (formRef.current) {
@@ -915,19 +939,67 @@ export default function MapSettings() {
 
         {activeTab === "menu" && (
           <>
-            <FormPanel title={t("common.layerGroups")}>
-              <LayerSwitcherDnD />
-            </FormPanel>
-            <FormPanel title={t("common.layers")}>
-              <LayerSwitcherDnD />
-            </FormPanel>
+            <LayerSwitcherDnD
+              layers={layers}
+              dropZones={[
+                {
+                  id: "layers",
+                  title: t("common.layers"),
+                  items: backgroundLayersDZ,
+                  onItemsChange: setBackgroundLayersDZ,
+                },
+              ]}
+            />
+            <LayerSwitcherDnD
+              groups={groups}
+              dropZones={[
+                {
+                  id: "groups",
+                  title: t("common.layerGroups"),
+                  items: groupLayersDZ,
+                  onItemsChange: setGroupLayersDZ,
+                },
+              ]}
+            />
           </>
         )}
 
         {activeTab === "tools" && (
-          <FormPanel title={t("navBar.navigation")}>
-            <ToolSwitcherOrderList />
-          </FormPanel>
+          <LayerSwitcherDnD
+            tools={tools.map((t) => ({ id: t.id, name: t.type }))}
+            dropZones={[
+              {
+                id: "drawer",
+                title: "Drawer",
+                items: drawerDZ,
+                onItemsChange: setDrawerDZ,
+              },
+              {
+                id: "control",
+                title: "Control Button",
+                items: controlDZ,
+                onItemsChange: setControlDZ,
+              },
+              {
+                id: "widgetLeft",
+                title: "WidgetLeft",
+                items: widgetLeftDZ,
+                onItemsChange: setWidgetLeftDZ,
+              },
+              {
+                id: "widgetRight",
+                title: "WidgetRight",
+                items: widgetRightDZ,
+                onItemsChange: setWidgetRightDZ,
+              },
+              {
+                id: "other",
+                title: "Other",
+                items: otherDZ,
+                onItemsChange: setOtherDZ,
+              },
+            ]}
+          />
         )}
       </FormActionPanel>
     </Page>
