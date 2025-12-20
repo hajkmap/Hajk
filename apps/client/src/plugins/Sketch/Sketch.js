@@ -23,7 +23,7 @@ import AngleSnapping from "../Measurer/AngleSnapping";
 import Select from "ol/interaction/Select";
 import Translate from "ol/interaction/Translate";
 import Modify from "ol/interaction/Modify";
-import { Stroke, Fill } from "ol/style";
+import { Stroke, Fill, Style } from "ol/style";
 import GeoJSON from "ol/format/GeoJSON";
 import { altKeyOnly } from "ol/events/condition";
 
@@ -268,17 +268,21 @@ const Sketch = (props) => {
 
   function materializeStyleFromLayer(layer, feature, map) {
     if (!feature) return;
-    if (feature.get && feature.get("__ae_style_delegate")) return;
     const lf = layer?.getStyleFunction?.();
     if (!lf) return;
 
+    // Mark that this feature's style is managed by AttributeEditor
+    // (used by AttributeEditor for internal bookkeeping)
     feature.set?.("__ae_style_delegate", true, true);
 
-    feature.setStyle((f, resArg) => {
+    // Create a style function that's compatible with DrawModel's expectations
+    const styleFunc = (f, resArg) => {
       const res = resArg ?? map?.getView?.().getResolution?.();
       let st = lf(f, res);
       if (Array.isArray(st)) st = st[0];
-      if (!st) return st;
+      // If the layer's style function returns null (e.g., when feature is not visible),
+      // return an empty style instead of null
+      if (!st) return new Style({});
 
       const out = st.clone ? st.clone() : st;
 
@@ -294,7 +298,11 @@ const Sketch = (props) => {
       }
 
       return out;
-    });
+    };
+
+    // Set the style function on the feature
+    // DrawModel will detect this is a function (not a Style object) and skip style manipulation
+    feature.setStyle(styleFunc);
   }
 
   // Helper function to validate geometry using turf/kinks
@@ -500,7 +508,7 @@ const Sketch = (props) => {
         }
       }
 
-      if (feature && !feature.getStyle?.()) {
+      if (feature) {
         const owner = [...reg.keys()].find((lyr) => {
           const src = lyr.getSource?.();
           return (
@@ -509,6 +517,7 @@ const Sketch = (props) => {
               src.getFeatures?.().includes?.(feature))
           );
         });
+        // Always materialize/refresh style to reflect current selection state
         materializeStyleFromLayer(owner, feature, map);
       }
 
@@ -712,7 +721,9 @@ const Sketch = (props) => {
       const onSelect = () => {
         const arr = fc.getArray ? fc.getArray() : [];
         arr.forEach((f) => {
-          if (f && !f.getStyle?.()) materializeStyleFromLayer(layer, f, map);
+          // Always materialize/refresh style, even if feature already has one
+          // This ensures the style reflects the current selection state
+          if (f) materializeStyleFromLayer(layer, f, map);
         });
         publishToEditView(arr[0] ?? null);
 
@@ -973,7 +984,7 @@ const Sketch = (props) => {
         return;
       }
       const f = findAeFeatureById(id);
-      if (f && !f.getStyle?.()) {
+      if (f) {
         const layerForF = [...reg.keys()].find((lyr) => {
           const src = lyr.getSource?.();
           return (
@@ -981,6 +992,7 @@ const Sketch = (props) => {
             (src.getFeatureById?.(id) || src.getFeatures?.().includes?.(f))
           );
         });
+        // Always materialize/refresh style to reflect current selection state
         materializeStyleFromLayer(layerForF, f, map);
       }
       if (activityId === "EDIT") {

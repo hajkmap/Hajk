@@ -561,7 +561,13 @@ export default function AttributeEditorView({
           });
     };
 
-    const pri = (r) => (r.__pending === "add" ? 0 : 1);
+    const pri = (r) => {
+      // Drafts (negative IDs) always stay in the "new items" section,
+      // even if marked for deletion
+      if (r.id < 0) return 0;
+      // Otherwise, "add" gets priority 0, rest gets 1
+      return r.__pending === "add" ? 0 : 1;
+    };
     if (editingId != null) {
       rows.sort((a, b) => {
         const p = pri(a) - pri(b);
@@ -1745,8 +1751,9 @@ export default function AttributeEditorView({
     });
 
     filtered.sort((a, b) => {
-      const ap = a.__pending === "add" ? 0 : 1;
-      const bp = b.__pending === "add" ? 0 : 1;
+      // Drafts (negative IDs) stay in "new items" section, even if marked for deletion
+      const ap = a.id < 0 ? 0 : a.__pending === "add" ? 0 : 1;
+      const bp = b.id < 0 ? 0 : b.__pending === "add" ? 0 : 1;
       if (ap !== bp) return ap - bp;
       return a.__idx - b.__idx;
     });

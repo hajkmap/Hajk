@@ -29,7 +29,7 @@ const FormListItem = ({
       const v = row[k];
       if (v != null && v !== "") {
         parts.push(String(v));
-        if (parts.length >= 3) break;
+        if (parts.length >= 5) break;
       }
     }
     return parts.join(" • ");

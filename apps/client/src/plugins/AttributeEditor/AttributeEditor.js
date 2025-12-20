@@ -278,6 +278,13 @@ function AttributeEditor(props) {
         );
       });
 
+      // Check if draft is marked for deletion
+      const isDraftDeleted =
+        isDraft &&
+        aliases.some((k) =>
+          adds.some((d) => d.id === k && d.__pending === "delete")
+        );
+
       if (!isVisible && !isSelected && !isHovered) return null;
 
       // Hover has highest priority (if not selected)
@@ -287,7 +294,7 @@ function AttributeEditor(props) {
 
       // Determine category (priority order)
       let category = "visible";
-      if (isDeleted) category = "toDelete";
+      if (isDeleted || isDraftDeleted) category = "toDelete";
       else if (isDraft) category = "draft";
       else if (hasEdits) category = "edited";
 

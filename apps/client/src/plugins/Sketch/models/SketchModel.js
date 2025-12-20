@@ -256,6 +256,41 @@ class SketchModel {
   // Returns the feature-style in a form that fits the feature-style-editor
   getFeatureStyle = (feature) => {
     try {
+      // Check if feature has a style function (from AttributeEditor) - return default style
+      const featureStyle = feature?.getStyle?.();
+      if (typeof featureStyle === "function") {
+        return {
+          strokeColor: { r: 0, g: 0, b: 0, a: 1 },
+          lineDash: null,
+          strokeWidth: 2,
+          strokeType: "solid",
+          radius: 5,
+          fillColor: { r: 255, g: 255, b: 255, a: 0.5 },
+          textForegroundColor: "#FFFFFF",
+          textBackgroundColor: "#000000",
+          textSize: 14,
+        };
+      }
+
+      const styleObj = Array.isArray(featureStyle)
+        ? featureStyle[0]
+        : featureStyle;
+
+      // If the feature doesn't have a valid OL style, return a default style
+      if (!styleObj || typeof styleObj.getFill !== "function") {
+        return {
+          strokeColor: { r: 0, g: 0, b: 0, a: 1 },
+          lineDash: null,
+          strokeWidth: 2,
+          strokeType: "solid",
+          radius: 5,
+          fillColor: { r: 255, g: 255, b: 255, a: 0.5 },
+          textForegroundColor: "#FFFFFF",
+          textBackgroundColor: "#000000",
+          textSize: 14,
+        };
+      }
+
       // We're gonna need the base-style of the feature
       const featureBaseStyle = this.#drawModel.extractFeatureStyleInfo(feature);
       // Then we'll extract the text-settings. (These might be undefined, and
@@ -286,12 +321,23 @@ class SketchModel {
   // Applies the supplied style on the supplied feature.
   setFeatureStyle = (feature, styleSettings) => {
     try {
+      // Check if feature has a style function (from AttributeEditor) - if so, don't modify it
+      const rawStyle = feature.getStyle();
+      if (typeof rawStyle === "function") {
+        return;
+      }
+
       // First we'll have to get the base-style. (If we're dealing
       // with an arrow-feature, the base-style is the first element of the array
       // returned from the getStyle-method).
-      const featureStyle = Array.isArray(feature.getStyle())
-        ? feature.getStyle()[0]
-        : feature.getStyle();
+      const featureStyle = Array.isArray(rawStyle) ? rawStyle[0] : rawStyle;
+
+      // Check if featureStyle is a valid OpenLayers Style object
+      // If not, we cannot apply the style (the feature might not have a proper OL style yet)
+      if (!featureStyle || typeof featureStyle.getFill !== "function") {
+        return;
+      }
+
       // Then we'll get the stroke and text-style
       const fillStyle = featureStyle.getFill();
       const strokeStyle = featureStyle.getStroke();
