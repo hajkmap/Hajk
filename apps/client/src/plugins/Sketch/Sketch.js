@@ -92,6 +92,8 @@ const Sketch = (props) => {
   const [localObserver] = React.useState(() => Observer());
 
   const prevActivityRef = React.useRef(activityId);
+  // Track if AttributeEditor has an active editable layer
+  const attributeEditorActiveRef = React.useRef(false);
 
   React.useEffect(() => {
     const prev = prevActivityRef.current;
@@ -169,8 +171,12 @@ const Sketch = (props) => {
 
       if (!id) {
         setAllowedGeometryTypes(null);
+        attributeEditorActiveRef.current = false;
         return;
       }
+
+      // Mark that AttributeEditor is active with an editable layer
+      attributeEditorActiveRef.current = true;
 
       try {
         // Retrieve schema
@@ -210,6 +216,7 @@ const Sketch = (props) => {
       const { source } = ev.detail || {};
       if (source === "sketch") return;
       setAllowedGeometryTypes(null);
+      attributeEditorActiveRef.current = false;
     });
 
     return () => {
@@ -471,6 +478,10 @@ const Sketch = (props) => {
             ? "Polygon"
             : gt.replace(/^Multi/, "");
         feature.set("USER_DRAWN", true, true);
+        // Mark feature for AttributeEditor sync only if AttributeEditor has an active layer
+        if (attributeEditorActiveRef.current) {
+          feature.set("SKETCH_ATTRIBUTEEDITOR", true, true);
+        }
         feature.set("DRAW_METHOD", method, true);
         feature.set("EDIT_ACTIVE", activityId === "EDIT", true);
         if (feature.get("TEXT_SETTINGS") == null) {
@@ -1242,8 +1253,16 @@ const Sketch = (props) => {
     const handleFeatureAdd = (event) => {
       const feature = event?.feature;
       if (feature && feature.get("USER_MEASUREMENT_GUIDE")) {
-        // Immediately mark as non-user-drawn to prevent AttributeEditor sync
+        // Measurement guides should not sync to AttributeEditor
         feature.set("USER_DRAWN", false, true); // silent = true
+        feature.set("SKETCH_ATTRIBUTEEDITOR", false, true); // Explicitly prevent AttributeEditor sync
+      } else if (
+        feature &&
+        feature.get("USER_DRAWN") &&
+        attributeEditorActiveRef.current
+      ) {
+        // Mark normal user-drawn features for AttributeEditor sync when active
+        feature.set("SKETCH_ATTRIBUTEEDITOR", true, true);
       }
     };
 

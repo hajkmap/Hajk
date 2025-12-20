@@ -911,8 +911,9 @@ function AttributeEditor(props) {
           return;
         }
 
-        // Ignore measurement guides from Sketch/Measurer tools
-        if (f.get?.("USER_MEASUREMENT_GUIDE")) {
+        // Only sync features explicitly marked for AttributeEditor from Sketch
+        // This opt-in approach prevents accidental syncing of features from other plugins
+        if (f.get?.("SKETCH_ATTRIBUTEEDITOR") !== true) {
           return;
         }
 
