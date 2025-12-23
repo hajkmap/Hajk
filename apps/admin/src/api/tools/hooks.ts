@@ -1,6 +1,11 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { getTools, getMapsByToolName } from "./requests";
-import { Tool } from "./types";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
+import { getTools, getMapsByToolName, updateTool } from "./requests";
+import { Tool, ToolUpdateInput } from "./types";
 import { Map } from "../maps";
 
 // React Query hook to fetch tools
@@ -18,5 +23,17 @@ export const useMapsByToolName = (toolName: string): UseQueryResult<Map[]> => {
   return useQuery({
     queryKey: ["mapsByTool", toolName],
     queryFn: () => getMapsByToolName(toolName),
+  });
+};
+
+// React Query mutation hook to update a tool
+export const useUpdateTool = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ToolUpdateInput }) =>
+      updateTool(id, data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["tools"] });
+    },
   });
 };

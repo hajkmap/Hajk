@@ -45,7 +45,7 @@ export default function InfoClickRenderer({
         <Grid container>
           <Grid size={{ xs: 12, md: 12 }}>
             <Controller
-              name="options.title"
+              name="options.displayName"
               control={control}
               defaultValue={tool?.options?.title ?? ""}
               render={({ field }) => (
@@ -80,9 +80,9 @@ export default function InfoClickRenderer({
           </Grid>
           <Grid size={{ xs: 12, md: 10 }}>
             <Controller
-              name="options.title"
+              name="options.customTitleForMap"
               control={control}
-              defaultValue={tool?.options?.title ?? ""}
+              defaultValue={tool?.options?.customTitleForMap ?? ""}
               render={({ field }) => (
                 <TextField
                   label={t("tools.customTitleForMap")}

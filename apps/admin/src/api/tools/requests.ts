@@ -1,4 +1,9 @@
-import { Tool, ToolsApiResponse, GlobalMapsApiResponse } from "./types";
+import {
+  Tool,
+  ToolsApiResponse,
+  GlobalMapsApiResponse,
+  ToolUpdateInput,
+} from "./types";
 import { Map } from "../maps";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 
@@ -55,6 +60,29 @@ export const getMapsByToolName = async (toolName: string): Promise<Map[]> => {
       );
     } else {
       throw new Error(`Failed to fetch maps.`);
+    }
+  }
+};
+
+export const updateTool = async (
+  id: string,
+  data: ToolUpdateInput
+): Promise<Tool> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.patch<Tool>(`/tools/${id}`, data);
+    if (!response.data) {
+      throw new Error("No tool data returned");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to update tool. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to update tool.`);
     }
   }
 };

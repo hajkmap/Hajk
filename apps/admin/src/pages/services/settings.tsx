@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation, Trans } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { Controller, FieldValues, useForm } from "react-hook-form";
@@ -84,19 +84,42 @@ export default function ServiceSettings() {
         : service?.type,
   });
 
-  const defaultValues = {} as FieldValues;
   const {
     register,
     handleSubmit,
     control,
     setValue,
     getValues,
-    formState: { errors },
+    reset,
+    formState: { errors, isDirty },
   } = useForm<FieldValues>({
-    defaultValues,
     mode: "onChange",
     reValidateMode: "onChange",
   });
+
+  // Reset form with service data when it loads
+  useEffect(() => {
+    if (service) {
+      reset({
+        name: service.name ?? "",
+        url: service.url ?? "",
+        type: service.type ?? "",
+        serverType: service.serverType ?? "",
+        version: service.version ?? "",
+        imageFormat: service.imageFormat ?? "",
+        workspace: service.workspace ?? "All",
+        getMapUrl: service.getMapUrl ?? "",
+        comment: service.comment ?? "",
+        projection: {
+          code: service.projection?.code ?? "",
+        },
+        metadata: {
+          description: service.metadata?.description ?? "",
+          owner: service.metadata?.owner ?? "",
+        },
+      });
+    }
+  }, [service, reset]);
 
   const handleDialogOpen = () => {
     setIsDialogOpen(true);
@@ -217,6 +240,7 @@ export default function ServiceSettings() {
         createdDate={service?.createdDate}
         lastSavedBy={service?.lastSavedBy}
         lastSavedDate={service?.lastSavedDate}
+        isDirty={isDirty}
       >
         <FormContainer formRef={formRef} onSubmit={onSubmit} noValidate={false}>
           <FormPanel title={t("common.information")}>
@@ -225,7 +249,6 @@ export default function ServiceSettings() {
                 <TextField
                   label={t("common.name")}
                   fullWidth
-                  defaultValue={service?.name}
                   {...register("name", { required: `${t("common.required")}` })}
                   error={!!errors.name}
                   helperText={
@@ -237,7 +260,6 @@ export default function ServiceSettings() {
                 <TextField
                   label={t("common.serviceType")}
                   fullWidth
-                  defaultValue={service?.type}
                   slotProps={{ input: { readOnly: true } }}
                   {...register("type")}
                 />
@@ -248,7 +270,6 @@ export default function ServiceSettings() {
                   fullWidth
                   multiline
                   rows={3}
-                  defaultValue={service?.comment}
                   {...register("comment")}
                 />
               </Grid>
@@ -266,12 +287,12 @@ export default function ServiceSettings() {
                     name="serverType"
                     control={control}
                     rules={{ required: `${t("common.required")}` }}
-                    defaultValue={service?.serverType}
                     render={({ field }) => (
                       <Select
                         labelId="serverType-label"
                         label={t("common.serverType")}
                         {...field}
+                        value={field.value || ""}
                       >
                         {serverTypes.map((s) => (
                           <MenuItem key={s.value} value={s.value}>
@@ -288,7 +309,6 @@ export default function ServiceSettings() {
                   label="Url"
                   fullWidth
                   disabled
-                  defaultValue={service?.url}
                   {...register("url")}
                   slotProps={{
                     input: {
@@ -313,12 +333,12 @@ export default function ServiceSettings() {
                   <Controller
                     name="workspace"
                     control={control}
-                    defaultValue={service?.workspace ?? "All"}
                     render={({ field }) => (
                       <Select
                         labelId="workspace-label"
                         label={t("services.workspace")}
                         {...field}
+                        value={field.value || ""}
                       >
                         <MenuItem value="All">{t("common.all")}</MenuItem>
                         {(getCapWorkspaces ?? []).map((w) => (
@@ -340,7 +360,6 @@ export default function ServiceSettings() {
                 <TextField
                   label="GetMap-url"
                   fullWidth
-                  defaultValue={service?.getMapUrl}
                   {...register("getMapUrl")}
                 />
               </Grid>
@@ -351,12 +370,12 @@ export default function ServiceSettings() {
                     name="version"
                     control={control}
                     rules={{ required: `${t("common.required")}` }}
-                    defaultValue={service?.version}
                     render={({ field }) => (
                       <Select
                         labelId="version-label"
                         label="Version"
                         {...field}
+                        value={field.value || ""}
                       >
                         {versions.map((v) => (
                           <MenuItem key={v.value} value={v.value}>
@@ -376,12 +395,12 @@ export default function ServiceSettings() {
                   <Controller
                     name="imageFormat"
                     control={control}
-                    defaultValue={service?.imageFormat}
                     render={({ field }) => (
                       <Select
                         labelId="imageFormat-label"
                         label={t("services.imageFormats")}
                         {...field}
+                        value={field.value || ""}
                       >
                         {imageFormats.map((f) => (
                           <MenuItem key={f.value} value={f.value}>
@@ -401,12 +420,12 @@ export default function ServiceSettings() {
                   <Controller
                     name="projection.code"
                     control={control}
-                    defaultValue={service?.projection?.code}
                     render={({ field }) => (
                       <Select
                         labelId="projection-label"
                         label={t("services.coordinateSystem")}
                         {...field}
+                        value={field.value || ""}
                       >
                         {defaultCoordinates.map((value) => {
                           const opt = epsgProjectionsMap?.find(
@@ -432,7 +451,6 @@ export default function ServiceSettings() {
                 <TextField
                   label={t("services.owner")}
                   fullWidth
-                  defaultValue={service?.metadata?.owner}
                   {...register("metadata.owner")}
                 />
               </Grid>
@@ -442,7 +460,6 @@ export default function ServiceSettings() {
                   fullWidth
                   multiline
                   rows={3}
-                  defaultValue={service?.metadata?.description}
                   {...register("metadata.description")}
                 />
               </Grid>

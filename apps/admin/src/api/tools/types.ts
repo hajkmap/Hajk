@@ -1,11 +1,17 @@
 export interface Tool {
   id: string;
   type: string;
-  options: Record<string, string>;
+  options: Record<string, unknown>;
   createdBy?: string;
   createdDate?: string;
   lastSavedBy?: string;
   lastSavedDate?: string;
+}
+
+export interface ToolUpdateInput {
+  type?: string;
+  options?: Record<string, unknown>;
+  locked?: boolean;
 }
 
 export interface ToolsApiResponse {

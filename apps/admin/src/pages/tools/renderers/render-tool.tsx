@@ -9,30 +9,38 @@ import SearchRenderer from "./render-search";
 // import LocationRenderer from "./renderers/LocationRenderer";
 // import PresetRenderer from "./renderers/PresetRenderer";
 import React from "react";
+import { Control, FieldValues } from "react-hook-form";
+import { Tool } from "../../../api/tools";
 
-const toolRenderers: Record<string, React.ComponentType<any>> = {
-  print: PrintRenderer as React.ComponentType<any>,
-  infoclick: InfoClickRenderer as React.ComponentType<any>,
-  anchor: AnchorRenderer as React.ComponentType<any>,
-  sketch: SketchRenderer as React.ComponentType<any>,
-  measure: MeasureRenderer as React.ComponentType<any>,
-  streetview: StreetViewRenderer as React.ComponentType<any>,
-  search: SearchRenderer as React.ComponentType<any>,
+interface ToolRendererProps {
+  tool: Tool;
+  control?: Control<FieldValues>;
+}
+
+const toolRenderers: Record<string, React.ComponentType<ToolRendererProps>> = {
+  print: PrintRenderer as React.ComponentType<ToolRendererProps>,
+  infoclick: InfoClickRenderer as React.ComponentType<ToolRendererProps>,
+  anchor: AnchorRenderer as React.ComponentType<ToolRendererProps>,
+  sketch: SketchRenderer as React.ComponentType<ToolRendererProps>,
+  measure: MeasureRenderer as React.ComponentType<ToolRendererProps>,
+  streetview: StreetViewRenderer as React.ComponentType<ToolRendererProps>,
+  search: SearchRenderer as React.ComponentType<ToolRendererProps>,
   // routing: RoutingRenderer,
   // location: LocationRenderer,
   // preset: PresetRenderer,
 };
 
-export default function RenderTool({
-  tool,
-}: {
-  tool: { type: string; [key: string]: any };
-}) {
+interface RenderToolProps {
+  tool: Tool;
+  control: Control<FieldValues>;
+}
+
+export default function RenderTool({ tool, control }: RenderToolProps) {
   const Renderer = toolRenderers[tool?.type];
 
   if (!Renderer) {
     return <div> Not rendering from render function: {tool?.type}</div>;
   }
 
-  return <Renderer tool={tool} />;
+  return <Renderer tool={tool} control={control} />;
 }

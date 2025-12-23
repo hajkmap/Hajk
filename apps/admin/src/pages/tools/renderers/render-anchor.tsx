@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Grid2 as Grid } from "@mui/material";
 import {
   TextField,
@@ -9,33 +10,47 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, FieldValues, Control } from "react-hook-form";
 import FormPanel from "../../../components/form-components/form-panel";
 import FormAccordion from "../../../components/form-components/form-accordion";
 import { useTranslation } from "react-i18next";
+import { Tool } from "../../../api/tools";
+
+interface AnchorToolRendererProps {
+  tool: Tool;
+  control?: Control<FieldValues>;
+}
 
 export default function AnchorToolRenderer({
   tool,
-}: {
-  tool: { [key: string]: any };
-}) {
+  control: parentControl,
+}: AnchorToolRendererProps) {
   const { t } = useTranslation();
 
-  const { control } = useForm<FieldValues>({
-    defaultValues: {
-      type: tool?.type ?? "",
-      ...(tool?.options
-        ? Object.fromEntries(
-            Object.entries(tool.options).map(([k, v]) => [
-              `options.${k}`,
-              String(v ?? ""),
-            ])
-          )
-        : {}),
-    },
+  const { control: localControl, reset } = useForm<FieldValues>({
     mode: "onChange",
     reValidateMode: "onChange",
   });
+
+  // Use parent control if provided, otherwise use local
+  const control = parentControl ?? localControl;
+
+  // Reset form with tool data when it loads (only for local control)
+  useEffect(() => {
+    if (tool && !parentControl) {
+      reset({
+        type: tool.type ?? "",
+        active: tool.options?.active ?? false,
+        options: {
+          target: tool.options?.target ?? "",
+          visibleAtStart: tool.options?.visibleAtStart ?? false,
+          allowCreatingCleanUrls: tool.options?.allowCreatingCleanUrls ?? false,
+          instruction: tool.options?.instruction ?? "",
+          visibleForGroups: tool.options?.visibleForGroups ?? [],
+        },
+      });
+    }
+  }, [tool, reset, parentControl]);
 
   return (
     <>
@@ -84,6 +99,7 @@ export default function AnchorToolRenderer({
                   <InputLabel id={"target"}>{t("tools.placement")}</InputLabel>
                   <Select
                     {...field}
+                    value={field.value || ""}
                     labelId={"target"}
                     label={t("tools.placement")}
                   >

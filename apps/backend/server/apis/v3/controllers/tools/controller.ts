@@ -38,16 +38,14 @@ class ToolsController {
   }
 
   async updateTool(req: Request, res: Response) {
-    const tool = await ToolService.updateTool(
-      req.params.id,
-      req.body,
-      req.user?.id
-    );
+    const id = parseInt(req.params.id, 10);
+    const tool = await ToolService.updateTool(id, req.body, req.user?.id);
     res.status(HttpStatusCodes.OK).json(tool);
   }
 
   async deleteTool(req: Request, res: Response) {
-    await ToolService.deleteTool(req.params.id);
+    const id = parseInt(req.params.id, 10);
+    await ToolService.deleteTool(id);
     res.status(HttpStatusCodes.NO_CONTENT).send();
   }
 }

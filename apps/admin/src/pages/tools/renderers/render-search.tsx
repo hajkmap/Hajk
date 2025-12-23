@@ -1,48 +1,95 @@
+import { useEffect } from "react";
 import { Grid2 as Grid, Switch } from "@mui/material";
 import { TextField, FormControlLabel, Checkbox } from "@mui/material";
-import { useForm, Controller, FieldValues } from "react-hook-form";
+import { useForm, Controller, FieldValues, Control } from "react-hook-form";
 import FormAccordion from "../../../components/form-components/form-accordion";
 import FormPanel from "../../../components/form-components/form-panel";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import { useTranslation } from "react-i18next";
 import { SketchPicker } from "react-color";
-import AvailableLayersGrid from "../../layers/available-layers-grid";
-import { useParams } from "react-router";
-import {
-  useLayerById,
-  // useDeleteLayer,
-  // LayerUpdateInput,
-  // useUpdateLayer,
-  // infoClickFormat,
-  // sortType,
-  // searchOutputFormat,
-  // useServiceByLayerId,
-  // useCreateAndUpdateRoleOnLayer,
-  // useGetRoleOnLayerByLayerId,
-} from "../../../api/layers";
+import { Tool } from "../../../api/tools";
+
+interface SearchRendererProps {
+  tool: Tool;
+  control?: Control<FieldValues>;
+}
 
 export default function SearchRenderer({
   tool,
-}: {
-  tool: { [key: string]: any };
-}) {
+  control: parentControl,
+}: SearchRendererProps) {
   const { t } = useTranslation();
-  const { layerId } = useParams<{ layerId: string }>();
-  const { data: layer, isLoading, isError } = useLayerById(layerId ?? "");
-  const { control } = useForm<FieldValues>({
-    defaultValues: {
-      searchInfoText: tool?.options?.searchInfoText ?? "",
-      maxHitsPerDataset: tool?.options?.maxHitsPerDataset ?? 1000,
-      autoSearchDelay: tool?.options?.autoSearchDelay ?? 500,
-      showInfoWhenExceeded: tool?.options?.showInfoWhenExceeded ?? false,
-      disableAutocomplete: tool?.options?.disableAutocomplete ?? false,
-      disableAutoCombinations: tool?.options?.disableAutoCombinations ?? false,
-      wildcardBeforeSearch: tool?.options?.wildcardBeforeSearch ?? false,
-      autofocusSearch: tool?.options?.autofocusSearch ?? false,
-    },
+  const { control: localControl, reset } = useForm<FieldValues>({
     mode: "onChange",
+    reValidateMode: "onChange",
   });
+
+  // Use parent control if provided, otherwise use local
+  const control = parentControl ?? localControl;
+
+  // Reset form with tool data when it loads (only for local control)
+  useEffect(() => {
+    if (tool && !parentControl) {
+      reset({
+        searchInfoText: tool.options?.searchInfoText ?? "",
+        maxHitsPerDataset: tool.options?.maxHitsPerDataset ?? 1000,
+        autoSearchDelay: tool.options?.autoSearchDelay ?? 500,
+        showInfoWhenExceeded: tool.options?.showInfoWhenExceeded ?? false,
+        disableAutocomplete: tool.options?.disableAutocomplete ?? false,
+        disableAutoCombinations: tool.options?.disableAutoCombinations ?? false,
+        wildcardBeforeSearch: tool.options?.wildcardBeforeSearch ?? false,
+        autofocusSearch: tool.options?.autofocusSearch ?? false,
+        enablePolygonSearch: tool.options?.enablePolygonSearch ?? true,
+        enableRadiusSearch: tool.options?.enableRadiusSearch ?? true,
+        enableAreaSearch: tool.options?.enableAreaSearch ?? true,
+        searchWithinView: tool.options?.searchWithinView ?? false,
+        searchVisibleLayers: tool.options?.searchVisibleLayers ?? true,
+        wildcardBefore: tool.options?.wildcardBefore ?? true,
+        wildcardAfter: tool.options?.wildcardAfter ?? true,
+        caseSensitive: tool.options?.caseSensitive ?? true,
+        requireFullObject: tool.options?.requireFullObject ?? true,
+        showResultLabel: tool.options?.showResultLabel ?? true,
+        preSelected: tool.options?.preSelected ?? true,
+        autoShowAllResultsOnMap: tool.options?.autoShowAllResultsOnMap ?? false,
+        allowResultFiltering: tool.options?.allowResultFiltering ?? false,
+        allowResultSorting: tool.options?.allowResultSorting ?? false,
+        allowQuickClearSelection:
+          tool.options?.allowQuickClearSelection ?? false,
+        allowDownloadResults: tool.options?.allowDownloadResults ?? false,
+        showPreviewOnHover: tool.options?.showPreviewOnHover ?? false,
+        collectSelectedResults: tool.options?.collectSelectedResults ?? false,
+        showPrevNextButtons: tool.options?.showPrevNextButtons ?? false,
+        maxZoomLevel: tool.options?.maxZoomLevel ?? -1,
+        hitIcon: tool.options?.hitIcon ?? "",
+        iconDisplacementX: tool.options?.iconDisplacementX ?? 0,
+        iconDisplacementY: tool.options?.iconDisplacementY ?? 0,
+        iconScale: tool.options?.iconScale ?? 1,
+        strokeColor: tool.options?.strokeColor ?? "",
+        strokeOpacity: tool.options?.strokeOpacity ?? "",
+        standardResultsMarkedFillColor:
+          tool.options?.standardResultsMarkedFillColor ?? "",
+        standardResultsMarkedFrameColor:
+          tool.options?.standardResultsMarkedFrameColor ?? "",
+        markedResultsTextFillColor:
+          tool.options?.markedResultsTextFillColor ?? "",
+        markedResultsTextFrameColor:
+          tool.options?.markedResultsTextFrameColor ?? "",
+        markedResultsMarkedFillColor:
+          tool.options?.markedResultsMarkedFillColor ?? "",
+        markedResultsMarkedFrameColor:
+          tool.options?.markedResultsMarkedFrameColor ?? "",
+        activeResultTextFillColor:
+          tool.options?.activeResultTextFillColor ?? "",
+        activeResultTextFrameColor:
+          tool.options?.activeResultTextFrameColor ?? "",
+        activeResultMarkedFillColor:
+          tool.options?.activeResultMarkedFillColor ?? "",
+        activeResultMarkedFrameColor:
+          tool.options?.activeResultMarkedFrameColor ?? "",
+      });
+    }
+  }, [tool, reset, parentControl]);
 
   return (
     <>
@@ -168,7 +215,6 @@ export default function SearchRenderer({
             <Controller
               name="enablePolygonSearch"
               control={control}
-              defaultValue={tool?.options?.enablePolygonSearch ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -182,7 +228,6 @@ export default function SearchRenderer({
             <Controller
               name="enableRadiusSearch"
               control={control}
-              defaultValue={tool?.options?.enableRadiusSearch ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -196,7 +241,6 @@ export default function SearchRenderer({
             <Controller
               name="enableAreaSearch"
               control={control}
-              defaultValue={tool?.options?.enableAreaSearch ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -210,7 +254,6 @@ export default function SearchRenderer({
             <Controller
               name="searchWithinView"
               control={control}
-              defaultValue={tool?.options?.searchWithinView ?? false}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -227,7 +270,7 @@ export default function SearchRenderer({
                 {t("tools.strokeColor")}
               </InputLabel>
               <Controller
-                name="options.strokeColor"
+                name="strokeColor"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -245,7 +288,7 @@ export default function SearchRenderer({
                 {t("tools.strokeOpacity")}
               </InputLabel>
               <Controller
-                name="options.strokeOpacity"
+                name="strokeOpacity"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -266,7 +309,6 @@ export default function SearchRenderer({
             <Controller
               name="searchVisibleLayers"
               control={control}
-              defaultValue={tool?.options?.searchVisibleLayers ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -279,7 +321,6 @@ export default function SearchRenderer({
             <Controller
               name="preSelected"
               control={control}
-              defaultValue={tool?.options?.preSelected ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Switch {...field} checked={!!field.value} />}
@@ -295,7 +336,6 @@ export default function SearchRenderer({
             <Controller
               name="wildcardBefore"
               control={control}
-              defaultValue={tool?.options?.wildcardBefore ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -308,7 +348,6 @@ export default function SearchRenderer({
             <Controller
               name="preSelected"
               control={control}
-              defaultValue={tool?.options?.preSelected ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Switch {...field} checked={!!field.value} />}
@@ -324,7 +363,6 @@ export default function SearchRenderer({
             <Controller
               name="wildcardAfter"
               control={control}
-              defaultValue={tool?.options?.wildcardAfter ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -337,7 +375,6 @@ export default function SearchRenderer({
             <Controller
               name="preSelected"
               control={control}
-              defaultValue={tool?.options?.preSelected ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Switch {...field} checked={!!field.value} />}
@@ -353,7 +390,6 @@ export default function SearchRenderer({
             <Controller
               name="caseSensitive"
               control={control}
-              defaultValue={tool?.options?.caseSensitive ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -366,7 +402,6 @@ export default function SearchRenderer({
             <Controller
               name="preSelected"
               control={control}
-              defaultValue={tool?.options?.preSelected ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Switch {...field} checked={!!field.value} />}
@@ -382,7 +417,6 @@ export default function SearchRenderer({
             <Controller
               name="requireFullObject"
               control={control}
-              defaultValue={tool?.options?.requireFullObject ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -395,7 +429,6 @@ export default function SearchRenderer({
             <Controller
               name="preSelected"
               control={control}
-              defaultValue={tool?.options?.preSelected ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Switch {...field} checked={!!field.value} />}
@@ -411,7 +444,6 @@ export default function SearchRenderer({
             <Controller
               name="showResultLabel"
               control={control}
-              defaultValue={tool?.options?.showResultLabel ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -424,7 +456,6 @@ export default function SearchRenderer({
             <Controller
               name="preSelected"
               control={control}
-              defaultValue={tool?.options?.preSelected ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Switch {...field} checked={!!field.value} />}
@@ -446,7 +477,6 @@ export default function SearchRenderer({
             <Controller
               name="autoShowAllResultsOnMap"
               control={control}
-              defaultValue={tool?.options?.autoShowAllResultsOnMap ?? false}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -461,7 +491,6 @@ export default function SearchRenderer({
             <Controller
               name="allowResultFiltering"
               control={control}
-              defaultValue={tool?.options?.allowResultFiltering ?? false}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -476,7 +505,6 @@ export default function SearchRenderer({
             <Controller
               name="allowResultSorting"
               control={control}
-              defaultValue={tool?.options?.allowResultSorting ?? false}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -491,7 +519,6 @@ export default function SearchRenderer({
             <Controller
               name="allowQuickClearSelection"
               control={control}
-              defaultValue={tool?.options?.allowQuickClearSelection ?? false}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -506,7 +533,6 @@ export default function SearchRenderer({
             <Controller
               name="allowDownloadResults"
               control={control}
-              defaultValue={tool?.options?.allowDownloadResults ?? false}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -521,7 +547,6 @@ export default function SearchRenderer({
             <Controller
               name="showPreviewOnHover"
               control={control}
-              defaultValue={tool?.options?.showPreviewOnHover ?? false}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -536,7 +561,6 @@ export default function SearchRenderer({
             <Controller
               name="collectSelectedResults"
               control={control}
-              defaultValue={tool?.options?.collectSelectedResults ?? false}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -551,7 +575,6 @@ export default function SearchRenderer({
             <Controller
               name="showPrevNextButtons"
               control={control}
-              defaultValue={tool?.options?.showPrevNextButtons ?? false}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} checked={!!field.value} />}
@@ -566,7 +589,6 @@ export default function SearchRenderer({
             <Controller
               name="maxZoomLevel"
               control={control}
-              defaultValue={tool?.options?.maxZoomLevel ?? -1}
               render={({ field }) => (
                 <TextField
                   {...field}
