@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useParams } from "react-router";
 import Page from "../../layouts/root/components/page";
 import { useTranslation } from "react-i18next";
@@ -13,7 +13,12 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
+  Button,
+  IconButton,
+  Box,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
 import { GridRowSelectionModel } from "@mui/x-data-grid";
 import { Controller, FieldValues, useForm } from "react-hook-form";
 import UsedInMapsGrid from "./used-in-maps-grid";
@@ -65,6 +70,13 @@ export default function LayerSettings() {
   //);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectGridId, setSelectGridId] = useState<GridRowSelectionModel>();
+  const [useCustomDpiList, setUseCustomDpiList] = useState<boolean>(false);
+  const [customDpiList, setCustomDpiList] = useState<
+    { pxRatio: number; dpi: number }[]
+  >([
+    { pxRatio: 0, dpi: 90 },
+    { pxRatio: 2, dpi: 180 },
+  ]);
   const { layers: getCapLayers, styles: getCapStyles } = useServiceCapabilities(
     {
       baseUrl: service?.url ?? "",
@@ -92,18 +104,82 @@ export default function LayerSettings() {
     }
   };
 
-  const defaultValues = {} as FieldValues;
   const {
     register,
     handleSubmit,
     control,
     watch,
+    reset,
     formState: { errors, isDirty },
   } = useForm<FieldValues>({
-    defaultValues,
     mode: "onChange",
     reValidateMode: "onChange",
   });
+
+  // Reset form with layer data when it loads
+  useEffect(() => {
+    if (layer) {
+      reset({
+        name: layer.name ?? "",
+        serviceId: layer.serviceId ?? "",
+        internalName: layer.internalName ?? "",
+        description: layer.description ?? "",
+        hidpi: layer.hidpi ?? false,
+        singleTile: layer.singleTile ?? false,
+        customRatio: layer.customRatio,
+        style: layer.style ?? "",
+        opacity: layer.opacity,
+        minZoom: layer.minZoom,
+        maxZoom: layer.maxZoom,
+        minMaxZoomAlertOnToggleOnly: layer.minMaxZoomAlertOnToggleOnly ?? false,
+        infoClickActive: layer.infoClickActive ?? false,
+        showMetadata: layer.showMetadata ?? false,
+        legendUrl: layer.legendUrl ?? "",
+        legendIconUrl: layer.legendIconUrl ?? "",
+        legendOptions: layer.legendOptions ?? "",
+        useCustomDpiList: false,
+        roleId: roleOnLayer?.roleId ?? "",
+        metadata: {
+          title: layer.metadata?.title ?? "",
+          url: layer.metadata?.url ?? "",
+          urlTitle: layer.metadata?.urlTitle ?? "",
+          attribution: layer.metadata?.attribution ?? "",
+        },
+        searchSettings: {
+          active: layer.searchSettings?.active ?? false,
+          url: layer.searchSettings?.url ?? "",
+          searchFields: (layer.searchSettings?.searchFields ?? []).join(", "),
+          primaryDisplayFields: (
+            layer.searchSettings?.primaryDisplayFields ?? []
+          ).join(", "),
+          secondaryDisplayFields: (
+            layer.searchSettings?.secondaryDisplayFields ?? []
+          ).join(", "),
+          shortDisplayFields: (
+            layer.searchSettings?.shortDisplayFields ?? []
+          ).join(", "),
+          geometryField: layer.searchSettings?.geometryField ?? "",
+          outputFormat: layer.searchSettings?.outputFormat ?? "",
+        },
+        infoClickSettings: {
+          definition: layer.infoClickSettings?.definition ?? "",
+          icon: layer.infoClickSettings?.icon ?? "",
+          format: layer.infoClickSettings?.format ?? "",
+          sortProperty: layer.infoClickSettings?.sortProperty ?? "",
+          sortMethod: layer.infoClickSettings?.sortMethod ?? "",
+          sortDescending: layer.infoClickSettings?.sortDescending ?? false,
+        },
+        options: {
+          keyword: layer.options?.keyword ?? "",
+          category: layer.options?.category ?? "",
+          layerDisplayDescription: layer.options?.layerDisplayDescription ?? "",
+          geoWebCache: layer.options?.geoWebCache ?? false,
+          showAttributeTableButton:
+            layer.options?.showAttributeTableButton ?? false,
+        },
+      });
+    }
+  }, [layer, roleOnLayer, reset]);
 
   const watchRoleIdInput = watch("roleId") as string | undefined;
 
@@ -152,6 +228,33 @@ export default function LayerSettings() {
     () => selectedRowsData?.map((row) => row?.layer ?? ""),
     [selectedRowsData]
   );
+
+  const handleUpdateDpiList = (
+    index: number,
+    key: "pxRatio" | "dpi",
+    value: string
+  ) => {
+    if (value.includes(".") || value.includes(",")) {
+      return; // Don't allow decimals
+    }
+    const numValue = parseInt(value, 10) || 0;
+    const newList = [...customDpiList];
+    newList[index] = { ...newList[index], [key]: numValue };
+    setCustomDpiList(newList);
+  };
+
+  const handleRemoveDpiListRow = (index: number) => {
+    if (customDpiList.length <= 1) {
+      return; // Keep at least one row
+    }
+    const newList = [...customDpiList];
+    newList.splice(index, 1);
+    setCustomDpiList(newList);
+  };
+
+  const handleAddDpiListRow = () => {
+    setCustomDpiList([...customDpiList, { pxRatio: 0, dpi: 90 }]);
+  };
 
   const handleUpdateLayer = async (layerData: LayerUpdateInput) => {
     try {
@@ -386,7 +489,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("common.name")}
                   fullWidth
-                  defaultValue={layer?.name}
                   {...register("name", {
                     required: `${t("common.required")}`,
                   })}
@@ -404,7 +506,6 @@ export default function LayerSettings() {
                   <Controller
                     name="serviceId"
                     control={control}
-                    defaultValue={layer?.serviceId}
                     rules={{ required: `${t("common.required")}` }}
                     render={({ field }) => (
                       <Select
@@ -426,7 +527,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("layers.internalName")}
                   fullWidth
-                  defaultValue={layer?.internalName}
                   {...register("internalName")}
                 />
               </Grid>
@@ -434,7 +534,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("layers.copyRight")}
                   fullWidth
-                  defaultValue={layer?.metadata?.attribution}
                   {...register("metadata.attribution")}
                 />
               </Grid>
@@ -444,7 +543,6 @@ export default function LayerSettings() {
                   fullWidth
                   multiline
                   rows={3}
-                  defaultValue={layer?.description}
                   {...register("description")}
                 />
               </Grid>
@@ -452,7 +550,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("layers.keyword")}
                   fullWidth
-                  defaultValue={layer?.options?.keyword}
                   {...register("options.keyword")}
                 />
               </Grid>
@@ -460,7 +557,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("layers.category")}
                   fullWidth
-                  defaultValue={layer?.options?.category}
                   {...register("options.category")}
                 />
               </Grid>
@@ -471,26 +567,115 @@ export default function LayerSettings() {
             <Grid container>
               <Grid size={12}>
                 <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        defaultChecked={layer?.hidpi}
-                        {...register("hidpi")}
+                  <Controller
+                    name="hidpi"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={Boolean(field.value)}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                          />
+                        }
+                        label={t("layers.hidpi")}
                       />
-                    }
-                    label={t("layers.hidpi")}
+                    )}
                   />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        defaultChecked={layer?.singleTile}
-                        {...register("singleTile")}
+                  <Controller
+                    name="singleTile"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={Boolean(field.value)}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                          />
+                        }
+                        label="Single tile"
                       />
-                    }
-                    label="Single tile"
+                    )}
                   />
                 </FormGroup>
               </Grid>
+            </Grid>
+          </FormAccordion>
+
+          <FormAccordion title={t("layers.customDpi")}>
+            <Grid container>
+              <Grid size={12}>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Controller
+                        name="useCustomDpiList"
+                        control={control}
+                        render={({ field }) => (
+                          <Checkbox
+                            {...field}
+                            checked={Boolean(field.value)}
+                            onChange={(e) => {
+                              field.onChange(e.target.checked);
+                              setUseCustomDpiList(e.target.checked);
+                            }}
+                          />
+                        )}
+                      />
+                    }
+                    label={t("layers.useCustomDpiList")}
+                  />
+                </FormGroup>
+              </Grid>
+              {useCustomDpiList && (
+                <Grid container>
+                  {customDpiList.map((item, index) => (
+                    <Grid size={12} key={index}>
+                      <Box display="flex" alignItems="center" gap={2}>
+                        <TextField
+                          label={t("layers.pxRatio")}
+                          type="number"
+                          value={item.pxRatio}
+                          onChange={(e) =>
+                            handleUpdateDpiList(
+                              index,
+                              "pxRatio",
+                              e.target.value
+                            )
+                          }
+                          sx={{ width: 150 }}
+                        />
+                        <TextField
+                          label={t("layers.dpi")}
+                          type="number"
+                          value={item.dpi}
+                          onChange={(e) =>
+                            handleUpdateDpiList(index, "dpi", e.target.value)
+                          }
+                          sx={{ width: 150 }}
+                        />
+                        <IconButton
+                          onClick={() => handleRemoveDpiListRow(index)}
+                          disabled={customDpiList.length <= 1}
+                          color="error"
+                          aria-label={t("common.delete")}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    </Grid>
+                  ))}
+                  <Grid size={12}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<AddIcon />}
+                      onClick={handleAddDpiListRow}
+                    >
+                      {t("layers.addDpiRow")}
+                    </Button>
+                  </Grid>
+                </Grid>
+              )}
             </Grid>
           </FormAccordion>
 
@@ -502,7 +687,6 @@ export default function LayerSettings() {
                   <Controller
                     name="style"
                     control={control}
-                    defaultValue={layer?.style ?? ""}
                     render={({ field }) => (
                       <Select
                         labelId="style-label"
@@ -525,7 +709,6 @@ export default function LayerSettings() {
                   label={t("layers.opacity")}
                   fullWidth
                   type="number"
-                  defaultValue={layer?.opacity}
                   {...register("opacity")}
                 />
               </Grid>
@@ -538,9 +721,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("layers.primaryDisplayFields")}
                   fullWidth
-                  defaultValue={(
-                    layer?.searchSettings?.primaryDisplayFields ?? []
-                  ).join(", ")}
                   {...register("searchSettings.primaryDisplayFields")}
                 />
               </Grid>
@@ -548,9 +728,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("layers.secondaryDisplayFields")}
                   fullWidth
-                  defaultValue={(
-                    layer?.searchSettings?.secondaryDisplayFields ?? []
-                  ).join(", ")}
                   {...register("searchSettings.secondaryDisplayFields")}
                 />
               </Grid>
@@ -558,9 +735,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("layers.shortDisplayFields")}
                   fullWidth
-                  defaultValue={(
-                    layer?.searchSettings?.shortDisplayFields ?? []
-                  ).join(", ")}
                   {...register("searchSettings.shortDisplayFields")}
                 />
               </Grid>
@@ -571,14 +745,20 @@ export default function LayerSettings() {
             <Grid container>
               <Grid size={12}>
                 <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        defaultChecked={layer?.infoClickActive}
-                        {...register("infoClickActive")}
+                  <Controller
+                    name="infoClickActive"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={Boolean(field.value)}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                          />
+                        }
+                        label={t("common.infoclick")}
                       />
-                    }
-                    label={t("common.infoclick")}
+                    )}
                   />
                 </FormGroup>
               </Grid>
@@ -588,7 +768,6 @@ export default function LayerSettings() {
                   fullWidth
                   multiline
                   rows={3}
-                  defaultValue={layer?.infoClickSettings?.definition}
                   {...register("infoClickSettings.definition")}
                 />
               </Grid>
@@ -596,7 +775,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("layers.infoClickIcon")}
                   fullWidth
-                  defaultValue={layer?.infoClickSettings?.icon}
                   {...register("infoClickSettings.icon")}
                 />
               </Grid>
@@ -604,7 +782,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("layers.sortByAttribute")}
                   fullWidth
-                  defaultValue={layer?.infoClickSettings?.sortProperty}
                   {...register("infoClickSettings.sortProperty")}
                 />
               </Grid>
@@ -616,7 +793,6 @@ export default function LayerSettings() {
                   <Controller
                     name="infoClickSettings.format"
                     control={control}
-                    defaultValue={layer?.infoClickSettings?.format}
                     render={({ field }) => (
                       <Select
                         labelId="format-label"
@@ -641,7 +817,6 @@ export default function LayerSettings() {
                   <Controller
                     name="infoClickSettings.sortMethod"
                     control={control}
-                    defaultValue={layer?.infoClickSettings?.sortMethod}
                     render={({ field }) => (
                       <Select
                         labelId="sortMethod-label"
@@ -665,14 +840,20 @@ export default function LayerSettings() {
             <Grid container>
               <Grid size={12}>
                 <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        defaultChecked={layer?.searchSettings?.active}
-                        {...register("searchSettings.active")}
+                  <Controller
+                    name="searchSettings.active"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={Boolean(field.value)}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                          />
+                        }
+                        label={t("layers.searchSettings.active")}
                       />
-                    }
-                    label={t("layers.searchSettings.active")}
+                    )}
                   />
                 </FormGroup>
               </Grid>
@@ -680,7 +861,6 @@ export default function LayerSettings() {
                 <TextField
                   label="Url"
                   fullWidth
-                  defaultValue={layer?.searchSettings?.url}
                   {...register("searchSettings.url")}
                 />
               </Grid>
@@ -692,7 +872,6 @@ export default function LayerSettings() {
                   <Controller
                     name="searchSettings.outputFormat"
                     control={control}
-                    defaultValue={layer?.searchSettings?.outputFormat}
                     render={({ field }) => (
                       <Select
                         labelId="outputFormat-label"
@@ -713,7 +892,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("layers.searchSettings.geometryField")}
                   fullWidth
-                  defaultValue={layer?.searchSettings?.geometryField}
                   {...register("searchSettings.geometryField")}
                 />
               </Grid>
@@ -724,14 +902,20 @@ export default function LayerSettings() {
             <Grid container>
               <Grid size={12}>
                 <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        defaultChecked={layer?.showMetadata}
-                        {...register("showMetadata")}
+                  <Controller
+                    name="showMetadata"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={Boolean(field.value)}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                          />
+                        }
+                        label={t("layers.showMetadata")}
                       />
-                    }
-                    label={t("layers.showMetadata")}
+                    )}
                   />
                 </FormGroup>
               </Grid>
@@ -739,7 +923,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("layers.metadata.title")}
                   fullWidth
-                  defaultValue={layer?.metadata?.title}
                   {...register("metadata.title")}
                 />
               </Grid>
@@ -747,7 +930,6 @@ export default function LayerSettings() {
                 <TextField
                   label={t("layers.metadata.urlTitle")}
                   fullWidth
-                  defaultValue={layer?.metadata?.urlTitle}
                   {...register("metadata.urlTitle")}
                 />
               </Grid>
@@ -755,7 +937,6 @@ export default function LayerSettings() {
                 <TextField
                   label="Url"
                   fullWidth
-                  defaultValue={layer?.metadata?.url}
                   {...register("metadata.url")}
                 />
               </Grid>
@@ -765,7 +946,6 @@ export default function LayerSettings() {
                   fullWidth
                   multiline
                   rows={3}
-                  defaultValue={layer?.options?.layerDisplayDescription}
                   {...register("options.layerDisplayDescription")}
                 />
               </Grid>
@@ -780,7 +960,6 @@ export default function LayerSettings() {
               <Controller
                 name="roleId"
                 control={control}
-                defaultValue={roleOnLayer?.roleId}
                 render={({ field }) => (
                   <Select
                     labelId="roleId-label"
