@@ -34,15 +34,23 @@ export function isMissingValue(v) {
   return v == null || v === "";
 }
 
-export function renderTableCellDisplay({ meta, value, s }) {
+export function renderTableCellDisplay({ meta, value, s, selected = true }) {
+  const MAX_LENGTH = 50; // Number of characters befor truncating
+
+  const truncate = (str) => {
+    if (selected || !str || str.length <= MAX_LENGTH) return str;
+    return str.slice(0, MAX_LENGTH) + "...";
+  };
+
   // URL (clickable in display mode)
   if (meta.type === "url") {
     const str = String(value ?? "");
     if (!str) return <span />;
     const href = /^(https?:)?\/\//i.test(str) ? str : `https://${str}`;
+    const displayText = truncate(str);
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" title={str}>
-        {str}
+        {displayText}
       </a>
     );
   }
@@ -85,11 +93,13 @@ export function renderTableCellDisplay({ meta, value, s }) {
             .split(";")
             .map((s) => s.trim())
         : [];
-    return <span>{arr.join(";")}</span>;
+    const joined = arr.join(";");
+    return <span>{truncate(joined)}</span>;
   }
 
   // Standard
-  return <span>{value == null ? "" : String(value)}</span>;
+  const str = value == null ? "" : String(value);
+  return <span>{truncate(str)}</span>;
 }
 
 export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {

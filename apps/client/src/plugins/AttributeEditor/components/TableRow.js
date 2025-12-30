@@ -319,6 +319,7 @@ const TableRow = ({
                     meta,
                     value: effectiveValue,
                     s,
+                    selected,
                   })}
           </td>
         );
