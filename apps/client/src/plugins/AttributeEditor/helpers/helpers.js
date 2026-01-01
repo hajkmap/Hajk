@@ -35,7 +35,7 @@ export function isMissingValue(v) {
 }
 
 export function renderTableCellDisplay({ meta, value, s, selected = true }) {
-  const MAX_LENGTH = 50; // Number of characters befor truncating
+  const MAX_LENGTH = 30; // Number of characters befor truncating
 
   const truncate = (str) => {
     if (selected || !str || str.length <= MAX_LENGTH) return str;
