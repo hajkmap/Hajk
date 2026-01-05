@@ -5,6 +5,7 @@ import SketchRenderer from "./render-sketch";
 import MeasureRenderer from "./render-measure";
 import StreetViewRenderer from "./render-streetview";
 import SearchRenderer from "./render-search";
+import LayerSwitcherRenderer from "./render-layerswitcher";
 // import RoutingRenderer from "./renderers/RoutingRenderer";
 // import LocationRenderer from "./renderers/LocationRenderer";
 // import PresetRenderer from "./renderers/PresetRenderer";
@@ -25,6 +26,8 @@ const toolRenderers: Record<string, React.ComponentType<ToolRendererProps>> = {
   measure: MeasureRenderer as React.ComponentType<ToolRendererProps>,
   streetview: StreetViewRenderer as React.ComponentType<ToolRendererProps>,
   search: SearchRenderer as React.ComponentType<ToolRendererProps>,
+  layerswitcher:
+    LayerSwitcherRenderer as React.ComponentType<ToolRendererProps>,
   // routing: RoutingRenderer,
   // location: LocationRenderer,
   // preset: PresetRenderer,
