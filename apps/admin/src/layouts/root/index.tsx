@@ -11,6 +11,7 @@ import {
 } from "./constants";
 import useAppStateStore from "../../store/use-app-state-store";
 import PageTitle from "./components/page-title";
+import WebSocketProvider from "../../components/websocket-provider";
 
 export default function RootLayout() {
   const sidebarLocked = useAppStateStore((state) => state.sidebarLocked);
@@ -28,60 +29,62 @@ export default function RootLayout() {
   };
 
   return (
-    <Paper
-      sx={{
-        width: "100%",
-        backgroundColor: theme.palette.background.default,
-        backgroundImage: "unset",
-        minHeight: "100vh",
-      }}
-      square
-    >
-      <PageTitle title={"Hajk - admin"} />
-      <Header />
-      <Sidebar
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-        locked={sidebarLocked}
-        toggleLocked={toggleSidebarLocked}
-      />
-      <Box
-        component="main"
-        id="main"
+    <WebSocketProvider>
+      <Paper
         sx={{
-          paddingTop: `${HEADER_HEIGHT}px`,
-          marginLeft:
-            sidebarOpen && sidebarLocked
-              ? `${SIDEBAR_WIDTH}px`
-              : `${SIDEBAR_MINI_WIDTH}px`,
+          width: "100%",
+          backgroundColor: theme.palette.background.default,
+          backgroundImage: "unset",
           minHeight: "100vh",
-          overflowY: "clip",
-          overflowX: "clip",
-          transition: "margin-left 250ms ease",
         }}
+        square
       >
+        <PageTitle title={"Hajk - admin"} />
+        <Header />
+        <Sidebar
+          open={sidebarOpen}
+          setOpen={setSidebarOpen}
+          locked={sidebarLocked}
+          toggleLocked={toggleSidebarLocked}
+        />
         <Box
-          onClick={(e) => {
-            if (sidebarOpen && !sidebarLocked) {
-              setSidebarOpen(false);
-              e.preventDefault();
-            }
-          }}
+          component="main"
+          id="main"
           sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            opacity: showOverlay() ? 1.0 : 0.0,
-            pointerEvents: showOverlay() ? "all" : "none",
-            transition: "opacity 250ms ease",
-            zIndex: SIDEBAR_Z_INDEX - 1,
+            paddingTop: `${HEADER_HEIGHT}px`,
+            marginLeft:
+              sidebarOpen && sidebarLocked
+                ? `${SIDEBAR_WIDTH}px`
+                : `${SIDEBAR_MINI_WIDTH}px`,
+            minHeight: "100vh",
+            overflowY: "clip",
+            overflowX: "clip",
+            transition: "margin-left 250ms ease",
           }}
-        ></Box>
-        <Outlet />
-      </Box>
-    </Paper>
+        >
+          <Box
+            onClick={(e) => {
+              if (sidebarOpen && !sidebarLocked) {
+                setSidebarOpen(false);
+                e.preventDefault();
+              }
+            }}
+            sx={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              opacity: showOverlay() ? 1.0 : 0.0,
+              pointerEvents: showOverlay() ? "all" : "none",
+              transition: "opacity 250ms ease",
+              zIndex: SIDEBAR_Z_INDEX - 1,
+            }}
+          ></Box>
+          <Outlet />
+        </Box>
+      </Paper>
+    </WebSocketProvider>
   );
 }

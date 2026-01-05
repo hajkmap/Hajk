@@ -138,6 +138,8 @@ export default async (expressServer: Server) => {
       // This will be called when connection is closed. Can be used for
       // various cleanups.
       websocketConnection.on("close", () => {
+        // Clean up presence tracking
+        WebSocketMessageHandler.handleDisconnect(websocketConnection.uuid);
         // Can't send a message at this time, but we can at least log
         logger.trace(`Goodbye ${websocketConnection.uuid}!`);
       });
