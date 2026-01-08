@@ -44,6 +44,8 @@ export default class PrintModel {
     this.scaleMeters = settings.options.scaleMeters;
     this.scaleBarLengths = this.calculateScaleBarLengths();
     this.copyright = settings.options.copyright || "";
+    this.textFontSize = settings.options.textFontSize || 8;
+    this.textFontWeight = settings.options.textFontWeight || "normal";
     this.date = settings.options.date || "";
     this.disclaimer = settings.options.disclaimer || "";
     this.localObserver = settings.localObserver;
@@ -1444,9 +1446,10 @@ export default class PrintModel {
           let yPos = options.useTextIconsInMargin
             ? this.textIconsMargin + this.margin / 2
             : this.margin;
-          pdf.setFontSize(8);
+          pdf.setFont("helvetica", this.textFontWeight);
+          pdf.setFontSize(this.textFontSize);
           pdf.setTextColor(options.mapTextColor);
-          pdf.text(this.copyright, dim[0] - 4 - yPos, dim[1] - 5.5 - yPos, {
+          pdf.text(this.copyright, dim[0] - 4 - yPos, dim[1] - 6 - yPos, {
             align: "right",
           });
         }
@@ -1460,7 +1463,8 @@ export default class PrintModel {
           let yPos = options.useTextIconsInMargin
             ? this.textIconsMargin + this.margin / 2
             : this.margin;
-          pdf.setFontSize(8);
+          pdf.setFont("helvetica", this.textFontWeight);
+          pdf.setFontSize(this.textFontSize);
           pdf.setTextColor(options.mapTextColor);
           pdf.text(date, dim[0] - 4 - yPos, dim[1] - 2 - yPos, {
             align: "right",
@@ -1472,13 +1476,15 @@ export default class PrintModel {
           let yPos = options.useTextIconsInMargin
             ? this.textIconsMargin + this.margin / 2
             : this.margin;
-          pdf.setFontSize(8);
+          pdf.setFont("helvetica", this.textFontWeight);
           pdf.setTextColor(options.mapTextColor);
           let textLines = pdf.splitTextToSize(
             this.disclaimer,
             dim[0] / 2 - this.margin - 8
           );
-          let textLinesDims = pdf.getTextDimensions(textLines, { fontSize: 8 });
+          let textLinesDims = pdf.getTextDimensions(textLines, {
+            fontSize: this.textFontSize,
+          });
           pdf.text(
             textLines,
             dim[0] - 4 - yPos,
