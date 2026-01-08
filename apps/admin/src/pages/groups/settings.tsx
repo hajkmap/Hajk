@@ -18,6 +18,7 @@ import {
   LayerSwitcherDnD,
   TreeItemData,
 } from "../../components/layerswitcher-dnd";
+import LayerSwitcherDnDComponent from "./components/layerswitcher-dnd";
 import { useGroupById } from "../../api/groups";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import { HttpError } from "../../lib/http-error";
@@ -198,18 +199,7 @@ function GroupSettings() {
             </Grid>
           </FormPanel>
         </FormContainer>
-        <LayerSwitcherDnD
-          layers={layers}
-          groups={groups}
-          dropZones={[
-            {
-              id: "layers",
-              title: "Layers",
-              items: layersDZ,
-              onItemsChange: setLayersDZ,
-            },
-          ]}
-        />
+        <LayerSwitcherDnDComponent />
       </FormActionPanel>
     </Page>
   );
