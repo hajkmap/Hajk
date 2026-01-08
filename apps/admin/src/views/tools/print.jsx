@@ -923,11 +923,11 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="textFontWeight">
-              Typsnittsvikt{" "}
+              Typsnitt{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Typsnittsvikt för copyright, date och disclaimer texten i utskriften"
+                title="Typsnitt för copyright, date och disclaimer texten i utskriften"
               />
             </label>
             <select
