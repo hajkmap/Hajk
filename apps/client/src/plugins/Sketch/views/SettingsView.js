@@ -187,13 +187,13 @@ const SettingsView = (props) => {
                 variant="outlined"
                 id="sketch-select-snap-tolerance-label"
               >
-                Snappningstolerans
+                Snappningsavstånd
               </InputLabel>
               <Select
                 id="sketch-select-snap-tolerance"
                 labelId="sketch-select-snap-tolerance-label"
                 value={snapTolerance}
-                label="Snappningstolerans"
+                label="Snappningsavstånd"
                 variant="outlined"
                 onChange={(e) => setSnapTolerance(Number(e.target.value))}
                 onFocus={() => handleFocus("select4", false)}

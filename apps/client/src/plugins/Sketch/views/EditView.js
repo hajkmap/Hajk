@@ -96,8 +96,7 @@ const EditView = (props) => {
             <Grid size={12}>
               {typeof props.editFeature?.getStyle?.() === "function" ? (
                 <Typography align="center" style={{ marginTop: 24 }}>
-                  Detta objekt hanteras av redigerbart lager och kan inte
-                  redigeras här.
+                  Detta objekt hanteras av redigerbart lager.
                 </Typography>
               ) : (
                 <div

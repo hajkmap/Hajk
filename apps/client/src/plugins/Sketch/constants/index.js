@@ -185,12 +185,12 @@ export const DEFAULT_MEASUREMENT_SETTINGS = {
 };
 
 export const SNAP_TOLERANCE_OPTIONS = [
-  { value: 4, name: "4 pixlar (låg)" },
+  { value: 4, name: "4 pixlar" },
   { value: 6, name: "6 pixlar" },
   { value: 8, name: "8 pixlar" },
-  { value: 10, name: "10 pixlar (standard)" },
+  { value: 10, name: "10 pixlar" },
   { value: 12, name: "12 pixlar" },
-  { value: 15, name: "15 pixlar (hög)" },
+  { value: 15, name: "15 pixlar" },
 ];
 
 export const DEFAULT_SNAP_SETTINGS = {
