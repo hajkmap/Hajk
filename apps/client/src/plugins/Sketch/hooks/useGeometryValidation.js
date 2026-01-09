@@ -9,6 +9,7 @@ import { editBus } from "../../../buses/editBus";
  * Validates geometries when drawn or edited, showing warnings for self-intersecting polygons/lines
  */
 const useGeometryValidation = ({
+  map,
   drawModel,
   allowedGeometryTypes,
   activityId,
@@ -95,15 +96,25 @@ const useGeometryValidation = ({
       const { id } = ev.detail || {};
       if (id == null) return;
 
-      // Find the feature and validate it
-      const source = drawModel?.getCurrentVectorSource?.();
-      if (!source) return;
-
-      const features = source.getFeatures().filter(
-        // Filter out measurement guides
-        (f) => !f.get("USER_MEASUREMENT_GUIDE")
+      // Find the feature in attributeeditor layer(s)
+      // Note: sketch:geometry-edited is only emitted for features in attributeeditor layers
+      const layers = map?.getLayers?.()?.getArray?.() || [];
+      const attributeEditorLayers = layers.filter(
+        (lyr) => lyr?.get?.("name") === "attributeeditor"
       );
-      const feature = features.find((f) => {
+
+      // Collect all features from attributeeditor layers
+      // Note: measurement guides are never synced to attributeeditor layers,
+      // so no need to filter them out here
+      const allFeatures = [];
+      attributeEditorLayers.forEach((layer) => {
+        const src = layer.getSource?.();
+        if (src) {
+          allFeatures.push(...src.getFeatures());
+        }
+      });
+
+      const feature = allFeatures.find((f) => {
         const fid = f.getId?.() ?? f.get?.("@_fid") ?? f.get?.("id");
         return (
           String(fid) === String(id) || String(fid).endsWith("." + String(id))
@@ -116,7 +127,7 @@ const useGeometryValidation = ({
     });
 
     return () => offGeomEdited();
-  }, [drawModel, validateGeometry]);
+  }, [map, validateGeometry]);
 };
 
 export default useGeometryValidation;
