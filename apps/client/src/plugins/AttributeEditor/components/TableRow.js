@@ -31,6 +31,7 @@ const TableRow = ({
   selectedRowRefs,
   handleRowHover,
   handleRowLeave,
+  colWidths,
 }) => {
   const [isHovering, setIsHovering] = React.useState(false);
   const rowHasEdits =
@@ -320,6 +321,7 @@ const TableRow = ({
                     value: effectiveValue,
                     s,
                     selected,
+                    columnWidth: colWidths?.[meta.key],
                   })}
           </td>
         );

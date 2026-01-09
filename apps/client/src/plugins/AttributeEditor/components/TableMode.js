@@ -835,6 +835,7 @@ export default function TableMode(props) {
                     selectedRowRefs={selectedRowRefs}
                     handleRowHover={handleRowHover}
                     handleRowLeave={handleRowLeave}
+                    colWidths={colWidths}
                   />
                 );
               })}

@@ -34,8 +34,16 @@ export function isMissingValue(v) {
   return v == null || v === "";
 }
 
-export function renderTableCellDisplay({ meta, value, s, selected = true }) {
-  const MAX_LENGTH = 30; // Number of characters befor truncating
+export function renderTableCellDisplay({
+  meta,
+  value,
+  s,
+  selected = true,
+  columnWidth,
+}) {
+  // Calculate max length based on column width (roughly 7-8px per character)
+  // Default to 30 characters if no width is provided
+  const MAX_LENGTH = columnWidth ? Math.floor(columnWidth / 7.5) : 30;
 
   const truncate = (str) => {
     if (selected || !str || str.length <= MAX_LENGTH) return str;
