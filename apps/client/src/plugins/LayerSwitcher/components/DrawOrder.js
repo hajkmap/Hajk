@@ -298,6 +298,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
       // This class is used to style specific elements when the tab is active
       // If you search for this class in the codebase, you can find related style-fixes.
       className={"ls-draworder-tab-view"}
+      id="draw-order-list"
       sx={[
         {
           height: "inherit",
@@ -327,7 +328,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
       >
         <Stack direction="row" alignItems="center">
           {options.enableSystemLayersSwitch && (
-            <FormGroup>
+            <FormGroup id="draw-order-switch">
               <FormControlLabel
                 control={
                   <Switch

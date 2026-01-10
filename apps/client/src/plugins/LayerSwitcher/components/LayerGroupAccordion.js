@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Collapse, Box, ListItemButton } from "@mui/material";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 import LsIconButton from "./LsIconButton";
@@ -10,18 +10,39 @@ export default function LayerGroupAccordion({
   layerGroupTitle,
   toggleDetails,
   display,
+  isFirstGroup,
+  isFirstChild,
+  disableAccordion,
 }) {
-  const [state, setState] = React.useState({ expanded: expanded });
+  const [state, setState] = useState({ expanded: expanded });
 
-  React.useEffect(() => {
+  useEffect(() => {
     setState({ expanded: expanded });
   }, [expanded]);
+
+  //Ensures that each accordion, especially the first group and first child, responds to the intro step by forcing open expanded state
+  useEffect(() => {
+    const handler = () => {
+      if (isFirstGroup) {
+        setState({ expanded: true });
+      }
+      if (isFirstChild) {
+        setState({ expanded: true });
+      }
+    };
+    document.addEventListener("expandFirstGroup", handler);
+    return () => document.removeEventListener("expandFirstGroup", handler);
+  }, [isFirstGroup, isFirstChild]);
 
   return (
     <div style={{ display: display }}>
       <ListItemButton
         disableTouchRipple
-        onClick={() => setState({ expanded: !state.expanded })}
+        onClick={
+          disableAccordion
+            ? undefined
+            : () => setState({ expanded: !state.expanded })
+        }
         sx={(theme) => ({
           alignItems: "flex-start",
           borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
@@ -39,20 +60,25 @@ export default function LayerGroupAccordion({
         })}
         dense
       >
-        <LsIconButton
-          size="small"
-          sx={{
-            mt: "2px",
-            pl: "3px",
-            pr: "4px",
-            "&:hover": {
-              backgroundColor: "transparent", // or same as default bg color
-              boxShadow: "none",
-            },
-          }}
-        >
-          <KeyboardArrowRightOutlinedIcon className="ls-arrow"></KeyboardArrowRightOutlinedIcon>
-        </LsIconButton>
+        {!disableAccordion && (
+          <LsIconButton
+            id="layerGroup-accordion-arrow-button"
+            data-first={isFirstGroup ? "true" : "false"}
+            data-expanded={state.expanded}
+            size="small"
+            sx={{
+              mt: "2px",
+              pl: "3px",
+              pr: "4px",
+              "&:hover": {
+                backgroundColor: "transparent",
+                boxShadow: "none",
+              },
+            }}
+          >
+            <KeyboardArrowRightOutlinedIcon className="ls-arrow"></KeyboardArrowRightOutlinedIcon>
+          </LsIconButton>
+        )}
         <Box
           sx={{
             display: "flex",
@@ -67,7 +93,7 @@ export default function LayerGroupAccordion({
           {layerGroupTitle}
         </Box>
       </ListItemButton>
-      <Collapse in={state.expanded} unmountOnExit>
+      {disableAccordion ? (
         <Box
           sx={{
             marginLeft: "20px" /* jesade-vbg compact mode, changed from 26px */,
@@ -75,7 +101,17 @@ export default function LayerGroupAccordion({
         >
           {children}
         </Box>
-      </Collapse>
+      ) : (
+        <Collapse in={state.expanded} unmountOnExit>
+          <Box
+            sx={{
+              marginLeft: "20px",
+            }}
+          >
+            {children}
+          </Box>
+        </Collapse>
+      )}
     </div>
   );
 }

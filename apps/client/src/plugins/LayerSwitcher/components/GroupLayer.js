@@ -1,4 +1,4 @@
-import React, { useState, memo } from "react";
+import React, { useState, useEffect, useRef, memo } from "react";
 
 import { Box, Collapse, IconButton } from "@mui/material";
 
@@ -22,6 +22,7 @@ function GroupLayer({
   display,
   filterHits,
   filterValue,
+  isGroupLayerQuickAccess,
 }) {
   const { layerIsToggled, visibleSubLayers } = layerState;
 
@@ -29,8 +30,38 @@ function GroupLayer({
     layerConfig;
 
   const [showSublayers, setShowSublayers] = useState(false);
+  const wasLoadedFromFavorites = useRef(false);
 
   const layerSwitcherDispatch = useLayerSwitcherDispatch();
+
+  // Listen for when layers are loaded from favorites
+  useEffect(() => {
+    const layersLoadedSubscription = globalObserver.subscribe(
+      "layerswitcher.quickAccessLayersLoaded",
+      ({ layerIds }) => {
+        if (layerIds && Array.isArray(layerIds) && layerIds.includes(layerId)) {
+          wasLoadedFromFavorites.current = true;
+          // Check if layer is toggled and expand
+          if (layerIsToggled) {
+            setShowSublayers(true);
+          }
+        }
+      }
+    );
+
+    return () => {
+      layersLoadedSubscription.unsubscribe();
+    };
+  }, [globalObserver, layerId, layerIsToggled]);
+
+  // Expand when layer becomes toggled after being loaded from favorites
+  useEffect(() => {
+    if (wasLoadedFromFavorites.current && layerIsToggled) {
+      setShowSublayers(true);
+      // Reset the flag after expanding
+      wasLoadedFromFavorites.current = false;
+    }
+  }, [layerIsToggled]);
 
   const setSubLayerVisible = (subLayer) => {
     layerSwitcherDispatch.setSubLayerVisibility(layerId, subLayer, true);
@@ -41,6 +72,9 @@ function GroupLayer({
   };
 
   const lowercaseFilterValue = filterValue?.toLocaleLowerCase();
+  // Check if the GroupLayer itself is a filter hit
+  const isGroupLayerHit = filterHits && filterHits.has(layerId);
+
   // Find out which (if any) sublayer is the filter hit
   const subLayersToShow = filterHits
     ? allSubLayers.filter((sl) => {
@@ -53,6 +87,11 @@ function GroupLayer({
 
   // Is the filter hit on a sub layer or on the GroupLayer Captions?
   const isSubLayerFilterHit = filterHits && subLayersToShow.length > 0;
+
+  // If the GroupLayer itself is a hit, show all subLayers regardless of filter
+  // But if only subLayers match the filter, show only those
+  const filterSubLayersToShow =
+    isGroupLayerHit && !isSubLayerFilterHit ? allSubLayers : subLayersToShow;
 
   const handleLayerItemClick = () => {
     if (layerIsToggled) {
@@ -82,10 +121,8 @@ function GroupLayer({
       ? false
       : showSublayers || isSubLayerFilterHit;
 
-  // If there is an active search we don't want to show the expand arrow since
-  // it does not do anything.
-  const showExpandArrow =
-    layerInfo.hideExpandArrow !== true && !isSubLayerFilterHit;
+  // Show expand arrow unless hideExpandArrow is set to true
+  const showExpandArrow = layerInfo.hideExpandArrow !== true;
 
   return (
     <LayerItem
@@ -179,10 +216,11 @@ function GroupLayer({
           </Box>
         )
       }
+      isGroupLayerQuickAccess={isGroupLayerQuickAccess}
       subLayersSection={
         <Collapse in={subLayerSectionOpen} unmountOnExit>
           <Box sx={{ marginLeft: 3 }}>
-            {subLayersToShow?.map((subLayer) => (
+            {filterSubLayersToShow?.map((subLayer) => (
               <SubLayerItem
                 key={subLayer}
                 subLayer={subLayer}

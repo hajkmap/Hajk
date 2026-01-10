@@ -91,6 +91,25 @@ class LayersSwitcherView extends React.PureComponent {
       zIndex: l["zIndex"],
     }));
 
+    // *Introduction Guide* Add event listener for favoritesBackTransition 'Tillbaka' button and handleFavoritesShowTransition 'Redigera Favoriter' button
+    this.handleFavoritesBackTransition = () => {
+      this.toggleFavoritesQuickAccessBackButton();
+    };
+
+    document.addEventListener(
+      "favoritesBackTransition",
+      this.handleFavoritesBackTransition
+    );
+
+    this.handleFavoritesShowTransition = () => {
+      this.toggleShowFavoritesView();
+    };
+
+    document.addEventListener(
+      "favoritesShowTransition",
+      this.handleFavoritesShowTransition
+    );
+
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
         this.setState({
@@ -184,6 +203,31 @@ class LayersSwitcherView extends React.PureComponent {
       },
     }));
   };
+  /* 
+  *Introduction Guide* The functions are being implemented due to handleFavoritesViewToggle and handleQuickAccessPresetsToggle 
+  both being triggered when a click event is programmatically dispatched (e.g., via id="example"), 
+  causing unwanted simultaneous execution. Separate handlers ensure that depending on the step in the Introduction Guide, 
+  runs for its respective component.
+  */
+  toggleFavoritesQuickAccessBackButton = () => {
+    if (
+      this.state.displayContentOverlay === "favorites" ||
+      this.state.displayContentOverlay === "quickAccessPresets"
+    ) {
+      this.setState({
+        displayContentOverlay: null,
+      });
+    }
+  };
+  // quickAccessPresets was not needed here since it's being handled as a MouseEvent("click") event
+  // in the Introduction.js component instead of a custom event like here.
+  toggleShowFavoritesView = () => {
+    if (this.state.displayContentOverlay === null) {
+      this.setState({
+        displayContentOverlay: "favorites",
+      });
+    }
+  };
 
   /**
    * LayerSwitcher consists of three Tabs: one shows
@@ -257,6 +301,18 @@ class LayersSwitcherView extends React.PureComponent {
     }, 1);
   };
 
+  componentWillUnmount() {
+    // Clean up event listener
+    document.removeEventListener(
+      "favoritesBackTransition",
+      this.handleFavoritesBackTransition
+    );
+    document.removeEventListener(
+      "favoritesShowTransition",
+      this.handleFavoritesShowTransition
+    );
+  }
+
   render() {
     const { windowVisible, layersState } = this.props;
 
@@ -271,7 +327,11 @@ class LayersSwitcherView extends React.PureComponent {
           flex: 1,
         }}
       >
-        <StyledAppBar position="relative" color="default">
+        <StyledAppBar
+          id="layer-switcher-tab-panel"
+          position="relative"
+          color="default"
+        >
           <Tabs
             action={this.handleTabsMounted}
             onChange={this.handleChangeTabs}
@@ -285,7 +345,7 @@ class LayersSwitcherView extends React.PureComponent {
             <Tab label="Kartlager" />
             <Tab label="Bakgrund" />
             {this.options.showDrawOrderView === true && (
-              <Tab label={"Ritordning"} />
+              <Tab id="draw-order-tab" label={"Ritordning"} />
             )}
           </Tabs>
         </StyledAppBar>

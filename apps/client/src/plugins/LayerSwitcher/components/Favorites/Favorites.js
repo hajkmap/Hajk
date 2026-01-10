@@ -8,6 +8,7 @@ import FavoritesList from "./FavoritesList.js";
 import FavoritesOptions from "./FavoritesOptions.js";
 import FavoritesViewHeader from "./FavoritesViewHeader.js";
 import ConfirmationDialog from "components/ConfirmationDialog.js";
+import { useLayerSwitcherDispatch } from "../../LayerSwitcherProvider.js";
 
 import {
   Box,
@@ -43,6 +44,7 @@ function Favorites({
   const [openNoLayersAlert, setOpenNoLayersAlert] = useState(false);
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
+  const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
   useEffect(() => {
     // Set state from localstorage on component load
@@ -109,12 +111,15 @@ function Favorites({
     setMissingLayersConfirmation(null);
 
     const allMapLayers = map.getAllLayers();
+    const loadedLayerIds = new Set();
+
     layers.forEach((l) => {
       const layer = allMapLayers.find((la) => la.get("name") === l.id);
       if (layer) {
         // Set quickaccess property
         if (layer.get("layerType") !== "base") {
           layer.set("quickAccess", true);
+          loadedLayerIds.add(l.id);
         }
         // Set drawOrder (zIndex)
         layer.setZIndex(l.drawOrder);
@@ -124,10 +129,7 @@ function Favorites({
         if (layer.get("layerType") === "group") {
           if (l.visible === true) {
             const subLayersToShow = l.subLayers ? l.subLayers : [];
-            globalObserver.publish("layerswitcher.showLayer", {
-              layer,
-              subLayersToShow,
-            });
+            layerSwitcherDispatch.setSubLayersVisible(l.id, subLayersToShow);
           } else {
             globalObserver.publish("layerswitcher.hideLayer", layer);
           }
@@ -158,6 +160,13 @@ function Favorites({
         }
       }
     });
+
+    // Publish event to auto-expand affected groups and GroupLayers
+    if (loadedLayerIds.size > 0) {
+      globalObserver.publish("layerswitcher.quickAccessLayersLoaded", {
+        layerIds: Array.from(loadedLayerIds),
+      });
+    }
 
     enqueueSnackbar(`${title} har nu laddats till snabbåtkomst.`, {
       variant: "success",
@@ -386,9 +395,15 @@ function Favorites({
     return createPortal(
       <Box
         sx={[
+          {
+            height: "inherit",
+            maxHeight: "inherit",
+            flexDirection: "column",
+            overflow: "hidden",
+          },
           favoriteViewDisplay
             ? {
-                display: "block",
+                display: "flex",
               }
             : {
                 display: "none",
@@ -401,7 +416,12 @@ function Favorites({
           functionalCookiesOk={functionalCookiesOk}
           favoritesInfoText={favoritesInfoText}
         ></FavoritesViewHeader>
-        <Box>
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflowY: "auto",
+          }}
+        >
           <FavoritesList
             map={map}
             favorites={favorites}

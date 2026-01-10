@@ -37,6 +37,7 @@ const QuickAccessView = ({
   enqueueSnackbar,
   layersState,
   staticLayerConfig,
+  staticLayerTree,
 }) => {
   const qaLayers = Object.values(layersState).filter((obj) => obj.quickAccess);
   const hasVisibleLayers = qaLayers.some((l) => l.visible);
@@ -80,6 +81,7 @@ const QuickAccessView = ({
   return (
     showQuickAccess && (
       <Box
+        id="quick-access-view"
         sx={(theme) => ({
           borderBottom: `${theme.spacing(quickAccessSectionExpanded ? 0.2 : 0.0)} solid ${theme.palette.divider}`,
         })}
@@ -148,7 +150,10 @@ const QuickAccessView = ({
             <ListItemSecondaryAction sx={{ right: "4px" }}>
               {enableQuickAccessPresets && (
                 <HajkTooltip title="Teman">
-                  <LsIconButton onClick={handleQuickAccessPresetsToggle}>
+                  <LsIconButton
+                    id="quick-access-theme-button"
+                    onClick={handleQuickAccessPresetsToggle}
+                  >
                     <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
                   </LsIconButton>
                 </HajkTooltip>
@@ -181,6 +186,7 @@ const QuickAccessView = ({
               globalObserver={globalObserver}
               layersState={layersState}
               staticLayerConfig={staticLayerConfig}
+              staticLayerTree={staticLayerTree}
             ></QuickAccessLayers>
           </Box>
         </Collapse>
