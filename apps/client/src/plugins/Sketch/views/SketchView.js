@@ -450,6 +450,12 @@ const SketchView = (props) => {
         title: newOgcSourceTitle,
         color: PLUGIN_COLORS.warning,
       });
+
+      // Open AttributeEditor plugin window when a service is selected
+      globalObserver.publish("attributeeditor.showWindow", {
+        hideOtherPluginWindows: false, // Keep Sketch window open
+        runCallback: true,
+      });
     }
     setOgcSource(newOgcSourceTitle);
   };
@@ -482,12 +488,18 @@ const SketchView = (props) => {
 
     setOgcSource(targetService.title);
 
+    // Open AttributeEditor plugin window when a service is selected
+    globalObserver.publish("attributeeditor.showWindow", {
+      hideOtherPluginWindows: false, // Keep Sketch window open
+      runCallback: true,
+    });
+
     // Show notification to user
     enqueueSnackbar(
       `Redigeringsbart lager valt. ${drawingsWarningDialog.drawingCount} ritade objekt finns kvar i kartan.`,
       { variant: "info" }
     );
-  }, [drawingsWarningDialog, props, enqueueSnackbar]);
+  }, [drawingsWarningDialog, props, enqueueSnackbar, globalObserver]);
 
   const handleClearDrawingsAndSwitch = React.useCallback(() => {
     const { targetService } = drawingsWarningDialog;
@@ -519,11 +531,23 @@ const SketchView = (props) => {
 
     setOgcSource(targetService.title);
 
+    // Open AttributeEditor plugin window when a service is selected
+    globalObserver.publish("attributeeditor.showWindow", {
+      hideOtherPluginWindows: false, // Keep Sketch window open
+      runCallback: true,
+    });
+
     // Show confirmation
     enqueueSnackbar("Ritade objekt borttagna. Redigeringsbart lager valt.", {
       variant: "success",
     });
-  }, [drawingsWarningDialog, drawModel, props, enqueueSnackbar]);
+  }, [
+    drawingsWarningDialog,
+    drawModel,
+    props,
+    enqueueSnackbar,
+    globalObserver,
+  ]);
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
