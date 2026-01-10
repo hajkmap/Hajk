@@ -1022,19 +1022,11 @@ function AttributeEditor(props) {
         selectedIdsRef.current.delete(fid);
         visibleIdsRef.current.delete(fid);
 
-        if (typeof fid === "number" && fid < 0) {
-          model.dispatch({
-            type: Action.SET_DELETE_STATE,
-            ids: [fid],
-            mode: "mark",
-          });
-        } else {
-          model.dispatch({
-            type: Action.SET_DELETE_STATE,
-            ids: [fid],
-            mode: "mark",
-          });
-        }
+        model.dispatch({
+          type: Action.SET_DELETE_STATE,
+          ids: [fid],
+          mode: "mark",
+        });
 
         if (focusedIdRef?.current === fid) {
           editBus.emit("attrib:focus-id", { id: null });

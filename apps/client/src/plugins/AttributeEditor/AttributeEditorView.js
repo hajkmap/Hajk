@@ -75,6 +75,7 @@ export default function AttributeEditorView({
   const explicitClearRef = React.useRef(false);
 
   const [columnFilters, setColumnFilters] = useState({});
+  const [columnFilterUI, setColumnFilterUI] = useState({});
   const [openFilterColumn, setOpenFilterColumn] = useState(null);
   const filterOverlayRef = useRef(null);
   const firstColumnRef = useRef(null);
@@ -487,7 +488,11 @@ export default function AttributeEditorView({
       (k) => !k.startsWith("__") && !HIDE.has(k)
     );
 
-    keys.sort((a, b) => (a === "id" ? -1 : b === "id" ? 1 : 0));
+    keys.sort((a, b) => {
+      if (a === "id") return -1;
+      if (b === "id") return 1;
+      return 0;
+    });
 
     return keys.map((key, i) => ({
       key,
@@ -1184,15 +1189,13 @@ export default function AttributeEditorView({
         controller.commit();
 
         // Reset undo stacks
-        Promise.resolve().then(() => {
-          formUndoSnapshotsRef.current.clear();
-          setFormUndoStack([]);
-          setTableUndoLocal([]);
-          setTableEditing(null);
-          setLastTableIndex(null);
-          geomUndoRef.current = [];
-          setGeomUndoCount(0);
-        });
+        formUndoSnapshotsRef.current.clear();
+        setFormUndoStack([]);
+        setTableUndoLocal([]);
+        setTableEditing(null);
+        setLastTableIndex(null);
+        geomUndoRef.current = [];
+        setGeomUndoCount(0);
 
         return;
       }
@@ -1257,15 +1260,13 @@ export default function AttributeEditorView({
         );
 
         // Reset undo stacks
-        Promise.resolve().then(() => {
-          formUndoSnapshotsRef.current.clear();
-          setFormUndoStack([]);
-          setTableUndoLocal([]);
-          setTableEditing(null);
-          setLastTableIndex(null);
-          geomUndoRef.current = [];
-          setGeomUndoCount(0);
-        });
+        formUndoSnapshotsRef.current.clear();
+        setFormUndoStack([]);
+        setTableUndoLocal([]);
+        setTableEditing(null);
+        setLastTableIndex(null);
+        geomUndoRef.current = [];
+        setGeomUndoCount(0);
 
         // Reload features from server
         try {
@@ -1843,7 +1844,7 @@ export default function AttributeEditorView({
     if (mode !== "form") return;
 
     // If user explicitly cleared the selection, do nothing
-    if (explicitClearRef) return;
+    if (explicitClearRef.current) return;
 
     // If both focus and selection are valid, do nothing
     if (focusedIdValid && selectedIdsValid) return;
@@ -2053,12 +2054,13 @@ export default function AttributeEditorView({
     const override = opts.targetIds;
 
     const idsToUpdate =
-      (override && override.length ? override : null) ??
-      (selectedIds.size > 1
-        ? Array.from(selectedIds)
-        : focusedFeature
-          ? [focusedFeature.id]
-          : []);
+      override?.length > 0
+        ? override
+        : selectedIds.size > 1
+          ? Array.from(selectedIds)
+          : focusedFeature
+            ? [focusedFeature.id]
+            : [];
 
     if (!idsToUpdate.length) return;
 
@@ -2129,20 +2131,14 @@ export default function AttributeEditorView({
     ? tableUndoLocal
     : tableUndoStack;
 
-  const canUndo = Boolean(
-    tableUndoLocal?.length ||
-    0 ||
-    tableUndoStack?.length ||
-    0 ||
-    formUndoStack?.length ||
-    0 ||
+  const canUndo =
+    (tableUndoLocal?.length ?? 0) > 0 ||
+    (tableUndoStack?.length ?? 0) > 0 ||
+    (formUndoStack?.length ?? 0) > 0 ||
     geomUndoCount > 0 ||
-    dirty
-  );
+    dirty;
 
   const hasGeomUndo = geomUndoCount > 0;
-
-  const [columnFilterUI, setColumnFilterUI] = useState({});
 
   return (
     <div style={s.shell}>

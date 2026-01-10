@@ -197,6 +197,21 @@ const useAttributeEditorIntegration = ({
           feature.set("SKETCH_ATTRIBUTEEDITOR", true, true);
         }
         feature.set("DRAW_METHOD", method, true);
+
+        // Clear EDIT_ACTIVE from all other features before setting it on this one
+        // This ensures only one feature shows edit nodes at a time
+        for (const [layer] of reg.entries()) {
+          const src = layer.getSource?.();
+          if (src) {
+            const allFeatures = src.getFeatures?.() || [];
+            allFeatures.forEach((f) => {
+              if (f !== feature && f.get("EDIT_ACTIVE")) {
+                f.set("EDIT_ACTIVE", false, true);
+              }
+            });
+          }
+        }
+
         // Set EDIT_ACTIVE when in EDIT mode AND modify is enabled (to show nodes)
         feature.set(
           "EDIT_ACTIVE",
@@ -216,6 +231,19 @@ const useAttributeEditorIntegration = ({
         }
         if (feature.get("STYLE_BEFORE_HIDE") === undefined) {
           feature.set("STYLE_BEFORE_HIDE", null, true);
+        }
+      } else {
+        // When clearing selection (feature is null), clear EDIT_ACTIVE from all features
+        for (const [layer] of reg.entries()) {
+          const src = layer.getSource?.();
+          if (src) {
+            const allFeatures = src.getFeatures?.() || [];
+            allFeatures.forEach((f) => {
+              if (f.get("EDIT_ACTIVE")) {
+                f.set("EDIT_ACTIVE", false, true);
+              }
+            });
+          }
         }
       }
 
