@@ -2187,6 +2187,42 @@ export default function AttributeEditorView({
             <div style={s.formEmpty}>Inget redigeringsbart lager vald.</div>
           </div>
         </div>
+      ) : isMobile ? (
+        <MobileForm
+          s={s}
+          mobileActiveTab={mobileActiveTab}
+          setMobileActiveTab={setMobileActiveTab}
+          visibleFormList={visibleFormList}
+          selectedIds={selectedIds}
+          focusedId={focusedId}
+          handleBeforeChangeFocus={handleBeforeChangeFocus}
+          onFormRowClick={onFormRowClick}
+          focusedFeature={focusedFeature}
+          FIELD_META={FM}
+          changedFields={changedFields}
+          editValues={editValues}
+          handleFieldChange={handleFieldChange}
+          renderInput={renderInput}
+          dirty={dirty}
+          resetEdits={resetEdits}
+          saveChanges={saveChanges}
+          tablePendingDeletes={pendingDeletes}
+          setDeleteState={setDeleteState}
+          tableHasPending={tableHasPending}
+          commitTableEdits={commitTableEdits}
+          tableUndoStack={tableUndoStack}
+          undoLatestTableChange={undoLatestTableChange}
+          formUndoStack={formUndoStack}
+          undoLatestFormChange={undoLatestFormChange}
+          tablePendingEdits={pendingEdits}
+          tablePendingAdds={pendingAdds}
+          lastEditTargetIdsRef={lastEditTargetIdsRef}
+          duplicateInForm={duplicateInForm}
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+          hasGeomUndo={hasGeomUndo}
+          exportToExcel={exportToExcel}
+        />
       ) : ui.mode === "table" ? (
         <TableMode
           s={s}
@@ -2233,45 +2269,6 @@ export default function AttributeEditorView({
           handleRowHover={handleRowHover}
           handleRowLeave={handleRowLeave}
           exportToExcel={exportToExcel}
-        />
-      ) : isMobile ? (
-        <MobileForm
-          s={s}
-          theme={theme}
-          isMobile={isMobile}
-          mode={ui.mode}
-          mobileActiveTab={mobileActiveTab}
-          setMobileActiveTab={setMobileActiveTab}
-          visibleFormList={visibleFormList}
-          selectedIds={selectedIds}
-          focusedId={focusedId}
-          handleBeforeChangeFocus={handleBeforeChangeFocus}
-          onFormRowClick={onFormRowClick}
-          focusPrev={focusPrev}
-          focusNext={focusNext}
-          focusedFeature={focusedFeature}
-          FIELD_META={FM}
-          changedFields={changedFields}
-          editValues={editValues}
-          handleFieldChange={handleFieldChange}
-          renderInput={renderInput}
-          dirty={dirty}
-          resetEdits={resetEdits}
-          saveChanges={saveChanges}
-          tablePendingDeletes={pendingDeletes}
-          setDeleteState={setDeleteState}
-          tableHasPending={tableHasPending}
-          commitTableEdits={commitTableEdits}
-          tableUndoStack={tableUndoStack}
-          undoLatestTableChange={undoLatestTableChange}
-          formUndoStack={formUndoStack}
-          undoLatestFormChange={undoLatestFormChange}
-          tablePendingEdits={pendingEdits}
-          tablePendingAdds={pendingAdds}
-          lastEditTargetIdsRef={lastEditTargetIdsRef}
-          duplicateInForm={duplicateInForm}
-          columnFilters={columnFilters}
-          setColumnFilters={setColumnFilters}
         />
       ) : (
         <DesktopForm

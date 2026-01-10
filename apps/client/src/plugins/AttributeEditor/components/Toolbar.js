@@ -320,25 +320,29 @@ export default function Toolbar({
       <strong style={s.toolbarTitle}>Attributredigerare</strong>
       {!isMobile && <div style={s.toolbarSpacer} />}
 
-      <button
-        type="button"
-        onClick={() => setMode("table")}
-        style={s.toggle(mode === "table")}
-        aria-pressed={mode === "table"}
-        title="Tabelläge"
-      >
-        <TableRowsIcon fontSize="small" />
-      </button>
+      {!isMobile && (
+        <>
+          <button
+            type="button"
+            onClick={() => setMode("table")}
+            style={s.toggle(mode === "table")}
+            aria-pressed={mode === "table"}
+            title="Tabelläge"
+          >
+            <TableRowsIcon fontSize="small" />
+          </button>
 
-      <button
-        type="button"
-        onClick={() => setMode("form")}
-        style={s.toggle(mode === "form")}
-        aria-pressed={mode === "form"}
-        title="Formulärläge"
-      >
-        <DynamicFormIcon fontSize="small" />
-      </button>
+          <button
+            type="button"
+            onClick={() => setMode("form")}
+            style={s.toggle(mode === "form")}
+            aria-pressed={mode === "form"}
+            title="Formulärläge"
+          >
+            <DynamicFormIcon fontSize="small" />
+          </button>
+        </>
+      )}
 
       <select
         value={serviceId}

@@ -184,7 +184,7 @@ const SettingsView = (props) => {
             } röda markeringar där geometrin korsar sig själv. Varningar om självkorsningar visas alltid.`}
           >
             <FormControlLabel
-              label="Visa självkorsningar"
+              label="Visa självkorsningsfel"
               control={
                 <Switch
                   checked={showKinkMarkers}

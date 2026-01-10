@@ -3,13 +3,16 @@ import UndoIcon from "@mui/icons-material/Undo";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DescriptionIcon from "@mui/icons-material/Description";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
+import { editBus } from "../../../buses/editBus";
 
 export default function MobileForm({
   s,
-  isMobile,
-  mode,
   mobileActiveTab,
   setMobileActiveTab,
 
@@ -19,8 +22,6 @@ export default function MobileForm({
   onFormRowClick,
   focusedId,
   handleBeforeChangeFocus,
-  focusPrev,
-  focusNext,
 
   // form
   lastEditTargetIdsRef,
@@ -49,11 +50,10 @@ export default function MobileForm({
   hasGeomUndo,
   columnFilters,
   setColumnFilters,
+  exportToExcel,
 }) {
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
-
-  const isActive = isMobile && mode === "form";
 
   // Helpers
 
@@ -78,23 +78,6 @@ export default function MobileForm({
       .split(/\s+/)
       .some((tok) => tok.length >= Math.max(30, Math.floor(limit * 0.6)));
     return hasLongToken;
-  }
-
-  function makeRowPreview(row, FIELD_META) {
-    const keys = FIELD_META.map((m) => m.key);
-    const contentKeys = keys.filter(
-      (k) => !["id", "geoid", "oracle_geoid"].includes(k)
-    );
-    const parts = [];
-    if (row.id != null && row.id !== "") parts.push(String(row.id));
-    for (const k of contentKeys) {
-      const v = row[k];
-      if (v != null && v !== "") {
-        parts.push(String(v));
-        if (parts.length >= 3) break;
-      }
-    }
-    return parts.join(" • ");
   }
 
   const handleDeleteClick = () => {
@@ -152,8 +135,6 @@ export default function MobileForm({
     dirty
   );
 
-  if (!isActive) return null;
-
   return (
     <>
       <div style={s.mobileTabBar}>
@@ -195,63 +176,186 @@ export default function MobileForm({
         )}
         {mobileActiveTab === "list" ? (
           <>
-            <div style={s.list}>
-              {visibleFormList.map((f, idx) => {
-                const selected = selectedIds.has(f.id);
-                const isFocused = focusedId === f.id;
-                const isPendingDelete =
-                  f.__pending === "delete" || tablePendingDeletes?.has?.(f.id);
-                const hasPendingEdits = !!tablePendingEdits?.[f.id];
-                const hasGeomChange = !!tablePendingEdits?.[f.id]?.__geom__;
-                const isDraftAdd =
-                  f.__pending === "add" ||
-                  tablePendingAdds?.some?.(
-                    (d) => d.id === f.id && d.__pending !== "delete"
-                  );
-
-                const status = isPendingDelete
-                  ? "delete"
-                  : hasGeomChange
-                    ? "geom"
-                    : hasPendingEdits
-                      ? "edit"
-                      : isDraftAdd
-                        ? "add"
-                        : null;
-
-                return (
-                  <div
-                    key={f.id}
-                    data-row-id={f.id}
-                    style={s.listRow(selected, status, isFocused, false)}
-                    onClick={(e) => onFormRowClick(f.id, idx, e)}
-                  >
-                    <div>
-                      <div style={s.listRowText}>
-                        <div style={s.listRowTitle}>
-                          {makeRowPreview(f, FIELD_META)}
-                          {hasPendingEdits && (
-                            <span style={s.labelChanged}>&nbsp;• ändrad</span>
+            <div style={{ overflowX: "auto", flex: 1 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    {FIELD_META.map((meta) => (
+                      <th
+                        key={meta.key}
+                        style={{
+                          padding: "8px",
+                          borderBottom: "2px solid #ddd",
+                          textAlign: "left",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                          whiteSpace: "nowrap",
+                          position: "sticky",
+                          top: 0,
+                          backgroundColor: "#fff",
+                          zIndex: 1,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                        >
+                          <span>{meta.label}</span>
+                          {meta.description && meta.description.trim() && (
+                            <button
+                              style={s.descriptionIcon}
+                              title={meta.description}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                alert(`${meta.label}\n\n${meta.description}`);
+                              }}
+                              aria-label={`Information om ${meta.label}`}
+                            >
+                              <InfoOutlinedIcon style={{ fontSize: "14px" }} />
+                            </button>
                           )}
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              {visibleFormList.length === 0 && (
-                <div style={s.listEmpty}>Inga objekt i listan.</div>
-              )}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleFormList.map((f, idx) => {
+                    const selected = selectedIds.has(f.id);
+                    const isPendingDelete =
+                      f.__pending === "delete" ||
+                      tablePendingDeletes?.has?.(f.id);
+                    const hasPendingEdits = !!tablePendingEdits?.[f.id];
+                    const hasGeomChange = !!tablePendingEdits?.[f.id]?.__geom__;
+                    const isDraftAdd =
+                      f.__pending === "add" ||
+                      tablePendingAdds?.some?.(
+                        (d) => d.id === f.id && d.__pending !== "delete"
+                      );
+
+                    const bgColor = isPendingDelete
+                      ? "#ffe0e0"
+                      : hasGeomChange
+                        ? "#fff4e0"
+                        : hasPendingEdits
+                          ? "#fff8dc"
+                          : isDraftAdd
+                            ? "#e0f7fa"
+                            : selected
+                              ? "#e3f2fd"
+                              : "#fff";
+
+                    return (
+                      <tr
+                        key={f.id}
+                        data-row-id={f.id}
+                        onClick={(e) => onFormRowClick(f.id, idx, e)}
+                        style={{
+                          backgroundColor: bgColor,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {FIELD_META.map((meta) => (
+                          <td
+                            key={meta.key}
+                            style={{
+                              padding: "8px",
+                              borderBottom: "1px solid #eee",
+                              fontSize: "13px",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {f[meta.key] ?? ""}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                  {visibleFormList.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={FIELD_META.length}
+                        style={{
+                          padding: "20px",
+                          textAlign: "center",
+                          color: "#999",
+                        }}
+                      >
+                        Inga objekt i listan.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
 
             <div style={s.listFooter}>
-              <button style={s.btn} onClick={focusPrev}>
-                &larr; Föreg.
+              <button
+                style={
+                  visibleFormList.length === 0 ? s.iconBtnDisabled : s.iconBtn
+                }
+                disabled={visibleFormList.length === 0}
+                onClick={() => exportToExcel(visibleFormList)}
+                title={
+                  visibleFormList.length
+                    ? `Exportera till Excel (${visibleFormList.length} rader)`
+                    : "Inga rader att exportera"
+                }
+                aria-label="Exportera till Excel"
+              >
+                <DescriptionIcon fontSize="small" />
               </button>
-              <button style={s.btn} onClick={focusNext}>
-                Nästa &rarr;
+
+              <button
+                style={selectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
+                disabled={selectedIds.size === 0}
+                onClick={() => {
+                  const ids = Array.from(selectedIds);
+                  if (ids.length > 0) {
+                    editBus.emit("attrib:zoom-to-features", { ids });
+                  }
+                }}
+                title={
+                  selectedIds.size
+                    ? `Zooma till ${selectedIds.size} objekt`
+                    : "Markera rader först"
+                }
+                aria-label="Zooma till valda"
+              >
+                <CenterFocusStrongIcon fontSize="small" />
               </button>
-              <div style={s.spacer} />
+
+              <button
+                style={selectedIds.size === 0 ? s.iconBtnDisabled : s.iconBtn}
+                disabled={selectedIds.size === 0}
+                onClick={() => {
+                  const ids = Array.from(selectedIds);
+                  if (ids.length > 0) {
+                    const firstId = ids[0];
+                    const el = document.querySelector(
+                      `[data-row-id="${firstId}"]`
+                    );
+                    if (el) {
+                      el.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      });
+                    }
+                  }
+                }}
+                title={
+                  selectedIds.size
+                    ? "Skrolla till markerad rad"
+                    : "Markera rader först"
+                }
+                aria-label="Skrolla till markerad"
+              >
+                <VisibilityIcon fontSize="small" />
+              </button>
+
               <button
                 style={
                   selectedIds.size === 0 && focusedId == null
@@ -340,6 +444,26 @@ export default function MobileForm({
               </div>
             ) : (
               <>
+                {selectedIds.size > 1 && (
+                  <div style={s.bulkEditWarning}>
+                    <svg
+                      style={s.bulkEditWarningIcon}
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                      <line x1="12" y1="9" x2="12" y2="13" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    <span>
+                      OBS! Nu redigerar du {selectedIds.size} objekt samtidigt
+                    </span>
+                  </div>
+                )}
                 <div style={s.form}>
                   {FIELD_META.map((meta) => {
                     const changed = changedFields.has(meta.key);
@@ -352,6 +476,19 @@ export default function MobileForm({
                       <div key={meta.key} style={s.field}>
                         <label style={s.label}>
                           {meta.label}
+                          {meta.description && meta.description.trim() && (
+                            <button
+                              style={s.descriptionIcon}
+                              title={meta.description}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                alert(`${meta.label}\n\n${meta.description}`);
+                              }}
+                              aria-label={`Information om ${meta.label}`}
+                            >
+                              <InfoOutlinedIcon style={{ fontSize: "16px" }} />
+                            </button>
+                          )}
                           {changed && (
                             <span style={s.labelChanged}>(ändrad)</span>
                           )}
