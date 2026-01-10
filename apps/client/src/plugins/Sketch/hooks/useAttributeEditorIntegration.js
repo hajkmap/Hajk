@@ -2,8 +2,10 @@ import React from "react";
 import Select from "ol/interaction/Select";
 import Translate from "ol/interaction/Translate";
 import Modify from "ol/interaction/Modify";
-import { Stroke, Fill, Style } from "ol/style";
+import { Stroke, Fill, Style, Circle } from "ol/style";
 import { altKeyOnly } from "ol/events/condition";
+import { fromCircle } from "ol/geom/Polygon";
+import MultiPoint from "ol/geom/MultiPoint";
 import { editBus } from "../../../buses/editBus";
 
 /**
@@ -81,6 +83,53 @@ const useAttributeEditorIntegration = ({
       return idLike;
     };
 
+    // Helper: Extract coordinates from feature for node highlighting
+    const getFeatureCoordinates = (feature) => {
+      const geometry = feature.getGeometry();
+      if (!geometry) return [];
+
+      const geometryType = geometry.getType();
+      switch (geometryType) {
+        case "Circle":
+          return fromCircle(geometry, 8).getCoordinates()[0];
+        case "LineString":
+          return geometry.getCoordinates();
+        case "Point":
+          return [geometry.getCoordinates()];
+        case "MultiPolygon":
+          let coords = [];
+          geometry.getCoordinates()[0].forEach((a) => {
+            a.forEach((b) => {
+              coords.push(b);
+            });
+          });
+          return coords;
+        default:
+          // Polygon
+          return geometry.getCoordinates()[0];
+      }
+    };
+
+    // Helper: Create node highlight style
+    const getNodeHighlightStyle = (feature) => {
+      return new Style({
+        image: new Circle({
+          radius: 5,
+          fill: new Fill({
+            color: "rgba(58, 130, 208, 0.6)", // Blue fill
+          }),
+          stroke: new Stroke({
+            color: "#3A82D0", // Blue stroke
+            width: 2,
+          }),
+        }),
+        geometry: () => {
+          const coordinates = getFeatureCoordinates(feature);
+          return new MultiPoint(coordinates);
+        },
+      });
+    };
+
     // Helper: Materialize style from layer for a feature
     const materializeStyleFromLayer = (layer, feature) => {
       if (!feature) return;
@@ -113,6 +162,11 @@ const useAttributeEditorIntegration = ({
           }
         }
 
+        // Add node highlights when in edit mode (like DrawModel does)
+        if (f.get("EDIT_ACTIVE") === true) {
+          return [out, getNodeHighlightStyle(f)];
+        }
+
         return out;
       };
 
@@ -143,7 +197,12 @@ const useAttributeEditorIntegration = ({
           feature.set("SKETCH_ATTRIBUTEEDITOR", true, true);
         }
         feature.set("DRAW_METHOD", method, true);
-        feature.set("EDIT_ACTIVE", activityId === "EDIT", true);
+        // Set EDIT_ACTIVE when in EDIT mode AND modify is enabled (to show nodes)
+        feature.set(
+          "EDIT_ACTIVE",
+          activityId === "EDIT" && modifyEnabled,
+          true
+        );
         if (feature.get("TEXT_SETTINGS") == null) {
           feature.set(
             "TEXT_SETTINGS",
@@ -229,7 +288,7 @@ const useAttributeEditorIntegration = ({
 
       const shouldBeActive = pluginShown;
 
-      for (const { select, translate, modify } of reg.values()) {
+      for (const [layer, { select, translate, modify }] of reg.entries()) {
         try {
           select.setActive(shouldBeActive);
         } catch {}
@@ -241,6 +300,21 @@ const useAttributeEditorIntegration = ({
         try {
           modify.setActive(inEditWithNodes && modify.__allowModify);
         } catch {}
+
+        // Update EDIT_ACTIVE on selected features to show/hide nodes
+        if (activityId === "EDIT") {
+          const fc = select?.getFeatures?.();
+          if (fc) {
+            const features = fc.getArray ? fc.getArray() : [];
+            features.forEach((f) => {
+              f.set("EDIT_ACTIVE", modifyEnabled, true);
+            });
+            // Trigger re-render if any features were updated
+            if (features.length > 0) {
+              layer?.changed?.();
+            }
+          }
+        }
       }
     };
 
