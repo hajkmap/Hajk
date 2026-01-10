@@ -686,6 +686,7 @@ const SketchView = (props) => {
             ogcSource={ogcSource}
             handleOgcSourceChange={handleOgcSourceChange}
             serviceList={serviceList}
+            globalObserver={globalObserver}
           />
         );
       default:
