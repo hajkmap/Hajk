@@ -259,7 +259,93 @@ const useGeometryValidation = ({
       }
     });
 
-    return () => offGeomEdited();
+    // Listen for source.clear() events from AttributeEditor
+    // This happens after commit when features are reloaded from server
+    const offSourceCleared = editBus.on("sketch:source-cleared", () => {
+      const layers = map?.getLayers?.()?.getArray?.() || [];
+      const attributeEditorLayers = layers.filter(
+        (lyr) => lyr?.get?.("name") === "attributeeditor"
+      );
+
+      // Remove all kink markers from all attributeeditor layers
+      attributeEditorLayers.forEach((layer) => {
+        const src = layer.getSource?.();
+        if (!src) return;
+
+        const kinkMarkers = src
+          .getFeatures()
+          .filter((f) => f.get("KINK_MARKER"));
+        kinkMarkers.forEach((marker) => src.removeFeature(marker));
+      });
+    });
+
+    // Listen for feature removal events
+    // This happens when draft features are removed from pendingAdds via undo
+    const offFeatureRemoved = editBus.on("sketch:feature-removed", (ev) => {
+      const { id } = ev.detail || {};
+
+      const layers = map?.getLayers?.()?.getArray?.() || [];
+      const attributeEditorLayers = layers.filter(
+        (lyr) => lyr?.get?.("name") === "attributeeditor"
+      );
+
+      // Remove kink markers for this specific feature
+      attributeEditorLayers.forEach((layer) => {
+        const src = layer.getSource?.();
+        if (!src) return;
+
+        const kinkMarkers = src
+          .getFeatures()
+          .filter((f) => f.get("KINK_MARKER_FOR") === id);
+
+        kinkMarkers.forEach((marker) => src.removeFeature(marker));
+      });
+    });
+
+    // Listen for validation requests (from geometry undo operations)
+    // This event is used to trigger validation without interfering with undo logic
+    const offValidateGeometry = editBus.on("sketch:validate-geometry", (ev) => {
+      const { id } = ev.detail || {};
+      if (id == null) return;
+
+      const layers = map?.getLayers?.()?.getArray?.() || [];
+      const attributeEditorLayers = layers.filter(
+        (lyr) => lyr?.get?.("name") === "attributeeditor"
+      );
+
+      // Find the feature and validate it
+      let foundFeature = null;
+      let foundLayer = null;
+
+      for (const layer of attributeEditorLayers) {
+        const src = layer.getSource?.();
+        if (!src) continue;
+
+        const feature = src.getFeatures().find((f) => {
+          const fid = f.getId?.() ?? f.get?.("@_fid") ?? f.get?.("id");
+          return (
+            String(fid) === String(id) || String(fid).endsWith("." + String(id))
+          );
+        });
+
+        if (feature) {
+          foundFeature = feature;
+          foundLayer = layer;
+          break;
+        }
+      }
+
+      if (foundFeature && foundLayer) {
+        validateGeometry(foundFeature, foundLayer);
+      }
+    });
+
+    return () => {
+      offGeomEdited();
+      offSourceCleared();
+      offFeatureRemoved();
+      offValidateGeometry();
+    };
   }, [map, validateGeometry]);
 
   // Effect to remove all kink markers when showKinkMarkers is disabled

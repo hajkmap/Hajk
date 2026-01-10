@@ -1290,6 +1290,8 @@ export default function AttributeEditorView({
 
             const source = vectorLayerRef.current.getSource();
             source.clear();
+            // Emit event to clean up kink markers after clearing source
+            editBus.emit("sketch:source-cleared", {});
             source.addFeatures(newFeatures);
 
             // Rebuild feature index
@@ -1521,6 +1523,10 @@ export default function AttributeEditorView({
         // Restore geometry in OL layer
         setGeometryById(id, before);
 
+        // Trigger validation for the restored geometry
+        // Use a separate event to avoid interfering with undo logic
+        editBus.emit("sketch:validate-geometry", { id });
+
         // Remove this entry from the stack
         geomUndoRef.current.pop();
         setGeomUndoCount((c) => Math.max(0, c - 1));
@@ -1671,6 +1677,9 @@ export default function AttributeEditorView({
     setDirty(changed.size > 0);
   }, [pendingAdds, focusedId, FM, originalValues, draftBaselineRef]);
 
+  // Track which draft IDs were in pendingAdds previously
+  const previousPendingAddsRef = React.useRef(new Set());
+
   // CLEAN UP: remove baseline when a draft is saved (commit/undo/remove etc.)
   useEffect(() => {
     const existingDraftIds = new Set(pendingAdds.map((d) => d.id));
@@ -1679,7 +1688,42 @@ export default function AttributeEditorView({
         draftBaselineRef.current.delete(id);
       }
     }
-  }, [pendingAdds, draftBaselineRef]);
+
+    // Find IDs that were removed from pendingAdds
+    const removedIds = [];
+    for (const prevId of previousPendingAddsRef.current) {
+      if (!existingDraftIds.has(prevId)) {
+        removedIds.push(prevId);
+      }
+    }
+
+    // Remove OL features for IDs that were removed from pendingAdds
+    if (removedIds.length > 0) {
+      const layer = vectorLayerRef?.current;
+      const src = layer?.getSource?.();
+      if (src) {
+        removedIds.forEach((fid) => {
+          // Find and remove the feature
+          const feature =
+            src.getFeatureById?.(fid) ||
+            src.getFeatures().find((f) => {
+              const id = f.getId?.() ?? f.get?.("@_fid") ?? f.get?.("id");
+              return id === fid;
+            });
+
+          if (feature) {
+            src.removeFeature(feature);
+            featureIndexRef.current.delete(fid);
+            // Emit event to clean up kink markers for this feature
+            editBus.emit("sketch:feature-removed", { id: fid });
+          }
+        });
+      }
+    }
+
+    // Update previousPendingAddsRef for next time
+    previousPendingAddsRef.current = existingDraftIds;
+  }, [pendingAdds, draftBaselineRef, vectorLayerRef, featureIndexRef]);
 
   function normalize(v) {
     return v == null ? "" : v;
