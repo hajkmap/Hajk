@@ -24,7 +24,14 @@ import {
 
 const SettingsView = (props) => {
   // Let's destruct some props
-  const { model, measurementSettings, setMeasurementSettings, map } = props;
+  const {
+    model,
+    measurementSettings,
+    setMeasurementSettings,
+    showKinkMarkers,
+    setShowKinkMarkers,
+    map,
+  } = props;
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(props.globalObserver);
   // We're gonna need some local state as well. For example, should we show helper-snacks?
@@ -166,6 +173,22 @@ const SettingsView = (props) => {
                 <Switch
                   checked={snapEnabled}
                   onChange={() => setSnapEnabled((enabled) => !enabled)}
+                  color="primary"
+                />
+              }
+            />
+          </HajkToolTip>
+          <HajkToolTip
+            title={`Slå ${showKinkMarkers ? "av" : "på"} om du vill ${
+              showKinkMarkers ? "dölja" : "visa"
+            } röda markeringar där geometrin korsar sig själv. Varningar om självkorsningar visas alltid.`}
+          >
+            <FormControlLabel
+              label="Visa självkorsningar"
+              control={
+                <Switch
+                  checked={showKinkMarkers}
+                  onChange={() => setShowKinkMarkers((show) => !show)}
                   color="primary"
                 />
               }

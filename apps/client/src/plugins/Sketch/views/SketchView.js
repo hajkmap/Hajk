@@ -645,6 +645,8 @@ const SketchView = (props) => {
             functionalCookiesOk={functionalCookiesOk}
             measurementSettings={props.measurementSettings}
             setMeasurementSettings={props.setMeasurementSettings}
+            showKinkMarkers={props.showKinkMarkers}
+            setShowKinkMarkers={props.setShowKinkMarkers}
             globalObserver={globalObserver}
             map={props.map}
             ogcSource={ogcSource}

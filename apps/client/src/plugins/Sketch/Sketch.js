@@ -75,6 +75,11 @@ const Sketch = (props) => {
   const [measurementSettings, setMeasurementSettings] = React.useState(
     getMeasurementSettings()
   );
+  // Keep track of whether to show kink markers
+  const [showKinkMarkers, setShowKinkMarkers] = React.useState(() => {
+    const saved = LocalStorageHelper.get(STORAGE_KEY);
+    return saved?.showKinkMarkers ?? true;
+  });
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(props.app.globalObserver);
   // The local observer will handle the communication between models and views.
@@ -92,6 +97,26 @@ const Sketch = (props) => {
     }
     prevActivityRef.current = activityId;
   }, [activityId]);
+
+  // Save showKinkMarkers to localStorage when it changes
+  React.useEffect(() => {
+    if (functionalCookiesOk) {
+      LocalStorageHelper.set(STORAGE_KEY, {
+        ...LocalStorageHelper.get(STORAGE_KEY),
+        showKinkMarkers: showKinkMarkers,
+      });
+    }
+  }, [showKinkMarkers, functionalCookiesOk]);
+
+  // Load showKinkMarkers from localStorage when cookie status changes
+  React.useEffect(() => {
+    if (functionalCookiesOk) {
+      const saved = LocalStorageHelper.get(STORAGE_KEY);
+      setShowKinkMarkers(saved?.showKinkMarkers ?? true);
+    } else {
+      setShowKinkMarkers(true);
+    }
+  }, [functionalCookiesOk]);
 
   // We're also gonna need a drawModel to handle all draw functionality
   const [drawModel] = React.useState(
@@ -275,6 +300,7 @@ const Sketch = (props) => {
     map: props.map,
     allowedGeometryTypes,
     activityId,
+    showKinkMarkers,
   });
 
   // This functions handles events from the draw-model that are sent
@@ -479,6 +505,8 @@ const Sketch = (props) => {
         moveFeatures={moveFeatures}
         measurementSettings={measurementSettings}
         setMeasurementSettings={setMeasurementSettings}
+        showKinkMarkers={showKinkMarkers}
+        setShowKinkMarkers={setShowKinkMarkers}
         pluginShown={pluginShown}
         toggleBufferBtn={toggleBufferBtn}
         setToggleBufferBtn={setToggleBufferBtn}

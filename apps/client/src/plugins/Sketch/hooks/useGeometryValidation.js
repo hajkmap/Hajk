@@ -9,7 +9,12 @@ import { editBus } from "../../../buses/editBus";
  * Custom hook for geometry validation (self-intersection detection)
  * Validates geometries when drawn or edited, showing warnings for self-intersecting polygons/lines
  */
-const useGeometryValidation = ({ map, allowedGeometryTypes, activityId }) => {
+const useGeometryValidation = ({
+  map,
+  allowedGeometryTypes,
+  activityId,
+  showKinkMarkers,
+}) => {
   const { enqueueSnackbar } = useSnackbar();
 
   // Helper function to validate geometry using turf/kinks
@@ -69,38 +74,40 @@ const useGeometryValidation = ({ map, allowedGeometryTypes, activityId }) => {
             }
           );
 
-          // Create visual markers for each kink point
-          kinksResult.features.forEach((kinkFeature, index) => {
-            const olFeature = format.readFeature(kinkFeature);
-            const kinkGeom = olFeature.getGeometry();
+          // Create visual markers for each kink point (only if enabled)
+          if (showKinkMarkers) {
+            kinksResult.features.forEach((kinkFeature, index) => {
+              const olFeature = format.readFeature(kinkFeature);
+              const kinkGeom = olFeature.getGeometry();
 
-            // Create a feature for the kink marker
-            const markerFeature = new olFeature.constructor();
-            markerFeature.setGeometry(kinkGeom);
-            markerFeature.setId(`${kinkMarkerId}_${index}`);
-            markerFeature.set("KINK_MARKER_FOR", featureId, true);
-            markerFeature.set("KINK_MARKER", true, true);
+              // Create a feature for the kink marker
+              const markerFeature = new olFeature.constructor();
+              markerFeature.setGeometry(kinkGeom);
+              markerFeature.setId(`${kinkMarkerId}_${index}`);
+              markerFeature.set("KINK_MARKER_FOR", featureId, true);
+              markerFeature.set("KINK_MARKER", true, true);
 
-            // Set red circle style
-            markerFeature.setStyle(
-              new Style({
-                image: new Circle({
-                  radius: 8,
-                  fill: new Fill({ color: "rgba(255, 0, 0, 0.6)" }),
-                  stroke: new Stroke({ color: "#ff0000", width: 2 }),
-                }),
-                zIndex: 10000, // Make sure markers are on top
-              })
-            );
+              // Set red circle style
+              markerFeature.setStyle(
+                new Style({
+                  image: new Circle({
+                    radius: 8,
+                    fill: new Fill({ color: "rgba(255, 0, 0, 0.6)" }),
+                    stroke: new Stroke({ color: "#ff0000", width: 2 }),
+                  }),
+                  zIndex: 10000, // Make sure markers are on top
+                })
+              );
 
-            source.addFeature(markerFeature);
-          });
+              source.addFeature(markerFeature);
+            });
+          }
         }
       } catch (error) {
         console.error("Geometry validation error:", error);
       }
     },
-    [allowedGeometryTypes, activityId, enqueueSnackbar]
+    [allowedGeometryTypes, activityId, enqueueSnackbar, showKinkMarkers]
   );
 
   // Effect to listen for geometry draw/edit events and validate
@@ -254,6 +261,27 @@ const useGeometryValidation = ({ map, allowedGeometryTypes, activityId }) => {
 
     return () => offGeomEdited();
   }, [map, validateGeometry]);
+
+  // Effect to remove all kink markers when showKinkMarkers is disabled
+  React.useEffect(() => {
+    if (!map || showKinkMarkers) return;
+
+    // Find all attributeeditor layers and remove all kink markers
+    const layers = map.getLayers()?.getArray?.() || [];
+    const attributeEditorLayers = layers.filter(
+      (lyr) => lyr?.get?.("name") === "attributeeditor"
+    );
+
+    attributeEditorLayers.forEach((layer) => {
+      const source = layer.getSource?.();
+      if (!source) return;
+
+      const kinkMarkers = source
+        .getFeatures()
+        .filter((f) => f.get("KINK_MARKER"));
+      kinkMarkers.forEach((marker) => source.removeFeature(marker));
+    });
+  }, [map, showKinkMarkers]);
 };
 
 export default useGeometryValidation;
