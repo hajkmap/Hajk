@@ -13,6 +13,7 @@ import LastPageIcon from "@mui/icons-material/LastPage";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import { editBus } from "../../../buses/editBus";
 import FormListItem from "./FormListItem";
 import useCookieStatus from "../../../hooks/useCookieStatus";
@@ -60,6 +61,8 @@ export default function DesktopForm({
 }) {
   const RESIZER_KEY = "ae_df_leftw";
   const ROWS_PER_PAGE_KEY = "ae_rows_per_page";
+  const SHOW_ALL_VALUE = -1;
+  const SHOW_ALL_WARNING_THRESHOLD = 100;
   const MIN_LEFT = 220; // px
   const MAX_LEFT = 800; // px
 
@@ -73,6 +76,9 @@ export default function DesktopForm({
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
 
+  // State for "show all" confirmation dialog
+  const [showAllConfirmOpen, setShowAllConfirmOpen] = React.useState(false);
+
   const textareaRefs = React.useRef({});
   const [pendingCaret, setPendingCaret] = React.useState(null);
   const saveLeftWTimer = React.useRef(null);
@@ -83,7 +89,7 @@ export default function DesktopForm({
     if (!functionalCookiesOk) return 20;
     try {
       const saved = Number(localStorage.getItem(ROWS_PER_PAGE_KEY));
-      return [10, 20, 50, 100].includes(saved) ? saved : 20;
+      return [10, 20, 50, 100, SHOW_ALL_VALUE].includes(saved) ? saved : 20;
     } catch {
       return 20;
     }
@@ -120,9 +126,12 @@ export default function DesktopForm({
 
   // Calculate pagination
   const totalRows = visibleFormList.length;
-  const totalPages = Math.ceil(totalRows / rowsPerPage);
-  const startIndex = currentPage * rowsPerPage;
-  const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
+  const isShowingAll = rowsPerPage === SHOW_ALL_VALUE;
+  const totalPages = isShowingAll ? 1 : Math.ceil(totalRows / rowsPerPage);
+  const startIndex = isShowingAll ? 0 : currentPage * rowsPerPage;
+  const endIndex = isShowingAll
+    ? totalRows
+    : Math.min(startIndex + rowsPerPage, totalRows);
   const paginatedRows = visibleFormList.slice(startIndex, endIndex);
   const showPagination = totalRows > 10;
 
@@ -354,6 +363,26 @@ export default function DesktopForm({
     ]
   );
 
+  // Handler for rows per page dropdown change
+  const handleRowsPerPageChange = (e) => {
+    const newValue = Number(e.target.value);
+
+    if (newValue === SHOW_ALL_VALUE && totalRows > SHOW_ALL_WARNING_THRESHOLD) {
+      setShowAllConfirmOpen(true);
+    } else {
+      setRowsPerPage(newValue);
+    }
+  };
+
+  const handleShowAllConfirm = () => {
+    setRowsPerPage(SHOW_ALL_VALUE);
+    setShowAllConfirmOpen(false);
+  };
+
+  const handleShowAllAbort = () => {
+    setShowAllConfirmOpen(false);
+  };
+
   async function confirmSave() {
     try {
       setSavingNow(true);
@@ -434,7 +463,9 @@ export default function DesktopForm({
         {/* List footer with pagination */}
         <div style={s.listFooterCompact}>
           <div style={s.paginationInfo}>
-            {startIndex + 1}-{endIndex} av {totalRows}
+            {isShowingAll
+              ? `Alla ${totalRows}`
+              : `${startIndex + 1}-${endIndex} av ${totalRows}`}
           </div>
           {showPagination && (
             <>
@@ -494,13 +525,14 @@ export default function DesktopForm({
 
                 <select
                   value={rowsPerPage}
-                  onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                  onChange={handleRowsPerPageChange}
                   style={s.rowsPerPageSelect}
                 >
                   <option value={10}>10</option>
                   <option value={20}>20</option>
                   <option value={50}>50</option>
                   <option value={100}>100</option>
+                  <option value={SHOW_ALL_VALUE}>Alla</option>
                 </select>
               </div>
             </>
@@ -809,6 +841,16 @@ export default function DesktopForm({
               onConfirm={confirmSave}
               summary={summary}
               saving={savingNow}
+            />
+
+            <ConfirmationDialog
+              open={showAllConfirmOpen}
+              titleName="Visa alla objekt"
+              contentDescription="Om du väljer att visa alla objekt kan systemet bli långsammare. Vill du fortsätta?"
+              cancel="Avbryt"
+              confirm="Fortsätt"
+              handleConfirm={handleShowAllConfirm}
+              handleAbort={handleShowAllAbort}
             />
           </>
         )}

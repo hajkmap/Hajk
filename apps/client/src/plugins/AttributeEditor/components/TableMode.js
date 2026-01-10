@@ -12,6 +12,7 @@ import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import DescriptionIcon from "@mui/icons-material/Description";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import { editBus } from "../../../buses/editBus";
 import useCookieStatus from "../../../hooks/useCookieStatus";
 import TableRow from "./TableRow";
@@ -167,6 +168,8 @@ export default function TableMode(props) {
   const DEFAULT_WRAP_CH = 100;
 
   const ROWS_PER_PAGE_KEY = "ae_rows_per_page";
+  const SHOW_ALL_VALUE = -1;
+  const SHOW_ALL_WARNING_THRESHOLD = 100;
 
   const { functionalCookiesOk } = useCookieStatus(app.globalObserver);
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
@@ -174,13 +177,16 @@ export default function TableMode(props) {
   const [errorMsg, setErrorMsg] = React.useState(null);
   const caretStoreRef = React.useRef(new Map());
 
+  // State for "show all" confirmation dialog
+  const [showAllConfirmOpen, setShowAllConfirmOpen] = React.useState(false);
+
   // Pagination state
   const [currentPage, setCurrentPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(() => {
     if (!functionalCookiesOk) return 20;
     try {
       const saved = Number(localStorage.getItem(ROWS_PER_PAGE_KEY));
-      return [10, 20, 50, 100].includes(saved) ? saved : 20;
+      return [10, 20, 50, 100, SHOW_ALL_VALUE].includes(saved) ? saved : 20;
     } catch {
       return 20;
     }
@@ -224,9 +230,12 @@ export default function TableMode(props) {
 
   // Calculate pagination
   const totalRows = filteredAndSorted.length;
-  const totalPages = Math.ceil(totalRows / rowsPerPage);
-  const startIndex = currentPage * rowsPerPage;
-  const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
+  const isShowingAll = rowsPerPage === SHOW_ALL_VALUE;
+  const totalPages = isShowingAll ? 1 : Math.ceil(totalRows / rowsPerPage);
+  const startIndex = isShowingAll ? 0 : currentPage * rowsPerPage;
+  const endIndex = isShowingAll
+    ? totalRows
+    : Math.min(startIndex + rowsPerPage, totalRows);
   const paginatedRows = filteredAndSorted.slice(startIndex, endIndex);
   const showPagination = totalRows > 10;
 
@@ -455,6 +464,26 @@ export default function TableMode(props) {
     }),
     [tablePendingAdds, tablePendingEdits, tablePendingDeletes]
   );
+
+  // Handler for rows per page dropdown change
+  const handleRowsPerPageChange = (e) => {
+    const newValue = Number(e.target.value);
+
+    if (newValue === SHOW_ALL_VALUE && totalRows > SHOW_ALL_WARNING_THRESHOLD) {
+      setShowAllConfirmOpen(true);
+    } else {
+      setRowsPerPage(newValue);
+    }
+  };
+
+  const handleShowAllConfirm = () => {
+    setRowsPerPage(SHOW_ALL_VALUE);
+    setShowAllConfirmOpen(false);
+  };
+
+  const handleShowAllAbort = () => {
+    setShowAllConfirmOpen(false);
+  };
 
   async function confirmSave() {
     try {
@@ -855,7 +884,9 @@ export default function TableMode(props) {
       {showPagination && (
         <div style={s.tableFooter}>
           <div style={s.paginationInfo}>
-            Visar {startIndex + 1}-{endIndex} av {totalRows}
+            {isShowingAll
+              ? `Visar alla ${totalRows} objekt`
+              : `Visar ${startIndex + 1}-${endIndex} av ${totalRows}`}
           </div>
 
           <div style={s.spacer} />
@@ -865,13 +896,14 @@ export default function TableMode(props) {
               Rader per sida:
               <select
                 value={rowsPerPage}
-                onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                onChange={handleRowsPerPageChange}
                 style={s.rowsPerPageSelect}
               >
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
+                <option value={SHOW_ALL_VALUE}>Alla</option>
               </select>
             </label>
 
@@ -936,6 +968,16 @@ export default function TableMode(props) {
         title="Spara ändringar"
         body="Det finns osparade ändringar i tabellen. Vill du spara nu?"
         primaryLabel="Spara"
+      />
+
+      <ConfirmationDialog
+        open={showAllConfirmOpen}
+        titleName="Visa alla objekt"
+        contentDescription="Om du väljer att visa alla objekt kan systemet bli långsammare. Vill du fortsätta?"
+        cancel="Avbryt"
+        confirm="Fortsätt"
+        handleConfirm={handleShowAllConfirm}
+        handleAbort={handleShowAllAbort}
       />
     </div>
   );
