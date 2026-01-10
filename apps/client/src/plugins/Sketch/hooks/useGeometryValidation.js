@@ -2,23 +2,19 @@ import React from "react";
 import { useSnackbar } from "notistack";
 import GeoJSON from "ol/format/GeoJSON";
 import kinks from "@turf/kinks";
+import { Circle, Fill, Stroke, Style } from "ol/style";
 import { editBus } from "../../../buses/editBus";
 
 /**
  * Custom hook for geometry validation (self-intersection detection)
  * Validates geometries when drawn or edited, showing warnings for self-intersecting polygons/lines
  */
-const useGeometryValidation = ({
-  map,
-  drawModel,
-  allowedGeometryTypes,
-  activityId,
-}) => {
+const useGeometryValidation = ({ map, allowedGeometryTypes, activityId }) => {
   const { enqueueSnackbar } = useSnackbar();
 
   // Helper function to validate geometry using turf/kinks
   const validateGeometry = React.useCallback(
-    (feature) => {
+    (feature, layer) => {
       // Only validate when in AttributeEditor mode (allowedGeometryTypes is set)
       // or when Sketch is in edit mode (activityId === "EDIT")
       const shouldValidate =
@@ -39,6 +35,20 @@ const useGeometryValidation = ({
         ];
         if (!validatableTypes.includes(geomType)) return;
 
+        const source = layer?.getSource?.();
+        if (!source) return;
+
+        // Get feature ID for tracking kink markers
+        const featureId =
+          feature.getId?.() ?? feature.get?.("@_fid") ?? feature.get?.("id");
+        const kinkMarkerId = `KINK_MARKER_${featureId}`;
+
+        // Remove old kink markers for this feature
+        const existingMarkers = source
+          .getFeatures()
+          .filter((f) => f.get("KINK_MARKER_FOR") === featureId);
+        existingMarkers.forEach((marker) => source.removeFeature(marker));
+
         // Convert OpenLayers geometry to GeoJSON for turf
         const format = new GeoJSON();
         const geojson = format.writeGeometryObject(geom);
@@ -58,6 +68,33 @@ const useGeometryValidation = ({
               autoHideDuration: 8000,
             }
           );
+
+          // Create visual markers for each kink point
+          kinksResult.features.forEach((kinkFeature, index) => {
+            const olFeature = format.readFeature(kinkFeature);
+            const kinkGeom = olFeature.getGeometry();
+
+            // Create a feature for the kink marker
+            const markerFeature = new olFeature.constructor();
+            markerFeature.setGeometry(kinkGeom);
+            markerFeature.setId(`${kinkMarkerId}_${index}`);
+            markerFeature.set("KINK_MARKER_FOR", featureId, true);
+            markerFeature.set("KINK_MARKER", true, true);
+
+            // Set red circle style
+            markerFeature.setStyle(
+              new Style({
+                image: new Circle({
+                  radius: 8,
+                  fill: new Fill({ color: "rgba(255, 0, 0, 0.6)" }),
+                  stroke: new Stroke({ color: "#ff0000", width: 2 }),
+                }),
+                zIndex: 10000, // Make sure markers are on top
+              })
+            );
+
+            source.addFeature(markerFeature);
+          });
         }
       } catch (error) {
         console.error("Geometry validation error:", error);
@@ -68,27 +105,112 @@ const useGeometryValidation = ({
 
   // Effect to listen for geometry draw/edit events and validate
   React.useEffect(() => {
-    if (!drawModel) return;
+    if (!map) return;
 
-    // Listen for when a feature is added (drawn)
-    const handleFeatureAdded = (event) => {
-      const feature = event?.feature;
-      if (feature && feature.get("USER_DRAWN")) {
-        validateGeometry(feature);
+    // Find all attributeeditor layers and listen to addfeature events
+    const layers = map.getLayers()?.getArray?.() || [];
+    const attributeEditorLayers = layers.filter(
+      (lyr) => lyr?.get?.("name") === "attributeeditor"
+    );
+
+    const addHandlers = new Map();
+    const removeHandlers = new Map();
+
+    attributeEditorLayers.forEach((layer) => {
+      const source = layer.getSource?.();
+      if (source) {
+        // Create handler for feature added
+        const handleFeatureAdded = (event) => {
+          const feature = event?.feature;
+          // Skip kink markers
+          if (feature?.get("KINK_MARKER")) return;
+          if (feature && feature.get("USER_DRAWN")) {
+            validateGeometry(feature, layer);
+          }
+        };
+
+        // Create handler for feature removed - clean up kink markers
+        const handleFeatureRemoved = (event) => {
+          const feature = event?.feature;
+          // Skip if this is a kink marker itself
+          if (feature?.get("KINK_MARKER")) return;
+
+          const featureId =
+            feature?.getId?.() ??
+            feature?.get?.("@_fid") ??
+            feature?.get?.("id");
+
+          // Remove kink markers for this feature
+          const existingMarkers = source
+            .getFeatures()
+            .filter((f) => f.get("KINK_MARKER_FOR") === featureId);
+          existingMarkers.forEach((marker) => source.removeFeature(marker));
+        };
+
+        addHandlers.set(layer, handleFeatureAdded);
+        removeHandlers.set(layer, handleFeatureRemoved);
+        source.on("addfeature", handleFeatureAdded);
+        source.on("removefeature", handleFeatureRemoved);
+      }
+    });
+
+    // Also listen for new layers being added
+    const mapLayers = map.getLayers();
+    const onLayerAdd = (e) => {
+      const layer = e.element || e.layer;
+      if (layer?.get?.("name") === "attributeeditor") {
+        const source = layer.getSource?.();
+        if (source) {
+          const handleFeatureAdded = (event) => {
+            const feature = event?.feature;
+            // Skip kink markers
+            if (feature?.get("KINK_MARKER")) return;
+            if (feature && feature.get("USER_DRAWN")) {
+              validateGeometry(feature, layer);
+            }
+          };
+
+          const handleFeatureRemoved = (event) => {
+            const feature = event?.feature;
+            if (feature?.get("KINK_MARKER")) return;
+
+            const featureId =
+              feature?.getId?.() ??
+              feature?.get?.("@_fid") ??
+              feature?.get?.("id");
+
+            const existingMarkers = source
+              .getFeatures()
+              .filter((f) => f.get("KINK_MARKER_FOR") === featureId);
+            existingMarkers.forEach((marker) => source.removeFeature(marker));
+          };
+
+          addHandlers.set(layer, handleFeatureAdded);
+          removeHandlers.set(layer, handleFeatureRemoved);
+          source.on("addfeature", handleFeatureAdded);
+          source.on("removefeature", handleFeatureRemoved);
+        }
       }
     };
 
-    const source = drawModel.getCurrentVectorSource?.();
-    if (source) {
-      source.on("addfeature", handleFeatureAdded);
-    }
+    mapLayers.on?.("add", onLayerAdd);
 
     return () => {
-      if (source) {
-        source.un("addfeature", handleFeatureAdded);
+      for (const [layer, handler] of addHandlers.entries()) {
+        const source = layer.getSource?.();
+        if (source) {
+          source.un("addfeature", handler);
+        }
       }
+      for (const [layer, handler] of removeHandlers.entries()) {
+        const source = layer.getSource?.();
+        if (source) {
+          source.un("removefeature", handler);
+        }
+      }
+      mapLayers.un?.("add", onLayerAdd);
     };
-  }, [drawModel, validateGeometry]);
+  }, [map, validateGeometry]);
 
   // Effect to listen for modify events from AttributeEditor
   React.useEffect(() => {
@@ -103,26 +225,30 @@ const useGeometryValidation = ({
         (lyr) => lyr?.get?.("name") === "attributeeditor"
       );
 
-      // Collect all features from attributeeditor layers
-      // Note: measurement guides are never synced to attributeeditor layers,
-      // so no need to filter them out here
-      const allFeatures = [];
-      attributeEditorLayers.forEach((layer) => {
+      // Find the feature and its layer
+      let foundFeature = null;
+      let foundLayer = null;
+
+      for (const layer of attributeEditorLayers) {
         const src = layer.getSource?.();
-        if (src) {
-          allFeatures.push(...src.getFeatures());
+        if (!src) continue;
+
+        const feature = src.getFeatures().find((f) => {
+          const fid = f.getId?.() ?? f.get?.("@_fid") ?? f.get?.("id");
+          return (
+            String(fid) === String(id) || String(fid).endsWith("." + String(id))
+          );
+        });
+
+        if (feature) {
+          foundFeature = feature;
+          foundLayer = layer;
+          break;
         }
-      });
+      }
 
-      const feature = allFeatures.find((f) => {
-        const fid = f.getId?.() ?? f.get?.("@_fid") ?? f.get?.("id");
-        return (
-          String(fid) === String(id) || String(fid).endsWith("." + String(id))
-        );
-      });
-
-      if (feature) {
-        validateGeometry(feature);
+      if (foundFeature && foundLayer) {
+        validateGeometry(foundFeature, foundLayer);
       }
     });
 

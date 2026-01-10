@@ -273,7 +273,6 @@ const Sketch = (props) => {
 
   useGeometryValidation({
     map: props.map,
-    drawModel,
     allowedGeometryTypes,
     activityId,
   });

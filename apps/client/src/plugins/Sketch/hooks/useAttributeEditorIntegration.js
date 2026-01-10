@@ -298,6 +298,8 @@ const useAttributeEditorIntegration = ({
         multi: true,
         // We sync selection via attrib:select-ids; block OL's own picking.
         condition: () => false,
+        // Filter out kink markers from selection
+        filter: (feature) => !feature.get("KINK_MARKER"),
       });
 
       const fc = sel.getFeatures();
@@ -311,7 +313,7 @@ const useAttributeEditorIntegration = ({
           map.forEachFeatureAtPixel(
             evt.pixel,
             (f, lyr) => {
-              if (lyr === layer) {
+              if (lyr === layer && !f.get("KINK_MARKER")) {
                 hit = f;
                 return true;
               }
@@ -739,7 +741,10 @@ const useAttributeEditorIntegration = ({
       let hit = null;
       map.forEachFeatureAtPixel(
         evt.pixel,
-        (f, lyr) => (lyr === targetLayer ? ((hit = f), true) : false),
+        (f, lyr) =>
+          lyr === targetLayer && !f.get("KINK_MARKER")
+            ? ((hit = f), true)
+            : false,
         { layerFilter: (lyr) => lyr === targetLayer, hitTolerance: 6 }
       );
       if (!hit) return;
