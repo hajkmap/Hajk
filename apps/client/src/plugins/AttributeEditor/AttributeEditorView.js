@@ -2128,15 +2128,16 @@ export default function AttributeEditorView({
   const combinedUndoStack = tableUndoLocal.length
     ? tableUndoLocal
     : tableUndoStack;
+
   const canUndo = Boolean(
     tableUndoLocal?.length ||
-      0 ||
-      tableUndoStack?.length ||
-      0 ||
-      formUndoStack?.length ||
-      0 ||
-      geomUndoCount > 0 ||
-      dirty
+    0 ||
+    tableUndoStack?.length ||
+    0 ||
+    formUndoStack?.length ||
+    0 ||
+    geomUndoCount > 0 ||
+    dirty
   );
 
   const hasGeomUndo = geomUndoCount > 0;
