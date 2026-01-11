@@ -71,6 +71,11 @@ const Sketch = (props) => {
     app: props.app, // Reference to the app object passed as a prop
   });
 
+  // State for fixed-length drawing mode (AttributeEditor mode)
+  const [fixedLengthEnabled, setFixedLengthEnabled] = React.useState(false);
+  const [fixedLength, setFixedLength] = React.useState(1000); // Default 1000 meters
+  const [fixedAngle, setFixedAngle] = React.useState(0); // Default 0 degrees (North)
+
   // We have to keep track of some measurement-settings
   const [measurementSettings, setMeasurementSettings] = React.useState(
     getMeasurementSettings()
@@ -320,13 +325,24 @@ const Sketch = (props) => {
     setMoveFeatures(selectedFeatures);
   }, []);
 
-  // Handle draw start event to enable angle snapping
+  // Handle draw start event to enable angle snapping and publish to localObserver
   const handleDrawStart = React.useCallback(
     (e) => {
       angleSnapping.handleDrawStartEvent(e, props.map, drawModel);
+      localObserver.publish("sketch:drawStart");
     },
-    [angleSnapping, props.map, drawModel]
+    [angleSnapping, props.map, drawModel, localObserver]
   );
+
+  // Handle draw end event to publish to localObserver
+  const handleDrawEnd = React.useCallback(() => {
+    localObserver.publish("sketch:drawEnd");
+  }, [localObserver]);
+
+  // Handle draw abort event to publish to localObserver
+  const handleDrawAbort = React.useCallback(() => {
+    localObserver.publish("sketch:drawAbort");
+  }, [localObserver]);
 
   // This effect makes sure to subscribe (and un-subscribe) to all observer-events
   // we are interested in in this view.
@@ -353,6 +369,11 @@ const Sketch = (props) => {
       case "ADD":
         return drawModel.toggleDrawInteraction(activeDrawType, {
           handleDrawStart: handleDrawStart,
+          handleDrawEnd: handleDrawEnd,
+          handleDrawAbort: handleDrawAbort,
+          fixedLengthEnabled: fixedLengthEnabled,
+          // Note: fixedLength and fixedAngle are NOT passed here
+          // They are updated via a separate useEffect that calls updateFixedLengthSettings
         });
       case "DELETE":
         return drawModel.toggleDrawInteraction("Delete");
@@ -370,7 +391,19 @@ const Sketch = (props) => {
     pluginShown,
     toggleBufferBtn,
     handleDrawStart,
+    handleDrawEnd,
+    handleDrawAbort,
+    fixedLengthEnabled,
+    // Note: fixedLength and fixedAngle are NOT in this dependency array
+    // because they are updated separately via updateFixedLengthSettings effect below.
+    // This allows users to change length/angle mid-drawing without restarting.
   ]);
+
+  // Separate effect to update fixed length/angle settings in DrawModel
+  // This allows user to change direction between segments without restarting drawing
+  React.useEffect(() => {
+    drawModel.updateFixedLengthSettings(fixedLength, fixedAngle);
+  }, [drawModel, fixedLength, fixedAngle]);
 
   // This effect makes sure to reset the edit- and move-feature if the window is closed,
   // or if the user changes activity. (We don't want to keep the features selected
@@ -513,6 +546,12 @@ const Sketch = (props) => {
         setPluginSettings={setPluginSettings}
         map={props.map}
         allowedGeometryTypes={allowedGeometryTypes}
+        fixedLengthEnabled={fixedLengthEnabled}
+        setFixedLengthEnabled={setFixedLengthEnabled}
+        fixedLength={fixedLength}
+        setFixedLength={setFixedLength}
+        fixedAngle={fixedAngle}
+        setFixedAngle={setFixedAngle}
       />
     </BaseWindowPlugin>
   );

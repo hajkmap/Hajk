@@ -254,6 +254,19 @@ const SketchView = (props) => {
     functionalCookiesOk && model.setStoredDrawStyleSettings(drawStyle);
   }, [drawStyle, functionalCookiesOk, model]);
 
+  // This effect resets settings when switching between normal Sketch and AttributeEditor mode
+  React.useEffect(() => {
+    if (ogcSource === "Ingen") {
+      // Switching back to normal Sketch mode from AttributeEditor mode
+      // Reset fixed length drawing to avoid the red cursor dot in normal mode
+      props.setFixedLengthEnabled?.(false);
+    } else {
+      // Switching to AttributeEditor mode (ogcSource is a layer)
+      // Reset draw style to default since user cannot control style in AttributeEditor mode
+      setDrawStyle(model.getDrawStyleSettings());
+    }
+  }, [ogcSource, props, model]);
+
   // This effect makes sure to save the text-style-settings to the LS when it
   // changes. (Only if functional cookies are allowed obviously).
   React.useEffect(() => {
@@ -599,6 +612,13 @@ const SketchView = (props) => {
             setToggleBufferBtn={setToggleBufferBtn}
             uiDisabled={uiDisabled}
             allowedGeometryTypes={allowedGeometryTypes}
+            ogcSource={ogcSource}
+            fixedLengthEnabled={props.fixedLengthEnabled}
+            setFixedLengthEnabled={props.setFixedLengthEnabled}
+            fixedLength={props.fixedLength}
+            setFixedLength={props.setFixedLength}
+            fixedAngle={props.fixedAngle}
+            setFixedAngle={props.setFixedAngle}
           />
         );
       case "DELETE":

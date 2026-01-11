@@ -3,7 +3,7 @@ import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Icon, Stroke, Style, Circle, Fill, Text } from "ol/style";
-import { Circle as CircleGeometry, LineString } from "ol/geom";
+import { Circle as CircleGeometry, LineString, Polygon } from "ol/geom";
 import { fromCircle } from "ol/geom/Polygon";
 import { MultiPoint, Point } from "ol/geom";
 import Overlay from "ol/Overlay";
@@ -94,6 +94,13 @@ class DrawModel {
   #circleInteractionActive;
   #selectInteractionActive;
   #lastZIndex;
+  #fixedLengthEnabled = false;
+  #fixedLength = 1000;
+  #fixedAngle = 0;
+  #activeSketch = null;
+  #mapClickListener = null;
+  #activeDrawMethod = null;
+  #customHandleDrawAbort = null;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -1471,6 +1478,10 @@ class DrawModel {
     if (this.#circleInteractionActive) {
       this.#disableCircleInteraction();
     }
+    // Check if fixed length mode is active (indicated by map click listener)
+    if (this.#mapClickListener) {
+      return this.#disableFixedLengthMode();
+    }
     // If there isn't an active draw interaction currently, we just return.
     if (!this.#drawInteraction) return;
     // Otherwise, we remove the interaction from the map.
@@ -1740,6 +1751,195 @@ class DrawModel {
     if (this.#translateInteraction) {
       this.#map.removeInteraction(this.#translateInteraction);
       this.#translateInteraction = null;
+    }
+  };
+
+  // Enables fixed length drawing mode - listens for map clicks directly
+  // instead of using Draw interaction (to avoid rubber band effect)
+  #enableFixedLengthMode = (drawMethod, settings) => {
+    // Store the draw method for later use
+    this.#activeDrawMethod = drawMethod;
+
+    // Add clickLock to avoid featureInfo etc.
+    this.#map.clickLock.add("coreDrawModel");
+
+    // Add snap-helper for snap functionality
+    this.#map.snapHelper.add("coreDrawModel");
+
+    // Store custom handlers from settings
+    this.#customHandleDrawStart = settings.handleDrawStart;
+    this.#customHandleDrawEnd = settings.handleDrawEnd;
+    this.#customHandleDrawAbort = settings.handleDrawAbort;
+
+    // Listen for map clicks to set start point
+    this.#mapClickListener = this.#handleFixedLengthMapClick.bind(this);
+    this.#map.on("singleclick", this.#mapClickListener);
+
+    // Set cursor with red dot to indicate user should click in map
+    this.#setFixedLengthCursor();
+  };
+
+  // Disables fixed length drawing mode
+  #disableFixedLengthMode = () => {
+    // Remove map click listener
+    if (this.#mapClickListener) {
+      this.#map.un("singleclick", this.#mapClickListener);
+      this.#mapClickListener = null;
+    }
+
+    // Clear active sketch
+    if (this.#activeSketch) {
+      this.#drawSource.removeFeature(this.#activeSketch);
+      this.#activeSketch = null;
+    }
+
+    // Remove clickLock and snap helper
+    this.#map.clickLock.delete("coreDrawModel");
+    this.#map.snapHelper.delete("coreDrawModel");
+
+    // Reset cursor back to default
+    this.#resetFixedLengthCursor();
+
+    // Clear draw method
+    this.#activeDrawMethod = null;
+  };
+
+  // Handles map click in fixed length mode - creates the initial feature
+  #handleFixedLengthMapClick = (event) => {
+    const coordinate = event.coordinate;
+
+    // If we don't have an active sketch yet, create one
+    if (!this.#activeSketch) {
+      // Create geometry based on draw method
+      let geometry;
+      if (this.#activeDrawMethod === "LineString") {
+        geometry = new LineString([coordinate]);
+      } else if (this.#activeDrawMethod === "Polygon") {
+        geometry = new Polygon([[coordinate]]);
+      }
+
+      // Create the feature
+      this.#activeSketch = new Feature({ geometry });
+
+      // Add to source so it's visible (as a sketch/preview)
+      this.#drawSource.addFeature(this.#activeSketch);
+
+      // Apply draw style (temporary style while drawing)
+      this.#activeSketch.setStyle(this.#getDrawStyle());
+
+      // Publish drawStart event
+      if (this.#customHandleDrawStart) {
+        this.#customHandleDrawStart({ feature: this.#activeSketch });
+      }
+
+      // Reset cursor to normal - user should now use the "Lägg till segment" button
+      // instead of clicking in the map
+      this.#resetFixedLengthCursor();
+    }
+  };
+
+  // Sets a custom cursor with a dot to indicate fixed length drawing mode
+  #setFixedLengthCursor = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 32;
+    canvas.height = 32;
+    const ctx = canvas.getContext("2d");
+
+    // Draw a small dot in the center
+    ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red dot
+    ctx.beginPath();
+    ctx.arc(16, 16, 4, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // Draw a circle around it for visibility
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(16, 16, 4, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    const dataURL = canvas.toDataURL();
+    const mapElement = this.#map.getTargetElement();
+    if (mapElement) {
+      mapElement.style.cursor = `url("${dataURL}") 16 16, crosshair`;
+    }
+  };
+
+  // Resets cursor back to default
+  #resetFixedLengthCursor = () => {
+    const mapElement = this.#map.getTargetElement();
+    if (mapElement) {
+      mapElement.style.cursor = "";
+    }
+  };
+
+  // Public method to add a segment with fixed length and angle
+  addFixedLengthSegment = () => {
+    if (!this.#activeSketch || !this.#fixedLengthEnabled) {
+      return;
+    }
+
+    const geometry = this.#activeSketch.getGeometry();
+    let coordinates;
+
+    // Get current coordinates
+    if (geometry instanceof LineString) {
+      coordinates = geometry.getCoordinates();
+    } else if (geometry instanceof Polygon) {
+      // For polygon, get the outer ring coordinates
+      coordinates = geometry.getCoordinates()[0];
+    } else {
+      return;
+    }
+
+    if (coordinates.length === 0) {
+      return;
+    }
+
+    // Get the last coordinate (starting point for new segment)
+    const lastCoord = coordinates[coordinates.length - 1];
+
+    // Create a temporary point feature for Turf
+    const startPoint = new Feature({
+      geometry: new Point(lastCoord),
+    });
+
+    // Convert to GeoJSON
+    const gjPoint = this.#geoJSONParser.writeFeatureObject(startPoint);
+
+    // Calculate end point using transformTranslate
+    // fixedLength is in meters, convert to kilometers for Turf
+    const endGjPoint = transformTranslate(
+      gjPoint,
+      this.#fixedLength / 1000,
+      this.#fixedAngle
+    );
+
+    // Extract the new coordinate
+    const endCoord = this.#geoJSONParser
+      .readGeometry(endGjPoint.geometry)
+      .getCoordinates();
+
+    // Add the new coordinate to the geometry
+    if (geometry instanceof LineString) {
+      coordinates.push(endCoord);
+      geometry.setCoordinates(coordinates);
+    } else if (geometry instanceof Polygon) {
+      coordinates.push(endCoord);
+      geometry.setCoordinates([coordinates]);
+    }
+
+    // Update the feature style to reflect the new geometry
+    this.#activeSketch.setStyle(this.#getDrawStyle());
+  };
+
+  // Updates fixed length settings (called when user changes inputs)
+  updateFixedLengthSettings = (length, angle) => {
+    if (length !== undefined) {
+      this.#fixedLength = length;
+    }
+    if (angle !== undefined) {
+      this.#fixedAngle = angle;
     }
   };
 
@@ -2451,6 +2651,22 @@ class DrawModel {
     if (drawMethod === "Circle") {
       this.#enableCircleInteraction();
     }
+
+    // Extract fixed length enabled setting from settings object
+    this.#fixedLengthEnabled = settings.fixedLengthEnabled || false;
+    // Note: fixedLength and fixedAngle are NOT extracted from settings here
+    // They are updated via updateFixedLengthSettings() when user changes them
+
+    // Check if we should use fixed length mode instead of normal Draw interaction
+    if (
+      this.#fixedLengthEnabled &&
+      (drawMethod === "LineString" || drawMethod === "Polygon")
+    ) {
+      // For fixed length mode, we DON'T use Draw interaction
+      // Instead, we listen for map clicks directly
+      return this.#enableFixedLengthMode(drawMethod, settings);
+    }
+
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
     const type = this.#getDrawInteractionType(drawMethod);
@@ -2483,7 +2699,58 @@ class DrawModel {
 
   // Finishes the currently active draw interaction.
   finishDraw = () => {
-    if (this.#drawInteraction) {
+    // Handle fixed length mode
+    if (this.#activeSketch && this.#fixedLengthEnabled) {
+      const geometry = this.#activeSketch.getGeometry();
+      let coordinates;
+
+      // Get current coordinates
+      if (geometry instanceof LineString) {
+        coordinates = geometry.getCoordinates();
+      } else if (geometry instanceof Polygon) {
+        coordinates = geometry.getCoordinates()[0];
+      }
+
+      // Only finalize if we have at least 2 points for LineString or 3 for Polygon
+      const minPoints = geometry instanceof Polygon ? 3 : 2;
+      if (coordinates && coordinates.length >= minPoints) {
+        // For Polygon, close the ring if needed
+        if (geometry instanceof Polygon) {
+          // Check if first and last coordinates are the same
+          const first = coordinates[0];
+          const last = coordinates[coordinates.length - 1];
+          if (first[0] !== last[0] || first[1] !== last[1]) {
+            coordinates.push(first);
+            geometry.setCoordinates([coordinates]);
+          }
+        }
+
+        // Remove feature from source temporarily
+        this.#drawSource.removeFeature(this.#activeSketch);
+
+        // Apply final properties (same as #handleDrawEnd)
+        this.#activeSketch.set("USER_DRAWN", true);
+        this.#activeSketch.set("DRAW_METHOD", this.#activeDrawMethod);
+        this.#activeSketch.set("TEXT_SETTINGS", this.#textStyleSettings);
+        // Apply the final feature style (not draw style)
+        this.#activeSketch.setStyle(this.#getFeatureStyle(this.#activeSketch));
+
+        // Re-add feature to source - this triggers addfeature event which sets SKETCH_ATTRIBUTEEDITOR
+        this.#drawSource.addFeature(this.#activeSketch);
+
+        // Trigger drawEnd handler
+        if (this.#customHandleDrawEnd) {
+          this.#customHandleDrawEnd({ feature: this.#activeSketch });
+        }
+
+        // Clear the active sketch so we can start a new one
+        this.#activeSketch = null;
+
+        // Set cursor with red dot again - ready for next feature
+        this.#setFixedLengthCursor();
+      }
+    } else if (this.#drawInteraction) {
+      // Normal draw interaction
       this.#drawInteraction.finishDrawing();
     }
   };

@@ -31,6 +31,7 @@ const SettingsView = (props) => {
     showKinkMarkers,
     setShowKinkMarkers,
     map,
+    ogcSource,
   } = props;
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(props.globalObserver);
@@ -164,6 +165,24 @@ const SettingsView = (props) => {
               }
             />
           </HajkToolTip>
+          {ogcSource !== "Ingen" && (
+            <HajkToolTip
+              title={`Slå ${showKinkMarkers ? "av" : "på"} om du vill ${
+                showKinkMarkers ? "dölja" : "visa"
+              } röda markeringar där geometrin korsar sig själv. Varningar om självkorsningar visas alltid.`}
+            >
+              <FormControlLabel
+                label="Visa självkorsningsfel"
+                control={
+                  <Switch
+                    checked={showKinkMarkers}
+                    onChange={() => setShowKinkMarkers((show) => !show)}
+                    color="primary"
+                  />
+                }
+              />
+            </HajkToolTip>
+          )}
           <HajkToolTip
             title={`Slå ${snapEnabled ? "av" : "på"} snappning. När snappning är påslaget kommer ritverktyget att automatiskt fästa vid närliggande punkter och linjer.`}
           >
@@ -173,22 +192,6 @@ const SettingsView = (props) => {
                 <Switch
                   checked={snapEnabled}
                   onChange={() => setSnapEnabled((enabled) => !enabled)}
-                  color="primary"
-                />
-              }
-            />
-          </HajkToolTip>
-          <HajkToolTip
-            title={`Slå ${showKinkMarkers ? "av" : "på"} om du vill ${
-              showKinkMarkers ? "dölja" : "visa"
-            } röda markeringar där geometrin korsar sig själv. Varningar om självkorsningar visas alltid.`}
-          >
-            <FormControlLabel
-              label="Visa självkorsningsfel"
-              control={
-                <Switch
-                  checked={showKinkMarkers}
-                  onChange={() => setShowKinkMarkers((show) => !show)}
                   color="primary"
                 />
               }
