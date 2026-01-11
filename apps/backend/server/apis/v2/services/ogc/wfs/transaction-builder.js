@@ -13,6 +13,7 @@ export function buildWfsTransactionXml(options) {
     typeName,
     srsName,
     geometryName = "geometry",
+    namespace,
     inserts = [],
     updates = [],
     deletes = [],
@@ -30,6 +31,10 @@ export function buildWfsTransactionXml(options) {
     ? typeName.split(":")
     : ["feature", typeName];
 
+  // Use provided namespace or generate from prefix
+  const namespaceUri =
+    namespace || `http://hajk.se/wfs/${nsPrefix}`;
+
   const transaction = {
     "wfs:Transaction": {
       "@_service": "WFS",
@@ -37,7 +42,7 @@ export function buildWfsTransactionXml(options) {
       "@_xmlns:wfs": wfsNs,
       "@_xmlns:gml": gmlNs,
       "@_xmlns:ogc": "http://www.opengis.net/ogc",
-      [`@_xmlns:${nsPrefix}`]: `http://example.com/${nsPrefix}`,
+      [`@_xmlns:${nsPrefix}`]: namespaceUri,
     },
   };
 
@@ -211,11 +216,59 @@ function buildGeometryXml(geojson, srsName, gmlNs) {
       return polygonObj;
 
     case "MultiPoint":
+      return {
+        "gml:MultiPoint": {
+          "@_srsName": srsName,
+          "gml:pointMember": coords.map((coord) => ({
+            "gml:Point": {
+              "gml:pos": coord.join(" "),
+            },
+          })),
+        },
+      };
+
     case "MultiLineString":
+      return {
+        "gml:MultiLineString": {
+          "@_srsName": srsName,
+          "gml:lineStringMember": coords.map((lineCoords) => ({
+            "gml:LineString": {
+              "gml:posList": lineCoords.flat().join(" "),
+            },
+          })),
+        },
+      };
+
     case "MultiPolygon":
-      throw new Error(
-        `Multi-geometry type ${geojson.type} not yet implemented`
-      );
+      return {
+        "gml:MultiPolygon": {
+          "@_srsName": srsName,
+          "gml:polygonMember": coords.map((polyCoords) => {
+            const exterior = polyCoords[0];
+            const holes = polyCoords.slice(1);
+
+            const polygon = {
+              "gml:Polygon": {
+                "gml:exterior": {
+                  "gml:LinearRing": {
+                    "gml:posList": exterior.flat().join(" "),
+                  },
+                },
+              },
+            };
+
+            if (holes.length) {
+              polygon["gml:Polygon"]["gml:interior"] = holes.map((hole) => ({
+                "gml:LinearRing": {
+                  "gml:posList": hole.flat().join(" "),
+                },
+              }));
+            }
+
+            return polygon;
+          }),
+        },
+      };
 
     default:
       throw new Error(`Unsupported geometry type: ${geojson.type}`);

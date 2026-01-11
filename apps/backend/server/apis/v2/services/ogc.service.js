@@ -122,8 +122,15 @@ export async function getWFSTFeatures(params) {
 
     const tn =
       typeName ||
-      (Array.isArray(layer.layers) ? layer.layers[0] : layer.layers);
-    if (!tn) throw new ValidationError("Missing typeName for layer");
+      (Array.isArray(layer.layers) && layer.layers.length > 0
+        ? layer.layers[0]
+        : layer.layers);
+    if (!tn) {
+      throw new ValidationError("Missing typeName for layer", {
+        layerId: id,
+        availableLayers: layer.layers,
+      });
+    }
 
     // Determine CRS: use request param, layer config, or default to EPSG:3006
     const crs = srsName || layer.projection || "EPSG:3006";
@@ -358,9 +365,15 @@ export async function commitWFSTTransaction(params) {
     throw new UpstreamError("Invalid layer URL configuration", 500);
   }
 
-  const typeName = Array.isArray(layer.layers) ? layer.layers[0] : layer.layers;
+  const typeName =
+    Array.isArray(layer.layers) && layer.layers.length > 0
+      ? layer.layers[0]
+      : layer.layers;
   if (!typeName) {
-    throw new ValidationError("Missing typeName for layer");
+    throw new ValidationError("Missing typeName for layer", {
+      layerId: id,
+      availableLayers: layer.layers,
+    });
   }
 
   // Validate geometries
@@ -435,10 +448,6 @@ export async function commitWFSTTransaction(params) {
     updates: cleanedUpdates,
     deletes: formattedDeletes,
   });
-
-  console.log("=== WFS-T XML som skickas till QGIS ===");
-  console.log(transactionXml);
-  console.log("=== Slut på XML ===");
 
   logger.debug("Sending WFS-T transaction", {
     url: layer.url,
@@ -632,7 +641,16 @@ function isValidGeoJSONGeometry(geom) {
   ];
 
   if (!validTypes.includes(geom.type)) return false;
-  if (!Array.isArray(geom.coordinates) && geom.type !== "GeometryCollection") {
+
+  // GeometryCollection must have geometries array
+  if (geom.type === "GeometryCollection") {
+    if (!Array.isArray(geom.geometries)) return false;
+    // Recursively validate each geometry in the collection
+    return geom.geometries.every((g) => isValidGeoJSONGeometry(g));
+  }
+
+  // All other types must have coordinates array
+  if (!Array.isArray(geom.coordinates)) {
     return false;
   }
 

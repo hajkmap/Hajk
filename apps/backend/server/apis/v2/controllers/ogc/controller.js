@@ -1,4 +1,5 @@
 import * as svc from "../../services/ogc.service.js";
+import { Validator } from "../../services/ogc/validator.js";
 import log4js from "log4js";
 
 const log = log4js.getLogger("ogc.v2");
@@ -6,15 +7,6 @@ const log = log4js.getLogger("ogc.v2");
 // Base URL to the backend so the service can call /api/v2/mapconfig/layers
 const getBaseUrl = (req) =>
   process.env.HAJK_BASE_URL || `${req.protocol}://${req.get("host")}`;
-
-// Simple bbox validation: "minx,miny,maxx,maxy" (optional with ,EPSG:XXXX at the end)
-function isValidBbox(bbox) {
-  if (typeof bbox !== "string") return false;
-  const parts = bbox.split(",");
-  if (parts.length < 4) return false;
-  const nums = parts.slice(0, 4).map((p) => Number.parseFloat(p));
-  return nums.every((n) => Number.isFinite(n));
-}
 
 export class Controller {
   // GET /api/v2/ogc/wfst/:id?fields=...
@@ -81,7 +73,7 @@ export class Controller {
           .json({ error: "Offset too large (max 1000000)" });
       }
 
-      if (req.query.bbox && !isValidBbox(req.query.bbox)) {
+      if (req.query.bbox && !Validator.isValidBbox(req.query.bbox)) {
         return res.status(400).json({ error: "Invalid bbox format" });
       }
 
