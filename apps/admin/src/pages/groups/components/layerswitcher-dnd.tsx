@@ -1558,52 +1558,17 @@ export default function LayerSwitcherDnD() {
         return { item: foundItem, updatedItems };
       };
 
-      const findParentAndSiblings = (
-        treeItems: TreeItems<TreeItemData>,
-        targetId: string
-      ): {
-        parent: TreeItem<TreeItemData> | null;
-        siblings: TreeItems<TreeItemData>;
-        targetIndex: number;
-      } | null => {
-        // Check root level
-        const rootIndex = treeItems.findIndex(
-          (item) => item.id.toString() === targetId
-        );
-        if (rootIndex !== -1) {
-          return {
-            parent: null,
-            siblings: treeItems,
-            targetIndex: rootIndex,
-          };
-        }
-
-        // Check children
-        for (const item of treeItems) {
-          if (item.children) {
-            const childIndex = item.children.findIndex(
-              (child) => child.id.toString() === targetId
-            );
-            if (childIndex !== -1) {
-              return {
-                parent: item,
-                siblings: item.children,
-                targetIndex: childIndex,
-              };
-            }
-            const result = findParentAndSiblings(item.children, targetId);
-            if (result) return result;
-          }
-        }
-        return null;
-      };
-
       setItems((prevItems) => {
         let draggedItem: TreeItem<TreeItemData> | null = null;
         let updatedItemsAfterRemove = prevItems;
 
+        const draggedPosBefore = !isFromSource
+          ? findItemParent(prevItems, draggedItemId)
+          : null;
+
+        const targetPosBefore = findItemParent(prevItems, targetGroupId);
+
         if (isFromSource) {
-          // Create new item from source
           const parts = draggedItemId.split("-");
           if (parts.length < 2) {
             return prevItems;
@@ -1621,7 +1586,6 @@ export default function LayerSwitcherDnD() {
             canHaveChildren: true,
           };
         } else {
-          // Remove existing item
           const result = findAndRemoveItem(prevItems, draggedItemId);
           draggedItem = result.item;
           updatedItemsAfterRemove = result.updatedItems;
@@ -1631,70 +1595,63 @@ export default function LayerSwitcherDnD() {
           return prevItems;
         }
 
-        const parentInfo = findParentAndSiblings(
+        const targetPosAfter = findItemParent(
           updatedItemsAfterRemove,
           targetGroupId
         );
-        if (!parentInfo) {
+        if (!targetPosAfter) {
           return prevItems;
         }
 
-        const { parent, siblings, targetIndex } = parentInfo;
-        const newSiblings = [...siblings];
-        newSiblings.splice(targetIndex, 0, draggedItem);
+        const sameParent =
+          (draggedPosBefore?.parent?.id?.toString() ?? null) ===
+          (targetPosBefore?.parent?.id?.toString() ?? null);
 
-        if (parent) {
-          const updated = updatedItemsAfterRemove.map((item) => {
-            if (item.id.toString() === parent.id.toString()) {
-              return {
-                ...item,
-                children: newSiblings,
-              };
-            }
-            if (item.children) {
-              const updateChildren = (
-                children: TreeItems<TreeItemData>
-              ): TreeItems<TreeItemData> => {
-                return children.map((child) => {
-                  if (child.id.toString() === parent.id.toString()) {
-                    return {
-                      ...child,
-                      children: newSiblings,
-                    };
-                  }
-                  if (child.children) {
-                    return {
-                      ...child,
-                      children: updateChildren(child.children),
-                    };
-                  }
-                  return child;
-                });
-              };
-              return {
-                ...item,
-                children: updateChildren(item.children),
-              };
-            }
-            return item;
-          });
-          const updatedEnforced = enforceLayerRules(updated);
-          // Update the ref immediately to prevent false detection on next interaction
-          itemsBeforeChangeRef.current = updatedEnforced;
-          return updatedEnforced;
+        const movingDown =
+          sameParent &&
+          draggedPosBefore != null &&
+          targetPosBefore != null &&
+          draggedPosBefore.index < targetPosBefore.index;
+
+        const siblings: TreeItems<TreeItemData> =
+          targetPosAfter.parent?.children ?? updatedItemsAfterRemove;
+
+        const insertIndex = targetPosAfter.index + (movingDown ? 1 : 0);
+
+        const newSiblings = [...siblings];
+        newSiblings.splice(insertIndex, 0, draggedItem);
+
+        if (targetPosAfter.parent) {
+          const parentId = targetPosAfter.parent.id.toString();
+
+          const updateChildren = (
+            treeItems: TreeItems<TreeItemData>
+          ): TreeItems<TreeItemData> => {
+            return treeItems.map((item) => {
+              if (item.id.toString() === parentId) {
+                return { ...item, children: newSiblings };
+              }
+              if (item.children) {
+                return { ...item, children: updateChildren(item.children) };
+              }
+              return item;
+            });
+          };
+
+          const updated = updateChildren(updatedItemsAfterRemove);
+          const enforced = enforceLayerRules(updated);
+          itemsBeforeChangeRef.current = enforced;
+          return enforced;
         } else {
-          const updatedEnforced = enforceLayerRules(newSiblings);
-          // Update the ref immediately to prevent false detection on next interaction
-          itemsBeforeChangeRef.current = updatedEnforced;
-          return updatedEnforced;
+          const enforced = enforceLayerRules(newSiblings);
+          itemsBeforeChangeRef.current = enforced;
+          return enforced;
         }
       });
     }
 
     setPendingGroupDrop(null);
     setGroupDropDialogOpen(false);
-
-    // The flag will be reset by useEffect when items update
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
