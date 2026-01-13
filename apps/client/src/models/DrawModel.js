@@ -1840,6 +1840,14 @@ class DrawModel {
 
   // Sets a custom cursor with a dot to indicate fixed length drawing mode
   #setFixedLengthCursor = () => {
+    const mapElement = this.#map.getTargetElement();
+    // OpenLayers cursor must be set on the viewport element
+    const viewportElement = mapElement?.querySelector(".ol-viewport");
+
+    if (!viewportElement) {
+      return;
+    }
+
     const canvas = document.createElement("canvas");
     canvas.width = 32;
     canvas.height = 32;
@@ -1859,17 +1867,18 @@ class DrawModel {
     ctx.stroke();
 
     const dataURL = canvas.toDataURL();
-    const mapElement = this.#map.getTargetElement();
-    if (mapElement) {
-      mapElement.style.cursor = `url("${dataURL}") 16 16, crosshair`;
-    }
+    const cursorValue = `url("${dataURL}") 16 16, crosshair`;
+
+    viewportElement.style.cursor = cursorValue;
   };
 
   // Resets cursor back to default
   #resetFixedLengthCursor = () => {
     const mapElement = this.#map.getTargetElement();
-    if (mapElement) {
-      mapElement.style.cursor = "";
+    const viewportElement = mapElement?.querySelector(".ol-viewport");
+
+    if (viewportElement) {
+      viewportElement.style.cursor = "";
     }
   };
 
