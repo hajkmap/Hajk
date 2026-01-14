@@ -34,12 +34,14 @@ import FormAccordion from "../../components/form-components/form-accordion";
 import {
   LayerSwitcherDnD,
   TreeItemData,
+  ToolPlacementDnD,
 } from "../../components/layerswitcher-dnd";
 import { useLayers } from "../../api/layers";
 import { useGroups } from "../../api/groups";
 import { useTools } from "../../api/tools";
 import { TreeItems } from "dnd-kit-sortable-tree";
 import ActiveAdminsBadge from "../../components/active-admins-badge";
+import mapBackgroundImage from "../../../public/mapbackground.png";
 
 export default function MapSettings() {
   const { t } = useTranslation();
@@ -70,7 +72,8 @@ export default function MapSettings() {
   const [widgetRightDZ, setWidgetRightDZ] = useState<TreeItems<TreeItemData>>(
     []
   );
-  const [otherDZ, setOtherDZ] = useState<TreeItems<TreeItemData>>([]);
+
+  const backgroundImage = mapBackgroundImage;
 
   const handleExternalSubmit = () => {
     if (formRef.current) {
@@ -975,40 +978,17 @@ export default function MapSettings() {
         )}
 
         {activeTab === "tools" && (
-          <LayerSwitcherDnD
-            tools={tools.map((t) => ({ id: t.id, name: t.type }))}
-            dropZones={[
-              {
-                id: "drawer",
-                title: "Drawer",
-                items: drawerDZ,
-                onItemsChange: setDrawerDZ,
-              },
-              {
-                id: "control",
-                title: "Control Button",
-                items: controlDZ,
-                onItemsChange: setControlDZ,
-              },
-              {
-                id: "widgetLeft",
-                title: "WidgetLeft",
-                items: widgetLeftDZ,
-                onItemsChange: setWidgetLeftDZ,
-              },
-              {
-                id: "widgetRight",
-                title: "WidgetRight",
-                items: widgetRightDZ,
-                onItemsChange: setWidgetRightDZ,
-              },
-              {
-                id: "other",
-                title: "Other",
-                items: otherDZ,
-                onItemsChange: setOtherDZ,
-              },
-            ]}
+          <ToolPlacementDnD
+            tools={tools.map((tool) => ({ id: tool.id, name: tool.type }))}
+            drawerItems={drawerDZ}
+            onDrawerItemsChange={setDrawerDZ}
+            widgetLeftItems={widgetLeftDZ}
+            onWidgetLeftItemsChange={setWidgetLeftDZ}
+            widgetRightItems={widgetRightDZ}
+            onWidgetRightItemsChange={setWidgetRightDZ}
+            controlButtonItems={controlDZ}
+            onControlButtonItemsChange={setControlDZ}
+            backgroundImage={backgroundImage}
           />
         )}
       </FormActionPanel>

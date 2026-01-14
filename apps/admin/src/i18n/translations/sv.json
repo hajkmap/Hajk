@@ -549,6 +549,8 @@
         "activeResultMarkedFrameColor": "Markeringsram (aktiv)",
         "availableLayers": "Tillgängliga lager"
       }
-    }
+    },
+    "layerSwitcherDnd.search": "Ange adress, fastighet...",
+    "layerSwitcherDnd.tools": "Kartverktyg"
   }
 }

@@ -549,6 +549,8 @@
       "markFeatures": "Mark features at level 1",
       "urlVerification": "URL verification active",
       "generalSettings": "General settings"
-    }
+    },
+    "layerSwitcherDnd.search": "Input address, real estate...",
+    "layerSwitcherDnd.tools": "Map tools"
   }
 }
