@@ -94,7 +94,7 @@ const EditView = (props) => {
             </Typography>
           ) : (
             <Grid size={12}>
-              {typeof props.editFeature?.getStyle?.() === "function" ? (
+              {props.editFeature?.get?.("__ae_style_delegate") === true ? (
                 <Typography align="center" style={{ marginTop: 24 }}>
                   Detta objekt hanteras av redigerbart lager.
                 </Typography>

@@ -320,7 +320,7 @@ export default function MobileForm({
                 }}
                 title={
                   selectedIds.size
-                    ? `Zooma till ${selectedIds.size} objekt`
+                    ? `Zooma till ${selectedIds.size} objekt i kartan`
                     : "Markera rader först"
                 }
                 aria-label="Zooma till valda"

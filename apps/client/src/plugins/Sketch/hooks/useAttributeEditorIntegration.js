@@ -2,10 +2,11 @@ import React from "react";
 import Select from "ol/interaction/Select";
 import Translate from "ol/interaction/Translate";
 import Modify from "ol/interaction/Modify";
-import { Stroke, Fill, Style, Circle } from "ol/style";
+import { Stroke, Fill, Style, Circle, Text } from "ol/style";
 import { altKeyOnly } from "ol/events/condition";
 import { fromCircle } from "ol/geom/Polygon";
 import MultiPoint from "ol/geom/MultiPoint";
+import LineString from "ol/geom/LineString";
 import { editBus } from "../../../buses/editBus";
 
 /**
@@ -37,7 +38,11 @@ const useAttributeEditorIntegration = ({
   translateEnabled,
   pluginShown,
   attributeEditorActiveRef,
+  measurementSettings,
 }) => {
+  // Track selected feature IDs to restore selection after effect re-runs
+  const selectedIdsRef = React.useRef([]);
+
   React.useEffect(() => {
     if (!map) return;
     const lastPublishRef = { id: null, chan: null };
@@ -130,49 +135,191 @@ const useAttributeEditorIntegration = ({
       });
     };
 
-    // Helper: Materialize style from layer for a feature
-    const materializeStyleFromLayer = (layer, feature) => {
+    // ============================================================
+    // SECTION: Measurement helpers for AttributeEditor features
+    // ============================================================
+
+    // Helper: Get polygon perimeter by creating a LineString from the outer ring
+    const getPolygonPerimeter = (geometry) => {
+      try {
+        const linearRingCoords =
+          geometry?.getLinearRing?.(0)?.getCoordinates?.() || null;
+        if (!linearRingCoords) return 0;
+        return new LineString(linearRingCoords)?.getLength?.() || 0;
+      } catch {
+        return 0;
+      }
+    };
+
+    // Helper: Calculate measurements for a feature (area, length, perimeter)
+    const getFeatureMeasurements = (feature) => {
+      const geometry = feature?.getGeometry?.();
+      if (!geometry) return [];
+
+      const measurementSettings = drawModel?.getMeasurementSettings?.() || {};
+      const showAreaPrefix =
+        measurementSettings.showArea && measurementSettings.showPerimeter;
+
+      const geoType = geometry.getType?.();
+
+      // Point - no measurements to show
+      if (geoType === "Point" || geoType === "MultiPoint") {
+        return [];
+      }
+
+      // LineString - show length
+      if (geoType === "LineString" || geoType === "MultiLineString") {
+        const length =
+          geoType === "LineString"
+            ? geometry.getLength?.() || 0
+            : geometry
+                .getLineStrings?.()
+                ?.reduce((sum, ls) => sum + (ls.getLength?.() || 0), 0) || 0;
+        return [{ type: "LENGTH", value: length, prefix: "" }];
+      }
+
+      // Polygon - show area and perimeter
+      if (geoType === "Polygon" || geoType === "MultiPolygon") {
+        const area = geometry?.getArea?.() || 0;
+        const perimeter =
+          geoType === "Polygon"
+            ? getPolygonPerimeter(geometry)
+            : geometry
+                .getPolygons?.()
+                ?.reduce((sum, p) => sum + getPolygonPerimeter(p), 0) || 0;
+
+        return [
+          {
+            type: "AREA",
+            value: area,
+            prefix: showAreaPrefix ? "Area:" : "",
+          },
+          {
+            type: "PERIMETER",
+            value: perimeter,
+            prefix: "\n Omkrets:",
+          },
+        ];
+      }
+
+      return [];
+    };
+
+    // Helper: Format measurement value to readable string
+    const formatMeasurement = (measurement) => {
+      const measurementSettings = drawModel?.getMeasurementSettings?.() || {};
+      const { type, value, prefix } = measurement;
+
+      // Check if this measurement type should be shown
+      const showMeasurement =
+        (type === "LENGTH" && measurementSettings.showLength) ||
+        (type === "AREA" && measurementSettings.showArea) ||
+        (type === "PERIMETER" && measurementSettings.showPerimeter);
+
+      if (!showMeasurement) return "";
+
+      const precision = measurementSettings.precision ?? 0;
+      const lengthUnit = measurementSettings.lengthUnit || "AUTO";
+      const areaUnit = measurementSettings.areaUnit || "AUTO";
+
+      // Determine which unit format to use
+      const isLength = type === "LENGTH" || type === "PERIMETER";
+      const unitFormat = isLength ? lengthUnit : areaUnit;
+
+      // Format based on unit type
+      let formatted = "";
+      if (unitFormat === "KM" || unitFormat === "KM2") {
+        // Kilometers
+        if (isLength) {
+          formatted = `${Number((value / 1e3).toFixed(precision)).toLocaleString()} km`;
+        } else {
+          formatted = `${Number((value / 1e6).toFixed(precision)).toLocaleString()} km²`;
+        }
+      } else if (unitFormat === "HECTARE" && !isLength) {
+        // Hectare (only for area)
+        formatted = `${Number((value / 1e4).toFixed(precision)).toLocaleString()} ha`;
+      } else if (unitFormat === "AUTO") {
+        // Auto - use km for large values
+        const lengthCutOff = 1e3;
+        const areaCutOff = 1e6;
+        const useKm = isLength ? value > lengthCutOff : value > areaCutOff;
+
+        if (useKm) {
+          if (isLength) {
+            formatted = `${Number((value / 1e3).toFixed(precision)).toLocaleString()} km`;
+          } else {
+            formatted = `${Number((value / 1e6).toFixed(precision)).toLocaleString()} km²`;
+          }
+        } else {
+          if (isLength) {
+            formatted = `${Number(value.toFixed(precision)).toLocaleString()} m`;
+          } else {
+            formatted = `${Number(value.toFixed(precision)).toLocaleString()} m²`;
+          }
+        }
+      } else {
+        // Default - meters
+        if (isLength) {
+          formatted = `${Number(value.toFixed(precision)).toLocaleString()} m`;
+        } else {
+          formatted = `${Number(value.toFixed(precision)).toLocaleString()} m²`;
+        }
+      }
+
+      return `${prefix} ${formatted}`.trim();
+    };
+
+    // Helper: Get measurement label text for a feature
+    const getMeasurementLabelText = (feature) => {
+      const measurementSettings = drawModel?.getMeasurementSettings?.() || {};
+      if (!measurementSettings.showText) return "";
+
+      const measurements = getFeatureMeasurements(feature);
+      return measurements
+        .map((m) => formatMeasurement(m))
+        .filter((s) => s.length > 0)
+        .join("");
+    };
+
+    // Helper: Create Text style for measurement display
+    const getMeasurementTextStyle = (feature) => {
+      const labelText = getMeasurementLabelText(feature);
+      if (!labelText) return null;
+
+      const geometry = feature?.getGeometry?.();
+      const geoType = geometry?.getType?.();
+      const featureIsPoint = geoType === "Point" || geoType === "MultiPoint";
+
+      return new Text({
+        textAlign: "center",
+        textBaseline: "middle",
+        font: "12pt sans-serif",
+        fill: new Fill({ color: "#FFF" }),
+        text: labelText,
+        overflow: true,
+        stroke: new Stroke({
+          color: "rgba(0, 0, 0, 0.7)",
+          width: 3,
+        }),
+        offsetX: 0,
+        offsetY: featureIsPoint ? -15 : 0,
+      });
+    };
+
+    // Helper: Mark feature as managed by AttributeEditor
+    // The layer's style function (wrapped in attachForLayer) handles all styling
+    const markFeatureForAttributeEditor = (feature) => {
       if (!feature) return;
-      const lf = layer?.getStyleFunction?.();
-      if (!lf) return;
 
       // Mark that this feature's style is managed by AttributeEditor
       // (used by AttributeEditor for internal bookkeeping)
       feature.set?.("__ae_style_delegate", true, true);
 
-      // Create a style function that's compatible with DrawModel's expectations
-      const styleFunc = (f, resArg) => {
-        const res = resArg ?? map?.getView?.().getResolution?.();
-        let st = lf(f, res);
-        if (Array.isArray(st)) st = st[0];
-        // If the layer's style function returns null (e.g., when feature is not visible),
-        // return an empty style instead of null
-        if (!st) return new Style({});
-
-        const out = st.clone ? st.clone() : st;
-
-        const gt = f.getGeometry?.()?.getType?.();
-        const isPointy = gt === "Point" || gt === "MultiPoint";
-        if (!isPointy) {
-          if (out.getStroke && !out.getStroke()) {
-            out.setStroke(new Stroke({ color: "rgba(0,0,0,0)", width: 0 }));
-          }
-          if (out.getFill && !out.getFill()) {
-            out.setFill(new Fill({ color: "rgba(0,0,0,0)" }));
-          }
-        }
-
-        // Add node highlights when in edit mode (like DrawModel does)
-        if (f.get("EDIT_ACTIVE") === true) {
-          return [out, getNodeHighlightStyle(f)];
-        }
-
-        return out;
-      };
-
-      // Set the style function on the feature
-      // DrawModel will detect this is a function (not a Style object) and skip style manipulation
-      feature.setStyle(styleFunc);
+      // Clear any feature-level style so the layer's style function is used
+      // (the layer's style function handles measurements and edit highlights)
+      if (feature.getStyle?.()) {
+        feature.setStyle(null);
+      }
     };
 
     // Helper: Publish feature to Sketch/EditView without affecting AE selection
@@ -248,16 +395,8 @@ const useAttributeEditorIntegration = ({
       }
 
       if (feature) {
-        const owner = [...reg.keys()].find((lyr) => {
-          const src = lyr.getSource?.();
-          return (
-            !!src &&
-            (src.getFeatureById?.(feature.getId?.()) ||
-              src.getFeatures?.().includes?.(feature))
-          );
-        });
-        // Always materialize/refresh style to reflect current selection state
-        materializeStyleFromLayer(owner, feature);
+        // Mark feature for AttributeEditor (clears feature-level style so layer style is used)
+        markFeatureForAttributeEditor(feature);
       }
 
       if (activityId === "EDIT") {
@@ -296,7 +435,12 @@ const useAttributeEditorIntegration = ({
           const f =
             src.getFeatureById?.(wid) ||
             srcFeatures.find((x) => matchesLogicalId(x, wid));
-          if (f) fc.push(f);
+          if (f) {
+            // Set EDIT_ACTIVE immediately before adding to fc to prevent flash
+            // This ensures the style function sees the correct value on first render
+            f.set("EDIT_ACTIVE", activityId === "EDIT" && modifyEnabled, true);
+            fc.push(f);
+          }
         });
       }
     };
@@ -391,6 +535,56 @@ const useAttributeEditorIntegration = ({
       if (!layer || reg.has(layer)) return;
       if (layer.get?.("name") !== LAYER_NAME) return;
 
+      // Wrap the layer's style function to include measurement text and edit highlights
+      const originalStyleFn = layer.getStyleFunction?.();
+      if (originalStyleFn && !layer.__measurementStyleWrapped) {
+        layer.__measurementStyleWrapped = true;
+        layer.setStyle((feature, resolution) => {
+          // Skip kink markers
+          if (feature.get("KINK_MARKER")) {
+            return originalStyleFn(feature, resolution);
+          }
+
+          // Get original style
+          let style = originalStyleFn(feature, resolution);
+          if (!style) return style;
+
+          // Handle array of styles - work with the first one
+          const isArray = Array.isArray(style);
+          const primaryStyle = isArray ? style[0] : style;
+          if (!primaryStyle) return style;
+
+          // Clone style to avoid mutating the original
+          const clonedStyle = primaryStyle.clone
+            ? primaryStyle.clone()
+            : primaryStyle;
+
+          // Add measurement text if enabled
+          const measurementTextStyle = getMeasurementTextStyle(feature);
+          if (measurementTextStyle) {
+            clonedStyle.setText(measurementTextStyle);
+          }
+
+          // Add node highlights when in edit mode
+          if (feature.get("EDIT_ACTIVE") === true) {
+            if (isArray) {
+              return [
+                clonedStyle,
+                getNodeHighlightStyle(feature),
+                ...style.slice(1),
+              ];
+            }
+            return [clonedStyle, getNodeHighlightStyle(feature)];
+          }
+
+          // Return cloned style (preserving array structure if needed)
+          if (isArray) {
+            return [clonedStyle, ...style.slice(1)];
+          }
+          return clonedStyle;
+        });
+      }
+
       const beforeGeomRef = new Map();
 
       const sel = new Select({
@@ -425,7 +619,7 @@ const useAttributeEditorIntegration = ({
           );
           if (!hit) return false;
 
-          materializeStyleFromLayer(layer, hit);
+          markFeatureForAttributeEditor(hit);
 
           const raw = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
           const canon = toCanonicalId(raw);
@@ -479,7 +673,7 @@ const useAttributeEditorIntegration = ({
         arr.forEach((f) => {
           // Always materialize/refresh style, even if feature already has one
           // This ensures the style reflects the current selection state
-          if (f) materializeStyleFromLayer(layer, f);
+          if (f) markFeatureForAttributeEditor(f);
         });
         publishToEditView(arr[0] ?? null);
 
@@ -615,10 +809,18 @@ const useAttributeEditorIntegration = ({
       // Sync OL selection with logical ids from UI
       const { ids = [] } = ev.detail || {};
 
+      // Store selected IDs so we can restore selection after effect re-runs
+      selectedIdsRef.current = ids;
+
       lastPublishRef.id = null;
       lastPublishRef.chan = null;
 
+      // Ensure Modify interaction is deactivated BEFORE adding features to fc
+      // This prevents vertex handles from flashing when modifyEnabled is false
+      applyEnablement();
+
       syncOlSelection(ids);
+
       if (ids.length) {
         const f = findAeFeatureById(ids[0]);
         publishToEditView(f || null);
@@ -741,15 +943,8 @@ const useAttributeEditorIntegration = ({
       }
       const f = findAeFeatureById(id);
       if (f) {
-        const layerForF = [...reg.keys()].find((lyr) => {
-          const src = lyr.getSource?.();
-          return (
-            !!src &&
-            (src.getFeatureById?.(id) || src.getFeatures?.().includes?.(f))
-          );
-        });
-        // Always materialize/refresh style to reflect current selection state
-        materializeStyleFromLayer(layerForF, f);
+        // Mark feature for AttributeEditor (clears feature-level style so layer style is used)
+        markFeatureForAttributeEditor(f);
       }
       if (activityId === "EDIT") {
         localObserver?.publish("drawModel.modify.mapClick", f || null);
@@ -870,6 +1065,20 @@ const useAttributeEditorIntegration = ({
     map.on("singleclick", onDeleteClick);
 
     // ============================================================
+    // SECTION: Restore selection after effect re-runs
+    // ============================================================
+    // When modifyEnabled changes, the effect re-runs and all interactions are
+    // recreated with empty feature collections. Restore the previous selection
+    // so the user doesn't have to click again.
+    if (selectedIdsRef.current.length > 0) {
+      syncOlSelection(selectedIdsRef.current);
+      const f = findAeFeatureById(selectedIdsRef.current[0]);
+      if (f) {
+        publishToEditView(f);
+      }
+    }
+
+    // ============================================================
     // SECTION: Cleanup
     // ============================================================
     return () => {
@@ -918,6 +1127,19 @@ const useAttributeEditorIntegration = ({
     pluginShown,
     attributeEditorActiveRef,
   ]);
+
+  // Separate effect to trigger layer redraw when measurement settings change
+  React.useEffect(() => {
+    if (!map) return;
+    const LAYER_NAME = "attributeeditor";
+
+    // Find AttributeEditor layer and trigger redraw
+    const layers = map.getLayers?.()?.getArray?.() || [];
+    const aeLayer = layers.find((l) => l.get?.("name") === LAYER_NAME);
+    if (aeLayer) {
+      aeLayer.changed?.();
+    }
+  }, [map, measurementSettings]);
 };
 
 export default useAttributeEditorIntegration;

@@ -32,6 +32,7 @@ const TableRow = ({
   handleRowHover,
   handleRowLeave,
   colWidths,
+  isViewedRow,
 }) => {
   const [isHovering, setIsHovering] = React.useState(false);
   const rowHasEdits =
@@ -49,8 +50,8 @@ const TableRow = ({
         }
       }}
       style={{
-        ...s.tr(selected, pendingKind),
-        ...(rowHasEdits && !pendingKind
+        ...s.tr(selected, pendingKind, isViewedRow),
+        ...(rowHasEdits && !pendingKind && !isViewedRow
           ? { outline: `2px dashed ${s.editOutlineColor || "#f59e0b"}` }
           : {}),
         ...(isHovering && !selected && !pendingKind

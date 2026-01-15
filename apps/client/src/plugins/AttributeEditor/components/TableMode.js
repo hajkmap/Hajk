@@ -198,6 +198,9 @@ export default function TableMode(props) {
   // Track which selected row we're currently showing (for cycling through multiple selections)
   const [currentScrollIndex, setCurrentScrollIndex] = React.useState(0);
 
+  // Track which row is currently being viewed (scrolled to with the eye button)
+  const [viewedRowId, setViewedRowId] = React.useState(null);
+
   const setQFor = (key, val) =>
     setColumnFilterUI((prev) => ({
       ...prev,
@@ -252,9 +255,10 @@ export default function TableMode(props) {
     }
   }, [rowsPerPage, totalRows, currentPage]);
 
-  // Reset scroll index when selection changes
+  // Reset scroll index and viewed row when selection changes
   React.useEffect(() => {
     setCurrentScrollIndex(0);
+    setViewedRowId(null);
   }, [tableSelectedIds]);
 
   // Navigate to page containing selected row and scroll to it (manual only)
@@ -277,6 +281,9 @@ export default function TableMode(props) {
     if (targetPage !== currentPage) {
       setCurrentPage(targetPage);
     }
+
+    // Mark this row as the currently viewed row (for visual highlighting)
+    setViewedRowId(targetId);
 
     if (handleRowHover) {
       handleRowHover(targetId, true);
@@ -542,9 +549,11 @@ export default function TableMode(props) {
               }
             }}
             title={
-              tableSelectedIds.size
-                ? `Zooma till ${tableSelectedIds.size} objekt`
-                : "Markera rader först"
+              tableSelectedIds.size > 1
+                ? `Zooma till ${tableSelectedIds.size} objekt i kartan`
+                : tableSelectedIds.size === 1
+                  ? "Zooma till valt objekt i kartan"
+                  : "Markera rader först"
             }
             aria-label="Zooma till valda"
           >
@@ -865,6 +874,7 @@ export default function TableMode(props) {
                     handleRowHover={handleRowHover}
                     handleRowLeave={handleRowLeave}
                     colWidths={colWidths}
+                    isViewedRow={row.id === viewedRowId}
                   />
                 );
               })}

@@ -1395,6 +1395,7 @@ function AttributeEditor(props) {
     map.addInteraction(dragBox);
 
     // When user releases box-selection
+    // Ctrl + drag box always ADDS to existing selection
     dragBox.on("boxend", () => {
       const boxExtent = dragBox.getGeometry().getExtent();
       const layer = vectorLayerRef.current;
@@ -1430,13 +1431,22 @@ function AttributeEditor(props) {
         return hit ? hit.id : idLike;
       };
 
-      const selectedIds = selectedFeatures.map((f) => {
+      const newIds = selectedFeatures.map((f) => {
         const rawId = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
         return toCanonicalId(rawId);
       });
 
-      // Remove duplicates
-      const uniqueIds = Array.from(new Set(selectedIds));
+      // Always combine with existing selection
+      const existingIds = [];
+      if (selectedIdsRef.current.size > 0) {
+        selectedIdsRef.current.forEach((id) => {
+          // Only add non-string versions to avoid duplicates
+          if (typeof id !== "string" || !existingIds.includes(Number(id))) {
+            existingIds.push(id);
+          }
+        });
+      }
+      const finalIds = Array.from(new Set([...existingIds, ...newIds]));
 
       // Build viz set
       const buildVizSet = (logicalIds) => {
@@ -1449,14 +1459,14 @@ function AttributeEditor(props) {
       };
 
       // Update selection
-      selectedIdsRef.current = buildVizSet(uniqueIds);
+      selectedIdsRef.current = buildVizSet(finalIds);
       vectorLayerRef.current?.changed?.();
 
       // Emit event
       editBus.emit("attrib:select-ids", {
-        ids: uniqueIds,
+        ids: finalIds,
         source: "map",
-        mode: "replace",
+        mode: "add",
       });
     });
 

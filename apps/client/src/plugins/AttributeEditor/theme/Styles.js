@@ -20,6 +20,7 @@ export const themes = {
 
     rowHover: "#eef6ff",
     rowSelected: "#dbeafe",
+    rowViewed: "#1e3a5f",
 
     warning: "#b45309",
     warningBg: "#fef3c7",
@@ -53,6 +54,7 @@ export const themes = {
 
     rowHover: "rgba(96,165,250,0.08)",
     rowSelected: "rgba(96,165,250,0.22)",
+    rowViewed: "#3b82f6",
 
     warning: "#f59e0b",
     warningBg: "rgba(245,158,11,0.1)",
@@ -305,7 +307,13 @@ export function makeStyles(t, isMobile) {
 
     list: { overflowY: "auto", overflowX: "hidden", flex: 1, minHeight: 0 },
 
-    listRow: (sel, status = null, isFocused = false, hasLeading = true) => {
+    listRow: (
+      sel,
+      status = null,
+      isFocused = false,
+      hasLeading = true,
+      isViewed = false
+    ) => {
       const isAdd = status === "add";
       const isEdit = status === "edit";
       const isDelete = status === "delete";
@@ -353,6 +361,8 @@ export function makeStyles(t, isMobile) {
         boxShadow: [statusShadow, selectRing, focusRing]
           .filter(Boolean)
           .join(", "),
+        outline: isViewed ? `3px solid ${t.rowViewed}` : undefined,
+        outlineOffset: isViewed ? "-1px" : undefined,
       };
     },
 
@@ -684,7 +694,7 @@ export function makeStyles(t, isMobile) {
       lineHeight: "20px",
       color: t.textMuted,
     },
-    tr: (selected, pending) => ({
+    tr: (selected, pending, isViewed) => ({
       background: selected
         ? t.rowSelected
         : pending === "add"
@@ -695,14 +705,16 @@ export function makeStyles(t, isMobile) {
               ? t.warningBg
               : "transparent",
       cursor: "pointer",
-      outline:
-        pending === "delete"
+      outline: isViewed
+        ? `3px solid ${t.rowViewed}`
+        : pending === "delete"
           ? `2px dashed ${t.danger}`
           : pending === "add"
             ? `2px dashed ${t.success}`
             : pending === "edit" || pending === "geom"
               ? `2px dashed ${t.warning}`
               : "none",
+      outlineOffset: isViewed ? "-1px" : undefined,
       transition: "background-color 0.15s ease",
     }),
 

@@ -1570,6 +1570,34 @@ export default function AttributeEditorView({
     syncColumnFilterOnValueChange,
   ]);
 
+  // Ctrl+Z keyboard shortcut for undo
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Only handle Ctrl+Z (or Cmd+Z on Mac)
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        // Don't intercept if user is typing in an input/textarea
+        const tag = document.activeElement?.tagName?.toLowerCase();
+        if (tag === "input" || tag === "textarea") {
+          return; // Let native undo handle it
+        }
+
+        // Check if there's anything to undo
+        const hasTableUndo = tableUndoLocal?.length > 0;
+        const hasFormUndo = formUndoStack?.length > 0;
+        const hasModelUndo = state.undoStack?.length > 0;
+        const hasGeomUndo = geomUndoRef.current?.length > 0;
+
+        if (hasTableUndo || hasFormUndo || hasModelUndo || hasGeomUndo) {
+          e.preventDefault();
+          undoLatestTableChange();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [undoLatestTableChange, tableUndoLocal, formUndoStack, state.undoStack]);
+
   function normalizeForCommit(key, value, FM) {
     if (value === "") {
       const t = FM.find((m) => m.key === key)?.type;
@@ -1731,13 +1759,26 @@ export default function AttributeEditorView({
   }
 
   function selectAllVisible() {
-    const ids = visibleFormList.map((f) => f.id);
-    setSelectedIds(new Set(ids));
-    if (!focusedId && ids.length) setFocusedId(ids[0]);
+    if (ui.mode === "table") {
+      // Table mode: select all filtered/sorted rows
+      const ids = filteredAndSorted.map((f) => f.id);
+      setTableSelectedIds(new Set(ids));
+      // Also sync to selectedIds for consistency when switching modes
+      setSelectedIds(new Set(ids));
+      if (!focusedId && ids.length) setFocusedId(ids[0]);
+    } else {
+      // Form mode: select all visible rows
+      const ids = visibleFormList.map((f) => f.id);
+      setSelectedIds(new Set(ids));
+      // Also sync to tableSelectedIds for consistency when switching modes
+      setTableSelectedIds(new Set(ids));
+      if (!focusedId && ids.length) setFocusedId(ids[0]);
+    }
   }
   function clearSelection() {
     explicitClearRef.current = true;
     setSelectedIds(new Set());
+    setTableSelectedIds(new Set());
 
     editBus.emit("attrib:select-ids", {
       ids: [],

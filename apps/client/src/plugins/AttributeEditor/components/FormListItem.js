@@ -15,6 +15,7 @@ const FormListItem = ({
   selectedRowRefs,
   handleRowHover,
   handleRowLeave,
+  isViewedRow,
 }) => {
   const [isHovering, setIsHovering] = React.useState(false);
 
@@ -56,7 +57,7 @@ const FormListItem = ({
       }}
       data-row-id={row.id}
       style={{
-        ...s.listRow(selected, status, isFocused, false),
+        ...s.listRow(selected, status, isFocused, false, isViewedRow),
         // Use hover style from theme (via trHover) ONLY when:
         // - hovering AND not selected AND not focused AND no pending status
         // This prevents hover from overwriting add/delete/edit colors

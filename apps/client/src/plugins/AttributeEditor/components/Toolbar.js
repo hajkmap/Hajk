@@ -116,7 +116,10 @@ export default function Toolbar({
       setPluginSettings(
         label === "Ingen"
           ? { title: "Attributredigerare", color: PLUGIN_COLORS.default }
-          : { title: `Redigerar ${label}`, color: PLUGIN_COLORS.warning }
+          : {
+              title: `Attributredigerare - Redigerar ${label}`,
+              color: PLUGIN_COLORS.warning,
+            }
       );
 
       if (!def || def.id === "NONE_ID") {
@@ -126,7 +129,7 @@ export default function Toolbar({
         editBus.emit("edit:service-selected", {
           source: "toolbar",
           id: def.id,
-          title: `Redigerar ${label}`,
+          title: `Attributredigerare - Redigerar ${label}`,
           color: PLUGIN_COLORS.warning,
         });
         setServiceId(def.id);
@@ -317,7 +320,6 @@ export default function Toolbar({
 
   return (
     <div style={s.toolbar}>
-      <strong style={s.toolbarTitle}>Attributredigerare</strong>
       {!isMobile && <div style={s.toolbarSpacer} />}
 
       {!isMobile && (
@@ -398,48 +400,32 @@ export default function Toolbar({
         {dark ? "Dark" : "Light"}
       </button>*/}
 
-      {mode === "table" ? (
-        <div style={s.toolbarInfo}>
-          <input
-            style={s.inputComb}
-            placeholder="Filtrera listan…"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-          {!isMobile && (
+      <div style={s.toolbarInfo}>
+        <input
+          style={s.inputComb}
+          placeholder="Filtrera listan…"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+        {!isMobile && (
+          <>
+            <button style={s.btn} onClick={selectAllVisible}>
+              Markera alla
+            </button>
+            <button
+              style={selectedCount === 0 ? s.btnDisabled : s.btn}
+              onClick={clearSelection}
+              disabled={selectedCount === 0}
+            >
+              Avmarkera alla
+            </button>
             <span style={s.toolbarStats}>
               Totalt: {features.length} • Visas: {filteredAndSorted.length} •
-              Valda: {tableSelectedIds.size}
+              Valda: {selectedCount}
             </span>
-          )}
-        </div>
-      ) : (
-        <div style={s.toolbarInfo}>
-          <input
-            style={s.inputComb}
-            placeholder="Filtrera listan…"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-          {!isMobile && (
-            <>
-              <button style={s.btn} onClick={selectAllVisible}>
-                Markera alla
-              </button>
-              <button
-                style={selectedIds.size === 0 ? s.btnDisabled : s.btn}
-                onClick={clearSelection}
-                disabled={selectedIds.size === 0}
-              >
-                Avmarkera
-              </button>
-              <span style={s.toolbarStats}>
-                Valda: {selectedIds.size} / {features.length}
-              </span>
-            </>
-          )}
-        </div>
-      )}
+          </>
+        )}
+      </div>
 
       <ConfirmSaveDialog
         open={saveDialogOpen}

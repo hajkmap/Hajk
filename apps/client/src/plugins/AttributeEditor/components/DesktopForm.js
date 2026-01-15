@@ -101,6 +101,9 @@ export default function DesktopForm({
   // Track which selected row we're currently showing (for cycling through multiple selections)
   const [currentScrollIndex, setCurrentScrollIndex] = React.useState(0);
 
+  // Track which row is currently being viewed (scrolled to with the eye button)
+  const [viewedRowId, setViewedRowId] = React.useState(null);
+
   const registerTextareaRef = React.useCallback((key, el) => {
     if (el) textareaRefs.current[key] = el;
   }, []);
@@ -148,9 +151,10 @@ export default function DesktopForm({
     }
   }, [rowsPerPage, totalRows, currentPage]);
 
-  // Reset scroll index when selection changes
+  // Reset scroll index and viewed row when selection changes
   React.useEffect(() => {
     setCurrentScrollIndex(0);
+    setViewedRowId(null);
   }, [selectedIds, focusedId]);
 
   // Scroll to selected/focused row in the list WITH TOOLTIP
@@ -190,6 +194,9 @@ export default function DesktopForm({
     if (targetPage !== currentPage) {
       setCurrentPage(targetPage);
     }
+
+    // Mark this row as the currently viewed row (for visual highlighting)
+    setViewedRowId(targetId);
 
     // Show tooltip on map for this feature
     if (handleRowHover) {
@@ -452,6 +459,7 @@ export default function DesktopForm({
                 selectedRowRefs={selectedRowRefs}
                 handleRowHover={handleRowHover}
                 handleRowLeave={handleRowLeave}
+                isViewedRow={f.id === viewedRowId}
               />
             );
           })}
@@ -662,9 +670,9 @@ export default function DesktopForm({
             aria-label="Zooma till valda"
             title={
               selectedIds.size > 1
-                ? `Zooma till ${selectedIds.size} objekt`
+                ? `Zooma till ${selectedIds.size} objekt i kartan`
                 : selectedIds.size === 1 || focusedId != null
-                  ? "Zooma till valt objekt"
+                  ? "Zooma till valt objekt i kartan"
                   : "Välj objekt först"
             }
           >

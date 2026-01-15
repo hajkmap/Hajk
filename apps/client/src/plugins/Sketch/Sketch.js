@@ -299,6 +299,7 @@ const Sketch = (props) => {
     translateEnabled,
     pluginShown,
     attributeEditorActiveRef,
+    measurementSettings,
   });
 
   useGeometryValidation({
