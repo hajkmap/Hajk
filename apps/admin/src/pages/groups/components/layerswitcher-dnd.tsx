@@ -111,6 +111,7 @@ const TreeItemComponent = React.forwardRef<
     onAdd?: () => void;
     canMoveUp?: boolean;
     canMoveDown?: boolean;
+    rootNumber?: number;
   }
 >((props, ref) => {
   const {
@@ -122,10 +123,14 @@ const TreeItemComponent = React.forwardRef<
     onAdd,
     canMoveUp,
     canMoveDown,
+    depth,
+    rootNumber,
   } = props;
   const themeMode = useAppStateStore((state) => state.themeMode);
   const isDarkMode = themeMode === "dark";
   const isGroup = item.type === "group";
+  const isTopLevelGroup = isGroup && depth === 0 && rootNumber != null;
+
   const { t } = useTranslation();
   const handleRemove = React.useCallback(() => {
     if (props.onRemove) {
@@ -138,6 +143,35 @@ const TreeItemComponent = React.forwardRef<
 
   return (
     <SimpleTreeItemWrapper {...props} ref={ref}>
+      {isTopLevelGroup && (
+        <Box
+          sx={{
+            position: "absolute",
+            left: 3,
+            top: 2,
+            width: 22,
+            height: 22,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 12,
+            fontWeight: 700,
+            backgroundColor: isDarkMode
+              ? "rgba(66,165,245,0.25)"
+              : "rgba(25,118,210,0.12)",
+            border: `1px solid ${
+              isDarkMode ? "rgba(66,165,245,0.7)" : "rgba(25,118,210,0.7)"
+            }`,
+            color: isDarkMode ? "#90caf9" : "#1976d2",
+            pointerEvents: "none",
+            zIndex: 20,
+          }}
+        >
+          {rootNumber}
+        </Box>
+      )}
+
       {isReorderTarget && (
         <Box
           sx={{
@@ -153,6 +187,7 @@ const TreeItemComponent = React.forwardRef<
           }}
         />
       )}
+
       <Box
         sx={{
           display: "flex",
@@ -176,6 +211,7 @@ const TreeItemComponent = React.forwardRef<
               : "1px solid #ddd",
           borderRadius: 1,
           mb: 0.5,
+          ml: 2,
           minHeight: 48,
           position: "relative",
           transition: "all 0.2s ease",
@@ -203,9 +239,8 @@ const TreeItemComponent = React.forwardRef<
               cursor: "grabbing",
             },
           }}
-        >
-          <DragIndicator sx={{ color: "text.secondary" }} />
-        </Box>
+        />
+
         <Box sx={{ flex: 1 }}>
           <Typography
             variant="body2"
@@ -216,12 +251,16 @@ const TreeItemComponent = React.forwardRef<
           >
             {item.name ?? ""}
           </Typography>
+
           {isGroup && (
-            <Typography variant="caption" color="text.secondary">
-              {t("common.group")}
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                {t("common.group")}
+              </Typography>
+            </Box>
           )}
         </Box>
+
         <Box
           sx={{
             display: "flex",
@@ -256,6 +295,7 @@ const TreeItemComponent = React.forwardRef<
               <ArrowUpwardIcon fontSize="small" />
             </IconButton>
           )}
+
           {onMoveDown && (
             <IconButton
               size="small"
@@ -277,6 +317,7 @@ const TreeItemComponent = React.forwardRef<
               <ArrowDownwardIcon fontSize="small" />
             </IconButton>
           )}
+
           {isGroup && onAdd && (
             <IconButton
               size="small"
@@ -296,6 +337,7 @@ const TreeItemComponent = React.forwardRef<
               <AddIcon fontSize="small" />
             </IconButton>
           )}
+
           {props.onRemove && (
             <IconButton
               size="small"
@@ -317,6 +359,7 @@ const TreeItemComponent = React.forwardRef<
           )}
         </Box>
       </Box>
+
       {isReorderTarget && (
         <Box
           sx={{
@@ -928,6 +971,25 @@ export default function LayerSwitcherDnD() {
         .sort((a, b) => a.name.localeCompare(b.name)),
     [groups, search, addedItemIdsLagerordning]
   );
+
+  const rootNumberByAnyItemId = useMemo(() => {
+    const map: Record<string, number> = {};
+    let counter = 0;
+
+    const walk = (node: TreeItem<TreeItemData>, num: number) => {
+      map[node.id.toString()] = num;
+      node.children?.forEach((c) => walk(c, num));
+    };
+
+    items.forEach((it) => {
+      if (it.type === "group") {
+        counter += 1;
+        walk(it as TreeItem<TreeItemData>, counter);
+      }
+    });
+
+    return map;
+  }, [items]);
 
   const handleDragStart = (event: DragStartEvent) => {
     const activeIdStr = event.active.id.toString();
@@ -2219,12 +2281,14 @@ export default function LayerSwitcherDnD() {
                       ) : (
                         <Box
                           sx={{
+                            position: "relative",
+                            pl: "10px",
+                            boxSizing: "border-box",
                             "& .dnd-sortable-tree_simple_tree-item-collapse_button":
                               {
                                 filter: isDarkMode
                                   ? "brightness(0) invert(0.6)"
                                   : "none",
-                                marginRight: 1,
                               },
                             "& .dnd-sortable-tree_simple_tree-item-collapse_button-container":
                               {
@@ -2413,6 +2477,7 @@ export default function LayerSwitcherDnD() {
                               return (
                                 <TreeItemComponent
                                   {...treeItemProps}
+                                  rootNumber={rootNumberByAnyItemId[itemId]}
                                   onMoveUp={() => handleMoveUp(itemId)}
                                   onMoveDown={() => handleMoveDown(itemId)}
                                   onAdd={
