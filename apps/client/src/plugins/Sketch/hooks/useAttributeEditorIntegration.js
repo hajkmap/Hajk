@@ -463,7 +463,7 @@ const useAttributeEditorIntegration = ({
 
       const shouldBeActive = pluginShown;
 
-      for (const [layer, { select, translate, modify }] of reg.entries()) {
+      for (const [, { select, translate, modify }] of reg.entries()) {
         try {
           select.setActive(shouldBeActive);
         } catch {}
@@ -476,22 +476,8 @@ const useAttributeEditorIntegration = ({
           modify.setActive(inEditWithNodes && modify.__allowModify);
         } catch {}
 
-        // Update EDIT_ACTIVE on selected features to show nodes
-        // EDIT_ACTIVE controls node VISIBILITY (always true in EDIT mode)
-        // modifyEnabled controls whether nodes can be MODIFIED (via Modify interaction above)
-        if (activityId === "EDIT") {
-          const fc = select?.getFeatures?.();
-          if (fc) {
-            const features = fc.getArray ? fc.getArray() : [];
-            features.forEach((f) => {
-              f.set("EDIT_ACTIVE", true, true);
-            });
-            // Trigger re-render if any features were updated
-            if (features.length > 0) {
-              layer?.changed?.();
-            }
-          }
-        }
+        // Note: EDIT_ACTIVE is handled by syncOlSelection(), not here.
+        // This keeps the logic in one place and avoids redundant layer refreshes.
       }
     };
 
