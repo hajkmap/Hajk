@@ -2109,10 +2109,21 @@ class DrawModel {
   };
 
   // Toggles the draw-interaction on and off if it is currently on.
-  // This refresh makes sure new settings are applied.
+  // This refresh makes sure new settings are applied while preserving custom handlers.
   #refreshDrawInteraction = () => {
     if (this.#drawInteraction) {
-      this.toggleDrawInteraction(this.#drawInteraction.get("DRAW_METHOD"));
+      // Preserve the custom handlers when refreshing the interaction
+      const settings = {
+        handleDrawStart: this.#customHandleDrawStart,
+        handleDrawEnd: this.#customHandleDrawEnd,
+        handlePointerMove: this.#customHandlePointerMove,
+        handleAddFeature: this.#customHandleAddFeature,
+        fixedLengthEnabled: this.#fixedLengthEnabled,
+      };
+      this.toggleDrawInteraction(
+        this.#drawInteraction.get("DRAW_METHOD"),
+        settings
+      );
     }
   };
 

@@ -345,26 +345,13 @@ const useAttributeEditorIntegration = ({
         }
         feature.set("DRAW_METHOD", method, true);
 
-        // Clear EDIT_ACTIVE from all other features before setting it on this one
-        // This ensures only one feature shows edit nodes at a time
-        for (const [layer] of reg.entries()) {
-          const src = layer.getSource?.();
-          if (src) {
-            const allFeatures = src.getFeatures?.() || [];
-            allFeatures.forEach((f) => {
-              if (f !== feature && f.get("EDIT_ACTIVE")) {
-                f.set("EDIT_ACTIVE", false, true);
-              }
-            });
-          }
-        }
+        // Note: We no longer clear EDIT_ACTIVE from other features here.
+        // syncOlSelection handles setting EDIT_ACTIVE on all selected features,
+        // allowing multiple features to show nodes when multi-selected.
 
-        // Set EDIT_ACTIVE when in EDIT mode AND modify is enabled (to show nodes)
-        feature.set(
-          "EDIT_ACTIVE",
-          activityId === "EDIT" && modifyEnabled,
-          true
-        );
+        // Set EDIT_ACTIVE when in EDIT mode (to show nodes)
+        // modifyEnabled only controls whether nodes can be MODIFIED, not visibility
+        feature.set("EDIT_ACTIVE", activityId === "EDIT", true);
         if (feature.get("TEXT_SETTINGS") == null) {
           feature.set(
             "TEXT_SETTINGS",
@@ -428,20 +415,36 @@ const useAttributeEditorIntegration = ({
 
         fc.clear();
 
+        const srcFeatures = src.getFeatures?.() || [];
+
+        // First, clear EDIT_ACTIVE from ALL features in the source
+        // This ensures previously selected features no longer show nodes
+        srcFeatures.forEach((f) => {
+          if (f.get("EDIT_ACTIVE")) {
+            f.set("EDIT_ACTIVE", false, true);
+          }
+        });
+
         if (wanted.size === 0) continue;
 
-        const srcFeatures = src.getFeatures?.() || [];
+        // Then set EDIT_ACTIVE on the newly selected features
         wanted.forEach((wid) => {
           const f =
             src.getFeatureById?.(wid) ||
             srcFeatures.find((x) => matchesLogicalId(x, wid));
           if (f) {
-            // Set EDIT_ACTIVE immediately before adding to fc to prevent flash
-            // This ensures the style function sees the correct value on first render
-            f.set("EDIT_ACTIVE", activityId === "EDIT" && modifyEnabled, true);
+            // Mark feature for AttributeEditor (ensures layer style function is used)
+            markFeatureForAttributeEditor(f);
+            // Set EDIT_ACTIVE to show nodes (always in EDIT mode)
+            // modifyEnabled controls whether nodes can be MODIFIED (via Modify interaction)
+            f.set("EDIT_ACTIVE", activityId === "EDIT", true);
             fc.push(f);
           }
         });
+
+        // Trigger layer refresh to ensure vertex handles are rendered
+        // This is needed when selection comes from TableMode (vs map click)
+        layer?.changed?.();
       }
     };
 
@@ -473,13 +476,15 @@ const useAttributeEditorIntegration = ({
           modify.setActive(inEditWithNodes && modify.__allowModify);
         } catch {}
 
-        // Update EDIT_ACTIVE on selected features to show/hide nodes
+        // Update EDIT_ACTIVE on selected features to show nodes
+        // EDIT_ACTIVE controls node VISIBILITY (always true in EDIT mode)
+        // modifyEnabled controls whether nodes can be MODIFIED (via Modify interaction above)
         if (activityId === "EDIT") {
           const fc = select?.getFeatures?.();
           if (fc) {
             const features = fc.getArray ? fc.getArray() : [];
             features.forEach((f) => {
-              f.set("EDIT_ACTIVE", modifyEnabled, true);
+              f.set("EDIT_ACTIVE", true, true);
             });
             // Trigger re-render if any features were updated
             if (features.length > 0) {
@@ -633,6 +638,10 @@ const useAttributeEditorIntegration = ({
             try {
               fc.clear();
             } catch {}
+            // Set EDIT_ACTIVE before adding to fc so the style function sees correct value
+            // EDIT_ACTIVE controls node VISIBILITY (always show in EDIT mode)
+            // modifyEnabled controls whether nodes can be MODIFIED (via Modify interaction)
+            hit.set("EDIT_ACTIVE", activityId === "EDIT", true);
             fc.push(hit);
             editBus.emit("attrib:select-ids", {
               ids: [canon],
@@ -641,8 +650,14 @@ const useAttributeEditorIntegration = ({
             });
           } else {
             const arr = fc.getArray ? fc.getArray() : [];
-            if (arr.includes(hit)) fc.remove(hit);
-            else fc.push(hit);
+            if (arr.includes(hit)) {
+              fc.remove(hit);
+            } else {
+              // Set EDIT_ACTIVE before adding to fc so the style function sees correct value
+              // EDIT_ACTIVE controls node VISIBILITY (always show in EDIT mode)
+              hit.set("EDIT_ACTIVE", activityId === "EDIT", true);
+              fc.push(hit);
+            }
 
             const ids = (fc.getArray ? fc.getArray() : []).map((f) => {
               const id = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();

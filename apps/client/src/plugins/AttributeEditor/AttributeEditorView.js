@@ -1943,6 +1943,12 @@ export default function AttributeEditorView({
         else if (isToggle) {
           next.has(rowId) ? next.delete(rowId) : next.add(rowId);
 
+          // If toggle results in empty selection, mark as explicit clear
+          // so ensureFormSelection doesn't auto-select the first row
+          if (next.size === 0) {
+            explicitClearRef.current = true;
+          }
+
           if (rowId === focusedId && !next.has(rowId) && next.size > 0) {
             const vis = visibleFormList.map((f) => f.id);
             let candidate = null;
