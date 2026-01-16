@@ -136,11 +136,14 @@ function LayerItemDetails({
     );
   };
 
-  // Add a check for CQL filter visibility and exclude system layers
+  // Add a check for CQL filter visibility and exclude system and background layers
   const isCqlFilterEnabled = () => {
     return (
+      cqlFilterVisible &&
       // Exclude system layers
-      cqlFilterVisible && layerItemDetails?.layer?.get("layerType") !== "system"
+      layerItemDetails?.layer?.get("layerType") !== "system" &&
+      // Exclude background layers
+      layerItemDetails?.layer?.get("layerType") !== "base"
     );
   };
 
