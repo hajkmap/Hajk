@@ -39,7 +39,7 @@ export function createOgcApi(baseUrl) {
       return res.json();
     },
 
-    async fetchWfstFeatures(id, params = {}) {
+    async fetchWfstFeatures(id, params = {}, { signal } = {}) {
       const queryParams = {
         limit: "10000",
         srsName: "EPSG:3006",
@@ -60,6 +60,7 @@ export function createOgcApi(baseUrl) {
           Expires: "0",
         },
         cache: "no-store",
+        signal,
       });
 
       if (!res.ok) {

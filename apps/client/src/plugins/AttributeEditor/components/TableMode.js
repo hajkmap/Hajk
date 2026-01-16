@@ -882,7 +882,7 @@ export default function TableMode(props) {
               {filteredAndSorted.length === 0 && (
                 <tr>
                   <td style={s.tdEmpty} colSpan={FIELD_META.length}>
-                    Inga rader matchar sökningen.
+                    Laddning pågår...
                   </td>
                 </tr>
               )}

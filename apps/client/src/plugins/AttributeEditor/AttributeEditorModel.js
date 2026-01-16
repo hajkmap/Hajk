@@ -443,6 +443,9 @@ export default class AttributeEditorModel {
   // === Getters/setters ===
   getFieldMetadata = () => this.#fieldMeta || [];
   getFeatureCollection = () => this._lastFeatureCollection;
+  clearFeatureCollection = () => {
+    this._lastFeatureCollection = null;
+  };
   getLayerProjection = () => this.#layerProjection || "EPSG:3006";
 
   // === API data normalization ===
@@ -532,15 +535,22 @@ export default class AttributeEditorModel {
   };
 
   // === Load data from service ===
-  loadFromService = async (serviceId, extraParams = {}) => {
+  loadFromService = async (serviceId, extraParams = {}, { signal } = {}) => {
     if (!this.#ogc)
       throw new Error("OGC API missing (inject via settings.ogc)");
 
-    // Fetch feature collection from backend
-    const payload = await this.#ogc.fetchWfstFeatures(serviceId, {
-      limit: 10000,
-      ...extraParams,
-    });
+    // Fetch feature collection from backend (pass signal to allow cancellation)
+    const payload = await this.#ogc.fetchWfstFeatures(
+      serviceId,
+      {
+        limit: 10000,
+        ...extraParams,
+      },
+      { signal }
+    );
+
+    // If aborted after fetch, don't update state
+    if (signal?.aborted) return null;
 
     this._lastFeatureCollection = payload;
 
@@ -552,6 +562,9 @@ export default class AttributeEditorModel {
     // Normalize data to table rows and infer field metadata
     const rows = this.normalizeApiFeatures(payload);
     const fieldMeta = this.inferFieldMetaFromFeatures(rows);
+
+    // Final abort check before updating state
+    if (signal?.aborted) return null;
 
     // Initialize state with fetched features
     this._state = reducer(this._state, { type: Action.INIT, features: rows });

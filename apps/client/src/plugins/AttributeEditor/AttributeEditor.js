@@ -528,10 +528,11 @@ function AttributeEditor(props) {
         color: color ?? u.color,
       }));
 
-      // Initialize model to empty state
+      // Initialize model to empty state and free memory from previous layer
       model.dispatch({ type: Action.INIT, features: [] });
       setFieldMetaLocal([]);
       model.setFieldMetadata([]);
+      model.clearFeatureCollection?.();
 
       try {
         // Check if operation was aborted before starting
@@ -698,8 +699,9 @@ function AttributeEditor(props) {
         // Check before loading data
         if (signal.aborted) return;
 
-        // 7) Load data (once FM is set)
-        const { featureCollection } = (await model.loadFromService?.(id)) || {};
+        // 7) Load data (once FM is set) - pass signal to allow cancellation
+        const { featureCollection } =
+          (await model.loadFromService?.(id, {}, { signal })) || {};
 
         // Check before OpenLayers operations
         if (signal.aborted) return;
@@ -805,6 +807,7 @@ function AttributeEditor(props) {
       model.dispatch({ type: Action.INIT, features: [] });
       setFieldMetaLocal([]);
       model.setFieldMetadata([]);
+      model.clearFeatureCollection?.();
 
       if (vectorLayerRef.current) {
         props.map.removeLayer(vectorLayerRef.current);
