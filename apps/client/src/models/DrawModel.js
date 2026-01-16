@@ -2755,7 +2755,7 @@ class DrawModel {
         // Apply the final feature style (not draw style)
         this.#activeSketch.setStyle(this.#getFeatureStyle(this.#activeSketch));
 
-        // Re-add feature to source - this triggers addfeature event which sets SKETCH_ATTRIBUTEEDITOR
+        // Re-add feature to source - this triggers addfeature event
         this.#drawSource.addFeature(this.#activeSketch);
 
         // Trigger drawEnd handler
@@ -2767,6 +2767,18 @@ class DrawModel {
         this.#activeSketch = null;
 
         // Set cursor with red dot again - ready for next feature
+        this.#setFixedLengthCursor();
+      } else {
+        // Not enough points - abort the drawing
+        this.#drawSource.removeFeature(this.#activeSketch);
+        this.#activeSketch = null;
+
+        // Trigger drawAbort handler so UI updates correctly
+        if (this.#customHandleDrawAbort) {
+          this.#customHandleDrawAbort();
+        }
+
+        // Set cursor with red dot again - ready for new feature
         this.#setFixedLengthCursor();
       }
     } else if (this.#drawInteraction) {

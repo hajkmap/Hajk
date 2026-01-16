@@ -299,7 +299,7 @@ export function makeStyles(t, isMobile) {
       fontWeight: 600,
       display: "flex",
       alignItems: "center",
-      gap: isMobile ? 4 : 8,
+      gap: isMobile ? 2 : 4,
       color: t.text,
       fontSize: isMobile ? 14 : 16,
       flexWrap: isMobile ? "wrap" : "nowrap",
@@ -543,7 +543,7 @@ export function makeStyles(t, isMobile) {
     },
     tableHeaderBar: {
       display: "flex",
-      gap: isMobile ? 4 : 8,
+      gap: isMobile ? 2 : 4,
       alignItems: "center",
       padding: isMobile ? 6 : 8,
       background: t.panelBg,

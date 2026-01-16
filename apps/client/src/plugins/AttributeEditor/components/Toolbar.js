@@ -129,7 +129,7 @@ export default function Toolbar({
         editBus.emit("edit:service-selected", {
           source: "toolbar",
           id: def.id,
-          title: `Attributredigerare - Redigerar ${label}`,
+          title: `Redigerar ${label}`,
           color: PLUGIN_COLORS.warning,
         });
         setServiceId(def.id);
