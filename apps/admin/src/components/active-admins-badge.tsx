@@ -40,7 +40,6 @@ export function ActiveAdminsBadge({
 
   // Debug mode: show connection status
   if (showDebug) {
-    console.log(admins, activeAdmins);
     return (
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <Tooltip

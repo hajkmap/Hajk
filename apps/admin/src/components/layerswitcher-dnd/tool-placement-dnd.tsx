@@ -417,7 +417,7 @@ export const ToolPlacementDnD: React.FC<ToolPlacementDnDProps> = ({
     name: string;
   } | null>(null);
   // const [hoveredZone, setHoveredZone] = useState<ToolPlacement | null>(null);
-  const [hideBackground, setHiddenBackground] = useState(true);
+  const [hideBackground, setHiddenBackground] = useState(false);
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),

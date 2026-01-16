@@ -249,7 +249,7 @@ export default function MapsList({
           <Grid size={12} container sx={{ mb: 2 }}>
             <TextField
               fullWidth
-              label={t("maps.searchTitle")}
+              label={t("map.searchTitle")}
               variant="outlined"
               value={searchString}
               onChange={handleSearchChange}

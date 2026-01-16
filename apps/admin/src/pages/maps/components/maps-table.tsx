@@ -10,7 +10,7 @@ import { Map } from "../../../api/maps";
 import { useMaps } from "../../../api/maps/hooks";
 import MapListFilterPanel from "./map-list-filter-panel";
 import { useNavigate } from "react-router";
-import StyledDataGrid  from "../../../components/data-grid";
+import StyledDataGrid from "../../../components/data-grid";
 
 export default function MapsTable() {
   const { t } = useTranslation();
