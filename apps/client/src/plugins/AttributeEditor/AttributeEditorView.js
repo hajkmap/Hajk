@@ -188,6 +188,12 @@ export default function AttributeEditorView({
       };
       const canonical = Array.from(new Set(incoming.map(normalizeId)));
 
+      // Mark as explicit clear when receiving empty selection from map
+      // This prevents ensureFormSelection from auto-selecting the first row
+      if (canonical.length === 0 && ev.detail?.source === "map") {
+        explicitClearRef.current = true;
+      }
+
       setTableSelectedIds(new Set(canonical));
       setSelectedIds(new Set(canonical));
 

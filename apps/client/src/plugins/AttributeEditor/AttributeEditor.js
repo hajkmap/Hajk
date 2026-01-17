@@ -1015,6 +1015,13 @@ function AttributeEditor(props) {
         visibleIdsRef.current.add(tempId);
 
         vectorLayerRef.current?.changed?.();
+
+        // Emit select-ids to sync table selection state with map selection
+        editBus.emit("attrib:select-ids", {
+          ids: [tempId],
+          source: "map",
+          mode: "replace",
+        });
         editBus.emit("attrib:focus-id", { id: tempId, source: "map" });
       };
 

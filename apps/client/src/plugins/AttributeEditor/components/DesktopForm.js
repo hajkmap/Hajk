@@ -110,6 +110,26 @@ export default function DesktopForm({
     setCurrentPage(0);
   }, [columnFilters, setCurrentPage]);
 
+  // Navigate to the page containing focusedId when it changes (e.g. via focusPrev/focusNext)
+  React.useEffect(() => {
+    if (focusedId == null || isShowingAll) return;
+
+    const rowIndex = visibleFormList.findIndex((r) => r.id === focusedId);
+    if (rowIndex === -1) return;
+
+    const targetPage = Math.floor(rowIndex / rowsPerPage);
+    if (targetPage !== currentPage) {
+      setCurrentPage(targetPage);
+    }
+  }, [
+    focusedId,
+    visibleFormList,
+    rowsPerPage,
+    currentPage,
+    isShowingAll,
+    setCurrentPage,
+  ]);
+
   // Ref for scrolling to selected rows
   const selectedRowRefs = React.useRef(new Map());
 
@@ -803,10 +823,10 @@ export default function DesktopForm({
               }
             >
               <button style={s.btn} onClick={focusPrev}>
-                &larr; Föregående
+                &larr; Föregående objekt
               </button>
               <button style={s.btn} onClick={focusNext}>
-                Nästa &rarr;
+                Nästa objekt&rarr;
               </button>
               <div style={s.spacer} />
               {dirty
