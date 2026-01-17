@@ -47,10 +47,9 @@ function buildVizSet(logicalIds) {
   return set;
 }
 
-// Helper: Convert idLike to canonical id using feature rows
-function toCanonicalId(idLike, rows) {
-  const hit = rows.find((r) => String(r.id) === String(idLike));
-  return hit ? hit.id : idLike;
+// Helper: Convert idLike to canonical id using a pre-built Map (O(1))
+function toCanonicalId(idLike, idMap) {
+  return idMap.get(String(idLike)) ?? idLike;
 }
 
 function AttributeEditor(props) {
@@ -103,6 +102,9 @@ function AttributeEditor(props) {
   const deletedIdsRef = React.useRef(new Set());
   const pendingEditsRef = React.useRef({});
   const pendingAddsRef = React.useRef([]);
+  const pendingAddIdsSetRef = React.useRef(new Set());
+  const pendingDeletedDraftIdsSetRef = React.useRef(new Set());
+  const rowIdMapRef = React.useRef(new Map());
   const featureIndexRef = React.useRef(new Map());
   const graveyardRef = React.useRef(new Map());
   const focusedIdRef = React.useRef(null);
@@ -110,6 +112,16 @@ function AttributeEditor(props) {
 
   const currentServiceIdRef = React.useRef("NONE_ID");
   const [serviceList, setServiceList] = React.useState([]);
+
+  // Keep rowIdMapRef in sync with features for O(1) toCanonicalId lookups
+  React.useEffect(() => {
+    const features = modelState.features || [];
+    const map = new Map();
+    for (const row of features) {
+      map.set(String(row.id), row.id);
+    }
+    rowIdMapRef.current = map;
+  }, [modelState.features]);
 
   const hoveredIdRef = React.useRef(null);
   const tooltipOverlayRef = React.useRef(null);
@@ -292,8 +304,10 @@ function AttributeEditor(props) {
       const vis = visibleIdsRef.current;
       const del = deletedIdsRef.current;
       const edits = pendingEditsRef.current;
-      const adds = pendingAddsRef.current;
       const hov = hoveredIdRef.current;
+      // Use pre-computed Sets for O(1) lookups instead of O(n) array scans
+      const addIds = pendingAddIdsSetRef.current;
+      const deletedDraftIds = pendingDeletedDraftIdsSetRef.current;
 
       const isSelected = aliases.some((k) => sel.has(k));
       const isVisible = aliases.some((k) => vis.has(k));
@@ -306,19 +320,15 @@ function AttributeEditor(props) {
         (k) => edits[k] && Object.keys(edits[k]).length > 0
       );
 
+      // P1 Optimization: O(1) Set.has() instead of O(n) Array.some()
       const isDraft = aliases.some((k) => {
         const numId = typeof k === "number" ? k : Number(k);
-        return (
-          (Number.isFinite(numId) && numId < 0) || adds.some((d) => d.id === k)
-        );
+        return (Number.isFinite(numId) && numId < 0) || addIds.has(k);
       });
 
-      // Check if draft is marked for deletion
+      // P1 Optimization: O(1) Set.has() instead of O(n) Array.some()
       const isDraftDeleted =
-        isDraft &&
-        aliases.some((k) =>
-          adds.some((d) => d.id === k && d.__pending === "delete")
-        );
+        isDraft && aliases.some((k) => deletedDraftIds.has(k));
 
       if (!isVisible && !isSelected && !isHovered) return null;
 
@@ -1100,6 +1110,22 @@ function AttributeEditor(props) {
       deletedIdsRef.current = new Set(del);
       pendingEditsRef.current = st.pendingEdits || {};
       pendingAddsRef.current = st.pendingAdds || [];
+
+      // Build Sets for O(1) lookups in styleFn
+      const adds = st.pendingAdds || [];
+      const addIdsSet = new Set();
+      const deletedDraftIdsSet = new Set();
+      for (const d of adds) {
+        addIdsSet.add(d.id);
+        addIdsSet.add(String(d.id));
+        if (d.__pending === "delete") {
+          deletedDraftIdsSet.add(d.id);
+          deletedDraftIdsSet.add(String(d.id));
+        }
+      }
+      pendingAddIdsSetRef.current = addIdsSet;
+      pendingDeletedDraftIdsSetRef.current = deletedDraftIdsSet;
+
       vectorLayerRef.current?.changed?.();
     });
   }, [model, vectorLayerRef]);
@@ -1207,16 +1233,14 @@ function AttributeEditor(props) {
     const map = props.map;
     if (!map) return;
 
-    // Helper: Get rows for ID lookup
-    const getRows = () => model.getSnapshot?.().features || [];
-
     // Helper: Get current logical ids
+    // Use rowIdMapRef for O(1) lookups
     const getCurrentLogical = () => {
-      const rows = getRows();
+      const idMap = rowIdMapRef.current;
       const current = selectedIdsRef.current || new Set();
       const uniqStr = new Set(Array.from(current).map(String));
       const canon = new Set(
-        Array.from(uniqStr).map((id) => toCanonicalId(id, rows))
+        Array.from(uniqStr).map((id) => toCanonicalId(id, idMap))
       );
       return canon;
     };
@@ -1261,10 +1285,11 @@ function AttributeEditor(props) {
 
       // Multiple features → show picker
       if (hits.length > 1) {
-        const rows = getRows();
+        // Use rowIdMapRef for O(1) lookups
+        const idMap = rowIdMapRef.current;
         const pickerFeatures = hits.map((f) => {
           const rawId = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-          const canonId = toCanonicalId(rawId, rows);
+          const canonId = toCanonicalId(rawId, idMap);
           return {
             id: canonId,
             feature: f,
@@ -1293,7 +1318,8 @@ function AttributeEditor(props) {
       // Single feature (original logic fortsätter...)
       const hit = hits[0];
       const rawId = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
-      const canonId = toCanonicalId(rawId, getRows());
+      // Use rowIdMapRef for O(1) lookup
+      const canonId = toCanonicalId(rawId, rowIdMapRef.current);
 
       editBus.emit("attrib:select-ids", {
         ids: [canonId],
@@ -1422,10 +1448,11 @@ function AttributeEditor(props) {
       if (selectedFeatures.length === 0) return;
 
       // Convert to canonical IDs
-      const rows = model.getSnapshot?.().features || [];
+      // Use rowIdMapRef for O(1) lookups
+      const idMap = rowIdMapRef.current;
       const newIds = selectedFeatures.map((f) => {
         const rawId = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-        return toCanonicalId(rawId, rows);
+        return toCanonicalId(rawId, idMap);
       });
 
       // Always combine with existing selection

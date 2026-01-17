@@ -21,10 +21,9 @@ import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import { editBus } from "../../../buses/editBus";
 import FormListItem from "./FormListItem";
 import useCookieStatus from "../../../hooks/useCookieStatus";
+import { usePagination, SHOW_ALL_VALUE } from "../hooks/usePagination";
 
 const RESIZER_KEY = "ae_df_leftw";
-const ROWS_PER_PAGE_KEY = "ae_rows_per_page";
-const SHOW_ALL_VALUE = -1;
 const SHOW_ALL_WARNING_THRESHOLD = 100;
 const MIN_LEFT = 220; // px
 const MAX_LEFT = 800; // px
@@ -87,17 +86,29 @@ export default function DesktopForm({
   const [pendingCaret, setPendingCaret] = React.useState(null);
   const saveLeftWTimer = React.useRef(null);
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(() => {
-    if (!functionalCookiesOk) return 20;
-    try {
-      const saved = Number(localStorage.getItem(ROWS_PER_PAGE_KEY));
-      return [10, 20, 50, 100, SHOW_ALL_VALUE].includes(saved) ? saved : 20;
-    } catch {
-      return 20;
-    }
+  // Shared pagination hook
+  const {
+    currentPage,
+    setCurrentPage,
+    rowsPerPage,
+    setRowsPerPage,
+    totalRows,
+    totalPages,
+    startIndex,
+    endIndex,
+    paginatedItems: paginatedRows,
+    isShowingAll,
+    showPagination,
+  } = usePagination(visibleFormList, {
+    storageKey: "ae_rows_per_page",
+    defaultPerPage: 20,
+    functionalCookiesOk,
   });
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(0);
+  }, [columnFilters, setCurrentPage]);
 
   // Ref for scrolling to selected rows
   const selectedRowRefs = React.useRef(new Map());
@@ -130,30 +141,6 @@ export default function DesktopForm({
   const clearColumnFilters = React.useCallback(() => {
     setColumnFilters({});
   }, [setColumnFilters]);
-
-  // Calculate pagination
-  const totalRows = visibleFormList.length;
-  const isShowingAll = rowsPerPage === SHOW_ALL_VALUE;
-  const totalPages = isShowingAll ? 1 : Math.ceil(totalRows / rowsPerPage);
-  const startIndex = isShowingAll ? 0 : currentPage * rowsPerPage;
-  const endIndex = isShowingAll
-    ? totalRows
-    : Math.min(startIndex + rowsPerPage, totalRows);
-  const paginatedRows = visibleFormList.slice(startIndex, endIndex);
-  const showPagination = totalRows > 10;
-
-  // Reset to first page when filters change
-  React.useEffect(() => {
-    setCurrentPage(0);
-  }, [columnFilters]);
-
-  // Ensure current page is valid when rowsPerPage changes
-  React.useEffect(() => {
-    const maxPage = Math.max(0, Math.ceil(totalRows / rowsPerPage) - 1);
-    if (currentPage > maxPage) {
-      setCurrentPage(maxPage);
-    }
-  }, [rowsPerPage, totalRows, currentPage]);
 
   // Reset scroll index and viewed row when selection changes
   React.useEffect(() => {
@@ -245,6 +232,7 @@ export default function DesktopForm({
     currentPage,
     handleRowHover,
     handleRowLeave,
+    setCurrentPage,
   ]);
 
   React.useEffect(() => {
@@ -286,14 +274,6 @@ export default function DesktopForm({
       if (saveLeftWTimer.current) clearTimeout(saveLeftWTimer.current);
     };
   }, [leftW]);
-
-  // Save rowsPerPage to localStorage when it changes
-  React.useEffect(() => {
-    if (!functionalCookiesOk) return;
-    try {
-      localStorage.setItem(ROWS_PER_PAGE_KEY, String(rowsPerPage));
-    } catch {}
-  }, [rowsPerPage, functionalCookiesOk]);
 
   React.useEffect(() => {
     if (!focusedFeature) return;
@@ -471,6 +451,18 @@ export default function DesktopForm({
             <>
               <div style={s.spacer} />
               <div style={s.paginationControlsCompact}>
+                <select
+                  value={rowsPerPage}
+                  onChange={handleRowsPerPageChange}
+                  style={s.rowsPerPageSelect}
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value={SHOW_ALL_VALUE}>Alla</option>
+                </select>
+
                 <button
                   style={currentPage === 0 ? s.iconBtnDisabled : s.iconBtn}
                   disabled={currentPage === 0}
@@ -522,18 +514,6 @@ export default function DesktopForm({
                 >
                   <LastPageIcon fontSize="small" />
                 </button>
-
-                <select
-                  value={rowsPerPage}
-                  onChange={handleRowsPerPageChange}
-                  style={s.rowsPerPageSelect}
-                >
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                  <option value={SHOW_ALL_VALUE}>Alla</option>
-                </select>
               </div>
             </>
           )}

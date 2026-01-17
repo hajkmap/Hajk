@@ -16,10 +16,9 @@ import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import { editBus } from "../../../buses/editBus";
 import useCookieStatus from "../../../hooks/useCookieStatus";
 import TableRow from "./TableRow";
+import { usePagination, SHOW_ALL_VALUE } from "../hooks/usePagination";
 
 const DEFAULT_WRAP_CH = 100;
-const ROWS_PER_PAGE_KEY = "ae_rows_per_page";
-const SHOW_ALL_VALUE = -1;
 const SHOW_ALL_WARNING_THRESHOLD = 100;
 const MIN_W = 80; // px
 const MAX_W = 720; // px
@@ -187,17 +186,29 @@ export default function TableMode(props) {
   // State for "show all" confirmation dialog
   const [showAllConfirmOpen, setShowAllConfirmOpen] = React.useState(false);
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(() => {
-    if (!functionalCookiesOk) return 20;
-    try {
-      const saved = Number(localStorage.getItem(ROWS_PER_PAGE_KEY));
-      return [10, 20, 50, 100, SHOW_ALL_VALUE].includes(saved) ? saved : 20;
-    } catch {
-      return 20;
-    }
+  // Shared pagination hook
+  const {
+    currentPage,
+    setCurrentPage,
+    rowsPerPage,
+    setRowsPerPage,
+    totalRows,
+    totalPages,
+    startIndex,
+    endIndex,
+    paginatedItems: paginatedRows,
+    isShowingAll,
+    showPagination,
+  } = usePagination(filteredAndSorted, {
+    storageKey: "ae_rows_per_page",
+    defaultPerPage: 20,
+    functionalCookiesOk,
   });
+
+  // Reset to first page when filters or sort change
+  React.useEffect(() => {
+    setCurrentPage(0);
+  }, [columnFilters, sort, setCurrentPage]);
 
   // Ref for scrolling to selected rows
   const selectedRowRefs = React.useRef(new Map());
@@ -234,30 +245,6 @@ export default function TableMode(props) {
       return {};
     }
   });
-
-  // Calculate pagination
-  const totalRows = filteredAndSorted.length;
-  const isShowingAll = rowsPerPage === SHOW_ALL_VALUE;
-  const totalPages = isShowingAll ? 1 : Math.ceil(totalRows / rowsPerPage);
-  const startIndex = isShowingAll ? 0 : currentPage * rowsPerPage;
-  const endIndex = isShowingAll
-    ? totalRows
-    : Math.min(startIndex + rowsPerPage, totalRows);
-  const paginatedRows = filteredAndSorted.slice(startIndex, endIndex);
-  const showPagination = totalRows > 10;
-
-  // Reset to first page when filters change
-  React.useEffect(() => {
-    setCurrentPage(0);
-  }, [columnFilters, sort]);
-
-  // Ensure current page is valid when rowsPerPage changes
-  React.useEffect(() => {
-    const maxPage = Math.max(0, Math.ceil(totalRows / rowsPerPage) - 1);
-    if (currentPage > maxPage) {
-      setCurrentPage(maxPage);
-    }
-  }, [rowsPerPage, totalRows, currentPage]);
 
   // Reset scroll index and viewed row when selection changes
   React.useEffect(() => {
@@ -327,6 +314,7 @@ export default function TableMode(props) {
     currentScrollIndex,
     handleRowHover,
     handleRowLeave,
+    setCurrentPage,
   ]);
 
   const syncFilterOnCellChange = React.useCallback(
@@ -415,14 +403,6 @@ export default function TableMode(props) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(colWidths));
     } catch {}
   }, [colWidths, STORAGE_KEY, functionalCookiesOk]);
-
-  // Save rowsPerPage to localStorage when it changes
-  React.useEffect(() => {
-    if (!functionalCookiesOk) return;
-    try {
-      localStorage.setItem(ROWS_PER_PAGE_KEY, String(rowsPerPage));
-    } catch {}
-  }, [rowsPerPage, functionalCookiesOk]);
 
   const resizingRef = React.useRef(null); // { key, startX, startW }
 

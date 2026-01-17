@@ -511,6 +511,17 @@ export default function AttributeEditorView({
     const q = searchText.trim().toLowerCase();
     const editingId = tableEditing?.id ?? null;
 
+    // Pre-compute Sets for O(1) filter lookups instead of O(k) array scans
+    const columnFilterSets = {};
+    for (const [key, selectedValues] of Object.entries(columnFilters)) {
+      if (selectedValues && selectedValues.length > 0) {
+        columnFilterSets[key] = new Set(
+          selectedValues.map((v) => (v === "(tom)" ? "" : String(v)))
+        );
+      }
+    }
+    const filterKeys = Object.keys(columnFilterSets);
+
     let rows = allRows.filter((f) => {
       // Always show negative IDs (new/duplicate)
       const isNegativeId = typeof f.id === "number" && f.id < 0;
@@ -534,19 +545,14 @@ export default function AttributeEditorView({
             .includes(q)
         );
 
+      // Use pre-computed Sets for O(1) lookup
       const matchesColumnFilters =
         editingId === f.id
           ? true
-          : Object.entries(columnFilters).every(([key, selectedValues]) => {
-              if (!selectedValues || selectedValues.length === 0) return true;
+          : filterKeys.every((key) => {
+              const filterSet = columnFilterSets[key];
               const cellValue = String(f[key] ?? "");
-
-              // Convert "(tom)" in filter back to "" for comparison
-              const normalizedSelected = selectedValues.map((v) =>
-                v === "(tom)" ? "" : v
-              );
-
-              return normalizedSelected.includes(cellValue);
+              return filterSet.has(cellValue);
             });
 
       return matchesSearch && matchesColumnFilters;
@@ -799,13 +805,16 @@ export default function AttributeEditorView({
     cloneGeometryForDuplicates,
   ]);
 
+  // Separated useEffects to reduce unnecessary re-renders
+  // Effect 1: Update visibleIdsRef when filtered rows change
   React.useEffect(() => {
-    // always: which rows are visible (for dim/visibility-end-filtered)
     visibleIdsRef.current = new Set(
       filteredAndSorted.flatMap((r) => [r.id, String(r.id)])
     );
+  }, [filteredAndSorted, visibleIdsRef]);
 
-    // trigger a re-render when the dependent values change
+  // Effect 2: Update selectedIdsRef and trigger layer re-render when selection changes
+  React.useEffect(() => {
     const tableSel = Array.from(tableSelectedIds);
     const formSel = Array.from(selectedIds);
 
@@ -826,8 +835,6 @@ export default function AttributeEditorView({
 
     vectorLayerRef?.current?.changed?.();
   }, [
-    allRows,
-    filteredAndSorted,
     tableSelectedIds,
     selectedIds,
     focusedId,
