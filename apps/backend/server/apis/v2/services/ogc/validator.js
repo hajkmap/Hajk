@@ -1,6 +1,16 @@
 import { CONSTANTS } from "./constants.js";
 import { logger } from "./logger.js";
 
+// Private IPv4 patterns (module-scope to avoid recreation on each call)
+const PRIVATE_V4_PATTERNS = [
+  /^127\./,
+  /^10\./,
+  /^172\.(1[6-9]|2[0-9]|3[01])\./,
+  /^192\.168\./,
+  /^169\.254\./,
+  /^0\.0\.0\.0$/,
+];
+
 export const Validator = {
   isValidId(id) {
     if (!id) return false;
@@ -30,16 +40,7 @@ export const Validator = {
       // Block private addresses
       const hostname = u.hostname;
 
-      // IPv4
-      const privateV4 = [
-        /^127\./,
-        /^10\./,
-        /^172\.(1[6-9]|2[0-9]|3[01])\./,
-        /^192\.168\./,
-        /^169\.254\./,
-        /^0\.0\.0\.0$/,
-      ];
-      if (privateV4.some((re) => re.test(hostname))) {
+      if (PRIVATE_V4_PATTERNS.some((re) => re.test(hostname))) {
         logger.warn("Private IPv4 address blocked", { url: urlString });
         return false;
       }

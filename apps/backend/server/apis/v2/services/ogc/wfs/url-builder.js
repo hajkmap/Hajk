@@ -23,6 +23,14 @@ export function buildWfsGetFeatureUrl(options) {
     throw new ValidationError("Invalid base URL");
   }
 
+  // Validate WFS version
+  const allowedVersions = Object.values(CONSTANTS.WFS_VERSIONS);
+  if (!allowedVersions.includes(version)) {
+    throw new ValidationError(
+      `Invalid WFS version. Allowed: ${allowedVersions.join(", ")}`
+    );
+  }
+
   const url = new URL(baseUrl);
   const isV2 = version.startsWith("2.");
 
@@ -67,8 +75,29 @@ export function buildWfsGetFeatureUrl(options) {
     const bboxValue = bbox.includes(",EPSG") ? bbox : `${bbox},${srsName}`;
     url.searchParams.set("BBOX", bboxValue);
   }
-  if (filter) url.searchParams.set("FILTER", filter);
-  if (cqlFilter) url.searchParams.set("CQL_FILTER", cqlFilter);
+
+  // Validate and set OGC Filter (must look like XML with Filter element)
+  if (filter) {
+    const trimmed = filter.trim();
+    if (!trimmed.startsWith("<") || !trimmed.endsWith(">")) {
+      throw new ValidationError("Invalid OGC Filter format (must be XML)");
+    }
+    if (!/Filter/i.test(trimmed)) {
+      throw new ValidationError(
+        "Invalid OGC Filter (must contain Filter element)"
+      );
+    }
+    url.searchParams.set("FILTER", filter);
+  }
+
+  // Validate and set CQL Filter (block potential SQL injection patterns)
+  if (cqlFilter) {
+    // Block dangerous SQL patterns that shouldn't appear in CQL
+    if (/;\s*(?:DROP|DELETE|UPDATE|INSERT|ALTER|TRUNCATE)/i.test(cqlFilter)) {
+      throw new ValidationError("Invalid CQL Filter (dangerous pattern)");
+    }
+    url.searchParams.set("CQL_FILTER", cqlFilter);
+  }
 
   return url.toString();
 }

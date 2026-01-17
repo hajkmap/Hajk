@@ -1,6 +1,7 @@
 import ConfigService from "./config.service.js";
 import { logger } from "./ogc/logger.js";
 import { Validator } from "./ogc/validator.js";
+import { CONSTANTS } from "./ogc/constants.js";
 import { pick } from "./ogc/utils/object.js";
 import { fetchWithRetry, ensureNotTooLarge } from "./ogc/utils/http.js";
 import {
@@ -29,6 +30,105 @@ const stripMilliseconds = (value) => {
   return value;
 };
 
+// Helper function to normalize EPSG code format
+const normalizeEpsg = (name) => {
+  if (!name) return undefined;
+  const m = String(name).match(/EPSG[:/]*[:]*([0-9]+)/i);
+  return m ? `EPSG:${m[1]}` : undefined;
+};
+
+// Helper function to add CRS metadata to a FeatureCollection
+const addCrsMetadata = (fc, crs, layerProjection) => {
+  const finalCrs = normalizeEpsg(crs) || "EPSG:3006";
+  fc.crsName = finalCrs;
+  fc.layerProjection = layerProjection || "EPSG:3006";
+
+  const epsgCode = finalCrs.match(/EPSG:(\d+)/)?.[1];
+  if (epsgCode) {
+    fc.crs = {
+      type: "name",
+      properties: { name: `urn:ogc:def:crs:EPSG::${epsgCode}` },
+    };
+  }
+};
+
+// Helper to check if bbox looks like lon/lat coordinates
+const looksLonLatBbox = (bbox) => {
+  if (!Array.isArray(bbox) || bbox.length < 4) return false;
+  const [xmin, ymin, xmax, ymax] = bbox.map(Number);
+  const inLon = Math.abs(xmin) <= 180 && Math.abs(xmax) <= 180;
+  const inLat = Math.abs(ymin) <= 90 && Math.abs(ymax) <= 90;
+  return inLon && inLat;
+};
+
+// Helper to check if coordinates look like projected (not lon/lat)
+const coordsLookProjected = (featureCollection) => {
+  const check = (xy) =>
+    Array.isArray(xy) && xy.length >= 2 && xy[0] > 1e5 && xy[1] > 1e6;
+
+  const scanGeom = (g) => {
+    if (!g) return false;
+    switch (g.type) {
+      case "Point":
+        return check(g.coordinates);
+      case "MultiPoint":
+      case "LineString":
+        return (g.coordinates || []).some(check);
+      case "MultiLineString":
+      case "Polygon":
+        return (g.coordinates || []).flat(1).some(check);
+      case "MultiPolygon":
+        return (g.coordinates || []).flat(2).some(check);
+      case "GeometryCollection":
+        return (g.geometries || []).some(scanGeom);
+      default:
+        return false;
+    }
+  };
+
+  // Sample only first few features for O(1) performance
+  const sample = (featureCollection.features || []).slice(0, 3);
+  for (const f of sample) {
+    if (scanGeom(f.geometry)) return true;
+  }
+  return false;
+};
+
+// Helper to clean milliseconds from date fields (Oracle compatibility)
+const cleanDateFields = (feature) => ({
+  ...feature,
+  properties: Object.fromEntries(
+    Object.entries(feature.properties || {}).map(([key, value]) => [
+      key,
+      stripMilliseconds(value),
+    ])
+  ),
+});
+
+// Helper to format feature IDs for WFS-T based on server type
+const formatFeatureId = (featureId, layer, typeName) => {
+  if (featureId == null) return featureId;
+
+  const idStr = String(featureId);
+
+  // If already in native format (contains : or .), keep as-is
+  if (idStr.includes(":") || idStr.includes(".")) {
+    return idStr;
+  }
+
+  // Detect server type from URL or explicit flag
+  const isGeoServer =
+    layer.serverType === "geoserver" ||
+    layer.url?.toLowerCase().includes("geoserver");
+
+  if (isGeoServer) {
+    return `${typeName}.${featureId}`;
+  }
+
+  // QGIS Server or unknown - return canonical ID as-is
+  return featureId;
+};
+
 /** ===== Internal function: get WFST layer from config ===== */
 async function getWFSTStore({ user = null, washContent = true } = {}) {
   const store = await ConfigService.getLayersStore(user, washContent);
@@ -37,13 +137,16 @@ async function getWFSTStore({ user = null, washContent = true } = {}) {
       originalError: store.error?.message || String(store.error),
     });
   }
-  return store?.wfstlayers || [];
+  const list = store?.wfstlayers || [];
+  // Build Map for O(1) lookup by id
+  const byId = new Map(list.map((l) => [String(l.id), l]));
+  return { list, byId };
 }
 
 /** ===== Public API: listWFSTLayers ===== */
 export async function listWFSTLayers({ fields, user, washContent } = {}) {
   try {
-    const layers = await getWFSTStore({ user, washContent });
+    const { list: layers } = await getWFSTStore({ user, washContent });
     if (!fields) return layers;
 
     const pickFields = fields
@@ -65,8 +168,8 @@ export async function getWFSTLayer({ id, fields, user, washContent } = {}) {
     throw new ValidationError("Invalid layer ID format", { id });
   }
 
-  const layers = await getWFSTStore({ user, washContent });
-  const layer = layers.find((l) => String(l.id) === String(id));
+  const { byId } = await getWFSTStore({ user, washContent });
+  const layer = byId.get(String(id)); // O(1) lookup
   if (!layer) {
     throw new NotFoundError("WFST layer not found", { layerId: id });
   }
@@ -111,8 +214,8 @@ export async function getWFSTFeatures(params) {
   const validatedOffset = Validator.validateOffset(offset);
 
   try {
-    const layers = await getWFSTStore({ user, washContent });
-    const layer = layers.find((l) => String(l.id) === String(id));
+    const { byId } = await getWFSTStore({ user, washContent });
+    const layer = byId.get(String(id)); // O(1) lookup
     if (!layer)
       throw new NotFoundError("WFST layer not found", { layerId: id });
 
@@ -197,72 +300,10 @@ export async function getWFSTFeatures(params) {
           fc.numberReturned = fc.features.length;
         }
 
-        // Normalize EPSG code format
-        const normalizeEpsg = (name) => {
-          if (!name) return undefined;
-          const m = String(name).match(/EPSG[:/]*[:]*([0-9]+)/i);
-          return m ? `EPSG:${m[1]}` : undefined;
-        };
-
-        // Set crsName to requested CRS (normalized)
-        const finalCrs = normalizeEpsg(crs) || "EPSG:3006";
-        fc.crsName = finalCrs;
-
-        // Set crs object for OpenLayers compatibility
-        const epsgCode = finalCrs.match(/EPSG:(\d+)/)?.[1];
-        if (epsgCode) {
-          fc.crs = {
-            type: "name",
-            properties: {
-              name: `urn:ogc:def:crs:EPSG::${epsgCode}`,
-            },
-          };
-        }
-
-        // Store layer's native projection for coordinate transformation
-        fc.layerProjection = layer.projection || "EPSG:3006";
+        // Add CRS metadata
+        addCrsMetadata(fc, crs, layer.projection);
 
         // Clean up inconsistent bbox (lon/lat bbox with projected coords)
-        const looksLonLatBbox = (bbox) => {
-          if (!Array.isArray(bbox) || bbox.length < 4) return false;
-          const [xmin, ymin, xmax, ymax] = bbox.map(Number);
-          const inLon = Math.abs(xmin) <= 180 && Math.abs(xmax) <= 180;
-          const inLat = Math.abs(ymin) <= 90 && Math.abs(ymax) <= 90;
-          return inLon && inLat;
-        };
-
-        const coordsLookProjected = (featureCollection) => {
-          const check = (xy) =>
-            Array.isArray(xy) && xy.length >= 2 && xy[0] > 1e5 && xy[1] > 1e6;
-
-          const scanGeom = (g) => {
-            if (!g) return false;
-            switch (g.type) {
-              case "Point":
-                return check(g.coordinates);
-              case "MultiPoint":
-                return (g.coordinates || []).some(check);
-              case "LineString":
-                return (g.coordinates || []).some(check);
-              case "MultiLineString":
-                return (g.coordinates || []).flat(1).some(check);
-              case "Polygon":
-                return (g.coordinates || []).flat(1).some(check);
-              case "MultiPolygon":
-                return (g.coordinates || []).flat(2).some(check);
-              case "GeometryCollection":
-                return (g.geometries || []).some(scanGeom);
-              default:
-                return false;
-            }
-          };
-
-          for (const f of featureCollection.features || []) {
-            if (scanGeom(f.geometry)) return true;
-          }
-          return false;
-        };
-
         if (fc.bbox && looksLonLatBbox(fc.bbox) && coordsLookProjected(fc)) {
           logger.debug(
             "Removing inconsistent bbox (lon/lat bbox with projected coords)"
@@ -291,19 +332,7 @@ export async function getWFSTFeatures(params) {
     text = await res.text();
     if (res.ok && text.trim().startsWith("<")) {
       const fc = gmlToFeatureCollection(text);
-
-      // Add CRS metadata for GML response
-      fc.crsName = crs;
-      fc.layerProjection = layer.projection || "EPSG:3006";
-
-      const epsgCode = crs.match(/EPSG:(\d+)/)?.[1];
-      if (epsgCode) {
-        fc.crs = {
-          type: "name",
-          properties: { name: `urn:ogc:def:crs:EPSG::${epsgCode}` },
-        };
-      }
-
+      addCrsMetadata(fc, crs, layer.projection);
       return fc;
     }
 
@@ -316,19 +345,7 @@ export async function getWFSTFeatures(params) {
     text = await res.text();
     if (res.ok && text.trim().startsWith("<")) {
       const fc = gmlToFeatureCollection(text);
-
-      // Add CRS metadata for GML2 response
-      fc.crsName = crs;
-      fc.layerProjection = layer.projection || "EPSG:3006";
-
-      const epsgCode = crs.match(/EPSG:(\d+)/)?.[1];
-      if (epsgCode) {
-        fc.crs = {
-          type: "name",
-          properties: { name: `urn:ogc:def:crs:EPSG::${epsgCode}` },
-        };
-      }
-
+      addCrsMetadata(fc, crs, layer.projection);
       return fc;
     }
 
@@ -354,8 +371,8 @@ export async function commitWFSTTransaction(params) {
   }
 
   // Fetch layer configuration
-  const layers = await getWFSTStore({ user, washContent });
-  const layer = layers.find((l) => String(l.id) === String(id));
+  const { byId } = await getWFSTStore({ user, washContent });
+  const layer = byId.get(String(id)); // O(1) lookup
 
   if (!layer) {
     throw new NotFoundError("WFST layer not found", { layerId: id });
@@ -388,51 +405,15 @@ export async function commitWFSTTransaction(params) {
   // Determine effective CRS: prioritize frontend srsName, then layer config, then default
   const effectiveSrsName = srsName || layer.projection || "EPSG:3006";
 
-  // Helper to format feature IDs for WFS-T
-  const formatFeatureId = (featureId) => {
-    if (featureId == null) return featureId;
-
-    const idStr = String(featureId);
-
-    // If already in native format (contains : or .), keep as-is
-    // Examples: "workspace:layer.123", "layer.123", "namespace:feature.456"
-    if (idStr.includes(":") || idStr.includes(".")) {
-      return idStr;
-    }
-
-    // Detect server type from URL or explicit flag
-    const isGeoServer =
-      layer.serverType === "geoserver" ||
-      layer.url?.toLowerCase().includes("geoserver");
-
-    if (isGeoServer) {
-      // GeoServer format: "typename.123" or keep workspace prefix if present
-      // If typeName has workspace prefix (e.g. "goteborg:buildings"), use full prefix
-      return `${typeName}.${featureId}`;
-    }
-
-    // QGIS Server or unknown - return canonical ID as-is
-    return featureId;
-  };
-
   // Format IDs for updates and deletes
   const formattedUpdates = updates.map((feature) => ({
     ...feature,
-    id: formatFeatureId(feature.id),
+    id: formatFeatureId(feature.id, layer, typeName),
   }));
 
-  const formattedDeletes = deletes.map(formatFeatureId);
-
-  // Clean milliseconds from date fields for Oracle compatibility
-  const cleanDateFields = (feature) => ({
-    ...feature,
-    properties: Object.fromEntries(
-      Object.entries(feature.properties || {}).map(([key, value]) => [
-        key,
-        stripMilliseconds(value),
-      ])
-    ),
-  });
+  const formattedDeletes = deletes.map((fid) =>
+    formatFeatureId(fid, layer, typeName)
+  );
 
   const cleanedInserts = inserts.map(cleanDateFields);
   const cleanedUpdates = formattedUpdates.map(cleanDateFields);
@@ -630,17 +611,8 @@ export async function commitWFSTTransaction(params) {
 function isValidGeoJSONGeometry(geom) {
   if (!geom || typeof geom !== "object") return false;
 
-  const validTypes = [
-    "Point",
-    "LineString",
-    "Polygon",
-    "MultiPoint",
-    "MultiLineString",
-    "MultiPolygon",
-    "GeometryCollection",
-  ];
-
-  if (!validTypes.includes(geom.type)) return false;
+  // Use centralized geometry types Set for O(1) lookup
+  if (!CONSTANTS.GEOMETRY_TYPES_SET.has(geom.type)) return false;
 
   // GeometryCollection must have geometries array
   if (geom.type === "GeometryCollection") {

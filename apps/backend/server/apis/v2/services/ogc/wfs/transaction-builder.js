@@ -27,13 +27,15 @@ export function buildWfsTransactionXml(options) {
     ? "http://www.opengis.net/wfs/2.0"
     : "http://www.opengis.net/wfs";
 
-  const [nsPrefix, localName] = typeName.includes(":")
-    ? typeName.split(":")
-    : ["feature", typeName];
+  // Split only on first colon to handle "workspace:schema:layer" correctly
+  const colonIndex = typeName.indexOf(":");
+  const [nsPrefix, localName] =
+    colonIndex !== -1
+      ? [typeName.slice(0, colonIndex), typeName.slice(colonIndex + 1)]
+      : ["feature", typeName];
 
   // Use provided namespace or generate from prefix
-  const namespaceUri =
-    namespace || `http://hajk.se/wfs/${nsPrefix}`;
+  const namespaceUri = namespace || `http://hajk.se/wfs/${nsPrefix}`;
 
   const transaction = {
     "wfs:Transaction": {
@@ -57,8 +59,7 @@ export function buildWfsTransactionXml(options) {
           feature,
           geometryName,
           srsName,
-          gmlNs,
-          nsPrefix
+          gmlNs
         ),
       },
     ]);
@@ -66,6 +67,11 @@ export function buildWfsTransactionXml(options) {
 
   // UPDATE operations
   updates.forEach((feature) => {
+    // Skip updates without valid feature ID
+    if (feature.id == null || feature.id === "") {
+      return;
+    }
+
     const properties = [];
 
     Object.entries(feature.properties || {}).forEach(([key, value]) => {
@@ -111,6 +117,11 @@ export function buildWfsTransactionXml(options) {
 
   // DELETE operations
   deletes.forEach((featureId) => {
+    // Skip deletes without valid feature ID
+    if (featureId == null || featureId === "") {
+      return;
+    }
+
     operations.push([
       "wfs:Delete",
       {
@@ -150,7 +161,7 @@ export function buildWfsTransactionXml(options) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n${xml}`;
 }
 
-function buildFeatureXml(feature, geometryName, srsName, gmlNs, nsPrefix) {
+function buildFeatureXml(feature, geometryName, srsName, gmlNs) {
   const featureObj = {};
 
   Object.entries(feature.properties || {}).forEach(([key, value]) => {
@@ -171,7 +182,26 @@ function buildFeatureXml(feature, geometryName, srsName, gmlNs, nsPrefix) {
 }
 
 function buildGeometryXml(geojson, srsName, gmlNs) {
+  // GeometryCollection uses geometries, not coordinates
+  if (geojson.type === "GeometryCollection") {
+    if (!Array.isArray(geojson.geometries)) {
+      throw new Error("GeometryCollection requires geometries array");
+    }
+    return {
+      "gml:MultiGeometry": {
+        "@_srsName": srsName,
+        "gml:geometryMember": geojson.geometries.map((g) =>
+          buildGeometryXml(g, srsName, gmlNs)
+        ),
+      },
+    };
+  }
+
+  // All other geometry types require coordinates
   const coords = geojson.coordinates;
+  if (!Array.isArray(coords)) {
+    throw new Error(`${geojson.type} requires coordinates array`);
+  }
 
   switch (geojson.type) {
     case "Point":

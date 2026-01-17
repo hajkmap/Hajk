@@ -2,6 +2,9 @@ import { CONSTANTS } from "../constants.js";
 import { UpstreamError } from "../errors.js";
 import { logger } from "../logger.js";
 
+// Status codes that trigger retry (Set for O(1) lookup)
+const RETRY_STATUS_CODES = new Set([502, 503, 504]);
+
 /**
  * Fetch with AbortController timeout.
  */
@@ -37,7 +40,7 @@ export async function fetchWithRetry(url, options = {}, retryCount = 0) {
     const response = await fetchWithTimeout(url, options);
 
     if (
-      [502, 503, 504].includes(response.status) &&
+      RETRY_STATUS_CODES.has(response.status) &&
       retryCount < CONSTANTS.MAX_RETRIES
     ) {
       const delay = CONSTANTS.RETRY_DELAYS[retryCount] || 5000;

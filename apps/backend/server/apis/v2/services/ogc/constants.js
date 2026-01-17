@@ -25,6 +25,19 @@ export const CONSTANTS = {
     "GeometryCollection",
   ],
 
+  // Set version for O(1) lookups (used by .has() instead of .includes())
+  GEOMETRY_TYPES_SET: new Set([
+    "Point",
+    "LineString",
+    "Polygon",
+    "MultiPoint",
+    "MultiLineString",
+    "MultiPolygon",
+    "MultiSurface",
+    "MultiGeometry",
+    "GeometryCollection",
+  ]),
+
   WFS_VERSIONS: {
     V1: "1.1.0",
     V2: "2.0.0",

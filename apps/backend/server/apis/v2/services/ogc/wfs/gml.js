@@ -57,6 +57,7 @@ const nums = (s) =>
 
 const posToCoord = (s) => {
   const n = nums(s);
+  if (n.length < 2) return null;
   return [n[0], n[1]];
 };
 
@@ -71,7 +72,8 @@ const coordsElToCoords = (s) =>
   String(s)
     .trim()
     .split(/\s+/)
-    .map((p) => p.split(",").map(Number));
+    .map((p) => p.split(",").map(Number))
+    .filter((coord) => coord.every((n) => !Number.isNaN(n)));
 
 // Return only the key that actually exists in the object (namespace-agnostisk)
 const keyOf = (obj, localName) =>
@@ -94,9 +96,12 @@ function getProp(obj, localNames) {
 }
 
 function ensureClosed(ring) {
-  if (!Array.isArray(ring) || ring.length === 0) return ring || [];
-  const [fx, fy] = ring[0];
-  const [lx, ly] = ring[ring.length - 1];
+  if (!Array.isArray(ring) || ring.length === 0) return [];
+  const first = ring[0];
+  const last = ring[ring.length - 1];
+  if (!Array.isArray(first) || !Array.isArray(last)) return ring;
+  const [fx, fy] = first;
+  const [lx, ly] = last;
   return fx === lx && fy === ly ? ring : [...ring, ring[0]];
 }
 
@@ -112,7 +117,7 @@ function parseRing(linearRingObj) {
   const pos = getProp(linearRingObj, ["pos"]);
   if (pos) {
     const arr = Array.isArray(pos) ? pos : [pos];
-    return arr.map((p) => posToCoord(asText(p)));
+    return arr.map((p) => posToCoord(asText(p))).filter(Boolean);
   }
 
   return [];
