@@ -58,18 +58,18 @@ const AddView = (props) => {
     ogcSource !== "Ingen";
 
   // Handler to add a segment programmatically
-  const handleAddSegment = () => {
+  const handleAddSegment = React.useCallback(() => {
     if (fixedLengthEnabled && drawingActive) {
       drawModel.addFixedLengthSegment();
     }
-  };
+  }, [fixedLengthEnabled, drawingActive, drawModel]);
 
   // Handler to finish the drawing
-  const handleFinishDrawing = () => {
+  const handleFinishDrawing = React.useCallback(() => {
     if (drawingActive) {
       drawModel.finishDraw();
     }
-  };
+  }, [drawingActive, drawModel]);
 
   return (
     <Grid container>

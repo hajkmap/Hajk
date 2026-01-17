@@ -9,6 +9,64 @@ import MultiPoint from "ol/geom/MultiPoint";
 import LineString from "ol/geom/LineString";
 import { editBus } from "../../../buses/editBus";
 
+// Layer name for AttributeEditor features
+const LAYER_NAME = "attributeeditor";
+
+// Check if a feature matches a given logical ID
+function matchesLogicalId(feat, want) {
+  const a = feat?.getId?.();
+  const b = feat?.get?.("@_fid");
+  const c = feat?.get?.("id");
+  const wantStr = String(want);
+  const A = a != null ? String(a) : null;
+  const B = b != null ? String(b) : null;
+  const C = c != null ? String(c) : null;
+
+  if (A === wantStr || B === wantStr || C === wantStr) return true;
+  if (A && A.endsWith("." + wantStr)) return true;
+  if (B && B.endsWith("." + wantStr)) return true;
+  return false;
+}
+
+// Extract coordinates from feature for node highlighting
+function getFeatureCoordinates(feature) {
+  const geometry = feature.getGeometry();
+  if (!geometry) return [];
+
+  const geometryType = geometry.getType();
+  switch (geometryType) {
+    case "Circle":
+      return fromCircle(geometry, 8).getCoordinates()[0];
+    case "LineString":
+      return geometry.getCoordinates();
+    case "Point":
+      return [geometry.getCoordinates()];
+    case "MultiPolygon":
+      let coords = [];
+      geometry.getCoordinates()[0].forEach((a) => {
+        a.forEach((b) => {
+          coords.push(b);
+        });
+      });
+      return coords;
+    default:
+      // Polygon
+      return geometry.getCoordinates()[0];
+  }
+}
+
+// Get polygon perimeter by creating a LineString from the outer ring
+function getPolygonPerimeter(geometry) {
+  try {
+    const linearRingCoords =
+      geometry?.getLinearRing?.(0)?.getCoordinates?.() || null;
+    if (!linearRingCoords) return 0;
+    return new LineString(linearRingCoords)?.getLength?.() || 0;
+  } catch {
+    return 0;
+  }
+}
+
 /**
  * Custom hook for Sketch ↔ AttributeEditor integration
  *
@@ -47,22 +105,6 @@ const useAttributeEditorIntegration = ({
     if (!map) return;
     const lastPublishRef = { id: null, chan: null };
 
-    //Helper
-    const matchesLogicalId = (feat, want) => {
-      const a = feat?.getId?.();
-      const b = feat?.get?.("@_fid");
-      const c = feat?.get?.("id");
-      const wantStr = String(want);
-      const A = a != null ? String(a) : null;
-      const B = b != null ? String(b) : null;
-      const C = c != null ? String(c) : null;
-
-      if (A === wantStr || B === wantStr || C === wantStr) return true;
-      if (A && A.endsWith("." + wantStr)) return true;
-      if (B && B.endsWith("." + wantStr)) return true;
-      return false;
-    };
-
     // Helper: Canonicalize feature ID
     const toCanonicalId = (idLike) => {
       const rows = props?.model?.getSnapshot?.().features || [];
@@ -88,33 +130,6 @@ const useAttributeEditorIntegration = ({
       return idLike;
     };
 
-    // Helper: Extract coordinates from feature for node highlighting
-    const getFeatureCoordinates = (feature) => {
-      const geometry = feature.getGeometry();
-      if (!geometry) return [];
-
-      const geometryType = geometry.getType();
-      switch (geometryType) {
-        case "Circle":
-          return fromCircle(geometry, 8).getCoordinates()[0];
-        case "LineString":
-          return geometry.getCoordinates();
-        case "Point":
-          return [geometry.getCoordinates()];
-        case "MultiPolygon":
-          let coords = [];
-          geometry.getCoordinates()[0].forEach((a) => {
-            a.forEach((b) => {
-              coords.push(b);
-            });
-          });
-          return coords;
-        default:
-          // Polygon
-          return geometry.getCoordinates()[0];
-      }
-    };
-
     // Helper: Create node highlight style
     const getNodeHighlightStyle = (feature) => {
       return new Style({
@@ -138,18 +153,6 @@ const useAttributeEditorIntegration = ({
     // ============================================================
     // SECTION: Measurement helpers for AttributeEditor features
     // ============================================================
-
-    // Helper: Get polygon perimeter by creating a LineString from the outer ring
-    const getPolygonPerimeter = (geometry) => {
-      try {
-        const linearRingCoords =
-          geometry?.getLinearRing?.(0)?.getCoordinates?.() || null;
-        if (!linearRingCoords) return 0;
-        return new LineString(linearRingCoords)?.getLength?.() || 0;
-      } catch {
-        return 0;
-      }
-    };
 
     // Helper: Calculate measurements for a feature (area, length, perimeter)
     const getFeatureMeasurements = (feature) => {
@@ -449,9 +452,8 @@ const useAttributeEditorIntegration = ({
     };
 
     // ============================================================
-    // SECTION: Constants & shared refs
+    // SECTION: Shared refs
     // ============================================================
-    const LAYER_NAME = "attributeeditor";
     const reg = new Map(); // Map<olLayer, { select, translate, modify, cleanup }>
 
     // ============================================================
@@ -1132,7 +1134,6 @@ const useAttributeEditorIntegration = ({
   // Separate effect to trigger layer redraw when measurement settings change
   React.useEffect(() => {
     if (!map) return;
-    const LAYER_NAME = "attributeeditor";
 
     // Find AttributeEditor layer and trigger redraw
     const layers = map.getLayers?.()?.getArray?.() || [];

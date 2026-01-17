@@ -407,71 +407,82 @@ const SketchView = (props) => {
 
   const uiDisabled = isSaving || (ogcSource && ogcSource !== "Ingen");
 
-  const handleOgcSourceChange = (newOgcSourceTitle) => {
-    if (isSaving) return;
+  const handleOgcSourceChange = React.useCallback(
+    (newOgcSourceTitle) => {
+      if (isSaving) return;
 
-    const selectedService = serviceList.find(
-      (s) => (s.title || s.id) === newOgcSourceTitle
-    );
-    const serviceId = selectedService?.id || null;
+      const selectedService = serviceList.find(
+        (s) => (s.title || s.id) === newOgcSourceTitle
+      );
+      const serviceId = selectedService?.id || null;
 
-    // Check if user is trying to select a service (not "Ingen")
-    const isSelectingService = newOgcSourceTitle !== "Ingen";
+      // Check if user is trying to select a service (not "Ingen")
+      const isSelectingService = newOgcSourceTitle !== "Ingen";
 
-    // If user selects a service AND there are drawn objects, show warning
-    if (isSelectingService && ogcSource === "Ingen") {
-      const drawingCount = getDrawnFeaturesCount();
+      // If user selects a service AND there are drawn objects, show warning
+      if (isSelectingService && ogcSource === "Ingen") {
+        const drawingCount = getDrawnFeaturesCount();
 
-      if (drawingCount > 0) {
-        // Show warning dialog instead of switching directly
-        setDrawingsWarningDialog({
-          open: true,
-          targetService: { title: newOgcSourceTitle, id: serviceId },
-          drawingCount: drawingCount,
-        });
-        return; // Cancel the switch until user confirms
+        if (drawingCount > 0) {
+          // Show warning dialog instead of switching directly
+          setDrawingsWarningDialog({
+            open: true,
+            targetService: { title: newOgcSourceTitle, id: serviceId },
+            drawingCount: drawingCount,
+          });
+          return; // Cancel the switch until user confirms
+        }
       }
-    }
 
-    // Logic for unsaved changes in AttributeEditor
-    if (hasUnsaved) {
-      editBus.emit("edit:service-switch-requested", {
-        source: "sketch",
-        targetLabel: newOgcSourceTitle,
-        targetId: serviceId,
-      });
-      return;
-    }
+      // Logic for unsaved changes in AttributeEditor
+      if (hasUnsaved) {
+        editBus.emit("edit:service-switch-requested", {
+          source: "sketch",
+          targetLabel: newOgcSourceTitle,
+          targetId: serviceId,
+        });
+        return;
+      }
 
-    // Continue with switch
-    props.setPluginSettings(
-      newOgcSourceTitle === "Ingen"
-        ? { title: "Rita", color: PLUGIN_COLORS.default }
-        : {
-            title: `Redigerar ${newOgcSourceTitle}`,
-            color: PLUGIN_COLORS.warning,
-          }
-    );
+      // Continue with switch
+      props.setPluginSettings(
+        newOgcSourceTitle === "Ingen"
+          ? { title: "Rita", color: PLUGIN_COLORS.default }
+          : {
+              title: `Redigerar ${newOgcSourceTitle}`,
+              color: PLUGIN_COLORS.warning,
+            }
+      );
 
-    if (newOgcSourceTitle === "Ingen") {
-      editBus.emit("edit:service-cleared", { source: "sketch" });
-    } else {
-      editBus.emit("edit:service-selected", {
-        source: "sketch",
-        id: serviceId,
-        layerId: selectedService?.layers?.[0]?.id || "",
-        title: newOgcSourceTitle,
-        color: PLUGIN_COLORS.warning,
-      });
+      if (newOgcSourceTitle === "Ingen") {
+        editBus.emit("edit:service-cleared", { source: "sketch" });
+      } else {
+        editBus.emit("edit:service-selected", {
+          source: "sketch",
+          id: serviceId,
+          layerId: selectedService?.layers?.[0]?.id || "",
+          title: newOgcSourceTitle,
+          color: PLUGIN_COLORS.warning,
+        });
 
-      // Open AttributeEditor plugin window when a service is selected
-      globalObserver.publish("attributeeditor.showWindow", {
-        hideOtherPluginWindows: false, // Keep Sketch window open
-        runCallback: true,
-      });
-    }
-    setOgcSource(newOgcSourceTitle);
-  };
+        // Open AttributeEditor plugin window when a service is selected
+        globalObserver.publish("attributeeditor.showWindow", {
+          hideOtherPluginWindows: false, // Keep Sketch window open
+          runCallback: true,
+        });
+      }
+      setOgcSource(newOgcSourceTitle);
+    },
+    [
+      isSaving,
+      serviceList,
+      ogcSource,
+      getDrawnFeaturesCount,
+      hasUnsaved,
+      props,
+      globalObserver,
+    ]
+  );
 
   // Add callback to handle user's choice in dialog
   const handleConfirmServiceSwitchWithDrawings = React.useCallback(() => {

@@ -5,6 +5,14 @@ import kinks from "@turf/kinks";
 import { Circle, Fill, Stroke, Style } from "ol/style";
 import { editBus } from "../../../buses/editBus";
 
+// Geometry types that support self-intersection validation
+const VALIDATABLE_TYPES = Object.freeze([
+  "LineString",
+  "MultiLineString",
+  "Polygon",
+  "MultiPolygon",
+]);
+
 /**
  * Custom hook for geometry validation (self-intersection detection)
  * Validates geometries when drawn or edited, showing warnings for self-intersecting polygons/lines
@@ -32,13 +40,7 @@ const useGeometryValidation = ({
 
         const geomType = geom.getType();
         // Only validate LineString, MultiLineString, Polygon and MultiPolygon geometries
-        const validatableTypes = [
-          "LineString",
-          "MultiLineString",
-          "Polygon",
-          "MultiPolygon",
-        ];
-        if (!validatableTypes.includes(geomType)) return;
+        if (!VALIDATABLE_TYPES.includes(geomType)) return;
 
         const source = layer?.getSource?.();
         if (!source) return;

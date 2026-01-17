@@ -24,8 +24,14 @@ const OGCView = ({
 }) => {
   const activity = model?.getActivityFromId?.(id);
 
-  const onFocus = () => handleFocus && handleFocus(focusKey, false);
-  const onBlur = () => handleFocus && handleFocus(focusKey, true);
+  const onFocus = React.useCallback(
+    () => handleFocus && handleFocus(focusKey, false),
+    [handleFocus, focusKey]
+  );
+  const onBlur = React.useCallback(
+    () => handleFocus && handleFocus(focusKey, true),
+    [handleFocus, focusKey]
+  );
 
   const options = React.useMemo(() => {
     return [
@@ -37,14 +43,14 @@ const OGCView = ({
     ];
   }, [serviceList]);
 
-  const handleOpenAttributeEditor = () => {
+  const handleOpenAttributeEditor = React.useCallback(() => {
     if (globalObserver) {
       globalObserver.publish("attributeeditor.showWindow", {
         hideOtherPluginWindows: false, // Keep Sketch window open
         runCallback: true,
       });
     }
-  };
+  }, [globalObserver]);
 
   return (
     <Grid container spacing={2} sx={{ mt: 1 }}>
