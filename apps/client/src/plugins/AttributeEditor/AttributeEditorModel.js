@@ -617,7 +617,7 @@ export default class AttributeEditorModel {
       try {
         fn();
       } catch (e) {
-        /* eslint-disable no-empty */
+        console.warn("AttributeEditorModel: listener error", e);
       }
     });
   }

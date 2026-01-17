@@ -1,5 +1,23 @@
 import React from "react";
 
+// Helper
+function makeRowPreview(row, FIELD_META) {
+  const keys = FIELD_META.map((m) => m.key);
+  const contentKeys = keys.filter(
+    (k) => !["id", "geoid", "oracle_geoid"].includes(k)
+  );
+  const parts = [];
+  if (row.id != null && row.id !== "") parts.push(String(row.id));
+  for (const k of contentKeys) {
+    const v = row[k];
+    if (v != null && v !== "") {
+      parts.push(String(v));
+      if (parts.length >= 5) break;
+    }
+  }
+  return parts.join(" • ");
+}
+
 const FormListItem = ({
   row,
   idx,
@@ -18,23 +36,6 @@ const FormListItem = ({
   isViewedRow,
 }) => {
   const [isHovering, setIsHovering] = React.useState(false);
-
-  const makeRowPreview = (row, FIELD_META) => {
-    const keys = FIELD_META.map((m) => m.key);
-    const contentKeys = keys.filter(
-      (k) => !["id", "geoid", "oracle_geoid"].includes(k)
-    );
-    const parts = [];
-    if (row.id != null && row.id !== "") parts.push(String(row.id));
-    for (const k of contentKeys) {
-      const v = row[k];
-      if (v != null && v !== "") {
-        parts.push(String(v));
-        if (parts.length >= 5) break;
-      }
-    }
-    return parts.join(" • ");
-  };
 
   const status = isPendingDelete
     ? "delete"

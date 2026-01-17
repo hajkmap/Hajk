@@ -23,15 +23,24 @@ export function computeIdsToMarkForDelete(
   return ids.filter((id) => !tablePendingDeletes?.has?.(id));
 }
 
-export function getNextGeoidSeed(rows) {
-  const nums = rows
-    .map((r) => Number(r.geoid))
-    .filter((n) => Number.isFinite(n));
-  return (nums.length ? Math.max(...nums) : 0) + 1;
-}
-
 export function isMissingValue(v) {
   return v == null || v === "";
+}
+
+/**
+ * Determines if a value should be rendered as a multiline textarea.
+ * Checks for newlines, long text, or long tokens (e.g., URLs).
+ */
+export function autoIsMultiline(val, meta) {
+  const s = String(val ?? "");
+  if (!s) return false;
+  if (s.includes("\n")) return true;
+  const limit = meta.wrapCh ?? 100;
+  if (s.length >= limit) return true;
+  const hasLongToken = s
+    .split(/\s+/)
+    .some((tok) => tok.length >= Math.max(30, Math.floor(limit * 0.6)));
+  return hasLongToken;
 }
 
 export function renderTableCellDisplay({

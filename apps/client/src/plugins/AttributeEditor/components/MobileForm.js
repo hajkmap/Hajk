@@ -8,7 +8,11 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import DescriptionIcon from "@mui/icons-material/Description";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
-import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
+import {
+  getIdsForDeletion,
+  isMissingValue,
+  autoIsMultiline,
+} from "../helpers/helpers";
 import { editBus } from "../../../buses/editBus";
 
 export default function MobileForm({
@@ -64,21 +68,9 @@ export default function MobileForm({
     ).length;
   }, [columnFilters]);
 
-  const clearColumnFilters = () => {
+  const clearColumnFilters = React.useCallback(() => {
     setColumnFilters({});
-  };
-
-  function autoIsMultiline(val, meta) {
-    const sVal = String(val ?? "");
-    if (!sVal) return false;
-    if (sVal.includes("\n")) return true;
-    const limit = meta.wrapCh ?? 60;
-    if (sVal.length >= limit) return true;
-    const hasLongToken = sVal
-      .split(/\s+/)
-      .some((tok) => tok.length >= Math.max(30, Math.floor(limit * 0.6)));
-    return hasLongToken;
-  }
+  }, [setColumnFilters]);
 
   const handleDeleteClick = () => {
     const ids = getIdsForDeletion(selectedIds, focusedId);

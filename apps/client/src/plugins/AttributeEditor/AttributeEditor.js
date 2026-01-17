@@ -18,6 +18,41 @@ import Overlay from "ol/Overlay";
 import DragBox from "ol/interaction/DragBox";
 import { platformModifierKeyOnly } from "ol/events/condition";
 
+const TOOLTIP_EXCLUDE_KEYS = new Set([
+  "geometry",
+  "USER_DRAWN",
+  "DRAW_METHOD",
+  "EDIT_ACTIVE",
+  "__geom__",
+  "__pending",
+  "__idx",
+  "__ae_style_delegate",
+  "TEXT_SETTINGS",
+  "@_fid",
+]);
+
+// Helper: Find Sketch layer by name
+function getSketchLayer(map) {
+  const layers = map?.getLayers?.()?.getArray?.() || [];
+  return layers.find((lyr) => lyr?.get?.("name") === "pluginSketch") || null;
+}
+
+// Helper: Build set with both numeric and string versions of IDs
+function buildVizSet(logicalIds) {
+  const set = new Set();
+  logicalIds.forEach((x) => {
+    set.add(x);
+    set.add(String(x));
+  });
+  return set;
+}
+
+// Helper: Convert idLike to canonical id using feature rows
+function toCanonicalId(idLike, rows) {
+  const hit = rows.find((r) => String(r.id) === String(idLike));
+  return hit ? hit.id : idLike;
+}
+
 function AttributeEditor(props) {
   const programmaticSketchOpsRef = React.useRef(new WeakSet());
   const [fieldMetaLocal, setFieldMetaLocal] = React.useState([]);
@@ -333,25 +368,11 @@ function AttributeEditor(props) {
           if (coord) {
             const props = feature.getProperties();
 
-            // Filter out internal/technical fields and object properties
-            const excludeKeys = [
-              "geometry",
-              "USER_DRAWN",
-              "DRAW_METHOD",
-              "EDIT_ACTIVE",
-              "__geom__",
-              "__pending",
-              "__idx",
-              "__ae_style_delegate",
-              "TEXT_SETTINGS",
-              "@_fid",
-            ];
-
             const displayProps = [];
 
             Object.entries(props).forEach(([key, value]) => {
               if (
-                excludeKeys.includes(key) ||
+                TOOLTIP_EXCLUDE_KEYS.has(key) ||
                 key.startsWith("_") ||
                 key.startsWith("__") ||
                 value == null ||
@@ -869,13 +890,6 @@ function AttributeEditor(props) {
     };
   }, [props.map]);
 
-  // Find Sketch layer
-  function getSketchLayer(map) {
-    const layers = map.getLayers().getArray?.() || [];
-    // Sketch layer name: "pluginSketch"
-    return layers.find((lyr) => lyr?.get?.("name") === "pluginSketch") || null;
-  }
-
   React.useEffect(() => {
     const map = props.map;
     if (!map) return;
@@ -1105,7 +1119,7 @@ function AttributeEditor(props) {
       const src = sketchLayer?.getSource?.();
       if (!src) return;
 
-      // Helperr
+      // Helper
       const getDraftMap = (st) => new Map(st.pendingAdds.map((d) => [d.id, d]));
       const prevDrafts = getDraftMap(prev);
       const nextDrafts = getDraftMap(next);
@@ -1193,28 +1207,17 @@ function AttributeEditor(props) {
     const map = props.map;
     if (!map) return;
 
-    // Helper: Convert idLike to canonical id
-    const toCanonicalId = (idLike) => {
-      const rows = model.getSnapshot?.().features || [];
-      const hit = rows.find((r) => String(r.id) === String(idLike));
-      return hit ? hit.id : idLike;
-    };
-
-    // Helper: Build set of logical ids
-    const buildVizSet = (logicalIds) => {
-      const set = new Set();
-      logicalIds.forEach((x) => {
-        set.add(x);
-        set.add(String(x));
-      });
-      return set;
-    };
+    // Helper: Get rows for ID lookup
+    const getRows = () => model.getSnapshot?.().features || [];
 
     // Helper: Get current logical ids
     const getCurrentLogical = () => {
+      const rows = getRows();
       const current = selectedIdsRef.current || new Set();
       const uniqStr = new Set(Array.from(current).map(String));
-      const canon = new Set(Array.from(uniqStr).map(toCanonicalId));
+      const canon = new Set(
+        Array.from(uniqStr).map((id) => toCanonicalId(id, rows))
+      );
       return canon;
     };
 
@@ -1258,9 +1261,10 @@ function AttributeEditor(props) {
 
       // Multiple features → show picker
       if (hits.length > 1) {
+        const rows = getRows();
         const pickerFeatures = hits.map((f) => {
           const rawId = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-          const canonId = toCanonicalId(rawId);
+          const canonId = toCanonicalId(rawId, rows);
           return {
             id: canonId,
             feature: f,
@@ -1289,7 +1293,7 @@ function AttributeEditor(props) {
       // Single feature (original logic fortsätter...)
       const hit = hits[0];
       const rawId = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
-      const canonId = toCanonicalId(rawId);
+      const canonId = toCanonicalId(rawId, getRows());
 
       editBus.emit("attrib:select-ids", {
         ids: [canonId],
@@ -1349,16 +1353,6 @@ function AttributeEditor(props) {
   const handleFeaturePickerSelect = React.useCallback(
     (selectedIds) => {
       if (selectedIds.length === 0) return;
-
-      // Build viz set
-      const buildVizSet = (logicalIds) => {
-        const set = new Set();
-        logicalIds.forEach((x) => {
-          set.add(x);
-          set.add(String(x));
-        });
-        return set;
-      };
 
       // Update selection
       selectedIdsRef.current = buildVizSet(selectedIds);
@@ -1428,15 +1422,10 @@ function AttributeEditor(props) {
       if (selectedFeatures.length === 0) return;
 
       // Convert to canonical IDs
-      const toCanonicalId = (idLike) => {
-        const rows = model.getSnapshot?.().features || [];
-        const hit = rows.find((r) => String(r.id) === String(idLike));
-        return hit ? hit.id : idLike;
-      };
-
+      const rows = model.getSnapshot?.().features || [];
       const newIds = selectedFeatures.map((f) => {
         const rawId = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-        return toCanonicalId(rawId);
+        return toCanonicalId(rawId, rows);
       });
 
       // Always combine with existing selection
@@ -1450,16 +1439,6 @@ function AttributeEditor(props) {
         });
       }
       const finalIds = Array.from(new Set([...existingIds, ...newIds]));
-
-      // Build viz set
-      const buildVizSet = (logicalIds) => {
-        const set = new Set();
-        logicalIds.forEach((x) => {
-          set.add(x);
-          set.add(String(x));
-        });
-        return set;
-      };
 
       // Update selection
       selectedIdsRef.current = buildVizSet(finalIds);
@@ -1571,13 +1550,13 @@ function AttributeEditor(props) {
     props.options?.maxzoom,
   ]);
 
-  const updateCustomProp = (prop, value) => {
+  const updateCustomProp = React.useCallback((prop, value) => {
     setUi((prev) => ({ ...prev, [prop]: value }));
-  };
+  }, []);
 
-  const panelHeaderButtonCallback = () => {
+  const panelHeaderButtonCallback = React.useCallback(() => {
     console.log("You just clicked the panel-header button!");
-  };
+  }, []);
 
   return (
     <>

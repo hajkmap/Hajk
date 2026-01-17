@@ -11,12 +11,23 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import DescriptionIcon from "@mui/icons-material/Description";
-import { getIdsForDeletion, isMissingValue } from "../helpers/helpers";
+import {
+  getIdsForDeletion,
+  isMissingValue,
+  autoIsMultiline,
+} from "../helpers/helpers";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import { editBus } from "../../../buses/editBus";
 import FormListItem from "./FormListItem";
 import useCookieStatus from "../../../hooks/useCookieStatus";
+
+const RESIZER_KEY = "ae_df_leftw";
+const ROWS_PER_PAGE_KEY = "ae_rows_per_page";
+const SHOW_ALL_VALUE = -1;
+const SHOW_ALL_WARNING_THRESHOLD = 100;
+const MIN_LEFT = 220; // px
+const MAX_LEFT = 800; // px
 
 export default function DesktopForm({
   s,
@@ -59,13 +70,6 @@ export default function DesktopForm({
   app,
   exportToExcel,
 }) {
-  const RESIZER_KEY = "ae_df_leftw";
-  const ROWS_PER_PAGE_KEY = "ae_rows_per_page";
-  const SHOW_ALL_VALUE = -1;
-  const SHOW_ALL_WARNING_THRESHOLD = 100;
-  const MIN_LEFT = 220; // px
-  const MAX_LEFT = 800; // px
-
   const { functionalCookiesOk } = useCookieStatus(app.globalObserver);
 
   const [leftW, setLeftW] = React.useState(() => {
@@ -123,9 +127,9 @@ export default function DesktopForm({
     ).length;
   }, [columnFilters]);
 
-  const clearColumnFilters = () => {
+  const clearColumnFilters = React.useCallback(() => {
     setColumnFilters({});
-  };
+  }, [setColumnFilters]);
 
   // Calculate pagination
   const totalRows = visibleFormList.length;
@@ -327,18 +331,6 @@ export default function DesktopForm({
     }
     setPendingCaret(null);
   }, [pendingCaret]);
-
-  function autoIsMultiline(val, meta) {
-    const s = String(val ?? "");
-    if (!s) return false;
-    if (s.includes("\n")) return true; // line break
-    const limit = meta.wrapCh ?? 100; // long text
-    if (s.length >= limit) return true;
-    const longToken = s
-      .split(/\s+/)
-      .some((tok) => tok.length >= Math.max(30, Math.floor(limit * 0.6)));
-    return longToken; // e.g. long URL
-  }
 
   const handleDeleteClick = () => {
     const ids = getIdsForDeletion(selectedIds, focusedId);

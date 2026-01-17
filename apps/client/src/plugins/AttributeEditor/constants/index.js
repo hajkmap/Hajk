@@ -15,7 +15,7 @@ export const OGC_SOURCES = Object.freeze([
   { id: "wfs_trad", type: "WFS", label: "Träd" },
 ]);
 
-export const PLUGIN_COLORS = {
+export const PLUGIN_COLORS = Object.freeze({
   default: "#4a90e2",
   warning: "#ff5420ff",
-};
+});

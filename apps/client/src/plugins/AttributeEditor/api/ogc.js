@@ -8,8 +8,10 @@ export function createOgcApi(baseUrl) {
   };
 
   return {
-    async fetchWfstList(fields = "id,caption") {
-      const res = await fetch(`${base}/ogc/wfst${pickFields(fields)}`);
+    async fetchWfstList(fields = "id,caption", { signal } = {}) {
+      const res = await fetch(`${base}/ogc/wfst${pickFields(fields)}`, {
+        signal,
+      });
       if (!res.ok) throw new Error(`WFST-lista misslyckades (${res.status})`);
       const json = await res.json();
       let items = [];
@@ -19,8 +21,8 @@ export function createOgcApi(baseUrl) {
       return items;
     },
 
-    async getServiceMeta(id) {
-      const res = await fetch(`${base}/ogc/wfst/${id}`);
+    async getServiceMeta(id, { signal } = {}) {
+      const res = await fetch(`${base}/ogc/wfst/${id}`, { signal });
       if (!res.ok) throw new Error(`Failed to fetch metadata (${res.status})`);
       const layer = await res.json();
       return {
@@ -32,9 +34,13 @@ export function createOgcApi(baseUrl) {
       };
     },
 
-    async fetchWfst(id, fields /* = undefined */) {
+    async fetchWfstMeta(id, { signal } = {}) {
+      return this.getServiceMeta(id, { signal });
+    },
+
+    async fetchWfst(id, fields, { signal } = {}) {
       const url = `${base}/ogc/wfst/${id}${pickFields(fields)}`;
-      const res = await fetch(url);
+      const res = await fetch(url, { signal });
       if (!res.ok) throw new Error(`WFST get misslyckades (${res.status})`);
       return res.json();
     },
@@ -83,8 +89,8 @@ export function createOgcApi(baseUrl) {
       return data;
     },
 
-    async commitWfstTransaction(layerId, transaction) {
-      const url = `${baseUrl}/ogc/wfst/${layerId}/transaction`;
+    async commitWfstTransaction(layerId, transaction, { signal } = {}) {
+      const url = `${base}/ogc/wfst/${layerId}/transaction`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -92,6 +98,7 @@ export function createOgcApi(baseUrl) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(transaction),
+        signal,
       });
 
       if (!response.ok) {

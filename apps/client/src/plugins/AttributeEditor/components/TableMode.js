@@ -17,6 +17,13 @@ import { editBus } from "../../../buses/editBus";
 import useCookieStatus from "../../../hooks/useCookieStatus";
 import TableRow from "./TableRow";
 
+const DEFAULT_WRAP_CH = 100;
+const ROWS_PER_PAGE_KEY = "ae_rows_per_page";
+const SHOW_ALL_VALUE = -1;
+const SHOW_ALL_WARNING_THRESHOLD = 100;
+const MIN_W = 80; // px
+const MAX_W = 720; // px
+
 const ColumnFilter = React.memo(function ColumnFilter({
   s,
   columnKey,
@@ -38,6 +45,12 @@ const ColumnFilter = React.memo(function ColumnFilter({
       : placement === "left"
         ? { right: 0, left: "auto", transform: "none" }
         : { left: "50%", right: "auto", transform: "translateX(-50%)" };
+
+  // O(1) lookup
+  const selectedSet = React.useMemo(
+    () => new Set(selectedValues),
+    [selectedValues]
+  );
 
   const query = q.trim().toLowerCase();
   const filtered = query
@@ -84,7 +97,7 @@ const ColumnFilter = React.memo(function ColumnFilter({
       <div style={s.filterListScroll}>
         {list.map((value) => {
           const str = String(value ?? "");
-          const checked = selectedValues.includes(value);
+          const checked = selectedSet.has(value);
           return (
             <label key={str} style={s.filterCheckbox} title={str}>
               <input
@@ -165,12 +178,6 @@ export default function TableMode(props) {
     exportToExcel,
   } = props;
 
-  const DEFAULT_WRAP_CH = 100;
-
-  const ROWS_PER_PAGE_KEY = "ae_rows_per_page";
-  const SHOW_ALL_VALUE = -1;
-  const SHOW_ALL_WARNING_THRESHOLD = 100;
-
   const { functionalCookiesOk } = useCookieStatus(app.globalObserver);
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
@@ -212,9 +219,6 @@ export default function TableMode(props) {
       ...prev,
       [key]: { ...(prev[key] || {}), showAll: val },
     }));
-
-  const MIN_W = 80; // px
-  const MAX_W = 720; // px
 
   const STORAGE_KEY = React.useMemo(
     () => `ae_colwidths_${serviceId}`,

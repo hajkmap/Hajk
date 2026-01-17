@@ -4,6 +4,8 @@ import {
   renderTableCellDisplay,
 } from "../helpers/helpers";
 
+const DEFAULT_WRAP_CH = 100;
+
 const TableRow = ({
   row,
   idx,
@@ -201,7 +203,6 @@ const TableRow = ({
         };
 
         const isDeletedRow = row.__pending === "delete";
-        const DEFAULT_WRAP_CH = 100;
         const wrapCh = meta.wrapCh ?? DEFAULT_WRAP_CH;
         const editingValue = effectiveValue ?? "";
         const useTextarea = shouldUseTextarea(meta, editingValue);

@@ -24,6 +24,10 @@ import { pickPreferredId } from "./helpers/helpers";
 import { useSnackbar } from "notistack";
 import GeoJSON from "ol/format/GeoJSON";
 
+function normalize(v) {
+  return v == null ? "" : v;
+}
+
 export default function AttributeEditorView({
   state,
   controller,
@@ -1753,10 +1757,6 @@ export default function AttributeEditorView({
     // Update previousPendingAddsRef for next time
     previousPendingAddsRef.current = existingDraftIds;
   }, [pendingAdds, draftBaselineRef, vectorLayerRef, featureIndexRef]);
-
-  function normalize(v) {
-    return v == null ? "" : v;
-  }
 
   function selectAllVisible() {
     if (ui.mode === "table") {
