@@ -46,6 +46,7 @@ const TOOLTIP_EXCLUDE_KEYS = new Set([
   "__ae_style_delegate",
   "TEXT_SETTINGS",
   "@_fid",
+  "SKETCH_ATTRIBUTEEDITOR",
 ]);
 
 /**
@@ -170,6 +171,7 @@ function AttributeEditor(props) {
   const pendingDeletedDraftIdsSetRef = React.useRef(new Set());
   const rowIdMapRef = React.useRef(new Map());
   const featureIndexRef = React.useRef(new Map());
+  const featureAliasesRef = React.useRef(new Map()); // Pre-computed aliases for O(1) lookup in styleFn
   const graveyardRef = React.useRef(new Map());
   const focusedIdRef = React.useRef(null);
   const draftBaselineRef = React.useRef(new Map());
@@ -361,7 +363,8 @@ function AttributeEditor(props) {
   const styleFn = React.useCallback(
     (feature) => {
       const raw = getFeatureId(feature);
-      const aliases = idAliases(raw);
+      // O(1) lookup from pre-computed cache instead of computing aliases every render
+      const aliases = featureAliasesRef.current.get(raw) || idAliases(raw);
 
       const sel = selectedIdsRef.current;
       const vis = visibleIdsRef.current;
@@ -801,12 +804,17 @@ function AttributeEditor(props) {
 
         // Reset index and visibility set
         featureIndexRef.current.clear();
+        featureAliasesRef.current.clear();
         visibleIdsRef.current = new Set();
 
         // Index all features and make them visible initially (both num & str)
+        // Pre-compute aliases once here for O(1) lookup in styleFn
         features.forEach((f) => {
           const raw = getFeatureId(f);
           const aliases = idAliases(raw);
+
+          // Store pre-computed aliases for this feature (keyed by raw id)
+          featureAliasesRef.current.set(raw, aliases);
 
           for (const k of aliases) {
             featureIndexRef.current.set(k, f);
@@ -1033,6 +1041,8 @@ function AttributeEditor(props) {
         draftBaselineRef.current.set(tempId, baseline);
 
         featureIndexRef.current.set(tempId, f);
+        // Pre-compute aliases for the new draft feature
+        featureAliasesRef.current.set(tempId, idAliases(tempId));
         graveyardRef.current.delete(tempId);
 
         // Remove from Sketch layer and add to AE layer
@@ -1095,6 +1105,7 @@ function AttributeEditor(props) {
         graveyardRef.current.set(fid, f);
         limitMapSize(graveyardRef.current, MAX_GRAVEYARD_SIZE);
         featureIndexRef.current.delete(fid);
+        featureAliasesRef.current.delete(fid);
         selectedIdsRef.current.delete(fid);
         visibleIdsRef.current.delete(fid);
 
@@ -1211,6 +1222,7 @@ function AttributeEditor(props) {
               src.removeFeature(f);
             } catch {}
             featureIndexRef.current.delete(id);
+            featureAliasesRef.current.delete(id);
             graveyardRef.current.set(id, f);
             limitMapSize(graveyardRef.current, MAX_GRAVEYARD_SIZE);
           }
@@ -1230,6 +1242,7 @@ function AttributeEditor(props) {
               src.removeFeature(f);
             } catch {}
             featureIndexRef.current.delete(id);
+            featureAliasesRef.current.delete(id);
             graveyardRef.current.set(id, f);
             limitMapSize(graveyardRef.current, MAX_GRAVEYARD_SIZE);
           }
@@ -1249,6 +1262,7 @@ function AttributeEditor(props) {
               src.addFeature(f);
             } catch {}
             featureIndexRef.current.set(id, f);
+            featureAliasesRef.current.set(id, idAliases(id));
             graveyardRef.current.delete(id);
           }
         }
@@ -1274,6 +1288,7 @@ function AttributeEditor(props) {
               src.removeFeature(f);
             } catch {}
             featureIndexRef.current.delete(id);
+            featureAliasesRef.current.delete(id);
           }
         }
       });

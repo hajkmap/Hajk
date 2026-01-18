@@ -22,6 +22,7 @@ import { editBus } from "../../../buses/editBus";
 import FormListItem from "./FormListItem";
 import useCookieStatus from "../../../hooks/useCookieStatus";
 import { usePagination, SHOW_ALL_VALUE } from "../hooks/usePagination";
+import { useScrollToSelectedRow } from "../hooks/useScrollToSelectedRow";
 
 const RESIZER_KEY = "ae_df_leftw";
 const SHOW_ALL_WARNING_THRESHOLD = 100;
@@ -85,7 +86,6 @@ export default function DesktopForm({
   const textareaRefs = React.useRef({});
   const [pendingCaret, setPendingCaret] = React.useState(null);
   const saveLeftWTimer = React.useRef(null);
-  const scrollTimeoutRef = React.useRef(null);
 
   // Shared pagination hook
   const {
@@ -131,14 +131,22 @@ export default function DesktopForm({
     setCurrentPage,
   ]);
 
-  // Ref for scrolling to selected rows
-  const selectedRowRefs = React.useRef(new Map());
-
-  // Track which selected row we're currently showing (for cycling through multiple selections)
-  const [currentScrollIndex, setCurrentScrollIndex] = React.useState(0);
-
-  // Track which row is currently being viewed (scrolled to with the eye button)
-  const [viewedRowId, setViewedRowId] = React.useState(null);
+  // Shared scroll-to-selected hook
+  const {
+    scrollToSelectedRow,
+    selectedRowRefs,
+    currentScrollIndex,
+    viewedRowId,
+  } = useScrollToSelectedRow({
+    selectedIds,
+    focusedId,
+    items: visibleFormList,
+    rowsPerPage,
+    currentPage,
+    setCurrentPage,
+    handleRowHover,
+    handleRowLeave,
+  });
 
   const registerTextareaRef = React.useCallback((key, el) => {
     if (el) textareaRefs.current[key] = el;
@@ -162,113 +170,6 @@ export default function DesktopForm({
   const clearColumnFilters = React.useCallback(() => {
     setColumnFilters({});
   }, [setColumnFilters]);
-
-  // Reset scroll index and viewed row when selection changes
-  React.useEffect(() => {
-    setCurrentScrollIndex(0);
-    setViewedRowId(null);
-  }, [selectedIds, focusedId]);
-
-  // Scroll to selected/focused row in the list WITH TOOLTIP
-  // Cycles through multiple selected rows on each click
-  const scrollToSelectedRow = React.useCallback(() => {
-    // Determine target ID(s)
-    let targetId;
-
-    if (selectedIds.size > 1) {
-      // Multiple selections - cycle through them
-      const selectedArray = Array.from(selectedIds);
-      targetId = selectedArray[currentScrollIndex];
-
-      // Move to next for next click
-      setCurrentScrollIndex((prev) => (prev + 1) % selectedArray.length);
-    } else if (selectedIds.size === 1) {
-      // Single selection - always go to it
-      targetId = Array.from(selectedIds)[0];
-    } else if (focusedId != null) {
-      // No selection but have focused
-      targetId = focusedId;
-    } else {
-      return; // Nothing to scroll to
-    }
-
-    // Clear any existing hover
-    if (handleRowLeave) {
-      handleRowLeave();
-    }
-
-    // Find the row in the full list (not paginated)
-    const rowIndex = visibleFormList.findIndex((r) => r.id === targetId);
-    if (rowIndex === -1) return;
-
-    // Navigate to the correct page
-    const targetPage = Math.floor(rowIndex / rowsPerPage);
-    if (targetPage !== currentPage) {
-      setCurrentPage(targetPage);
-    }
-
-    // Mark this row as the currently viewed row (for visual highlighting)
-    setViewedRowId(targetId);
-
-    // Show tooltip on map for this feature
-    if (handleRowHover) {
-      handleRowHover(targetId, true); // true = show tooltip
-    }
-
-    // Scroll to the row in the list (with delay if page changed)
-    // Clear any pending scroll timeout to avoid stale callbacks
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-    scrollTimeoutRef.current = setTimeout(
-      () => {
-        scrollTimeoutRef.current = null;
-        const rowElement = selectedRowRefs.current.get(targetId);
-        if (rowElement) {
-          // Find the scrollable parent (the list container)
-          const scrollParent = rowElement.closest('[style*="overflow"]');
-          if (scrollParent) {
-            const rowRect = rowElement.getBoundingClientRect();
-            const parentRect = scrollParent.getBoundingClientRect();
-            const scrollTop = scrollParent.scrollTop;
-
-            // Calculate position to center the row in the viewport
-            const targetScrollTop =
-              scrollTop +
-              (rowRect.top - parentRect.top) -
-              parentRect.height / 2 +
-              rowRect.height / 2;
-
-            // Smooth scroll to position
-            scrollParent.scrollTo({
-              top: targetScrollTop,
-              behavior: "smooth",
-            });
-          }
-        }
-      },
-      targetPage !== currentPage ? 100 : 0
-    );
-  }, [
-    focusedId,
-    selectedIds,
-    currentScrollIndex,
-    visibleFormList,
-    rowsPerPage,
-    currentPage,
-    handleRowHover,
-    handleRowLeave,
-    setCurrentPage,
-  ]);
-
-  // Cleanup scroll timeout on unmount
-  React.useEffect(() => {
-    return () => {
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, []);
 
   React.useEffect(() => {
     function onMove(e) {

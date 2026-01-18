@@ -903,7 +903,7 @@ export function makeStyles(t, isMobile) {
       whiteSpace: "nowrap",
     },
     trHover: {
-      backgroundColor: t.rowHover,
+      background: t.rowHover,
     },
     descriptionIcon: {
       display: "inline-flex",

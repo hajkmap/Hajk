@@ -17,6 +17,7 @@ import { editBus } from "../../../buses/editBus";
 import useCookieStatus from "../../../hooks/useCookieStatus";
 import TableRow from "./TableRow";
 import { usePagination, SHOW_ALL_VALUE } from "../hooks/usePagination";
+import { useScrollToSelectedRow } from "../hooks/useScrollToSelectedRow";
 
 const DEFAULT_WRAP_CH = 100;
 const SHOW_ALL_WARNING_THRESHOLD = 100;
@@ -183,7 +184,6 @@ export default function TableMode(props) {
   const [savingNow, setSavingNow] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState(null);
   const caretStoreRef = React.useRef(new Map());
-  const scrollTimeoutRef = React.useRef(null);
 
   // State for "show all" confirmation dialog
   const [showAllConfirmOpen, setShowAllConfirmOpen] = React.useState(false);
@@ -212,14 +212,21 @@ export default function TableMode(props) {
     setCurrentPage(0);
   }, [columnFilters, sort, setCurrentPage]);
 
-  // Ref for scrolling to selected rows
-  const selectedRowRefs = React.useRef(new Map());
-
-  // Track which selected row we're currently showing (for cycling through multiple selections)
-  const [currentScrollIndex, setCurrentScrollIndex] = React.useState(0);
-
-  // Track which row is currently being viewed (scrolled to with the eye button)
-  const [viewedRowId, setViewedRowId] = React.useState(null);
+  // Shared scroll-to-selected hook
+  const {
+    scrollToSelectedRow,
+    selectedRowRefs,
+    currentScrollIndex,
+    viewedRowId,
+  } = useScrollToSelectedRow({
+    selectedIds: tableSelectedIds,
+    items: filteredAndSorted,
+    rowsPerPage,
+    currentPage,
+    setCurrentPage,
+    handleRowHover,
+    handleRowLeave,
+  });
 
   const setQFor = (key, val) =>
     setColumnFilterUI((prev) => ({
@@ -247,91 +254,6 @@ export default function TableMode(props) {
       return {};
     }
   });
-
-  // Cleanup scroll timeout on unmount
-  React.useEffect(() => {
-    return () => {
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Reset scroll index and viewed row when selection changes
-  React.useEffect(() => {
-    setCurrentScrollIndex(0);
-    setViewedRowId(null);
-  }, [tableSelectedIds]);
-
-  // Navigate to page containing selected row and scroll to it (manual only)
-  // Cycles through multiple selected rows on each click
-  const scrollToSelectedRow = React.useCallback(() => {
-    if (tableSelectedIds.size === 0) return;
-
-    const selectedArray = Array.from(tableSelectedIds);
-    const targetIndex = selectedArray.length === 1 ? 0 : currentScrollIndex;
-    const targetId = selectedArray[targetIndex];
-
-    if (handleRowLeave) {
-      handleRowLeave();
-    }
-
-    const rowIndex = filteredAndSorted.findIndex((r) => r.id === targetId);
-    if (rowIndex === -1) return;
-
-    const targetPage = Math.floor(rowIndex / rowsPerPage);
-    if (targetPage !== currentPage) {
-      setCurrentPage(targetPage);
-    }
-
-    // Mark this row as the currently viewed row (for visual highlighting)
-    setViewedRowId(targetId);
-
-    if (handleRowHover) {
-      handleRowHover(targetId, true);
-    }
-
-    // Clear any pending scroll timeout to avoid stale callbacks
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-    scrollTimeoutRef.current = setTimeout(() => {
-      scrollTimeoutRef.current = null;
-      const rowElement = selectedRowRefs.current.get(targetId);
-      if (rowElement) {
-        const scrollParent = rowElement.closest('[style*="overflow"]');
-        if (scrollParent) {
-          const rowRect = rowElement.getBoundingClientRect();
-          const parentRect = scrollParent.getBoundingClientRect();
-          const scrollTop = scrollParent.scrollTop;
-
-          const targetScrollTop =
-            scrollTop +
-            (rowRect.top - parentRect.top) -
-            parentRect.height / 2 +
-            rowRect.height / 2;
-
-          scrollParent.scrollTo({
-            top: targetScrollTop,
-            behavior: "smooth",
-          });
-        }
-      }
-    }, 100);
-
-    if (selectedArray.length > 1) {
-      setCurrentScrollIndex((prev) => (prev + 1) % selectedArray.length);
-    }
-  }, [
-    tableSelectedIds,
-    filteredAndSorted,
-    rowsPerPage,
-    currentPage,
-    currentScrollIndex,
-    handleRowHover,
-    handleRowLeave,
-    setCurrentPage,
-  ]);
 
   const syncFilterOnCellChange = React.useCallback(
     (columnKey, fromValue, toValue, rowId) => {

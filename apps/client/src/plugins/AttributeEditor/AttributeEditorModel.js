@@ -16,6 +16,7 @@ export const MAX_UNDO = 100;
 
 const initialState = {
   features: [],
+  featuresMap: new Map(), // O(1) lookup by id
   nextId: 1,
   nextTempId: -1,
 
@@ -25,6 +26,15 @@ const initialState = {
 
   undoStack: [], // [{ label, inverse: Array<InverseOp> }]
   redoStack: [],
+};
+
+// Helper to build featuresMap from features array
+const buildFeaturesMap = (features) => {
+  const map = new Map();
+  for (const f of features) {
+    map.set(f.id, f);
+  }
+  return map;
 };
 
 const isEmpty = (v) => v === null || v === undefined || v === "";
@@ -50,7 +60,7 @@ const pushUndo = (state, label, inverseOps) => ({
 
 // InverseOps: { kind: 'edit'|'draft_edit'|'delete_state'|'create_drafts', payload: {...} }
 const applyEditToExisting = (state, id, key, value, suppressUndo = false) => {
-  const base = state.features.find((f) => f.id === id);
+  const base = state.featuresMap.get(id); // O(1) lookup
   const prevPending = state.pendingEdits[id]?.[key];
   const effectivePrev = prevPending !== undefined ? prevPending : base?.[key];
 
@@ -161,7 +171,12 @@ const reducer = (state, action) => {
         .map((f) => Number(f.id))
         .filter((n) => Number.isFinite(n));
       const max = numericIds.length ? Math.max(...numericIds) : 0;
-      return { ...initialState, features, nextId: max + 1 };
+      return {
+        ...initialState,
+        features,
+        featuresMap: buildFeaturesMap(features),
+        nextId: max + 1,
+      };
     }
 
     case Action.CREATE_DRAFTS: {
@@ -243,7 +258,7 @@ const reducer = (state, action) => {
       let nextTempId = state.nextTempId;
 
       ids.forEach((id) => {
-        const base = state.features.find((f) => f.id === id);
+        const base = state.featuresMap.get(id); // O(1) lookup
         if (!base) return;
 
         // Merge base row with pending edits to get the effective row
@@ -348,9 +363,11 @@ const reducer = (state, action) => {
           __pending: undefined,
         }));
 
+      const newFeatures = [...afterDeletes, ...committedAdds];
       return {
         ...state,
-        features: [...afterDeletes, ...committedAdds],
+        features: newFeatures,
+        featuresMap: buildFeaturesMap(newFeatures),
         nextId,
         pendingAdds: [],
         pendingEdits: {},
@@ -397,7 +414,7 @@ export const selectors = {
 
   selectEffectiveFeature: (s, id) => {
     if (id == null) return null;
-    const base = s.features.find((f) => f.id === id);
+    const base = s.featuresMap.get(id); // O(1) lookup
     if (!base) return null;
     return { ...base, ...(s.pendingEdits[id] || {}) };
   },
