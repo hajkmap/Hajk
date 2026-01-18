@@ -4,6 +4,83 @@ const CACHE_MAX_SIZE = 10000;
 
 export const isEditableField = (meta) => !meta?.readOnly;
 
+/**
+ * Extracts the canonical ID from an OpenLayers Feature.
+ * Handles different ID property locations consistently.
+ * @param {Feature} feature - OL Feature object
+ * @returns {string|number|null} The feature ID or null
+ */
+export function getFeatureId(feature) {
+  if (!feature) return null;
+  return (
+    feature.get?.("id") ?? feature.get?.("@_fid") ?? feature.getId?.() ?? null
+  );
+}
+
+/**
+ * Normalizes an ID for comparison (handles string/number mismatches).
+ * @param {string|number} id
+ * @returns {string}
+ */
+export function normalizeId(id) {
+  if (id == null) return "";
+  const s = String(id);
+  // If purely numeric, return as number for consistency
+  return /^-?\d+$/.test(s) ? Number(s) : s;
+}
+
+/**
+ * Compares two IDs for equality, handling type coercion.
+ * @param {string|number} a
+ * @param {string|number} b
+ * @returns {boolean}
+ */
+export function idsEqual(a, b) {
+  if (a == null || b == null) return a === b;
+  return String(a) === String(b);
+}
+
+/**
+ * Finds a feature/row by ID in an array, with type-safe comparison.
+ * @param {Array} items - Array of objects with 'id' property
+ * @param {string|number} targetId - ID to find
+ * @returns {Object|undefined}
+ */
+export function findById(items, targetId) {
+  if (!Array.isArray(items) || targetId == null) return undefined;
+  const targetStr = String(targetId);
+  return items.find((item) => String(item?.id) === targetStr);
+}
+
+/**
+ * Creates an effective row by merging base data with pending edits.
+ * @param {Object} base - Base row data
+ * @param {Object} pendingEdits - Object keyed by ID with edit objects
+ * @returns {Object} Merged row
+ */
+export function getEffectiveRow(base, pendingEdits) {
+  if (!base) return null;
+  const edits = pendingEdits?.[base.id];
+  return edits ? { ...base, ...edits } : base;
+}
+
+/**
+ * Creates a Map for O(1) lookups from an array of items with 'id' property.
+ * @param {Array} items - Array of objects with 'id' property
+ * @returns {Map}
+ */
+export function createIdMap(items) {
+  const map = new Map();
+  if (!Array.isArray(items)) return map;
+  for (const item of items) {
+    if (item?.id != null) {
+      map.set(item.id, item);
+      map.set(String(item.id), item);
+    }
+  }
+  return map;
+}
+
 export function getIdsForDeletion(selectedIds, focusedId) {
   if (selectedIds && selectedIds.size) return Array.from(selectedIds);
   return focusedId != null ? [focusedId] : [];
@@ -23,8 +100,36 @@ export function computeIdsToMarkForDelete(
   return ids.filter((id) => !tablePendingDeletes?.has?.(id));
 }
 
+/**
+ * Checks if a value is considered "missing" or empty.
+ * Consistent check across the codebase.
+ * @param {*} v - Value to check
+ * @returns {boolean}
+ */
 export function isMissingValue(v) {
   return v == null || v === "";
+}
+
+/**
+ * Normalizes a value to an empty string if null/undefined.
+ * Use for consistent display/comparison.
+ * @param {*} v - Value to normalize
+ * @returns {string}
+ */
+export function normalizeValue(v) {
+  return v == null ? "" : v;
+}
+
+/**
+ * Compares two values for equality, treating null/undefined/"" as equivalent.
+ * @param {*} a
+ * @param {*} b
+ * @returns {boolean}
+ */
+export function valuesEqual(a, b) {
+  const normA = a == null ? "" : a;
+  const normB = b == null ? "" : b;
+  return normA === normB;
 }
 
 /**

@@ -121,6 +121,7 @@ export default function TableMode(props) {
     FIELD_META,
     isMobile,
     features,
+    featuresMap,
     filteredAndSorted,
     columnFilterUI,
     setColumnFilterUI,
@@ -182,6 +183,7 @@ export default function TableMode(props) {
   const [savingNow, setSavingNow] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState(null);
   const caretStoreRef = React.useRef(new Map());
+  const scrollTimeoutRef = React.useRef(null);
 
   // State for "show all" confirmation dialog
   const [showAllConfirmOpen, setShowAllConfirmOpen] = React.useState(false);
@@ -246,6 +248,15 @@ export default function TableMode(props) {
     }
   });
 
+  // Cleanup scroll timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Reset scroll index and viewed row when selection changes
   React.useEffect(() => {
     setCurrentScrollIndex(0);
@@ -280,7 +291,12 @@ export default function TableMode(props) {
       handleRowHover(targetId, true);
     }
 
-    setTimeout(() => {
+    // Clear any pending scroll timeout to avoid stale callbacks
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    scrollTimeoutRef.current = setTimeout(() => {
+      scrollTimeoutRef.current = null;
       const rowElement = selectedRowRefs.current.get(targetId);
       if (rowElement) {
         const scrollParent = rowElement.closest('[style*="overflow"]');
@@ -828,14 +844,18 @@ export default function TableMode(props) {
                 const pendingKind =
                   row.__pending || (row.__geom__ != null ? "geom" : null);
 
+                // Use stable composite key: drafts get prefix to avoid collision
+                const stableKey = row.id < 0 ? `draft_${row.id}` : row.id;
+
                 return (
                   <TableRow
-                    key={row.id}
+                    key={stableKey}
                     row={row}
                     idx={startIndex + idx}
                     FIELD_META={FIELD_META}
                     s={s}
                     features={features}
+                    featuresMap={featuresMap}
                     selected={selected}
                     pendingKind={pendingKind}
                     tablePendingEdits={tablePendingEdits}

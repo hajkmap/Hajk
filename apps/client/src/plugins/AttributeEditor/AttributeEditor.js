@@ -7,7 +7,7 @@ import AttributeEditorModel, { Action } from "./AttributeEditorModel";
 import { editBus } from "../../buses/editBus";
 import { PLUGIN_COLORS } from "./constants/index";
 import { createOgcApi } from "./api/ogc";
-import { idAliases } from "./helpers/helpers";
+import { idAliases, getFeatureId } from "./helpers/helpers";
 import FeaturePickerDialog from "./components/FeaturePickerDialog";
 
 import GeoJSON from "ol/format/GeoJSON";
@@ -17,6 +17,23 @@ import { Style, Circle as CircleStyle, Fill, Stroke } from "ol/style";
 import Overlay from "ol/Overlay";
 import DragBox from "ol/interaction/DragBox";
 import { platformModifierKeyOnly } from "ol/events/condition";
+
+// Cache size limits to prevent memory leaks
+const MAX_SCHEMA_CACHE_SIZE = 50;
+const MAX_GRAVEYARD_SIZE = 1000;
+
+/**
+ * Manages Map cache with LRU-like eviction (removes oldest entries when limit reached)
+ */
+function limitMapSize(map, maxSize, removeCount = 10) {
+  if (map.size <= maxSize) return;
+  const keysToRemove = [];
+  for (const key of map.keys()) {
+    keysToRemove.push(key);
+    if (keysToRemove.length >= removeCount) break;
+  }
+  keysToRemove.forEach((key) => map.delete(key));
+}
 
 const TOOLTIP_EXCLUDE_KEYS = new Set([
   "geometry",
@@ -30,6 +47,53 @@ const TOOLTIP_EXCLUDE_KEYS = new Set([
   "TEXT_SETTINGS",
   "@_fid",
 ]);
+
+/**
+ * Safely builds tooltip content using DOM APIs to prevent XSS attacks.
+ * All text content is escaped via textContent instead of innerHTML.
+ */
+function buildTooltipContent(tooltipEl, displayId, displayProps, colors) {
+  const { mutedColor, textColor } = colors;
+
+  // Clear existing content safely
+  while (tooltipEl.firstChild) {
+    tooltipEl.removeChild(tooltipEl.firstChild);
+  }
+
+  // Create ID header
+  const idDiv = document.createElement("div");
+  idDiv.style.cssText =
+    "font-weight: 600; color: #FFD700; margin-bottom: 6px; font-size: 14px;";
+  idDiv.textContent = `ID: ${displayId}`;
+  tooltipEl.appendChild(idDiv);
+
+  if (displayProps.length === 0) {
+    // No attributes message
+    idDiv.style.marginBottom = "0";
+    const emptyDiv = document.createElement("div");
+    emptyDiv.style.cssText = `font-size: 11px; color: ${mutedColor}; font-style: italic; margin-top: 4px;`;
+    emptyDiv.textContent = "Inga attribut att visa";
+    tooltipEl.appendChild(emptyDiv);
+  } else {
+    // Build property rows
+    displayProps.forEach(({ key, value }) => {
+      const rowDiv = document.createElement("div");
+      rowDiv.style.cssText = "font-size: 12px; margin-bottom: 2px;";
+
+      const keySpan = document.createElement("span");
+      keySpan.style.cssText = `color: ${mutedColor}; font-weight: 500;`;
+      keySpan.textContent = `${key}:`;
+
+      const valueSpan = document.createElement("span");
+      valueSpan.style.cssText = `color: ${textColor}; margin-left: 4px;`;
+      valueSpan.textContent = String(value ?? "");
+
+      rowDiv.appendChild(keySpan);
+      rowDiv.appendChild(valueSpan);
+      tooltipEl.appendChild(rowDiv);
+    });
+  }
+}
 
 // Helper: Find Sketch layer by name
 function getSketchLayer(map) {
@@ -296,8 +360,7 @@ function AttributeEditor(props) {
 
   const styleFn = React.useCallback(
     (feature) => {
-      const raw =
-        feature.get?.("id") ?? feature.get?.("@_fid") ?? feature.getId?.();
+      const raw = getFeatureId(feature);
       const aliases = idAliases(raw);
 
       const sel = selectedIdsRef.current;
@@ -402,32 +465,11 @@ function AttributeEditor(props) {
             const textColor = isDark ? "#e5e7eb" : "#111827";
             const mutedColor = isDark ? "#9ca3af" : "#6b7280";
 
-            if (displayProps.length === 0) {
-              tooltipEl.innerHTML = `
-            <div style="font-weight: 600; color: #FFD700; font-size: 14px;">
-              ID: ${props.id || id}
-            </div>
-            <div style="font-size: 11px; color: ${mutedColor}; font-style: italic; margin-top: 4px;">
-              Inga attribut att visa
-            </div>
-          `;
-            } else {
-              tooltipEl.innerHTML = `
-            <div style="font-weight: 600; color: #FFD700; margin-bottom: 6px; font-size: 14px;">
-              ID: ${props.id || id}
-            </div>
-            ${displayProps
-              .map(
-                ({ key, value }) => `
-              <div style="font-size: 12px; margin-bottom: 2px;">
-                <span style="color: ${mutedColor}; font-weight: 500;">${key}:</span>
-                <span style="color: ${textColor}; margin-left: 4px;">${value}</span>
-              </div>
-            `
-              )
-              .join("")}
-          `;
-            }
+            // Build tooltip content safely (XSS-protected)
+            buildTooltipContent(tooltipEl, props.id || id, displayProps, {
+              mutedColor,
+              textColor,
+            });
 
             tooltipEl.style.background = bgColor;
             tooltipEl.style.color = textColor;
@@ -578,6 +620,8 @@ function AttributeEditor(props) {
           if (signal.aborted) return;
 
           schemaCache.current.set(id, schema);
+          // Prevent unbounded cache growth
+          limitMapSize(schemaCache.current, MAX_SCHEMA_CACHE_SIZE);
         }
 
         // Always emit schema-loaded, even if schema was cached
@@ -761,17 +805,14 @@ function AttributeEditor(props) {
 
         // Index all features and make them visible initially (both num & str)
         features.forEach((f) => {
-          const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+          const raw = getFeatureId(f);
           const aliases = idAliases(raw);
 
-          // index all aliases
-          aliases.forEach((k) => featureIndexRef.current.set(k, f));
-
-          // Visible all aliases
-          aliases.forEach((k) => {
+          for (const k of aliases) {
+            featureIndexRef.current.set(k, f);
             visibleIdsRef.current.add(k);
             visibleIdsRef.current.add(String(k));
-          });
+          }
         });
 
         // Set OL-ID to @_fid if it exists (for safer hit testing etc.)
@@ -1052,6 +1093,7 @@ function AttributeEditor(props) {
         }
 
         graveyardRef.current.set(fid, f);
+        limitMapSize(graveyardRef.current, MAX_GRAVEYARD_SIZE);
         featureIndexRef.current.delete(fid);
         selectedIdsRef.current.delete(fid);
         visibleIdsRef.current.delete(fid);
@@ -1170,6 +1212,7 @@ function AttributeEditor(props) {
             } catch {}
             featureIndexRef.current.delete(id);
             graveyardRef.current.set(id, f);
+            limitMapSize(graveyardRef.current, MAX_GRAVEYARD_SIZE);
           }
         }
       }
@@ -1188,6 +1231,7 @@ function AttributeEditor(props) {
             } catch {}
             featureIndexRef.current.delete(id);
             graveyardRef.current.set(id, f);
+            limitMapSize(graveyardRef.current, MAX_GRAVEYARD_SIZE);
           }
         }
       }
@@ -1295,7 +1339,7 @@ function AttributeEditor(props) {
         // Use rowIdMapRef for O(1) lookups
         const idMap = rowIdMapRef.current;
         const pickerFeatures = hits.map((f) => {
-          const rawId = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+          const rawId = getFeatureId(f);
           const canonId = toCanonicalId(rawId, idMap);
           return {
             id: canonId,
@@ -1324,7 +1368,7 @@ function AttributeEditor(props) {
 
       // Single feature (original logic fortsätter...)
       const hit = hits[0];
-      const rawId = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
+      const rawId = getFeatureId(hit);
       // Use rowIdMapRef for O(1) lookup
       const canonId = toCanonicalId(rawId, rowIdMapRef.current);
 
@@ -1438,8 +1482,7 @@ function AttributeEditor(props) {
       const selectedFeatures = [];
       source.forEachFeatureInExtent(boxExtent, (feature) => {
         // Check that the feature is actually visible
-        const raw =
-          feature.get?.("id") ?? feature.get?.("@_fid") ?? feature.getId?.();
+        const raw = getFeatureId(feature);
         const aliases = idAliases(raw);
 
         const isVisible = aliases.some(
@@ -1458,7 +1501,7 @@ function AttributeEditor(props) {
       // Use rowIdMapRef for O(1) lookups
       const idMap = rowIdMapRef.current;
       const newIds = selectedFeatures.map((f) => {
-        const rawId = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const rawId = getFeatureId(f);
         return toCanonicalId(rawId, idMap);
       });
 

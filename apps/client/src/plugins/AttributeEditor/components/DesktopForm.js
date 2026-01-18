@@ -85,6 +85,7 @@ export default function DesktopForm({
   const textareaRefs = React.useRef({});
   const [pendingCaret, setPendingCaret] = React.useState(null);
   const saveLeftWTimer = React.useRef(null);
+  const scrollTimeoutRef = React.useRef(null);
 
   // Shared pagination hook
   const {
@@ -215,8 +216,13 @@ export default function DesktopForm({
     }
 
     // Scroll to the row in the list (with delay if page changed)
-    setTimeout(
+    // Clear any pending scroll timeout to avoid stale callbacks
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    scrollTimeoutRef.current = setTimeout(
       () => {
+        scrollTimeoutRef.current = null;
         const rowElement = selectedRowRefs.current.get(targetId);
         if (rowElement) {
           // Find the scrollable parent (the list container)
@@ -254,6 +260,15 @@ export default function DesktopForm({
     handleRowLeave,
     setCurrentPage,
   ]);
+
+  // Cleanup scroll timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     function onMove(e) {
@@ -434,9 +449,12 @@ export default function DesktopForm({
                 (d) => d.id === f.id && d.__pending !== "delete"
               );
 
+            // Use stable composite key: drafts get prefix to avoid collision
+            const stableKey = f.id < 0 ? `draft_${f.id}` : f.id;
+
             return (
               <FormListItem
-                key={f.id}
+                key={stableKey}
                 row={f}
                 idx={startIndex + idx}
                 FIELD_META={FIELD_META}

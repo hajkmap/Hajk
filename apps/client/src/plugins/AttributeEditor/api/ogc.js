@@ -1,10 +1,33 @@
+/**
+ * Creates an OGC API client for WFST operations.
+ * @param {string} baseUrl - The base URL for the API
+ * @returns {Object} API methods
+ */
 export function createOgcApi(baseUrl) {
   const base = (baseUrl || "").replace(/\/+$/, "");
+
+  // Validate layerId to prevent path traversal attacks
+  const validateLayerId = (id) => {
+    if (id == null || id === "") {
+      throw new Error("Layer ID is required");
+    }
+    const idStr = String(id);
+    // Disallow path traversal characters
+    if (/[/\\.]{2,}|[<>"|*?]/.test(idStr)) {
+      throw new Error("Invalid layer ID format");
+    }
+    return encodeURIComponent(idStr);
+  };
 
   // Skip undefined fields in ?fields=
   const pickFields = (fields) => {
     const f = (fields ?? "").trim();
     return f ? `?fields=${encodeURIComponent(f)}` : "";
+  };
+
+  // Centralized error logging
+  const logError = (context, error) => {
+    console.error(`[AttributeEditor/OGC] ${context}:`, error);
   };
 
   return {
@@ -22,16 +45,23 @@ export function createOgcApi(baseUrl) {
     },
 
     async getServiceMeta(id, { signal } = {}) {
-      const res = await fetch(`${base}/ogc/wfst/${id}`, { signal });
-      if (!res.ok) throw new Error(`Failed to fetch metadata (${res.status})`);
-      const layer = await res.json();
-      return {
-        id: layer.id,
-        caption: layer.caption,
-        title: layer.caption,
-        projection: layer.projection,
-        layers: layer.layers || [],
-      };
+      const safeId = validateLayerId(id);
+      try {
+        const res = await fetch(`${base}/ogc/wfst/${safeId}`, { signal });
+        if (!res.ok)
+          throw new Error(`Failed to fetch metadata (${res.status})`);
+        const layer = await res.json();
+        return {
+          id: layer.id,
+          caption: layer.caption,
+          title: layer.caption,
+          projection: layer.projection,
+          layers: layer.layers || [],
+        };
+      } catch (error) {
+        logError("getServiceMeta", error);
+        throw error;
+      }
     },
 
     async fetchWfstMeta(id, { signal } = {}) {
@@ -39,13 +69,20 @@ export function createOgcApi(baseUrl) {
     },
 
     async fetchWfst(id, fields, { signal } = {}) {
-      const url = `${base}/ogc/wfst/${id}${pickFields(fields)}`;
-      const res = await fetch(url, { signal });
-      if (!res.ok) throw new Error(`WFST get misslyckades (${res.status})`);
-      return res.json();
+      const safeId = validateLayerId(id);
+      try {
+        const url = `${base}/ogc/wfst/${safeId}${pickFields(fields)}`;
+        const res = await fetch(url, { signal });
+        if (!res.ok) throw new Error(`WFST get misslyckades (${res.status})`);
+        return res.json();
+      } catch (error) {
+        logError("fetchWfst", error);
+        throw error;
+      }
     },
 
     async fetchWfstFeatures(id, params = {}, { signal } = {}) {
+      const safeId = validateLayerId(id);
       const queryParams = {
         limit: "10000",
         srsName: "EPSG:3006",
@@ -55,7 +92,7 @@ export function createOgcApi(baseUrl) {
       };
 
       const q = new URLSearchParams(queryParams).toString();
-      const url = `${base}/ogc/wfst/${id}/features?${q}`;
+      const url = `${base}/ogc/wfst/${safeId}/features?${q}`;
 
       const res = await fetch(url, {
         method: "GET",
@@ -90,26 +127,32 @@ export function createOgcApi(baseUrl) {
     },
 
     async commitWfstTransaction(layerId, transaction, { signal } = {}) {
-      const url = `${base}/ogc/wfst/${layerId}/transaction`;
+      const safeLayerId = validateLayerId(layerId);
+      try {
+        const url = `${base}/ogc/wfst/${safeLayerId}/transaction`;
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(transaction),
-        signal,
-      });
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(transaction),
+          signal,
+        });
 
-      if (!response.ok) {
-        const error = await response
-          .json()
-          .catch(() => ({ error: "Unknown error" }));
-        throw new Error(error.error || "Transaction failed");
+        if (!response.ok) {
+          const error = await response
+            .json()
+            .catch(() => ({ error: "Unknown error" }));
+          throw new Error(error.error || "Transaction failed");
+        }
+
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        logError("commitWfstTransaction", error);
+        throw error;
       }
-
-      const result = await response.json();
-      return result;
     },
   };
 }

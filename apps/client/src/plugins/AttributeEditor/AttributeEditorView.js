@@ -12,6 +12,7 @@ import {
   isMissingValue,
   renderInput,
   idAliases,
+  getFeatureId,
 } from "./helpers/helpers";
 
 import Toolbar from "./components/Toolbar";
@@ -23,6 +24,12 @@ import { editBus } from "../../buses/editBus";
 import { pickPreferredId } from "./helpers/helpers";
 import { useSnackbar } from "notistack";
 import GeoJSON from "ol/format/GeoJSON";
+
+// Max geometry undo stack size to prevent memory leaks
+const MAX_GEOM_UNDO = 100;
+
+// Max unique values cache size
+const MAX_UNIQUE_CACHE = 200;
 
 function normalize(v) {
   return v == null ? "" : v;
@@ -151,9 +158,12 @@ export default function AttributeEditorView({
       // 1) mark as "geometry edited"
       controller.batchEdit([{ id, key: "__geom__", value: when }]);
 
-      // 2) add to local undo stack
+      // 2) add to local undo stack (with size limit to prevent memory leaks)
       geomUndoRef.current.push({ id, before, after, when });
-      setGeomUndoCount((c) => c + 1);
+      if (geomUndoRef.current.length > MAX_GEOM_UNDO) {
+        geomUndoRef.current = geomUndoRef.current.slice(-MAX_GEOM_UNDO);
+      }
+      setGeomUndoCount((c) => Math.min(c + 1, MAX_GEOM_UNDO));
     });
     return () => off();
   }, [controller]);
@@ -280,6 +290,19 @@ export default function AttributeEditorView({
 
   // === Model state ===
   const features = React.useMemo(() => state.features ?? [], [state.features]);
+
+  // O(1) lookup map for features by ID
+  const featuresMap = React.useMemo(() => {
+    const map = new Map();
+    for (const f of features) {
+      if (f?.id != null) {
+        map.set(f.id, f);
+        map.set(String(f.id), f);
+      }
+    }
+    return map;
+  }, [features]);
+
   const pendingEdits = React.useMemo(
     () => state.pendingEdits ?? {},
     [state.pendingEdits]
@@ -288,6 +311,19 @@ export default function AttributeEditorView({
     () => state.pendingAdds ?? [],
     [state.pendingAdds]
   );
+
+  // O(1) lookup map for pending adds by ID
+  const pendingAddsMap = React.useMemo(() => {
+    const map = new Map();
+    for (const d of pendingAdds) {
+      if (d?.id != null) {
+        map.set(d.id, d);
+        map.set(String(d.id), d);
+      }
+    }
+    return map;
+  }, [pendingAdds]);
+
   const pendingDeletes = React.useMemo(
     () => state.pendingDeletes ?? new Set(),
     [state.pendingDeletes]
@@ -898,16 +934,16 @@ export default function AttributeEditorView({
         filterParts.push(k + "=" + (Array.isArray(vals) ? vals.join(",") : ""));
       }
 
-      // include a signature of the current column values so the cache
-      // invalidates whenever any value in this column changes.
-      const colValuesSignature = allRows
-        .map((r) => String(r?.[columnKey] ?? ""))
-        .join("|");
+      // The cache invalidates when: row count changes, edits change, or filters change.
+      // Include pendingEdits keys that affect this column for more precise invalidation.
+      const columnEditCount = Object.values(pendingEdits || {}).filter(
+        (edits) => edits && columnKey in edits
+      ).length;
 
       const cacheKey =
         `facet::${columnKey}::` +
         `${features.length}|${pendingAdds.length}|${editsCount}|${delSize}|` +
-        `${colValuesSignature}|` +
+        `col:${columnEditCount}|` +
         `${searchText.trim().toLowerCase()}|` +
         filterParts.sort().join(";");
 
@@ -954,6 +990,11 @@ export default function AttributeEditorView({
       });
 
       uniqueCacheRef.current.set(cacheKey, out);
+      // Limit cache size to prevent memory leaks
+      if (uniqueCacheRef.current.size > MAX_UNIQUE_CACHE) {
+        const firstKey = uniqueCacheRef.current.keys().next().value;
+        uniqueCacheRef.current.delete(firstKey);
+      }
       return out;
     },
     [
@@ -1072,7 +1113,7 @@ export default function AttributeEditorView({
 
       // Helper: Check if geometry has changed
       const hasGeometryChanged = (id) => {
-        const effective = features.find((f) => String(f.id) === String(id));
+        const effective = featuresMap.get(id) || featuresMap.get(String(id));
         if (!effective) {
           return false;
         }
@@ -1317,13 +1358,13 @@ export default function AttributeEditorView({
             visibleIdsRef.current = new Set();
 
             newFeatures.forEach((f) => {
-              const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+              const raw = getFeatureId(f);
               const aliases = idAliases(raw);
-              aliases.forEach((k) => featureIndexRef.current.set(k, f));
-              aliases.forEach((k) => {
+              for (const k of aliases) {
+                featureIndexRef.current.set(k, f);
                 visibleIdsRef.current.add(k);
                 visibleIdsRef.current.add(String(k));
-              });
+              }
             });
 
             // Set feature IDs from FID property
@@ -1374,6 +1415,7 @@ export default function AttributeEditorView({
   }, [
     controller,
     features,
+    featuresMap,
     pendingAdds,
     pendingEdits,
     pendingDeletes,
@@ -1638,12 +1680,14 @@ export default function AttributeEditorView({
   const focusedFeature = useMemo(() => {
     if (focusedId == null) return null;
     if (focusedId < 0) {
-      return pendingAdds.find((d) => d.id === focusedId) || null;
+      // O(1) lookup using pendingAddsMap
+      return pendingAddsMap.get(focusedId) || null;
     }
-    const base = features.find((f) => f.id === focusedId);
+    // O(1) lookup using featuresMap
+    const base = featuresMap.get(focusedId);
     if (!base) return null;
     return { ...base, ...(pendingEdits[focusedId] || {}) };
-  }, [focusedId, features, pendingAdds, pendingEdits]);
+  }, [focusedId, featuresMap, pendingAddsMap, pendingEdits]);
 
   useEffect(() => {
     if (!focusedId) {
@@ -1656,7 +1700,7 @@ export default function AttributeEditorView({
 
     // Draft (negative id)
     if (focusedId < 0) {
-      const draft = pendingAdds.find((d) => d.id === focusedId);
+      const draft = pendingAddsMap.get(focusedId);
       if (!draft) return;
 
       // Use existing baseline (created when draft was added)
@@ -1682,7 +1726,7 @@ export default function AttributeEditorView({
       return;
     }
 
-    const feat = features.find((f) => f.id === focusedId);
+    const feat = featuresMap.get(focusedId);
     if (!feat) return;
 
     const base = {};
@@ -1704,12 +1748,21 @@ export default function AttributeEditorView({
     });
     setChangedFields(changed);
     setDirty(false);
-  }, [focusedId, FM, features, pendingEdits, pendingAdds, draftBaselineRef]);
+  }, [
+    focusedId,
+    FM,
+    features,
+    featuresMap,
+    pendingEdits,
+    pendingAdds,
+    pendingAddsMap,
+    draftBaselineRef,
+  ]);
 
   // EXTERNAL SYNCH FOR DRAFTS: when pendingAdds changes, immediately update editValues + changedFields (using originalValues)
   useEffect(() => {
     if (!focusedId || focusedId >= 0) return;
-    const draft = pendingAdds.find((d) => d.id === focusedId);
+    const draft = pendingAddsMap.get(focusedId);
     if (!draft) return;
     const effective = {};
     FM.forEach(({ key }) => (effective[key] = normalize(draft[key])));
@@ -1721,7 +1774,14 @@ export default function AttributeEditorView({
     });
     setChangedFields(changed);
     setDirty(changed.size > 0);
-  }, [pendingAdds, focusedId, FM, originalValues, draftBaselineRef]);
+  }, [
+    pendingAdds,
+    pendingAddsMap,
+    focusedId,
+    FM,
+    originalValues,
+    draftBaselineRef,
+  ]);
 
   // Track which draft IDs were in pendingAdds previously
   const previousPendingAddsRef = React.useRef(new Set());
@@ -2287,6 +2347,7 @@ export default function AttributeEditorView({
           FIELD_META={FM}
           isMobile={isMobile}
           features={features}
+          featuresMap={featuresMap}
           filteredAndSorted={filteredAndSorted}
           tableSelectedIds={tableSelectedIds}
           tableHasPending={tableHasPending}

@@ -240,9 +240,12 @@ export default function MobileForm({
                               ? "#e3f2fd"
                               : "#fff";
 
+                    // Use stable composite key: drafts get prefix to avoid collision
+                    const stableKey = f.id < 0 ? `draft_${f.id}` : f.id;
+
                     return (
                       <tr
-                        key={f.id}
+                        key={stableKey}
                         data-row-id={f.id}
                         onClick={(e) => onFormRowClick(f.id, idx, e)}
                         style={{

@@ -12,6 +12,7 @@ const TableRow = ({
   FIELD_META,
   s,
   features,
+  featuresMap,
   selected,
   pendingKind,
   tablePendingEdits,
@@ -128,9 +129,7 @@ const TableRow = ({
             setTablePendingEdits((prev) => {
               const next = { ...prev };
               const current = next[row.id] ? { ...next[row.id] } : {};
-              const original = features.find((f) => f.id === row.id)?.[
-                meta.key
-              ];
+              const original = featuresMap.get(row.id)?.[meta.key];
               if ((newVal ?? "") === (original ?? "")) {
                 delete current[meta.key];
               } else {
@@ -154,7 +153,7 @@ const TableRow = ({
           else {
             const draft = tablePendingAdds?.find?.((d) => d.id === row.id);
             if (draft) currentVal = draft[meta.key];
-            else currentVal = features.find((f) => f.id === row.id)?.[meta.key];
+            else currentVal = featuresMap.get(row.id)?.[meta.key];
           }
 
           const prevVal = ed.startValue ?? "";
@@ -185,9 +184,7 @@ const TableRow = ({
             setTablePendingEdits((prev) => {
               const next = { ...prev };
               const current = { ...(next[row.id] || {}) };
-              const original = features.find((f) => f.id === row.id)?.[
-                meta.key
-              ];
+              const original = featuresMap.get(row.id)?.[meta.key];
               const revertTo = ed.startValue;
               if ((revertTo ?? "") === (original ?? "")) {
                 delete current[meta.key];
