@@ -11,6 +11,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import DescriptionIcon from "@mui/icons-material/Description";
+import CircularProgress from "@mui/material/CircularProgress";
 import {
   getIdsForDeletion,
   isMissingValue,
@@ -375,7 +376,17 @@ export default function DesktopForm({
             );
           })}
           {visibleFormList.length === 0 && (
-            <div style={s.listEmpty}>Inga objekt i listan.</div>
+            <div
+              style={{
+                ...s.listEmpty,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              Laddning pågår...
+              <CircularProgress size={16} />
+            </div>
           )}
         </div>
 

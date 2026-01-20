@@ -11,6 +11,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import DescriptionIcon from "@mui/icons-material/Description";
+import CircularProgress from "@mui/material/CircularProgress";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import { editBus } from "../../../buses/editBus";
@@ -808,7 +809,16 @@ export default function TableMode(props) {
               {filteredAndSorted.length === 0 && (
                 <tr>
                   <td style={s.tdEmpty} colSpan={FIELD_META.length}>
-                    Laddning pågår...
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      Laddning pågår...
+                      <CircularProgress size={16} />
+                    </span>
                   </td>
                 </tr>
               )}
