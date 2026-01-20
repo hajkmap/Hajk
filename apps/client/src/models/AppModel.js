@@ -571,8 +571,16 @@ class AppModel {
       name: "-3",
       caption: "OpenStreetMap",
       layerInfo: {
-        caption: "OpenStreetMap",
+        infoText:
+          "OpenStreetMap är en öppen, användargenererad karta där vem som helst kan bidra med information. Innehållet är inte kvalitetssäkrat, granskat eller godkänt av Lantmäteriet.",
+        infoTitle: "Om OpenStreetMap",
+        infoUrl:
+          "https://wiki.openstreetmap.org/wiki/OpenStreetMap_Carto/Symbols",
+        infoUrlText: "Länk till teckenförklaring",
+        information: "Här finns mer info",
         layerType: "base",
+        hideExpandArrow: false,
+        showAttributeTableButton: false,
       },
     });
 
