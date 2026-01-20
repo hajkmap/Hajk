@@ -39,9 +39,10 @@ class AdGroupHeaderService extends AdBaseService {
         }
       }
       this.logger2.trace(
-        "[getUserFromRequestHeader] Group Header %s has value: %o",
+        `[getUserFromRequestHeader] For user "%s", the group header "%s" has value: \n%s`,
+        user,
         process.env.AD_TRUSTED_GROUP_HEADER,
-        groups
+        JSON.stringify(groups, null, 2) // way nicer to print this as formatted JSON string
       );
 
       // Use override email or get email from header.
