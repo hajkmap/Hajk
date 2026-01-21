@@ -1,6 +1,10 @@
 import GeoJSON from "ol/format/GeoJSON.js";
 import buffer from "@turf/buffer";
 import union from "@turf/union";
+import lineSplit from "@turf/line-split";
+import lineIntersect from "@turf/line-intersect";
+import difference from "@turf/difference";
+import { polygon as turfPolygon } from "@turf/helpers";
 import { transform } from "ol/proj";
 
 class HajkTransformer {
@@ -79,6 +83,78 @@ class HajkTransformer {
       x: parseFloat(newCoords[0].toFixed(numberOfDecimals)),
       y: parseFloat(newCoords[1].toFixed(numberOfDecimals)),
     };
+  }
+
+  getSplit(feature, cuttingLine) {
+    const featureGeoJSON = this.#geoJson.writeFeatureObject(feature);
+    const cuttingGeoJSON = this.#geoJson.writeFeatureObject(cuttingLine);
+
+    const geomType = featureGeoJSON.geometry.type;
+
+    if (geomType === "LineString") {
+      return this.#splitLineString(featureGeoJSON, cuttingGeoJSON);
+    } else if (geomType === "Polygon") {
+      return this.#splitPolygon(featureGeoJSON, cuttingGeoJSON);
+    }
+
+    throw new Error(`Geometrityp ${geomType} kan inte delas`);
+  }
+
+  #splitLineString(lineFeature, cuttingLine) {
+    const result = lineSplit(lineFeature, cuttingLine);
+    if (!result.features || result.features.length < 2) {
+      throw new Error(
+        "Linjen kunde inte delas - klipplinjen måste korsa linjen"
+      );
+    }
+    return result.features.map((f) => this.#toOLFeature(f));
+  }
+
+  #splitPolygon(polygonFeature, cuttingLine) {
+    // Check that cutting line intersects the polygon at least twice
+    const intersections = lineIntersect(polygonFeature, cuttingLine);
+    if (intersections.features.length < 2) {
+      throw new Error("Klipplinjen måste korsa polygonen på minst två ställen");
+    }
+
+    // Create a thin buffer around the cutting line to use with difference
+    const bufferedLine = buffer(cuttingLine, 0.0001, { units: "kilometers" });
+
+    // Use difference to cut the polygon
+    // Turf v7 takes a FeatureCollection with both features
+    const result = difference({
+      type: "FeatureCollection",
+      features: [polygonFeature, bufferedLine],
+    });
+
+    if (!result) {
+      throw new Error("Kunde inte dela polygonen");
+    }
+
+    // If the result is a MultiPolygon, we have successfully split
+    if (result.geometry.type === "MultiPolygon") {
+      const polygons = result.geometry.coordinates.map((coords) => {
+        return turfPolygon(coords);
+      });
+      return polygons.map((p) => this.#toOLFeature(p));
+    }
+
+    // If still a single polygon, the cut didn't work as expected
+    if (result.geometry.type === "Polygon") {
+      throw new Error(
+        "Klipplinjen delade inte polygonen helt - se till att linjen korsar hela polygonen"
+      );
+    }
+
+    throw new Error("Oväntat resultat vid delning av polygon");
+  }
+
+  #toOLFeature(geoJsonFeature) {
+    const olf = this.#geoJson.readFeature(geoJsonFeature, {
+      featureProjection: this.#mapProjection,
+    });
+    olf.setId(Math.random() * 1e20);
+    return olf;
   }
 }
 

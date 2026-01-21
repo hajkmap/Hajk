@@ -114,22 +114,45 @@ export default function AttributeEditorView({
       if (!src) return false;
 
       const want = String(logicalId);
+      const wantNum = Number(logicalId);
       const all = src.getFeatures?.() || [];
 
-      const matches = (f) => {
-        const a = f?.getId?.();
-        const b = f?.get?.("@_fid");
-        const c = f?.get?.("id");
-        const A = a != null ? String(a) : null;
-        const B = b != null ? String(b) : null;
-        const C = c != null ? String(c) : null;
-        if (A === want || B === want || C === want) return true;
-        if ((A && A.endsWith("." + want)) || (B && B.endsWith("." + want)))
-          return true;
+      // First, try match on OL feature ID (most reliable)
+      // This prevents matching drafts that inherited the original's id property
+      // Also check for WFS-style IDs like "layername.92" when searching for "92"
+      let f = all.find((feat) => {
+        const olId = feat?.getId?.();
+        if (olId === wantNum || String(olId) === want) return true;
+        // Check for WFS-style IDs ending with ".92"
+        const olIdStr = olId != null ? String(olId) : null;
+        if (olIdStr && olIdStr.endsWith("." + want)) return true;
         return false;
-      };
+      });
 
-      const f = src.getFeatureById?.(want) || all.find(matches);
+      // Fallback: try getFeatureById
+      if (!f) {
+        f = src.getFeatureById?.(want) || src.getFeatureById?.(wantNum);
+      }
+
+      // Last resort: match on properties (but verify OL ID doesn't conflict)
+      if (!f) {
+        f = all.find((feat) => {
+          const olId = feat?.getId?.();
+          const b = feat?.get?.("@_fid");
+          const c = feat?.get?.("id");
+          const B = b != null ? String(b) : null;
+          const C = c != null ? String(c) : null;
+
+          // Skip if OL ID exists and doesn't match (prevents matching wrong feature)
+          if (olId != null && String(olId) !== want && olId !== wantNum) {
+            return false;
+          }
+
+          if (B === want || C === want) return true;
+          if (B && B.endsWith("." + want)) return true;
+          return false;
+        });
+      }
       if (!f) return false;
 
       if (targetGeometry && targetGeometry.clone) {
@@ -138,28 +161,31 @@ export default function AttributeEditorView({
         f.setGeometry(targetGeometry);
       }
 
-      try {
-        f.set?.("USER_DRAWN", true, true);
-        f.set?.("EDIT_ACTIVE", false, true);
-      } catch {}
-
-      layer?.changed?.();
-      src?.changed?.();
       return true;
     },
     [vectorLayerRef]
   );
 
+  // Ref to access current undoStack without causing effect re-runs
+  const undoStackRef = React.useRef(state.undoStack);
+  undoStackRef.current = state.undoStack;
+
   React.useEffect(() => {
     const off = editBus.on("sketch:geometry-edited", (ev) => {
-      const { id, before, after, when = Date.now() } = ev.detail || {};
+      const { id, before, after } = ev.detail || {};
       if (id == null || !after) return;
 
       // 1) mark as "geometry edited"
-      controller.batchEdit([{ id, key: "__geom__", value: when }]);
+      const modelMarker = Date.now();
+      controller.batchEdit([{ id, key: "__geom__", value: modelMarker }]);
 
-      // 2) add to local undo stack (with size limit to prevent memory leaks)
-      geomUndoRef.current.push({ id, before, after, when });
+      // 2) add to local undo stack with a timestamp guaranteed to be AFTER any model entry
+      // Get the model's last undo timestamp and ensure geometry undo is at least 1ms later
+      const currentUndoStack = undoStackRef.current;
+      const modelLastWhen =
+        currentUndoStack?.[currentUndoStack.length - 1]?.when ?? 0;
+      const geomWhen = Math.max(Date.now(), modelLastWhen + 1);
+      geomUndoRef.current.push({ id, before, after, when: geomWhen });
       if (geomUndoRef.current.length > MAX_GEOM_UNDO) {
         geomUndoRef.current = geomUndoRef.current.slice(-MAX_GEOM_UNDO);
       }
@@ -2260,6 +2286,123 @@ export default function AttributeEditorView({
 
   const hasGeomUndo = geomUndoCount > 0;
 
+  // === Split Feature Logic ===
+  const canSplitGeometry = React.useMemo(() => {
+    // For table mode, use tableSelectedIds
+    const activeSelectedIds =
+      ui.mode === "table" ? tableSelectedIds : selectedIds;
+
+    if (activeSelectedIds.size !== 1) return false;
+    const id = Array.from(activeSelectedIds)[0];
+    const feature = featureIndexRef.current?.get(id);
+    if (!feature) return false;
+    const type = feature.getGeometry?.()?.getType?.();
+    return type === "Polygon" || type === "LineString";
+  }, [ui.mode, tableSelectedIds, selectedIds, featureIndexRef]);
+
+  const splitFeature = React.useCallback(() => {
+    const activeSelectedIds =
+      ui.mode === "table" ? tableSelectedIds : selectedIds;
+    if (activeSelectedIds.size !== 1) return;
+
+    const id = Array.from(activeSelectedIds)[0];
+    const feature = featureIndexRef.current?.get(id);
+    if (!feature) return;
+
+    const geometryType = feature.getGeometry()?.getType?.();
+    if (geometryType !== "Polygon" && geometryType !== "LineString") {
+      showNotification("Endast Polygon och LineString kan delas");
+      return;
+    }
+
+    // Emit event to start split mode in Sketch
+    editBus.emit("attrib:split-start", {
+      featureId: id,
+      geometryType,
+    });
+
+    showNotification("Rita en linje som delar objektet");
+  }, [
+    ui.mode,
+    tableSelectedIds,
+    selectedIds,
+    featureIndexRef,
+    showNotification,
+  ]);
+
+  // Listen for split completion from Sketch
+  React.useEffect(() => {
+    const offSplitComplete = editBus.on("sketch:split-complete", (ev) => {
+      const { originalFeatureId, splitFeatures } = ev.detail || {};
+      if (!originalFeatureId || !splitFeatures?.length) return;
+
+      // Get the original feature to copy attributes
+      const originalFeature = featureIndexRef.current?.get(originalFeatureId);
+      if (!originalFeature) return;
+
+      // Mark original for deletion
+      setDeleteState([originalFeatureId], "mark");
+
+      // Create drafts for each split part
+      const createdIds = [];
+      splitFeatures.forEach((splitGeometry) => {
+        // Clone the original feature to get its attributes
+        const draftFeature = originalFeature.clone();
+        draftFeature.setGeometry(splitGeometry);
+
+        // Add draft to model
+        const draftId = model.addDraftFromFeature(draftFeature);
+        createdIds.push(draftId);
+
+        // Add feature to vector layer
+        const layer = vectorLayerRef.current;
+        const src = layer?.getSource?.();
+        if (src) {
+          draftFeature.setId?.(draftId);
+          try {
+            draftFeature.set?.("id", draftId, true);
+            draftFeature.set?.("USER_DRAWN", true, true);
+            draftFeature.set?.("EDIT_ACTIVE", false, true);
+          } catch {}
+
+          src.addFeature(draftFeature);
+          featureIndexRef.current.set(draftId, draftFeature);
+        }
+      });
+
+      // Select the new drafts
+      if (createdIds.length > 0) {
+        setTableSelectedIds(new Set(createdIds));
+        setSelectedIds(new Set(createdIds));
+        setFocusedId(createdIds[0]);
+
+        editBus.emit("attrib:select-ids", {
+          ids: createdIds,
+          source: "view",
+          mode: "replace",
+        });
+      }
+
+      showNotification(`Objektet delades i ${splitFeatures.length} delar`);
+    });
+
+    const offSplitError = editBus.on("sketch:split-error", (ev) => {
+      const { message } = ev.detail || {};
+      showNotification(message || "Kunde inte dela objektet");
+    });
+
+    return () => {
+      offSplitComplete();
+      offSplitError();
+    };
+  }, [
+    model,
+    featureIndexRef,
+    vectorLayerRef,
+    setDeleteState,
+    showNotification,
+  ]);
+
   return (
     <div style={s.shell}>
       <Toolbar
@@ -2335,6 +2478,8 @@ export default function AttributeEditorView({
           tablePendingAdds={pendingAdds}
           lastEditTargetIdsRef={lastEditTargetIdsRef}
           duplicateInForm={duplicateInForm}
+          splitFeature={splitFeature}
+          canSplitGeometry={canSplitGeometry}
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}
           hasGeomUndo={hasGeomUndo}
@@ -2352,6 +2497,8 @@ export default function AttributeEditorView({
           tableSelectedIds={tableSelectedIds}
           tableHasPending={tableHasPending}
           duplicateSelectedRows={duplicateSelectedRows}
+          splitFeature={splitFeature}
+          canSplitGeometry={canSplitGeometry}
           openSelectedInFormFromTable={openSelectedInFormFromTable}
           commitTableEdits={commitTableEdits}
           columnFilters={columnFilters}
@@ -2422,6 +2569,8 @@ export default function AttributeEditorView({
           tablePendingAdds={pendingAdds}
           lastEditTargetIdsRef={lastEditTargetIdsRef}
           duplicateInForm={duplicateInForm}
+          splitFeature={splitFeature}
+          canSplitGeometry={canSplitGeometry}
           hasGeomUndo={hasGeomUndo}
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}

@@ -8,6 +8,8 @@ import { fromCircle } from "ol/geom/Polygon";
 import MultiPoint from "ol/geom/MultiPoint";
 import LineString from "ol/geom/LineString";
 import { editBus } from "../../../buses/editBus";
+import HajkTransformer from "../../../utils/HajkTransformer";
+import Draw from "ol/interaction/Draw";
 
 // Layer name for AttributeEditor features
 const LAYER_NAME = "attributeeditor";
@@ -100,6 +102,14 @@ const useAttributeEditorIntegration = ({
 }) => {
   // Track selected feature IDs to restore selection after effect re-runs
   const selectedIdsRef = React.useRef([]);
+
+  // Track split mode context
+  const splitContextRef = React.useRef(null);
+  const splitDrawInteractionRef = React.useRef(null);
+
+  // Persistent ref for geometry undo - survives effect re-runs
+  // Key: canonical feature ID, Value: geometry before translation/modification
+  const beforeGeomPersistentRef = React.useRef(new Map());
 
   React.useEffect(() => {
     if (!map) return;
@@ -578,7 +588,8 @@ const useAttributeEditorIntegration = ({
         });
       }
 
-      const beforeGeomRef = new Map();
+      // Use persistent ref for geometry undo - survives effect re-runs
+      const beforeGeomRef = beforeGeomPersistentRef.current;
 
       const sel = new Select({
         layers: (lyr) => lyr === layer,
@@ -598,18 +609,39 @@ const useAttributeEditorIntegration = ({
         condition: (evt) => {
           if (activityId !== "MOVE" || !translateEnabled) return false;
 
-          let hit = null;
+          // Collect ALL features at the pixel to enable priority-based selection
+          const candidates = [];
           map.forEachFeatureAtPixel(
             evt.pixel,
             (f, lyr) => {
               if (lyr === layer && !f.get("KINK_MARKER")) {
-                hit = f;
-                return true;
+                candidates.push(f);
               }
-              return false;
+              return false; // Continue iterating to collect all
             },
             { hitTolerance: 6, layerFilter: (lyr) => lyr === layer }
           );
+          if (!candidates.length) return false;
+
+          // Priority selection:
+          // 1. Prefer features already in the selection (so user can grab a selected feature)
+          // 2. Prefer existing features (positive ID) over drafts (negative ID)
+          //    This helps when original is marked for deletion but overlaps with split parts
+          // 3. Otherwise use the first (topmost) candidate
+          const currentSelection = fc.getArray ? fc.getArray() : [];
+          let hit = candidates.find((f) => currentSelection.includes(f));
+          if (!hit) {
+            // Prefer existing features (positive ID) over drafts (negative ID)
+            const getId = (f) => {
+              const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+              return typeof raw === "number" ? raw : parseInt(raw, 10);
+            };
+            const existingFeatures = candidates.filter((f) => {
+              const id = getId(f);
+              return Number.isFinite(id) && id > 0;
+            });
+            hit = existingFeatures[0] || candidates[0];
+          }
           if (!hit) return false;
 
           markFeatureForAttributeEditor(hit);
@@ -798,7 +830,8 @@ const useAttributeEditorIntegration = ({
         try {
           map.removeInteraction(mod);
         } catch {}
-        beforeGeomRef.clear();
+        // Note: Do NOT clear beforeGeomRef here - it's a persistent ref
+        // that needs to survive effect re-runs for undo to work correctly
       };
 
       reg.set(layer, { select: sel, translate: tr, modify: mod, cleanup });
@@ -978,6 +1011,121 @@ const useAttributeEditorIntegration = ({
     });
 
     // ============================================================
+    // SECTION: Split feature mode
+    // ============================================================
+    const offSplitStart = editBus.on("attrib:split-start", (ev) => {
+      const { featureId, geometryType } = ev.detail || {};
+      if (!featureId) return;
+
+      // Store context
+      splitContextRef.current = { featureId, geometryType };
+
+      // Find the target feature
+      const targetFeature = findAeFeatureById(featureId);
+      if (!targetFeature) {
+        editBus.emit("sketch:split-error", {
+          message: "Kunde inte hitta objektet att dela",
+        });
+        splitContextRef.current = null;
+        return;
+      }
+
+      // Disable other interactions during split
+      for (const { select, translate, modify } of reg.values()) {
+        try {
+          select.setActive(false);
+        } catch {}
+        try {
+          translate.setActive(false);
+        } catch {}
+        try {
+          modify.setActive(false);
+        } catch {}
+      }
+
+      // Temporarily disable all map interactions to prevent interference
+      // We'll use the sketch:disable-ae-interactions pattern
+      editBus.emit("sketch:disable-ae-interactions", { disable: true });
+
+      // Create a draw interaction for LineString (cutting line)
+      const drawInteraction = new Draw({
+        type: "LineString",
+        style: new Style({
+          stroke: new Stroke({
+            color: "#ff0000",
+            width: 2,
+            lineDash: [5, 5],
+          }),
+          image: new Circle({
+            radius: 5,
+            fill: new Fill({ color: "#ff0000" }),
+          }),
+        }),
+      });
+
+      // Handle draw end
+      drawInteraction.on("drawend", (e) => {
+        const cuttingLine = e.feature;
+        const context = splitContextRef.current;
+
+        if (!context) {
+          // Cleanup
+          map.removeInteraction(drawInteraction);
+          splitDrawInteractionRef.current = null;
+          applyEnablement();
+          return;
+        }
+
+        // Find the target feature again
+        const feature = findAeFeatureById(context.featureId);
+        if (!feature) {
+          editBus.emit("sketch:split-error", {
+            message: "Kunde inte hitta objektet att dela",
+          });
+          map.removeInteraction(drawInteraction);
+          splitDrawInteractionRef.current = null;
+          splitContextRef.current = null;
+          // Re-enable interactions
+          editBus.emit("sketch:disable-ae-interactions", { disable: false });
+          applyEnablement();
+          return;
+        }
+
+        try {
+          // Create HajkTransformer with map projection
+          const projection = map.getView().getProjection().getCode();
+          const transformer = new HajkTransformer({ projection });
+
+          // Perform the split
+          const splitResults = transformer.getSplit(feature, cuttingLine);
+
+          // Emit results - send geometries
+          editBus.emit("sketch:split-complete", {
+            originalFeatureId: context.featureId,
+            splitFeatures: splitResults.map((f) => f.getGeometry()),
+          });
+        } catch (error) {
+          editBus.emit("sketch:split-error", {
+            message: error.message || "Kunde inte dela objektet",
+          });
+        }
+
+        // Cleanup
+        map.removeInteraction(drawInteraction);
+        splitDrawInteractionRef.current = null;
+        splitContextRef.current = null;
+
+        // Re-enable interactions
+        editBus.emit("sketch:disable-ae-interactions", { disable: false });
+        applyEnablement();
+      });
+
+      // Add the draw interaction to the map
+      map.addInteraction(drawInteraction);
+      splitDrawInteractionRef.current = drawInteraction;
+    });
+
+    // ============================================================
     // SECTION: Wire up existing layers
     // ============================================================
     const offAttach = editBus.on("sketch.attachExternalLayer", (ev) => {
@@ -1106,6 +1254,17 @@ const useAttributeEditorIntegration = ({
       try {
         offDisable();
       } catch {}
+      try {
+        offSplitStart();
+      } catch {}
+      // Cleanup split draw interaction if active
+      if (splitDrawInteractionRef.current) {
+        try {
+          map.removeInteraction(splitDrawInteractionRef.current);
+        } catch {}
+        splitDrawInteractionRef.current = null;
+        splitContextRef.current = null;
+      }
       try {
         layers.un?.("add", onLayerAdd);
       } catch {}

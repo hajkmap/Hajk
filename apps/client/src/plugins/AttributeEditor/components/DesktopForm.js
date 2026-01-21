@@ -3,6 +3,7 @@ import UndoIcon from "@mui/icons-material/Undo";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CallSplitIcon from "@mui/icons-material/CallSplit";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
@@ -63,6 +64,8 @@ export default function DesktopForm({
   tablePendingEdits,
   tablePendingAdds,
   duplicateInForm,
+  splitFeature,
+  canSplitGeometry,
   hasGeomUndo,
   columnFilters,
   setColumnFilters,
@@ -637,6 +640,26 @@ export default function DesktopForm({
             }
           >
             <ContentCopyIcon fontSize="small" />
+          </button>
+
+          <button
+            style={
+              selectedIds.size !== 1 || !canSplitGeometry
+                ? s.iconBtnDisabled
+                : s.iconBtn
+            }
+            disabled={selectedIds.size !== 1 || !canSplitGeometry}
+            onClick={splitFeature}
+            aria-label="Dela objekt"
+            title={
+              selectedIds.size !== 1
+                ? "Markera exakt ett objekt för att dela"
+                : !canSplitGeometry
+                  ? "Endast Polygon och LineString kan delas"
+                  : "Dela valt objekt med en klipplinje"
+            }
+          >
+            <CallSplitIcon fontSize="small" />
           </button>
 
           <button

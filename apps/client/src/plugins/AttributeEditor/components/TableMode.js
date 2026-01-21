@@ -1,5 +1,6 @@
 import React from "react";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CallSplitIcon from "@mui/icons-material/CallSplit";
 import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
@@ -135,6 +136,8 @@ export default function TableMode(props) {
 
     // actions (top bar)
     duplicateSelectedRows,
+    splitFeature,
+    canSplitGeometry,
     openSelectedInFormFromTable,
     commitTableEdits,
     setDeleteState,
@@ -509,6 +512,26 @@ export default function TableMode(props) {
             aria-label="Duplicera val"
           >
             <ContentCopyIcon fontSize="small" />
+          </button>
+
+          <button
+            style={
+              tableSelectedIds.size !== 1 || !canSplitGeometry
+                ? s.iconBtnDisabled
+                : s.iconBtn
+            }
+            disabled={tableSelectedIds.size !== 1 || !canSplitGeometry}
+            onClick={splitFeature}
+            title={
+              tableSelectedIds.size !== 1
+                ? "Markera exakt en rad för att dela"
+                : !canSplitGeometry
+                  ? "Endast Polygon och LineString kan delas"
+                  : "Dela valt objekt med en klipplinje"
+            }
+            aria-label="Dela objekt"
+          >
+            <CallSplitIcon fontSize="small" />
           </button>
 
           <button
