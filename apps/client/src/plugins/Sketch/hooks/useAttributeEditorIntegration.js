@@ -481,11 +481,16 @@ const useAttributeEditorIntegration = ({
         } catch {}
         try {
           translate.setActive(
-            inMove && translate.__allowTranslate && translateEnabled
+            pluginShown &&
+              inMove &&
+              translate.__allowTranslate &&
+              translateEnabled
           );
         } catch {}
         try {
-          modify.setActive(inEditWithNodes && modify.__allowModify);
+          modify.setActive(
+            pluginShown && inEditWithNodes && modify.__allowModify
+          );
         } catch {}
 
         // Note: EDIT_ACTIVE is handled by syncOlSelection(), not here.

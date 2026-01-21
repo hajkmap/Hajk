@@ -1605,6 +1605,11 @@ export default function AttributeEditorView({
     // 3) GEOMETRY UNDO: restore geometry and remove highlight
     if (tGeom >= tModel && geomLast) {
       const { id, before } = geomLast;
+
+      // Always remove the entry from the stack first
+      geomUndoRef.current.pop();
+      setGeomUndoCount((c) => Math.max(0, c - 1));
+
       if (before) {
         // Restore geometry in OL layer
         setGeometryById(id, before);
@@ -1612,10 +1617,6 @@ export default function AttributeEditorView({
         // Trigger validation for the restored geometry
         // Use a separate event to avoid interfering with undo logic
         editBus.emit("sketch:validate-geometry", { id });
-
-        // Remove this entry from the stack
-        geomUndoRef.current.pop();
-        setGeomUndoCount((c) => Math.max(0, c - 1));
 
         // Check if there are MORE geometry edits for this same feature still in the stack
         const hasMoreGeomEdits = geomUndoRef.current.some(
@@ -1626,9 +1627,10 @@ export default function AttributeEditorView({
         if (!hasMoreGeomEdits) {
           controller.batchEdit([{ id, key: "__geom__", value: null }]);
         }
+
+        showNotification("Ångrade geometriändring");
       }
 
-      showNotification("Ångrade geometriändring");
       return;
     }
 
