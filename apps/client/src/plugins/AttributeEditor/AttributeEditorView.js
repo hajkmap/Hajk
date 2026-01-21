@@ -614,14 +614,15 @@ export default function AttributeEditorView({
         );
 
       // Use pre-computed Sets for O(1) lookup
+      // Always show new features (negative IDs) regardless of column filters
       const matchesColumnFilters =
-        editingId === f.id
-          ? true
-          : filterKeys.every((key) => {
-              const filterSet = columnFilterSets[key];
-              const cellValue = String(f[key] ?? "");
-              return filterSet.has(cellValue);
-            });
+        isNegativeId ||
+        editingId === f.id ||
+        filterKeys.every((key) => {
+          const filterSet = columnFilterSets[key];
+          const cellValue = String(f[key] ?? "");
+          return filterSet.has(cellValue);
+        });
 
       return matchesSearch && matchesColumnFilters;
     });
@@ -879,7 +880,9 @@ export default function AttributeEditorView({
     visibleIdsRef.current = new Set(
       filteredAndSorted.flatMap((r) => [r.id, String(r.id)])
     );
-  }, [filteredAndSorted, visibleIdsRef]);
+    // Trigger map re-render when filtering changes
+    vectorLayerRef?.current?.changed?.();
+  }, [filteredAndSorted, visibleIdsRef, vectorLayerRef]);
 
   // Effect 2: Update selectedIdsRef and trigger layer re-render when selection changes
   React.useEffect(() => {
@@ -1920,8 +1923,10 @@ export default function AttributeEditorView({
         });
 
       // Match column filters (same logic as in filteredAndSorted)
-      const matchesColumnFilters = Object.entries(columnFilters || {}).every(
-        ([key, selectedValues]) => {
+      // Always show new features (negative IDs) regardless of column filters
+      const matchesColumnFilters =
+        isNegativeId ||
+        Object.entries(columnFilters || {}).every(([key, selectedValues]) => {
           if (!selectedValues || selectedValues.length === 0) return true;
           const cellValue = String(row[key] ?? "");
 
@@ -1931,8 +1936,7 @@ export default function AttributeEditorView({
           );
 
           return normalizedSelected.includes(cellValue);
-        }
-      );
+        });
 
       return matchesSearch && matchesColumnFilters;
     });
