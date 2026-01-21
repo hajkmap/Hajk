@@ -2393,9 +2393,14 @@ export default function AttributeEditorView({
       showNotification(message || "Kunde inte dela objektet");
     });
 
+    const offSplitCancelled = editBus.on("sketch:split-cancelled", () => {
+      showNotification("Delning avbruten");
+    });
+
     return () => {
       offSplitComplete();
       offSplitError();
+      offSplitCancelled();
     };
   }, [
     model,

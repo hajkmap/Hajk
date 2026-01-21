@@ -1055,6 +1055,7 @@ const useAttributeEditorIntegration = ({
       // Create a draw interaction for LineString (cutting line)
       const drawInteraction = new Draw({
         type: "LineString",
+        stopClick: true, // Prevent double-click zoom
         style: new Style({
           stroke: new Stroke({
             color: "#ff0000",
@@ -1068,16 +1069,54 @@ const useAttributeEditorIntegration = ({
         }),
       });
 
+      // Cleanup function for split drawing
+      const cleanupSplitDraw = (cancelled = false) => {
+        document.removeEventListener("keydown", handleSplitKeyDown);
+        map.removeInteraction(drawInteraction);
+        splitDrawInteractionRef.current = null;
+        splitContextRef.current = null;
+
+        // Re-enable interactions
+        editBus.emit("sketch:disable-ae-interactions", { disable: false });
+        applyEnablement();
+
+        if (cancelled) {
+          editBus.emit("sketch:split-cancelled", {});
+        }
+      };
+
+      // Keyboard handler for Escape and Ctrl+Z
+      const handleSplitKeyDown = (e) => {
+        const { keyCode, ctrlKey, metaKey } = e;
+        if (keyCode === 27) {
+          // Escape - abort drawing
+          e.preventDefault();
+          drawInteraction.abortDrawing();
+        } else if ((ctrlKey || metaKey) && keyCode === 90) {
+          // Ctrl+Z / Cmd+Z - remove last point
+          e.preventDefault();
+          drawInteraction.removeLastPoint();
+        }
+      };
+
+      // Add keyboard listener
+      document.addEventListener("keydown", handleSplitKeyDown);
+
+      // Handle draw abort (triggered by abortDrawing())
+      drawInteraction.on("drawabort", () => {
+        cleanupSplitDraw(true);
+      });
+
       // Handle draw end
       drawInteraction.on("drawend", (e) => {
+        // Remove keyboard listener first
+        document.removeEventListener("keydown", handleSplitKeyDown);
+
         const cuttingLine = e.feature;
         const context = splitContextRef.current;
 
         if (!context) {
-          // Cleanup
-          map.removeInteraction(drawInteraction);
-          splitDrawInteractionRef.current = null;
-          applyEnablement();
+          cleanupSplitDraw(false);
           return;
         }
 
@@ -1087,12 +1126,7 @@ const useAttributeEditorIntegration = ({
           editBus.emit("sketch:split-error", {
             message: "Kunde inte hitta objektet att dela",
           });
-          map.removeInteraction(drawInteraction);
-          splitDrawInteractionRef.current = null;
-          splitContextRef.current = null;
-          // Re-enable interactions
-          editBus.emit("sketch:disable-ae-interactions", { disable: false });
-          applyEnablement();
+          cleanupSplitDraw(false);
           return;
         }
 
@@ -1115,14 +1149,8 @@ const useAttributeEditorIntegration = ({
           });
         }
 
-        // Cleanup
-        map.removeInteraction(drawInteraction);
-        splitDrawInteractionRef.current = null;
-        splitContextRef.current = null;
-
-        // Re-enable interactions
-        editBus.emit("sketch:disable-ae-interactions", { disable: false });
-        applyEnablement();
+        // Cleanup (don't emit cancelled since we completed or errored)
+        cleanupSplitDraw(false);
       });
 
       // Add the draw interaction to the map
