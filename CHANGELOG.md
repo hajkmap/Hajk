@@ -9,11 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ## [Unreleased] -->
 
-## [4.2.0] - 2026-01-16
+## [4.2.0] - 2026-01-23
 
 ### Fixed
 
 - Added more info about the OpenStreetMap background, hidden CQL filters for background layers. [commit](https://github.com/hajkmap/Hajk/commit/b4824ef9f22ac60aa85aa70cfbf2cd2e816d748d)
+- Integrated sphere-based calculations for area and length in DrawModel using `getArea` and `getLength` from `ol/sphere`. [issue](https://github.com/hajkmap/Hajk/issues/1750)
 
 ## [4.2.0-rc.1] - 2025-11-26
 
