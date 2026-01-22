@@ -14,8 +14,7 @@ import { Feature } from "ol";
 import { handleClick } from "./Click";
 import { noModifierKeys, platformModifierKeyOnly } from "ol/events/condition";
 import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
-import { getArea, getLength, getDistance } from "ol/sphere";
-import { transform } from "ol/proj";
+import { getArea, getLength } from "ol/sphere";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -963,9 +962,11 @@ class DrawModel {
       // Calculate radius using sphere-based distance calculation
       const center = geometry.getCenter();
       const edgePoint = polygon.getCoordinates()[0][0]; // First point on the polygon edge
-      const centerWGS84 = transform(center, mapProjection, "EPSG:4326");
-      const edgePointWGS84 = transform(edgePoint, mapProjection, "EPSG:4326");
-      const radius = getDistance(centerWGS84, edgePointWGS84);
+
+      // The radius is measured by creating a line string between the center and the edge point
+      const radius = getLength(new LineString([center, edgePoint]), {
+        projection: mapProjection,
+      });
 
       return [
         {
