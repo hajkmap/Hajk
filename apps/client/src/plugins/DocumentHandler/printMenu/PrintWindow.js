@@ -581,6 +581,7 @@ class PrintWindow extends React.PureComponent {
     */
     const { options } = this.props;
 
+    const modelDocuments = this.props.model.allDocuments;
     const newOptions = { ...options };
     const menuConfig = { ...newOptions }.menuConfig;
     const menuConfigClone = JSON.parse(JSON.stringify(menuConfig));
@@ -611,9 +612,14 @@ class PrintWindow extends React.PureComponent {
 
       //add the table of contents settings from the document json.
       if (document.document) {
+        let modelDoc = modelDocuments.find(
+          (modelDoc) => modelDoc.documentFileName === document.document
+        );
         document.tocChapterLevels =
-          this.props.options?.tableOfContents?.chapterLevelsToShowForPrint ??
-          100;
+          modelDoc?.tableOfContents?.chapterLevelsToShowForPrint ||
+          modelDoc?.tableOfContents?.chapterLevelsToShow ||
+          (this.props.options?.tableOfContents?.chapterLevelsToShowForPrint ??
+            100);
       }
       if (document.document) {
         document.chapters = [];

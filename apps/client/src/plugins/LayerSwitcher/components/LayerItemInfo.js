@@ -104,13 +104,15 @@ export default function LayerItemInfo({ layer, app, chapters }) {
           )}
           {/* MetadataLink */}
           {layerInfo.infoUrl && (
-            <a
-              href={layerInfo.infoUrl || null}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {layerInfo.infoUrlText || layerInfo.infoUrl}
-            </a>
+            <Typography variant="body2">
+              <a
+                href={layerInfo.infoUrl || null}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {layerInfo.infoUrlText || layerInfo.infoUrl}
+              </a>
+            </Typography>
           )}
           {/* Owner */}
           {layerInfo.infoOwner && (
