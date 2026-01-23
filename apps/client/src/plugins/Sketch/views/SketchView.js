@@ -461,7 +461,7 @@ const SketchView = (props) => {
           source: "sketch",
           id: serviceId,
           layerId: selectedService?.layers?.[0]?.id || "",
-          title: newOgcSourceTitle,
+          title: `Redigerar ${newOgcSourceTitle}`,
           color: PLUGIN_COLORS.warning,
         });
 
