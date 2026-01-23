@@ -10,20 +10,16 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-touch-fullscreen" content="yes" />
     <meta name="description" content="Hajk - open source webGIS" />
-    <meta name="app-name" content="%REACT_APP_NAME%" />
-    <meta name="%REACT_APP_NAME%-build-date" content="%REACT_APP_BUILD_DATE%" />
-    <meta name="%REACT_APP_NAME%-git-hash" content="%REACT_APP_GIT_HASH%" />
-    <meta name="%REACT_APP_NAME%-version" content="%REACT_APP_VERSION%" />
+    <meta name="app-name" content="%VITE_APP_NAME%" />
+    <meta name="%VITE_APP_NAME%-build-date" content="%VITE_APP_BUILD_DATE%" />
+    <meta name="%VITE_APP_NAME%-git-hash" content="%VITE_APP_GIT_HASH%" />
+    <meta name="%VITE_APP_NAME%-version" content="%VITE_APP_VERSION%" />
     <meta
-      name="%REACT_APP_NAME%-use-cache-buster"
-      content="%REACT_APP_USE_CACHE_BUSTER%"
+      name="%VITE_APP_NAME%-use-cache-buster"
+      content="%VITE_APP_USE_CACHE_BUSTER%"
     />
 
-    <link
-      rel="manifest"
-      href="/manifest.json"
-      crossorigin="use-credentials"
-    />
+    <link rel="manifest" href="/manifest.json" crossorigin="use-credentials" />
     <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="stylesheet" type="text/css" href="/index.css" />
     <title>Hajk - open source webGIS</title>
@@ -35,9 +31,9 @@
     <div id="root">
       <div class="app-start">
         <span class="sr-only">Sidan laddas</span>
-        <img class="compass" src="/compass.svg" alt="Hajks logga"/>
+        <img class="compass" src="/compass.svg" alt="Hajks logga" />
         <div class="app-name">Hajk</div>
-        <div class="app-version">version %REACT_APP_VERSION%</div>
+        <div class="app-version">version %VITE_APP_VERSION%</div>
       </div>
     </div>
   </body>
