@@ -806,7 +806,7 @@ export function makeStyles(t, isMobile) {
     },
 
     filterWarningBanner: {
-      padding: isMobile ? "8px 10px" : "10px 12px",
+      padding: isMobile ? "4px 8px" : "6px 10px",
       background: t.warningBg,
       border: `1px solid ${t.warning}`,
       borderRadius: 8,
@@ -832,10 +832,12 @@ export function makeStyles(t, isMobile) {
       background: t.warningBg,
       border: `1px solid ${t.warning}`,
       borderRadius: 8,
-      fontSize: isMobile ? 11 : 12,
+      fontSize: isMobile ? 12 : 13,
       color: t.text,
       fontWeight: 600,
       flexShrink: 0,
+      margin: isMobile ? 8 : 12,
+      marginBottom: 0,
     },
     bulkEditWarningIcon: {
       color: t.warning,
