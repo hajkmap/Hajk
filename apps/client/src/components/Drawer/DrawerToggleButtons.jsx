@@ -6,7 +6,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 import CloseIcon from "@mui/icons-material/Close";
-import { Paper, Hidden } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import { functionalOk as functionalCookieOk } from "../../models/Cookie";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -27,10 +27,10 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   [theme.breakpoints.down("sm")]: {
     border: "none",
   },
-  color:
-    theme.palette.mode === "dark"
-      ? theme.palette.common.white
-      : theme.palette.action.active,
+  color: theme.palette.action.active,
+  ...theme.applyStyles("dark", {
+    color: theme.palette.common.white,
+  }),
 }));
 
 function DrawerToggleButtons({
@@ -88,30 +88,24 @@ function DrawerToggleButtons({
       ) : (
         <ButtonIcon sx={{ marginRight: { md: 1 } }} />
       );
-
     const disabled = drawerStatic && value === activeButton ? true : false;
-
     return (
       <StyledToggleButton
         id={value}
         key={value}
         value={value}
-        sx={{
-          // This sx rule is a special case, used by the
-          // "Plugin Tools" drawer button. There are some
-          // cases where we want to hide it on MD & up screens,
-          // see #1020.
-          ...(hideOnMdScreensAndAbove && {
+        sx={[
+          hideOnMdScreensAndAbove && {
             display: {
               md: "none",
             },
-          }),
-        }}
+          },
+        ]}
         disabled={disabled}
       >
         {icon}
         {/* Caption should be hidden on small screens*/}
-        <Hidden mdDown>{caption}</Hidden>
+        <Box sx={{ display: { xs: "none", md: "block" } }}>{caption}</Box>
       </StyledToggleButton>
     );
   };
@@ -126,6 +120,7 @@ function DrawerToggleButtons({
     !areAllButtonsHiddenOnMdAndAbove && (
       <StyledPaper>
         <StyledToggleButtonGroup
+          id="drawer-toggle-button-group"
           value={activeButton}
           exclusive
           onChange={handleClickOnToggleButton}

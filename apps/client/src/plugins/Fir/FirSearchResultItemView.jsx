@@ -5,11 +5,16 @@ import propFilters from "../../components/FeatureInfo/FeaturePropsFilters";
 
 const Container = styled("div")(({ theme }) => ({
   "& table": {
+    userSelect: "text",
+    cursor: "auto",
     borderSpacing: 0,
     width: "100%",
     marginBottom: theme.spacing(2),
     "& tr:nth-of-type(even) td": {
-      backgroundColor: theme.palette.mode === "dark" ? "#373737" : "#ececec",
+      backgroundColor: "#ececec",
+      ...theme.applyStyles("dark", {
+        backgroundColor: "#373737",
+      }),
     },
     "& tr td:first-of-type": {
       fontWeight: 500,

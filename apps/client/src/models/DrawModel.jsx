@@ -14,6 +14,7 @@ import { Feature } from "ol";
 import { handleClick } from "./Click";
 import { noModifierKeys, platformModifierKeyOnly } from "ol/events/condition";
 import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
+import { getArea, getLength } from "ol/sphere";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -580,13 +581,13 @@ class DrawModel {
     // Let's grab the foreground (fill) and background (stroke) colors that we're supposed to use.
     // First we'll try to grab the color from the feature style, then from the current settings, and lastly from the fallback.
     const foregroundColor = featureIsTextType
-      ? feature.get("TEXT_SETTINGS")?.foregroundColor ??
-        this.#textStyleSettings.foregroundColor
+      ? (feature.get("TEXT_SETTINGS")?.foregroundColor ??
+        this.#textStyleSettings.foregroundColor)
       : "#FFF";
     // Same applies for the background
     const backgroundColor = featureIsTextType
-      ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
-        this.#textStyleSettings.backgroundColor
+      ? (feature.get("TEXT_SETTINGS")?.backgroundColor ??
+        this.#textStyleSettings.backgroundColor)
       : "rgba(0, 0, 0, 0.5)";
     // Then we can create and return the style
     return new Text({
@@ -594,13 +595,13 @@ class DrawModel {
       textBaseline: "middle",
       font: `${
         featureIsTextType
-          ? feature.get("TEXT_SETTINGS")?.size ?? this.#textStyleSettings.size
+          ? (feature.get("TEXT_SETTINGS")?.size ?? this.#textStyleSettings.size)
           : 12
       }pt sans-serif`,
       fill: new Fill({
         color: featureIsTextType
-          ? feature.get("TEXT_SETTINGS")?.foregroundColor ??
-            this.#textStyleSettings.foregroundColor
+          ? (feature.get("TEXT_SETTINGS")?.foregroundColor ??
+            this.#textStyleSettings.foregroundColor)
           : "#FFF",
       }),
       text: this.#getFeatureLabelText(feature),
@@ -610,8 +611,8 @@ class DrawModel {
         foregroundColor !== backgroundColor
           ? new Stroke({
               color: featureIsTextType
-                ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
-                  this.#textStyleSettings.backgroundColor
+                ? (feature.get("TEXT_SETTINGS")?.backgroundColor ??
+                  this.#textStyleSettings.backgroundColor)
                 : "rgba(0, 0, 0, 0.7)",
               width: 3,
             })
@@ -930,6 +931,11 @@ class DrawModel {
     // Let's get the geometry-type to begin with, we are going
     // to be handling points, line-strings, and surfaces differently.
     const geometry = feature.getGeometry();
+
+    // We will need projection for sphere-based calculations: the utilities
+    // provided in ol/sphere need to know the projection of the map to work correctly.
+    const mapProjection = this.#map.getView().getProjection();
+
     // If we're dealing with a point, we simply return the coordinates of the point.
     if (geometry instanceof Point) {
       return [
@@ -942,15 +948,32 @@ class DrawModel {
     const showAreaPrefix =
       this.#measurementSettings.showArea &&
       this.#measurementSettings.showPerimeter;
-    // Apparently the circle geometry instance does not expose a
-    // getArea method. Here's a quick fix. (Remember that this area
-    // is only used as an heads-up for the user.)
+
+    // We must convert Circle to Polygon in order to use sphere-based calculations.
+    // This ensures accurate measurements for both local (e.g., EPSG:3008)
+    // and global (e.g., EPSG:3857) projections, accounting for spherical distortion,
+    // see issue #1750 for more details.
     if (geometry instanceof CircleGeometry) {
-      const radius = geometry.getRadius();
+      // Convert circle to polygon with 96 segments for accurate approximation. I picked
+      // 96 segments because it's a good compromise between accuracy and performance and we
+      // seem to use it in other places as well.
+      const polygon = fromCircle(geometry, 96);
+
+      // Calculate radius using sphere-based distance calculation
+      const center = geometry.getCenter();
+      const edgePoint = polygon.getCoordinates()[0][0]; // First point on the polygon edge
+
+      // The radius is measured by creating a line string between the center and the edge point
+      const radius = getLength(new LineString([center, edgePoint]), {
+        projection: mapProjection,
+      });
+
       return [
         {
           type: "AREA",
-          value: Math.pow(radius, 2) * Math.PI,
+          value: getArea(polygon, {
+            projection: mapProjection,
+          }),
           prefix: `${showAreaPrefix ? "Area:" : ""}`,
         },
         {
@@ -963,43 +986,34 @@ class DrawModel {
     // If we're dealing with a line we cannot calculate an area,
     // instead, we only calculate the length.
     if (geometry instanceof LineString) {
-      return [{ type: "LENGTH", value: geometry.getLength(), prefix: "" }];
+      return [
+        {
+          type: "LENGTH",
+          value: getLength(geometry, {
+            projection: mapProjection,
+          }),
+          prefix: "",
+        },
+      ];
     }
     // If we're not dealing with a point, circle, or a line, we are probably dealing
     // with a polygon. For the polygons, we want to return the area and perimeter.
     return [
       {
         type: "AREA",
-        value: geometry?.getArea() || 0,
+        value: getArea(geometry, {
+          projection: mapProjection,
+        }),
         prefix: `${showAreaPrefix ? "Area:" : ""}`,
       },
       {
         type: "PERIMETER",
-        value: this.#getPolygonPerimeter(geometry),
+        value: getLength(geometry, {
+          projection: mapProjection,
+        }),
         prefix: "\n Omkrets:",
       },
     ];
-  };
-
-  // Returns the perimeter of the supplied polygon-geometry
-  #getPolygonPerimeter = (geometry) => {
-    try {
-      // To get the perimeter, we have to get the coordinates of the
-      // outer (0) linear-ring of the supplied geometry. If we fail to extract these
-      // coordinates, we set the linear-ring-coords to null.
-      const linearRingCoords =
-        geometry?.getLinearRing(0)?.getCoordinates() || null;
-      // If no coords were found, we simply return an area of 0.
-      if (!linearRingCoords) {
-        return 0;
-      }
-      // If some coords were found, we can construct a Line-string, and get the length
-      // of that line-string!
-      return new LineString(linearRingCoords)?.getLength() || 0;
-    } catch (error) {
-      // If we fail somewhere, we return 0. Would be better with more handling here!
-      return 0;
-    }
   };
 
   // Returns an OL style to be used in the draw-interaction.
@@ -1903,7 +1917,7 @@ class DrawModel {
   #isFreeHandDrawing = (drawMethod, settings) => {
     return ["Circle", "Rectangle"].includes(drawMethod)
       ? true
-      : settings.freehand ?? false;
+      : (settings.freehand ?? false);
   };
 
   // Accepts a feature with "CIRCLE_RADIUS" and "CIRCLE_CENTER" properties.
@@ -2075,8 +2089,74 @@ class DrawModel {
     });
   };
 
-  // Clones the supplied ol-feature and adds it to the map (the added clone
-  // will be offset just a tad to the east of the supplied feature).
+  toggleGpxFeaturesVisibility = (id) => {
+    this.#drawSource.getFeatures().forEach((f) => {
+      if (f.get("GPX_ID") === id) {
+        const featureHidden = f.get("HIDDEN") ?? false;
+        f.set("HIDDEN", !featureHidden);
+        f.setStyle(this.#getFeatureStyle(f));
+      }
+    });
+  };
+
+  toggleGpxFeaturesTextVisibility = (id) => {
+    this.#drawSource.getFeatures().forEach((f) => {
+      if (f.get("GPX_ID") === id) {
+        const featureTextShown = f.get("SHOW_TEXT") ?? true;
+        f.set("SHOW_TEXT", !featureTextShown);
+        f.setStyle(this.#getFeatureStyle(f));
+      }
+    });
+  };
+
+  removeGpxFeaturesById = (id) => {
+    const features = this.#drawSource
+      .getFeatures()
+      .filter((feature) => feature.get("GPX_ID") === id);
+    features.forEach((feature) => {
+      this.#drawSource.removeFeature(feature);
+    });
+  };
+
+  addGpxFeatures = (features) => {
+    if (!features || !Array.isArray(features)) {
+      console.warn("No features supplied to addGpxFeatures");
+      return;
+    }
+
+    features.forEach((feature) => {
+      // Set necessary properties for editing
+      feature.set("USER_DRAWN", true);
+      feature.set("EDIT_ACTIVE", false);
+
+      // Set DRAW_METHOD based on geometry type
+      const geometryType = feature.getGeometry().getType();
+      switch (geometryType) {
+        case "Point":
+          feature.set("DRAW_METHOD", "Point");
+          break;
+        case "LineString":
+          feature.set("DRAW_METHOD", "Line");
+          break;
+        case "MultiLineString":
+          feature.set("DRAW_METHOD", "Line");
+          break;
+        default:
+          console.warn(
+            `Unsupported geometry type for GPX feature: ${geometryType}`
+          );
+      }
+
+      feature.setStyle(this.#getDrawStyle());
+
+      // Add to the main draw source
+      this.#drawSource.addFeature(feature);
+    });
+
+    // Refresh the layer to show changes
+    this.refreshDrawLayer();
+  };
+
   duplicateFeature = (feature) => {
     try {
       // First we'll have to get a clone of the supplied feature

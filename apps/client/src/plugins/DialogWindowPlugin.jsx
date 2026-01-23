@@ -1,18 +1,14 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withTheme } from "@emotion/react";
-
-import {
-  Hidden,
-  Icon,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
+import { Icon, ListItemIcon, ListItemText } from "@mui/material";
+import { Box } from "@mui/material";
 
 import Card from "../components/Card";
 import Dialog from "../components/Dialog/Dialog";
 import PluginControlButton from "../components/PluginControlButton";
+
+import ListItemButton from "@mui/material/ListItemButton";
 
 class DialogWindowPlugin extends React.PureComponent {
   state = {
@@ -100,6 +96,11 @@ class DialogWindowPlugin extends React.PureComponent {
     this.props.app.globalObserver.subscribe(eventName, (opts = {}) => {
       this.setState({ dialogOpen: true });
     });
+
+    // If our global observers wants to re-render plugins, we want to obey.
+    this.props.app.globalObserver.subscribe("core.pluginsRerender", () => {
+      this.forceUpdate();
+    });
   }
 
   #pluginIsWidget = (target) => {
@@ -166,52 +167,61 @@ class DialogWindowPlugin extends React.PureComponent {
    */
   renderDrawerButton() {
     return createPortal(
-      <Hidden
-        mdUp={
-          this.#pluginIsWidget(this.opts.target) ||
-          this.opts.target === "control"
-        }
+      <Box
+        sx={{
+          display:
+            this.#pluginIsWidget(this.opts.target) ||
+            this.opts.target === "control"
+              ? { xs: "block", md: "none" }
+              : "initial",
+        }}
       >
-        <ListItem
-          button
+        <ListItemButton
           divider={true}
           selected={this.state.dialogOpen}
           onClick={this.#handleButtonClick}
         >
           <ListItemIcon>{this.icon}</ListItemIcon>
           <ListItemText primary={this.title} />
-        </ListItem>
-      </Hidden>,
+        </ListItemButton>
+      </Box>,
       document.getElementById("plugin-buttons")
     );
   }
 
   renderWidgetButton(id) {
     return createPortal(
-      // Hide Widget button on small screens, see renderDrawerButton too
-      <Hidden mdDown>
+      <Box
+        sx={{
+          display: { xs: "none", md: "flex" },
+          width: "fit-content",
+        }}
+      >
         <Card
           icon={this.icon}
           onClick={this.#handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      </Hidden>,
+      </Box>,
       document.getElementById(id)
     );
   }
 
   renderControlButton() {
     return createPortal(
-      // Hide Control button on small screens, see renderDrawerButton too
-      <Hidden mdDown>
+      <Box
+        sx={{
+          display: { xs: "none", md: "block" },
+        }}
+      >
         <PluginControlButton
           icon={this.icon}
           onClick={this.#handleButtonClick}
           title={this.title}
           abstract={this.description}
         />
-      </Hidden>,
+      </Box>,
       document.getElementById("plugin-control-buttons")
     );
   }
@@ -224,9 +234,9 @@ class DialogWindowPlugin extends React.PureComponent {
         <>
           {this.renderDialog()}
           {/* Always render a Drawer button unless its target is "hidden". 
-              It's a backup for plugins render elsewhere: we hide 
-              Widget and Control buttons on small screens and fall 
-              back to Drawer button). */}
+          It's a backup for plugins render elsewhere: we hide 
+          Widget and Control buttons on small screens and fall 
+          back to Drawer button). */}
           {target !== "hidden" && this.renderDrawerButton()}
           {/* Widget buttons must also render a Widget */}
           {this.#pluginIsWidget(target) &&

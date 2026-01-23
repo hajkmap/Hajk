@@ -1,18 +1,12 @@
 import React, { useState, useRef } from "react";
 import { useSnackbar } from "notistack";
 
-import {
-  Box,
-  Collapse,
-  IconButton,
-  Stack,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Box, Collapse, IconButton, Stack, Typography } from "@mui/material";
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import HajkToolTip from "components/HajkToolTip";
 
 function FavoritesViewHeader({
   backButtonCallback,
@@ -94,27 +88,31 @@ function FavoritesViewHeader({
 
   return (
     <Box
-      sx={{
+      sx={(theme) => ({
         p: 1,
-        backgroundColor: (theme) =>
-          theme.palette.mode === "dark" ? "#373737" : theme.palette.grey[100],
-        borderBottom: (theme) =>
-          `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-      }}
+        backgroundColor: theme.palette.grey[100],
+        borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+        ...theme.applyStyles("dark", {
+          backgroundColor: "#373737",
+        }),
+      })}
       onClick={(e) => e.stopPropagation()}
     >
       <Stack direction="row" alignItems="center">
-        <Tooltip
+        <HajkToolTip
           open={tooltipOpen}
           onClose={handleClose}
           onOpen={handleOpen}
           title="Tillbaka"
           TransitionProps={{ timeout: 0 }}
         >
-          <IconButton onClick={handleBackButtonClick}>
+          <IconButton
+            id="favorites-list-back-button"
+            onClick={handleBackButtonClick}
+          >
             <ArrowBackIcon />
           </IconButton>
-        </Tooltip>
+        </HajkToolTip>
         <Box sx={{ flexGrow: 1, textAlign: "center" }}>
           <Typography variant="subtitle1">Mina favoriter</Typography>
         </Box>
@@ -126,17 +124,18 @@ function FavoritesViewHeader({
           onChange={handleFileInputChange}
         />
         <IconButton
+          id="import-favorites-button"
           disabled={!functionalCookiesOk}
           onClick={handleImportButtonClick}
         >
-          <Tooltip title={"Importera"}>
+          <HajkToolTip title={"Importera"}>
             <FileUploadOutlinedIcon />
-          </Tooltip>
+          </HajkToolTip>
         </IconButton>
         <IconButton onClick={handleInfoButtonClick}>
-          <Tooltip title={infoIsActive ? "Dölj info" : "Visa info"}>
+          <HajkToolTip title={infoIsActive ? "Dölj info" : "Visa info"}>
             <InfoOutlinedIcon />
-          </Tooltip>
+          </HajkToolTip>
         </IconButton>
       </Stack>
       <Collapse
@@ -146,12 +145,11 @@ function FavoritesViewHeader({
         className="infoCollapse"
       >
         <Box
-          sx={{
+          sx={(theme) => ({
             px: 1,
             pt: 1,
-            borderTop: (theme) =>
-              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-          }}
+            borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          })}
         >
           <Typography variant="subtitle2">{favoritesInfoText}</Typography>
         </Box>

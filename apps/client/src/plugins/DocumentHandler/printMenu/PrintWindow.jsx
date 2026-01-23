@@ -66,6 +66,8 @@ const GridMiddleContainer = styled(Grid)(({ theme }) => ({
 
 const GridHeaderContainer = styled(Grid)(({ theme }) => ({
   marginBottom: theme.spacing(2),
+  alignItems: "center",
+  justifyContent: "space-between",
 }));
 
 const GridSettingsContainer = styled(Grid)(({ theme }) => ({
@@ -350,6 +352,19 @@ class PrintWindow extends React.PureComponent {
             h6 {
               page-break-after: avoid;
             }
+            img {
+              max-width: 100% !important;
+              height: auto !important;
+              display: block;
+              margin: 0.5em 0 !important;
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            figure {
+              margin: 0.5em 0 !important;
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
             .MuiTypography-body1 {
               page-break-before: avoid;
             }
@@ -566,6 +581,7 @@ class PrintWindow extends React.PureComponent {
     */
     const { options } = this.props;
 
+    const modelDocuments = this.props.model.allDocuments;
     const newOptions = { ...options };
     const menuConfig = { ...newOptions }.menuConfig;
     const menuConfigClone = JSON.parse(JSON.stringify(menuConfig));
@@ -596,9 +612,14 @@ class PrintWindow extends React.PureComponent {
 
       //add the table of contents settings from the document json.
       if (document.document) {
+        let modelDoc = modelDocuments.find(
+          (modelDoc) => modelDoc.documentFileName === document.document
+        );
         document.tocChapterLevels =
-          this.props.options?.tableOfContents?.chapterLevelsToShowForPrint ??
-          100;
+          modelDoc?.tableOfContents?.chapterLevelsToShowForPrint ||
+          modelDoc?.tableOfContents?.chapterLevelsToShow ||
+          (this.props.options?.tableOfContents?.chapterLevelsToShowForPrint ??
+            100);
       }
       if (document.document) {
         document.chapters = [];
@@ -865,7 +886,6 @@ class PrintWindow extends React.PureComponent {
   renderCreatePDFButton() {
     return (
       <GridFooterContainer
-        item
         container
         alignContent="center"
         alignItems="center"
@@ -925,10 +945,10 @@ class PrintWindow extends React.PureComponent {
         <Typography align="center" variant="h6">
           Skapa PDF
         </Typography>
-        <GridSettingsContainer container item>
+        <GridSettingsContainer container>
           <Typography variant="h6">Inställningar</Typography>
 
-          <Grid xs={12} item>
+          <Grid size={12}>
             <FormControlLabel
               value="Välj alla dokument"
               control={
@@ -945,10 +965,8 @@ class PrintWindow extends React.PureComponent {
             />
           </Grid>
         </GridSettingsContainer>
-
         <Typography variant="h6">Valt innehåll</Typography>
-
-        <GridMiddleContainer item container>
+        <GridMiddleContainer container>
           <PrintList
             localObserver={localObserver}
             documentMenu={menuInformation}
@@ -956,7 +974,6 @@ class PrintWindow extends React.PureComponent {
             handleTogglePrint={this.toggleChosenForPrint}
           />
         </GridMiddleContainer>
-
         {documentWindowMaximized && this.renderCreatePDFButton()}
         {this.renderLoadingDialog()}
       </>
@@ -1100,13 +1117,8 @@ class PrintWindow extends React.PureComponent {
       <>
         {!showAttachments ? (
           <GridGridContainer container wrap="nowrap" direction="column">
-            <GridHeaderContainer
-              alignItems="center"
-              justifyContent="space-between"
-              item
-              container
-            >
-              <Grid item xs={4}>
+            <GridHeaderContainer container>
+              <Grid size={4}>
                 <Button
                   color="primary"
                   style={{ paddingLeft: 0 }}
@@ -1116,7 +1128,7 @@ class PrintWindow extends React.PureComponent {
                   <Typography justify="center">Tillbaka</Typography>
                 </Button>
               </Grid>
-              <StyledGrid item xs={4}>
+              <StyledGrid size={4}>
                 {pdfLinks?.length > 0 && (
                   <Button
                     color="primary"
@@ -1133,13 +1145,8 @@ class PrintWindow extends React.PureComponent {
           </GridGridContainer>
         ) : (
           <GridGridContainer container wrap="nowrap" direction="column">
-            <GridHeaderContainer
-              alignItems="center"
-              justifyContent="space-between"
-              item
-              container
-            >
-              <Grid item xs={4}>
+            <GridHeaderContainer container>
+              <Grid size={4}>
                 <Button
                   color="primary"
                   style={{ paddingLeft: 0 }}

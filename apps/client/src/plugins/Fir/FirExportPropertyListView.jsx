@@ -17,12 +17,6 @@ import Collapse from "@mui/material/Collapse";
 import CircularProgress from "@mui/material/CircularProgress";
 import { hfetch } from "../../utils/FetchWrapper";
 
-const ButtonWithLoader = styled(Button)(({ theme, loading }) => ({
-  "& img": {
-    opacity: loading === "true" ? 0.3 : 1.0,
-  },
-}));
-
 const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
   fontSize: "0.875rem",
   fontWeight: "400",
@@ -88,7 +82,7 @@ class FirExportPropertyListView extends React.PureComponent {
     const params = {
       samfallighet: this.state.chCommunities,
       ga: this.state.chCommunityFacilities,
-      rattigheter: this.state.chRights,
+      rattighet: this.state.chRights,
       persnr: this.state.chSsn,
       taxerad_agare: this.state.chTaxedOwner,
       fastighet_utskick: this.state.chSendList,
@@ -253,18 +247,18 @@ class FirExportPropertyListView extends React.PureComponent {
               </CheckboxGroupContainer>
               <div>
                 <div>
-                  <ButtonWithLoader
+                  <Button
                     fullWidth={true}
                     variant="outlined"
                     color="primary"
-                    loading={"" + this.state.loading}
                     startIcon={<this.ExcelLogo />}
                     onClick={this.handleSendClick}
                     disabled={this.state.loading}
+                    sx={{ opacity: this.state.loading ? 0.3 : 1.0 }}
                   >
                     Skapa fastighetsförteckning
                     {this.state.loading && <CircularProgressButton size={24} />}
-                  </ButtonWithLoader>
+                  </Button>
                 </div>
 
                 <Collapse in={this.state.downloadUrl !== null}>

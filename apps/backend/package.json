@@ -1,6 +1,6 @@
 {
   "name": "hajk-backend",
-  "version": "4.0.0",
+  "version": "4.2.0",
   "description": "Hajk Backend",
   "homepage": ".",
   "repository": {
@@ -18,40 +18,36 @@
     "compile": "shx rm -rf dist && shx cp -r server dist",
     "dev": "nodemon server --config .nodemonrc.json",
     "dev:debug": "nodemon server --config .nodemonrc.json --inspect",
-    "test": "mocha --exit",
-    "test:debug": "mocha --inspect-brk --exit",
     "lint": "eslint ./server",
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
+    "@babel/runtime": "^7.28.6",
     "activedirectory2": "^2.2.0",
     "clf-date": "^0.2.1",
-    "compression": "^1.8.0",
+    "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "express-openapi-validator": "^5.4.3",
-    "fast-xml-parser": "^4.5.2",
-    "helmet": "^8.0.0",
-    "http-proxy-middleware": "^2.0.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "express-openapi-validator": "^5.6.0",
+    "fast-xml-parser": "^5.3.3",
+    "helmet": "^8.1.0",
+    "http-proxy-middleware": "^3.0.5",
     "log4js": "^6.9.1",
-    "query-string": "^8.2.0",
-    "write-excel-file": "^1.4.29",
-    "ws": "^8.18.0"
+    "query-string": "^9.3.1",
+    "write-excel-file": "^2.3.10",
+    "ws": "^8.19.0"
   },
   "devDependencies": {
-    "chai": "^4.3.10",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.29.1",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^5.1.3",
-    "mocha": "^11.1.0",
-    "nodemon": "^3.0.3",
-    "prettier": "^3.2.5",
-    "shx": "^0.3.4",
-    "supertest": "^6.3.4"
+    "eslint-plugin-prettier": "^5.5.5",
+    "nodemon": "^3.1.11",
+    "prettier": "^3.8.0",
+    "shx": "^0.4.0"
   },
   "author": "Jacob Wodzyński <jacob.wodzynski@halmstad.se> (https://github.com/hajkmap)"
 }

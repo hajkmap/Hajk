@@ -27,8 +27,14 @@ class HajkTransformer {
     const f1 = this.#geoJson.writeFeatureObject(feature1);
     const f2 = this.#geoJson.writeFeatureObject(feature2);
 
-    // union the 2 incoming geometries.
-    const unionFeatureObject = union(f1.geometry, f2.geometry);
+    // Create a FeatureCollection containing both features
+    const featureCollection = {
+      type: "FeatureCollection",
+      features: [f1, f2],
+    };
+
+    // union the features in the collection
+    const unionFeatureObject = union(featureCollection);
 
     // convert GeoJSON feature object back to OpenLayer Feature using the maps projection.
     const olf = this.#geoJson.readFeature(unionFeatureObject, {

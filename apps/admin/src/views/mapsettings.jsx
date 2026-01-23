@@ -472,10 +472,13 @@ class Menu extends Component {
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
       enableOSM: false,
+      OSMVisibleAtStart: false,
       showBreadcrumbs: false,
       showDrawOrderView: false,
       showFilter: false,
       showQuickAccess: false,
+      legendForceTransparency: false,
+      legendTryHiDPI: false,
       enableSystemLayersSwitch: false,
       lockDrawOrderBaselayer: false,
       drawOrderViewInfoText:
@@ -505,6 +508,7 @@ class Menu extends Component {
       keywords: [],
       keywordInput: "",
       cqlFilterVisible: false,
+      renderSpecialBackgroundsAtBottom: false,
     };
     this.titleRef = React.createRef();
     this.authorRef = React.createRef();
@@ -543,6 +547,8 @@ class Menu extends Component {
             existingConfig.backgroundSwitcherWhite ??
             this.state.backgroundSwitcherWhite,
           enableOSM: existingConfig.enableOSM ?? this.state.enableOSM,
+          OSMVisibleAtStart:
+            existingConfig.OSMVisibleAtStart ?? this.state.OSMVisibleAtStart,
           showBreadcrumbs:
             existingConfig.showBreadcrumbs ?? this.state.showBreadcrumbs,
           showDrawOrderView:
@@ -550,6 +556,11 @@ class Menu extends Component {
           showFilter: existingConfig.showFilter ?? this.state.showFilter,
           showQuickAccess:
             existingConfig.showQuickAccess ?? this.state.showQuickAccess,
+          legendForceTransparency:
+            existingConfig.legendForceTransparency ??
+            this.state.legendForceTransparency,
+          legendTryHiDPI:
+            existingConfig.legendTryHiDPI ?? this.state.legendTryHiDPI,
           enableSystemLayersSwitch:
             existingConfig.enableSystemLayersSwitch ??
             this.state.enableSystemLayersSwitch,
@@ -593,6 +604,9 @@ class Menu extends Component {
             this.state.minMaxZoomAlertOnToggleOnly,
           cqlFilterVisible:
             existingConfig.cqlFilterVisible ?? this.state.cqlFilterVisible,
+          renderSpecialBackgroundsAtBottom:
+            existingConfig.renderSpecialBackgroundsAtBottom ??
+            this.state.renderSpecialBackgroundsAtBottom,
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -800,10 +814,13 @@ class Menu extends Component {
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,
+      OSMVisibleAtStart: this.state.OSMVisibleAtStart,
       showBreadcrumbs: this.state.showBreadcrumbs,
       showDrawOrderView: this.state.showDrawOrderView,
       showFilter: this.state.showFilter,
       showQuickAccess: this.state.showQuickAccess,
+      legendForceTransparency: this.state.legendForceTransparency,
+      legendTryHiDPI: this.state.legendTryHiDPI,
       enableSystemLayersSwitch: this.state.enableSystemLayersSwitch,
       lockDrawOrderBaselayer: this.state.lockDrawOrderBaselayer,
       drawOrderViewInfoText: this.state.drawOrderViewInfoText,
@@ -816,6 +833,8 @@ class Menu extends Component {
       instruction: this.state.instruction,
       minMaxZoomAlertOnToggleOnly: this.state.minMaxZoomAlertOnToggleOnly,
       cqlFilterVisible: this.state.cqlFilterVisible,
+      renderSpecialBackgroundsAtBottom:
+        this.state.renderSpecialBackgroundsAtBottom,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
       themeMapHeaderCaption: this.state.themeMapHeaderCaption,
       visibleForGroups: this.state.visibleForGroups.map(
@@ -2269,6 +2288,42 @@ class Menu extends Component {
               </div>
               <div>
                 <input
+                  id="legendForceTransparency"
+                  name="legendForceTransparency"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.legendForceTransparency}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="legendForceTransparency">
+                  Försök att göra teckenförteckning transparent (Experimentell){" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Lagerhanteraren kommer försöka att göra GetLegendGraphics transparenta och lägga till en bakgrund för att fungera bättre visuellt i vissa lägen. I GeoServer kommer även texten bli vit istället i dark mode"
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="legendTryHiDPI"
+                  name="legendTryHiDPI"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.legendTryHiDPI}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="legendTryHiDPI">
+                  Försök att hämta teckenförklaring i 180dpi (Experimentell){" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Lagerhanteraren kommer försöka hämta GetLegendGraphics i högre upplösning. 180dpi."
+                  />
+                </label>
+              </div>
+              <div>
+                <input
                   id="enableTransparencySlider"
                   name="enableTransparencySlider"
                   type="checkbox"
@@ -2520,6 +2575,32 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label htmlFor="enableOSM">OpenStreetMap</label>
+              </div>
+              <div>
+                <input
+                  id="OSMVisibleAtStart"
+                  name="OSMVisibleAtStart"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.OSMVisibleAtStart}
+                />
+                &nbsp;
+                <label htmlFor="OSMVisibleAtStart">
+                  Ladda kartan med OpenStreetMap synligt vid start
+                </label>
+              </div>
+              <div>
+                <input
+                  id="renderSpecialBackgroundsAtBottom"
+                  name="renderSpecialBackgroundsAtBottom"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.renderSpecialBackgroundsAtBottom}
+                />
+                &nbsp;
+                <label htmlFor="renderSpecialBackgroundsAtBottom">
+                  Visa lagren "Vit", "Svart" och "OSM" längst ner i listan.
+                </label>
               </div>
               <div className="separator">Justera lagerhanteraren</div>
               <div className="margined">

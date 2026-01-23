@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 
 import { ListItemText } from "@mui/material";
 
@@ -51,18 +51,57 @@ const LayersTab = ({
 
   const [filterValue, setFilterValue] = useState(null);
 
-  const handleFilterSubmit = useCallback((value) => {
-    const filterValue = value === "" ? null : value;
-    if (filterValue?.length > 0) {
-      setFilterValue(filterValue);
+  // state to store the staticLayerTree to dynamically update the status of a specific grouplayer and trigger a rerender
+  const [layerTree, setLayerTree] = useState(staticLayerTree);
+
+  // Listen for global DOM events dispatched by the Introduction component
+  // to expand the first grouplayer object including its children
+  useEffect(() => {
+    function expandFirstGroupLayerObject(tree) {
+      if (!Array.isArray(tree)) return [];
+
+      return tree.map((node, index) => ({
+        ...node,
+        defaultExpanded: index === 0,
+        children:
+          index === 0 && node.children
+            ? expandFirstGroupLayerObject(node.children)
+            : node.children,
+      }));
     }
-  }, []);
+
+    const handleExpand = () => {
+      const updated = expandFirstGroupLayerObject(staticLayerTree);
+      setLayerTree(updated);
+    };
+
+    document.addEventListener("expandFirstGroup", handleExpand);
+    return () => {
+      document.removeEventListener("expandFirstGroup", handleExpand);
+    };
+  }, [staticLayerTree]);
+
+  const handleFilterSubmit = useCallback(
+    (value) => {
+      const filterValue = value === "" ? null : value;
+      if (filterValue?.length > 0) {
+        setFilterValue(filterValue);
+      } else {
+        setFilterValue(null);
+        // Reset layerTree to original staticLayerTree when filter is cleared
+        setLayerTree(staticLayerTree);
+      }
+    },
+    [staticLayerTree]
+  );
 
   const handleFilterValueChange = debounce((value) => {
     const filterValue = value === "" ? null : value;
 
     if (value === "") {
       setFilterValue(null);
+      // Reset layerTree to original staticLayerTree when filter is cleared
+      setLayerTree(staticLayerTree);
     } else if (filterValue.length >= minFilterLength) {
       setFilterValue(filterValue);
     }
@@ -107,6 +146,9 @@ const LayersTab = ({
 
   return (
     <div
+      // This class is used to style specific elements when the tab is active
+      // If you search for this class in the codebase, you can find related style-fixes.
+      className={"ls-layers-tab-view"}
       style={{
         ...style,
         position: "relative",
@@ -133,23 +175,27 @@ const LayersTab = ({
             px: 4,
           }}
           primary="Inga resultat"
-          primaryTypographyProps={{
-            pr: 5,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            variant: "body1",
+          slotProps={{
+            primary: {
+              pr: 5,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              variant: "body1",
+            },
           }}
         />
       )}
       <div
-        id="sc-test"
+        id="layerslist-container"
         ref={scrollContainerRef}
         style={{
           height: "inherit",
           overflowY: "auto",
+          overflowX: "hidden",
           flexBasis: "100%",
           flexGrow: "1",
           flexShrink: "1",
+          transform: "translateZ(0)", // Force layer into 3D space to prevent flickering
         }}
       >
         {filterHits === null && (
@@ -167,9 +213,10 @@ const LayersTab = ({
             filterValue={filterValue}
             layersState={layersState}
             staticLayerConfig={staticLayerConfig}
+            staticLayerTree={staticLayerTree}
           />
         )}
-        {staticLayerTree.map((group) => (
+        {layerTree.map((group, index) => (
           <LayerGroup
             key={group.id}
             staticLayerConfig={staticLayerConfig}
@@ -178,6 +225,7 @@ const LayersTab = ({
             globalObserver={globalObserver}
             filterHits={filterHits}
             filterValue={filterValue}
+            isFirstGroup={index === 0}
           />
         ))}
       </div>

@@ -44,15 +44,12 @@ const FileInputContainer = styled("div")(({ theme }) => ({
   position: "relative",
   display: "flex",
   alignItems: "center",
-
   "& > *": {
     display: "flex",
   },
-
   "& span": {
     whiteSpace: "nowrap",
   },
-
   "& span.filename": {
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
@@ -424,12 +421,14 @@ class FirToolbarView extends React.PureComponent {
                 }
               }}
               size="small"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">meter</InputAdornment>
-                ),
-              }}
               variant="outlined"
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">meter</InputAdornment>
+                  ),
+                },
+              }}
             />
           </ContainerTopDoublePadded>
         </Collapse>

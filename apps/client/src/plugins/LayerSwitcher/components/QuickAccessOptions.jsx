@@ -1,17 +1,12 @@
 import * as React from "react";
-
-import {
-  IconButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Tooltip,
-} from "@mui/material";
+import { useEffect } from "react";
+import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import HajkToolTip from "components/HajkToolTip";
+import LsIconButton from "./LsIconButton";
 
 export default function QuickAccessOptions({
   handleAddLayersToQuickAccess,
@@ -23,6 +18,17 @@ export default function QuickAccessOptions({
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const optionsMenuIsOpen = Boolean(anchorEl);
+  // Add event listener for closing the quickAccess menu in the introduction component.
+  useEffect(() => {
+    const handleCloseMenu = () => {
+      setAnchorEl(null);
+    };
+
+    document.addEventListener("closeQuickAccessMenu", handleCloseMenu);
+    return () => {
+      document.removeEventListener("closeQuickAccessMenu", handleCloseMenu);
+    };
+  }, []);
 
   // Show the options menu by setting an anchor element
   const handleShowMoreOptionsClick = (e) => {
@@ -40,22 +46,28 @@ export default function QuickAccessOptions({
 
   return (
     <>
-      <IconButton
+      <LsIconButton
+        id="quick-access-menu-button"
         size="small"
         aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <Tooltip title="Fler val för snabbåtkomst">
+        <HajkToolTip title="Fler val för snabbåtkomst">
           <MoreVertOutlinedIcon />
-        </Tooltip>
-      </IconButton>
+        </HajkToolTip>
+      </LsIconButton>
       <Menu
         anchorEl={anchorEl}
         open={optionsMenuIsOpen}
         onClose={onOptionsMenuClose}
         variant={"menu"}
+        slotProps={{
+          paper: {
+            id: "quick-access-menu-content",
+          },
+        }}
       >
         <MenuItem
           onClick={(e) => {

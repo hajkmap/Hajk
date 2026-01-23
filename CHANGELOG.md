@@ -7,11 +7,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-<!-- ## [Unreleased]
+<!-- ## [Unreleased] -->
+
+## [4.2.0] - 2026-01-23
+
+### Fixed
+
+- Added more info about the OpenStreetMap background, hidden CQL filters for background layers. [commit](https://github.com/hajkmap/Hajk/commit/b4824ef9f22ac60aa85aa70cfbf2cd2e816d748d)
+- Integrated sphere-based calculations for area and length in DrawModel using `getArea` and `getLength` from `ol/sphere`. [issue](https://github.com/hajkmap/Hajk/issues/1750)
+
+## [4.2.0-rc.1] - 2025-11-26
 
 ### Added
 
+- It's now possible to use Matomo tracking without cookies. [PR#1691](https://github.com/hajkmap/Hajk/pull/1691)
+- OpenStreetMap can optionally be selected as default background layer in map config. See commits [here](https://github.com/hajkmap/Hajk/commit/e1b5f59c69b8985a498efee27aa76ea11ca4afbb) and [here](https://github.com/hajkmap/Hajk/commit/4040c7c11367620040efc7609a56e1b3b436cc67). In addition, the Admin UI option has been added in [this commit](https://github.com/hajkmap/Hajk/commit/06c52b0cd863022f7c9a58e5103168627ac41172).
+- Changed Hajk's default projection (in `simpleMapConfig.json` and `map_1.json`) to EPSG:3857. This makes our new default OSM background look way better. [commit](https://github.com/hajkmap/Hajk/commit/6f5a5dc89a5c18d49f5af2d26353036d35945b82)
+
 ### Changed
+
+- Select Tool in FmeServer plugin can now select/deselect several features. [PR#1708](https://github.com/hajkmap/Hajk/pull/1708)
+- MUI upgraded to v7. [PR#1658](https://github.com/hajkmap/Hajk/pull/1658)
+- The OpenStreetMap background (as well as the white and black backgrounds) are now first-class citizens in LayerSwitcher, enabling e.g. loading the app with these layers visible. [PR#1680](https://github.com/hajkmap/Hajk/pull/1680)
+- The legacy `react-smooth-dnd` have been replaced with `dnd-kit`, [PR#1689](https://github.com/hajkmap/Hajk/pull/1689)
+- The introduction module has been updated to support Hajk 4. Two tour modes have been implemented (full tour and new layerswitcher tour). [PR#1664](https://github.com/hajkmap/Hajk/pull/1664)
+- The Anchor tool is now a dialog component. [PR#1711](https://github.com/hajkmap/Hajk/pull/1711)
+- QuickAccess: LayerGroups are now shown as breadcrumbs, with each group’s layers displayed beneath it. [PR#1726](https://github.com/hajkmap/Hajk/pull/1726)
 
 ### Deprecated
 
@@ -19,7 +40,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-### Security -->
+- Bookmarks: Fixed button state. [PR#1609](https://github.com/hajkmap/Hajk/pull/1609)
+- WFS layers: Fixed how different ways of writing the WFS service URL were affecting Client's ability to load layers from that service. [PR#1677](https://github.com/hajkmap/Hajk/pull/1677)
+- DialogWindowPlugin-based tools: Fixed disappearing toolbar button when toolbar state was toggled. [issue](https://github.com/hajkmap/Hajk/issues/1687)
+- LayerSwitcher: Don't show multiple legend graphics for a layer group if Admin specified one legend image. [issue](https://github.com/hajkmap/Hajk/issues/1644)
+- LayerSwitcher: Don't render Quick Access Presets if the functionality has been disabled in Admin. [PR](https://github.com/hajkmap/Hajk/pull/1693)
+- LayerSwitcher: Info for groups now shows the same button as info for regular layers and group layers. This solution is compatible with existing configurations. [PR](https://github.com/hajkmap/Hajk/pull/1699)
+- Infoclick: Fix bug where true/false values could be switched if certain conditions in the underlying database were met. [issue](https://github.com/hajkmap/Hajk/issues/1698)
+- Client: Show an Access Denied message if Backend returns 403. Closes [issue](https://github.com/hajkmap/Hajk/issues/1705)
+- LayerSwitcher: It is now possible to search on a LayerGroup name. GroupLayer search now supports expanding and showing sublayers, which was not possible before. Closes [issue](https://github.com/hajkmap/Hajk/issues/1722)
+- The add button in Bookmark is now only enabled when user has entered text in input. [PR#1657](https://github.com/hajkmap/Hajk/pull/1657)
+- QuickAccess: Sublayers inside a GroupLayer are now toggled correctly when using the “Ladda” button in QuickAccess. [PR#1726](https://github.com/hajkmap/Hajk/pull/1726)
+
+### Security
+
+- Upgraded dependencies in Client and Backend. [commit](https://github.com/hajkmap/Hajk/commit/2bee79696a66413749fb70c32b5c0b1cb7d4835f) and [commit](https://github.com/hajkmap/Hajk/commit/6f8f1741cfba6cb7eb57bf65943a8af192af7bc2)
+
+## [4.1.0] - 2025-06-18
+
+### Fixed
+
+- LayerComparer: Corrected layer comparison logic in onClose handler. [commit](https://github.com/hajkmap/Hajk/commit/7f85c143055f1648a3033588a9462a902af4dea5)
+- The `reinstall_modules.sh` script has been fixed to resolve install problems due to outdated peer dependency in one of our dependencies. [commit](https://github.com/hajkmap/Hajk/commit/ef4940b566f39b20190fe03726dc4a6ef33aa9db)
+
+## [4.1.0-rc.1] - 2025-04-25
+
+### Added
+
+- Sketch: Added GPX import and export. [PR#1641](https://github.com/hajkmap/Hajk/pull/1641)
+- Sketch/Measurer: Disable snapping temporarily on keyDown (Space) ([issue](https://github.com/hajkmap/Hajk/issues/1616))
+- DocumentHandler: Now possible to add map-link that opens corresponding plugin (with/without enableAppStatInHash) ([issue](https://github.com/hajkmap/Hajk/issues/1613))
+
+### Removed
+
+- Backend: Packages related to testing were never really used. [commit](https://github.com/hajkmap/Hajk/commit/934ba9780d2e57e60cde19f8341db49bcc6103e7) and [commit](https://github.com/hajkmap/Hajk/commit/8029c0b45dd38107acca3a47607f48d504dfd716)
+
+### Fixed
+
+- LayerSwitcher: UX Improvements ([issue](https://github.com/hajkmap/Hajk/issues/1637))
+- LayerSwitcher: Now possible to render special layers at the bottom [PR#1648](https://github.com/hajkmap/Hajk/pull/1648)
+- Core: Fixed a bug where the application would crash and leave user with a blank screen in the unlikely condition of a vector layer being configured in such a way that the URL for fetching SLD for styling that layer would become unavailable. [commit](https://github.com/hajkmap/Hajk/commit/af17bc7e8e0af618d306b6c3ce4dfad660531e0a)
+
+### Security
+
+- Backend: Major upgrades of dependencies, e.g. the latest Express, HTTP Proxy Middleware, ESlint. [commit](https://github.com/hajkmap/Hajk/commit/64877fb4ed70d4a8829babc8ea126da4aee8d062)
 
 ## [4.0.0] - 2025-04-04
 
@@ -415,7 +479,12 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v4.0.0...develop
+<!-- [unreleased]: https://github.com/hajkmap/Hajk/compare/v4.2.0-rc.1...develop -->
+
+[4.2.0]: https://github.com/hajkmap/Hajk/compare/v4.2.0-rc.1...v4.2.0
+[4.2.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v4.1.0...v4.2.0-rc.1
+[4.1.0]: https://github.com/hajkmap/Hajk/compare/v4.1.0-rc.1...v4.1.0
+[4.1.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v4.0.0...v4.1.0-rc.1
 [4.0.0]: https://github.com/hajkmap/Hajk/compare/v4.0.0-rc.2...v4.0.0
 [4.0.0-rc.2]: https://github.com/hajkmap/Hajk/compare/v4.0.0-rc.1...v4.0.0-rc.2
 [4.0.0-rc.1]: https://github.com/hajkmap/Hajk/compare/v3.14.1...v4.0.0-rc.1

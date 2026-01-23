@@ -7,7 +7,6 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@mui/material";
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -15,6 +14,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+import HajkToolTip from "components/HajkToolTip";
 
 export default function FavoritePackageOptions({
   infoCallback,
@@ -72,20 +72,36 @@ export default function FavoritePackageOptions({
     deleteCallback(favorite);
   };
 
+  // Add event listener for closing the favorites list menu in the introduction component.
+  React.useEffect(() => {
+    const handleCloseMenu = () => {
+      setAnchorEl(null);
+    };
+
+    document.addEventListener("closeFavoritesListMenu", handleCloseMenu);
+    return () => {
+      document.removeEventListener("closeFavoritesListMenu", handleCloseMenu);
+    };
+  }, []);
+
   return (
     <>
       <IconButton
+        id="favorites-list-options-button"
         size="small"
         aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <Tooltip title="Hantera">
+        <HajkToolTip title="Hantera">
           <MoreVertOutlinedIcon />
-        </Tooltip>
+        </HajkToolTip>
       </IconButton>
       <Menu
+        slotProps={{
+          paper: { id: "favorites-list-options-menu" },
+        }}
         anchorEl={anchorEl}
         open={optionsMenuIsOpen}
         onClose={onOptionsMenuClose}

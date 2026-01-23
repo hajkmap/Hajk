@@ -11,7 +11,7 @@ export const ACTIVITIES = [
     id: "ADD",
     tooltip: "Lägg till nya objekt.",
     information:
-      "Lägg till objekt genom att rita i kartan. Börja med att välja vilken typ av objekt du vill rita nedan.",
+      "Lägg till objekt genom att rita i kartan. Börja med att välja vilken typ av objekt du vill rita nedan. Observera att export till GPX-format endast stödjer punkter och linjer.",
     icon: <EditIcon />,
   },
   {
@@ -46,7 +46,7 @@ export const ACTIVITIES = [
     id: "UPLOAD",
     tooltip: "Ladda ned eller ladda upp ritade objekt.",
     information:
-      "Importera eller exportera ritobjekt i .kml-format. Använd knapparna nedan, eller dra in en .KML-fil direkt till kartan.",
+      "Importera eller exportera ritobjekt i .kml/.gpx-format. Använd knapparna nedan, eller dra in en fil direkt till kartan.",
     icon: <ImportExportIcon />,
   },
   {
@@ -84,7 +84,7 @@ export const DRAW_TYPES = [
     type: "LineString",
     label: "Linje",
     tooltip:
-      "Rita en linje i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
+      "Rita en linje i kartan genom att klicka en gång per nod, avsluta med ett dubbelklick.",
   },
   {
     type: "Rectangle",
@@ -96,7 +96,7 @@ export const DRAW_TYPES = [
     type: "Arrow",
     label: "Pil",
     tooltip:
-      "Rita en pil i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
+      "Rita en pil i kartan genom att klicka en gång per nod, avsluta med ett dubbelklick.",
   },
   {
     type: "Select",
@@ -108,7 +108,7 @@ export const DRAW_TYPES = [
     type: "Polygon",
     label: "Polygon",
     tooltip:
-      "Rita en polygon i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
+      "Rita en polygon i kartan genom att klicka en gång per nod, avsluta med ett dubbelklick.",
   },
   {
     type: "Point",

@@ -4,22 +4,23 @@ import { styled } from "@mui/material/styles";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
+import Box from "@mui/material/Box";
 import Badge from "@mui/material/Badge";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Typography } from "@mui/material";
 import List from "@mui/material/List";
-import Divider from "@mui/material/Divider";
 import ListItem from "@mui/material/ListItem";
+import Divider from "@mui/material/Divider";
 import ListItemText from "@mui/material/ListItemText";
 import Collapse from "@mui/material/Collapse";
 import FirSearchResultItemView from "./FirSearchResultItemView";
 import Pagination from "@mui/material/Pagination";
-import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircle from "@mui/icons-material/AddCircleOutline";
 import RemoveCircle from "@mui/icons-material/RemoveCircleOutline";
 import CircularProgress from "@mui/material/CircularProgress";
+import ListItemButton from "@mui/material/ListItemButton";
 
 const LoaderContainer = styled("div")(({ theme }) => ({
   paddingLeft: theme.spacing(2),
@@ -76,25 +77,6 @@ const DivPaddedBottom = styled("div")(({ theme }) => ({
   paddingLeft: theme.spacing(2),
   paddingRight: theme.spacing(2),
   paddingBottom: theme.spacing(1),
-}));
-
-const ExtendedAccordionSummary = styled("div")(({ theme }) => ({
-  display: "flex",
-  width: "100%",
-
-  "& > div:last-of-type": {
-    marginLeft: "auto",
-  },
-
-  "& button": {
-    marginTop: "-6px",
-    marginBottom: "-6px",
-    marginRight: "0",
-  },
-
-  "& button:first-of-type": {
-    marginRight: "0",
-  },
 }));
 
 class FirSearchResultsView extends React.PureComponent {
@@ -166,7 +148,7 @@ class FirSearchResultsView extends React.PureComponent {
       "fir.search.results.addFeatureByMapClick",
       (data) => {
         if (data.active === false) {
-          this.setState({ addFeatureByMapClickActive: data.active });
+          this.setState({ addFeatureByMapClickActive: !!data.active });
         }
       }
     );
@@ -174,7 +156,7 @@ class FirSearchResultsView extends React.PureComponent {
       "fir.search.results.removeFeatureByMapClick",
       (data) => {
         if (data.active === false) {
-          this.setState({ removeFeatureByMapClickActive: data.active });
+          this.setState({ removeFeatureByMapClickActive: !!data.active });
         }
       }
     );
@@ -281,7 +263,7 @@ class FirSearchResultsView extends React.PureComponent {
       addFeatureByMapClickActive: active,
     });
     this.localObserver.publish("fir.search.results.addFeatureByMapClick", {
-      active: active,
+      active,
     });
   };
 
@@ -290,7 +272,7 @@ class FirSearchResultsView extends React.PureComponent {
       removeFeatureByMapClickActive: active,
     });
     this.localObserver.publish("fir.search.results.removeFeatureByMapClick", {
-      active: active,
+      active,
     });
   };
 
@@ -327,6 +309,8 @@ class FirSearchResultsView extends React.PureComponent {
   };
 
   handleDeleteClick(e, data) {
+    e.preventDefault();
+    e.stopPropagation();
     this.removeFeature(data);
     this.setPage(null);
   }
@@ -374,50 +358,55 @@ class FirSearchResultsView extends React.PureComponent {
             });
           }}
         >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <ExtendedAccordionSummary>
-              <div>
-                <StyledBadge
-                  badgeContent={this.state.results.list.length}
-                  color="secondary"
-                  max={10000}
-                >
-                  <TypographyHeading>Sökresultat</TypographyHeading>
-                </StyledBadge>
-              </div>
-              <div>
-                <StyledIconButton
-                  disabled={
-                    this.state.results.list.length === 0 ||
-                    this.state.addFeatureByMapClickActive === true
-                  }
-                  edge="end"
-                  title="Ta bort"
-                  color={
-                    this.state.removeFeatureByMapClickActive
-                      ? "primary"
-                      : "default"
-                  }
-                  onClick={this.removeFeatureClick}
-                >
-                  <RemoveCircle />
-                </StyledIconButton>
-                <StyledIconButton
-                  disabled={this.state.removeFeatureByMapClickActive === true}
-                  edge="end"
-                  title="Lägg till"
-                  color={
-                    this.state.addFeatureByMapClickActive
-                      ? "primary"
-                      : "default"
-                  }
-                  onClick={this.addFeatureClick}
-                >
-                  <AddCircle />
-                </StyledIconButton>
-              </div>
-            </ExtendedAccordionSummary>
-          </AccordionSummary>
+          <Box sx={{ position: "relative" }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <StyledBadge
+                badgeContent={this.state.results.list.length}
+                color="secondary"
+                max={10000}
+              >
+                <TypographyHeading>Sökresultat</TypographyHeading>
+              </StyledBadge>
+            </AccordionSummary>
+            <Box
+              sx={{
+                position: "absolute",
+                right: 48,
+                top: "50%",
+                transform: "translateY(-50%)",
+                display: "flex",
+                gap: 1,
+              }}
+            >
+              <StyledIconButton
+                disabled={
+                  this.state.results.list.length === 0 ||
+                  !!this.state.addFeatureByMapClickActive
+                }
+                edge="end"
+                title="Ta bort"
+                color={
+                  this.state.removeFeatureByMapClickActive
+                    ? "primary"
+                    : "default"
+                }
+                onClick={this.removeFeatureClick}
+              >
+                <RemoveCircle />
+              </StyledIconButton>
+              <StyledIconButton
+                disabled={!!this.state.removeFeatureByMapClickActive}
+                edge="end"
+                title="Lägg till"
+                color={
+                  this.state.addFeatureByMapClickActive ? "primary" : "default"
+                }
+                onClick={this.addFeatureClick}
+              >
+                <AddCircle />
+              </StyledIconButton>
+            </Box>
+          </Box>
           <AccordionDetails style={{ display: "block", padding: 0 }}>
             <div>
               <List ref={this.accordionList} dense={true} component="nav">
@@ -428,14 +417,8 @@ class FirSearchResultsView extends React.PureComponent {
                   >
                     {index > 0 ? <Divider /> : ""}
                     <ListItem
-                      button
-                      onClick={(e) => {
-                        this.handleItemClick(e, data);
-                      }}
-                    >
-                      <ListItemText primary={data.get(this.textField)} />
-
-                      <ListItemSecondaryAction>
+                      sx={{ paddingLeft: 0, paddingTop: 0, paddingBottom: 0 }}
+                      secondaryAction={
                         <StyledIconButton
                           edge="end"
                           title="Ta bort"
@@ -445,7 +428,15 @@ class FirSearchResultsView extends React.PureComponent {
                         >
                           <DeleteIcon />
                         </StyledIconButton>
-                      </ListItemSecondaryAction>
+                      }
+                    >
+                      <ListItemButton
+                        onClick={(e) => {
+                          this.handleItemClick(e, data);
+                        }}
+                      >
+                        <ListItemText primary={data.get(this.textField)} />
+                      </ListItemButton>
                     </ListItem>
                     <Collapse in={data.open} timeout="auto" unmountOnExit>
                       <Divider />

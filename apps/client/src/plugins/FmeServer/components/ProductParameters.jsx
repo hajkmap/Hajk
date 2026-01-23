@@ -46,7 +46,7 @@ const ProductParameters = (props) => {
 
   function renderParameterRenderingError() {
     return (
-      <Grid item xs={12} sx={{ padding: 1 }}>
+      <Grid sx={{ padding: 1 }} size={12}>
         <InformationWrapper type="error">
           <Typography>
             Observera att vissa publicerade parametrar inte kunde renderas! Det
@@ -59,7 +59,7 @@ const ProductParameters = (props) => {
 
   function renderInformationUrl() {
     return (
-      <Grid container item xs={12} wrap="nowrap" justifyContent="space-between">
+      <Grid container wrap="nowrap" justifyContent="space-between" size={12}>
         <Typography sx={{ alignSelf: "center", marginLeft: 1 }}>
           Oklart hur produkten fungerar? Tryck på frågetecknet för mer
           information.
@@ -76,7 +76,7 @@ const ProductParameters = (props) => {
 
   function renderNoParametersToRenderError() {
     return (
-      <Grid item xs={12} sx={{ padding: 1 }}>
+      <Grid sx={{ padding: 1 }} size={12}>
         <InformationWrapper type="info">
           <Typography>
             Det finns inga publicerade parametrar att rendera! Du kan fortsätta
@@ -89,7 +89,7 @@ const ProductParameters = (props) => {
 
   function renderChoice(parameter, index) {
     return (
-      <Grid key={`${parameter.type}-${index}`} item xs={12} sx={{ padding: 1 }}>
+      <Grid key={`${parameter.type}-${index}`} sx={{ padding: 1 }} size={12}>
         <FormControl fullWidth size="small" required={!parameter.optional}>
           <InputLabel
             variant="outlined"
@@ -134,11 +134,11 @@ const ProductParameters = (props) => {
     const sliderMin = model.getRangeSliderMinimum(parameter, step);
     const sliderMax = model.getRangeSliderMaximum(parameter, step);
     return (
-      <Grid key={`${parameter.type}-${index}`} item xs={12} sx={{ padding: 1 }}>
-        <Grid item xs={12}>
+      <Grid key={`${parameter.type}-${index}`} sx={{ padding: 1 }} size={12}>
+        <Grid size={12}>
           <Typography variant="caption">{parameter.description}</Typography>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Slider
             value={value}
             min={sliderMin}
@@ -158,7 +158,7 @@ const ProductParameters = (props) => {
 
   function renderText(parameter, index) {
     return (
-      <Grid key={`${parameter.type}-${index}`} item xs={12} sx={{ padding: 1 }}>
+      <Grid key={`${parameter.type}-${index}`} sx={{ padding: 1 }} size={12}>
         <TextField
           id={`fme-text-${index}`}
           size="small"

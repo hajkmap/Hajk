@@ -7,13 +7,13 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@mui/material";
 
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import LibraryAddOutlinedIcon from "@mui/icons-material/LibraryAddOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+import HajkToolTip from "components/HajkToolTip";
 
 export default function FavoritesOptions({
   handleFavoritesViewToggle,
@@ -28,6 +28,18 @@ export default function FavoritesOptions({
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const optionsMenuIsOpen = Boolean(anchorEl);
+
+  // Add event listener for closing the favorites menu in the introduction component.
+  React.useEffect(() => {
+    const handleCloseMenu = () => {
+      setAnchorEl(null);
+    };
+
+    document.addEventListener("closeFavoritesMenu", handleCloseMenu);
+    return () => {
+      document.removeEventListener("closeFavoritesMenu", handleCloseMenu);
+    };
+  }, []);
 
   // Show the options menu by setting an anchor element
   const handleShowMoreOptionsClick = (e) => {
@@ -76,18 +88,23 @@ export default function FavoritesOptions({
           functionalCookiesOk ? handleShowMoreOptionsClick : handleEditFavorites
         }
       >
-        <Tooltip title="Mina favoriter">
+        <HajkToolTip title="Mina favoriter">
           <PersonOutlinedIcon />
-        </Tooltip>
+        </HajkToolTip>
       </IconButton>
       <Menu
         anchorEl={anchorEl}
-        id="favorites-menu"
         aria-labelledby="favorites-menu-button"
         open={optionsMenuIsOpen}
         onClose={onOptionsMenuClose}
         variant={"menu"}
         onClick={(e) => e.stopPropagation()}
+        // 'id' is not a valid prop for the MUI Menu component, it should be set inside slotProps
+        slotProps={{
+          paper: {
+            id: "favorites-menu",
+          },
+        }}
       >
         <MenuItem onClick={handleAdd}>
           <ListItemIcon>
@@ -95,7 +112,7 @@ export default function FavoritesOptions({
           </ListItemIcon>
           <ListItemText>Spara till favoriter</ListItemText>
         </MenuItem>
-        <MenuItem onClick={handleEditFavorites}>
+        <MenuItem id="edit-favorites" onClick={handleEditFavorites}>
           <ListItemIcon>
             <EditOutlinedIcon fontSize="small" />
           </ListItemIcon>

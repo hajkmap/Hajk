@@ -35,10 +35,35 @@ export default class MapViewModel {
     }
   };
 
+  showPluginsFromUrlParams = (url) => {
+    try {
+      //We check for plugin parameters in url
+      const params = new Set(
+        new URLSearchParams(url.replaceAll("#", "?").split("?")[1])
+          .getAll("p")
+          .flatMap((p) => p.split(","))
+      );
+
+      // Open matching windows
+      this.appModel.windows
+        .filter((w) => params.has(w.type))
+        .forEach((w) => w.showWindow());
+
+      // Close windows that are not in params, except "documentviewer"
+      this.appModel.windows
+        .filter((w) => !params.has(w.type) && w.type !== "documentviewer")
+        .forEach((w) => w.closeWindow());
+    } catch (error) {
+      console.error("Error processing window parameters:", error);
+    }
+  };
+
   bindSubscriptions = () => {
     this.localObserver.subscribe("fly-to", (url) => {
       this.globalObserver.publish("core.minimizeWindow");
       const mapSettings = this.convertMapSettingsUrlToOlSettings(url);
+
+      this.showPluginsFromUrlParams(url);
 
       if (mapSettings.layers !== null) {
         // Let's use Hajk's generic layer visibility

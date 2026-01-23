@@ -167,6 +167,18 @@
       "definition": "+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +units=m +no_defs",
       "extent": [1392811.0743, 6208496.7665, 1570600.8906, 7546077.6984],
       "units": null
+    },
+    {
+      "code": "EPSG:3857",
+      "definition": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs",
+      "extent": [-20037508.34, -20037508.34, 20037508.34, 20037508.34],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3857",
+      "definition": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs",
+      "extent": [-20037508.34, -20037508.34, 20037508.34, 20037508.34],
+      "units": null
     }
   ],
   "tools": [
@@ -532,7 +544,7 @@
         "baselayers": [
           {
             "id": "1",
-            "visibleAtStart": true,
+            "visibleAtStart": false,
             "drawOrder": 0,
             "infobox": ""
           },
@@ -605,10 +617,13 @@
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
         "enableOSM": true,
+        "OSMVisibleAtStart": true,
         "showBreadcrumbs": true,
         "showDrawOrderView": true,
         "showFilter": true,
         "showQuickAccess": true,
+        "legendForceTransparency": false,
+        "legendTryHiDPI": false,
         "enableSystemLayersSwitch": true,
         "lockDrawOrderBaselayer": true,
         "drawOrderViewInfoText": "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
@@ -620,6 +635,7 @@
         "instruction": "",
         "minMaxZoomAlertOnToggleOnly": false,
         "cqlFilterVisible": false,
+        "renderSpecialBackgroundsAtBottom": true,
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Standardkartan",
         "visibleForGroups": [],
@@ -963,11 +979,11 @@
           "visibleForGroups": []
         },
         {
-          "target": "left",
+          "target": "right",
           "name": "announcements",
           "headerText": "Nyheter i Hajk",
           "icon": "announcement",
-          "text": "_[43 commits](https://github.com/hajkmap/Hajk/compare/v3.14.1...v4.0.0-rc.1) and changes across 144 files since the most recent stable release, 3.14.1 – here's Hajk 4! This packaged release was brought to you by @Hallbergs and @jacobwod, with contributions from multiple coders. Please see the list of commits for all contributors._\n\n__This is the first release on the 4.x branch. Enjoy!__\n\nFor an overview of planned development, refer to the [project's roadmap](https://github.com/hajkmap/Hajk/blob/master/ROADMAP.md).\n\nHajk 4 represents a significant milestone for Hajk for two main reasons:\n\n- Layer Switcher has been rewritten and seen crucial improvments, including filtering the layer's list.\n- There's now one official Hajk backend and it's written in NodeJS (the .NET backend has become a _community extensions_, for those who for some reasons still are in need of it).\n\nHajk 4 is packed with new features, bug fixes, and security improvements. 🔒\n\nScroll down to find a comprehensive list of changes! 🚀\n\n# Breaking changes\n\n- Dropped official support for the .NET backend.\n\n# Changelog highlights\n\nFor a comprehensive list of commits, please visit [this link](https://github.com/hajkmap/Hajk/compare/v3.14.1...v4.0.0-rc.1).\n\n## Added\n\n- Major __LayerSwitcher__ improvements and new features (see below for details)\n- __Measurer__: * It is now possible to measure segments in lines and polygons. [#1549](https://github.com/hajkmap/Hajk/pull/1549)\n- __LayerComparer__: It is now possible for to select specific layers (in Admin) that will be visible in the tool. Previously only all background layer and/or all regular layers could be selected. [#1570](https://github.com/hajkmap/Hajk/issues/1570)\n- __Search__: Added possibility to set default search options via admin UI. PR: [#1496](https://github.com/hajkmap/Hajk/pull/1496)\n\n### Major LayerSwitcher changes\n\n- 🚀 Added filter functionality\n- Enhanced layer visibility indicators\n- Quick Access grouping in LayerSwitcher for access to frequently used layers. Includes support for saving and restoring sets of \"Quick Access layers\" to LocalStorage.\n- Quick Access Layer Presets/Themes/Packages. Choose from ready made sets of Layers to load into the Quick Access section. The Presets/Themes Packages are set up in the map config. See example in `simpleMapConfig.json`.\n- Improved Draw Order tab functionality for managing layer drawing order\n\nFor further details, see the following issues: [#1237](https://github.com/hajkmap/Hajk/issues/1237), [#1275](https://github.com/hajkmap/Hajk/issues/1275), [#1284](https://github.com/hajkmap/Hajk/issues/1284), [#1296](https://github.com/hajkmap/Hajk/issues/1296), [#1300](https://github.com/hajkmap/Hajk/issues/1300), [#1347](https://github.com/hajkmap/Hajk/issues/1347), [#1365](https://github.com/hajkmap/Hajk/issues/1365), [#1380](https://github.com/hajkmap/Hajk/issues/1380).\n\n## Fixed\n\n- Improved how overlapping windows are handled. PR: [#1546](https://github.com/hajkmap/Hajk/pull/1546)\n- Several accessability improvements. PRs: [#1561](https://github.com/hajkmap/Hajk/pull/1561), [#1562](https://github.com/hajkmap/Hajk/pull/1562), [#1563](https://github.com/hajkmap/Hajk/pull/1563), [#1565](https://github.com/hajkmap/Hajk/pull/1565), [#1566](https://github.com/hajkmap/Hajk/pull/1566), [#1567](https://github.com/hajkmap/Hajk/pull/1567), [#1569](https://github.com/hajkmap/Hajk/pull/1569)\n- Admin: Fixed issue with naming of the FME Server configuration property ([commit](https://github.com/hajkmap/Hajk/commit/98b9280b56a05eaa2a037359341329ed5fc46f8e)\n\n## Security\n\n- Updates across the board to dependencies\n\n## Changed\n\n## Removed\n\n- In accordance with [the roadmap](https://github.com/hajkmap/Hajk/blob/master/ROADMAP.md) the .NET backend was removed in the 4.0 release. ([commit](https://github.com/hajkmap/Hajk/commit/5c50105cc3fa957967196f7fc321bf5827772e7c))\n\n## New Contributors\n\n* @karljakoblarsson made their first contribution in https://github.com/hajkmap/Hajk/pull/1568\n* @michaelsund made their first contribution in https://github.com/hajkmap/Hajk/pull/1549\n* @sweco-semtsg made their first contribution in https://github.com/hajkmap/Hajk/pull/1561\n\n# Downloads\n\nThere are multiple ways to get the latest Hajk up and running, including Docker container.\n\n## Pre-compiled releases\n\nThere are two different versions of the pre-compiled solution: the regular (NodeJS edition) and a simple edition. The main difference is that the simple edition does not contain a Backend nor an Admin (it's just some static files that read all required configuration from a bunch of JSON files). The regular (NodeJS edition) contains all three Hajk components: the Backend, the Frontend and the Admin. \n\n1. [Hajk 4.0 NodeJS edition](https://github.com/hajkmap/Hajk/releases/download/v4.0.0-rc.1/hajk-v4.0.0-rc.1-nodejs.zip)\n1. [Hajk 4.0 Simple edition](https://github.com/hajkmap/Hajk/releases/download/v4.0.0-rc.1/hajk-v4.0.0-rc.1-simple.zip)\n\n## Docker container\n\nThe container is available on Docker Hub: https://hub.docker.com/r/hallbergs/hajk\n\n# Installation\n\nRefer to our [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29).\n\n**Full Changelog**: https://github.com/hajkmap/Hajk/compare/v3.14.1...v4.0.0-rc.1",
+          "text": "This release includes _[205 commits](https://github.com/hajkmap/Hajk/compare/v4.1.0...v4.2.0) and changes across 173 files since Hajk 4.1. Packaged by @Hallbergs and @jacobwod, with contributions from the community. See the commit list for all contributors._\n\n## Summary\n\nHajk 4.2 combines stabilization efforts following the 4.0 update with a suite of new features and optimizations.\n\nFor an overview of planned development, refer to the [project roadmap](https://github.com/hajkmap/Hajk/blob/master/ROADMAP.md).\n\nScroll down for a comprehensive list of changes! 🚀\n\n---\n\n## Changelog highlights\n\nFor a complete list of changes, see the [project changelog](https://github.com/hajkmap/Hajk/blob/master/CHANGELOG.md).\n\nFor a full list of commits, visit [this link](https://github.com/hajkmap/Hajk/compare/v4.1.0...v4.2.0-rc.1).\n\n### Added\n\n- Support for **cookie-less Matomo tracking**. [PR#1691](https://github.com/hajkmap/Hajk/pull/1691)\n- **OpenStreetMap** is now a selectable **default background layer** in map config. See [commit](https://github.com/hajkmap/Hajk/commit/e1b5f59c69b8985a498efee27aa76ea11ca4afbb) and [commit](https://github.com/hajkmap/Hajk/commit/4040c7c11367620040efc7609a56e1b3b436cc67). Admin UI option added in [commit](https://github.com/hajkmap/Hajk/commit/06c52b0cd863022f7c9a58e5103168627ac41172).\n- Updated **default projection** (in `simpleMapConfig.json` and `map_1.json`) to **EPSG:3857**. This improves rendering for the new OpenStreetMap background. [commit](https://github.com/hajkmap/Hajk/commit/6f5a5dc89a5c18d49f5af2d26353036d35945b82)\n\n### Changed\n\n- **FmeServer plugin:** Select Tool now supports multi-feature selection/deselection. [PR#1708](https://github.com/hajkmap/Hajk/pull/1708)\n- Upgraded Material UI (MUI) to v7. [PR#1658](https://github.com/hajkmap/Hajk/pull/1658)\n- **OpenStreetMap**, white, and black backgrounds are now standard layers in LayerSwitcher, allowing visibility initialization via configuration. [PR#1680](https://github.com/hajkmap/Hajk/pull/1680)\n- Replaced legacy `react-smooth-dnd` with `dnd-kit`. [PR#1689](https://github.com/hajkmap/Hajk/pull/1689)\n- Updated **Introduction module** for Hajk 4 compatibility, introducing two tour modes (Full and LayerSwitcher). [PR#1664](https://github.com/hajkmap/Hajk/pull/1664)\n- Refactored the **Anchor tool** into a dialog component. [PR#1711](https://github.com/hajkmap/Hajk/pull/1711)\n- QuickAccess: LayerGroups are now shown as breadcrumbs, with each group’s layers displayed beneath it. [PR#1726](https://github.com/hajkmap/Hajk/pull/1726)\n\n### Fixed\n\n- **Bookmarks:** Corrected button state logic. [PR#1609](https://github.com/hajkmap/Hajk/pull/1609)\n- **Bookmarks:** \"Add\" button is now conditionally enabled based on input presence. [PR#1657](https://github.com/hajkmap/Hajk/pull/1657)\n- **WFS:** Resolved URL parsing inconsistencies that hindered layer loading from certain services. [PR#1677](https://github.com/hajkmap/Hajk/pull/1677)\n- **DialogWindowPlugin:** Fixed toolbar button visibility issues during state toggling. [issue](https://github.com/hajkmap/Hajk/issues/1687)\n- **LayerSwitcher:** Prevented duplicate legend graphics when a custom group legend is defined. [issue](https://github.com/hajkmap/Hajk/issues/1644)\n- **LayerSwitcher:** Hidden Quick Access Presets when functionality is disabled in Admin. [PR](https://github.com/hajkmap/Hajk/pull/1693)\n- **LayerSwitcher:** Standardized info buttons for groups to match regular/group layers (backward compatible). [PR](https://github.com/hajkmap/Hajk/pull/1699)\n- **LayerSwitcher:** Enabled searching by LayerGroup name. GroupLayer search now expands to reveal sublayers. Closes [issue](https://github.com/hajkmap/Hajk/issues/1722)\n- **Infoclick:** Fixed boolean value inversion occurring under specific database conditions. [issue](https://github.com/hajkmap/Hajk/issues/1698)\n- **Client:** Added \"Access Denied\" UI feedback for 403 Backend responses. Closes [issue](https://github.com/hajkmap/Hajk/issues/1705)\n\n### Security\n\n- Upgraded dependencies in Client and Backend. [commit](https://github.com/hajkmap/Hajk/commit/2bee79696a66413749fb70c32b5c0b1cb7d4835f) and [commit](https://github.com/hajkmap/Hajk/commit/6f8f1741cfba6cb7eb57bf65943a8af192af7bc2)\n\n---\n\n## Downloads\n\nHajk can be deployed using pre-built release packages or via Docker.\n\n### Pre-built packages\n\nThere are two versions of the downloadable package:\n\n- **Simple Edition:** Static files only (no backend/admin). Configuration relies on JSON files.\n- **NodeJS Edition:** Full stack, including Backend, Frontend, and Admin.\n\n1. [Hajk 4.2 NodeJS edition](https://github.com/hajkmap/Hajk/releases/download/v4.2.0/hajk-v4.2.0-nodejs.zip)\n2. [Hajk 4.2 Simple edition](https://github.com/hajkmap/Hajk/releases/download/v4.2.0/hajk-v4.2.0-simple.zip)\n\n### Docker container\n\nThe container is available on Docker Hub: [hallbergs/hajk](https://hub.docker.com/r/hallbergs/hajk).\n\n---\n\n## Installation\n\nRefer to the [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29).\n\n**Full Changelog**: https://github.com/hajkmap/Hajk/compare/v4.1.0...v4.2.0",
           "allowDangerousHtml": true,
           "useLegacyNonMarkdownRenderer": false,
           "buttonText": "Ok, uppfattat!",
@@ -1089,15 +1105,22 @@
   ],
   "map": {
     "target": "map",
-    "center": [576357, 6386049],
+    "center": [1325000, 7900000],
     "title": "Hajk 4",
-    "projection": "EPSG:3006",
-    "zoom": 1,
-    "maxZoom": 8,
+    "projection": "EPSG:3857",
+    "zoom": 6,
+    "maxZoom": 18,
     "minZoom": 0,
-    "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
-    "origin": [0, 0],
-    "extent": [-1200000, 4700000, 2600000, 8500000],
+    "resolutions": [
+      156543.03392804097, 78271.51696402048, 39135.75848201024,
+      19567.87924100512, 9783.93962050256, 4891.96981025128, 2445.98490512564,
+      1222.99245256282, 611.49622628141, 305.748113140705, 152.8740565703525,
+      76.43702828517625, 38.21851414258813, 19.109257071294063,
+      9.554628535647032, 4.777314267823516, 2.388657133911758,
+      1.194328566955879, 0.5971642834779395
+    ],
+    "origin": [-20037508.34, 20037508.34],
+    "extent": [-20037508.34, -20037508.34, 20037508.34, 20037508.34],
     "constrainOnlyCenter": false,
     "constrainResolution": false,
     "logo": "/logoLight.png",

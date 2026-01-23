@@ -89,7 +89,7 @@ export default function LayerItemInfo({ layer, app, chapters }) {
   return (
     <>
       {hasInfo() ? (
-        <Box>
+        <Box id="layer-item-details-info">
           {/* Infotext */}
           {layerInfo.infoText && (
             <>
@@ -104,13 +104,15 @@ export default function LayerItemInfo({ layer, app, chapters }) {
           )}
           {/* MetadataLink */}
           {layerInfo.infoUrl && (
-            <a
-              href={layerInfo.infoUrl || null}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {layerInfo.infoUrlText || layerInfo.infoUrl}
-            </a>
+            <Typography variant="body2">
+              <a
+                href={layerInfo.infoUrl || null}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {layerInfo.infoUrlText || layerInfo.infoUrl}
+              </a>
+            </Typography>
           )}
           {/* Owner */}
           {layerInfo.infoOwner && (
@@ -122,7 +124,9 @@ export default function LayerItemInfo({ layer, app, chapters }) {
           {renderChapterLinks()}
         </Box>
       ) : (
-        <Typography>Ingen information tillgänglig</Typography>
+        <Typography id="layer-item-details-info">
+          Ingen information tillgänglig
+        </Typography>
       )}
     </>
   );

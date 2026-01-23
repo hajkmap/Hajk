@@ -11,11 +11,15 @@ import CoordinateSystemLoader from "../utils/CoordinateSystemLoader";
 import { hfetch } from "../utils/FetchWrapper";
 import { isMobile } from "../utils/IsMobile";
 import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
-// import ArcGISLayer from "./layers/ArcGISLayer";
-// import DataLayer from "./layers/DataLayer";
+// import ArcGISLayer from "./layers/ArcGISLayer.js";
+// import DataLayer from "./layers/DataLayer.js";
 import WMSLayer from "./layers/WMSLayer";
-import WMTSLayer from "./layers/WMTSLayer";
-import WFSVectorLayer from "./layers/VectorLayer";
+import WMTSLayer from "./layers/WMTSLayer.";
+import WFSVectorLayer from "./layers/VectorLayer.";
+import OSM from "ol/source/OSM";
+import TileLayer from "ol/layer/Tile";
+import { mapDirectionToAngle } from "../utils/mapDirectionToAngle";
+import { easeOut } from "ol/easing";
 // TODO: Uncomment and ensure they show as expected
 // import {
 // defaults as defaultControls,
@@ -204,8 +208,8 @@ class AppModel {
           // look for the "target" property inside that array. As soon
           // as one of the entities has a valid "target" value, we
           // consider the entire plugin to be valid and included in this list.
-          plugin.options.some?.((p) => this.#validPluginTarget(p.target)) ||
           // If "options" isn't an array, we can grab the "target" directly.
+          plugin.options.some?.((p) => this.#validPluginTarget(p.target)) ||
           this.#validPluginTarget(plugin.options.target)
         );
       })
@@ -476,7 +480,138 @@ class AppModel {
         }
       });
     }
+
+    // Creation of non server background layers.
+    const layerSwitcherConf = config.tools.find(
+      (tool) => tool.type === "layerswitcher"
+    );
+
+    // Create the white and black background layers if they are enabled in config
+    if (layerSwitcherConf?.options?.backgroundSwitcherWhite) {
+      this.createWhiteLayer();
+    }
+
+    if (layerSwitcherConf?.options?.backgroundSwitcherBlack) {
+      this.createBlackLayer();
+    }
+
+    // Add the OSM layer if it is enabled in the conf
+    if (layerSwitcherConf?.options?.enableOSM) {
+      this.createOSMLayer();
+    }
+
     return this;
+  }
+
+  createWhiteLayer() {
+    // Creates a empty vectorlayer to let the url handle them like other layers. BackgroundSwitcher then
+    // sets the real colors based on matching the name.
+    const whiteLayer = new VectorLayer({
+      visible: false,
+      source: new VectorSource(),
+      zIndex: -1,
+      layerType: "base",
+      rotateMap: "n",
+      name: "-1",
+      caption: "Vit",
+      layerInfo: {
+        caption: "Vit",
+        layerType: "base",
+      },
+    });
+
+    whiteLayer.on("change:visible", (e) => {
+      this.globalObserver.publish("core.layerVisibilityChanged", e);
+    });
+
+    // Add the white layer to the map
+    this.map.addLayer(whiteLayer);
+  }
+
+  createBlackLayer() {
+    // Creates a empty vectorlayer to let the url handle them like other layers. BackgroundSwitcher then
+    // sets the real colors based on matching the name.
+    const blackLayer = new VectorLayer({
+      visible: false,
+      source: new VectorSource(),
+      zIndex: -1,
+      layerType: "base",
+      rotateMap: "n",
+      name: "-2",
+      caption: "Svart",
+      layerInfo: {
+        caption: "Svart",
+        layerType: "base",
+      },
+    });
+
+    blackLayer.on("change:visible", (e) => {
+      this.globalObserver.publish("core.layerVisibilityChanged", e);
+    });
+
+    // Add the black layer to the map
+    this.map.addLayer(blackLayer);
+  }
+
+  createOSMLayer() {
+    const layerSwitcherConf = this.config.mapConfig.tools.find(
+      (tool) => tool.type === "layerswitcher"
+    );
+
+    // Respect the OSMVisibleAtStart option from layerswitcher config
+    // only if no override is provided in URLSearchParams (else we will
+    // end up with multiple background layers visible at start).
+    const visibleAtStart =
+      (this.layersFromParams.length === 0 &&
+        layerSwitcherConf?.options?.OSMVisibleAtStart === true) ??
+      false;
+
+    const osmLayer = new TileLayer({
+      visible: visibleAtStart,
+      source: new OSM({
+        reprojectionErrorThreshold: 5,
+      }),
+      zIndex: -1,
+      layerType: "base",
+      rotateMap: "n", // OpenStreetMap should be rotated to North
+      name: "-3",
+      caption: "OpenStreetMap",
+      layerInfo: {
+        infoText:
+          "OpenStreetMap är en öppen, användargenererad karta där vem som helst kan bidra med information. Innehållet är inte kvalitetssäkrat, granskat eller godkänt av Lantmäteriet.",
+        infoTitle: "Om OpenStreetMap",
+        infoUrl:
+          "https://wiki.openstreetmap.org/wiki/OpenStreetMap_Carto/Symbols",
+        infoUrlText: "Länk till teckenförklaring",
+        information: "Här finns mer info",
+        layerType: "base",
+        hideExpandArrow: false,
+        showAttributeTableButton: false,
+      },
+    });
+
+    osmLayer.on("change:visible", (e) => {
+      const olLayer = e.target;
+
+      // If the layer becomes visible, set the map rotation to match
+      if (olLayer.get("visible")) {
+        const direction = olLayer.get("rotateMap");
+        const duration = 1000;
+
+        const angle = mapDirectionToAngle(direction);
+        this.map.getView().animate({
+          rotation: angle,
+          duration: duration,
+          easing: easeOut,
+        });
+      }
+
+      // Publish event to ensure DrawOrder tab is updated with osmLayer changes
+      this.globalObserver.publish("core.layerVisibilityChanged", e);
+    });
+
+    // Add the osmLayer to the map
+    this.map.addLayer(osmLayer);
   }
 
   getMap() {
@@ -656,6 +791,43 @@ class AppModel {
       this.addMapLayer(layer);
     });
 
+    // Check if the layerParams contains -1 (white background) and handle set it to visible on load
+    if (
+      this.layersFromParams.includes("-1") &&
+      layerSwitcherConfig?.options?.backgroundSwitcherWhite
+    ) {
+      const whiteLayer = this.map
+        .getAllLayers()
+        .find((l) => l.get("name") === "-1");
+      whiteLayer.setVisible(true);
+    }
+
+    // Check if the layerParams contains -2 (black background) and handle set it to visible on load
+    if (
+      this.layersFromParams.includes("-2") &&
+      layerSwitcherConfig?.options?.backgroundSwitcherBlack
+    ) {
+      const blackLayer = this.map
+        .getAllLayers()
+        .find((l) => l.get("name") === "-2");
+      blackLayer.setVisible(true);
+    }
+
+    // Check if the layerParams contains -3 (osm-layer) and handle set it to visible on load
+    if (
+      this.layersFromParams.includes("-3") &&
+      layerSwitcherConfig?.options?.enableOSM
+    ) {
+      const osmLayer = this.map
+        .getAllLayers()
+        .find((l) => l.get("name") === "-3");
+      if (osmLayer === undefined) {
+        console.warn(`Cannot find the OSM layer`);
+      } else {
+        osmLayer.setVisible(true);
+      }
+    }
+
     // FIXME: Move to infoClick instead. All other plugins create their own layers.
     if (infoclickConfig !== undefined) {
       this.addHighlightLayer(infoclickConfig.options);
@@ -798,7 +970,9 @@ class AppModel {
       // shown at start. All others should be hidden (no matter the setting in Admin).
       else {
         mapConfig.tools.forEach((t) => {
-          t.options.visibleAtStart = pluginsToShow.includes(t.type);
+          t.options.visibleAtStart = pluginsToShow.includes(
+            t.type.toLowerCase()
+          );
         });
       }
     }

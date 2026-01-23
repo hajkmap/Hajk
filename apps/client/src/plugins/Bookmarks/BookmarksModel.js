@@ -53,6 +53,43 @@ class BookmarksModel {
       });
   }
 
+  getPartlyToggledGroupLayers() {
+    const partlyToggledGroupLayers = {};
+
+    const allLayers =
+      typeof this.map.getAllLayers === "function"
+        ? this.map.getAllLayers()
+        : this.map.getLayers().getArray();
+
+    allLayers
+      .filter((layer) => {
+        const layerId = layer.getProperties().name;
+        if (!layer.getVisible() || !layerId || !isValidLayerId(layerId)) {
+          return false;
+        }
+        if (layer.getProperties().layerType !== "group") {
+          return false;
+        }
+
+        const allSubLayers = layer.get("allSubLayers");
+        const visibleSubLayers = layer.get("subLayers");
+
+        return (
+          Array.isArray(allSubLayers) &&
+          Array.isArray(visibleSubLayers) &&
+          visibleSubLayers.length > 0 &&
+          visibleSubLayers.length !== allSubLayers.length
+        );
+      })
+      .forEach((layer) => {
+        partlyToggledGroupLayers[layer.getProperties().name] = layer
+          .get("subLayers")
+          .join(",");
+      });
+
+    return partlyToggledGroupLayers;
+  }
+
   getMapState() {
     const view = this.map.getView();
     const viewCenter = view.getCenter();
@@ -62,9 +99,16 @@ class BookmarksModel {
       z: view.getZoom(),
     };
 
+    const partlyToggledGroupLayers = this.getPartlyToggledGroupLayers();
+    const gl =
+      Object.keys(partlyToggledGroupLayers).length > 0
+        ? partlyToggledGroupLayers
+        : undefined;
+
     return {
       m: this.app.config.activeMap,
       l: this.getVisibleLayers(),
+      gl,
       ...pos,
     };
   }
@@ -74,7 +118,11 @@ class BookmarksModel {
       return;
     }
     bookmark = this.getDecodedBookmark(bookmark);
-    this.setVisibleLayers(bookmark.settings.l);
+    const layers = bookmark?.settings?.l ?? "";
+    const groupLayers = JSON.stringify(bookmark?.settings?.gl ?? {});
+
+    this.app.setLayerVisibilityFromParams(layers, groupLayers);
+
     let view = this.map.getView();
     view.setCenter([bookmark.settings.x, bookmark.settings.y]);
     view.setZoom(bookmark.settings.z);
@@ -152,12 +200,13 @@ class BookmarksModel {
 
   addBookmark(name, allowReplace = false) {
     // Check if bookmark exist and if we should replace it.
-    if (this.bookmarkWithNameExists(name) && allowReplace) {
-      this.replaceBookmark(this.bookmarks[name]);
+    const trimmedName = name.trim();
+    if (this.bookmarkWithNameExists(trimmedName) && allowReplace) {
+      this.replaceBookmark(this.bookmarks[trimmedName]);
       return;
     }
 
-    this.bookmarks[name] = {
+    this.bookmarks[trimmedName] = {
       settings: btoa(JSON.stringify(this.getMapState())),
     };
     this.writeToStorage();

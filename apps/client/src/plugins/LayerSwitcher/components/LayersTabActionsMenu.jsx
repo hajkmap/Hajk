@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import {
   IconButton,
@@ -6,7 +6,6 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@mui/material";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
@@ -15,6 +14,7 @@ import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrow
 import KeyboardDoubleArrowUpIcon from "@mui/icons-material/KeyboardDoubleArrowUp";
 
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+import HajkToolTip from "components/HajkToolTip";
 
 const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
   // Element that we will anchor the options menu to is
@@ -23,6 +23,19 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [menuIsOpen, setMenuIsOpen] = useState(false);
+
+  // Add event listener for closing menu
+  useEffect(() => {
+    const handleCloseMenu = () => {
+      setAnchorEl(null);
+      setMenuIsOpen(false);
+    };
+
+    document.addEventListener("closeLayersMenu", handleCloseMenu);
+    return () => {
+      document.removeEventListener("closeLayersMenu", handleCloseMenu);
+    };
+  }, []);
 
   // Show the options menu by setting an anchor element
   const handleShowMoreOptionsClick = (e) => {
@@ -45,21 +58,28 @@ const LayersTabActionsMenu = ({ scrollToTop, scrollToBottom }) => {
   return (
     <>
       <IconButton
+        id="layerswitcher-actions-menu-button"
         size="small"
         aria-controls={menuIsOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={menuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
+        sx={{ my: "3px", ml: "2px" }}
       >
-        <Tooltip title="Fler funktioner för Lagerhanteraren">
+        <HajkToolTip title="Fler funktioner för Lagerhanteraren">
           <MoreVertOutlinedIcon />
-        </Tooltip>
+        </HajkToolTip>
       </IconButton>
       <Menu
         anchorEl={anchorEl}
         open={menuIsOpen}
         onClose={onOptionsMenuClose}
         variant={"menu"}
+        slotProps={{
+          paper: {
+            id: "layerswitcher-actions-menu",
+          },
+        }}
       >
         <MenuItem
           onClick={(e) => {

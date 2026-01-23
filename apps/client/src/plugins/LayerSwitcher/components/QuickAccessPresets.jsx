@@ -11,7 +11,6 @@ import {
   DialogContent,
   DialogActions,
   DialogContentText,
-  IconButton,
   InputAdornment,
   List,
   ListItemButton,
@@ -38,6 +37,7 @@ import {
   useLayerSwitcherDispatch,
 } from "../LayerSwitcherProvider";
 import LocalStorageHelper from "../../../utils/LocalStorageHelper";
+import LsIconButton from "./LsIconButton";
 
 function QuickAccessPresets({
   display,
@@ -453,17 +453,37 @@ function QuickAccessPresets({
 
   return (
     <>
-      <Box sx={{ display: display ? "block" : "none" }}>
+      <Box
+        id="quick-access-presets-view"
+        sx={[
+          (theme) => ({
+            position: "relative",
+            overflow: "hidden",
+            flexGrow: 1,
+            backgroundColor: "#fff",
+            ...theme.applyStyles("dark", {
+              backgroundColor: "rgb(18,18,18)",
+            }),
+          }),
+          display
+            ? {
+                display: "flex",
+                flexDirection: "column",
+              }
+            : {
+                display: "none",
+              },
+        ]}
+      >
         <Box
-          sx={{
+          sx={(theme) => ({
             p: 1,
-            backgroundColor: (theme) =>
-              theme.palette.mode === "dark"
-                ? "#373737"
-                : theme.palette.grey[100],
-            borderBottom: (theme) =>
-              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-          }}
+            backgroundColor: theme.palette.grey[100],
+            borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+            ...theme.applyStyles("dark", {
+              backgroundColor: "#373737",
+            }),
+          })}
         >
           <Stack direction="row" alignItems="center">
             <HajkToolTip
@@ -473,18 +493,21 @@ function QuickAccessPresets({
               title="Tillbaka"
               TransitionProps={{ timeout: 0 }}
             >
-              <IconButton onClick={handleBackButtonClick}>
+              <LsIconButton
+                id="quick-access-back-button"
+                onClick={handleBackButtonClick}
+              >
                 <ArrowBackIcon />
-              </IconButton>
+              </LsIconButton>
             </HajkToolTip>
             <Box sx={{ flexGrow: 1, textAlign: "center" }}>
               <Typography variant="subtitle1">Teman</Typography>
             </Box>
-            <IconButton onClick={handleInfoButtonClick}>
+            <LsIconButton onClick={handleInfoButtonClick}>
               <HajkToolTip title={infoIsActive ? "Dölj info" : "Visa info"}>
                 <InfoOutlinedIcon />
               </HajkToolTip>
-            </IconButton>
+            </LsIconButton>
           </Stack>
           <Collapse
             in={infoIsActive}
@@ -493,12 +516,11 @@ function QuickAccessPresets({
             className="infoCollapse"
           >
             <Box
-              sx={{
+              sx={(theme) => ({
                 px: 1,
                 pt: 1,
-                borderTop: (theme) =>
-                  `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-              }}
+                borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+              })}
             >
               <Typography variant="subtitle2">
                 {quickAccessPresetsInfoText}
@@ -507,33 +529,40 @@ function QuickAccessPresets({
           </Collapse>
           <Box
             sx={{
-              width: 500,
-              maxWidth: "100%",
               p: 1,
             }}
           >
             <TextField
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
               size="small"
               value={filter.query}
               onChange={(event) => handleFilterChange(event.target.value)}
               fullWidth
               placeholder="Filtrera"
               variant="outlined"
-              sx={{
-                background: (theme) =>
-                  theme.palette.mode === "dark" ? "inherit" : "#fff",
+              sx={(theme) => ({
+                background: "#fff",
+                ...theme.applyStyles("dark", {
+                  background: "inherit",
+                }),
+              })}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                },
               }}
             />
           </Box>
         </Box>
-        <Box>
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflowY: "auto",
+          }}
+        >
           <List dense sx={{ p: 0 }}>
             {!filter.list.length ? (
               <Typography sx={{ p: 2 }}>
@@ -555,10 +584,28 @@ function QuickAccessPresets({
                     <ListItemIcon sx={{ px: 0, minWidth: "34px" }}>
                       <TopicOutlinedIcon fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText primary={l.title} secondary={l.author} />
-                    <ListItemSecondaryAction>
+                    <ListItemText
+                      primary={l.title}
+                      secondary={l.author}
+                      slotProps={{
+                        primary: {
+                          pr: 5,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        },
+                        secondary: {
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        },
+                      }}
+                    />
+                    <ListItemSecondaryAction
+                      sx={{
+                        right: "4px",
+                      }}
+                    >
                       <HajkToolTip title={"Information om " + l.title}>
-                        <IconButton
+                        <LsIconButton
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -566,7 +613,7 @@ function QuickAccessPresets({
                           }}
                         >
                           <InfoOutlinedIcon fontSize="small" />
-                        </IconButton>
+                        </LsIconButton>
                       </HajkToolTip>
                     </ListItemSecondaryAction>
                   </ListItemButton>

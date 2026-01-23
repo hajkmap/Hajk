@@ -18,7 +18,7 @@ import {
 
 import Window from "./Window";
 import CookieNotice from "./CookieNotice";
-import Introduction from "./Introduction";
+import Introduction from "./Introduction/Introduction";
 import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
@@ -51,7 +51,6 @@ import {
   Divider,
   Drawer,
   Grid,
-  Hidden,
   IconButton,
   Link,
   Typography,
@@ -146,6 +145,8 @@ const DrawerHeaderGrid = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(1, 2),
   backgroundColor: theme.palette.background.paper,
   minHeight: theme.spacing(6),
+  justifyContent: "space-between",
+  alignItems: "center",
 }));
 
 const DrawerContentContainer = styled("div")(({ theme }) => ({
@@ -1019,30 +1020,23 @@ class App extends React.PureComponent {
     return (
       <>
         <Box
-          sx={{
-            padding: (theme) => theme.spacing(1, 2),
-            height: (theme) => theme.spacing(6),
-          }}
+          sx={(theme) => ({
+            padding: theme.spacing(1, 2),
+            height: theme.spacing(6),
+          })}
         >
           <LogoImage alt={logoAltText} src={logoUrl} />
         </Box>
         <Divider />
-        <DrawerHeaderGrid
-          item
-          container
-          wrap="nowrap"
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Grid item>
+        <DrawerHeaderGrid container wrap="nowrap">
+          <Grid>
             <DrawerTitle variant="button">{drawerTitle}</DrawerTitle>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
           {/** Hide Lock button if user has chosen static drawer*/}
           {!this.state.drawerStatic && (
-            <Grid item>
-              <Hidden mdDown>
+            <Grid>
+              <Box sx={{ display: { xs: "none", md: "block" } }}>
                 <HajkToolTip
                   title={
                     (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
@@ -1050,6 +1044,7 @@ class App extends React.PureComponent {
                   }
                 >
                   <IconButton
+                    id="toggle-drawer-permanent"
                     ref={this.buttonToggleDrawerPermanentRef}
                     sx={{ margin: "-12px" }} // Ugh... However, it tightens everything up
                     onClick={this.togglePermanent}
@@ -1070,7 +1065,7 @@ class App extends React.PureComponent {
                     )}
                   </IconButton>
                 </HajkToolTip>
-              </Hidden>
+              </Box>
             </Grid>
           )}
         </DrawerHeaderGrid>
@@ -1083,11 +1078,18 @@ class App extends React.PureComponent {
       <DrawerContentContainer id="drawer-content">
         <Box
           key="plugins"
-          sx={{
-            height: "inherit",
-            display:
-              this.state.activeDrawerContent === "plugins" ? "unset" : "none",
-          }}
+          sx={[
+            {
+              height: "inherit",
+            },
+            this.state.activeDrawerContent === "plugins"
+              ? {
+                  display: "unset",
+                }
+              : {
+                  display: "none",
+                },
+          ]}
         >
           <nav role="navigation" id="plugin-buttons" />
         </Box>
@@ -1095,13 +1097,18 @@ class App extends React.PureComponent {
           return (
             <Box
               key={db.value}
-              sx={{
-                height: "inherit",
-                display:
-                  this.state.activeDrawerContent === db.value
-                    ? "unset"
-                    : "none",
-              }}
+              sx={[
+                {
+                  height: "inherit",
+                },
+                this.state.activeDrawerContent === db.value
+                  ? {
+                      display: "unset",
+                    }
+                  : {
+                      display: "none",
+                    },
+              ]}
             >
               {db.renderDrawerContent()}
             </Box>
@@ -1152,13 +1159,13 @@ class App extends React.PureComponent {
               keepMounted: true, //Ensure we dont have to render plugins more than once - UnMounting every time is slow
             }}
             variant={this.state.drawerPermanent ? "permanent" : "temporary"}
-            sx={{
+            sx={(theme) => ({
               "& .MuiPaper-root": {
                 width: DRAWER_WIDTH,
-                backgroundColor: (theme) => theme.palette.background.default,
+                backgroundColor: theme.palette.background.default,
                 backgroundImage: "unset", // To match the new (darker) black theme.
               },
-            }}
+            })}
           >
             {this.renderDrawerHeader()}
             <Divider />
@@ -1400,6 +1407,11 @@ class App extends React.PureComponent {
                 this.appModel.config.mapConfig.map.introductionSteps
               }
               globalObserver={this.globalObserver}
+              plugins={this.appModel.plugins}
+              drawerButtonTitle={
+                this.appModel.config.mapConfig.map.drawerButtonTitle
+              }
+              isDarkMode={this.props.theme.palette.mode === "dark"}
             />
           )}
         </>
