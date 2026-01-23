@@ -14,8 +14,8 @@ import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashPar
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
 import WMSLayer from "./layers/WMSLayer";
-import WMTSLayer from "./layers/WMTSLayer.";
-import WFSVectorLayer from "./layers/VectorLayer.";
+import WMTSLayer from "./layers/WMTSLayer";
+import WFSVectorLayer from "./layers/VectorLayer";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
 import { mapDirectionToAngle } from "../utils/mapDirectionToAngle";
