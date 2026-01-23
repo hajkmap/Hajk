@@ -1140,7 +1140,7 @@ export default class PrintModel {
     // Bold
     pdf.addFileToVFS("roboto-bold.ttf", ROBOTO_BOLD);
     pdf.addFont("roboto-bold.ttf", "roboto-bold", "bold");
-
+    // Then we'll set the font that we want to use.
     switch (font) {
       case "normal":
         pdf.setFont("roboto-normal", "normal");
@@ -1447,6 +1447,7 @@ export default class PrintModel {
             align: "center",
           });
         }
+        // Calculate the y-offset for the copyright and disclaimer text based on font size.
         const yOffset =
           this.textFontSize === 8
             ? { copyright: 5.5, disclaimer: 6 }
@@ -1455,7 +1456,7 @@ export default class PrintModel {
               : this.textFontSize === 13
                 ? { copyright: 8, disclaimer: 9 }
                 : { copyright: 5.5, disclaimer: 6 };
-
+        //  Add potential copyright text
         if (this.copyright.length > 0) {
           let yPos = options.useTextIconsInMargin
             ? this.textIconsMargin + this.margin / 2
