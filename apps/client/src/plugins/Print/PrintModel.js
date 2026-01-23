@@ -20,7 +20,7 @@ import ImageWMS from "ol/source/ImageWMS";
 
 import QRCode from "qrcode";
 
-import { ROBOTO_NORMAL } from "./constants";
+import { ROBOTO_NORMAL, ROBOTO_BOLD } from "./constants";
 
 const DEFAULT_DIMS = {
   a0: [1189, 841],
@@ -1132,17 +1132,24 @@ export default class PrintModel {
 
   // Adds fonts needed to properly render necessary characters. (The default jsPDF fonts does not support all characters).
   // Also enables a font (in the future we could provide a possibility for the user to select font).
-  setupFonts = (pdf, font = "ROBOTO_NORMAL") => {
+  setupFonts = (pdf, font) => {
     // First we'll add the available fonts
+    // Normal
     pdf.addFileToVFS("roboto-normal.ttf", ROBOTO_NORMAL);
     pdf.addFont("roboto-normal.ttf", "roboto-normal", "normal");
-    // Then we'll set the font we want to use now. (The switch below is unnecessary but
-    // added for possible future use cases).
+    // Bold
+    pdf.addFileToVFS("roboto-bold.ttf", ROBOTO_BOLD);
+    pdf.addFont("roboto-bold.ttf", "roboto-bold", "bold");
+
     switch (font) {
-      case "ROBOTO_NORMAL":
-        pdf.setFont("roboto-normal");
+      case "normal":
+        pdf.setFont("roboto-normal", "normal");
+        break;
+      case "bold":
+        pdf.setFont("roboto-bold", "bold");
         break;
       default:
+        pdf.setFont("roboto-normal", "normal");
         break;
     }
   };
@@ -1240,7 +1247,7 @@ export default class PrintModel {
         });
 
         // Make sure to add necessary fonts and enable the font we want to use.
-        this.setupFonts(pdf, "ROBOTO_NORMAL");
+        this.setupFonts(pdf, this.textFontWeight);
 
         // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
         pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
@@ -1440,18 +1447,29 @@ export default class PrintModel {
             align: "center",
           });
         }
+        const yOffset =
+          this.textFontSize === 8
+            ? { copyright: 5.5, disclaimer: 6 }
+            : this.textFontSize === 11
+              ? { copyright: 7, disclaimer: 7.5 }
+              : this.textFontSize === 13
+                ? { copyright: 8, disclaimer: 9 }
+                : { copyright: 5.5, disclaimer: 6 };
 
-        // Add potential copyright text
         if (this.copyright.length > 0) {
           let yPos = options.useTextIconsInMargin
             ? this.textIconsMargin + this.margin / 2
             : this.margin;
-          pdf.setFont("helvetica", this.textFontWeight);
           pdf.setFontSize(this.textFontSize);
           pdf.setTextColor(options.mapTextColor);
-          pdf.text(this.copyright, dim[0] - 4 - yPos, dim[1] - 6 - yPos, {
-            align: "right",
-          });
+          pdf.text(
+            this.copyright,
+            dim[0] - 4 - yPos,
+            dim[1] - yOffset.copyright - yPos,
+            {
+              align: "right",
+            }
+          );
         }
 
         // Add potential date text
@@ -1463,7 +1481,6 @@ export default class PrintModel {
           let yPos = options.useTextIconsInMargin
             ? this.textIconsMargin + this.margin / 2
             : this.margin;
-          pdf.setFont("helvetica", this.textFontWeight);
           pdf.setFontSize(this.textFontSize);
           pdf.setTextColor(options.mapTextColor);
           pdf.text(date, dim[0] - 4 - yPos, dim[1] - 2 - yPos, {
@@ -1476,7 +1493,6 @@ export default class PrintModel {
           let yPos = options.useTextIconsInMargin
             ? this.textIconsMargin + this.margin / 2
             : this.margin;
-          pdf.setFont("helvetica", this.textFontWeight);
           pdf.setTextColor(options.mapTextColor);
           let textLines = pdf.splitTextToSize(
             this.disclaimer,
@@ -1488,7 +1504,7 @@ export default class PrintModel {
           pdf.text(
             textLines,
             dim[0] - 4 - yPos,
-            dim[1] - 6 - yPos - textLinesDims.h,
+            dim[1] - yOffset.disclaimer - yPos - textLinesDims.h,
             {
               align: "right",
             }

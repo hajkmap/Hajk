@@ -902,7 +902,7 @@ class ToolOptions extends Component {
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Teckenstorlek för copyright, date och disclaimer texten i utskriften (8-12)"
+                title="Teckenstorlek för copyright, date och disclaimer texten i utskriften."
               />
             </label>
             <select
@@ -914,11 +914,9 @@ class ToolOptions extends Component {
               }}
               value={this.state.textFontSize}
             >
-              <option value={8}>8</option>
-              <option value={9}>9</option>
-              <option value={10}>10</option>
-              <option value={11}>11</option>
-              <option value={12}>12</option>
+              <option value={8}>Liten</option>
+              <option value={11}>Mellan</option>
+              <option value={13}>Stor</option>
             </select>
           </div>
           <div>
@@ -927,7 +925,7 @@ class ToolOptions extends Component {
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Typsnitt för copyright, date och disclaimer texten i utskriften"
+                title="Typsnitt för copyright, date och disclaimer texten i utskriften."
               />
             </label>
             <select
@@ -941,8 +939,6 @@ class ToolOptions extends Component {
             >
               <option value="normal">Normal</option>
               <option value="bold">Fet</option>
-              <option value="italic">Kursiv</option>
-              <option value="bolditalic">Fet kursiv</option>
             </select>
           </div>
           {this.renderVisibleForGroups()}
