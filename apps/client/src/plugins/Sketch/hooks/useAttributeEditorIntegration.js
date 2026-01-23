@@ -362,9 +362,9 @@ const useAttributeEditorIntegration = ({
         // syncOlSelection handles setting EDIT_ACTIVE on all selected features,
         // allowing multiple features to show nodes when multi-selected.
 
-        // Set EDIT_ACTIVE when in EDIT mode (to show nodes)
+        // Set EDIT_ACTIVE when in EDIT mode AND plugin is shown (to show nodes)
         // modifyEnabled only controls whether nodes can be MODIFIED, not visibility
-        feature.set("EDIT_ACTIVE", activityId === "EDIT", true);
+        feature.set("EDIT_ACTIVE", pluginShown && activityId === "EDIT", true);
         if (feature.get("TEXT_SETTINGS") == null) {
           feature.set(
             "TEXT_SETTINGS",
@@ -448,9 +448,9 @@ const useAttributeEditorIntegration = ({
           if (f) {
             // Mark feature for AttributeEditor (ensures layer style function is used)
             markFeatureForAttributeEditor(f);
-            // Set EDIT_ACTIVE to show nodes (always in EDIT mode)
+            // Set EDIT_ACTIVE to show nodes (only when plugin is shown AND in EDIT mode)
             // modifyEnabled controls whether nodes can be MODIFIED (via Modify interaction)
-            f.set("EDIT_ACTIVE", activityId === "EDIT", true);
+            f.set("EDIT_ACTIVE", pluginShown && activityId === "EDIT", true);
             fc.push(f);
           }
         });
@@ -664,9 +664,9 @@ const useAttributeEditorIntegration = ({
               fc.clear();
             } catch {}
             // Set EDIT_ACTIVE before adding to fc so the style function sees correct value
-            // EDIT_ACTIVE controls node VISIBILITY (always show in EDIT mode)
+            // EDIT_ACTIVE controls node VISIBILITY (only when plugin shown AND in EDIT mode)
             // modifyEnabled controls whether nodes can be MODIFIED (via Modify interaction)
-            hit.set("EDIT_ACTIVE", activityId === "EDIT", true);
+            hit.set("EDIT_ACTIVE", pluginShown && activityId === "EDIT", true);
             fc.push(hit);
             editBus.emit("attrib:select-ids", {
               ids: [canon],
@@ -679,8 +679,12 @@ const useAttributeEditorIntegration = ({
               fc.remove(hit);
             } else {
               // Set EDIT_ACTIVE before adding to fc so the style function sees correct value
-              // EDIT_ACTIVE controls node VISIBILITY (always show in EDIT mode)
-              hit.set("EDIT_ACTIVE", activityId === "EDIT", true);
+              // EDIT_ACTIVE controls node VISIBILITY (only when plugin shown AND in EDIT mode)
+              hit.set(
+                "EDIT_ACTIVE",
+                pluginShown && activityId === "EDIT",
+                true
+              );
               fc.push(hit);
             }
 
@@ -1016,6 +1020,104 @@ const useAttributeEditorIntegration = ({
     });
 
     // ============================================================
+    // SECTION: Manual coordinate snapping helper
+    // ============================================================
+    // Snaps a coordinate to the nearest vertex of visible vector features
+    const snapCoordinate = (coordinate) => {
+      const snapHelper = map.snapHelper;
+      if (!snapHelper?.snapEnabled) {
+        return coordinate;
+      }
+
+      const pixelTolerance = snapHelper.pixelTolerance || 10;
+      const pixel = map.getPixelFromCoordinate(coordinate);
+
+      let closestVertex = null;
+      let closestDistanceSq = Infinity;
+
+      // Get all visible vector layers
+      const layers = map
+        .getLayers()
+        .getArray()
+        .filter(
+          (l) =>
+            l.getVisible() && typeof l.getSource?.()?.getFeatures === "function"
+        );
+
+      // Search for vertices near the click
+      for (const layer of layers) {
+        const source = layer.getSource();
+        const features = source.getFeatures();
+
+        for (const feature of features) {
+          const geometry = feature.getGeometry();
+          if (!geometry) continue;
+
+          // Get all coordinates from the geometry
+          let coords = [];
+          const type = geometry.getType();
+
+          if (type === "Point") {
+            coords = [geometry.getCoordinates()];
+          } else if (type === "LineString") {
+            coords = geometry.getCoordinates();
+          } else if (type === "Polygon") {
+            geometry.getCoordinates().forEach((ring) => {
+              coords = coords.concat(ring);
+            });
+          } else if (type === "MultiPolygon") {
+            geometry.getCoordinates().forEach((polygon) => {
+              polygon.forEach((ring) => {
+                coords = coords.concat(ring);
+              });
+            });
+          } else if (type === "MultiLineString") {
+            geometry.getCoordinates().forEach((line) => {
+              coords = coords.concat(line);
+            });
+          }
+
+          // Check each vertex
+          for (const vertexCoord of coords) {
+            const vertexPixel = map.getPixelFromCoordinate(vertexCoord);
+            const dx = vertexPixel[0] - pixel[0];
+            const dy = vertexPixel[1] - pixel[1];
+            const distanceSq = dx * dx + dy * dy;
+
+            if (distanceSq < closestDistanceSq) {
+              closestDistanceSq = distanceSq;
+              closestVertex = vertexCoord;
+            }
+          }
+        }
+      }
+
+      // Check if closest vertex is within tolerance
+      const toleranceSq = pixelTolerance * pixelTolerance;
+      if (closestVertex && closestDistanceSq <= toleranceSq) {
+        return closestVertex;
+      }
+
+      return coordinate;
+    };
+
+    // Listen for snap-coordinate requests from DrawModel (for fixed length mode)
+    const offSnapRequest = editBus.on(
+      "sketch:snap-coordinate-request",
+      (ev) => {
+        const { coordinate, requestId } = ev.detail || {};
+        if (!coordinate || !requestId) return;
+
+        const snappedCoordinate = snapCoordinate(coordinate);
+        editBus.emit("sketch:snap-coordinate-response", {
+          requestId,
+          originalCoordinate: coordinate,
+          snappedCoordinate,
+        });
+      }
+    );
+
+    // ============================================================
     // SECTION: Split feature mode
     // ============================================================
     const offSplitStart = editBus.on("attrib:split-start", (ev) => {
@@ -1073,6 +1175,7 @@ const useAttributeEditorIntegration = ({
       const cleanupSplitDraw = (cancelled = false) => {
         document.removeEventListener("keydown", handleSplitKeyDown);
         map.removeInteraction(drawInteraction);
+        map.snapHelper?.delete?.("attributeEditorSplit");
         splitDrawInteractionRef.current = null;
         splitContextRef.current = null;
 
@@ -1156,6 +1259,19 @@ const useAttributeEditorIntegration = ({
       // Add the draw interaction to the map
       map.addInteraction(drawInteraction);
       splitDrawInteractionRef.current = drawInteraction;
+
+      // Enable snapping after draw interaction is added.
+      // IMPORTANT: OpenLayers Snap must be added AFTER the Draw interaction it intercepts.
+      // If snap interactions already exist (from other Sketch modes), we need to refresh
+      // them so they're re-added after our Draw interaction.
+      const snapHelper = map.snapHelper;
+      if (snapHelper) {
+        // Force refresh by re-setting the same pixel tolerance - this removes
+        // and re-adds all snap interactions, placing them after our Draw
+        const currentTolerance = snapHelper.pixelTolerance || 10;
+        snapHelper.setPixelTolerance(currentTolerance);
+        snapHelper.add("attributeEditorSplit");
+      }
     });
 
     // ============================================================
@@ -1290,6 +1406,9 @@ const useAttributeEditorIntegration = ({
       try {
         offSplitStart();
       } catch {}
+      try {
+        offSnapRequest();
+      } catch {}
       // Cleanup split draw interaction if active
       if (splitDrawInteractionRef.current) {
         try {
@@ -1301,6 +1420,21 @@ const useAttributeEditorIntegration = ({
       try {
         layers.un?.("add", onLayerAdd);
       } catch {}
+      // Clear EDIT_ACTIVE from all features when cleaning up
+      // This ensures nodes don't stay visible after Sketch is closed
+      for (const [layer] of reg.entries()) {
+        try {
+          const src = layer.getSource?.();
+          if (src) {
+            const allFeatures = src.getFeatures?.() || [];
+            allFeatures.forEach((f) => {
+              if (f.get?.("EDIT_ACTIVE")) {
+                f.set("EDIT_ACTIVE", false, true);
+              }
+            });
+          }
+        } catch {}
+      }
       for (const { cleanup } of reg.values()) {
         try {
           cleanup();

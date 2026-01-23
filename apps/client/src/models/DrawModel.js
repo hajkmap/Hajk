@@ -1766,6 +1766,9 @@ class DrawModel {
     // Add snap-helper for snap functionality
     this.#map.snapHelper.add("coreDrawModel");
 
+    // Start snap tracking for visual feedback on hover
+    this.#map.snapHelper.startSnapTracking();
+
     // Store custom handlers from settings
     this.#customHandleDrawStart = settings.handleDrawStart;
     this.#customHandleDrawEnd = settings.handleDrawEnd;
@@ -1775,8 +1778,8 @@ class DrawModel {
     this.#mapClickListener = this.#handleFixedLengthMapClick.bind(this);
     this.#map.on("singleclick", this.#mapClickListener);
 
-    // Set cursor with red dot to indicate user should click in map
-    this.#setFixedLengthCursor();
+    // Note: We no longer set custom cursor here - the snap tracking overlay
+    // provides the visual indicator (red dot that follows mouse and snaps)
   };
 
   // Disables fixed length drawing mode
@@ -1793,12 +1796,10 @@ class DrawModel {
       this.#activeSketch = null;
     }
 
-    // Remove clickLock and snap helper
+    // Stop snap tracking and remove snap helper
+    this.#map.snapHelper.stopSnapTracking();
     this.#map.clickLock.delete("coreDrawModel");
     this.#map.snapHelper.delete("coreDrawModel");
-
-    // Reset cursor back to default
-    this.#resetFixedLengthCursor();
 
     // Clear draw method
     this.#activeDrawMethod = null;
@@ -1806,7 +1807,9 @@ class DrawModel {
 
   // Handles map click in fixed length mode - creates the initial feature
   #handleFixedLengthMapClick = (event) => {
-    const coordinate = event.coordinate;
+    // Use snapped coordinate from tracking, or fall back to click coordinate
+    const snapped = this.#map.snapHelper?.getSnappedCoordinate?.();
+    const coordinate = snapped ?? event.coordinate;
 
     // If we don't have an active sketch yet, create one
     if (!this.#activeSketch) {
@@ -1832,53 +1835,8 @@ class DrawModel {
         this.#customHandleDrawStart({ feature: this.#activeSketch });
       }
 
-      // Reset cursor to normal - user should now use the "Lägg till segment" button
-      // instead of clicking in the map
-      this.#resetFixedLengthCursor();
-    }
-  };
-
-  // Sets a custom cursor with a dot to indicate fixed length drawing mode
-  #setFixedLengthCursor = () => {
-    const mapElement = this.#map.getTargetElement();
-    // OpenLayers cursor must be set on the viewport element
-    const viewportElement = mapElement?.querySelector(".ol-viewport");
-
-    if (!viewportElement) {
-      return;
-    }
-
-    const canvas = document.createElement("canvas");
-    canvas.width = 32;
-    canvas.height = 32;
-    const ctx = canvas.getContext("2d");
-
-    // Draw a small dot in the center
-    ctx.fillStyle = "rgba(255, 0, 0, 0.8)"; // Red dot
-    ctx.beginPath();
-    ctx.arc(16, 16, 4, 0, 2 * Math.PI);
-    ctx.fill();
-
-    // Draw a circle around it for visibility
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(16, 16, 4, 0, 2 * Math.PI);
-    ctx.stroke();
-
-    const dataURL = canvas.toDataURL();
-    const cursorValue = `url("${dataURL}") 16 16, crosshair`;
-
-    viewportElement.style.cursor = cursorValue;
-  };
-
-  // Resets cursor back to default
-  #resetFixedLengthCursor = () => {
-    const mapElement = this.#map.getTargetElement();
-    const viewportElement = mapElement?.querySelector(".ol-viewport");
-
-    if (viewportElement) {
-      viewportElement.style.cursor = "";
+      // Stop snap tracking - the red dot should disappear after start point is set
+      this.#map.snapHelper.stopSnapTracking();
     }
   };
 
@@ -2766,8 +2724,8 @@ class DrawModel {
         // Clear the active sketch so we can start a new one
         this.#activeSketch = null;
 
-        // Set cursor with red dot again - ready for next feature
-        this.#setFixedLengthCursor();
+        // Start snap tracking again - red dot indicates ready for new start point
+        this.#map.snapHelper.startSnapTracking();
       } else {
         // Not enough points - abort the drawing
         this.#drawSource.removeFeature(this.#activeSketch);
@@ -2778,8 +2736,8 @@ class DrawModel {
           this.#customHandleDrawAbort();
         }
 
-        // Set cursor with red dot again - ready for new feature
-        this.#setFixedLengthCursor();
+        // Start snap tracking again - red dot indicates ready for new start point
+        this.#map.snapHelper.startSnapTracking();
       }
     } else if (this.#drawInteraction) {
       // Normal draw interaction
