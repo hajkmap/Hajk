@@ -50,22 +50,26 @@ export function useScrollToSelectedRow({
     let targetId;
     let shouldIncrementIndex = false;
 
-    const selectedSize = selectedIds?.size ?? 0;
+    // Filter selected IDs to only include those visible in current items list
+    const visibleSelectedIds = selectedIds
+      ? Array.from(selectedIds).filter((id) => items.some((r) => r.id === id))
+      : [];
+    const visibleSize = visibleSelectedIds.length;
 
-    if (selectedSize > 1) {
+    if (visibleSize > 1) {
       // Multiple selections - cycle through them in list order (not click order)
-      const selectedArray = Array.from(selectedIds).sort((a, b) => {
+      const selectedArray = visibleSelectedIds.sort((a, b) => {
         const idxA = items.findIndex((r) => r.id === a);
         const idxB = items.findIndex((r) => r.id === b);
         return idxA - idxB;
       });
       targetId = selectedArray[currentScrollIndex % selectedArray.length];
       shouldIncrementIndex = true;
-    } else if (selectedSize === 1) {
+    } else if (visibleSize === 1) {
       // Single selection
-      targetId = Array.from(selectedIds)[0];
-    } else if (focusedId != null) {
-      // Fallback to focused ID
+      targetId = visibleSelectedIds[0];
+    } else if (focusedId != null && items.some((r) => r.id === focusedId)) {
+      // Fallback to focused ID (only if visible in items)
       targetId = focusedId;
     } else {
       return; // Nothing to scroll to
@@ -128,11 +132,9 @@ export function useScrollToSelectedRow({
       pageChanged ? 100 : 0
     );
 
-    // Increment scroll index for cycling
-    if (shouldIncrementIndex) {
-      setCurrentScrollIndex(
-        (prev) => (prev + 1) % Array.from(selectedIds).length
-      );
+    // Increment scroll index for cycling (use visible count, not total selected)
+    if (shouldIncrementIndex && visibleSize > 0) {
+      setCurrentScrollIndex((prev) => (prev + 1) % visibleSize);
     }
   }, [
     selectedIds,

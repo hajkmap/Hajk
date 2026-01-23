@@ -303,24 +303,21 @@ export default function TableMode(props) {
   );
 
   React.useEffect(() => {
-    // only when the table actually shows something
-    if (!filteredAndSorted.length) return;
+    // If nothing is selected, nothing to do
     if (tableSelectedIds.size === 0) return;
 
-    // is any selected id still visible in the current filtered list?
-    const selectedVisible = filteredAndSorted.some((r) =>
-      tableSelectedIds.has(r.id)
+    // Get IDs that are visible in the current filtered list
+    const visibleSelectedIds = Array.from(tableSelectedIds).filter((id) =>
+      filteredAndSorted.some((r) => r.id === id)
     );
 
-    if (!selectedVisible) {
-      const firstId = filteredAndSorted[0]?.id;
-      if (firstId != null) {
-        editBus.emit("attrib:select-ids", {
-          ids: [firstId],
-          source: "view",
-          mode: "replace",
-        });
-      }
+    // If some selected features got filtered out, update selection to only visible ones
+    if (visibleSelectedIds.length !== tableSelectedIds.size) {
+      editBus.emit("attrib:select-ids", {
+        ids: visibleSelectedIds,
+        source: "view",
+        mode: "replace",
+      });
     }
   }, [filteredAndSorted, tableSelectedIds]);
 
