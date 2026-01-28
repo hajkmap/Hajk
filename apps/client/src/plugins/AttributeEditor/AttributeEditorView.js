@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import { useTheme as useMuiTheme } from "@mui/material/styles";
 
 import { themes, makeStyles } from "./theme/Styles";
 import {
@@ -57,6 +58,7 @@ export default function AttributeEditorView({
   handleRowLeave,
 }) {
   const { enqueueSnackbar } = useSnackbar();
+  const muiTheme = useMuiTheme();
   const geomUndoRef = React.useRef([]);
   const [geomUndoCount, setGeomUndoCount] = React.useState(0);
   const uniqueCacheRef = useRef(new Map());
@@ -302,8 +304,9 @@ export default function AttributeEditorView({
     setFocusedId(null);
   }, [serviceId]);
 
-  // === Theme ===
-  const theme = ui.dark ? themes.dark : themes.light;
+  // === Theme (follows Hajk global dark mode) ===
+  const isDarkMode = muiTheme.palette.mode === "dark";
+  const theme = isDarkMode ? themes.dark : themes.light;
   const s = useMemo(() => makeStyles(theme, isMobile), [theme, isMobile]);
 
   // === Responsiveness ===
@@ -2424,10 +2427,8 @@ export default function AttributeEditorView({
         isMobile={isMobile}
         mode={ui.mode}
         setMode={controller.setMode}
-        dark={ui.dark}
         title={ui.title}
         color={ui.color}
-        setDark={controller.setDark}
         features={features}
         filteredAndSorted={filteredAndSorted}
         tableSelectedIds={tableSelectedIds}

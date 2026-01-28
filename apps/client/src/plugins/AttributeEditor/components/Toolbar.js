@@ -11,8 +11,6 @@ export default function Toolbar({
   isMobile,
   mode,
   setMode,
-  dark,
-  setDark,
   features,
   filteredAndSorted,
   tableSelectedIds,
@@ -389,16 +387,6 @@ export default function Toolbar({
       >
         {showOnlySelected ? `Visa alla` : `Visa markerade (${selectedCount})`}
       </button>
-
-      {/*<button
-        type="button"
-        onClick={() => setDark(!dark)}
-        style={s.toggle(dark)}
-        aria-pressed={dark}
-        title="Växla dark mode"
-      >
-        {dark ? "Dark" : "Light"}
-      </button>*/}
 
       <div style={s.toolbarInfo}>
         <input

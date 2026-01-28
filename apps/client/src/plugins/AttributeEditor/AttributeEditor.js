@@ -1,4 +1,5 @@
 import React from "react";
+import { useTheme as useMuiTheme } from "@mui/material/styles";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import AttributeEditorView from "./AttributeEditorView";
 import Observer from "react-event-observer";
@@ -118,6 +119,7 @@ function toCanonicalId(idLike, idMap) {
 }
 
 function AttributeEditor(props) {
+  const muiTheme = useMuiTheme();
   const programmaticSketchOpsRef = React.useRef(new WeakSet());
   const [fieldMetaLocal, setFieldMetaLocal] = React.useState([]);
   const vectorLayerRef = React.useRef(null);
@@ -129,7 +131,6 @@ function AttributeEditor(props) {
     title: "Attributredigerare",
     color: "4a90e2",
     mode: "table", // "table" | "form"
-    dark: false,
   });
 
   const DEFAULT_TITLE = "Attributredigerare";
@@ -463,7 +464,7 @@ function AttributeEditor(props) {
               }
             });
 
-            const isDark = ui.dark;
+            const isDark = muiTheme.palette.mode === "dark";
             const bgColor = isDark ? "#1e293b" : "white";
             const textColor = isDark ? "#e5e7eb" : "#111827";
             const mutedColor = isDark ? "#9ca3af" : "#6b7280";
@@ -483,7 +484,7 @@ function AttributeEditor(props) {
         }
       }
     },
-    [ui.dark]
+    [muiTheme.palette.mode]
   );
 
   const handleRowLeave = React.useCallback(() => {
@@ -1569,7 +1570,6 @@ function AttributeEditor(props) {
     () => ({
       // UI
       setMode: (m) => setUi((u) => ({ ...u, mode: m })),
-      setDark: (v) => setUi((u) => ({ ...u, dark: v })),
       setTitle: (t) => setUi((u) => ({ ...u, title: t })),
       setColor: (c) => setUi((u) => ({ ...u, color: c })),
 
