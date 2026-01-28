@@ -36,6 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LayerSwitcher: Expand Quick Access automatically when loading theme presets ([commit](https://github.com/hajkmap/Hajk/commit/29405a36bb54eedf98ec9c72119c771e5e984784)).
 - LayerSwitcher: Save loaded favorites to `localStorage` ([commit](https://github.com/hajkmap/Hajk/commit/b4741f25f9ca6bd633276ce16707fac22335e993)).
 
+### Changed
+- Make the CQL filter in Client more interactive and user-friendly, see issue [#1731](https://github.com/hajkmap/Hajk/issues/1731).
+
 ## [4.2.0] - 2026-01-23
 
 ### Fixed
