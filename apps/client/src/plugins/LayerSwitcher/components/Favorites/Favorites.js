@@ -111,12 +111,15 @@ function Favorites({
     setMissingLayersConfirmation(null);
 
     const allMapLayers = map.getAllLayers();
+    const loadedLayerIds = new Set();
+
     layers.forEach((l) => {
       const layer = allMapLayers.find((la) => la.get("name") === l.id);
       if (layer) {
         // Set quickaccess property
         if (layer.get("layerType") !== "base") {
           layer.set("quickAccess", true);
+          loadedLayerIds.add(l.id);
         }
         // Set drawOrder (zIndex)
         layer.setZIndex(l.drawOrder);
@@ -157,6 +160,13 @@ function Favorites({
         }
       }
     });
+
+    // Publish event to auto-expand affected groups and GroupLayers
+    if (loadedLayerIds.size > 0) {
+      globalObserver.publish("layerswitcher.quickAccessLayersLoaded", {
+        layerIds: Array.from(loadedLayerIds),
+      });
+    }
 
     enqueueSnackbar(`${title} har nu laddats till snabbåtkomst.`, {
       variant: "success",
@@ -385,9 +395,15 @@ function Favorites({
     return createPortal(
       <Box
         sx={[
+          {
+            height: "inherit",
+            maxHeight: "inherit",
+            flexDirection: "column",
+            overflow: "hidden",
+          },
           favoriteViewDisplay
             ? {
-                display: "block",
+                display: "flex",
               }
             : {
                 display: "none",
@@ -400,7 +416,12 @@ function Favorites({
           functionalCookiesOk={functionalCookiesOk}
           favoritesInfoText={favoritesInfoText}
         ></FavoritesViewHeader>
-        <Box>
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflowY: "auto",
+          }}
+        >
           <FavoritesList
             map={map}
             favorites={favorites}

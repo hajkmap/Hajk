@@ -1,4 +1,4 @@
-FROM node:22-alpine AS buildImage
+FROM node:22-alpine AS buildimage
 
 # --- BACKEND --- #
 # Start with Backend
@@ -56,7 +56,7 @@ COPY /apps/backend/package*.json ./
 RUN npm ci --production
 
 # Move the built Backend into app's root at /usr/app
-COPY --from=buildImage /tmp/build/backend/dist ./
+COPY --from=buildimage /tmp/build/backend/dist ./
 
 # Copy some more necessary files. There's a great chance that 
 # they'll be mounted when running anyway, but if someone forgets
@@ -69,8 +69,8 @@ COPY /apps/backend/static ./static
 RUN sed -i 's|http://localhost:3002||g' ./App_Data/layers.json
 
 # Move the built Client and Admin dirs into static
-COPY --from=buildImage /tmp/build/client/build ./static/client
-COPY --from=buildImage /tmp/build/admin/build ./static/admin
+COPY --from=buildimage /tmp/build/client/build ./static/client
+COPY --from=buildimage /tmp/build/admin/build ./static/admin
 # --- FINAL ASSEMBLY END --- #
 
 # Go!

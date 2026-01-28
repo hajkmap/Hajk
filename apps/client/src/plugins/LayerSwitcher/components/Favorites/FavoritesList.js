@@ -308,8 +308,24 @@ function FavoritesList({
                   <ListItemText
                     primary={favorite.metadata.title}
                     secondary={parseDate(favorite.metadata.savedAt)}
+                    slotProps={{
+                      primary: {
+                        pr: 5,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      },
+                      secondary: {
+                        pr: 5,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      },
+                    }}
                   />
-                  <ListItemSecondaryAction>
+                  <ListItemSecondaryAction
+                    sx={{
+                      right: "4px",
+                    }}
+                  >
                     <FavoritePackageOptions
                       infoCallback={handleInfo}
                       deleteCallback={handleDelete}
