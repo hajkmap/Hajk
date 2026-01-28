@@ -1,5 +1,13 @@
 # ROADMAP admin
 
+## 2026-01-28 - Teams meet-up
+
+Today's discussion resulted in the following decisions:
+
+- Ensure to always set a default value for JSONB objects from Prisma. As this can't be done in prisma.schema, we'll do it in application logic, by doing a deep merge with our default values + database values on top of that.
+- Move all stuff in the PG columns into the `options` column that belong to the application data (including things like `name` in Layer). The only columns that should stay directly in the tables are those that are related to the API and Backend itself - not application data - e.g. `id`, `lastUpdated`, etc. Also, columns that refer to other tables should be left as-is due to database normalization rules (e.g. `Map` table should still have the `projections` column).
+- The API response must always be full, include default values for everything that's missing. To implement this one should proceed by checking the current default value we use for a given property in Client and add it into the new default object. We export all defaults from one file with constants (`server/common/defaults.ts`).
+
 ## List of sprints
 
 - [2025-03-28](#2025-03-28)
