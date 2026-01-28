@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Parser from "html2json";
+import { htmlToJson } from "utils/htmlToJson";
 import Button from "@mui/material/Button";
 import Input from "@mui/material/Input";
 import TextField from "@mui/material/TextField";
@@ -32,7 +32,7 @@ class Page extends Component {
   constructor(props) {
     super(props);
     if (props.page.text) {
-      var json = Parser.html2json(props.page.text);
+      var json = htmlToJson(props.page.text);
       this.state = {
         json: json,
         displayThankYou: false,
