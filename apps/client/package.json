@@ -1,6 +1,6 @@
 {
   "name": "hajk-client",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "description": "Hajk Client UI",
   "homepage": ".",
   "repository": {
@@ -10,10 +10,10 @@
   "license": "MIT",
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "start": "vite dev",
+    "dev": "vite dev",
+    "build": "tsc && vite build",
+    "build-preview": "vite build && vite preview",
     "prestart": "node prebuild.js",
     "prebuild": "node prebuild.js"
   },
@@ -28,16 +28,16 @@
     "ios > 12"
   ],
   "devDependencies": {
+    "vite": "^7.3.1",
+    "@vitejs/plugin-react-swc": "^4.2.2",
+    "vite-tsconfig-paths": "6.0.5",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "eslint-config-prettier": "^10.1.8",
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-prettier": "^5.5.5",
     "prettier": "^3.8.0",
     "prop-types": "^15.8.1",
-    "react-app-rewired": "^2.2.1",
-    "react-scripts": "5.0.1",
-    "source-map-explorer": "^2.5.3",
-    "webpack": "^5.104.1"
+    "source-map-explorer": "^2.5.3"
   },
   "dependencies": {
     "@barbapapazes/plausible-tracker": "^0.5.6",
@@ -61,7 +61,6 @@
     "core-js": "^3.47.0",
     "elm-pep": "^1.0.6",
     "file-saver": "^2.0.5",
-    "html2json": "^1.0.2",
     "intro.js": "^7.2.0",
     "intro.js-react": "^1.0.0",
     "jspdf": "^2.5.2",

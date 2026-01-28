@@ -4,14 +4,14 @@ import { getCenter } from "ol/extent";
 import jsPDF from "jspdf";
 import { saveAs } from "file-saver";
 
-import Vector from "ol/layer/Vector.js";
+import Vector from "ol/layer/Vector";
 import View from "ol/View";
-import VectorSource from "ol/source/Vector.js";
+import VectorSource from "ol/source/Vector";
 import Polygon from "ol/geom/Polygon";
-import Feature from "ol/Feature.js";
-import { Translate } from "ol/interaction.js";
+import Feature from "ol/Feature";
+import { Translate } from "ol/interaction";
 import Collection from "ol/Collection";
-import { Style, Stroke, Fill } from "ol/style.js";
+import { Style, Stroke, Fill } from "ol/style";
 
 import ImageLayer from "ol/layer/Image";
 import TileLayer from "ol/layer/Tile";

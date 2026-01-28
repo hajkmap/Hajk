@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import GeoJSON from "ol/format/GeoJSON.js";
+import GeoJSON from "ol/format/GeoJSON";
 import HajkTransformer from "utils/HajkTransformer";
 import { hfetch } from "utils/FetchWrapper";
 import { Circle, Stroke, Fill, Style } from "ol/style";

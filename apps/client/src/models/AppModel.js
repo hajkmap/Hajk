@@ -13,9 +13,9 @@ import { isMobile } from "../utils/IsMobile";
 import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
-import WMSLayer from "./layers/WMSLayer.js";
-import WMTSLayer from "./layers/WMTSLayer.js";
-import WFSVectorLayer from "./layers/VectorLayer.js";
+import WMSLayer from "./layers/WMSLayer";
+import WMTSLayer from "./layers/WMTSLayer";
+import WFSVectorLayer from "./layers/VectorLayer";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
 import { mapDirectionToAngle } from "../utils/mapDirectionToAngle";
@@ -248,10 +248,16 @@ class AppModel {
    */
   loadPlugins(plugins) {
     const promises = [];
+    const modules = import.meta.glob([
+      "../components/Search/*.j*",
+      "../plugins/*/*.j*",
+    ]);
     plugins.forEach((plugin) => {
       const dir = ["Search"].includes(plugin) ? "components" : "plugins";
-      const prom = import(`../${dir}/${plugin}/${plugin}.js`)
-        .then((module) => {
+
+      // const prom = import(`../${dir}/${plugin}/${plugin}.js`)
+      const prom = modules[`../${dir}/${plugin}/${plugin}.jsx`]()
+        ?.then((module) => {
           const toolConfig =
             this.config.mapConfig.tools.find(
               (plug) => plug.type.toLowerCase() === plugin.toLowerCase()

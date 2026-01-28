@@ -1,10 +1,10 @@
 import { Draw } from "ol/interaction";
-import { Circle as CircleGeometry } from "ol/geom.js";
+import { Circle as CircleGeometry } from "ol/geom";
 import { createBox, createRegularPolygon } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Stroke, Style, Circle, Fill, Text } from "ol/style";
-import Overlay from "ol/Overlay.js";
+import Overlay from "ol/Overlay";
 import GeoJSON from "ol/format/GeoJSON";
 import { handleClick } from "../../../models/Click";
 

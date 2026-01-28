@@ -2,8 +2,8 @@ import { transform } from "ol/proj";
 import Feature from "ol/Feature";
 import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import Point from "ol/geom/Point.js";
-import Draw from "ol/interaction/Draw.js";
+import Point from "ol/geom/Point";
+import Draw from "ol/interaction/Draw";
 import { Circle as CircleStyle, Fill, Stroke, Style, Icon } from "ol/style";
 
 class CoordinatesModel {
