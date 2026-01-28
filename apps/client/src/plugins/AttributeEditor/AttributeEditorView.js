@@ -652,21 +652,23 @@ export default function AttributeEditorView({
       // Otherwise, "add" gets priority 0, rest gets 1
       return r.__pending === "add" ? 0 : 1;
     };
-    if (editingId != null) {
-      rows.sort((a, b) => {
-        const p = pri(a) - pri(b);
-        if (p !== 0) return p;
-        return (a.__idx ?? 0) - (b.__idx ?? 0);
-      });
-      return rows;
-    }
+    // Helper: get the sort value for a row. When a row is being edited,
+    // use the original (unpatched) value so the row doesn't jump while typing.
+    const sortVal = (r) => {
+      if (editingId != null && r.id === editingId) {
+        const orig = featuresMap.get(r.id);
+        if (orig) return orig[sort.key];
+      }
+      return r[sort.key];
+    };
+
     rows.sort((a, b) => {
       const p = pri(a) - pri(b);
       if (p !== 0) return p;
 
       if (!sort.key) return (a.__idx ?? 0) - (b.__idx ?? 0);
 
-      const res = cmp(a[sort.key], b[sort.key]);
+      const res = cmp(sortVal(a), sortVal(b));
       return sort.dir === "asc" ? res : -res;
     });
 
@@ -679,6 +681,7 @@ export default function AttributeEditorView({
     showOnlySelected,
     frozenSelectedIds,
     searchText,
+    featuresMap,
   ]);
 
   const cloneGeometryForDuplicates = React.useCallback(
