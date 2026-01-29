@@ -38,6 +38,10 @@ class StreetViewModel {
   }
 
   activate() {
+    if (!this.googleMapsApi) {
+      console.warn("Google Maps API is not loaded yet.");
+      return;
+    }
     this.map.clickLock.add("streetview");
 
     this.streetViewService = new this.googleMapsApi.StreetViewService();
