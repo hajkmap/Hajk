@@ -26,7 +26,10 @@ const DateWrapper = styled("div")(({ theme }) => ({
 }));
 
 class StreetViewView extends React.PureComponent {
-  state = {};
+  state = {
+    apiReady: false,
+    apiLoadError: false,
+  };
 
   constructor(props) {
     super(props);
@@ -40,6 +43,14 @@ class StreetViewView extends React.PureComponent {
       this.setState({
         imageDate: imageDate,
       });
+    });
+
+    this.localObserver.subscribe("streetViewApiReady", () => {
+      this.setState({ apiReady: true, apiLoadError: false });
+    });
+
+    this.localObserver.subscribe("streetViewApiLoadError", () => {
+      this.setState({ apiLoadError: true });
     });
   }
 
@@ -59,6 +70,22 @@ class StreetViewView extends React.PureComponent {
   }
 
   render() {
+    const { apiLoadError } = this.state;
+    const apiReady = this.state.apiReady || this.model.apiReady;
+
+    if (apiLoadError || this.model.apiLoadError) {
+      return (
+        <Typography color="textSecondary">
+          Verktyget kan inte användas på grund av tekniska problem, kontakta
+          systemadministratören.
+        </Typography>
+      );
+    }
+
+    if (!apiReady) {
+      return <Typography color="textSecondary">Laddar Gatuvy…</Typography>;
+    }
+
     return (
       <div>
         {this.renderInfoText()}

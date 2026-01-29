@@ -39,7 +39,9 @@ class StreetView extends React.PureComponent {
   };
 
   onResize = () => {
-    this.streetViewModel.showLocation();
+    if (!this.streetViewModel.apiLoadError) {
+      this.streetViewModel.showLocation();
+    }
   };
 
   render() {
