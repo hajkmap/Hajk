@@ -23,6 +23,8 @@ var defaultState = {
   target: "toolbar",
   instruction: "",
   copyright: "",
+  textFontSize: 8,
+  textFontWeight: "normal",
   disclaimer: "",
   date: "",
   scales: "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000",
@@ -70,6 +72,9 @@ class ToolOptions extends Component {
         index: tool.index,
         target: tool.options.target || "toolbar",
         copyright: tool.options.copyright || this.state.copyright,
+        textFontSize: tool.options.textFontSize || this.state.textFontSize,
+        textFontWeight:
+          tool.options.textFontWeight || this.state.textFontWeight,
         disclaimer: tool.options.disclaimer || this.state.disclaimer,
         date: tool.options.date || this.state.date,
         position: tool.options.position,
@@ -189,6 +194,8 @@ class ToolOptions extends Component {
         target: this.state.target,
         position: this.state.position,
         copyright: this.state.copyright,
+        textFontSize: this.state.textFontSize,
+        textFontWeight: this.state.textFontWeight,
         disclaimer: this.state.disclaimer,
         date: this.state.date,
         width: this.state.width,
@@ -888,6 +895,51 @@ class ToolOptions extends Component {
                   : "Utskriften sker på klienten och inte på servern som den gamla gjorde."
               }
             />
+          </div>
+          <div>
+            <label htmlFor="textFontSize">
+              Teckenstorlek{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Teckenstorlek för copyright, date och disclaimer texten i utskriften."
+              />
+            </label>
+            <select
+              id="textFontSize"
+              name="textFontSize"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.textFontSize}
+            >
+              <option value={8}>Liten</option>
+              <option value={11}>Mellan</option>
+              <option value={13}>Stor</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="textFontWeight">
+              Typsnitt{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Typsnitt för copyright, date och disclaimer texten i utskriften."
+              />
+            </label>
+            <select
+              id="textFontWeight"
+              name="textFontWeight"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.textFontWeight}
+            >
+              <option value="normal">Normal</option>
+              <option value="bold">Fet</option>
+            </select>
           </div>
           {this.renderVisibleForGroups()}
         </form>

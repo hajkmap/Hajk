@@ -82,7 +82,7 @@ class FirExportPropertyListView extends React.PureComponent {
     const params = {
       samfallighet: this.state.chCommunities,
       ga: this.state.chCommunityFacilities,
-      rattigheter: this.state.chRights,
+      rattighet: this.state.chRights,
       persnr: this.state.chSsn,
       taxerad_agare: this.state.chTaxedOwner,
       fastighet_utskick: this.state.chSendList,

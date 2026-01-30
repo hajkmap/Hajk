@@ -18,6 +18,7 @@ import {
   altKeyOnly,
 } from "ol/events/condition";
 import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
+import { getArea, getLength } from "ol/sphere";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -948,6 +949,11 @@ class DrawModel {
     // Let's get the geometry-type to begin with, we are going
     // to be handling points, line-strings, and surfaces differently.
     const geometry = feature.getGeometry();
+
+    // We will need projection for sphere-based calculations: the utilities
+    // provided in ol/sphere need to know the projection of the map to work correctly.
+    const mapProjection = this.#map.getView().getProjection();
+
     // If we're dealing with a point, we simply return the coordinates of the point.
     if (geometry instanceof Point) {
       return [
@@ -960,15 +966,32 @@ class DrawModel {
     const showAreaPrefix =
       this.#measurementSettings.showArea &&
       this.#measurementSettings.showPerimeter;
-    // Apparently the circle geometry instance does not expose a
-    // getArea method. Here's a quick fix. (Remember that this area
-    // is only used as an heads-up for the user.)
+
+    // We must convert Circle to Polygon in order to use sphere-based calculations.
+    // This ensures accurate measurements for both local (e.g., EPSG:3008)
+    // and global (e.g., EPSG:3857) projections, accounting for spherical distortion,
+    // see issue #1750 for more details.
     if (geometry instanceof CircleGeometry) {
-      const radius = geometry.getRadius();
+      // Convert circle to polygon with 96 segments for accurate approximation. I picked
+      // 96 segments because it's a good compromise between accuracy and performance and we
+      // seem to use it in other places as well.
+      const polygon = fromCircle(geometry, 96);
+
+      // Calculate radius using sphere-based distance calculation
+      const center = geometry.getCenter();
+      const edgePoint = polygon.getCoordinates()[0][0]; // First point on the polygon edge
+
+      // The radius is measured by creating a line string between the center and the edge point
+      const radius = getLength(new LineString([center, edgePoint]), {
+        projection: mapProjection,
+      });
+
       return [
         {
           type: "AREA",
-          value: Math.pow(radius, 2) * Math.PI,
+          value: getArea(polygon, {
+            projection: mapProjection,
+          }),
           prefix: `${showAreaPrefix ? "Area:" : ""}`,
         },
         {
@@ -981,43 +1004,34 @@ class DrawModel {
     // If we're dealing with a line we cannot calculate an area,
     // instead, we only calculate the length.
     if (geometry instanceof LineString) {
-      return [{ type: "LENGTH", value: geometry.getLength(), prefix: "" }];
+      return [
+        {
+          type: "LENGTH",
+          value: getLength(geometry, {
+            projection: mapProjection,
+          }),
+          prefix: "",
+        },
+      ];
     }
     // If we're not dealing with a point, circle, or a line, we are probably dealing
     // with a polygon. For the polygons, we want to return the area and perimeter.
     return [
       {
         type: "AREA",
-        value: geometry?.getArea() || 0,
+        value: getArea(geometry, {
+          projection: mapProjection,
+        }),
         prefix: `${showAreaPrefix ? "Area:" : ""}`,
       },
       {
         type: "PERIMETER",
-        value: this.#getPolygonPerimeter(geometry),
+        value: getLength(geometry, {
+          projection: mapProjection,
+        }),
         prefix: "\n Omkrets:",
       },
     ];
-  };
-
-  // Returns the perimeter of the supplied polygon-geometry
-  #getPolygonPerimeter = (geometry) => {
-    try {
-      // To get the perimeter, we have to get the coordinates of the
-      // outer (0) linear-ring of the supplied geometry. If we fail to extract these
-      // coordinates, we set the linear-ring-coords to null.
-      const linearRingCoords =
-        geometry?.getLinearRing(0)?.getCoordinates() || null;
-      // If no coords were found, we simply return an area of 0.
-      if (!linearRingCoords) {
-        return 0;
-      }
-      // If some coords were found, we can construct a Line-string, and get the length
-      // of that line-string!
-      return new LineString(linearRingCoords)?.getLength() || 0;
-    } catch (error) {
-      // If we fail somewhere, we return 0. Would be better with more handling here!
-      return 0;
-    }
   };
 
   // Returns an OL style to be used in the draw-interaction.
