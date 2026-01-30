@@ -435,7 +435,12 @@ export async function commitWFSTTransaction(params) {
     inserts: inserts.length,
     updates: updates.length,
     deletes: deletes.length,
+    srsName: effectiveSrsName,
+    firstInsertGeom: cleanedInserts[0]?.geometry
+      ? JSON.stringify(cleanedInserts[0].geometry).slice(0, 200)
+      : null,
   });
+  logger.debug("WFS-T XML being sent:", transactionXml.slice(0, 2000));
 
   // Send transaction to WFS server
   const response = await fetchWithRetry(layer.url, {

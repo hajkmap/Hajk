@@ -788,7 +788,13 @@ function AttributeEditor(props) {
         // 8) Set up the vector layer
         const map = props.map;
         const mapProj = map.getView().getProjection();
-        const dataProj = mapProj.getCode();
+
+        // Use CRS from featureCollection (set by backend) instead of assuming map projection
+        // Backend provides: crsName, layerProjection, or crs.properties.name
+        const dataProj =
+          featureCollection?.crsName ||
+          featureCollection?.layerProjection ||
+          mapProj.getCode();
 
         if (vectorLayerRef.current) {
           map.removeLayer(vectorLayerRef.current);

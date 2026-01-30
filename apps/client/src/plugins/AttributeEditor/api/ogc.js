@@ -83,9 +83,9 @@ export function createOgcApi(baseUrl) {
 
     async fetchWfstFeatures(id, params = {}, { signal } = {}) {
       const safeId = validateLayerId(id);
+      // Backend will return crsName/layerProjection in response metadata
       const queryParams = {
         limit: "10000",
-        srsName: "EPSG:3006",
         ...params,
         _t: Date.now(),
         _r: Math.random().toString(36).substring(7),

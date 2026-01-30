@@ -572,8 +572,9 @@ export default class AttributeEditorModel {
     this._lastFeatureCollection = payload;
 
     // Store layer's native projection for coordinate transformations
-    if (payload.layerProjection) {
-      this.#layerProjection = payload.layerProjection;
+    // Backend provides: layerProjection (from layer config) or crsName (actual data CRS)
+    if (payload.layerProjection || payload.crsName) {
+      this.#layerProjection = payload.layerProjection || payload.crsName;
     }
 
     // Normalize data to table rows and infer field metadata

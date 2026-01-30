@@ -1374,11 +1374,16 @@ export default function AttributeEditorView({
           // Update vector layer with new features
           if (vectorLayerRef.current && featureCollection) {
             const mapProj = map.getView().getProjection();
-            const mapProjCode = mapProj.getCode();
+
+            // Use CRS from featureCollection (set by backend) instead of assuming map projection
+            const dataProj =
+              featureCollection?.crsName ||
+              featureCollection?.layerProjection ||
+              mapProj.getCode();
 
             const fmt = new GeoJSON();
             const newFeatures = fmt.readFeatures(featureCollection, {
-              dataProjection: mapProjCode,
+              dataProjection: dataProj,
               featureProjection: mapProj,
             });
 
