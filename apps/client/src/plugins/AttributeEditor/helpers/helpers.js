@@ -8,10 +8,17 @@ export const isEditableField = (meta) => !meta?.readOnly;
  * Extracts the canonical ID from an OpenLayers Feature.
  * Handles different ID property locations consistently.
  * @param {Feature} feature - OL Feature object
+ * @param {string} [idField] - Optional custom ID field name from configuration
  * @returns {string|number|null} The feature ID or null
  */
-export function getFeatureId(feature) {
+export function getFeatureId(feature, idField) {
   if (!feature) return null;
+  // If a custom idField is configured, try that first
+  if (idField) {
+    const customId = feature.get?.(idField);
+    if (customId != null) return customId;
+  }
+  // Fallback to standard ID properties
   return (
     feature.get?.("id") ?? feature.get?.("@_fid") ?? feature.getId?.() ?? null
   );

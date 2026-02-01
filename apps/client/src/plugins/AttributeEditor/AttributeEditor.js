@@ -155,6 +155,7 @@ function AttributeEditor(props) {
   const model = modelRef.current;
 
   const schemaCache = React.useRef(new Map());
+  const idFieldRef = React.useRef(null); // Configured ID field name from schema
 
   const modelState = React.useSyncExternalStore(
     model.subscribe,
@@ -363,7 +364,7 @@ function AttributeEditor(props) {
 
   const styleFn = React.useCallback(
     (feature) => {
-      const raw = getFeatureId(feature);
+      const raw = getFeatureId(feature, idFieldRef.current);
       // O(1) lookup from pre-computed cache instead of computing aliases every render
       const aliases = featureAliasesRef.current.get(raw) || idAliases(raw);
 
@@ -642,6 +643,9 @@ function AttributeEditor(props) {
           schema?.geometryField || "geometry"
         ).toLowerCase();
 
+        // Store configured ID field for use in getFeatureId
+        idFieldRef.current = schema?.idField || null;
+
         // 2) Create FM from editableFields (schema winner)
         const fmEditable = (schema?.editableFields || [])
           .filter((f) => !f.hidden && String(f.name).toLowerCase() !== geomKey)
@@ -817,7 +821,7 @@ function AttributeEditor(props) {
         // Index all features and make them visible initially (both num & str)
         // Pre-compute aliases once here for O(1) lookup in styleFn
         features.forEach((f) => {
-          const raw = getFeatureId(f);
+          const raw = getFeatureId(f, idFieldRef.current);
           const aliases = idAliases(raw);
 
           // Store pre-computed aliases for this feature (keyed by raw id)
@@ -1361,7 +1365,7 @@ function AttributeEditor(props) {
         // Use rowIdMapRef for O(1) lookups
         const idMap = rowIdMapRef.current;
         const pickerFeatures = hits.map((f) => {
-          const rawId = getFeatureId(f);
+          const rawId = getFeatureId(f, idFieldRef.current);
           const canonId = toCanonicalId(rawId, idMap);
           return {
             id: canonId,
@@ -1390,7 +1394,7 @@ function AttributeEditor(props) {
 
       // Single feature (original logic fortsätter...)
       const hit = hits[0];
-      const rawId = getFeatureId(hit);
+      const rawId = getFeatureId(hit, idFieldRef.current);
       // Use rowIdMapRef for O(1) lookup
       const canonId = toCanonicalId(rawId, rowIdMapRef.current);
 
@@ -1504,7 +1508,7 @@ function AttributeEditor(props) {
       const selectedFeatures = [];
       source.forEachFeatureInExtent(boxExtent, (feature) => {
         // Check that the feature is actually visible
-        const raw = getFeatureId(feature);
+        const raw = getFeatureId(feature, idFieldRef.current);
         const aliases = idAliases(raw);
 
         const isVisible = aliases.some(
@@ -1523,7 +1527,7 @@ function AttributeEditor(props) {
       // Use rowIdMapRef for O(1) lookups
       const idMap = rowIdMapRef.current;
       const newIds = selectedFeatures.map((f) => {
-        const rawId = getFeatureId(f);
+        const rawId = getFeatureId(f, idFieldRef.current);
         return toCanonicalId(rawId, idMap);
       });
 
@@ -1698,6 +1702,7 @@ function AttributeEditor(props) {
           featureIndexRef={featureIndexRef}
           graveyardRef={graveyardRef}
           draftBaselineRef={draftBaselineRef}
+          idFieldRef={idFieldRef}
           map={props.map}
           handleRowHover={handleRowHover}
           handleRowLeave={handleRowLeave}

@@ -43,6 +43,7 @@ const defaultState = {
   uri: "",
   projection: "",
   geometryField: "",
+  idField: "",
   point: false,
   multipoint: false,
   linestring: false,
@@ -134,6 +135,7 @@ class Edit extends Component {
       uri: layer.uri,
       projection: layer.projection || "EPSG:3006",
       geometryField: layer.geometryField || "",
+      idField: layer.idField || "",
       addedLayers: [],
       point: layer.editPoint,
       multipoint: layer.editMultiPoint,
@@ -653,6 +655,7 @@ class Edit extends Component {
         layers: this.getValue("layers"),
         projection: this.getValue("projection"),
         geometryField: this.getValue("geometryField"),
+        idField: this.state.idField || "",
         editableFields: this.getValue("editableFields"),
         nonEditableFields: this.getNonEditableFields(),
         editPoint: this.getValue("point"),
@@ -1039,6 +1042,16 @@ class Edit extends Component {
               }}
             />
           </td>
+          <td>
+            <input
+              type="radio"
+              name="idField"
+              checked={this.state.idField === property.name}
+              onChange={() => {
+                this.setState({ idField: property.name });
+              }}
+            />
+          </td>
           <td>{property.name}</td>
           <td>{aliasEditor(property.localType, property.alias)}</td>
           <td>{descriptionEditor(property.localType, property.description)}</td>
@@ -1058,6 +1071,7 @@ class Edit extends Component {
           <tr>
             <th>Redigerbar</th>
             <th>Dold</th>
+            <th>ID (valfritt)</th>
             <th>Namn</th>
             <th>Alias</th>
             <th>Beskrivning</th>
@@ -1067,7 +1081,31 @@ class Edit extends Component {
             <th>Standardvärde</th>
           </tr>
         </thead>
-        <tbody>{rows}</tbody>
+        <tbody>
+          <tr key="auto-id-row" style={{ backgroundColor: "#f5f5f5" }}>
+            <td></td>
+            <td></td>
+            <td>
+              <input
+                type="radio"
+                name="idField"
+                checked={this.state.idField === ""}
+                onChange={() => {
+                  this.setState({ idField: "" });
+                }}
+              />
+            </td>
+            <td>
+              <em>(Auto)</em>
+            </td>
+            <td colSpan="6">
+              <em style={{ color: "#666" }}>
+                Automatisk identifiering via WFS - fungerar i de flesta fall
+              </em>
+            </td>
+          </tr>
+          {rows}
+        </tbody>
       </table>
     );
   }

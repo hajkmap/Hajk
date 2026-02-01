@@ -52,6 +52,7 @@ export default function AttributeEditorView({
   graveyardRef,
   model,
   draftBaselineRef,
+  idFieldRef,
   app,
   map,
   handleRowHover,
@@ -1398,7 +1399,7 @@ export default function AttributeEditorView({
             visibleIdsRef.current = new Set();
 
             newFeatures.forEach((f) => {
-              const raw = getFeatureId(f);
+              const raw = getFeatureId(f, idFieldRef?.current);
               const aliases = idAliases(raw);
               for (const k of aliases) {
                 featureIndexRef.current.set(k, f);
@@ -1469,6 +1470,7 @@ export default function AttributeEditorView({
     enqueueSnackbar,
     vectorLayerRef,
     visibleIdsRef,
+    idFieldRef,
   ]);
 
   const exportToExcel = useCallback(
