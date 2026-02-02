@@ -630,6 +630,8 @@ const SketchView = (props) => {
             setFixedLength={props.setFixedLength}
             fixedAngle={props.fixedAngle}
             setFixedAngle={props.setFixedAngle}
+            multiDrawEnabled={props.multiDrawEnabled}
+            setMultiDrawEnabled={props.setMultiDrawEnabled}
           />
         );
       case "DELETE":

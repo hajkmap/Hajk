@@ -7,6 +7,7 @@ import FeatureStyleSelector from "../components/featureStyle/FeatureStyleSelecto
 import FeatureTextSetter from "../components/FeatureTextSetter";
 import SelectFeaturesDialog from "utils/SelectFeaturesDialog";
 import FixedLengthDrawSelector from "../components/FixedLengthDrawSelector";
+import MultiDrawSelector from "../components/MultiDrawSelector";
 
 const AddView = (props) => {
   // Let's destruct some properties from the props
@@ -25,6 +26,8 @@ const AddView = (props) => {
     setFixedLength,
     fixedAngle,
     setFixedAngle,
+    multiDrawEnabled,
+    setMultiDrawEnabled,
   } = props;
 
   // Track if drawing is currently active (for enabling/disabling buttons)
@@ -50,12 +53,44 @@ const AddView = (props) => {
   // We have to get some information about the current activity (view)
   const activity = model.getActivityFromId(props.id);
 
+  // Track multi-draw part count
+  const [multiDrawPartCount, setMultiDrawPartCount] = React.useState(0);
+
+  // Update multi-draw part count when drawing ends
+  React.useEffect(() => {
+    const updatePartCount = () => {
+      if (multiDrawEnabled) {
+        setMultiDrawPartCount(drawModel.getMultiDrawPartCount());
+      }
+    };
+
+    // Update on draw end
+    localObserver.subscribe("sketch:drawEnd", updatePartCount);
+
+    // Also update when multi-draw mode changes
+    if (multiDrawEnabled) {
+      updatePartCount();
+    } else {
+      setMultiDrawPartCount(0);
+    }
+
+    return () => {
+      localObserver.unsubscribe("sketch:drawEnd", updatePartCount);
+    };
+  }, [localObserver, drawModel, multiDrawEnabled]);
+
   // Determine if fixed length selector should be shown
   // Only show when AttributeEditor layer is selected AND draw type is LineString or Polygon
   const showFixedLengthSelector =
     ["LineString", "Polygon"].includes(activeDrawType) &&
     ogcSource &&
     ogcSource !== "Ingen";
+
+  // Determine if multi-draw selector should be shown
+  // Only show for Point, LineString, and Polygon draw types
+  const showMultiDrawSelector = ["Point", "LineString", "Polygon"].includes(
+    activeDrawType
+  );
 
   // Handler to add a segment programmatically
   const handleAddSegment = React.useCallback(() => {
@@ -70,6 +105,28 @@ const AddView = (props) => {
       drawModel.finishDraw();
     }
   }, [drawingActive, drawModel]);
+
+  // Handler to finish multi-draw mode
+  const handleFinishMultiDraw = React.useCallback(() => {
+    // Get the completed multi-feature before finishing
+    const completedFeature = drawModel.finishMultiDraw();
+    setMultiDrawPartCount(0);
+
+    // Disable multi-draw mode in DrawModel directly (not just React state)
+    // This must happen BEFORE re-adding so that SKETCH_ATTRIBUTEEDITOR gets set
+    drawModel.setMultiDrawMode(false);
+    setMultiDrawEnabled(false);
+
+    // Re-add the feature to trigger the addfeature event for AttributeEditor sync
+    // This is necessary because the feature was added while multi-draw mode was active
+    if (completedFeature) {
+      const source = drawModel.getCurrentVectorSource();
+      if (source) {
+        source.removeFeature(completedFeature);
+        source.addFeature(completedFeature);
+      }
+    }
+  }, [drawModel, setMultiDrawEnabled]);
 
   return (
     <Grid container>
@@ -88,6 +145,17 @@ const AddView = (props) => {
           />
         </Grid>
       </Grid>
+      {showMultiDrawSelector && (
+        <Grid size={12}>
+          <MultiDrawSelector
+            multiDrawEnabled={multiDrawEnabled}
+            setMultiDrawEnabled={setMultiDrawEnabled}
+            multiDrawPartCount={multiDrawPartCount}
+            onFinishMultiDraw={handleFinishMultiDraw}
+            uiDisabled={false}
+          />
+        </Grid>
+      )}
       {showFixedLengthSelector && (
         <FixedLengthDrawSelector
           fixedLengthEnabled={fixedLengthEnabled}

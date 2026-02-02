@@ -3,9 +3,16 @@ import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Icon, Stroke, Style, Circle, Fill, Text } from "ol/style";
-import { Circle as CircleGeometry, LineString, Polygon } from "ol/geom";
+import {
+  Circle as CircleGeometry,
+  LineString,
+  Polygon,
+  MultiPoint,
+  MultiLineString,
+  MultiPolygon,
+  Point,
+} from "ol/geom";
 import { fromCircle } from "ol/geom/Polygon";
-import { MultiPoint, Point } from "ol/geom";
 import Overlay from "ol/Overlay";
 import GeoJSON from "ol/format/GeoJSON";
 import transformTranslate from "@turf/transform-translate";
@@ -102,6 +109,9 @@ class DrawModel {
   #mapClickListener = null;
   #activeDrawMethod = null;
   #customHandleDrawAbort = null;
+  #multiDrawModeActive = false;
+  #multiDrawFeature = null;
+  #multiDrawGeometryType = null;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -764,6 +774,12 @@ class DrawModel {
         // GetCoordinates returns an array with the coordinates for points,
         // so we have to wrap that array in an array before returning.
         return [geometry.getCoordinates()];
+      case "MultiPoint":
+        // GetCoordinates returns an array of coordinate arrays for MultiPoints.
+        return geometry.getCoordinates();
+      case "MultiLineString":
+        // Flatten all LineString coordinates into a single array.
+        return geometry.getCoordinates().flat();
       case "MultiPolygon":
         // We'll need to flatten the data from MultiPolygon. It's the coordinates we want.
         let coords = [];
@@ -1375,8 +1391,15 @@ class DrawModel {
     feature.set("USER_DRAWN", true);
     feature.set("DRAW_METHOD", this.#drawInteraction?.get("DRAW_METHOD"));
     feature.set("TEXT_SETTINGS", this.#textStyleSettings);
-    // And set a nice style on the feature to be added.
-    feature.setStyle(this.#getFeatureStyle(feature));
+
+    // Handle multi-draw mode: merge geometries instead of adding separate features
+    if (this.#multiDrawModeActive) {
+      this.#handleMultiDrawFeature(feature);
+    } else {
+      // And set a nice style on the feature to be added.
+      feature.setStyle(this.#getFeatureStyle(feature));
+    }
+
     // Make sure to remove the event-listener for the pointer-moves.
     // (We don't want the pointer to keep updating while we're not drawing).
     this.#map.un("pointermove", this.#handlePointerMove);
@@ -2724,11 +2747,19 @@ class DrawModel {
         this.#activeSketch.set("USER_DRAWN", true);
         this.#activeSketch.set("DRAW_METHOD", this.#activeDrawMethod);
         this.#activeSketch.set("TEXT_SETTINGS", this.#textStyleSettings);
-        // Apply the final feature style (not draw style)
-        this.#activeSketch.setStyle(this.#getFeatureStyle(this.#activeSketch));
 
         // Re-add feature to source - this triggers addfeature event
         this.#drawSource.addFeature(this.#activeSketch);
+
+        // Handle multi-draw mode: merge geometries instead of adding separate features
+        if (this.#multiDrawModeActive) {
+          this.#handleMultiDrawFeature(this.#activeSketch);
+        } else {
+          // Apply the final feature style (not draw style)
+          this.#activeSketch.setStyle(
+            this.#getFeatureStyle(this.#activeSketch)
+          );
+        }
 
         // Trigger drawEnd handler
         if (this.#customHandleDrawEnd) {
@@ -2976,6 +3007,167 @@ class DrawModel {
   // Get:er returning circle radius
   getCircleRadius = () => {
     return this.#circleRadius;
+  };
+
+  // SECTION: Multi-draw mode
+  // Allows users to draw multiple geometries that are merged into
+  // a single Multi-geometry (MultiPoint, MultiLineString, MultiPolygon)
+
+  // Private method to handle a feature drawn in multi-draw mode
+  #handleMultiDrawFeature = (feature) => {
+    const geometry = feature.getGeometry();
+    const geometryType = geometry.getType();
+
+    // Only allow Point, LineString, and Polygon in multi-draw mode
+    if (!["Point", "LineString", "Polygon"].includes(geometryType)) {
+      console.warn(`Multi-draw mode does not support ${geometryType}`);
+      feature.setStyle(this.#getFeatureStyle(feature));
+      return;
+    }
+
+    // Check if we're trying to mix geometry types
+    if (
+      this.#multiDrawGeometryType &&
+      this.#multiDrawGeometryType !== geometryType
+    ) {
+      console.warn(
+        `Cannot mix geometry types in multi-draw mode. Expected ${this.#multiDrawGeometryType}, got ${geometryType}`
+      );
+      // Remove the incompatible feature
+      setTimeout(() => {
+        this.#drawSource.removeFeature(feature);
+      }, 0);
+      return;
+    }
+
+    if (!this.#multiDrawFeature) {
+      // First feature in multi-draw mode - convert to multi-geometry
+      this.#multiDrawGeometryType = geometryType;
+      this.#convertToMultiGeometry(feature);
+      this.#multiDrawFeature = feature;
+      feature.setStyle(this.#getFeatureStyle(feature));
+    } else {
+      // Subsequent features - merge into existing multi-feature
+      this.#mergeIntoMultiFeature(feature);
+    }
+  };
+
+  // Convert a single geometry feature to a multi-geometry feature
+  #convertToMultiGeometry = (feature) => {
+    const geometry = feature.getGeometry();
+    const geometryType = geometry.getType();
+
+    let multiGeometry;
+    switch (geometryType) {
+      case "Point":
+        multiGeometry = new MultiPoint([geometry.getCoordinates()]);
+        break;
+      case "LineString":
+        multiGeometry = new MultiLineString([geometry.getCoordinates()]);
+        break;
+      case "Polygon":
+        multiGeometry = new MultiPolygon([geometry.getCoordinates()]);
+        break;
+      default:
+        return; // Should not happen due to earlier check
+    }
+
+    feature.setGeometry(multiGeometry);
+    // Update DRAW_METHOD to reflect multi-type
+    feature.set("DRAW_METHOD", `Multi${geometryType}`);
+  };
+
+  // Merge a new feature's geometry into the existing multi-draw feature
+  #mergeIntoMultiFeature = (feature) => {
+    const newGeometry = feature.getGeometry();
+    const multiGeometry = this.#multiDrawFeature.getGeometry();
+    const multiType = multiGeometry.getType();
+
+    // Get existing coordinates and add new ones
+    const existingCoords = multiGeometry.getCoordinates();
+    let newCoords;
+
+    switch (multiType) {
+      case "MultiPoint":
+        newCoords = [...existingCoords, newGeometry.getCoordinates()];
+        multiGeometry.setCoordinates(newCoords);
+        break;
+      case "MultiLineString":
+        newCoords = [...existingCoords, newGeometry.getCoordinates()];
+        multiGeometry.setCoordinates(newCoords);
+        break;
+      case "MultiPolygon":
+        newCoords = [...existingCoords, newGeometry.getCoordinates()];
+        multiGeometry.setCoordinates(newCoords);
+        break;
+      default:
+        console.warn(`Unexpected multi-geometry type: ${multiType}`);
+        return;
+    }
+
+    // Update style on the multi-feature to refresh measurements etc.
+    this.#multiDrawFeature.setStyle(
+      this.#getFeatureStyle(this.#multiDrawFeature)
+    );
+
+    // Remove the individual feature that was just drawn
+    // Use setTimeout to avoid issues with OL's internal feature handling
+    setTimeout(() => {
+      this.#drawSource.removeFeature(feature);
+    }, 0);
+  };
+
+  // Enable or disable multi-draw mode
+  setMultiDrawMode = (active) => {
+    if (active === this.#multiDrawModeActive) {
+      return;
+    }
+
+    this.#multiDrawModeActive = active;
+
+    if (!active) {
+      // When disabling, finalize any ongoing multi-draw
+      this.finishMultiDraw();
+    }
+  };
+
+  // Get current multi-draw mode state
+  getMultiDrawMode = () => {
+    return this.#multiDrawModeActive;
+  };
+
+  // Finish multi-draw mode and return the completed feature
+  finishMultiDraw = () => {
+    const completedFeature = this.#multiDrawFeature;
+
+    // Reset multi-draw state
+    this.#multiDrawFeature = null;
+    this.#multiDrawGeometryType = null;
+
+    // Publish information about the completed multi-feature
+    if (completedFeature) {
+      this.#publishInformation({
+        subject: "drawModel.multiDrawCompleted",
+        payLoad: completedFeature,
+      });
+    }
+
+    return completedFeature;
+  };
+
+  // Get the current multi-draw feature (if any)
+  getMultiDrawFeature = () => {
+    return this.#multiDrawFeature;
+  };
+
+  // Get the number of parts in the current multi-draw feature
+  getMultiDrawPartCount = () => {
+    if (!this.#multiDrawFeature) {
+      return 0;
+    }
+    const geometry = this.#multiDrawFeature.getGeometry();
+    const coords = geometry.getCoordinates();
+    return coords.length;
   };
 }
 export default DrawModel;

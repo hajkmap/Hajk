@@ -76,6 +76,9 @@ const Sketch = (props) => {
   const [fixedLength, setFixedLength] = React.useState(1000); // Default 1000 meters
   const [fixedAngle, setFixedAngle] = React.useState(0); // Default 0 degrees (North)
 
+  // State for multi-draw mode (drawing multiple geometries into a single Multi-geometry)
+  const [multiDrawEnabled, setMultiDrawEnabled] = React.useState(false);
+
   // We have to keep track of some measurement-settings
   const [measurementSettings, setMeasurementSettings] = React.useState(
     getMeasurementSettings()
@@ -406,6 +409,36 @@ const Sketch = (props) => {
     drawModel.updateFixedLengthSettings(fixedLength, fixedAngle);
   }, [drawModel, fixedLength, fixedAngle]);
 
+  // Effect to sync multi-draw mode with DrawModel
+  React.useEffect(() => {
+    drawModel.setMultiDrawMode(multiDrawEnabled);
+  }, [drawModel, multiDrawEnabled]);
+
+  // Reset multi-draw mode when activity or draw type changes
+  // Also properly finish any active multi-draw and sync to AttributeEditor
+  React.useEffect(() => {
+    if (
+      activityId !== "ADD" ||
+      !["Point", "LineString", "Polygon"].includes(activeDrawType)
+    ) {
+      // If multi-draw is active, finish it properly before disabling
+      if (drawModel.getMultiDrawMode()) {
+        const completedFeature = drawModel.finishMultiDraw();
+        drawModel.setMultiDrawMode(false);
+
+        // Re-add the feature to trigger AE sync (if in AE mode)
+        if (completedFeature) {
+          const source = drawModel.getCurrentVectorSource();
+          if (source) {
+            source.removeFeature(completedFeature);
+            source.addFeature(completedFeature);
+          }
+        }
+      }
+      setMultiDrawEnabled(false);
+    }
+  }, [activityId, activeDrawType, drawModel]);
+
   // This effect makes sure to reset the edit- and move-feature if the window is closed,
   // or if the user changes activity. (We don't want to keep the features selected
   // if the user toggles from edit- or move-mode to create mode for example).
@@ -437,7 +470,8 @@ const Sketch = (props) => {
       } else if (
         feature &&
         feature.get("USER_DRAWN") &&
-        attributeEditorActiveRef.current
+        attributeEditorActiveRef.current &&
+        !drawModel.getMultiDrawMode() // Don't mark during multi-draw - wait until finished
       ) {
         // Mark normal user-drawn features for AttributeEditor sync when active
         feature.set("SKETCH_ATTRIBUTEEDITOR", true, true);
@@ -553,6 +587,8 @@ const Sketch = (props) => {
         setFixedLength={setFixedLength}
         fixedAngle={fixedAngle}
         setFixedAngle={setFixedAngle}
+        multiDrawEnabled={multiDrawEnabled}
+        setMultiDrawEnabled={setMultiDrawEnabled}
       />
     </BaseWindowPlugin>
   );

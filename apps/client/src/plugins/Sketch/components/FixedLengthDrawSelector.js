@@ -1,15 +1,35 @@
 import React from "react";
+import { styled } from "@mui/material/styles";
 import {
   Grid,
-  Paper,
   TextField,
   Typography,
   Switch,
   Button,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import HajkToolTip from "components/HajkToolTip";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
+
+// Styled AccordionSummary to match other accordions in Sketch
+const StyledAccordionSummary = styled(AccordionSummary)(() => ({
+  minHeight: 35,
+  "&.MuiAccordionSummary-root.Mui-expanded": {
+    minHeight: 35,
+  },
+  "& .MuiAccordionSummary-content": {
+    transition: "inherit !important",
+    marginTop: 0,
+    marginBottom: 0,
+    "&.Mui-expanded": {
+      marginTop: 0,
+      marginBottom: 0,
+    },
+  },
+}));
 
 /**
  * Component for controlling fixed-length drawing mode in AddView
@@ -67,42 +87,45 @@ const FixedLengthDrawSelector = (props) => {
     }
   };
 
-  return (
-    <Paper sx={{ p: 1, mt: 1 }}>
-      <Grid container justifyContent="center" alignItems="center">
-        {/* Toggle switch for enabling/disabling fixed length mode */}
-        <Grid
-          container
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{ mb: 2 }}
-        >
-          <Grid item>
-            <Typography variant="body2">Fast längd och riktning</Typography>
-          </Grid>
-          <Grid item>
-            <HajkToolTip
-              title={
-                props.fixedLengthEnabled
-                  ? "Avaktivera för att rita fritt med musen"
-                  : "Aktivera för att rita segment med fast längd och riktning"
-              }
-            >
-              <Switch
-                checked={props.fixedLengthEnabled}
-                onChange={() =>
-                  props.setFixedLengthEnabled(!props.fixedLengthEnabled)
-                }
-                disabled={props.uiDisabled}
-                size="small"
-                color="primary"
-              />
-            </HajkToolTip>
-          </Grid>
-        </Grid>
+  // Handle switch click without triggering accordion toggle
+  const handleSwitchClick = (e) => {
+    e.stopPropagation();
+    props.setFixedLengthEnabled(!props.fixedLengthEnabled);
+  };
 
-        {/* Input fields - always shown but disabled when fixed length mode is off */}
-        <>
+  return (
+    <Accordion
+      expanded={props.fixedLengthEnabled}
+      onChange={(e, expanded) => props.setFixedLengthEnabled(expanded)}
+      style={{ marginTop: 8 }}
+    >
+      <HajkToolTip
+        title={
+          props.fixedLengthEnabled
+            ? "Klicka för att avaktivera fast längd och riktning"
+            : "Klicka för att rita segment med fast längd och riktning"
+        }
+      >
+        <StyledAccordionSummary>
+          <Grid
+            container
+            justifyContent="space-between"
+            alignItems="center"
+            size={12}
+          >
+            <Typography variant="button">Rita manuellt</Typography>
+            <Switch
+              checked={props.fixedLengthEnabled}
+              onClick={handleSwitchClick}
+              disabled={props.uiDisabled}
+              size="small"
+              color="primary"
+            />
+          </Grid>
+        </StyledAccordionSummary>
+      </HajkToolTip>
+      <AccordionDetails>
+        <Grid container>
           {/* Length input */}
           <Grid sx={{ mb: 2 }} size={12}>
             <HajkToolTip title="Ange längden för varje segment i meter (0.1 - 100000m)">
@@ -114,7 +137,7 @@ const FixedLengthDrawSelector = (props) => {
                 size="small"
                 value={lengthInput}
                 onChange={handleFixedLengthChange}
-                disabled={props.uiDisabled || !props.fixedLengthEnabled}
+                disabled={props.uiDisabled}
                 inputProps={{
                   min: 0.1,
                   max: 100000,
@@ -135,7 +158,7 @@ const FixedLengthDrawSelector = (props) => {
                 size="small"
                 value={angleInput}
                 onChange={handleFixedAngleChange}
-                disabled={props.uiDisabled || !props.fixedLengthEnabled}
+                disabled={props.uiDisabled}
                 inputProps={{
                   min: 0,
                   max: 360,
@@ -149,44 +172,40 @@ const FixedLengthDrawSelector = (props) => {
           <Grid container spacing={1} sx={{ mt: 2 }} size={12}>
             <Grid size={12}>
               <HajkToolTip title="Klicka först i kartan för att sätta startpunkt, sedan klicka här för att lägga till varje segment">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  startIcon={<AddIcon />}
-                  onClick={props.onAddSegment}
-                  disabled={
-                    props.uiDisabled ||
-                    !props.drawingActive ||
-                    !props.fixedLengthEnabled
-                  }
-                >
-                  Lägg till segment
-                </Button>
+                <span style={{ display: "block" }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    startIcon={<AddIcon />}
+                    onClick={props.onAddSegment}
+                    disabled={props.uiDisabled || !props.drawingActive}
+                  >
+                    Lägg till segment
+                  </Button>
+                </span>
               </HajkToolTip>
             </Grid>
             <Grid size={12}>
               <HajkToolTip title="Avsluta ritningen">
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  fullWidth
-                  startIcon={<CheckIcon />}
-                  onClick={props.onFinishDrawing}
-                  disabled={
-                    props.uiDisabled ||
-                    !props.drawingActive ||
-                    !props.fixedLengthEnabled
-                  }
-                >
-                  Avsluta ritning
-                </Button>
+                <span style={{ display: "block" }}>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    fullWidth
+                    startIcon={<CheckIcon />}
+                    onClick={props.onFinishDrawing}
+                    disabled={props.uiDisabled || !props.drawingActive}
+                  >
+                    Avsluta ritning
+                  </Button>
+                </span>
               </HajkToolTip>
             </Grid>
           </Grid>
-        </>
-      </Grid>
-    </Paper>
+        </Grid>
+      </AccordionDetails>
+    </Accordion>
   );
 };
 

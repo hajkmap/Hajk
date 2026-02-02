@@ -43,11 +43,17 @@ function getFeatureCoordinates(feature) {
       return geometry.getCoordinates();
     case "Point":
       return [geometry.getCoordinates()];
+    case "MultiPoint":
+      return geometry.getCoordinates();
+    case "MultiLineString":
+      return geometry.getCoordinates().flat();
     case "MultiPolygon":
       let coords = [];
-      geometry.getCoordinates()[0].forEach((a) => {
-        a.forEach((b) => {
-          coords.push(b);
+      geometry.getCoordinates().forEach((polygon) => {
+        polygon.forEach((ring) => {
+          ring.forEach((coord) => {
+            coords.push(coord);
+          });
         });
       });
       return coords;

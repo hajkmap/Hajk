@@ -221,6 +221,8 @@ export const PROMPT_TEXTS = {
     "Skapa en polygon genom att klicka på en position för varje nod, avsluta med dubbelklick.",
   PointHelp: "Klicka på en position för att infoga en punkt.",
   TextHelp: "Klicka på en position för att infoga text.",
+  MultiDrawHelp:
+    "Rita flera separata delar som blir ett gemensamt objekt (MultiPolygon/MultiLineString/MultiPoint). Klicka 'Avsluta multi-ritning' när du är klar.",
   EDITHelp:
     "Klicka på ett objekt för att ändra dess utseende eller ritordning.",
   MOVEHelp: "Klicka på ett objekt för att förflytta det.",
