@@ -3193,7 +3193,7 @@ class DrawModel {
     const coordinates = geometry.getCoordinates();
     const newFeatures = [];
 
-    // Copy properties from original feature (except geometry-related)
+    // Copy properties from original feature (except geometry)
     const properties = feature.getProperties();
     delete properties.geometry;
 
@@ -3275,7 +3275,7 @@ class DrawModel {
         return null;
     }
 
-    // Use properties from the first feature as base
+    // Use properties from the first feature as base (except geometry)
     const baseProperties = features[0].getProperties();
     delete baseProperties.geometry;
 

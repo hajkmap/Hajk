@@ -510,13 +510,19 @@ const useAttributeEditorIntegration = ({
     const getAeSelected = () => {
       const arr = [];
       const seen = new Set();
+      // Get pendingDeletes to filter out deleted features
+      const pendingDeletes =
+        props?.model?.getSnapshot?.()?.pendingDeletes || new Set();
 
       for (const { select } of reg.values()) {
         select?.getFeatures?.().forEach((f) => {
-          const id = f.getId?.() ?? f.get?.("@_fid") ?? f.get?.("id");
-          const key = String(id);
+          const rawId = f.getId?.() ?? f.get?.("@_fid") ?? f.get?.("id");
+          const key = String(rawId);
+          // Parse as number for pendingDeletes check
+          const numId = typeof rawId === "number" ? rawId : parseInt(rawId, 10);
 
-          if (!seen.has(key)) {
+          // Skip if already seen or marked for deletion
+          if (!seen.has(key) && !pendingDeletes.has(numId)) {
             seen.add(key);
             arr.push(f);
           }
@@ -620,13 +626,27 @@ const useAttributeEditorIntegration = ({
         condition: (evt) => {
           if (activityId !== "MOVE" || !translateEnabled) return false;
 
-          // Collect ALL features at the pixel to enable priority-based selection
+          // Get pendingDeletes to filter out deleted features
+          const pendingDeletes =
+            props?.model?.getSnapshot?.()?.pendingDeletes || new Set();
+
+          // Helper to get feature ID
+          const getId = (f) => {
+            const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+            return typeof raw === "number" ? raw : parseInt(raw, 10);
+          };
+
+          // Collect ALL features at the pixel, excluding deleted ones
           const candidates = [];
           map.forEachFeatureAtPixel(
             evt.pixel,
             (f, lyr) => {
               if (lyr === layer && !f.get("KINK_MARKER")) {
-                candidates.push(f);
+                // Filter out features marked for deletion
+                const id = getId(f);
+                if (!pendingDeletes.has(id)) {
+                  candidates.push(f);
+                }
               }
               return false; // Continue iterating to collect all
             },
@@ -636,22 +656,11 @@ const useAttributeEditorIntegration = ({
 
           // Priority selection:
           // 1. Prefer features already in the selection (so user can grab a selected feature)
-          // 2. Prefer existing features (positive ID) over drafts (negative ID)
-          //    This helps when original is marked for deletion but overlaps with split parts
-          // 3. Otherwise use the first (topmost) candidate
+          // 2. Otherwise use the first (topmost) candidate
           const currentSelection = fc.getArray ? fc.getArray() : [];
           let hit = candidates.find((f) => currentSelection.includes(f));
           if (!hit) {
-            // Prefer existing features (positive ID) over drafts (negative ID)
-            const getId = (f) => {
-              const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-              return typeof raw === "number" ? raw : parseInt(raw, 10);
-            };
-            const existingFeatures = candidates.filter((f) => {
-              const id = getId(f);
-              return Number.isFinite(id) && id > 0;
-            });
-            hit = existingFeatures[0] || candidates[0];
+            hit = candidates[0];
           }
           if (!hit) return false;
 
@@ -1333,6 +1342,13 @@ const useAttributeEditorIntegration = ({
       // Add the new individual features to Sketch source
       const newIds = [];
       newFeatures.forEach((newFeature) => {
+        // Clear any existing ID - each new feature needs a fresh ID from AE
+        newFeature.setId(undefined);
+        newFeature.unset("id", true);
+        newFeature.unset("@_fid", true);
+        newFeature.unset("fid", true);
+        newFeature.unset("ogc_fid", true);
+
         // Mark for AttributeEditor processing - AE's onAdd will assign the ID
         newFeature.set("USER_DRAWN", true, true);
         newFeature.set("SKETCH_ATTRIBUTEEDITOR", true, true);
@@ -1403,6 +1419,13 @@ const useAttributeEditorIntegration = ({
         source: "merge",
         mode: "mark",
       });
+
+      // Clear any existing ID - merged feature needs a fresh ID from AE
+      mergedFeature.setId(undefined);
+      mergedFeature.unset("id", true);
+      mergedFeature.unset("@_fid", true);
+      mergedFeature.unset("fid", true);
+      mergedFeature.unset("ogc_fid", true);
 
       // Mark for AttributeEditor processing - AE's onAdd will assign the ID
       mergedFeature.set("USER_DRAWN", true, true);
