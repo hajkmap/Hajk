@@ -339,9 +339,21 @@ const Sketch = (props) => {
   );
 
   // Handle draw end event to publish to localObserver
-  const handleDrawEnd = React.useCallback(() => {
-    localObserver.publish("sketch:drawEnd");
-  }, [localObserver]);
+  // Clear DrawModel's style so AE's styleFn takes over (needed for fixed-length mode)
+  const handleDrawEnd = React.useCallback(
+    (e) => {
+      const feature = e?.feature;
+      if (
+        feature &&
+        attributeEditorActiveRef.current &&
+        !drawModel.getMultiDrawMode()
+      ) {
+        feature.setStyle(null);
+      }
+      localObserver.publish("sketch:drawEnd");
+    },
+    [localObserver, drawModel]
+  );
 
   // Handle draw abort event to publish to localObserver
   const handleDrawAbort = React.useCallback(() => {

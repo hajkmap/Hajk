@@ -1056,6 +1056,11 @@ function AttributeEditor(props) {
         featureAliasesRef.current.set(tempId, idAliases(tempId));
         graveyardRef.current.delete(tempId);
 
+        // IMPORTANT: Update visibleIdsRef and selectedIdsRef BEFORE adding feature to AE layer
+        // This ensures styleFn sees the correct state when the layer re-renders after addFeature
+        selectedIdsRef.current = new Set([tempId]);
+        visibleIdsRef.current.add(tempId);
+
         // Remove from Sketch layer and add to AE layer
         try {
           // Remove from Sketch layer
@@ -1072,9 +1077,6 @@ function AttributeEditor(props) {
         } catch (err) {
           console.warn("Kunde inte flytta feature mellan lager:", err);
         }
-
-        selectedIdsRef.current = new Set([tempId]);
-        visibleIdsRef.current.add(tempId);
 
         vectorLayerRef.current?.changed?.();
 
