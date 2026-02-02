@@ -87,10 +87,11 @@ const AddView = (props) => {
     ogcSource !== "Ingen";
 
   // Determine if multi-draw selector should be shown
-  // Only show for Point, LineString, and Polygon draw types
-  const showMultiDrawSelector = ["Point", "LineString", "Polygon"].includes(
-    activeDrawType
-  );
+  // Only show when AttributeEditor layer is selected AND draw type is Point, LineString, or Polygon
+  const showMultiDrawSelector =
+    ["Point", "LineString", "Polygon"].includes(activeDrawType) &&
+    ogcSource &&
+    ogcSource !== "Ingen";
 
   // Handler to add a segment programmatically
   const handleAddSegment = React.useCallback(() => {

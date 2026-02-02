@@ -1281,6 +1281,150 @@ const useAttributeEditorIntegration = ({
     });
 
     // ============================================================
+    // SECTION: Split multi-feature into individual features
+    // ============================================================
+    const offSplitMulti = editBus.on("attrib:split-multi-feature", (ev) => {
+      const { featureId } = ev.detail || {};
+      if (!featureId) return;
+
+      // Find the target feature
+      const targetFeature = findAeFeatureById(featureId);
+      if (!targetFeature) {
+        editBus.emit("sketch:split-multi-error", {
+          message: "Kunde inte hitta objektet att dela upp",
+        });
+        return;
+      }
+
+      // Check if it's actually a multi-feature
+      if (!drawModel.isMultiFeature(targetFeature)) {
+        editBus.emit("sketch:split-multi-error", {
+          message: "Objektet är inte en multi-feature",
+        });
+        return;
+      }
+
+      // Split the multi-feature
+      const newFeatures = drawModel.splitMultiFeature(targetFeature);
+      if (newFeatures.length === 0) {
+        editBus.emit("sketch:split-multi-error", {
+          message: "Kunde inte dela upp objektet",
+        });
+        return;
+      }
+
+      // Get the Sketch source - we add to Sketch and let AE's onAdd flow handle it
+      const sketchSource = drawModel.getCurrentVectorSource();
+      if (!sketchSource) {
+        editBus.emit("sketch:split-multi-error", {
+          message: "Kunde inte hitta Sketch-lagret",
+        });
+        return;
+      }
+
+      // Mark original multi-feature for deletion (don't remove from source yet)
+      // User can commit to save, or undo to restore
+      editBus.emit("attrib:toggle-delete-ids", {
+        ids: [featureId],
+        source: "split-multi",
+        mode: "mark",
+      });
+
+      // Add the new individual features to Sketch source
+      const newIds = [];
+      newFeatures.forEach((newFeature) => {
+        // Mark for AttributeEditor processing - AE's onAdd will assign the ID
+        newFeature.set("USER_DRAWN", true, true);
+        newFeature.set("SKETCH_ATTRIBUTEEDITOR", true, true);
+
+        // Add to Sketch source - AE's onAdd handler will process it
+        sketchSource.addFeature(newFeature);
+
+        // Get the ID that was assigned by AE's onAdd handler
+        const newId = newFeature.getId();
+        newIds.push(newId);
+      });
+
+      // Emit success event with the new feature IDs
+      editBus.emit("sketch:split-multi-complete", {
+        originalId: featureId,
+        newIds: newIds,
+        count: newFeatures.length,
+      });
+    });
+
+    // ============================================================
+    // SECTION: Merge features into a multi-feature
+    // ============================================================
+    const offMergeFeatures = editBus.on("attrib:merge-features", (ev) => {
+      const { featureIds } = ev.detail || {};
+      if (!featureIds || featureIds.length < 2) {
+        editBus.emit("sketch:merge-error", {
+          message: "Minst två objekt krävs för att slå ihop",
+        });
+        return;
+      }
+
+      // Find all target features
+      const targetFeatures = featureIds
+        .map((id) => findAeFeatureById(id))
+        .filter((f) => f !== null);
+
+      if (targetFeatures.length < 2) {
+        editBus.emit("sketch:merge-error", {
+          message: "Kunde inte hitta tillräckligt många objekt",
+        });
+        return;
+      }
+
+      // Merge the features
+      const mergedFeature = drawModel.mergeFeatures(targetFeatures);
+      if (!mergedFeature) {
+        editBus.emit("sketch:merge-error", {
+          message:
+            "Kunde inte slå ihop objekten. Kontrollera att alla objekt har samma geometrityp.",
+        });
+        return;
+      }
+
+      // Get the Sketch source - we add to Sketch and let AE's onAdd flow handle it
+      const sketchSource = drawModel.getCurrentVectorSource();
+      if (!sketchSource) {
+        editBus.emit("sketch:merge-error", {
+          message: "Kunde inte hitta Sketch-lagret",
+        });
+        return;
+      }
+
+      // Mark original features for deletion (don't remove from source yet)
+      // User can commit to save, or undo to restore
+      editBus.emit("attrib:toggle-delete-ids", {
+        ids: featureIds,
+        source: "merge",
+        mode: "mark",
+      });
+
+      // Mark for AttributeEditor processing - AE's onAdd will assign the ID
+      mergedFeature.set("USER_DRAWN", true, true);
+      mergedFeature.set("SKETCH_ATTRIBUTEEDITOR", true, true);
+
+      // Add to Sketch source - AE's onAdd handler will:
+      // 1. Create a draft with negative ID
+      // 2. Move feature from Sketch to AE layer
+      // 3. Update featureIndexRef
+      sketchSource.addFeature(mergedFeature);
+
+      // Get the ID that was assigned by AE's onAdd handler
+      const newId = mergedFeature.getId();
+
+      // Emit success event
+      editBus.emit("sketch:merge-complete", {
+        originalIds: featureIds,
+        newId: newId,
+      });
+    });
+
+    // ============================================================
     // SECTION: Wire up existing layers
     // ============================================================
     const offAttach = editBus.on("sketch.attachExternalLayer", (ev) => {
@@ -1411,6 +1555,12 @@ const useAttributeEditorIntegration = ({
       } catch {}
       try {
         offSplitStart();
+      } catch {}
+      try {
+        offSplitMulti();
+      } catch {}
+      try {
+        offMergeFeatures();
       } catch {}
       try {
         offSnapRequest();

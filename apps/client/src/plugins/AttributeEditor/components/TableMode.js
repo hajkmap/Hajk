@@ -1,6 +1,8 @@
 import React from "react";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
+import MergeTypeIcon from "@mui/icons-material/MergeType";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import SaveIcon from "@mui/icons-material/Save";
 import UndoIcon from "@mui/icons-material/Undo";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
@@ -138,6 +140,10 @@ export default function TableMode(props) {
     duplicateSelectedRows,
     splitFeature,
     canSplitGeometry,
+    splitMultiFeature,
+    canSplitMultiFeature,
+    mergeFeatures,
+    canMergeFeatures,
     openSelectedInFormFromTable,
     commitTableEdits,
     setDeleteState,
@@ -529,6 +535,36 @@ export default function TableMode(props) {
             aria-label="Dela objekt"
           >
             <CallSplitIcon fontSize="small" />
+          </button>
+
+          <button
+            style={
+              !canSplitMultiFeature && !canMergeFeatures
+                ? s.iconBtnDisabled
+                : s.iconBtn
+            }
+            disabled={!canSplitMultiFeature && !canMergeFeatures}
+            onClick={canSplitMultiFeature ? splitMultiFeature : mergeFeatures}
+            title={
+              canSplitMultiFeature
+                ? "Dela upp multi-objekt till enskilda objekt"
+                : canMergeFeatures
+                  ? "Slå ihop markerade objekt till ett multi-objekt"
+                  : tableSelectedIds.size === 1
+                    ? "Markera ett multi-objekt för att dela upp, eller flera rader för att slå ihop"
+                    : tableSelectedIds.size < 2
+                      ? "Markera objekt för att dela upp eller slå ihop"
+                      : "Objekten måste ha samma geometrityp för att slås ihop"
+            }
+            aria-label={
+              canSplitMultiFeature ? "Dela upp multi-objekt" : "Slå ihop objekt"
+            }
+          >
+            {canSplitMultiFeature ? (
+              <AccountTreeIcon fontSize="small" />
+            ) : (
+              <MergeTypeIcon fontSize="small" />
+            )}
           </button>
 
           <button

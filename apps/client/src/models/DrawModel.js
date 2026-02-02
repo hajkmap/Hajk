@@ -3169,5 +3169,165 @@ class DrawModel {
     const coords = geometry.getCoordinates();
     return coords.length;
   };
+
+  // SECTION: Split and Merge operations for multi-features
+
+  /**
+   * Splits a multi-feature into individual features.
+   * @param {Feature} feature - The multi-feature to split (MultiPoint, MultiLineString, or MultiPolygon)
+   * @returns {Feature[]} Array of individual features, or empty array if not a multi-feature
+   */
+  splitMultiFeature = (feature) => {
+    if (!feature) return [];
+
+    const geometry = feature.getGeometry();
+    const geometryType = geometry.getType();
+
+    // Only handle multi-geometries
+    if (
+      !["MultiPoint", "MultiLineString", "MultiPolygon"].includes(geometryType)
+    ) {
+      return [];
+    }
+
+    const coordinates = geometry.getCoordinates();
+    const newFeatures = [];
+
+    // Copy properties from original feature (except geometry-related)
+    const properties = feature.getProperties();
+    delete properties.geometry;
+
+    coordinates.forEach((coords) => {
+      let newGeometry;
+      switch (geometryType) {
+        case "MultiPoint":
+          newGeometry = new Point(coords);
+          break;
+        case "MultiLineString":
+          newGeometry = new LineString(coords);
+          break;
+        case "MultiPolygon":
+          newGeometry = new Polygon(coords);
+          break;
+        default:
+          return;
+      }
+
+      const newFeature = new Feature({
+        geometry: newGeometry,
+        ...properties,
+      });
+
+      // Update DRAW_METHOD to reflect single geometry type
+      const singleType = geometryType.replace("Multi", "");
+      newFeature.set("DRAW_METHOD", singleType);
+
+      newFeatures.push(newFeature);
+    });
+
+    return newFeatures;
+  };
+
+  /**
+   * Merges multiple features of the same type into a single multi-feature.
+   * @param {Feature[]} features - Array of features to merge (must be same geometry type)
+   * @returns {Feature|null} The merged multi-feature, or null if merge is not possible
+   */
+  mergeFeatures = (features) => {
+    if (!features || features.length < 2) return null;
+
+    // Get geometry types and validate they're all the same
+    const geometryTypes = features.map((f) => f.getGeometry().getType());
+    const uniqueTypes = [...new Set(geometryTypes)];
+
+    if (uniqueTypes.length !== 1) {
+      console.warn("Cannot merge features of different geometry types");
+      return null;
+    }
+
+    const geometryType = uniqueTypes[0];
+
+    // Only handle Point, LineString, and Polygon (convert to Multi variants)
+    if (!["Point", "LineString", "Polygon"].includes(geometryType)) {
+      // If already multi-geometries, we could merge them but that's more complex
+      console.warn("Can only merge Point, LineString, or Polygon features");
+      return null;
+    }
+
+    // Collect all coordinates
+    const allCoordinates = features.map((f) =>
+      f.getGeometry().getCoordinates()
+    );
+
+    // Create the multi-geometry
+    let multiGeometry;
+    switch (geometryType) {
+      case "Point":
+        multiGeometry = new MultiPoint(allCoordinates);
+        break;
+      case "LineString":
+        multiGeometry = new MultiLineString(allCoordinates);
+        break;
+      case "Polygon":
+        multiGeometry = new MultiPolygon(allCoordinates);
+        break;
+      default:
+        return null;
+    }
+
+    // Use properties from the first feature as base
+    const baseProperties = features[0].getProperties();
+    delete baseProperties.geometry;
+
+    const mergedFeature = new Feature({
+      geometry: multiGeometry,
+      ...baseProperties,
+    });
+
+    // Update DRAW_METHOD to reflect multi-type
+    mergedFeature.set("DRAW_METHOD", `Multi${geometryType}`);
+
+    return mergedFeature;
+  };
+
+  /**
+   * Checks if a feature is a multi-feature (has multiple parts).
+   * @param {Feature} feature - The feature to check
+   * @returns {boolean} True if the feature is a multi-feature with more than one part
+   */
+  isMultiFeature = (feature) => {
+    if (!feature) return false;
+    const geometry = feature.getGeometry();
+    const geometryType = geometry.getType();
+
+    if (
+      !["MultiPoint", "MultiLineString", "MultiPolygon"].includes(geometryType)
+    ) {
+      return false;
+    }
+
+    // Check if it actually has multiple parts
+    const coordinates = geometry.getCoordinates();
+    return coordinates.length > 1;
+  };
+
+  /**
+   * Gets the number of parts in a multi-feature.
+   * @param {Feature} feature - The feature to check
+   * @returns {number} Number of parts (0 if not a multi-feature)
+   */
+  getMultiFeaturePartCount = (feature) => {
+    if (!feature) return 0;
+    const geometry = feature.getGeometry();
+    const geometryType = geometry.getType();
+
+    if (
+      !["MultiPoint", "MultiLineString", "MultiPolygon"].includes(geometryType)
+    ) {
+      return 0;
+    }
+
+    return geometry.getCoordinates().length;
+  };
 }
 export default DrawModel;

@@ -926,7 +926,8 @@ export default function AttributeEditorView({
     const off = editBus.on("attrib:toggle-delete-ids", (ev) => {
       const ids = ev?.detail?.ids || [];
       if (!ids.length) return;
-      controller.toggleDelete(ids, "toggle");
+      const mode = ev?.detail?.mode || "toggle";
+      controller.toggleDelete(ids, mode);
     });
     return () => off();
   }, [controller]);
@@ -2427,6 +2428,116 @@ export default function AttributeEditorView({
     showNotification,
   ]);
 
+  // === Split Multi-Feature Logic ===
+  const canSplitMultiFeature = React.useMemo(() => {
+    const activeSelectedIds =
+      ui.mode === "table" ? tableSelectedIds : selectedIds;
+
+    if (activeSelectedIds.size !== 1) return false;
+    const id = Array.from(activeSelectedIds)[0];
+    const feature = featureIndexRef.current?.get(id);
+    if (!feature) return false;
+    const type = feature.getGeometry?.()?.getType?.();
+    // Check if it's a multi-geometry with more than one part
+    if (!["MultiPoint", "MultiLineString", "MultiPolygon"].includes(type)) {
+      return false;
+    }
+    const coords = feature.getGeometry()?.getCoordinates?.();
+    return coords && coords.length > 1;
+  }, [ui.mode, tableSelectedIds, selectedIds, featureIndexRef]);
+
+  const splitMultiFeature = React.useCallback(() => {
+    const activeSelectedIds =
+      ui.mode === "table" ? tableSelectedIds : selectedIds;
+    if (activeSelectedIds.size !== 1) return;
+
+    const id = Array.from(activeSelectedIds)[0];
+    editBus.emit("attrib:split-multi-feature", { featureId: id });
+  }, [ui.mode, tableSelectedIds, selectedIds]);
+
+  // === Merge Features Logic ===
+  const canMergeFeatures = React.useMemo(() => {
+    const activeSelectedIds =
+      ui.mode === "table" ? tableSelectedIds : selectedIds;
+
+    if (activeSelectedIds.size < 2) return false;
+
+    // Get all selected features and check they have the same geometry type
+    const ids = Array.from(activeSelectedIds);
+    const types = ids.map((id) => {
+      const feature = featureIndexRef.current?.get(id);
+      return feature?.getGeometry?.()?.getType?.();
+    });
+
+    // Filter out null/undefined and check all are the same type
+    const validTypes = types.filter((t) => t);
+    if (validTypes.length !== ids.length) return false;
+
+    const uniqueTypes = [...new Set(validTypes)];
+    if (uniqueTypes.length !== 1) return false;
+
+    // Only allow merging Point, LineString, Polygon (not already multi)
+    return ["Point", "LineString", "Polygon"].includes(uniqueTypes[0]);
+  }, [ui.mode, tableSelectedIds, selectedIds, featureIndexRef]);
+
+  const mergeFeatures = React.useCallback(() => {
+    const activeSelectedIds =
+      ui.mode === "table" ? tableSelectedIds : selectedIds;
+    if (activeSelectedIds.size < 2) return;
+
+    const ids = Array.from(activeSelectedIds);
+    editBus.emit("attrib:merge-features", { featureIds: ids });
+  }, [ui.mode, tableSelectedIds, selectedIds]);
+
+  // Listen for split-multi and merge completion/error events
+  React.useEffect(() => {
+    const offSplitMultiComplete = editBus.on(
+      "sketch:split-multi-complete",
+      (ev) => {
+        const { count, newIds } = ev.detail || {};
+        showNotification(`Multi-objektet delades upp i ${count} delar`);
+        // Select the new features
+        if (newIds?.length > 0) {
+          editBus.emit("attrib:select-ids", {
+            ids: newIds,
+            source: "view",
+            mode: "replace",
+          });
+        }
+      }
+    );
+
+    const offSplitMultiError = editBus.on("sketch:split-multi-error", (ev) => {
+      const { message } = ev.detail || {};
+      showNotification(message || "Kunde inte dela upp multi-objektet");
+    });
+
+    const offMergeComplete = editBus.on("sketch:merge-complete", (ev) => {
+      const { newId } = ev.detail || {};
+      showNotification("Objekten slogs ihop till ett multi-objekt");
+      // Select the new merged feature
+      if (newId != null) {
+        editBus.emit("attrib:select-ids", {
+          ids: [newId],
+          source: "view",
+          mode: "replace",
+        });
+      }
+    });
+
+    const offMergeError = editBus.on("sketch:merge-error", (ev) => {
+      const { message } = ev.detail || {};
+      showNotification(message || "Kunde inte slå ihop objekten");
+    });
+
+    return () => {
+      offSplitMultiComplete();
+      offSplitMultiError();
+      offMergeComplete();
+      offMergeError();
+    };
+  }, [showNotification]);
+
   return (
     <div style={s.shell}>
       <Toolbar
@@ -2502,6 +2613,10 @@ export default function AttributeEditorView({
           duplicateInForm={duplicateInForm}
           splitFeature={splitFeature}
           canSplitGeometry={canSplitGeometry}
+          splitMultiFeature={splitMultiFeature}
+          canSplitMultiFeature={canSplitMultiFeature}
+          mergeFeatures={mergeFeatures}
+          canMergeFeatures={canMergeFeatures}
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}
           hasGeomUndo={hasGeomUndo}
@@ -2521,6 +2636,10 @@ export default function AttributeEditorView({
           duplicateSelectedRows={duplicateSelectedRows}
           splitFeature={splitFeature}
           canSplitGeometry={canSplitGeometry}
+          splitMultiFeature={splitMultiFeature}
+          canSplitMultiFeature={canSplitMultiFeature}
+          mergeFeatures={mergeFeatures}
+          canMergeFeatures={canMergeFeatures}
           openSelectedInFormFromTable={openSelectedInFormFromTable}
           commitTableEdits={commitTableEdits}
           columnFilters={columnFilters}
@@ -2593,6 +2712,10 @@ export default function AttributeEditorView({
           duplicateInForm={duplicateInForm}
           splitFeature={splitFeature}
           canSplitGeometry={canSplitGeometry}
+          splitMultiFeature={splitMultiFeature}
+          canSplitMultiFeature={canSplitMultiFeature}
+          mergeFeatures={mergeFeatures}
+          canMergeFeatures={canMergeFeatures}
           hasGeomUndo={hasGeomUndo}
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}

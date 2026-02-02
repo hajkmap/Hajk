@@ -4,6 +4,8 @@ import SaveIcon from "@mui/icons-material/Save";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
+import MergeTypeIcon from "@mui/icons-material/MergeType";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
@@ -66,6 +68,10 @@ export default function DesktopForm({
   duplicateInForm,
   splitFeature,
   canSplitGeometry,
+  splitMultiFeature,
+  canSplitMultiFeature,
+  mergeFeatures,
+  canMergeFeatures,
   hasGeomUndo,
   columnFilters,
   setColumnFilters,
@@ -660,6 +666,36 @@ export default function DesktopForm({
             }
           >
             <CallSplitIcon fontSize="small" />
+          </button>
+
+          <button
+            style={
+              !canSplitMultiFeature && !canMergeFeatures
+                ? s.iconBtnDisabled
+                : s.iconBtn
+            }
+            disabled={!canSplitMultiFeature && !canMergeFeatures}
+            onClick={canSplitMultiFeature ? splitMultiFeature : mergeFeatures}
+            aria-label={
+              canSplitMultiFeature ? "Dela upp multi-objekt" : "Slå ihop objekt"
+            }
+            title={
+              canSplitMultiFeature
+                ? "Dela upp multi-objekt till enskilda objekt"
+                : canMergeFeatures
+                  ? "Slå ihop markerade objekt till ett multi-objekt"
+                  : selectedIds.size === 1
+                    ? "Markera ett multi-objekt för att dela upp, eller flera objekt för att slå ihop"
+                    : selectedIds.size < 2
+                      ? "Markera objekt för att dela upp eller slå ihop"
+                      : "Objekten måste ha samma geometrityp för att slås ihop"
+            }
+          >
+            {canSplitMultiFeature ? (
+              <AccountTreeIcon fontSize="small" />
+            ) : (
+              <MergeTypeIcon fontSize="small" />
+            )}
           </button>
 
           <button
