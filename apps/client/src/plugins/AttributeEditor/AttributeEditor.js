@@ -1394,7 +1394,7 @@ function AttributeEditor(props) {
         }
       }
 
-      // Single feature (original logic fortsätter...)
+      // Single feature (original logic continues...)
       const hit = hits[0];
       const rawId = getFeatureId(hit, idFieldRef.current);
       // Use rowIdMapRef for O(1) lookup

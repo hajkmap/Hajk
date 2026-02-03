@@ -183,7 +183,7 @@ const reducer = (state, action) => {
       const { rows = [] } = action;
       if (!rows.length) return state;
 
-      let nextTempId = state.nextTempId; // startar på -1, -2, ...
+      let nextTempId = state.nextTempId; // starts at -1, -2, ...
       const drafts = rows.map((r) => {
         const id = nextTempId--;
         return { ...r, id, __pending: "add" };
@@ -212,10 +212,10 @@ const reducer = (state, action) => {
       const removed = state.pendingAdds.filter((d) => ids.has(d.id));
       if (!removed.length) return state;
 
-      // ta bort från pendingAdds
+      // Remove from pendingAdds
       const nextAdds = state.pendingAdds.filter((d) => !ids.has(d.id));
 
-      // undo: kunna ångra borttagningen genom att återskapa utkasten
+      // Undo: allow reverting the deletion by restoring the drafts
       return pushUndo(
         { ...state, pendingAdds: nextAdds },
         `Remove drafts (${removed.length})`,
@@ -648,7 +648,7 @@ export default class AttributeEditorModel {
     }
   };
 
-  // Plocka ut attribut från en OL Feature (utan geometry)
+  // Extract attributes from an OL Feature (excluding geometry)
   _makeDraftFromFeature = (feature, fieldMeta = []) => {
     const props = feature?.getProperties ? feature.getProperties() : {};
     const { geometry, ...rest } = props;
@@ -657,8 +657,8 @@ export default class AttributeEditorModel {
     const row = {};
     if (fmKeys.length) {
       fmKeys.forEach((k) => {
-        if (k === "id") return; // id sätts i reducer
-        row[k] = rest[k] ?? null; // null → visas som tomt / “#saknas” för readOnly
+        if (k === "id") return; // id is set in reducer
+        row[k] = rest[k] ?? null; // null → shown as empty / "#saknas" for readOnly
       });
     } else {
       Object.keys(rest).forEach((k) => {
@@ -672,7 +672,7 @@ export default class AttributeEditorModel {
   addDraftFromFeature = (feature) => {
     const draft = this._makeDraftFromFeature(feature, this.#fieldMeta);
     this.dispatch({ type: Action.CREATE_DRAFTS, rows: [draft] });
-    // temp-id som just skapades = nextTempId + 1 (vi dekrementerade i reducern)
+    // temp-id just created = nextTempId + 1 (we decremented in the reducer)
     return this._state.nextTempId + 1; // negativt id: -1, -2, ...
   };
 }

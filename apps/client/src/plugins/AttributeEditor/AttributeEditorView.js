@@ -718,7 +718,7 @@ export default function AttributeEditorView({
         // 2) Search all features and compare multiple id variants
         const all = src.getFeatures?.() || [];
         f = all.find((x) => {
-          const a = x?.getId?.(); // OL-ID (kan vara "@_fid")
+          const a = x?.getId?.(); // OL-ID (may be "@_fid")
           const b = x?.get?.("@_fid");
           const c = x?.get?.("id");
           const A = a != null ? String(a) : null;

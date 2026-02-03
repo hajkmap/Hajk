@@ -723,7 +723,7 @@ export default function DesktopForm({
             disabled={!canUndo}
             onClick={() => {
               if (tableUndoStack?.length) {
-                // inkluderar ev. __geom__-poster i modellens stack
+                // includes possible __geom__ entries in the model's stack
                 undoLatestTableChange();
                 return;
               }
@@ -732,7 +732,7 @@ export default function DesktopForm({
                 return;
               }
               if (hasGeomUndo) {
-                // låt din tidsbaserade dispatcher ta geometri-undo här
+                // let the time-based dispatcher handle geometry undo here
                 undoLatestTableChange();
                 return;
               }
