@@ -23,7 +23,14 @@ export default defineConfig({
   build: {
     target: "ES2022",
     outDir: "build",
-    sourcemap: true,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "app-core": ["./src/components/App.jsx"],
+        },
+      },
+    },
   },
   esbuild: {
     loader: "jsx",
