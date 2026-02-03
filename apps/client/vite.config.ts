@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    open: true,
+    open: false,
   },
   resolve: {
     alias: {
@@ -23,6 +23,7 @@ export default defineConfig({
   build: {
     target: "ES2022",
     outDir: "build",
+    sourcemap: true,
   },
   esbuild: {
     loader: "jsx",
