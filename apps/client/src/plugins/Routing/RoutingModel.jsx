@@ -6,11 +6,6 @@ import { Feature } from "ol";
 import { transform } from "ol/proj";
 import { Polyline } from "ol/format";
 
-let loadGoogleMapsApi;
-import("load-google-maps-api").then((mod) => {
-  loadGoogleMapsApi = mod.default;
-});
-
 class RouteModel {
   constructor(settings) {
     this.olMap = settings.map;
@@ -32,13 +27,19 @@ class RouteModel {
     };
     this.projection = settings.app.config.mapConfig.map.projection;
 
-    loadGoogleMapsApi({
-      key: this.apiKey,
-    }).then((googleMapApi) => {
-      this.googleMapsApi = googleMapApi;
-    });
+    this.initGoogleMapsApi();
 
     this.initiateRoutingLayerInOpenLayersMap();
+  }
+
+  async initGoogleMapsApi() {
+    try {
+      const { default: loadGoogleMapsApi } =
+        await import("load-google-maps-api");
+      this.googleMapsApi = await loadGoogleMapsApi({ key: this.apiKey });
+    } catch (error) {
+      console.error("Failed to load Google Maps API:", error);
+    }
   }
 
   setTravelMode = (travelModeKey) => {
