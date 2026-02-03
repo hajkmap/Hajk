@@ -1,6 +1,9 @@
 import { delay } from "../../utils/Delay";
 import { getPointResolution } from "ol/proj";
 import { getCenter } from "ol/extent";
+import { PDF, rgb } from "@libpdf/core";
+
+// REMOVE THIS
 import jsPDF from "jspdf";
 import { saveAs } from "file-saver";
 
@@ -30,6 +33,14 @@ const DEFAULT_DIMS = {
   a4: [297, 210],
   a5: [210, 148],
 };
+
+// Paper sizes in points
+const DEFAULT_PAPER_SIZE = {
+  a2: { width: 1190, height: 1684 },
+  a3: { width: 842, height: 1190 },
+  a4: { width: 594, height: 842 },
+};
+
 export default class PrintModel {
   constructor(settings) {
     this.proxy = settings.proxy;
@@ -1154,7 +1165,252 @@ export default class PrintModel {
     }
   };
 
+  // Decode the base64 font to binary string
+  async loadFont(font) {
+    const binaryString = atob(font);
+
+    const length = binaryString.length;
+    const uint8Array = new Uint8Array(length);
+
+    for (let i = 0; i < length; i++) {
+      uint8Array[i] = binaryString.charCodeAt(i);
+    }
+
+    return uint8Array;
+  }
+
   print = async (options) => {
+    return new Promise(async (resolve, reject) => {
+      const format = options.format;
+      const orientation = options.orientation;
+      const resolution = options.resolution;
+      const scale = options.scale / 1000;
+
+      // Our dimensions are for landscape orientation by default. Flip the values if portrait orientation requested.
+      const dim =
+        orientation === "portrait"
+          ? [...this.dims[format]].reverse()
+          : this.dims[format];
+
+      const width = Math.round((dim[0] * resolution) / 25.4);
+      const height = Math.round((dim[1] * resolution) / 25.4);
+
+      // Since we're allowing the users to choose which DPI they want to print the map
+      // in, we have to make sure to prepare the layers so that they are fetched with
+      // the correct DPI-settings! We're only doing this if we're supposed to. An admin
+      // might choose not to use this functionality (useCustomTileLoaders set to false).
+      this.useCustomTileLoaders && this.prepareActiveLayersForPrint(options);
+
+      // Before we're printing we must make sure to change the map-view from the
+      // original one, to the print-view.
+      this.printView.setCenter(this.originalView.getCenter());
+      this.map.setView(this.printView);
+
+      // Store mapsize, it's needed when map is restored after print or cancel.
+      this.originalMapSize = this.map.getSize();
+
+      const scaleResolution = this.getScaleResolution(
+        scale,
+        resolution,
+        this.map.getView().getCenter()
+      );
+
+      // Save some of our values that are necessary to use if user want to cancel the process
+
+      this.map.once("rendercomplete", async () => {
+        if (this.pdfCreationCancelled === true) {
+          this.pdfCreationCancelled = false;
+          resolve(null);
+          return false;
+        }
+
+        // This is needed to prevent some buggy output from some browsers
+        // when a lot of tiles are being rendered (it could result in black
+        // canvas PDF)
+        await delay(500);
+
+        // Create the map canvas that will hold all of our map tiles
+        const mapCanvas = document.createElement("canvas");
+
+        // Set canvas dimensions to the newly calculated ones that take user's desired resolution etc into account
+        mapCanvas.width = width;
+        mapCanvas.height = height;
+
+        const mapContext = mapCanvas.getContext("2d");
+        const backgroundColor = this.getMapBackgroundColor(); // Make sure we use the same background-color as the map
+        mapContext.fillStyle = backgroundColor;
+        mapContext.fillRect(0, 0, width, height);
+
+        // Each canvas element inside OpenLayer's viewport should get printed
+        document.querySelectorAll(".ol-viewport canvas").forEach((canvas) => {
+          if (canvas.width > 0) {
+            const opacity = canvas.parentNode.style.opacity;
+            mapContext.globalAlpha = opacity === "" ? 1 : Number(opacity);
+            // Get the transform parameters from the style's transform matrix
+            if (canvas.style.transform) {
+              const matrix = canvas.style.transform
+                .match(/^matrix\(([^(]*)\)$/)[1]
+                .split(",")
+                .map(Number);
+              // Apply the transform to the export map context
+              CanvasRenderingContext2D.prototype.setTransform.apply(
+                mapContext,
+                matrix
+              );
+            }
+            mapContext.drawImage(canvas, 0, 0);
+          }
+        });
+
+        console.log(options);
+
+        const dataUrl = mapCanvas.toDataURL("image/png");
+        let pageHeight = 0;
+        let pageWidth = 0;
+
+        // Assign our pagewidth and heights
+        switch (options.format) {
+          case "a4":
+            pageWidth = DEFAULT_PAPER_SIZE.a4.width;
+            pageHeight = DEFAULT_PAPER_SIZE.a4.height;
+            break;
+          case "a3":
+            pageWidth = DEFAULT_PAPER_SIZE.a3.width;
+            pageHeight = DEFAULT_PAPER_SIZE.a3.height;
+            break;
+          case "a2":
+            pageWidth = DEFAULT_PAPER_SIZE.a2.width;
+            pageHeight = DEFAULT_PAPER_SIZE.a2.height;
+            break;
+          default:
+            // Defult to a4
+            pageWidth = DEFAULT_PAPER_SIZE.a4.width;
+            pageHeight = DEFAULT_PAPER_SIZE.a4.height;
+        }
+
+        const pdf = PDF.create();
+        let page = pdf.addPage({
+          orientation,
+          width: orientation === "landscape" ? pageHeight : pageWidth,
+          height: orientation === "landscape" ? pageWidth : pageHeight,
+        });
+
+        let fontNormalBytes = null;
+        let fontBoldBytes = null;
+        await this.loadFont(ROBOTO_NORMAL).then(
+          (result) => (fontNormalBytes = result)
+        );
+        await this.loadFont(ROBOTO_BOLD).then(
+          (result) => (fontBoldBytes = result)
+        );
+        const fontNormal = pdf.embedFont(fontNormalBytes);
+        const fontBold = pdf.embedFont(fontBoldBytes);
+
+        // Canvas to dataUrl to ArrayBuffer, since libPDF embedImage expects a Uint8Array
+        // Build the rest of the visible elements aswell.
+        fetch(dataUrl)
+          .then((response) => response.arrayBuffer())
+          .then((buffer) => {
+            const uint8Array = new Uint8Array(buffer);
+            const image = pdf.embedImage(uint8Array);
+
+            // Draw image on the PDF
+            page.drawImage(image, {
+              x: 0,
+              y: 0,
+              width: orientation === "landscape" ? pageHeight : pageWidth,
+              height: orientation === "landscape" ? pageWidth : pageHeight,
+            });
+
+            // Draw some text
+            // page.drawText("Hello, World!", {
+            //   x: 0,
+            //   y: 0,
+            //   size: 24,
+            //   color: rgb(0, 0, 0),
+            // });
+            page.drawText("Custom font text", {
+              x: 50,
+              y: 50,
+              size: 14,
+              fontNormal,
+            });
+
+            if (this.includeImageBorder) {
+              // Drawpath to create border
+              // page
+              //   .drawPath()
+              //   .moveTo(100, 100)
+              //   .lineTo(150, 200)
+              //   .lineTo(50, 200)
+              //   .close()
+              //   .fillAndStroke({
+              //     color: rgb(0.8, 0.2, 0.2),
+              //     borderColor: rgb(0.4, 0, 0),
+              //     borderWidth: 2,
+              //   });
+              // Frame color is set to dark gray
+              // pdf.setDrawColor(this.textColor);
+              // pdf.setLineWidth(0.5);
+              // pdf.rect(0.3, 0.3, dim[0] - 0.5, dim[1] - 0, "S");
+            }
+          })
+          .then(async () => {
+            const bytes = await pdf.save();
+            const blob = new Blob([bytes], { type: "application/pdf" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "test_document_with_image.pdf";
+            link.click();
+            URL.revokeObjectURL(url);
+          })
+          .catch((error) => {
+            console.error("Error processing image:", error);
+          });
+        this.localObserver.publish("print-completed");
+      });
+
+      // Since we've been messing with the layer-settings while printing, we have to
+      // make sure to reset these settings. (Should only be done if custom loaders has been used).
+      this.useCustomTileLoaders && this.resetPrintLayers();
+
+      //   // Finally, save the PDF (or PNG)
+      //   this.saveToFile(pdf, width, options.saveAsType)
+      //     .then((blob) => {
+      //       this.localObserver.publish("print-completed");
+      //       resolve(blob);
+      //     })
+      //     .catch((error) => {
+      //       console.warn(error);
+      //       this.localObserver.publish("print-failed-to-save");
+      //       reject(error);
+      //     })
+      //     .finally(() => {
+      //       // Reset map to how it was before print
+      //       this.restoreOriginalView();
+      //     });
+      // });
+
+      // Get print center from preview feature's center coordinate
+      const printCenter = getCenter(
+        this.previewFeature.getGeometry().getExtent()
+      );
+
+      // Hide our preview feature so it won't get printed
+      this.previewLayer.setVisible(false);
+
+      // Set map size and resolution, this will initiate print, as we have a listener for renderComplete.
+      // (Which will fire when the new size and resolution has been set and the new tiles has been loaded).
+      this.map.getTargetElement().style.width = `${width}px`;
+      this.map.getTargetElement().style.height = `${height}px`;
+      this.map.updateSize();
+      this.map.getView().setCenter(printCenter);
+      this.map.getView().setResolution(scaleResolution);
+    });
+  };
+
+  oldprint = async (options) => {
     return new Promise((resolve, reject) => {
       const url = window.location.href;
       const format = options.format;
