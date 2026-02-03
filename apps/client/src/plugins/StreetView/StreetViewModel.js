@@ -7,23 +7,14 @@ import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { imageBlob } from "./exports";
 
-let loadGoogleMapsApi;
-import("load-google-maps-api").then((mod) => {
-  loadGoogleMapsApi = mod.default;
-});
-
 class StreetViewModel {
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
     this.localObserver = settings.localObserver;
+    this.apiKey = settings.apiKey;
     this.location = undefined;
-
-    loadGoogleMapsApi({
-      key: settings.apiKey,
-    }).then((googleMapApi) => {
-      this.googleMapsApi = googleMapApi;
-    });
+    this.googleMapsApi = null;
 
     this.streetViewMarkerLayer = new Vector({
       source: new VectorSource({}),
@@ -36,10 +27,33 @@ class StreetViewModel {
   }
 
   activate() {
-    if (!this.googleMapsApi) {
-      console.warn("Google Maps API is not loaded yet.");
+    if (this.googleMapsApi) {
+      this.doActivate();
       return;
     }
+    if (!this.apiKey) {
+      console.warn("StreetView: No Google Maps API key configured.");
+      this.localObserver.publish(
+        "googleMapsApiLoadFailed",
+        new Error("No API key")
+      );
+      return;
+    }
+    import("load-google-maps-api")
+      .then((mod) => mod.default)
+      .then((loadGoogleMapsApi) => loadGoogleMapsApi({ key: this.apiKey }))
+      .then((googleMapApi) => {
+        this.googleMapsApi = googleMapApi;
+        this.doActivate();
+      })
+      .catch((err) => {
+        console.warn("Could not load Google Maps API:", err);
+        this.localObserver.publish("googleMapsApiLoadFailed", err);
+      });
+  }
+
+  doActivate() {
+    if (!this.googleMapsApi) return;
     this.map.clickLock.add("streetview");
 
     this.streetViewService = new this.googleMapsApi.StreetViewService();
