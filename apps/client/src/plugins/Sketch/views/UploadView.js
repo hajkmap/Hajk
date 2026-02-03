@@ -23,7 +23,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   borderLeft: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
 }));
 
-const ButtonPanel = ({ kmlModel, gpxModel, setDialogOpen }) => {
+const ButtonPanel = ({ kmlModel, gpxModel, setDialogOpen, uiDisabled }) => {
   return (
     <Grid container spacing={1}>
       <Grid size={12}>
@@ -40,26 +40,32 @@ const ButtonPanel = ({ kmlModel, gpxModel, setDialogOpen }) => {
       </Grid>
       <Grid size={12}>
         <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .kml-fil. KML stödjer alla typer av geometrier inklusive polygoner, linjer, punkter och text.">
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={() => kmlModel.export()}
-            startIcon={<SaveAltIcon />}
-          >
-            Exportera till KML
-          </Button>
+          <span>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => kmlModel.export()}
+              startIcon={<SaveAltIcon />}
+              disabled={uiDisabled}
+            >
+              Exportera till KML
+            </Button>
+          </span>
         </HajkToolTip>
       </Grid>
       <Grid size={12}>
         <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .gpx-fil. GPX stödjer endast punkter (waypoints) och linjer (tracks/routes). Polygoner och andra komplexa geometrier kommer att exkluderas.">
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={() => gpxModel.export()}
-            startIcon={<SaveAltIcon />}
-          >
-            Exportera till GPX
-          </Button>
+          <span>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => gpxModel.export()}
+              startIcon={<SaveAltIcon />}
+              disabled={uiDisabled}
+            >
+              Exportera till GPX
+            </Button>
+          </span>
         </HajkToolTip>
       </Grid>
     </Grid>
@@ -236,10 +242,11 @@ const UploadView = (props) => {
           kmlModel={props.kmlModel}
           gpxModel={props.gpxModel}
           setDialogOpen={setDialogOpen}
+          uiDisabled={props.uiDisabled}
         />
       </Grid>
       <Grid size={12}>
-        {props.uploadedFiles.length > 0 && (
+        {!props.uiDisabled && props.uploadedFiles.length > 0 && (
           <UploadedFileList
             uploadedFiles={props.uploadedFiles}
             onVisibilityChangeClick={onVisibilityChangeClick}

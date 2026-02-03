@@ -680,6 +680,7 @@ const SketchView = (props) => {
             drawModel={drawModel}
             globalObserver={globalObserver}
             functionalCookiesOk={functionalCookiesOk}
+            uiDisabled={uiDisabled}
           />
         );
       case "UPLOAD":
@@ -692,6 +693,7 @@ const SketchView = (props) => {
             gpxModel={gpxModel}
             uploadedFiles={uploadedFiles}
             setUploadedFiles={setUploadedFiles}
+            uiDisabled={uiDisabled}
           />
         );
       case "SETTINGS":

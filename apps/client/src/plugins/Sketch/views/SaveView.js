@@ -333,7 +333,13 @@ const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
   );
 };
 
-const SaveView = ({ globalObserver, model, id, functionalCookiesOk }) => {
+const SaveView = ({
+  globalObserver,
+  model,
+  id,
+  functionalCookiesOk,
+  uiDisabled = false,
+}) => {
   // If the user wants to save their work, they'll have to choose a name
   // so that the workspace can be identified in the list of saved workspaces later.
   const [sketchName, setSketchName] = React.useState("");
@@ -350,7 +356,11 @@ const SaveView = ({ globalObserver, model, id, functionalCookiesOk }) => {
   return !functionalCookiesOk ? (
     <NotSupportedView globalObserver={globalObserver} />
   ) : (
-    <Grid container spacing={2}>
+    <Grid
+      container
+      spacing={2}
+      sx={uiDisabled ? { opacity: 0.38, pointerEvents: "none" } : undefined}
+    >
       <Grid size={12}>
         <Information text={activity.information} />
       </Grid>
