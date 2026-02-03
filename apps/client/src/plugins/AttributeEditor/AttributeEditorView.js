@@ -670,10 +670,23 @@ export default function AttributeEditorView({
       const p = pri(a) - pri(b);
       if (p !== 0) return p;
 
-      if (!sort.key) return (a.__idx ?? 0) - (b.__idx ?? 0);
+      if (!sort.key) {
+        // Sort by ID for stable ordering regardless of server response order
+        const aN = Number(a.id),
+          bN = Number(b.id);
+        if (Number.isFinite(aN) && Number.isFinite(bN)) return aN - bN;
+        return String(a.id).localeCompare(String(b.id), "sv", {
+          numeric: true,
+        });
+      }
 
       const res = cmp(sortVal(a), sortVal(b));
-      return sort.dir === "asc" ? res : -res;
+      if (res !== 0) return sort.dir === "asc" ? res : -res;
+      // Tiebreaker: sort by ID for stable ordering when primary sort values are equal
+      const aN = Number(a.id),
+        bN = Number(b.id);
+      if (Number.isFinite(aN) && Number.isFinite(bN)) return aN - bN;
+      return String(a.id).localeCompare(String(b.id), "sv", { numeric: true });
     });
 
     return rows;
@@ -1960,7 +1973,11 @@ export default function AttributeEditorView({
       const ap = a.id < 0 ? 0 : a.__pending === "add" ? 0 : 1;
       const bp = b.id < 0 ? 0 : b.__pending === "add" ? 0 : 1;
       if (ap !== bp) return ap - bp;
-      return a.__idx - b.__idx;
+      // Sort by ID for stable ordering regardless of server response order
+      const aN = Number(a.id),
+        bN = Number(b.id);
+      if (Number.isFinite(aN) && Number.isFinite(bN)) return aN - bN;
+      return String(a.id).localeCompare(String(b.id), "sv", { numeric: true });
     });
 
     return filtered;
