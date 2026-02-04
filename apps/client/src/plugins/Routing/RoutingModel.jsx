@@ -5,6 +5,7 @@ import { Point } from "ol/geom";
 import { Feature } from "ol";
 import { transform } from "ol/proj";
 import { Polyline } from "ol/format";
+import loadGoogleMapsApi from "../../utils/googleMapsLoader";
 
 class RouteModel {
   constructor(settings) {
@@ -27,22 +28,32 @@ class RouteModel {
     };
     this.projection = settings.app.config.mapConfig.map.projection;
 
-    this.initGoogleMapsApi();
-
     this.initiateRoutingLayerInOpenLayersMap();
   }
 
-  async initGoogleMapsApi() {
+  async ensureGoogleMapsApi() {
+    if (this.googleMapsApi) {
+      return true;
+    }
+    if (!this.apiKey) {
+      const error = new Error("No Google Maps API key");
+      console.warn("Routing: No Google Maps API key configured.");
+      this.localObserver.publish("routingGoogleMapsApiLoadFailed", error);
+      return false;
+    }
     try {
-      const { default: loadGoogleMapsApi } =
-        await import("load-google-maps-api");
-      this.googleMapsApi = await loadGoogleMapsApi({ key: this.apiKey });
+      this.googleMapsApi = await loadGoogleMapsApi(this.apiKey);
+      return true;
     } catch (error) {
       console.error("Failed to load Google Maps API:", error);
+      this.localObserver.publish("routingGoogleMapsApiLoadFailed", error);
+      return false;
     }
   }
 
-  setTravelMode = (travelModeKey) => {
+  setTravelMode = async (travelModeKey) => {
+    const ready = await this.ensureGoogleMapsApi();
+    if (!ready) return;
     this.travelMode = this.googleMapsApi.DirectionsTravelMode.hasOwnProperty(
       travelModeKey
     )
@@ -274,7 +285,9 @@ class RouteModel {
     this.searchTrip();
   }
 
-  searchTrip() {
+  async searchTrip() {
+    const ready = await this.ensureGoogleMapsApi();
+    if (!ready) return;
     var pos = this.position;
     if (
       pos.latitude === undefined ||
