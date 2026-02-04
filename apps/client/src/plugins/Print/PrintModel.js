@@ -404,13 +404,13 @@ export default class PrintModel {
       (contentType === "qrCode" && this.textIconsMargin) === 0 ? 3 : 0;
 
     let pdfPlacement = { x: 0, y: 0 };
-    if (placement === "topLeft") {
+    if (placement === "bottomLeft") {
       pdfPlacement.x = margin;
       pdfPlacement.y = margin - qrMargin;
-    } else if (placement === "topRight") {
+    } else if (placement === "bottomRight") {
       pdfPlacement.x = pdfWidth - contentWidth - margin;
       pdfPlacement.y = margin - qrMargin;
-    } else if (placement === "bottomRight") {
+    } else if (placement === "topRight") {
       pdfPlacement.x = pdfWidth - contentWidth - margin;
       pdfPlacement.y = pdfHeight - contentHeight - margin + qrMargin;
     } else {
@@ -1165,10 +1165,9 @@ export default class PrintModel {
     }
   };
 
-  // Decode the base64 font to binary string
+  // Decode the base64 font to Uint8Array
   async loadFont(font) {
     const binaryString = atob(font);
-
     const length = binaryString.length;
     const uint8Array = new Uint8Array(length);
 
@@ -1177,6 +1176,18 @@ export default class PrintModel {
     }
 
     return uint8Array;
+  }
+
+  // Fetch image and return it as Uint8Array
+  async fetchImage(url) {
+    try {
+      const response = await fetch(url);
+      const buffer = await response.arrayBuffer();
+      return new Uint8Array(buffer);
+    } catch (error) {
+      console.error(`Error fetching image from ${url}:`, error);
+      throw error;
+    }
   }
 
   print = async (options) => {
@@ -1311,109 +1322,119 @@ export default class PrintModel {
         const fontBold = pdf.embedFont(fontBoldBytes);
 
         // Canvas to dataUrl to ArrayBuffer, since libPDF embedImage expects a Uint8Array
-        // Build the rest of the visible elements aswell.
-        fetch(dataUrl)
-          .then((response) => response.arrayBuffer())
-          .then((buffer) => {
-            const uint8Array = new Uint8Array(buffer);
-            const image = pdf.embedImage(uint8Array);
+        try {
+          const mapImage = await this.fetchImage(dataUrl);
+          const image = pdf.embedImage(mapImage);
 
-            // Draw image on the PDF
-            page.drawImage(image, {
-              x: 0,
-              y: 0,
-              width: pageWidth,
-              height: pageHeight,
-            });
-
-            // Not included in options, skipping for now.
-            // if (this.includeImageBorder) {
-            // }
-
-            // Add potential margin around the image
-            if (this.margin > 0) {
-              // We want to check if user has chosen to put icons and text
-              // in the margins, which if so, must be larger than usual
-              // Note that we first check if user has NOT chosen this (!).
-              if (!options.useTextIconsInMargin) {
-                page
-                  .drawPath()
-                  .moveTo(0, 0)
-                  .lineTo(pageWidth, 0)
-                  .lineTo(pageWidth, pageHeight)
-                  .lineTo(0, pageHeight)
-                  .lineTo(0, 0)
-                  .close()
-                  .stroke({
-                    borderColor: rgb(255, 255, 255),
-                    borderWidth: 5.5 * this.margin,
-                  });
-                // Now we check if user did choose text in margins
-              } else {
-                console.log("using text in margins, making it wider");
-                //     // We do a special check for a5-format and set the dimValue
-                //     // to get the correct margin values when drawing the rectangle
-                //     let dimValue =
-                //       options.format === "a5" ? this.margin + 2 : this.margin;
-                //     // This lineWidth needs to be larger if user has chosen text in margins
-                //     pdf.setLineWidth(dimValue * 6);
-                //     // Draw the increased border (margin) around the entire image
-                //     // here with special values for larger margins.
-                //     pdf.rect(
-                //       -(dimValue * 2),
-                //       0,
-                //       dim[0] + dimValue * 4,
-                //       dim[1],
-                //       "S"
-                //     );
-                //     // If selected as feature in Admin, we draw a frame around the map image
-              }
-            }
-
-            // Text
-            page.drawText("Custom font text", {
-              x: 50,
-              y: 50,
-              size: 14,
-              fontNormal,
-            });
-          })
-          .then(async () => {
-            const bytes = await pdf.save();
-            const blob = new Blob([bytes], { type: "application/pdf" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = "test_document_with_image.pdf";
-            link.click();
-            URL.revokeObjectURL(url);
-          })
-          .catch((error) => {
-            console.error("Error processing image:", error);
+          // Draw image on the PDF
+          page.drawImage(image, {
+            x: 0,
+            y: 0,
+            width: pageWidth,
+            height: pageHeight,
           });
-        this.localObserver.publish("print-completed");
+
+          // Add potential margin around the image
+          if (this.margin > 0) {
+            // We want to check if user has chosen to put icons and text
+            // in the margins, which if so, must be larger than usual
+            // Note that we first check if user has NOT chosen this (!).
+            if (!options.useTextIconsInMargin) {
+              page
+                .drawPath()
+                .moveTo(0, 0)
+                .lineTo(pageWidth, 0)
+                .lineTo(pageWidth, pageHeight)
+                .lineTo(0, pageHeight)
+                .lineTo(0, 0)
+                .close()
+                .stroke({
+                  borderColor: rgb(255, 255, 255),
+                  borderWidth: 5.5 * this.margin,
+                });
+              // Now we check if user did choose text in margins
+            } else {
+              console.log("using text in margins, making it wider");
+              //     // We do a special check for a5-format and set the dimValue
+              //     // to get the correct margin values when drawing the rectangle
+              //     let dimValue =
+              //       options.format === "a5" ? this.margin + 2 : this.margin;
+              //     // This lineWidth needs to be larger if user has chosen text in margins
+              //     pdf.setLineWidth(dimValue * 6);
+              //     // Draw the increased border (margin) around the entire image
+              //     // here with special values for larger margins.
+              //     pdf.rect(
+              //       -(dimValue * 2),
+              //       0,
+              //       dim[0] + dimValue * 4,
+              //       dim[1],
+              //       "S"
+              //     );
+              //     // If selected as feature in Admin, we draw a frame around the map image
+            }
+          }
+
+          // Check if logo should be added
+          if (options.includeLogo && this.logoUrl.trim().length >= 5) {
+            console.log(this.logoUrl);
+            const {
+              data: logoData,
+              width: logoWidth,
+              height: logoHeight,
+            } = await this.getImageForPdfFromUrl(
+              this.logoUrl,
+              this.logoMaxWidth
+            );
+            let logoPlacement = this.getPlacement(
+              options.logoPlacement,
+              logoWidth,
+              logoHeight,
+              pageWidth,
+              pageHeight
+            );
+
+            // Fetch the logoData in base64 and recieve it as a Uint8Array
+            const logoImage = await this.fetchImage(logoData);
+            const image = pdf.embedImage(logoImage);
+
+            // Draw logo on the PDF
+            page.drawImage(image, {
+              x: logoPlacement.x,
+              y: logoPlacement.y,
+              width: logoWidth,
+              height: logoHeight,
+            });
+          }
+
+          // Custom font used example
+          page.drawText("Custom font text", {
+            x: 50,
+            y: 50,
+            size: 14,
+            fontNormal,
+          });
+        } catch (error) {
+          console.error("Error processing pdf:", error);
+          this.localObserver.publish("print-failed-to-save");
+          reject(error);
+        } finally {
+          const bytes = await pdf.save();
+          const blob = new Blob([bytes], { type: "application/pdf" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "test_document_with_image.pdf";
+          link.click();
+          URL.revokeObjectURL(url);
+          this.localObserver.publish("print-completed");
+          resolve();
+          this.restoreOriginalView();
+        }
       });
 
       // Since we've been messing with the layer-settings while printing, we have to
       // make sure to reset these settings. (Should only be done if custom loaders has been used).
       this.useCustomTileLoaders && this.resetPrintLayers();
-
-      //   // Finally, save the PDF (or PNG)
-      //   this.saveToFile(pdf, width, options.saveAsType)
-      //     .then((blob) => {
-      //       this.localObserver.publish("print-completed");
-      //       resolve(blob);
-      //     })
-      //     .catch((error) => {
-      //       console.warn(error);
-      //       this.localObserver.publish("print-failed-to-save");
-      //       reject(error);
-      //     })
-      //     .finally(() => {
-      //       // Reset map to how it was before print
-      //       this.restoreOriginalView();
-      //     });
-      // });
 
       // Get print center from preview feature's center coordinate
       const printCenter = getCenter(
