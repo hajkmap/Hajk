@@ -28,16 +28,17 @@
     "ios > 12"
   ],
   "devDependencies": {
-    "vite": "^7.3.1",
-    "@vitejs/plugin-react-swc": "^4.2.2",
-    "vite-tsconfig-paths": "6.0.5",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@types/load-google-maps-api": "^2.0.5",
+    "@vitejs/plugin-react-swc": "^4.2.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-prettier": "^5.5.5",
     "prettier": "^3.8.0",
     "prop-types": "^15.8.1",
-    "source-map-explorer": "^2.5.3"
+    "source-map-explorer": "^2.5.3",
+    "vite": "^7.3.1",
+    "vite-tsconfig-paths": "6.0.5"
   },
   "dependencies": {
     "@barbapapazes/plausible-tracker": "^0.5.6",
