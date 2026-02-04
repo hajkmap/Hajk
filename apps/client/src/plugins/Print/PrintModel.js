@@ -369,7 +369,7 @@ export default class PrintModel {
     } = await this.getImageDataBlobFromUrl(url);
 
     // We must ensure that the logo will be printed with a max width of X, while keeping the aspect ratio between width and height
-    const ratio = maxWidth / sourceWidth;
+    const ratio = (maxWidth * 3) / sourceWidth;
     const width = sourceWidth * ratio;
     const height = sourceHeight * ratio;
     return { data, width, height };
@@ -445,6 +445,7 @@ export default class PrintModel {
 
   //Formats the text for the scale bar
   getLengthText = (scaleBarLengthMeters) => {
+    console.log("scalebarlengthmeters: " + scaleBarLengthMeters);
     let units = "m";
     if (scaleBarLengthMeters > 1000) {
       scaleBarLengthMeters /= 1000;
@@ -642,58 +643,67 @@ export default class PrintModel {
   };
 
   drawScaleBar = (
-    pdf,
+    page,
     scaleBarPosition,
     color,
     scaleBarLength,
     scale,
     scaleBarLengthMeters,
     format,
-    orientation
+    orientation,
+    font
   ) => {
     const lengthText = this.getLengthText(scaleBarLengthMeters);
-    pdf.setFontSize(8);
-    pdf.setTextColor(color);
-    pdf.setLineWidth(0.25);
-    pdf.text(
-      lengthText,
-      scaleBarPosition.x + scaleBarLength + 1,
-      scaleBarPosition.y + 4
-    );
+    page.drawText(lengthText, {
+      x: scaleBarPosition.x + scaleBarLength + 40,
+      y: scaleBarPosition.y + 10,
+      size: 8,
+      font,
+    });
 
-    pdf.setFontSize(10);
-    pdf.text(
+    page.drawText(
       `Skala: ${this.getUserFriendlyScale(
         scale
       )} (vid ${format.toUpperCase()} ${
         orientation === "landscape" ? "liggande" : "stående"
       })`,
-      scaleBarPosition.x,
-      scaleBarPosition.y - 1
+      {
+        x: scaleBarPosition.x + 10,
+        y: scaleBarPosition.y + 20,
+        size: 10,
+        font,
+      }
     );
 
-    this.addDividerLinesAndTexts({
-      pdf,
-      scale,
-      scaleBarLengthMeters,
-      scaleBarPosition,
-      scaleBarLength,
-      color,
-    });
+    // this.addDividerLinesAndTexts({
+    //   page,
+    //   scale,
+    //   scaleBarLengthMeters,
+    //   scaleBarPosition,
+    //   scaleBarLength,
+    //   color,
+    // });
   };
 
   addScaleBar = (
-    pdf,
+    page,
     color,
     scale,
     resolution,
     scaleBarPlacement,
     scaleResolution,
     format,
-    orientation
+    orientation,
+    font,
+    pageWidth,
+    pageHeight
   ) => {
     const millimetersPerInch = 25.4;
     const pixelSize = millimetersPerInch / resolution / scaleResolution;
+    console.log(
+      `milimetersPerInch: ${millimetersPerInch} resolution: ${resolution} scaleResolution: ${scaleResolution}`
+    );
+    console.log("pixelsize: " + pixelSize);
     const scaleBarLengthMeters = this.getFittingScaleBarLength(scale);
 
     const scaleBarLength = scaleBarLengthMeters * pixelSize;
@@ -703,19 +713,20 @@ export default class PrintModel {
       scaleBarPlacement,
       scaleBarLength + 9,
       scaleBarHeight,
-      pdf.internal.pageSize.width,
-      pdf.internal.pageSize.height
+      pageWidth,
+      pageHeight
     );
 
     this.drawScaleBar(
-      pdf,
+      page,
       scaleBarPosition,
       color,
       scaleBarLength,
       scale,
       scaleBarLengthMeters,
       format,
-      orientation
+      orientation,
+      font
     );
   };
 
@@ -1192,6 +1203,7 @@ export default class PrintModel {
 
   print = async (options) => {
     return new Promise(async (resolve, reject) => {
+      const windowUrl = window.location.href;
       const format = options.format;
       const orientation = options.orientation;
       const resolution = options.resolution;
@@ -1323,11 +1335,11 @@ export default class PrintModel {
 
         // Canvas to dataUrl to ArrayBuffer, since libPDF embedImage expects a Uint8Array
         try {
-          const mapImage = await this.fetchImage(dataUrl);
-          const image = pdf.embedImage(mapImage);
+          const mapBuffer = await this.fetchImage(dataUrl);
+          const mapImage = pdf.embedImage(mapBuffer);
 
           // Draw image on the PDF
-          page.drawImage(image, {
+          page.drawImage(mapImage, {
             x: 0,
             y: 0,
             width: pageWidth,
@@ -1374,45 +1386,147 @@ export default class PrintModel {
             }
           }
 
+          if (options.includeQrCode && this.mapConfig.enableAppStateInHash) {
+            try {
+              const qrCode = await this.generateQR(windowUrl, 20);
+              let qrCodePlacement = this.getPlacement(
+                options.qrCodePlacement,
+                qrCode.width,
+                qrCode.height,
+                pageWidth,
+                pageHeight,
+                "qrCode"
+              );
+
+              // Fetch the logoData in base64 and recieve it as a Uint8Array
+              const qrBuffer = await this.fetchImage(qrCode.data);
+              const qrImage = pdf.embedImage(qrBuffer);
+
+              // Draw logo on the PDF
+              page.drawImage(qrImage, {
+                x: qrCodePlacement.x,
+                y: qrCodePlacement.y,
+                width: qrCode.width,
+                height: qrCode.height,
+              });
+            } catch (error) {
+              const imgLoadingError = { error: error, type: "QR-koden" };
+              // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
+              this.localObserver.publish(
+                "error-loading-image",
+                imgLoadingError
+              );
+            }
+          }
+
           // Check if logo should be added
           if (options.includeLogo && this.logoUrl.trim().length >= 5) {
-            console.log(this.logoUrl);
-            const {
-              data: logoData,
-              width: logoWidth,
-              height: logoHeight,
-            } = await this.getImageForPdfFromUrl(
-              this.logoUrl,
-              this.logoMaxWidth
-            );
-            let logoPlacement = this.getPlacement(
-              options.logoPlacement,
-              logoWidth,
-              logoHeight,
+            console.log(this.logoMaxWidth);
+            try {
+              const {
+                data: logoData,
+                width: logoWidth,
+                height: logoHeight,
+              } = await this.getImageForPdfFromUrl(
+                this.logoUrl,
+                this.logoMaxWidth
+              );
+              let logoPlacement = this.getPlacement(
+                options.logoPlacement,
+                logoWidth,
+                logoHeight,
+                pageWidth,
+                pageHeight
+              );
+
+              // Fetch the logoData in base64 and recieve it as a Uint8Array
+              const logoBuffer = await this.fetchImage(logoData);
+              const logoImage = pdf.embedImage(logoBuffer);
+
+              // Draw logo on the PDF
+              page.drawImage(logoImage, {
+                x: logoPlacement.x,
+                y: logoPlacement.y,
+                width: logoWidth,
+                height: logoHeight,
+              });
+            } catch (error) {
+              const imgLoadingError = { error: error, type: "Logotypbilden" };
+              // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
+              this.localObserver.publish(
+                "error-loading-image",
+                imgLoadingError
+              );
+            }
+          }
+
+          if (
+            options.includeNorthArrow &&
+            this.northArrowUrl.trim().length >= 5
+          ) {
+            try {
+              const {
+                data: arrowData,
+                width: arrowWidth,
+                height: arrowHeight,
+              } = await this.getImageForPdfFromUrl(
+                this.northArrowUrl,
+                this.northArrowMaxWidth
+              );
+
+              const arrowPlacement = this.getPlacement(
+                options.northArrowPlacement,
+                arrowWidth,
+                arrowHeight,
+                pageWidth,
+                pageHeight
+              );
+
+              // Fetch the arrow image in base64 and recieve it as a Uint8Array
+              const arrowBuffer = await this.fetchImage(arrowData);
+              const arrowImage = pdf.embedImage(arrowBuffer);
+
+              // Draw logo on the PDF
+              page.drawImage(arrowImage, {
+                x: arrowPlacement.x,
+                y: arrowPlacement.y,
+                width: arrowWidth,
+                height: arrowHeight,
+              });
+            } catch (error) {
+              const imgLoadingError = { error: error, type: "Norrpilen" };
+              // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
+              this.localObserver.publish(
+                "error-loading-image",
+                imgLoadingError
+              );
+            }
+          }
+
+          if (options.includeScaleBar) {
+            console.log("adding scalebar");
+            this.addScaleBar(
+              page,
+              options.mapTextColor,
+              options.scale,
+              options.resolution,
+              options.scaleBarPlacement,
+              scaleResolution,
+              options.format,
+              options.orientation,
+              fontNormal,
               pageWidth,
               pageHeight
             );
-
-            // Fetch the logoData in base64 and recieve it as a Uint8Array
-            const logoImage = await this.fetchImage(logoData);
-            const image = pdf.embedImage(logoImage);
-
-            // Draw logo on the PDF
-            page.drawImage(image, {
-              x: logoPlacement.x,
-              y: logoPlacement.y,
-              width: logoWidth,
-              height: logoHeight,
-            });
           }
 
           // Custom font used example
-          page.drawText("Custom font text", {
-            x: 50,
-            y: 50,
-            size: 14,
-            fontNormal,
-          });
+          // page.drawText("Custom font text", {
+          //   x: 50,
+          //   y: 50,
+          //   size: 14,
+          //   fontNormal,
+          // });
         } catch (error) {
           console.error("Error processing pdf:", error);
           this.localObserver.publish("print-failed-to-save");
