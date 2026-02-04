@@ -34,11 +34,11 @@ const DEFAULT_DIMS = {
   a5: [210, 148],
 };
 
-// Paper sizes in points
+// Paper sizes in points assuming landscape
 const DEFAULT_PAPER_SIZE = {
-  a2: { width: 1190, height: 1684 },
-  a3: { width: 842, height: 1190 },
-  a4: { width: 594, height: 842 },
+  a2: { width: 1684, height: 1190 },
+  a3: { width: 1190, height: 842 },
+  a4: { width: 842, height: 595 },
 };
 
 export default class PrintModel {
@@ -1288,11 +1288,15 @@ export default class PrintModel {
             pageHeight = DEFAULT_PAPER_SIZE.a4.height;
         }
 
+        // Flip depending on orientation
+        pageWidth = orientation === "landscape" ? pageWidth : pageHeight;
+        pageHeight = orientation === "landscape" ? pageHeight : pageWidth;
+
         const pdf = PDF.create();
         let page = pdf.addPage({
           orientation,
-          width: orientation === "landscape" ? pageHeight : pageWidth,
-          height: orientation === "landscape" ? pageWidth : pageHeight,
+          width: pageWidth,
+          height: pageHeight,
         });
 
         let fontNormalBytes = null;
@@ -1318,42 +1322,61 @@ export default class PrintModel {
             page.drawImage(image, {
               x: 0,
               y: 0,
-              width: orientation === "landscape" ? pageHeight : pageWidth,
-              height: orientation === "landscape" ? pageWidth : pageHeight,
+              width: pageWidth,
+              height: pageHeight,
             });
 
-            // Draw some text
-            // page.drawText("Hello, World!", {
-            //   x: 0,
-            //   y: 0,
-            //   size: 24,
-            //   color: rgb(0, 0, 0),
-            // });
+            // Not included in options, skipping for now.
+            // if (this.includeImageBorder) {
+            // }
+
+            // Add potential margin around the image
+            if (this.margin > 0) {
+              // We want to check if user has chosen to put icons and text
+              // in the margins, which if so, must be larger than usual
+              // Note that we first check if user has NOT chosen this (!).
+              if (!options.useTextIconsInMargin) {
+                page
+                  .drawPath()
+                  .moveTo(0, 0)
+                  .lineTo(pageWidth, 0)
+                  .lineTo(pageWidth, pageHeight)
+                  .lineTo(0, pageHeight)
+                  .lineTo(0, 0)
+                  .close()
+                  .stroke({
+                    borderColor: rgb(255, 255, 255),
+                    borderWidth: 5.5 * this.margin,
+                  });
+                // Now we check if user did choose text in margins
+              } else {
+                console.log("using text in margins, making it wider");
+                //     // We do a special check for a5-format and set the dimValue
+                //     // to get the correct margin values when drawing the rectangle
+                //     let dimValue =
+                //       options.format === "a5" ? this.margin + 2 : this.margin;
+                //     // This lineWidth needs to be larger if user has chosen text in margins
+                //     pdf.setLineWidth(dimValue * 6);
+                //     // Draw the increased border (margin) around the entire image
+                //     // here with special values for larger margins.
+                //     pdf.rect(
+                //       -(dimValue * 2),
+                //       0,
+                //       dim[0] + dimValue * 4,
+                //       dim[1],
+                //       "S"
+                //     );
+                //     // If selected as feature in Admin, we draw a frame around the map image
+              }
+            }
+
+            // Text
             page.drawText("Custom font text", {
               x: 50,
               y: 50,
               size: 14,
               fontNormal,
             });
-
-            if (this.includeImageBorder) {
-              // Drawpath to create border
-              // page
-              //   .drawPath()
-              //   .moveTo(100, 100)
-              //   .lineTo(150, 200)
-              //   .lineTo(50, 200)
-              //   .close()
-              //   .fillAndStroke({
-              //     color: rgb(0.8, 0.2, 0.2),
-              //     borderColor: rgb(0.4, 0, 0),
-              //     borderWidth: 2,
-              //   });
-              // Frame color is set to dark gray
-              // pdf.setDrawColor(this.textColor);
-              // pdf.setLineWidth(0.5);
-              // pdf.rect(0.3, 0.3, dim[0] - 0.5, dim[1] - 0, "S");
-            }
           })
           .then(async () => {
             const bytes = await pdf.save();
