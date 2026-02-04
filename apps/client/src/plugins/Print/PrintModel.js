@@ -69,6 +69,7 @@ export default class PrintModel {
     // limit Image-WMS requests. The size below is the maximum tile-size allowed.
     // This max-size is only used if the custom-tile-loaders are used.
     this.maxTileSize = settings.options.maxTileSize || 4096;
+    // Hex color value, libPDF expects rgb colors, so this is converted in places.
     this.textColor = settings.options.mapTextColor;
     // Let's keep track of the original view, since we're gonna change the view
     // under the print-process. (And we want to be able to change back to the original one).
@@ -124,6 +125,13 @@ export default class PrintModel {
 
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
+
+  hexToRgb = (hex) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return rgb(r, g, b);
+  };
 
   generateQR = async (url, qrSize) => {
     try {
@@ -504,34 +512,42 @@ export default class PrintModel {
   };
 
   drawDividerLines({
-    pdf,
+    page,
     scaleBarPosition,
     scaleBarLength,
     color,
     scaleBarLengthMeters,
   }) {
-    // Set line width and color
-    pdf.setLineWidth(0.25).setDrawColor(color);
-
-    // Draw starting, finish, and through lines
-    pdf.line(
-      scaleBarPosition.x,
-      scaleBarPosition.y + 3,
-      scaleBarPosition.x + scaleBarLength,
-      scaleBarPosition.y + 3
-    );
-    pdf.line(
-      scaleBarPosition.x,
-      scaleBarPosition.y + 1,
-      scaleBarPosition.x,
-      scaleBarPosition.y + 5
-    );
-    pdf.line(
-      scaleBarPosition.x + scaleBarLength,
-      scaleBarPosition.y + 1,
-      scaleBarPosition.x + scaleBarLength,
-      scaleBarPosition.y + 5
-    );
+    page.drawLine({
+      start: { x: scaleBarPosition.x, y: scaleBarPosition.y + 3 },
+      end: {
+        x: scaleBarPosition.x + scaleBarLength,
+        y: scaleBarPosition.y + 3,
+      },
+      color,
+      thickness: 1,
+    });
+    page.drawLine({
+      start: { x: scaleBarPosition.x, y: scaleBarPosition.y + 1 },
+      end: {
+        x: scaleBarPosition.x,
+        y: scaleBarPosition.y + 5,
+      },
+      color,
+      thickness: 1,
+    });
+    page.drawLine({
+      start: {
+        x: scaleBarPosition.x + scaleBarLength,
+        y: scaleBarPosition.y + 1,
+      },
+      end: {
+        x: scaleBarPosition.x + scaleBarLength,
+        y: scaleBarPosition.y + 5,
+      },
+      color,
+      thickness: 1,
+    });
 
     // Here we get number of lines we will draw below
     const { divLinesArray } = this.getDivLinesArrayAndDivider(
@@ -543,12 +559,18 @@ export default class PrintModel {
     divLinesArray.forEach((divLine) => {
       const largerMiddleLineValue =
         divLinesArray.length === 10 && divLine === divLinesArray[4] ? 0.7 : 0;
-      pdf.line(
-        scaleBarPosition.x + divLine,
-        scaleBarPosition.y + 1.9 - largerMiddleLineValue,
-        scaleBarPosition.x + divLine,
-        scaleBarPosition.y + 4.1 + largerMiddleLineValue
-      );
+      page.drawLine({
+        start: {
+          x: scaleBarPosition.x + divLine,
+          y: scaleBarPosition.y + 1.9 - largerMiddleLineValue,
+        },
+        end: {
+          x: scaleBarPosition.x + divLine,
+          y: scaleBarPosition.y + 4.1 + largerMiddleLineValue,
+        },
+        color,
+        thickness: 1,
+      });
     });
 
     // If the space between 0 and the first number on the scalebar is long enough...
@@ -560,12 +582,18 @@ export default class PrintModel {
         divLine < divLinesArray[0];
         divLine += numLine
       ) {
-        pdf.line(
-          scaleBarPosition.x + divLine,
-          scaleBarPosition.y + 2.25,
-          scaleBarPosition.x + divLine,
-          scaleBarPosition.y + 3.85
-        );
+        page.drawLine({
+          start: {
+            x: scaleBarPosition.x + divLine,
+            y: scaleBarPosition.y + 2.25,
+          },
+          end: {
+            x: scaleBarPosition.x + divLine,
+            y: scaleBarPosition.y + 3.85,
+          },
+          color,
+          thickness: 1,
+        });
       }
     }
   }
@@ -675,14 +703,14 @@ export default class PrintModel {
       }
     );
 
-    // this.addDividerLinesAndTexts({
-    //   page,
-    //   scale,
-    //   scaleBarLengthMeters,
-    //   scaleBarPosition,
-    //   scaleBarLength,
-    //   color,
-    // });
+    this.addDividerLinesAndTexts({
+      page,
+      scale,
+      scaleBarLengthMeters,
+      scaleBarPosition,
+      scaleBarLength,
+      color,
+    });
   };
 
   addScaleBar = (
@@ -1209,6 +1237,9 @@ export default class PrintModel {
       const resolution = options.resolution;
       const scale = options.scale / 1000;
 
+      // Convert hex color provided to rgb since libPDF uses that instead, should probably be handled earlier.
+      options.mapTextColor = this.hexToRgb(options.mapTextColor);
+
       // Our dimensions are for landscape orientation by default. Flip the values if portrait orientation requested.
       const dim =
         orientation === "portrait"
@@ -1504,7 +1535,6 @@ export default class PrintModel {
           }
 
           if (options.includeScaleBar) {
-            console.log("adding scalebar");
             this.addScaleBar(
               page,
               options.mapTextColor,
