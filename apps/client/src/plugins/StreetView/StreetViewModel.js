@@ -6,6 +6,7 @@ import Point from "ol/geom/Point";
 import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { imageBlob } from "./exports";
+import loadGoogleMapsApi from "../../utils/googleMapsLoader";
 
 class StreetViewModel {
   constructor(settings) {
@@ -39,9 +40,7 @@ class StreetViewModel {
       );
       return;
     }
-    import("load-google-maps-api")
-      .then((mod) => mod.default)
-      .then((loadGoogleMapsApi) => loadGoogleMapsApi({ key: this.apiKey }))
+    loadGoogleMapsApi(this.apiKey)
       .then((googleMapApi) => {
         this.googleMapsApi = googleMapApi;
         this.doActivate();
