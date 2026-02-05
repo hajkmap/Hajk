@@ -508,7 +508,7 @@ export default class PrintModel {
 
     // We want to make sure that given scale is a set scale in our admin settings...
     // to ensure the text has correct spacing
-    if (this.scaleBarLengths[props.scale]) this.addDividerTexts(props);
+    // if (this.scaleBarLengths[props.scale]) this.addDividerTexts(props);
   };
 
   drawDividerLines({
@@ -519,19 +519,19 @@ export default class PrintModel {
     scaleBarLengthMeters,
   }) {
     page.drawLine({
-      start: { x: scaleBarPosition.x, y: scaleBarPosition.y + 3 },
+      start: { x: scaleBarPosition.x, y: scaleBarPosition.y + 9 },
       end: {
         x: scaleBarPosition.x + scaleBarLength,
-        y: scaleBarPosition.y + 3,
+        y: scaleBarPosition.y + 9,
       },
       color,
       thickness: 1,
     });
     page.drawLine({
-      start: { x: scaleBarPosition.x, y: scaleBarPosition.y + 1 },
+      start: { x: scaleBarPosition.x, y: scaleBarPosition.y + 3 },
       end: {
         x: scaleBarPosition.x,
-        y: scaleBarPosition.y + 5,
+        y: scaleBarPosition.y + 15,
       },
       color,
       thickness: 1,
@@ -539,11 +539,11 @@ export default class PrintModel {
     page.drawLine({
       start: {
         x: scaleBarPosition.x + scaleBarLength,
-        y: scaleBarPosition.y + 1,
+        y: scaleBarPosition.y + 3,
       },
       end: {
         x: scaleBarPosition.x + scaleBarLength,
-        y: scaleBarPosition.y + 5,
+        y: scaleBarPosition.y + 15,
       },
       color,
       thickness: 1,
@@ -558,15 +558,15 @@ export default class PrintModel {
     // Here we draw the dividing lines marking 10 (or 100) meters each
     divLinesArray.forEach((divLine) => {
       const largerMiddleLineValue =
-        divLinesArray.length === 10 && divLine === divLinesArray[4] ? 0.7 : 0;
+        divLinesArray.length === 10 && divLine === divLinesArray[4] ? 2.1 : 0;
       page.drawLine({
         start: {
           x: scaleBarPosition.x + divLine,
-          y: scaleBarPosition.y + 1.9 - largerMiddleLineValue,
+          y: scaleBarPosition.y + 5.7 - largerMiddleLineValue,
         },
         end: {
           x: scaleBarPosition.x + divLine,
-          y: scaleBarPosition.y + 4.1 + largerMiddleLineValue,
+          y: scaleBarPosition.y + 12.3 + largerMiddleLineValue,
         },
         color,
         thickness: 1,
@@ -585,11 +585,11 @@ export default class PrintModel {
         page.drawLine({
           start: {
             x: scaleBarPosition.x + divLine,
-            y: scaleBarPosition.y + 2.25,
+            y: scaleBarPosition.y + 6.75,
           },
           end: {
             x: scaleBarPosition.x + divLine,
-            y: scaleBarPosition.y + 3.85,
+            y: scaleBarPosition.y + 11.55,
           },
           color,
           thickness: 1,
@@ -683,8 +683,8 @@ export default class PrintModel {
   ) => {
     const lengthText = this.getLengthText(scaleBarLengthMeters);
     page.drawText(lengthText, {
-      x: scaleBarPosition.x + scaleBarLength + 40,
-      y: scaleBarPosition.y + 10,
+      x: scaleBarPosition.x + scaleBarLength + 2,
+      y: scaleBarPosition.y + 6,
       size: 8,
       font,
     });
@@ -696,7 +696,7 @@ export default class PrintModel {
         orientation === "landscape" ? "liggande" : "stående"
       })`,
       {
-        x: scaleBarPosition.x + 10,
+        x: scaleBarPosition.x,
         y: scaleBarPosition.y + 20,
         size: 10,
         font,
@@ -734,16 +734,22 @@ export default class PrintModel {
     console.log("pixelsize: " + pixelSize);
     const scaleBarLengthMeters = this.getFittingScaleBarLength(scale);
 
-    const scaleBarLength = scaleBarLengthMeters * pixelSize;
+    const scaleBarLength = scaleBarLengthMeters * pixelSize + 92;
     const scaleBarHeight = 6;
 
-    const scaleBarPosition = this.getPlacement(
+    let scaleBarPosition = this.getPlacement(
       scaleBarPlacement,
-      scaleBarLength + 9,
+      scaleBarLength,
       scaleBarHeight,
       pageWidth,
       pageHeight
     );
+
+    // Account for x,y justifications in libPDF when placing the scalebar
+    scaleBarPosition = {
+      x: scaleBarPosition.x + 10,
+      y: scaleBarPosition.y + 10,
+    };
 
     this.drawScaleBar(
       page,
