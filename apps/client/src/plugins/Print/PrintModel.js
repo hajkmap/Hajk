@@ -1481,8 +1481,8 @@ export default class PrintModel {
 
               // Draw logo on the PDF
               page.drawImage(logoImage, {
-                x: logoPlacement.x,
-                y: logoPlacement.y,
+                x: logoPlacement.x - 5,
+                y: logoPlacement.y - 5,
                 width: logoWidth,
                 height: logoHeight,
               });
@@ -1524,8 +1524,8 @@ export default class PrintModel {
 
               // Draw logo on the PDF
               page.drawImage(arrowImage, {
-                x: arrowPlacement.x,
-                y: arrowPlacement.y,
+                x: arrowPlacement.x + 15,
+                y: arrowPlacement.y - 15,
                 width: arrowWidth,
                 height: arrowHeight,
               });
@@ -1562,9 +1562,9 @@ export default class PrintModel {
               ? 8 + this.margin
               : 12 + this.margin;
             page.drawText(options.mapTitle, {
-              x: pageWidth / 2,
-              y: verticalMargin,
-              size: 24,
+              x: pageWidth / 2 - (options.mapTitle.trim().length * 13) / 2,
+              y: pageHeight - verticalMargin - 12,
+              size: 28,
               fontNormal,
             });
           }
@@ -1607,7 +1607,6 @@ export default class PrintModel {
 
           // Add potential date text
           if (this.date.length > 0) {
-            console.log("adding date");
             const date = this.date.replace(
               "{date}",
               new Date().toLocaleDateString()
