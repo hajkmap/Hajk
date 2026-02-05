@@ -9,6 +9,8 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DescriptionIcon from "@mui/icons-material/Description";
+import GpsFixedIcon from "@mui/icons-material/GpsFixed";
+import CircularProgress from "@mui/material/CircularProgress";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import {
@@ -64,6 +66,9 @@ export default function MobileForm({
   columnFilters,
   setColumnFilters,
   exportToExcel,
+  addFeatureFromGps,
+  gpsLoading,
+  supportsPointGeometry,
 }) {
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
@@ -297,6 +302,30 @@ export default function MobileForm({
             </div>
 
             <div style={s.listFooter}>
+              <button
+                style={
+                  !supportsPointGeometry || gpsLoading
+                    ? s.iconBtnDisabled
+                    : s.iconBtn
+                }
+                disabled={!supportsPointGeometry || gpsLoading}
+                onClick={addFeatureFromGps}
+                title={
+                  !supportsPointGeometry
+                    ? "GPS-punkt kräver ett lager med punktgeometri"
+                    : gpsLoading
+                      ? "Hämtar GPS-position..."
+                      : "Skapa punkt från GPS-position"
+                }
+                aria-label="GPS-punkt"
+              >
+                {gpsLoading ? (
+                  <CircularProgress size={18} />
+                ) : (
+                  <GpsFixedIcon fontSize="small" />
+                )}
+              </button>
+
               <button
                 style={
                   visibleFormList.length === 0 ? s.iconBtnDisabled : s.iconBtn

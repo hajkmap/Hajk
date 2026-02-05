@@ -25,6 +25,8 @@ import { editBus } from "../../buses/editBus";
 import { pickPreferredId } from "./helpers/helpers";
 import { useSnackbar } from "notistack";
 import GeoJSON from "ol/format/GeoJSON";
+import Feature from "ol/Feature";
+import Point from "ol/geom/Point";
 
 // Max geometry undo stack size to prevent memory leaks
 const MAX_GEOM_UNDO = 100;
@@ -95,6 +97,9 @@ export default function AttributeEditorView({
   const firstColumnRef = useRef(null);
   const [searchText, setSearchText] = useState("");
 
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [supportsPointGeometry, setSupportsPointGeometry] = useState(false);
+
   const [notification, setNotification] = useState(null);
   const notifTimerRef = useRef(null);
   const formUndoSnapshotsRef = useRef(new Map());
@@ -109,6 +114,21 @@ export default function AttributeEditorView({
     },
     []
   );
+
+  // Track whether the active service supports Point geometry (from admin schema)
+  useEffect(() => {
+    const offSchema = editBus.on("attrib:schema-loaded", (ev) => {
+      const { schema } = ev.detail || {};
+      setSupportsPointGeometry(!!(schema?.editPoint || schema?.editMultiPoint));
+    });
+    const offClr = editBus.on("edit:service-cleared", () => {
+      setSupportsPointGeometry(false);
+    });
+    return () => {
+      offSchema();
+      offClr();
+    };
+  }, []);
 
   const setGeometryById = React.useCallback(
     (logicalId, targetGeometry) => {
@@ -892,6 +912,124 @@ export default function AttributeEditorView({
     draftBaselineRef,
     showNotification,
     cloneGeometryForDuplicates,
+  ]);
+
+  const addFeatureFromGps = React.useCallback(() => {
+    if (!navigator.geolocation) {
+      enqueueSnackbar("Din webbläsare stöder inte GPS/platstjänster.", {
+        variant: "error",
+      });
+      return;
+    }
+
+    setGpsLoading(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        try {
+          const point = new Point([pos.coords.longitude, pos.coords.latitude]);
+          point.transform("EPSG:4326", map.getView().getProjection().getCode());
+
+          const feature = new Feature({ geometry: point });
+          feature.set("USER_DRAWN", true, true);
+          feature.set("DRAW_METHOD", "Point", true);
+          feature.set("EDIT_ACTIVE", false, true);
+
+          const tempId = model.addDraftFromFeature(feature);
+          feature.setId(tempId);
+          feature.set("id", tempId, true);
+
+          // Capture empty baseline for the new draft
+          const baseline = {};
+          fieldMeta.forEach(({ key }) => {
+            baseline[key] = "";
+          });
+          draftBaselineRef.current.set(tempId, baseline);
+
+          featureIndexRef.current.set(tempId, feature);
+          graveyardRef.current.delete(tempId);
+
+          // Add to AE vector layer
+          const layer = vectorLayerRef.current;
+          const aeSrc = layer?.getSource?.();
+          if (aeSrc) {
+            aeSrc.addFeature(feature);
+          }
+
+          // Update visibility and selection
+          visibleIdsRef.current.add(tempId);
+
+          if (ui.mode === "table") {
+            setTableSelectedIds(new Set([tempId]));
+          } else {
+            setSelectedIds(new Set([tempId]));
+            setFocusedId(tempId);
+          }
+
+          editBus.emit("attrib:select-ids", {
+            ids: [tempId],
+            source: "view",
+            mode: "replace",
+          });
+          editBus.emit("attrib:focus-id", { id: tempId, source: "view" });
+
+          layer?.changed?.();
+
+          // Center map on the new point
+          map
+            .getView()
+            .animate({ center: point.getCoordinates(), duration: 500 });
+
+          showNotification("Punkt skapad från GPS-position");
+        } catch (err) {
+          console.warn("Kunde inte skapa GPS-punkt:", err);
+          enqueueSnackbar(
+            "Ett oväntat fel uppstod vid skapande av GPS-punkt.",
+            {
+              variant: "error",
+            }
+          );
+        } finally {
+          setGpsLoading(false);
+        }
+      },
+      (error) => {
+        setGpsLoading(false);
+        if (error.code === 1) {
+          enqueueSnackbar(
+            "Åtkomst till platstjänster nekades. Tillåt platsåtkomst i webbläsarens inställningar.",
+            { variant: "warning" }
+          );
+        } else if (error.code === 2) {
+          enqueueSnackbar(
+            "Kunde inte hämta din position. Kontrollera att platstjänster är aktiverade i systemets inställningar (kan vara begränsat av grupprincip/GPO).",
+            { variant: "error" }
+          );
+        } else if (error.code === 3) {
+          enqueueSnackbar(
+            "GPS-förfrågan tog för lång tid. Försök igen eller kontrollera att platstjänster är aktiverade.",
+            { variant: "warning" }
+          );
+        } else {
+          enqueueSnackbar("Kunde inte hämta GPS-position.", {
+            variant: "error",
+          });
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+    );
+  }, [
+    map,
+    model,
+    fieldMeta,
+    ui.mode,
+    vectorLayerRef,
+    featureIndexRef,
+    graveyardRef,
+    visibleIdsRef,
+    draftBaselineRef,
+    showNotification,
+    enqueueSnackbar,
   ]);
 
   // Separated useEffects to reduce unnecessary re-renders
@@ -2638,6 +2776,9 @@ export default function AttributeEditorView({
           setColumnFilters={setColumnFilters}
           hasGeomUndo={hasGeomUndo}
           exportToExcel={exportToExcel}
+          addFeatureFromGps={addFeatureFromGps}
+          gpsLoading={gpsLoading}
+          supportsPointGeometry={supportsPointGeometry}
         />
       ) : ui.mode === "table" ? (
         <TableMode
@@ -2692,6 +2833,9 @@ export default function AttributeEditorView({
           handleRowHover={handleRowHover}
           handleRowLeave={handleRowLeave}
           exportToExcel={exportToExcel}
+          addFeatureFromGps={addFeatureFromGps}
+          gpsLoading={gpsLoading}
+          supportsPointGeometry={supportsPointGeometry}
         />
       ) : (
         <DesktopForm
@@ -2740,6 +2884,9 @@ export default function AttributeEditorView({
           handleRowLeave={handleRowLeave}
           app={app}
           exportToExcel={exportToExcel}
+          addFeatureFromGps={addFeatureFromGps}
+          gpsLoading={gpsLoading}
+          supportsPointGeometry={supportsPointGeometry}
         />
       )}
       <NotificationBar s={s} theme={theme} text={notification} />

@@ -14,6 +14,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import DescriptionIcon from "@mui/icons-material/Description";
+import GpsFixedIcon from "@mui/icons-material/GpsFixed";
 import CircularProgress from "@mui/material/CircularProgress";
 import {
   getIdsForDeletion,
@@ -79,6 +80,9 @@ export default function DesktopForm({
   handleRowLeave,
   app,
   exportToExcel,
+  addFeatureFromGps,
+  gpsLoading,
+  supportsPointGeometry,
 }) {
   const { functionalCookiesOk } = useCookieStatus(app.globalObserver);
 
@@ -564,6 +568,29 @@ export default function DesktopForm({
         <div style={s.paneHeaderWithActions}>
           <span>Redigera attribut</span>
           <div style={s.spacer} />
+          <button
+            style={
+              !supportsPointGeometry || gpsLoading
+                ? s.iconBtnDisabled
+                : s.iconBtn
+            }
+            disabled={!supportsPointGeometry || gpsLoading}
+            onClick={addFeatureFromGps}
+            title={
+              !supportsPointGeometry
+                ? "GPS-punkt kräver ett lager med punktgeometri"
+                : gpsLoading
+                  ? "Hämtar GPS-position..."
+                  : "Skapa punkt från GPS-position"
+            }
+            aria-label="GPS-punkt"
+          >
+            {gpsLoading ? (
+              <CircularProgress size={18} />
+            ) : (
+              <GpsFixedIcon fontSize="small" />
+            )}
+          </button>
           <button
             style={visibleFormList.length === 0 ? s.iconBtnDisabled : s.iconBtn}
             disabled={visibleFormList.length === 0}
