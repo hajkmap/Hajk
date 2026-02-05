@@ -121,25 +121,22 @@ export default function DesktopForm({
     setCurrentPage(0);
   }, [columnFilters, setCurrentPage]);
 
-  // Navigate to the page containing focusedId when it changes (e.g. via focusPrev/focusNext)
+  // Navigate to the page containing focusedId when it actually changes
+  // (e.g. via focusPrev/focusNext). We track the previous value so that
+  // re-renders caused by visibleFormList updates (bulk edits etc.) don't
+  // snap the user back to focusedId's page.
+  const prevFocusedIdRef = React.useRef(focusedId);
   React.useEffect(() => {
     if (focusedId == null || isShowingAll) return;
+    if (focusedId === prevFocusedIdRef.current) return;
+    prevFocusedIdRef.current = focusedId;
 
     const rowIndex = visibleFormList.findIndex((r) => r.id === focusedId);
     if (rowIndex === -1) return;
 
     const targetPage = Math.floor(rowIndex / rowsPerPage);
-    if (targetPage !== currentPage) {
-      setCurrentPage(targetPage);
-    }
-  }, [
-    focusedId,
-    visibleFormList,
-    rowsPerPage,
-    currentPage,
-    isShowingAll,
-    setCurrentPage,
-  ]);
+    setCurrentPage((prev) => (prev !== targetPage ? targetPage : prev));
+  }, [focusedId, visibleFormList, rowsPerPage, isShowingAll, setCurrentPage]);
 
   // Shared scroll-to-selected hook
   const {
