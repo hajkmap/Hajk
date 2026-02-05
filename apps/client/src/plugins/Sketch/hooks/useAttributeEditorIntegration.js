@@ -1169,6 +1169,14 @@ const useAttributeEditorIntegration = ({
       // We'll use the sketch:disable-ae-interactions pattern
       editBus.emit("sketch:disable-ae-interactions", { disable: true });
 
+      // Disable Sketch's draw interaction (AddView) so the split line
+      // isn't also added as a drawn feature
+      const sketchDraw = map
+        .getInteractions()
+        .getArray()
+        .find((i) => i instanceof Draw && i.get("DRAW_METHOD"));
+      if (sketchDraw) sketchDraw.setActive(false);
+
       // Create a draw interaction for LineString (cutting line)
       const drawInteraction = new Draw({
         type: "LineString",
@@ -1197,6 +1205,9 @@ const useAttributeEditorIntegration = ({
         // Re-enable interactions
         editBus.emit("sketch:disable-ae-interactions", { disable: false });
         applyEnablement();
+
+        // Re-enable Sketch's draw interaction (AddView) if it was paused
+        if (sketchDraw) sketchDraw.setActive(true);
 
         if (cancelled) {
           editBus.emit("sketch:split-cancelled", {});
