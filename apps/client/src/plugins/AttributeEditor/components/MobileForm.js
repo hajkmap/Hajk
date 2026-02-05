@@ -69,6 +69,7 @@ export default function MobileForm({
   addFeatureFromGps,
   gpsLoading,
   supportsPointGeometry,
+  isLoading,
 }) {
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
@@ -293,7 +294,20 @@ export default function MobileForm({
                           color: "#999",
                         }}
                       >
-                        Inga objekt i listan.
+                        {isLoading ? (
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 8,
+                            }}
+                          >
+                            Laddning pågår...
+                            <CircularProgress size={16} />
+                          </span>
+                        ) : (
+                          "Inga objekt i tjänsten"
+                        )}
                       </td>
                     </tr>
                   )}

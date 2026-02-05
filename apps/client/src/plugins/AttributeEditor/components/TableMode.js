@@ -902,8 +902,14 @@ export default function TableMode(props) {
                         gap: 8,
                       }}
                     >
-                      Laddning pågår...
-                      <CircularProgress size={16} />
+                      {props.isLoading ? (
+                        <>
+                          Laddning pågår...
+                          <CircularProgress size={16} />
+                        </>
+                      ) : (
+                        "Inga objekt i tjänsten"
+                      )}
                     </span>
                   </td>
                 </tr>

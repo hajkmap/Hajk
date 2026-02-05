@@ -83,6 +83,7 @@ export default function DesktopForm({
   addFeatureFromGps,
   gpsLoading,
   supportsPointGeometry,
+  isLoading,
 }) {
   const { functionalCookiesOk } = useCookieStatus(app.globalObserver);
 
@@ -394,8 +395,14 @@ export default function DesktopForm({
                 gap: 8,
               }}
             >
-              Laddning pågår...
-              <CircularProgress size={16} />
+              {isLoading ? (
+                <>
+                  Laddning pågår...
+                  <CircularProgress size={16} />
+                </>
+              ) : (
+                "Inga objekt i tjänsten"
+              )}
             </div>
           )}
         </div>

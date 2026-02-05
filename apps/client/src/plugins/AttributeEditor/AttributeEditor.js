@@ -180,6 +180,7 @@ function AttributeEditor(props) {
 
   const currentServiceIdRef = React.useRef("NONE_ID");
   const [serviceList, setServiceList] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   // Keep rowIdMapRef in sync with features for O(1) toCanonicalId lookups
   React.useEffect(() => {
@@ -611,6 +612,7 @@ function AttributeEditor(props) {
       setFieldMetaLocal([]);
       model.setFieldMetadata([]);
       model.clearFeatureCollection?.();
+      setIsLoading(true);
 
       try {
         // Check if operation was aborted before starting
@@ -874,6 +876,10 @@ function AttributeEditor(props) {
 
         // Log actual errors
         console.warn("Fel vid laddning av schema/data:", e);
+      } finally {
+        if (!signal.aborted) {
+          setIsLoading(false);
+        }
       }
     });
 
@@ -899,6 +905,7 @@ function AttributeEditor(props) {
       setFieldMetaLocal([]);
       model.setFieldMetadata([]);
       model.clearFeatureCollection?.();
+      setIsLoading(false);
 
       if (vectorLayerRef.current) {
         props.map.removeLayer(vectorLayerRef.current);
@@ -1708,6 +1715,7 @@ function AttributeEditor(props) {
           map={props.map}
           handleRowHover={handleRowHover}
           handleRowLeave={handleRowLeave}
+          isLoading={isLoading}
         />
       </BaseWindowPlugin>
 

@@ -59,6 +59,7 @@ export default function AttributeEditorView({
   map,
   handleRowHover,
   handleRowLeave,
+  isLoading,
 }) {
   const { enqueueSnackbar } = useSnackbar();
   const muiTheme = useMuiTheme();
@@ -2779,6 +2780,7 @@ export default function AttributeEditorView({
           addFeatureFromGps={addFeatureFromGps}
           gpsLoading={gpsLoading}
           supportsPointGeometry={supportsPointGeometry}
+          isLoading={isLoading}
         />
       ) : ui.mode === "table" ? (
         <TableMode
@@ -2836,6 +2838,7 @@ export default function AttributeEditorView({
           addFeatureFromGps={addFeatureFromGps}
           gpsLoading={gpsLoading}
           supportsPointGeometry={supportsPointGeometry}
+          isLoading={isLoading}
         />
       ) : (
         <DesktopForm
@@ -2887,6 +2890,7 @@ export default function AttributeEditorView({
           addFeatureFromGps={addFeatureFromGps}
           gpsLoading={gpsLoading}
           supportsPointGeometry={supportsPointGeometry}
+          isLoading={isLoading}
         />
       )}
       <NotificationBar s={s} theme={theme} text={notification} />
