@@ -605,10 +605,9 @@ export default class PrintModel {
     font,
   }) => {
     // Here we set the number 0 at the start of the scalebar
-    // pdf.text("0", scaleBarPosition.x - 0.7, scaleBarPosition.y + 8);
     page.drawText("0", {
-      x: scaleBarPosition.x + scaleBarLength - 2.1,
-      y: scaleBarPosition.y + 22,
+      x: scaleBarPosition.x,
+      y: scaleBarPosition.y - 5,
       size: 8,
       font,
     });
@@ -627,15 +626,8 @@ export default class PrintModel {
 
     const scaleBarHasSpace = divLinesArray[0] > 10 && scaleBarLengthMeters > 10;
 
-    // Here we add the first number after 0
     let divNr = calculatedScaleBarLengthMeters / divider;
     let divNrString = divNr.toLocaleString();
-    page.drawText(divNrString, {
-      x: scaleBarPosition.x + divLinesArray[0] - divNrString.length,
-      y: scaleBarPosition.y + 8,
-      size: 8,
-      font,
-    });
 
     // Here we add the middle number or if no middle exists...
     // a number that's close to the middle
@@ -650,8 +642,12 @@ export default class PrintModel {
     divNr = (calculatedScaleBarLengthMeters / divider) * midIndex;
     divNrString = divNr.toLocaleString();
     page.drawText(divNrString, {
-      x: scaleBarPosition.x + divLinesArray[midIndex - 1] - divNrString.length,
-      y: scaleBarPosition.y + 8,
+      x:
+        scaleBarPosition.x +
+        divLinesArray[midIndex - 1] -
+        divNrString.length -
+        2,
+      y: scaleBarPosition.y - 5,
       size: 8,
       font,
     });
@@ -667,8 +663,8 @@ export default class PrintModel {
         divNr % 1 !== 0 ? divNrString.length - 1 : divNrString.length;
 
       page.drawText(divNrString, {
-        x: scaleBarPosition.x + dividerNrPosition - dividerStrLength,
-        y: scaleBarPosition.y + 8,
+        x: scaleBarPosition.x + dividerNrPosition - dividerStrLength - 2,
+        y: scaleBarPosition.y - 5,
         size: 8,
         font,
       });
@@ -733,11 +729,8 @@ export default class PrintModel {
     pageHeight
   ) => {
     const millimetersPerInch = 25.4;
+    const millimetersPerPoint = 0.3528;
     const pixelSize = millimetersPerInch / resolution / scaleResolution;
-    console.log(
-      `milimetersPerInch: ${millimetersPerInch} resolution: ${resolution} scaleResolution: ${scaleResolution}`
-    );
-    console.log("pixelsize: " + pixelSize);
     const scaleBarLengthMeters = this.getFittingScaleBarLength(scale);
 
     const scaleBarLength = scaleBarLengthMeters * pixelSize + 92;
