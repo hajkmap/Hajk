@@ -13,12 +13,22 @@ import HelpIcon from "@mui/icons-material/Help";
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 import DrawModel from "../../models/DrawModel";
 
+interface PropertyCheckerProps {
+  app: any;
+  map: any;
+  options: {
+    visibleAtStart?: boolean;
+    title?: string;
+    description?: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
 /**
- * @summary Main component for the Dummy-plugin.
- * @description The purpose of having a Dummy plugin is to exemplify
- * and document how plugins should be constructed in Hajk.
+ * @summary Main component for the PropertyChecker plugin.
  */
-function PropertyChecker(props) {
+const PropertyChecker: React.FC<PropertyCheckerProps> = (props) => {
   //
   // Used to keep track of the plugin's current visibility.
   // We will want to do some cleanup later on when the window is hidden.
@@ -137,6 +147,6 @@ function PropertyChecker(props) {
       />
     </BaseWindowPlugin>
   );
-}
+};
 
 export default PropertyChecker;

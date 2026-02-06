@@ -243,21 +243,41 @@ class AppModel {
    * Dynamically load plugins from the configured plugins folder.
    * Assumed that a folder exists with the same name as the requested plugin.
    * There must also be a file present with the same name as well.
+   * We look for both .jsx and .tsx files.
    * @param {Array} - List of plugins to be loaded.
-   * @returns {Array} - List of promises to be resolved for.
+   * @returns {Array} - List of promises to be resolved.
    */
   loadPlugins(plugins) {
     const promises = [];
-    const modules = import.meta.glob([
-      "../components/Search/*.j*",
-      "../plugins/*/*.j*",
+
+    // First let's check what files exist in the expected paths
+    const availableFiles = import.meta.glob([
+      "../components/Search/*.{js,jsx,ts,tsx}", // special case as it's not inside plugins/
+      "../plugins/*/*.{js,jsx,ts,tsx}",
     ]);
+
+    // Now loop the plugins array and…
     plugins.forEach((plugin) => {
+      // (Again, for our special case)
       const dir = ["Search"].includes(plugin) ? "components" : "plugins";
 
-      // const prom = import(`../${dir}/${plugin}/${plugin}.js`)
-      const prom = modules[`../${dir}/${plugin}/${plugin}.jsx`]()
-        ?.then((module) => {
+      // …determine the expected path (but we don't know the file extension yet!).
+      const basePath = `../${dir}/${plugin}/${plugin}`;
+
+      // Our module loader _should_ be on the expected path + one of the possible
+      // file extensions.
+      const loader =
+        availableFiles[`${basePath}.tsx`] || availableFiles[`${basePath}.jsx`];
+
+      if (!loader) {
+        console.error(
+          `AppModel.loadPlugins: Could not find module for plugin "${plugin}".`
+        );
+        return;
+      }
+
+      const prom = loader()
+        .then((module) => {
           const toolConfig =
             this.config.mapConfig.tools.find(
               (plug) => plug.type.toLowerCase() === plugin.toLowerCase()
