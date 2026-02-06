@@ -1654,17 +1654,22 @@ export default class PrintModel {
           this.localObserver.publish("print-failed-to-save");
           reject(error);
         } finally {
-          const bytes = await pdf.save();
-          const blob = new Blob([bytes], { type: "application/pdf" });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = "test_document_with_image.pdf";
-          link.click();
-          URL.revokeObjectURL(url);
-          this.localObserver.publish("print-completed");
-          resolve();
-          this.restoreOriginalView();
+          // Save as pdf or png
+          // Finally, save the PDF (or PNG)
+          this.saveToFile(pdf, width, options.saveAsType)
+            .then((blob) => {
+              this.localObserver.publish("print-completed");
+              resolve(blob);
+            })
+            .catch((error) => {
+              console.warn(error);
+              this.localObserver.publish("print-failed-to-save");
+              reject(error);
+            })
+            .finally(() => {
+              // Reset map to how it was before print
+              this.restoreOriginalView();
+            });
         }
       });
 
@@ -1714,7 +1719,15 @@ export default class PrintModel {
   // Saves the supplied PDF with the supplied file-name.
   #saveToPdf = async (pdf, fileName) => {
     try {
-      return await pdf.save(`${fileName}.pdf`);
+      // return await pdf.save(`${fileName}.pdf`);
+      const bytes = await pdf.save();
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${fileName}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
     } catch (error) {
       throw new Error(`Failed to save PDF. Error: ${error}`);
     }
@@ -1731,7 +1744,7 @@ export default class PrintModel {
       // source-map-errors that occur from setting the worker the ordinary way.
       pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
       // We'll output the PDF as an array-buffer that can be used to create the PNG.
-      const ab = pdf.output("arraybuffer");
+      const ab = await pdf.save();
       // We'll use the PDF-JS library to create a new "PDF-JS-PDF". (Wasteful? Yes very, but the JS-PDF-library
       // does not support export to any other format than PDF, and the PDF-JS-library does.) Notice that
       // JS-PDF and PDF-JS are two different libraries, both with their pros and cons.
