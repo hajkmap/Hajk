@@ -10,7 +10,7 @@ import { getPointResolution, transform } from "ol/proj";
 
 import * as SLDReader from "@nieuwlandgeo/sldreader";
 
-import LayerInfo from "./LayerInfo.js";
+import LayerInfo from "./LayerInfo";
 import { hfetch } from "../../utils/FetchWrapper";
 
 const vectorLayerProperties = {

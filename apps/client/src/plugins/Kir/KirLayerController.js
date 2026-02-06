@@ -2,9 +2,9 @@ import { Vector as VectorLayer } from "ol/layer";
 import { Vector as VectorSource } from "ol/source";
 import { IconMarker } from "../Fir/FirIcons";
 import { Fill, Stroke, Style, Circle, Icon } from "ol/style";
-import Feature from "ol/Feature.js";
+import Feature from "ol/Feature";
 import HajkTransformer from "../../utils/HajkTransformer";
-import { Point } from "ol/geom.js";
+import { Point } from "ol/geom";
 import FirStyles from "../Fir/FirStyles";
 
 class KirLayerController {

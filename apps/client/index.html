@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <meta name="theme-color" content="#000000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta name="description" content="Hajk - open source webGIS" />
+    <meta name="app-name" content="%VITE_APP_NAME%" />
+    <meta name="%VITE_APP_NAME%-build-date" content="%VITE_APP_BUILD_DATE%" />
+    <meta name="%VITE_APP_NAME%-git-hash" content="%VITE_APP_GIT_HASH%" />
+    <meta name="%VITE_APP_NAME%-version" content="%VITE_APP_VERSION%" />
+    <meta
+      name="%VITE_APP_NAME%-use-cache-buster"
+      content="%VITE_APP_USE_CACHE_BUSTER%"
+    />
+
+    <link rel="manifest" href="/manifest.json" crossorigin="use-credentials" />
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    <link rel="stylesheet" type="text/css" href="/index.css" />
+    <title>Hajk - open source webGIS</title>
+  </head>
+
+  <body>
+    <script type="module" src="src/index.jsx"></script>
+    <noscript> You need to enable JavaScript to run this app. </noscript>
+    <div id="root">
+      <div class="app-start">
+        <span class="sr-only">Sidan laddas</span>
+        <img class="compass" src="/compass.svg" alt="Hajks logga" />
+        <div class="app-name">Hajk</div>
+        <div class="app-version">version %VITE_APP_VERSION%</div>
+      </div>
+    </div>
+  </body>
+</html>

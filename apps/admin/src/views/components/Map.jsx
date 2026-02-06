@@ -1,6 +1,6 @@
 import React from "react";
 import { Component } from "react";
-import OpenLayersMap from "./../../models/OpenLayersMap.js";
+import OpenLayersMap from "./../../models/OpenLayersMap";
 import LayerList from "./LayerList.jsx";
 
 const target = "map";
