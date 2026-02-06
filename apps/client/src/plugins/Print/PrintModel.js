@@ -1321,8 +1321,6 @@ export default class PrintModel {
           }
         });
 
-        console.log(options);
-
         const dataUrl = mapCanvas.toDataURL("image/png");
         let pageHeight = 0;
         let pageWidth = 0;
@@ -1402,23 +1400,42 @@ export default class PrintModel {
                 });
               // Now we check if user did choose text in margins
             } else {
-              console.log("using text in margins, making it wider");
-              //     // We do a special check for a5-format and set the dimValue
-              //     // to get the correct margin values when drawing the rectangle
-              //     let dimValue =
-              //       options.format === "a5" ? this.margin + 2 : this.margin;
-              //     // This lineWidth needs to be larger if user has chosen text in margins
-              //     pdf.setLineWidth(dimValue * 6);
-              //     // Draw the increased border (margin) around the entire image
-              //     // here with special values for larger margins.
-              //     pdf.rect(
-              //       -(dimValue * 2),
-              //       0,
-              //       dim[0] + dimValue * 4,
-              //       dim[1],
-              //       "S"
-              //     );
-              //     // If selected as feature in Admin, we draw a frame around the map image
+              page
+                .drawPath()
+                .moveTo(0, 0)
+                .lineTo(pageWidth, 0)
+                .close()
+                .stroke({
+                  borderColor: rgb(255, 255, 255),
+                  borderWidth: 16 * this.margin,
+                });
+              page
+                .drawPath()
+                .moveTo(pageWidth, 0)
+                .lineTo(pageWidth, pageHeight)
+                .close()
+                .stroke({
+                  borderColor: rgb(255, 255, 255),
+                  borderWidth: 5.5 * this.margin,
+                });
+              page
+                .drawPath()
+                .moveTo(pageWidth, pageHeight)
+                .lineTo(0, pageHeight)
+                .close()
+                .stroke({
+                  borderColor: rgb(255, 255, 255),
+                  borderWidth: 16 * this.margin,
+                });
+              page
+                .drawPath()
+                .moveTo(0, pageHeight)
+                .lineTo(0, 0)
+                .close()
+                .stroke({
+                  borderColor: rgb(255, 255, 255),
+                  borderWidth: 5.5 * this.margin,
+                });
             }
           }
 
@@ -1557,13 +1574,12 @@ export default class PrintModel {
 
           // Add map title if user supplied one
           if (options.mapTitle.trim().length > 0) {
-            console.log("adding title");
             let verticalMargin = options.useTextIconsInMargin
-              ? 8 + this.margin
-              : 12 + this.margin;
+              ? this.margin + 35
+              : 50;
             page.drawText(options.mapTitle, {
               x: pageWidth / 2 - (options.mapTitle.trim().length * 13) / 2,
-              y: pageHeight - verticalMargin - 12,
+              y: pageHeight - verticalMargin,
               size: 28,
               fontNormal,
             });
@@ -1572,12 +1588,10 @@ export default class PrintModel {
           // Add print comment if user supplied one
           if (options.printComment.trim().length > 0) {
             console.log("adding comment");
-            let yPos = options.useTextIconsInMargin
-              ? 13 + this.margin
-              : 18 + this.margin;
+            let yPos = options.useTextIconsInMargin ? this.margin + 50 : 60;
             page.drawText(options.printComment, {
-              x: pageWidth / 2,
-              y: yPos,
+              x: pageWidth / 2 - (options.mapTitle.trim().length * 4) / 2,
+              y: pageHeight - yPos,
               size: 11,
               fontNormal,
             });
