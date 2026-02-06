@@ -22,7 +22,6 @@
     "defaults"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/load-google-maps-api": "^2.0.5",
     "@types/node": "^25.2.1",
     "@vitejs/plugin-react-swc": "^4.2.3",
