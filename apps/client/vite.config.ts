@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
 import path from "path";
+import { fileURLToPath } from "url";
 import react from "@vitejs/plugin-react-swc";
 
-// https://vitejs.dev/config/
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   base: "./",
@@ -21,7 +22,7 @@ export default defineConfig({
     },
   },
   build: {
-    target: "ES2022",
+    target: "baseline-widely-available",
     outDir: "build",
     sourcemap: false,
     rollupOptions: {

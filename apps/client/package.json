@@ -15,21 +15,18 @@
     "build": "tsc && vite build",
     "build-preview": "vite build && vite preview",
     "prestart": "node prebuild.js",
-    "prebuild": "node prebuild.js"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
+    "prebuild": "node prebuild.js",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix"
   },
   "overrides": {},
   "browserslist": [
-    "defaults and supports es6-module",
-    "ios > 12"
+    "defaults"
   ],
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/load-google-maps-api": "^2.0.5",
+    "@types/node": "^25.2.1",
     "@vitejs/plugin-react-swc": "^4.2.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-config-react-app": "^7.0.1",
@@ -59,8 +56,6 @@
     "@turf/buffer": "^7.3.2",
     "@turf/transform-translate": "^7.3.2",
     "@turf/union": "^7.3.2",
-    "core-js": "^3.47.0",
-    "elm-pep": "^1.0.6",
     "file-saver": "^2.0.5",
     "intro.js": "^7.2.0",
     "intro.js-react": "^1.0.0",
@@ -73,7 +68,6 @@
     "proj4": "^2.20.2",
     "qrcode": "^1.5.4",
     "react": "^19.2.3",
-    "react-app-polyfill": "^3.0.0",
     "react-color": "^2.19.3",
     "react-dom": "^19.2.3",
     "react-event-observer": "^0.5.11",
