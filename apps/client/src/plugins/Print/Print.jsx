@@ -41,7 +41,7 @@ class Print extends React.PureComponent {
     super(props);
 
     // Prepare scales from admin options, fallback to default if needed
-    const propScales =  props?.options?.scales;
+    const propScales = props?.options?.scales;
     if (Array.isArray(propScales)) {
       props.options.scales = propScales;
     } else if (
