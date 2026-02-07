@@ -387,14 +387,7 @@ export default function DesktopForm({
             );
           })}
           {visibleFormList.length === 0 && (
-            <div
-              style={{
-                ...s.listEmpty,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
+            <div style={s.listEmptyFlex}>
               {isLoading ? (
                 <>
                   Laddning pågår...
@@ -513,15 +506,7 @@ export default function DesktopForm({
             setLeftW((w) => Math.min(MAX_LEFT, w + step));
           }
         }}
-        style={{
-          cursor: "col-resize",
-          // snappy grip: a thin vertical line
-          background:
-            "linear-gradient(to right, transparent 0, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 5px, transparent 5px)",
-          width: "8px",
-          userSelect: "none",
-          touchAction: "none",
-        }}
+        style={s.resizerGrip}
       />
 
       {/* Right: Form */}
@@ -539,7 +524,7 @@ export default function DesktopForm({
             >
               <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
             </svg>
-            <span style={{ flex: 1 }}>
+            <span style={s.spacer}>
               Kolumnfilter från tabellläget är aktiva ({activeFilterCount}{" "}
               filter påverkar kartan)
             </span>

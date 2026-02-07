@@ -44,12 +44,7 @@ const ColumnFilter = React.memo(function ColumnFilter({
   onClearFilter,
   filterOverlayRef,
 }) {
-  const anchorStyle =
-    placement === "right"
-      ? { left: 0, right: "auto", transform: "none" }
-      : placement === "left"
-        ? { right: 0, left: "auto", transform: "none" }
-        : { left: "50%", right: "auto", transform: "translateX(-50%)" };
+  const anchorStyle = s.filterAnchor(placement);
 
   // O(1) lookup
   const selectedSet = React.useMemo(
@@ -448,12 +443,12 @@ export default function TableMode(props) {
 
         <>
           {tablePendingDeletes.size > 0 && (
-            <span style={{ ...s.toolbarStats, color: theme.danger }}>
+            <span style={s.toolbarStatsColor(theme.danger)}>
               {tablePendingDeletes.size} markerade för radering
             </span>
           )}
           {tableHasPending && (
-            <span style={{ ...s.toolbarStats, color: theme.warning }}>
+            <span style={s.toolbarStatsColor(theme.warning)}>
               Osparade ändringar
             </span>
           )}
@@ -895,13 +890,7 @@ export default function TableMode(props) {
               {filteredAndSorted.length === 0 && (
                 <tr>
                   <td style={s.tdEmpty} colSpan={FIELD_META.length}>
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 8,
-                      }}
-                    >
+                    <span style={s.inlineFlexCenter}>
                       {props.isLoading ? (
                         <>
                           Laddning pågår...

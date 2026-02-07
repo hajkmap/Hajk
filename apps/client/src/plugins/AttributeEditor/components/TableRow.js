@@ -54,14 +54,8 @@ const TableRow = ({
       }}
       style={{
         ...s.tr(selected, pendingKind, isViewedRow),
-        ...(rowHasEdits && !pendingKind && !isViewedRow
-          ? { outline: `2px dashed ${s.editOutlineColor || "#f59e0b"}` }
-          : {}),
-        ...(isHovering && !selected && !pendingKind
-          ? {
-              background: "rgba(96, 165, 250, 0.08)",
-            }
-          : {}),
+        ...(rowHasEdits && !pendingKind && !isViewedRow ? s.trEditOutline : {}),
+        ...(isHovering && !selected && !pendingKind ? s.trHover : {}),
       }}
       aria-selected={selected}
       onClick={(e) => handleRowClick(row.id, idx, e)}
@@ -208,12 +202,7 @@ const TableRow = ({
         const flowStyle = wrapCh
           ? s.tdWrap(wrapCh)
           : hasNl
-            ? {
-                whiteSpace: "pre-wrap",
-                overflowWrap: "anywhere",
-                wordBreak: "break-word",
-                verticalAlign: "top",
-              }
+            ? s.textFlowFallback
             : s.tdNowrap;
 
         let editorNode = null;

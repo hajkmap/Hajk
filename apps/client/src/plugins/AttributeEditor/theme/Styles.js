@@ -926,5 +926,110 @@ export function makeStyles(t, isMobile) {
         transform: "scale(1.1)",
       },
     },
+
+    // Resizer grip (DesktopForm panel divider)
+    resizerGrip: {
+      cursor: "col-resize",
+      background:
+        "linear-gradient(to right, transparent 0, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 5px, transparent 5px)",
+      width: "8px",
+      userSelect: "none",
+      touchAction: "none",
+    },
+
+    // List empty state with loading spinner layout
+    listEmptyFlex: {
+      padding: 12,
+      color: t.textMuted,
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+    },
+
+    // Inline flex for loading spinners
+    inlineFlexCenter: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 8,
+    },
+
+    // Toolbar stats with overridden color
+    toolbarStatsColor: (color) => ({
+      fontSize: isMobile ? 11 : 12,
+      whiteSpace: isMobile ? "nowrap" : "normal",
+      color,
+    }),
+
+    // Text flow fallback (newlines but no wrapCh)
+    textFlowFallback: {
+      whiteSpace: "pre-wrap",
+      overflowWrap: "anywhere",
+      wordBreak: "break-word",
+      verticalAlign: "top",
+    },
+
+    // Edit outline for rows with pending edits
+    trEditOutline: {
+      outline: `2px dashed ${t.warning}`,
+    },
+
+    // Filter overlay anchor positioning
+    filterAnchor: (placement) =>
+      placement === "right"
+        ? { left: 0, right: "auto", transform: "none" }
+        : placement === "left"
+          ? { right: 0, left: "auto", transform: "none" }
+          : { left: "50%", right: "auto", transform: "translateX(-50%)" },
+
+    // Mobile simple-table styles
+    mobileTableScroll: {
+      overflowX: "auto",
+      flex: 1,
+    },
+    mobileTable: {
+      width: "100%",
+      borderCollapse: "collapse",
+    },
+    mobileTableTh: {
+      padding: 8,
+      borderBottom: `2px solid ${t.border}`,
+      textAlign: "left",
+      fontSize: 12,
+      fontWeight: 600,
+      whiteSpace: "nowrap",
+      position: "sticky",
+      top: 0,
+      backgroundColor: t.overlayBg,
+      zIndex: 1,
+    },
+    mobileTableThContent: {
+      display: "flex",
+      alignItems: "center",
+      gap: 4,
+    },
+    mobileTableTd: {
+      padding: 8,
+      borderBottom: `1px solid ${t.borderMuted}`,
+      fontSize: 13,
+      whiteSpace: "nowrap",
+    },
+    mobileTableTdEmpty: {
+      padding: 20,
+      textAlign: "center",
+      color: t.textMuted,
+    },
+    mobileTableTrBg: (status, selected) => ({
+      backgroundColor:
+        status === "delete"
+          ? t.dangerBg
+          : status === "geom" || status === "edit"
+            ? t.warningBg
+            : status === "add"
+              ? t.successBg
+              : selected
+                ? t.rowSelected
+                : t.overlayBg,
+      cursor: "pointer",
+    }),
   };
 }

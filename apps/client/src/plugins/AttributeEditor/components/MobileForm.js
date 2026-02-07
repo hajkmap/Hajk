@@ -173,7 +173,7 @@ export default function MobileForm({
             >
               <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
             </svg>
-            <span style={{ flex: 1 }}>
+            <span style={s.spacer}>
               Kolumnfilter aktiva ({activeFilterCount})
             </span>
             <button style={s.btnSmall} onClick={clearColumnFilters}>
@@ -183,33 +183,13 @@ export default function MobileForm({
         )}
         {mobileActiveTab === "list" ? (
           <>
-            <div style={{ overflowX: "auto", flex: 1 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <div style={s.mobileTableScroll}>
+              <table style={s.mobileTable}>
                 <thead>
                   <tr>
                     {FIELD_META.map((meta) => (
-                      <th
-                        key={meta.key}
-                        style={{
-                          padding: "8px",
-                          borderBottom: "2px solid #ddd",
-                          textAlign: "left",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          whiteSpace: "nowrap",
-                          position: "sticky",
-                          top: 0,
-                          backgroundColor: "#fff",
-                          zIndex: 1,
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                        >
+                      <th key={meta.key} style={s.mobileTableTh}>
+                        <div style={s.mobileTableThContent}>
                           <span>{meta.label}</span>
                           {meta.description && meta.description.trim() && (
                             <button
@@ -243,17 +223,15 @@ export default function MobileForm({
                         (d) => d.id === f.id && d.__pending !== "delete"
                       );
 
-                    const bgColor = isPendingDelete
-                      ? "#ffe0e0"
+                    const status = isPendingDelete
+                      ? "delete"
                       : hasGeomChange
-                        ? "#fff4e0"
+                        ? "geom"
                         : hasPendingEdits
-                          ? "#fff8dc"
+                          ? "edit"
                           : isDraftAdd
-                            ? "#e0f7fa"
-                            : selected
-                              ? "#e3f2fd"
-                              : "#fff";
+                            ? "add"
+                            : null;
 
                     // Use stable composite key: drafts get prefix to avoid collision
                     const stableKey = f.id < 0 ? `draft_${f.id}` : f.id;
@@ -263,21 +241,10 @@ export default function MobileForm({
                         key={stableKey}
                         data-row-id={f.id}
                         onClick={(e) => onFormRowClick(f.id, idx, e)}
-                        style={{
-                          backgroundColor: bgColor,
-                          cursor: "pointer",
-                        }}
+                        style={s.mobileTableTrBg(status, selected)}
                       >
                         {FIELD_META.map((meta) => (
-                          <td
-                            key={meta.key}
-                            style={{
-                              padding: "8px",
-                              borderBottom: "1px solid #eee",
-                              fontSize: "13px",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
+                          <td key={meta.key} style={s.mobileTableTd}>
                             {f[meta.key] ?? ""}
                           </td>
                         ))}
@@ -288,20 +255,10 @@ export default function MobileForm({
                     <tr>
                       <td
                         colSpan={FIELD_META.length}
-                        style={{
-                          padding: "20px",
-                          textAlign: "center",
-                          color: "#999",
-                        }}
+                        style={s.mobileTableTdEmpty}
                       >
                         {isLoading ? (
-                          <span
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 8,
-                            }}
-                          >
+                          <span style={s.inlineFlexCenter}>
                             Laddning pågår...
                             <CircularProgress size={16} />
                           </span>
