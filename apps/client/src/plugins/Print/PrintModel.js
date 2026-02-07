@@ -746,8 +746,8 @@ export default class PrintModel {
 
     // Account for x,y justifications in libPDF when placing the scalebar
     scaleBarPosition = {
-      x: scaleBarPosition.x + 10,
-      y: scaleBarPosition.y + 10,
+      x: scaleBarPosition.x + 15,
+      y: scaleBarPosition.y + 15,
     };
 
     this.drawScaleBar(
@@ -1346,8 +1346,13 @@ export default class PrintModel {
         }
 
         // Flip depending on orientation
-        pageWidth = orientation === "landscape" ? pageWidth : pageHeight;
-        pageHeight = orientation === "landscape" ? pageHeight : pageWidth;
+        const originalPageWidth = pageWidth;
+        const originalPageHeight = pageHeight;
+
+        pageWidth =
+          orientation === "landscape" ? originalPageWidth : originalPageHeight;
+        pageHeight =
+          orientation === "landscape" ? originalPageHeight : originalPageWidth;
 
         const pdf = PDF.create();
         let page = pdf.addPage({
@@ -1606,14 +1611,18 @@ export default class PrintModel {
                   ? { copyright: 8, disclaimer: 9 }
                   : { copyright: 5.5, disclaimer: 6 };
           //  Add potential copyright text
+          const avgCharWidth = this.textFontSize / 2.3;
+          const textWidth = this.copyright.length * avgCharWidth;
+          const xPosition = pageWidth - textWidth - 10;
+          const yPosition = 10;
+
           if (this.copyright.length > 0) {
-            console.log("adding copyright");
             let yPos = options.useTextIconsInMargin
               ? this.textIconsMargin + this.margin / 2
               : this.margin;
             page.drawText(this.copyright, {
-              x: pageWidth - 4 - yPos,
-              y: pageHeight - yOffset.copyright - yPos,
+              x: xPosition,
+              y: yPosition,
               size: this.textFontSize,
               fontNormal,
             });
@@ -1629,8 +1638,8 @@ export default class PrintModel {
               ? this.textIconsMargin + this.margin / 2
               : this.margin;
             page.drawText(date, {
-              x: pageWidth - 4 - yPos,
-              y: pageHeight - 2 - yPos,
+              x: pageWidth - 150,
+              y: 50,
               size: this.textFontSize,
               fontNormal,
             });
@@ -1638,13 +1647,12 @@ export default class PrintModel {
 
           // Add potential disclaimer text
           if (this.disclaimer.length > 0) {
-            console.log("adding disclaimer");
             let yPos = options.useTextIconsInMargin
               ? this.textIconsMargin + this.margin / 2
               : this.margin;
             page.drawText(this.disclaimer, {
-              x: pageWidth - 4 - yPos,
-              y: pageHeight - yOffset.disclaimer - yPos,
+              x: pageWidth - 150,
+              y: 100,
               size: this.textFontSize,
               fontNormal,
             });
