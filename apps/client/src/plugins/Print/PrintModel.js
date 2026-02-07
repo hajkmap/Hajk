@@ -131,6 +131,18 @@ export default class PrintModel {
     return rgb(r, g, b);
   };
 
+  getRightAlignedPositions = (text, fontSize, xmargin, ymargin, paperWidth) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    context.font = `${fontSize}px roboto-normal`;
+    const textWidth = context.measureText(text).width;
+
+    // Calculate the x position for right alignment
+    const x = paperWidth - textWidth - xmargin;
+    const y = ymargin; // y is set based on ymargin
+    return { x, y };
+  };
+
   generateQR = async (url, qrSize) => {
     try {
       return {
@@ -1592,7 +1604,6 @@ export default class PrintModel {
 
           // Add print comment if user supplied one
           if (options.printComment.trim().length > 0) {
-            console.log("adding comment");
             let yPos = options.useTextIconsInMargin ? this.margin + 50 : 60;
             page.drawText(options.printComment, {
               x: pageWidth / 2 - (options.mapTitle.trim().length * 4) / 2,
@@ -1611,18 +1622,21 @@ export default class PrintModel {
                   ? { copyright: 8, disclaimer: 9 }
                   : { copyright: 5.5, disclaimer: 6 };
           //  Add potential copyright text
-          const avgCharWidth = this.textFontSize / 2.3;
-          const textWidth = this.copyright.length * avgCharWidth;
-          const xPosition = pageWidth - textWidth - 10;
-          const yPosition = 10;
 
+          const position = this.getRightAlignedPositions(
+            this.copyright,
+            this.textFontSize,
+            10,
+            10,
+            pageWidth
+          );
           if (this.copyright.length > 0) {
             let yPos = options.useTextIconsInMargin
               ? this.textIconsMargin + this.margin / 2
               : this.margin;
             page.drawText(this.copyright, {
-              x: xPosition,
-              y: yPosition,
+              x: position.x,
+              y: position.y,
               size: this.textFontSize,
               fontNormal,
             });
@@ -1637,9 +1651,16 @@ export default class PrintModel {
             let yPos = options.useTextIconsInMargin
               ? this.textIconsMargin + this.margin / 2
               : this.margin;
+            const position = this.getRightAlignedPositions(
+              this.date,
+              this.textFontSize,
+              20,
+              20,
+              pageWidth
+            );
             page.drawText(date, {
-              x: pageWidth - 150,
-              y: 50,
+              x: position.x,
+              y: position.y,
               size: this.textFontSize,
               fontNormal,
             });
@@ -1650,9 +1671,16 @@ export default class PrintModel {
             let yPos = options.useTextIconsInMargin
               ? this.textIconsMargin + this.margin / 2
               : this.margin;
+            const position = this.getRightAlignedPositions(
+              this.disclaimer,
+              this.textFontSize,
+              10,
+              30,
+              pageWidth
+            );
             page.drawText(this.disclaimer, {
-              x: pageWidth - 150,
-              y: 100,
+              x: position.x,
+              y: position.y,
               size: this.textFontSize,
               fontNormal,
             });
