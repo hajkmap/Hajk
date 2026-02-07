@@ -574,7 +574,7 @@ export default function TableMode(props) {
               canSplitMultiFeature
                 ? "Dela upp multi-objekt till enskilda objekt"
                 : canMergeFeatures
-                  ? "Slå ihop markerade objekt till ett multi-objekt"
+                  ? "Slå ihop markerade objekt till ett multi-objekt. Attribut kopieras från objektet som markerades först."
                   : tableSelectedIds.size === 1
                     ? "Markera ett multi-objekt för att dela upp, eller flera rader för att slå ihop"
                     : tableSelectedIds.size < 2

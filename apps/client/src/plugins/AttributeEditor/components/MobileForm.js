@@ -419,7 +419,7 @@ export default function MobileForm({
                   canSplitMultiFeature
                     ? "Dela upp multi-objekt till enskilda objekt"
                     : canMergeFeatures
-                      ? "Slå ihop markerade objekt till ett multi-objekt"
+                      ? "Slå ihop markerade objekt till ett multi-objekt. Attribut kopieras från objektet som markerades först."
                       : selectedIds.size === 1
                         ? "Markera ett multi-objekt för att dela upp, eller flera objekt för att slå ihop"
                         : selectedIds.size < 2
