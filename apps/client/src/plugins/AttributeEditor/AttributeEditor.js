@@ -6,7 +6,6 @@ import Observer from "react-event-observer";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import AttributeEditorModel, { Action } from "./AttributeEditorModel";
 import { editBus } from "../../buses/editBus";
-import { PLUGIN_COLORS } from "./constants/index";
 import { createOgcApi } from "./api/ogc";
 import { idAliases, getFeatureId } from "./helpers/helpers";
 import FeaturePickerDialog from "./components/FeaturePickerDialog";
@@ -136,7 +135,7 @@ function AttributeEditor(props) {
   const DEFAULT_TITLE = "Attributredigerare";
   const [pluginSettings, setPluginSettings] = React.useState({
     title: DEFAULT_TITLE,
-    color: PLUGIN_COLORS.default,
+    color: muiTheme.palette.primary.main,
   });
 
   const [localObserver] = React.useState(Observer());
@@ -898,7 +897,7 @@ function AttributeEditor(props) {
       setPluginSettings((u) => ({
         ...u,
         title: DEFAULT_TITLE,
-        color: PLUGIN_COLORS.default,
+        color: muiTheme.palette.primary.main,
       }));
 
       model.dispatch({ type: Action.INIT, features: [] });
@@ -926,7 +925,14 @@ function AttributeEditor(props) {
       offSel();
       offClr();
     };
-  }, [model, props.map, setPluginSettings, styleFn, ogc]);
+  }, [
+    model,
+    props.map,
+    setPluginSettings,
+    styleFn,
+    ogc,
+    muiTheme.palette.primary.main,
+  ]);
 
   React.useEffect(() => {
     const map = props.map;

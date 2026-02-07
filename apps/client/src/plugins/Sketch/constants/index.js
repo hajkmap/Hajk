@@ -266,11 +266,6 @@ export const DEFAULT_TEXT_STYLE_SETTINGS = {
   size: 14,
 };
 
-export const PLUGIN_COLORS = {
-  default: "#4a90e2",
-  warning: "#ff5420ff",
-};
-
 export const OGC_SOURCES = [
   {
     type: "NONE",

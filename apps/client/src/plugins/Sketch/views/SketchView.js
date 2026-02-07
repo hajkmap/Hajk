@@ -2,11 +2,11 @@
 import React from "react";
 import { Grid } from "@mui/material";
 // Constants
+import { useTheme } from "@mui/material/styles";
 import {
   PLUGIN_MARGIN,
   MAX_REMOVED_FEATURES,
   DEFAULT_DRAW_STYLE_SETTINGS,
-  PLUGIN_COLORS,
 } from "../constants";
 // Components
 import ActivityMenu from "../components/ActivityMenu";
@@ -34,6 +34,7 @@ import { editBus } from "../../../buses/editBus";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
+  const theme = useTheme();
   const [hasUnsaved, setHasUnsaved] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const unsavedRef = React.useRef({
@@ -447,10 +448,10 @@ const SketchView = (props) => {
       // Continue with switch
       props.setPluginSettings(
         newOgcSourceTitle === "Ingen"
-          ? { title: "Rita", color: PLUGIN_COLORS.default }
+          ? { title: "Rita", color: theme.palette.primary.main }
           : {
               title: `Redigerar ${newOgcSourceTitle}`,
-              color: PLUGIN_COLORS.warning,
+              color: theme.palette.warning.main,
             }
       );
 
@@ -462,7 +463,7 @@ const SketchView = (props) => {
           id: serviceId,
           layerId: selectedService?.layers?.[0]?.id || "",
           title: `Redigerar ${newOgcSourceTitle}`,
-          color: PLUGIN_COLORS.warning,
+          color: theme.palette.warning.main,
         });
 
         // Open AttributeEditor plugin window when a service is selected
@@ -481,6 +482,8 @@ const SketchView = (props) => {
       hasUnsaved,
       props,
       globalObserver,
+      theme.palette.primary.main,
+      theme.palette.warning.main,
     ]
   );
 
@@ -500,14 +503,14 @@ const SketchView = (props) => {
     // Continue with switch
     props.setPluginSettings({
       title: `Redigerar ${targetService.title}`,
-      color: PLUGIN_COLORS.warning,
+      color: theme.palette.warning.main,
     });
 
     editBus.emit("edit:service-selected", {
       source: "sketch",
       id: targetService.id,
       title: targetService.title,
-      color: PLUGIN_COLORS.warning,
+      color: theme.palette.warning.main,
     });
 
     setOgcSource(targetService.title);
@@ -523,7 +526,13 @@ const SketchView = (props) => {
       `Redigeringsbart lager valt. ${drawingsWarningDialog.drawingCount} ritade objekt finns kvar i kartan.`,
       { variant: "info" }
     );
-  }, [drawingsWarningDialog, props, enqueueSnackbar, globalObserver]);
+  }, [
+    drawingsWarningDialog,
+    props,
+    enqueueSnackbar,
+    globalObserver,
+    theme.palette.warning.main,
+  ]);
 
   const handleClearDrawingsAndSwitch = React.useCallback(() => {
     const { targetService } = drawingsWarningDialog;
@@ -543,14 +552,14 @@ const SketchView = (props) => {
     // Continue with switch
     props.setPluginSettings({
       title: `Redigerar ${targetService.title}`,
-      color: PLUGIN_COLORS.warning,
+      color: theme.palette.warning.main,
     });
 
     editBus.emit("edit:service-selected", {
       source: "sketch",
       id: targetService.id,
       title: targetService.title,
-      color: PLUGIN_COLORS.warning,
+      color: theme.palette.warning.main,
     });
 
     setOgcSource(targetService.title);
@@ -571,6 +580,7 @@ const SketchView = (props) => {
     props,
     enqueueSnackbar,
     globalObserver,
+    theme.palette.warning.main,
   ]);
 
   React.useEffect(() => {

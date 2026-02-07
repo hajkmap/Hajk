@@ -2,7 +2,7 @@ import React from "react";
 import TableRowsIcon from "@mui/icons-material/TableRows";
 import DynamicFormIcon from "@mui/icons-material/DynamicForm";
 import { editBus } from "../../../buses/editBus";
-import { PLUGIN_COLORS } from "../constants/index";
+import { useTheme } from "@mui/material/styles";
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
 import ConfirmServiceSwitchWithDrawings from "../../../components/ConfirmServiceSwitchWithDrawings";
 
@@ -35,6 +35,7 @@ export default function Toolbar({
   map,
   enqueueSnackbar,
 }) {
+  const theme = useTheme();
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
   const pendingTargetRef = React.useRef(null);
@@ -113,10 +114,10 @@ export default function Toolbar({
     (def, label) => {
       setPluginSettings(
         label === "Ingen"
-          ? { title: "Attributredigerare", color: PLUGIN_COLORS.default }
+          ? { title: "Attributredigerare", color: theme.palette.primary.main }
           : {
               title: `Attributredigerare - Redigerar ${label}`,
-              color: PLUGIN_COLORS.warning,
+              color: theme.palette.warning.main,
             }
       );
 
@@ -128,12 +129,12 @@ export default function Toolbar({
           source: "toolbar",
           id: def.id,
           title: `Redigerar ${label}`,
-          color: PLUGIN_COLORS.warning,
+          color: theme.palette.warning.main,
         });
         setServiceId(def.id);
       }
     },
-    [setPluginSettings]
+    [setPluginSettings, theme.palette.primary.main, theme.palette.warning.main]
   );
 
   async function confirmSave() {

@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useTheme } from "@mui/material/styles";
 import Observer from "react-event-observer";
 import EditIcon from "@mui/icons-material/Edit";
 
@@ -20,11 +21,7 @@ import GpxModel from "../../models/GpxModel";
 import AngleSnapping from "../Measurer/AngleSnapping";
 
 // Constants
-import {
-  STORAGE_KEY,
-  DEFAULT_MEASUREMENT_SETTINGS,
-  PLUGIN_COLORS,
-} from "./constants";
+import { STORAGE_KEY, DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 
 // Hooks
 import useCookieStatus from "../../hooks/useCookieStatus";
@@ -40,6 +37,7 @@ const getMeasurementSettings = () => {
 };
 
 const Sketch = (props) => {
+  const theme = useTheme();
   const lastEditFeatureRef = React.useRef(null);
   // We're gonna need to keep track of the current chosen activity. ("ADD", "REMOVE", etc).
   const [activityId, setActivityId] = React.useState("ADD");
@@ -281,7 +279,7 @@ const Sketch = (props) => {
       setPluginSettings((ps) => ({
         ...ps,
         title: "Rita",
-        color: PLUGIN_COLORS.default,
+        color: theme.palette.primary.main,
       }));
     });
 
@@ -289,7 +287,7 @@ const Sketch = (props) => {
       offSel();
       offClr();
     };
-  }, []);
+  }, [theme.palette.primary.main]);
 
   // Use custom hooks for AttributeEditor integration and geometry validation
   useAttributeEditorIntegration({
