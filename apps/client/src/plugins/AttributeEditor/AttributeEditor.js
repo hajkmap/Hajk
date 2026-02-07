@@ -1472,18 +1472,25 @@ function AttributeEditor(props) {
     (selectedIds) => {
       if (selectedIds.length === 0) return;
 
+      // Merge with existing selection instead of replacing
+      const current = selectedIdsRef.current || new Set();
+      const currentLogical = new Set(Array.from(current).map(String));
+      selectedIds.forEach((id) => currentLogical.add(String(id)));
+
+      const mergedIds = Array.from(currentLogical);
+
       // Update selection
-      selectedIdsRef.current = buildVizSet(selectedIds);
+      selectedIdsRef.current = buildVizSet(mergedIds);
       vectorLayerRef.current?.changed?.();
 
       // Emit event
       editBus.emit("attrib:select-ids", {
-        ids: selectedIds,
+        ids: mergedIds,
         source: "map",
         mode: "replace",
       });
 
-      // Focus on first selected
+      // Focus on first of the newly selected
       if (selectedIds.length > 0) {
         editBus.emit("attrib:focus-id", {
           id: selectedIds[0],
