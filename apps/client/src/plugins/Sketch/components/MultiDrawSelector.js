@@ -53,7 +53,7 @@ const MultiDrawSelector = (props) => {
   return (
     <Accordion
       expanded={multiDrawEnabled}
-      onChange={(e, expanded) => setMultiDrawEnabled(expanded)}
+      onChange={(e, expanded) => !uiDisabled && setMultiDrawEnabled(expanded)}
       style={{ marginTop: 8 }}
     >
       <HajkToolTip

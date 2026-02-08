@@ -61,6 +61,8 @@ const Sketch = (props) => {
   );
   // Allowed geometry types when in AttributeEditor-mode
   const [allowedGeometryTypes, setAllowedGeometryTypes] = React.useState(null);
+  // Whether the current edit service allows multi-geometries
+  const [allowMultiGeom, setAllowMultiGeom] = React.useState(false);
 
   // A toggle-button that allows the user to toggle between turn off & choose-drawn-object to buffer in the new buffer sketch accordion.
   const [toggleBufferBtn, setToggleBufferBtn] = React.useState({
@@ -233,12 +235,14 @@ const Sketch = (props) => {
       }
 
       setAllowedGeometryTypes(allowed.length > 0 ? allowed : null);
+      setAllowMultiGeom(schema.allowMultiGeom === true);
     });
 
     const offClr = editBus.on("edit:service-cleared", (ev) => {
       const { source } = ev.detail || {};
       if (source === "sketch") return;
       setAllowedGeometryTypes(null);
+      setAllowMultiGeom(false);
       attributeEditorActiveRef.current = false;
     });
 
@@ -591,6 +595,7 @@ const Sketch = (props) => {
         setPluginSettings={setPluginSettings}
         map={props.map}
         allowedGeometryTypes={allowedGeometryTypes}
+        allowMultiGeom={allowMultiGeom}
         fixedLengthEnabled={fixedLengthEnabled}
         setFixedLengthEnabled={setFixedLengthEnabled}
         fixedLength={fixedLength}

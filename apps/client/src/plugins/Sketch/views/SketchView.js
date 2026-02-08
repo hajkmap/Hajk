@@ -633,6 +633,7 @@ const SketchView = (props) => {
             setToggleBufferBtn={setToggleBufferBtn}
             uiDisabled={uiDisabled}
             allowedGeometryTypes={allowedGeometryTypes}
+            allowMultiGeom={props.allowMultiGeom}
             ogcSource={ogcSource}
             fixedLengthEnabled={props.fixedLengthEnabled}
             setFixedLengthEnabled={props.setFixedLengthEnabled}

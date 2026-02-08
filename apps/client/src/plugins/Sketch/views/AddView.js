@@ -20,6 +20,7 @@ const AddView = (props) => {
     uiDisabled = false,
     allowedGeometryTypes,
     ogcSource,
+    allowMultiGeom,
     fixedLengthEnabled,
     setFixedLengthEnabled,
     fixedLength,
@@ -153,7 +154,7 @@ const AddView = (props) => {
             setMultiDrawEnabled={setMultiDrawEnabled}
             multiDrawPartCount={multiDrawPartCount}
             onFinishMultiDraw={handleFinishMultiDraw}
-            uiDisabled={false}
+            uiDisabled={!allowMultiGeom}
           />
         </Grid>
       )}
