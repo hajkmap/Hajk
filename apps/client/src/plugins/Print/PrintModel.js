@@ -125,6 +125,7 @@ export default class PrintModel {
   pdfCreationCancelled = null;
 
   hexToRgb = (hex) => {
+    console.log(hex);
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
@@ -134,12 +135,28 @@ export default class PrintModel {
   getRightAlignedPositions = (text, fontSize, xmargin, ymargin, paperWidth) => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
-    context.font = `${fontSize}px roboto-normal`;
+    context.font = `${fontSize}px Helvetica`;
     const textWidth = context.measureText(text).width;
 
-    // Calculate the x position for right alignment
     const x = paperWidth - textWidth - xmargin;
-    const y = ymargin; // y is set based on ymargin
+    const y = ymargin;
+    return { x, y };
+  };
+
+  getCenterAlignedPositions = (
+    text,
+    fontSize,
+    ymargin,
+    paperWidth,
+    paperHeight
+  ) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    context.font = `${fontSize}px Helvetica`;
+    const textWidth = context.measureText(text).width;
+
+    const x = (paperWidth - textWidth) / 2;
+    const y = paperHeight - ymargin;
     return { x, y };
   };
 
@@ -147,8 +164,8 @@ export default class PrintModel {
     try {
       return {
         data: await QRCode.toDataURL(url),
-        width: qrSize,
-        height: qrSize,
+        width: qrSize * 4,
+        height: qrSize * 4,
       };
     } catch (err) {
       console.warn(err);
@@ -463,7 +480,6 @@ export default class PrintModel {
 
   //Formats the text for the scale bar
   getLengthText = (scaleBarLengthMeters) => {
-    console.log("scalebarlengthmeters: " + scaleBarLengthMeters);
     let units = "m";
     if (scaleBarLengthMeters > 1000) {
       scaleBarLengthMeters /= 1000;
@@ -1253,9 +1269,11 @@ export default class PrintModel {
       const orientation = options.orientation;
       const resolution = options.resolution;
       const scale = options.scale / 1000;
+      console.log(options);
 
       // Convert hex color provided to rgb since libPDF uses that instead, should probably be handled earlier.
-      options.mapTextColor = this.hexToRgb(options.mapTextColor);
+      this.textColor = this.hexToRgb(options.mapTextColor);
+      console.log(this.textColor);
 
       // Our dimensions are for landscape orientation by default. Flip the values if portrait orientation requested.
       const dim =
@@ -1382,6 +1400,7 @@ export default class PrintModel {
           (result) => (fontBoldBytes = result)
         );
         const fontNormal = pdf.embedFont(fontNormalBytes);
+        // console.log(fontNormal);
         const fontBold = pdf.embedFont(fontBoldBytes);
 
         // Canvas to dataUrl to ArrayBuffer, since libPDF embedImage expects a Uint8Array
@@ -1491,7 +1510,6 @@ export default class PrintModel {
 
           // Check if logo should be added
           if (options.includeLogo && this.logoUrl.trim().length >= 5) {
-            console.log(this.logoMaxWidth);
             try {
               const {
                 data: logoData,
@@ -1576,7 +1594,7 @@ export default class PrintModel {
           if (options.includeScaleBar) {
             this.addScaleBar(
               page,
-              options.mapTextColor,
+              rgb(0, 0, 0),
               options.scale,
               options.resolution,
               options.scaleBarPlacement,
@@ -1594,35 +1612,45 @@ export default class PrintModel {
             let verticalMargin = options.useTextIconsInMargin
               ? this.margin + 35
               : 50;
+            const position = this.getCenterAlignedPositions(
+              options.mapTitle,
+              28,
+              verticalMargin,
+              pageWidth,
+              pageHeight
+            );
+            console.log(this.textColor);
             page.drawText(options.mapTitle, {
-              x: pageWidth / 2 - (options.mapTitle.trim().length * 13) / 2,
-              y: pageHeight - verticalMargin,
+              x: position.x,
+              y: position.y,
               size: 28,
               fontNormal,
+              color: this.textColor,
             });
           }
 
           // Add print comment if user supplied one
           if (options.printComment.trim().length > 0) {
-            let yPos = options.useTextIconsInMargin ? this.margin + 50 : 60;
+            let verticalMargin = options.useTextIconsInMargin
+              ? this.margin + 50
+              : 60;
+            const position = this.getCenterAlignedPositions(
+              options.printComment,
+              11,
+              verticalMargin,
+              pageWidth,
+              pageHeight
+            );
             page.drawText(options.printComment, {
-              x: pageWidth / 2 - (options.mapTitle.trim().length * 4) / 2,
-              y: pageHeight - yPos,
+              x: position.x,
+              y: position.y - 5,
               size: 11,
               fontNormal,
+              color: this.textColor,
             });
           }
-          // Calculate the y-offset for the copyright and disclaimer text based on font size.
-          const yOffset =
-            this.textFontSize === 8
-              ? { copyright: 5.5, disclaimer: 6 }
-              : this.textFontSize === 11
-                ? { copyright: 7, disclaimer: 7.5 }
-                : this.textFontSize === 13
-                  ? { copyright: 8, disclaimer: 9 }
-                  : { copyright: 5.5, disclaimer: 6 };
-          //  Add potential copyright text
 
+          //  Add potential copyright text
           const position = this.getRightAlignedPositions(
             this.copyright,
             this.textFontSize,
@@ -1638,6 +1666,7 @@ export default class PrintModel {
               x: position.x,
               y: position.y,
               size: this.textFontSize,
+              color: this.textColor,
               fontNormal,
             });
           }
@@ -1662,15 +1691,13 @@ export default class PrintModel {
               x: position.x,
               y: position.y,
               size: this.textFontSize,
+              color: this.textColor,
               fontNormal,
             });
           }
 
           // Add potential disclaimer text
           if (this.disclaimer.length > 0) {
-            let yPos = options.useTextIconsInMargin
-              ? this.textIconsMargin + this.margin / 2
-              : this.margin;
             const position = this.getRightAlignedPositions(
               this.disclaimer,
               this.textFontSize,
@@ -1679,9 +1706,10 @@ export default class PrintModel {
               pageWidth
             );
             page.drawText(this.disclaimer, {
-              x: position.x,
+              x: position.x - 1,
               y: position.y,
               size: this.textFontSize,
+              color: this.textColor,
               fontNormal,
             });
           }
