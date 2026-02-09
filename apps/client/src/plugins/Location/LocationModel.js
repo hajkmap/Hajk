@@ -1,12 +1,12 @@
-import Geolocation from "ol/Geolocation.js";
-import Feature from "ol/Feature.js";
-import Point from "ol/geom/Point.js";
-import { Vector as VectorLayer } from "ol/layer.js";
-import { Vector as VectorSource } from "ol/source.js";
+import Geolocation from "ol/Geolocation";
+import Feature from "ol/Feature";
+import Point from "ol/geom/Point";
+import { Vector as VectorLayer } from "ol/layer";
+import { Vector as VectorSource } from "ol/source";
 import { easeOut } from "ol/easing";
 import { getVectorContext } from "ol/render";
 import { unByKey } from "ol/Observable";
-import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style.js";
+import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style";
 
 class LocationModel {
   constructor(props) {

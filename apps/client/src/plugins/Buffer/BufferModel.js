@@ -1,8 +1,8 @@
-import { Circle, Stroke, Fill, Style } from "ol/style.js";
-import { Vector as VectorSource } from "ol/source.js";
-import { Vector as VectorLayer } from "ol/layer.js";
+import { Circle, Stroke, Fill, Style } from "ol/style";
+import { Vector as VectorSource } from "ol/source";
+import { Vector as VectorLayer } from "ol/layer";
 
-import GeoJSON from "ol/format/GeoJSON.js";
+import GeoJSON from "ol/format/GeoJSON";
 
 import HajkTransformer from "../../utils/HajkTransformer";
 import { hfetch } from "../../utils/FetchWrapper";
