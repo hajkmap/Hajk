@@ -140,7 +140,7 @@ export default class PrintModel {
   getRightAlignedPositions = (text, fontSize, xmargin, ymargin, paperWidth) => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
-    context.font = `${fontSize}px Roboto`;
+    context.font = `${fontSize}px roboto-normal`;
     const textWidth = context.measureText(text).width;
 
     const x = paperWidth - textWidth - xmargin;
@@ -157,7 +157,7 @@ export default class PrintModel {
   ) => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
-    context.font = `${fontSize}px Roboto`;
+    context.font = `${fontSize}px roboto-normal`;
     const textWidth = context.measureText(text).width;
 
     const x = (paperWidth - textWidth) / 2;
@@ -1218,30 +1218,6 @@ export default class PrintModel {
     this.addedLayers = new Set();
   };
 
-  // Adds fonts needed to properly render necessary characters. (The default jsPDF fonts does not support all characters).
-  // Also enables a font (in the future we could provide a possibility for the user to select font).
-  setupFonts = (pdf, font) => {
-    // First we'll add the available fonts
-    // Normal
-    pdf.addFileToVFS("roboto-normal.ttf", ROBOTO_NORMAL);
-    pdf.addFont("roboto-normal.ttf", "roboto-normal", "normal");
-    // Bold
-    pdf.addFileToVFS("roboto-bold.ttf", ROBOTO_BOLD);
-    pdf.addFont("roboto-bold.ttf", "roboto-bold", "bold");
-    // Then we'll set the font that we want to use.
-    switch (font) {
-      case "normal":
-        pdf.setFont("roboto-normal", "normal");
-        break;
-      case "bold":
-        pdf.setFont("roboto-bold", "bold");
-        break;
-      default:
-        pdf.setFont("roboto-normal", "normal");
-        break;
-    }
-  };
-
   // Decode the base64 font to Uint8Array
   async loadFont(font) {
     const binaryString = atob(font);
@@ -1405,7 +1381,6 @@ export default class PrintModel {
           (result) => (fontBoldBytes = result)
         );
         const fontNormal = pdf.embedFont(fontNormalBytes);
-        // console.log(fontNormal);
         const fontBold = pdf.embedFont(fontBoldBytes);
 
         // Canvas to dataUrl to ArrayBuffer, since libPDF embedImage expects a Uint8Array
@@ -1629,7 +1604,7 @@ export default class PrintModel {
               x: position.x,
               y: position.y,
               size: 28,
-              fontNormal,
+              font: fontNormal,
               color: this.textColor,
             });
           }
@@ -1650,7 +1625,7 @@ export default class PrintModel {
               x: position.x,
               y: position.y - 5,
               size: 11,
-              fontNormal,
+              font: fontNormal,
               color: this.textColor,
             });
           }
@@ -1672,7 +1647,7 @@ export default class PrintModel {
               y: position.y,
               size: this.textFontSize,
               color: this.textColor,
-              fontNormal,
+              font: fontNormal,
             });
           }
 
@@ -1697,7 +1672,7 @@ export default class PrintModel {
               y: position.y,
               size: this.textFontSize,
               color: this.textColor,
-              fontNormal,
+              font: fontNormal,
             });
           }
 
@@ -1715,7 +1690,7 @@ export default class PrintModel {
               y: position.y,
               size: this.textFontSize,
               color: this.textColor,
-              fontNormal,
+              font: fontNormal,
             });
           }
         } catch (error) {
