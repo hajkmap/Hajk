@@ -125,17 +125,22 @@ export default class PrintModel {
   pdfCreationCancelled = null;
 
   hexToRgb = (hex) => {
-    console.log(hex);
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
+    hex = hex.replace(/^#/, "");
+    let r = parseInt(hex.slice(0, 2), 16);
+    let g = parseInt(hex.slice(2, 4), 16);
+    let b = parseInt(hex.slice(4, 6), 16);
+
+    r = r > 127.5 ? 1 : 0;
+    g = g > 127.5 ? 1 : 0;
+    b = b > 127.5 ? 1 : 0;
+
     return rgb(r, g, b);
   };
 
   getRightAlignedPositions = (text, fontSize, xmargin, ymargin, paperWidth) => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
-    context.font = `${fontSize}px Helvetica`;
+    context.font = `${fontSize}px Roboto`;
     const textWidth = context.measureText(text).width;
 
     const x = paperWidth - textWidth - xmargin;
@@ -152,7 +157,7 @@ export default class PrintModel {
   ) => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
-    context.font = `${fontSize}px Helvetica`;
+    context.font = `${fontSize}px Roboto`;
     const textWidth = context.measureText(text).width;
 
     const x = (paperWidth - textWidth) / 2;
@@ -1706,7 +1711,7 @@ export default class PrintModel {
               pageWidth
             );
             page.drawText(this.disclaimer, {
-              x: position.x - 1,
+              x: position.x,
               y: position.y,
               size: this.textFontSize,
               color: this.textColor,
