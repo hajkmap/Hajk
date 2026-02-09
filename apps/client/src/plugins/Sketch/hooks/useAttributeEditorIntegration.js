@@ -1037,83 +1037,10 @@ const useAttributeEditorIntegration = ({
     // ============================================================
     // SECTION: Manual coordinate snapping helper
     // ============================================================
-    // Snaps a coordinate to the nearest vertex of visible vector features
+    // Snaps a coordinate to the nearest snap target (vertex, edge, midpoint,
+    // or intersection) by delegating to the central SnapHelper.
     const snapCoordinate = (coordinate) => {
-      const snapHelper = map.snapHelper;
-      if (!snapHelper?.snapEnabled) {
-        return coordinate;
-      }
-
-      const pixelTolerance = snapHelper.pixelTolerance || 10;
-      const pixel = map.getPixelFromCoordinate(coordinate);
-
-      let closestVertex = null;
-      let closestDistanceSq = Infinity;
-
-      // Get all visible vector layers
-      const layers = map
-        .getLayers()
-        .getArray()
-        .filter(
-          (l) =>
-            l.getVisible() && typeof l.getSource?.()?.getFeatures === "function"
-        );
-
-      // Search for vertices near the click
-      for (const layer of layers) {
-        const source = layer.getSource();
-        const features = source.getFeatures();
-
-        for (const feature of features) {
-          const geometry = feature.getGeometry();
-          if (!geometry) continue;
-
-          // Get all coordinates from the geometry
-          let coords = [];
-          const type = geometry.getType();
-
-          if (type === "Point") {
-            coords = [geometry.getCoordinates()];
-          } else if (type === "LineString") {
-            coords = geometry.getCoordinates();
-          } else if (type === "Polygon") {
-            geometry.getCoordinates().forEach((ring) => {
-              coords = coords.concat(ring);
-            });
-          } else if (type === "MultiPolygon") {
-            geometry.getCoordinates().forEach((polygon) => {
-              polygon.forEach((ring) => {
-                coords = coords.concat(ring);
-              });
-            });
-          } else if (type === "MultiLineString") {
-            geometry.getCoordinates().forEach((line) => {
-              coords = coords.concat(line);
-            });
-          }
-
-          // Check each vertex
-          for (const vertexCoord of coords) {
-            const vertexPixel = map.getPixelFromCoordinate(vertexCoord);
-            const dx = vertexPixel[0] - pixel[0];
-            const dy = vertexPixel[1] - pixel[1];
-            const distanceSq = dx * dx + dy * dy;
-
-            if (distanceSq < closestDistanceSq) {
-              closestDistanceSq = distanceSq;
-              closestVertex = vertexCoord;
-            }
-          }
-        }
-      }
-
-      // Check if closest vertex is within tolerance
-      const toleranceSq = pixelTolerance * pixelTolerance;
-      if (closestVertex && closestDistanceSq <= toleranceSq) {
-        return closestVertex;
-      }
-
-      return coordinate;
+      return map.snapHelper?.snapCoordinate(coordinate) ?? coordinate;
     };
 
     // Listen for snap-coordinate requests from DrawModel (for fixed length mode)

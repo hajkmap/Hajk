@@ -1,5 +1,8 @@
 import Snap from "ol/interaction/Snap";
 import Overlay from "ol/Overlay";
+import Feature from "ol/Feature";
+import Point from "ol/geom/Point";
+import VectorSource from "ol/source/Vector";
 import LocalStorageHelper from "../utils/LocalStorageHelper";
 
 const DISABLE_KEY = "space";
@@ -30,6 +33,10 @@ export default class SnapHelper {
     this.snappedCoordinate = null;
     this.snapOverlay = null;
     this.isTracking = false;
+
+    // Advanced snap state (synthetic snap targets for midpoints/intersections)
+    this.advancedSnapSource = null;
+    this.advancedSnapHandler = null;
 
     // When layer visibility is changed, check if there was a
     // vector source. If so, refresh the snap interactions to
@@ -130,54 +137,105 @@ export default class SnapHelper {
     let closestPoint = null;
     let closestDistanceSq = Infinity;
 
+    const nearbyEdges = [];
+
+    // Build a search extent around the cursor to use spatial index
+    const resolution = this.map.getView().getResolution();
+    const searchRadius = this.pixelTolerance * resolution * 3;
+    const searchExtent = [
+      coordinate[0] - searchRadius,
+      coordinate[1] - searchRadius,
+      coordinate[0] + searchRadius,
+      coordinate[1] + searchRadius,
+    ];
+
     // Get all visible vector layers (including those nested in LayerGroups)
     const layers = this.map
       .getAllLayers()
       .filter((l) => l.getVisible() && this.#isVectorSource(l.getSource?.()));
 
+    // Collect features from all visible layers using spatial index
+    const candidateFeatures = [];
     for (const layer of layers) {
       const source = layer.getSource();
-      const features = source.getFeatures();
+      source.forEachFeatureInExtent(searchExtent, (feature) => {
+        candidateFeatures.push(feature);
+      });
+    }
 
-      for (const feature of features) {
-        // Skip excluded feature (e.g., the feature being drawn)
-        if (excludeFeature && feature === excludeFeature) continue;
+    // Process collected features (outside loop to satisfy no-loop-func)
+    for (const feature of candidateFeatures) {
+      if (excludeFeature && feature === excludeFeature) continue;
 
-        const geometry = feature.getGeometry();
-        if (!geometry) continue;
+      const geometry = feature.getGeometry();
+      if (!geometry) continue;
 
-        // Check vertices first (they have priority)
-        const vertices = this.#getGeometryVertices(geometry);
-        for (const vertexCoord of vertices) {
-          const vertexPixel = this.map.getPixelFromCoordinate(vertexCoord);
-          const dx = vertexPixel[0] - pixel[0];
-          const dy = vertexPixel[1] - pixel[1];
-          const distanceSq = dx * dx + dy * dy;
+      // Check vertices first (they have priority)
+      const vertices = this.#getGeometryVertices(geometry);
+      for (const vertexCoord of vertices) {
+        const vertexPixel = this.map.getPixelFromCoordinate(vertexCoord);
+        const dx = vertexPixel[0] - pixel[0];
+        const dy = vertexPixel[1] - pixel[1];
+        const distanceSq = dx * dx + dy * dy;
 
-          if (distanceSq < closestDistanceSq) {
-            closestDistanceSq = distanceSq;
-            closestPoint = vertexCoord;
-          }
+        if (distanceSq < closestDistanceSq) {
+          closestDistanceSq = distanceSq;
+          closestPoint = vertexCoord;
+        }
+      }
+
+      // Also check edges (lines between vertices) and midpoints
+      const edges = this.#getGeometryEdges(geometry);
+      for (const [segStart, segEnd] of edges) {
+        // Check closest point on edge
+        const edgePoint = this.#closestPointOnSegment(
+          coordinate,
+          segStart,
+          segEnd
+        );
+        const edgePixel = this.map.getPixelFromCoordinate(edgePoint);
+        const edx = edgePixel[0] - pixel[0];
+        const edy = edgePixel[1] - pixel[1];
+        const edgeDistanceSq = edx * edx + edy * edy;
+
+        if (edgeDistanceSq < closestDistanceSq) {
+          closestDistanceSq = edgeDistanceSq;
+          closestPoint = edgePoint;
         }
 
-        // Also check edges (lines between vertices)
-        const edges = this.#getGeometryEdges(geometry);
-        for (const [segStart, segEnd] of edges) {
-          const edgePoint = this.#closestPointOnSegment(
-            coordinate,
-            segStart,
-            segEnd
-          );
-          const edgePixel = this.map.getPixelFromCoordinate(edgePoint);
-          const dx = edgePixel[0] - pixel[0];
-          const dy = edgePixel[1] - pixel[1];
-          const distanceSq = dx * dx + dy * dy;
+        // Check midpoint of edge
+        const midpoint = [
+          (segStart[0] + segEnd[0]) / 2,
+          (segStart[1] + segEnd[1]) / 2,
+        ];
+        const midPixel = this.map.getPixelFromCoordinate(midpoint);
+        const mdx = midPixel[0] - pixel[0];
+        const mdy = midPixel[1] - pixel[1];
+        const midDistanceSq = mdx * mdx + mdy * mdy;
 
-          if (distanceSq < closestDistanceSq) {
-            closestDistanceSq = distanceSq;
-            closestPoint = edgePoint;
-          }
+        if (midDistanceSq < closestDistanceSq) {
+          closestDistanceSq = midDistanceSq;
+          closestPoint = midpoint;
         }
+      }
+
+      // Collect edges for intersection calculation
+      if (edges.length > 0) {
+        nearbyEdges.push(...edges);
+      }
+    }
+
+    // Check intersection points between nearby edges from different segments
+    const intersections = this.#findEdgeIntersections(nearbyEdges);
+    for (const intPoint of intersections) {
+      const intPixel = this.map.getPixelFromCoordinate(intPoint);
+      const idx = intPixel[0] - pixel[0];
+      const idy = intPixel[1] - pixel[1];
+      const intDistanceSq = idx * idx + idy * idy;
+
+      if (intDistanceSq < closestDistanceSq) {
+        closestDistanceSq = intDistanceSq;
+        closestPoint = intPoint;
       }
     }
 
@@ -396,6 +454,59 @@ export default class SnapHelper {
     return [segStart[0] + t * dx, segStart[1] + t * dy];
   };
   /**
+   * @summary Finds all intersection points between a set of line segments.
+   * @param {Array<[number[], number[]]>} edges - Array of [start, end] segments
+   * @returns {number[][]} Array of intersection coordinates
+   */
+  #findEdgeIntersections = (edges) => {
+    const intersections = [];
+    for (let i = 0; i < edges.length; i++) {
+      for (let j = i + 1; j < edges.length; j++) {
+        const point = this.#segmentIntersection(
+          edges[i][0],
+          edges[i][1],
+          edges[j][0],
+          edges[j][1]
+        );
+        if (point) {
+          intersections.push(point);
+        }
+      }
+    }
+    return intersections;
+  };
+
+  /**
+   * @summary Computes the intersection point of two line segments, if any.
+   * @param {number[]} p1 - Start of segment 1
+   * @param {number[]} p2 - End of segment 1
+   * @param {number[]} p3 - Start of segment 2
+   * @param {number[]} p4 - End of segment 2
+   * @returns {number[]|null} The intersection point [x, y] or null
+   */
+  #segmentIntersection = (p1, p2, p3, p4) => {
+    const d1x = p2[0] - p1[0];
+    const d1y = p2[1] - p1[1];
+    const d2x = p4[0] - p3[0];
+    const d2y = p4[1] - p3[1];
+
+    const denom = d1x * d2y - d1y * d2x;
+
+    // Parallel or coincident segments
+    if (Math.abs(denom) < 1e-10) return null;
+
+    const t = ((p3[0] - p1[0]) * d2y - (p3[1] - p1[1]) * d2x) / denom;
+    const u = ((p3[0] - p1[0]) * d1y - (p3[1] - p1[1]) * d1x) / denom;
+
+    // Check that intersection lies within both segments
+    if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+      return [p1[0] + t * d1x, p1[1] + t * d1y];
+    }
+
+    return null;
+  };
+
+  /**
    * @summary Helper used to determine if a given source is ol.VectorSource.
    * @description Ideally, we would look into the prototype, to see if
    * constructor.name is "VectorSource". But, because Webpack uglifies the
@@ -482,9 +593,15 @@ export default class SnapHelper {
       // And save each interaction into a local stack (so we can remove them later)
       this.snapInteractions.push(snap);
     });
+
+    // Also enable advanced snapping (midpoints and intersections)
+    this.#startAdvancedSnapping();
   };
 
   #removeAllSnapInteractions = () => {
+    // Stop advanced snapping first
+    this.#stopAdvancedSnapping();
+
     if (this.snapInteractions.length === 0) return;
 
     // Loop through the local stack of snap interactions
@@ -495,5 +612,112 @@ export default class SnapHelper {
 
     // Important: purge the local stack!
     this.snapInteractions = [];
+  };
+
+  /**
+   * @summary Creates a synthetic VectorSource with Point features at midpoints
+   * and intersection points, updated on every pointermove. This makes these
+   * snap targets available to OL's native Snap interaction in ALL draw modes.
+   */
+  #startAdvancedSnapping = () => {
+    if (this.advancedSnapSource) return;
+
+    this.advancedSnapSource = new VectorSource();
+
+    // Add a Snap interaction for the synthetic source
+    const snap = new Snap({
+      source: this.advancedSnapSource,
+      pixelTolerance: this.pixelTolerance,
+    });
+    this.map.addInteraction(snap);
+    this.snapInteractions.push(snap);
+
+    // Use viewport-level pointermove so we get the RAW cursor coordinate
+    // (before OL's Snap interaction modifies event.coordinate)
+    this.advancedSnapHandler = (domEvent) => {
+      if (!this.snapEnabled) return;
+
+      const pixel = this.map.getEventPixel(domEvent);
+      const coordinate = this.map.getCoordinateFromPixel(pixel);
+      if (!coordinate) return;
+
+      // Build a small search extent around the cursor (in map units)
+      // to avoid iterating ALL features. Only features whose bounding
+      // box intersects this extent are checked.
+      const resolution = this.map.getView().getResolution();
+      const searchRadius = this.pixelTolerance * resolution * 3;
+      const searchExtent = [
+        coordinate[0] - searchRadius,
+        coordinate[1] - searchRadius,
+        coordinate[0] + searchRadius,
+        coordinate[1] + searchRadius,
+      ];
+
+      const nearbyEdges = [];
+      const newFeatures = [];
+
+      const layers = this.map
+        .getAllLayers()
+        .filter((l) => l.getVisible() && this.#isVectorSource(l.getSource?.()));
+
+      for (const layer of layers) {
+        const source = layer.getSource();
+
+        // Use spatial index to only get features near the cursor
+        source.forEachFeatureInExtent(searchExtent, (feature) => {
+          const geometry = feature.getGeometry();
+          if (!geometry) return;
+
+          const edges = this.#getGeometryEdges(geometry);
+          if (edges.length === 0) return;
+
+          nearbyEdges.push(...edges);
+
+          // Add midpoints for this feature's edges
+          for (const [segStart, segEnd] of edges) {
+            newFeatures.push(
+              new Feature(
+                new Point([
+                  (segStart[0] + segEnd[0]) / 2,
+                  (segStart[1] + segEnd[1]) / 2,
+                ])
+              )
+            );
+          }
+        });
+      }
+
+      // Add intersection points between nearby edges
+      const intersections = this.#findEdgeIntersections(nearbyEdges);
+      for (const intPoint of intersections) {
+        newFeatures.push(new Feature(new Point(intPoint)));
+      }
+
+      // Update the synthetic source
+      this.advancedSnapSource.clear(true);
+      if (newFeatures.length > 0) {
+        this.advancedSnapSource.addFeatures(newFeatures);
+      }
+    };
+
+    this.map
+      .getViewport()
+      .addEventListener("pointermove", this.advancedSnapHandler);
+  };
+
+  /**
+   * @summary Removes the advanced snapping handler and clears the synthetic source.
+   */
+  #stopAdvancedSnapping = () => {
+    if (this.advancedSnapHandler) {
+      this.map
+        .getViewport()
+        .removeEventListener("pointermove", this.advancedSnapHandler);
+      this.advancedSnapHandler = null;
+    }
+    if (this.advancedSnapSource) {
+      this.advancedSnapSource.clear();
+      this.advancedSnapSource = null;
+    }
   };
 }
