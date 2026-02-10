@@ -13,17 +13,9 @@ import HelpIcon from "@mui/icons-material/Help";
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 import DrawModel from "../../models/DrawModel";
 
-interface PropertyCheckerProps {
-  app: any;
-  map: any;
-  options: {
-    visibleAtStart?: boolean;
-    title?: string;
-    description?: string;
-    [key: string]: any;
-  };
-  [key: string]: any;
-}
+// Some types
+import type { PropertyCheckerProps } from "./types";
+import type { DrawModelInterface } from "../../types/hajk";
 
 /**
  * @summary Main component for the PropertyChecker plugin.
@@ -54,7 +46,10 @@ const PropertyChecker: React.FC<PropertyCheckerProps> = (props) => {
         map: props.map,
         measurementSettings: DEFAULT_MEASUREMENT_SETTINGS,
         observer: localObserver,
-      })
+        // Until we convert DrawModel to TS, this "as unknown as DrawModelInterface"
+        // on the next line ensures that we don't get a warning about incompatible
+        // type casting
+      }) as unknown as DrawModelInterface
   );
 
   // Initiate the model

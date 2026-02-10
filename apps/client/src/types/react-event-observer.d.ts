@@ -1,18 +1,24 @@
 declare module "react-event-observer" {
   type EventName = string;
 
-  interface EventListener {
+  export interface EventListener {
     on(type: "error" | "succeed", handler: (error?: any) => void): void;
     off(): void;
     unsubscribe(): void;
   }
 
-  interface EventObserver {
+  export interface EventObserver {
     on(event: EventName, callback: (data?: any) => void): EventListener;
     subscribe(event: EventName, callback: (data?: any) => void): EventListener;
 
-    off(event: EventName, listener?: EventListener): void;
-    unsubscribe(event: EventName, listener?: EventListener): void;
+    off(
+      event: EventName,
+      listener?: EventListener | ((...args: any[]) => void)
+    ): void;
+    unsubscribe(
+      event: EventName,
+      listener?: EventListener | ((...args: any[]) => void)
+    ): void;
 
     publish(event: EventName, data?: any): void;
     trigger(event: EventName, data?: any): void;

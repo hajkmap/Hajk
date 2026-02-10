@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
-import { useSnackbar } from "notistack";
+import { type SnackbarKey, useSnackbar } from "notistack";
 
 // import useCookieStatus from "hooks/useCookieStatus";
 
@@ -23,11 +23,21 @@ import InfoDialog from "./views/InfoDialog";
 import PropertyItem from "./views/PropertyItem";
 import QuickLayerToggleButtons from "./views/QuickLayerToggleButtons";
 
+import type Feature from "ol/Feature";
+import type SimpleGeometry from "ol/geom/SimpleGeometry";
+import type {
+  PropertyCheckerViewProps,
+  GroupedFeatures,
+  GroupedDigitalPlanFeatures,
+  GetFeatureInfoPayload,
+  NoFeaturesPayload,
+} from "./types";
+
 const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(2),
 }));
 
-function PropertyCheckerView(props) {
+function PropertyCheckerView(props: PropertyCheckerViewProps) {
   const {
     drawModel,
     globalObserver,
@@ -38,14 +48,17 @@ function PropertyCheckerView(props) {
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  const snackbarId = useRef(null);
+  const snackbarId = useRef<SnackbarKey | undefined>(undefined);
 
-  const [groupedFeatures, setGroupedFeatures] = useState({});
-  const [digitalPlanFeatures, setDigitalPlanFeatures] = useState([]);
+  const [groupedFeatures, setGroupedFeatures] = useState<GroupedFeatures>({});
+  const [digitalPlanFeatures, setDigitalPlanFeatures] =
+    useState<GroupedDigitalPlanFeatures>({});
 
   // We want to keep track of the clicked point's coordinates, to be able
   // to pass them down to child components.
-  const [clickedPointsCoordinates, setClickedPointsCoordinates] = useState([]);
+  const [clickedPointsCoordinates, setClickedPointsCoordinates] = useState<
+    number[]
+  >([]);
 
   // Keep visibility state for the dialog that we'll show to the user
   // when user clicks on the Clear button.
@@ -69,11 +82,11 @@ function PropertyCheckerView(props) {
   const handleCleanClick = () => {
     setClearDialogVisible(false);
     setGroupedFeatures({});
-    setDigitalPlanFeatures([]);
+    setDigitalPlanFeatures({});
     drawModel.removeDrawnFeatures();
   };
 
-  const [controlledLayers, setControlledLayers] = useState([]);
+  const [controlledLayers, setControlledLayers] = useState<string[]>([]);
 
   // Subscribe and unsubscribe to events
   useEffect(() => {
@@ -81,9 +94,11 @@ function PropertyCheckerView(props) {
     // user clicks a point on the map). We want to know when this happens so that
     // we can a) disable the draw interaction and b) grab the coordinates of the
     // clicked point.
-    const handleFeatureAdded = (feature) => {
+    const handleFeatureAdded = (feature: Feature) => {
       setDrawInteraction("");
-      setClickedPointsCoordinates(feature.getGeometry().getFlatCoordinates());
+      setClickedPointsCoordinates(
+        (feature.getGeometry() as SimpleGeometry).getFlatCoordinates()
+      );
     };
 
     // This runs when our model has successfully fetched features and there's
@@ -91,7 +106,7 @@ function PropertyCheckerView(props) {
     const handleNewGetFeatureInfoFeatures = ({
       digitalPlanFeatures,
       groupedFeatures,
-    }) => {
+    }: GetFeatureInfoPayload) => {
       setGroupedFeatures(groupedFeatures);
       setDigitalPlanFeatures(digitalPlanFeatures);
     };
@@ -102,7 +117,7 @@ function PropertyCheckerView(props) {
     const handleNoFeaturesInResult = ({
       amountOfProperties,
       amountOfDigitalPlans,
-    }) => {
+    }: NoFeaturesPayload) => {
       drawModel.removeDrawnFeatures();
       if (amountOfProperties === 0) {
         enqueueSnackbar(
