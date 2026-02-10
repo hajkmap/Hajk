@@ -1249,8 +1249,7 @@ export default class PrintModel {
       const format = options.format;
       const orientation = options.orientation;
       const resolution = options.resolution;
-      const scale = options.scale / 1000;
-      console.log(options);
+      const scale = options.scale / 2000;
 
       // Convert hex color provided to rgb since libPDF uses that instead, should probably be handled earlier.
       this.textColor = this.hexToRgb(options.mapTextColor);
