@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking
+
+- Client: As part of migration the to Vite (see below and [PR #1754](https://github.com/hajkmap/Hajk/pull/1754)), support for some legacy browsers, including iOS <=12, has been removed. See [commit](https://github.com/hajkmap/Hajk/commit/3fc95ba9b565503af499909eb2cdb521e061c706) for more details.
+
 ### Changed
 
 - Client: Migrated from Create React App to Vite. See [issue #1253](https://github.com/hajkmap/Hajk/issues/1253) and [PR #1754](https://github.com/hajkmap/Hajk/pull/1754) for more details.
