@@ -59,6 +59,7 @@ export default class PrintModel {
     this.disclaimer = settings.options.disclaimer || "";
     this.localObserver = settings.localObserver;
     this.mapConfig = settings.mapConfig;
+    this.mmPerPoint = 2.83465;
     // If we want the printed tiles to have correct styling, we have to use
     // custom loaders to make sure that the requests has all the required parameters.
     // If for some reason these tile-loaders shouldn't be used, a setting is exposed.
@@ -137,13 +138,39 @@ export default class PrintModel {
     return rgb(r, g, b);
   };
 
-  getRightAlignedPositions = (text, fontSize, xmargin, ymargin, paperWidth) => {
+  getRightAlignedPositions = (
+    text,
+    fontSize,
+    xmargin,
+    ymargin,
+    paperWidth,
+    options
+  ) => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
-    context.font = `${fontSize}px roboto-normal`;
+    context.font = `${fontSize}px roboto`;
     const textWidth = context.measureText(text).width;
 
-    const x = paperWidth - textWidth - xmargin;
+    // If QrCode is placed in the bottom right corner, move text to the left of it (its wider)
+    // Otherwise its a logo or northarrow, needs less text movement.
+    let x;
+    if (options.includeQrCode && options.qrCodePlacement === "bottomRight") {
+      x = paperWidth - textWidth - xmargin - 80;
+    } else if (
+      options.includeNorthArrow &&
+      options.northArrowPlacement === "bottomRight"
+    ) {
+      x = paperWidth - textWidth - xmargin - this.northArrowMaxWidth * 3;
+    } else if (options.includeLogo && options.logoPlacement === "bottomRight") {
+      x =
+        paperWidth -
+        textWidth -
+        xmargin -
+        this.logoMaxWidth * this.mmPerPoint -
+        10;
+    } else {
+      x = paperWidth - textWidth - xmargin;
+    }
     const y = ymargin;
     return { x, y };
   };
@@ -157,7 +184,7 @@ export default class PrintModel {
   ) => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
-    context.font = `${fontSize}px roboto-normal`;
+    context.font = `${fontSize}px roboto`;
     const textWidth = context.measureText(text).width;
 
     const x = (paperWidth - textWidth) / 2;
@@ -1249,11 +1276,10 @@ export default class PrintModel {
       const format = options.format;
       const orientation = options.orientation;
       const resolution = options.resolution;
-      const scale = options.scale / 2000;
+      const scale = options.scale / 1000;
 
       // Convert hex color provided to rgb since libPDF uses that instead, should probably be handled earlier.
       this.textColor = this.hexToRgb(options.mapTextColor);
-      console.log(this.textColor);
 
       // Our dimensions are for landscape orientation by default. Flip the values if portrait orientation requested.
       const dim =
@@ -1555,8 +1581,8 @@ export default class PrintModel {
 
               // Draw logo on the PDF
               page.drawImage(arrowImage, {
-                x: arrowPlacement.x + 15,
-                y: arrowPlacement.y - 15,
+                x: arrowPlacement.x,
+                y: arrowPlacement.y,
                 width: arrowWidth,
                 height: arrowHeight,
               });
@@ -1598,7 +1624,6 @@ export default class PrintModel {
               pageWidth,
               pageHeight
             );
-            console.log(this.textColor);
             page.drawText(options.mapTitle, {
               x: position.x,
               y: position.y,
@@ -1629,13 +1654,37 @@ export default class PrintModel {
             });
           }
 
+          // Add potential date text
+          if (this.date.length > 0) {
+            const date = this.date.replace(
+              "{date}",
+              new Date().toLocaleDateString()
+            );
+            const position = this.getRightAlignedPositions(
+              this.date,
+              this.textFontSize,
+              23,
+              5,
+              pageWidth,
+              options
+            );
+            page.drawText(date, {
+              x: position.x,
+              y: position.y,
+              size: this.textFontSize,
+              color: this.textColor,
+              font: fontNormal,
+            });
+          }
+
           //  Add potential copyright text
           const position = this.getRightAlignedPositions(
             this.copyright,
             this.textFontSize,
-            10,
-            10,
-            pageWidth
+            5,
+            15,
+            pageWidth,
+            options
           );
           if (this.copyright.length > 0) {
             let yPos = options.useTextIconsInMargin
@@ -1650,39 +1699,15 @@ export default class PrintModel {
             });
           }
 
-          // Add potential date text
-          if (this.date.length > 0) {
-            const date = this.date.replace(
-              "{date}",
-              new Date().toLocaleDateString()
-            );
-            let yPos = options.useTextIconsInMargin
-              ? this.textIconsMargin + this.margin / 2
-              : this.margin;
-            const position = this.getRightAlignedPositions(
-              this.date,
-              this.textFontSize,
-              20,
-              20,
-              pageWidth
-            );
-            page.drawText(date, {
-              x: position.x,
-              y: position.y,
-              size: this.textFontSize,
-              color: this.textColor,
-              font: fontNormal,
-            });
-          }
-
           // Add potential disclaimer text
           if (this.disclaimer.length > 0) {
             const position = this.getRightAlignedPositions(
               this.disclaimer,
               this.textFontSize,
-              10,
-              30,
-              pageWidth
+              5,
+              25,
+              pageWidth,
+              options
             );
             page.drawText(this.disclaimer, {
               x: position.x,
