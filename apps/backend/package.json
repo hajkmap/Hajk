@@ -18,8 +18,8 @@
     "compile": "shx rm -rf dist && shx cp -r server dist",
     "dev": "nodemon server --config .nodemonrc.json",
     "dev:debug": "nodemon server --config .nodemonrc.json --inspect",
-    "lint": "eslint ./server",
-    "lint:fix": "eslint --fix ."
+    "lint": "eslint server",
+    "lint:fix": "eslint --fix server"
   },
   "dependencies": {
     "@babel/runtime": "^7.28.6",
@@ -40,11 +40,12 @@
     "ws": "^8.19.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-n": "^17",
     "eslint-plugin-prettier": "^5.5.5",
+    "globals": "^17",
     "nodemon": "^3.1.11",
     "prettier": "^3.8.1",
     "shx": "^0.4.0"
