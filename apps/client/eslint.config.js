@@ -40,6 +40,10 @@ export default defineConfig([
       prettier: prettierPlugin,
     },
     rules: {
+      "no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
       "prettier/prettier": "error", // run Prettier as an ESLint rule
       "arrow-body-style": "off", // let Prettier handle this
       "prefer-arrow-callback": "off", // same, avoid conflicts with Prettier

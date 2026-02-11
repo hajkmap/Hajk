@@ -26,6 +26,10 @@ export default defineConfig([
     },
     rules: {
       "prettier/prettier": "error", // run Prettier as an ESLint rule
+      "no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
     },
   },
   prettierConfig, // disables ESLint rules that would conflict with Prettier
