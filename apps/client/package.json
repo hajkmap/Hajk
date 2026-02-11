@@ -8,6 +8,9 @@
     "url": "git+https://github.com/hajkmap/Hajk.git"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "vite dev",
     "dev": "vite dev",
