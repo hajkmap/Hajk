@@ -8,6 +8,9 @@
     "url": "git+https://github.com/hajkmap/Hajk.git"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "vite dev",
     "dev": "vite dev",
@@ -15,23 +18,30 @@
     "build-preview": "vite build && vite preview",
     "prestart": "node prebuild.js",
     "prebuild": "node prebuild.js",
-    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix"
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix src"
   },
   "browserslist": [
     "defaults"
   ],
   "devDependencies": {
+    "@eslint/js": "^9",
     "@types/load-google-maps-api": "^2.0.5",
-    "@types/node": "^25.2.1",
+    "@types/node": "^25.2.3",
     "@vitejs/plugin-react-swc": "^4.2.3",
+    "eslint": "^9",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-jsx-a11y": "^6",
     "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-react": "^7",
+    "eslint-plugin-react-hooks": "^7",
+    "eslint-plugin-react-refresh": "^0.5",
+    "globals": "^17",
     "prettier": "^3.8.1",
     "prop-types": "^15.8.1",
+    "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "vite-tsconfig-paths": "6.0.5"
+    "vite-tsconfig-paths": "6.1.0"
   },
   "dependencies": {
     "@barbapapazes/plausible-tracker": "^0.5.6",
@@ -48,10 +58,10 @@
     "@mui/utils": "^7.3.7",
     "@mui/x-data-grid": "^8.27.0",
     "@nieuwlandgeo/sldreader": "^0.7.3",
-    "@turf/boolean-point-on-line": "^7.3.3",
-    "@turf/buffer": "^7.3.3",
-    "@turf/transform-translate": "^7.3.3",
-    "@turf/union": "^7.3.3",
+    "@turf/boolean-point-on-line": "^7.3.4",
+    "@turf/buffer": "^7.3.4",
+    "@turf/transform-translate": "^7.3.4",
+    "@turf/union": "^7.3.4",
     "file-saver": "^2.0.5",
     "intro.js": "^7.2.0",
     "intro.js-react": "^1.0.0",

@@ -90,7 +90,6 @@ class SettingsService {
         //
         // IMPORTANT: Ignore the warning saying that "await has no effect on this type of expression".
         // It does, as without it, we return a pending Promise, instead of its resolved value.
-        // eslint-disable-next-line
         newLayer.id = await this.generateId();
         layersTypeWithChanges = layersType; // No need to clean up existing data, just use as is
         status = 201;
