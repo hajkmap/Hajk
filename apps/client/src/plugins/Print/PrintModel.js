@@ -355,10 +355,21 @@ export default class PrintModel {
       ? getCenter(this.previewFeature.getGeometry().getExtent())
       : this.map.getView().getCenter();
 
+    // Let's account for projection distortion: in projections like EPSG:3857,
+    // 1 map unit != 1 meter (except at the equator).
+    // We can grab the resolution at the center point, using getPointResolution,
+    // and then use it to scale the width and height of the preview feature (see
+    // how we calculate w and y below).
+    const pointResolution = getPointResolution(
+      this.map.getView().getProjection(),
+      1,
+      center
+    );
+
     const ipu = 39.37,
       sf = 1,
-      w = (((paper.width / dpi / ipu) * scale) / 2) * sf,
-      y = (((paper.height / dpi / ipu) * scale) / 2) * sf,
+      w = (((paper.width / dpi / ipu) * scale) / 2 / pointResolution) * sf,
+      y = (((paper.height / dpi / ipu) * scale) / 2 / pointResolution) * sf,
       coords = [
         [
           [center[0] - w, center[1] - y],
