@@ -829,11 +829,15 @@ export default class PrintModel {
     pageWidth,
     pageHeight
   ) => {
-    const millimetersPerInch = 25.4;
-    const pixelSize = millimetersPerInch / resolution / scaleResolution;
+    const mPerInch = 0.0254;
+    const pointsPerInch = 72;
+    // Get the length that the scalebar should represent
     const scaleBarLengthMeters = this.getFittingScaleBarLength(scale);
+    // Convert those meters to inches for the scale
+    const lengthInInches = scaleBarLengthMeters / scale / mPerInch;
 
-    const scaleBarLength = scaleBarLengthMeters * pixelSize * this.mmPerPoint;
+    // Convert inches to points
+    const scaleBarLength = lengthInInches * pointsPerInch;
     const scaleBarHeight = 6;
 
     this.scaleText = `Skala: ${this.getUserFriendlyScale(
