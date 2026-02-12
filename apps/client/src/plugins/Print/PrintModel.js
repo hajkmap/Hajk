@@ -60,6 +60,8 @@ export default class PrintModel {
     this.localObserver = settings.localObserver;
     this.mapConfig = settings.mapConfig;
     this.mmPerPoint = 2.83465;
+    this.scaleText = "";
+    this.scalebarMaxWidth = 0;
     // If we want the printed tiles to have correct styling, we have to use
     // custom loaders to make sure that the requests has all the required parameters.
     // If for some reason these tile-loaders shouldn't be used, a setting is exposed.
@@ -153,14 +155,22 @@ export default class PrintModel {
 
     // If QrCode is placed in the bottom right corner, move text to the left of it (its wider)
     // Otherwise its a logo or northarrow, needs less text movement.
+    // Also take care of scalebar placement bottomRight
     let x;
     if (options.includeQrCode && options.qrCodePlacement === "bottomRight") {
-      x = paperWidth - textWidth - xmargin - 80;
+      x = paperWidth - textWidth - xmargin - 90;
     } else if (
       options.includeNorthArrow &&
       options.northArrowPlacement === "bottomRight"
     ) {
-      x = paperWidth - textWidth - xmargin - this.northArrowMaxWidth * 3;
+      x = paperWidth - textWidth - xmargin - this.northArrowMaxWidth * 3 - 10;
+    } else if (
+      options.includeScaleBar &&
+      options.scaleBarPlacement === "bottomRight"
+    ) {
+      // Use the scalebarMaxWidth that either is the text or the scalebar length, to align ex copyright
+      // and disclaimer/date correctly to the left of the scalebar when bottomRight
+      x = paperWidth - textWidth - xmargin - this.scalebarMaxWidth - 10;
     } else if (options.includeLogo && options.logoPlacement === "bottomRight") {
       x =
         paperWidth -
@@ -442,6 +452,13 @@ export default class PrintModel {
     return { data, width, height };
   };
 
+  getTextWidth = (text, size) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    context.font = `${size}px roboto`;
+    return context.measureText(text).width;
+  };
+
   /**
    * @summary Returns an object stating the x and y position
    * @description Helper function that takes some content and calculates where it should be placed on the canvas
@@ -475,11 +492,31 @@ export default class PrintModel {
       pdfPlacement.x = margin;
       pdfPlacement.y = margin - qrMargin;
     } else if (placement === "bottomRight") {
-      pdfPlacement.x = pdfWidth - contentWidth - margin;
-      pdfPlacement.y = margin - qrMargin;
+      if (contentType === "scaleBar") {
+        // Check if the text is longer than the scalebar to get the one with most width.
+        const textLength = this.getTextWidth(this.scaleText, this.fontSize);
+        // If the contentWidth aka the scalebar and not the text, add some extra padding.
+        this.scalebarMaxWidth =
+          contentWidth > this.scalebarMaxWidth ? contentWidth + 25 : textLength;
+        pdfPlacement.x = pdfWidth - margin - this.scalebarMaxWidth;
+        pdfPlacement.y = margin;
+      } else {
+        pdfPlacement.x = pdfWidth - contentWidth - margin;
+        pdfPlacement.y = margin - qrMargin + 10;
+      }
     } else if (placement === "topRight") {
-      pdfPlacement.x = pdfWidth - contentWidth - margin;
-      pdfPlacement.y = pdfHeight - contentHeight - margin + qrMargin;
+      if (contentType === "scaleBar") {
+        // Check if the text is longer than the scalebar to get the one with most width.
+        const scaleTextWidth = this.getTextWidth(this.scaleText, this.fontSize);
+        // If the contentWidth aka the scalebar and not the text, add some extra padding.
+        const scalebarMaxWidth =
+          contentWidth > scaleTextWidth ? contentWidth + 25 : scaleTextWidth;
+        pdfPlacement.x = pdfWidth - margin - scalebarMaxWidth;
+        pdfPlacement.y = pdfHeight - contentHeight - margin - 20;
+      } else {
+        pdfPlacement.x = pdfWidth - contentWidth - margin;
+        pdfPlacement.y = pdfHeight - contentHeight - margin + qrMargin;
+      }
     } else {
       pdfPlacement.x = margin;
       pdfPlacement.y = pdfHeight - contentHeight - margin + qrMargin;
@@ -750,19 +787,12 @@ export default class PrintModel {
       font,
     });
 
-    page.drawText(
-      `Skala: ${this.getUserFriendlyScale(
-        scale
-      )} (vid ${format.toUpperCase()} ${
-        orientation === "landscape" ? "liggande" : "stående"
-      })`,
-      {
-        x: scaleBarPosition.x,
-        y: scaleBarPosition.y + 20,
-        size: 10,
-        font,
-      }
-    );
+    page.drawText(this.scaleText, {
+      x: scaleBarPosition.x,
+      y: scaleBarPosition.y + 20,
+      size: 10,
+      font,
+    });
 
     this.addDividerLinesAndTexts({
       page,
@@ -789,26 +819,26 @@ export default class PrintModel {
     pageHeight
   ) => {
     const millimetersPerInch = 25.4;
-    const millimetersPerPoint = 0.3528;
     const pixelSize = millimetersPerInch / resolution / scaleResolution;
     const scaleBarLengthMeters = this.getFittingScaleBarLength(scale);
 
-    const scaleBarLength = scaleBarLengthMeters * pixelSize + 92;
+    const scaleBarLength = scaleBarLengthMeters * pixelSize * this.mmPerPoint;
     const scaleBarHeight = 6;
+
+    this.scaleText = `Skala: ${this.getUserFriendlyScale(
+      scale
+    )} (vid ${format.toUpperCase()} ${
+      orientation === "landscape" ? "liggande" : "stående"
+    })`;
 
     let scaleBarPosition = this.getPlacement(
       scaleBarPlacement,
       scaleBarLength,
       scaleBarHeight,
       pageWidth,
-      pageHeight
+      pageHeight,
+      "scaleBar"
     );
-
-    // Account for x,y justifications in libPDF when placing the scalebar
-    scaleBarPosition = {
-      x: scaleBarPosition.x + 15,
-      y: scaleBarPosition.y + 15,
-    };
 
     this.drawScaleBar(
       page,
