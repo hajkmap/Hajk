@@ -1,5 +1,11 @@
+import { hfetch } from "../../../utils/FetchWrapper";
+
 /**
  * Creates an OGC API client for WFST operations.
+ * Uses hfetch (FetchWrapper) to ensure correct credential handling,
+ * including support for Windows Authentication (NTLM/Kerberos) and
+ * per-URL overrides configured in appConfig.hfetch.optionOverrides.
+ *
  * @param {string} baseUrl - The base URL for the API
  * @returns {Object} API methods
  */
@@ -32,7 +38,7 @@ export function createOgcApi(baseUrl) {
 
   return {
     async fetchWfstList(fields = "id,caption", { signal } = {}) {
-      const res = await fetch(`${base}/ogc/wfst${pickFields(fields)}`, {
+      const res = await hfetch(`${base}/ogc/wfst${pickFields(fields)}`, {
         signal,
       });
       if (!res.ok) throw new Error(`WFST-lista misslyckades (${res.status})`);
@@ -47,7 +53,7 @@ export function createOgcApi(baseUrl) {
     async getServiceMeta(id, { signal } = {}) {
       const safeId = validateLayerId(id);
       try {
-        const res = await fetch(`${base}/ogc/wfst/${safeId}`, { signal });
+        const res = await hfetch(`${base}/ogc/wfst/${safeId}`, { signal });
         if (!res.ok)
           throw new Error(`Failed to fetch metadata (${res.status})`);
         const layer = await res.json();
@@ -72,7 +78,7 @@ export function createOgcApi(baseUrl) {
       const safeId = validateLayerId(id);
       try {
         const url = `${base}/ogc/wfst/${safeId}${pickFields(fields)}`;
-        const res = await fetch(url, { signal });
+        const res = await hfetch(url, { signal });
         if (!res.ok) throw new Error(`WFST get misslyckades (${res.status})`);
         return res.json();
       } catch (error) {
@@ -94,7 +100,7 @@ export function createOgcApi(baseUrl) {
       const q = new URLSearchParams(queryParams).toString();
       const url = `${base}/ogc/wfst/${safeId}/features?${q}`;
 
-      const res = await fetch(url, {
+      const res = await hfetch(url, {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -131,7 +137,7 @@ export function createOgcApi(baseUrl) {
       try {
         const url = `${base}/ogc/wfst/${safeLayerId}/transaction`;
 
-        const response = await fetch(url, {
+        const response = await hfetch(url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

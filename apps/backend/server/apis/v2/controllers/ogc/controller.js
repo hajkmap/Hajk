@@ -1,4 +1,5 @@
 import * as svc from "../../services/ogc.service.js";
+import ad from "../../services/activedirectory.service.js";
 import { Validator } from "../../services/ogc/validator.js";
 import log4js from "log4js";
 
@@ -14,10 +15,9 @@ export class Controller {
     try {
       const { id } = req.params;
       const { fields, washContent } = req.query;
-      const user = req.user ?? null; // om du har auth
+      const user = ad.getUserFromRequestHeader(req);
 
       const layer = await svc.getWFSTLayer({ id, fields, user, washContent });
-      // välj svarformat: för single returnerar vi bara objektet
       return res.json(layer);
     } catch (e) {
       if (e.name === "ValidationError")
@@ -34,8 +34,10 @@ export class Controller {
   async listWFSTLayers(req, res) {
     try {
       const baseUrl = getBaseUrl(req);
+      const user = ad.getUserFromRequestHeader(req);
       const layers = await svc.listWFSTLayers({
         fields: req.query.fields,
+        user,
         baseUrl,
       });
       res.json({ count: layers.length, layers });
@@ -49,6 +51,7 @@ export class Controller {
   async getWFSTFeatures(req, res) {
     try {
       const baseUrl = getBaseUrl(req);
+      const user = ad.getUserFromRequestHeader(req);
 
       // ---- Parameter validation ----
       const rawLimit = Number.parseInt(
@@ -80,6 +83,7 @@ export class Controller {
       // ---- Call the service ----
       const fc = await svc.getWFSTFeatures({
         id: req.params.id,
+        user,
         version: req.query.version || "1.1.0",
         typeName: req.query.typeName,
         srsName: req.query.srsName,
@@ -115,7 +119,7 @@ export class Controller {
     try {
       const { id } = req.params;
       const { inserts = [], updates = [], deletes = [], srsName } = req.body;
-      const user = req.user ?? null;
+      const user = ad.getUserFromRequestHeader(req);
 
       // Validate that transaction contains at least one operation
       if (!inserts.length && !updates.length && !deletes.length) {
@@ -130,7 +134,7 @@ export class Controller {
         inserts,
         updates,
         deletes,
-        srsName, // Pass srsName from frontend to service
+        srsName,
       });
 
       return res.json(result);
