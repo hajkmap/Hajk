@@ -2,9 +2,7 @@ import { delay } from "../../utils/Delay";
 import { getPointResolution } from "ol/proj";
 import { getCenter } from "ol/extent";
 import { PDF, rgb } from "@libpdf/core";
-
 import { saveAs } from "file-saver";
-
 import Vector from "ol/layer/Vector";
 import View from "ol/View";
 import VectorSource from "ol/source/Vector";
@@ -13,7 +11,6 @@ import Feature from "ol/Feature";
 import { Translate } from "ol/interaction";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style";
-
 import ImageLayer from "ol/layer/Image";
 import TileLayer from "ol/layer/Tile";
 import TileWMS from "ol/source/TileWMS";
@@ -714,7 +711,7 @@ export default class PrintModel {
   }) => {
     // Here we set the number 0 at the start of the scalebar
     page.drawText("0", {
-      x: scaleBarPosition.x,
+      x: scaleBarPosition.x - 2,
       y: scaleBarPosition.y - 5,
       size: 8,
       font,
@@ -766,16 +763,18 @@ export default class PrintModel {
       divNr = calculatedScaleBarLengthMeters / divider / 5;
       divNrString = divNr.toLocaleString();
 
-      // We need to make sure correct placement if divNr is a decimal number
+      // We need to check if this number would be a decimal number, and skip drawing it in that case
+      // so the beginning of the scalebar doesn't get cramped for space
       const dividerStrLength =
         divNr % 1 !== 0 ? divNrString.length - 1 : divNrString.length;
-
-      page.drawText(divNrString, {
-        x: scaleBarPosition.x + dividerNrPosition - dividerStrLength - 2,
-        y: scaleBarPosition.y - 5,
-        size: 8,
-        font,
-      });
+      if (dividerStrLength === 1) {
+        page.drawText(divNrString, {
+          x: scaleBarPosition.x + dividerNrPosition - dividerStrLength - 2,
+          y: scaleBarPosition.y - 5,
+          size: 8,
+          font,
+        });
+      }
     }
   };
 
@@ -854,6 +853,13 @@ export default class PrintModel {
       pageHeight,
       "scaleBar"
     );
+
+    if (
+      scaleBarPlacement === "bottomLeft" ||
+      scaleBarPlacement === "bottomRight"
+    ) {
+      scaleBarPosition.y += 2;
+    }
 
     this.drawScaleBar(
       page,
