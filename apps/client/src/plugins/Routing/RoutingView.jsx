@@ -82,6 +82,15 @@ class RoutingView extends React.PureComponent {
       );
     });
 
+    props.localObserver.subscribe("routingGoogleMapsApiLoadFailed", () => {
+      this.props.enqueueSnackbar(
+        "Kunde inte ladda Google Maps API. Kontakta systemadministratör.",
+        {
+          variant: "error",
+        }
+      );
+    });
+
     props.localObserver.subscribe("zeroResults", () => {
       this.props.enqueueSnackbar(
         "Kunde inte hitta vägbeskrivning mellan valda punkter och för det valda transportslaget. Prova att byta färdsätt och sök igen.",

@@ -1,15 +1,16 @@
 import { defineConfig } from "vite";
 import path from "path";
+import { fileURLToPath } from "url";
 import react from "@vitejs/plugin-react-swc";
 
-// https://vitejs.dev/config/
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   base: "./",
   plugins: [react()],
   server: {
     port: 3000,
-    open: true,
+    open: false,
   },
   resolve: {
     alias: {
@@ -21,8 +22,16 @@ export default defineConfig({
     },
   },
   build: {
-    target: "ES2022",
+    target: "baseline-widely-available",
     outDir: "build",
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "app-core": ["./src/components/App.jsx"],
+        },
+      },
+    },
   },
   esbuild: {
     loader: "jsx",

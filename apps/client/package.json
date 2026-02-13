@@ -2,42 +2,46 @@
   "name": "hajk-client",
   "version": "4.3.0",
   "description": "Hajk Client UI",
-  "homepage": ".",
+  "homepage": "https://github.com/hajkmap/Hajk/blob/master/README.md",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hajkmap/Hajk.git"
+    "url": "git+https://github.com/hajkmap/Hajk.git"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "vite dev",
     "dev": "vite dev",
     "build": "tsc && vite build",
     "build-preview": "vite build && vite preview",
     "prestart": "node prebuild.js",
-    "prebuild": "node prebuild.js"
+    "prebuild": "node prebuild.js",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix src"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
-  },
-  "overrides": {},
   "browserslist": [
-    "defaults and supports es6-module",
-    "ios > 12"
+    "defaults"
   ],
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@vitejs/plugin-react-swc": "^4.2.2",
+    "@eslint/js": "^9",
+    "@types/load-google-maps-api": "^2.0.5",
+    "@types/node": "^25.2.3",
+    "@vitejs/plugin-react-swc": "^4.2.3",
+    "eslint": "^9",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-jsx-a11y": "^6",
     "eslint-plugin-prettier": "^5.5.5",
-    "prettier": "^3.8.0",
+    "eslint-plugin-react": "^7",
+    "eslint-plugin-react-hooks": "^7",
+    "eslint-plugin-react-refresh": "^0.5",
+    "globals": "^17",
+    "prettier": "^3.8.1",
     "prop-types": "^15.8.1",
-    "source-map-explorer": "^2.5.3",
+    "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "vite-tsconfig-paths": "6.0.5"
+    "vite-tsconfig-paths": "6.1.0"
   },
   "dependencies": {
     "@barbapapazes/plausible-tracker": "^0.5.6",
@@ -53,14 +57,12 @@
     "@mui/material": "^7.3.7",
     "@mui/system": "^7.3.7",
     "@mui/utils": "^7.3.7",
-    "@mui/x-data-grid": "^8.25.0",
+    "@mui/x-data-grid": "^8.27.0",
     "@nieuwlandgeo/sldreader": "^0.7.3",
-    "@turf/boolean-point-on-line": "^7.3.2",
-    "@turf/buffer": "^7.3.2",
-    "@turf/transform-translate": "^7.3.2",
-    "@turf/union": "^7.3.2",
-    "core-js": "^3.47.0",
-    "elm-pep": "^1.0.6",
+    "@turf/boolean-point-on-line": "^7.3.4",
+    "@turf/buffer": "^7.3.4",
+    "@turf/transform-translate": "^7.3.4",
+    "@turf/union": "^7.3.4",
     "file-saver": "^2.0.5",
     "intro.js": "^7.2.0",
     "intro.js-react": "^1.0.0",
@@ -71,10 +73,9 @@
     "pdfjs-dist": "^3.11.174",
     "proj4": "^2.20.2",
     "qrcode": "^1.5.4",
-    "react": "^19.2.3",
-    "react-app-polyfill": "^3.0.0",
+    "react": "^19.2.4",
     "react-color": "^2.19.3",
-    "react-dom": "^19.2.3",
+    "react-dom": "^19.2.4",
     "react-event-observer": "^0.5.11",
     "react-horizontal-scrolling-menu": "^8.2.0",
     "react-markdown": "^10.1.0",

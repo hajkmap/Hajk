@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
+    "forceConsistentCasingInFileNames": true,
     "target": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
+    "checkJs": false, // If we enable it now and run `npx tsc --noEmit`, we'll get a hint of what should be fixed. Disabled for now cause it's way too noisy unless we go the TS way.
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": false,
+    "strict": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -16,5 +18,5 @@
     "jsx": "react-jsx",
     "types": ["vite/client"]
   },
-  "include": ["src"]
+  "include": ["src", "vite.config.ts", "prebuild.js"] // Added prebuild.js as it's outside `src/` and can be missed once we decide to type-check the JS files too
 }

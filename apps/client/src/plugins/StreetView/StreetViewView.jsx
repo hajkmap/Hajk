@@ -41,6 +41,12 @@ class StreetViewView extends React.PureComponent {
         imageDate: imageDate,
       });
     });
+    this.localObserver.subscribe("googleMapsApiLoadFailed", () => {
+      this.props.snackbar.show(
+        "Kunde inte ladda Google Maps. Kontakta systemadministratören och be om att kontrollera API-nyckeln.",
+        "error"
+      );
+    });
   }
 
   componentWillUnmount() {

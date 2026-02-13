@@ -32,7 +32,11 @@ const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
 // divider color. (borderColor would be a more fitting name, but
 // since this is a custom prop it must be all lowerCase, hence border will have
 // to do!)
-const ButtonWithBorder = styled(Button)(({ theme }) => ({
+const ButtonWithBorder = styled(Button, {
+  // Prevent the custom "border" prop from being forwarded, we derive it
+  // from incoming props. See https://mui.com/system/styled/#api.
+  shouldForwardProp: (prop) => prop !== "border",
+})(({ theme, border }) => ({
   border: `${theme.spacing(0.5)} solid ${border ?? theme.palette.divider}`,
 }));
 
