@@ -74,8 +74,6 @@ export default function MobileForm({
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
 
-  // Helpers
-
   const activeFilterCount = React.useMemo(() => {
     if (!columnFilters) return 0;
     return Object.values(columnFilters).filter(

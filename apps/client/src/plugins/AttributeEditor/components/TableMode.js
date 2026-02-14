@@ -46,7 +46,6 @@ const ColumnFilter = React.memo(function ColumnFilter({
 }) {
   const anchorStyle = s.filterAnchor(placement);
 
-  // O(1) lookup
   const selectedSet = React.useMemo(
     () => new Set(selectedValues),
     [selectedValues]

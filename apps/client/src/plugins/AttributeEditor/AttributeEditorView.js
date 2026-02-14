@@ -147,7 +147,6 @@ export default function AttributeEditorView({
       let f = all.find((feat) => {
         const olId = feat?.getId?.();
         if (olId === wantNum || String(olId) === want) return true;
-        // Check for WFS-style IDs ending with ".92"
         const olIdStr = olId != null ? String(olId) : null;
         if (olIdStr && olIdStr.endsWith("." + want)) return true;
         return false;
@@ -295,7 +294,6 @@ export default function AttributeEditorView({
     [controller]
   );
 
-  // Cleanup effect
   React.useEffect(() => {
     return () => {
       if (debouncedTimerRef.current) {
@@ -311,14 +309,12 @@ export default function AttributeEditorView({
   }, [focusedId, selectedIds]);
 
   React.useEffect(() => {
-    // Reset filter
     setColumnFilters({});
     setColumnFilterUI({});
     setOpenFilterColumn(null);
     uniqueCacheRef.current?.clear?.();
     setSearchText("");
 
-    // End celledits
     setTableEditing(null);
     setTableSelectedIds(new Set());
     setSelectedIds(new Set());
@@ -341,7 +337,6 @@ export default function AttributeEditorView({
   // === Model state ===
   const features = React.useMemo(() => state.features ?? [], [state.features]);
 
-  // O(1) lookup map for features by ID
   const featuresMap = React.useMemo(() => {
     const map = new Map();
     for (const f of features) {
@@ -362,7 +357,6 @@ export default function AttributeEditorView({
     [state.pendingAdds]
   );
 
-  // O(1) lookup map for pending adds by ID
   const pendingAddsMap = React.useMemo(() => {
     const map = new Map();
     for (const d of pendingAdds) {
@@ -603,7 +597,6 @@ export default function AttributeEditorView({
     const q = searchText.trim().toLowerCase();
     const editingId = tableEditing?.id ?? null;
 
-    // Pre-compute Sets for O(1) filter lookups instead of O(k) array scans
     const columnFilterSets = {};
     for (const [key, selectedValues] of Object.entries(columnFilters)) {
       if (selectedValues && selectedValues.length > 0) {
@@ -618,7 +611,7 @@ export default function AttributeEditorView({
       // Always show negative IDs (new/duplicate)
       const isNegativeId = isDraftId(f.id);
 
-      // If "show only first ID" is active, use the FIRST ID:na
+      // If "show only first ID" is active, use the FIRST ID
       if (
         showOnlySelected &&
         !isNegativeId &&
@@ -637,7 +630,6 @@ export default function AttributeEditorView({
             .includes(q)
         );
 
-      // Use pre-computed Sets for O(1) lookup
       // Always show new features (negative IDs) regardless of column filters
       const matchesColumnFilters =
         isNegativeId ||
@@ -731,11 +723,9 @@ export default function AttributeEditorView({
       const resolveSourceFeature = (fromId) => {
         const want = String(fromId);
 
-        // 1) Directly via getFeatureById (OL-ID)
         let f = src.getFeatureById?.(want);
         if (f) return f;
 
-        // 2) Search all features and compare multiple id variants
         const all = src.getFeatures?.() || [];
         f = all.find((x) => {
           const a = x?.getId?.(); // OL-ID (may be "@_fid")
@@ -745,10 +735,7 @@ export default function AttributeEditorView({
           const B = b != null ? String(b) : null;
           const C = c != null ? String(c) : null;
 
-          // exact match against any variant
           if (A === want || B === want || C === want) return true;
-
-          // “suffix”-match: "@_fid" ending with ".<id>" (e.g. "bg_byggnader_y.5")
           if (A && A.endsWith("." + want)) return true;
           if (B && B.endsWith("." + want)) return true;
 
@@ -766,7 +753,7 @@ export default function AttributeEditorView({
         const g = clone.getGeometry?.();
         if (g && g.clone) clone.setGeometry(g.clone());
 
-        // Set goal id (temporary negative id that AE needs to replace)
+        // Set target id (temporary negative id that AE needs to replace)
         let toId = createdIds?.[i];
         if (toId == null) {
           // fallback: create a draft in the model if it doesn't exist
@@ -816,10 +803,8 @@ export default function AttributeEditorView({
     if (typeof start === "number") {
       const created = ids.map((_, i) => start - i);
 
-      // Get the latest state after duplicateRows dispatch
       const currentState = model.getSnapshot();
 
-      // Set baseline for each duplicated draft to its current values
       created.forEach((draftId) => {
         const draft = currentState.pendingAdds?.find?.((d) => d.id === draftId);
         if (draft) {
@@ -870,10 +855,8 @@ export default function AttributeEditorView({
     if (typeof start === "number" && ids.length) {
       const created = ids.map((_, i) => start - i);
 
-      // Get the latest state after duplicateRows dispatch
       const currentState = model.getSnapshot();
 
-      // Set baseline for each duplicated draft to its current values
       created.forEach((draftId) => {
         const draft = currentState.pendingAdds?.find?.((d) => d.id === draftId);
         if (draft) {
@@ -935,7 +918,6 @@ export default function AttributeEditorView({
           feature.setId(tempId);
           feature.set("id", tempId, true);
 
-          // Capture empty baseline for the new draft
           const baseline = {};
           fieldMeta.forEach(({ key }) => {
             baseline[key] = "";
@@ -945,14 +927,12 @@ export default function AttributeEditorView({
           featureIndexRef.current.set(tempId, feature);
           graveyardRef.current.delete(tempId);
 
-          // Add to AE vector layer
           const layer = vectorLayerRef.current;
           const aeSrc = layer?.getSource?.();
           if (aeSrc) {
             aeSrc.addFeature(feature);
           }
 
-          // Update visibility and selection
           visibleIdsRef.current.add(tempId);
 
           if (ui.mode === "table") {
@@ -971,7 +951,6 @@ export default function AttributeEditorView({
 
           layer?.changed?.();
 
-          // Center map on the new point
           map
             .getView()
             .animate({ center: point.getCoordinates(), duration: 500 });
@@ -1028,17 +1007,13 @@ export default function AttributeEditorView({
     enqueueSnackbar,
   ]);
 
-  // Separated useEffects to reduce unnecessary re-renders
-  // Effect 1: Update visibleIdsRef when filtered rows change
   React.useEffect(() => {
     visibleIdsRef.current = new Set(
       filteredAndSorted.flatMap((r) => [r.id, String(r.id)])
     );
-    // Trigger map re-render when filtering changes
     vectorLayerRef?.current?.changed?.();
   }, [filteredAndSorted, visibleIdsRef, vectorLayerRef]);
 
-  // Effect 2: Update selectedIdsRef and trigger layer re-render when selection changes
   React.useEffect(() => {
     const tableSel = Array.from(tableSelectedIds);
     const formSel = Array.from(selectedIds);
@@ -1050,7 +1025,6 @@ export default function AttributeEditorView({
           ? [...new Set([...formSel, focusedId])]
           : formSel;
 
-    // Limited to the most recently visible features
     const visibleSelected = activeSelected.filter(
       (id) =>
         visibleIdsRef.current.has(id) || visibleIdsRef.current.has(String(id))
@@ -1081,18 +1055,15 @@ export default function AttributeEditorView({
 
   React.useEffect(() => {
     if (ui.mode === "form") {
-      // Keep the selection from the table when switching to the form
       if (selectedIds.size === 0 && tableSelectedIds.size > 0) {
         const next = new Set(tableSelectedIds);
         setSelectedIds(next);
-        // Focus the first selected item if we lose focus
         if (focusedId == null) {
           const first = [...next][0];
           if (first != null) setFocusedId(first);
         }
       }
     } else if (ui.mode === "table") {
-      // Keep the selection from the form when switching to the table
       const fromForm = selectedIds.size
         ? selectedIds
         : focusedId != null
@@ -1167,7 +1138,6 @@ export default function AttributeEditorView({
       }
 
       const out = Array.from(vals).sort((a, b) => {
-        // Sort "(tom)" first
         if (a === "(tom)" && b !== "(tom)") return 1;
         if (a !== "(tom)" && b === "(tom)") return -1;
         return a.localeCompare(b, "sv", { numeric: true, sensitivity: "base" });
@@ -1256,7 +1226,6 @@ export default function AttributeEditorView({
     [pendingAdds, pendingEdits, pendingDeletes, dirty, changedFields]
   );
 
-  // The variable that was changed, emit
   const lastHasUnsavedRef = React.useRef(hasUnsaved);
   React.useEffect(() => {
     if (hasUnsaved !== lastHasUnsavedRef.current) {
@@ -1273,7 +1242,6 @@ export default function AttributeEditorView({
     try {
       const layerCRS = model.getLayerProjection();
 
-      // Helper: Get geometry from OpenLayers feature
       const getGeometryForFeature = (id) => {
         const feature = featureIndexRef.current.get(id);
         if (!feature) {
@@ -1285,7 +1253,6 @@ export default function AttributeEditorView({
           return null;
         }
 
-        // Transform geometry from map projection to layer's native CRS
         const format = new GeoJSON();
         const geojsonFeature = format.writeFeatureObject(feature, {
           featureProjection: map.getView().getProjection(),
@@ -1295,7 +1262,6 @@ export default function AttributeEditorView({
         return geojsonFeature.geometry;
       };
 
-      // Helper: Check if geometry has changed
       const hasGeometryChanged = (id) => {
         const effective = featuresMap.get(id) || featuresMap.get(String(id));
         if (!effective) {
@@ -1341,10 +1307,8 @@ export default function AttributeEditorView({
           return notDeleted;
         })
         .map(([id, changes]) => {
-          // Remove internal fields
           const { __geom__, __pending, __idx, ...properties } = changes;
 
-          // Handle qualified FID (layer.123)
           let cleanId = String(id);
           const fidMatch = cleanId.match(/\.(\d+)$/);
           if (fidMatch) {
@@ -1356,7 +1320,6 @@ export default function AttributeEditorView({
             properties,
           };
 
-          // Add geometry if changed
           const geomChanged = hasGeometryChanged(id);
           if (geomChanged) {
             const geom = getGeometryForFeature(id);
@@ -1391,12 +1354,10 @@ export default function AttributeEditorView({
           return cleanId;
         });
 
-      // Count deleted drafts (these don't go to server but need to be cleaned up)
       const deletedDraftsCount = pendingAdds.filter(
         (d) => d.__pending === "delete"
       ).length;
 
-      // Check if there are any changes (including deleted drafts)
       if (
         !inserts.length &&
         !updates.length &&
@@ -1407,7 +1368,6 @@ export default function AttributeEditorView({
         return;
       }
 
-      // Build summary for user notification
       const totalDeletes = deletes.length + deletedDraftsCount;
       const summary = [
         inserts.length && `${inserts.length} nya`,
@@ -1424,10 +1384,8 @@ export default function AttributeEditorView({
           autoHideDuration: 3000,
         });
 
-        // Commit changes in model (removes deleted drafts from pendingAdds)
         controller.commit();
 
-        // Reset undo stacks
         formUndoSnapshotsRef.current.clear();
         setFormUndoStack([]);
         setTableUndoLocal([]);
@@ -1453,7 +1411,6 @@ export default function AttributeEditorView({
       });
 
       if (result.success) {
-        // Clear browser caches
         if ("caches" in window) {
           try {
             const names = await caches.keys();
@@ -1461,7 +1418,6 @@ export default function AttributeEditorView({
           } catch (e) {}
         }
 
-        // Check for partial failures
         const hasPartialFailure =
           result.partialFailures && result.partialFailures.length > 0;
 
@@ -1487,10 +1443,8 @@ export default function AttributeEditorView({
           );
         }
 
-        // Commit changes in model
         controller.commit();
 
-        // Clear geometry change markers
         const allIds = [
           ...new Set([
             ...features.map((f) => f.id),
@@ -1501,7 +1455,6 @@ export default function AttributeEditorView({
           allIds.map((id) => ({ id, key: "__geom__", value: null }))
         );
 
-        // Reset undo stacks
         formUndoSnapshotsRef.current.clear();
         setFormUndoStack([]);
         setTableUndoLocal([]);
@@ -1509,8 +1462,6 @@ export default function AttributeEditorView({
         setLastTableIndex(null);
         geomUndoRef.current = [];
         setGeomUndoCount(0);
-
-        // Reload features from server
         try {
           const reloadId = `reload_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
@@ -1519,7 +1470,6 @@ export default function AttributeEditorView({
             _nocache: "1",
             _bust: Date.now(),
           });
-          // Update vector layer with new features
           if (vectorLayerRef.current && featureCollection) {
             const mapProj = map.getView().getProjection();
 
@@ -1537,11 +1487,9 @@ export default function AttributeEditorView({
 
             const source = vectorLayerRef.current.getSource();
             source.clear();
-            // Emit event to clean up kink markers after clearing source
             editBus.emit("sketch:source-cleared", {});
             source.addFeatures(newFeatures);
 
-            // Rebuild feature index
             featureIndexRef.current.clear();
             visibleIdsRef.current = new Set();
 
@@ -1555,7 +1503,6 @@ export default function AttributeEditorView({
               }
             });
 
-            // Set feature IDs from FID property
             newFeatures.forEach((f) => {
               const fidProp = f.get?.("@_fid");
               if (fidProp) {
@@ -1627,12 +1574,10 @@ export default function AttributeEditorView({
       try {
         const xlsx = await import("xlsx");
 
-        // Filter out geometry fields and prepare headers
         const exportHeaders = FM.filter((meta) => meta.type !== "geometry").map(
           (meta) => meta.label
         );
 
-        // Prepare data rows
         const exportData = exportFeatures.map((feature) => {
           return FM.filter((meta) => meta.type !== "geometry").map((meta) => {
             const value = feature[meta.key];
@@ -1640,10 +1585,8 @@ export default function AttributeEditorView({
           });
         });
 
-        // Combine headers and data
         const exportArray = [exportHeaders, ...exportData];
 
-        // Create worksheet and workbook
         const worksheet = xlsx.utils.aoa_to_sheet(exportArray);
         const workbook = xlsx.utils.book_new();
         xlsx.utils.book_append_sheet(
@@ -1652,11 +1595,9 @@ export default function AttributeEditorView({
           "Attributlista".slice(0, 30)
         );
 
-        // Generate filename with timestamp
         const timestamp = new Date().toLocaleString("sv-SE");
         const filename = `Attributlista-${timestamp}.xlsx`;
 
-        // Write file
         xlsx.writeFile(workbook, filename);
 
         enqueueSnackbar(`✓ Excel-fil skapad (${exportFeatures.length} rader)`, {
@@ -1677,7 +1618,6 @@ export default function AttributeEditorView({
   );
 
   const undoLatestTableChange = useCallback(() => {
-    // Pop the latest entry from the respective stack
     const modelLast = state.undoStack?.[state.undoStack.length - 1] ?? null;
     const tableLast = tableUndoLocal[tableUndoLocal.length - 1] ?? null;
     const formLast = formUndoStack[formUndoStack.length - 1] ?? null;
@@ -1691,7 +1631,6 @@ export default function AttributeEditorView({
 
     // 1) FORM UNDO: restore the same group (same timestamp)
     if (tForm >= tTable && tForm >= tModel && tForm >= tGeom && formLast) {
-      // Get the count of entries that share the same "when" timestamp
       let k = 0;
       for (let i = formUndoStack.length - 1; i >= 0; i--) {
         if ((formUndoStack[i]?.when ?? -1) !== tForm) break;
@@ -1699,7 +1638,6 @@ export default function AttributeEditorView({
       }
       const group = formUndoStack.slice(-k);
 
-      // Restore all affected rows in the model
       const ops = [];
       group.forEach(({ id, snapshot }) => {
         FM.forEach(({ key }) => {
@@ -1709,7 +1647,6 @@ export default function AttributeEditorView({
       });
       if (ops.length) controller.batchEdit(ops);
 
-      // If the focused row was found with: updated formula fields/dirty
       const hit = group.find((g) => g.id === focusedId);
       if (hit?.snapshot) {
         const snap = hit.snapshot;
@@ -1725,7 +1662,6 @@ export default function AttributeEditorView({
         setDirty(nextChanged.size > 0);
       }
 
-      // Remove the group and clean up the snapshots-ref
       setFormUndoStack((prev) => prev.slice(0, prev.length - k));
       group.forEach(({ id }) => formUndoSnapshotsRef.current.delete(id));
 
@@ -1761,7 +1697,6 @@ export default function AttributeEditorView({
           tableLast.id
         );
       } else {
-        // other local table action – remove the post
         setTableUndoLocal((prev) => prev.slice(0, -1));
       }
       return;
@@ -1771,19 +1706,16 @@ export default function AttributeEditorView({
     if (tGeom >= tModel && geomLast) {
       const { id, before } = geomLast;
 
-      // Always remove the entry from the stack first
       geomUndoRef.current.pop();
       setGeomUndoCount((c) => Math.max(0, c - 1));
 
       if (before) {
-        // Restore geometry in OL layer
         setGeometryById(id, before);
 
         // Trigger validation for the restored geometry
         // Use a separate event to avoid interfering with undo logic
         editBus.emit("sketch:validate-geometry", { id });
 
-        // Check if there are MORE geometry edits for this same feature still in the stack
         const hasMoreGeomEdits = geomUndoRef.current.some(
           (entry) => String(entry.id) === String(id)
         );
@@ -1833,7 +1765,6 @@ export default function AttributeEditorView({
           return; // Let native undo handle it
         }
 
-        // Check if there's anything to undo
         const hasTableUndo = tableUndoLocal?.length > 0;
         const hasFormUndo = formUndoStack?.length > 0;
         const hasModelUndo = state.undoStack?.length > 0;
@@ -1873,10 +1804,8 @@ export default function AttributeEditorView({
   const focusedFeature = useMemo(() => {
     if (focusedId == null) return null;
     if (focusedId < 0) {
-      // O(1) lookup using pendingAddsMap
       return pendingAddsMap.get(focusedId) || null;
     }
-    // O(1) lookup using featuresMap
     const base = featuresMap.get(focusedId);
     if (!base) return null;
     return { ...base, ...(pendingEdits[focusedId] || {}) };
@@ -1988,7 +1917,6 @@ export default function AttributeEditorView({
       }
     }
 
-    // Find IDs that were removed from pendingAdds
     const removedIds = [];
     for (const prevId of previousPendingAddsRef.current) {
       if (!existingDraftIds.has(prevId)) {
@@ -1996,13 +1924,11 @@ export default function AttributeEditorView({
       }
     }
 
-    // Remove OL features for IDs that were removed from pendingAdds
     if (removedIds.length > 0) {
       const layer = vectorLayerRef?.current;
       const src = layer?.getSource?.();
       if (src) {
         removedIds.forEach((fid) => {
-          // Find and remove the feature
           const feature =
             src.getFeatureById?.(fid) ||
             src.getFeatures().find((f) => {
@@ -2013,30 +1939,24 @@ export default function AttributeEditorView({
           if (feature) {
             src.removeFeature(feature);
             featureIndexRef.current.delete(fid);
-            // Emit event to clean up kink markers for this feature
             editBus.emit("sketch:feature-removed", { id: fid });
           }
         });
       }
     }
 
-    // Update previousPendingAddsRef for next time
     previousPendingAddsRef.current = existingDraftIds;
   }, [pendingAdds, draftBaselineRef, vectorLayerRef, featureIndexRef]);
 
   function selectAllVisible() {
     if (ui.mode === "table") {
-      // Table mode: select all filtered/sorted rows
       const ids = filteredAndSorted.map((f) => f.id);
       setTableSelectedIds(new Set(ids));
-      // Also sync to selectedIds for consistency when switching modes
       setSelectedIds(new Set(ids));
       if (!focusedId && ids.length) setFocusedId(ids[0]);
     } else {
-      // Form mode: select all visible rows
       const ids = visibleFormList.map((f) => f.id);
       setSelectedIds(new Set(ids));
-      // Also sync to tableSelectedIds for consistency when switching modes
       setTableSelectedIds(new Set(ids));
       if (!focusedId && ids.length) setFocusedId(ids[0]);
     }
@@ -2076,7 +1996,6 @@ export default function AttributeEditorView({
         return false;
       }
 
-      // Match search text
       const matchesSearch =
         !sTerm ||
         keys.some((k) => {
@@ -2084,7 +2003,6 @@ export default function AttributeEditorView({
           return v != null && String(v).toLowerCase().includes(sTerm);
         });
 
-      // Match column filters (same logic as in filteredAndSorted)
       // Always show new features (negative IDs) regardless of column filters
       const matchesColumnFilters =
         isNegativeId ||
@@ -2092,7 +2010,6 @@ export default function AttributeEditorView({
           if (!selectedValues || selectedValues.length === 0) return true;
           const cellValue = String(row[key] ?? "");
 
-          // Convert "(tom)" in filter back to "" for comparison
           const normalizedSelected = selectedValues.map((v) =>
             v === "(tom)" ? "" : v
           );
@@ -2156,13 +2073,9 @@ export default function AttributeEditorView({
 
     if (mode !== "form") return;
 
-    // If user explicitly cleared the selection, do nothing
     if (explicitClearRef.current) return;
-
-    // If both focus and selection are valid, do nothing
     if (focusedIdValid && selectedIdsValid) return;
 
-    // Select first visible row as fallback
     if (firstVisibleId != null) {
       setSelectedIds(new Set([firstVisibleId]));
       setFocusedId(firstVisibleId);
@@ -2179,7 +2092,6 @@ export default function AttributeEditorView({
       const isShift = evt.shiftKey;
       const isToggle = evt.metaKey || evt.ctrlKey || evt.altKey; // Alt = toggle only
 
-      // Ensure valid rowIndex (in case it's missing):
       let idx = rowIndex;
       if (idx == null || idx < 0) {
         idx = visibleFormList.findIndex((f) => f.id === rowId);
@@ -2242,12 +2154,10 @@ export default function AttributeEditorView({
             if (candidate != null && candidate !== focusedId)
               handleBeforeChangeFocus(candidate);
           }
-          // Note: update the anchor index on toggle
         } else {
           next = new Set([rowId]);
           if (String(focusedId) !== String(rowId))
             handleBeforeChangeFocus(rowId);
-          // Update the anchor
           anchorRef.current = { id: rowId, index: idx };
         }
 
@@ -2466,7 +2376,6 @@ export default function AttributeEditorView({
 
   // === Split Feature Logic ===
   const canSplitGeometry = React.useMemo(() => {
-    // For table mode, use tableSelectedIds
     const activeSelectedIds =
       ui.mode === "table" ? tableSelectedIds : selectedIds;
 
@@ -2493,7 +2402,6 @@ export default function AttributeEditorView({
       return;
     }
 
-    // Emit event to start split mode in Sketch
     editBus.emit("attrib:split-start", {
       featureId: id,
       geometryType,
@@ -2514,25 +2422,19 @@ export default function AttributeEditorView({
       const { originalFeatureId, splitFeatures } = ev.detail || {};
       if (!originalFeatureId || !splitFeatures?.length) return;
 
-      // Get the original feature to copy attributes
       const originalFeature = featureIndexRef.current?.get(originalFeatureId);
       if (!originalFeature) return;
 
-      // Mark original for deletion
       setDeleteState([originalFeatureId], "mark");
 
-      // Create drafts for each split part
       const createdIds = [];
       splitFeatures.forEach((splitGeometry) => {
-        // Clone the original feature to get its attributes
         const draftFeature = originalFeature.clone();
         draftFeature.setGeometry(splitGeometry);
 
-        // Add draft to model
         const draftId = model.addDraftFromFeature(draftFeature);
         createdIds.push(draftId);
 
-        // Add feature to vector layer
         const layer = vectorLayerRef.current;
         const src = layer?.getSource?.();
         if (src) {
@@ -2548,7 +2450,6 @@ export default function AttributeEditorView({
         }
       });
 
-      // Select the new drafts
       if (createdIds.length > 0) {
         setTableSelectedIds(new Set(createdIds));
         setSelectedIds(new Set(createdIds));
@@ -2596,7 +2497,6 @@ export default function AttributeEditorView({
     const feature = featureIndexRef.current?.get(id);
     if (!feature) return false;
     const type = feature.getGeometry?.()?.getType?.();
-    // Check if it's a multi-geometry with more than one part
     if (!["MultiPoint", "MultiLineString", "MultiPolygon"].includes(type)) {
       return false;
     }
@@ -2620,14 +2520,12 @@ export default function AttributeEditorView({
 
     if (activeSelectedIds.size < 2) return false;
 
-    // Get all selected features and check they have the same geometry type
     const ids = Array.from(activeSelectedIds);
     const types = ids.map((id) => {
       const feature = featureIndexRef.current?.get(id);
       return feature?.getGeometry?.()?.getType?.();
     });
 
-    // Filter out null/undefined and check all are the same type
     const validTypes = types.filter((t) => t);
     if (validTypes.length !== ids.length) return false;
 
@@ -2654,7 +2552,6 @@ export default function AttributeEditorView({
       (ev) => {
         const { count, newIds } = ev.detail || {};
         showNotification(`Multi-objektet delades upp i ${count} delar`);
-        // Select the new features
         if (newIds?.length > 0) {
           editBus.emit("attrib:select-ids", {
             ids: newIds,
@@ -2673,7 +2570,6 @@ export default function AttributeEditorView({
     const offMergeComplete = editBus.on("sketch:merge-complete", (ev) => {
       const { newId } = ev.detail || {};
       showNotification("Objekten slogs ihop till ett multi-objekt");
-      // Select the new merged feature
       if (newId != null) {
         editBus.emit("attrib:select-ids", {
           ids: [newId],

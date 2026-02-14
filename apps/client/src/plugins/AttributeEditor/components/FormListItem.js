@@ -1,6 +1,5 @@
 import React from "react";
 
-// Helper
 function makeRowPreview(row, FIELD_META) {
   const keys = FIELD_META.map((m) => m.key);
   const contentKeys = keys.filter(

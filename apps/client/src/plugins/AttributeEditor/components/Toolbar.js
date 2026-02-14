@@ -49,7 +49,6 @@ export default function Toolbar({
     drawingCount: 0,
   });
 
-  // Helper
   const getDrawnFeaturesCount = React.useCallback(() => {
     if (!map) return 0;
 
@@ -68,7 +67,7 @@ export default function Toolbar({
     return visibleFeatures.length;
   }, [map]);
 
-  // Build options: "None" + in command serviceList
+  // Build options: "None" + configured services
   const services = React.useMemo(() => {
     const base = [{ id: "NONE_ID", label: "Ingen" }];
     const fromProps = (serviceList || []).map((s) => ({
@@ -88,7 +87,6 @@ export default function Toolbar({
     }
   }, [serviceList]);
 
-  // Summarization for confirm dialog
   const summary = React.useMemo(
     () => ({
       adds:
@@ -109,7 +107,6 @@ export default function Toolbar({
     ]
   );
 
-  // Set plugin title and color and emit value/clear
   const applyServiceSwitch = React.useCallback(
     (def, label) => {
       setPluginSettings(
@@ -141,7 +138,6 @@ export default function Toolbar({
     try {
       setSavingNow(true);
 
-      // Move edits to pending if needed
       if (dirty) {
         saveChanges({
           toPending: true,
@@ -149,7 +145,6 @@ export default function Toolbar({
         });
       }
 
-      // Save all pending changes (table + form)
       await Promise.resolve(commitTableEdits());
     } finally {
       setSavingNow(false);
@@ -170,7 +165,6 @@ export default function Toolbar({
       const def = services.find((o) => o.id === nextId);
       const label = def?.label ?? "Ingen";
 
-      // Check for drawn objects if selecting service from "Ingen"
       const isSelectingService = label !== "Ingen";
       if (isSelectingService && serviceId === "NONE_ID") {
         try {
@@ -189,7 +183,6 @@ export default function Toolbar({
         }
       }
 
-      // Check for pending changes
       const pendingCount =
         (tablePendingAdds?.filter((d) => d.__pending !== "delete").length ??
           0) +
@@ -245,7 +238,6 @@ export default function Toolbar({
   const handleClearDrawingsAndSwitch = React.useCallback(() => {
     const { def, label } = drawingsWarningDialog.targetService || {};
 
-    // Remove all drawn objects
     if (map) {
       const layers = map.getLayers().getArray?.() || [];
       const sketchLayer = layers.find(
@@ -294,7 +286,7 @@ export default function Toolbar({
       setServiceId("NONE_ID");
     });
 
-    // When SketchView is about to be closed and has unsaved changes
+    // Handle external request to switch the active editing service
     const offSwitch = editBus.on("edit:service-switch-requested", (ev) => {
       const { targetLabel, targetId, source } = ev.detail || {};
       if (source === "toolbar") return;

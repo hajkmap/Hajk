@@ -2,7 +2,6 @@ export const CONSTANTS = {
   DEFAULT_BASE:
     process.env.HAJK_BASE_URL || `http://localhost:${process.env.PORT || 3002}`,
   UPSTREAM_TIMEOUT: Number(process.env.OGC_UPSTREAM_TIMEOUT_MS || 20000),
-  // WFS-T can trigger spatial indexes, triggers — needs more time than reads
   TRANSACTION_TIMEOUT: Number(process.env.OGC_TRANSACTION_TIMEOUT_MS || 60000),
 
   MAX_RETRIES: 3,
@@ -35,7 +34,6 @@ export const CONSTANTS = {
     "GeometryCollection",
   ],
 
-  // Set version for O(1) lookups (used by .has() instead of .includes())
   GEOMETRY_TYPES_SET: new Set([
     "Point",
     "LineString",
@@ -53,7 +51,7 @@ export const CONSTANTS = {
     V2: "2.0.0",
   },
 
-  // null = allow all (fallback); otherwise, comma-separated whitelist in env
+  // null = allow all (fallback); otherwise, comma-separated allowlist in env
   ALLOWED_HOSTS: process.env.WFS_ALLOWED_HOSTS
     ? process.env.WFS_ALLOWED_HOSTS.split(",").map((h) => h.trim())
     : null,

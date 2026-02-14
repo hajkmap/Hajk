@@ -316,7 +316,6 @@ export default function DesktopForm({
     try {
       setSavingNow(true);
 
-      // reset the summary of pending changes
       if (dirty) {
         saveChanges({
           toPending: true,
@@ -324,7 +323,6 @@ export default function DesktopForm({
         });
       }
 
-      // save all pending changes (table + form) – this prop is sync; Promise.resolve makes await work seamlessly
       await Promise.resolve(commitTableEdits());
     } finally {
       setSavingNow(false);
@@ -843,25 +841,26 @@ export default function DesktopForm({
                   ? "Ändringar buffrade (ej sparade)"
                   : "Allt sparat"}
             </div>
-            <ConfirmSaveDialog
-              open={saveDialogOpen}
-              onClose={() => setSaveDialogOpen(false)}
-              onConfirm={confirmSave}
-              summary={summary}
-              saving={savingNow}
-            />
-
-            <ConfirmationDialog
-              open={showAllConfirmOpen}
-              titleName="Visa alla objekt"
-              contentDescription="Om du väljer att visa alla objekt kan systemet bli långsammare. Vill du fortsätta?"
-              cancel="Avbryt"
-              confirm="Fortsätt"
-              handleConfirm={handleShowAllConfirm}
-              handleAbort={handleShowAllAbort}
-            />
           </>
         )}
+
+        <ConfirmSaveDialog
+          open={saveDialogOpen}
+          onClose={() => setSaveDialogOpen(false)}
+          onConfirm={confirmSave}
+          summary={summary}
+          saving={savingNow}
+        />
+
+        <ConfirmationDialog
+          open={showAllConfirmOpen}
+          titleName="Visa alla objekt"
+          contentDescription="Om du väljer att visa alla objekt kan systemet bli långsammare. Vill du fortsätta?"
+          cancel="Avbryt"
+          confirm="Fortsätt"
+          handleConfirm={handleShowAllConfirm}
+          handleAbort={handleShowAllAbort}
+        />
       </div>
     </div>
   );

@@ -30,13 +30,11 @@ export function useScrollToSelectedRow({
   const [currentScrollIndex, setCurrentScrollIndex] = useState(0);
   const [viewedRowId, setViewedRowId] = useState(null);
 
-  // Reset scroll index and viewed row when selection changes
   useEffect(() => {
     setCurrentScrollIndex(0);
     setViewedRowId(null);
   }, [selectedIds, focusedId]);
 
-  // Cleanup scroll timeout on unmount
   useEffect(() => {
     return () => {
       if (scrollTimeoutRef.current) {
@@ -46,11 +44,9 @@ export function useScrollToSelectedRow({
   }, []);
 
   const scrollToSelectedRow = useCallback(() => {
-    // Determine target ID
     let targetId;
     let shouldIncrementIndex = false;
 
-    // Filter selected IDs to only include those visible in current items list
     const visibleSelectedIds = selectedIds
       ? Array.from(selectedIds).filter((id) => items.some((r) => r.id === id))
       : [];
@@ -78,36 +74,29 @@ export function useScrollToSelectedRow({
       return; // Nothing to scroll to
     }
 
-    // Clear any existing hover
     if (handleRowLeave) {
       handleRowLeave();
     }
 
-    // Find the row in the full list
     const rowIndex = items.findIndex((r) => String(r.id) === String(targetId));
     if (rowIndex === -1) return;
 
-    // Navigate to the correct page
     const targetPage = Math.floor(rowIndex / rowsPerPage);
     const pageChanged = targetPage !== currentPage;
     if (pageChanged) {
       setCurrentPage(targetPage);
     }
 
-    // Mark this row as the currently viewed row (for visual highlighting)
     setViewedRowId(targetId);
 
-    // Show tooltip on map for this feature
     if (handleRowHover) {
       handleRowHover(targetId, true);
     }
 
-    // Clear any pending scroll timeout
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current);
     }
 
-    // Scroll to the row (with delay if page changed)
     scrollTimeoutRef.current = setTimeout(
       () => {
         scrollTimeoutRef.current = null;

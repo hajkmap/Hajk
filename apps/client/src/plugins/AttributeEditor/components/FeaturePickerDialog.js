@@ -32,7 +32,6 @@ export default function FeaturePickerDialog({
 }) {
   const [selectedIds, setSelectedIds] = React.useState(new Set());
 
-  // Reset selection when dialog opens
   React.useEffect(() => {
     if (open) {
       setSelectedIds(new Set());
@@ -64,7 +63,6 @@ export default function FeaturePickerDialog({
     onClose();
   };
 
-  // Get display properties for a feature
   const getDisplayProps = (feature) => {
     const props = feature.getProperties();
     const display = [];
@@ -130,7 +128,6 @@ export default function FeaturePickerDialog({
       </DialogTitle>
 
       <DialogContent dividers sx={{ p: 0 }}>
-        {/* Select All checkbox */}
         <Box
           sx={{
             px: 2,
@@ -156,7 +153,6 @@ export default function FeaturePickerDialog({
           />
         </Box>
 
-        {/* Feature list */}
         <List sx={{ pt: 0 }}>
           {features.map((item, idx) => {
             const { id, feature } = item;
@@ -196,12 +192,10 @@ export default function FeaturePickerDialog({
                     onChange={() => handleToggle(id)}
                   />
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    {/* Feature ID */}
                     <Typography variant="subtitle2" fontWeight={600}>
                       ID: {id}
                     </Typography>
 
-                    {/* Feature properties */}
                     {props.length > 0 ? (
                       <Box sx={{ mt: 0.5 }}>
                         {props.map((prop, i) => (

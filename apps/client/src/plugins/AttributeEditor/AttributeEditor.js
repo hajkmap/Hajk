@@ -18,7 +18,6 @@ import Overlay from "ol/Overlay";
 import DragBox from "ol/interaction/DragBox";
 import { platformModifierKeyOnly } from "ol/events/condition";
 
-// Cache size limits to prevent memory leaks
 const MAX_SCHEMA_CACHE_SIZE = 50;
 const MAX_GRAVEYARD_SIZE = 1000;
 
@@ -56,12 +55,10 @@ const TOOLTIP_EXCLUDE_KEYS = new Set([
 function buildTooltipContent(tooltipEl, displayId, displayProps, colors) {
   const { mutedColor, textColor } = colors;
 
-  // Clear existing content safely
   while (tooltipEl.firstChild) {
     tooltipEl.removeChild(tooltipEl.firstChild);
   }
 
-  // Create ID header
   const idDiv = document.createElement("div");
   idDiv.style.cssText =
     "font-weight: 600; color: #FFD700; margin-bottom: 6px; font-size: 14px;";
@@ -69,14 +66,12 @@ function buildTooltipContent(tooltipEl, displayId, displayProps, colors) {
   tooltipEl.appendChild(idDiv);
 
   if (displayProps.length === 0) {
-    // No attributes message
     idDiv.style.marginBottom = "0";
     const emptyDiv = document.createElement("div");
     emptyDiv.style.cssText = `font-size: 11px; color: ${mutedColor}; font-style: italic; margin-top: 4px;`;
     emptyDiv.textContent = "Inga attribut att visa";
     tooltipEl.appendChild(emptyDiv);
   } else {
-    // Build property rows
     displayProps.forEach(({ key, value }) => {
       const rowDiv = document.createElement("div");
       rowDiv.style.cssText = "font-size: 12px; margin-bottom: 2px;";
@@ -365,7 +360,6 @@ function AttributeEditor(props) {
   const styleFn = React.useCallback(
     (feature) => {
       const raw = getFeatureId(feature, idFieldRef.current);
-      // O(1) lookup from pre-computed cache instead of computing aliases every render
       const aliases = featureAliasesRef.current.get(raw) || idAliases(raw);
 
       const sel = selectedIdsRef.current;
@@ -373,7 +367,6 @@ function AttributeEditor(props) {
       const del = deletedIdsRef.current;
       const edits = pendingEditsRef.current;
       const hov = hoveredIdRef.current;
-      // Use pre-computed Sets for O(1) lookups instead of O(n) array scans
       const addIds = pendingAddIdsSetRef.current;
       const deletedDraftIds = pendingDeletedDraftIdsSetRef.current;
 
@@ -388,13 +381,11 @@ function AttributeEditor(props) {
         (k) => edits[k] && Object.keys(edits[k]).length > 0
       );
 
-      // P1 Optimization: O(1) Set.has() instead of O(n) Array.some()
       const isDraft = aliases.some((k) => {
         const numId = typeof k === "number" ? k : Number(k);
         return (Number.isFinite(numId) && numId < 0) || addIds.has(k);
       });
 
-      // P1 Optimization: O(1) Set.has() instead of O(n) Array.some()
       const isDraftDeleted =
         isDraft && aliases.some((k) => deletedDraftIds.has(k));
 
@@ -470,7 +461,6 @@ function AttributeEditor(props) {
             const textColor = isDark ? "#e5e7eb" : "#111827";
             const mutedColor = isDark ? "#9ca3af" : "#6b7280";
 
-            // Build tooltip content safely (XSS-protected)
             buildTooltipContent(tooltipEl, props.id || id, displayProps, {
               mutedColor,
               textColor,
@@ -510,25 +500,21 @@ function AttributeEditor(props) {
 
     (async () => {
       try {
-        // Fetch list with abort signal
         const list = await ogc.fetchWfstList(
           "id,uuid,caption,title,name,projection,layers",
           { signal }
         );
 
-        // Check if aborted after first async operation
         if (signal.aborted) return;
 
         const allArr = Array.isArray(list) ? list : (list?.layers ?? []);
         const ids = active.map((x) => x.id).filter(Boolean);
 
-        // Fetch all metadata with same signal
         const items = await Promise.all(
           ids.map(async (id) => {
             try {
               const meta = await ogc.fetchWfstMeta(id, { signal });
 
-              // Check abort after each meta fetch
               if (signal.aborted) return null;
 
               const title =
@@ -546,10 +532,8 @@ function AttributeEditor(props) {
                 layers: meta?.layers || [],
               };
             } catch (err) {
-              // If aborted, return null immediately
               if (signal.aborted) return null;
 
-              // Otherwise fallback to list data
               const m = allArr.find((x) => (x.id ?? x.uuid) === id);
               return {
                 id,
@@ -561,7 +545,6 @@ function AttributeEditor(props) {
           })
         );
 
-        // Final abort check before setting state
         if (signal.aborted) return;
 
         setServiceList(items.filter(Boolean));
@@ -606,7 +589,6 @@ function AttributeEditor(props) {
         color: color ?? u.color,
       }));
 
-      // Initialize model to empty state and free memory from previous layer
       model.dispatch({ type: Action.INIT, features: [] });
       setFieldMetaLocal([]);
       model.setFieldMetadata([]);
@@ -614,7 +596,6 @@ function AttributeEditor(props) {
       setIsLoading(true);
 
       try {
-        // Check if operation was aborted before starting
         if (signal.aborted) return;
 
         // 1) Fetch whole schema (no fields-param)
@@ -622,11 +603,9 @@ function AttributeEditor(props) {
         if (!schema) {
           schema = await ogc.fetchWfst(id);
 
-          // Check if aborted after async operation
           if (signal.aborted) return;
 
           schemaCache.current.set(id, schema);
-          // Prevent unbounded cache growth
           limitMapSize(schemaCache.current, MAX_SCHEMA_CACHE_SIZE);
         }
 
@@ -637,7 +616,6 @@ function AttributeEditor(props) {
           serviceId: id,
         });
 
-        // Check before continuing
         if (signal.aborted) return;
 
         const geomKey = String(
@@ -773,21 +751,18 @@ function AttributeEditor(props) {
         }
         ensureRo("id", "ID", 90);
 
-        // Check before state updates
         if (signal.aborted) return;
 
         // 6) Set FM (state + model) - trigger render in View
         setFieldMetaLocal(fmMerged);
         model.setFieldMetadata(fmMerged);
 
-        // Check before loading data
         if (signal.aborted) return;
 
-        // 7) Load data (once FM is set) - pass signal to allow cancellation
+        // 7) Load data (once FM is set)
         const { featureCollection } =
           (await model.loadFromService?.(id, {}, { signal })) || {};
 
-        // Check before OpenLayers operations
         if (signal.aborted) return;
 
         // 8) Set up the vector layer
@@ -820,18 +795,14 @@ function AttributeEditor(props) {
           features = [];
         }
 
-        // Reset index and visibility set
         featureIndexRef.current.clear();
         featureAliasesRef.current.clear();
         visibleIdsRef.current = new Set();
 
-        // Index all features and make them visible initially (both num & str)
-        // Pre-compute aliases once here for O(1) lookup in styleFn
         features.forEach((f) => {
           const raw = getFeatureId(f, idFieldRef.current);
           const aliases = idAliases(raw);
 
-          // Store pre-computed aliases for this feature (keyed by raw id)
           featureAliasesRef.current.set(raw, aliases);
 
           for (const k of aliases) {
@@ -892,7 +863,6 @@ function AttributeEditor(props) {
       const { source } = ev.detail || {};
       if (source === "attrib") return;
 
-      // Cancel any ongoing operation
       if (currentAbortController) {
         currentAbortController.abort();
         currentAbortController = null;
@@ -921,13 +891,9 @@ function AttributeEditor(props) {
     });
 
     return () => {
-      // Cleanup on unmount
-      // 1. Abort any ongoing async operation
       if (currentAbortController) {
         currentAbortController.abort();
       }
-
-      // 2. Remove event listeners (EventBus handles this automatically)
       offSel();
       offClr();
     };
@@ -944,7 +910,6 @@ function AttributeEditor(props) {
     const map = props.map;
     if (!map) return;
 
-    // Create the tooltip element
     const tooltipEl = document.createElement("div");
     tooltipEl.style.cssText = `
     position: absolute;
@@ -1071,7 +1036,6 @@ function AttributeEditor(props) {
         draftBaselineRef.current.set(tempId, baseline);
 
         featureIndexRef.current.set(tempId, f);
-        // Pre-compute aliases for the new draft feature
         featureAliasesRef.current.set(tempId, idAliases(tempId));
         graveyardRef.current.delete(tempId);
 
@@ -1080,13 +1044,10 @@ function AttributeEditor(props) {
         selectedIdsRef.current = new Set([tempId]);
         visibleIdsRef.current.add(tempId);
 
-        // Remove from Sketch layer and add to AE layer
         try {
-          // Remove from Sketch layer
           programmaticSketchOpsRef.current.add(f);
           src.removeFeature(f);
 
-          // Add to AE layer
           const aeLayer = vectorLayerRef.current;
           const aeSrc = aeLayer?.getSource?.();
           if (aeSrc) {
@@ -1099,7 +1060,6 @@ function AttributeEditor(props) {
 
         vectorLayerRef.current?.changed?.();
 
-        // Emit select-ids to sync table selection state with map selection
         editBus.emit("attrib:select-ids", {
           ids: [tempId],
           source: "map",
@@ -1122,7 +1082,6 @@ function AttributeEditor(props) {
           return;
         }
 
-        // Find id
         let fid = f.getId?.() ?? f.get?.("id");
         if (fid == null) {
           for (const [k, v] of featureIndexRef.current.entries()) {
@@ -1154,7 +1113,6 @@ function AttributeEditor(props) {
         vectorLayerRef.current?.changed?.();
       };
 
-      // bind
       src.on("addfeature", onAdd);
       src.on("removefeature", onRemove);
 
@@ -1203,7 +1161,6 @@ function AttributeEditor(props) {
       pendingEditsRef.current = st.pendingEdits || {};
       pendingAddsRef.current = st.pendingAdds || [];
 
-      // Build Sets for O(1) lookups in styleFn
       const adds = st.pendingAdds || [];
       const addIdsSet = new Set();
       const deletedDraftIdsSet = new Set();
@@ -1249,7 +1206,6 @@ function AttributeEditor(props) {
           const f = featureIndexRef.current.get(id);
           if (f) {
             try {
-              // PROG-GUARD: mark this remove as programmatic so onRemove ignores it
               programmaticSketchOpsRef.current.add(f);
               src.removeFeature(f);
             } catch {}
@@ -1269,7 +1225,6 @@ function AttributeEditor(props) {
           const f = featureIndexRef.current.get(id);
           if (f) {
             try {
-              // PROG-GUARD: programmatic remove to avoid re-dispatch in onRemove
               programmaticSketchOpsRef.current.add(f);
               src.removeFeature(f);
             } catch {}
@@ -1289,7 +1244,6 @@ function AttributeEditor(props) {
           const f = graveyardRef.current.get(id);
           if (f) {
             try {
-              // PROG-GUARD: programmatic add to avoid re-dispatch in onAdd
               programmaticSketchOpsRef.current.add(f);
               src.addFeature(f);
             } catch {}
@@ -1315,7 +1269,6 @@ function AttributeEditor(props) {
           const f = featureIndexRef.current.get(id);
           if (f) {
             try {
-              // PROG-GUARD: programmatic remove to avoid onRemove loop
               programmaticSketchOpsRef.current.add(f);
               src.removeFeature(f);
             } catch {}
@@ -1367,7 +1320,6 @@ function AttributeEditor(props) {
         { layerFilter: (lyr) => lyr === layer, hitTolerance: 3 }
       );
 
-      // No hits → clear selection
       if (hits.length === 0) {
         if (selectedIdsRef.current.size) {
           selectedIdsRef.current = new Set();
@@ -1381,9 +1333,7 @@ function AttributeEditor(props) {
         return;
       }
 
-      // Multiple features → show picker
       if (hits.length > 1) {
-        // Use rowIdMapRef for O(1) lookups
         const idMap = rowIdMapRef.current;
         const pickerFeatures = hits.map((f) => {
           const rawId = getFeatureId(f, idFieldRef.current);
@@ -1394,7 +1344,6 @@ function AttributeEditor(props) {
           };
         });
 
-        // Remove duplicates
         const uniqueFeatures = [];
         const seenIds = new Set();
         pickerFeatures.forEach((item) => {
@@ -1413,10 +1362,8 @@ function AttributeEditor(props) {
         }
       }
 
-      // Single feature (original logic continues...)
       const hit = hits[0];
       const rawId = getFeatureId(hit, idFieldRef.current);
-      // Use rowIdMapRef for O(1) lookup
       const canonId = toCanonicalId(rawId, rowIdMapRef.current);
 
       editBus.emit("attrib:select-ids", {
@@ -1473,30 +1420,25 @@ function AttributeEditor(props) {
     };
   }, [props.map, vectorLayerRef, selectedIdsRef, model, handleRowLeave]);
 
-  // HANDLE FEATURE PICKER SELECTION
   const handleFeaturePickerSelect = React.useCallback(
     (selectedIds) => {
       if (selectedIds.length === 0) return;
 
-      // Merge with existing selection instead of replacing
       const current = selectedIdsRef.current || new Set();
       const currentLogical = new Set(Array.from(current).map(String));
       selectedIds.forEach((id) => currentLogical.add(String(id)));
 
       const mergedIds = Array.from(currentLogical);
 
-      // Update selection
       selectedIdsRef.current = buildVizSet(mergedIds);
       vectorLayerRef.current?.changed?.();
 
-      // Emit event
       editBus.emit("attrib:select-ids", {
         ids: mergedIds,
         source: "map",
         mode: "replace",
       });
 
-      // Focus on first of the newly selected
       if (selectedIds.length > 0) {
         editBus.emit("attrib:focus-id", {
           id: selectedIds[0],
@@ -1515,14 +1457,12 @@ function AttributeEditor(props) {
     const map = props.map;
     if (!map) return;
 
-    // Create DragBox interaction - activated with Ctrl+Drag
     const dragBox = new DragBox({
-      condition: platformModifierKeyOnly, // Ctrl (Mac: Cmd) + drag
+      condition: platformModifierKeyOnly,
     });
 
     map.addInteraction(dragBox);
 
-    // When user releases box-selection
     // Ctrl + drag box always ADDS to existing selection
     dragBox.on("boxend", () => {
       const boxExtent = dragBox.getGeometry().getExtent();
@@ -1532,10 +1472,8 @@ function AttributeEditor(props) {
       const source = layer.getSource();
       if (!source) return;
 
-      // Find all features within the box
       const selectedFeatures = [];
       source.forEachFeatureInExtent(boxExtent, (feature) => {
-        // Check that the feature is actually visible
         const raw = getFeatureId(feature, idFieldRef.current);
         const aliases = idAliases(raw);
 
@@ -1551,8 +1489,6 @@ function AttributeEditor(props) {
 
       if (selectedFeatures.length === 0) return;
 
-      // Convert to canonical IDs
-      // Use rowIdMapRef for O(1) lookups
       const idMap = rowIdMapRef.current;
       const newIds = selectedFeatures.map((f) => {
         const rawId = getFeatureId(f, idFieldRef.current);
@@ -1567,11 +1503,9 @@ function AttributeEditor(props) {
       newIds.forEach((id) => existingStrs.add(String(id)));
       const finalIds = Array.from(existingStrs);
 
-      // Update selection
       selectedIdsRef.current = buildVizSet(finalIds);
       vectorLayerRef.current?.changed?.();
 
-      // Emit event
       editBus.emit("attrib:select-ids", {
         ids: finalIds,
         source: "map",
@@ -1680,9 +1614,7 @@ function AttributeEditor(props) {
     setUi((prev) => ({ ...prev, [prop]: value }));
   }, []);
 
-  const panelHeaderButtonCallback = React.useCallback(() => {
-    console.log("You just clicked the panel-header button!");
-  }, []);
+  const panelHeaderButtonCallback = React.useCallback(() => {}, []);
 
   return (
     <>
@@ -1693,7 +1625,7 @@ function AttributeEditor(props) {
           icon: <BugReportIcon />,
           title: pluginSettings.title,
           color: pluginSettings.color,
-          description: "En kort beskrivning som visas i widgeten",
+          description: "Redigera attribut för WFS-lager",
           customPanelHeaderButtons: [
             {
               icon: <BugReportIcon />,
@@ -1734,7 +1666,6 @@ function AttributeEditor(props) {
         />
       </BaseWindowPlugin>
 
-      {/* Modal Dialog */}
       <FeaturePickerDialog
         open={featurePicker.open}
         onClose={handleFeaturePickerClose}

@@ -646,7 +646,6 @@ export function idAliases(x) {
 
   const result = Array.from(out);
 
-  // Store in cache (with size limit)
   if (idAliasCache.size >= CACHE_MAX_SIZE) {
     // Remove oldest entry (first in Map)
     const firstKey = idAliasCache.keys().next().value;

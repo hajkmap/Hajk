@@ -6,7 +6,6 @@ import log4js from "log4js";
 
 const log = log4js.getLogger("ogc.v2");
 
-// Shared error handler to keep individual methods clean
 function handleError(e, res) {
   if (e.name === "ValidationError")
     return res.status(400).json({ error: e.message, details: e.details });
@@ -55,7 +54,6 @@ export class Controller {
     try {
       const user = ad.getUserFromRequestHeader(req);
 
-      // Parameter validation
       const rawLimit = Number.parseInt(
         req.query.limit ?? req.query.maxFeatures ?? String(CONSTANTS.DEFAULT_LIMIT),
         10
@@ -84,7 +82,6 @@ export class Controller {
         return res.status(400).json({ error: "Invalid bbox format" });
       }
 
-      // Fetch and proxy the raw WFS response
       const result = await svc.getWFSTFeatures({
         id: req.params.id,
         user,

@@ -1,7 +1,6 @@
 import { CONSTANTS } from "./constants.js";
 import { logger } from "./logger.js";
 
-// Private IPv4 patterns (module-scope to avoid recreation on each call)
 const PRIVATE_V4_PATTERNS = [
   /^127\./,
   /^10\./,

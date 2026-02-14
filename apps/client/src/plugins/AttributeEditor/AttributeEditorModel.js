@@ -28,7 +28,6 @@ const initialState = {
   redoStack: [],
 };
 
-// Helper to build featuresMap from features array
 const buildFeaturesMap = (features) => {
   const map = new Map();
   for (const f of features) {
@@ -516,7 +515,6 @@ export default class AttributeEditorModel {
       const uniq = arr.length;
       const nullRate = nRows ? nullCounts[k] / nRows : 0;
 
-      // Detect date/datetime types
       const hasDateTime = arr.some(isDateTime);
       const hasDate = arr.some(isDateLike);
       const isPara = isParagraphish(k);
@@ -556,7 +554,6 @@ export default class AttributeEditorModel {
     if (!this.#ogc)
       throw new Error("OGC API missing (inject via settings.ogc)");
 
-    // Fetch feature collection from backend (pass signal to allow cancellation)
     const payload = await this.#ogc.fetchWfstFeatures(
       serviceId,
       {
@@ -566,7 +563,6 @@ export default class AttributeEditorModel {
       { signal }
     );
 
-    // If aborted after fetch, don't update state
     if (signal?.aborted) return null;
 
     this._lastFeatureCollection = payload;
@@ -577,20 +573,15 @@ export default class AttributeEditorModel {
       this.#layerProjection = payload.layerProjection || payload.crsName;
     }
 
-    // Normalize data to table rows and infer field metadata
     const rows = this.normalizeApiFeatures(payload);
     const fieldMeta = this.inferFieldMetaFromFeatures(rows);
 
-    // Final abort check before updating state
     if (signal?.aborted) return null;
 
-    // Initialize state with fetched features
     this._state = reducer(this._state, { type: Action.INIT, features: rows });
 
-    // Set field metadata in the model
     this.setFieldMetadata(fieldMeta);
 
-    // Notify subscribers (UI updates)
     this._emit();
 
     return { features: rows, fieldMeta, featureCollection: payload };
@@ -648,7 +639,6 @@ export default class AttributeEditorModel {
     }
   };
 
-  // Extract attributes from an OL Feature (excluding geometry)
   _makeDraftFromFeature = (feature, fieldMeta = []) => {
     const props = feature?.getProperties ? feature.getProperties() : {};
     const { geometry, ...rest } = props;

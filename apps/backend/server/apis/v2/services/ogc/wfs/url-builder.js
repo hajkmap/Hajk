@@ -34,13 +34,11 @@ export function buildWfsGetFeatureUrl(options) {
   const url = new URL(baseUrl);
   const isV2 = version.startsWith("2.");
 
-  // Basic parameters
   url.searchParams.set("SERVICE", "WFS");
   url.searchParams.set("REQUEST", "GetFeature");
   url.searchParams.set("VERSION", version);
   if (srsName) url.searchParams.set("SRSNAME", srsName);
 
-  // Output format (compatibility)
   url.searchParams.set("OUTPUTFORMAT", outputFormat);
   url.searchParams.set("outputFormat", outputFormat);
   url.searchParams.set("outputformat", outputFormat);
@@ -56,7 +54,7 @@ export function buildWfsGetFeatureUrl(options) {
     if (offset != null) url.searchParams.set("STARTINDEX", String(offset));
   }
 
-  // Bounding box compatibility (activated via env)
+  // WFS version parameter name compatibility
   if (process.env.OGC_WFS_PARAM_COMPAT === "both") {
     url.searchParams.set("TYPENAME", typeName);
     url.searchParams.set("TYPENAMES", typeName);
@@ -70,13 +68,11 @@ export function buildWfsGetFeatureUrl(options) {
     }
   }
 
-  // Optional parameters
   if (bbox) {
     const bboxValue = bbox.includes(",EPSG") ? bbox : `${bbox},${srsName}`;
     url.searchParams.set("BBOX", bboxValue);
   }
 
-  // Validate and set OGC Filter (must look like XML with Filter element)
   if (filter) {
     const trimmed = filter.trim();
     if (!trimmed.startsWith("<") || !trimmed.endsWith(">")) {
@@ -90,9 +86,7 @@ export function buildWfsGetFeatureUrl(options) {
     url.searchParams.set("FILTER", filter);
   }
 
-  // Validate and set CQL Filter (block potential SQL injection patterns)
   if (cqlFilter) {
-    // Block dangerous SQL patterns that shouldn't appear in CQL
     if (/;\s*(?:DROP|DELETE|UPDATE|INSERT|ALTER|TRUNCATE)/i.test(cqlFilter)) {
       throw new ValidationError("Invalid CQL Filter (dangerous pattern)");
     }

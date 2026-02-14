@@ -2,7 +2,6 @@ import { CONSTANTS } from "../constants.js";
 import { UpstreamError } from "../errors.js";
 import { logger } from "../logger.js";
 
-// Status codes that trigger retry (Set for O(1) lookup)
 const RETRY_STATUS_CODES = new Set([502, 503, 504]);
 
 /**
@@ -80,13 +79,11 @@ export async function readTextWithLimit(
   res,
   maxBytes = CONSTANTS.MAX_RESPONSE_BYTES
 ) {
-  // Fast path: Content-Length header present
   const contentLength = res.headers.get("content-length");
   if (contentLength && parseInt(contentLength, 10) > maxBytes) {
     throw new UpstreamError("Response too large", 413);
   }
 
-  // Stream the body, tracking bytes
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   const chunks = [];
@@ -106,7 +103,6 @@ export async function readTextWithLimit(
       }
       chunks.push(decoder.decode(value, { stream: true }));
     }
-    // Flush remaining bytes
     chunks.push(decoder.decode());
     return chunks.join("");
   } catch (error) {

@@ -21,14 +21,12 @@ import {
   ValidationError,
 } from "./ogc/errors.js";
 
-// Normalize EPSG code format (e.g. "urn:ogc:def:crs:EPSG::3006" → "EPSG:3006")
 const normalizeEpsg = (name) => {
   if (!name) return undefined;
   const m = String(name).match(/EPSG[:/]*[:]*([0-9]+)/i);
   return m ? `EPSG:${m[1]}` : undefined;
 };
 
-// Resolve the effective typeName from a layer config entry
 const resolveTypeName = (layer, overrideTypeName) => {
   const tn =
     overrideTypeName ||
@@ -44,7 +42,6 @@ const resolveTypeName = (layer, overrideTypeName) => {
   return tn;
 };
 
-// ── In-memory config cache (avoids disk reads on every request) ────────────
 const _layersCache = { mtime: 0, data: null };
 const LAYERS_PATH = path.join(process.cwd(), "App_Data", "layers.json");
 
@@ -55,7 +52,6 @@ async function getCachedLayersStore() {
     if (_layersCache.data && mtime === _layersCache.mtime) {
       return _layersCache.data;
     }
-    // File changed (or first load) — read and cache
     const text = await fs.readFile(LAYERS_PATH, "utf-8");
     const json = JSON.parse(text);
     _layersCache.mtime = mtime;
@@ -78,8 +74,6 @@ async function getCachedLayersStore() {
 async function getWFSTStore({ user = null, washContent = true } = {}) {
   let store;
 
-  // When AD is active we must go through ConfigService for group filtering.
-  // Otherwise use the fast mtime-cached path.
   if (process.env.AD_LOOKUP_ACTIVE === "true") {
     store = await ConfigService.getLayersStore(user, washContent);
   } else {
@@ -118,8 +112,6 @@ async function requireLayer(id, { user, washContent } = {}) {
   }
   return layer;
 }
-
-// ── Public API ──────────────────────────────────────────────────────────────
 
 /** List all WFST layers visible to the current user. */
 export async function listWFSTLayers({ fields, user, washContent } = {}) {

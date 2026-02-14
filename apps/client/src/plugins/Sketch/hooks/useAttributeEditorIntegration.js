@@ -11,10 +11,8 @@ import { editBus } from "../../../buses/editBus";
 import HajkTransformer from "../../../utils/HajkTransformer";
 import Draw from "ol/interaction/Draw";
 
-// Layer name for AttributeEditor features
 const LAYER_NAME = "attributeeditor";
 
-// Check if a feature matches a given logical ID
 function matchesLogicalId(feat, want) {
   const a = feat?.getId?.();
   const b = feat?.get?.("@_fid");
@@ -30,7 +28,6 @@ function matchesLogicalId(feat, want) {
   return false;
 }
 
-// Extract coordinates from feature for node highlighting
 function getFeatureCoordinates(feature) {
   const geometry = feature.getGeometry();
   if (!geometry) return [];
@@ -63,7 +60,6 @@ function getFeatureCoordinates(feature) {
   }
 }
 
-// Get polygon perimeter by creating a LineString from the outer ring
 function getPolygonPerimeter(geometry) {
   try {
     const linearRingCoords =
@@ -106,10 +102,8 @@ const useAttributeEditorIntegration = ({
   attributeEditorActiveRef,
   measurementSettings,
 }) => {
-  // Track selected feature IDs to restore selection after effect re-runs
   const selectedIdsRef = React.useRef([]);
 
-  // Track split mode context
   const splitContextRef = React.useRef(null);
   const splitDrawInteractionRef = React.useRef(null);
 
@@ -121,7 +115,6 @@ const useAttributeEditorIntegration = ({
     if (!map) return;
     const lastPublishRef = { id: null, chan: null };
 
-    // Helper: Canonicalize feature ID
     const toCanonicalId = (idLike) => {
       const rows = props?.model?.getSnapshot?.().features || [];
       const s = String(idLike);
@@ -146,7 +139,6 @@ const useAttributeEditorIntegration = ({
       return idLike;
     };
 
-    // Helper: Create node highlight style
     const getNodeHighlightStyle = (feature) => {
       return new Style({
         image: new Circle({
@@ -170,7 +162,6 @@ const useAttributeEditorIntegration = ({
     // SECTION: Measurement helpers for AttributeEditor features
     // ============================================================
 
-    // Helper: Calculate measurements for a feature (area, length, perimeter)
     const getFeatureMeasurements = (feature) => {
       const geometry = feature?.getGeometry?.();
       if (!geometry) return [];
@@ -224,12 +215,10 @@ const useAttributeEditorIntegration = ({
       return [];
     };
 
-    // Helper: Format measurement value to readable string
     const formatMeasurement = (measurement) => {
       const measurementSettings = drawModel?.getMeasurementSettings?.() || {};
       const { type, value, prefix } = measurement;
 
-      // Check if this measurement type should be shown
       const showMeasurement =
         (type === "LENGTH" && measurementSettings.showLength) ||
         (type === "AREA" && measurementSettings.showArea) ||
@@ -241,11 +230,9 @@ const useAttributeEditorIntegration = ({
       const lengthUnit = measurementSettings.lengthUnit || "AUTO";
       const areaUnit = measurementSettings.areaUnit || "AUTO";
 
-      // Determine which unit format to use
       const isLength = type === "LENGTH" || type === "PERIMETER";
       const unitFormat = isLength ? lengthUnit : areaUnit;
 
-      // Format based on unit type
       let formatted = "";
       if (unitFormat === "KM" || unitFormat === "KM2") {
         // Kilometers
@@ -288,7 +275,6 @@ const useAttributeEditorIntegration = ({
       return `${prefix} ${formatted}`.trim();
     };
 
-    // Helper: Get measurement label text for a feature
     const getMeasurementLabelText = (feature) => {
       const measurementSettings = drawModel?.getMeasurementSettings?.() || {};
       if (!measurementSettings.showText) return "";
@@ -300,7 +286,6 @@ const useAttributeEditorIntegration = ({
         .join("");
     };
 
-    // Helper: Create Text style for measurement display
     const getMeasurementTextStyle = (feature) => {
       const labelText = getMeasurementLabelText(feature);
       if (!labelText) return null;
@@ -341,7 +326,6 @@ const useAttributeEditorIntegration = ({
       }
     };
 
-    // Helper: Publish feature to Sketch/EditView without affecting AE selection
     const publishToEditView = (feature) => {
       const chan = activityId === "MOVE" ? "move" : "edit";
       const fid = feature
@@ -418,7 +402,6 @@ const useAttributeEditorIntegration = ({
       lastPublishRef.chan = chan;
     };
 
-    // Helper: Update OL selection based on logical IDs
     const syncOlSelection = (logicalIds) => {
       const wanted = new Set();
       logicalIds.forEach((id) => {
@@ -446,13 +429,11 @@ const useAttributeEditorIntegration = ({
 
         if (wanted.size === 0) continue;
 
-        // Then set EDIT_ACTIVE on the newly selected features
         wanted.forEach((wid) => {
           const f =
             src.getFeatureById?.(wid) ||
             srcFeatures.find((x) => matchesLogicalId(x, wid));
           if (f) {
-            // Mark feature for AttributeEditor (ensures layer style function is used)
             markFeatureForAttributeEditor(f);
             // Set EDIT_ACTIVE to show nodes (only when plugin is shown AND in EDIT mode)
             // modifyEnabled controls whether nodes can be MODIFIED (via Modify interaction)
@@ -820,8 +801,6 @@ const useAttributeEditorIntegration = ({
       // --------------------------------------------------------------------
 
       // Bind
-      // (Note: your Select uses condition: () => false, so 'select' won't fire; keep or remove.)
-      // sel.on("select", onSelect);
 
       tr.on("translatestart", onTranslateStart);
       tr.on("translateend", onTranslateEnd);
@@ -971,7 +950,7 @@ const useAttributeEditorIntegration = ({
         f.getGeometry().rotate(angleRad, anchor);
       });
 
-      // AFTER ⇒ geometry-edited (DE-DUPLICERA)
+      // AFTER => geometry-edited
       const when = Date.now();
       const emittedIds = new Set();
 
