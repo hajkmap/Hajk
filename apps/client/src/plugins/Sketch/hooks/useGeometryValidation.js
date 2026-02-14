@@ -53,7 +53,9 @@ const useGeometryValidation = ({
         // Remove old kink markers for this feature
         const existingMarkers = source
           .getFeatures()
-          .filter((f) => f.get("KINK_MARKER_FOR") === featureId);
+          .filter(
+            (f) => String(f.get("KINK_MARKER_FOR")) === String(featureId)
+          );
         existingMarkers.forEach((marker) => source.removeFeature(marker));
 
         // Convert OpenLayers geometry to GeoJSON for turf
@@ -152,7 +154,9 @@ const useGeometryValidation = ({
           // Remove kink markers for this feature
           const existingMarkers = source
             .getFeatures()
-            .filter((f) => f.get("KINK_MARKER_FOR") === featureId);
+            .filter(
+              (f) => String(f.get("KINK_MARKER_FOR")) === String(featureId)
+            );
           existingMarkers.forEach((marker) => source.removeFeature(marker));
         };
 
@@ -190,7 +194,9 @@ const useGeometryValidation = ({
 
             const existingMarkers = source
               .getFeatures()
-              .filter((f) => f.get("KINK_MARKER_FOR") === featureId);
+              .filter(
+                (f) => String(f.get("KINK_MARKER_FOR")) === String(featureId)
+              );
             existingMarkers.forEach((marker) => source.removeFeature(marker));
           };
 
@@ -298,7 +304,7 @@ const useGeometryValidation = ({
 
         const kinkMarkers = src
           .getFeatures()
-          .filter((f) => f.get("KINK_MARKER_FOR") === id);
+          .filter((f) => String(f.get("KINK_MARKER_FOR")) === String(id));
 
         kinkMarkers.forEach((marker) => src.removeFeature(marker));
       });

@@ -1,149 +1,127 @@
+import { promises as fs } from "fs";
+import path from "path";
 import ConfigService from "./config.service.js";
 import { logger } from "./ogc/logger.js";
 import { Validator } from "./ogc/validator.js";
 import { CONSTANTS } from "./ogc/constants.js";
 import { pick } from "./ogc/utils/object.js";
-import { fetchWithRetry, ensureNotTooLarge } from "./ogc/utils/http.js";
+import {
+  fetchWithRetry,
+  fetchWithTimeout,
+  readTextWithLimit,
+} from "./ogc/utils/http.js";
 import {
   buildWfsGetFeatureUrl,
   rewriteOutputFormat,
 } from "./ogc/wfs/url-builder.js";
-import { gmlToFeatureCollection } from "./ogc/wfs/gml.js";
 import {
   ServiceError,
   NotFoundError,
   UpstreamError,
   ValidationError,
 } from "./ogc/errors.js";
-import { buildWfsTransactionXml } from "./ogc/wfs/transaction-builder.js";
-import { parseTransactionResponse } from "./ogc/wfs/transaction-response.js";
 
-// Helper function to strip milliseconds from ISO date strings
-const stripMilliseconds = (value) => {
-  if (
-    typeof value === "string" &&
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+/.test(value)
-  ) {
-    // Remove the .xxx part (milliseconds), keep the rest
-    return value.replace(/\.\d+/, "");
-  }
-  return value;
-};
-
-// Helper function to normalize EPSG code format
+// Normalize EPSG code format (e.g. "urn:ogc:def:crs:EPSG::3006" → "EPSG:3006")
 const normalizeEpsg = (name) => {
   if (!name) return undefined;
   const m = String(name).match(/EPSG[:/]*[:]*([0-9]+)/i);
   return m ? `EPSG:${m[1]}` : undefined;
 };
 
-// Helper function to add CRS metadata to a FeatureCollection
-const addCrsMetadata = (fc, crs, layerProjection) => {
-  const finalCrs = normalizeEpsg(crs) || "EPSG:3006";
-  fc.crsName = finalCrs;
-  fc.layerProjection = layerProjection || "EPSG:3006";
-
-  const epsgCode = finalCrs.match(/EPSG:(\d+)/)?.[1];
-  if (epsgCode) {
-    fc.crs = {
-      type: "name",
-      properties: { name: `urn:ogc:def:crs:EPSG::${epsgCode}` },
-    };
+// Resolve the effective typeName from a layer config entry
+const resolveTypeName = (layer, overrideTypeName) => {
+  const tn =
+    overrideTypeName ||
+    (Array.isArray(layer.layers) && layer.layers.length > 0
+      ? layer.layers[0]
+      : layer.layers);
+  if (!tn) {
+    throw new ValidationError("Missing typeName for layer", {
+      layerId: layer.id,
+      availableLayers: layer.layers,
+    });
   }
+  return tn;
 };
 
-// Helper to check if bbox looks like lon/lat coordinates
-const looksLonLatBbox = (bbox) => {
-  if (!Array.isArray(bbox) || bbox.length < 4) return false;
-  const [xmin, ymin, xmax, ymax] = bbox.map(Number);
-  const inLon = Math.abs(xmin) <= 180 && Math.abs(xmax) <= 180;
-  const inLat = Math.abs(ymin) <= 90 && Math.abs(ymax) <= 90;
-  return inLon && inLat;
-};
+// ── In-memory config cache (avoids disk reads on every request) ────────────
+const _layersCache = { mtime: 0, data: null };
+const LAYERS_PATH = path.join(process.cwd(), "App_Data", "layers.json");
 
-// Helper to check if coordinates look like projected (not lon/lat)
-const coordsLookProjected = (featureCollection) => {
-  const check = (xy) =>
-    Array.isArray(xy) && xy.length >= 2 && xy[0] > 1e5 && xy[1] > 1e6;
-
-  const scanGeom = (g) => {
-    if (!g) return false;
-    switch (g.type) {
-      case "Point":
-        return check(g.coordinates);
-      case "MultiPoint":
-      case "LineString":
-        return (g.coordinates || []).some(check);
-      case "MultiLineString":
-      case "Polygon":
-        return (g.coordinates || []).flat(1).some(check);
-      case "MultiPolygon":
-        return (g.coordinates || []).flat(2).some(check);
-      case "GeometryCollection":
-        return (g.geometries || []).some(scanGeom);
-      default:
-        return false;
+async function getCachedLayersStore() {
+  try {
+    const stat = await fs.stat(LAYERS_PATH);
+    const mtime = stat.mtimeMs;
+    if (_layersCache.data && mtime === _layersCache.mtime) {
+      return _layersCache.data;
     }
-  };
-
-  // Sample only first few features for O(1) performance
-  const sample = (featureCollection.features || []).slice(0, 3);
-  for (const f of sample) {
-    if (scanGeom(f.geometry)) return true;
+    // File changed (or first load) — read and cache
+    const text = await fs.readFile(LAYERS_PATH, "utf-8");
+    const json = JSON.parse(text);
+    _layersCache.mtime = mtime;
+    _layersCache.data = json;
+    logger.debug("Layers config reloaded from disk", { mtime });
+    return json;
+  } catch (error) {
+    logger.error("Failed to read layers.json", error);
+    // Fall through to ConfigService as fallback
+    return null;
   }
-  return false;
-};
+}
 
-// Helper to clean milliseconds from date fields (Oracle compatibility)
-const cleanDateFields = (feature) => ({
-  ...feature,
-  properties: Object.fromEntries(
-    Object.entries(feature.properties || {}).map(([key, value]) => [
-      key,
-      stripMilliseconds(value),
-    ])
-  ),
-});
-
-// Helper to format feature IDs for WFS-T based on server type
-const formatFeatureId = (featureId, layer, typeName) => {
-  if (featureId == null) return featureId;
-
-  const idStr = String(featureId);
-
-  // If already in native format (contains : or .), keep as-is
-  if (idStr.includes(":") || idStr.includes(".")) {
-    return idStr;
-  }
-
-  // Detect server type from URL or explicit flag
-  const isGeoServer =
-    layer.serverType === "geoserver" ||
-    layer.url?.toLowerCase().includes("geoserver");
-
-  if (isGeoServer) {
-    return `${typeName}.${featureId}`;
-  }
-
-  // QGIS Server or unknown - return canonical ID as-is
-  return featureId;
-};
-
-/** ===== Internal function: get WFST layer from config ===== */
+/**
+ * Read the WFST layer store, filtered by AD group membership.
+ * Uses in-memory cache with mtime invalidation to avoid disk I/O per request.
+ * Falls back to ConfigService when AD filtering is needed (AD checks user groups).
+ * Returns { list, byId } where byId is a Map keyed by layer id.
+ */
 async function getWFSTStore({ user = null, washContent = true } = {}) {
-  const store = await ConfigService.getLayersStore(user, washContent);
+  let store;
+
+  // When AD is active we must go through ConfigService for group filtering.
+  // Otherwise use the fast mtime-cached path.
+  if (process.env.AD_LOOKUP_ACTIVE === "true") {
+    store = await ConfigService.getLayersStore(user, washContent);
+  } else {
+    store = await getCachedLayersStore();
+    if (!store) {
+      // Cache failed — fall back to ConfigService
+      store = await ConfigService.getLayersStore(user, washContent);
+    }
+  }
+
   if (store?.error) {
     throw new ServiceError("Failed to read layers store", 500, {
       originalError: store.error?.message || String(store.error),
     });
   }
   const list = store?.wfstlayers || [];
-  // Build Map for O(1) lookup by id
   const byId = new Map(list.map((l) => [String(l.id), l]));
   return { list, byId };
 }
 
-/** ===== Public API: listWFSTLayers ===== */
+/**
+ * Look up a single WFST layer by id (with AD filtering).
+ * Throws NotFoundError if the layer doesn't exist or the user lacks access.
+ */
+async function requireLayer(id, { user, washContent } = {}) {
+  if (!Validator.isValidId(id)) {
+    throw new ValidationError("Invalid layer ID format", { id });
+  }
+  const { byId } = await getWFSTStore({ user, washContent });
+  const layer = byId.get(String(id));
+  if (!layer) {
+    throw new NotFoundError("WFST layer not found", { layerId: id });
+  }
+  if (!Validator.isValidUrl(layer.url)) {
+    throw new UpstreamError("Invalid layer URL configuration", 500);
+  }
+  return layer;
+}
+
+// ── Public API ──────────────────────────────────────────────────────────────
+
+/** List all WFST layers visible to the current user. */
 export async function listWFSTLayers({ fields, user, washContent } = {}) {
   try {
     const { list: layers } = await getWFSTStore({ user, washContent });
@@ -162,18 +140,9 @@ export async function listWFSTLayers({ fields, user, washContent } = {}) {
   }
 }
 
-/** ===== Public API: getWFSTLayer ===== */
+/** Get metadata for a single WFST layer. */
 export async function getWFSTLayer({ id, fields, user, washContent } = {}) {
-  if (!Validator.isValidId(id)) {
-    throw new ValidationError("Invalid layer ID format", { id });
-  }
-
-  const { byId } = await getWFSTStore({ user, washContent });
-  const layer = byId.get(String(id)); // O(1) lookup
-  if (!layer) {
-    throw new NotFoundError("WFST layer not found", { layerId: id });
-  }
-
+  const layer = await requireLayer(id, { user, washContent });
   if (!fields) return layer;
 
   const pickFields = fields
@@ -183,7 +152,16 @@ export async function getWFSTLayer({ id, fields, user, washContent } = {}) {
   return pickFields.length ? pick(layer, pickFields) : layer;
 }
 
-/** ===== Public API: getWFSTFeatures ===== */
+/**
+ * Fetch features from the upstream WFS server and return the raw response.
+ *
+ * The backend acts as a transparent proxy:
+ *  1. Tries GeoJSON first (most efficient, widely supported).
+ *  2. Falls back to GML if the server doesn't support JSON.
+ *
+ * The response includes a `format` field ("json" or "xml") so the client
+ * knows how to parse it. GML parsing is done client-side with OpenLayers.
+ */
 export async function getWFSTFeatures(params) {
   const {
     user,
@@ -199,47 +177,20 @@ export async function getWFSTFeatures(params) {
     cqlFilter,
   } = params;
 
-  if (!Validator.isValidId(id)) {
-    throw new ValidationError("Invalid layer ID format", { id });
-  }
-
   if (bbox && !Validator.isValidBbox(bbox)) {
-    throw new ValidationError(
-      "Invalid bbox format (must be: xmin,ymin,xmax,ymax)",
-      { bbox }
-    );
+    throw new ValidationError("Invalid bbox format", { bbox });
   }
 
   const validatedLimit = Validator.validateLimit(limit);
   const validatedOffset = Validator.validateOffset(offset);
 
   try {
-    const { byId } = await getWFSTStore({ user, washContent });
-    const layer = byId.get(String(id)); // O(1) lookup
-    if (!layer)
-      throw new NotFoundError("WFST layer not found", { layerId: id });
-
-    if (!Validator.isValidUrl(layer.url)) {
-      throw new UpstreamError("Invalid layer URL configuration", 500);
-    }
-
-    const tn =
-      typeName ||
-      (Array.isArray(layer.layers) && layer.layers.length > 0
-        ? layer.layers[0]
-        : layer.layers);
-    if (!tn) {
-      throw new ValidationError("Missing typeName for layer", {
-        layerId: id,
-        availableLayers: layer.layers,
-      });
-    }
-
-    // Determine CRS: use request param, layer config, or default to EPSG:3006
+    const layer = await requireLayer(id, { user, washContent });
+    const tn = resolveTypeName(layer, typeName);
     const crs = srsName || layer.projection || "EPSG:3006";
 
-    // 1) Try GeoJSON
-    const urlJson = buildWfsGetFeatureUrl({
+    // Build base URL requesting JSON (most servers support this)
+    const jsonUrl = buildWfsGetFeatureUrl({
       baseUrl: layer.url,
       version,
       typeName: tn,
@@ -252,110 +203,64 @@ export async function getWFSTFeatures(params) {
       cqlFilter,
     });
 
-    let res = await fetchWithRetry(urlJson, {
-      headers: {
-        Accept:
-          "application/json, application/geo+json, application/vnd.geo+json",
-      },
+    // 1) Try JSON — most efficient, no client-side parsing needed
+    let res = await fetchWithRetry(jsonUrl, {
+      headers: { Accept: "application/json, application/geo+json" },
     });
 
-    ensureNotTooLarge(res);
-    let ctype = res.headers.get("content-type") || "";
-    let text = await res.text();
+    if (res.ok) {
+      const ctype = res.headers.get("content-type") || "";
+      const text = await readTextWithLimit(res);
+      const looksLikeJson = /json/i.test(ctype) || text.trim().startsWith("{");
 
-    // Handle 4xx errors - abort if not a format issue
-    if (!res.ok && res.status >= 400 && res.status < 500) {
-      const snippet = text.substring(0, 500);
-      const maybeFormatIssue =
-        res.status === 406 ||
-        res.status === 415 ||
-        /output|format|json|geo\s*\+?\s*json/i.test(snippet);
+      if (looksLikeJson) {
+        try {
+          return {
+            format: "json",
+            data: JSON.parse(text),
+            srsName: normalizeEpsg(crs) || "EPSG:3006",
+            layerProjection: layer.projection || "EPSG:3006",
+          };
+        } catch {
+          logger.warn("Response looked like JSON but failed to parse");
+        }
+      }
 
-      if (!maybeFormatIssue) {
-        logger.warn("Client error from WFS server (no fallback)", {
-          status: res.status,
-          url: layer.url,
-          error: snippet,
-        });
-        throw new UpstreamError(`WFS server error: ${snippet}`, res.status);
+      // Server returned OK but with XML/GML instead of JSON (common with
+      // QGIS Server which ignores unsupported outputFormat). Reuse this
+      // response directly — no need for a second request.
+      if (text.trim().startsWith("<")) {
+        return {
+          format: "xml",
+          data: text,
+          srsName: normalizeEpsg(crs) || "EPSG:3006",
+          layerProjection: layer.projection || "EPSG:3006",
+        };
       }
     }
 
-    const isJsonCtype = /application\/(vnd\.geo\+json|geo\+json|json)/i.test(
-      ctype
-    );
-
-    if (res.ok && (isJsonCtype || text.trim().startsWith("{"))) {
-      try {
-        const fc = JSON.parse(text);
-
-        // Add basic metadata
-        if (typeof fc.totalFeatures === "number") {
-          fc.numberMatched = fc.totalFeatures;
-        }
-        if (
-          Array.isArray(fc.features) &&
-          typeof fc.numberReturned !== "number"
-        ) {
-          fc.numberReturned = fc.features.length;
-        }
-
-        // Add CRS metadata
-        addCrsMetadata(fc, crs, layer.projection);
-
-        // Clean up inconsistent bbox (lon/lat bbox with projected coords)
-        if (fc.bbox && looksLonLatBbox(fc.bbox) && coordsLookProjected(fc)) {
-          logger.debug(
-            "Removing inconsistent bbox (lon/lat bbox with projected coords)"
-          );
-          delete fc.bbox;
-        }
-
-        return fc;
-      } catch (parseError) {
-        logger.warn("Failed to parse JSON response, trying GML", {
-          error: parseError.message,
-        });
-        // Fallback to GML
-      }
-    }
-
-    // 2) Try GML3
-    const urlGml3 = rewriteOutputFormat(
-      urlJson,
+    // 2) Fallback — first request failed or returned unexpected content
+    const gmlUrl = rewriteOutputFormat(
+      jsonUrl,
       "application/gml+xml; version=3.2"
     );
-    res = await fetchWithRetry(urlGml3, {
+    res = await fetchWithRetry(gmlUrl, {
       headers: { Accept: "application/xml, text/xml, application/gml+xml" },
     });
-    ensureNotTooLarge(res);
-    text = await res.text();
-    if (res.ok && text.trim().startsWith("<")) {
-      const fc = gmlToFeatureCollection(text);
-      addCrsMetadata(fc, crs, layer.projection);
-      return fc;
+
+    if (!res.ok) {
+      const snippet = (await readTextWithLimit(res)).substring(0, 500);
+      throw new UpstreamError(`WFS server error: ${snippet}`, res.status);
     }
 
-    // 3) Try GML2
-    const urlGml2 = rewriteOutputFormat(urlJson, "GML2");
-    res = await fetchWithRetry(urlGml2, {
-      headers: { Accept: "application/xml, text/xml" },
-    });
-    ensureNotTooLarge(res);
-    text = await res.text();
-    if (res.ok && text.trim().startsWith("<")) {
-      const fc = gmlToFeatureCollection(text);
-      addCrsMetadata(fc, crs, layer.projection);
-      return fc;
-    }
-
-    throw new UpstreamError(
-      "Upstream server did not return valid GeoJSON or GML",
-      res.status || 502
-    );
+    return {
+      format: "xml",
+      data: await readTextWithLimit(res),
+      srsName: normalizeEpsg(crs) || "EPSG:3006",
+      layerProjection: layer.projection || "EPSG:3006",
+    };
   } catch (error) {
     if (error instanceof ServiceError) throw error;
-
     logger.error("Unexpected error in getWFSTFeatures", error);
     throw new ServiceError("Internal server error", 500, {
       originalError: error.message,
@@ -363,273 +268,59 @@ export async function getWFSTFeatures(params) {
   }
 }
 
+/**
+ * Forward a WFS-T transaction to the upstream server.
+ *
+ * The client builds the WFS-T XML using OpenLayers; the backend validates
+ * access (AD) and proxies the request to the correct WFS endpoint.
+ */
 export async function commitWFSTTransaction(params) {
-  const { id, user, washContent, inserts, updates, deletes, srsName } = params;
+  const { id, user, washContent, transactionXml } = params;
 
-  if (!Validator.isValidId(id)) {
-    throw new ValidationError("Invalid layer ID format", { id });
+  if (!transactionXml) {
+    throw new ValidationError("Transaction XML is required");
   }
 
-  // Fetch layer configuration
-  const { byId } = await getWFSTStore({ user, washContent });
-  const layer = byId.get(String(id)); // O(1) lookup
-
-  if (!layer) {
-    throw new NotFoundError("WFST layer not found", { layerId: id });
+  // Guard against oversized payloads (catches both bulk ops and complex geometries)
+  if (transactionXml.length > CONSTANTS.MAX_TRANSACTION_XML_BYTES) {
+    throw new ValidationError(
+      `Transaction XML too large (${(transactionXml.length / 1024 / 1024).toFixed(1)} MB, max ${CONSTANTS.MAX_TRANSACTION_XML_BYTES / 1024 / 1024} MB)`
+    );
   }
 
-  if (!Validator.isValidUrl(layer.url)) {
-    throw new UpstreamError("Invalid layer URL configuration", 500);
-  }
+  const layer = await requireLayer(id, { user, washContent });
 
-  const typeName =
-    Array.isArray(layer.layers) && layer.layers.length > 0
-      ? layer.layers[0]
-      : layer.layers;
-  if (!typeName) {
-    throw new ValidationError("Missing typeName for layer", {
-      layerId: id,
-      availableLayers: layer.layers,
-    });
-  }
+  logger.debug("Forwarding WFS-T transaction", {
+    url: layer.url,
+    xmlLength: transactionXml.length,
+  });
 
-  // Validate geometries
-  for (const feature of [...inserts, ...updates]) {
-    if (feature.geometry && !isValidGeoJSONGeometry(feature.geometry)) {
-      throw new ValidationError("Invalid geometry", {
-        featureId: feature.id,
-      });
-    }
-  }
-
-  // Determine effective CRS: prioritize frontend srsName, then layer config, then default
-  const effectiveSrsName = srsName || layer.projection || "EPSG:3006";
-
-  // Format IDs for updates and deletes
-  const formattedUpdates = updates.map((feature) => ({
-    ...feature,
-    id: formatFeatureId(feature.id, layer, typeName),
-  }));
-
-  const formattedDeletes = deletes.map((fid) =>
-    formatFeatureId(fid, layer, typeName)
+  // Use longer timeout for transactions (spatial triggers, indexing)
+  const response = await fetchWithTimeout(
+    layer.url,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/xml",
+        Accept: "application/xml, text/xml",
+      },
+      body: transactionXml,
+    },
+    CONSTANTS.TRANSACTION_TIMEOUT
   );
 
-  const cleanedInserts = inserts.map(cleanDateFields);
-  const cleanedUpdates = formattedUpdates.map(cleanDateFields);
-
-  // Pass namespace and formatted IDs
-  const transactionXml = buildWfsTransactionXml({
-    version: layer.wfsVersion || "1.1.0",
-    typeName,
-    srsName: effectiveSrsName,
-    geometryName: layer.geometryField || "geometry",
-    namespace: layer.namespace, // Pass namespace for GeoServer
-    inserts: cleanedInserts,
-    updates: cleanedUpdates,
-    deletes: formattedDeletes,
-  });
-
-  logger.debug("Sending WFS-T transaction", {
-    url: layer.url,
-    inserts: inserts.length,
-    updates: updates.length,
-    deletes: deletes.length,
-    srsName: effectiveSrsName,
-    firstInsertGeom: cleanedInserts[0]?.geometry
-      ? JSON.stringify(cleanedInserts[0].geometry).slice(0, 200)
-      : null,
-  });
-  logger.debug("WFS-T XML being sent:", transactionXml.slice(0, 2000));
-
-  // Send transaction to WFS server
-  const response = await fetchWithRetry(layer.url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/xml",
-      Accept: "application/xml, text/xml",
-    },
-    body: transactionXml,
-  });
-
-  ensureNotTooLarge(response);
-  const responseText = await response.text();
+  const wfsResponse = await readTextWithLimit(response);
 
   if (!response.ok) {
     logger.error("WFS-T transaction failed", {
       status: response.status,
-      response: responseText.substring(0, 500),
+      response: wfsResponse.substring(0, 500),
     });
-
     throw new UpstreamError(
       `WFS-T transaction failed: ${response.status}`,
       response.status
     );
   }
 
-  // Parse and validate transaction response
-  const result = parseTransactionResponse(responseText);
-
-  if (result.success === false) {
-    logger.error("WFS-T reported failure", result);
-    throw new UpstreamError(result.message || "Transaction failed", 400);
-  }
-
-  // TOTAL FAILURES
-
-  // Check if we expected inserts but got 0
-  if (inserts.length > 0 && result.inserted === 0) {
-    logger.error("WFS-T returned 0 inserts when we expected some", {
-      layerId: id,
-      typeName,
-      expectedInserts: inserts.length,
-      geometryTypes: inserts.map((f) => f.geometry?.type).filter(Boolean),
-      serverWarning: result.warning,
-    });
-
-    // Detect geometry type from inserts
-    const geomTypes = [
-      ...new Set(inserts.map((f) => f.geometry?.type).filter(Boolean)),
-    ];
-    const geomTypeStr =
-      geomTypes.length > 0 ? ` (försökte spara ${geomTypes.join(", ")})` : "";
-
-    // Combine QGIS error with helpful explanation
-    let errorMessage = `Servern sparade 0 av ${inserts.length} objekt${geomTypeStr}.`;
-
-    if (result.warning) {
-      errorMessage += `\n\nServermeddelande: ${result.warning}`;
-    }
-
-    errorMessage += `\n\nDetta beror ofta på fel geometrityp (t.ex. försöker spara polygon i ett punktlager) eller datafel.`;
-
-    throw new UpstreamError(errorMessage, 400);
-  }
-
-  // Check if we expected updates but got 0 (could indicate ID mismatch)
-  if (formattedUpdates.length > 0 && result.updated === 0) {
-    logger.error("WFS-T returned 0 updates when we expected some", {
-      layerId: id,
-      typeName,
-      expectedUpdates: formattedUpdates.length,
-      updateIds: formattedUpdates.map((u) => u.id).slice(0, 5),
-      serverWarning: result.warning,
-    });
-
-    // Combine QGIS error with helpful explanation
-    let errorMessage = `Servern uppdaterade 0 av ${formattedUpdates.length} objekt.`;
-
-    if (result.warning) {
-      errorMessage += `\n\nServermeddelande: ${result.warning}`;
-    }
-
-    errorMessage += `\n\nDetta kan bero på fel feature-ID-format eller att objekten inte finns i lagret.`;
-
-    throw new UpstreamError(errorMessage, 400);
-  }
-
-  // Check if we expected deletes but got 0
-  if (formattedDeletes.length > 0 && result.deleted === 0) {
-    logger.error("WFS-T returned 0 deletes when we expected some", {
-      layerId: id,
-      typeName,
-      expectedDeletes: formattedDeletes.length,
-      deleteIds: formattedDeletes.slice(0, 5),
-      serverWarning: result.warning,
-    });
-
-    // Combine QGIS error with helpful explanation
-    let errorMessage = `Servern raderade 0 av ${formattedDeletes.length} objekt.`;
-
-    if (result.warning) {
-      errorMessage += `\n\nServermeddelande: ${result.warning}`;
-    }
-
-    errorMessage += `\n\nDetta kan bero på fel feature-ID-format eller att objekten inte finns i lagret.`;
-
-    throw new UpstreamError(errorMessage, 400);
-  }
-
-  // PARTIAL FAILURES
-
-  const partialFailures = [];
-
-  if (inserts.length > 0 && result.inserted < inserts.length) {
-    const failed = inserts.length - result.inserted;
-    partialFailures.push(`${failed} av ${inserts.length} nya objekt`);
-
-    logger.warn("WFS-T partial insert failure", {
-      layerId: id,
-      typeName,
-      expected: inserts.length,
-      actual: result.inserted,
-      failed,
-      geometryTypes: inserts.map((f) => f.geometry?.type).filter(Boolean),
-    });
-  }
-
-  if (formattedUpdates.length > 0 && result.updated < formattedUpdates.length) {
-    const failed = formattedUpdates.length - result.updated;
-    partialFailures.push(
-      `${failed} av ${formattedUpdates.length} uppdateringar`
-    );
-
-    logger.warn("WFS-T partial update failure", {
-      layerId: id,
-      typeName,
-      expected: formattedUpdates.length,
-      actual: result.updated,
-      failed,
-    });
-  }
-
-  if (formattedDeletes.length > 0 && result.deleted < formattedDeletes.length) {
-    const failed = formattedDeletes.length - result.deleted;
-    partialFailures.push(
-      `${failed} av ${formattedDeletes.length} borttagningar`
-    );
-
-    logger.warn("WFS-T partial delete failure", {
-      layerId: id,
-      typeName,
-      expected: formattedDeletes.length,
-      actual: result.deleted,
-      failed,
-    });
-  }
-
-  logger.info("WFS-T transaction successful", {
-    inserted: result.inserted,
-    updated: result.updated,
-    deleted: result.deleted,
-    partialFailures: partialFailures.length > 0 ? partialFailures : undefined,
-  });
-
-  return {
-    ...result,
-    partialFailures: partialFailures.length > 0 ? partialFailures : undefined,
-    warning: result.warning || undefined,
-  };
-}
-
-// Helper: validate GeoJSON geometry
-function isValidGeoJSONGeometry(geom) {
-  if (!geom || typeof geom !== "object") return false;
-
-  // Use centralized geometry types Set for O(1) lookup
-  if (!CONSTANTS.GEOMETRY_TYPES_SET.has(geom.type)) return false;
-
-  // GeometryCollection must have geometries array
-  if (geom.type === "GeometryCollection") {
-    if (!Array.isArray(geom.geometries)) return false;
-    // Recursively validate each geometry in the collection
-    return geom.geometries.every((g) => isValidGeoJSONGeometry(g));
-  }
-
-  // All other types must have coordinates array
-  if (!Array.isArray(geom.coordinates)) {
-    return false;
-  }
-
-  return true;
+  return { wfsResponse };
 }

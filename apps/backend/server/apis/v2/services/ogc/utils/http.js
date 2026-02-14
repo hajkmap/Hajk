@@ -72,15 +72,45 @@ export async function fetchWithRetry(url, options = {}, retryCount = 0) {
 }
 
 /**
- * Warn about large responses above MAX_RESPONSE_BYTES (via Content-Length).
- * Use directly after fetch for budget control.
+ * Read response body as text with a hard byte limit.
+ * Works even when Content-Length is missing (e.g. QGIS Server chunked responses).
+ * Aborts the stream and throws if the limit is exceeded.
  */
-export function ensureNotTooLarge(res) {
+export async function readTextWithLimit(
+  res,
+  maxBytes = CONSTANTS.MAX_RESPONSE_BYTES
+) {
+  // Fast path: Content-Length header present
   const contentLength = res.headers.get("content-length");
-  if (
-    contentLength &&
-    parseInt(contentLength, 10) > CONSTANTS.MAX_RESPONSE_BYTES
-  ) {
+  if (contentLength && parseInt(contentLength, 10) > maxBytes) {
     throw new UpstreamError("Response too large", 413);
+  }
+
+  // Stream the body, tracking bytes
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  const chunks = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      totalBytes += value.length;
+      if (totalBytes > maxBytes) {
+        reader.cancel();
+        throw new UpstreamError(
+          `Response too large (>${(maxBytes / 1024 / 1024).toFixed(0)} MB)`,
+          413
+        );
+      }
+      chunks.push(decoder.decode(value, { stream: true }));
+    }
+    // Flush remaining bytes
+    chunks.push(decoder.decode());
+    return chunks.join("");
+  } catch (error) {
+    reader.cancel().catch(() => {});
+    throw error;
   }
 }

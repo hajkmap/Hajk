@@ -136,7 +136,9 @@ export default function DesktopForm({
     if (focusedId === prevFocusedIdRef.current) return;
     prevFocusedIdRef.current = focusedId;
 
-    const rowIndex = visibleFormList.findIndex((r) => r.id === focusedId);
+    const rowIndex = visibleFormList.findIndex(
+      (r) => String(r.id) === String(focusedId)
+    );
     if (rowIndex === -1) return;
 
     const targetPage = Math.floor(rowIndex / rowsPerPage);
@@ -350,8 +352,9 @@ export default function DesktopForm({
       <div style={s.pane} aria-label="Objektlista">
         <div style={s.list}>
           {paginatedRows.map((f, idx) => {
-            const selected = selectedIds.has(f.id);
-            const isFocused = focusedId === f.id;
+            const selected =
+              selectedIds.has(f.id) || selectedIds.has(String(f.id));
+            const isFocused = String(focusedId) === String(f.id);
             const isPendingDelete =
               f.__pending === "delete" || tablePendingDeletes?.has?.(f.id);
             const hasPendingEdits = !!tablePendingEdits?.[f.id];

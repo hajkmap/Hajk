@@ -1,72 +1,76 @@
 import * as svc from "../../services/ogc.service.js";
 import ad from "../../services/activedirectory.service.js";
 import { Validator } from "../../services/ogc/validator.js";
+import { CONSTANTS } from "../../services/ogc/constants.js";
 import log4js from "log4js";
 
 const log = log4js.getLogger("ogc.v2");
 
-// Base URL to the backend so the service can call /api/v2/mapconfig/layers
-const getBaseUrl = (req) =>
-  process.env.HAJK_BASE_URL || `${req.protocol}://${req.get("host")}`;
+// Shared error handler to keep individual methods clean
+function handleError(e, res) {
+  if (e.name === "ValidationError")
+    return res.status(400).json({ error: e.message, details: e.details });
+  if (e.name === "NotFoundError")
+    return res.status(404).json({ error: e.message, details: e.details });
+  if (e.name === "UpstreamError")
+    return res.status(e.status || 502).json({ error: e.message });
+
+  log.error(e);
+  return res.status(500).json({ error: String(e?.message || e) });
+}
 
 export class Controller {
-  // GET /api/v2/ogc/wfst/:id?fields=...
-  async getWFSTLayer(req, res) {
-    try {
-      const { id } = req.params;
-      const { fields, washContent } = req.query;
-      const user = ad.getUserFromRequestHeader(req);
-
-      const layer = await svc.getWFSTLayer({ id, fields, user, washContent });
-      return res.json(layer);
-    } catch (e) {
-      if (e.name === "ValidationError")
-        return res.status(400).json({ error: e.message, details: e.details });
-      if (e.name === "NotFoundError")
-        return res.status(404).json({ error: e.message, details: e.details });
-
-      log.error(e);
-      return res.status(500).json({ error: String(e?.message || e) });
-    }
-  }
-
-  // GET /api/v2/ogc/wfst?fields=...
+  // GET /api/v2/ogc/wfst
   async listWFSTLayers(req, res) {
     try {
-      const baseUrl = getBaseUrl(req);
       const user = ad.getUserFromRequestHeader(req);
       const layers = await svc.listWFSTLayers({
         fields: req.query.fields,
         user,
-        baseUrl,
       });
       res.json({ count: layers.length, layers });
     } catch (e) {
-      log.error(e);
-      res.status(500).json({ error: String(e?.message || e) });
+      handleError(e, res);
     }
   }
 
-  // GET /api/v2/ogc/wfst/:id/features?bbox=...&limit=...&offset=...&typeName=...&srsName=...&version=...&filter=...&cqlFilter=...
+  // GET /api/v2/ogc/wfst/:id
+  async getWFSTLayer(req, res) {
+    try {
+      const user = ad.getUserFromRequestHeader(req);
+      const layer = await svc.getWFSTLayer({
+        id: req.params.id,
+        fields: req.query.fields,
+        user,
+        washContent: req.query.washContent,
+      });
+      return res.json(layer);
+    } catch (e) {
+      handleError(e, res);
+    }
+  }
+
+  // GET /api/v2/ogc/wfst/:id/features
   async getWFSTFeatures(req, res) {
     try {
-      const baseUrl = getBaseUrl(req);
       const user = ad.getUserFromRequestHeader(req);
 
-      // ---- Parameter validation ----
+      // Parameter validation
       const rawLimit = Number.parseInt(
-        req.query.limit ?? req.query.maxFeatures ?? "1000",
+        req.query.limit ?? req.query.maxFeatures ?? String(CONSTANTS.DEFAULT_LIMIT),
         10
       );
       if (!Number.isFinite(rawLimit) || rawLimit < 1) {
         return res.status(400).json({ error: "Invalid limit" });
       }
-      if (rawLimit > 10000) {
-        return res.status(400).json({ error: "Limit too high (max 10000)" });
+      if (rawLimit > CONSTANTS.MAX_LIMIT) {
+        return res.status(400).json({ error: `Limit too high (max ${CONSTANTS.MAX_LIMIT})` });
       }
 
-      const rawOffsetStr = req.query.offset ?? req.query.startIndex ?? "0";
-      const rawOffset = Number.parseInt(rawOffsetStr, 10);
+      const rawOffset = Number.parseInt(
+        req.query.offset ?? req.query.startIndex ?? "0",
+        10
+      );
       if (!Number.isFinite(rawOffset) || rawOffset < 0) {
         return res.status(400).json({ error: "Invalid offset" });
       }
@@ -80,8 +84,8 @@ export class Controller {
         return res.status(400).json({ error: "Invalid bbox format" });
       }
 
-      // ---- Call the service ----
-      const fc = await svc.getWFSTFeatures({
+      // Fetch and proxy the raw WFS response
+      const result = await svc.getWFSTFeatures({
         id: req.params.id,
         user,
         version: req.query.version || "1.1.0",
@@ -90,64 +94,53 @@ export class Controller {
         bbox: req.query.bbox,
         limit: rawLimit,
         offset: rawOffset,
-        filter: req.query.filter, // OGC Filter (XML, URL-encoded)
-        cqlFilter: req.query.cqlFilter, // GeoServer CQL filter (optional)
-        baseUrl,
+        filter: req.query.filter,
+        cqlFilter: req.query.cqlFilter,
       });
 
-      // ---- Cache headers (short TTL) ----
-      const ttl = Number(process.env.OGC_CACHE_SECONDS || 300);
-      res.set({
-        "Cache-Control": `public, max-age=${ttl}`,
-        Vary: "Accept-Encoding",
-      });
-
-      return res.json(fc);
-    } catch (e) {
-      if (e.name === "NotFoundError") {
-        return res.status(404).json({ error: e.message });
-      }
-      if (e.name === "UpstreamError") {
-        return res.status(e.status || 502).json({ error: e.message });
-      }
-      log.error(e);
-      return res.status(500).json({ error: String(e?.message || e) });
-    }
-  }
-
-  async commitWFSTTransaction(req, res) {
-    try {
-      const { id } = req.params;
-      const { inserts = [], updates = [], deletes = [], srsName } = req.body;
-      const user = ad.getUserFromRequestHeader(req);
-
-      // Validate that transaction contains at least one operation
-      if (!inserts.length && !updates.length && !deletes.length) {
-        return res.status(400).json({
-          error: "Transaction must contain at least one operation",
+      // Allow caching for normal requests but bypass when client sends
+      // cache-busting params (e.g. after a WFS-T commit + reload).
+      if (req.query._nocache || req.query._bust || req.query._reload) {
+        res.set({
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        });
+      } else {
+        const ttl = Number(process.env.OGC_CACHE_SECONDS || 300);
+        res.set({
+          "Cache-Control": `public, max-age=${ttl}`,
+          Vary: "Accept-Encoding",
         });
       }
 
+      return res.json(result);
+    } catch (e) {
+      handleError(e, res);
+    }
+  }
+
+  // POST /api/v2/ogc/wfst/:id/transaction
+  async commitWFSTTransaction(req, res) {
+    try {
+      const user = ad.getUserFromRequestHeader(req);
+      const { transactionXml } = req.body;
+
+      if (!transactionXml) {
+        return res
+          .status(400)
+          .json({ error: "Transaction XML is required (transactionXml)" });
+      }
+
       const result = await svc.commitWFSTTransaction({
-        id,
+        id: req.params.id,
         user,
-        inserts,
-        updates,
-        deletes,
-        srsName,
+        transactionXml,
       });
 
       return res.json(result);
     } catch (e) {
-      if (e.name === "ValidationError")
-        return res.status(400).json({ error: e.message, details: e.details });
-      if (e.name === "NotFoundError")
-        return res.status(404).json({ error: e.message, details: e.details });
-      if (e.name === "UpstreamError")
-        return res.status(e.status || 502).json({ error: e.message });
-
-      log.error(e);
-      return res.status(500).json({ error: String(e?.message || e) });
+      handleError(e, res);
     }
   }
 }

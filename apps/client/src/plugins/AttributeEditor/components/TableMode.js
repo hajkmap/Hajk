@@ -314,8 +314,9 @@ export default function TableMode(props) {
     if (tableSelectedIds.size === 0) return;
 
     // Get IDs that are visible in the current filtered list
+    // Use String() comparison to handle mixed types (string from GML vs number for drafts)
     const visibleSelectedIds = Array.from(tableSelectedIds).filter((id) =>
-      filteredAndSorted.some((r) => r.id === id)
+      filteredAndSorted.some((r) => String(r.id) === String(id))
     );
 
     // If some selected features got filtered out, update selection to only visible ones

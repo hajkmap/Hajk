@@ -26,14 +26,25 @@ export function getFeatureId(feature, idField) {
 
 /**
  * Normalizes an ID for comparison (handles string/number mismatches).
+ * Returns the value as-is — kept for backward compatibility.
  * @param {string|number} id
- * @returns {string}
+ * @returns {string|number}
  */
 export function normalizeId(id) {
   if (id == null) return "";
-  const s = String(id);
-  // If purely numeric, return as number for consistency
-  return /^-?\d+$/.test(s) ? Number(s) : s;
+  return id;
+}
+
+/**
+ * Checks whether an ID represents a draft (temporary, unsaved) feature.
+ * Drafts have negative numeric IDs (e.g. -1, -2, or "-1").
+ * Works with both number and string types.
+ * @param {string|number} id
+ * @returns {boolean}
+ */
+export function isDraftId(id) {
+  const n = Number(id);
+  return Number.isFinite(n) && n < 0;
 }
 
 /**

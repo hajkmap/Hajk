@@ -22,7 +22,7 @@ import MobileForm from "./components/MobileForm";
 import DesktopForm from "./components/DesktopForm";
 import NotificationBar from "./helpers/NotificationBar";
 import { editBus } from "../../buses/editBus";
-import { pickPreferredId } from "./helpers/helpers";
+import { pickPreferredId, isDraftId } from "./helpers/helpers";
 import { useSnackbar } from "notistack";
 import GeoJSON from "ol/format/GeoJSON";
 import Feature from "ol/Feature";
@@ -242,11 +242,10 @@ export default function AttributeEditorView({
   React.useEffect(() => {
     const offSelIds = editBus.on("attrib:select-ids", (ev) => {
       const incoming = ev.detail?.ids || [];
-      const normalizeId = (id) => {
-        const s = String(id);
-        return /^-?\d+$/.test(s) ? Number(s) : s;
-      };
-      const canonical = Array.from(new Set(incoming.map(normalizeId)));
+      // Deduplicate — but do NOT convert types. IDs arrive from emitters
+      // in the same type as row.id (string from GML, number for drafts).
+      // Converting e.g. "11" → 11 breaks strict-equality lookups later.
+      const canonical = Array.from(new Set(incoming));
 
       // Mark as explicit clear when receiving empty selection from map
       // This prevents ensureFormSelection from auto-selecting the first row
@@ -617,7 +616,7 @@ export default function AttributeEditorView({
 
     let rows = allRows.filter((f) => {
       // Always show negative IDs (new/duplicate)
-      const isNegativeId = typeof f.id === "number" && f.id < 0;
+      const isNegativeId = isDraftId(f.id);
 
       // If "show only first ID" is active, use the FIRST ID:na
       if (
@@ -807,7 +806,7 @@ export default function AttributeEditorView({
   const duplicateSelectedRows = useCallback(() => {
     if (!tableSelectedIds.size) return;
     const allIds = [...tableSelectedIds];
-    const ids = allIds.filter((id) => !(typeof id === "number" && id < 0));
+    const ids = allIds.filter((id) => !isDraftId(id));
     if (!ids.length) {
       return;
     }
@@ -861,10 +860,6 @@ export default function AttributeEditorView({
         ? [focusedId]
         : [];
 
-    const isDraftId = (id) => {
-      const n = Number(id);
-      return Number.isFinite(n) && n < 0;
-    };
     const ids = base.filter((id) => !isDraftId(id));
     if (!ids.length) return;
 
@@ -1380,15 +1375,12 @@ export default function AttributeEditorView({
       // 3. Build DELETE operations
       const deletes = Array.from(pendingDeletes)
         .filter((id) => {
-          // Accept both numeric IDs and qualified FIDs (layer.123)
-          if (typeof id === "number" && id > 0) {
-            return true;
-          }
-
-          // Check if it's a qualified FID string (layer.123)
+          // Accept positive numeric IDs (number or numeric string) and
+          // qualified FIDs (layer.123). Drafts (negative) are handled separately.
           const str = String(id);
-          const isFid = /\.\d+$/.test(str); // Ends with .NUMBER
-          return isFid;
+          if (/^\d+$/.test(str)) return true; // plain positive numeric
+          if (/\.\d+$/.test(str)) return true; // qualified FID (layer.123)
+          return false;
         })
         .map((id) => {
           let cleanId = String(id);
@@ -1450,11 +1442,14 @@ export default function AttributeEditorView({
       enqueueSnackbar(`Sparar: ${summary}...`, { variant: "info" });
 
       // Send transaction to backend
+      // Pass the detected geometry name from loaded features (matches WFS schema)
+      const detectedGeomName = model.getFeatureCollection()?.geometryName;
       const result = await ogc.commitWfstTransaction(serviceId, {
         inserts,
         updates,
         deletes,
         srsName: layerCRS,
+        geometryName: detectedGeomName,
       });
 
       if (result.success) {
@@ -1524,7 +1519,6 @@ export default function AttributeEditorView({
             _nocache: "1",
             _bust: Date.now(),
           });
-
           // Update vector layer with new features
           if (vectorLayerRef.current && featureCollection) {
             const mapProj = map.getView().getProjection();
@@ -1574,20 +1568,22 @@ export default function AttributeEditorView({
             vectorLayerRef.current.changed();
           }
 
-          // Restore selection
+          // Invalidate the unique-values cache so column filter dropdowns
+          // reflect the fresh data (not stale pre-save values).
+          uniqueCacheRef.current.clear();
+
+          // Restore selection — keep IDs as strings to match re-fetched
+          // feature rows (OL GML parser returns all values as strings).
           if (result.insertedIds && result.insertedIds.length > 0) {
             const newIds = result.insertedIds.map((fid) => {
               const match = fid.match(/\.(\d+)$/);
-              return match ? Number(match[1]) : fid;
+              return match ? match[1] : fid;
             });
             setTableSelectedIds(new Set(newIds));
             setSelectedIds(new Set(newIds));
             if (newIds.length > 0) setFocusedId(newIds[0]);
           } else if (updates.length > 0) {
-            const updatedIds = updates.map((u) => {
-              const numId = Number(u.id);
-              return Number.isFinite(numId) ? numId : u.id;
-            });
+            const updatedIds = updates.map((u) => u.id);
             setTableSelectedIds(new Set(updatedIds));
             setSelectedIds(new Set(updatedIds));
           }
@@ -1789,7 +1785,7 @@ export default function AttributeEditorView({
 
         // Check if there are MORE geometry edits for this same feature still in the stack
         const hasMoreGeomEdits = geomUndoRef.current.some(
-          (entry) => entry.id === id
+          (entry) => String(entry.id) === String(id)
         );
 
         // Only clear the __geom__ marker if no more geometry edits remain for this feature
@@ -2073,7 +2069,7 @@ export default function AttributeEditorView({
 
     const filtered = all.filter((row) => {
       // Always show negative IDs (i.e. drafts)
-      const isNegativeId = typeof row.id === "number" && row.id < 0;
+      const isNegativeId = isDraftId(row.id);
 
       // If "Select first" is active, use the FIRST ID
       if (showOnlySelected && !isNegativeId && !frozenSelectedIds.has(row.id)) {
@@ -2141,11 +2137,12 @@ export default function AttributeEditorView({
       mode: ui.mode,
       focusedId,
       focusedIdValid:
-        focusedId != null && visibleFormList.some((f) => f.id === focusedId),
+        focusedId != null &&
+        visibleFormList.some((f) => String(f.id) === String(focusedId)),
       selectedIdsValid:
         selectedIds.size > 0 &&
         Array.from(selectedIds).some((id) =>
-          visibleFormList.some((f) => f.id === id)
+          visibleFormList.some((f) => String(f.id) === String(id))
         ),
       firstVisibleId: visibleFormList[0]?.id ?? null,
       explicitClear: explicitClearRef.current,
@@ -2195,7 +2192,7 @@ export default function AttributeEditorView({
           let anchorIdx = anchorRef.current.index;
           if (anchorIdx == null || anchorIdx < 0) {
             const focusIdx = visibleFormList.findIndex(
-              (f) => f.id === focusedId
+              (f) => String(f.id) === String(focusedId)
             );
             anchorIdx = focusIdx >= 0 ? focusIdx : idx;
           }
@@ -2207,7 +2204,7 @@ export default function AttributeEditorView({
           // Don't change focus (keep the current one), but
           // if the current focus is no longer valid and there is a value, jump to rowId:
           const focusStillVisible = visibleFormList.some(
-            (f) => f.id === focusedId
+            (f) => String(f.id) === String(focusedId)
           );
           if (!focusStillVisible && next.size) {
             handleBeforeChangeFocus(rowId);
@@ -2224,7 +2221,11 @@ export default function AttributeEditorView({
             explicitClearRef.current = true;
           }
 
-          if (rowId === focusedId && !next.has(rowId) && next.size > 0) {
+          if (
+            String(rowId) === String(focusedId) &&
+            !next.has(rowId) &&
+            next.size > 0
+          ) {
             const vis = visibleFormList.map((f) => f.id);
             let candidate = null;
             for (let i = idx + 1; i < vis.length; i++)
@@ -2244,7 +2245,8 @@ export default function AttributeEditorView({
           // Note: update the anchor index on toggle
         } else {
           next = new Set([rowId]);
-          if (focusedId !== rowId) handleBeforeChangeFocus(rowId);
+          if (String(focusedId) !== String(rowId))
+            handleBeforeChangeFocus(rowId);
           // Update the anchor
           anchorRef.current = { id: rowId, index: idx };
         }

@@ -59,8 +59,8 @@ export function useScrollToSelectedRow({
     if (visibleSize > 1) {
       // Multiple selections - cycle through them in list order (not click order)
       const selectedArray = visibleSelectedIds.sort((a, b) => {
-        const idxA = items.findIndex((r) => r.id === a);
-        const idxB = items.findIndex((r) => r.id === b);
+        const idxA = items.findIndex((r) => String(r.id) === String(a));
+        const idxB = items.findIndex((r) => String(r.id) === String(b));
         return idxA - idxB;
       });
       targetId = selectedArray[currentScrollIndex % selectedArray.length];
@@ -68,7 +68,10 @@ export function useScrollToSelectedRow({
     } else if (visibleSize === 1) {
       // Single selection
       targetId = visibleSelectedIds[0];
-    } else if (focusedId != null && items.some((r) => r.id === focusedId)) {
+    } else if (
+      focusedId != null &&
+      items.some((r) => String(r.id) === String(focusedId))
+    ) {
       // Fallback to focused ID (only if visible in items)
       targetId = focusedId;
     } else {
@@ -81,7 +84,7 @@ export function useScrollToSelectedRow({
     }
 
     // Find the row in the full list
-    const rowIndex = items.findIndex((r) => r.id === targetId);
+    const rowIndex = items.findIndex((r) => String(r.id) === String(targetId));
     if (rowIndex === -1) return;
 
     // Navigate to the correct page

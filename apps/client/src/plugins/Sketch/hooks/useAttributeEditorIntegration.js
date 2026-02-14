@@ -644,7 +644,10 @@ const useAttributeEditorIntegration = ({
               if (lyr === layer && !f.get("KINK_MARKER")) {
                 // Filter out features marked for deletion
                 const id = getId(f);
-                if (!pendingDeletes.has(id)) {
+                if (
+                  !pendingDeletes.has(id) &&
+                  !pendingDeletes.has(String(id))
+                ) {
                   candidates.push(f);
                 }
               }

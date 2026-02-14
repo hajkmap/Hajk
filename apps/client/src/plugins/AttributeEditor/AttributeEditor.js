@@ -807,12 +807,18 @@ function AttributeEditor(props) {
         }
 
         const fmt = new GeoJSON();
-        const features = featureCollection
-          ? fmt.readFeatures(featureCollection, {
-              dataProjection: dataProj,
-              featureProjection: mapProj,
-            })
-          : [];
+        let features = [];
+        try {
+          features = featureCollection
+            ? fmt.readFeatures(featureCollection, {
+                dataProjection: dataProj,
+                featureProjection: mapProj,
+              })
+            : [];
+        } catch (readErr) {
+          console.error("readFeatures failed:", readErr);
+          features = [];
+        }
 
         // Reset index and visibility set
         featureIndexRef.current.clear();
@@ -1553,17 +1559,13 @@ function AttributeEditor(props) {
         return toCanonicalId(rawId, idMap);
       });
 
-      // Always combine with existing selection
-      const existingIds = [];
-      if (selectedIdsRef.current.size > 0) {
-        selectedIdsRef.current.forEach((id) => {
-          // Only add non-string versions to avoid duplicates
-          if (typeof id !== "string" || !existingIds.includes(Number(id))) {
-            existingIds.push(id);
-          }
-        });
-      }
-      const finalIds = Array.from(new Set([...existingIds, ...newIds]));
+      // Always combine with existing selection.
+      // selectedIdsRef is a buildVizSet (has both original + String forms),
+      // so deduplicate via String to get the logical set.
+      const existingStrs = new Set();
+      selectedIdsRef.current.forEach((id) => existingStrs.add(String(id)));
+      newIds.forEach((id) => existingStrs.add(String(id)));
+      const finalIds = Array.from(existingStrs);
 
       // Update selection
       selectedIdsRef.current = buildVizSet(finalIds);
