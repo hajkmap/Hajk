@@ -380,14 +380,24 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
 
   // datetime/timestamp
   if (meta.type === "datetime") {
-    const toLocal = (val) => (!val ? "" : String(val).slice(0, 19)); // YYYY-MM-DDTHH:mm:ss
+    const toLocal = (val) =>
+      !val ? "" : String(val).slice(0, 19).replace(" ", "T");
     return (
       <input
         type="datetime-local"
         style={inputStyle}
         value={toLocal(value)}
         step="1" // seconds
-        onChange={(e) => onChange(e.target.value || null)}
+        onChange={(e) => {
+          let val = e.target.value || null;
+          if (val) {
+            val = val.replace("T", " ");
+            if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(val)) {
+              val += ":00";
+            }
+          }
+          onChange(val);
+        }}
       />
     );
   }
@@ -576,14 +586,24 @@ export function renderTableCellEditor({
 
   // DATETIME
   if (meta.type === "datetime") {
-    const toLocal = (val) => (!val ? "" : String(val).slice(0, 19)); // YYYY-MM-DDTHH:mm:ss
+    const toLocal = (val) =>
+      !val ? "" : String(val).slice(0, 19).replace(" ", "T");
     return (
       <input
         {...editorProps}
         type="datetime-local"
         step="1" // seconds
         value={toLocal(editingValue)}
-        onChange={(e) => applyChange(e.target.value || null)}
+        onChange={(e) => {
+          let val = e.target.value || null;
+          if (val) {
+            val = val.replace("T", " ");
+            if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(val)) {
+              val += ":00";
+            }
+          }
+          applyChange(val);
+        }}
       />
     );
   }

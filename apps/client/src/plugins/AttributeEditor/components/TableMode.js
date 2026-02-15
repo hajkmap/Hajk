@@ -270,8 +270,21 @@ export default function TableMode(props) {
       const active = columnFilters?.[columnKey];
       if (!Array.isArray(active) || active.length === 0) return;
 
-      const fromStr = String(fromValue ?? "");
-      const toStr = String(toValue ?? "");
+      // Normalize datetime strings for consistent comparison
+      const isDt = FIELD_META.some(
+        (m) => m.key === columnKey && m.type === "datetime"
+      );
+      const norm = (v) => {
+        const s = String(v ?? "");
+        if (!isDt) return s;
+        const match = s.match(
+          /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/
+        );
+        return match ? `${match[1]} ${match[2]}${match[3] || ":00"}` : s;
+      };
+
+      const fromStr = norm(fromValue);
+      const toStr = norm(toValue);
 
       // Build an "effective" set of all rows (base + pending), excluding rows marked for deletion
       const effectiveAll = [
@@ -284,13 +297,13 @@ export default function TableMode(props) {
 
       setColumnFilters((prev) => {
         const before = prev?.[columnKey] || [];
-        const nextSet = new Set(before.map(String));
+        const nextSet = new Set(before.map((v) => norm(v)));
 
         if (toStr !== "") nextSet.add(toStr);
 
         if (fromStr !== "" && fromStr !== toStr) {
           const stillUsed = effectiveAll.some(
-            (r) => r.id !== rowId && String(r?.[columnKey] ?? "") === fromStr
+            (r) => r.id !== rowId && norm(r?.[columnKey]) === fromStr
           );
           if (!stillUsed) nextSet.delete(fromStr);
         }
@@ -305,6 +318,7 @@ export default function TableMode(props) {
       tablePendingEdits,
       tablePendingAdds,
       tablePendingDeletes,
+      FIELD_META,
     ]
   );
 

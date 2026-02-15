@@ -38,6 +38,24 @@ function normalize(v) {
   return v == null ? "" : v;
 }
 
+/**
+ * Normalize a datetime string so that different representations compare equal.
+ * Handles variations returned by different backends (PostgreSQL, Oracle/GeoServer):
+ *   "2025-01-02T00:00:00"       → "2025-01-02 00:00:00"
+ *   "2025-01-02 00:00:00"       → "2025-01-02 00:00:00"
+ *   "2025-01-02T00:00"          → "2025-01-02 00:00:00"
+ *   "2025-01-02T00:00:00Z"      → "2025-01-02 00:00:00"
+ *   "2025-01-02T00:00:00+02:00" → "2025-01-02 00:00:00"
+ *   "2025-01-02 00:00:00.0"     → "2025-01-02 00:00:00"
+ */
+function normDt(val) {
+  const s = String(val ?? "");
+  const m = s.match(
+    /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/
+  );
+  return m ? `${m[1]} ${m[2]}${m[3] || ":00"}` : s;
+}
+
 export default function AttributeEditorView({
   state,
   controller,
@@ -597,11 +615,20 @@ export default function AttributeEditorView({
     const q = searchText.trim().toLowerCase();
     const editingId = tableEditing?.id ?? null;
 
+    // Build a set of datetime field keys for normalization
+    const dtKeys = new Set(
+      FM.filter((m) => m.type === "datetime").map((m) => m.key)
+    );
+
     const columnFilterSets = {};
     for (const [key, selectedValues] of Object.entries(columnFilters)) {
       if (selectedValues && selectedValues.length > 0) {
+        const isDt = dtKeys.has(key);
         columnFilterSets[key] = new Set(
-          selectedValues.map((v) => (v === "(tom)" ? "" : String(v)))
+          selectedValues.map((v) => {
+            const s = v === "(tom)" ? "" : String(v);
+            return isDt ? normDt(s) : s;
+          })
         );
       }
     }
@@ -637,7 +664,7 @@ export default function AttributeEditorView({
         filterKeys.every((key) => {
           const filterSet = columnFilterSets[key];
           const cellValue = String(f[key] ?? "");
-          return filterSet.has(cellValue);
+          return filterSet.has(dtKeys.has(key) ? normDt(cellValue) : cellValue);
         });
 
       return matchesSearch && matchesColumnFilters;
@@ -711,6 +738,7 @@ export default function AttributeEditorView({
     frozenSelectedIds,
     searchText,
     featuresMap,
+    FM,
   ]);
 
   const cloneGeometryForDuplicates = React.useCallback(
@@ -1119,22 +1147,32 @@ export default function AttributeEditorView({
         );
       });
 
+      // Check which keys are datetime for normalization
+      const dtKeySet = new Set(
+        FM.filter((m) => m.type === "datetime").map((m) => m.key)
+      );
+
       // 2) ...and apply all other column filters (except for the current column)
       const rowsForFacet = rowsAfterSearch.filter((r) => {
         return Object.entries(columnFilters || {}).every(([k, selected]) => {
           if (k === columnKey) return true;
           if (!selected || selected.length === 0) return true;
           const cell = String(r[k] ?? "");
-          return selected.includes(cell);
+          const cmp = dtKeySet.has(k) ? normDt(cell) : cell;
+          return selected.some(
+            (sv) => (dtKeySet.has(k) ? normDt(sv) : sv) === cmp
+          );
         });
       });
 
       // 3) Lock in unique values for the current column
+      const isDtCol = dtKeySet.has(columnKey);
       const vals = new Set();
       for (let i = 0; i < rowsForFacet.length; i++) {
         const v = rowsForFacet[i]?.[columnKey];
         const s = String(v ?? "");
-        vals.add(s === "" ? "(tom)" : s); // Show "(tom)" empty values
+        const display = s === "" ? "(tom)" : isDtCol ? normDt(s) : s;
+        vals.add(display);
       }
 
       const out = Array.from(vals).sort((a, b) => {
@@ -1160,6 +1198,7 @@ export default function AttributeEditorView({
       searchText,
       columnFilters,
       tableEditing,
+      FM,
     ]
   );
 
@@ -1281,9 +1320,13 @@ export default function AttributeEditorView({
         })
         .map((draft) => {
           const properties = {};
-          FM.forEach(({ key, readOnly }) => {
+          FM.forEach(({ key, readOnly, type }) => {
             if (key !== "id" && !readOnly) {
-              properties[key] = draft[key] ?? null;
+              let val = draft[key] ?? null;
+              if (type === "datetime" && typeof val === "string") {
+                val = val.replace(" ", "T");
+              }
+              properties[key] = val;
             }
           });
 
@@ -1308,6 +1351,17 @@ export default function AttributeEditorView({
         })
         .map(([id, changes]) => {
           const { __geom__, __pending, __idx, ...properties } = changes;
+
+          // Convert datetime values to ISO 8601 (T-separator) for WFS-T
+          FM.forEach(({ key, type }) => {
+            if (
+              type === "datetime" &&
+              key in properties &&
+              typeof properties[key] === "string"
+            ) {
+              properties[key] = properties[key].replace(" ", "T");
+            }
+          });
 
           let cleanId = String(id);
           const fidMatch = cleanId.match(/\.(\d+)$/);
@@ -2004,15 +2058,22 @@ export default function AttributeEditorView({
         });
 
       // Always show new features (negative IDs) regardless of column filters
+      const dtKeySet = new Set(
+        FM.filter((m) => m.type === "datetime").map((m) => m.key)
+      );
       const matchesColumnFilters =
         isNegativeId ||
         Object.entries(columnFilters || {}).every(([key, selectedValues]) => {
           if (!selectedValues || selectedValues.length === 0) return true;
-          const cellValue = String(row[key] ?? "");
+          const isDt = dtKeySet.has(key);
+          const cellValue = isDt
+            ? normDt(String(row[key] ?? ""))
+            : String(row[key] ?? "");
 
-          const normalizedSelected = selectedValues.map((v) =>
-            v === "(tom)" ? "" : v
-          );
+          const normalizedSelected = selectedValues.map((v) => {
+            const s = v === "(tom)" ? "" : v;
+            return isDt ? normDt(s) : s;
+          });
 
           return normalizedSelected.includes(cellValue);
         });
