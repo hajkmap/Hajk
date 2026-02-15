@@ -595,7 +595,9 @@ export default class SnapHelper {
     });
 
     // Also enable advanced snapping (midpoints and intersections)
-    this.#startAdvancedSnapping();
+    // Disabled — even with only intersection snapping removed, the midpoint
+    // computation on every pointermove can be heavy with many features.
+    // this.#startAdvancedSnapping();
   };
 
   #removeAllSnapInteractions = () => {
@@ -687,11 +689,13 @@ export default class SnapHelper {
         });
       }
 
-      // Add intersection points between nearby edges
-      const intersections = this.#findEdgeIntersections(nearbyEdges);
-      for (const intPoint of intersections) {
-        newFeatures.push(new Feature(new Point(intPoint)));
-      }
+      // Intersection snapping disabled — the O(n²) computation in
+      // #findEdgeIntersections blocks the main thread when many features
+      // (and thus many edges) are near the cursor.
+      // const intersections = this.#findEdgeIntersections(nearbyEdges);
+      // for (const intPoint of intersections) {
+      //   newFeatures.push(new Feature(new Point(intPoint)));
+      // }
 
       // Update the synthetic source
       this.advancedSnapSource.clear(true);
