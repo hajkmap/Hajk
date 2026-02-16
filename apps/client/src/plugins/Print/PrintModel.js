@@ -707,7 +707,6 @@ export default class PrintModel {
     scaleBarPosition,
     scaleBarLength,
     scaleBarLengthMeters,
-    color,
     font,
   }) => {
     // Here we set the number 0 at the start of the scalebar
@@ -811,7 +810,6 @@ export default class PrintModel {
       scaleBarLengthMeters,
       scaleBarPosition,
       scaleBarLength,
-      color,
       font,
     });
   };
