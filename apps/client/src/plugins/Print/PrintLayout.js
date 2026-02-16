@@ -16,7 +16,7 @@
 
 /**
  * Build the complete layout for a print page.
- * @param {Object} model - PrintModel instance (provides helpers and configuration)
+ * @param {import("./PrintModel").default} model - PrintModel instance (provides helpers and configuration)
  * @param {string} mapDataUrl - data URL of the rendered map canvas
  * @param {Object} options - print options
  * @param {number} pageWidth - page width in PDF points
@@ -336,8 +336,40 @@ export async function buildLayout(
   return elements;
 }
 
-// --- Scale bar layout helpers ---
+// SCALE BAR HELPERS
+// All helpers below work by pushing layout elements into the shared `elements`
+// array that's passed in from `buildLayout`. They don't return anything — instead
+// they mutate the array directly.
+// You may wonder why we don't use a more functional approach here?
+// Well, the scale bar is made up of lots of small pieces (lines, texts, ticks). Having each
+// helper return its own array, that we'd eventually have to merge, felt unnecessarily complex.
+// So we just mutate the array directly. The code is synchronous anyway.
 
+/**
+ * Builds all the layout elements needed for the scale bar.
+ * This one is invoked from the main buildLayout function.
+ *
+ * We need to do some math here:
+ * - First we figure out how many meters the bar should represent (depending on the current scale).
+ * - Then we convert that to PDF points (since the scale bar is a rectangle in the PDF).
+ *
+ * The scale bar consists of two text labels (the length text and the "Skala: 1:X..." text),
+ * along with all the divider lines and optional divider numbers.
+ *
+ * We also have to set `model.scaleText` here since `getPlacement` relies on it when calculating
+ * the position (specifically for the "bottomRight" case where the text width matters).
+ *
+ * @param {import("./PrintModel").default} model - PrintModel instance
+ * @param {Array} elements - The array of layout elements
+ * @param {Object} color - The color of the scale bar.
+ * @param {number} scale - The current scale.
+ * @param {string} scaleBarPlacement - The placement of the scale bar.
+ * @param {string} format - The format of the page.
+ * @param {string} orientation - The orientation of the page.
+ * @param {number} pageWidth - The width of the page.
+ * @param {number} pageHeight - The height of the page.
+ * @returns {void}
+ */
 function buildScaleBarElements(
   model,
   elements,
@@ -349,14 +381,27 @@ function buildScaleBarElements(
   pageWidth,
   pageHeight
 ) {
-  const mPerInch = 0.0254;
-  const pointsPerInch = 72;
-  // Get the length that the scalebar should represent
-  const scaleBarLengthMeters = model.getFittingScaleBarLength(scale);
-  // Convert those meters to inches for the scale
-  const lengthInInches = scaleBarLengthMeters / scale / mPerInch;
-  // Convert inches to points
-  const scaleBarLength = lengthInInches * pointsPerInch;
+  const mPerInch = 0.0254; // 1 inch = 0.0254 meters
+  const pointsPerInch = 72; // 1 inch = 72 points
+
+  // We need the scale bar length in three units:
+  // 1. Meters — that's the real-world distance the bar represents on the map.
+  // 2. Inches — we get here by dividing meters by the map scale (to get the
+  //    physical length on paper) and then by meters-per-inch (to switch units).
+  // 3. PDF points — there are 72 points in an inch, and points are what our
+  //    layout coordinate system uses. So we multiply inches by 72 to arrive
+  //    at the final value we can actually position on the page.
+
+  // 1. Get the length that the scalebar should represent
+  const scaleBarLengthInMeters = model.getFittingScaleBarLength(scale);
+
+  // 2. Convert those meters to inches for the scale
+  const scaleBarLengthInInches = scaleBarLengthInMeters / scale / mPerInch;
+
+  // 3. Convert inches to points
+  const scaleBarLengthInPoints = scaleBarLengthInInches * pointsPerInch;
+
+  // The height of the scale bar, could be configurable later but for now it's a constant.
   const scaleBarHeight = 6;
 
   model.scaleText = `Skala: ${model.getUserFriendlyScale(
@@ -365,9 +410,10 @@ function buildScaleBarElements(
     orientation === "landscape" ? "liggande" : "stående"
   })`;
 
+  // Determine the position of the scale bar on the page.
   const scaleBarPosition = model.getPlacement(
     scaleBarPlacement,
-    scaleBarLength,
+    scaleBarLengthInPoints,
     scaleBarHeight,
     pageWidth,
     pageHeight,
@@ -375,11 +421,11 @@ function buildScaleBarElements(
   );
 
   // Length text (e.g. "500 m")
-  const lengthText = model.getLengthText(scaleBarLengthMeters);
+  const lengthText = model.getLengthText(scaleBarLengthInMeters);
   elements.push({
     type: "text",
     text: lengthText,
-    x: scaleBarPosition.x + scaleBarLength + 2,
+    x: scaleBarPosition.x + scaleBarLengthInPoints + 2,
     y: scaleBarPosition.y + 6,
     size: 8,
     fontStyle: "normal",
@@ -397,29 +443,51 @@ function buildScaleBarElements(
     color,
   });
 
-  // Divider lines
+  // Now, let's invoke the helper that builds the divider lines.
+  // Please note that it will mutate the `elements` array directly, just
+  // as the rest of this function does.
   buildDividerLines(
     model,
     elements,
     scaleBarPosition,
-    scaleBarLength,
+    scaleBarLengthInPoints,
     color,
-    scaleBarLengthMeters
+    scaleBarLengthInMeters
   );
 
-  // Divider texts (only if scale is a configured scale)
+  // Divider _texts_ (labels like "0", "500", etc.) are only added if the
+  // current scale is one of the admin-configured scales. Why? Because the numbers are
+  // derived from that configuration, and if the scale isn't in there, the labels wouldn't
+  // line up with the tick marks — which would be more confusing than having no labels at all.
   if (model.scaleBarLengths[scale]) {
     buildDividerTexts(
       model,
       elements,
       scaleBarPosition,
-      scaleBarLength,
-      scaleBarLengthMeters,
+      scaleBarLengthInPoints,
+      scaleBarLengthInMeters,
       color
     );
   }
 }
 
+/**
+ * Draws all the lines that make up the actual scale bar line. This includes the
+ * main horizontal line and the vertical ticks.
+ *
+ * If the space between 0 and the first major division is large enough, we also add
+ * finer subdivision lines (every 1/5 of the first interval) so the bar looks more precise.
+ * Without this extra calculation, the bar would look like it was missing some lines. And
+ * if we'd always add the lines, the bar would look way too crowded.
+ *
+ * @param {import("./PrintModel").default} model - PrintModel instance
+ * @param {Array} elements - The array of layout elements.
+ * @param {Object} scaleBarPosition - The position of the scale bar.
+ * @param {number} scaleBarLength - The length of the scale bar.
+ * @param {Object} color - The color of the scale bar.
+ * @param {number} scaleBarLengthMeters - The length of the scale bar in meters.
+ * @returns {void}
+ */
 function buildDividerLines(
   model,
   elements,
@@ -502,6 +570,18 @@ function buildDividerLines(
   }
 }
 
+/**
+ * Builds the text labels for the scale bar divider lines.
+ * This one is invoked from the buildScaleBarElements function.
+ *
+ * @param {import("./PrintModel").default} model - PrintModel instance
+ * @param {Array} elements - The array of layout elements.
+ * @param {Object} scaleBarPosition - The position of the scale bar.
+ * @param {number} scaleBarLength - The length of the scale bar.
+ * @param {number} scaleBarLengthMeters - The length of the scale bar in meters.
+ * @param {Object} color - The color of the scale bar.
+ * @returns {void}
+ */
 function buildDividerTexts(
   model,
   elements,
