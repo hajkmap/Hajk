@@ -2,7 +2,6 @@ import { delay } from "../../utils/Delay";
 import { getPointResolution } from "ol/proj";
 import { getCenter } from "ol/extent";
 import { PDF, rgb } from "@libpdf/core";
-import { saveAs } from "file-saver";
 import Vector from "ol/layer/Vector";
 import View from "ol/View";
 import VectorSource from "ol/source/Vector";
@@ -15,6 +14,8 @@ import ImageLayer from "ol/layer/Image";
 import TileLayer from "ol/layer/Tile";
 import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
+import { PDFiumLibrary } from "@hyzyla/pdfium/browser/base64";
+import wasmUrl from "@hyzyla/pdfium/pdfium.wasm?url";
 
 import QRCode from "qrcode";
 
@@ -1297,8 +1298,8 @@ export default class PrintModel {
   };
 
   // Decode the base64 font to Uint8Array
-  async loadFont(font) {
-    const binaryString = atob(font);
+  async base64ToUint8Array(input) {
+    const binaryString = atob(input);
     const length = binaryString.length;
     const uint8Array = new Uint8Array(length);
 
@@ -1322,7 +1323,7 @@ export default class PrintModel {
   }
 
   print = async (options) => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const windowUrl = window.location.href;
       const format = options.format;
       const orientation = options.orientation;
@@ -1450,10 +1451,10 @@ export default class PrintModel {
 
         let fontNormalBytes = null;
         let fontBoldBytes = null;
-        await this.loadFont(ROBOTO_NORMAL).then(
+        await this.base64ToUint8Array(ROBOTO_NORMAL).then(
           (result) => (fontNormalBytes = result)
         );
-        await this.loadFont(ROBOTO_BOLD).then(
+        await this.base64ToUint8Array(ROBOTO_BOLD).then(
           (result) => (fontBoldBytes = result)
         );
         const fontNormal = pdf.embedFont(fontNormalBytes);
@@ -1738,9 +1739,6 @@ export default class PrintModel {
             options
           );
           if (this.copyright.length > 0) {
-            let yPos = options.useTextIconsInMargin
-              ? this.textIconsMargin + this.margin / 2
-              : this.margin;
             page.drawText(this.copyright, {
               x: position.x,
               y: position.y,
@@ -1775,7 +1773,7 @@ export default class PrintModel {
         } finally {
           // Save as pdf or png
           // Finally, save the PDF (or PNG)
-          this.saveToFile(pdf, width, options.saveAsType)
+          this.saveToFile(pdf, options.resolution, options.saveAsType)
             .then((blob) => {
               this.localObserver.publish("print-completed");
               resolve(blob);
@@ -1824,21 +1822,20 @@ export default class PrintModel {
   };
 
   // Imports and returns the dependencies required to create a PNG-print-export.
-  #getPngDependencies = async () => {
-    try {
-      const pdfjs = await import("pdfjs-dist/build/pdf");
-      return { pdfjs };
-    } catch (error) {
-      throw new Error(
-        `Failed to import required dependencies. Error: ${error}`
-      );
-    }
-  };
+  // #getPngDependencies = async () => {
+  //   try {
+  //     const pdfjs = await import("pdfjs-dist/build/pdf");
+  //     return { pdfjs };
+  //   } catch (error) {
+  //     throw new Error(
+  //       `Failed to import required dependencies. Error: ${error}`
+  //     );
+  //   }
+  // };
 
   // Saves the supplied PDF with the supplied file-name.
   #saveToPdf = async (pdf, fileName) => {
     try {
-      // return await pdf.save(`${fileName}.pdf`);
       const bytes = await pdf.save();
       const blob = new Blob([bytes], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
@@ -1855,58 +1852,72 @@ export default class PrintModel {
   // Saves the supplied PDF *as a PNG* with the supplied file-name.
   // The width of the document has to be supplied since some calculations
   // must be done in order to create a PNG with the correct resolution etc.
-  #saveToPng = async (pdf, fileName, width, type) => {
+  #saveToPng = async (pdf, resolution, fileName) => {
     try {
-      // First we'll dynamically import the required dependencies.
-      const { pdfjs } = await this.#getPngDependencies();
-      // Then we'll set up the pdfJS-worker. TODO: Terrible?! PDF-js does not seem to have a better solution for the
-      // source-map-errors that occur from setting the worker the ordinary way.
-      pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-      // We'll output the PDF as an array-buffer that can be used to create the PNG.
-      const ab = await pdf.save();
-      // We'll use the PDF-JS library to create a new "PDF-JS-PDF". (Wasteful? Yes very, but the JS-PDF-library
-      // does not support export to any other format than PDF, and the PDF-JS-library does.) Notice that
-      // JS-PDF and PDF-JS are two different libraries, both with their pros and cons.
-      // - PDF-JS: Pro => Can export to PNG, Con: Cannot create as nice of an image as JS-PDF.
-      // - JS-PDF: Pro => Creates good-looking PDFs, Con: Cannot export to PNG.
-      // - Conclusion: We use both...
-      return new Promise((resolve) => {
-        pdfjs.getDocument({ data: ab }).promise.then((pdf) => {
-          // So, when the PDF-JS-PDF is created, we get the first page, and then render
-          // it on a canvas so that we can export it as a PNG.
-          pdf.getPage(1).then((page) => {
-            // We're gonna need a canvas and its context.
-            let canvas = document.createElement("canvas");
-            let ctx = canvas.getContext("2d");
-            // Scale the viewport to match current resolution
-            const viewport = page.getViewport({ scale: 1 });
-            const scale = width / viewport.width;
-            const scaledViewport = page.getViewport({ scale: scale });
-            // Create the render-context-object.
-            const renderContext = {
-              canvasContext: ctx,
-              viewport: scaledViewport,
-            };
-            // Set the canvas dimensions to the correct width and height.
-            canvas.height = scaledViewport.height;
-            canvas.width = scaledViewport.width;
-            // Then we'll render and save!
-            page.render(renderContext).promise.then(() => {
-              canvas.toBlob((blob) => {
-                type !== "BLOB" && saveAs(blob, `${fileName}.png`);
-                resolve(blob);
-              });
-            });
-          });
-        });
+      // Use max resolution by default.
+      let selectedRes;
+      switch (resolution) {
+        case 72:
+          selectedRes = 1;
+          break;
+        case 150:
+          selectedRes = 2;
+          break;
+        case 300:
+          selectedRes = 3;
+          break;
+        default:
+          // Use max as defalut.
+          selectedRes = 3;
+          break;
+      }
+      const bytes = await pdf.save();
+      // Initialize the library and load the web assembly
+      const library = await PDFiumLibrary.init({
+        wasmUrl: wasmUrl,
       });
+      const doc = await library.loadDocument(bytes);
+      const page = await doc.getPage(0);
+      // Library only supports bitmap out of the box.
+      const image = await page.render({
+        scale: selectedRes,
+        render: "bitmap",
+      });
+
+      // Create a canvas that we will render the image on.
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Set canvas dimensions
+      canvas.width = image.width;
+      canvas.height = image.height;
+
+      // Draw the image on the canvas
+      const imageData = new ImageData(
+        new Uint8ClampedArray(image.data),
+        image.width,
+        image.height
+      );
+      ctx.putImageData(imageData, 0, 0);
+
+      // Download the image
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${fileName}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }, "image/png");
+      library.destroy();
     } catch (error) {
       throw new Error(`Failed to save PNG. Error: ${error}`);
     }
   };
 
   // Saves the print-contents to file, either PDF, or PNG (depending on supplied type).
-  saveToFile = async (pdf, width, type) => {
+  saveToFile = async (pdf, resolution, type) => {
     // We're gonna need to create a file-name.
     const fileName = `Kartexport - ${new Date().toLocaleString()}`;
     // Then we'll try to save the contents in the format the user requested.
@@ -1916,7 +1927,7 @@ export default class PrintModel {
           return await this.#saveToPdf(pdf, fileName);
         case "PNG":
         case "BLOB":
-          return await this.#saveToPng(pdf, fileName, width, type);
+          return await this.#saveToPng(pdf, resolution, fileName);
         default:
           throw new Error(
             `Supplied type could not be handled. The supplied type was ${type} and currently only PDF, PNG, and BLOB is supported.`
