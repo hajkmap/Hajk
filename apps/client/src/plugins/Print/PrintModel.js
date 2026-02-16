@@ -14,7 +14,7 @@ import ImageLayer from "ol/layer/Image";
 import TileLayer from "ol/layer/Tile";
 import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
-import { PDFiumLibrary } from "@hyzyla/pdfium/browser/base64";
+import { PDFiumLibrary } from "@hyzyla/pdfium";
 import wasmUrl from "@hyzyla/pdfium/pdfium.wasm?url";
 
 import QRCode from "qrcode";
