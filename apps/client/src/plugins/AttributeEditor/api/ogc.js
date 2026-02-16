@@ -420,7 +420,13 @@ function splitTypeName(typeName) {
 
 /**
  * Format a feature ID for the upstream WFS server.
- * GeoServer expects "typeName.numericId", QGIS Server uses plain IDs.
+ *
+ * The OGC WFS/GML standard uses qualified IDs: "typeName.numericId".
+ * Most WFS servers follow this (GeoServer, ArcGIS Server, MapServer, …).
+ * QGIS Server is a known exception — it uses plain unqualified IDs.
+ *
+ * The logic therefore qualifies by default (standard-compliant) and
+ * only skips qualification for QGIS Server.
  */
 function formatFeatureId(featureId, layer) {
   if (featureId == null) return featureId;
@@ -432,17 +438,17 @@ function formatFeatureId(featureId, layer) {
     return idStr;
   }
 
-  // GeoServer expects "typeName.id"
-  const isGeoServer =
-    layer.serverType === "geoserver" ||
-    layer.url?.toLowerCase().includes("geoserver");
+  // QGIS Server uses plain (unqualified) feature IDs
+  const isQgis =
+    layer.serverType === "qgis" || layer.url?.toLowerCase().includes("qgis");
 
-  if (isGeoServer) {
-    const typeName = resolveTypeName(layer);
-    return `${typeName}.${featureId}`;
+  if (isQgis) {
+    return idStr;
   }
 
-  return idStr;
+  // Standard WFS: qualify as "typeName.id"
+  const typeName = resolveTypeName(layer);
+  return `${typeName}.${featureId}`;
 }
 
 /**
