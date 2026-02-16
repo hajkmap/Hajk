@@ -1723,7 +1723,7 @@ export default class PrintModel {
               y: position.y,
               size: this.textFontSize,
               color: this.textColor,
-              font: fontNormal,
+              font: this.textFontWeight === "bold" ? fontBold : fontNormal,
             });
           }
 
@@ -1742,7 +1742,7 @@ export default class PrintModel {
               y: position.y,
               size: this.textFontSize,
               color: this.textColor,
-              font: fontNormal,
+              font: this.textFontWeight === "bold" ? fontBold : fontNormal,
             });
           }
 
@@ -1761,7 +1761,7 @@ export default class PrintModel {
               y: position.y,
               size: this.textFontSize,
               color: this.textColor,
-              font: fontNormal,
+              font: this.textFontWeight === "bold" ? fontBold : fontNormal,
             });
           }
         } catch (error) {
