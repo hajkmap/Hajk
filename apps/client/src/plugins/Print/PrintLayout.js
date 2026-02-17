@@ -275,8 +275,8 @@ export async function buildLayout(
     const position = model.getRightAlignedPositions(
       model.date,
       model.textFontSize,
-      23,
-      5,
+      30,
+      8,
       pageWidth,
       options
     );
@@ -296,8 +296,8 @@ export async function buildLayout(
     const position = model.getRightAlignedPositions(
       model.copyright,
       model.textFontSize,
-      5,
-      15,
+      8,
+      18,
       pageWidth,
       options
     );
@@ -317,8 +317,8 @@ export async function buildLayout(
     const position = model.getRightAlignedPositions(
       model.disclaimer,
       model.textFontSize,
-      5,
-      25,
+      8,
+      28,
       pageWidth,
       options
     );
@@ -595,7 +595,7 @@ function buildDividerTexts(
     type: "text",
     text: "0",
     x: scaleBarPosition.x,
-    y: scaleBarPosition.y - 5,
+    y: scaleBarPosition.y - 3,
     size: 8,
     fontStyle: "normal",
     color,
@@ -622,7 +622,7 @@ function buildDividerTexts(
     text: divNrString,
     x:
       scaleBarPosition.x + divLinesArray[midIndex - 1] - divNrString.length - 2,
-    y: scaleBarPosition.y - 5,
+    y: scaleBarPosition.y - 3,
     size: 8,
     fontStyle: "normal",
     color,
@@ -641,7 +641,7 @@ function buildDividerTexts(
       type: "text",
       text: divNrString,
       x: scaleBarPosition.x + dividerNrPosition - dividerStrLength - 2,
-      y: scaleBarPosition.y - 5,
+      y: scaleBarPosition.y - 3,
       size: 8,
       fontStyle: "normal",
       color,
