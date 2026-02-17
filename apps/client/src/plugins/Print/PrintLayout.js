@@ -286,7 +286,7 @@ export async function buildLayout(
       x: position.x,
       y: position.y,
       size: model.textFontSize,
-      fontStyle: "normal",
+      fontStyle: model.textFontWeight,
       color: model.textColor,
     });
   }
@@ -307,7 +307,7 @@ export async function buildLayout(
       x: position.x,
       y: position.y,
       size: model.textFontSize,
-      fontStyle: "normal",
+      fontStyle: model.textFontWeight,
       color: model.textColor,
     });
   }
@@ -328,7 +328,7 @@ export async function buildLayout(
       x: position.x,
       y: position.y,
       size: model.textFontSize,
-      fontStyle: "normal",
+      fontStyle: model.textFontWeight,
       color: model.textColor,
     });
   }
