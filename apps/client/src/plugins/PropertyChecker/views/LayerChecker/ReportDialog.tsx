@@ -16,6 +16,11 @@ import {
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { Box } from "@mui/system";
 
+import type {
+  LayerCheckerReportDialogProps,
+  ControlledLayer,
+} from "../../types";
+
 export default function ReportDialog({
   reportDialogVisible,
   setReportDialogVisible,
@@ -23,7 +28,7 @@ export default function ReportDialog({
   controlledLayers,
   layerNotes,
   userDetails,
-}) {
+}: LayerCheckerReportDialogProps) {
   // Helper: Prepare plain text version of the report, used for clipboard.
   const getPlainTextForClipboard = () => {
     return (
@@ -32,7 +37,7 @@ export default function ReportDialog({
       "Granskning har gjorts mot följande kartlager:\n\n" +
       controlledLayers
         .map(
-          (l) =>
+          (l: ControlledLayer) =>
             // Take only care of current property's layers.
             l.propertyName === currentPropertyName &&
             // Produce a nice looking line for each item. We want it
@@ -59,7 +64,7 @@ export default function ReportDialog({
       "<p>Granskning har gjorts mot följande kartlager:</p>" +
       "<ul>" +
       controlledLayers
-        .map((l) =>
+        .map((l: ControlledLayer) =>
           // Take only care of current property's layers.
           l.propertyName === currentPropertyName
             ? // Produce a nice looking line for each item. We want it
@@ -70,7 +75,7 @@ export default function ReportDialog({
               (l.subcaption !== null ? ` (${l.subcaption})` : "") +
               (getLayerNotesAsArray(l.id).length > 0 ? "<br>Notering: " : "") +
               getLayerNotesAsArray(l.id)
-                .map((s) => s)
+                .map((s: string) => s)
                 .join("<br>") +
               "</li>"
             : ""
@@ -116,7 +121,7 @@ export default function ReportDialog({
     }
   };
 
-  const getLayerNotesAsArray = (lid) => {
+  const getLayerNotesAsArray = (lid: string): string[] => {
     // Let's use the 'lid' (layer ID) to find a corresponding
     // value in layerNotes. Next, split on new lines and remove
     // duplicate new lines. Finally, put it all together to an array
@@ -145,7 +150,7 @@ export default function ReportDialog({
             Granskning har gjorts mot följande kartlager:
           </Typography>
           <List>
-            {controlledLayers.map((l, key) => {
+            {controlledLayers.map((l: ControlledLayer, key: number) => {
               return (
                 l.propertyName === currentPropertyName && (
                   <ListItem key={key} alignItems="flex-start">
@@ -156,25 +161,27 @@ export default function ReportDialog({
                       disableTypography
                       primary={
                         <Box sx={{ mb: 1 }}>
-                          <Typography variant="h6" element="div">
+                          <Typography variant="h6" component="div">
                             {l.caption}
                           </Typography>
-                          <Typography variant="body2" element="div">
+                          <Typography variant="body2" component="div">
                             {l.subcaption}
                           </Typography>
                         </Box>
                       }
                       secondary={
                         <>
-                          {getLayerNotesAsArray(l.id).map((s, i) => (
-                            <Typography
-                              key={i}
-                              variant="caption"
-                              sx={{ display: "block" }}
-                            >
-                              {i === 0 && "Notering: "} {s}
-                            </Typography>
-                          ))}
+                          {getLayerNotesAsArray(l.id).map(
+                            (s: string, i: number) => (
+                              <Typography
+                                key={i}
+                                variant="caption"
+                                sx={{ display: "block" }}
+                              >
+                                {i === 0 && "Notering: "} {s}
+                              </Typography>
+                            )
+                          )}
                         </>
                       }
                     />

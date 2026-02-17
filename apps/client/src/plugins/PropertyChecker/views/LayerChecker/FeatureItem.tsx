@@ -13,12 +13,19 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import IconWarning from "@mui/icons-material/Warning";
+// @ts-expect-error — HajkToolTip is a JS component without type declarations
 import HajkToolTip from "components/HajkToolTip";
 
-const ExpandMore = styled((props) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme }) => ({
+import type { IconButtonProps } from "@mui/material";
+import type { FeatureItemProps, ControlledLayer } from "../../types";
+
+interface ExpandMoreProps extends IconButtonProps {
+  expand: boolean;
+}
+
+const ExpandMore = styled(({ expand: _expand, ...other }: ExpandMoreProps) => (
+  <IconButton {...other} />
+))(({ theme }) => ({
   transform: "rotate(180deg)",
   marginLeft: "auto",
   transition: theme.transitions.create("transform", {
@@ -26,7 +33,7 @@ const ExpandMore = styled((props) => {
   }),
   variants: [
     {
-      props: ({ expand }) => !expand,
+      props: ({ expand }: ExpandMoreProps) => !expand,
       style: {
         transform: "rotate(0deg)",
       },
@@ -34,7 +41,7 @@ const ExpandMore = styled((props) => {
   ],
 }));
 
-const FeatureItem = (props) => {
+const FeatureItem = (props: FeatureItemProps) => {
   const {
     globalObserver,
     layerNotes,
@@ -52,7 +59,7 @@ const FeatureItem = (props) => {
   const caption = props.feature.get("caption");
   // For Hajk group layers, we want to append a small
   // text saying that "this layer is part of group layer X".
-  const subcaption =
+  const subcaption: string | null =
     olLayer.get("caption") !== caption
       ? `del av: ${olLayer.get("caption")}`
       : null;
@@ -60,7 +67,7 @@ const FeatureItem = (props) => {
   // Define an object that will be used when keeping track
   // of user-selected layers that should be printed inside the
   // Report dialog.
-  const selectionFormat = {
+  const selectionFormat: ControlledLayer = {
     id, // We want to distinguish by something more unique than merely the caption.
     layer,
     caption,
@@ -74,7 +81,8 @@ const FeatureItem = (props) => {
 
   // Used to keep track of OL Layer's current visibility.
   const [visible, setVisible] = React.useState(olLayer.getVisible());
-  const layerVisibilityChanged = (e) => setVisible(!e.oldValue);
+  const layerVisibilityChanged = (e: import("ol/Object").ObjectEvent) =>
+    setVisible(!e.oldValue);
 
   // Used to keep track of the expansion area below the main layer item
   const [expanded, setExpanded] = React.useState(false);
@@ -119,7 +127,7 @@ const FeatureItem = (props) => {
   }, [olLayer]);
 
   const layerLoadErrorHandler = React.useCallback(
-    (d) => {
+    (d: { id: string; status: string }) => {
       loadStatus !== "loaderror" &&
         olLayer.get("name") === d.id &&
         setLoadStatus(d.status);
@@ -149,7 +157,7 @@ const FeatureItem = (props) => {
   const isSelected = () =>
     controlledLayers.filter((l) => l.id === selectionFormat.id).length > 0;
 
-  const handleLayerNoteChange = (e) => {
+  const handleLayerNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLayerNotes({ ...layerNotes, ...{ [id]: e.target.value } });
   };
 

@@ -31,6 +31,7 @@ import type {
   GroupedDigitalPlanFeatures,
   GetFeatureInfoPayload,
   NoFeaturesPayload,
+  ControlledLayer,
 } from "./types";
 
 const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
@@ -86,7 +87,9 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
     drawModel.removeDrawnFeatures();
   };
 
-  const [controlledLayers, setControlledLayers] = useState<string[]>([]);
+  const [controlledLayers, setControlledLayers] = useState<ControlledLayer[]>(
+    []
+  );
 
   // Subscribe and unsubscribe to events
   useEffect(() => {

@@ -15,6 +15,8 @@ import { Box } from "@mui/system";
 import TabContentLayerChecker from "./LayerChecker/TabContentView";
 import TabContentDigitalPlanChecker from "./DigitalPlanChecker/TabContentView";
 
+import type { PropertyItemProps, LayerNotes } from "../types";
+
 function PropertyItem({
   clickedPointsCoordinates,
   controlledLayers,
@@ -26,12 +28,12 @@ function PropertyItem({
   setControlledLayers,
   startExpanded,
   userDetails,
-}) {
+}: PropertyItemProps) {
   const [selectedTab, setSelectedTab] = useState(0);
 
   // This map will hold values for user's own notes that can be written
   // for each layer in the list.
-  const [layerNotes, setLayerNotes] = useState({});
+  const [layerNotes, setLayerNotes] = useState<LayerNotes>({});
 
   return (
     <React.Fragment>

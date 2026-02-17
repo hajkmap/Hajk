@@ -4,6 +4,8 @@ import ReportDialog from "./ReportDialog";
 
 import { Button } from "@mui/material";
 
+import type { LayerCheckerTabContentViewProps } from "../../types";
+
 function TabContentView({
   clickedPointsCoordinates,
   controlledLayers,
@@ -15,10 +17,10 @@ function TabContentView({
   setControlledLayers,
   setLayerNotes,
   userDetails,
-}) {
+}: LayerCheckerTabContentViewProps) {
   const [reportDialogVisible, setReportDialogVisible] = useState(false);
 
-  const handleShowReportDialog = (propertyName) => {
+  const handleShowReportDialog = (propertyName: string) => {
     setCurrentPropertyName(propertyName);
     setReportDialogVisible(true);
   };

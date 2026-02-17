@@ -13,13 +13,23 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DigitalPlanItem from "./DigitalPlanItem";
 import ReportDialog from "./ReportDialog";
 
-function DigitalPlan(props) {
+import type Feature from "ol/Feature";
+import type { Geometry } from "ol/geom";
+import type {
+  DigitalPlanProps,
+  ControlledRegulation,
+  LayerNotes,
+} from "../../types";
+
+function DigitalPlan(props: DigitalPlanProps) {
   const { digitalPlanKey, plan, options, userDetails } = props;
-  const [controlledRegulations, setControlledRegulations] = useState([]);
+  const [controlledRegulations, setControlledRegulations] = useState<
+    ControlledRegulation[]
+  >([]);
 
   // This map will hold values for user's own notes that can be written
   // for each layer in the list.
-  const [regulationNotes, setRegulationNotes] = useState({});
+  const [regulationNotes, setRegulationNotes] = useState<LayerNotes>({});
 
   const [reportDialogVisible, setReportDialogVisible] = useState(false);
   return (
@@ -57,33 +67,37 @@ function DigitalPlan(props) {
             </Button>
           </>
         )}
-        {Object.entries(plan.features).map(([useType, type], j) => (
-          <React.Fragment key={j}>
-            <Typography variant="h6" sx={[j !== 0 && { mt: 2 }]}>
-              {useType}
-              {}
-            </Typography>
-            {type
-              .sort((a, b) => {
-                return a
-                  .get(options.digitalPlanItemTitleAttribute)
-                  ?.localeCompare(b.get(options.digitalPlanItemTitleAttribute));
-              })
-              .map((f, index) => (
-                <DigitalPlanItem
-                  feature={f}
-                  digitalPlanKey={digitalPlanKey}
-                  key={index}
-                  controlledRegulations={controlledRegulations}
-                  setControlledRegulations={setControlledRegulations}
-                  regulationNotes={regulationNotes}
-                  setRegulationNotes={setRegulationNotes}
-                  options={options}
-                  useType={useType}
-                />
-              ))}
-          </React.Fragment>
-        ))}
+        {Object.entries(plan.features).map(
+          ([useType, type]: [string, Feature<Geometry>[]], j) => (
+            <React.Fragment key={j}>
+              <Typography variant="h6" sx={[j !== 0 && { mt: 2 }]}>
+                {useType}
+                {}
+              </Typography>
+              {type
+                .sort((a: Feature<Geometry>, b: Feature<Geometry>) => {
+                  return a
+                    .get(options.digitalPlanItemTitleAttribute)
+                    ?.localeCompare(
+                      b.get(options.digitalPlanItemTitleAttribute)
+                    );
+                })
+                .map((f: Feature<Geometry>, index: number) => (
+                  <DigitalPlanItem
+                    feature={f}
+                    digitalPlanKey={digitalPlanKey}
+                    key={index}
+                    controlledRegulations={controlledRegulations}
+                    setControlledRegulations={setControlledRegulations}
+                    regulationNotes={regulationNotes}
+                    setRegulationNotes={setRegulationNotes}
+                    options={options}
+                    useType={useType}
+                  />
+                ))}
+            </React.Fragment>
+          )
+        )}
       </AccordionDetails>
     </Accordion>
   );

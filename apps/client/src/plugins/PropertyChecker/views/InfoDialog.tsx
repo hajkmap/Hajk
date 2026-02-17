@@ -9,7 +9,9 @@ import {
   Typography,
 } from "@mui/material";
 
-function InfoDialog({ localObserver }) {
+import type { InfoDialogProps } from "../types";
+
+function InfoDialog({ localObserver }: InfoDialogProps) {
   const [clearDialogVisible, setClearDialogVisible] = useState(false);
 
   const handleClose = () => {

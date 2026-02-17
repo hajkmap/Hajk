@@ -15,7 +15,12 @@ import {
 import { Box } from "@mui/system";
 import { styled } from "@mui/material/styles";
 
-export default function ReportDialog(props) {
+import type {
+  DigitalPlanReportDialogProps,
+  ControlledRegulation,
+} from "../../types";
+
+export default function ReportDialog(props: DigitalPlanReportDialogProps) {
   const {
     reportDialogVisible,
     setReportDialogVisible,
@@ -36,14 +41,14 @@ export default function ReportDialog(props) {
       ).toLocaleDateString()}\n\n` +
       "Granskning har gjorts mot följande planbestämmelser:\n\n" +
       digitalPlansLayerSecondLevelOrder
-        .map((useType, i) => {
+        .map((useType: string) => {
           return (
             useType.toUpperCase() +
             "\n\n" +
             controlledRegulations
-              .filter((r) => r.useType === useType)
+              .filter((r: ControlledRegulation) => r.useType === useType)
               .map(
-                (r) =>
+                (r: ControlledRegulation) =>
                   // Take only care of current property's layers.
                   r.digitalPlanKey === digitalPlanKey &&
                   // Produce a nice looking line for each item. We want it
@@ -80,14 +85,14 @@ export default function ReportDialog(props) {
       ).toLocaleDateString()}</p>` +
       "<h2>Granskning har gjorts mot följande planbestämmelser:</h2>" +
       digitalPlansLayerSecondLevelOrder
-        .map((useType, i) => {
+        .map((useType: string) => {
           return (
             `<h3>${useType.toUpperCase()}</h3>` +
             "<ul>" +
             controlledRegulations
-              .filter((r) => r.useType === useType)
+              .filter((r: ControlledRegulation) => r.useType === useType)
               .map(
-                (r) =>
+                (r: ControlledRegulation) =>
                   // Take only care of current property's layers.
                   r.digitalPlanKey === digitalPlanKey &&
                   // Produce a nice looking line for each item. We want it
@@ -100,7 +105,7 @@ export default function ReportDialog(props) {
                     "<br>" +
                     (getLayerNotesAsArray(r.id).length > 0
                       ? `Notering: ${getLayerNotesAsArray(r.id)
-                          ?.map((s) => `${s}<br>`)
+                          ?.map((s: string) => `${s}<br>`)
                           .join("")}`
                       : "") +
                     "</li>"
@@ -153,7 +158,7 @@ export default function ReportDialog(props) {
     }
   };
 
-  const getLayerNotesAsArray = (lid) => {
+  const getLayerNotesAsArray = (lid: string): string[] => {
     // Let's use the 'lid' (layer ID) to find a corresponding
     // value in layerNotes. Next, split on new lines and remove
     // duplicate new lines. Finally, put it all together to an array
@@ -192,57 +197,69 @@ export default function ReportDialog(props) {
           <Typography gutterBottom variant="h5">
             Granskning har gjorts mot följande planbestämmelser:
           </Typography>
-          {digitalPlansLayerSecondLevelOrder.map((useType, i) => {
-            const filteredRegulations = controlledRegulations.filter(
-              (r) => r.useType === useType
-            );
-            return (
-              filteredRegulations.length > 0 && (
-                <React.Fragment key={i}>
-                  <Typography variant="h6">{useType}</Typography>
-                  <List>
-                    {filteredRegulations.map((l, key) => {
-                      return (
-                        l.digitalPlanKey === digitalPlanKey && (
-                          <ListItem key={key} alignItems="flex-start">
-                            {/* <ListItemAvatar>
+          {digitalPlansLayerSecondLevelOrder.map(
+            (useType: string, i: number) => {
+              const filteredRegulations = controlledRegulations.filter(
+                (r: ControlledRegulation) => r.useType === useType
+              );
+              return (
+                filteredRegulations.length > 0 && (
+                  <React.Fragment key={i}>
+                    <Typography variant="h6">{useType}</Typography>
+                    <List>
+                      {filteredRegulations.map(
+                        (l: ControlledRegulation, key: number) => {
+                          return (
+                            l.digitalPlanKey === digitalPlanKey && (
+                              <ListItem key={key} alignItems="flex-start">
+                                {/* <ListItemAvatar>
                             <CheckBoxIcon />
                           </ListItemAvatar> */}
-                            <ListItemText
-                              disableTypography
-                              primary={
-                                <Box sx={{ mb: 1 }}>
-                                  <Typography variant="subtitle2" element="div">
-                                    {l.regulationName}
-                                  </Typography>
-                                  <Typography variant="body2" element="div">
-                                    {l.regulationCaptionAsElement}
-                                  </Typography>
-                                </Box>
-                              }
-                              secondary={
-                                <>
-                                  {getLayerNotesAsArray(l.id).map((s, i) => (
-                                    <Typography
-                                      key={i}
-                                      variant="caption"
-                                      sx={{ display: "block" }}
-                                    >
-                                      {i === 0 && "Notering: "} {s}
-                                    </Typography>
-                                  ))}
-                                </>
-                              }
-                            />
-                          </ListItem>
-                        )
-                      );
-                    })}
-                  </List>
-                </React.Fragment>
-              )
-            );
-          })}
+                                <ListItemText
+                                  disableTypography
+                                  primary={
+                                    <Box sx={{ mb: 1 }}>
+                                      <Typography
+                                        variant="subtitle2"
+                                        component="div"
+                                      >
+                                        {l.regulationName}
+                                      </Typography>
+                                      <Typography
+                                        variant="body2"
+                                        component="div"
+                                      >
+                                        {l.regulationCaptionAsElement}
+                                      </Typography>
+                                    </Box>
+                                  }
+                                  secondary={
+                                    <>
+                                      {getLayerNotesAsArray(l.id).map(
+                                        (s: string, i: number) => (
+                                          <Typography
+                                            key={i}
+                                            variant="caption"
+                                            sx={{ display: "block" }}
+                                          >
+                                            {i === 0 && "Notering: "} {s}
+                                          </Typography>
+                                        )
+                                      )}
+                                    </>
+                                  }
+                                />
+                              </ListItem>
+                            )
+                          );
+                        }
+                      )}
+                    </List>
+                  </React.Fragment>
+                )
+              );
+            }
+          )}
           <Typography gutterBottom variant="h5">
             Planens syfte
           </Typography>
