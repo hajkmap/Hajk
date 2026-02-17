@@ -51,17 +51,6 @@ export const CONSTANTS = {
     V2: "2.0.0",
   },
 
-  // ── Upstream authentication (backend → kartserver) ──────────────
-  // "none" | "basic" | "bearer" | "oauth2"
-  UPSTREAM_AUTH: (process.env.OGC_UPSTREAM_AUTH || "none").toLowerCase(),
-  UPSTREAM_USER: process.env.OGC_UPSTREAM_USER || "",
-  UPSTREAM_PASS: process.env.OGC_UPSTREAM_PASS || "",
-  UPSTREAM_TOKEN: process.env.OGC_UPSTREAM_TOKEN || "",
-  OAUTH2_TOKEN_URL: process.env.OGC_OAUTH2_TOKEN_URL || "",
-  OAUTH2_CLIENT_ID: process.env.OGC_OAUTH2_CLIENT_ID || "",
-  OAUTH2_CLIENT_SECRET: process.env.OGC_OAUTH2_CLIENT_SECRET || "",
-  OAUTH2_SCOPE: process.env.OGC_OAUTH2_SCOPE || "",
-
   // null = allow all (fallback); otherwise, comma-separated allowlist in env
   ALLOWED_HOSTS: process.env.WFS_ALLOWED_HOSTS
     ? process.env.WFS_ALLOWED_HOSTS.split(",").map((h) => h.trim())

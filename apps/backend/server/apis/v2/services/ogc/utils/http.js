@@ -1,13 +1,11 @@
 import { CONSTANTS } from "../constants.js";
 import { UpstreamError } from "../errors.js";
 import { logger } from "../logger.js";
-import { getUpstreamHeaders } from "./auth.js";
 
 const RETRY_STATUS_CODES = new Set([502, 503, 504]);
 
 /**
- * Fetch with AbortController timeout and upstream auth injection.
- * Auth headers are merged first so callers can override if needed.
+ * Fetch with AbortController timeout.
  */
 export async function fetchWithTimeout(
   url,
@@ -18,10 +16,8 @@ export async function fetchWithTimeout(
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const authHeaders = await getUpstreamHeaders();
     const response = await fetch(url, {
       ...options,
-      headers: { ...authHeaders, ...options.headers },
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
