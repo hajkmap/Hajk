@@ -25,7 +25,8 @@ export interface HajkApp {
  * typically populated via ActiveDirectory or similar auth.
  */
 export interface UserDetails {
-  [key: string]: unknown;
+  displayName: string;
+  description: string;
 }
 
 /**
