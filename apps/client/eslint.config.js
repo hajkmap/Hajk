@@ -6,6 +6,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import prettierConfig from "eslint-config-prettier";
 import prettierPlugin from "eslint-plugin-prettier";
+import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 // Here's the new flat style config for ESLint, as of 2026. I tried to follow
@@ -18,6 +19,7 @@ export default defineConfig([
     files: ["src/**/*.{js,jsx,ts,tsx}"], // We want ESlint to only care of these files
     extends: [
       js.configs.recommended, // Core JS rules (no-unused-vars, no-undef, basic stuff)
+      ...tseslint.configs.recommended, // TypeScript-specific rules
       reactPlugin.configs.flat.recommended, // React-specific rules. This does not exist in the default create-vite template, but given we're React-heavy, I find it useful.
       reactPlugin.configs.flat["jsx-runtime"], // More recommended React rules.
       reactHooks.configs.flat.recommended, // Rules-of-hooks. Not part of default React plugin config.
