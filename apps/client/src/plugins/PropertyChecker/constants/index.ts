@@ -1,5 +1,5 @@
 // A file where we can keep some constant values to keep the components etc. more clean.
-export const DEFAULT_MEASUREMENT_SETTINGS = Object.freeze({
+export const DEFAULT_MEASUREMENT_SETTINGS = {
   showText: false,
   showArea: false,
   showLength: false,
@@ -7,4 +7,4 @@ export const DEFAULT_MEASUREMENT_SETTINGS = Object.freeze({
   areaUnit: "AUTO",
   lengthUnit: "AUTO",
   precision: 0,
-});
+} as const;
