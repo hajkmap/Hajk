@@ -43,16 +43,10 @@ export default async function restrictAdmin(req, res, next) {
     return res.sendStatus(500);
   }
 
-  // Save user name to eliminate multiple calls to the same method
-  const user = ad.getUserFromRequestHeader(req);
-
-  // Save user name so that it's available to following middleware
-  res.locals.authUser = user;
-
   logger.trace(
     "Access to admin endpoints is limited to the following groups: '%s'. Checking if user '%s' is member in any of them.",
     adminGroups,
-    user
+    res.locals.authUser
   );
 
   // Convert comma-separated list of allowed groups to an array
@@ -60,11 +54,11 @@ export default async function restrictAdmin(req, res, next) {
 
   // Check if user is a member in at least one of the specified admins AD groups
   for await (let group of adminGroups) {
-    const allowed = await ad.isUserMemberOf(user, group);
+    const allowed = await ad.isUserMemberOf(res.locals.authUser, group);
     if (allowed === true) {
       logger.trace(
         "'%s' is member of '%s' which gives access to '%s'. Access to admin granted.",
-        user,
+        res.locals.authUser,
         group,
         req.baseUrl
       );
@@ -78,7 +72,7 @@ export default async function restrictAdmin(req, res, next) {
   // because user isn't member in any of the specified groups. Warn and exit.
   logger.warn(
     "Access to admin forbidden. %o is not member of %o.",
-    user,
+    res.locals.authUser,
     adminGroups
   );
 

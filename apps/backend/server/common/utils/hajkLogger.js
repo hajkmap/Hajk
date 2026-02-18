@@ -1,4 +1,8 @@
 import log4js from "log4js";
+import { requestContext } from "./requestContext.js";
+
+// Let's grab user object from the request context. If it's not available, we'll use a dash.
+const userToken = () => requestContext.getStore()?.user ?? "-";
 
 // Setup our logger.
 // First, see if Hajk is running in a clustered environment, if so, we want unique log file
@@ -22,22 +26,36 @@ log4js.configure({
   // Appenders are output methods, e.g. if log should be written to file or console (or both)
   appenders: {
     // Console appender will print to stdout
-    console: { type: "stdout" },
+    console: {
+      type: "stdout",
+      layout: {
+        type: "pattern",
+        // This pattern mimics the default layout, but adds the user token to the output.
+        // The %x{user} is replaced with the userToken value…
+        pattern: "%[[%d] [%p] %c -%] [%x{user}] %m",
+        // …which we pass to logger from request context store here:
+        tokens: { user: userToken },
+      },
+    },
     // File appender will print to a log file, rotating it each day.
     file: {
       type: "dateFile",
       filename: `logs/output${uniqueInstance}.log`,
+      layout: {
+        type: "pattern",
+        pattern: "[%d] [%p] %c - [%x{user}] %m",
+        tokens: { user: userToken },
+      },
       ...commonDateFileOptions,
     },
     // Another file appender, specifically to log events that modify Hajk's layers/maps
     adminEventLog: {
       type: "dateFile",
       filename: `logs/admin_events${uniqueInstance}.log`,
-      // Custom layout as we only care about the timestamp, the message and new line,
-      // log level and log context are not of interest to this specific appender.
       layout: {
         type: "pattern",
-        pattern: "[%d] %m",
+        pattern: "[%d] [%x{user}] %m",
+        tokens: { user: userToken },
       },
       ...commonDateFileOptions,
     },

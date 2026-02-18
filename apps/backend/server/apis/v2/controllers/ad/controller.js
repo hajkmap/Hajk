@@ -24,10 +24,7 @@ export class Controller {
     ActiveDirectoryService.getStore(store).then((data) => {
       handleStandardResponse(res, data);
       // If data doesn't contain the error property, we're good - print event to admin log
-      !data.error &&
-        ael.info(
-          `${res.locals.authUser} viewed contents of AD store "${store}"`
-        );
+      !data.error && ael.info(`viewed contents of AD store "${store}"`);
     });
   }
 
@@ -35,7 +32,7 @@ export class Controller {
     ActiveDirectoryService.flushStores().then((data) => {
       handleStandardResponse(res, data);
       // If data doesn't contain the error property, we're good - print event to admin log
-      !data.error && ael.info(`${res.locals.authUser} flushed all AD stores`);
+      !data.error && ael.info("flushed all AD stores");
     });
   }
 }
