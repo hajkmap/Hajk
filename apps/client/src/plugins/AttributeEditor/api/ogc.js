@@ -12,8 +12,9 @@ const geojsonFormat = new GeoJSON();
  *
  * - Layer listing and metadata are fetched from the Hajk backend
  *   (which handles AD filtering).
- * - Feature data is proxied through the backend but parsed client-side
- *   using OpenLayers (supports both GeoJSON and GML responses).
+ * - Feature data is fetched directly from layer.url (absolute URL) or via
+ *   the backend proxy (relative URL), and parsed client-side using OpenLayers
+ *   (supports both GeoJSON and GML responses).
  * - WFS-T transactions are built client-side with OpenLayers and
  *   forwarded through the backend proxy.
  *
@@ -25,6 +26,23 @@ const geojsonFormat = new GeoJSON();
  */
 export function createOgcApi(baseUrl) {
   const base = (baseUrl || "").replace(/\/+$/, "");
+
+  // Backend origin from mapserviceBase (e.g. "http://localhost:3002").
+  // Used to prefix relative layer.url paths so they reach the backend.
+  const backendOrigin = (() => {
+    try {
+      return new URL(base).origin;
+    } catch {
+      return "";
+    }
+  })();
+
+  /** Resolve layer.url: prefix relative paths with backend origin. */
+  const resolveLayerUrl = (url) => {
+    if (!url) return url;
+    if (url.startsWith("/")) return `${backendOrigin}${url}`;
+    return url;
+  };
 
   // Validate layerId to prevent path traversal attacks
   const validateLayerId = (id) => {
@@ -98,42 +116,63 @@ export function createOgcApi(baseUrl) {
     }
   };
 
-  // ── Features (backend proxies, client parses with OpenLayers) ────
+  // ── Features (fetched from layer.url — either proxy or direct) ───
 
   const fetchWfstFeatures = async (id, params = {}, { signal } = {}) => {
-    const safeId = validateLayerId(id);
-    const queryParams = {
-      ...params,
-    };
+    // Always get layer config from backend (AD filtering, metadata)
+    const layer = await fetchWfst(id, null, { signal });
+    const typeName = resolveTypeName(layer);
+    const srs = params.srsName || layer.projection || "EPSG:3006";
+    const version = params.version || "1.1.0";
 
-    const q = new URLSearchParams(queryParams).toString();
-    const url = `${base}/ogc/wfst/${safeId}/features?${q}`;
+    // Build WFS GetFeature URL using layer.url.
+    // If layer.url is relative (e.g. /api/v2/proxy/kartserver/wfs)
+    // it goes through the backend proxy. If absolute
+    // (e.g. https://karta.orebro.se/wfs) it goes direct.
+    const queryParams = new URLSearchParams({
+      SERVICE: "WFS",
+      REQUEST: "GetFeature",
+      VERSION: version,
+      TYPENAME: typeName,
+      SRSNAME: srs,
+    });
+    if (params.maxFeatures) {
+      queryParams.set("MAXFEATURES", String(params.maxFeatures));
+    }
+    if (params.bbox) {
+      queryParams.set("BBOX", params.bbox);
+    }
+    if (params.filter) {
+      queryParams.set("FILTER", params.filter);
+    }
+    if (params.cqlFilter) {
+      queryParams.set("CQL_FILTER", params.cqlFilter);
+    }
+    const layerUrl = resolveLayerUrl(layer.url);
+    const separator = layerUrl.includes("?") ? "&" : "?";
+    const wfsUrl = `${layerUrl}${separator}${queryParams.toString()}`;
 
-    const res = await hfetch(url, {
+    const res = await hfetch(wfsUrl, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        Pragma: "no-cache",
-        Expires: "0",
-      },
       cache: "no-store",
       signal,
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch WFST features (${res.status})`);
+      throw new Error(`Failed to fetch WFS features (${res.status})`);
     }
 
-    const result = await res.json();
-    const srs = result.srsName || "EPSG:3006";
-    const layerProj = result.layerProjection || srs;
+    const contentType = res.headers.get("Content-Type") || "";
+    const responseText = await res.text();
+    const layerProj = layer.projection || srs;
 
-    // JSON response — already GeoJSON, pass through with CRS metadata
-    if (result.format === "json") {
-      const fc = addCrsMetadata(result.data, srs, layerProj);
-      // Post-process to match old gml.js output format:
-      // add @_fid and strip namespace prefixes from property keys
+    // JSON response — parse as GeoJSON
+    if (contentType.includes("json")) {
+      const data =
+        typeof responseText === "string"
+          ? JSON.parse(responseText)
+          : responseText;
+      const fc = addCrsMetadata(data, srs, layerProj);
       if (Array.isArray(fc.features)) {
         for (const f of fc.features) {
           if (f.id != null && f.properties && !f.properties["@_fid"]) {
@@ -150,7 +189,6 @@ export function createOgcApi(baseUrl) {
           }
         }
       }
-      // QGIS Server includes geometry_name in GeoJSON features
       const firstFeature = fc.features?.[0];
       if (firstFeature?.geometry_name) {
         fc.geometryName = firstFeature.geometry_name;
@@ -159,46 +197,29 @@ export function createOgcApi(baseUrl) {
     }
 
     // XML/GML response — parse with OpenLayers.
-    // Don't pass dataProjection/featureProjection here: the GML may
-    // contain a different srsName than what the backend requested
-    // (e.g. QGIS Server ignoring the SRSNAME parameter). Letting OL
-    // auto-detect avoids failed reprojections for unregistered CRS.
-    //
     // Some WFS servers (notably QGIS Server) return GML2 encoding
-    // inside a WFS 1.1.0 response. OL defaults to a GML3 parser for
-    // WFS 1.1.0 which can fail on GML2 polygon geometries. If the
-    // GML3 parse fails we retry with an explicit GML2 parser.
+    // inside a WFS 1.1.0 response. If GML3 parse fails, retry GML2.
     let features;
     try {
-      features = wfsFormat.readFeatures(result.data);
+      features = wfsFormat.readFeatures(responseText);
     } catch (e) {
-      features = []; // trigger GML2 fallback below
+      features = [];
     }
 
-    // GML2 fallback: if GML3 parser returned 0 features (or threw),
-    // the XML likely contains GML2 encoding (common with QGIS Server).
-    // Check if the XML actually contains feature members before giving up.
     if (
       features.length === 0 &&
-      /<(gml:)?featureMember|<wfs:member/i.test(result.data)
+      /<(gml:)?featureMember|<wfs:member/i.test(responseText)
     ) {
       try {
-        features = wfsGml2Format.readFeatures(result.data);
+        features = wfsGml2Format.readFeatures(responseText);
       } catch (e2) {
         logError("GML2 fallback parsing also failed", e2);
       }
     }
 
-    // Detect the actual geometry field name from parsed features.
-    // This is critical for WFS-T: the insert XML must use the correct
-    // element name (e.g. "geometry" not "geom"). OL reads this from GML.
     const detectedGeomName =
       features.length > 0 ? features[0].getGeometryName() : null;
 
-    // Use the backend-reported CRS (from layer config) for the
-    // FeatureCollection metadata. The old backend gml.js never detected
-    // CRS from XML — it just used the configured projection. Using the
-    // XML-detected CRS can fail if that CRS isn't registered in OL/proj4.
     const fc = toFeatureCollection(features, srs, layerProj);
     if (detectedGeomName) {
       fc.geometryName = detectedGeomName;
@@ -213,7 +234,6 @@ export function createOgcApi(baseUrl) {
     transaction,
     { signal } = {}
   ) => {
-    const safeLayerId = validateLayerId(layerId);
     const {
       inserts = [],
       updates = [],
@@ -266,26 +286,23 @@ export function createOgcApi(baseUrl) {
         transactionNode
       );
 
-      // Send through backend proxy (which validates AD and forwards to WFS)
-      const url = `${base}/ogc/wfst/${safeLayerId}/transaction`;
-      const response = await hfetch(url, {
+      // POST WFS-T XML directly to layer.url (proxy or kartserver)
+      const response = await hfetch(resolveLayerUrl(layer.url), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transactionXml }),
+        headers: { "Content-Type": "application/xml" },
+        body: transactionXml,
         signal,
       });
 
       if (!response.ok) {
-        const err = await response
-          .json()
-          .catch(() => ({ error: "Unknown error" }));
-        throw new Error(err.error || "Transaction failed");
+        const errorText = await response.text().catch(() => "Unknown error");
+        throw new Error(
+          `Transaction failed (${response.status}): ${errorText}`
+        );
       }
 
-      // Parse the raw WFS-T response from the upstream server
-      const { wfsResponse } = await response.json();
-      const parsed = parseWfstResponse(wfsResponse);
-      return parsed;
+      const wfsResponse = await response.text();
+      return parseWfstResponse(wfsResponse);
     } catch (error) {
       logError("commitWfstTransaction", error);
       throw error;

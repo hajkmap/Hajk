@@ -305,14 +305,33 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     // Prepare a logger
     const l = log4js.getLogger("hajk.proxy");
     try {
+      // Suffixes used for per-proxy credentials — these are NOT proxy targets.
+      const credentialSuffixes = ["_USER", "_PASSWORD"];
+
       // Convert the settings from DOTENV to a nice Array of Objects.
+      // Skip entries that are credential keys (e.g. PROXY_GEOSERVER_USER).
       const proxyMap = Object.entries(process.env)
-        .filter(([k]) => k.startsWith("PROXY_"))
+        .filter(
+          ([k]) =>
+            k.startsWith("PROXY_") &&
+            !credentialSuffixes.some((s) => k.endsWith(s))
+        )
         .map(([k, v]) => {
-          // Get rid of the leading "PROXY_" and convert to lower case
-          k = k.replace("PROXY_", "").toLowerCase();
-          return { context: k, target: v };
+          // Original key without "PROXY_" prefix, e.g. "GEOSERVER"
+          const rawName = k.replace("PROXY_", "");
+          return {
+            context: rawName.toLowerCase(),
+            target: v,
+            // Look up optional Basic auth credentials using same naming convention
+            user: process.env[`PROXY_${rawName}_USER`] || "",
+            password: process.env[`PROXY_${rawName}_PASSWORD`] || "",
+          };
         });
+
+      // AD header names (same as the rest of Hajk uses)
+      const userHeader = process.env.AD_TRUSTED_HEADER || "X-Control-Header";
+      const groupHeader =
+        process.env.AD_TRUSTED_GROUP_HEADER || "X-Control-Group-Header";
 
       // Iterate enabled API versions and expose one proxy endpoint
       // for each version.
@@ -325,17 +344,44 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
             `Setting up proxy: /api/v${apiVersion}/proxy/${context} -> ${target}`
           );
 
+          // Build proxy options
+          const proxyOptions = {
+            logger: l,
+            target: target,
+            changeOrigin: true,
+            pathRewrite: {
+              [`^/api/v${apiVersion}/proxy/${context}`]: "", // remove base path
+            },
+          };
+
+          // If credentials are configured, inject Basic auth and forward
+          // AD headers so the upstream server knows who the user is.
+          if (v.user && v.password) {
+            l.trace(`Proxy ${context}: Basic auth enabled"`);
+            const basicCredentials = Buffer.from(
+              `${v.user}:${v.password}`
+            ).toString("base64");
+
+            proxyOptions.on = {
+              proxyReq: (proxyReq, req) => {
+                // Basic auth for the service account
+                proxyReq.setHeader(
+                  "Authorization",
+                  `Basic ${basicCredentials}`
+                );
+                // Forward AD user/group headers from the original request
+                const hUser = req.get(userHeader);
+                const hGroups = req.get(groupHeader);
+                if (hUser) proxyReq.setHeader(userHeader, hUser);
+                if (hGroups) proxyReq.setHeader(groupHeader, hGroups);
+              },
+            };
+          }
+
           // Create the proxy itself
           app.use(
             `/api/v${apiVersion}/proxy/${context}`,
-            createProxyMiddleware({
-              logger: l,
-              target: target,
-              changeOrigin: true,
-              pathRewrite: {
-                [`^/api/v${apiVersion}/proxy/${context}`]: "", // remove base path
-              },
-            })
+            createProxyMiddleware(proxyOptions)
           );
         });
       }

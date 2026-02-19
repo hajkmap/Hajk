@@ -7,6 +7,4 @@ import controller from "./controller.js";
 export default express
   .Router()
   .get("/wfst", controller.listWFSTLayers)
-  .get("/wfst/:id", controller.getWFSTLayer)
-  .get("/wfst/:id/features", controller.getWFSTFeatures)
-  .post("/wfst/:id/transaction", controller.commitWFSTTransaction);
+  .get("/wfst/:id", controller.getWFSTLayer);
