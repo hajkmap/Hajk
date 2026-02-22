@@ -1,17 +1,15 @@
 import { delay } from "../../utils/Delay";
 import { getPointResolution } from "ol/proj";
 import { getCenter } from "ol/extent";
-import jsPDF from "jspdf";
-import { saveAs } from "file-saver";
 
-import Vector from "ol/layer/Vector.js";
+import Vector from "ol/layer/Vector";
 import View from "ol/View";
-import VectorSource from "ol/source/Vector.js";
+import VectorSource from "ol/source/Vector";
 import Polygon from "ol/geom/Polygon";
-import Feature from "ol/Feature.js";
-import { Translate } from "ol/interaction.js";
+import Feature from "ol/Feature";
+import { Translate } from "ol/interaction";
 import Collection from "ol/Collection";
-import { Style, Stroke, Fill } from "ol/style.js";
+import { Style, Stroke, Fill } from "ol/style";
 
 import ImageLayer from "ol/layer/Image";
 import TileLayer from "ol/layer/Tile";
@@ -20,7 +18,9 @@ import ImageWMS from "ol/source/ImageWMS";
 
 import QRCode from "qrcode";
 
-import { ROBOTO_NORMAL, ROBOTO_BOLD } from "./constants";
+import { buildLayout } from "./PrintLayout";
+import { renderToPdf } from "./PdfRenderer";
+import { renderToPng } from "./PngRenderer";
 
 const DEFAULT_DIMS = {
   a0: [1189, 841],
@@ -30,6 +30,14 @@ const DEFAULT_DIMS = {
   a4: [297, 210],
   a5: [210, 148],
 };
+
+// Paper sizes in points assuming landscape
+const DEFAULT_PAPER_SIZE = {
+  a2: { width: 1684, height: 1190 },
+  a3: { width: 1190, height: 842 },
+  a4: { width: 842, height: 595 },
+};
+
 export default class PrintModel {
   constructor(settings) {
     this.proxy = settings.proxy;
@@ -50,6 +58,9 @@ export default class PrintModel {
     this.disclaimer = settings.options.disclaimer || "";
     this.localObserver = settings.localObserver;
     this.mapConfig = settings.mapConfig;
+    this.mmPerPoint = 2.83465;
+    this.scaleText = "";
+    this.scalebarMaxWidth = 0;
     // If we want the printed tiles to have correct styling, we have to use
     // custom loaders to make sure that the requests has all the required parameters.
     // If for some reason these tile-loaders shouldn't be used, a setting is exposed.
@@ -58,6 +69,7 @@ export default class PrintModel {
     // limit Image-WMS requests. The size below is the maximum tile-size allowed.
     // This max-size is only used if the custom-tile-loaders are used.
     this.maxTileSize = settings.options.maxTileSize || 4096;
+    // Hex color value, libPDF expects rgb colors, so this is converted in places.
     this.textColor = settings.options.mapTextColor;
     // Let's keep track of the original view, since we're gonna change the view
     // under the print-process. (And we want to be able to change back to the original one).
@@ -114,12 +126,87 @@ export default class PrintModel {
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
 
+  hexToRgb = (hex) => {
+    hex = hex.replace(/^#/, "");
+    let r = parseInt(hex.slice(0, 2), 16);
+    let g = parseInt(hex.slice(2, 4), 16);
+    let b = parseInt(hex.slice(4, 6), 16);
+
+    r = r > 127.5 ? 1 : 0;
+    g = g > 127.5 ? 1 : 0;
+    b = b > 127.5 ? 1 : 0;
+
+    return { r, g, b };
+  };
+
+  getRightAlignedPositions = (
+    text,
+    fontSize,
+    xmargin,
+    ymargin,
+    paperWidth,
+    options
+  ) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    context.font = `${fontSize}px roboto`;
+    const textWidth = context.measureText(text).width;
+
+    // If QrCode is placed in the bottom right corner, move text to the left of it (its wider)
+    // Otherwise its a logo or northarrow, needs less text movement.
+    // Also take care of scalebar placement bottomRight
+    let x;
+    if (options.includeQrCode && options.qrCodePlacement === "bottomRight") {
+      x = paperWidth - textWidth - xmargin - 90;
+    } else if (
+      options.includeNorthArrow &&
+      options.northArrowPlacement === "bottomRight"
+    ) {
+      x = paperWidth - textWidth - xmargin - this.northArrowMaxWidth * 3 - 10;
+    } else if (
+      options.includeScaleBar &&
+      options.scaleBarPlacement === "bottomRight"
+    ) {
+      // Use the scalebarMaxWidth that either is the text or the scalebar length, to align ex copyright
+      // and disclaimer/date correctly to the left of the scalebar when bottomRight
+      x = paperWidth - textWidth - xmargin - this.scalebarMaxWidth - 10;
+    } else if (options.includeLogo && options.logoPlacement === "bottomRight") {
+      x =
+        paperWidth -
+        textWidth -
+        xmargin -
+        this.logoMaxWidth * this.mmPerPoint -
+        10;
+    } else {
+      x = paperWidth - textWidth - xmargin;
+    }
+    const y = ymargin;
+    return { x, y };
+  };
+
+  getCenterAlignedPositions = (
+    text,
+    fontSize,
+    ymargin,
+    paperWidth,
+    paperHeight
+  ) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    context.font = `${fontSize}px roboto`;
+    const textWidth = context.measureText(text).width;
+
+    const x = (paperWidth - textWidth) / 2;
+    const y = paperHeight - ymargin;
+    return { x, y };
+  };
+
   generateQR = async (url, qrSize) => {
     try {
       return {
         data: await QRCode.toDataURL(url),
-        width: qrSize,
-        height: qrSize,
+        width: qrSize * 4,
+        height: qrSize * 4,
       };
     } catch (err) {
       console.warn(err);
@@ -267,10 +354,21 @@ export default class PrintModel {
       ? getCenter(this.previewFeature.getGeometry().getExtent())
       : this.map.getView().getCenter();
 
+    // Let's account for projection distortion: in projections like EPSG:3857,
+    // 1 map unit != 1 meter (except at the equator).
+    // We can grab the resolution at the center point, using getPointResolution,
+    // and then use it to scale the width and height of the preview feature (see
+    // how we calculate w and y below).
+    const pointResolution = getPointResolution(
+      this.map.getView().getProjection(),
+      1,
+      center
+    );
+
     const ipu = 39.37,
       sf = 1,
-      w = (((paper.width / dpi / ipu) * scale) / 2) * sf,
-      y = (((paper.height / dpi / ipu) * scale) / 2) * sf,
+      w = (((paper.width / dpi / ipu) * scale) / 2 / pointResolution) * sf,
+      y = (((paper.height / dpi / ipu) * scale) / 2 / pointResolution) * sf,
       coords = [
         [
           [center[0] - w, center[1] - y],
@@ -358,10 +456,17 @@ export default class PrintModel {
     } = await this.getImageDataBlobFromUrl(url);
 
     // We must ensure that the logo will be printed with a max width of X, while keeping the aspect ratio between width and height
-    const ratio = maxWidth / sourceWidth;
+    const ratio = (maxWidth * 3) / sourceWidth;
     const width = sourceWidth * ratio;
     const height = sourceHeight * ratio;
     return { data, width, height };
+  };
+
+  getTextWidth = (text, size) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    context.font = `${size}px roboto`;
+    return context.measureText(text).width;
   };
 
   /**
@@ -393,15 +498,35 @@ export default class PrintModel {
       (contentType === "qrCode" && this.textIconsMargin) === 0 ? 3 : 0;
 
     let pdfPlacement = { x: 0, y: 0 };
-    if (placement === "topLeft") {
+    if (placement === "bottomLeft") {
       pdfPlacement.x = margin;
       pdfPlacement.y = margin - qrMargin;
-    } else if (placement === "topRight") {
-      pdfPlacement.x = pdfWidth - contentWidth - margin;
-      pdfPlacement.y = margin - qrMargin;
     } else if (placement === "bottomRight") {
-      pdfPlacement.x = pdfWidth - contentWidth - margin;
-      pdfPlacement.y = pdfHeight - contentHeight - margin + qrMargin;
+      if (contentType === "scaleBar") {
+        // Check if the text is longer than the scalebar to get the one with most width.
+        const textLength = this.getTextWidth(this.scaleText, this.fontSize);
+        // If the contentWidth aka the scalebar and not the text, add some extra padding.
+        this.scalebarMaxWidth =
+          contentWidth > this.scalebarMaxWidth ? contentWidth + 25 : textLength;
+        pdfPlacement.x = pdfWidth - margin - this.scalebarMaxWidth;
+        pdfPlacement.y = margin;
+      } else {
+        pdfPlacement.x = pdfWidth - contentWidth - margin;
+        pdfPlacement.y = margin - qrMargin + 10;
+      }
+    } else if (placement === "topRight") {
+      if (contentType === "scaleBar") {
+        // Check if the text is longer than the scalebar to get the one with most width.
+        const scaleTextWidth = this.getTextWidth(this.scaleText, this.fontSize);
+        // If the contentWidth aka the scalebar and not the text, add some extra padding.
+        const scalebarMaxWidth =
+          contentWidth > scaleTextWidth ? contentWidth + 25 : scaleTextWidth;
+        pdfPlacement.x = pdfWidth - margin - scalebarMaxWidth;
+        pdfPlacement.y = pdfHeight - contentHeight - margin - 20;
+      } else {
+        pdfPlacement.x = pdfWidth - contentWidth - margin;
+        pdfPlacement.y = pdfHeight - contentHeight - margin + qrMargin;
+      }
     } else {
       pdfPlacement.x = margin;
       pdfPlacement.y = pdfHeight - contentHeight - margin + qrMargin;
@@ -481,231 +606,6 @@ export default class PrintModel {
     }
 
     return { divLinesArray, divider };
-  };
-
-  addDividerLinesAndTexts = (props) => {
-    this.drawDividerLines(props);
-
-    // We want to make sure that given scale is a set scale in our admin settings...
-    // to ensure the text has correct spacing
-    if (this.scaleBarLengths[props.scale]) this.addDividerTexts(props);
-  };
-
-  drawDividerLines({
-    pdf,
-    scaleBarPosition,
-    scaleBarLength,
-    color,
-    scaleBarLengthMeters,
-  }) {
-    // Set line width and color
-    pdf.setLineWidth(0.25).setDrawColor(color);
-
-    // Draw starting, finish, and through lines
-    pdf.line(
-      scaleBarPosition.x,
-      scaleBarPosition.y + 3,
-      scaleBarPosition.x + scaleBarLength,
-      scaleBarPosition.y + 3
-    );
-    pdf.line(
-      scaleBarPosition.x,
-      scaleBarPosition.y + 1,
-      scaleBarPosition.x,
-      scaleBarPosition.y + 5
-    );
-    pdf.line(
-      scaleBarPosition.x + scaleBarLength,
-      scaleBarPosition.y + 1,
-      scaleBarPosition.x + scaleBarLength,
-      scaleBarPosition.y + 5
-    );
-
-    // Here we get number of lines we will draw below
-    const { divLinesArray } = this.getDivLinesArrayAndDivider(
-      scaleBarLengthMeters,
-      scaleBarLength
-    );
-
-    // Here we draw the dividing lines marking 10 (or 100) meters each
-    divLinesArray.forEach((divLine) => {
-      const largerMiddleLineValue =
-        divLinesArray.length === 10 && divLine === divLinesArray[4] ? 0.7 : 0;
-      pdf.line(
-        scaleBarPosition.x + divLine,
-        scaleBarPosition.y + 1.9 - largerMiddleLineValue,
-        scaleBarPosition.x + divLine,
-        scaleBarPosition.y + 4.1 + largerMiddleLineValue
-      );
-    });
-
-    // If the space between 0 and the first number on the scalebar is long enough...
-    // we draw additional lines between 0 and the first number
-    if (divLinesArray[0] > 10) {
-      const numLine = divLinesArray[0] / 5;
-      for (
-        let divLine = numLine;
-        divLine < divLinesArray[0];
-        divLine += numLine
-      ) {
-        pdf.line(
-          scaleBarPosition.x + divLine,
-          scaleBarPosition.y + 2.25,
-          scaleBarPosition.x + divLine,
-          scaleBarPosition.y + 3.85
-        );
-      }
-    }
-  }
-
-  addDividerTexts = ({
-    pdf,
-    scaleBarPosition,
-    scaleBarLength,
-    scaleBarLengthMeters,
-    color,
-  }) => {
-    pdf.setFontSize(8);
-    pdf.setTextColor(color);
-
-    // Here we set the number 0 at the start of the scalebar
-    pdf.text("0", scaleBarPosition.x - 0.7, scaleBarPosition.y + 8);
-
-    // Here we convert the scaleBarLengthMeters to km if above 1000
-    const calculatedScaleBarLengthMeters =
-      scaleBarLengthMeters > 1000
-        ? (scaleBarLengthMeters / 1000).toString()
-        : scaleBarLengthMeters;
-
-    // Here we get number of lines we will draw below
-    const { divLinesArray, divider } = this.getDivLinesArrayAndDivider(
-      scaleBarLengthMeters,
-      scaleBarLength
-    );
-
-    const scaleBarHasSpace = divLinesArray[0] > 10 && scaleBarLengthMeters > 10;
-
-    // Here we add the first number after 0
-    let divNr = calculatedScaleBarLengthMeters / divider;
-    let divNrString = divNr.toLocaleString();
-    pdf.text(
-      divNrString,
-      scaleBarPosition.x + divLinesArray[0] - divNrString.length,
-      scaleBarPosition.y + 8
-    );
-
-    // Here we add the middle number or if no middle exists...
-    // a number that's close to the middle
-
-    // let midIndex =
-    //   divLinesArray.length % 2 === 0
-    //     ? divLinesArray.length / 2
-    //     : Math.floor(divLinesArray.length / 2);
-
-    const midIndex = Math.round(divLinesArray.length / 2);
-
-    divNr = (calculatedScaleBarLengthMeters / divider) * midIndex;
-    divNrString = divNr.toLocaleString();
-    pdf.text(
-      divNrString,
-      scaleBarPosition.x + divLinesArray[midIndex - 1] - divNrString.length,
-      scaleBarPosition.y + 8
-    );
-
-    // Here we add a number to the first additional division line but only if scaleBar has space
-    if (scaleBarHasSpace) {
-      const dividerNrPosition = divLinesArray[0] / 5;
-      divNr = calculatedScaleBarLengthMeters / divider / 5;
-      divNrString = divNr.toLocaleString();
-
-      // We need to make sure correct placement if divNr is a decimal number
-      const dividerStrLength =
-        divNr % 1 !== 0 ? divNrString.length - 1 : divNrString.length;
-
-      pdf.text(
-        divNrString,
-        scaleBarPosition.x + dividerNrPosition - dividerStrLength,
-        scaleBarPosition.y + 8
-      );
-    }
-  };
-
-  drawScaleBar = (
-    pdf,
-    scaleBarPosition,
-    color,
-    scaleBarLength,
-    scale,
-    scaleBarLengthMeters,
-    format,
-    orientation
-  ) => {
-    const lengthText = this.getLengthText(scaleBarLengthMeters);
-    pdf.setFontSize(8);
-    pdf.setTextColor(color);
-    pdf.setLineWidth(0.25);
-    pdf.text(
-      lengthText,
-      scaleBarPosition.x + scaleBarLength + 1,
-      scaleBarPosition.y + 4
-    );
-
-    pdf.setFontSize(10);
-    pdf.text(
-      `Skala: ${this.getUserFriendlyScale(
-        scale
-      )} (vid ${format.toUpperCase()} ${
-        orientation === "landscape" ? "liggande" : "stående"
-      })`,
-      scaleBarPosition.x,
-      scaleBarPosition.y - 1
-    );
-
-    this.addDividerLinesAndTexts({
-      pdf,
-      scale,
-      scaleBarLengthMeters,
-      scaleBarPosition,
-      scaleBarLength,
-      color,
-    });
-  };
-
-  addScaleBar = (
-    pdf,
-    color,
-    scale,
-    resolution,
-    scaleBarPlacement,
-    scaleResolution,
-    format,
-    orientation
-  ) => {
-    const millimetersPerInch = 25.4;
-    const pixelSize = millimetersPerInch / resolution / scaleResolution;
-    const scaleBarLengthMeters = this.getFittingScaleBarLength(scale);
-
-    const scaleBarLength = scaleBarLengthMeters * pixelSize;
-    const scaleBarHeight = 6;
-
-    const scaleBarPosition = this.getPlacement(
-      scaleBarPlacement,
-      scaleBarLength + 9,
-      scaleBarHeight,
-      pdf.internal.pageSize.width,
-      pdf.internal.pageSize.height
-    );
-
-    this.drawScaleBar(
-      pdf,
-      scaleBarPosition,
-      color,
-      scaleBarLength,
-      scale,
-      scaleBarLengthMeters,
-      format,
-      orientation
-    );
   };
 
   // Make sure the desired resolution (depending on scale and dpi)
@@ -1130,37 +1030,16 @@ export default class PrintModel {
     this.addedLayers = new Set();
   };
 
-  // Adds fonts needed to properly render necessary characters. (The default jsPDF fonts does not support all characters).
-  // Also enables a font (in the future we could provide a possibility for the user to select font).
-  setupFonts = (pdf, font) => {
-    // First we'll add the available fonts
-    // Normal
-    pdf.addFileToVFS("roboto-normal.ttf", ROBOTO_NORMAL);
-    pdf.addFont("roboto-normal.ttf", "roboto-normal", "normal");
-    // Bold
-    pdf.addFileToVFS("roboto-bold.ttf", ROBOTO_BOLD);
-    pdf.addFont("roboto-bold.ttf", "roboto-bold", "bold");
-    // Then we'll set the font that we want to use.
-    switch (font) {
-      case "normal":
-        pdf.setFont("roboto-normal", "normal");
-        break;
-      case "bold":
-        pdf.setFont("roboto-bold", "bold");
-        break;
-      default:
-        pdf.setFont("roboto-normal", "normal");
-        break;
-    }
-  };
-
   print = async (options) => {
-    return new Promise((resolve, reject) => {
-      const url = window.location.href;
+    return new Promise(async (resolve, reject) => {
+      const windowUrl = window.location.href;
       const format = options.format;
       const orientation = options.orientation;
       const resolution = options.resolution;
       const scale = options.scale / 1000;
+
+      // Convert hex color provided to rgb since libPDF uses that instead, should probably be handled earlier.
+      this.textColor = this.hexToRgb(options.mapTextColor);
 
       // Our dimensions are for landscape orientation by default. Flip the values if portrait orientation requested.
       const dim =
@@ -1238,300 +1117,97 @@ export default class PrintModel {
           }
         });
 
-        // Initiate the PDF object
-        const pdf = new jsPDF({
-          orientation,
-          format,
-          putOnlyUsedFonts: true,
-          compress: true,
-        });
+        const dataUrl = mapCanvas.toDataURL("image/png");
+        let pageHeight = 0;
+        let pageWidth = 0;
 
-        // Make sure to add necessary fonts and enable the font we want to use.
-        this.setupFonts(pdf, this.textFontWeight);
-
-        // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
-        pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
-
-        if (this.includeImageBorder) {
-          // Frame color is set to dark gray
-          pdf.setDrawColor(this.textColor);
-          pdf.setLineWidth(0.5);
-          pdf.rect(0.3, 0.3, dim[0] - 0.5, dim[1] - 0, "S");
+        // Assign our pagewidth and heights
+        switch (options.format) {
+          case "a4":
+            pageWidth = DEFAULT_PAPER_SIZE.a4.width;
+            pageHeight = DEFAULT_PAPER_SIZE.a4.height;
+            break;
+          case "a3":
+            pageWidth = DEFAULT_PAPER_SIZE.a3.width;
+            pageHeight = DEFAULT_PAPER_SIZE.a3.height;
+            break;
+          case "a2":
+            pageWidth = DEFAULT_PAPER_SIZE.a2.width;
+            pageHeight = DEFAULT_PAPER_SIZE.a2.height;
+            break;
+          default:
+            // Defult to a4
+            pageWidth = DEFAULT_PAPER_SIZE.a4.width;
+            pageHeight = DEFAULT_PAPER_SIZE.a4.height;
         }
 
-        // Add potential margin around the image
-        if (this.margin > 0) {
-          // We always want a white margin
-          pdf.setDrawColor("white");
-          // We want to check if user has chosen to put icons and text
-          // in the margins, which if so, must be larger than usual
-          // Note that we first check if user has NOT chosen this (!).
-          if (!options.useTextIconsInMargin) {
-            // The lineWidth increases the line width equally to "both sides",
-            // therefore, we must have a line width two times the margin we want.
-            pdf.setLineWidth(this.margin * 2);
-            // Draw the border (margin) around the entire image
-            pdf.rect(0, 0, dim[0], dim[1], "S");
-            // If selected as feature in Admin, we draw a frame around the map image
-            if (this.includeImageBorder) {
-              // Frame color is set to dark gray
-              pdf.setDrawColor(this.textColor);
-              pdf.setLineWidth(0.5);
-              pdf.rect(
-                this.margin,
-                this.margin,
-                dim[0] - this.margin * 2,
-                dim[1] - this.margin * 2,
-                "S"
-              );
-            }
-            // Now we check if user did choose text in margins
-          } else {
-            // We do a special check for a5-format and set the dimValue
-            // to get the correct margin values when drawing the rectangle
-            let dimValue =
-              options.format === "a5" ? this.margin + 2 : this.margin;
-            // This lineWidth needs to be larger if user has chosen text in margins
-            pdf.setLineWidth(dimValue * 6);
-            // Draw the increased border (margin) around the entire image
-            // here with special values for larger margins.
-            pdf.rect(-(dimValue * 2), 0, dim[0] + dimValue * 4, dim[1], "S");
-            // If selected as feature in Admin, we draw a frame around the map image
-            if (this.includeImageBorder) {
-              // Frame color is set to dark gray
-              pdf.setDrawColor(this.textColor);
-              pdf.setLineWidth(0.5);
-              pdf.rect(
-                dimValue,
-                dimValue * 3,
-                dim[0] - dimValue * 2,
-                dim[1] - dimValue * 6,
-                "S"
-              );
-            }
-          }
-        }
+        // Flip depending on orientation
+        const originalPageWidth = pageWidth;
+        const originalPageHeight = pageHeight;
 
-        if (options.includeQrCode && this.mapConfig.enableAppStateInHash) {
-          try {
-            const qrCode = await this.generateQR(url, 20);
+        pageWidth =
+          orientation === "landscape" ? originalPageWidth : originalPageHeight;
+        pageHeight =
+          orientation === "landscape" ? originalPageHeight : originalPageWidth;
 
-            let qrCodePlacement = this.getPlacement(
-              options.qrCodePlacement,
-              qrCode.width,
-              qrCode.height,
-              dim[0],
-              dim[1],
-              "qrCode"
-            );
-
-            pdf.addImage(
-              qrCode.data,
-              "PNG",
-              qrCodePlacement.x,
-              qrCodePlacement.y,
-              qrCode.width,
-              qrCode.height
-            );
-          } catch (error) {
-            const imgLoadingError = { error: error, type: "QR-koden" };
-            // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
-            this.localObserver.publish("error-loading-image", imgLoadingError);
-          }
-        }
-
-        // If logo URL is provided, add the logo to the map
-        if (options.includeLogo && this.logoUrl.trim().length >= 5) {
-          try {
-            const {
-              data: logoData,
-              width: logoWidth,
-              height: logoHeight,
-            } = await this.getImageForPdfFromUrl(
-              this.logoUrl,
-              this.logoMaxWidth
-            );
-            let logoPlacement = this.getPlacement(
-              options.logoPlacement,
-              logoWidth,
-              logoHeight,
-              dim[0],
-              dim[1]
-            );
-
-            pdf.addImage(
-              logoData,
-              "PNG",
-              logoPlacement.x,
-              logoPlacement.y,
-              logoWidth,
-              logoHeight
-            );
-          } catch (error) {
-            const imgLoadingError = { error: error, type: "Logotypbilden" };
-            // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
-            this.localObserver.publish("error-loading-image", imgLoadingError);
-          }
-        }
-
-        if (
-          options.includeNorthArrow &&
-          this.northArrowUrl.trim().length >= 5
-        ) {
-          try {
-            const {
-              data: arrowData,
-              width: arrowWidth,
-              height: arrowHeight,
-            } = await this.getImageForPdfFromUrl(
-              this.northArrowUrl,
-              this.northArrowMaxWidth
-            );
-
-            const arrowPlacement = this.getPlacement(
-              options.northArrowPlacement,
-              arrowWidth,
-              arrowHeight,
-              dim[0],
-              dim[1]
-            );
-
-            pdf.addImage(
-              arrowData,
-              "PNG",
-              arrowPlacement.x,
-              arrowPlacement.y,
-              arrowWidth,
-              arrowHeight
-            );
-          } catch (error) {
-            const imgLoadingError = { error: error, type: "Norrpilen" };
-            // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
-            this.localObserver.publish("error-loading-image", imgLoadingError);
-          }
-        }
-
-        if (options.includeScaleBar) {
-          this.addScaleBar(
-            pdf,
-            options.mapTextColor,
-            options.scale,
-            options.resolution,
-            options.scaleBarPlacement,
+        try {
+          // Build the shared layout (renderer-agnostic element list)
+          const elements = await buildLayout(
+            this,
+            dataUrl,
+            options,
+            pageWidth,
+            pageHeight,
             scaleResolution,
-            options.format,
-            options.orientation
+            windowUrl
           );
-        }
 
-        // Add map title if user supplied one
-        if (options.mapTitle.trim().length > 0) {
-          let verticalMargin = options.useTextIconsInMargin
-            ? 8 + this.margin
-            : 12 + this.margin;
-          pdf.setFontSize(24);
-          pdf.setTextColor(options.mapTextColor);
-          pdf.text(options.mapTitle, dim[0] / 2, verticalMargin, {
-            align: "center",
-          });
-        }
+          const fileName = `Kartexport - ${new Date().toLocaleString()}`;
+          let blob = null;
 
-        // Add print comment if user supplied one
-        if (options.printComment.trim().length > 0) {
-          let yPos = options.useTextIconsInMargin
-            ? 13 + this.margin
-            : 18 + this.margin;
-          pdf.setFontSize(11);
-          pdf.setTextColor(options.mapTextColor);
-          pdf.text(options.printComment, dim[0] / 2, yPos, {
-            align: "center",
-          });
-        }
-        // Calculate the y-offset for the copyright and disclaimer text based on font size.
-        const yOffset =
-          this.textFontSize === 8
-            ? { copyright: 5.5, disclaimer: 6 }
-            : this.textFontSize === 11
-              ? { copyright: 7, disclaimer: 7.5 }
-              : this.textFontSize === 13
-                ? { copyright: 8, disclaimer: 9 }
-                : { copyright: 5.5, disclaimer: 6 };
-        //  Add potential copyright text
-        if (this.copyright.length > 0) {
-          let yPos = options.useTextIconsInMargin
-            ? this.textIconsMargin + this.margin / 2
-            : this.margin;
-          pdf.setFontSize(this.textFontSize);
-          pdf.setTextColor(options.mapTextColor);
-          pdf.text(
-            this.copyright,
-            dim[0] - 4 - yPos,
-            dim[1] - yOffset.copyright - yPos,
-            {
-              align: "right",
-            }
-          );
-        }
+          if (options.saveAsType === "PDF") {
+            const pdf = await renderToPdf(
+              elements,
+              pageWidth,
+              pageHeight,
+              orientation
+            );
+            const bytes = await pdf.save();
+            const pdfBlob = new Blob([bytes], { type: "application/pdf" });
+            const url = URL.createObjectURL(pdfBlob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${fileName}.pdf`;
+            link.click();
+            URL.revokeObjectURL(url);
+          } else {
+            // PNG or BLOB
+            blob = await renderToPng(
+              elements,
+              pageWidth,
+              pageHeight,
+              width,
+              height,
+              fileName,
+              options.saveAsType
+            );
+          }
 
-        // Add potential date text
-        if (this.date.length > 0) {
-          const date = this.date.replace(
-            "{date}",
-            new Date().toLocaleDateString()
-          );
-          let yPos = options.useTextIconsInMargin
-            ? this.textIconsMargin + this.margin / 2
-            : this.margin;
-          pdf.setFontSize(this.textFontSize);
-          pdf.setTextColor(options.mapTextColor);
-          pdf.text(date, dim[0] - 4 - yPos, dim[1] - 2 - yPos, {
-            align: "right",
-          });
+          this.localObserver.publish("print-completed");
+          resolve(blob);
+        } catch (error) {
+          console.error("Error processing print:", error);
+          this.localObserver.publish("print-failed-to-save");
+          reject(error);
+        } finally {
+          // Reset map to how it was before print
+          this.restoreOriginalView();
         }
-
-        // Add potential disclaimer text
-        if (this.disclaimer.length > 0) {
-          let yPos = options.useTextIconsInMargin
-            ? this.textIconsMargin + this.margin / 2
-            : this.margin;
-          pdf.setTextColor(options.mapTextColor);
-          let textLines = pdf.splitTextToSize(
-            this.disclaimer,
-            dim[0] / 2 - this.margin - 8
-          );
-          let textLinesDims = pdf.getTextDimensions(textLines, {
-            fontSize: this.textFontSize,
-          });
-          pdf.text(
-            textLines,
-            dim[0] - 4 - yPos,
-            dim[1] - yOffset.disclaimer - yPos - textLinesDims.h,
-            {
-              align: "right",
-            }
-          );
-        }
-
-        // Since we've been messing with the layer-settings while printing, we have to
-        // make sure to reset these settings. (Should only be done if custom loaders has been used).
-        this.useCustomTileLoaders && this.resetPrintLayers();
-
-        // Finally, save the PDF (or PNG)
-        this.saveToFile(pdf, width, options.saveAsType)
-          .then((blob) => {
-            this.localObserver.publish("print-completed");
-            resolve(blob);
-          })
-          .catch((error) => {
-            console.warn(error);
-            this.localObserver.publish("print-failed-to-save");
-            reject(error);
-          })
-          .finally(() => {
-            // Reset map to how it was before print
-            this.restoreOriginalView();
-          });
       });
+
+      // Since we've been messing with the layer-settings while printing, we have to
+      // make sure to reset these settings. (Should only be done if custom loaders has been used).
+      this.useCustomTileLoaders && this.resetPrintLayers();
 
       // Get print center from preview feature's center coordinate
       const printCenter = getCenter(
@@ -1558,102 +1234,6 @@ export default class PrintModel {
     this.map.getTargetElement().style.height = "";
     this.map.updateSize();
     this.map.setView(this.originalView);
-  };
-
-  // Imports and returns the dependencies required to create a PNG-print-export.
-  #getPngDependencies = async () => {
-    try {
-      const pdfjs = await import("pdfjs-dist/build/pdf");
-      return { pdfjs };
-    } catch (error) {
-      throw new Error(
-        `Failed to import required dependencies. Error: ${error}`
-      );
-    }
-  };
-
-  // Saves the supplied PDF with the supplied file-name.
-  #saveToPdf = async (pdf, fileName) => {
-    try {
-      return await pdf.save(`${fileName}.pdf`);
-    } catch (error) {
-      throw new Error(`Failed to save PDF. Error: ${error}`);
-    }
-  };
-
-  // Saves the supplied PDF *as a PNG* with the supplied file-name.
-  // The width of the document has to be supplied since some calculations
-  // must be done in order to create a PNG with the correct resolution etc.
-  #saveToPng = async (pdf, fileName, width, type) => {
-    try {
-      // First we'll dynamically import the required dependencies.
-      const { pdfjs } = await this.#getPngDependencies();
-      // Then we'll set up the pdfJS-worker. TODO: Terrible?! PDF-js does not seem to have a better solution for the
-      // source-map-errors that occur from setting the worker the ordinary way.
-      pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-      // We'll output the PDF as an array-buffer that can be used to create the PNG.
-      const ab = pdf.output("arraybuffer");
-      // We'll use the PDF-JS library to create a new "PDF-JS-PDF". (Wasteful? Yes very, but the JS-PDF-library
-      // does not support export to any other format than PDF, and the PDF-JS-library does.) Notice that
-      // JS-PDF and PDF-JS are two different libraries, both with their pros and cons.
-      // - PDF-JS: Pro => Can export to PNG, Con: Cannot create as nice of an image as JS-PDF.
-      // - JS-PDF: Pro => Creates good-looking PDFs, Con: Cannot export to PNG.
-      // - Conclusion: We use both...
-      return new Promise((resolve) => {
-        pdfjs.getDocument({ data: ab }).promise.then((pdf) => {
-          // So, when the PDF-JS-PDF is created, we get the first page, and then render
-          // it on a canvas so that we can export it as a PNG.
-          pdf.getPage(1).then((page) => {
-            // We're gonna need a canvas and its context.
-            let canvas = document.createElement("canvas");
-            let ctx = canvas.getContext("2d");
-            // Scale the viewport to match current resolution
-            const viewport = page.getViewport({ scale: 1 });
-            const scale = width / viewport.width;
-            const scaledViewport = page.getViewport({ scale: scale });
-            // Create the render-context-object.
-            const renderContext = {
-              canvasContext: ctx,
-              viewport: scaledViewport,
-            };
-            // Set the canvas dimensions to the correct width and height.
-            canvas.height = scaledViewport.height;
-            canvas.width = scaledViewport.width;
-            // Then we'll render and save!
-            page.render(renderContext).promise.then(() => {
-              canvas.toBlob((blob) => {
-                type !== "BLOB" && saveAs(blob, `${fileName}.png`);
-                resolve(blob);
-              });
-            });
-          });
-        });
-      });
-    } catch (error) {
-      throw new Error(`Failed to save PNG. Error: ${error}`);
-    }
-  };
-
-  // Saves the print-contents to file, either PDF, or PNG (depending on supplied type).
-  saveToFile = async (pdf, width, type) => {
-    // We're gonna need to create a file-name.
-    const fileName = `Kartexport - ${new Date().toLocaleString()}`;
-    // Then we'll try to save the contents in the format the user requested.
-    try {
-      switch (type) {
-        case "PDF":
-          return await this.#saveToPdf(pdf, fileName);
-        case "PNG":
-        case "BLOB":
-          return await this.#saveToPng(pdf, fileName, width, type);
-        default:
-          throw new Error(
-            `Supplied type could not be handled. The supplied type was ${type} and currently only PDF, PNG, and BLOB is supported.`
-          );
-      }
-    } catch (error) {
-      throw new Error(`Failed to save file... ${error}`);
-    }
   };
 
   cancelPrint = () => {

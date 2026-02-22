@@ -182,7 +182,7 @@ class AdLdapService extends AdBaseService {
     try {
       fs.accessSync(path, fs.constants.R_OK);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -289,7 +289,7 @@ ABORTING STARTUP.
           }
         }
       );
-    } catch (error) {
+    } catch {
       const e = new ActiveDirectoryError(`
       Couldn't test AD connection to ${process.env.AD_URL} due to malformed query value: "${process.env.AD_CHECK_CONNECTION_QUERY}". 
       Check the AD_CHECK_CONNECTION_QUERY parameter in .env.

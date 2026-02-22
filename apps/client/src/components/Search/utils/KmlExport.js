@@ -2,9 +2,9 @@ import FeatureStyle from "./FeatureStyle";
 import { createXML } from "../../../utils/KMLWriter";
 import { saveAs } from "file-saver";
 
-import { Circle as CircleStyle, Icon } from "ol/style.js";
-import { fromCircle } from "ol/geom/Polygon.js";
-import { Circle } from "ol/geom.js";
+import { Circle as CircleStyle, Icon } from "ol/style";
+import { fromCircle } from "ol/geom/Polygon";
+import { Circle } from "ol/geom";
 
 export default class KmlExport {
   #featureStyle;
