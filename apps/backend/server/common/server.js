@@ -19,6 +19,7 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 
 import detailedRequestLogger from "./middlewares/detailed.request.logger.js";
 import errorHandler from "./middlewares/error.handler.js";
+import extractUserContext from "./middlewares/extractUserContext.js";
 
 const app = new Express();
 
@@ -136,6 +137,22 @@ export default class ExpressServer {
           ),
       })
     );
+
+    // Now let's setup a unique context for each request. We implement it using Node's
+    // AsyncLocalStorage feature - https://nodejs.org/api/async_context.html#asynchronous-context-tracking.
+    //
+    // From Node's documentation:
+    //    "These classes are used to associate state and propagate it throughout callbacks and
+    //    promise chains. They allow storing data throughout the lifetime of a web request or
+    //    any other asynchronous duration. It is similar to thread-local storage in other languages."
+    //
+    // In other words: this is the perfect place for us to extract the user info (if AD_LOOKUP_ACTIVE is enabled)
+    // and store it once and for all in the request's context.
+    // We could of course add a check here and only run this if AD_LOOKUP_ACTIVE is true. But that's
+    // no good, as we always want to create the context, even if it will be populated with user: "anonymous".
+    // That's way better than having to check "do we have the context? ah, ok, so who is the user?" down the line.
+    // The performance penalty is negligible, if it's even there (according to some test there's none).
+    app.use(extractUserContext);
 
     process.env.LOG_DETAILED_REQUEST_LOGGER === "true" &&
       app.use(detailedRequestLogger);

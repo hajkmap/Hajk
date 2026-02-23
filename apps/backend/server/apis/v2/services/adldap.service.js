@@ -149,14 +149,17 @@ class AdLdapService extends AdBaseService {
 
     this._ad = new ActiveDirectory(this.#config);
 
-    this.logger.info(`Testing the AD connection to ${process.env.AD_URL}…`);
-
     // Check the LDAP(S) connection. It will return true if OK or throw an error if connection
     // can't be established. Ideally, we'd want to await the return value here, but
     // we're in a constructor so it can't be done. Still, we achieve the goal of
     // aborting the startup if connection fails, so it doesn't really matter in the end.
     if (process.env.AD_CHECK_CONNECTION === "true") {
+      this.logger.info(`Testing the AD connection to ${process.env.AD_URL}…`);
       this.#checkConnection();
+    } else {
+      this.logger.info(
+        `AD_CHECK_CONNECTION is set to false in .env. Skipping AD connection check.`
+      );
     }
 
     // Initiate 3 local stores to cache the results from AD.

@@ -1,6 +1,5 @@
 import ConfigService from "../../services/config.service.js";
 import InformativeService from "../../services/informative.service.js";
-import ad from "../../services/activedirectory.service.js";
 import handleStandardResponse from "../../utils/handleStandardResponse.js";
 import log4js from "log4js";
 
@@ -19,7 +18,7 @@ export class Controller {
   byMap(req, res) {
     ConfigService.getMapConfig(
       req.params.map,
-      ad.getUserFromRequestHeader(req),
+      res.locals.authUser,
       false // 'false' here means that the map config won't be "washed" - this is exactly what we need for this admin request
     ).then((data) => handleStandardResponse(res, data));
   }
@@ -39,7 +38,7 @@ export class Controller {
     ConfigService.exportMapConfig(
       req.params.map,
       req.params.format,
-      ad.getUserFromRequestHeader(req)
+      res.locals.authUser
     ).then((data) => handleStandardResponse(res, data));
   }
 
@@ -52,13 +51,13 @@ export class Controller {
    */
   layers(req, res) {
     ConfigService.getLayersStore(
-      ad.getUserFromRequestHeader(req),
+      res.locals.authUser,
       false // won't "wash" content, which is what we need for admin UI to list the entire layer's store
     ).then((data) => handleStandardResponse(res, data));
   }
 
   layersVerify(req, res) {
-    ConfigService.verifyLayers(ad.getUserFromRequestHeader(req)).then((data) =>
+    ConfigService.verifyLayers(res.locals.authUser).then((data) =>
       handleStandardResponse(res, data)
     );
   }
