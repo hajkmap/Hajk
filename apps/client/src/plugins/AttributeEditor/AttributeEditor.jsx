@@ -1421,14 +1421,18 @@ function AttributeEditor(props) {
   }, [props.map, vectorLayerRef, selectedIdsRef, model, handleRowLeave]);
 
   const handleFeaturePickerSelect = React.useCallback(
-    (selectedIds) => {
+    (selectedIds, addToSelection) => {
       if (selectedIds.length === 0) return;
 
-      const current = selectedIdsRef.current || new Set();
-      const currentLogical = new Set(Array.from(current).map(String));
-      selectedIds.forEach((id) => currentLogical.add(String(id)));
-
-      const mergedIds = Array.from(currentLogical);
+      let mergedIds;
+      if (addToSelection) {
+        const current = selectedIdsRef.current || new Set();
+        const currentLogical = new Set(Array.from(current).map(String));
+        selectedIds.forEach((id) => currentLogical.add(String(id)));
+        mergedIds = Array.from(currentLogical);
+      } else {
+        mergedIds = selectedIds.map(String);
+      }
 
       selectedIdsRef.current = buildVizSet(mergedIds);
       vectorLayerRef.current?.changed?.();
@@ -1436,7 +1440,7 @@ function AttributeEditor(props) {
       editBus.emit("attrib:select-ids", {
         ids: mergedIds,
         source: "map",
-        mode: "replace",
+        mode: addToSelection ? "add" : "replace",
       });
 
       if (selectedIds.length > 0) {

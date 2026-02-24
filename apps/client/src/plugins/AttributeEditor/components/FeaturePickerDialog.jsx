@@ -58,8 +58,8 @@ export default function FeaturePickerDialog({
     }
   };
 
-  const handleConfirm = () => {
-    onSelect(Array.from(selectedIds));
+  const handleConfirm = (e) => {
+    onSelect(Array.from(selectedIds), e.ctrlKey || e.metaKey);
     onClose();
   };
 
