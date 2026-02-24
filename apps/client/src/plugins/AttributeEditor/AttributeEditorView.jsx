@@ -1545,15 +1545,12 @@ export default function AttributeEditorView({
             source.addFeatures(newFeatures);
 
             featureIndexRef.current.clear();
-            visibleIdsRef.current = new Set();
 
             newFeatures.forEach((f) => {
               const raw = getFeatureId(f, idFieldRef?.current);
               const aliases = idAliases(raw);
               for (const k of aliases) {
                 featureIndexRef.current.set(k, f);
-                visibleIdsRef.current.add(k);
-                visibleIdsRef.current.add(String(k));
               }
             });
 
