@@ -97,9 +97,7 @@ export class Controller {
     ConfigService.createNewMap(req.params.name).then((data) => {
       handleStandardResponse(res, data);
       !data.error &&
-        ael.info(
-          `${res.locals.authUser} created a new map config: ${req.params.name}.json`
-        );
+        ael.info(`created a new map config: ${req.params.name}.json`);
     });
   }
 
@@ -109,7 +107,7 @@ export class Controller {
         handleStandardResponse(res, data);
         !data.error &&
           ael.info(
-            `${res.locals.authUser} created a new map config, ${req.params.nameTo}.json, by duplicating ${req.params.nameFrom}.json`
+            `created a new map config, ${req.params.nameTo}.json, by duplicating ${req.params.nameFrom}.json`
           );
       }
     );
@@ -118,10 +116,7 @@ export class Controller {
   deleteMap(req, res) {
     ConfigService.deleteMap(req.params.name).then((data) => {
       handleStandardResponse(res, data);
-      !data.error &&
-        ael.info(
-          `${res.locals.authUser} deleted map config ${req.params.name}.json`
-        );
+      !data.error && ael.info(`deleted map config ${req.params.name}.json`);
     });
   }
 }
