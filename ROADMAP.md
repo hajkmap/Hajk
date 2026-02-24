@@ -38,6 +38,13 @@ Also, an overhaul of the Introduction Guide and the Anchor tool is included in t
 
 Client is migrated to Vite, leaving the CRA behind.
 
+## 4.4
+
+Two of the most important findings from CodeQL are fixed in Backend:
+
+- Uncontrolled data used in path expression (https://github.com/hajkmap/Hajk/security/code-scanning/53)
+- Missing rate limiting (https://github.com/hajkmap/Hajk/security/code-scanning/8)
+
 ## 5.0
 
 The Hajk 5 branch introduces several additions and changes:
