@@ -21,7 +21,6 @@ import QRCode from "qrcode";
 import { buildLayout } from "./PrintLayout";
 import { renderToPdf } from "./PdfRenderer";
 import { renderToPng } from "./PngRenderer";
-import { maxWidth } from "@mui/system";
 
 const DEFAULT_DIMS = {
   a0: [1189, 841],
