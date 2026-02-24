@@ -86,6 +86,11 @@ export async function renderToPdf(
           size: el.size,
           font: fonts[el.fontStyle] || fonts.normal,
           color: toRgb(el.color),
+          // When aligning in the pdf we need to set a maxWidth of the element before wordwrapping
+          // occurs, thes also gives us the width of the element and we dont need to measure it anymore.
+          maxWidth: el.maxWidth || 200,
+          // Alignment if specified, defaults to left in pdf
+          alignment: el.alignment || "left",
         });
         break;
       }

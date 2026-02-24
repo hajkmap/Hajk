@@ -35,6 +35,7 @@ export async function buildLayout(
   windowUrl
 ) {
   const elements = [];
+  const bottomRightTexts = [];
 
   // 1. Map image (full page background)
   elements.push({
@@ -272,66 +273,47 @@ export async function buildLayout(
       "{date}",
       new Date().toLocaleDateString()
     );
-    const position = model.getRightAlignedPositions(
-      model.date,
-      model.textFontSize,
-      30,
-      8,
-      pageWidth,
-      options
-    );
-    elements.push({
-      type: "text",
-      text: dateText,
-      x: position.x,
-      y: position.y,
-      size: model.textFontSize,
-      fontStyle: model.textFontWeight,
-      color: model.textColor,
-    });
+    bottomRightTexts.push(dateText);
   }
 
   // 10. Copyright text
   if (model.copyright.length > 0) {
-    const position = model.getRightAlignedPositions(
-      model.copyright,
-      model.textFontSize,
-      8,
-      18,
-      pageWidth,
-      options
-    );
-    elements.push({
-      type: "text",
-      text: model.copyright,
-      x: position.x,
-      y: position.y,
-      size: model.textFontSize,
-      fontStyle: model.textFontWeight,
-      color: model.textColor,
-    });
+    bottomRightTexts.push(model.copyright);
   }
 
   // 11. Disclaimer text
   if (model.disclaimer.length > 0) {
-    const position = model.getRightAlignedPositions(
-      model.disclaimer,
-      model.textFontSize,
-      8,
-      28,
-      pageWidth,
-      options
-    );
-    elements.push({
-      type: "text",
-      text: model.disclaimer,
-      x: position.x,
-      y: position.y,
-      size: model.textFontSize,
-      fontStyle: model.textFontWeight,
-      color: model.textColor,
-    });
+    bottomRightTexts.push(model.disclaimer);
   }
+
+  // Now combine Copyrigth/Disclaimer/Date to one text and align them to the right.
+
+  // Value set in the text for multiline purposes when building the text in PrintLayout.
+  // This is required for aligning text in libpdf, upside: we know the width, downside: text longer than 400 points will wrap.
+  // Set as 400 points as approx half of a landscape a4 page.
+  const maxWidthBeforeWrap = 400;
+  const position = model.getRightAlignedPositions(
+    bottomRightTexts,
+    model.textFontSize,
+    10,
+    5,
+    pageWidth,
+    options,
+    model.textFontWeight,
+    maxWidthBeforeWrap
+  );
+
+  elements.push({
+    type: "text",
+    text: bottomRightTexts.reverse().join("\n"),
+    x: position.x,
+    y: position.y,
+    size: model.textFontSize,
+    fontStyle: model.textFontWeight,
+    color: model.textColor,
+    alignment: "right",
+    maxWidth: maxWidthBeforeWrap,
+  });
 
   return elements;
 }

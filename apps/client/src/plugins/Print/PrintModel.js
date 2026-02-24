@@ -21,6 +21,7 @@ import QRCode from "qrcode";
 import { buildLayout } from "./PrintLayout";
 import { renderToPdf } from "./PdfRenderer";
 import { renderToPng } from "./PngRenderer";
+import { maxWidth } from "@mui/system";
 
 const DEFAULT_DIMS = {
   a0: [1189, 841],
@@ -126,6 +127,16 @@ export default class PrintModel {
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
 
+  // Gets the height in points or pixels of the combined texts in the array with newlines.
+  getTextHeight = (textArray, fontSize) => {
+    const numberOfLines = textArray.length;
+    // Estimate lineheight and calculate the height in points over number of lines.
+    const lineHeight = fontSize * 1.2;
+    const totalHeight = lineHeight * numberOfLines;
+    const totalHeightInPoints = totalHeight * (72 / 96);
+    return totalHeightInPoints;
+  };
+
   hexToRgb = (hex) => {
     hex = hex.replace(/^#/, "");
     let r = parseInt(hex.slice(0, 2), 16);
@@ -145,42 +156,45 @@ export default class PrintModel {
     xmargin,
     ymargin,
     paperWidth,
-    options
+    options,
+    fontWeight,
+    maxWidthBeforeWrap
   ) => {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    context.font = `${fontSize}px roboto`;
-    const textWidth = context.measureText(text).width;
-
     // If QrCode is placed in the bottom right corner, move text to the left of it (its wider)
     // Otherwise its a logo or northarrow, needs less text movement.
     // Also take care of scalebar placement bottomRight
     let x;
     if (options.includeQrCode && options.qrCodePlacement === "bottomRight") {
-      x = paperWidth - textWidth - xmargin - 90;
+      x = paperWidth - maxWidthBeforeWrap - xmargin - 90;
     } else if (
       options.includeNorthArrow &&
       options.northArrowPlacement === "bottomRight"
     ) {
-      x = paperWidth - textWidth - xmargin - this.northArrowMaxWidth * 3 - 10;
+      x =
+        paperWidth -
+        maxWidthBeforeWrap -
+        xmargin -
+        this.northArrowMaxWidth * 3 -
+        10;
     } else if (
       options.includeScaleBar &&
       options.scaleBarPlacement === "bottomRight"
     ) {
       // Use the scalebarMaxWidth that either is the text or the scalebar length, to align ex copyright
       // and disclaimer/date correctly to the left of the scalebar when bottomRight
-      x = paperWidth - textWidth - xmargin - this.scalebarMaxWidth - 10;
+      x =
+        paperWidth - maxWidthBeforeWrap - xmargin - this.scalebarMaxWidth - 10;
     } else if (options.includeLogo && options.logoPlacement === "bottomRight") {
       x =
         paperWidth -
-        textWidth -
+        maxWidthBeforeWrap -
         xmargin -
         this.logoMaxWidth * this.mmPerPoint -
         10;
     } else {
-      x = paperWidth - textWidth - xmargin;
+      x = paperWidth - maxWidthBeforeWrap - xmargin;
     }
-    const y = ymargin;
+    const y = this.getTextHeight(text, fontSize) + ymargin;
     return { x, y };
   };
 
@@ -193,7 +207,7 @@ export default class PrintModel {
   ) => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
-    context.font = `${fontSize}px roboto`;
+    context.font = `${fontSize}px Roboto, Helvetica, Arial, sans-serif`;
     const textWidth = context.measureText(text).width;
 
     const x = (paperWidth - textWidth) / 2;
@@ -1031,7 +1045,8 @@ export default class PrintModel {
   };
 
   print = async (options) => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
+      this.saveAsType = options.saveAsType;
       const windowUrl = window.location.href;
       const format = options.format;
       const orientation = options.orientation;
