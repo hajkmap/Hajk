@@ -175,6 +175,7 @@ function AttributeEditor(props) {
   const currentServiceIdRef = React.useRef("NONE_ID");
   const [serviceList, setServiceList] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [allowMultiGeom, setAllowMultiGeom] = React.useState(false);
 
   // Keep rowIdMapRef in sync with features for O(1) toCanonicalId lookups
   React.useEffect(() => {
@@ -624,6 +625,7 @@ function AttributeEditor(props) {
 
         // Store configured ID field for use in getFeatureId
         idFieldRef.current = schema?.idField || null;
+        setAllowMultiGeom(schema?.allowMultiGeom === true);
 
         // 2) Create FM from editableFields (schema winner)
         const fmEditable = (schema?.editableFields || [])
@@ -881,6 +883,7 @@ function AttributeEditor(props) {
       model.setFieldMetadata([]);
       model.clearFeatureCollection?.();
       setIsLoading(false);
+      setAllowMultiGeom(false);
 
       if (vectorLayerRef.current) {
         props.map.removeLayer(vectorLayerRef.current);
@@ -1667,6 +1670,7 @@ function AttributeEditor(props) {
           handleRowHover={handleRowHover}
           handleRowLeave={handleRowLeave}
           isLoading={isLoading}
+          allowMultiGeom={allowMultiGeom}
         />
       </BaseWindowPlugin>
 

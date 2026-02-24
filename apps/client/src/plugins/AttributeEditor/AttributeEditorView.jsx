@@ -78,6 +78,7 @@ export default function AttributeEditorView({
   handleRowHover,
   handleRowLeave,
   isLoading,
+  allowMultiGeom = false,
 }) {
   const { enqueueSnackbar } = useSnackbar();
   const muiTheme = useMuiTheme();
@@ -1472,13 +1473,35 @@ export default function AttributeEditorView({
           } catch (e) {}
         }
 
+        const failedInserts = inserts.length - (result.inserted || 0);
+        const failedUpdates = updates.length - (result.updated || 0);
+        const failedDeletes = deletes.length - (result.deleted || 0);
         const hasPartialFailure =
-          result.partialFailures && result.partialFailures.length > 0;
+          (result.partialFailures && result.partialFailures.length > 0) ||
+          failedInserts > 0 ||
+          failedUpdates > 0 ||
+          failedDeletes > 0;
 
         if (hasPartialFailure) {
           const totalDeletedCount = (result.deleted || 0) + deletedDraftsCount;
+          const failureParts = [];
+          if (failedInserts > 0)
+            failureParts.push(
+              `${failedInserts} ny(a) kunde inte sparas`
+            );
+          if (failedUpdates > 0)
+            failureParts.push(
+              `${failedUpdates} uppdatering(ar) kunde inte sparas`
+            );
+          if (failedDeletes > 0)
+            failureParts.push(
+              `${failedDeletes} borttagning(ar) kunde inte sparas`
+            );
+          if (result.partialFailures?.length > 0)
+            failureParts.push(...result.partialFailures);
+
           let message = `⚠ Delvis sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${totalDeletedCount} borttagna\n`;
-          message += `Misslyckades: ${result.partialFailures.join(", ")}`;
+          message += failureParts.join(", ");
 
           if (result.warning) {
             message += `\n\nServermeddelande: ${result.warning}`;
@@ -2573,6 +2596,8 @@ export default function AttributeEditorView({
 
   // === Merge Features Logic ===
   const canMergeFeatures = React.useMemo(() => {
+    if (!allowMultiGeom) return false;
+
     const activeSelectedIds =
       ui.mode === "table" ? tableSelectedIds : selectedIds;
 
@@ -2592,7 +2617,7 @@ export default function AttributeEditorView({
 
     // Only allow merging Point, LineString, Polygon (not already multi)
     return ["Point", "LineString", "Polygon"].includes(uniqueTypes[0]);
-  }, [ui.mode, tableSelectedIds, selectedIds, featureIndexRef]);
+  }, [ui.mode, tableSelectedIds, selectedIds, featureIndexRef, allowMultiGeom]);
 
   const mergeFeatures = React.useCallback(() => {
     const activeSelectedIds =
