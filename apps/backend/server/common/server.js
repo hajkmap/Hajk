@@ -176,7 +176,7 @@ export default class ExpressServer {
 
     // Enable compression early so that responses that follow will get gziped
     if (process.env.ENABLE_GZIP_COMPRESSION !== "false") {
-      logger.trace("[HTTP] Enabling Hajk's built-in GZIP compression");
+      logger.debug("[HTTP] Enabling Hajk's built-in GZIP compression");
       app.use(compression());
     } else {
       logger.warn(
@@ -224,7 +224,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
       const openApiSpecification = path.join(__dirname, `api.v${v}.yml`);
 
       // Expose the API specification as a simple static route…
-      logger.trace(
+      logger.debug(
         `[API] Exposing ${openApiSpecification} on route /api/v${v}/spec`
       );
       app.use(`/api/v${v}/spec`, Express.static(openApiSpecification));
@@ -238,7 +238,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
       // created in async parts of the code) would render a 404 in the middleware.
       // Related to #1309. Discovered during PR in #1332.
       setTimeout(() => {
-        logger.trace(`[VALIDATOR] Setting up OpenApiValidator for /api/v${v}`);
+        logger.debug(`[VALIDATOR] Setting up OpenApiValidator for /api/v${v}`);
         app.use(
           OpenApiValidator.middleware({
             apiSpec: openApiSpecification,
@@ -338,7 +338,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           // Grab context and target from current element
           const context = v.context;
           const target = v.target;
-          l.trace(
+          l.debug(
             `Setting up proxy: /api/v${apiVersion}/proxy/${context} -> ${target}`
           );
 
@@ -421,12 +421,12 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         .map((entry) => entry.name);
 
       if (staticDirs.length > 0) {
-        l.trace(
+        l.debug(
           "Found following directories in 'static': %s",
           staticDirs.join(", ")
         );
       } else {
-        l.trace(
+        l.debug(
           "No directories found in 'static' - not exposing anything except the backend's API itself."
         );
       }

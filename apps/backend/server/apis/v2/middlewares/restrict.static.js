@@ -37,7 +37,7 @@ export default async function restrictStatic(req, res, next) {
       `EXPOSE_AND_RESTRICT_STATIC_${dir.toUpperCase().replace(/-/g, "_")}`
     ]?.split(",");
 
-  logger.trace(
+  logger.debug(
     "Access to '%s' is limited to the following groups: '%s'. Checking if user '%s' is member in any of them.",
     req.baseUrl,
     restrictedToGroups,
@@ -48,7 +48,7 @@ export default async function restrictStatic(req, res, next) {
     // Check if current user is member of the admins AD group
     const allowed = await ad.isUserMemberOf(res.locals.authUser, group);
     if (allowed === true) {
-      logger.trace(
+      logger.debug(
         "'%s' is member of '%s' which gives access to '%s'",
         res.locals.authUser,
         group,

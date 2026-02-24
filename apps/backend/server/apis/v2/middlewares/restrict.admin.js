@@ -4,7 +4,7 @@ import ad from "../services/activedirectory.service.js";
 const logger = log4js.getLogger("router.v2");
 
 export default async function restrictAdmin(req, res, next) {
-  logger.trace("Attempt to access admin-only API endpoint");
+  logger.debug("Attempt to access admin-only API endpoint");
 
   // If AD lookup isn't active, there's no way for us to find
   // out if access should be granted. If there are no access group
@@ -43,7 +43,7 @@ export default async function restrictAdmin(req, res, next) {
     return res.sendStatus(500);
   }
 
-  logger.trace(
+  logger.debug(
     "Access to admin endpoints is limited to the following groups: '%s'. Checking if user '%s' is member in any of them.",
     adminGroups,
     res.locals.authUser
@@ -56,7 +56,7 @@ export default async function restrictAdmin(req, res, next) {
   for await (let group of adminGroups) {
     const allowed = await ad.isUserMemberOf(res.locals.authUser, group);
     if (allowed === true) {
-      logger.trace(
+      logger.debug(
         "'%s' is member of '%s' which gives access to '%s'. Access to admin granted.",
         res.locals.authUser,
         group,

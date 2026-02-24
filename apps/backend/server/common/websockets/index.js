@@ -18,7 +18,7 @@ function broadcastToClients(clients) {
 export default async (expressServer) => {
   const logger = log4js.getLogger("websockets");
 
-  logger.trace("Initiating WebSockets");
+  logger.debug("Initiating WebSockets");
 
   const websocketServer = new WebSocket.Server({
     noServer: true, // we don't want the WebSocket constructor to create an additional HTTP - we're already in Express!
@@ -27,7 +27,7 @@ export default async (expressServer) => {
 
   // Upgrade request event handler
   expressServer.on("upgrade", (request, socket, head) => {
-    logger.trace(`Upgrade to WebSockets initiated by call to "${request.url}"`);
+    logger.debug(`Upgrade to WebSockets initiated by call to "${request.url}"`);
     websocketServer.handleUpgrade(request, socket, head, (websocket) => {
       websocketServer.emit("connection", websocket, request);
     });
@@ -58,7 +58,7 @@ export default async (expressServer) => {
       const [path, params] = connectionRequest?.url?.split("?") || undefined;
       const connectionParams = queryString.parse(params);
 
-      logger.trace(
+      logger.debug(
         `Upgrade successful. Opening connection ${
           websocketConnection.uuid
         }. Path: "${path}". Query params: "${JSON.stringify(
@@ -84,7 +84,7 @@ export default async (expressServer) => {
       websocketConnection.on("message", (message) => {
         try {
           const parsedMessage = JSON.parse(message);
-          logger.trace(
+          logger.debug(
             `Got message from ${websocketConnection.uuid}: "${parsedMessage}"`
           );
 
@@ -116,7 +116,7 @@ export default async (expressServer) => {
       // various cleanups.
       websocketConnection.on("close", () => {
         // Can't send a message at this time, but we can at least log
-        logger.trace(`Goodbye ${websocketConnection.uuid}!`);
+        logger.debug(`Goodbye ${websocketConnection.uuid}!`);
       });
     }
   );
