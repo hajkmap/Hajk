@@ -81,7 +81,7 @@ export function useScrollToSelectedRow({
     const rowIndex = items.findIndex((r) => String(r.id) === String(targetId));
     if (rowIndex === -1) return;
 
-    const targetPage = Math.floor(rowIndex / rowsPerPage);
+    const targetPage = rowsPerPage > 0 ? Math.floor(rowIndex / rowsPerPage) : 0;
     const pageChanged = targetPage !== currentPage;
     if (pageChanged) {
       setCurrentPage(targetPage);

@@ -53,10 +53,13 @@ export function usePagination(items, options = {}) {
 
   // Ensure current page is valid when rowsPerPage or totalRows changes
   useEffect(() => {
-    if (isShowingAll) return;
+    if (isShowingAll) {
+      if (currentPage !== 0) setCurrentPage(0);
+      return;
+    }
     const maxPage = Math.max(0, totalPages - 1);
-    if (currentPage > maxPage) {
-      setCurrentPage(maxPage);
+    if (currentPage < 0 || currentPage > maxPage) {
+      setCurrentPage(Math.max(0, Math.min(currentPage, maxPage)));
     }
   }, [rowsPerPage, totalRows, currentPage, totalPages, isShowingAll]);
 
