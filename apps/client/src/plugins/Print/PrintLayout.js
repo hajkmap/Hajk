@@ -291,7 +291,7 @@ export async function buildLayout(
   // Value set in the text for multiline purposes when building the text in PrintLayout.
   // This is required for aligning text in libpdf, upside: we know the width, downside: text longer than 400 points will wrap.
   // Set as 400 points as approx half of a landscape a4 page.
-  const maxWidthBeforeWrap = 400;
+  const maxWidthBeforeWrap = pageWidth;
   const position = model.getRightAlignedPositions(
     bottomRightTexts,
     model.textFontSize,
