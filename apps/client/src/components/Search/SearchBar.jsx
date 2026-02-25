@@ -528,13 +528,7 @@ class SearchBar extends React.PureComponent {
           {
             width: 400,
           },
-          renderElsewhere
-            ? {
-                height: "auto",
-              }
-            : {
-                height: 6,
-              },
+          { height: "auto" },
         ]}
       >
         <Grid>
