@@ -32,6 +32,9 @@ const buildFeaturesMap = (features) => {
   const map = new Map();
   for (const f of features) {
     map.set(f.id, f);
+    map.set(String(f.id), f); // string version
+    const n = Number(f.id);
+    if (Number.isFinite(n)) map.set(n, f); // numeric version
   }
   return map;
 };

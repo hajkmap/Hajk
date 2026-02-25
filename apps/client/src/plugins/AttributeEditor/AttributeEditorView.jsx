@@ -460,7 +460,7 @@ export default function AttributeEditorView({
           ...Object.keys(prevRow),
           ...Object.keys(nextRow),
         ]);
-        const base = features.find((f) => f.id === id) || {};
+        const base = features.find((f) => String(f.id) === String(id)) || {};
 
         keys.forEach((key) => {
           const hadPrev = Object.prototype.hasOwnProperty.call(prevRow, key);
@@ -2338,7 +2338,7 @@ export default function AttributeEditorView({
           const d = pendingAdds.find((x) => x.id === id) || {};
           effective = { ...d };
         } else {
-          const base = features.find((f) => f.id === id) || {};
+          const base = features.find((f) => String(f.id) === String(id)) || {};
           const patch = pendingEdits[id] || {};
           effective = { ...base, ...patch };
         }
