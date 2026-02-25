@@ -35,7 +35,12 @@ export async function buildLayout(
   windowUrl
 ) {
   const elements = [];
-  const bottomRightTexts = [];
+  const pdfBottomRightTexts = [];
+
+  // Load the bold font since the browser has not loaded it yet. We need it to be loaded before measuring it using the canvas.
+  await document.fonts.load(
+    `700 ${model.textFontSize}px Roboto, roboto, sans-serif`
+  );
 
   // 1. Map image (full page background)
   elements.push({
@@ -273,47 +278,110 @@ export async function buildLayout(
       "{date}",
       new Date().toLocaleDateString()
     );
-    bottomRightTexts.push(dateText);
+    if (model.saveAsType === "PDF") {
+      pdfBottomRightTexts.push(dateText);
+    } else {
+      const position = model.getRightAlignedPositions(
+        dateText,
+        model.textFontSize,
+        10,
+        0,
+        pageWidth,
+        options
+      );
+      elements.push({
+        type: "text",
+        text: dateText,
+        x: position.x,
+        y: position.y,
+        size: model.textFontSize,
+        fontStyle: model.textFontWeight,
+        color: model.textColor,
+      });
+    }
   }
 
   // 10. Copyright text
   if (model.copyright.length > 0) {
-    bottomRightTexts.push(model.copyright);
+    if (model.saveAsType === "PDF") {
+      pdfBottomRightTexts.push(model.copyright);
+    } else {
+      const position = model.getRightAlignedPositions(
+        model.copyright,
+        model.textFontSize,
+        10,
+        0,
+        pageWidth,
+        options
+      );
+      elements.push({
+        type: "text",
+        text: model.copyright,
+        x: position.x,
+        y: position.y * 2,
+        size: model.textFontSize,
+        fontStyle: model.textFontWeight,
+        color: model.textColor,
+      });
+    }
   }
 
   // 11. Disclaimer text
   if (model.disclaimer.length > 0) {
-    bottomRightTexts.push(model.disclaimer);
+    if (model.saveAsType === "PDF") {
+      pdfBottomRightTexts.push(model.disclaimer);
+    } else {
+      const position = model.getRightAlignedPositions(
+        model.disclaimer,
+        model.textFontSize,
+        10,
+        0,
+        pageWidth,
+        options
+      );
+      elements.push({
+        type: "text",
+        text: model.disclaimer,
+        x: position.x,
+        y: position.y * 3,
+        size: model.textFontSize,
+        fontStyle: model.textFontWeight,
+        color: model.textColor,
+      });
+    }
   }
 
-  // Now combine Copyrigth/Disclaimer/Date to one text and align them to the right.
+  // If we are printing a PNG we combine the strings as one element, PNG strings is allready handled separatly.
+  if (model.saveAsType === "PDF") {
+    // Now combine Copyrigth/Disclaimer/Date to one text and align them to the right.
 
-  // Value set in the text for multiline purposes when building the text in PrintLayout.
-  // This is required for aligning text in libpdf, upside: we know the width, downside: text longer than 400 points will wrap.
-  // Set as 400 points as approx half of a landscape a4 page.
-  const maxWidthBeforeWrap = pageWidth;
-  const position = model.getRightAlignedPositions(
-    bottomRightTexts,
-    model.textFontSize,
-    10,
-    5,
-    pageWidth,
-    options,
-    model.textFontWeight,
-    maxWidthBeforeWrap
-  );
+    // Value set in the text for multiline purposes when building the text in PrintLayout.
+    // This is required for aligning text in libpdf, upside: we know the width, downside: text longer than 400 points will wrap.
+    // Set as 400 points as approx half of a landscape a4 page.
+    const maxWidthBeforeWrap = pageWidth;
+    const position = model.getRightAlignedPositions(
+      pdfBottomRightTexts,
+      model.textFontSize,
+      10,
+      10,
+      pageWidth,
+      options,
+      model.textFontWeight,
+      maxWidthBeforeWrap
+    );
 
-  elements.push({
-    type: "text",
-    text: bottomRightTexts.reverse().join("\n"),
-    x: position.x,
-    y: position.y,
-    size: model.textFontSize,
-    fontStyle: model.textFontWeight,
-    color: model.textColor,
-    alignment: "right",
-    maxWidth: maxWidthBeforeWrap,
-  });
+    elements.push({
+      type: "text",
+      text: pdfBottomRightTexts.reverse().join("\n"),
+      x: position.x,
+      y: position.y,
+      size: model.textFontSize,
+      fontStyle: model.textFontWeight,
+      color: model.textColor,
+      alignment: "right",
+      maxWidth: maxWidthBeforeWrap,
+    });
+  }
 
   return elements;
 }

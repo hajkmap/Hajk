@@ -61,6 +61,7 @@ export default class PrintModel {
     this.mmPerPoint = 2.83465;
     this.scaleText = "";
     this.scalebarMaxWidth = 0;
+    this.saveAsType = "";
     // If we want the printed tiles to have correct styling, we have to use
     // custom loaders to make sure that the requests has all the required parameters.
     // If for some reason these tile-loaders shouldn't be used, a setting is exposed.
@@ -126,14 +127,23 @@ export default class PrintModel {
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
 
-  // Gets the height in points or pixels of the combined texts in the array with newlines.
-  getTextHeight = (textArray, fontSize) => {
-    const numberOfLines = textArray.length;
+  // Gets the height in points or pixels of the combined texts in the array with newlines, or just a string.
+  getTextHeight = (text, fontSize) => {
+    // If we are generating a PDF, an array of text is passed. Otherwise just a string.
+    let numberOfLines = 1;
+    if (typeof text === "object") {
+      numberOfLines = text.length;
+    }
     // Estimate lineheight and calculate the height in points over number of lines.
     const lineHeight = fontSize * 1.2;
     const totalHeight = lineHeight * numberOfLines;
+    // Calculate points if we are creating a pdf
     const totalHeightInPoints = totalHeight * (72 / 96);
-    return totalHeightInPoints;
+    // Return pixels if PNG or points if PDF
+    if (this.saveAsType === "PDF") {
+      return totalHeightInPoints;
+    }
+    return totalHeight;
   };
 
   hexToRgb = (hex) => {
@@ -157,41 +167,42 @@ export default class PrintModel {
     paperWidth,
     options,
     fontWeight,
-    maxWidthBeforeWrap
+    maxWidth
   ) => {
+    // If we are printing a PNG we reassign the maxWidth to the width of the separate text string.
+    if (this.saveAsType !== "PDF") {
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      context.font = `${fontWeight === "bold" ? "700" : "400"} ${fontSize}px Roboto, roboto, sans-serif`;
+      maxWidth = context.measureText(text).width;
+    }
     // If QrCode is placed in the bottom right corner, move text to the left of it (its wider)
     // Otherwise its a logo or northarrow, needs less text movement.
     // Also take care of scalebar placement bottomRight
     let x;
     if (options.includeQrCode && options.qrCodePlacement === "bottomRight") {
-      x = paperWidth - maxWidthBeforeWrap - xmargin - 90;
+      x = paperWidth - maxWidth - xmargin - 90;
     } else if (
       options.includeNorthArrow &&
       options.northArrowPlacement === "bottomRight"
     ) {
-      x =
-        paperWidth -
-        maxWidthBeforeWrap -
-        xmargin -
-        this.northArrowMaxWidth * 3 -
-        10;
+      x = paperWidth - maxWidth - xmargin - this.northArrowMaxWidth * 3 - 10;
     } else if (
       options.includeScaleBar &&
       options.scaleBarPlacement === "bottomRight"
     ) {
       // Use the scalebarMaxWidth that either is the text or the scalebar length, to align ex copyright
       // and disclaimer/date correctly to the left of the scalebar when bottomRight
-      x =
-        paperWidth - maxWidthBeforeWrap - xmargin - this.scalebarMaxWidth - 10;
+      x = paperWidth - maxWidth - xmargin - this.scalebarMaxWidth - 10;
     } else if (options.includeLogo && options.logoPlacement === "bottomRight") {
       x =
         paperWidth -
-        maxWidthBeforeWrap -
+        maxWidth -
         xmargin -
         this.logoMaxWidth * this.mmPerPoint -
         10;
     } else {
-      x = paperWidth - maxWidthBeforeWrap - xmargin;
+      x = paperWidth - maxWidth - xmargin;
     }
     const y = this.getTextHeight(text, fontSize) + ymargin;
     return { x, y };
@@ -206,7 +217,7 @@ export default class PrintModel {
   ) => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
-    context.font = `${fontSize}px Roboto, Helvetica, Arial, sans-serif`;
+    context.font = `${fontSize}px Roboto, roboto, sans-serif`;
     const textWidth = context.measureText(text).width;
 
     const x = (paperWidth - textWidth) / 2;
@@ -1045,6 +1056,7 @@ export default class PrintModel {
 
   print = async (options) => {
     return new Promise((resolve, reject) => {
+      this.saveAsType = options.saveAsType;
       this.saveAsType = options.saveAsType;
       const windowUrl = window.location.href;
       const format = options.format;
