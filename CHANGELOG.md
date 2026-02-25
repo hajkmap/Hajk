@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Client: Migrated from Create React App to Vite. See [issue #1253](https://github.com/hajkmap/Hajk/issues/1253) and [PR #1754](https://github.com/hajkmap/Hajk/pull/1754) for more details.
 - Client/Print: Print tool's components changed. We managed to replace two large, rather old, dependencies with one modern PDF library + native rendering of the PNG files, see issue [#1757](https://github.com/hajkmap/Hajk/issues/1757).
+- Backend: Refactored and consolidated logging. All log messages are now automatically decorated with username (if AD lookup is active, else "-"). As a result of this, the default log level for most messages has changed from `TRACE` to `DEBUG`. If you see too much info in the production log, ensure not to use `TRACE` there (which isn't a good idea for production anyway, except for hunting down runtime issues). See [issue #1764](https://github.com/hajkmap/Hajk/issues/1764) and [PR #1765](https://github.com/hajkmap/Hajk/pull/1765) for more details.
 
 ### Fixed
 
