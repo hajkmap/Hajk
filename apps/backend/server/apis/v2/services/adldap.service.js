@@ -43,7 +43,7 @@ class AdLdapService extends AdBaseService {
       return;
     }
 
-    this.logger.trace("Initiating ActiveDirectoryService V2");
+    this.logger.debug("Initiating ActiveDirectoryService V2");
 
     // If .env says we should use AD but the configuration is missing, abort.
     if (
@@ -140,23 +140,26 @@ class AdLdapService extends AdBaseService {
     };
 
     // The main AD object that will handle communication
-    this.logger.trace(
+    this.logger.debug(
       `Setting up AD connection to using the following options (\`logging\`, \`password\` and \`tlsOptions\` are obfuscated from this log message):`
     );
     // eslint-disable-next-line no-unused-vars
     const { password, tlsOptions, logging, ...obfuscatedConfig } = this.#config;
-    this.logger.trace("%o", obfuscatedConfig);
+    this.logger.debug("%o", obfuscatedConfig);
 
     this._ad = new ActiveDirectory(this.#config);
-
-    this.logger.info(`Testing the AD connection to ${process.env.AD_URL}…`);
 
     // Check the LDAP(S) connection. It will return true if OK or throw an error if connection
     // can't be established. Ideally, we'd want to await the return value here, but
     // we're in a constructor so it can't be done. Still, we achieve the goal of
     // aborting the startup if connection fails, so it doesn't really matter in the end.
     if (process.env.AD_CHECK_CONNECTION === "true") {
+      this.logger.info(`Testing the AD connection to ${process.env.AD_URL}…`);
       this.#checkConnection();
+    } else {
+      this.logger.info(
+        `AD_CHECK_CONNECTION is set to false in .env. Skipping AD connection check.`
+      );
     }
 
     // Initiate 3 local stores to cache the results from AD.
@@ -310,7 +313,7 @@ ABORTING STARTUP.
     try {
       // Exit early if someone tries to call this endpoint on a setup with disabled AD
       if (!this._ad) {
-        this.logger.trace(
+        this.logger.debug(
           "Attempt to access AD functionality failed – AD is disabled in .env"
         );
         throw new ActiveDirectoryError(
@@ -366,7 +369,7 @@ ABORTING STARTUP.
    */
   async flushStores() {
     try {
-      this.logger.trace("Flushing local cache stores…");
+      this.logger.debug("Flushing local cache stores…");
       this._users.clear();
       this._groups.clear();
       this._groupsPerUser.clear();
@@ -396,7 +399,7 @@ ABORTING STARTUP.
    */
 
   async isUserValid(sAMAccountName) {
-    this.logger.trace(
+    this.logger.debug(
       "[isUserValid] Checking if %o is a valid user in AD",
       sAMAccountName
     );
@@ -411,7 +414,7 @@ ABORTING STARTUP.
       user,
       "sAMAccountName"
     );
-    this.logger.trace(
+    this.logger.debug(
       "[isUserValid] %o is %sa valid user in AD",
       sAMAccountName,
       isValid ? "" : "NOT "
@@ -446,14 +449,14 @@ ABORTING STARTUP.
 
       // Check if user entry already exists in store
       if (!this._users.has(sAMAccountName)) {
-        this.logger.trace(
+        this.logger.debug(
           "[findUser] Looking up %o in real AD",
           sAMAccountName
         );
         // If store didn't contain the requested user, get it from AD
         const user = await this._findUser(sAMAccountName);
 
-        this.logger.trace(
+        this.logger.debug(
           "[findUser] Saving %o in user store with value: \n%O",
           sAMAccountName,
           user
@@ -486,14 +489,14 @@ ABORTING STARTUP.
     // or else we'd just get the Promise itself!
     let groups = await this._groupsPerUser.get(sAMAccountName);
     if (groups !== undefined) {
-      this.logger.trace(
+      this.logger.debug(
         "[getGroupMembershipForUser] %o groups already found in groups-per-users store",
         sAMAccountName
       );
       return groups;
     }
 
-    this.logger.trace(
+    this.logger.debug(
       "[getGroupMembershipForUser] No entry for %o in the groups-per-users store yet. Populating…",
       sAMAccountName
     );
@@ -517,7 +520,7 @@ ABORTING STARTUP.
         // We only care about the shortname (CN)
         groups = groups.map((g) => g.cn).sort();
 
-        this.logger.trace(
+        this.logger.debug(
           "[getGroupMembershipForUser] Done. Setting groups-per-users store key %o to value: %O",
           sAMAccountName,
           groups
@@ -563,7 +566,7 @@ ABORTING STARTUP.
 
       // If we haven't cached the requested user's groups yet…
       if (!this._groupsPerUser.has(sAMAccountName)) {
-        this.logger.trace(
+        this.logger.debug(
           "[isUserMemberOf] Can't find %o in groups-per-users store. Will need to populate.",
           sAMAccountName
         );

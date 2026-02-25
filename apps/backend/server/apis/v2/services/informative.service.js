@@ -5,7 +5,7 @@ const logger = log4js.getLogger("service.informative.v2");
 
 class InformativeService {
   constructor() {
-    logger.trace("Initiating InformativeService V2");
+    logger.debug("Initiating InformativeService V2");
   }
 
   /**
@@ -316,7 +316,7 @@ class InformativeService {
         uploadDirPath = path.join(process.cwd(), "App_Data", "Upload");
       }
 
-      logger.trace(
+      logger.debug(
         `[getUploadedFiles] Attempting to read contents of "${uploadDirPath}".\nLooking for ${type} files.\nValid extensions are: ${[
           ...extensions,
           ...extensionsUpperCase,
