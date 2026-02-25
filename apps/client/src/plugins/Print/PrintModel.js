@@ -1,8 +1,7 @@
 import { delay } from "../../utils/Delay";
 import { getPointResolution } from "ol/proj";
 import { getCenter } from "ol/extent";
-import { PDF, rgb } from "@libpdf/core";
-import { saveAs } from "file-saver";
+
 import Vector from "ol/layer/Vector";
 import View from "ol/View";
 import VectorSource from "ol/source/Vector";
@@ -11,6 +10,7 @@ import Feature from "ol/Feature";
 import { Translate } from "ol/interaction";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style";
+
 import ImageLayer from "ol/layer/Image";
 import TileLayer from "ol/layer/Tile";
 import TileWMS from "ol/source/TileWMS";
@@ -18,7 +18,9 @@ import ImageWMS from "ol/source/ImageWMS";
 
 import QRCode from "qrcode";
 
-import { ROBOTO_NORMAL, ROBOTO_BOLD } from "./constants";
+import { buildLayout } from "./PrintLayout";
+import { renderToPdf } from "./PdfRenderer";
+import { renderToPng } from "./PngRenderer";
 
 const DEFAULT_DIMS = {
   a0: [1189, 841],
@@ -134,7 +136,7 @@ export default class PrintModel {
     g = g > 127.5 ? 1 : 0;
     b = b > 127.5 ? 1 : 0;
 
-    return rgb(r, g, b);
+    return { r, g, b };
   };
 
   getRightAlignedPositions = (
@@ -606,274 +608,6 @@ export default class PrintModel {
     return { divLinesArray, divider };
   };
 
-  addDividerLinesAndTexts = (props) => {
-    this.drawDividerLines(props);
-
-    // We want to make sure that given scale is a set scale in our admin settings...
-    // to ensure the text has correct spacing
-    if (this.scaleBarLengths[props.scale]) this.addDividerTexts(props);
-  };
-
-  drawDividerLines({
-    page,
-    scaleBarPosition,
-    scaleBarLength,
-    color,
-    scaleBarLengthMeters,
-  }) {
-    page.drawLine({
-      start: { x: scaleBarPosition.x, y: scaleBarPosition.y + 9 },
-      end: {
-        x: scaleBarPosition.x + scaleBarLength,
-        y: scaleBarPosition.y + 9,
-      },
-      color,
-      thickness: 1,
-    });
-    page.drawLine({
-      start: { x: scaleBarPosition.x, y: scaleBarPosition.y + 3 },
-      end: {
-        x: scaleBarPosition.x,
-        y: scaleBarPosition.y + 15,
-      },
-      color,
-      thickness: 1,
-    });
-    page.drawLine({
-      start: {
-        x: scaleBarPosition.x + scaleBarLength,
-        y: scaleBarPosition.y + 3,
-      },
-      end: {
-        x: scaleBarPosition.x + scaleBarLength,
-        y: scaleBarPosition.y + 15,
-      },
-      color,
-      thickness: 1,
-    });
-
-    // Here we get number of lines we will draw below
-    const { divLinesArray } = this.getDivLinesArrayAndDivider(
-      scaleBarLengthMeters,
-      scaleBarLength
-    );
-
-    // Here we draw the dividing lines marking 10 (or 100) meters each
-    divLinesArray.forEach((divLine) => {
-      const largerMiddleLineValue =
-        divLinesArray.length === 10 && divLine === divLinesArray[4] ? 2.1 : 0;
-      page.drawLine({
-        start: {
-          x: scaleBarPosition.x + divLine,
-          y: scaleBarPosition.y + 5.7 - largerMiddleLineValue,
-        },
-        end: {
-          x: scaleBarPosition.x + divLine,
-          y: scaleBarPosition.y + 12.3 + largerMiddleLineValue,
-        },
-        color,
-        thickness: 1,
-      });
-    });
-
-    // If the space between 0 and the first number on the scalebar is long enough...
-    // we draw additional lines between 0 and the first number
-    if (divLinesArray[0] > 10) {
-      const numLine = divLinesArray[0] / 5;
-      for (
-        let divLine = numLine;
-        divLine < divLinesArray[0];
-        divLine += numLine
-      ) {
-        page.drawLine({
-          start: {
-            x: scaleBarPosition.x + divLine,
-            y: scaleBarPosition.y + 6.75,
-          },
-          end: {
-            x: scaleBarPosition.x + divLine,
-            y: scaleBarPosition.y + 11.55,
-          },
-          color,
-          thickness: 1,
-        });
-      }
-    }
-  }
-
-  addDividerTexts = ({
-    page,
-    scaleBarPosition,
-    scaleBarLength,
-    scaleBarLengthMeters,
-    color,
-    font,
-  }) => {
-    // Here we set the number 0 at the start of the scalebar
-    page.drawText("0", {
-      x: scaleBarPosition.x - 2,
-      y: scaleBarPosition.y - 5,
-      size: 8,
-      font,
-    });
-
-    // Here we convert the scaleBarLengthMeters to km if above 1000
-    const calculatedScaleBarLengthMeters =
-      scaleBarLengthMeters > 1000
-        ? (scaleBarLengthMeters / 1000).toString()
-        : scaleBarLengthMeters;
-
-    // Here we get number of lines we will draw below
-    const { divLinesArray, divider } = this.getDivLinesArrayAndDivider(
-      scaleBarLengthMeters,
-      scaleBarLength
-    );
-
-    const scaleBarHasSpace = divLinesArray[0] > 10 && scaleBarLengthMeters > 10;
-
-    let divNr = calculatedScaleBarLengthMeters / divider;
-    let divNrString = divNr.toLocaleString();
-
-    // Here we add the middle number or if no middle exists...
-    // a number that's close to the middle
-
-    // let midIndex =
-    //   divLinesArray.length % 2 === 0
-    //     ? divLinesArray.length / 2
-    //     : Math.floor(divLinesArray.length / 2);
-
-    const midIndex = Math.round(divLinesArray.length / 2);
-
-    divNr = (calculatedScaleBarLengthMeters / divider) * midIndex;
-    divNrString = divNr.toLocaleString();
-    page.drawText(divNrString, {
-      x:
-        scaleBarPosition.x +
-        divLinesArray[midIndex - 1] -
-        divNrString.length -
-        2,
-      y: scaleBarPosition.y - 5,
-      size: 8,
-      font,
-    });
-
-    // Here we add a number to the first additional division line but only if scaleBar has space
-    if (scaleBarHasSpace) {
-      const dividerNrPosition = divLinesArray[0] / 5;
-      divNr = calculatedScaleBarLengthMeters / divider / 5;
-      divNrString = divNr.toLocaleString();
-
-      // We need to check if this number would be a decimal number, and skip drawing it in that case
-      // so the beginning of the scalebar doesn't get cramped for space
-      const dividerStrLength =
-        divNr % 1 !== 0 ? divNrString.length - 1 : divNrString.length;
-      if (dividerStrLength === 1) {
-        page.drawText(divNrString, {
-          x: scaleBarPosition.x + dividerNrPosition - dividerStrLength - 2,
-          y: scaleBarPosition.y - 5,
-          size: 8,
-          font,
-        });
-      }
-    }
-  };
-
-  drawScaleBar = (
-    page,
-    scaleBarPosition,
-    color,
-    scaleBarLength,
-    scale,
-    scaleBarLengthMeters,
-    format,
-    orientation,
-    font
-  ) => {
-    const lengthText = this.getLengthText(scaleBarLengthMeters);
-    page.drawText(lengthText, {
-      x: scaleBarPosition.x + scaleBarLength + 2,
-      y: scaleBarPosition.y + 6,
-      size: 8,
-      font,
-    });
-
-    page.drawText(this.scaleText, {
-      x: scaleBarPosition.x,
-      y: scaleBarPosition.y + 20,
-      size: 10,
-      font,
-    });
-
-    this.addDividerLinesAndTexts({
-      page,
-      scale,
-      scaleBarLengthMeters,
-      scaleBarPosition,
-      scaleBarLength,
-      color,
-      font,
-    });
-  };
-
-  addScaleBar = (
-    page,
-    color,
-    scale,
-    resolution,
-    scaleBarPlacement,
-    scaleResolution,
-    format,
-    orientation,
-    font,
-    pageWidth,
-    pageHeight
-  ) => {
-    const mPerInch = 0.0254;
-    const pointsPerInch = 72;
-    // Get the length that the scalebar should represent
-    const scaleBarLengthMeters = this.getFittingScaleBarLength(scale);
-    // Convert those meters to inches for the scale
-    const lengthInInches = scaleBarLengthMeters / scale / mPerInch;
-
-    // Convert inches to points
-    const scaleBarLength = lengthInInches * pointsPerInch;
-    const scaleBarHeight = 6;
-
-    this.scaleText = `Skala: ${this.getUserFriendlyScale(
-      scale
-    )} (vid ${format.toUpperCase()} ${
-      orientation === "landscape" ? "liggande" : "stående"
-    })`;
-
-    let scaleBarPosition = this.getPlacement(
-      scaleBarPlacement,
-      scaleBarLength,
-      scaleBarHeight,
-      pageWidth,
-      pageHeight,
-      "scaleBar"
-    );
-
-    if (
-      scaleBarPlacement === "bottomLeft" ||
-      scaleBarPlacement === "bottomRight"
-    ) {
-      scaleBarPosition.y += 2;
-    }
-
-    this.drawScaleBar(
-      page,
-      scaleBarPosition,
-      color,
-      scaleBarLength,
-      scale,
-      scaleBarLengthMeters,
-      format,
-      orientation,
-      font
-    );
-  };
-
   // Make sure the desired resolution (depending on scale and dpi)
   // works with the current map-setup.
   desiredPrintOptionsOk = (options) => {
@@ -1296,31 +1030,6 @@ export default class PrintModel {
     this.addedLayers = new Set();
   };
 
-  // Decode the base64 font to Uint8Array
-  async loadFont(font) {
-    const binaryString = atob(font);
-    const length = binaryString.length;
-    const uint8Array = new Uint8Array(length);
-
-    for (let i = 0; i < length; i++) {
-      uint8Array[i] = binaryString.charCodeAt(i);
-    }
-
-    return uint8Array;
-  }
-
-  // Fetch image and return it as Uint8Array
-  async fetchImage(url) {
-    try {
-      const response = await fetch(url);
-      const buffer = await response.arrayBuffer();
-      return new Uint8Array(buffer);
-    } catch (error) {
-      console.error(`Error fetching image from ${url}:`, error);
-      throw error;
-    }
-  }
-
   print = async (options) => {
     return new Promise(async (resolve, reject) => {
       const windowUrl = window.location.href;
@@ -1441,354 +1150,58 @@ export default class PrintModel {
         pageHeight =
           orientation === "landscape" ? originalPageHeight : originalPageWidth;
 
-        const pdf = PDF.create();
-        let page = pdf.addPage({
-          orientation,
-          width: pageWidth,
-          height: pageHeight,
-        });
-
-        let fontNormalBytes = null;
-        let fontBoldBytes = null;
-        await this.loadFont(ROBOTO_NORMAL).then(
-          (result) => (fontNormalBytes = result)
-        );
-        await this.loadFont(ROBOTO_BOLD).then(
-          (result) => (fontBoldBytes = result)
-        );
-        const fontNormal = pdf.embedFont(fontNormalBytes);
-        const fontBold = pdf.embedFont(fontBoldBytes);
-
-        // Canvas to dataUrl to ArrayBuffer, since libPDF embedImage expects a Uint8Array
         try {
-          const mapBuffer = await this.fetchImage(dataUrl);
-          const mapImage = pdf.embedImage(mapBuffer);
-
-          // Draw image on the PDF
-          page.drawImage(mapImage, {
-            x: 0,
-            y: 0,
-            width: pageWidth,
-            height: pageHeight,
-          });
-
-          // Add potential margin around the image
-          if (this.margin > 0) {
-            // We want to check if user has chosen to put icons and text
-            // in the margins, which if so, must be larger than usual
-            // Note that we first check if user has NOT chosen this (!).
-            if (!options.useTextIconsInMargin) {
-              page
-                .drawPath()
-                .moveTo(0, 0)
-                .lineTo(pageWidth, 0)
-                .lineTo(pageWidth, pageHeight)
-                .lineTo(0, pageHeight)
-                .lineTo(0, 0)
-                .close()
-                .stroke({
-                  borderColor: rgb(255, 255, 255),
-                  borderWidth: 5.5 * this.margin,
-                });
-              // Now we check if user did choose text in margins
-            } else {
-              page
-                .drawPath()
-                .moveTo(0, 0)
-                .lineTo(pageWidth, 0)
-                .close()
-                .stroke({
-                  borderColor: rgb(255, 255, 255),
-                  borderWidth: 16 * this.margin,
-                });
-              page
-                .drawPath()
-                .moveTo(pageWidth, 0)
-                .lineTo(pageWidth, pageHeight)
-                .close()
-                .stroke({
-                  borderColor: rgb(255, 255, 255),
-                  borderWidth: 5.5 * this.margin,
-                });
-              page
-                .drawPath()
-                .moveTo(pageWidth, pageHeight)
-                .lineTo(0, pageHeight)
-                .close()
-                .stroke({
-                  borderColor: rgb(255, 255, 255),
-                  borderWidth: 16 * this.margin,
-                });
-              page
-                .drawPath()
-                .moveTo(0, pageHeight)
-                .lineTo(0, 0)
-                .close()
-                .stroke({
-                  borderColor: rgb(255, 255, 255),
-                  borderWidth: 5.5 * this.margin,
-                });
-            }
-          }
-
-          if (options.includeQrCode && this.mapConfig.enableAppStateInHash) {
-            try {
-              const qrCode = await this.generateQR(windowUrl, 20);
-              let qrCodePlacement = this.getPlacement(
-                options.qrCodePlacement,
-                qrCode.width,
-                qrCode.height,
-                pageWidth,
-                pageHeight,
-                "qrCode"
-              );
-
-              // Fetch the logoData in base64 and recieve it as a Uint8Array
-              const qrBuffer = await this.fetchImage(qrCode.data);
-              const qrImage = pdf.embedImage(qrBuffer);
-
-              // Draw logo on the PDF
-              page.drawImage(qrImage, {
-                x: qrCodePlacement.x,
-                y: qrCodePlacement.y,
-                width: qrCode.width,
-                height: qrCode.height,
-              });
-            } catch (error) {
-              const imgLoadingError = { error: error, type: "QR-koden" };
-              // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
-              this.localObserver.publish(
-                "error-loading-image",
-                imgLoadingError
-              );
-            }
-          }
-
-          // Check if logo should be added
-          if (options.includeLogo && this.logoUrl.trim().length >= 5) {
-            try {
-              const {
-                data: logoData,
-                width: logoWidth,
-                height: logoHeight,
-              } = await this.getImageForPdfFromUrl(
-                this.logoUrl,
-                this.logoMaxWidth
-              );
-              let logoPlacement = this.getPlacement(
-                options.logoPlacement,
-                logoWidth,
-                logoHeight,
-                pageWidth,
-                pageHeight
-              );
-
-              // Fetch the logoData in base64 and recieve it as a Uint8Array
-              const logoBuffer = await this.fetchImage(logoData);
-              const logoImage = pdf.embedImage(logoBuffer);
-
-              // Draw logo on the PDF
-              page.drawImage(logoImage, {
-                x: logoPlacement.x - 5,
-                y: logoPlacement.y - 5,
-                width: logoWidth,
-                height: logoHeight,
-              });
-            } catch (error) {
-              const imgLoadingError = { error: error, type: "Logotypbilden" };
-              // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
-              this.localObserver.publish(
-                "error-loading-image",
-                imgLoadingError
-              );
-            }
-          }
-
-          if (
-            options.includeNorthArrow &&
-            this.northArrowUrl.trim().length >= 5
-          ) {
-            try {
-              const {
-                data: arrowData,
-                width: arrowWidth,
-                height: arrowHeight,
-              } = await this.getImageForPdfFromUrl(
-                this.northArrowUrl,
-                this.northArrowMaxWidth
-              );
-
-              const arrowPlacement = this.getPlacement(
-                options.northArrowPlacement,
-                arrowWidth,
-                arrowHeight,
-                pageWidth,
-                pageHeight
-              );
-
-              // Fetch the arrow image in base64 and recieve it as a Uint8Array
-              const arrowBuffer = await this.fetchImage(arrowData);
-              const arrowImage = pdf.embedImage(arrowBuffer);
-
-              // Draw logo on the PDF
-              page.drawImage(arrowImage, {
-                x: arrowPlacement.x,
-                y: arrowPlacement.y,
-                width: arrowWidth,
-                height: arrowHeight,
-              });
-            } catch (error) {
-              const imgLoadingError = { error: error, type: "Norrpilen" };
-              // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
-              this.localObserver.publish(
-                "error-loading-image",
-                imgLoadingError
-              );
-            }
-          }
-
-          if (options.includeScaleBar) {
-            this.addScaleBar(
-              page,
-              rgb(0, 0, 0),
-              options.scale,
-              options.resolution,
-              options.scaleBarPlacement,
-              scaleResolution,
-              options.format,
-              options.orientation,
-              fontNormal,
-              pageWidth,
-              pageHeight
-            );
-          }
-
-          // Add map title if user supplied one
-          if (options.mapTitle.trim().length > 0) {
-            let verticalMargin = options.useTextIconsInMargin
-              ? this.margin + 35
-              : 50;
-            const position = this.getCenterAlignedPositions(
-              options.mapTitle,
-              28,
-              verticalMargin,
-              pageWidth,
-              pageHeight
-            );
-            page.drawText(options.mapTitle, {
-              x: position.x,
-              y: position.y,
-              size: 28,
-              font: fontNormal,
-              color: this.textColor,
-            });
-          }
-
-          // Add print comment if user supplied one
-          if (options.printComment.trim().length > 0) {
-            let verticalMargin = options.useTextIconsInMargin
-              ? this.margin + 50
-              : 60;
-            const position = this.getCenterAlignedPositions(
-              options.printComment,
-              11,
-              verticalMargin,
-              pageWidth,
-              pageHeight
-            );
-            page.drawText(options.printComment, {
-              x: position.x,
-              y: position.y - 5,
-              size: 11,
-              font: fontNormal,
-              color: this.textColor,
-            });
-          }
-
-          // Add potential date text
-          if (this.date.length > 0) {
-            const date = this.date.replace(
-              "{date}",
-              new Date().toLocaleDateString()
-            );
-            const position = this.getRightAlignedPositions(
-              this.date,
-              this.textFontSize,
-              23,
-              5,
-              pageWidth,
-              options
-            );
-            page.drawText(date, {
-              x: position.x,
-              y: position.y,
-              size: this.textFontSize,
-              color: this.textColor,
-              font: fontNormal,
-            });
-          }
-
-          //  Add potential copyright text
-          const position = this.getRightAlignedPositions(
-            this.copyright,
-            this.textFontSize,
-            5,
-            15,
+          // Build the shared layout (renderer-agnostic element list)
+          const elements = await buildLayout(
+            this,
+            dataUrl,
+            options,
             pageWidth,
-            options
+            pageHeight,
+            scaleResolution,
+            windowUrl
           );
-          if (this.copyright.length > 0) {
-            let yPos = options.useTextIconsInMargin
-              ? this.textIconsMargin + this.margin / 2
-              : this.margin;
-            page.drawText(this.copyright, {
-              x: position.x,
-              y: position.y,
-              size: this.textFontSize,
-              color: this.textColor,
-              font: fontNormal,
-            });
+
+          const fileName = `Kartexport - ${new Date().toLocaleString()}`;
+          let blob = null;
+
+          if (options.saveAsType === "PDF") {
+            const pdf = await renderToPdf(
+              elements,
+              pageWidth,
+              pageHeight,
+              orientation
+            );
+            const bytes = await pdf.save();
+            const pdfBlob = new Blob([bytes], { type: "application/pdf" });
+            const url = URL.createObjectURL(pdfBlob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${fileName}.pdf`;
+            link.click();
+            URL.revokeObjectURL(url);
+          } else {
+            // PNG or BLOB
+            blob = await renderToPng(
+              elements,
+              pageWidth,
+              pageHeight,
+              width,
+              height,
+              fileName,
+              options.saveAsType
+            );
           }
 
-          // Add potential disclaimer text
-          if (this.disclaimer.length > 0) {
-            const position = this.getRightAlignedPositions(
-              this.disclaimer,
-              this.textFontSize,
-              5,
-              25,
-              pageWidth,
-              options
-            );
-            page.drawText(this.disclaimer, {
-              x: position.x,
-              y: position.y,
-              size: this.textFontSize,
-              color: this.textColor,
-              font: fontNormal,
-            });
-          }
+          this.localObserver.publish("print-completed");
+          resolve(blob);
         } catch (error) {
-          console.error("Error processing pdf:", error);
+          console.error("Error processing print:", error);
           this.localObserver.publish("print-failed-to-save");
           reject(error);
         } finally {
-          // Save as pdf or png
-          // Finally, save the PDF (or PNG)
-          this.saveToFile(pdf, width, options.saveAsType)
-            .then((blob) => {
-              this.localObserver.publish("print-completed");
-              resolve(blob);
-            })
-            .catch((error) => {
-              console.warn(error);
-              this.localObserver.publish("print-failed-to-save");
-              reject(error);
-            })
-            .finally(() => {
-              // Reset map to how it was before print
-              this.restoreOriginalView();
-            });
+          // Reset map to how it was before print
+          this.restoreOriginalView();
         }
       });
 
@@ -1821,110 +1234,6 @@ export default class PrintModel {
     this.map.getTargetElement().style.height = "";
     this.map.updateSize();
     this.map.setView(this.originalView);
-  };
-
-  // Imports and returns the dependencies required to create a PNG-print-export.
-  #getPngDependencies = async () => {
-    try {
-      const pdfjs = await import("pdfjs-dist/build/pdf");
-      return { pdfjs };
-    } catch (error) {
-      throw new Error(
-        `Failed to import required dependencies. Error: ${error}`
-      );
-    }
-  };
-
-  // Saves the supplied PDF with the supplied file-name.
-  #saveToPdf = async (pdf, fileName) => {
-    try {
-      // return await pdf.save(`${fileName}.pdf`);
-      const bytes = await pdf.save();
-      const blob = new Blob([bytes], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${fileName}.pdf`;
-      link.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      throw new Error(`Failed to save PDF. Error: ${error}`);
-    }
-  };
-
-  // Saves the supplied PDF *as a PNG* with the supplied file-name.
-  // The width of the document has to be supplied since some calculations
-  // must be done in order to create a PNG with the correct resolution etc.
-  #saveToPng = async (pdf, fileName, width, type) => {
-    try {
-      // First we'll dynamically import the required dependencies.
-      const { pdfjs } = await this.#getPngDependencies();
-      // Then we'll set up the pdfJS-worker. TODO: Terrible?! PDF-js does not seem to have a better solution for the
-      // source-map-errors that occur from setting the worker the ordinary way.
-      pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-      // We'll output the PDF as an array-buffer that can be used to create the PNG.
-      const ab = await pdf.save();
-      // We'll use the PDF-JS library to create a new "PDF-JS-PDF". (Wasteful? Yes very, but the JS-PDF-library
-      // does not support export to any other format than PDF, and the PDF-JS-library does.) Notice that
-      // JS-PDF and PDF-JS are two different libraries, both with their pros and cons.
-      // - PDF-JS: Pro => Can export to PNG, Con: Cannot create as nice of an image as JS-PDF.
-      // - JS-PDF: Pro => Creates good-looking PDFs, Con: Cannot export to PNG.
-      // - Conclusion: We use both...
-      return new Promise((resolve) => {
-        pdfjs.getDocument({ data: ab }).promise.then((pdf) => {
-          // So, when the PDF-JS-PDF is created, we get the first page, and then render
-          // it on a canvas so that we can export it as a PNG.
-          pdf.getPage(1).then((page) => {
-            // We're gonna need a canvas and its context.
-            let canvas = document.createElement("canvas");
-            let ctx = canvas.getContext("2d");
-            // Scale the viewport to match current resolution
-            const viewport = page.getViewport({ scale: 1 });
-            const scale = width / viewport.width;
-            const scaledViewport = page.getViewport({ scale: scale });
-            // Create the render-context-object.
-            const renderContext = {
-              canvasContext: ctx,
-              viewport: scaledViewport,
-            };
-            // Set the canvas dimensions to the correct width and height.
-            canvas.height = scaledViewport.height;
-            canvas.width = scaledViewport.width;
-            // Then we'll render and save!
-            page.render(renderContext).promise.then(() => {
-              canvas.toBlob((blob) => {
-                type !== "BLOB" && saveAs(blob, `${fileName}.png`);
-                resolve(blob);
-              });
-            });
-          });
-        });
-      });
-    } catch (error) {
-      throw new Error(`Failed to save PNG. Error: ${error}`);
-    }
-  };
-
-  // Saves the print-contents to file, either PDF, or PNG (depending on supplied type).
-  saveToFile = async (pdf, width, type) => {
-    // We're gonna need to create a file-name.
-    const fileName = `Kartexport - ${new Date().toLocaleString()}`;
-    // Then we'll try to save the contents in the format the user requested.
-    try {
-      switch (type) {
-        case "PDF":
-          return await this.#saveToPdf(pdf, fileName);
-        case "PNG":
-        case "BLOB":
-          return await this.#saveToPng(pdf, fileName, width, type);
-        default:
-          throw new Error(
-            `Supplied type could not be handled. The supplied type was ${type} and currently only PDF, PNG, and BLOB is supported.`
-          );
-      }
-    } catch (error) {
-      throw new Error(`Failed to save file... ${error}`);
-    }
   };
 
   cancelPrint = () => {

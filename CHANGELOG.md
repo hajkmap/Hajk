@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Client: Migrated from Create React App to Vite. See [issue #1253](https://github.com/hajkmap/Hajk/issues/1253) and [PR #1754](https://github.com/hajkmap/Hajk/pull/1754) for more details.
+- Client/Print: Print tool's components changed. We managed to replace two large, rather old, dependencies with one modern PDF library + native rendering of the PNG files, see issue [#1757](https://github.com/hajkmap/Hajk/issues/1757).
 
 ### Fixed
 
