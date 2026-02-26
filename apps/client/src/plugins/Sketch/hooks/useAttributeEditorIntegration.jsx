@@ -499,11 +499,16 @@ const useAttributeEditorIntegration = ({
         select?.getFeatures?.().forEach((f) => {
           const rawId = f.getId?.() ?? f.get?.("@_fid") ?? f.get?.("id");
           const key = String(rawId);
-          // Parse as number for pendingDeletes check
-          const numId = typeof rawId === "number" ? rawId : parseInt(rawId, 10);
+          const numId = Number(rawId);
 
-          // Skip if already seen or marked for deletion
-          if (!seen.has(key) && !pendingDeletes.has(numId)) {
+          // Skip if already seen or marked for deletion (check raw, numeric and string forms
+          // to handle both Postgres numeric IDs and Oracle string IDs like "typename.1234")
+          if (
+            !seen.has(key) &&
+            !pendingDeletes.has(rawId) &&
+            !(Number.isFinite(numId) && pendingDeletes.has(numId)) &&
+            !pendingDeletes.has(key)
+          ) {
             seen.add(key);
             arr.push(f);
           }
@@ -521,7 +526,7 @@ const useAttributeEditorIntegration = ({
         if (!f) {
           f = src.getFeatures?.().find((x) => matchesLogicalId(x, id));
         }
-        return f || null;
+        if (f) return f;
       }
       return null;
     };
@@ -611,10 +616,16 @@ const useAttributeEditorIntegration = ({
           const pendingDeletes =
             props?.model?.getSnapshot?.()?.pendingDeletes || new Set();
 
-          // Helper to get feature ID
-          const getId = (f) => {
+          // Helper: check if a feature is marked for deletion.
+          // Checks raw value, numeric and string forms to handle both
+          // Postgres numeric IDs and Oracle string IDs like "typename.1234".
+          const isDeleted = (f) => {
             const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-            return typeof raw === "number" ? raw : parseInt(raw, 10);
+            if (pendingDeletes.has(raw)) return true;
+            const n = Number(raw);
+            if (Number.isFinite(n) && pendingDeletes.has(n)) return true;
+            if (pendingDeletes.has(String(raw))) return true;
+            return false;
           };
 
           // Collect ALL features at the pixel, excluding deleted ones
@@ -624,11 +635,7 @@ const useAttributeEditorIntegration = ({
             (f, lyr) => {
               if (lyr === layer && !f.get("KINK_MARKER")) {
                 // Filter out features marked for deletion
-                const id = getId(f);
-                if (
-                  !pendingDeletes.has(id) &&
-                  !pendingDeletes.has(String(id))
-                ) {
+                if (!isDeleted(f)) {
                   candidates.push(f);
                 }
               }
