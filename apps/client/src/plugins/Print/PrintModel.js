@@ -169,7 +169,7 @@ export default class PrintModel {
     fontWeight,
     maxWidth
   ) => {
-    // If we are printing a PNG we reassign the maxWidth to the width of the separate text string.
+    // If we are printing a PNG we assign the maxWidth to the width of the separate text string.
     if (this.saveAsType !== "PDF") {
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");

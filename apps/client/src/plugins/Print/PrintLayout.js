@@ -287,7 +287,8 @@ export async function buildLayout(
         10,
         0,
         pageWidth,
-        options
+        options,
+        model.textFontWeight
       );
       elements.push({
         type: "text",
@@ -312,7 +313,8 @@ export async function buildLayout(
         10,
         0,
         pageWidth,
-        options
+        options,
+        model.textFontWeight
       );
       elements.push({
         type: "text",
@@ -337,7 +339,8 @@ export async function buildLayout(
         10,
         0,
         pageWidth,
-        options
+        options,
+        model.textFontWeight
       );
       elements.push({
         type: "text",

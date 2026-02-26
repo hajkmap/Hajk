@@ -76,7 +76,6 @@ export async function renderToPng(
         ctx.font = `${el.fontStyle === "bold" ? "700" : "400"} ${el.size * s}px Roboto, roboto, sans-serif`;
         ctx.fillStyle = toCssColor(el.color);
         ctx.textBaseline = "alphabetic";
-        ctx.textAlign = "left";
         // PDF y is the baseline position from bottom
         const tx = el.x * s;
         const ty = flipY(el.y);
