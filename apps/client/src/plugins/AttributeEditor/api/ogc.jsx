@@ -448,10 +448,23 @@ function splitTypeName(typeName) {
 function formatFeatureId(featureId, layer) {
   if (featureId == null) return featureId;
 
-  const idStr = String(featureId);
+  let idStr = String(featureId);
 
-  // Already qualified (contains . or :) — keep as-is
-  if (idStr.includes(".") || idStr.includes(":")) {
+  // Strip the namespace prefix if OpenLayers included it in the gml:id.
+  try {
+    const [wsPrefix] = splitTypeName(resolveTypeName(layer));
+    if (
+      wsPrefix &&
+      wsPrefix !== "feature" &&
+      idStr.startsWith(`${wsPrefix}:`)
+    ) {
+      idStr = idStr.slice(wsPrefix.length + 1);
+    }
+  } catch {
+    // resolveTypeName can throw if layer has no typeName — skip prefix stripping
+  }
+
+  if (idStr.includes(".")) {
     return idStr;
   }
 
@@ -465,7 +478,7 @@ function formatFeatureId(featureId, layer) {
 
   // Standard WFS: qualify as "typeName.id"
   const typeName = resolveTypeName(layer);
-  return `${typeName}.${featureId}`;
+  return `${typeName}.${idStr}`;
 }
 
 /**
