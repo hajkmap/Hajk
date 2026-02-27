@@ -34,6 +34,7 @@ function loadImage(src) {
  * @param {number} pixelHeight - output canvas height in pixels
  * @param {string} fileName - file name for download (without extension)
  * @param {string} type - "PNG" for file download, "BLOB" for returning blob only
+ * @param {string} textFontSize - font size chosen
  * @returns {Promise<Blob>}
  */
 export async function renderToPng(
@@ -72,7 +73,7 @@ export async function renderToPng(
 
       case "text": {
         ctx.save();
-        ctx.font = `${el.size * s}px Roboto, roboto, sans-serif`;
+        ctx.font = `${el.fontStyle === "bold" ? "700" : "400"} ${el.size * s}px Roboto, roboto, sans-serif`;
         ctx.fillStyle = toCssColor(el.color);
         ctx.textBaseline = "alphabetic";
         // PDF y is the baseline position from bottom
