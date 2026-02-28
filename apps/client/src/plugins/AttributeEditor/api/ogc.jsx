@@ -476,9 +476,11 @@ function formatFeatureId(featureId, layer) {
     return idStr;
   }
 
-  // Standard WFS: qualify as "typeName.id"
-  const typeName = resolveTypeName(layer);
-  return `${typeName}.${idStr}`;
+  // Standard WFS: qualify as "localTypeName.id" (without workspace prefix).
+  // GeoServer and most WFS servers use the local layer name in GML IDs,
+  // e.g. "mylayer.1" not "myworkspace:mylayer.1".
+  const [, localType] = splitTypeName(resolveTypeName(layer));
+  return `${localType}.${idStr}`;
 }
 
 /**
