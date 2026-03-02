@@ -1,12 +1,12 @@
 import React, { useRef, useState } from "react";
 
-import { Box, IconButton, InputAdornment, TextField } from "@mui/material";
+import { IconButton, InputAdornment, TextField, Divider } from "@mui/material";
 
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 
 import HajkToolTip from "components/HajkToolTip";
-import LayersTabActionsMenu from "./LayersTabActionsMenu";
+import LayersTabActionsMenu from "./LayersTabActionsMenu.jsx";
 
 const MIN_FILTER_TOOLTIP_DELAY = 1000;
 
@@ -30,19 +30,7 @@ const LayerListFilter = ({
   };
 
   return (
-    <Box
-      id="layer-list-filter"
-      sx={(theme) => ({
-        p: 2,
-        backgroundColor: theme.palette.grey[100],
-        borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-        display: "flex",
-        flexDirection: "row",
-        ...theme.applyStyles("dark", {
-          backgroundColor: "#373737",
-        }),
-      })}
-    >
+    <>
       <HajkToolTip
         title={`Skriv minst ${minFilterLength} tecken eller tryck enter`}
         placement="right"
@@ -71,53 +59,48 @@ const LayerListFilter = ({
           fullWidth
           placeholder="Sök lager"
           inputRef={inputRef}
-          variant="outlined"
-          sx={(theme) => ({
-            background: "#fff",
-            width: "calc(100% - 39px)",
-            maxWidth: "100%",
-            ...theme.applyStyles("dark", {
-              background: theme.palette.grey[900],
-            }),
-          })}
+          variant="standard"
+          sx={{ pt: 1.25, pb: 1, pl: 1.75, pr: 0.5 }}
           slotProps={{
             input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
+              disableUnderline: true,
               endAdornment: (
                 <InputAdornment position="end">
-                  {inputRef.current?.value && (
-                    <IconButton
-                      onClick={() => {
-                        if (inputRef.current) {
-                          inputRef.current.value = "";
-                          handleFilterValueChange("");
-                          updateTooltip("");
-                        }
-                      }}
-                      size="small"
-                    >
-                      <ClearIcon />
+                  {inputRef.current?.value.length >= minFilterLength ? (
+                    <HajkToolTip title="Rensa sökning">
+                      <IconButton
+                        onClick={() => {
+                          if (inputRef.current) {
+                            inputRef.current.value = "";
+                            handleFilterValueChange("");
+                            updateTooltip("");
+                          }
+                        }}
+                        size="small"
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    </HajkToolTip>
+                  ) : (
+                    <IconButton size="small" disabled>
+                      <SearchIcon />
                     </IconButton>
                   )}
+                  <LayersTabActionsMenu
+                    scrollToTop={scrollToTop}
+                    scrollToBottom={scrollToBottom}
+                  />
                 </InputAdornment>
               ),
             },
-
             formHelperText: {
               color: "red",
             },
           }}
         />
       </HajkToolTip>
-      <LayersTabActionsMenu
-        scrollToTop={scrollToTop}
-        scrollToBottom={scrollToBottom}
-      />
-    </Box>
+      <Divider orientation="horizontal" flexItem />
+    </>
   );
 };
 export default LayerListFilter;

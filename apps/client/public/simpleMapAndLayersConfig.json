@@ -677,32 +677,24 @@
         "options": {
           "presetList": [
             {
-              "name": "Halmstad",
-              "presetUrl": "?m=simpleMapConfig&x=368494.9197547268&y=6282312.7413127115&z=6.7339618545565125&l=1&f=%7B%7D&clean=false"
-            },
-            {
-              "name": "Alingsås",
-              "presetUrl": "?m=simpleMapConfig&x=354049.24452326825&y=6424217.248216377&z=7.903686478656474&l=1&f=%7B%7D&clean=false"
-            },
-            {
               "name": "Göteborg",
-              "presetUrl": "?m=simpleMapConfig&x=315850.5321760868&y=6398503.693206446&z=6.502756678859521&l=1&f=%7B%7D&clean=false"
+              "presetUrl": "x=1321139.1624138714&y=7912264.346665324&z=12"
             },
             {
-              "name": "Jönköping",
-              "presetUrl": "?m=simpleMapConfig&x=450214.34373580024&y=6403315.750951234&z=6.7931556775514546&l=1&f=%7B%7D&clean=false"
+              "name": "Halmstad",
+              "presetUrl": "x=1427601.0460239877&y=7695072.913788887&z=12"
             },
             {
-              "name": "Karlstad",
-              "presetUrl": "?m=simpleMapConfig&x=416370.6129169631&y=6583095.470395488&z=6.221222447365537&l=1&f=%7B%7D&clean=false"
+              "name": "Kungsbacka",
+              "presetUrl": "x=1323808.489763441&y=7850867.971644933&z=12"
             },
             {
-              "name": "Stockholm",
-              "presetUrl": "?m=simpleMapConfig&x=671675.4989296548&y=6570377.474044046&z=4.9236065968776375&l=1&f=%7B%7D&clean=false"
+              "name": "Varberg",
+              "presetUrl": "x=1357562.7727971568&y=7778074.126093438&z=12"
             },
             {
-              "name": "Umeå",
-              "presetUrl": "?m=simpleMapConfig&x=758454.9972847599&y=7084504.860998487&z=6.739288215480473&l=1&f=%7B%7D&clean=false"
+              "name": "Örebro",
+              "presetUrl": "x=1700469.5474212733&y=8243503.043603574&z=12"
             }
           ],
           "visibleForGroups": []
@@ -712,13 +704,31 @@
       {
         "type": "coordinates",
         "options": {
-          "target": "control",
+          "target": "toolbar",
           "position": "right",
           "instruction": "",
           "transformations": [
             {
-              "code": "EPSG:3006",
+              "code": "EPSG:3857",
               "default": true,
+              "hint": "Web Mercator",
+              "title": "Web Mercator",
+              "xtitle": "Easting",
+              "ytitle": "Northing",
+              "inverseAxis": false
+            },
+            {
+              "code": "EPSG:4326",
+              "default": false,
+              "hint": "WGS84",
+              "title": "WGS84",
+              "xtitle": "Longitude",
+              "ytitle": "Latitude",
+              "inverseAxis": false
+            },
+            {
+              "code": "EPSG:3006",
+              "default": false,
               "hint": "Sweref99 TM",
               "title": "Sweref99 TM",
               "xtitle": "E",
@@ -757,8 +767,8 @@
         "options": {
           "target": "left",
           "position": "left",
-          "copyright": "",
-          "disclaimer": "",
+          "copyright": "Hajk - öppen webbGIS-klient – https://github.com/hajkmap/Hajk",
+          "disclaimer": "Tänk på att gränserna i kartan inte alltid stämmer överens med verkligheten och de är inte juridiskt gällande.",
           "date": "Utskriftsdatum: {date}",
           "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000, 800000, 1000000, 5000000, 10000000",
           "scaleMeters": "10, 10, 20, 40, 60, 100, 100, 300, 600, 2000, 4000, 8000, 10000, 160000",
@@ -771,6 +781,8 @@
           "useMargin": false,
           "useTextIconsInMargin": false,
           "mapTextColor": "#000000",
+          "textFontWeight": "bold",
+          "textFontSize": 8,
           "instruction": "",
           "visibleAtStart": false,
           "visibleForGroups": [],
@@ -918,7 +930,7 @@
     "map": {
       "target": "map",
       "center": [1325000, 7900000],
-      "title": "Hajk 4",
+      "title": "Hajk - open source webGIS",
       "projection": "EPSG:3857",
       "zoom": 6,
       "maxZoom": 18,
@@ -938,7 +950,7 @@
       "logo": "/logoLight.png",
       "geoserverLegendOptions": "",
       "mapselector": false,
-      "mapcleaner": false,
+      "mapcleaner": true,
       "showUserAvatar": false,
       "drawerVisible": false,
       "drawerPermanent": false,
