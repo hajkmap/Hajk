@@ -1,4 +1,4 @@
-import GeoJSON from "ol/format/GeoJSON.js";
+import GeoJSON from "ol/format/GeoJSON";
 import buffer from "@turf/buffer";
 import union from "@turf/union";
 import { transform } from "ol/proj";

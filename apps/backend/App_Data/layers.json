@@ -1,41 +1,5 @@
 {
-  "wmtslayers": [
-    {
-      "id": "1",
-      "caption": "Topografiska webbkartan, öppna data",
-      "url": "https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/b84e03e0-c917-313e-9f7d-fb5303034148/",
-      "owner": null,
-      "date": "1582209573601",
-      "content": "Topowebbkartan i WMTS-format",
-      "legend": "",
-      "projection": "EPSG:3006",
-      "visibleAtStart": false,
-      "layer": "topowebb_nedtonad",
-      "style": "default",
-      "matrixSet": "3006",
-      "origin": ["-1200000", "8500000"],
-      "resolutions": [
-        "2048",
-        "1024",
-        "512",
-        "256",
-        "128",
-        "64",
-        "32",
-        "16",
-        "8"
-      ],
-      "matrixIds": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
-      "attribution": "Lantmäteriet",
-      "infoVisible": false,
-      "infoTitle": "Topowebbkartan i WMTS-format",
-      "infoText": "Bakgrundskarta från Lantmäteriet i WMTS-format.",
-      "infoUrl": "https://www.lantmateriet.se/globalassets/kartor-och-geografisk-information/geodatatjanster/tb_twkvisningv1.0.4.pdf",
-      "infoUrlText": "Information om tjänsten",
-      "infoOwner": "Lantmäteriet",
-      "zIndex": null
-    }
-  ],
+  "wmtslayers": [],
   "wmslayers": [
     {
       "id": "2",

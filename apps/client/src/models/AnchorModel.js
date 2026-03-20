@@ -1,4 +1,4 @@
-import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "constants";
+import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "../constants";
 import { isValidLayerId } from "../utils/Validator";
 import { debounce } from "../utils/debounce";
 

@@ -11,14 +11,14 @@ import Release from "../views/release.jsx";
 import Search from "../views/search.jsx";
 import DocumentEditor from "../views/documenteditor.jsx";
 
-import editModel from "../models/edit.js";
-import layerManagerModel from "../models/layermanager.js";
-import informativeEditorModel from "../models/informativeEditor.js";
-import mapSettingsModel from "../models/mapsettings.js";
-import infoModel from "../models/info.js";
-import releaseModel from "../models/release.js";
-import searchModel from "../models/search.js";
-import documentEditorModel from "../models/documenteditor.js";
+import editModel from "../models/edit";
+import layerManagerModel from "../models/layermanager";
+import informativeEditorModel from "../models/informativeEditor";
+import mapSettingsModel from "../models/mapsettings";
+import infoModel from "../models/info";
+import releaseModel from "../models/release";
+import searchModel from "../models/search";
+import documentEditorModel from "../models/documenteditor";
 
 var defaultState = {
   alert: false,

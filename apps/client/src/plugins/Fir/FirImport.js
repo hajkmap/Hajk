@@ -1,4 +1,4 @@
-import KML from "ol/format/KML.js";
+import KML from "ol/format/KML";
 export default class FirImport {
   constructor(options) {
     this.localObserver = options.localObserver;

@@ -37,13 +37,7 @@ export default async function restrictStatic(req, res, next) {
       `EXPOSE_AND_RESTRICT_STATIC_${dir.toUpperCase().replace(/-/g, "_")}`
     ]?.split(",");
 
-  // Save user name to eliminate multiple calls to the same method
-  const user = ad.getUserFromRequestHeader(req);
-
-  // Save user name so that it's available to following middleware
-  res.locals.authUser = user;
-
-  logger.trace(
+  logger.debug(
     "Access to '%s' is limited to the following groups: '%s'. Checking if user '%s' is member in any of them.",
     req.baseUrl,
     restrictedToGroups,
@@ -52,11 +46,11 @@ export default async function restrictStatic(req, res, next) {
 
   for await (let group of restrictedToGroups) {
     // Check if current user is member of the admins AD group
-    const allowed = await ad.isUserMemberOf(user, group);
+    const allowed = await ad.isUserMemberOf(res.locals.authUser, group);
     if (allowed === true) {
-      logger.trace(
+      logger.debug(
         "'%s' is member of '%s' which gives access to '%s'",
-        user,
+        res.locals.authUser,
         group,
         req.baseUrl
       );
@@ -69,7 +63,7 @@ export default async function restrictStatic(req, res, next) {
   // If we got here, access is restricted. No next(), but don't forget to send the 403 as response!
   logger.warn(
     "'%s' is not member in any of the groups required to access %s.",
-    user,
+    res.locals.authUser,
     req.baseUrl
   );
   res.sendStatus(403);

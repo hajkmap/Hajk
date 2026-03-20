@@ -16,7 +16,7 @@ export class Controller {
           // Send response
           res.status(200).json(data.mapConfig);
           // Log admin action
-          ael.info(`${res.locals.authUser} saved map ${req.query.mapFile}`);
+          ael.info(`saved map ${req.query.mapFile}`);
         }
       }
     );
@@ -35,7 +35,7 @@ export class Controller {
         // Send response
         res.sendStatus(data);
         // Log admin action
-        ael.info(`${res.locals.authUser} saved map ${req.query.mapFile}`);
+        ael.info(`saved map ${req.query.mapFile}`);
       }
     });
   }
@@ -51,9 +51,7 @@ export class Controller {
           res.status(data.status).json(data.newLayer);
 
           ael.info(
-            `${res.locals.authUser} ${
-              data.status === 201 ? "added" : "updated"
-            } ${req.params.type} with id ${data.newLayer.id} ("${
+            `${data.status === 201 ? "added" : "updated"} ${req.params.type} with id ${data.newLayer.id} ("${
               data.newLayer.caption
             }")`
           );
@@ -67,9 +65,7 @@ export class Controller {
       (data) => {
         handleStandardResponse(res, data);
         !data.error &&
-          ael.info(
-            `${res.locals.authUser} deleted ${req.params.type} with id ${req.params.layerId}`
-          );
+          ael.info(`deleted ${req.params.type} with id ${req.params.layerId}`);
       }
     );
   }

@@ -21,7 +21,7 @@ class ConfigServiceV2 {
     // We should also implement an update-store method, perhaps
     // have a global bus (using EventEmitter?), so we can trigger
     // re-reads from FS into our in-memory store.
-    logger.trace("Initiating ConfigService V2");
+    logger.debug("Initiating ConfigService V2");
     // Prepare the XML parser
     this.xmlParser = new XMLParser();
   }
@@ -56,7 +56,7 @@ class ConfigServiceV2 {
       }
 
       if (washContent === false) {
-        logger.trace(
+        logger.debug(
           "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire %s map config.",
           user,
           map
@@ -66,14 +66,14 @@ class ConfigServiceV2 {
 
       // If we haven't enabled AD restrictions, just return the entire map config
       if (process.env.AD_LOOKUP_ACTIVE !== "true") {
-        logger.trace(
+        logger.debug(
           "[getMapConfig] AD auth disabled. Getting the entire %s map config.",
           map
         );
         return json;
       }
 
-      logger.trace(
+      logger.debug(
         "[getMapConfig] Attempting to get %s for user %s",
         map,
         user
@@ -97,7 +97,7 @@ class ConfigServiceV2 {
       ).options?.visibleForGroups;
 
       if (Array.isArray(visibleForGroups) && visibleForGroups.length > 0) {
-        logger.trace(
+        logger.debug(
           "[getMapConfig] Access to %s is allowed only for the following groups: %o. \nChecking if %s is member in any of them…",
           map,
           visibleForGroups,
@@ -107,7 +107,7 @@ class ConfigServiceV2 {
         for (const group of visibleForGroups) {
           const isMember = await ad.isUserMemberOf(user, group);
 
-          logger.trace(
+          logger.debug(
             "[getMapConfig] Is %s? member of %s? %o ",
             user,
             group,
@@ -262,7 +262,7 @@ class ConfigServiceV2 {
    * @memberof ConfigServiceV2
    */
   async getMapWithLayers(map, user, washContent = true) {
-    logger.trace(
+    logger.debug(
       "[getMapWithLayers] invoked with 'washContent=%s' for user %s. Grabbing '%s' map config and all layers.",
       washContent,
       user,
@@ -329,14 +329,14 @@ class ConfigServiceV2 {
   async filterByGroupVisibility(visibleForGroups, user, identifier) {
     if (!Array.isArray(visibleForGroups) || visibleForGroups.length === 0) {
       // If no restrictions are set, allow access
-      logger.trace(
+      logger.debug(
         "[filterByGroupVisibility] Access to %s unrestricted",
         identifier
       );
       return true;
     } else {
       // There are tools restrictions.
-      logger.trace(
+      logger.debug(
         "[filterByGroupVisibility] Only the following groups have access to %s: %o",
         identifier,
         visibleForGroups
@@ -348,7 +348,7 @@ class ConfigServiceV2 {
 
         // If membership found, return true - no need to keep looping
         if (isMember === true) {
-          logger.trace(
+          logger.debug(
             "[filterByGroupVisibility] Access to %s gained for user %o",
             identifier,
             user
@@ -419,7 +419,7 @@ class ConfigServiceV2 {
       return groups;
     };
 
-    logger.trace("[washMapConfig] Washing map config for %s", user);
+    logger.debug("[washMapConfig] Washing map config for %s", user);
 
     // Part 1: Remove those tools that user lacks access to
     mapConfig.tools = await asyncFilter(
@@ -553,7 +553,7 @@ class ConfigServiceV2 {
   }
 
   async getLayersStore(user, washContent = true) {
-    logger.trace("[getLayersStore] for user %o", user);
+    logger.debug("[getLayersStore] for user %o", user);
     try {
       const pathToFile = path.join(process.cwd(), "App_Data", `layers.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
@@ -571,7 +571,7 @@ class ConfigServiceV2 {
       // exist in the store.
 
       if (washContent === false) {
-        logger.trace(
+        logger.debug(
           "[getLayersStore] invoked with 'washContent=false'. Returning the entire contents of layers store."
         );
         return json;
@@ -579,7 +579,7 @@ class ConfigServiceV2 {
 
       // If we haven't enabled AD restrictions, just return the entire layers store
       if (process.env.AD_LOOKUP_ACTIVE !== "true") {
-        logger.trace(
+        logger.debug(
           "[getLayersStore] AD auth disabled. Returning the entire contents of layers store."
         );
         return json;
@@ -988,7 +988,7 @@ class ConfigServiceV2 {
    * @memberof ConfigService
    */
   async getAvailableMaps() {
-    logger.trace("[getAvailableMaps] invoked");
+    logger.debug("[getAvailableMaps] invoked");
     try {
       const dir = path.join(process.cwd(), "App_Data");
       // List dir contents, the second parameter will ensure we get Dirent objects
@@ -1014,7 +1014,7 @@ class ConfigServiceV2 {
   }
 
   async getUserSpecificMaps(user) {
-    logger.trace("[getUserSpecificMaps] for %o", user);
+    logger.debug("[getUserSpecificMaps] for %o", user);
     try {
       // Prepare our return array
       const output = [];

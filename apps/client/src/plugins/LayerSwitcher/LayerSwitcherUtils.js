@@ -1,4 +1,4 @@
-import AppModel from "models/AppModel";
+import AppModel from "../../models/AppModel";
 
 const { options } = AppModel.config.mapConfig.tools.find(
   (tool) => tool.type.toLowerCase() === "layerswitcher"

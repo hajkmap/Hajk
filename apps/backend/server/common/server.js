@@ -19,6 +19,7 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 
 import detailedRequestLogger from "./middlewares/detailed.request.logger.js";
 import errorHandler from "./middlewares/error.handler.js";
+import extractUserContext from "./middlewares/extractUserContext.js";
 
 const app = new Express();
 
@@ -119,6 +120,18 @@ export default class ExpressServer {
       );
 
       app.set("trust proxy", trustProxy);
+
+      // Should our proxy middleware add the x-forwarded-* headers?
+      this.addXForwardedHeaders = this.grabDotEnvBoolean(
+        "HAJK_PROXY_ADD_X_FORWARDED_HEADERS",
+        false
+      );
+
+      // Should we send the X-Qgis-Service-Url header to proxied services? See #1774 for more info.
+      this.addQgisServiceUrlHeader = this.grabDotEnvBoolean(
+        "HAJK_PROXY_ADD_X_QGIS_SERVICE_URL_HEADER",
+        false
+      );
     }
 
     // Configure the HTTP access logger. We want it to log in the Combined Log Format, which requires some custom configuration below.
@@ -136,6 +149,22 @@ export default class ExpressServer {
           ),
       })
     );
+
+    // Now let's setup a unique context for each request. We implement it using Node's
+    // AsyncLocalStorage feature - https://nodejs.org/api/async_context.html#asynchronous-context-tracking.
+    //
+    // From Node's documentation:
+    //    "These classes are used to associate state and propagate it throughout callbacks and
+    //    promise chains. They allow storing data throughout the lifetime of a web request or
+    //    any other asynchronous duration. It is similar to thread-local storage in other languages."
+    //
+    // In other words: this is the perfect place for us to extract the user info (if AD_LOOKUP_ACTIVE is enabled)
+    // and store it once and for all in the request's context.
+    // We could of course add a check here and only run this if AD_LOOKUP_ACTIVE is true. But that's
+    // no good, as we always want to create the context, even if it will be populated with user: "anonymous".
+    // That's way better than having to check "do we have the context? ah, ok, so who is the user?" down the line.
+    // The performance penalty is negligible, if it's even there (according to some test there's none).
+    app.use(extractUserContext);
 
     process.env.LOG_DETAILED_REQUEST_LOGGER === "true" &&
       app.use(detailedRequestLogger);
@@ -159,7 +188,7 @@ export default class ExpressServer {
 
     // Enable compression early so that responses that follow will get gziped
     if (process.env.ENABLE_GZIP_COMPRESSION !== "false") {
-      logger.trace("[HTTP] Enabling Hajk's built-in GZIP compression");
+      logger.debug("[HTTP] Enabling Hajk's built-in GZIP compression");
       app.use(compression());
     } else {
       logger.warn(
@@ -207,7 +236,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
       const openApiSpecification = path.join(__dirname, `api.v${v}.yml`);
 
       // Expose the API specification as a simple static route…
-      logger.trace(
+      logger.debug(
         `[API] Exposing ${openApiSpecification} on route /api/v${v}/spec`
       );
       app.use(`/api/v${v}/spec`, Express.static(openApiSpecification));
@@ -221,7 +250,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
       // created in async parts of the code) would render a 404 in the middleware.
       // Related to #1309. Discovered during PR in #1332.
       setTimeout(() => {
-        logger.trace(`[VALIDATOR] Setting up OpenApiValidator for /api/v${v}`);
+        logger.debug(`[VALIDATOR] Setting up OpenApiValidator for /api/v${v}`);
         app.use(
           OpenApiValidator.middleware({
             apiSpec: openApiSpecification,
@@ -234,6 +263,19 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         );
       }, 2000);
     });
+  }
+
+  /**
+   * @description Utility function to grab boolean values from .env, with a default fallback.
+   * Handles the different ways users can setup their .envs (e.g. "true"/"1"/"false"/"0", case insensitively).
+   * @param {string} name Name of the .env variable to grab
+   * @param {boolean} defaultValue Default value to return if the variable isn't set in .env
+   * @returns {boolean}
+   */
+  grabDotEnvBoolean(name, defaultValue) {
+    const value = process.env[name];
+    if (value === undefined) return defaultValue;
+    return value === "1" || value.toLowerCase() === "true";
   }
 
   async setupSokigoProxy() {
@@ -321,21 +363,71 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           // Grab context and target from current element
           const context = v.context;
           const target = v.target;
-          l.trace(
+          l.debug(
             `Setting up proxy: /api/v${apiVersion}/proxy/${context} -> ${target}`
           );
 
           // Create the proxy itself
+          const options = {
+            logger: l,
+            target: target,
+            changeOrigin: true,
+            ...(this.addXForwardedHeaders && { xfwd: true }), // Respect the setting from .env
+            pathRewrite: {
+              [`^/api/v${apiVersion}/proxy/${context}`]: "", // remove base path
+            },
+            ...(this.addQgisServiceUrlHeader && {
+              on: {
+                // This entire dance below is made for one purpose: ensure that we set
+                // the "X-Qgis-Service-Url" header on the proxied request, which is
+                // required by QGIS Server to properly generate responses with correct URLs.
+                // The value of this header must be the public-facing URL of the service,
+                // which we reconstruct here based on the incoming request's headers and original URL.
+                // See #1774 for more info.
+                proxyReq: (proxyReq, req, _res) => {
+                  // See if there's a corresponding header setting for QGIS service URL
+                  // See if there's another proxy in front of this backend that sets the x-forwarded-* headers.
+                  // If so, we want to use those headers to reconstruct the original URL as seen by the client,
+                  // not the URL as seen by this backend.
+                  const proto = (
+                    req.headers["x-forwarded-proto"] || req.protocol
+                  )
+                    .split(",")[0]
+                    .trim();
+
+                  // Same here, but with one additional thing…
+                  const host = (
+                    req.headers["x-forwarded-host"] || req.headers.host
+                  )
+                    .split(",")[0]
+                    .split(":")[0] // …i.e. not taking the port part if it exists on host.
+                    .trim();
+
+                  const port = (req.headers["x-forwarded-port"] || "")
+                    .split(",")[0]
+                    .trim();
+
+                  // For standard ports (80 for HTTP and 443 for HTTPS), we don't want to include the port
+                  const hostWithPort =
+                    port && port !== "443" && port !== "80"
+                      ? `${host}:${port}`
+                      : host;
+
+                  // Ensure we get the original URL path, before the proxy middleware rewrote it.
+                  const publicPath = req.originalUrl.split("?")[0];
+
+                  // Finally, construct the header value for QGIS…
+                  const serviceUrl = `${proto}://${hostWithPort}${publicPath}`;
+
+                  // …and set it.
+                  proxyReq.setHeader("X-Qgis-Service-Url", serviceUrl);
+                },
+              },
+            }),
+          };
           app.use(
             `/api/v${apiVersion}/proxy/${context}`,
-            createProxyMiddleware({
-              logger: l,
-              target: target,
-              changeOrigin: true,
-              pathRewrite: {
-                [`^/api/v${apiVersion}/proxy/${context}`]: "", // remove base path
-              },
-            })
+            createProxyMiddleware(options)
           );
         });
       }
@@ -404,12 +496,12 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         .map((entry) => entry.name);
 
       if (staticDirs.length > 0) {
-        l.trace(
+        l.debug(
           "Found following directories in 'static': %s",
           staticDirs.join(", ")
         );
       } else {
-        l.trace(
+        l.debug(
           "No directories found in 'static' - not exposing anything except the backend's API itself."
         );
       }

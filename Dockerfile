@@ -74,5 +74,4 @@ COPY --from=buildimage /tmp/build/admin/build ./static/admin
 # --- FINAL ASSEMBLY END --- #
 
 # Go!
-CMD node index.js
-
+CMD ["node", "index.js"]

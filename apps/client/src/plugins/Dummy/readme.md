@@ -8,5 +8,5 @@ When creating a new plugin, there are some crucial steps to get going:
 
 - Make a copy of the plugin-template (The plugin template is still TODO, so copy the Dummy for now)
 - Set proper names on files and components
-- **Make sure to add the new plugin to buildConfig.json (both to "allTools" as well as "activeTools")**
-- Make sure to add the Dummy-plugin to the tool-array in the mapConfig.
+- **Make sure to add the new plugin to `AVAILABLE_TOOLS` (in `apps/client/src/constants.js`) as well as to `availableTools` in `appConfig.json`.**
+- Make sure to add some kind of basic configuration for your plugin to the tool in the your map configuration file.

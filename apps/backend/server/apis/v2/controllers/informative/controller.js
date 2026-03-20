@@ -13,7 +13,7 @@ export class Controller {
       if (r && !r.error) {
         res.status(200).send("Document created");
         ael.info(
-          `${res.locals.authUser} created a new document ${
+          `created a new document ${
             folderName && `${folderName}/`
           }${documentName}.json, and connected it to map ${mapName}.json.`
         );
@@ -26,7 +26,7 @@ export class Controller {
     InformativeService.createFolder(folderName).then((r) => {
       if (r && !r.error) {
         res.status(200).send("Folder created");
-        ael.info(`${res.locals.authUser} created a new folder, ${folderName}`);
+        ael.info(`created a new folder, ${folderName}`);
       } else res.status(500).send(r.error.message);
     });
   }
@@ -48,11 +48,7 @@ export class Controller {
     InformativeService.saveByName(folder, name, req.body).then((r) => {
       if (r && !r.error) {
         res.status(200).send("File saved");
-        ael.info(
-          `${res.locals.authUser} saved document ${
-            folder && `${folder}/`
-          }${name}.json`
-        );
+        ael.info(`saved document ${folder && `${folder}/`}${name}.json`);
       } else {
         res.status(500).send(r.error.message);
       }
@@ -64,11 +60,7 @@ export class Controller {
     InformativeService.deleteByName(folder, name).then((r) => {
       if (r && !r.error) {
         res.status(200).send("File deleted");
-        ael.info(
-          `${res.locals.authUser} deleted document ${
-            folder && `${folder}/`
-          }${name}.json`
-        );
+        ael.info(`deleted document ${folder && `${folder}/`}${name}.json`);
       } else {
         res.status(500).send(r.error.message);
       }
