@@ -39,6 +39,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Make the CQL filter in Client more interactive and user-friendly, see issue [#1731](https://github.com/hajkmap/Hajk/issues/1731).
 
+### Changed
+- Make the CQL filter in Client more interactive and user-friendly, see issue [#1731](https://github.com/hajkmap/Hajk/issues/1731).
+
 ## [4.2.0] - 2026-01-23
 
 ### Fixed
