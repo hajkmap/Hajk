@@ -107,6 +107,7 @@ class CoordinatesView extends React.PureComponent {
         <Grid
           size={{
             xs: 12,
+            sm: 6,
             md: 6,
           }}
         >
@@ -126,6 +127,7 @@ class CoordinatesView extends React.PureComponent {
         <Grid
           size={{
             xs: 12,
+            sm: 6,
             md: 6,
           }}
         >
