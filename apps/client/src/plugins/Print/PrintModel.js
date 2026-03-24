@@ -1226,14 +1226,13 @@ export default class PrintModel {
           this.localObserver.publish("print-failed-to-save");
           reject(error);
         } finally {
-          // Reset map to how it was before print
+          // Reset the DPI-prepared print layers back to the originals.
+          // Must happen here (after render) rather than before the render,
+          // otherwise the WMS layers never receive the DPI parameters.
+          this.useCustomTileLoaders && this.resetPrintLayers();
           this.restoreOriginalView();
         }
       });
-
-      // Since we've been messing with the layer-settings while printing, we have to
-      // make sure to reset these settings. (Should only be done if custom loaders has been used).
-      this.useCustomTileLoaders && this.resetPrintLayers();
 
       // Get print center from preview feature's center coordinate
       const printCenter = getCenter(
