@@ -122,10 +122,25 @@ export async function buildLayout(
   if (options.includeQrCode && model.mapConfig.enableAppStateInHash) {
     try {
       const qrCode = await model.generateQR(windowUrl, 20);
+      let qrWidth = qrCode.width;
+      let qrHeight = qrCode.height;
+
+      // Same height clamping as logo/north arrow — see comment in section 4.
+      if (
+        model.textIconsMargin === 0 &&
+        options.qrCodePlacement.startsWith("top")
+      ) {
+        const maxHeight = 5.25 * model.margin;
+        if (qrHeight > maxHeight) {
+          qrWidth *= maxHeight / qrHeight;
+          qrHeight = maxHeight;
+        }
+      }
+
       const qrCodePlacement = model.getPlacement(
         options.qrCodePlacement,
-        qrCode.width,
-        qrCode.height,
+        qrWidth,
+        qrHeight,
         pageWidth,
         pageHeight,
         "qrCode"
@@ -135,8 +150,8 @@ export async function buildLayout(
         src: qrCode.data,
         x: qrCodePlacement.x,
         y: qrCodePlacement.y,
-        width: qrCode.width,
-        height: qrCode.height,
+        width: qrWidth,
+        height: qrHeight,
       });
     } catch (error) {
       model.localObserver.publish("error-loading-image", {
