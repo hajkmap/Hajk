@@ -149,11 +149,28 @@ export async function buildLayout(
   // 4. Logo
   if (options.includeLogo && model.logoUrl.trim().length >= 5) {
     try {
-      const {
+      let {
         data: logoData,
         width: logoWidth,
         height: logoHeight,
       } = await model.getImageForPdfFromUrl(model.logoUrl, model.logoMaxWidth);
+
+      // In margin mode (textIconsMargin === 0), the top/bottom white border has
+      // lineWidth = 16 * model.margin, so its inner edge is 8 * model.margin from
+      // the page edge. Elements are placed with their top at 2.75 * model.margin
+      // from the page top (via getPlacement), leaving only (8 - 2.75) * model.margin
+      // pts of space before the map boundary. Clamp height to fit within that space.
+      if (
+        model.textIconsMargin === 0 &&
+        options.logoPlacement.startsWith("top")
+      ) {
+        const maxHeight = 5.25 * model.margin;
+        if (logoHeight > maxHeight) {
+          logoWidth *= maxHeight / logoHeight;
+          logoHeight = maxHeight;
+        }
+      }
+
       const logoPlacement = model.getPlacement(
         options.logoPlacement,
         logoWidth,
@@ -164,8 +181,8 @@ export async function buildLayout(
       elements.push({
         type: "image",
         src: logoData,
-        x: logoPlacement.x - 5,
-        y: logoPlacement.y - 5,
+        x: logoPlacement.x,
+        y: logoPlacement.y,
         width: logoWidth,
         height: logoHeight,
       });
@@ -180,7 +197,7 @@ export async function buildLayout(
   // 5. North Arrow
   if (options.includeNorthArrow && model.northArrowUrl.trim().length >= 5) {
     try {
-      const {
+      let {
         data: arrowData,
         width: arrowWidth,
         height: arrowHeight,
@@ -188,6 +205,19 @@ export async function buildLayout(
         model.northArrowUrl,
         model.northArrowMaxWidth
       );
+
+      // Same height clamping as logo — see comment above.
+      if (
+        model.textIconsMargin === 0 &&
+        options.northArrowPlacement.startsWith("top")
+      ) {
+        const maxHeight = 5.25 * model.margin;
+        if (arrowHeight > maxHeight) {
+          arrowWidth *= maxHeight / arrowHeight;
+          arrowHeight = maxHeight;
+        }
+      }
+
       const arrowPlacement = model.getPlacement(
         options.northArrowPlacement,
         arrowWidth,
