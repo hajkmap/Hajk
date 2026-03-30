@@ -362,11 +362,17 @@ export async function buildLayout(
     // This is required for aligning text in libpdf, upside: we know the width, downside: text longer than 400 points will wrap.
     // Set as 400 points as approx half of a landscape a4 page.
     const maxWidthBeforeWrap = pageWidth;
+    // When useMargin=true and not useTextIconsInMargin, ensure text stays within
+    // the map area (past the white border). The white border's visible inner width
+    // is 2.75 * model.margin. textIconsMargin=0 means icons/text go in the margin,
+    // so keep the small inset; otherwise push past the white area.
+    const textEdgeMargin =
+      model.textIconsMargin === 0 ? 10 : 2.75 * model.margin + 10;
     const position = model.getRightAlignedPositions(
       pdfBottomRightTexts,
       model.textFontSize,
-      10,
-      10,
+      textEdgeMargin,
+      textEdgeMargin,
       pageWidth,
       options,
       model.textFontWeight,

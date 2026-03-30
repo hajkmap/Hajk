@@ -339,8 +339,13 @@ export default class PrintModel {
     this.margin = useMargin ? this.getMargin(dim) : 0;
 
     //We need a different margin value for text and icons to be placed in the margins,
-    //because "this.margin" (above) is sometimes used independently
-    this.textIconsMargin = useTextIconsInMargin ? 0 : 6;
+    //because "this.margin" (above) is sometimes used independently.
+    // When useMargin is true but content should NOT go in the margins, the total
+    // offset (textIconsMargin + margin) must exceed the white stroke's inward extent
+    // (2.75 * margin), requiring textIconsMargin >= 1.75 * margin.
+    this.textIconsMargin = useTextIconsInMargin
+      ? 0
+      : Math.max(6, Math.ceil(1.75 * this.margin));
 
     const inchInMillimeter = 25.4;
     // We should take pixelRatio into account? What happens when we have
@@ -515,7 +520,16 @@ export default class PrintModel {
     // We must take the potential margin around the map-image into account (this.margin)
     // And the extra margin for textIconsMargin.
     // And the extra extra margin for qrcode image
-    const margin = this.textIconsMargin + this.margin;
+    //
+    // The white border is drawn as a stroke centered on the page edge, so its visible
+    // inner width = 2.75 * this.margin (half of lineWidth 5.5 * margin in PrintLayout).
+    // When elements should NOT be in the margin (textIconsMargin > 0), offset them past
+    // that white area. When they ARE intended for the margin (textIconsMargin === 0), keep
+    // them near the edge with just this.margin as a small inset.
+    const margin =
+      this.textIconsMargin === 0
+        ? this.margin
+        : 2.75 * this.margin + this.textIconsMargin;
     // Here we simply say if content that is going to be placed is a qr code...
     // we need to adjust it slightly because the qr code is bigger than the other icons.
     const qrMargin =
