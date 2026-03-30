@@ -523,13 +523,10 @@ export default class PrintModel {
     //
     // The white border is drawn as a stroke centered on the page edge, so its visible
     // inner width = 2.75 * this.margin (half of lineWidth 5.5 * margin in PrintLayout).
-    // When elements should NOT be in the margin (textIconsMargin > 0), offset them past
-    // that white area. When they ARE intended for the margin (textIconsMargin === 0), keep
-    // them near the edge with just this.margin as a small inset.
-    const margin =
-      this.textIconsMargin === 0
-        ? this.margin
-        : 2.75 * this.margin + this.textIconsMargin;
+    // Using 2.75 * this.margin as the base aligns elements with the map's edge boundary.
+    // textIconsMargin adds extra inward padding when elements should NOT be in the margin
+    // (textIconsMargin=6); it is 0 when elements intentionally go in the margin.
+    const margin = 2.75 * this.margin + this.textIconsMargin;
     // Here we simply say if content that is going to be placed is a qr code...
     // we need to adjust it slightly because the qr code is bigger than the other icons.
     const qrMargin =
