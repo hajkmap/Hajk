@@ -317,6 +317,20 @@ export async function buildLayout(
     });
   }
 
+  // For PNG, the right-edge x margin mirrors the PDF textEdgeMargin: align with the
+  // map's right boundary (2.75 * margin) plus padding when not in margin mode.
+  const pngXMargin =
+    model.margin > 0 && model.textIconsMargin === 0
+      ? 2.75 * model.margin
+      : 2.75 * model.margin + 10;
+
+  // lineHeight drives the y-stacking: each successive line is one lineHeight higher.
+  // Texts sit near the bottom page edge, naturally inside the white margin area.
+  const pngLineHeight = model.getTextHeight(
+    model.date || model.copyright || model.disclaimer,
+    model.textFontSize
+  );
+
   // 9. Date text
   if (model.date.length > 0) {
     const dateText = model.date.replace(
@@ -329,7 +343,7 @@ export async function buildLayout(
       const position = model.getRightAlignedPositions(
         dateText,
         model.textFontSize,
-        10,
+        pngXMargin,
         0,
         pageWidth,
         options,
@@ -339,7 +353,7 @@ export async function buildLayout(
         type: "text",
         text: dateText,
         x: position.x,
-        y: position.y,
+        y: 2.75 * model.margin + pngLineHeight,
         size: model.textFontSize,
         fontStyle: model.textFontWeight,
         color: model.textColor,
@@ -355,7 +369,7 @@ export async function buildLayout(
       const position = model.getRightAlignedPositions(
         model.copyright,
         model.textFontSize,
-        10,
+        pngXMargin,
         0,
         pageWidth,
         options,
@@ -365,7 +379,7 @@ export async function buildLayout(
         type: "text",
         text: model.copyright,
         x: position.x,
-        y: position.y * 2,
+        y: 2.75 * model.margin + pngLineHeight * 2,
         size: model.textFontSize,
         fontStyle: model.textFontWeight,
         color: model.textColor,
@@ -381,7 +395,7 @@ export async function buildLayout(
       const position = model.getRightAlignedPositions(
         model.disclaimer,
         model.textFontSize,
-        10,
+        pngXMargin,
         0,
         pageWidth,
         options,
@@ -391,7 +405,7 @@ export async function buildLayout(
         type: "text",
         text: model.disclaimer,
         x: position.x,
-        y: position.y * 3,
+        y: 2.75 * model.margin + pngLineHeight * 3,
         size: model.textFontSize,
         fontStyle: model.textFontWeight,
         color: model.textColor,
