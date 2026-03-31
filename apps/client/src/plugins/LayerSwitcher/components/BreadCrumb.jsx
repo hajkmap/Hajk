@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
@@ -8,7 +8,14 @@ import CallMadeIcon from "@mui/icons-material/CallMade";
 import { styled } from "@mui/material/styles";
 import Popover from "@mui/material/Popover";
 
+// Version 8.2.0 of react-horizontal-scrolling-menu removed drag functionality. We need to manage drag events manually.
+import { horizontalScrollDragManager } from "../HorizontalScrollMenuDragManager";
+
 const StyledPaper = styled(Paper)(({ theme }) => ({
+  // Display as inline-flex on desktop to prevent the breadcrumbs from wrapping to the next line.
+  [theme.breakpoints.up("sm")]: {
+    display: "inline-flex",
+  },
   marginRight: theme.spacing(0.5),
   border: `${theme.spacing(0.1)} solid ${theme.palette.divider}`,
 }));
@@ -17,6 +24,7 @@ const ContentGridContainer = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(1),
   justifyContent: "space-between",
   alignItems: "center",
+  userSelect: "none", // Prevent text selection during drag etc.
 }));
 
 const TitleGridContainer = styled(Grid)(({ theme }) => ({
@@ -56,7 +64,7 @@ class BreadCrumb extends Component {
     this.props.layer.un("change:opacity", this.setHidden);
   }
 
-  setLayerOpacity = (layer) => (event) => {
+  setLayerOpacity = (layer) => () => {
     this.setState(
       {
         hidden: !this.state.hidden,
@@ -67,7 +75,7 @@ class BreadCrumb extends Component {
     );
   };
 
-  setLayerVisibility = (layer) => (event) => {
+  setLayerVisibility = (layer) => () => {
     if (layer.get("visible")) {
       layer.setOpacity(1);
       this.props.app.globalObserver.publish("layerswitcher.hideLayer", layer);
@@ -183,11 +191,15 @@ class BreadCrumb extends Component {
     const { hidden } = this.state;
     return (
       <StyledPaper square={type === "flat"} elevation={0}>
-        <ContentGridContainer container data-type="bread-crumb">
+        <ContentGridContainer container wrap="nowrap" data-type="bread-crumb">
           <Grid>
             <IconButton
               size="small"
-              onClick={this.setLayerOpacity(layer)}
+              onClick={
+                horizontalScrollDragManager.dragging
+                  ? undefined
+                  : this.setLayerOpacity(layer)
+              }
               aria-label="Visa/dölj lagret tillfälligt"
             >
               {!hidden ? <VisibilityIcon /> : <VisibilityOffIcon />}
@@ -214,7 +226,11 @@ class BreadCrumb extends Component {
           <Grid>
             <IconButton
               size="small"
-              onClick={this.setLayerVisibility(layer)}
+              onClick={
+                horizontalScrollDragManager.dragging
+                  ? undefined
+                  : this.setLayerVisibility(layer)
+              }
               aria-label="Ta bort lagret från kartan"
             >
               <CloseIcon />
