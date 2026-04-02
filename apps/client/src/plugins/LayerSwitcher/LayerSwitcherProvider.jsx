@@ -91,8 +91,15 @@ const LayerZoomVisibleSnackbarProvider = ({ children, layers }) => {
     <>
       {layers.map((l) => {
         const id = l.get("name");
-        if (!id.includes("plugin")) {
-          return <LayerZoomListener key={l.get("name")} layer={l} />;
+        if (id === undefined) {
+          console.warn(
+            "Possibly misconfigured layer: 'name' property is missing",
+            l
+          );
+          return null;
+        }
+        if (!id?.includes("plugin")) {
+          return <LayerZoomListener key={id} layer={l} />;
         } else {
           return null;
         }
