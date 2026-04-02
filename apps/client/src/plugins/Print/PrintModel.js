@@ -136,9 +136,12 @@ export default class PrintModel {
       // so, ensure that they count towards the total height.
       let lineBreaks = 0;
       for (let i = 0; i < text.length; i++) {
-        if (text[i]?.includes("\n")) {
-          lineBreaks++;
-        }
+        // Count how many newlines exist in the specific text part. Bear in mind that \n
+        // is not the only possible newline, let's also count \r. \r\n is also a possibility,
+        // but since it contains both \r and \n, we will count it as two newlines, which is correct.
+        const newlineCount = (text[i].match(/\n|\r/g) || []).length;
+
+        lineBreaks = lineBreaks + newlineCount;
       }
       numberOfLines = text.length + lineBreaks;
     }
@@ -212,13 +215,7 @@ export default class PrintModel {
     } else {
       x = paperWidth - maxWidth - xmargin;
     }
-
-    // When using large white margins (i.e. texts should appear in them)
-    // we don't need additional spacing. If margins are smaller though,
-    // we add some room so our text doesn't end up "touching" the canvas's
-    // bottom edge.
-    const extraSpacing = options.useTextIconsInMargin ? 0 : 10;
-    const y = this.getTextHeight(text, fontSize) + ymargin + extraSpacing;
+    const y = this.getTextHeight(text, fontSize) + ymargin;
     return { x, y };
   };
 
