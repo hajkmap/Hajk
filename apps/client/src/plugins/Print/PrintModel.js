@@ -132,7 +132,15 @@ export default class PrintModel {
     // If we are generating a PDF, an array of text is passed. Otherwise just a string.
     let numberOfLines = 1;
     if (typeof text === "object") {
-      numberOfLines = text.length;
+      // Let's see if our texts (disclaimer, copyright)contain newlines, and if
+      // so, ensure that they count towards the total height.
+      let lineBreaks = 0;
+      for (let i = 0; i < text.length; i++) {
+        if (text[i]?.includes("\n")) {
+          lineBreaks++;
+        }
+      }
+      numberOfLines = text.length + lineBreaks;
     }
     // Estimate lineheight and calculate the height in points over number of lines.
     const lineHeight = fontSize * 1.2;
@@ -204,7 +212,13 @@ export default class PrintModel {
     } else {
       x = paperWidth - maxWidth - xmargin;
     }
-    const y = this.getTextHeight(text, fontSize) + ymargin;
+
+    // When using large white margins (i.e. texts should appear in them)
+    // we don't need additional spacing. If margins are smaller though,
+    // we add some room so our text doesn't end up "touching" the canvas's
+    // bottom edge.
+    const extraSpacing = options.useTextIconsInMargin ? 0 : 10;
+    const y = this.getTextHeight(text, fontSize) + ymargin + extraSpacing;
     return { x, y };
   };
 
