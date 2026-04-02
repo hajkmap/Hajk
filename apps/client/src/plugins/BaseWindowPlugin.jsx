@@ -109,6 +109,10 @@ class BaseWindowPlugin extends React.PureComponent {
     return ["left", "right"].includes(target);
   }
 
+  pluginIsControlButton(target) {
+    return target === "control";
+  }
+
   handleButtonClick = (e) => {
     this.showWindow({
       hideOtherPluginWindows: true,
@@ -263,7 +267,7 @@ class BaseWindowPlugin extends React.PureComponent {
    * but it will also render Widget and Control plugins - given some special condition.
    *
    * Those special conditions are small screens, where there's no screen
-   * estate to render the Widget button in Map Overlay.
+   * estate to render the Widget or Control button in Map Overlay.
    */
   renderDrawerButton() {
     return createPortal(
@@ -271,7 +275,7 @@ class BaseWindowPlugin extends React.PureComponent {
         sx={{
           display:
             this.pluginIsWidget(this.props.options.target) ||
-            this.props.options.target === "control"
+            this.pluginIsControlButton(this.props.options.target)
               ? { xs: "block", md: "none" }
               : "initial",
         }}
@@ -310,18 +314,14 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   renderControlButton() {
-    // Special case: if there are no plugins with target "toolbar", we want to render the Control button on small screens
-    const hasToolbarTarget = this.props.app.config.mapConfig.tools.filter(
-      (tool) => tool.options && tool.options.target === "toolbar"
-    );
-
+    // Control buttons should only be rendered as control buttons on md+ screens.
+    // On xs screens they should be rendered as drawer buttons (check renderDrawerButton for more details)
     return createPortal(
-      // Hide Control button on small screens, see renderDrawerButton too
       <Box
         sx={{
           display: {
             xs: "none",
-            md: hasToolbarTarget.length > 0 ? "block" : "none",
+            md: "block",
           },
         }}
       >

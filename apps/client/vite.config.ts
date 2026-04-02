@@ -24,6 +24,7 @@ export default defineConfig({
   build: {
     target: "baseline-widely-available",
     outDir: "build",
+    assetsDir: "static",
     sourcemap: false,
     rollupOptions: {
       output: {

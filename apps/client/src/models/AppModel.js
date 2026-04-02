@@ -230,12 +230,14 @@ class AppModel {
    * have a way to determine whether the Drawer toggle button should be
    * rendered. It's not as easy as checking for Drawer plugins only (i.e.
    * those with target=toolbar) - this simple logic gets complicated by
-   * the fact that Widget plugins (target=left|right) also render Drawer
-   * buttons on small screens.
+   * the fact that Widget plugins (target=left|right) and Control buttons (target=control)
+   * also render Drawer buttons on small screens.
    */
   getPluginsThatMightRenderInDrawer() {
     return this.getPlugins().filter((plugin) => {
-      return ["toolbar", "left", "right"].includes(plugin.options.target);
+      return ["toolbar", "left", "right", "control"].includes(
+        plugin.options.target
+      );
     });
   }
 

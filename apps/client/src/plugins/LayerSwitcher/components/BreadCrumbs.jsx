@@ -13,6 +13,12 @@ import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { ScrollMenu } from "react-horizontal-scrolling-menu";
 
+// Version 8.2.0 of react-horizontal-scrolling-menu removed drag functionality. We need to manage it manually.
+import { horizontalScrollDragManager } from "../HorizontalScrollMenuDragManager";
+
+// Import styles for the horizontal scrolling menu. Required after react-horizontal-scrolling-menu v8.2.0 for some reason.
+import "react-horizontal-scrolling-menu/dist/styles.css";
+
 // A HOC that pipes isMobile to the children. See this as a proposed
 // solution. It is not pretty, but if we move this to a separate file
 // we could use this HOC instead of the isMobile helper function in ../../utils/.
@@ -49,6 +55,15 @@ const BreadCrumbsContainerMobile = styled("div")(({ theme }) => ({
 }));
 
 const BreadCrumbsContainer = styled("div")(() => ({
+  // Hide scrollbar on the container that wraps the scroll menu
+  // React-horizontal-scrolling-menu v8.2.0 does not remove the scrollbar by default.
+  "& .react-horizontal-scrolling-menu--scroll-container::-webkit-scrollbar": {
+    display: "none",
+  },
+  "& .react-horizontal-scrolling-menu--scroll-container": {
+    scrollbarWidth: "none",
+    msOverflowStyle: "none",
+  },
   position: "absolute",
   left: 0,
   right: 0,
@@ -225,7 +240,22 @@ class BreadCrumbs extends Component {
     ));
     return (
       <BreadCrumbsContainer>
-        <ScrollMenu data={breadCrumbs} alignCenter={false} />
+        <ScrollMenu
+          alignCenter={false}
+          onMouseDown={() => (event) =>
+            horizontalScrollDragManager.dragStart(event)
+          }
+          onMouseUp={() => () => horizontalScrollDragManager.dragStop()}
+          onMouseMove={(apiObj) => (event) =>
+            horizontalScrollDragManager.dragMove(event, (posDiff) => {
+              if (apiObj.scrollContainer && apiObj.scrollContainer.current) {
+                apiObj.scrollContainer.current.scrollLeft += posDiff;
+              }
+            })
+          }
+        >
+          {breadCrumbs}
+        </ScrollMenu>
       </BreadCrumbsContainer>
     );
   }
