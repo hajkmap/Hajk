@@ -331,8 +331,14 @@ export async function buildLayout(
     model.textFontSize
   );
 
+  // We have to keep track of the number of lines we are adding to the page to correctly calculate the y-position for each line.
+  // When text is to be printed inside the margin, we have to start a bit further down, hence -1.
+  // TODO: The calculations for the layout handling in .png mode must be improved to increase readability.
+  let numberOfLinesAdded = options.useTextIconsInMargin ? -1 : 0;
+
   // 9. Date text
   if (model.date.length > 0) {
+    numberOfLinesAdded++;
     const dateText = model.date.replace(
       "{date}",
       new Date().toLocaleDateString()
@@ -353,7 +359,7 @@ export async function buildLayout(
         type: "text",
         text: dateText,
         x: position.x,
-        y: 2.75 * model.margin + pngLineHeight,
+        y: 2.75 * model.margin + pngLineHeight * numberOfLinesAdded,
         size: model.textFontSize,
         fontStyle: model.textFontWeight,
         color: model.textColor,
@@ -363,6 +369,7 @@ export async function buildLayout(
 
   // 10. Copyright text
   if (model.copyright.length > 0) {
+    numberOfLinesAdded++;
     if (model.saveAsType === "PDF") {
       pdfBottomRightTexts.push(model.copyright);
     } else {
@@ -379,7 +386,7 @@ export async function buildLayout(
         type: "text",
         text: model.copyright,
         x: position.x,
-        y: 2.75 * model.margin + pngLineHeight * 2,
+        y: 2.75 * model.margin + pngLineHeight * numberOfLinesAdded,
         size: model.textFontSize,
         fontStyle: model.textFontWeight,
         color: model.textColor,
@@ -392,23 +399,31 @@ export async function buildLayout(
     if (model.saveAsType === "PDF") {
       pdfBottomRightTexts.push(model.disclaimer);
     } else {
-      const position = model.getRightAlignedPositions(
-        model.disclaimer,
-        model.textFontSize,
-        pngXMargin,
-        0,
-        pageWidth,
-        options,
-        model.textFontWeight
-      );
-      elements.push({
-        type: "text",
-        text: model.disclaimer,
-        x: position.x,
-        y: 2.75 * model.margin + pngLineHeight * 3,
-        size: model.textFontSize,
-        fontStyle: model.textFontWeight,
-        color: model.textColor,
+      // The disclaimer text might contain multiple lines separated by newlines.
+      // Let's add each line individually and bump the y-position for each line.
+      // The reverse is used to start from the bottom of the page and work our way up.
+      const disclaimerTextLines = model.disclaimer.split("\n").reverse();
+
+      disclaimerTextLines.forEach((line) => {
+        numberOfLinesAdded++;
+        const position = model.getRightAlignedPositions(
+          line,
+          model.textFontSize,
+          pngXMargin,
+          0,
+          pageWidth,
+          options,
+          model.textFontWeight
+        );
+        elements.push({
+          type: "text",
+          text: line,
+          x: position.x,
+          y: 2.75 * model.margin + pngLineHeight * numberOfLinesAdded,
+          size: model.textFontSize,
+          fontStyle: model.textFontWeight,
+          color: model.textColor,
+        });
       });
     }
   }
