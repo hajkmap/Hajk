@@ -8,11 +8,15 @@ export class HorizontalScrollDragManager {
   }
 
   dragStart = (event) => {
-    if (!event || typeof event.clientX !== "number") {
-      return;
+    try {
+      if (!event || typeof event.clientX !== "number") {
+        return;
+      }
+      this.position = event.clientX;
+      this.clicked = true;
+    } catch (error) {
+      console.error("Error in dragStart:", error);
     }
-    this.position = event.clientX;
-    this.clicked = true;
   };
 
   dragStop = () => {
@@ -23,20 +27,24 @@ export class HorizontalScrollDragManager {
   };
 
   dragMove = (event, cb) => {
-    if (!event || typeof event.clientX !== "number") {
-      return;
-    }
-    const newDiff = this.position - event.clientX;
+    try {
+      if (!event || typeof event.clientX !== "number") {
+        return;
+      }
+      const newDiff = this.position - event.clientX;
 
-    const movedEnough = Math.abs(newDiff) > 5;
+      const movedEnough = Math.abs(newDiff) > 5;
 
-    if (this.clicked && movedEnough) {
-      this.dragging = true;
-    }
+      if (this.clicked && movedEnough) {
+        this.dragging = true;
+      }
 
-    if (this.dragging && movedEnough) {
-      this.position = event.clientX;
-      cb(newDiff);
+      if (this.dragging && movedEnough) {
+        this.position = event.clientX;
+        cb(newDiff);
+      }
+    } catch (error) {
+      console.error("Error in dragMove:", error);
     }
   };
 }

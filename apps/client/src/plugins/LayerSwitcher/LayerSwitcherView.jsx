@@ -31,8 +31,7 @@ const BreadCrumbsContainer = ({ map, app }) => {
     // We must wrap the component in a div, on which we can catch
     // events. This is done to prevent event bubbling to the
     // layerSwitcher component.
-    // We have to set a role so that it's "clear" why the element is not interactive.
-    <div role="presentation" onMouseDown={(e) => e.stopPropagation()}>
+    <div onMouseDown={(e) => e.stopPropagation()}>
       <BreadCrumbs map={map} app={app} />
     </div>,
     document.getElementById("breadcrumbs-container")
