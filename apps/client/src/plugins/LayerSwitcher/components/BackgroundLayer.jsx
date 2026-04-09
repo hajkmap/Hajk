@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 
 import BackgroundLayerItem from "./BackgroundLayerItem";
 
-export default function BackgroundLayer({ layer, toggleable, globalObserver }) {
+export default function BackgroundLayer({
+  layer,
+  toggleable,
+  globalObserver,
+  draggable,
+}) {
   // Keep visible backgroundlayer in state
   const [backgroundVisible, setBackgroundVisible] = useState(
     layer.get("visible")
@@ -54,6 +59,7 @@ export default function BackgroundLayer({ layer, toggleable, globalObserver }) {
 
   return (
     <BackgroundLayerItem
+      draggable={draggable}
       layer={layer}
       clickCallback={handleLayerItemClick}
       selected={backgroundVisible}
