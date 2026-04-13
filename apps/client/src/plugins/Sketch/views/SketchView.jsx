@@ -26,6 +26,12 @@ import { useSnackbar } from "notistack";
 import { Vector as VectorSource } from "ol/source";
 import { Vector as VectorLayer } from "ol/layer";
 
+// Beware! In the view we only use kml and gpx, even if the actual file type might be application/vnd.google-earth.kml+xml or application/gpx+xml etc.
+const FILE_TYPES = {
+  KML: "kml",
+  GPX: "gpx",
+};
+
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
   // We want to render the ActivityMenu on the same side as the plugin
@@ -166,14 +172,15 @@ const SketchView = (props) => {
     [model, removedFeatures]
   );
 
-  // Handles when a kml-file has been added to the map via the drag-and-drop
+  // Handles when a kml/gpx-file has been added to the map via the drag-and-drop
   // functionality. Makes sure to update the state containing the uploaded files.
-  const handleKmlFileImported = React.useCallback(
-    ({ id }) => {
+  const handleFileImported = React.useCallback(
+    (id, type) => {
       setUploadedFiles((files) => [
         ...files,
         {
           id,
+          type,
           title: model.getDateTimeString({
             hour: "numeric",
             minute: "numeric",
@@ -244,12 +251,18 @@ const SketchView = (props) => {
     localObserver.subscribe("drawModel.featureRemoved", handleFeatureRemoved);
     localObserver.subscribe("drawModel.featuresRemoved", handleFeaturesRemoved);
     localObserver.subscribe("drawModel.featureAdded", handleFeatureAdded);
-    localObserver.subscribe("kmlModel.fileImported", handleKmlFileImported);
+    localObserver.subscribe("kmlModel.fileImported", ({ id }) =>
+      handleFileImported(id, FILE_TYPES.KML)
+    );
+    localObserver.subscribe("gpxModel.fileImported", ({ id }) =>
+      handleFileImported(id, FILE_TYPES.GPX)
+    );
     return () => {
       localObserver.unsubscribe("drawModel.featureRemoved");
       localObserver.unsubscribe("drawModel.featuresRemoved");
       localObserver.unsubscribe("drawModel.featureAdded");
       localObserver.unsubscribe("kmlModel.fileImported");
+      localObserver.unsubscribe("gpxModel.fileImported");
     };
   }, [
     activityId,
@@ -257,7 +270,7 @@ const SketchView = (props) => {
     handleFeatureRemoved,
     handleFeaturesRemoved,
     handleFeatureAdded,
-    handleKmlFileImported,
+    handleFileImported,
   ]);
 
   /* State object for the buffer sketch component
