@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import IconWarning from "@mui/icons-material/Warning";
-// @ts-expect-error — HajkToolTip is a JS component without type declarations
 import HajkToolTip from "components/HajkToolTip";
 
 import type { IconButtonProps } from "@mui/material";

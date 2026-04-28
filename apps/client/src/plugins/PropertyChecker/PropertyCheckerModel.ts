@@ -3,7 +3,6 @@ import {
   parseGeoJsonFeatures,
   experimentalParseEsriWmsRawXml,
   parseWmsGetFeatureInfoXml,
-  // @ts-expect-error — wmsFeatureParsers is a .jsx file without type declarations
 } from "utils/wmsFeatureParsers";
 
 import type Feature from "ol/Feature";

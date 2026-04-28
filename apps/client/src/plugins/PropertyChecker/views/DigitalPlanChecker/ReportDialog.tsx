@@ -179,7 +179,7 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
         onClose={() => {
           setReportDialogVisible(false);
         }}
-        onMouseDown={(e) => {
+        onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => {
           // Needed to disabled unwanted dragging of the underlying Window component
           // and allow text selection in Dialog.
           e.stopPropagation();
