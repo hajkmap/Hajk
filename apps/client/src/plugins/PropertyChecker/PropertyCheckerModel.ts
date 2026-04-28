@@ -216,8 +216,9 @@ export default class PropertyCheckerModel {
         markerFeature.set("USER_DRAWN", true);
 
         // Check if we should add the marker feature to map. Don't send any events from DrawModel
-        addMarkerFeatureToMap === true &&
+        if (addMarkerFeatureToMap === true) {
           this.#drawModel.addFeature(markerFeature, { silent: true });
+        }
 
         // Finally, initialize the object for the current identifier, don't add
         // any features to the features array yet (it'll be taken care of next).

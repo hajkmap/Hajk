@@ -1,5 +1,5 @@
 // Make sure to only import the hooks you intend to use
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import useUpdateEffect from "../../hooks/useUpdateEffect";
 
@@ -183,7 +183,10 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
   return (
     <>
       <InfoDialog localObserver={localObserver} />
-      <BaseDialog open={clearDialogVisible} onClose={handleCloseConfirmationDialog}>
+      <BaseDialog
+        open={clearDialogVisible}
+        onClose={handleCloseConfirmationDialog}
+      >
         <DialogTitle>{"Är du säker på att du vill rensa listan?"}</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -194,9 +197,7 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseConfirmationDialog}>Avbryt</Button>
-          <Button onClick={handleCleanClick} autoFocus>
-            Ja, rensa
-          </Button>
+          <Button onClick={handleCleanClick}>Ja, rensa</Button>
         </DialogActions>
       </BaseDialog>
       {Object.keys(groupedFeatures).length === 0 && (
@@ -225,7 +226,7 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
         </CardActions>
       </Card>
       {Object.keys(groupedFeatures).length > 0 &&
-        Object.entries(groupedFeatures).map(([k, features], i) => (
+        Object.entries(groupedFeatures).map(([_k, features], i) => (
           <PropertyItem
             clickedPointsCoordinates={clickedPointsCoordinates}
             controlledLayers={controlledLayers}

@@ -12,7 +12,7 @@ import HajkToolTip from "components/HajkToolTip";
 import type Layer from "ol/layer/Layer";
 import type { QuickLayerToggleButtonsProps } from "../types";
 
-const StyledBox = styled(Box)(({ theme }) => ({
+const StyledBox = styled(Box)(() => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
@@ -56,7 +56,9 @@ function QuickLayerTogglerButtons({
 
     (Object.entries(layersCollection) as [LayerType, Layer[]][]).forEach(
       ([type, layer]) => {
-        layer.map((l) => l.getVisible()).includes(true) && initValue.push(type);
+        if (layer.map((l) => l.getVisible()).includes(true)) {
+          initValue.push(type);
+        }
       }
     );
 

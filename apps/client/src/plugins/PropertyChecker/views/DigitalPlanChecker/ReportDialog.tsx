@@ -20,6 +20,10 @@ import type {
   ControlledRegulation,
 } from "../../types";
 
+const TextParagraph = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
 export default function ReportDialog(props: DigitalPlanReportDialogProps) {
   const {
     reportDialogVisible,
@@ -167,10 +171,6 @@ export default function ReportDialog(props: DigitalPlanReportDialogProps) {
     // depending on the rendering method (MUI? Html? Plain text?).
     return layerNotes?.[lid]?.split("\n").filter((s) => s.length > 0) || [];
   };
-
-  const TextParagraph = styled(Typography)(({ theme }) => ({
-    marginBottom: theme.spacing(2),
-  }));
 
   return (
     reportDialogVisible && (

@@ -127,9 +127,9 @@ const FeatureItem = (props: FeatureItemProps) => {
 
   const layerLoadErrorHandler = React.useCallback(
     (d: { id: string; status: string }) => {
-      loadStatus !== "loaderror" &&
-        olLayer.get("name") === d.id &&
+      if (loadStatus !== "loaderror" && olLayer.get("name") === d.id) {
         setLoadStatus(d.status);
+      }
     },
     [loadStatus, olLayer]
   );
@@ -189,7 +189,7 @@ const FeatureItem = (props: FeatureItemProps) => {
           options.enableCheckLayerReport && (
             <>
               <Checkbox
-                onChange={(e) => {
+                onChange={(_e) => {
                   setControlledLayers((prev) => {
                     // If layer is already selected using the checkbox…
                     if (isSelected()) {

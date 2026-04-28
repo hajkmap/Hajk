@@ -86,9 +86,7 @@ function InfoDialog({ localObserver }: InfoDialogProps) {
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} autoFocus>
-          Stäng
-        </Button>
+        <Button onClick={handleClose}>Stäng</Button>
       </DialogActions>
     </BaseDialog>
   );
