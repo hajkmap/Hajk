@@ -19,7 +19,9 @@
     "prestart": "node prebuild.js",
     "prebuild": "node prebuild.js",
     "lint": "eslint src",
-    "lint:fix": "eslint --fix src"
+    "lint:fix": "eslint --fix src",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "browserslist": [
     "defaults"
