@@ -10,6 +10,7 @@ import {
   IconButton,
   Switch,
   TextField,
+  Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import IconWarning from "@mui/icons-material/Warning";
@@ -56,6 +57,9 @@ const FeatureItem = (props: FeatureItemProps) => {
   const id = useId();
   const layer = props.feature.get("layer");
   const caption = props.feature.get("caption");
+  const paverkasAvText = props.feature.get("paverkasAvText") as
+    | string
+    | undefined;
   // For Hajk group layers, we want to append a small
   // text saying that "this layer is part of group layer X".
   const subcaption: string | null =
@@ -222,6 +226,15 @@ const FeatureItem = (props: FeatureItemProps) => {
       {options.enableCheckLayerReport && (
         <Collapse in={expanded} timeout="auto">
           <CardContent>
+            {paverkasAvText && paverkasAvText.trim().length > 0 && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 2, whiteSpace: "pre-wrap" }}
+              >
+                {paverkasAvText}
+              </Typography>
+            )}
             <TextField
               label="Notering"
               multiline

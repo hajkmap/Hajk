@@ -18,6 +18,8 @@ export interface PropertyCheckerOptions {
   description?: string;
   /** Attribute name used to group check-layer features (e.g. property ID) */
   checkLayerPropertyAttribute: string;
+  /** Attribute name on a check-layer feature holding the JSON-encoded list of affecting layers (e.g. `paverkas_av`) */
+  checkLayerAffectedByAttribute: string;
   /** Layer ID for the check layer in the OL Map */
   checkLayerId: string;
   /** Layer ID for the digital plans layer in the OL Map */
@@ -81,6 +83,14 @@ export interface PropertyCheckerViewProps {
   model: import("./PropertyCheckerModel").default;
   options: PropertyCheckerOptions;
   setDrawInteraction: React.Dispatch<React.SetStateAction<string>>;
+}
+
+// ---- Check-layer response decoding ----
+
+/** A single entry inside a check-layer feature's `paverkas_av` JSON array. */
+export interface PaverkasAvEntry {
+  id: string;
+  text: string;
 }
 
 // ---- Feature grouping result ----

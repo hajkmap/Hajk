@@ -5,6 +5,7 @@ import {
   parseWmsGetFeatureInfoXml,
 } from "utils/wmsFeatureParsers";
 
+import OlFeature from "ol/Feature";
 import type Feature from "ol/Feature";
 import type { Geometry } from "ol/geom";
 import type { Coordinate } from "ol/coordinate";
@@ -17,6 +18,7 @@ import type {
   PropertyCheckerModelSettings,
   GroupedFeatures,
   GroupedDigitalPlanFeatures,
+  PaverkasAvEntry,
 } from "./types";
 import type { DrawModelInterface, HajkApp } from "../../types/hajk";
 
@@ -33,6 +35,7 @@ interface WmsSource extends Source {
 export default class PropertyCheckerModel {
   #app: HajkApp;
   #checkLayerPropertyAttribute: string;
+  #checkLayerAffectedByAttribute: string;
   #groupDigitalPlansLayerByAttribute: string;
   #groupDigitalPlansLayerSecondLevelByAttribute: string;
   #checkLayer: Layer<WmsSource> | undefined;
@@ -49,6 +52,8 @@ export default class PropertyCheckerModel {
     // Set some private fields
     this.#app = settings.app;
     this.#checkLayerPropertyAttribute = settings.checkLayerPropertyAttribute;
+    this.#checkLayerAffectedByAttribute =
+      settings.checkLayerAffectedByAttribute;
     this.#groupDigitalPlansLayerByAttribute =
       settings.groupDigitalPlansLayerByAttribute;
     this.#groupDigitalPlansLayerSecondLevelByAttribute =
@@ -249,6 +254,78 @@ export default class PropertyCheckerModel {
       new Map<string, Feature<Geometry>[]>()
     );
 
+  // As of a change in 2026, the check layer now returns one
+  // feature per affected property, with its affecting
+  // layers encoded in a `paverkas_av` JSON-string property:
+  //   [{"id":"<hajk-layer-id>","text":"..."}, ...]
+  // To make a minimal amount of changes to the rest of the pipeline, we decode that
+  // back into the old shape, which is one feature per affecting layer, and with the property ID as a separate attribute. This way, the rest of the code can continue
+  // to expect the old shape, and we only do the decoding here in the beginning of the flow.
+  #expandCheckLayerFeatures = (
+    parentFeatures: Feature<Geometry>[]
+  ): Feature<Geometry>[] => {
+    const layersConfig = (this.#app.config.layersConfig ?? []) as Array<{
+      id: string;
+      name?: string;
+      caption?: string;
+      layers?: string[];
+    }>;
+    const expanded: Feature<Geometry>[] = [];
+
+    for (const parent of parentFeatures) {
+      const raw = parent.get(this.#checkLayerAffectedByAttribute) as
+        | string
+        | undefined;
+      if (raw === undefined) {
+        console.warn(
+          `PropertyChecker: feature has no \`${this.#checkLayerAffectedByAttribute}\` attribute, skipping.`
+        );
+        continue;
+      }
+
+      let entries: PaverkasAvEntry[];
+      try {
+        entries = JSON.parse(raw) as PaverkasAvEntry[];
+      } catch (e) {
+        console.warn(
+          `PropertyChecker: failed to parse \`${this.#checkLayerAffectedByAttribute}\` JSON, skipping feature.`,
+          e
+        );
+        continue;
+      }
+      if (!Array.isArray(entries) || entries.length === 0) {
+        continue;
+      }
+
+      const propertyAttrValue = parent.get(this.#checkLayerPropertyAttribute);
+      const geometry = parent.getGeometry();
+
+      for (const entry of entries) {
+        const layerConfig = layersConfig.find((l) => l.id === entry.id);
+        if (!layerConfig) {
+          console.warn(
+            `PropertyChecker: layer id "${entry.id}" from \`${this.#checkLayerAffectedByAttribute}\` not found in layersConfig, skipping.`
+          );
+          continue;
+        }
+
+        const synthetic = new OlFeature({
+          geometry: geometry?.clone(),
+        });
+        synthetic.set("id", layerConfig.id);
+        synthetic.set("caption", layerConfig.caption ?? "");
+        synthetic.set(
+          "layer",
+          layerConfig.layers?.[0] ?? layerConfig.name ?? layerConfig.id
+        );
+        synthetic.set(this.#checkLayerPropertyAttribute, propertyAttrValue);
+        synthetic.set("paverkasAvText", entry.text);
+        expanded.push(synthetic);
+      }
+    }
+    return expanded;
+  };
+
   #handleFeatureAdded = async (feature: Feature<Geometry>) => {
     const geometry = feature.getGeometry();
     if (!geometry) return;
@@ -263,9 +340,13 @@ export default class PropertyCheckerModel {
     // in separate views but still related to each other.
 
     // Check Layer features
-    const checkLayerFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
+    const rawCheckLayerFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
       coords,
       this.#checkLayer
+    );
+    // Decode `paverkas_av` and expand into the legacy flat-array shape.
+    const checkLayerFeatures = this.#expandCheckLayerFeatures(
+      rawCheckLayerFeatures
     );
 
     // Let's group the flat array of objects into an array where key is
