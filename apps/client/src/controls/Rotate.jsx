@@ -1,19 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { easeOut } from "ol/easing";
-import { IconButton, Paper } from "@mui/material";
 import NavigationIcon from "@mui/icons-material/Navigation";
-import { styled } from "@mui/material/styles";
-import HajkToolTip from "components/HajkToolTip";
+import ControlButton from "components/ControlButton";
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  marginBottom: theme.spacing(1),
-}));
-
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  minWidth: "unset",
-}));
-
-const RotateControl = React.memo((props) => {
+const RotateControl = (props) => {
   const view = useRef();
   const [rotation, setRotation] = useState(view.current?.getRotation() || 0);
 
@@ -56,19 +46,16 @@ const RotateControl = React.memo((props) => {
 
   return (
     (props.map && rotation !== 0 && (
-      <HajkToolTip title="Återställ rotation">
-        <StyledPaper>
-          <StyledIconButton
-            aria-label="Återställ rotation"
-            onClick={rotateNorth}
-          >
-            <NavigationIcon style={{ transform: `rotate(${rotation}rad)` }} />
-          </StyledIconButton>
-        </StyledPaper>
-      </HajkToolTip>
+      <ControlButton
+        tooltip="Återställ rotation"
+        ariaLabel="Återställ rotation"
+        onClick={rotateNorth}
+      >
+        <NavigationIcon style={{ transform: `rotate(${rotation}rad)` }} />
+      </ControlButton>
     )) ||
     null
   );
-});
+};
 
 export default RotateControl;

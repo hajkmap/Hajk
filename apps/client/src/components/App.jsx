@@ -445,7 +445,7 @@ class App extends React.PureComponent {
     lowerCaseActiveTools.push("externallinks");
     lowerCaseActiveTools.push("information");
 
-    // Check which plugins defined in mapConfig don't exist in buildConfig
+    // Check which plugins defined in mapConfig don't exist in appConfig.availableTools
     const unsupportedToolsFoundInMapConfig = this.props.config.mapConfig.tools
       .map((t) => t.type.toLowerCase())
       .filter((e) => {
@@ -463,7 +463,7 @@ class App extends React.PureComponent {
       console.info(
         `The map configuration contains unavailable plugins: ${unsupportedToolsFoundInMapConfig.join(
           ", "
-        )}. Please check your map config and buildConfig.json.  `
+        )}. Please check your map config.  `
       );
   };
   /**
@@ -1023,6 +1023,7 @@ class App extends React.PureComponent {
           sx={(theme) => ({
             padding: theme.spacing(1, 2),
             height: theme.spacing(6),
+            flexShrink: 0,
           })}
         >
           <LogoImage alt={logoAltText} src={logoUrl} />
@@ -1162,8 +1163,11 @@ class App extends React.PureComponent {
             sx={(theme) => ({
               "& .MuiPaper-root": {
                 width: DRAWER_WIDTH,
+                height: "auto",
+                maxHeight: "100%",
                 backgroundColor: theme.palette.background.default,
                 backgroundImage: "unset", // To match the new (darker) black theme.
+                borderBottomRightRadius: theme.spacing(2),
               },
             })}
           >
@@ -1329,10 +1333,12 @@ class App extends React.PureComponent {
                   },
                 }}
               >
-                <Zoom
-                  map={this.appModel.getMap()}
-                  mapConfig={this.appModel.config.mapConfig.map}
-                />
+                {!isMobile && (
+                  <Zoom
+                    map={this.appModel.getMap()}
+                    mapConfig={this.appModel.config.mapConfig.map}
+                  />
+                )}
                 {clean === false && (
                   <CookieNoticeButton appModel={this.appModel} />
                 )}

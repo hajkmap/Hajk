@@ -6,12 +6,12 @@ import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import PluginControlButton from "../PluginControlButton";
 import {
   Button,
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Box,
 } from "@mui/material";
+import BaseDialog from "../Dialog/BaseDialog";
 
 import "intro.js/introjs.css";
 import "intro.js/themes/introjs-modern.css";
@@ -38,7 +38,7 @@ const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherPlugin }) => {
   };
 
   return (
-    <Dialog
+    <BaseDialog
       open={true}
       onClose={handleClose}
       slotProps={{
@@ -94,10 +94,10 @@ const IntroSelectionScreen = ({ onSelect, onClose, layerSwitcherPlugin }) => {
           </Button>
         </Box>
       </DialogContent>
-      <DialogActions sx={{ p: 1 }}>
+      <DialogActions>
         <Button onClick={handleClose}>Avbryt</Button>
       </DialogActions>
-    </Dialog>
+    </BaseDialog>
   );
 };
 

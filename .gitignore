@@ -1,4 +1,6 @@
 node_modules/
+releases/*
+!releases/.gitkeep
 
 ### VS Code ###
 .vscode/*

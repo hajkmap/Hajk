@@ -91,8 +91,15 @@ const LayerZoomVisibleSnackbarProvider = ({ children, layers }) => {
     <>
       {layers.map((l) => {
         const id = l.get("name");
-        if (!id.includes("plugin")) {
-          return <LayerZoomListener key={l.get("name")} layer={l} />;
+        if (id === undefined) {
+          console.warn(
+            "Possibly misconfigured layer: 'name' property is missing",
+            l
+          );
+          return null;
+        }
+        if (!id?.includes("plugin")) {
+          return <LayerZoomListener key={id} layer={l} />;
         } else {
           return null;
         }
@@ -134,6 +141,15 @@ const setQuickAccessStateInLocalStorage = (map) => {
       .map((l) => l.get("name"));
     LocalStorageHelper.set(QUICK_ACCESS_LS_KEY, qaLayers);
   }
+};
+
+const clearQuickAccessState = (map) => {
+  // force UI to update and clear.
+  map
+    .getAllLayers()
+    .filter((l) => l.get("quickAccess") === true)
+    .forEach((l) => l.set(QUICK_ACCESS_KEY, false));
+  LocalStorageHelper.set(QUICK_ACCESS_LS_KEY, []);
 };
 
 const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
@@ -430,6 +446,11 @@ const LayerSwitcherProvider = ({
   // OpenLayers listeners. So that the application realizes that some new
   // layers might have been added to QuickAccess.
   useEffect(() => {
+    if (!functionalCookieOk()) {
+      clearQuickAccessState(map);
+      return;
+    }
+
     const ls = LocalStorageHelper.get(QUICK_ACCESS_LS_KEY);
 
     if (!(typeof ls === "object" && ls !== null)) {
@@ -445,6 +466,22 @@ const LayerSwitcherProvider = ({
         }
       });
   }, [map]);
+
+  useEffect(() => {
+    const cookieLevelChangedListener = globalObserver.subscribe(
+      "core.cookieLevelChanged",
+      () => {
+        if (!functionalCookieOk()) {
+          // Clean up if someone changed to disable functional cookies
+          clearQuickAccessState(map);
+        }
+      }
+    );
+
+    return () => {
+      cookieLevelChangedListener.unsubscribe();
+    };
+  }, [globalObserver, map]);
 
   const dispatcher = useRef(
     createDispatch(map, staticLayerConfigMap, layerTreeData)

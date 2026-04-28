@@ -1,0 +1,1815 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hajk — Open Source Web GIS</title>
+    <meta
+      name="description"
+      content="Hajk is an open-source web GIS platform built on React, OpenLayers, and Node.js — powering map applications for municipalities and organisations across Sweden."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --blue: #1a6fc4;
+        --blue-dark: #124f8f;
+        --blue-light: #e8f1fb;
+        --teal: #0f9d8d;
+        --text: #1a1f2e;
+        --muted: #5a6478;
+        --border: #e2e8f0;
+        --bg: #f8fafc;
+        --white: #ffffff;
+        --radius: 12px;
+        --shadow-sm:
+          0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: "Inter", system-ui, sans-serif;
+        color: var(--text);
+        background: var(--white);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ── NAV ──────────────────────────────────────────── */
+      nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+      .nav-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        flex-shrink: 0;
+      }
+      .nav-logo img {
+        height: 36px;
+        width: auto;
+        display: block;
+      }
+      .nav-links {
+        display: flex;
+        gap: 28px;
+        list-style: none;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: var(--muted);
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.15s;
+      }
+      .nav-links a:hover {
+        color: var(--blue);
+      }
+      .nav-cta {
+        background: var(--blue);
+        color: var(--white) !important;
+        padding: 8px 18px;
+        border-radius: 8px;
+        transition: background 0.15s !important;
+      }
+      .nav-cta:hover {
+        background: var(--blue-dark) !important;
+        color: var(--white) !important;
+      }
+
+      /* ── HERO ─────────────────────────────────────────── */
+      .hero {
+        background: linear-gradient(
+          135deg,
+          #0d2d5c 0%,
+          #1a6fc4 55%,
+          #0f9d8d 100%
+        );
+        color: var(--white);
+        padding: 96px 24px 80px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      }
+      .hero-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 5px 14px;
+        border-radius: 100px;
+        margin-bottom: 24px;
+      }
+      .hero h1 {
+        font-size: clamp(2.4rem, 6vw, 4rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin-bottom: 20px;
+      }
+      .hero h1 span {
+        color: #7dd3fc;
+      }
+      .hero p {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.8);
+        max-width: 640px;
+        margin: 0 auto 40px;
+        line-height: 1.7;
+      }
+      .hero-actions {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 13px 26px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      }
+      .btn-primary {
+        background: var(--white);
+        color: var(--blue);
+      }
+      .btn-outline {
+        background: transparent;
+        color: var(--white);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+      }
+      .btn-outline:hover {
+        border-color: var(--white);
+      }
+
+      .hero-stats {
+        display: flex;
+        gap: 48px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 64px;
+        padding-top: 48px;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        position: relative;
+      }
+      .stat {
+        text-align: center;
+      }
+      .stat-num {
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: #7dd3fc;
+      }
+      .stat-label {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.65);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-top: 2px;
+      }
+
+      /* ── SECTIONS ─────────────────────────────────────── */
+      section {
+        padding: 80px 24px;
+      }
+      .section-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .section-tag {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--blue);
+        margin-bottom: 12px;
+      }
+      h2 {
+        font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 16px;
+      }
+      .section-lead {
+        font-size: 1.1rem;
+        color: var(--muted);
+        max-width: 640px;
+        line-height: 1.7;
+        margin-bottom: 56px;
+      }
+
+      /* ── DEMO SHOWCASE ────────────────────────────────── */
+      .demo-section {
+        background: var(--bg);
+      }
+      .demo-frame {
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        background: #0d2d5c;
+        position: relative;
+      }
+      .demo-bar {
+        background: #1e293b;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .demo-dots {
+        display: flex;
+        gap: 6px;
+      }
+      .demo-dots span {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        display: block;
+      }
+      .demo-dots span:nth-child(1) {
+        background: #ef4444;
+      }
+      .demo-dots span:nth-child(2) {
+        background: #f59e0b;
+      }
+      .demo-dots span:nth-child(3) {
+        background: #22c55e;
+      }
+      .demo-url {
+        flex: 1;
+        background: #0f172a;
+        border-radius: 6px;
+        padding: 5px 12px;
+        font-size: 0.8rem;
+        color: #94a3b8;
+        font-family: monospace;
+      }
+      .demo-iframe-wrap {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%;
+        background: #f1f5f9;
+      }
+      .demo-placeholder {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #0d2d5c 0%, #1a6fc4 100%);
+      }
+      .demo-placeholder-inner {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.9);
+      }
+      .demo-placeholder-icon {
+        font-size: 3rem;
+        margin-bottom: 12px;
+      }
+      .demo-placeholder-inner p {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 20px;
+      }
+      #demo-load-btn {
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        color: var(--white);
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+      }
+      #demo-load-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: var(--white);
+      }
+      .demo-iframe-wrap iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      .demo-caption {
+        background: #1e293b;
+        padding: 12px 16px;
+        font-size: 0.85rem;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .demo-caption a {
+        color: #7dd3fc;
+        text-decoration: none;
+      }
+      .demo-caption a:hover {
+        text-decoration: underline;
+      }
+
+      /* ── FEATURE GRID ─────────────────────────────────── */
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+      .feature-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 28px;
+        transition:
+          box-shadow 0.2s,
+          transform 0.2s;
+      }
+      .feature-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+      }
+      .feature-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin-bottom: 16px;
+      }
+      .feature-card h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        letter-spacing: -0.01em;
+      }
+      .feature-card p {
+        font-size: 0.9rem;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      /* ── LIVE EXAMPLES ────────────────────────────────── */
+      .examples-section {
+        background: var(--bg);
+      }
+
+      /* Compact org cards grid */
+      .org-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 14px;
+      }
+      .org-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px 20px;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        position: relative;
+        overflow: hidden;
+        transition:
+          box-shadow 0.2s,
+          transform 0.2s,
+          border-color 0.2s;
+      }
+      .org-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        border-radius: 3px 0 0 3px;
+      }
+      .org-card.type-municipality::before {
+        background: var(--blue);
+      }
+      .org-card.type-regional::before {
+        background: var(--teal);
+      }
+      .org-card.type-agency::before {
+        background: #7c3aed;
+      }
+      .org-card.type-demo::before {
+        background: #f59e0b;
+      }
+      .org-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+        border-color: #c7d9f0;
+      }
+      .org-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .org-type {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border-radius: 100px;
+      }
+      .type-municipality .org-type {
+        background: var(--blue-light);
+        color: var(--blue-dark);
+      }
+      .type-regional .org-type {
+        background: #e6faf8;
+        color: #0a7066;
+      }
+      .type-agency .org-type {
+        background: #ede9fe;
+        color: #6d28d9;
+      }
+      .type-demo .org-type {
+        background: #fef3c7;
+        color: #b45309;
+      }
+      .org-card h3 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+      }
+      .org-card p {
+        font-size: 0.8rem;
+        color: var(--muted);
+        line-height: 1.5;
+        flex: 1;
+      }
+      .org-url {
+        font-size: 0.75rem;
+        color: var(--blue);
+        font-family: "Fira Code", monospace;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 4px;
+      }
+      .org-url svg {
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      .org-card:hover .org-url svg {
+        opacity: 1;
+      }
+
+      /* ── SPLIT SECTIONS ───────────────────────────────── */
+      .split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: center;
+      }
+      @media (max-width: 768px) {
+        .split {
+          grid-template-columns: 1fr;
+          gap: 40px;
+        }
+      }
+      .split-visual {
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+      }
+      .admin-visual {
+        background: #1e293b;
+        padding: 0;
+      }
+      .admin-visual-inner {
+        background: linear-gradient(160deg, #1a6fc4 0%, #0d2d5c 100%);
+        padding: 32px;
+        border-radius: 11px;
+      }
+      .admin-mockup {
+        background: var(--white);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      }
+      .admin-mockup-bar {
+        background: #e2e8f0;
+        padding: 8px 12px;
+        display: flex;
+        gap: 6px;
+      }
+      .admin-mockup-bar span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .admin-mockup-bar span:nth-child(1) {
+        background: #ef4444;
+      }
+      .admin-mockup-bar span:nth-child(2) {
+        background: #f59e0b;
+      }
+      .admin-mockup-bar span:nth-child(3) {
+        background: #22c55e;
+      }
+      .admin-mockup-body {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        height: 160px;
+      }
+      .admin-sidebar {
+        background: #f8fafc;
+        border-right: 1px solid #e2e8f0;
+        padding: 12px;
+      }
+      .admin-sidebar-item {
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        color: #64748b;
+        margin-bottom: 4px;
+      }
+      .admin-sidebar-item.active {
+        background: #e8f1fb;
+        color: var(--blue);
+        font-weight: 600;
+      }
+      .admin-content {
+        padding: 14px;
+        font-size: 0.72rem;
+        color: #64748b;
+      }
+      .admin-field {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 5px;
+        padding: 6px 8px;
+        margin-bottom: 8px;
+        color: #1a1f2e;
+      }
+      .admin-field label {
+        display: block;
+        font-size: 0.65rem;
+        color: #94a3b8;
+        margin-bottom: 2px;
+      }
+      .admin-field input-mock {
+        display: block;
+        font-size: 0.72rem;
+        color: #1a1f2e;
+      }
+
+      /* ── BACKEND SECTION ──────────────────────────────── */
+      .backend-section {
+        background: #0d2d5c;
+        color: var(--white);
+      }
+      .backend-section .section-tag {
+        color: #7dd3fc;
+      }
+      .backend-section h2 {
+        color: var(--white);
+      }
+      .backend-section .section-lead {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      .tech-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 48px;
+      }
+      .tech-badge {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: rgba(255, 255, 255, 0.9);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .backend-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+      }
+      .backend-card {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius);
+        padding: 24px;
+      }
+      .backend-card h3 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #7dd3fc;
+      }
+      .backend-card p {
+        font-size: 0.87rem;
+        color: rgba(255, 255, 255, 0.6);
+        line-height: 1.6;
+      }
+
+      /* ── CODE BLOCK ───────────────────────────────────── */
+      .code-block {
+        background: #0f172a;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius);
+        padding: 24px;
+        font-family: "Fira Code", "Cascadia Code", monospace;
+        font-size: 0.84rem;
+        color: #e2e8f0;
+        overflow-x: auto;
+        margin-top: 32px;
+      }
+      .code-block .cmd {
+        color: #7dd3fc;
+      }
+      .code-block .comment {
+        color: #475569;
+      }
+      .code-block .str {
+        color: #86efac;
+      }
+
+      /* ── COMMUNITY ────────────────────────────────────── */
+      .community-section {
+        background: var(--bg);
+      }
+      .community-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+      }
+      .community-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 28px;
+        text-align: center;
+      }
+      .community-card .icon {
+        font-size: 2rem;
+        margin-bottom: 12px;
+      }
+      .community-card h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .community-card p {
+        font-size: 0.87rem;
+        color: var(--muted);
+      }
+      .community-card a {
+        color: var(--blue);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .community-card a:hover {
+        text-decoration: underline;
+      }
+
+      /* ── CTA STRIP ────────────────────────────────────── */
+      .cta-strip {
+        background: linear-gradient(135deg, #1a6fc4, #0f9d8d);
+        color: var(--white);
+        padding: 80px 24px;
+        text-align: center;
+      }
+      .cta-strip h2 {
+        color: var(--white);
+        margin-bottom: 12px;
+      }
+      .cta-strip p {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 1.1rem;
+        margin-bottom: 36px;
+      }
+      .cta-strip .btn-primary {
+        color: var(--blue-dark);
+      }
+
+      /* ── FOOTER ───────────────────────────────────────── */
+      footer {
+        background: #0d2d5c;
+        color: rgba(255, 255, 255, 0.5);
+        padding: 40px 24px;
+        text-align: center;
+        font-size: 0.85rem;
+      }
+      footer a {
+        color: rgba(255, 255, 255, 0.65);
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: var(--white);
+      }
+      footer p + p {
+        margin-top: 8px;
+      }
+
+      /* ── RESPONSIVE ───────────────────────────────────── */
+      @media (max-width: 640px) {
+        .nav-links {
+          display: none;
+        }
+        .hero-stats {
+          gap: 28px;
+        }
+        section {
+          padding: 60px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── NAV ──────────────────────────────────────────────────── -->
+    <nav>
+      <div class="nav-inner">
+        <a class="nav-logo" href="#"><img src="logoLight.png" alt="Hajk" /></a>
+        <ul class="nav-links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#examples">Live Examples</a></li>
+          <li><a href="#backend">Stack</a></li>
+          <li><a href="#community">Community</a></li>
+          <li>
+            <a href="https://github.com/hajkmap/Hajk" class="nav-cta">GitHub</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- ── HERO ─────────────────────────────────────────────────── -->
+    <header class="hero">
+      <div class="hero-badge">Open Source Web GIS</div>
+      <h1>Maps that <span>do more</span>.</h1>
+      <p>
+        Hajk is a modular, full-featured web GIS platform built on React,
+        OpenLayers, and Node.js — powering everything from public map portals to
+        advanced internal support tools for Swedish municipalities and beyond.
+      </p>
+      <div class="hero-actions">
+        <a href="https://github.com/hajkmap/Hajk" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+            />
+          </svg>
+          View on GitHub
+        </a>
+        <a href="#examples" class="btn btn-outline">See it live ↓</a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-num">28+</div>
+          <div class="stat-label">Built-in tools</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">15+</div>
+          <div class="stat-label">Municipalities</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">React 19</div>
+          <div class="stat-label">Modern stack</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">MIT</div>
+          <div class="stat-label">License</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── LIVE DEMO ─────────────────────────────────────────────── -->
+    <section class="demo-section" id="demo">
+      <div class="section-inner">
+        <div class="section-tag">Live deployment</div>
+        <h2>See Hajk in action</h2>
+        <p class="section-lead">
+          The City of Halmstad runs Hajk as their public map portal — explore
+          layers, search addresses, measure areas, and more, right here.
+        </p>
+        <div class="demo-frame">
+          <div class="demo-bar">
+            <div class="demo-dots"><span></span><span></span><span></span></div>
+            <div class="demo-url">karta.halmstad.se</div>
+          </div>
+          <div class="demo-iframe-wrap" id="demo-iframe-wrap">
+            <div class="demo-placeholder">
+              <div class="demo-placeholder-inner">
+                <div class="demo-placeholder-icon">🗺️</div>
+                <p>Interactive map — karta.halmstad.se</p>
+                <button id="demo-load-btn">Load demo</button>
+              </div>
+            </div>
+          </div>
+          <div class="demo-caption">
+            <span>Halmstad municipality — public map portal</span>
+            <a href="https://karta.halmstad.se" target="_blank" rel="noopener"
+              >Open in new tab ↗</a
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FEATURES ──────────────────────────────────────────────── -->
+    <section id="features">
+      <div class="section-inner">
+        <div class="section-tag">Client capabilities</div>
+        <h2>Everything a modern GIS needs.</h2>
+        <p class="section-lead">
+          Hajk's client ships with a rich set of tools out of the box. Each
+          plugin is independently configurable, so you can tailor the interface
+          to your exact use case.
+        </p>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon" style="background: #e8f1fb">🗺️</div>
+            <h3>Multi-source map layers</h3>
+            <p>
+              Connect WMS, WMTS, WFS and vector layers. Mix GeoServer and QGIS
+              Server sources in a single map.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background: #e6faf8">✏️</div>
+            <h3>WFS feature editing</h3>
+            <p>
+              Draw, edit, and delete vector features directly on the map with
+              full WFS-T write-back support — no separate editing tool needed.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background: #fef3c7">🔍</div>
+            <h3>Powerful search</h3>
+            <p>
+              Search across several WFS layers simultaneously. Pan and zoom the
+              map, highlight matching features. Export to Excel or KLM for
+              further analysis.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background: #ede9fe">📐</div>
+            <h3>Measure &amp; analyse</h3>
+            <p>
+              Point, line, and area measurement with real-time calculations.
+              Buffer, intersect, and clip geometries on the fly.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background: #fce7f3">🖨️</div>
+            <h3>Print to PDF</h3>
+            <p>
+              Export pixel-perfect, scaled map prints at user-selectable sizes
+              and resolutions — including north arrow, scale bar, and logo.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background: #d1fae5">📌</div>
+            <h3>Bookmarks &amp; sharing</h3>
+            <p>
+              Save map state as shareable URLs. Embed maps in other pages or
+              share deep links to a specific view, layer combination, and
+              selection.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background: #e8f1fb">📝</div>
+            <h3>Text-to-map</h3>
+            <p>
+              Link rich text directly to geographic areas — a powerful pattern
+              widely used by municipalities to publish statutory comprehensive
+              plans where policy text and map context live side by side.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background: #fef9c3">🔒</div>
+            <h3>Access control</h3>
+            <p>
+              Map- , layer- and tool-level visibility can be tied to Active
+              Directory groups, making Hajk suitable for both public portals and
+              restricted internal systems.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background: #e6faf8">📱</div>
+            <h3>Responsive &amp; accessible</h3>
+            <p>
+              Works on desktop and mobile. Built with Material UI v7 and React
+              19, following Material Design principles for a familiar,
+              accessible experience.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── LIVE EXAMPLES ─────────────────────────────────────────── -->
+    <section class="examples-section" id="examples">
+      <div class="section-inner">
+        <div class="section-tag">In production</div>
+        <h2>Trusted across Sweden.</h2>
+        <p class="section-lead">
+          From coastal cities to national government agencies, Hajk powers real
+          maps for real citizens — at scale. Here are all known public
+          deployments.
+        </p>
+        <div class="org-grid">
+          <a
+            href="https://karta.ale.se/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-municipality"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Municipality</span>
+            </div>
+            <h3>Ale</h3>
+            <p>
+              Public map portal for this municipality north of Göteborg covering
+              planning and services.
+            </p>
+            <div class="org-url">
+              karta.ale.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://karta.askersund.se/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-municipality"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Municipality</span>
+            </div>
+            <h3>Askersund</h3>
+            <p>
+              Interactive map services for residents of this municipality in
+              Örebro County.
+            </p>
+            <div class="org-url">
+              karta.askersund.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://oversiktsplan.botkyrka.se/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-municipality"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Municipality</span>
+            </div>
+            <h3>Botkyrka</h3>
+            <p>
+              Comprehensive plan viewer for this municipality south of Stockholm
+              — spatial planning made public.
+            </p>
+            <div class="org-url">
+              oversiktsplan.botkyrka.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://karta.goteborg.se/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-municipality"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Municipality</span>
+            </div>
+            <h3>Göteborg</h3>
+            <p>Public map portal for Sweden's second-largest city.</p>
+            <div class="org-url">
+              karta.goteborg.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://karta.goteborgsregionen.se/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-regional"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Regional</span>
+            </div>
+            <h3>Göteborgsregionen</h3>
+            <p>
+              The Greater Gothenburg municipal association's shared map
+              infrastructure for 13 member municipalities.
+            </p>
+            <div class="org-url">
+              karta.goteborgsregionen.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://karta.halmstad.se/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-municipality"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Municipality</span>
+            </div>
+            <h3>Halmstad</h3>
+            <p>
+              Public map portal for this coastal city in Halland — also featured
+              as the live demo above.
+            </p>
+            <div class="org-url">
+              karta.halmstad.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://karta.kungsbacka.se/publik/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-municipality"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Municipality</span>
+            </div>
+            <h3>Kungsbacka</h3>
+            <p>Public map portal for this municipality south of Göteborg.</p>
+            <div class="org-url">
+              karta.kungsbacka.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://karta.lekeberg.se/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-municipality"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Municipality</span>
+            </div>
+            <h3>Lekeberg</h3>
+            <p>
+              Map services for residents of this municipality in Örebro County.
+            </p>
+            <div class="org-url">
+              karta.lekeberg.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://karta.laxa.se/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-municipality"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Municipality</span>
+            </div>
+            <h3>Laxå</h3>
+            <p>
+              Publicly accessible maps covering planning and nature for this
+              municipality in Örebro County.
+            </p>
+            <div class="org-url">
+              karta.laxa.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://karta.nacka.se/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-municipality"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Municipality</span>
+            </div>
+            <h3>Nacka</h3>
+            <p>
+              Map portal for this municipality east of Stockholm, serving one of
+              Sweden's fastest-growing areas.
+            </p>
+            <div class="org-url">
+              karta.nacka.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://bredbandskartan.pts.se"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-agency"
+          >
+            <div class="org-card-top"><span class="org-type">Agency</span></div>
+            <h3>Post- och telestyrelsen</h3>
+            <p>
+              Sweden's telecoms regulator uses Hajk to publish the national
+              broadband coverage map.
+            </p>
+            <div class="org-url">
+              bredbandskartan.pts.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://gis.sgi.se/hajk/?m=rasskrederosion"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-agency"
+          >
+            <div class="org-card-top"><span class="org-type">Agency</span></div>
+            <h3>SGI</h3>
+            <p>
+              The Swedish Geotechnical Institute publishes landslide and erosion
+              risk maps through Hajk.
+            </p>
+            <div class="org-url">
+              gis.sgi.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://karta.uddevalla.se/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-municipality"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Municipality</span>
+            </div>
+            <h3>Uddevalla</h3>
+            <p>Public maps for this harbour city in Västra Götaland.</p>
+            <div class="org-url">
+              karta.uddevalla.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://karta.varberg.se/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-municipality"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Municipality</span>
+            </div>
+            <h3>Varberg</h3>
+            <p>
+              Interactive map portal for this coastal municipality in Halland.
+            </p>
+            <div class="org-url">
+              karta.varberg.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://karta.varmdo.se/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-municipality"
+          >
+            <div class="org-card-top">
+              <span class="org-type">Municipality</span>
+            </div>
+            <h3>Värmdö</h3>
+            <p>
+              Map services for residents of this archipelago municipality east
+              of Stockholm.
+            </p>
+            <div class="org-url">
+              karta.varmdo.se
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="https://hajk-demo.netlify.app/"
+            target="_blank"
+            rel="noopener"
+            class="org-card type-demo"
+          >
+            <div class="org-card-top"><span class="org-type">Demo</span></div>
+            <h3>Official Demo</h3>
+            <p>
+              A basic Hajk setup, with OpenStreetMap as background with some
+              default tools enabled.
+            </p>
+            <div class="org-url">
+              hajk-demo.netlify.app
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"
+                />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ADMIN ─────────────────────────────────────────────────── -->
+    <section id="admin">
+      <div class="section-inner">
+        <div class="split">
+          <div>
+            <div class="section-tag">Administration</div>
+            <h2>Configure everything from a UI.</h2>
+            <p
+              style="
+                color: var(--muted);
+                font-size: 1rem;
+                line-height: 1.7;
+                margin-bottom: 24px;
+              "
+            >
+              Hajk's dedicated admin interface lets you manage maps, layers,
+              tools, and access control without touching a single config file.
+              Add a new WMS layer, enable a plugin, or restrict a tool to a
+              specific user group — all through a structured, guided interface.
+            </p>
+            <ul
+              style="
+                list-style: none;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+              "
+            >
+              <li
+                style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 10px;
+                  font-size: 0.92rem;
+                  color: var(--muted);
+                "
+              >
+                <span
+                  style="color: var(--teal); font-weight: 700; flex-shrink: 0"
+                  >✓</span
+                >
+                Create and manage multiple named map configurations
+              </li>
+              <li
+                style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 10px;
+                  font-size: 0.92rem;
+                  color: var(--muted);
+                "
+              >
+                <span
+                  style="color: var(--teal); font-weight: 700; flex-shrink: 0"
+                  >✓</span
+                >
+                Add layers from any OGC-compliant source
+              </li>
+              <li
+                style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 10px;
+                  font-size: 0.92rem;
+                  color: var(--muted);
+                "
+              >
+                <span
+                  style="color: var(--teal); font-weight: 700; flex-shrink: 0"
+                  >✓</span
+                >
+                Configure map, layer and tool visibility per AD role
+              </li>
+            </ul>
+          </div>
+          <div class="split-visual admin-visual">
+            <div class="admin-visual-inner">
+              <div class="admin-mockup">
+                <div class="admin-mockup-bar">
+                  <span></span><span></span><span></span>
+                </div>
+                <div class="admin-mockup-body">
+                  <div class="admin-sidebar">
+                    <div class="admin-sidebar-item active">Maps</div>
+                    <div class="admin-sidebar-item">Layers</div>
+                    <div class="admin-sidebar-item">Tools</div>
+                    <div class="admin-sidebar-item">Groups</div>
+                    <div class="admin-sidebar-item">Settings</div>
+                  </div>
+                  <div class="admin-content">
+                    <div
+                      style="
+                        font-size: 0.7rem;
+                        font-weight: 700;
+                        color: #1a1f2e;
+                        margin-bottom: 10px;
+                      "
+                    >
+                      Edit map: Halmstad Public
+                    </div>
+                    <div class="admin-field">
+                      <label>Map name</label>
+                      <div style="font-size: 0.72rem">Halmstad Public</div>
+                    </div>
+                    <div class="admin-field">
+                      <label>Default projection</label>
+                      <div style="font-size: 0.72rem">EPSG:3007</div>
+                    </div>
+                    <div class="admin-field">
+                      <label>Visible to</label>
+                      <div style="font-size: 0.72rem">Everyone (public)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BACKEND ────────────────────────────────────────────────── -->
+    <section class="backend-section" id="backend">
+      <div class="section-inner">
+        <div class="section-tag">Backend &amp; infrastructure</div>
+        <h2>Modern. Fast. Container-ready.</h2>
+        <p class="section-lead">
+          Hajk's backend is a clean, dependency-light REST API designed for
+          reliability and straightforward deployment — whether on bare metal, a
+          VM, or Kubernetes.
+        </p>
+
+        <div class="tech-badges">
+          <div class="tech-badge">⬡ Node.js ≥22</div>
+          <div class="tech-badge">⚡ Express 5</div>
+          <div class="tech-badge">📦 ES Modules</div>
+          <div class="tech-badge">🐳 Docker Hub image</div>
+          <div class="tech-badge">🔑 ActiveDirectory auth</div>
+          <div class="tech-badge">📖 API Explorer</div>
+        </div>
+
+        <div class="backend-grid">
+          <div class="backend-card">
+            <h3>Pre-built Docker image</h3>
+            <p>
+              Pull the official image from Docker Hub and have Hajk running in
+              seconds. No build step, no toolchain required.
+            </p>
+          </div>
+          <div class="backend-card">
+            <h3>Clean REST API</h3>
+            <p>
+              Every endpoint is documented via a built-in API Explorer. Clients,
+              admins, and third-party tools all talk to the same versioned API.
+            </p>
+          </div>
+          <div class="backend-card">
+            <h3>ActiveDirectory integration</h3>
+            <p>
+              Plug straight into your organisation's AD to gate map
+              configurations and layers based on group membership — no custom
+              auth code needed.
+            </p>
+          </div>
+          <div class="backend-card">
+            <h3>Minimal footprint</h3>
+            <p>
+              Pure ESM, no bundler required. The backend stays slim, starts
+              fast, and is easy to audit and extend.
+            </p>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <span class="comment"
+            ># Pull the pre-built image from Docker Hub and run</span
+          >
+          <span class="cmd">docker pull</span> hallbergs/hajk
+          <span class="cmd">docker run</span> -p 3002:3002 hallbergs/hajk
+          <span class="comment"
+            ># → Image on Docker Hub: hub.docker.com/r/hallbergs/hajk</span
+          >
+
+          <span class="comment"
+            ># Prefer to develop locally? Clone and start each app:</span
+          >
+          <span class="cmd">cd</span> apps/backend &amp;&amp; npm install
+          &amp;&amp; <span class="cmd">npm run dev</span>
+          <span class="comment"># :3002</span>
+          <span class="cmd">cd</span> apps/client &amp;&amp; npm install
+          &amp;&amp; <span class="cmd">npm run dev</span>
+          <span class="comment"># :3000</span>
+          <span class="cmd">cd</span> apps/admin &amp;&amp; npm install
+          &amp;&amp; <span class="cmd">npm start</span>
+          <span class="comment"># :3001</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── COMMUNITY ─────────────────────────────────────────────── -->
+    <section class="community-section" id="community">
+      <div class="section-inner">
+        <div class="section-tag">Open source</div>
+        <h2>Built in the open, for everyone.</h2>
+        <p class="section-lead">
+          Hajk is governed by a collaborative group of municipalities and
+          organisations. Contributions of all kinds — code, bug reports,
+          documentation — are welcome.
+        </p>
+        <div class="community-grid">
+          <div class="community-card">
+            <div class="icon">⭐</div>
+            <h3>Star &amp; fork on GitHub</h3>
+            <p>
+              Browse the source, open issues, and submit pull requests.<br /><a
+                href="https://github.com/hajkmap/Hajk"
+                target="_blank"
+                rel="noopener"
+                >github.com/hajkmap/Hajk</a
+              >
+            </p>
+          </div>
+          <div class="community-card">
+            <div class="icon">💬</div>
+            <h3>Chat on Discord</h3>
+            <p>
+              Join the community workspace to ask questions, share deployments,
+              and collaborate with other users and developers.
+            </p>
+          </div>
+          <div class="community-card">
+            <div class="icon">📋</div>
+            <h3>Changelog &amp; roadmap</h3>
+            <p>
+              Follow what's shipping and what's planned.<br /><a
+                href="https://github.com/hajkmap/Hajk/blob/master/CHANGELOG.md"
+                target="_blank"
+                rel="noopener"
+                >View changelog</a
+              >
+              ·
+              <a
+                href="https://github.com/hajkmap/Hajk/blob/master/ROADMAP.md"
+                target="_blank"
+                rel="noopener"
+                >View roadmap</a
+              >
+            </p>
+          </div>
+          <div class="community-card">
+            <div class="icon">📄</div>
+            <h3>MIT Licensed</h3>
+            <p>
+              Use Hajk freely in commercial and non-commercial projects. Fork
+              it, extend it, ship it.<br /><a
+                href="https://github.com/hajkmap/Hajk/blob/master/LICENSE"
+                target="_blank"
+                rel="noopener"
+                >Read the license</a
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA ───────────────────────────────────────────────────── -->
+    <section class="cta-strip">
+      <div class="section-inner">
+        <h2>Ready to build your map application?</h2>
+        <p>Get started in minutes with the documentation and examples.</p>
+        <div class="hero-actions">
+          <a href="https://github.com/hajkmap/Hajk" class="btn btn-primary"
+            >Get started on GitHub</a
+          >
+          <a href="https://github.com/hajkmap/Hajk/wiki" class="btn btn-outline"
+            >View user docs</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FOOTER ─────────────────────────────────────────────────── -->
+    <footer>
+      <p>
+        <a href="https://github.com/hajkmap/Hajk">Hajk</a> is open source
+        software released under the
+        <a href="https://github.com/hajkmap/Hajk/blob/master/LICENSE"
+          >MIT License</a
+        >.
+      </p>
+      <p>
+        Developed and maintained by municipalities and organisations in Sweden.
+      </p>
+    </footer>
+  <script>
+    document.getElementById("demo-load-btn").addEventListener("click", function () {
+      var wrap = document.getElementById("demo-iframe-wrap");
+      wrap.innerHTML =
+        '<iframe src="https://karta.halmstad.se" title="Halmstad municipality map powered by Hajk" allowfullscreen></iframe>';
+      this.closest(".demo-placeholder").remove();
+    });
+  </script>
+  </body>
+</html>

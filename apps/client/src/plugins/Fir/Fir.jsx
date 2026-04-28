@@ -116,6 +116,7 @@ class Fir extends React.PureComponent {
         {...this.props}
         type="Fir"
         custom={{
+          disablePadding: true,
           icon: <PluginIcon />,
           title: this.state.title,
           color: this.state.color,

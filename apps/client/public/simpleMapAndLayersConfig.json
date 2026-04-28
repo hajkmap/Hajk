@@ -578,16 +578,6 @@
         "index": 3
       },
       {
-        "type": "measure",
-        "options": {
-          "target": "control",
-          "position": "right",
-          "instruction": "",
-          "icons": ""
-        },
-        "index": 4
-      },
-      {
         "type": "streetview",
         "options": {
           "target": "toolbar",

@@ -1,6 +1,6 @@
 import React from "react";
 import { isMobile } from "../../../utils/IsMobile";
-import { List, ListItem } from "@mui/material";
+import { List, ListItemButton } from "@mui/material";
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
 import SearchResultsPreview from "./SearchResultsPreview";
@@ -12,7 +12,7 @@ const StyledList = styled(List)(() => ({
   transition: "none",
 }));
 
-const StyledListItem = styled(ListItem)(() => ({
+const StyledListItemButton = styled(ListItemButton)(() => ({
   width: "100%",
   display: "flex",
   padding: 0,
@@ -154,11 +154,11 @@ class SearchResultsDataset extends React.Component {
         >
           {sortedFeatures.map((f) => {
             return (
-              <StyledListItem
+              <StyledListItemButton
                 disableTouchRipple
                 key={f.getId()}
                 divider
-                button
+                button={"true"}
                 onClick={() => {
                   this.resetPreview();
                   handleOnFeatureClick(f);
@@ -212,7 +212,7 @@ class SearchResultsDataset extends React.Component {
                     shouldRenderSelectedCollection
                   }
                 />
-              </StyledListItem>
+              </StyledListItemButton>
             );
           })}
         </StyledList>

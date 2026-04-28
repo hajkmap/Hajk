@@ -4,7 +4,9 @@ import { Attribution } from "ol/control";
 
 const Root = styled("div")(({ theme }) => ({
   background: theme.palette.background.paper,
-  borderRadius: "2px",
+  borderRadius: theme.shape.borderRadius,
+  overflow: "hidden",
+  boxShadow: theme.shadows[4],
   "& .ol-control": {
     position: "static",
     maxWidth: "none",
@@ -19,8 +21,6 @@ const Root = styled("div")(({ theme }) => ({
   },
   "& .ol-attribution": {
     background: theme.palette.background.paper,
-    boxShadow: theme.shadows[4],
-    borderRadius: theme.shape.borderRadius,
     height: "25px",
     overflow: "auto",
     whiteSpace: "nowrap",

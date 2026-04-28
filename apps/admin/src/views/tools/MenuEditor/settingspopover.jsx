@@ -89,7 +89,10 @@ class SettingsPopover extends React.Component {
   };
 
   handleColorPickerChange = (color) => {
-    this.setState({ color: color.hex });
+    // react-color's hex string can include a leading space; normalize for JSON/config.
+    const hex =
+      color.hex != null ? String(color.hex).trim() : color.hex;
+    this.setState({ color: hex });
   };
 
   renderSettings = () => {

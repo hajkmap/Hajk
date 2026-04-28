@@ -275,6 +275,27 @@ export default class FeaturePropsParsing {
     }
   };
 
+  // Converts [text](url){key=value ...} into <a href="url" key="value" ...>text</a>.
+  // Runs before placeholder replacement so the {attrs} block isn't consumed.
+  #linkAttributeReplacer = (match, text, href, attrsStr) => {
+    // Splits on whitespace but respects quoted values,
+    // e.g. key="value with spaces"
+    // Not pretty and readable, but it works.
+    const attrs = (
+      attrsStr.match(/[\w-]+=(?:"[^"]*"|'[^']*'|\S+)|[\w-]+/g) || []
+    )
+      .map((attr) => {
+        const eqIdx = attr.indexOf("=");
+        if (eqIdx === -1) return attr;
+        const key = attr.substring(0, eqIdx);
+        let value = attr.substring(eqIdx + 1);
+        value = value.replace(/^["']|["']$/g, "");
+        return `${key}="${value}"`;
+      })
+      .join(" ");
+    return `<a href="${href}" ${attrs}>${text}</a>`;
+  };
+
   /**
    * @summary Ensure that the href part in Markdown links is well-formatted
    * @description Href in Markdown should be UTF8 formatted and have whitespace
@@ -368,6 +389,17 @@ export default class FeaturePropsParsing {
    */
   mergeFeaturePropsWithMarkdown = async () => {
     if (this.markdown && typeof this.markdown === "string") {
+      // Convert markdown links with inline attributes to HTML anchors before
+      // placeholder replacement, which would otherwise consume the {attrs} block.
+      // E.g. [text](url){link-check=true} -> <a href="url" link-check="true">text</a>
+      // Requires allowDangerousHtml (rehype-raw) to render the resulting HTML.
+      if (this.allowDangerousHtml) {
+        this.markdown = this.markdown.replace(
+          /\[([^\]]*)\]\(([^)]*)\)\{(?!\{)([^}]+)\}/g,
+          this.#linkAttributeReplacer
+        );
+      }
+
       // this.markdown is a string that contains placeholders and conditionals for our future values.
       // The placeholders are surrounded by single curly brackets ({ & }) while conditionals are
       // surrounded by double curly brackets, e.g. "{{if ...}}".

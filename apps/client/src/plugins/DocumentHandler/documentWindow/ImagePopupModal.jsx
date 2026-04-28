@@ -2,7 +2,7 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import Dialog from "@mui/material/Dialog";
+import BaseDialog from "components/Dialog/BaseDialog";
 import Paper from "@mui/material/Paper";
 
 const mapDiv = document.getElementById("map");
@@ -60,7 +60,7 @@ class ImagePopupModal extends React.PureComponent {
     open ? this.addMapBlur() : this.removeMapBlur();
 
     return (
-      <Dialog
+      <BaseDialog
         maxWidth="lg"
         onBackdropClick={close}
         PaperComponent={PaperComponent}

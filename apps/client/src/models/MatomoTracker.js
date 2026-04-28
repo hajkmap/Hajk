@@ -5,13 +5,18 @@ export default class MatomoTracker {
       throw new Error("MatomoTracker requires urlBase and siteId");
     }
 
+    this.disabled = this._isLocalhost();
+    if (this.disabled) {
+      console.info("Matomo tracking disabled on localhost");
+      return;
+    }
+
     this.url = urlBase.endsWith("matomo.php")
       ? urlBase
       : new URL("matomo.php", urlBase.replace(/\/?$/, "/")).toString();
     this.siteId = siteId;
     this.cookieLess = cookieLess;
 
-    // If not cookieLess, generate or reuse a visitor ID
     if (!this.cookieLess) {
       this.visitorId = localStorage.getItem("matomo_vid");
       if (!this.visitorId) {
@@ -25,7 +30,13 @@ export default class MatomoTracker {
     return crypto.randomUUID().replace(/-/g, "");
   }
 
-  async _send(params) {
+  _isLocalhost() {
+    const hostname = window?.location?.hostname;
+    return hostname === "localhost" || hostname === "127.0.0.1";
+  }
+
+  _send(params) {
+    if (this.disabled) return;
     params.set("idsite", this.siteId);
     params.set("rec", "1");
     params.set("apiv", "1");
@@ -56,14 +67,12 @@ export default class MatomoTracker {
       params.set("res", `${window.screen.width}x${window.screen.height}`);
     }
 
-    try {
-      fetch(`${this.url}?${params.toString()}`, {
-        method: "GET",
-        mode: "no-cors", // Matomo tracking doesn't need CORS
-      });
-    } catch (err) {
+    fetch(`${this.url}?${params.toString()}`, {
+      method: "GET",
+      mode: "no-cors",
+    }).catch((err) => {
       console.debug("Matomo tracking failed:", err);
-    }
+    });
   }
 
   trackPageView() {

@@ -11,11 +11,11 @@
     "url_arcgislayer_settings": "http://localhost:3002/api/v2/settings/arcgislayer",
     "url_vectorlayer_settings": "http://localhost:3002/api/v2/settings/vectorlayer",
     "default_server_type": "geoserver",
-    "url_default_server": "https://geoservertest.halmstad.se/geoserver/wms",
+    "url_default_server": "https://opengeodata.goteborg.se/services/stadskarta/wms/v4",
     "owner_options": [
       {
-        "value": "SBK",
-        "title": "SBK"
+        "value": "Hajk",
+        "title": "Hajk"
       },
       {
         "value": "Lantmäterienheten",
@@ -34,11 +34,7 @@
     "url_layers": "http://localhost:3002/api/v2/mapconfig/layers",
     "url_layer_settings": "http://localhost:3002/api/v2/settings/wfstlayer",
     "url_default_server": "https://giscloud.se/geoserver/wfs",
-    "projections": [
-      "EPSG:3006",
-      "EPSG:3007",
-      "EPSG:3008"
-    ]
+    "projections": ["EPSG:3006", "EPSG:3007", "EPSG:3008"]
   },
   "mapsettings": {
     "url_proxy": "",
@@ -69,10 +65,7 @@
     "url_save": "http://localhost:3002/api/v2/informative/save",
     "url_create": "http://localhost:3002/api/v2/informative/create",
     "url_delete": "http://localhost:3002/api/v2/informative/delete",
-    "default_coordinate": [
-      320564,
-      6471766
-    ],
+    "default_coordinate": [320564, 6471766],
     "wms_url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",
     "wms_layers": "topowebbkartan"
   },
@@ -95,10 +88,7 @@
     "url_save": "http://localhost:3002/api/v2/informative/save",
     "url_create": "http://localhost:3002/api/v2/informative/create",
     "url_delete": "http://localhost:3002/api/v2/informative/delete",
-    "default_coordinate": [
-      320564,
-      6471766
-    ],
+    "default_coordinate": [320564, 6471766],
     "wms_url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",
     "wms_layers": "topowebbkartan",
     "list_images": "http://localhost:3002/api/v2/mapconfig/listimage",

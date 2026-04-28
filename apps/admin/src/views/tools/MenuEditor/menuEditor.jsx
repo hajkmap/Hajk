@@ -150,10 +150,11 @@ class ToolOptions extends Component {
   };
 
   handleColorChange = (target, color) => {
+    const value = typeof color === "string" ? color.trim() : color;
     this.setState((prevState) => ({
       defaultDocumentColorSettings: {
         ...prevState.defaultDocumentColorSettings,
-        [target]: color,
+        [target]: value,
       },
     }));
   };

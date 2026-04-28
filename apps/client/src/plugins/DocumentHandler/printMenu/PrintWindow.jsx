@@ -8,10 +8,10 @@ import {
   ThemeProvider,
   useTheme,
 } from "@mui/material/styles";
+import BaseDialog from "components/Dialog/BaseDialog";
 import {
   Button,
   Checkbox,
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
@@ -550,12 +550,12 @@ class PrintWindow extends React.PureComponent {
   removeNonPrintableDocuments(documents) {
     /*
      * Remove menu items that should not appear in the print menu.
-     * Items that should be removed are: items without a document that are not a group parent. (maplinks, links)
+     * Only menu items that have documents connected to them should be included in the print menu.
      */
     let removedIds = [];
 
     Object.keys(documents).forEach((key) => {
-      if (documents[key].maplink.trim() || documents[key].link.trim()) {
+      if (!documents[key].document) {
         removedIds.push(parseInt(key));
         delete documents[key];
       }
@@ -915,7 +915,7 @@ class PrintWindow extends React.PureComponent {
     return (
       <>
         {createPortal(
-          <Dialog disableEscapeKeyDown={true} open={this.state.pdfLoading}>
+          <BaseDialog disableEscapeKeyDown={true} open={this.state.pdfLoading}>
             <LinearProgress />
             <DialogTitle>Din PDF skapas</DialogTitle>
             <DialogContent>
@@ -926,7 +926,7 @@ class PrintWindow extends React.PureComponent {
                 <br />
               </DialogContentText>
             </DialogContent>
-          </Dialog>,
+          </BaseDialog>,
           document.getElementById("root")
         )}
       </>
@@ -1012,7 +1012,7 @@ class PrintWindow extends React.PureComponent {
       const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
       return (
-        <Dialog
+        <BaseDialog
           fullScreen={fullScreen}
           open={isModalOpen}
           PaperProps={{ style: { width: !fullScreen && "30%" } }}
@@ -1032,7 +1032,7 @@ class PrintWindow extends React.PureComponent {
               <Typography variant="body2">Stäng</Typography>
             </Button>
           </DialogActions>
-        </Dialog>
+        </BaseDialog>
       );
     }
     return (

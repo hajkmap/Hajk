@@ -2,12 +2,12 @@ import React from "react";
 import { createPortal } from "react-dom";
 import {
   Button,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
 } from "@mui/material";
+import BaseDialog from "./Dialog/BaseDialog";
 
 // Simple dialog that can be used to prompt the user before committing action.
 const ConfirmationDialog = ({
@@ -20,7 +20,7 @@ const ConfirmationDialog = ({
   confirm,
 }) => {
   return createPortal(
-    <Dialog
+    <BaseDialog
       open={open}
       onClose={handleAbort}
       onMouseDown={(e) => {
@@ -52,7 +52,7 @@ const ConfirmationDialog = ({
           </Button>
         )}
       </DialogActions>
-    </Dialog>,
+    </BaseDialog>,
     document.getElementById("map")
   );
 };

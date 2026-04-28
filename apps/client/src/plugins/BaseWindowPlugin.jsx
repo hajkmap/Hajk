@@ -2,13 +2,15 @@ import React from "react";
 import propTypes from "prop-types";
 import { isMobile } from "./../utils/IsMobile";
 import { createPortal } from "react-dom";
-import { ListItemIcon, ListItemText } from "@mui/material";
+import { Box, ListItemIcon, ListItemText } from "@mui/material";
+import ListItemButton from "@mui/material/ListItemButton";
+
 import Window from "../components/Window";
+import WindowSheet from "../components/WindowSheet";
 import Card from "../components/Card";
 import PluginControlButton from "../components/PluginControlButton";
-import { Box } from "@mui/material";
 
-import ListItemButton from "@mui/material/ListItemButton";
+const SHEET_MIN_HEIGHT = 54;
 
 class BaseWindowPlugin extends React.PureComponent {
   static propTypes = {
@@ -107,6 +109,10 @@ class BaseWindowPlugin extends React.PureComponent {
 
   pluginIsWidget(target) {
     return ["left", "right"].includes(target);
+  }
+
+  pluginIsControlButton(target) {
+    return target === "control";
   }
 
   handleButtonClick = (e) => {
@@ -211,47 +217,58 @@ class BaseWindowPlugin extends React.PureComponent {
       // That includes rendering the plugin Window itself, as well as a
       // button (that will trigger opening of the plugin Window).
       <>
-        <Window
-          componentId={this.type}
-          globalObserver={this.props.app.globalObserver}
-          title={this.state.title}
-          color={this.state.color}
-          onClose={this.closeWindowClick}
-          open={this.state.windowVisible}
-          onResize={this.props.custom.onResize}
-          onMaximize={this.props.custom.onMaximize}
-          onMinimize={this.props.custom.onMinimize}
-          draggingEnabled={this.props.custom.draggingEnabled}
-          customPanelHeaderButtons={this.props.custom.customPanelHeaderButtons}
-          resizingEnabled={this.props.custom.resizingEnabled}
-          scrollable={this.props.custom.scrollable}
-          allowMaximizedWindow={this.props.custom.allowMaximizedWindow}
-          disablePadding={this.props.custom.disablePadding}
-          width={this.width}
-          height={this.height}
-          position={this.position}
-          mode="window"
-          layerswitcherConfig={this.props.app.config.mapConfig.tools.find(
-            (t) => t.type === "layerswitcher"
-          )}
-        >
-          {/* We have to pass windowVisible down to the children so that we can conditionally render
-          the <Tabs /> component, since it does not accept components with display: "none". We use the
-          windowVisible-prop to make sure that we don't render the <Tabs /> when the window
-          is not visible.*/}
-          {React.cloneElement(this.props.children, {
-            windowVisible: this.state.windowVisible,
-          })}
-        </Window>
-        {/* Always render a Drawer button unless its target is "hidden". 
-              It's a backup for plugins render elsewhere: we hide 
-              Widget and Control buttons on small screens and fall 
-              back to Drawer button). */}
+        {isMobile ? (
+          <WindowSheet
+            isOpen={this.state.windowVisible}
+            onClose={this.closeWindowClick}
+            title={this.state.title}
+            snapPoints={[0, SHEET_MIN_HEIGHT / window.innerHeight, 0.4, 0.7, 1]}
+            initialSnap={2}
+            globalObserver={this.props.app.globalObserver}
+            minimizeOnFocusMapClick
+            disablePadding={this.props.custom.disablePadding}
+          >
+            <section id={this.type}>
+              {React.cloneElement(this.props.children, {
+                windowVisible: this.state.windowVisible,
+              })}
+            </section>
+          </WindowSheet>
+        ) : (
+          <Window
+            componentId={this.type}
+            globalObserver={this.props.app.globalObserver}
+            title={this.state.title}
+            color={this.state.color}
+            onClose={this.closeWindowClick}
+            open={this.state.windowVisible}
+            onResize={this.props.custom.onResize}
+            onMaximize={this.props.custom.onMaximize}
+            onMinimize={this.props.custom.onMinimize}
+            draggingEnabled={this.props.custom.draggingEnabled}
+            customPanelHeaderButtons={
+              this.props.custom.customPanelHeaderButtons
+            }
+            resizingEnabled={this.props.custom.resizingEnabled}
+            scrollable={this.props.custom.scrollable}
+            allowMaximizedWindow={this.props.custom.allowMaximizedWindow}
+            disablePadding={this.props.custom.disablePadding}
+            width={this.width}
+            height={this.height}
+            position={this.position}
+            mode="window"
+            layerswitcherConfig={this.props.app.config.mapConfig.tools.find(
+              (t) => t.type === "layerswitcher"
+            )}
+          >
+            {React.cloneElement(this.props.children, {
+              windowVisible: this.state.windowVisible,
+            })}
+          </Window>
+        )}
         {target !== "hidden" && this.renderDrawerButton()}
-        {/* Widget buttons must also render a Widget */}
         {this.pluginIsWidget(target) &&
           this.renderWidgetButton(`${target}-column`)}
-        {/* Finally, render a Control button if target has that value */}
         {target === "control" && this.renderControlButton()}
       </>
     );
@@ -263,7 +280,7 @@ class BaseWindowPlugin extends React.PureComponent {
    * but it will also render Widget and Control plugins - given some special condition.
    *
    * Those special conditions are small screens, where there's no screen
-   * estate to render the Widget button in Map Overlay.
+   * estate to render the Widget or Control button in Map Overlay.
    */
   renderDrawerButton() {
     return createPortal(
@@ -271,7 +288,7 @@ class BaseWindowPlugin extends React.PureComponent {
         sx={{
           display:
             this.pluginIsWidget(this.props.options.target) ||
-            this.props.options.target === "control"
+            this.pluginIsControlButton(this.props.options.target)
               ? { xs: "block", md: "none" }
               : "initial",
         }}
@@ -280,8 +297,11 @@ class BaseWindowPlugin extends React.PureComponent {
           divider={true}
           selected={this.state.windowVisible}
           onClick={this.handleButtonClick}
+          alignItems="flex-start"
         >
-          <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
+          <ListItemIcon sx={{ mt: 0, alignSelf: "center" }}>
+            {this.props.custom.icon}
+          </ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItemButton>
       </Box>,
@@ -310,18 +330,14 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   renderControlButton() {
-    // Special case: if there are no plugins with target "toolbar", we want to render the Control button on small screens
-    const hasToolbarTarget = this.props.app.config.mapConfig.tools.filter(
-      (tool) => tool.options && tool.options.target === "toolbar"
-    );
-
+    // Control buttons should only be rendered as control buttons on md+ screens.
+    // On xs screens they should be rendered as drawer buttons (check renderDrawerButton for more details)
     return createPortal(
-      // Hide Control button on small screens, see renderDrawerButton too
       <Box
         sx={{
           display: {
             xs: "none",
-            md: hasToolbarTarget.length > 0 ? "block" : "none",
+            md: "block",
           },
         }}
       >

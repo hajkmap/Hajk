@@ -16,7 +16,15 @@
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "jsx": "react-jsx",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "components/*": ["src/components/*"],
+      "utils/*": ["src/utils/*"],
+      "hooks/*": ["src/hooks/*"],
+      "src/*": ["src/*"],
+      "plugins/*": ["src/plugins/*"]
+    }
   },
   "include": ["src", "vite.config.ts", "prebuild.js"] // Added prebuild.js as it's outside `src/` and can be missed once we decide to type-check the JS files too
 }

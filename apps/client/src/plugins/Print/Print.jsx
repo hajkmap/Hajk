@@ -151,6 +151,7 @@ class Print extends React.PureComponent {
         {...this.props}
         type="Print"
         custom={{
+          disablePadding: true,
           icon: <PrintIcon />,
           title: "Skriv ut",
           description: "Skapa en PDF av kartan",

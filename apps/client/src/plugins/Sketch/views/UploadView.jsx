@@ -71,10 +71,10 @@ const UploadedFile = (props) => {
     <Zoom in appear>
       <StyledPaper>
         <Grid container justifyContent="space-between" alignItems="center">
-          <Grid size={4}>
-            <Typography variant="button">{props.title}</Typography>
+          <Grid size={8}>
+            <Typography variant="button" sx={{ textTransform: 'none'}}>{props.title}</Typography>
           </Grid>
-          <Grid container justifyContent="flex-end" spacing={1} size={8}>
+          <Grid container justifyContent="flex-end" spacing={1} size={4}>
             <Grid>
               <HajkToolTip title="Klicka för att ta bort de importerade objekten.">
                 <IconButton size="small" onClick={props.onRemoveClick}>
@@ -153,7 +153,7 @@ const UploadView = (props) => {
 
   // Adds the supplied file (kml/gpx string) to the map and updates the list
   // of added files.
-  const handleUploadedFile = (file, fileType) => {
+  const handleUploadedFile = (file, fileName, fileType) => {
     // We're gonna need to generate an id that we can set on all the features
     // in each file. This id can then be used to find all features that belongs to
     // a file upload.
@@ -168,7 +168,7 @@ const UploadView = (props) => {
     // Let's create an object with some meta-data and add it to the list of uploaded files.
     props.setUploadedFiles((files) => [
       ...files,
-      { id, title: dateTime, hidden: false, textShown: true, type: fileType },
+      { id, title: `${fileName} (${dateTime})`, hidden: false, textShown: true, type: fileType },
     ]);
     // Then we can add the features to the map!
     if (fileType === "kml") {

@@ -20,6 +20,9 @@
 # it serving the static client and admin apps) via one command:
 # node index.js
 
+show_unmaintained_warning() {
+	echo "WARNING: This script is legacy and unmaintained. Use at your own risk." 1>&2
+}
 
 show_usage() {
 	echo "Usage: $0 git_dir dest_dir" 1>&2
@@ -38,6 +41,8 @@ Press (y) to continue or any other key to abort." -n 1 -r
 }
 
 # Main program starts here
+
+show_unmaintained_warning
 
 if [ $# -ne 2 ]; then
 	show_usage

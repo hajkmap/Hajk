@@ -3,11 +3,12 @@ import { styled } from "@mui/material/styles";
 import withSnackbar from "components/WithSnackbar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { isMobile } from "../../utils/IsMobile";
 
 const StreetViewWindow = styled("div")(() => ({
   flex: 1,
   position: "absolute !important",
-  top: "42px",
+  top: isMobile ? 0 : "54px",
   bottom: 0,
   left: 0,
   right: 0,
@@ -17,7 +18,7 @@ const DateWrapper = styled("div")(({ theme }) => ({
   color: theme.palette.common.white,
   position: "absolute",
   zIndex: 1,
-  top: "42px",
+  top: isMobile ? 0 : "54px",
   left: 0,
   background: "rgba(0, 0, 0, 0.7)",
   padding: "0px 3px",
@@ -56,7 +57,7 @@ class StreetViewView extends React.PureComponent {
   renderInfoText() {
     if (!this.props.displayPanorama) {
       return (
-        <Typography>
+        <Typography sx={{ padding: 2 }}>
           Klicka i kartan för att aktivera street view. <br />
           Förstora fönstret genom att trycka på symbolen i övre högra hörnet.
         </Typography>
@@ -68,7 +69,12 @@ class StreetViewView extends React.PureComponent {
     return (
       <div>
         {this.renderInfoText()}
-        <Box sx={{ display: this.props.displayPanorama ? "flex" : "none" }}>
+        <Box
+          sx={{
+            minHeight: "200px",
+            display: this.props.displayPanorama ? "flex" : "none",
+          }}
+        >
           <StreetViewWindow id="street-view-window" />
           <DateWrapper id="image-date">
             {this.state.imageDate ? this.state.imageDate : ""}

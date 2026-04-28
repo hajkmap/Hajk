@@ -14,13 +14,45 @@ import "./custom-ol.css";
 
 import React from "react";
 import { createRoot } from "react-dom/client";
-import buildConfig from "./buildConfig.json";
 import StartupError from "./components/Errors/StartupError";
 import HajkThemeProvider from "./components/HajkThemeProvider";
 import { initHFetch, hfetch, initFetchWrapper } from "./utils/FetchWrapper";
 import LocalStorageHelper from "./utils/LocalStorageHelper";
 import { getMergedSearchAndHashParams } from "./utils/getMergedSearchAndHashParams";
 import { AccessError, NotFoundError } from "./utils/CustomErrors";
+import { AVAILABLE_TOOLS } from "./constants";
+
+function ensureActiveToolsAreValid(availableTools = []) {
+  // First check if there's a valid array
+  if (!Array.isArray(availableTools)) {
+    console.warn(
+      'activeTools should be an array. Falling back to default tools, which will load all available tools. Please check your appConfig.json and configure activeTools as an array. Example: "activeTools": ["LayerSwitcher", "Search"]'
+    );
+    return AVAILABLE_TOOLS;
+  }
+
+  // Now let's see that whatever's in activeTools is actually valid, i.e.
+  // exists in the AVAILABLE_TOOLS list. If not, we log a warning and filter out the invalid tools.
+  const validActiveTools = availableTools.filter((tool) => {
+    if (!AVAILABLE_TOOLS.includes(tool)) {
+      console.warn(
+        `Tool "${tool}" in activeTools is not a valid tool. Please check your appConfig.json and ensure all tools listed in activeTools are valid. Valid tools are: ${AVAILABLE_TOOLS.join(", ")}.`
+      );
+      return false;
+    }
+    return true;
+  });
+
+  // If after filtering out invalid tools, we end up with an empty array, we fall back to the default of loading all tools.
+  if (validActiveTools.length === 0) {
+    console.warn(
+      "No valid tools found in activeTools. Falling back to default tools, which will load all available tools."
+    );
+    return AVAILABLE_TOOLS;
+  }
+
+  return validActiveTools;
+}
 
 /**
  * Entry point to Hajk.
@@ -38,9 +70,7 @@ initHFetch();
 let appConfig;
 
 try {
-  const appConfigResponse = await hfetch("appConfig.json", {
-    cacheBuster: true,
-  });
+  const appConfigResponse = await hfetch("appConfig.json");
   appConfig = await appConfigResponse.json();
 
   // Legacy code expects certain keys to be existent in appConfig.
@@ -71,9 +101,7 @@ try {
     if (useBackend === false) {
       // Load the user specified consolidated map and layers config, or fall back to default one
       const simpleConfig = `${initialURLParams.get("m") || "simpleMapAndLayersConfig"}.json`;
-      return await hfetch(simpleConfig, {
-        cacheBuster: true,
-      });
+      return await hfetch(simpleConfig);
     } else {
       // Prepare the URL config string
       const configUrl = `${appConfig.proxy}${appConfig.mapserviceBase}/config`;
@@ -91,7 +119,7 @@ try {
 
   const [mapConfigResponse, customThemeResponse] = await Promise.all([
     fetchConfig(),
-    hfetch("customTheme.json", { cacheBuster: true }),
+    hfetch("customTheme.json"),
   ]);
   // If mapConfigResponse.status is 403, throw a custom access denied error that we
   // later catch and display Access Denied message
@@ -128,10 +156,13 @@ try {
   // At this stage, we know for sure what activeMap is, so we can initiate the LocalStorageHelper
   LocalStorageHelper.setKeyName(config.activeMap);
 
+  // Use availableTools from appConfig, with an empty array as fallback if not provided.
+  const availableTools = ensureActiveToolsAreValid(appConfig.availableTools);
+
   // Invoke React's renderer. Render the theme. Theme will render the App.
   createRoot(document.getElementById("root")).render(
     <HajkThemeProvider
-      activeTools={buildConfig.activeTools}
+      activeTools={availableTools}
       config={config}
       customTheme={customTheme}
     />

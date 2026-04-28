@@ -230,14 +230,15 @@ const getTextArea = (tag, defaultColors) => {
   });
 
   const backgroundColor =
-    tag.attributes.getNamedItem("data-background-color")?.value ||
+    tag.attributes.getNamedItem("data-background-color")?.value?.trim() ||
     defaultColors?.textAreaBackgroundColor;
 
   const dividerColor =
-    tag.attributes.getNamedItem("data-divider-color")?.value ||
+    tag.attributes.getNamedItem("data-divider-color")?.value?.trim() ||
     defaultColors?.textAreaDividerColor;
 
-  const textColor = tag.attributes.getNamedItem("data-text-color")?.value;
+  const textColor =
+    tag.attributes.getNamedItem("data-text-color")?.value?.trim();
 
   return (
     <TextArea
@@ -257,8 +258,8 @@ export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
       const bgColorItem = blockQuoteTag.attributes.getNamedItem(
         "data-background-color"
       );
-      if (bgColorItem.value) {
-        const textColor = theme.palette.getContrastText(bgColorItem.value);
+      if (bgColorItem?.value?.trim()) {
+        const textColor = theme.palette.getContrastText(bgColorItem.value.trim());
         blockQuoteTag.setAttribute("data-text-color", textColor);
       }
     }
@@ -319,14 +320,15 @@ const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
     : (tag.innerText || tag.textContent).substring(0, 100);
 
   const backgroundColor =
-    tag.attributes.getNamedItem("data-background-color")?.value ||
+    tag.attributes.getNamedItem("data-background-color")?.value?.trim() ||
     defaultColors?.textAreaBackgroundColor;
 
   const dividerColor =
-    tag.attributes.getNamedItem("data-divider-color")?.value ||
+    tag.attributes.getNamedItem("data-divider-color")?.value?.trim() ||
     defaultColors?.textAreaBackgroundColor;
 
-  const textColor = tag.attributes.getNamedItem("data-text-color")?.value;
+  const textColor =
+    tag.attributes.getNamedItem("data-text-color")?.value?.trim();
 
   return (
     <StyledAccordion
@@ -361,8 +363,8 @@ export const AccordionSection = ({ blockQuoteTag, defaultColors }) => {
     const bgColorItem = blockQuoteTag.attributes.getNamedItem(
       "data-background-color"
     );
-    if (bgColorItem.value) {
-      const textColor = theme.palette.getContrastText(bgColorItem.value);
+    if (bgColorItem?.value?.trim()) {
+      const textColor = theme.palette.getContrastText(bgColorItem.value.trim());
       blockQuoteTag.setAttribute("data-text-color", textColor);
     }
   }

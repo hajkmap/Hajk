@@ -1,7 +1,7 @@
 import React from "react";
 import propTypes from "prop-types";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
+import BaseDialog from "./Dialog/BaseDialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -27,7 +27,7 @@ class AlertView extends React.PureComponent {
       message = "Meddelande saknas",
     } = this.props;
     return (
-      <Dialog
+      <BaseDialog
         open={open}
         onClose={this.handleClose}
         aria-labelledby="alert-dialog-title"
@@ -40,7 +40,7 @@ class AlertView extends React.PureComponent {
             Ok
           </Button>
         </DialogActions>
-      </Dialog>
+      </BaseDialog>
     );
   }
 }

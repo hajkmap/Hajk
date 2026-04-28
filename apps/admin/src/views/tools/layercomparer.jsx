@@ -27,6 +27,7 @@ const defaultState = {
   visibleForGroups: [],
   chosenLayers: [],
   selectChosenLayers: false,
+  startCompareMode: "sideBySide",
   layers: [],
 };
 
@@ -57,6 +58,8 @@ class LayerComparer extends Component {
           ? tool.options.chosenLayers
           : [],
         selectChosenLayers: tool.options.selectChosenLayers,
+        startCompareMode:
+          tool.options.startCompareMode || "sideBySide",
       });
       this.loadLayers();
     } else {
@@ -209,6 +212,7 @@ class LayerComparer extends Component {
         ),
         chosenLayers: this.state.chosenLayers,
         selectChosenLayers: this.state.selectChosenLayers,
+        startCompareMode: this.state.startCompareMode || "sideBySide",
       },
     };
 
@@ -419,6 +423,21 @@ class LayerComparer extends Component {
               />
               Aktivera "Välj lager"
             </label>
+          </div>
+          <div>
+            <label htmlFor="startCompareMode">Startläge för jämförare</label>
+            <select
+              id="startCompareMode"
+              name="startCompareMode"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.startCompareMode}
+            >
+              <option value="sideBySide">Sida vid sida</option>
+              <option value="spyGlass">Titthål</option>
+            </select>
           </div>
           <div>
             {this.state.selectChosenLayers && (

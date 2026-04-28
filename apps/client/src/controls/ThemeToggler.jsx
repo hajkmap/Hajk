@@ -1,41 +1,29 @@
 import React from "react";
-import { IconButton, Paper } from "@mui/material";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
-import { styled } from "@mui/material/styles";
-import HajkToolTip from "components/HajkToolTip";
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  marginBottom: theme.spacing(1),
-}));
-
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  minWidth: "unset",
-}));
+import ControlButton from "components/ControlButton";
 
 /**
- * @summary Hides all visible layers
+ * @summary Toggles between dark and light theme
  *
  * @param {object} props
  * @returns {object} React
  */
-const ThemeToggler = React.memo((props) => {
+const ThemeToggler = (props) => {
   return (
     (props.showThemeToggler && (
-      <HajkToolTip title="Växla mellan mörkt och ljust färgtema">
-        <StyledPaper>
-          <StyledIconButton
-            aria-label="Växla färgtema"
-            onClick={(e) => {
-              props.toggleMUITheme();
-            }}
-          >
-            <Brightness4Icon />
-          </StyledIconButton>
-        </StyledPaper>
-      </HajkToolTip>
+      <ControlButton
+        tooltip="Växla mellan mörkt och ljust färgtema"
+        ariaLabel="Växla färgtema"
+        onClick={() => {
+          props.toggleMUITheme();
+        }}
+      >
+        <Brightness4Icon />
+      </ControlButton>
     )) ||
     null
   );
-});
+};
 
 export default ThemeToggler;

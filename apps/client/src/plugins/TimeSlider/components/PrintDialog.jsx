@@ -1,10 +1,10 @@
 import React from "react";
 import { createPortal } from "react-dom";
 
+import BaseDialog from "components/Dialog/BaseDialog";
 import {
   Button,
   LinearProgress,
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -13,7 +13,7 @@ import {
 
 export default function PrintDialog({ cancelPrint, open }) {
   return createPortal(
-    <Dialog disableEscapeKeyDown={true} open={open}>
+    <BaseDialog disableEscapeKeyDown={true} open={open}>
       <LinearProgress />
       <DialogTitle>Dina bilder skapas</DialogTitle>
       <DialogContent>
@@ -27,7 +27,7 @@ export default function PrintDialog({ cancelPrint, open }) {
           Avbryt
         </Button>
       </DialogActions>
-    </Dialog>,
+    </BaseDialog>,
     document.getElementById("root")
   );
 }

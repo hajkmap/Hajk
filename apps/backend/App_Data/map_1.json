@@ -543,12 +543,6 @@
         ],
         "baselayers": [
           {
-            "id": "1",
-            "visibleAtStart": false,
-            "drawOrder": 0,
-            "infobox": ""
-          },
-          {
             "id": "2",
             "visibleAtStart": false,
             "drawOrder": 0,
@@ -820,13 +814,31 @@
     {
       "type": "coordinates",
       "options": {
-        "target": "control",
+        "target": "toolbar",
         "position": "right",
         "instruction": "",
         "transformations": [
           {
-            "code": "EPSG:3006",
+            "code": "EPSG:3857",
             "default": true,
+            "hint": "Web Mercator",
+            "title": "Web Mercator",
+            "xtitle": "Easting",
+            "ytitle": "Northing",
+            "inverseAxis": false
+          },
+          {
+            "code": "EPSG:4326",
+            "default": false,
+            "hint": "WGS84",
+            "title": "WGS84",
+            "xtitle": "Longitude",
+            "ytitle": "Latitude",
+            "inverseAxis": false
+          },
+          {
+            "code": "EPSG:3006",
+            "default": false,
             "hint": "Sweref99 TM",
             "title": "Sweref99 TM",
             "xtitle": "E",
@@ -1106,7 +1118,7 @@
   "map": {
     "target": "map",
     "center": [1325000, 7900000],
-    "title": "Hajk 4",
+    "title": "Hajk - open source webGIS",
     "projection": "EPSG:3857",
     "zoom": 6,
     "maxZoom": 18,
@@ -1126,7 +1138,7 @@
     "logo": "/logoLight.png",
     "geoserverLegendOptions": "",
     "mapselector": false,
-    "mapcleaner": false,
+    "mapcleaner": true,
     "showUserAvatar": false,
     "drawerVisible": false,
     "drawerPermanent": false,

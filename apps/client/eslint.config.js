@@ -49,6 +49,7 @@ export default defineConfig([
       "prettier/prettier": "error", // run Prettier as an ESLint rule
       "arrow-body-style": "off", // let Prettier handle this
       "prefer-arrow-callback": "off", // same, avoid conflicts with Prettier
+      "react/prop-types": "off", // we don't use prop-types in our codebase
     },
   },
   prettierConfig, // disables ESLint rules that would conflict with Prettier

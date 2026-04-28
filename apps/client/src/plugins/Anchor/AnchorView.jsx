@@ -5,7 +5,7 @@ import withSnackbar from "components/WithSnackbar";
 import QRCode from "qrcode";
 import HajkToolTip from "components/HajkToolTip";
 import ShareIcon from "@mui/icons-material/Share";
-import Collapse from "@mui/material/Collapse";
+
 import Alert from "@mui/material/Alert";
 
 import {
@@ -15,8 +15,8 @@ import {
   Radio,
   RadioGroup,
   TextField,
+  Box,
   Paper,
-  Switch,
 } from "@mui/material";
 
 import FileCopyIcon from "@mui/icons-material/FileCopy";
@@ -67,20 +67,22 @@ class AnchorView extends React.PureComponent {
     anchor: "",
     cleanUrl: false,
     qrCode: null,
-    showQr: false,
   };
 
   async componentDidMount() {
     // Subscribe to changes to anchor URL caused by other components. This ensure
     // that we have a live update of the anchor whether user does anything in the map.
-    this.props.globalObserver.subscribe("core.mapUpdated", ({ url }) => {
-      this.generateQr(url).then((data) => {
-        this.setState({
-          anchor: this.appendCleanModeIfActive(url),
-          qrCode: data,
+    this.mapUpdatedSubscription = this.props.globalObserver.subscribe(
+      "core.mapUpdated",
+      ({ url }) => {
+        this.generateQr(url).then((data) => {
+          this.setState({
+            anchor: this.appendCleanModeIfActive(url),
+            qrCode: data,
+          });
         });
-      });
-    });
+      }
+    );
 
     // Initiate the anchor-url on mount
     const a = await this.props.model.getAnchor();
@@ -91,12 +93,12 @@ class AnchorView extends React.PureComponent {
     });
   }
 
+  componentWillUnmount() {
+    this.mapUpdatedSubscription?.unsubscribe();
+  }
+
   generateQr = (url) => {
     return QRCode.toDataURL(this.appendCleanModeIfActive(url));
-  };
-
-  toggleShowQr = () => {
-    this.setState({ showQr: !this.state.showQr });
   };
 
   appendCleanModeIfActive = (url) =>
@@ -131,14 +133,14 @@ class AnchorView extends React.PureComponent {
 
     return (
       <Grid container direction="column" sx={{ maxWidth: 400 }}>
-        <Grid item>
+        <Grid>
           <StyledAlert icon={<ShareIcon />} variant="info">
             Skapa en länk med kartans synliga lager, aktuella zoomnivå och
             utbredning.
           </StyledAlert>
         </Grid>
         {allowCreatingCleanUrls && (
-          <Grid item sx={{ mb: 1.5 }}>
+          <Grid sx={{ mb: 1.5, display: { xs: "none", sm: "block" } }}>
             <RadioGroup
               aria-label="copy-url"
               name="copy-url"
@@ -159,7 +161,7 @@ class AnchorView extends React.PureComponent {
             </RadioGroup>
           </Grid>
         )}
-        <Grid item sx={{ mb: 1 }}>
+        <Grid sx={{ mb: 1, display: { xs: "none", sm: "block" } }}>
           <StyledTextField
             fullWidth={true}
             id="anchorUrl"
@@ -170,9 +172,9 @@ class AnchorView extends React.PureComponent {
           />
         </Grid>
         {document.queryCommandSupported("copy") && (
-          <Grid item sx={{ mb: 0 }}>
+          <Grid sx={{ mb: 0 }}>
             <Grid container spacing={2}>
-              <Grid item size={6} sx={{ display: "flex" }}>
+              <Grid size={6} sx={{ display: "flex" }}>
                 <HajkToolTip title="Kopiera länk till urklipp">
                   <StyledButton
                     fullWidth
@@ -197,7 +199,7 @@ class AnchorView extends React.PureComponent {
                   </StyledButton>
                 </HajkToolTip>
               </Grid>
-              <Grid item size={6} sx={{ display: "flex" }}>
+              <Grid size={6} sx={{ display: "flex" }}>
                 <HajkToolTip title="Öppna länk i nytt fönster">
                   <StyledButton
                     fullWidth
@@ -226,37 +228,27 @@ class AnchorView extends React.PureComponent {
           </Grid>
         )}
         {appStateInHashEnabled && (
-          <Grid item>
+          <Grid>
             <Paper sx={{ p: 1, mt: 2 }}>
-              <Grid
-                container
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Grid item xs={6}>
-                  Slå på QR-kod
-                </Grid>
-                <Grid item xs={6} style={{ textAlign: "end" }}>
-                  <HajkToolTip title="Slå på QR-kod">
-                    <Switch
-                      variant="contained"
-                      color="primary"
-                      onClick={this.toggleShowQr}
-                    />
-                  </HajkToolTip>
+              <Grid container justifyContent="center">
+                <Grid size={12}>
+                  <Box
+                    sx={{
+                      minHeight: 200,
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {this.state.qrCode && (
+                      <img
+                        src={this.state.qrCode}
+                        alt="QR-kod"
+                        style={{ minHeight: 200 }}
+                      />
+                    )}
+                  </Box>
                 </Grid>
               </Grid>
-              <Collapse in={this.state.showQr} unmountOnExit>
-                <Grid container justifyContent="center">
-                  <Grid item xs={12} style={{ textAlign: "center" }}>
-                    <img
-                      src={this.state.qrCode}
-                      alt=""
-                      style={{ minHeight: "200px" }}
-                    />
-                  </Grid>
-                </Grid>
-              </Collapse>
             </Paper>
           </Grid>
         )}

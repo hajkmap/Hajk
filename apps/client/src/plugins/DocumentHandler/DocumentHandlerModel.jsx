@@ -125,7 +125,10 @@ export default class DocumentHandlerModel {
 
             return {
               ...doc,
-              documentColor: menuItem.color,
+              documentColor:
+                typeof menuItem.color === "string"
+                  ? menuItem.color.trim()
+                  : menuItem.color,
               documentFileName: menuItem.document,
               documentTitle: doc.title,
               menuItemId: menuItem.id,

@@ -176,7 +176,7 @@ export const customComponentsForReactMarkdown = {
     return !children ? null : <Paragraph variant="body2">{children}</Paragraph>;
   },
   hr: () => <Divider />,
-  a: ({ children, href, title, target }) => {
+  a: ({ children, href, title, target, node, ...extraAttrs }) => {
     // Grab color and underline from options. Fallback to default MUI values if no settings exist.
     // Also, see #1106.
     const { linksColor = "primary", linksUnderline = "always" } =
@@ -188,6 +188,7 @@ export const customComponentsForReactMarkdown = {
         target={target || "_blank"}
         color={linksColor}
         underline={linksUnderline}
+        {...extraAttrs}
       >
         {children}
       </Link>

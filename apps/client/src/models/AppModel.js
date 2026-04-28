@@ -230,12 +230,14 @@ class AppModel {
    * have a way to determine whether the Drawer toggle button should be
    * rendered. It's not as easy as checking for Drawer plugins only (i.e.
    * those with target=toolbar) - this simple logic gets complicated by
-   * the fact that Widget plugins (target=left|right) also render Drawer
-   * buttons on small screens.
+   * the fact that Widget plugins (target=left|right) and Control buttons (target=control)
+   * also render Drawer buttons on small screens.
    */
   getPluginsThatMightRenderInDrawer() {
     return this.getPlugins().filter((plugin) => {
-      return ["toolbar", "left", "right"].includes(plugin.options.target);
+      return ["toolbar", "left", "right", "control"].includes(
+        plugin.options.target
+      );
     });
   }
 
@@ -906,16 +908,6 @@ class AppModel {
         // Let's handle multiple features as array and keep backward compatibility with single features.
         features = Array.isArray(features) ? features : [features];
         this.highlightSource.addFeatures(features);
-
-        if (window.innerWidth < 600) {
-          // Do we have any geometries? It's needed if you want to get a center.
-          if (features[0].getGeometry()) {
-            // Use the source extent to get a good center.
-            this.map
-              .getView()
-              .setCenter(this.getCenter(this.highlightSource.getExtent()));
-          }
-        }
       }
     }
   }

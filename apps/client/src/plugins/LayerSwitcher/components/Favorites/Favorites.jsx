@@ -8,12 +8,16 @@ import FavoritesList from "./FavoritesList";
 import FavoritesOptions from "./FavoritesOptions";
 import FavoritesViewHeader from "./FavoritesViewHeader";
 import ConfirmationDialog from "components/ConfirmationDialog";
-import { useLayerSwitcherDispatch } from "../../LayerSwitcherProvider";
+import {
+  QUICK_ACCESS_KEY,
+  QUICK_ACCESS_LS_KEY,
+  useLayerSwitcherDispatch,
+} from "../../LayerSwitcherProvider";
 
+import BaseDialog from "components/Dialog/BaseDialog";
 import {
   Box,
   Button,
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -160,6 +164,12 @@ function Favorites({
         }
       }
     });
+
+    // Save loaded layers to localStorage
+    const loadedLayerIdsArray = allMapLayers
+      .filter((l) => l.get(QUICK_ACCESS_KEY) === true)
+      .map((l) => l.get("name"));
+    LocalStorageHelper.set(QUICK_ACCESS_LS_KEY, loadedLayerIdsArray);
 
     // Publish event to auto-expand affected groups and GroupLayers
     if (loadedLayerIds.size > 0) {
@@ -439,7 +449,7 @@ function Favorites({
   // Render dialog with missing layers information
   const renderMissingLayersDialog = () => {
     return createPortal(
-      <Dialog
+      <BaseDialog
         open={missingLayersConfirmation ? true : false}
         onClose={handleMissingLayersConfirmationAbort}
         onMouseDown={(e) => {
@@ -489,13 +499,13 @@ function Favorites({
             Fortsätt
           </Button>
         </DialogActions>
-      </Dialog>,
+      </BaseDialog>,
       document.getElementById("map")
     );
   };
   const renderAddFavoriteDialog = () => {
     return createPortal(
-      <Dialog
+      <BaseDialog
         open={saveFavoriteDialog}
         aria-labelledby="saveFavorite-dialog-title"
         aria-describedby="save-favorite-dialog-description"
@@ -555,7 +565,7 @@ function Favorites({
             Spara
           </Button>
         </DialogActions>
-      </Dialog>,
+      </BaseDialog>,
       document.getElementById("map")
     );
   };

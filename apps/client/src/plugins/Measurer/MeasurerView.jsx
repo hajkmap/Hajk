@@ -1,10 +1,10 @@
 import { styled } from "@mui/material/styles";
+import BaseDialog from "components/Dialog/BaseDialog";
 import {
   ToggleButtonGroup,
   ToggleButton,
   Button,
   Grid,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
@@ -75,7 +75,7 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 
 function HelpDialog(props) {
   return (
-    <Dialog
+    <BaseDialog
       open={props.open}
       onClose={() => {
         props.setShowHelp(false);
@@ -120,7 +120,7 @@ function HelpDialog(props) {
           OK
         </Button>
       </DialogActions>
-    </Dialog>
+    </BaseDialog>
   );
 }
 

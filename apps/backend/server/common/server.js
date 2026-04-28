@@ -11,9 +11,7 @@ import cookieParser from "cookie-parser";
 import * as OpenApiValidator from "express-openapi-validator";
 
 import log4js from "./utils/hajkLogger.js";
-import clfDate from "clf-date";
-
-import websockets from "./websockets/index.js";
+import { getCLFDate } from "./utils/get-clf-date.ts";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
 
@@ -120,6 +118,18 @@ export default class ExpressServer {
       );
 
       app.set("trust proxy", trustProxy);
+
+      // Should our proxy middleware add the x-forwarded-* headers?
+      this.addXForwardedHeaders = this.grabDotEnvBoolean(
+        "HAJK_PROXY_ADD_X_FORWARDED_HEADERS",
+        false
+      );
+
+      // Should we send the X-Qgis-Service-Url header to proxied services? See #1774 for more info.
+      this.addQgisServiceUrlHeader = this.grabDotEnvBoolean(
+        "HAJK_PROXY_ADD_X_QGIS_SERVICE_URL_HEADER",
+        false
+      );
     }
 
     // Configure the HTTP access logger. We want it to log in the Combined Log Format, which requires some custom configuration below.
@@ -130,7 +140,7 @@ export default class ExpressServer {
             ":remote-addr - " + // Host name or IP of accesser. RFC 1413 identity (unreliable, hence always a dash)
               (req.get(process.env.AD_TRUSTED_HEADER || "X-Control-Header") ||
                 "-") + // Value of X-Control-Header (or whatever header specified in .env)
-              ` [${clfDate()}]` + // Timestamp string surrounded by square brackets, e.g. [12/Dec/2012:12:12:12 -0500]
+              ` [${getCLFDate()}]` + // Timestamp string surrounded by square brackets, e.g. [12/Dec/2012:12:12:12 -0500]
               ' ":method :url HTTP/:http-version"' + // HTTP request surrounded by double quotes, e.g., "GET /stuff.html HTTP/1.1"
               ' :status :content-length ":referrer"' + // HTTP status code, content length in bytes and referer (where request came from to your site)
               ' ":user-agent"' // User agent string, e.g. name of the browser
@@ -253,6 +263,19 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     });
   }
 
+  /**
+   * @description Utility function to grab boolean values from .env, with a default fallback.
+   * Handles the different ways users can setup their .envs (e.g. "true"/"1"/"false"/"0", case insensitively).
+   * @param {string} name Name of the .env variable to grab
+   * @param {boolean} defaultValue Default value to return if the variable isn't set in .env
+   * @returns {boolean}
+   */
+  grabDotEnvBoolean(name, defaultValue) {
+    const value = process.env[name];
+    if (value === undefined) return defaultValue;
+    return value === "1" || value.toLowerCase() === "true";
+  }
+
   async setupSokigoProxy() {
     // Each API version has its own Sokigo proxy middleware. Let's iterate them.
     for await (const v of app.get("apiVersions")) {
@@ -343,16 +366,66 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           );
 
           // Create the proxy itself
+          const options = {
+            logger: l,
+            target: target,
+            changeOrigin: true,
+            ...(this.addXForwardedHeaders && { xfwd: true }), // Respect the setting from .env
+            pathRewrite: {
+              [`^/api/v${apiVersion}/proxy/${context}`]: "", // remove base path
+            },
+            ...(this.addQgisServiceUrlHeader && {
+              on: {
+                // This entire dance below is made for one purpose: ensure that we set
+                // the "X-Qgis-Service-Url" header on the proxied request, which is
+                // required by QGIS Server to properly generate responses with correct URLs.
+                // The value of this header must be the public-facing URL of the service,
+                // which we reconstruct here based on the incoming request's headers and original URL.
+                // See #1774 for more info.
+                proxyReq: (proxyReq, req, _res) => {
+                  // See if there's a corresponding header setting for QGIS service URL
+                  // See if there's another proxy in front of this backend that sets the x-forwarded-* headers.
+                  // If so, we want to use those headers to reconstruct the original URL as seen by the client,
+                  // not the URL as seen by this backend.
+                  const proto = (
+                    req.headers["x-forwarded-proto"] || req.protocol
+                  )
+                    .split(",")[0]
+                    .trim();
+
+                  // Same here, but with one additional thing…
+                  const host = (
+                    req.headers["x-forwarded-host"] || req.headers.host
+                  )
+                    .split(",")[0]
+                    .split(":")[0] // …i.e. not taking the port part if it exists on host.
+                    .trim();
+
+                  const port = (req.headers["x-forwarded-port"] || "")
+                    .split(",")[0]
+                    .trim();
+
+                  // For standard ports (80 for HTTP and 443 for HTTPS), we don't want to include the port
+                  const hostWithPort =
+                    port && port !== "443" && port !== "80"
+                      ? `${host}:${port}`
+                      : host;
+
+                  // Ensure we get the original URL path, before the proxy middleware rewrote it.
+                  const publicPath = req.originalUrl.split("?")[0];
+
+                  // Finally, construct the header value for QGIS…
+                  const serviceUrl = `${proto}://${hostWithPort}${publicPath}`;
+
+                  // …and set it.
+                  proxyReq.setHeader("X-Qgis-Service-Url", serviceUrl);
+                },
+              },
+            }),
+          };
           app.use(
             `/api/v${apiVersion}/proxy/${context}`,
-            createProxyMiddleware({
-              logger: l,
-              target: target,
-              changeOrigin: true,
-              pathRewrite: {
-                [`^/api/v${apiVersion}/proxy/${context}`]: "", // remove base path
-              },
-            })
+            createProxyMiddleware(options)
           );
         });
       }
@@ -513,10 +586,6 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
 
     // Let's setup the server and start listening.
     const server = http.createServer(app).listen(port, welcome(port));
-
-    // For WS support we must also supply the server to the WebSocket component.
-    process.env.ENABLE_WEBSOCKETS?.toLowerCase() === "true" &&
-      websockets(server);
 
     return app;
   }

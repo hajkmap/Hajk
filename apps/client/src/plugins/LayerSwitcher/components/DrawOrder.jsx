@@ -269,7 +269,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
         layer={l}
         app={app}
         globalObserver={app.globalObserver}
-        draggable={!options.lockDrawOrderBaselayer}
+        draggable={true}
         toggleable={false}
       />
     ) : l.get("layerType") === "group" ? (
@@ -379,8 +379,9 @@ function DrawOrder({ display, app, map, localObserver, options }) {
         >
           {sortedLayers.map((l) => {
             if (
-              l.get("layerType") !== "base" &&
-              options.lockDrawOrderBaselayer
+              l.get("layerType") !== "base" ||
+              (l.get("layerType") === "base" &&
+                options.lockDrawOrderBaselayer === false)
             ) {
               return (
                 <SortableList key={l.get("name")} id={l.get("name")}>

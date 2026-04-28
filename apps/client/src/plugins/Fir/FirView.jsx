@@ -11,14 +11,13 @@ import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 
 const DivRoot = styled("div")(({ theme }) => ({
-  margin: -10,
   display: "flex",
   flexDirection: "column",
   height: "100%",
 }));
 
 const StickyAppBar = styled(AppBar)(({ theme }) => ({
-  top: -10,
+  top: 0,
 }));
 
 const TabPanel = styled("div")(({ theme }) => ({
@@ -72,68 +71,66 @@ class FirView extends React.PureComponent {
     const { windowVisible } = this.props;
 
     return (
-      <>
-        <DivRoot>
-          <StickyAppBar position="sticky" color="default">
-            <Tabs
-              action={this.handleTabsMounted}
-              onChange={this.handleChangeTabs}
-              // make sure the window is visible, otherwise an error will be thrown.
-              value={windowVisible ? this.state.activeTab : false}
-              variant="fullWidth"
-            >
-              <Tab label="Sök" />
-              <Tab label="Exportera" />
-            </Tabs>
-          </StickyAppBar>
-          <TabPanel
-            style={
-              this.state.activeTab !== 0
-                ? {
-                    visibility: "hidden",
-                    height: 0,
-                    overflow: "hidden",
-                    padding: 0,
-                  }
-                : {}
-            }
+      <DivRoot>
+        <StickyAppBar position="sticky" color="default">
+          <Tabs
+            action={this.handleTabsMounted}
+            onChange={this.handleChangeTabs}
+            // make sure the window is visible, otherwise an error will be thrown.
+            value={windowVisible ? this.state.activeTab : false}
+            variant="fullWidth"
           >
-            <FirSearchView
-              model={this.props.model}
-              app={this.props.app}
-              localObserver={this.localObserver}
-            />
-            <FirSearchNeighborView
-              model={this.props.model}
-              app={this.props.app}
-              localObserver={this.localObserver}
-            />
-            <FirSearchResultsView
-              model={this.props.model}
-              app={this.props.app}
-              localObserver={this.localObserver}
-            />
-          </TabPanel>
-          <TabPanel
-            style={
-              this.state.activeTab !== 1
-                ? {
-                    visibility: "hidden",
-                    height: 0,
-                    overflow: "hidden",
-                    padding: 0,
-                  }
-                : {}
-            }
-          >
-            <FirExportView
-              model={this.props.model}
-              app={this.props.app}
-              localObserver={this.localObserver}
-            />
-          </TabPanel>
-        </DivRoot>
-      </>
+            <Tab label="Sök" />
+            <Tab label="Exportera" />
+          </Tabs>
+        </StickyAppBar>
+        <TabPanel
+          style={
+            this.state.activeTab !== 0
+              ? {
+                  visibility: "hidden",
+                  height: 0,
+                  overflow: "hidden",
+                  padding: 0,
+                }
+              : {}
+          }
+        >
+          <FirSearchView
+            model={this.props.model}
+            app={this.props.app}
+            localObserver={this.localObserver}
+          />
+          <FirSearchNeighborView
+            model={this.props.model}
+            app={this.props.app}
+            localObserver={this.localObserver}
+          />
+          <FirSearchResultsView
+            model={this.props.model}
+            app={this.props.app}
+            localObserver={this.localObserver}
+          />
+        </TabPanel>
+        <TabPanel
+          style={
+            this.state.activeTab !== 1
+              ? {
+                  visibility: "hidden",
+                  height: 0,
+                  overflow: "hidden",
+                  padding: 0,
+                }
+              : {}
+          }
+        >
+          <FirExportView
+            model={this.props.model}
+            app={this.props.app}
+            localObserver={this.localObserver}
+          />
+        </TabPanel>
+      </DivRoot>
     );
   }
 }

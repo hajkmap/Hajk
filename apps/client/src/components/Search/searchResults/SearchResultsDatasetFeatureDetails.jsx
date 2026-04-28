@@ -170,7 +170,13 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       currentFeatureIndex + 1 >= numFeaturesInCollection;
 
     return (
-      <Grid container alignItems="center" justifyContent="space-between">
+      <Grid
+        container
+        alignItems="center"
+        justifyContent="center"
+        spacing={1}
+        sx={{ mt: 1, mb: 1 }}
+      >
         <Grid>
           <HajkToolTip
             title={
@@ -199,6 +205,11 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
           </HajkToolTip>
         </Grid>
         <Grid>
+          <Typography variant="body2" sx={{ px: 1 }}>
+            {currentFeatureIndex + 1} av {numFeaturesInCollection}
+          </Typography>
+        </Grid>
+        <Grid>
           <HajkToolTip
             title={
               !buttonRightDisabled ? "Visa nästa objekt i resultatlistan" : ""
@@ -213,7 +224,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
                   this.handleTogglerPressed(currentFeatureIndex + 1)
                 }
                 aria-label="show-next-feature"
-                id="step-left"
+                id="step-right"
               >
                 <ArrowRightIcon
                   fontSize="small"
@@ -243,25 +254,11 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       (enableFeatureToggler ?? true) && features?.length > 1;
     return (
       <FeatureDetailsContainer container>
+        {shouldRenderToggler && (
+          <Grid size={12}>{this.renderFeatureToggler()}</Grid>
+        )}
         <HeaderContainer container>
-          <Grid
-            size={{
-              xs: shouldRenderToggler ? 9 : 12,
-              md: shouldRenderToggler ? 10 : 12,
-            }}
-          >
-            {this.renderFeatureTitle()}
-          </Grid>
-          {shouldRenderToggler && (
-            <Grid
-              size={{
-                xs: 3,
-                md: 2,
-              }}
-            >
-              {this.renderFeatureToggler()}
-            </Grid>
-          )}
+          <Grid size={12}>{this.renderFeatureTitle()}</Grid>
         </HeaderContainer>
         {infoBox && <Grid size={12}>{infoBox}</Grid>}
       </FeatureDetailsContainer>

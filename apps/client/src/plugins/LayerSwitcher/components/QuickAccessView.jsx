@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import withSnackbar from "components/WithSnackbar";
 import LsIconButton from "./LsIconButton";
 
@@ -47,6 +47,20 @@ const QuickAccessView = ({
     useState(false);
 
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+
+  // Subscribe to expandQuickAccess event
+  useEffect(() => {
+    const expandSubscription = globalObserver.subscribe(
+      "layerswitcher.expandQuickAccess",
+      () => {
+        setQuickAccessSectionExpanded(true);
+      }
+    );
+
+    return () => {
+      expandSubscription.unsubscribe();
+    };
+  }, [globalObserver]);
 
   // Handles click on clear quickAccess menu item
   const handleShowDeleteConfirmation = (e) => {
