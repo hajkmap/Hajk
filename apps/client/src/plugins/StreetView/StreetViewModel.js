@@ -29,7 +29,7 @@ class StreetViewModel {
 
   activate() {
     if (this.googleMapsApi) {
-      this.doActivate();
+      this.requestDoActivate();
       return;
     }
     if (!this.apiKey) {
@@ -43,7 +43,7 @@ class StreetViewModel {
     loadGoogleMapsApi(this.apiKey)
       .then((googleMapApi) => {
         this.googleMapsApi = googleMapApi;
-        this.doActivate();
+        this.requestDoActivate();
       })
       .catch((err) => {
         console.warn("Could not load Google Maps API:", err);
@@ -51,16 +51,28 @@ class StreetViewModel {
       });
   }
 
+  requestDoActivate() {
+    // Run it at next tick to ensure the container is mounted.
+    // This is a workaround for a bug in the StreetView plugin where the container is not mounted when the plugin is activated.
+    requestAnimationFrame(() => this.doActivate());
+  }
+
   doActivate() {
     if (!this.googleMapsApi) return;
+
+    const container = document.getElementById("street-view-window");
+    if (!container) {
+      console.warn("StreetView: container not mounted, aborting activation.");
+      return;
+    }
+
     this.map.clickLock.add("streetview");
 
     this.streetViewService = new this.googleMapsApi.StreetViewService();
-    this.panorama = new this.googleMapsApi.StreetViewPanorama(
-      document.getElementById("street-view-window")
-    );
+    this.panorama = new this.googleMapsApi.StreetViewPanorama(container);
     document.querySelector(".ol-viewport").style.cursor = "crosshair";
-    this.map.on("singleclick", (e) => {
+
+    this._onSingleClick = (e) => {
       this.coordinate = e.coordinate;
       this.coord = transform(
         this.coordinate,
@@ -69,18 +81,23 @@ class StreetViewModel {
       );
       this.showLocation();
       this.localObserver.publish("maximizeWindow", true);
-    });
+    };
+    this.map.on("singleclick", this._onSingleClick);
     this.activated = true;
   }
 
   deactivate() {
     this.map.clickLock.delete("streetview");
     document.querySelector(".ol-viewport").style.cursor = "default";
-    this.map.un("singleclick", this.showLocation);
+    if (this._onSingleClick) {
+      this.map.un("singleclick", this._onSingleClick);
+      this._onSingleClick = undefined;
+    }
     this.activated = false;
     this.streetViewMarkerLayer.getSource().clear();
     this.panorama = undefined;
-    var win = document.getElementById("street-view-window");
+
+    const win = document.getElementById("street-view-window");
     if (win) win.innerHTML = "";
   }
 

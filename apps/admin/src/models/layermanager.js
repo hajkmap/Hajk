@@ -457,6 +457,49 @@ var manager = Model.extend({
     });
   },
 
+  getAllWMTSCapabilities: function (url) {
+    var xmlParser = new X2JS({
+      attributePrefix: "_",
+      arrayAccessFormPaths: [
+        "Capabilities.Contents.Layer",
+        "Capabilities.Contents.Layer.TileMatrixSetLink",
+        "Capabilities.Contents.Layer.ResourceURL",
+        "Capabilities.Contents.Layer.Style",
+        "Capabilities.Contents.Layer.Format",
+        "Capabilities.Contents.TileMatrixSet",
+        "Capabilities.Contents.TileMatrixSet.TileMatrix",
+      ],
+    });
+
+    var hasCapabilitiesInUrl = /xml|GetCapabilities/i.test(url);
+    var data = hasCapabilitiesInUrl
+      ? undefined
+      : {
+          service: "WMTS",
+          request: "GetCapabilities",
+          version: "1.0.0",
+        };
+
+    return $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
+      data: data
+    }).then((value) => {
+      var xmlstr =
+        typeof value === "string"
+          ? value
+          : new XMLSerializer().serializeToString(value);
+      var json = xmlParser.xml2js(xmlstr);
+
+      var capabilitiesKey = Object.keys(json)[0];
+      if (capabilitiesKey === "html") {
+        throw new Error(
+          "Server returns HTML instead of expected WMTS GetCapabilities response"
+        );
+      }
+
+      return json[capabilitiesKey];
+    });
+  },
+
   getWMSCapabilities: function (url, callback) {
     $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       data: {

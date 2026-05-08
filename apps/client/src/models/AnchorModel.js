@@ -52,8 +52,19 @@ class AnchorModel {
         // Grab an unique ID for each layer, we'll need this to save CQL filter value for each layer
         const layerId = layer.get("name");
 
+        // Initialize CQL filter for visible layers that already have one
+        this.#initializeCqlFilterForLayer(layer, layerId);
+
         // Update anchor each time layer visibility changes (to reflect current visible layers)
         layer.on("change:visible", async (event) => {
+          // Clean up CQL filter from URL when layer becomes invisible
+          if (!event.target.getVisible()) {
+            delete this.#cqlFilters[layerId];
+          } else {
+            // Initialize CQL filter when layer becomes visible
+            this.#initializeCqlFilterForLayer(event.target, layerId);
+          }
+
           this.#app.globalObserver.publish("core.mapUpdated", {
             url: await this.getAnchor(),
             source: "layerVisibility",
@@ -64,13 +75,17 @@ class AnchorModel {
         layer.getSource().on("change", async ({ target }) => {
           if (typeof target.getParams !== "function") return;
 
-          // Update CQL filters only if a real value exists
+          // Update CQL filters only if a real value exists and layer is visible
           const cqlFilterForCurrentLayer = target.getParams()?.CQL_FILTER;
           if (
             cqlFilterForCurrentLayer !== null &&
-            cqlFilterForCurrentLayer !== undefined
+            cqlFilterForCurrentLayer !== undefined &&
+            layer.getVisible()
           ) {
             this.#cqlFilters[layerId] = cqlFilterForCurrentLayer;
+          } else if (!layer.getVisible()) {
+            // Remove CQL filter if layer is not visible
+            delete this.#cqlFilters[layerId];
           }
 
           // Publish the event
@@ -80,6 +95,19 @@ class AnchorModel {
           });
         });
       });
+  }
+
+  #initializeCqlFilterForLayer(layer, layerId) {
+    // Only initialize CQL filter for visible layers
+    if (!layer.getVisible()) return;
+
+    const source = layer.getSource();
+    if (typeof source?.getParams === "function") {
+      const cqlFilter = source.getParams()?.CQL_FILTER;
+      if (cqlFilter !== null && cqlFilter !== undefined && cqlFilter !== "") {
+        this.#cqlFilters[layerId] = cqlFilter;
+      }
+    }
   }
 
   #getAnchorWhenAnimationFinishes = async (e) => {

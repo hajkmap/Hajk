@@ -38,13 +38,17 @@ const PrintButtonContainer = styled("div")(({ theme }) => ({
 function hexToNormRgb(hex) {
   // Get rid of the # if it's there, and ensure it's a string (in case something else is passed in)
   hex = (hex ?? "").replace(/^#/, "");
+  const normalizeHexChannel = (value) => {
+    const parsed = parseInt(value, 16);
+    return Number.isNaN(parsed) ? 1 : parsed / 255;
+  };
   return {
     // For each color channel, parse the corresponding part (xxyyzz) of the hex string
     // using base-16 (since it's hex right…). Then divide by 255 because our
     // libPDF renderer expects colors in 0-1 range.
-    r: parseInt(hex.slice(0, 2), 16) / 255 || 1,
-    g: parseInt(hex.slice(2, 4), 16) / 255 || 1,
-    b: parseInt(hex.slice(4, 6), 16) / 255 || 1,
+    r: normalizeHexChannel(hex.slice(0, 2)),
+    g: normalizeHexChannel(hex.slice(2, 4)),
+    b: normalizeHexChannel(hex.slice(4, 6)),
   };
 }
 
@@ -81,6 +85,9 @@ class PrintView extends React.PureComponent {
     logoPlacement: this.props.options.logoPlacement || "topRight",
     includeQrCode: this.props.options.includeQrCode ?? false,
     qrCodePlacement: this.props.options.qrCodePlacement || "topRight",
+    includeLegendsInPdf:
+      (this.props.options.allowLegendsInPdfOutput ?? false) &&
+      (this.props.options.generateLegendsByDefault ?? false),
     saveAsType: "PDF",
     printOptionsOk: false,
   };
@@ -196,6 +203,7 @@ class PrintView extends React.PureComponent {
       scaleBarPlacement: this.state.scaleBarPlacement,
       includeNorthArrow: this.state.includeNorthArrow,
       northArrowPlacement: this.state.northArrowPlacement,
+      includeLegendsInPdf: this.state.includeLegendsInPdf,
       saveAsType: this.state.saveAsType,
     };
   };
@@ -219,9 +227,13 @@ class PrintView extends React.PureComponent {
   };
 
   handleChange = (event) => {
+    const value =
+      event.target.type === "checkbox"
+        ? event.target.checked
+        : event.target.value;
     this.setState(
       {
-        [event.target.name]: event.target.value,
+        [event.target.name]: value,
       },
       () => {
         this.handlePotentialPrintOptionError();
@@ -300,7 +312,9 @@ class PrintView extends React.PureComponent {
       logoPlacement,
       includeQrCode,
       qrCodePlacement,
+      includeLegendsInPdf,
       printOptionsOk,
+      saveAsType,
     } = this.state;
 
     return (
@@ -321,6 +335,8 @@ class PrintView extends React.PureComponent {
         logoPlacement={logoPlacement}
         includeQrCode={includeQrCode}
         qrCodePlacement={qrCodePlacement}
+        includeLegendsInPdf={includeLegendsInPdf}
+        saveAsType={saveAsType}
         printOptionsOk={printOptionsOk}
         options={this.props.options}
         enableAppStateInHash={this.props.enableAppStateInHash}

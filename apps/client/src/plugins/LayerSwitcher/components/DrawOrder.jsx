@@ -262,6 +262,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
       numberOfSubLayers: l.subLayers?.length,
       layerInfo: l.get("layerInfo"),
       layerLegendIcon: l.get("legendIcon"),
+      olLayer: l,
     };
     return l.get("layerType") === "base" ? (
       <BackgroundLayer

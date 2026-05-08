@@ -38,9 +38,6 @@ const StyledAccordion = styled(Accordion)(
 const StyledAccordionTypography = styled(Typography)({
   marginBottom: "0",
   fontSize: "16px",
-  whiteSpace: "nowrap",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
   maxWidth: "100%",
   display: "block",
 });
@@ -237,8 +234,9 @@ const getTextArea = (tag, defaultColors) => {
     tag.attributes.getNamedItem("data-divider-color")?.value?.trim() ||
     defaultColors?.textAreaDividerColor;
 
-  const textColor =
-    tag.attributes.getNamedItem("data-text-color")?.value?.trim();
+  const textColor = tag.attributes
+    .getNamedItem("data-text-color")
+    ?.value?.trim();
 
   return (
     <TextArea
@@ -259,7 +257,9 @@ export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
         "data-background-color"
       );
       if (bgColorItem?.value?.trim()) {
-        const textColor = theme.palette.getContrastText(bgColorItem.value.trim());
+        const textColor = theme.palette.getContrastText(
+          bgColorItem.value.trim()
+        );
         blockQuoteTag.setAttribute("data-text-color", textColor);
       }
     }
@@ -327,8 +327,9 @@ const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
     tag.attributes.getNamedItem("data-divider-color")?.value?.trim() ||
     defaultColors?.textAreaBackgroundColor;
 
-  const textColor =
-    tag.attributes.getNamedItem("data-text-color")?.value?.trim();
+  const textColor = tag.attributes
+    .getNamedItem("data-text-color")
+    ?.value?.trim();
 
   return (
     <StyledAccordion
@@ -336,6 +337,7 @@ const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
       backgroundcolor={backgroundColor}
       dividercolor={dividerColor}
       sx={{ color: textColor }}
+      disableGutters
     >
       <StyledAccordionButton color="inherit" fullWidth>
         <StyledAccordionSummary
@@ -393,6 +395,7 @@ export const Figure = ({ figureTag }) => {
  * @memberof Contents
  */
 export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
+  const theme = useTheme();
   const tagIsPresent = (imgTag, attribute) => {
     return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
   };
@@ -495,6 +498,10 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
             image.width && {
               height: image.height,
               width: image.width,
+              [theme.breakpoints.down("sm")]: {
+                maxWidth: "100%",
+                height: "auto",
+              },
             },
         ]}
       />

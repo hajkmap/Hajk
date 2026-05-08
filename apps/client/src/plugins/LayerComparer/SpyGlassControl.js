@@ -1,11 +1,12 @@
 import Control from "ol/control/Control";
 import { getRenderPixel } from "ol/render";
+import { getIsMobile } from "../../utils/IsMobile.js";
 import "./index.css";
 
 // Maybe these values should be ok?
 const DEFAULT_LENS_DIAMETER = 200;
 const MIN_LENS_DIAMETER = 60;
-const MAX_LENS_DIAMETER = 400;
+const MAX_LENS_DIAMETER = getIsMobile() ? 400 : 700; 
 const LENS_DIAMETER_STEP = 20;
 
 const DEFAULT_TOP_LAYER_OPACITY = 1;

@@ -123,7 +123,6 @@ function GroupLayer({
 
   // Show expand arrow unless hideExpandArrow is set to true
   const showExpandArrow = layerInfo.hideExpandArrow !== true;
-
   return (
     <LayerItem
       display={display}

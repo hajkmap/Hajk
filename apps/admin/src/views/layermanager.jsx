@@ -310,6 +310,7 @@ class Manager extends Component {
           infoClickSortDesc: layer.infoClickSortDesc ?? true,
           tiled: layer.tiled,
           showAttributeTableButton: layer.showAttributeTableButton || false,
+          hasLabelStyle: layer.hasLabelStyle || false,
           singleTile: layer.singleTile,
           hidpi: layer.hidpi,
           customRatio: layer.customRatio,
@@ -351,7 +352,7 @@ class Manager extends Component {
       });
 
       setTimeout(() => {
-        this.refs["WMTSLayerForm"].setState({
+        this.refs["WMTSLayerForm"].loadLayerState({
           id: layer.id,
           caption: layer.caption,
           internalLayerName: layer.internalLayerName,
@@ -361,14 +362,28 @@ class Manager extends Component {
           legend: layer.legend,
           legendIcon: layer.legendIcon,
           owner: layer.owner,
+          capabilitiesUrl: layer.capabilitiesUrl || layer.url,
           url: layer.url,
           layer: layer.layer,
           matrixSet: layer.matrixSet,
           style: layer.style,
+          requestEncoding: layer.requestEncoding || "",
+          imageFormat: layer.imageFormat,
           projection: layer.projection,
-          origin: layer.origin,
+          origins: layer.origins
+            ? layer.origins.map((o) => o.join(" ")).join("; ")
+            : "",
           resolutions: layer.resolutions,
           matrixIds: layer.matrixIds,
+          sizes: layer.sizes
+            ? layer.sizes.map((s) => s.join(" ")).join("; ")
+            : "",
+          tileSize:
+            layer.tileSize != null
+              ? Array.isArray(layer.tileSize)
+                ? layer.tileSize.join(" ")
+                : String(layer.tileSize)
+              : "",
           layerType: layer.type,
           attribution: layer.attribution,
           infoVisible: layer.infoVisible,
@@ -384,9 +399,6 @@ class Manager extends Component {
           minZoom: layer.minZoom,
           maxZoom: layer.maxZoom,
         });
-        setTimeout(() => {
-          this.refs["WMTSLayerForm"].validate();
-        }, 0);
       }, 0);
     }
   }
@@ -400,7 +412,7 @@ class Manager extends Component {
           layerProperties: properties,
           layerPropertiesName: layerName,
         });
-      }
+      },
     );
   }
 
@@ -656,7 +668,7 @@ class Manager extends Component {
         }
 
         let node = $(this.refs[`${type}Iframe`].contentDocument).find(
-          "body"
+          "body",
         )[0];
         let url = `${window.location.origin}/${node.innerHTML}`;
         this.props.model.set(type, url);
@@ -684,7 +696,7 @@ class Manager extends Component {
             model={this.props.model}
             layer={this.state.layer}
             parent={this}
-            url={this.props.config.url_default_server}
+            capabilitiesUrl={this.props.config.url_default_server}
             serverType={this.props.config.default_server_type}
           />
         );

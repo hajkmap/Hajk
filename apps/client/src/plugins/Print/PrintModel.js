@@ -21,6 +21,7 @@ import QRCode from "qrcode";
 import { buildLayout } from "./PrintLayout";
 import { renderToPdf } from "./PdfRenderer";
 import { renderToPng } from "./PngRenderer";
+import { buildLegendPdfPages, getLegendInfoForLayer } from "./LegendUtil";
 
 const DEFAULT_DIMS = {
   a0: [1189, 841],
@@ -1076,6 +1077,18 @@ export default class PrintModel {
 
       this.textColor = options.mapTextColorNormRgb;
 
+      // Snapshot the legend info for the layers that are about to be
+      // printed. We resolve it *now* (before `prepareActiveLayersForPrint`
+      // swaps originals for temporary image layers and hides the source
+      // layers) so the legend set matches what the user actually sees on
+      // the map – otherwise the originals would have `visible=false` by the
+      // time the PDF renderer runs.
+      const legendInfosForPdf = options.includeLegendsInPdf
+        ? this.getVisibleTileAndImageLayers()
+            .map((layer) => getLegendInfoForLayer(layer))
+            .filter(Boolean)
+        : [];
+
       // Our dimensions are for landscape orientation by default. Flip the values if portrait orientation requested.
       const dim =
         orientation === "portrait"
@@ -1201,11 +1214,24 @@ export default class PrintModel {
           let blob = null;
 
           if (options.saveAsType === "PDF") {
+            // Build one or more extra pages listing the WMS legends for
+            // each visible layer, appended after the map page.
+            // Note: we intentionally don't pass `options.mapTextColorNormRgb`
+            // here – that color is chosen by the user for text overlaid on
+            // the map image (often white, so it pops on dark aerial
+            // backgrounds), which would be invisible on the plain white
+            // legend page. Let the helper's default (black) take over.
+            const legendPages = await buildLegendPdfPages(legendInfosForPdf, {
+              pageWidth,
+              pageHeight,
+              orientation,
+            });
             const pdf = await renderToPdf(
               elements,
               pageWidth,
               pageHeight,
-              orientation
+              orientation,
+              legendPages
             );
             const bytes = await pdf.save();
             const pdfBlob = new Blob([bytes], { type: "application/pdf" });

@@ -52,7 +52,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 
 const ResultListWrapper = styled(Grid)(({ theme }) => ({
   [theme.breakpoints.down("sm")]: {
-    maxHeight: "78vh",
+    maxHeight: "65vh",
   },
   [theme.breakpoints.up("sm")]: {
     maxHeight: "82vh",

@@ -443,7 +443,7 @@ const LayerComparer = (props) => {
                     component="span"
                     sx={{ typography: "caption", pt: "4px", pl: "6px" }}
                   >
-                    Ändra transparens
+                    Pil vänster/höger: Ändra transparens
                   </Box>
                 </KeyHintRow>
                 <KeyHintRow>
@@ -457,7 +457,7 @@ const LayerComparer = (props) => {
                     component="span"
                     sx={{ typography: "caption", pt: "4px", pl: "6px" }}
                   >
-                    Ändra storlek
+                    Pil upp/ner: Ändra storlek
                   </Box>
                 </KeyHintRow>
               </Box>

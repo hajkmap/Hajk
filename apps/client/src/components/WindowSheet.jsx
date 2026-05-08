@@ -1,10 +1,25 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { Sheet } from "react-modal-sheet";
 import { useTransform } from "motion/react";
 import { isMobile } from "../utils/IsMobile";
 
 const KEYBOARD_EXPAND_THRESHOLD = 0.4;
+
+// Lets nested components reset the sheet's scroll when content swaps in place.
+const WindowSheetScrollContext = createContext({
+  scrollToTop: () => {},
+});
+
+export const useWindowSheetScroll = () => useContext(WindowSheetScrollContext);
 
 const isTextInput = (el, container) => {
   if (!el) return false;
@@ -44,6 +59,22 @@ const WindowSheet = ({
     },
     [onSnap]
   );
+
+  const scrollToTop = useCallback(() => {
+    // rAF so pending DOM updates are committed before we set scrollTop.
+    requestAnimationFrame(() => {
+      const container = scrollContainerRef.current;
+      if (container) container.scrollTop = 0;
+    });
+  }, []);
+
+  // Reset scroll on open and on title change (signals content swap).
+  useEffect(() => {
+    if (!isOpen) return;
+    scrollToTop();
+  }, [isOpen, title, scrollToTop]);
+
+  const scrollContextValue = useMemo(() => ({ scrollToTop }), [scrollToTop]);
 
   useEffect(() => {
     if (!isMobile || !isOpen || !avoidKeyboard) return;
@@ -176,7 +207,9 @@ const WindowSheet = ({
               },
             }}
           >
-            {children}
+            <WindowSheetScrollContext.Provider value={scrollContextValue}>
+              {children}
+            </WindowSheetScrollContext.Provider>
           </Box>
         </Sheet.Content>
       </Sheet.Container>

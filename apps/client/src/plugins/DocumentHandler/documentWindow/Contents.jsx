@@ -22,7 +22,7 @@ class Contents extends React.PureComponent {
    */
   bindPrintSpecificHandlers = () => {
     const { localObserver, model } = this.props;
-    localObserver.unsubscribe("append-chapter-components");
+    localObserver.unsubscribe("append-document-components");
 
     localObserver.subscribe("append-document-components", (documents) => {
       let chapters = [];

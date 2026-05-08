@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo } from "react";
+import { useEffect, useState, memo, useRef } from "react";
 
 // Material UI components
 import {
@@ -21,6 +21,7 @@ import LsIconButton from "./LsIconButton";
 import BtnShowDetails from "./BtnShowDetails";
 import BtnLayerWarning from "./BtnLayerWarning";
 import BtnShowLegend from "./BtnShowLegend";
+import BtnToggleLayerLabel from "./BtnToggleLayerLabel";
 import LsCheckBox from "./LsCheckBox";
 
 import { useMapZoom } from "../LayerSwitcherProvider";
@@ -104,11 +105,21 @@ function LayerItem({
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
+  // Track if the label layer is active
+  const [showingLabelLayer, setShowingLabelLayer] = useState(false);
+  // Store the previous STYLES values when toggling labels
+  const previousStylesRef = useRef("");
   const theme = useTheme();
 
   const mapZoom = useMapZoom();
 
   const { layerIsToggled } = layerState ?? {};
+
+  const toggleLabelLayer = (e) => {
+    e.stopPropagation();
+    const newValue = !olLayer.get("showLabelLayer");
+    olLayer.set("showLabelLayer", newValue);
+  };
 
   const {
     layerId,
@@ -121,9 +132,68 @@ function LayerItem({
     allSubLayers,
     layerInfo,
     layerLegendIcon,
+    olLayer,
   } = layerConfig ?? {};
 
   const legendIcon = layerInfo?.legendIcon || layerLegendIcon;
+
+  const applyLabelStyle = () => {
+    if (!olLayer) return;
+
+    const source = olLayer.getSource();
+    if (!source) return;
+
+    const currentParams = source.getParams?.() || {};
+    const currentLayerName = currentParams.LAYERS;
+
+    if (!currentLayerName) return;
+
+    const isActive = !!olLayer.get("showLabelLayer");
+
+    if (isActive) {
+      // Save previous style
+      if (!currentParams.STYLES?.includes("_labels")) {
+        previousStylesRef.current = currentParams.STYLES || "";
+      }
+
+      source.updateParams({
+        ...currentParams,
+        STYLES: `${currentLayerName}_labels`,
+      });
+    } else {
+      source.updateParams({
+        ...currentParams,
+        STYLES: previousStylesRef.current || "",
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!olLayer) return;
+
+    const update = () => {
+      setShowingLabelLayer(!!olLayer.get("showLabelLayer"));
+      applyLabelStyle();
+    };
+    // Initial sync on mount or layer change
+    update();
+    olLayer.on("change:showLabelLayer", update);
+
+    return () => {
+      olLayer.un("change:showLabelLayer", update);
+    };
+  }, [olLayer]);
+
+  useEffect(() => {
+    // Do not run unless we have olLayer and layer is toggled
+    if (!olLayer) return;
+    if (!layerIsToggled) return;
+
+    // Wait for OL state to be ready
+    requestAnimationFrame(() => {
+      applyLabelStyle();
+    });
+  }, [layerIsToggled, olLayer]);
 
   useEffect(() => {
     const handleLoadStatusChange = (d) => {
@@ -344,6 +414,12 @@ function LayerItem({
               }}
             >
               {renderStatusIcon()}
+              {layerInfo?.hasLabelStyle && (
+                <BtnToggleLayerLabel
+                  active={showingLabelLayer}
+                  onClick={toggleLabelLayer}
+                />
+              )}
               {!toggleable && !draggable ? (
                 <LsIconButton size="small">
                   <HajkToolTip title="Bakgrundskartan ligger låst längst ner i ritordningen">

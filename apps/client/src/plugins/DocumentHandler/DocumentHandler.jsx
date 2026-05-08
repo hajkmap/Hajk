@@ -228,6 +228,10 @@ class DocumentHandler extends React.PureComponent {
     });
   };
 
+  closePrintWindow = () => {
+    this.setState({ showPrintWindow: false });
+  };
+
   getIcon = (iconName) => {
     const { dynamicImportUrls } = this.props.options;
     if (dynamicImportUrls.iconFonts) {
@@ -256,6 +260,7 @@ class DocumentHandler extends React.PureComponent {
           customTheme={this.state.customTheme}
           onWindowHide={this.onWindowHide}
           togglePrintWindow={this.togglePrintWindow}
+          closePrintWindow={this.closePrintWindow}
           document={this.state.document}
           documentColor={this.state.documentColor}
           documentWindowMaximized={this.state.documentWindowMaximized}

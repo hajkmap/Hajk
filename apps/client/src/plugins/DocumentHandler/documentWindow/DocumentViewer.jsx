@@ -21,6 +21,10 @@ const ContentContainer = styled(Grid)(({ theme }) => ({
   paddingLeft: theme.spacing(2),
   paddingRight: theme.spacing(2),
   outline: "none",
+  [theme.breakpoints.only("xs")]: {
+    paddingLeft: 0,
+    paddingRight: 0,
+  },
 }));
 
 const TocGridWrapper = styled(Grid)(({ theme }) => ({

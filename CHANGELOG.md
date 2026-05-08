@@ -13,9 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Client + Admin: DocumentHandler - Added a "Direct Print" setting that prints the currently active document directly without showing the document selection dialog [#1773](https://github.com/hajkmap/Hajk/issues/1773)
 - Client: Infoclick - Functionality to hide links that point to non-existing resources [#1804](https://github.com/hajkmap/Hajk/issues/1804)
 - Client: LayerComparer - Added the long-awaited spy glass mode [#1808](https://github.com/hajkmap/Hajk/issues/1808)
 - Client: LayerComparer - The Spy can now be resized and the transparency can be changed [#1812](https://github.com/hajkmap/Hajk/issues/1812)
+- Admin: You can now configure CQL filters for WMS layers directly in the admin interface [#1818](https://github.com/hajkmap/Hajk/issues/1818)
+- Client: Better WMTS Support [#1795](https://github.com/hajkmap/Hajk/issues/1795)
+- Client: LayerSwitcher - it is possible to add an additional style to WMS layers that contains feature labels. A button in the LayerSwitcher allows user to control labels' visibility for such a layer. [#1816](https://github.com/hajkmap/Hajk/issues/1816)
 
 ### Changed
 
@@ -24,9 +28,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Client: DocumentHandler - Fixed subscription accumulation in Contents.jsx that caused duplicate print headers [#1773](https://github.com/hajkmap/Hajk/issues/1773)
 - Client: Ensure the Quick Access function respects the cookie setting [Issue #1798](https://github.com/hajkmap/Hajk/issues/1798)
 - Backend: Removed/replaced two unnecessary dependencies, see [commit](https://github.com/hajkmap/Hajk/commit/138e8668326b19a643542330ffef2ec5e3d847a6).
 - Client: Display the filename of imported draw objects along with the time, see issue [#1782](https://github.com/hajkmap/Hajk/issues/1782).
+- Client: DocumentHandler - Mobile UI - Removed double padding and forced images to fit width instead of breaking the layout. [commit](https://github.com/hajkmap/Hajk/commit/458437ad98184d2ef049a3915c83ac75d8675fff)
+- Client: DocumentHandler - Mobile UI etc - Stop cutting text in accordion and keep expansion stable. [commit](7af45edb2b692853dfc71bff1c617aef01786d1a)
+- Client: Mobile UI - Reset the WindowSheet's scroll position when its content changes (opening the sheet, switching documents in DocumentHandler, navigating between feature collections/features in Infoclick) so new content always starts at the top. [commit](d6073ce901d117efd296a53f17654ab6e3b849d5)
 
 ## [4.3.0] 2026-04-20
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import { useWindowSheetScroll } from "../WindowSheet";
 import FeatureCollectionsListView from "./views/FeatureCollectionsListView";
 import FeaturesListView from "./views/FeaturesListView";
 
@@ -9,12 +10,19 @@ const MapClickViewerView = (props) => {
   const [selectedFeatureCollection, setSelectedFeatureCollection] =
     useState(null);
 
+  const { scrollToTop } = useWindowSheetScroll();
+
   // If exactly ONE feature collection is returned, let's pre-select it.
   useEffect(() => {
     const preselectedFeatureCollection =
       featureCollections.length === 1 && featureCollections[0].layerId;
     setSelectedFeatureCollection(preselectedFeatureCollection || null);
   }, [featureCollections]);
+
+  // Reset sheet scroll when entering/leaving a feature collection.
+  useEffect(() => {
+    scrollToTop();
+  }, [selectedFeatureCollection, scrollToTop]);
 
   // Conditional render: if no feature collection is selected - render
   // a list of available collections. Else, render the selected collection's

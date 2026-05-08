@@ -66,7 +66,9 @@ function LayerItemDetails({
   const legendInfo = layerInfo?.legend;
   const legendUrl =
     showLegend && subLayerIndex === null
-      ? legendInfo?.map((l) => l?.url)
+      ? (Array.isArray(legendInfo) ? legendInfo : [])
+          .map((l) => l?.url)
+          .filter(Boolean)
       : Array.isArray(legendInfo) && legendInfo[subLayerIndex]?.url;
 
   // Handle opacity slider changes

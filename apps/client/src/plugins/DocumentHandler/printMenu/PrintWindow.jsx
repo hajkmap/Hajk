@@ -140,6 +140,7 @@ class PrintWindow extends React.PureComponent {
   };
 
   internalId = 0;
+  #printInitiated = false;
 
   #handleSubMenuClicked = (id) => {
     this.#setItemStateProperties(id);
@@ -212,6 +213,10 @@ class PrintWindow extends React.PureComponent {
     this.props.localObserver.subscribe("print-submenu-clicked", (id) => {
       this.#handleSubMenuClicked(id);
     });
+
+    if (this.props.options?.directPrint && this.props.activeDocument) {
+      this.autoSelectAndPrint();
+    }
   };
 
   componentWillUnmount = () => {
@@ -321,7 +326,7 @@ class PrintWindow extends React.PureComponent {
 
     printWindow.document.head.insertAdjacentHTML(
       "beforeend",
-      ` <title>${document.title}</title>
+      ` <title>${this.props.options?.directPrint && this.props.activeDocument?.documentTitle ? `${document.title} - ${this.props.activeDocument.documentTitle}` : document.title}</title>
         <base href="${document.location.protocol}//${
           document.location.host
         }/" />
@@ -338,6 +343,7 @@ class PrintWindow extends React.PureComponent {
             size: A4;
             margin: 25mm 25mm 25mm 25mm;
           }
+
           @media print {
             * {
               -webkit-print-color-adjust: exact !important;
@@ -411,6 +417,29 @@ class PrintWindow extends React.PureComponent {
       printContent: undefined,
       menuInformation: this.createMenu(),
     });
+
+    this.props.closePrintWindow();
+  };
+
+  autoSelectAndPrint = () => {
+    if (this.#printInitiated) return;
+    this.#printInitiated = true;
+
+    const menuState = { ...this.state.menuInformation };
+    const activeFileName = this.props.activeDocument?.documentFileName;
+
+    const itemKey = Object.keys(menuState).find(
+      (key) => menuState[key].document === activeFileName
+    );
+
+    if (!itemKey) {
+      return;
+    }
+
+    menuState[itemKey] = { ...menuState[itemKey], chosenForPrint: true };
+    this.setState({ menuInformation: menuState }, () => {
+      this.createPDF();
+    });
   };
 
   addPageBreaksBeforeHeadings = (printContent) => {
@@ -449,6 +478,7 @@ class PrintWindow extends React.PureComponent {
       }
     }
   };
+
 
   // Creates a new window, appends all elements that should be printed, and invokes
   // window.print(), allowing the user to save the document as a PDF (or print it straight away).
@@ -502,6 +532,7 @@ class PrintWindow extends React.PureComponent {
           }
         }
 
+        // In directPrint mode: add the active document's title as a header on every printed page.
         // Add our recently-created DIV to the new window's document
         newWindow.document.body.appendChild(printContent);
 
@@ -1112,8 +1143,12 @@ class PrintWindow extends React.PureComponent {
   };
 
   render() {
-    const { togglePrintWindow } = this.props;
+    const { togglePrintWindow, options } = this.props;
     const { showAttachments, pdfLinks } = this.state;
+
+    if (options?.directPrint) {
+      return this.renderLoadingDialog();
+    }
 
     return (
       <>

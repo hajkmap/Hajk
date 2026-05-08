@@ -29,6 +29,7 @@ const getOlLayerState = (l) => ({
   visibleSubLayers: l.get("visible") ? l.get("subLayers") : [],
   wmsLoadError: l.get("wmsLoadStatus") ?? undefined,
   zIndex: l.get("zIndex"),
+  hasLabelStyle: l.get("hasLabelStyle"),
   // "filterAttribute"
   // "filterComparer"
   // "filterValue"
@@ -163,15 +164,13 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
       olLayer.setVisible(visible);
 
-      // VectorLayers have no sublayers.
-      if (!(olLayer instanceof VectorLayer)) {
+      // Only handle sublayers for WMS group layers (they have allSubLayers
+      // configured and a source that supports updateParams).
+      const allSubLayers = staticLayerConfig[layerId]?.allSubLayers;
+      if (allSubLayers && !(olLayer instanceof VectorLayer)) {
         if (visible) {
-          // For GroupLayers:
-          const allSubLayers = staticLayerConfig[layerId]?.allSubLayers;
-          if (allSubLayers) {
-            olLayer.set("subLayers", allSubLayers);
-            setOLSubLayers(olLayer, allSubLayers);
-          }
+          olLayer.set("subLayers", allSubLayers);
+          setOLSubLayers(olLayer, allSubLayers);
         } else {
           olLayer.set("subLayers", []);
           setOLSubLayers(olLayer, []);
@@ -335,6 +334,7 @@ const getLayerNodes = (groups, olLayerMap) =>
         infogroupurltext: node.infogroupurltext,
         infogroupopendatalink: node.infogroupopendatalink,
         infogroupowner: node.infogroupowner,
+        olLayer: olLayer,
       },
       ...(children?.length === 0 ? [] : children),
     ];
