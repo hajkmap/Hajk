@@ -14,6 +14,7 @@ import TipsAndUpdatesOutlinedIcon from "@mui/icons-material/TipsAndUpdatesOutlin
 // We might want to import some other classes or constants etc.
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 import DrawModel from "../../models/DrawModel";
+import LocalStorageHelper from "../../utils/LocalStorageHelper";
 
 // Some types
 import type { PropertyCheckerProps } from "./types";
@@ -91,9 +92,26 @@ const PropertyChecker: React.FC<PropertyCheckerProps> = (props) => {
     setPluginShown(true);
   };
 
-  const [showTooltips, setShowTooltips] = React.useState(true);
+  // Let's save the last state of the "showTooltips" setting in the local storage,
+  // so that we can keep it between sessions. We also need to make sure to read
+  // from local storage when initiating the state, so that we get the correct value
+  //  when the plugin is opened.
+  const [showTooltips, setShowTooltips] = React.useState<boolean>(
+    () =>
+      LocalStorageHelper.get("propertyChecker", { showTooltips: true })
+        .showTooltips
+  );
 
-  const toggleTooltips = () => setShowTooltips((v) => !v);
+  // Updates the state of "showTooltips" and saves the new value in local storage,
+  // so that it can be kept between sessions. This in turn controls whether or not
+  // the tooltips are shown in the plugin.
+  const toggleTooltips = () => {
+    setShowTooltips((v) => {
+      const next = !v;
+      LocalStorageHelper.set("propertyChecker", { showTooltips: next });
+      return next;
+    });
+  };
 
   const showInfoDialog = () => {
     localObserver.publish("showInfoDialog");
