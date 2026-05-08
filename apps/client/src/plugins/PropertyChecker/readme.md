@@ -125,6 +125,10 @@ Anyway, the featured returned from the layer is required to have at least these 
         "bordersLayerIds": "1329,1358,1439,1357", // ID(s) of layers to toggle when user clicks the borders shortcut button.
         "plansLayerIds": "j77k2s,7vmhc3,tpgv5m,aoxhlq,h91wc9,s5viu8", // ID(s) of layers to toggle when user clicks the plans shortcut button.
 
+        /* Which tabs/modules are active? */
+        "enableCheckLayerTab": true, // Show the Check Layer tab? When false, no GetFeatureInfo request is made to the check layer. Default: true.
+        "enableDigitalPlansTab": true, // Show the Digital Plans tab? When false, no GetFeatureInfo request is made to the digital plans layer. Default: true.
+
         /* Should report functionality be enabled? */
         "enableCheckLayerReport": true, // Allow generating reports for the "Check Layer" tab?
         "enableDigitalPlansReport": true, // Allow generating reports for the "Digital Plans" tab?

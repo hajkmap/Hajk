@@ -27,6 +27,7 @@ function PropertyItem({
   options,
   setControlledLayers,
   startExpanded,
+  title,
   userDetails,
 }: PropertyItemProps) {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -35,46 +36,54 @@ function PropertyItem({
   // for each layer in the list.
   const [layerNotes, setLayerNotes] = useState<LayerNotes>({});
 
+  const showLayerTab = options.enableCheckLayerTab !== false;
+  const showPlansTab = options.enableDigitalPlansTab !== false;
+  const bothTabsEnabled = showLayerTab && showPlansTab;
+
   return (
     <React.Fragment>
       <Accordion disableGutters defaultExpanded={startExpanded}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="button">
-            {features.markerFeature.get(options.checkLayerPropertyAttribute)}
+            {title ?? features.markerFeature.get(options.checkLayerPropertyAttribute)}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Tabs
-            onChange={(e, v) => {
-              setSelectedTab(v);
-            }}
-            value={selectedTab}
-            variant="fullWidth"
-          >
-            <Tab label={`${features.features.length} lager`} />
-            <Tab label={`Planbestämmelser`} />
-          </Tabs>
-          <Box hidden={selectedTab !== 0}>
-            <TabContentLayerChecker
-              clickedPointsCoordinates={clickedPointsCoordinates}
-              controlledLayers={controlledLayers}
-              features={features}
-              globalObserver={globalObserver}
-              layerNotes={layerNotes}
-              olMap={olMap}
-              options={options}
-              setControlledLayers={setControlledLayers}
-              setLayerNotes={setLayerNotes}
-              userDetails={userDetails}
-            />
-          </Box>
-          <Box hidden={selectedTab !== 1}>
-            <TabContentDigitalPlanChecker
-              digitalPlanFeatures={digitalPlanFeatures}
-              options={options}
-              userDetails={userDetails}
-            />
-          </Box>
+          {bothTabsEnabled && (
+            <Tabs
+              onChange={(_e, v) => setSelectedTab(v)}
+              value={selectedTab}
+              variant="fullWidth"
+            >
+              <Tab label={`${features.features.length} lager`} />
+              <Tab label="Planbestämmelser" />
+            </Tabs>
+          )}
+          {showLayerTab && (
+            <Box hidden={bothTabsEnabled && selectedTab !== 0}>
+              <TabContentLayerChecker
+                clickedPointsCoordinates={clickedPointsCoordinates}
+                controlledLayers={controlledLayers}
+                features={features}
+                globalObserver={globalObserver}
+                layerNotes={layerNotes}
+                olMap={olMap}
+                options={options}
+                setControlledLayers={setControlledLayers}
+                setLayerNotes={setLayerNotes}
+                userDetails={userDetails}
+              />
+            </Box>
+          )}
+          {showPlansTab && (
+            <Box hidden={bothTabsEnabled && selectedTab !== 1}>
+              <TabContentDigitalPlanChecker
+                digitalPlanFeatures={digitalPlanFeatures}
+                options={options}
+                userDetails={userDetails}
+              />
+            </Box>
+          )}
         </AccordionDetails>
       </Accordion>
     </React.Fragment>

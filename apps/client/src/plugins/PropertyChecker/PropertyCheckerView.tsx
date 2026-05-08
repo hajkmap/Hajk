@@ -5,6 +5,7 @@ import useUpdateEffect from "../../hooks/useUpdateEffect";
 
 import BaseDialog from "components/Dialog/BaseDialog";
 import {
+  Alert,
   Button,
   Card,
   CardActions,
@@ -46,6 +47,9 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
     drawInteraction,
     setDrawInteraction,
   } = props;
+
+  const enableCheckLayerTab = props.options.enableCheckLayerTab !== false;
+  const enableDigitalPlansTab = props.options.enableDigitalPlansTab !== false;
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -122,26 +126,20 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
       amountOfDigitalPlans,
     }: NoFeaturesPayload) => {
       drawModel.removeDrawnFeatures();
-      if (amountOfProperties === 0) {
+      if (enableCheckLayerTab && amountOfProperties === 0) {
         enqueueSnackbar(
           "Den klickade fastigheten gav inga träffar i Fastighetskontrollens databas",
-          {
-            variant: "info",
-          }
+          { variant: "info" }
         );
-      } else if (amountOfProperties > 1) {
+      } else if (enableCheckLayerTab && amountOfProperties > 1) {
         enqueueSnackbar(
           "Du klickade på fler än en fastighet. Vänligen prova igen. Tips: slå på fastighetsgränser och håll dig en bit från gränsen när du klickar.",
-          {
-            variant: "warning",
-          }
+          { variant: "warning" }
         );
-      } else if (amountOfDigitalPlans > 1) {
+      } else if (enableDigitalPlansTab && amountOfDigitalPlans > 1) {
         enqueueSnackbar(
           "Du klickade på fler än en detaljplan. Vänligen prova igen. Tips: slå på detaljplaner och titta var gränserna går. Håll dig en bit från gränsen när du klickar.",
-          {
-            variant: "warning",
-          }
+          { variant: "warning" }
         );
       }
     };
@@ -162,7 +160,7 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
       );
       localObserver.unsubscribe("noFeaturesInResult", handleNoFeaturesInResult);
     };
-  }, [drawModel, enqueueSnackbar, localObserver, setDrawInteraction]);
+  }, [drawModel, enableCheckLayerTab, enableDigitalPlansTab, enqueueSnackbar, localObserver, setDrawInteraction]);
 
   // useUpdateEffect ignores the first render, which is exactly what
   // we want.
@@ -200,17 +198,28 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
           <Button onClick={handleCleanClick}>Ja, rensa</Button>
         </DialogActions>
       </BaseDialog>
-      {Object.keys(groupedFeatures).length === 0 && (
+      {!enableCheckLayerTab && !enableDigitalPlansTab && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Verktyget är felinställt: varken lagerflik eller planflik är aktiverad.
+          Kontakta systemadministratören.
+        </Alert>
+      )}
+      {(enableCheckLayerTab
+        ? Object.keys(groupedFeatures).length === 0
+        : Object.keys(digitalPlanFeatures).length === 0) && (
         <ButtonWithBottomMargin
           variant="contained"
           fullWidth={true}
           color="primary"
           onClick={handleToggleDrawClick}
+          disabled={!enableCheckLayerTab && !enableDigitalPlansTab}
         >
           {drawInteraction === "" ? "Välj fastighet" : "Avbryt"}
         </ButtonWithBottomMargin>
       )}
-      {Object.keys(groupedFeatures).length > 0 && (
+      {(enableCheckLayerTab
+        ? Object.keys(groupedFeatures).length > 0
+        : Object.keys(digitalPlanFeatures).length > 0) && (
         <ButtonWithBottomMargin
           variant="contained"
           fullWidth={true}
@@ -225,7 +234,8 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
           <QuickLayerToggleButtons options={props.options} map={props.map} />
         </CardActions>
       </Card>
-      {Object.keys(groupedFeatures).length > 0 &&
+      {enableCheckLayerTab &&
+        Object.keys(groupedFeatures).length > 0 &&
         Object.entries(groupedFeatures).map(([_k, features], i) => (
           <PropertyItem
             clickedPointsCoordinates={clickedPointsCoordinates}
@@ -237,7 +247,25 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
             olMap={props.app.map}
             options={props.options}
             setControlledLayers={setControlledLayers}
-            startExpanded={Object.keys(groupedFeatures).length === 1} // Start with expanded by default if only one item exists}
+            startExpanded={Object.keys(groupedFeatures).length === 1}
+            userDetails={props.app.config?.userDetails}
+          />
+        ))}
+      {!enableCheckLayerTab &&
+        Object.keys(digitalPlanFeatures).length > 0 &&
+        Object.entries(digitalPlanFeatures).map(([planKey, planEntry], i) => (
+          <PropertyItem
+            clickedPointsCoordinates={clickedPointsCoordinates}
+            controlledLayers={controlledLayers}
+            digitalPlanFeatures={digitalPlanFeatures}
+            features={{ markerFeature: planEntry.markerFeature, features: [] }}
+            globalObserver={globalObserver}
+            key={i}
+            olMap={props.app.map}
+            options={props.options}
+            setControlledLayers={setControlledLayers}
+            startExpanded={Object.keys(digitalPlanFeatures).length === 1}
+            title={planKey}
             userDetails={props.app.config?.userDetails}
           />
         ))}

@@ -42,6 +42,8 @@ export default class PropertyCheckerModel {
   #checkLayerId: string;
   #digitalPlansLayer: Layer<WmsSource> | undefined;
   #digitalPlansLayerId: string;
+  #enableCheckLayerTab: boolean;
+  #enableDigitalPlansTab: boolean;
   #drawModel: DrawModelInterface;
   #localObserver: EventObserver;
   #map: OlMap;
@@ -60,6 +62,8 @@ export default class PropertyCheckerModel {
       settings.groupDigitalPlansLayerSecondLevelByAttribute;
     this.#checkLayerId = settings.checkLayerId;
     this.#digitalPlansLayerId = settings.digitalPlansLayerId;
+    this.#enableCheckLayerTab = settings.enableCheckLayerTab !== false;
+    this.#enableDigitalPlansTab = settings.enableDigitalPlansTab !== false;
     this.#drawModel = settings.drawModel;
     this.#localObserver = settings.localObserver;
     this.#map = settings.map;
@@ -334,73 +338,67 @@ export default class PropertyCheckerModel {
       geometry as import("ol/geom/Point").default
     ).getCoordinates();
 
-    // We will do two GetFeatureInfo requests here: one to the check layer and
-    // one to the digital plans layer. Each result will be used in its own View
-    // as we've noticed that the administrators often want to see those aspects
-    // in separate views but still related to each other.
-
-    // Check Layer features
-    const rawCheckLayerFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
-      coords,
-      this.#checkLayer
-    );
-    // Decode `paverkas_av` and expand into the legacy flat-array shape.
-    const checkLayerFeatures = this.#expandCheckLayerFeatures(
-      rawCheckLayerFeatures
-    );
-
-    // Let's group the flat array of objects into an array where key is
-    // the property ID (or whatever is configured in the Admin).
-    const groupedCheckLayerFeatures = this.#groupFeaturesByAttributeName(
-      checkLayerFeatures,
-      this.#checkLayerPropertyAttribute, // the attribute name that we wish to group on
-      true // we want to add the marker feature to the map
-    );
-
-    // Digital Plans features
-    const digitalPlanFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
-      coords,
-      this.#digitalPlansLayer
-    );
-    const groupedDigitalPlanFeatures = this.#groupFeaturesByAttributeName(
-      digitalPlanFeatures,
-      this.#groupDigitalPlansLayerByAttribute
-    );
-
-    const groupedDigitalPlanFeaturesWithGroupedUseType: GroupedDigitalPlanFeatures =
-      {};
-
-    // Digital plans must be further grouped by use type. The attribute
-    // is specified by the admin setting groupDigitalPlansLayerSecondLevelByAttribute.
-    for (const key in groupedDigitalPlanFeatures) {
-      if (Object.hasOwnProperty.call(groupedDigitalPlanFeatures, key)) {
-        const element = groupedDigitalPlanFeatures[key];
-        groupedDigitalPlanFeaturesWithGroupedUseType[key] = {
-          ...element, // Spread whatever already exists…
-          features: Object.fromEntries(
-            // but replace "features" with the grouped results.
-            this.#groupedMap(
-              element.features,
-              this.#groupDigitalPlansLayerSecondLevelByAttribute
-            )
-          ),
-        };
-      }
+    // Check Layer features (skipped when tab is disabled)
+    let groupedCheckLayerFeatures: GroupedFeatures = {};
+    let amountOfProperties = 0;
+    if (this.#enableCheckLayerTab) {
+      const rawCheckLayerFeatures =
+        await this.#getOlFeaturesForCoordsAndOlLayer(
+          coords,
+          this.#checkLayer
+        );
+      const checkLayerFeatures = this.#expandCheckLayerFeatures(
+        rawCheckLayerFeatures
+      );
+      groupedCheckLayerFeatures = this.#groupFeaturesByAttributeName(
+        checkLayerFeatures,
+        this.#checkLayerPropertyAttribute,
+        true
+      );
+      amountOfProperties = Object.keys(groupedCheckLayerFeatures).length;
     }
 
-    // Let's find out how many results of each type we've got.
-    const amountOfProperties = Object.keys(groupedCheckLayerFeatures).length;
-    const amountOfDigitalPlans = Object.keys(
-      groupedDigitalPlanFeaturesWithGroupedUseType
-    ).length;
+    // Digital Plans features (skipped when tab is disabled)
+    const groupedDigitalPlanFeaturesWithGroupedUseType: GroupedDigitalPlanFeatures =
+      {};
+    let amountOfDigitalPlans = 0;
+    if (this.#enableDigitalPlansTab) {
+      const digitalPlanFeatures =
+        await this.#getOlFeaturesForCoordsAndOlLayer(
+          coords,
+          this.#digitalPlansLayer
+        );
+      const groupedDigitalPlanFeatures = this.#groupFeaturesByAttributeName(
+        digitalPlanFeatures,
+        this.#groupDigitalPlansLayerByAttribute
+      );
+      for (const key in groupedDigitalPlanFeatures) {
+        if (Object.hasOwnProperty.call(groupedDigitalPlanFeatures, key)) {
+          const element = groupedDigitalPlanFeatures[key];
+          groupedDigitalPlanFeaturesWithGroupedUseType[key] = {
+            ...element,
+            features: Object.fromEntries(
+              this.#groupedMap(
+                element.features,
+                this.#groupDigitalPlansLayerSecondLevelByAttribute
+              )
+            ),
+          };
+        }
+      }
+      amountOfDigitalPlans = Object.keys(
+        groupedDigitalPlanFeaturesWithGroupedUseType
+      ).length;
+    }
 
-    // When user clicks, check that the click was valid by controlling that…
-    if (
-      amountOfProperties === 1 && // …we've got exactly one property in the response…
-      amountOfDigitalPlans < 2 // …and there are no or one digital plan. (I.e. don't allow results in places with more than one digital plan)
-    ) {
-      // Tell the rest of the plugin that we've got features. The View
-      // subscribes to this and will update itself accordingly.
+    // Validate only the enabled modules. A disabled module's count is treated
+    // as always-valid so it never blocks the result from being shown.
+    const propertyCountOk =
+      !this.#enableCheckLayerTab || amountOfProperties === 1;
+    const digitalPlanCountOk =
+      !this.#enableDigitalPlansTab || amountOfDigitalPlans < 2;
+
+    if (propertyCountOk && digitalPlanCountOk) {
       this.#localObserver.publish("getFeatureInfoFeatures", {
         groupedFeatures: groupedCheckLayerFeatures,
         digitalPlanFeatures: groupedDigitalPlanFeaturesWithGroupedUseType,

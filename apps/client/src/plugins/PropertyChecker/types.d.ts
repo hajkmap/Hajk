@@ -34,6 +34,10 @@ export interface PropertyCheckerOptions {
   bordersLayerIds: string;
   /** Comma-separated layer IDs for the plans quick-toggle */
   plansLayerIds: string;
+  /** Show the check-layer tab (default: true) */
+  enableCheckLayerTab?: boolean;
+  /** Show the digital plans tab (default: true) */
+  enableDigitalPlansTab?: boolean;
   /** Enable the report feature for the check-layer tab */
   enableCheckLayerReport?: boolean;
   /** Enable the report feature for the digital-plans tab */
@@ -180,6 +184,8 @@ export interface PropertyItemProps {
   options: PropertyCheckerOptions;
   setControlledLayers: React.Dispatch<React.SetStateAction<ControlledLayer[]>>;
   startExpanded: boolean;
+  /** Overrides the accordion title derived from the check-layer feature attribute */
+  title?: string;
   userDetails?: UserDetails;
 }
 
