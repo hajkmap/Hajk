@@ -3,8 +3,10 @@ import FeatureItem from "./FeatureItem";
 import ReportDialog from "./ReportDialog";
 
 import { Box, Button } from "@mui/material";
+import HajkToolTip from "components/HajkToolTip";
 
 import type { LayerCheckerTabContentViewProps } from "../../types";
+import { usePropertyCheckerContext } from "../../context";
 
 function TabContentView({
   clickedPointsCoordinates,
@@ -19,6 +21,7 @@ function TabContentView({
   userDetails,
 }: LayerCheckerTabContentViewProps) {
   const [reportDialogVisible, setReportDialogVisible] = useState(false);
+  const { showTooltips } = usePropertyCheckerContext();
 
   const handleShowReportDialog = (propertyName: string) => {
     setCurrentPropertyName(propertyName);
@@ -37,28 +40,40 @@ function TabContentView({
             layerNotes={layerNotes}
             userDetails={userDetails}
           />
-          <Button
-            fullWidth
-            variant="outlined"
-            size="small"
-            sx={{ mt: 2, mb: 2 }}
-            disabled={
-              controlledLayers.filter(
-                (l) =>
-                  l.propertyName ===
-                  features.markerFeature.get(
-                    options.checkLayerPropertyAttribute
-                  )
-              ).length === 0
+          <HajkToolTip
+            title={
+              showTooltips
+                ? "Generera en granskningsrapport för de valda lagren"
+                : ""
             }
-            onClick={() => {
-              handleShowReportDialog(
-                features.markerFeature.get(options.checkLayerPropertyAttribute)
-              );
-            }}
           >
-            Generera rapport
-          </Button>
+            <span>
+              <Button
+                fullWidth
+                variant="outlined"
+                size="small"
+                sx={{ mt: 2, mb: 2 }}
+                disabled={
+                  controlledLayers.filter(
+                    (l) =>
+                      l.propertyName ===
+                      features.markerFeature.get(
+                        options.checkLayerPropertyAttribute
+                      )
+                  ).length === 0
+                }
+                onClick={() => {
+                  handleShowReportDialog(
+                    features.markerFeature.get(
+                      options.checkLayerPropertyAttribute
+                    )
+                  );
+                }}
+              >
+                Generera rapport
+              </Button>
+            </span>
+          </HajkToolTip>
         </>
       )}
       <Box sx={{ mt: options.enableCheckLayerReport ? 1 : 0 }}>

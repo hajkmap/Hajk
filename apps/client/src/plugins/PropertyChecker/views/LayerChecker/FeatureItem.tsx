@@ -15,6 +15,7 @@ import IconWarning from "@mui/icons-material/Warning";
 import HajkToolTip from "components/HajkToolTip";
 
 import type { FeatureItemProps, ControlledLayer } from "../../types";
+import { usePropertyCheckerContext } from "../../context";
 
 const FeatureItem = (props: FeatureItemProps) => {
   const {
@@ -142,6 +143,8 @@ const FeatureItem = (props: FeatureItemProps) => {
   const hasExpandContent =
     !!paverkasAvText?.trim() || options.enableCheckLayerReport;
 
+  const { showTooltips } = usePropertyCheckerContext();
+
   return (
     <>
       <Box
@@ -168,11 +171,15 @@ const FeatureItem = (props: FeatureItemProps) => {
               </IconButton>
             </HajkToolTip>
           ) : (
-            <Switch
-              size="small"
-              onChange={handleLayerToggle}
-              checked={visible}
-            />
+            <HajkToolTip
+              title={showTooltips ? "Slå på/av lagret i kartan" : ""}
+            >
+              <Switch
+                size="small"
+                onChange={handleLayerToggle}
+                checked={visible}
+              />
+            </HajkToolTip>
           )}
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -194,37 +201,45 @@ const FeatureItem = (props: FeatureItemProps) => {
           sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 0 }}
         >
           {options.enableCheckLayerReport && (
-            <Checkbox
-              size="small"
-              onChange={() => {
-                setControlledLayers((prev) => {
-                  if (isSelected()) {
-                    return prev.filter((l) => l.id !== selectionFormat.id);
-                  } else {
-                    return [...prev, selectionFormat];
-                  }
-                });
-              }}
-              checked={isSelected()}
-            />
+            <HajkToolTip
+              title={showTooltips ? "Inkludera lagret i rapport" : ""}
+            >
+              <Checkbox
+                size="small"
+                onChange={() => {
+                  setControlledLayers((prev) => {
+                    if (isSelected()) {
+                      return prev.filter((l) => l.id !== selectionFormat.id);
+                    } else {
+                      return [...prev, selectionFormat];
+                    }
+                  });
+                }}
+                checked={isSelected()}
+              />
+            </HajkToolTip>
           )}
           {hasExpandContent && (
-            <IconButton
-              size="small"
-              onClick={handleExpandClick}
-              aria-expanded={expanded}
-              aria-label="Visa noteringar"
+            <HajkToolTip
+              title={showTooltips ? "Visa detaljer och noteringar" : ""}
             >
-              <ExpandMoreIcon
-                sx={{
-                  transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: (theme) =>
-                    theme.transitions.create("transform", {
-                      duration: theme.transitions.duration.shortest,
-                    }),
-                }}
-              />
-            </IconButton>
+              <IconButton
+                size="small"
+                onClick={handleExpandClick}
+                aria-expanded={expanded}
+                aria-label="Visa noteringar"
+              >
+                <ExpandMoreIcon
+                  sx={{
+                    transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: (theme) =>
+                      theme.transitions.create("transform", {
+                        duration: theme.transitions.duration.shortest,
+                      }),
+                  }}
+                />
+              </IconButton>
+            </HajkToolTip>
           )}
         </Box>
       </Box>

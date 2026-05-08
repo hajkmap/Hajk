@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import { Box, Button, Divider, Typography } from "@mui/material";
+import HajkToolTip from "components/HajkToolTip";
 
 import DigitalPlanItem from "./DigitalPlanItem";
 import ReportDialog from "./ReportDialog";
@@ -12,6 +13,7 @@ import type {
   ControlledRegulation,
   LayerNotes,
 } from "../../types";
+import { usePropertyCheckerContext } from "../../context";
 
 function DigitalPlan({
   digitalPlanKey,
@@ -24,6 +26,7 @@ function DigitalPlan({
   >([]);
   const [regulationNotes, setRegulationNotes] = useState<LayerNotes>({});
   const [reportDialogVisible, setReportDialogVisible] = useState(false);
+  const { showTooltips } = usePropertyCheckerContext();
 
   return (
     <Box>
@@ -39,20 +42,30 @@ function DigitalPlan({
             userDetails={userDetails}
             options={options}
           />
-          <Button
-            fullWidth
-            variant="outlined"
-            size="small"
-            sx={{ mb: 1 }}
-            disabled={
-              controlledRegulations.filter(
-                (l) => l.digitalPlanKey === digitalPlanKey
-              ).length === 0
+          <HajkToolTip
+            title={
+              showTooltips
+                ? "Generera en rapport för de valda planbestämmelserna"
+                : ""
             }
-            onClick={() => setReportDialogVisible(true)}
           >
-            Generera rapport
-          </Button>
+            <span>
+              <Button
+                fullWidth
+                variant="outlined"
+                size="small"
+                sx={{ mt: 2, mb: 2 }}
+                disabled={
+                  controlledRegulations.filter(
+                    (l) => l.digitalPlanKey === digitalPlanKey
+                  ).length === 0
+                }
+                onClick={() => setReportDialogVisible(true)}
+              >
+                Generera rapport
+              </Button>
+            </span>
+          </HajkToolTip>
         </>
       )}
       {Object.entries(plan.features).map(

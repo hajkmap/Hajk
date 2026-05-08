@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import useUpdateEffect from "../../hooks/useUpdateEffect";
 
 import BaseDialog from "components/Dialog/BaseDialog";
+import HajkToolTip from "components/HajkToolTip";
 import {
   Alert,
   Button,
@@ -15,6 +16,8 @@ import {
   DialogTitle,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+
+import { PropertyCheckerContext } from "./context";
 
 import { type SnackbarKey, useSnackbar } from "notistack";
 
@@ -185,8 +188,10 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
     }
   }, [drawInteraction]);
 
+  const showTooltips = props.showTooltips;
+
   return (
-    <>
+    <PropertyCheckerContext.Provider value={{ showTooltips }}>
       <InfoDialog localObserver={localObserver} />
       <BaseDialog
         open={clearDialogVisible}
@@ -214,27 +219,43 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
       {(enableCheckLayerTab
         ? Object.keys(groupedFeatures).length === 0
         : Object.keys(digitalPlanFeatures).length === 0) && (
-        <ButtonWithBottomMargin
-          variant="contained"
-          fullWidth={true}
-          color="primary"
-          onClick={handleToggleDrawClick}
-          disabled={!enableCheckLayerTab && !enableDigitalPlansTab}
+        <HajkToolTip
+          title={
+            showTooltips
+              ? drawInteraction === ""
+                ? "Klicka i kartan för att välja en fastighet"
+                : "Avbryt val av fastighet"
+              : ""
+          }
         >
-          {drawInteraction === "" ? "Välj fastighet" : "Avbryt"}
-        </ButtonWithBottomMargin>
+          <ButtonWithBottomMargin
+            variant="contained"
+            fullWidth={true}
+            color="primary"
+            onClick={handleToggleDrawClick}
+            disabled={!enableCheckLayerTab && !enableDigitalPlansTab}
+          >
+            {drawInteraction === "" ? "Välj fastighet" : "Avbryt"}
+          </ButtonWithBottomMargin>
+        </HajkToolTip>
       )}
       {(enableCheckLayerTab
         ? Object.keys(groupedFeatures).length > 0
         : Object.keys(digitalPlanFeatures).length > 0) && (
-        <ButtonWithBottomMargin
-          variant="contained"
-          fullWidth={true}
-          color="secondary"
-          onClick={handleShowConfirmationDialog}
+        <HajkToolTip
+          title={
+            showTooltips ? "Rensa resultatlistan och ta bort markören" : ""
+          }
         >
-          Rensa
-        </ButtonWithBottomMargin>
+          <ButtonWithBottomMargin
+            variant="contained"
+            fullWidth={true}
+            color="secondary"
+            onClick={handleShowConfirmationDialog}
+          >
+            Rensa
+          </ButtonWithBottomMargin>
+        </HajkToolTip>
       )}
       <Card sx={{ minWidth: 275, mb: 2 }}>
         <CardActions>
@@ -276,7 +297,7 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
             userDetails={props.app.config?.userDetails}
           />
         ))}
-    </>
+    </PropertyCheckerContext.Provider>
   );
 }
 

@@ -11,12 +11,14 @@ import {
 } from "@mui/material";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import HajkToolTip from "components/HajkToolTip";
 
 import type {
   DigitalPlanItemProps,
   ControlledRegulation,
   DigitalPlanDescriptionAttribute,
 } from "../../types";
+import { usePropertyCheckerContext } from "../../context";
 
 const DigitalPlanItem = ({
   feature,
@@ -72,6 +74,8 @@ const DigitalPlanItem = ({
     useType,
   };
 
+  const { showTooltips } = usePropertyCheckerContext();
+
   const isSelected = () =>
     controlledRegulations.filter(
       (l: ControlledRegulation) => l.id === selectionFormat.id
@@ -113,37 +117,47 @@ const DigitalPlanItem = ({
               mt: -0.5,
             }}
           >
-            <Checkbox
-              size="small"
-              onChange={() => {
-                setControlledRegulations((prev: ControlledRegulation[]) => {
-                  if (isSelected()) {
-                    return prev.filter(
-                      (l: ControlledRegulation) => l.id !== selectionFormat.id
-                    );
-                  } else {
-                    return [...prev, selectionFormat];
-                  }
-                });
-              }}
-              checked={isSelected()}
-            />
-            <IconButton
-              size="small"
-              onClick={handleExpandClick}
-              aria-expanded={expanded}
-              aria-label="Visa noteringar"
+            <HajkToolTip
+              title={
+                showTooltips ? "Inkludera planbestämmelsen i rapport" : ""
+              }
             >
-              <ExpandMoreIcon
-                sx={{
-                  transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: (theme) =>
-                    theme.transitions.create("transform", {
-                      duration: theme.transitions.duration.shortest,
-                    }),
+              <Checkbox
+                size="small"
+                onChange={() => {
+                  setControlledRegulations((prev: ControlledRegulation[]) => {
+                    if (isSelected()) {
+                      return prev.filter(
+                        (l: ControlledRegulation) => l.id !== selectionFormat.id
+                      );
+                    } else {
+                      return [...prev, selectionFormat];
+                    }
+                  });
                 }}
+                checked={isSelected()}
               />
-            </IconButton>
+            </HajkToolTip>
+            <HajkToolTip
+              title={showTooltips ? "Lägg till notering" : ""}
+            >
+              <IconButton
+                size="small"
+                onClick={handleExpandClick}
+                aria-expanded={expanded}
+                aria-label="Visa noteringar"
+              >
+                <ExpandMoreIcon
+                  sx={{
+                    transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: (theme) =>
+                      theme.transitions.create("transform", {
+                        duration: theme.transitions.duration.shortest,
+                      }),
+                  }}
+                />
+              </IconButton>
+            </HajkToolTip>
           </Box>
         )}
       </Box>

@@ -8,6 +8,8 @@ import Observer from "react-event-observer";
 
 import ChecklistIcon from "@mui/icons-material/Checklist";
 import HelpIcon from "@mui/icons-material/Help";
+import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
+import TipsAndUpdatesOutlinedIcon from "@mui/icons-material/TipsAndUpdatesOutlined";
 
 // We might want to import some other classes or constants etc.
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
@@ -89,6 +91,10 @@ const PropertyChecker: React.FC<PropertyCheckerProps> = (props) => {
     setPluginShown(true);
   };
 
+  const [showTooltips, setShowTooltips] = React.useState(true);
+
+  const toggleTooltips = () => setShowTooltips((v) => !v);
+
   const showInfoDialog = () => {
     localObserver.publish("showInfoDialog");
   };
@@ -115,8 +121,16 @@ const PropertyChecker: React.FC<PropertyCheckerProps> = (props) => {
         // Do you want to add buttons to the plugin-header? That can be done as follows:
         customPanelHeaderButtons: [
           {
-            icon: <HelpIcon />, // Specify which icon the button should use...
-            onClickCallback: showInfoDialog, // ...and which callback should run on click.
+            icon: <HelpIcon />,
+            onClickCallback: showInfoDialog,
+          },
+          {
+            icon: showTooltips ? (
+              <TipsAndUpdatesIcon />
+            ) : (
+              <TipsAndUpdatesOutlinedIcon />
+            ),
+            onClickCallback: toggleTooltips,
           },
         ],
         height: "dynamic", // The height of the plugin-window in px. "dynamic" resizes the window so all content fits, "auto" uses all available space.
@@ -139,6 +153,7 @@ const PropertyChecker: React.FC<PropertyCheckerProps> = (props) => {
         model={propertyCheckerModel} // We can supply our model
         options={props.options}
         setDrawInteraction={setDrawInteraction} // Finally, we'll pass the updater for the draw-interaction state (so that we can toggle draw on/off).
+        showTooltips={showTooltips}
       />
     </BaseWindowPlugin>
   );

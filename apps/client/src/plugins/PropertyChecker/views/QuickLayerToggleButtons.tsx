@@ -11,6 +11,7 @@ import HajkToolTip from "components/HajkToolTip";
 
 import type Layer from "ol/layer/Layer";
 import type { QuickLayerToggleButtonsProps } from "../types";
+import { usePropertyCheckerContext } from "../context";
 
 const StyledBox = styled(Box)(() => ({
   display: "flex",
@@ -24,6 +25,7 @@ function QuickLayerTogglerButtons({
   map,
   options,
 }: QuickLayerToggleButtonsProps) {
+  const { showTooltips } = usePropertyCheckerContext();
   // Grab relevant layers IDs from options
   const { buildingsLayerIds, bordersLayerIds, plansLayerIds } = options;
 
@@ -116,7 +118,7 @@ function QuickLayerTogglerButtons({
       fullWidth
     >
       <ToggleButton value="buildings" size="small">
-        <HajkToolTip title="Visa/dölj byggnader">
+        <HajkToolTip title={showTooltips ? "Visa/dölj byggnader" : ""}>
           <StyledBox>
             <LocationCityIcon />
             <Typography variant="button">Byggnader</Typography>
@@ -124,7 +126,7 @@ function QuickLayerTogglerButtons({
         </HajkToolTip>
       </ToggleButton>
       <ToggleButton value="borders" size="small">
-        <HajkToolTip title="Visa/dölj fastigheter">
+        <HajkToolTip title={showTooltips ? "Visa/dölj fastigheter" : ""}>
           <StyledBox>
             <BorderInnerIcon />
             <Typography variant="button">Fastigheter</Typography>
@@ -132,7 +134,7 @@ function QuickLayerTogglerButtons({
         </HajkToolTip>
       </ToggleButton>
       <ToggleButton value="plans" size="small">
-        <HajkToolTip title="Visa/dölj planer">
+        <HajkToolTip title={showTooltips ? "Visa/dölj planer" : ""}>
           <StyledBox>
             <TravelExploreIcon />
             <Typography variant="button">Planer</Typography>

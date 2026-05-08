@@ -87,6 +87,7 @@ export interface PropertyCheckerViewProps {
   model: import("./PropertyCheckerModel").default;
   options: PropertyCheckerOptions;
   setDrawInteraction: React.Dispatch<React.SetStateAction<string>>;
+  showTooltips: boolean;
 }
 
 // ---- Check-layer response decoding ----
