@@ -45,7 +45,8 @@ function PropertyItem({
       <Accordion disableGutters defaultExpanded={startExpanded}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="button">
-            {title ?? features.markerFeature.get(options.checkLayerPropertyAttribute)}
+            {title ??
+              features.markerFeature.get(options.checkLayerPropertyAttribute)}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>

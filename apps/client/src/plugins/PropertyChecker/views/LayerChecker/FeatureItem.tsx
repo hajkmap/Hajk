@@ -245,6 +245,7 @@ const FeatureItem = (props: FeatureItemProps) => {
               multiline
               fullWidth
               size="small"
+              minRows={1}
               maxRows={4}
               onChange={handleLayerNoteChange}
               value={layerNotes?.id}

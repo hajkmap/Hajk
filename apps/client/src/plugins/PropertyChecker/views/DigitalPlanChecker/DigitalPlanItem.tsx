@@ -154,6 +154,7 @@ const DigitalPlanItem = ({
             multiline
             fullWidth
             size="small"
+            minRows={1}
             maxRows={4}
             onChange={handleLayerNoteChange}
             value={regulationNotes?.id}

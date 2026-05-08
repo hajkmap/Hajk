@@ -343,10 +343,7 @@ export default class PropertyCheckerModel {
     let amountOfProperties = 0;
     if (this.#enableCheckLayerTab) {
       const rawCheckLayerFeatures =
-        await this.#getOlFeaturesForCoordsAndOlLayer(
-          coords,
-          this.#checkLayer
-        );
+        await this.#getOlFeaturesForCoordsAndOlLayer(coords, this.#checkLayer);
       const checkLayerFeatures = this.#expandCheckLayerFeatures(
         rawCheckLayerFeatures
       );
@@ -363,11 +360,10 @@ export default class PropertyCheckerModel {
       {};
     let amountOfDigitalPlans = 0;
     if (this.#enableDigitalPlansTab) {
-      const digitalPlanFeatures =
-        await this.#getOlFeaturesForCoordsAndOlLayer(
-          coords,
-          this.#digitalPlansLayer
-        );
+      const digitalPlanFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
+        coords,
+        this.#digitalPlansLayer
+      );
       const groupedDigitalPlanFeatures = this.#groupFeaturesByAttributeName(
         digitalPlanFeatures,
         this.#groupDigitalPlansLayerByAttribute

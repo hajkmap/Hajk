@@ -160,7 +160,14 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
       );
       localObserver.unsubscribe("noFeaturesInResult", handleNoFeaturesInResult);
     };
-  }, [drawModel, enableCheckLayerTab, enableDigitalPlansTab, enqueueSnackbar, localObserver, setDrawInteraction]);
+  }, [
+    drawModel,
+    enableCheckLayerTab,
+    enableDigitalPlansTab,
+    enqueueSnackbar,
+    localObserver,
+    setDrawInteraction,
+  ]);
 
   // useUpdateEffect ignores the first render, which is exactly what
   // we want.
@@ -200,8 +207,8 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
       </BaseDialog>
       {!enableCheckLayerTab && !enableDigitalPlansTab && (
         <Alert severity="warning" sx={{ mb: 2 }}>
-          Verktyget är felinställt: varken lagerflik eller planflik är aktiverad.
-          Kontakta systemadministratören.
+          Verktyget är felinställt: varken lagerflik eller planflik är
+          aktiverad. Kontakta systemadministratören.
         </Alert>
       )}
       {(enableCheckLayerTab
@@ -229,7 +236,7 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
           Rensa
         </ButtonWithBottomMargin>
       )}
-      <Card sx={{ minWidth: 275 }}>
+      <Card sx={{ minWidth: 275, mb: 2 }}>
         <CardActions>
           <QuickLayerToggleButtons options={props.options} map={props.map} />
         </CardActions>
