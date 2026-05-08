@@ -1,46 +1,22 @@
 import React, { useId } from "react";
-import { styled } from "@mui/material/styles";
 
 import {
-  Card,
-  CardContent,
-  CardHeader,
+  Box,
   Checkbox,
   Collapse,
+  Divider,
   IconButton,
   TextField,
+  Typography,
 } from "@mui/material";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-import type { IconButtonProps } from "@mui/material";
 import type {
   DigitalPlanItemProps,
   ControlledRegulation,
   DigitalPlanDescriptionAttribute,
 } from "../../types";
-
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
-
-const ExpandMore = styled(({ expand: _expand, ...other }: ExpandMoreProps) => (
-  <IconButton {...other} />
-))(({ theme }) => ({
-  transform: "rotate(180deg)",
-  marginLeft: "auto",
-  transition: theme.transitions.create("transform", {
-    duration: theme.transitions.duration.shortest,
-  }),
-  variants: [
-    {
-      props: ({ expand }: ExpandMoreProps) => !expand,
-      style: {
-        transform: "rotate(0deg)",
-      },
-    },
-  ],
-}));
 
 const DigitalPlanItem = ({
   feature,
@@ -106,49 +82,73 @@ const DigitalPlanItem = ({
   };
 
   return (
-    <Card variant="outlined">
-      <CardHeader
-        title={regulationName}
-        subheader={regulationCaptionAsElement}
-        avatar={
-          <>
-            {/* Empty, in order to retain same CardHeader layout as for the Check Layer view */}
-          </>
-        }
-        action={
-          options.enableDigitalPlansReport && (
-            <>
-              <Checkbox
-                onChange={() => {
-                  setControlledRegulations((prev: ControlledRegulation[]) => {
-                    // If layer is already selected using the checkbox…
-                    if (isSelected()) {
-                      // … let's uncheck the box by the removing element with current layer's ID.
-                      return prev.filter(
-                        (l: ControlledRegulation) => l.id !== selectionFormat.id
-                      );
-                    } else {
-                      // Else, let's check the box by adding the new element.
-                      return [...prev, selectionFormat];
-                    }
-                  });
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 1,
+          py: 0.75,
+          px: 1,
+        }}
+      >
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="body2">{regulationName}</Typography>
+          {regulationCaptionAsElement.length > 0 && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              component="div"
+            >
+              {regulationCaptionAsElement}
+            </Typography>
+          )}
+        </Box>
+        {options.enableDigitalPlansReport && (
+          <Box
+            sx={{
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              mt: -0.5,
+            }}
+          >
+            <Checkbox
+              size="small"
+              onChange={() => {
+                setControlledRegulations((prev: ControlledRegulation[]) => {
+                  if (isSelected()) {
+                    return prev.filter(
+                      (l: ControlledRegulation) => l.id !== selectionFormat.id
+                    );
+                  } else {
+                    return [...prev, selectionFormat];
+                  }
+                });
+              }}
+              checked={isSelected()}
+            />
+            <IconButton
+              size="small"
+              onClick={handleExpandClick}
+              aria-expanded={expanded}
+              aria-label="Visa noteringar"
+            >
+              <ExpandMoreIcon
+                sx={{
+                  transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: (theme) =>
+                    theme.transitions.create("transform", {
+                      duration: theme.transitions.duration.shortest,
+                    }),
                 }}
-                checked={isSelected()}
               />
-              <ExpandMore
-                expand={expanded}
-                onClick={handleExpandClick}
-                aria-expanded={expanded}
-                aria-label="Visa noteringar"
-              >
-                <ExpandMoreIcon />
-              </ExpandMore>
-            </>
-          )
-        }
-      />
+            </IconButton>
+          </Box>
+        )}
+      </Box>
       <Collapse in={expanded} timeout="auto">
-        <CardContent>
+        <Box sx={{ px: 2, pb: 1.5 }}>
           <TextField
             label="Notering"
             multiline
@@ -158,9 +158,10 @@ const DigitalPlanItem = ({
             onChange={handleLayerNoteChange}
             value={regulationNotes?.id}
           />
-        </CardContent>
+        </Box>
       </Collapse>
-    </Card>
+      <Divider />
+    </>
   );
 };
 

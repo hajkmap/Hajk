@@ -1,12 +1,10 @@
 import React, { useEffect, useId } from "react";
-import { styled } from "@mui/material/styles";
 
 import {
-  Card,
-  CardContent,
-  CardHeader,
+  Box,
   Checkbox,
   Collapse,
+  Divider,
   IconButton,
   Switch,
   TextField,
@@ -16,30 +14,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import IconWarning from "@mui/icons-material/Warning";
 import HajkToolTip from "components/HajkToolTip";
 
-import type { IconButtonProps } from "@mui/material";
 import type { FeatureItemProps, ControlledLayer } from "../../types";
-
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
-
-const ExpandMore = styled(({ expand: _expand, ...other }: ExpandMoreProps) => (
-  <IconButton {...other} />
-))(({ theme }) => ({
-  transform: "rotate(180deg)",
-  marginLeft: "auto",
-  transition: theme.transitions.create("transform", {
-    duration: theme.transitions.duration.shortest,
-  }),
-  variants: [
-    {
-      props: ({ expand }: ExpandMoreProps) => !expand,
-      style: {
-        transform: "rotate(0deg)",
-      },
-    },
-  ],
-}));
 
 const FeatureItem = (props: FeatureItemProps) => {
   const {
@@ -164,77 +139,107 @@ const FeatureItem = (props: FeatureItemProps) => {
     setLayerNotes({ ...layerNotes, ...{ [id]: e.target.value } });
   };
 
+  const hasExpandContent =
+    !!paverkasAvText?.trim() || options.enableCheckLayerReport;
+
   return (
-    <Card variant="outlined">
-      <CardHeader
-        avatar={
-          <>
-            {loadStatus === "loaderror" ? (
-              <HajkToolTip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
-                <IconButton
-                  disableFocusRipple
-                  disableRipple
-                  disableTouchRipple
-                  sx={{ cursor: "not-allowed" }}
-                >
-                  <IconWarning />
-                </IconButton>
-              </HajkToolTip>
-            ) : (
-              <Switch
-                edge="start"
-                onChange={handleLayerToggle}
-                checked={visible}
-              />
-            )}
-          </>
-        }
-        action={
-          options.enableCheckLayerReport && (
-            <>
-              <Checkbox
-                onChange={(_e) => {
-                  setControlledLayers((prev) => {
-                    // If layer is already selected using the checkbox…
-                    if (isSelected()) {
-                      // … let's uncheck the box by the removing element with current layer's ID.
-                      return prev.filter((l) => l.id !== selectionFormat.id);
-                    } else {
-                      // Else, let's check the box by adding the new element.
-                      return [...prev, selectionFormat];
-                    }
-                  });
+    <>
+      <Box
+        sx={{ display: "flex", alignItems: "center", gap: 1, py: 0.75, px: 1 }}
+      >
+        <Box
+          sx={{
+            flexShrink: 0,
+            width: 44,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {loadStatus === "loaderror" ? (
+            <HajkToolTip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
+              <IconButton
+                disableFocusRipple
+                disableRipple
+                disableTouchRipple
+                sx={{ cursor: "not-allowed" }}
+                size="small"
+              >
+                <IconWarning />
+              </IconButton>
+            </HajkToolTip>
+          ) : (
+            <Switch
+              size="small"
+              onChange={handleLayerToggle}
+              checked={visible}
+            />
+          )}
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="body2" noWrap>
+            {caption}
+          </Typography>
+          {subcaption && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+              noWrap
+            >
+              {subcaption}
+            </Typography>
+          )}
+        </Box>
+        <Box
+          sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 0 }}
+        >
+          {options.enableCheckLayerReport && (
+            <Checkbox
+              size="small"
+              onChange={() => {
+                setControlledLayers((prev) => {
+                  if (isSelected()) {
+                    return prev.filter((l) => l.id !== selectionFormat.id);
+                  } else {
+                    return [...prev, selectionFormat];
+                  }
+                });
+              }}
+              checked={isSelected()}
+            />
+          )}
+          {hasExpandContent && (
+            <IconButton
+              size="small"
+              onClick={handleExpandClick}
+              aria-expanded={expanded}
+              aria-label="Visa noteringar"
+            >
+              <ExpandMoreIcon
+                sx={{
+                  transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: (theme) =>
+                    theme.transitions.create("transform", {
+                      duration: theme.transitions.duration.shortest,
+                    }),
                 }}
-                checked={isSelected()}
               />
-
-              <ExpandMore
-                expand={expanded}
-                onClick={handleExpandClick}
-                aria-expanded={expanded}
-                aria-label="Visa noteringar"
-              >
-                <ExpandMoreIcon />
-              </ExpandMore>
-            </>
-          )
-        }
-        title={caption}
-        subheader={subcaption}
-      />
-
-      {options.enableCheckLayerReport && (
-        <Collapse in={expanded} timeout="auto">
-          <CardContent>
-            {paverkasAvText && paverkasAvText.trim().length > 0 && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mb: 2, whiteSpace: "pre-wrap" }}
-              >
-                {paverkasAvText}
-              </Typography>
-            )}
+            </IconButton>
+          )}
+        </Box>
+      </Box>
+      <Collapse in={expanded} timeout="auto">
+        <Box sx={{ pl: 7, pr: 2, pb: 1.5 }}>
+          {paverkasAvText && paverkasAvText.trim().length > 0 && (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 2, whiteSpace: "pre-wrap" }}
+            >
+              {paverkasAvText}
+            </Typography>
+          )}
+          {options.enableCheckLayerReport && (
             <TextField
               label="Notering"
               multiline
@@ -244,10 +249,11 @@ const FeatureItem = (props: FeatureItemProps) => {
               onChange={handleLayerNoteChange}
               value={layerNotes?.id}
             />
-          </CardContent>
-        </Collapse>
-      )}
-    </Card>
+          )}
+        </Box>
+      </Collapse>
+      <Divider />
+    </>
   );
 };
 

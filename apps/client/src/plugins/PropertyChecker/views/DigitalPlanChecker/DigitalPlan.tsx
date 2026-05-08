@@ -4,6 +4,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Box,
   Button,
   Typography,
 } from "@mui/material";
@@ -70,31 +71,32 @@ function DigitalPlan(props: DigitalPlanProps) {
         {Object.entries(plan.features).map(
           ([useType, type]: [string, Feature<Geometry>[]], j) => (
             <React.Fragment key={j}>
-              <Typography variant="h6" sx={[j !== 0 && { mt: 2 }]}>
+              <Typography variant="h6" sx={[{ mt: j === 0 ? 1 : 2 }]}>
                 {useType}
-                {}
               </Typography>
-              {type
-                .sort((a: Feature<Geometry>, b: Feature<Geometry>) => {
-                  return a
-                    .get(options.digitalPlanItemTitleAttribute)
-                    ?.localeCompare(
-                      b.get(options.digitalPlanItemTitleAttribute)
-                    );
-                })
-                .map((f: Feature<Geometry>, index: number) => (
-                  <DigitalPlanItem
-                    feature={f}
-                    digitalPlanKey={digitalPlanKey}
-                    key={index}
-                    controlledRegulations={controlledRegulations}
-                    setControlledRegulations={setControlledRegulations}
-                    regulationNotes={regulationNotes}
-                    setRegulationNotes={setRegulationNotes}
-                    options={options}
-                    useType={useType}
-                  />
-                ))}
+              <Box>
+                {type
+                  .sort((a: Feature<Geometry>, b: Feature<Geometry>) => {
+                    return a
+                      .get(options.digitalPlanItemTitleAttribute)
+                      ?.localeCompare(
+                        b.get(options.digitalPlanItemTitleAttribute)
+                      );
+                  })
+                  .map((f: Feature<Geometry>, index: number) => (
+                    <DigitalPlanItem
+                      feature={f}
+                      digitalPlanKey={digitalPlanKey}
+                      key={index}
+                      controlledRegulations={controlledRegulations}
+                      setControlledRegulations={setControlledRegulations}
+                      regulationNotes={regulationNotes}
+                      setRegulationNotes={setRegulationNotes}
+                      options={options}
+                      useType={useType}
+                    />
+                  ))}
+              </Box>
             </React.Fragment>
           )
         )}
