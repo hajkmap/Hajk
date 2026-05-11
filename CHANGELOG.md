@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Admin: You can now configure CQL filters for WMS layers directly in the admin interface [#1818](https://github.com/hajkmap/Hajk/issues/1818)
 - Client: Better WMTS Support [#1795](https://github.com/hajkmap/Hajk/issues/1795)
 - Client: LayerSwitcher - it is possible to add an additional style to WMS layers that contains feature labels. A button in the LayerSwitcher allows user to control labels' visibility for such a layer. [#1816](https://github.com/hajkmap/Hajk/issues/1816)
+- Client + Admin: DocumentHandler — Added support for embedding external content via iframes, such as Microsoft Power BI reports, directly in documents.
 
 ### Changed
 
