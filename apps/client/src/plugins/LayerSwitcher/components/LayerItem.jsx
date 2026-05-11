@@ -1,4 +1,4 @@
-import { useEffect, useState, memo, useRef } from "react";
+import { useEffect, useState, memo } from "react";
 
 // Material UI components
 import {
@@ -107,25 +107,16 @@ function LayerItem({
   const [legendIsActive, setLegendIsActive] = useState(false);
   // Track if the label layer is active
   const [showingLabelLayer, setShowingLabelLayer] = useState(false);
-  // Store the previous STYLES values when toggling labels
-  const previousStylesRef = useRef("");
   const theme = useTheme();
 
   const mapZoom = useMapZoom();
 
   const { layerIsToggled } = layerState ?? {};
 
-  const toggleLabelLayer = (e) => {
-    e.stopPropagation();
-    const newValue = !olLayer.get("showLabelLayer");
-    olLayer.set("showLabelLayer", newValue);
-  };
-
   const {
     layerId,
     layerCaption,
     layerType,
-
     layerIsFakeMapLayer,
     layerMinZoom,
     layerMaxZoom,
@@ -140,52 +131,69 @@ function LayerItem({
   const applyLabelStyle = () => {
     if (!olLayer) return;
 
-    const source = olLayer.getSource();
-    if (!source) return;
+    const source = olLayer.getSource?.();
+    if (!source || typeof source.updateParams !== "function") return;
 
     const currentParams = source.getParams?.() || {};
-    const currentLayerName = currentParams.LAYERS;
+    const layerName = currentParams.LAYERS;
 
-    if (!currentLayerName) return;
+    if (!layerName) return;
 
-    const isActive = !!olLayer.get("showLabelLayer");
+    const isActive = !!olLayer.get("useLabelStyle");
+    const baseStyle = olLayer.get("initialStyles") || "";
 
-    if (isActive) {
-      // Save previous style
-      if (!currentParams.STYLES?.includes("_labels")) {
-        previousStylesRef.current = currentParams.STYLES || "";
-      }
-
-      source.updateParams({
-        ...currentParams,
-        STYLES: `${currentLayerName}_labels`,
-      });
-    } else {
-      source.updateParams({
-        ...currentParams,
-        STYLES: previousStylesRef.current || "",
-      });
-    }
+    source.updateParams({
+      ...currentParams,
+      STYLES: isActive ? `${layerName}_labels` : baseStyle,
+    });
   };
 
+  const toggleLabelLayer = (e) => {
+    e.stopPropagation();
+    if (!olLayer) return;
+
+    const newValue = !olLayer.get("useLabelStyle");
+    olLayer.set("useLabelStyle", newValue);
+  };
+
+  // Save the initial styles in "initialStyles" once when olLayer is ready
+  useEffect(() => {
+    if (!olLayer) return;
+
+    const source = olLayer.getSource?.();
+    if (!source) return;
+
+    const params = source.getParams?.() || {};
+
+    // Store original style once
+    if (olLayer.get("initialStyles") == null) {
+      olLayer.set("initialStyles", params.STYLES || "");
+    }
+  }, [olLayer]);
+
+  // Sync showingLabelLayer state with olLayer property and apply styles
   useEffect(() => {
     if (!olLayer) return;
 
     const update = () => {
-      setShowingLabelLayer(!!olLayer.get("showLabelLayer"));
+      const active = !!olLayer.get("useLabelStyle");
+      setShowingLabelLayer(active);
       applyLabelStyle();
     };
+
     // Initial sync on mount or layer change
     update();
-    olLayer.on("change:showLabelLayer", update);
+
+    // Listen for changes on label change
+    olLayer.on("change:useLabelStyle", update);
 
     return () => {
-      olLayer.un("change:showLabelLayer", update);
+      olLayer.un("change:useLabelStyle", update);
     };
   }, [olLayer]);
 
+  // Apply label style when layer becomes visible (in case it was set while hidden)
   useEffect(() => {
-    // Do not run unless we have olLayer and layer is toggled
     if (!olLayer) return;
     if (!layerIsToggled) return;
 

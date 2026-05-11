@@ -71,6 +71,14 @@ class AnchorModel {
           });
         });
 
+        // E: Update anchor when label layer state changes
+        layer.on("change:useLabelStyle", async (_event) => {
+          this.#app.globalObserver.publish("core.mapUpdated", {
+            url: await this.getAnchor(),
+            source: "labelLayerToggle",
+          });
+        });
+
         // Update anchor each time an underlying Source changes in some way (could be new CQL params, for example).
         layer.getSource().on("change", async ({ target }) => {
           if (typeof target.getParams !== "function") return;
@@ -127,14 +135,21 @@ class AnchorModel {
       .getArray()
       .filter((layer) => {
         return (
-          // We consider a layer to be visible only if…
-          // …has a specified name property…
-          layer.getVisible() && // …it's visible…
-          layer.getProperties().name &&
-          isValidLayerId(layer.getProperties().name)
+          layer.getVisible() === true &&
+          ["group", "layer", "base"].includes(layer.get("layerType"))
         );
       })
-      .map((layer) => layer.getProperties().name)
+      .map((layer) => {
+        const layerId = layer.get("name");
+        // Check if the layer should show labels
+        const useLabelStyle = layer.get("useLabelStyle");
+        const hasLabelStyle = layer.get("hasLabelStyle");
+
+        if (useLabelStyle && hasLabelStyle) {
+          return `${layerId}_l`;
+        }
+        return layerId;
+      })
       .join(",");
   }
 

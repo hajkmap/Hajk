@@ -162,7 +162,6 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
   return {
     setLayerVisibility(layerId, visible) {
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
-      olLayer.setVisible(visible);
 
       // Only handle sublayers for WMS group layers (they have allSubLayers
       // configured and a source that supports updateParams).
@@ -172,10 +171,13 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
           olLayer.set("subLayers", allSubLayers);
           setOLSubLayers(olLayer, allSubLayers);
         } else {
+          olLayer.setVisible(false);
           olLayer.set("subLayers", []);
           setOLSubLayers(olLayer, []);
+          return;
         }
       }
+      olLayer.setVisible(visible);
     },
     setSubLayerVisibility(layerId, subLayerId, visible) {
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
@@ -219,7 +221,29 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
 
       allLayerIdsInGroup.forEach((id) => {
         const olLayer = map.getAllLayers().find((l) => l.get("name") === id);
-        olLayer.setVisible(visible);
+
+        const allSubLayers = staticLayerConfig[id]?.allSubLayers;
+        if (allSubLayers && !(olLayer instanceof VectorLayer)) {
+          if (visible) {
+            const wasVisible = olLayer.get("visible");
+            if (wasVisible) {
+              olLayer.setVisible(false);
+            }
+
+            olLayer.set("subLayers", allSubLayers);
+            setOLSubLayers(olLayer, allSubLayers);
+
+            setTimeout(() => {
+              olLayer.setVisible(true);
+            }, 0);
+          } else {
+            olLayer.setVisible(false);
+            olLayer.set("subLayers", []);
+            setOLSubLayers(olLayer, []);
+          }
+        } else {
+          olLayer.setVisible(visible);
+        }
       });
     },
     setAllLayersInvisible() {

@@ -700,10 +700,37 @@ class AppModel {
       case "wms":
         layerConfig = configMapper.mapWMSConfig(layer, this.config);
         layerItem = new WMSLayer(
-          layerConfig.options,
+          {
+            ...layerConfig.options,
+            requestLabelLayer: layer._requestLabelLayer === true,
+          },
           this.config.appConfig.proxy,
           this.globalObserver
         );
+
+        if (layer.hasLabelStyle === true) {
+          layerItem.layer.set("hasLabelStyle", true);
+        }
+
+        // Check if we should load the label layer for this layer
+        if (
+          layer._requestLabelLayer &&
+          layerItem?.layer?.getSource?.()?.updateParams
+        ) {
+          const olLayer = layerItem.layer;
+          const source = olLayer.getSource();
+          const params = source.getParams?.() || {};
+          const layerName = params.LAYERS;
+
+          // Save the provided style before we change it
+          olLayer.set("initialStyles", params.STYLES || "");
+          olLayer.set("useLabelStyle", true);
+
+          source.updateParams({
+            ...params,
+            STYLES: `${layerName}_labels`,
+          });
+        }
         this.map.addLayer(layerItem.layer);
         break;
       case "wmts":
@@ -794,9 +821,13 @@ class AppModel {
     this.layers.forEach((layer) => {
       if (this.layersFromParams.length > 0) {
         // Override the default visibleAtStart if a value was provided in URLSearchParams
-        layer.visibleAtStart = this.layersFromParams.some(
-          (layerId) => layerId === layer.id
-        );
+        layer.visibleAtStart = this.layersFromParams.some((layerId) => {
+          return layerId === layer.id || layerId === `${layer.id}_l`;
+        });
+
+        layer._requestLabelLayer =
+          layer.hasLabelStyle === true &&
+          this.layersFromParams.includes(`${layer.id}_l`);
 
         // groupLayersFromParams is an object where keys are layer IDs and values are
         // the sublayers that should be active for this given layer. A layer's key will
@@ -811,6 +842,21 @@ class AppModel {
       }
       layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
       this.addMapLayer(layer);
+    });
+
+    // Now that layers exist, we set useLabelStyle on the proper layers
+    this.layers.forEach((layer) => {
+      if (layer._requestLabelLayer === true) {
+        const olLayer = this.map
+          .getAllLayers()
+          .find((l) => l.get("name") === layer.id);
+
+        if (olLayer && olLayer.get("hasLabelStyle")) {
+          if (!olLayer.get("useLabelStyle")) {
+            olLayer.set("useLabelStyle", true);
+          }
+        }
+      }
     });
 
     // Check if the layerParams contains -1 (white background) and handle set it to visible on load
@@ -1226,47 +1272,79 @@ class AppModel {
       // console.log("No changes");
     } else {
       // It's easier to work on the values if we parse them first
+      const parseLayerId = (layerId) => {
+        const hasLabelSuffix = layerId.endsWith("_l");
+        const baseId = hasLabelSuffix ? layerId.slice(0, -2) : layerId;
+        return { baseId, hasLabelSuffix };
+      };
+
+      const findOLLayer = (baseId) => {
+        return this.map.getAllLayers().find((l) => l.get("name") === baseId);
+      };
+
       const wantedL = l.split(",");
       const wantedGl = JSON.parse(gl);
       const currentL = visibleLayers.split(",");
-      const currentGl = partlyToggledGroupLayers; // This is already an object, no need to parse
+      const currentGl = partlyToggledGroupLayers;
 
-      // Get what should be shown
-      const lToShow = wantedL.filter((a) => !currentL.includes(a));
+      const wantedLayersMap = new Map();
+      wantedL.forEach((layerId) => {
+        const { baseId, hasLabelSuffix } = parseLayerId(layerId);
+        wantedLayersMap.set(baseId, hasLabelSuffix);
+      });
 
-      // Get what should be hidden
-      const lToHide = currentL.filter((a) => !wantedL.includes(a));
+      const currentLayersMap = new Map();
+      currentL.forEach((layerId) => {
+        const { baseId, hasLabelSuffix } = parseLayerId(layerId);
+        currentLayersMap.set(baseId, hasLabelSuffix);
+      });
 
-      // Act!
-      lToShow.forEach((layer) => {
-        // Grab the corresponding OL layer from Map
-        const olLayer = this.map
-          .getAllLayers()
-          .find((l) => l.get("name") === layer);
+      const lToShow = [];
+      const lToHide = [];
+      const lToUpdateStyle = [];
 
-        // First, ensure that we had a match. It is possible that pretty much
-        // anything shows up as layer id here (as it can come from multiple sources)
-        // and we can't assume that the requested layer actually exists in current
-        // map's config. In order to prevent a silent failure (see #1305), this check is added.
+      wantedLayersMap.forEach((wantedHasLabel, baseId) => {
+        if (!currentLayersMap.has(baseId)) {
+          lToShow.push({ baseId, hasLabelSuffix: wantedHasLabel });
+        } else if (currentLayersMap.get(baseId) !== wantedHasLabel) {
+          lToUpdateStyle.push({ baseId, hasLabelSuffix: wantedHasLabel });
+        }
+      });
+
+      currentLayersMap.forEach((currentHasLabel, baseId) => {
+        if (!wantedLayersMap.has(baseId)) {
+          lToHide.push({ baseId, hasLabelSuffix: currentHasLabel });
+        }
+      });
+
+      // Update label styles for layers that are already visible
+      lToUpdateStyle.forEach(({ baseId, hasLabelSuffix }) => {
+        const olLayer = findOLLayer(baseId);
+
         if (olLayer === undefined) {
           console.warn(
-            `Attempt to show layer with id ${layer} failed: layer not found in current map`
+            `Attempt to update layer style for ${baseId} failed: layer not found in current map`
           );
+        } else {
+          if (hasLabelSuffix && olLayer.get("hasLabelStyle")) {
+            olLayer.set("useLabelStyle", true);
+          } else {
+            olLayer.set("useLabelStyle", false);
+          }
         }
-        // If it's a group layer we can use the 'layerswitcher.showLayer' event
-        // that each group layer listens to.
-        else if (olLayer.get("layerType") === "group") {
-          // We can publish the 'layerswitcher.showLayer' event with two different
-          // sets of parameters, depending on whether the group layer has all
-          // sublayers selected, or only a subset.
+      });
 
-          // If only a subset is selected, we will find the sublayers in our 'wantedGl' object.
-          // Anything else than 'undefined' here means that we want to publish
-          // the showLayer event and supply the sub-selection of sublayers too.
-          if (wantedGl[layer]) {
-            // In addition, this looks like a group layer that has
-            // its sublayers specified and we should take care of that too
-            const subLayersToShow = wantedGl[layer]?.split(",");
+      // Show layers
+      lToShow.forEach(({ baseId, hasLabelSuffix }) => {
+        const olLayer = findOLLayer(baseId);
+
+        if (olLayer === undefined) {
+          console.warn(
+            `Attempt to show layer with id ${baseId} failed: layer not found in current map`
+          );
+        } else if (olLayer.get("layerType") === "group") {
+          if (wantedGl[baseId]) {
+            const subLayersToShow = wantedGl[baseId]?.split(",");
             setOLSubLayers(olLayer, subLayersToShow);
           }
           // On the other hand, if the layer to be shown does not exist in 'wantedGl',
@@ -1277,25 +1355,28 @@ class AppModel {
             const allSubLayers = olLayer.get("allSubLayers");
             setOLSubLayers(olLayer, allSubLayers);
           }
-        }
-        // That's it for group layer. The other layers, the "normal"
-        // ones, are easier: just show them.
-        else {
+          // That's it for group layer. The other layers, the "normal"
+          // ones, are easier: just show them.
+        } else {
           // Each layer has a listener that will take care of toggling
           // the checkbox in LayerSwitcher.
           olLayer.setVisible(true);
+
+          if (hasLabelSuffix && olLayer.get("hasLabelStyle")) {
+            olLayer.set("useLabelStyle", true);
+          } else {
+            olLayer.set("useLabelStyle", false);
+          }
         }
       });
 
       // Next, let's take care of layers that should be hidden.
-      lToHide.forEach((layer) => {
-        const olLayer = this.map
-          .getAllLayers()
-          .find((l) => l.get("name") === layer);
+      lToHide.forEach(({ baseId }) => {
+        const olLayer = findOLLayer(baseId);
 
         if (olLayer === undefined) {
           console.warn(
-            `Attempt to hide layer with id ${layer} failed: layer not found in current map`
+            `Attempt to hide layer with id ${baseId} failed: layer not found in current map`
           );
         } else if (olLayer.get("layerType") === "group") {
           // Tell the LayerSwitcher about it
@@ -1315,12 +1396,11 @@ class AppModel {
         // If the currently visible groups object has the layer's key…
         // …and it's value differs from the wantedGl's corresponding value…
         if (Object.hasOwn(currentGl, key) && currentGl[key] !== wantedGl[key]) {
-          const olLayer = this.map
-            .getAllLayers()
-            .find((l) => l.get("name") === key);
-
-          const subLayersToShow = wantedGl[key]?.split(",");
-          setOLSubLayers(olLayer, subLayersToShow);
+          const olLayer = findOLLayer(key);
+          if (olLayer) {
+            const subLayersToShow = wantedGl[key]?.split(",");
+            setOLSubLayers(olLayer, subLayersToShow);
+          }
         }
       }
 
@@ -1333,22 +1413,23 @@ class AppModel {
       // One solution is to loop through our visible layers (again). Any of them
       // that are of type 'groupLayer', and where a wantedGl key is missing should
       // be toggled on completely.
-      wantedL.forEach((layer) => {
+      wantedL.forEach((layerId) => {
+        const { baseId } = parseLayerId(layerId);
         const olLayer = this.map
           .getAllLayers()
           .find(
-            (l) => l.get("name") === layer && l.get("layerType") === "group"
+            (l) => l.get("name") === baseId && l.get("layerType") === "group"
           );
 
         if (olLayer !== undefined) {
           // Determine how we should call the layerswitcher.showLayer event.
           // A: No sublayers specified for layer in 'wantedGl'. That means show ALL sublayers.
           // B: Sublayers found in 'wantedGl'. Set visibility accordingly.
-          if (wantedGl[layer] === undefined) {
+          if (wantedGl[baseId] === undefined) {
             const allSubLayers = olLayer.get("allSubLayers");
             setOLSubLayers(olLayer, allSubLayers);
           } else {
-            const subLayersToShow = wantedGl[layer]?.split(",");
+            const subLayersToShow = wantedGl[baseId]?.split(",");
             setOLSubLayers(olLayer, subLayersToShow);
           }
         }
