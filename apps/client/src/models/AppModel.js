@@ -271,7 +271,8 @@ class AppModel {
       const loader =
         availableFiles[`${basePath}.tsx`] || availableFiles[`${basePath}.jsx`];
 
-      if (!loader) {
+      // We have to make sure that the loader is an actual function
+      if (typeof loader !== "function") {
         console.error(
           `AppModel.loadPlugins: Could not find module for plugin "${plugin}".`
         );
