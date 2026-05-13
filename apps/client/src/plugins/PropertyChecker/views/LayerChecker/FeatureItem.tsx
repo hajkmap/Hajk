@@ -189,9 +189,11 @@ const FeatureItem = (props: FeatureItemProps) => {
           {subcaption && (
             <Typography
               variant="caption"
-              color="text.secondary"
-              display="block"
               noWrap
+              sx={{
+                color: "text.secondary",
+                display: "block",
+              }}
             >
               {subcaption}
             </Typography>
@@ -248,8 +250,11 @@ const FeatureItem = (props: FeatureItemProps) => {
           {paverkasAvText && paverkasAvText.trim().length > 0 && (
             <Typography
               variant="body2"
-              color="text.secondary"
-              sx={{ mb: 2, whiteSpace: "pre-wrap" }}
+              sx={{
+                color: "text.secondary",
+                mb: 2,
+                whiteSpace: "pre-wrap",
+              }}
             >
               {paverkasAvText}
             </Typography>

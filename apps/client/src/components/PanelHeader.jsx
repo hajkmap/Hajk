@@ -74,7 +74,12 @@ class PanelHeader extends Component {
         <Typography component="h1" variant="button" align="left" noWrap={true}>
           {this.props.title}
         </Typography>
-        <Box display="flex" component="nav">
+        <Box
+          component="nav"
+          sx={{
+            display: "flex",
+          }}
+        >
           {this.shouldRenderCustomHeaderButtons() &&
             this.renderCustomHeaderButtons()}
           {mode !== "maximized" && // If window isn't in fit screen mode currently…

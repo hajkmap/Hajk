@@ -56,9 +56,22 @@ const StrokeSizeSlider = ({ radius, handleRadiusChange }) => {
 
 const AccordionSummaryContents = (props) => {
   return (
-    <Grid container justifyContent="space-between" alignItems="center">
+    <Grid
+      container
+      sx={{
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
       <Typography variant="button">{props.title}</Typography>
-      <Grid container justifyContent="flex-end" alignItems="center" size={4}>
+      <Grid
+        container
+        size={4}
+        sx={{
+          justifyContent: "flex-end",
+          alignItems: "center",
+        }}
+      >
         {typeof props.radius === "number" && (
           <Typography variant="caption">{`${props.radius}px`}</Typography>
         )}

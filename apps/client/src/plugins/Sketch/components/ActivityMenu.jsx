@@ -8,9 +8,10 @@ const ActivityMenu = (props) => {
   return (
     <Grid
       container
-      justifyContent={
-        props.pluginPosition === "right" ? "flex-end" : "flex-start"
-      }
+      sx={{
+        justifyContent:
+          props.pluginPosition === "right" ? "flex-end" : "flex-start",
+      }}
     >
       <Paper elevation={4}>
         {ACTIVITIES.map((activity, index) => {

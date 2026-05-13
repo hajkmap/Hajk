@@ -221,7 +221,12 @@ function LayerItemDetails({
               }),
             })}
           >
-            <Stack direction="row" alignItems="center">
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: "center",
+              }}
+            >
               <HajkToolTip
                 open={tooltipOpen}
                 onClose={handleClose}
@@ -256,7 +261,12 @@ function LayerItemDetails({
               p: 1,
             }}
           >
-            <Stack direction="row" alignItems="center">
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: "center",
+              }}
+            >
               <LsIconButton
                 sx={{ cursor: "default" }}
                 disableFocusRipple
@@ -298,7 +308,12 @@ function LayerItemDetails({
               ></LayerItemInfo>
               <LegendImage src={legendUrl} open={legendIsActive}></LegendImage>
             </Box>
-            <Stack direction="row" alignItems="center">
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: "center",
+              }}
+            >
               <LsIconButton
                 sx={{ cursor: "default" }}
                 disableFocusRipple
@@ -319,7 +334,13 @@ function LayerItemDetails({
                   pb: 2,
                 }}
               >
-                <Stack direction="row" spacing={2} alignItems="center">
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  sx={{
+                    alignItems: "center",
+                  }}
+                >
                   <Typography
                     variant="subtitle2"
                     sx={{ flexGrow: 1, flexBasis: "25%" }}
@@ -354,7 +375,12 @@ function LayerItemDetails({
             {layerItemDetails?.layer?.getProperties().filterable && (
               <>
                 <Divider />
-                <Stack direction="row" alignItems="center">
+                <Stack
+                  direction="row"
+                  sx={{
+                    alignItems: "center",
+                  }}
+                >
                   <LsIconButton
                     sx={{ cursor: "default" }}
                     disableFocusRipple

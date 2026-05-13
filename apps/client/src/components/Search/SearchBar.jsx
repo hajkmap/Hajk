@@ -330,7 +330,6 @@ class SearchBar extends React.PureComponent {
               // there, which can become duplicated under some circumstances).
               <Grid
                 container
-                alignItems="center"
                 {...props}
                 key={props.id}
                 onClick={(e) => {
@@ -338,6 +337,12 @@ class SearchBar extends React.PureComponent {
                     props.onClick(e);
                   }
                 }}
+                sx={[
+                  {
+                    alignItems: "center",
+                  },
+                  ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
+                ]}
               >
                 <Grid size={1} key={`searchautocomplete-${index}`}>
                   {this.getOriginBasedIcon(option.origin)}

@@ -1,10 +1,8 @@
 export const isValidLayerId = (id) => {
   return (
-    // ... or it is the "fake" OpenStreetMapLayer
-    // … or a 6 to 8 characters long alphanumeric string (default in current version of NodeJS backend)
     !Number.isNaN(Number(id)) || // A Hajk layer is considered valid if it's ID is either a Number…
     /^[a-f0-9]{32}$/i.test(id) || // … or a MD5 string (default in the first versions of NodeJS backend)…
-    /^[a-z0-9]{6,8}$/i.test(id)
+    /^[a-z0-9]{6,8}$/i.test(id) // … or a 6 to 8 characters long alphanumeric string (default in current version of NodeJS backend)
   );
 };
 

@@ -461,7 +461,13 @@ class GeosuiteExportView extends React.PureComponent {
       "Välj geoteknisk utredning nedan för att hämta motsvarande handlingar.";
     return (
       <>
-        <Grid container direction="row" alignItems="center">
+        <Grid
+          container
+          direction="row"
+          sx={{
+            alignItems: "center",
+          }}
+        >
           <DescriptionOutlinedIcon />
           <TypographySubheading variant="subtitle1">
             {"Geotekniska utredningar"}
@@ -474,11 +480,13 @@ class GeosuiteExportView extends React.PureComponent {
           container
           direction="row-reverse"
           spacing={1}
-          alignItems="center"
           style={{
             width: "100%",
             margin: "0px 0px 0px 5px",
             padding: "0px 0px 0px 0px",
+          }}
+          sx={{
+            alignItems: "center",
           }}
         >
           <Grid>
@@ -506,11 +514,19 @@ class GeosuiteExportView extends React.PureComponent {
         <Grid
           container
           direction="row"
-          alignItems="center"
           style={{ marginTop: "24px", marginBottom: "24px" }}
+          sx={{
+            alignItems: "center",
+          }}
         >
           <Link href={termsAndConditionsLink || null} target="_blank">
-            <Box display="flex" alignItems="center" gridColumnGap="4px">
+            <Box
+              gridColumnGap="4px"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               {"Villkor för nyttjande"}
               <LaunchIcon fontSize="small" />
             </Box>
@@ -526,7 +542,12 @@ class GeosuiteExportView extends React.PureComponent {
     return (
       <Grid container direction="row" justify="center">
         <Grid size={12}>
-          <Box display="flex" justifyContent="center">
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
             <CircularProgress variant="indeterminate" size={30} />
           </Box>
         </Grid>
@@ -638,7 +659,13 @@ class GeosuiteExportView extends React.PureComponent {
     return (
       <div>
         <Grid container>
-          <Grid container direction="row" alignItems="center">
+          <Grid
+            container
+            direction="row"
+            sx={{
+              alignItems: "center",
+            }}
+          >
             <EmailOutlinedIcon />
             <TypographySubheading variant="subtitle1">
               {"Borrhålsdata i GeoSuite-format"}
@@ -729,10 +756,18 @@ class GeosuiteExportView extends React.PureComponent {
             style={{ marginTop: "16px", marginBottom: "8px" }}
             container
             direction="row"
-            alignItems="center"
+            sx={{
+              alignItems: "center",
+            }}
           >
             <Link href={termsAndConditionsLink || null} target="_blank">
-              <Box display="flex" alignItems="center" gridColumnGap="4px">
+              <Box
+                gridColumnGap="4px"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
                 {"Villkor för nyttjande"}
                 <LaunchIcon fontSize="small" />
               </Box>
@@ -893,7 +928,13 @@ class GeosuiteExportView extends React.PureComponent {
     const step = this.state.activeStep;
 
     return (
-      <Box display="flex" mt={1} gridColumnGap={"10px"}>
+      <Box
+        gridColumnGap={"10px"}
+        sx={{
+          display: "flex",
+          mt: 1,
+        }}
+      >
         <Button
           onClick={() => {
             this.setState({ activeStep: step + 1 });

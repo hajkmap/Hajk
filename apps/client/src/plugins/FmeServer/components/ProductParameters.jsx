@@ -58,7 +58,14 @@ const ProductParameters = (props) => {
 
   function renderInformationUrl() {
     return (
-      <Grid container wrap="nowrap" justifyContent="space-between" size={12}>
+      <Grid
+        container
+        wrap="nowrap"
+        size={12}
+        sx={{
+          justifyContent: "space-between",
+        }}
+      >
         <Typography sx={{ alignSelf: "center", marginLeft: 1 }}>
           Oklart hur produkten fungerar? Tryck på frågetecknet för mer
           information.

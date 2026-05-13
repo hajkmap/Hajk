@@ -72,7 +72,12 @@ function DigitalPlan({
         ([useType, type]: [string, Feature<Geometry>[]], j) => (
           <React.Fragment key={j}>
             <Divider textAlign="left" sx={{ mt: j === 0 ? 0.5 : 2, mb: 0.5 }}>
-              <Typography variant="overline" color="text.secondary">
+              <Typography
+                variant="overline"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 {useType}
               </Typography>
             </Divider>

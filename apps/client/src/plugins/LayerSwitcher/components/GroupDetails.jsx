@@ -70,7 +70,12 @@ function GroupDetails({ display, groupDetails, app }) {
               }),
             })}
           >
-            <Stack direction="row" alignItems="center">
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: "center",
+              }}
+            >
               <HajkToolTip
                 open={tooltipOpen}
                 onClose={handleClose}

@@ -172,10 +172,13 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     return (
       <Grid
         container
-        alignItems="center"
-        justifyContent="center"
         spacing={1}
-        sx={{ mt: 1, mb: 1 }}
+        sx={{
+          alignItems: "center",
+          justifyContent: "center",
+          mt: 1,
+          mb: 1,
+        }}
       >
         <Grid>
           <HajkToolTip

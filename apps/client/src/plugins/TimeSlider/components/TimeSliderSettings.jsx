@@ -64,7 +64,9 @@ class TimeSliderSettings extends React.PureComponent {
                       this.setState({ time: new Date() });
                     }}
                     name="checkedA"
-                    inputProps={{ "aria-label": "secondary checkbox" }}
+                    slotProps={{
+                      input: { "aria-label": "secondary checkbox" },
+                    }}
                   />
                 </HajkToolTip>
               </ListItemSecondaryAction>

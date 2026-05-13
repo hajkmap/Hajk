@@ -237,9 +237,15 @@ export default function CQLFilter({ layer }) {
       <Typography sx={{ flexGrow: 1, flexBasis: "25%" }} variant="subtitle2">
         Attributbaserad filtrering
       </Typography>
-
       {rows.map((row, i) => (
-        <Stack key={i} direction="row" spacing={1} alignItems="center">
+        <Stack
+          key={i}
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+          }}
+        >
           {i > 0 && (
             <IconButton
               size="small"
@@ -418,7 +424,6 @@ export default function CQLFilter({ layer }) {
           )}
         </Stack>
       ))}
-
       {/* Add row */}
       <Tooltip title="Lägg till ett villkor">
         <span>
@@ -433,8 +438,14 @@ export default function CQLFilter({ layer }) {
           </IconButton>
         </span>
       </Tooltip>
-
-      <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{
+          alignItems: "center",
+          mt: 1,
+        }}
+      >
         <Typography sx={{ flexGrow: 1, flexBasis: "25%" }} variant="subtitle2">
           Filtreringstillstånd
         </Typography>

@@ -100,12 +100,21 @@ const AccordionSummaryContents = (props) => {
   return (
     <Grid
       container
-      justifyContent="space-between"
-      alignItems="center"
       size={12}
+      sx={{
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
     >
       <Typography variant="button">{props.title}</Typography>
-      <Grid container justifyContent="flex-end" alignItems="center" size={4}>
+      <Grid
+        container
+        size={4}
+        sx={{
+          justifyContent: "flex-end",
+          alignItems: "center",
+        }}
+      >
         {props.showOpacitySlider && (
           <Typography variant="caption">{`${
             typeof props.color === "string"
