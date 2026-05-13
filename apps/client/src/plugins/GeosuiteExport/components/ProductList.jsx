@@ -48,14 +48,25 @@ class ProductList extends React.PureComponent {
     let shouldExportAll = project.exportAll;
     if (shouldExportAll) {
       return (
-        <Box display="flex" justifyContent="center" gridColumnGap="5%">
+        <Box
+          gridColumnGap="5%"
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
           <WorkIcon />
           <Typography>{project.numBoreHolesTotal}</Typography>
         </Box>
       );
     } else {
       return (
-        <Box display="flex" gridColumnGap="5%">
+        <Box
+          gridColumnGap="5%"
+          sx={{
+            display: "flex",
+          }}
+        >
           <Crop32Icon />
           <Typography>{project.numBoreHolesSelected}</Typography>
         </Box>
@@ -76,7 +87,13 @@ class ProductList extends React.PureComponent {
       return (
         <Grid container style={{ marginTop: "10px" }}>
           <Grid size={12}>
-            <Box display="flex" justifyContent="start" gridColumnGap="8px">
+            <Box
+              gridColumnGap="8px"
+              sx={{
+                display: "flex",
+                justifyContent: "start",
+              }}
+            >
               <StyledChip
                 onClick={() => {
                   this.setState({ globalExportSetting: "withinArea" });
@@ -114,9 +131,11 @@ class ProductList extends React.PureComponent {
                   <GridListItemContainer key={project.id} container>
                     <Grid size={12}>
                       <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="center"
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
                       >
                         <Typography
                           noWrap
@@ -174,7 +193,12 @@ class ProductList extends React.PureComponent {
                                 });
                               }}
                             >
-                              <Box display="flex" gridColumnGap={"8px"}>
+                              <Box
+                                gridColumnGap={"8px"}
+                                sx={{
+                                  display: "flex",
+                                }}
+                              >
                                 <Crop32Icon />
                                 <Typography>{`Inom markering (${this.state.activeProject?.numBoreHolesSelected})`}</Typography>
                               </Box>
@@ -191,7 +215,12 @@ class ProductList extends React.PureComponent {
                                 });
                               }}
                             >
-                              <Box display="flex" gridColumnGap={"8px"}>
+                              <Box
+                                gridColumnGap={"8px"}
+                                sx={{
+                                  display: "flex",
+                                }}
+                              >
                                 <WorkIcon />
                                 <Typography>{`Hela projekt (${this.state.activeProject?.numBoreHolesTotal})`}</Typography>
                               </Box>
@@ -215,7 +244,12 @@ class ProductList extends React.PureComponent {
                         md: 2,
                       }}
                     >
-                      <Box display="flex" gridColumnGap="5%">
+                      <Box
+                        gridColumnGap="5%"
+                        sx={{
+                          display: "flex",
+                        }}
+                      >
                         {this.renderProjectDetails(project)}
                       </Box>
                     </Grid>

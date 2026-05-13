@@ -157,9 +157,7 @@ function LayerItemDetails({
   };
 
   const hasSettings = () => {
-    return (
-      (showOpacitySlider !== false && showOpacity) || isCqlFilterEnabled()
-    );
+    return (showOpacitySlider !== false && showOpacity) || isCqlFilterEnabled();
   };
 
   // Handle quickacces action
@@ -233,7 +231,12 @@ function LayerItemDetails({
               }),
             })}
           >
-            <Stack direction="row" alignItems="center">
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: "center",
+              }}
+            >
               <HajkToolTip
                 open={tooltipOpen}
                 onClose={handleClose}
@@ -313,7 +316,10 @@ function LayerItemDetails({
                   app={app}
                   layer={layerItemDetails.layer}
                 ></LayerItemInfo>
-                <LegendImage src={legendUrl} open={legendIsActive}></LegendImage>
+                <LegendImage
+                  src={legendUrl}
+                  open={legendIsActive}
+                ></LegendImage>
               </Box>
             </Box>
             {hasSettings() && (
@@ -339,7 +345,13 @@ function LayerItemDetails({
                   pb: 2,
                 }}
               >
-                <Stack direction="row" spacing={2} alignItems="center">
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  sx={{
+                    alignItems: "center",
+                  }}
+                >
                   <Typography
                     variant="subtitle2"
                     sx={{ flexGrow: 1, flexBasis: "25%" }}
@@ -374,7 +386,12 @@ function LayerItemDetails({
             {layerItemDetails?.layer?.getProperties().filterable && (
               <>
                 <Divider />
-                <Stack direction="row" alignItems="center">
+                <Stack
+                  direction="row"
+                  sx={{
+                    alignItems: "center",
+                  }}
+                >
                   <LsIconButton
                     sx={{ cursor: "default" }}
                     disableFocusRipple

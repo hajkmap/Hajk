@@ -156,8 +156,21 @@ function MeasurerView(props) {
 
   return (
     <>
-      <Grid container spacing={1} alignItems="flex-start">
-        <Grid size={12} display="flex" alignItems="center" gap={1}>
+      <Grid
+        container
+        spacing={1}
+        sx={{
+          alignItems: "flex-start",
+        }}
+      >
+        <Grid
+          size={12}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           <StyledToggleButtonGroup
             exclusive
             value={drawType}

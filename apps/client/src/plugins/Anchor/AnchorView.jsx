@@ -230,7 +230,12 @@ class AnchorView extends React.PureComponent {
         {appStateInHashEnabled && (
           <Grid>
             <Paper sx={{ p: 1, mt: 2 }}>
-              <Grid container justifyContent="center">
+              <Grid
+                container
+                sx={{
+                  justifyContent: "center",
+                }}
+              >
                 <Grid size={12}>
                   <Box
                     sx={{

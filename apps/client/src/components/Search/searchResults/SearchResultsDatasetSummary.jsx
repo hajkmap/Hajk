@@ -71,7 +71,13 @@ class SearchResultsDatasetSummary extends React.PureComponent {
               {featureCollection.source.caption}
             </StyledTypography>
           </Grid>
-          <Grid container justifyContent="flex-end" size={2}>
+          <Grid
+            container
+            size={2}
+            sx={{
+              justifyContent: "flex-end",
+            }}
+          >
             <HajkToolTip title={toolTipTitle}>
               {displayWarning ? (
                 <WarningChip

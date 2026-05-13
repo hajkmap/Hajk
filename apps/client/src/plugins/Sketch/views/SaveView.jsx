@@ -182,7 +182,13 @@ const SketchSaver = (props) => {
 
   return (
     <Paper style={{ padding: 8 }}>
-      <Grid container alignItems="center" justifyContent="space-between">
+      <Grid
+        container
+        sx={{
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <Grid size={8}>
           <HajkToolTip title="Ange att namn så att arbetsytan kan identifieras senare.">
             <TextField
@@ -196,7 +202,13 @@ const SketchSaver = (props) => {
             />
           </HajkToolTip>
         </Grid>
-        <Grid container justifyContent="flex-end" size={3}>
+        <Grid
+          container
+          size={3}
+          sx={{
+            justifyContent: "flex-end",
+          }}
+        >
           <HajkToolTip title={saveButtonStateTest.message}>
             <span>
               <Button
@@ -227,7 +239,13 @@ const SavedSketch = ({
   return (
     <Zoom in appear>
       <StyledPaper>
-        <Grid container justifyContent="space-between" alignItems="center">
+        <Grid
+          container
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Grid size={8}>
             <HajkToolTip title={sketchInfo.title}>
               <Grid
@@ -250,7 +268,13 @@ const SavedSketch = ({
             </Grid>
           </Grid>
 
-          <Grid container justifyContent="flex-end" size={4}>
+          <Grid
+            container
+            size={4}
+            sx={{
+              justifyContent: "flex-end",
+            }}
+          >
             <HajkToolTip title="Klicka för att radera arbetsytan.">
               <IconButton size="small" onClick={handleRemoveClick}>
                 <DeleteIcon />

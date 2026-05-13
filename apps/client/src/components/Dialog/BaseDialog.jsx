@@ -12,8 +12,10 @@ export default function BaseDialog(rest) {
   const isMobile = getIsMobile();
   return (
     <Dialog
-      TransitionComponent={isMobile ? SlideUpTransition : undefined}
       {...rest}
+      slots={{
+        transition: isMobile ? SlideUpTransition : undefined,
+      }}
     />
   );
 }

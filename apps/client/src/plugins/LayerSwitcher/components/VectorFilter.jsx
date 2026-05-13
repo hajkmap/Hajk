@@ -165,7 +165,13 @@ function VectorFilter({ layer }) {
         />
       ) : (
         <>
-          <Stack direction="row" spacing={2} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              alignItems: "center",
+            }}
+          >
             <Typography
               sx={{ flexGrow: 1, flexBasis: "25%" }}
               variant="subtitle2"
@@ -197,7 +203,14 @@ function VectorFilter({ layer }) {
               })}
             </Select>
           </Stack>
-          <Stack direction="row" spacing={2} alignItems="center" sx={{ pt: 1 }}>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              alignItems: "center",
+              pt: 1,
+            }}
+          >
             <Typography
               sx={{ flexGrow: 1, flexBasis: "25%" }}
               variant="subtitle2"
@@ -222,7 +235,14 @@ function VectorFilter({ layer }) {
               <MenuItem value="not">Skilt från</MenuItem>
             </Select>
           </Stack>
-          <Stack direction="row" spacing={2} alignItems="center" sx={{ pt: 1 }}>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              alignItems: "center",
+              pt: 1,
+            }}
+          >
             <Typography
               sx={{ flexGrow: 1, flexBasis: "25%" }}
               variant="subtitle2"
@@ -244,8 +264,10 @@ function VectorFilter({ layer }) {
           <Stack
             direction="row"
             spacing={2}
-            justifyContent="end"
-            sx={{ pt: 2 }}
+            sx={{
+              justifyContent: "end",
+              pt: 2,
+            }}
           >
             <Button onClick={resetFilter}>Återställ</Button>
             <Button

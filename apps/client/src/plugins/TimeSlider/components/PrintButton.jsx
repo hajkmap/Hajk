@@ -4,7 +4,14 @@ import HajkToolTip from "components/HajkToolTip";
 
 export default function PrintButton({ disabled, onClick }) {
   return (
-    <Grid container justifyContent="center" alignContent="center" size={12}>
+    <Grid
+      container
+      size={12}
+      sx={{
+        justifyContent: "center",
+        alignContent: "center",
+      }}
+    >
       <HajkToolTip
         title={disabled ? PRINT_DISABLED_TOOLTIP : PRINT_ENABLED_TOOLTIP}
       >

@@ -220,7 +220,13 @@ class KirSearchView extends React.PureComponent {
                 <TypographySubtitleShallow variant="subtitle2">
                   Inkludera kön:
                 </TypographySubtitleShallow>
-                <Grid container spacing={0} alignItems="center">
+                <Grid
+                  container
+                  spacing={0}
+                  sx={{
+                    alignItems: "center",
+                  }}
+                >
                   <StyledFormControlLabel
                     control={
                       <StyledCheckbox
@@ -253,7 +259,13 @@ class KirSearchView extends React.PureComponent {
               <TypographySubtitleShallow variant="subtitle2">
                 Ålder (från, till):
               </TypographySubtitleShallow>
-              <Grid container spacing={0} alignItems="center">
+              <Grid
+                container
+                spacing={0}
+                sx={{
+                  alignItems: "center",
+                }}
+              >
                 <Grid size={6}>
                   <StyledSlider
                     value={this.state.ageValues}

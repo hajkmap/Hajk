@@ -40,15 +40,22 @@ const Breadcrumbs = (props) => {
           <Link
             onClick={() => setSelectedFeatureCollection(null)}
             underline="hover"
-            color="text.primary"
             variant="caption"
-            sx={{ cursor: "pointer" }}
+            sx={{
+              color: "text.primary",
+              cursor: "pointer",
+            }}
           >
             Översikt
           </Link>
         )}
         {setSelectedFeatureCollection && !setSelectedFeatureId && (
-          <Typography color="text.primary" variant="caption">
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.primary",
+            }}
+          >
             {featureCollection.displayName}
           </Typography>
         )}
@@ -57,15 +64,22 @@ const Breadcrumbs = (props) => {
           <Link
             onClick={() => setSelectedFeatureId(null)}
             underline="hover"
-            color="text.primary"
             variant="caption"
-            sx={{ cursor: "pointer" }}
+            sx={{
+              color: "text.primary",
+              cursor: "pointer",
+            }}
           >
             {featureCollection.displayName}
           </Link>
         )}
         {setSelectedFeatureId && (
-          <Typography color="text.primary" variant="caption">
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.primary",
+            }}
+          >
             {feature.primaryLabel}
           </Typography>
         )}

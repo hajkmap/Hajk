@@ -327,7 +327,12 @@ function DrawOrder({ display, app, map, _localObserver, options }) {
           }),
         })}
       >
-        <Stack direction="row" alignItems="center">
+        <Stack
+          direction="row"
+          sx={{
+            alignItems: "center",
+          }}
+        >
           {options.enableSystemLayersSwitch && (
             <FormGroup id="draw-order-switch">
               <FormControlLabel
