@@ -97,6 +97,7 @@ class Kir extends React.PureComponent {
         {...this.props}
         type="Kir"
         custom={{
+          disablePadding: true,
           icon: <PluginIcon />,
           title: this.state.title,
           color: this.state.color,

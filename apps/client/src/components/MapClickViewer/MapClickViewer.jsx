@@ -1,10 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import { isMobile } from "../../utils/IsMobile";
 import Window from "../../components/Window";
+import WindowSheet from "../../components/WindowSheet";
 import FeaturePropsParsing from "../../components/FeatureInfo/FeaturePropsParsing";
 
 import MapClickViewerView from "./MapClickViewerView";
 import { MapClickViewerContext } from "./MapClickViewerContext";
+
+const snapPoints = [0, 0.4, 0.7, 1];
 
 const MapClickViewer = (props) => {
   const { appModel, globalObserver, infoclickOptions } = props;
@@ -13,11 +17,10 @@ const MapClickViewer = (props) => {
   const [open, setOpen] = useState(false);
   const [featureCollections, setFeatureCollections] = useState([]);
 
-  // Used to hold the instance of FeaturePropsParsing class
+  const currentSnapRef = useRef(1);
+
   const featurePropsParsing = useRef();
 
-  // Instantiate the Markdown parser once and for all by
-  // assigning the returned value to a ref.
   useEffect(() => {
     featurePropsParsing.current = new FeaturePropsParsing({
       globalObserver: globalObserver,
@@ -26,20 +29,38 @@ const MapClickViewer = (props) => {
   }, [globalObserver, infoclickOptions]);
 
   const closeWindow = useCallback(() => {
-    // Hide window
     setOpen(false);
-
-    // Important: reset feature collections to ensure nothing else is rendered
     setFeatureCollections([]);
-
-    // Remove highlight from any highlighted features in map
     appModel.highlight(false);
-
-    // Tell the MapClickModel to remove the clicked marker
     globalObserver.publish("mapClick.removeMarker");
   }, [appModel, globalObserver]);
 
-  // Subscribe to events on global observer
+  const panMapAboveSheet = useCallback(
+    (snapIndex) => {
+      currentSnapRef.current = snapIndex;
+      if (snapIndex === 0) return;
+
+      const map = appModel.getMap();
+      const { x, y } = appModel.getClickLocationData();
+      const view = map.getView();
+      const mapSize = map.getSize();
+      if (!mapSize) return;
+
+      const sheetFraction = snapPoints[snapIndex];
+      const visibleHeight = mapSize[1] * (1 - sheetFraction);
+      const targetCenterY = visibleHeight / 2;
+      const resolution = view.getResolution();
+
+      const offsetY = (mapSize[1] / 2 - targetCenterY) * resolution;
+
+      view.animate({
+        center: [x, y - offsetY],
+        duration: 300,
+      });
+    },
+    [appModel]
+  );
+
   useEffect(() => {
     const mapClickObserver = globalObserver.subscribe(
       "mapClick.featureCollections",
@@ -47,6 +68,10 @@ const MapClickViewer = (props) => {
         if (fc.length > 0) {
           setFeatureCollections(fc);
           setOpen(true);
+          if (isMobile) {
+            panMapAboveSheet(currentSnapRef.current);
+            globalObserver.publish("core.focusMapClick");
+          }
           globalObserver.publish("analytics.trackEvent", {
             eventName: "pluginShown",
             pluginName: "mapclickviewer",
@@ -57,12 +82,43 @@ const MapClickViewer = (props) => {
         }
       }
     );
+
+    const focusWindowObserver = isMobile
+      ? globalObserver.subscribe("core.focusWindow", () => {
+          closeWindow();
+        })
+      : null;
+
     return () => {
       mapClickObserver.unsubscribe();
+      focusWindowObserver?.unsubscribe();
     };
   }, [closeWindow, globalObserver, activeMap]);
 
   const { height, position, title, width } = props.infoclickOptions;
+
+  const contextValue = {
+    appModel: props.appModel,
+    featurePropsParsing: featurePropsParsing.current,
+  };
+
+  if (isMobile) {
+    return (
+      <WindowSheet
+        isOpen={open}
+        onClose={closeWindow}
+        title={title}
+        snapPoints={snapPoints}
+        initialSnap={1}
+        zIndex={1199}
+        onSnap={panMapAboveSheet}
+      >
+        <MapClickViewerContext.Provider value={contextValue}>
+          <MapClickViewerView featureCollections={featureCollections} />
+        </MapClickViewerContext.Provider>
+      </WindowSheet>
+    );
+  }
 
   return (
     <Window
@@ -73,17 +129,10 @@ const MapClickViewer = (props) => {
       width={width || 400}
       position={position || "right"}
       mode="window"
-      // This is not perfect, but it will do for now.
-      // It will force window to front when features change.
       forceBringToFrontOnEvent={"mapClick.featureCollections"}
       onClose={closeWindow}
     >
-      <MapClickViewerContext.Provider
-        value={{
-          appModel: props.appModel,
-          featurePropsParsing: featurePropsParsing.current,
-        }}
-      >
+      <MapClickViewerContext.Provider value={contextValue}>
         <MapClickViewerView featureCollections={featureCollections} />
       </MapClickViewerContext.Provider>
     </Window>

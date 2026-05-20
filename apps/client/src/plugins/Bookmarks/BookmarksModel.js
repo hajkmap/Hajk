@@ -25,7 +25,7 @@ class BookmarksModel {
   }
 
   getVisibleLayers() {
-    return this.map
+    const layers = this.map
       .getLayers()
       .getArray()
       .filter(
@@ -33,9 +33,23 @@ class BookmarksModel {
           layer.getVisible() &&
           layer.getProperties().name &&
           isValidLayerId(layer.getProperties().name)
-      )
-      .map((layer) => layer.getProperties().name)
+      );
+
+    const result = layers
+      .map((layer) => {
+        const layerId = layer.getProperties().name;
+        const useLabelStyle = layer.get("useLabelStyle");
+        const hasLabelStyle = layer.get("hasLabelStyle");
+
+        // Add _l suffix if label layer is active and supported
+        if (useLabelStyle && hasLabelStyle) {
+          return `${layerId}_l`;
+        }
+        return layerId;
+      })
       .join(",");
+
+    return result;
   }
 
   setVisibleLayers(strLayers) {

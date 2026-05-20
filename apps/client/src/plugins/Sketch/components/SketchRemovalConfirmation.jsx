@@ -1,8 +1,8 @@
 import React from "react";
 import { createPortal } from "react-dom";
+import BaseDialog from "components/Dialog/BaseDialog";
 import {
   Button,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -13,7 +13,7 @@ import {
 // to remove a sketch from LS.
 const SketchRemovalConfirmation = ({ open, handleConfirm, handleAbort }) => {
   return createPortal(
-    <Dialog
+    <BaseDialog
       open={open}
       onClose={handleAbort}
       onMouseDown={(e) => {
@@ -33,7 +33,7 @@ const SketchRemovalConfirmation = ({ open, handleConfirm, handleAbort }) => {
           Avbryt
         </Button>
       </DialogActions>
-    </Dialog>,
+    </BaseDialog>,
     document.getElementById("map")
   );
 };

@@ -388,7 +388,10 @@ class LayersSwitcherView extends React.PureComponent {
             backButtonCallback={this.handleQuickAccessPresetsToggle}
             map={this.props.map}
             globalObserver={this.globalObserver}
-            quickAccessPresetsInfoText={this.options.quickAccessPresetsInfoText}
+            quickAccessPresetsInfoText={
+              this.options.quickAccessPresetsInfoText ??
+              this.options.quickAccessTopicsInfoText
+            }
           ></QuickAccessPresets>
         )}
         <LayerItemDetails

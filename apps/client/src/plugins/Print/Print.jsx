@@ -120,6 +120,14 @@ class Print extends React.PureComponent {
       typeof props.options?.includeImageBorder === "boolean"
         ? props.options.includeImageBorder
         : false;
+    props.options.allowLegendsInPdfOutput =
+      typeof props.options?.allowLegendsInPdfOutput === "boolean"
+        ? props.options.allowLegendsInPdfOutput
+        : false;
+    props.options.generateLegendsByDefault =
+      typeof props.options?.generateLegendsByDefault === "boolean"
+        ? props.options.generateLegendsByDefault
+        : false;
 
     // Ensure we have a value for the crossOrigin parameter
     props.options.crossOrigin =
@@ -151,6 +159,7 @@ class Print extends React.PureComponent {
         {...this.props}
         type="Print"
         custom={{
+          disablePadding: true,
           icon: <PrintIcon />,
           title: "Skriv ut",
           description: "Skapa en PDF av kartan",

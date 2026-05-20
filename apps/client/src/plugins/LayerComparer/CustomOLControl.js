@@ -94,10 +94,12 @@ export default class OlSideBySideControl extends Control {
   }
 
   #unsetLayers = () => {
-    // Grab previous compare layer and hide them
-    this.getMap()
-      .getLayers()
-      .getArray()
+    const map = this.getMap();
+    if (!map) return;
+
+    // Clean up old compare layers, including nested ones, so stale prerender etc hooks don't leak.
+    map
+      .getAllLayers()
       .filter(
         (l) =>
           l.get("isLeftCompareLayer") === true ||
@@ -120,8 +122,10 @@ export default class OlSideBySideControl extends Control {
     // Unset possible previous compare layers
     this.#unsetLayers();
 
-    // Set visibility, silently (don't trigger a map render at this time)
-    leftLayer.set("visible", true, true);
+   // Non-silent so OL fires `change:visible` and wires the layer into the
+   // render pipeline — silent won't trigger the prerender hook.
+    
+    leftLayer.setVisible(true);
 
     // Set a unique flag - used later
     leftLayer.set("isLeftCompareLayer", true);
@@ -131,7 +135,7 @@ export default class OlSideBySideControl extends Control {
     leftLayer.on("postrender", this.#postrender);
 
     // Do the same for the other side of the screen
-    rightLayer.set("visible", true, true);
+    rightLayer.setVisible(true);
     rightLayer.set("isRightCompareLayer", true);
     rightLayer.on("prerender", this.#prerenderRight);
     rightLayer.on("postrender", this.#postrender);

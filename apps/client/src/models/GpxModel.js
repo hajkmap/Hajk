@@ -27,6 +27,7 @@ class GpxModel {
   #map;
   #layerName;
   #drawModel;
+  #observer;
   #gpxSource;
   #gpxLayer;
   #parser;
@@ -42,7 +43,7 @@ class GpxModel {
     this.#map = settings.map;
     this.#layerName = settings.layerName;
     this.#drawModel = settings.drawModel || null;
-
+    this.#observer = settings.observer || null;
     // If a setting to enable drag-and-drop has been passed, we have to initiate
     // the listeners for that.
     settings.enableDragAndDrop && this.#addMapDropListeners();
@@ -120,6 +121,11 @@ class GpxModel {
         zoomToExtent: true,
         setProperties: { GPX_ID: id },
       });
+      // We also want to publish an event on the observer so that we can update potential views.
+      this.#observer &&
+        this.#observer.publish("gpxModel.fileImported", {
+          id,
+        });
     };
     reader.readAsText(file);
   };

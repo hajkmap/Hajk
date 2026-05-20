@@ -121,7 +121,7 @@ const BookmarksView = (props) => {
   const [name, setName] = React.useState("");
   const [error, setError] = React.useState(false);
   const [helperText, setHelperText] = React.useState(" ");
-  const [bookmarks, setBookmarks] = React.useState({});
+  const [bookmarks, setBookmarks] = React.useState(props.model.bookmarks);
   const [showRemovalConfirmation, setShowRemovalConfirmation] =
     React.useState(false);
   const [bookmarkToDelete, setBookmarkToDelete] = React.useState(null);

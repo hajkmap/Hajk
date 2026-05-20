@@ -58,6 +58,7 @@ class StreetView extends React.PureComponent {
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,
           onResize: this.onResize,
+          disablePadding: true,
         }}
       >
         <StreetViewView

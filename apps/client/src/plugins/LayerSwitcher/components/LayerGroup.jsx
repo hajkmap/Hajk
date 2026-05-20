@@ -286,8 +286,8 @@ const LayerGroup = ({
                 draggable={false}
                 toggleable={true}
                 globalObserver={globalObserver}
-                filterHits={filterHits}
-                filterValue={filterValue}
+                filterHits={skipFilter ? null : filterHits}
+                filterValue={skipFilter ? null : filterValue}
                 isFirstChild={isFirstChild}
               />
             ) : (

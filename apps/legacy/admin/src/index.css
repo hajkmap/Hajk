@@ -239,6 +239,21 @@ article fieldset > span > div {
   cursor: pointer;
   font-size: 20px;
   margin-right: 10px;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.config-layer-list li i.fa-info {
+  margin-right: 20px;
+}
+
+.config-layer-list li i.fa-info:hover {
+  color: #1976d2;
+  transform: scale(1.15);
+}
+
+.config-layer-list li i.fa-trash:hover {
+  color: #d32f2f;
+  transform: scale(1.15);
 }
 
 table th {

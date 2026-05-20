@@ -12,6 +12,7 @@ export const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
     // Hide the layer in OL
     olLayer.setVisible(false);
   } else {
+    const layerInfo = olLayer.get("layerInfo");
     // Set LAYERS and STYLES so that the exact sublayers that are needed
     // will be visible
     olLayer.getSource().updateParams({
@@ -24,7 +25,7 @@ export const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
         .filter((k) => visibleSubLayersArray.indexOf(k[0]) !== -1)
         .map((l) => l[1].style)
         .join(","),
-      CQL_FILTER: null,
+      CQL_FILTER: layerInfo?.params?.CQL_FILTER || null,
     });
     olLayer.set("subLayers", visibleSubLayersArray);
     olLayer.setVisible(true);

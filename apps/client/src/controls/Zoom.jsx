@@ -1,18 +1,15 @@
 import React from "react";
 import { easeOut } from "ol/easing";
-import { IconButton, Paper } from "@mui/material";
+import { Paper } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { styled } from "@mui/material/styles";
+import { StyledControlButton } from "components/ControlButton";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
   display: "flex",
   flexDirection: "column",
-}));
-
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  minWidth: "unset",
 }));
 
 const ZoomControl = React.memo((props) => {
@@ -45,22 +42,22 @@ const ZoomControl = React.memo((props) => {
   return (
     props.map !== undefined && (
       <StyledPaper>
-        <StyledIconButton
+        <StyledControlButton
           aria-label="Zooma in"
           onClick={() => {
             zoomByDelta(1);
           }}
         >
           <AddIcon />
-        </StyledIconButton>
-        <StyledIconButton
+        </StyledControlButton>
+        <StyledControlButton
           aria-label="Zooma ut"
           onClick={() => {
             zoomByDelta(-1);
           }}
         >
           <RemoveIcon />
-        </StyledIconButton>
+        </StyledControlButton>
       </StyledPaper>
     )
   );

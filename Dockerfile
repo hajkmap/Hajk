@@ -1,4 +1,4 @@
-FROM node:22-alpine AS buildimage
+FROM node:24-alpine AS buildimage
 
 # --- BACKEND --- #
 # Start with Backend
@@ -48,7 +48,7 @@ RUN npm run build
 
 # --- FINAL ASSEMBLY --- #
 # Finally, let's assembly it all into another image
-FROM node:22-alpine
+FROM node:24-slim
 WORKDIR /usr/app
 
 # Copy NPM package files from Backend
@@ -61,7 +61,7 @@ COPY --from=buildimage /tmp/build/backend/dist ./
 # Copy some more necessary files. There's a great chance that 
 # they'll be mounted when running anyway, but if someone forgets
 # that, it's good to have them around so we get running with the defaults. 
-COPY /apps/backend/.env .
+COPY /apps/backend/.env.example ./.env
 COPY /apps/backend/App_Data ./App_Data
 COPY /apps/backend/static ./static
 

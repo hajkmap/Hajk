@@ -1,22 +1,13 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
 import withSnackbar from "components/WithSnackbar";
 
-import { IconButton, Paper, Menu, MenuItem } from "@mui/material";
+import { Menu, MenuItem } from "@mui/material";
 import FolderSpecial from "@mui/icons-material/FolderSpecial";
 
 import Dialog from "../components/Dialog/Dialog";
-import HajkToolTip from "components/HajkToolTip";
-
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  marginBottom: theme.spacing(1),
-}));
-
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  minWidth: "unset",
-}));
+import ControlButton from "components/ControlButton";
 
 class Preset extends React.PureComponent {
   static propTypes = {
@@ -229,16 +220,13 @@ class Preset extends React.PureComponent {
       const open = Boolean(anchorEl);
       return (
         <>
-          <HajkToolTip title={this.title}>
-            <StyledPaper>
-              <StyledIconButton
-                aria-label={this.title}
-                onClick={this.handleClick}
-              >
-                <FolderSpecial />
-              </StyledIconButton>
-            </StyledPaper>
-          </HajkToolTip>
+          <ControlButton
+            tooltip={this.title}
+            ariaLabel={this.title}
+            onClick={this.handleClick}
+          >
+            <FolderSpecial />
+          </ControlButton>
           <Menu
             id="render-props-menu"
             anchorEl={anchorEl}

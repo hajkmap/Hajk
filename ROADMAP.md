@@ -45,6 +45,13 @@ Two of the most important findings from CodeQL are fixed in Backend:
 - Uncontrolled data used in path expression (https://github.com/hajkmap/Hajk/security/code-scanning/53)
 - Missing rate limiting (https://github.com/hajkmap/Hajk/security/code-scanning/8)
 
+Mobile UI etc:
+
+- This release will introduce a new Mobile UI for Client, aimed at improving usability and responsiveness on smaller screens.
+- A key improvement for mobile devices is that the map will remain visible while using plugins such as Measurer, Sketch, and InfoClick.
+- The work on the new Mobile UI will also result in several general UI bug fixes and polishing efforts, helping create a more consistent experience throughout the application.
+- Both desktop and mobile UI will receive an updated visual style with rounded corners, giving Hajk a more modern and unified look.
+
 ## 5.0
 
 The Hajk 5 branch introduces several additions and changes:

@@ -12,15 +12,69 @@ You must prepare a proper WMS layer to query in order to use this plugin. Curren
 
 So, here is a brief specification of this required WMS layer.
 
-1. A WMS layer with at least these attributes:
+1. A WMS layer that returns **one feature per affected property**. The layer could, in theory, return more than one features and the UI could be extended to support it, but currently that functionality is disabled, as it was found to distract the users. But depending on where the user clicks, it can happen that more than one features is returned.
 
-   1.1 `id` - corresponds to Hajk layer's ID in `layers.json`
+Anyway, the featured returned from the layer is required to have at least these two attributes:
 
-   1.2 `caption` - corresponds to Hajk layer's caption in `layers.json` OR (in case of a Hajk group layer) the affected sublayer's caption
+1.1 **A grouping attribute** (e.g. `fastighet`) — identifies a single property. Results are grouped by its value in the UI. The attribute name is set via the plugin's `checkLayerPropertyAttribute` setting.
 
-   1.3 `layer` - - corresponds to Hajk layer's sublayer name in `layers.json`. Not required for non-group layers.
+1.2 **An "affected by" attribute** (e.g. `paverkas_av`) — a JSON-encoded string listing the Hajk layers that affect this property. The attribute name is set via the plugin's `checkLayerAffectedByAttribute` setting. Expected format:
 
-   1.4 Any field you wish to group on. For example, if we're creating some property checker (which was the main intention of this plugin), we may want to group the results per _property_ (in Swedish, _fastighet_). You specify the WMS layer's attribute name you wish to group by using the `checkLayerPropertyAttribute` setting for this plugin. In our example, it is set to `fastighet`.
+```json
+[
+  {
+    "id": "<hajk-layer-id>",
+    "text": "Optional explanation, shown when the row is expanded"
+  }
+]
+```
+
+- `id` must match a layer's ID in `layers.json`. The plugin uses it to look up the layer's caption and the OpenLayers layer reference (needed for the visibility toggle and sorting). Entries whose `id` is not found are skipped with a console warning.
+- `text` is optional. When non-empty, it is rendered above the user's "Notering" field inside the expandable area of each layer row.
+
+**Note:** Layer captions are resolved from `layers.json` via the looked-up `id`.
+
+##### Example WMS Check Layer Response
+
+```json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "fastighetskollen_data.7",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [9280.3736, 83207.631],
+            [9254.0005, 83200.519],
+            [256.0465, 83179.8],
+            [282.5938, 83183.483],
+            [285.5404, 83187.905],
+            [280.3736, 83207.631]
+          ]
+        ]
+      },
+      "geometry_name": "geom",
+      "properties": {
+        "fastighet": "EXEMPLET 1:1",
+        "omr": 1,
+        "karta": "map_1",
+        "paverkas_av": "[{\"id\":\"a14ad9\",\"text\":\"Exempeltext att visa i UI\"},{\"id\":\"m16c9a\",\"text\":\"Exempeltext att visa i UI\"}]",
+        "primary_key": 7
+      }
+    }
+  ],
+  "totalFeatures": "unknown",
+  "numberReturned": 1,
+  "timeStamp": "2026-04-28T12:02:35.910Z",
+  "crs": {
+    "type": "name",
+    "properties": { "name": "urn:ogc:def:crs:EPSG::3008" }
+  }
+}
+```
 
 ### Example configuration
 
@@ -31,6 +85,7 @@ So, here is a brief specification of this required WMS layer.
         /* Check Layer - see the documentation for definition */
         "checkLayerId": "ar8q1v", // ID of the WMS layer that will act as the "Check Layer".
         "checkLayerPropertyAttribute": "fastighet", // The attribute name to group Check Layer features by. Normally the field that holds property's name.
+        "checkLayerAffectedByAttribute": "paverkas_av", // The attribute name on a Check Layer feature holding the JSON-encoded list of affecting layers (`[{"id":"<hajk-layer-id>","text":"This will be shown in the UI, could provide further explanation on why this layer is part of the layer check."}]`).
 
         /* Digital Plans Layer - roughly corresponds to the table layout delivered by the MyCarta Plan application.
          * We still have the ability to customize which column names are used, so this could work with other
@@ -69,6 +124,10 @@ So, here is a brief specification of this required WMS layer.
         "buildingsLayerIds": "1328", // ID(s) of layers to toggle when user clicks the buildings shortcut button.
         "bordersLayerIds": "1329,1358,1439,1357", // ID(s) of layers to toggle when user clicks the borders shortcut button.
         "plansLayerIds": "j77k2s,7vmhc3,tpgv5m,aoxhlq,h91wc9,s5viu8", // ID(s) of layers to toggle when user clicks the plans shortcut button.
+
+        /* Which tabs/modules are active? */
+        "enableCheckLayerTab": true, // Show the Check Layer tab? When false, no GetFeatureInfo request is made to the check layer. Default: true.
+        "enableDigitalPlansTab": true, // Show the Digital Plans tab? When false, no GetFeatureInfo request is made to the digital plans layer. Default: true.
 
         /* Should report functionality be enabled? */
         "enableCheckLayerReport": true, // Allow generating reports for the "Check Layer" tab?

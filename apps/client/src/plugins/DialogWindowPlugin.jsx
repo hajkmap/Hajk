@@ -93,7 +93,7 @@ class DialogWindowPlugin extends React.PureComponent {
     const eventName = `${this.uniqueIdentifier}.showWindow`;
     // Next, subscribe to that event, expect 'opts' array.
     // To find all places where this event is publish, search for 'globalObserver.publish("show'
-    this.props.app.globalObserver.subscribe(eventName, (opts = {}) => {
+    this.props.app.globalObserver.subscribe(eventName, (_opts = {}) => {
       this.setState({ dialogOpen: true });
     });
 
@@ -107,10 +107,14 @@ class DialogWindowPlugin extends React.PureComponent {
     return ["left", "right"].includes(target);
   };
 
-  #handleButtonClick = (e) => {
+  #handleButtonClick = (_e) => {
     this.setState({
       dialogOpen: true,
     });
+
+    // Match BaseWindowPlugin behavior: when a plugin is opened from the
+    // Drawer, hide the Drawer if it's not in permanent mode otherwise it gets stuck.
+    this.props.app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
 
     // Tell the Analytics model about this
     this.props.app.globalObserver.publish("analytics.trackEvent", {
@@ -151,7 +155,7 @@ class DialogWindowPlugin extends React.PureComponent {
         onAbort={this.#onAbort}
         onVisibilityChanged={this.opts.onVisibilityChanged}
       >
-        {this.props.children}
+        {this.state.dialogOpen && this.props.children}
       </Dialog>,
       document.getElementById("windows-container")
     );
@@ -180,8 +184,11 @@ class DialogWindowPlugin extends React.PureComponent {
           divider={true}
           selected={this.state.dialogOpen}
           onClick={this.#handleButtonClick}
+          alignItems="flex-start"
         >
-          <ListItemIcon>{this.icon}</ListItemIcon>
+          <ListItemIcon sx={{ mt: 0, alignSelf: "center" }}>
+            {this.icon}
+          </ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItemButton>
       </Box>,

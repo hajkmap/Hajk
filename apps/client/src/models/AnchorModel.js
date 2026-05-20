@@ -52,11 +52,30 @@ class AnchorModel {
         // Grab an unique ID for each layer, we'll need this to save CQL filter value for each layer
         const layerId = layer.get("name");
 
+        // Initialize CQL filter for visible layers that already have one
+        this.#initializeCqlFilterForLayer(layer, layerId);
+
         // Update anchor each time layer visibility changes (to reflect current visible layers)
         layer.on("change:visible", async (event) => {
+          // Clean up CQL filter from URL when layer becomes invisible
+          if (!event.target.getVisible()) {
+            delete this.#cqlFilters[layerId];
+          } else {
+            // Initialize CQL filter when layer becomes visible
+            this.#initializeCqlFilterForLayer(event.target, layerId);
+          }
+
           this.#app.globalObserver.publish("core.mapUpdated", {
             url: await this.getAnchor(),
             source: "layerVisibility",
+          });
+        });
+
+        // E: Update anchor when label layer state changes
+        layer.on("change:useLabelStyle", async (_event) => {
+          this.#app.globalObserver.publish("core.mapUpdated", {
+            url: await this.getAnchor(),
+            source: "labelLayerToggle",
           });
         });
 
@@ -64,13 +83,17 @@ class AnchorModel {
         layer.getSource().on("change", async ({ target }) => {
           if (typeof target.getParams !== "function") return;
 
-          // Update CQL filters only if a real value exists
+          // Update CQL filters only if a real value exists and layer is visible
           const cqlFilterForCurrentLayer = target.getParams()?.CQL_FILTER;
           if (
             cqlFilterForCurrentLayer !== null &&
-            cqlFilterForCurrentLayer !== undefined
+            cqlFilterForCurrentLayer !== undefined &&
+            layer.getVisible()
           ) {
             this.#cqlFilters[layerId] = cqlFilterForCurrentLayer;
+          } else if (!layer.getVisible()) {
+            // Remove CQL filter if layer is not visible
+            delete this.#cqlFilters[layerId];
           }
 
           // Publish the event
@@ -80,6 +103,19 @@ class AnchorModel {
           });
         });
       });
+  }
+
+  #initializeCqlFilterForLayer(layer, layerId) {
+    // Only initialize CQL filter for visible layers
+    if (!layer.getVisible()) return;
+
+    const source = layer.getSource();
+    if (typeof source?.getParams === "function") {
+      const cqlFilter = source.getParams()?.CQL_FILTER;
+      if (cqlFilter !== null && cqlFilter !== undefined && cqlFilter !== "") {
+        this.#cqlFilters[layerId] = cqlFilter;
+      }
+    }
   }
 
   #getAnchorWhenAnimationFinishes = async (e) => {
@@ -99,14 +135,21 @@ class AnchorModel {
       .getArray()
       .filter((layer) => {
         return (
-          // We consider a layer to be visible only if…
-          // …has a specified name property…
-          layer.getVisible() && // …it's visible…
-          layer.getProperties().name &&
-          isValidLayerId(layer.getProperties().name)
+          layer.getVisible() === true &&
+          ["group", "layer", "base"].includes(layer.get("layerType"))
         );
       })
-      .map((layer) => layer.getProperties().name)
+      .map((layer) => {
+        const layerId = layer.get("name");
+        // Check if the layer should show labels
+        const useLabelStyle = layer.get("useLabelStyle");
+        const hasLabelStyle = layer.get("hasLabelStyle");
+
+        if (useLabelStyle && hasLabelStyle) {
+          return `${layerId}_l`;
+        }
+        return layerId;
+      })
       .join(",");
   }
 

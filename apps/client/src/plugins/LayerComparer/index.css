@@ -115,3 +115,16 @@
 .ol-side-by-side-range::-moz-focus-outer {
   border: 0;
 }
+
+/* Spyglass control — rendered on the canvas via prerender, so this element
+ * just needs to exist for OL to mount to. */
+
+.ol-spyglass-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+}

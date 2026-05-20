@@ -1,10 +1,10 @@
 import { styled } from "@mui/material/styles";
+import BaseDialog from "components/Dialog/BaseDialog";
 import {
   ToggleButtonGroup,
   ToggleButton,
   Button,
   Grid,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
@@ -46,14 +46,6 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   },
 }));
 
-const StyledSingleToggleButton = styled(StyledToggleButton)(({ theme }) => ({
-  border: "2px solid white",
-  borderColor: theme.palette.divider,
-  [theme.breakpoints.only("xs")]: {
-    marginTop: "2px",
-  },
-}));
-
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
   border: "2px solid white",
   borderColor: theme.palette.divider,
@@ -75,7 +67,7 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 
 function HelpDialog(props) {
   return (
-    <Dialog
+    <BaseDialog
       open={props.open}
       onClose={() => {
         props.setShowHelp(false);
@@ -120,7 +112,7 @@ function HelpDialog(props) {
           OK
         </Button>
       </DialogActions>
-    </Dialog>
+    </BaseDialog>
   );
 }
 
@@ -165,81 +157,68 @@ function MeasurerView(props) {
   return (
     <>
       <Grid container spacing={1} alignItems="flex-start">
-        <Grid size={9}>
-          <Grid container spacing={0} alignItems="center">
-            <Grid
-              size={{
-                xs: 12,
-                md: 10,
-              }}
-            >
-              <StyledToggleButtonGroup
-                exclusive
-                value={drawType}
-                onChange={handleDrawTypeChange}
-                orientation="horizontal"
-                variant="contained"
-                aria-label="outlined button group"
+        <Grid size={12} display="flex" alignItems="center" gap={1}>
+          <StyledToggleButtonGroup
+            exclusive
+            value={drawType}
+            onChange={handleDrawTypeChange}
+            orientation="horizontal"
+            variant="contained"
+            aria-label="outlined button group"
+          >
+            <HajkToolTip title="Punkt (Visar koordinat)">
+              <StyledToggleButton value="Point">
+                <SvgImg src={IconPoint()} />
+              </StyledToggleButton>
+            </HajkToolTip>
+            <HajkToolTip title="Sträcka">
+              <StyledToggleButton value="LineString">
+                <SvgImg src={IconLine()} />
+              </StyledToggleButton>
+            </HajkToolTip>
+            <HajkToolTip title="Areal">
+              <StyledToggleButton value="Polygon">
+                <SvgImg src={IconPolygon()} />
+              </StyledToggleButton>
+            </HajkToolTip>
+            <HajkToolTip title="Cirkel">
+              <StyledToggleButton value="Circle">
+                <SvgImg src={IconCircle()} />
+              </StyledToggleButton>
+            </HajkToolTip>
+            <HajkToolTip title="Välj på kartan">
+              <StyledToggleButton value="Select">
+                <TouchAppIcon />
+              </StyledToggleButton>
+            </HajkToolTip>
+            <HajkToolTip title="Ta bort enskild mätning">
+              <StyledToggleButton value="Delete">
+                <DeleteIcon />
+              </StyledToggleButton>
+            </HajkToolTip>
+          </StyledToggleButtonGroup>
+          <HajkToolTip title="Rita del-längder av mätningar">
+            <Zoom in={showSegmentButton}>
+              <StyledToggleButton
+                value="Segments"
+                selected={segmentsEnabled}
+                sx={{
+                  border: "2px solid",
+                  borderColor: "divider",
+                }}
+                onClick={() => handleSegmentsToggle()}
               >
-                <HajkToolTip title="Punkt (Visar koordinat)">
-                  <StyledToggleButton value="Point">
-                    <SvgImg src={IconPoint()} />
-                  </StyledToggleButton>
-                </HajkToolTip>
-                <HajkToolTip title="Sträcka">
-                  <StyledToggleButton value="LineString">
-                    <SvgImg src={IconLine()} />
-                  </StyledToggleButton>
-                </HajkToolTip>
-                <HajkToolTip title="Areal">
-                  <StyledToggleButton value="Polygon">
-                    <SvgImg src={IconPolygon()} />
-                  </StyledToggleButton>
-                </HajkToolTip>
-                <HajkToolTip title="Cirkel">
-                  <StyledToggleButton value="Circle">
-                    <SvgImg src={IconCircle()} />
-                  </StyledToggleButton>
-                </HajkToolTip>
-                <HajkToolTip title="Välj på kartan">
-                  <StyledToggleButton value="Select">
-                    <TouchAppIcon />
-                  </StyledToggleButton>
-                </HajkToolTip>
-                <HajkToolTip title="Ta bort enskild mätning">
-                  <StyledToggleButton value="Delete">
-                    <DeleteIcon />
-                  </StyledToggleButton>
-                </HajkToolTip>
-              </StyledToggleButtonGroup>
-            </Grid>
-            <Grid
-              spacing={2}
-              size={{
-                xs: 12,
-                md: 2,
-              }}
-            >
-              <HajkToolTip title="Rita del-längder av mätningar">
-                <Zoom in={showSegmentButton}>
-                  <StyledSingleToggleButton
-                    value="Segments"
-                    selected={segmentsEnabled}
-                    onClick={() => handleSegmentsToggle()}
-                  >
-                    <SvgImg src={IconSegment()} />
-                  </StyledSingleToggleButton>
-                </Zoom>
-              </HajkToolTip>
-            </Grid>
-          </Grid>
+                <SvgImg src={IconSegment()} />
+              </StyledToggleButton>
+            </Zoom>
+          </HajkToolTip>
         </Grid>
-        <Grid size={3}>
+        <Grid size={12}>
           <HajkToolTip title="Rensa bort alla mätningar">
             <Button
-              sx={{ marginTop: "6px" }}
+              size="small"
               variant="contained"
-              fullWidth
+              startIcon={<DeleteIcon />}
               onClick={() => {
                 setShowDeleteConfirmation(true);
               }}

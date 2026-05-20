@@ -1,17 +1,7 @@
 import React from "react";
-import { IconButton, Paper } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 
-import { styled } from "@mui/material/styles";
-import HajkToolTip from "components/HajkToolTip";
-
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  marginBottom: theme.spacing(1),
-}));
-
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  minWidth: "unset",
-}));
+import ControlButton from "components/ControlButton";
 
 /**
  * @summary Resets map to initial zoom level, centrum coordinate and active layers.
@@ -32,16 +22,13 @@ class MapResetter extends React.PureComponent {
 
   render() {
     return (
-      <HajkToolTip title="Återställ kartan till startläget">
-        <StyledPaper>
-          <StyledIconButton
-            aria-label="Återställ kartan till startläget"
-            onClick={this.handleClick}
-          >
-            <HomeIcon />
-          </StyledIconButton>
-        </StyledPaper>
-      </HajkToolTip>
+      <ControlButton
+        tooltip="Återställ kartan till startläget"
+        ariaLabel="Återställ kartan till startläget"
+        onClick={this.handleClick}
+      >
+        <HomeIcon />
+      </ControlButton>
     );
   }
 }

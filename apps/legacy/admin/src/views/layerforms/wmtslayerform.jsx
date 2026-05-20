@@ -2,6 +2,27 @@ import React from "react";
 import { Component } from "react";
 import $ from "jquery";
 
+// X2JS keeps namespace-prefixed elements (e.g. ows:Title) as objects
+// { __text: "value", __prefix: "ows" } instead of plain strings.
+function textValue(val) {
+  if (val == null) return "";
+  if (typeof val === "string") return val;
+  if (typeof val === "object" && val.__text != null) return String(val.__text);
+  return String(val);
+}
+
+// Normalize CRS identifiers to "EPSG:CODE" format for OpenLayers.
+// Handles OGC URN, OGC HTTP URI, and pass-through for already correct values.
+function crsToEpsg(crs) {
+  if (!crs) return "";
+  var s = String(crs);
+  var urn = s.match(/urn:ogc:def:crs:(\w+)::(\w+)/);
+  if (urn) return urn[1] + ":" + urn[2];
+  var uri = s.match(/\/def\/crs\/(\w+)\/\w+\/(\w+)/);
+  if (uri) return uri[1] + ":" + uri[2];
+  return s;
+}
+
 const defaultState = {
   load: false,
   imageLoad: false,
@@ -14,13 +35,17 @@ const defaultState = {
   legend: "",
   legendIcon: "",
   url: "",
+  capabilitiesUrl: "",
   queryable: true,
   drawOrder: 1,
-  layer: "topowebb",
-  matrixSet: "3006",
+  layer: "",
+  matrixSet: "",
   style: "default",
+  requestEncoding: "REST",
+  imageFormat: "",
+  selectedResource: "",
   projection: "EPSG:3006",
-  origin: [-1200000, 8500000],
+  origins: "-1200000 8500000",
   resolutions: [4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
   matrixIds: [
     "0",
@@ -38,6 +63,9 @@ const defaultState = {
     "12",
     "13",
   ],
+  sizes: "",
+  tileSize: "",
+  crossOrigin: "",
   layerType: "WMTS",
   attribution: "",
   infoVisible: false,
@@ -52,6 +80,11 @@ const defaultState = {
   timeSliderEnd: "",
   maxZoom: -1,
   minZoom: -1,
+  wmtsCapabilities: null,
+  wmtsLayers: [],
+  wmtsTileMatrixSets: [],
+  availableMatrixSets: [],
+  availableResources: [],
 };
 
 /**
@@ -59,7 +92,8 @@ const defaultState = {
  */
 class WMTSLayerForm extends Component {
   componentDidMount() {
-    defaultState.url = this.props.url;
+    defaultState.capabilitiesUrl =
+      this.props.capabilitiesUrl || this.props.url || "";
     this.setState(defaultState);
     this.props.model.on("change:select-image", () => {
       this.setState({
@@ -94,12 +128,181 @@ class WMTSLayerForm extends Component {
     $("#select-legend-icon").trigger("click");
   }
 
+  fetchCapabilities() {
+    return this.props.model
+      .getAllWMTSCapabilities(this.state.capabilitiesUrl)
+      .then((capabilities) => {
+        var layers = capabilities.Contents?.Layer || [];
+        var tileMatrixSets = capabilities.Contents?.TileMatrixSet || [];
+
+        if (!Array.isArray(layers)) {
+          layers = [layers];
+        }
+        if (!Array.isArray(tileMatrixSets)) {
+          tileMatrixSets = [tileMatrixSets];
+        }
+
+        return { capabilities, layers, tileMatrixSets };
+      });
+  }
+
+  deriveLayerOptions(layers, layerIdentifier) {
+    var selectedLayer = layers.find(
+      (l) => textValue(l.Identifier) === layerIdentifier,
+    );
+    if (!selectedLayer) {
+      return { availableMatrixSets: [], availableResources: [] };
+    }
+
+    var links = selectedLayer.TileMatrixSetLink || [];
+    if (!Array.isArray(links)) {
+      links = [links];
+    }
+    var availableMatrixSets = links.map((link) =>
+      textValue(link.TileMatrixSet),
+    );
+
+    var resources = selectedLayer.ResourceURL || [];
+    if (!Array.isArray(resources)) {
+      resources = [resources];
+    }
+    var availableResources = [];
+    resources
+      .filter((r) => r._resourceType === "tile")
+      .forEach((r) => {
+        var format = textValue(r._format);
+        var template = textValue(r._template);
+        if (!format) return;
+        availableResources.push({
+          format,
+          template: template || "",
+        });
+      });
+
+    if (availableResources.length === 0) {
+      var formats = selectedLayer.Format || [];
+      if (!Array.isArray(formats)) {
+        formats = [formats];
+      }
+      availableResources = formats.map((f) => ({
+        format: textValue(f),
+        template: "",
+      }));
+    }
+
+    return { availableMatrixSets, availableResources };
+  }
+
+  loadWMTSCapabilities(e) {
+    if (e) {
+      e.preventDefault();
+    }
+
+    this.setState({ load: true });
+
+    this.fetchCapabilities()
+      .then(({ capabilities, layers, tileMatrixSets }) => {
+        this.setState({
+          load: false,
+          wmtsCapabilities: capabilities,
+          wmtsLayers: layers,
+          wmtsTileMatrixSets: tileMatrixSets,
+          layer: "",
+          matrixSet: "",
+          selectedResource: "",
+          requestEncoding: "REST",
+          imageFormat: "",
+          url: "",
+          availableMatrixSets: [],
+          availableResources: [],
+        });
+      })
+      .catch((err) => {
+        console.error("WMTS GetCapabilities failed:", err);
+        this.setState({
+          load: false,
+          wmtsLayers: [],
+          wmtsTileMatrixSets: [],
+        });
+        if (this.props.parent) {
+          this.props.parent.setState({
+            alert: true,
+            alertMessage:
+              "Servern svarar inte eller blockeras av CORS.\nFörsök med en annan URL.",
+          });
+        }
+      });
+  }
+
+  loadLayerState(savedState) {
+    this.setState({ ...savedState, load: true });
+
+    this.fetchCapabilities()
+      .then(({ capabilities, layers, tileMatrixSets }) => {
+        var options = this.deriveLayerOptions(layers, savedState.layer);
+        var selectedResourceIndex = options.availableResources.findIndex(
+          (resource) =>
+            resource.format === savedState.imageFormat &&
+            resource.template === savedState.url,
+        );
+        var inferredRequestEncoding =
+          /\{TileMatrix\}|\{TileRow\}|\{TileCol\}/i.test(savedState.url || "")
+            ? "REST"
+            : "KVP";
+
+        this.setState({
+          load: false,
+          wmtsCapabilities: capabilities,
+          wmtsLayers: layers,
+          wmtsTileMatrixSets: tileMatrixSets,
+          selectedResource:
+            selectedResourceIndex >= 0 ? String(selectedResourceIndex) : "",
+          requestEncoding:
+            savedState.requestEncoding || inferredRequestEncoding,
+          ...options,
+        });
+      })
+      .catch((err) => {
+        console.error("WMTS GetCapabilities failed:", err);
+        this.setState({ load: false });
+      });
+  }
+
+  onLayerChange(identifier) {
+    if (!identifier) {
+      this.setState({
+        layer: "",
+        matrixSet: "",
+        selectedResource: "",
+        requestEncoding: "REST",
+        imageFormat: "",
+        url: "",
+        availableMatrixSets: [],
+        availableResources: [],
+      });
+      return;
+    }
+
+    var options = this.deriveLayerOptions(this.state.wmtsLayers, identifier);
+
+    this.setState({
+      layer: identifier,
+      matrixSet: "",
+      selectedResource: "",
+      requestEncoding: "REST",
+      imageFormat: "",
+      url: "",
+      ...options,
+    });
+  }
+
   getLayer() {
     return {
       type: this.state.layerType,
       id: this.state.id,
       caption: this.getValue("caption"),
       url: this.getValue("url"),
+      capabilitiesUrl: this.getValue("capabilitiesUrl"),
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
@@ -107,10 +310,15 @@ class WMTSLayerForm extends Component {
       layer: this.getValue("layer"),
       matrixSet: this.getValue("matrixSet"),
       style: this.getValue("style"),
+      requestEncoding: this.getValue("requestEncoding"),
+      imageFormat: this.getValue("imageFormat"),
       projection: this.getValue("projection"),
-      origin: this.getValue("origin"),
+      origins: this.getValue("origins"),
       resolutions: this.getValue("resolutions"),
       matrixIds: this.getValue("matrixIds"),
+      sizes: this.getValue("sizes"),
+      tileSize: this.getValue("tileSize"),
+      crossOrigin: this.getValue("crossOrigin"),
       attribution: this.getValue("attribution"),
       infoVisible: this.getValue("infoVisible"),
       infoTitle: this.getValue("infoTitle"),
@@ -153,9 +361,34 @@ class WMTSLayerForm extends Component {
     if (fieldName === "tiled") value = input.checked;
     if (fieldName === "searchFields") value = value.split(",");
     if (fieldName === "displayFields") value = value.split(",");
-    if (fieldName === "origin") value = value.split(",");
+    if (fieldName === "origins")
+      value = value
+        .split(";")
+        .map((pair) => pair.trim().split(/[\s,]+/))
+        .filter((pair) => pair.length === 2 && pair[0] !== "");
     if (fieldName === "resolutions") value = value.split(",");
     if (fieldName === "matrixIds") value = value.split(",");
+    if (fieldName === "sizes") {
+      value = value
+        .split(";")
+        .map((pair) => pair.trim().split(/\s+/).map(Number))
+        .filter(
+          (pair) => pair.length === 2 && !isNaN(pair[0]) && !isNaN(pair[1]),
+        );
+      if (value.length === 0) value = undefined;
+    }
+    if (fieldName === "tileSize") {
+      var parts = value.trim().split(/\s+/).map(Number);
+      if (parts.length === 1 && !isNaN(parts[0]) && parts[0] > 0) {
+        value = parts[0];
+      } else if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        value = parts;
+      } else {
+        value = undefined;
+      }
+    }
+    if (fieldName === "crossOrigin")
+      value = value.trim() === "" ? undefined : value;
     if (fieldName === "infoVisible") value = input.checked;
     if (fieldName === "timeSliderVisible") value = input.checked;
 
@@ -165,12 +398,12 @@ class WMTSLayerForm extends Component {
   validate() {
     var validationFields = [
       "url",
+      "capabilitiesUrl",
       "caption",
       "layer",
       "matrixSet",
-      "style",
       "projection",
-      "origin",
+      "origins",
       "resolutions",
       "matrixIds",
     ];
@@ -207,18 +440,22 @@ class WMTSLayerForm extends Component {
     }
 
     switch (fieldName) {
-      case "origin":
+      case "origins":
+        if (value.length === 0) {
+          valid = false;
+        }
+        break;
       case "resolutions":
       case "matrixIds":
         if (value.length === 1 && value[0] === "") {
           valid = false;
         }
         break;
+      case "capabilitiesUrl":
       case "url":
       case "caption":
       case "layer":
       case "matrixSet":
-      case "style":
       case "projection":
         if (value === "") {
           valid = false;
@@ -243,7 +480,7 @@ class WMTSLayerForm extends Component {
       } else {
         this.setState({
           validationErrors: this.state.validationErrors.filter(
-            (v) => v !== fieldName
+            (v) => v !== fieldName,
           ),
         });
       }
@@ -262,6 +499,9 @@ class WMTSLayerForm extends Component {
     const imageLoader = this.state.imageLoad ? (
       <i className="fa fa-refresh fa-spin" />
     ) : null;
+    const loader = this.state.load ? (
+      <i className="fa fa-refresh fa-spin" />
+    ) : null;
     const infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
     const timeSliderClass = this.state.timeSliderVisible
       ? "tooltip-timeSlider"
@@ -272,31 +512,46 @@ class WMTSLayerForm extends Component {
         <legend>WMTS-lager</legend>
         <div className="separator">Val av lager</div>
         <div>
-          <label>Url*</label>
+          <label>CapabilitiesUrl*</label>
           <input
             type="text"
-            ref="input_url"
-            value={this.state.url}
-            className={this.getValidationClass("url")}
+            ref="input_capabilitiesUrl"
+            value={this.state.capabilitiesUrl}
+            className={this.getValidationClass("capabilitiesUrl")}
             onChange={(e) => {
-              this.setState({ url: e.target.value }, () =>
-                this.validateField("url")
+              this.setState({ capabilitiesUrl: e.target.value }, () =>
+                this.validateField("capabilitiesUrl"),
               );
             }}
           />
+          <span
+            onClick={(e) => {
+              this.loadWMTSCapabilities(e);
+            }}
+            className="btn btn-default"
+          >
+            Hämta {loader}
+          </span>
         </div>
         <div>
           <label>Lager*</label>
-          <input
-            type="text"
+          <select
             ref="input_layer"
-            onChange={(e) => {
-              const v = e.target.value;
-              this.setState({ layer: v }, () => this.validateField("layer", v));
-            }}
             value={this.state.layer}
             className={this.getValidationClass("layer")}
-          />
+            style={{ width: "400px" }}
+            onChange={(e) => {
+              this.onLayerChange(e.target.value);
+              this.validateField("layer");
+            }}
+          >
+            <option value="">Välj lager...</option>
+            {this.state.wmtsLayers.map((l, i) => (
+              <option key={i} value={textValue(l.Identifier)}>
+                {textValue(l.Title) || textValue(l.Identifier)}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label>Visningsnamn*</label>
@@ -307,7 +562,7 @@ class WMTSLayerForm extends Component {
             className={this.getValidationClass("caption")}
             onChange={(e) => {
               this.setState({ caption: e.target.value }, () =>
-                this.validateField("caption")
+                this.validateField("caption"),
               );
             }}
           />
@@ -393,29 +648,241 @@ class WMTSLayerForm extends Component {
             onChange={(e) => {
               const v = e.target.value;
               this.setState({ maxZoom: v }, () =>
-                this.validateField("maxZoom")
+                this.validateField("maxZoom"),
               );
             }}
           />
         </div>
         <div className="separator">Inställningar för request</div>
         <div>
-          <label>Matrisuppsättning*</label>
-          <input
-            type="text"
+          <label>Matrisuppsättning (matrixSet)*</label>
+          <select
             ref="input_matrixSet"
-            onChange={(e) => {
-              const v = e.target.value;
-              this.setState({ matrixSet: v }, () =>
-                this.validateField("matrixSet", v)
-              );
-            }}
             value={this.state.matrixSet}
             className={this.getValidationClass("matrixSet")}
+            onChange={(e) => {
+              const v = e.target.value;
+              var stateUpdate = { matrixSet: v };
+              if (v) {
+                var fullSet = this.state.wmtsTileMatrixSets.find(
+                  (tms) => textValue(tms.Identifier) === v,
+                );
+                if (fullSet) {
+                  var projection = crsToEpsg(textValue(fullSet.SupportedCRS));
+                  if (projection) {
+                    stateUpdate.projection = projection;
+                  }
+                  var matrices = fullSet.TileMatrix || [];
+                  if (!Array.isArray(matrices)) {
+                    matrices = [matrices];
+                  }
+                  if (matrices.length > 0) {
+                    // WMTS may report TopLeftCorner in CRS axis order.
+                    // Swap only when the first value is positive.
+                    stateUpdate.origins = matrices
+                      .map((m) => {
+                        var parts = textValue(m.TopLeftCorner)
+                          .trim()
+                          .split(/\s+/);
+                        if (parts.length !== 2) {
+                          return textValue(m.TopLeftCorner).trim();
+                        }
+                        var firstValue = Number(parts[0]);
+                        return !Number.isNaN(firstValue) && firstValue > 0
+                          ? parts[1] + " " + parts[0]
+                          : parts[0] + " " + parts[1];
+                      })
+                      .filter(Boolean)
+                      .join("; ");
+                    stateUpdate.matrixIds = matrices
+                      .map((m) => textValue(m.Identifier))
+                      .join(",");
+                    stateUpdate.resolutions = matrices
+                      .map(
+                        (m) => Number(textValue(m.ScaleDenominator)) * 0.00028,
+                      )
+                      .join(",");
+                    stateUpdate.sizes = matrices
+                      .map(
+                        (m) =>
+                          textValue(m.MatrixWidth) +
+                          " " +
+                          textValue(m.MatrixHeight),
+                      )
+                      .filter((s) => s.trim() !== "")
+                      .join("; ");
+                    var tw = textValue(matrices[0].TileWidth);
+                    var th = textValue(matrices[0].TileHeight);
+                    if (tw && th) {
+                      stateUpdate.tileSize = tw === th ? tw : tw + " " + th;
+                    }
+                  }
+                }
+              }
+              this.setState(stateUpdate, () =>
+                this.validateField("matrixSet", v),
+              );
+            }}
+          >
+            <option value="">Välj matrisuppsättning...</option>
+            {this.state.availableMatrixSets.map((name, i) => (
+              <option key={i} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label>Resource</label>
+          <select
+            ref="input_resource"
+            value={this.state.selectedResource}
+            style={{ width: "400px" }}
+            onChange={(e) => {
+              const selectedResource = e.target.value;
+              const selectedIndex = Number(selectedResource);
+              const resource = this.state.availableResources[selectedIndex];
+              const imageFormat = resource ? resource.format : "";
+              const url = resource ? resource.template : "";
+              const requestEncoding =
+                resource && resource.template ? "REST" : "KVP";
+              this.setState(
+                { selectedResource, imageFormat, requestEncoding, url },
+                () => this.validateField("url"),
+              );
+            }}
+          >
+            <option value="">Välj resource...</option>
+            {this.state.availableResources.map((resource, i) => (
+              <option key={i} value={String(i)}>
+                {resource.format + " @ " + (resource.template || "")}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label>Format (imageFormat)</label>
+          <input
+            type="text"
+            ref="input_imageFormat"
+            value={this.state.imageFormat}
+            onChange={(e) => {
+              this.setState({ imageFormat: e.target.value });
+            }}
           />
         </div>
         <div>
-          <label>Stilsättning*</label>
+          <label>Request encoding</label>
+          <select
+            ref="input_requestEncoding"
+            value={this.state.requestEncoding}
+            onChange={(e) => {
+              this.setState({ requestEncoding: e.target.value });
+            }}
+          >
+            <option value="REST">REST</option>
+            <option value="KVP">KVP</option>
+          </select>
+        </div>
+        <div>
+          <label>Url*</label>
+          <input
+            type="text"
+            ref="input_url"
+            value={this.state.url}
+            className={this.getValidationClass("url")}
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ url: v }, () => this.validateField("url", v));
+            }}
+          />
+        </div>
+        <div>
+          <label>Projektion (projection)*</label>
+          <input
+            type="text"
+            ref="input_projection"
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ projection: v }, () =>
+                this.validateField("projection", v),
+              );
+            }}
+            value={this.state.projection}
+            className={this.getValidationClass("projection")}
+          />
+        </div>
+        <div>
+          <label>Startkoordinater (origins)*</label>
+          <input
+            type="text"
+            ref="input_origins"
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ origins: v }, () =>
+                this.validateField("origins", v),
+              );
+            }}
+            value={this.state.origins}
+            className={this.getValidationClass("origins")}
+          />
+        </div>
+        <div>
+          <label>Upplösningar (resolutions)*</label>
+          <input
+            type="text"
+            ref="input_resolutions"
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ resolutions: v }, () =>
+                this.validateField("resolutions", v),
+              );
+            }}
+            value={this.state.resolutions}
+            className={this.getValidationClass("resolutions")}
+          />
+        </div>
+        <div>
+          <label>Matrisnivåer (matrixIds)*</label>
+          <input
+            type="text"
+            ref="input_matrixIds"
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ matrixIds: v }, () =>
+                this.validateField("matrixIds", v),
+              );
+            }}
+            value={this.state.matrixIds}
+            className={this.getValidationClass("matrixIds")}
+          />
+        </div>
+        <div>
+          <label>Storlekar (sizes)</label>
+          <input
+            type="text"
+            ref="input_sizes"
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ sizes: v });
+            }}
+            value={this.state.sizes}
+          />
+        </div>
+        <div>
+          <label>Rutstorlek (tileSize)</label>
+          <input
+            type="text"
+            ref="input_tileSize"
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ tileSize: v });
+            }}
+            value={this.state.tileSize}
+          />
+        </div>
+        <div>
+          <label>Stilsättning</label>
           <input
             type="text"
             ref="input_style"
@@ -428,64 +895,18 @@ class WMTSLayerForm extends Component {
           />
         </div>
         <div>
-          <label>Projektion*</label>
-          <input
-            type="text"
-            ref="input_projection"
+          <label>Cross origin</label>
+          <select
+            ref="input_crossOrigin"
+            value={this.state.crossOrigin || ""}
             onChange={(e) => {
-              const v = e.target.value;
-              this.setState({ projection: v }, () =>
-                this.validateField("projection", v)
-              );
+              this.setState({ crossOrigin: e.target.value });
             }}
-            value={this.state.projection}
-            className={this.getValidationClass("projection")}
-          />
-        </div>
-        <div>
-          <label>Startkoordinat för rutnät*</label>
-          <input
-            type="text"
-            ref="input_origin"
-            onChange={(e) => {
-              const v = e.target.value;
-              this.setState({ origin: v }, () =>
-                this.validateField("origin", v)
-              );
-            }}
-            value={this.state.origin}
-            className={this.getValidationClass("origin")}
-          />
-        </div>
-        <div>
-          <label>Upplösningar (resolutions)*</label>
-          <input
-            type="text"
-            ref="input_resolutions"
-            onChange={(e) => {
-              const v = e.target.value;
-              this.setState({ resolutions: v }, () =>
-                this.validateField("resolutions", v)
-              );
-            }}
-            value={this.state.resolutions}
-            className={this.getValidationClass("resolutions")}
-          />
-        </div>
-        <div>
-          <label>Matrisnivåer*</label>
-          <input
-            type="text"
-            ref="input_matrixIds"
-            onChange={(e) => {
-              const v = e.target.value;
-              this.setState({ matrixIds: v }, () =>
-                this.validateField("matrixIds", v)
-              );
-            }}
-            value={this.state.matrixIds}
-            className={this.getValidationClass("matrixIds")}
-          />
+          >
+            <option value="">Ej satt</option>
+            <option value="anonymous">anonymous</option>
+            <option value="use-credentials">use-credentials</option>
+          </select>
         </div>
         <div className="separator">Metadata</div>
         <div>
@@ -513,7 +934,7 @@ class WMTSLayerForm extends Component {
             onChange={(e) => {
               const v = e.target.value;
               this.setState({ attribution: e.target.value }, () =>
-                this.validateField("attribution", v)
+                this.validateField("attribution", v),
               );
             }}
             value={this.state.attribution}
@@ -542,7 +963,7 @@ class WMTSLayerForm extends Component {
               onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoTitle: v }, () =>
-                  this.validateField("infoTitle", v)
+                  this.validateField("infoTitle", v),
                 );
               }}
               value={this.state.infoTitle}
@@ -557,7 +978,7 @@ class WMTSLayerForm extends Component {
               onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoText: v }, () =>
-                  this.validateField("infoText", v)
+                  this.validateField("infoText", v),
                 );
               }}
               value={this.state.infoText}
@@ -572,7 +993,7 @@ class WMTSLayerForm extends Component {
               onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoUrl: v }, () =>
-                  this.validateField("infoUrl", v)
+                  this.validateField("infoUrl", v),
                 );
               }}
               value={this.state.infoUrl}
@@ -587,7 +1008,7 @@ class WMTSLayerForm extends Component {
               onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoUrlText: v }, () =>
-                  this.validateField("infoUrlText", v)
+                  this.validateField("infoUrlText", v),
                 );
               }}
               value={this.state.infoUrlText}
@@ -602,7 +1023,7 @@ class WMTSLayerForm extends Component {
               onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoOpenDataLink: v }, () =>
-                  this.validateField("infoOpenDataLink", v)
+                  this.validateField("infoOpenDataLink", v),
                 );
               }}
               value={this.state.infoOpenDataLink}
@@ -617,7 +1038,7 @@ class WMTSLayerForm extends Component {
               onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoOwner: v }, () =>
-                  this.validateField("infoOwner", v)
+                  this.validateField("infoOwner", v),
                 );
               }}
               value={this.state.infoOwner}

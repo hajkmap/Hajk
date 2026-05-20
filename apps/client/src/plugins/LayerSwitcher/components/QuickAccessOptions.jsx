@@ -1,17 +1,20 @@
 import * as React from "react";
 import { useEffect } from "react";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
+import { useSnackbar } from "notistack";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import HajkToolTip from "components/HajkToolTip";
 import LsIconButton from "./LsIconButton";
+import { functionalOk } from "../../../models/Cookie";
 
 export default function QuickAccessOptions({
   handleAddLayersToQuickAccess,
   handleClearQuickAccessLayers,
 }) {
+  const { enqueueSnackbar } = useSnackbar();
   // Element that we will anchor the options menu to is
   // held in state. If it's null (unanchored), we can tell
   // that the menu should be hidden.
@@ -73,6 +76,16 @@ export default function QuickAccessOptions({
           onClick={(e) => {
             e.stopPropagation();
             setAnchorEl(null);
+            if (!functionalOk()) {
+              enqueueSnackbar(
+                "Du har inte tillåtit funktionella kakor. För att använda snabbåtkomst så måste du tillåta funktionella kakor.",
+                {
+                  variant: "warning",
+                  anchorOrigin: { vertical: "bottom", horizontal: "center" },
+                }
+              );
+              return;
+            }
             handleAddLayersToQuickAccess(e);
           }}
         >

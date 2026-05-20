@@ -1,9 +1,9 @@
 import React from "react";
 import { createPortal } from "react-dom";
+import BaseDialog from "components/Dialog/BaseDialog";
 import {
   Button,
   Checkbox,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -115,7 +115,7 @@ export default function SelectFeaturesDialog({ localObserver, drawModel }) {
   }, [localObserver, handleDrawSelectClick]);
 
   return createPortal(
-    <Dialog
+    <BaseDialog
       open={state.clickedFeatures.length > 1}
       onClose={handleAbort}
       // Must stop event-bubbling. Otherwise the parent element in react can be dragged etc.
@@ -160,7 +160,7 @@ export default function SelectFeaturesDialog({ localObserver, drawModel }) {
         </Button>
         <Button onClick={handleAbort}>Avbryt</Button>
       </DialogActions>
-    </Dialog>,
+    </BaseDialog>,
     document.getElementById("map")
   );
 }

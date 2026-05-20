@@ -29,6 +29,7 @@ const getOlLayerState = (l) => ({
   visibleSubLayers: l.get("visible") ? l.get("subLayers") : [],
   wmsLoadError: l.get("wmsLoadStatus") ?? undefined,
   zIndex: l.get("zIndex"),
+  hasLabelStyle: l.get("hasLabelStyle"),
   // "filterAttribute"
   // "filterComparer"
   // "filterValue"
@@ -91,8 +92,15 @@ const LayerZoomVisibleSnackbarProvider = ({ children, layers }) => {
     <>
       {layers.map((l) => {
         const id = l.get("name");
-        if (!id.includes("plugin")) {
-          return <LayerZoomListener key={l.get("name")} layer={l} />;
+        if (id === undefined) {
+          console.warn(
+            "Possibly misconfigured layer: 'name' property is missing",
+            l
+          );
+          return null;
+        }
+        if (!id?.includes("plugin")) {
+          return <LayerZoomListener key={id} layer={l} />;
         } else {
           return null;
         }
@@ -136,6 +144,15 @@ const setQuickAccessStateInLocalStorage = (map) => {
   }
 };
 
+const clearQuickAccessState = (map) => {
+  // force UI to update and clear.
+  map
+    .getAllLayers()
+    .filter((l) => l.get("quickAccess") === true)
+    .forEach((l) => l.set(QUICK_ACCESS_KEY, false));
+  LocalStorageHelper.set(QUICK_ACCESS_LS_KEY, []);
+};
+
 const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
   const olBackgroundLayers = map
     .getLayers()
@@ -145,22 +162,22 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
   return {
     setLayerVisibility(layerId, visible) {
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
-      olLayer.setVisible(visible);
 
-      // VectorLayers have no sublayers.
-      if (!(olLayer instanceof VectorLayer)) {
+      // Only handle sublayers for WMS group layers (they have allSubLayers
+      // configured and a source that supports updateParams).
+      const allSubLayers = staticLayerConfig[layerId]?.allSubLayers;
+      if (allSubLayers && !(olLayer instanceof VectorLayer)) {
         if (visible) {
-          // For GroupLayers:
-          const allSubLayers = staticLayerConfig[layerId]?.allSubLayers;
-          if (allSubLayers) {
-            olLayer.set("subLayers", allSubLayers);
-            setOLSubLayers(olLayer, allSubLayers);
-          }
+          olLayer.set("subLayers", allSubLayers);
+          setOLSubLayers(olLayer, allSubLayers);
         } else {
+          olLayer.setVisible(false);
           olLayer.set("subLayers", []);
           setOLSubLayers(olLayer, []);
+          return;
         }
       }
+      olLayer.setVisible(visible);
     },
     setSubLayerVisibility(layerId, subLayerId, visible) {
       const olLayer = map.getAllLayers().find((l) => l.get("name") === layerId);
@@ -204,7 +221,29 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
 
       allLayerIdsInGroup.forEach((id) => {
         const olLayer = map.getAllLayers().find((l) => l.get("name") === id);
-        olLayer.setVisible(visible);
+
+        const allSubLayers = staticLayerConfig[id]?.allSubLayers;
+        if (allSubLayers && !(olLayer instanceof VectorLayer)) {
+          if (visible) {
+            const wasVisible = olLayer.get("visible");
+            if (wasVisible) {
+              olLayer.setVisible(false);
+            }
+
+            olLayer.set("subLayers", allSubLayers);
+            setOLSubLayers(olLayer, allSubLayers);
+
+            setTimeout(() => {
+              olLayer.setVisible(true);
+            }, 0);
+          } else {
+            olLayer.setVisible(false);
+            olLayer.set("subLayers", []);
+            setOLSubLayers(olLayer, []);
+          }
+        } else {
+          olLayer.setVisible(visible);
+        }
       });
     },
     setAllLayersInvisible() {
@@ -319,6 +358,7 @@ const getLayerNodes = (groups, olLayerMap) =>
         infogroupurltext: node.infogroupurltext,
         infogroupopendatalink: node.infogroupopendatalink,
         infogroupowner: node.infogroupowner,
+        olLayer: olLayer,
       },
       ...(children?.length === 0 ? [] : children),
     ];
@@ -430,6 +470,11 @@ const LayerSwitcherProvider = ({
   // OpenLayers listeners. So that the application realizes that some new
   // layers might have been added to QuickAccess.
   useEffect(() => {
+    if (!functionalCookieOk()) {
+      clearQuickAccessState(map);
+      return;
+    }
+
     const ls = LocalStorageHelper.get(QUICK_ACCESS_LS_KEY);
 
     if (!(typeof ls === "object" && ls !== null)) {
@@ -445,6 +490,22 @@ const LayerSwitcherProvider = ({
         }
       });
   }, [map]);
+
+  useEffect(() => {
+    const cookieLevelChangedListener = globalObserver.subscribe(
+      "core.cookieLevelChanged",
+      () => {
+        if (!functionalCookieOk()) {
+          // Clean up if someone changed to disable functional cookies
+          clearQuickAccessState(map);
+        }
+      }
+    );
+
+    return () => {
+      cookieLevelChangedListener.unsubscribe();
+    };
+  }, [globalObserver, map]);
 
   const dispatcher = useRef(
     createDispatch(map, staticLayerConfigMap, layerTreeData)

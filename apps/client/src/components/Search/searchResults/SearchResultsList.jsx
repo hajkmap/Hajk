@@ -1,5 +1,5 @@
 import React from "react";
-import { List, ListItem } from "@mui/material";
+import { List, ListItemButton } from "@mui/material";
 import SearchResultsDataset from "./SearchResultsDataset";
 import SearchResultsDatasetSummary from "./SearchResultsDatasetSummary";
 import { useTheme } from "@mui/material";
@@ -22,7 +22,7 @@ const StyledList = styled(List)(() => ({
   transition: "none",
 }));
 
-const StyledListItem = styled(ListItem)(() => ({
+const StyledListItemButton = styled(ListItemButton)(() => ({
   display: "block",
   padding: 0,
   transition: "none",
@@ -149,17 +149,17 @@ class SearchResultsList extends React.PureComponent {
     return (
       <StyledList>
         {featureCollections.map((featureCollection) => (
-          <StyledListItem
+          <StyledListItemButton
             disableTouchRipple
             key={featureCollection.source.id}
             id={`search-result-dataset-${featureCollection.source.id}`}
             aria-controls={`search-result-dataset-details-${featureCollection.source.id}`}
             onClick={() => handleFeatureCollectionClick(featureCollection)}
-            button
             divider
+            button={"true"}
           >
             {this.renderSearchResultDatasetSummary(featureCollection)}
-          </StyledListItem>
+          </StyledListItemButton>
         ))}
       </StyledList>
     );

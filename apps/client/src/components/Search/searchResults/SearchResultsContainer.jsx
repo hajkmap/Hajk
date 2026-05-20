@@ -45,12 +45,14 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
     position: "absolute",
     left: 0,
     borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+    borderTopRightRadius: 0,
+    borderTopLeftRadius: 0,
   },
 }));
 
 const ResultListWrapper = styled(Grid)(({ theme }) => ({
   [theme.breakpoints.down("sm")]: {
-    maxHeight: "78vh",
+    maxHeight: "65vh",
   },
   [theme.breakpoints.up("sm")]: {
     maxHeight: "82vh",
@@ -1007,8 +1009,9 @@ class SearchResultsContainer extends React.PureComponent {
 
     return (
       <Grid
-        sx={
-          shouldRenderHeaderInfoBar
+        sx={{
+          maxWidth: "calc(100% - 1px)", // could not find a better way to prevent overflow right now.
+          ...(shouldRenderHeaderInfoBar
             ? {
                 minHeight: 42,
                 paddingRight: 1,
@@ -1016,8 +1019,8 @@ class SearchResultsContainer extends React.PureComponent {
                 borderBottom: 0.8,
                 borderBottomColor: "divider",
               }
-            : { paddingRight: 1, paddingLeft: 1 }
-        }
+            : { paddingRight: 1, paddingLeft: 1 }),
+        }}
         container
         size={12}
       >

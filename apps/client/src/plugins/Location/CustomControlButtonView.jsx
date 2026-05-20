@@ -175,7 +175,7 @@ const CustomControlButtonView = React.memo(
     ]);
 
     return (
-      <HajkToolTip title={tooltip}>
+      <HajkToolTip title={tooltip} placement="left">
         <StyledPaper>
           <StyledToggleButton
             aria-label={defaultTooltip}

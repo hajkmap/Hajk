@@ -7,6 +7,7 @@ import Avatar from "@mui/material/Avatar";
 import { Divider, Typography } from "@mui/material";
 
 import { useMapClickViewerContext } from "../MapClickViewerContext";
+import { useWindowSheetScroll } from "../../WindowSheet";
 
 import Breadcrumbs from "./Breadcrumbs";
 import FeatureDetailView from "./FeatureDetailView";
@@ -20,6 +21,7 @@ const FeaturesListView = (props) => {
   } = props;
 
   const { appModel } = useMapClickViewerContext();
+  const { scrollToTop } = useWindowSheetScroll();
 
   const [selectedFeatureId, setSelectedFeatureId] = useState(null);
 
@@ -32,6 +34,11 @@ const FeaturesListView = (props) => {
         : null;
     setSelectedFeatureId(preselectedFeature || null);
   }, [featureCollection]);
+
+  // Reset sheet scroll when entering/leaving the detail view or paginating.
+  useEffect(() => {
+    scrollToTop();
+  }, [selectedFeatureId, scrollToTop]);
 
   return featureCollection ? (
     selectedFeatureId === null ? (

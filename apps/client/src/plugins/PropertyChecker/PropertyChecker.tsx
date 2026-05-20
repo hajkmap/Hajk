@@ -8,17 +8,22 @@ import Observer from "react-event-observer";
 
 import ChecklistIcon from "@mui/icons-material/Checklist";
 import HelpIcon from "@mui/icons-material/Help";
+import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
+import TipsAndUpdatesOutlinedIcon from "@mui/icons-material/TipsAndUpdatesOutlined";
 
 // We might want to import some other classes or constants etc.
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 import DrawModel from "../../models/DrawModel";
+import LocalStorageHelper from "../../utils/LocalStorageHelper";
+
+// Some types
+import type { PropertyCheckerProps } from "./types";
+import type { DrawModelInterface } from "../../types/hajk";
 
 /**
- * @summary Main component for the Dummy-plugin.
- * @description The purpose of having a Dummy plugin is to exemplify
- * and document how plugins should be constructed in Hajk.
+ * @summary Main component for the PropertyChecker plugin.
  */
-function PropertyChecker(props) {
+const PropertyChecker: React.FC<PropertyCheckerProps> = (props) => {
   //
   // Used to keep track of the plugin's current visibility.
   // We will want to do some cleanup later on when the window is hidden.
@@ -44,7 +49,10 @@ function PropertyChecker(props) {
         map: props.map,
         measurementSettings: DEFAULT_MEASUREMENT_SETTINGS,
         observer: localObserver,
-      })
+        // Until we convert DrawModel to TS, this "as unknown as DrawModelInterface"
+        // on the next line ensures that we don't get a warning about incompatible
+        // type casting
+      }) as unknown as DrawModelInterface
   );
 
   // Initiate the model
@@ -84,6 +92,27 @@ function PropertyChecker(props) {
     setPluginShown(true);
   };
 
+  // Let's save the last state of the "showTooltips" setting in the local storage,
+  // so that we can keep it between sessions. We also need to make sure to read
+  // from local storage when initiating the state, so that we get the correct value
+  //  when the plugin is opened.
+  const [showTooltips, setShowTooltips] = React.useState<boolean>(
+    () =>
+      LocalStorageHelper.get("propertyChecker", { showTooltips: true })
+        .showTooltips
+  );
+
+  // Updates the state of "showTooltips" and saves the new value in local storage,
+  // so that it can be kept between sessions. This in turn controls whether or not
+  // the tooltips are shown in the plugin.
+  const toggleTooltips = () => {
+    setShowTooltips((v) => {
+      const next = !v;
+      LocalStorageHelper.set("propertyChecker", { showTooltips: next });
+      return next;
+    });
+  };
+
   const showInfoDialog = () => {
     localObserver.publish("showInfoDialog");
   };
@@ -110,8 +139,16 @@ function PropertyChecker(props) {
         // Do you want to add buttons to the plugin-header? That can be done as follows:
         customPanelHeaderButtons: [
           {
-            icon: <HelpIcon />, // Specify which icon the button should use...
-            onClickCallback: showInfoDialog, // ...and which callback should run on click.
+            icon: <HelpIcon />,
+            onClickCallback: showInfoDialog,
+          },
+          {
+            icon: showTooltips ? (
+              <TipsAndUpdatesIcon />
+            ) : (
+              <TipsAndUpdatesOutlinedIcon />
+            ),
+            onClickCallback: toggleTooltips,
           },
         ],
         height: "dynamic", // The height of the plugin-window in px. "dynamic" resizes the window so all content fits, "auto" uses all available space.
@@ -134,9 +171,10 @@ function PropertyChecker(props) {
         model={propertyCheckerModel} // We can supply our model
         options={props.options}
         setDrawInteraction={setDrawInteraction} // Finally, we'll pass the updater for the draw-interaction state (so that we can toggle draw on/off).
+        showTooltips={showTooltips}
       />
     </BaseWindowPlugin>
   );
-}
+};
 
 export default PropertyChecker;

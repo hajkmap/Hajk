@@ -4,10 +4,10 @@ import { saveAs } from "file-saver";
 
 import FavoritePackageOptions from "./FavoritePackageOptions";
 import ConfirmationDialog from "../../../../components/ConfirmationDialog";
+import BaseDialog from "components/Dialog/BaseDialog";
 
 import {
   Button,
-  Dialog,
   DialogActions,
   DialogTitle,
   DialogContent,
@@ -137,7 +137,7 @@ function FavoritesList({
   // Render dialog with layerpackage information
   const renderInfoDialog = () => {
     return createPortal(
-      <Dialog
+      <BaseDialog
         open={infoAlert}
         aria-labelledby="infoalert-dialog-title"
         aria-describedby="infoalert-dialog-description"
@@ -191,14 +191,14 @@ function FavoritesList({
             Ladda
           </Button>
         </DialogActions>
-      </Dialog>,
+      </BaseDialog>,
       document.getElementById("map")
     );
   };
 
   const renderEditDialog = () => {
     return createPortal(
-      <Dialog
+      <BaseDialog
         open={editAlert}
         aria-labelledby="editalert-dialog-title"
         aria-describedby="editalert-dialog-description"
@@ -251,7 +251,7 @@ function FavoritesList({
             Spara
           </Button>
         </DialogActions>
-      </Dialog>,
+      </BaseDialog>,
       document.getElementById("map")
     );
   };

@@ -1,40 +1,23 @@
 import React, { useEffect, useId } from "react";
-import { styled } from "@mui/material/styles";
 
 import {
-  Card,
-  CardContent,
-  CardHeader,
+  Box,
   Checkbox,
   Collapse,
+  Divider,
   IconButton,
   Switch,
   TextField,
+  Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import IconWarning from "@mui/icons-material/Warning";
 import HajkToolTip from "components/HajkToolTip";
 
-const ExpandMore = styled((props) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme }) => ({
-  transform: "rotate(180deg)",
-  marginLeft: "auto",
-  transition: theme.transitions.create("transform", {
-    duration: theme.transitions.duration.shortest,
-  }),
-  variants: [
-    {
-      props: ({ expand }) => !expand,
-      style: {
-        transform: "rotate(0deg)",
-      },
-    },
-  ],
-}));
+import type { FeatureItemProps, ControlledLayer } from "../../types";
+import { usePropertyCheckerContext } from "../../context";
 
-const FeatureItem = (props) => {
+const FeatureItem = (props: FeatureItemProps) => {
   const {
     globalObserver,
     layerNotes,
@@ -50,9 +33,12 @@ const FeatureItem = (props) => {
   const id = useId();
   const layer = props.feature.get("layer");
   const caption = props.feature.get("caption");
+  const paverkasAvText = props.feature.get("paverkasAvText") as
+    | string
+    | undefined;
   // For Hajk group layers, we want to append a small
   // text saying that "this layer is part of group layer X".
-  const subcaption =
+  const subcaption: string | null =
     olLayer.get("caption") !== caption
       ? `del av: ${olLayer.get("caption")}`
       : null;
@@ -60,7 +46,7 @@ const FeatureItem = (props) => {
   // Define an object that will be used when keeping track
   // of user-selected layers that should be printed inside the
   // Report dialog.
-  const selectionFormat = {
+  const selectionFormat: ControlledLayer = {
     id, // We want to distinguish by something more unique than merely the caption.
     layer,
     caption,
@@ -74,7 +60,8 @@ const FeatureItem = (props) => {
 
   // Used to keep track of OL Layer's current visibility.
   const [visible, setVisible] = React.useState(olLayer.getVisible());
-  const layerVisibilityChanged = (e) => setVisible(!e.oldValue);
+  const layerVisibilityChanged = (e: import("ol/Object").ObjectEvent) =>
+    setVisible(!e.oldValue);
 
   // Used to keep track of the expansion area below the main layer item
   const [expanded, setExpanded] = React.useState(false);
@@ -119,10 +106,10 @@ const FeatureItem = (props) => {
   }, [olLayer]);
 
   const layerLoadErrorHandler = React.useCallback(
-    (d) => {
-      loadStatus !== "loaderror" &&
-        olLayer.get("name") === d.id &&
+    (d: { id: string; status: string }) => {
+      if (loadStatus !== "loaderror" && olLayer.get("name") === d.id) {
         setLoadStatus(d.status);
+      }
     },
     [loadStatus, olLayer]
   );
@@ -149,85 +136,140 @@ const FeatureItem = (props) => {
   const isSelected = () =>
     controlledLayers.filter((l) => l.id === selectionFormat.id).length > 0;
 
-  const handleLayerNoteChange = (e) => {
+  const handleLayerNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLayerNotes({ ...layerNotes, ...{ [id]: e.target.value } });
   };
 
+  const hasExpandContent =
+    !!paverkasAvText?.trim() || options.enableCheckLayerReport;
+
+  const { showTooltips } = usePropertyCheckerContext();
+
   return (
-    <Card variant="outlined">
-      <CardHeader
-        avatar={
-          <>
-            {loadStatus === "loaderror" ? (
-              <HajkToolTip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
-                <IconButton
-                  disableFocusRipple
-                  disableRipple
-                  disableTouchRipple
-                  sx={{ cursor: "not-allowed" }}
-                >
-                  <IconWarning />
-                </IconButton>
-              </HajkToolTip>
-            ) : (
+    <>
+      <Box
+        sx={{ display: "flex", alignItems: "center", gap: 1, py: 0.75, px: 1 }}
+      >
+        <Box
+          sx={{
+            flexShrink: 0,
+            width: 44,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {loadStatus === "loaderror" ? (
+            <HajkToolTip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
+              <IconButton
+                disableFocusRipple
+                disableRipple
+                disableTouchRipple
+                sx={{ cursor: "not-allowed" }}
+                size="small"
+              >
+                <IconWarning />
+              </IconButton>
+            </HajkToolTip>
+          ) : (
+            <HajkToolTip
+              title={showTooltips ? "Slå på/av lagret i kartan" : ""}
+            >
               <Switch
-                edge="start"
+                size="small"
                 onChange={handleLayerToggle}
                 checked={visible}
               />
-            )}
-          </>
-        }
-        action={
-          options.enableCheckLayerReport && (
-            <>
+            </HajkToolTip>
+          )}
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="body2" noWrap>
+            {caption}
+          </Typography>
+          {subcaption && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+              noWrap
+            >
+              {subcaption}
+            </Typography>
+          )}
+        </Box>
+        <Box
+          sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 0 }}
+        >
+          {options.enableCheckLayerReport && (
+            <HajkToolTip
+              title={showTooltips ? "Inkludera lagret i rapport" : ""}
+            >
               <Checkbox
-                onChange={(e) => {
+                size="small"
+                onChange={() => {
                   setControlledLayers((prev) => {
-                    // If layer is already selected using the checkbox…
                     if (isSelected()) {
-                      // … let's uncheck the box by the removing element with current layer's ID.
                       return prev.filter((l) => l.id !== selectionFormat.id);
                     } else {
-                      // Else, let's check the box by adding the new element.
                       return [...prev, selectionFormat];
                     }
                   });
                 }}
                 checked={isSelected()}
               />
-
-              <ExpandMore
-                expand={expanded}
+            </HajkToolTip>
+          )}
+          {hasExpandContent && (
+            <HajkToolTip
+              title={showTooltips ? "Visa detaljer och noteringar" : ""}
+            >
+              <IconButton
+                size="small"
                 onClick={handleExpandClick}
                 aria-expanded={expanded}
                 aria-label="Visa noteringar"
               >
-                <ExpandMoreIcon />
-              </ExpandMore>
-            </>
-          )
-        }
-        title={caption}
-        subheader={subcaption}
-      />
-
-      {options.enableCheckLayerReport && (
-        <Collapse in={expanded} timeout="auto">
-          <CardContent>
+                <ExpandMoreIcon
+                  sx={{
+                    transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: (theme) =>
+                      theme.transitions.create("transform", {
+                        duration: theme.transitions.duration.shortest,
+                      }),
+                  }}
+                />
+              </IconButton>
+            </HajkToolTip>
+          )}
+        </Box>
+      </Box>
+      <Collapse in={expanded} timeout="auto">
+        <Box sx={{ pl: 7, pr: 2, pb: 1.5 }}>
+          {paverkasAvText && paverkasAvText.trim().length > 0 && (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 2, whiteSpace: "pre-wrap" }}
+            >
+              {paverkasAvText}
+            </Typography>
+          )}
+          {options.enableCheckLayerReport && (
             <TextField
               label="Notering"
               multiline
               fullWidth
               size="small"
+              minRows={1}
               maxRows={4}
               onChange={handleLayerNoteChange}
               value={layerNotes?.id}
             />
-          </CardContent>
-        </Collapse>
-      )}
-    </Card>
+          )}
+        </Box>
+      </Collapse>
+      <Divider />
+    </>
   );
 };
 

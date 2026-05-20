@@ -1,3 +1,8 @@
+node_modules/
+releases/*
+!releases/.gitkeep
+
+
 ### VS Code ###
 .vscode/*
 !.vscode/settings.json

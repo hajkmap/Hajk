@@ -9,14 +9,13 @@ import KirExportView from "./KirExportView";
 import KirSearchResultsView from "./KirSearchResultsView";
 
 const KirContainer = styled("div")(({ theme }) => ({
-  margin: -10,
   display: "flex",
   flexDirection: "column",
   height: "100%",
 }));
 
 const StickyAppBar = styled(AppBar)(({ theme }) => ({
-  top: -10,
+  top: 0,
 }));
 
 const TabPanel = styled("div")(({ theme }) => ({

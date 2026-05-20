@@ -9,24 +9,34 @@ import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import { Box } from "@mui/system";
 import HajkToolTip from "components/HajkToolTip";
 
-const StyledBox = styled(Box)(({ theme }) => ({
+import type Layer from "ol/layer/Layer";
+import type { QuickLayerToggleButtonsProps } from "../types";
+import { usePropertyCheckerContext } from "../context";
+
+const StyledBox = styled(Box)(() => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
 }));
 
-function QuickLayerTogglerButtons({ map, options }) {
+type LayerType = "buildings" | "borders" | "plans";
+
+function QuickLayerTogglerButtons({
+  map,
+  options,
+}: QuickLayerToggleButtonsProps) {
+  const { showTooltips } = usePropertyCheckerContext();
   // Grab relevant layers IDs from options
   const { buildingsLayerIds, bordersLayerIds, plansLayerIds } = options;
 
   // Helper: Convert the string of IDs that comes from Admin into an Array
   // of real OL Layers.
   const getOlLayersFromIds = useCallback(
-    (ids) =>
+    (ids: string) =>
       ids
         .split(",")
         .map((id) => map.getAllLayers().find((l) => l.get("name") === id))
-        .filter((l) => l !== undefined),
+        .filter((l): l is Layer => l !== undefined),
     [map]
   );
 
@@ -44,11 +54,15 @@ function QuickLayerTogglerButtons({ map, options }) {
   // that the app starts with some of our quick layers already visible and
   // in that case, the toggle buttons should reflect that by already being enabled.
   const initialVisibilityForLayers = useMemo(() => {
-    const initValue = [];
+    const initValue: LayerType[] = [];
 
-    Object.entries(layersCollection).forEach(([type, layer]) => {
-      layer.map((l) => l.getVisible()).includes(true) && initValue.push(type);
-    });
+    (Object.entries(layersCollection) as [LayerType, Layer[]][]).forEach(
+      ([type, layer]) => {
+        if (layer.map((l) => l.getVisible()).includes(true)) {
+          initValue.push(type);
+        }
+      }
+    );
 
     return initValue;
   }, [layersCollection]);
@@ -73,19 +87,22 @@ function QuickLayerTogglerButtons({ map, options }) {
     initialVisibilityForLayers
   );
 
-  const handleToggleButtons = (event, newStates) => {
+  const handleToggleButtons = (
+    _event: React.MouseEvent<HTMLElement>,
+    newStates: LayerType[]
+  ) => {
     setSelectedButtons(newStates);
   };
 
   // When toggle button state changes, let's update layer's visibility.
   useEffect(() => {
     // Helper: Set visibility for Array of OL Layers.
-    const setVisibilityForOlLayers = (layers, visibility) =>
+    const setVisibilityForOlLayers = (layers: Layer[], visibility: boolean) =>
       layers.forEach((l) => l.setVisible(visibility));
 
     // Let's loop the keys of layersCollection. Each key effectively
     // corresponds to a toggle button.
-    Object.keys(layersCollection).forEach((button) => {
+    (Object.keys(layersCollection) as LayerType[]).forEach((button) => {
       // Call our helper that updates relevant layers' visibility
       setVisibilityForOlLayers(
         layersCollection[button], // OL Layers live here
@@ -101,7 +118,7 @@ function QuickLayerTogglerButtons({ map, options }) {
       fullWidth
     >
       <ToggleButton value="buildings" size="small">
-        <HajkToolTip title="Visa/dölj byggnader">
+        <HajkToolTip title={showTooltips ? "Visa/dölj byggnader" : ""}>
           <StyledBox>
             <LocationCityIcon />
             <Typography variant="button">Byggnader</Typography>
@@ -109,7 +126,7 @@ function QuickLayerTogglerButtons({ map, options }) {
         </HajkToolTip>
       </ToggleButton>
       <ToggleButton value="borders" size="small">
-        <HajkToolTip title="Visa/dölj fastigheter">
+        <HajkToolTip title={showTooltips ? "Visa/dölj fastigheter" : ""}>
           <StyledBox>
             <BorderInnerIcon />
             <Typography variant="button">Fastigheter</Typography>
@@ -117,7 +134,7 @@ function QuickLayerTogglerButtons({ map, options }) {
         </HajkToolTip>
       </ToggleButton>
       <ToggleButton value="plans" size="small">
-        <HajkToolTip title="Visa/dölj planer">
+        <HajkToolTip title={showTooltips ? "Visa/dölj planer" : ""}>
           <StyledBox>
             <TravelExploreIcon />
             <Typography variant="button">Planer</Typography>

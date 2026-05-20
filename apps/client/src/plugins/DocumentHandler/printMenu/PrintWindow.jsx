@@ -8,10 +8,10 @@ import {
   ThemeProvider,
   useTheme,
 } from "@mui/material/styles";
+import BaseDialog from "components/Dialog/BaseDialog";
 import {
   Button,
   Checkbox,
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
@@ -140,6 +140,7 @@ class PrintWindow extends React.PureComponent {
   };
 
   internalId = 0;
+  #printInitiated = false;
 
   #handleSubMenuClicked = (id) => {
     this.#setItemStateProperties(id);
@@ -212,6 +213,10 @@ class PrintWindow extends React.PureComponent {
     this.props.localObserver.subscribe("print-submenu-clicked", (id) => {
       this.#handleSubMenuClicked(id);
     });
+
+    if (this.props.options?.directPrint && this.props.activeDocument) {
+      this.autoSelectAndPrint();
+    }
   };
 
   componentWillUnmount = () => {
@@ -321,7 +326,7 @@ class PrintWindow extends React.PureComponent {
 
     printWindow.document.head.insertAdjacentHTML(
       "beforeend",
-      ` <title>${document.title}</title>
+      ` <title>${this.props.options?.directPrint && this.props.activeDocument?.documentTitle ? `${document.title} - ${this.props.activeDocument.documentTitle}` : document.title}</title>
         <base href="${document.location.protocol}//${
           document.location.host
         }/" />
@@ -338,6 +343,7 @@ class PrintWindow extends React.PureComponent {
             size: A4;
             margin: 25mm 25mm 25mm 25mm;
           }
+
           @media print {
             * {
               -webkit-print-color-adjust: exact !important;
@@ -411,6 +417,29 @@ class PrintWindow extends React.PureComponent {
       printContent: undefined,
       menuInformation: this.createMenu(),
     });
+
+    this.props.closePrintWindow();
+  };
+
+  autoSelectAndPrint = () => {
+    if (this.#printInitiated) return;
+    this.#printInitiated = true;
+
+    const menuState = { ...this.state.menuInformation };
+    const activeFileName = this.props.activeDocument?.documentFileName;
+
+    const itemKey = Object.keys(menuState).find(
+      (key) => menuState[key].document === activeFileName
+    );
+
+    if (!itemKey) {
+      return;
+    }
+
+    menuState[itemKey] = { ...menuState[itemKey], chosenForPrint: true };
+    this.setState({ menuInformation: menuState }, () => {
+      this.createPDF();
+    });
   };
 
   addPageBreaksBeforeHeadings = (printContent) => {
@@ -449,6 +478,7 @@ class PrintWindow extends React.PureComponent {
       }
     }
   };
+
 
   // Creates a new window, appends all elements that should be printed, and invokes
   // window.print(), allowing the user to save the document as a PDF (or print it straight away).
@@ -502,6 +532,7 @@ class PrintWindow extends React.PureComponent {
           }
         }
 
+        // In directPrint mode: add the active document's title as a header on every printed page.
         // Add our recently-created DIV to the new window's document
         newWindow.document.body.appendChild(printContent);
 
@@ -550,12 +581,12 @@ class PrintWindow extends React.PureComponent {
   removeNonPrintableDocuments(documents) {
     /*
      * Remove menu items that should not appear in the print menu.
-     * Items that should be removed are: items without a document that are not a group parent. (maplinks, links)
+     * Only menu items that have documents connected to them should be included in the print menu.
      */
     let removedIds = [];
 
     Object.keys(documents).forEach((key) => {
-      if (documents[key].maplink.trim() || documents[key].link.trim()) {
+      if (!documents[key].document) {
         removedIds.push(parseInt(key));
         delete documents[key];
       }
@@ -915,7 +946,7 @@ class PrintWindow extends React.PureComponent {
     return (
       <>
         {createPortal(
-          <Dialog disableEscapeKeyDown={true} open={this.state.pdfLoading}>
+          <BaseDialog disableEscapeKeyDown={true} open={this.state.pdfLoading}>
             <LinearProgress />
             <DialogTitle>Din PDF skapas</DialogTitle>
             <DialogContent>
@@ -926,7 +957,7 @@ class PrintWindow extends React.PureComponent {
                 <br />
               </DialogContentText>
             </DialogContent>
-          </Dialog>,
+          </BaseDialog>,
           document.getElementById("root")
         )}
       </>
@@ -1012,7 +1043,7 @@ class PrintWindow extends React.PureComponent {
       const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
       return (
-        <Dialog
+        <BaseDialog
           fullScreen={fullScreen}
           open={isModalOpen}
           PaperProps={{ style: { width: !fullScreen && "30%" } }}
@@ -1032,7 +1063,7 @@ class PrintWindow extends React.PureComponent {
               <Typography variant="body2">Stäng</Typography>
             </Button>
           </DialogActions>
-        </Dialog>
+        </BaseDialog>
       );
     }
     return (
@@ -1112,8 +1143,12 @@ class PrintWindow extends React.PureComponent {
   };
 
   render() {
-    const { togglePrintWindow } = this.props;
+    const { togglePrintWindow, options } = this.props;
     const { showAttachments, pdfLinks } = this.state;
+
+    if (options?.directPrint) {
+      return this.renderLoadingDialog();
+    }
 
     return (
       <>

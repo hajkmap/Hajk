@@ -51,6 +51,8 @@ var defaultState = {
   mapTextColor: "#000000",
   useCustomTileLoaders: true,
   includeImageBorder: false,
+  allowLegendsInPdfOutput: false,
+  generateLegendsByDefault: false,
   maxTileSize: 4096,
 };
 
@@ -128,6 +130,14 @@ class ToolOptions extends Component {
           tool.options.northArrowPlacement || this.state.northArrowPlacement,
         includeImageBorder:
           tool.options.includeImageBorder || this.state.includeImageBorder,
+        allowLegendsInPdfOutput:
+          typeof tool.options.allowLegendsInPdfOutput === "boolean"
+            ? tool.options.allowLegendsInPdfOutput
+            : this.state.allowLegendsInPdfOutput,
+        generateLegendsByDefault:
+          typeof tool.options.generateLegendsByDefault === "boolean"
+            ? tool.options.generateLegendsByDefault
+            : this.state.generateLegendsByDefault,
         useCustomTileLoaders:
           tool.options.useCustomTileLoaders ?? this.state.useCustomTileLoaders,
         maxTileSize: tool.options.maxTileSize || this.state.maxTileSize,
@@ -215,7 +225,7 @@ class ToolOptions extends Component {
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
-          String.prototype.trim
+          String.prototype.trim,
         ),
         includeLogo: this.state.includeLogo,
         logoPlacement: this.state.logoPlacement,
@@ -226,6 +236,8 @@ class ToolOptions extends Component {
         includeNorthArrow: this.state.includeNorthArrow,
         northArrowPlacement: this.state.northArrowPlacement,
         includeImageBorder: this.state.includeImageBorder,
+        allowLegendsInPdfOutput: this.state.allowLegendsInPdfOutput,
+        generateLegendsByDefault: this.state.generateLegendsByDefault,
         useCustomTileLoaders: this.state.useCustomTileLoaders,
         maxTileSize: this.state.maxTileSize,
       },
@@ -241,7 +253,7 @@ class ToolOptions extends Component {
             alert: true,
             alertMessage: "Uppdateringen lyckades",
           });
-        }
+        },
       );
     }
 
@@ -388,8 +400,8 @@ class ToolOptions extends Component {
             mycket minne. Standard för GeoServer är 128MB och det är inte säkert
             det räcker för att alla requests ska returneras korrekt. <br />
             <div className="separator">För att ändra minnesanvändningen</div>
-            Logga in i GeoServer > Tjänster > WMS > Gränser för
-            resursförbrukning > Max renderingsminne (KB)
+            Logga in i GeoServer {">"} Tjänster {">"} WMS {">"} Gränser för
+            resursförbrukning {">"} Max renderingsminne (KB)
           </div>
           <div>
             <input
@@ -512,7 +524,7 @@ class ToolOptions extends Component {
             </label>
             {this.renderUseCustomTileLoadersSelect(
               this.state.useCustomTileLoaders,
-              "useCustomTileLoaders"
+              "useCustomTileLoaders",
             )}
           </div>
           <div>
@@ -654,7 +666,7 @@ class ToolOptions extends Component {
             </label>
             {this.renderPlacementSelect(
               this.state.logoPlacement,
-              "logoPlacement"
+              "logoPlacement",
             )}
           </div>
           <div>
@@ -707,7 +719,7 @@ class ToolOptions extends Component {
             </label>
             {this.renderIncludeSelect(
               this.state.includeNorthArrow,
-              "includeNorthArrow"
+              "includeNorthArrow",
             )}
           </div>
           <div>
@@ -721,7 +733,7 @@ class ToolOptions extends Component {
             </label>
             {this.renderPlacementSelect(
               this.state.northArrowPlacement,
-              "northArrowPlacement"
+              "northArrowPlacement",
             )}
           </div>
 
@@ -758,7 +770,7 @@ class ToolOptions extends Component {
             </label>
             {this.renderIncludeSelect(
               this.state.includeScaleBar,
-              "includeScaleBar"
+              "includeScaleBar",
             )}
           </div>
           <div>
@@ -772,7 +784,7 @@ class ToolOptions extends Component {
             </label>
             {this.renderPlacementSelect(
               this.state.scaleBarPlacement,
-              "scaleBarPlacement"
+              "scaleBarPlacement",
             )}
           </div>
           <div>
@@ -786,7 +798,7 @@ class ToolOptions extends Component {
             </label>
             {this.renderIncludeSelect(
               this.state.includeQrCode,
-              "includeQrCode"
+              "includeQrCode",
             )}
           </div>
           <div>
@@ -800,7 +812,7 @@ class ToolOptions extends Component {
             </label>
             {this.renderPlacementSelect(
               this.state.qrCodePlacement,
-              "qrCodePlacement"
+              "qrCodePlacement",
             )}
           </div>
           <div>
@@ -814,7 +826,35 @@ class ToolOptions extends Component {
             </label>
             {this.renderIncludeSelect(
               this.state.includeImageBorder,
-              "includeImageBorder"
+              "includeImageBorder",
+            )}
+          </div>
+          <div>
+            <label htmlFor="allowLegendsInPdfOutput">
+              Tillåt teckenförklaring i PDF (experimentell funktion){" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Om aktivt kan användaren välja att inkludera teckenförklaring i PDF-utskrift. (experimentell funktion)"
+              />
+            </label>
+            {this.renderIncludeSelect(
+              this.state.allowLegendsInPdfOutput,
+              "allowLegendsInPdfOutput",
+            )}
+          </div>
+          <div>
+            <label htmlFor="generateLegendsByDefault">
+              Generera teckenförklaring som standard{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Om aktivt är teckenförklaring förvald för PDF-utskrift i klienten."
+              />
+            </label>
+            {this.renderIncludeSelect(
+              this.state.generateLegendsByDefault,
+              "generateLegendsByDefault",
             )}
           </div>
           <div>

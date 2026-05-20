@@ -70,9 +70,7 @@ initHFetch();
 let appConfig;
 
 try {
-  const appConfigResponse = await hfetch("appConfig.json", {
-    cacheBuster: true,
-  });
+  const appConfigResponse = await hfetch("appConfig.json");
   appConfig = await appConfigResponse.json();
 
   // Legacy code expects certain keys to be existent in appConfig.
@@ -103,9 +101,7 @@ try {
     if (useBackend === false) {
       // Load the user specified consolidated map and layers config, or fall back to default one
       const simpleConfig = `${initialURLParams.get("m") || "simpleMapAndLayersConfig"}.json`;
-      return await hfetch(simpleConfig, {
-        cacheBuster: true,
-      });
+      return await hfetch(simpleConfig);
     } else {
       // For API < v3, use /config while for v3 and later, /public is used.
       const endpoint = appConfig.mapserviceBase.includes("/api/v3")
@@ -127,7 +123,7 @@ try {
 
   const [mapConfigResponse, customThemeResponse] = await Promise.all([
     fetchConfig(),
-    hfetch("customTheme.json", { cacheBuster: true }),
+    hfetch("customTheme.json"),
   ]);
   // If mapConfigResponse.status is 403, throw a custom access denied error that we
   // later catch and display Access Denied message

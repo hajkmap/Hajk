@@ -14,10 +14,10 @@ import {
   useLayerSwitcherDispatch,
 } from "../../LayerSwitcherProvider";
 
+import BaseDialog from "components/Dialog/BaseDialog";
 import {
   Box,
   Button,
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -449,7 +449,7 @@ function Favorites({
   // Render dialog with missing layers information
   const renderMissingLayersDialog = () => {
     return createPortal(
-      <Dialog
+      <BaseDialog
         open={missingLayersConfirmation ? true : false}
         onClose={handleMissingLayersConfirmationAbort}
         onMouseDown={(e) => {
@@ -499,13 +499,13 @@ function Favorites({
             Fortsätt
           </Button>
         </DialogActions>
-      </Dialog>,
+      </BaseDialog>,
       document.getElementById("map")
     );
   };
   const renderAddFavoriteDialog = () => {
     return createPortal(
-      <Dialog
+      <BaseDialog
         open={saveFavoriteDialog}
         aria-labelledby="saveFavorite-dialog-title"
         aria-describedby="save-favorite-dialog-description"
@@ -565,7 +565,7 @@ function Favorites({
             Spara
           </Button>
         </DialogActions>
-      </Dialog>,
+      </BaseDialog>,
       document.getElementById("map")
     );
   };

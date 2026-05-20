@@ -72,13 +72,8 @@ class CoordinatesModel {
 
   activate() {
     this.addInteraction();
-    this.localObserver.publish("showSnackbar");
-    if (this.showFieldsOnStart) {
-      this.localObserver.publish("newCoordinates", {
-        coordinates: this.map.getView().getCenter(),
-        proj: this.map.getView().getProjection().getCode(),
-        force: true,
-      });
+    if (!this.showFieldsOnStart) {
+      this.localObserver.publish("showSnackbar");
     }
   }
 
@@ -199,15 +194,16 @@ class CoordinatesModel {
    * @memberof CoordinatesModel
    */
   handleDrawEnd = (e) => {
-    // Grab coordinates from the Point that has been drawn
     this.coordinates = e.feature.getGeometry().getCoordinates();
     this.addMarker(this.coordinates);
 
     this.localObserver.publish("newCoordinates", {
       coordinates: this.coordinates,
-      proj: this.map.getView().getProjection(),
+      proj: this.map.getView().getProjection().getCode(),
       force: true,
     });
+
+    this.localObserver.publish("hideSnackbar");
   };
 
   addInteraction() {

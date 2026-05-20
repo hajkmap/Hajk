@@ -31,6 +31,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   lineHeight: "25px",
   borderRadius: theme.shape.borderRadius,
   cursor: "default",
+  whiteSpace: "nowrap",
 }));
 
 class ScaleLineControl extends React.PureComponent {

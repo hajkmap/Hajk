@@ -1,17 +1,8 @@
 import React from "react";
-import { IconButton, Menu, MenuItem, Paper } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Menu, MenuItem } from "@mui/material";
 import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import { hfetch } from "../utils/FetchWrapper";
-import HajkToolTip from "components/HajkToolTip";
-
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  marginBottom: theme.spacing(1),
-}));
-
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  minWidth: "unset",
-}));
+import ControlButton from "components/ControlButton";
 
 class MapSwitcher extends React.PureComponent {
   // Will hold map configs
@@ -144,18 +135,15 @@ class MapSwitcher extends React.PureComponent {
       // Render only if config says so
       this.props.appModel.config.mapConfig.map.mapselector && (
         <>
-          <HajkToolTip title={`Nuvarande karta: ${title}`}>
-            <StyledPaper>
-              <StyledIconButton
-                aria-label="Byt karta"
-                aria-owns={open ? "render-props-menu" : undefined}
-                aria-haspopup="true"
-                onClick={this.handleClick}
-              >
-                <SwitchCameraIcon />
-              </StyledIconButton>
-            </StyledPaper>
-          </HajkToolTip>
+          <ControlButton
+            tooltip={`Nuvarande karta: ${title}`}
+            ariaLabel="Byt karta"
+            aria-owns={open ? "render-props-menu" : undefined}
+            aria-haspopup="true"
+            onClick={this.handleClick}
+          >
+            <SwitchCameraIcon />
+          </ControlButton>
           <Menu
             id="render-props-menu"
             anchorEl={anchorEl}

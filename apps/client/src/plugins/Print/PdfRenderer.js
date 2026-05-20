@@ -37,34 +37,9 @@ async function fetchImageAsBytes(url) {
 }
 
 /**
- * Render layout elements to a PDF document.
- * @param {Array} elements - layout elements from buildLayout()
- * @param {number} pageWidth - page width in PDF points
- * @param {number} pageHeight - page height in PDF points
- * @param {string} orientation - "landscape" or "portrait"
- * @returns {Promise<Object>} the PDF document (caller saves via pdf.save())
+ * Render an array of layout elements onto a single PDF page.
  */
-export async function renderToPdf(
-  elements,
-  pageWidth,
-  pageHeight,
-  orientation
-) {
-  const pdf = PDF.create();
-  const page = pdf.addPage({
-    orientation,
-    width: pageWidth,
-    height: pageHeight,
-  });
-
-  // Embed fonts
-  const fontNormalBytes = loadFont(ROBOTO_NORMAL);
-  const fontBoldBytes = loadFont(ROBOTO_BOLD);
-  const fonts = {
-    normal: pdf.embedFont(fontNormalBytes),
-    bold: pdf.embedFont(fontBoldBytes),
-  };
-
+async function renderElementsToPage(pdf, page, elements, fonts) {
   for (const el of elements) {
     switch (el.type) {
       case "image": {
@@ -124,6 +99,42 @@ export async function renderToPdf(
       default:
         console.warn(`PdfRenderer: unknown element type "${el.type}"`);
     }
+  }
+}
+
+// Render layout elements to a PDF document.
+// returns the pdf document (caller saves via pdf.save())
+export async function renderToPdf(
+  elements,
+  pageWidth,
+  pageHeight,
+  orientation,
+  extraPages = []
+) {
+  const pdf = PDF.create();
+
+  // Embed fonts once, reuse for every page.
+  const fontNormalBytes = loadFont(ROBOTO_NORMAL);
+  const fontBoldBytes = loadFont(ROBOTO_BOLD);
+  const fonts = {
+    normal: pdf.embedFont(fontNormalBytes),
+    bold: pdf.embedFont(fontBoldBytes),
+  };
+
+  const mainPage = pdf.addPage({
+    orientation,
+    width: pageWidth,
+    height: pageHeight,
+  });
+  await renderElementsToPage(pdf, mainPage, elements, fonts);
+
+  for (const extra of extraPages) {
+    const page = pdf.addPage({
+      orientation: extra.orientation || orientation,
+      width: extra.width || pageWidth,
+      height: extra.height || pageHeight,
+    });
+    await renderElementsToPage(pdf, page, extra.elements || [], fonts);
   }
 
   return pdf;

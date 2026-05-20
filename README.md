@@ -1,8 +1,26 @@
 [![Netlify Status](https://api.netlify.com/api/v1/badges/fa0760e3-fd3a-43bf-a704-27e05cb901cc/deploy-status)](https://app.netlify.com/sites/hajk-demo/deploys)
 
-# Hajk
+<p align="center">
+  <a href="https://hajkmap.github.io/Hajk/">
+    <img src="https://raw.githubusercontent.com/hajkmap/Hajk/refs/heads/develop/docs/logoLight.png" alt="Hajk logo">
+  </a>
+</p>
 
-_Hajk is an open source web GIS solution based on React, Material UI and OpenLayers. It is developed in Sweden and used by various municipalities and government agencies, as well as by public and private enterprises._
+<h3 align="center">Hajk</h3>
+
+<p align="center">
+  An open source web GIS solution based on React, Material UI and OpenLayers. Developed in Sweden and used by various municipalities and government agencies, as well as by public and private enterprises.
+  <br>
+  <br>
+  <a href="https://hajkmap.github.io/Hajk/"><strong>Learn more »</strong></a>
+  <br>
+  <br>
+  <a href="https://github.com/hajkmap/Hajk/issues/new?template=bug_report.md">Report bug</a>
+  ·
+  <a href="https://github.com/hajkmap/Hajk/issues/new?template=feature_request.md">Request feature</a> 
+  ·
+  <a href="https://github.com/hajkmap/Hajk/discussions">Ask a question</a> 
+</p>
 
 ![Hajk 4 client UI example](https://github.com/user-attachments/assets/a221eb84-1b8c-440c-84ad-52b57f85b1d0)
 

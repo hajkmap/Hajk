@@ -1,36 +1,24 @@
 import React, { useId } from "react";
-import { styled } from "@mui/material/styles";
 
 import {
-  Card,
-  CardContent,
-  CardHeader,
+  Box,
   Checkbox,
   Collapse,
+  Divider,
   IconButton,
   TextField,
+  Typography,
 } from "@mui/material";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import HajkToolTip from "components/HajkToolTip";
 
-const ExpandMore = styled((props) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme }) => ({
-  transform: "rotate(180deg)",
-  marginLeft: "auto",
-  transition: theme.transitions.create("transform", {
-    duration: theme.transitions.duration.shortest,
-  }),
-  variants: [
-    {
-      props: ({ expand }) => !expand,
-      style: {
-        transform: "rotate(0deg)",
-      },
-    },
-  ],
-}));
+import type {
+  DigitalPlanItemProps,
+  ControlledRegulation,
+  DigitalPlanDescriptionAttribute,
+} from "../../types";
+import { usePropertyCheckerContext } from "../../context";
 
 const DigitalPlanItem = ({
   feature,
@@ -41,7 +29,7 @@ const DigitalPlanItem = ({
   regulationNotes,
   setRegulationNotes,
   useType,
-}) => {
+}: DigitalPlanItemProps) => {
   // Used to keep track of the expansion area below the main layer item
   const [expanded, setExpanded] = React.useState(false);
   const handleExpandClick = () => setExpanded(!expanded);
@@ -55,7 +43,7 @@ const DigitalPlanItem = ({
   // 2. To get the value as a plain string. This is used in the Report dialog.
   const regulationCaptionAsElement =
     options.digitalPlanItemDescriptionAttributes
-      .map((a, i) =>
+      .map((a: DigitalPlanDescriptionAttribute, i: number) =>
         feature.get(a.column) || a.fallbackValue ? (
           <React.Fragment key={i}>
             <b>{a.label}: </b>
@@ -64,15 +52,15 @@ const DigitalPlanItem = ({
           </React.Fragment>
         ) : null
       )
-      .filter((a) => a !== null);
+      .filter((a: React.ReactNode) => a !== null);
 
   const regulationCaptionAsArray = options.digitalPlanItemDescriptionAttributes
-    .map((a, i) =>
+    .map((a: DigitalPlanDescriptionAttribute) =>
       feature.get(a.column) || a.fallbackValue
         ? `${a.label}: ${feature.get(a.column) ?? a?.fallbackValue}`
         : null
     )
-    .filter((a) => a !== null);
+    .filter((a: string | null): a is string => a !== null);
 
   // Define an object that will be used when keeping track
   // of user-selected layers that should be printed inside the
@@ -86,67 +74,105 @@ const DigitalPlanItem = ({
     useType,
   };
 
-  const isSelected = () =>
-    controlledRegulations.filter((l) => l.id === selectionFormat.id).length > 0;
+  const { showTooltips } = usePropertyCheckerContext();
 
-  const handleLayerNoteChange = (e) => {
+  const isSelected = () =>
+    controlledRegulations.filter(
+      (l: ControlledRegulation) => l.id === selectionFormat.id
+    ).length > 0;
+
+  const handleLayerNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRegulationNotes({ ...regulationNotes, ...{ [id]: e.target.value } });
   };
 
   return (
-    <Card variant="outlined">
-      <CardHeader
-        title={regulationName}
-        subheader={regulationCaptionAsElement}
-        avatar={
-          <>
-            {/* Empty, in order to retain same CardHeader layout as for the Check Layer view */}
-          </>
-        }
-        action={
-          options.enableDigitalPlansReport && (
-            <>
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 1,
+          py: 0.75,
+          px: 1,
+        }}
+      >
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="body2">{regulationName}</Typography>
+          {regulationCaptionAsElement.length > 0 && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              component="div"
+            >
+              {regulationCaptionAsElement}
+            </Typography>
+          )}
+        </Box>
+        {options.enableDigitalPlansReport && (
+          <Box
+            sx={{
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              mt: -0.5,
+            }}
+          >
+            <HajkToolTip
+              title={showTooltips ? "Inkludera planbestämmelsen i rapport" : ""}
+            >
               <Checkbox
-                onChange={(e) => {
-                  setControlledRegulations((prev) => {
-                    // If layer is already selected using the checkbox…
+                size="small"
+                onChange={() => {
+                  setControlledRegulations((prev: ControlledRegulation[]) => {
                     if (isSelected()) {
-                      // … let's uncheck the box by the removing element with current layer's ID.
-                      return prev.filter((l) => l.id !== selectionFormat.id);
+                      return prev.filter(
+                        (l: ControlledRegulation) => l.id !== selectionFormat.id
+                      );
                     } else {
-                      // Else, let's check the box by adding the new element.
                       return [...prev, selectionFormat];
                     }
                   });
                 }}
                 checked={isSelected()}
               />
-              <ExpandMore
-                expand={expanded}
+            </HajkToolTip>
+            <HajkToolTip title={showTooltips ? "Lägg till notering" : ""}>
+              <IconButton
+                size="small"
                 onClick={handleExpandClick}
                 aria-expanded={expanded}
                 aria-label="Visa noteringar"
               >
-                <ExpandMoreIcon />
-              </ExpandMore>
-            </>
-          )
-        }
-      />
+                <ExpandMoreIcon
+                  sx={{
+                    transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: (theme) =>
+                      theme.transitions.create("transform", {
+                        duration: theme.transitions.duration.shortest,
+                      }),
+                  }}
+                />
+              </IconButton>
+            </HajkToolTip>
+          </Box>
+        )}
+      </Box>
       <Collapse in={expanded} timeout="auto">
-        <CardContent>
+        <Box sx={{ px: 2, pb: 1.5 }}>
           <TextField
             label="Notering"
             multiline
             fullWidth
             size="small"
+            minRows={1}
             maxRows={4}
             onChange={handleLayerNoteChange}
             value={regulationNotes?.id}
           />
-        </CardContent>
+        </Box>
       </Collapse>
-    </Card>
+      <Divider />
+    </>
   );
 };
 

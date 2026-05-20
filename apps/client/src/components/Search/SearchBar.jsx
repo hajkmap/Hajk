@@ -89,6 +89,8 @@ const CustomPaper = (props) => {
     ? {
         margin: 0,
         borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+        borderTopRightRadius: 0,
+        borderTopLeftRadius: 0,
       }
     : { margin: 0 };
   return <Paper {...props} style={style} />;
@@ -320,7 +322,7 @@ class SearchBar extends React.PureComponent {
         isOptionEqualToValue={(option, value) =>
           option.autocompleteEntry === value.autocompleteEntry
         }
-        renderOption={(props, option) => {
+        renderOption={(props, option, index) => {
           if (searchString.length > 0) {
             return (
               // Important: the `key` prop must be set last, so we override the
@@ -337,8 +339,14 @@ class SearchBar extends React.PureComponent {
                   }
                 }}
               >
-                <Grid size={1}>{this.getOriginBasedIcon(option.origin)}</Grid>
-                <Grid container size={11}>
+                <Grid size={1} key={`searchautocomplete-${index}`}>
+                  {this.getOriginBasedIcon(option.origin)}
+                </Grid>
+                <Grid
+                  container
+                  size={11}
+                  key={`searchautocomplete-${index}-content`}
+                >
                   <Grid size={12}>
                     {this.getHighlightedACE(
                       searchString,
@@ -421,7 +429,7 @@ class SearchBar extends React.PureComponent {
           input: {
             ...params.InputProps,
             ...disableUnderline,
-            style: { margin: 0 },
+            style: { margin: 0, ...(isMobile && { height: "46px" }) }, // TODO: Prevent hardcoding of height, really not urgent.
             notched: isMobile ? null : false,
             "aria-label": "Sök i webbplatsens innehåll",
             endAdornment: (

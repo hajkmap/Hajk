@@ -5,14 +5,14 @@ import gfm from "remark-gfm";
 
 import {
   Button,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   TextField,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import { useMediaQuery, useTheme } from "@mui/material";
-
+import BaseDialog from "./BaseDialog";
 import LegacyNonMarkdownRenderer from "./LegacyNonMarkdownRenderer";
 import { customComponentsForReactMarkdown } from "../../utils/customComponentsForReactMarkdown";
 
@@ -47,6 +47,7 @@ export default function ResponsiveDialog(props) {
     onAbort(promptText);
   };
   const handleClose = () => {
+    document.body.focus();
     onClose(promptText);
   };
 
@@ -56,75 +57,72 @@ export default function ResponsiveDialog(props) {
   typeof onVisibilityChanged === "function" && onVisibilityChanged(open);
 
   return (
-    open && (
-      <Dialog
-        sx={{
-          zIndex: props.type === "Information" ? 1301 : undefined,
-        }}
-        aria-labelledby="responsive-dialog-title"
-        aria-describedby="responsive-dialog-content"
-        fullScreen={fullScreen}
-        onClose={handleClose}
-        open={open}
-        // Must stop event-bubbling. Otherwise the parent element in react can be dragged etc.
-        onMouseDown={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        {headerText && (
-          <DialogTitle id="responsive-dialog-title">{headerText}</DialogTitle>
+    <BaseDialog
+      sx={{
+        zIndex: props.type === "Information" ? 1301 : undefined,
+      }}
+      aria-labelledby="responsive-dialog-title"
+      aria-describedby="responsive-dialog-content"
+      onClose={handleClose}
+      open={open}
+      // Must stop event-bubbling. Otherwise the parent element in react can be dragged etc.
+      onMouseDown={(e) => {
+        e.stopPropagation();
+      }}
+    >
+      {headerText && (
+        <DialogTitle id="responsive-dialog-title">{headerText}</DialogTitle>
+      )}
+      <DialogContent id="responsive-dialog-content">
+        {children}
+        {useLegacyNonMarkdownRenderer === true ? (
+          <LegacyNonMarkdownRenderer text={text} />
+        ) : (
+          <ReactMarkdown
+            remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
+            rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
+            components={customComponentsForReactMarkdown} // Custom renderers for components, see definition in components
+            children={text} // Our MD, as a text string
+          />
         )}
-        <DialogContent id="responsive-dialog-content">
-          {children}
-          {useLegacyNonMarkdownRenderer === true ? (
-            <LegacyNonMarkdownRenderer text={text} />
-          ) : (
-            <ReactMarkdown
-              remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
-              rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
-              components={customComponentsForReactMarkdown} // Custom renderers for components, see definition in components
-              children={text} // Our MD, as a text string
-            />
-          )}
 
-          {prompt && (
-            <form
-              noValidate
-              autoComplete="off"
-              onSubmit={(e) => {
-                e.preventDefault();
-                props.onClose(promptText);
-                return false;
-              }}
-            >
-              <TextField
-                id="prompt-text"
-                label=""
-                value={promptText}
-                onChange={(e) => {
-                  setPromptText(e.target.value);
-                }}
-                margin="normal"
-                autoFocus={true}
-              />
-            </form>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleClose}
-            variant={primaryButtonVariant || "text"}
-            sx={{ color: "text.primary" }}
+        {prompt && (
+          <form
+            noValidate
+            autoComplete="off"
+            onSubmit={(e) => {
+              e.preventDefault();
+              props.onClose(promptText);
+              return false;
+            }}
           >
-            {buttonText}
+            <TextField
+              id="prompt-text"
+              label=""
+              value={promptText}
+              onChange={(e) => {
+                setPromptText(e.target.value);
+              }}
+              margin="normal"
+              autoFocus={true}
+            />
+          </form>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={handleClose}
+          variant={primaryButtonVariant || "text"}
+          color="primary"
+        >
+          {buttonText}
+        </Button>
+        {abortText && (
+          <Button onClick={handleAbort} sx={{ color: "text.primary" }}>
+            {abortText}
           </Button>
-          {abortText && (
-            <Button onClick={handleAbort} sx={{ color: "text.primary" }}>
-              {abortText}
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
-    )
+        )}
+      </DialogActions>
+    </BaseDialog>
   );
 }

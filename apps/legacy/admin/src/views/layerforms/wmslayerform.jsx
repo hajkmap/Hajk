@@ -2,7 +2,11 @@ import React from "react";
 import { Component } from "react";
 import $ from "jquery";
 import { hfetch } from "utils/FetchWrapper";
-import { WMS_VERSION_1_1_0, WMS_VERSION_1_1_1, WMS_VERSION_1_3_0 } from "models/layermanager";
+import {
+  WMS_VERSION_1_1_0,
+  WMS_VERSION_1_1_1,
+  WMS_VERSION_1_3_0,
+} from "models/layermanager";
 
 var solpop;
 
@@ -43,6 +47,7 @@ const defaultState = {
   minMaxZoomAlertOnToggleOnly: false,
   tiled: false,
   showAttributeTableButton: false,
+  hasLabelStyle: false,
   singleTile: false,
   hidpi: true,
   useCustomDpiList: false,
@@ -77,6 +82,7 @@ const defaultState = {
   infoClickSortDesc: true,
   infoclickIcon: "",
   rotateMap: "n",
+  defaultCqlFilter: "",
   hideExpandArrow: false,
   style: [],
   workspaceList: [],
@@ -149,9 +155,13 @@ class WMSLayerForm extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (prevState.serverType !== this.state.serverType) {
       let newState = {
-        workspaceSelectorVisible: this.state.serverType === SERVERTYPE_GEOSERVER
+        workspaceSelectorVisible:
+          this.state.serverType === SERVERTYPE_GEOSERVER,
       };
-      newState.tiled = this.state.serverType === SERVERTYPE_GWC_STANDALONE ? true : defaultState.tiled;
+      newState.tiled =
+        this.state.serverType === SERVERTYPE_GWC_STANDALONE
+          ? true
+          : defaultState.tiled;
       this.setState(newState);
     }
   }
@@ -184,7 +194,7 @@ class WMSLayerForm extends Component {
   loadLayersInfoLegendIcon(e) {
     $("#select-layers-info-legend-icon").attr(
       "caller",
-      "select-layers-info-legend-icon"
+      "select-layers-info-legend-icon",
     );
     $("#select-layers-info-legend-icon").trigger("click");
   }
@@ -285,7 +295,7 @@ class WMSLayerForm extends Component {
           addedLayers: [...this.state.addedLayers, checkedLayer],
           addedLayersInfo: addedLayersInfo,
         },
-        () => this.validateLayers(opts)
+        () => this.validateLayers(opts),
       );
     } else {
       // unchecked..
@@ -306,10 +316,10 @@ class WMSLayerForm extends Component {
         {
           addedLayersInfo: addedLayersInfo,
           addedLayers: this.state.addedLayers.filter(
-            (layer) => layer !== checkedLayer
+            (layer) => layer !== checkedLayer,
           ),
         },
-        () => this.validateLayers(opts)
+        () => this.validateLayers(opts),
       );
     }
   }
@@ -328,7 +338,7 @@ class WMSLayerForm extends Component {
     layerName,
     arrayToSearchIn = this.state.capabilities?.Capability?.Layer?.Layer
       ? this.state.capabilities.Capability.Layer.Layer
-      : [this.state.capabilities?.Capability?.Layer]
+      : [this.state.capabilities?.Capability?.Layer],
   ) {
     if (!arrayToSearchIn) return null;
 
@@ -390,7 +400,7 @@ class WMSLayerForm extends Component {
                   },
                   () => {
                     this.renderLayerInfoDialog(layerInfo);
-                  }
+                  },
                 );
               }}
               type="text"
@@ -415,7 +425,7 @@ class WMSLayerForm extends Component {
                 },
                 () => {
                   this.renderLayerInfoDialog(layerInfo);
-                }
+                },
               );
             }}
             type="text"
@@ -439,7 +449,7 @@ class WMSLayerForm extends Component {
                   },
                   () => {
                     this.renderLayerInfoDialog(layerInfo);
-                  }
+                  },
                 );
               }}
             />
@@ -459,11 +469,11 @@ class WMSLayerForm extends Component {
                       () => {
                         this.renderLayerInfoDialog(layerInfo);
                         this.props.model.off(
-                          "change:select-layers-info-legend-icon"
+                          "change:select-layers-info-legend-icon",
                         );
-                      }
+                      },
                     );
-                  }
+                  },
                 );
                 this.loadLayersInfoLegendIcon(e);
               }}
@@ -491,7 +501,7 @@ class WMSLayerForm extends Component {
                   },
                   () => {
                     this.renderLayerInfoDialog(layerInfo);
-                  }
+                  },
                 );
               }}
             >
@@ -521,7 +531,7 @@ class WMSLayerForm extends Component {
                   },
                   () => {
                     this.renderLayerInfoDialog(layerInfo);
-                  }
+                  },
                 );
               }}
             />
@@ -555,7 +565,7 @@ class WMSLayerForm extends Component {
                   },
                   () => {
                     this.renderLayerInfoDialog(layerInfo);
-                  }
+                  },
                 );
               }}
               type="text"
@@ -589,7 +599,7 @@ class WMSLayerForm extends Component {
                   },
                   () => {
                     this.renderLayerInfoDialog(layerInfo);
-                  }
+                  },
                 );
               }}
             />
@@ -619,7 +629,7 @@ class WMSLayerForm extends Component {
                   },
                   () => {
                     this.renderLayerInfoDialog(layerInfo);
-                  }
+                  },
                 );
               }}
             />
@@ -649,7 +659,7 @@ class WMSLayerForm extends Component {
                   },
                   () => {
                     this.renderLayerInfoDialog(layerInfo);
-                  }
+                  },
                 );
               }}
             />
@@ -676,7 +686,7 @@ class WMSLayerForm extends Component {
                   },
                   () => {
                     this.renderLayerInfoDialog(layerInfo);
-                  }
+                  },
                 );
               }}
             />
@@ -706,7 +716,7 @@ class WMSLayerForm extends Component {
                   },
                   () => {
                     this.renderLayerInfoDialog(layerInfo);
-                  }
+                  },
                 );
               }}
             />
@@ -732,7 +742,7 @@ class WMSLayerForm extends Component {
                   },
                   () => {
                     this.renderLayerInfoDialog(layerInfo);
-                  }
+                  },
                 );
               }}
             />
@@ -757,7 +767,7 @@ class WMSLayerForm extends Component {
                   },
                   () => {
                     this.renderLayerInfoDialog(layerInfo);
-                  }
+                  },
                 );
               }}
             />
@@ -786,7 +796,7 @@ class WMSLayerForm extends Component {
             checked: false,
           },
         },
-        layer
+        layer,
       );
       // Don't assume there is something to uncheck - the layer might have been deleted from WMS server,
       // and hence non existing in layers list and impossible to uncheck.
@@ -855,7 +865,7 @@ class WMSLayerForm extends Component {
         addedLayers: [...layerNames],
         addedLayersInfo: addedLayersInfo,
       },
-      () => this.validateLayers(opts)
+      () => this.validateLayers(opts),
     );
   }
 
@@ -977,7 +987,7 @@ class WMSLayerForm extends Component {
 
       var addedLayersInfo = {};
       var capabilities = this.state.capabilitiesList.find(
-        (capabilities) => capabilities.version === layer.version
+        (capabilities) => capabilities.version === layer.version,
       );
       if (layer.layersInfo) {
         addedLayersInfo = layer.layersInfo.reduce((c, l) => {
@@ -1013,6 +1023,7 @@ class WMSLayerForm extends Component {
           infoClickSortProperty: layer.infoClickSortProperty ?? "",
           infoClickSortType: layer.infoClickSortType ?? "string",
           rotateMap: layer.rotateMap ?? "n",
+          defaultCqlFilter: layer.defaultCqlFilter ?? "",
           hideExpandArrow: layer.hideExpandArrow ?? false,
           minMaxZoomAlertOnToggleOnly:
             layer.minMaxZoomAlertOnToggleOnly ?? false,
@@ -1030,7 +1041,7 @@ class WMSLayerForm extends Component {
           this.validate();
 
           if (callback) callback();
-        }
+        },
       );
     });
   }
@@ -1095,9 +1106,13 @@ class WMSLayerForm extends Component {
 
     // #1469: Stand-Alone GeoWebCache only support v1.1.1 but will (confusingly) answer when called with e.g. ?VERSION=1.3.0,
     // avoiding parsing such version-inconsistent replies by narrowing down WMS versions used for querying server to specifically v1.1.1
-    var versions = this.state.serverType === SERVERTYPE_GWC_STANDALONE ? [ WMS_VERSION_1_1_1 ] : undefined;
+    var versions =
+      this.state.serverType === SERVERTYPE_GWC_STANDALONE
+        ? [WMS_VERSION_1_1_1]
+        : undefined;
     var capabilitiesPromise = this.props.model.getAllWMSCapabilities(
-      this.state.url, versions
+      this.state.url,
+      versions,
     );
 
     capabilitiesPromise
@@ -1120,21 +1135,22 @@ class WMSLayerForm extends Component {
                 () => {
                   this.setLayerOpts(capabilities);
                   this.setServerType();
-                }
+                },
               );
             }
-          }
+          },
         );
       })
       .catch((err) => {
         this.setState({
           load: false,
-          capabilitiesList: []
+          capabilitiesList: [],
         });
         if (this.props.parent) {
           this.props.parent.setState({
             alert: true,
-            alertMessage: "Servern svarar inte eller blockeras av CORS.\nFörsök med en annan URL.",
+            alertMessage:
+              "Servern svarar inte eller blockeras av CORS.\nFörsök med en annan URL.",
           });
         }
       });
@@ -1143,7 +1159,7 @@ class WMSLayerForm extends Component {
   selectVersion(e) {
     var version = e.target.value;
     var capabilities = this.state.capabilitiesList.find(
-      (capabilities) => capabilities.version === version
+      (capabilities) => capabilities.version === version,
     );
 
     var singleTile = this.state.singleTile;
@@ -1199,9 +1215,13 @@ class WMSLayerForm extends Component {
 
   setProjections() {
     let projections;
-    const RS = this.state.version === WMS_VERSION_1_3_0 ? "CRS" : "SRS";  
+    const RS = this.state.version === WMS_VERSION_1_3_0 ? "CRS" : "SRS";
     const capabilities = this.state.capabilities;
-    if (capabilities && capabilities.Capability && capabilities.Capability.Layer) {
+    if (
+      capabilities &&
+      capabilities.Capability &&
+      capabilities.Capability.Layer
+    ) {
       // #1469: Projection metadata can be present on the parent or child Layer element of GetCapabilities
       // both are valid for e.g. OGC WMS v1.1.1 DTD.
       const layers = capabilities.Capability.Layer.Layer;
@@ -1213,9 +1233,9 @@ class WMSLayerForm extends Component {
         projections = layers.flatMap((layer) => {
           // Ensure we always return an array from flatMap by concatenating the layer[RS] if it exists or returning an empty array if not
           return layer[RS] ? [].concat(layer[RS]) : [];
-        });      
+        });
         // Create a Set from the array to remove duplicates, convert it back to an array, and filter out any falsy values (like undefined or null)
-        projections = [...new Set(projections)].filter(Boolean);      
+        projections = [...new Set(projections)].filter(Boolean);
         // If there are no projections left after filtering, set to null
         if (!projections.length) {
           projections = null;
@@ -1230,17 +1250,24 @@ class WMSLayerForm extends Component {
         projections = [projections];
       }
 
-      projections = projections.map(projection => projection ? projection.toUpperCase() : null);
+      projections = projections.map((projection) =>
+        projection ? projection.toUpperCase() : null,
+      );
     }
 
-    return projections ? projections.map((proj, i) => {
-      if (supportedProjections.includes(proj)) {
-        return <option key={i}>{proj}</option>;
-      } else {
-        console.log("Unsupported spatial reference system found in WMS capabilities document, ignoring:", proj);
-        return null;
-      }
-    }) : null;
+    return projections
+      ? projections.map((proj, i) => {
+          if (supportedProjections.includes(proj)) {
+            return <option key={i}>{proj}</option>;
+          } else {
+            console.log(
+              "Unsupported spatial reference system found in WMS capabilities document, ignoring:",
+              proj,
+            );
+            return null;
+          }
+        })
+      : null;
   }
 
   setInfoFormats() {
@@ -1312,6 +1339,8 @@ class WMSLayerForm extends Component {
   }
 
   getLayer() {
+    const cql = this.getValue("defaultCqlFilter");
+
     const o = {
       type: this.state.layerType,
       id: this.state.id,
@@ -1332,6 +1361,7 @@ class WMSLayerForm extends Component {
       visibleAtStart: this.getValue("visibleAtStart"),
       tiled: this.getValue("tiled"),
       showAttributeTableButton: this.getValue("showAttributeTableButton"),
+      hasLabelStyle: this.getValue("hasLabelStyle"),
       opacity: this.getValue("opacity"),
       maxZoom: this.getValue("maxZoom"),
       minZoom: this.getValue("minZoom"),
@@ -1371,6 +1401,7 @@ class WMSLayerForm extends Component {
       infoClickSortDesc: this.getValue("infoClickSortDesc"),
       infoClickSortType: this.getValue("infoClickSortType"),
       rotateMap: this.getValue("rotateMap"),
+      ...(cql?.length > 0 && { defaultCqlFilter: cql }),
       // infoclickIcon: this.getValue("infoclickIcon"),
       hideExpandArrow: this.getValue("hideExpandArrow"),
       // style: this.getValue("style"),
@@ -1412,6 +1443,7 @@ class WMSLayerForm extends Component {
       value = parseFloat(Number(value).toFixed(2));
     if (fieldName === "tiled") value = input.checked;
     if (fieldName === "showAttributeTableButton") value = input.checked;
+    if (fieldName === "hasLabelStyle") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "layersInfo")
       value = format_layers_info(this.state.addedLayersInfo);
@@ -1509,7 +1541,7 @@ class WMSLayerForm extends Component {
       } else {
         this.setState({
           validationErrors: this.state.validationErrors.filter(
-            (v) => v !== fieldName
+            (v) => v !== fieldName,
           ),
         });
       }
@@ -1527,10 +1559,12 @@ class WMSLayerForm extends Component {
       const res = await hfetch(url);
       if (!res.ok) {
         // Handle non-successful responses, e.g. HTTP/404 when REST API is not exposed
-        throw new Error('Failed to fetch workspaces: ' + res.status);
+        throw new Error("Failed to fetch workspaces: " + res.status);
       }
       const json = await res.json();
-      var sortedWorkspaces = json.workspaces.workspace.sort(GetSortOrder("name")); //Pass the attribute to be sorted on
+      var sortedWorkspaces = json.workspaces.workspace.sort(
+        GetSortOrder("name"),
+      ); //Pass the attribute to be sorted on
 
       function GetSortOrder(prop) {
         return function (a, b) {
@@ -1547,7 +1581,8 @@ class WMSLayerForm extends Component {
       if (this.props.parent) {
         this.props.parent.setState({
           alert: true,
-          alertMessage: "Workspace-listan kan inte hämtas från denna server, välj \"Alla\".",
+          alertMessage:
+            'Workspace-listan kan inte hämtas från denna server, välj "Alla".',
         });
       } else {
         console.warn("Workspace fetch from REST API failed.");
@@ -1561,7 +1596,7 @@ class WMSLayerForm extends Component {
 
     if (e.target.value.includes(".") || e.target.value.includes(",")) {
       kv[key] = parseFloat(
-        parseFloat(e.target.value.replace(",", ".")).toFixed(1)
+        parseFloat(e.target.value.replace(",", ".")).toFixed(1),
       );
     } else {
       kv[key] = parseInt(e.target.value);
@@ -1668,7 +1703,7 @@ class WMSLayerForm extends Component {
                   url:
                     this.state.url.substring(
                       0,
-                      this.state.url.lastIndexOf("geoserver/") + 10
+                      this.state.url.lastIndexOf("geoserver/") + 10,
                     ) + e.target.value,
                 })
               }
@@ -1929,6 +1964,26 @@ class WMSLayerForm extends Component {
             />
           </label>
         </div>
+        <div>
+          <input
+            type="checkbox"
+            ref="input_hasLabelStyle"
+            id="input_hasLabelStyle"
+            onChange={(e) => {
+              this.setState({ hasLabelStyle: e.target.checked });
+            }}
+            checked={this.state.hasLabelStyle}
+          />
+          &nbsp;
+          <label htmlFor="input_hasLabelStyle">
+            Har etikettstil (måste sluta på "_labels"){" "}
+            <i
+              className="fa fa-question-circle"
+              data-toggle="tooltip"
+              title="Aktivera om lagret har en tillhörande etikettstil i WMS:en, där namnet på stilen är samma som lagret med tillägget '_labels'. Exempelvis: 'mystyle' och 'mystyle_labels'. Se issue #1816."
+            />
+          </label>
+        </div>
         <div className="separator">Tillgängliga lager</div>
         <div>
           <table
@@ -2148,7 +2203,7 @@ class WMSLayerForm extends Component {
             onChange={(e) => {
               const v = e.target.value;
               this.setState({ maxZoom: v }, () =>
-                this.validateField("maxZoom")
+                this.validateField("maxZoom"),
               );
             }}
           />
@@ -2184,6 +2239,18 @@ class WMSLayerForm extends Component {
             <option value="s">Syd</option>
             <option value="w">Väst</option>
           </select>
+        </div>
+        <div>
+          <label>CQL-filter:</label>
+          <input
+            className="control-fixed-width"
+            ref="input_defaultCqlFilter"
+            placeholder="foo='bar' AND fii='baz'"
+            value={this.state.defaultCqlFilter}
+            onChange={(e) => {
+              this.setState({ defaultCqlFilter: e.target.value });
+            }}
+          />
         </div>
         <div className="separator">Metadata</div>
         <div>

@@ -1,17 +1,16 @@
 import React from "react";
 import {
+  Box,
   Button,
   Checkbox,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   FormControlLabel,
   FormGroup,
   Link,
-  Slide,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import BaseDialog from "./Dialog/BaseDialog";
 import {
   functionalOk,
   setLevel,
@@ -24,15 +23,6 @@ const DEFAULT_MESSAGE =
   "Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du godkänner användningen av dessa.";
 const DEFAULT_URL =
   "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/";
-
-const StyledDialog = styled(Dialog)(({ theme }) => ({
-  [theme.breakpoints.up("sm")]: {
-    "& .MuiDialog-container": {
-      alignItems: "flex-end",
-      padding: "16px 20px",
-    },
-  },
-}));
 
 // We're using several labeled checkboxes, let's create a component so that we keep DRY.
 const LabeledCheckbox = ({ checked, disabled, label, onChange }) => {
@@ -50,10 +40,6 @@ const LabeledCheckbox = ({ checked, disabled, label, onChange }) => {
     />
   );
 };
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 function CookieNotice({ globalObserver, appModel }) {
   const { config } = appModel;
@@ -126,12 +112,22 @@ function CookieNotice({ globalObserver, appModel }) {
   }, [showThirdPartCheckbox]);
 
   return (
-    <StyledDialog
+    <BaseDialog
+      slotProps={{
+        paper: {
+          sx: (theme) => ({
+            width: {
+              // 16px = theme.spacing(2)
+              xs: `calc(100% - ${theme.spacing(2)})`,
+              // 32px = theme.spacing(4)
+              sm: `calc(100% - ${theme.spacing(4)})`,
+            },
+            maxWidth: "md",
+          }),
+        },
+      }}
       sx={{ zIndex: "9999" }}
-      fullWidth={true}
-      maxWidth={"md"}
       open={open}
-      TransitionComponent={Transition}
       keepMounted
       aria-describedby="cookie-dialog-content-text"
     >
@@ -158,9 +154,13 @@ function CookieNotice({ globalObserver, appModel }) {
         }}
       >
         <FormGroup
-          sx={{
-            flexDirection: { xs: "column", sm: "row" },
-          }}
+          row={true}
+          sx={(theme) => ({
+            // For some weird reason, the last checkbox is not getting the correct margin-right on mobile. And the only way to fix it is to use a media query and forced css.
+            [theme.breakpoints.down("sm")]: {
+              ".MuiFormControlLabel-root:last-child": { mr: 0 },
+            },
+          })}
         >
           <LabeledCheckbox
             disabled={true}
@@ -184,23 +184,34 @@ function CookieNotice({ globalObserver, appModel }) {
             />
           )}
         </FormGroup>
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={handleAllowSelectedClick}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 1,
+            pt: 1,
+            pb: 2,
+            "&&": { ml: 0 },
+          }}
         >
-          {"Tillåt valda"}
-        </Button>
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={handleAllowAllClick}
-          sx={{ margin: [1, 1] }}
-        >
-          {"Tillåt Alla"}
-        </Button>
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={handleAllowSelectedClick}
+          >
+            {"Tillåt valda"}
+          </Button>
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={handleAllowAllClick}
+            sx={{ mr: { sm: 2 } }}
+          >
+            {"Tillåt Alla"}
+          </Button>
+        </Box>
       </DialogActions>
-    </StyledDialog>
+    </BaseDialog>
   );
 }
 

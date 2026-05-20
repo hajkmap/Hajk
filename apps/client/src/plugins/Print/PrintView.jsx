@@ -13,14 +13,13 @@ import AdvancedOptions from "./AdvancedOptions";
 import HajkToolTip from "components/HajkToolTip";
 
 const Root = styled("div")(() => ({
-  margin: -10,
   display: "flex",
   flexDirection: "column",
   height: "100%",
 }));
 
 const StyledAppBar = styled(AppBar)(() => ({
-  top: -10,
+  top: 0,
 }));
 
 const TabContent = styled("div")(({ theme }) => ({
@@ -35,6 +34,23 @@ const TabContent = styled("div")(({ theme }) => ({
 const PrintButtonContainer = styled("div")(({ theme }) => ({
   padding: theme.spacing(1),
 }));
+
+function hexToNormRgb(hex) {
+  // Get rid of the # if it's there, and ensure it's a string (in case something else is passed in)
+  hex = (hex ?? "").replace(/^#/, "");
+  const normalizeHexChannel = (value) => {
+    const parsed = parseInt(value, 16);
+    return Number.isNaN(parsed) ? 1 : parsed / 255;
+  };
+  return {
+    // For each color channel, parse the corresponding part (xxyyzz) of the hex string
+    // using base-16 (since it's hex right…). Then divide by 255 because our
+    // libPDF renderer expects colors in 0-1 range.
+    r: normalizeHexChannel(hex.slice(0, 2)),
+    g: normalizeHexChannel(hex.slice(2, 4)),
+    b: normalizeHexChannel(hex.slice(4, 6)),
+  };
+}
 
 class PrintView extends React.PureComponent {
   static propTypes = {
@@ -53,7 +69,11 @@ class PrintView extends React.PureComponent {
     scale: this.props.scales[Math.round((this.props.scales.length - 1) / 2)], // 10000 means scale of 1:10000
     mapTitle: "", // User can set a title that will get printed on the map
     printComment: "", // User can set a comment that will get printed on the map
-    mapTextColor: this.props.options.mapTextColor ?? "#FFFFFF", // Default color of text printed on the map
+    mapTextColor: this.props.options.mapTextColor ?? "#000000", // Default color of text printed on the map (as hex, for picker display, SX stylig etc)
+    // Same as above, but normalized to 0-1 rgb as that's what libPDF expects
+    mapTextColorNormRgb: hexToNormRgb(
+      this.props.options.mapTextColor ?? "#000000"
+    ),
     printInProgress: false,
     previewLayerVisible: false,
     activeTab: 0,
@@ -65,6 +85,9 @@ class PrintView extends React.PureComponent {
     logoPlacement: this.props.options.logoPlacement || "topRight",
     includeQrCode: this.props.options.includeQrCode ?? false,
     qrCodePlacement: this.props.options.qrCodePlacement || "topRight",
+    includeLegendsInPdf:
+      (this.props.options.allowLegendsInPdfOutput ?? false) &&
+      (this.props.options.generateLegendsByDefault ?? false),
     saveAsType: "PDF",
     printOptionsOk: false,
   };
@@ -127,6 +150,18 @@ class PrintView extends React.PureComponent {
     });
   }
 
+  componentDidMount() {
+    // On mobile the Sheet unmounts children when closed and remounts them
+    // when opened. By that time the "showPrintPreview" event has already
+    // been published (and missed), so we trigger the preview here instead.
+    if (this.props.windowVisible) {
+      const scale = this.model.getFittingScale();
+      this.setState({ previewLayerVisible: true, scale: scale }, () => {
+        this.handlePotentialPrintOptionError();
+      });
+    }
+  }
+
   initiatePrint = (e) => {
     // Print can be initiated by submitting the <form>. In that case, we must prevent default behavior.
     e.preventDefault();
@@ -159,6 +194,7 @@ class PrintView extends React.PureComponent {
       mapTitle: this.state.mapTitle,
       printComment: this.state.printComment,
       mapTextColor: this.state.mapTextColor,
+      mapTextColorNormRgb: this.state.mapTextColorNormRgb,
       includeLogo: this.state.includeLogo,
       logoPlacement: this.state.logoPlacement,
       includeQrCode: this.state.includeQrCode,
@@ -167,6 +203,7 @@ class PrintView extends React.PureComponent {
       scaleBarPlacement: this.state.scaleBarPlacement,
       includeNorthArrow: this.state.includeNorthArrow,
       northArrowPlacement: this.state.northArrowPlacement,
+      includeLegendsInPdf: this.state.includeLegendsInPdf,
       saveAsType: this.state.saveAsType,
     };
   };
@@ -190,9 +227,13 @@ class PrintView extends React.PureComponent {
   };
 
   handleChange = (event) => {
+    const value =
+      event.target.type === "checkbox"
+        ? event.target.checked
+        : event.target.value;
     this.setState(
       {
-        [event.target.name]: event.target.value,
+        [event.target.name]: value,
       },
       () => {
         this.handlePotentialPrintOptionError();
@@ -207,7 +248,11 @@ class PrintView extends React.PureComponent {
   };
 
   setMapTextColor = (color) => {
-    this.setState({ mapTextColor: color.hex });
+    const { r, g, b } = color.rgb;
+    this.setState({
+      mapTextColor: color.hex,
+      mapTextColorNormRgb: { r: r / 255, g: g / 255, b: b / 255 },
+    });
   };
 
   handleChangeTabs = (event, activeTab) => {
@@ -267,7 +312,9 @@ class PrintView extends React.PureComponent {
       logoPlacement,
       includeQrCode,
       qrCodePlacement,
+      includeLegendsInPdf,
       printOptionsOk,
+      saveAsType,
     } = this.state;
 
     return (
@@ -288,6 +335,8 @@ class PrintView extends React.PureComponent {
         logoPlacement={logoPlacement}
         includeQrCode={includeQrCode}
         qrCodePlacement={qrCodePlacement}
+        includeLegendsInPdf={includeLegendsInPdf}
+        saveAsType={saveAsType}
         printOptionsOk={printOptionsOk}
         options={this.props.options}
         enableAppStateInHash={this.props.enableAppStateInHash}

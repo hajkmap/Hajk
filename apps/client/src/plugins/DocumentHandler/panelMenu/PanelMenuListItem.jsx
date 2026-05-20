@@ -107,6 +107,7 @@ class PanelMenuListItem extends React.PureComponent {
           ref={this.props.itemRef}
           size="small"
           disableGutters
+          alignItems="flex-start"
           aria-controls={hasSubMenu ? `submenu_${id}` : null}
           aria-expanded={expanded}
           onClick={() => {

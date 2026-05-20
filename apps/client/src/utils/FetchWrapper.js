@@ -13,9 +13,6 @@ let config = {
 //   },
 //   "useOptionOverrides": true,
 //   "optionOverrides": {
-//     "*www.cachebuster.com*": {
-//       "cacheBuster": true
-//     },
 //     "*wms-utv.varberg.se*": {
 //       "credentials": "include"
 //     },
@@ -24,8 +21,6 @@ let config = {
 //     }
 //   }
 // }
-
-const cacheBusterParamName = "cacheBuster";
 
 class FetchWrapper {
   // Had to disable.... eslint does not like my regex for som reason.
@@ -37,21 +32,6 @@ class FetchWrapper {
     this.config = config;
     this.url = "";
     this.options = {};
-
-    // Lets get the values from generated meta-tags
-    // Hash is used for cacheBuster function.
-    const appName =
-      document
-        .querySelector(`meta[name='app-name']`)
-        ?.getAttribute("content") || "";
-    this.hash =
-      document
-        .querySelector(`meta[name='${appName}-git-hash']`)
-        ?.getAttribute("content") || "";
-    this.useCacheBuster =
-      document
-        .querySelector(`meta[name='${appName}-use-cache-buster']`)
-        ?.getAttribute("content") === "true";
   }
 
   matchesUrlPart(url, ruleWithWildCard) {
@@ -107,30 +87,10 @@ class FetchWrapper {
       // Will be used in admin later.
       this.translateToJqueryAjaxOptions();
     }
-
-    if (this.useCacheBuster === true) {
-      // cacheBuster will force browser to reload the file.
-      // In this case it's using git commit hash.
-      // So every new Hajk version that's build will force reload.
-
-      if (
-        this.options.cacheBuster === true ||
-        (this.mapserviceBaseUri &&
-          this.url.indexOf(this.mapserviceBaseUri) === 0)
-      ) {
-        let cacheBuster = `${
-          this.url.indexOf("?") === -1 ? "?" : "&"
-        }${cacheBusterParamName}=${this.hash}`;
-        this.url = `${this.url}${cacheBuster}`;
-      }
-    }
   }
 
   updateConfig(config) {
     this.config = config;
-    this.mapserviceBase = this.config.mapserviceBase || "";
-    this.proxy = this.config.proxy || "";
-    this.mapserviceBaseUri = `${this.proxy}${this.mapserviceBase}`;
   }
 
   reset() {

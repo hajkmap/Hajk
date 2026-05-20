@@ -24,6 +24,7 @@ export default defineConfig({
   build: {
     target: "baseline-widely-available",
     outDir: "build",
+    assetsDir: "static",
     sourcemap: false,
     rollupOptions: {
       output: {
@@ -34,8 +35,9 @@ export default defineConfig({
     },
   },
   esbuild: {
-    loader: "jsx",
-    include: /src\/.*\.jsx?$/,
+    // Allow both JS/JSX and TS/TSX in src
+    loader: "tsx",
+    include: /src\/.*\.[tj]sx?$/,
     exclude: [],
   },
 });

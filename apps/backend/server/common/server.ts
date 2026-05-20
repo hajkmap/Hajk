@@ -10,7 +10,12 @@ import { type WebSocketServer } from "ws";
 import { randomUUID } from "crypto";
 import fs from "fs";
 import * as path from "path";
-import { createServer, type Server as NodeServerType } from "http";
+import {
+  createServer,
+  type ClientRequest,
+  type IncomingMessage,
+  type Server as NodeServerType,
+} from "http";
 import { fileURLToPath } from "url";
 
 import compression from "compression";
@@ -49,6 +54,8 @@ class Server {
   private server: NodeServerType;
   private wss: WebSocketServer | null = null;
   private apiVersions: number[];
+  private addXForwardedHeaders: boolean = false;
+  private addQgisServiceUrlHeader: boolean = false;
 
   constructor() {
     logger.debug("Process's current working directory: ", process.cwd());
@@ -757,9 +764,40 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
               logger: l,
               target: target,
               changeOrigin: true,
+              ...(this.addXForwardedHeaders && { xfwd: true }),
               pathRewrite: {
                 [`^/api/v${apiVersion}/proxy/${context}`]: "", // remove base path
               },
+              ...(this.addQgisServiceUrlHeader && {
+                on: {
+                  // Set the X-Qgis-Service-Url header so QGIS Server generates
+                  // correct URLs in its responses. See #1774.
+                  proxyReq: (proxyReq: ClientRequest, req: IncomingMessage) => {
+                    const expressReq = req as Request;
+                    const proto = String(
+                      req.headers["x-forwarded-proto"] || expressReq.protocol
+                    )
+                      .split(",")[0]
+                      .trim();
+                    const host = String(
+                      req.headers["x-forwarded-host"] || req.headers.host
+                    )
+                      .split(",")[0]
+                      .split(":")[0]
+                      .trim();
+                    const port = String(req.headers["x-forwarded-port"] || "")
+                      .split(",")[0]
+                      .trim();
+                    const hostWithPort =
+                      port && port !== "443" && port !== "80"
+                        ? `${host}:${port}`
+                        : host;
+                    const publicPath = expressReq.originalUrl.split("?")[0];
+                    const serviceUrl = `${proto}://${hostWithPort}${publicPath}`;
+                    proxyReq.setHeader("X-Qgis-Service-Url", serviceUrl);
+                  },
+                },
+              }),
             })
           );
         });

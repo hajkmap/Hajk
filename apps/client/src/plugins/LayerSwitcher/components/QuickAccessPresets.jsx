@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { useSnackbar } from "notistack";
 
+import BaseDialog from "components/Dialog/BaseDialog";
 import {
   Button,
   Box,
   Chip,
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -323,7 +323,7 @@ function QuickAccessPresets({
   // Render dialog with layerpackage information
   const renderInfoDialog = () => {
     return createPortal(
-      <Dialog
+      <BaseDialog
         open={loadLpInfoConfirmation ? true : false}
         onClose={handleLoadConfirmationAbort}
         onMouseDown={(e) => {
@@ -367,7 +367,7 @@ function QuickAccessPresets({
             Ladda
           </Button>
         </DialogActions>
-      </Dialog>,
+      </BaseDialog>,
       document.getElementById("map")
     );
   };
@@ -375,7 +375,7 @@ function QuickAccessPresets({
   // Render dialog to load layerpackage
   const renderLoadDialog = () => {
     return createPortal(
-      <Dialog
+      <BaseDialog
         open={loadLpConfirmation ? true : false}
         onClose={handleLoadConfirmationAbort}
         closeAfterTransition={false}
@@ -401,7 +401,7 @@ function QuickAccessPresets({
             Ladda
           </Button>
         </DialogActions>
-      </Dialog>,
+      </BaseDialog>,
       document.getElementById("map")
     );
   };
@@ -409,7 +409,7 @@ function QuickAccessPresets({
   // Render dialog with missing layers information
   const renderMissingLayersDialog = () => {
     return createPortal(
-      <Dialog
+      <BaseDialog
         open={missingLayersConfirmation ? true : false}
         onClose={handleMissingLayersConfirmationAbort}
         closeAfterTransition={false}
@@ -449,7 +449,7 @@ function QuickAccessPresets({
             Fortsätt
           </Button>
         </DialogActions>
-      </Dialog>,
+      </BaseDialog>,
       document.getElementById("map")
     );
   };

@@ -19,6 +19,7 @@ import LayerItemInfo from "./LayerItemInfo";
 import LegendImage from "./LegendImage";
 import HajkToolTip from "components/HajkToolTip";
 import LsIconButton from "./LsIconButton";
+import { functionalOk } from "../../../models/Cookie";
 
 function LayerItemDetails({
   display,
@@ -65,7 +66,9 @@ function LayerItemDetails({
   const legendInfo = layerInfo?.legend;
   const legendUrl =
     showLegend && subLayerIndex === null
-      ? legendInfo?.map((l) => l?.url)
+      ? (Array.isArray(legendInfo) ? legendInfo : [])
+          .map((l) => l?.url)
+          .filter(Boolean)
       : Array.isArray(legendInfo) && legendInfo[subLayerIndex]?.url;
 
   // Handle opacity slider changes
@@ -149,6 +152,17 @@ function LayerItemDetails({
 
   // Handle quickacces action
   const handleQuickAccess = () => {
+    if (!functionalOk()) {
+      enqueueSnackbar(
+        "Du har inte tillåtit funktionella kakor. För att använda snabbåtkomst så måste du tillåta funktionella kakor.",
+        {
+          variant: "warning",
+          anchorOrigin: { vertical: "bottom", horizontal: "center" },
+        }
+      );
+      return;
+    }
+
     let snackbarMessage = "";
     if (!quickAccess) {
       snackbarMessage = `${renderDetailTitle()} har nu lagts till i snabbåtkomst.`;

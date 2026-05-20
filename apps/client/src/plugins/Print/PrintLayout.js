@@ -122,10 +122,25 @@ export async function buildLayout(
   if (options.includeQrCode && model.mapConfig.enableAppStateInHash) {
     try {
       const qrCode = await model.generateQR(windowUrl, 20);
+      let qrWidth = qrCode.width;
+      let qrHeight = qrCode.height;
+
+      // Same height clamping as logo/north arrow — see comment in section 4.
+      if (
+        model.textIconsMargin === 0 &&
+        options.qrCodePlacement.startsWith("top")
+      ) {
+        const maxHeight = 5.25 * model.margin;
+        if (qrHeight > maxHeight) {
+          qrWidth *= maxHeight / qrHeight;
+          qrHeight = maxHeight;
+        }
+      }
+
       const qrCodePlacement = model.getPlacement(
         options.qrCodePlacement,
-        qrCode.width,
-        qrCode.height,
+        qrWidth,
+        qrHeight,
         pageWidth,
         pageHeight,
         "qrCode"
@@ -135,8 +150,8 @@ export async function buildLayout(
         src: qrCode.data,
         x: qrCodePlacement.x,
         y: qrCodePlacement.y,
-        width: qrCode.width,
-        height: qrCode.height,
+        width: qrWidth,
+        height: qrHeight,
       });
     } catch (error) {
       model.localObserver.publish("error-loading-image", {
@@ -149,11 +164,28 @@ export async function buildLayout(
   // 4. Logo
   if (options.includeLogo && model.logoUrl.trim().length >= 5) {
     try {
-      const {
+      let {
         data: logoData,
         width: logoWidth,
         height: logoHeight,
       } = await model.getImageForPdfFromUrl(model.logoUrl, model.logoMaxWidth);
+
+      // In margin mode (textIconsMargin === 0), the top/bottom white border has
+      // lineWidth = 16 * model.margin, so its inner edge is 8 * model.margin from
+      // the page edge. Elements are placed with their top at 2.75 * model.margin
+      // from the page top (via getPlacement), leaving only (8 - 2.75) * model.margin
+      // pts of space before the map boundary. Clamp height to fit within that space.
+      if (
+        model.textIconsMargin === 0 &&
+        options.logoPlacement.startsWith("top")
+      ) {
+        const maxHeight = 5.25 * model.margin;
+        if (logoHeight > maxHeight) {
+          logoWidth *= maxHeight / logoHeight;
+          logoHeight = maxHeight;
+        }
+      }
+
       const logoPlacement = model.getPlacement(
         options.logoPlacement,
         logoWidth,
@@ -164,8 +196,8 @@ export async function buildLayout(
       elements.push({
         type: "image",
         src: logoData,
-        x: logoPlacement.x - 5,
-        y: logoPlacement.y - 5,
+        x: logoPlacement.x,
+        y: logoPlacement.y,
         width: logoWidth,
         height: logoHeight,
       });
@@ -180,7 +212,7 @@ export async function buildLayout(
   // 5. North Arrow
   if (options.includeNorthArrow && model.northArrowUrl.trim().length >= 5) {
     try {
-      const {
+      let {
         data: arrowData,
         width: arrowWidth,
         height: arrowHeight,
@@ -188,6 +220,19 @@ export async function buildLayout(
         model.northArrowUrl,
         model.northArrowMaxWidth
       );
+
+      // Same height clamping as logo — see comment above.
+      if (
+        model.textIconsMargin === 0 &&
+        options.northArrowPlacement.startsWith("top")
+      ) {
+        const maxHeight = 5.25 * model.margin;
+        if (arrowHeight > maxHeight) {
+          arrowWidth *= maxHeight / arrowHeight;
+          arrowHeight = maxHeight;
+        }
+      }
+
       const arrowPlacement = model.getPlacement(
         options.northArrowPlacement,
         arrowWidth,
@@ -272,8 +317,28 @@ export async function buildLayout(
     });
   }
 
+  // For PNG, the right-edge x margin mirrors the PDF textEdgeMargin: align with the
+  // map's right boundary (2.75 * margin) plus padding when not in margin mode.
+  const pngXMargin =
+    model.margin > 0 && model.textIconsMargin === 0
+      ? 2.75 * model.margin
+      : 2.75 * model.margin + 10;
+
+  // lineHeight drives the y-stacking: each successive line is one lineHeight higher.
+  // Texts sit near the bottom page edge, naturally inside the white margin area.
+  const pngLineHeight = model.getTextHeight(
+    model.date || model.copyright || model.disclaimer,
+    model.textFontSize
+  );
+
+  // We have to keep track of the number of lines we are adding to the page to correctly calculate the y-position for each line.
+  // When text is to be printed inside the margin, we have to start a bit further down, hence -1.
+  // TODO: The calculations for the layout handling in .png mode must be improved to increase readability.
+  let numberOfLinesAdded = options.useTextIconsInMargin ? -1 : 0;
+
   // 9. Date text
   if (model.date.length > 0) {
+    numberOfLinesAdded++;
     const dateText = model.date.replace(
       "{date}",
       new Date().toLocaleDateString()
@@ -284,7 +349,7 @@ export async function buildLayout(
       const position = model.getRightAlignedPositions(
         dateText,
         model.textFontSize,
-        10,
+        pngXMargin,
         0,
         pageWidth,
         options,
@@ -294,7 +359,7 @@ export async function buildLayout(
         type: "text",
         text: dateText,
         x: position.x,
-        y: position.y,
+        y: 2.75 * model.margin + pngLineHeight * numberOfLinesAdded,
         size: model.textFontSize,
         fontStyle: model.textFontWeight,
         color: model.textColor,
@@ -304,13 +369,14 @@ export async function buildLayout(
 
   // 10. Copyright text
   if (model.copyright.length > 0) {
+    numberOfLinesAdded++;
     if (model.saveAsType === "PDF") {
       pdfBottomRightTexts.push(model.copyright);
     } else {
       const position = model.getRightAlignedPositions(
         model.copyright,
         model.textFontSize,
-        10,
+        pngXMargin,
         0,
         pageWidth,
         options,
@@ -320,7 +386,7 @@ export async function buildLayout(
         type: "text",
         text: model.copyright,
         x: position.x,
-        y: position.y * 2,
+        y: 2.75 * model.margin + pngLineHeight * numberOfLinesAdded,
         size: model.textFontSize,
         fontStyle: model.textFontWeight,
         color: model.textColor,
@@ -333,23 +399,31 @@ export async function buildLayout(
     if (model.saveAsType === "PDF") {
       pdfBottomRightTexts.push(model.disclaimer);
     } else {
-      const position = model.getRightAlignedPositions(
-        model.disclaimer,
-        model.textFontSize,
-        10,
-        0,
-        pageWidth,
-        options,
-        model.textFontWeight
-      );
-      elements.push({
-        type: "text",
-        text: model.disclaimer,
-        x: position.x,
-        y: position.y * 3,
-        size: model.textFontSize,
-        fontStyle: model.textFontWeight,
-        color: model.textColor,
+      // The disclaimer text might contain multiple lines separated by newlines.
+      // Let's add each line individually and bump the y-position for each line.
+      // The reverse is used to start from the bottom of the page and work our way up.
+      const disclaimerTextLines = model.disclaimer.split("\n").reverse();
+
+      disclaimerTextLines.forEach((line) => {
+        numberOfLinesAdded++;
+        const position = model.getRightAlignedPositions(
+          line,
+          model.textFontSize,
+          pngXMargin,
+          0,
+          pageWidth,
+          options,
+          model.textFontWeight
+        );
+        elements.push({
+          type: "text",
+          text: line,
+          x: position.x,
+          y: 2.75 * model.margin + pngLineHeight * numberOfLinesAdded,
+          size: model.textFontSize,
+          fontStyle: model.textFontWeight,
+          color: model.textColor,
+        });
       });
     }
   }
@@ -362,11 +436,18 @@ export async function buildLayout(
     // This is required for aligning text in libpdf, upside: we know the width, downside: text longer than 400 points will wrap.
     // Set as 400 points as approx half of a landscape a4 page.
     const maxWidthBeforeWrap = pageWidth;
+    // Align the text's right edge with the map's right boundary (2.75 * model.margin from page edge).
+    // When textIconsMargin=0 (icons in margin mode), use exactly 2.75 * margin so the text
+    // right-aligns with the map edge. Otherwise add 10 pts of extra inward padding.
+    const textEdgeMargin =
+      model.margin > 0 && model.textIconsMargin === 0
+        ? 2.75 * model.margin
+        : 2.75 * model.margin + 10;
     const position = model.getRightAlignedPositions(
       pdfBottomRightTexts,
       model.textFontSize,
-      10,
-      10,
+      textEdgeMargin,
+      textEdgeMargin,
       pageWidth,
       options,
       model.textFontWeight,

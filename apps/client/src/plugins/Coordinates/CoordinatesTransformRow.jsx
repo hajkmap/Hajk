@@ -285,14 +285,7 @@ class CoordinatesTransformRow extends React.PureComponent {
 
     if (this.model.showFieldsOnStart || this.state.wasModified) {
       return (
-        <Grid
-          container
-          rowSpacing={0.5}
-          columnSpacing={2}
-          padding={0}
-          marginLeft={"-7px"}
-          paddingTop={1}
-        >
+        <Grid container columnSpacing={2} padding={0}>
           <Grid
             alignSelf={"end"}
             size={{
@@ -329,8 +322,7 @@ class CoordinatesTransformRow extends React.PureComponent {
           </Grid>
           <Grid
             size={{
-              xs: 12,
-              md: 6,
+              xs: 6,
             }}
           >
             <NumericFormat
@@ -357,8 +349,7 @@ class CoordinatesTransformRow extends React.PureComponent {
           </Grid>
           <Grid
             size={{
-              xs: 12,
-              md: 6,
+              xs: 6,
             }}
           >
             <NumericFormat

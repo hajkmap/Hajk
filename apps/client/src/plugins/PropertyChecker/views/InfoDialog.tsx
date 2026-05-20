@@ -1,7 +1,7 @@
 import React, { useState } from "react";
+import BaseDialog from "components/Dialog/BaseDialog";
 import {
   Button,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
@@ -9,7 +9,9 @@ import {
   Typography,
 } from "@mui/material";
 
-function InfoDialog({ localObserver }) {
+import type { InfoDialogProps } from "../types";
+
+function InfoDialog({ localObserver }: InfoDialogProps) {
   const [clearDialogVisible, setClearDialogVisible] = useState(false);
 
   const handleClose = () => {
@@ -29,11 +31,11 @@ function InfoDialog({ localObserver }) {
   }, [localObserver]);
 
   return (
-    <Dialog
+    <BaseDialog
       open={clearDialogVisible}
       onClose={handleClose}
       scroll="body"
-      onMouseDown={(e) => {
+      onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => {
         // Needed to disabled unwanted dragging of the underlying Window component
         // and allow text selection in Dialog.
         e.stopPropagation();
@@ -84,11 +86,9 @@ function InfoDialog({ localObserver }) {
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} autoFocus>
-          Stäng
-        </Button>
+        <Button onClick={handleClose}>Stäng</Button>
       </DialogActions>
-    </Dialog>
+    </BaseDialog>
   );
 }
 

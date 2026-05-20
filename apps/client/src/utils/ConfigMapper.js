@@ -152,6 +152,7 @@ export default class ConfigMapper {
         layerType: args.layerType,
         caption: args.caption,
         visible: args.visibleAtStart,
+        hasLabelStyle: args.hasLabelStyle || false,
         opacity: args.opacity || 1,
         zIndex: args.drawOrder || 0,
         maxZoom: args.maxZoom,
@@ -186,6 +187,7 @@ export default class ConfigMapper {
           LAYERS: args.layers.join(","),
           ...(args.cqlFilter && { CQL_FILTER: args.cqlFilter }), // nice way to add property only if needed
           FORMAT: args.imageFormat,
+          CQL_FILTER: args.defaultCqlFilter,
           INFO_FORMAT: args.infoFormat,
           VERSION: args.version || "1.1.1",
           [srsOrCrs]: projection || "EPSG:3006",
@@ -254,7 +256,7 @@ export default class ConfigMapper {
         zIndex: args.drawOrder || 0,
         maxZoom: args.maxZoom,
         minZoom: args.minZoom,
-        format: "image/png",
+        imageFormat: args.imageFormat || args.format || "image/png",
         crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
         wrapX: false,
         url: args.url,
@@ -262,9 +264,15 @@ export default class ConfigMapper {
         matrixSet: args.matrixSet,
         style: args.style,
         projection: args.projection,
-        origin: args.origin,
+        ...(args.origins
+          ? { origins: args.origins }
+          : args.origin
+            ? { origins: [args.origin] }
+            : {}),
         resolutions: args.resolutions,
         matrixIds: args.matrixIds,
+        sizes: args.sizes,
+        tileSize: args.tileSize,
         attribution: args.attribution,
         legend: args.legend,
         legendIcon: args.legendIcon,

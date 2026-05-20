@@ -21,6 +21,7 @@ import QRCode from "qrcode";
 import { buildLayout } from "./PrintLayout";
 import { renderToPdf } from "./PdfRenderer";
 import { renderToPng } from "./PngRenderer";
+import { buildLegendPdfPages, getLegendInfoForLayer } from "./LegendUtil";
 
 const DEFAULT_DIMS = {
   a0: [1189, 841],
@@ -132,7 +133,18 @@ export default class PrintModel {
     // If we are generating a PDF, an array of text is passed. Otherwise just a string.
     let numberOfLines = 1;
     if (typeof text === "object") {
-      numberOfLines = text.length;
+      // Let's see if our texts (disclaimer, copyright)contain newlines, and if
+      // so, ensure that they count towards the total height.
+      let lineBreaks = 0;
+      for (let i = 0; i < text.length; i++) {
+        // Count how many newlines exist in the specific text part. Bear in mind that \n
+        // is not the only possible newline, let's also count \r. \r\n is also a possibility,
+        // but since it contains both \r and \n, we will count it as two newlines, which is correct.
+        const newlineCount = (text[i].match(/\n|\r/g) || []).length;
+
+        lineBreaks = lineBreaks + newlineCount;
+      }
+      numberOfLines = text.length + lineBreaks;
     }
     // Estimate lineheight and calculate the height in points over number of lines.
     const lineHeight = fontSize * 1.2;
@@ -144,19 +156,6 @@ export default class PrintModel {
       return totalHeightInPoints;
     }
     return totalHeight;
-  };
-
-  hexToRgb = (hex) => {
-    hex = hex.replace(/^#/, "");
-    let r = parseInt(hex.slice(0, 2), 16);
-    let g = parseInt(hex.slice(2, 4), 16);
-    let b = parseInt(hex.slice(4, 6), 16);
-
-    r = r > 127.5 ? 1 : 0;
-    g = g > 127.5 ? 1 : 0;
-    b = b > 127.5 ? 1 : 0;
-
-    return { r, g, b };
   };
 
   getRightAlignedPositions = (
@@ -250,6 +249,7 @@ export default class PrintModel {
   }
 
   addPreviewLayer() {
+    if (this.previewLayer) return;
     this.previewLayer = new Vector({
       source: new VectorSource(),
       layerType: "system",
@@ -339,8 +339,13 @@ export default class PrintModel {
     this.margin = useMargin ? this.getMargin(dim) : 0;
 
     //We need a different margin value for text and icons to be placed in the margins,
-    //because "this.margin" (above) is sometimes used independently
-    this.textIconsMargin = useTextIconsInMargin ? 0 : 6;
+    //because "this.margin" (above) is sometimes used independently.
+    // When useMargin is true but content should NOT go in the margins, the total
+    // offset (textIconsMargin + margin) must exceed the white stroke's inward extent
+    // (2.75 * margin), requiring textIconsMargin >= 1.75 * margin.
+    this.textIconsMargin = useTextIconsInMargin
+      ? 0
+      : Math.max(6, Math.ceil(1.75 * this.margin));
 
     const inchInMillimeter = 25.4;
     // We should take pixelRatio into account? What happens when we have
@@ -515,7 +520,13 @@ export default class PrintModel {
     // We must take the potential margin around the map-image into account (this.margin)
     // And the extra margin for textIconsMargin.
     // And the extra extra margin for qrcode image
-    const margin = this.textIconsMargin + this.margin;
+    //
+    // The white border is drawn as a stroke centered on the page edge, so its visible
+    // inner width = 2.75 * this.margin (half of lineWidth 5.5 * margin in PrintLayout).
+    // Using 2.75 * this.margin as the base aligns elements with the map's edge boundary.
+    // textIconsMargin adds extra inward padding when elements should NOT be in the margin
+    // (textIconsMargin=6); it is 0 when elements intentionally go in the margin.
+    const margin = 2.75 * this.margin + this.textIconsMargin;
     // Here we simply say if content that is going to be placed is a qr code...
     // we need to adjust it slightly because the qr code is bigger than the other icons.
     const qrMargin =
@@ -1064,8 +1075,19 @@ export default class PrintModel {
       const resolution = options.resolution;
       const scale = options.scale / 1000;
 
-      // Convert hex color provided to rgb since libPDF uses that instead, should probably be handled earlier.
-      this.textColor = this.hexToRgb(options.mapTextColor);
+      this.textColor = options.mapTextColorNormRgb;
+
+      // Snapshot the legend info for the layers that are about to be
+      // printed. We resolve it *now* (before `prepareActiveLayersForPrint`
+      // swaps originals for temporary image layers and hides the source
+      // layers) so the legend set matches what the user actually sees on
+      // the map – otherwise the originals would have `visible=false` by the
+      // time the PDF renderer runs.
+      const legendInfosForPdf = options.includeLegendsInPdf
+        ? this.getVisibleTileAndImageLayers()
+            .map((layer) => getLegendInfoForLayer(layer))
+            .filter(Boolean)
+        : [];
 
       // Our dimensions are for landscape orientation by default. Flip the values if portrait orientation requested.
       const dim =
@@ -1192,11 +1214,24 @@ export default class PrintModel {
           let blob = null;
 
           if (options.saveAsType === "PDF") {
+            // Build one or more extra pages listing the WMS legends for
+            // each visible layer, appended after the map page.
+            // Note: we intentionally don't pass `options.mapTextColorNormRgb`
+            // here – that color is chosen by the user for text overlaid on
+            // the map image (often white, so it pops on dark aerial
+            // backgrounds), which would be invisible on the plain white
+            // legend page. Let the helper's default (black) take over.
+            const legendPages = await buildLegendPdfPages(legendInfosForPdf, {
+              pageWidth,
+              pageHeight,
+              orientation,
+            });
             const pdf = await renderToPdf(
               elements,
               pageWidth,
               pageHeight,
-              orientation
+              orientation,
+              legendPages
             );
             const bytes = await pdf.save();
             const pdfBlob = new Blob([bytes], { type: "application/pdf" });
@@ -1226,14 +1261,13 @@ export default class PrintModel {
           this.localObserver.publish("print-failed-to-save");
           reject(error);
         } finally {
-          // Reset map to how it was before print
+          // Reset the DPI-prepared print layers back to the originals.
+          // Must happen here (after render) rather than before the render,
+          // otherwise the WMS layers never receive the DPI parameters.
+          this.useCustomTileLoaders && this.resetPrintLayers();
           this.restoreOriginalView();
         }
       });
-
-      // Since we've been messing with the layer-settings while printing, we have to
-      // make sure to reset these settings. (Should only be done if custom loaders has been used).
-      this.useCustomTileLoaders && this.resetPrintLayers();
 
       // Get print center from preview feature's center coordinate
       const printCenter = getCenter(

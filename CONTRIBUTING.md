@@ -1,55 +1,122 @@
-## Contributing
+# Contributing
 
-### Required tools
+## Required tools
 
-- Latest LTS of NodeJS
+- Node.js ≥22 (LTS)
 - Latest Git
 
-All apps reside inside the `apps/` directory. The Client UI (`client`), Admin UI (`admin`) and NodeJS backend (`backend`) applications can be built and deployed on any OS supported by recent Git and Node versions (tested on macOS, Windows and Linux).
+## Project structure
 
-### User documentation
+Hajk is a monorepo with three independent apps under `apps/` — no root-level workspace tooling. Each app manages its own dependencies.
+
+| App       | Directory       | Port | Stack                                                       |
+| --------- | --------------- | ---- | ----------------------------------------------------------- |
+| Client UI | `apps/client/`  | 3000 | React 19, Vite 7, OpenLayers 10, MUI v7, TypeScript         |
+| Admin UI  | `apps/admin/`   | 3001 | React 16 (legacy), Create React App 3, MUI v4, OpenLayers 5 |
+| Backend   | `apps/backend/` | 3002 | Node.js ESM, Express 5                                      |
+
+## User documentation
 
 End-user documentation can be found in [Hajk's Wiki](https://github.com/hajkmap/Hajk/wiki). Writing user documentation is a very important way of contributing to the project and suits well for organizations that wish to contribute but lack coding capabilities.
 
-### Design guidelines
+## Design guidelines
 
 Hajk is built using **Material Design** components from the [Material UI](https://material-ui.com/) project. Make sure to familiarize yourself with all the available components. It is crucial for the user experience that the design principles are followed throughout the system.
 
-### Git workflow
+## Local development setup
 
-Hajk strictly enforces the use of **Git Feature Branch Workflow** as described in [this document](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
+Start apps in this order:
 
-#### Pre-requirements
+1. **Backend**
 
-**Create an issue on GitHub.** You will need the issue number to give your branch a good name in the steps that follow.
+   ```bash
+   cd apps/backend
+   cp .env.example .env   # edit as needed
+   npm install
+   npm run dev            # http://localhost:3002
+                          # API Explorer: http://localhost:3002/api-explorer/
+   ```
 
-#### Steps in `git`
+2. **Client UI**
 
-In short, developing a new feature, would look something like:
+   Ensure `apps/client/public/appConfig.json` has `mapserviceBase: "http://localhost:3002/api/v2"`.
 
-1. Always fetch latest with `git fetch`.
-1. Make sure you are in the develop branch by `git checkout develop`.
-1. Make sure that you've merged all upstream changes in `develop` with `git merge`.
-1. Create a new branch and give it a name that relates to the issue you created on GitHub. E.g. if you created an issue called _"Add a blue button"_ and it has issue number #1234, your branch should be called `feature/1234-blue-button`. You create this branch by running `git checkout -b feature/1234-blue-button`
-1. Don't forget to set upstream so that your newly created branch is pushed to GitHub: `git push --set-upstream origin feature/1234-blue-button`
-1. Code… :neckbeard:
-1. Regularly commit changes to your branch with `git commit -S -m "A good comment, can be multiline."`. (Note, the `-S` flag [signs your commit](https://help.github.com/en/articles/signing-commits), and signing commits is something you really should be doing.)
-1. Regularly push your changes upstream (to GitHub) with `git push`
-1. **Regularly merge changes that other developers might be doing, from `develop` into your branch.** That means that you will incorporate recent changes and your local branch will stay up-to-date with the latest developments. **Please don't overlook it. This is a really important part.** You can do it like this: `git stash && git checkout develop && git fetch && git merge && git checkout feature/1234-blue-button && git merge develop && git stash apply`. (If you feel comfortable enough with Git, there are of course shorter way of doing this, such as directly merging the upstream remote branch.)
-1. Describe your change with a log entry in the CHANGELOG.md. Select the subsection below the **Unreleased** section based on the type of issue: **Added** for feature, **Fixed** for any bug fixes, **Changed** for changes in existing functionality, **Security** in case of vulnerabilities. See further at the very end of CHANGELOG.md. \
-   Format your new row like: \
-    \- `area`: Short explanation of what the change resolves/adds. [#`issue-number`]\(https://github.com/hajkmap/Hajk/issues/`issue-number`)
-   - area: could be a specific feature in Hajk like Sketch, Print or Cookie or an app like Admin, Backend or Client or more generic like Core, Bug, Fix.
-   - issue-number: The number of your Hajk issue.
-1. When you're done coding, go to GitHub and create a new pull request. Make sure that you want to merge your branch into `develop`.
-1. Hajk maintainers will get notified when you create the PR. They will review your PR and either accept and merge your branch (as well as delete it from the remote, as it's no longer needed) or (if the code isn't considered ready) request changes. After a successful merge you will still have a copy of your feature branch locally, but it can be safely removed by running `git branch -d feature/1234-blue-button`.
+   ```bash
+   cd apps/client
+   npm install
+   npm run dev   # http://localhost:3000
+   ```
 
-### Code standard
+3. **Admin UI** (optional)
 
-Hajk uses **ESLint** and **Prettier** to enforce code formatting across the project.
+   Ensure `apps/admin/public/config.json` URLs point to `http://localhost:3002/api/v2/...`.
 
-🔥 **Code that gets checked in must follow those rules.** 🔥
+   ```bash
+   cd apps/admin
+   npm install
+   npm start     # http://localhost:3001
+   ```
 
-The `client` and `backend` directories contain all necessary configuration files. The recommended way is to use an editor that has extensions for ESLint and Prettier installed. It is also highly recommended to make the editor run Prettier on each file save (i.e. in VSCode it can be controlled by the `formatOnSave: true` flag).
+## Build commands
 
-**For a simple guide on setting up VSCode with ESLint, Prettier and some , see [this presentation](dokumentation/VSCodeSetup.pdf)**. (Swedish only)
+```bash
+# Backend: compile to dist/
+cd apps/backend && npm run compile && npm start
+
+# Client: build to build/
+cd apps/client && npm run build
+
+# Admin: build to build/ (OpenSSL legacy provider handled by npm scripts)
+cd apps/admin && npm run build
+```
+
+## Git workflow
+
+Hajk enforces the **Git Feature Branch Workflow** as described in [this document](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
+
+### Steps
+
+1. **Create a GitHub issue.** You will need the issue number for your branch name.
+1. `git fetch` and `git checkout develop` and `git merge` to get the latest.
+1. Create a branch: `git checkout -b feature/1234-blue-button` (use your issue number and a short description).
+1. Set upstream: `git push --set-upstream origin feature/1234-blue-button`
+1. Code, commit, and push regularly:
+
+   ```bash
+   git commit -S -m "A good commit message"
+   git push
+   ```
+
+   (The `-S` flag [signs your commit](https://help.github.com/en/articles/signing-commits), which is strongly recommended.)
+
+1. **Regularly merge `develop` into your branch** to stay up to date:
+
+   ```bash
+   git stash && git checkout develop && git fetch && git merge \
+     && git checkout feature/1234-blue-button && git merge develop && git stash apply
+   ```
+
+1. Add a line to `CHANGELOG.md` under the **Unreleased** section:
+
+   ```markdown
+   - area: Short explanation. [#1234](https://github.com/hajkmap/Hajk/issues/1234)
+   ```
+
+   Use `Added`, `Fixed`, `Changed`, or `Security` subsections as appropriate. `area` can be a plugin name (Sketch, Print…) or app name (Admin, Backend, Client) or general (Core, Bug).
+
+1. Open a pull request on GitHub targeting the `develop` branch.
+
+## Code standards
+
+The **Client** and **Backend** use ESLint 9 + Prettier. The **Admin** uses Prettier only.
+
+Run `npm run lint:fix` in the relevant app directory before committing. Code that does not pass linting will not be accepted.
+
+Additional conventions for the Client:
+
+- Prefer functional components with hooks over class components.
+- Use TypeScript interfaces for prop types.
+- Keep components focused — aim for under 200 lines.
+- Backend uses ES module syntax throughout; do not use CommonJS `require()`.
+
+The recommended editor setup is VSCode with the ESLint and Prettier extensions, with `formatOnSave: true` enabled.

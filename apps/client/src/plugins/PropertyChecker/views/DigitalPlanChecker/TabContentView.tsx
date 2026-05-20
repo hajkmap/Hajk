@@ -1,9 +1,14 @@
-import React from "react";
 import { Typography } from "@mui/material";
 
 import DigitalPlan from "./DigitalPlan";
 
-function DigitalPlanList({ digitalPlanFeatures, options, userDetails }) {
+import type { DigitalPlanCheckerTabContentViewProps } from "../../types";
+
+function DigitalPlanList({
+  digitalPlanFeatures,
+  options,
+  userDetails,
+}: DigitalPlanCheckerTabContentViewProps) {
   return Object.entries(digitalPlanFeatures).length > 0 ? (
     Object.entries(digitalPlanFeatures).map(([digitalPlanKey, plan], i) => (
       <DigitalPlan

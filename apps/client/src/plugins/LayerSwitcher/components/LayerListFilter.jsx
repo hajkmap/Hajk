@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 
 import { IconButton, InputAdornment, TextField, Divider } from "@mui/material";
 
+import { isMobile } from "../../../utils/IsMobile";
+
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 
@@ -54,6 +56,10 @@ const LayerListFilter = ({
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               handleFilterSubmit(event.target.value);
+              if (isMobile) {
+                // try to get rid of the keyboard on mobile.
+                event.target.blur();
+              }
             }
           }}
           fullWidth

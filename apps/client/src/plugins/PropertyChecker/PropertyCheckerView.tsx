@@ -1,13 +1,15 @@
 // Make sure to only import the hooks you intend to use
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import useUpdateEffect from "../../hooks/useUpdateEffect";
 
+import BaseDialog from "components/Dialog/BaseDialog";
+import HajkToolTip from "components/HajkToolTip";
 import {
+  Alert,
   Button,
   Card,
   CardActions,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
@@ -15,7 +17,9 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
-import { useSnackbar } from "notistack";
+import { PropertyCheckerContext } from "./context";
+
+import { type SnackbarKey, useSnackbar } from "notistack";
 
 // import useCookieStatus from "hooks/useCookieStatus";
 
@@ -23,11 +27,22 @@ import InfoDialog from "./views/InfoDialog";
 import PropertyItem from "./views/PropertyItem";
 import QuickLayerToggleButtons from "./views/QuickLayerToggleButtons";
 
+import type Feature from "ol/Feature";
+import type SimpleGeometry from "ol/geom/SimpleGeometry";
+import type {
+  PropertyCheckerViewProps,
+  GroupedFeatures,
+  GroupedDigitalPlanFeatures,
+  GetFeatureInfoPayload,
+  NoFeaturesPayload,
+  ControlledLayer,
+} from "./types";
+
 const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(2),
 }));
 
-function PropertyCheckerView(props) {
+function PropertyCheckerView(props: PropertyCheckerViewProps) {
   const {
     drawModel,
     globalObserver,
@@ -36,16 +51,22 @@ function PropertyCheckerView(props) {
     setDrawInteraction,
   } = props;
 
+  const enableCheckLayerTab = props.options.enableCheckLayerTab !== false;
+  const enableDigitalPlansTab = props.options.enableDigitalPlansTab !== false;
+
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  const snackbarId = useRef(null);
+  const snackbarId = useRef<SnackbarKey | undefined>(undefined);
 
-  const [groupedFeatures, setGroupedFeatures] = useState({});
-  const [digitalPlanFeatures, setDigitalPlanFeatures] = useState([]);
+  const [groupedFeatures, setGroupedFeatures] = useState<GroupedFeatures>({});
+  const [digitalPlanFeatures, setDigitalPlanFeatures] =
+    useState<GroupedDigitalPlanFeatures>({});
 
   // We want to keep track of the clicked point's coordinates, to be able
   // to pass them down to child components.
-  const [clickedPointsCoordinates, setClickedPointsCoordinates] = useState([]);
+  const [clickedPointsCoordinates, setClickedPointsCoordinates] = useState<
+    number[]
+  >([]);
 
   // Keep visibility state for the dialog that we'll show to the user
   // when user clicks on the Clear button.
@@ -69,11 +90,13 @@ function PropertyCheckerView(props) {
   const handleCleanClick = () => {
     setClearDialogVisible(false);
     setGroupedFeatures({});
-    setDigitalPlanFeatures([]);
+    setDigitalPlanFeatures({});
     drawModel.removeDrawnFeatures();
   };
 
-  const [controlledLayers, setControlledLayers] = useState([]);
+  const [controlledLayers, setControlledLayers] = useState<ControlledLayer[]>(
+    []
+  );
 
   // Subscribe and unsubscribe to events
   useEffect(() => {
@@ -81,9 +104,11 @@ function PropertyCheckerView(props) {
     // user clicks a point on the map). We want to know when this happens so that
     // we can a) disable the draw interaction and b) grab the coordinates of the
     // clicked point.
-    const handleFeatureAdded = (feature) => {
+    const handleFeatureAdded = (feature: Feature) => {
       setDrawInteraction("");
-      setClickedPointsCoordinates(feature.getGeometry().getFlatCoordinates());
+      setClickedPointsCoordinates(
+        (feature.getGeometry() as SimpleGeometry).getFlatCoordinates()
+      );
     };
 
     // This runs when our model has successfully fetched features and there's
@@ -91,7 +116,7 @@ function PropertyCheckerView(props) {
     const handleNewGetFeatureInfoFeatures = ({
       digitalPlanFeatures,
       groupedFeatures,
-    }) => {
+    }: GetFeatureInfoPayload) => {
       setGroupedFeatures(groupedFeatures);
       setDigitalPlanFeatures(digitalPlanFeatures);
     };
@@ -102,28 +127,22 @@ function PropertyCheckerView(props) {
     const handleNoFeaturesInResult = ({
       amountOfProperties,
       amountOfDigitalPlans,
-    }) => {
+    }: NoFeaturesPayload) => {
       drawModel.removeDrawnFeatures();
-      if (amountOfProperties === 0) {
+      if (enableCheckLayerTab && amountOfProperties === 0) {
         enqueueSnackbar(
           "Den klickade fastigheten gav inga träffar i Fastighetskontrollens databas",
-          {
-            variant: "info",
-          }
+          { variant: "info" }
         );
-      } else if (amountOfProperties > 1) {
+      } else if (enableCheckLayerTab && amountOfProperties > 1) {
         enqueueSnackbar(
           "Du klickade på fler än en fastighet. Vänligen prova igen. Tips: slå på fastighetsgränser och håll dig en bit från gränsen när du klickar.",
-          {
-            variant: "warning",
-          }
+          { variant: "warning" }
         );
-      } else if (amountOfDigitalPlans > 1) {
+      } else if (enableDigitalPlansTab && amountOfDigitalPlans > 1) {
         enqueueSnackbar(
           "Du klickade på fler än en detaljplan. Vänligen prova igen. Tips: slå på detaljplaner och titta var gränserna går. Håll dig en bit från gränsen när du klickar.",
-          {
-            variant: "warning",
-          }
+          { variant: "warning" }
         );
       }
     };
@@ -144,7 +163,14 @@ function PropertyCheckerView(props) {
       );
       localObserver.unsubscribe("noFeaturesInResult", handleNoFeaturesInResult);
     };
-  }, [drawModel, enqueueSnackbar, localObserver, setDrawInteraction]);
+  }, [
+    drawModel,
+    enableCheckLayerTab,
+    enableDigitalPlansTab,
+    enqueueSnackbar,
+    localObserver,
+    setDrawInteraction,
+  ]);
 
   // useUpdateEffect ignores the first render, which is exactly what
   // we want.
@@ -162,10 +188,15 @@ function PropertyCheckerView(props) {
     }
   }, [drawInteraction]);
 
+  const showTooltips = props.showTooltips;
+
   return (
-    <>
+    <PropertyCheckerContext.Provider value={{ showTooltips }}>
       <InfoDialog localObserver={localObserver} />
-      <Dialog open={clearDialogVisible} onClose={handleCloseConfirmationDialog}>
+      <BaseDialog
+        open={clearDialogVisible}
+        onClose={handleCloseConfirmationDialog}
+      >
         <DialogTitle>{"Är du säker på att du vill rensa listan?"}</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -176,38 +207,64 @@ function PropertyCheckerView(props) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseConfirmationDialog}>Avbryt</Button>
-          <Button onClick={handleCleanClick} autoFocus>
-            Ja, rensa
-          </Button>
+          <Button onClick={handleCleanClick}>Ja, rensa</Button>
         </DialogActions>
-      </Dialog>
-      {Object.keys(groupedFeatures).length === 0 && (
-        <ButtonWithBottomMargin
-          variant="contained"
-          fullWidth={true}
-          color="primary"
-          onClick={handleToggleDrawClick}
-        >
-          {drawInteraction === "" ? "Välj fastighet" : "Avbryt"}
-        </ButtonWithBottomMargin>
+      </BaseDialog>
+      {!enableCheckLayerTab && !enableDigitalPlansTab && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Verktyget är felinställt: varken lagerflik eller planflik är
+          aktiverad. Kontakta systemadministratören.
+        </Alert>
       )}
-      {Object.keys(groupedFeatures).length > 0 && (
-        <ButtonWithBottomMargin
-          variant="contained"
-          fullWidth={true}
-          color="secondary"
-          onClick={handleShowConfirmationDialog}
+      {(enableCheckLayerTab
+        ? Object.keys(groupedFeatures).length === 0
+        : Object.keys(digitalPlanFeatures).length === 0) && (
+        <HajkToolTip
+          title={
+            showTooltips
+              ? drawInteraction === ""
+                ? "Klicka i kartan för att välja en fastighet"
+                : "Avbryt val av fastighet"
+              : ""
+          }
         >
-          Rensa
-        </ButtonWithBottomMargin>
+          <ButtonWithBottomMargin
+            variant="contained"
+            fullWidth={true}
+            color="primary"
+            onClick={handleToggleDrawClick}
+            disabled={!enableCheckLayerTab && !enableDigitalPlansTab}
+          >
+            {drawInteraction === "" ? "Välj fastighet" : "Avbryt"}
+          </ButtonWithBottomMargin>
+        </HajkToolTip>
       )}
-      <Card sx={{ minWidth: 275 }}>
+      {(enableCheckLayerTab
+        ? Object.keys(groupedFeatures).length > 0
+        : Object.keys(digitalPlanFeatures).length > 0) && (
+        <HajkToolTip
+          title={
+            showTooltips ? "Rensa resultatlistan och ta bort markören" : ""
+          }
+        >
+          <ButtonWithBottomMargin
+            variant="contained"
+            fullWidth={true}
+            color="secondary"
+            onClick={handleShowConfirmationDialog}
+          >
+            Rensa
+          </ButtonWithBottomMargin>
+        </HajkToolTip>
+      )}
+      <Card sx={{ minWidth: 275, mb: 2 }}>
         <CardActions>
           <QuickLayerToggleButtons options={props.options} map={props.map} />
         </CardActions>
       </Card>
-      {Object.keys(groupedFeatures).length > 0 &&
-        Object.entries(groupedFeatures).map(([k, features], i) => (
+      {enableCheckLayerTab &&
+        Object.keys(groupedFeatures).length > 0 &&
+        Object.entries(groupedFeatures).map(([_k, features], i) => (
           <PropertyItem
             clickedPointsCoordinates={clickedPointsCoordinates}
             controlledLayers={controlledLayers}
@@ -218,11 +275,29 @@ function PropertyCheckerView(props) {
             olMap={props.app.map}
             options={props.options}
             setControlledLayers={setControlledLayers}
-            startExpanded={Object.keys(groupedFeatures).length === 1} // Start with expanded by default if only one item exists}
+            startExpanded={Object.keys(groupedFeatures).length === 1}
             userDetails={props.app.config?.userDetails}
           />
         ))}
-    </>
+      {!enableCheckLayerTab &&
+        Object.keys(digitalPlanFeatures).length > 0 &&
+        Object.entries(digitalPlanFeatures).map(([planKey, planEntry], i) => (
+          <PropertyItem
+            clickedPointsCoordinates={clickedPointsCoordinates}
+            controlledLayers={controlledLayers}
+            digitalPlanFeatures={digitalPlanFeatures}
+            features={{ markerFeature: planEntry.markerFeature, features: [] }}
+            globalObserver={globalObserver}
+            key={i}
+            olMap={props.app.map}
+            options={props.options}
+            setControlledLayers={setControlledLayers}
+            startExpanded={Object.keys(digitalPlanFeatures).length === 1}
+            title={planKey}
+            userDetails={props.app.config?.userDetails}
+          />
+        ))}
+    </PropertyCheckerContext.Provider>
   );
 }
 

@@ -229,8 +229,17 @@ class Window extends React.PureComponent {
   }
 
   #onOpenChange(open) {
+    // On open, disregard previous states like minimized and reset the window height
     if (open) {
-      this.bringToFront();
+      if (this.state.mode === "minimized") {
+        this.setState({
+          height:
+            this.props.height === "auto"
+              ? this.getMaxWindowHeight()
+              : this.props.height,
+          mode: "window",
+        });
+      }
     }
   }
 
@@ -427,10 +436,18 @@ class Window extends React.PureComponent {
 
     // Don't matter the current mode – just collapse
     this.height = this.state.height;
+    // Save previous height
+    this.previousHeight = this.state.height;
+
+    // Set header height to 50 to show the whole header
     this.setState({
-      height: 0,
+      height: 50,
       mode: "minimized",
     });
+
+    if (this.previousHeight) {
+      this.height = this.previousHeight;
+    }
 
     // Run callbacks
     typeof onMinimize === "function" && onMinimize();
@@ -558,7 +575,8 @@ class Window extends React.PureComponent {
           topRight: resizeTopRight,
         }}
         minWidth={200}
-        minHeight={this.state.mode === "minimized" ? 42 : 100}
+        // Header height 50 visually shows the "whole" header without cutoffs
+        minHeight={this.state.mode === "minimized" ? 50 : 100}
         size={{
           width: width,
           height: height === "dynamic" ? "auto" : height, // 1507 - Quick fix, make sure Rnd component doesn't get "dynamic" as input
@@ -603,7 +621,8 @@ class Window extends React.PureComponent {
                 this.props.scrollable && this.props.disablePadding !== true
                   ? "10px"
                   : "0px",
-              height: "calc(100% - 54px)", // Fix to force correct height.. 54px is unfortunately hardcoded, it's the height of the <header>.
+              flex: 1,
+              minHeight: 0,
               maxHeight:
                 this.getMaxWindowHeight() - (isMobile === false ? 50 : -30), // Super-hack special case for small screens
             }}
