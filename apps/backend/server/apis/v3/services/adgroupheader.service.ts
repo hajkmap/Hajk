@@ -1,4 +1,4 @@
-import AdBaseService from "./base/adbase.service.js";
+import AdBaseService from "./base/adbase.service.ts";
 import log4js from "log4js";
 
 class AdGroupHeaderService extends AdBaseService {

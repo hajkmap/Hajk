@@ -5,7 +5,7 @@
 let importPath = "./adldap.service.ts"; // The old Ldap approach is of course Default.
 
 if (process.env.AD_USE_GROUPS_FROM_HEADER === "true") {
-  importPath = "./adgroupheader.service.js";
+  importPath = "./adgroupheader.service.ts";
 }
 
 const Cls = await import(importPath);
