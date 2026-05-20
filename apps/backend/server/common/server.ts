@@ -54,8 +54,8 @@ class Server {
   private server: NodeServerType;
   private wss: WebSocketServer | null = null;
   private apiVersions: number[];
-  private addXForwardedHeaders: boolean = false;
-  private addQgisServiceUrlHeader: boolean = false;
+  private addXForwardedHeaders = false;
+  private addQgisServiceUrlHeader = false;
 
   constructor() {
     logger.debug("Process's current working directory: ", process.cwd());
