@@ -1,7 +1,6 @@
 import { type Server } from "http";
 import crypto from "crypto";
 import { type WebSocket, WebSocketServer } from "ws";
-import queryString from "query-string";
 import log4js from "../utils/hajk-logger.ts";
 import WebSocketMessageHandler from "./web-socket-message-handler.ts";
 
@@ -77,7 +76,7 @@ export default async (expressServer: Server) => {
       // We can use 'connectionRequest' to read additional options, such
       // as query parameters and request path:
       const [path, params] = connectionRequest?.url?.split("?") || [];
-      const connectionParams = queryString.parse(params);
+      const connectionParams = Object.fromEntries(new URLSearchParams(params));
 
       logger.debug(
         `Upgrade successful. Opening connection ${
