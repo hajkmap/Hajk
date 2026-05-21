@@ -479,7 +479,6 @@ class PrintWindow extends React.PureComponent {
     }
   };
 
-
   // Creates a new window, appends all elements that should be printed, and invokes
   // window.print(), allowing the user to save the document as a PDF (or print it straight away).
   printContents = () => {

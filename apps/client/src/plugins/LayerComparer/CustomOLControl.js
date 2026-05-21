@@ -122,9 +122,9 @@ export default class OlSideBySideControl extends Control {
     // Unset possible previous compare layers
     this.#unsetLayers();
 
-   // Non-silent so OL fires `change:visible` and wires the layer into the
-   // render pipeline — silent won't trigger the prerender hook.
-    
+    // Non-silent so OL fires `change:visible` and wires the layer into the
+    // render pipeline — silent won't trigger the prerender hook.
+
     leftLayer.setVisible(true);
 
     // Set a unique flag - used later

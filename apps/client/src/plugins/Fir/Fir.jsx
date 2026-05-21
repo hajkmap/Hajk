@@ -7,9 +7,8 @@ import FirModel from "./FirModel";
 import FirView from "./FirView";
 import FirLayerController from "./FirLayerController";
 import FirImport from "./FirImport";
-/* eslint-disable no-unused-vars */
+
 import FirWfsService from "./FirWfsService";
-/* eslint-enable no-unused-vars */
 
 class Fir extends React.PureComponent {
   state = {
