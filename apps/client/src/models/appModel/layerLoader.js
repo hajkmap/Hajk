@@ -23,8 +23,9 @@ export function addMapLayer(appModel, layer) {
 
       if (layer.hasLabelStyle === true) {
         layerItem.layer.set("hasLabelStyle", true);
-        // Store the layer name so we can access it before WMS layer changes (e.g. when switching labels)
-        layerItem.layer.set("wmsLayerName", layer.layers?.[0] || layer.name);
+        // Store the layername so we can access it before wms layer changes
+        // ex when switching labels
+        layerItem.layer.set("wmsLayerName", layer.layers?.[0] || layer.name); // ← Store it!
 
         const source = layerItem.layer.getSource();
         if (source && source.getParams) {
