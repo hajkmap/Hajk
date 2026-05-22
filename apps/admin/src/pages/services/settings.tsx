@@ -782,7 +782,6 @@ export default function ServiceSettings() {
                 serviceId={service.id}
                 isError={layersError}
                 isLoading={layersLoading}
-                type={service?.type}
                 onRetry={() => void refetchLayers()}
               />
               <ServiceUsagePanel serviceId={service.id} />

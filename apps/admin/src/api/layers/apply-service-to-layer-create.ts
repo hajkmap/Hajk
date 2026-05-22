@@ -1,11 +1,5 @@
+import type { LayerKind } from "./types";
 import type { Service } from "../services/types";
-import { SERVICE_TYPE } from "../services/types";
-
-const WFS_FAMILY = new Set<SERVICE_TYPE>([
-  SERVICE_TYPE.WFS,
-  SERVICE_TYPE.WFST,
-  SERVICE_TYPE.VECTOR,
-]);
 
 function hasNonEmptyString(v: unknown): boolean {
   return typeof v === "string" && v.trim().length > 0;
@@ -14,14 +8,27 @@ function hasNonEmptyString(v: unknown): boolean {
 export function applyServiceDefaultsToLayerCreate(
   merged: Record<string, unknown>,
   service: Service,
+  layerKind: LayerKind = "display",
 ): void {
-  if (WFS_FAMILY.has(service.type)) {
+  if (layerKind === "search") {
     const existing =
       (merged.searchSettings as Record<string, unknown> | undefined) ?? {};
     const url = typeof existing.url === "string" ? existing.url.trim() : "";
     if (!url) {
       merged.searchSettings = { ...existing, url: service.url };
     }
+    if (merged.url === undefined || merged.url === "") {
+      merged.url = service.url;
+    }
+  }
+
+  if (layerKind === "display" && merged.infoClickSettings === undefined) {
+    // Matches Prisma InfoClickSettings defaults (format, sortMethod, sortDescending).
+    merged.infoClickSettings = {
+      format: "application/json",
+      sortMethod: "text",
+      sortDescending: false,
+    };
   }
 
   if (!service.metadata) {

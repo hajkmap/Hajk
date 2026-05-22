@@ -2,6 +2,10 @@ import { Prisma } from "@prisma/client";
 
 import log4js from "log4js";
 import prisma from "../../../common/prisma.ts";
+import {
+  activeLayerInstanceWhere,
+  layerInstanceIncludeAll,
+} from "../utils/layer-instance.ts";
 
 const logger = log4js.getLogger("service.v3.layer");
 
@@ -23,11 +27,27 @@ class GroupsService {
   }
 
   async getLayersByGroupId(id: string) {
-    const layers = await prisma.layer.findMany({
-      where: { groups: { some: { groupId: id } } },
+    const instances = await prisma.layerInstance.findMany({
+      where: {
+        AND: [{ groupId: id }, activeLayerInstanceWhere],
+      },
+      include: layerInstanceIncludeAll,
     });
 
-    return layers;
+    return instances
+      .map((instance) => {
+        if (instance.displayLayer) {
+          return { ...instance.displayLayer, layerKind: "display" as const };
+        }
+        if (instance.searchLayer) {
+          return { ...instance.searchLayer, layerKind: "search" as const };
+        }
+        if (instance.editingLayer) {
+          return { ...instance.editingLayer, layerKind: "editing" as const };
+        }
+        return null;
+      })
+      .filter((layer): layer is NonNullable<typeof layer> => layer !== null);
   }
 
   async getMapsByGroupId(id: string) {

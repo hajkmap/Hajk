@@ -14,6 +14,8 @@ import { generateRandomName } from "../generated/names";
 import useAppStateStore from "../../store/use-app-state-store";
 import { mergeWithConfigDefaults } from "../../lib/merge-with-config-defaults";
 import { applyServiceDefaultsToLayerCreate } from "./apply-service-to-layer-create";
+import { filterDefaultsForLayerKind } from "./build-layer-payload";
+import type { LayerKind } from "./types";
 
 /**
  * This module provides API request functions to interact with the backend
@@ -49,7 +51,7 @@ export const getLayers = async (): Promise<Layer[]> => {
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch layers. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch layers. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch layers`);
@@ -71,7 +73,7 @@ export const getLayerById = async (layerId: string): Promise<Layer> => {
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch layer. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch layer. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch layer`);
@@ -84,7 +86,7 @@ export const getLayersByType = async (type: string): Promise<Layer[]> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<LayersApiResponse>(
-      `/layers/types/${type}`
+      `/layers/types/${type}`,
     );
     if (!response.data) {
       throw new Error("No layers found for this type");
@@ -95,7 +97,7 @@ export const getLayersByType = async (type: string): Promise<Layer[]> => {
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch layers by type. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch layers by type. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch layers by type`);
@@ -107,9 +109,8 @@ export const getLayersByType = async (type: string): Promise<Layer[]> => {
 export const getLayerTypes = async (): Promise<string[]> => {
   const internalApiClient = getApiClient();
   try {
-    const response = await internalApiClient.get<LayerTypesApiResponse>(
-      "/layers/types"
-    );
+    const response =
+      await internalApiClient.get<LayerTypesApiResponse>("/layers/types");
 
     if (!response.data) {
       throw new Error("No layer types found");
@@ -120,7 +121,7 @@ export const getLayerTypes = async (): Promise<string[]> => {
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch layer types. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch layer types. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch layer types`);
@@ -129,12 +130,12 @@ export const getLayerTypes = async (): Promise<string[]> => {
 };
 
 export const getServiceByLayerId = async (
-  layerId: string
+  layerId: string,
 ): Promise<Service> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<Service>(
-      `/layers/${layerId}/service`
+      `/layers/${layerId}/service`,
     );
     if (!response.data) {
       throw new Error("No service data found");
@@ -145,7 +146,7 @@ export const getServiceByLayerId = async (
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch service. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch service. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch service`);
@@ -154,7 +155,7 @@ export const getServiceByLayerId = async (
 };
 
 export const createLayer = async (
-  newLayer: LayerCreateInput
+  newLayer: LayerCreateInput,
 ): Promise<Layer> => {
   const internalApiClient = getApiClient();
   const { layersDefault } = useAppStateStore.getState();
@@ -164,24 +165,34 @@ export const createLayer = async (
     payload.name = generateRandomName();
   }
 
+  const layerKind: LayerKind = payload.layerKind ?? "display";
+  const kindDefaults = filterDefaultsForLayerKind(
+    layerKind,
+    layersDefault ?? {},
+  );
+
   const merged = mergeWithConfigDefaults(
-    { ...(layersDefault ?? {}) },
+    { ...kindDefaults },
     { ...payload } as Record<string, unknown>,
     {
-      deepMergeKeys: [
-        "searchSettings",
-        "metadata",
-        "infoClickSettings",
-        "options",
-      ],
+      deepMergeKeys:
+        layerKind === "search"
+          ? ["searchSettings", "metadata", "options"]
+          : layerKind === "display"
+            ? ["metadata", "infoClickSettings", "options"]
+            : ["options"],
     },
   );
 
   const { getServiceById } = await import("../services/requests");
   const service = await getServiceById(payload.serviceId);
-  applyServiceDefaultsToLayerCreate(merged, service);
+  applyServiceDefaultsToLayerCreate(merged, service, layerKind);
 
-  const layerData = merged as unknown as Record<string, unknown>;
+  const layerData = {
+    ...merged,
+    layerKind,
+    serviceId: payload.serviceId,
+  } as Record<string, unknown>;
   try {
     const response = await internalApiClient.post<Layer>("/layers", layerData);
     if (!response.data) {
@@ -193,7 +204,7 @@ export const createLayer = async (
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to create layer. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to create layer. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to create layer`);
@@ -203,23 +214,25 @@ export const createLayer = async (
 
 export const updateLayer = async (
   layerId: string,
-  data: Partial<LayerUpdateInput>
+  data: Partial<LayerUpdateInput>,
 ): Promise<LayerUpdateInput> => {
   const internalApiClient = getApiClient();
+  const layerKind: LayerKind = data.layerKind ?? "display";
+  const body = { ...data, layerKind };
   try {
     const response = await internalApiClient.patch<Layer>(
       `/layers/${layerId}`,
-      data
+      body,
     );
     if (!response.data) {
       throw new Error("No layer data found");
     }
-    return response.data;
+    return response.data as LayerUpdateInput;
   } catch (error) {
     const axiosError = error as InternalApiError;
     if (axiosError.response) {
       throw new Error(
-        `Failed to update service. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to update service. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error("Failed to update service");
@@ -235,7 +248,7 @@ export const deleteLayer = async (layerId: string): Promise<void> => {
     const axiosError = error as InternalApiError;
     if (axiosError.response) {
       throw new Error(
-        `Failed to delete layer. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to delete layer. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error("Failed to delete layer");
@@ -247,7 +260,7 @@ export const getRoleOnLayerByLayerId = async (layerId: string) => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<RoleOnLayer>(
-      `/layers/role/${layerId}`
+      `/layers/role/${layerId}`,
     );
     if (!response.data) {
       throw new Error("No data found");
@@ -257,7 +270,7 @@ export const getRoleOnLayerByLayerId = async (layerId: string) => {
     const axiosError = error as InternalApiError;
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch layer role. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch layer role. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch layer role`);
@@ -269,7 +282,7 @@ export const getLayerUsage = async (layerId: string): Promise<LayerUsage[]> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<LayerUsageApiResponse>(
-      `/layers/${layerId}/usage`
+      `/layers/${layerId}/usage`,
     );
     if (!response.data) {
       throw new Error("No usage data found");
@@ -279,7 +292,7 @@ export const getLayerUsage = async (layerId: string): Promise<LayerUsage[]> => {
     const axiosError = error as InternalApiError;
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch layer usage. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch layer usage. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error("Failed to fetch layer usage");
@@ -288,14 +301,14 @@ export const getLayerUsage = async (layerId: string): Promise<LayerUsage[]> => {
 };
 
 export const createAndUpdateRoleOnLayer = async (
-  newLayerRole: RoleOnLayerCreateAndUpdateInput
+  newLayerRole: RoleOnLayerCreateAndUpdateInput,
 ): Promise<RoleOnLayerCreateAndUpdateInput> => {
   const internalApiClient = getApiClient();
   try {
     const response =
       await internalApiClient.post<RoleOnLayerCreateAndUpdateInput>(
         "/layers/role",
-        newLayerRole
+        newLayerRole,
       );
     if (!response.data) {
       throw new Error("No data found");
@@ -306,7 +319,7 @@ export const createAndUpdateRoleOnLayer = async (
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to create layer role. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to create layer role. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to create layer role`);

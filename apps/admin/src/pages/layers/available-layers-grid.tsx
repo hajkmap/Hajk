@@ -29,6 +29,7 @@ function AvailableLayersGrid({
   filteredLayers,
   setSearchTerm,
   setSelectGridId,
+  onSelectionChange,
   searchTerm,
   selectGridId,
   selectedRowObjects,
@@ -42,6 +43,7 @@ function AvailableLayersGrid({
   filteredLayers: GridValidRowModel[];
   setSearchTerm: (term: string) => void;
   setSelectGridId: (ids: GridRowSelectionModel) => void;
+  onSelectionChange?: (ids: GridRowSelectionModel) => void;
   searchTerm: string;
   selectGridId?: GridRowSelectionModel;
   selectedRowObjects?: string[];
@@ -225,7 +227,11 @@ function AvailableLayersGrid({
             rowSelectionModel={selectGridId ?? []}
             onRowSelectionModelChange={(ids) => {
               userHasInteractedRef.current = true;
-              setSelectGridId(ids);
+              if (onSelectionChange) {
+                onSelectionChange(ids);
+              } else {
+                setSelectGridId(ids);
+              }
             }}
             checkboxSelection
             disableRowSelectionOnClick

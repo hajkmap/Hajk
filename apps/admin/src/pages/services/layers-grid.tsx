@@ -27,7 +27,14 @@ import { LayersGridProps, useLayersByServiceId } from "../../api/services";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
 import useAppStateStore from "../../store/use-app-state-store";
 import { useCreateLayer } from "../../api/layers";
-import { SERVICE_TYPE } from "../../api/services/types";
+import LayerKindBadge from "../layers/components/layer-kind-badge";
+import LayerKindSelect from "../layers/components/layer-kind-select";
+import {
+  getLayerSettingsPath,
+  LAYER_CATEGORY_I18N_KEYS,
+  LayerCategory,
+  normalizeLayerCategory,
+} from "../layers/layer-category";
 
 interface CapabilityRow {
   id: number;
@@ -36,13 +43,18 @@ interface CapabilityRow {
   publications: string;
 }
 
+interface PublishedLayerRow {
+  id: string;
+  name: string;
+  layerKind: LayerCategory;
+}
+
 function LayersGrid({
   layers,
   workspaces,
   serviceId,
   isError,
   isLoading,
-  type,
   onRetry,
 }: LayersGridProps) {
   const { t } = useTranslation();
@@ -60,6 +72,8 @@ function LayersGrid({
   const { data: layersByService, isLoading: isLoadingLayersByService } =
     useLayersByServiceId(serviceId);
   const [open, setOpen] = React.useState(false);
+  const [publishLayerKind, setPublishLayerKind] =
+    useState<LayerCategory>("display");
   const [selectedWorkspace, setSelectedWorkspace] = useState("");
   const [capabilitiesPaginationModel, setCapabilitiesPaginationModel] =
     useState(() => {
@@ -90,21 +104,21 @@ function LayersGrid({
     },
   } as const;
 
-  const handleCreateLayer = async (layerName: string) => {
+  const handleCreateLayer = async (
+    layerName: string,
+    layerKind: LayerCategory = publishLayerKind,
+  ) => {
     setCreatingLayerName(layerName);
     try {
       const response = await createLayer({
+        layerKind,
         serviceId,
         name: layerName,
         selectedLayers: [layerName],
       });
-      const base =
-        type === SERVICE_TYPE.WFS
-          ? "/search-layers/"
-          : type === SERVICE_TYPE.WFST
-            ? "/editing-layers/"
-            : "/display-layers/";
-      void navigate(`${base}${response?.id}?fromService=${serviceId}`);
+      void navigate(
+        getLayerSettingsPath(layerKind, response?.id ?? "", serviceId),
+      );
     } catch (error) {
       console.error("Failed to create layer:", error);
       toast.error(t("layers.createLayerFailed"), {
@@ -153,7 +167,7 @@ function LayersGrid({
         const layerName = params.row.layer;
         return (
           <Tooltip
-            title={t("services.publishLayerAction")}
+            title={`${t("services.publishLayerAction")} (${t(LAYER_CATEGORY_I18N_KEYS[publishLayerKind])})`}
             slotProps={tooltipSlotProps}
           >
             <span>
@@ -199,13 +213,17 @@ function LayersGrid({
   }, [layers, dialogSearchTerm, selectedWorkspace]);
 
   // Existing service layers filtered by main search
-  const filteredLayersByService = useMemo(() => {
+  const filteredLayersByService = useMemo<PublishedLayerRow[]>(() => {
     if (!layersByService?.layers) return [];
     return layersByService.layers
       .filter((layer) =>
         layer.name.toLowerCase().includes(serviceLayerSearch.toLowerCase()),
       )
-      .map((layer) => ({ id: layer.id, name: layer.name }));
+      .map((layer) => ({
+        id: layer.id,
+        name: layer.name,
+        layerKind: normalizeLayerCategory(layer.layerKind),
+      }));
   }, [layersByService?.layers, serviceLayerSearch]);
 
   const hasExistingLayers = (layersByService?.layers?.length ?? 0) > 0;
@@ -272,10 +290,18 @@ function LayersGrid({
           rows={filteredLayersByService}
           columns={[
             {
+              field: "layerKind",
+              headerName: t("layers.layerKind"),
+              width: 160,
+              renderCell: (params: GridRenderCellParams<PublishedLayerRow>) => (
+                <LayerKindBadge layerKind={params.row.layerKind} />
+              ),
+            },
+            {
               field: "name",
               headerName: t("common.name"),
               flex: 1,
-              renderCell: (params: GridRenderCellParams) => (
+              renderCell: (params: GridRenderCellParams<PublishedLayerRow>) => (
                 <Tooltip
                   title={params.value as string}
                   enterDelay={500}
@@ -310,15 +336,8 @@ function LayersGrid({
           pagination
           loading={isLoadingLayersByService}
           localeText={language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined}
-          onRowClick={({ row }: { row: { id: string; name: string } }) => {
-            const id = row.id;
-            void navigate(
-              type === SERVICE_TYPE.WFS
-                ? `/search-layers/${id}`
-                : type === SERVICE_TYPE.WFST
-                  ? `/editing-layers/${id}`
-                  : `/display-layers/${id}`,
-            );
+          onRowClick={({ row }: { row: PublishedLayerRow }) => {
+            void navigate(getLayerSettingsPath(row.layerKind, row.id));
           }}
           disableMultipleRowSelection
           disableRowSelectionOnClick
@@ -336,7 +355,14 @@ function LayersGrid({
               mb: 1,
             }}
           >
-            <Box sx={{ display: "flex", gap: 2, flex: 1, mt: 1 }}>
+            <Box
+              sx={{ display: "flex", gap: 2, flex: 1, mt: 1, flexWrap: "wrap" }}
+            >
+              <LayerKindSelect
+                value={publishLayerKind}
+                onChange={setPublishLayerKind}
+                labelKey="layers.publishAs"
+              />
               <TextField
                 sx={{
                   width: "100%",

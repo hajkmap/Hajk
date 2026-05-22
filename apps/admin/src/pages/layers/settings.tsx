@@ -76,12 +76,19 @@ import {
 import DialogWrapper from "../../components/flexible-dialog";
 import type { EditableFieldConfig } from "./types/editing-layer";
 import type { EditingGeometryTypes } from "./types/editing-layer";
+import { buildLayerUpdatePayload } from "../../api/layers/build-layer-payload";
 import {
   getLayerCategoryFromPathname,
-  getLayerCategoryFromServiceType,
   getLayerSettingsVisibility,
+  isLayerSettingsChanged,
   LayerSettingsTab,
+  normalizeLayerCategory,
 } from "./layer-category";
+import {
+  buildLayerSettingsFormValues,
+  getLayerGeometryField,
+  resolveGeometryFieldFromPayload,
+} from "./layer-settings-form-values";
 import {
   FieldLabelAbove,
   TextFieldWithHelp,
@@ -160,6 +167,7 @@ export default function LayerSettings() {
   const { data: roleOnLayer } = useGetRoleOnLayerByLayerId(layerId ?? "");
 
   const formRef = useRef<HTMLFormElement | null>(null);
+  const [formBaseline, setFormBaseline] = useState<FieldValues | null>(null);
   const { data: service, isLoading: serviceLoading } = useServiceByLayerId(
     layer?.id ?? "",
     !!layer?.id,
@@ -192,9 +200,10 @@ export default function LayerSettings() {
   const isDeleteConfirmNameMatching =
     Boolean(layer?.name) && deleteConfirmName === layer?.name;
 
-  const getLayersListPath = (type: SERVICE_TYPE | undefined) => {
-    if (type === SERVICE_TYPE.WFS) return "/search-layers";
-    if (type === SERVICE_TYPE.WFST) return "/editing-layers";
+  const getLayersListPath = () => {
+    const category = getLayerCategoryFromPathname(location.pathname);
+    if (category === "search") return "/search-layers";
+    if (category === "editing") return "/editing-layers";
     return "/display-layers";
   };
 
@@ -211,7 +220,7 @@ export default function LayerSettings() {
       if (fromService) {
         void navigate(`/services/${fromService}?tab=layers`);
       } else {
-        void navigate(getLayersListPath(service?.type));
+        void navigate(getLayersListPath());
       }
     } catch (error) {
       console.error("Failed to delete layer:", error);
@@ -224,12 +233,17 @@ export default function LayerSettings() {
   };
   const [activeTab, setActiveTab] = useState<LayerSettingsTab>("general");
 
-  const settingsVisibility = useMemo(() => {
-    const category =
+  const layerCategory = useMemo(
+    () =>
       getLayerCategoryFromPathname(location.pathname) ??
-      (service ? getLayerCategoryFromServiceType(service.type) : "display");
-    return getLayerSettingsVisibility(category);
-  }, [location.pathname, service]);
+      normalizeLayerCategory(layer?.layerKind),
+    [location.pathname, layer?.layerKind],
+  );
+
+  const settingsVisibility = useMemo(
+    () => getLayerSettingsVisibility(layerCategory),
+    [layerCategory],
+  );
 
   const visibleTabs = useMemo(
     () =>
@@ -299,7 +313,7 @@ export default function LayerSettings() {
     watch,
     reset,
     setValue,
-    formState: { errors, isDirty },
+    formState: { errors },
   } = useForm<FieldValues>({
     mode: "onChange",
     reValidateMode: "onChange",
@@ -308,81 +322,9 @@ export default function LayerSettings() {
   // Reset form with layer data when it loads
   useEffect(() => {
     if (layer) {
-      const savedGeometry = geometryTypesFromOptions(layer.options);
-      reset({
-        name: layer.name ?? "",
-        serviceId: layer.serviceId ?? "",
-        internalName: layer.internalName ?? "",
-        description: layer.description ?? "",
-        hidpi: layer.hidpi ?? false,
-        tiled: layer.tiled ?? false,
-        singleTile: layer.singleTile ?? false,
-        customRatio: layer.customRatio,
-        timeSliderVisible: layer.timeSliderVisible ?? false,
-        timeSliderStart: layer.timeSliderStart ?? "",
-        timeSliderEnd: layer.timeSliderEnd ?? "",
-        hideExpandArrow: layer.hideExpandArrow ?? false,
-        zIndex: layer.zIndex ?? 0,
-        style: layer.style ?? "",
-        opacity: layer.opacity,
-        minZoom: layer.minZoom,
-        maxZoom: layer.maxZoom,
-        minMaxZoomAlertOnToggleOnly: layer.minMaxZoomAlertOnToggleOnly ?? false,
-        infoClickActive: layer.infoClickActive ?? false,
-        showMetadata: layer.showMetadata ?? false,
-        legendUrl: layer.legendUrl ?? "",
-        legendIconUrl: layer.legendIconUrl ?? "",
-        legendOptions: layer.legendOptions ?? "",
-        useCustomDpiList: false,
-        roleId: roleOnLayer?.roleId ?? "",
-        metadata: {
-          title: layer.metadata?.title ?? "",
-          description: layer.metadata?.description ?? "",
-          owner: layer.metadata?.owner ?? "",
-          url: layer.metadata?.url ?? "",
-          urlTitle: layer.metadata?.urlTitle ?? "",
-          attribution: layer.metadata?.attribution ?? "",
-        },
-        searchSettings: {
-          active: layer.searchSettings?.active ?? false,
-          url: layer.searchSettings?.url ?? "",
-          searchFields: (layer.searchSettings?.searchFields ?? []).join(", "),
-          primaryDisplayFields: (
-            layer.searchSettings?.primaryDisplayFields ?? []
-          ).join(", "),
-          secondaryDisplayFields: (
-            layer.searchSettings?.secondaryDisplayFields ?? []
-          ).join(", "),
-          shortDisplayFields: (
-            layer.searchSettings?.shortDisplayFields ?? []
-          ).join(", "),
-          geometryField: layer.searchSettings?.geometryField ?? "",
-          outputFormat: layer.searchSettings?.outputFormat ?? "",
-        },
-        infoClickSettings: {
-          definition: layer.infoClickSettings?.definition ?? "",
-          icon: layer.infoClickSettings?.icon ?? "",
-          format: layer.infoClickSettings?.format ?? "",
-          sortProperty: layer.infoClickSettings?.sortProperty ?? "",
-          sortMethod: layer.infoClickSettings?.sortMethod ?? "",
-          sortDescending: layer.infoClickSettings?.sortDescending ?? false,
-        },
-        options: {
-          keyword: layer.options?.keyword ?? "",
-          category: layer.options?.category ?? "",
-          layerDisplayDescription: layer.options?.layerDisplayDescription ?? "",
-          geoWebCache: layer.options?.geoWebCache ?? false,
-          showAttributeTableButton:
-            layer.options?.showAttributeTableButton ?? false,
-          editPoint: savedGeometry.editPoint,
-          editMultiPoint: savedGeometry.editMultiPoint,
-          editLine: savedGeometry.editLine,
-          editMultiLine: savedGeometry.editMultiLine,
-          editPolygon: savedGeometry.editPolygon,
-          editMultiPolygon: savedGeometry.editMultiPolygon,
-          allowMultiGeometries: savedGeometry.allowMultiGeometries,
-        },
-      });
+      const baseline = buildLayerSettingsFormValues(layer, roleOnLayer?.roleId);
+      setFormBaseline(baseline);
+      reset(baseline);
     }
   }, [layer, roleOnLayer, reset]);
 
@@ -407,6 +349,7 @@ export default function LayerSettings() {
     );
   }, [layer]);
 
+  const formValues = watch();
   const watchRoleIdInput = watch("roleId") as string | undefined;
   const watchGeometryField = watch("searchSettings.geometryField") as
     | string
@@ -458,6 +401,21 @@ export default function LayerSettings() {
     () => selectedRowsData?.map((row) => row?.layer ?? ""),
     [selectedRowsData],
   );
+
+  const selectedLayersDirty = useMemo(() => {
+    if (selectGridId === undefined) return false;
+    const saved = [...(layer?.selectedLayers ?? [])].sort();
+    const current = [...(selectedRowObjects ?? [])].filter(Boolean).sort();
+    if (saved.length !== current.length) return true;
+    return saved.some((value, index) => value !== current[index]);
+  }, [layer?.selectedLayers, selectedRowObjects, selectGridId]);
+
+  const isSaveDirty = useMemo(() => {
+    if (!formBaseline) return false;
+    return isLayerSettingsChanged(layerCategory, formValues, formBaseline, {
+      selectedLayersDirty,
+    });
+  }, [layerCategory, formValues, formBaseline, selectedLayersDirty]);
 
   const [openInfoClickModal, setOpenInfoClickModal] = useState(false);
   const [selectedInfoClickLayer, setSelectedInfoClickLayer] =
@@ -639,7 +597,7 @@ export default function LayerSettings() {
         url: layer.searchSettings?.url ?? "",
         searchFields: layer.searchSettings?.searchFields ?? [],
         outputFormat: layer.searchSettings?.outputFormat ?? "",
-        geometryField: layer.searchSettings?.geometryField ?? "",
+        geometryField: getLayerGeometryField(layer),
         primaryDisplayFields: layer.searchSettings?.primaryDisplayFields ?? [],
         secondaryDisplayFields:
           layer.searchSettings?.secondaryDisplayFields ?? [],
@@ -786,12 +744,17 @@ export default function LayerSettings() {
         }),
       };
 
-      const payload = {
+      const geometryField = resolveGeometryFieldFromPayload(
+        layerData as Record<string, unknown>,
+      );
+
+      const payload = buildLayerUpdatePayload(layerCategory, {
         name: layerData.name,
         serviceId: layerData.serviceId,
         selectedLayers: layerData.selectedLayers,
         internalName: layerData.internalName,
         description: layerData.description,
+        geometryField,
         hidpi: layerData.hidpi,
         tiled: layerData.tiled,
         singleTile: layerData.singleTile,
@@ -825,7 +788,7 @@ export default function LayerSettings() {
           url: layerData?.searchSettings?.url,
           searchFields: layerData?.searchSettings?.searchFields,
           outputFormat: layerData?.searchSettings?.outputFormat,
-          geometryField: layerData?.searchSettings?.geometryField,
+          geometryField,
           primaryDisplayFields: layerData?.searchSettings?.primaryDisplayFields,
           secondaryDisplayFields:
             layerData?.searchSettings?.secondaryDisplayFields,
@@ -839,11 +802,11 @@ export default function LayerSettings() {
           format: layerData?.infoClickSettings?.format,
           sortMethod: layerData?.infoClickSettings?.sortMethod,
         },
-      };
+      } as Record<string, unknown>);
 
       await updateLayer({
         layerId: layer?.id ?? "",
-        data: payload,
+        data: payload as Partial<LayerUpdateInput>,
       });
       toast.success(t("layers.updateLayerSuccess", { name: layerData.name }), {
         position: "bottom-left",
@@ -861,89 +824,89 @@ export default function LayerSettings() {
       // Reset form with updated data to clear dirty state after successful save
       // This ensures the form reflects the saved state
       if (layer) {
-        reset(
-          {
-            name: layerData.name,
-            serviceId: layerData.serviceId,
-            internalName: layerData.internalName,
-            description: layerData.description,
-            hidpi: layerData.hidpi,
-            tiled: layerData.tiled,
-            singleTile: layerData.singleTile,
-            customRatio: layerData.customRatio,
-            timeSliderVisible: layerData.timeSliderVisible,
-            timeSliderStart: layerData.timeSliderStart,
-            timeSliderEnd: layerData.timeSliderEnd,
-            hideExpandArrow: layerData.hideExpandArrow,
-            zIndex: layerData.zIndex,
-            style: layerData.style,
-            opacity: layerData.opacity,
-            minZoom: layerData.minZoom,
-            maxZoom: layerData.maxZoom,
-            minMaxZoomAlertOnToggleOnly: layerData.minMaxZoomAlertOnToggleOnly,
-            infoClickActive: layerData.infoClickActive,
-            showMetadata: layerData.showMetadata,
-            legendUrl: layerData.legendUrl,
-            legendIconUrl: layerData.legendIconUrl,
-            legendOptions: layerData.legendOptions,
-            useCustomDpiList: false,
-            roleId: watchRoleIdInput,
-            metadata: {
-              title: layerData.metadata?.title,
-              description: layerData.metadata?.description,
-              owner: layerData.metadata?.owner,
-              url: layerData.metadata?.url,
-              urlTitle: layerData.metadata?.urlTitle,
-              attribution: layerData.metadata?.attribution,
-            },
-            searchSettings: {
-              active: layerData.searchSettings?.active,
-              url: layerData.searchSettings?.url,
-              searchFields: (layerData.searchSettings?.searchFields ?? []).join(
-                ", ",
-              ),
-              primaryDisplayFields: (
-                layerData.searchSettings?.primaryDisplayFields ?? []
-              ).join(", "),
-              secondaryDisplayFields: (
-                layerData.searchSettings?.secondaryDisplayFields ?? []
-              ).join(", "),
-              shortDisplayFields: (
-                layerData.searchSettings?.shortDisplayFields ?? []
-              ).join(", "),
-              geometryField: layerData.searchSettings?.geometryField,
-              outputFormat: layerData.searchSettings?.outputFormat,
-            },
-            infoClickSettings: {
-              definition: layerData.infoClickSettings?.definition,
-              icon: layerData.infoClickSettings?.icon,
-              format: layerData.infoClickSettings?.format,
-              sortProperty: layerData.infoClickSettings?.sortProperty,
-              sortMethod: layerData.infoClickSettings?.sortMethod,
-              sortDescending: layerData.infoClickSettings?.sortDescending,
-            },
-            options: {
-              keyword: layerData.options?.keyword,
-              category: layerData.options?.category,
-              layerDisplayDescription:
-                layerData.options?.layerDisplayDescription,
-              geoWebCache: layerData.options?.geoWebCache,
-              showAttributeTableButton:
-                layerData.options?.showAttributeTableButton,
-              editPoint: editingGeometryTypes.editPoint,
-              editMultiPoint: editingGeometryTypes.editMultiPoint,
-              editLine: editingGeometryTypes.editLine,
-              editMultiLine: editingGeometryTypes.editMultiLine,
-              editPolygon: editingGeometryTypes.editPolygon,
-              editMultiPolygon: editingGeometryTypes.editMultiPolygon,
-              allowMultiGeometries:
-                editingGeometryTypes.allowMultiGeometries,
-            },
+        const savedBaseline: FieldValues = {
+          name: layerData.name,
+          serviceId: layerData.serviceId,
+          internalName: layerData.internalName,
+          description: layerData.description,
+          hidpi: layerData.hidpi,
+          tiled: layerData.tiled,
+          singleTile: layerData.singleTile,
+          customRatio: layerData.customRatio,
+          timeSliderVisible: layerData.timeSliderVisible,
+          timeSliderStart: layerData.timeSliderStart,
+          timeSliderEnd: layerData.timeSliderEnd,
+          hideExpandArrow: layerData.hideExpandArrow,
+          zIndex: layerData.zIndex,
+          style: layerData.style,
+          opacity: layerData.opacity,
+          minZoom: layerData.minZoom,
+          maxZoom: layerData.maxZoom,
+          minMaxZoomAlertOnToggleOnly: layerData.minMaxZoomAlertOnToggleOnly,
+          infoClickActive: layerData.infoClickActive,
+          showMetadata: layerData.showMetadata,
+          legendUrl: layerData.legendUrl,
+          legendIconUrl: layerData.legendIconUrl,
+          legendOptions: layerData.legendOptions,
+          useCustomDpiList: false,
+          roleId: watchRoleIdInput,
+          metadata: {
+            title: layerData.metadata?.title,
+            description: layerData.metadata?.description,
+            owner: layerData.metadata?.owner,
+            url: layerData.metadata?.url,
+            urlTitle: layerData.metadata?.urlTitle,
+            attribution: layerData.metadata?.attribution,
           },
-          {
-            keepDefaultValues: true,
+          searchSettings: {
+            active: layerData.searchSettings?.active,
+            url: layerData.searchSettings?.url,
+            searchFields: (layerData.searchSettings?.searchFields ?? []).join(
+              ", ",
+            ),
+            primaryDisplayFields: (
+              layerData.searchSettings?.primaryDisplayFields ?? []
+            ).join(", "),
+            secondaryDisplayFields: (
+              layerData.searchSettings?.secondaryDisplayFields ?? []
+            ).join(", "),
+            shortDisplayFields: (
+              layerData.searchSettings?.shortDisplayFields ?? []
+            ).join(", "),
+            geometryField:
+              resolveGeometryFieldFromPayload(
+                layerData as Record<string, unknown>,
+              ) ?? "",
+            outputFormat: layerData.searchSettings?.outputFormat,
           },
-        );
+          infoClickSettings: {
+            definition: layerData.infoClickSettings?.definition,
+            icon: layerData.infoClickSettings?.icon,
+            format: layerData.infoClickSettings?.format,
+            sortProperty: layerData.infoClickSettings?.sortProperty,
+            sortMethod: layerData.infoClickSettings?.sortMethod,
+            sortDescending: layerData.infoClickSettings?.sortDescending,
+          },
+          options: {
+            keyword: layerData.options?.keyword,
+            category: layerData.options?.category,
+            layerDisplayDescription: layerData.options?.layerDisplayDescription,
+            geoWebCache: layerData.options?.geoWebCache,
+            showAttributeTableButton:
+              layerData.options?.showAttributeTableButton,
+            editPoint: editingGeometryTypes.editPoint,
+            editMultiPoint: editingGeometryTypes.editMultiPoint,
+            editLine: editingGeometryTypes.editLine,
+            editMultiLine: editingGeometryTypes.editMultiLine,
+            editPolygon: editingGeometryTypes.editPolygon,
+            editMultiPolygon: editingGeometryTypes.editMultiPolygon,
+            allowMultiGeometries: editingGeometryTypes.allowMultiGeometries,
+            editableFields: editingEditableFields,
+            nonEditableFields: editingNonEditableFields,
+          },
+        };
+        setFormBaseline(savedBaseline);
+        reset(savedBaseline);
       }
     } catch (error) {
       console.error("Failed to update layer:", error);
@@ -989,7 +952,7 @@ export default function LayerSettings() {
         createdDate={layer?.createdDate}
         lastSavedBy={layer?.lastSavedBy}
         lastSavedDate={layer?.lastSavedDate}
-        isDirty={isDirty}
+        isDirty={isSaveDirty}
         warning={
           <Box sx={{ mt: 1 }}>
             <Button
@@ -1061,40 +1024,43 @@ export default function LayerSettings() {
                         .filter((s) => s.length > 0)
                     : undefined;
 
-              const normalized: LayerUpdateInput = {
-                name: data.name as string | undefined,
-                serviceId: data.serviceId as string | undefined,
-                internalName: data.internalName as string | undefined,
-                description: data.description as string | undefined,
+              if (
+                selectedRowObjects !== undefined &&
+                selectedRowObjects.length === 0
+              ) {
+                toast.warning(t("layers.noLayersSelected"), {
+                  position: "bottom-left",
+                  theme: palette.mode,
+                  hideProgressBar: true,
+                });
+                return;
+              }
+
+              const normalized = buildLayerUpdatePayload(layerCategory, {
+                name: data.name,
+                serviceId: data.serviceId,
+                internalName: data.internalName,
+                description: data.description,
                 opacity: toNumber(data.opacity),
                 minZoom: toNumber(data.minZoom),
                 maxZoom: toNumber(data.maxZoom),
-                minMaxZoomAlertOnToggleOnly:
-                  data.minMaxZoomAlertOnToggleOnly as boolean | undefined,
-                tiled: data.tiled as boolean | undefined,
-                singleTile: data.singleTile as boolean | undefined,
-                hidpi: data.hidpi as boolean | undefined,
+                minMaxZoomAlertOnToggleOnly: data.minMaxZoomAlertOnToggleOnly,
+                tiled: data.tiled,
+                singleTile: data.singleTile,
+                hidpi: data.hidpi,
                 customRatio: toNumber(data.customRatio),
-                timeSliderVisible: data.timeSliderVisible as
-                  | boolean
-                  | undefined,
-                timeSliderStart: data.timeSliderStart as string | undefined,
-                timeSliderEnd: data.timeSliderEnd as string | undefined,
-                hideExpandArrow: data.hideExpandArrow as boolean | undefined,
+                timeSliderVisible: data.timeSliderVisible,
+                timeSliderStart: data.timeSliderStart,
+                timeSliderEnd: data.timeSliderEnd,
+                hideExpandArrow: data.hideExpandArrow,
                 zIndex: toNumber(data.zIndex),
-                showMetadata: data.showMetadata as boolean | undefined,
-                infoClickActive: data.infoClickActive as boolean | undefined,
-                style: data.style as string | undefined,
-                metadata: {
-                  title: (data.metadata as { title?: string })?.title,
-                  description: (data.metadata as { description?: string })
-                    ?.description,
-                  owner: (data.metadata as { owner?: string })?.owner,
-                  url: (data.metadata as { url?: string })?.url,
-                  urlTitle: (data.metadata as { urlTitle?: string })?.urlTitle,
-                  attribution: (data.metadata as { attribution?: string })
-                    ?.attribution,
-                },
+                showMetadata: data.showMetadata,
+                infoClickActive: data.infoClickActive,
+                style: data.style,
+                legendUrl: data.legendUrl,
+                legendIconUrl: data.legendIconUrl,
+                legendOptions: data.legendOptions,
+                metadata: data.metadata,
                 searchSettings: {
                   active: (data.searchSettings as { active?: boolean })?.active,
                   url: (data.searchSettings as { url?: string })?.url,
@@ -1124,20 +1090,7 @@ export default function LayerSettings() {
                     data.searchSettings as { outputFormat?: string }
                   )?.outputFormat,
                 },
-                infoClickSettings: {
-                  definition: (
-                    data.infoClickSettings as { definition?: string }
-                  )?.definition,
-                  icon: (data.infoClickSettings as { icon?: string })?.icon,
-                  format: (data.infoClickSettings as { format?: string })
-                    ?.format,
-                  sortProperty: (
-                    data.infoClickSettings as { sortProperty?: string }
-                  )?.sortProperty,
-                  sortMethod: (
-                    data.infoClickSettings as { sortMethod?: string }
-                  )?.sortMethod,
-                },
+                infoClickSettings: data.infoClickSettings,
                 options: {
                   keyword: (data.options as { keyword?: string })?.keyword,
                   category: (data.options as { category?: string })?.category,
@@ -1149,23 +1102,23 @@ export default function LayerSettings() {
                   showAttributeTableButton: (
                     data.options as { showAttributeTableButton?: boolean }
                   )?.showAttributeTableButton,
-                } as Record<string, unknown>,
+                  ...(settingsVisibility.showEditingSettingsPanel && {
+                    editPoint: editingGeometryTypes.editPoint,
+                    editMultiPoint: editingGeometryTypes.editMultiPoint,
+                    editLine: editingGeometryTypes.editLine,
+                    editMultiLine: editingGeometryTypes.editMultiLine,
+                    editPolygon: editingGeometryTypes.editPolygon,
+                    editMultiPolygon: editingGeometryTypes.editMultiPolygon,
+                    allowMultiGeometries:
+                      editingGeometryTypes.allowMultiGeometries,
+                    editableFields: editingEditableFields,
+                    nonEditableFields: editingNonEditableFields,
+                  }),
+                },
                 selectedLayers: selectedRowObjects,
-              };
+              } as Record<string, unknown>);
 
-              if (
-                selectedRowObjects !== undefined &&
-                selectedRowObjects.length === 0
-              ) {
-                toast.warning(t("layers.noLayersSelected"), {
-                  position: "bottom-left",
-                  theme: palette.mode,
-                  hideProgressBar: true,
-                });
-                return;
-              }
-
-              void handleUpdateLayer(normalized);
+              void handleUpdateLayer(normalized as LayerUpdateInput);
             })(e);
           }}
           formRef={formRef}
@@ -2221,7 +2174,7 @@ export default function LayerSettings() {
               "",
             searchGeometryField:
               layerInstanceSettings.searchGeometryField ??
-              layer?.searchSettings?.geometryField ??
+              getLayerGeometryField(layer) ??
               "",
             definition:
               layerInstanceSettings.definition ??

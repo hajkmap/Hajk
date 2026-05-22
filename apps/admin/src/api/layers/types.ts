@@ -1,11 +1,14 @@
 import { Role } from "../users";
 
+export type LayerKind = "display" | "search" | "editing";
+
 export interface Layer {
+  layerKind?: LayerKind;
   id: string;
   serviceId: string;
-  metadataId: string;
-  searchSettingsId: string;
-  infoClickSettingsId: string;
+  metadataId?: string | null;
+  searchSettingsId?: string | null;
+  infoClickSettingsId?: string | null;
   selectedLayers: string[];
   locked: boolean;
   name: string;
@@ -31,22 +34,22 @@ export interface Layer {
   hideExpandArrow: boolean;
   zIndex: number;
   style?: string;
+  /** Search/editing layers: geometry attribute name (top-level on API for editing). */
+  geometryField?: string;
   createdBy?: string;
   createdDate?: string;
   lastSavedBy?: string;
   lastSavedDate?: string;
-  metadata?:
-    | {
-        id: string;
-        title?: string;
-        description?: string;
-        owner?: string;
-        url?: string;
-        urlTitle?: string;
-        attribution?: string;
-      }
-    | null;
-  searchSettings: {
+  metadata?: {
+    id: string;
+    title?: string;
+    description?: string;
+    owner?: string;
+    url?: string;
+    urlTitle?: string;
+    attribution?: string;
+  } | null;
+  searchSettings?: {
     id: string;
     active: boolean;
     url?: string;
@@ -57,7 +60,7 @@ export interface Layer {
     geometryField?: string;
     outputFormat: string;
   };
-  infoClickSettings: {
+  infoClickSettings?: {
     id: string;
     layerId?: string;
     layerInstanceId?: string;
@@ -86,6 +89,7 @@ export interface LayerTypesApiResponse {
 }
 
 export interface LayerCreateInput {
+  layerKind?: LayerKind;
   id?: string;
   name?: string;
   serviceId: string;
@@ -95,6 +99,7 @@ export interface LayerCreateInput {
 }
 
 export interface LayerUpdateInput {
+  layerKind?: LayerKind;
   name?: string;
   serviceId?: string;
   selectedLayers?: string[];
@@ -149,6 +154,7 @@ export interface LayerUpdateInput {
     sortDescending?: boolean;
   };
   options?: Record<string, unknown>;
+  geometryField?: string;
 }
 
 export interface LayerUsage {

@@ -7,6 +7,10 @@ import HttpStatusCodes from "../../../common/http-status-codes.ts";
 import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
 import { getUserRoles } from "../../../common/auth/get-user-roles.ts";
 import { isAuthActive } from "../../../common/auth/is-auth-active.ts";
+import {
+  activeLayerInstanceWhere,
+  layerInstanceIncludeAll,
+} from "../utils/layer-instance.ts";
 
 const logger = log4js.getLogger("service.v3.map");
 
@@ -101,7 +105,7 @@ class MapService {
         projections: true,
         tools: { include: { tool: true } },
         layers: {
-          include: { layer: true },
+          include: layerInstanceIncludeAll,
         },
         groups: { include: { group: { include: { layers: true } } } },
       },
@@ -159,16 +163,35 @@ class MapService {
   }
 
   async getLayersForMap(mapName: string) {
-    const layers = await prisma.layer.findMany({
+    const instances = await prisma.layerInstance.findMany({
       where: {
-        OR: [
-          { maps: { some: { mapName } } },
-          { groups: { some: { group: { maps: { some: { mapName } } } } } },
+        AND: [
+          activeLayerInstanceWhere,
+          {
+            OR: [
+              { map: { name: mapName } },
+              { group: { maps: { some: { mapName } } } },
+            ],
+          },
         ],
       },
+      include: layerInstanceIncludeAll,
     });
 
-    return layers;
+    return instances
+      .map((instance) => {
+        if (instance.displayLayer) {
+          return { ...instance.displayLayer, layerKind: "display" as const };
+        }
+        if (instance.searchLayer) {
+          return { ...instance.searchLayer, layerKind: "search" as const };
+        }
+        if (instance.editingLayer) {
+          return { ...instance.editingLayer, layerKind: "editing" as const };
+        }
+        return null;
+      })
+      .filter((layer): layer is NonNullable<typeof layer> => layer !== null);
   }
 
   async getProjectionsForMap(mapName: string) {

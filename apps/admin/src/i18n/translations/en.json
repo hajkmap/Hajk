@@ -325,6 +325,8 @@
     "layers.dialog.addBtn": "Add a new layer",
     "layers.dialog.title": "New layer",
     "layers.searchTitle": "Search layers...",
+    "layers.layerKind": "Layer type",
+    "layers.publishAs": "Publish as",
     "layers.usedInMapsNone": "This layer is not used in any maps or groups.",
     "layers.createLayerSuccess": "Layer {{name}} created!",
     "layers.createLayerFailed": "Failed to create layer.",

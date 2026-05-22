@@ -24,7 +24,9 @@ class ServicesService {
         projection: true,
         _count: {
           select: {
-            layers: true,
+            displayLayers: true,
+            searchLayers: true,
+            editingLayers: true,
           },
         },
       },
@@ -48,11 +50,23 @@ class ServicesService {
   }
 
   async getLayersByServiceId(id: string) {
-    const layers = await prisma.layer.findMany({
-      where: { serviceId: id, deletedAt: null },
-    });
+    const [displayLayers, searchLayers, editingLayers] = await Promise.all([
+      prisma.displayLayer.findMany({
+        where: { serviceId: id, deletedAt: null },
+      }),
+      prisma.searchLayer.findMany({
+        where: { serviceId: id, deletedAt: null },
+      }),
+      prisma.editingLayer.findMany({
+        where: { serviceId: id, deletedAt: null },
+      }),
+    ]);
 
-    return layers;
+    return [
+      ...displayLayers.map((layer) => ({ ...layer, layerKind: "display" })),
+      ...searchLayers.map((layer) => ({ ...layer, layerKind: "search" })),
+      ...editingLayers.map((layer) => ({ ...layer, layerKind: "editing" })),
+    ];
   }
 
   // Get all maps that use a layer or a group that uses a layer
@@ -68,7 +82,7 @@ class ServicesService {
           {
             layers: {
               some: {
-                layer: {
+                displayLayer: {
                   serviceId: id,
                   deletedAt: null,
                 },
@@ -81,7 +95,7 @@ class ServicesService {
                 group: {
                   layers: {
                     some: {
-                      layer: {
+                      displayLayer: {
                         serviceId: id,
                         deletedAt: null,
                       },
@@ -104,7 +118,7 @@ class ServicesService {
       where: {
         layers: {
           some: {
-            layer: { serviceId: id, deletedAt: null },
+            displayLayer: { serviceId: id, deletedAt: null },
           },
         },
       },
@@ -227,10 +241,7 @@ class ServicesService {
     return updatedService;
   }
 
-  async updateHealthStatus(
-    id: string,
-    healthStatus: "HEALTHY" | "UNHEALTHY"
-  ) {
+  async updateHealthStatus(id: string, healthStatus: "HEALTHY" | "UNHEALTHY") {
     return await prisma.service.update({
       where: { id },
       data: {
@@ -255,53 +266,77 @@ class ServicesService {
         );
       }
 
-      const layers = await transaction.layer.findMany({
-        where: { serviceId: id, deletedAt: null },
-        select: {
-          id: true,
-          metadataId: true,
-          searchSettingsId: true,
-          infoClickSettingsId: true,
-        },
-      });
+      const [displayLayers, searchLayers, editingLayers] = await Promise.all([
+        transaction.displayLayer.findMany({
+          where: { serviceId: id, deletedAt: null },
+          select: { id: true, metadataId: true, infoClickSettingsId: true },
+        }),
+        transaction.searchLayer.findMany({
+          where: { serviceId: id, deletedAt: null },
+          select: { id: true, metadataId: true },
+        }),
+        transaction.editingLayer.findMany({
+          where: { serviceId: id, deletedAt: null },
+          select: { id: true },
+        }),
+      ]);
 
-      const layerIds = layers.map((layer) => layer.id);
-      const layerMetadataIds = layers
-        .map((layer) => layer.metadataId)
-        .filter((metadataId): metadataId is string => Boolean(metadataId));
-      const layerSearchSettingsIds = layers
-        .map((layer) => layer.searchSettingsId)
-        .filter(
-          (searchSettingsId): searchSettingsId is string =>
-            Boolean(searchSettingsId)
-        );
-      const layerInfoClickSettingsIds = layers
+      const displayLayerIds = displayLayers.map((layer) => layer.id);
+      const searchLayerIds = searchLayers.map((layer) => layer.id);
+      const editingLayerIds = editingLayers.map((layer) => layer.id);
+      const layerMetadataIds = [
+        ...displayLayers.map((layer) => layer.metadataId),
+        ...searchLayers.map((layer) => layer.metadataId),
+      ].filter((metadataId): metadataId is string => Boolean(metadataId));
+      const layerInfoClickSettingsIds = displayLayers
         .map((layer) => layer.infoClickSettingsId)
-        .filter(
-          (infoClickSettingsId): infoClickSettingsId is string =>
-            Boolean(infoClickSettingsId)
+        .filter((infoClickSettingsId): infoClickSettingsId is string =>
+          Boolean(infoClickSettingsId)
         );
 
       const deletedAt = new Date();
 
-      if (layerIds.length > 0) {
+      if (displayLayerIds.length > 0) {
         await transaction.layerInstance.deleteMany({
-          where: { layerId: { in: layerIds } },
+          where: { displayLayerId: { in: displayLayerIds } },
         });
-
-        await transaction.roleOnLayer.deleteMany({
-          where: { layerId: { in: layerIds } },
+        await transaction.roleOnDisplayLayer.deleteMany({
+          where: { displayLayerId: { in: displayLayerIds } },
         });
-
-        await transaction.layer.updateMany({
-          where: { id: { in: layerIds }, deletedAt: null },
+        await transaction.displayLayer.updateMany({
+          where: { id: { in: displayLayerIds }, deletedAt: null },
           data: {
             deletedAt,
             lastSavedDate: deletedAt,
             metadataId: null,
-            searchSettingsId: null,
             infoClickSettingsId: null,
           },
+        });
+      }
+
+      if (searchLayerIds.length > 0) {
+        await transaction.layerInstance.deleteMany({
+          where: { searchLayerId: { in: searchLayerIds } },
+        });
+        await transaction.roleOnSearchLayer.deleteMany({
+          where: { searchLayerId: { in: searchLayerIds } },
+        });
+        await transaction.searchLayer.updateMany({
+          where: { id: { in: searchLayerIds }, deletedAt: null },
+          data: { deletedAt, lastSavedDate: deletedAt, metadataId: null },
+        });
+      }
+
+      if (editingLayerIds.length > 0) {
+        await transaction.layerInstance.deleteMany({
+          where: { editingLayerId: { in: editingLayerIds } },
+        });
+        await transaction.roleOnEditingLayer.deleteMany({
+          where: { editingLayerId: { in: editingLayerIds } },
+        });
+        await transaction.editingLayer.updateMany({
+          where: { id: { in: editingLayerIds }, deletedAt: null },
+          data: { deletedAt, lastSavedDate: deletedAt },
         });
       }
 
@@ -313,12 +348,6 @@ class ServicesService {
       if (layerMetadataIds.length > 0) {
         await transaction.metadata.deleteMany({
           where: { id: { in: layerMetadataIds } },
-        });
-      }
-
-      if (layerSearchSettingsIds.length > 0) {
-        await transaction.searchSettings.deleteMany({
-          where: { id: { in: layerSearchSettingsIds } },
         });
       }
 

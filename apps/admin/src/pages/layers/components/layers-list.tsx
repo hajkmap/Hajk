@@ -29,7 +29,6 @@ import {
 } from "../../../api/layers";
 import {
   useServices,
-  Service,
   SERVICE_TYPE,
   SERVICE_STATUS,
   useServiceCapabilities,
@@ -39,20 +38,21 @@ import { SquareSpinnerComponent } from "../../../components/progress/square-prog
 import DialogWrapper from "../../../components/flexible-dialog";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import ServiceTypeBadge from "../../services/components/service-type-badge";
+import LayerKindBadge from "./layer-kind-badge";
+import { LayerCategory, normalizeLayerCategory } from "../layer-category";
 import ServiceStatusIndicator from "../../services/components/service-status-indicator";
 import StyledDataGrid from "../../../components/data-grid";
 import { CapabilityRow, CreateLayerGrid } from "./create-layer-grid";
 
 interface LayersListProps {
-  filterLayers: (layers: Layer[], services: Service[]) => Layer[];
+  layerKind: LayerCategory;
   showCreateButton?: boolean;
   pageTitleKey: string;
   baseRoute: string;
 }
 
 type LayersGridRow = Omit<Layer, "status"> & {
-  type: SERVICE_TYPE;
+  layerKind: LayerCategory;
   url: string;
   status: SERVICE_STATUS | undefined;
   lastChecked: string | undefined;
@@ -61,7 +61,7 @@ type LayersGridRow = Omit<Layer, "status"> & {
 type CreateLayerStep = "details" | "capabilities";
 
 export default function LayersList({
-  filterLayers,
+  layerKind,
   showCreateButton = true,
   pageTitleKey,
   baseRoute,
@@ -143,14 +143,11 @@ export default function LayersList({
       handleCloseDeleteDialog();
     } catch (error) {
       console.error("Failed to delete layer:", error);
-      toast.error(
-        t("layers.deleteLayerFailed", { name: selectedLayer.name }),
-        {
-          position: "bottom-left",
-          theme: palette.mode,
-          hideProgressBar: true,
-        },
-      );
+      toast.error(t("layers.deleteLayerFailed", { name: selectedLayer.name }), {
+        position: "bottom-left",
+        theme: palette.mode,
+        hideProgressBar: true,
+      });
     }
   };
 
@@ -170,36 +167,33 @@ export default function LayersList({
   const filteredLayers = useMemo<LayersGridRow[]>(() => {
     if (!layers || !services) return [];
 
-    // First apply the specific filter for this page type
-    const typeFilteredLayers = filterLayers(layers, services);
+    const kindFilteredLayers = layers.filter(
+      (layer) => normalizeLayerCategory(layer.layerKind) === layerKind,
+    );
 
-    // Then apply search + service-url filter
     const searchFilter = (layer: Layer) => {
       const service = services.find(
         (service) => service.id === layer.serviceId,
       );
       if (selectedServiceUrl && service?.url !== selectedServiceUrl)
         return false;
-      const combinedText = `${layer.name} ${service?.type ?? ""} ${
-        service?.url ?? ""
-      }`.toLowerCase();
+      const combinedText = `${layer.name} ${service?.url ?? ""}`.toLowerCase();
       return combinedText.includes(searchTerm.toLowerCase());
     };
 
-    return typeFilteredLayers.filter(searchFilter).map((layer) => {
+    return kindFilteredLayers.filter(searchFilter).map((layer) => {
       const service = services.find(
         (service) => service.id === layer.serviceId,
       );
-      const serviceType: SERVICE_TYPE = service?.type ?? SERVICE_TYPE.WMS;
       return {
         ...layer,
-        type: serviceType,
+        layerKind: normalizeLayerCategory(layer.layerKind),
         url: service?.url ?? "",
         status: service?.status,
         lastChecked: service?.lastChecked,
       };
     });
-  }, [layers, services, searchTerm, selectedServiceUrl, filterLayers]);
+  }, [layers, services, searchTerm, selectedServiceUrl, layerKind]);
 
   const handleClose = () => {
     setOpen(false);
@@ -292,6 +286,7 @@ export default function LayersList({
   const handleLayerSubmit = async (layerData: LayerCreateInput) => {
     try {
       const payload = {
+        layerKind,
         name: layerData.name,
         serviceId: layerData.serviceId,
         selectedLayers: layerData.selectedLayers,
@@ -565,12 +560,12 @@ export default function LayersList({
               columns={
                 [
                   {
-                    field: "type",
-                    flex: 0.1,
-                    headerName: t("common.serviceType"),
+                    field: "layerKind",
+                    flex: 0.2,
+                    headerName: t("layers.layerKind"),
                     renderCell: (
                       params: GridRenderCellParams<LayersGridRow>,
-                    ) => <ServiceTypeBadge type={params.row.type} />,
+                    ) => <LayerKindBadge layerKind={params.row.layerKind} />,
                   },
                   {
                     field: "name",

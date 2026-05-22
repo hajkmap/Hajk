@@ -55,13 +55,15 @@ const SearchSettingsSchema = z.object({
   geometryField: z.string().optional(),
 });
 
+const LayerKindSchema = z.enum(["display", "search", "editing"]);
+
 export const LayerCreateSchema = z.object({
+  layerKind: LayerKindSchema.default("display"),
   name: z.string().min(1, "Layer name is required"),
   internalName: z.string().optional(),
   description: z.string().optional(),
   serviceId: z.string().min(1, "Service ID is required"),
   metadataId: z.string().optional(),
-  searchSettingsId: z.string().optional(),
   infoClickSettingsId: z.string().optional(),
   selectedLayers: z.array(z.string()).default([]),
   locked: z.boolean().default(false),
@@ -91,16 +93,35 @@ export const LayerCreateSchema = z.object({
   searchSettings: SearchSettingsSchema.optional(),
 });
 
-export const LayerInstanceCreateSchema = z.object({
-  layerId: z.string().min(1, "Layer ID is required"),
-  mapId: z.number().optional(),
-  groupId: z.string().optional(),
-  usage: UseTypeSchema,
-  infoClickActive: z.boolean().default(true),
-  visibleAtStart: z.boolean().default(false),
-  zIndex: z.number().default(0),
-  options: z.record(z.string(), z.unknown()).default({}),
-});
+export const LayerInstanceCreateSchema = z
+  .object({
+    displayLayerId: z.string().min(1).optional(),
+    searchLayerId: z.string().min(1).optional(),
+    editingLayerId: z.string().min(1).optional(),
+    layerId: z.string().min(1).optional(),
+    mapId: z.number().optional(),
+    groupId: z.string().optional(),
+    usage: UseTypeSchema.optional(),
+    infoClickActive: z.boolean().default(true),
+    visibleAtStart: z.boolean().default(false),
+    zIndex: z.number().default(0),
+    options: z.record(z.string(), z.unknown()).default({}),
+  })
+  .superRefine((data, ctx) => {
+    const refs = [
+      data.displayLayerId,
+      data.searchLayerId,
+      data.editingLayerId,
+      data.layerId,
+    ].filter(Boolean);
+    if (refs.length !== 1) {
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "Provide exactly one of displayLayerId, searchLayerId, editingLayerId, or layerId",
+      });
+    }
+  });
 
 export const MetadataCreateSchema = z.object({
   title: z.string().optional(),
@@ -134,12 +155,12 @@ export const SearchSettingsCreateSchema = z.object({
 });
 
 export const LayerUpdateSchema = z.object({
+  layerKind: LayerKindSchema.optional(),
   name: z.string().min(1, "Layer name is required").optional(),
   internalName: z.string().optional(),
   description: z.string().optional(),
   serviceId: z.string().min(1, "Service ID is required").optional(),
   metadataId: z.string().optional(),
-  searchSettingsId: z.string().optional(),
   infoClickSettingsId: z.string().optional(),
   selectedLayers: z.array(z.string()).optional(),
   locked: z.boolean().optional(),
@@ -170,7 +191,10 @@ export const LayerUpdateSchema = z.object({
 });
 
 export const LayerInstanceUpdateSchema = z.object({
-  layerId: z.string().min(1, "Layer ID is required").optional(),
+  displayLayerId: z.string().min(1).optional(),
+  searchLayerId: z.string().min(1).optional(),
+  editingLayerId: z.string().min(1).optional(),
+  layerId: z.string().min(1).optional(),
   mapId: z.number().optional(),
   groupId: z.string().optional(),
   usage: UseTypeSchema.optional(),

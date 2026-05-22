@@ -41,7 +41,9 @@ model Role {
   systemCriticalRole  Boolean               @default(false)
   users               RoleOnUser[]
   RoleOnMap           RoleOnMap[]
-  RoleOnLayer         RoleOnLayer[]
+  RoleOnDisplayLayer  RoleOnDisplayLayer[]
+  RoleOnSearchLayer   RoleOnSearchLayer[]
+  RoleOnEditingLayer  RoleOnEditingLayer[]
   RoleOnLayerInstance RoleOnLayerInstance[]
   RoleOnTool          RoleOnTool[]
   RoleOnGroup         RoleOnGroup[]
@@ -65,13 +67,31 @@ model RoleOnMap {
   @@id([mapId, roleId])
 }
 
-model RoleOnLayer {
-  layerId String
-  roleId  String?
-  layer   Layer   @relation(fields: [layerId], references: [id], onDelete: Cascade)
-  role    Role?   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+model RoleOnDisplayLayer {
+  displayLayerId String
+  roleId         String?
+  displayLayer   DisplayLayer @relation(fields: [displayLayerId], references: [id], onDelete: Cascade)
+  role           Role?        @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  @@id([layerId])
+  @@id([displayLayerId])
+}
+
+model RoleOnSearchLayer {
+  searchLayerId String
+  roleId        String?
+  searchLayer   SearchLayer @relation(fields: [searchLayerId], references: [id], onDelete: Cascade)
+  role          Role?       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([searchLayerId])
+}
+
+model RoleOnEditingLayer {
+  editingLayerId String
+  roleId         String?
+  editingLayer   EditingLayer @relation(fields: [editingLayerId], references: [id], onDelete: Cascade)
+  role           Role?        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([editingLayerId])
 }
 
 model RoleOnLayerInstance {
@@ -171,56 +191,58 @@ model Group {
 
 model Service {
   /// Primary key; stable reference for layers and APIs. Multiple services may share the same `url`.
-  id              String      @id @default(cuid())
-  metadataId      String?     @unique
+  id              String         @id @default(cuid())
+  metadataId      String?        @unique
   projectionId    Int?
   name            String
-  locked          Boolean     @default(false)
+  locked          Boolean        @default(false)
   url             String
-  version         String      @default("1.3.0")
-  imageFormat     String      @default("image/png")
+  version         String         @default("1.3.0")
+  imageFormat     String         @default("image/png")
   type            ServiceType
-  serverType      ServerType  @default(GEOSERVER)
-  projection      Projection? @relation(fields: [projectionId], references: [id])
+  serverType      ServerType     @default(GEOSERVER)
+  projection      Projection?    @relation(fields: [projectionId], references: [id])
   workspace       String?
   getMapUrl       String?
   comment         String?
   createdBy       String?
-  createdDate     DateTime?   @db.Timestamptz(3)
+  createdDate     DateTime?      @db.Timestamptz(3)
   lastSavedBy     String?
-  lastSavedDate   DateTime?   @db.Timestamptz(3)
+  lastSavedDate   DateTime?      @db.Timestamptz(3)
   healthStatus    String?
-  healthCheckedAt DateTime?   @db.Timestamptz(3)
-  deletedAt       DateTime?   @db.Timestamptz(3)
-  layers          Layer[]
-  metadata        Metadata?   @relation(fields: [metadataId], references: [id])
+  healthCheckedAt DateTime?      @db.Timestamptz(3)
+  deletedAt       DateTime?      @db.Timestamptz(3)
+  displayLayers   DisplayLayer[]
+  searchLayers    SearchLayer[]
+  editingLayers   EditingLayer[]
+  metadata        Metadata?      @relation(fields: [metadataId], references: [id])
 }
 
 model Metadata {
-  id          String   @id @default(cuid())
-  title       String?
-  description String?
-  owner       String?
-  url         String?
-  urlTitle    String?
-  attribution String?
-  created     DateTime @default(now())
-  updated     DateTime @updatedAt
-  service     Service?
-  layer       Layer?
+  id           String        @id @default(cuid())
+  title        String?
+  description  String?
+  owner        String?
+  url          String?
+  urlTitle     String?
+  attribution  String?
+  created      DateTime      @default(now())
+  updated      DateTime      @updatedAt
+  service      Service?
+  displayLayer DisplayLayer?
+  searchLayer  SearchLayer?
 }
 
 model InfoClickSettings {
-  id              String  @id @default(cuid())
-  layerId         String?
+  id              String        @id @default(cuid())
   layerInstanceId String?
   definition      String?
   icon            String?
-  format          String  @default("application/json")
+  format          String        @default("application/json")
   sortProperty    String?
-  sortMethod      String  @default("text") // number or text
-  sortDescending  Boolean @default(false)
-  layers          Layer[]
+  sortMethod      String        @default("text") // number or text
+  sortDescending  Boolean       @default(false)
+  displayLayer    DisplayLayer?
 }
 
 enum SearchOutputFormat {
@@ -229,81 +251,131 @@ enum SearchOutputFormat {
   GML32
 }
 
-// Hopefully these can be used for all layer types
-model SearchSettings {
-  id                     String             @id @default(cuid())
-  active                 Boolean            @default(false)
-  url                    String?
-  searchFields           String[] // searchPropertyName should map to this
-  primaryDisplayFields   String[]
-  secondaryDisplayFields String[]
-  shortDisplayFields     String[]
-  outputFormat           SearchOutputFormat @default(GML3)
-  geometryField          String?
-  layers                 Layer[]
-}
-
-model Layer {
-  id                          String             @id @default(cuid())
+/// Map visualization layer (WMS, WMTS, ARCGIS, VECTOR, etc.).
+model DisplayLayer {
+  id                          String               @id @default(cuid())
   serviceId                   String
-  metadataId                  String?            @unique
-  searchSettingsId            String?            @unique
-  infoClickSettingsId         String?            @unique
-  selectedLayers              String[]           @default([])
-  // Locked is used to avoid multiple people messing with the same layer at the same time
-  locked                      Boolean            @default(false)
+  metadataId                  String?              @unique
+  infoClickSettingsId         String?              @unique
+  selectedLayers              String[]             @default([])
+  locked                      Boolean              @default(false)
   name                        String
   internalName                String?
   description                 String?
-  service                     Service            @relation(fields: [serviceId], references: [id])
-  metadata                    Metadata?          @relation(fields: [metadataId], references: [id])
-  infoClickSettings           InfoClickSettings? @relation(fields: [infoClickSettingsId], references: [id])
-  searchSettings              SearchSettings?    @relation(fields: [searchSettingsId], references: [id])
-  opacity                     Float              @default(1)
-  maxZoom                     Int                @default(-1)
-  minZoom                     Int                @default(-1)
-  minMaxZoomAlertOnToggleOnly Boolean            @default(false)
-  tiled                       Boolean            @default(false)
-  singleTile                  Boolean            @default(false)
-  hidpi                       Boolean            @default(false)
+  service                     Service              @relation(fields: [serviceId], references: [id])
+  metadata                    Metadata?            @relation(fields: [metadataId], references: [id])
+  infoClickSettings           InfoClickSettings?   @relation(fields: [infoClickSettingsId], references: [id])
+  opacity                     Float                @default(1)
+  maxZoom                     Int                  @default(-1)
+  minZoom                     Int                  @default(-1)
+  minMaxZoomAlertOnToggleOnly Boolean              @default(false)
+  tiled                       Boolean              @default(false)
+  singleTile                  Boolean              @default(false)
+  hidpi                       Boolean              @default(false)
   legendOptions               String?
   legendUrl                   String?
   legendIconUrl               String?
   style                       String?
-  customRatio                 Int                @default(0)
-  showMetadata                Boolean            @default(false)
-  infoClickActive             Boolean            @default(true)
-  timeSliderVisible           Boolean            @default(false)
+  customRatio                 Int                  @default(0)
+  showMetadata                Boolean              @default(false)
+  infoClickActive             Boolean              @default(true)
+  timeSliderVisible           Boolean              @default(false)
   timeSliderStart             String?
   timeSliderEnd               String?
-  hideExpandArrow             Boolean            @default(false)
-  zIndex                      Int                @default(0)
+  hideExpandArrow             Boolean              @default(false)
+  zIndex                      Int                  @default(0)
   createdBy                   String?
-  createdDate                 DateTime?          @db.Timestamptz(3)
+  createdDate                 DateTime?            @db.Timestamptz(3)
   lastSavedBy                 String?
-  lastSavedDate               DateTime?          @db.Timestamptz(3)
-  deletedAt                   DateTime?          @db.Timestamptz(3)
-  restrictedToRoles           RoleOnLayer[]
+  lastSavedDate               DateTime?            @db.Timestamptz(3)
+  deletedAt                   DateTime?            @db.Timestamptz(3)
+  restrictedToRoles           RoleOnDisplayLayer[]
   instances                   LayerInstance[]
-  options                     Json               @default("{}")
+  options                     Json                 @default("{}")
+
+  @@index([serviceId])
+}
+
+/// Search layer configuration (independent of service type; WFS is common).
+model SearchLayer {
+  id                     String              @id @default(cuid())
+  serviceId              String
+  metadataId             String?             @unique
+  selectedLayers         String[]            @default([])
+  locked                 Boolean             @default(false)
+  name                   String
+  internalName           String?
+  description            String?
+  service                Service             @relation(fields: [serviceId], references: [id])
+  metadata               Metadata?           @relation(fields: [metadataId], references: [id])
+  active                 Boolean             @default(false)
+  url                    String?
+  searchFields           String[]            @default([])
+  primaryDisplayFields   String[]            @default([])
+  secondaryDisplayFields String[]            @default([])
+  shortDisplayFields     String[]            @default([])
+  outputFormat           SearchOutputFormat  @default(GML3)
+  geometryField          String?
+  infobox                String?
+  aliasDict              String?
+  zIndex                 Int                 @default(0)
+  createdBy              String?
+  createdDate            DateTime?           @db.Timestamptz(3)
+  lastSavedBy            String?
+  lastSavedDate          DateTime?           @db.Timestamptz(3)
+  deletedAt              DateTime?           @db.Timestamptz(3)
+  restrictedToRoles      RoleOnSearchLayer[]
+  instances              LayerInstance[]
+  options                Json                @default("{}")
+
+  @@index([serviceId])
+}
+
+/// Editing layer configuration (WFST and similar).
+model EditingLayer {
+  id                String               @id @default(cuid())
+  serviceId         String
+  selectedLayers    String[]             @default([])
+  locked            Boolean              @default(false)
+  name              String
+  internalName      String?
+  description       String?
+  service           Service              @relation(fields: [serviceId], references: [id])
+  geometryField     String?
+  createdBy         String?
+  createdDate       DateTime?            @db.Timestamptz(3)
+  lastSavedBy       String?
+  lastSavedDate     DateTime?            @db.Timestamptz(3)
+  deletedAt         DateTime?            @db.Timestamptz(3)
+  restrictedToRoles RoleOnEditingLayer[]
+  instances         LayerInstance[]
+  options           Json                 @default("{}")
 
   @@index([serviceId])
 }
 
 model LayerInstance {
   id                String                @id @default(cuid())
-  layerId           String
+  displayLayerId    String?
+  searchLayerId     String?
+  editingLayerId    String?
   mapId             Int?
   groupId           String?
-  layer             Layer                 @relation(fields: [layerId], references: [id])
+  displayLayer      DisplayLayer?         @relation(fields: [displayLayerId], references: [id])
+  searchLayer       SearchLayer?          @relation(fields: [searchLayerId], references: [id])
+  editingLayer      EditingLayer?         @relation(fields: [editingLayerId], references: [id])
   map               Map?                  @relation(fields: [mapId], references: [id])
   group             Group?                @relation(fields: [groupId], references: [id])
-  usage             UseType
+  usage             UseType?
   restrictedToRoles RoleOnLayerInstance[]
   infoClickActive   Boolean               @default(true)
   visibleAtStart    Boolean               @default(false)
   zIndex            Int                   @default(0)
   options           Json                  @default("{}")
+
+  @@index([displayLayerId])
+  @@index([searchLayerId])
+  @@index([editingLayerId])
 }
 
 model GroupsOnMaps {
