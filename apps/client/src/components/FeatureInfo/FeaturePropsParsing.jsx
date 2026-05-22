@@ -242,7 +242,7 @@ export default class FeaturePropsParsing {
             // See #669
             case "=":
               // Using truthy equal below: we want 2 and "2" to be seen as equal.
-              // eslint-disable-next-line eqeqeq
+
               if (k == v) {
                 return matched.content;
               } else {
@@ -251,7 +251,7 @@ export default class FeaturePropsParsing {
             // See #1128
             case "!=":
               // Using truthy not equal below: we want '2 is not equal "2"' to evaluate to false.
-              // eslint-disable-next-line eqeqeq
+
               if (k != v) {
                 return matched.content;
               } else {

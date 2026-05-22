@@ -36,11 +36,7 @@ export default function SimpleDialog({ globalObserver }) {
   };
 
   return (
-    <BaseDialog
-      onClose={handleClose}
-      open={open}
-      fullScreen
-    >
+    <BaseDialog onClose={handleClose} open={open} fullScreen>
       <AppBar sx={{ position: "relative" }}>
         <Toolbar>
           <IconButton

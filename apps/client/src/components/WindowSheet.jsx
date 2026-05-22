@@ -25,9 +25,7 @@ const isTextInput = (el, container) => {
   if (!el) return false;
   if (container && !container.contains(el)) return false;
   return (
-    el.tagName === "INPUT" ||
-    el.tagName === "TEXTAREA" ||
-    el.isContentEditable
+    el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable
   );
 };
 

@@ -10,4 +10,3 @@ export interface BaseWindowPluginProps {
 }
 
 export default class BaseWindowPlugin extends React.PureComponent<BaseWindowPluginProps> {}
-

@@ -101,7 +101,6 @@ export const getLegendInfoForLayer = (layer) => {
     : [];
 
   const entries = visibleSublayers.map((sublayer, index) => {
-
     const style = activeStyles[index] || layersInfo?.[sublayer]?.style || "";
     const configuredEntry = configuredLegend[index];
     const configuredUrl = configuredEntry?.Url ?? configuredEntry?.url ?? null;

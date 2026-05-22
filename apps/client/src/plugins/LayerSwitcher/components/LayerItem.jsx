@@ -1,4 +1,4 @@
-import { useEffect, useState, memo } from "react";
+import { useEffect, useState, memo, useCallback } from "react";
 
 // Material UI components
 import {
@@ -128,14 +128,17 @@ function LayerItem({
 
   const legendIcon = layerInfo?.legendIcon || layerLegendIcon;
 
-  const applyLabelStyle = () => {
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const applyLabelStyle = useCallback(() => {
     if (!olLayer) return;
 
     const source = olLayer.getSource?.();
     if (!source || typeof source.updateParams !== "function") return;
 
     const currentParams = source.getParams?.() || {};
-    const layerName = currentParams.LAYERS;
+
+    // Get stored layer name
+    const layerName = olLayer.get("wmsLayerName") || currentParams.LAYERS;
 
     if (!layerName) return;
 
@@ -144,9 +147,10 @@ function LayerItem({
 
     source.updateParams({
       ...currentParams,
+      LAYERS: layerName,
       STYLES: isActive ? `${layerName}_labels` : baseStyle,
     });
-  };
+  }, [olLayer, layerId]);
 
   const toggleLabelLayer = (e) => {
     e.stopPropagation();
@@ -190,7 +194,7 @@ function LayerItem({
     return () => {
       olLayer.un("change:useLabelStyle", update);
     };
-  }, [olLayer]);
+  }, [olLayer, layerId, applyLabelStyle]);
 
   // Apply label style when layer becomes visible (in case it was set while hidden)
   useEffect(() => {

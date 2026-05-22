@@ -72,7 +72,9 @@ const UploadedFile = (props) => {
       <StyledPaper>
         <Grid container justifyContent="space-between" alignItems="center">
           <Grid size={8}>
-            <Typography variant="button" sx={{ textTransform: 'none'}}>{props.title}</Typography>
+            <Typography variant="button" sx={{ textTransform: "none" }}>
+              {props.title}
+            </Typography>
           </Grid>
           <Grid container justifyContent="flex-end" spacing={1} size={4}>
             <Grid>
@@ -168,7 +170,13 @@ const UploadView = (props) => {
     // Let's create an object with some meta-data and add it to the list of uploaded files.
     props.setUploadedFiles((files) => [
       ...files,
-      { id, title: `${fileName} (${dateTime})`, hidden: false, textShown: true, type: fileType },
+      {
+        id,
+        title: `${fileName} (${dateTime})`,
+        hidden: false,
+        textShown: true,
+        type: fileType,
+      },
     ]);
     // Then we can add the features to the map!
     if (fileType === "kml") {
