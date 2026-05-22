@@ -1,25 +1,16 @@
 import AnchorModel from "./AnchorModel";
-import MapClickModel from "./MapClickModel";
 import SearchModel from "./SearchModel";
-import Plugin from "./Plugin";
-import SnapHelper from "./SnapHelper";
-import { bindMapClickEvent } from "./Click";
 import WindowZModel from "./WindowZModel";
+import { decorateConfig } from "./appModel/configTranslator";
+import { createMap } from "./appModel/mapFactory";
+import { addLayers, highlight, clear } from "./appModel/layerLoader";
+import { setLayerVisibilityFromParams } from "./appModel/layerVisibility";
+import PluginManager from "./appModel/pluginManager";
 
-import ConfigMapper from "../utils/ConfigMapper";
 import CoordinateSystemLoader from "../utils/CoordinateSystemLoader";
 import { hfetch } from "../utils/FetchWrapper";
-import { isMobile } from "../utils/IsMobile";
-import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
-import WMSLayer from "./layers/WMSLayer";
-import WMTSLayer from "./layers/WMTSLayer";
-import WFSVectorLayer from "./layers/VectorLayer";
-import OSM from "ol/source/OSM";
-import TileLayer from "ol/layer/Tile";
-import { mapDirectionToAngle } from "../utils/mapDirectionToAngle";
-import { easeOut } from "ol/easing";
 // TODO: Uncomment and ensure they show as expected
 // import {
 // defaults as defaultControls,
@@ -35,14 +26,7 @@ import { easeOut } from "ol/easing";
 // ZoomToExtent
 // } from "ol/control";
 
-import { Map as OLMap, View } from "ol";
-import { defaults as defaultInteractions } from "ol/interaction";
 import { register } from "ol/proj/proj4";
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
-import { Icon, Fill, Stroke, Style } from "ol/style";
-
-import { setOLSubLayers } from "../utils/groupLayers";
 
 class AppModel {
   /**
@@ -50,17 +34,15 @@ class AppModel {
    * @param object Config
    * @param Observer observer
    */
-  constructor(settings) {
+  constructor(_settings) {
     this.map = undefined;
-    this.windows = [];
-    this.plugins = {};
     this.activeTool = undefined;
     this.layersFromParams = [];
     this.groupLayersFromParams = [];
     this.cqlFiltersFromParams = {};
     this.hfetch = hfetch;
-    this.pluginHistory = new Map();
     this.windowZModel = WindowZModel;
+    this.pluginManager = new PluginManager();
 
     // We store the click location data here for later use.
     // Right now this is only used in the new infoClick but it will most likely be used in other parts of the program.
@@ -70,6 +52,18 @@ class AppModel {
       y: 0,
       zoom: 0,
     };
+  }
+
+  get windows() {
+    return this.pluginManager.windows;
+  }
+
+  get plugins() {
+    return this.pluginManager.plugins;
+  }
+
+  get pluginHistory() {
+    return this.pluginManager.pluginHistory;
   }
 
   init(settings) {
@@ -82,7 +76,7 @@ class AppModel {
     const { config, globalObserver, refreshMUITheme } = settings;
 
     this.config = config;
-    this.decorateConfig();
+    decorateConfig(this);
     this.coordinateSystemLoader = new CoordinateSystemLoader(
       config.mapConfig.projections
     );
@@ -92,51 +86,16 @@ class AppModel {
     this.windowZModel.init(globalObserver);
   }
 
-  decorateConfig() {
-    // .allResolutions should be used when creating layers etc
-    // It will also be used in the print plugin to be able to print in higher resolutions.
-    this.config.mapConfig.map.allResolutions = [
-      ...this.config.mapConfig.map.resolutions,
-      ...(this.config.mapConfig.map.extraPrintResolutions ?? []),
-    ];
-  }
-
   registerWindowPlugin(windowComponent) {
-    this.windows.push(windowComponent);
-  }
-
-  invokeCloseOnAllWindowPlugins() {
-    this.windows.forEach((window) => {
-      window.closeWindow();
-    });
+    this.pluginManager.registerWindowPlugin(windowComponent);
   }
 
   onWindowOpen(currentWindow) {
-    this.windows
-      .filter((window) => window !== currentWindow)
-      .forEach((window) => {
-        if (window.position === currentWindow.position || isMobile) {
-          window.closeWindow();
-        }
-      });
+    this.pluginManager.onWindowOpen(currentWindow);
   }
 
   pushPluginIntoHistory(plugin) {
-    // plugin is an object that will contain a 'type' as well as some
-    // other properties. We use the 'type' as a unique key in our Map.
-    const { type, ...rest } = plugin;
-    // If plugin already exists in set…
-    if (this.pluginHistory.has(type)) {
-      // …remove it first so that we don't have duplicates.
-      this.pluginHistory.delete(type);
-    }
-    this.pluginHistory.set(type, rest);
-
-    // Finally, announce to everyone who cares
-    this.globalObserver.publish(
-      "core.pluginHistoryChanged",
-      this.pluginHistory
-    );
+    this.pluginManager.pushPluginIntoHistory(plugin, this.globalObserver);
   }
 
   getClickLocationData() {
@@ -152,75 +111,19 @@ class AppModel {
   }
 
   /**
-   * Add plugin to this tools property of loaded plugins.
-   * @internal
-   */
-  addPlugin(plugin) {
-    this.plugins[plugin.type] = plugin;
-  }
-
-  /**
    * Get loaded plugins
    * @returns Array<Plugin>
    */
   getPlugins() {
-    return Object.keys(this.plugins).reduce((v, key) => {
-      return [...v, this.plugins[key]];
-    }, []);
+    return this.pluginManager.getPlugins();
   }
 
-  /**
-   * @summary Helper used by getBothDrawerAndWidgetPlugins(), checks
-   * that the supplied parameter has one of the valid "target" values.
-   *
-   * @param {string} t Target to be tested
-   * @returns {boolean}
-   */
-  #validPluginTarget = (t) => {
-    // FIXME: Why is "hidden" included in this list, anyone?
-    return ["toolbar", "left", "right", "control", "hidden"].includes(t);
-  };
-
-  /**
-   * A plugin may have the 'target' option. Currently we use four
-   * targets: toolbar, control, left and right. Toolbar means it's a
-   * plugin that will be visible in Drawer list. Left and right
-   * are Widget plugins, that on large displays show on left/right
-   * side of the map viewport, while on small screens change its
-   * appearance and end up as Drawer list plugins too. Control buttons
-   * are displayed in the same area as map controls, e.g. zoom buttons.
-   *
-   * This method filters out those plugins that should go into
-   * the Drawer, Widget or Control list and returns them.
-   *
-   * It is used in AppModel to initiate all plugins' Components,
-   * so whatever is returned here will result in a render() for
-   * that plugin.
-   *
-   * @returns array of Plugins
-   * @memberof AppModel
-   */
   getBothDrawerAndWidgetPlugins() {
-    const r = this.getPlugins()
-      .filter((plugin) => {
-        return (
-          // If "options" is an Array (of plugin entities) we must
-          // look for the "target" property inside that array. As soon
-          // as one of the entities has a valid "target" value, we
-          // consider the entire plugin to be valid and included in this list.
-          // If "options" isn't an array, we can grab the "target" directly.
-          plugin.options.some?.((p) => this.#validPluginTarget(p.target)) ||
-          this.#validPluginTarget(plugin.options.target)
-        );
-      })
-      .sort((a, b) => a.sortOrder - b.sortOrder);
-    return r;
+    return this.pluginManager.getBothDrawerAndWidgetPlugins();
   }
 
   getDrawerPlugins() {
-    return this.getPlugins().filter((plugin) => {
-      return ["toolbar"].includes(plugin.options.target);
-    });
+    return this.pluginManager.getDrawerPlugins();
   }
 
   /**
@@ -234,11 +137,7 @@ class AppModel {
    * also render Drawer buttons on small screens.
    */
   getPluginsThatMightRenderInDrawer() {
-    return this.getPlugins().filter((plugin) => {
-      return ["toolbar", "left", "right", "control"].includes(
-        plugin.options.target
-      );
-    });
+    return this.pluginManager.getPluginsThatMightRenderInDrawer();
   }
 
   /**
@@ -250,69 +149,7 @@ class AppModel {
    * @returns {Array} - List of promises to be resolved.
    */
   loadPlugins(plugins) {
-    const promises = [];
-
-    // First let's check what files exist in the expected paths
-    const availableFiles = import.meta.glob([
-      "../components/Search/*.{js,jsx,ts,tsx}", // special case as it's not inside plugins/
-      "../plugins/*/*.{js,jsx,ts,tsx}",
-    ]);
-
-    // Now loop the plugins array and…
-    plugins.forEach((plugin) => {
-      // (Again, for our special case)
-      const dir = ["Search"].includes(plugin) ? "components" : "plugins";
-
-      // …determine the expected path (but we don't know the file extension yet!).
-      const basePath = `../${dir}/${plugin}/${plugin}`;
-
-      // Our module loader _should_ be on the expected path + one of the possible
-      // file extensions.
-      const loader =
-        availableFiles[`${basePath}.tsx`] || availableFiles[`${basePath}.jsx`];
-
-      // We have to make sure that the loader is an actual function
-      if (typeof loader !== "function") {
-        console.error(
-          `AppModel.loadPlugins: Could not find module for plugin "${plugin}".`
-        );
-        return;
-      }
-
-      const prom = loader()
-        .then((module) => {
-          const toolConfig =
-            this.config.mapConfig.tools.find(
-              (plug) => plug.type.toLowerCase() === plugin.toLowerCase()
-            ) || {};
-
-          const toolOptions =
-            toolConfig && toolConfig.options ? toolConfig.options : {};
-
-          const sortOrder = toolConfig.hasOwnProperty("index")
-            ? Number(toolConfig.index)
-            : 0;
-
-          if (Object.keys(toolConfig).length > 0) {
-            this.addPlugin(
-              new Plugin({
-                map: this.map,
-                app: this,
-                type: plugin.toLowerCase(),
-                searchInterface: {},
-                sortOrder: sortOrder,
-                options: toolOptions,
-                component: module.default,
-              })
-            );
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-      promises.push(prom);
-    });
-    return promises;
+    return this.pluginManager.loadPlugins(this, plugins);
   }
 
   /**
@@ -320,321 +157,8 @@ class AppModel {
    * @return {ol.Map} map
    */
   createMap() {
-    const config = this.translateConfig();
-
-    // Prepare OL interactions options, refer to https://openlayers.org/en/latest/apidoc/module-ol_interaction.html#.defaults.
-    // We use conditional properties to ensure that only existing keys are set. The rest
-    // will fallback to defaults from OL. (The entire interactionsOptions object, as well as all its properties are optional
-    // according to OL documentation, so there's no need to set stuff that won't be needed.)
-    const interactionsOptions = {
-      ...(config.map.hasOwnProperty("altShiftDragRotate") && {
-        altShiftDragRotate: config.map.altShiftDragRotate,
-      }),
-      ...(config.map.hasOwnProperty("onFocusOnly") && {
-        onFocusOnly: config.map.onFocusOnly,
-      }),
-      ...(config.map.hasOwnProperty("doubleClickZoom") && {
-        doubleClickZoom: config.map.doubleClickZoom,
-      }),
-      ...(config.map.hasOwnProperty("keyboard") && {
-        keyboard: config.map.keyboard,
-      }),
-      ...(config.map.hasOwnProperty("mouseWheelZoom") && {
-        mouseWheelZoom: config.map.mouseWheelZoom,
-      }),
-      ...(config.map.hasOwnProperty("shiftDragZoom") && {
-        shiftDragZoom: config.map.shiftDragZoom,
-      }),
-      ...(config.map.hasOwnProperty("dragPan") && {
-        dragPan: config.map.dragPan,
-      }),
-      ...(config.map.hasOwnProperty("pinchRotate") && {
-        pinchRotate: config.map.pinchRotate,
-      }),
-      ...(config.map.hasOwnProperty("pinchZoom") && {
-        pinchZoom: config.map.pinchZoom,
-      }),
-      ...(!Number.isNaN(Number.parseInt(config.map.zoomDelta)) && {
-        zoomDelta: config.map.zoomDelta,
-      }),
-      ...(!Number.isNaN(Number.parseInt(config.map.zoomDuration)) && {
-        zoomDuration: config.map.zoomDuration,
-      }),
-    };
-
-    this.map = new OLMap({
-      controls: [
-        // new FullScreen({ target: document.getElementById("controls-column") }),
-        // new Rotate({ target: document.getElementById("controls-column") }),
-        // new MousePosition({
-        //   target: document.querySelector("#root > div > footer")
-        // }),
-        // new OverviewMap({
-        //   target: document.querySelector("#root > div > footer"),
-        //   view: new View({
-        //     projection: config.map.projection
-        //   })
-        // })
-      ],
-      interactions: defaultInteractions(interactionsOptions),
-      layers: [],
-      target: config.map.target,
-      overlays: [],
-      view: new View({
-        center: config.map.center,
-        extent: config.map.extent.length > 0 ? config.map.extent : undefined, // backend will always write extent as an Array, so basic "config.map.extent || undefined" wouldn't work here
-        constrainOnlyCenter: config.map.constrainOnlyCenter, // If true, the extent constraint will only apply to the view center and not the whole extent.
-        constrainResolution:
-          isMobile && config.map.constrainResolutionMobile !== undefined
-            ? config.map.constrainResolutionMobile
-            : config.map.constrainResolution, // If true, the view will always animate to the closest zoom level after an interaction; false means intermediary zoom levels are allowed.
-        maxZoom: config.map.maxZoom || 24,
-        minZoom: config.map.minZoom || 0,
-        projection: config.map.projection,
-        resolutions: config.map.resolutions,
-        units: "m",
-        zoom: config.map.zoom,
-      }),
-    });
-
-    // Create throttled zoomEnd event
-    let currentZoom = this.map.getView().getZoom();
-
-    this.map.on("moveend", (e) => {
-      // using moveend to create a throttled zoomEnd event
-      // instead of using change:resolution to minimize events being fired.
-      const newZoom = this.map.getView().getZoom();
-      if (currentZoom !== newZoom) {
-        this.globalObserver.publish("core.zoomEnd", { zoom: newZoom });
-        currentZoom = newZoom;
-      }
-    });
-
-    // Add Snap Helper to the Map
-    this.map.snapHelper = new SnapHelper(this);
-
-    // Add the clickLock set. Its primary use is to disable infoclick action
-    // when some other plugin (such as Draw or Measure) is active (in that case
-    // we want the plugin to handle click - not to show infoclick).
-    // It's easy to think that this is only needed if Infoclick plugin is active
-    // in map config - but that is not the case:
-    // A lot of plugins rely on the 'clickLock' property to exist on Map,
-    // and to be a Set (we use .has()).
-    // So, we create the Set no matter what:
-    this.map.clickLock = new Set();
-
-    const infoclickOptions = config.tools.find(
-      (t) => t.type === "infoclick"
-    )?.options;
-    if (infoclickOptions?.useNewInfoclick === true) {
-      const mapClickModel = new MapClickModel(
-        this.map,
-        this.globalObserver,
-        infoclickOptions
-      );
-
-      mapClickModel.bindMapClick((featureCollections) => {
-        const featureCollectionsToBeHandledByMapClickViewer =
-          featureCollections.filter((fc) => fc.type !== "SearchResults");
-
-        // Publish the retrieved collections, even if they're empty. We want the
-        // handling components to know, so they can act accordingly (e.g. close
-        // window if no features are to be shown).
-        this.globalObserver.publish(
-          "mapClick.featureCollections",
-          featureCollectionsToBeHandledByMapClickViewer
-        );
-
-        // Next, handle search results features.
-        // Check if we've got any features from the search layer,
-        // and if we do, announce it to the search component so it can
-        // show relevant feature in the search results list.
-        const searchResultFeatures = featureCollections.find(
-          (c) => c.type === "SearchResults"
-        )?.features;
-
-        if (searchResultFeatures?.length > 0) {
-          this.globalObserver.publish(
-            "infoClick.searchResultLayerClick",
-            searchResultFeatures // Clicked features sent to the search-component for display
-          );
-        }
-      });
-    }
-
-    // FIXME: Potential miss here: don't we want to register click on search results
-    // But we register the Infoclick handler only if the plugin exists in map config:
-    // even if Infoclick plugin is inactive? Currently search won't register clicks in
-    // map without infoclick, which seems as an unnecessary limitation.
-    if (
-      config.tools.some((tool) => tool.type === "infoclick") &&
-      infoclickOptions?.useNewInfoclick !== true
-    ) {
-      bindMapClickEvent(this.map, (mapClickDataResult) => {
-        // We have to separate features coming from the searchResult-layer
-        // from the rest, since we want to render this information in the
-        // search-component rather than in the featureInfo-component.
-        const searchResultFeatures = mapClickDataResult.features.filter(
-          (feature) => {
-            return feature?.layer.get("name") === "pluginSearchResults";
-          }
-        );
-        const infoclickFeatures = mapClickDataResult.features.filter(
-          (feature) => {
-            return feature?.layer.get("name") !== "pluginSearchResults";
-          }
-        );
-
-        // If there are any results from search layer, send an event about that.
-        if (searchResultFeatures.length > 0) {
-          this.globalObserver.publish(
-            "infoClick.searchResultLayerClick",
-            searchResultFeatures // Clicked features sent to the search-component for display
-          );
-        }
-
-        // Do the same for regular infoclick results from WMS layers
-        if (infoclickFeatures.length > 0) {
-          // Note that infoclick.mapClick seems to have a different interface…
-          this.globalObserver.publish("infoClick.mapClick", {
-            ...mapClickDataResult, // as it requires the entire object, not just "features", like infoClick.searchResultLayerClick.
-            features: infoclickFeatures, // Hence, we send everything from mapClickDataResult, but replace the features property.
-          });
-        }
-      });
-    }
-
-    // Creation of non server background layers.
-    const layerSwitcherConf = config.tools.find(
-      (tool) => tool.type === "layerswitcher"
-    );
-
-    // Create the white and black background layers if they are enabled in config
-    if (layerSwitcherConf?.options?.backgroundSwitcherWhite) {
-      this.createWhiteLayer();
-    }
-
-    if (layerSwitcherConf?.options?.backgroundSwitcherBlack) {
-      this.createBlackLayer();
-    }
-
-    // Add the OSM layer if it is enabled in the conf
-    if (layerSwitcherConf?.options?.enableOSM) {
-      this.createOSMLayer();
-    }
-
+    createMap(this);
     return this;
-  }
-
-  createWhiteLayer() {
-    // Creates a empty vectorlayer to let the url handle them like other layers. BackgroundSwitcher then
-    // sets the real colors based on matching the name.
-    const whiteLayer = new VectorLayer({
-      visible: false,
-      source: new VectorSource(),
-      zIndex: -1,
-      layerType: "base",
-      rotateMap: "n",
-      name: "-1",
-      caption: "Vit",
-      layerInfo: {
-        caption: "Vit",
-        layerType: "base",
-      },
-    });
-
-    whiteLayer.on("change:visible", (e) => {
-      this.globalObserver.publish("core.layerVisibilityChanged", e);
-    });
-
-    // Add the white layer to the map
-    this.map.addLayer(whiteLayer);
-  }
-
-  createBlackLayer() {
-    // Creates a empty vectorlayer to let the url handle them like other layers. BackgroundSwitcher then
-    // sets the real colors based on matching the name.
-    const blackLayer = new VectorLayer({
-      visible: false,
-      source: new VectorSource(),
-      zIndex: -1,
-      layerType: "base",
-      rotateMap: "n",
-      name: "-2",
-      caption: "Svart",
-      layerInfo: {
-        caption: "Svart",
-        layerType: "base",
-      },
-    });
-
-    blackLayer.on("change:visible", (e) => {
-      this.globalObserver.publish("core.layerVisibilityChanged", e);
-    });
-
-    // Add the black layer to the map
-    this.map.addLayer(blackLayer);
-  }
-
-  createOSMLayer() {
-    const layerSwitcherConf = this.config.mapConfig.tools.find(
-      (tool) => tool.type === "layerswitcher"
-    );
-
-    // Respect the OSMVisibleAtStart option from layerswitcher config
-    // only if no override is provided in URLSearchParams (else we will
-    // end up with multiple background layers visible at start).
-    const visibleAtStart =
-      (this.layersFromParams.length === 0 &&
-        layerSwitcherConf?.options?.OSMVisibleAtStart === true) ??
-      false;
-
-    const osmLayer = new TileLayer({
-      visible: visibleAtStart,
-      source: new OSM({
-        reprojectionErrorThreshold: 5,
-      }),
-      zIndex: -1,
-      layerType: "base",
-      rotateMap: "n", // OpenStreetMap should be rotated to North
-      name: "-3",
-      caption: "OpenStreetMap",
-      layerInfo: {
-        infoText:
-          "OpenStreetMap är en öppen, användargenererad karta där vem som helst kan bidra med information. Innehållet är inte kvalitetssäkrat, granskat eller godkänt av Lantmäteriet.",
-        infoTitle: "Om OpenStreetMap",
-        infoUrl:
-          "https://wiki.openstreetmap.org/wiki/OpenStreetMap_Carto/Symbols",
-        infoUrlText: "Länk till teckenförklaring",
-        information: "Här finns mer info",
-        layerType: "base",
-        hideExpandArrow: false,
-        showAttributeTableButton: false,
-      },
-    });
-
-    osmLayer.on("change:visible", (e) => {
-      const olLayer = e.target;
-
-      // If the layer becomes visible, set the map rotation to match
-      if (olLayer.get("visible")) {
-        const direction = olLayer.get("rotateMap");
-        const duration = 1000;
-
-        const angle = mapDirectionToAngle(direction);
-        this.map.getView().animate({
-          rotation: angle,
-          duration: duration,
-          easing: easeOut,
-        });
-      }
-
-      // Publish event to ensure DrawOrder tab is updated with osmLayer changes
-      this.globalObserver.publish("core.layerVisibilityChanged", e);
-    });
-
-    // Add the osmLayer to the map
-    this.map.addLayer(osmLayer);
   }
 
   getMap() {
@@ -674,589 +198,16 @@ class AppModel {
   }
 
   clear() {
-    this.clearing = true;
-    this.highlight(false);
-    this.map
-      .getAllLayers()
-      .filter(
-        (l) =>
-          l.getVisible() === true &&
-          ["layer", "group"].includes(l.get("layerType"))
-      )
-      .forEach((l) => {
-        l.setVisible(false);
-        if (l.get("layerType") === "group") {
-          this.globalObserver.publish("layerswitcher.hideLayer", l);
-        }
-      });
-    setTimeout(() => {
-      this.clearing = false;
-    }, 100);
-  }
-
-  addMapLayer(layer) {
-    const configMapper = new ConfigMapper(this.config.appConfig.proxy);
-    let layerItem, layerConfig;
-    switch (layer.type) {
-      case "wms":
-        layerConfig = configMapper.mapWMSConfig(layer, this.config);
-        layerItem = new WMSLayer(
-          {
-            ...layerConfig.options,
-            requestLabelLayer: layer._requestLabelLayer === true,
-          },
-          this.config.appConfig.proxy,
-          this.globalObserver
-        );
-
-        if (layer.hasLabelStyle === true) {
-          layerItem.layer.set("hasLabelStyle", true);
-          // Store the layername so we can access it before wms layer changes
-          // ex when switching labels
-          layerItem.layer.set("wmsLayerName", layer.layers?.[0] || layer.name); // ← Store it!
-
-          const source = layerItem.layer.getSource();
-          if (source && source.getParams) {
-            const params = source.getParams();
-            layerItem.layer.set("initialStyles", params.STYLES || "");
-          }
-        }
-
-        // Check if we should load the label layer for this layer
-        if (
-          layer._requestLabelLayer &&
-          layerItem?.layer?.getSource?.()?.updateParams
-        ) {
-          const olLayer = layerItem.layer;
-          const source = olLayer.getSource();
-          const params = source.getParams?.() || {};
-          const layerName = params.LAYERS;
-
-          // Save the provided style before we change it
-          olLayer.set("initialStyles", params.STYLES || "");
-          olLayer.set("useLabelStyle", true);
-
-          source.updateParams({
-            ...params,
-            STYLES: `${layerName}_labels`,
-          });
-        }
-        this.map.addLayer(layerItem.layer);
-        break;
-      case "wmts":
-        layerConfig = configMapper.mapWMTSConfig(layer, this.config);
-        layerItem = new WMTSLayer(
-          layerConfig.options,
-          this.config.appConfig.proxy,
-          this.map
-        );
-        this.map.addLayer(layerItem.layer);
-        break;
-      case "vector":
-        layerConfig = configMapper.mapVectorConfig(layer);
-        layerItem = new WFSVectorLayer(
-          layerConfig.options,
-          this.config.appConfig.proxy,
-          this.map
-        );
-        this.map.addLayer(layerItem.layer);
-        break;
-      // case "arcgis":
-      //   layerConfig = configMapper.mapArcGISConfig(layer);
-      //   layer = new ArcGISLayer(layerConfig);
-      //   break;
-      // case "data":
-      //   layerConfig = configMapper.mapDataConfig(layer);
-      //   layer = new DataLayer(layerConfig);
-      //   break;
-      default:
-        break;
-    }
-  }
-
-  lookup(layers, type) {
-    const matchedLayers = [];
-    layers.forEach((layer) => {
-      const layerConfig = this.config.layersConfig.find(
-        (lookupLayer) => lookupLayer.id === layer.id
-      );
-      // Note that "layer" below IS NOT an OL Layer, only a structure from our config.
-      // Hence, no layer.set("layerType"). Instead we do this:
-      layer.layerType = type;
-      // Use the general value for infobox if not present in map config.
-      if (layerConfig !== undefined && layerConfig.type === "vector") {
-        if (!layer.infobox && layerConfig) {
-          layer.infobox = layerConfig.infobox;
-        }
-      }
-      matchedLayers.push({
-        ...layerConfig,
-        ...layer,
-      });
-    });
-    return matchedLayers;
-  }
-
-  expand(groups) {
-    var result = [];
-    groups.forEach((group) => {
-      result = [...result, ...group.layers];
-      if (group.groups) {
-        result = [...result, ...this.expand(group.groups)];
-      }
-    });
-    return result;
-  }
-
-  flattern(layerSwitcherConfig) {
-    const layers = [
-      ...this.lookup(layerSwitcherConfig.options.baselayers, "base"),
-      ...this.lookup(this.expand(layerSwitcherConfig.options.groups), "layer"),
-    ];
-
-    return layers;
+    clear(this);
   }
 
   addLayers() {
-    const layerSwitcherConfig = this.config.mapConfig.tools.find(
-        (tool) => tool.type === "layerswitcher"
-      ),
-      infoclickConfig = this.config.mapConfig.tools.find(
-        (t) => t.type === "infoclick"
-      );
-
-    // Prepare layers
-    this.layers = this.flattern(layerSwitcherConfig);
-    // Loop the layers and add each of them to the map
-    this.layers.forEach((layer) => {
-      if (this.layersFromParams.length > 0) {
-        // Override the default visibleAtStart if a value was provided in URLSearchParams
-        layer.visibleAtStart = this.layersFromParams.some((layerId) => {
-          return layerId === layer.id || layerId === `${layer.id}_l`;
-        });
-
-        layer._requestLabelLayer =
-          layer.hasLabelStyle === true &&
-          this.layersFromParams.includes(`${layer.id}_l`);
-
-        // groupLayersFromParams is an object where keys are layer IDs and values are
-        // the sublayers that should be active for this given layer. A layer's key will
-        // only exist in groupLayersFromParams if there is a subset of sublayers to be shown
-        // at start (default behavior is to turn on all sublayers).
-        layer.visibleAtStartSubLayers = Object.hasOwn(
-          this.groupLayersFromParams,
-          layer.id
-        )
-          ? this.groupLayersFromParams[layer.id]?.split(",")
-          : [];
-      }
-      layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
-      this.addMapLayer(layer);
-    });
-
-    // Now that layers exist, we set useLabelStyle on the proper layers
-    this.layers.forEach((layer) => {
-      if (layer._requestLabelLayer === true) {
-        const olLayer = this.map
-          .getAllLayers()
-          .find((l) => l.get("name") === layer.id);
-
-        if (olLayer && olLayer.get("hasLabelStyle")) {
-          if (!olLayer.get("useLabelStyle")) {
-            olLayer.set("useLabelStyle", true);
-          }
-        }
-      }
-    });
-
-    // Check if the layerParams contains -1 (white background) and handle set it to visible on load
-    if (
-      this.layersFromParams.includes("-1") &&
-      layerSwitcherConfig?.options?.backgroundSwitcherWhite
-    ) {
-      const whiteLayer = this.map
-        .getAllLayers()
-        .find((l) => l.get("name") === "-1");
-      whiteLayer.setVisible(true);
-    }
-
-    // Check if the layerParams contains -2 (black background) and handle set it to visible on load
-    if (
-      this.layersFromParams.includes("-2") &&
-      layerSwitcherConfig?.options?.backgroundSwitcherBlack
-    ) {
-      const blackLayer = this.map
-        .getAllLayers()
-        .find((l) => l.get("name") === "-2");
-      blackLayer.setVisible(true);
-    }
-
-    // Check if the layerParams contains -3 (osm-layer) and handle set it to visible on load
-    if (
-      this.layersFromParams.includes("-3") &&
-      layerSwitcherConfig?.options?.enableOSM
-    ) {
-      const osmLayer = this.map
-        .getAllLayers()
-        .find((l) => l.get("name") === "-3");
-      if (osmLayer === undefined) {
-        console.warn(`Cannot find the OSM layer`);
-      } else {
-        osmLayer.setVisible(true);
-      }
-    }
-
-    // FIXME: Move to infoClick instead. All other plugins create their own layers.
-    if (infoclickConfig !== undefined) {
-      this.addHighlightLayer(infoclickConfig.options);
-    }
-
+    addLayers(this);
     return this;
   }
 
-  addHighlightLayer(options) {
-    const { anchor, scale, src, strokeColor, strokeWidth, fillColor } = options;
-    const strokeColorAsArray = strokeColor && [
-      strokeColor.r,
-      strokeColor.g,
-      strokeColor.b,
-      strokeColor.a,
-    ];
-    const fillColorAsArray = fillColor && [
-      fillColor.r,
-      fillColor.g,
-      fillColor.b,
-      fillColor.a,
-    ];
-    this.highlightSource = new VectorSource();
-    this.highlightLayer = new VectorLayer({
-      caption: "Infoclick layer",
-      name: "pluginInfoclick",
-      layerType: "system",
-      zIndex: 5001, // System layer's zIndex start at 5000, ensure click is above
-      source: this.highlightSource,
-      style: new Style({
-        stroke: new Stroke({
-          color: strokeColorAsArray || [200, 0, 0, 0.7],
-          width: strokeWidth || 4,
-        }),
-        fill: new Fill({
-          color: fillColorAsArray || [255, 0, 0, 0.1],
-        }),
-        image: new Icon({
-          anchor: [anchor[0] || 0.5, anchor[1] || 1],
-          scale: scale || 0.15,
-          src: src || "marker.png",
-        }),
-      }),
-    });
-    this.map.addLayer(this.highlightLayer);
-  }
-
-  getCenter(e) {
-    return [e[0] + Math.abs(e[2] - e[0]) / 2, e[1] + Math.abs(e[3] - e[1]) / 2];
-  }
-
-  highlight(features) {
-    if (this.highlightSource) {
-      this.highlightSource.clear();
-      if (features) {
-        // Let's handle multiple features as array and keep backward compatibility with single features.
-        features = Array.isArray(features) ? features : [features];
-        this.highlightSource.addFeatures(features);
-      }
-    }
-  }
-
-  /**
-   * @summary Merges two objects.
-   *
-   * @param {*} mapConfig
-   * @param {*} paramsAsPlainObject
-   * @returns {*} a Result of overwriting a with values from b
-   * @memberof AppModel
-   */
-  mergeConfigWithValuesFromParams(mapConfig, paramsAsPlainObject) {
-    // clean is used to strip the UI of all elements so we get a super clean viewport back, without any plugins
-    const clean =
-      Boolean(paramsAsPlainObject.hasOwnProperty("clean")) &&
-      paramsAsPlainObject.clean !== "false" &&
-      paramsAsPlainObject.clean !== "0";
-
-    // Merge query params to the map config from JSON
-    let x = parseFloat(paramsAsPlainObject.x),
-      y = parseFloat(paramsAsPlainObject.y),
-      z = parseInt(paramsAsPlainObject.z, 10);
-
-    if (typeof paramsAsPlainObject.l === "string") {
-      this.layersFromParams = paramsAsPlainObject.l.split(",");
-    }
-
-    if (typeof paramsAsPlainObject.gl === "string") {
-      try {
-        this.groupLayersFromParams = JSON.parse(paramsAsPlainObject.gl);
-      } catch (error) {
-        console.error(
-          "Couldn't parse the group layers parameter. Attempted with this value:",
-          paramsAsPlainObject.gl
-        );
-      }
-    }
-
-    if (Number.isNaN(x)) {
-      x = mapConfig.map.center[0];
-    }
-    if (Number.isNaN(y)) {
-      y = mapConfig.map.center[1];
-    }
-    if (Number.isNaN(z)) {
-      z = mapConfig.map.zoom;
-    }
-
-    mapConfig.map.clean = clean;
-    mapConfig.map.center[0] = x;
-    mapConfig.map.center[1] = y;
-    mapConfig.map.zoom = z;
-
-    // f contains our CQL Filters
-    const f = paramsAsPlainObject.f;
-    if (f) {
-      // Filters come as a URI encoded JSON object, so we must parse it first
-      this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
-    }
-
-    // If the 'p' param exists, we want to modify which plugins are visible at start
-    const pluginsToShow = paramsAsPlainObject?.p?.split(",");
-    if (pluginsToShow) {
-      // If the value of 'p' is an empty string, it means that no plugin should be shown at start
-      if (pluginsToShow.length === 1 && pluginsToShow[0] === "") {
-        mapConfig.tools.forEach((t) => {
-          t.options.visibleAtStart = false;
-        });
-      }
-      // If 'p' exists but is not an empty string, we have a list of plugins that should be
-      // shown at start. All others should be hidden (no matter the setting in Admin).
-      else {
-        mapConfig.tools.forEach((t) => {
-          t.options.visibleAtStart = pluginsToShow.includes(
-            t.type.toLowerCase()
-          );
-        });
-      }
-    }
-
-    // If enableAppStateInHash exists in params, let's override
-    // the corresponding setting from map config. This allows users
-    // to activate live hash params (#1252).
-    const enableAppStateInHash = Object.hasOwn(
-      paramsAsPlainObject,
-      "enableAppStateInHash"
-    );
-    if (enableAppStateInHash) {
-      console.info("Activating live updating of query parameters");
-      mapConfig.map.enableAppStateInHash = true;
-    }
-
-    return mapConfig;
-  }
-  /**
-   * @summary If supplied argument, v, is a string and is longer then 0, return an encoded value of v. Else return undefined.
-   *
-   * @param {*} v
-   * @returns
-   * @memberof AppModel
-   */
-  returnStringOrUndefined(v) {
-    return typeof v === "string" && v.trim().length > 0 ? v : undefined;
-  }
-
-  overrideGlobalSearchConfig(searchTool, wfslayers) {
-    const configSpecificSearchLayers = searchTool.options.layers;
-    const searchLayers = wfslayers.filter((layer) => {
-      if (configSpecificSearchLayers.find((x) => x.id === layer.id)) {
-        return layer;
-      } else {
-        return undefined;
-      }
-    });
-    return searchLayers;
-  }
-
-  overrideGlobalEditConfig(editTool, wfstlayers) {
-    const configSpecificEditLayers = editTool.options.activeServices;
-    const editLayers = wfstlayers.filter((layer) => {
-      if (configSpecificEditLayers.find((x) => x.id === layer.id)) {
-        return layer;
-      } else {
-        return undefined;
-      }
-    });
-    return editLayers;
-  }
-
-  translateConfig() {
-    if (
-      this.config.mapConfig.hasOwnProperty("map") &&
-      this.config.mapConfig.map.hasOwnProperty("title")
-    ) {
-      document.title = this.config.mapConfig.map.title; // TODO: add opt-out in admin to cancel this override behaviour.
-    }
-
-    const layerSwitcherTool = this.config.mapConfig.tools.find((tool) => {
-      return tool.type === "layerswitcher";
-    });
-
-    const searchTool = this.config.mapConfig.tools.find((tool) => {
-      return tool.type === "search";
-    });
-
-    const editTool = this.config.mapConfig.tools.find((tool) => {
-      return tool.type === "edit";
-    });
-
-    let layers = {};
-
-    if (layerSwitcherTool) {
-      layers.wmslayers = this.config.layersConfig.wmslayers || [];
-      layers.wfslayers = this.config.layersConfig.wfslayers || [];
-      layers.wfstlayers = this.config.layersConfig.wfstlayers || [];
-      layers.wmtslayers = this.config.layersConfig.wmtslayers || [];
-      layers.vectorlayers = this.config.layersConfig.vectorlayers || [];
-      layers.arcgislayers = this.config.layersConfig.arcgislayers || [];
-
-      layers.wmslayers.forEach((l) => (l.type = "wms"));
-      layers.wmtslayers.forEach((l) => (l.type = "wmts"));
-      layers.wfstlayers.forEach((l) => (l.type = "edit"));
-      layers.vectorlayers.forEach((l) => (l.type = "vector"));
-      layers.arcgislayers.forEach((l) => (l.type = "arcgis"));
-
-      let allLayers = [
-        ...layers.wmslayers,
-        ...layers.wmtslayers,
-        ...layers.vectorlayers,
-        ...layers.wfstlayers,
-        ...layers.arcgislayers,
-      ];
-
-      this.config.layersConfig = allLayers;
-    }
-
-    if (searchTool) {
-      // Take a look at all available wfslayers in layers repository,
-      // but let the search tool only see those that are specified in searchTool.options
-      const wfslayers = this.overrideGlobalSearchConfig(
-        searchTool,
-        layers.wfslayers
-      );
-
-      // See if admin wants to expose any WMS layers. selectedSources will
-      // in that case be an array that will hold the IDs of corresponding layers
-      // (that can be found in our layers.wmslayers array). In there, a properly
-      // configured WMS layer that is to be searchable will have certain search-related
-      // settings active (such as name of the geometry column or URL to the WFS service).
-      const wmslayers = searchTool.options.selectedSources?.flatMap(
-        (wmslayerId) => {
-          // Find the corresponding layer
-          const layer = layers.wmslayers.find((l) => l.id === wmslayerId);
-
-          // Prevent crash if no layer was found, see #1206
-          if (layer === undefined) {
-            console.warn(
-              `WMS layer with ID "${wmslayerId}" does not exist and should be removed from config. Please contact the system administrator.`
-            );
-            return undefined;
-          }
-
-          // Look into the layersInfo array - it will contain sublayers. We must
-          // expose each one of them as a WFS service.
-          return layer?.layersInfo.map((sl) => {
-            return {
-              id: sl.id,
-              pid: layer.id, // Relevant for group layers: will hold the actual OL layer name, not only current sublayer
-              caption: sl.caption,
-              url: sl.searchUrl || layer.url,
-              layers: [sl.id],
-              searchFields:
-                typeof sl.searchPropertyName === "string" &&
-                sl.searchPropertyName.length > 0
-                  ? sl.searchPropertyName.split(",")
-                  : [],
-              infobox: sl.infobox || "",
-              infoclickIcon: sl.infoclickIcon || "",
-              aliasDict: "",
-              displayFields:
-                typeof sl.searchDisplayName === "string" &&
-                sl.searchDisplayName.length > 0
-                  ? sl.searchDisplayName.split(",")
-                  : [],
-              secondaryLabelFields:
-                typeof sl.secondaryLabelFields === "string" &&
-                sl.secondaryLabelFields.length > 0
-                  ? sl.secondaryLabelFields.split(",")
-                  : [],
-              shortDisplayFields:
-                typeof sl.searchShortDisplayName === "string" &&
-                sl.searchShortDisplayName.length > 0
-                  ? sl.searchShortDisplayName.split(",")
-                  : [],
-              geometryField: sl.searchGeometryField || "geom",
-              outputFormat: sl.searchOutputFormat || "GML3",
-              serverType: layer.serverType || "geoserver",
-            };
-          });
-        }
-      );
-
-      // Spread the WMS search layers onto the array with WFS search sources,
-      // from now on they're equal to our code. Before spreading, let's filter
-      // the wmslayers so we get rid of potential undefined values (see #1206).
-      Array.isArray(wmslayers) && wfslayers.push(...wmslayers.filter(Boolean));
-
-      searchTool.options.sources = wfslayers;
-    }
-
-    // This is for backwards compatibility prior to adding locking WFST edit layers with AD.
-    // This code handles if activeServices does not have an object with "id", "visibleForGroups"
-    if (editTool) {
-      if (editTool.options.activeServices === null) {
-        editTool.options.sources = [];
-      } else {
-        if (
-          editTool.options.activeServices &&
-          editTool.options.activeServices.length !== 0
-        ) {
-          if (
-            typeof editTool.options.activeServices[0].visibleForGroups ===
-            "undefined"
-          ) {
-            // If activeService does not have an object with "id", "visibleForGroups", add it
-            let as = [];
-            for (let i = 0; i < editTool.options.activeServices.length; i++) {
-              let service = {
-                id: editTool.options.activeServices[i],
-                visibleForGroups: [],
-              };
-              as.push(service);
-            }
-            editTool.options.activeServices = as;
-          }
-
-          let wfstlayers = this.overrideGlobalEditConfig(
-            editTool,
-            layers.wfstlayers
-          );
-          editTool.options.sources = wfstlayers;
-          layers.wfstlayers = wfstlayers;
-        } else {
-          editTool.options.sources = [];
-        }
-      }
-    }
-
-    return this.mergeConfigWithValuesFromParams(
-      this.config.mapConfig,
-      Object.fromEntries(getMergedSearchAndHashParams())
-    );
+  highlight(f) {
+    highlight(this, f);
   }
 
   /**
@@ -1265,189 +216,8 @@ class AppModel {
    * visibility. E.g. "{"1242"%3A"name_of_sublayer_a, name_of_sublayer_b"}".
    */
   setLayerVisibilityFromParams(layers = null, groupLayers = "{}") {
-    // Grab the wanted values from params
-    const l = layers;
-    const gl = groupLayers ?? "{}"; // Default to a stringified empty object, as that's what we'll compare against
-
-    // Find out what's currently visible
-    const visibleLayers = this.anchorModel.getVisibleLayers();
-    const partlyToggledGroupLayers =
-      this.anchorModel.getPartlyToggledGroupLayers();
-
-    // Compare these two
-    if (
-      l === visibleLayers &&
-      JSON.stringify(partlyToggledGroupLayers) === gl
-    ) {
-      // console.log("No changes");
-    } else {
-      // It's easier to work on the values if we parse them first
-      const parseLayerId = (layerId) => {
-        const hasLabelSuffix = layerId.endsWith("_l");
-        const baseId = hasLabelSuffix ? layerId.slice(0, -2) : layerId;
-        return { baseId, hasLabelSuffix };
-      };
-
-      const findOLLayer = (baseId) => {
-        return this.map.getAllLayers().find((l) => l.get("name") === baseId);
-      };
-
-      const wantedL = l.split(",");
-      const wantedGl = JSON.parse(gl);
-      const currentL = visibleLayers.split(",");
-      const currentGl = partlyToggledGroupLayers;
-
-      const wantedLayersMap = new Map();
-      wantedL.forEach((layerId) => {
-        const { baseId, hasLabelSuffix } = parseLayerId(layerId);
-        wantedLayersMap.set(baseId, hasLabelSuffix);
-      });
-
-      const currentLayersMap = new Map();
-      currentL.forEach((layerId) => {
-        const { baseId, hasLabelSuffix } = parseLayerId(layerId);
-        currentLayersMap.set(baseId, hasLabelSuffix);
-      });
-
-      const lToShow = [];
-      const lToHide = [];
-      const lToUpdateStyle = [];
-
-      wantedLayersMap.forEach((wantedHasLabel, baseId) => {
-        if (!currentLayersMap.has(baseId)) {
-          lToShow.push({ baseId, hasLabelSuffix: wantedHasLabel });
-        } else if (currentLayersMap.get(baseId) !== wantedHasLabel) {
-          lToUpdateStyle.push({ baseId, hasLabelSuffix: wantedHasLabel });
-        }
-      });
-
-      currentLayersMap.forEach((currentHasLabel, baseId) => {
-        if (!wantedLayersMap.has(baseId)) {
-          lToHide.push({ baseId, hasLabelSuffix: currentHasLabel });
-        }
-      });
-
-      // Update label styles for layers that are already visible
-      lToUpdateStyle.forEach(({ baseId, hasLabelSuffix }) => {
-        const olLayer = findOLLayer(baseId);
-
-        if (olLayer === undefined) {
-          console.warn(
-            `Attempt to update layer style for ${baseId} failed: layer not found in current map`
-          );
-        } else {
-          if (hasLabelSuffix && olLayer.get("hasLabelStyle")) {
-            olLayer.set("useLabelStyle", true);
-          } else {
-            olLayer.set("useLabelStyle", false);
-          }
-        }
-      });
-
-      // Show layers
-      lToShow.forEach(({ baseId, hasLabelSuffix }) => {
-        const olLayer = findOLLayer(baseId);
-
-        if (olLayer === undefined) {
-          console.warn(
-            `Attempt to show layer with id ${baseId} failed: layer not found in current map`
-          );
-        } else if (olLayer.get("layerType") === "group") {
-          if (wantedGl[baseId]) {
-            const subLayersToShow = wantedGl[baseId]?.split(",");
-            setOLSubLayers(olLayer, subLayersToShow);
-          }
-          // On the other hand, if the layer to be shown does not exist in 'wantedGl',
-          // it means that we should show ALL the sublayers.
-          // For that we must publish the event slightly differently. (Also, see
-          // where we subscribe to layerswitcher.showLayer for further understanding.)
-          else {
-            const allSubLayers = olLayer.get("allSubLayers");
-            setOLSubLayers(olLayer, allSubLayers);
-          }
-          // That's it for group layer. The other layers, the "normal"
-          // ones, are easier: just show them.
-        } else {
-          // Set label state before making it visible
-          if (hasLabelSuffix && olLayer.get("hasLabelStyle")) {
-            olLayer.set("useLabelStyle", true);
-          } else {
-            olLayer.set("useLabelStyle", false);
-          }
-
-          // Each layer has a listener that will take care of toggling
-          // the checkbox in LayerSwitcher.
-          olLayer.setVisible(true);
-        }
-      });
-
-      // Next, let's take care of layers that should be hidden.
-      lToHide.forEach(({ baseId }) => {
-        const olLayer = findOLLayer(baseId);
-
-        if (olLayer === undefined) {
-          console.warn(
-            `Attempt to hide layer with id ${baseId} failed: layer not found in current map`
-          );
-        } else if (olLayer.get("layerType") === "group") {
-          // Tell the LayerSwitcher about it
-          this.globalObserver.publish("layerswitcher.hideLayer", olLayer);
-          olLayer.setVisible(false);
-        } else {
-          olLayer.setVisible(false);
-        }
-      });
-
-      // One more special case must be taken care of. lToShow and lToHide can be empty
-      // if user toggled only a sublayer WITHIN a group layer. In that case we
-      // won't need to change visibility for any OL layers, but we must still fix the group
-      // layer's components' visibility.
-      // We start by looping the wantedGl and comparing to currentGl.
-      for (const key of Object.keys(wantedGl)) {
-        // If the currently visible groups object has the layer's key…
-        // …and it's value differs from the wantedGl's corresponding value…
-        if (Object.hasOwn(currentGl, key) && currentGl[key] !== wantedGl[key]) {
-          const olLayer = findOLLayer(key);
-          if (olLayer) {
-            const subLayersToShow = wantedGl[key]?.split(",");
-            setOLSubLayers(olLayer, subLayersToShow);
-          }
-        }
-      }
-
-      // Super-special case:
-      // If a partly-toggled group layer becomes fully toggled it will
-      // not show up as a diff in wanted vs current layers. Neither will
-      // we see anything in 'wantedGl' (it will be empty, as that's what we
-      // expect for fully toggled group layers [no sub-selection]).
-      // So what can we do?
-      // One solution is to loop through our visible layers (again). Any of them
-      // that are of type 'groupLayer', and where a wantedGl key is missing should
-      // be toggled on completely.
-      wantedL.forEach((layerId) => {
-        const { baseId } = parseLayerId(layerId);
-        const olLayer = this.map
-          .getAllLayers()
-          .find(
-            (l) => l.get("name") === baseId && l.get("layerType") === "group"
-          );
-
-        if (olLayer !== undefined) {
-          // Determine how we should call the layerswitcher.showLayer event.
-          // A: No sublayers specified for layer in 'wantedGl'. That means show ALL sublayers.
-          // B: Sublayers found in 'wantedGl'. Set visibility accordingly.
-          if (wantedGl[baseId] === undefined) {
-            const allSubLayers = olLayer.get("allSubLayers");
-            setOLSubLayers(olLayer, allSubLayers);
-          } else {
-            const subLayersToShow = wantedGl[baseId]?.split(",");
-            setOLSubLayers(olLayer, subLayersToShow);
-          }
-        }
-      });
-    }
+    setLayerVisibilityFromParams(this, layers, groupLayers);
   }
 }
 
-/* eslint import/no-anonymous-default-export: [2, {"allowNew": true}] */
 export default new AppModel();
