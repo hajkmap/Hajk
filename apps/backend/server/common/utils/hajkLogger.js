@@ -66,6 +66,16 @@ log4js.configure({
       layout: { type: "messagePassThrough" },
       ...commonDateFileOptions,
     },
+    // Appender for the detailed request logger middleware.
+    detailedRequestLog: {
+      type: "dateFile",
+      filename: `logs/detailed-requests${uniqueInstance}.log`,
+      layout: {
+        type: "pattern",
+        pattern: "[%d]%m",
+      },
+      ...commonDateFileOptions,
+    },
   },
   // Categories specify _which appender is used with respective logger_. E.g., if we create
   // a logger with 'const logger = log4js.getLogger("foo")', and there exists a "foo" category
@@ -89,6 +99,13 @@ log4js.configure({
     ...(process.env.LOG_ACCESS_LOG_TO.trim().length !== 0 && {
       http: {
         appenders: process.env.LOG_ACCESS_LOG_TO.split(","),
+        level: "all",
+      },
+    }),
+    // If activated in .env, write detailed request log to its own file, independent of LOG_LEVEL
+    ...(process.env.LOG_DETAILED_REQUEST_LOGGER === "true" && {
+      "detailed.request.logger": {
+        appenders: ["detailedRequestLog"],
         level: "all",
       },
     }),
