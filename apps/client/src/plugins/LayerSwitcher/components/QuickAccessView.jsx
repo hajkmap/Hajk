@@ -156,7 +156,7 @@ const QuickAccessView = ({
               slotProps={{
                 primary: {
                   variant: "body1",
-                  fontWeight: hasVisibleLayers ? "bold" : "inherit",
+                  sx: { fontWeight: hasVisibleLayers ? "bold" : "inherit" },
                 },
               }}
             />

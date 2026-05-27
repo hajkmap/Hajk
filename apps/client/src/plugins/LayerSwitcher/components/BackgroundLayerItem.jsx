@@ -134,11 +134,13 @@ function BackgroundLayerItem({
             primary={name}
             slotProps={{
               primary: {
-                pr: 5,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
                 variant: "body1",
-                fontWeight: "inherit",
+                sx: {
+                  pr: 5,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  fontWeight: "inherit",
+                },
               },
             }}
           />

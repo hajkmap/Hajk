@@ -109,15 +109,17 @@ export default function SubLayerItem({
           primary={subLayerInfo.caption}
           slotProps={{
             primary: {
-              pr: 5,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              fontWeight: (theme) =>
-                visible
-                  ? toggleable
-                    ? theme.typography.fontWeightBold
-                    : "inherit"
-                  : "inherit",
+              sx: {
+                pr: 5,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                fontWeight: (theme) =>
+                  visible
+                    ? toggleable
+                      ? theme.typography.fontWeightBold
+                      : "inherit"
+                    : "inherit",
+              },
             },
           }}
         />

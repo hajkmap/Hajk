@@ -310,14 +310,18 @@ function FavoritesList({
                     secondary={parseDate(favorite.metadata.savedAt)}
                     slotProps={{
                       primary: {
-                        pr: 5,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
+                        sx: {
+                          pr: 5,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        },
                       },
                       secondary: {
-                        pr: 5,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
+                        sx: {
+                          pr: 5,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        },
                       },
                     }}
                   />

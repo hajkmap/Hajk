@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: New Mobile UI etc, see [#1778](https://github.com/hajkmap/Hajk/issues/1778).
 - Client: New CQL filter UI, PR [#1756](https://github.com/hajkmap/Hajk/pull/1756).
 - Client: TypeScript is now supported, see [#1824.](https://github.com/hajkmap/Hajk/pull/1824)
-- Client: Upgraded MUI packages to v9. Completed the migration steps not covered by the codemods — Autocomplete `renderInput` now reads `params.slotProps` (fixes a startup crash in the search bar), `PopperComponent`/`PaperComponent` moved to `slots`, Dialog `PaperComponent`/`PaperProps`/`BackdropProps`/`onBackdropClick` and Tooltip `TransitionProps` moved to `slots`/`slotProps`, and remaining `InputProps` on TextField moved to `slotProps.input`.
+- Client: Upgraded MUI packages to v9. Completed the migration steps not covered by the codemods — Autocomplete `renderInput` now reads `params.slotProps` (fixes a startup crash in the search bar), `PopperComponent`/`PaperComponent` moved to `slots`, Dialog `PaperComponent`/`PaperProps`/`BackdropProps`/`onBackdropClick` and Tooltip `TransitionProps` moved to `slots`/`slotProps`, remaining `InputProps` on TextField moved to `slotProps.input`, `SpeedDialAction` tooltip props moved to `slotProps.tooltip`, and CSS props inside `ListItemText` Typography slots moved into `sx` (silences DOM prop warnings and restores layer-name truncation).
 
 ### Fixed
 
