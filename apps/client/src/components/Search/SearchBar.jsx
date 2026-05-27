@@ -303,8 +303,7 @@ class SearchBar extends React.PureComponent {
         id="searchInputField"
         freeSolo
         size={"small"}
-        PopperComponent={(popperProps) => <CustomPopper {...popperProps} />}
-        PaperComponent={CustomPaper}
+        slots={{ popper: CustomPopper, paper: CustomPaper }}
         clearOnEscape
         disabled={
           searchActive === "extentSearch" ||
@@ -431,8 +430,9 @@ class SearchBar extends React.PureComponent {
         autoFocus={this.props.options?.autofocusOnStart ?? false}
         onKeyDown={handleSearchBarKeyPress}
         slotProps={{
+          ...params.slotProps,
           input: {
-            ...params.InputProps,
+            ...params.slotProps.input,
             ...disableUnderline,
             style: { margin: 0, ...(isMobile && { height: "46px" }) }, // TODO: Prevent hardcoding of height, really not urgent.
             notched: isMobile ? null : false,
@@ -442,7 +442,7 @@ class SearchBar extends React.PureComponent {
                 {loading ? (
                   <CircularProgress color="inherit" size={20} />
                 ) : null}
-                {params.InputProps.endAdornment}
+                {params.slotProps.input.endAdornment}
                 {showFailedWFSMessage &&
                   this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
                 {!showSearchResults ? (

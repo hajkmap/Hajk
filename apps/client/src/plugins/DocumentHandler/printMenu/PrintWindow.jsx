@@ -1045,9 +1045,11 @@ class PrintWindow extends React.PureComponent {
         <BaseDialog
           fullScreen={fullScreen}
           open={isModalOpen}
-          PaperProps={{ style: { width: !fullScreen && "30%" } }}
-          BackdropProps={{
-            style: { backgroundColor: "rgba(0, 0, 0, 0.25)" },
+          slotProps={{
+            paper: { style: { width: !fullScreen && "30%" } },
+            backdrop: {
+              style: { backgroundColor: "rgba(0, 0, 0, 0.25)" },
+            },
           }}
           onClose={() => closeAttachmentModal()}
         >

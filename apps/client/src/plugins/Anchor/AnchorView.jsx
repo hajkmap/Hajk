@@ -165,7 +165,7 @@ class AnchorView extends React.PureComponent {
           <StyledTextField
             fullWidth={true}
             id="anchorUrl"
-            InputProps={{ readOnly: true }}
+            slotProps={{ input: { readOnly: true } }}
             value={this.state.anchor}
             variant="outlined"
             size="small"

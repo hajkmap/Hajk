@@ -232,7 +232,7 @@ function LayerItemDetails({
                 onClose={handleClose}
                 onOpen={handleOpen}
                 title="Tillbaka"
-                TransitionProps={{ timeout: 0 }}
+                slotProps={{ transition: { timeout: 0 } }}
               >
                 <LsIconButton
                   id="layer-item-details-back-button"

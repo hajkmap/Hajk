@@ -478,10 +478,12 @@ class FirExportResidentListView extends React.PureComponent {
                       }
                     }}
                     size="small"
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">år</InputAdornment>
-                      ),
+                    slotProps={{
+                      input: {
+                        endAdornment: (
+                          <InputAdornment position="end">år</InputAdornment>
+                        ),
+                      },
                     }}
                     variant="outlined"
                   />
