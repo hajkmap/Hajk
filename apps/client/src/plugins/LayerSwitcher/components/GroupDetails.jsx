@@ -81,7 +81,7 @@ function GroupDetails({ display, groupDetails, app }) {
                 onClose={handleClose}
                 onOpen={handleOpen}
                 title="Tillbaka"
-                TransitionProps={{ timeout: 0 }}
+                slotProps={{ transition: { timeout: 0 } }}
               >
                 <LsIconButton onClick={handleBackButtonClick}>
                   <ArrowBackIcon />

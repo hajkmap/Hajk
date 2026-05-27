@@ -8,13 +8,18 @@ const SlideUpTransition = React.forwardRef(
   }
 );
 
-export default function BaseDialog(rest) {
+export default function BaseDialog(props) {
+  const { slots, ...rest } = props;
   const isMobile = getIsMobile();
   return (
     <Dialog
       {...rest}
       slots={{
-        transition: isMobile ? SlideUpTransition : undefined,
+        ...slots,
+        // On mobile we always force the slide-up transition; otherwise we
+        // respect any transition the caller provided (falling back to the
+        // MUI default).
+        transition: isMobile ? SlideUpTransition : slots?.transition,
       }}
     />
   );

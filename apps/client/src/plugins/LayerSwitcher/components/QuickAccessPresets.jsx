@@ -499,7 +499,7 @@ function QuickAccessPresets({
               onClose={handleClose}
               onOpen={handleOpen}
               title="Tillbaka"
-              TransitionProps={{ timeout: 0 }}
+              slotProps={{ transition: { timeout: 0 } }}
             >
               <LsIconButton
                 id="quick-access-back-button"

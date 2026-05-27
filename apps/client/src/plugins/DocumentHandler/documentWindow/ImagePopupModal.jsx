@@ -62,13 +62,17 @@ class ImagePopupModal extends React.PureComponent {
     return (
       <BaseDialog
         maxWidth="lg"
-        onBackdropClick={close}
-        PaperComponent={PaperComponent}
-        PaperProps={{
-          component: "img",
-          onClose: close,
-          src: image?.url,
-          altValue: image?.altValue,
+        onClose={(_e, reason) => {
+          if (reason === "backdropClick") close();
+        }}
+        slots={{ paper: PaperComponent }}
+        slotProps={{
+          paper: {
+            component: "img",
+            onClose: close,
+            src: image?.url,
+            altValue: image?.altValue,
+          },
         }}
         open={open}
       />
