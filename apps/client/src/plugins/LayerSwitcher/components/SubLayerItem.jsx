@@ -92,15 +92,17 @@ export default function SubLayerItem({
           sx={{ alignSelf: "center" }}
           slotProps={{
             primary: {
-              pr: 5,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              fontWeight: (theme) =>
-                visible
-                  ? toggleable
-                    ? theme.typography.fontWeightBold
-                    : "inherit"
-                  : "inherit",
+              sx: {
+                pr: 5,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                fontWeight: (theme) =>
+                  visible
+                    ? toggleable
+                      ? theme.typography.fontWeightBold
+                      : "inherit"
+                    : "inherit",
+              },
             },
           }}
         />

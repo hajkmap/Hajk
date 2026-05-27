@@ -597,13 +597,17 @@ function QuickAccessPresets({
                       secondary={l.author}
                       slotProps={{
                         primary: {
-                          pr: 5,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          sx: {
+                            pr: 5,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          },
                         },
                         secondary: {
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          sx: {
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          },
                         },
                       }}
                     />

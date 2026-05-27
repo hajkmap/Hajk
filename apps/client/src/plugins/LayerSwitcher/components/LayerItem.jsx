@@ -410,11 +410,14 @@ function LayerItem({
               sx={{ alignSelf: "center" }}
               slotProps={{
                 primary: {
-                  pr: 5,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
                   variant: "body1",
-                  fontWeight: layerIsToggled && !draggable ? "bold" : "inherit",
+                  sx: {
+                    pr: 5,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    fontWeight:
+                      layerIsToggled && !draggable ? "bold" : "inherit",
+                  },
                 },
               }}
             />
