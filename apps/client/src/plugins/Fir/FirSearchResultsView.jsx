@@ -18,8 +18,8 @@ import FirSearchResultItemView from "./FirSearchResultItemView";
 import Pagination from "@mui/material/Pagination";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AddCircle from "@mui/icons-material/AddCircleOutline";
-import RemoveCircle from "@mui/icons-material/RemoveCircleOutline";
+import AddCircle from "@mui/icons-material/AddCircleOutlined";
+import RemoveCircle from "@mui/icons-material/RemoveCircleOutlined";
 import CircularProgress from "@mui/material/CircularProgress";
 import ListItemButton from "@mui/material/ListItemButton";
 
