@@ -27,6 +27,27 @@ class ConfigServiceV2 {
   }
 
   /**
+   * Validate map configuration name before using it in filesystem paths.
+   *
+   * @param {string} map
+   * @returns {string}
+   */
+  #validateMapName(map) {
+    if (typeof map !== "string") {
+      throw new Error("Invalid map name.");
+    }
+
+    const normalizedMap = map.trim();
+
+    // Only allow simple map IDs (file stem), e.g. "default_map-1".
+    if (!/^[A-Za-z0-9_-]+$/.test(normalizedMap)) {
+      throw new Error("Invalid map name.");
+    }
+
+    return normalizedMap;
+  }
+
+  /**
    * @summary Get contents of a map configuration as JSON object, if AD is active
    * a check will be made to see if specified user has access to the map.
    *
@@ -39,7 +60,12 @@ class ConfigServiceV2 {
    */
   async getMapConfig(map, user, washContent = true) {
     try {
-      const pathToFile = path.join(process.cwd(), "App_Data", `${map}.json`);
+      const safeMap = this.#validateMapName(map);
+      const pathToFile = path.join(
+        process.cwd(),
+        "App_Data",
+        `${safeMap}.json`
+      );
       const text = await fs.promises.readFile(pathToFile, "utf-8");
       const json = await JSON.parse(text);
 

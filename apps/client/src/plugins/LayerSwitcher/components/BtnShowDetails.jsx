@@ -6,7 +6,7 @@ const BtnShowDetails = ({ children, id, ...props }) => (
     id={id}
     size="small"
     sx={(theme) => ({
-      marginTop: "3px",
+      marginTop: "2px",
       "&:hover .ls-details-icon": {
         color: theme.palette.grey[900],
         ...theme.applyStyles("dark", {

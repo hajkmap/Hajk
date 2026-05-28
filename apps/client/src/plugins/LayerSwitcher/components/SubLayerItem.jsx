@@ -10,10 +10,8 @@ import {
 import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
 
-import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
-import HajkToolTip from "components/HajkToolTip";
-import LsIconButton from "./LsIconButton";
 import BtnShowDetails from "./BtnShowDetails";
+import BtnShowLegend from "./BtnShowLegend";
 import LsCheckBox from "./LsCheckBox";
 
 export default function SubLayerItem({
@@ -50,28 +48,11 @@ export default function SubLayerItem({
     if (subLayerInfo.legendIcon) {
       return <LegendIcon url={subLayerInfo.legendIcon} />;
     }
-    return renderLegendIcon();
-  };
-
-  const renderLegendIcon = () => {
     return (
-      <HajkToolTip
-        placement="left"
-        title={
-          legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"
-        }
-      >
-        <LsIconButton
-          sx={{ p: 0.25, mr: "5px" }}
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            setLegendIsActive(!legendIsActive);
-          }}
-        >
-          <FormatListBulletedOutlinedIcon fontSize="small" />
-        </LsIconButton>
-      </HajkToolTip>
+      <BtnShowLegend
+        legendIsActive={legendIsActive}
+        onClick={() => setLegendIsActive(!legendIsActive)}
+      />
     );
   };
 
@@ -86,6 +67,7 @@ export default function SubLayerItem({
         onClick={() => (toggleable ? toggleSubLayer(subLayer, visible) : null)}
         sx={(theme) => ({
           pl: "calc(2px + 10px)",
+          alignItems: "flex-start",
           borderBottom: toggleable
             ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
             : "none",
@@ -107,6 +89,7 @@ export default function SubLayerItem({
         {getIconFromLayer()}
         <ListItemText
           primary={subLayerInfo.caption}
+          sx={{ alignSelf: "center" }}
           slotProps={{
             primary: {
               sx: {

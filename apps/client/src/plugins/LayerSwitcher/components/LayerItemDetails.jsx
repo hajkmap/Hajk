@@ -9,7 +9,6 @@ import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 import { Button, Box, Divider, Slider, Typography, Stack } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
@@ -30,8 +29,14 @@ function LayerItemDetails({
   showQuickAccess,
 }) {
   const { enqueueSnackbar } = useSnackbar();
-  // State that toggles legend collapse
-  const [legendIsActive, setLegendIsActive] = useState(false);
+
+  const layerSwitcherConfig = app.config.mapConfig.tools.find(
+    (tool) => tool.type === "layerswitcher"
+  );
+  // State that toggles legend collapse — defaults to true if admin has enabled showLegendByDefault
+  const [legendIsActive, setLegendIsActive] = useState(
+    layerSwitcherConfig?.options?.showLegendByDefault ?? false
+  );
   // Keep the layer opacity in state
   const [opacity, setOpacity] = useState(0);
   // Keep the layer quickAccess property in state
@@ -44,9 +49,6 @@ function LayerItemDetails({
 
   const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
-  const layerSwitcherConfig = app.config.mapConfig.tools.find(
-    (tool) => tool.type === "layerswitcher"
-  );
   const cqlFilterVisible =
     layerSwitcherConfig?.options.cqlFilterVisible || false;
   const subLayerIndex =
@@ -83,6 +85,10 @@ function LayerItemDetails({
 
   // Setup listeners when component is mounted
   useEffect(() => {
+    // Reset legend visibility to the configured default each time a new layer is shown
+    setLegendIsActive(
+      layerSwitcherConfig?.options?.showLegendByDefault ?? false
+    );
     if (layerItemDetails?.layer) {
       // Register a listener: when layer's opacity changes make sure
       // to update opacity state. Not applicable for fakeMapLayers
@@ -147,6 +153,12 @@ function LayerItemDetails({
       layerItemDetails?.layer?.get("layerType") !== "system" &&
       // Exclude background layers
       layerItemDetails?.layer?.get("layerType") !== "base"
+    );
+  };
+
+  const hasSettings = () => {
+    return (
+      (showOpacitySlider !== false && showOpacity) || isCqlFilterEnabled()
     );
   };
 
@@ -261,21 +273,11 @@ function LayerItemDetails({
               p: 1,
             }}
           >
-            <Stack
-              direction="row"
-              sx={{
-                alignItems: "center",
-              }}
-            >
-              <LsIconButton
-                sx={{ cursor: "default" }}
-                disableFocusRipple
-                disableRipple
-              >
-                <InfoOutlinedIcon />
-              </LsIconButton>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="subtitle1">Info</Typography>
+            <Stack direction="row" alignItems="center">
+              <Box sx={{ flexGrow: 1, ml: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                  Info
+                </Typography>
               </Box>
               {showLegend && (
                 <HajkToolTip
@@ -297,34 +299,42 @@ function LayerItemDetails({
             <Box
               sx={(theme) => ({
                 py: 1,
-                px: 2,
-                borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+                ...(hasSettings() && {
+                  borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+                }),
               })}
             >
-              <LayerItemInfo
-                chapters={chapters}
-                app={app}
-                layer={layerItemDetails.layer}
-              ></LayerItemInfo>
-              <LegendImage src={legendUrl} open={legendIsActive}></LegendImage>
-            </Box>
-            <Stack
-              direction="row"
-              sx={{
-                alignItems: "center",
-              }}
-            >
-              <LsIconButton
-                sx={{ cursor: "default" }}
-                disableFocusRipple
-                disableRipple
+              <Box
+                sx={{
+                  ml: 1,
+                  mr: 1,
+                  "& .MuiCollapse-root": {
+                    ml: "-1px",
+                  },
+                }}
               >
-                <SettingsOutlinedIcon />
-              </LsIconButton>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="subtitle1">Inställningar</Typography>
+                <LayerItemInfo
+                  chapters={chapters}
+                  app={app}
+                  layer={layerItemDetails.layer}
+                ></LayerItemInfo>
+                <LegendImage src={legendUrl} open={legendIsActive}></LegendImage>
               </Box>
-            </Stack>
+            </Box>
+            {hasSettings() && (
+              <Stack direction="row" alignItems="center">
+                <LsIconButton
+                  sx={{ cursor: "default" }}
+                  disableFocusRipple
+                  disableRipple
+                >
+                  <SettingsOutlinedIcon />
+                </LsIconButton>
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="subtitle1">Inställningar</Typography>
+                </Box>
+              </Stack>
+            )}
             {showOpacitySlider !== false && showOpacity ? (
               <Box
                 id="layer-details-opacity-slider"

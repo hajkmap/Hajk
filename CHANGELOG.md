@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Client + Admin: LayerSwitcher - Added a new admin setting "Visa teckenförklaring direkt" that forces the legend to be expanded by default in the layer details view, so users don't have to click the legend button. [#1838](https://github.com/hajkmap/Hajk/issues/1838)
 - Client + Admin: DocumentHandler - Added a "Direct Print" setting that prints the currently active document directly without showing the document selection dialog [#1773](https://github.com/hajkmap/Hajk/issues/1773)
 - Client: Infoclick - Functionality to hide links that point to non-existing resources [#1804](https://github.com/hajkmap/Hajk/issues/1804)
 - Client: LayerComparer - Added the long-awaited spy glass mode [#1808](https://github.com/hajkmap/Hajk/issues/1808)
@@ -37,6 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Backend: Prevent path traversal in v2 map config loading by validating map names before reading files (`js/path-injection`, [code scanning alert #53](https://github.com/hajkmap/Hajk/security/code-scanning/53)).
+- Client: LayerSwitcher - Fixed vertical alignment of list items when using icons in the layer details view. [#1838](https://github.com/hajkmap/Hajk/issues/1838)
+- Client: LayerSwitcher - Removed redundant (i) icon next to the "Info" label in the layer details view. [#1838](https://github.com/hajkmap/Hajk/issues/1838)
+- Client: LayerSwitcher - The "Inställningar" heading is no longer shown when there are no settings available for a layer. [#1838](https://github.com/hajkmap/Hajk/issues/1838)
 - Client: DocumentHandler - Fixed subscription accumulation in Contents.jsx that caused duplicate print headers [#1773](https://github.com/hajkmap/Hajk/issues/1773)
 - Client: Ensure the Quick Access function respects the cookie setting [Issue #1798](https://github.com/hajkmap/Hajk/issues/1798)
 - Backend: Removed/replaced two unnecessary dependencies, see [commit](https://github.com/hajkmap/Hajk/commit/138e8668326b19a643542330ffef2ec5e3d847a6).

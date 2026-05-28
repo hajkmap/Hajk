@@ -218,6 +218,7 @@ const LayerGroup = ({
           <div style={{ width: "100%", display: "flex", flexDirection: "row" }}>
             <ListItemText
               style={{ flex: 1 }}
+              sx={{ alignSelf: "center", pt: "1px" }}
               primary={name}
               slotProps={{
                 primary: {

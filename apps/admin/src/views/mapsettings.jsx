@@ -508,6 +508,7 @@ class Menu extends Component {
       keywords: [],
       keywordInput: "",
       cqlFilterVisible: false,
+      showLegendByDefault: false,
       renderSpecialBackgroundsAtBottom: false,
     };
     this.titleRef = React.createRef();
@@ -604,6 +605,8 @@ class Menu extends Component {
             this.state.minMaxZoomAlertOnToggleOnly,
           cqlFilterVisible:
             existingConfig.cqlFilterVisible ?? this.state.cqlFilterVisible,
+          showLegendByDefault:
+            existingConfig.showLegendByDefault ?? this.state.showLegendByDefault,
           renderSpecialBackgroundsAtBottom:
             existingConfig.renderSpecialBackgroundsAtBottom ??
             this.state.renderSpecialBackgroundsAtBottom,
@@ -833,6 +836,7 @@ class Menu extends Component {
       instruction: this.state.instruction,
       minMaxZoomAlertOnToggleOnly: this.state.minMaxZoomAlertOnToggleOnly,
       cqlFilterVisible: this.state.cqlFilterVisible,
+      showLegendByDefault: this.state.showLegendByDefault,
       renderSpecialBackgroundsAtBottom:
         this.state.renderSpecialBackgroundsAtBottom,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
@@ -2358,6 +2362,24 @@ class Menu extends Component {
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
                     title="När rutan är ikryssad visas ett fält för CQL-filter. Inställningen är global och visas för alla lager när rutan är ikryssad."
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="showLegendByDefault"
+                  name="showLegendByDefault"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.showLegendByDefault}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="showLegendByDefault">
+                  Visa teckenförklaring direkt{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad visas teckenförklaringen direkt i lagerdetaljvyn utan att användaren behöver klicka på knappen."
                   />
                 </label>
               </div>
