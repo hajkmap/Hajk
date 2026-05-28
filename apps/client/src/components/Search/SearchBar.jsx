@@ -432,7 +432,7 @@ class SearchBar extends React.PureComponent {
         slotProps={{
           ...params.slotProps,
           input: {
-            ...params.slotProps.input,
+            ...(params.slotProps?.input ?? {}),
             ...disableUnderline,
             style: { margin: 0, ...(isMobile && { height: "46px" }) }, // TODO: Prevent hardcoding of height, really not urgent.
             notched: isMobile ? null : false,
@@ -442,7 +442,7 @@ class SearchBar extends React.PureComponent {
                 {loading ? (
                   <CircularProgress color="inherit" size={20} />
                 ) : null}
-                {params.slotProps.input.endAdornment}
+                {params.slotProps?.input?.endAdornment}
                 {showFailedWFSMessage &&
                   this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
                 {!showSearchResults ? (
