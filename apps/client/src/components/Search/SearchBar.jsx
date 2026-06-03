@@ -422,6 +422,8 @@ class SearchBar extends React.PureComponent {
       : "Visa sökresultat i kartan";
 
     const placeholder = this.getPlaceholder();
+    // Autocomplete renderInput still passes InputProps (not slotProps) in MUI v9.
+    const inputSlotProps = params.InputProps ?? params.slotProps?.input ?? {};
     return (
       <TextField
         {...params}
@@ -432,7 +434,7 @@ class SearchBar extends React.PureComponent {
         slotProps={{
           ...params.slotProps,
           input: {
-            ...params.slotProps.input,
+            ...inputSlotProps,
             ...disableUnderline,
             style: { margin: 0, ...(isMobile && { height: "46px" }) }, // TODO: Prevent hardcoding of height, really not urgent.
             notched: isMobile ? null : false,
@@ -442,7 +444,7 @@ class SearchBar extends React.PureComponent {
                 {loading ? (
                   <CircularProgress color="inherit" size={20} />
                 ) : null}
-                {params.slotProps.input.endAdornment}
+                {inputSlotProps.endAdornment}
                 {showFailedWFSMessage &&
                   this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
                 {!showSearchResults ? (
