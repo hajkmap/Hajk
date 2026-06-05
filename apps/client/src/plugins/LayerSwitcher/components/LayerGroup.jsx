@@ -124,6 +124,11 @@ const LayerGroup = ({
       ? overrideToggleable
       : staticGroupTree.groupIsToggable;
 
+  // An exclusive group means that only one child can be toggled on at a time.
+  // This is controlled by the "exclusive" property on the group and implemented
+  // in the UI using radio buttons.
+  const groupIsExclusive = staticGroupTree.exclusive ?? false;
+
   const infogrouptitle = groupConfig?.infogrouptitle;
   const infogrouptext = groupConfig?.infogrouptext;
   const infogroupurl = groupConfig?.infogroupurl;
@@ -196,7 +201,7 @@ const LayerGroup = ({
         disableAccordion={disableAccordion}
         toggleDetails={
           <ToggleAllComponent
-            toggleable={groupIsToggable}
+            toggleable={groupIsToggable && !groupIsExclusive} // Exclusive groups cannot be toggled as a whole, only individual children
             toggleState={toggleState}
             clickHandler={() => {
               if (limitToggleToTree) {
@@ -280,6 +285,26 @@ const LayerGroup = ({
               return null;
             }
 
+            // Exclusive groups act as radio buttons: toggling one layer turns off all siblings.
+            // directChildLayerIds excludes sub-groups, so we only affect direct layer children.
+            // First, let's grab the ids of all direct child layers. Then we can use those ids
+            // in the callback to toggle siblings off when another is toggled on.
+            const directChildLayerIds = children
+              .filter((c) => staticLayerConfig[c.id]?.layerType !== "group")
+              .map((c) => c.id);
+
+            const exclusiveClickCallback = groupIsExclusive
+              ? () => {
+                  const nowVisible = !layerState?.layerIsToggled;
+                  directChildLayerIds.forEach((sibId) => {
+                    if (sibId !== layerId) {
+                      layerSwitcherDispatch.setLayerVisibility(sibId, false);
+                    }
+                  });
+                  layerSwitcherDispatch.setLayerVisibility(layerId, nowVisible);
+                }
+              : undefined;
+
             return layerSettings.layerType === "groupLayer" ? (
               <GroupLayer
                 key={layerId}
@@ -301,6 +326,8 @@ const LayerGroup = ({
                 toggleable={true}
                 globalObserver={globalObserver}
                 filterValue={filterValue}
+                isExclusive={groupIsExclusive}
+                clickCallback={exclusiveClickCallback}
               />
             );
           })}

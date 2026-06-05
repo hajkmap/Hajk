@@ -395,6 +395,7 @@ const buildLayerTree = (groups, olLayerMap) =>
       groupIsToggable: group.toggled,
       defaultExpanded: group.expanded,
       parent: group.parent,
+      exclusive: group.exclusive,
     };
   });
 

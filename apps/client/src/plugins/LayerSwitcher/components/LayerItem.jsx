@@ -23,6 +23,7 @@ import BtnLayerWarning from "./BtnLayerWarning";
 import BtnShowLegend from "./BtnShowLegend";
 import BtnToggleLayerLabel from "./BtnToggleLayerLabel";
 import LsCheckBox from "./LsCheckBox";
+import LsRadioButton from "./LsRadioButton";
 
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
@@ -100,6 +101,7 @@ function LayerItem({
   subLayersSection,
   isGroupLayerQuickAccess,
   isLayerQuickAccess,
+  isExclusive,
 }) {
   // WmsLayer load status, shows warning icon if !ok
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
@@ -389,16 +391,26 @@ function LayerItem({
               borderBottom: (theme) => renderBorder(theme),
             }}
           >
-            {toggleable && (
-              <LsCheckBox
-                id={
-                  !isLayerQuickAccess && !isGroupLayerQuickAccess
-                    ? "toggle-layer-item"
-                    : undefined
-                }
-                toggleState={toggleState}
-              />
-            )}
+            {toggleable &&
+              (isExclusive ? (
+                <LsRadioButton
+                  id={
+                    !isLayerQuickAccess && !isGroupLayerQuickAccess
+                      ? "toggle-layer-item"
+                      : undefined
+                  }
+                  toggleState={toggleState}
+                />
+              ) : (
+                <LsCheckBox
+                  id={
+                    !isLayerQuickAccess && !isGroupLayerQuickAccess
+                      ? "toggle-layer-item"
+                      : undefined
+                  }
+                  toggleState={toggleState}
+                />
+              ))}
             <LayerLegendIcon
               legendIcon={legendIcon}
               layerType={layerType}
