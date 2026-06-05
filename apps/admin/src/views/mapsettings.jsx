@@ -93,6 +93,7 @@ $.fn.editable = function (component) {
       remove.remove();
       toggled.remove();
       expanded.remove();
+      exclusive.remove();
       infogroupcontainer.remove();
       infogroupvisible.remove();
       infogrouptitle.remove();
@@ -111,6 +112,7 @@ $.fn.editable = function (component) {
       let name = input.val();
       let toggled = checkbox2.is(":checked");
       let expanded = checkbox.is(":checked");
+      let exclusive = checkbox6.is(":checked");
       let infogroupvisible = checkbox5.is(":checked");
       let infogrouptitle = infogroupvisible ? input5.val() : "";
       let infogrouptext = infogroupvisible ? input6.val() : "";
@@ -123,6 +125,7 @@ $.fn.editable = function (component) {
       node.parent().attr("data-name", name);
       node.parent().attr("data-toggled", toggled);
       node.parent().attr("data-expanded", expanded);
+      node.parent().attr("data-exclusive", exclusive);
       node.parent().attr("data-infogroupvisible", infogroupvisible);
       node.parent().attr("data-infogrouptitle", infogrouptitle);
       node.parent().attr("data-infogrouptext", infogrouptext);
@@ -170,6 +173,7 @@ $.fn.editable = function (component) {
       id12 = Math.floor(Math.random() * 1e5),
       id13 = Math.floor(Math.random() * 1e5),
       id14 = Math.floor(Math.random() * 1e5),
+      id15 = Math.floor(Math.random() * 1e5),
       ok = $('<span class="btn btn-success">OK</span>'),
       layerOk = $('<span class="btn btn-success">OK</span>'),
       layerOk2 = $('<span class="btn btn-success">OK</span>'),
@@ -189,6 +193,9 @@ $.fn.editable = function (component) {
       label5 = $(`<br /><label for="${id6}">Tillträde</label><br />`),
       label6 = $(`<label for="${id7}">Infobox</label><br />`),
       label7 = $(`<label for="${id8}">Infodokument&nbsp;</label>`).css(
+        groupCheckboxLabelStyle
+      ),
+      label14 = $(`<label for="${id15}">Exklusiv grupp&nbsp;</label>`).css(
         groupCheckboxLabelStyle
       ),
       label8 = $(`<label for="${id9}">Rubrik&nbsp;</label>`).css(
@@ -214,6 +221,7 @@ $.fn.editable = function (component) {
       checkbox3 = $(`<input id="${id3}" type="checkbox"/>`),
       checkbox4 = $(`<input id="${id4}" type="text" value="Nytt namn"/><br />`),
       checkbox5 = $(`<input id="${id8}" type="checkbox"/>`),
+      checkbox6 = $(`<input id="${id15}" type="checkbox"/>`),
       remove = $('<span class="fa fa-minus-circle"></span>'),
       input = $("<input />"),
       input2 = $(`<input id="${id5}" type="text" placeholder="Ny länk"/>`),
@@ -229,6 +237,7 @@ $.fn.editable = function (component) {
       input10 = $(`<input id="${id14}" type="text"/>`).css(infoGroupInputStyle),
       expanded = $('<div class="expanded-at-start"></div>'),
       toggled = $('<div class="expanded-at-start"></div>'),
+      exclusive = $('<div class="expanded-at-start"></div>'),
       infogroupvisible = $('<div class="expanded-at-start"></div>'),
       infogroupcontainer = $('<div class="info-groupContainer"></div>'),
       infogrouptitle = $("<div></div>").css(infoGroupStyle),
@@ -264,6 +273,9 @@ $.fn.editable = function (component) {
     }
     if (node.parent().attr("data-toggled")) {
       checkbox2.attr("checked", JSON.parse(node.parent().attr("data-toggled")));
+    }
+    if (node.parent().attr("data-exclusive")) {
+      checkbox6.attr("checked", JSON.parse(node.parent().attr("data-exclusive")));
     }
 
     if (node.parent().attr("data-infogroupvisible")) {
@@ -316,6 +328,7 @@ $.fn.editable = function (component) {
     ) {
       expanded.append(checkbox, label);
       toggled.append(checkbox2, label2);
+      exclusive.append(checkbox6, label14);
       infogroupvisible.append(checkbox5, label7);
       infogrouptitle.append(label8, input5);
       infogrouptext.append(label9, input6);
@@ -398,7 +411,7 @@ $.fn.editable = function (component) {
       marginTop: "7px",
     });
 
-    tools.append(ok, abort, toggled, expanded, infogroupvisible);
+    tools.append(ok, abort, toggled, expanded, exclusive, infogroupvisible);
 
     infogroupcontainer.append(
       infogrouptitle,
@@ -924,6 +937,7 @@ class Menu extends Component {
         name: node.dataset.name,
         toggled: checkIfTrue(node.dataset.toggled),
         expanded: checkIfTrue(node.dataset.expanded),
+        exclusive: checkIfTrue(node.dataset.exclusive),
         infogroupvisible: checkIfTrue(node.dataset.infogroupvisible),
         infogrouptitle: node.dataset.infogrouptitle,
         infogrouptext: node.dataset.infogrouptext,
@@ -1155,6 +1169,7 @@ class Menu extends Component {
     name,
     expanded,
     toggled,
+    exclusive,
     infogroupvisible,
     infogrouptitle,
     infogrouptext,
@@ -1171,6 +1186,7 @@ class Menu extends Component {
         data-type="group"
         data-toggled="${toggled}"
         data-expanded="${expanded}"
+        data-exclusive="${exclusive}"
         data-infogroupvisible="${infogroupvisible}"
         data-infogrouptitle="${infogrouptitle}"
         data-infogrouptext="${infogrouptext}"
@@ -1382,6 +1398,7 @@ class Menu extends Component {
               data-type="group"
               data-expanded={group.expanded}
               data-toggled={group.toggled}
+              data-exclusive={group.exclusive}
               data-infogroupvisible={group.infogroupvisible}
               data-infogrouptitle={group.infogrouptitle}
               data-infogrouptext={group.infogrouptext}
@@ -2641,6 +2658,7 @@ class Menu extends Component {
                   onClick={(e) =>
                     this.createGroup(
                       "Ny grupp",
+                      false,
                       false,
                       false,
                       false,
