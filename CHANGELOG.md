@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: Infoclick - Functionality to hide links that point to non-existing resources [#1804](https://github.com/hajkmap/Hajk/issues/1804)
 - Client: LayerComparer - Added the long-awaited spy glass mode [#1808](https://github.com/hajkmap/Hajk/issues/1808)
 - Client: LayerComparer - The Spy can now be resized and the transparency can be changed [#1812](https://github.com/hajkmap/Hajk/issues/1812)
+- Client: LayerSwitcher - A group can now be set to be `exclusive`, meaning that its layers will be rendered as radio buttons and just one layer will be allowed to be visible at a given time. [#1848](https://github.com/hajkmap/Hajk/pull/1848)
 - Admin: You can now configure CQL filters for WMS layers directly in the admin interface [#1818](https://github.com/hajkmap/Hajk/issues/1818)
 - Client: Better WMTS Support [#1795](https://github.com/hajkmap/Hajk/issues/1795)
 - Client: LayerSwitcher - it is possible to add an additional style to WMS layers that contains feature labels. A button in the LayerSwitcher allows user to control labels' visibility for such a layer. [#1816](https://github.com/hajkmap/Hajk/issues/1816)
