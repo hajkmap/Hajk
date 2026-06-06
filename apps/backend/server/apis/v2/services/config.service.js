@@ -670,7 +670,7 @@ class ConfigServiceV2 {
 
       // Next, prepare the URL that we will fetch in order to GetCapabilities.
       // This differs a little, depending on if it's WMS or WFS.
-      let params = {};
+      let params;
       switch (type) {
         case "wms":
           params = {
@@ -695,9 +695,7 @@ class ConfigServiceV2 {
       // A slight delay - too many requests to the same server can cause a block
       await delay(100);
 
-      let response,
-        text,
-        json = "";
+      let response, text, json;
       try {
         // Go fetch
         response = await fetch(getCapabilitiesUrl);
