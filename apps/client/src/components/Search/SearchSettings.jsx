@@ -91,20 +91,30 @@ class SearchSettings extends React.PureComponent {
                       fullWidth
                       labelId="demo-mutiple-chip-label"
                       multiple
-                      value={searchSources}
-                      onChange={(event) =>
-                        this.props.setSearchSources(event.target.value)
-                      }
+                      value={searchSources.map((s) => s.id)}
+                      onChange={(event) => {
+                        const selectedIds = event.target.value;
+                        const allSources = searchModel.getSources();
+                        const selectedSources = allSources.filter((s) =>
+                          selectedIds.includes(s.id)
+                        );
+                        this.props.setSearchSources(selectedSources);
+                      }}
                       input={<Input id="select-multiple-chip" />}
                       renderValue={(selected) => (
                         <ChipsWrapper>
-                          {selected.map((option) => (
-                            <Chip
-                              key={option.id}
-                              label={option.caption}
-                              sx={{ margin: 0.25 }}
-                            />
-                          ))}
+                          {selected.map((id) => {
+                            const source = searchModel
+                              .getSources()
+                              .find((s) => s.id === id);
+                            return source ? (
+                              <Chip
+                                key={id}
+                                label={source.caption}
+                                sx={{ margin: 0.25 }}
+                              />
+                            ) : null;
+                          })}
                         </ChipsWrapper>
                       )}
                     >
@@ -112,7 +122,7 @@ class SearchSettings extends React.PureComponent {
                         .getSources()
                         .sort((a, b) => a.caption.localeCompare(b.caption))
                         .map((source) => (
-                          <MenuItem key={source.id} value={source}>
+                          <MenuItem key={source.id} value={source.id}>
                             {source.caption}
                           </MenuItem>
                         ))}
