@@ -83,10 +83,24 @@ class MapSwitcher extends React.PureComponent {
       const hashParams = new URLSearchParams(
         window.location.hash.replaceAll("#", "")
       );
+      // Set the m param to the new map's name
       hashParams.set("m", selectedMap);
+      // We must remove layer and group layer keys as it's really
+      // dangerous to keep them. If a layer, specified in l, wouldn't
+      // be available in the new map we're changing to, we would end up
+      // with no layers at all. (The reason for that is that _if_ the l param
+      // is present, the visibleAtStart value for layers from map config are
+      // ignored. We don't want to do that when changing map, so be sure and
+      // remove them.)
+      // TODO: Consider removing more keys, if issues come up. Candidates include
+      // "q", "s" and "p".
       hashParams.delete("l");
       hashParams.delete("gl");
+
+      // Set the modified hash to our location bar
       url.hash = "#" + hashParams.toString();
+
+      // Force the browser to reload
       window.location.href = url.toString();
     } else {
       // If live hash params are disabled, fall back to the old and tried
