@@ -143,21 +143,27 @@ class MapSwitcher extends React.PureComponent {
               : ""
           }
           onChange={this.handleChange}
+          renderValue={() =>
+            selectedIndex !== null && this.maps[selectedIndex]
+              ? this.maps[selectedIndex].mapConfigurationTitle
+              : ""
+          }
           displayEmpty
           sx={{
             height: (theme) => theme.spacing(6),
             backgroundColor: "background.paper",
           }}
         >
-          {this.maps.map((item, index) => (
-            <MenuItem
-              key={index}
-              value={item.mapConfigurationName}
-              selected={index === selectedIndex}
-            >
-              {item.mapConfigurationTitle}
-            </MenuItem>
-          ))}
+          {this.maps
+            .filter((_, index) => index !== selectedIndex)
+            .map((item) => (
+              <MenuItem
+                key={item.mapConfigurationName}
+                value={item.mapConfigurationName}
+              >
+                {item.mapConfigurationTitle}
+              </MenuItem>
+            ))}
         </Select>
       </FormControl>
     );
