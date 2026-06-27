@@ -1,5 +1,5 @@
 import React from "react";
-import { Menu, MenuItem } from "@mui/material";
+import { Menu, MenuItem, Select, FormControl } from "@mui/material";
 import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import { hfetch } from "../utils/FetchWrapper";
 import ControlButton from "components/ControlButton";
@@ -76,35 +76,18 @@ class MapSwitcher extends React.PureComponent {
   handleMenuItemClick = (event, index) => {
     const selectedMap = this.maps[index].mapConfigurationName;
     if (this.appModel.config.mapConfig.map?.enableAppStateInHash === true) {
-      // If live changing of hash params is enabled, grab the old hash
-      const oldHash = new URLSearchParams(
+      // Build a clean URL: clear query params to avoid conflicts,
+      // set the m param in the hash, and reload.
+      const url = new URL(window.location.href);
+      url.search = "";
+      const hashParams = new URLSearchParams(
         window.location.hash.replaceAll("#", "")
       );
-
-      // Set the m param to the new map's name
-      oldHash.set("m", selectedMap);
-
-      // We must remove layer and group layer keys as it's really
-      // dangerous to keep them. If a layer, specified in l, wouldn't
-      // be available in the new map we're changing to, we would end up
-      // with no layers at all. (The reason for that is that _if_ the l param
-      // is present, the visibleAtStart value for layers from map config are
-      // ignored. We don't want to do that when changing map, so be sure and
-      // remove them.)
-      // TODO: Consider removing more keys, if issues come up. Candidates include
-      // "q", "s" and "p".
-      oldHash.delete("l");
-      oldHash.delete("gl");
-
-      // Set the modified hash to our location bar
-      window.location.hash = "#" + oldHash.toString();
-
-      // Force the browser to reload
-      window.location.reload();
-
-      // Not needed, but if we will ever go towards hot reload,
-      // don't forget to hide the dropdown menu
-      // this.setState({ anchorEl: null, selectedIndex: index });
+      hashParams.set("m", selectedMap);
+      hashParams.delete("l");
+      hashParams.delete("gl");
+      url.hash = "#" + hashParams.toString();
+      window.location.href = url.toString();
     } else {
       // If live hash params are disabled, fall back to the old and tried
       // method of setting query params. This will also reload the page
@@ -114,9 +97,7 @@ class MapSwitcher extends React.PureComponent {
       const y = this.map.getView().getCenter()[1];
       const z = this.map.getView().getZoom();
 
-      window.location.assign(
-        `${window.location.origin}${window.location.pathname}?m=${selectedMap}&x=${x}&y=${y}&z=${z}`
-      );
+      window.location.href = `${window.location.origin}${window.location.pathname}?m=${selectedMap}&x=${x}&y=${y}&z=${z}`;
     }
   };
 
@@ -124,36 +105,85 @@ class MapSwitcher extends React.PureComponent {
     this.setState({ anchorEl: null });
   };
 
+  handleChange = (event) => {
+    const selectedMapName = event.target.value;
+    const index = this.maps.findIndex(
+      (m) => m.mapConfigurationName === selectedMapName
+    );
+    if (index !== -1) {
+      this.handleMenuItemClick(event, index);
+    }
+  };
+
+  renderDropdown = () => {
+    const { selectedIndex } = this.state;
+
+    return (
+      <FormControl sx={{ minWidth: 180 }}>
+        <Select
+          variant="outlined"
+          size="small"
+          value={
+            selectedIndex !== null && this.maps[selectedIndex]
+              ? this.maps[selectedIndex].mapConfigurationName
+              : ""
+          }
+          onChange={this.handleChange}
+          displayEmpty
+          sx={{
+            height: (theme) => theme.spacing(6),
+            backgroundColor: "background.paper",
+          }}
+        >
+          {this.maps.map((item, index) => (
+            <MenuItem
+              key={index}
+              value={item.mapConfigurationName}
+              selected={index === selectedIndex}
+            >
+              {item.mapConfigurationTitle}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    );
+  };
+
   render() {
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
+    const { variant = "button" } = this.props;
 
     const title =
       this.props.appModel.config.mapConfig.map.title || "Karta utan titel";
 
+    if (!this.props.appModel.config.mapConfig.map.mapselector) return null;
+    if (this.maps.length <= 1) return null;
+
+    if (variant === "dropdown") {
+      return this.renderDropdown();
+    }
+
     return (
-      // Render only if config says so
-      this.props.appModel.config.mapConfig.map.mapselector && (
-        <>
-          <ControlButton
-            tooltip={`Nuvarande karta: ${title}`}
-            ariaLabel="Byt karta"
-            aria-owns={open ? "render-props-menu" : undefined}
-            aria-haspopup="true"
-            onClick={this.handleClick}
-          >
-            <SwitchCameraIcon />
-          </ControlButton>
-          <Menu
-            id="render-props-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={this.handleClose}
-          >
-            {this.renderMenuItems()}
-          </Menu>
-        </>
-      )
+      <>
+        <ControlButton
+          tooltip={`Nuvarande karta: ${title}`}
+          ariaLabel="Byt karta"
+          aria-owns={open ? "render-props-menu" : undefined}
+          aria-haspopup="true"
+          onClick={this.handleClick}
+        >
+          <SwitchCameraIcon />
+        </ControlButton>
+        <Menu
+          id="render-props-menu"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={this.handleClose}
+        >
+          {this.renderMenuItems()}
+        </Menu>
+      </>
     );
   }
 }

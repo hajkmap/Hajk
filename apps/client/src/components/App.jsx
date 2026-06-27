@@ -1218,6 +1218,9 @@ class App extends React.PureComponent {
     const showMapSwitcher =
       clean === false && config.activeMap !== "simpleMapAndLayersConfig";
 
+    const mapSelectorStyle =
+      config.mapConfig?.map?.mapSelectorStyle || "button";
+
     const useNewInfoclick = this.infoclickOptions?.useNewInfoclick === true;
 
     return (
@@ -1285,8 +1288,22 @@ class App extends React.PureComponent {
                   drawerStatic={this.state.drawerStatic}
                 />
               )}
-              {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
-              {this.renderSearchComponent()}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  ml: this.showDrawerButtons() ? 0 : "auto",
+                }}
+              >
+                {showMapSwitcher &&
+                  mapSelectorStyle === "dropdown" &&
+                  !isMobile && (
+                    <MapSwitcher appModel={this.appModel} variant="dropdown" />
+                  )}
+                {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
+                {this.renderSearchComponent()}
+              </Box>
             </StyledHeader>
             <WindowsContainer id="windows-container">
               {useNewInfoclick === false && this.renderInfoclickWindow()}
@@ -1355,7 +1372,10 @@ class App extends React.PureComponent {
                   />
                 )}
                 <Rotate map={this.appModel.getMap()} />
-                {showMapSwitcher && <MapSwitcher appModel={this.appModel} />}
+                {showMapSwitcher &&
+                  (isMobile || mapSelectorStyle !== "dropdown") && (
+                    <MapSwitcher appModel={this.appModel} />
+                  )}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
                 {clean === false && <PresetLinks appModel={this.appModel} />}
                 {clean === false && <ExternalLinks appModel={this.appModel} />}
