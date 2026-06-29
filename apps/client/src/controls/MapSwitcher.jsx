@@ -1,5 +1,5 @@
 import React from "react";
-import { Menu, MenuItem, Select, FormControl } from "@mui/material";
+import { Menu, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import { hfetch } from "../utils/FetchWrapper";
 import ControlButton from "components/ControlButton";
@@ -134,9 +134,12 @@ class MapSwitcher extends React.PureComponent {
 
     return (
       <FormControl sx={{ minWidth: 180 }}>
+        <InputLabel id="selected-map-label">Aktiv karta</InputLabel>
         <Select
           variant="outlined"
           size="small"
+          label="Aktiv karta"
+          labelId="selected-map-label"
           value={
             selectedIndex !== null && this.maps[selectedIndex]
               ? this.maps[selectedIndex].mapConfigurationName
