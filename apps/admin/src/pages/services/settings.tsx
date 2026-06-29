@@ -1,5 +1,4 @@
-import { useParams, Link, useNavigate, useSearchParams } from "react-router";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type FormEvent, type MouseEvent } from "react";
 import { useTranslation, Trans } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { Controller, FieldValues, useForm } from "react-hook-form";
@@ -11,13 +10,10 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
-  styled,
-  List,
-  ListItem,
-  Typography,
   Box,
   Alert,
   CircularProgress,
+  Typography,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LayersIcon from "@mui/icons-material/Layers";
@@ -46,43 +42,42 @@ import {
   TextFieldWithHelp,
 } from "../../components/form-components/field-label-with-help";
 import FormFieldGrid, { FormFieldRow } from "../../components/form-components/form-field-grid";
-
-const StyledTabButton = styled(Button, {
-  shouldForwardProp: (prop) => prop !== "isActive",
-})<{ isActive: boolean }>(({ theme, isActive }) => ({
-  textTransform: "none",
-  width: "100%",
-  borderRadius: 14,
-  justifyContent: "flex-start",
-  color: theme.palette.text.primary,
-  paddingTop: theme.spacing(1.8),
-  paddingBottom: theme.spacing(1.8),
-  paddingLeft: theme.spacing(2),
-  paddingRight: theme.spacing(2),
-  minHeight: 48,
-  backgroundColor: isActive ? theme.palette.action.focus : "transparent",
-  transition: "all 200ms ease",
-  "&:hover": {
-    backgroundColor: isActive
-      ? theme.palette.action.selected
-      : theme.palette.action.hover,
-  },
-  "& .MuiButton-startIcon": {
-    fontSize: "1.25rem",
-    marginRight: theme.spacing(2),
-  },
-}));
+import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import FormContainer from "../../components/form-components/form-container";
 import FormPanel from "../../components/form-components/form-panel";
-
 import DialogWrapper from "../../components/flexible-dialog";
 import LayersGrid from "./layers-grid";
 import ServiceUsagePanel from "./service-usage-panel";
 import { toast } from "react-toastify";
-
 import FormActionPanel from "../../components/form-action-panel";
 import { SquareSpinnerComponent } from "../../components/progress/square-progress";
 import useAppStateStore from "../../store/use-app-state-store";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router";
+
+const SERVICE_PAGE_TABS = [
+  {
+    key: "settings",
+    labelKey: "common.settings",
+    icon: <SettingsIcon />,
+  },
+  {
+    key: "display",
+    labelKey: "layers.display",
+    icon: <TuneIcon />,
+  },
+  {
+    key: "layers",
+    labelKey: "services.publishedLayers",
+    icon: <LayersIcon />,
+  },
+  {
+    key: "search",
+    labelKey: "common.searchSettings",
+    icon: <ManageSearchIcon />,
+  },
+] as const;
+
+type ServiceSettingsTab = (typeof SERVICE_PAGE_TABS)[number]["key"];
 
 export default function ServiceSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -211,7 +206,7 @@ export default function ServiceSettings() {
     }
   };
 
-  const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDeleteClick = (event: MouseEvent<HTMLButtonElement>) => {
     if (isDeletingService) return;
     event.preventDefault();
     event.stopPropagation();
@@ -320,7 +315,7 @@ export default function ServiceSettings() {
     }
   };
 */
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     void handleSubmit((data: FieldValues) => {
       const serviceData = data as ServiceUpdateInput;
@@ -414,56 +409,11 @@ export default function ServiceSettings() {
           </Box>
         }
       >
-        <List
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "wrap",
-            gap: 1,
-            p: 0,
-            mb: 2,
-          }}
-        >
-          {(
-            [
-              {
-                key: "settings",
-                label: t("common.settings"),
-                icon: <SettingsIcon />,
-              },
-              {
-                key: "display",
-                label: t("layers.display"),
-                icon: <TuneIcon />,
-              },
-              {
-                key: "layers",
-                label: t("services.publishedLayers"),
-                icon: <LayersIcon />,
-              },
-              {
-                key: "search",
-                label: t("common.searchSettings"),
-                icon: <ManageSearchIcon />,
-              },
-            ] as const
-          ).map((tab) => (
-            <ListItem
-              key={tab.key}
-              disablePadding
-              disableGutters
-              sx={{ width: "auto" }}
-            >
-              <StyledTabButton
-                isActive={activeTab === tab.key}
-                startIcon={tab.icon}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                <Typography>{tab.label}</Typography>
-              </StyledTabButton>
-            </ListItem>
-          ))}
-        </List>
+        <SettingsPageTabs
+          value={activeTab}
+          onChange={setActiveTab}
+          tabs={[...SERVICE_PAGE_TABS]}
+        />
         <FormContainer formRef={formRef} onSubmit={onSubmit} noValidate={false}>
           <Box sx={{ display: showSettingsPanels ? "block" : "none" }}>
             {showSearchUi && (

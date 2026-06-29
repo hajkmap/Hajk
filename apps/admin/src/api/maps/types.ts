@@ -29,6 +29,8 @@ export interface Map {
 export interface MapLayer extends Layer {
   mapId: number | null;
   groupId: string | null;
+  /** Placement on map (from LayerInstance), when loaded via GET /maps/:name/layers. */
+  visibleAtStart?: boolean;
 }
 
 /** A group placement on a map (GroupsOnMaps row, GET /maps/:name/groups). */

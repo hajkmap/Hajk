@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useEffect } from "react";
+import { useState, useRef, useMemo, useEffect, type ReactElement } from "react";
 import {
   useParams,
   useSearchParams,
@@ -18,10 +18,7 @@ import {
   Button,
   IconButton,
   Box,
-  List,
-  ListItem,
   Typography,
-  styled,
   Alert,
   CircularProgress,
 } from "@mui/material";
@@ -99,37 +96,12 @@ import SearchablePanel from "../../components/form-components/searchable-panel";
 import { SettingsSearchField } from "../../components/form-components/searchable-field";
 import { useSettingsSearchLabels } from "../../hooks/use-settings-search-labels";
 import { useLayerFieldLabels } from "./use-layer-field-labels";
-
-const StyledTabButton = styled(Button, {
-  shouldForwardProp: (prop) => prop !== "isActive",
-})<{ isActive: boolean }>(({ theme, isActive }) => ({
-  textTransform: "none",
-  width: "100%",
-  borderRadius: 14,
-  justifyContent: "flex-start",
-  color: theme.palette.text.primary,
-  paddingTop: theme.spacing(1.8),
-  paddingBottom: theme.spacing(1.8),
-  paddingLeft: theme.spacing(2),
-  paddingRight: theme.spacing(2),
-  minHeight: 48,
-  backgroundColor: isActive ? theme.palette.action.focus : "transparent",
-  transition: "all 200ms ease",
-  "&:hover": {
-    backgroundColor: isActive
-      ? theme.palette.action.selected
-      : theme.palette.action.hover,
-  },
-  "& .MuiButton-startIcon": {
-    fontSize: "1.25rem",
-    marginRight: theme.spacing(2),
-  },
-}));
+import { SettingsPageTabs } from "../../components/settings-page-tabs";
 
 const ALL_SETTINGS_TABS: {
   key: LayerSettingsTab;
   labelKey: string;
-  icon: React.ReactNode;
+  icon: ReactElement;
 }[] = [
   { key: "general", labelKey: "common.settings", icon: <SettingsIcon /> },
   { key: "display", labelKey: "layers.display", icon: <TuneIcon /> },
@@ -1011,33 +983,11 @@ export default function LayerSettings() {
           </Box>
         }
       >
-        <List
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "wrap",
-            gap: 1,
-            p: 0,
-            mb: 2,
-          }}
-        >
-          {visibleTabs.map((tab) => (
-            <ListItem
-              key={tab.key}
-              disablePadding
-              disableGutters
-              sx={{ width: "auto" }}
-            >
-              <StyledTabButton
-                isActive={activeTab === tab.key}
-                startIcon={tab.icon}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                <Typography>{t(tab.labelKey)}</Typography>
-              </StyledTabButton>
-            </ListItem>
-          ))}
-        </List>
+        <SettingsPageTabs
+          value={activeTab}
+          onChange={setActiveTab}
+          tabs={visibleTabs}
+        />
         <FormContainer
           onSubmit={(e) => {
             e.preventDefault();

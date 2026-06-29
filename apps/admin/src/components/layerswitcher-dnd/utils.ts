@@ -233,6 +233,41 @@ export const flattenTreeItemIds = <T extends { id: unknown; children?: T[] }>(
   return ids;
 };
 
+/** Removes an item (and its subtree) from a sortable tree by id. */
+export const removeItemFromTree = (
+  items: TreeItems<TreeItemData>,
+  itemId: string,
+): TreeItems<TreeItemData> =>
+  items
+    .filter((item) => item.id.toString() !== itemId)
+    .map((item) =>
+      item.children?.length
+        ? {
+            ...item,
+            children: removeItemFromTree(item.children, itemId),
+          }
+        : item,
+    );
+
+/** Updates a single tree node in place (depth-first). */
+export const updateItemInTree = (
+  items: TreeItems<TreeItemData>,
+  itemId: string,
+  updater: (item: TreeItem<TreeItemData>) => TreeItem<TreeItemData>,
+): TreeItems<TreeItemData> =>
+  items.map((item) => {
+    if (item.id.toString() === itemId) {
+      return updater(item);
+    }
+    if (item.children?.length) {
+      return {
+        ...item,
+        children: updateItemInTree(item.children, itemId, updater),
+      };
+    }
+    return item;
+  });
+
 /** Drop edge from list order: dragging down → below target, dragging up → above. */
 export const getReorderDropPosition = (
   targetItemId: string,

@@ -12,6 +12,8 @@ export interface TreeItemData {
   id: string;
   name: string;
   type: ItemType;
+  /** Layer placement: visible in map on load (client config). */
+  visibleAtStart?: boolean;
 }
 
 export interface DropZoneConfig {
@@ -20,6 +22,10 @@ export interface DropZoneConfig {
   titleIcon?: React.ReactNode;
   items: TreeItems<TreeItemData>;
   onItemsChange: (items: TreeItems<TreeItemData>) => void;
+  /** Show remove button on placed items (returns them to the source list). */
+  enableRemove?: boolean;
+  /** Layer rows: active chip, draw order, visible-at-start toggle. */
+  showLayerPlacementStatus?: boolean;
 }
 
 export interface LayerSwitcherDnDProps {
@@ -27,6 +33,8 @@ export interface LayerSwitcherDnDProps {
   groups?: SourceItem[];
   tools?: SourceItem[];
   dropZones: DropZoneConfig[];
+  /** Show "inactive" chip on layers still available in the source list. */
+  showSourceLayerStatus?: boolean;
 }
 
 // Use a delimiter unlikely to appear in IDs

@@ -31,6 +31,8 @@ export {
   moveItemDown,
   canItemMoveUp,
   canItemMoveDown,
+  removeItemFromTree,
+  updateItemInTree,
   DND_ITEM_TITLE_SX,
   DND_TREE_ITEM_CARD_SX,
   DND_TREE_ICON_BUTTON_SX,

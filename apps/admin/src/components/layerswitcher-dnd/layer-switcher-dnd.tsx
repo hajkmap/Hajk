@@ -47,6 +47,7 @@ export const LayerSwitcherDnD: React.FC<LayerSwitcherDnDProps> = ({
   groups = [],
   tools = [],
   dropZones,
+  showSourceLayerStatus = false,
 }) => {
   const { t } = useTranslation();
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
@@ -160,6 +161,7 @@ export const LayerSwitcherDnD: React.FC<LayerSwitcherDnDProps> = ({
       type: itemType,
       children: ITEM_CAPABILITIES[itemType].canHaveChildren ? [] : undefined,
       canHaveChildren: ITEM_CAPABILITIES[itemType].canHaveChildren,
+      ...(itemType === "layer" ? { visibleAtStart: false } : {}),
     };
 
     const targetId = over.id.toString();
@@ -251,7 +253,12 @@ export const LayerSwitcherDnD: React.FC<LayerSwitcherDnDProps> = ({
               >
                 {currentTabType === "layer" &&
                   filteredLayers.map((i) => (
-                    <DraggableSourceItem key={i.id} item={i} type="layer" />
+                    <DraggableSourceItem
+                      key={i.id}
+                      item={i}
+                      type="layer"
+                      showInactiveStatus={showSourceLayerStatus}
+                    />
                   ))}
                 {currentTabType === "group" &&
                   filteredGroups.map((i) => (
@@ -286,6 +293,8 @@ export const LayerSwitcherDnD: React.FC<LayerSwitcherDnDProps> = ({
                   onItemsChange={zone.onItemsChange}
                   onAddToGroup={handleAddToGroup}
                   minHeight={dropZones.length === 1 ? 598 : undefined}
+                  enableRemove={zone.enableRemove ?? true}
+                  showLayerPlacementStatus={zone.showLayerPlacementStatus}
                 />
               ))}
             </Paper>

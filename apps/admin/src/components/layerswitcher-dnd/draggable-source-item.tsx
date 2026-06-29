@@ -1,7 +1,8 @@
 import React from "react";
 import { useDraggable } from "@dnd-kit/core";
-import { ListItem, Typography } from "@mui/material";
+import { Box, Chip, ListItem, Typography } from "@mui/material";
 import { DragIndicator } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 import useAppStateStore from "../../store/use-app-state-store";
 import { ItemType } from "./types";
@@ -10,12 +11,15 @@ import { createSourceId, DND_ITEM_TITLE_SX } from "./utils";
 interface DraggableSourceItemProps {
   item: { id: string; name: string };
   type: ItemType;
+  showInactiveStatus?: boolean;
 }
 
 export const DraggableSourceItem: React.FC<DraggableSourceItemProps> = ({
   item,
   type,
+  showInactiveStatus = false,
 }) => {
+  const { t } = useTranslation();
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -47,9 +51,19 @@ export const DraggableSourceItem: React.FC<DraggableSourceItemProps> = ({
       }}
     >
       <DragIndicator sx={{ mr: 1, mt: 0.25, flexShrink: 0 }} />
-      <Typography variant="body2" title={item.name} sx={DND_ITEM_TITLE_SX}>
-        {item.name}
-      </Typography>
+      <Box sx={{ minWidth: 0, flex: 1 }}>
+        <Typography variant="body2" title={item.name} sx={DND_ITEM_TITLE_SX}>
+          {item.name}
+        </Typography>
+        {showInactiveStatus && type === "layer" ? (
+          <Chip
+            size="small"
+            variant="outlined"
+            sx={{ mt: 0.5 }}
+            label={t("map.layerInactive")}
+          />
+        ) : null}
+      </Box>
     </ListItem>
   );
 };

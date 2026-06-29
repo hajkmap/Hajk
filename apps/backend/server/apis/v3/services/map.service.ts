@@ -354,6 +354,8 @@ class MapService {
           mapId: instance.mapId,
           groupId: instance.groupId,
           zIndex: instance.zIndex,
+          visibleAtStart: instance.visibleAtStart,
+          infoClickActive: instance.infoClickActive,
         };
         if (instance.displayLayer) {
           return { ...instance.displayLayer, ...source, layerKind: "display" as const };

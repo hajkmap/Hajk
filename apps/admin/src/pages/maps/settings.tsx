@@ -11,15 +11,12 @@ import { Trans, useTranslation } from "react-i18next";
 import {
   TextField,
   useTheme,
-  Tabs,
-  Tab,
   Box,
   Button,
   Alert,
   Typography,
   CircularProgress,
 } from "@mui/material";
-import type { Theme } from "@mui/material/styles";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LayersIcon from "@mui/icons-material/Layers";
 import BuildIcon from "@mui/icons-material/Build";
@@ -80,6 +77,7 @@ import {
 import { useProjections } from "../../api/services";
 import useAppStateStore from "../../store/use-app-state-store";
 import { TreeItems } from "dnd-kit-sortable-tree";
+import { SettingsPageTabs } from "../../components/settings-page-tabs";
 
 const MAP_PAGE_TABS = [
   { key: "settings", labelKey: "common.settings", icon: <SettingsIcon /> },
@@ -153,12 +151,18 @@ function layersToPayload(items: TreeItems<TreeItemData>): MapLayerPlacement[] {
   return items.map((item, index) => ({
     layerId: entityIdFromItemId(item.id),
     zIndex: index,
+    visibleAtStart: item.visibleAtStart ?? false,
   }));
 }
 
-/** Stable signature for the layers zone (order-sensitive), for dirty checks. */
+/** Stable signature for the layers zone (order + visibility), for dirty checks. */
 function layersSignature(items: TreeItems<TreeItemData>): string {
-  return JSON.stringify(items.map((item) => entityIdFromItemId(item.id)));
+  return JSON.stringify(
+    items.map((item) => ({
+      id: entityIdFromItemId(item.id),
+      visibleAtStart: item.visibleAtStart ?? false,
+    })),
+  );
 }
 
 /**
@@ -203,24 +207,6 @@ function groupsSignature(items: TreeItems<TreeItemData>): string {
     });
   return JSON.stringify(walk(items, null));
 }
-
-const tabTextColorSx = {
-  "& .MuiTab-root": {
-    color: (theme: Theme) =>
-      theme.palette.mode === "dark"
-        ? theme.palette.common.white
-        : theme.palette.common.black,
-  },
-  "& .MuiTab-root.Mui-selected": {
-    color: (theme: Theme) =>
-      theme.palette.mode === "dark"
-        ? theme.palette.common.white
-        : theme.palette.common.black,
-  },
-  "& .MuiTab-icon": {
-    color: "inherit",
-  },
-};
 
 export default function MapSettings() {
   const { t } = useTranslation();
@@ -321,6 +307,7 @@ export default function MapSettings() {
           name: layer.name,
           type: "layer" as const,
           canHaveChildren: false,
+          visibleAtStart: layer.visibleAtStart ?? false,
         })),
     [mapLayers],
   );
@@ -538,23 +525,11 @@ export default function MapSettings() {
           : t("common.settings")
       }
     >
-      <Tabs
+      <SettingsPageTabs
         value={activeTab}
-        onChange={(_, value) =>
-          setActiveTab(value as (typeof MAP_PAGE_TABS)[number]["key"])
-        }
-        sx={{ mb: 2, ...tabTextColorSx }}
-      >
-        {MAP_PAGE_TABS.map((tab) => (
-          <Tab
-            key={tab.key}
-            value={tab.key}
-            icon={tab.icon}
-            iconPosition="start"
-            label={t(tab.labelKey as never)}
-          />
-        ))}
-      </Tabs>
+        onChange={setActiveTab}
+        tabs={[...MAP_PAGE_TABS]}
+      />
       <FormActionPanel
         updateStatus={updateStatus}
         onUpdate={handleExternalSubmit}
@@ -600,57 +575,16 @@ export default function MapSettings() {
             formRef={formRef}
             noValidate={false}
           >
-            <Tabs
+            <SettingsPageTabs
               value={settingsSection}
-              onChange={(_, value) =>
-                setSettingsSection(value as MapSettingsSection)
-              }
-              variant="scrollable"
-              scrollButtons="auto"
-              sx={{
-                mb: 2,
-                minHeight: 36,
-                pl: 1,
-                borderLeft: 2,
-                borderColor: "divider",
-                "& .MuiTab-root": {
-                  minHeight: 36,
-                  fontSize: (theme) => theme.typography.body2.fontSize,
-                  fontWeight: 500,
-                  textTransform: "none",
-                  px: 1.5,
-                  py: 0.5,
-                  minWidth: "auto",
-                  color: (theme: Theme) =>
-                    theme.palette.mode === "dark"
-                      ? theme.palette.common.white
-                      : theme.palette.common.black,
-                },
-                "& .MuiTab-root.Mui-selected": {
-                  color: (theme: Theme) =>
-                    theme.palette.mode === "dark"
-                      ? theme.palette.common.white
-                      : theme.palette.common.black,
-                },
-                "& .MuiTab-icon": {
-                  fontSize: "1.125rem",
-                  color: "inherit",
-                },
-                "& .MuiTabs-indicator": {
-                  height: 2,
-                },
-              }}
-            >
-              {MAP_SETTINGS_SECTIONS.map((section) => (
-                <Tab
-                  key={section.key}
-                  value={section.key}
-                  icon={section.icon}
-                  iconPosition="start"
-                  label={t(section.labelKey as never)}
-                />
-              ))}
-            </Tabs>
+              onChange={setSettingsSection}
+              variant="section"
+              tabs={MAP_SETTINGS_SECTIONS.map((section) => ({
+                key: section.key,
+                labelKey: section.labelKey,
+                icon: section.icon,
+              }))}
+            />
 
             {showSettingsSearchUi && (
               <TextField
@@ -685,34 +619,39 @@ export default function MapSettings() {
           </FormContainer>
         </Box>
 
-        {activeTab === "menu" && (
-          <>
-            <LayerSwitcherDnD
-              layers={layers}
-              dropZones={[
-                {
-                  id: "layers",
-                  title: t("common.layers"),
-                  titleIcon: <LayersIcon />,
-                  items: backgroundLayersDZ,
-                  onItemsChange: setBackgroundLayersDZ,
-                },
-              ]}
-            />
-            <LayerSwitcherDnD
-              groups={groups}
-              dropZones={[
-                {
-                  id: "groups",
-                  title: t("common.layerGroups"),
-                  titleIcon: <CollectionsIcon />,
-                  items: groupLayersDZ,
-                  onItemsChange: setGroupLayersDZ,
-                },
-              ]}
-            />
-          </>
-        )}
+        {activeTab === "menu" &&
+          (mapLayers === undefined || mapGroups === undefined ? (
+            <SquareSpinnerComponent />
+          ) : (
+            <>
+              <LayerSwitcherDnD
+                layers={layers}
+                showSourceLayerStatus
+                dropZones={[
+                  {
+                    id: "layers",
+                    title: t("common.layers"),
+                    titleIcon: <LayersIcon />,
+                    items: backgroundLayersDZ,
+                    onItemsChange: setBackgroundLayersDZ,
+                    showLayerPlacementStatus: true,
+                  },
+                ]}
+              />
+              <LayerSwitcherDnD
+                groups={groups}
+                dropZones={[
+                  {
+                    id: "groups",
+                    title: t("common.layerGroups"),
+                    titleIcon: <CollectionsIcon />,
+                    items: groupLayersDZ,
+                    onItemsChange: setGroupLayersDZ,
+                  },
+                ]}
+              />
+            </>
+          ))}
 
         {activeTab === "tools" && (
           <ToolPlacementDnD

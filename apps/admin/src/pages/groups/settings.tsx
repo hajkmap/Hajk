@@ -9,12 +9,9 @@ import {
   Chip,
   CircularProgress,
   FormControlLabel,
-  List,
-  ListItem,
   MenuItem,
   TextField,
   Typography,
-  styled,
   useTheme,
 } from "@mui/material";
 import { Controller, FieldValues, useForm } from "react-hook-form";
@@ -63,36 +60,24 @@ import {
 import { getDeleteGroupErrorMessage, getUpdateGroupErrorMessage, applyGroupFormValidationErrors } from "./utils/group-errors";
 import { groupCompositionKey } from "./utils/group-composition";
 import { stripEditingGroupFromTree } from "./utils/layer-switcher-tree";
+import { SettingsPageTabs } from "../../components/settings-page-tabs";
+
+const GROUP_PAGE_TABS = [
+  {
+    key: "settings",
+    labelKey: "common.settings",
+    icon: <SettingsIcon />,
+  },
+  {
+    key: "layers",
+    labelKey: "common.layerSwitcherOrder",
+    icon: <LayersIcon />,
+  },
+] as const;
 
 const EMPTY_GROUP_LAYERS: GroupLayer[] = [];
 const EMPTY_MAPS: Map[] = [];
 const EMPTY_ROLES: Role[] = [];
-
-const StyledTabButton = styled(Button, {
-  shouldForwardProp: (prop) => prop !== "isActive",
-})<{ isActive: boolean }>(({ theme, isActive }) => ({
-  textTransform: "none",
-  width: "100%",
-  borderRadius: 14,
-  justifyContent: "flex-start",
-  color: theme.palette.text.primary,
-  paddingTop: theme.spacing(1.8),
-  paddingBottom: theme.spacing(1.8),
-  paddingLeft: theme.spacing(2),
-  paddingRight: theme.spacing(2),
-  minHeight: 48,
-  backgroundColor: isActive ? theme.palette.action.focus : "transparent",
-  transition: "all 200ms ease",
-  "&:hover": {
-    backgroundColor: isActive
-      ? theme.palette.action.selected
-      : theme.palette.action.hover,
-  },
-  "& .MuiButton-startIcon": {
-    fontSize: "1.25rem",
-    marginRight: theme.spacing(2),
-  },
-}));
 
 type GroupSettingsTab = "settings" | "layers";
 
@@ -422,44 +407,11 @@ function GroupSettings() {
           </Box>
         }
       >
-        <List
-          sx={{
-            display: "flex",
-            gap: 1,
-            mb: 2,
-            flexWrap: "wrap",
-          }}
-        >
-          {(
-            [
-              {
-                key: "settings",
-                label: t("common.settings"),
-                icon: <SettingsIcon />,
-              },
-              {
-                key: "layers",
-                label: t("common.layerSwitcherOrder"),
-                icon: <LayersIcon />,
-              },
-            ] as const
-          ).map((tab) => (
-            <ListItem
-              key={tab.key}
-              disablePadding
-              disableGutters
-              sx={{ width: "auto" }}
-            >
-              <StyledTabButton
-                isActive={activeTab === tab.key}
-                startIcon={tab.icon}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                <Typography>{tab.label}</Typography>
-              </StyledTabButton>
-            </ListItem>
-          ))}
-        </List>
+        <SettingsPageTabs
+          value={activeTab}
+          onChange={setActiveTab}
+          tabs={[...GROUP_PAGE_TABS]}
+        />
 
         <Box sx={{ display: activeTab === "settings" ? "block" : "none" }}>
           <FormContainer
