@@ -128,6 +128,7 @@ export const useUpdateMapLayers = () => {
       void queryClient.invalidateQueries({
         queryKey: ["layersByMap", mapName],
       });
+      void queryClient.invalidateQueries({ queryKey: ["maps"] });
     },
   });
 };

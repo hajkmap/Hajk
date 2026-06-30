@@ -171,6 +171,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   /maps/{mapName}/layers:
+    get:
+      tags:
+        - Admin only
+      parameters:
+        - name: mapName
+          in: path
+          description: Name of the map
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Layers on the map (direct placements and via groups)
+        404:
+          description: Map not found
     put:
       tags:
         - Admin only

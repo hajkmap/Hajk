@@ -3,6 +3,7 @@ import {
   useState,
   useCallback,
   useMemo,
+  useEffect,
   type ReactElement,
 } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
@@ -316,31 +317,52 @@ export default function MapSettings() {
     [mapGroups],
   );
 
-  // Seed the drop zones from the server once both queries have resolved, and
-  // re-seed whenever the active map changes.
-  const [menuSyncKey, setMenuSyncKey] = useState<string | null>(null);
-  if (
-    mapName &&
-    mapName !== menuSyncKey &&
-    mapLayers !== undefined &&
-    mapGroups !== undefined
-  ) {
-    setMenuSyncKey(mapName);
-    setBackgroundLayersDZ(serverLayerItems);
-    setGroupLayersDZ(serverGroupItems);
-  }
-
-  const layersDirty = useMemo(() => {
-    if (menuSyncKey !== mapName) return false;
+  const layersDirtyRaw = useMemo(() => {
+    if (!mapName || mapLayers === undefined) return false;
     return (
       layersSignature(backgroundLayersDZ) !== layersSignature(serverLayerItems)
     );
-  }, [backgroundLayersDZ, serverLayerItems, menuSyncKey, mapName]);
+  }, [backgroundLayersDZ, serverLayerItems, mapName, mapLayers]);
 
-  const groupsDirty = useMemo(() => {
-    if (menuSyncKey !== mapName) return false;
+  const groupsDirtyRaw = useMemo(() => {
+    if (!mapName || mapGroups === undefined) return false;
     return groupsSignature(groupLayersDZ) !== groupsSignature(serverGroupItems);
-  }, [groupLayersDZ, serverGroupItems, menuSyncKey, mapName]);
+  }, [groupLayersDZ, serverGroupItems, mapName, mapGroups]);
+
+  const [menuSynced, setMenuSynced] = useState(false);
+
+  useEffect(() => {
+    setMenuSynced(false);
+  }, [mapName]);
+
+  useEffect(() => {
+    if (!mapName || mapLayers === undefined || mapGroups === undefined) {
+      return;
+    }
+    if (!menuSynced) {
+      setBackgroundLayersDZ(serverLayerItems);
+      setGroupLayersDZ(serverGroupItems);
+      setMenuSynced(true);
+      return;
+    }
+    if (layersDirtyRaw || groupsDirtyRaw) {
+      return;
+    }
+    setBackgroundLayersDZ(serverLayerItems);
+    setGroupLayersDZ(serverGroupItems);
+  }, [
+    mapName,
+    mapLayers,
+    mapGroups,
+    serverLayerItems,
+    serverGroupItems,
+    menuSynced,
+    layersDirtyRaw,
+    groupsDirtyRaw,
+  ]);
+
+  const layersDirty = menuSynced && layersDirtyRaw;
+  const groupsDirty = menuSynced && groupsDirtyRaw;
   const serverToolZones = useMemo(
     () => (mapTools ? mapToolsToZones(mapTools) : null),
     [mapTools],
@@ -358,11 +380,10 @@ export default function MapSettings() {
   // True when the local tool placement draft differs from what the server has.
   const toolsDirty = useMemo(() => {
     if (toolsDraft == null || toolsDraft.mapName !== mapName) return false;
-    const draftPayload = zonesToToolsPayload(toolsDraft.zones);
-    const serverPayload = zonesToToolsPayload(
-      serverToolZones ?? EMPTY_TOOL_ZONES,
+    return (
+      toolZonesSignature(toolsDraft.zones) !==
+      toolZonesSignature(serverToolZones ?? EMPTY_TOOL_ZONES)
     );
-    return JSON.stringify(draftPayload) !== JSON.stringify(serverPayload);
   }, [toolsDraft, mapName, serverToolZones]);
 
   const updateToolZone = useCallback(
@@ -654,22 +675,10 @@ export default function MapSettings() {
           ))}
 
         {activeTab === "tools" && (
-          <ToolPlacementDnD
-            tools={tools.map((tool) => ({ id: tool.id, name: tool.type }))}
-            drawerItems={toolZones.drawer}
-            onDrawerItemsChange={(items) => updateToolZone("drawer", items)}
-            widgetLeftItems={toolZones.widgetLeft}
-            onWidgetLeftItemsChange={(items) =>
-              updateToolZone("widgetLeft", items)
-            }
-            widgetRightItems={toolZones.widgetRight}
-            onWidgetRightItemsChange={(items) =>
-              updateToolZone("widgetRight", items)
-            }
-            controlButtonItems={toolZones.control}
-            onControlButtonItemsChange={(items) =>
-              updateToolZone("control", items)
-            }
+          <MapToolsPanel
+            mapTools={mapTools}
+            toolZones={toolZones}
+            onUpdateToolZone={updateToolZone}
             backgroundImage={backgroundImage}
           />
         )}

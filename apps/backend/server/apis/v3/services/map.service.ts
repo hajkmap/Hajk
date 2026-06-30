@@ -12,7 +12,7 @@ import {
   activeLayerInstancesForMapWhere,
   activeLayerInstancesForMapsWhere,
   layerInstanceIncludeAll,
-  resolveLayerKindById,
+  resolveLayerPlacementById,
 } from "../utils/layer-instance.ts";
 
 const logger = log4js.getLogger("service.v3.map");
@@ -435,14 +435,19 @@ class MapService {
     // Resolve each layer's kind up front so unknown ids fail before we delete.
     const data: Prisma.LayerInstanceCreateManyInput[] = [];
     for (const [index, layer] of layers.entries()) {
-      const kind = await resolveLayerKindById(layer.layerId);
-      if (!kind) {
+      const resolved = await resolveLayerPlacementById(layer.layerId);
+      if (!resolved.ok) {
         throw new HajkError(
           HttpStatusCodes.BAD_REQUEST,
-          `Unknown layer id: ${layer.layerId}`,
-          HajkStatusCodes.INVALID_REQUEST_BODY
+          resolved.reason === "deleted"
+            ? `Layer "${layer.layerId}" is deleted and cannot be placed on a map`
+            : `Unknown layer id: ${layer.layerId}`,
+          resolved.reason === "deleted"
+            ? HajkStatusCodes.INVALID_REQUEST_BODY
+            : HajkStatusCodes.UNKNOWN_LAYER_ID,
         );
       }
+      const kind = resolved.kind;
       data.push({
         mapId: map.id,
         displayLayerId: kind === "display" ? layer.layerId : undefined,

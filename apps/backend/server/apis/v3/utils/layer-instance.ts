@@ -27,6 +27,36 @@ export async function resolveLayerKindById(
   return null;
 }
 
+/** Whether a layer id exists but is soft-deleted (cannot be placed on a map). */
+export async function isSoftDeletedLayerId(id: string): Promise<boolean> {
+  const deletedWhere = { id, deletedAt: { not: null } } as const;
+  const [display, search, editing] = await Promise.all([
+    prisma.displayLayer.findFirst({ where: deletedWhere, select: { id: true } }),
+    prisma.searchLayer.findFirst({ where: deletedWhere, select: { id: true } }),
+    prisma.editingLayer.findFirst({ where: deletedWhere, select: { id: true } }),
+  ]);
+  return Boolean(display ?? search ?? editing);
+}
+
+/**
+ * Resolves an active layer kind for map placement, or why the id was rejected.
+ * Soft-deleted layers are excluded (same filter as GET /maps/:name/layers).
+ */
+export async function resolveLayerPlacementById(
+  id: string,
+): Promise<
+  { ok: true; kind: LayerKind } | { ok: false; reason: "deleted" | "unknown" }
+> {
+  const kind = await resolveLayerKindById(id);
+  if (kind) {
+    return { ok: true, kind };
+  }
+  if (await isSoftDeletedLayerId(id)) {
+    return { ok: false, reason: "deleted" };
+  }
+  return { ok: false, reason: "unknown" };
+}
+
 /** Prisma connect input for exactly one layer FK on LayerInstance. */
 export async function layerInstanceLayerConnect(input: {
   displayLayerId?: string;

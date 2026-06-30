@@ -198,6 +198,10 @@ export const updateMapTools = async (
   }
 };
 
+/**
+ * Replaces layers placed directly on a map (`PUT /maps/:mapName/layers`).
+ * Alias: `setMapLayers`.
+ */
 export const updateMapLayers = async (
   mapName: string,
   layers: MapLayerPlacement[]
@@ -216,6 +220,9 @@ export const updateMapLayers = async (
     }
   }
 };
+
+/** @alias updateMapLayers */
+export const setMapLayers = updateMapLayers;
 
 export const updateMapGroups = async (
   mapName: string,
