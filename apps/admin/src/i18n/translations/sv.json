@@ -238,7 +238,7 @@
     "maps.duplicateMapSuccess": "Kartan \"{{name}}\" duplicerades.",
     "maps.duplicate.dialog.title": "Duplicera karta",
     "maps.duplicate.dialog.sourceMap": "Duplicerar från \"{{name}}\". Ange ett unikt namn för den nya kartan.",
-    "maps.duplicate.includeRelations": "Inkludera från källkartan",
+    "maps.duplicate.includeRelations": "Inkludera från kartan",
     "maps.duplicate.includeLayers": "Lager",
     "maps.duplicate.includeGroups": "Lagergrupper",
     "maps.duplicate.includeTools": "Verktyg",
