@@ -62,6 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: LayerSwitcher - Fix an issue where loading saved favorites and presets did not hide previously visible group layers ([commit](https://github.com/hajkmap/Hajk/commit/bc49dc4fa73c820546b90f97870a17d0a6cb1a00)).
 - Client: Search - User's limit of search sources (made in search settings) was not respected in Safari. [#1852](https://github.com/hajkmap/Hajk/issues/1852).
 - Client: Crashes when activating Snap-enabled tools (e.g. PropertyChecker) with nested GeometryCollection features in the map. [#1860](https://github.com/hajkmap/Hajk/issues/1860).
+- Client: MapSwitcher can now be configured to show as a larger dropdown element next to the search box (in addition to the traditional Control button). [#1858](https://github.com/hajkmap/Hajk/issues/1858).
 
 ## [4.3.0] 2026-04-20
 
