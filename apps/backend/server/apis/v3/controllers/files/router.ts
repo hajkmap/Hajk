@@ -1,4 +1,9 @@
-import * as express from "express";
-import FilesController from "./controller.ts";
+import { Router } from "express";
+import controller from "./controller.ts";
+import { asyncHandler } from "../../utils/async-handler.ts";
 
-export default express.Router().get("/list", FilesController.list);
+const router = Router();
+
+router.get("/list", asyncHandler(controller.list.bind(controller)));
+
+export default router;
