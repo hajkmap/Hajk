@@ -160,7 +160,7 @@ export default class DocumentHandlerModel {
 
   getAllChapterInfo() {
     if (this.chapterInfo.length === 0) {
-      this.allDocuments.forEach((document, index) => {
+      this.allDocuments.forEach((document) => {
         document.chapters.forEach((mainChapter) => {
           this.setChapterInfo(
             mainChapter,
@@ -203,12 +203,7 @@ export default class DocumentHandlerModel {
       this.chapterInfo = [...this.chapterInfo, chapterInfo];
       level = level + 1;
       chapter.chapters.forEach((subChapter) => {
-        subChapter = this.setChapterInfo(
-          subChapter,
-          level,
-          color,
-          documentFileName
-        );
+        this.setChapterInfo(subChapter, level, color, documentFileName);
       });
     } else {
       chapterInfo.hasSubChapters = false;
@@ -244,9 +239,9 @@ export default class DocumentHandlerModel {
 
   async fetchJsonDocument(folder = "", title) {
     try {
-      const url = `${this.mapServiceUrl}/informative/load${
-        folder && `/${folder}`
-      }/${title}`;
+      const mapName = this.app.config.activeMap;
+      const folderPath = folder ? `/${folder}` : "";
+      const url = `${this.mapServiceUrl}/api/v3/maps/${mapName}/documenthandler/load${folderPath}/${title}`;
 
       const response = await hfetch(url);
       const text = await response.text();
@@ -258,6 +253,9 @@ export default class DocumentHandlerModel {
       }
 
       const document = await JSON.parse(text);
+
+      // Backend loadDocumentForClient returns { title, chapters } directly (no content wrapper)
+
       this.internalId = 0;
       document.chapters.forEach((chapter) => {
         this.setParentChapter(chapter, undefined);
@@ -572,7 +570,7 @@ export default class DocumentHandlerModel {
   appendParsedComponentsToDocument = () => {
     const { activeDocument } = this.props;
     let content = { ...activeDocument };
-    content.chapters.forEach((chapter, index) => {
+    content.chapters.forEach((chapter, _index) => {
       this.appendComponentsToChapter(chapter);
     });
     this.setState({ activeContent: content });

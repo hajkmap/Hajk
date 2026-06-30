@@ -107,6 +107,26 @@ class DocumentHandlerController {
     );
     res.status(HttpStatusCodes.NO_CONTENT).send();
   }
+
+  // ─── Load (client-facing) ──────────────────────────────────────────────────
+
+  async loadDocumentInFolder(req: Request, res: Response) {
+    const document = await DocumentService.loadDocumentForClient(
+      req.params.mapName,
+      req.params.folder,
+      req.params.name
+    );
+    res.status(HttpStatusCodes.OK).json(document);
+  }
+
+  async loadDocumentRoot(req: Request, res: Response) {
+    const document = await DocumentService.loadDocumentForClient(
+      req.params.mapName,
+      null,
+      req.params.name
+    );
+    res.status(HttpStatusCodes.OK).json(document);
+  }
 }
 
 export default new DocumentHandlerController();

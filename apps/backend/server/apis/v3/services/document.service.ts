@@ -6,6 +6,12 @@ import HttpStatusCodes from "../../../common/http-status-codes.ts";
 import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
 import { slugify, uniqueSlug } from "../utils/slugify.ts";
 
+interface Chapter {
+  headerIdentifier?: string;
+  chapters?: Chapter[];
+  [key: string]: unknown;
+}
+
 const SLUG_MAX_RETRIES = 5;
 
 const logger = log4js.getLogger("service.v3.document");
@@ -297,6 +303,52 @@ class DocumentService {
     }
     const { folder, ...rest } = doc;
     return { ...rest, folderName: folder.name };
+  }
+
+  async loadDocumentForClient(mapName: string, folderName: string | null, docName: string) {
+    let folder;
+    if (folderName) {
+      folder = await this.#requireFolder(mapName, folderName);
+    } else {
+      // Root-level document — no folder required
+      folder = null;
+    }
+
+    const doc = await prisma.document.findFirst({
+      where: folder
+        ? { mapName, folderId: folder.id, name: docName }
+        : { mapName, folderId: null, name: docName },
+    });
+
+    if (!doc) {
+      throw new HajkError(
+        HttpStatusCodes.NOT_FOUND,
+        `No document '${docName}' in map '${mapName}'.`,
+        HajkStatusCodes.UNKNOWN_DOCUMENT
+      );
+    }
+
+    const chapters = this.#ensureHeaderIdentifiers(doc.content?.chapters || []);
+
+    return {
+      title: doc.title,
+      chapters,
+    };
+  }
+
+  #ensureHeaderIdentifiers(chapters: Chapter[]): Chapter[] {
+    const counter = { current: 0 };
+    const processChapter = (chapter: Chapter): Chapter => {
+      const processed: Chapter = { ...chapter };
+      if (!processed.headerIdentifier) {
+        processed.headerIdentifier = `header-${++counter.current}`;
+      }
+      if (Array.isArray(processed.chapters)) {
+        processed.chapters = processed.chapters.map((child) => processChapter(child));
+      }
+      return processed;
+    };
+    return chapters.map((ch) => processChapter(ch));
   }
 
   // ─── Private ──────────────────────────────────────────────────────────────

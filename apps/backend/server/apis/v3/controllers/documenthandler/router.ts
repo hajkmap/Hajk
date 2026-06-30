@@ -52,4 +52,7 @@ export default express
     controller.renameFolder
   )
   .delete("/folders/:folder", restrictAdmin, controller.deleteFolder)
+  // Client-facing load endpoints — order matters: /load/:folder/:name before /load/:name
+  .get("/load/:folder/:name", controller.loadDocumentInFolder)
+  .get("/load/:name", controller.loadDocumentRoot)
   .use("/folders/:folder/documents", documentsRouter);

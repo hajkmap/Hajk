@@ -463,6 +463,13 @@ const toolData = [
       visibleForGroups: [],
     },
   },
+  {
+    type: "documenthandler",
+    options: {
+      title: "Dokumenthanterare",
+      visibleForGroups: [],
+    },
+  },
 ];
 
 const layersOnMapsdata = [
@@ -476,7 +483,7 @@ const layersOnMapsdata = [
 const toolsOnMapsData = [
   {
     mapName: "default",
-    toolId: 1,
+    toolType: "layerswitcher",
     index: 1,
     options: {
       target: "control",
@@ -484,20 +491,40 @@ const toolsOnMapsData = [
   },
   {
     mapName: "default",
-    toolId: 2,
+    toolType: "print",
     index: 2,
   },
   {
     mapName: "default",
-    toolId: 3,
+    toolType: "measure",
     index: 2,
   },
   {
     mapName: "secondary",
-    toolId: 2,
+    toolType: "print",
     index: 1,
   },
+  {
+    mapName: "default",
+    toolType: "documenthandler",
+    index: 3,
+    target: "toolbar",
+  },
 ];
+
+// Resolve toolIds dynamically based on toolData order (ids start at 1)
+const toolIdMap = new Map();
+toolData.forEach((tool, idx) => {
+  toolIdMap.set(tool.type, idx + 1);
+});
+
+// Replace toolType with actual toolId
+toolsOnMapsData.forEach(entry => {
+  if (entry.toolType && toolIdMap.has(entry.toolType)) {
+    entry.toolId = toolIdMap.get(entry.toolType);
+    delete entry.toolType;
+  }
+});
 
 const layerData = [
   {
