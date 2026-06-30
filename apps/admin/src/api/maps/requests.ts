@@ -309,15 +309,26 @@ export const deleteMap = async (mapName: string): Promise<void> => {
 export const duplicateMap = async ({
   sourceMapName,
   name,
+  includeLayers = true,
+  includeGroups = true,
+  includeTools = true,
 }: {
   sourceMapName: string;
   name: string;
+  includeLayers?: boolean;
+  includeGroups?: boolean;
+  includeTools?: boolean;
 }): Promise<MapRecord> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.post<MapRecord>(
       `/maps/${encodeURIComponent(sourceMapName)}/duplicate`,
-      { name: name.trim() }
+      {
+        name: name.trim(),
+        includeLayers,
+        includeGroups,
+        includeTools,
+      }
     );
     if (!response.data) {
       throw new Error("No map data found");

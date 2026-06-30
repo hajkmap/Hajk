@@ -110,6 +110,7 @@ export default function MapThemesTab({ mapName }: MapThemesTabProps) {
   > | null>(null);
   const [importStatus, setImportStatus] = useState<boolean | null>(null);
   const [importMessage, setImportMessage] = useState("");
+  const [selectedFileName, setSelectedFileName] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Theme | null>(null);
 
   const isEditing = selectedId != null;
@@ -131,6 +132,7 @@ export default function MapThemesTab({ mapName }: MapThemesTabProps) {
     setImportedData(null);
     setImportStatus(null);
     setImportMessage("");
+    setSelectedFileName("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -146,6 +148,7 @@ export default function MapThemesTab({ mapName }: MapThemesTabProps) {
     setImportedData(theme.data ?? {});
     setImportStatus(true);
     setImportMessage(t("maps.themes.importValid"));
+    setSelectedFileName("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -154,6 +157,8 @@ export default function MapThemesTab({ mapName }: MapThemesTabProps) {
   const handleImportJson = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    setSelectedFileName(file.name);
 
     const reader = new FileReader();
     reader.readAsText(file, "UTF-8");
@@ -348,16 +353,23 @@ export default function MapThemesTab({ mapName }: MapThemesTabProps) {
 
           <Stack spacing={2}>
             <Box>
-              <Button variant="outlined" component="label">
-                {t("maps.themes.chooseJsonFile")}
-                <input
-                  ref={fileInputRef}
-                  hidden
-                  type="file"
-                  accept=".json,application/json"
-                  onChange={handleImportJson}
-                />
-              </Button>
+              <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+                <Button variant="outlined" component="label">
+                  {t("maps.themes.chooseJsonFile")}
+                  <input
+                    ref={fileInputRef}
+                    hidden
+                    type="file"
+                    accept=".json,application/json"
+                    onChange={handleImportJson}
+                  />
+                </Button>
+                {selectedFileName && (
+                  <Typography variant="body2" color="text.secondary" noWrap>
+                    {selectedFileName}
+                  </Typography>
+                )}
+              </Stack>
               {importMessage && (
                 <Stack
                   direction="row"

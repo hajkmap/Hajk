@@ -86,9 +86,16 @@ class MapsController {
   }
 
   async duplicateMap(req: Request, res: Response) {
+    const { name, includeLayers, includeGroups, includeTools } = req.body as {
+      name: string;
+      includeLayers?: boolean;
+      includeGroups?: boolean;
+      includeTools?: boolean;
+    };
     const map = await MapService.duplicateMap(
       req.params.mapName,
-      req.body.name,
+      name,
+      { includeLayers, includeGroups, includeTools },
       req.user?.id
     );
     res.status(HttpStatusCodes.CREATED).json(map);
