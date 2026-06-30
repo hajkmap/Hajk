@@ -391,6 +391,46 @@ export const DND_TREE_SORTABLE_OVERRIDES_SX: SxProps<Theme> = {
   },
 };
 
+/** Full tree panel overrides — fixes library overlap (-1px margin) and nested flex clipping. */
+export const getSortableTreePanelSx = (isDarkMode: boolean): SxProps<Theme> => ({
+  ...DND_TREE_SORTABLE_OVERRIDES_SX,
+  position: "relative",
+  width: "100%",
+  maxWidth: "100%",
+  minWidth: 0,
+  boxSizing: "border-box",
+  "& .dnd-sortable-tree_simple_wrapper": {
+    width: "100%",
+    maxWidth: "100%",
+    minWidth: 0,
+    marginBottom: "8px",
+    listStyle: "none",
+  },
+  "& .dnd-sortable-tree_simple_tree-item": {
+    width: "100%",
+    maxWidth: "100%",
+    minWidth: 0,
+    p: 0,
+    border: "none",
+    alignItems: "stretch",
+    display: "flex",
+    boxSizing: "border-box",
+  },
+  "& .dnd-sortable-tree_simple_tree-item-collapse_button": {
+    filter: isDarkMode ? "brightness(0) invert(0.6)" : "none",
+    alignSelf: "flex-start",
+    mt: 1,
+  },
+  "& .dnd-sortable-tree_simple_handle": {
+    display: "none",
+  },
+  "& .dnd-sortable-tree_drop-indicator": {
+    backgroundColor: isDarkMode ? "#42a5f5" : "#1976d2",
+    height: "2px",
+    boxShadow: `0 0 4px ${isDarkMode ? "#42a5f5" : "#1976d2"}`,
+  },
+});
+
 // Parse source ID: "source::type::actualId" -> { type, id }
 export const parseSourceId = (
   sourceId: string,
@@ -421,6 +461,61 @@ export const enforceItemRules = (
         : item.children
       : undefined,
   }));
+
+/** Flattens a tree to root-level siblings (preserves depth-first order). */
+export const flattenToRoot = (
+  treeItems: TreeItems<TreeItemData>,
+): TreeItems<TreeItemData> => {
+  const result: TreeItems<TreeItemData> = [];
+  const visit = (nodes: TreeItems<TreeItemData>) => {
+    nodes.forEach((node) => {
+      result.push({ ...node, children: undefined, canHaveChildren: false });
+      if (node.children?.length) {
+        visit(node.children);
+      }
+    });
+  };
+  visit(treeItems);
+  return result;
+};
+
+const filterAcceptedItemTypes = (
+  treeItems: TreeItems<TreeItemData>,
+  acceptedItemTypes: ItemType[],
+): TreeItems<TreeItemData> =>
+  treeItems
+    .filter((item) => acceptedItemTypes.includes(item.type))
+    .map((item) =>
+      item.children?.length
+        ? {
+            ...item,
+            children: filterAcceptedItemTypes(item.children, acceptedItemTypes),
+          }
+        : item,
+    );
+
+export const enforceZoneRules = (
+  treeItems: TreeItems<TreeItemData>,
+  options?: {
+    acceptedItemTypes?: ItemType[];
+    allowNesting?: boolean;
+  },
+): TreeItems<TreeItemData> => {
+  let tree = enforceItemRules(treeItems);
+  if (options?.acceptedItemTypes?.length) {
+    tree = filterAcceptedItemTypes(tree, options.acceptedItemTypes);
+  }
+  if (options?.allowNesting === false) {
+    tree = flattenToRoot(tree);
+  }
+  return tree;
+};
+
+export const zoneAcceptsItemType = (
+  zone: { acceptedItemTypes?: ItemType[] },
+  itemType: ItemType,
+): boolean =>
+  !zone.acceptedItemTypes?.length || zone.acceptedItemTypes.includes(itemType);
 
 // Collect all item IDs from tree(s)
 export const collectItemIds = (

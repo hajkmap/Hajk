@@ -645,32 +645,46 @@ export default function MapSettings() {
             <SquareSpinnerComponent />
           ) : (
             <>
-              <LayerSwitcherDnD
-                layers={layers}
-                showSourceLayerStatus
-                dropZones={[
-                  {
-                    id: "layers",
-                    title: t("common.layers"),
-                    titleIcon: <LayersIcon />,
-                    items: backgroundLayersDZ,
-                    onItemsChange: setBackgroundLayersDZ,
-                    showLayerPlacementStatus: true,
-                  },
-                ]}
-              />
-              <LayerSwitcherDnD
-                groups={groups}
-                dropZones={[
-                  {
-                    id: "groups",
-                    title: t("common.layerGroups"),
-                    titleIcon: <CollectionsIcon />,
-                    items: groupLayersDZ,
-                    onItemsChange: setGroupLayersDZ,
-                  },
-                ]}
-              />
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                <LayerSwitcherDnD
+                  layers={layers}
+                  showSourceLayerStatus
+                  dropZones={[
+                    {
+                      id: "layers",
+                      title: t("map.layerStructure.directLayers.title"),
+                      helpText: t("map.layerStructure.directLayers.help"),
+                      clientBucketLabel: t(
+                        "map.layerStructure.directLayers.clientBucket",
+                      ),
+                      titleIcon: <LayersIcon />,
+                      items: backgroundLayersDZ,
+                      onItemsChange: setBackgroundLayersDZ,
+                      showLayerPlacementStatus: true,
+                      acceptedItemTypes: ["layer"],
+                      allowNesting: false,
+                    },
+                  ]}
+                />
+                <LayerSwitcherDnD
+                  groups={groups}
+                  dropZones={[
+                    {
+                      id: "groups",
+                      title: t("map.layerStructure.layerGroups.title"),
+                      helpText: t("map.layerStructure.layerGroups.help"),
+                      clientBucketLabel: t(
+                        "map.layerStructure.layerGroups.clientBucket",
+                      ),
+                      titleIcon: <CollectionsIcon />,
+                      items: groupLayersDZ,
+                      onItemsChange: setGroupLayersDZ,
+                      acceptedItemTypes: ["group"],
+                      allowNesting: true,
+                    },
+                  ]}
+                />
+              </Box>
             </>
           ))}
 

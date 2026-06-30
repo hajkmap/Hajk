@@ -33,10 +33,11 @@ import {
 } from "./types";
 import {
   parseSourceId,
-  enforceItemRules,
+  enforceZoneRules,
   collectItemIds,
   findGroupInTree,
   insertIntoGroup,
+  zoneAcceptsItemType,
 } from "./utils";
 import { DraggableSourceItem } from "./draggable-source-item";
 import { DND_ITEM_TITLE_SX } from "./utils";
@@ -155,30 +156,46 @@ export const LayerSwitcherDnD: React.FC<LayerSwitcherDnDProps> = ({
 
     if (!source) return;
 
-    const newItem: TreeItem<TreeItemData> = {
-      id: `${itemType}${ID_DELIMITER}${source.id}`,
-      name: source.name,
-      type: itemType,
-      children: ITEM_CAPABILITIES[itemType].canHaveChildren ? [] : undefined,
-      canHaveChildren: ITEM_CAPABILITIES[itemType].canHaveChildren,
-      ...(itemType === "layer" ? { visibleAtStart: false } : {}),
-    };
-
-    const targetId = over.id.toString();
-
-    // Check each drop zone
+    // Check each drop zone — only accept configured item types.
     for (const zone of dropZones) {
-      // Check if dropped on this zone's root
+      if (!zoneAcceptsItemType(zone, itemType)) {
+        continue;
+      }
+
+      const newItem: TreeItem<TreeItemData> = {
+        id: `${itemType}${ID_DELIMITER}${source.id}`,
+        name: source.name,
+        type: itemType,
+        children: ITEM_CAPABILITIES[itemType].canHaveChildren ? [] : undefined,
+        canHaveChildren: ITEM_CAPABILITIES[itemType].canHaveChildren,
+        ...(itemType === "layer" ? { visibleAtStart: false } : {}),
+      };
+
+      const targetId = over.id.toString();
+
+      // Dropped on this zone's root
       if (targetId === zone.id) {
-        zone.onItemsChange(enforceItemRules([...zone.items, newItem]));
+        zone.onItemsChange(
+          enforceZoneRules([...zone.items, newItem], {
+            acceptedItemTypes: zone.acceptedItemTypes,
+            allowNesting: zone.allowNesting,
+          }),
+        );
         return;
       }
 
-      // Check if dropped on a group within this zone
+      // Nested drop — only when the zone allows nesting and target is a group.
+      if (zone.allowNesting === false) {
+        continue;
+      }
+
       const targetGroup = findGroupInTree(zone.items, targetId);
       if (targetGroup) {
         zone.onItemsChange(
-          enforceItemRules(insertIntoGroup(zone.items, targetId, newItem)),
+          enforceZoneRules(insertIntoGroup(zone.items, targetId, newItem), {
+            acceptedItemTypes: zone.acceptedItemTypes,
+            allowNesting: zone.allowNesting,
+          }),
         );
         return;
       }
@@ -289,8 +306,12 @@ export const LayerSwitcherDnD: React.FC<LayerSwitcherDnDProps> = ({
                   id={zone.id}
                   title={zone.title}
                   titleIcon={zone.titleIcon}
+                  helpText={zone.helpText}
+                  clientBucketLabel={zone.clientBucketLabel}
                   items={zone.items}
                   onItemsChange={zone.onItemsChange}
+                  acceptedItemTypes={zone.acceptedItemTypes}
+                  allowNesting={zone.allowNesting}
                   onAddToGroup={handleAddToGroup}
                   minHeight={dropZones.length === 1 ? 598 : undefined}
                   enableRemove={zone.enableRemove ?? true}

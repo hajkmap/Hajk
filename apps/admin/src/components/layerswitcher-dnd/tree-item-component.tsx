@@ -67,8 +67,11 @@ export const TreeItemComponent = React.forwardRef<
       <Box
         sx={{
           ...DND_TREE_ITEM_CARD_SX,
+          width: "100%",
+          boxSizing: "border-box",
           background: isDarkMode ? "#1a1a1a" : "#fff",
           border: "1px solid #ddd",
+          mb: 0.5,
         }}
       >
         <Box

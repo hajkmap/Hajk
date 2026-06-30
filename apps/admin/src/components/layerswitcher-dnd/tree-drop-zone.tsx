@@ -1,6 +1,6 @@
 import React from "react";
 import { useDroppable } from "@dnd-kit/core";
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 
 import useAppStateStore from "../../store/use-app-state-store";
 
@@ -9,6 +9,8 @@ interface TreeDropZoneProps {
   id: string;
   title?: string;
   titleIcon?: React.ReactNode;
+  helpText?: string;
+  clientBucketLabel?: string;
   minHeight?: number;
 }
 
@@ -17,6 +19,8 @@ export const TreeDropZone: React.FC<TreeDropZoneProps> = ({
   id,
   title,
   titleIcon,
+  helpText,
+  clientBucketLabel,
   minHeight = 280,
 }) => {
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
@@ -44,23 +48,41 @@ export const TreeDropZone: React.FC<TreeDropZoneProps> = ({
         transition: "all 0.2s ease",
       }}
     >
-      {title &&
-        (titleIcon ? (
-          <Tooltip title={title}>
-            <Box
-              component="span"
-              sx={{ display: "inline-flex", mb: 1 }}
-              aria-label={title}
-            >
-              {titleIcon}
-            </Box>
-          </Tooltip>
-        ) : (
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
-            {title}
-          </Typography>
-        ))}
-      {children}
+      {title ? (
+        <Box sx={{ mb: 1.5, flexShrink: 0 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexWrap: "wrap",
+            }}
+          >
+            {titleIcon ? (
+              <Box component="span" sx={{ display: "inline-flex" }}>
+                {titleIcon}
+              </Box>
+            ) : null}
+            <Typography variant="subtitle1" fontWeight={600}>
+              {title}
+            </Typography>
+            {clientBucketLabel ? (
+              <Chip
+                size="small"
+                variant="outlined"
+                label={clientBucketLabel}
+                sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}
+              />
+            ) : null}
+          </Box>
+          {helpText ? (
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
+              {helpText}
+            </Typography>
+          ) : null}
+        </Box>
+      ) : null}
+      <Box sx={{ minWidth: 0, width: "100%", overflow: "hidden" }}>{children}</Box>
     </Box>
   );
 };

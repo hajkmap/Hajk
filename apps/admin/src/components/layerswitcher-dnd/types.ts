@@ -20,8 +20,16 @@ export interface DropZoneConfig {
   id: string;
   title: string;
   titleIcon?: React.ReactNode;
+  /** Short explanation shown under the zone title. */
+  helpText?: string;
+  /** Client config target label (e.g. layersConfig, LayerSwitcher groups). */
+  clientBucketLabel?: string;
   items: TreeItems<TreeItemData>;
   onItemsChange: (items: TreeItems<TreeItemData>) => void;
+  /** Item types allowed in this zone; defaults to all types present in the source panel. */
+  acceptedItemTypes?: ItemType[];
+  /** When false, nested items are flattened to the zone root (direct map layers). */
+  allowNesting?: boolean;
   /** Show remove button on placed items (returns them to the source list). */
   enableRemove?: boolean;
   /** Layer rows: active chip, draw order, visible-at-start toggle. */

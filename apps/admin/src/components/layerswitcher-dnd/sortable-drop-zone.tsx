@@ -3,26 +3,32 @@ import { Box } from "@mui/material";
 import { SortableTree, TreeItems } from "dnd-kit-sortable-tree";
 import { useTranslation } from "react-i18next";
 
+import useAppStateStore from "../../store/use-app-state-store";
 import { TreeItemData } from "./types";
 import { TreeDropZone } from "./tree-drop-zone";
 import { TreeItemComponent } from "./tree-item-component";
 import {
-  enforceItemRules,
+  enforceZoneRules,
   moveItemUp,
   moveItemDown,
   canItemMoveUp,
   canItemMoveDown,
   removeItemFromTree,
   updateItemInTree,
-  DND_TREE_SORTABLE_OVERRIDES_SX,
+  getSortableTreePanelSx,
 } from "./utils";
+import type { ItemType } from "./types";
 
 interface SortableDropZoneProps {
   id: string;
   title?: string;
   titleIcon?: React.ReactNode;
+  helpText?: string;
+  clientBucketLabel?: string;
   items: TreeItems<TreeItemData>;
   onItemsChange: (items: TreeItems<TreeItemData>) => void;
+  acceptedItemTypes?: ItemType[];
+  allowNesting?: boolean;
   onAddToGroup?: (groupId: string) => void;
   minHeight?: number;
   enableRemove?: boolean;
@@ -33,35 +39,43 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
   id,
   title,
   titleIcon,
+  helpText,
+  clientBucketLabel,
   items,
   onItemsChange,
+  acceptedItemTypes,
+  allowNesting,
   onAddToGroup,
   minHeight,
   enableRemove = true,
   showLayerPlacementStatus = false,
 }) => {
   const { t } = useTranslation();
+  const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
+
+  const applyZoneRules = (nextItems: TreeItems<TreeItemData>) =>
+    onItemsChange(
+      enforceZoneRules(nextItems, { acceptedItemTypes, allowNesting }),
+    );
 
   const handleMoveUp = (itemId: string) => {
-    onItemsChange(enforceItemRules(moveItemUp(items, itemId)));
+    applyZoneRules(moveItemUp(items, itemId));
   };
 
   const handleMoveDown = (itemId: string) => {
-    onItemsChange(enforceItemRules(moveItemDown(items, itemId)));
+    applyZoneRules(moveItemDown(items, itemId));
   };
 
   const handleRemove = (itemId: string) => {
-    onItemsChange(enforceItemRules(removeItemFromTree(items, itemId)));
+    applyZoneRules(removeItemFromTree(items, itemId));
   };
 
   const handleToggleVisibleAtStart = (itemId: string, visible: boolean) => {
-    onItemsChange(
-      enforceItemRules(
-        updateItemInTree(items, itemId, (item) => ({
-          ...item,
-          visibleAtStart: visible,
-        })),
-      ),
+    applyZoneRules(
+      updateItemInTree(items, itemId, (item) => ({
+        ...item,
+        visibleAtStart: visible,
+      })),
     );
   };
 
@@ -70,13 +84,18 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
   );
 
   return (
-    <TreeDropZone id={id} title={title} titleIcon={titleIcon} minHeight={minHeight}>
-      <Box sx={DND_TREE_SORTABLE_OVERRIDES_SX}>
+    <TreeDropZone
+      id={id}
+      title={title}
+      titleIcon={titleIcon}
+      helpText={helpText}
+      clientBucketLabel={clientBucketLabel}
+      minHeight={minHeight}
+    >
+      <Box sx={getSortableTreePanelSx(isDarkMode)}>
         <SortableTree
           items={items}
-          onItemsChanged={(newItems) =>
-            onItemsChange(enforceItemRules(newItems))
-          }
+          onItemsChanged={(newItems) => applyZoneRules(newItems)}
           TreeItemComponent={(treeItemProps) => {
             const itemId = treeItemProps.item.id.toString();
             const isGroup = treeItemProps.item.type === "group";
