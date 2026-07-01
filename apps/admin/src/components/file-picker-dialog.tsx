@@ -21,6 +21,7 @@ import InsertDriveFileOutlined from "@mui/icons-material/InsertDriveFileOutlined
 import FolderOutlined from "@mui/icons-material/FolderOutlined";
 import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
 import type { TreeViewItemId } from "@mui/x-tree-view/models";
+import { useTranslation } from "react-i18next";
 import { useFileList, getFileList } from "../api/file-picker";
 import type { FileEntry, ReadableDir } from "../api/file-picker";
 
@@ -84,8 +85,10 @@ export default function FilePickerDialog({
   onClose,
   onSelect,
   filter = "",
-  title = "Select file",
+  title,
 }: FilePickerDialogProps) {
+  const { t } = useTranslation();
+  const dialogTitle = title ?? t("filePicker.title");
   const [nav, setNav] = useState<NavState>({ dirId: undefined, relPath: "" });
   const [selectedFile, setSelectedFile] = useState<FileEntry | null>(null);
   const [manualValue, setManualValue] = useState("");
@@ -225,11 +228,11 @@ export default function FilePickerDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>{title}</DialogTitle>
+      <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent dividers>
         {isPending && !data ? (
           <Typography variant="body2" sx={{ p: 2, color: "text.secondary" }}>
-            Loading...
+            {t("common.loading")}
           </Typography>
         ) : !dirsConfigured ? (
           /* Not-configured state: message + manual path entry */
@@ -242,16 +245,13 @@ export default function FilePickerDialog({
               minHeight: 200,
             }}
           >
-            <Alert severity="info">
-              Filepicker directories not configured. You can enter a path or URL
-              manually below.
-            </Alert>
+            <Alert severity="info">{t("filePicker.notConfigured")}</Alert>
             <TextField
-              label="Enter path manually"
+              label={t("filePicker.enterPathManually")}
               value={manualValue}
               onChange={(e) => setManualValue(e.target.value)}
               placeholder="/uploads/images/example.png"
-              helperText="Enter the path or URL that will be stored in the configuration."
+              helperText={t("filePicker.manualHelp")}
               size="small"
               fullWidth
               autoFocus
@@ -274,7 +274,7 @@ export default function FilePickerDialog({
                 }}
                 sx={{ cursor: isAtRoot ? "default" : "pointer" }}
               >
-                All folders
+                {t("filePicker.allFolders")}
               </Link>
               {nav.dirId && (
                 <Link
@@ -336,7 +336,7 @@ export default function FilePickerDialog({
                     variant="body2"
                     sx={{ p: 2, color: "text.secondary" }}
                   >
-                    Select a folder to browse
+                    {t("filePicker.selectFolderToBrowse")}
                   </Typography>
                 ) : treeItems.length > 0 ? (
                   <RichTreeView
@@ -353,7 +353,7 @@ export default function FilePickerDialog({
                     variant="body2"
                     sx={{ p: 2, color: "text.secondary" }}
                   >
-                    No subfolders
+                    {t("filePicker.noSubfolders")}
                   </Typography>
                 )}
               </Box>
@@ -367,7 +367,7 @@ export default function FilePickerDialog({
                       variant="caption"
                       sx={{ px: 1, color: "text.secondary" }}
                     >
-                      Folders
+                      {t("filePicker.folders")}
                     </Typography>
                     <List dense disablePadding>
                       {rootDirs.map((dir) => (
@@ -392,7 +392,7 @@ export default function FilePickerDialog({
                       variant="caption"
                       sx={{ px: 1, color: "text.secondary" }}
                     >
-                      Folders
+                      {t("filePicker.folders")}
                     </Typography>
                     <List dense disablePadding>
                       {subdirs.map((d) => (
@@ -419,8 +419,8 @@ export default function FilePickerDialog({
                       sx={{ px: 1, color: "text.secondary" }}
                     >
                       {filter
-                        ? `Files (${files.length})`
-                        : `All files (${files.length})`}
+                        ? t("filePicker.filesCount", { count: files.length })
+                        : t("filePicker.allFilesCount", { count: files.length })}
                     </Typography>
                     <List dense disablePadding>
                       {files.map((file) => (
@@ -448,7 +448,7 @@ export default function FilePickerDialog({
                           variant="body2"
                           sx={{ p: 2, color: "text.secondary" }}
                         >
-                          No files
+                          {t("filePicker.noFiles")}
                         </Typography>
                       )}
                     </List>
@@ -461,12 +461,12 @@ export default function FilePickerDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleNavigateUp} disabled={isAtRoot || !dirsConfigured}>
-          Up
+          {t("filePicker.up")}
         </Button>
         <Box sx={{ flex: 1 }} />
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t("common.cancel")}</Button>
         <Button variant="contained" onClick={handleOk} disabled={!canConfirm}>
-          OK
+          {t("filePicker.ok")}
         </Button>
       </DialogActions>
     </Dialog>
