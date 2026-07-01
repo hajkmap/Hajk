@@ -28,6 +28,7 @@
     "@mui/material": "^9.0.1",
     "@mui/x-charts": "^9.3.0",
     "@mui/x-data-grid": "^9.3.0",
+    "@mui/x-tree-view": "^9.7.0",
     "@tanstack/react-query": "^5.100.14",
     "@tanstack/react-query-devtools": "^5.100.14",
     "@tiptap/extension-placeholder": "^3.26.0",

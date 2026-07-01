@@ -35,6 +35,9 @@ export const ProjectionCreateSchema = z.object({
 
 export const MapDuplicateSchema = z.object({
   name: z.string().min(1, "Map name is required"),
+  includeLayers: z.boolean().default(true),
+  includeGroups: z.boolean().default(true),
+  includeTools: z.boolean().default(true),
 });
 
 export const MapUpdateSchema = z.object({

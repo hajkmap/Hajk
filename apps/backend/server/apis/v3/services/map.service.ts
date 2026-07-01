@@ -683,7 +683,16 @@ class MapService {
     ]);
   }
 
-  async duplicateMap(sourceMapName: string, newName: string, userId?: string) {
+  async duplicateMap(
+    sourceMapName: string,
+    newName: string,
+    options: {
+      includeLayers?: boolean;
+      includeGroups?: boolean;
+      includeTools?: boolean;
+    } = {},
+    userId?: string
+  ) {
     const name =
       typeof newName === "string" ? newName.trim() : String(newName ?? "");
     if (!name) {
@@ -693,6 +702,10 @@ class MapService {
         HajkStatusCodes.INVALID_REQUEST_BODY
       );
     }
+
+    const includeLayers = options.includeLayers !== false;
+    const includeGroups = options.includeGroups !== false;
+    const includeTools = options.includeTools !== false;
 
     const source = await prisma.map.findUnique({
       where: { name: sourceMapName },
@@ -750,7 +763,7 @@ class MapService {
           },
         });
 
-        if (source.tools.length > 0) {
+        if (includeTools && source.tools.length > 0) {
           await tx.toolsOnMaps.createMany({
             data: source.tools.map((tool) => ({
               mapName: name,
@@ -762,6 +775,7 @@ class MapService {
           });
         }
 
+        if (includeGroups) {
         const uniqueGroupIds = [
           ...new Set(source.groups.map((entry) => entry.groupId)),
         ];
@@ -881,7 +895,9 @@ class MapService {
             }
           }
         }
+        }
 
+        if (includeLayers) {
         for (const layer of source.layers) {
           const createdLayer = await tx.layerInstance.create({
             data: {
@@ -905,6 +921,7 @@ class MapService {
               })),
             });
           }
+        }
         }
 
         const folderIdMap = new Map<number, number>();

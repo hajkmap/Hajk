@@ -1,6 +1,14 @@
 import { useEffect } from "react";
-import { Button, TextField } from "@mui/material";
-import { useForm } from "react-hook-form";
+import {
+  Button,
+  TextField,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+  Typography,
+  Box,
+} from "@mui/material";
+import { useForm, Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { isAxiosError } from "axios";
@@ -13,6 +21,9 @@ import type { ApiValidationDetail } from "../../../lib/internal-api-client";
 
 interface DuplicateMapFormValues {
   name: string;
+  includeLayers: boolean;
+  includeGroups: boolean;
+  includeTools: boolean;
 }
 
 interface MapDuplicateErrorBody {
@@ -20,6 +31,12 @@ interface MapDuplicateErrorBody {
   error?: string;
   details?: ApiValidationDetail[];
 }
+
+const DEFAULT_DUPLICATE_OPTIONS = {
+  includeLayers: true,
+  includeGroups: true,
+  includeTools: true,
+};
 
 function getDuplicateMapErrorMessage(error: unknown, t: TFunction): string {
   if (!isAxiosError<MapDuplicateErrorBody>(error) || !error.response) {
@@ -68,6 +85,16 @@ function buildSuggestedName(sourceMapName: string, existingMaps: MapRecord[]) {
   return `${sourceMapName} (copy ${suffix})`;
 }
 
+function buildDefaultValues(
+  sourceMap: MapRecord | null,
+  existingMaps: MapRecord[],
+): DuplicateMapFormValues {
+  return {
+    name: sourceMap ? buildSuggestedName(sourceMap.name, existingMaps) : "",
+    ...DEFAULT_DUPLICATE_OPTIONS,
+  };
+}
+
 interface DuplicateMapDialogProps {
   open: boolean;
   sourceMap: MapRecord | null;
@@ -89,18 +116,19 @@ export default function DuplicateMapDialog({
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<DuplicateMapFormValues>({
-    defaultValues: { name: "" },
+    defaultValues: buildDefaultValues(null, existingMaps),
     mode: "onChange",
     reValidateMode: "onChange",
   });
 
   useEffect(() => {
-    if (open && sourceMap) {
-      reset({ name: buildSuggestedName(sourceMap.name, existingMaps) });
+    if (open) {
+      reset(buildDefaultValues(sourceMap, existingMaps));
     }
   }, [open, sourceMap, existingMaps, reset]);
 
@@ -124,6 +152,9 @@ export default function DuplicateMapDialog({
       const response = await duplicateMap({
         sourceMapName: sourceMap.name,
         name: data.name.trim(),
+        includeLayers: data.includeLayers,
+        includeGroups: data.includeGroups,
+        includeTools: data.includeTools,
       });
       toast.success(t("maps.duplicateMapSuccess", { name: data.name.trim() }), {
         position: "bottom-left",
@@ -194,6 +225,62 @@ export default function DuplicateMapDialog({
             : undefined)
         }
       />
+
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+          {t("maps.duplicate.includeRelations")}
+        </Typography>
+        <FormGroup>
+          <Controller
+            name="includeLayers"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={field.value}
+                    onChange={(event) => field.onChange(event.target.checked)}
+                    disabled={isPending}
+                  />
+                }
+                label={t("maps.duplicate.includeLayers")}
+              />
+            )}
+          />
+          <Controller
+            name="includeGroups"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={field.value}
+                    onChange={(event) => field.onChange(event.target.checked)}
+                    disabled={isPending}
+                  />
+                }
+                label={t("maps.duplicate.includeGroups")}
+              />
+            )}
+          />
+          <Controller
+            name="includeTools"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={field.value}
+                    onChange={(event) => field.onChange(event.target.checked)}
+                    disabled={isPending}
+                  />
+                }
+                label={t("maps.duplicate.includeTools")}
+              />
+            )}
+          />
+        </FormGroup>
+      </Box>
     </DialogWrapper>
   );
 }
