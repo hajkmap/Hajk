@@ -1,0 +1,49 @@
+{
+  "chapters": [
+    {
+      "header": "Vandringsleder i kommunen",
+      "headerIdentifier": "vandringsleder:vandringsleder-i-kommunen",
+      "html": "<p><strong>Kommunen erbjuder ett väl utbyggt nät av vandringsleder med totalt 210 km markerade leder. Lederna varierar från lättgångna promenadstigar i tätortsnära natur till krävande dagsvandringar i kuperad terräng.</strong></p>\n<p>Alla kommunens leder är kostnadsfria och de flesta är öppna året om. Lederna är markerade med orange pilar och hänvisningsskyltar vid start- och slutpunkter.</p>\n<p><a href=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=6j0lgq,toimzo&p=layerswitcher\" data-maplink=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=6j0lgq,toimzo&p=layerswitcher\">Visa vandringsleder i kartan</a></p>",
+      "keywords": ["vandring", "leder", "friluftsliv", "natur"],
+      "geoObjects": [],
+      "chapters": [
+        {
+          "header": "Skogsslingan – 6 km (lätt)",
+          "headerIdentifier": "vandringsleder:skogsslingan",
+          "html": "<p>Skogsslingan är kommunens mest besökta led och passar utmärkt för familjer med barn. Leden utgår från naturcentrum vid Ekeby och löper genom blandskog med flera rastplatser längs vägen.</p>\n<blockquote data-divider-color=\"#2E7D32\" data-background-color=\"#E8F5E9\" data-text-section=\"\" data-accordion=\"false\"><strong>Skogsslingan – snabbfakta</strong><br/>\nLängd: <strong>6 km</strong> (rund)<br/>\nTid: ca <strong>1,5–2 timmar</strong><br/>\nSvårighetsgrad: <strong>Lätt</strong><br/>\nUnderlag: Grusad stig, delvis träspång<br/>\nFaciliteter: Parkering, toalett, vindskydd, grillplats\n</blockquote>\n<p>Längs leden finns <a data-hover=\"Håll koll på växter och djur med hjälp av appen iNaturalist\">informationsskyltar om den lokala floran och faunan</a>. På våren blommar vitsippor och blåsippor i stora mattor längs stigen.</p>",
+          "keywords": ["Skogsslingan", "familjeled", "Ekeby"],
+          "geoObjects": [],
+          "chapters": []
+        },
+        {
+          "header": "Höjdrundan – 14 km (medelsvår)",
+          "headerIdentifier": "vandringsleder:hojdrundan",
+          "html": "<p>Höjdrundan tar vandraren upp till kommunens högsta punkt – Björkbacken (217 m ö.h.) – med utsikt över hela kommunen och vid klart väder ända till kusten.</p>\n<blockquote data-divider-color=\"#1565C0\" data-background-color=\"#E3F2FD\" data-text-section=\"\" data-accordion=\"false\"><strong>Höjdrundan – snabbfakta</strong><br/>\nLängd: <strong>14 km</strong> (rund)<br/>\nTid: ca <strong>4–5 timmar</strong><br/>\nSvårighetsgrad: <strong>Medelsvår</strong><br/>\nHöjdskillnad: <strong>180 m</strong><br/>\nFaciliteter: Parkering vid start, ingen toalett längs leden\n</blockquote>\n<p>Ta med ordentliga vandringskängor – leden innehåller steniga partier och kan vara blöt efter regn. Det finns ett vindskydd vid ledens mitt, vid tjärnen Lången, som är en perfekt rastplats.</p>",
+          "keywords": ["Höjdrundan", "utsikt", "Björkbacken"],
+          "geoObjects": [],
+          "chapters": []
+        },
+        {
+          "header": "Kustleden – 35 km (krävande)",
+          "headerIdentifier": "vandringsleder:kustleden",
+          "html": "<p>Kommunens längsta led löper längs hela kuststräckan och passerar igenom strandängar, klippor och pittoreska fiskelägen. Leden kan vandras i etapper och det finns flera övernattningsstugor längs vägen.</p>\n<p>Kustleden är en del av det nationella ledsystemet och håller hög standard. Läs mer och boka övernattningsstugor på:</p>\n<p><a href=\"https://www.naturkartan.se\" data-link=\"https://www.naturkartan.se\">Naturkartan.se – kartor och information om friluftslivet</a></p>\n<p><a href=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=0si2ys,6j0lgq&p=layerswitcher\" data-maplink=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=0si2ys,6j0lgq&p=layerswitcher\">Visa Kustleden och skyddade områden i kartan</a></p>",
+          "keywords": ["Kustleden", "kust", "övernattning", "fiskelägen"],
+          "geoObjects": [],
+          "chapters": []
+        }
+      ],
+      "expanded": true
+    },
+    {
+      "header": "Praktisk information",
+      "headerIdentifier": "vandringsleder:praktisk-information",
+      "html": "<p>Planera din vandring väl och tänk på följande:</p>\n<ul>\n  <li>Kontrollera väderleksprognosen – väder kan snabbt förändras</li>\n  <li>Bär alltid med dig dricksvatten, oavsett ledens längd</li>\n  <li>Lämna naturen som du fann den – tag med ditt skräp</li>\n  <li>Håll hunden i koppel i och nära naturreservat</li>\n  <li>Vid nödsituation, ring 112 och ange din position</li>\n</ul>\n<p>Allemansrätten ger rätt att vistas i naturen – men med respekt för djur, natur och markägare. Läs mer om <a href=\"https://www.naturvardsverket.se/allemansratten\" data-link=\"https://www.naturvardsverket.se/allemansratten\">allemansrätten på Naturvårdsverkets webbplats</a>.</p>",
+      "keywords": ["allemansrätten", "säkerhet", "tips", "friluftsliv"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": false
+    }
+  ],
+  "map": "map_1",
+  "title": "Vandringsleder"
+}

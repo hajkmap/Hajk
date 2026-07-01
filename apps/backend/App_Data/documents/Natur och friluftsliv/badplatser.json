@@ -1,0 +1,41 @@
+{
+  "chapters": [
+    {
+      "header": "Kommunens badplatser",
+      "headerIdentifier": "badplatser:kommunens-badplatser",
+      "html": "<p><strong>Kommunen har 18 officiella badplatser – nio vid sjöar och nio vid havet. Samtliga badplatser provtas regelbundet av Miljö- och hälsoskyddsenheten för att säkerställa god vattenkvalitet.</strong></p>\n<p>Badplatskvaliteten rapporteras löpande till EU:s badvattenregister. De flesta av kommunens badplatser uppnår klassificeringen <em>Utmärkt</em> badvatten.</p>\n<p><a href=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=yp97e0,4y2nnu&p=layerswitcher\" data-maplink=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=yp97e0,4y2nnu&p=layerswitcher\">Visa alla badplatser i kartan</a></p>",
+      "keywords": ["badplats", "simning", "badvatten", "sommar"],
+      "geoObjects": [],
+      "chapters": [
+        {
+          "header": "Sjöbadet Örnviken",
+          "headerIdentifier": "badplatser:sjobadet-ornviken",
+          "html": "<p>Örnvikens sjöbad är kommunens mest välbesökta badplats under sommaren och erbjuder en bred sandstrand vid den kristallklara sjön Örnviken.</p>\n<blockquote data-divider-color=\"#0277BD\" data-background-color=\"#E1F5FE\" data-text-section=\"\" data-accordion=\"false\"><strong>Örnviken – Faciliteter</strong><br/>\nSandstrand: <strong>280 m</strong><br/>\nBadbrygga och hopptorn: <strong>Ja</strong><br/>\nBadvärd: <strong>Ja (15 juni – 15 aug, kl 10–18)</strong><br/>\nParkering: <strong>Kostnadsfri, 150 platser</strong><br/>\nToaletter och omklädningsrum: <strong>Ja</strong><br/>\nRullstolsanpassad: <strong>Ja, inklusive ramp till vattnet</strong>\n</blockquote>\n<p>Hunden är välkommen på den hundvänliga stranden (norra delen), men hålls i koppel på den gemensamma stranden.</p>",
+          "keywords": ["Örnviken", "sjöbad", "sandstrand", "badvärd"],
+          "geoObjects": [],
+          "chapters": []
+        },
+        {
+          "header": "Havsbad Sandviken",
+          "headerIdentifier": "badplatser:havsbad-sandviken",
+          "html": "<p>Sandviken är kommunens populäraste havsbad med en lång sandstrand och grunt, barnvänligt vatten. Stranden är omgiven av klittnatur och är ett Natura 2000-område.</p>\n<blockquote data-divider-color=\"#0277BD\" data-background-color=\"#E1F5FE\" data-text-section=\"\" data-accordion=\"false\"><strong>Sandviken – Faciliteter</strong><br/>\nSandstrand: <strong>650 m</strong><br/>\nBadbrygga: <strong>Ja</strong><br/>\nBadvärd: <strong>Ja (15 juni – 15 aug, kl 10–18)</strong><br/>\nParkering: <strong>Belagd avgift sommarsäsong</strong><br/>\nToaletter: <strong>Ja</strong><br/>\nKiosk: <strong>Ja (sommarperioden)</strong>\n</blockquote>",
+          "keywords": ["Sandviken", "havsbad", "klittmiljö", "Natura 2000"],
+          "geoObjects": [],
+          "chapters": []
+        }
+      ],
+      "expanded": true
+    },
+    {
+      "header": "Vattenkvalitet och provtagning",
+      "headerIdentifier": "badplatser:vattenkvalitet-och-provtagning",
+      "html": "<p>Kommunen provtar badvatten veckovis under badsäsongen (juni–augusti). Proverna analyseras av ett ackrediterat laboratorium avseende E. coli och intestinala enterokocker.</p>\n<ul>\n  <li><strong>Utmärkt</strong> – Mycket låga halter av bakterier, säkert att bada</li>\n  <li><strong>Bra</strong> – Låga halter, säkert att bada</li>\n  <li><strong>Tillfredsställande</strong> – Något förhöjda halter, normalt säkert</li>\n  <li><strong>Dåligt</strong> – Förhöjda halter, badförbud kan utfärdas</li>\n</ul>\n<p>Aktuella analysresultat publiceras på kommunens webbplats och i kartan. <a href=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=yp97e0&p=layerswitcher\" data-maplink=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=yp97e0&p=layerswitcher\">Visa badvattenklassificering i kartan</a></p>\n<p>För mer information om EU:s badvattendirektiv: <a href=\"https://www.havochvatten.se\" data-link=\"https://www.havochvatten.se\">Havs- och vattenmyndigheten</a></p>",
+      "keywords": ["vattenkvalitet", "badvatten", "provtagning", "E. coli"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": false
+    }
+  ],
+  "map": "map_1",
+  "title": "Badplatser"
+}

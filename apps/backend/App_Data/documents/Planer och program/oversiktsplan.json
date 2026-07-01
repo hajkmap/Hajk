@@ -1,0 +1,59 @@
+{
+  "chapters": [
+    {
+      "header": "Om översiktsplanen",
+      "headerIdentifier": "oversiktsplan-2040:om-oversiktsplanen",
+      "html": "<p><strong>Kommunens översiktsplan är det övergripande strategiska dokumentet som vägleder all planering och bebyggelseutveckling fram till år 2040. Planen är inte juridiskt bindande, men vägledande för hur kommunen ska utvecklas på lång sikt.</strong></p>\n<figure><img src=\"https://picsum.photos/id/106/500/280\" data-image-width=\"500px\" data-image-height=\"280px\" data-caption=\"Kommunens centrala delar sett från luften\" data-source=\"Illustration: Kommunen\" data-image-position=\"right\" data-image-popup=\"\"/></figure>\n<p>Översiktsplanen ger vägledning för:</p>\n<ul>\n  <li>Hur mark och vatten ska användas</li>\n  <li>Hur den byggda miljön ska användas, utvecklas och bevaras</li>\n  <li>Riksintressen och andra statliga och kommunala intressen</li>\n  <li>Hur hänsyn ska tas till miljö- och riskfaktorer</li>\n</ul>\n<p>Planen är framtagen i dialog med invånare, näringsliv och föreningar under 2022–2023 och antogs av kommunfullmäktige i mars 2024.</p>",
+      "keywords": ["översiktsplan", "planering", "markanvändning", "2040"],
+      "geoObjects": [],
+      "chapters": [
+        {
+          "header": "Planeringsförutsättningar",
+          "headerIdentifier": "oversiktsplan-2040:planeringsforutsattningar",
+          "html": "<p>Kommunen har idag drygt 45 000 invånare och prognosen pekar på en tillväxt till 55 000 invånare år 2040. Det ställer krav på planering av bostäder, infrastruktur och service.</p>\n<blockquote data-divider-color=\"#2E7D32\" data-background-color=\"#E8F5E9\" data-text-section=\"\" data-accordion=\"false\"><strong>Fakta: Kommunens tillväxt</strong><br/>\nInvånare 2024: <strong>45 200</strong><br/>\nPrognos 2040: <strong>55 000</strong><br/>\nNya bostäder som behövs: <strong>ca 4 500</strong><br/>\nNya arbetsplatser: <strong>ca 3 000</strong>\n</blockquote>\n<p>Kommunen är belägen i ett attraktivt läge med god kollektivtrafik och närheten till naturen är en stor kvalitet som ska värnas i planeringen.</p>",
+          "keywords": ["befolkningstillväxt", "prognos", "bostäder"],
+          "geoObjects": [],
+          "chapters": []
+        },
+        {
+          "header": "Utbyggnadsriktningar",
+          "headerIdentifier": "oversiktsplan-2040:utbyggnadsriktningar",
+          "html": "<p>Kommunen pekar ut tre prioriterade utbyggnadsområden för ny bebyggelse:</p>\n<ol>\n  <li><strong>Centralorten</strong> – förtätning och kompletteringsbebyggelse i befintliga bostadsområden, med fokus på kollektivtrafiknära lägen.</li>\n  <li><strong>Norra stationsområdet</strong> – omvandling från industri till blandat stads­område med bostäder, kontor och service.</li>\n  <li><strong>Södra entrén</strong> – ny stadsdel med upp till 1 500 bostäder, skola och idrottsanläggning.</li>\n</ol>\n<p>Klicka nedan för att se de utpekade områdena i kartan:</p>\n<p><a href=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=p5w1tn,40zayx&p=layerswitcher\" data-maplink=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=p5w1tn,40zayx&p=layerswitcher\">Visa utbyggnadsområden i kartan</a></p>",
+          "keywords": ["utbyggnad", "bostäder", "förtätning", "stationsområde"],
+          "geoObjects": [],
+          "chapters": []
+        }
+      ],
+      "expanded": true
+    },
+    {
+      "header": "Grönstruktur och naturvård",
+      "headerIdentifier": "oversiktsplan-2040:gronstruktur-och-naturvard",
+      "html": "<p>Kommunens gröna kilar och naturreservat är viktiga för biologisk mångfald, friluftsliv och klimatanpassning. Översiktsplanen slår fast att dessa värden ska stärkas, inte försämras, i takt med att kommunen växer.</p>\n<blockquote data-divider-color=\"#1565C0\" data-background-color=\"#E3F2FD\" data-text-section=\"\" data-accordion=\"true\"><strong>Kommunens naturreservat</strong><br/>\nKommunen förvaltar <strong>12 naturreservat</strong> med en total area av <strong>3 840 hektar</strong>. Ytterligare tre reservat planeras att bildas fram till 2030. Klicka på rubriken för att läsa mer.\n<br/><br/>\nDe skyddade områdena är viktiga spridningskorridorer för djur och växter och ska bevaras i sin helhet.\n</blockquote>\n<p>Läs mer om kommunens naturreservat i avsnittet <a href=\"naturreservat\" data-document=\"naturreservat\">Naturreservat</a>.</p>",
+      "keywords": ["grönstruktur", "naturvård", "naturreservat", "biologisk mångfald"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": false
+    },
+    {
+      "header": "Klimat och hållbarhet",
+      "headerIdentifier": "oversiktsplan-2040:klimat-och-hallbarhet",
+      "html": "<p>Klimatfrågan är central i översiktsplanen. Kommunen har som mål att vara klimatneutralt till 2040 och all ny planering ska bidra till detta.</p>\n<p>Viktiga principer:</p>\n<ul>\n  <li>Ny bebyggelse ska planeras med hänsyn till klimatrisker såsom översvämning, skred och värmeöar</li>\n  <li>Energieffektivisering och förnybara energikällor ska prioriteras</li>\n  <li>Transporter ska i ökad utsträckning ske kollektivt, till fots eller med cykel</li>\n  <li>Dagvattenhantering ska planeras enligt <a href=\"https://www.naturvardsverket.se\" data-link=\"https://www.naturvardsverket.se\">Naturvårdsverkets riktlinjer</a></li>\n</ul>\n<p><a href=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=2kzj0u,f1yh1g&p=layerswitcher\" data-maplink=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=2kzj0u,f1yh1g&p=layerswitcher\">Visa klimatriskzoner i kartan</a></p>",
+      "keywords": ["klimat", "hållbarhet", "klimatneutral", "energi", "dagvatten"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": false
+    },
+    {
+      "header": "Läs mer",
+      "headerIdentifier": "oversiktsplan-2040:las-mer",
+      "html": "<p>Vill du fördjupa dig i specifika frågor? Läs mer i de tematiska fördjupningarna:</p>\n<ul>\n  <li><a href=\"detaljplaner\" data-document=\"detaljplaner\">Detaljplaner och genomförande</a></li>\n  <li><a href=\"naturreservat\" data-document=\"naturreservat\">Naturreservat i kommunen</a></li>\n  <li><a href=\"skolor-och-forskolor\" data-document=\"skolor-och-forskolor\">Skolor och förskolor</a></li>\n</ul>\n<p>Hela översiktsplanedokumentet finns tillgängligt på kommunens webbplats: <a href=\"https://www.hajk.se\" data-link=\"https://www.hajk.se\">Hajk Kommun</a>.</p>",
+      "keywords": ["fördjupning", "detaljplan", "kommunens webbplats"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": false
+    }
+  ],
+  "map": "map_1",
+  "title": "Översiktsplan 2040"
+}

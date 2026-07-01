@@ -1,0 +1,50 @@
+{
+  "chapters": [
+    {
+      "header": "Återvinning i kommunen",
+      "headerIdentifier": "atervinningscentraler:atervinning-i-kommunen",
+      "html": "<p><strong>Kommunen har sex återvinningscentraler (ÅVC) och ett nätverk av fastighetsnära insamling (FNI) med separata kärl för olika avfallsslag. Kommunens mål är att 70 % av hushållsavfallet ska materialåtervinnas till 2030.</strong></p>\n<p>Hushållsavfall är kommunens ansvar och sorteras i följande fraktioner:</p>\n<ul>\n  <li>Matavfall (brunt kärl) – rötas till biogas och biogödsel</li>\n  <li>Restavfall (grått kärl) – förbränns med energiåtervinning</li>\n  <li>Förpackningar och tidningar – lämnas till fastighetsnär insamling eller återvinningsstation</li>\n  <li>Farligt avfall – lämnas till återvinningscentral eller mobil miljöstation</li>\n</ul>\n<p><a href=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=vzjhpz,d2fxdy&p=layerswitcher\" data-maplink=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=vzjhpz,d2fxdy&p=layerswitcher\">Visa återvinningscentraler i kartan</a></p>",
+      "keywords": ["återvinning", "ÅVC", "avfall", "sopsortering", "matavfall"],
+      "geoObjects": [],
+      "chapters": [
+        {
+          "header": "Återvinningscentralernas öppettider",
+          "headerIdentifier": "atervinningscentraler:oppettider",
+          "html": "<p>Kommunens sex ÅVC tar emot grov­sopor, el-avfall, farligt avfall och trädgårdsavfall. Besök är kostnadsfria för privatpersoner bosatta i kommunen.</p>\n<blockquote data-divider-color=\"#E65100\" data-background-color=\"#FFF3E0\" data-text-section=\"\" data-accordion=\"false\"><strong>Öppettider ÅVC Centralorten</strong><br/>\nMåndag–fredag: <strong>08:00–19:00</strong><br/>\nLördag: <strong>08:00–16:00</strong><br/>\nSöndag: <strong>Stängt</strong><br/>\nHelgdag: Se aktuell information på kommunens webbplats\n</blockquote>\n<blockquote data-divider-color=\"#E65100\" data-background-color=\"#FFF3E0\" data-text-section=\"\" data-accordion=\"true\"><strong>Öppettider övriga ÅVC</strong><br/>\nNorra ÅVC: Tis–tors 12–19, lör 09–14<br/>\nSödra ÅVC: Mån, ons, fre 12–19, lör 09–14<br/>\nÖstra ÅVC: Tis, tor 12–19, lör 09–14<br/>\nVästra ÅVC: Mån, ons 12–19, lör 09–14<br/>\nLandsbygds-ÅVC: Lör 09–13 (maj–september)\n</blockquote>",
+          "keywords": ["öppettider", "ÅVC", "grovavfall"],
+          "geoObjects": [],
+          "chapters": []
+        },
+        {
+          "header": "Farligt avfall",
+          "headerIdentifier": "atervinningscentraler:farligt-avfall",
+          "html": "<p>Farligt avfall ska alltid lämnas till ÅVC eller den mobila miljöstationen – det får <strong>aldrig</strong> kastas i vanliga sopkärl eller hällas ut i avloppet.</p>\n<p>Exempel på farligt avfall:</p>\n<ul>\n  <li>Batterier och ackumulatorer</li>\n  <li>Elavfall (mobiltelefoner, datorer, TV-apparater)</li>\n  <li>Lysrör och lågenergilampor</li>\n  <li>Färg, lim och kemikalier</li>\n  <li>Bekämpningsmedel och gödning</li>\n  <li>Läkemedel och kanyler (lämnas till apotek)</li>\n</ul>\n<p>Den mobila miljöstationen besöker kommunens tätorter med jämna mellanrum. Schema publiceras på kommunens webbplats och som notis i kommunens app.</p>",
+          "keywords": ["farligt avfall", "batterier", "elavfall", "kemikalier"],
+          "geoObjects": [],
+          "chapters": []
+        }
+      ],
+      "expanded": true
+    },
+    {
+      "header": "Hämtning av hushållsavfall",
+      "headerIdentifier": "atervinningscentraler:hamtning-av-hushallsavfall",
+      "html": "<p>Hushållsavfall hämtas varannan vecka (restavfall och matavfall), dock minst en gång per vecka under sommarsäsongen (juni–augusti). Förpackningar och tidningar hämtas en gång per månad.</p>\n<p>Tömningsschema varierar beroende på vilket område du bor i. Hitta ditt hämtningsschema:</p>\n<p><a href=\"https://www.hajkkommun.se/avfall/hamtningsschema\" data-link=\"https://www.hajkkommun.se/avfall/hamtningsschema\">Sök hämtningsschema på kommunens webbplats</a></p>\n<p>Frågor om avfallshämtning? Kontakta <a data-hover=\"Kommunens kundtjänst för avfallsfrågor, öppen vardagar 8–17\">Avfallsenheten på kundtjänst</a>.</p>",
+      "keywords": ["hämtning", "tömningstid", "hushållsavfall", "sophämtning"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": false
+    },
+    {
+      "header": "Kommunens hållbarhetsmål",
+      "headerIdentifier": "atervinningscentraler:hallbarhetmal",
+      "html": "<p>Kommunen arbetar mot de nationella avfallsmålen och EU:s avfallsdirektiv. Nyckelmål till 2030:</p>\n<ol>\n  <li>70 % av hushållsavfallet ska materialåtervinnas (jämfört med 52 % idag)</li>\n  <li>Matavfallsinsamlingen ska öka från 62 % till 80 % av det totala matavfallet</li>\n  <li>Mängden restavfall ska minska med 20 % per person</li>\n</ol>\n<p>Läs mer om kommunens hållbarhetsarbete i <a href=\"oversiktsplan-2040\" data-document=\"oversiktsplan-2040\" data-header-identifier=\"klimat-och-hallbarhet\">Översiktsplanens klimat- och hållbarhetskapitel</a>.</p>\n<p>Nationell information om avfallshantering: <a href=\"https://www.naturvardsverket.se/avfall\" data-link=\"https://www.naturvardsverket.se/avfall\">Naturvårdsverket – Avfall</a></p>",
+      "keywords": ["hållbarhet", "avfallsmål", "materialåtervinning", "EU-direktiv"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": false
+    }
+  ],
+  "map": "map_1",
+  "title": "Återvinningscentraler"
+}

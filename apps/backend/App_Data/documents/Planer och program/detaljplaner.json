@@ -1,0 +1,42 @@
+{
+  "chapters": [
+    {
+      "header": "Vad är en detaljplan?",
+      "headerIdentifier": "detaljplaner:vad-ar-en-detaljplan",
+      "html": "<p><strong>En detaljplan reglerar hur mark och vatten får användas och hur bebyggelsen ska utformas inom ett begränsat område. Det är kommunen som tar fram detaljplaner enligt plan- och bygglagen (PBL).</strong></p>\n<p>En detaljplan innehåller en plankarta med bestämmelser och ska alltid innehålla:</p>\n<ul>\n  <li>Planbestämmelser om markanvändning (t.ex. bostäder, handel, park)</li>\n  <li>Byggrätt – hur mycket och var man får bygga</li>\n  <li>Bestämmelser om utformning och gestaltning</li>\n  <li>Genomförandetid, vanligtvis 5–15 år</li>\n</ul>\n<p>Planprocessen i korthet:</p>\n<ol>\n  <li>Planuppdrag – kommunen beslutar att ta fram en plan</li>\n  <li>Samråd – myndigheter, grannar och allmänhet ges möjlighet att lämna synpunkter</li>\n  <li>Granskning – reviderat förslag ställs ut för granskning</li>\n  <li>Antagande – kommunfullmäktige eller byggnadsnämnden antar planen</li>\n  <li>Laga kraft – planen vinner laga kraft om den inte överklagas</li>\n</ol>",
+      "keywords": ["detaljplan", "planprocess", "PBL", "byggrätt"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": true
+    },
+    {
+      "header": "Pågående planarbete",
+      "headerIdentifier": "detaljplaner:pagaende-planarbete",
+      "html": "<p>Kommunen arbetar just nu med ett antal detaljplaner. Nedan visas de planer som befinner sig i aktivt planarbete.</p>\n<blockquote data-divider-color=\"#E65100\" data-background-color=\"#FFF3E0\" data-text-section=\"\" data-accordion=\"false\"><strong>Observera</strong><br/>\nSamrådshandlingar och granskningshandlingar finns tillgängliga på kommunhusets expeditioner och på kommunens webbplats. Synpunkter ska lämnas skriftligen till Plan- och bygglovsenheten.\n</blockquote>\n<p><strong>Norra stationsområdet (samråd pågår)</strong><br/>\nOmvandling av gamla industrimark till blandat stadsområde med ca 600 bostäder, förskola och kontor. Samrådstid: 15 jan – 15 feb 2025.</p>\n<p><strong>Södra entrén, etapp 1 (granskning)</strong><br/>\nNy bostadsbebyggelse med 250 lägenheter och radhus. Planerad antagning: maj 2025.</p>\n<p><strong>Centrumtorget (startskede)</strong><br/>\nUtveckling av torget med ny handel och bostäder ovanpå. Dialog med fastighetsägare pågår.</p>",
+      "keywords": ["pågående planer", "samråd", "granskning", "stationsområdet"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": false
+    },
+    {
+      "header": "Så påverkar planen dig",
+      "headerIdentifier": "detaljplaner:sa-paverkar-planen-dig",
+      "html": "<p>Om du bor eller äger fastighet nära ett planområde har du rätt att delta i planprocessen. Kommunen är skyldig att underrätta sakägare och kommunicera planförslaget.</p>\n<p><strong>Dina rättigheter:</strong></p>\n<ul>\n  <li><em>Samrådstiden</em> – du kan lämna skriftliga synpunkter som kommunen är skyldig att bemöta</li>\n  <li><em>Granskningstiden</em> – du kan granska det reviderade förslaget och lämna ytterligare synpunkter</li>\n  <li><em>Överklagande</em> – du kan överklaga ett antaget planbeslut inom tre veckor till länsstyrelsen</li>\n</ul>\n<p>Läs mer om kommunens övergripande planering i <a href=\"oversiktsplan-2040\" data-document=\"oversiktsplan-2040\" data-header-identifier=\"utbyggnadsriktningar\">Översiktsplanens utbyggnadsriktningar</a>.</p>\n<p><a href=\"https://www.boverket.se/sv/PBL-kunskapsbanken/planering/detaljplan/\" data-link=\"https://www.boverket.se/sv/PBL-kunskapsbanken/planering/detaljplan/\">Boverkets information om detaljplaner</a></p>",
+      "keywords": ["sakägare", "synpunkter", "överklagande", "planrättigheter"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": false
+    },
+    {
+      "header": "Kontakt och handlingar",
+      "headerIdentifier": "detaljplaner:kontakt-och-handlingar",
+      "html": "<p>Samtliga gällande detaljplaner finns i kommunens digitala planarkiv. Du kan söka på adress, fastighetsbeteckning eller plannamn.</p>\n<p><a href=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=p5w1tn,w4yufj&p=layerswitcher\" data-maplink=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=p5w1tn,w4yufj&p=layerswitcher\">Visa gällande detaljplaner i kartan</a></p>\n<p><strong>Plan- och bygglovsenheten</strong><br/>\nTelefon: 0XXX-XXX XX<br/>\nE-post: <a href=\"mailto:plan@hajkkommun.se\" data-hover=\"Skicka e-post till Plan- och bygglovsenheten\">plan@hajkkommun.se</a></p>",
+      "keywords": ["planarkiv", "kontakt", "bygglov"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": false
+    }
+  ],
+  "map": "map_1",
+  "title": "Detaljplaner"
+}

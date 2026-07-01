@@ -924,7 +924,7 @@
       "type": "documenthandler",
       "index": 0,
       "options": {
-        "title": "Visa informationsruta",
+        "title": "DocumentHandler Title",
         "target": "hidden",
         "showScrollButtonLimit": 400,
         "dynamicImportUrls": {
@@ -943,7 +943,7 @@
         "drawerTitle": "",
         "drawerButtonTitle": "Meny",
         "tableOfContents": {
-          "active": false,
+          "active": true,
           "expanded": false,
           "chapterLevelsToShow": 2,
           "title": "Innehållsförteckning"
@@ -955,12 +955,12 @@
         "menuConfig": {
           "menu": [
             {
-              "title": "Exempeldokument",
-              "folder": "",
+              "title": "Om dokumenthanteraren",
+              "folder": "general",
               "document": "exempeldokument",
-              "color": "",
+              "color": "#1565C0",
               "icon": {
-                "materialUiIconName": "",
+                "materialUiIconName": "home",
                 "fontSize": "large"
               },
               "maplink": "",
@@ -968,16 +968,178 @@
               "menu": []
             },
             {
-              "title": "Exempeldokument2",
+              "title": "Planer och program",
               "folder": "",
-              "document": "exempeldokument2",
-              "color": "",
+              "document": "",
+              "color": "#4527A0",
               "icon": {
-                "materialUiIconName": "",
+                "materialUiIconName": "map",
                 "fontSize": "large"
               },
               "maplink": "",
               "link": "",
+              "expandedSubMenu": true,
+              "menu": [
+                {
+                  "title": "Översiktsplan 2040",
+                  "folder": "planer-och-program",
+                  "document": "oversiktsplan-2040",
+                  "color": "",
+                  "icon": {
+                    "materialUiIconName": "account_balance",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Detaljplaner",
+                  "folder": "planer-och-program",
+                  "document": "detaljplaner",
+                  "color": "",
+                  "icon": {
+                    "materialUiIconName": "grid_on",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                }
+              ]
+            },
+            {
+              "title": "Natur och friluftsliv",
+              "folder": "",
+              "document": "",
+              "color": "#2E7D32",
+              "icon": {
+                "materialUiIconName": "park",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "expandedSubMenu": false,
+              "menu": [
+                {
+                  "title": "Naturreservat",
+                  "folder": "natur-och-friluftsliv",
+                  "document": "naturreservat",
+                  "color": "",
+                  "icon": {
+                    "materialUiIconName": "nature",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Vandringsleder",
+                  "folder": "natur-och-friluftsliv",
+                  "document": "vandringsleder",
+                  "color": "",
+                  "icon": {
+                    "materialUiIconName": "hiking",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Badplatser",
+                  "folder": "natur-och-friluftsliv",
+                  "document": "badplatser",
+                  "color": "",
+                  "icon": {
+                    "materialUiIconName": "pool",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                }
+              ]
+            },
+            {
+              "title": "Kommunal service",
+              "folder": "",
+              "document": "",
+              "color": "#BF360C",
+              "icon": {
+                "materialUiIconName": "location_city",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "expandedSubMenu": false,
+              "menu": [
+                {
+                  "title": "Skolor och förskolor",
+                  "folder": "kommunal-service",
+                  "document": "skolor-och-forskolor",
+                  "color": "",
+                  "icon": {
+                    "materialUiIconName": "school",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Återvinningscentraler",
+                  "folder": "kommunal-service",
+                  "document": "atervinningscentraler",
+                  "color": "",
+                  "icon": {
+                    "materialUiIconName": "delete_outline",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                }
+              ]
+            },
+            {
+              "title": "Visa skyddade områden i kartan",
+              "folder": "",
+              "document": "",
+              "color": "#00695C",
+              "icon": {
+                "materialUiIconName": "layers",
+                "fontSize": "large"
+              },
+              "maplink": "/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=1514&p=layerswitcher",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Dokumenthanteraren – hjälp och demo",
+              "folder": "general",
+              "document": "exempeldokument2",
+              "color": "#546E7A",
+              "icon": {
+                "materialUiIconName": "help_outline",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Hajk på GitHub",
+              "folder": "",
+              "document": "",
+              "color": "#37474F",
+              "icon": {
+                "materialUiIconName": "open_in_new",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "https://github.com/hajkmap/Hajk",
               "menu": []
             }
           ]

@@ -1,0 +1,50 @@
+{
+  "chapters": [
+    {
+      "header": "Kommunens naturreservat",
+      "headerIdentifier": "naturreservat:kommunens-naturreservat",
+      "html": "<p><strong>Kommunen förvaltar 12 naturreservat med en sammantagen area av 3 840 hektar. Reservaten sträcker sig från kust till inland och rymmer en stor mångfald av naturtyper – från sandstränder och kustmyrar till gammelskogar och bäckraviner.</strong></p>\n<figure><img src=\"https://picsum.photos/id/15/480/300\" data-image-width=\"480px\" data-image-height=\"300px\" data-caption=\"Gammelskog i ett av kommunens naturreservat\" data-source=\"Foto: Länsstyrelsen\" data-image-position=\"right\" data-image-popup=\"\"/></figure>\n<p>Naturreservaten är kommunens mest värdefulla naturmiljöer och spelar en avgörande roll för:</p>\n<ul>\n  <li>Bevarandet av biologisk mångfald</li>\n  <li>Friluftsliv och rekreation för invånarna</li>\n  <li>Klimatreglering – kolsänkor, temperaturutjämning</li>\n  <li>Vattenrening och flödesdämpning</li>\n</ul>\n<p><a href=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=0si2ys,027x4i,yp97e0&p=layerswitcher\" data-maplink=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=0si2ys,027x4i,yp97e0&p=layerswitcher\">Visa alla naturreservat i kartan</a></p>",
+      "keywords": ["naturreservat", "skyddad natur", "biologisk mångfald", "friluftsliv"],
+      "geoObjects": [],
+      "chapters": [
+        {
+          "header": "Ekeby naturreservat",
+          "headerIdentifier": "naturreservat:ekeby-naturreservat",
+          "html": "<p>Ekeby naturreservat bildades 1987 och skyddar en av kommunens få kvarvarande naturskogar. Reservatets 240 hektar domineras av gamla tallar och granar, och hyser ett rikt fågelliv med bl.a. sparvuggla, spillkråka och tretåig hackspett.</p>\n<blockquote data-divider-color=\"#2E7D32\" data-background-color=\"#E8F5E9\" data-text-section=\"\" data-accordion=\"false\"><strong>Besöksinformation Ekeby</strong><br/>\nParkering: Ekoparkeringen, Skogsvägen 4<br/>\nAnlagda leder: 8 km markerade stigar<br/>\nFaciliteter: Vindskydd, grillplats, informationsskyltar<br/>\nTillgänglighet: Delvis tillgängligt, rullstolsanpassad kortled (500 m)\n</blockquote>\n<p>I reservatet råder förbud mot:</p>\n<ul>\n  <li>Att ta ved, plocka svamp och bär i kommersiellt syfte</li>\n  <li>Terrängkörning med motorfordon</li>\n  <li>Att klättra i träd eller skada vegetation</li>\n  <li>Campning mer än en natt på samma plats</li>\n</ul>",
+          "keywords": ["Ekeby", "naturskog", "hackspett", "fågelliv"],
+          "geoObjects": [],
+          "chapters": []
+        },
+        {
+          "header": "Strandängsreservatet",
+          "headerIdentifier": "naturreservat:strandangsreservatet",
+          "html": "<p>Strandängsreservatet skyddar ett unikt kust­landskap med blomsterrika fuktängar, havsvikar och vassruggar. Området är ett Natura 2000-område och hyser nationellt rödlistade arter.</p>\n<p>Reservatet är särskilt intressant för fågelskådning under vår- och höstflytten. Noterade rödlistade arter inkluderar rördrom, vattenrall och brushane.</p>\n<p><a href=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=0si2ys,dxy624&p=layerswitcher\" data-maplink=\"/#m=map_1&x=166361.55984876302&y=6334599.058384342&z=6&l=0si2ys,dxy624&p=layerswitcher\">Visa Strandängsreservatet i kartan</a></p>",
+          "keywords": ["strandäng", "Natura 2000", "fågelskådning", "rödlistade arter"],
+          "geoObjects": [],
+          "chapters": []
+        }
+      ],
+      "expanded": true
+    },
+    {
+      "header": "Skötsel och förvaltning",
+      "headerIdentifier": "naturreservat:skotsel-och-forvaltning",
+      "html": "<p>Kommunens naturreservat sköts av Miljö- och naturförvaltningen i enlighet med varje reservats skötselplan. Skötselarbetet finansieras dels av kommunen, dels av bidrag från Naturvårdsverket och länsstyrelsen.</p>\n<p>Typiska skötselåtgärder:</p>\n<ol>\n  <li><strong>Slåtter</strong> – ängsmarker slås en gång per år efter blomning för att gynna örter</li>\n  <li><strong>Betesgång</strong> – betesdjur (kor, hästar) hålls i vissa reservat för att hålla öppna landskap</li>\n  <li><strong>Röjning</strong> – sly och invasiva arter bekämpas regelbundet</li>\n  <li><strong>Död ved</strong> – döda träd lämnas kvar för insekter och hackspettar</li>\n</ol>\n<blockquote data-divider-color=\"#4527A0\" data-background-color=\"#EDE7F6\" data-text-section=\"\" data-accordion=\"true\"><strong>Medborgarinitiativ: Adoptera ett reservat</strong><br/>\nKommunen välkomnar ideella insatser för naturreservatens skötsel. Via programmet \"Adoptera ett reservat\" kan föreningar och privatpersoner delta i röjningsdagar och stängselreparationer. Kontakta Miljö- och naturförvaltningen för mer information.\n</blockquote>",
+      "keywords": ["skötsel", "slåtter", "bete", "naturförvaltning"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": false
+    },
+    {
+      "header": "Planerade skydd",
+      "headerIdentifier": "naturreservat:planerade-skydd",
+      "html": "<p>Kommunen arbetar med att bilda ytterligare tre naturreservat under perioden 2024–2030, i enlighet med översiktsplanens mål om stärkt grönstruktur.</p>\n<p>Läs mer i <a href=\"oversiktsplan-2040\" data-document=\"oversiktsplan-2040\" data-header-identifier=\"gronstruktur-och-naturvard\">Översiktsplanens avsnitt om grönstruktur och naturvård</a>.</p>\n<p>Mer information om biologisk mångfald och arter i kommunen: <a href=\"https://www.artdatabanken.se\" data-link=\"https://www.artdatabanken.se\">SLU Artdatabanken</a></p>",
+      "keywords": ["nya reservat", "grönstruktur", "artskydd"],
+      "geoObjects": [],
+      "chapters": [],
+      "expanded": false
+    }
+  ],
+  "map": "map_1",
+  "title": "Naturreservat"
+}
