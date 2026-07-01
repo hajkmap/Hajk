@@ -91,15 +91,22 @@ function toWebUrl(urlBase: string, relPath: string): string {
   return normalizedRel ? `${rootBase}/${normalizedRel}` : rootBase;
 }
 
+/**
+ * Filters on file extensions. A filter is a comma-separated list of extensions
+ * ("*.png", ".png" or "png" styles are all accepted); an entry matches when the
+ * file's extension equals it. Any match in the list passes (OR semantics).
+ */
 function matchesFilter(name: string, filter: string): boolean {
   if (!filter) return true;
+  const exts = filter
+    .split(",")
+    .map((p) => p.trim().replace(/^\*/, "").toLowerCase())
+    .map((p) => (p.startsWith(".") ? p : p ? `.${p}` : ""))
+    .filter(Boolean);
+  if (exts.length === 0) return true;
+
   const ext = path.extname(name).toLowerCase();
-  // Support both ".png" and "*.png" styles for extension matching
-  const filterNorm = filter.startsWith("*") ? filter.slice(1) : filter;
-  if (filterNorm.startsWith(".")) {
-    return ext === filterNorm.toLowerCase();
-  }
-  return name.toLowerCase().includes(filterNorm.toLowerCase());
+  return exts.includes(ext);
 }
 
 class FilesController {

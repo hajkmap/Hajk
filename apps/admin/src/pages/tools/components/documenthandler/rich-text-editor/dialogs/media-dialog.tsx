@@ -10,6 +10,7 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
+  InputAdornment,
   MenuItem,
   Radio,
   RadioGroup,
@@ -18,6 +19,7 @@ import {
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import type { MediaFigureAttrs, MediaType } from "../extensions/media-figure";
+import FilePickerDialog from "@/components/file-picker-dialog";
 
 interface MediaDialogProps {
   open: boolean;
@@ -99,8 +101,21 @@ function MediaDialog({
   const [source, setSource] = useState(initial?.source ?? "");
   const [popup, setPopup] = useState(initial?.popup ?? false);
   const [position, setPosition] = useState(initial?.position ?? "left");
+  const [filePickerOpen, setFilePickerOpen] = useState(false);
   const aspectRatio =
     initial?.width && initial?.height ? initial.width / initial.height : null;
+
+  const filePickerFilter =
+    mediaType === "image"
+      ? ".png,.jpg,.jpeg,.gif,.webp,.svg,.bmp,.ico,.tif,.tiff,.avif"
+      : mediaType === "video"
+        ? ".mp4,.m4v,.webm,.ogv,.mov,.avi,.mkv"
+        : ".mp3,.wav,.oga,.ogg,.m4a,.aac,.flac";
+
+  const filePickerTitleKey =
+    mediaType === "image" ? "dhRichTextEditor.media.selectImageTitle"
+    : mediaType === "video" ? "dhRichTextEditor.media.selectVideoTitle"
+    : "dhRichTextEditor.media.selectAudioTitle";
 
   function handleWidthChange(v: string) {
     setWidth(v);
@@ -140,7 +155,13 @@ function MediaDialog({
     ? EDIT_TITLE_KEYS[mediaType]
     : INSERT_TITLE_KEYS[mediaType];
 
+  function handleFilePickerSelect(fileUrl: string) {
+    setSrc(fileUrl);
+    setFilePickerOpen(false);
+  }
+
   return (
+    <>
     <Dialog open={open} onClose={onCancel} maxWidth="sm" fullWidth>
       <DialogTitle>{t(titleKey)}</DialogTitle>
       <DialogContent>
@@ -158,6 +179,26 @@ function MediaDialog({
             size="small"
             fullWidth
             select={srcList.length > 0}
+            slotProps={
+              srcList.length === 0
+                ? {
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => setFilePickerOpen(true)}
+                            sx={{ minWidth: 0, whiteSpace: "nowrap" }}
+                          >
+                            {t("dhRichTextEditor.media.browse")}
+                          </Button>
+                        </InputAdornment>
+                      ),
+                    },
+                  }
+                : undefined
+            }
           >
             {srcList.length > 0 &&
               srcList.map((s) => (
@@ -243,6 +284,15 @@ function MediaDialog({
         </Button>
       </DialogActions>
     </Dialog>
+
+    <FilePickerDialog
+      open={filePickerOpen}
+      onClose={() => setFilePickerOpen(false)}
+      onSelect={handleFilePickerSelect}
+      filter={filePickerFilter}
+      title={t(filePickerTitleKey)}
+    />
+    </>
   );
 }
 

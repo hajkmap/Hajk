@@ -1141,7 +1141,11 @@
           "floatRight": "Float right"
         },
         "audioPlaceholder": "Audio…",
-        "uploadPathPlaceholder": "/Upload/..."
+        "uploadPathPlaceholder": "/Upload/...",
+        "browse": "Browse...",
+        "selectImageTitle": "Select image",
+        "selectVideoTitle": "Select video",
+        "selectAudioTitle": "Select audio"
       },
       "textSection": {
         "title": "Fact box settings",

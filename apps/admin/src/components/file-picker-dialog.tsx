@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Dispatch, SetStateAction } from "react";
 import {
   Alert,
   Box,
@@ -18,12 +17,11 @@ import {
   Typography,
 } from "@mui/material";
 import InsertDriveFileOutlined from "@mui/icons-material/InsertDriveFileOutlined";
-import FolderOutlined from "@mui/icons-material/FolderOutlined";
 import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
 import type { TreeViewItemId } from "@mui/x-tree-view/models";
 import { useTranslation } from "react-i18next";
 import { useFileList, getFileList } from "../api/file-picker";
-import type { FileEntry, ReadableDir } from "../api/file-picker";
+import type { FileEntry } from "../api/file-picker";
 
 interface FilePickerDialogProps {
   open: boolean;
@@ -33,51 +31,52 @@ interface FilePickerDialogProps {
   title?: string;
 }
 
-interface NavState {
-  /** Id of the selected ReadableDir, or undefined when at the root listing. */
-  dirId: string | undefined;
-  /** Relative path within the selected dir. */
+interface Selection {
+  /** Id of the selected ReadableDir (root folder). */
+  dirId: string;
+  /** Relative path within the selected root folder. */
   relPath: string;
 }
 
 interface TreeNode {
   id: string;
   label: string;
+  dirId: string;
+  relPath: string;
   children?: TreeNode[];
 }
 
-function buildTreeItems(
-  parentPath: string,
-  treeData: Record<string, FileEntry[]>
-): TreeNode[] {
-  const dirs = treeData[parentPath] ?? [];
-  return dirs.map((dir) => {
-    const hasChildren = dir.path in treeData;
-    const children = hasChildren
-      ? buildTreeItems(dir.path, treeData)
-      : undefined;
-    return {
-      id: dir.path,
-      label: dir.name,
-      children: children && children.length > 0 ? children : undefined,
-    };
-  });
+const KEY_SEP = "\u0000";
+
+function makeKey(dirId: string, relPath: string): string {
+  return `${dirId}${KEY_SEP}${relPath}`;
 }
 
-async function fetchTreeDirs(
-  relPath: string,
+function parseKey(key: string): Selection {
+  const idx = key.indexOf(KEY_SEP);
+  return { dirId: key.slice(0, idx), relPath: key.slice(idx + 1) };
+}
+
+/**
+ * Build the child nodes for a folder from cached subdirectory data. Returns
+ * undefined when the folder has no known subfolders (either not yet fetched or
+ * genuinely empty), so the tree only shows an expand arrow once we actually
+ * know there are subfolders.
+ */
+function buildChildren(
   dirId: string,
-  treeData: Record<string, FileEntry[]>,
-  setTreeData: Dispatch<SetStateAction<Record<string, FileEntry[]>>>
-) {
-  if (relPath in treeData) return;
-  try {
-    const result = await getFileList(relPath, undefined, dirId);
-    const dirs = result.items.filter((i) => i.type === "directory");
-    setTreeData((prev) => ({ ...prev, [relPath]: dirs }));
-  } catch {
-    // directory read failed, skip
-  }
+  relPath: string,
+  treeData: Record<string, FileEntry[]>
+): TreeNode[] | undefined {
+  const subdirs = treeData[makeKey(dirId, relPath)];
+  if (!subdirs || subdirs.length === 0) return undefined;
+  return subdirs.map((sd) => ({
+    id: makeKey(dirId, sd.path),
+    label: sd.name,
+    dirId,
+    relPath: sd.path,
+    children: buildChildren(dirId, sd.path, treeData),
+  }));
 }
 
 export default function FilePickerDialog({
@@ -89,119 +88,134 @@ export default function FilePickerDialog({
 }: FilePickerDialogProps) {
   const { t } = useTranslation();
   const dialogTitle = title ?? t("filePicker.title");
-  const [nav, setNav] = useState<NavState>({ dirId: undefined, relPath: "" });
+  const [selected, setSelected] = useState<Selection | null>(null);
   const [selectedFile, setSelectedFile] = useState<FileEntry | null>(null);
   const [manualValue, setManualValue] = useState("");
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [treeData, setTreeData] = useState<Record<string, FileEntry[]>>({});
-  const prevDirId = useRef<string | undefined>(undefined);
 
-  // Fetch the current listing. Always enabled — root uses dirId=undefined, path="".
-  const { data, isPending } = useFileList(nav.relPath, filter, nav.dirId);
+  // Mirror of treeData plus in-flight fetches, used by the async fetch helpers
+  // to avoid duplicate requests without depending on render-time snapshots.
+  const treeDataRef = useRef<Record<string, FileEntry[]>>({});
+  const inFlight = useRef<Record<string, Promise<FileEntry[]>>>({});
+  useEffect(() => {
+    treeDataRef.current = treeData;
+  }, [treeData]);
 
-  const dirsConfigured = (data?.dirs.length ?? 0) > 0;
+  // Root listing — always enabled — provides the configured readable dirs.
+  const { data: rootData, isPending: rootPending } = useFileList(
+    "",
+    filter,
+    undefined
+  );
+  const dirs = useMemo(() => rootData?.dirs ?? [], [rootData]);
+  const dirsConfigured = dirs.length > 0;
+
+  // Files for the currently selected folder.
+  const { data: filesData, isPending: filesPending } = useFileList(
+    selected ? selected.relPath : undefined,
+    filter,
+    selected?.dirId
+  );
+
+  // Fetch (once) the subdirectories of a folder and cache them.
+  const ensureFetched = useCallback(
+    (dirId: string, relPath: string): Promise<FileEntry[]> => {
+      const key = makeKey(dirId, relPath);
+      const cached = treeDataRef.current[key];
+      if (cached) return Promise.resolve(cached);
+      if (key in inFlight.current) return inFlight.current[key];
+      const promise = getFileList(relPath, undefined, dirId)
+        .then((result) => result.items.filter((i) => i.type === "directory"))
+        .catch(() => [] as FileEntry[])
+        .then((subdirs) => {
+          treeDataRef.current = { ...treeDataRef.current, [key]: subdirs };
+          setTreeData((prev) =>
+            key in prev ? prev : { ...prev, [key]: subdirs }
+          );
+          delete inFlight.current[key];
+          return subdirs;
+        });
+      inFlight.current[key] = promise;
+      return promise;
+    },
+    []
+  );
+
+  // Fetch a folder's subfolders plus one level deeper, so every visible folder
+  // node knows whether it has children (accurate expand arrows).
+  const prefetch = useCallback(
+    async (dirId: string, relPath: string) => {
+      const subdirs = await ensureFetched(dirId, relPath);
+      await Promise.all(subdirs.map((sd) => ensureFetched(dirId, sd.path)));
+    },
+    [ensureFetched]
+  );
 
   // Reset all state when the dialog opens.
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!open) return;
-    setNav({ dirId: undefined, relPath: "" });
+    setSelected(null);
     setSelectedFile(null);
     setManualValue("");
     setExpandedItems([]);
     setTreeData({});
-    prevDirId.current = undefined;
+    treeDataRef.current = {};
+    inFlight.current = {};
   }, [open]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  // When the user switches to a different root dir, clear the tree cache.
+  // Pre-fetch the first two levels of each configured root folder so the tree
+  // shows accurate expand arrows from the start.
+  const dirIdsKey = dirs.map((d) => d.id).join("|");
   useEffect(() => {
-    if (nav.dirId !== prevDirId.current) {
-      prevDirId.current = nav.dirId;
-      setTreeData({});
-      setExpandedItems([]);
-    }
-  }, [nav.dirId]);
+    if (!open || dirs.length === 0) return;
+    dirs.forEach((d) => {
+      void prefetch(d.id, "");
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, dirIdsKey]);
 
-  // Pre-fetch tree entries for every ancestor of the current relPath so the
-  // tree is expanded to the right place when the user navigates.
-  useEffect(() => {
-    if (!open || !nav.dirId) return;
-    const parts = nav.relPath.split("/").filter(Boolean);
-    const pathsToFetch: string[] = [];
-    for (let i = 0; i <= parts.length; i++) {
-      const p = parts.slice(0, i).join("/");
-      if (!(p in treeData)) pathsToFetch.push(p);
-    }
-    if (pathsToFetch.length > 0) {
-      void Promise.all(
-        pathsToFetch.map((p) =>
-          fetchTreeDirs(p, nav.dirId!, treeData, setTreeData)
-        )
-      );
-    }
-  }, [open, nav.dirId, nav.relPath, treeData]);
-
-  const treeItems = useMemo(() => buildTreeItems("", treeData), [treeData]);
+  const treeItems = useMemo<TreeNode[]>(
+    () =>
+      dirs.map((d) => ({
+        id: makeKey(d.id, ""),
+        label: d.label,
+        dirId: d.id,
+        relPath: "",
+        children: buildChildren(d.id, "", treeData),
+      })),
+    [dirs, treeData]
+  );
 
   const handleExpandedItemsChange = useCallback(
     (_event: React.SyntheticEvent | null, itemIds: TreeViewItemId[]) => {
       setExpandedItems([...itemIds]);
-      const newlyExpanded = itemIds.filter(
-        (id) => !expandedItems.includes(id)
-      );
-      if (nav.dirId) {
-        newlyExpanded.forEach((id) => {
-          void fetchTreeDirs(id, nav.dirId!, treeData, setTreeData);
-        });
-      }
+      const newlyExpanded = itemIds.filter((id) => !expandedItems.includes(id));
+      newlyExpanded.forEach((id) => {
+        const { dirId, relPath } = parseKey(id);
+        void prefetch(dirId, relPath);
+      });
     },
-    [expandedItems, treeData, nav.dirId]
+    [expandedItems, prefetch]
   );
 
   const handleTreeItemClick = useCallback(
     (_event: React.MouseEvent, itemId: TreeViewItemId) => {
-      setNav((prev) => ({ ...prev, relPath: itemId }));
+      const { dirId, relPath } = parseKey(itemId);
+      setSelected({ dirId, relPath });
       setSelectedFile(null);
+      setExpandedItems((prev) =>
+        prev.includes(itemId) ? prev : [...prev, itemId]
+      );
+      void prefetch(dirId, relPath);
     },
-    []
+    [prefetch]
   );
-
-  // Navigate into a readable dir from the root listing.
-  const handleDirSelect = useCallback((dir: ReadableDir) => {
-    setNav({ dirId: dir.id, relPath: "" });
-    setSelectedFile(null);
-  }, []);
-
-  // Navigate into a subdirectory within the current dir.
-  const handleSubdirClick = useCallback((subdir: FileEntry) => {
-    setNav((prev) => ({ ...prev, relPath: subdir.path }));
-    setSelectedFile(null);
-  }, []);
 
   const handleFileClick = useCallback((file: FileEntry) => {
     setSelectedFile(file);
-  }, []);
-
-  const handleFileDoubleClick = useCallback((file: FileEntry) => {
-    if (file.type === "directory") {
-      setNav((prev) => ({ ...prev, relPath: file.path }));
-      setSelectedFile(null);
-    }
-  }, []);
-
-  // Navigate up one level.
-  const handleNavigateUp = useCallback(() => {
-    setSelectedFile(null);
-    setNav((prev) => {
-      if (!prev.dirId) return prev;
-      if (!prev.relPath) {
-        // At root of a dir — go back to the root listing.
-        return { dirId: undefined, relPath: "" };
-      }
-      const parentPath = prev.relPath.split("/").slice(0, -1).join("/");
-      return { ...prev, relPath: parentPath };
-    });
   }, []);
 
   const canConfirm = dirsConfigured
@@ -217,20 +231,31 @@ export default function FilePickerDialog({
     onClose();
   }, [dirsConfigured, selectedFile, manualValue, onSelect, onClose]);
 
-  const isAtRoot = !nav.dirId;
-  const breadcrumbParts = nav.relPath.split("/").filter(Boolean);
-  const currentDirLabel =
-    data?.dirs.find((d) => d.id === nav.dirId)?.label ?? nav.dirId ?? "";
+  const handleFileDoubleClick = useCallback(
+    (file: FileEntry) => {
+      onSelect(file.url ?? file.path);
+      onClose();
+    },
+    [onSelect, onClose]
+  );
 
-  const files = data?.items.filter((i) => i.type === "file") ?? [];
-  const subdirs = data?.items.filter((i) => i.type === "directory") ?? [];
-  const rootDirs = isAtRoot ? (data?.dirs ?? []) : [];
+  const breadcrumbParts = selected
+    ? selected.relPath.split("/").filter(Boolean)
+    : [];
+  const currentDirLabel = selected
+    ? (dirs.find((d) => d.id === selected.dirId)?.label ?? selected.dirId)
+    : "";
+
+  const files = filesData?.items.filter((i) => i.type === "file") ?? [];
+  const selectedTreeId = selected
+    ? makeKey(selected.dirId, selected.relPath)
+    : null;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent dividers>
-        {isPending && !data ? (
+        {rootPending && !rootData ? (
           <Typography variant="body2" sx={{ p: 2, color: "text.secondary" }}>
             {t("common.loading")}
           </Typography>
@@ -258,25 +283,25 @@ export default function FilePickerDialog({
             />
           </Box>
         ) : (
-          /* Configured state: breadcrumb + two-pane browse UI */
+          /* Configured state: breadcrumb + folder tree (left) / files (right) */
           <>
             <Breadcrumbs sx={{ mb: 1 }}>
               <Link
                 component="button"
                 variant="body2"
                 underline="hover"
-                color={isAtRoot ? "text.primary" : "inherit"}
+                color={selected ? "inherit" : "text.primary"}
                 onClick={() => {
-                  if (!isAtRoot) {
-                    setNav({ dirId: undefined, relPath: "" });
+                  if (selected) {
+                    setSelected(null);
                     setSelectedFile(null);
                   }
                 }}
-                sx={{ cursor: isAtRoot ? "default" : "pointer" }}
+                sx={{ cursor: selected ? "pointer" : "default" }}
               >
                 {t("filePicker.allFolders")}
               </Link>
-              {nav.dirId && (
+              {selected && (
                 <Link
                   component="button"
                   variant="body2"
@@ -285,7 +310,7 @@ export default function FilePickerDialog({
                     breadcrumbParts.length === 0 ? "text.primary" : "inherit"
                   }
                   onClick={() => {
-                    setNav({ dirId: nav.dirId, relPath: "" });
+                    setSelected({ dirId: selected.dirId, relPath: "" });
                     setSelectedFile(null);
                   }}
                   sx={{
@@ -296,32 +321,36 @@ export default function FilePickerDialog({
                   {currentDirLabel}
                 </Link>
               )}
-              {breadcrumbParts.map((part, i) => {
-                const partPath = breadcrumbParts.slice(0, i + 1).join("/");
-                const isLast = i === breadcrumbParts.length - 1;
-                return (
-                  <Link
-                    key={partPath}
-                    component="button"
-                    variant="body2"
-                    underline="hover"
-                    color={isLast ? "text.primary" : "inherit"}
-                    onClick={() => {
-                      if (!isLast) {
-                        setNav((prev) => ({ ...prev, relPath: partPath }));
-                        setSelectedFile(null);
-                      }
-                    }}
-                    sx={{ cursor: isLast ? "default" : "pointer" }}
-                  >
-                    {part}
-                  </Link>
-                );
-              })}
+              {selected &&
+                breadcrumbParts.map((part, i) => {
+                  const partPath = breadcrumbParts.slice(0, i + 1).join("/");
+                  const isLast = i === breadcrumbParts.length - 1;
+                  return (
+                    <Link
+                      key={partPath}
+                      component="button"
+                      variant="body2"
+                      underline="hover"
+                      color={isLast ? "text.primary" : "inherit"}
+                      onClick={() => {
+                        if (!isLast) {
+                          setSelected({
+                            dirId: selected.dirId,
+                            relPath: partPath,
+                          });
+                          setSelectedFile(null);
+                        }
+                      }}
+                      sx={{ cursor: isLast ? "default" : "pointer" }}
+                    >
+                      {part}
+                    </Link>
+                  );
+                })}
             </Breadcrumbs>
 
             <Box sx={{ display: "flex", gap: 2, minHeight: 400 }}>
-              {/* Left: folder tree (only when inside a dir) */}
+              {/* Left: full folder tree */}
               <Box
                 sx={{
                   width: 280,
@@ -329,90 +358,38 @@ export default function FilePickerDialog({
                   borderRight: 1,
                   borderColor: "divider",
                   overflow: "auto",
+                  pr: 1,
                 }}
               >
-                {isAtRoot ? (
+                <RichTreeView
+                  items={treeItems}
+                  expandedItems={expandedItems}
+                  onExpandedItemsChange={handleExpandedItemsChange}
+                  selectedItems={selectedTreeId}
+                  onItemClick={handleTreeItemClick}
+                  getItemId={(item: TreeNode) => item.id}
+                  getItemLabel={(item: TreeNode) => item.label}
+                  getItemChildren={(item: TreeNode) => item.children}
+                />
+              </Box>
+
+              {/* Right: files in the selected folder */}
+              <Box sx={{ flex: 1, overflow: "auto" }}>
+                {!selected ? (
                   <Typography
                     variant="body2"
                     sx={{ p: 2, color: "text.secondary" }}
                   >
                     {t("filePicker.selectFolderToBrowse")}
                   </Typography>
-                ) : treeItems.length > 0 ? (
-                  <RichTreeView
-                    items={treeItems}
-                    expandedItems={expandedItems}
-                    onExpandedItemsChange={handleExpandedItemsChange}
-                    onItemClick={handleTreeItemClick}
-                    getItemId={(item: TreeNode) => item.id}
-                    getItemLabel={(item: TreeNode) => item.label}
-                    getItemChildren={(item: TreeNode) => item.children}
-                  />
-                ) : (
+                ) : filesPending && !filesData ? (
                   <Typography
                     variant="body2"
                     sx={{ p: 2, color: "text.secondary" }}
                   >
-                    {t("filePicker.noSubfolders")}
+                    {t("common.loading")}
                   </Typography>
-                )}
-              </Box>
-
-              {/* Right: contents of the current location */}
-              <Box sx={{ flex: 1, overflow: "auto" }}>
-                {/* Root listing — show configured readable dirs */}
-                {isAtRoot && rootDirs.length > 0 && (
-                  <>
-                    <Typography
-                      variant="caption"
-                      sx={{ px: 1, color: "text.secondary" }}
-                    >
-                      {t("filePicker.folders")}
-                    </Typography>
-                    <List dense disablePadding>
-                      {rootDirs.map((dir) => (
-                        <ListItemButton
-                          key={dir.id}
-                          onClick={() => handleDirSelect(dir)}
-                        >
-                          <ListItemIcon sx={{ minWidth: 36 }}>
-                            <FolderOutlined fontSize="small" />
-                          </ListItemIcon>
-                          <ListItemText primary={dir.label} />
-                        </ListItemButton>
-                      ))}
-                    </List>
-                  </>
-                )}
-
-                {/* Subdirectories within the current dir */}
-                {!isAtRoot && subdirs.length > 0 && (
-                  <>
-                    <Typography
-                      variant="caption"
-                      sx={{ px: 1, color: "text.secondary" }}
-                    >
-                      {t("filePicker.folders")}
-                    </Typography>
-                    <List dense disablePadding>
-                      {subdirs.map((d) => (
-                        <ListItemButton
-                          key={d.path}
-                          onClick={() => handleSubdirClick(d)}
-                          onDoubleClick={() => handleFileDoubleClick(d)}
-                        >
-                          <ListItemIcon sx={{ minWidth: 36 }}>
-                            <FolderOutlined fontSize="small" />
-                          </ListItemIcon>
-                          <ListItemText primary={d.name} />
-                        </ListItemButton>
-                      ))}
-                    </List>
-                  </>
-                )}
-
-                {/* File listing */}
-                {!isAtRoot && (
+                ) : (
                   <>
                     <Typography
                       variant="caption"
@@ -460,10 +437,6 @@ export default function FilePickerDialog({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleNavigateUp} disabled={isAtRoot || !dirsConfigured}>
-          {t("filePicker.up")}
-        </Button>
-        <Box sx={{ flex: 1 }} />
         <Button onClick={onClose}>{t("common.cancel")}</Button>
         <Button variant="contained" onClick={handleOk} disabled={!canConfirm}>
           {t("filePicker.ok")}

@@ -1141,7 +1141,11 @@
           "floatRight": "Flytande höger"
         },
         "audioPlaceholder": "Ljud…",
-        "uploadPathPlaceholder": "/Upload/..."
+        "uploadPathPlaceholder": "/Upload/...",
+        "browse": "Bläddra...",
+        "selectImageTitle": "Välj bild",
+        "selectVideoTitle": "Välj video",
+        "selectAudioTitle": "Välj ljud"
       },
       "textSection": {
         "title": "Faktaruta-inställningar",
