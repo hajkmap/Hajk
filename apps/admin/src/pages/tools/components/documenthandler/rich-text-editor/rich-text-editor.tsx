@@ -22,7 +22,7 @@ interface RichTextEditorProps {
   imageList?: string[];
   videoList?: string[];
   audioList?: string[];
-  mapName?: string;
+  toolId?: number;
   readOnly?: boolean;
 }
 
@@ -33,7 +33,7 @@ export function RichTextEditor({
   imageList,
   videoList,
   audioList,
-  mapName,
+  toolId,
   readOnly = false,
 }: RichTextEditorProps) {
   const { t, i18n } = useTranslation();
@@ -133,7 +133,7 @@ export function RichTextEditor({
           imageList={imageList}
           videoList={videoList}
           audioList={audioList}
-          mapName={mapName}
+          toolId={toolId}
         />
       )}
       <Box

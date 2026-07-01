@@ -20,10 +20,10 @@ const HEADER_VARIANTS = [
 interface ChapterViewProps {
   chapter: Chapter;
   depth: number;
-  mapName: string;
+  toolId: number;
 }
 
-function ChapterView({ chapter, depth, mapName }: ChapterViewProps) {
+function ChapterView({ chapter, depth, toolId }: ChapterViewProps) {
   const variant = HEADER_VARIANTS[Math.min(depth, HEADER_VARIANTS.length - 1)];
 
   return (
@@ -38,7 +38,7 @@ function ChapterView({ chapter, depth, mapName }: ChapterViewProps) {
         <RichTextEditor
           html={chapter.html}
           readOnly
-          mapName={mapName}
+          toolId={toolId}
         />
       ) : null}
 
@@ -49,7 +49,7 @@ function ChapterView({ chapter, depth, mapName }: ChapterViewProps) {
               key={child.headerIdentifier || i}
               chapter={child}
               depth={depth + 1}
-              mapName={mapName}
+              toolId={toolId}
             />
           ))}
         </Box>
@@ -60,10 +60,10 @@ function ChapterView({ chapter, depth, mapName }: ChapterViewProps) {
 
 interface DocumentViewPanelProps {
   document: Document;
-  mapName: string;
+  toolId: number;
 }
 
-export function DocumentViewPanel({ document, mapName }: DocumentViewPanelProps) {
+export function DocumentViewPanel({ document, toolId }: DocumentViewPanelProps) {
   const { t } = useTranslation();
   const chapters = extractChapters(document.content);
 
@@ -85,7 +85,7 @@ export function DocumentViewPanel({ document, mapName }: DocumentViewPanelProps)
             key={chapter.headerIdentifier || i}
             chapter={chapter}
             depth={0}
-            mapName={mapName}
+            toolId={toolId}
           />
         ))
       )}

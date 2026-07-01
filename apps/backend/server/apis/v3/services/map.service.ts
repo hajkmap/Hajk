@@ -718,8 +718,6 @@ class MapService {
         tools: true,
         layers: { include: { restrictedToRoles: true } },
         groups: true,
-        documentFolders: { include: { documents: true } },
-        documents: true,
         themes: true,
       },
     });
@@ -926,56 +924,9 @@ class MapService {
         }
         }
 
-        const folderIdMap = new Map<number, number>();
-        for (const folder of source.documentFolders) {
-          const newFolder = await tx.documentFolder.create({
-            data: {
-              name: folder.name,
-              title: folder.title,
-              mapName: name,
-              createdBy: userId,
-              createdDate: new Date(),
-            },
-          });
-          folderIdMap.set(folder.id, newFolder.id);
-
-          if (folder.documents.length > 0) {
-            await tx.document.createMany({
-              data: folder.documents.map((document) => ({
-                name: document.name,
-                title: document.title,
-                content: document.content,
-                mapName: name,
-                folderId: newFolder.id,
-                createdBy: userId,
-                createdDate: new Date(),
-              })),
-            });
-          }
-        }
-
-        const copiedDocumentIds = new Set(
-          source.documentFolders.flatMap((folder) =>
-            folder.documents.map((document) => document.id)
-          )
-        );
-        const standaloneDocuments = source.documents.filter(
-          (document) => !copiedDocumentIds.has(document.id)
-        );
-
-        if (standaloneDocuments.length > 0) {
-          await tx.document.createMany({
-            data: standaloneDocuments.map((document) => ({
-              name: document.name,
-              title: document.title,
-              content: document.content,
-              mapName: name,
-              folderId: folderIdMap.get(document.folderId) ?? document.folderId,
-              createdBy: userId,
-              createdDate: new Date(),
-            })),
-          });
-        }
+        // Documents now belong to Tool instances, not maps.
+        // When tools are shared via ToolsOnMaps (above), their documents
+        // are automatically available on the duplicated map. No copy needed.
 
         if (source.themes.length > 0) {
           await tx.theme.createMany({

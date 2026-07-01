@@ -13,6 +13,7 @@ App_Data/*
 # …except some example files that should be tracked
 !App_Data/layers.json
 !App_Data/map_1.json
-!App_Data/documents/exempeldokument.json
-!App_Data/documents/exempeldokument2.json
+!App_Data/documents/
+!App_Data/documents/**
+!App_Data/templates/map.template
 !App_Data/templates/map.template

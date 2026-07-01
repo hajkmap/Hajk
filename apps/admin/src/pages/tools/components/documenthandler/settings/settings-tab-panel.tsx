@@ -35,22 +35,22 @@ import { AttachmentsEditor } from "../attachments/attachments-editor";
 interface SettingsTabPanelProps {
   control: Control<FieldValues>;
   setValue: UseFormSetValue<FieldValues>;
-  mapName?: string;
+  toolId?: number;
 }
 
 export function SettingsTabPanel({
   control,
   setValue,
-  mapName,
+  toolId,
 }: SettingsTabPanelProps) {
   const { t } = useTranslation();
-  const { data: folders = [] } = useFolders(mapName);
+  const { data: folders = [] } = useFolders(toolId);
 
   const documentQueries = useQueries({
     queries: folders.map((folder) => ({
-      queryKey: ["documents", mapName, folder.name],
-      queryFn: () => getDocuments(mapName!, folder.name),
-      enabled: !!mapName,
+      queryKey: ["documents", toolId, folder.name],
+      queryFn: () => getDocuments(toolId!, folder.name),
+      enabled: toolId !== undefined,
       staleTime: 60_000,
     })),
   });
@@ -61,7 +61,7 @@ export function SettingsTabPanel({
   }, [documentQueries]);
 
   const isLoadingDocuments =
-    !!mapName &&
+    toolId !== undefined &&
     folders.length > 0 &&
     documentQueries.some((query) => query.isLoading);
 
@@ -209,7 +209,7 @@ export function SettingsTabPanel({
                 return (
                   <FormControl
                     fullWidth
-                    disabled={!mapName || isLoadingDocuments}
+                    disabled={toolId === undefined || isLoadingDocuments}
                   >
                     <InputLabel id="document-on-start-label">
                       {t("tools.documenthandler.documentOnStart")}

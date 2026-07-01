@@ -34,28 +34,28 @@ import type {
 // ─── Folder hooks ────────────────────────────────────────────────────────────
 
 export const useFolders = (
-  mapName: string | undefined
+  toolId: number | undefined
 ): UseQueryResult<DocumentFolder[]> => {
   return useQuery({
-    queryKey: ["documentFolders", mapName],
-    queryFn: () => getFolders(mapName!),
-    enabled: !!mapName,
+    queryKey: ["documentFolders", toolId],
+    queryFn: () => getFolders(toolId!),
+    enabled: toolId !== undefined,
   });
 };
 
-export const useCreateFolder = (mapName: string) => {
+export const useCreateFolder = (toolId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: FolderCreateInput) => createFolder(mapName, data),
+    mutationFn: (data: FolderCreateInput) => createFolder(toolId, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ["documentFolders", mapName],
+        queryKey: ["documentFolders", toolId],
       });
     },
   });
 };
 
-export const useRenameFolder = (mapName: string) => {
+export const useRenameFolder = (toolId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -64,22 +64,22 @@ export const useRenameFolder = (mapName: string) => {
     }: {
       folderName: string;
       data: FolderRenameInput;
-    }) => renameFolder(mapName, folderName, data),
+    }) => renameFolder(toolId, folderName, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ["documentFolders", mapName],
+        queryKey: ["documentFolders", toolId],
       });
     },
   });
 };
 
-export const useDeleteFolder = (mapName: string) => {
+export const useDeleteFolder = (toolId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (folderName: string) => deleteFolder(mapName, folderName),
+    mutationFn: (folderName: string) => deleteFolder(toolId, folderName),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ["documentFolders", mapName],
+        queryKey: ["documentFolders", toolId],
       });
     },
   });
@@ -98,10 +98,10 @@ export function getDefaultDocumentFolder(
 /**
  * Resolves which folder contains a document. Legacy menu items often store
  * `folder: ""` even though documents now live in named folders (e.g. "general").
- * When no folder is stored, falls back to the map default folder.
+ * When no folder is stored, falls back to the tool's default folder.
  */
 export function useResolveDocumentFolder(
-  mapName: string | undefined,
+  toolId: number | undefined,
   documentName: string | undefined,
   storedFolder: string | undefined,
   folders: DocumentFolder[]
@@ -119,7 +119,7 @@ export function useResolveDocumentFolder(
 
   const { data: storedFolderDocs = [], isLoading: storedFolderDocsLoading } =
     useDocuments(
-      mapName,
+      toolId,
       storedFolderValid ? storedFolderName : undefined
     );
 
@@ -129,12 +129,12 @@ export function useResolveDocumentFolder(
     storedFolderDocs.some((doc) => doc.name === trimmedDoc);
 
   const shouldSearch =
-    trimmedDoc !== "" && !!mapName && folders.length > 0 && !storedFolderMatches;
+    trimmedDoc !== "" && toolId !== undefined && folders.length > 0 && !storedFolderMatches;
 
   const folderQueries = useQueries({
     queries: folders.map((folder) => ({
-      queryKey: ["documents", mapName, folder.name],
-      queryFn: () => getDocuments(mapName!, folder.name),
+      queryKey: ["documents", toolId, folder.name],
+      queryFn: () => getDocuments(toolId!, folder.name),
       enabled: shouldSearch,
       staleTime: 60_000,
     })),
@@ -166,25 +166,25 @@ export function useResolveDocumentFolder(
 }
 
 export const useDocuments = (
-  mapName: string | undefined,
+  toolId: number | undefined,
   folder: string | undefined
 ): UseQueryResult<DocumentSummary[]> => {
   return useQuery({
-    queryKey: ["documents", mapName, folder],
-    queryFn: () => getDocuments(mapName!, folder!),
-    enabled: !!mapName && !!folder,
+    queryKey: ["documents", toolId, folder],
+    queryFn: () => getDocuments(toolId!, folder!),
+    enabled: toolId !== undefined && !!folder,
   });
 };
 
 export const useDocument = (
-  mapName: string | undefined,
+  toolId: number | undefined,
   folder: string | undefined,
   name: string | undefined
 ): UseQueryResult<Document> => {
   return useQuery({
-    queryKey: ["document", mapName, folder, name],
-    queryFn: () => getDocument(mapName!, folder!, name!),
-    enabled: !!mapName && !!folder && !!name,
+    queryKey: ["document", toolId, folder, name],
+    queryFn: () => getDocument(toolId!, folder!, name!),
+    enabled: toolId !== undefined && !!folder && !!name,
   });
 };
 
@@ -203,59 +203,59 @@ export const useDocumentById = (
   });
 };
 
-export const useCreateDocument = (mapName: string, folder: string) => {
+export const useCreateDocument = (toolId: number, folder: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: DocumentCreateInput) =>
-      createDocument(mapName, folder, data),
+      createDocument(toolId, folder, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ["documents", mapName, folder],
+        queryKey: ["documents", toolId, folder],
       });
     },
   });
 };
 
 export const useSaveDocument = (
-  mapName: string,
+  toolId: number,
   folder: string,
   name: string
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: DocumentSaveInput) =>
-      saveDocument(mapName, folder, name, data),
+      saveDocument(toolId, folder, name, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ["document", mapName, folder, name],
+        queryKey: ["document", toolId, folder, name],
       });
       void queryClient.invalidateQueries({
-        queryKey: ["documents", mapName, folder],
+        queryKey: ["documents", toolId, folder],
       });
     },
   });
 };
 
-export const useMoveDocument = (mapName: string, folder: string) => {
+export const useMoveDocument = (toolId: number, folder: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ name, data }: { name: string; data: DocumentMoveInput }) =>
-      moveDocument(mapName, folder, name, data),
+      moveDocument(toolId, folder, name, data),
     onSuccess: (_result, { data }) => {
       void queryClient.invalidateQueries({
-        queryKey: ["documents", mapName, folder],
+        queryKey: ["documents", toolId, folder],
       });
       void queryClient.invalidateQueries({
-        queryKey: ["documents", mapName, data.targetFolder],
+        queryKey: ["documents", toolId, data.targetFolder],
       });
       void queryClient.invalidateQueries({
-        queryKey: ["documentFolders", mapName],
+        queryKey: ["documentFolders", toolId],
       });
     },
   });
 };
 
-export const useMoveDocumentAcrossFolders = (mapName: string) => {
+export const useMoveDocumentAcrossFolders = (toolId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -266,28 +266,28 @@ export const useMoveDocumentAcrossFolders = (mapName: string) => {
       sourceFolder: string;
       name: string;
       targetFolder: string;
-    }) => moveDocument(mapName, sourceFolder, name, { targetFolder }),
+    }) => moveDocument(toolId, sourceFolder, name, { targetFolder }),
     onSuccess: (_result, { sourceFolder, targetFolder }) => {
       void queryClient.invalidateQueries({
-        queryKey: ["documents", mapName, sourceFolder],
+        queryKey: ["documents", toolId, sourceFolder],
       });
       void queryClient.invalidateQueries({
-        queryKey: ["documents", mapName, targetFolder],
+        queryKey: ["documents", toolId, targetFolder],
       });
       void queryClient.invalidateQueries({
-        queryKey: ["documentFolders", mapName],
+        queryKey: ["documentFolders", toolId],
       });
     },
   });
 };
 
-export const useDeleteDocument = (mapName: string, folder: string) => {
+export const useDeleteDocument = (toolId: number, folder: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (name: string) => deleteDocument(mapName, folder, name),
+    mutationFn: (name: string) => deleteDocument(toolId, folder, name),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ["documents", mapName, folder],
+        queryKey: ["documents", toolId, folder],
       });
     },
   });

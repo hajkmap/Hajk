@@ -136,8 +136,6 @@ model Map {
   layers            LayerInstance[]
   groups            GroupsOnMaps[]
   restrictedToRoles RoleOnMap[]
-  documentFolders   DocumentFolder[]
-  documents         Document[]
   themes            Theme[]
 }
 
@@ -160,25 +158,25 @@ model Theme {
   @@index([mapName])
 }
 
-/// A folder scoped to one map that groups documents.
+/// A folder owned by a DocumentHandler Tool instance that groups documents.
 model DocumentFolder {
   id            Int        @id @default(autoincrement())
   /// URL-safe slug derived from title at creation time. Immutable.
   name          String
   /// Human-readable display name.
   title         String
-  mapName       String
+  toolId        Int
   createdBy     String?
   createdDate   DateTime?  @db.Timestamptz(3)
   lastSavedBy   String?
   lastSavedDate DateTime?  @db.Timestamptz(3)
-  map           Map        @relation(fields: [mapName], references: [name], onDelete: Cascade)
+  tool          Tool       @relation(fields: [toolId], references: [id], onDelete: Cascade)
   documents     Document[]
 
-  @@unique([mapName, name])
+  @@unique([toolId, name])
 }
 
-/// A document belonging to a map and folder. Content is stored as JSON.
+/// A document belonging to a DocumentHandler Tool instance and folder. Content is stored as JSON.
 model Document {
   id            Int            @id @default(autoincrement())
   /// URL-safe slug derived from title at creation time. Immutable.
@@ -187,16 +185,16 @@ model Document {
   title         String
   /// Chapter tree content: { chapters: [...] }
   content       Json           @default("{\"chapters\":[]}")
-  mapName       String
+  toolId        Int
   folderId      Int
   createdBy     String?
   createdDate   DateTime?      @db.Timestamptz(3)
   lastSavedBy   String?
   lastSavedDate DateTime?      @db.Timestamptz(3)
-  map           Map            @relation(fields: [mapName], references: [name], onDelete: Cascade)
+  tool          Tool           @relation(fields: [toolId], references: [id], onDelete: Cascade)
   folder        DocumentFolder @relation(fields: [folderId], references: [id], onDelete: Restrict)
 
-  @@unique([mapName, folderId, name])
+  @@unique([toolId, folderId, name])
 }
 
 /// Available plugin types. Each Tool instance references one of these.
@@ -210,21 +208,23 @@ model ToolType {
 /// A configured instance of a plugin (ToolType). Several instances of the
 /// same type can exist, e.g. "Dokument Bygglov" and "Dokument Detaljplaner".
 model Tool {
-  id                Int           @id @default(autoincrement())
-  locked            Boolean       @default(false)
+  id                Int              @id @default(autoincrement())
+  locked            Boolean          @default(false)
   type              String
   /// Instance name, distinguishes instances of the same type
   title             String?
-  options           Json          @default("{}")
+  options           Json             @default("{}")
   createdBy         String?
-  createdDate       DateTime?     @db.Timestamptz(3) // Timestamp when created
+  createdDate       DateTime?        @db.Timestamptz(3) // Timestamp when created
   lastSavedBy       String?
-  lastSavedDate     DateTime?     @db.Timestamptz(3) // Timestamp when last saved
+  lastSavedDate     DateTime?        @db.Timestamptz(3) // Timestamp when last saved
   /// Soft delete - set instead of removing the row
-  deletedAt         DateTime?     @db.Timestamptz(3)
-  toolType          ToolType      @relation(fields: [type], references: [type])
+  deletedAt         DateTime?        @db.Timestamptz(3)
+  toolType          ToolType         @relation(fields: [type], references: [type])
   maps              ToolsOnMaps[]
   restrictedToRoles RoleOnTool[]
+  documentFolders   DocumentFolder[]
+  documents         Document[]
 }
 
 model ToolsOnMaps {

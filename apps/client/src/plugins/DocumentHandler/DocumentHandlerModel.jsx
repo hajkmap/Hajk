@@ -239,9 +239,9 @@ export default class DocumentHandlerModel {
 
   async fetchJsonDocument(folder = "", title) {
     try {
-      const mapName = this.app.config.activeMap;
+      const documentHandlerId = this.options?.documentHandlerId;
       const folderPath = folder ? `/${folder}` : "";
-      const url = `${this.mapServiceUrl}/api/v3/maps/${mapName}/documenthandler/load${folderPath}/${title}`;
+      const url = `${this.mapServiceUrl}/api/v3/tools/${documentHandlerId}/documenthandler/load${folderPath}/${title}`;
 
       const response = await hfetch(url);
       const text = await response.text();

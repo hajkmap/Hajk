@@ -42,7 +42,7 @@ export const CHAPTER_PANEL_WIDTH = 340;
 
 interface ChapterEditorPanelProps {
   document: Document;
-  mapName: string;
+  toolId: number;
   folderName: string;
   docName: string;
   docTitle: string;
@@ -59,7 +59,7 @@ interface ChapterEditorPanelProps {
 
 export function ChapterEditorPanel({
   document,
-  mapName,
+  toolId,
   folderName,
   docName,
   docTitle,
@@ -87,7 +87,7 @@ export function ChapterEditorPanel({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-  const saveDocMutation = useSaveDocument(mapName, folderName, docName);
+  const saveDocMutation = useSaveDocument(toolId, folderName, docName);
 
   // Expose dirty/pending state to parent dialog
   useEffect(() => {
@@ -327,7 +327,7 @@ export function ChapterEditorPanel({
                 html={selectedChapter.data.html}
                 onDirty={handleEditorDirty}
                 getHtmlRef={getHtmlRef}
-                mapName={mapName}
+                toolId={toolId}
               />
             </Box>
           </>

@@ -896,7 +896,8 @@ function uniqueSlug(base, existingSet) {
  * Seeds DocumentFolder + Document rows from legacy App_Data/documents/*.json files.
  * Legacy documents can be at root level or inside a single subfolder level.
  * Since documents now require a folder, root-level docs are placed in a
- * default "General" folder for each map.
+ * default "General" folder for each documenthandler tool.
+ * Documents are now owned by a DocumentHandler Tool instance (toolId), not a map.
  */
 async function seedDocuments() {
   const docsDir = path.join(process.cwd(), "App_Data", "documents");
@@ -909,46 +910,68 @@ async function seedDocuments() {
     return;
   }
 
-  // Collect all maps from the DB so we know valid mapNames
-  const mapsInDB = await prisma.map.findMany({ select: { name: true } });
-  const mapNames = new Set(mapsInDB.map((m) => m.name));
+  // Collect all documenthandler tools from the DB, keyed by their map(s).
+  // We resolve a tool for each document by the doc's optional "map" field,
+  // then fall back to the first documenthandler tool found.
+  const dhTools = await prisma.tool.findMany({
+    where: { type: "documenthandler", deletedAt: null },
+    include: { maps: { select: { mapName: true } } },
+  });
 
-  if (mapNames.size === 0) {
-    console.log("No maps in DB — skipping document seed.");
+  if (dhTools.length === 0) {
+    console.log("No documenthandler tools in DB — skipping document seed.");
     return;
   }
 
-  // We'll track slugs per (mapName, folderId) to ensure uniqueness
-  const folderSlugsByMap = new Map(); // mapName -> Set<slug>
+  // Build a lookup: mapName -> first documenthandler toolId for that map
+  const toolByMapName = new Map();
+  for (const tool of dhTools) {
+    for (const tom of tool.maps) {
+      if (!toolByMapName.has(tom.mapName)) {
+        toolByMapName.set(tom.mapName, tool.id);
+      }
+    }
+  }
+  const firstToolId = dhTools[0].id;
+
+  // Helper: determine which tool to assign a document to.
+  // Use the doc's "map" field to find the map's documenthandler tool; fallback to the first tool.
+  function resolveToolId(docMapField) {
+    if (docMapField && toolByMapName.has(docMapField)) return toolByMapName.get(docMapField);
+    return firstToolId;
+  }
+
+  // We'll track slugs per (toolId, folderId) to ensure uniqueness
+  const folderSlugsByTool = new Map(); // toolId -> Set<slug>
   const docSlugsByFolder = new Map(); // folderId -> Set<slug>
 
-  // Helper: get or create a folder for a map
-  async function getOrCreateFolder(mapName, folderTitle) {
-    if (!folderSlugsByMap.has(mapName)) {
-      folderSlugsByMap.set(mapName, new Set());
+  // Helper: get or create a folder for a tool
+  async function getOrCreateFolder(toolId, folderTitle) {
+    if (!folderSlugsByTool.has(toolId)) {
+      folderSlugsByTool.set(toolId, new Set());
     }
-    const existingSlugs = folderSlugsByMap.get(mapName);
+    const existingSlugs = folderSlugsByTool.get(toolId);
     const folderSlug = uniqueSlug(slugify(folderTitle), existingSlugs);
     existingSlugs.add(folderSlug);
 
     const folder = await prisma.documentFolder.upsert({
-      where: { mapName_name: { mapName, name: folderSlug } },
+      where: { toolId_name: { toolId, name: folderSlug } },
       update: {},
       create: {
         name: folderSlug,
         title: folderTitle,
-        mapName,
+        toolId,
         createdDate: new Date(),
         lastSavedDate: new Date(),
       },
     });
-    console.log(`  → Folder "${folderTitle}" (${folderSlug}) in map "${mapName}"`);
+    console.log(`  → Folder "${folderTitle}" (${folderSlug}) in tool #${toolId}`);
     docSlugsByFolder.set(folder.id, new Set());
     return folder;
   }
 
   // Helper: create a document inside a folder
-  async function createDocument(mapName, folderId, docTitle, content) {
+  async function createDocument(toolId, folderId, docTitle, content) {
     if (!docSlugsByFolder.has(folderId)) {
       docSlugsByFolder.set(folderId, new Set());
     }
@@ -961,20 +984,12 @@ async function seedDocuments() {
         name: docSlug,
         title: docTitle,
         content,
-        mapName,
+        toolId,
         folderId,
         createdDate: new Date(),
         lastSavedDate: new Date(),
       },
     });
-  }
-
-  // Helper: determine which map to assign a document to.
-  // Use the doc's "map" field if it matches a known map; fallback to the first map.
-  const firstMapName = [...mapNames][0];
-  function resolveMapName(docMapField) {
-    if (docMapField && mapNames.has(docMapField)) return docMapField;
-    return firstMapName;
   }
 
   let totalDocs = 0;
@@ -985,8 +1000,8 @@ async function seedDocuments() {
   );
 
   if (rootJsonFiles.length > 0) {
-    // Group root docs by their intended map so each map gets one "General" folder
-    const rootDocsByMap = new Map();
+    // Group root docs by their resolved toolId so each tool gets one "General" folder
+    const rootDocsByTool = new Map();
     for (const entry of rootJsonFiles) {
       const filePath = path.join(docsDir, entry.name);
       const text = await fs.promises.readFile(filePath, "utf-8");
@@ -997,17 +1012,17 @@ async function seedDocuments() {
         console.warn(`  Skipping invalid JSON: ${entry.name}`);
         continue;
       }
-      const mapName = resolveMapName(doc.map);
-      if (!rootDocsByMap.has(mapName)) rootDocsByMap.set(mapName, []);
-      rootDocsByMap.get(mapName).push({ entry, doc });
+      const toolId = resolveToolId(doc.map);
+      if (!rootDocsByTool.has(toolId)) rootDocsByTool.set(toolId, []);
+      rootDocsByTool.get(toolId).push({ entry, doc });
     }
 
-    for (const [mapName, items] of rootDocsByMap) {
-      const generalFolder = await getOrCreateFolder(mapName, "General");
+    for (const [toolId, items] of rootDocsByTool) {
+      const generalFolder = await getOrCreateFolder(toolId, "General");
       for (const { entry, doc } of items) {
         const docTitle = doc.title || entry.name.replace(".json", "");
         const content = { chapters: doc.chapters ?? [] };
-        await createDocument(mapName, generalFolder.id, docTitle, content);
+        await createDocument(toolId, generalFolder.id, docTitle, content);
         console.log(`    • "${docTitle}" → General`);
         totalDocs++;
       }
@@ -1026,8 +1041,8 @@ async function seedDocuments() {
     );
     if (subJsonFiles.length === 0) continue;
 
-    // Group by map
-    const docsByMap = new Map();
+    // Group by tool
+    const docsByTool = new Map();
     for (const entry of subJsonFiles) {
       const filePath = path.join(subDirPath, entry.name);
       const text = await fs.promises.readFile(filePath, "utf-8");
@@ -1038,17 +1053,17 @@ async function seedDocuments() {
         console.warn(`  Skipping invalid JSON: ${subDir.name}/${entry.name}`);
         continue;
       }
-      const mapName = resolveMapName(doc.map);
-      if (!docsByMap.has(mapName)) docsByMap.set(mapName, []);
-      docsByMap.get(mapName).push({ entry, doc });
+      const toolId = resolveToolId(doc.map);
+      if (!docsByTool.has(toolId)) docsByTool.set(toolId, []);
+      docsByTool.get(toolId).push({ entry, doc });
     }
 
-    for (const [mapName, items] of docsByMap) {
-      const folder = await getOrCreateFolder(mapName, subDir.name);
+    for (const [toolId, items] of docsByTool) {
+      const folder = await getOrCreateFolder(toolId, subDir.name);
       for (const { entry, doc } of items) {
         const docTitle = doc.title || entry.name.replace(".json", "");
         const content = { chapters: doc.chapters ?? [] };
-        await createDocument(mapName, folder.id, docTitle, content);
+        await createDocument(toolId, folder.id, docTitle, content);
         console.log(`    • "${docTitle}" → ${subDir.name}`);
         totalDocs++;
       }

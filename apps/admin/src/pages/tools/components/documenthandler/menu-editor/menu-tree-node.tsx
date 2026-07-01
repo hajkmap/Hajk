@@ -25,7 +25,7 @@ interface MenuTreeNodeProps extends NodeRendererProps<MenuTreeNode> {
   onDelete: (id: string) => void;
   onAddChild: (parentId: string) => void;
   onOpenDocument: (folder: string, document: string) => void;
-  mapName?: string;
+  toolId?: number;
   selectedId: string | null;
 }
 
@@ -34,20 +34,20 @@ const tooltipSlotProps = {
 } as const;
 
 function MenuTreeDocumentIcon({
-  mapName,
+  toolId,
   document,
   folder,
   onOpenDocument,
 }: {
-  mapName?: string;
+  toolId?: number;
   document: string;
   folder?: string;
   onOpenDocument: (folder: string, document: string) => void;
 }) {
   const { t } = useTranslation();
-  const { data: folders = [] } = useFolders(mapName);
+  const { data: folders = [] } = useFolders(toolId);
   const { effectiveFolder, isResolving } = useResolveDocumentFolder(
-    mapName,
+    toolId,
     document,
     folder,
     folders
@@ -109,7 +109,7 @@ export const MenuTreeNodeRenderer = React.forwardRef<
     onDelete,
     onAddChild,
     onOpenDocument,
-    mapName,
+    toolId,
     selectedId,
   },
   ref
@@ -233,7 +233,7 @@ export const MenuTreeNodeRenderer = React.forwardRef<
       {document ? (
         <Box sx={{ display: "flex", flexShrink: 0 }}>
           <MenuTreeDocumentIcon
-            mapName={mapName}
+            toolId={toolId}
             document={document}
             folder={folder}
             onOpenDocument={onOpenDocument}

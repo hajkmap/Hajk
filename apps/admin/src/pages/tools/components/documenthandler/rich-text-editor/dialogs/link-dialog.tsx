@@ -27,7 +27,7 @@ interface LinkDialogProps {
   open: boolean;
   linkType: HajkLinkType;
   initial?: Partial<HajkLinkAttrs>;
-  mapName?: string;
+  toolId?: number;
   onConfirm: (attrs: HajkLinkAttrs) => void;
   onCancel: () => void;
   onRemove?: () => void;
@@ -65,7 +65,7 @@ export function LinkDialog({
   open,
   linkType,
   initial,
-  mapName,
+  toolId,
   onConfirm,
   onCancel,
   onRemove,
@@ -82,9 +82,9 @@ export function LinkDialog({
   const [maplink, setMaplink] = useState(initial?.maplink ?? "");
   const [hoverText, setHoverText] = useState(initial?.hoverText ?? "");
 
-  const { data: folders = [] } = useFolders(mapName);
+  const { data: folders = [] } = useFolders(toolId);
   const { effectiveFolder, isResolving } = useResolveDocumentFolder(
-    mapName,
+    toolId,
     documentName,
     folderName,
     folders
@@ -99,11 +99,11 @@ export function LinkDialog({
   }, [folderName, folders, initial?.documentName, effectiveFolder]);
 
   const { data: documents = [], isLoading: docsLoading } = useDocuments(
-    mapName,
+    toolId,
     activeFolderName || undefined
   );
   const { data: selectedDoc, isLoading: docLoading } = useDocument(
-    mapName,
+    toolId,
     activeFolderName || undefined,
     documentName || undefined
   );
@@ -169,7 +169,7 @@ export function LinkDialog({
 
           {linkType === "document" && (
             <>
-              {!mapName ? (
+              {toolId === undefined ? (
                 <Typography variant="body2" color="text.secondary">
                   {t("dhRichTextEditor.link.noMapContext")}
                 </Typography>

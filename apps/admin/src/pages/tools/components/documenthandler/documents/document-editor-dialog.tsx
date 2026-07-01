@@ -30,7 +30,7 @@ function noop() { /* intentional no-op for initial save ref */ }
 
 interface DocumentEditorDialogProps {
   open: boolean;
-  mapName: string;
+  toolId: number;
   folderName?: string;
   docName?: string;
   onClose: () => void;
@@ -38,7 +38,7 @@ interface DocumentEditorDialogProps {
 
 export function DocumentEditorDialog({
   open,
-  mapName,
+  toolId,
   folderName,
   docName,
   onClose,
@@ -71,13 +71,13 @@ export function DocumentEditorDialog({
   const [savedContentJson, setSavedContentJson] = useState("");
 
   const { data: activeDocument, isLoading: docLoading } = useDocument(
-    mapName,
+    toolId,
     folderName,
     docName
   );
 
   const saveDocMutation = useSaveDocument(
-    mapName,
+    toolId,
     folderName ?? "",
     docName ?? ""
   );
@@ -249,7 +249,7 @@ export function DocumentEditorDialog({
                   <Box sx={{ flex: 1, minHeight: 0, overflow: "auto" }}>
                     <DocumentViewPanel
                       document={draftDocument ?? activeDocument}
-                      mapName={mapName}
+                      toolId={toolId}
                     />
                   </Box>
                 )}
@@ -268,7 +268,7 @@ export function DocumentEditorDialog({
                     <ChapterEditorPanel
                       key={`${activeDocument.id}-${editorKey}`}
                       document={activeDocument}
-                      mapName={mapName}
+                      toolId={toolId}
                       folderName={folderName ?? ""}
                       docName={docName ?? ""}
                       docTitle={docTitleDraft}

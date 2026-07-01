@@ -2,7 +2,7 @@ export interface DocumentFolder {
   id: number;
   name: string;
   title: string;
-  mapName: string;
+  toolId: number;
   createdBy?: string;
   createdDate?: string;
   lastSavedBy?: string;
@@ -23,7 +23,7 @@ export interface Document {
   name: string;
   title: string;
   content: Record<string, unknown>;
-  mapName: string;
+  toolId: number;
   folderId: number;
   createdBy?: string;
   createdDate?: string;

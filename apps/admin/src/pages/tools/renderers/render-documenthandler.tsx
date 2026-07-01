@@ -45,8 +45,8 @@ export default function DocumentHandlerRenderer({
     document: string;
   } | null>(null);
 
-  // Derive mapName from tool.mapNames (the standard way tools connect to maps)
-  const resolvedMapName = tool.mapNames?.[0] ?? undefined;
+  // Documents are now owned by the Tool instance itself — use tool.id directly.
+  const toolId = tool.id != null ? Number(tool.id) : undefined;
 
   // Resolve the URL document id → open the editor dialog
   const documentId = searchParams.get("documentId") ?? undefined;
@@ -89,12 +89,11 @@ export default function DocumentHandlerRenderer({
 
   function handleOpenDocument(folder: string, document: string) {
     setOpenDocument({ folder, document });
-    const map = resolvedMapName;
-    if (!map) return;
+    if (toolId === undefined) return;
     queryClient
       .fetchQuery({
-        queryKey: ["documents", map, folder],
-        queryFn: () => getDocuments(map, folder),
+        queryKey: ["documents", toolId, folder],
+        queryFn: () => getDocuments(toolId, folder),
         staleTime: 30_000,
       })
       .then((docs) => {
@@ -136,7 +135,7 @@ export default function DocumentHandlerRenderer({
         <SettingsTabPanel
           control={control}
           setValue={setValue}
-          mapName={resolvedMapName}
+          toolId={toolId}
         />
       </Box>
 
@@ -149,7 +148,7 @@ export default function DocumentHandlerRenderer({
             <MenuEditor
               value={field.value as MenuConfig | undefined}
               onChange={field.onChange}
-              mapName={resolvedMapName}
+              toolId={toolId}
               onOpenDocument={handleOpenDocument}
             />
           )}
@@ -159,18 +158,18 @@ export default function DocumentHandlerRenderer({
       {/* Documents tab */}
       <Box sx={{ display: activeTab === "documents" ? "block" : "none" }}>
         <DocumentsTabPanel
-          key={resolvedMapName ?? "none"}
-          mapName={resolvedMapName}
+          key={toolId ?? "none"}
+          toolId={toolId}
           openDocument={openDocument}
           onOpenDocument={handleOpenDocument}
           onCloseDocument={handleCloseDocument}
         />
       </Box>
 
-      {resolvedMapName && openDocument && (
+      {toolId !== undefined && openDocument && (
         <DocumentEditorDialog
           open
-          mapName={resolvedMapName}
+          toolId={toolId}
           folderName={openDocument.folder}
           docName={openDocument.document}
           onClose={handleCloseDocument}

@@ -35,10 +35,10 @@ interface MenuEditorProps {
   value: MenuConfig | undefined;
   onChange: (next: MenuConfig) => void;
   onOpenDocument: (folder: string, document: string) => void;
-  mapName?: string;
+  toolId?: number;
 }
 
-export function MenuEditor({ value, onChange, onOpenDocument, mapName }: MenuEditorProps) {
+export function MenuEditor({ value, onChange, onOpenDocument, toolId }: MenuEditorProps) {
   const { t } = useTranslation();
   const [tree, setTree] = useState<MenuTreeNode[]>(() =>
     toTree(value?.menu ?? [])
@@ -207,7 +207,7 @@ export function MenuEditor({ value, onChange, onOpenDocument, mapName }: MenuEdi
               onAddChild={handleAddChild}
               onDelete={handleDeleteRequest}
               onOpenDocument={onOpenDocument}
-              mapName={mapName}
+              toolId={toolId}
             />
           )}
         </Box>
@@ -226,7 +226,7 @@ export function MenuEditor({ value, onChange, onOpenDocument, mapName }: MenuEdi
             tree={tree}
             onNodeChange={handleTreeChange}
             onOpenDocument={onOpenDocument}
-            mapName={mapName}
+            toolId={toolId}
           />
         </Paper>
       </Box>

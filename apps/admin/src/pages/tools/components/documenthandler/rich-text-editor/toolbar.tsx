@@ -49,7 +49,7 @@ interface ToolbarProps {
   imageList?: string[];
   videoList?: string[];
   audioList?: string[];
-  mapName?: string;
+  toolId?: number;
 }
 
 interface ToolbarBtnProps {
@@ -87,7 +87,7 @@ export function RichTextToolbar({
   imageList,
   videoList,
   audioList,
-  mapName,
+  toolId,
 }: ToolbarProps) {
   const { t, i18n } = useTranslation();
   const spellcheckEnabled = useAppStateStore((s) => s.editorSpellcheckEnabled);
@@ -487,7 +487,7 @@ export function RichTextToolbar({
         open={linkDialogOpen}
         linkType={pendingLinkType}
         initial={currentLink}
-        mapName={mapName}
+        toolId={toolId}
         onConfirm={handleLinkConfirm}
         onCancel={() => setLinkDialogOpen(false)}
         onRemove={linkDialogIsEdit ? handleLinkRemove : undefined}

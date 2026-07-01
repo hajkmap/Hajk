@@ -10,7 +10,7 @@ import {
   DocumentMoveSchema,
 } from "../../schemas/document.schemas.ts";
 
-// Sub-router for /:folder/documents — mergeParams inherits :mapName and :folder
+// Sub-router for /:folder/documents — mergeParams inherits :toolId and :folder
 const documentsRouter = express.Router({ mergeParams: true });
 documentsRouter
   .get("/", controller.getDocuments)
@@ -35,7 +35,7 @@ documentsRouter
   )
   .delete("/:name", restrictAdmin, controller.deleteDocument);
 
-// Main router mounted at /:mapName/documenthandler — mergeParams inherits :mapName
+// Main router mounted at /tools/:toolId/documenthandler — mergeParams inherits :toolId
 export default express
   .Router({ mergeParams: true })
   .get("/folders", controller.getFolders)

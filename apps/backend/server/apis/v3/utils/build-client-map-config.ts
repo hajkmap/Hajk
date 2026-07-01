@@ -319,6 +319,20 @@ export async function buildClientToolsForMap(mapName: string) {
       };
     }
 
+    if (entry.tool.type === "documenthandler") {
+      return {
+        type: entry.tool.type,
+        index: entry.index,
+        options: {
+          ...mergedOptions,
+          // Expose the tool's own id so the client plugin can load documents
+          // directly from /api/v3/tools/:documentHandlerId/documenthandler/load/...
+          // without relying on the active map name.
+          documentHandlerId: entry.tool.id,
+        },
+      };
+    }
+
     return {
       type: entry.tool.type,
       index: entry.index,

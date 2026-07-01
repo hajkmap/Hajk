@@ -20,13 +20,15 @@ class DocumentHandlerController {
   // ─── Folders ───────────────────────────────────────────────────────────────
 
   async getFolders(req: Request, res: Response) {
-    const folders = await DocumentService.getFolders(req.params.mapName);
+    const toolId = parseInt(req.params.toolId, 10);
+    const folders = await DocumentService.getFolders(toolId);
     res.status(HttpStatusCodes.OK).json({ count: folders.length, folders });
   }
 
   async createFolder(req: Request, res: Response) {
+    const toolId = parseInt(req.params.toolId, 10);
     const folder = await DocumentService.createFolder(
-      req.params.mapName,
+      toolId,
       req.body.title as string,
       req.user?.id
     );
@@ -34,8 +36,9 @@ class DocumentHandlerController {
   }
 
   async renameFolder(req: Request, res: Response) {
+    const toolId = parseInt(req.params.toolId, 10);
     const folder = await DocumentService.renameFolder(
-      req.params.mapName,
+      toolId,
       req.params.folder,
       req.body.title as string,
       req.user?.id
@@ -44,23 +47,26 @@ class DocumentHandlerController {
   }
 
   async deleteFolder(req: Request, res: Response) {
-    await DocumentService.deleteFolder(req.params.mapName, req.params.folder);
+    const toolId = parseInt(req.params.toolId, 10);
+    await DocumentService.deleteFolder(toolId, req.params.folder);
     res.status(HttpStatusCodes.NO_CONTENT).send();
   }
 
   // ─── Documents ─────────────────────────────────────────────────────────────
 
   async getDocuments(req: Request, res: Response) {
+    const toolId = parseInt(req.params.toolId, 10);
     const documents = await DocumentService.getDocuments(
-      req.params.mapName,
+      toolId,
       req.params.folder
     );
     res.status(HttpStatusCodes.OK).json({ count: documents.length, documents });
   }
 
   async createDocument(req: Request, res: Response) {
+    const toolId = parseInt(req.params.toolId, 10);
     const document = await DocumentService.createDocument(
-      req.params.mapName,
+      toolId,
       req.params.folder,
       req.body.title as string,
       req.user?.id
@@ -69,8 +75,9 @@ class DocumentHandlerController {
   }
 
   async getDocument(req: Request, res: Response) {
+    const toolId = parseInt(req.params.toolId, 10);
     const document = await DocumentService.getDocument(
-      req.params.mapName,
+      toolId,
       req.params.folder,
       req.params.name
     );
@@ -78,8 +85,9 @@ class DocumentHandlerController {
   }
 
   async saveDocument(req: Request, res: Response) {
+    const toolId = parseInt(req.params.toolId, 10);
     const document = await DocumentService.saveDocument(
-      req.params.mapName,
+      toolId,
       req.params.folder,
       req.params.name,
       req.body as { title?: string; content: Record<string, unknown> },
@@ -89,8 +97,9 @@ class DocumentHandlerController {
   }
 
   async moveDocument(req: Request, res: Response) {
+    const toolId = parseInt(req.params.toolId, 10);
     const document = await DocumentService.moveDocument(
-      req.params.mapName,
+      toolId,
       req.params.folder,
       req.params.name,
       req.body.targetFolder as string,
@@ -100,8 +109,9 @@ class DocumentHandlerController {
   }
 
   async deleteDocument(req: Request, res: Response) {
+    const toolId = parseInt(req.params.toolId, 10);
     await DocumentService.deleteDocument(
-      req.params.mapName,
+      toolId,
       req.params.folder,
       req.params.name
     );
@@ -111,8 +121,9 @@ class DocumentHandlerController {
   // ─── Load (client-facing) ──────────────────────────────────────────────────
 
   async loadDocumentInFolder(req: Request, res: Response) {
+    const toolId = parseInt(req.params.toolId, 10);
     const document = await DocumentService.loadDocumentForClient(
-      req.params.mapName,
+      toolId,
       req.params.folder,
       req.params.name
     );
@@ -120,8 +131,9 @@ class DocumentHandlerController {
   }
 
   async loadDocumentRoot(req: Request, res: Response) {
+    const toolId = parseInt(req.params.toolId, 10);
     const document = await DocumentService.loadDocumentForClient(
-      req.params.mapName,
+      toolId,
       null,
       req.params.name
     );

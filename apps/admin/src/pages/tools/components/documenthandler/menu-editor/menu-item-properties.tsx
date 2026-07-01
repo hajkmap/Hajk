@@ -35,7 +35,7 @@ interface MenuItemPropertiesProps {
   tree: MenuTreeNode[];
   onNodeChange: (next: MenuTreeNode[]) => void;
   onOpenDocument: (folder: string, document: string) => void;
-  mapName?: string;
+  toolId?: number;
 }
 
 const FONT_SIZE_OPTIONS = ["small", "medium", "large"];
@@ -45,18 +45,18 @@ export function MenuItemProperties({
   tree,
   onNodeChange,
   onOpenDocument,
-  mapName,
+  toolId,
 }: MenuItemPropertiesProps) {
   const { t } = useTranslation();
 
-  const { data: folders = [] } = useFolders(mapName);
+  const { data: folders = [] } = useFolders(toolId);
   const { effectiveFolder, isResolving } = useResolveDocumentFolder(
-    mapName,
+    toolId,
     node?.data.document,
     node?.data.folder,
     folders
   );
-  const { data: documents = [] } = useDocuments(mapName, effectiveFolder);
+  const { data: documents = [] } = useDocuments(toolId, effectiveFolder);
 
   useEffect(() => {
     if (!node || !effectiveFolder || node.userTouchedFolder) return;
@@ -230,7 +230,7 @@ export function MenuItemProperties({
             </Select>
           </FormControl>
         ) : (
-          mapName && (
+          toolId !== undefined && (
             <Typography
               variant="caption"
               color="text.secondary"

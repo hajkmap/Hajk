@@ -32,14 +32,14 @@ import { DocumentsTree } from "./documents-tree";
 import type { DocTreeNode } from "./types.ts";
 
 interface DocumentsTabPanelProps {
-  mapName: string | undefined;
+  toolId: number | undefined;
   openDocument?: { folder: string; document: string } | null;
   onOpenDocument: (folder: string, document: string) => void;
   onCloseDocument: () => void;
 }
 
 export function DocumentsTabPanel({
-  mapName,
+  toolId,
   openDocument,
   onOpenDocument,
   onCloseDocument,
@@ -64,14 +64,14 @@ export function DocumentsTabPanel({
   // ─── Data queries ────────────────────────────────────────────────────────────
 
   const { data: folders = [], isLoading: foldersLoading } =
-    useFolders(mapName);
+    useFolders(toolId);
 
   // Fetch all documents for all folders so the tree is fully populated
   const allDocQueries = useQueries({
     queries: folders.map((folder) => ({
-      queryKey: ["documents", mapName, folder.name],
-      queryFn: () => getDocuments(mapName!, folder.name),
-      enabled: !!mapName,
+      queryKey: ["documents", toolId, folder.name],
+      queryFn: () => getDocuments(toolId!, folder.name),
+      enabled: toolId !== undefined,
       staleTime: 30_000,
     })),
   });
@@ -126,22 +126,22 @@ export function DocumentsTabPanel({
 
   // ─── Mutations ───────────────────────────────────────────────────────────────
 
-  const createFolderMutation = useCreateFolder(mapName ?? "");
-  const deleteFolderMutation = useDeleteFolder(mapName ?? "");
+  const createFolderMutation = useCreateFolder(toolId ?? 0);
+  const deleteFolderMutation = useDeleteFolder(toolId ?? 0);
   const createDocMutation = useCreateDocument(
-    mapName ?? "",
+    toolId ?? 0,
     activeNewDocFolder ?? ""
   );
   const deleteDocMutation = useDeleteDocument(
-    mapName ?? "",
+    toolId ?? 0,
     deleteDocInfo?.folderName ?? ""
   );
-  const moveDocMutation = useMoveDocumentAcrossFolders(mapName ?? "");
+  const moveDocMutation = useMoveDocumentAcrossFolders(toolId ?? 0);
 
   // ─── Handlers ────────────────────────────────────────────────────────────────
 
   function handleCreateFolder() {
-    if (!newFolderTitle.trim() || !mapName) return;
+    if (!newFolderTitle.trim() || toolId === undefined) return;
     createFolderMutation.mutate(
       { title: newFolderTitle.trim() },
       {
@@ -154,7 +154,7 @@ export function DocumentsTabPanel({
   }
 
   function handleCreateDocument() {
-    if (!newDocTitle.trim() || !activeNewDocFolder || !mapName) return;
+    if (!newDocTitle.trim() || !activeNewDocFolder || toolId === undefined) return;
     createDocMutation.mutate(
       { title: newDocTitle.trim() },
       {
@@ -182,7 +182,7 @@ export function DocumentsTabPanel({
     });
   }
 
-  if (!mapName) {
+  if (toolId === undefined) {
     return null;
   }
 

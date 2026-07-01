@@ -54,7 +54,7 @@ interface MenuTreeProps {
   onAddChild: (parentId: string) => void;
   onDelete: (id: string) => void;
   onOpenDocument: (folder: string, document: string) => void;
-  mapName?: string;
+  toolId?: number;
   treeRef?: React.RefObject<TreeApi<MenuTreeNode> | undefined>;
 }
 
@@ -66,7 +66,7 @@ export function MenuTree({
   onAddChild,
   onDelete,
   onOpenDocument,
-  mapName,
+  toolId,
   treeRef,
 }: MenuTreeProps) {
   function NodeRenderer(props: NodeRendererProps<MenuTreeNode>) {
@@ -77,7 +77,7 @@ export function MenuTree({
         onDelete={onDelete}
         onAddChild={onAddChild}
         onOpenDocument={onOpenDocument}
-        mapName={mapName}
+        toolId={toolId}
       />
     );
   }

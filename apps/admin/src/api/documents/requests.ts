@@ -13,14 +13,14 @@ import type {
   DocumentsApiResponse,
 } from "./types";
 
-const base = (mapName: string) =>
-  `/maps/${encodeURIComponent(mapName)}/documenthandler`;
+const base = (toolId: number) =>
+  `/tools/${toolId}/documenthandler`;
 
-const folderBase = (mapName: string, folder: string) =>
-  `${base(mapName)}/folders/${encodeURIComponent(folder)}`;
+const folderBase = (toolId: number, folder: string) =>
+  `${base(toolId)}/folders/${encodeURIComponent(folder)}`;
 
-const docBase = (mapName: string, folder: string, name: string) =>
-  `${folderBase(mapName, folder)}/documents/${encodeURIComponent(name)}`;
+const docBase = (toolId: number, folder: string, name: string) =>
+  `${folderBase(toolId, folder)}/documents/${encodeURIComponent(name)}`;
 
 // ─── By id ──────────────────────────────────────────────────────────────────
 
@@ -44,12 +44,12 @@ export const getDocumentById: (
 // ─── Folders ────────────────────────────────────────────────────────────────
 
 export const getFolders = async (
-  mapName: string
+  toolId: number
 ): Promise<DocumentFolder[]> => {
   const client = getApiClient();
   try {
     const response = await client.get<FoldersApiResponse>(
-      `${base(mapName)}/folders`
+      `${base(toolId)}/folders`
     );
     return response.data.folders;
   } catch (error) {
@@ -63,13 +63,13 @@ export const getFolders = async (
 };
 
 export const createFolder = async (
-  mapName: string,
+  toolId: number,
   data: FolderCreateInput
 ): Promise<DocumentFolder> => {
   const client = getApiClient();
   try {
     const response = await client.post<DocumentFolder>(
-      `${base(mapName)}/folders`,
+      `${base(toolId)}/folders`,
       data
     );
     return response.data;
@@ -84,14 +84,14 @@ export const createFolder = async (
 };
 
 export const renameFolder = async (
-  mapName: string,
+  toolId: number,
   folderName: string,
   data: FolderRenameInput
 ): Promise<DocumentFolder> => {
   const client = getApiClient();
   try {
     const response = await client.put<DocumentFolder>(
-      folderBase(mapName, folderName),
+      folderBase(toolId, folderName),
       data
     );
     return response.data;
@@ -106,12 +106,12 @@ export const renameFolder = async (
 };
 
 export const deleteFolder = async (
-  mapName: string,
+  toolId: number,
   folderName: string
 ): Promise<void> => {
   const client = getApiClient();
   try {
-    await client.delete(folderBase(mapName, folderName));
+    await client.delete(folderBase(toolId, folderName));
   } catch (error) {
     const axiosError = error as InternalApiError;
     throw new Error(
@@ -125,13 +125,13 @@ export const deleteFolder = async (
 // ─── Documents ───────────────────────────────────────────────────────────────
 
 export const getDocuments = async (
-  mapName: string,
+  toolId: number,
   folder: string
 ): Promise<DocumentSummary[]> => {
   const client = getApiClient();
   try {
     const response = await client.get<DocumentsApiResponse>(
-      `${folderBase(mapName, folder)}/documents`
+      `${folderBase(toolId, folder)}/documents`
     );
     return response.data.documents;
   } catch (error) {
@@ -145,13 +145,13 @@ export const getDocuments = async (
 };
 
 export const getDocument = async (
-  mapName: string,
+  toolId: number,
   folder: string,
   name: string
 ): Promise<Document> => {
   const client = getApiClient();
   try {
-    const response = await client.get<Document>(docBase(mapName, folder, name));
+    const response = await client.get<Document>(docBase(toolId, folder, name));
     return response.data;
   } catch (error) {
     const axiosError = error as InternalApiError;
@@ -164,14 +164,14 @@ export const getDocument = async (
 };
 
 export const createDocument = async (
-  mapName: string,
+  toolId: number,
   folder: string,
   data: DocumentCreateInput
 ): Promise<Document> => {
   const client = getApiClient();
   try {
     const response = await client.post<Document>(
-      `${folderBase(mapName, folder)}/documents`,
+      `${folderBase(toolId, folder)}/documents`,
       data
     );
     return response.data;
@@ -186,7 +186,7 @@ export const createDocument = async (
 };
 
 export const saveDocument = async (
-  mapName: string,
+  toolId: number,
   folder: string,
   name: string,
   data: DocumentSaveInput
@@ -194,7 +194,7 @@ export const saveDocument = async (
   const client = getApiClient();
   try {
     const response = await client.put<Document>(
-      docBase(mapName, folder, name),
+      docBase(toolId, folder, name),
       data
     );
     return response.data;
@@ -209,7 +209,7 @@ export const saveDocument = async (
 };
 
 export const moveDocument = async (
-  mapName: string,
+  toolId: number,
   folder: string,
   name: string,
   data: DocumentMoveInput
@@ -217,7 +217,7 @@ export const moveDocument = async (
   const client = getApiClient();
   try {
     const response = await client.patch<Document>(
-      `${docBase(mapName, folder, name)}/move`,
+      `${docBase(toolId, folder, name)}/move`,
       data
     );
     return response.data;
@@ -232,13 +232,13 @@ export const moveDocument = async (
 };
 
 export const deleteDocument = async (
-  mapName: string,
+  toolId: number,
   folder: string,
   name: string
 ): Promise<void> => {
   const client = getApiClient();
   try {
-    await client.delete(docBase(mapName, folder, name));
+    await client.delete(docBase(toolId, folder, name));
   } catch (error) {
     const axiosError = error as InternalApiError;
     throw new Error(
