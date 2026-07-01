@@ -78,6 +78,7 @@ export function resolveToolZone(tool: ToolOnMap): ToolZoneKey | null {
 }
 
 export function isHiddenMapTool(tool: ToolOnMap): boolean {
+  if (tool.target) return false;
   return legacyOptionsTarget(tool) === "hidden";
 }
 

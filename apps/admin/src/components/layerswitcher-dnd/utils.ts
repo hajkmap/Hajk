@@ -456,9 +456,9 @@ export const enforceItemRules = (
     ...item,
     canHaveChildren: ITEM_CAPABILITIES[item.type].canHaveChildren,
     children: ITEM_CAPABILITIES[item.type].canHaveChildren
-      ? item.children
+      ? item.children?.length
         ? enforceItemRules(item.children)
-        : item.children
+        : undefined
       : undefined,
   }));
 

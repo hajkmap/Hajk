@@ -12,8 +12,12 @@ export interface TreeItemData {
   id: string;
   name: string;
   type: ItemType;
-  /** Layer placement: visible in map on load (client config). */
+  /** Layer placement: visible in map on load (client layersConfig). */
   visibleAtStart?: boolean;
+  /** Group map placement: toggled on in the layer switcher at start. */
+  toggled?: boolean;
+  /** Group map placement: expanded in the layer switcher at start. */
+  expanded?: boolean;
 }
 
 export interface DropZoneConfig {
@@ -34,6 +38,8 @@ export interface DropZoneConfig {
   enableRemove?: boolean;
   /** Layer rows: active chip, draw order, visible-at-start toggle. */
   showLayerPlacementStatus?: boolean;
+  /** Group map placement rows: toggled + expanded at start. */
+  showGroupPlacementStatus?: boolean;
 }
 
 export interface LayerSwitcherDnDProps {

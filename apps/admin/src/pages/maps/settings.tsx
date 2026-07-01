@@ -23,7 +23,6 @@ import LayersIcon from "@mui/icons-material/Layers";
 import BuildIcon from "@mui/icons-material/Build";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import MapIcon from "@mui/icons-material/Map";
-import CollectionsIcon from "@mui/icons-material/Collections";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 import PaletteIcon from "@mui/icons-material/Palette";
 import StyleIcon from "@mui/icons-material/Style";
@@ -35,16 +34,11 @@ import {
   useMapByName,
   useUpdateMap,
   useUpdateMapTools,
-  useUpdateMapLayers,
   useUpdateMapGroups,
   useDeleteMap,
   useMaps,
   useToolsByMapName,
-  useLayersByMapName,
   useGroupsByMapName,
-  type MapGroup,
-  type MapLayerPlacement,
-  type MapGroupPlacement,
 } from "../../api/maps";
 import DialogWrapper from "../../components/flexible-dialog";
 import {
@@ -60,12 +54,13 @@ import MapSettingsForm, {
   type MapSettingsSection,
 } from "./components/map-settings-form";
 import MapThemesTab from "./components/map-themes-tab";
+import MapGroupPlacementPanel from "./components/map-group-placement-panel";
 import {
-  LayerSwitcherDnD,
-  TreeItemData,
-  ID_DELIMITER,
-} from "../../components/layerswitcher-dnd";
-import { useLayers } from "../../api/layers";
+  buildMapGroupTree,
+  mapGroupTreeSignature,
+  mapGroupTreeToPayload,
+} from "./map-group-placement-utils";
+import { TreeItemData } from "../../components/layerswitcher-dnd";
 import { useGroups } from "../../api/groups";
 import MapToolsPanel from "./components/map-tools-panel";
 import {
@@ -119,96 +114,6 @@ const VALID_MAP_SETTINGS_SECTIONS = new Set<MapSettingsSection>(
   MAP_SETTINGS_SECTIONS.map((section) => section.key),
 );
 
-/** Extracts the trailing entity id from a drop-zone item id (`type::id`). */
-function entityIdFromItemId(itemId: string | number): string {
-  const parts = String(itemId).split(ID_DELIMITER);
-  return parts[parts.length - 1];
-}
-
-/** Builds a nested group tree (for the drop zone) from GroupsOnMaps rows. */
-function buildGroupTree(rows: MapGroup[]): TreeItems<TreeItemData> {
-  const byParent = new Map<string | null, MapGroup[]>();
-  rows.forEach((row) => {
-    const key = row.parentGroupId ?? null;
-    const bucket = byParent.get(key);
-    if (bucket) bucket.push(row);
-    else byParent.set(key, [row]);
-  });
-
-  const build = (parentPlacementId: string | null): TreeItems<TreeItemData> =>
-    (byParent.get(parentPlacementId) ?? []).map((row) => ({
-      id: `group${ID_DELIMITER}${row.groupId}`,
-      name: row.name,
-      type: "group" as const,
-      canHaveChildren: true,
-      children: build(row.id),
-    }));
-
-  return build(null);
-}
-
-/** Flattens the layers drop zone into the `PUT /maps/:name/layers` payload. */
-function layersToPayload(items: TreeItems<TreeItemData>): MapLayerPlacement[] {
-  return items.map((item, index) => ({
-    layerId: entityIdFromItemId(item.id),
-    zIndex: index,
-    visibleAtStart: item.visibleAtStart ?? false,
-  }));
-}
-
-/** Stable signature for the layers zone (order + visibility), for dirty checks. */
-function layersSignature(items: TreeItems<TreeItemData>): string {
-  return JSON.stringify(
-    items.map((item) => ({
-      id: entityIdFromItemId(item.id),
-      visibleAtStart: item.visibleAtStart ?? false,
-    })),
-  );
-}
-
-/**
- * Flattens the groups tree into the `PUT /maps/:name/groups` payload. Fresh
- * placement ids are generated each save (the backend fully replaces the set),
- * and nesting is expressed via `parentGroupId`.
- */
-function groupTreeToPayload(
-  items: TreeItems<TreeItemData>,
-): MapGroupPlacement[] {
-  const result: MapGroupPlacement[] = [];
-  const walk = (
-    nodes: TreeItems<TreeItemData>,
-    parentPlacementId: string | null,
-  ) => {
-    nodes.forEach((node) => {
-      const placementId = crypto.randomUUID();
-      result.push({
-        id: placementId,
-        groupId: entityIdFromItemId(node.id),
-        parentGroupId: parentPlacementId,
-      });
-      if (node.children?.length) walk(node.children, placementId);
-    });
-  };
-  walk(items, null);
-  return result;
-}
-
-/** Stable signature for the groups tree (structure + order), for dirty checks. */
-function groupsSignature(items: TreeItems<TreeItemData>): string {
-  const walk = (
-    nodes: TreeItems<TreeItemData>,
-    parentGroupId: string | null,
-  ): { groupId: string; parent: string | null }[] =>
-    nodes.flatMap((node) => {
-      const groupId = entityIdFromItemId(node.id);
-      return [
-        { groupId, parent: parentGroupId },
-        ...(node.children?.length ? walk(node.children, groupId) : []),
-      ];
-    });
-  return JSON.stringify(walk(items, null));
-}
-
 export default function MapSettings() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -218,7 +123,6 @@ export default function MapSettings() {
   const { data: map, isLoading, isError } = useMapByName(mapName ?? "");
   const { mutateAsync: updateMap, status: updateStatus } = useUpdateMap();
   const { mutateAsync: updateMapTools } = useUpdateMapTools();
-  const { mutateAsync: updateMapLayers } = useUpdateMapLayers();
   const { mutateAsync: updateMapGroups } = useUpdateMapGroups();
   const { mutateAsync: deleteMap, isPending: isDeletingMap } = useDeleteMap();
   const { palette } = useTheme();
@@ -267,10 +171,12 @@ export default function MapSettings() {
   const showSettingsSearchUi =
     activeTab === "settings" && settingsSection === "search";
   const settingsSearchTerm = showSettingsSearchUi ? settingsSearchQuery : "";
-  const { data: layers = [] } = useLayers();
   const { data: groups = [] } = useGroups();
+  const catalogGroups = useMemo(
+    () => groups.map((group) => ({ id: group.id, name: group.name })),
+    [groups],
+  );
   const { data: mapTools } = useToolsByMapName(mapName ?? "");
-  const { data: mapLayers } = useLayersByMapName(mapName ?? "");
   const { data: mapGroups } = useGroupsByMapName(mapName ?? "");
   const { data: projections } = useProjections();
   const { defaultCoordinates } = useAppStateStore.getState();
@@ -286,47 +192,22 @@ export default function MapSettings() {
     [projections],
   );
 
-  // Drop zone states
-  const [backgroundLayersDZ, setBackgroundLayersDZ] = useState<
-    TreeItems<TreeItemData>
-  >([]);
+  // Drop zone state for group placements on this map.
   const [groupLayersDZ, setGroupLayersDZ] = useState<TreeItems<TreeItemData>>(
     [],
   );
 
-  // Server baselines for the menu tab (layers placed directly on the map and
-  // the map's group placements). Used both to seed the drop zones and to
-  // detect unsaved changes.
-  const serverLayerItems = useMemo<TreeItems<TreeItemData>>(
-    () =>
-      (mapLayers ?? [])
-        .filter((layer) => layer.mapId != null)
-        .slice()
-        .sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0))
-        .map((layer) => ({
-          id: `layer${ID_DELIMITER}${layer.id}`,
-          name: layer.name,
-          type: "layer" as const,
-          canHaveChildren: false,
-          visibleAtStart: layer.visibleAtStart ?? false,
-        })),
-    [mapLayers],
-  );
   const serverGroupItems = useMemo<TreeItems<TreeItemData>>(
-    () => buildGroupTree(mapGroups ?? []),
+    () => buildMapGroupTree(mapGroups ?? []),
     [mapGroups],
   );
 
-  const layersDirtyRaw = useMemo(() => {
-    if (!mapName || mapLayers === undefined) return false;
-    return (
-      layersSignature(backgroundLayersDZ) !== layersSignature(serverLayerItems)
-    );
-  }, [backgroundLayersDZ, serverLayerItems, mapName, mapLayers]);
-
   const groupsDirtyRaw = useMemo(() => {
     if (!mapName || mapGroups === undefined) return false;
-    return groupsSignature(groupLayersDZ) !== groupsSignature(serverGroupItems);
+    return (
+      mapGroupTreeSignature(groupLayersDZ) !==
+      mapGroupTreeSignature(serverGroupItems)
+    );
   }, [groupLayersDZ, serverGroupItems, mapName, mapGroups]);
 
   const [menuSynced, setMenuSynced] = useState(false);
@@ -336,32 +217,20 @@ export default function MapSettings() {
   }, [mapName]);
 
   useEffect(() => {
-    if (!mapName || mapLayers === undefined || mapGroups === undefined) {
+    if (!mapName || mapGroups === undefined) {
       return;
     }
     if (!menuSynced) {
-      setBackgroundLayersDZ(serverLayerItems);
       setGroupLayersDZ(serverGroupItems);
       setMenuSynced(true);
       return;
     }
-    if (layersDirtyRaw || groupsDirtyRaw) {
+    if (groupsDirtyRaw) {
       return;
     }
-    setBackgroundLayersDZ(serverLayerItems);
     setGroupLayersDZ(serverGroupItems);
-  }, [
-    mapName,
-    mapLayers,
-    mapGroups,
-    serverLayerItems,
-    serverGroupItems,
-    menuSynced,
-    layersDirtyRaw,
-    groupsDirtyRaw,
-  ]);
+  }, [mapName, mapGroups, serverGroupItems, menuSynced, groupsDirtyRaw]);
 
-  const layersDirty = menuSynced && layersDirtyRaw;
   const groupsDirty = menuSynced && groupsDirtyRaw;
   const serverToolZones = useMemo(
     () => (mapTools ? mapToolsToZones(mapTools) : null),
@@ -455,17 +324,10 @@ export default function MapSettings() {
         setToolsDraft(null);
       }
 
-      if (layersDirty) {
-        await updateMapLayers({
-          mapName: map.name,
-          layers: layersToPayload(backgroundLayersDZ),
-        });
-      }
-
       if (groupsDirty) {
         await updateMapGroups({
           mapName: map.name,
-          groups: groupTreeToPayload(groupLayersDZ),
+          groups: mapGroupTreeToPayload(groupLayersDZ),
         });
       }
 
@@ -559,7 +421,7 @@ export default function MapSettings() {
         createdDate={map?.createdDate}
         lastSavedBy={map?.lastSavedBy}
         lastSavedDate={map?.lastSavedDate}
-        isDirty={isDirty || toolsDirty || layersDirty || groupsDirty}
+        isDirty={isDirty || toolsDirty || groupsDirty}
         warning={
           <Box sx={{ mt: 1 }}>
             {map.locked ? (
@@ -641,51 +503,14 @@ export default function MapSettings() {
         </Box>
 
         {activeTab === "menu" &&
-          (mapLayers === undefined || mapGroups === undefined ? (
+          (mapGroups === undefined ? (
             <SquareSpinnerComponent />
           ) : (
-            <>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                <LayerSwitcherDnD
-                  layers={layers}
-                  showSourceLayerStatus
-                  dropZones={[
-                    {
-                      id: "layers",
-                      title: t("map.layerStructure.directLayers.title"),
-                      helpText: t("map.layerStructure.directLayers.help"),
-                      clientBucketLabel: t(
-                        "map.layerStructure.directLayers.clientBucket",
-                      ),
-                      titleIcon: <LayersIcon />,
-                      items: backgroundLayersDZ,
-                      onItemsChange: setBackgroundLayersDZ,
-                      showLayerPlacementStatus: true,
-                      acceptedItemTypes: ["layer"],
-                      allowNesting: false,
-                    },
-                  ]}
-                />
-                <LayerSwitcherDnD
-                  groups={groups}
-                  dropZones={[
-                    {
-                      id: "groups",
-                      title: t("map.layerStructure.layerGroups.title"),
-                      helpText: t("map.layerStructure.layerGroups.help"),
-                      clientBucketLabel: t(
-                        "map.layerStructure.layerGroups.clientBucket",
-                      ),
-                      titleIcon: <CollectionsIcon />,
-                      items: groupLayersDZ,
-                      onItemsChange: setGroupLayersDZ,
-                      acceptedItemTypes: ["group"],
-                      allowNesting: true,
-                    },
-                  ]}
-                />
-              </Box>
-            </>
+            <MapGroupPlacementPanel
+              catalogGroups={catalogGroups}
+              items={groupLayersDZ}
+              onItemsChange={setGroupLayersDZ}
+            />
           ))}
 
         {activeTab === "tools" && (

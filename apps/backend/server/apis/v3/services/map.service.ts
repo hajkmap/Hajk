@@ -14,6 +14,7 @@ import {
   layerInstanceIncludeAll,
   resolveLayerPlacementById,
 } from "../utils/layer-instance.ts";
+import { toolsOnMapsOptionsForTarget } from "../utils/tool-placement.ts";
 
 const logger = log4js.getLogger("service.v3.map");
 
@@ -405,6 +406,7 @@ class MapService {
                 toolId: t.toolId,
                 index: t.index,
                 target: t.target,
+                options: toolsOnMapsOptionsForTarget(t.target),
               })),
             }),
           ]

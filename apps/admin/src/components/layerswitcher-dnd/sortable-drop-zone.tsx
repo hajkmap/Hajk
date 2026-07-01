@@ -33,6 +33,7 @@ interface SortableDropZoneProps {
   minHeight?: number;
   enableRemove?: boolean;
   showLayerPlacementStatus?: boolean;
+  showGroupPlacementStatus?: boolean;
 }
 
 export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
@@ -49,6 +50,7 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
   minHeight,
   enableRemove = true,
   showLayerPlacementStatus = false,
+  showGroupPlacementStatus = false,
 }) => {
   const { t } = useTranslation();
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
@@ -79,6 +81,24 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
     );
   };
 
+  const handleToggleToggled = (itemId: string, toggled: boolean) => {
+    applyZoneRules(
+      updateItemInTree(items, itemId, (item) => ({
+        ...item,
+        toggled,
+      })),
+    );
+  };
+
+  const handleToggleExpanded = (itemId: string, expanded: boolean) => {
+    applyZoneRules(
+      updateItemInTree(items, itemId, (item) => ({
+        ...item,
+        expanded,
+      })),
+    );
+  };
+
   const topLevelIndexById = new Map(
     items.map((item, index) => [item.id.toString(), index]),
   );
@@ -92,10 +112,26 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
       clientBucketLabel={clientBucketLabel}
       minHeight={minHeight}
     >
-      <Box sx={getSortableTreePanelSx(isDarkMode)}>
+      <Box
+        sx={{
+          ...getSortableTreePanelSx(isDarkMode),
+          ...(allowNesting === false
+            ? {
+                "& .dnd-sortable-tree_simple_tree-item-collapse_button": {
+                  display: "none",
+                },
+              }
+            : {}),
+        }}
+      >
         <SortableTree
           items={items}
           onItemsChanged={(newItems) => applyZoneRules(newItems)}
+          keepGhostInPlace
+          indentationWidth={allowNesting === false ? 0 : 20}
+          canRootHaveChildren={
+            allowNesting === false ? false : undefined
+          }
           TreeItemComponent={(treeItemProps) => {
             const itemId = treeItemProps.item.id.toString();
             const isGroup = treeItemProps.item.type === "group";
@@ -117,8 +153,15 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
                 canMoveDown={canItemMoveDown(items, itemId)}
                 drawOrderIndex={topLevelIndexById.get(itemId)}
                 showLayerPlacementStatus={showLayerPlacementStatus}
+                showGroupPlacementStatus={showGroupPlacementStatus}
                 onToggleVisibleAtStart={(visible) =>
                   handleToggleVisibleAtStart(itemId, visible)
+                }
+                onToggleToggled={(toggled) =>
+                  handleToggleToggled(itemId, toggled)
+                }
+                onToggleExpanded={(expanded) =>
+                  handleToggleExpanded(itemId, expanded)
                 }
                 removeTitle={t("map.removeFromMap")}
               />

@@ -6,6 +6,7 @@ import {
   buildLayerSwitcherBaselayersForMap,
   buildLayerSwitcherGroupsForMap,
 } from "./build-layer-switcher-groups-for-map.ts";
+import { legacyTargetForBackendZone } from "./tool-placement.ts";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return (
@@ -299,13 +300,18 @@ export async function buildClientToolsForMap(mapName: string) {
 
   return toolsOnMap.map((entry) => {
     const mergedOptions = mergeJsonObjects(entry.tool.options, entry.options);
+    const legacyTarget = legacyTargetForBackendZone(entry.target);
+    const options =
+      legacyTarget != null
+        ? mergeJsonObjects(mergedOptions, { target: legacyTarget })
+        : mergedOptions;
 
     if (entry.tool.type === "layerswitcher") {
       return {
         type: entry.tool.type,
         index: entry.index,
         options: {
-          ...mergedOptions,
+          ...options,
           groups,
           baselayers,
           ...(quickAccessPresets.length > 0 ? { quickAccessPresets } : {}),
@@ -316,7 +322,7 @@ export async function buildClientToolsForMap(mapName: string) {
     return {
       type: entry.tool.type,
       index: entry.index,
-      options: mergedOptions,
+      options,
     };
   });
 }

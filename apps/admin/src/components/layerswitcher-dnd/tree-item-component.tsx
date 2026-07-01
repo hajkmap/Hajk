@@ -31,7 +31,10 @@ interface TreeItemComponentExtendedProps
   canMoveDown?: boolean;
   drawOrderIndex?: number;
   showLayerPlacementStatus?: boolean;
+  showGroupPlacementStatus?: boolean;
   onToggleVisibleAtStart?: (visible: boolean) => void;
+  onToggleToggled?: (toggled: boolean) => void;
+  onToggleExpanded?: (expanded: boolean) => void;
   removeTitle?: string;
 }
 
@@ -48,7 +51,10 @@ export const TreeItemComponent = React.forwardRef<
     canMoveDown,
     drawOrderIndex,
     showLayerPlacementStatus,
+    showGroupPlacementStatus,
     onToggleVisibleAtStart,
+    onToggleToggled,
+    onToggleExpanded,
     removeTitle,
   } = props;
   const { t } = useTranslation();
@@ -56,6 +62,7 @@ export const TreeItemComponent = React.forwardRef<
   const isGroup = item.type === "group";
   const isLayer = item.type === "layer";
   const showLayerStatus = showLayerPlacementStatus && isLayer;
+  const showGroupStatus = showGroupPlacementStatus && isGroup;
 
   return (
     <SimpleTreeItemWrapper
@@ -130,6 +137,62 @@ export const TreeItemComponent = React.forwardRef<
                 label={
                   <Typography variant="caption">
                     {t("map.layerVisibleAtStart")}
+                  </Typography>
+                }
+              />
+            </Box>
+          ) : null}
+
+          {showGroupStatus ? (
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <Chip
+                size="small"
+                color="success"
+                variant="outlined"
+                label={t("map.groupActiveOnMap")}
+              />
+              <FormControlLabel
+                sx={{ m: 0 }}
+                control={
+                  <Switch
+                    size="small"
+                    checked={item.toggled ?? false}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      onToggleToggled?.(e.target.checked);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                }
+                label={
+                  <Typography variant="caption">
+                    {t("map.groupVisibleAtStart")}
+                  </Typography>
+                }
+              />
+              <FormControlLabel
+                sx={{ m: 0 }}
+                control={
+                  <Switch
+                    size="small"
+                    checked={item.expanded ?? false}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      onToggleExpanded?.(e.target.checked);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                }
+                label={
+                  <Typography variant="caption">
+                    {t("map.groupExpandedAtStart")}
                   </Typography>
                 }
               />
