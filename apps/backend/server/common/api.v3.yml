@@ -13,6 +13,23 @@ tags:
   - name: Specification
     description: The OpenAPI specification
 paths:
+  /healthz:
+    get:
+      tags:
+        - Client-accessible
+      summary: Backend liveness check
+      description: Returns 200 when the backend process is up. No authentication required.
+      responses:
+        200:
+          description: Backend is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
   /maps:
     get:
       tags:

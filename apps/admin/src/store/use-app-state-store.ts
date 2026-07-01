@@ -1,6 +1,7 @@
 import { PaletteMode } from "@mui/material";
 import { create } from "zustand";
 import i18n, { Language } from "../i18n/i18n";
+import { checkBackendReachable } from "../lib/backend-health";
 
 interface AppState {
   language: string;
@@ -15,12 +16,14 @@ interface AppState {
   mapsDefault: Record<string, unknown>;
   defaultCoordinates: string[];
   loading: boolean;
+  backendStatus: "checking" | "online" | "offline";
   setLanguage: (lang: Language) => void;
   setThemeMode: (theme: PaletteMode) => void;
   setSidebarLocked: (locked: boolean) => void;
   setDefaultMap: (mapName: string) => void;
   setEditorSpellcheckEnabled: (enabled: boolean) => void;
   loadConfig: () => Promise<void>;
+  checkBackend: () => Promise<void>;
 }
 
 const getDefaultThemeMode = () => {
@@ -72,6 +75,7 @@ const useAppStateStore = create<AppState>((set) => ({
   mapsDefault: {},
   defaultCoordinates: [],
   loading: true,
+  backendStatus: "checking",
 
   setLanguage: (lang: string) => {
     localStorage.setItem("language", lang);
@@ -125,6 +129,13 @@ const useAppStateStore = create<AppState>((set) => ({
       console.error("Failed to load config:", error);
       set({ loading: false });
     }
+  },
+
+  checkBackend: async () => {
+    const { apiBaseUrl } = useAppStateStore.getState();
+    set({ backendStatus: "checking" });
+    const reachable = await checkBackendReachable(apiBaseUrl);
+    set({ backendStatus: reachable ? "online" : "offline" });
   },
 }));
 

@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import authRouter from "./controllers/auth/router.ts";
+import healthRouter from "./controllers/health/router.ts";
 import databaseRouter from "./controllers/database/router.ts";
 import documentsRouter from "./controllers/documents/router.ts";
 import filesRouter from "./controllers/files/router.ts";
@@ -17,8 +18,9 @@ import { isAuthenticated } from "../../common/auth/is-authenticated.middleware.t
 import { isAdmin } from "../../common/auth/is-admin.ts";
 
 export default Router()
-  // The /auth endpoint should always be accessible
+  // The /auth and /healthz endpoints should always be accessible
   .use("/auth", authRouter)
+  .use("/healthz", healthRouter)
   // All other endpoints require authentication
   .use("/public", isAuthenticated, publicRouter)
   // The admin endpoints require that the user is authenticated and has the admin role

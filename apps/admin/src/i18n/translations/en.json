@@ -1,5 +1,7 @@
 {
   "translation": {
+    "backend.unavailableTitle": "An error occurred",
+    "backend.unavailableMessage": "Could not reach the backend at {{url}}. Make sure the backend is running and try again.",
     "common.loading": "Loading...",
     "common.notFound": "Not found",
     "common.actions": "Actions",

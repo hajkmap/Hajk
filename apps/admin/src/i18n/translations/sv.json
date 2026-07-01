@@ -1,5 +1,7 @@
 {
   "translation": {
+    "backend.unavailableTitle": "Ett fel inträffade",
+    "backend.unavailableMessage": "Kunde inte nå backenden på {{url}}. Kontrollera att backenden körs och försök igen.",
     "common.loading": "Laddar...",
     "common.notFound": "Hittades inte",
     "common.actions": "Åtgärder",

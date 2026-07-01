@@ -21,6 +21,7 @@ import ToolsPage from "./pages/tools/index.tsx";
 import ToolSettings from "./pages/tools/settings";
 
 import useAppStateStore from "./store/use-app-state-store.ts";
+import BackendUnavailable from "./components/backend-unavailable/index.tsx";
 import SettingsPage from "./pages/settings/index.tsx";
 import ServicesPage from "./pages/services/index.tsx";
 import ServiceSettings from "./pages/services/settings.tsx";
@@ -133,19 +134,26 @@ const router = createBrowserRouter(
 );
 
 export default function App() {
-  const { loadConfig, loading } = useAppStateStore();
+  const { loadConfig, loading, checkBackend, backendStatus } =
+    useAppStateStore();
 
   useEffect(() => {
-    void loadConfig();
-  }, [loadConfig]);
+    void loadConfig().then(() => checkBackend());
+  }, [loadConfig, checkBackend]);
 
-  return !loading ? (
+  if (loading || backendStatus === "checking") {
+    return <SquareSpinnerComponent />;
+  }
+
+  if (backendStatus === "offline") {
+    return <BackendUnavailable />;
+  }
+
+  return (
     <QueryClientProvider client={queryClient}>
       {import.meta.env.DEV && <ReactQueryDevtools />}
       <RouterProvider router={router} />
       <ToastContainer />
     </QueryClientProvider>
-  ) : (
-    <SquareSpinnerComponent />
   );
 }
