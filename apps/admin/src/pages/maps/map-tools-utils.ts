@@ -1,5 +1,6 @@
 import type { TreeItem } from "dnd-kit-sortable-tree";
 import type { ToolOnMap } from "../../api/maps";
+import type { Tool } from "../../api/tools";
 import type { TreeItemData } from "../../components/layerswitcher-dnd";
 import { ID_DELIMITER } from "../../components/layerswitcher-dnd";
 
@@ -48,6 +49,13 @@ export function getToolDisplayName(tool: ToolOnMap): string {
     return title.trim();
   }
   return tool.tool.type;
+}
+
+export function getCatalogToolDisplayName(tool: Tool): string {
+  if (typeof tool.title === "string" && tool.title.trim()) {
+    return tool.title.trim();
+  }
+  return tool.type;
 }
 
 function legacyOptionsTarget(tool: ToolOnMap): string | null {
@@ -149,13 +157,37 @@ export function unplacedMapToolsToSourceItems(
   }));
 }
 
+/** All catalog tools not yet placed in a zone — available to drag onto the map. */
+export function catalogToolsToSourceItems(
+  catalogTools: Tool[],
+  zones: ToolZones,
+): { id: string; name: string }[] {
+  const placedIds = collectPlacedToolIds(zones);
+
+  return catalogTools
+    .filter((tool) => !placedIds.has(Number(tool.id)))
+    .slice()
+    .sort((a, b) =>
+      getCatalogToolDisplayName(a).localeCompare(
+        getCatalogToolDisplayName(b),
+        undefined,
+        { sensitivity: "base" },
+      ),
+    )
+    .map((tool) => ({
+      id: tool.id,
+      name: getCatalogToolDisplayName(tool),
+    }));
+}
+
 export type ToolPlacementLabelKey =
   | "maps.toolPlacement.drawer"
   | "maps.toolPlacement.widgetLeft"
   | "maps.toolPlacement.widgetRight"
   | "maps.toolPlacement.controlButton"
   | "maps.toolPlacement.unplaced"
-  | "maps.toolPlacement.hidden";
+  | "maps.toolPlacement.hidden"
+  | "maps.toolPlacement.notOnMap";
 
 export function getToolPlacementLabelKey(tool: ToolOnMap): ToolPlacementLabelKey {
   if (isHiddenMapTool(tool)) {

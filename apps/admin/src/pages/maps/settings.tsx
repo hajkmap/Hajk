@@ -447,10 +447,10 @@ export default function MapSettings() {
     try {
       // Persist placements first (keyed by the current name) so a simultaneous
       // rename doesn't target a no-longer-existing map name.
-      if (toolsDirty && toolsDraft && mapTools) {
+      if (toolsDirty && toolsDraft) {
         await updateMapTools({
           mapName: map.name,
-          tools: zonesToToolsPayload(toolsDraft.zones, mapTools),
+          tools: zonesToToolsPayload(toolsDraft.zones, mapTools ?? []),
         });
         setToolsDraft(null);
       }

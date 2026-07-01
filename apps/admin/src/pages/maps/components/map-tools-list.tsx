@@ -11,44 +11,61 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import type { GridRenderCellParams } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
 import type { ToolOnMap } from "../../../api/maps";
+import type { Tool } from "../../../api/tools";
 import StyledDataGrid from "../../../components/data-grid";
 import {
-  getToolDisplayName,
+  getCatalogToolDisplayName,
   getToolPlacementLabelKey,
 } from "../map-tools-utils";
 
 interface MapToolsListProps {
+  catalogTools: Tool[];
   mapTools: ToolOnMap[];
 }
 
-export default function MapToolsList({ mapTools }: MapToolsListProps) {
+export default function MapToolsList({
+  catalogTools,
+  mapTools,
+}: MapToolsListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
 
   const rows = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    return mapTools
+    const mapToolsById = new Map(mapTools.map((tool) => [tool.toolId, tool]));
+
+    return catalogTools
       .slice()
-      .sort((a, b) => a.index - b.index)
+      .sort((a, b) =>
+        getCatalogToolDisplayName(a).localeCompare(
+          getCatalogToolDisplayName(b),
+          undefined,
+          { sensitivity: "base" },
+        ),
+      )
       .filter((tool) => {
         if (!query) return true;
-        const title = getToolDisplayName(tool).toLowerCase();
-        return (
-          title.includes(query) ||
-          tool.tool.type.toLowerCase().includes(query)
-        );
+        const title = getCatalogToolDisplayName(tool).toLowerCase();
+        return title.includes(query) || tool.type.toLowerCase().includes(query);
       })
-      .map((tool) => ({
-        id: tool.toolId,
-        toolId: tool.toolId,
-        title: getToolDisplayName(tool),
-        type: tool.tool.type,
-        index: tool.index,
-        placementKey: getToolPlacementLabelKey(tool),
-        tool,
-      }));
-  }, [mapTools, searchTerm]);
+      .map((tool) => {
+        const toolId = Number(tool.id);
+        const onMap = mapToolsById.get(toolId);
+
+        return {
+          id: toolId,
+          toolId,
+          title: getCatalogToolDisplayName(tool),
+          type: tool.type,
+          index: onMap?.index ?? null,
+          placementKey: onMap
+            ? getToolPlacementLabelKey(onMap)
+            : ("maps.toolPlacement.notOnMap" as const),
+          onMap: onMap != null,
+        };
+      });
+  }, [catalogTools, mapTools, searchTerm]);
 
   return (
     <Box>
@@ -64,7 +81,7 @@ export default function MapToolsList({ mapTools }: MapToolsListProps) {
 
       {rows.length === 0 ? (
         <Typography color="text.secondary">
-          {t("maps.toolsListEmpty")}
+          {t("maps.toolsCatalogEmpty")}
         </Typography>
       ) : (
         <StyledDataGrid
@@ -94,6 +111,8 @@ export default function MapToolsList({ mapTools }: MapToolsListProps) {
               headerName: t("maps.toolsOrder"),
               align: "center",
               headerAlign: "center",
+              valueFormatter: (value: number | null) =>
+                value == null ? "—" : value,
             },
             {
               field: "actions",

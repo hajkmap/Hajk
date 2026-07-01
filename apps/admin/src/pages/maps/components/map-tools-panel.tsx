@@ -5,13 +5,15 @@ import TouchAppIcon from "@mui/icons-material/TouchApp";
 import { useTranslation } from "react-i18next";
 import type { TreeItems } from "dnd-kit-sortable-tree";
 import type { ToolOnMap } from "../../../api/maps";
+import type { Tool } from "../../../api/tools";
+import { useTools } from "../../../api/tools";
 import {
   ToolPlacementDnD,
   TreeItemData,
 } from "../../../components/layerswitcher-dnd";
 import { SettingsPageTabs } from "../../../components/settings-page-tabs";
 import type { ToolZones } from "../map-tools-utils";
-import { unplacedMapToolsToSourceItems } from "../map-tools-utils";
+import { catalogToolsToSourceItems } from "../map-tools-utils";
 import MapToolsList from "./map-tools-list";
 
 const TOOLS_SUB_TABS = [
@@ -29,6 +31,7 @@ const TOOLS_SUB_TABS = [
 
 interface MapToolsPanelProps {
   mapTools: ToolOnMap[] | undefined;
+  catalogTools?: Tool[] | undefined;
   toolZones: ToolZones;
   onUpdateToolZone: (
     zone: keyof ToolZones,
@@ -39,14 +42,17 @@ interface MapToolsPanelProps {
 
 export default function MapToolsPanel({
   mapTools,
+  catalogTools: catalogToolsProp,
   toolZones,
   onUpdateToolZone,
   backgroundImage,
 }: MapToolsPanelProps) {
   const { t } = useTranslation();
   const [toolsSubTab, setToolsSubTab] = useState<"list" | "placement">("list");
+  const { data: catalogToolsQuery } = useTools();
+  const catalogTools = catalogToolsProp ?? catalogToolsQuery;
 
-  if (mapTools === undefined) {
+  if (mapTools === undefined || catalogTools === undefined) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
         <CircularProgress />
@@ -54,7 +60,7 @@ export default function MapToolsPanel({
     );
   }
 
-  const sourceTools = unplacedMapToolsToSourceItems(mapTools, toolZones);
+  const sourceTools = catalogToolsToSourceItems(catalogTools, toolZones);
 
   return (
     <Box>
@@ -66,11 +72,11 @@ export default function MapToolsPanel({
       />
 
       {toolsSubTab === "list" ? (
-        <MapToolsList mapTools={mapTools} />
+        <MapToolsList catalogTools={catalogTools} mapTools={mapTools} />
       ) : (
         <ToolPlacementDnD
           tools={sourceTools}
-          sourceTitle={t("maps.toolsUnplacedSource")}
+          sourceTitle={t("maps.toolsAvailableSource")}
           drawerItems={toolZones.drawer}
           onDrawerItemsChange={(items) => onUpdateToolZone("drawer", items)}
           widgetLeftItems={toolZones.widgetLeft}
