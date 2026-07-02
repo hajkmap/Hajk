@@ -1,5 +1,5 @@
 import type { TreeItem } from "dnd-kit-sortable-tree";
-import type { ToolOnMap } from "../../api/maps";
+import type { ToolOnMap, ToolWindowPosition, ToolZone } from "../../api/maps";
 import type { Tool } from "../../api/tools";
 import type { TreeItemData } from "../../components/layerswitcher-dnd";
 import { ID_DELIMITER } from "../../components/layerswitcher-dnd";
@@ -26,6 +26,132 @@ const ZONE_TO_TARGET: Record<ToolZoneKey, string> = {
   widgetRight: "widgetRight",
   control: "controlButton",
 };
+
+const TARGET_TO_ZONE: Record<ToolZone, ToolZoneKey> = {
+  drawer: "drawer",
+  widgetLeft: "widgetLeft",
+  widgetRight: "widgetRight",
+  controlButton: "control",
+};
+
+export interface MapToolsDraftState {
+  activeToolIds: Set<number>;
+  windowPositions: Record<number, ToolWindowPosition>;
+  inactiveTargets: Record<number, ToolZone>;
+}
+
+export interface MapToolPayloadEntry {
+  toolId: number;
+  active: boolean;
+  index: number;
+  target: string | null;
+  options?: Record<string, string>;
+}
+
+function extractToolIdFromItemId(itemId: string | number): number | null {
+  const parts = String(itemId).split(ID_DELIMITER);
+  const toolId = Number(parts[parts.length - 1]);
+  return Number.isNaN(toolId) ? null : toolId;
+}
+
+export function getMapToolWindowPosition(tool: ToolOnMap): ToolWindowPosition {
+  const mapPosition = tool.options?.position;
+  if (mapPosition === "left" || mapPosition === "right") {
+    return mapPosition;
+  }
+
+  const toolPosition = tool.tool.options?.position;
+  if (toolPosition === "left" || toolPosition === "right") {
+    return toolPosition;
+  }
+
+  return "right";
+}
+
+export function isMapToolActive(tool: ToolOnMap): boolean {
+  return tool.active !== false;
+}
+
+export function buildToolsDraftState(
+  mapTools: ToolOnMap[],
+): MapToolsDraftState {
+  const activeToolIds = new Set<number>();
+  const windowPositions: Record<number, ToolWindowPosition> = {};
+  const inactiveTargets: Record<number, ToolZone> = {};
+
+  for (const tool of mapTools) {
+    windowPositions[tool.toolId] = getMapToolWindowPosition(tool);
+
+    if (!isMapToolActive(tool)) {
+      const zone = resolveToolZone(tool);
+      if (zone) inactiveTargets[tool.toolId] = zoneKeyToTarget(zone);
+      continue;
+    }
+
+    activeToolIds.add(tool.toolId);
+  }
+
+  return { activeToolIds, windowPositions, inactiveTargets };
+}
+
+export function findToolZoneForId(
+  zones: ToolZones,
+  toolId: number,
+): ToolZoneKey | null {
+  const itemId = `tool${ID_DELIMITER}${toolId}`;
+  for (const zone of Object.keys(zones) as ToolZoneKey[]) {
+    if (zones[zone].some((item) => item.id === itemId)) {
+      return zone;
+    }
+  }
+  return null;
+}
+
+export function zoneKeyToTarget(zone: ToolZoneKey): ToolZone {
+  return ZONE_TO_TARGET[zone] as ToolZone;
+}
+
+export function targetToZoneKey(target: ToolZone): ToolZoneKey {
+  return TARGET_TO_ZONE[target];
+}
+
+export function moveToolToZone(
+  zones: ToolZones,
+  toolId: number,
+  displayName: string,
+  targetZone: ToolZoneKey | null,
+): ToolZones {
+  const itemId = `tool${ID_DELIMITER}${toolId}`;
+  const next: ToolZones = {
+    drawer: zones.drawer.filter((item) => item.id !== itemId),
+    widgetLeft: zones.widgetLeft.filter((item) => item.id !== itemId),
+    widgetRight: zones.widgetRight.filter((item) => item.id !== itemId),
+    control: zones.control.filter((item) => item.id !== itemId),
+  };
+
+  if (!targetZone) {
+    return next;
+  }
+
+  next[targetZone] = [
+    ...next[targetZone],
+    {
+      id: itemId,
+      name: displayName,
+      type: "tool",
+      canHaveChildren: false,
+    },
+  ];
+
+  return next;
+}
+
+export function removeToolFromZones(
+  zones: ToolZones,
+  toolId: number,
+): ToolZones {
+  return moveToolToZone(zones, toolId, "", null);
+}
 
 const BACKEND_TARGET_TO_ZONE: Record<string, ToolZoneKey> = {
   drawer: "drawer",
@@ -103,7 +229,7 @@ export function mapToolsToZones(mapTools: ToolOnMap[]): ToolZones {
   const byZone = new Map<ToolZoneKey, ToolOnMap[]>();
 
   for (const tool of mapTools) {
-    if (isHiddenMapTool(tool)) continue;
+    if (!isMapToolActive(tool)) continue;
 
     const zone = resolveToolZone(tool);
     if (!zone) continue;
@@ -158,6 +284,37 @@ export function unplacedMapToolsToSourceItems(
   }));
 }
 
+/** Active tools not placed in a zone — shown in the placement DnD source list. */
+export function unplacedActiveToolsToSourceItems(
+  catalogTools: Tool[],
+  mapTools: ToolOnMap[],
+  zones: ToolZones,
+  activeToolIds: Set<number>,
+): { id: string; name: string }[] {
+  const placedIds = collectPlacedToolIds(zones);
+  const catalogById = new Map(
+    catalogTools.map((tool) => [Number(tool.id), tool]),
+  );
+  const mapToolsById = new Map(mapTools.map((tool) => [tool.toolId, tool]));
+
+  return [...activeToolIds]
+    .filter((toolId) => !placedIds.has(toolId))
+    .map((toolId) => {
+      const catalogTool = catalogById.get(toolId);
+      const mapTool = mapToolsById.get(toolId);
+      const name = catalogTool
+        ? getCatalogToolDisplayName(catalogTool)
+        : mapTool
+          ? getToolDisplayName(mapTool)
+          : String(toolId);
+
+      return { id: String(toolId), name };
+    })
+    .sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+    );
+}
+
 /** All catalog tools not yet placed in a zone — available to drag onto the map. */
 export function catalogToolsToSourceItems(
   catalogTools: Tool[],
@@ -190,7 +347,9 @@ export type ToolPlacementLabelKey =
   | "maps.toolPlacement.hidden"
   | "maps.toolPlacement.notOnMap";
 
-export function getToolPlacementLabelKey(tool: ToolOnMap): ToolPlacementLabelKey {
+export function getToolPlacementLabelKey(
+  tool: ToolOnMap,
+): ToolPlacementLabelKey {
   if (isHiddenMapTool(tool)) {
     return "maps.toolPlacement.hidden";
   }
@@ -210,48 +369,124 @@ export function getToolPlacementLabelKey(tool: ToolOnMap): ToolPlacementLabelKey
   }
 }
 
-/** Flattens zones into the `PUT /maps/:name/tools` payload, keeping unplaced map tools. */
+function buildToolPayloadOptions(
+  windowPosition?: ToolWindowPosition,
+): Record<string, string> | undefined {
+  if (!windowPosition) return undefined;
+  return { position: windowPosition };
+}
+
+/** Flattens the draft into the `PUT /maps/:name/tools` payload. */
 export function zonesToToolsPayload(
   zones: ToolZones,
+  activeToolIds: Set<number>,
+  windowPositions: Record<number, ToolWindowPosition>,
+  inactiveTargets: Record<number, ToolZone>,
   mapTools: ToolOnMap[],
-): { toolId: number; index: number; target: string | null }[] {
-  const result: { toolId: number; index: number; target: string | null }[] = [];
-  const placedIds = new Set<number>();
+): MapToolPayloadEntry[] {
+  const mapToolsById = new Map(mapTools.map((tool) => [tool.toolId, tool]));
+  const allToolIds = new Set<number>([
+    ...mapTools.map((tool) => tool.toolId),
+    ...activeToolIds,
+    ...Object.keys(inactiveTargets).map(Number),
+  ]);
 
-  (Object.keys(ZONE_TO_TARGET) as ToolZoneKey[]).forEach((zone) => {
-    zones[zone].forEach((item, index) => {
-      const parts = String(item.id).split(ID_DELIMITER);
-      const toolId = Number(parts[parts.length - 1]);
-      if (!Number.isNaN(toolId)) {
-        placedIds.add(toolId);
-        result.push({ toolId, index, target: ZONE_TO_TARGET[zone] });
+  const result: MapToolPayloadEntry[] = [];
+  let unplacedIndex = 0;
+  let inactiveIndex = 0;
+
+  for (const toolId of [...allToolIds].sort((a, b) => a - b)) {
+    const existing = mapToolsById.get(toolId);
+    const isActive = activeToolIds.has(toolId);
+    const options = buildToolPayloadOptions(windowPositions[toolId]);
+
+    let target: string | null;
+    let index: number;
+
+    if (isActive) {
+      const zone = findToolZoneForId(zones, toolId);
+      target = zone ? ZONE_TO_TARGET[zone] : null;
+      if (zone) {
+        index = zones[zone].findIndex(
+          (item) => extractToolIdFromItemId(item.id) === toolId,
+        );
+      } else {
+        index = existing?.index ?? unplacedIndex++;
       }
-    });
-  });
+    } else {
+      target =
+        inactiveTargets[toolId] != null
+          ? inactiveTargets[toolId]
+          : (existing?.target ?? null);
+      index = existing?.index ?? inactiveIndex++;
+    }
 
-  mapTools
-    .slice()
-    .sort((a, b) => a.index - b.index)
-    .forEach((tool) => {
-      if (placedIds.has(tool.toolId)) return;
-      result.push({
-        toolId: tool.toolId,
-        index: tool.index,
-        target: null,
-      });
+    result.push({
+      toolId,
+      active: isActive,
+      index,
+      target,
+      ...(options ? { options } : {}),
     });
+  }
 
   return result;
 }
 
-export function toolsPayloadSignature(
-  payload: { toolId: number; index: number; target: string | null }[],
-): string {
+export function toolsPayloadSignature(payload: MapToolPayloadEntry[]): string {
   return JSON.stringify(
     payload
       .slice()
       .sort((a, b) => a.toolId - b.toolId)
-      .map(({ toolId, index, target }) => ({ toolId, index, target })),
+      .map(({ toolId, active, index, target, options }) => ({
+        toolId,
+        active,
+        index,
+        target,
+        options: options ?? {},
+      })),
+  );
+}
+
+export function toolsDraftSignature(
+  zones: ToolZones,
+  activeToolIds: Set<number>,
+  windowPositions: Record<number, ToolWindowPosition>,
+  inactiveTargets: Record<number, ToolZone>,
+): string {
+  const relevantIds = new Set<number>([
+    ...activeToolIds,
+    ...Object.keys(inactiveTargets).map(Number),
+  ]);
+  const positions: Record<number, ToolWindowPosition> = {};
+  [...relevantIds]
+    .sort((a, b) => a - b)
+    .forEach((id) => {
+      if (windowPositions[id]) positions[id] = windowPositions[id];
+    });
+
+  return JSON.stringify({
+    zones: JSON.parse(toolZonesSignature(zones)) as Record<
+      ToolZoneKey,
+      number[]
+    >,
+    active: [...activeToolIds].sort((a, b) => a - b),
+    inactive: Object.entries(inactiveTargets)
+      .map(([id, target]) => [Number(id), target] as [number, ToolZone])
+      .sort((a, b) => a[0] - b[0]),
+    windowPositions: positions,
+  });
+}
+
+export function serverToolsSignature(mapTools: ToolOnMap[]): string {
+  const zones = mapToolsToZones(mapTools);
+  const { activeToolIds, windowPositions, inactiveTargets } =
+    buildToolsDraftState(mapTools);
+  return toolsDraftSignature(
+    zones,
+    activeToolIds,
+    windowPositions,
+    inactiveTargets,
   );
 }
 

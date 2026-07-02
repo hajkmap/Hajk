@@ -4,7 +4,7 @@ import ViewListIcon from "@mui/icons-material/ViewList";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 import { useTranslation } from "react-i18next";
 import type { TreeItems } from "dnd-kit-sortable-tree";
-import type { ToolOnMap } from "../../../api/maps";
+import type { ToolOnMap, ToolWindowPosition, ToolZone } from "../../../api/maps";
 import type { Tool } from "../../../api/tools";
 import { useTools } from "../../../api/tools";
 import {
@@ -33,9 +33,17 @@ interface MapToolsPanelProps {
   mapTools: ToolOnMap[] | undefined;
   catalogTools?: Tool[] | undefined;
   toolZones: ToolZones;
+  activeToolIds: Set<number>;
+  windowPositions: Record<number, ToolWindowPosition>;
   onUpdateToolZone: (
     zone: keyof ToolZones,
     items: TreeItems<TreeItemData>,
+  ) => void;
+  onToggleToolActive: (toolId: number, active: boolean) => void;
+  onToolTargetChange: (toolId: number, target: ToolZone | null) => void;
+  onToolWindowPositionChange: (
+    toolId: number,
+    position: ToolWindowPosition,
   ) => void;
   backgroundImage?: string;
 }
@@ -44,7 +52,12 @@ export default function MapToolsPanel({
   mapTools,
   catalogTools: catalogToolsProp,
   toolZones,
+  activeToolIds,
+  windowPositions,
   onUpdateToolZone,
+  onToggleToolActive,
+  onToolTargetChange,
+  onToolWindowPositionChange,
   backgroundImage,
 }: MapToolsPanelProps) {
   const { t } = useTranslation();
@@ -72,11 +85,21 @@ export default function MapToolsPanel({
       />
 
       {toolsSubTab === "list" ? (
-        <MapToolsList catalogTools={catalogTools} mapTools={mapTools} />
+        <MapToolsList
+          catalogTools={catalogTools}
+          mapTools={mapTools}
+          toolZones={toolZones}
+          activeToolIds={activeToolIds}
+          windowPositions={windowPositions}
+          onToggleActive={onToggleToolActive}
+          onTargetChange={onToolTargetChange}
+          onWindowPositionChange={onToolWindowPositionChange}
+        />
       ) : (
         <ToolPlacementDnD
           tools={sourceTools}
-          sourceTitle={t("maps.toolsAvailableSource")}
+          activeToolIds={activeToolIds}
+          sourceTitle={t("maps.toolsUnplacedSource")}
           drawerItems={toolZones.drawer}
           onDrawerItemsChange={(items) => onUpdateToolZone("drawer", items)}
           widgetLeftItems={toolZones.widgetLeft}

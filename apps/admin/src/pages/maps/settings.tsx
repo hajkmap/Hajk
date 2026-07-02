@@ -61,13 +61,25 @@ import {
   mapGroupTreeToPayload,
 } from "./map-group-placement-utils";
 import { TreeItemData } from "../../components/layerswitcher-dnd";
+import { useTools } from "../../api/tools";
 import { useGroups } from "../../api/groups";
+import type { ToolWindowPosition, ToolZone } from "../../api/maps";
 import MapToolsPanel from "./components/map-tools-panel";
 import {
   EMPTY_TOOL_ZONES,
+  buildToolsDraftState,
+  findToolZoneForId,
+  getCatalogToolDisplayName,
+  getToolDisplayName,
   mapToolsToZones,
-  toolZonesSignature,
+  moveToolToZone,
+  removeToolFromZones,
+  serverToolsSignature,
+  targetToZoneKey,
+  toolsDraftSignature,
+  zoneKeyToTarget,
   zonesToToolsPayload,
+  type MapToolsDraftState,
   type ToolZones,
 } from "./map-tools-utils";
 import { useProjections } from "../../api/services";
@@ -113,6 +125,14 @@ const MAP_SETTINGS_SECTIONS: {
 const VALID_MAP_SETTINGS_SECTIONS = new Set<MapSettingsSection>(
   MAP_SETTINGS_SECTIONS.map((section) => section.key),
 );
+
+interface ToolsDraft {
+  mapName: string;
+  zones: ToolZones;
+  activeToolIds: Set<number>;
+  windowPositions: Record<number, ToolWindowPosition>;
+  inactiveTargets: Record<number, ToolZone>;
+}
 
 export default function MapSettings() {
   const { t } = useTranslation();
@@ -177,6 +197,7 @@ export default function MapSettings() {
     [groups],
   );
   const { data: mapTools } = useToolsByMapName(mapName ?? "");
+  const { data: catalogTools } = useTools();
   const { data: mapGroups } = useGroupsByMapName(mapName ?? "");
   const { data: projections } = useProjections();
   const { defaultCoordinates } = useAppStateStore.getState();
@@ -236,40 +257,174 @@ export default function MapSettings() {
     () => (mapTools ? mapToolsToZones(mapTools) : null),
     [mapTools],
   );
-  const [toolsDraft, setToolsDraft] = useState<{
-    mapName: string;
-    zones: ToolZones;
-  } | null>(null);
+  const serverToolsDraftState = useMemo<MapToolsDraftState | null>(
+    () => (mapTools ? buildToolsDraftState(mapTools) : null),
+    [mapTools],
+  );
+  const [toolsDraft, setToolsDraft] = useState<ToolsDraft | null>(null);
 
   const toolZones =
     toolsDraft != null && toolsDraft.mapName === mapName
       ? toolsDraft.zones
       : (serverToolZones ?? EMPTY_TOOL_ZONES);
 
-  // True when the local tool placement draft differs from what the server has.
+  const activeToolIds =
+    toolsDraft != null && toolsDraft.mapName === mapName
+      ? toolsDraft.activeToolIds
+      : (serverToolsDraftState?.activeToolIds ?? new Set<number>());
+
+  const windowPositions =
+    toolsDraft != null && toolsDraft.mapName === mapName
+      ? toolsDraft.windowPositions
+      : (serverToolsDraftState?.windowPositions ?? {});
+
   const toolsDirty = useMemo(() => {
-    if (toolsDraft == null || toolsDraft.mapName !== mapName) return false;
+    if (toolsDraft == null || toolsDraft.mapName !== mapName || !mapTools) {
+      return false;
+    }
     return (
-      toolZonesSignature(toolsDraft.zones) !==
-      toolZonesSignature(serverToolZones ?? EMPTY_TOOL_ZONES)
+      serverToolsSignature(mapTools) !==
+      toolsDraftSignature(
+        toolsDraft.zones,
+        toolsDraft.activeToolIds,
+        toolsDraft.windowPositions,
+        toolsDraft.inactiveTargets,
+      )
     );
-  }, [toolsDraft, mapName, serverToolZones]);
+  }, [toolsDraft, mapName, mapTools]);
+
+  const resolveToolsDraft = useCallback(
+    (prev: ToolsDraft | null): ToolsDraft => {
+      if (prev != null && prev.mapName === mapName) return prev;
+
+      return {
+        mapName: mapName ?? "",
+        zones: serverToolZones ?? EMPTY_TOOL_ZONES,
+        activeToolIds: new Set<number>(serverToolsDraftState?.activeToolIds ?? []),
+        windowPositions: { ...(serverToolsDraftState?.windowPositions ?? {}) },
+        inactiveTargets: { ...(serverToolsDraftState?.inactiveTargets ?? {}) },
+      };
+    },
+    [mapName, serverToolZones, serverToolsDraftState],
+  );
+
+  const resolveToolName = useCallback(
+    (toolId: number) => {
+      const catalogTool = catalogTools?.find((tool) => Number(tool.id) === toolId);
+      if (catalogTool) return getCatalogToolDisplayName(catalogTool);
+
+      const mapTool = mapTools?.find((tool) => tool.toolId === toolId);
+      if (mapTool) return getToolDisplayName(mapTool);
+
+      return String(toolId);
+    },
+    [catalogTools, mapTools],
+  );
 
   const updateToolZone = useCallback(
     (zone: keyof ToolZones, items: TreeItems<TreeItemData>) => {
       setToolsDraft((prev) => {
-        const base =
-          prev != null && prev.mapName === mapName
-            ? prev.zones
-            : (serverToolZones ?? EMPTY_TOOL_ZONES);
-
+        const base = resolveToolsDraft(prev);
         return {
-          mapName: mapName ?? "",
-          zones: { ...base, [zone]: items },
+          ...base,
+          zones: { ...base.zones, [zone]: items },
         };
       });
     },
-    [mapName, serverToolZones],
+    [resolveToolsDraft],
+  );
+
+  const toggleToolActive = useCallback(
+    (toolId: number, active: boolean) => {
+      setToolsDraft((prev) => {
+        const base = resolveToolsDraft(prev);
+        const nextActiveToolIds = new Set(base.activeToolIds);
+        let nextZones = base.zones;
+        const nextWindowPositions = { ...base.windowPositions };
+        const nextInactiveTargets = { ...base.inactiveTargets };
+
+        if (active) {
+          nextActiveToolIds.add(toolId);
+          if (!nextWindowPositions[toolId]) {
+            nextWindowPositions[toolId] = "right";
+          }
+          // Restore the placement remembered from when it was disabled.
+          const remembered = nextInactiveTargets[toolId];
+          if (remembered) {
+            nextZones = moveToolToZone(
+              nextZones,
+              toolId,
+              resolveToolName(toolId),
+              targetToZoneKey(remembered),
+            );
+            delete nextInactiveTargets[toolId];
+          }
+        } else {
+          nextActiveToolIds.delete(toolId);
+          // Remember its current zone so re-enabling can restore it.
+          const zone = findToolZoneForId(nextZones, toolId);
+          if (zone) {
+            nextInactiveTargets[toolId] = zoneKeyToTarget(zone);
+          } else {
+            delete nextInactiveTargets[toolId];
+          }
+          nextZones = removeToolFromZones(nextZones, toolId);
+        }
+
+        return {
+          mapName: mapName ?? "",
+          zones: nextZones,
+          activeToolIds: nextActiveToolIds,
+          windowPositions: nextWindowPositions,
+          inactiveTargets: nextInactiveTargets,
+        };
+      });
+    },
+    [mapName, resolveToolsDraft, resolveToolName],
+  );
+
+  const setToolTarget = useCallback(
+    (toolId: number, target: ToolZone | null) => {
+      setToolsDraft((prev) => {
+        const base = resolveToolsDraft(prev);
+        if (!base.activeToolIds.has(toolId)) return prev;
+
+        return {
+          mapName: mapName ?? "",
+          zones: moveToolToZone(
+            base.zones,
+            toolId,
+            resolveToolName(toolId),
+            target ? targetToZoneKey(target) : null,
+          ),
+          activeToolIds: new Set(base.activeToolIds),
+          windowPositions: { ...base.windowPositions },
+          inactiveTargets: { ...base.inactiveTargets },
+        };
+      });
+    },
+    [mapName, resolveToolsDraft, resolveToolName],
+  );
+
+  const setToolWindowPosition = useCallback(
+    (toolId: number, position: ToolWindowPosition) => {
+      setToolsDraft((prev) => {
+        const base = resolveToolsDraft(prev);
+        if (!base.activeToolIds.has(toolId)) return prev;
+
+        return {
+          mapName: mapName ?? "",
+          zones: base.zones,
+          activeToolIds: new Set(base.activeToolIds),
+          windowPositions: {
+            ...base.windowPositions,
+            [toolId]: position,
+          },
+          inactiveTargets: { ...base.inactiveTargets },
+        };
+      });
+    },
+    [mapName, resolveToolsDraft],
   );
 
   const backgroundImage = "/mapbackground.png";
@@ -317,9 +472,16 @@ export default function MapSettings() {
       // Persist placements first (keyed by the current name) so a simultaneous
       // rename doesn't target a no-longer-existing map name.
       if (toolsDirty && toolsDraft) {
+        const toolsPayload = zonesToToolsPayload(
+          toolsDraft.zones,
+          toolsDraft.activeToolIds,
+          toolsDraft.windowPositions,
+          toolsDraft.inactiveTargets,
+          mapTools ?? [],
+        );
         await updateMapTools({
           mapName: map.name,
-          tools: zonesToToolsPayload(toolsDraft.zones, mapTools ?? []),
+          tools: toolsPayload,
         });
         setToolsDraft(null);
       }
@@ -516,8 +678,14 @@ export default function MapSettings() {
         {activeTab === "tools" && (
           <MapToolsPanel
             mapTools={mapTools}
+            catalogTools={catalogTools}
             toolZones={toolZones}
+            activeToolIds={activeToolIds}
+            windowPositions={windowPositions}
             onUpdateToolZone={updateToolZone}
+            onToggleToolActive={toggleToolActive}
+            onToolTargetChange={setToolTarget}
+            onToolWindowPositionChange={setToolWindowPosition}
             backgroundImage={backgroundImage}
           />
         )}

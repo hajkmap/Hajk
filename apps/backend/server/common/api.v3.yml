@@ -172,9 +172,15 @@ paths:
                         type: integer
                       index:
                         type: integer
+                      active:
+                        type: boolean
                       target:
                         type: string
-                        enum: [drawer, widgetLeft, widgetRight, controlButton]
+                        nullable: true
+                        enum: [drawer, widgetLeft, widgetRight, controlButton, null]
+                      options:
+                        type: object
+                        additionalProperties: true
                     required:
                       - toolId
                       - index

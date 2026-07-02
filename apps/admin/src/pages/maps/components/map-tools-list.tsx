@@ -2,7 +2,11 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Box,
+  FormControl,
   IconButton,
+  MenuItem,
+  Select,
+  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -10,22 +14,48 @@ import {
 import SettingsIcon from "@mui/icons-material/Settings";
 import type { GridRenderCellParams } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
-import type { ToolOnMap } from "../../../api/maps";
+import type { ToolOnMap, ToolWindowPosition, ToolZone } from "../../../api/maps";
 import type { Tool } from "../../../api/tools";
 import StyledDataGrid from "../../../components/data-grid";
 import {
+  findToolZoneForId,
   getCatalogToolDisplayName,
-  getToolPlacementLabelKey,
+  type ToolZones,
+  zoneKeyToTarget,
 } from "../map-tools-utils";
+
+const TOOL_PLACEMENT_OPTIONS: ToolZone[] = [
+  "drawer",
+  "widgetLeft",
+  "widgetRight",
+  "controlButton",
+];
+
+const WINDOW_PLACEMENT_OPTIONS: ToolWindowPosition[] = ["left", "right"];
 
 interface MapToolsListProps {
   catalogTools: Tool[];
   mapTools: ToolOnMap[];
+  toolZones: ToolZones;
+  activeToolIds: Set<number>;
+  windowPositions: Record<number, ToolWindowPosition>;
+  onToggleActive: (toolId: number, active: boolean) => void;
+  onTargetChange: (toolId: number, target: ToolZone | null) => void;
+  onWindowPositionChange: (
+    toolId: number,
+    position: ToolWindowPosition,
+  ) => void;
 }
 
 export default function MapToolsList({
   catalogTools,
   mapTools,
+  toolZones,
+  activeToolIds,
+  windowPositions,
+  onToggleActive,
+  onTargetChange,
+  onWindowPositionChange,
 }: MapToolsListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -52,20 +82,28 @@ export default function MapToolsList({
       .map((tool) => {
         const toolId = Number(tool.id);
         const onMap = mapToolsById.get(toolId);
+        const active = activeToolIds.has(toolId);
+        const zone = active ? findToolZoneForId(toolZones, toolId) : null;
 
         return {
           id: toolId,
           toolId,
           title: getCatalogToolDisplayName(tool),
           type: tool.type,
+          active,
+          target: zone ? zoneKeyToTarget(zone) : ("" as const),
+          windowPosition: windowPositions[toolId] ?? "right",
           index: onMap?.index ?? null,
-          placementKey: onMap
-            ? getToolPlacementLabelKey(onMap)
-            : ("maps.toolPlacement.notOnMap" as const),
-          onMap: onMap != null,
         };
       });
-  }, [catalogTools, mapTools, searchTerm]);
+  }, [
+    catalogTools,
+    mapTools,
+    searchTerm,
+    activeToolIds,
+    toolZones,
+    windowPositions,
+  ]);
 
   return (
     <Box>
@@ -91,19 +129,109 @@ export default function MapToolsList({
           columns={[
             {
               field: "title",
-              flex: 0.35,
+              flex: 0.25,
               headerName: t("tools.title"),
             },
             {
               field: "type",
-              flex: 0.25,
+              flex: 0.15,
               headerName: t("tools.type"),
             },
             {
-              field: "placementKey",
-              flex: 0.25,
-              headerName: t("tools.placement"),
-              valueGetter: (_value, row) => t(row.placementKey as never),
+              field: "active",
+              width: 90,
+              headerName: t("maps.toolsActive"),
+              align: "center",
+              headerAlign: "center",
+              sortable: false,
+              filterable: false,
+              disableColumnMenu: true,
+              renderCell: (
+                params: GridRenderCellParams<(typeof rows)[number]>,
+              ) => (
+                <Switch
+                  size="small"
+                  checked={params.row.active}
+                  aria-label={t("maps.toolsActive")}
+                  onClick={(event) => event.stopPropagation()}
+                  onChange={(event) => {
+                    onToggleActive(params.row.toolId, event.target.checked);
+                  }}
+                />
+              ),
+            },
+            {
+              field: "target",
+              flex: 0.2,
+              headerName: t("maps.toolsToolPlacement"),
+              sortable: false,
+              filterable: false,
+              disableColumnMenu: true,
+              renderCell: (
+                params: GridRenderCellParams<(typeof rows)[number]>,
+              ) => (
+                <FormControl
+                  size="small"
+                  fullWidth
+                  disabled={!params.row.active}
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <Select
+                    displayEmpty
+                    value={params.row.target}
+                    onChange={(event) => {
+                      const value = event.target.value as ToolZone | "";
+                      onTargetChange(
+                        params.row.toolId,
+                        value === "" ? null : value,
+                      );
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>{t("maps.toolPlacement.unplaced")}</em>
+                    </MenuItem>
+                    {TOOL_PLACEMENT_OPTIONS.map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {t(`maps.toolPlacement.${option}`)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              ),
+            },
+            {
+              field: "windowPosition",
+              flex: 0.15,
+              headerName: t("maps.toolsWindowPlacement"),
+              sortable: false,
+              filterable: false,
+              disableColumnMenu: true,
+              renderCell: (
+                params: GridRenderCellParams<(typeof rows)[number]>,
+              ) => (
+                <FormControl
+                  size="small"
+                  fullWidth
+                  disabled={!params.row.active}
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <Select
+                    value={params.row.windowPosition}
+                    onChange={(event) => {
+                      onWindowPositionChange(
+                        params.row.toolId,
+                        event.target.value,
+                      );
+                    }}
+                  >
+                    {WINDOW_PLACEMENT_OPTIONS.map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {t(`maps.windowPlacement.${option}`)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              ),
             },
             {
               field: "index",
@@ -112,7 +240,7 @@ export default function MapToolsList({
               align: "center",
               headerAlign: "center",
               valueFormatter: (value: number | null) =>
-                value == null ? "—" : value,
+                value ?? "—",
             },
             {
               field: "actions",
@@ -122,7 +250,9 @@ export default function MapToolsList({
               filterable: false,
               disableColumnMenu: true,
               align: "center",
-              renderCell: (params: GridRenderCellParams<(typeof rows)[number]>) => (
+              renderCell: (
+                params: GridRenderCellParams<(typeof rows)[number]>,
+              ) => (
                 <Tooltip title={t("common.settings")}>
                   <IconButton
                     size="small"

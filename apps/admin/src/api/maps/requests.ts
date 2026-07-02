@@ -165,7 +165,10 @@ export const getToolsByMapName = async (
     if (!response.data) {
       throw new Error("No tools data found");
     }
-    return response.data.tools;
+    return response.data.tools.map((tool) => ({
+      ...tool,
+      active: tool.active !== false,
+    }));
   } catch (error) {
     const axiosError = error as InternalApiError;
 
@@ -181,7 +184,13 @@ export const getToolsByMapName = async (
 
 export const updateMapTools = async (
   mapName: string,
-  tools: { toolId: number; index: number; target: string | null }[]
+  tools: {
+    toolId: number;
+    index: number;
+    target: string | null;
+    active?: boolean;
+    options?: Record<string, string>;
+  }[],
 ): Promise<void> => {
   const internalApiClient = getApiClient();
   try {

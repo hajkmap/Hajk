@@ -390,7 +390,13 @@ class MapService {
 
   async updateMapTools(
     mapName: string,
-    tools: { toolId: number; index: number; target: string }[]
+    tools: {
+      toolId: number;
+      index: number;
+      target: string | null;
+      active?: boolean;
+      options?: Record<string, unknown>;
+    }[]
   ) {
     await prisma.$transaction([
       // Only replace placements for active tools — soft-deleted tools keep
@@ -404,9 +410,10 @@ class MapService {
               data: tools.map((t) => ({
                 mapName,
                 toolId: t.toolId,
+                active: t.active ?? true,
                 index: t.index,
                 target: t.target,
-                options: toolsOnMapsOptionsForTarget(t.target),
+                options: toolsOnMapsOptionsForTarget(t.target, t.options),
               })),
             }),
           ]
@@ -768,6 +775,7 @@ class MapService {
             data: source.tools.map((tool) => ({
               mapName: name,
               toolId: tool.toolId,
+              active: tool.active,
               index: tool.index,
               target: tool.target,
               options: tool.options,

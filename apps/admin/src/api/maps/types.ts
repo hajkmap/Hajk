@@ -105,13 +105,21 @@ export interface MapMutation {
   options?: Record<string, string>;
 }
 
-export type ToolZone = "drawer" | "widgetLeft" | "widgetRight" | "controlButton";
+export type ToolZone =
+  | "drawer"
+  | "widgetLeft"
+  | "widgetRight"
+  | "controlButton";
+
+export type ToolWindowPosition = "left" | "right";
 
 export interface ToolOnMap {
   mapName: string;
   toolId: number;
+  active?: boolean;
   index: number;
   target: ToolZone | null;
+  options?: Record<string, unknown>;
   tool: {
     id: number;
     type: string;

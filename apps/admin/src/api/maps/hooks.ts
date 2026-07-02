@@ -104,10 +104,53 @@ export const useUpdateMapTools = () => {
       tools,
     }: {
       mapName: string;
-      tools: { toolId: number; index: number; target: string | null }[];
+      tools: {
+        toolId: number;
+        index: number;
+        target: string | null;
+        active?: boolean;
+        options?: Record<string, string>;
+      }[];
     }) => updateMapTools(mapName, tools),
-    onSuccess: (_, { mapName }) => {
-      void queryClient.invalidateQueries({ queryKey: ["toolsByMap", mapName] });
+    onMutate: async ({ mapName, tools }) => {
+      await queryClient.cancelQueries({ queryKey: ["toolsByMap", mapName] });
+      const previous = queryClient.getQueryData<ToolOnMap[]>([
+        "toolsByMap",
+        mapName,
+      ]);
+      if (previous) {
+        const previousById = new Map(
+          previous.map((tool) => [tool.toolId, tool]),
+        );
+        queryClient.setQueryData<ToolOnMap[]>(
+          ["toolsByMap", mapName],
+          tools.map((entry) => {
+            const existing = previousById.get(entry.toolId);
+            return {
+              mapName,
+              toolId: entry.toolId,
+              active: entry.active !== false,
+              index: entry.index,
+              target: entry.target as ToolOnMap["target"],
+              options: entry.options ?? existing?.options,
+              tool: existing?.tool ?? {
+                id: entry.toolId,
+                type: "",
+                options: {},
+              },
+            };
+          }),
+        );
+      }
+      return { previous };
+    },
+    onError: (_error, { mapName }, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["toolsByMap", mapName], context.previous);
+      }
+    },
+    onSettled: async (_data, _error, { mapName }) => {
+      await queryClient.refetchQueries({ queryKey: ["toolsByMap", mapName] });
       void queryClient.invalidateQueries({ queryKey: ["tools"] });
     },
   });

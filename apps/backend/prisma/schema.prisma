@@ -230,6 +230,9 @@ model Tool {
 model ToolsOnMaps {
   mapName String
   toolId  Int
+  /// Whether the tool is enabled on the map. Inactive tools keep their row (and
+  /// placement) so they can be re-enabled without losing configuration.
+  active  Boolean @default(true)
   /// Determines the sort between tools within a zone
   index   Int    @default(0)
   /// Placement zone in the map UI: drawer | widgetLeft | widgetRight | controlButton. Null means unplaced (managed via admin UI).

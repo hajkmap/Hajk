@@ -16,7 +16,17 @@ export function legacyTargetForBackendZone(
 /** Per-map options override so legacy `options.target: hidden` does not win. */
 export function toolsOnMapsOptionsForTarget(
   target: string | null | undefined,
+  extra?: Record<string, unknown>,
 ): Record<string, string> {
   const legacyTarget = legacyTargetForBackendZone(target);
-  return legacyTarget ? { target: legacyTarget } : {};
+  const options: Record<string, string> = legacyTarget
+    ? { target: legacyTarget }
+    : {};
+
+  const position = extra?.position;
+  if (position === "left" || position === "right") {
+    options.position = position;
+  }
+
+  return options;
 }

@@ -19,9 +19,9 @@ class ToolService {
       orderBy: { type: "asc" },
       include: {
         maps: {
-          // Only count actual placements — target null means the tool is
-          // connected to the map but not placed in any zone.
-          where: { target: { not: null } },
+          // Count maps where the tool is enabled. Inactive rows are kept to
+          // preserve placement but should not count as "used".
+          where: { active: true },
           select: { mapName: true },
         },
       },

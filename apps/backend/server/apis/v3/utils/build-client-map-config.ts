@@ -262,7 +262,7 @@ export async function buildClientMapForMap(mapName: string) {
 export async function buildClientToolsForMap(mapName: string) {
   const [toolsOnMap, groups, baselayers, themes] = await Promise.all([
     prisma.toolsOnMaps.findMany({
-      where: { mapName },
+      where: { mapName, active: true },
       include: { tool: true },
       orderBy: { index: "asc" },
     }),

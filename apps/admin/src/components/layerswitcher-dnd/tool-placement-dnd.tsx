@@ -135,17 +135,20 @@ interface CompactDraggableItemProps {
   item: { id: string; name: string };
   type: ItemType;
   icon: React.ReactNode;
+  disabled?: boolean;
 }
 
 const CompactDraggableItem: React.FC<CompactDraggableItemProps> = ({
   item,
   type,
   icon,
+  disabled = false,
 }) => {
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `${type}::${item.id}`,
     data: { type, item },
+    disabled,
   });
 
   return (
@@ -160,8 +163,8 @@ const CompactDraggableItem: React.FC<CompactDraggableItemProps> = ({
         gap: 1,
         px: 1,
         py: 2,
-        cursor: "grab",
-        opacity: isDragging ? 0.5 : 1,
+        cursor: disabled ? "default" : "grab",
+        opacity: isDragging ? 0.5 : disabled ? 0.65 : 1,
         backgroundColor: isDarkMode ? "#2a2a2a" : "#fff",
         "&:hover": {
           backgroundColor: isDarkMode ? "#3a3a3a" : "#f5f5f5",
@@ -374,6 +377,8 @@ const SortableZoneItem: React.FC<SortableZoneItemProps> = ({
 interface ToolPlacementDnDProps {
   /** Map tools not yet placed in a zone — available to drag into the view. */
   tools: SourceItem[];
+  /** Tool IDs enabled on this map — only these can be dragged from the source list. */
+  activeToolIds: Set<number>;
   /** Heading for the source list below the placement view. */
   sourceTitle?: string;
   /** Items in drawer zone */
@@ -394,6 +399,7 @@ interface ToolPlacementDnDProps {
 
 export const ToolPlacementDnD: React.FC<ToolPlacementDnDProps> = ({
   tools,
+  activeToolIds,
   sourceTitle,
   drawerItems,
   onDrawerItemsChange,
@@ -652,8 +658,17 @@ export const ToolPlacementDnD: React.FC<ToolPlacementDnDProps> = ({
       return;
     }
 
-    // New item from source tools - only if dropping on a zone
+    // New item from source tools - only if dropping on a zone and tool is active
     if (!isDropOnZoneContainer && !overZone) return;
+
+    const dragData = active.data.current as
+      | { type: ItemType; item: { id: string; name: string } }
+      | undefined;
+
+    if (!dragData?.item) return;
+
+    const sourceToolId = Number(dragData.item.id);
+    if (!activeToolIds.has(sourceToolId)) return;
 
     const targetZone: ToolPlacement = isDropOnZoneContainer
       ? (overId as ToolPlacement)
@@ -666,12 +681,6 @@ export const ToolPlacementDnD: React.FC<ToolPlacementDnDProps> = ({
     if (targetZone === "widgetRight" && widgetRightItems.length >= 3) {
       return;
     }
-
-    const dragData = active.data.current as
-      | { type: ItemType; item: { id: string; name: string } }
-      | undefined;
-
-    if (!dragData?.item) return;
 
     const newItem: TreeItem<TreeItemData> = {
       id: `tool${ID_DELIMITER}${dragData.item.id}`,
@@ -843,6 +852,7 @@ export const ToolPlacementDnD: React.FC<ToolPlacementDnDProps> = ({
                 key={tool.id}
                 item={tool}
                 type="tool"
+                disabled={!activeToolIds.has(Number(tool.id))}
                 icon={<ToolIcon name={tool.name} fontSize="small" />}
               />
             ))}
