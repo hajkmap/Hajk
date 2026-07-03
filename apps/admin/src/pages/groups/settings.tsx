@@ -61,6 +61,7 @@ import { getDeleteGroupErrorMessage, getUpdateGroupErrorMessage, applyGroupFormV
 import { groupCompositionKey } from "./utils/group-composition";
 import { stripEditingGroupFromTree } from "./utils/layer-switcher-tree";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
+import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 
 const GROUP_PAGE_TABS = [
   {
@@ -671,6 +672,7 @@ function GroupSettings() {
           disabled={isDeletingGroup}
         />
       </DialogWrapper>
+      <UnsavedChangesGuard when={isSaveDirty} />
     </Page>
   );
 }

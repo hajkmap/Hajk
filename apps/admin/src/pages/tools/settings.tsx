@@ -6,6 +6,7 @@ import { Typography } from "@mui/material";
 import { useTools, useUpdateTool, Tool } from "../../api/tools";
 import FormContainer from "../../components/form-components/form-container";
 import FormActionPanel from "../../components/form-action-panel";
+import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 import { useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import RenderTool from "./renderers/render-tool";
@@ -142,6 +143,7 @@ export default function ToolSettings() {
           </FormContainer>
         )}
       </FormActionPanel>
+      <UnsavedChangesGuard when={isDirty} />
     </Page>
   );
 }

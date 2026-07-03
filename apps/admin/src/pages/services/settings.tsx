@@ -43,6 +43,7 @@ import {
 } from "../../components/form-components/field-label-with-help";
 import FormFieldGrid, { FormFieldRow } from "../../components/form-components/form-field-grid";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
+import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 import FormContainer from "../../components/form-components/form-container";
 import FormPanel from "../../components/form-components/form-panel";
 import DialogWrapper from "../../components/flexible-dialog";
@@ -972,6 +973,7 @@ export default function ServiceSettings() {
           disabled={isDeletingService}
         />
       </DialogWrapper>
+      <UnsavedChangesGuard when={isDirty} />
     </Page>
   );
 }

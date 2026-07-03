@@ -86,6 +86,7 @@ import { useProjections } from "../../api/services";
 import useAppStateStore from "../../store/use-app-state-store";
 import { TreeItems } from "dnd-kit-sortable-tree";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
+import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 
 const MAP_PAGE_TABS = [
   { key: "settings", labelKey: "common.settings", icon: <SettingsIcon /> },
@@ -756,6 +757,7 @@ export default function MapSettings() {
           disabled={isDeletingMap}
         />
       </DialogWrapper>
+      <UnsavedChangesGuard when={isDirty || toolsDirty || groupsDirty} />
     </Page>
   );
 }

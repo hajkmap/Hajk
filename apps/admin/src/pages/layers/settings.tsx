@@ -97,6 +97,7 @@ import { SettingsSearchField } from "../../components/form-components/searchable
 import { useSettingsSearchLabels } from "../../hooks/use-settings-search-labels";
 import { useLayerFieldLabels } from "./use-layer-field-labels";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
+import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 
 const ALL_SETTINGS_TABS: {
   key: LayerSettingsTab;
@@ -2947,6 +2948,7 @@ export default function LayerSettings() {
           disabled={isDeletingLayer}
         />
       </DialogWrapper>
+      <UnsavedChangesGuard when={isDirty || selectedLayersDirty} />
     </Page>
   );
 }
