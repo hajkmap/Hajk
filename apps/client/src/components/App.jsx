@@ -692,6 +692,35 @@ class App extends React.PureComponent {
             );
           }
 
+          // Act when filter params change (f parameter).
+          if (mergedParams.get("f") !== null) {
+            try {
+              const newFilters = JSON.parse(mergedParams.get("f"));
+              if (typeof newFilters === "object" && newFilters !== null) {
+                this.appModel.map.getAllLayers().forEach((olLayer) => {
+                  const layerId = olLayer.get("name");
+                  if (layerId && Object.hasOwn(newFilters, layerId)) {
+                    const source = olLayer.getSource();
+                    if (source?.updateParams) {
+                      const params = source.getParams();
+                      const key =
+                        params.FILTER !== undefined ? "FILTER" : "CQL_FILTER";
+                      source.updateParams({
+                        [key]: newFilters[layerId] || null,
+                      });
+                    }
+                  }
+                });
+              }
+            } catch (e) {
+              console.error(
+                "Failed to parse and apply url-hash for filtering",
+                mergedParams.get("f"),
+                e
+              );
+            }
+          }
+
           // Act when the l parameter changes
           if (mergedParams.get("l") || mergedParams.get("gl")) {
             this.appModel.setLayerVisibilityFromParams(

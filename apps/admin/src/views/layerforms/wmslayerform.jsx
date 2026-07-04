@@ -2246,11 +2246,11 @@ class WMSLayerForm extends Component {
           </select>
         </div>
         <div>
-          <label>CQL-filter:</label>
+          <label>{this.state.serverType === "qgis" ? "FILTER:" : "CQL-filter:"}</label>
           <input
             className="control-fixed-width"
             ref="input_defaultCqlFilter"
-            placeholder="foo='bar' AND fii='baz'"
+            placeholder={this.state.serverType === "qgis" ? "layer_1:\"foo\" = 'bar'" : "foo='bar' AND fii='baz'"}
             value={this.state.defaultCqlFilter}
             onChange={(e) => {
               this.setState({ defaultCqlFilter: e.target.value });

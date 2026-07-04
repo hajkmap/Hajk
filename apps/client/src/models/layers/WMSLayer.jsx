@@ -86,6 +86,11 @@ class WMSLayer {
         minZoom: minZoom,
         maxZoom: maxZoom,
       });
+      // Seems like openlayers drops nonstandard wms params like FILTER from
+      // the url. This forces the preservation of custom params in the request.
+      this.layer.getSource().setImageLoadFunction((image, src) => {
+        image.getImage().src = src;
+      });
     } else {
       this.layer = new TileLayer({
         name: config.name,

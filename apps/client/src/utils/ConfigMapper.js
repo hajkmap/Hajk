@@ -96,6 +96,11 @@ export default class ConfigMapper {
       }
     }
 
+    // New filter key for qgis own filtering
+    function getFilterKey(serverType) {
+      return serverType === "qgis" ? "FILTER" : "CQL_FILTER";
+    }
+
     function mapLayersInfo(layersInfo, infobox) {
       if (Array.isArray(layersInfo)) {
         return layersInfo.reduce((layersInfoObject, layerInfo) => {
@@ -186,9 +191,11 @@ export default class ConfigMapper {
         legendIcon: args.legendIcon,
         params: {
           LAYERS: args.layers.join(","),
-          ...(args.cqlFilter && { CQL_FILTER: args.cqlFilter }), // nice way to add property only if needed
+          ...((args.cqlFilter || args.defaultCqlFilter) && {
+            [getFilterKey(args.serverType)]:
+              args.cqlFilter || args.defaultCqlFilter,
+          }),
           FORMAT: args.imageFormat,
-          CQL_FILTER: args.defaultCqlFilter,
           INFO_FORMAT: args.infoFormat,
           VERSION: args.version || "1.1.1",
           [srsOrCrs]: projection || "EPSG:3006",

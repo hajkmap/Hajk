@@ -1,4 +1,11 @@
 export const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
+  // Uses the configure filter for the source, cql or qgis filtering
+  // Could and should be extended if other sources has their own filtering params
+  const getFilterKey = (source) => {
+    const params = source?.getParams?.() || {};
+    return params.FILTER !== undefined ? "FILTER" : "CQL_FILTER";
+  };
+
   if (visibleSubLayersArray.length === 0) {
     // Fix underlying source
     olLayer.getSource().updateParams({
@@ -6,7 +13,7 @@ export const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
       // "remembered" the next time user toggles group)
       LAYERS: "",
       // Remove any filters
-      CQL_FILTER: null,
+      [getFilterKey(olLayer.getSource())]: null,
     });
 
     // Hide the layer in OL
@@ -25,10 +32,11 @@ export const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
         .filter(([k]) => visibleSubLayersArray.indexOf(k) !== -1)
         .map(([name, info]) => {
           const labeled = olLayer.get("labeledSubLayers");
-          return labeled?.has(name) ? `${name}_labels` : (info.style || "");
+          return labeled?.has(name) ? `${name}_labels` : info.style || "";
         })
         .join(","),
-      CQL_FILTER: layerInfo?.params?.CQL_FILTER || null,
+      [getFilterKey(olLayer.getSource())]:
+        layerInfo?.params?.CQL_FILTER || layerInfo?.params?.FILTER || null,
     });
     olLayer.set("subLayers", visibleSubLayersArray);
     olLayer.setVisible(true);

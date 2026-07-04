@@ -100,7 +100,9 @@ export default function CQLFilter({ layer }) {
   useEffect(() => {
     if (!layer) return;
     const source = layer.getSource?.();
-    const activeCQL = source?.getParams?.()?.CQL_FILTER || "";
+    // Add check for CQL or just FILTER
+    const activeCQL =
+      source?.getParams?.()?.FILTER || source?.getParams?.()?.CQL_FILTER || "";
     setCqlFilter(activeCQL);
 
     if (activeCQL.trim()) {
@@ -188,7 +190,9 @@ export default function CQLFilter({ layer }) {
     if (disabled) return;
     const filter = cqlFilter.trim() || undefined;
     const source = layer?.getSource?.();
-    if (source?.updateParams) source.updateParams({ CQL_FILTER: filter });
+    const params = source?.getParams?.() || {};
+    const key = params.FILTER !== undefined ? "FILTER" : "CQL_FILTER";
+    if (source?.updateParams) source.updateParams({ [key]: filter });
   };
 
   // Row handlers

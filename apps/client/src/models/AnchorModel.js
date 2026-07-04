@@ -97,8 +97,9 @@ class AnchorModel {
         layer.getSource().on("change", async ({ target }) => {
           if (typeof target.getParams !== "function") return;
 
-          // Update CQL filters only if a real value exists and layer is visible
-          const cqlFilterForCurrentLayer = target.getParams()?.CQL_FILTER;
+          // Update CQL filters or FILTER (qgis-server) only if a real value exists and layer is visible
+          const cqlFilterForCurrentLayer =
+            target.getParams()?.FILTER ?? target.getParams()?.CQL_FILTER;
           if (
             cqlFilterForCurrentLayer !== null &&
             cqlFilterForCurrentLayer !== undefined &&
@@ -125,7 +126,8 @@ class AnchorModel {
 
     const source = layer.getSource();
     if (typeof source?.getParams === "function") {
-      const cqlFilter = source.getParams()?.CQL_FILTER;
+      const cqlFilter =
+        source.getParams()?.FILTER ?? source.getParams()?.CQL_FILTER;
       if (cqlFilter !== null && cqlFilter !== undefined && cqlFilter !== "") {
         this.#cqlFilters[layerId] = cqlFilter;
       }
