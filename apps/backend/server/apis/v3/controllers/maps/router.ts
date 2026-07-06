@@ -8,6 +8,7 @@ import {
   MapUpdateSchema,
   MapLayersUpdateSchema,
   MapGroupsUpdateSchema,
+  MapContentUpdateSchema,
 } from "../../schemas/map.schemas.ts";
 
 export default express
@@ -28,6 +29,7 @@ export default express
   .get("/:mapName", MapsController.getMapByName)
   .get("/:mapName/groups", MapsController.getGroupsForMap)
   .get("/:mapName/layers", MapsController.getLayersForMap)
+  .get("/:mapName/content", MapsController.getMapContent)
   .get("/:mapName/projections", MapsController.getProjectionsForMap)
   .get("/:mapName/tools", MapsController.getToolsForMap)
   .put("/:mapName/tools", MapsController.updateMapTools)
@@ -40,5 +42,10 @@ export default express
     "/:mapName/groups",
     validatePayload(MapGroupsUpdateSchema),
     MapsController.updateMapGroups
+  )
+  .put(
+    "/:mapName/content",
+    validatePayload(MapContentUpdateSchema),
+    MapsController.updateMapContent
   )
   .use("/:mapName/themes", themesRouter);

@@ -9,11 +9,13 @@ import {
   getMapByName,
   getGroupsByMapName,
   getLayersByMapName,
+  getMapContentByName,
   getProjectionsByMapName,
   getToolsByMapName,
   updateMapTools,
   updateMapLayers,
   updateMapGroups,
+  updateMapContent,
   createMap,
   deleteMap,
   duplicateMap,
@@ -26,6 +28,7 @@ import type {
   MapLayer,
   MapLayerPlacement,
   MapGroupPlacement,
+  MapContentPlacement,
   MapMutation,
   ToolOnMap,
 } from "./types";
@@ -69,6 +72,18 @@ export const useLayersByMapName = (
     queryKey: ["layersByMap", mapName],
     queryFn: () => getLayersByMapName(mapName),
     enabled: Boolean(mapName),
+  });
+};
+
+export const useMapContentByName = (mapName: string) => {
+  return useQuery({
+    queryKey: ["mapContent", mapName],
+    queryFn: () => getMapContentByName(mapName),
+    enabled: Boolean(mapName),
+    select: (data) => ({
+      layers: data.layers,
+      groups: data.groups,
+    }),
   });
 };
 
@@ -171,6 +186,9 @@ export const useUpdateMapLayers = () => {
       void queryClient.invalidateQueries({
         queryKey: ["layersByMap", mapName],
       });
+      void queryClient.invalidateQueries({
+        queryKey: ["mapContent", mapName],
+      });
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
     },
   });
@@ -191,6 +209,34 @@ export const useUpdateMapGroups = () => {
       void queryClient.invalidateQueries({
         queryKey: ["groupsByMap", mapName],
       });
+      void queryClient.invalidateQueries({
+        queryKey: ["mapContent", mapName],
+      });
+    },
+  });
+};
+
+export const useUpdateMapContent = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      mapName,
+      content,
+    }: {
+      mapName: string;
+      content: MapContentPlacement;
+    }) => updateMapContent(mapName, content),
+    onSuccess: (_, { mapName }) => {
+      void queryClient.invalidateQueries({
+        queryKey: ["mapContent", mapName],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["layersByMap", mapName],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["groupsByMap", mapName],
+      });
+      void queryClient.invalidateQueries({ queryKey: ["maps"] });
     },
   });
 };

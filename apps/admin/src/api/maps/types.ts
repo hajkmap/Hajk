@@ -89,6 +89,18 @@ export interface MapLayersApiResponse {
   count: number;
 }
 
+export interface MapContentApiResponse {
+  layers: MapLayer[];
+  groups: MapGroup[];
+  count: number;
+}
+
+/** Payload for PUT /maps/:name/content (atomic Kartinnehåll save). */
+export interface MapContentPlacement {
+  layers: MapLayerPlacement[];
+  groups: MapGroupPlacement[];
+}
+
 export interface ProjectionsApiResponse {
   projections: Projection[];
   count: number;

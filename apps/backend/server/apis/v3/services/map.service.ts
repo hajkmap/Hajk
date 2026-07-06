@@ -449,8 +449,58 @@ class MapService {
    */
   async updateMapLayers(mapName: string, layers: MapLayerInput[]) {
     const map = await this.requireMapByName(mapName);
+    const layerData = await this.buildDirectMapLayerRows(map.id, layers);
 
-    // Resolve each layer's kind up front so unknown ids fail before we delete.
+    await prisma.$transaction(async (tx) => {
+      await tx.layerInstance.deleteMany({ where: { mapId: map.id } });
+      if (layerData.length > 0) {
+        await tx.layerInstance.createMany({ data: layerData });
+      }
+    });
+  }
+
+  /**
+   * Replaces the map's group placements (GroupsOnMaps). Supports nesting via
+   * `parentGroupId`; entries referenced as a parent must carry an explicit
+   * `id`. Missing names default to the group's own name.
+   */
+  async updateMapGroups(mapName: string, groups: MapGroupInput[]) {
+    await this.requireMapByName(mapName);
+    await this.replaceMapGroups(mapName, groups);
+  }
+
+  /**
+   * Replaces direct map layers and group placements in one transaction
+   * (admin Kartinnehåll save).
+   */
+  async updateMapContent(
+    mapName: string,
+    content: { layers: MapLayerInput[]; groups: MapGroupInput[] },
+  ) {
+    const map = await this.requireMapByName(mapName);
+    const layerData = await this.buildDirectMapLayerRows(map.id, content.layers);
+    await this.validateMapGroupPlacements(content.groups);
+    await prisma.$transaction(async (tx) => {
+      await tx.layerInstance.deleteMany({ where: { mapId: map.id } });
+      if (layerData.length > 0) {
+        await tx.layerInstance.createMany({ data: layerData });
+      }
+      await this.replaceMapGroupsInTransaction(tx, mapName, content.groups);
+    });
+  }
+
+  async getMapContent(mapName: string) {
+    const [layers, groups] = await Promise.all([
+      this.getLayersForMap(mapName),
+      this.getGroupsForMap(mapName),
+    ]);
+    return { layers, groups };
+  }
+
+  private async buildDirectMapLayerRows(
+    mapId: number,
+    layers: MapLayerInput[],
+  ): Promise<Prisma.LayerInstanceCreateManyInput[]> {
     const data: Prisma.LayerInstanceCreateManyInput[] = [];
     for (const [index, layer] of layers.entries()) {
       const resolved = await resolveLayerPlacementById(layer.layerId);
@@ -467,7 +517,7 @@ class MapService {
       }
       const kind = resolved.kind;
       data.push({
-        mapId: map.id,
+        mapId,
         displayLayerId: kind === "display" ? layer.layerId : undefined,
         searchLayerId: kind === "search" ? layer.layerId : undefined,
         editingLayerId: kind === "editing" ? layer.layerId : undefined,
@@ -477,86 +527,107 @@ class MapService {
         zIndex: layer.zIndex ?? index,
       });
     }
-
-    await prisma.$transaction(async (tx) => {
-      await tx.layerInstance.deleteMany({ where: { mapId: map.id } });
-      if (data.length > 0) {
-        await tx.layerInstance.createMany({ data });
-      }
-    });
+    return data;
   }
 
-  /**
-   * Replaces the map's group placements (GroupsOnMaps). Supports nesting via
-   * `parentGroupId`; entries referenced as a parent must carry an explicit
-   * `id`. Missing names default to the group's own name.
-   */
-  async updateMapGroups(mapName: string, groups: MapGroupInput[]) {
-    await this.requireMapByName(mapName);
-
+  private async validateMapGroupPlacements(groups: MapGroupInput[]) {
     const groupIds = Array.from(new Set(groups.map((g) => g.groupId)));
+    if (groupIds.length === 0) {
+      return;
+    }
     const groupRecords = await prisma.group.findMany({
       where: { id: { in: groupIds } },
-      select: { id: true, name: true },
+      select: { id: true },
     });
-    const nameById = new Map(groupRecords.map((g) => [g.id, g.name]));
-
+    const knownIds = new Set(groupRecords.map((g) => g.id));
     for (const group of groups) {
-      if (!nameById.has(group.groupId)) {
+      if (!knownIds.has(group.groupId)) {
         throw new HajkError(
           HttpStatusCodes.BAD_REQUEST,
           `Unknown group id: ${group.groupId}`,
-          HajkStatusCodes.INVALID_REQUEST_BODY
+          HajkStatusCodes.INVALID_REQUEST_BODY,
         );
       }
     }
+  }
 
+  private async replaceMapGroups(mapName: string, groups: MapGroupInput[]) {
+    const groupIds = Array.from(new Set(groups.map((g) => g.groupId)));
+    const groupRecords =
+      groupIds.length > 0
+        ? await prisma.group.findMany({
+            where: { id: { in: groupIds } },
+            select: { id: true, name: true },
+          })
+        : [];
+    const nameById = new Map(groupRecords.map((g) => [g.id, g.name]));
+    await this.validateMapGroupPlacements(groups);
     await prisma.$transaction(async (tx) => {
-      await tx.groupsOnMaps.deleteMany({ where: { mapName } });
+      await this.replaceMapGroupsInTransaction(tx, mapName, groups, nameById);
+    });
+  }
 
-      // Insert parents before children so self-referencing FKs resolve.
-      const pending = [...groups];
-      const createdIds = new Set<string>();
-
-      while (pending.length > 0) {
-        const batch = pending.filter(
-          (entry) =>
-            !entry.parentGroupId || createdIds.has(entry.parentGroupId)
-        );
-
-        if (batch.length === 0) {
-          throw new HajkError(
-            HttpStatusCodes.BAD_REQUEST,
-            "Invalid groups-on-maps parent references.",
-            HajkStatusCodes.INVALID_REQUEST_BODY
-          );
-        }
-
-        for (const entry of batch) {
-          const created = await tx.groupsOnMaps.create({
-            data: {
-              ...(entry.id ? { id: entry.id } : {}),
-              mapName,
-              groupId: entry.groupId,
-              parentGroupId: entry.parentGroupId ?? null,
-              usage: entry.usage ?? UseType.FOREGROUND,
-              name: entry.name ?? nameById.get(entry.groupId) ?? "",
-              toggled: entry.toggled ?? false,
-              expanded: entry.expanded ?? false,
-              index: entry.index ?? 0,
+  private async replaceMapGroupsInTransaction(
+    tx: Prisma.TransactionClient,
+    mapName: string,
+    groups: MapGroupInput[],
+    nameById?: Map<string, string>,
+  ) {
+    const names =
+      nameById ??
+      new Map(
+        (
+          await tx.group.findMany({
+            where: {
+              id: { in: Array.from(new Set(groups.map((g) => g.groupId))) },
             },
-          });
-          createdIds.add(created.id);
-        }
+            select: { id: true, name: true },
+          })
+        ).map((g) => [g.id, g.name]),
+      );
 
-        for (const entry of batch) {
-          const index = pending.indexOf(entry);
-          if (index !== -1) {
-            pending.splice(index, 1);
-          }
+    await tx.groupsOnMaps.deleteMany({ where: { mapName } });
+
+    const pending = [...groups];
+    const createdIds = new Set<string>();
+
+    while (pending.length > 0) {
+      const batch = pending.filter(
+        (entry) => !entry.parentGroupId || createdIds.has(entry.parentGroupId),
+      );
+
+      if (batch.length === 0) {
+        throw new HajkError(
+          HttpStatusCodes.BAD_REQUEST,
+          "Invalid groups-on-maps parent references.",
+          HajkStatusCodes.INVALID_REQUEST_BODY,
+        );
+      }
+
+      for (const entry of batch) {
+        const created = await tx.groupsOnMaps.create({
+          data: {
+            ...(entry.id ? { id: entry.id } : {}),
+            mapName,
+            groupId: entry.groupId,
+            parentGroupId: entry.parentGroupId ?? null,
+            usage: entry.usage ?? UseType.FOREGROUND,
+            name: entry.name ?? names.get(entry.groupId) ?? "",
+            toggled: entry.toggled ?? false,
+            expanded: entry.expanded ?? false,
+            index: entry.index ?? 0,
+          },
+        });
+        createdIds.add(created.id);
+      }
+
+      for (const entry of batch) {
+        const index = pending.indexOf(entry);
+        if (index !== -1) {
+          pending.splice(index, 1);
         }
       }
-    });
+    }
   }
 
   async createMap(data: MapWriteInput, userId?: string) {

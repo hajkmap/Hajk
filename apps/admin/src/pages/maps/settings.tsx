@@ -34,13 +34,11 @@ import {
   useMapByName,
   useUpdateMap,
   useUpdateMapTools,
-  useUpdateMapLayers,
-  useUpdateMapGroups,
+  useUpdateMapContent,
   useDeleteMap,
   useMaps,
   useToolsByMapName,
-  useGroupsByMapName,
-  useLayersByMapName,
+  useMapContentByName,
 } from "../../api/maps";
 import DialogWrapper from "../../components/flexible-dialog";
 import {
@@ -148,8 +146,7 @@ export default function MapSettings() {
   const { data: map, isLoading, isError } = useMapByName(mapName ?? "");
   const { mutateAsync: updateMap, status: updateStatus } = useUpdateMap();
   const { mutateAsync: updateMapTools } = useUpdateMapTools();
-  const { mutateAsync: updateMapLayers } = useUpdateMapLayers();
-  const { mutateAsync: updateMapGroups } = useUpdateMapGroups();
+  const { mutateAsync: updateMapContent } = useUpdateMapContent();
   const { mutateAsync: deleteMap, isPending: isDeletingMap } = useDeleteMap();
   const { palette } = useTheme();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -220,10 +217,13 @@ export default function MapSettings() {
   );
   const { data: mapTools } = useToolsByMapName(mapName ?? "");
   const { data: catalogTools } = useTools();
-  const { data: mapGroups, isError: mapGroupsError, isLoading: mapGroupsLoading } =
-    useGroupsByMapName(mapName ?? "");
-  const { data: mapLayers, isError: mapLayersError, isLoading: mapLayersLoading } =
-    useLayersByMapName(mapName ?? "");
+  const {
+    data: mapContent,
+    isError: mapContentError,
+    isLoading: mapContentLoading,
+  } = useMapContentByName(mapName ?? "");
+  const mapLayers = mapContent?.layers;
+  const mapGroups = mapContent?.groups;
   const { data: projections } = useProjections();
   const { defaultCoordinates } = useAppStateStore.getState();
 
@@ -536,15 +536,9 @@ export default function MapSettings() {
       }
 
       if (contentDirty) {
-        const { layers: layersPayload, groups: groupsPayload } =
-          mapContentToPayloads(mapContentDZ);
-        await updateMapLayers({
+        await updateMapContent({
           mapName: map.name,
-          layers: layersPayload,
-        });
-        await updateMapGroups({
-          mapName: map.name,
-          groups: groupsPayload,
+          content: mapContentToPayloads(mapContentDZ),
         });
       }
 
@@ -720,13 +714,10 @@ export default function MapSettings() {
         </Box>
 
         {activeTab === "menu" &&
-          (mapGroupsLoading ||
-          mapLayersLoading ||
-          ((mapGroups === undefined || mapLayers === undefined) &&
-            !mapGroupsError &&
-            !mapLayersError) ? (
+          (mapContentLoading ||
+          (mapContent === undefined && !mapContentError) ? (
             <SquareSpinnerComponent />
-          ) : mapGroupsError || mapLayersError ? (
+          ) : mapContentError ? (
             <Alert severity="error" sx={{ mt: 2 }}>
               {t("maps.contentLoadError")}
             </Alert>

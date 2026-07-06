@@ -83,6 +83,12 @@ export const MapGroupsUpdateSchema = z.object({
     .default([]),
 });
 
+/** Atomic replace of direct map layers and group placements (Kartinnehåll). */
+export const MapContentUpdateSchema = z.object({
+  layers: MapLayersUpdateSchema.shape.layers,
+  groups: MapGroupsUpdateSchema.shape.groups,
+});
+
 export const ProjectionUpdateSchema = z.object({
   code: z.string().min(1, "Projection code is required").optional(),
   definition: z.string().min(1, "Projection definition is required").optional(),
@@ -98,3 +104,4 @@ export type MapUpdateInput = z.infer<typeof MapUpdateSchema>;
 export type ProjectionUpdateInput = z.infer<typeof ProjectionUpdateSchema>;
 export type MapLayersUpdateInput = z.infer<typeof MapLayersUpdateSchema>;
 export type MapGroupsUpdateInput = z.infer<typeof MapGroupsUpdateSchema>;
+export type MapContentUpdateInput = z.infer<typeof MapContentUpdateSchema>;

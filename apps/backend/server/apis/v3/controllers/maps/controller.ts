@@ -28,6 +28,14 @@ class MapsController {
     res.status(HttpStatusCodes.OK).json({ count: layers.length, layers });
   }
 
+  async getMapContent(req: Request, res: Response) {
+    const content = await MapService.getMapContent(req.params.mapName);
+    res.status(HttpStatusCodes.OK).json({
+      count: content.layers.length + content.groups.length,
+      ...content,
+    });
+  }
+
   async getProjectionsForMap(req: Request, res: Response) {
     const projections = await MapService.getProjectionsForMap(
       req.params.mapName
@@ -69,6 +77,18 @@ class MapsController {
       groups: Parameters<typeof MapService.updateMapGroups>[1];
     };
     await MapService.updateMapGroups(req.params.mapName, groups ?? []);
+    res.status(HttpStatusCodes.NO_CONTENT).send();
+  }
+
+  async updateMapContent(req: Request, res: Response) {
+    const { layers, groups } = req.body as {
+      layers: Parameters<typeof MapService.updateMapContent>[1]["layers"];
+      groups: Parameters<typeof MapService.updateMapContent>[1]["groups"];
+    };
+    await MapService.updateMapContent(req.params.mapName, {
+      layers: layers ?? [],
+      groups: groups ?? [],
+    });
     res.status(HttpStatusCodes.NO_CONTENT).send();
   }
 

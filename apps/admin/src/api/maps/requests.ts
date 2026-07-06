@@ -8,6 +8,8 @@ import type {
   MapLayersApiResponse,
   MapLayerPlacement,
   MapGroupPlacement,
+  MapContentPlacement,
+  MapContentApiResponse,
   MapMutation,
   ToolOnMap,
 } from "./types";
@@ -124,6 +126,31 @@ export const getLayersByMapName = async (
       );
     } else {
       throw new Error(`Failed to fetch layers.`);
+    }
+  }
+};
+
+export const getMapContentByName = async (
+  mapName: string
+): Promise<MapContentApiResponse> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.get<MapContentApiResponse>(
+      `/maps/${mapName}/content`
+    );
+    if (!response.data) {
+      throw new Error("No map content data found");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to fetch map content. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to fetch map content.`);
     }
   }
 };
@@ -248,6 +275,29 @@ export const updateMapGroups = async (
       );
     } else {
       throw new Error(`Failed to update map groups.`);
+    }
+  }
+};
+
+/**
+ * Atomically replaces direct map layers and group placements
+ * (`PUT /maps/:mapName/content`).
+ */
+export const updateMapContent = async (
+  mapName: string,
+  content: MapContentPlacement
+): Promise<void> => {
+  const internalApiClient = getApiClient();
+  try {
+    await internalApiClient.put(`/maps/${mapName}/content`, content);
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to update map content. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to update map content.`);
     }
   }
 };
