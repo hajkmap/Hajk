@@ -11,7 +11,15 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { TreeItem, TreeItems } from "dnd-kit-sortable-tree";
-import { Box, List, Paper, Tab, Tabs, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  List,
+  Paper,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { DragIndicator } from "@mui/icons-material";
 import MapIcon from "@mui/icons-material/Map";
 import { useTranslation } from "react-i18next";
@@ -55,6 +63,11 @@ const CONTENT_ZONE_RULES = {
   acceptedItemTypes: ["layer", "group"] as const,
   allowNesting: false,
 };
+
+const MAP_CONTENT_DND_HEIGHT = {
+  xs: 400,
+  lg: "calc(100vh - 400px)",
+} as const;
 
 export default function MapGroupPlacementPanel({
   catalogLayers,
@@ -108,7 +121,10 @@ export default function MapGroupPlacementPanel({
 
   const applyContentRules = (nextItems: TreeItems<TreeItemData>) =>
     onItemsChange(
-      enforceZoneRules(nextItems, CONTENT_ZONE_RULES) as TreeItems<TreeItemData>,
+      enforceZoneRules(
+        nextItems,
+        CONTENT_ZONE_RULES,
+      ) as TreeItems<TreeItemData>,
     );
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -129,7 +145,9 @@ export default function MapGroupPlacementPanel({
     if (!dragData?.item || !dragData.type) return;
 
     if (dragData.type === "layer") {
-      const source = catalogLayers.find((layer) => layer.id === dragData.item.id);
+      const source = catalogLayers.find(
+        (layer) => layer.id === dragData.item.id,
+      );
       if (!source) return;
 
       const newItem: TreeItem<TreeItemData> = {
@@ -144,7 +162,9 @@ export default function MapGroupPlacementPanel({
     }
 
     if (dragData.type === "group") {
-      const source = catalogGroups.find((group) => group.id === dragData.item.id);
+      const source = catalogGroups.find(
+        (group) => group.id === dragData.item.id,
+      );
       if (!source) return;
 
       const newItem: TreeItem<TreeItemData> = {
@@ -188,7 +208,8 @@ export default function MapGroupPlacementPanel({
                 p: 2,
                 display: "flex",
                 flexDirection: "column",
-                maxHeight: 630,
+                height: MAP_CONTENT_DND_HEIGHT,
+                minHeight: MAP_CONTENT_DND_HEIGHT,
                 minWidth: 0,
                 overflow: "hidden",
               }}
@@ -277,24 +298,32 @@ export default function MapGroupPlacementPanel({
                 p: 2,
                 display: "flex",
                 flexDirection: "column",
-                maxHeight: 630,
-                overflowY: "auto",
+                height: MAP_CONTENT_DND_HEIGHT,
+                minHeight: MAP_CONTENT_DND_HEIGHT,
+                overflow: "hidden",
               }}
             >
-              <SortableDropZone
-                id="map-content"
-                title={t("map.groupPlacement.onMap.title")}
-                helpText={t("map.groupPlacement.onMap.help")}
-                clientBucketLabel={t("map.groupPlacement.onMap.clientBucket")}
-                titleIcon={<MapIcon />}
-                items={items}
-                onItemsChange={applyContentRules}
-                acceptedItemTypes={[...CONTENT_ZONE_RULES.acceptedItemTypes]}
-                allowNesting={CONTENT_ZONE_RULES.allowNesting}
-                showLayerPlacementStatus
-                showGroupPlacementStatus
-                minHeight={598}
-              />
+              <Box
+                sx={{
+                  flex: 1,
+                  minHeight: 0,
+                  overflowY: "auto",
+                }}
+              >
+                <SortableDropZone
+                  id="map-content"
+                  title={t("map.groupPlacement.onMap.title")}
+                  helpText={t("map.groupPlacement.onMap.help")}
+                  clientBucketLabel={t("map.groupPlacement.onMap.clientBucket")}
+                  titleIcon={<MapIcon />}
+                  items={items}
+                  onItemsChange={applyContentRules}
+                  acceptedItemTypes={[...CONTENT_ZONE_RULES.acceptedItemTypes]}
+                  allowNesting={CONTENT_ZONE_RULES.allowNesting}
+                  showLayerPlacementStatus
+                  showGroupPlacementStatus
+                />
+              </Box>
             </Paper>
           </Box>
         </Box>
