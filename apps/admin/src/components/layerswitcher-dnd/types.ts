@@ -18,6 +18,10 @@ export interface TreeItemData {
   toggled?: boolean;
   /** Group map placement: expanded in the layer switcher at start. */
   expanded?: boolean;
+  layerCount?: number;
+  nestedGroupCount?: number;
+  /** Catalog composition depth — source list only. */
+  nestingLevel?: number;
 }
 
 export interface DropZoneConfig {

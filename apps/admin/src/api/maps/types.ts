@@ -33,7 +33,6 @@ export interface MapLayer extends Layer {
   visibleAtStart?: boolean;
 }
 
-/** A group placement on a map (GroupsOnMaps row, GET /maps/:name/groups). */
 export interface MapGroup {
   id: string;
   mapName: string;
@@ -43,6 +42,9 @@ export interface MapGroup {
   name: string;
   toggled: boolean;
   expanded: boolean;
+  index: number;
+  /** From linked Group — used to detect map-only section headings. */
+  internalName?: string | null;
 }
 
 /** Payload entry for PUT /maps/:name/layers. */
@@ -63,6 +65,7 @@ export interface MapGroupPlacement {
   name?: string;
   toggled?: boolean;
   expanded?: boolean;
+  index?: number;
 }
 
 export interface Projection {

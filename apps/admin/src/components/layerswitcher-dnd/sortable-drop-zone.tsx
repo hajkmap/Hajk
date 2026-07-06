@@ -99,6 +99,12 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
     );
   };
 
+  const layerDrawOrderById = new Map(
+    items
+      .filter((item) => item.type === "layer")
+      .map((item, index) => [item.id.toString(), index]),
+  );
+
   const topLevelIndexById = new Map(
     items.map((item, index) => [item.id.toString(), index]),
   );
@@ -129,9 +135,7 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
           onItemsChanged={(newItems) => applyZoneRules(newItems)}
           keepGhostInPlace
           indentationWidth={allowNesting === false ? 0 : 20}
-          canRootHaveChildren={
-            allowNesting === false ? false : undefined
-          }
+          canRootHaveChildren={allowNesting === false ? false : undefined}
           TreeItemComponent={(treeItemProps) => {
             const itemId = treeItemProps.item.id.toString();
             const isGroup = treeItemProps.item.type === "group";
@@ -142,7 +146,9 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
                 onMoveUp={() => handleMoveUp(itemId)}
                 onMoveDown={() => handleMoveDown(itemId)}
                 onAdd={
-                  isGroup && onAddToGroup ? () => onAddToGroup(itemId) : undefined
+                  isGroup && onAddToGroup
+                    ? () => onAddToGroup(itemId)
+                    : undefined
                 }
                 onRemove={
                   enableRemove
@@ -151,7 +157,12 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
                 }
                 canMoveUp={canItemMoveUp(items, itemId)}
                 canMoveDown={canItemMoveDown(items, itemId)}
-                drawOrderIndex={topLevelIndexById.get(itemId)}
+                drawOrderIndex={
+                  showLayerPlacementStatus &&
+                  treeItemProps.item.type === "layer"
+                    ? layerDrawOrderById.get(itemId)
+                    : topLevelIndexById.get(itemId)
+                }
                 showLayerPlacementStatus={showLayerPlacementStatus}
                 showGroupPlacementStatus={showGroupPlacementStatus}
                 onToggleVisibleAtStart={(visible) =>
@@ -167,7 +178,6 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
               />
             );
           }}
-          keepGhostInPlace
         />
       </Box>
     </TreeDropZone>

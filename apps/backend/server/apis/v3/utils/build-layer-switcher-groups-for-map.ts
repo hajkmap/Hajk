@@ -344,7 +344,9 @@ function buildPlacementNode(
 
   visitedPlacementIds.add(placement.id);
   const composition = compositions.get(placement.groupId);
-  const childPlacements = placementsByParentGomId.get(placement.id) ?? [];
+  const childPlacements = (placementsByParentGomId.get(placement.id) ?? []).sort(
+    (a, b) => (a.index ?? 0) - (b.index ?? 0),
+  );
   const visitedGroupIds = new Set<string>([placement.groupId]);
 
   const { layers, groups: internalGroups } = composition?.layerSwitcherTree
@@ -405,7 +407,6 @@ export async function buildLayerSwitcherGroupsForMap(
   const placements = await prisma.groupsOnMaps.findMany({
     where: { mapName },
     include: { group: true },
-    orderBy: { name: "asc" },
   });
 
   if (placements.length === 0) {
@@ -437,7 +438,9 @@ export async function buildLayerSwitcherGroupsForMap(
     placementsByParentGomId.set(parentKey, list);
   }
 
-  const roots = placementsByParentGomId.get(null) ?? [];
+  const roots = (placementsByParentGomId.get(null) ?? []).sort(
+    (a, b) => (a.index ?? 0) - (b.index ?? 0),
+  );
 
   return roots.map((placement) =>
     buildPlacementNode(

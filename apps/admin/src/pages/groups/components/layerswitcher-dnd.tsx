@@ -52,6 +52,8 @@ import {
   type LayerSwitcherTreeItem,
 } from "../utils/layer-switcher-tree";
 import { groupCompositionKey } from "../utils/group-composition";
+import { groupToCatalogMeta } from "../utils/group-composition-stats";
+import GroupCompositionSummary from "../../../components/group-composition-summary";
 import { TreeItemActions } from "../../../components/layerswitcher-dnd/tree-item-actions";
 import { GroupIntoDropTarget } from "../../../components/layerswitcher-dnd/group-into-drop-target";
 import {
@@ -144,7 +146,8 @@ const FLAT_GROUP_REFERENCES = true;
 const DraggableSourceItem: React.FC<{
   item: { id: string; name: string };
   type: "group" | "layer";
-}> = ({ item, type }) => {
+  groupMeta?: ReturnType<typeof groupToCatalogMeta>;
+}> = ({ item, type, groupMeta }) => {
   const themeMode = useAppStateStore((state) => state.themeMode);
   const isDarkMode = themeMode === "dark";
 
@@ -189,9 +192,14 @@ const DraggableSourceItem: React.FC<{
       <DragIndicator
         sx={{ mr: 1, mt: 0.25, color: "text.secondary", flexShrink: 0 }}
       />
-      <Typography variant="body2" title={item.name} sx={DND_ITEM_TITLE_SX}>
-        {item.name}
-      </Typography>
+      <Box sx={{ minWidth: 0, flex: 1 }}>
+        <Typography variant="body2" title={item.name} sx={DND_ITEM_TITLE_SX}>
+          {item.name}
+        </Typography>
+        {type === "group" && groupMeta ? (
+          <GroupCompositionSummary meta={groupMeta} compact />
+        ) : null}
+      </Box>
     </ListItem>
   );
 };
@@ -3082,6 +3090,7 @@ export default function LayerSwitcherDnD({
                                 key={group.id}
                                 item={group}
                                 type="group"
+                                groupMeta={groupToCatalogMeta(group)}
                               />
                             ))}
                         {leftTab === 0 &&

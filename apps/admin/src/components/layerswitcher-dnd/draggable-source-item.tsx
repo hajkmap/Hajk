@@ -7,17 +7,21 @@ import { useTranslation } from "react-i18next";
 import useAppStateStore from "../../store/use-app-state-store";
 import { ItemType } from "./types";
 import { createSourceId, DND_ITEM_TITLE_SX } from "./utils";
+import GroupCompositionSummary from "../group-composition-summary";
+import type { GroupCatalogMeta } from "../pages/groups/utils/group-composition-stats";
 
 interface DraggableSourceItemProps {
   item: { id: string; name: string };
   type: ItemType;
   showInactiveStatus?: boolean;
+  groupMeta?: GroupCatalogMeta;
 }
 
 export const DraggableSourceItem: React.FC<DraggableSourceItemProps> = ({
   item,
   type,
   showInactiveStatus = false,
+  groupMeta,
 }) => {
   const { t } = useTranslation();
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
@@ -62,6 +66,9 @@ export const DraggableSourceItem: React.FC<DraggableSourceItemProps> = ({
             sx={{ mt: 0.5 }}
             label={t("map.layerInactive")}
           />
+        ) : null}
+        {type === "group" && groupMeta ? (
+          <GroupCompositionSummary meta={groupMeta} compact />
         ) : null}
       </Box>
     </ListItem>

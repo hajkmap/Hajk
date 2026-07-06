@@ -475,6 +475,7 @@ model GroupsOnMaps {
   name     String // It has a title, shown to the user
   toggled  Boolean
   expanded Boolean
+  index    Int     @default(0)
 }
 
 enum ServiceType {

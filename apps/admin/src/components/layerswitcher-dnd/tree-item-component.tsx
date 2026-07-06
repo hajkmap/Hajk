@@ -3,27 +3,21 @@ import {
   SimpleTreeItemWrapper,
   TreeItemComponentProps,
 } from "dnd-kit-sortable-tree";
-import {
-  Box,
-  Chip,
-  FormControlLabel,
-  Switch,
-  Typography,
-} from "@mui/material";
+import { Box, Chip, FormControlLabel, Switch, Typography } from "@mui/material";
 import { DragIndicator } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 
 import useAppStateStore from "../../store/use-app-state-store";
 import { TreeItemData } from "./types";
 import { TreeItemActions } from "./tree-item-actions";
+import GroupCompositionSummary from "../group-composition-summary";
 import {
   DND_DRAG_HANDLE_SX,
   DND_ITEM_TITLE_SX,
   DND_TREE_ITEM_CARD_SX,
 } from "./utils";
 
-interface TreeItemComponentExtendedProps
-  extends TreeItemComponentProps<TreeItemData> {
+interface TreeItemComponentExtendedProps extends TreeItemComponentProps<TreeItemData> {
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   onAdd?: () => void;
@@ -88,7 +82,14 @@ export const TreeItemComponent = React.forwardRef<
           <DragIndicator sx={DND_DRAG_HANDLE_SX} />
         </Box>
 
-        <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.5 }}>
+        <Box
+          sx={{
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.5,
+          }}
+        >
           <Typography
             fontWeight={isGroup ? 600 : 400}
             variant="body2"
@@ -147,11 +148,30 @@ export const TreeItemComponent = React.forwardRef<
             <Box
               sx={{
                 display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                gap: 1,
+                flexDirection: "column",
+                gap: 0.75,
               }}
             >
+              {item.layerCount !== undefined ||
+              item.nestedGroupCount !== undefined ? (
+                <GroupCompositionSummary
+                  meta={{
+                    layerCount: item.layerCount ?? 0,
+                    nestedGroupCount: item.nestedGroupCount ?? 0,
+                    toggleAllEnabled: item.toggled,
+                  }}
+                  compact
+                  hideNestingLevel
+                />
+              ) : null}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
               <Chip
                 size="small"
                 color="success"
@@ -173,7 +193,7 @@ export const TreeItemComponent = React.forwardRef<
                 }
                 label={
                   <Typography variant="caption">
-                    {t("map.groupVisibleAtStart")}
+                    {t("map.groupToggleAll")}
                   </Typography>
                 }
               />
@@ -196,6 +216,7 @@ export const TreeItemComponent = React.forwardRef<
                   </Typography>
                 }
               />
+              </Box>
             </Box>
           ) : null}
         </Box>

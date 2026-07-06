@@ -77,6 +77,7 @@ export const MapGroupsUpdateSchema = z.object({
         name: z.string().optional(),
         toggled: z.boolean().optional(),
         expanded: z.boolean().optional(),
+        index: z.number().int().min(0).optional(),
       })
     )
     .default([]),

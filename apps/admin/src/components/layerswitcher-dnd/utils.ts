@@ -134,8 +134,10 @@ export const isPointerOverGroupSiblingDropZone = (
   edge: ReorderDropPosition,
   pointer?: { x: number | null; y: number | null },
 ): boolean => {
-  const x = pointer?.x ?? lastTreeDragPointerRef.current.x ?? treePointerXRef.current;
-  const y = pointer?.y ?? lastTreeDragPointerRef.current.y ?? treePointerYRef.current;
+  const x =
+    pointer?.x ?? lastTreeDragPointerRef.current.x ?? treePointerXRef.current;
+  const y =
+    pointer?.y ?? lastTreeDragPointerRef.current.y ?? treePointerYRef.current;
   const el = document.getElementById(getTreeItemRowElementId(groupId));
   const rect = el?.getBoundingClientRect() ?? null;
   if (x === null || y === null || rect === null) {
@@ -151,8 +153,7 @@ export const isPointerOverGroupSiblingDropZone = (
     );
   }
   return (
-    y >= rect.bottom - GROUP_SIBLING_DROP_ZONE_BELOW_PX &&
-    y <= rect.bottom + 10
+    y >= rect.bottom - GROUP_SIBLING_DROP_ZONE_BELOW_PX && y <= rect.bottom + 10
   );
 };
 
@@ -392,7 +393,9 @@ export const DND_TREE_SORTABLE_OVERRIDES_SX: SxProps<Theme> = {
 };
 
 /** Full tree panel overrides — fixes library overlap (-1px margin) and nested flex clipping. */
-export const getSortableTreePanelSx = (isDarkMode: boolean): SxProps<Theme> => ({
+export const getSortableTreePanelSx = (
+  isDarkMode: boolean,
+): SxProps<Theme> => ({
   ...DND_TREE_SORTABLE_OVERRIDES_SX,
   position: "relative",
   width: "100%",

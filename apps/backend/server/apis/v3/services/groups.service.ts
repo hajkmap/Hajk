@@ -9,6 +9,10 @@ import {
   activeLayerInstanceWhere,
   layerInstanceIncludeAll,
 } from "../utils/layer-instance.ts";
+import {
+  buildGroupCompositionMap,
+  computeGroupCompositionStats,
+} from "../utils/group-composition.ts";
 
 const logger = log4js.getLogger("service.v3.layer");
 
@@ -206,7 +210,50 @@ class GroupsService {
   }
 
   async getGroups() {
-    return await prisma.group.findMany({ orderBy: { name: "asc" } });
+    const groups = await prisma.group.findMany({ orderBy: { name: "asc" } });
+
+    if (groups.length === 0) {
+      return [];
+    }
+
+    const groupIds = groups.map((group) => group.id);
+    const instances = await prisma.layerInstance.findMany({
+      where: {
+        AND: [{ groupId: { in: groupIds } }, activeLayerInstanceWhere],
+      },
+      select: {
+        groupId: true,
+        options: true,
+        displayLayerId: true,
+        searchLayerId: true,
+        editingLayerId: true,
+      },
+      orderBy: { zIndex: "asc" },
+    });
+
+    const treeByGroupId = buildGroupCompositionMap(instances);
+    const directLayerCountByGroupId = new Map<string, number>();
+
+    for (const instance of instances) {
+      if (!instance.groupId) continue;
+      directLayerCountByGroupId.set(
+        instance.groupId,
+        (directLayerCountByGroupId.get(instance.groupId) ?? 0) + 1
+      );
+    }
+
+    return groups.map((group) => {
+      const tree = treeByGroupId.get(group.id);
+      const directLayerCount = directLayerCountByGroupId.get(group.id) ?? 0;
+      const composition = computeGroupCompositionStats(tree, directLayerCount);
+
+      return {
+        ...group,
+        layerCount: composition.layerCount,
+        nestedGroupCount: composition.nestedGroupCount,
+        nestingLevel: composition.nestingLevel,
+      };
+    });
   }
 
   async getGroupById(id: string) {

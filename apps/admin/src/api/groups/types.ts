@@ -12,6 +12,10 @@ export interface Group {
   createdDate?: string;
   lastSavedBy?: string;
   lastSavedDate?: string;
+  /** From GET /groups — composition summary for list views. */
+  layerCount?: number;
+  nestedGroupCount?: number;
+  nestingLevel?: number;
 }
 
 export interface GroupsApiResponse {
@@ -54,7 +58,12 @@ export interface GroupLayersUpdateInput {
 
 export type LayerSwitcherTreeNode =
   | { type: "layer"; id: string }
-  | { type: "group"; id: string; name: string; children: LayerSwitcherTreeNode[] };
+  | {
+      type: "group";
+      id: string;
+      name: string;
+      children: LayerSwitcherTreeNode[];
+    };
 
 export interface GroupLayerCreateInput {
   layerId: string;

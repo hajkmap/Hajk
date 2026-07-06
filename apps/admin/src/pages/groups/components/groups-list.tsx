@@ -41,6 +41,10 @@ import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 import StyledDataGrid from "../../../components/data-grid";
 import { getCreateGroupErrorMessage, getDeleteGroupErrorMessage } from "../utils/group-errors";
+import {
+  GroupCompositionIconsCell,
+  GroupCompositionLevelCell,
+} from "../../../components/group-composition-summary";
 
 interface GroupCreateForm {
   name: string;
@@ -405,7 +409,7 @@ export default function GroupsList({
                 {
                   field: "type",
                   headerName: t("groups.type"),
-                  flex: 0.5,
+                  flex: 0.35,
                   valueFormatter: (value: GroupType) => {
                     const key = Object.keys(GroupType).find(
                       (enumKey) =>
@@ -415,9 +419,33 @@ export default function GroupsList({
                   },
                 },
                 {
+                  field: "nestingLevel",
+                  headerName: t("groups.composition.nestingLevel"),
+                  flex: 0.15,
+                  sortable: true,
+                  renderCell: (params: GridRenderCellParams<Group>) => (
+                    <GroupCompositionLevelCell
+                      nestingLevel={params.row.nestingLevel}
+                    />
+                  ),
+                },
+                {
+                  field: "composition",
+                  headerName: t("groups.layers"),
+                  flex: 0.2,
+                  sortable: false,
+                  filterable: false,
+                  renderCell: (params: GridRenderCellParams<Group>) => (
+                    <GroupCompositionIconsCell
+                      layerCount={params.row.layerCount}
+                      nestedGroupCount={params.row.nestedGroupCount}
+                    />
+                  ),
+                },
+                {
                   field: "internalName",
                   headerName: t("groups.internalName"),
-                  flex: 0.3,
+                  flex: 0.25,
                 },
                 {
                   field: "lastSavedDate",

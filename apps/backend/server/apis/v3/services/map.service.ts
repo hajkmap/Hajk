@@ -49,6 +49,7 @@ interface MapGroupInput {
   name?: string;
   toggled?: boolean;
   expanded?: boolean;
+  index?: number;
 }
 
 async function resolveProjectionConnect(code?: string) {
@@ -336,9 +337,17 @@ class MapService {
       where: {
         mapName: mapName,
       },
+      include: {
+        group: {
+          select: { internalName: true },
+        },
+      },
     });
 
-    return allGroups;
+    return allGroups.map(({ group, ...placement }) => ({
+      ...placement,
+      internalName: group.internalName,
+    }));
   }
 
   async getLayersForMap(mapName: string) {
@@ -534,6 +543,7 @@ class MapService {
               name: entry.name ?? nameById.get(entry.groupId) ?? "",
               toggled: entry.toggled ?? false,
               expanded: entry.expanded ?? false,
+              index: entry.index ?? 0,
             },
           });
           createdIds.add(created.id);
