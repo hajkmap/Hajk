@@ -37,6 +37,10 @@ import {
   type ToolZones,
   zoneKeyToTarget,
 } from "../map-tools-utils";
+import {
+  getMapToolFieldConfig,
+  type MapToolFieldConfig,
+} from "../map-tool-field-config";
 
 const TOOL_PLACEMENT_OPTIONS: ToolZone[] = [
   "drawer",
@@ -48,6 +52,14 @@ const TOOL_PLACEMENT_OPTIONS: ToolZone[] = [
 const WINDOW_PLACEMENT_OPTIONS: ToolWindowPosition[] = ["left", "right"];
 
 const CELL_FIELD_SX = { mt: 0.5, width: "100%", minWidth: 0 };
+
+function NotApplicableCell() {
+  return (
+    <Typography color="text.secondary" sx={{ px: 0.5 }}>
+      —
+    </Typography>
+  );
+}
 
 const MAP_TOOLS_GRID_SX = {
   height: "calc(100vh - 320px)",
@@ -180,6 +192,21 @@ const WindowSizeNumberInput = memo(function WindowSizeNumberInput({
   );
 });
 
+interface MapToolGridRow {
+  id: number;
+  toolId: number;
+  title: string;
+  type: string;
+  active: boolean;
+  target: ToolZone | "";
+  windowPosition: ToolWindowPosition;
+  index: number | null;
+}
+
+function fieldsForToolType(toolType: string): MapToolFieldConfig {
+  return getMapToolFieldConfig(toolType);
+}
+
 interface MapToolsListProps {
   catalogTools: Tool[];
   mapTools: ToolOnMap[];
@@ -308,7 +335,7 @@ export default function MapToolsList({
     [catalogTools],
   );
 
-  const rows = useMemo(() => {
+  const rows = useMemo((): MapToolGridRow[] => {
     const query = searchTerm.trim().toLowerCase();
     const mapToolsById = new Map(mapTools.map((tool) => [tool.toolId, tool]));
 
@@ -376,7 +403,7 @@ export default function MapToolsList({
         sortable: false,
         filterable: false,
         disableColumnMenu: true,
-        renderCell: (params: GridRenderCellParams<(typeof rows)[number]>) => (
+        renderCell: (params: GridRenderCellParams<MapToolGridRow>) => (
           <Switch
             size="small"
             checked={params.row.active}
@@ -396,7 +423,12 @@ export default function MapToolsList({
         sortable: false,
         filterable: false,
         disableColumnMenu: true,
-        renderCell: (params: GridRenderCellParams<(typeof rows)[number]>) => {
+        renderCell: (params: GridRenderCellParams<MapToolGridRow>) => {
+          const fields = fieldsForToolType(params.row.type);
+          if (!fields.target) {
+            return <NotApplicableCell />;
+          }
+
           const placementLabel =
             params.row.target === ""
               ? t("maps.toolPlacement.unplaced")
@@ -443,7 +475,12 @@ export default function MapToolsList({
         sortable: false,
         filterable: false,
         disableColumnMenu: true,
-        renderCell: (params: GridRenderCellParams<(typeof rows)[number]>) => {
+        renderCell: (params: GridRenderCellParams<MapToolGridRow>) => {
+          const fields = fieldsForToolType(params.row.type);
+          if (!fields.windowPosition) {
+            return <NotApplicableCell />;
+          }
+
           const positionLabel = t(
             `maps.windowPlacement.${params.row.windowPosition}`,
           );
@@ -484,7 +521,12 @@ export default function MapToolsList({
         sortable: false,
         filterable: false,
         disableColumnMenu: true,
-        renderCell: (params: GridRenderCellParams<(typeof rows)[number]>) => {
+        renderCell: (params: GridRenderCellParams<MapToolGridRow>) => {
+          const fields = fieldsForToolType(params.row.type);
+          if (!fields.windowWidth) {
+            return <NotApplicableCell />;
+          }
+
           const size = windowSizes[params.row.toolId] ?? {};
           const catalogTool = catalogToolsById.get(params.row.toolId);
           const defaultSize = catalogTool
@@ -519,7 +561,12 @@ export default function MapToolsList({
         sortable: false,
         filterable: false,
         disableColumnMenu: true,
-        renderCell: (params: GridRenderCellParams<(typeof rows)[number]>) => {
+        renderCell: (params: GridRenderCellParams<MapToolGridRow>) => {
+          const fields = fieldsForToolType(params.row.type);
+          if (!fields.windowHeight) {
+            return <NotApplicableCell />;
+          }
+
           const size = windowSizes[params.row.toolId] ?? {};
           const catalogTool = catalogToolsById.get(params.row.toolId);
           const defaultSize = catalogTool
@@ -553,7 +600,12 @@ export default function MapToolsList({
         headerName: t("maps.toolsOrder"),
         align: "center" as const,
         headerAlign: "center" as const,
-        valueFormatter: (value: number | null) => value ?? "—",
+        renderCell: (params: GridRenderCellParams<MapToolGridRow>) => {
+          if (!fieldsForToolType(params.row.type).index) {
+            return <NotApplicableCell />;
+          }
+          return params.row.index ?? "—";
+        },
       },
       {
         field: "actions",
@@ -563,7 +615,7 @@ export default function MapToolsList({
         filterable: false,
         disableColumnMenu: true,
         align: "center" as const,
-        renderCell: (params: GridRenderCellParams<(typeof rows)[number]>) => (
+        renderCell: (params: GridRenderCellParams<MapToolGridRow>) => (
           <Tooltip title={t("common.settings")}>
             <IconButton
               size="small"

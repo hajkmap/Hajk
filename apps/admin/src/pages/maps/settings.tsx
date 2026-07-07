@@ -78,6 +78,7 @@ import type { ToolWindowPosition, ToolZone } from "../../api/maps";
 import MapToolsPanel from "./components/map-tools-panel";
 import {
   EMPTY_TOOL_ZONES,
+  buildToolTypesById,
   buildToolsDraftState,
   findToolZoneForId,
   getCatalogToolDisplayName,
@@ -417,21 +418,27 @@ export default function MapSettings() {
       ? toolsDraft.windowSizes
       : (serverToolsDraftState?.windowSizes ?? {});
 
+  const toolTypesById = useMemo(
+    () => buildToolTypesById(catalogTools ?? [], mapTools ?? []),
+    [catalogTools, mapTools],
+  );
+
   const toolsDirty = useMemo(() => {
     if (toolsDraft == null || toolsDraft.mapName !== mapName || !mapTools) {
       return false;
     }
     return (
-      serverToolsSignature(mapTools) !==
+      serverToolsSignature(mapTools, toolTypesById) !==
       toolsDraftSignature(
         toolsDraft.zones,
         toolsDraft.activeToolIds,
         toolsDraft.windowPositions,
         toolsDraft.windowSizes,
         toolsDraft.inactiveTargets,
+        toolTypesById,
       )
     );
-  }, [toolsDraft, mapName, mapTools]);
+  }, [toolsDraft, mapName, mapTools, toolTypesById]);
 
   const resolveToolsDraft = useCallback(
     (prev: ToolsDraft | null): ToolsDraft => {
@@ -653,13 +660,14 @@ export default function MapSettings() {
       const shouldSaveTools =
         currentToolsDraft != null &&
         mapTools != null &&
-        serverToolsSignature(mapTools) !==
+        serverToolsSignature(mapTools, toolTypesById) !==
           toolsDraftSignature(
             currentToolsDraft.zones,
             currentToolsDraft.activeToolIds,
             currentToolsDraft.windowPositions,
             currentToolsDraft.windowSizes,
             currentToolsDraft.inactiveTargets,
+            toolTypesById,
           );
 
       // Persist placements first (keyed by the current name) so a simultaneous
@@ -672,6 +680,7 @@ export default function MapSettings() {
           currentToolsDraft.windowSizes,
           currentToolsDraft.inactiveTargets,
           mapTools ?? [],
+          toolTypesById,
         );
         await updateMapTools({
           mapName: map.name,

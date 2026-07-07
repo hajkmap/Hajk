@@ -3,6 +3,7 @@ import type { ToolOnMap, ToolWindowPosition, ToolZone } from "../../api/maps";
 import type { Tool } from "../../api/tools";
 import type { TreeItemData } from "../../components/layerswitcher-dnd";
 import { ID_DELIMITER } from "../../components/layerswitcher-dnd";
+import { getMapToolFieldConfig, type MapToolFieldConfig } from "./map-tool-field-config";
 
 export interface ToolZones {
   drawer: TreeItem<TreeItemData>[];
@@ -52,6 +53,35 @@ export interface MapToolPayloadEntry {
   index: number;
   target: string | null;
   options?: Record<string, string | number>;
+}
+
+export type { MapToolFieldConfig } from "./map-tool-field-config";
+export { getMapToolFieldConfig } from "./map-tool-field-config";
+
+export function buildToolTypesById(
+  catalogTools: Tool[],
+  mapTools: ToolOnMap[],
+): Map<number, string> {
+  const types = new Map<number, string>();
+
+  for (const tool of catalogTools) {
+    types.set(Number(tool.id), tool.type);
+  }
+  for (const tool of mapTools) {
+    types.set(tool.toolId, tool.tool.type);
+  }
+
+  return types;
+}
+
+function resolveToolType(
+  toolId: number,
+  mapToolsById: Map<number, ToolOnMap>,
+  toolTypesById: Map<number, string>,
+): string {
+  return (
+    mapToolsById.get(toolId)?.tool.type ?? toolTypesById.get(toolId) ?? ""
+  );
 }
 
 function extractToolIdFromItemId(itemId: string | number): number | null {
@@ -401,18 +431,19 @@ export function getToolPlacementLabelKey(
 }
 
 function buildToolPayloadOptions(
+  fields: MapToolFieldConfig,
   windowPosition?: ToolWindowPosition,
   windowSize?: ToolWindowSize,
 ): Record<string, string | number> | undefined {
   const options: Record<string, string | number> = {};
 
-  if (windowPosition) {
+  if (fields.windowPosition && windowPosition) {
     options.position = windowPosition;
   }
-  if (windowSize?.width != null) {
+  if (fields.windowWidth && windowSize?.width != null) {
     options.width = windowSize.width;
   }
-  if (windowSize?.height != null) {
+  if (fields.windowHeight && windowSize?.height != null) {
     options.height = windowSize.height;
   }
 
@@ -427,6 +458,7 @@ export function zonesToToolsPayload(
   windowSizes: Record<number, ToolWindowSize>,
   inactiveTargets: Record<number, ToolZone>,
   mapTools: ToolOnMap[],
+  toolTypesById: Map<number, string> = new Map(),
 ): MapToolPayloadEntry[] {
   const mapToolsById = new Map(mapTools.map((tool) => [tool.toolId, tool]));
   const allToolIds = new Set<number>([
@@ -442,30 +474,42 @@ export function zonesToToolsPayload(
   for (const toolId of [...allToolIds].sort((a, b) => a - b)) {
     const existing = mapToolsById.get(toolId);
     const isActive = activeToolIds.has(toolId);
+    const toolType = resolveToolType(toolId, mapToolsById, toolTypesById);
+    const fields = getMapToolFieldConfig(toolType);
     const options = buildToolPayloadOptions(
+      fields,
       windowPositions[toolId],
       windowSizes[toolId],
     );
 
-    let target: string | null;
+    let target: string | null = null;
     let index: number;
 
-    if (isActive) {
-      const zone = findToolZoneForId(zones, toolId);
-      target = zone ? ZONE_TO_TARGET[zone] : null;
-      if (zone) {
-        index = zones[zone].findIndex(
-          (item) => extractToolIdFromItemId(item.id) === toolId,
-        );
+    if (fields.index) {
+      if (isActive) {
+        if (fields.target) {
+          const zone = findToolZoneForId(zones, toolId);
+          target = zone ? ZONE_TO_TARGET[zone] : null;
+          if (zone) {
+            index = zones[zone].findIndex(
+              (item) => extractToolIdFromItemId(item.id) === toolId,
+            );
+          } else {
+            index = existing?.index ?? unplacedIndex++;
+          }
+        } else {
+          index = existing?.index ?? unplacedIndex++;
+        }
       } else {
-        index = existing?.index ?? unplacedIndex++;
+        target = fields.target
+          ? inactiveTargets[toolId] != null
+            ? inactiveTargets[toolId]
+            : (existing?.target ?? null)
+          : null;
+        index = existing?.index ?? inactiveIndex++;
       }
     } else {
-      target =
-        inactiveTargets[toolId] != null
-          ? inactiveTargets[toolId]
-          : (existing?.target ?? null);
-      index = existing?.index ?? inactiveIndex++;
+      index = existing?.index ?? 0;
     }
 
     result.push({
@@ -501,6 +545,7 @@ export function toolsDraftSignature(
   windowPositions: Record<number, ToolWindowPosition>,
   windowSizes: Record<number, ToolWindowSize>,
   inactiveTargets: Record<number, ToolZone>,
+  toolTypesById: Map<number, string> = new Map(),
 ): string {
   const relevantIds = new Set<number>([
     ...activeToolIds,
@@ -508,40 +553,72 @@ export function toolsDraftSignature(
   ]);
   const positions: Record<number, ToolWindowPosition> = {};
   const sizes: Record<number, ToolWindowSize> = {};
+  const filteredInactive = Object.entries(inactiveTargets)
+    .map(([id, target]) => [Number(id), target] as [number, ToolZone])
+    .filter(([id]) => getMapToolFieldConfig(toolTypesById.get(id) ?? "").target)
+    .sort((a, b) => a[0] - b[0]);
+
   [...relevantIds]
     .sort((a, b) => a - b)
     .forEach((id) => {
-      if (windowPositions[id]) positions[id] = windowPositions[id];
+      const fields = getMapToolFieldConfig(toolTypesById.get(id) ?? "");
+      if (fields.windowPosition && windowPositions[id]) {
+        positions[id] = windowPositions[id];
+      }
       const size = windowSizes[id];
       if (size?.width != null || size?.height != null) {
-        sizes[id] = size;
+        const filteredSize: ToolWindowSize = {};
+        if (fields.windowWidth && size.width != null) {
+          filteredSize.width = size.width;
+        }
+        if (fields.windowHeight && size.height != null) {
+          filteredSize.height = size.height;
+        }
+        if (filteredSize.width != null || filteredSize.height != null) {
+          sizes[id] = filteredSize;
+        }
       }
     });
 
+  const zoneLayout = JSON.parse(toolZonesSignature(zones)) as Record<
+    ToolZoneKey,
+    number[]
+  >;
+  if (toolTypesById.size > 0) {
+    (Object.keys(zoneLayout) as ToolZoneKey[]).forEach((zone) => {
+      zoneLayout[zone] = zoneLayout[zone].filter((toolId) =>
+        getMapToolFieldConfig(toolTypesById.get(toolId) ?? "").target,
+      );
+    });
+  }
+
   return JSON.stringify({
-    zones: JSON.parse(toolZonesSignature(zones)) as Record<
-      ToolZoneKey,
-      number[]
-    >,
+    zones: zoneLayout,
     active: [...activeToolIds].sort((a, b) => a - b),
-    inactive: Object.entries(inactiveTargets)
-      .map(([id, target]) => [Number(id), target] as [number, ToolZone])
-      .sort((a, b) => a[0] - b[0]),
+    inactive: filteredInactive,
     windowPositions: positions,
     windowSizes: sizes,
   });
 }
 
-export function serverToolsSignature(mapTools: ToolOnMap[]): string {
+export function serverToolsSignature(
+  mapTools: ToolOnMap[],
+  toolTypesById: Map<number, string> = new Map(),
+): string {
   const zones = mapToolsToZones(mapTools);
   const { activeToolIds, windowPositions, windowSizes, inactiveTargets } =
     buildToolsDraftState(mapTools);
+  const types =
+    toolTypesById.size > 0
+      ? toolTypesById
+      : new Map(mapTools.map((tool) => [tool.toolId, tool.tool.type]));
   return toolsDraftSignature(
     zones,
     activeToolIds,
     windowPositions,
     windowSizes,
     inactiveTargets,
+    types,
   );
 }
 
