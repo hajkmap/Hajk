@@ -46,7 +46,6 @@ import {
 } from "../utils/group-errors";
 import {
   GroupCompositionIconsCell,
-  GroupCompositionLevelCell,
 } from "../../../components/group-composition-summary";
 
 interface GroupCreateForm {
@@ -417,17 +416,6 @@ export default function GroupsList({
                     );
                     return key ? t(`groupType.${key}`) : value;
                   },
-                },
-                {
-                  field: "nestingLevel",
-                  headerName: t("groups.composition.nestingLevel"),
-                  flex: 0.15,
-                  sortable: true,
-                  renderCell: (params: GridRenderCellParams<Group>) => (
-                    <GroupCompositionLevelCell
-                      nestingLevel={params.row.nestingLevel}
-                    />
-                  ),
                 },
                 {
                   field: "composition",

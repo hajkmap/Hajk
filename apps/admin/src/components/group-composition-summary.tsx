@@ -12,14 +12,11 @@ interface GroupCompositionSummaryProps {
   meta?: GroupCatalogMeta;
   /** Compact layout for narrow DnD source cards. */
   compact?: boolean;
-  /** Hide the nesting-level chip (e.g. flat map placement list). */
-  hideNestingLevel?: boolean;
 }
 
 export default function GroupCompositionSummary({
   meta,
   compact = false,
-  hideNestingLevel = false,
 }: GroupCompositionSummaryProps) {
   const { t } = useTranslation();
 
@@ -30,7 +27,6 @@ export default function GroupCompositionSummary({
   const {
     layerCount = 0,
     nestedGroupCount = 0,
-    nestingLevel = 1,
     toggleAllEnabled,
   } = meta;
 
@@ -58,20 +54,6 @@ export default function GroupCompositionSummary({
           sx={{ height: compact ? 22 : 24 }}
         />
       </Tooltip>
-      {hideNestingLevel ? null : (
-        <Tooltip
-          title={t("groups.composition.nestingLevelHelp", { level: nestingLevel })}
-        >
-          <Chip
-            size="small"
-            variant="outlined"
-            label={t("groups.composition.nestingLevelShort", {
-              level: nestingLevel,
-            })}
-            sx={{ height: compact ? 22 : 24 }}
-          />
-        </Tooltip>
-      )}
       {toggleAllEnabled !== undefined ? (
         <Tooltip
           title={
@@ -117,21 +99,6 @@ export default function GroupCompositionSummary({
     <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 0.75 }}>
       {chips}
     </Box>
-  );
-}
-
-export function GroupCompositionLevelCell({
-  nestingLevel,
-}: {
-  nestingLevel?: number;
-}) {
-  const { t } = useTranslation();
-  const level = nestingLevel ?? 1;
-
-  return (
-    <Tooltip title={t("groups.composition.nestingLevelHelp", { level })}>
-      <Typography variant="body2">{level}</Typography>
-    </Tooltip>
   );
 }
 

@@ -172,7 +172,6 @@ export const TreeItemComponent = React.forwardRef<
                     toggleAllEnabled: item.toggled,
                   }}
                   compact
-                  hideNestingLevel
                 />
               ) : null}
               <Box

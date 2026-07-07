@@ -349,7 +349,6 @@ const PlacementEdgeDrop: React.FC<{
 
 const PlacementListItem: React.FC<{
   item: TreeItem<TreeItemData>;
-  orderIndex: number;
   isDragging: boolean;
   onRemove: () => void;
   onToggleVisibleAtStart?: (visible: boolean) => void;
@@ -357,7 +356,6 @@ const PlacementListItem: React.FC<{
   onToggleExpanded?: (expanded: boolean) => void;
 }> = ({
   item,
-  orderIndex,
   isDragging,
   onRemove,
   onToggleVisibleAtStart,
@@ -452,9 +450,6 @@ const PlacementListItem: React.FC<{
               variant="outlined"
               label={t("map.layerActive")}
             />
-            <Typography variant="caption" color="primary" sx={{ fontWeight: 600 }}>
-              {orderIndex + 1}
-            </Typography>
             <FormControlLabel
               sx={{ m: 0 }}
               control={
@@ -481,15 +476,14 @@ const PlacementListItem: React.FC<{
           <Box sx={{ mt: 0.5, display: "flex", flexDirection: "column", gap: 0.75 }}>
             {item.layerCount !== undefined ||
             item.nestedGroupCount !== undefined ? (
-              <GroupCompositionSummary
-                meta={{
-                  layerCount: item.layerCount ?? 0,
-                  nestedGroupCount: item.nestedGroupCount ?? 0,
-                  toggleAllEnabled: item.toggled,
-                }}
-                compact
-                hideNestingLevel
-              />
+                <GroupCompositionSummary
+                  meta={{
+                    layerCount: item.layerCount ?? 0,
+                    nestedGroupCount: item.nestedGroupCount ?? 0,
+                    toggleAllEnabled: item.toggled,
+                  }}
+                  compact
+                />
             ) : null}
             <Box
               sx={{
@@ -505,9 +499,6 @@ const PlacementListItem: React.FC<{
                 variant="outlined"
                 label={t("map.groupActiveOnMap")}
               />
-              <Typography variant="caption" color="primary" sx={{ fontWeight: 600 }}>
-                {orderIndex + 1}
-              </Typography>
               <FormControlLabel
                 sx={{ m: 0 }}
                 control={
@@ -718,7 +709,6 @@ export function PlacementListPanel({
                 <PlacementListItem
                   key={placementListDomId(row.treeItemId)}
                   item={item}
-                  orderIndex={itemIds.indexOf(row.treeItemId)}
                   isDragging={row.treeItemId === draggedTreeItemId}
                   onRemove={() => onRemove(row.treeItemId)}
                   onToggleVisibleAtStart={(visible) =>
