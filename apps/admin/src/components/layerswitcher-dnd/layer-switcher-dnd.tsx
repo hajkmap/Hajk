@@ -38,6 +38,7 @@ import {
   findGroupInTree,
   insertIntoGroup,
   zoneAcceptsItemType,
+  isValidExternalDropTarget,
 } from "./utils";
 import { DraggableSourceItem } from "./draggable-source-item";
 import { DND_ITEM_TITLE_SX } from "./utils";
@@ -156,22 +157,38 @@ export const LayerSwitcherDnD: React.FC<LayerSwitcherDnDProps> = ({
 
     if (!source) return;
 
+    const newItemId = `${itemType}${ID_DELIMITER}${source.id}`;
+
     // Check each drop zone — only accept configured item types.
     for (const zone of dropZones) {
       if (!zoneAcceptsItemType(zone, itemType)) {
         continue;
       }
 
+      const targetId = over.id.toString();
+      if (!isValidExternalDropTarget(targetId, zone)) {
+        continue;
+      }
+
+      if (collectItemIds(zone.items).has(newItemId)) {
+        return;
+      }
+
       const newItem: TreeItem<TreeItemData> = {
-        id: `${itemType}${ID_DELIMITER}${source.id}`,
+        id: newItemId,
         name: source.name,
         type: itemType,
-        children: ITEM_CAPABILITIES[itemType].canHaveChildren ? [] : undefined,
-        canHaveChildren: ITEM_CAPABILITIES[itemType].canHaveChildren,
+        children:
+          zone.allowNesting !== false &&
+          ITEM_CAPABILITIES[itemType].canHaveChildren
+            ? []
+            : undefined,
+        canHaveChildren:
+          zone.allowNesting === false
+            ? false
+            : ITEM_CAPABILITIES[itemType].canHaveChildren,
         ...(itemType === "layer" ? { visibleAtStart: false } : {}),
       };
-
-      const targetId = over.id.toString();
 
       // Dropped on this zone's root
       if (targetId === zone.id) {

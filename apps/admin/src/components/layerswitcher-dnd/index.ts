@@ -5,6 +5,10 @@ export { TreeItemActions } from "./tree-item-actions";
 export { GroupIntoDropTarget } from "./group-into-drop-target";
 export { TreeDropZone } from "./tree-drop-zone";
 export { SortableDropZone } from "./sortable-drop-zone";
+export { DrawOrderListPanel, useDrawOrderDndHandlers, getDrawOrderActiveDragName, isValidDrawOrderDropTarget } from "./draw-order-list";
+export { PlacementListPanel, usePlacementDndHandlers, getPlacementActiveDragName, isValidPlacementDropTarget } from "./placement-list";
+export { PlacementCatalogItem } from "./placement-catalog-item";
+export { DrawOrderCatalogItem } from "./draw-order-catalog-item";
 export { ToolPlacementWindow } from "./tool-placement-window";
 export { ToolPlacementDnD } from "./tool-placement-dnd";
 
@@ -27,6 +31,10 @@ export {
   enforceZoneRules,
   flattenToRoot,
   zoneAcceptsItemType,
+  findZoneRuleViolations,
+  isValidZoneTree,
+  isValidExternalDropTarget,
+  isValidTreeDrop,
   collectItemIds,
   findGroupInTree,
   insertIntoGroup,
@@ -43,6 +51,7 @@ export {
   getSortableTreePanelSx,
   DND_DRAG_HANDLE_SX,
   getDropLineSx,
+  adjustDrawOrderInsertIndex,
   getReorderDropPosition,
   flattenTreeItemIds,
   useTrackTreeDragActiveId,
@@ -69,4 +78,4 @@ export {
   GROUP_SIBLING_DROP_ZONE_BELOW_PX,
   GROUP_SIBLING_DROP_ZONE_EXTEND_ABOVE_PX,
 } from "./utils";
-export type { GroupDropIntent } from "./utils";
+export type { GroupDropIntent, ZoneRules, ZoneRuleViolation } from "./utils";

@@ -24,7 +24,8 @@ export interface Map {
 /**
  * A layer attached to a map (GET /maps/:name/layers). `mapId` is set for
  * layers placed directly on the map; `groupId` is set for layers inherited
- * via a group on the map.
+ * via a group on the map. `zIndex` on the response is the placement draw order
+ * (`LayerInstance.zIndex`); higher values are drawn on top in layersConfig.
  */
 export interface MapLayer extends Layer {
   mapId: number | null;

@@ -35,6 +35,7 @@ import {
   useUpdateMap,
   useUpdateMapTools,
   useUpdateMapContent,
+  useUpdateMapLayers,
   useDeleteMap,
   useMaps,
   useToolsByMapName,
@@ -54,12 +55,20 @@ import MapSettingsForm, {
   type MapSettingsSection,
 } from "./components/map-settings-form";
 import MapThemesTab from "./components/map-themes-tab";
-import MapGroupPlacementPanel from "./components/map-group-placement-panel";
+import MapContentPanel from "./components/map-content-panel";
 import {
+  buildMapLayerTree,
   buildServerMapContentItems,
   entityIdFromItemId,
-  mapContentSignature,
+  mapLayerDrawOrderSignature,
+  mapPlacementSignature,
   mapContentToPayloads,
+  mapLayerTreeToPayload,
+  syncLayerDrawOrderWithPlacement,
+  syncPlacementVisibleAtStartFromDrawOrder,
+  addLayerToPlacementIfMissing,
+  insertLayerInDrawOrder,
+  removeLayerFromDrawOrderTree,
 } from "./map-group-placement-utils";
 import { TreeItemData } from "../../components/layerswitcher-dnd";
 import { useTools } from "../../api/tools";
@@ -149,6 +158,7 @@ export default function MapSettings() {
   const { mutateAsync: updateMap, status: updateStatus } = useUpdateMap();
   const { mutateAsync: updateMapTools } = useUpdateMapTools();
   const { mutateAsync: updateMapContent } = useUpdateMapContent();
+  const { mutateAsync: updateMapLayers } = useUpdateMapLayers();
   const { mutateAsync: deleteMap, isPending: isDeletingMap } = useDeleteMap();
   const { palette } = useTheme();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -244,6 +254,9 @@ export default function MapSettings() {
   const [mapContentDZ, setMapContentDZ] = useState<TreeItems<TreeItemData>>(
     [],
   );
+  const [mapLayerDrawOrderDZ, setMapLayerDrawOrderDZ] = useState<
+    TreeItems<TreeItemData>
+  >([]);
 
   const serverMapContentItems = useMemo<TreeItems<TreeItemData>>(() => {
     const items = buildServerMapContentItems(mapLayers ?? [], mapGroups ?? []);
@@ -261,15 +274,37 @@ export default function MapSettings() {
     });
   }, [mapLayers, mapGroups, catalogGroups]);
 
-  const contentDirtyRaw = useMemo(() => {
+  const serverLayerDrawOrderItems = useMemo<TreeItems<TreeItemData>>(
+    () => buildMapLayerTree(mapLayers ?? []),
+    [mapLayers],
+  );
+
+  const placementDirtyRaw = useMemo(() => {
     if (!mapName || mapLayers === undefined || mapGroups === undefined) {
       return false;
     }
     return (
-      mapContentSignature(mapContentDZ) !==
-      mapContentSignature(serverMapContentItems)
+      mapPlacementSignature(mapContentDZ) !==
+      mapPlacementSignature(serverMapContentItems)
     );
   }, [mapContentDZ, serverMapContentItems, mapName, mapLayers, mapGroups]);
+
+  const drawOrderDirtyRaw = useMemo(() => {
+    if (!mapName || mapLayers === undefined) {
+      return false;
+    }
+    return (
+      mapLayerDrawOrderSignature(mapLayerDrawOrderDZ) !==
+      mapLayerDrawOrderSignature(serverLayerDrawOrderItems)
+    );
+  }, [
+    mapLayerDrawOrderDZ,
+    serverLayerDrawOrderItems,
+    mapName,
+    mapLayers,
+  ]);
+
+  const contentDirtyRaw = placementDirtyRaw || drawOrderDirtyRaw;
 
   const [menuSynced, setMenuSynced] = useState(false);
 
@@ -283,6 +318,7 @@ export default function MapSettings() {
     }
     if (!menuSynced) {
       setMapContentDZ(serverMapContentItems);
+      setMapLayerDrawOrderDZ(serverLayerDrawOrderItems);
       setMenuSynced(true);
       return;
     }
@@ -290,14 +326,52 @@ export default function MapSettings() {
       return;
     }
     setMapContentDZ(serverMapContentItems);
+    setMapLayerDrawOrderDZ(serverLayerDrawOrderItems);
   }, [
     mapName,
     mapLayers,
     mapGroups,
     serverMapContentItems,
+    serverLayerDrawOrderItems,
     menuSynced,
     contentDirtyRaw,
   ]);
+
+  const handleMapContentChange = useCallback(
+    (items: TreeItems<TreeItemData>) => {
+      setMapContentDZ(items);
+      setMapLayerDrawOrderDZ((prev) =>
+        syncLayerDrawOrderWithPlacement(items, prev),
+      );
+    },
+    [],
+  );
+
+  const handleMapDrawOrderChange = useCallback(
+    (items: TreeItems<TreeItemData>) => {
+      setMapLayerDrawOrderDZ(items);
+      setMapContentDZ((prev) =>
+        syncPlacementVisibleAtStartFromDrawOrder(prev, items),
+      );
+    },
+    [],
+  );
+
+  const handleInsertLayerToDrawOrder = useCallback(
+    (layer: { id: string; name: string }, insertIndex: number) => {
+      setMapContentDZ((prev) => addLayerToPlacementIfMissing(prev, layer));
+      setMapLayerDrawOrderDZ((prev) =>
+        insertLayerInDrawOrder(prev, layer, insertIndex),
+      );
+    },
+    [],
+  );
+
+  const handleRemoveLayerFromDrawOrder = useCallback((layerId: string) => {
+    setMapLayerDrawOrderDZ((prev) =>
+      removeLayerFromDrawOrderTree(prev, layerId),
+    );
+  }, []);
 
   const contentDirty = menuSynced && contentDirtyRaw;
   const serverToolZones = useMemo(
@@ -609,10 +683,17 @@ export default function MapSettings() {
       }
 
       if (contentDirty) {
-        await updateMapContent({
-          mapName: map.name,
-          content: mapContentToPayloads(mapContentDZ),
-        });
+        if (placementDirtyRaw) {
+          await updateMapContent({
+            mapName: map.name,
+            content: mapContentToPayloads(mapContentDZ, mapLayerDrawOrderDZ),
+          });
+        } else if (drawOrderDirtyRaw) {
+          await updateMapLayers({
+            mapName: map.name,
+            layers: mapLayerTreeToPayload(mapLayerDrawOrderDZ),
+          });
+        }
       }
 
       if (isDirty) {
@@ -797,11 +878,15 @@ export default function MapSettings() {
               {t("maps.contentLoadError")}
             </Alert>
           ) : (
-            <MapGroupPlacementPanel
+            <MapContentPanel
               catalogLayers={catalogLayers}
               catalogGroups={catalogGroups}
-              items={mapContentDZ}
-              onItemsChange={setMapContentDZ}
+              placementItems={mapContentDZ}
+              onPlacementItemsChange={handleMapContentChange}
+              drawOrderItems={mapLayerDrawOrderDZ}
+              onDrawOrderItemsChange={handleMapDrawOrderChange}
+              onInsertLayerToDrawOrder={handleInsertLayerToDrawOrder}
+              onRemoveLayerFromDrawOrder={handleRemoveLayerFromDrawOrder}
             />
           ))}
 

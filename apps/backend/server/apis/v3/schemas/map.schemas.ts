@@ -60,7 +60,7 @@ export const MapLayersUpdateSchema = z.object({
         usage: UsageSchema.optional(),
         visibleAtStart: z.boolean().optional(),
         infoClickActive: z.boolean().optional(),
-        zIndex: z.number().optional(),
+        zIndex: z.number().int().min(0).optional(),
       })
     )
     .default([]),

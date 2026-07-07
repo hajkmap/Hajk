@@ -1,6 +1,6 @@
 import React from "react";
 import { Box } from "@mui/material";
-import { SortableTree, TreeItems } from "dnd-kit-sortable-tree";
+import { SortableTree, TreeItems, type ItemChangedReason } from "dnd-kit-sortable-tree";
 import { useTranslation } from "react-i18next";
 
 import useAppStateStore from "../../store/use-app-state-store";
@@ -9,6 +9,8 @@ import { TreeDropZone } from "./tree-drop-zone";
 import { TreeItemComponent } from "./tree-item-component";
 import {
   enforceZoneRules,
+  findZoneRuleViolations,
+  isValidTreeDrop,
   moveItemUp,
   moveItemDown,
   canItemMoveUp,
@@ -34,6 +36,7 @@ interface SortableDropZoneProps {
   enableRemove?: boolean;
   showLayerPlacementStatus?: boolean;
   showGroupPlacementStatus?: boolean;
+  showListOrder?: boolean;
 }
 
 export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
@@ -51,14 +54,28 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
   enableRemove = true,
   showLayerPlacementStatus = false,
   showGroupPlacementStatus = false,
+  showListOrder = false,
 }) => {
   const { t } = useTranslation();
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
 
+  const zoneRules = { acceptedItemTypes, allowNesting };
+
   const applyZoneRules = (nextItems: TreeItems<TreeItemData>) =>
-    onItemsChange(
-      enforceZoneRules(nextItems, { acceptedItemTypes, allowNesting }),
-    );
+    onItemsChange(enforceZoneRules(nextItems, zoneRules));
+
+  const handleItemsChanged = (
+    newItems: TreeItems<TreeItemData>,
+    reason: ItemChangedReason<TreeItemData>,
+  ) => {
+    if (!isValidTreeDrop(reason, zoneRules)) {
+      return;
+    }
+    if (findZoneRuleViolations(newItems, zoneRules)) {
+      return;
+    }
+    applyZoneRules(newItems);
+  };
 
   const handleMoveUp = (itemId: string) => {
     applyZoneRules(moveItemUp(items, itemId));
@@ -105,8 +122,10 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
       .map((item, index) => [item.id.toString(), index]),
   );
 
-  const topLevelIndexById = new Map(
-    items.map((item, index) => [item.id.toString(), index]),
+  const groupSwitcherOrderById = new Map(
+    items
+      .filter((item) => item.type === "group")
+      .map((item, index) => [item.id.toString(), index]),
   );
 
   return (
@@ -132,7 +151,7 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
       >
         <SortableTree
           items={items}
-          onItemsChanged={(newItems) => applyZoneRules(newItems)}
+          onItemsChanged={handleItemsChanged}
           keepGhostInPlace
           indentationWidth={allowNesting === false ? 0 : 20}
           canRootHaveChildren={allowNesting === false ? false : undefined}
@@ -161,8 +180,15 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
                   showLayerPlacementStatus &&
                   treeItemProps.item.type === "layer"
                     ? layerDrawOrderById.get(itemId)
-                    : topLevelIndexById.get(itemId)
+                    : undefined
                 }
+                groupOrderIndex={
+                  showGroupPlacementStatus &&
+                  treeItemProps.item.type === "group"
+                    ? groupSwitcherOrderById.get(itemId)
+                    : undefined
+                }
+                showListOrder={showListOrder}
                 showLayerPlacementStatus={showLayerPlacementStatus}
                 showGroupPlacementStatus={showGroupPlacementStatus}
                 onToggleVisibleAtStart={(visible) =>
@@ -175,6 +201,8 @@ export const SortableDropZone: React.FC<SortableDropZoneProps> = ({
                   handleToggleExpanded(itemId, expanded)
                 }
                 removeTitle={t("map.removeFromMap")}
+                moveUpTitle={t("map.drawOrderMoveUp")}
+                moveDownTitle={t("map.drawOrderMoveDown")}
               />
             );
           }}

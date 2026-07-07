@@ -1,6 +1,10 @@
 import type { SxProps, Theme } from "@mui/material";
 import { useDndMonitor } from "@dnd-kit/core";
-import { TreeItems, TreeItem } from "dnd-kit-sortable-tree";
+import {
+  TreeItems,
+  TreeItem,
+  type ItemChangedReason,
+} from "dnd-kit-sortable-tree";
 import {
   ItemType,
   TreeItemData,
@@ -38,6 +42,22 @@ export const getDropLineSx = (isDarkMode: boolean, edge: "top" | "bottom") => ({
   pointerEvents: "none" as const,
   boxShadow: `0 0 4px ${isDarkMode ? "#42a5f5" : "#1976d2"}`,
 });
+
+/** Map a drop index from the full list to an index in the list without `movedLayerId`. */
+export function adjustDrawOrderInsertIndex(
+  layerIds: string[],
+  movedLayerId: string,
+  insertIndex: number,
+): number {
+  const existingIndex = layerIds.indexOf(movedLayerId);
+  const maxIndex =
+    existingIndex === -1 ? layerIds.length : layerIds.length - 1;
+  const clamped = Math.max(0, Math.min(insertIndex, layerIds.length));
+  if (existingIndex === -1 || existingIndex >= clamped) {
+    return Math.min(clamped, maxIndex);
+  }
+  return Math.max(0, clamped - 1);
+}
 
 export const treeDragActiveIdRef = { current: null as string | null };
 
@@ -451,19 +471,99 @@ export const parseSourceId = (
 export const createSourceId = (type: ItemType, id: string): string =>
   `source${ID_DELIMITER}${type}${ID_DELIMITER}${id}`;
 
+export type ZoneRules = {
+  acceptedItemTypes?: ItemType[];
+  allowNesting?: boolean;
+};
+
+export type ZoneRuleViolation =
+  | "invalid-item-type"
+  | "nesting-not-allowed"
+  | "parent-cannot-have-children";
+
+/** Returns the first zone rule violation in `treeItems`, or null if valid. */
+export const findZoneRuleViolations = (
+  treeItems: TreeItems<TreeItemData>,
+  options?: ZoneRules,
+): ZoneRuleViolation | null => {
+  for (const item of treeItems) {
+    if (
+      options?.acceptedItemTypes?.length &&
+      !options.acceptedItemTypes.includes(item.type)
+    ) {
+      return "invalid-item-type";
+    }
+    if (item.children?.length) {
+      if (options?.allowNesting === false) {
+        return "nesting-not-allowed";
+      }
+      if (!ITEM_CAPABILITIES[item.type].canHaveChildren) {
+        return "parent-cannot-have-children";
+      }
+      const childViolation = findZoneRuleViolations(item.children, options);
+      if (childViolation) {
+        return childViolation;
+      }
+    }
+  }
+  return null;
+};
+
+export const isValidZoneTree = (
+  treeItems: TreeItems<TreeItemData>,
+  options?: ZoneRules,
+): boolean => findZoneRuleViolations(treeItems, options) === null;
+
+/** Whether a SortableTree drop should be applied (rejects invalid nest targets). */
+export const isValidTreeDrop = (
+  reason: ItemChangedReason<TreeItemData>,
+  options?: ZoneRules,
+): boolean => {
+  if (reason.type !== "dropped") {
+    return true;
+  }
+
+  const { droppedToParent, draggedItem } = reason;
+
+  if (options?.allowNesting === false && droppedToParent !== null) {
+    return false;
+  }
+
+  if (droppedToParent) {
+    if (!ITEM_CAPABILITIES[droppedToParent.type].canHaveChildren) {
+      return false;
+    }
+    if (
+      options?.acceptedItemTypes?.length &&
+      !options.acceptedItemTypes.includes(draggedItem.type)
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 // Enforce item rules (canHaveChildren based on type)
 export const enforceItemRules = (
   treeItems: TreeItems<TreeItemData>,
+  options?: Pick<ZoneRules, "allowNesting">,
 ): TreeItems<TreeItemData> =>
-  treeItems.map((item) => ({
-    ...item,
-    canHaveChildren: ITEM_CAPABILITIES[item.type].canHaveChildren,
-    children: ITEM_CAPABILITIES[item.type].canHaveChildren
-      ? item.children?.length
-        ? enforceItemRules(item.children)
-        : undefined
-      : undefined,
-  }));
+  treeItems.map((item) => {
+    const canHaveChildren =
+      options?.allowNesting === false
+        ? false
+        : ITEM_CAPABILITIES[item.type].canHaveChildren;
+    return {
+      ...item,
+      canHaveChildren,
+      children: canHaveChildren
+        ? item.children?.length
+          ? enforceItemRules(item.children, options)
+          : undefined
+        : undefined,
+    };
+  });
 
 /** Flattens a tree to root-level siblings (preserves depth-first order). */
 export const flattenToRoot = (
@@ -499,12 +599,11 @@ const filterAcceptedItemTypes = (
 
 export const enforceZoneRules = (
   treeItems: TreeItems<TreeItemData>,
-  options?: {
-    acceptedItemTypes?: ItemType[];
-    allowNesting?: boolean;
-  },
+  options?: ZoneRules,
 ): TreeItems<TreeItemData> => {
-  let tree = enforceItemRules(treeItems);
+  let tree = enforceItemRules(treeItems, {
+    allowNesting: options?.allowNesting,
+  });
   if (options?.acceptedItemTypes?.length) {
     tree = filterAcceptedItemTypes(tree, options.acceptedItemTypes);
   }
@@ -545,6 +644,24 @@ export const findGroupInTree = (
     }
   }
   return null;
+};
+
+/** Whether a catalog/external drop landed on an allowed target for the zone. */
+export const isValidExternalDropTarget = (
+  overId: string,
+  zone: {
+    id: string;
+    items: TreeItems<TreeItemData>;
+    allowNesting?: boolean;
+  },
+): boolean => {
+  if (overId === zone.id) {
+    return true;
+  }
+  if (zone.allowNesting === false) {
+    return false;
+  }
+  return findGroupInTree(zone.items, overId) !== null;
 };
 
 // Insert item into a group within a tree

@@ -242,6 +242,8 @@ paths:
                         type: boolean
                       zIndex:
                         type: integer
+                        minimum: 0
+                        description: Draw order for direct map placement (ascending; higher = drawn on top). Emitted as drawOrder in client layersConfig.
                     required:
                       - layerId
       responses:
@@ -253,6 +255,72 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+        404:
+          description: Map not found
+  /maps/{mapName}/content:
+    get:
+      tags:
+        - Admin only
+      parameters:
+        - name: mapName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Direct map layers and group placements (combined Kartinnehåll load)
+        404:
+          description: Map not found
+    put:
+      tags:
+        - Admin only
+      parameters:
+        - name: mapName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Atomically replaces direct map layers (zIndex draw order) and group placements
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                layers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      layerId:
+                        type: string
+                      zIndex:
+                        type: integer
+                        minimum: 0
+                      visibleAtStart:
+                        type: boolean
+                    required:
+                      - layerId
+                groups:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      groupId:
+                        type: string
+                      index:
+                        type: integer
+                    required:
+                      - groupId
+              required:
+                - layers
+                - groups
+      responses:
+        204:
+          description: Map content updated
+        400:
+          description: Invalid request
         404:
           description: Map not found
   /maps/{mapName}/groups:

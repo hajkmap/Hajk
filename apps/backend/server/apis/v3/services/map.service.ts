@@ -354,6 +354,7 @@ class MapService {
     const instances = await prisma.layerInstance.findMany({
       where: activeLayerInstancesForMapWhere(mapName),
       include: layerInstanceIncludeAll,
+      orderBy: { zIndex: "asc" },
     });
 
     return instances

@@ -24,12 +24,16 @@ interface TreeItemComponentExtendedProps extends TreeItemComponentProps<TreeItem
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   drawOrderIndex?: number;
+  groupOrderIndex?: number;
+  showListOrder?: boolean;
   showLayerPlacementStatus?: boolean;
   showGroupPlacementStatus?: boolean;
   onToggleVisibleAtStart?: (visible: boolean) => void;
   onToggleToggled?: (toggled: boolean) => void;
   onToggleExpanded?: (expanded: boolean) => void;
   removeTitle?: string;
+  moveUpTitle?: string;
+  moveDownTitle?: string;
 }
 
 export const TreeItemComponent = React.forwardRef<
@@ -44,12 +48,16 @@ export const TreeItemComponent = React.forwardRef<
     canMoveUp,
     canMoveDown,
     drawOrderIndex,
+    groupOrderIndex,
+    showListOrder = false,
     showLayerPlacementStatus,
     showGroupPlacementStatus,
     onToggleVisibleAtStart,
     onToggleToggled,
     onToggleExpanded,
     removeTitle,
+    moveUpTitle,
+    moveDownTitle,
   } = props;
   const { t } = useTranslation();
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
@@ -117,10 +125,13 @@ export const TreeItemComponent = React.forwardRef<
                 variant="outlined"
                 label={t("map.layerActive")}
               />
-              {drawOrderIndex != null ? (
-                <Typography variant="caption" color="text.secondary">
-                  {t("map.layerDrawOrder", { order: drawOrderIndex + 1 })}
-                </Typography>
+              {showListOrder && drawOrderIndex != null ? (
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  label={t("map.drawOrderShort", { order: drawOrderIndex + 1 })}
+                />
               ) : null}
               <FormControlLabel
                 sx={{ m: 0 }}
@@ -178,6 +189,16 @@ export const TreeItemComponent = React.forwardRef<
                 variant="outlined"
                 label={t("map.groupActiveOnMap")}
               />
+              {showListOrder && groupOrderIndex != null ? (
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  label={t("map.groupSwitcherOrderShort", {
+                    order: groupOrderIndex + 1,
+                  })}
+                />
+              ) : null}
               <FormControlLabel
                 sx={{ m: 0 }}
                 control={
@@ -228,9 +249,11 @@ export const TreeItemComponent = React.forwardRef<
           onRemove={props.onRemove ? () => props.onRemove?.() : undefined}
           canMoveUp={canMoveUp}
           canMoveDown={canMoveDown}
-          showAddSlot
+          showAddSlot={Boolean(onAdd)}
           isDarkMode={isDarkMode}
           removeTitle={removeTitle}
+          moveUpTitle={moveUpTitle}
+          moveDownTitle={moveDownTitle}
         />
       </Box>
     </SimpleTreeItemWrapper>

@@ -1,22 +1,19 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   DndContext,
-  DragEndEvent,
   DragOverlay,
-  DragStartEvent,
   MouseSensor,
   PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { TreeItem, TreeItems } from "dnd-kit-sortable-tree";
+import type { TreeItems } from "dnd-kit-sortable-tree";
 import {
   Box,
+  Chip,
   List,
   Paper,
-  Tab,
-  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -26,24 +23,30 @@ import { useTranslation } from "react-i18next";
 
 import useAppStateStore from "../../../store/use-app-state-store";
 import {
-  DraggableSourceItem,
-  SortableDropZone,
+  DND_DRAG_HANDLE_SX,
+  DND_ITEM_TITLE_SX,
+  PlacementCatalogItem,
+  PlacementListPanel,
   TreeItemData,
   ID_DELIMITER,
-  enforceZoneRules,
-  DND_ITEM_TITLE_SX,
-  ItemType,
+  getPlacementActiveDragName,
+  updateItemInTree,
+  usePlacementDndHandlers,
 } from "../../../components/layerswitcher-dnd";
 import {
   groupToCatalogMeta,
   type GroupCatalogMeta,
 } from "../../groups/utils/group-composition-stats";
-import { collectPlacedItemIds } from "../map-group-placement-utils";
-
-interface MapCatalogLayer {
-  id: string;
-  name: string;
-}
+import {
+  createGroupTreeItem,
+  extractGroupItems,
+  extractLayerItems,
+  insertItemInPlacement,
+  mergeMapContentLayersAndGroups,
+  placementTreeToItemIds,
+  removeItemFromPlacement,
+  reorderPlacementByItemIds,
+} from "../map-group-placement-utils";
 
 interface MapCatalogGroup {
   id: string;
@@ -53,16 +56,10 @@ interface MapCatalogGroup {
 }
 
 interface MapGroupPlacementPanelProps {
-  catalogLayers: MapCatalogLayer[];
   catalogGroups: MapCatalogGroup[];
   items: TreeItems<TreeItemData>;
   onItemsChange: (items: TreeItems<TreeItemData>) => void;
 }
-
-const CONTENT_ZONE_RULES = {
-  acceptedItemTypes: ["layer", "group"] as const,
-  allowNesting: false,
-};
 
 const MAP_CONTENT_DND_HEIGHT = {
   xs: 400,
@@ -70,16 +67,14 @@ const MAP_CONTENT_DND_HEIGHT = {
 } as const;
 
 export default function MapGroupPlacementPanel({
-  catalogLayers,
   catalogGroups,
   items,
   onItemsChange,
 }: MapGroupPlacementPanelProps) {
   const { t } = useTranslation();
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
-  const [leftTab, setLeftTab] = useState(0);
   const [search, setSearch] = useState("");
-  const [activeDragName, setActiveDragName] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
@@ -89,96 +84,103 @@ export default function MapGroupPlacementPanel({
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
 
-  const placedItemIds = useMemo(() => collectPlacedItemIds(items), [items]);
+  const layerItems = useMemo(() => extractLayerItems(items), [items]);
+  const groupItems = useMemo(() => extractGroupItems(items), [items]);
 
-  const availableLayers = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return catalogLayers
-      .filter(
-        (layer) =>
-          !placedItemIds.has(`layer${ID_DELIMITER}${layer.id}`) &&
-          (!query || layer.name.toLowerCase().includes(query)),
-      )
-      .slice()
-      .sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
-      );
-  }, [catalogLayers, placedItemIds, search]);
-
-  const availableGroups = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return catalogGroups
-      .filter(
-        (group) =>
-          !placedItemIds.has(`group${ID_DELIMITER}${group.id}`) &&
-          (!query || group.name.toLowerCase().includes(query)),
-      )
-      .slice()
-      .sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
-      );
-  }, [catalogGroups, placedItemIds, search]);
-
-  const applyContentRules = (nextItems: TreeItems<TreeItemData>) =>
-    onItemsChange(
-      enforceZoneRules(
-        nextItems,
-        CONTENT_ZONE_RULES,
-      ) as TreeItems<TreeItemData>,
-    );
-
-  const handleDragStart = (event: DragStartEvent) => {
-    const data = event.active.data.current as
-      | { item: { name: string } }
-      | undefined;
-    setActiveDragName(data?.item.name ?? null);
+  const applyGroupPlacementChange = (
+    nextGroups: TreeItems<TreeItemData>,
+  ) => {
+    onItemsChange(mergeMapContentLayersAndGroups(layerItems, nextGroups));
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    setActiveDragName(null);
-    const { over } = event;
-    if (!over || over.id.toString() !== "map-content") return;
+  const placedGroupIds = useMemo(
+    () => new Set(groupItems.map((item) => item.id.toString())),
+    [groupItems],
+  );
 
-    const dragData = event.active.data.current as
-      | { type: ItemType; item: { id: string; name: string } }
-      | undefined;
-    if (!dragData?.item || !dragData.type) return;
+  const groupById = useMemo(
+    () => new Map(groupItems.map((item) => [item.id.toString(), item])),
+    [groupItems],
+  );
 
-    if (dragData.type === "layer") {
-      const source = catalogLayers.find(
-        (layer) => layer.id === dragData.item.id,
+  const placementNameByTreeItemId = useMemo(() => {
+    const map = new Map<string, string>();
+    groupItems.forEach((item) => map.set(item.id.toString(), item.name));
+    catalogGroups.forEach((group) => {
+      map.set(`group${ID_DELIMITER}${group.id}`, group.name);
+    });
+    return map;
+  }, [groupItems, catalogGroups]);
+
+  const filteredGroups = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return catalogGroups
+      .filter((group) => !query || group.name.toLowerCase().includes(query))
+      .slice()
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
       );
-      if (!source) return;
+  }, [catalogGroups, search]);
 
-      const newItem: TreeItem<TreeItemData> = {
-        id: `layer${ID_DELIMITER}${source.id}`,
-        name: source.name,
-        type: "layer",
-        canHaveChildren: false,
-        visibleAtStart: false,
-      };
-      applyContentRules([...items, newItem]);
-      return;
-    }
+  const groupItemIds = useMemo(
+    () => placementTreeToItemIds(groupItems),
+    [groupItems],
+  );
 
-    if (dragData.type === "group") {
-      const source = catalogGroups.find(
-        (group) => group.id === dragData.item.id,
+  const {
+    activeId,
+    insertIndex,
+    handleDragStart,
+    handleDragOver,
+    handleDragEnd,
+  } = usePlacementDndHandlers({
+    itemIds: groupItemIds,
+    scrollRef,
+    onReorder: (nextItemIds) => {
+      applyGroupPlacementChange(
+        reorderPlacementByItemIds(groupItems, nextItemIds),
       );
-      if (!source) return;
+    },
+    onInsertFromSource: (type, entityId, insertIndex) => {
+      if (type !== "group") return;
 
-      const newItem: TreeItem<TreeItemData> = {
-        id: `group${ID_DELIMITER}${source.id}`,
-        name: source.name,
-        type: "group",
-        canHaveChildren: false,
-        toggled: true,
-        expanded: false,
-        layerCount: source.layerCount,
-        nestedGroupCount: source.nestedGroupCount,
-      };
-      applyContentRules([...items, newItem]);
-    }
+      const group = catalogGroups.find((entry) => entry.id === entityId);
+      if (!group) return;
+      applyGroupPlacementChange(
+        insertItemInPlacement(
+          groupItems,
+          createGroupTreeItem(group),
+          insertIndex,
+        ),
+      );
+    },
+  });
+
+  const activeDragName = getPlacementActiveDragName(
+    activeId,
+    placementNameByTreeItemId,
+  );
+
+  const handleRemove = (treeItemId: string) => {
+    applyGroupPlacementChange(removeItemFromPlacement(groupItems, treeItemId));
+  };
+
+  const handleToggleToggled = (treeItemId: string, toggled: boolean) => {
+    applyGroupPlacementChange(
+      updateItemInTree(groupItems, treeItemId, (item) => ({
+        ...item,
+        toggled,
+      })),
+    );
+  };
+
+  const handleToggleExpanded = (treeItemId: string, expanded: boolean) => {
+    applyGroupPlacementChange(
+      updateItemInTree(groupItems, treeItemId, (item) => ({
+        ...item,
+        expanded,
+      })),
+    );
   };
 
   return (
@@ -186,6 +188,7 @@ export default function MapGroupPlacementPanel({
       <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         <Box
@@ -215,30 +218,15 @@ export default function MapGroupPlacementPanel({
               }}
             >
               <Typography variant="subtitle1" fontWeight={600}>
-                {t("map.groupPlacement.availableContent")}
+                {t("map.groupPlacement.availableGroups")}
               </Typography>
               <Typography
                 variant="caption"
                 color="text.secondary"
                 sx={{ mt: 0.5, mb: 2, display: "block" }}
               >
-                {t("map.groupPlacement.availableContentHelp")}
+                {t("map.placementGroupsCatalogHelp")}
               </Typography>
-
-              <Tabs
-                value={leftTab}
-                onChange={(_, value) => setLeftTab(value)}
-                sx={{ mb: 2, minHeight: 36, flexShrink: 0 }}
-              >
-                <Tab
-                  label={t("common.layers")}
-                  sx={{ minHeight: 36, py: 0.5 }}
-                />
-                <Tab
-                  label={t("common.layerGroups")}
-                  sx={{ minHeight: 36, py: 0.5 }}
-                />
-              </Tabs>
 
               <TextField
                 size="small"
@@ -257,36 +245,35 @@ export default function MapGroupPlacementPanel({
                   width: "100%",
                 }}
               >
-                {leftTab === 0 ? (
-                  availableLayers.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary">
-                      {t("map.groupPlacement.noAvailableLayers")}
-                    </Typography>
-                  ) : (
-                    availableLayers.map((layer) => (
-                      <DraggableSourceItem
-                        key={layer.id}
-                        item={layer}
-                        type="layer"
-                        showInactiveStatus
-                      />
-                    ))
-                  )
-                ) : availableGroups.length === 0 ? (
+                {catalogGroups.length === 0 ? (
                   <Typography variant="body2" color="text.secondary">
-                    {t("map.groupPlacement.noAvailableGroups")}
+                    {t("map.placementNoCatalogGroups")}
+                  </Typography>
+                ) : filteredGroups.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary">
+                    {t("map.placementNoSearchResults")}
                   </Typography>
                 ) : (
-                  availableGroups.map((group) => (
-                    <DraggableSourceItem
-                      key={group.id}
-                      item={group}
-                      type="group"
-                      groupMeta={
-                        groupToCatalogMeta(group) satisfies GroupCatalogMeta
-                      }
-                    />
-                  ))
+                  filteredGroups.map((group) => {
+                    const treeItemId = `group${ID_DELIMITER}${group.id}`;
+                    const inPlacement = placedGroupIds.has(treeItemId);
+                    return (
+                      <PlacementCatalogItem
+                        key={group.id}
+                        item={group}
+                        type="group"
+                        inPlacement={inPlacement}
+                        groupMeta={
+                          groupToCatalogMeta(group) satisfies GroupCatalogMeta
+                        }
+                        onRemoveFromPlacement={
+                          inPlacement
+                            ? () => handleRemove(treeItemId)
+                            : undefined
+                        }
+                      />
+                    );
+                  })
                 )}
               </List>
             </Paper>
@@ -303,25 +290,39 @@ export default function MapGroupPlacementPanel({
                 overflow: "hidden",
               }}
             >
-              <Box
-                sx={{
-                  flex: 1,
-                  minHeight: 0,
-                  overflowY: "auto",
-                }}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                <MapIcon color="primary" fontSize="small" />
+                <Typography variant="subtitle1" fontWeight={600}>
+                  {t("map.groupPlacement.onMap.title")}
+                </Typography>
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={t("map.groupPlacement.onMap.clientBucket")}
+                  sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}
+                />
+              </Box>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mb: 2, display: "block" }}
               >
-                <SortableDropZone
-                  id="map-content"
-                  title={t("map.groupPlacement.onMap.title")}
-                  helpText={t("map.groupPlacement.onMap.help")}
-                  clientBucketLabel={t("map.groupPlacement.onMap.clientBucket")}
-                  titleIcon={<MapIcon />}
-                  items={items}
-                  onItemsChange={applyContentRules}
-                  acceptedItemTypes={[...CONTENT_ZONE_RULES.acceptedItemTypes]}
-                  allowNesting={CONTENT_ZONE_RULES.allowNesting}
-                  showLayerPlacementStatus
-                  showGroupPlacementStatus
+                {t("map.placementGroupsOnMapHelp")}
+              </Typography>
+
+              <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
+                <PlacementListPanel
+                  items={groupItems}
+                  itemById={groupById}
+                  itemNameByTreeItemId={placementNameByTreeItemId}
+                  activeId={activeId}
+                  insertIndex={insertIndex}
+                  scrollRef={scrollRef}
+                  emptyLabel={t("map.placementGroupsDropEmpty")}
+                  onRemove={handleRemove}
+                  onToggleVisibleAtStart={() => {}}
+                  onToggleToggled={handleToggleToggled}
+                  onToggleExpanded={handleToggleExpanded}
                 />
               </Box>
             </Paper>
@@ -337,9 +338,12 @@ export default function MapGroupPlacementPanel({
                 alignItems: "flex-start",
                 gap: 1,
                 maxWidth: "100%",
+                background: isDarkMode ? "#1a1a1a" : "#fff",
+                opacity: 0.55,
+                boxShadow: 3,
               }}
             >
-              <DragIndicator sx={{ mt: 0.25, flexShrink: 0 }} />
+              <DragIndicator sx={{ ...DND_DRAG_HANDLE_SX, mt: 0.25 }} />
               <Typography title={activeDragName} sx={DND_ITEM_TITLE_SX}>
                 {activeDragName}
               </Typography>
