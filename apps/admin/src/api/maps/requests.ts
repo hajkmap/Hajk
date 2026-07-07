@@ -216,7 +216,7 @@ export const updateMapTools = async (
     index: number;
     target: string | null;
     active?: boolean;
-    options?: Record<string, string>;
+    options?: Record<string, string | number>;
   }[],
 ): Promise<void> => {
   const internalApiClient = getApiClient();

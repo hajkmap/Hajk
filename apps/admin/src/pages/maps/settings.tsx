@@ -82,6 +82,7 @@ import {
   zoneKeyToTarget,
   zonesToToolsPayload,
   type MapToolsDraftState,
+  type ToolWindowSize,
   type ToolZones,
 } from "./map-tools-utils";
 import { useProjections } from "../../api/services";
@@ -134,6 +135,7 @@ interface ToolsDraft {
   zones: ToolZones;
   activeToolIds: Set<number>;
   windowPositions: Record<number, ToolWindowPosition>;
+  windowSizes: Record<number, ToolWindowSize>;
   inactiveTargets: Record<number, ToolZone>;
 }
 
@@ -307,6 +309,19 @@ export default function MapSettings() {
     [mapTools],
   );
   const [toolsDraft, setToolsDraft] = useState<ToolsDraft | null>(null);
+  const toolsDraftRef = useRef<ToolsDraft | null>(null);
+  const flushMapToolEditsRef = useRef<(() => void) | null>(null);
+  const [hasPendingWindowSizeInput, setHasPendingWindowSizeInput] =
+    useState(false);
+
+  useEffect(() => {
+    toolsDraftRef.current = toolsDraft;
+  }, [toolsDraft]);
+
+  const applyToolsDraft = useCallback((next: ToolsDraft) => {
+    toolsDraftRef.current = next;
+    setToolsDraft(next);
+  }, []);
 
   const toolZones =
     toolsDraft != null && toolsDraft.mapName === mapName
@@ -323,6 +338,11 @@ export default function MapSettings() {
       ? toolsDraft.windowPositions
       : (serverToolsDraftState?.windowPositions ?? {});
 
+  const windowSizes =
+    toolsDraft != null && toolsDraft.mapName === mapName
+      ? toolsDraft.windowSizes
+      : (serverToolsDraftState?.windowSizes ?? {});
+
   const toolsDirty = useMemo(() => {
     if (toolsDraft == null || toolsDraft.mapName !== mapName || !mapTools) {
       return false;
@@ -333,6 +353,7 @@ export default function MapSettings() {
         toolsDraft.zones,
         toolsDraft.activeToolIds,
         toolsDraft.windowPositions,
+        toolsDraft.windowSizes,
         toolsDraft.inactiveTargets,
       )
     );
@@ -345,10 +366,9 @@ export default function MapSettings() {
       return {
         mapName: mapName ?? "",
         zones: serverToolZones ?? EMPTY_TOOL_ZONES,
-        activeToolIds: new Set<number>(
-          serverToolsDraftState?.activeToolIds ?? [],
-        ),
+        activeToolIds: new Set<number>(serverToolsDraftState?.activeToolIds ?? []),
         windowPositions: { ...(serverToolsDraftState?.windowPositions ?? {}) },
+        windowSizes: { ...(serverToolsDraftState?.windowSizes ?? {}) },
         inactiveTargets: { ...(serverToolsDraftState?.inactiveTargets ?? {}) },
       };
     },
@@ -357,9 +377,7 @@ export default function MapSettings() {
 
   const resolveToolName = useCallback(
     (toolId: number) => {
-      const catalogTool = catalogTools?.find(
-        (tool) => Number(tool.id) === toolId,
-      );
+      const catalogTool = catalogTools?.find((tool) => Number(tool.id) === toolId);
       if (catalogTool) return getCatalogToolDisplayName(catalogTool);
 
       const mapTool = mapTools?.find((tool) => tool.toolId === toolId);
@@ -390,6 +408,7 @@ export default function MapSettings() {
         const nextActiveToolIds = new Set(base.activeToolIds);
         let nextZones = base.zones;
         const nextWindowPositions = { ...base.windowPositions };
+        const nextWindowSizes = { ...base.windowSizes };
         const nextInactiveTargets = { ...base.inactiveTargets };
 
         if (active) {
@@ -425,6 +444,7 @@ export default function MapSettings() {
           zones: nextZones,
           activeToolIds: nextActiveToolIds,
           windowPositions: nextWindowPositions,
+          windowSizes: nextWindowSizes,
           inactiveTargets: nextInactiveTargets,
         };
       });
@@ -448,6 +468,7 @@ export default function MapSettings() {
           ),
           activeToolIds: new Set(base.activeToolIds),
           windowPositions: { ...base.windowPositions },
+          windowSizes: { ...base.windowSizes },
           inactiveTargets: { ...base.inactiveTargets },
         };
       });
@@ -469,11 +490,45 @@ export default function MapSettings() {
             ...base.windowPositions,
             [toolId]: position,
           },
+          windowSizes: { ...base.windowSizes },
           inactiveTargets: { ...base.inactiveTargets },
         };
       });
     },
     [mapName, resolveToolsDraft],
+  );
+
+  const setToolWindowSize = useCallback(
+    (toolId: number, size: Partial<ToolWindowSize>) => {
+      const base = resolveToolsDraft(toolsDraftRef.current);
+      if (!base.activeToolIds.has(toolId)) return;
+
+      const current = base.windowSizes[toolId] ?? {};
+      const nextSize: ToolWindowSize = { ...current };
+
+      if (Object.prototype.hasOwnProperty.call(size, "width")) {
+        if (size.width === undefined) delete nextSize.width;
+        else nextSize.width = size.width;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(size, "height")) {
+        if (size.height === undefined) delete nextSize.height;
+        else nextSize.height = size.height;
+      }
+
+      applyToolsDraft({
+        mapName: mapName ?? "",
+        zones: base.zones,
+        activeToolIds: new Set(base.activeToolIds),
+        windowPositions: { ...base.windowPositions },
+        windowSizes: {
+          ...base.windowSizes,
+          [toolId]: nextSize,
+        },
+        inactiveTargets: { ...base.inactiveTargets },
+      });
+    },
+    [mapName, resolveToolsDraft, applyToolsDraft],
   );
 
   const backgroundImage = "/mapbackground.png";
@@ -518,21 +573,39 @@ export default function MapSettings() {
     if (!map) return;
 
     try {
+      flushMapToolEditsRef.current?.();
+
+      const currentToolsDraft = toolsDraftRef.current;
+      const shouldSaveTools =
+        currentToolsDraft != null &&
+        mapTools != null &&
+        serverToolsSignature(mapTools) !==
+          toolsDraftSignature(
+            currentToolsDraft.zones,
+            currentToolsDraft.activeToolIds,
+            currentToolsDraft.windowPositions,
+            currentToolsDraft.windowSizes,
+            currentToolsDraft.inactiveTargets,
+          );
+
       // Persist placements first (keyed by the current name) so a simultaneous
       // rename doesn't target a no-longer-existing map name.
-      if (toolsDirty && toolsDraft) {
+      if (shouldSaveTools) {
         const toolsPayload = zonesToToolsPayload(
-          toolsDraft.zones,
-          toolsDraft.activeToolIds,
-          toolsDraft.windowPositions,
-          toolsDraft.inactiveTargets,
+          currentToolsDraft.zones,
+          currentToolsDraft.activeToolIds,
+          currentToolsDraft.windowPositions,
+          currentToolsDraft.windowSizes,
+          currentToolsDraft.inactiveTargets,
           mapTools ?? [],
         );
         await updateMapTools({
           mapName: map.name,
           tools: toolsPayload,
         });
+        toolsDraftRef.current = null;
         setToolsDraft(null);
+        setHasPendingWindowSizeInput(false);
       }
 
       if (contentDirty) {
@@ -632,7 +705,9 @@ export default function MapSettings() {
         createdDate={map?.createdDate}
         lastSavedBy={map?.lastSavedBy}
         lastSavedDate={map?.lastSavedDate}
-        isDirty={isDirty || toolsDirty || contentDirty}
+        isDirty={
+          isDirty || toolsDirty || hasPendingWindowSizeInput || contentDirty
+        }
         warning={
           <Box sx={{ mt: 1 }}>
             {map.locked ? (
@@ -737,10 +812,14 @@ export default function MapSettings() {
             toolZones={toolZones}
             activeToolIds={activeToolIds}
             windowPositions={windowPositions}
+            windowSizes={windowSizes}
             onUpdateToolZone={updateToolZone}
             onToggleToolActive={toggleToolActive}
             onToolTargetChange={setToolTarget}
             onToolWindowPositionChange={setToolWindowPosition}
+            onToolWindowSizeChange={setToolWindowSize}
+            flushPendingEditsRef={flushMapToolEditsRef}
+            onPendingWindowSizeDirtyChange={setHasPendingWindowSizeInput}
             backgroundImage={backgroundImage}
           />
         )}
@@ -811,7 +890,9 @@ export default function MapSettings() {
           disabled={isDeletingMap}
         />
       </DialogWrapper>
-      <UnsavedChangesGuard when={isDirty || toolsDirty || contentDirty} />
+      <UnsavedChangesGuard
+        when={isDirty || toolsDirty || hasPendingWindowSizeInput || contentDirty}
+      />
     </Page>
   );
 }

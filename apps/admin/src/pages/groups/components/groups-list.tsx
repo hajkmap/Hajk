@@ -40,7 +40,10 @@ import { SquareSpinnerComponent } from "../../../components/progress/square-prog
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 import StyledDataGrid from "../../../components/data-grid";
-import { getCreateGroupErrorMessage, getDeleteGroupErrorMessage } from "../utils/group-errors";
+import {
+  getCreateGroupErrorMessage,
+  getDeleteGroupErrorMessage,
+} from "../utils/group-errors";
 import {
   GroupCompositionIconsCell,
   GroupCompositionLevelCell,
@@ -147,14 +150,11 @@ export default function GroupsList({
       handleCloseDeleteDialog();
     } catch (error) {
       console.error("Failed to delete group:", error);
-      toast.error(
-        getDeleteGroupErrorMessage(error, t, selectedGroup.name),
-        {
-          position: "bottom-left",
-          theme: palette.mode,
-          hideProgressBar: true,
-        },
-      );
+      toast.error(getDeleteGroupErrorMessage(error, t, selectedGroup.name), {
+        position: "bottom-left",
+        theme: palette.mode,
+        hideProgressBar: true,
+      });
     }
   };
 
@@ -336,7 +336,7 @@ export default function GroupsList({
               control={control}
               render={({ field }) => {
                 const selectedLayers = availableLayerOptions.filter((layer) =>
-                  field.value.includes(layer.id)
+                  field.value.includes(layer.id),
                 );
                 return (
                   <Autocomplete<Layer, true, false, false>
@@ -392,7 +392,7 @@ export default function GroupsList({
           <Grid size={12}>
             <StyledDataGrid<Group>
               storageKey="groups"
-              customSx={{ height: "calc(100vh - 320px)" }}
+              customSx={{ height: "calc(100vh - 320px)", minHeight: 420 }}
               onRowClick={({ row }) => {
                 const id: string = row.id;
                 if (id) {
