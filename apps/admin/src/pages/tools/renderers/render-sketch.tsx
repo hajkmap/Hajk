@@ -11,7 +11,9 @@ import {
 
 import { Control, Controller, FieldValues, useForm } from "react-hook-form";
 import FormPanel from "../../../components/form-components/form-panel";
-import FormFieldGrid, { FormFieldRow } from "../../../components/form-components/form-field-grid";
+import FormFieldGrid, {
+  FormFieldRow,
+} from "../../../components/form-components/form-field-grid";
 import FormAccordion from "../../../components/form-components/form-accordion";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";

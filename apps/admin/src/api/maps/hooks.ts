@@ -109,7 +109,7 @@ export const useUpdateMapTools = () => {
         index: number;
         target: string | null;
         active?: boolean;
-        options?: Record<string, string>;
+        options?: Record<string, string | number>;
       }[];
     }) => updateMapTools(mapName, tools),
     onMutate: async ({ mapName, tools }) => {

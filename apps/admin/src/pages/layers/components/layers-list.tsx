@@ -151,7 +151,11 @@ function LayerUsedInMapsCell({
             {t("common.usedInMaps")}
           </Typography>
           {mapNames.map((mapName) => (
-            <Typography key={mapName} variant="caption" sx={{ display: "block" }}>
+            <Typography
+              key={mapName}
+              variant="caption"
+              sx={{ display: "block" }}
+            >
               {mapName}
             </Typography>
           ))}
@@ -306,7 +310,14 @@ export default function LayersList({
         usedInMapNames: usage?.mapNames ?? [],
       };
     });
-  }, [layers, services, searchTerm, selectedServiceUrl, layerKind, usageSummary]);
+  }, [
+    layers,
+    services,
+    searchTerm,
+    selectedServiceUrl,
+    layerKind,
+    usageSummary,
+  ]);
 
   const handleClose = () => {
     setOpen(false);
@@ -694,7 +705,7 @@ export default function LayersList({
           <Grid size={12}>
             <StyledDataGrid<LayersGridRow>
               storageKey="layers"
-              customSx={{ height: "calc(100vh - 320px)" }}
+              customSx={{ height: "calc(100vh - 320px)", minHeight: 420 }}
               rows={filteredLayers ?? []}
               columns={
                 [

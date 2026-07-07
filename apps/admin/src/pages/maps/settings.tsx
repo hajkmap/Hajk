@@ -34,13 +34,11 @@ import {
   useMapByName,
   useUpdateMap,
   useUpdateMapTools,
-  useUpdateMapLayers,
   useUpdateMapGroups,
   useDeleteMap,
   useMaps,
   useToolsByMapName,
   useGroupsByMapName,
-  useLayersByMapName,
 } from "../../api/maps";
 import DialogWrapper from "../../components/flexible-dialog";
 import {
@@ -58,15 +56,13 @@ import MapSettingsForm, {
 import MapThemesTab from "./components/map-themes-tab";
 import MapGroupPlacementPanel from "./components/map-group-placement-panel";
 import {
-  buildServerMapContentItems,
-  entityIdFromItemId,
-  mapContentSignature,
-  mapContentToPayloads,
+  buildMapGroupTree,
+  mapGroupTreeSignature,
+  mapGroupTreeToPayload,
 } from "./map-group-placement-utils";
 import { TreeItemData } from "../../components/layerswitcher-dnd";
 import { useTools } from "../../api/tools";
 import { useGroups } from "../../api/groups";
-import { useLayers } from "../../api/layers";
 import type { ToolWindowPosition, ToolZone } from "../../api/maps";
 import MapToolsPanel from "./components/map-tools-panel";
 import {
@@ -84,6 +80,7 @@ import {
   zoneKeyToTarget,
   zonesToToolsPayload,
   type MapToolsDraftState,
+  type ToolWindowSize,
   type ToolZones,
 } from "./map-tools-utils";
 import { useProjections } from "../../api/services";
@@ -94,7 +91,7 @@ import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 
 const MAP_PAGE_TABS = [
   { key: "settings", labelKey: "common.settings", icon: <SettingsIcon /> },
-  { key: "menu", labelKey: "maps.tab.mapContent", icon: <LayersIcon /> },
+  { key: "menu", labelKey: "common.layerGroups", icon: <LayersIcon /> },
   { key: "tools", labelKey: "common.tools", icon: <BuildIcon /> },
   { key: "themes", labelKey: "common.themes", icon: <StyleIcon /> },
 ] as const;
@@ -136,6 +133,7 @@ interface ToolsDraft {
   zones: ToolZones;
   activeToolIds: Set<number>;
   windowPositions: Record<number, ToolWindowPosition>;
+  windowSizes: Record<number, ToolWindowSize>;
   inactiveTargets: Record<number, ToolZone>;
 }
 
@@ -148,7 +146,6 @@ export default function MapSettings() {
   const { data: map, isLoading, isError } = useMapByName(mapName ?? "");
   const { mutateAsync: updateMap, status: updateStatus } = useUpdateMap();
   const { mutateAsync: updateMapTools } = useUpdateMapTools();
-  const { mutateAsync: updateMapLayers } = useUpdateMapLayers();
   const { mutateAsync: updateMapGroups } = useUpdateMapGroups();
   const { mutateAsync: deleteMap, isPending: isDeletingMap } = useDeleteMap();
   const { palette } = useTheme();
@@ -198,32 +195,13 @@ export default function MapSettings() {
     activeTab === "settings" && settingsSection === "search";
   const settingsSearchTerm = showSettingsSearchUi ? settingsSearchQuery : "";
   const { data: groups = [] } = useGroups();
-  const { data: layers = [] } = useLayers();
-  const catalogLayers = useMemo(
-    () =>
-      layers.map((layer) => ({
-        id: layer.id,
-        name: layer.name,
-      })),
-    [layers],
-  );
   const catalogGroups = useMemo(
-    () =>
-      groups.map((group) => ({
-        id: group.id,
-        name: group.name,
-        layerCount: group.layerCount ?? 0,
-        nestedGroupCount: group.nestedGroupCount ?? 0,
-        nestingLevel: group.nestingLevel ?? 1,
-      })),
+    () => groups.map((group) => ({ id: group.id, name: group.name })),
     [groups],
   );
   const { data: mapTools } = useToolsByMapName(mapName ?? "");
   const { data: catalogTools } = useTools();
-  const { data: mapGroups, isError: mapGroupsError, isLoading: mapGroupsLoading } =
-    useGroupsByMapName(mapName ?? "");
-  const { data: mapLayers, isError: mapLayersError, isLoading: mapLayersLoading } =
-    useLayersByMapName(mapName ?? "");
+  const { data: mapGroups } = useGroupsByMapName(mapName ?? "");
   const { data: projections } = useProjections();
   const { defaultCoordinates } = useAppStateStore.getState();
 
@@ -238,36 +216,23 @@ export default function MapSettings() {
     [projections],
   );
 
-  // Drop zone state for map content (direct layers + group placements).
-  const [mapContentDZ, setMapContentDZ] = useState<TreeItems<TreeItemData>>(
+  // Drop zone state for group placements on this map.
+  const [groupLayersDZ, setGroupLayersDZ] = useState<TreeItems<TreeItemData>>(
     [],
   );
 
-  const serverMapContentItems = useMemo<TreeItems<TreeItemData>>(() => {
-    const items = buildServerMapContentItems(mapLayers ?? [], mapGroups ?? []);
-    const catalogById = new Map(catalogGroups.map((group) => [group.id, group]));
+  const serverGroupItems = useMemo<TreeItems<TreeItemData>>(
+    () => buildMapGroupTree(mapGroups ?? []),
+    [mapGroups],
+  );
 
-    return items.map((node) => {
-      if (node.type !== "group") return node;
-      const groupId = entityIdFromItemId(node.id);
-      const catalog = catalogById.get(groupId);
-      return {
-        ...node,
-        layerCount: catalog?.layerCount,
-        nestedGroupCount: catalog?.nestedGroupCount,
-      };
-    });
-  }, [mapLayers, mapGroups, catalogGroups]);
-
-  const contentDirtyRaw = useMemo(() => {
-    if (!mapName || mapLayers === undefined || mapGroups === undefined) {
-      return false;
-    }
+  const groupsDirtyRaw = useMemo(() => {
+    if (!mapName || mapGroups === undefined) return false;
     return (
-      mapContentSignature(mapContentDZ) !==
-      mapContentSignature(serverMapContentItems)
+      mapGroupTreeSignature(groupLayersDZ) !==
+      mapGroupTreeSignature(serverGroupItems)
     );
-  }, [mapContentDZ, serverMapContentItems, mapName, mapLayers, mapGroups]);
+  }, [groupLayersDZ, serverGroupItems, mapName, mapGroups]);
 
   const [menuSynced, setMenuSynced] = useState(false);
 
@@ -276,28 +241,21 @@ export default function MapSettings() {
   }, [mapName]);
 
   useEffect(() => {
-    if (!mapName || mapLayers === undefined || mapGroups === undefined) {
+    if (!mapName || mapGroups === undefined) {
       return;
     }
     if (!menuSynced) {
-      setMapContentDZ(serverMapContentItems);
+      setGroupLayersDZ(serverGroupItems);
       setMenuSynced(true);
       return;
     }
-    if (contentDirtyRaw) {
+    if (groupsDirtyRaw) {
       return;
     }
-    setMapContentDZ(serverMapContentItems);
-  }, [
-    mapName,
-    mapLayers,
-    mapGroups,
-    serverMapContentItems,
-    menuSynced,
-    contentDirtyRaw,
-  ]);
+    setGroupLayersDZ(serverGroupItems);
+  }, [mapName, mapGroups, serverGroupItems, menuSynced, groupsDirtyRaw]);
 
-  const contentDirty = menuSynced && contentDirtyRaw;
+  const groupsDirty = menuSynced && groupsDirtyRaw;
   const serverToolZones = useMemo(
     () => (mapTools ? mapToolsToZones(mapTools) : null),
     [mapTools],
@@ -307,6 +265,19 @@ export default function MapSettings() {
     [mapTools],
   );
   const [toolsDraft, setToolsDraft] = useState<ToolsDraft | null>(null);
+  const toolsDraftRef = useRef<ToolsDraft | null>(null);
+  const flushMapToolEditsRef = useRef<(() => void) | null>(null);
+  const [hasPendingWindowSizeInput, setHasPendingWindowSizeInput] =
+    useState(false);
+
+  useEffect(() => {
+    toolsDraftRef.current = toolsDraft;
+  }, [toolsDraft]);
+
+  const applyToolsDraft = useCallback((next: ToolsDraft) => {
+    toolsDraftRef.current = next;
+    setToolsDraft(next);
+  }, []);
 
   const toolZones =
     toolsDraft != null && toolsDraft.mapName === mapName
@@ -323,6 +294,11 @@ export default function MapSettings() {
       ? toolsDraft.windowPositions
       : (serverToolsDraftState?.windowPositions ?? {});
 
+  const windowSizes =
+    toolsDraft != null && toolsDraft.mapName === mapName
+      ? toolsDraft.windowSizes
+      : (serverToolsDraftState?.windowSizes ?? {});
+
   const toolsDirty = useMemo(() => {
     if (toolsDraft == null || toolsDraft.mapName !== mapName || !mapTools) {
       return false;
@@ -333,6 +309,7 @@ export default function MapSettings() {
         toolsDraft.zones,
         toolsDraft.activeToolIds,
         toolsDraft.windowPositions,
+        toolsDraft.windowSizes,
         toolsDraft.inactiveTargets,
       )
     );
@@ -345,10 +322,9 @@ export default function MapSettings() {
       return {
         mapName: mapName ?? "",
         zones: serverToolZones ?? EMPTY_TOOL_ZONES,
-        activeToolIds: new Set<number>(
-          serverToolsDraftState?.activeToolIds ?? [],
-        ),
+        activeToolIds: new Set<number>(serverToolsDraftState?.activeToolIds ?? []),
         windowPositions: { ...(serverToolsDraftState?.windowPositions ?? {}) },
+        windowSizes: { ...(serverToolsDraftState?.windowSizes ?? {}) },
         inactiveTargets: { ...(serverToolsDraftState?.inactiveTargets ?? {}) },
       };
     },
@@ -357,9 +333,7 @@ export default function MapSettings() {
 
   const resolveToolName = useCallback(
     (toolId: number) => {
-      const catalogTool = catalogTools?.find(
-        (tool) => Number(tool.id) === toolId,
-      );
+      const catalogTool = catalogTools?.find((tool) => Number(tool.id) === toolId);
       if (catalogTool) return getCatalogToolDisplayName(catalogTool);
 
       const mapTool = mapTools?.find((tool) => tool.toolId === toolId);
@@ -390,6 +364,7 @@ export default function MapSettings() {
         const nextActiveToolIds = new Set(base.activeToolIds);
         let nextZones = base.zones;
         const nextWindowPositions = { ...base.windowPositions };
+        const nextWindowSizes = { ...base.windowSizes };
         const nextInactiveTargets = { ...base.inactiveTargets };
 
         if (active) {
@@ -425,6 +400,7 @@ export default function MapSettings() {
           zones: nextZones,
           activeToolIds: nextActiveToolIds,
           windowPositions: nextWindowPositions,
+          windowSizes: nextWindowSizes,
           inactiveTargets: nextInactiveTargets,
         };
       });
@@ -448,6 +424,7 @@ export default function MapSettings() {
           ),
           activeToolIds: new Set(base.activeToolIds),
           windowPositions: { ...base.windowPositions },
+          windowSizes: { ...base.windowSizes },
           inactiveTargets: { ...base.inactiveTargets },
         };
       });
@@ -469,11 +446,45 @@ export default function MapSettings() {
             ...base.windowPositions,
             [toolId]: position,
           },
+          windowSizes: { ...base.windowSizes },
           inactiveTargets: { ...base.inactiveTargets },
         };
       });
     },
     [mapName, resolveToolsDraft],
+  );
+
+  const setToolWindowSize = useCallback(
+    (toolId: number, size: Partial<ToolWindowSize>) => {
+      const base = resolveToolsDraft(toolsDraftRef.current);
+      if (!base.activeToolIds.has(toolId)) return;
+
+      const current = base.windowSizes[toolId] ?? {};
+      const nextSize: ToolWindowSize = { ...current };
+
+      if (Object.prototype.hasOwnProperty.call(size, "width")) {
+        if (size.width === undefined) delete nextSize.width;
+        else nextSize.width = size.width;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(size, "height")) {
+        if (size.height === undefined) delete nextSize.height;
+        else nextSize.height = size.height;
+      }
+
+      applyToolsDraft({
+        mapName: mapName ?? "",
+        zones: base.zones,
+        activeToolIds: new Set(base.activeToolIds),
+        windowPositions: { ...base.windowPositions },
+        windowSizes: {
+          ...base.windowSizes,
+          [toolId]: nextSize,
+        },
+        inactiveTargets: { ...base.inactiveTargets },
+      });
+    },
+    [mapName, resolveToolsDraft, applyToolsDraft],
   );
 
   const backgroundImage = "/mapbackground.png";
@@ -518,33 +529,45 @@ export default function MapSettings() {
     if (!map) return;
 
     try {
+      flushMapToolEditsRef.current?.();
+
+      const currentToolsDraft = toolsDraftRef.current;
+      const shouldSaveTools =
+        currentToolsDraft != null &&
+        mapTools != null &&
+        serverToolsSignature(mapTools) !==
+          toolsDraftSignature(
+            currentToolsDraft.zones,
+            currentToolsDraft.activeToolIds,
+            currentToolsDraft.windowPositions,
+            currentToolsDraft.windowSizes,
+            currentToolsDraft.inactiveTargets,
+          );
+
       // Persist placements first (keyed by the current name) so a simultaneous
       // rename doesn't target a no-longer-existing map name.
-      if (toolsDirty && toolsDraft) {
+      if (shouldSaveTools) {
         const toolsPayload = zonesToToolsPayload(
-          toolsDraft.zones,
-          toolsDraft.activeToolIds,
-          toolsDraft.windowPositions,
-          toolsDraft.inactiveTargets,
+          currentToolsDraft.zones,
+          currentToolsDraft.activeToolIds,
+          currentToolsDraft.windowPositions,
+          currentToolsDraft.windowSizes,
+          currentToolsDraft.inactiveTargets,
           mapTools ?? [],
         );
         await updateMapTools({
           mapName: map.name,
           tools: toolsPayload,
         });
+        toolsDraftRef.current = null;
         setToolsDraft(null);
+        setHasPendingWindowSizeInput(false);
       }
 
-      if (contentDirty) {
-        const { layers: layersPayload, groups: groupsPayload } =
-          mapContentToPayloads(mapContentDZ);
-        await updateMapLayers({
-          mapName: map.name,
-          layers: layersPayload,
-        });
+      if (groupsDirty) {
         await updateMapGroups({
           mapName: map.name,
-          groups: groupsPayload,
+          groups: mapGroupTreeToPayload(groupLayersDZ),
         });
       }
 
@@ -638,7 +661,7 @@ export default function MapSettings() {
         createdDate={map?.createdDate}
         lastSavedBy={map?.lastSavedBy}
         lastSavedDate={map?.lastSavedDate}
-        isDirty={isDirty || toolsDirty || contentDirty}
+        isDirty={isDirty || toolsDirty || hasPendingWindowSizeInput || groupsDirty}
         warning={
           <Box sx={{ mt: 1 }}>
             {map.locked ? (
@@ -720,22 +743,13 @@ export default function MapSettings() {
         </Box>
 
         {activeTab === "menu" &&
-          (mapGroupsLoading ||
-          mapLayersLoading ||
-          ((mapGroups === undefined || mapLayers === undefined) &&
-            !mapGroupsError &&
-            !mapLayersError) ? (
+          (mapGroups === undefined ? (
             <SquareSpinnerComponent />
-          ) : mapGroupsError || mapLayersError ? (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {t("maps.contentLoadError")}
-            </Alert>
           ) : (
             <MapGroupPlacementPanel
-              catalogLayers={catalogLayers}
               catalogGroups={catalogGroups}
-              items={mapContentDZ}
-              onItemsChange={setMapContentDZ}
+              items={groupLayersDZ}
+              onItemsChange={setGroupLayersDZ}
             />
           ))}
 
@@ -746,10 +760,14 @@ export default function MapSettings() {
             toolZones={toolZones}
             activeToolIds={activeToolIds}
             windowPositions={windowPositions}
+            windowSizes={windowSizes}
             onUpdateToolZone={updateToolZone}
             onToggleToolActive={toggleToolActive}
             onToolTargetChange={setToolTarget}
             onToolWindowPositionChange={setToolWindowPosition}
+            onToolWindowSizeChange={setToolWindowSize}
+            flushPendingEditsRef={flushMapToolEditsRef}
+            onPendingWindowSizeDirtyChange={setHasPendingWindowSizeInput}
             backgroundImage={backgroundImage}
           />
         )}
@@ -820,7 +838,9 @@ export default function MapSettings() {
           disabled={isDeletingMap}
         />
       </DialogWrapper>
-      <UnsavedChangesGuard when={isDirty || toolsDirty || contentDirty} />
+      <UnsavedChangesGuard
+        when={isDirty || toolsDirty || hasPendingWindowSizeInput || groupsDirty}
+      />
     </Page>
   );
 }

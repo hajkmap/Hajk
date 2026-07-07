@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type MutableRefObject } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
@@ -12,7 +12,7 @@ import {
   TreeItemData,
 } from "../../../components/layerswitcher-dnd";
 import { SettingsPageTabs } from "../../../components/settings-page-tabs";
-import type { ToolZones } from "../map-tools-utils";
+import type { ToolZones, ToolWindowSize } from "../map-tools-utils";
 import { catalogToolsToSourceItems } from "../map-tools-utils";
 import MapToolsList from "./map-tools-list";
 
@@ -35,6 +35,7 @@ interface MapToolsPanelProps {
   toolZones: ToolZones;
   activeToolIds: Set<number>;
   windowPositions: Record<number, ToolWindowPosition>;
+  windowSizes: Record<number, ToolWindowSize>;
   onUpdateToolZone: (
     zone: keyof ToolZones,
     items: TreeItems<TreeItemData>,
@@ -45,6 +46,12 @@ interface MapToolsPanelProps {
     toolId: number,
     position: ToolWindowPosition,
   ) => void;
+  onToolWindowSizeChange: (
+    toolId: number,
+    size: Partial<ToolWindowSize>,
+  ) => void;
+  flushPendingEditsRef?: MutableRefObject<(() => void) | null>;
+  onPendingWindowSizeDirtyChange?: (pending: boolean) => void;
   backgroundImage?: string;
 }
 
@@ -54,10 +61,14 @@ export default function MapToolsPanel({
   toolZones,
   activeToolIds,
   windowPositions,
+  windowSizes,
   onUpdateToolZone,
   onToggleToolActive,
   onToolTargetChange,
   onToolWindowPositionChange,
+  onToolWindowSizeChange,
+  flushPendingEditsRef,
+  onPendingWindowSizeDirtyChange,
   backgroundImage,
 }: MapToolsPanelProps) {
   const { t } = useTranslation();
@@ -91,9 +102,13 @@ export default function MapToolsPanel({
           toolZones={toolZones}
           activeToolIds={activeToolIds}
           windowPositions={windowPositions}
+          windowSizes={windowSizes}
           onToggleActive={onToggleToolActive}
           onTargetChange={onToolTargetChange}
           onWindowPositionChange={onToolWindowPositionChange}
+          onWindowSizeChange={onToolWindowSizeChange}
+          flushPendingEditsRef={flushPendingEditsRef}
+          onPendingWindowSizeDirtyChange={onPendingWindowSizeDirtyChange}
         />
       ) : (
         <ToolPlacementDnD
