@@ -321,6 +321,15 @@ export const DND_ITEM_TITLE_SX: SxProps<Theme> = {
   lineHeight: 1.25,
 };
 
+/** Item text shown in full, wrapping across multiple lines when needed. */
+export const DND_ITEM_TITLE_FULL_SX: SxProps<Theme> = {
+  flex: 1,
+  minWidth: 0,
+  wordBreak: "break-word",
+  lineHeight: 1.25,
+  whiteSpace: "normal",
+};
+
 export const DND_TREE_ACTION_SLOT_SIZE = 28;
 
 export const DND_TREE_ACTION_SLOT_GAP = 2;

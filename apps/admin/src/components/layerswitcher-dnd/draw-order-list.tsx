@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { DragEndEvent, DragOverEvent, DragStartEvent } from "@dnd-kit/core";
 import {
   Box,
+  Chip,
   IconButton,
   List,
   ListItem,
@@ -13,7 +14,7 @@ import { useTranslation } from "react-i18next";
 
 import useAppStateStore from "../../store/use-app-state-store";
 import {
-  DND_ITEM_TITLE_SX,
+  DND_ITEM_TITLE_FULL_SX,
   DND_TREE_ICON_BUTTON_SX,
   adjustDrawOrderInsertIndex,
   parseSourceId,
@@ -31,6 +32,39 @@ export const DRAW_ORDER_DROP_ZONE_ID = "draw-order-drop-zone";
 export const DRAW_ORDER_EDGE_TOP_ID = "draw-order-edge-top";
 export const DRAW_ORDER_EDGE_BOTTOM_ID = "draw-order-edge-bottom";
 export const drawOrderItemId = (layerId: string) => `draw-order-${layerId}`;
+
+export function scrollDrawOrderItemIntoView(
+  layerId: string,
+  scrollContainer: HTMLElement | null,
+): void {
+  const itemEl = document.getElementById(drawOrderItemId(layerId));
+  if (!itemEl || !scrollContainer) return;
+
+  const containerRect = scrollContainer.getBoundingClientRect();
+  const itemRect = itemEl.getBoundingClientRect();
+  const isVisible =
+    itemRect.top >= containerRect.top &&
+    itemRect.bottom <= containerRect.bottom;
+
+  if (!isVisible) {
+    const targetScroll =
+      itemRect.top -
+      containerRect.top +
+      scrollContainer.scrollTop -
+      containerRect.height / 2 +
+      itemRect.height / 2;
+    scrollContainer.scrollTo({
+      top: Math.max(0, targetScroll),
+      behavior: "smooth",
+    });
+  }
+
+  itemEl.style.transition = "box-shadow 0.2s ease";
+  itemEl.style.boxShadow = "0 0 0 2px rgba(25, 118, 210, 0.8)";
+  window.setTimeout(() => {
+    itemEl.style.boxShadow = "";
+  }, 1200);
+}
 
 export const isValidDrawOrderDropTarget = (overId: string): boolean =>
   overId === DRAW_ORDER_DROP_ZONE_ID ||
@@ -310,7 +344,7 @@ const DrawOrderInsertionShadow: React.FC<{ layerName: string }> = ({
         variant="body2"
         color="primary"
         title={layerName}
-        sx={{ ...DND_ITEM_TITLE_SX, fontStyle: "italic" }}
+        sx={{ ...DND_ITEM_TITLE_FULL_SX, fontStyle: "italic" }}
       >
         {layerName}
       </Typography>
@@ -389,7 +423,7 @@ const DrawOrderListItem: React.FC<{
           "transform 0.2s ease, opacity 0.2s ease, margin 0.2s ease, box-shadow 0.2s ease",
         position: "relative",
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         gap: 0.5,
         boxShadow: showAsDragging ? "none" : "0 1px 2px rgba(0,0,0,0.06)",
         pointerEvents: showAsDragging ? "none" : "auto",
@@ -398,16 +432,16 @@ const DrawOrderListItem: React.FC<{
     >
       <DragIndicator
         fontSize="small"
-        sx={{ color: "text.secondary", flexShrink: 0 }}
+        sx={{ color: "text.secondary", flexShrink: 0, mt: 0.25 }}
       />
-      <Typography
-        variant="caption"
+      <Chip
+        size="small"
         color="primary"
-        sx={{ flexShrink: 0, minWidth: 20, fontWeight: 600 }}
-      >
-        {orderIndex + 1}
-      </Typography>
-      <Typography variant="body2" title={layerName} sx={DND_ITEM_TITLE_SX}>
+        variant="outlined"
+        sx={{ flexShrink: 0, mt: 0.125 }}
+        label={t("map.drawOrderLayerPlacedAt", { order: orderIndex + 1 })}
+      />
+      <Typography variant="body2" title={layerName} sx={DND_ITEM_TITLE_FULL_SX}>
         {layerName}
       </Typography>
       <IconButton
@@ -419,6 +453,8 @@ const DrawOrderListItem: React.FC<{
         sx={{
           ...DND_TREE_ICON_BUTTON_SX,
           ml: "auto",
+          mt: 0.125,
+          flexShrink: 0,
           "&:hover": {
             backgroundColor: isDarkMode ? "#2a2a2a" : "#f5f5f5",
           },

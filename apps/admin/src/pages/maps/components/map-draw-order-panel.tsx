@@ -29,6 +29,7 @@ import {
   DND_DRAG_HANDLE_SX,
   DND_ITEM_TITLE_SX,
   getDrawOrderActiveDragName,
+  scrollDrawOrderItemIntoView,
   TreeItemData,
   useDrawOrderDndHandlers,
 } from "../../../components/layerswitcher-dnd";
@@ -78,6 +79,12 @@ export default function MapDrawOrderPanel({
 
   const layerIds = useMemo(() => drawOrderTreeToLayerIds(items), [items]);
 
+  const drawOrderIndexByLayerId = useMemo(() => {
+    const map = new Map<string, number>();
+    layerIds.forEach((id, index) => map.set(id, index + 1));
+    return map;
+  }, [layerIds]);
+
   const drawOrderLayerIds = useMemo(
     () => new Set(layerIds),
     [layerIds],
@@ -97,10 +104,15 @@ export default function MapDrawOrderPanel({
     return catalogLayers
       .filter((layer) => !query || layer.name.toLowerCase().includes(query))
       .slice()
-      .sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
-      );
-  }, [catalogLayers, search]);
+      .sort((a, b) => {
+        const aInDrawOrder = drawOrderLayerIds.has(a.id);
+        const bInDrawOrder = drawOrderLayerIds.has(b.id);
+        if (aInDrawOrder !== bInDrawOrder) {
+          return aInDrawOrder ? 1 : -1;
+        }
+        return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+      });
+  }, [catalogLayers, search, drawOrderLayerIds]);
 
   const {
     activeId,
@@ -122,6 +134,15 @@ export default function MapDrawOrderPanel({
   });
 
   const activeDragName = getDrawOrderActiveDragName(activeId, layerNameById);
+
+  const scrollToDrawOrderLayer = (layerId: string) => {
+    scrollDrawOrderItemIntoView(layerId, scrollRef.current);
+  };
+
+  const addLayerToDrawOrderEnd = (layer: MapCatalogLayer) => {
+    onInsertLayer(layer, layerIds.length);
+    window.setTimeout(() => scrollToDrawOrderLayer(layer.id), 50);
+  };
 
   return (
     <Paper sx={{ p: 2, background: isDarkMode ? "#121212" : "#efefef" }}>
@@ -206,9 +227,20 @@ export default function MapDrawOrderPanel({
                       key={layer.id}
                       layer={layer}
                       inDrawOrder={drawOrderLayerIds.has(layer.id)}
+                      drawOrderIndex={drawOrderIndexByLayerId.get(layer.id)}
+                      onScrollToDrawOrder={
+                        drawOrderLayerIds.has(layer.id)
+                          ? () => scrollToDrawOrderLayer(layer.id)
+                          : undefined
+                      }
                       onRemoveFromDrawOrder={
                         drawOrderLayerIds.has(layer.id)
                           ? () => onRemoveLayer(layer.id)
+                          : undefined
+                      }
+                      onAddToDrawOrderEnd={
+                        !drawOrderLayerIds.has(layer.id)
+                          ? () => addLayerToDrawOrderEnd(layer)
                           : undefined
                       }
                     />

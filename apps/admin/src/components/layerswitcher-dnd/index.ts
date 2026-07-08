@@ -5,7 +5,7 @@ export { TreeItemActions } from "./tree-item-actions";
 export { GroupIntoDropTarget } from "./group-into-drop-target";
 export { TreeDropZone } from "./tree-drop-zone";
 export { SortableDropZone } from "./sortable-drop-zone";
-export { DrawOrderListPanel, useDrawOrderDndHandlers, getDrawOrderActiveDragName, isValidDrawOrderDropTarget } from "./draw-order-list";
+export { DrawOrderListPanel, useDrawOrderDndHandlers, getDrawOrderActiveDragName, isValidDrawOrderDropTarget, scrollDrawOrderItemIntoView } from "./draw-order-list";
 export { PlacementListPanel, usePlacementDndHandlers, getPlacementActiveDragName, isValidPlacementDropTarget } from "./placement-list";
 export { PlacementCatalogItem } from "./placement-catalog-item";
 export { DrawOrderCatalogItem } from "./draw-order-catalog-item";
