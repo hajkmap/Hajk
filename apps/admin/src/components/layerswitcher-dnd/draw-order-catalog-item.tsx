@@ -43,14 +43,28 @@ const CATALOG_LEAD_SLOT_SX = {
   position: "relative",
 } as const;
 
-const getCatalogItemBackground = (inDrawOrder: boolean, isDarkMode: boolean) => {
+const getCatalogItemBackground = (
+  inMoveZone: boolean,
+  inDrawOrder: boolean,
+  isDarkMode: boolean,
+) => {
+  if (inMoveZone) {
+    return isDarkMode ? "rgba(255, 152, 0, 0.14)" : "rgba(255, 152, 0, 0.1)";
+  }
   if (!inDrawOrder) {
     return isDarkMode ? "#1a1a1a" : "#fff";
   }
   return isDarkMode ? "rgba(76, 175, 80, 0.14)" : "rgba(76, 175, 80, 0.1)";
 };
 
-const getCatalogItemBorderColor = (inDrawOrder: boolean, isDarkMode: boolean) => {
+const getCatalogItemBorderColor = (
+  inMoveZone: boolean,
+  inDrawOrder: boolean,
+  isDarkMode: boolean,
+) => {
+  if (inMoveZone) {
+    return isDarkMode ? "rgba(255, 152, 0, 0.4)" : "rgba(255, 152, 0, 0.35)";
+  }
   if (!inDrawOrder) {
     return "#ddd";
   }
@@ -60,6 +74,7 @@ const getCatalogItemBorderColor = (inDrawOrder: boolean, isDarkMode: boolean) =>
 interface DrawOrderCatalogItemProps {
   layer: { id: string; name: string };
   inDrawOrder: boolean;
+  inMoveZone?: boolean;
   drawOrderIndex?: number;
   onScrollToDrawOrder?: () => void;
   onRemoveFromDrawOrder?: () => void;
@@ -69,6 +84,7 @@ interface DrawOrderCatalogItemProps {
 export function DrawOrderCatalogItem({
   layer,
   inDrawOrder,
+  inMoveZone = false,
   drawOrderIndex,
   onScrollToDrawOrder,
   onRemoveFromDrawOrder,
@@ -93,9 +109,9 @@ export function DrawOrderCatalogItem({
         px: 2,
         py: 1.5,
         border: "1px solid",
-        borderColor: getCatalogItemBorderColor(inDrawOrder, isDarkMode),
+        borderColor: getCatalogItemBorderColor(inMoveZone, inDrawOrder, isDarkMode),
         borderRadius: 2,
-        background: getCatalogItemBackground(inDrawOrder, isDarkMode),
+        background: getCatalogItemBackground(inMoveZone, inDrawOrder, isDarkMode),
         opacity: isDragging ? 0 : 1,
         width: "100%",
         maxWidth: "100%",
@@ -153,8 +169,13 @@ export function DrawOrderCatalogItem({
           <Chip
             size="small"
             variant="outlined"
+            color={inMoveZone ? "warning" : "default"}
             sx={{ mt: 0.5 }}
-            label={t("map.drawOrderLayerNotPlaced")}
+            label={
+              inMoveZone
+                ? t("map.drawOrderLayerInMoveZone")
+                : t("map.drawOrderLayerNotPlaced")
+            }
           />
         ) : null}
       </Box>
@@ -198,7 +219,7 @@ export function DrawOrderCatalogItem({
               </IconButton>
             ) : null}
           </>
-        ) : onAddToDrawOrderEnd ? (
+        ) : onAddToDrawOrderEnd && !inMoveZone ? (
           <IconButton
             onClick={(e) => {
               e.stopPropagation();

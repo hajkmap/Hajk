@@ -28,10 +28,36 @@ const isSourceLayerDragId = (id: string) => {
 const INSERTION_SHADOW_HEIGHT = 48;
 const INSERTION_GAP = 8;
 
+const getDrawOrderItemBackground = (
+  isRecentlyAdded: boolean,
+  isDarkMode: boolean,
+) => {
+  if (!isRecentlyAdded) {
+    return isDarkMode ? "#1a1a1a" : "#fff";
+  }
+  return isDarkMode ? "rgba(76, 175, 80, 0.14)" : "rgba(76, 175, 80, 0.1)";
+};
+
+const getDrawOrderItemBorderColor = (
+  isRecentlyAdded: boolean,
+  isDarkMode: boolean,
+) => {
+  if (!isRecentlyAdded) {
+    return "#ddd";
+  }
+  return isDarkMode ? "rgba(76, 175, 80, 0.35)" : "rgba(76, 175, 80, 0.28)";
+};
+
 export const DRAW_ORDER_DROP_ZONE_ID = "draw-order-drop-zone";
+export const DRAW_ORDER_MOVE_ZONE_ID = "draw-order-move-zone";
 export const DRAW_ORDER_EDGE_TOP_ID = "draw-order-edge-top";
 export const DRAW_ORDER_EDGE_BOTTOM_ID = "draw-order-edge-bottom";
 export const drawOrderItemId = (layerId: string) => `draw-order-${layerId}`;
+export const drawOrderMoveZoneItemId = (layerId: string) =>
+  `draw-order-move-zone-${layerId}`;
+
+export const isDrawOrderMoveZoneItemId = (id: string) =>
+  id.startsWith("draw-order-move-zone-");
 
 export function scrollDrawOrderItemIntoView(
   layerId: string,
@@ -60,7 +86,7 @@ export function scrollDrawOrderItemIntoView(
   }
 
   itemEl.style.transition = "box-shadow 0.2s ease";
-  itemEl.style.boxShadow = "0 0 0 2px rgba(25, 118, 210, 0.8)";
+  itemEl.style.boxShadow = "0 0 0 2px rgba(76, 175, 80, 0.8)";
   window.setTimeout(() => {
     itemEl.style.boxShadow = "";
   }, 1200);
@@ -70,7 +96,7 @@ export const isValidDrawOrderDropTarget = (overId: string): boolean =>
   overId === DRAW_ORDER_DROP_ZONE_ID ||
   overId === DRAW_ORDER_EDGE_TOP_ID ||
   overId === DRAW_ORDER_EDGE_BOTTOM_ID ||
-  overId.startsWith("draw-order-");
+  (overId.startsWith("draw-order-") && !isDrawOrderMoveZoneItemId(overId));
 
 /** @deprecated Use insertIndex from useDrawOrderDndHandlers */
 export type DrawOrderDragOver = {
@@ -84,6 +110,9 @@ export type DrawOrderPreviewRow =
 
 function getDraggedLayerId(activeId: string | null): string | null {
   if (!activeId) return null;
+  if (isDrawOrderMoveZoneItemId(activeId)) {
+    return activeId.replace("draw-order-move-zone-", "");
+  }
   if (activeId.startsWith("draw-order-")) {
     return activeId.replace("draw-order-", "");
   }
@@ -105,7 +134,9 @@ function resolveInsertIndex(
   ) {
     return layerIds.length;
   }
-  if (!overId.startsWith("draw-order-")) return null;
+  if (!overId.startsWith("draw-order-") || isDrawOrderMoveZoneItemId(overId)) {
+    return null;
+  }
 
   const targetLayerId = overId.replace("draw-order-", "");
   const targetIndex = layerIds.indexOf(targetLayerId);
@@ -135,7 +166,14 @@ function computeDrawOrderInsertIndex(
   const fallback = resolveInsertIndex(overId, layerIds, pointerY);
   if (fallback !== null) return fallback;
 
-  if (activeItemId?.startsWith("draw-order-")) {
+  if (activeItemId && isDrawOrderMoveZoneItemId(activeItemId)) {
+    return layerIds.length;
+  }
+
+  if (
+    activeItemId?.startsWith("draw-order-") &&
+    !isDrawOrderMoveZoneItemId(activeItemId)
+  ) {
     const draggedLayerId = activeItemId.replace("draw-order-", "");
     const draggedIndex = layerIds.indexOf(draggedLayerId);
     if (draggedIndex !== -1) return draggedIndex;
@@ -180,11 +218,15 @@ export function useDrawOrderDndHandlers({
   layerIds,
   onReorder,
   onInsertFromSource,
+  onMoveToZone,
+  onInsertFromMoveZone,
   scrollRef,
 }: {
   layerIds: string[];
   onReorder: (layerIds: string[]) => void;
   onInsertFromSource: (layerId: string, insertIndex: number) => void;
+  onMoveToZone: (layerId: string) => void;
+  onInsertFromMoveZone: (layerId: string, insertIndex: number) => void;
   scrollRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -218,7 +260,13 @@ export function useDrawOrderDndHandlers({
     const currentActiveId = event.active.id.toString();
     const isDrawOrderDrag =
       currentActiveId.startsWith("draw-order-") ||
+      isDrawOrderMoveZoneItemId(currentActiveId) ||
       isSourceLayerDragId(currentActiveId);
+
+    if (overId === DRAW_ORDER_MOVE_ZONE_ID) {
+      setInsertIndex(null);
+      return;
+    }
 
     if (!isDrawOrderDrag || !isValidDrawOrderDropTarget(overId)) {
       setInsertIndex(null);
@@ -247,12 +295,48 @@ export function useDrawOrderDndHandlers({
     setInsertIndex(null);
     pointerYRef.current = null;
 
-    if (!over || active.id === over.id) return;
+    if (!over) {
+      if (
+        isDrawOrderMoveZoneItemId(active.id.toString()) &&
+        currentInsertIndex !== null
+      ) {
+        const layerId = active.id
+          .toString()
+          .replace("draw-order-move-zone-", "");
+        onInsertFromMoveZone(layerId, currentInsertIndex);
+      }
+      return;
+    }
+
+    if (active.id === over.id) return;
 
     const activeIdStr = active.id.toString();
     const overIdStr = over.id.toString();
 
+    if (overIdStr === DRAW_ORDER_MOVE_ZONE_ID) {
+      if (
+        activeIdStr.startsWith("draw-order-") &&
+        !isDrawOrderMoveZoneItemId(activeIdStr)
+      ) {
+        onMoveToZone(activeIdStr.replace("draw-order-", ""));
+      }
+      return;
+    }
+
     if (!isValidDrawOrderDropTarget(overIdStr)) {
+      return;
+    }
+
+    if (isDrawOrderMoveZoneItemId(activeIdStr)) {
+      const layerId = activeIdStr.replace("draw-order-move-zone-", "");
+      const resolvedInsertIndex = computeDrawOrderInsertIndex(
+        overIdStr,
+        activeIdStr,
+        layerIds,
+        currentInsertIndex,
+        pointerY,
+      );
+      onInsertFromMoveZone(layerId, resolvedInsertIndex);
       return;
     }
 
@@ -261,7 +345,10 @@ export function useDrawOrderDndHandlers({
       if (parsed?.type !== "layer") {
         return;
       }
-    } else if (!activeIdStr.startsWith("draw-order-")) {
+    } else if (
+      !activeIdStr.startsWith("draw-order-") ||
+      isDrawOrderMoveZoneItemId(activeIdStr)
+    ) {
       return;
     }
 
@@ -363,7 +450,7 @@ const DrawOrderEdgeDrop: React.FC<{
       ref={setNodeRef}
       sx={{
         position: "relative",
-        minHeight: active || isOver ? INSERTION_SHADOW_HEIGHT / 2 : 12,
+        minHeight: active || isOver ? INSERTION_SHADOW_HEIGHT / 2 : 24,
         transition: "min-height 0.2s ease",
       }}
     />
@@ -375,8 +462,16 @@ const DrawOrderListItem: React.FC<{
   layerName: string;
   orderIndex: number;
   isDragging: boolean;
+  isRecentlyAdded: boolean;
   onRemove: () => void;
-}> = ({ layerId, layerName, orderIndex, isDragging, onRemove }) => {
+}> = ({
+  layerId,
+  layerName,
+  orderIndex,
+  isDragging,
+  isRecentlyAdded,
+  onRemove,
+}) => {
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
   const { t } = useTranslation();
   const itemDomId = drawOrderItemId(layerId);
@@ -393,7 +488,9 @@ const DrawOrderListItem: React.FC<{
 
   const { setNodeRef: setDroppableRef } = useDroppable({
     id: itemDomId,
-    data: { accepts: ["source-layer", "draw-order-item"] },
+    data: {
+      accepts: ["source-layer", "draw-order-item", "draw-order-move-zone-item"],
+    },
   });
 
   const setNodeRef = (node: HTMLElement | null) => {
@@ -410,9 +507,10 @@ const DrawOrderListItem: React.FC<{
       {...listeners}
       {...attributes}
       sx={{
-        backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
+        backgroundColor: getDrawOrderItemBackground(isRecentlyAdded, isDarkMode),
         cursor: showAsDragging ? "grabbing" : "grab",
-        border: "1px solid #ddd",
+        border: "1px solid",
+        borderColor: getDrawOrderItemBorderColor(isRecentlyAdded, isDarkMode),
         borderRadius: 2,
         mb: 0.5,
         px: 1,
@@ -473,7 +571,9 @@ const DrawOrderDropZone: React.FC<{ children: React.ReactNode }> = ({
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
   const { setNodeRef, isOver } = useDroppable({
     id: DRAW_ORDER_DROP_ZONE_ID,
-    data: { accepts: ["source-layer", "draw-order-item"] },
+    data: {
+      accepts: ["source-layer", "draw-order-item", "draw-order-move-zone-item"],
+    },
   });
 
   return (
@@ -515,6 +615,7 @@ export interface DrawOrderListPanelProps {
   onRemove: (layerId: string) => void;
   emptyLabel: string;
   scrollRef: React.RefObject<HTMLDivElement | null>;
+  recentlyAddedLayerIds?: ReadonlySet<string>;
 }
 
 export function DrawOrderListPanel({
@@ -525,6 +626,7 @@ export function DrawOrderListPanel({
   onRemove,
   emptyLabel,
   scrollRef,
+  recentlyAddedLayerIds,
 }: DrawOrderListPanelProps) {
   const previewRows = useMemo(
     () => buildDrawOrderPreviewRows(layerIds, activeId, insertIndex),
@@ -607,6 +709,7 @@ export function DrawOrderListPanel({
                   layerName={name}
                   orderIndex={layerIds.indexOf(row.layerId)}
                   isDragging={row.layerId === draggedLayerId}
+                  isRecentlyAdded={recentlyAddedLayerIds?.has(row.layerId) ?? false}
                   onRemove={() => onRemove(row.layerId)}
                 />
               );
