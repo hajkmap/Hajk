@@ -23,8 +23,8 @@ class PropFilters {
     } else {
       value = this.properties[key];
 
-      if (typeof value === "boolean") {
-        // We must convert to string to avoid boolean comparisons
+      if (typeof value === "boolean" || typeof value === "number") {
+        // We must convert to string to avoid boolean or numeric comparisons
         // Everything should be stringified
         value = String(value);
       }
