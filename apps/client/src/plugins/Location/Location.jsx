@@ -11,6 +11,7 @@ import CustomControlButtonView from "./CustomControlButtonView";
 class Location extends React.PureComponent {
   constructor(props) {
     super(props);
+    this.options = this.props.options;
     this.localObserver = Observer();
     this.model = new LocationModel({
       ...this.props,
@@ -58,7 +59,11 @@ class Location extends React.PureComponent {
               : null,
         }}
       >
-        <LocationView map={this.props.map} model={this.model} />
+        <LocationView
+          map={this.props.map}
+          model={this.model}
+          options={this.options}
+        />
       </BaseWindowPlugin>
     );
   }

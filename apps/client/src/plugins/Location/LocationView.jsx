@@ -22,6 +22,7 @@ class LocationView extends React.PureComponent {
   state = {
     loading: false, // indicates if loading is in progress
     track: false, // enables or disables GPS tracking
+    follow: false, // centers the map on the last position
     accuracy: undefined, // this and the following actual GPS info values
     altitude: undefined,
     altitudeAccuracy: undefined,
@@ -40,6 +41,7 @@ class LocationView extends React.PureComponent {
   componentDidMount() {
     this.map = this.props.map;
     this.model = this.props.model;
+    this.options = this.props.options;
 
     this.model.localObserver.subscribe(
       "geolocationChange",
@@ -97,6 +99,12 @@ class LocationView extends React.PureComponent {
     this.setState({ loading: checked });
   };
 
+  toggleFollow = (event) => {
+    const { checked } = event.target;
+    checked ? this.model.enableFollow() : this.model.disableFollow();
+    this.setState({ follow: checked });
+  };
+
   renderLocationDetails() {
     if (this.state.track === false) {
       return null;
@@ -132,6 +140,8 @@ class LocationView extends React.PureComponent {
   }
 
   render() {
+    const showFollowLocation = this.props.options?.showFollowLocation ?? false;
+
     return (
       <>
         <FormGroup row>
@@ -145,6 +155,18 @@ class LocationView extends React.PureComponent {
             }
             label="Visa min position"
           />
+          {showFollowLocation && (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={this.state.follow}
+                  onChange={this.toggleFollow}
+                  value="follow"
+                />
+              }
+              label="Följ min position"
+            />
+          )}
         </FormGroup>
         {this.state.loading && <LinearProgress />}
         {this.renderLocationDetails()}

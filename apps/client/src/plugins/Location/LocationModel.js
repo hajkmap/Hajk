@@ -13,6 +13,8 @@ class LocationModel {
     this.map = props.map;
     this.localObserver = props.localObserver;
     this.zoomToLocation = true;
+    this.centerOnUpdate = false;
+    this.showLocationFollow = false;
 
     // Create source and layer and add to map. Later on we'll draw features to this layer.
     this.source = new VectorSource({ wrapX: false });
@@ -102,6 +104,15 @@ class LocationModel {
       this.map.getView().animate({ duration: 2500, center: coordinates, zoom });
       this.zoomToLocation = false;
     }
+
+    // If the initial zoom already happened and we want to update the map center to "follow" the user's position
+    if (!this.zoomToLocation && this.centerOnUpdate) {
+      this.map.getView().setCenter(coordinates);
+    }
+  };
+
+  toggleFollow = (active) => {
+    this.centerOnUpdate = active;
   };
 
   toggleTracking = (active) => {
@@ -188,6 +199,14 @@ class LocationModel {
 
   disable() {
     this.toggleTracking(false);
+  }
+
+  enableFollow() {
+    this.toggleFollow(true);
+  }
+
+  disableFollow() {
+    this.toggleFollow(false);
   }
 }
 
