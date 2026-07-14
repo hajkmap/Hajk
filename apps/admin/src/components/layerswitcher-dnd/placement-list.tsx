@@ -578,6 +578,7 @@ const PlacementDropZone: React.FC<{ children: React.ReactNode }> = ({
       sx={{
         flex: 1,
         minHeight: 0,
+        height: "100%",
         minWidth: 0,
         width: "100%",
         p: 1,

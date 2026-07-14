@@ -308,6 +308,7 @@ model Metadata {
   owner        String?
   url          String?
   urlTitle     String?
+  urlOpenData  String?
   attribution  String?
   created      DateTime      @default(now())
   updated      DateTime      @updatedAt
@@ -475,6 +476,10 @@ model GroupsOnMaps {
   name     String // It has a title, shown to the user
   toggled  Boolean
   expanded Boolean
+  exclusiveGroup Boolean @default(false)
+  infoDocument Boolean @default(false)
+  metadataId String?
+  metadata Metadata? @relation(fields: [metadataId], references: [id])
   index    Int     @default(0)
 }
 

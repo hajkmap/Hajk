@@ -27,6 +27,7 @@ import ServicesPage from "./pages/services/index.tsx";
 import ServiceSettings from "./pages/services/settings.tsx";
 import GroupsPage from "./pages/groups/index.tsx";
 import GroupSettings from "./pages/groups/settings.tsx";
+import GroupsDevelopmentPage from "./pages/groups-development/index.tsx";
 import UsersPage from "./pages/users/index.tsx";
 import UserRolesPage from "./pages/user-roles/index.tsx";
 import FormComponentsExamplePage from "./pages/examples/index.tsx";
@@ -103,6 +104,10 @@ const router = createBrowserRouter(
         {
           path: "groups/:groupId",
           element: <GroupSettings />,
+        },
+        {
+          path: "groups-development",
+          element: <GroupsDevelopmentPage />,
         },
         {
           path: "settings",

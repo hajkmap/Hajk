@@ -9,14 +9,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import type { TreeItems } from "dnd-kit-sortable-tree";
-import {
-  Box,
-  Chip,
-  List,
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Chip, List, Paper, TextField, Typography } from "@mui/material";
 import { DragIndicator } from "@mui/icons-material";
 import MapIcon from "@mui/icons-material/Map";
 import { useTranslation } from "react-i18next";
@@ -62,8 +55,8 @@ interface MapGroupPlacementPanelProps {
 }
 
 const MAP_CONTENT_DND_HEIGHT = {
-  xs: 400,
-  lg: "calc(100vh - 400px)",
+  xs: "clamp(360px, calc(100vh - 260px), 640px)",
+  lg: "clamp(640px, calc(100vh - 400px), 800px)",
 } as const;
 
 export default function MapGroupPlacementPanel({
@@ -87,9 +80,7 @@ export default function MapGroupPlacementPanel({
   const layerItems = useMemo(() => extractLayerItems(items), [items]);
   const groupItems = useMemo(() => extractGroupItems(items), [items]);
 
-  const applyGroupPlacementChange = (
-    nextGroups: TreeItems<TreeItemData>,
-  ) => {
+  const applyGroupPlacementChange = (nextGroups: TreeItems<TreeItemData>) => {
     onItemsChange(mergeMapContentLayersAndGroups(layerItems, nextGroups));
   };
 
@@ -290,7 +281,9 @@ export default function MapGroupPlacementPanel({
                 overflow: "hidden",
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              >
                 <MapIcon color="primary" fontSize="small" />
                 <Typography variant="subtitle1" fontWeight={600}>
                   {t("map.groupPlacement.onMap.title")}
@@ -310,7 +303,14 @@ export default function MapGroupPlacementPanel({
                 {t("map.placementGroupsOnMapHelp")}
               </Typography>
 
-              <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
+              <Box
+                sx={{
+                  flex: 1,
+                  minHeight: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
                 <PlacementListPanel
                   items={groupItems}
                   itemById={groupById}
