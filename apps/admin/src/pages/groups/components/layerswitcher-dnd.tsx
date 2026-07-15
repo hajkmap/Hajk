@@ -837,10 +837,12 @@ const GroupDropDialog: React.FC<{
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
-        },
+      slotprops={{
+        paper:{
+          sx: {
+            backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
+          },
+        }
       }}
     >
       <DialogTitle>{t("common.groupDropAction")}</DialogTitle>
@@ -1017,10 +1019,12 @@ const AddItemsDialog: React.FC<{
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
-        },
+      slotprops={{
+        paper:{
+          sx: {
+            backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
+          },
+        }
       }}
     >
       <DialogTitle>{t("common.addItemsToGroup")}</DialogTitle>

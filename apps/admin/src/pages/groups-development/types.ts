@@ -7,6 +7,7 @@ export type GroupLayerNodeKind = "group" | "layer";
 export interface GroupLayerNodeData {
   kind: GroupLayerNodeKind;
   sourceId: string;
+  order?: number;
 }
 
 export type GroupLayerTreeNode = NodeModel<GroupLayerNodeData>;

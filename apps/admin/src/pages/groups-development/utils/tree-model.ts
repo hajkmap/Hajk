@@ -1,4 +1,5 @@
 import type { LayerSwitcherTreeNode } from "../../../api/groups/types";
+import { mutateTreeWithIndex } from "@minoru/react-dnd-treeview";
 import type { CatalogDragItem, GroupLayerTreeNode } from "../types";
 import { CATALOG_DRAG_TYPE, GROUP_LAYER_TREE_ROOT_ID } from "../types";
 
@@ -23,13 +24,14 @@ export function createGroupTreeNode(
   groupId: string,
   name: string,
   parent: GroupLayerTreeNode["parent"] = GROUP_LAYER_TREE_ROOT_ID,
+  order = 0,
 ): GroupLayerTreeNode {
   return {
     id: toGroupTreeNodeId(groupId),
     parent,
     text: name,
     droppable: true,
-    data: { kind: "group", sourceId: groupId },
+    data: { kind: "group", sourceId: groupId, order },
   };
 }
 
@@ -37,23 +39,139 @@ export function createLayerTreeNode(
   layerId: string,
   name: string,
   parent: GroupLayerTreeNode["parent"] = GROUP_LAYER_TREE_ROOT_ID,
+  order = 0,
 ): GroupLayerTreeNode {
   return {
     id: toLayerTreeNodeId(layerId),
     parent,
     text: name,
     droppable: false,
-    data: { kind: "layer", sourceId: layerId },
+    data: { kind: "layer", sourceId: layerId, order },
   };
 }
 
 export function createTreeNodeFromCatalogItem(
   item: CatalogDragItem,
   parent: GroupLayerTreeNode["parent"],
+  order = 0,
 ): GroupLayerTreeNode {
   return item.kind === "group"
-    ? createGroupTreeNode(item.id, item.name, parent)
-    : createLayerTreeNode(item.id, item.name, parent);
+    ? createGroupTreeNode(item.id, item.name, parent, order)
+    : createLayerTreeNode(item.id, item.name, parent, order);
+}
+
+export function getNextSiblingOrder(
+  tree: GroupLayerTreeNode[],
+  parentId: GroupLayerTreeNode["parent"],
+): number {
+  return tree
+    .filter((node) => node.parent === parentId)
+    .reduce((max, node) => Math.max(max, node.data?.order ?? 0), -1) + 1;
+}
+
+export function sortSiblingNodes<T extends GroupLayerTreeNode>(
+  a: T,
+  b: T,
+): number {
+  if (a.parent !== b.parent) {
+    return 0;
+  }
+
+  return (a.data?.order ?? 0) - (b.data?.order ?? 0);
+}
+
+/** Assign sibling order from the flat tree array order returned by the DnD tree. */
+export function applySiblingOrderFromFlatTree(
+  tree: GroupLayerTreeNode[],
+): GroupLayerTreeNode[] {
+  const orderCounters = new Map<string, number>();
+
+  return tree.map((node) => {
+    const parentKey = String(node.parent);
+    const order = orderCounters.get(parentKey) ?? 0;
+    orderCounters.set(parentKey, order + 1);
+
+    if (!node.data) {
+      return node;
+    }
+
+    return {
+      ...node,
+      data: {
+        ...node.data,
+        order,
+      },
+    };
+  });
+}
+
+export function resolveCatalogInsertTarget(
+  tree: GroupLayerTreeNode[],
+  dropTargetId: GroupLayerTreeNode["id"],
+  dropTarget?: GroupLayerTreeNode,
+  relativeIndex?: number,
+): { parentId: GroupLayerTreeNode["parent"]; index: number } {
+  const target = dropTarget ?? tree.find((node) => node.id === dropTargetId);
+
+  if (target?.data?.kind === "layer" && dropTargetId === target.id) {
+    const parentId = target.parent ?? GROUP_LAYER_TREE_ROOT_ID;
+    const siblings = tree.filter((node) => node.parent === parentId);
+    const targetSiblingIndex = siblings.findIndex((node) => node.id === target.id);
+
+    return {
+      parentId,
+      index: relativeIndex ?? Math.max(0, targetSiblingIndex),
+    };
+  }
+
+  const parentId =
+    target?.data?.kind === "layer"
+      ? (target.parent ?? GROUP_LAYER_TREE_ROOT_ID)
+      : dropTargetId;
+
+  const siblingCount = tree.filter((node) => node.parent === parentId).length;
+
+  return {
+    parentId,
+    index: relativeIndex ?? siblingCount,
+  };
+}
+
+export function insertCatalogItemIntoTree(
+  tree: GroupLayerTreeNode[],
+  catalogItem: CatalogDragItem,
+  options: {
+    dropTargetId: GroupLayerTreeNode["id"];
+    dropTarget?: GroupLayerTreeNode;
+    relativeIndex?: number;
+  },
+): GroupLayerTreeNode[] | null {
+  const { dropTargetId, dropTarget, relativeIndex } = options;
+  const { parentId, index } = resolveCatalogInsertTarget(
+    tree,
+    dropTargetId,
+    dropTarget,
+    relativeIndex,
+  );
+
+  if (catalogItem.kind === "layer" && !isValidLayerParentId(tree, parentId)) {
+    return null;
+  }
+
+  const newNode = createTreeNodeFromCatalogItem(catalogItem, parentId, 0);
+
+  if (tree.some((node) => node.id === newNode.id)) {
+    return null;
+  }
+
+  const next = mutateTreeWithIndex(
+    [...tree, newNode],
+    newNode.id,
+    parentId,
+    index,
+  ) as GroupLayerTreeNode[];
+
+  return applySiblingOrderFromFlatTree(next);
 }
 
 export function collectTreeNodeIds(tree: GroupLayerTreeNode[]): Set<string> {
@@ -250,13 +368,15 @@ export function layerSwitcherTreeToNodeModels(
 ): GroupLayerTreeNode[] {
   const result: GroupLayerTreeNode[] = [];
 
-  for (const node of nodes) {
+  for (let index = 0; index < nodes.length; index += 1) {
+    const node = nodes[index];
     if (node.type === "layer") {
       result.push(
         createLayerTreeNode(
           node.id,
           layerNames.get(node.id) ?? node.id,
           parent,
+          index,
         ),
       );
       continue;
@@ -266,6 +386,7 @@ export function layerSwitcherTreeToNodeModels(
       node.id,
       node.name || groupNames.get(node.id) || node.id,
       parent,
+      index,
     );
     result.push(groupNode);
 
@@ -288,7 +409,10 @@ export function nodeModelsToLayerSwitcherTree(
   tree: GroupLayerTreeNode[],
   parentId: GroupLayerTreeNode["parent"] = GROUP_LAYER_TREE_ROOT_ID,
 ): LayerSwitcherTreeNode[] {
-  const children = tree.filter((node) => node.parent === parentId);
+  const children = tree
+    .filter((node) => node.parent === parentId)
+    .slice()
+    .sort(sortSiblingNodes);
 
   return children.map((node) => {
     if (node.data?.kind === "layer") {

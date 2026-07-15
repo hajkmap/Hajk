@@ -19,7 +19,11 @@ import type { GroupLayerTreeNode } from "../types";
 import LayerSwitcherCheckbox, {
   type LayerSwitcherToggleState,
 } from "./layer-switcher-checkbox";
-import { getGroupToggleState, isGroupActive, isLayerVisible } from "../utils/tree-visibility";
+import {
+  getGroupToggleState,
+  isGroupActive,
+  isLayerVisible,
+} from "../utils/tree-visibility";
 
 interface GroupLayerTreeNodeProps {
   node: GroupLayerTreeNode;
@@ -180,7 +184,7 @@ export default function GroupLayerTreeNodeView({
               />
             </Box>
 
-            {(onAddToGroup || onRemoveFromTree || onEditGroupMetadata) ? (
+            {onAddToGroup || onRemoveFromTree || onEditGroupMetadata ? (
               <ListItemSecondaryAction
                 sx={{
                   right: 4,
@@ -316,28 +320,48 @@ export default function GroupLayerTreeNodeView({
                 right: 4,
                 top: "50%",
                 transform: "translateY(-50%)",
+                display: "flex",
+                alignItems: "center",
               }}
             >
-              <IconButton
-                size="small"
-                aria-label="Layer details"
-                sx={{ mt: "1px" }}
-                onMouseDown={(event) => {
-                  event.stopPropagation();
-                }}
-                onClick={(event) => {
-                  event.stopPropagation();
-                }}
-              >
-                <MoreOutlinedIcon
-                  sx={{
-                    width: "0.7em",
-                    height: "0.7em",
-                    transform: "rotate(180deg)",
-                    color: "grey.500",
+              {onRemoveFromTree ? (
+                <IconButton
+                  size="small"
+                  aria-label={t("groupsDevelopment.removeLayerFromTree")}
+                  title={t("groupsDevelopment.removeLayerFromTree")}
+                  sx={{ mt: "1px", cursor: "pointer" }}
+                  onMouseDown={(event) => {
+                    event.stopPropagation();
                   }}
-                />
-              </IconButton>
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onRemoveFromTree(node.id);
+                  }}
+                >
+                  <DeleteOutlineIcon fontSize="small" />
+                </IconButton>
+              ) : (
+                <IconButton
+                  size="small"
+                  aria-label="Layer details"
+                  sx={{ mt: "1px" }}
+                  onMouseDown={(event) => {
+                    event.stopPropagation();
+                  }}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
+                >
+                  <MoreOutlinedIcon
+                    sx={{
+                      width: "0.7em",
+                      height: "0.7em",
+                      transform: "rotate(180deg)",
+                      color: "grey.500",
+                    }}
+                  />
+                </IconButton>
+              )}
             </ListItemSecondaryAction>
           </ListItemButton>
         )}

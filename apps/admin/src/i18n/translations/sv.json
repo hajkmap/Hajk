@@ -795,6 +795,7 @@
     "groupsDevelopment.metadata.urlOpenData": "Länk till öppna data",
     "groupsDevelopment.editMetadata": "Redigera infodokument",
     "groupsDevelopment.removeFromTree": "Ta bort från lagerhanteraren",
+    "groupsDevelopment.removeLayerFromTree": "Ta bort lager från lagerhanteraren",
     "tools.searchTitle": "Sök bland verktyg...",
     "database.title": "Databashantering",
     "database.status.title": "Databasstatus",

@@ -162,9 +162,11 @@ export default function GroupLayerAddDialog({
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{
+      slotprops={{
+        paper:{
         sx: {
-          backgroundColor: isDarkMode ? "grey.900" : "background.paper",
+            backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
+          },
         },
       }}
     >

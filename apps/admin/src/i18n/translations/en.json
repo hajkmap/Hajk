@@ -796,6 +796,7 @@
     "groupsDevelopment.metadata.urlOpenData": "Link to open data",
     "groupsDevelopment.editMetadata": "Edit info document",
     "groupsDevelopment.removeFromTree": "Remove from layer switcher",
+    "groupsDevelopment.removeLayerFromTree": "Remove layer from layer switcher",
     "tools.searchTitle": "Search tools...",
     "database.title": "Database Management",
     "database.status.title": "Database Status",

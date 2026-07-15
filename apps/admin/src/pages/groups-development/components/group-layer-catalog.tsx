@@ -73,7 +73,12 @@ interface CatalogRowProps {
   disableActions?: boolean;
 }
 
-function CatalogRow({ item, onEdit, onDelete, disableActions }: CatalogRowProps) {
+function CatalogRow({
+  item,
+  onEdit,
+  onDelete,
+  disableActions,
+}: CatalogRowProps) {
   const { t } = useTranslation();
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
   const isGroup = item.kind === "group";
@@ -241,8 +246,7 @@ export default function GroupLayerCatalog({
     );
   }, [layers, normalizedSearch, placedLayerIds]);
 
-  const activeItems =
-    activeTab === "groups" ? catalogGroups : availableLayers;
+  const activeItems = activeTab === "groups" ? catalogGroups : availableLayers;
 
   const emptyMessage =
     activeTab === "groups"
@@ -360,14 +364,11 @@ export default function GroupLayerCatalog({
       );
       handleCloseDeleteDialog();
     } catch (error) {
-      toast.error(
-        getDeleteGroupErrorMessage(error, t, deleteTarget.name),
-        {
-          position: "bottom-left",
-          theme: palette.mode,
-          hideProgressBar: true,
-        },
-      );
+      toast.error(getDeleteGroupErrorMessage(error, t, deleteTarget.name), {
+        position: "bottom-left",
+        theme: palette.mode,
+        hideProgressBar: true,
+      });
     }
   };
 
@@ -487,8 +488,7 @@ export default function GroupLayerCatalog({
                 }
                 disableActions={
                   item.kind === "group"
-                    ? layerGroups.find((group) => group.id === item.id)
-                        ?.locked
+                    ? layerGroups.find((group) => group.id === item.id)?.locked
                     : false
                 }
               />

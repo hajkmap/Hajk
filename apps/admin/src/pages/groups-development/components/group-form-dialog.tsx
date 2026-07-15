@@ -88,10 +88,12 @@ export default function GroupFormDialog({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          backgroundColor: isDarkMode ? "grey.900" : "background.paper",
-        },
+      slotprops={{
+        paper:{
+          sx: {
+            backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
+          },
+        }
       }}
     >
       <DialogTitle>

@@ -25,12 +25,14 @@ import { CATALOG_DRAG_TYPE, DEFAULT_GROUP_DISPLAY_SETTINGS, GROUP_LAYER_TREE_ROO
 import { toDisplaySettings, toFormValues } from "../utils/group-form";
 import {
   applyDropOnLayerRedirect,
+  applySiblingOrderFromFlatTree,
   canDropGroupLayerNode,
   collectPlacedSourceIds,
   createTreeNodeFromCatalogItem,
+  getNextSiblingOrder,
+  insertCatalogItemIntoTree,
   isValidLayerParentId,
   removeTreeNodeWithDescendants,
-  resolveDropParentId,
 } from "../utils/tree-model";
 import { filterTreeBySearch } from "../utils/tree-filter";
 import {
@@ -98,7 +100,12 @@ export default function GroupLayerTree() {
         let next = current;
 
         for (const catalogItem of catalogItems) {
-          const newNode = createTreeNodeFromCatalogItem(catalogItem, parentId);
+          const order = getNextSiblingOrder(next, parentId);
+          const newNode = createTreeNodeFromCatalogItem(
+            catalogItem,
+            parentId,
+            order,
+          );
 
           if (next.some((node) => node.id === newNode.id)) {
             continue;
@@ -114,7 +121,7 @@ export default function GroupLayerTree() {
           next = [...next, newNode];
         }
 
-        return next;
+        return applySiblingOrderFromFlatTree(next);
       });
 
       setVisibleIds((current) => {
@@ -141,34 +148,32 @@ export default function GroupLayerTree() {
   const addCatalogItem = useCallback(
     (
       catalogItem: CatalogDragItem,
-      dropTargetId?: GroupLayerTreeNode["id"],
-      dropTarget?: GroupLayerTreeNode,
+      dropOptions: {
+        dropTargetId: GroupLayerTreeNode["id"];
+        dropTarget?: GroupLayerTreeNode;
+        relativeIndex?: number;
+      },
     ) => {
       setTreeData((current) => {
-        const parentId = resolveDropParentId(current, dropTargetId, dropTarget);
-        const newNode = createTreeNodeFromCatalogItem(catalogItem, parentId);
+        const next = insertCatalogItemIntoTree(current, catalogItem, dropOptions);
 
-        if (current.some((node) => node.id === newNode.id)) {
-          return current;
-        }
-
-        if (
-          catalogItem.kind === "layer" &&
-          !isValidLayerParentId(current, parentId)
-        ) {
+        if (!next) {
           return current;
         }
 
         if (catalogItem.kind === "layer") {
-          const layerNodeId = newNode.id;
+          const layerNodeId = createTreeNodeFromCatalogItem(
+            catalogItem,
+            dropOptions.dropTargetId,
+          ).id;
           setVisibleIds((visible) => {
-            const next = new Set(visible);
-            next.add(String(layerNodeId));
-            return next;
+            const nextVisible = new Set(visible);
+            nextVisible.add(String(layerNodeId));
+            return nextVisible;
           });
         }
 
-        return [...current, newNode];
+        return next;
       });
     },
     [],
@@ -180,7 +185,9 @@ export default function GroupLayerTree() {
         return;
       }
 
-      addCatalogItem(catalogItem, GROUP_LAYER_TREE_ROOT_ID);
+      addCatalogItem(catalogItem, {
+        dropTargetId: GROUP_LAYER_TREE_ROOT_ID,
+      });
     },
     [addCatalogItem],
   );
@@ -198,11 +205,11 @@ export default function GroupLayerTree() {
       const itemType = options.monitor.getItemType();
 
       if (itemType === CATALOG_DRAG_TYPE) {
-        addCatalogItem(
-          options.monitor.getItem() as CatalogDragItem,
-          options.dropTargetId,
-          options.dropTarget,
-        );
+        addCatalogItem(options.monitor.getItem() as CatalogDragItem, {
+          dropTargetId: options.dropTargetId,
+          dropTarget: options.dropTarget,
+          relativeIndex: options.relativeIndex,
+        });
         return;
       }
 
@@ -222,9 +229,9 @@ export default function GroupLayerTree() {
         return;
       }
 
-      setTreeData(updatedTree);
+      setTreeData(applySiblingOrderFromFlatTree(updatedTree));
     },
-    [addCatalogItem, treeData],
+    [addCatalogItem],
   );
 
   const handleToggleLayerVisibility = useCallback(
@@ -455,11 +462,23 @@ export default function GroupLayerTree() {
                 initialOpen
                 enableAnimateExpand
                 sort={false}
-                insertDroppableFirst
+                insertDroppableFirst={false}
+                dropTargetOffset={12}
                 canDrop={(tree, options) =>
                   canDropGroupLayerNode(tree, options)
                 }
                 onDrop={handleDrop}
+                placeholderRender={(_node, { depth }) => (
+                  <Box
+                    sx={{
+                      height: 2,
+                      ml: `${depth * 20}px`,
+                      mr: 1,
+                      bgcolor: "primary.main",
+                      borderRadius: 1,
+                    }}
+                  />
+                )}
                 rootProps={{
                   style: {
                     flex: 1,

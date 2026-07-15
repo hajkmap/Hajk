@@ -121,17 +121,17 @@ model RoleOnGroup {
 }
 
 model Map {
-  id                Int              @id @default(autoincrement())
-  locked            Boolean          @default(false)
-  name              String           @unique
-  options           Json             @default("{}")
+  id                Int             @id @default(autoincrement())
+  locked            Boolean         @default(false)
+  name              String          @unique
+  options           Json            @default("{}")
   projectionId      Int?
   createdBy         String?
-  createdDate       DateTime?        @db.Timestamptz(3) // Timestamp when created
+  createdDate       DateTime?       @db.Timestamptz(3) // Timestamp when created
   lastSavedBy       String?
-  lastSavedDate     DateTime?        @db.Timestamptz(3) // Timestamp when last saved
-  projection        Projection?      @relation("MapViewProjection", fields: [projectionId], references: [id])
-  projections       Projection[]     @relation("MapProjections")
+  lastSavedDate     DateTime?       @db.Timestamptz(3) // Timestamp when last saved
+  projection        Projection?     @relation("MapViewProjection", fields: [projectionId], references: [id])
+  projections       Projection[]    @relation("MapProjections")
   tools             ToolsOnMaps[]
   layers            LayerInstance[]
   groups            GroupsOnMaps[]
@@ -234,13 +234,13 @@ model ToolsOnMaps {
   /// placement) so they can be re-enabled without losing configuration.
   active  Boolean @default(true)
   /// Determines the sort between tools within a zone
-  index   Int    @default(0)
+  index   Int     @default(0)
   /// Placement zone in the map UI: drawer | widgetLeft | widgetRight | controlButton. Null means unplaced (managed via admin UI).
   target  String?
   /// Allows overriding default tool options (set in Tool) on a per-map basis
-  options Json   @default("{}")
-  map     Map    @relation(fields: [mapName], references: [name])
-  tool    Tool   @relation(fields: [toolId], references: [id])
+  options Json    @default("{}")
+  map     Map     @relation(fields: [mapName], references: [name])
+  tool    Tool    @relation(fields: [toolId], references: [id])
 
   @@id([mapName, toolId])
 }
@@ -315,6 +315,8 @@ model Metadata {
   service      Service?
   displayLayer DisplayLayer?
   searchLayer  SearchLayer?
+
+  groupsOnMaps GroupsOnMaps[]
 }
 
 model InfoClickSettings {
@@ -472,15 +474,15 @@ model GroupsOnMaps {
   parent        GroupsOnMaps?  @relation("GroupOnGroups", fields: [parentGroupId], references: [id], onDelete: Cascade) // The optional parent record
   groups        GroupsOnMaps[] @relation("GroupOnGroups") // The optional list of children records
 
-  usage    UseType // It may be used as a background or a foreground group
-  name     String // It has a title, shown to the user
-  toggled  Boolean
-  expanded Boolean
-  exclusiveGroup Boolean @default(false)
-  infoDocument Boolean @default(false)
-  metadataId String?
-  metadata Metadata? @relation(fields: [metadataId], references: [id])
-  index    Int     @default(0)
+  usage          UseType // It may be used as a background or a foreground group
+  name           String // It has a title, shown to the user
+  toggled        Boolean
+  expanded       Boolean
+  exclusiveGroup Boolean   @default(false)
+  infoDocument   Boolean   @default(false)
+  metadataId     String?
+  metadata       Metadata? @relation(fields: [metadataId], references: [id])
+  index          Int       @default(0)
 }
 
 enum ServiceType {
