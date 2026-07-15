@@ -39,11 +39,6 @@ export const SIDEBAR_MENU = [
         titleKey: "common.layerGroups",
         icon: <CollectionsIcon />,
       },
-      {
-        to: "/groups-development",
-        titleKey: "common.groupsDevelopment",
-        icon: <CollectionsIcon />,
-      },
     ],
   },
   {

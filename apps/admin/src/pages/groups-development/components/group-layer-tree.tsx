@@ -123,24 +123,6 @@ export default function GroupLayerTree() {
 
         return applySiblingOrderFromFlatTree(next);
       });
-
-      setVisibleIds((current) => {
-        const next = new Set(current);
-
-        for (const catalogItem of catalogItems) {
-          if (catalogItem.kind !== "layer") {
-            continue;
-          }
-
-          const layerNodeId = createTreeNodeFromCatalogItem(
-            catalogItem,
-            parentId,
-          ).id;
-          next.add(String(layerNodeId));
-        }
-
-        return next;
-      });
     },
     [],
   );
@@ -159,18 +141,6 @@ export default function GroupLayerTree() {
 
         if (!next) {
           return current;
-        }
-
-        if (catalogItem.kind === "layer") {
-          const layerNodeId = createTreeNodeFromCatalogItem(
-            catalogItem,
-            dropOptions.dropTargetId,
-          ).id;
-          setVisibleIds((visible) => {
-            const nextVisible = new Set(visible);
-            nextVisible.add(String(layerNodeId));
-            return nextVisible;
-          });
         }
 
         return next;

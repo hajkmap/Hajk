@@ -12,16 +12,24 @@ import {
   Box,
   FormControl,
   IconButton,
+  InputLabel,
   MenuItem,
   Select,
   Switch,
   TextField,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import type { GridRenderCellParams } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
+import {
+  ListFilterField,
+  ListFilterRow,
+  ListFilterSearch,
+} from "../../../components/form-components/list-filter-row";
 import type {
   ToolOnMap,
   ToolWindowPosition,
@@ -240,8 +248,10 @@ export default function MapToolsList({
   onPendingWindowSizeDirtyChange,
 }: MapToolsListProps) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
   const flushCallbacksRef = useRef(new Set<() => void>());
   const pendingFieldsRef = useRef(new Set<string>());
   const pendingWindowSizesRef = useRef(new Map<number, Partial<ToolWindowSize>>());
@@ -335,6 +345,53 @@ export default function MapToolsList({
     [catalogTools],
   );
 
+  const typeOptions = useMemo(
+    () =>
+      [...new Set(catalogTools.map((tool) => tool.type))].sort((a, b) =>
+        a.localeCompare(b, undefined, { sensitivity: "base" }),
+      ),
+    [catalogTools],
+  );
+
+  const hasActiveFilters = searchTerm.trim() !== "" || typeFilter !== "";
+
+  const handleToggleActive = useCallback(
+    (toolId: number, active: boolean) => {
+      if (active) {
+        const toolType = catalogToolsById.get(toolId)?.type;
+        if (toolType) {
+          const conflictingId = [...activeToolIds].find(
+            (id) =>
+              id !== toolId && catalogToolsById.get(id)?.type === toolType,
+          );
+          if (conflictingId != null) {
+            const conflictingTool = catalogToolsById.get(conflictingId);
+            const activatingTool = catalogToolsById.get(toolId);
+            toast.warning(
+              t("maps.toolsDuplicateTypeWarning", {
+                type: toolType,
+                deactivatedTool: conflictingTool
+                  ? getCatalogToolDisplayName(conflictingTool)
+                  : String(conflictingId),
+                activatedTool: activatingTool
+                  ? getCatalogToolDisplayName(activatingTool)
+                  : String(toolId),
+              }),
+              {
+                position: "bottom-left",
+                theme: theme.palette.mode,
+                hideProgressBar: true,
+              },
+            );
+          }
+        }
+      }
+
+      onToggleActive(toolId, active);
+    },
+    [activeToolIds, catalogToolsById, onToggleActive, t, theme.palette.mode],
+  );
+
   const rows = useMemo((): MapToolGridRow[] => {
     const query = searchTerm.trim().toLowerCase();
     const mapToolsById = new Map(mapTools.map((tool) => [tool.toolId, tool]));
@@ -349,6 +406,7 @@ export default function MapToolsList({
         ),
       )
       .filter((tool) => {
+        if (typeFilter && tool.type !== typeFilter) return false;
         if (!query) return true;
         const title = getCatalogToolDisplayName(tool).toLowerCase();
         return title.includes(query) || tool.type.toLowerCase().includes(query);
@@ -374,6 +432,7 @@ export default function MapToolsList({
     catalogTools,
     mapTools,
     searchTerm,
+    typeFilter,
     activeToolIds,
     toolZones,
     windowPositions,
@@ -410,7 +469,7 @@ export default function MapToolsList({
             aria-label={t("maps.toolsActive")}
             onClick={(event) => event.stopPropagation()}
             onChange={(event) => {
-              onToggleActive(params.row.toolId, event.target.checked);
+              handleToggleActive(params.row.toolId, event.target.checked);
             }}
           />
         ),
@@ -633,7 +692,7 @@ export default function MapToolsList({
       navigate,
       catalogToolsById,
       windowSizes,
-      onToggleActive,
+      handleToggleActive,
       onTargetChange,
       onWindowPositionChange,
       onWindowSizeChange,
@@ -645,19 +704,43 @@ export default function MapToolsList({
 
   return (
     <Box>
-      <Box sx={{ mb: 2, width: { xs: "100%", sm: "50%", md: "33%" } }}>
-        <TextField
-          fullWidth
-          label={t("tools.searchTitle")}
-          variant="outlined"
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-        />
-      </Box>
+      <ListFilterRow>
+        <ListFilterSearch>
+          <TextField
+            fullWidth
+            label={t("tools.searchTitle")}
+            variant="outlined"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </ListFilterSearch>
+        <ListFilterField>
+          <FormControl fullWidth variant="outlined">
+            <InputLabel id="map-tools-type-filter-label">
+              {t("maps.toolsFilterByType")}
+            </InputLabel>
+            <Select
+              labelId="map-tools-type-filter-label"
+              label={t("maps.toolsFilterByType")}
+              value={typeFilter}
+              onChange={(event) => setTypeFilter(event.target.value)}
+            >
+              <MenuItem value="">{t("common.all")}</MenuItem>
+              {typeOptions.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </ListFilterField>
+      </ListFilterRow>
 
       {rows.length === 0 ? (
         <Typography color="text.secondary">
-          {t("maps.toolsCatalogEmpty")}
+          {hasActiveFilters
+            ? t("maps.toolsNoSearchResults")
+            : t("maps.toolsCatalogEmpty")}
         </Typography>
       ) : (
         <StyledDataGrid

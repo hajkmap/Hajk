@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Box } from "@mui/material";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 import SortIcon from "@mui/icons-material/Sort";
+import CollectionsIcon from "@mui/icons-material/Collections";
 import type { TreeItems } from "dnd-kit-sortable-tree";
 
 import { SettingsPageTabs } from "../../../components/settings-page-tabs";
 import { TreeItemData } from "../../../components/layerswitcher-dnd";
+import GroupLayerTree from "../../groups-development/components/group-layer-tree";
 import MapGroupPlacementPanel from "./map-group-placement-panel";
 import MapDrawOrderPanel from "./map-draw-order-panel";
 
@@ -19,6 +21,11 @@ const CONTENT_SUB_TABS = [
     key: "drawOrder" as const,
     labelKey: "maps.contentTab.drawOrder",
     icon: <SortIcon />,
+  },
+  {
+    key: "groupsDevelopment" as const,
+    labelKey: "common.groupsDevelopment",
+    icon: <CollectionsIcon />,
   },
 ];
 
@@ -59,7 +66,7 @@ export default function MapContentPanel({
   onRemoveLayerFromDrawOrder,
 }: MapContentPanelProps) {
   const [contentSubTab, setContentSubTab] = useState<
-    "placement" | "drawOrder"
+    "placement" | "drawOrder" | "groupsDevelopment"
   >("placement");
 
   return (
@@ -77,7 +84,7 @@ export default function MapContentPanel({
           items={placementItems}
           onItemsChange={onPlacementItemsChange}
         />
-      ) : (
+      ) : contentSubTab === "drawOrder" ? (
         <MapDrawOrderPanel
           catalogLayers={catalogLayers}
           items={drawOrderItems}
@@ -85,6 +92,8 @@ export default function MapContentPanel({
           onInsertLayer={onInsertLayerToDrawOrder}
           onRemoveLayer={onRemoveLayerFromDrawOrder}
         />
+      ) : (
+        <GroupLayerTree />
       )}
     </Box>
   );

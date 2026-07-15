@@ -49,7 +49,7 @@ export default function GroupLayerTreeNodeView({
   onEditGroupMetadata,
 }: GroupLayerTreeNodeProps) {
   const { t } = useTranslation();
-  const { depth, isOpen, onToggle, hasChild, isDragging } = options;
+  const { depth, isOpen, onToggle, isDragging } = options;
   const isGroup = node.data?.kind === "group";
   const isLayer = node.data?.kind === "layer";
   const isVisible = isLayerVisible(visibleIds, node.id);
@@ -98,7 +98,7 @@ export default function GroupLayerTreeNodeView({
         {isGroup ? (
           <ListItemButton
             disableTouchRipple
-            onClick={hasChild ? onToggle : undefined}
+            onClick={onToggle}
             dense
             sx={{
               flex: 1,
@@ -120,34 +120,30 @@ export default function GroupLayerTreeNodeView({
               },
             }}
           >
-            {hasChild ? (
-              <IconButton
-                size="small"
-                onMouseDown={(event) => {
-                  event.stopPropagation();
-                }}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onToggle();
-                }}
-                aria-label={isOpen ? "Collapse group" : "Expand group"}
-                sx={{
-                  mt: "2px",
-                  pl: "3px",
-                  pr: "4px",
-                  "&:hover": {
-                    backgroundColor: "transparent",
-                  },
-                }}
-              >
-                <KeyboardArrowRightOutlinedIcon
-                  className="ls-arrow"
-                  fontSize="small"
-                />
-              </IconButton>
-            ) : (
-              <Box sx={{ width: 28, flexShrink: 0 }} />
-            )}
+            <IconButton
+              size="small"
+              onMouseDown={(event) => {
+                event.stopPropagation();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                onToggle();
+              }}
+              aria-label={isOpen ? "Collapse group" : "Expand group"}
+              sx={{
+                mt: "2px",
+                pl: "3px",
+                pr: "4px",
+                "&:hover": {
+                  backgroundColor: "transparent",
+                },
+              }}
+            >
+              <KeyboardArrowRightOutlinedIcon
+                className="ls-arrow"
+                fontSize="small"
+              />
+            </IconButton>
 
             <Box
               sx={{

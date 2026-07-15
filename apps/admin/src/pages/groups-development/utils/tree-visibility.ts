@@ -114,17 +114,43 @@ export function getDescendantLayerNodeIds(
 }
 
 export function getGroupToggleState(
-  _tree: GroupLayerTreeNode[],
+  tree: GroupLayerTreeNode[],
   groupId: GroupLayerTreeNode["id"],
   visibleIds: Set<string>,
 ): LayerSwitcherToggleState {
-  return visibleIds.has(normalizeVisibleId(groupId)) ? "checked" : "unchecked";
+  const descendantLayerIds = getDescendantLayerNodeIds(tree, groupId);
+
+  if (descendantLayerIds.length === 0) {
+    return visibleIds.has(normalizeVisibleId(groupId)) ? "checked" : "unchecked";
+  }
+
+  const visibleCount = descendantLayerIds.filter((id) =>
+    visibleIds.has(normalizeVisibleId(id)),
+  ).length;
+
+  if (visibleCount === 0) {
+    return "unchecked";
+  }
+
+  if (visibleCount === descendantLayerIds.length) {
+    return "checked";
+  }
+
+  return "semichecked";
 }
 
 export function isGroupActive(
-  _tree: GroupLayerTreeNode[],
+  tree: GroupLayerTreeNode[],
   groupId: GroupLayerTreeNode["id"],
   visibleIds: Set<string>,
 ): boolean {
-  return visibleIds.has(normalizeVisibleId(groupId));
+  const descendantLayerIds = getDescendantLayerNodeIds(tree, groupId);
+
+  if (descendantLayerIds.length === 0) {
+    return visibleIds.has(normalizeVisibleId(groupId));
+  }
+
+  return descendantLayerIds.every((id) =>
+    visibleIds.has(normalizeVisibleId(id)),
+  );
 }

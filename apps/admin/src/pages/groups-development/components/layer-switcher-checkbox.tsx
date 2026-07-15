@@ -50,14 +50,13 @@ export default function LayerSwitcherCheckbox({
           },
           toggleState !== "unchecked" && {
             transform: "translate(-50%, -50%) scale(1.05)",
-            opacity: 1,
+            opacity: toggleState === "semichecked" ? 0.45 : 1,
           },
         ]}
       >
         <CheckBoxIcon
           fontSize="small"
           sx={{
-            ...(toggleState === "semichecked" && { fill: "grey.500" }),
             ...(toggleState === "checkedWithWarning" && {
               fill: "warning.dark",
             }),

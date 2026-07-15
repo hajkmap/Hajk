@@ -492,7 +492,30 @@ export default function MapSettings() {
         const nextWindowSizes = { ...base.windowSizes };
         const nextInactiveTargets = { ...base.inactiveTargets };
 
+        const deactivateTool = (id: number) => {
+          nextActiveToolIds.delete(id);
+          const zone = findToolZoneForId(nextZones, id);
+          if (zone) {
+            nextInactiveTargets[id] = zoneKeyToTarget(zone);
+          } else {
+            delete nextInactiveTargets[id];
+          }
+          nextZones = removeToolFromZones(nextZones, id);
+        };
+
         if (active) {
+          const toolType = toolTypesById.get(toolId) ?? "";
+          if (toolType) {
+            for (const activeId of nextActiveToolIds) {
+              if (
+                activeId !== toolId &&
+                toolTypesById.get(activeId) === toolType
+              ) {
+                deactivateTool(activeId);
+              }
+            }
+          }
+
           nextActiveToolIds.add(toolId);
           if (!nextWindowPositions[toolId]) {
             nextWindowPositions[toolId] = "right";
@@ -509,15 +532,7 @@ export default function MapSettings() {
             delete nextInactiveTargets[toolId];
           }
         } else {
-          nextActiveToolIds.delete(toolId);
-          // Remember its current zone so re-enabling can restore it.
-          const zone = findToolZoneForId(nextZones, toolId);
-          if (zone) {
-            nextInactiveTargets[toolId] = zoneKeyToTarget(zone);
-          } else {
-            delete nextInactiveTargets[toolId];
-          }
-          nextZones = removeToolFromZones(nextZones, toolId);
+          deactivateTool(toolId);
         }
 
         return {
@@ -530,7 +545,7 @@ export default function MapSettings() {
         };
       });
     },
-    [mapName, resolveToolsDraft, resolveToolName],
+    [mapName, resolveToolsDraft, resolveToolName, toolTypesById],
   );
 
   const setToolTarget = useCallback(
