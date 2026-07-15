@@ -483,6 +483,8 @@ model GroupsOnMaps {
   metadataId     String?
   metadata       Metadata? @relation(fields: [metadataId], references: [id])
   index          Int       @default(0)
+  layerVisibleAtStart Boolean @default(false)
+  layerInfoBox        String?
 }
 
 enum ServiceType {

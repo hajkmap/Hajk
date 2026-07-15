@@ -35,6 +35,7 @@ interface GroupLayerTreeNodeProps {
   onAddToGroup?: (nodeId: GroupLayerTreeNode["id"]) => void;
   onRemoveFromTree?: (nodeId: GroupLayerTreeNode["id"]) => void;
   onEditGroupMetadata?: (nodeId: GroupLayerTreeNode["id"]) => void;
+  onEditLayerSettings?: (nodeId: GroupLayerTreeNode["id"]) => void;
 }
 
 export default function GroupLayerTreeNodeView({
@@ -47,11 +48,11 @@ export default function GroupLayerTreeNodeView({
   onAddToGroup,
   onRemoveFromTree,
   onEditGroupMetadata,
+  onEditLayerSettings,
 }: GroupLayerTreeNodeProps) {
   const { t } = useTranslation();
   const { depth, isOpen, onToggle, isDragging } = options;
   const isGroup = node.data?.kind === "group";
-  const isLayer = node.data?.kind === "layer";
   const isVisible = isLayerVisible(visibleIds, node.id);
 
   const groupToggleState: LayerSwitcherToggleState = isGroup
@@ -320,6 +321,30 @@ export default function GroupLayerTreeNodeView({
                 alignItems: "center",
               }}
             >
+              {onEditLayerSettings ? (
+                <IconButton
+                  size="small"
+                  aria-label={t("groupsDevelopment.editLayer")}
+                  title={t("groupsDevelopment.editLayer")}
+                  sx={{ mt: "1px", cursor: "pointer" }}
+                  onMouseDown={(event) => {
+                    event.stopPropagation();
+                  }}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onEditLayerSettings(node.id);
+                  }}
+                >
+                  <MoreOutlinedIcon
+                    sx={{
+                      width: "0.7em",
+                      height: "0.7em",
+                      transform: "rotate(180deg)",
+                      color: "grey.500",
+                    }}
+                  />
+                </IconButton>
+              ) : null}
               {onRemoveFromTree ? (
                 <IconButton
                   size="small"
@@ -336,28 +361,7 @@ export default function GroupLayerTreeNodeView({
                 >
                   <DeleteOutlineIcon fontSize="small" />
                 </IconButton>
-              ) : (
-                <IconButton
-                  size="small"
-                  aria-label="Layer details"
-                  sx={{ mt: "1px" }}
-                  onMouseDown={(event) => {
-                    event.stopPropagation();
-                  }}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                  }}
-                >
-                  <MoreOutlinedIcon
-                    sx={{
-                      width: "0.7em",
-                      height: "0.7em",
-                      transform: "rotate(180deg)",
-                      color: "grey.500",
-                    }}
-                  />
-                </IconButton>
-              )}
+              ) : null}
             </ListItemSecondaryAction>
           </ListItemButton>
         )}

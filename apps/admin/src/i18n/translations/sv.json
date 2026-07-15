@@ -792,6 +792,8 @@
     "groups.deleteGroupTypeNameLabel": "Skriv gruppens namn för att bekräfta",
     "groups.deleteGroupTypeNameHelper": "För att aktivera borttagning, skriv gruppens namn exakt: <strong>{{name}}</strong>",
     "groupsDevelopment.editGroup": "Redigera grupp",
+    "groupsDevelopment.editLayer": "Redigera lager",
+    "groupsDevelopment.layerInfoBox": "Infobox",
     "groupsDevelopment.exclusiveGroup": "Exklusiv grupp",
     "groupsDevelopment.infoDocument": "Infodokument",
     "groupsDevelopment.noGroupsMatchSearch": "Inga lagergrupper matchar din sökning.",

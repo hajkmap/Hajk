@@ -20,8 +20,15 @@ import type {
   GroupDisplaySettings,
   GroupFormValues,
   GroupLayerTreeNode,
+  LayerDisplaySettings,
+  LayerFormValues,
 } from "../types";
-import { CATALOG_DRAG_TYPE, DEFAULT_GROUP_DISPLAY_SETTINGS, GROUP_LAYER_TREE_ROOT_ID } from "../types";
+import {
+  CATALOG_DRAG_TYPE,
+  DEFAULT_GROUP_DISPLAY_SETTINGS,
+  DEFAULT_LAYER_DISPLAY_SETTINGS,
+  GROUP_LAYER_TREE_ROOT_ID,
+} from "../types";
 import { toDisplaySettings, toFormValues } from "../utils/group-form";
 import {
   applyDropOnLayerRedirect,
@@ -42,6 +49,7 @@ import {
 import GroupLayerAddDialog from "./group-layer-add-dialog";
 import GroupLayerCatalog from "./group-layer-catalog";
 import GroupFormDialog from "./group-form-dialog";
+import LayerFormDialog from "./layer-form-dialog";
 import GroupLayerTreeDropZone from "./group-layer-tree-drop-zone";
 import GroupLayerTreeNodeView from "./group-layer-tree-node";
 import LayerSwitcherPreview from "./layer-switcher-preview";
@@ -68,6 +76,14 @@ export default function GroupLayerTree() {
     Record<string, GroupDisplaySettings>
   >({});
   const [editDialogTarget, setEditDialogTarget] = useState<{
+    nodeId: GroupLayerTreeNode["id"];
+    sourceId: string;
+    name: string;
+  } | null>(null);
+  const [layerDisplaySettings, setLayerDisplaySettings] = useState<
+    Record<string, LayerDisplaySettings>
+  >({});
+  const [layerEditDialogTarget, setLayerEditDialogTarget] = useState<{
     nodeId: GroupLayerTreeNode["id"];
     sourceId: string;
     name: string;
@@ -259,19 +275,29 @@ export default function GroupLayerTree() {
   const handleRemoveFromTree = useCallback(
     (nodeId: GroupLayerTreeNode["id"]) => {
       setTreeData((current) => {
-        const updatedTree = removeTreeNodeWithDescendants(current, nodeId);
-        const removedIds = new Set(
-          current
-            .filter(
-              (node) => !updatedTree.some((remaining) => remaining.id === node.id),
-            )
-            .map((node) => String(node.id)),
+        const removedNodes = current.filter(
+          (node) =>
+            !removeTreeNodeWithDescendants(current, nodeId).some(
+              (remaining) => remaining.id === node.id,
+            ),
         );
+        const updatedTree = removeTreeNodeWithDescendants(current, nodeId);
+        const removedIds = new Set(removedNodes.map((node) => String(node.id)));
 
         setVisibleIds((visible) => {
           const next = new Set(visible);
           for (const id of removedIds) {
             next.delete(id);
+          }
+          return next;
+        });
+
+        setLayerDisplaySettings((settings) => {
+          const next = { ...settings };
+          for (const node of removedNodes) {
+            if (node.data?.kind === "layer") {
+              delete next[node.data.sourceId];
+            }
           }
           return next;
         });
@@ -296,6 +322,41 @@ export default function GroupLayerTree() {
       });
     },
     [treeData],
+  );
+
+  const handleOpenLayerEditDialog = useCallback(
+    (nodeId: GroupLayerTreeNode["id"]) => {
+      const node = treeData.find((entry) => entry.id === nodeId);
+      if (!node || node.data?.kind !== "layer") {
+        return;
+      }
+
+      setLayerEditDialogTarget({
+        nodeId,
+        sourceId: node.data.sourceId,
+        name: node.text,
+      });
+    },
+    [treeData],
+  );
+
+  const handleLayerFormSubmit = useCallback(
+    (values: LayerFormValues) => {
+      if (!layerEditDialogTarget) {
+        return;
+      }
+
+      setLayerDisplaySettings((current) => ({
+        ...current,
+        [layerEditDialogTarget.sourceId]: {
+          layerVisibleAtStart: values.layerVisibleAtStart,
+          layerInfoBox: values.layerInfoBox,
+        },
+      }));
+
+      setLayerEditDialogTarget(null);
+    },
+    [layerEditDialogTarget],
   );
 
   const handleTreeGroupFormSubmit = useCallback(
@@ -358,6 +419,17 @@ export default function GroupLayerTree() {
         DEFAULT_GROUP_DISPLAY_SETTINGS,
     );
   }, [editDialogTarget, groupDisplaySettings]);
+
+  const layerEditFormInitialValues = useMemo((): LayerFormValues | undefined => {
+    if (!layerEditDialogTarget) {
+      return undefined;
+    }
+
+    return (
+      layerDisplaySettings[layerEditDialogTarget.sourceId] ??
+      DEFAULT_LAYER_DISPLAY_SETTINGS
+    );
+  }, [layerEditDialogTarget, layerDisplaySettings]);
 
   const isLoading = groupsLoading || layersLoading;
 
@@ -480,6 +552,7 @@ export default function GroupLayerTree() {
                       onAddToGroup={handleOpenAddDialog}
                       onRemoveFromTree={handleRemoveFromTree}
                       onEditGroupMetadata={handleOpenEditDialog}
+                      onEditLayerSettings={handleOpenLayerEditDialog}
                     />
                   </Box>
                 )}
@@ -513,6 +586,14 @@ export default function GroupLayerTree() {
           }}
           onSubmit={handleTreeGroupFormSubmit}
           isSubmitting={isUpdatingGroup}
+        />
+
+        <LayerFormDialog
+          open={layerEditDialogTarget != null}
+          layerName={layerEditDialogTarget?.name ?? ""}
+          initialValues={layerEditFormInitialValues}
+          onClose={() => setLayerEditDialogTarget(null)}
+          onSubmit={handleLayerFormSubmit}
         />
       </Box>
     </DndProvider>

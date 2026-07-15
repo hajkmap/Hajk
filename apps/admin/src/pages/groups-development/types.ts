@@ -62,3 +62,18 @@ export interface GroupFormValues {
   infoDocument: boolean;
   metadata: GroupMetadataSettings;
 }
+
+export interface LayerDisplaySettings {
+  layerVisibleAtStart: boolean;
+  layerInfoBox: string;
+}
+
+export const DEFAULT_LAYER_DISPLAY_SETTINGS: LayerDisplaySettings = {
+  layerVisibleAtStart: false,
+  layerInfoBox: "",
+};
+
+export interface LayerFormValues {
+  layerVisibleAtStart: boolean;
+  layerInfoBox: string;
+}
