@@ -90,6 +90,16 @@ class LocationView extends React.PureComponent {
         );
       }
     });
+
+    // sync state from model (for where the component mounts after model is already tracking)
+    const modelState = this.model.getState();
+    if (modelState.track) {
+      this.setState({
+        track: modelState.track,
+        follow: modelState.follow,
+        loading: !modelState.positionReceived,
+      });
+    }
   }
 
   toggleTracking = (event) => {
