@@ -2,6 +2,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
+import LayersClearIcon from "@mui/icons-material/LayersClear";
 import LayersIcon from "@mui/icons-material/Layers";
 import MoreOutlinedIcon from "@mui/icons-material/MoreOutlined";
 import {
@@ -15,7 +16,7 @@ import type { RenderParams } from "@minoru/react-dnd-treeview";
 
 import { useTranslation } from "react-i18next";
 
-import type { GroupLayerTreeNode } from "../types";
+import type { GroupDisplaySettings, GroupLayerTreeNode } from "../types";
 import LayerSwitcherCheckbox, {
   type LayerSwitcherToggleState,
 } from "./layer-switcher-checkbox";
@@ -30,6 +31,7 @@ interface GroupLayerTreeNodeProps {
   options: RenderParams;
   treeData: GroupLayerTreeNode[];
   visibleIds: Set<string>;
+  groupDisplaySettings: Record<string, GroupDisplaySettings>;
   onToggleLayerVisibility: (nodeId: GroupLayerTreeNode["id"]) => void;
   onToggleGroupVisibility: (nodeId: GroupLayerTreeNode["id"]) => void;
   onAddToGroup?: (nodeId: GroupLayerTreeNode["id"]) => void;
@@ -43,6 +45,7 @@ export default function GroupLayerTreeNodeView({
   options,
   treeData,
   visibleIds,
+  groupDisplaySettings,
   onToggleLayerVisibility,
   onToggleGroupVisibility,
   onAddToGroup,
@@ -66,6 +69,14 @@ export default function GroupLayerTreeNodeView({
   const rowIsActive = isGroup
     ? isGroupActive(treeData, node.id, visibleIds)
     : isVisible;
+
+  const groupHasChildren =
+    isGroup && treeData.some((entry) => entry.parent === node.id);
+  const showGroupToggle =
+    !isGroup ||
+    (node.data?.sourceId
+      ? (groupDisplaySettings[node.data.sourceId]?.toggled ?? true)
+      : true);
 
   return (
     <Box
@@ -155,15 +166,33 @@ export default function GroupLayerTreeNodeView({
                 pr: 1,
               }}
             >
-              <LayerSwitcherCheckbox
-                toggleState={groupToggleState}
-                ariaLabel={`Toggle all layers in ${node.text}`}
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  onToggleGroupVisibility(node.id);
-                }}
-              />
+              {showGroupToggle ? (
+                <LayerSwitcherCheckbox
+                  toggleState={groupToggleState}
+                  ariaLabel={`Toggle all layers in ${node.text}`}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onToggleGroupVisibility(node.id);
+                  }}
+                />
+              ) : null}
+
+              {!groupHasChildren ? (
+                <LayersClearIcon
+                  aria-hidden
+                  titleAccess={t("groupsDevelopment.emptyGroup")}
+                  sx={{
+                    display: "block",
+                    mr: "5px",
+                    mt: "6px",
+                    width: 18,
+                    height: 18,
+                    color: "action.active",
+                    flexShrink: 0,
+                  }}
+                />
+              ) : null}
 
               <ListItemText
                 primary={node.text}

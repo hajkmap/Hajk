@@ -547,6 +547,7 @@ export default function GroupLayerTree() {
                       options={options}
                       treeData={treeData}
                       visibleIds={visibleIds}
+                      groupDisplaySettings={groupDisplaySettings}
                       onToggleLayerVisibility={handleToggleLayerVisibility}
                       onToggleGroupVisibility={handleToggleGroupVisibility}
                       onAddToGroup={handleOpenAddDialog}

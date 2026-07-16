@@ -794,6 +794,7 @@
     "groups.deleteGroupTypeNameHelper": "To enable deletion, type the group name exactly: <strong>{{name}}</strong>",
     "groupsDevelopment.editGroup": "Edit group",
     "groupsDevelopment.editLayer": "Edit layer",
+    "groupsDevelopment.emptyGroup": "Empty group",
     "groupsDevelopment.layerInfoBox": "Info box",
     "groupsDevelopment.exclusiveGroup": "Exclusive group",
     "groupsDevelopment.infoDocument": "Info document",
