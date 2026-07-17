@@ -71,7 +71,12 @@ import {
   removeLayerFromDrawOrderTree,
 } from "./map-group-placement-utils";
 import { TreeItemData } from "../../components/layerswitcher-dnd";
-import { useTools } from "../../api/tools";
+import { useTools, useUpdateTool } from "../../api/tools";
+
+interface KartlagerDraft {
+  toolId: number;
+  options: Record<string, unknown>;
+}
 import { useGroups } from "../../api/groups";
 import { useLayers } from "../../api/layers";
 import type { ToolWindowPosition, ToolZone } from "../../api/maps";
@@ -160,6 +165,7 @@ export default function MapSettings() {
   const { mutateAsync: updateMapTools } = useUpdateMapTools();
   const { mutateAsync: updateMapContent } = useUpdateMapContent();
   const { mutateAsync: updateMapLayers } = useUpdateMapLayers();
+  const { mutateAsync: updateTool } = useUpdateTool();
   const { mutateAsync: deleteMap, isPending: isDeletingMap } = useDeleteMap();
   const { palette } = useTheme();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -388,6 +394,35 @@ export default function MapSettings() {
   const flushMapToolEditsRef = useRef<(() => void) | null>(null);
   const [hasPendingWindowSizeInput, setHasPendingWindowSizeInput] =
     useState(false);
+  const [kartlagerDraft, setKartlagerDraft] = useState<KartlagerDraft | null>(
+    null,
+  );
+  const kartlagerDirty = kartlagerDraft != null;
+  const kartlagerMapNameRef = useRef(mapName);
+  const [kartlagerMoveZoneVisible, setKartlagerMoveZoneVisible] =
+    useState(false);
+  const kartlagerMoveZoneHostRef = useRef<HTMLDivElement | null>(null);
+
+  if (kartlagerMapNameRef.current !== mapName) {
+    kartlagerMapNameRef.current = mapName;
+    if (kartlagerDraft != null) {
+      setKartlagerDraft(null);
+    }
+  }
+
+  const handleKartlagerDraftChange = useCallback(
+    (draft: KartlagerDraft | null) => {
+      setKartlagerDraft(draft);
+    },
+    [],
+  );
+
+  const handleGroupsDevelopmentActiveChange = useCallback(
+    (active: boolean) => {
+      setKartlagerMoveZoneVisible(active);
+    },
+    [],
+  );
 
   useEffect(() => {
     toolsDraftRef.current = toolsDraft;
@@ -720,6 +755,14 @@ export default function MapSettings() {
         }
       }
 
+      if (kartlagerDraft) {
+        await updateTool({
+          id: String(kartlagerDraft.toolId),
+          data: { options: kartlagerDraft.options },
+        });
+        setKartlagerDraft(null);
+      }
+
       if (isDirty) {
         const payload = buildMapUpdatePayload(formData, map);
         await updateMap({
@@ -811,7 +854,23 @@ export default function MapSettings() {
         lastSavedBy={map?.lastSavedBy}
         lastSavedDate={map?.lastSavedDate}
         isDirty={
-          isDirty || toolsDirty || hasPendingWindowSizeInput || contentDirty
+          isDirty ||
+          toolsDirty ||
+          hasPendingWindowSizeInput ||
+          contentDirty ||
+          kartlagerDirty
+        }
+        sidebarExtra={
+          kartlagerMoveZoneVisible ? (
+            <Box
+              ref={kartlagerMoveZoneHostRef}
+              sx={{
+                mt: 2,
+                width: "100%",
+                textAlign: "left",
+              }}
+            />
+          ) : null
         }
         warning={
           <Box sx={{ mt: 1 }}>
@@ -911,6 +970,14 @@ export default function MapSettings() {
               onDrawOrderItemsChange={handleMapDrawOrderChange}
               onInsertLayerToDrawOrder={handleInsertLayerToDrawOrder}
               onRemoveLayerFromDrawOrder={handleRemoveLayerFromDrawOrder}
+              mapTools={mapTools}
+              activeToolIds={activeToolIds}
+              kartlagerDraft={kartlagerDraft}
+              onKartlagerDraftChange={handleKartlagerDraftChange}
+              onGroupsDevelopmentActiveChange={
+                handleGroupsDevelopmentActiveChange
+              }
+              moveZoneHostRef={kartlagerMoveZoneHostRef}
             />
           ))}
 
@@ -1000,7 +1067,13 @@ export default function MapSettings() {
         />
       </DialogWrapper>
       <UnsavedChangesGuard
-        when={isDirty || toolsDirty || hasPendingWindowSizeInput || contentDirty}
+        when={
+          isDirty ||
+          toolsDirty ||
+          hasPendingWindowSizeInput ||
+          contentDirty ||
+          kartlagerDirty
+        }
       />
     </Page>
   );

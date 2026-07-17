@@ -1,7 +1,11 @@
 import type { LayerSwitcherTreeNode } from "../../../api/groups/types";
 import { mutateTreeWithIndex } from "@minoru/react-dnd-treeview";
-import type { CatalogDragItem, GroupLayerTreeNode } from "../types";
-import { CATALOG_DRAG_TYPE, GROUP_LAYER_TREE_ROOT_ID } from "../types";
+import type { CatalogDragItem, GroupLayerTreeNode, MoveZoneItem } from "../types";
+import {
+  CATALOG_DRAG_TYPE,
+  GROUP_LAYER_TREE_ROOT_ID,
+  MOVE_ZONE_DRAG_TYPE,
+} from "../types";
 
 const GROUP_ID_PREFIX = "group:";
 const LAYER_ID_PREFIX = "layer:";
@@ -200,7 +204,7 @@ export function collectPlacedSourceIds(tree: GroupLayerTreeNode[]): {
   return { groupIds, layerIds };
 }
 
-function getDescendantIds(
+export function getDescendantIds(
   tree: GroupLayerTreeNode[],
   nodeId: GroupLayerTreeNode["id"],
 ): Set<GroupLayerTreeNode["id"]> {
@@ -222,6 +226,41 @@ function getDescendantIds(
   }
 
   return descendants;
+}
+
+/**
+ * Extract a node + descendants from the Kartlager tree for the Flyttzon.
+ * Root of the extracted subtree is re-parented to GROUP_LAYER_TREE_ROOT_ID.
+ */
+export function extractSubtreeForMoveZone(
+  tree: GroupLayerTreeNode[],
+  nodeId: GroupLayerTreeNode["id"],
+): { remainingTree: GroupLayerTreeNode[]; subtree: GroupLayerTreeNode[] } | null {
+  const root = tree.find((node) => node.id === nodeId);
+  if (!root?.data) {
+    return null;
+  }
+
+  const descendantIds = getDescendantIds(tree, nodeId);
+  const idsToExtract = new Set<GroupLayerTreeNode["id"]>([
+    nodeId,
+    ...descendantIds,
+  ]);
+
+  const subtree = tree
+    .filter((node) => idsToExtract.has(node.id))
+    .map((node) =>
+      node.id === nodeId
+        ? { ...node, parent: GROUP_LAYER_TREE_ROOT_ID }
+        : { ...node },
+    );
+
+  const remainingTree = tree.filter((node) => !idsToExtract.has(node.id));
+
+  return {
+    remainingTree: applySiblingOrderFromFlatTree(remainingTree),
+    subtree: applySiblingOrderFromFlatTree(subtree),
+  };
 }
 
 export function removeTreeNodeWithDescendants(
@@ -266,6 +305,59 @@ export function isValidLayerParentId(
 
   const parentNode = tree.find((node) => node.id === parentId);
   return isGroupNode(parentNode);
+}
+
+export function insertMoveZoneSubtreeIntoTree(
+  tree: GroupLayerTreeNode[],
+  subtree: GroupLayerTreeNode[],
+  dropOptions: {
+    dropTargetId: GroupLayerTreeNode["id"];
+    dropTarget?: GroupLayerTreeNode;
+    relativeIndex?: number;
+  },
+): GroupLayerTreeNode[] | null {
+  const root = subtree.find(
+    (node) => node.parent === GROUP_LAYER_TREE_ROOT_ID,
+  );
+  if (!root?.data) {
+    return null;
+  }
+
+  if (tree.some((node) => node.id === root.id)) {
+    return null;
+  }
+
+  const { parentId, index } = resolveCatalogInsertTarget(
+    tree,
+    dropOptions.dropTargetId,
+    dropOptions.dropTarget,
+    dropOptions.relativeIndex,
+  );
+
+  if (root.data.kind === "layer" && !isValidLayerParentId(tree, parentId)) {
+    return null;
+  }
+
+  if (
+    root.data.kind === "group" &&
+    parentId !== GROUP_LAYER_TREE_ROOT_ID &&
+    !isGroupNode(tree.find((node) => node.id === parentId))
+  ) {
+    return null;
+  }
+
+  const remappedRoot = { ...root, parent: parentId };
+  const descendants = subtree.filter((node) => node.id !== root.id);
+
+  let next = mutateTreeWithIndex(
+    [...tree, remappedRoot],
+    remappedRoot.id,
+    parentId,
+    index,
+  ) as GroupLayerTreeNode[];
+
+  next = [...next, ...descendants];
+  return applySiblingOrderFromFlatTree(next);
 }
 
 export function canPlaceLayerAt(
@@ -328,6 +420,13 @@ export function canDropGroupLayerNode(
     const itemType = monitor?.getItemType();
     if (itemType === CATALOG_DRAG_TYPE) {
       const item = monitor?.getItem() as CatalogDragItem | undefined;
+      if (item?.kind === "layer") {
+        return canPlaceLayerAt(tree, dropTargetId, dropTarget);
+      }
+    }
+
+    if (itemType === MOVE_ZONE_DRAG_TYPE) {
+      const item = monitor?.getItem() as MoveZoneItem | undefined;
       if (item?.kind === "layer") {
         return canPlaceLayerAt(tree, dropTargetId, dropTarget);
       }

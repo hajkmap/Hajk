@@ -1,8 +1,8 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useDrop } from "react-dnd";
 
-import type { CatalogDragItem } from "../types";
-import { CATALOG_DRAG_TYPE } from "../types";
+import type { CatalogDragItem, MoveZoneItem } from "../types";
+import { CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE } from "../types";
 
 interface GroupLayerTreeDropZoneProps {
   children?: React.ReactNode;
@@ -11,6 +11,8 @@ interface GroupLayerTreeDropZoneProps {
   onEmptyAction?: () => void;
   onCatalogDrop: (item: CatalogDragItem) => void;
   canAcceptCatalogItem?: (item: CatalogDragItem) => boolean;
+  onMoveZoneDrop?: (item: MoveZoneItem) => void;
+  canAcceptMoveZoneItem?: (item: MoveZoneItem) => boolean;
 }
 
 export default function GroupLayerTreeDropZone({
@@ -20,13 +22,29 @@ export default function GroupLayerTreeDropZone({
   onEmptyAction,
   onCatalogDrop,
   canAcceptCatalogItem = () => true,
+  onMoveZoneDrop,
+  canAcceptMoveZoneItem = () => true,
 }: GroupLayerTreeDropZoneProps) {
   const [{ isOver, canDrop }, dropRef] = useDrop(
     () => ({
-      accept: CATALOG_DRAG_TYPE,
-      canDrop: (item: CatalogDragItem) => canAcceptCatalogItem(item),
-      drop: (item: CatalogDragItem) => {
-        onCatalogDrop(item);
+      accept: [CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE],
+      canDrop: (item: CatalogDragItem | MoveZoneItem, monitor) => {
+        const type = monitor.getItemType();
+        if (type === MOVE_ZONE_DRAG_TYPE) {
+          return canAcceptMoveZoneItem(item as MoveZoneItem);
+        }
+        return canAcceptCatalogItem(item as CatalogDragItem);
+      },
+      drop: (item: CatalogDragItem | MoveZoneItem, monitor) => {
+        if (monitor.didDrop()) {
+          return;
+        }
+        const type = monitor.getItemType();
+        if (type === MOVE_ZONE_DRAG_TYPE) {
+          onMoveZoneDrop?.(item as MoveZoneItem);
+          return { dropped: true };
+        }
+        onCatalogDrop(item as CatalogDragItem);
         return { dropped: true };
       },
       collect: (monitor) => ({
@@ -34,7 +52,12 @@ export default function GroupLayerTreeDropZone({
         canDrop: monitor.canDrop(),
       }),
     }),
-    [canAcceptCatalogItem, onCatalogDrop],
+    [
+      canAcceptCatalogItem,
+      canAcceptMoveZoneItem,
+      onCatalogDrop,
+      onMoveZoneDrop,
+    ],
   );
 
   return (

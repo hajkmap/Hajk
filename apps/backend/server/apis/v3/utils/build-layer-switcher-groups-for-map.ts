@@ -51,7 +51,7 @@ type LayerInstanceRow = Prisma.LayerInstanceGetPayload<{
 }>;
 
 type GroupsOnMapsRow = Prisma.GroupsOnMapsGetPayload<{
-  include: { group: true };
+  include: { group: true; metadata: true };
 }>;
 
 const INFOGROUP_DEFAULTS = {
@@ -63,6 +63,23 @@ const INFOGROUP_DEFAULTS = {
   infogroupopendatalink: "",
   infogroupowner: "",
 } as const;
+
+function infoGroupFieldsFromPlacement(placement: GroupsOnMapsRow) {
+  const metadata = placement.metadata;
+  if (!placement.infoDocument && !metadata) {
+    return { ...INFOGROUP_DEFAULTS };
+  }
+
+  return {
+    infogroupvisible: Boolean(placement.infoDocument),
+    infogrouptitle: metadata?.title ?? "",
+    infogrouptext: metadata?.description ?? "",
+    infogroupurl: metadata?.url ?? "",
+    infogroupurltext: metadata?.urlTitle ?? "",
+    infogroupopendatalink: metadata?.urlOpenData ?? "",
+    infogroupowner: metadata?.owner ?? "",
+  };
+}
 
 function extractLayerSwitcherTree(
   options: Prisma.JsonValue | null | undefined
@@ -338,7 +355,7 @@ function buildPlacementNode(
       parent: parentGroupId,
       layers: [],
       groups: [],
-      ...INFOGROUP_DEFAULTS,
+      ...infoGroupFieldsFromPlacement(placement),
     };
   }
 
@@ -391,7 +408,7 @@ function buildPlacementNode(
     parent: parentGroupId,
     layers,
     groups: mergeGroupChildrenAtLevel(internalGroups, mapChildGroups),
-    ...INFOGROUP_DEFAULTS,
+    ...infoGroupFieldsFromPlacement(placement),
   };
 }
 
@@ -406,7 +423,7 @@ export async function buildLayerSwitcherGroupsForMap(
 ): Promise<ClientLayerSwitcherGroupNode[]> {
   const placements = await prisma.groupsOnMaps.findMany({
     where: { mapName },
-    include: { group: true },
+    include: { group: true, metadata: true },
   });
 
   if (placements.length === 0) {

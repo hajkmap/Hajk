@@ -14,10 +14,24 @@ export type GroupLayerTreeNode = NodeModel<GroupLayerNodeData>;
 
 export const CATALOG_DRAG_TYPE = "GROUP_LAYER_CATALOG_ITEM";
 
+/** Drag type for items parked in the Kartlager Flyttzon. */
+export const MOVE_ZONE_DRAG_TYPE = "GROUP_LAYER_MOVE_ZONE_ITEM";
+
 export interface CatalogDragItem {
   kind: GroupLayerNodeKind;
   id: string;
   name: string;
+}
+
+/** A group or layer (with subtree) temporarily lifted out of Kartlager. */
+export interface MoveZoneItem {
+  /** Stable key for React lists / drag identity. */
+  key: string;
+  kind: GroupLayerNodeKind;
+  sourceId: string;
+  name: string;
+  /** Flat subtree; root node has parent === GROUP_LAYER_TREE_ROOT_ID. */
+  nodes: GroupLayerTreeNode[];
 }
 
 export interface GroupMetadataSettings {
@@ -47,7 +61,7 @@ export const DEFAULT_GROUP_METADATA: GroupMetadataSettings = {
 };
 
 export const DEFAULT_GROUP_DISPLAY_SETTINGS: GroupDisplaySettings = {
-  toggled: true,
+  toggled: false,
   expanded: false,
   exclusiveGroup: false,
   infoDocument: false,
@@ -66,14 +80,22 @@ export interface GroupFormValues {
 export interface LayerDisplaySettings {
   layerVisibleAtStart: boolean;
   layerInfoBox: string;
+  drawOrder?: number;
 }
 
 export const DEFAULT_LAYER_DISPLAY_SETTINGS: LayerDisplaySettings = {
   layerVisibleAtStart: false,
   layerInfoBox: "",
+  drawOrder: 1000,
 };
 
 export interface LayerFormValues {
   layerVisibleAtStart: boolean;
   layerInfoBox: string;
+}
+
+/** Unsaved layerswitcher Tool.options payload from Kartlager edits. */
+export interface KartlagerDraft {
+  toolId: number;
+  options: Record<string, unknown>;
 }

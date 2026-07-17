@@ -17,6 +17,7 @@ import type { RenderParams } from "@minoru/react-dnd-treeview";
 import { useTranslation } from "react-i18next";
 
 import type { GroupDisplaySettings, GroupLayerTreeNode } from "../types";
+import { DEFAULT_GROUP_DISPLAY_SETTINGS } from "../types";
 import LayerSwitcherCheckbox, {
   type LayerSwitcherToggleState,
 } from "./layer-switcher-checkbox";
@@ -75,7 +76,8 @@ export default function GroupLayerTreeNodeView({
   const showGroupToggle =
     !isGroup ||
     (node.data?.sourceId
-      ? (groupDisplaySettings[node.data.sourceId]?.toggled ?? true)
+      ? (groupDisplaySettings[node.data.sourceId]?.toggled ??
+        DEFAULT_GROUP_DISPLAY_SETTINGS.toggled)
       : true);
 
   return (

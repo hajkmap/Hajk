@@ -246,7 +246,7 @@ export default function GroupFormDialog({
           variant="contained"
           disabled={isSubmitting || !values.name.trim()}
         >
-          {mode === "create" ? t("common.add") : t("common.save")}
+          {mode === "create" ? t("common.add") : t("common.dialog.okBtn")}
         </Button>
       </DialogActions>
     </Dialog>

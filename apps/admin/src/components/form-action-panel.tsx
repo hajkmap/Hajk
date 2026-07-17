@@ -19,6 +19,8 @@ interface FormActionProps {
   children?: React.ReactNode;
   isDirty?: boolean;
   warning?: React.ReactNode;
+  /** Optional content rendered below the action buttons in the sticky sidebar. */
+  sidebarExtra?: React.ReactNode;
 }
 
 const FormActionPanel: React.FC<FormActionProps> = ({
@@ -34,6 +36,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
   children,
   isDirty,
   warning,
+  sidebarExtra,
 }) => {
   const { t } = useTranslation();
   const { data: createdUser } = useUser(createdBy ?? "");
@@ -154,6 +157,7 @@ const FormActionPanel: React.FC<FormActionProps> = ({
         )}
 
         {warning}
+        {sidebarExtra}
       </Box>
       <Box
         sx={{

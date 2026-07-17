@@ -174,7 +174,11 @@ async function readMapConfigAndPopulateMap(file) {
     `Connected ${projectionsToConnect.length} projections to map ${file}`
   );
 
-  // Take care of tools. Right now we let each map have it's own Tool.
+  // Take care of tools. Right now we let each map have its own Tool.
+  // For layerswitcher, `options` is the full plugin config from the map JSON
+  // (e.g. App_Data/map_1.json → tools[type=layerswitcher].options), including
+  // nested groups/layers, baselayers, and UI flags. That JSON is the source of
+  // truth for the Kartlager tree stored on Tool.options.
   console.log("Creating tools…");
   const toolsToConnectToMap = [];
   for await (const t of mapConfig.tools) {
@@ -186,20 +190,42 @@ async function readMapConfigAndPopulateMap(file) {
       create: { type: t.type, title: t.type },
     });
 
+    const toolOptions = t.options ?? {};
+    if (t.type === "layerswitcher") {
+      const groupCount = Array.isArray(toolOptions.groups)
+        ? toolOptions.groups.length
+        : 0;
+      const baselayerCount = Array.isArray(toolOptions.baselayers)
+        ? toolOptions.baselayers.length
+        : 0;
+      console.log(
+        `  layerswitcher options from ${file}.json: ${groupCount} root group(s), ${baselayerCount} baselayer(s)`
+      );
+    }
+
     const tool = await prisma.tool.create({
-      data: { type: t.type, title: t.options?.title ?? null, options: t.options },
+      data: {
+        type: t.type,
+        title: toolOptions.title ?? null,
+        options: toolOptions,
+      },
     });
 
     // Add potential role restrictions on the tool
     await updateRolesFromVisibleForGroups(
-      t.options.visibleForGroups || [],
+      toolOptions.visibleForGroups || [],
       tool.id,
       "tool"
     );
 
     // Connect tool to map — target is intentionally null (unplaced).
     // Placement is managed via the admin UI, not seeded.
-    toolsToConnectToMap.push({ toolId: tool.id, mapName: file, index: t.index });
+    toolsToConnectToMap.push({
+      toolId: tool.id,
+      mapName: file,
+      index: t.index,
+      active: toolOptions.active !== false,
+    });
   }
 
   // Finally we can create the map
@@ -227,9 +253,8 @@ async function readMapConfigAndPopulateMap(file) {
 
   // Now that the map is created, we can create and connect roles that should have access to the map.
   // The "roles" (defined as groups in the .json-files) are set on the layerSwitcher...
-  const visibleForGroups =
-    mapConfig.tools.find((t) => t.type === "layerswitcher").options
-      ?.visibleForGroups || [];
+  const layerswitcherTool = mapConfig.tools.find((t) => t.type === "layerswitcher");
+  const visibleForGroups = layerswitcherTool?.options?.visibleForGroups || [];
 
   // Add potential role restrictions on the map
   await updateRolesFromVisibleForGroups(visibleForGroups, createdMap.id, "map");
@@ -594,7 +619,32 @@ async function populateSearchAndEditingLayerInstances() {
   }
 }
 
-// Populates the database with the layer structure for the map corresponding to mapName
+function groupHasInfoDocument(group) {
+  return Boolean(
+    group.infogroupvisible ||
+      group.infogrouptitle ||
+      group.infogrouptext ||
+      group.infogroupurl ||
+      group.infogroupurltext ||
+      group.infogroupopendatalink ||
+      group.infogroupowner
+  );
+}
+
+function metadataFromGroupInfo(group) {
+  return {
+    title: group.infogrouptitle || null,
+    description: group.infogrouptext || null,
+    owner: group.infogroupowner || null,
+    url: group.infogroupurl || null,
+    urlTitle: group.infogroupurltext || null,
+    urlOpenData: group.infogroupopendatalink || null,
+  };
+}
+
+// Populates the database with the layer structure for the map corresponding to mapName.
+// Source: the layerswitcher Tool.options seeded from App_Data/<mapName>.json
+// (e.g. map_1.json tools[].options.groups / .baselayers).
 async function populateMapLayerStructure(mapName) {
   const map = await prisma.map.findUnique({
     where: { name: mapName },
@@ -603,10 +653,23 @@ async function populateMapLayerStructure(mapName) {
       tools: {
         where: { tool: { type: "layerswitcher" } },
         include: { tool: true },
+        orderBy: { index: "asc" },
       },
     },
   });
-  const { baselayers, groups } = map.tools[0].tool.options;
+
+  const layerswitcherOnMap = map?.tools?.[0];
+  if (!layerswitcherOnMap?.tool?.options) {
+    console.log(
+      `No layerswitcher tool options for map "${mapName}" — skipping layer structure`
+    );
+    return;
+  }
+
+  const { baselayers = [], groups = [] } = layerswitcherOnMap.tool.options;
+  console.log(
+    `Populating layer structure for "${mapName}" from layerswitcher Tool.options (${groups.length} root groups, ${(baselayers || []).length} baselayers)`
+  );
 
   // Imagine this is our "groups.json"…
   const groupsToInsert = [];
@@ -620,7 +683,7 @@ async function populateMapLayerStructure(mapName) {
   // in "baselayers" in current map's LayerSwitcher's options. The goal
   // is to prepare an object that will be almost ready to use in Prisma's
   // createMany() method.
-  baselayers.forEach((bl) => {
+  (baselayers || []).forEach((bl) => {
     const { id: layerId, ...rest } = bl;
     layersOnMaps.push({
       layerId: layerId,
@@ -632,12 +695,20 @@ async function populateMapLayerStructure(mapName) {
 
   // Helper: invoked recursively and extract any
   // layers and groups within the given group.
-  const extractGroup = (group, parentId = null) => {
+  // `index` preserves sibling order from the map JSON groups array.
+  const extractGroup = (group, parentId = null, index = 0) => {
     // First let's handle the group's layers
     extractLayersFromGroup(group);
 
     // Next, let's handle the group itself
-    const { id: groupId, name, toggled, expanded, visibleForGroups } = group;
+    const {
+      id: groupId,
+      name,
+      toggled,
+      expanded,
+      exclusiveGroup,
+      visibleForGroups,
+    } = group;
 
     // This is a plain, flat group object - similar to layers.json
     groupsToInsert.push({
@@ -657,21 +728,30 @@ async function populateMapLayerStructure(mapName) {
       mapName,
       usage: "FOREGROUND",
       name,
-      toggled,
-      expanded,
+      toggled: Boolean(toggled),
+      expanded: Boolean(expanded),
+      exclusiveGroup: Boolean(exclusiveGroup),
+      infoDocument: Boolean(group.infogroupvisible),
+      index,
+      // Metadata is created below when the group has info-document fields
+      _infoMetadata: groupHasInfoDocument(group)
+        ? metadataFromGroupInfo(group)
+        : null,
     };
 
     groupsOnMap.push(groupsOnMapObject);
 
     // Finally, recursively call on any other groups that might be in this group
-    group.groups?.forEach((g) => extractGroup(g, newUUID));
+    (group.groups || []).forEach((g, childIndex) =>
+      extractGroup(g, newUUID, childIndex)
+    );
   };
 
   // Helper: called by extractGroup. Grabs all layers
   // in the given group.
   const extractLayersFromGroup = (group) => {
     const layerIds = [];
-    group.layers.forEach((l) => {
+    (group.layers || []).forEach((l) => {
       const { id: layerId, ...rest } = l;
 
       // Prepare object to insert into layersOnGroups
@@ -689,8 +769,8 @@ async function populateMapLayerStructure(mapName) {
     return layerIds;
   };
 
-  // Next, go on with groups, recursively
-  groups.forEach((g) => extractGroup(g));
+  // Next, go on with groups, recursively — index preserves sibling order
+  (groups || []).forEach((g, index) => extractGroup(g, null, index));
 
   // Now we have all arrays ready. One more thing left is to
   // check for consistency: our map config may refer to layerIds
@@ -719,8 +799,27 @@ async function populateMapLayerStructure(mapName) {
     data: groupsToInsert.map((g) => ({ id: g.id, name: g.name })),
     skipDuplicates: true, // We assume - for now! - that same ID means same group, so there's no need to watch out for conflicts
   });
-  // Connect each of the inserted groups to map (and another group, where applicable)
-  await prisma.groupsOnMaps.createMany({ data: groupsOnMap });
+
+  // Connect each of the inserted groups to map (and another group, where applicable).
+  // Create Metadata rows first when the map JSON has info-document fields.
+  for (const placement of groupsOnMap) {
+    const { _infoMetadata, ...groupsOnMapData } = placement;
+    let metadataId = null;
+
+    if (_infoMetadata) {
+      const metadata = await prisma.metadata.create({
+        data: _infoMetadata,
+      });
+      metadataId = metadata.id;
+    }
+
+    await prisma.groupsOnMaps.create({
+      data: {
+        ...groupsOnMapData,
+        metadataId,
+      },
+    });
+  }
   // Connect valid layer instances (i.e. those layers that are used in maps (background) or groups (foreground))
   for await (const layer of validLayers) {
     const placement = layerInstancePlacementFromOptions(layer.options);
@@ -1085,6 +1184,91 @@ async function createToolTypes() {
   console.log(`Created ${created.count} tool types`);
 }
 
+function remapLayerIdInLayerswitcherOptions(options, idMap) {
+  if (!options || typeof options !== "object") {
+    return options;
+  }
+
+  const remapLayerRef = (layer) => {
+    if (!layer || typeof layer !== "object") {
+      return layer;
+    }
+    const nextId = idMap.get(layer.id);
+    return nextId ? { ...layer, id: nextId } : layer;
+  };
+
+  const remapGroup = (group) => {
+    if (!group || typeof group !== "object") {
+      return group;
+    }
+    return {
+      ...group,
+      layers: Array.isArray(group.layers)
+        ? group.layers.map(remapLayerRef)
+        : group.layers,
+      groups: Array.isArray(group.groups)
+        ? group.groups.map(remapGroup)
+        : group.groups,
+    };
+  };
+
+  const next = { ...options };
+
+  if (Array.isArray(next.groups)) {
+    next.groups = next.groups.map(remapGroup);
+  }
+
+  if (Array.isArray(next.baselayers)) {
+    next.baselayers = next.baselayers.map(remapLayerRef);
+  }
+
+  if (Array.isArray(next.quickAccessPresets)) {
+    next.quickAccessPresets = next.quickAccessPresets.map((preset) => {
+      if (!preset || typeof preset !== "object") {
+        return preset;
+      }
+      return {
+        ...preset,
+        layers: Array.isArray(preset.layers)
+          ? preset.layers.map(remapLayerRef)
+          : preset.layers,
+      };
+    });
+  }
+
+  return next;
+}
+
+/**
+ * After DisplayLayer rows exist, rewrite layerswitcher Tool.options so layer
+ * ids match Prisma DisplayLayer ids (catalog / Kartlager lookups).
+ */
+async function remapLayerswitcherToolOptionsLayerIds() {
+  const tools = await prisma.tool.findMany({
+    where: { type: "layerswitcher" },
+    select: { id: true, options: true },
+  });
+
+  let updated = 0;
+  for (const tool of tools) {
+    const remapped = remapLayerIdInLayerswitcherOptions(
+      tool.options,
+      jsonToDisplayLayerId
+    );
+    await prisma.tool.update({
+      where: { id: tool.id },
+      data: { options: remapped },
+    });
+    updated += 1;
+  }
+
+  if (updated > 0) {
+    console.log(
+      `Remapped layer ids in ${updated} layerswitcher Tool.options to DisplayLayer ids`
+    );
+  }
+}
+
 async function main() {
   // The known plugin types — Tool instances reference these via FK.
   await createToolTypes();
@@ -1096,6 +1280,9 @@ async function main() {
   }
   // Get all layers from layers.json and insert them into the layer tables.
   await readAndPopulateLayers();
+  // Rewrite layerswitcher Tool.options layer ids to Prisma DisplayLayer ids
+  // before building GroupsOnMaps / LayerInstances from those options.
+  await remapLayerswitcherToolOptionsLayerIds();
   // Search/editing layers are global in layers.json — attach them to every map via LayerInstance.
   await populateSearchAndEditingLayerInstances();
   // Finally we extract the layer switcher config from all maps and add all groups etc. with their connections to the database.

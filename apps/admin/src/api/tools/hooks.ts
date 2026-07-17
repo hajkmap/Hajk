@@ -60,6 +60,7 @@ export const useUpdateTool = () => {
       updateTool(id, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["tools"] });
+      void queryClient.invalidateQueries({ queryKey: ["toolsByMap"] });
     },
   });
 };

@@ -93,7 +93,7 @@ export default function LayerFormDialog({
       <DialogActions>
         <Button onClick={onClose}>{t("common.cancel")}</Button>
         <Button onClick={handleSubmit} variant="contained">
-          {t("common.save")}
+          {t("common.dialog.okBtn")}
         </Button>
       </DialogActions>
     </Dialog>
