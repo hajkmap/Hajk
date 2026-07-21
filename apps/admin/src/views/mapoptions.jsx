@@ -63,6 +63,7 @@ class MapOptions extends Component {
         pinchRotate: config.pinchRotate || true,
         pinchZoom: config.pinchZoom || true,
         mapselector: config.mapselector,
+        mapSelectorStyle: config.mapSelectorStyle || "button",
         mapcleaner: config.mapcleaner,
         mapresetter: config.mapresetter,
         showThemeToggler: config.showThemeToggler,
@@ -174,6 +175,7 @@ class MapOptions extends Component {
       zoomDelta: mapConfig.zoomDelta || "",
       zoomDuration: mapConfig.zoomDuration || "",
       mapselector: mapConfig.mapselector,
+      mapSelectorStyle: mapConfig.mapSelectorStyle || "button",
       mapcleaner: mapConfig.mapcleaner,
       mapresetter: mapConfig.mapresetter,
       showThemeToggler: mapConfig.showThemeToggler,
@@ -454,6 +456,7 @@ class MapOptions extends Component {
         config.zoomDelta = this.getValue("zoomDelta");
         config.zoomDuration = this.getValue("zoomDuration");
         config.mapselector = this.getValue("mapselector");
+        config.mapSelectorStyle = this.getValue("mapSelectorStyle");
         config.mapcleaner = this.getValue("mapcleaner");
         config.mapresetter = this.getValue("mapresetter");
         config.showThemeToggler = this.getValue("showThemeToggler");
@@ -1320,9 +1323,33 @@ class MapOptions extends Component {
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren"
+                  title="Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren (förutsatt att det finns fler än en karta)"
                 />
               </label>
+              {this.state.mapselector && (
+                <div style={{ marginLeft: 24, marginTop: 4 }}>
+                  <select
+                    id="input_mapSelectorStyle"
+                    ref="input_mapSelectorStyle"
+                    value={this.state.mapSelectorStyle}
+                    onChange={(e) => {
+                      this.setState({ mapSelectorStyle: e.target.value });
+                    }}
+                    style={{ width: 200 }}
+                  >
+                    <option value="button">Visa som knapp</option>
+                    <option value="dropdown">
+                      Visa som rullista i sidhuvudet (endast desktop)
+                    </option>
+                  </select>
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Rullistan visas endast på desktop. På mobila enheter visas knappen istället."
+                    style={{ marginLeft: 4 }}
+                  />
+                </div>
+              )}
             </div>
             <div>
               <input

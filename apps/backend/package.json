@@ -29,11 +29,11 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-openapi-validator": "^5.6.2",
-    "fast-xml-parser": "^5.7.1",
-    "helmet": "^8.1.0",
-    "http-proxy-middleware": "^3.0.5",
+    "fast-xml-parser": "^5.8.0",
+    "helmet": "^8.2.0",
+    "http-proxy-middleware": "^4.1.0",
     "log4js": "^6.9.1",
-    "write-excel-file": "^4.0.7"
+    "write-excel-file": "^4.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9",

@@ -224,6 +224,47 @@ export default class PrintModel {
     return { x, y };
   };
 
+  /** Word-wrap text to maxWidth. Honours explicit newlines. */
+  wrapTextToLines = (text, fontSize, maxWidth, fontWeight = "normal") => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const weight = fontWeight === "bold" ? "700" : "400";
+    ctx.font = `${weight} ${fontSize}px Roboto, roboto, sans-serif`;
+
+    const measure = (str) => ctx.measureText(str).width;
+
+    const lines = [];
+    for (const segment of text.split("\n")) {
+      if (measure(segment) <= maxWidth) {
+        lines.push(segment);
+        continue;
+      }
+      const words = segment.split(" ");
+      let current = "";
+      for (const word of words) {
+        const candidate = current ? `${current} ${word}` : word;
+        if (measure(candidate) <= maxWidth) {
+          current = candidate;
+        } else {
+          if (current) lines.push(current);
+          current = word;
+        }
+      }
+      if (current) lines.push(current);
+    }
+    return lines.length ? lines : [""];
+  };
+
+  /** Centred x for text within paperWidth. */
+  getCenteredX = (text, fontSize, paperWidth, fontWeight = "normal") => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const weight = fontWeight === "bold" ? "700" : "400";
+    ctx.font = `${weight} ${fontSize}px Roboto, roboto, sans-serif`;
+    const textWidth = ctx.measureText(text).width;
+    return (paperWidth - textWidth) / 2;
+  };
+
   generateQR = async (url, qrSize) => {
     try {
       return {
@@ -359,13 +400,14 @@ export default class PrintModel {
     const calculatedWidth =
       this.includeImageBorder && !options.useMargin ? 1 : this.margin * 2;
 
+    // Match preview to the wider top margin band in PrintLayout (20 vs 16 * margin).
     const calculatedHeight =
       this.includeImageBorder && !options.useMargin
         ? 1
         : options.useTextIconsInMargin && format === "a5"
-          ? this.margin * 8
+          ? this.margin * 9
           : options.useTextIconsInMargin
-            ? this.margin * 6
+            ? this.margin * 7
             : this.margin * 2;
 
     //We set the size of preview window based on the calculated heights and widths.

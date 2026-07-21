@@ -258,6 +258,7 @@ function MeasurerView(props) {
       <SelectFeaturesDialog
         localObserver={props.localObserver}
         drawModel={drawModel}
+        dialogTitle="Välj de objekt du vill mäta"
       />
     </>
   );

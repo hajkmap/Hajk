@@ -206,7 +206,7 @@ const AddView = (props) => {
       <SelectFeaturesDialog
         localObserver={localObserver}
         drawModel={drawModel}
-        model={model}
+        dialogTitle="Välj de objekt du vill kopiera"
       />
     </Grid>
   );
