@@ -187,8 +187,8 @@ const Sketch = (props) => {
   });
 
   React.useEffect(() => {
-    const offSel = editBus.on("edit:service-selected", async (ev) => {
-      const { id, source } = ev.detail || {};
+    const offSel = editBus.on("edit:service-selected", (ev) => {
+      const { id } = ev.detail || {};
 
       if (!id) {
         setAllowedGeometryTypes(null);
@@ -196,20 +196,10 @@ const Sketch = (props) => {
         return;
       }
 
-      // Mark that AttributeEditor is active with an editable layer
+      // Mark that AttributeEditor is active with an editable layer.
+      // (The schema itself arrives via attrib:schema-loaded, emitted by
+      // AttributeEditor's own edit:service-selected handler.)
       attributeEditorActiveRef.current = true;
-
-      // If source is "sketch", we don't need to request schema
-      // (Sketch already knows the schema from its own selection)
-      if (source === "sketch") return;
-
-      try {
-        // Retrieve schema
-        // AttributeEditor emits the schema via the bus
-        editBus.emit("attrib:request-schema", { serviceId: id });
-      } catch (e) {
-        console.warn("Kunde inte hämta schema:", e);
-      }
     });
 
     const offSchema = editBus.on("attrib:schema-loaded", (ev) => {
@@ -296,7 +286,6 @@ const Sketch = (props) => {
   // Use custom hooks for AttributeEditor integration and geometry validation
   useAttributeEditorIntegration({
     map: props.map,
-    props,
     drawModel,
     localObserver,
     activityId,

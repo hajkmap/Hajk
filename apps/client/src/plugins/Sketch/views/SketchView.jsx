@@ -104,8 +104,8 @@ const SketchView = (props) => {
     const layers = props.map.getLayers().getArray?.() || [];
     const sketchLayer =
       layers.find((lyr) => lyr?.get?.("name") === "pluginSketch") || null;
-    const source = sketchLayer.getSource?.();
-    const features = source.getFeatures?.() || [];
+    const source = sketchLayer?.getSource?.();
+    const features = source?.getFeatures?.() || [];
     const visibleFeatures = features.filter((f) => f.get("HIDDEN") !== true);
     return visibleFeatures.length;
   }, [props.map]);
@@ -404,6 +404,8 @@ const SketchView = (props) => {
       };
     });
 
+    // Lock parts of the UI while AttributeEditor runs a save transaction
+    // (emitted from commitTableEdits; "finished" always fires via finally).
     const offSaveStart = editBus.on("edit:saving-started", () => {
       setIsSaving(true);
     });

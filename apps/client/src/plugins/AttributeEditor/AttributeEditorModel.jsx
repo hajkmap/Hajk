@@ -1,15 +1,14 @@
 import LocalStorageHelper from "../../utils/LocalStorageHelper";
+import { editBus } from "../../buses/editBus";
 
 export const Action = {
   INIT: "INIT",
-  EDIT: "EDIT", // { id, key, value }
   BATCH_EDIT: "BATCH_EDIT", // { ops: [{ id, key, value }] }
   DUPLICATE_ROWS: "DUPLICATE_ROWS", // { ids, readOnlyKeys: string[], annotateField?: string }
   SET_DELETE_STATE: "SET_DELETE_STATE", // { ids, mode: 'toggle'|'mark'|'unmark' }
   COMMIT: "COMMIT",
   UNDO: "UNDO",
   CREATE_DRAFTS: "CREATE_DRAFTS",
-  REMOVE_DRAFTS: "REMOVE_DRAFTS",
 };
 
 export const MAX_UNDO = 100;
@@ -151,15 +150,6 @@ const applyInverse = (state, op) => {
         ),
       };
     }
-    case "restore_drafts": {
-      const { drafts } = op.payload;
-      const minNeg = Math.min(...drafts.map((d) => d.id), state.nextTempId);
-      return {
-        ...state,
-        nextTempId: Math.min(state.nextTempId, minNeg),
-        pendingAdds: [...state.pendingAdds, ...drafts],
-      };
-    }
     default:
       return state;
   }
@@ -205,35 +195,6 @@ const reducer = (state, action) => {
           },
         ]
       );
-    }
-
-    case Action.REMOVE_DRAFTS: {
-      const ids = new Set(action.ids || []);
-      if (!ids.size) return state;
-
-      const removed = state.pendingAdds.filter((d) => ids.has(d.id));
-      if (!removed.length) return state;
-
-      // Remove from pendingAdds
-      const nextAdds = state.pendingAdds.filter((d) => !ids.has(d.id));
-
-      // Undo: allow reverting the deletion by restoring the drafts
-      return pushUndo(
-        { ...state, pendingAdds: nextAdds },
-        `Remove drafts (${removed.length})`,
-        [
-          {
-            kind: "restore_drafts",
-            payload: { drafts: removed },
-          },
-        ]
-      );
-    }
-
-    case Action.EDIT: {
-      const { id, key, value } = action;
-      if (id < 0) return applyEditToDraft(state, id, key, value);
-      return applyEditToExisting(state, id, key, value);
     }
 
     case Action.BATCH_EDIT: {
@@ -398,37 +359,9 @@ const reducer = (state, action) => {
   }
 };
 
-export const selectors = {
-  selectHasPending: (s) =>
-    s.pendingAdds.length > 0 ||
-    Object.keys(s.pendingEdits).length > 0 ||
-    s.pendingDeletes.size > 0,
-
-  selectAllRows: (s) => {
-    const edited = s.features.map((f) =>
-      s.pendingEdits[f.id] ? { ...f, ...s.pendingEdits[f.id] } : f
-    );
-    const marked = edited.map((f) =>
-      s.pendingDeletes.has(f.id) ? { ...f, __pending: "delete" } : f
-    );
-    return [...marked, ...s.pendingAdds];
-  },
-
-  selectEffectiveFeature: (s, id) => {
-    if (id == null) return null;
-    const base = s.featuresMap.get(id); // O(1) lookup
-    if (!base) return null;
-    return { ...base, ...(s.pendingEdits[id] || {}) };
-  },
-
-  selectEffectiveList: (s) =>
-    s.features.map((f) => ({ ...f, ...(s.pendingEdits[f.id] || {}) })),
-};
-
 export default class AttributeEditorModel {
   #map;
   #app;
-  #localObserver;
   #storageKey;
   #fieldMeta;
   #ogc;
@@ -441,7 +374,6 @@ export default class AttributeEditorModel {
     this.#ogc = settings.ogc || null;
     this.#map = settings.map;
     this.#app = settings.app;
-    this.#localObserver = settings.localObserver;
     this.#storageKey = "AttributeEditor";
     this.#fieldMeta = settings.fieldMeta || null;
     const initFeatures = settings.initialFeatures || [];
@@ -451,8 +383,6 @@ export default class AttributeEditorModel {
     const max = numericInit.length ? Math.max(...numericInit) : 0;
 
     this.#state = { ...initialState, features: initFeatures, nextId: max + 1 };
-
-    this.#initSubscriptions();
   }
 
   // === Getters/setters ===
@@ -566,6 +496,16 @@ export default class AttributeEditorModel {
 
     this.#lastFeatureCollection = payload;
 
+    // The fetch hit the feature cap — the layer likely contains more objects
+    // than were loaded. Let the UI warn the user instead of silently showing
+    // a truncated dataset.
+    if (payload?.limitReached) {
+      editBus.emit("attrib:load-truncated", {
+        limit: payload.limitReached,
+        count: payload.features?.length ?? 0,
+      });
+    }
+
     // Store layer's native projection for coordinate transformations
     // Backend provides: layerProjection (from layer config) or crsName (actual data CRS)
     if (payload.layerProjection || payload.crsName) {
@@ -599,17 +539,6 @@ export default class AttributeEditorModel {
     this.#emit();
 
     return { features: rows, fieldMeta, featureCollection: payload };
-  };
-
-  #initSubscriptions = () => {
-    this.#localObserver.subscribe(
-      "AttributeEditorEvent",
-      this.#handleAttributeEditorEvent
-    );
-  };
-
-  #handleAttributeEditorEvent = (message = "") => {
-    console.log(`AttributeEditor-event caught in model! Message: ${message}`);
   };
 
   setAttributeEditorKeyInStorage = (key, value) => {

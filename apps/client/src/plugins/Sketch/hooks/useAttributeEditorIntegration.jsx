@@ -123,7 +123,6 @@ function getPolygonPerimeter(geometry) {
  */
 const useAttributeEditorIntegration = ({
   map,
-  props,
   drawModel,
   localObserver,
   activityId,
@@ -142,33 +141,24 @@ const useAttributeEditorIntegration = ({
   // Key: canonical feature ID, Value: geometry before translation/modification
   const beforeGeomPersistentRef = React.useRef(new Map());
 
+  // Ids currently marked for deletion in AttributeEditor, kept fresh via the
+  // attrib:deleted-ids bus event. This hook has no direct access to the
+  // AttributeEditor model (Sketch is mounted with map/app/options only), so
+  // the bus is the only reliable source. The set contains raw, string and
+  // numeric forms of each id.
+  const aeDeletedIdsRef = React.useRef(new Set());
+
   React.useEffect(() => {
     if (!map) return;
     const lastPublishRef = { id: null, chan: null };
 
-    const toCanonicalId = (idLike) => {
-      const rows = props?.model?.getSnapshot?.().features || [];
-      const s = String(idLike);
-
-      // 1) exact match of id
-      let hit = rows.find((r) => String(r.id) === s);
-      if (hit) return hit.id;
-
-      // 2) exact match against @_fid (e.g. fid)
-      hit = rows.find((r) => String(r["@_fid"] ?? r.fid ?? "") === s);
-      if (hit) return hit.id;
-
-      // 3) suffix match: "...<dot><id>"  -> extract the suffix
-      const m = s.match(/\.([^.]+)$/);
-      if (m) {
-        const tail = m[1];
-        hit = rows.find((r) => String(r.id) === String(tail));
-        if (hit) return hit.id;
-      }
-
-      // fallback (canonical negative draft-id)
-      return idLike;
-    };
+    // AE feature ids are read from the feature's "id"/"@_fid" properties,
+    // which carry the same value as the row id in AttributeEditor — and the
+    // consumers of the events we emit match ids with String()/alias logic.
+    // (An earlier version tried to canonicalize against the AttributeEditor
+    // model here, but that model was never available in this hook, so the
+    // effective behavior has always been a passthrough.)
+    const toCanonicalId = (idLike) => idLike;
 
     const getNodeHighlightStyle = (feature) => {
       return new Style({
@@ -460,12 +450,23 @@ const useAttributeEditorIntegration = ({
 
         if (wanted.size === 0) continue;
 
+        // Features marked for deletion in AttributeEditor are kept OUT of the
+        // interaction collection: no edit nodes are shown for them, and the
+        // Modify/Translate interactions (which operate on this collection)
+        // cannot touch them. They can still be selected/unmarked in the UI —
+        // that selection state lives in AttributeEditor, not in `fc`.
+        const deletedIds = aeDeletedIdsRef.current;
+        const isDeletionMarked = (f) => {
+          const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+          return deletedIds.has(raw) || deletedIds.has(String(raw));
+        };
+
         const pushedFeatures = new Set();
         wanted.forEach((wid) => {
           const f =
             src.getFeatureById?.(wid) ||
             srcFeatures.find((x) => matchesLogicalId(x, wid));
-          if (f && !pushedFeatures.has(f)) {
+          if (f && !pushedFeatures.has(f) && !isDeletionMarked(f)) {
             pushedFeatures.add(f);
             markFeatureForAttributeEditor(f);
             // Set EDIT_ACTIVE to show nodes (only when plugin is shown AND in EDIT mode)
@@ -524,23 +525,20 @@ const useAttributeEditorIntegration = ({
     const getAeSelected = () => {
       const arr = [];
       const seen = new Set();
-      // Get pendingDeletes to filter out deleted features
-      const pendingDeletes =
-        props?.model?.getSnapshot?.()?.pendingDeletes || new Set();
+      // Ids marked for deletion in AttributeEditor (via attrib:deleted-ids).
+      // The set already contains raw, numeric and string forms of each id.
+      const deletedIds = aeDeletedIdsRef.current;
 
       for (const { select } of reg.values()) {
         select?.getFeatures?.().forEach((f) => {
           const rawId = f.getId?.() ?? f.get?.("@_fid") ?? f.get?.("id");
           const key = String(rawId);
-          const numId = Number(rawId);
 
-          // Skip if already seen or marked for deletion (check raw, numeric and string forms
-          // to handle both Postgres numeric IDs and Oracle string IDs like "typename.1234")
+          // Skip if already seen or marked for deletion
           if (
             !seen.has(key) &&
-            !pendingDeletes.has(rawId) &&
-            !(Number.isFinite(numId) && pendingDeletes.has(numId)) &&
-            !pendingDeletes.has(key)
+            !deletedIds.has(rawId) &&
+            !deletedIds.has(key)
           ) {
             seen.add(key);
             arr.push(f);
@@ -645,20 +643,12 @@ const useAttributeEditorIntegration = ({
         condition: (evt) => {
           if (activityId !== "MOVE" || !translateEnabled) return false;
 
-          // Get pendingDeletes to filter out deleted features
-          const pendingDeletes =
-            props?.model?.getSnapshot?.()?.pendingDeletes || new Set();
-
-          // Helper: check if a feature is marked for deletion.
-          // Checks raw value, numeric and string forms to handle both
-          // Postgres numeric IDs and Oracle string IDs like "typename.1234".
+          // Ids marked for deletion in AttributeEditor (via the
+          // attrib:deleted-ids event; contains raw/numeric/string forms).
+          const deletedIds = aeDeletedIdsRef.current;
           const isDeleted = (f) => {
             const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-            if (pendingDeletes.has(raw)) return true;
-            const n = Number(raw);
-            if (Number.isFinite(n) && pendingDeletes.has(n)) return true;
-            if (pendingDeletes.has(String(raw))) return true;
-            return false;
+            return deletedIds.has(raw) || deletedIds.has(String(raw));
           };
 
           // Collect ALL features at the pixel, excluding deleted ones
@@ -751,26 +741,6 @@ const useAttributeEditorIntegration = ({
       mod.__allowModify = !!allow.modify;
 
       // ---------- named handlers (so we can bind/unbind cleanly) ----------
-      const onSelect = () => {
-        const arr = fc.getArray ? fc.getArray() : [];
-        arr.forEach((f) => {
-          // Always materialize/refresh style, even if feature already has one
-          // This ensures the style reflects the current selection state
-          if (f) markFeatureForAttributeEditor(f);
-        });
-        publishToEditView(arr[0] ?? null);
-
-        const ids = arr.map((f) => {
-          const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
-          return toCanonicalId(raw);
-        });
-        editBus.emit("attrib:select-ids", {
-          ids,
-          source: "map",
-          mode: "replace",
-        });
-      };
-
       const onTranslateStart = (e) => {
         const f = e?.features?.item?.(0);
         if (!f) return;
@@ -865,9 +835,6 @@ const useAttributeEditorIntegration = ({
           mod.un("modifyend", onModifyEnd);
         } catch {}
         try {
-          sel.un("select", onSelect);
-        } catch {}
-        try {
           map.removeInteraction(sel);
         } catch {}
         try {
@@ -887,6 +854,27 @@ const useAttributeEditorIntegration = ({
     // ============================================================
     // SECTION: Cross-plugin bus subscriptions (AE ↔ Sketch)
     // ============================================================
+    // Mirror AttributeEditor's deletion-marked ids into a local ref, so
+    // translate/rotate/move can refuse to touch those features. Expand each
+    // id to raw/string/numeric forms for cheap lookups.
+    const offDeletedIds = editBus.on("attrib:deleted-ids", (ev) => {
+      const ids = ev.detail?.ids || [];
+      const set = new Set();
+      ids.forEach((id) => {
+        set.add(id);
+        set.add(String(id));
+        const n = Number(id);
+        if (Number.isFinite(n)) set.add(n);
+      });
+      aeDeletedIdsRef.current = set;
+
+      // Re-sync the OL selection against the new deletion set: features that
+      // just became deletion-marked are dropped from the interaction
+      // collection (their edit nodes disappear and vertex editing stops
+      // working), and features that were unmarked come back.
+      syncOlSelection(selectedIdsRef.current || []);
+    });
+
     const offAttribSelectIds = editBus.on("attrib:select-ids", (ev) => {
       // Sync OL selection with logical ids from UI
       const { ids = [] } = ev.detail || {};
@@ -1520,6 +1508,9 @@ const useAttributeEditorIntegration = ({
     // ============================================================
     return () => {
       try {
+        offDeletedIds();
+      } catch {}
+      try {
         offAttribSelectIds();
       } catch {}
       try {
@@ -1590,7 +1581,6 @@ const useAttributeEditorIntegration = ({
     };
   }, [
     map,
-    props,
     localObserver,
     activityId,
     modifyEnabled,

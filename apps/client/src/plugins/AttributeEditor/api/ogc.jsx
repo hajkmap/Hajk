@@ -163,8 +163,13 @@ export function createOgcApi(baseUrl) {
       TYPENAME: typeName,
       SRSNAME: srs,
     });
-    if (params.maxFeatures) {
-      queryParams.set("MAXFEATURES", String(params.maxFeatures));
+    // Feature cap — WFS 1.x uses MAXFEATURES, WFS 2.0 uses COUNT.
+    const limit = params.limit ?? params.maxFeatures;
+    if (limit) {
+      queryParams.set(
+        version.startsWith("2") ? "COUNT" : "MAXFEATURES",
+        String(limit)
+      );
     }
     if (params.bbox) {
       queryParams.set("BBOX", params.bbox);
@@ -238,6 +243,10 @@ export function createOgcApi(baseUrl) {
           if (!fc.hasZ) fc.hasZ = dtResult.hasZ;
         }
       }
+      if (limit && Array.isArray(fc.features) && fc.features.length >= limit) {
+        // The server returned exactly the cap — the layer likely has more.
+        fc.limitReached = Number(limit);
+      }
       fc.layerConfig = layer;
       return fc;
     }
@@ -289,6 +298,10 @@ export function createOgcApi(baseUrl) {
         fc.geometryType = dtResult.type;
         if (!fc.hasZ) fc.hasZ = dtResult.hasZ;
       }
+    }
+    if (limit && Array.isArray(fc.features) && fc.features.length >= limit) {
+      // The server returned exactly the cap — the layer likely has more.
+      fc.limitReached = Number(limit);
     }
     fc.layerConfig = layer;
     return fc;
@@ -653,16 +666,17 @@ function parseWfstResponse(xml) {
   if (exception) {
     return {
       success: false,
-      error: exception.textContent.trim(),
+      message: exception.textContent.trim(),
       inserted: 0,
       updated: 0,
       deleted: 0,
     };
   }
 
-  // 2) Extract counts from TransactionSummary
+  // 2) Extract counts and inserted feature ids from TransactionSummary
   const getText = (tag) => parseInt(findNS(tag)?.textContent || "0", 10);
   let inserted, updated, deleted;
+  let insertedIds = [];
 
   try {
     const result = wfsFormat.readTransactionResponse(xml);
@@ -670,6 +684,9 @@ function parseWfstResponse(xml) {
       inserted = result.transactionSummary?.totalInserted ?? 0;
       updated = result.transactionSummary?.totalUpdated ?? 0;
       deleted = result.transactionSummary?.totalDeleted ?? 0;
+      // The fids the server assigned to newly inserted features
+      // (e.g. "mylayer.124") — used to re-select them after save.
+      insertedIds = result.insertIds ?? [];
     }
   } catch {
     // OL parser failed — fall through to manual count extraction
@@ -680,6 +697,15 @@ function parseWfstResponse(xml) {
     inserted = getText("totalInserted");
     updated = getText("totalUpdated");
     deleted = getText("totalDeleted");
+  }
+
+  // Fallback for inserted fids: read InsertResults' FeatureId (WFS 1.x)
+  // or ResourceId (WFS 2.0) elements directly.
+  if (insertedIds.length === 0 && inserted > 0) {
+    insertedIds = [
+      ...findAllNS("FeatureId").map((el) => el.getAttribute("fid")),
+      ...findAllNS("ResourceId").map((el) => el.getAttribute("rid")),
+    ].filter(Boolean);
   }
 
   // 3) Check for failure messages in TransactionResults/Action/Message.
@@ -693,7 +719,7 @@ function parseWfstResponse(xml) {
     const errors = actionMessages.map((el) => el.textContent.trim());
     return {
       success: false,
-      error: errors.join("; "),
+      message: errors.join("; "),
       inserted: 0,
       updated: 0,
       deleted: 0,
@@ -701,7 +727,7 @@ function parseWfstResponse(xml) {
   }
 
   // 4) If we have counts or messages, build the response
-  const response = { success: true, inserted, updated, deleted };
+  const response = { success: true, inserted, updated, deleted, insertedIds };
 
   // Attach warning if there were messages but some operations succeeded
   if (actionMessages.length > 0) {

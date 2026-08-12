@@ -193,7 +193,6 @@ export default function TableMode(props) {
   const { functionalCookiesOk } = useCookieStatus(app.globalObserver);
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
-  const [errorMsg, setErrorMsg] = React.useState(null);
   const caretStoreRef = React.useRef(new Map());
 
   // State for "show all" confirmation dialog
@@ -438,13 +437,12 @@ export default function TableMode(props) {
   };
 
   async function confirmSave() {
+    // Note: commitTableEdits handles its own errors (snackbar) and never
+    // throws, so there is no error branch here.
     try {
-      setErrorMsg(null);
       setSavingNow(true);
       await Promise.resolve(commitTableEdits());
       setSaveDialogOpen(false);
-    } catch (err) {
-      setErrorMsg(err?.message || "Kunde inte spara.");
     } finally {
       setSavingNow(false);
     }
@@ -1007,7 +1005,6 @@ export default function TableMode(props) {
         onDiscard={onDiscard}
         summary={summary}
         saving={savingNow}
-        error={errorMsg}
         title="Spara ändringar"
         body="Det finns osparade ändringar i tabellen. Vill du spara nu?"
         primaryLabel="Spara"

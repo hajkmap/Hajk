@@ -186,7 +186,6 @@ function AttributeEditor(props) {
   const featureIndexRef = React.useRef(new Map());
   const featureAliasesRef = React.useRef(new Map()); // Pre-computed aliases for O(1) lookup in styleFn
   const graveyardRef = React.useRef(new Map());
-  const focusedIdRef = React.useRef(null);
   const draftBaselineRef = React.useRef(new Map());
 
   const currentServiceIdRef = React.useRef("NONE_ID");
@@ -479,7 +478,9 @@ function AttributeEditor(props) {
           } else if (geomType === "LineString") {
             const coords = geom.getCoordinates();
             coord = coords[Math.floor(coords.length / 2)];
-          } else if (geomType === "Polygon" || geomType === "MultiPolygon") {
+          } else {
+            // Polygon, MultiPolygon, MultiPoint, MultiLineString etc. —
+            // anchor the tooltip at the extent center
             const extent = geom.getExtent();
             coord = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
           }
@@ -909,7 +910,6 @@ function AttributeEditor(props) {
       } catch (e) {
         // Ignore abort errors - these are expected when user switches services quickly
         if (e.name === "AbortError" || signal.aborted) {
-          console.log("Service loading aborted (user switched services)");
           return;
         }
 
@@ -1186,10 +1186,6 @@ function AttributeEditor(props) {
           mode: "mark",
         });
 
-        if (focusedIdRef?.current === fid) {
-          editBus.emit("attrib:focus-id", { id: null });
-        }
-
         vectorLayerRef.current?.changed?.();
       };
 
@@ -1245,6 +1241,9 @@ function AttributeEditor(props) {
   }, [props.map, model, vectorLayerRef, fieldMetaLocal]);
 
   React.useEffect(() => {
+    // Signature of the last emitted attrib:deleted-ids payload, so we only
+    // emit when the set of deletion-marked ids actually changes.
+    let lastDeletedSig = null;
     return model.subscribe(() => {
       const st = model.getSnapshot?.() || {};
       const del =
@@ -1267,118 +1266,37 @@ function AttributeEditor(props) {
       pendingAddIdsSetRef.current = addIdsSet;
       pendingDeletedDraftIdsSetRef.current = deletedDraftIdsSet;
 
+      // Broadcast which ids are marked for deletion (existing features and
+      // drafts alike). Sketch's integration hook has no access to this
+      // model, so it relies on this event to refuse move/rotate/translate
+      // of deletion-marked features.
+      const deletedIds = [
+        ...del,
+        ...adds.filter((d) => d.__pending === "delete").map((d) => d.id),
+      ];
+      const sig = deletedIds.map(String).sort().join("|");
+      if (sig !== lastDeletedSig) {
+        lastDeletedSig = sig;
+        editBus.emit("attrib:deleted-ids", {
+          ids: deletedIds,
+          source: "attrib",
+        });
+      }
+
       vectorLayerRef.current?.changed?.();
     });
   }, [model, vectorLayerRef]);
 
-  // --- BACK-SYNC: AttributeEditor -> Sketch layer -----------------------------
-  React.useEffect(() => {
-    // We need to keep track of the previous state to get the diff
-    // (pendingAdds = drafts with negative id, __pending: 'add'|'delete')
-    const prevRef = { current: null };
-    return model.subscribe(() => {
-      const prev = prevRef.current;
-      const next = model.getSnapshot();
-      prevRef.current = next;
-      if (!prev) return;
-
-      const sketchLayer = getSketchLayer(props.map);
-      const src = sketchLayer?.getSource?.();
-      if (!src) return;
-
-      // Helper
-      const getDraftMap = (st) => new Map(st.pendingAdds.map((d) => [d.id, d]));
-      const prevDrafts = getDraftMap(prev);
-      const nextDrafts = getDraftMap(next);
-
-      // 1) Drafts that are removed completely (REMOVE_DRAFTS, or UNDO of an add)
-      //    -> remove feature from Sketch layer if it exists
-      for (const [id] of prevDrafts) {
-        if (!nextDrafts.has(id)) {
-          const f = featureIndexRef.current.get(id);
-          if (f) {
-            try {
-              programmaticSketchOpsRef.current.add(f);
-              src.removeFeature(f);
-            } catch {
-              // ignore
-            }
-            featureIndexRef.current.delete(id);
-            featureAliasesRef.current.delete(id);
-            graveyardRef.current.set(id, f);
-            limitMapSize(graveyardRef.current, MAX_GRAVEYARD_SIZE);
-          }
-        }
-      }
-
-      // 2) Drafts that are marked for deletion (toggle/mark) -> remove from the map
-      for (const [id, draftNext] of nextDrafts) {
-        const was = prevDrafts.get(id)?.__pending;
-        const now = draftNext.__pending;
-        if (was !== "delete" && now === "delete") {
-          const f = featureIndexRef.current.get(id);
-          if (f) {
-            try {
-              programmaticSketchOpsRef.current.add(f);
-              src.removeFeature(f);
-            } catch {
-              // ignore
-            }
-            featureIndexRef.current.delete(id);
-            featureAliasesRef.current.delete(id);
-            graveyardRef.current.set(id, f);
-            limitMapSize(graveyardRef.current, MAX_GRAVEYARD_SIZE);
-          }
-        }
-      }
-
-      // 3) Drafts that are unmarked for deletion (unmark/undo) -> put back in the map
-      for (const [id, draftNext] of nextDrafts) {
-        const was = prevDrafts.get(id)?.__pending;
-        const now = draftNext.__pending;
-        if (was === "delete" && now !== "delete") {
-          const f = graveyardRef.current.get(id);
-          if (f) {
-            try {
-              programmaticSketchOpsRef.current.add(f);
-              src.addFeature(f);
-            } catch {
-              // ignore
-            }
-            featureIndexRef.current.set(id, f);
-            featureAliasesRef.current.set(id, idAliases(id));
-            graveyardRef.current.delete(id);
-          }
-        }
-      }
-
-      // 4) Commit: negative IDs disappear and become real features in the model.
-      //    We want to ensure that corresponding temporary (Sketch) features are removed from the map.
-      //    What we detect here is: all negative IDs that existed before but are not present now
-      //    (and are not in the next drafts) -> remove from the map.
-      const prevNegIds = prev.pendingAdds
-        .map((d) => d.id)
-        .filter((id) => id < 0);
-      const nextNegSet = new Set(
-        next.pendingAdds.map((d) => d.id).filter((id) => id < 0)
-      );
-      prevNegIds.forEach((id) => {
-        if (!nextNegSet.has(id)) {
-          const f = featureIndexRef.current.get(id);
-          if (f) {
-            try {
-              programmaticSketchOpsRef.current.add(f);
-              src.removeFeature(f);
-            } catch {
-              // ignore
-            }
-            featureIndexRef.current.delete(id);
-            featureAliasesRef.current.delete(id);
-          }
-        }
-      });
-    });
-  }, [props.map, model]);
+  // NOTE: There used to be a "back-sync" effect here that tried to keep the
+  // pluginSketch layer's source in sync with draft state (remove features for
+  // deletion-marked drafts, re-add them on unmark, etc). It operated on the
+  // wrong source — drafts are moved to the AttributeEditor layer in onAdd —
+  // so its removals were silent no-ops, and its only real effect was a bug:
+  // re-adding features to the Sketch source on unmark, causing double
+  // rendering. Draft removal from the map is handled by the cleanup effect in
+  // AttributeEditorView (which watches pendingAdds and works against the AE
+  // source), and deletion-marked drafts intentionally stay in the map with
+  // the red "toDelete" styling from styleFn — just like existing features.
 
   React.useEffect(() => {
     const map = props.map;
@@ -1465,12 +1383,6 @@ function AttributeEditor(props) {
       const hit = hits[0];
       const rawId = getFeatureId(hit, idFieldRef.current);
       const canonId = toCanonicalId(rawId, rowIdMapRef.current);
-
-      editBus.emit("attrib:select-ids", {
-        ids: [canonId],
-        source: "map",
-        mode: "replace",
-      });
 
       const multi =
         evt.originalEvent?.ctrlKey ||
@@ -1648,8 +1560,6 @@ function AttributeEditor(props) {
       setColor: (c) => setUi((u) => ({ ...u, color: c })),
 
       // Model actions
-      editCell: (id, key, value) =>
-        model.dispatch({ type: Action.EDIT, id, key, value }),
       batchEdit: (ops) => model.dispatch({ type: Action.BATCH_EDIT, ops }), // ops: [{id,key,value}]
       toggleDelete: (ids, mode = "toggle") =>
         model.dispatch({ type: Action.SET_DELETE_STATE, ids, mode }),

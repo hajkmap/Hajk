@@ -135,6 +135,19 @@ export default function AttributeEditorView({
     []
   );
 
+  // Warn when a load hit the feature cap — the layer most likely contains
+  // more objects than were fetched, and only the fetched ones are editable.
+  useEffect(() => {
+    const off = editBus.on("attrib:load-truncated", (ev) => {
+      const { limit } = ev.detail || {};
+      enqueueSnackbar(
+        `Lagret innehåller fler objekt än vad som hämtats (max ${Number(limit).toLocaleString("sv-SE")}). Endast de hämtade visas och kan redigeras.`,
+        { variant: "warning", autoHideDuration: 10000 }
+      );
+    });
+    return () => off();
+  }, [enqueueSnackbar]);
+
   // Track whether the active service supports Point geometry (from admin schema)
   useEffect(() => {
     const offSchema = editBus.on("attrib:schema-loaded", (ev) => {
@@ -319,9 +332,17 @@ export default function AttributeEditorView({
         clearTimeout(debouncedTimerRef.current);
         debouncedTimerRef.current = null;
       }
+      // Flush queued edits instead of dropping them — keystrokes made in the
+      // last debounce window (120 ms) must not be lost on unmount.
+      const flush = debouncedBatchRef.current || [];
       debouncedBatchRef.current = [];
+      if (flush.length) {
+        const byKey = new Map();
+        for (const op of flush) byKey.set(`${op.id}::${op.key}`, op);
+        controller.batchEdit(Array.from(byKey.values()));
+      }
     };
-  }, []);
+  }, [controller]);
 
   React.useEffect(() => {
     lastSentRef.current.clear();
@@ -1285,6 +1306,11 @@ export default function AttributeEditorView({
   }, [hasUnsaved, unsavedSummary]);
 
   const commitTableEdits = useCallback(async () => {
+    // Signal save-in-progress to other plugins. Sketch locks its service
+    // selector while a save is running (edit:saving-started listeners in
+    // SketchView) — the matching "finished" is emitted in the finally block
+    // below, so the lock is always released, even on errors.
+    editBus.emit("edit:saving-started", { source: "attribute-editor" });
     try {
       const layerCRS = model.getLayerProjection();
 
@@ -1398,16 +1424,13 @@ export default function AttributeEditorView({
           return keep;
         });
 
-      // 3. Build DELETE operations
+      // 3. Build DELETE operations. Everything marked for deletion is sent to
+      // the server EXCEPT drafts (negative ids) — those only exist locally
+      // and are committed away by controller.commit(). Non-numeric ids (e.g.
+      // a UUID idField or Oracle-style fids) must pass through untouched;
+      // formatFeatureId in ogc.jsx handles the qualification for the server.
       const deletes = Array.from(pendingDeletes)
-        .filter((id) => {
-          // Accept positive numeric IDs (number or numeric string) and
-          // qualified FIDs (layer.123). Drafts (negative) are handled separately.
-          const str = String(id);
-          if (/^\d+$/.test(str)) return true; // plain positive numeric
-          if (/\.\d+$/.test(str)) return true; // qualified FID (layer.123)
-          return false;
-        })
+        .filter((id) => !isDraftId(id))
         .map((id) => {
           let cleanId = String(id);
           const fidMatch = cleanId.match(/\.(\d+)$/);
@@ -1477,23 +1500,11 @@ export default function AttributeEditorView({
       });
 
       if (result.success) {
-        if ("caches" in window) {
-          try {
-            const names = await caches.keys();
-            await Promise.all(names.map((name) => caches.delete(name)));
-          } catch {
-            // ignore
-          }
-        }
-
         const failedInserts = inserts.length - (result.inserted || 0);
         const failedUpdates = updates.length - (result.updated || 0);
         const failedDeletes = deletes.length - (result.deleted || 0);
         const hasPartialFailure =
-          (result.partialFailures && result.partialFailures.length > 0) ||
-          failedInserts > 0 ||
-          failedUpdates > 0 ||
-          failedDeletes > 0;
+          failedInserts > 0 || failedUpdates > 0 || failedDeletes > 0;
 
         if (hasPartialFailure) {
           const totalDeletedCount = (result.deleted || 0) + deletedDraftsCount;
@@ -1508,8 +1519,6 @@ export default function AttributeEditorView({
             failureParts.push(
               `${failedDeletes} borttagning(ar) kunde inte sparas`
             );
-          if (result.partialFailures?.length > 0)
-            failureParts.push(...result.partialFailures);
 
           let message = `⚠ Delvis sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${totalDeletedCount} borttagna\n`;
           message += failureParts.join(", ");
@@ -1551,13 +1560,7 @@ export default function AttributeEditorView({
         geomUndoRef.current = [];
         setGeomUndoCount(0);
         try {
-          const reloadId = `reload_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-          const { featureCollection } = await model.loadFromService(serviceId, {
-            _reload: reloadId,
-            _nocache: "1",
-            _bust: Date.now(),
-          });
+          const { featureCollection } = await model.loadFromService(serviceId);
           if (vectorLayerRef.current && featureCollection) {
             const mapProj = map.getView().getProjection();
 
@@ -1635,6 +1638,8 @@ export default function AttributeEditorView({
         variant: "error",
         autoHideDuration: 8000,
       });
+    } finally {
+      editBus.emit("edit:saving-finished", { source: "attribute-editor" });
     }
   }, [
     controller,
@@ -1683,7 +1688,10 @@ export default function AttributeEditorView({
           "Attributlista".slice(0, 30)
         );
 
-        const timestamp = new Date().toLocaleString("sv-SE");
+        // Colons are invalid in Windows filenames — use dashes in the time part
+        const timestamp = new Date()
+          .toLocaleString("sv-SE")
+          .replace(/:/g, "-");
         const filename = `Attributlista-${timestamp}.xlsx`;
 
         xlsx.writeFile(workbook, filename);

@@ -265,18 +265,3 @@ export const DEFAULT_TEXT_STYLE_SETTINGS = {
   backgroundColor: "#000000",
   size: 14,
 };
-
-export const OGC_SOURCES = [
-  {
-    type: "NONE",
-    label: "Ingen",
-  },
-  {
-    type: "WFS",
-    label: "Avfallsstationer",
-  },
-  {
-    type: "WFS",
-    label: "Träd",
-  },
-];

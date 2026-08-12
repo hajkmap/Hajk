@@ -279,16 +279,11 @@ export default function Toolbar({
 
   React.useEffect(() => {
     const offSel = editBus.on("edit:service-selected", (ev) => {
-      const { id, title, source } = ev.detail || {};
+      const { id, source } = ev.detail || {};
       if (source === "toolbar") return;
 
       if (id) {
         setServiceId(id);
-      } else if (title) {
-        const matchingService = services.find((s) => s.label === title);
-        if (matchingService) {
-          setServiceId(matchingService.id);
-        }
       }
     });
 
