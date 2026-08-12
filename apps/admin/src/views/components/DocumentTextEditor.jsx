@@ -102,8 +102,16 @@ export default class DocumentTextEditor extends React.Component {
       console.log("---");
     };
     this.onChange = this._onChange.bind(this);
-    this.onURLChange = (e) =>
-      this.setState({ urlValue: this.sanitizeMediaUrl(e.target.value) });
+    // Document names / map links / hover text are identifiers or plain text,
+    // not media URLs — do not resolve them against the admin origin.
+    this.onURLChange = (e) => {
+      const value = e.target.value;
+      if (["documentlink", "maplink", "hover"].includes(this.state.urlType)) {
+        this.setState({ urlValue: value });
+        return;
+      }
+      this.setState({ urlValue: this.sanitizeMediaUrl(value) });
+    };
     this.onImageAltChange = (e) => this.setState({ imageAlt: e.target.value });
     this.onTitleChange = (e) => this.setState({ urlTitle: e.target.value });
     this.onTitleIdChange = (e) => this.setState({ urlTitleId: e.target.value });
