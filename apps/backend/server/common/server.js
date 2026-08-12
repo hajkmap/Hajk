@@ -353,7 +353,12 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     const l = log4js.getLogger("hajk.proxy");
     try {
       // Suffixes used for per-proxy settings — these are NOT proxy targets.
-      const credentialSuffixes = ["_USER", "_PASSWORD", "_STRIP_AUTH"];
+      const credentialSuffixes = [
+        "_USER",
+        "_PASSWORD",
+        "_STRIP_AUTH",
+        "_FORWARD_VALIDATED_USER",
+      ];
 
       // Convert the settings from DOTENV to a nice Array of Objects.
       // Skip entries that are credential keys (e.g. PROXY_GEOSERVER_USER).
@@ -372,8 +377,9 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
             // Look up optional per-proxy settings using same naming convention
             user: process.env[`PROXY_${rawName}_USER`] || "",
             password: process.env[`PROXY_${rawName}_PASSWORD`] || "",
-            stripAuth:
-              process.env[`PROXY_${rawName}_STRIP_AUTH`] === "true",
+            stripAuth: process.env[`PROXY_${rawName}_STRIP_AUTH`] === "true",
+            forwardValidatedUser:
+              process.env[`PROXY_${rawName}_FORWARD_VALIDATED_USER`] === "true",
           };
         });
 
@@ -406,8 +412,15 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
 
           // If credentials are configured, inject Basic auth and forward
           // AD headers so the upstream server knows who the user is.
+          // NOTE: The credentials are injected for EVERY request through this
+          // endpoint — Hajk performs no per-user authorization here. Any rights
+          // the service account has upstream (e.g. WFS-T writes) are available
+          // to anyone who can reach this backend, unless the upstream service
+          // authorizes each request per user (e.g. via the forwarded AD headers).
           if (v.user && v.password) {
-            l.trace(`Proxy ${context}: Basic auth enabled"`);
+            l.warn(
+              `Proxy "${context}": Basic auth enabled. The service account's credentials are injected for ALL requests through /api/v${apiVersion}/proxy/${context}. Do NOT grant this account write permissions (e.g. WFS-T) unless the upstream service authorizes requests per user, e.g. via the forwarded AD headers. Consider also setting PROXY_<NAME>_FORWARD_VALIDATED_USER=true so only validated identities are forwarded. See the generic proxy section in .env.example.`
+            );
             const basicCredentials = Buffer.from(
               `${v.user}:${v.password}`
             ).toString("base64");
@@ -437,6 +450,38 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
             };
           }
 
+          // If PROXY_<NAME>_FORWARD_VALIDATED_USER is enabled, only forward the
+          // identity that extractUserContext has already validated (trusted-IP
+          // check + AD lookup) instead of passing incoming AD headers through
+          // as-is. Without this, a client that reaches this backend directly
+          // (bypassing the reverse proxy that normally sets the headers) could
+          // spoof any user identity towards the upstream service. Runs AFTER
+          // the Basic auth handler above, so it overrides the raw forwarding.
+          if (v.forwardValidatedUser) {
+            l.info(
+              `Proxy "${context}": will forward only the validated AD user identity in ${userHeader} (unvalidated identity headers are stripped).`
+            );
+            const authHandler = proxyOptions.on?.proxyReq;
+            proxyOptions.on = {
+              ...proxyOptions.on,
+              proxyReq: (proxyReq, req, res) => {
+                authHandler?.(proxyReq, req, res);
+
+                // Set by extractUserContext, which only accepts the header from
+                // trusted IPs (AD_TRUSTED_PROXY_IPS) when AD_LOOKUP_ACTIVE=true.
+                const validatedUser = res?.locals?.authUser;
+                if (validatedUser) {
+                  proxyReq.setHeader(userHeader, validatedUser);
+                } else {
+                  // No validated user (AD inactive, or header absent) — make
+                  // sure no unvalidated identity reaches the upstream service.
+                  proxyReq.removeHeader(userHeader);
+                  proxyReq.removeHeader(groupHeader);
+                }
+              },
+            };
+          }
+
           // If the QGIS service URL header is needed, extend or create the proxyReq handler.
           // This cannot be a simple spread like the other options because the Basic auth block
           // above may have already assigned proxyOptions.on — we must not overwrite it.
@@ -451,9 +496,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
                 // See if there's another proxy in front of this backend that sets the x-forwarded-* headers.
                 // If so, we want to use those headers to reconstruct the original URL as seen by the client,
                 // not the URL as seen by this backend.
-                const proto = (
-                  req.headers["x-forwarded-proto"] || req.protocol
-                )
+                const proto = (req.headers["x-forwarded-proto"] || req.protocol)
                   .split(",")[0]
                   .trim();
 

@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Backend: Generic proxy - new optional per-proxy settings: `PROXY_<NAME>_USER`/`_PASSWORD` inject Basic auth for a service account (with AD user/group headers forwarded upstream), `PROXY_<NAME>_STRIP_AUTH` strips incoming Authorization headers, and `PROXY_<NAME>_FORWARD_VALIDATED_USER` forwards only the AD identity that the backend has validated (protects against identity spoofing towards upstream services). The backend warns at startup when service account credentials are configured — see the security notes in the generic proxy section of `.env.example`. [#1675](https://github.com/hajkmap/Hajk/issues/1675)
+
 - Client + Admin: LayerSwitcher - Added a new admin setting "Visa teckenförklaring direkt" that forces the legend to be expanded by default in the layer details view, so users don't have to click the legend button. [#1838](https://github.com/hajkmap/Hajk/issues/1838)
 - Client + Admin: DocumentHandler - Added a "Direct Print" setting that prints the currently active document directly without showing the document selection dialog [#1773](https://github.com/hajkmap/Hajk/issues/1773)
 - Client: Infoclick - Functionality to hide links that point to non-existing resources [#1804](https://github.com/hajkmap/Hajk/issues/1804)

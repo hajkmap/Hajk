@@ -35,9 +35,12 @@ async function getCachedLayersStore() {
 }
 
 /**
- * Read the WFST layer store, filtered by AD group membership.
+ * Read the WFST layer store.
  * Uses in-memory cache with mtime invalidation to avoid disk I/O per request.
- * Falls back to ConfigService when AD filtering is needed (AD checks user groups).
+ * NOTE: When AD_LOOKUP_ACTIVE is true, ConfigService validates that the user
+ * is a valid AD user — but it does NOT filter the store per layer (per-layer
+ * washing is a TODO in ConfigService.getLayersStore). All WFST layers are
+ * returned to any validated user.
  * Returns { list, byId } where byId is a Map keyed by layer id.
  */
 async function getWFSTStore({ user = null, washContent = true } = {}) {
@@ -64,8 +67,9 @@ async function getWFSTStore({ user = null, washContent = true } = {}) {
 }
 
 /**
- * Look up a single WFST layer by id (with AD filtering).
- * Throws NotFoundError if the layer doesn't exist or the user lacks access.
+ * Look up a single WFST layer by id.
+ * Throws NotFoundError if the layer doesn't exist. Note that there is no
+ * per-layer access control here (see note on getWFSTStore above).
  */
 async function requireLayer(id, { user, washContent } = {}) {
   if (!Validator.isValidId(id)) {
@@ -85,7 +89,7 @@ async function requireLayer(id, { user, washContent } = {}) {
   return layer;
 }
 
-/** List all WFST layers visible to the current user. */
+/** List all WFST layers (no per-layer filtering — see note on getWFSTStore). */
 export async function listWFSTLayers({ fields, user, washContent } = {}) {
   try {
     const { list: layers } = await getWFSTStore({ user, washContent });
