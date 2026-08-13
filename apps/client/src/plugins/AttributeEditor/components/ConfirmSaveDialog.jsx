@@ -59,20 +59,21 @@ export default function ConfirmSaveDialog({
     <Dialog
       open={open}
       onClose={handleClose}
-      TransitionComponent={Transition}
       fullWidth
       maxWidth="sm"
       fullScreen={isMobile}
       keepMounted
-      disableEscapeKeyDown={saving}
-      PaperProps={{
-        sx: (theme) => ({
-          borderRadius: isMobile ? 0 : 2.5,
-          overflow: "hidden",
-          border: isMobile ? "none" : `1px solid ${theme.palette.divider}`,
-          boxShadow: 12,
-          ...(isMobile && { margin: 0, maxHeight: "100%" }),
-        }),
+      slots={{ transition: Transition }}
+      slotProps={{
+        paper: {
+          sx: (theme) => ({
+            borderRadius: isMobile ? 0 : 2.5,
+            overflow: "hidden",
+            border: isMobile ? "none" : `1px solid ${theme.palette.divider}`,
+            boxShadow: 12,
+            ...(isMobile && { margin: 0, maxHeight: "100%" }),
+          }),
+        },
       }}
     >
       <DialogTitle
@@ -110,7 +111,7 @@ export default function ConfirmSaveDialog({
             direction={isMobile ? "column" : "row"}
             spacing={1}
             useFlexGap
-            flexWrap="wrap"
+            sx={{ flexWrap: "wrap" }}
           >
             <Chip
               icon={<AddCircleOutlineRoundedIcon />}

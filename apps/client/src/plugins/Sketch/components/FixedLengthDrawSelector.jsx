@@ -109,8 +109,7 @@ const FixedLengthDrawSelector = (props) => {
         <StyledAccordionSummary>
           <Grid
             container
-            justifyContent="space-between"
-            alignItems="center"
+            sx={{ justifyContent: "space-between", alignItems: "center" }}
             size={12}
           >
             <Typography variant="button">Rita manuellt</Typography>
@@ -138,10 +137,12 @@ const FixedLengthDrawSelector = (props) => {
                 value={lengthInput}
                 onChange={handleFixedLengthChange}
                 disabled={props.uiDisabled}
-                inputProps={{
-                  min: 0.1,
-                  max: 100000,
-                  step: 0.1,
+                slotProps={{
+                  htmlInput: {
+                    min: 0.1,
+                    max: 100000,
+                    step: 0.1,
+                  },
                 }}
               />
             </HajkToolTip>
@@ -159,10 +160,12 @@ const FixedLengthDrawSelector = (props) => {
                 value={angleInput}
                 onChange={handleFixedAngleChange}
                 disabled={props.uiDisabled}
-                inputProps={{
-                  min: 0,
-                  max: 360,
-                  step: 1,
+                slotProps={{
+                  htmlInput: {
+                    min: 0,
+                    max: 360,
+                    step: 1,
+                  },
                 }}
               />
             </HajkToolTip>

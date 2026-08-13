@@ -1,4 +1,3 @@
-import React from "react";
 import { styled } from "@mui/material/styles";
 import {
   Grid,
@@ -66,8 +65,7 @@ const MultiDrawSelector = (props) => {
         <StyledAccordionSummary>
           <Grid
             container
-            justifyContent="space-between"
-            alignItems="center"
+            sx={{ justifyContent: "space-between", alignItems: "center" }}
             size={12}
           >
             <Typography variant="button">Multi-ritning</Typography>
@@ -85,8 +83,7 @@ const MultiDrawSelector = (props) => {
         <Grid container>
           <Grid
             container
-            justifyContent="space-between"
-            alignItems="center"
+            sx={{ justifyContent: "space-between", alignItems: "center" }}
             size={12}
           >
             <Typography variant="body2" color="text.secondary">
