@@ -542,6 +542,7 @@ class SearchBar extends React.PureComponent {
         sx={{
           width: 400,
           height: (theme) => (renderElsewhere ? "auto" : theme.spacing(6)),
+          mr: isMobile ? 1 : 0,
         }}
       >
         <Grid>

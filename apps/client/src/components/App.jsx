@@ -1294,6 +1294,7 @@ class App extends React.PureComponent {
                   alignItems: "center",
                   gap: 1,
                   ml: this.showDrawerButtons() ? 0 : "auto",
+                  minWidth: 0,
                 }}
               >
                 {showMapSwitcher &&
