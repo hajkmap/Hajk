@@ -46,6 +46,7 @@ class ToolOptions extends Component {
         width: tool.options.width,
         height: tool.options.height,
         visibleAtStart: tool.options.visibleAtStart,
+        showFollowLocation: tool.options.showFollowLocation,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
