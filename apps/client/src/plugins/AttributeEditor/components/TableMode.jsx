@@ -141,6 +141,7 @@ export default function TableMode(props) {
     canMergeFeatures,
     openSelectedInFormFromTable,
     commitTableEdits,
+    summary,
     setDeleteState,
     tablePendingDeletes,
     pushTableUndo,
@@ -402,19 +403,6 @@ export default function TableMode(props) {
       (wrap != null && s.length >= wrap)
     );
   };
-
-  const summary = React.useMemo(
-    () => ({
-      adds:
-        tablePendingAdds?.filter((d) => d.__pending !== "delete").length ?? 0,
-      // number of rows with pending edits (not number of fields)
-      edits: tablePendingEdits ? Object.keys(tablePendingEdits).length : 0,
-      deletes:
-        (tablePendingDeletes?.size ?? 0) +
-        (tablePendingAdds?.filter((d) => d.__pending === "delete").length ?? 0),
-    }),
-    [tablePendingAdds, tablePendingEdits, tablePendingDeletes]
-  );
 
   // Handler for rows per page dropdown change
   const handleRowsPerPageChange = (e) => {

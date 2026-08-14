@@ -399,8 +399,8 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
             `Setting up proxy: /api/v${apiVersion}/proxy/${context} -> ${target}`
           );
 
-          // Build proxy options
-          const proxyOptions = {
+          // Create the proxy itself
+          const options = {
             logger: l,
             target: target,
             changeOrigin: true,
@@ -408,132 +408,126 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
             pathRewrite: {
               [`^/api/v${apiVersion}/proxy/${context}`]: "", // remove base path
             },
+            ...(this.addQgisServiceUrlHeader && {
+              on: {
+                // This entire dance below is made for one purpose: ensure that we set
+                // the "X-Qgis-Service-Url" header on the proxied request, which is
+                // required by QGIS Server to properly generate responses with correct URLs.
+                // The value of this header must be the public-facing URL of the service,
+                // which we reconstruct here based on the incoming request's headers and original URL.
+                // See #1774 for more info.
+                proxyReq: (proxyReq, req, _res) => {
+                  // See if there's a corresponding header setting for QGIS service URL
+                  // See if there's another proxy in front of this backend that sets the x-forwarded-* headers.
+                  // If so, we want to use those headers to reconstruct the original URL as seen by the client,
+                  // not the URL as seen by this backend.
+                  const proto = (
+                    req.headers["x-forwarded-proto"] || req.protocol
+                  )
+                    .split(",")[0]
+                    .trim();
+
+                  // Same here, but with one additional thing…
+                  const host = (
+                    req.headers["x-forwarded-host"] || req.headers.host
+                  )
+                    .split(",")[0]
+                    .split(":")[0] // …i.e. not taking the port part if it exists on host.
+                    .trim();
+
+                  const port = (req.headers["x-forwarded-port"] || "")
+                    .split(",")[0]
+                    .trim();
+
+                  // For standard ports (80 for HTTP and 443 for HTTPS), we don't want to include the port
+                  const hostWithPort =
+                    port && port !== "443" && port !== "80"
+                      ? `${host}:${port}`
+                      : host;
+
+                  // Ensure we get the original URL path, before the proxy middleware rewrote it.
+                  const publicPath = req.originalUrl.split("?")[0];
+
+                  // Finally, construct the header value for QGIS…
+                  const serviceUrl = `${proto}://${hostWithPort}${publicPath}`;
+
+                  // …and set it.
+                  proxyReq.setHeader("X-Qgis-Service-Url", serviceUrl);
+                },
+              },
+            }),
           };
 
-          // If credentials are configured, inject Basic auth and forward
-          // AD headers so the upstream server knows who the user is.
-          // NOTE: The credentials are injected for EVERY request through this
-          // endpoint — Hajk performs no per-user authorization here. Any rights
-          // the service account has upstream (e.g. WFS-T writes) are available
-          // to anyone who can reach this backend, unless the upstream service
-          // authorizes each request per user (e.g. via the forwarded AD headers).
+          // --- Per-proxy auth/identity handling ---------------------------
+          // Implemented as a plain Express middleware that runs BEFORE the
+          // proxy and mutates req.headers (which http-proxy always copies to
+          // the outgoing request). It must NOT live in http-proxy's proxyReq
+          // event: that event is skipped entirely for requests carrying an
+          // "Expect: 100-continue" header, which would let a client bypass
+          // header stripping/overwriting (identity spoofing) and silently
+          // disable the auth injection.
+          //
+          // NOTE on credentials: they are injected for EVERY request through
+          // this endpoint — Hajk performs no per-user authorization here. Any
+          // rights the service account has upstream (e.g. WFS-T writes) are
+          // available to anyone who can reach this backend, unless the
+          // upstream service authorizes each request per user (e.g. via the
+          // forwarded AD headers).
           if (v.user && v.password) {
             l.warn(
               `Proxy "${context}": Basic auth enabled. The service account's credentials are injected for ALL requests through /api/v${apiVersion}/proxy/${context}. Do NOT grant this account write permissions (e.g. WFS-T) unless the upstream service authorizes requests per user, e.g. via the forwarded AD headers. Consider also setting PROXY_<NAME>_FORWARD_VALIDATED_USER=true so only validated identities are forwarded. See the generic proxy section in .env.example.`
             );
-            const basicCredentials = Buffer.from(
-              `${v.user}:${v.password}`
-            ).toString("base64");
-
-            proxyOptions.on = {
-              proxyReq: (proxyReq, req) => {
-                // Basic auth for the service account
-                proxyReq.setHeader(
-                  "Authorization",
-                  `Basic ${basicCredentials}`
-                );
-                // Forward AD user/group headers from the original request
-                const hUser = req.get(userHeader);
-                const hGroups = req.get(groupHeader);
-                if (hUser) proxyReq.setHeader(userHeader, hUser);
-                if (hGroups) proxyReq.setHeader(groupHeader, hGroups);
-              },
-            };
-          } else if (v.stripAuth) {
-            // Strip any incoming Authorization header (e.g. Kerberos/Negotiate tokens
-            // from Windows Auth) so the upstream service doesn't reject the request.
-            l.trace(`Proxy ${context}: stripping Authorization header`);
-            proxyOptions.on = {
-              proxyReq: (proxyReq) => {
-                proxyReq.removeHeader("Authorization");
-              },
-            };
           }
-
-          // If PROXY_<NAME>_FORWARD_VALIDATED_USER is enabled, only forward the
-          // identity that extractUserContext has already validated (trusted-IP
-          // check + AD lookup) instead of passing incoming AD headers through
-          // as-is. Without this, a client that reaches this backend directly
-          // (bypassing the reverse proxy that normally sets the headers) could
-          // spoof any user identity towards the upstream service. Runs AFTER
-          // the Basic auth handler above, so it overrides the raw forwarding.
           if (v.forwardValidatedUser) {
             l.info(
               `Proxy "${context}": will forward only the validated AD user identity in ${userHeader} (unvalidated identity headers are stripped).`
             );
-            const authHandler = proxyOptions.on?.proxyReq;
-            proxyOptions.on = {
-              ...proxyOptions.on,
-              proxyReq: (proxyReq, req, res) => {
-                authHandler?.(proxyReq, req, res);
-
-                // Set by extractUserContext, which only accepts the header from
-                // trusted IPs (AD_TRUSTED_PROXY_IPS) when AD_LOOKUP_ACTIVE=true.
-                const validatedUser = res?.locals?.authUser;
-                if (validatedUser) {
-                  proxyReq.setHeader(userHeader, validatedUser);
-                } else {
-                  // No validated user (AD inactive, or header absent) — make
-                  // sure no unvalidated identity reaches the upstream service.
-                  proxyReq.removeHeader(userHeader);
-                  proxyReq.removeHeader(groupHeader);
-                }
-              },
-            };
           }
 
-          // If the QGIS service URL header is needed, extend or create the proxyReq handler.
-          // This cannot be a simple spread like the other options because the Basic auth block
-          // above may have already assigned proxyOptions.on — we must not overwrite it.
-          if (this.addQgisServiceUrlHeader) {
-            const existingHandler = proxyOptions.on?.proxyReq;
-            proxyOptions.on = {
-              ...proxyOptions.on,
-              proxyReq: (proxyReq, req, _res) => {
-                // Run the Basic auth handler first (if present)
-                existingHandler?.(proxyReq, req, _res);
+          const basicCredentials =
+            v.user && v.password
+              ? Buffer.from(`${v.user}:${v.password}`).toString("base64")
+              : null;
+          // Node lower-cases all incoming header names in req.headers
+          const userHeaderLc = userHeader.toLowerCase();
+          const groupHeaderLc = groupHeader.toLowerCase();
 
-                // See if there's another proxy in front of this backend that sets the x-forwarded-* headers.
-                // If so, we want to use those headers to reconstruct the original URL as seen by the client,
-                // not the URL as seen by this backend.
-                const proto = (req.headers["x-forwarded-proto"] || req.protocol)
-                  .split(",")[0]
-                  .trim();
+          const identityMiddleware = (req, res, next) => {
+            if (basicCredentials) {
+              // Basic auth for the service account
+              req.headers["authorization"] = `Basic ${basicCredentials}`;
+            } else if (v.stripAuth) {
+              // Strip any incoming Authorization header (e.g. Kerberos/
+              // Negotiate tokens from Windows Auth) so the upstream service
+              // doesn't reject the request.
+              delete req.headers["authorization"];
+            }
 
-                // Same here, but with one additional thing…
-                const host = (
-                  req.headers["x-forwarded-host"] || req.headers.host
-                )
-                  .split(",")[0]
-                  .split(":")[0] // …i.e. not taking the port part if it exists on host.
-                  .trim();
+            // With PROXY_<NAME>_FORWARD_VALIDATED_USER, only forward the
+            // identity that extractUserContext has already validated
+            // (trusted-IP check + AD lookup) instead of passing incoming AD
+            // headers through as-is — otherwise a client that reaches this
+            // backend directly (bypassing the reverse proxy that normally
+            // sets the headers) could spoof any user identity upstream.
+            if (v.forwardValidatedUser) {
+              const validatedUser = res?.locals?.authUser;
+              if (validatedUser) {
+                req.headers[userHeaderLc] = validatedUser;
+              } else {
+                // No validated user (AD inactive, or header absent) — make
+                // sure no unvalidated identity reaches the upstream service.
+                delete req.headers[userHeaderLc];
+                delete req.headers[groupHeaderLc];
+              }
+            }
 
-                const port = (req.headers["x-forwarded-port"] || "")
-                  .split(",")[0]
-                  .trim();
+            next();
+          };
 
-                // For standard ports (80 for HTTP and 443 for HTTPS), we don't want to include the port
-                const hostWithPort =
-                  port && port !== "443" && port !== "80"
-                    ? `${host}:${port}`
-                    : host;
-
-                // Ensure we get the original URL path, before the proxy middleware rewrote it.
-                const publicPath = req.originalUrl.split("?")[0];
-
-                // Finally, construct the header value for QGIS…
-                const serviceUrl = `${proto}://${hostWithPort}${publicPath}`;
-
-                // …and set it.
-                proxyReq.setHeader("X-Qgis-Service-Url", serviceUrl);
-              },
-            };
-          }
-
-          // Create the proxy itself
           app.use(
             `/api/v${apiVersion}/proxy/${context}`,
-            createProxyMiddleware(proxyOptions)
+            identityMiddleware,
+            createProxyMiddleware(options)
           );
         });
       }

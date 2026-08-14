@@ -60,6 +60,7 @@ export default function DesktopForm({
   tablePendingDeletes,
   tableHasPending,
   commitTableEdits,
+  summary,
   tableUndoStack,
   undoLatestTableChange,
   formUndoStack,
@@ -272,26 +273,6 @@ export default function DesktopForm({
     //   via the back-sync you already have for drafts (__pending === 'delete').
     setDeleteState(ids, "toggle");
   };
-
-  const summary = React.useMemo(
-    () => ({
-      adds:
-        tablePendingAdds?.filter((d) => d.__pending !== "delete").length ?? 0,
-      edits:
-        (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0) +
-        (dirty ? changedFields.size : 0),
-      deletes:
-        (tablePendingDeletes?.size ?? 0) +
-        (tablePendingAdds?.filter((d) => d.__pending === "delete").length ?? 0),
-    }),
-    [
-      tablePendingAdds,
-      tablePendingEdits,
-      tablePendingDeletes,
-      dirty,
-      changedFields,
-    ]
-  );
 
   // Handler for rows per page dropdown change
   const handleRowsPerPageChange = (e) => {

@@ -47,6 +47,7 @@ export default function MobileForm({
   // pending & commit
   tableHasPending,
   commitTableEdits,
+  summary,
   tablePendingDeletes,
   setDeleteState,
   tableUndoStack,
@@ -97,26 +98,6 @@ export default function MobileForm({
       duplicateInForm();
     }
   };
-
-  const summary = React.useMemo(
-    () => ({
-      adds:
-        tablePendingAdds?.filter((d) => d.__pending !== "delete").length ?? 0,
-      edits:
-        (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0) +
-        (dirty ? changedFields.size : 0),
-      deletes:
-        (tablePendingDeletes?.size ?? 0) +
-        (tablePendingAdds?.filter((d) => d.__pending === "delete").length ?? 0),
-    }),
-    [
-      tablePendingAdds,
-      tablePendingEdits,
-      tablePendingDeletes,
-      dirty,
-      changedFields,
-    ]
-  );
 
   async function confirmSave() {
     try {

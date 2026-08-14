@@ -25,7 +25,7 @@ export default function Toolbar({
   tablePendingAdds,
   tablePendingEdits,
   tablePendingDeletes,
-  changedFields,
+  summary,
   serviceList, // [{ id, title }]
   showOnlySelected,
   setShowOnlySelected,
@@ -88,26 +88,6 @@ export default function Toolbar({
     }
   }, [serviceList]);
 
-  const summary = React.useMemo(
-    () => ({
-      adds:
-        tablePendingAdds?.filter((d) => d.__pending !== "delete").length ?? 0,
-      edits:
-        (tablePendingEdits ? Object.keys(tablePendingEdits).length : 0) +
-        (dirty ? changedFields.size : 0),
-      deletes:
-        (tablePendingDeletes?.size ?? 0) +
-        (tablePendingAdds?.filter((d) => d.__pending === "delete").length ?? 0),
-    }),
-    [
-      tablePendingAdds,
-      tablePendingEdits,
-      tablePendingDeletes,
-      dirty,
-      changedFields,
-    ]
-  );
-
   const applyServiceSwitch = React.useCallback(
     (def, label) => {
       setPluginSettings(
@@ -136,6 +116,11 @@ export default function Toolbar({
   );
 
   async function confirmSave() {
+    // Only apply a pending service switch when the save actually succeeded.
+    // Switching unconditionally would dispatch INIT and wipe the very
+    // changes the user just chose to save (commitTableEdits shows its own
+    // error snackbar on failure and returns false).
+    let ok = false;
     try {
       setSavingNow(true);
 
@@ -146,17 +131,18 @@ export default function Toolbar({
         });
       }
 
-      await Promise.resolve(commitTableEdits());
+      ok = (await Promise.resolve(commitTableEdits())) !== false;
     } finally {
       setSavingNow(false);
       setSaveDialogOpen(false);
 
-      // Perform save after confirmation dialog is resolved (i.e. saved or not saved)
-      if (pendingTargetRef.current) {
-        const { def, label } = pendingTargetRef.current;
-        pendingTargetRef.current = null;
-        applyServiceSwitch(def, label);
+      const target = pendingTargetRef.current;
+      pendingTargetRef.current = null;
+      if (ok && target) {
+        applyServiceSwitch(target.def, target.label);
       }
+      // On failure: the dialog closes, the pending target is dropped and the
+      // user stays on the current service with all changes intact.
     }
   }
 
@@ -417,7 +403,12 @@ export default function Toolbar({
 
       <ConfirmSaveDialog
         open={saveDialogOpen}
-        onClose={() => setSaveDialogOpen(false)}
+        onClose={() => {
+          // Cancelling the dialog must also drop any pending service switch,
+          // so a later unrelated save can't apply a stale target.
+          pendingTargetRef.current = null;
+          setSaveDialogOpen(false);
+        }}
         onConfirm={confirmSave}
         onDiscard={handleDiscard}
         summary={summary}

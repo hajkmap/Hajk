@@ -228,9 +228,11 @@ const Sketch = (props) => {
       setAllowMultiGeom(schema.allowMultiGeom === true);
     });
 
-    const offClr = editBus.on("edit:service-cleared", (ev) => {
-      const { source } = ev.detail || {};
-      if (source === "sketch") return;
+    // NOTE: no source filter here — unlike pluginSettings (which
+    // handleOgcSourceChange resets locally), this state has no other reset
+    // path, so choosing "Ingen" in Sketch's own dropdown (source "sketch")
+    // must also clear the geometry restrictions and the AE-active flag.
+    const offClr = editBus.on("edit:service-cleared", () => {
       setAllowedGeometryTypes(null);
       setAllowMultiGeom(false);
       attributeEditorActiveRef.current = false;

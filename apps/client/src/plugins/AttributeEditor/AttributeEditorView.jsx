@@ -326,23 +326,28 @@ export default function AttributeEditorView({
     [controller]
   );
 
+  // Flush the debounce queue immediately (clears the timer and applies any
+  // queued edits to the model). Used on unmount and right before saving, so
+  // keystrokes made in the last debounce window (120 ms) are never lost.
+  const flushDebouncedEdits = React.useCallback(() => {
+    if (debouncedTimerRef.current) {
+      clearTimeout(debouncedTimerRef.current);
+      debouncedTimerRef.current = null;
+    }
+    const flush = debouncedBatchRef.current || [];
+    debouncedBatchRef.current = [];
+    if (flush.length) {
+      const byKey = new Map();
+      for (const op of flush) byKey.set(`${op.id}::${op.key}`, op);
+      controller.batchEdit(Array.from(byKey.values()));
+    }
+  }, [controller]);
+
   React.useEffect(() => {
     return () => {
-      if (debouncedTimerRef.current) {
-        clearTimeout(debouncedTimerRef.current);
-        debouncedTimerRef.current = null;
-      }
-      // Flush queued edits instead of dropping them — keystrokes made in the
-      // last debounce window (120 ms) must not be lost on unmount.
-      const flush = debouncedBatchRef.current || [];
-      debouncedBatchRef.current = [];
-      if (flush.length) {
-        const byKey = new Map();
-        for (const op of flush) byKey.set(`${op.id}::${op.key}`, op);
-        controller.batchEdit(Array.from(byKey.values()));
-      }
+      flushDebouncedEdits();
     };
-  }, [controller]);
+  }, [flushDebouncedEdits]);
 
   React.useEffect(() => {
     lastSentRef.current.clear();
@@ -1282,16 +1287,44 @@ export default function AttributeEditorView({
     return dirty || pendingCount > 0;
   }, [dirty, pendingAdds, pendingEdits, pendingDeletes]);
 
-  const unsavedSummary = React.useMemo(
-    () => ({
-      adds: pendingAdds?.length ?? 0,
-      edits:
-        (pendingEdits ? Object.keys(pendingEdits).length : 0) +
-        (dirty ? changedFields.size : 0),
-      deletes: pendingDeletes?.size ?? 0,
-    }),
-    [pendingAdds, pendingEdits, pendingDeletes, dirty, changedFields]
-  );
+  // The one canonical save summary, shared by all save dialogs and the
+  // edit:unsaved-state event. "edits" counts unique ROWS with unsaved
+  // attribute changes: rows already buffered to the model (pendingEdits)
+  // plus — when the form is dirty — the rows the form edit targets. A Set
+  // prevents double counting: while typing in the form the same row is
+  // typically both dirty AND already debounce-buffered into pendingEdits
+  // (the old per-component formulas added rows + changed FIELDS and showed
+  // e.g. "Ändrade: 2" for a single edited field). Drafts are excluded here —
+  // their edits are already represented in "adds".
+  const saveSummary = React.useMemo(() => {
+    const editedRows = new Set(Object.keys(pendingEdits || {}));
+    if (dirty && changedFields.size > 0) {
+      const targets =
+        selectedIds.size > 1
+          ? Array.from(selectedIds)
+          : focusedId != null
+            ? [focusedId]
+            : [];
+      targets
+        .filter((id) => !isDraftId(id))
+        .forEach((id) => editedRows.add(String(id)));
+    }
+    return {
+      adds: pendingAdds.filter((d) => d.__pending !== "delete").length,
+      edits: editedRows.size,
+      deletes:
+        (pendingDeletes?.size ?? 0) +
+        pendingAdds.filter((d) => d.__pending === "delete").length,
+    };
+  }, [
+    pendingAdds,
+    pendingEdits,
+    pendingDeletes,
+    dirty,
+    changedFields,
+    selectedIds,
+    focusedId,
+  ]);
 
   const lastHasUnsavedRef = React.useRef(hasUnsaved);
   React.useEffect(() => {
@@ -1299,12 +1332,15 @@ export default function AttributeEditorView({
       editBus.emit("edit:unsaved-state", {
         source: "attribute-editor",
         hasUnsaved,
-        summary: unsavedSummary,
+        summary: saveSummary,
       });
       lastHasUnsavedRef.current = hasUnsaved;
     }
-  }, [hasUnsaved, unsavedSummary]);
+  }, [hasUnsaved, saveSummary]);
 
+  // Returns true when saving succeeded (or there was nothing to save) and
+  // false when the transaction failed — callers like Toolbar use this to
+  // decide whether a pending service switch may proceed.
   const commitTableEdits = useCallback(async () => {
     // Signal save-in-progress to other plugins. Sketch locks its service
     // selector while a save is running (edit:saving-started listeners in
@@ -1312,6 +1348,21 @@ export default function AttributeEditorView({
     // below, so the lock is always released, even on errors.
     editBus.emit("edit:saving-started", { source: "attribute-editor" });
     try {
+      // Apply any edits still sitting in the debounce queue, then read the
+      // pending state FRESH from the model. The confirmSave flows call
+      // saveChanges() (which buffers ops synchronously) and this function in
+      // the same tick — the render-closure copies of pendingEdits/pendingAdds/
+      // pendingDeletes from the previous render would not include those ops,
+      // which used to silently drop form edits from the transaction.
+      flushDebouncedEdits();
+      const snap = model.getSnapshot();
+      const pendingEdits = snap.pendingEdits || {};
+      const pendingAdds = snap.pendingAdds || [];
+      const pendingDeletes =
+        snap.pendingDeletes instanceof Set ? snap.pendingDeletes : new Set();
+      const features = snap.features || [];
+      const featuresMap = snap.featuresMap || new Map();
+
       const layerCRS = model.getLayerProjection();
 
       const getGeometryForFeature = (id) => {
@@ -1451,7 +1502,7 @@ export default function AttributeEditorView({
         !deletedDraftsCount
       ) {
         showNotification("Inga ändringar att spara");
-        return;
+        return true;
       }
 
       const totalDeletes = deletes.length + deletedDraftsCount;
@@ -1480,7 +1531,7 @@ export default function AttributeEditorView({
         geomUndoRef.current = [];
         setGeomUndoCount(0);
 
-        return;
+        return true;
       }
 
       enqueueSnackbar(`Sparar: ${summary}...`, { variant: "info" });
@@ -1630,6 +1681,8 @@ export default function AttributeEditorView({
             autoHideDuration: 10000,
           });
         }
+        // The transaction itself succeeded (reload problems are cosmetic).
+        return true;
       } else {
         throw new Error(result.message || "Transaction failed");
       }
@@ -1638,16 +1691,13 @@ export default function AttributeEditorView({
         variant: "error",
         autoHideDuration: 8000,
       });
+      return false;
     } finally {
       editBus.emit("edit:saving-finished", { source: "attribute-editor" });
     }
   }, [
     controller,
-    features,
-    featuresMap,
-    pendingAdds,
-    pendingEdits,
-    pendingDeletes,
+    flushDebouncedEdits,
     FM,
     featureIndexRef,
     map,
@@ -1689,9 +1739,7 @@ export default function AttributeEditorView({
         );
 
         // Colons are invalid in Windows filenames — use dashes in the time part
-        const timestamp = new Date()
-          .toLocaleString("sv-SE")
-          .replace(/:/g, "-");
+        const timestamp = new Date().toLocaleString("sv-SE").replace(/:/g, "-");
         const filename = `Attributlista-${timestamp}.xlsx`;
 
         xlsx.writeFile(workbook, filename);
@@ -2744,7 +2792,7 @@ export default function AttributeEditorView({
         tablePendingAdds={pendingAdds}
         tablePendingEdits={pendingEdits}
         tablePendingDeletes={pendingDeletes}
-        changedFields={changedFields}
+        summary={saveSummary}
         ogc={ogc}
         serviceList={serviceList}
         showOnlySelected={showOnlySelected}
@@ -2787,6 +2835,7 @@ export default function AttributeEditorView({
           setDeleteState={setDeleteState}
           tableHasPending={tableHasPending}
           commitTableEdits={commitTableEdits}
+          summary={saveSummary}
           tableUndoStack={tableUndoStack}
           undoLatestTableChange={undoLatestTableChange}
           formUndoStack={formUndoStack}
@@ -2831,6 +2880,7 @@ export default function AttributeEditorView({
           canMergeFeatures={canMergeFeatures}
           openSelectedInFormFromTable={openSelectedInFormFromTable}
           commitTableEdits={commitTableEdits}
+          summary={saveSummary}
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}
           openFilterColumn={openFilterColumn}
@@ -2893,6 +2943,7 @@ export default function AttributeEditorView({
           tableHasPending={tableHasPending}
           tablePendingDeletes={pendingDeletes}
           commitTableEdits={commitTableEdits}
+          summary={saveSummary}
           tableUndoStack={
             tableUndoLocal.length ? tableUndoLocal : tableUndoStack
           }
