@@ -22,7 +22,7 @@ import MobileForm from "./components/MobileForm";
 import DesktopForm from "./components/DesktopForm";
 import NotificationBar from "./helpers/NotificationBar";
 import { editBus } from "../../buses/editBus";
-import { pickPreferredId, isDraftId } from "./helpers/helpers";
+import { pickPreferredId, isDraftId, isBooleanTrue } from "./helpers/helpers";
 import { useSnackbar } from "notistack";
 import GeoJSON from "ol/format/GeoJSON";
 import Feature from "ol/Feature";
@@ -272,6 +272,11 @@ export default function AttributeEditorView({
 
   React.useEffect(() => {
     const offSelIds = editBus.on("attrib:select-ids", (ev) => {
+      // "attribute-editor-sync" events come from View paths that have already
+      // set the table/form selection state locally — they exist to keep the
+      // map side (Sketch's OL selection) in sync. Re-processing them here
+      // would clobber the emitting path's focus choice via pickPreferredId.
+      if (ev.detail?.source === "attribute-editor-sync") return;
       const incoming = ev.detail?.ids || [];
       // Deduplicate — but do NOT convert types. IDs arrive from emitters
       // in the same type as row.id (string from GML, number for drafts).
@@ -282,6 +287,11 @@ export default function AttributeEditorView({
       // This prevents ensureFormSelection from auto-selecting the first row
       if (canonical.length === 0 && ev.detail?.source === "map") {
         explicitClearRef.current = true;
+      } else if (canonical.length > 0) {
+        // Any action that establishes a selection ends the "explicit clear"
+        // state — without this the flag stayed true forever (only a form row
+        // click reset it), permanently disabling form-mode auto-selection.
+        explicitClearRef.current = false;
       }
 
       setTableSelectedIds(new Set(canonical));
@@ -299,6 +309,23 @@ export default function AttributeEditorView({
     });
     return () => offSelIds();
   }, [setTableSelectedIds, setSelectedIds, setFocusedId]);
+
+  // Tell the map side (Sketch's OL selection + highlighting) about selection
+  // changes that originate inside the View. The View's own attrib:select-ids
+  // listener skips this source, so the emitting path keeps full control over
+  // its local state — without this, paths like form navigation or the
+  // post-save re-selection leave the map's selection out of sync.
+  const emitSelectionSync = React.useCallback((ids) => {
+    const arr = Array.from(ids);
+    // These emits bypass the View's own listener, so end the "explicit
+    // clear" state here as well when a selection is established.
+    if (arr.length > 0) explicitClearRef.current = false;
+    editBus.emit("attrib:select-ids", {
+      ids: arr,
+      source: "attribute-editor-sync",
+      mode: "replace",
+    });
+  }, []);
 
   const debouncedBatchRef = React.useRef(null);
   const debouncedTimerRef = React.useRef(null);
@@ -364,6 +391,17 @@ export default function AttributeEditorView({
     setTableSelectedIds(new Set());
     setSelectedIds(new Set());
     setFocusedId(null);
+    // The local undo stacks belong to the PREVIOUS layer — surviving a
+    // service switch would let Ctrl+Z replay the old layer's values onto
+    // the new one. (The model's own undoStack is reset by INIT already.)
+    formUndoSnapshotsRef.current.clear();
+    setFormUndoStack([]);
+    setTableUndoLocal([]);
+    geomUndoRef.current = [];
+    setGeomUndoCount(0);
+    // A service switch is not a user-made "explicit clear" — reset the flag
+    // so form-mode auto-selection works on the new layer.
+    explicitClearRef.current = false;
   }, [serviceId]);
 
   // === Theme (follows Hajk global dark mode) ===
@@ -648,13 +686,21 @@ export default function AttributeEditorView({
     const dtKeys = new Set(
       FM.filter((m) => m.type === "datetime").map((m) => m.key)
     );
+    // Boolean columns filter in the same two-value space the cells display
+    // ("Ja"/"Nej", where null and false both collapse to "Nej") — filtering
+    // on raw values showed "true"/"(tom)" while the cells said Ja/Nej.
+    const boolKeys = new Set(
+      FM.filter((m) => m.type === "boolean").map((m) => m.key)
+    );
 
     const columnFilterSets = {};
     for (const [key, selectedValues] of Object.entries(columnFilters)) {
       if (selectedValues && selectedValues.length > 0) {
         const isDt = dtKeys.has(key);
+        const isBool = boolKeys.has(key);
         columnFilterSets[key] = new Set(
           selectedValues.map((v) => {
+            if (isBool) return v === "(tom)" ? "Nej" : String(v);
             const s = v === "(tom)" ? "" : String(v);
             return isDt ? normDt(s) : s;
           })
@@ -692,6 +738,9 @@ export default function AttributeEditorView({
         editingId === f.id ||
         filterKeys.every((key) => {
           const filterSet = columnFilterSets[key];
+          if (boolKeys.has(key)) {
+            return filterSet.has(isBooleanTrue(f[key]) ? "Ja" : "Nej");
+          }
           const cellValue = String(f[key] ?? "");
           return filterSet.has(dtKeys.has(key) ? normDt(cellValue) : cellValue);
         });
@@ -1184,12 +1233,22 @@ export default function AttributeEditorView({
       const dtKeySet = new Set(
         FM.filter((m) => m.type === "datetime").map((m) => m.key)
       );
+      // Boolean columns facet in the cells' two-value space ("Ja"/"Nej") —
+      // the raw values would show as "true"/"(tom)" while the cells say
+      // Ja/Nej, and null must count as "Nej" exactly like the cells render.
+      const boolKeySet = new Set(
+        FM.filter((m) => m.type === "boolean").map((m) => m.key)
+      );
 
       // 2) ...and apply all other column filters (except for the current column)
       const rowsForFacet = rowsAfterSearch.filter((r) => {
         return Object.entries(columnFilters || {}).every(([k, selected]) => {
           if (k === columnKey) return true;
           if (!selected || selected.length === 0) return true;
+          if (boolKeySet.has(k)) {
+            const cmp = isBooleanTrue(r[k]) ? "Ja" : "Nej";
+            return selected.some((sv) => (sv === "(tom)" ? "Nej" : sv) === cmp);
+          }
           const cell = String(r[k] ?? "");
           const cmp = dtKeySet.has(k) ? normDt(cell) : cell;
           return selected.some(
@@ -1200,9 +1259,14 @@ export default function AttributeEditorView({
 
       // 3) Lock in unique values for the current column
       const isDtCol = dtKeySet.has(columnKey);
+      const isBoolCol = boolKeySet.has(columnKey);
       const vals = new Set();
       for (let i = 0; i < rowsForFacet.length; i++) {
         const v = rowsForFacet[i]?.[columnKey];
+        if (isBoolCol) {
+          vals.add(isBooleanTrue(v) ? "Ja" : "Nej");
+          continue;
+        }
         const s = String(v ?? "");
         const display = s === "" ? "(tom)" : isDtCol ? normDt(s) : s;
         vals.add(display);
@@ -1338,10 +1402,69 @@ export default function AttributeEditorView({
     }
   }, [hasUnsaved, saveSummary]);
 
+  // Rebuild the map's vector source and the feature index from a WFS
+  // feature collection. Used after a successful save (freshly reloaded
+  // collection) and by discard-all (the cached collection from the last
+  // load still holds the original geometries, so no refetch is needed).
+  const rebuildMapFromCollection = React.useCallback(
+    (featureCollection) => {
+      if (!vectorLayerRef.current || !featureCollection) return;
+      const mapProj = map.getView().getProjection();
+
+      // Use CRS from featureCollection (set by backend) instead of assuming map projection
+      const dataProj =
+        featureCollection?.crsName ||
+        featureCollection?.layerProjection ||
+        mapProj.getCode();
+
+      const fmt = new GeoJSON();
+      const newFeatures = fmt.readFeatures(featureCollection, {
+        dataProjection: dataProj,
+        featureProjection: mapProj,
+      });
+
+      const source = vectorLayerRef.current.getSource();
+      source.clear();
+      editBus.emit("sketch:source-cleared", {});
+      source.addFeatures(newFeatures);
+
+      featureIndexRef.current.clear();
+
+      newFeatures.forEach((f) => {
+        const raw = getFeatureId(f, idFieldRef?.current);
+        const aliases = idAliases(raw);
+        for (const k of aliases) {
+          featureIndexRef.current.set(k, f);
+        }
+      });
+
+      newFeatures.forEach((f) => {
+        const fidProp = f.get?.("@_fid");
+        if (fidProp) {
+          try {
+            f.setId?.(fidProp);
+          } catch {
+            // ignore
+          }
+        }
+      });
+
+      vectorLayerRef.current.changed();
+    },
+    [map, vectorLayerRef, featureIndexRef, idFieldRef]
+  );
+
+  // Re-entry guard: a second save invocation (double-click, Enter+click)
+  // while a transaction is in flight must not start a parallel transaction
+  // against the same pending state.
+  const savingLockRef = React.useRef(false);
+
   // Returns true when saving succeeded (or there was nothing to save) and
   // false when the transaction failed — callers like Toolbar use this to
   // decide whether a pending service switch may proceed.
   const commitTableEdits = useCallback(async () => {
+    if (savingLockRef.current) return false;
+    savingLockRef.current = true;
     // Signal save-in-progress to other plugins. Sketch locks its service
     // selector while a save is running (edit:saving-started listeners in
     // SketchView) — the matching "finished" is emitted in the finally block
@@ -1573,6 +1696,8 @@ export default function AttributeEditorView({
 
           let message = `⚠ Delvis sparat: ${result.inserted || 0} nya, ${result.updated || 0} uppdaterade, ${totalDeletedCount} borttagna\n`;
           message += failureParts.join(", ");
+          message +=
+            "\nObjekten kan ha ändrats eller tagits bort av någon annan — kontrollera efter omläsningen.";
 
           if (result.warning) {
             message += `\n\nServermeddelande: ${result.warning}`;
@@ -1591,8 +1716,11 @@ export default function AttributeEditorView({
           );
         }
 
-        controller.commit();
-
+        // Clear the geometry-change markers BEFORE commit: against pending
+        // state the sweep deletes the __geom__ entries (and the draft ids are
+        // still valid). Run after commit it would instead compare against the
+        // committed base geometry and CREATE {__geom__: null} pendingEdits —
+        // making just-saved rows appear edited again.
         const allIds = [
           ...new Set([
             ...features.map((f) => f.id),
@@ -1603,6 +1731,8 @@ export default function AttributeEditorView({
           allIds.map((id) => ({ id, key: "__geom__", value: null }))
         );
 
+        controller.commit();
+
         formUndoSnapshotsRef.current.clear();
         setFormUndoStack([]);
         setTableUndoLocal([]);
@@ -1612,49 +1742,7 @@ export default function AttributeEditorView({
         setGeomUndoCount(0);
         try {
           const { featureCollection } = await model.loadFromService(serviceId);
-          if (vectorLayerRef.current && featureCollection) {
-            const mapProj = map.getView().getProjection();
-
-            // Use CRS from featureCollection (set by backend) instead of assuming map projection
-            const dataProj =
-              featureCollection?.crsName ||
-              featureCollection?.layerProjection ||
-              mapProj.getCode();
-
-            const fmt = new GeoJSON();
-            const newFeatures = fmt.readFeatures(featureCollection, {
-              dataProjection: dataProj,
-              featureProjection: mapProj,
-            });
-
-            const source = vectorLayerRef.current.getSource();
-            source.clear();
-            editBus.emit("sketch:source-cleared", {});
-            source.addFeatures(newFeatures);
-
-            featureIndexRef.current.clear();
-
-            newFeatures.forEach((f) => {
-              const raw = getFeatureId(f, idFieldRef?.current);
-              const aliases = idAliases(raw);
-              for (const k of aliases) {
-                featureIndexRef.current.set(k, f);
-              }
-            });
-
-            newFeatures.forEach((f) => {
-              const fidProp = f.get?.("@_fid");
-              if (fidProp) {
-                try {
-                  f.setId?.(fidProp);
-                } catch {
-                  // ignore
-                }
-              }
-            });
-
-            vectorLayerRef.current.changed();
-          }
+          rebuildMapFromCollection(featureCollection);
 
           // Invalidate the unique-values cache so column filter dropdowns
           // reflect the fresh data (not stale pre-save values).
@@ -1670,16 +1758,29 @@ export default function AttributeEditorView({
             setTableSelectedIds(new Set(newIds));
             setSelectedIds(new Set(newIds));
             if (newIds.length > 0) setFocusedId(newIds[0]);
+            emitSelectionSync(newIds);
           } else if (updates.length > 0) {
             const updatedIds = updates.map((u) => u.id);
             setTableSelectedIds(new Set(updatedIds));
             setSelectedIds(new Set(updatedIds));
+            emitSelectionSync(updatedIds);
           }
         } catch (_reloadError) {
-          enqueueSnackbar("Data sparades! Tryck F5 för att se ändringarna.", {
-            variant: "warning",
-            autoHideDuration: 10000,
-          });
+          // With a partial failure the local state now overstates what was
+          // saved, and the reload that would have shown the server's truth
+          // failed too — that combination must be an explicit error, not the
+          // cheerful "saved!" message.
+          if (hasPartialFailure) {
+            enqueueSnackbar(
+              "⚠ Delvis sparat, och omläsningen misslyckades — tabellen kan visa osparade värden. Tryck F5 och kontrollera dina ändringar.",
+              { variant: "error", autoHideDuration: 15000 }
+            );
+          } else {
+            enqueueSnackbar("Data sparades! Tryck F5 för att se ändringarna.", {
+              variant: "warning",
+              autoHideDuration: 10000,
+            });
+          }
         }
         // The transaction itself succeeded (reload problems are cosmetic).
         return true;
@@ -1693,11 +1794,14 @@ export default function AttributeEditorView({
       });
       return false;
     } finally {
+      savingLockRef.current = false;
       editBus.emit("edit:saving-finished", { source: "attribute-editor" });
     }
   }, [
     controller,
     flushDebouncedEdits,
+    rebuildMapFromCollection,
+    emitSelectionSync,
     FM,
     featureIndexRef,
     map,
@@ -1706,8 +1810,6 @@ export default function AttributeEditorView({
     model,
     showNotification,
     enqueueSnackbar,
-    vectorLayerRef,
-    idFieldRef,
   ]);
 
   const exportToExcel = useCallback(
@@ -1762,6 +1864,11 @@ export default function AttributeEditorView({
   );
 
   const undoLatestTableChange = useCallback(() => {
+    // Undo rewrites values outside the typing flow, so the debounce dedup
+    // cache must be invalidated — otherwise re-typing the exact value that
+    // was just undone is silently dropped (form shows it, model never gets
+    // it). Clearing is always safe: the model ignores no-op edits itself.
+    lastSentRef.current.clear();
     const modelLast = state.undoStack?.[state.undoStack.length - 1] ?? null;
     const tableLast = tableUndoLocal[tableUndoLocal.length - 1] ?? null;
     const formLast = formUndoStack[formUndoStack.length - 1] ?? null;
@@ -2098,11 +2205,13 @@ export default function AttributeEditorView({
       setTableSelectedIds(new Set(ids));
       setSelectedIds(new Set(ids));
       if (!focusedId && ids.length) setFocusedId(ids[0]);
+      emitSelectionSync(ids);
     } else {
       const ids = visibleFormList.map((f) => f.id);
       setSelectedIds(new Set(ids));
       setTableSelectedIds(new Set(ids));
       if (!focusedId && ids.length) setFocusedId(ids[0]);
+      emitSelectionSync(ids);
     }
   }
   function clearSelection() {
@@ -2151,10 +2260,20 @@ export default function AttributeEditorView({
       const dtKeySet = new Set(
         FM.filter((m) => m.type === "datetime").map((m) => m.key)
       );
+      // Booleans match in the cells' "Ja"/"Nej" space (null counts as "Nej")
+      const boolKeySet = new Set(
+        FM.filter((m) => m.type === "boolean").map((m) => m.key)
+      );
       const matchesColumnFilters =
         isNegativeId ||
         Object.entries(columnFilters || {}).every(([key, selectedValues]) => {
           if (!selectedValues || selectedValues.length === 0) return true;
+          if (boolKeySet.has(key)) {
+            const cell = isBooleanTrue(row[key]) ? "Ja" : "Nej";
+            return selectedValues.some(
+              (v) => (v === "(tom)" ? "Nej" : v) === cell
+            );
+          }
           const isDt = dtKeySet.has(key);
           const cellValue = isDt
             ? normDt(String(row[key] ?? ""))
@@ -2231,8 +2350,9 @@ export default function AttributeEditorView({
     if (firstVisibleId != null) {
       setSelectedIds(new Set([firstVisibleId]));
       setFocusedId(firstVisibleId);
+      emitSelectionSync([firstVisibleId]);
     }
-  }, [ensureFormSelectionDeps]); // Only depends on the memoized object
+  }, [ensureFormSelectionDeps, emitSelectionSync]); // Only depends on the memoized object
 
   React.useLayoutEffect(() => {
     ensureFormSelection();
@@ -2249,80 +2369,103 @@ export default function AttributeEditorView({
         idx = visibleFormList.findIndex((f) => f.id === rowId);
       }
 
-      setSelectedIds((prev) => {
-        let next = new Set(prev);
+      // The next selection and the focus decision are computed OUTSIDE the
+      // setState updater. The old version ran handleBeforeChangeFocus and a
+      // bus emit inside the updater — the View's own listener then re-entered
+      // mid-update and overwrote the focus chosen here (updaters must also be
+      // pure: StrictMode runs them twice, which doubled the emits).
+      let next = new Set(selectedIds);
+      let focusTarget = null;
 
-        if (isShift) {
-          let anchorIdx = anchorRef.current.index;
-          if (anchorIdx == null || anchorIdx < 0) {
-            const focusIdx = visibleFormList.findIndex(
-              (f) => String(f.id) === String(focusedId)
-            );
-            anchorIdx = focusIdx >= 0 ? focusIdx : idx;
-          }
-
-          const [a, b] = [anchorIdx, idx].sort((x, y) => x - y);
-          next = new Set();
-          for (let i = a; i <= b; i++) next.add(visibleFormList[i].id);
-
-          // Don't change focus (keep the current one), but
-          // if the current focus is no longer valid and there is a value, jump to rowId:
-          const focusStillVisible = visibleFormList.some(
+      if (isShift) {
+        let anchorIdx = anchorRef.current.index;
+        if (anchorIdx == null || anchorIdx < 0) {
+          const focusIdx = visibleFormList.findIndex(
             (f) => String(f.id) === String(focusedId)
           );
-          if (!focusStillVisible && next.size) {
-            handleBeforeChangeFocus(rowId);
-          }
+          anchorIdx = focusIdx >= 0 ? focusIdx : idx;
         }
 
-        // ---- TOGGLE (Alt/Ctrl/Cmd) ------------------------------------
-        else if (isToggle) {
-          next.has(rowId) ? next.delete(rowId) : next.add(rowId);
+        const [a, b] = [anchorIdx, idx].sort((x, y) => x - y);
+        next = new Set();
+        for (let i = a; i <= b; i++) next.add(visibleFormList[i].id);
 
-          // If toggle results in empty selection, mark as explicit clear
-          // so ensureFormSelection doesn't auto-select the first row
-          if (next.size === 0) {
-            explicitClearRef.current = true;
-          }
+        // Don't change focus (keep the current one), but
+        // if the current focus is no longer valid and there is a value, jump to rowId:
+        const focusStillVisible = visibleFormList.some(
+          (f) => String(f.id) === String(focusedId)
+        );
+        if (!focusStillVisible && next.size) {
+          focusTarget = rowId;
+        }
+      }
 
-          if (
-            String(rowId) === String(focusedId) &&
-            !next.has(rowId) &&
-            next.size > 0
-          ) {
-            const vis = visibleFormList.map((f) => f.id);
-            let candidate = null;
-            for (let i = idx + 1; i < vis.length; i++)
+      // ---- TOGGLE (Alt/Ctrl/Cmd) ------------------------------------
+      else if (isToggle) {
+        next.has(rowId) ? next.delete(rowId) : next.add(rowId);
+
+        // If toggle results in empty selection, mark as explicit clear
+        // so ensureFormSelection doesn't auto-select the first row
+        if (next.size === 0) {
+          explicitClearRef.current = true;
+        }
+
+        if (
+          String(rowId) === String(focusedId) &&
+          !next.has(rowId) &&
+          next.size > 0
+        ) {
+          const vis = visibleFormList.map((f) => f.id);
+          let candidate = null;
+          for (let i = idx + 1; i < vis.length; i++)
+            if (next.has(vis[i])) {
+              candidate = vis[i];
+              break;
+            }
+          if (candidate == null)
+            for (let i = idx - 1; i >= 0; i--)
               if (next.has(vis[i])) {
                 candidate = vis[i];
                 break;
               }
-            if (candidate == null)
-              for (let i = idx - 1; i >= 0; i--)
-                if (next.has(vis[i])) {
-                  candidate = vis[i];
-                  break;
-                }
-            if (candidate != null && candidate !== focusedId)
-              handleBeforeChangeFocus(candidate);
-          }
-        } else {
-          next = new Set([rowId]);
-          if (String(focusedId) !== String(rowId))
-            handleBeforeChangeFocus(rowId);
-          anchorRef.current = { id: rowId, index: idx };
+          if (candidate != null && candidate !== focusedId)
+            focusTarget = candidate;
         }
+      } else {
+        next = new Set([rowId]);
+        if (String(focusedId) !== String(rowId)) focusTarget = rowId;
+        anchorRef.current = { id: rowId, index: idx };
+      }
 
-        editBus.emit("attrib:select-ids", {
-          ids: Array.from(next),
+      setSelectedIds(next);
+      setTableSelectedIds(new Set(next));
+      if (focusTarget != null) handleBeforeChangeFocus(focusTarget);
+      emitSelectionSync(next);
+
+      // Preserve the focus cascade to Sketch (its EDIT/MOVE publish listens
+      // on attrib:focus-id) that the old re-entrant listener provided — but
+      // with the focus this click actually decided on, not pickPreferredId's.
+      const effectiveFocus =
+        focusTarget ??
+        (focusedId != null &&
+        Array.from(next).some((x) => String(x) === String(focusedId))
+          ? focusedId
+          : null);
+      if (effectiveFocus != null) {
+        editBus.emit("attrib:focus-id", {
+          id: effectiveFocus,
           source: "view",
-          mode: "replace",
         });
-
-        return next;
-      });
+      }
     },
-    [visibleFormList, focusedId, handleBeforeChangeFocus]
+    [
+      visibleFormList,
+      focusedId,
+      handleBeforeChangeFocus,
+      selectedIds,
+      setTableSelectedIds,
+      emitSelectionSync,
+    ]
   );
 
   function scrollToRow(id) {
@@ -2341,6 +2484,7 @@ export default function AttributeEditorView({
       const lastId = order[order.length - 1];
       setFocusedId(lastId);
       setSelectedIds(new Set([lastId]));
+      emitSelectionSync([lastId]);
       scrollToRow(lastId);
       return;
     }
@@ -2350,6 +2494,7 @@ export default function AttributeEditorView({
       const newId = order[idx - 1];
       setFocusedId(newId);
       setSelectedIds(new Set([newId]));
+      emitSelectionSync([newId]);
       scrollToRow(newId);
     }
   }
@@ -2362,6 +2507,7 @@ export default function AttributeEditorView({
       const firstId = order[0];
       setFocusedId(firstId);
       setSelectedIds(new Set([firstId]));
+      emitSelectionSync([firstId]);
       scrollToRow(firstId);
       return;
     }
@@ -2371,6 +2517,7 @@ export default function AttributeEditorView({
       const newId = order[idx + 1];
       setFocusedId(newId);
       setSelectedIds(new Set([newId]));
+      emitSelectionSync([newId]);
       scrollToRow(newId);
     }
   }
@@ -2423,13 +2570,18 @@ export default function AttributeEditorView({
       setFormUndoStack((prev) => [...prev, ...snapshotsToPush]);
     }
 
+    // Buffer the commit-normalized value ("" -> null for date/textarea),
+    // same as the saveChanges path — otherwise a cleared date field reaches
+    // the WFS transaction as "" instead of null. editValues keeps "" since
+    // controlled inputs can't take null.
+    const commitVal = normalizeForCommit(key, norm, FM);
     const ops = [];
     ids.forEach((id) => {
       const lk = `${id}::${key}`;
       const last = lastSentRef.current.get(lk);
       if (last !== norm) {
         lastSentRef.current.set(lk, norm);
-        ops.push({ id, key, value: norm });
+        ops.push({ id, key, value: commitVal });
       }
     });
     if (ops.length) debouncedBatchEdit(ops);
@@ -2495,7 +2647,19 @@ export default function AttributeEditorView({
   const undoLatestFormChange = undoLatestTableChange;
 
   const discardAllChanges = useCallback(() => {
+    // Same dedup-cache invalidation as in undo: discarding restores old
+    // values, so a re-typed identical value must not be filtered out.
+    lastSentRef.current.clear();
     controller.discardAll(state.features);
+    // Restore the original geometries in the map as well — resetting the
+    // attribute state alone leaves moved/redrawn features visible. The cached
+    // collection from the last load is pristine (only loadFromService writes
+    // it), so no refetch is needed; the sketch:source-cleared emit inside the
+    // rebuild also removes drawn draft geometries, matching the model where
+    // pendingAdds were just dropped. With no cached collection (no service
+    // load yet) this is a no-op, i.e. the old attributes-only behavior.
+    rebuildMapFromCollection(model.getFeatureCollection());
+    uniqueCacheRef.current.clear();
     setEditValues({ ...originalValues });
     setChangedFields(new Set());
     setDirty(false);
@@ -2506,12 +2670,19 @@ export default function AttributeEditorView({
     setLastTableIndex(null);
     geomUndoRef.current = [];
     setGeomUndoCount(0);
-  }, [controller, state.features, originalValues]);
+  }, [
+    controller,
+    state.features,
+    originalValues,
+    model,
+    rebuildMapFromCollection,
+  ]);
 
   function openInFormFromTable(rowId) {
     controller.setMode("form");
     setSelectedIds(new Set([rowId]));
     setFocusedId(rowId);
+    emitSelectionSync([rowId]);
   }
 
   function openSelectedInFormFromTable() {
@@ -2525,6 +2696,7 @@ export default function AttributeEditorView({
       filteredAndSorted.find((r) => selected.has(r.id))?.id ??
       Array.from(selected)[0];
     setFocusedId(first);
+    emitSelectionSync(selected);
   }
 
   const combinedUndoStack = tableUndoLocal.length
@@ -2923,7 +3095,6 @@ export default function AttributeEditorView({
       ) : (
         <DesktopForm
           s={s}
-          theme={theme}
           visibleFormList={visibleFormList}
           selectedIds={selectedIds}
           onFormRowClick={onFormRowClick}

@@ -148,6 +148,18 @@ const useAttributeEditorIntegration = ({
   // numeric forms of each id.
   const aeDeletedIdsRef = React.useRef(new Set());
 
+  // The configured id field (schema.idField) for the active AE layer,
+  // mirrored from the attrib:schema-loaded bus event — same reasoning as
+  // aeDeletedIdsRef: this hook has no access to the AttributeEditor model,
+  // the bus is the only reliable source. Null when the layer has none.
+  const aeIdFieldRef = React.useRef(null);
+  React.useEffect(() => {
+    const off = editBus.on("attrib:schema-loaded", (ev) => {
+      aeIdFieldRef.current = ev.detail?.schema?.idField || null;
+    });
+    return () => off();
+  }, []);
+
   React.useEffect(() => {
     if (!map) return;
     const lastPublishRef = { id: null, chan: null };
@@ -159,6 +171,21 @@ const useAttributeEditorIntegration = ({
     // model here, but that model was never available in this hook, so the
     // effective behavior has always been a passthrough.)
     const toCanonicalId = (idLike) => idLike;
+
+    // Feature-id extraction for AE features. Honors the layer's configured
+    // idField (mirrored from attrib:schema-loaded) before the generic
+    // "id"/"@_fid"/getId fallbacks — with a custom id column the generic
+    // chain reads the wrong id space, so every emitted id would miss the
+    // AttributeEditor's rows. Without a configured idField the chain is
+    // identical to the old inline pattern.
+    const getAeFeatureId = (f) => {
+      const fld = aeIdFieldRef.current;
+      if (fld) {
+        const v = f?.get?.(fld);
+        if (v != null) return v;
+      }
+      return f?.get?.("id") ?? f?.get?.("@_fid") ?? f?.getId?.();
+    };
 
     const getNodeHighlightStyle = (feature) => {
       return new Style({
@@ -457,7 +484,7 @@ const useAttributeEditorIntegration = ({
         // that selection state lives in AttributeEditor, not in `fc`.
         const deletedIds = aeDeletedIdsRef.current;
         const isDeletionMarked = (f) => {
-          const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+          const raw = getAeFeatureId(f);
           return deletedIds.has(raw) || deletedIds.has(String(raw));
         };
 
@@ -647,7 +674,7 @@ const useAttributeEditorIntegration = ({
           // attrib:deleted-ids event; contains raw/numeric/string forms).
           const deletedIds = aeDeletedIdsRef.current;
           const isDeleted = (f) => {
-            const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+            const raw = getAeFeatureId(f);
             return deletedIds.has(raw) || deletedIds.has(String(raw));
           };
 
@@ -680,7 +707,7 @@ const useAttributeEditorIntegration = ({
 
           markFeatureForAttributeEditor(hit);
 
-          const raw = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
+          const raw = getAeFeatureId(hit);
           const canon = toCanonicalId(raw);
 
           const multi =
@@ -718,7 +745,7 @@ const useAttributeEditorIntegration = ({
             }
 
             const ids = (fc.getArray ? fc.getArray() : []).map((f) => {
-              const id = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+              const id = getAeFeatureId(f);
               return toCanonicalId(id);
             });
             editBus.emit("attrib:select-ids", {
@@ -744,7 +771,7 @@ const useAttributeEditorIntegration = ({
       const onTranslateStart = (e) => {
         const f = e?.features?.item?.(0);
         if (!f) return;
-        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const raw = getAeFeatureId(f);
         const canon = toCanonicalId(raw);
         const g = f.getGeometry?.();
         beforeGeomRef.set(canon, g && g.clone ? g.clone() : null);
@@ -753,7 +780,7 @@ const useAttributeEditorIntegration = ({
       const onModifyStart = (e) => {
         const f = e?.features?.item?.(0);
         if (!f) return;
-        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const raw = getAeFeatureId(f);
         const canon = toCanonicalId(raw);
         const g = f.getGeometry?.();
         beforeGeomRef.set(canon, g && g.clone ? g.clone() : null);
@@ -764,7 +791,7 @@ const useAttributeEditorIntegration = ({
         publishToEditView(f);
         if (!f) return;
 
-        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const raw = getAeFeatureId(f);
         const canon = toCanonicalId(raw);
 
         editBus.emit("attrib:select-ids", {
@@ -789,7 +816,7 @@ const useAttributeEditorIntegration = ({
         publishToEditView(f);
         if (!f) return;
 
-        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const raw = getAeFeatureId(f);
         const canon = toCanonicalId(raw);
 
         editBus.emit("attrib:select-ids", {
@@ -907,7 +934,7 @@ const useAttributeEditorIntegration = ({
       // 1) snapshot BEFORE
       const before = new Map();
       feats.forEach((f) => {
-        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const raw = getAeFeatureId(f);
         const id = toCanonicalId(raw);
         before.set(id, f.getGeometry?.()?.clone?.() ?? null);
       });
@@ -922,7 +949,7 @@ const useAttributeEditorIntegration = ({
       const emittedIds = new Set();
 
       feats.forEach((f) => {
-        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const raw = getAeFeatureId(f);
         const id = toCanonicalId(raw);
 
         // Skip if we have already emitted for this canonical ID
@@ -965,7 +992,7 @@ const useAttributeEditorIntegration = ({
       // Snapshot before rotation
       const before = new Map();
       feats.forEach((f) => {
-        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const raw = getAeFeatureId(f);
         const id = toCanonicalId(raw);
         before.set(id, f.getGeometry?.()?.clone?.() ?? null);
       });
@@ -983,7 +1010,7 @@ const useAttributeEditorIntegration = ({
       const emittedIds = new Set();
 
       feats.forEach((f) => {
-        const raw = f.get?.("id") ?? f.get?.("@_fid") ?? f.getId?.();
+        const raw = getAeFeatureId(f);
         const id = toCanonicalId(raw);
 
         if (emittedIds.has(id)) return;
@@ -1471,7 +1498,7 @@ const useAttributeEditorIntegration = ({
       );
       if (!hit) return;
 
-      const raw = hit.get?.("id") ?? hit.get?.("@_fid") ?? hit.getId?.();
+      const raw = getAeFeatureId(hit);
       if (raw == null) return;
 
       const canon = toCanonicalId(raw);

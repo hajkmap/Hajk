@@ -193,15 +193,21 @@ function AttributeEditor(props) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [allowMultiGeom, setAllowMultiGeom] = React.useState(false);
 
-  // Keep rowIdMapRef in sync with features for O(1) toCanonicalId lookups
+  // Keep rowIdMapRef in sync with features for O(1) toCanonicalId lookups.
+  // Drafts are included so their (negative, numeric) ids also canonicalize —
+  // otherwise a draft selected in the map stays a string and strict Set
+  // lookups in the table miss it.
   React.useEffect(() => {
     const features = modelState.features || [];
     const map = new Map();
     for (const row of features) {
       map.set(String(row.id), row.id);
     }
+    for (const draft of modelState.pendingAdds || []) {
+      map.set(String(draft.id), draft.id);
+    }
     rowIdMapRef.current = map;
-  }, [modelState.features]);
+  }, [modelState.features, modelState.pendingAdds]);
 
   const hoveredIdRef = React.useRef(null);
   const tooltipOverlayRef = React.useRef(null);
@@ -1438,14 +1444,20 @@ function AttributeEditor(props) {
     (selectedIds, addToSelection) => {
       if (selectedIds.length === 0) return;
 
+      // Deduplicate via String forms, but emit CANONICAL row ids — the table
+      // compares with strict Set.has(), so string ids for numeric rows would
+      // select in the map without showing as selected in the table.
+      const idMap = rowIdMapRef.current;
       let mergedIds;
       if (addToSelection) {
         const current = selectedIdsRef.current || new Set();
         const currentLogical = new Set(Array.from(current).map(String));
         selectedIds.forEach((id) => currentLogical.add(String(id)));
-        mergedIds = Array.from(currentLogical);
+        mergedIds = Array.from(currentLogical).map((id) =>
+          toCanonicalId(id, idMap)
+        );
       } else {
-        mergedIds = selectedIds.map(String);
+        mergedIds = selectedIds.map((id) => toCanonicalId(id, idMap));
       }
 
       selectedIdsRef.current = buildVizSet(mergedIds);
@@ -1459,7 +1471,7 @@ function AttributeEditor(props) {
 
       if (selectedIds.length > 0) {
         editBus.emit("attrib:focus-id", {
-          id: selectedIds[0],
+          id: toCanonicalId(selectedIds[0], idMap),
           source: "map",
         });
       }
@@ -1519,7 +1531,11 @@ function AttributeEditor(props) {
       const existingStrs = new Set();
       selectedIdsRef.current.forEach((id) => existingStrs.add(String(id)));
       newIds.forEach((id) => existingStrs.add(String(id)));
-      const finalIds = Array.from(existingStrs);
+      // Map the deduplicated String forms back to canonical row ids — the
+      // table's strict Set.has() misses string ids for numeric rows.
+      const finalIds = Array.from(existingStrs).map((id) =>
+        toCanonicalId(id, idMap)
+      );
 
       selectedIdsRef.current = buildVizSet(finalIds);
       vectorLayerRef.current?.changed?.();
@@ -1693,6 +1709,7 @@ function AttributeEditor(props) {
         fieldMeta={fieldMetaLocal}
         handleRowHover={handleRowHover}
         handleRowLeave={handleRowLeave}
+        hasExistingSelection={(selectedIdsRef.current?.size ?? 0) > 0}
       />
     </>
   );

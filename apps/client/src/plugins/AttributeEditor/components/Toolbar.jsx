@@ -39,6 +39,19 @@ export default function Toolbar({
   const theme = useTheme();
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [savingNow, setSavingNow] = React.useState(false);
+  // Save-in-progress mirrored from the bus (same events SketchView locks
+  // on). The service selector must be locked during a save — switching
+  // service mid-transaction dispatches INIT and wipes the pending state the
+  // running save is about to commit and reload.
+  const [aeSaving, setAeSaving] = React.useState(false);
+  React.useEffect(() => {
+    const offStart = editBus.on("edit:saving-started", () => setAeSaving(true));
+    const offEnd = editBus.on("edit:saving-finished", () => setAeSaving(false));
+    return () => {
+      offStart();
+      offEnd();
+    };
+  }, []);
   const pendingTargetRef = React.useRef(null);
   const [serviceId, setServiceId] = React.useState("NONE_ID");
   const selectedCount =
@@ -158,6 +171,7 @@ export default function Toolbar({
   }
 
   function handleServiceChange(e) {
+    if (aeSaving) return;
     try {
       const nextId = e.target.value;
       const def = services.find((o) => o.id === nextId);
@@ -334,8 +348,9 @@ export default function Toolbar({
         value={serviceId}
         onChange={handleServiceChange}
         style={s.inputComb}
+        disabled={aeSaving}
         aria-label="Välj redigerbart lager"
-        title="Välj redigerbart lager"
+        title={aeSaving ? "Sparar…" : "Välj redigerbart lager"}
       >
         <option value="NONE_ID">Ingen</option>
         {serviceList.map((o) => (

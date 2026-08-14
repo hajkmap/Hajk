@@ -29,14 +29,25 @@ export default function FeaturePickerDialog({
   fieldMeta = [],
   handleRowHover,
   handleRowLeave,
+  hasExistingSelection = false,
 }) {
   const [selectedIds, setSelectedIds] = React.useState(new Set());
+  // Whether the picked features are ADDED to the existing selection instead
+  // of replacing it. Pre-checked when something is already selected — the
+  // Ctrl+click shortcut on "Markera" still works but is undiscoverable.
+  const [addToExisting, setAddToExisting] = React.useState(false);
 
   React.useEffect(() => {
     if (open) {
       setSelectedIds(new Set());
     }
   }, [open]);
+
+  React.useEffect(() => {
+    if (open) {
+      setAddToExisting(hasExistingSelection);
+    }
+  }, [open, hasExistingSelection]);
 
   const handleToggle = (id) => {
     setSelectedIds((prev) => {
@@ -59,7 +70,10 @@ export default function FeaturePickerDialog({
   };
 
   const handleConfirm = (e) => {
-    onSelect(Array.from(selectedIds), e.ctrlKey || e.metaKey);
+    onSelect(
+      Array.from(selectedIds),
+      addToExisting || e.ctrlKey || e.metaKey
+    );
     onClose();
   };
 
@@ -238,6 +252,23 @@ export default function FeaturePickerDialog({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
+        {hasExistingSelection && (
+          <FormControlLabel
+            sx={{ mr: "auto" }}
+            control={
+              <Checkbox
+                size="small"
+                checked={addToExisting}
+                onChange={(e) => setAddToExisting(e.target.checked)}
+              />
+            }
+            label={
+              <Typography variant="body2">
+                Lägg till i befintlig markering
+              </Typography>
+            }
+          />
+        )}
         <Button onClick={onClose} color="inherit">
           Avbryt
         </Button>

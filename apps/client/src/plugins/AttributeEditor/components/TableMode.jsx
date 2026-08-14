@@ -23,6 +23,7 @@ import useCookieStatus from "../../../hooks/useCookieStatus";
 import TableRow from "./TableRow";
 import { usePagination, SHOW_ALL_VALUE } from "../hooks/usePagination";
 import { useScrollToSelectedRow } from "../hooks/useScrollToSelectedRow";
+import { isBooleanTrue } from "../helpers/helpers";
 
 const DEFAULT_WRAP_CH = 100;
 const SHOW_ALL_WARNING_THRESHOLD = 100;
@@ -31,7 +32,6 @@ const MAX_W = 720; // px
 
 const ColumnFilter = React.memo(function ColumnFilter({
   s,
-  columnKey,
   placement,
   uniqueValues,
   selectedValues,
@@ -218,8 +218,15 @@ export default function TableMode(props) {
     functionalCookiesOk,
   });
 
-  // Reset to first page when filters or sort change
+  // Reset to first page when filters or sort change — except when the change
+  // comes from syncFilterOnCellChange keeping an active filter in step with a
+  // cell edit; resetting then would throw the user to page 1 mid-editing.
+  const suppressFilterPageResetRef = React.useRef(false);
   React.useEffect(() => {
+    if (suppressFilterPageResetRef.current) {
+      suppressFilterPageResetRef.current = false;
+      return;
+    }
     setCurrentPage(0);
   }, [columnFilters, sort, setCurrentPage]);
 
@@ -275,7 +282,13 @@ export default function TableMode(props) {
       const isDt = FIELD_META.some(
         (m) => m.key === columnKey && m.type === "datetime"
       );
+      // Boolean filters live in the cells' "Ja"/"Nej" space (null = "Nej"),
+      // so the sync must translate the raw true/false edit values the same way
+      const isBool = FIELD_META.some(
+        (m) => m.key === columnKey && m.type === "boolean"
+      );
       const norm = (v) => {
+        if (isBool) return isBooleanTrue(v) ? "Ja" : "Nej";
         const s = String(v ?? "");
         if (!isDt) return s;
         const match = s.match(
@@ -296,6 +309,9 @@ export default function TableMode(props) {
         ...(tablePendingAdds || []),
       ].filter((r) => !tablePendingDeletes?.has?.(r.id));
 
+      // This filter update only mirrors the cell edit (it is not a user-made
+      // filter choice) — keep the user's current page.
+      suppressFilterPageResetRef.current = true;
       setColumnFilters((prev) => {
         const before = prev?.[columnKey] || [];
         const nextSet = new Set(before.map((v) => norm(v)));
@@ -362,7 +378,9 @@ export default function TableMode(props) {
     // Save changes with a service-specific key
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(colWidths));
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }, [colWidths, STORAGE_KEY, functionalCookiesOk]);
 
   const resizingRef = React.useRef(null); // { key, startX, startW }
@@ -699,6 +717,11 @@ export default function TableMode(props) {
                               : "↕"}
                           </button>
 
+                          {/* Redundant pointer target: the sort button above
+                              is the accessible control for the same action,
+                              so a second keyboard/tab stop here would only
+                              duplicate it. */}
+                          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
                           <span
                             onClick={() => toggleSort(f.key)}
                             style={s.columnHeader}
@@ -752,7 +775,6 @@ export default function TableMode(props) {
                           {openFilterColumn === f.key && (
                             <ColumnFilter
                               s={s}
-                              columnKey={f.key}
                               placement={placement}
                               uniqueValues={getUniqueColumnValues(f.key)}
                               selectedValues={columnFilters[f.key] || []}
@@ -804,6 +826,10 @@ export default function TableMode(props) {
 
                         <div style={s.spacer} />
                       </div>
+                      {/* Pointer-only affordance for column resizing (drag
+                          handle); column widths are cosmetic and all data
+                          stays reachable without it. */}
+                      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
                       <div
                         style={s.thResizer}
                         onMouseDown={(e) => {

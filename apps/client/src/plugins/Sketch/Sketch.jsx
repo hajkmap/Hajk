@@ -417,13 +417,24 @@ const Sketch = (props) => {
   // Effect to sync multi-draw mode with DrawModel
   React.useEffect(() => {
     if (!multiDrawEnabled) {
-      // Grab any pending multi-feature before setMultiDrawMode resets it,
-      // then discard it — prevents "hanging" features when the switch is
-      // toggled off without pressing "Avsluta ritning".
-      const pendingFeature = drawModel.getMultiDrawFeature();
-      drawModel.setMultiDrawMode(false);
-      if (pendingFeature) {
-        drawModel.getCurrentVectorSource()?.removeFeature(pendingFeature);
+      // Toggling the switch off FINISHES any pending multi-feature instead
+      // of silently discarding the drawn parts (mirrors the activity-change
+      // effect below): the parts become a completed feature that syncs to
+      // AttributeEditor and can be deleted if unwanted — discarding them
+      // here was unrecoverable data loss without any confirmation.
+      if (drawModel.getMultiDrawMode() && drawModel.getMultiDrawFeature()) {
+        const completedFeature = drawModel.finishMultiDraw();
+        drawModel.setMultiDrawMode(false);
+        if (completedFeature) {
+          const source = drawModel.getCurrentVectorSource();
+          if (source) {
+            // Re-add the feature to trigger AE sync (if in AE mode)
+            source.removeFeature(completedFeature);
+            source.addFeature(completedFeature);
+          }
+        }
+      } else {
+        drawModel.setMultiDrawMode(false);
       }
     } else {
       drawModel.setMultiDrawMode(true);
@@ -486,6 +497,11 @@ const Sketch = (props) => {
       } else if (
         feature &&
         feature.get("USER_DRAWN") &&
+        // Imported features (KML/GPX drag-and-drop or file import) also carry
+        // USER_DRAWN, but must not become AE drafts — a dropped file would
+        // mass-create unintended drafts in the active editing layer.
+        !feature.get("KML_IMPORT") &&
+        !feature.get("GPX_IMPORT") &&
         attributeEditorActiveRef.current &&
         !drawModel.getMultiDrawMode() // Don't mark during multi-draw - wait until finished
       ) {

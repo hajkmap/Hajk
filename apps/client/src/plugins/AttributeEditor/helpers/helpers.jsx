@@ -36,6 +36,18 @@ export function normalizeId(id) {
 }
 
 /**
+ * The single truthiness test for boolean-typed columns. Cells, facet lists
+ * and filter matching must all use this same test, so a boolean column has
+ * exactly two UI values ("Ja"/"Nej") — null/undefined/"false"/anything
+ * non-true collapses to "Nej", matching what the cells display.
+ * @param {*} value
+ * @returns {boolean}
+ */
+export function isBooleanTrue(value) {
+  return value === true || value === "true" || value === 1 || value === "1";
+}
+
+/**
  * Checks whether an ID represents a draft (temporary, unsaved) feature.
  * Drafts have negative numeric IDs (e.g. -1, -2, or "-1").
  * Works with both number and string types.
@@ -196,8 +208,7 @@ export function renderTableCellDisplay({
   }
 
   if (meta.type === "boolean") {
-    const checked =
-      value === true || value === "true" || value === 1 || value === "1";
+    const checked = isBooleanTrue(value);
     return (
       <span
         style={{
@@ -326,8 +337,7 @@ export function renderInput(meta, value, onChange, isChanged, s, opts = {}) {
 
   // boolean (checkbox)
   if (meta.type === "boolean") {
-    const checked =
-      value === true || value === "true" || value === 1 || value === "1";
+    const checked = isBooleanTrue(value);
     return (
       <label
         style={{
@@ -551,11 +561,7 @@ export function renderTableCellEditor({
 
   // BOOLEAN
   if (meta.type === "boolean") {
-    const checked =
-      editingValue === true ||
-      editingValue === "true" ||
-      editingValue === 1 ||
-      editingValue === "1";
+    const checked = isBooleanTrue(editingValue);
     return (
       <label
         style={{

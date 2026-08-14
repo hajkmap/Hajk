@@ -400,6 +400,16 @@ export default class AttributeEditorModel {
     return raw.map((f, i) => {
       const props = f?.properties ?? {};
       const id = f?.id ?? props?.id ?? i + 1;
+      // NOTE: the props spread comes last ON PURPOSE — when the layer has an
+      // attribute column literally named "id", that value wins over the fid
+      // and becomes the row id. Feature<->row bridges all over the plugin
+      // (styleFn/buildVizSet in AttributeEditor.jsx, the DragBox visibility
+      // check, the Sketch hook's deleted-ids mirror, TableMode's selection
+      // reconciliation) extract the "id" property first and assume row ids
+      // live in that same space. Letting the fid win here breaks map
+      // selection on such layers (WFS-T addressing still works: the fid is
+      // derived from the id/pk column, and formatFeatureId bridges the
+      // suffix). Do not flip this without reworking those bridges too.
       return { id, ...props };
     });
   };

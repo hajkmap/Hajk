@@ -36,7 +36,6 @@ const MAX_LEFT = 800; // px
 
 export default function DesktopForm({
   s,
-  theme,
   // left list
   visibleFormList,
   selectedIds,
@@ -219,16 +218,31 @@ export default function DesktopForm({
       saveLeftWTimer.current = setTimeout(() => {
         try {
           localStorage.setItem(RESIZER_KEY, String(Math.round(leftW)));
-        } catch {}
+        } catch {
+          /* ignore */
+        }
       }, 150);
-    } catch {}
+    } catch {
+      /* ignore */
+    }
     return () => {
       if (saveLeftWTimer.current) clearTimeout(saveLeftWTimer.current);
     };
   }, [leftW]);
 
+  const prevCaretFocusIdRef = React.useRef(null);
   React.useEffect(() => {
     if (!focusedFeature) return;
+
+    // The caret handoff below is only for a field that grows into a textarea
+    // WHILE the user types in it (the input element is replaced, so focus
+    // must be moved into the textarea). When the focused feature changes we
+    // only re-baseline which fields are multiline — setting the caret then
+    // would steal focus to the last multiline field on every object switch.
+    const sameFeature =
+      prevCaretFocusIdRef.current != null &&
+      String(prevCaretFocusIdRef.current) === String(focusedId);
+    prevCaretFocusIdRef.current = focusedId;
 
     FIELD_META.forEach((meta) => {
       const key = meta.key;
@@ -238,13 +252,13 @@ export default function DesktopForm({
       const wasMultiline = !!prevMultilineRef.current[key];
 
       // transition: input -> textarea
-      if (!wasMultiline && nowMultiline) {
+      if (sameFeature && !wasMultiline && nowMultiline) {
         const pos = String(val ?? "").length; // caret last
         setPendingCaret({ key, pos });
       }
       prevMultilineRef.current[key] = nowMultiline;
     });
-  }, [FIELD_META, editValues, focusedFeature]);
+  }, [FIELD_META, editValues, focusedFeature, focusedId]);
 
   React.useEffect(() => {
     if (focusedId != null) {
@@ -259,7 +273,9 @@ export default function DesktopForm({
       try {
         el.focus();
         el.selectionStart = el.selectionEnd = pendingCaret.pos;
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     }
     setPendingCaret(null);
   }, [pendingCaret]);
@@ -463,6 +479,12 @@ export default function DesktopForm({
         </div>
       </div>
 
+      {/* This is the WAI-ARIA "window splitter" pattern: a focusable
+          separator resized with the arrow keys. jsx-a11y's default config
+          does not model focusable separators, so it flags the listeners and
+          tabIndex even though the element is fully keyboard-accessible. */}
+      {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions,
+          jsx-a11y/no-noninteractive-tabindex */}
       <div
         role="separator"
         aria-orientation="vertical"
@@ -491,6 +513,8 @@ export default function DesktopForm({
         }}
         style={s.resizerGrip}
       />
+      {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions,
+          jsx-a11y/no-noninteractive-tabindex */}
 
       {/* Right: Form */}
       <div style={s.pane} aria-label="Formulär">

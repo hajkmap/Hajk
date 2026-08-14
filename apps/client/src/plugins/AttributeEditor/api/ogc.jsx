@@ -145,6 +145,24 @@ export function createOgcApi(baseUrl) {
 
   // ── Features (fetched from layer.url — either proxy or direct) ───
 
+  // WFS servers report errors as XML exception documents, often with
+  // HTTP 200 (classic QGIS Server/GeoServer behavior). Without this check
+  // such a response parses to "0 features" and looks like an empty layer.
+  // Only the head is sniffed for the ROOT element — feature responses start
+  // with FeatureCollection, and exception words inside attribute values are
+  // entity-escaped in real XML, so false positives are not possible.
+  const detectWfsException = (text) => {
+    if (typeof text !== "string") return null;
+    const head = text.slice(0, 1000);
+    if (!/<(\w+:)?(ExceptionReport|ServiceExceptionReport)[\s>]/i.test(head)) {
+      return null;
+    }
+    const m = text.match(
+      /<(?:\w+:)?(?:ExceptionText|ServiceException)[^>]*>([\s\S]*?)<\//i
+    );
+    return (m?.[1] || "").trim() || "Okänt WFS-fel (ExceptionReport)";
+  };
+
   const fetchWfstFeatures = async (id, params = {}, { signal } = {}) => {
     // Always get layer config from backend (AD filtering, metadata)
     const layer = await fetchWfst(id, null, { signal });
@@ -197,6 +215,11 @@ export function createOgcApi(baseUrl) {
     const contentType = res.headers.get("Content-Type") || "";
     const responseText = await res.text();
     const layerProj = layer.projection || srs;
+
+    const wfsError = detectWfsException(responseText);
+    if (wfsError) {
+      throw new Error(`WFS-fel från servern: ${wfsError}`);
+    }
 
     // JSON response — parse as GeoJSON
     if (contentType.includes("json")) {
@@ -681,9 +704,13 @@ function parseWfstResponse(xml) {
   try {
     const result = wfsFormat.readTransactionResponse(xml);
     if (result) {
-      inserted = result.transactionSummary?.totalInserted ?? 0;
-      updated = result.transactionSummary?.totalUpdated ?? 0;
-      deleted = result.transactionSummary?.totalDeleted ?? 0;
+      // NO "?? 0" here: when the OL parser returns a result without a
+      // usable transactionSummary the counts must stay undefined so the
+      // manual extraction below can engage — coercing to 0 made a
+      // successful transaction look like "Delvis sparat: 0 ...".
+      inserted = result.transactionSummary?.totalInserted;
+      updated = result.transactionSummary?.totalUpdated;
+      deleted = result.transactionSummary?.totalDeleted;
       // The fids the server assigned to newly inserted features
       // (e.g. "mylayer.124") — used to re-select them after save.
       insertedIds = result.insertIds ?? [];
@@ -692,12 +719,12 @@ function parseWfstResponse(xml) {
     // OL parser failed — fall through to manual count extraction
   }
 
-  // Fallback: extract counts manually if OL parser didn't produce them
-  if (inserted == null) {
-    inserted = getText("totalInserted");
-    updated = getText("totalUpdated");
-    deleted = getText("totalDeleted");
-  }
+  // Fallback: extract counts manually if OL parser didn't produce them.
+  // Per field, so a partially populated transactionSummary can't leave an
+  // undefined slot behind (inserted + undefined would make the total NaN).
+  if (inserted == null) inserted = getText("totalInserted");
+  if (updated == null) updated = getText("totalUpdated");
+  if (deleted == null) deleted = getText("totalDeleted");
 
   // Fallback for inserted fids: read InsertResults' FeatureId (WFS 1.x)
   // or ResourceId (WFS 2.0) elements directly.
