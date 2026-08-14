@@ -101,7 +101,10 @@ class LocationModel {
     this.#positionReceived = true;
 
     // If we've got new coordinates, make sure to hide the loading indicator
-    this.localObserver.publish("locationStatus", "on");
+    // Also make sure we are tracking otherwise we should not send locationstatus
+    if (this.#tracking && coordinates) {
+      this.localObserver.publish("locationStatus", "on");
+    }
 
     if (this.zoomToLocation) {
       const maxZoom = this.map.getView().getMaxZoom();
@@ -218,6 +221,8 @@ class LocationModel {
 
   disable() {
     this.toggleTracking(false);
+    // Also disable follow, the default state is turned off.
+    this.disableFollow(true);
   }
 
   enableFollow() {
