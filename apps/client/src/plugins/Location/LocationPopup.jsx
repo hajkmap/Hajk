@@ -1,5 +1,6 @@
 import React, { useState, forwardRef } from "react";
 import { Paper, Switch } from "@mui/material";
+import { isMobile } from "../../utils/IsMobile";
 
 const LocationPopup = forwardRef(function LocationPopup({ model }, ref) {
   const [localFollow, setLocalFollow] = useState(false);
@@ -28,7 +29,7 @@ const LocationPopup = forwardRef(function LocationPopup({ model }, ref) {
         py: 1,
         bgcolor: "background.paper",
         color: "text.primary",
-        mb: 4,
+        mb: isMobile ? 4 : 0,
       }}
     >
       <span>Följ position</span>
