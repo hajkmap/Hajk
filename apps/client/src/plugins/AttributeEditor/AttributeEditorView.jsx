@@ -145,7 +145,19 @@ export default function AttributeEditorView({
         { variant: "warning", autoHideDuration: 10000 }
       );
     });
-    return () => off();
+    // A failed schema/data load falls back to "Ingen" (emitted from the
+    // AttributeEditor load path) — tell the user why the layer was dropped.
+    const offErr = editBus.on("attrib:load-error", (ev) => {
+      const { message } = ev.detail || {};
+      enqueueSnackbar(
+        `Lagret kunde inte laddas${message ? `: ${message}` : ""}. Valet har återställts till "Ingen".`,
+        { variant: "error", autoHideDuration: 10000 }
+      );
+    });
+    return () => {
+      off();
+      offErr();
+    };
   }, [enqueueSnackbar]);
 
   // Track whether the active service supports Point geometry (from admin schema)
@@ -227,7 +239,7 @@ export default function AttributeEditorView({
 
   React.useEffect(() => {
     const off = editBus.on("sketch:geometry-edited", (ev) => {
-      const { id, before, after } = ev.detail || {};
+      const { id, before, after, coalesce } = ev.detail || {};
       if (id == null || !after) return;
 
       // 1) mark as "geometry edited"
@@ -240,7 +252,30 @@ export default function AttributeEditorView({
       const modelLastWhen =
         currentUndoStack?.[currentUndoStack.length - 1]?.when ?? 0;
       const geomWhen = Math.max(Date.now(), modelLastWhen + 1);
-      geomUndoRef.current.push({ id, before, after, when: geomWhen });
+
+      // Coalesce-flagged events (continuous rotation ticks every 60 ms):
+      // merge into the previous entry for the same feature — keep its
+      // "before", advance "after" — so a whole press-and-hold is ONE undo
+      // step instead of one per tick. Only explicitly flagged events merge;
+      // deliberate repeated gestures still get their own entries.
+      // The 500 ms window keeps the FIRST tick of a new press-and-hold from
+      // merging into an older, unrelated entry for the same feature (ticks
+      // arrive every 60 ms; a new hold starts at least 800 ms after the
+      // previous gesture's entry).
+      const stack = geomUndoRef.current;
+      const last = stack[stack.length - 1];
+      if (
+        coalesce &&
+        last &&
+        String(last.id) === String(id) &&
+        geomWhen - last.when < 500
+      ) {
+        last.after = after;
+        last.when = geomWhen;
+        return;
+      }
+
+      stack.push({ id, before, after, when: geomWhen });
       if (geomUndoRef.current.length > MAX_GEOM_UNDO) {
         geomUndoRef.current = geomUndoRef.current.slice(-MAX_GEOM_UNDO);
       }
@@ -391,6 +426,13 @@ export default function AttributeEditorView({
     setTableSelectedIds(new Set());
     setSelectedIds(new Set());
     setFocusedId(null);
+    // "Show only selected", the frozen id snapshot behind it and the sort
+    // order also belong to the previous layer — left alive, the new layer
+    // opens filtered on ids that no longer exist and sorted on a column it
+    // may not have.
+    setShowOnlySelected(false);
+    setFrozenSelectedIds(new Set());
+    setSort({ key: null, dir: "asc" });
     // The local undo stacks belong to the PREVIOUS layer — surviving a
     // service switch would let Ctrl+Z replay the old layer's values onto
     // the new one. (The model's own undoStack is reset by INIT already.)
@@ -717,7 +759,8 @@ export default function AttributeEditorView({
       if (
         showOnlySelected &&
         !isNegativeId &&
-        !frozenSelectedIds.has(f.id) &&
+        // The frozen set holds String forms (see Toolbar) — compare likewise
+        !frozenSelectedIds.has(String(f.id)) &&
         editingId !== f.id
       ) {
         return false;
@@ -1190,25 +1233,35 @@ export default function AttributeEditorView({
     (columnKey) => {
       // Build a cache key of the data version, search string, and all filters
       // EXCEPT for the current columnKey (so the facet does not cache itself).
-      const editsCount = Object.keys(pendingEdits || {}).length;
-      const delSize = pendingDeletes?.size ?? 0;
-
       const filterParts = [];
       for (const [k, vals] of Object.entries(columnFilters || {})) {
         if (k === columnKey) continue;
         filterParts.push(k + "=" + (Array.isArray(vals) ? vals.join(",") : ""));
       }
 
-      // The cache invalidates when: row count changes, edits change, or filters change.
-      // Include pendingEdits keys that affect this column for more precise invalidation.
-      const columnEditCount = Object.values(pendingEdits || {}).filter(
-        (edits) => edits && columnKey in edits
-      ).length;
+      // VALUE signatures, not counts: editing an already-edited cell, changing
+      // a draft value or swapping which rows are delete-marked all keep the
+      // counts identical — a count-based key served stale facet lists then.
+      // Object values (e.g. __geom__ geometries) become a constant marker:
+      // they never influence facet contents and may be circular.
+      const sigOf = (v) =>
+        typeof v === "object" && v !== null ? "obj" : String(v);
+      const sigParts = [];
+      for (const [id, e] of Object.entries(pendingEdits || {})) {
+        for (const [k, v] of Object.entries(e || {})) {
+          sigParts.push(`${id}.${k}=${sigOf(v)}`);
+        }
+      }
+      for (const d of pendingAdds || []) {
+        for (const [k, v] of Object.entries(d)) {
+          sigParts.push(`${d.id}.${k}=${sigOf(v)}`);
+        }
+      }
+      const deleteSig = Array.from(pendingDeletes ?? []).join(",");
 
       const cacheKey =
         `facet::${columnKey}::` +
-        `${features.length}|${pendingAdds.length}|${editsCount}|${delSize}|` +
-        `col:${columnEditCount}|` +
+        `${features.length}|${sigParts.join(";")}|del:${deleteSig}|` +
         `${searchText.trim().toLowerCase()}|` +
         filterParts.sort().join(";");
 
@@ -1316,7 +1369,14 @@ export default function AttributeEditorView({
       let newLast = rowIndex;
 
       if (isRange && lastTableIndex !== null) {
-        const [a, b] = [lastTableIndex, rowIndex].sort((x, y) => x - y);
+        // The anchor index may be stale (set before a filter/sort/search
+        // shrank the list) — clamp to the current bounds instead of
+        // crashing on filteredAndSorted[i].id for an out-of-range i.
+        const maxIdx = filteredAndSorted.length - 1;
+        if (maxIdx < 0) return;
+        const anchor = Math.min(Math.max(lastTableIndex, 0), maxIdx);
+        const target = Math.min(Math.max(rowIndex, 0), maxIdx);
+        const [a, b] = [anchor, target].sort((x, y) => x - y);
         next = new Set();
         for (let i = a; i <= b; i++) next.add(filteredAndSorted[i].id);
       } else if (isToggle) {
@@ -2245,7 +2305,12 @@ export default function AttributeEditorView({
       const isNegativeId = isDraftId(row.id);
 
       // If "Select first" is active, use the FIRST ID
-      if (showOnlySelected && !isNegativeId && !frozenSelectedIds.has(row.id)) {
+      // (frozen set holds String forms — see Toolbar)
+      if (
+        showOnlySelected &&
+        !isNegativeId &&
+        !frozenSelectedIds.has(String(row.id))
+      ) {
         return false;
       }
 
@@ -2333,19 +2398,48 @@ export default function AttributeEditorView({
           visibleFormList.some((f) => String(f.id) === String(id))
         ),
       firstVisibleId: visibleFormList[0]?.id ?? null,
+      // First row (in list order) that is part of the current selection —
+      // lets us repair an invalid focus without collapsing the selection.
+      firstSelectedVisibleId:
+        visibleFormList.find((f) =>
+          Array.from(selectedIds).some((id) => String(id) === String(f.id))
+        )?.id ?? null,
       explicitClear: explicitClearRef.current,
     }),
     [ui.mode, focusedId, selectedIds, visibleFormList]
   );
 
   const ensureFormSelection = React.useCallback(() => {
-    const { mode, focusedIdValid, selectedIdsValid, firstVisibleId } =
-      ensureFormSelectionDeps;
+    const {
+      mode,
+      focusedId: focus,
+      focusedIdValid,
+      selectedIdsValid,
+      firstVisibleId,
+      firstSelectedVisibleId,
+    } = ensureFormSelectionDeps;
 
     if (mode !== "form") return;
 
     if (explicitClearRef.current) return;
     if (focusedIdValid && selectedIdsValid) return;
+
+    // Repair instead of collapse: a valid (multi-)selection whose focus
+    // became invalid only needs a new focus — replacing the selection with
+    // the first visible row threw away the user's marked rows.
+    if (selectedIdsValid && !focusedIdValid) {
+      if (firstSelectedVisibleId != null) {
+        setFocusedId(firstSelectedVisibleId);
+      }
+      return;
+    }
+
+    // Valid focus but empty/invalid selection: select the focused row.
+    if (focusedIdValid && !selectedIdsValid) {
+      setSelectedIds(new Set([focus]));
+      emitSelectionSync([focus]);
+      return;
+    }
 
     if (firstVisibleId != null) {
       setSelectedIds(new Set([firstVisibleId]));
@@ -2712,6 +2806,18 @@ export default function AttributeEditorView({
 
   const hasGeomUndo = geomUndoCount > 0;
 
+  // Delete-marked rows must not be split/merged — the operations clone or
+  // consume the feature, effectively resurrecting a row the user chose to
+  // remove (as drafts inheriting its attributes).
+  const isDeleteMarked = React.useCallback(
+    (id) =>
+      (pendingDeletes?.has?.(id) ?? false) ||
+      pendingAdds.some(
+        (d) => String(d.id) === String(id) && d.__pending === "delete"
+      ),
+    [pendingDeletes, pendingAdds]
+  );
+
   // === Split Feature Logic ===
   const canSplitGeometry = React.useMemo(() => {
     const activeSelectedIds =
@@ -2719,11 +2825,12 @@ export default function AttributeEditorView({
 
     if (activeSelectedIds.size !== 1) return false;
     const id = Array.from(activeSelectedIds)[0];
+    if (isDeleteMarked(id)) return false;
     const feature = featureIndexRef.current?.get(id);
     if (!feature) return false;
     const type = feature.getGeometry?.()?.getType?.();
     return type === "Polygon" || type === "LineString";
-  }, [ui.mode, tableSelectedIds, selectedIds, featureIndexRef]);
+  }, [ui.mode, tableSelectedIds, selectedIds, featureIndexRef, isDeleteMarked]);
 
   const splitFeature = React.useCallback(() => {
     const activeSelectedIds =
@@ -2772,6 +2879,16 @@ export default function AttributeEditorView({
 
         const draftId = model.addDraftFromFeature(draftFeature);
         createdIds.push(draftId);
+
+        // Baseline for "Återställ" — the other draft-creation paths (drawn
+        // and duplicated drafts) store one; without it a reset blanks the
+        // attributes the split parts inherited from the original feature.
+        const baseline = {};
+        fieldMeta.forEach(({ key }) => {
+          const val = draftFeature.get?.(key);
+          baseline[key] = val == null ? "" : val;
+        });
+        draftBaselineRef.current.set(draftId, baseline);
 
         const layer = vectorLayerRef.current;
         const src = layer?.getSource?.();
@@ -2825,6 +2942,8 @@ export default function AttributeEditorView({
     vectorLayerRef,
     setDeleteState,
     showNotification,
+    fieldMeta,
+    draftBaselineRef,
   ]);
 
   // === Split Multi-Feature Logic ===
@@ -2834,6 +2953,7 @@ export default function AttributeEditorView({
 
     if (activeSelectedIds.size !== 1) return false;
     const id = Array.from(activeSelectedIds)[0];
+    if (isDeleteMarked(id)) return false;
     const feature = featureIndexRef.current?.get(id);
     if (!feature) return false;
     const type = feature.getGeometry?.()?.getType?.();
@@ -2842,7 +2962,7 @@ export default function AttributeEditorView({
     }
     const coords = feature.getGeometry()?.getCoordinates?.();
     return coords && coords.length > 1;
-  }, [ui.mode, tableSelectedIds, selectedIds, featureIndexRef]);
+  }, [ui.mode, tableSelectedIds, selectedIds, featureIndexRef, isDeleteMarked]);
 
   const splitMultiFeature = React.useCallback(() => {
     const activeSelectedIds =
@@ -2863,6 +2983,7 @@ export default function AttributeEditorView({
     if (activeSelectedIds.size < 2) return false;
 
     const ids = Array.from(activeSelectedIds);
+    if (ids.some(isDeleteMarked)) return false;
     const types = ids.map((id) => {
       const feature = featureIndexRef.current?.get(id);
       return feature?.getGeometry?.()?.getType?.();
@@ -2883,7 +3004,14 @@ export default function AttributeEditorView({
       "MultiLineString",
       "MultiPolygon",
     ].includes(uniqueTypes[0]);
-  }, [ui.mode, tableSelectedIds, selectedIds, featureIndexRef, allowMultiGeom]);
+  }, [
+    ui.mode,
+    tableSelectedIds,
+    selectedIds,
+    featureIndexRef,
+    allowMultiGeom,
+    isDeleteMarked,
+  ]);
 
   const mergeFeatures = React.useCallback(() => {
     const activeSelectedIds =

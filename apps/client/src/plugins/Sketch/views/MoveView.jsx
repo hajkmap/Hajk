@@ -142,7 +142,10 @@ const FeatureMoveSelector = (props) => {
               fullWidth
               size="small"
               onClick={handleUndoClick}
-              disabled={props.lastMoves.length === 0 || props.uiDisabled}
+              // Symmetric with "Flytta" (which is never uiDisabled): in AE
+              // mode uiDisabled is always true, which left the user able to
+              // move features but never undo the move.
+              disabled={props.lastMoves.length === 0}
             >
               Ångra
             </Button>
@@ -181,6 +184,9 @@ const FeatureRotateSelector = (props) => {
     editBus.emit("sketch:ae-rotate", {
       degrees: props.rotationDegrees,
       clockwise,
+      // Continuous rotation ticks every 60 ms — the flag lets the undo
+      // bookkeeping coalesce the whole press-and-hold into ONE entry.
+      continuous,
     });
 
     if (continuous) {

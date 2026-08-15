@@ -11,7 +11,6 @@ const TableRow = ({
   idx,
   FIELD_META,
   s,
-  features,
   featuresMap,
   selected,
   pendingKind,
@@ -76,6 +75,12 @@ const TableRow = ({
       }}
       title="Klick: markera • Dubbelklick: öppna i formulär"
     >
+      {/* react-hooks/refs: every caretStoreRef/editorNode access below lives
+          inside ref callbacks and event handlers (which run after render) —
+          the rule flags them only because editorProps flows into
+          renderTableCellEditor(), a render-time call whose closures the
+          linter cannot prove are deferred. No ref is read during render. */}
+      {/* eslint-disable-next-line react-hooks/refs */}
       {FIELD_META.map((meta) => {
         const patch = tablePendingEdits[row.id];
         const patchedValue =
@@ -151,7 +156,10 @@ const TableRow = ({
           }
 
           const prevVal = ed.startValue ?? "";
-          if (currentVal !== prevVal) {
+          // Normalize both sides: an untouched empty cell is null while
+          // startValue is "" (and numbers come back as strings) — a raw !==
+          // pushed phantom undo entries and ran the filter sync for nothing.
+          if (String(currentVal ?? "") !== String(prevVal)) {
             const isDraft = row.__pending === "add" || ed.id < 0;
             pushTableUndo({
               type: "edit_cell",
@@ -220,7 +228,9 @@ const TableRow = ({
               try {
                 el.focus();
                 el.selectionStart = el.selectionEnd = savedPos;
-              } catch {}
+              } catch {
+                /* ignore */
+              }
               caretStoreRef.current.delete(cellKey);
             }
           },
@@ -264,7 +274,9 @@ const TableRow = ({
                   (editorNode ?? el).selectionStart = (
                     editorNode ?? el
                   ).selectionEnd = start + 1;
-                } catch {}
+                } catch {
+                  /* ignore */
+                }
               });
               return;
             }

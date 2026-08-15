@@ -130,11 +130,14 @@ export default function DesktopForm({
   // Navigate to the page containing focusedId when it actually changes
   // (e.g. via focusPrev/focusNext). We track the previous value so that
   // re-renders caused by visibleFormList updates (bulk edits etc.) don't
-  // snap the user back to focusedId's page.
-  const prevFocusedIdRef = React.useRef(focusedId);
+  // snap the user back to focusedId's page. Initialized to null (NOT
+  // focusedId): seeding it with the current focus made the ref equal on
+  // mount, so opening the form always landed on page 1 regardless of
+  // where the focused row lives. String comparison bridges id types.
+  const prevFocusedIdRef = React.useRef(null);
   React.useEffect(() => {
     if (focusedId == null || isShowingAll) return;
-    if (focusedId === prevFocusedIdRef.current) return;
+    if (String(focusedId) === String(prevFocusedIdRef.current)) return;
     prevFocusedIdRef.current = focusedId;
 
     const rowIndex = visibleFormList.findIndex(

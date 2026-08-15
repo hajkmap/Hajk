@@ -885,7 +885,6 @@ export default function TableMode(props) {
                     idx={startIndex + idx}
                     FIELD_META={FIELD_META}
                     s={s}
-                    features={features}
                     featuresMap={featuresMap}
                     selected={selected}
                     pendingKind={pendingKind}

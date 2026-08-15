@@ -524,6 +524,12 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
             next();
           };
 
+          // NOTE: identityMiddleware runs as Express middleware, which only
+          // sees regular HTTP requests. If a proxy config ever enables
+          // WebSockets (ws: true), upgrade requests bypass Express entirely
+          // and would reach the target with the client's original headers —
+          // unstripped and unauthenticated. Do not add ws support here
+          // without moving the header sanitation into the upgrade path too.
           app.use(
             `/api/v${apiVersion}/proxy/${context}`,
             identityMiddleware,

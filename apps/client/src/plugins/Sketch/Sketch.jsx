@@ -236,6 +236,13 @@ const Sketch = (props) => {
       setAllowedGeometryTypes(null);
       setAllowMultiGeom(false);
       attributeEditorActiveRef.current = false;
+      // Leaving the editing context returns the draw modes to neutral —
+      // the switches were set for the edited layer's workflow. The values
+      // (length/angle) are kept as user preferences; only the modes reset.
+      // Turning multi-draw off finishes a pending multi-feature properly
+      // via the multiDrawEnabled effect (no parts are discarded).
+      setMultiDrawEnabled(false);
+      setFixedLengthEnabled(false);
     });
 
     return () => {
@@ -442,11 +449,19 @@ const Sketch = (props) => {
   }, [drawModel, multiDrawEnabled]);
 
   // Reset multi-draw mode when activity or draw type changes
-  // Also properly finish any active multi-draw and sync to AttributeEditor
+  // Also properly finish any active multi-draw and sync to AttributeEditor.
+  // The type change must be tracked explicitly: a switch WITHIN the drawable
+  // types (e.g. Polygon -> LineString) passed the includes() check and left
+  // multi-draw running, silently discarding the drawn parts of the old type.
+  const prevMultiDrawTypeRef = React.useRef(activeDrawType);
   React.useEffect(() => {
+    const typeChanged = prevMultiDrawTypeRef.current !== activeDrawType;
+    prevMultiDrawTypeRef.current = activeDrawType;
+
     if (
       activityId !== "ADD" ||
-      !["Point", "LineString", "Polygon"].includes(activeDrawType)
+      !["Point", "LineString", "Polygon"].includes(activeDrawType) ||
+      typeChanged
     ) {
       // If multi-draw is active, finish it properly before disabling
       if (drawModel.getMultiDrawMode()) {
@@ -497,15 +512,13 @@ const Sketch = (props) => {
       } else if (
         feature &&
         feature.get("USER_DRAWN") &&
-        // Imported features (KML/GPX drag-and-drop or file import) also carry
-        // USER_DRAWN, but must not become AE drafts — a dropped file would
-        // mass-create unintended drafts in the active editing layer.
-        !feature.get("KML_IMPORT") &&
-        !feature.get("GPX_IMPORT") &&
         attributeEditorActiveRef.current &&
         !drawModel.getMultiDrawMode() // Don't mark during multi-draw - wait until finished
       ) {
-        // Mark normal user-drawn features for AttributeEditor sync when active
+        // Mark user-drawn features for AttributeEditor sync when active.
+        // This DELIBERATELY includes KML/GPX imports (they carry USER_DRAWN
+        // too): importing external geometries into the active editing layer
+        // as new draft features is a supported workflow.
         feature.set("SKETCH_ATTRIBUTEEDITOR", true, true);
       }
     };

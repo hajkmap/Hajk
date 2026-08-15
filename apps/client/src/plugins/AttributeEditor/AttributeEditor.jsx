@@ -921,6 +921,18 @@ function AttributeEditor(props) {
 
         // Log actual errors
         console.warn("Fel vid laddning av schema/data:", e);
+
+        // Surface the failure and fall back to "Ingen" everywhere. Staying
+        // silent left the previous layer's features visible under the new
+        // service's title — an invisible failure. The service-cleared emit
+        // (with a source this component does NOT filter out) runs the full
+        // coordinated reset: Toolbar select, View state, Sketch restrictions
+        // and this component's own layer/title cleanup.
+        editBus.emit("attrib:load-error", {
+          serviceId: id,
+          message: e?.message || String(e),
+        });
+        editBus.emit("edit:service-cleared", { source: "attrib-load-error" });
       } finally {
         if (!signal.aborted) {
           setIsLoading(false);
@@ -1167,6 +1179,11 @@ function AttributeEditor(props) {
           programmaticSketchOpsRef.current.delete(f);
           return;
         }
+
+        // No editable service selected: erasing plain sketch drawings must
+        // not touch the AttributeEditor model — SET_DELETE_STATE pushes an
+        // undo entry even for ids it doesn't know, polluting the undo stack.
+        if (currentServiceIdRef.current === "NONE_ID") return;
 
         let fid = f.getId?.() ?? f.get?.("id");
         if (fid == null) {

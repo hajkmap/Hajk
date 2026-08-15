@@ -370,10 +370,12 @@ export default function Toolbar({
             setShowOnlySelected(false);
             setFrozenSelectedIds(new Set());
           } else {
-            // Activate the filter and freeze the currently selected objects
+            // Activate the filter and freeze the currently selected objects.
+            // Stored as String forms — consumers compare with String(row.id)
+            // so mixed id types (GML strings vs numeric drafts) always match.
             const currentIds =
               mode === "table" ? tableSelectedIds : selectedIds;
-            setFrozenSelectedIds(new Set(currentIds));
+            setFrozenSelectedIds(new Set(Array.from(currentIds).map(String)));
             setShowOnlySelected(true);
           }
         }}

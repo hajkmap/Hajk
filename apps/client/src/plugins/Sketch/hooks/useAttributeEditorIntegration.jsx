@@ -374,7 +374,21 @@ const useAttributeEditorIntegration = ({
       }
     };
 
-    const publishToEditView = (feature) => {
+    const publishToEditView = (featureIn) => {
+      // Delete-marked features must never be activated for edit/move: the
+      // click/drag paths already refuse them, but the focus path went
+      // straight through here and lit vertex nodes on red (pending delete)
+      // objects. Treat them as "no feature" — clears the edit view instead.
+      let feature = featureIn;
+      if (feature) {
+        const raw = getAeFeatureId(feature);
+        if (
+          aeDeletedIdsRef.current.has(raw) ||
+          aeDeletedIdsRef.current.has(String(raw))
+        ) {
+          feature = null;
+        }
+      }
       const chan = activityId === "MOVE" ? "move" : "edit";
       const fid = feature
         ? (feature.getId?.() ?? feature.get?.("@_fid") ?? feature.get?.("id"))
@@ -969,7 +983,7 @@ const useAttributeEditorIntegration = ({
     });
 
     const offRotateCmd = editBus.on("sketch:ae-rotate", (ev) => {
-      const { degrees = 0, clockwise = true } = ev.detail || {};
+      const { degrees = 0, clockwise = true, continuous = false } = ev.detail || {};
       const feats = getAeSelected();
       if (!feats.length) return;
 
@@ -1022,6 +1036,8 @@ const useAttributeEditorIntegration = ({
           before: before.get(id),
           after: g && g.clone ? g.clone() : g,
           when,
+          // Continuous rotation: let the undo bookkeeping merge the ticks
+          coalesce: continuous,
         });
       });
     });
@@ -1178,13 +1194,25 @@ const useAttributeEditorIntegration = ({
         }
       };
 
+      // Track whether the cutting line has been started: OL's abortDrawing()
+      // is a no-op (no drawabort event) before the first point is placed, so
+      // Escape pressed before the first click must exit split mode directly.
+      let splitSketchStarted = false;
+      drawInteraction.on("drawstart", () => {
+        splitSketchStarted = true;
+      });
+
       // Keyboard handler for Escape and Ctrl+Z
       const handleSplitKeyDown = (e) => {
         const { keyCode, ctrlKey, metaKey } = e;
         if (keyCode === 27) {
-          // Escape - abort drawing
+          // Escape - abort drawing (or exit split mode if not started)
           e.preventDefault();
-          drawInteraction.abortDrawing();
+          if (splitSketchStarted) {
+            drawInteraction.abortDrawing();
+          } else {
+            cleanupSplitDraw(true);
+          }
         } else if ((ctrlKey || metaKey) && keyCode === 90) {
           // Ctrl+Z / Cmd+Z - remove last point
           e.preventDefault();
