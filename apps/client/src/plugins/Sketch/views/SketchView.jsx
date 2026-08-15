@@ -523,7 +523,9 @@ const SketchView = (props) => {
     editBus.emit("edit:service-selected", {
       source: "sketch",
       id: targetService.id,
-      title: targetService.title,
+      // Same "Redigerar"-prefixed title as the normal (non-dialog) switch
+      // path — AE sets its window title straight from this event.
+      title: `Redigerar ${targetService.title}`,
       color: theme.palette.warning.main,
     });
 
@@ -572,7 +574,9 @@ const SketchView = (props) => {
     editBus.emit("edit:service-selected", {
       source: "sketch",
       id: targetService.id,
-      title: targetService.title,
+      // Same "Redigerar"-prefixed title as the normal (non-dialog) switch
+      // path — AE sets its window title straight from this event.
+      title: `Redigerar ${targetService.title}`,
       color: theme.palette.warning.main,
     });
 

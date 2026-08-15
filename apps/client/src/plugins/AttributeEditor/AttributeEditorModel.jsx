@@ -24,7 +24,6 @@ const initialState = {
   pendingDeletes: new Set(), // Set<number>
 
   undoStack: [], // [{ label, inverse: Array<InverseOp> }]
-  redoStack: [],
 };
 
 const buildFeaturesMap = (features) => {
@@ -56,7 +55,6 @@ const pushUndo = (state, label, inverseOps) => ({
     ...state.undoStack,
     { label, inverse: inverseOps, when: Date.now() },
   ]),
-  redoStack: [],
 });
 
 // InverseOps: { kind: 'edit'|'draft_edit'|'delete_state'|'create_drafts', payload: {...} }
@@ -336,7 +334,6 @@ const reducer = (state, action) => {
         pendingEdits: {},
         pendingDeletes: new Set(),
         undoStack: [],
-        redoStack: [],
       };
     }
 
@@ -350,7 +347,6 @@ const reducer = (state, action) => {
       return {
         ...s,
         undoStack: state.undoStack.slice(0, -1),
-        redoStack: [...state.redoStack, last],
       };
     }
 
@@ -382,7 +378,15 @@ export default class AttributeEditorModel {
       .filter((n) => Number.isFinite(n));
     const max = numericInit.length ? Math.max(...numericInit) : 0;
 
-    this.#state = { ...initialState, features: initFeatures, nextId: max + 1 };
+    // featuresMap must mirror features from the start — leaving it as the
+    // empty initialState Map breaks id lookups (DUPLICATE_ROWS, edit
+    // baselines) for rows passed via initialFeatures.
+    this.#state = {
+      ...initialState,
+      features: initFeatures,
+      featuresMap: buildFeaturesMap(initFeatures),
+      nextId: max + 1,
+    };
   }
 
   // === Getters/setters ===

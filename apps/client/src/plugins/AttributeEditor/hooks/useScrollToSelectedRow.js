@@ -30,10 +30,23 @@ export function useScrollToSelectedRow({
   const [currentScrollIndex, setCurrentScrollIndex] = useState(0);
   const [viewedRowId, setViewedRowId] = useState(null);
 
-  useEffect(() => {
+  // Reset the cycle position and the viewed-row marker when the selection
+  // or focus changes. Uses the documented "adjust state while rendering"
+  // pattern (react.dev/learn/you-might-not-need-an-effect) rather than an
+  // effect: the reset lands in the same render pass instead of causing an
+  // extra post-commit render.
+  const [prevResetInputs, setPrevResetInputs] = useState({
+    selectedIds,
+    focusedId,
+  });
+  if (
+    prevResetInputs.selectedIds !== selectedIds ||
+    prevResetInputs.focusedId !== focusedId
+  ) {
+    setPrevResetInputs({ selectedIds, focusedId });
     setCurrentScrollIndex(0);
     setViewedRowId(null);
-  }, [selectedIds, focusedId]);
+  }
 
   useEffect(() => {
     return () => {
@@ -48,7 +61,11 @@ export function useScrollToSelectedRow({
     let shouldIncrementIndex = false;
 
     const visibleSelectedIds = selectedIds
-      ? Array.from(selectedIds).filter((id) => items.some((r) => r.id === id))
+      ? Array.from(selectedIds).filter((id) =>
+          // String() like every other comparison in this hook — mixed id
+          // types (GML strings vs numeric drafts) must match here too
+          items.some((r) => String(r.id) === String(id))
+        )
       : [];
     const visibleSize = visibleSelectedIds.length;
 

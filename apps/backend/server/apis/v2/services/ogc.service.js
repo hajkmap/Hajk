@@ -92,7 +92,14 @@ async function requireLayer(id, { user, washContent } = {}) {
 /** List all WFST layers (no per-layer filtering — see note on getWFSTStore). */
 export async function listWFSTLayers({ fields, user, washContent } = {}) {
   try {
-    const { list: layers } = await getWFSTStore({ user, washContent });
+    const { list: allLayers } = await getWFSTStore({ user, washContent });
+    // Same rule as requireLayer: relative URLs are internal proxy routes,
+    // absolute URLs must pass the host allowlist (WFS_ALLOWED_HOSTS).
+    // Without this filter the list endpoint exposed — and appeared to
+    // offer — layers that the per-id endpoint then refuses to serve.
+    const layers = allLayers.filter(
+      (l) => (l.url && l.url.startsWith("/")) || Validator.isValidUrl(l.url)
+    );
     if (!fields) return layers;
 
     const pickFields = fields
@@ -119,4 +126,3 @@ export async function getWFSTLayer({ id, fields, user, washContent } = {}) {
     .filter(Boolean);
   return pickFields.length ? pick(layer, pickFields) : layer;
 }
-

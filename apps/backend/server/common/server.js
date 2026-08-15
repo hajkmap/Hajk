@@ -387,6 +387,8 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
       const userHeader = process.env.AD_TRUSTED_HEADER || "X-Control-Header";
       const groupHeader =
         process.env.AD_TRUSTED_GROUP_HEADER || "X-Control-Group-Header";
+      const emailHeader =
+        process.env.AD_TRUSTED_EMAIL_HEADER || "X-Control-Email-Header";
 
       // Iterate enabled API versions and expose one proxy endpoint
       // for each version.
@@ -491,6 +493,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           // Node lower-cases all incoming header names in req.headers
           const userHeaderLc = userHeader.toLowerCase();
           const groupHeaderLc = groupHeader.toLowerCase();
+          const emailHeaderLc = emailHeader.toLowerCase();
 
           const identityMiddleware = (req, res, next) => {
             if (basicCredentials) {
@@ -504,8 +507,9 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
             }
 
             // With PROXY_<NAME>_FORWARD_VALIDATED_USER, only forward the
-            // identity that extractUserContext has already validated
-            // (trusted-IP check + AD lookup) instead of passing incoming AD
+            // identity that extractUserContext has already accepted
+            // (trusted-IP check + header normalization — NOTE: no AD
+            // existence lookup is performed) instead of passing incoming AD
             // headers through as-is — otherwise a client that reaches this
             // backend directly (bypassing the reverse proxy that normally
             // sets the headers) could spoof any user identity upstream.
@@ -516,8 +520,11 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
               } else {
                 // No validated user (AD inactive, or header absent) — make
                 // sure no unvalidated identity reaches the upstream service.
+                // The e-mail header is an identity signal in Hajk's
+                // header-based AD flow too, so it is stripped as well.
                 delete req.headers[userHeaderLc];
                 delete req.headers[groupHeaderLc];
+                delete req.headers[emailHeaderLc];
               }
             }
 

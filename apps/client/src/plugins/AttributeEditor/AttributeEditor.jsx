@@ -19,7 +19,6 @@ import DragBox from "ol/interaction/DragBox";
 import { platformModifierKeyOnly } from "ol/events/condition";
 
 const MAX_SCHEMA_CACHE_SIZE = 50;
-const MAX_GRAVEYARD_SIZE = 1000;
 
 // OpenLayers feature style colors
 const OL_COLOR_VISIBLE = "#1976d2";
@@ -185,10 +184,15 @@ function AttributeEditor(props) {
   const rowIdMapRef = React.useRef(new Map());
   const featureIndexRef = React.useRef(new Map());
   const featureAliasesRef = React.useRef(new Map()); // Pre-computed aliases for O(1) lookup in styleFn
-  const graveyardRef = React.useRef(new Map());
   const draftBaselineRef = React.useRef(new Map());
 
   const currentServiceIdRef = React.useRef("NONE_ID");
+  // Whether the AE window is visible (BaseWindowPlugin onWindowShow/-Hide).
+  // Map interactions (select click, DragBox, FeaturePicker) are gated on
+  // this — without it a map click could pop the picker dialog or clear the
+  // selection while the user works with other tools, AE window closed.
+  const windowVisibleRef = React.useRef(false);
+  const dragBoxRef = React.useRef(null);
   const [serviceList, setServiceList] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [allowMultiGeom, setAllowMultiGeom] = React.useState(false);
@@ -660,7 +664,7 @@ function AttributeEditor(props) {
         // 1) Fetch whole schema (no fields-param)
         let schema = schemaCache.current.get(id);
         if (!schema) {
-          schema = await ogc.fetchWfst(id);
+          schema = await ogc.fetchWfst(id, null, { signal });
 
           if (signal.aborted) return;
 
@@ -1135,7 +1139,6 @@ function AttributeEditor(props) {
 
         featureIndexRef.current.set(tempId, f);
         featureAliasesRef.current.set(tempId, idAliases(tempId));
-        graveyardRef.current.delete(tempId);
 
         // IMPORTANT: Update visibleIdsRef and selectedIdsRef BEFORE adding feature to AE layer
         // This ensures styleFn sees the correct state when the layer re-renders after addFeature
@@ -1149,7 +1152,11 @@ function AttributeEditor(props) {
           const aeLayer = vectorLayerRef.current;
           const aeSrc = aeLayer?.getSource?.();
           if (aeSrc) {
-            programmaticSketchOpsRef.current.add(f);
+            // No programmaticSketchOpsRef flag here: the WeakSet is only
+            // consulted by the SKETCH source's add/remove listeners — a flag
+            // set before adding to the AE source is never consumed and would
+            // silently swallow a future genuine sketch event for the same
+            // feature object.
             aeSrc.addFeature(f);
           }
         } catch (err) {
@@ -1196,8 +1203,6 @@ function AttributeEditor(props) {
           if (fid == null) return;
         }
 
-        graveyardRef.current.set(fid, f);
-        limitMapSize(graveyardRef.current, MAX_GRAVEYARD_SIZE);
         featureIndexRef.current.delete(fid);
         featureAliasesRef.current.delete(fid);
         selectedIdsRef.current.delete(fid);
@@ -1338,6 +1343,9 @@ function AttributeEditor(props) {
     };
 
     const onClick = (evt) => {
+      // AE window closed: the map click belongs to other tools (infoclick
+      // etc.) — no selection changes, no FeaturePicker dialog.
+      if (!windowVisibleRef.current) return;
       if (evt.dragging) return;
       if (evt.originalEvent?.detail >= 2) return;
       if (evt.originalEvent?.button !== 0) return;
@@ -1509,9 +1517,14 @@ function AttributeEditor(props) {
     });
 
     map.addInteraction(dragBox);
+    // Inactive while the AE window is closed (activated by onWindowShow) —
+    // otherwise ctrl-drag draws a selection box for a hidden plugin.
+    dragBoxRef.current = dragBox;
+    dragBox.setActive(windowVisibleRef.current);
 
     // Ctrl + drag box always ADDS to existing selection
     dragBox.on("boxend", () => {
+      if (!windowVisibleRef.current) return;
       const boxExtent = dragBox.getGeometry().getExtent();
       const layer = vectorLayerRef.current;
       if (!layer) return;
@@ -1521,6 +1534,11 @@ function AttributeEditor(props) {
 
       const selectedFeatures = [];
       source.forEachFeatureInExtent(boxExtent, (feature) => {
+        // forEachFeatureInExtent iterates on bounding-box overlap — require
+        // the actual GEOMETRY to intersect the box, otherwise a diagonal
+        // line or L-shaped polygon whose bbox (but not geometry) touches
+        // the box gets selected.
+        if (!feature.getGeometry()?.intersectsExtent(boxExtent)) return;
         const raw = getFeatureId(feature, idFieldRef.current);
         const aliases = idAliases(raw);
 
@@ -1565,6 +1583,7 @@ function AttributeEditor(props) {
     });
 
     return () => {
+      if (dragBoxRef.current === dragBox) dragBoxRef.current = null;
       map.removeInteraction(dragBox);
     };
   }, [props.map, vectorLayerRef, selectedIdsRef, visibleIdsRef, model]);
@@ -1676,6 +1695,14 @@ function AttributeEditor(props) {
           title: pluginSettings.title,
           color: pluginSettings.color,
           description: "Redigera attribut för WFS-lager",
+          onWindowShow: () => {
+            windowVisibleRef.current = true;
+            dragBoxRef.current?.setActive(true);
+          },
+          onWindowHide: () => {
+            windowVisibleRef.current = false;
+            dragBoxRef.current?.setActive(false);
+          },
           customPanelHeaderButtons: [
             {
               icon: <EditNoteIcon />,
@@ -1707,7 +1734,6 @@ function AttributeEditor(props) {
           onlyFilteredRef={onlyFilteredRef}
           serviceList={serviceList}
           featureIndexRef={featureIndexRef}
-          graveyardRef={graveyardRef}
           draftBaselineRef={draftBaselineRef}
           idFieldRef={idFieldRef}
           map={props.map}

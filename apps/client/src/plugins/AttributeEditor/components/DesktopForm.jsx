@@ -36,12 +36,12 @@ const MAX_LEFT = 800; // px
 
 export default function DesktopForm({
   s,
+  filterPageResetSuppressRef,
   // left list
   visibleFormList,
   selectedIds,
   onFormRowClick,
   focusedId,
-  lastEditTargetIdsRef,
   focusPrev,
   focusNext,
 
@@ -122,18 +122,24 @@ export default function DesktopForm({
     functionalCookiesOk,
   });
 
-  // Reset to first page when filters change
+  // Reset to first page when filters change — except when the change comes
+  // from the View's form-edit filter sync (it sets the suppress ref):
+  // resetting then would yank the list to page 1 on every keystroke in a
+  // filtered column.
   React.useEffect(() => {
+    if (filterPageResetSuppressRef?.current) {
+      filterPageResetSuppressRef.current = false;
+      return;
+    }
     setCurrentPage(0);
-  }, [columnFilters, setCurrentPage]);
+  }, [columnFilters, setCurrentPage, filterPageResetSuppressRef]);
 
   // Navigate to the page containing focusedId when it actually changes
   // (e.g. via focusPrev/focusNext). We track the previous value so that
   // re-renders caused by visibleFormList updates (bulk edits etc.) don't
-  // snap the user back to focusedId's page. Initialized to null (NOT
-  // focusedId): seeding it with the current focus made the ref equal on
-  // mount, so opening the form always landed on page 1 regardless of
-  // where the focused row lives. String comparison bridges id types.
+  // snap the user back to focusedId's page. Starts as null so the mount
+  // itself counts as a focus change and jumps to the focused row's page.
+  // String comparison bridges mixed id types.
   const prevFocusedIdRef = React.useRef(null);
   React.useEffect(() => {
     if (focusedId == null || isShowingAll) return;
@@ -318,10 +324,7 @@ export default function DesktopForm({
       setSavingNow(true);
 
       if (dirty) {
-        saveChanges({
-          toPending: true,
-          targetIds: lastEditTargetIdsRef.current || undefined,
-        });
+        saveChanges({ toPending: true });
       }
 
       await Promise.resolve(commitTableEdits());

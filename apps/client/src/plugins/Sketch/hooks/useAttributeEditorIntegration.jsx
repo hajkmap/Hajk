@@ -136,6 +136,11 @@ const useAttributeEditorIntegration = ({
 
   const splitContextRef = React.useRef(null);
   const splitDrawInteractionRef = React.useRef(null);
+  // Cleanup for an in-progress split. Held in a ref so both the effect's
+  // teardown (unmount/dep change mid-split) and a re-entrant split-start
+  // can end the previous split — without it, aborting before the first
+  // click leaked the keydown listener and the snap helper key.
+  const splitCleanupRef = React.useRef(null);
 
   // Persistent ref for geometry undo - survives effect re-runs
   // Key: canonical feature ID, Value: geometry before translation/modification
@@ -914,10 +919,28 @@ const useAttributeEditorIntegration = ({
       // collection (their edit nodes disappear and vertex editing stops
       // working), and features that were unmarked come back.
       syncOlSelection(selectedIdsRef.current || []);
+
+      // Also re-publish to Sketch's Edit-/MoveView (same pattern as the
+      // select-ids handler): without this, a feature that just became
+      // deletion-marked stayed active in those panels — nodes went out but
+      // Flytta/Rotera silently no-opped against it. The dedup ref must be
+      // reset first, and publishToEditView's own deletion guard turns a
+      // now-deleted head feature into null (clearing the panel).
+      lastPublishRef.id = null;
+      lastPublishRef.chan = null;
+      const currentIds = selectedIdsRef.current || [];
+      if (currentIds.length) {
+        const f = findAeFeatureById(currentIds[0]);
+        publishToEditView(f || null);
+      } else {
+        publishToEditView(null);
+      }
     });
 
     const offAttribSelectIds = editBus.on("attrib:select-ids", (ev) => {
-      // Sync OL selection with logical ids from UI
+      // Sync OL selection with logical ids from UI. detail.mode is
+      // informational only — the ids list is always the complete final
+      // selection and replaces the previous state wholesale.
       const { ids = [] } = ev.detail || {};
 
       // Store selected IDs so we can restore selection after effect re-runs
@@ -1088,36 +1111,16 @@ const useAttributeEditorIntegration = ({
     });
 
     // ============================================================
-    // SECTION: Manual coordinate snapping helper
-    // ============================================================
-    // Snaps a coordinate to the nearest snap target (vertex, edge, midpoint,
-    // or intersection) by delegating to the central SnapHelper.
-    const snapCoordinate = (coordinate) => {
-      return map.snapHelper?.snapCoordinate(coordinate) ?? coordinate;
-    };
-
-    // Listen for snap-coordinate requests from DrawModel (for fixed length mode)
-    const offSnapRequest = editBus.on(
-      "sketch:snap-coordinate-request",
-      (ev) => {
-        const { coordinate, requestId } = ev.detail || {};
-        if (!coordinate || !requestId) return;
-
-        const snappedCoordinate = snapCoordinate(coordinate);
-        editBus.emit("sketch:snap-coordinate-response", {
-          requestId,
-          originalCoordinate: coordinate,
-          snappedCoordinate,
-        });
-      }
-    );
-
-    // ============================================================
     // SECTION: Split feature mode
     // ============================================================
     const offSplitStart = editBus.on("attrib:split-start", (ev) => {
       const { featureId, geometryType } = ev.detail || {};
       if (!featureId) return;
+
+      // Restart semantics: a split may already be in progress (double-click
+      // on the button) — clean the previous one up silently first, so two
+      // Draw interactions and two keydown listeners can never stack.
+      splitCleanupRef.current?.(false);
 
       // Store context
       splitContextRef.current = { featureId, geometryType };
@@ -1176,6 +1179,7 @@ const useAttributeEditorIntegration = ({
 
       // Cleanup function for split drawing
       const cleanupSplitDraw = (cancelled = false) => {
+        splitCleanupRef.current = null;
         document.removeEventListener("keydown", handleSplitKeyDown);
         map.removeInteraction(drawInteraction);
         map.snapHelper?.delete?.("attributeEditorSplit");
@@ -1222,6 +1226,10 @@ const useAttributeEditorIntegration = ({
 
       // Add keyboard listener
       document.addEventListener("keydown", handleSplitKeyDown);
+
+      // Expose the cleanup: the effect teardown and a re-entrant
+      // split-start use it to end this split without leaks.
+      splitCleanupRef.current = cleanupSplitDraw;
 
       // Handle draw abort (triggered by abortDrawing())
       drawInteraction.on("drawabort", () => {
@@ -1595,17 +1603,13 @@ const useAttributeEditorIntegration = ({
       try {
         offMergeFeatures();
       } catch {}
+      // End an in-progress split via its own cleanup (removes the keydown
+      // listener and the snap helper key too — plain removeInteraction
+      // leaked both when the split had not received its first click, since
+      // OL only fires drawabort for a started sketch) and tell AE.
       try {
-        offSnapRequest();
+        splitCleanupRef.current?.(true);
       } catch {}
-      // Cleanup split draw interaction if active
-      if (splitDrawInteractionRef.current) {
-        try {
-          map.removeInteraction(splitDrawInteractionRef.current);
-        } catch {}
-        splitDrawInteractionRef.current = null;
-        splitContextRef.current = null;
-      }
       try {
         layers.un?.("add", onLayerAdd);
       } catch {}

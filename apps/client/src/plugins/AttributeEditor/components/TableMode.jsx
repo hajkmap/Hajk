@@ -23,7 +23,7 @@ import useCookieStatus from "../../../hooks/useCookieStatus";
 import TableRow from "./TableRow";
 import { usePagination, SHOW_ALL_VALUE } from "../hooks/usePagination";
 import { useScrollToSelectedRow } from "../hooks/useScrollToSelectedRow";
-import { isBooleanTrue } from "../helpers/helpers";
+import { normalizeFilterValue } from "../helpers/helpers";
 
 const DEFAULT_WRAP_CH = 100;
 const SHOW_ALL_WARNING_THRESHOLD = 100;
@@ -278,24 +278,10 @@ export default function TableMode(props) {
       const active = columnFilters?.[columnKey];
       if (!Array.isArray(active) || active.length === 0) return;
 
-      // Normalize datetime strings for consistent comparison
-      const isDt = FIELD_META.some(
-        (m) => m.key === columnKey && m.type === "datetime"
-      );
-      // Boolean filters live in the cells' "Ja"/"Nej" space (null = "Nej"),
-      // so the sync must translate the raw true/false edit values the same way
-      const isBool = FIELD_META.some(
-        (m) => m.key === columnKey && m.type === "boolean"
-      );
-      const norm = (v) => {
-        if (isBool) return isBooleanTrue(v) ? "Ja" : "Nej";
-        const s = String(v ?? "");
-        if (!isDt) return s;
-        const match = s.match(
-          /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/
-        );
-        return match ? `${match[1]} ${match[2]}${match[3] || ":00"}` : s;
-      };
+      // Shared filter-space normalization (datetime reduction, boolean
+      // Ja/Nej) — the form-edit sync in the View uses the same function.
+      const colType = FIELD_META.find((m) => m.key === columnKey)?.type;
+      const norm = (v) => normalizeFilterValue(colType, v);
 
       const fromStr = norm(fromValue);
       const toStr = norm(toValue);

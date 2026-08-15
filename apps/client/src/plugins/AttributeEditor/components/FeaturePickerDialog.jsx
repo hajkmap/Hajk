@@ -70,10 +70,7 @@ export default function FeaturePickerDialog({
   };
 
   const handleConfirm = (e) => {
-    onSelect(
-      Array.from(selectedIds),
-      addToExisting || e.ctrlKey || e.metaKey
-    );
+    onSelect(Array.from(selectedIds), addToExisting || e.ctrlKey || e.metaKey);
     onClose();
   };
 
@@ -123,10 +120,12 @@ export default function FeaturePickerDialog({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 2,
-          maxHeight: "80vh",
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: 2,
+            maxHeight: "80vh",
+          },
         },
       }}
     >

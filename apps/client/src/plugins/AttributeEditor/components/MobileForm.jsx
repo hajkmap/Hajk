@@ -33,7 +33,6 @@ export default function MobileForm({
   focusedId,
 
   // form
-  lastEditTargetIdsRef,
   focusedFeature,
   FIELD_META,
   changedFields,
@@ -103,10 +102,7 @@ export default function MobileForm({
     try {
       setSavingNow(true);
       if (dirty) {
-        saveChanges({
-          toPending: true,
-          targetIds: lastEditTargetIdsRef.current || undefined,
-        });
+        saveChanges({ toPending: true });
       }
       await Promise.resolve(commitTableEdits());
     } finally {

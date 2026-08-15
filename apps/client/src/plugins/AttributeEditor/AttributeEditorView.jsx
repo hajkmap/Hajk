@@ -22,7 +22,11 @@ import MobileForm from "./components/MobileForm";
 import DesktopForm from "./components/DesktopForm";
 import NotificationBar from "./helpers/NotificationBar";
 import { editBus } from "../../buses/editBus";
-import { pickPreferredId, isDraftId, isBooleanTrue } from "./helpers/helpers";
+import {
+  isDraftId,
+  isBooleanTrue,
+  normalizeFilterValue,
+} from "./helpers/helpers";
 import { useSnackbar } from "notistack";
 import GeoJSON from "ol/format/GeoJSON";
 import Feature from "ol/Feature";
@@ -69,7 +73,6 @@ export default function AttributeEditorView({
   selectedIdsRef,
   serviceList,
   featureIndexRef,
-  graveyardRef,
   model,
   draftBaselineRef,
   idFieldRef,
@@ -105,12 +108,15 @@ export default function AttributeEditorView({
 
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [focusedId, setFocusedId] = useState(null);
-  const lastEditTargetIdsRef = useRef(null);
   const anchorRef = useRef({ id: null, index: null });
 
   const explicitClearRef = React.useRef(false);
 
   const [columnFilters, setColumnFilters] = useState({});
+  // Set by the form-edit filter sync right before it touches columnFilters;
+  // DesktopForm's page-reset effect consumes it so the sync doesn't yank
+  // the form list back to page 1 mid-typing.
+  const filterPageResetSuppressRef = useRef(false);
   const [columnFilterUI, setColumnFilterUI] = useState({});
   const [openFilterColumn, setOpenFilterColumn] = useState(null);
   const filterOverlayRef = useRef(null);
@@ -307,6 +313,11 @@ export default function AttributeEditorView({
 
   React.useEffect(() => {
     const offSelIds = editBus.on("attrib:select-ids", (ev) => {
+      // NOTE on the event contract: detail.mode ("replace"/"toggle"/"add"/
+      // "clear") is INFORMATIONAL ONLY — every listener (this one and the
+      // Sketch hook's) always REPLACES its state with the full ids list, so
+      // emitters must always send the complete final selection.
+      //
       // "attribute-editor-sync" events come from View paths that have already
       // set the table/form selection state locally — they exist to keep the
       // map side (Sketch's OL selection) in sync. Re-processing them here
@@ -332,7 +343,11 @@ export default function AttributeEditorView({
       setTableSelectedIds(new Set(canonical));
       setSelectedIds(new Set(canonical));
 
-      const focus = pickPreferredId(canonical);
+      // Focus follows the LAST id in the list: every emitter appends newly
+      // added ids last (Set insertion order in the toggle/add paths), so
+      // this is the most recently selected feature. Preferring numeric ids
+      // here kept focus glued to a draft no matter what was clicked.
+      const focus = canonical.length ? canonical[canonical.length - 1] : null;
       setFocusedId(focus);
 
       if (focus != null && ev.detail?.source !== "map") {
@@ -724,6 +739,12 @@ export default function AttributeEditorView({
     const q = searchText.trim().toLowerCase();
     const editingId = tableEditing?.id ?? null;
 
+    // Searchable keys: id + visible field columns (mirrors visibleFormList)
+    const searchKeys = (() => {
+      const keys = FM.filter((m) => !m.hidden).map((m) => m.key);
+      return keys.includes("id") ? keys : ["id", ...keys];
+    })();
+
     // Build a set of datetime field keys for normalization
     const dtKeys = new Set(
       FM.filter((m) => m.type === "datetime").map((m) => m.key)
@@ -769,8 +790,11 @@ export default function AttributeEditorView({
       const matchesSearch =
         !q ||
         editingId === f.id ||
-        Object.values(f).some((val) =>
-          String(val ?? "")
+        // Search id + visible field values only (same key set as the form
+        // list) — Object.values also matched internal fields, so searching
+        // e.g. "delete" hit every delete-marked row via __pending.
+        searchKeys.some((k) =>
+          String(f[k] ?? "")
             .toLowerCase()
             .includes(q)
         );
@@ -935,18 +959,21 @@ export default function AttributeEditorView({
 
         src.addFeature(clone);
         featureIndexRef.current.set(toId, clone);
-        graveyardRef.current.delete(toId);
       });
 
       layer?.changed?.();
     },
-    [vectorLayerRef, featureIndexRef, graveyardRef, model]
+    [vectorLayerRef, featureIndexRef, model]
   );
 
   const duplicateSelectedRows = useCallback(() => {
     if (!tableSelectedIds.size) return;
     const allIds = [...tableSelectedIds];
-    const ids = allIds.filter((id) => !isDraftId(id));
+    // Mirror DUPLICATE_ROWS' own eligibility exactly (no drafts, and the id
+    // must exist in featuresMap) — the reducer silently skips unknown ids,
+    // which would misalign the computed `created` ids below against the
+    // drafts actually created.
+    const ids = allIds.filter((id) => !isDraftId(id) && featuresMap.has(id));
     if (!ids.length) {
       return;
     }
@@ -985,6 +1012,7 @@ export default function AttributeEditorView({
     controller,
     model,
     state.nextTempId,
+    featuresMap,
     fieldMeta,
     draftBaselineRef,
     showNotification,
@@ -998,7 +1026,8 @@ export default function AttributeEditorView({
         ? [focusedId]
         : [];
 
-    const ids = base.filter((id) => !isDraftId(id));
+    // Same eligibility mirror as duplicateSelectedRows (see comment there)
+    const ids = base.filter((id) => !isDraftId(id) && featuresMap.has(id));
     if (!ids.length) return;
 
     const start = state.nextTempId;
@@ -1040,6 +1069,7 @@ export default function AttributeEditorView({
     controller,
     model,
     state.nextTempId,
+    featuresMap,
     fieldMeta,
     draftBaselineRef,
     showNotification,
@@ -1078,7 +1108,6 @@ export default function AttributeEditorView({
           draftBaselineRef.current.set(tempId, baseline);
 
           featureIndexRef.current.set(tempId, feature);
-          graveyardRef.current.delete(tempId);
 
           const layer = vectorLayerRef.current;
           const aeSrc = layer?.getSource?.();
@@ -1153,7 +1182,6 @@ export default function AttributeEditorView({
     ui.mode,
     vectorLayerRef,
     featureIndexRef,
-    graveyardRef,
     visibleIdsRef,
     draftBaselineRef,
     showNotification,
@@ -1272,11 +1300,17 @@ export default function AttributeEditorView({
 
       // 1) Start with ALL rows (not filteredAndSorted)
       //    and apply the search string …
+      // Same searchable key set as filteredAndSorted (id + visible fields) —
+      // the facet must mirror the table's search semantics.
+      const facetSearchKeys = (() => {
+        const keys = FM.filter((m) => !m.hidden).map((m) => m.key);
+        return keys.includes("id") ? keys : ["id", ...keys];
+      })();
       const rowsAfterSearch = allRows.filter((r) => {
         if (!q) return true;
         if (tableEditing && tableEditing.id === r.id) return true;
-        return Object.values(r).some((val) =>
-          String(val ?? "")
+        return facetSearchKeys.some((k) =>
+          String(r[k] ?? "")
             .toLowerCase()
             .includes(q)
         );
@@ -1342,7 +1376,9 @@ export default function AttributeEditorView({
     [
       allRows,
       features.length,
-      pendingAdds.length,
+      // The full array (not .length): the cache-key signature reads draft
+      // VALUES, so a draft edit with unchanged count must recompute too.
+      pendingAdds,
       pendingEdits,
       pendingDeletes,
       searchText,
@@ -2616,6 +2652,40 @@ export default function AttributeEditorView({
     }
   }
 
+  // Form-mode counterpart of TableMode's syncFilterOnCellChange: an edit in
+  // a column with an active filter extends the filter with the new value so
+  // the row doesn't vanish from the lists mid-typing. Unlike the table
+  // version this runs BEFORE the debounced op lands in the model, so the
+  // still-used check must NOT exclude the edited rows — their old value is
+  // still live for up to a debounce window, and dropping it early would
+  // blink the row out. The trade-off: the final value's last intermediate
+  // (e.g. "Stockhol") can linger as a selected-but-unmatched filter entry,
+  // which is invisible in the facet list and harmless.
+  function syncFilterOnFormEdit(columnKey, toValue, fromValue) {
+    const active = columnFilters?.[columnKey];
+    if (!Array.isArray(active) || active.length === 0) return;
+
+    const colType = FM.find((m) => m.key === columnKey)?.type;
+    const normF = (v) => normalizeFilterValue(colType, v);
+    const fromStr = normF(fromValue);
+    const toStr = normF(toValue);
+    if (fromStr === toStr) return;
+
+    filterPageResetSuppressRef.current = true;
+    setColumnFilters((prev) => {
+      const before = prev?.[columnKey] || [];
+      const nextSet = new Set(before.map(normF));
+      if (toStr !== "") nextSet.add(toStr);
+      if (fromStr !== "" && fromStr !== toStr) {
+        const stillUsed = allRows.some(
+          (r) => normF(r?.[columnKey]) === fromStr
+        );
+        if (!stillUsed) nextSet.delete(fromStr);
+      }
+      return { ...(prev || {}), [columnKey]: Array.from(nextSet) };
+    });
+  }
+
   function handleFieldChange(key, value) {
     const now = Date.now();
     const norm = value ?? "";
@@ -2678,7 +2748,14 @@ export default function AttributeEditorView({
         ops.push({ id, key, value: commitVal });
       }
     });
-    if (ops.length) debouncedBatchEdit(ops);
+    if (ops.length) {
+      // Keep an active filter on this column in step with the edit (same
+      // behavior as editing a cell in the table view). fromValue is the
+      // field's previous form value — for multi-edits the other rows' old
+      // values are filter selections already and stay untouched.
+      syncFilterOnFormEdit(key, commitVal, editValues[key]);
+      debouncedBatchEdit(ops);
+    }
   }
 
   function saveChanges(opts = {}) {
@@ -3087,7 +3164,6 @@ export default function AttributeEditorView({
         setPluginSettings={setPluginSettings}
         dirty={dirty}
         saveChanges={saveChanges}
-        lastEditTargetIdsRef={lastEditTargetIdsRef}
         commitTableEdits={commitTableEdits}
         tablePendingAdds={pendingAdds}
         tablePendingEdits={pendingEdits}
@@ -3142,7 +3218,6 @@ export default function AttributeEditorView({
           undoLatestFormChange={undoLatestFormChange}
           tablePendingEdits={pendingEdits}
           tablePendingAdds={pendingAdds}
-          lastEditTargetIdsRef={lastEditTargetIdsRef}
           duplicateInForm={duplicateInForm}
           splitFeature={splitFeature}
           canSplitGeometry={canSplitGeometry}
@@ -3223,6 +3298,7 @@ export default function AttributeEditorView({
       ) : (
         <DesktopForm
           s={s}
+          filterPageResetSuppressRef={filterPageResetSuppressRef}
           visibleFormList={visibleFormList}
           selectedIds={selectedIds}
           onFormRowClick={onFormRowClick}
@@ -3252,7 +3328,6 @@ export default function AttributeEditorView({
           setDeleteState={setDeleteState}
           tablePendingEdits={pendingEdits}
           tablePendingAdds={pendingAdds}
-          lastEditTargetIdsRef={lastEditTargetIdsRef}
           duplicateInForm={duplicateInForm}
           splitFeature={splitFeature}
           canSplitGeometry={canSplitGeometry}

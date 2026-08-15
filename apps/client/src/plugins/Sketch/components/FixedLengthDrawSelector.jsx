@@ -43,48 +43,67 @@ const FixedLengthDrawSelector = (props) => {
   );
   const [angleInput, setAngleInput] = React.useState(String(props.fixedAngle));
 
-  // Sync local state with props when they change externally
+  // Sync local state with props when they change externally. Numerically
+  // tolerant: while the field holds a representation of the same value
+  // (e.g. "0.50" vs 0.5) the user's text is left alone — overwriting on
+  // every echo made it impossible to type values like "0.5" at all.
   React.useEffect(() => {
-    setLengthInput(String(props.fixedLength));
+    setLengthInput((cur) =>
+      parseFloat(cur) === props.fixedLength ? cur : String(props.fixedLength)
+    );
   }, [props.fixedLength]);
 
   React.useEffect(() => {
-    setAngleInput(String(props.fixedAngle));
+    setAngleInput((cur) =>
+      parseFloat(cur) === props.fixedAngle ? cur : String(props.fixedAngle)
+    );
   }, [props.fixedAngle]);
 
-  // Handles change on the fixed-length input. Validates and constrains to 0.1-100000m
+  // While typing: propagate only values that are already valid, UNCHANGED —
+  // clamping/normalizing happens at blur. Clamping on every keystroke made
+  // the field fight the user ("0" bounced back as "0.1", "-4" as "356").
   const handleFixedLengthChange = (e) => {
     const inputValue = e.target.value;
     setLengthInput(inputValue); // Update local state immediately
 
-    // Only propagate valid values to parent
-    if (inputValue === "") {
-      return; // Don't update parent while editing
-    }
-
     const value = parseFloat(inputValue);
-    if (!isNaN(value)) {
-      const constrainedLength =
-        value < 0.1 ? 0.1 : value > 100000 ? 100000 : value;
-      props.setFixedLength(constrainedLength);
+    if (!isNaN(value) && value >= 0.1 && value <= 100000) {
+      props.setFixedLength(value);
     }
   };
 
-  // Handles change on the fixed-angle input. Normalizes to 0-360 degrees
   const handleFixedAngleChange = (e) => {
     const inputValue = e.target.value;
     setAngleInput(inputValue); // Update local state immediately
 
-    // Only propagate valid values to parent
-    if (inputValue === "") {
-      return; // Don't update parent while editing
-    }
-
     const value = parseFloat(inputValue);
-    if (!isNaN(value)) {
-      const normalizedAngle = ((value % 360) + 360) % 360;
-      props.setFixedAngle(normalizedAngle);
+    if (!isNaN(value) && value >= 0 && value < 360) {
+      props.setFixedAngle(value);
     }
+  };
+
+  // At blur: constrain/normalize and commit — or restore the last valid
+  // value when the field doesn't parse.
+  const commitFixedLength = () => {
+    const value = parseFloat(lengthInput);
+    if (isNaN(value)) {
+      setLengthInput(String(props.fixedLength));
+      return;
+    }
+    const constrained = value < 0.1 ? 0.1 : value > 100000 ? 100000 : value;
+    props.setFixedLength(constrained);
+    setLengthInput(String(constrained));
+  };
+
+  const commitFixedAngle = () => {
+    const value = parseFloat(angleInput);
+    if (isNaN(value)) {
+      setAngleInput(String(props.fixedAngle));
+      return;
+    }
+    const normalized = ((value % 360) + 360) % 360;
+    props.setFixedAngle(normalized);
+    setAngleInput(String(normalized));
   };
 
   // Handle switch click without triggering accordion toggle
@@ -136,6 +155,7 @@ const FixedLengthDrawSelector = (props) => {
                 size="small"
                 value={lengthInput}
                 onChange={handleFixedLengthChange}
+                onBlur={commitFixedLength}
                 disabled={props.uiDisabled}
                 slotProps={{
                   htmlInput: {
@@ -159,6 +179,7 @@ const FixedLengthDrawSelector = (props) => {
                 size="small"
                 value={angleInput}
                 onChange={handleFixedAngleChange}
+                onBlur={commitFixedAngle}
                 disabled={props.uiDisabled}
                 slotProps={{
                   htmlInput: {

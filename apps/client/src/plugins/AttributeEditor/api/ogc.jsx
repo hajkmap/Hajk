@@ -266,9 +266,18 @@ export function createOgcApi(baseUrl) {
           if (!fc.hasZ) fc.hasZ = dtResult.hasZ;
         }
       }
-      if (limit && Array.isArray(fc.features) && fc.features.length >= limit) {
-        // The server returned exactly the cap — the layer likely has more.
-        fc.limitReached = Number(limit);
+      {
+        // Prefer the server's declared total (numberMatched in WFS 2.0
+        // GeoJSON, totalFeatures in GeoServer's legacy output) — returning
+        // exactly `limit` rows is not proof of truncation (a layer with
+        // exactly 10000 objects warned falsely after every save).
+        const declared = Number(fc.numberMatched ?? fc.totalFeatures);
+        const returned = Array.isArray(fc.features) ? fc.features.length : 0;
+        if (Number.isFinite(declared)) {
+          if (limit && declared > returned) fc.limitReached = Number(limit);
+        } else if (limit && returned >= limit) {
+          fc.limitReached = Number(limit);
+        }
       }
       fc.layerConfig = layer;
       return fc;
@@ -322,9 +331,20 @@ export function createOgcApi(baseUrl) {
         if (!fc.hasZ) fc.hasZ = dtResult.hasZ;
       }
     }
-    if (limit && Array.isArray(fc.features) && fc.features.length >= limit) {
-      // The server returned exactly the cap — the layer likely has more.
-      fc.limitReached = Number(limit);
+    {
+      // Same declared-total logic as the JSON branch: WFS XML responses
+      // carry numberMatched (2.0) or numberOfFeatures (1.1) on the root
+      // element ("unknown" is possible and falls through to the heuristic).
+      const m = responseText
+        .slice(0, 2000)
+        .match(/(?:numberMatched|numberOfFeatures)="(\d+)"/);
+      const declared = m ? Number(m[1]) : NaN;
+      const returned = Array.isArray(fc.features) ? fc.features.length : 0;
+      if (Number.isFinite(declared)) {
+        if (limit && declared > returned) fc.limitReached = Number(limit);
+      } else if (limit && returned >= limit) {
+        fc.limitReached = Number(limit);
+      }
     }
     fc.layerConfig = layer;
     return fc;
@@ -752,6 +772,12 @@ function parseWfstResponse(xml) {
       deleted: 0,
     };
   }
+
+  // Sanitize the fids regardless of which path produced them: the OL parser
+  // can yield null entries, and WFS 1.0-style responses use the literal
+  // fid "none" for "no id assigned" — both would reach the re-selection
+  // code (which calls fid.match(...)) and the updates branch otherwise.
+  insertedIds = insertedIds.filter((s) => s && s !== "none");
 
   // 4) If we have counts or messages, build the response
   const response = { success: true, inserted, updated, deleted, insertedIds };

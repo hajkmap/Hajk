@@ -48,6 +48,26 @@ export function isBooleanTrue(value) {
 }
 
 /**
+ * Normalizes a value into the filter/facet comparison space for a column
+ * type: booleans become the cells' "Ja"/"Nej" (null counts as "Nej"),
+ * datetimes are reduced to "YYYY-MM-DD HH:mm(:ss)", everything else is the
+ * String form. Table cell editing, form editing and the facet lists must
+ * all normalize through this same function.
+ * @param {string|undefined} type Column type from field metadata
+ * @param {*} value
+ * @returns {string}
+ */
+export function normalizeFilterValue(type, value) {
+  if (type === "boolean") return isBooleanTrue(value) ? "Ja" : "Nej";
+  const s = String(value ?? "");
+  if (type !== "datetime") return s;
+  const match = s.match(
+    /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/
+  );
+  return match ? `${match[1]} ${match[2]}${match[3] || ":00"}` : s;
+}
+
+/**
  * Checks whether an ID represents a draft (temporary, unsaved) feature.
  * Drafts have negative numeric IDs (e.g. -1, -2, or "-1").
  * Works with both number and string types.
@@ -686,10 +706,4 @@ export function idAliases(x) {
   idAliasCache.set(s, result);
 
   return result;
-}
-
-export function pickPreferredId(aliases) {
-  // Prefer numbers over strings for consistency
-  const num = aliases.find((a) => typeof a === "number");
-  return num ?? aliases[0] ?? null;
 }

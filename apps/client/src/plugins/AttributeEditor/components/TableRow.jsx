@@ -291,7 +291,13 @@ const TableRow = ({
         return (
           <td
             key={meta.key}
-            data-editable={String(isEditableField(meta))}
+            data-editable={String(
+              // Must reflect the cell's ACTUAL editability, delete state
+              // included: the tr's double-click handler treats
+              // data-editable="true" as "the cell handles this" and then
+              // skips opening the form.
+              isEditableField(meta) && row.__pending !== "delete"
+            )}
             style={{
               ...tdBase,
               ...(isDeletedRow ? s.tdStrike : null),

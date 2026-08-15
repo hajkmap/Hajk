@@ -1821,6 +1821,13 @@ class DrawModel {
     if (this.#activeSketch) {
       this.#drawSource.removeFeature(this.#activeSketch);
       this.#activeSketch = null;
+      // Tell the initiator the sketch was aborted (same as finishDraws'
+      // too-few-points branch does) — without this, SketchView's
+      // drawingActive stayed true when fixed-length mode was toggled off
+      // mid-sketch, leaving the segment buttons active but no-op.
+      if (this.#customHandleDrawAbort) {
+        this.#customHandleDrawAbort();
+      }
     }
 
     // Stop snap tracking and remove snap helper

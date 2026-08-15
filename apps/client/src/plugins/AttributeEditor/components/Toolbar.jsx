@@ -20,7 +20,6 @@ export default function Toolbar({
   setPluginSettings,
   dirty,
   saveChanges,
-  lastEditTargetIdsRef,
   commitTableEdits,
   tablePendingAdds,
   tablePendingEdits,
@@ -138,10 +137,7 @@ export default function Toolbar({
       setSavingNow(true);
 
       if (dirty) {
-        saveChanges({
-          toPending: true,
-          targetIds: lastEditTargetIdsRef.current || undefined,
-        });
+        saveChanges({ toPending: true });
       }
 
       ok = (await Promise.resolve(commitTableEdits())) !== false;
