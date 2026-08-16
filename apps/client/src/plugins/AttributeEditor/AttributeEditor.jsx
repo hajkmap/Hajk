@@ -195,6 +195,12 @@ function AttributeEditor(props) {
   const dragBoxRef = React.useRef(null);
   const [serviceList, setServiceList] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
+  // Ref mirror of isLoading for event handlers (the sketch addfeature
+  // handler must see the CURRENT value without effect re-wiring). Updated
+  // at every setIsLoading call site — not via an effect, whose one-render
+  // lag would leave a window where a drawing enters the draft flow while
+  // the load is still in flight.
+  const isLoadingRef = React.useRef(false);
   const [allowMultiGeom, setAllowMultiGeom] = React.useState(false);
 
   // Keep rowIdMapRef in sync with features for O(1) toCanonicalId lookups.
@@ -656,6 +662,7 @@ function AttributeEditor(props) {
       setFieldMetaLocal([]);
       model.setFieldMetadata([]);
       model.clearFeatureCollection?.();
+      isLoadingRef.current = true;
       setIsLoading(true);
 
       try {
@@ -938,7 +945,10 @@ function AttributeEditor(props) {
         });
         editBus.emit("edit:service-cleared", { source: "attrib-load-error" });
       } finally {
+        // Same abort guard as the state: an aborted run must not clear the
+        // flag that a newer service-selected run just set for ITS load.
         if (!signal.aborted) {
+          isLoadingRef.current = false;
           setIsLoading(false);
         }
       }
@@ -965,6 +975,7 @@ function AttributeEditor(props) {
       setFieldMetaLocal([]);
       model.setFieldMetadata([]);
       model.clearFeatureCollection?.();
+      isLoadingRef.current = false;
       setIsLoading(false);
       setAllowMultiGeom(false);
 
@@ -1093,6 +1104,19 @@ function AttributeEditor(props) {
           !currentServiceIdRef.current ||
           currentServiceIdRef.current === "NONE_ID"
         ) {
+          return;
+        }
+
+        // The layer/data are still loading: a draft created now has nowhere
+        // to live (the AE vector layer doesn't exist yet) and its row is
+        // wiped by the INIT that ends the load — the drawing would be lost
+        // entirely. Leave it as a plain sketch drawing (flag removed so no
+        // later flow treats it as an AE feature) and tell the user via the
+        // View's snackbar. This guard must run BEFORE any feature mutation
+        // below (id stripping, style reset) so the drawing stays intact.
+        if (isLoadingRef.current) {
+          f.set?.("SKETCH_ATTRIBUTEEDITOR", false, true);
+          editBus.emit("attrib:draw-while-loading", {});
           return;
         }
 

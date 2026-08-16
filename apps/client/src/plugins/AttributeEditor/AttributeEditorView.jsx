@@ -160,9 +160,19 @@ export default function AttributeEditorView({
         { variant: "error", autoHideDuration: 10000 }
       );
     });
+    // Drawing while the layer is still loading: the drawing is kept as a
+    // plain sketch drawing instead of becoming a draft (see the guard in
+    // AttributeEditor's addfeature handler) — explain that to the user.
+    const offDrawWhileLoading = editBus.on("attrib:draw-while-loading", () => {
+      enqueueSnackbar(
+        "Lagret laddas fortfarande — objektet ligger kvar som vanlig ritning. Rita igen när lagret har laddats för att skapa ett nytt objekt i lagret.",
+        { variant: "info", autoHideDuration: 8000 }
+      );
+    });
     return () => {
       off();
       offErr();
+      offDrawWhileLoading();
     };
   }, [enqueueSnackbar]);
 
