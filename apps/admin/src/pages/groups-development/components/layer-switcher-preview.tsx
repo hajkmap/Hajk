@@ -1,7 +1,12 @@
 import SearchIcon from "@mui/icons-material/Search";
+import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import {
   AppBar,
   Box,
+  IconButton,
   InputAdornment,
   Tab,
   Tabs,
@@ -22,12 +27,22 @@ interface LayerSwitcherPreviewProps {
   children: React.ReactNode;
   search: string;
   onSearchChange: (value: string) => void;
+  showFilter?: boolean;
+  showQuickAccess?: boolean;
+  showDrawOrderView?: boolean;
+  enableQuickAccessPresets?: boolean;
+  enableUserQuickAccessFavorites?: boolean;
 }
 
 export default function LayerSwitcherPreview({
   children,
   search,
   onSearchChange,
+  showFilter = true,
+  showQuickAccess = false,
+  showDrawOrderView = true,
+  enableQuickAccessPresets = false,
+  enableUserQuickAccessFavorites = false,
 }: LayerSwitcherPreviewProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<PreviewTab>("layers");
@@ -76,31 +91,81 @@ export default function LayerSwitcherPreview({
         >
           <Tab value="layers" label={t("maps.tab.mapContent")} />
           <Tab value="background" label={t("common.usage.BACKGROUND")} />
-          <Tab value="drawOrder" label={t("common.drawOrder")} />
+          {showDrawOrderView ? (
+            <Tab value="drawOrder" label={t("common.drawOrder")} />
+          ) : null}
         </Tabs>
       </StyledAppBar>
 
       {activeTab === "layers" ? (
         <>
-          <TextField
-            size="small"
-            value={search}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder={t("common.search-layers")}
-            variant="standard"
-            fullWidth
-            sx={{ px: 2, pt: 1.25, pb: 1 }}
-            slotProps={{
-              input: {
-                disableUnderline: true,
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" color="action" />
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
+          {showFilter ? (
+            <TextField
+              size="small"
+              value={search}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder={t("common.search-layers")}
+              variant="standard"
+              fullWidth
+              sx={{ px: 2, pt: 1.25, pb: 1 }}
+              slotProps={{
+                input: {
+                  disableUnderline: true,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" color="action" />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+          ) : null}
+
+          {showQuickAccess ? (
+            <Box
+              sx={{
+                px: 2,
+                py: 1,
+                borderTop: "1px solid",
+                borderBottom: "1px solid",
+                borderColor: "divider",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 1,
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  minWidth: 0,
+                }}
+              >
+                <StarBorderOutlinedIcon fontSize="small" />
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {t("groupsDevelopment.quickAccessTitle")}
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
+                {enableQuickAccessPresets ? (
+                  <IconButton size="small" disabled>
+                    <FolderOpenOutlinedIcon fontSize="small" />
+                  </IconButton>
+                ) : null}
+                {enableUserQuickAccessFavorites ? (
+                  <IconButton size="small" disabled>
+                    <PersonOutlineOutlinedIcon fontSize="small" />
+                  </IconButton>
+                ) : null}
+                <IconButton size="small" disabled>
+                  <MoreVertIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            </Box>
+          ) : null}
 
           <Box
             sx={{
@@ -113,8 +178,8 @@ export default function LayerSwitcherPreview({
                 listStyle: "none",
                 m: 0,
                 p: 0,
-                flex: 1,
-                minHeight: "100%",
+                flex: "0 0 auto",
+                minHeight: 0,
               },
               "& .group-layer-tree-item": {
                 listStyle: "none",
@@ -144,9 +209,7 @@ export default function LayerSwitcherPreview({
           }}
         >
           <Typography variant="body2" color="text.secondary" align="center">
-            {activeTab === "background"
-              ? t("map.drawOrderHelp")
-              : t("common.layerSwitcherHierarchyTreeDescription")}
+            {t("map.drawOrderHelp")}
           </Typography>
         </Box>
       )}

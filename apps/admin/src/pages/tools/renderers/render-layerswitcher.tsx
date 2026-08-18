@@ -14,9 +14,9 @@ import FormFieldGrid, {
   FormFieldRow,
 } from "../../../components/form-components/form-field-grid";
 import FormAccordion from "../../../components/form-components/form-accordion";
-import FormContainer from "../../../components/form-components/form-container";
 import { useTranslation } from "react-i18next";
-import { Controller, FieldValues, useForm } from "react-hook-form";
+import { Control, Controller, FieldValues, useForm } from "react-hook-form";
+import { useEffect } from "react";
 import { Tool } from "../../../api/tools";
 
 // Helper function to safely get option values
@@ -29,37 +29,120 @@ const getOption = <T,>(
   return options[key] as T;
 };
 
-export default function LayerSwitcherRenderer({ tool }: { tool: Tool }) {
+interface LayerSwitcherRendererProps {
+  tool: Tool;
+  control?: Control<FieldValues>;
+}
+
+export default function LayerSwitcherRenderer({
+  tool,
+  control: parentControl,
+}: LayerSwitcherRendererProps) {
   const { t } = useTranslation();
   const options = tool?.options;
-
-  const { control } = useForm<FieldValues>({
-    defaultValues: {
-      type: tool?.type ?? "",
-      ...(options
-        ? Object.fromEntries(
-            Object.entries(options).map(([k, v]) => {
-              if (v == null) return [`options.${k}`, ""];
-              if (typeof v === "object")
-                return [`options.${k}`, JSON.stringify(v)];
-              if (
-                typeof v === "string" ||
-                typeof v === "number" ||
-                typeof v === "boolean"
-              ) {
-                return [`options.${k}`, String(v)];
-              }
-              return [`options.${k}`, ""];
-            }),
-          )
-        : {}),
-    },
+  const { control: localControl, reset } = useForm<FieldValues>({
     mode: "onChange",
     reValidateMode: "onChange",
   });
+  const control = parentControl ?? localControl;
+
+  useEffect(() => {
+    if (tool && !parentControl) {
+      reset({
+        type: tool.type ?? "",
+        options: {
+          title: getOption(options, "title", ""),
+          active: getOption(options, "active", false),
+          description: getOption(options, "description", ""),
+          target: getOption(options, "target", "toolbar"),
+          position: getOption(options, "position", "left"),
+          width: getOption(options, "width", ""),
+          height: getOption(options, "height", ""),
+          visibleAtStart: getOption(options, "visibleAtStart", false),
+          visibleAtStartMobile: getOption(
+            options,
+            "visibleAtStartMobile",
+            false,
+          ),
+          showBreadcrumbs: getOption(options, "showBreadcrumbs", false),
+          showDrawOrderView: getOption(options, "showDrawOrderView", false),
+          showFilter: getOption(options, "showFilter", false),
+          showQuickAccess: getOption(options, "showQuickAccess", false),
+          legendForceTransparency: getOption(
+            options,
+            "legendForceTransparency",
+            false,
+          ),
+          legendTryHiDPI: getOption(options, "legendTryHiDPI", false),
+          enableTransparencySlider: getOption(
+            options,
+            "enableTransparencySlider",
+            true,
+          ),
+          cqlFilterVisible: getOption(options, "cqlFilterVisible", false),
+          enableSystemLayersSwitch: getOption(
+            options,
+            "enableSystemLayersSwitch",
+            false,
+          ),
+          lockDrawOrderBaselayer: getOption(
+            options,
+            "lockDrawOrderBaselayer",
+            false,
+          ),
+          drawOrderViewInfoText: getOption(options, "drawOrderViewInfoText", ""),
+          enableQuickAccessPresets: getOption(
+            options,
+            "enableQuickAccessPresets",
+            false,
+          ),
+          quickAccessTopicsInfoText: getOption(
+            options,
+            "quickAccessTopicsInfoText",
+            "",
+          ),
+          enableUserQuickAccessFavorites: getOption(
+            options,
+            "enableUserQuickAccessFavorites",
+            false,
+          ),
+          userQuickAccessFavoritesInfoText: getOption(
+            options,
+            "userQuickAccessFavoritesInfoText",
+            "",
+          ),
+          dropdownThemeMaps: getOption(options, "dropdownThemeMaps", false),
+          themeMapHeaderCaption: getOption(options, "themeMapHeaderCaption", ""),
+          minMaxZoomAlertOnToggleOnly: getOption(
+            options,
+            "minMaxZoomAlertOnToggleOnly",
+            false,
+          ),
+          backgroundSwitcherBlack: getOption(
+            options,
+            "backgroundSwitcherBlack",
+            true,
+          ),
+          backgroundSwitcherWhite: getOption(
+            options,
+            "backgroundSwitcherWhite",
+            true,
+          ),
+          enableOSM: getOption(options, "enableOSM", false),
+          OSMVisibleAtStart: getOption(options, "OSMVisibleAtStart", false),
+          renderSpecialBackgroundsAtBottom: getOption(
+            options,
+            "renderSpecialBackgroundsAtBottom",
+            false,
+          ),
+          instruction: getOption(options, "instruction", ""),
+        },
+      });
+    }
+  }, [tool, options, parentControl, reset]);
 
   return (
-    <FormContainer>
+    <>
       {/* Basic Information Panel */}
       <FormPanel title={t("common.information")}>
         <FormFieldGrid>
@@ -725,6 +808,6 @@ export default function LayerSwitcherRenderer({ tool }: { tool: Tool }) {
           </FormFieldRow>
         </FormFieldGrid>
       </FormAccordion>
-    </FormContainer>
+    </>
   );
 }

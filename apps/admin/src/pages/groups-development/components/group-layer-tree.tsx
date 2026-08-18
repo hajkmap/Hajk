@@ -13,9 +13,7 @@ import { toast } from "react-toastify";
 import { useGroups, useUpdateGroup } from "../../../api/groups";
 import { useLayers } from "../../../api/layers";
 import type { ToolOnMap } from "../../../api/maps";
-import {
-  getUpdateGroupErrorMessage,
-} from "../../groups/utils/group-errors";
+import { getUpdateGroupErrorMessage } from "../../groups/utils/group-errors";
 import type {
   CatalogDragItem,
   GroupDisplaySettings,
@@ -135,9 +133,8 @@ export default function GroupLayerTree({
   const [treeData, setTreeData] = useState<GroupLayerTreeNode[]>([]);
   const [visibleIds, setVisibleIds] = useState<Set<string>>(() => new Set());
   const [search, setSearch] = useState("");
-  const [addDialogTarget, setAddDialogTarget] = useState<AddDialogTarget | null>(
-    null,
-  );
+  const [addDialogTarget, setAddDialogTarget] =
+    useState<AddDialogTarget | null>(null);
   const [groupDisplaySettings, setGroupDisplaySettings] = useState<
     Record<string, GroupDisplaySettings>
   >({});
@@ -253,8 +250,7 @@ export default function GroupLayerTree({
         layerNames,
       ),
     );
-    const serverHydrated =
-      hydrateDisplaySettingsFromClientGroups(serverGroups);
+    const serverHydrated = hydrateDisplaySettingsFromClientGroups(serverGroups);
 
     // Compare dirty state against the same serializer used on save.
     baselineGroupsJsonRef.current = serializeClientGroupsJson(
@@ -264,8 +260,7 @@ export default function GroupLayerTree({
     );
 
     const pending = pendingDraftRef.current;
-    const restoringDraft =
-      pending != null && pending.toolId === activeLayerswitcher.toolId;
+    const restoringDraft = pending?.toolId === activeLayerswitcher.toolId;
     const optionsToLoad = restoringDraft
       ? pending.options
       : activeLayerswitcherOptions;
@@ -410,7 +405,11 @@ export default function GroupLayerTree({
       },
     ) => {
       setTreeData((current) => {
-        const next = insertCatalogItemIntoTree(current, catalogItem, dropOptions);
+        const next = insertCatalogItemIntoTree(
+          current,
+          catalogItem,
+          dropOptions,
+        );
 
         if (!next) {
           return current;
@@ -440,24 +439,21 @@ export default function GroupLayerTree({
     [],
   );
 
-  const handleMoveZoneDropToRoot = useCallback(
-    (moveItem: MoveZoneItem) => {
-      if (moveItem.kind === "layer") {
-        return;
-      }
+  const handleMoveZoneDropToRoot = useCallback((moveItem: MoveZoneItem) => {
+    if (moveItem.kind === "layer") {
+      return;
+    }
 
-      setTreeData((current) => {
-        const next = insertMoveZoneSubtreeIntoTree(current, moveItem.nodes, {
-          dropTargetId: GROUP_LAYER_TREE_ROOT_ID,
-        });
-        return next ?? current;
+    setTreeData((current) => {
+      const next = insertMoveZoneSubtreeIntoTree(current, moveItem.nodes, {
+        dropTargetId: GROUP_LAYER_TREE_ROOT_ID,
       });
-      setMoveZoneItems((current) =>
-        current.filter((entry) => entry.key !== moveItem.key),
-      );
-    },
-    [],
-  );
+      return next ?? current;
+    });
+    setMoveZoneItems((current) =>
+      current.filter((entry) => entry.key !== moveItem.key),
+    );
+  }, []);
 
   const canAcceptMoveZoneDropToRoot = useCallback(
     (item: MoveZoneItem) => item.kind === "group",
@@ -589,9 +585,24 @@ export default function GroupLayerTree({
 
   const handleToggleLayerVisibility = useCallback(
     (nodeId: GroupLayerTreeNode["id"]) => {
+      const node = treeData.find((entry) => entry.id === nodeId);
+      if (!node || node.data?.kind !== "layer") {
+        return;
+      }
+
+      const sourceId = node.data.sourceId;
+      const nextVisible = !visibleIds.has(String(nodeId));
+
       setVisibleIds((current) => toggleLayerVisibility(current, nodeId));
+      setLayerDisplaySettings((current) => ({
+        ...current,
+        [sourceId]: {
+          ...(current[sourceId] ?? DEFAULT_LAYER_DISPLAY_SETTINGS),
+          layerVisibleAtStart: nextVisible,
+        },
+      }));
     },
-    [],
+    [treeData, visibleIds],
   );
 
   const handleToggleGroupVisibility = useCallback(
@@ -801,7 +812,9 @@ export default function GroupLayerTree({
     );
   }, [editDialogTarget, groupDisplaySettings]);
 
-  const layerEditFormInitialValues = useMemo((): LayerFormValues | undefined => {
+  const layerEditFormInitialValues = useMemo(():
+    | LayerFormValues
+    | undefined => {
     if (!layerEditDialogTarget) {
       return undefined;
     }
@@ -813,6 +826,38 @@ export default function GroupLayerTree({
   }, [layerEditDialogTarget, layerDisplaySettings]);
 
   const isLoading = groupsLoading || layersLoading;
+  const previewOptions = useMemo(
+    () => ({
+      showFilter: Boolean(activeLayerswitcherOptions?.showFilter),
+      showQuickAccess: Boolean(activeLayerswitcherOptions?.showQuickAccess),
+      showDrawOrderView: Boolean(activeLayerswitcherOptions?.showDrawOrderView),
+      enableQuickAccessPresets: Boolean(
+        activeLayerswitcherOptions?.enableQuickAccessPresets,
+      ),
+      enableUserQuickAccessFavorites: Boolean(
+        activeLayerswitcherOptions?.enableUserQuickAccessFavorites,
+      ),
+    }),
+    [activeLayerswitcherOptions],
+  );
+
+  const handleDropTreeItemToRoot = useCallback(
+    (nodeId: GroupLayerTreeNode["id"]) => {
+      setTreeData((current) => {
+        const node = current.find((entry) => entry.id === nodeId);
+        if (!node || node.data?.kind !== "group") {
+          return current;
+        }
+
+        const remaining = current.filter((entry) => entry.id !== nodeId);
+        return applySiblingOrderFromFlatTree([
+          ...remaining,
+          { ...node, parent: GROUP_LAYER_TREE_ROOT_ID },
+        ]);
+      });
+    },
+    [],
+  );
 
   return (
     <DndProvider backend={MultiBackend} options={getBackendOptions()}>
@@ -852,7 +897,17 @@ export default function GroupLayerTree({
           }}
         />
 
-        <LayerSwitcherPreview search={search} onSearchChange={setSearch}>
+        <LayerSwitcherPreview
+          search={search}
+          onSearchChange={setSearch}
+          showFilter={previewOptions.showFilter}
+          showQuickAccess={previewOptions.showQuickAccess}
+          showDrawOrderView={previewOptions.showDrawOrderView}
+          enableQuickAccessPresets={previewOptions.enableQuickAccessPresets}
+          enableUserQuickAccessFavorites={
+            previewOptions.enableUserQuickAccessFavorites
+          }
+        >
           {isLoading ? (
             <Box sx={{ p: 2 }}>
               <Typography variant="body2" color="text.secondary">
@@ -880,6 +935,7 @@ export default function GroupLayerTree({
               canAcceptCatalogItem={canAcceptCatalogDropToRoot}
               onMoveZoneDrop={handleMoveZoneDropToRoot}
               canAcceptMoveZoneItem={canAcceptMoveZoneDropToRoot}
+              onTreeDropToRoot={handleDropTreeItemToRoot}
             />
           ) : (
             <GroupLayerTreeDropZone
@@ -887,68 +943,71 @@ export default function GroupLayerTree({
               canAcceptCatalogItem={canAcceptCatalogDropToRoot}
               onMoveZoneDrop={handleMoveZoneDropToRoot}
               canAcceptMoveZoneItem={canAcceptMoveZoneDropToRoot}
+              onTreeDropToRoot={handleDropTreeItemToRoot}
             >
-              <Tree<GroupLayerTreeNode["data"]>
-                tree={treeData}
-                rootId={GROUP_LAYER_TREE_ROOT_ID}
-                extraAcceptTypes={[CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE]}
-                initialOpen
-                enableAnimateExpand
-                sort={false}
-                insertDroppableFirst={false}
-                dropTargetOffset={12}
-                canDrop={(tree, options) =>
-                  canDropGroupLayerNode(tree, options)
-                }
-                onDrop={handleDrop}
-                placeholderRender={(_node, { depth }) => (
-                  <Box
-                    sx={{
-                      height: 2,
-                      ml: `${depth * 20}px`,
-                      mr: 1,
-                      bgcolor: "primary.main",
-                      borderRadius: 1,
-                    }}
-                  />
-                )}
-                rootProps={{
-                  style: {
-                    flex: 1,
-                    minHeight: "100%",
-                  },
-                }}
-                classes={{
-                  root: "group-layer-tree-root",
-                  listItem: "group-layer-tree-item",
-                  dropTarget: "group-layer-tree-drop-target",
-                  draggingSource: "group-layer-tree-dragging",
-                }}
-                render={(node, options) => (
-                  <Box
-                    sx={{
-                      display:
-                        visibleNodeIds && !visibleNodeIds.has(String(node.id))
-                          ? "none"
-                          : "block",
-                    }}
-                  >
-                    <GroupLayerTreeNodeView
-                      node={node}
-                      options={options}
-                      treeData={treeData}
-                      visibleIds={visibleIds}
-                      groupDisplaySettings={groupDisplaySettings}
-                      onToggleLayerVisibility={handleToggleLayerVisibility}
-                      onToggleGroupVisibility={handleToggleGroupVisibility}
-                      onAddToGroup={handleOpenAddDialog}
-                      onRemoveFromTree={handleRemoveFromTree}
-                      onEditGroupMetadata={handleOpenEditDialog}
-                      onEditLayerSettings={handleOpenLayerEditDialog}
+              <Box sx={{ pb: "8px" }}>
+                <Tree<GroupLayerTreeNode["data"]>
+                  tree={treeData}
+                  rootId={GROUP_LAYER_TREE_ROOT_ID}
+                  extraAcceptTypes={[CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE]}
+                  initialOpen
+                  enableAnimateExpand
+                  sort={false}
+                  insertDroppableFirst={false}
+                  dropTargetOffset={12}
+                  canDrop={(tree, options) =>
+                    canDropGroupLayerNode(tree, options)
+                  }
+                  onDrop={handleDrop}
+                  placeholderRender={(_node, { depth }) => (
+                    <Box
+                      sx={{
+                        height: 2,
+                        ml: `${depth * 20}px`,
+                        mr: 1,
+                        bgcolor: "primary.main",
+                        borderRadius: 1,
+                      }}
                     />
-                  </Box>
-                )}
-              />
+                  )}
+                  rootProps={{
+                    style: {
+                      flex: "0 0 auto",
+                      minHeight: 0,
+                    },
+                  }}
+                  classes={{
+                    root: "group-layer-tree-root",
+                    listItem: "group-layer-tree-item",
+                    dropTarget: "group-layer-tree-drop-target",
+                    draggingSource: "group-layer-tree-dragging",
+                  }}
+                  render={(node, options) => (
+                    <Box
+                      sx={{
+                        display:
+                          visibleNodeIds && !visibleNodeIds.has(String(node.id))
+                            ? "none"
+                            : "block",
+                      }}
+                    >
+                      <GroupLayerTreeNodeView
+                        node={node}
+                        options={options}
+                        treeData={treeData}
+                        visibleIds={visibleIds}
+                        groupDisplaySettings={groupDisplaySettings}
+                        onToggleLayerVisibility={handleToggleLayerVisibility}
+                        onToggleGroupVisibility={handleToggleGroupVisibility}
+                        onAddToGroup={handleOpenAddDialog}
+                        onRemoveFromTree={handleRemoveFromTree}
+                        onEditGroupMetadata={handleOpenEditDialog}
+                        onEditLayerSettings={handleOpenLayerEditDialog}
+                      />
+                    </Box>
+                  )}
+                />
+              </Box>
             </GroupLayerTreeDropZone>
           )}
         </LayerSwitcherPreview>

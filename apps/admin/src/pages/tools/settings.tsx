@@ -38,7 +38,7 @@ export default function ToolSettings() {
     if (tool) {
       reset({
         type: tool.type ?? "",
-        ...tool.options,
+        options: tool.options ?? {},
       });
     }
   }, [tool, reset]);
@@ -53,8 +53,18 @@ export default function ToolSettings() {
   const onSubmit = (data: FieldValues) => {
     if (!tool) return;
 
-    // Extract type from data, rest goes into options
-    const { type, ...options } = data;
+    const { type, options: nestedOptions, ...rest } = data;
+    const submittedOptions =
+      nestedOptions && typeof nestedOptions === "object"
+        ? {
+            ...rest,
+            ...(nestedOptions as Record<string, unknown>),
+          }
+        : rest;
+    const options = {
+      ...(tool.options ?? {}),
+      ...submittedOptions,
+    };
 
     // Strip attachments where both name and link are blank
     if (Array.isArray(options.pdfLinks)) {

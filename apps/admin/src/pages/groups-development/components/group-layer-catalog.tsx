@@ -1,6 +1,6 @@
-import CollectionsIcon from "@mui/icons-material/Collections";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import FolderIcon from "@mui/icons-material/Folder";
 import LayersIcon from "@mui/icons-material/Layers";
 import { DragIndicator } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
@@ -129,7 +129,7 @@ function CatalogRow({
         >
           <DragIndicator sx={{ color: "text.secondary", flexShrink: 0 }} />
           {isGroup ? (
-            <CollectionsIcon fontSize="small" color="primary" />
+            <FolderIcon fontSize="small" color="primary" />
           ) : (
             <LayersIcon fontSize="small" color="action" />
           )}
@@ -410,8 +410,7 @@ export default function GroupLayerCatalog({
             </Button>
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Drag groups or layers into the tree. Groups can be nested inside
-            other groups.
+            {t("groupsDragAndDropDescription")}
           </Typography>
           <TextField
             fullWidth
@@ -444,7 +443,7 @@ export default function GroupLayerCatalog({
             }}
           >
             <Tab
-              icon={<CollectionsIcon />}
+              icon={<FolderIcon />}
               iconPosition="start"
               value="groups"
               label={`${t("common.layerGroups")} (${catalogGroups.length})`}

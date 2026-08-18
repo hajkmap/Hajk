@@ -174,11 +174,7 @@ export default function KartlagerMoveZone({
             justifyContent: "center",
             px: 1,
           }}
-        >
-          <Typography variant="body2" color="text.secondary" textAlign="center">
-            {t("groupsDevelopment.moveZoneEmpty")}
-          </Typography>
-        </Box>
+        ></Box>
       ) : (
         <Box
           sx={{

@@ -1,8 +1,6 @@
 import { useEffect, useState, type RefObject } from "react";
 import { Box } from "@mui/material";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
-import SortIcon from "@mui/icons-material/Sort";
-import CollectionsIcon from "@mui/icons-material/Collections";
 import type { TreeItems } from "dnd-kit-sortable-tree";
 
 import { SettingsPageTabs } from "../../../components/settings-page-tabs";
@@ -14,20 +12,20 @@ import MapGroupPlacementPanel from "./map-group-placement-panel";
 import MapDrawOrderPanel from "./map-draw-order-panel";
 
 const CONTENT_SUB_TABS = [
-  {
-    key: "placement" as const,
-    labelKey: "maps.contentTab.placement",
-    icon: <TouchAppIcon />,
-  },
-  {
-    key: "drawOrder" as const,
-    labelKey: "maps.contentTab.drawOrder",
-    icon: <SortIcon />,
-  },
+  // {
+  //   key: "placement" as const,
+  //   labelKey: "maps.contentTab.placement",
+  //   icon: <TouchAppIcon />,
+  // },
+  // {
+  //   key: "drawOrder" as const,
+  //   labelKey: "maps.contentTab.drawOrder",
+  //   icon: <SortIcon />,
+  // },
   {
     key: "groupsDevelopment" as const,
-    labelKey: "common.groupsDevelopment",
-    icon: <CollectionsIcon />,
+    labelKey: "maps.contentTab.placement",
+    icon: <TouchAppIcon />,
   },
 ];
 
@@ -83,7 +81,7 @@ export default function MapContentPanel({
 }: MapContentPanelProps) {
   const [contentSubTab, setContentSubTab] = useState<
     "placement" | "drawOrder" | "groupsDevelopment"
-  >("placement");
+  >("groupsDevelopment");
   const [moveZoneHostEl, setMoveZoneHostEl] = useState<HTMLElement | null>(
     null,
   );

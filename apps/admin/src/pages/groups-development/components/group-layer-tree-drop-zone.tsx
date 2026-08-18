@@ -1,8 +1,16 @@
 import { Box, Button, Typography } from "@mui/material";
+import { ItemTypes } from "@minoru/react-dnd-treeview";
 import { useDrop } from "react-dnd";
 
-import type { CatalogDragItem, MoveZoneItem } from "../types";
+import type {
+  CatalogDragItem,
+  GroupLayerTreeNode,
+  MoveZoneItem,
+} from "../types";
 import { CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE } from "../types";
+
+const TREE_ITEM_TYPE =
+  (ItemTypes as { TREE_ITEM?: string | symbol }).TREE_ITEM ?? "TREE_ITEM";
 
 interface GroupLayerTreeDropZoneProps {
   children?: React.ReactNode;
@@ -13,6 +21,7 @@ interface GroupLayerTreeDropZoneProps {
   canAcceptCatalogItem?: (item: CatalogDragItem) => boolean;
   onMoveZoneDrop?: (item: MoveZoneItem) => void;
   canAcceptMoveZoneItem?: (item: MoveZoneItem) => boolean;
+  onTreeDropToRoot?: (nodeId: GroupLayerTreeNode["id"]) => void;
 }
 
 export default function GroupLayerTreeDropZone({
@@ -24,22 +33,44 @@ export default function GroupLayerTreeDropZone({
   canAcceptCatalogItem = () => true,
   onMoveZoneDrop,
   canAcceptMoveZoneItem = () => true,
+  onTreeDropToRoot,
 }: GroupLayerTreeDropZoneProps) {
   const [{ isOver, canDrop }, dropRef] = useDrop(
     () => ({
-      accept: [CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE],
-      canDrop: (item: CatalogDragItem | MoveZoneItem, monitor) => {
+      accept: [CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE, TREE_ITEM_TYPE],
+      canDrop: (
+        item: CatalogDragItem | MoveZoneItem | GroupLayerTreeNode,
+        monitor,
+      ) => {
         const type = monitor.getItemType();
+        if (type === TREE_ITEM_TYPE) {
+          const node = item as GroupLayerTreeNode;
+          return (
+            onTreeDropToRoot != null &&
+            node?.id != null &&
+            node.data?.kind === "group"
+          );
+        }
         if (type === MOVE_ZONE_DRAG_TYPE) {
           return canAcceptMoveZoneItem(item as MoveZoneItem);
         }
         return canAcceptCatalogItem(item as CatalogDragItem);
       },
-      drop: (item: CatalogDragItem | MoveZoneItem, monitor) => {
+      drop: (
+        item: CatalogDragItem | MoveZoneItem | GroupLayerTreeNode,
+        monitor,
+      ) => {
         if (monitor.didDrop()) {
           return;
         }
         const type = monitor.getItemType();
+        if (type === TREE_ITEM_TYPE) {
+          const node = item as GroupLayerTreeNode;
+          if (node?.id != null) {
+            onTreeDropToRoot?.(node.id);
+          }
+          return { dropped: true };
+        }
         if (type === MOVE_ZONE_DRAG_TYPE) {
           onMoveZoneDrop?.(item as MoveZoneItem);
           return { dropped: true };
@@ -57,6 +88,7 @@ export default function GroupLayerTreeDropZone({
       canAcceptMoveZoneItem,
       onCatalogDrop,
       onMoveZoneDrop,
+      onTreeDropToRoot,
     ],
   );
 
@@ -80,8 +112,7 @@ export default function GroupLayerTreeDropZone({
           display: "flex",
           flexDirection: "column",
           borderRadius: 1,
-          backgroundColor:
-            isOver && canDrop ? "action.hover" : "transparent",
+          backgroundColor: isOver && canDrop ? "action.hover" : "transparent",
           outline: isOver && canDrop ? "2px dashed" : "none",
           outlineColor: "primary.main",
           outlineOffset: -4,
