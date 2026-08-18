@@ -40,6 +40,7 @@ class LocationView extends React.PureComponent {
   componentDidMount() {
     this.map = this.props.map;
     this.model = this.props.model;
+    this.options = this.props.options;
 
     this.model.localObserver.subscribe(
       "geolocationChange",
@@ -88,6 +89,15 @@ class LocationView extends React.PureComponent {
         );
       }
     });
+
+    // sync state from model (for where the component mounts after model is already tracking)
+    const modelState = this.model.getState();
+    if (modelState.track) {
+      this.setState({
+        track: modelState.track,
+        loading: !modelState.positionReceived,
+      });
+    }
   }
 
   toggleTracking = (event) => {

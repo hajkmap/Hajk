@@ -9,10 +9,16 @@ import { unByKey } from "ol/Observable";
 import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style";
 
 class LocationModel {
+  #tracking = false;
+  #following = false;
+  #positionReceived = false;
+
   constructor(props) {
     this.map = props.map;
     this.localObserver = props.localObserver;
     this.zoomToLocation = true;
+    this.centerOnUpdate = false;
+    this.showLocationFollow = false;
 
     // Create source and layer and add to map. Later on we'll draw features to this layer.
     this.source = new VectorSource({ wrapX: false });
@@ -92,8 +98,13 @@ class LocationModel {
       coordinates ? new Point(coordinates) : null
     );
 
+    this.#positionReceived = true;
+
     // If we've got new coordinates, make sure to hide the loading indicator
-    this.localObserver.publish("locationStatus", "on");
+    // Also make sure we are tracking otherwise we should not send locationstatus
+    if (this.#tracking && coordinates) {
+      this.localObserver.publish("locationStatus", "on");
+    }
 
     if (this.zoomToLocation) {
       const maxZoom = this.map.getView().getMaxZoom();
@@ -102,9 +113,23 @@ class LocationModel {
       this.map.getView().animate({ duration: 2500, center: coordinates, zoom });
       this.zoomToLocation = false;
     }
+
+    // If the initial zoom already happened and we want to update the map center to "follow" the user's position
+    if (!this.zoomToLocation && this.centerOnUpdate) {
+      this.map.getView().setCenter(coordinates);
+    }
+  };
+
+  toggleFollow = (active) => {
+    if (active === this.#following) return;
+    this.#following = active;
+    this.centerOnUpdate = active;
   };
 
   toggleTracking = (active) => {
+    if (active === this.#tracking) return;
+    this.#tracking = active;
+
     // Inform the View components that we're loading
     this.localObserver.publish("locationStatus", active ? "loading" : "off");
 
@@ -131,6 +156,14 @@ class LocationModel {
       }, 3000);
     }
   };
+
+  getState() {
+    return {
+      track: this.#tracking,
+      follow: this.#following,
+      positionReceived: this.#positionReceived,
+    };
+  }
 
   // Flash handler: sets up the animation and creates a handler for the postrender
   flash = (feature) => {
@@ -188,6 +221,16 @@ class LocationModel {
 
   disable() {
     this.toggleTracking(false);
+    // Also disable follow, the default state is turned off.
+    this.disableFollow(true);
+  }
+
+  enableFollow() {
+    this.toggleFollow(true);
+  }
+
+  disableFollow() {
+    this.toggleFollow(false);
   }
 }
 
