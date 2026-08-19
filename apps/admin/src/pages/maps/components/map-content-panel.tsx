@@ -6,8 +6,10 @@ import type { TreeItems } from "dnd-kit-sortable-tree";
 import { SettingsPageTabs } from "../../../components/settings-page-tabs";
 import { TreeItemData } from "../../../components/layerswitcher-dnd";
 import type { ToolOnMap } from "../../../api/maps";
+import type { Tool } from "../../../api/tools";
 import type { KartlagerDraft } from "../../groups-development/types";
 import GroupLayerTree from "../../groups-development/components/group-layer-tree";
+import { findActiveLayerswitcher } from "../../groups-development/utils/active-layerswitcher";
 import MapGroupPlacementPanel from "./map-group-placement-panel";
 import MapDrawOrderPanel from "./map-draw-order-panel";
 
@@ -54,6 +56,7 @@ interface MapContentPanelProps {
   ) => void;
   onRemoveLayerFromDrawOrder: (layerId: string) => void;
   mapTools?: ToolOnMap[];
+  catalogTools?: Tool[];
   activeToolIds?: Set<number>;
   kartlagerDraft?: KartlagerDraft | null;
   onKartlagerDraftChange?: (draft: KartlagerDraft | null) => void;
@@ -73,6 +76,7 @@ export default function MapContentPanel({
   onInsertLayerToDrawOrder,
   onRemoveLayerFromDrawOrder,
   mapTools,
+  catalogTools,
   activeToolIds,
   kartlagerDraft = null,
   onKartlagerDraftChange,
@@ -87,16 +91,19 @@ export default function MapContentPanel({
   );
 
   const isGroupsDevelopment = contentSubTab === "groupsDevelopment";
+  const hasActiveLayerswitcher =
+    findActiveLayerswitcher(mapTools, activeToolIds, catalogTools) != null;
+  const showKartlagerEditor = isGroupsDevelopment && hasActiveLayerswitcher;
 
   useEffect(() => {
-    onGroupsDevelopmentActiveChange?.(isGroupsDevelopment);
+    onGroupsDevelopmentActiveChange?.(showKartlagerEditor);
     return () => {
       onGroupsDevelopmentActiveChange?.(false);
     };
-  }, [isGroupsDevelopment, onGroupsDevelopmentActiveChange]);
+  }, [showKartlagerEditor, onGroupsDevelopmentActiveChange]);
 
   useEffect(() => {
-    if (!isGroupsDevelopment || !moveZoneHostRef) {
+    if (!showKartlagerEditor || !moveZoneHostRef) {
       setMoveZoneHostEl(null);
       return;
     }
@@ -110,7 +117,7 @@ export default function MapContentPanel({
     return () => {
       window.cancelAnimationFrame(frame);
     };
-  }, [isGroupsDevelopment, moveZoneHostRef]);
+  }, [showKartlagerEditor, moveZoneHostRef]);
 
   return (
     <Box>
@@ -143,10 +150,11 @@ export default function MapContentPanel({
       <Box sx={{ display: isGroupsDevelopment ? "block" : "none" }}>
         <GroupLayerTree
           mapTools={mapTools}
+          catalogTools={catalogTools}
           activeToolIds={activeToolIds}
           pendingDraft={kartlagerDraft}
           onKartlagerDraftChange={onKartlagerDraftChange}
-          moveZoneHostEl={isGroupsDevelopment ? moveZoneHostEl : null}
+          moveZoneHostEl={showKartlagerEditor ? moveZoneHostEl : null}
         />
       </Box>
     </Box>

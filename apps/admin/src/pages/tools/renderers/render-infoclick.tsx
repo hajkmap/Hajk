@@ -67,7 +67,7 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
               defaultValue={tool?.options?.title ?? ""}
               render={({ field }) => (
                 <TextField
-                  label={t("tools.displayName")}
+                  label={t("tools.title")}
                   fullWidth
                   {...field}
                 />

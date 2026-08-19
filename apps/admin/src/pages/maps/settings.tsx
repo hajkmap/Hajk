@@ -971,6 +971,7 @@ export default function MapSettings() {
               onInsertLayerToDrawOrder={handleInsertLayerToDrawOrder}
               onRemoveLayerFromDrawOrder={handleRemoveLayerFromDrawOrder}
               mapTools={mapTools}
+              catalogTools={catalogTools}
               activeToolIds={activeToolIds}
               kartlagerDraft={kartlagerDraft}
               onKartlagerDraftChange={handleKartlagerDraftChange}

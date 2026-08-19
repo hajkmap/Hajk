@@ -90,7 +90,11 @@ export default function LayerSwitcherRenderer({
             "lockDrawOrderBaselayer",
             false,
           ),
-          drawOrderViewInfoText: getOption(options, "drawOrderViewInfoText", ""),
+          drawOrderViewInfoText: getOption(
+            options,
+            "drawOrderViewInfoText",
+            "",
+          ),
           enableQuickAccessPresets: getOption(
             options,
             "enableQuickAccessPresets",
@@ -112,7 +116,11 @@ export default function LayerSwitcherRenderer({
             "",
           ),
           dropdownThemeMaps: getOption(options, "dropdownThemeMaps", false),
-          themeMapHeaderCaption: getOption(options, "themeMapHeaderCaption", ""),
+          themeMapHeaderCaption: getOption(
+            options,
+            "themeMapHeaderCaption",
+            "",
+          ),
           minMaxZoomAlertOnToggleOnly: getOption(
             options,
             "minMaxZoomAlertOnToggleOnly",
@@ -152,11 +160,7 @@ export default function LayerSwitcherRenderer({
               control={control}
               defaultValue={getOption(options, "title", "")}
               render={({ field }) => (
-                <TextField
-                  label={t("tools.displayName")}
-                  fullWidth
-                  {...field}
-                />
+                <TextField label={t("tools.title")} fullWidth {...field} />
               )}
             />
           </FormFieldRow>

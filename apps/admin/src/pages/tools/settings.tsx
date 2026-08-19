@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Typography } from "@mui/material";
 
 import { useTools, useUpdateTool, Tool } from "../../api/tools";
+import { useMaps } from "../../api/maps";
 import FormContainer from "../../components/form-components/form-container";
 import FormActionPanel from "../../components/form-action-panel";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
@@ -17,6 +18,7 @@ export default function ToolSettings() {
   const { t } = useTranslation();
   const { toolId } = useParams<{ toolId?: string }>();
   const { data: tools, isLoading } = useTools();
+  const { data: maps } = useMaps();
   const updateToolMutation = useUpdateTool();
   const formRef = useRef<HTMLFormElement | null>(null);
 
@@ -146,6 +148,7 @@ export default function ToolSettings() {
               rows={tool.mapNames.map((mapName) => ({
                 id: mapName,
                 map: mapName,
+                mapId: maps?.find((map) => map.name === mapName)?.id,
               }))}
               isLoading={isLoading}
               emptyMessage={t("tools.usedInMapsNone")}

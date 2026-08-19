@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { TextField, Typography, useTheme } from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { Link, TextField, Typography, useTheme } from "@mui/material";
+import { DataGrid, GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
+import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import SearchIcon from "@mui/icons-material/Search";
 import FormPanel from "./form-components/form-panel";
@@ -10,6 +11,7 @@ import useAppStateStore from "../store/use-app-state-store";
 export interface UsedInMapsRow {
   id: string;
   map: string;
+  mapId?: string | number;
   group?: string;
   usage?: string;
 }
@@ -31,6 +33,7 @@ export default function UsedInMapsPanel({
 }: UsedInMapsPanelProps) {
   const { t } = useTranslation();
   const { palette } = useTheme();
+  const navigate = useNavigate();
   const language = useAppStateStore((state) => state.language);
   const isDarkMode = palette.mode === "dark";
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,7 +50,30 @@ export default function UsedInMapsPanel({
 
   const columns = useMemo(() => {
     const cols: GridColDef[] = [
-      { field: "map", headerName: t("common.map"), flex: 1, minWidth: 160 },
+      {
+        field: "map",
+        headerName: t("common.map"),
+        flex: 1,
+        minWidth: 160,
+        renderCell: (params: GridRenderCellParams<UsedInMapsRow>) =>
+          params.row.mapId != null ? (
+            <Link
+              component="button"
+              type="button"
+              underline="hover"
+              onClick={(event) => {
+                event.stopPropagation();
+                void navigate(`/maps/${params.row.mapId}?tab=tools`);
+              }}
+              color="inherit"
+              sx={{ textAlign: "left" }}
+            >
+              {params.row.map}
+            </Link>
+          ) : (
+            params.row.map
+          ),
+      },
     ];
 
     if (showGroupColumn) {
@@ -69,7 +95,7 @@ export default function UsedInMapsPanel({
     }
 
     return cols;
-  }, [showGroupColumn, showUsageColumn, t]);
+  }, [navigate, showGroupColumn, showUsageColumn, t]);
 
   const showSearch = isLoading || rows.length > 0;
 

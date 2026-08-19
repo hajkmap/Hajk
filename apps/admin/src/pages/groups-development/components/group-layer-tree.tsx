@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import { useGroups, useUpdateGroup } from "../../../api/groups";
 import { useLayers } from "../../../api/layers";
 import type { ToolOnMap } from "../../../api/maps";
+import type { Tool } from "../../../api/tools";
 import { getUpdateGroupErrorMessage } from "../../groups/utils/group-errors";
 import type {
   CatalogDragItem,
@@ -55,6 +56,7 @@ import {
   removeTreeNodeWithDescendants,
 } from "../utils/tree-model";
 import { filterTreeBySearch } from "../utils/tree-filter";
+import { findActiveLayerswitcher } from "../utils/active-layerswitcher";
 import {
   toggleGroupVisibility,
   toggleLayerVisibility,
@@ -81,6 +83,8 @@ export type { KartlagerDraft };
 interface GroupLayerTreeProps {
   /** Map tools for the current map (includes layerswitcher Tool.options). */
   mapTools?: ToolOnMap[];
+  /** Catalog tools — used when a layerswitcher is activated but not yet on the map. */
+  catalogTools?: Tool[];
   /** Draft/server set of active tool ids — used to pick the active layerswitcher. */
   activeToolIds?: Set<number>;
   /** Unsaved Kartlager options held by the map settings page (survives tab unmount). */
@@ -91,36 +95,9 @@ interface GroupLayerTreeProps {
   moveZoneHostEl?: HTMLElement | null;
 }
 
-function findActiveLayerswitcher(
-  mapTools: ToolOnMap[] | undefined,
-  activeToolIds: Set<number> | undefined,
-): ToolOnMap | null {
-  const layerswitchers = (mapTools ?? []).filter(
-    (entry) => entry.tool.type === "layerswitcher",
-  );
-
-  if (layerswitchers.length === 0) {
-    return null;
-  }
-
-  if (activeToolIds && activeToolIds.size > 0) {
-    const fromDraft = layerswitchers.find((entry) =>
-      activeToolIds.has(entry.toolId),
-    );
-    if (fromDraft) {
-      return fromDraft;
-    }
-  }
-
-  return (
-    layerswitchers.find((entry) => entry.active !== false) ??
-    layerswitchers[0] ??
-    null
-  );
-}
-
 export default function GroupLayerTree({
   mapTools,
+  catalogTools,
   activeToolIds,
   pendingDraft = null,
   onKartlagerDraftChange,
@@ -163,8 +140,8 @@ export default function GroupLayerTree({
   const { data: layers = [], isLoading: layersLoading } = useLayers();
 
   const activeLayerswitcher = useMemo(
-    () => findActiveLayerswitcher(mapTools, activeToolIds),
-    [mapTools, activeToolIds],
+    () => findActiveLayerswitcher(mapTools, activeToolIds, catalogTools),
+    [mapTools, activeToolIds, catalogTools],
   );
 
   const activeLayerswitcherOptions = useMemo(() => {
@@ -211,6 +188,7 @@ export default function GroupLayerTree({
       setVisibleIds(new Set());
       setGroupDisplaySettings({});
       setLayerDisplaySettings({});
+      setMoveZoneItems([]);
       onKartlagerDraftChangeRef.current?.(null);
       return;
     }
@@ -282,6 +260,7 @@ export default function GroupLayerTree({
     setVisibleIds(hydrated.visibleIds);
     setGroupDisplaySettings(hydrated.groupDisplaySettings);
     setLayerDisplaySettings(hydrated.layerDisplaySettings);
+    setMoveZoneItems([]);
   }, [
     activeLayerswitcher,
     activeLayerswitcherOptions,
@@ -859,6 +838,16 @@ export default function GroupLayerTree({
     [],
   );
 
+  if (!activeLayerswitcher) {
+    return (
+      <Box sx={{ p: 2 }}>
+        <Typography variant="body2" color="text.secondary">
+          {t("groupsDevelopment.noActiveLayerswitcher")}
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <DndProvider backend={MultiBackend} options={getBackendOptions()}>
       <Box
@@ -918,12 +907,6 @@ export default function GroupLayerTree({
             <Box sx={{ p: 2 }}>
               <Typography variant="body2" color="text.secondary">
                 {t("map.drawOrderNoSearchResults")}
-              </Typography>
-            </Box>
-          ) : !activeLayerswitcher ? (
-            <Box sx={{ p: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                {t("groupsDevelopment.noActiveLayerswitcher")}
               </Typography>
             </Box>
           ) : treeData.length === 0 ? (
