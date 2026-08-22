@@ -370,6 +370,17 @@ class SearchBar extends React.PureComponent {
             ? decodeCommas(option?.autocompleteEntry)
             : option;
         }}
+        filterOptions={(options, state) => {
+          const cleanedInput = state.inputValue.replace(/"/g, "");
+          if (!cleanedInput) return options;
+          return options.filter((option) => {
+            const label =
+              option?.autocompleteEntry?.length > 0
+                ? decodeCommas(option.autocompleteEntry)
+                : option;
+            return label.toLowerCase().includes(cleanedInput.toLowerCase());
+          });
+        }}
         options={autocompleteList}
         loading={loading}
         renderInput={this.renderAutoCompleteInputField}
