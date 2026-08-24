@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Backend: Enhance detailed request logger with structured output and file logging configuration [#1836](https://github.com/hajkmap/Hajk/pull/1836)
 - Backend: Bumped the [API Explorer](https://github.com/swagger-api/swagger-ui) to v5.32.6.
 - Client: AppModel refactored — split the 1444-line class into 8 focused modules under `appModel/` (urlParamsMerger, configTranslator, backgroundLayers, clickBindings, mapFactory, layerLoader, layerVisibility, pluginManager). No behavior change; all public methods preserved. [#1826](https://github.com/hajkmap/Hajk/pull/1826)
+- Client: KmlModel and GpxModel unified — the near-identical import/export flows now live in a shared base class (`VectorImportModel`), with each model reduced to a format-specific profile and small overrides (KML keeps its style round-trip pipeline, GPX keeps its geometry filtering). No behavior change; all public methods preserved.
 - Client: New Mobile UI etc, see [#1778](https://github.com/hajkmap/Hajk/issues/1778).
 - Client: New CQL filter UI, PR [#1756](https://github.com/hajkmap/Hajk/pull/1756).
 - Client: TypeScript is now supported, see [#1824.](https://github.com/hajkmap/Hajk/pull/1824)
