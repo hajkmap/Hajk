@@ -29,8 +29,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: PropertyChecker - There's now a new option, `showToggleAllCheckLayers` that can add a toggle all button to the check layer results view, part of [#1760](https://github.com/hajkmap/Hajk/issues/1760).
 - Client: PropertyChecker - Added a `q_pc` URL parameter that programmatically triggers a property check from a property name or address. It reuses an existing WFS search source (configured via `propertyNameLookupWfsLayerId` and the optional `addressLookupWfsLayerId`) to resolve the value to a geometry, pans the map there, and is written back to the URL hash on map click so results are shareable. Closes [#1827](https://github.com/hajkmap/Hajk/issues/1827).
 
+### Fixed
+
+- Client: FIR - Fixed a crash in FIR when activating "add by map click" if the map configuration lacks the `wmsRealEstateLayer`. The plugin now works without it (search-area tools degrade gracefully).
+
 ### Changed
 
+- Client: FIR/KIR - Tab layout and search-error snackbar handling extracted into a shared view shell used by both plugins. KIR drops a stray prop on its tab panels; no user-facing changes.
+- Client: FIR/KIR - Search results views now share one common core component (state machine, pagination, list rendering, observer wiring). KIR result rows aligned with FIR's markup, which also fixes that clicking a row's delete button could simultaneously expand/mark the row.
+- Client: FIR/KIR - All class components converted to functional components with hooks, and first step of code deduplication between the plugins: KirModel now extends a shared base model from the FIR plugin, and KIR search results render using FIR's result item view. No user-facing behavior changes.
 - Backend: Upgraded `write-excel-file` from 3.x to 4.x.
 - Backend: Enhance detailed request logger with structured output and file logging configuration [#1836](https://github.com/hajkmap/Hajk/pull/1836)
 - Backend: Bumped the [API Explorer](https://github.com/swagger-api/swagger-ui) to v5.32.6.

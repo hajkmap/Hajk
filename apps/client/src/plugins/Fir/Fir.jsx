@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import Observer from "react-event-observer";
@@ -8,130 +8,116 @@ import FirView from "./FirView";
 import FirLayerController from "./FirLayerController";
 import FirImport from "./FirImport";
 
-class Fir extends React.PureComponent {
-  state = {
-    title: "FIR",
-    color: null,
-  };
+function Fir(props) {
+  const [{ localObserver, model }] = useState(() => {
+    const localObserver = new Observer();
 
-  static propTypes = {
-    app: PropTypes.object.isRequired,
-    map: PropTypes.object.isRequired,
-    options: PropTypes.object.isRequired,
-  };
+    function getService(type) {
+      // This is a factory to get make it possible to lazy-load service chunks
+      // It's possible to add more services here
+      if (type === "FirWfsService") {
+        return import("./FirWfsService");
+      } /* else if (type === "OtherServiceClass") {
+      return import("./OtherServiceClass");
+    }*/
+    }
 
-  constructor(props) {
-    super(props);
+    function loadFeatures(features) {
+      layerController.clearBeforeSearch();
+      layerController.addFeatures(features, {
+        zoomToLayer: true,
+        clearPrevious: true,
+      });
+      localObserver.publish("fir.search.completed", features);
+    }
 
-    this.localObserver = new Observer();
+    function handleSearch(params = {}) {
+      const type = "FirWfsService";
 
-    this.localObserver.subscribe("fir.search.search", this.handleSearch);
-    this.localObserver.subscribe("fir.search.load", this.loadFeatures);
+      let features = model.layers.buffer.getSource().getFeatures();
 
-    this.model = new FirModel({
-      localObserver: this.localObserver,
+      if (features.length === 0) {
+        features = model.layers.draw.getSource().getFeatures();
+      }
+
+      const defaultParams = {
+        features: features,
+        app: props.app,
+        map: props.map,
+      };
+
+      getService(type).then((Service) => {
+        const service = new Service.default(defaultParams, model);
+
+        layerController.clearBeforeSearch(params);
+        localObserver.publish("fir.search.started", params);
+        service
+          .search(params)
+          .then((features) => {
+            // We're expecting an array of features.
+            layerController.addFeatures(features, params);
+            localObserver.publish("fir.search.completed", features);
+          })
+          .catch((error) => {
+            localObserver.publish("fir.search.error", error);
+          });
+      });
+    }
+
+    localObserver.subscribe("fir.search.search", handleSearch);
+    localObserver.subscribe("fir.search.load", loadFeatures);
+
+    const model = new FirModel({
+      localObserver: localObserver,
 
       app: props.app,
       map: props.map,
     });
 
-    this.layerController = new FirLayerController(
-      this.model,
-      this.localObserver
-    );
+    const layerController = new FirLayerController(model, localObserver);
 
-    this.import = new FirImport({
-      localObserver: this.localObserver,
-      layerController: this.layerController,
+    new FirImport({
+      localObserver: localObserver,
+      layerController: layerController,
       map: props.map,
     });
-  }
 
-  onWindowShow = () => {
-    this.model.windowIsVisible = true;
+    return { localObserver, model };
+  });
+
+  const onWindowShow = () => {
+    model.windowIsVisible = true;
   };
 
-  onWindowHide = () => {
-    this.model.windowIsVisible = false;
+  const onWindowHide = () => {
+    model.windowIsVisible = false;
   };
 
-  getService(type) {
-    // This is a factory to get make it possible to lazy-load service chunks
-    // It's possible to add more services here
-    if (type === "FirWfsService") {
-      return import("./FirWfsService");
-    } /* else if (type === "OtherServiceClass") {
-      return import("./OtherServiceClass");
-    }*/
-  }
-
-  loadFeatures = (features) => {
-    this.layerController.clearBeforeSearch();
-    this.layerController.addFeatures(features, {
-      zoomToLayer: true,
-      clearPrevious: true,
-    });
-    this.localObserver.publish("fir.search.completed", features);
-  };
-
-  handleSearch = (params = {}) => {
-    const type = "FirWfsService";
-
-    let features = this.model.layers.buffer.getSource().getFeatures();
-
-    if (features.length === 0) {
-      features = this.model.layers.draw.getSource().getFeatures();
-    }
-
-    const defaultParams = {
-      features: features,
-      app: this.props.app,
-      map: this.props.map,
-    };
-
-    this.getService(type).then((Service) => {
-      const service = new Service.default(defaultParams, this.model);
-
-      this.layerController.clearBeforeSearch(params);
-      this.localObserver.publish("fir.search.started", params);
-      service
-        .search(params)
-        .then((features) => {
-          // We're expecting an array of features.
-          this.layerController.addFeatures(features, params);
-          this.localObserver.publish("fir.search.completed", features);
-        })
-        .catch((error) => {
-          this.localObserver.publish("fir.search.error", error);
-        });
-    });
-  };
-
-  render() {
-    return (
-      <BaseWindowPlugin
-        {...this.props}
-        type="Fir"
-        custom={{
-          disablePadding: true,
-          icon: <PluginIcon />,
-          title: this.state.title,
-          color: this.state.color,
-          description: "",
-          height: "auto",
-          width: 400,
-          onWindowShow: this.onWindowShow,
-          onWindowHide: this.onWindowHide,
-        }}
-      >
-        <FirView
-          model={this.model}
-          app={this.props.app}
-          localObserver={this.localObserver}
-        />
-      </BaseWindowPlugin>
-    );
-  }
+  return (
+    <BaseWindowPlugin
+      {...props}
+      type="Fir"
+      custom={{
+        disablePadding: true,
+        icon: <PluginIcon />,
+        title: "FIR",
+        color: null,
+        description: "",
+        height: "auto",
+        width: 400,
+        onWindowShow: onWindowShow,
+        onWindowHide: onWindowHide,
+      }}
+    >
+      <FirView model={model} app={props.app} localObserver={localObserver} />
+    </BaseWindowPlugin>
+  );
 }
+
+Fir.propTypes = {
+  app: PropTypes.object.isRequired,
+  map: PropTypes.object.isRequired,
+  options: PropTypes.object.isRequired,
+};
 
 export default Fir;

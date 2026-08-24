@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import Accordion from "@mui/material/Accordion";
@@ -62,241 +62,250 @@ const CircularProgressButton = styled(CircularProgress)(({ _theme }) => ({
   marginLeft: -12,
 }));
 
-class FirSearchNeighborView extends React.PureComponent {
-  #HT;
+function FirSearchNeighborView({ model, localObserver }) {
+  const updateTm = useRef(null);
+  const bufferTm = useRef(null);
+  const fnsRef = useRef({});
 
-  state = {
+  useState(() => new FirStyles(model));
+
+  const [HT] = useState(() => {
+    return new HajkTransformer({
+      projection: model.app.map.getView().getProjection().getCode(),
+    });
+  });
+
+  const [state, setStateRaw] = useState(() => ({
     accordionExpanded: false,
     radioValue: "delimiting",
     buffer: 50,
     results: [],
     resultHistory: [],
     loading: false,
+  }));
+  const stateRef = useRef(state);
+  const [, setTick] = useState(0);
+
+  const setState = (patch) => {
+    stateRef.current = { ...stateRef.current, ...patch };
+    setStateRaw(stateRef.current);
   };
 
-  static propTypes = {
-    model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired,
+  const forceUpdate = () => {
+    setTick((tick) => tick + 1);
   };
 
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
-    this.update_tm = null;
-
-    this.styles = new FirStyles(this.model);
-
-    this.#HT = new HajkTransformer({
-      projection: this.model.app.map.getView().getProjection().getCode(),
-    });
-
-    this.localObserver.subscribe(
-      "fir.results.filtered",
-      this.handleDataRefresh
-    );
-  }
-
-  handleDataRefresh = (list) => {
-    clearTimeout(this.update_tm);
+  const handleDataRefresh = (list) => {
+    clearTimeout(updateTm.current);
     const _list = list;
-    this.update_tm = setTimeout(() => {
-      this.setState({ results: _list });
+    updateTm.current = setTimeout(() => {
+      setState({ results: _list });
       if (_list.length === 0) {
-        this.setState({ accordionExpanded: false });
+        setState({ accordionExpanded: false });
       }
-      this.setState({ loading: false });
-      this.forceUpdate();
+      setState({ loading: false });
+      forceUpdate();
     }, 500);
   };
 
-  handleRadioChange = (e) => {
-    this.setState({ radioValue: e.target.value });
+  const handleRadioChange = (e) => {
+    setState({ radioValue: e.target.value });
   };
 
-  handleHistoryBack = () => {
-    if (this.state.resultHistory.length === 0) {
+  const handleHistoryBack = () => {
+    if (stateRef.current.resultHistory.length === 0) {
       return;
     }
 
-    this.setState({ loading: true });
+    setState({ loading: true });
 
-    this.props.model.layers.buffer.getSource().clear();
+    model.layers.buffer.getSource().clear();
 
     // Now we need to get previous results and publish to ResultView etc.
-    this.localObserver.publish(
+    localObserver.publish(
       "fir.search.load",
-      this.state.resultHistory.pop()
+      stateRef.current.resultHistory.pop()
     );
   };
 
-  #handleSearch = () => {
+  const handleNeighborSearch = () => {
     const buffer = new Feature();
     let unionFeature = null;
     let buffered = null;
     let bufferValue =
-      this.state.radioValue === "delimiting" ? 0.01 : this.state.buffer;
+      stateRef.current.radioValue === "delimiting"
+        ? 0.01
+        : stateRef.current.buffer;
 
-    this.state.resultHistory.push(this.state.results);
+    stateRef.current.resultHistory.push(stateRef.current.results);
 
-    this.state.results.forEach((feature) => {
-      buffered = this.#HT.getBuffered(feature, bufferValue);
+    stateRef.current.results.forEach((feature) => {
+      buffered = HT.getBuffered(feature, bufferValue);
       unionFeature = !unionFeature
         ? buffered
-        : this.#HT.getUnion(buffered, unionFeature);
+        : HT.getUnion(buffered, unionFeature);
     });
 
     if (unionFeature) {
       buffer.set("fir_type", "buffer");
       buffer.set("fir_origin", "neighbor");
       buffer.setGeometry(unionFeature.getGeometry());
-      this.props.model.layers.buffer.getSource().clear();
-      this.props.model.layers.buffer.getSource().addFeature(buffer);
+      model.layers.buffer.getSource().clear();
+      model.layers.buffer.getSource().addFeature(buffer);
     }
 
     let options = {
       text: "",
-      searchTypeId: this.model.config.wfsRealEstateLayer.id,
+      searchTypeId: model.config.wfsRealEstateLayer.id,
       zoomToLayer: true,
       keepNeighborBuffer: true,
     };
 
-    this.localObserver.publish("fir.search.search", options);
+    localObserver.publish("fir.search.search", options);
   };
 
-  handleSearch = () => {
-    this.setState({ loading: true });
-    clearTimeout(this.buffer_tm);
-    this.buffer_tm = setTimeout(() => {
-      this.#handleSearch();
+  const handleSearch = () => {
+    setState({ loading: true });
+    clearTimeout(bufferTm.current);
+    bufferTm.current = setTimeout(() => {
+      handleNeighborSearch();
     }, 25);
   };
 
-  render() {
-    return (
-      <>
-        <Accordion
-          disabled={this.state.results.length === 0}
-          expanded={
-            this.state.accordionExpanded && this.state.results.length > 0
-          }
-          onChange={() => {
-            this.setState({
-              accordionExpanded: !this.state.accordionExpanded,
-            });
-          }}
-        >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <TypographyHeading>Hitta grannar</TypographyHeading>
-          </AccordionSummary>
-          <AccordionDetails style={{ display: "block" }}>
-            <FormControl fullWidth={true}>
-              <RadioGroup
-                aria-label="search-type"
-                name="searchType"
-                value={this.state.radioValue}
-                onChange={this.handleRadioChange}
-              >
-                <StyledFormControlLabel
-                  value="delimiting"
-                  control={<StyledRadio color="primary" />}
-                  label="Hitta angränsade grannar"
-                />
-                <StyledFormControlLabel
-                  value="radius"
-                  control={<StyledRadio color="primary" />}
-                  label="Hitta grannar inom X meter"
-                />
-              </RadioGroup>
-            </FormControl>
-            <Collapse in={this.state.radioValue === "radius"}>
-              <ContainerTopPadded>
-                <SliderContainer>
-                  <TextField
-                    fullWidth={true}
-                    label="Buffer"
-                    value={this.state.buffer}
-                    onKeyDown={(e) => {
-                      return !isNaN(e.key);
-                    }}
-                    onChange={(e) => {
-                      let v = parseInt(e.target.value);
-                      if (isNaN(v)) {
-                        v = 0;
-                      }
-                      if (v > 100) {
-                        v = 100;
-                      }
-                      this.setState({ buffer: v });
-                    }}
-                    onFocus={(_e) => {
-                      if (this.state.buffer === 0) {
-                        this.setState({ buffer: "" });
-                      }
-                    }}
-                    onBlur={(_e) => {
-                      if (this.state.buffer === "") {
-                        this.setState({ buffer: 0 });
-                      }
-                    }}
-                    size="small"
-                    variant="outlined"
-                    slotProps={{
-                      input: {
-                        endAdornment: (
-                          <InputAdornment position="end">meter</InputAdornment>
-                        ),
-                      },
-                    }}
-                  />
-                  <Slider
-                    value={
-                      isNaN(this.state.buffer) ||
-                      parseInt(this.state.buffer) === 0
-                        ? 1
-                        : this.state.buffer || 1
+  fnsRef.current = {
+    handleDataRefresh,
+  };
+
+  useEffect(() => {
+    localObserver.subscribe("fir.results.filtered", (list) => {
+      fnsRef.current.handleDataRefresh(list);
+    });
+  }, [localObserver, fnsRef]);
+
+  return (
+    <>
+      <Accordion
+        disabled={state.results.length === 0}
+        expanded={state.accordionExpanded && state.results.length > 0}
+        onChange={() => {
+          setState({
+            accordionExpanded: !state.accordionExpanded,
+          });
+        }}
+      >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <TypographyHeading>Hitta grannar</TypographyHeading>
+        </AccordionSummary>
+        <AccordionDetails style={{ display: "block" }}>
+          <FormControl fullWidth={true}>
+            <RadioGroup
+              aria-label="search-type"
+              name="searchType"
+              value={state.radioValue}
+              onChange={handleRadioChange}
+            >
+              <StyledFormControlLabel
+                value="delimiting"
+                control={<StyledRadio color="primary" />}
+                label="Hitta angränsade grannar"
+              />
+              <StyledFormControlLabel
+                value="radius"
+                control={<StyledRadio color="primary" />}
+                label="Hitta grannar inom X meter"
+              />
+            </RadioGroup>
+          </FormControl>
+          <Collapse in={state.radioValue === "radius"}>
+            <ContainerTopPadded>
+              <SliderContainer>
+                <TextField
+                  fullWidth={true}
+                  label="Buffer"
+                  value={state.buffer}
+                  onKeyDown={(e) => {
+                    return !isNaN(e.key);
+                  }}
+                  onChange={(e) => {
+                    let v = parseInt(e.target.value);
+                    if (isNaN(v)) {
+                      v = 0;
                     }
-                    onChange={(e, v) => {
-                      this.setState({ buffer: v });
-                    }}
-                    step={1}
-                    min={1}
-                    max={100}
-                  />
-                </SliderContainer>
-              </ContainerTopPadded>
-            </Collapse>
-            <ContainerTopPadded style={{ textAlign: "right" }}>
-              <ButtonClear
-                disabled={this.state.resultHistory.length === 0}
-                variant="outlined"
-                color="primary"
-                component="span"
-                size="small"
-                onClick={this.handleHistoryBack}
-                startIcon={<HistoryIcon />}
-              >
-                Bakåt
-              </ButtonClear>
-              <Button
-                variant="contained"
-                color="primary"
-                component="span"
-                size="small"
-                onClick={this.handleSearch}
-                disabled={this.state.loading}
-              >
-                Sök
-                {this.state.loading && <CircularProgressButton size={24} />}
-              </Button>
+                    if (v > 100) {
+                      v = 100;
+                    }
+                    setState({ buffer: v });
+                  }}
+                  onFocus={(_e) => {
+                    if (stateRef.current.buffer === 0) {
+                      setState({ buffer: "" });
+                    }
+                  }}
+                  onBlur={(_e) => {
+                    if (stateRef.current.buffer === "") {
+                      setState({ buffer: 0 });
+                    }
+                  }}
+                  size="small"
+                  variant="outlined"
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">meter</InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+                <Slider
+                  value={
+                    isNaN(state.buffer) || parseInt(state.buffer) === 0
+                      ? 1
+                      : state.buffer || 1
+                  }
+                  onChange={(e, v) => {
+                    setState({ buffer: v });
+                  }}
+                  step={1}
+                  min={1}
+                  max={100}
+                />
+              </SliderContainer>
             </ContainerTopPadded>
-          </AccordionDetails>
-        </Accordion>
-      </>
-    );
-  }
+          </Collapse>
+          <ContainerTopPadded style={{ textAlign: "right" }}>
+            <ButtonClear
+              disabled={state.resultHistory.length === 0}
+              variant="outlined"
+              color="primary"
+              component="span"
+              size="small"
+              onClick={handleHistoryBack}
+              startIcon={<HistoryIcon />}
+            >
+              Bakåt
+            </ButtonClear>
+            <Button
+              variant="contained"
+              color="primary"
+              component="span"
+              size="small"
+              onClick={handleSearch}
+              disabled={state.loading}
+            >
+              Sök
+              {state.loading && <CircularProgressButton size={24} />}
+            </Button>
+          </ContainerTopPadded>
+        </AccordionDetails>
+      </Accordion>
+    </>
+  );
 }
+
+FirSearchNeighborView.propTypes = {
+  model: PropTypes.object.isRequired,
+  app: PropTypes.object.isRequired,
+  localObserver: PropTypes.object.isRequired,
+};
 
 export default FirSearchNeighborView;

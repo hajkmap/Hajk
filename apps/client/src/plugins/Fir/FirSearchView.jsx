@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
@@ -58,8 +58,11 @@ const CircularProgressButton = styled(CircularProgress)(({ _theme }) => ({
   marginLeft: -12,
 }));
 
-class FirSearchView extends React.PureComponent {
-  state = {
+function FirSearchView({ model, app, localObserver }) {
+  const searchTm = useRef(null);
+  const fnsRef = useRef({});
+
+  const [state, setStateRaw] = useState(() => ({
     searchText: "",
     searchPanelExpanded: true,
     neighborExpanded: false,
@@ -70,74 +73,51 @@ class FirSearchView extends React.PureComponent {
     showDesignation: true,
     showSearchArea: true,
     loading: false,
+    searchTypeId:
+      model.searchTypes.length > 0 ? model.searchTypes[0].id : undefined,
+  }));
+  const stateRef = useRef(state);
+
+  const setState = (patch) => {
+    stateRef.current = { ...stateRef.current, ...patch };
+    setStateRaw(stateRef.current);
   };
 
-  static propTypes = {
-    model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired,
+  const handleClearSearch = () => {
+    localObserver.publish("fir.search.clear", {});
+    setState({ searchText: "" });
   };
 
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
-
-    if (this.model.searchTypes.length > 0) {
-      this.state.searchTypeId = this.model.searchTypes[0].id;
-    }
-
-    this.initListeners();
-  }
-
-  initListeners() {
-    this.localObserver.subscribe("fir.search.started", () => {
-      this.setState({ loading: true });
-    });
-    this.localObserver.subscribe("fir.search.completed", () => {
-      this.setState({ loading: false });
-    });
-    this.localObserver.subscribe("fir.search.error", () => {
-      this.setState({ loading: false });
-    });
-  }
-
-  handleClearSearch = () => {
-    this.localObserver.publish("fir.search.clear", {});
-    this.setState({ searchText: "" });
-  };
-
-  handleSearch = (overrideOptions = {}) => {
+  const handleSearch = (overrideOptions = {}) => {
     let options = {
-      text: this.state.searchText,
-      exactMatch: this.state.exactMatch || false,
-      showDesignation: this.state.showDesignation || false,
-      showSearchArea: this.state.showSearchArea || false,
-      buffer: this.state.buffer || 0,
-      searchTypeId: this.state.searchTypeId,
+      text: stateRef.current.searchText,
+      exactMatch: stateRef.current.exactMatch || false,
+      showDesignation: stateRef.current.showDesignation || false,
+      showSearchArea: stateRef.current.showSearchArea || false,
+      buffer: stateRef.current.buffer || 0,
+      searchTypeId: stateRef.current.searchTypeId,
       zoomToLayer: true,
     };
 
     options = { ...options, ...overrideOptions };
 
-    this.localObserver.publish("fir.search.search", options);
+    localObserver.publish("fir.search.search", options);
   };
 
-  handleSearchTextChange = (e) => {
-    this.setState({
+  const handleSearchTextChange = (e) => {
+    setState({
       searchText: e.target.value || "",
     });
     if (e.target.value && e.target.value.length >= 4) {
       // Throttle!
-      clearTimeout(this.search_tm);
-      this.search_tm = setTimeout(() => {
-        this.handleSearch({ zoomToLayer: false });
+      clearTimeout(searchTm.current);
+      searchTm.current = setTimeout(() => {
+        handleSearch({ zoomToLayer: false });
       }, 500);
     }
   };
 
-  handleMultilinePaste = (text) => {
+  const handleMultilinePaste = (text) => {
     const separationChar = text.indexOf("  ") > -1 ? "  " : "\t";
 
     const notEmptyFilter = (s) => {
@@ -158,177 +138,196 @@ class FirSearchView extends React.PureComponent {
       }, [])
       .join(", ");
 
-    this.setState({ searchText: texts });
-    this.search_tm = setTimeout(() => {
-      this.handleSearch({ zoomToLayer: false });
+    setState({ searchText: texts });
+    searchTm.current = setTimeout(() => {
+      handleSearch({ zoomToLayer: false });
     }, 500);
   };
 
-  handlePaste = (e) => {
+  const handlePaste = (e) => {
     try {
       const cbText = e?.clipboardData?.getData("text").trim();
       if (cbText && cbText.indexOf("\n") > -1) {
         e.preventDefault();
-        this.handleMultilinePaste(cbText);
+        handleMultilinePaste(cbText);
       }
     } catch (error) {
       console.log("Error when pasting: ", error);
     }
   };
 
-  render() {
-    return (
-      <>
-        <Accordion
-          expanded={this.state.searchPanelExpanded}
-          onChange={() => {
-            this.setState({
-              searchPanelExpanded: !this.state.searchPanelExpanded,
-            });
-          }}
-        >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <TypographyHeading>Sök fastigheter</TypographyHeading>
-          </AccordionSummary>
-          <AccordionDetails style={{ display: "block" }}>
-            <div>
-              <StyledFormControl fullWidth={true} variant="standard">
-                <InputLabel id="FirSearchType">Sök på</InputLabel>
-                <Select
-                  labelId="FirSearchType"
-                  value={this.state.searchTypeId}
-                  variant="standard"
-                  onChange={(e) => {
-                    this.setState({ searchTypeId: e.target.value });
-                  }}
-                >
-                  {this.model.searchTypes
-                    .filter((item) => {
-                      return item.visibleInDropDown !== false;
-                    })
-                    .map((item, _index) => (
-                      <MenuItem
-                        key={`fir-searchType-${item.id}`}
-                        value={item.id}
-                      >
-                        {item.caption}
-                      </MenuItem>
-                    ))}
-                </Select>
-              </StyledFormControl>
-            </div>
-            <div>
-              <StyledFormControl2 fullWidth={true}>
-                <Input
-                  id="input-with-icon-adornment"
-                  placeholder="Söktext"
-                  onChange={this.handleSearchTextChange}
-                  onKeyPress={(e) => {
-                    if (e.key.toLowerCase() === "enter") {
-                      this.handleSearch();
-                      e.preventDefault();
-                    }
-                  }}
-                  onPaste={this.handlePaste}
-                  value={this.state.searchText}
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  }
-                />
-              </StyledFormControl2>
-            </div>
-            <div>
-              <FormControl fullWidth={true}>
-                <StyledFormControlLabel
-                  control={
-                    <StyledCheckbox
-                      checked={this.state.exactMatch}
-                      onChange={(e) => {
-                        this.setState({ exactMatch: e.target.checked });
-                      }}
-                      color="primary"
-                    />
-                  }
-                  label="Exakt matchning på text"
-                />
-              </FormControl>
-              <FormControl fullWidth={true}>
-                <StyledFormControlLabel
-                  control={
-                    <StyledCheckbox
-                      checked={this.state.showDesignation}
-                      onChange={(e) => {
-                        this.setState({ showDesignation: e.target.checked });
-                        this.localObserver.publish(
-                          "fir.layers.showDesignation",
-                          {
-                            value: e.target.checked,
-                          }
-                        );
-                      }}
-                      color="primary"
-                    />
-                  }
-                  label="Visa fastighetsbeteckning"
-                />
-              </FormControl>
-              <StyledFormControl fullWidth={true}>
-                <StyledFormControlLabel
-                  control={
-                    <StyledCheckbox
-                      checked={this.state.showSearchArea}
-                      onChange={(e) => {
-                        this.setState({ showSearchArea: e.target.checked });
-                        this.localObserver.publish(
-                          "fir.layers.showSearchArea",
-                          {
-                            value: e.target.checked,
-                          }
-                        );
-                      }}
-                      color="primary"
-                    />
-                  }
-                  label="Visa buffer/sökområde"
-                />
-              </StyledFormControl>
-            </div>
+  fnsRef.current = {
+    handleSearchStarted: () => {
+      setState({ loading: true });
+    },
+    handleSearchCompleted: () => {
+      setState({ loading: false });
+    },
+    handleSearchError: () => {
+      setState({ loading: false });
+    },
+  };
 
-            <FirToolbarView
-              model={this.model}
-              app={this.props.app}
-              localObserver={this.localObserver}
-            />
+  useEffect(() => {
+    localObserver.subscribe("fir.search.started", () => {
+      fnsRef.current.handleSearchStarted();
+    });
+    localObserver.subscribe("fir.search.completed", () => {
+      fnsRef.current.handleSearchCompleted();
+    });
+    localObserver.subscribe("fir.search.error", () => {
+      fnsRef.current.handleSearchError();
+    });
+  }, [localObserver, fnsRef]);
 
-            <ContainerTopPadded style={{ textAlign: "right" }}>
-              <ButtonClear
-                variant="outlined"
-                color="primary"
-                component="span"
-                size="small"
-                onClick={this.handleClearSearch}
+  return (
+    <>
+      <Accordion
+        expanded={state.searchPanelExpanded}
+        onChange={() => {
+          setState({
+            searchPanelExpanded: !state.searchPanelExpanded,
+          });
+        }}
+      >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <TypographyHeading>Sök fastigheter</TypographyHeading>
+        </AccordionSummary>
+        <AccordionDetails style={{ display: "block" }}>
+          <div>
+            <StyledFormControl fullWidth={true} variant="standard">
+              <InputLabel id="FirSearchType">Sök på</InputLabel>
+              <Select
+                labelId="FirSearchType"
+                value={state.searchTypeId}
+                variant="standard"
+                onChange={(e) => {
+                  setState({ searchTypeId: e.target.value });
+                }}
               >
-                Rensa
-              </ButtonClear>
-              <Button
-                variant="contained"
-                color="primary"
-                component="span"
-                size="small"
-                onClick={this.handleSearch}
-                disabled={this.state.loading}
-              >
-                Sök
-                {this.state.loading && <CircularProgressButton size={24} />}
-              </Button>
-            </ContainerTopPadded>
-          </AccordionDetails>
-        </Accordion>
-      </>
-    );
-  }
+                {model.searchTypes
+                  .filter((item) => {
+                    return item.visibleInDropDown !== false;
+                  })
+                  .map((item, _index) => (
+                    <MenuItem key={`fir-searchType-${item.id}`} value={item.id}>
+                      {item.caption}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </StyledFormControl>
+          </div>
+          <div>
+            <StyledFormControl2 fullWidth={true}>
+              <Input
+                id="input-with-icon-adornment"
+                placeholder="Söktext"
+                onChange={handleSearchTextChange}
+                onKeyPress={(e) => {
+                  if (e.key.toLowerCase() === "enter") {
+                    handleSearch();
+                    e.preventDefault();
+                  }
+                }}
+                onPaste={handlePaste}
+                value={state.searchText}
+                startAdornment={
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                }
+              />
+            </StyledFormControl2>
+          </div>
+          <div>
+            <FormControl fullWidth={true}>
+              <StyledFormControlLabel
+                control={
+                  <StyledCheckbox
+                    checked={state.exactMatch}
+                    onChange={(e) => {
+                      setState({ exactMatch: e.target.checked });
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Exakt matchning på text"
+              />
+            </FormControl>
+            <FormControl fullWidth={true}>
+              <StyledFormControlLabel
+                control={
+                  <StyledCheckbox
+                    checked={state.showDesignation}
+                    onChange={(e) => {
+                      setState({ showDesignation: e.target.checked });
+                      localObserver.publish("fir.layers.showDesignation", {
+                        value: e.target.checked,
+                      });
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Visa fastighetsbeteckning"
+              />
+            </FormControl>
+            <StyledFormControl fullWidth={true}>
+              <StyledFormControlLabel
+                control={
+                  <StyledCheckbox
+                    checked={state.showSearchArea}
+                    onChange={(e) => {
+                      setState({ showSearchArea: e.target.checked });
+                      localObserver.publish("fir.layers.showSearchArea", {
+                        value: e.target.checked,
+                      });
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Visa buffer/sökområde"
+              />
+            </StyledFormControl>
+          </div>
+
+          <FirToolbarView
+            model={model}
+            app={app}
+            localObserver={localObserver}
+          />
+
+          <ContainerTopPadded style={{ textAlign: "right" }}>
+            <ButtonClear
+              variant="outlined"
+              color="primary"
+              component="span"
+              size="small"
+              onClick={handleClearSearch}
+            >
+              Rensa
+            </ButtonClear>
+            <Button
+              variant="contained"
+              color="primary"
+              component="span"
+              size="small"
+              onClick={handleSearch}
+              disabled={state.loading}
+            >
+              Sök
+              {state.loading && <CircularProgressButton size={24} />}
+            </Button>
+          </ContainerTopPadded>
+        </AccordionDetails>
+      </Accordion>
+    </>
+  );
 }
+
+FirSearchView.propTypes = {
+  model: PropTypes.object.isRequired,
+  app: PropTypes.object.isRequired,
+  localObserver: PropTypes.object.isRequired,
+};
 
 export default FirSearchView;

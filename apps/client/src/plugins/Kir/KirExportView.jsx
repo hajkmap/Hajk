@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 
@@ -12,55 +12,68 @@ const SpanNum = styled("span")(({ _theme }) => ({
   fontWeight: 500,
   fontSize: "1rem",
 }));
-class KirExportView extends React.PureComponent {
-  state = {
+
+function KirExportView({ model, app, localObserver }) {
+  const fnsRef = useRef({});
+
+  const [state, setStateRaw] = useState(() => ({
     results: [],
+  }));
+  const stateRef = useRef(state);
+  const [, setTick] = useState(0);
+
+  const setState = (patch) => {
+    stateRef.current = { ...stateRef.current, ...patch };
+    setStateRaw(stateRef.current);
   };
 
-  static propTypes = {
-    model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired,
+  const forceUpdate = () => {
+    setTick((tick) => tick + 1);
   };
 
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
+  fnsRef.current = {
+    handleResultsFiltered: (list) => {
+      setState({ results: [...list] });
+      forceUpdate();
+    },
+  };
 
-    this.localObserver.subscribe("kir.results.filtered", (list) => {
-      this.setState({ results: [...list] });
-      this.forceUpdate();
+  useEffect(() => {
+    localObserver.subscribe("kir.results.filtered", (list) => {
+      fnsRef.current.handleResultsFiltered(list);
     });
-  }
+  }, [localObserver, fnsRef]);
 
-  render() {
-    return (
-      <>
-        <div>
-          <ContainerInfo>
-            {!this.model.app.plugins.kir?.options?.residentList && (
-              <div>Otillräcklig behörighet för att exportera resultat</div>
-            )}
-            {this.model.app.plugins.kir?.options?.residentList && (
-              <div>
-                <SpanNum>{this.state.results.length}</SpanNum> objekt finns
-                tillgängliga för export.
-              </div>
-            )}
-          </ContainerInfo>
-          <FirExportResidentListView
-            results={this.state.results}
-            model={this.model}
-            app={this.props.app}
-            localObserver={this.localObserver}
-            type={"kir"}
-          />
-        </div>
-      </>
-    );
-  }
+  return (
+    <>
+      <div>
+        <ContainerInfo>
+          {!model.app.plugins.kir?.options?.residentList && (
+            <div>Otillräcklig behörighet för att exportera resultat</div>
+          )}
+          {model.app.plugins.kir?.options?.residentList && (
+            <div>
+              <SpanNum>{state.results.length}</SpanNum> objekt finns
+              tillgängliga för export.
+            </div>
+          )}
+        </ContainerInfo>
+        <FirExportResidentListView
+          results={state.results}
+          model={model}
+          app={app}
+          localObserver={localObserver}
+          type={"kir"}
+        />
+      </div>
+    </>
+  );
 }
+
+KirExportView.propTypes = {
+  model: PropTypes.object.isRequired,
+  app: PropTypes.object.isRequired,
+  localObserver: PropTypes.object.isRequired,
+};
 
 export default KirExportView;

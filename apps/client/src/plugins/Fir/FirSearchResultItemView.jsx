@@ -1,4 +1,3 @@
-import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import propFilters from "../../components/FeatureInfo/FeaturePropsFilters";
@@ -37,33 +36,15 @@ const Container = styled("div")(({ theme }) => ({
   },
 }));
 
-class FirSearchResultItemView extends React.PureComponent {
-  state = {};
-
-  static propTypes = {
-    model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object,
+function FirSearchResultItemView({ model, rootModel }) {
+  const getTemplate = () => {
+    return rootModel.config.resultsList.template;
   };
 
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.rootModel = this.props.rootModel;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
-    this.propFilters = propFilters;
-  }
-
-  getTemplate = () => {
-    return this.rootModel.config.resultsList.template;
-  };
-
-  getHtml = () => {
-    const props = this.model.getProperties(); // model is a feature in this case...
+  const getHtml = () => {
+    const props = model.getProperties(); // model is a feature in this case...
     const nbsp = "\u00A0";
-    let s = this.getTemplate();
+    let s = getTemplate();
     const regex = /\{[a-zA-Z_0-9|\-()]+\}/gm;
     let m;
 
@@ -74,7 +55,7 @@ class FirSearchResultItemView extends React.PureComponent {
 
       for (let index = 0; index < m.length; index++) {
         const match = m[index];
-        let v = this.propFilters.applyFilters(
+        let v = propFilters.applyFilters(
           props,
           match.replace("{", "").replace("}", "")
         );
@@ -88,15 +69,18 @@ class FirSearchResultItemView extends React.PureComponent {
     return s;
   };
 
-  render() {
-    return (
-      <>
-        <Container
-          dangerouslySetInnerHTML={{ __html: this.getHtml() }}
-        ></Container>
-      </>
-    );
-  }
+  return (
+    <>
+      <Container dangerouslySetInnerHTML={{ __html: getHtml() }}></Container>
+    </>
+  );
 }
+
+FirSearchResultItemView.propTypes = {
+  model: PropTypes.object.isRequired,
+  app: PropTypes.object.isRequired,
+  localObserver: PropTypes.object.isRequired,
+  classes: PropTypes.object,
+};
 
 export default FirSearchResultItemView;

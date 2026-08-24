@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useRef } from "react";
 import { IconExcel } from "./FirIcons";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
@@ -46,8 +46,19 @@ const CircularProgressButton = styled(CircularProgress)(({ _theme }) => ({
   marginTop: -12,
   marginLeft: -12,
 }));
-class FirExportPropertyListView extends React.PureComponent {
-  state = {
+
+function FirExportPropertyListView({
+  results,
+  model,
+  localObserver,
+  closeSnackbar,
+  enqueueSnackbar,
+}) {
+  const snackBarRef = useRef(null);
+
+  const options = model.app.plugins.fir.options;
+
+  const [state, setStateRaw] = useState(() => ({
     accordionExpanded: false,
     loading: false,
     downloadUrl: null,
@@ -57,35 +68,28 @@ class FirExportPropertyListView extends React.PureComponent {
     chSsn: false,
     chTaxedOwner: false,
     chSendList: false,
+  }));
+  const stateRef = useRef(state);
+
+  const setState = (patch) => {
+    stateRef.current = { ...stateRef.current, ...patch };
+    setStateRaw(stateRef.current);
   };
 
-  static propTypes = {
-    results: PropTypes.array.isRequired,
-    model: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired,
-  };
-
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.options = this.model.app.plugins.fir.options;
-  }
-
-  #collectAndSendData = () => {
+  const collectAndSendData = () => {
     let ids = [];
 
-    this.props.results.forEach((feature) => {
-      ids.push("" + feature.get(this.options.propertyList.idField)); // force string
+    results.forEach((feature) => {
+      ids.push("" + feature.get(options.propertyList.idField)); // force string
     });
 
     const params = {
-      samfallighet: this.state.chCommunities,
-      ga: this.state.chCommunityFacilities,
-      rattighet: this.state.chRights,
-      persnr: this.state.chSsn,
-      taxerad_agare: this.state.chTaxedOwner,
-      fastighet_utskick: this.state.chSendList,
+      samfallighet: stateRef.current.chCommunities,
+      ga: stateRef.current.chCommunityFacilities,
+      rattighet: stateRef.current.chRights,
+      persnr: stateRef.current.chSsn,
+      taxerad_agare: stateRef.current.chTaxedOwner,
+      fastighet_utskick: stateRef.current.chSendList,
     };
 
     let data = {
@@ -95,7 +99,7 @@ class FirExportPropertyListView extends React.PureComponent {
 
     let searchParams = new URLSearchParams();
     searchParams.append("json", JSON.stringify(data));
-    hfetch(this.options.propertyList.excelExportUrl, {
+    hfetch(options.propertyList.excelExportUrl, {
       method: "post",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -108,15 +112,15 @@ class FirExportPropertyListView extends React.PureComponent {
       })
       .then((text) => {
         if (text) {
-          this.setState({ loading: false });
-          this.setState({ downloadUrl: text });
+          setState({ loading: false });
+          setState({ downloadUrl: text });
         }
       })
       .catch((_err, _a) => {
-        this.setState({ loading: false });
-        this.setState({ downloadUrl: null });
-        this.props.closeSnackbar(this.snackBar);
-        this.snackBar = this.props.enqueueSnackbar(
+        setState({ loading: false });
+        setState({ downloadUrl: null });
+        closeSnackbar(snackBarRef.current);
+        snackBarRef.current = enqueueSnackbar(
           "Ett fel inträffade vid exporten av fastighetsförteckningen.",
           {
             variant: "error",
@@ -125,165 +129,167 @@ class FirExportPropertyListView extends React.PureComponent {
       });
   };
 
-  handleSendClick = () => {
-    this.setState({ downloadUrl: null });
-    this.setState({ loading: true });
-    setTimeout(this.#collectAndSendData, 25);
+  const handleSendClick = () => {
+    setState({ downloadUrl: null });
+    setState({ loading: true });
+    setTimeout(collectAndSendData, 25);
   };
 
-  ExcelLogo() {
+  const ExcelLogo = () => {
     return (
       <img src={IconExcel()} alt="" style={{ width: "24px", height: "auto" }} />
     );
-  }
+  };
 
-  render() {
-    return (
-      <>
-        <Accordion
-          disabled={this.props.results.length === 0}
-          expanded={
-            this.state.accordionExpanded && this.props.results.length > 0
-          }
-          onChange={() => {
-            this.setState({
-              accordionExpanded: !this.state.accordionExpanded,
-            });
-          }}
-        >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <TypographyHeading>Fastighetsförteckning</TypographyHeading>
-          </AccordionSummary>
-          <AccordionDetails style={{ display: "block" }}>
+  return (
+    <>
+      <Accordion
+        disabled={results.length === 0}
+        expanded={state.accordionExpanded && results.length > 0}
+        onChange={() => {
+          setState({
+            accordionExpanded: !state.accordionExpanded,
+          });
+        }}
+      >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <TypographyHeading>Fastighetsförteckning</TypographyHeading>
+        </AccordionSummary>
+        <AccordionDetails style={{ display: "block" }}>
+          <div>
+            <div>Inkludera:</div>
+            <CheckboxGroupContainer>
+              <FormControl fullWidth={true}>
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.chCommunities}
+                      onChange={(e) => {
+                        setState({ chCommunities: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Samfälligheter"
+                />
+              </FormControl>
+              <FormControl fullWidth={true}>
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.chCommunityFacilities}
+                      onChange={(e) => {
+                        setState({
+                          chCommunityFacilities: e.target.checked,
+                        });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Gemensamhetsanläggningar"
+                />
+              </FormControl>
+              <FormControl fullWidth={true}>
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.chRights}
+                      onChange={(e) => {
+                        setState({ chRights: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Rättigheter"
+                />
+              </FormControl>
+              <FormControl fullWidth={true}>
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.chSsn}
+                      onChange={(e) => {
+                        setState({ chSsn: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Personnummer"
+                />
+              </FormControl>
+              <FormControl fullWidth={true}>
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.chTaxedOwner}
+                      onChange={(e) => {
+                        setState({ chTaxedOwner: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Taxerad ägare"
+                />
+              </FormControl>
+              <FormControl fullWidth={true}>
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.chSendList}
+                      onChange={(e) => {
+                        setState({ chSendList: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Utskickslista"
+                />
+              </FormControl>
+            </CheckboxGroupContainer>
             <div>
-              <div>Inkludera:</div>
-              <CheckboxGroupContainer>
-                <FormControl fullWidth={true}>
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.chCommunities}
-                        onChange={(e) => {
-                          this.setState({ chCommunities: e.target.checked });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Samfälligheter"
-                  />
-                </FormControl>
-                <FormControl fullWidth={true}>
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.chCommunityFacilities}
-                        onChange={(e) => {
-                          this.setState({
-                            chCommunityFacilities: e.target.checked,
-                          });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Gemensamhetsanläggningar"
-                  />
-                </FormControl>
-                <FormControl fullWidth={true}>
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.chRights}
-                        onChange={(e) => {
-                          this.setState({ chRights: e.target.checked });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Rättigheter"
-                  />
-                </FormControl>
-                <FormControl fullWidth={true}>
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.chSsn}
-                        onChange={(e) => {
-                          this.setState({ chSsn: e.target.checked });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Personnummer"
-                  />
-                </FormControl>
-                <FormControl fullWidth={true}>
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.chTaxedOwner}
-                        onChange={(e) => {
-                          this.setState({ chTaxedOwner: e.target.checked });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Taxerad ägare"
-                  />
-                </FormControl>
-                <FormControl fullWidth={true}>
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.chSendList}
-                        onChange={(e) => {
-                          this.setState({ chSendList: e.target.checked });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Utskickslista"
-                  />
-                </FormControl>
-              </CheckboxGroupContainer>
               <div>
-                <div>
+                <Button
+                  fullWidth={true}
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<ExcelLogo />}
+                  onClick={handleSendClick}
+                  disabled={state.loading}
+                  sx={{ opacity: state.loading ? 0.3 : 1.0 }}
+                >
+                  Skapa fastighetsförteckning
+                  {state.loading && <CircularProgressButton size={24} />}
+                </Button>
+              </div>
+
+              <Collapse in={state.downloadUrl !== null}>
+                <DownloadContainer>
                   <Button
                     fullWidth={true}
                     variant="outlined"
                     color="primary"
-                    startIcon={<this.ExcelLogo />}
-                    onClick={this.handleSendClick}
-                    disabled={this.state.loading}
-                    sx={{ opacity: this.state.loading ? 0.3 : 1.0 }}
+                    title={"Ladda ner: \n" + state.downloadUrl}
+                    startIcon={<DownloadIcon />}
+                    onClick={() => {
+                      document.location.href = state.downloadUrl;
+                    }}
                   >
-                    Skapa fastighetsförteckning
-                    {this.state.loading && <CircularProgressButton size={24} />}
+                    Ladda ner fil
                   </Button>
-                </div>
-
-                <Collapse in={this.state.downloadUrl !== null}>
-                  <DownloadContainer>
-                    <Button
-                      fullWidth={true}
-                      variant="outlined"
-                      color="primary"
-                      title={"Ladda ner: \n" + this.state.downloadUrl}
-                      startIcon={<DownloadIcon />}
-                      onClick={() => {
-                        document.location.href = this.state.downloadUrl;
-                      }}
-                    >
-                      Ladda ner fil
-                    </Button>
-                  </DownloadContainer>
-                </Collapse>
-              </div>
+                </DownloadContainer>
+              </Collapse>
             </div>
-          </AccordionDetails>
-        </Accordion>
-      </>
-    );
-  }
+          </div>
+        </AccordionDetails>
+      </Accordion>
+    </>
+  );
 }
+
+FirExportPropertyListView.propTypes = {
+  results: PropTypes.array.isRequired,
+  model: PropTypes.object.isRequired,
+  localObserver: PropTypes.object.isRequired,
+};
 
 export default withSnackbar(FirExportPropertyListView);
