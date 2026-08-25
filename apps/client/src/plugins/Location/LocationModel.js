@@ -98,6 +98,12 @@ class LocationModel {
       coordinates ? new Point(coordinates) : null
     );
 
+    // Also update the accuracy feature's geometry to stay centered on the current position
+    // This ensures the red ring stays centered on the blue dot as the user moves
+    if (coordinates) {
+      this.accuracyFeature.setGeometry(new Point(coordinates));
+    }
+
     this.#positionReceived = true;
 
     // If we've got new coordinates, make sure to hide the loading indicator
@@ -198,7 +204,13 @@ class LocationModel {
       });
 
       vectorContext.setStyle(style);
-      vectorContext.drawGeometry(flashGeom);
+      // Read the feature's geometry fresh on every frame (rather than a
+      // one-time clone) so the ring follows the position if it moves
+      // while the animation is still running.
+      const geometry = feature.getGeometry();
+      if (geometry) {
+        vectorContext.drawGeometry(geometry);
+      }
 
       // This ensure that the listener for postrender will be triggered
       this.map.render();
@@ -207,8 +219,6 @@ class LocationModel {
     // Setup the animation
     const duration = 3000;
     const start = Date.now();
-    // Prepare the feature that will get animated
-    const flashGeom = feature.getGeometry().clone();
     // Save the listener key so we can unsubscribe when animation is done
     const listenerKey = this.layer.on("postrender", animate);
     // We need to force render, otherwise postrender won't run the first time.
