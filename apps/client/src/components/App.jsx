@@ -682,8 +682,8 @@ class App extends React.PureComponent {
           // the Search component listens to.
           // TODO: Also handle sources change, the s parameter
           if (
-            mergedParams.get("q") !==
-              this.appModel.searchModel.lastSearchPhrase &&
+            mergedParams.get("q")?.replace(/"/g, "") !==
+              this.appModel.searchModel.lastSearchPhrase?.replace(/"/g, "") &&
             mergedParams.get("q") !== null
           ) {
             this.globalObserver.publish(

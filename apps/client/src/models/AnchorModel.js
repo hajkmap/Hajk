@@ -222,11 +222,7 @@ class AnchorModel {
     // Read some "optional" values so we have them prepared.
     // If some conditions aren't met, we won't add them to the
     // anchor string, in order to keep the string short.
-    const q =
-      document
-        .getElementById("searchInputField")
-        ?.value.trim()
-        .replace(/"/g, "") || "";
+    const q = document.getElementById("searchInputField")?.value.trim() || "";
     const f = this.#cqlFilters;
 
     // Split current URL on the "?" and just get the first part. This
