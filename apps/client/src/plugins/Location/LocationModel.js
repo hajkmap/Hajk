@@ -11,6 +11,7 @@ import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style";
 class LocationModel {
   #tracking = false;
   #following = false;
+  #autoRotate = false;
   #positionReceived = false;
 
   constructor(props) {
@@ -72,13 +73,21 @@ class LocationModel {
   }
 
   handleGeolocationChange = (e) => {
+    const heading = e.target.getHeading();
+
     this.localObserver.publish("geolocationChange", {
       accuracy: e.target.getAccuracy(),
       altitude: e.target.getAltitude(),
       altitudeAccuracy: e.target.getAltitudeAccuracy(),
-      heading: e.target.getHeading(),
+      heading,
       speed: e.target.getSpeed(),
     });
+
+    if (this.#autoRotate && typeof heading === "number") {
+      // Heading is in radians, clockwise from north. Negate it so the
+      // direction of travel is rotated to always point "up" on screen.
+      this.map.getView().setRotation(-heading);
+    }
   };
 
   handleGeolocationError = (error) => {
@@ -130,6 +139,15 @@ class LocationModel {
     if (active === this.#following) return;
     this.#following = active;
     this.centerOnUpdate = active;
+  };
+
+  toggleAutoRotate = (active) => {
+    if (active === this.#autoRotate) return;
+    this.#autoRotate = active;
+    if (!active) {
+      // Reset to north-up when auto-rotate is turned off
+      this.map.getView().setRotation(0);
+    }
   };
 
   toggleTracking = (active) => {
@@ -233,6 +251,8 @@ class LocationModel {
     this.toggleTracking(false);
     // Also disable follow, the default state is turned off.
     this.disableFollow(true);
+    // Also disable auto-rotate, the default state is turned off.
+    this.disableAutoRotate(true);
   }
 
   enableFollow() {
@@ -241,6 +261,14 @@ class LocationModel {
 
   disableFollow() {
     this.toggleFollow(false);
+  }
+
+  enableAutoRotate() {
+    this.toggleAutoRotate(true);
+  }
+
+  disableAutoRotate() {
+    this.toggleAutoRotate(false);
   }
 }
 
