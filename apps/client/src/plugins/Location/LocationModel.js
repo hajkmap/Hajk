@@ -13,6 +13,7 @@ class LocationModel {
   #following = false;
   #autoRotate = false;
   #positionReceived = false;
+  #lastHeading = null;
 
   constructor(props) {
     this.map = props.map;
@@ -73,21 +74,13 @@ class LocationModel {
   }
 
   handleGeolocationChange = (e) => {
-    const heading = e.target.getHeading();
-
     this.localObserver.publish("geolocationChange", {
       accuracy: e.target.getAccuracy(),
       altitude: e.target.getAltitude(),
       altitudeAccuracy: e.target.getAltitudeAccuracy(),
-      heading,
+      heading: e.target.getHeading(),
       speed: e.target.getSpeed(),
     });
-
-    if (this.#autoRotate && typeof heading === "number") {
-      // Heading is in radians, clockwise from north. Negate it so the
-      // direction of travel is rotated to always point "up" on screen.
-      this.map.getView().setRotation(-heading);
-    }
   };
 
   handleGeolocationError = (error) => {
@@ -144,9 +137,114 @@ class LocationModel {
   toggleAutoRotate = (active) => {
     if (active === this.#autoRotate) return;
     this.#autoRotate = active;
-    if (!active) {
+    if (active) {
+      this.#requestCompass();
+    } else {
+      this.#removeCompassListeners();
       // Reset to north-up when auto-rotate is turned off
       this.map.getView().setRotation(0);
+    }
+  };
+
+  // Geolocation's own `heading` property only updates from consecutive GPS
+  // fixes while the device is physically moving, so it's useless for
+  // rotating the map while the user is standing still. Instead we read the
+  // device's orientation sensors directly, the same way a compass would.
+  #applyHeading = (heading = 0) => {
+    // Don't fight an ongoing view animation, e.g. the initial zoom-to-location.
+    if (this.map.getView().getAnimating()) return;
+
+    // Heading is in degrees, clockwise from north. Convert to radians and
+    // negate it, otherwise the map rotates in the opposite direction.
+    this.map.getView().setRotation(-(heading / 180) * Math.PI);
+  };
+
+  #handleAbsoluteOrientation = (e) => {
+    if (
+      !e.absolute ||
+      e.alpha === null ||
+      e.beta === null ||
+      e.gamma === null
+    ) {
+      return;
+    }
+
+    // Determine heading
+    let heading = -(e.alpha + (e.beta * e.gamma) / 90);
+    heading -= Math.floor(heading / 360) * 360; // Wrap into range [0, 360)
+
+    if (heading !== this.#lastHeading) {
+      this.#lastHeading = heading;
+      this.#applyHeading(heading);
+    }
+  };
+
+  #handleWebkitOrientation = (e) => {
+    // Non-standard, but it's the only way to get an absolute compass
+    // heading directly on iOS/Safari.
+    const heading = e.webkitCompassHeading;
+
+    if (heading !== null && !isNaN(heading) && heading !== this.#lastHeading) {
+      this.#lastHeading = heading;
+      this.#applyHeading(heading);
+    }
+  };
+
+  #addCompassListeners = () => {
+    if ("ondeviceorientationabsolute" in window) {
+      window.addEventListener(
+        "deviceorientationabsolute",
+        this.#handleAbsoluteOrientation
+      );
+    } else {
+      window.addEventListener(
+        "deviceorientation",
+        this.#handleWebkitOrientation
+      );
+    }
+  };
+
+  #removeCompassListeners = () => {
+    window.removeEventListener(
+      "deviceorientationabsolute",
+      this.#handleAbsoluteOrientation
+    );
+    window.removeEventListener(
+      "deviceorientation",
+      this.#handleWebkitOrientation
+    );
+  };
+
+  // Devices that implement the Permission API (iOS 13+) require an explicit
+  // permission request, which must happen synchronously in response to a
+  // user gesture (i.e. the click that toggled the auto-rotate switch).
+  #requestCompass = () => {
+    if (!window.DeviceOrientationEvent) {
+      console.warn(
+        "[LocationModel] DeviceOrientation API not available, can't auto-rotate map."
+      );
+      return;
+    }
+
+    if (typeof DeviceOrientationEvent.requestPermission === "function") {
+      DeviceOrientationEvent.requestPermission()
+        .then((response) => {
+          if (response === "granted") {
+            this.#addCompassListeners();
+          } else {
+            console.error(
+              "[LocationModel] Permission for DeviceOrientationEvent was not granted."
+            );
+          }
+        })
+        .catch((error) => {
+          console.error(
+            "[LocationModel] Failed to request DeviceOrientationEvent permission.",
+            error
+          );
+        });
+    } else {
+      this.#addCompassListeners();
     }
   };
 

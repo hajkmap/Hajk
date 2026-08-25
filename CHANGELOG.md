@@ -67,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Admin: Map options can now be saved even when the map selector option is unchecked. [#1858](https://github.com/hajkmap/Hajk/issues/1858).
 - Client: Prevent search bar from overflowing on certain mobile screens. [#1877](https://github.com/hajkmap/Hajk/issues/1877)
 - Client: Location - The red flashing ring rendered around the blue geolocation dot does not move along when user moves, even during an ongoing flash animation.
-- Client: Location - Added a auto-rotate toggle that will rotate the map so that user's current heading direction always points up. [commit](https://github.com/hajkmap/Hajk/commit/ee27d00b9bdbc99f5c63d84793324ff251af75cb)
+- Client: Location - Added a auto-rotate toggle that will rotate the map so that user's current heading direction always points up.
 
 ## [4.3.0] 2026-04-20
 
