@@ -1,17 +1,9 @@
 import { useEffect } from "react";
-import {
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  Switch,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+import { TextField, FormControlLabel, Checkbox } from "@mui/material";
 import { Controller, useForm, FieldValues, Control } from "react-hook-form";
-import FormPanel from "../../../components/form-components/form-panel";
-import FormFieldGrid, { FormFieldRow } from "../../../components/form-components/form-field-grid";
+import FormFieldGrid, {
+  FormFieldRow,
+} from "../../../components/form-components/form-field-grid";
 import FormAccordion from "../../../components/form-components/form-accordion";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
@@ -40,9 +32,7 @@ export default function AnchorToolRenderer({
     if (tool && !parentControl) {
       reset({
         type: tool.type ?? "",
-        active: tool.options?.active ?? false,
         options: {
-          target: tool.options?.target ?? "",
           visibleAtStart: tool.options?.visibleAtStart ?? false,
           allowCreatingCleanUrls: tool.options?.allowCreatingCleanUrls ?? false,
           instruction: tool.options?.instruction ?? "",
@@ -54,68 +44,6 @@ export default function AnchorToolRenderer({
 
   return (
     <>
-      {/* BASIC INFO */}
-      <FormPanel title={t("common.information")}>
-        <FormFieldGrid>
-          <FormFieldRow>
-            <Controller
-              name="active"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={!!field.value}
-                      onChange={(_, checked) => field.onChange(checked)}
-                    />
-                  }
-                  label={t("tools.active")}
-                />
-              )}
-            />
-          </FormFieldRow>
-
-          <FormFieldRow>
-            <Controller
-              name="index"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  type="number"
-                  label={t("tools.sortIndex")}
-                  fullWidth
-                  {...field}
-                />
-              )}
-            />
-          </FormFieldRow>
-
-          <FormFieldRow>
-            <Controller
-              name="options.target"
-              control={control}
-              render={({ field }) => (
-                <FormControl fullWidth>
-                  <InputLabel id={"target"}>{t("tools.placement")}</InputLabel>
-                  <Select
-                    {...field}
-                    value={(field.value as string) ?? ""}
-                    labelId={"target"}
-                    label={t("tools.placement")}
-                  >
-                    <MenuItem value="toolbar">Drawer</MenuItem>
-                    <MenuItem value="left">Widget left</MenuItem>
-                    <MenuItem value="right">Widget right</MenuItem>
-                    <MenuItem value="control">Control button</MenuItem>
-                  </Select>
-                </FormControl>
-              )}
-            />
-          </FormFieldRow>
-        </FormFieldGrid>
-      </FormPanel>
-
-      {/* SETTINGS */}
       <FormAccordion title={t("tools.settings")} defaultExpanded>
         <FormFieldGrid>
           <FormFieldRow>

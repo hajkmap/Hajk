@@ -1,12 +1,10 @@
 import {
   TextField,
-  FormGroup,
   FormControlLabel,
   FormControl,
   MenuItem,
   InputLabel,
   Select,
-  Switch,
   Checkbox,
 } from "@mui/material";
 import FormPanel from "../../../components/form-components/form-panel";
@@ -75,27 +73,6 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
             />
           </FormFieldRow>
           <FormFieldRow>
-            <FormGroup>
-              <Controller
-                name="options.active"
-                control={control}
-                defaultValue={Boolean(tool?.options?.active)}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={!!field.value}
-                        onChange={(_, checked) => field.onChange(checked)}
-                        size="medium"
-                      />
-                    }
-                    label={t("tools.active")}
-                  />
-                )}
-              />
-            </FormGroup>
-          </FormFieldRow>
-          <FormFieldRow>
             <Controller
               name="options.customTitleForMap"
               control={control}
@@ -161,85 +138,6 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
           </FormFieldRow>
         </FormFieldGrid>
       </FormPanel>
-
-      <FormAccordion title={t("tools.windowSettings")}>
-        <FormFieldGrid>
-          <FormFieldRow>
-            <FormControl fullWidth>
-              <InputLabel id="window-placement" shrink>
-                {t("tools.windowPlacement")}
-              </InputLabel>
-              <Controller
-                name="options.windowPlacement"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    labelId="window-placement"
-                    label={t("tools.windowPlacement")}
-                    defaultValue="1"
-                    displayEmpty
-                    {...field}
-                  >
-                    <MenuItem value={"1"}>Left</MenuItem>
-                    <MenuItem value={"2"}>Right</MenuItem>
-                  </Select>
-                )}
-              />
-            </FormControl>
-          </FormFieldRow>
-          <FormFieldRow>
-            <Controller
-              name="options.windowWidth"
-              control={control}
-              defaultValue={tool?.options?.width ?? ""}
-              render={({ field }) => (
-                <TextField
-                  label={t("tools.windowWidth")}
-                  fullWidth
-                  {...field}
-                />
-              )}
-            />
-          </FormFieldRow>
-          <FormFieldRow>
-            <FormControl fullWidth>
-              <InputLabel id="window-height" shrink>
-                {t("tools.windowHeight")}
-              </InputLabel>
-              <Controller
-                name="options.window-height"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    labelId="window-height"
-                    label={t("tools.windowHeight")}
-                    defaultValue="1"
-                    displayEmpty
-                    {...field}
-                  >
-                    <MenuItem value={"1"}>Auto</MenuItem>
-                    <MenuItem value={"2"}>Dynamic</MenuItem>
-                  </Select>
-                )}
-              />
-            </FormControl>
-          </FormFieldRow>
-          <FormFieldRow>
-            <Controller
-              name="options.windowSetWindowHeight"
-              control={control}
-              defaultValue={tool?.options?.width ?? ""}
-              render={({ field }) => (
-                <TextField
-                  label={t("tools.windowSetWindowHeight")}
-                  fullWidth
-                  {...field}
-                />
-              )}
-            />
-          </FormFieldRow>
-        </FormFieldGrid>
-      </FormAccordion>
 
       <FormAccordion title={t("tools.generalSettings")}>
         <FormFieldGrid>

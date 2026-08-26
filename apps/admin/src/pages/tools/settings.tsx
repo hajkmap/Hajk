@@ -38,9 +38,19 @@ export default function ToolSettings() {
   // Reset form with tool data when it loads
   useEffect(() => {
     if (tool) {
+      const options = tool.options ?? {};
+      const optionsTitle =
+        typeof options.title === "string" && options.title
+          ? options.title
+          : (tool.title ?? "");
       reset({
         type: tool.type ?? "",
-        options: tool.options ?? {},
+        // Flat title field (e.g. documenthandler) — same seed as options.title
+        title: optionsTitle,
+        options: {
+          ...options,
+          title: optionsTitle,
+        },
       });
     }
   }, [tool, reset]);
@@ -55,18 +65,24 @@ export default function ToolSettings() {
   const onSubmit = (data: FieldValues) => {
     if (!tool) return;
 
-    const { type, options: nestedOptions, ...rest } = data;
-    const submittedOptions =
+    const { type, title: formTitle, options: nestedOptions, ...rest } = data;
+    const nested =
       nestedOptions && typeof nestedOptions === "object"
-        ? {
-            ...rest,
-            ...(nestedOptions as Record<string, unknown>),
-          }
-        : rest;
-    const options = {
+        ? (nestedOptions as Record<string, unknown>)
+        : null;
+    const submittedOptions = nested ? { ...rest, ...nested } : rest;
+    const options: Record<string, unknown> = {
       ...(tool.options ?? {}),
       ...submittedOptions,
     };
+
+    // options.title wins when present (layerswitcher etc.). Flat `title`
+    // (documenthandler) only fills in when options.title was not submitted.
+    if (nested && "title" in nested) {
+      options.title = nested.title;
+    } else if (typeof formTitle === "string") {
+      options.title = formTitle;
+    }
 
     // Strip attachments where both name and link are blank
     if (Array.isArray(options.pdfLinks)) {
@@ -75,23 +91,32 @@ export default function ToolSettings() {
       ).filter((a) => a.name.trim() !== "" || a.link.trim() !== "");
     }
 
+    // After create, options.title is source of truth and keeps tool.title in sync
+    const syncedTitle =
+      typeof options.title === "string" ? options.title : undefined;
+
     updateToolMutation.mutate(
       {
         id: tool.id,
         data: {
           type: type as string,
+          title: syncedTitle,
           options,
         },
       },
       {
         onSuccess: () => {
           toast.success(t("common.dialog.saveSuccess"));
-          reset(data); // Reset form with current data to clear dirty state
+          reset({
+            ...data,
+            title: syncedTitle ?? "",
+            options,
+          });
         },
         onError: (error: Error) => {
           toast.error(error.message);
         },
-      }
+      },
     );
   };
 
@@ -110,7 +135,12 @@ export default function ToolSettings() {
         ? "error"
         : "idle";
 
-  const displayName = tool?.title ?? tool?.type;
+  const displayName =
+    (typeof tool?.options?.title === "string" && tool.options.title
+      ? tool.options.title
+      : undefined) ??
+    tool?.title ??
+    tool?.type;
 
   return (
     <Page

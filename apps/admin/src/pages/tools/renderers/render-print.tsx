@@ -48,25 +48,6 @@ export default function PrintToolRenderer({ tool }: PrintToolRendererProps) {
         <FormFieldGrid>
           <FormFieldRow>
             <Controller
-              name="options.active"
-              control={control}
-              defaultValue={Boolean(tool?.options?.active)}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={!!field.value}
-                      onChange={(_, checked) => field.onChange(checked)}
-                    />
-                  }
-                  label={t("tools.active")}
-                />
-              )}
-            />
-          </FormFieldRow>
-
-          <FormFieldRow>
-            <Controller
               name="options.instruction"
               control={control}
               defaultValue={tool?.options?.instruction ?? ""}
@@ -107,76 +88,6 @@ export default function PrintToolRenderer({ tool }: PrintToolRendererProps) {
           </FormFieldRow>
         </FormFieldGrid>
       </FormPanel>
-
-      {/* ─────────────────────────────────────────────
-         WINDOW SETTINGS
-      ───────────────────────────────────────────── */}
-      <FormAccordion title={t("tools.windowSettings")}>
-        <FormFieldGrid>
-          <FormFieldRow>
-            <Controller
-              name="options.index"
-              control={control}
-              defaultValue={tool?.options?.index ?? 0}
-              render={({ field }) => (
-                <TextField
-                  type="number"
-                  label={t("tools.sortIndex")}
-                  fullWidth
-                  {...field}
-                />
-              )}
-            />
-          </FormFieldRow>
-
-          <FormFieldRow>
-            <FormControl fullWidth>
-              <InputLabel>{t("tools.windowPlacement")}</InputLabel>
-              <Controller
-                name="options.position"
-                control={control}
-                defaultValue={tool?.options?.position ?? "left"}
-                render={({ field }) => (
-                  <Select {...field} label={t("tools.windowPlacement")}>
-                    <MenuItem value="left">{t("tools.left")}</MenuItem>
-                    <MenuItem value="right">{t("tools.right")}</MenuItem>
-                  </Select>
-                )}
-              />
-            </FormControl>
-          </FormFieldRow>
-
-          <FormFieldRow>
-            <Controller
-              name="options.width"
-              control={control}
-              defaultValue={tool?.options?.width ?? ""}
-              render={({ field }) => (
-                <TextField
-                  label={t("tools.windowWidth")}
-                  fullWidth
-                  {...field}
-                />
-              )}
-            />
-          </FormFieldRow>
-
-          <FormFieldRow>
-            <Controller
-              name="options.height"
-              control={control}
-              defaultValue={tool?.options?.height ?? ""}
-              render={({ field }) => (
-                <TextField
-                  label={t("tools.windowHeight")}
-                  fullWidth
-                  {...field}
-                />
-              )}
-            />
-          </FormFieldRow>
-        </FormFieldGrid>
-      </FormAccordion>
 
       {/* ─────────────────────────────────────────────
          IMAGE PROCESSING SETTINGS

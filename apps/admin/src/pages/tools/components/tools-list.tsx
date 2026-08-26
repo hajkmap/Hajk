@@ -161,7 +161,11 @@ export default function ToolsList({
 
   const handleCreateSubmit = async (data: ToolCreateInput) => {
     try {
-      const response = await createTool({ type: data.type, title: data.title });
+      const response = await createTool({
+        type: data.type,
+        title: data.title,
+        options: data.title ? { title: data.title } : undefined,
+      });
       toast.success(t("tools.createSuccess"), {
         position: "bottom-left",
         theme: palette.mode,

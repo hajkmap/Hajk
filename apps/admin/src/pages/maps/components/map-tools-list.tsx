@@ -252,6 +252,7 @@ export default function MapToolsList({
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [placementFilter, setPlacementFilter] = useState<ToolZone | "" | "unplaced">("");
   const flushCallbacksRef = useRef(new Set<() => void>());
   const pendingFieldsRef = useRef(new Set<string>());
   const pendingWindowSizesRef = useRef(new Map<number, Partial<ToolWindowSize>>());
@@ -353,7 +354,8 @@ export default function MapToolsList({
     [catalogTools],
   );
 
-  const hasActiveFilters = searchTerm.trim() !== "" || typeFilter !== "";
+  const hasActiveFilters =
+    searchTerm.trim() !== "" || typeFilter !== "" || placementFilter !== "";
 
   const handleToggleActive = useCallback(
     (toolId: number, active: boolean) => {
@@ -406,7 +408,20 @@ export default function MapToolsList({
         ),
       )
       .filter((tool) => {
+        const toolId = Number(tool.id);
+        const active = activeToolIds.has(toolId);
+        const zone = active ? findToolZoneForId(toolZones, toolId) : null;
+        const target = zone ? zoneKeyToTarget(zone) : ("" as const);
+
         if (typeFilter && tool.type !== typeFilter) return false;
+        if (placementFilter === "unplaced" && target !== "") return false;
+        if (
+          placementFilter &&
+          placementFilter !== "unplaced" &&
+          target !== placementFilter
+        ) {
+          return false;
+        }
         if (!query) return true;
         const title = getCatalogToolDisplayName(tool).toLowerCase();
         return title.includes(query) || tool.type.toLowerCase().includes(query);
@@ -433,6 +448,7 @@ export default function MapToolsList({
     mapTools,
     searchTerm,
     typeFilter,
+    placementFilter,
     activeToolIds,
     toolZones,
     windowPositions,
@@ -729,6 +745,29 @@ export default function MapToolsList({
               {typeOptions.map((type) => (
                 <MenuItem key={type} value={type}>
                   {type}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </ListFilterField>
+        <ListFilterField>
+          <FormControl fullWidth variant="outlined">
+            <InputLabel id="map-tools-placement-filter-label">
+              {t("maps.toolsToolPlacement")}
+            </InputLabel>
+            <Select
+              labelId="map-tools-placement-filter-label"
+              label={t("maps.toolsToolPlacement")}
+              value={placementFilter}
+              onChange={(event) => setPlacementFilter(event.target.value)}
+            >
+              <MenuItem value="">{t("common.all")}</MenuItem>
+              <MenuItem value="unplaced">
+                {t("maps.toolPlacement.unplaced")}
+              </MenuItem>
+              {TOOL_PLACEMENT_OPTIONS.map((placement) => (
+                <MenuItem key={placement} value={placement}>
+                  {t(`maps.toolPlacement.${placement}`)}
                 </MenuItem>
               ))}
             </Select>

@@ -1,14 +1,4 @@
-import {
-  TextField,
-  FormGroup,
-  FormControlLabel,
-  FormControl,
-  MenuItem,
-  InputLabel,
-  Select,
-  Switch,
-  Checkbox,
-} from "@mui/material";
+import { TextField, FormControlLabel, Checkbox } from "@mui/material";
 import FormPanel from "../../../components/form-components/form-panel";
 import FormFieldGrid, {
   FormFieldRow,
@@ -40,6 +30,7 @@ export default function LayerSwitcherRenderer({
 }: LayerSwitcherRendererProps) {
   const { t } = useTranslation();
   const options = tool?.options;
+  console.log("tool", tool);
   const { control: localControl, reset } = useForm<FieldValues>({
     mode: "onChange",
     reValidateMode: "onChange",
@@ -51,13 +42,11 @@ export default function LayerSwitcherRenderer({
       reset({
         type: tool.type ?? "",
         options: {
-          title: getOption(options, "title", ""),
-          active: getOption(options, "active", false),
+          title:
+            getOption(options, "title", "") ||
+            (typeof tool.title === "string" ? tool.title : "") ||
+            "",
           description: getOption(options, "description", ""),
-          target: getOption(options, "target", "toolbar"),
-          position: getOption(options, "position", "left"),
-          width: getOption(options, "width", ""),
-          height: getOption(options, "height", ""),
           visibleAtStart: getOption(options, "visibleAtStart", false),
           visibleAtStartMobile: getOption(
             options,
@@ -158,32 +147,15 @@ export default function LayerSwitcherRenderer({
             <Controller
               name="options.title"
               control={control}
-              defaultValue={getOption(options, "title", "")}
+              defaultValue={
+                getOption(options, "title", "") ||
+                (typeof tool.title === "string" ? tool.title : "") ||
+                ""
+              }
               render={({ field }) => (
                 <TextField label={t("tools.title")} fullWidth {...field} />
               )}
             />
-          </FormFieldRow>
-          <FormFieldRow>
-            <FormGroup>
-              <Controller
-                name="options.active"
-                control={control}
-                defaultValue={getOption(options, "active", false)}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={!!field.value}
-                        onChange={(_, checked) => field.onChange(checked)}
-                        size="medium"
-                      />
-                    }
-                    label={t("tools.active")}
-                  />
-                )}
-              />
-            </FormGroup>
           </FormFieldRow>
           <FormFieldRow>
             <Controller
@@ -203,85 +175,6 @@ export default function LayerSwitcherRenderer({
           </FormFieldRow>
         </FormFieldGrid>
       </FormPanel>
-
-      {/* Window Settings */}
-      <FormAccordion title={t("tools.windowSettings")}>
-        <FormFieldGrid>
-          <FormFieldRow>
-            <FormControl fullWidth>
-              <InputLabel id="target-label" shrink>
-                {t("tools.target")}
-              </InputLabel>
-              <Controller
-                name="options.target"
-                control={control}
-                defaultValue={getOption(options, "target", "toolbar")}
-                render={({ field }) => (
-                  <Select
-                    labelId="target-label"
-                    label={t("tools.target")}
-                    displayEmpty
-                    {...field}
-                  >
-                    <MenuItem value="toolbar">Drawer</MenuItem>
-                    <MenuItem value="left">Widget left</MenuItem>
-                    <MenuItem value="right">Widget right</MenuItem>
-                    <MenuItem value="control">Control button</MenuItem>
-                  </Select>
-                )}
-              />
-            </FormControl>
-          </FormFieldRow>
-          <FormFieldRow>
-            <FormControl fullWidth>
-              <InputLabel id="position-label" shrink>
-                {t("tools.position")}
-              </InputLabel>
-              <Controller
-                name="options.position"
-                control={control}
-                defaultValue={getOption(options, "position", "left")}
-                render={({ field }) => (
-                  <Select
-                    labelId="position-label"
-                    label={t("tools.position")}
-                    displayEmpty
-                    {...field}
-                  >
-                    <MenuItem value="left">Left</MenuItem>
-                    <MenuItem value="right">Right</MenuItem>
-                  </Select>
-                )}
-              />
-            </FormControl>
-          </FormFieldRow>
-          <FormFieldRow>
-            <Controller
-              name="options.width"
-              control={control}
-              defaultValue={getOption(options, "width", "")}
-              render={({ field }) => (
-                <TextField
-                  label={t("tools.width")}
-                  fullWidth
-                  type="number"
-                  {...field}
-                />
-              )}
-            />
-          </FormFieldRow>
-          <FormFieldRow>
-            <Controller
-              name="options.height"
-              control={control}
-              defaultValue={getOption(options, "height", "")}
-              render={({ field }) => (
-                <TextField label={t("tools.height")} fullWidth {...field} />
-              )}
-            />
-          </FormFieldRow>
-        </FormFieldGrid>
-      </FormAccordion>
 
       {/* Layer Manager Settings */}
       <FormAccordion title={t("tools.displaySettings")}>
