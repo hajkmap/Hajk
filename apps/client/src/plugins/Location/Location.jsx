@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Observer from "react-event-observer";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
