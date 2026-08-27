@@ -129,7 +129,9 @@ class ToolOptions extends Component {
         northArrowPlacement:
           tool.options.northArrowPlacement || this.state.northArrowPlacement,
         includeImageBorder:
-          tool.options.includeImageBorder || this.state.includeImageBorder,
+          typeof tool.options.includeImageBorder === "boolean"
+            ? tool.options.includeImageBorder
+            : this.state.includeImageBorder,
         allowLegendsInPdfOutput:
           typeof tool.options.allowLegendsInPdfOutput === "boolean"
             ? tool.options.allowLegendsInPdfOutput

@@ -118,6 +118,62 @@ export async function buildLayout(
     }
   }
 
+  // 2b Borders
+  if (model.includeImageBorder) {
+    const color = model.textColor;
+    const lineWidth = 0.5;
+    if (model.margin === 0) {
+      // if there is no margin draw border at the page edge
+      elements.push({
+        type: "strokePath",
+        points: [
+          { x: 0.3, y: 0.3 },
+          { x: pageWidth - 0.5, y: 0.3 },
+          { x: pageWidth - 0.5, y: pageHeight },
+          { x: 0.3, y: pageHeight },
+          { x: 0.3, y: 0.3 },
+        ],
+        color,
+        lineWidth,
+        closePath: true,
+      });
+    } else if (!options.useTextIconsInMargin) {
+      // Inner margin with border
+      const inset = 2.75 * model.margin;
+      elements.push({
+        type: "strokePath",
+        points: [
+          { x: inset, y: inset },
+          { x: pageWidth - inset, y: inset },
+          { x: pageWidth - inset, y: pageHeight - inset },
+          { x: inset, y: pageHeight - inset },
+          { x: inset, y: inset },
+        ],
+        color,
+        lineWidth,
+        closePath: true,
+      });
+    } else {
+      // Text in margin with border
+      const insetLR = 2.75 * model.margin;
+      const insetBottom = 8 * model.margin;
+      const insetTop = 10 * model.margin;
+      elements.push({
+        type: "strokePath",
+        points: [
+          { x: insetLR, y: insetBottom },
+          { x: pageWidth - insetLR, y: insetBottom },
+          { x: pageWidth - insetLR, y: pageHeight - insetTop },
+          { x: insetLR, y: pageHeight - insetTop },
+          { x: insetLR, y: insetBottom },
+        ],
+        color,
+        lineWidth,
+        closePath: true,
+      });
+    }
+  }
+
   // 3. QR Code
   if (options.includeQrCode && model.mapConfig.enableAppStateInHash) {
     try {
