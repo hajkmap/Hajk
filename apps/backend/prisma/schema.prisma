@@ -6,243 +6,21 @@ datasource db {
   provider = "postgresql"
 }
 
-model Session {
-  id        String   @id
-  sid       String   @unique
-  data      String
-  expiresAt DateTime
-}
-
-model LocalAccount {
-  id       String    @id @default(cuid())
-  userId   String    @unique
-  email    String    @unique
-  password String
-  fullName String
-  expires  DateTime?
-  user     User      @relation(fields: [userId], references: [id])
-}
-
-model User {
-  id           String        @id @default(cuid())
-  email        String        @unique
-  fullName     String
-  strategy     AuthStrategy
-  localAccount LocalAccount?
-  roles        RoleOnUser[]
-}
-
 model Role {
   id                  String                @id @default(cuid())
   code                String                @unique
   title               String?
   description         String?
   systemCriticalRole  Boolean               @default(false)
-  users               RoleOnUser[]
+  createdBy           String?
+  createdDate         DateTime?             @db.Timestamptz(3) // Timestamp when created
+  lastSavedBy         String?
+  lastSavedDate       DateTime?             @db.Timestamptz(3) // Timestamp when last saved
   RoleOnMap           RoleOnMap[]
-  RoleOnDisplayLayer  RoleOnDisplayLayer[]
-  RoleOnSearchLayer   RoleOnSearchLayer[]
-  RoleOnEditingLayer  RoleOnEditingLayer[]
+  RoleOnLayer         RoleOnLayer[]
   RoleOnLayerInstance RoleOnLayerInstance[]
   RoleOnTool          RoleOnTool[]
   RoleOnGroup         RoleOnGroup[]
-}
-
-model RoleOnUser {
-  userId String
-  roleId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([userId, roleId])
-}
-
-model RoleOnMap {
-  mapId  Int
-  roleId String
-  map    Map    @relation(fields: [mapId], references: [id], onDelete: Cascade)
-  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([mapId, roleId])
-}
-
-model RoleOnDisplayLayer {
-  displayLayerId String
-  roleId         String?
-  displayLayer   DisplayLayer @relation(fields: [displayLayerId], references: [id], onDelete: Cascade)
-  role           Role?        @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([displayLayerId])
-}
-
-model RoleOnSearchLayer {
-  searchLayerId String
-  roleId        String?
-  searchLayer   SearchLayer @relation(fields: [searchLayerId], references: [id], onDelete: Cascade)
-  role          Role?       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([searchLayerId])
-}
-
-model RoleOnEditingLayer {
-  editingLayerId String
-  roleId         String?
-  editingLayer   EditingLayer @relation(fields: [editingLayerId], references: [id], onDelete: Cascade)
-  role           Role?        @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([editingLayerId])
-}
-
-model RoleOnLayerInstance {
-  layerInstanceId String
-  roleId          String
-  role            Role          @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  layerInstance   LayerInstance @relation(fields: [layerInstanceId], references: [id], onDelete: Cascade)
-
-  @@id([layerInstanceId, roleId])
-}
-
-model RoleOnTool {
-  toolId Int
-  roleId String
-  tool   Tool   @relation(fields: [toolId], references: [id], onDelete: Cascade)
-  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([toolId, roleId])
-}
-
-model RoleOnGroup {
-  groupId String
-  roleId  String
-  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  role    Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([groupId, roleId])
-}
-
-model Map {
-  id                Int             @id @default(autoincrement())
-  locked            Boolean         @default(false)
-  name              String          @unique
-  options           Json            @default("{}")
-  projectionId      Int?
-  createdBy         String?
-  createdDate       DateTime?       @db.Timestamptz(3) // Timestamp when created
-  lastSavedBy       String?
-  lastSavedDate     DateTime?       @db.Timestamptz(3) // Timestamp when last saved
-  projection        Projection?     @relation("MapViewProjection", fields: [projectionId], references: [id])
-  projections       Projection[]    @relation("MapProjections")
-  tools             ToolsOnMaps[]
-  layers            LayerInstance[]
-  groups            GroupsOnMaps[]
-  restrictedToRoles RoleOnMap[]
-  themes            Theme[]
-}
-
-/// Map theme preset for quick-access layer configurations.
-model Theme {
-  id            Int       @id @default(autoincrement())
-  mapName       String
-  title         String
-  owner         String?
-  description   String?
-  keywords      String[]  @default([])
-  /// Imported JSON payload (layers, metadata, etc.)
-  data          Json      @default("{}")
-  createdBy     String?
-  createdDate   DateTime? @db.Timestamptz(3)
-  lastSavedBy   String?
-  lastSavedDate DateTime? @db.Timestamptz(3)
-  map           Map       @relation(fields: [mapName], references: [name], onDelete: Cascade)
-
-  @@index([mapName])
-}
-
-/// A folder owned by a DocumentHandler Tool instance that groups documents.
-model DocumentFolder {
-  id            Int        @id @default(autoincrement())
-  /// URL-safe slug derived from title at creation time. Immutable.
-  name          String
-  /// Human-readable display name.
-  title         String
-  toolId        Int
-  createdBy     String?
-  createdDate   DateTime?  @db.Timestamptz(3)
-  lastSavedBy   String?
-  lastSavedDate DateTime?  @db.Timestamptz(3)
-  tool          Tool       @relation(fields: [toolId], references: [id], onDelete: Cascade)
-  documents     Document[]
-
-  @@unique([toolId, name])
-}
-
-/// A document belonging to a DocumentHandler Tool instance and folder. Content is stored as JSON.
-model Document {
-  id            Int            @id @default(autoincrement())
-  /// URL-safe slug derived from title at creation time. Immutable.
-  name          String
-  /// Human-readable display name.
-  title         String
-  /// Chapter tree content: { chapters: [...] }
-  content       Json           @default("{\"chapters\":[]}")
-  toolId        Int
-  folderId      Int
-  createdBy     String?
-  createdDate   DateTime?      @db.Timestamptz(3)
-  lastSavedBy   String?
-  lastSavedDate DateTime?      @db.Timestamptz(3)
-  tool          Tool           @relation(fields: [toolId], references: [id], onDelete: Cascade)
-  folder        DocumentFolder @relation(fields: [folderId], references: [id], onDelete: Restrict)
-
-  @@unique([toolId, folderId, name])
-}
-
-/// Available plugin types. Each Tool instance references one of these.
-model ToolType {
-  type        String  @id
-  title       String
-  description String?
-  tools       Tool[]
-}
-
-/// A configured instance of a plugin (ToolType). Several instances of the
-/// same type can exist, e.g. "Dokument Bygglov" and "Dokument Detaljplaner".
-model Tool {
-  id                Int              @id @default(autoincrement())
-  locked            Boolean          @default(false)
-  type              String
-  /// Instance name, distinguishes instances of the same type
-  title             String?
-  options           Json             @default("{}")
-  createdBy         String?
-  createdDate       DateTime?        @db.Timestamptz(3) // Timestamp when created
-  lastSavedBy       String?
-  lastSavedDate     DateTime?        @db.Timestamptz(3) // Timestamp when last saved
-  /// Soft delete - set instead of removing the row
-  deletedAt         DateTime?        @db.Timestamptz(3)
-  toolType          ToolType         @relation(fields: [type], references: [type])
-  maps              ToolsOnMaps[]
-  restrictedToRoles RoleOnTool[]
-  documentFolders   DocumentFolder[]
-  documents         Document[]
-}
-
-model ToolsOnMaps {
-  mapName String
-  toolId  Int
-  /// Whether the tool is enabled on the map. Inactive tools keep their row (and
-  /// placement) so they can be re-enabled without losing configuration.
-  active  Boolean @default(true)
-  /// Determines the sort between tools within a zone
-  index   Int     @default(0)
-  /// Placement zone in the map UI: drawer | widgetLeft | widgetRight | controlButton. Null means unplaced (managed via admin UI).
-  target  String?
-  /// Allows overriding default tool options (set in Tool) on a per-map basis
-  options Json    @default("{}")
-  map     Map     @relation(fields: [mapName], references: [name])
-  tool    Tool    @relation(fields: [toolId], references: [id])
-
-  @@id([mapName, toolId])
 }
 
 model Projection {
@@ -252,9 +30,41 @@ model Projection {
   definition String
   extent     Decimal[] @default([])
   units      String?
-  mapView    Map[]     @relation("MapViewProjection")
-  maps       Map[]     @relation("MapProjections")
+  maps       Map[]
   service    Service[]
+
+  createdBy     String?
+  createdDate   DateTime? @db.Timestamptz(3) // Timestamp when created
+  lastSavedBy   String?
+  lastSavedDate DateTime? @db.Timestamptz(3) // Timestamp when last saved
+  /// Soft delete - set instead of removing the row
+  deletedAt     DateTime? @db.Timestamptz(3)
+}
+
+model Metadata {
+  id            String        @id @default(cuid())
+  title         String?
+  description   String?
+  owner         String?
+  url           String?
+  urlTitle      String?
+  /// Open-data link, e.g. legacy `infoOpenDataLink` / `infogroupopendatalink`
+  urlOpenData   String?
+  attribution   String?
+  /// Whether the info panel is shown, e.g. legacy `infoVisible` / `infogroupvisible`
+  visible       Boolean       @default(false)
+  createdBy     String?
+  createdDate   DateTime?     @db.Timestamptz(3) // Timestamp when created
+  lastSavedBy   String?
+  lastSavedDate DateTime?     @db.Timestamptz(3) // Timestamp when last saved
+  service       Service?
+  layer         Layer?
+  groupsOnMap   GroupsOnMaps?
+}
+
+enum GroupType {
+  Layer
+  Search
 }
 
 model Group {
@@ -267,224 +77,36 @@ model Group {
   createdDate       DateTime?       @db.Timestamptz(3) // Timestamp when created
   lastSavedBy       String?
   lastSavedDate     DateTime?       @db.Timestamptz(3) // Timestamp when last saved
+  /// Soft delete - set instead of removing the row
+  deletedAt         DateTime?       @db.Timestamptz(3)
   layers            LayerInstance[]
   maps              GroupsOnMaps[]
   restrictedToRoles RoleOnGroup[]
 }
 
-model Service {
-  /// Primary key; stable reference for layers and APIs. Multiple services may share the same `url`.
-  id              String         @id @default(cuid())
-  metadataId      String?        @unique
-  projectionId    Int?
-  name            String
-  locked          Boolean        @default(false)
-  url             String
-  version         String         @default("1.3.0")
-  imageFormat     String         @default("image/png")
-  type            ServiceType
-  serverType      ServerType     @default(GEOSERVER)
-  projection      Projection?    @relation(fields: [projectionId], references: [id])
-  workspace       String?
-  getMapUrl       String?
-  comment         String?
-  createdBy       String?
-  createdDate     DateTime?      @db.Timestamptz(3)
-  lastSavedBy     String?
-  lastSavedDate   DateTime?      @db.Timestamptz(3)
-  healthStatus    String?
-  healthCheckedAt DateTime?      @db.Timestamptz(3)
-  deletedAt       DateTime?      @db.Timestamptz(3)
-  displayLayers   DisplayLayer[]
-  searchLayers    SearchLayer[]
-  editingLayers   EditingLayer[]
-  metadata        Metadata?      @relation(fields: [metadataId], references: [id])
-}
+/// A configured instance of a plugin. Several instances of the
+/// same type can exist, e.g. "Coordinates (light)" and "Coordinates (pro)".
+model Tool {
+  id     Int     @id @default(autoincrement())
+  locked Boolean @default(false)
+  type   String // Tillåtna värden varierar utifrån API-version - värdena hårdkodade
 
-model Metadata {
-  id           String        @id @default(cuid())
-  title        String?
-  description  String?
-  owner        String?
-  url          String?
-  urlTitle     String?
-  urlOpenData  String?
-  attribution  String?
-  created      DateTime      @default(now())
-  updated      DateTime      @updatedAt
-  service      Service?
-  displayLayer DisplayLayer?
-  searchLayer  SearchLayer?
+  /// Instance name, distinguishes instances of the same type
+  title         String?
+  // Holds the regular tool options
+  options       Json    @default("{}")
+  // Holds only render-specific options, such as target and position
+  renderOptions Json    @default("{}")
 
-  groupsOnMaps GroupsOnMaps[]
-}
+  createdBy     String?
+  createdDate   DateTime? @db.Timestamptz(3) // Timestamp when created
+  lastSavedBy   String?
+  lastSavedDate DateTime? @db.Timestamptz(3) // Timestamp when last saved
 
-model InfoClickSettings {
-  id              String        @id @default(cuid())
-  layerInstanceId String?
-  definition      String?
-  icon            String?
-  format          String        @default("application/json")
-  sortProperty    String?
-  sortMethod      String        @default("text") // number or text
-  sortDescending  Boolean       @default(false)
-  displayLayer    DisplayLayer?
-}
-
-enum SearchOutputFormat {
-  GML2
-  GML3
-  GML32
-}
-
-/// Map visualization layer (WMS, WMTS, ARCGIS, VECTOR, etc.).
-model DisplayLayer {
-  id                          String               @id @default(cuid())
-  serviceId                   String
-  metadataId                  String?              @unique
-  infoClickSettingsId         String?              @unique
-  selectedLayers              String[]             @default([])
-  locked                      Boolean              @default(false)
-  name                        String
-  internalName                String?
-  description                 String?
-  service                     Service              @relation(fields: [serviceId], references: [id])
-  metadata                    Metadata?            @relation(fields: [metadataId], references: [id])
-  infoClickSettings           InfoClickSettings?   @relation(fields: [infoClickSettingsId], references: [id])
-  opacity                     Float                @default(1)
-  maxZoom                     Int                  @default(-1)
-  minZoom                     Int                  @default(-1)
-  minMaxZoomAlertOnToggleOnly Boolean              @default(false)
-  tiled                       Boolean              @default(false)
-  singleTile                  Boolean              @default(false)
-  hidpi                       Boolean              @default(false)
-  legendOptions               String?
-  legendUrl                   String?
-  legendIconUrl               String?
-  style                       String?
-  customRatio                 Int                  @default(0)
-  showMetadata                Boolean              @default(false)
-  infoClickActive             Boolean              @default(true)
-  timeSliderVisible           Boolean              @default(false)
-  timeSliderStart             String?
-  timeSliderEnd               String?
-  hideExpandArrow             Boolean              @default(false)
-  zIndex                      Int                  @default(0)
-  createdBy                   String?
-  createdDate                 DateTime?            @db.Timestamptz(3)
-  lastSavedBy                 String?
-  lastSavedDate               DateTime?            @db.Timestamptz(3)
-  deletedAt                   DateTime?            @db.Timestamptz(3)
-  restrictedToRoles           RoleOnDisplayLayer[]
-  instances                   LayerInstance[]
-  options                     Json                 @default("{}")
-
-  @@index([serviceId])
-}
-
-/// Search layer configuration (independent of service type; WFS is common).
-model SearchLayer {
-  id                     String              @id @default(cuid())
-  serviceId              String
-  metadataId             String?             @unique
-  selectedLayers         String[]            @default([])
-  locked                 Boolean             @default(false)
-  name                   String
-  internalName           String?
-  description            String?
-  service                Service             @relation(fields: [serviceId], references: [id])
-  metadata               Metadata?           @relation(fields: [metadataId], references: [id])
-  active                 Boolean             @default(false)
-  url                    String?
-  searchFields           String[]            @default([])
-  primaryDisplayFields   String[]            @default([])
-  secondaryDisplayFields String[]            @default([])
-  shortDisplayFields     String[]            @default([])
-  outputFormat           SearchOutputFormat  @default(GML3)
-  geometryField          String?
-  infobox                String?
-  aliasDict              String?
-  zIndex                 Int                 @default(0)
-  createdBy              String?
-  createdDate            DateTime?           @db.Timestamptz(3)
-  lastSavedBy            String?
-  lastSavedDate          DateTime?           @db.Timestamptz(3)
-  deletedAt              DateTime?           @db.Timestamptz(3)
-  restrictedToRoles      RoleOnSearchLayer[]
-  instances              LayerInstance[]
-  options                Json                @default("{}")
-
-  @@index([serviceId])
-}
-
-/// Editing layer configuration (WFST and similar).
-model EditingLayer {
-  id                String               @id @default(cuid())
-  serviceId         String
-  selectedLayers    String[]             @default([])
-  locked            Boolean              @default(false)
-  name              String
-  internalName      String?
-  description       String?
-  service           Service              @relation(fields: [serviceId], references: [id])
-  geometryField     String?
-  createdBy         String?
-  createdDate       DateTime?            @db.Timestamptz(3)
-  lastSavedBy       String?
-  lastSavedDate     DateTime?            @db.Timestamptz(3)
-  deletedAt         DateTime?            @db.Timestamptz(3)
-  restrictedToRoles RoleOnEditingLayer[]
-  instances         LayerInstance[]
-  options           Json                 @default("{}")
-
-  @@index([serviceId])
-}
-
-model LayerInstance {
-  id                String                @id @default(cuid())
-  displayLayerId    String?
-  searchLayerId     String?
-  editingLayerId    String?
-  mapId             Int?
-  groupId           String?
-  displayLayer      DisplayLayer?         @relation(fields: [displayLayerId], references: [id])
-  searchLayer       SearchLayer?          @relation(fields: [searchLayerId], references: [id])
-  editingLayer      EditingLayer?         @relation(fields: [editingLayerId], references: [id])
-  map               Map?                  @relation(fields: [mapId], references: [id])
-  group             Group?                @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  usage             UseType?
-  restrictedToRoles RoleOnLayerInstance[]
-  infoClickActive   Boolean               @default(true)
-  visibleAtStart    Boolean               @default(false)
-  zIndex            Int                   @default(0)
-  options           Json                  @default("{}")
-
-  @@index([displayLayerId])
-  @@index([searchLayerId])
-  @@index([editingLayerId])
-}
-
-model GroupsOnMaps {
-  id            String         @id @default(cuid())
-  mapName       String // It relates to a map via its name
-  groupId       String // It relates to a group via its ID
-  map           Map            @relation(fields: [mapName], references: [name])
-  group         Group          @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  parentGroupId String? // This particular GroupOnMap can have a parent GroupOnMap
-  parent        GroupsOnMaps?  @relation("GroupOnGroups", fields: [parentGroupId], references: [id], onDelete: Cascade) // The optional parent record
-  groups        GroupsOnMaps[] @relation("GroupOnGroups") // The optional list of children records
-
-  usage          UseType // It may be used as a background or a foreground group
-  name           String // It has a title, shown to the user
-  toggled        Boolean
-  expanded       Boolean
-  exclusiveGroup Boolean   @default(false)
-  infoDocument   Boolean   @default(false)
-  metadataId     String?
-  metadata       Metadata? @relation(fields: [metadataId], references: [id])
-  index          Int       @default(0)
-  layerVisibleAtStart Boolean @default(false)
-  layerInfoBox        String?
+  /// Soft delete - set instead of removing the row
+  deletedAt         DateTime?      @db.Timestamptz(3)
+  restrictedToRoles RoleOnTool[]
+  toolInstances     ToolInstance[]
 }
 
 enum ServiceType {
@@ -501,18 +123,251 @@ enum ServerType {
   GEOSERVER
 }
 
+model Service {
+  /// Primary key; stable reference for layers and APIs. Multiple services may share the same `url`.
+  id              String      @id @default(cuid())
+  metadataId      String?     @unique
+  projectionId    Int?
+  name            String
+  locked          Boolean     @default(false)
+  url             String
+  version         String      @default("1.3.0")
+  imageFormat     String      @default("image/png")
+  type            ServiceType
+  serverType      ServerType  @default(GEOSERVER)
+  projection      Projection? @relation(fields: [projectionId], references: [id])
+  workspace       String?
+  getMapUrl       String?
+  comment         String?
+  createdBy       String?
+  createdDate     DateTime?   @db.Timestamptz(3)
+  lastSavedBy     String?
+  lastSavedDate   DateTime?   @db.Timestamptz(3)
+  healthStatus    String?
+  healthCheckedAt DateTime?   @db.Timestamptz(3)
+  deletedAt       DateTime?   @db.Timestamptz(3)
+  layers          Layer[]
+  metadata        Metadata?   @relation(fields: [metadataId], references: [id])
+}
+
+/// A layer definition (independent of service type; WMS/WFS/WMTS/etc. are all
+/// represented here). Kind-specific config lives in `options` rather than
+/// dedicated columns.
+model Layer {
+  id                String          @id @default(cuid())
+  serviceId         String
+  metadataId        String?         @unique
+  /// Which underlying service sublayer(s) this represents — required to
+  /// actually build a GetMap/GetFeature request, not just display metadata.
+  selectedLayers    String[]        @default([])
+  locked            Boolean         @default(false)
+  name              String
+  internalName      String?
+  description       String?
+  service           Service         @relation(fields: [serviceId], references: [id])
+  metadata          Metadata?       @relation(fields: [metadataId], references: [id])
+  /// Whether this layer is offered as a search source (drives options.search).
+  active            Boolean         @default(false)
+  /// Default rendering z-index; used by both display- and search-kind layers.
+  zIndex            Int             @default(0)
+  createdBy         String?
+  createdDate       DateTime?       @db.Timestamptz(3)
+  lastSavedBy       String?
+  lastSavedDate     DateTime?       @db.Timestamptz(3)
+  deletedAt         DateTime?       @db.Timestamptz(3)
+  restrictedToRoles RoleOnLayer[]
+  instances         LayerInstance[]
+  /// Kind-specific config, e.g. WMS/WFS/WMTS/etc. options. Stored as JSON
+  /// because the shape of this data varies by service type.
+  options           Json            @default("{}")
+
+  @@index([serviceId])
+}
+
+model Map {
+  id      Int     @id @default(autoincrement())
+  locked  Boolean @default(false)
+  name    String  @unique
+  options Json    @default("{}")
+
+  projection      Projection[]
+  tools           ToolInstance[]
+  layers          LayerInstance[]
+  groups          GroupsOnMaps[]
+  documentFolders DocumentFolder[]
+  documents       Document[]
+
+  restrictedToRoles RoleOnMap[]
+
+  createdBy     String?
+  createdDate   DateTime? @db.Timestamptz(3) // Timestamp when created
+  lastSavedBy   String?
+  lastSavedDate DateTime? @db.Timestamptz(3) // Timestamp when last saved
+}
+
+// A tool instance is tied to a map and a tool. It allows for multiple instances of the same tool
+// to exist on a map, as well as it allows for the same tool to be used on multiple maps.
+// The instance can have its own render options (e.g. different position on different maps),
+// but the regular tool options are shared across all instances of the same tool. Hence we don't
+// allow overriding the regular tool options on a per-instance basis.
+// __If different regular tool options are needed, a separate tool must be created.__
+model ToolInstance {
+  mapId  Int
+  toolId Int
+  /// Determines the sort between tools within a zone
+  index  Int @default(0)
+
+  /// Allows overriding of render options ONLY. If regular tool options are to be changed,
+  // a separate instance must be created.
+  renderOptions Json @default("{}")
+
+  createdBy     String?
+  createdDate   DateTime? @db.Timestamptz(3) // Timestamp when created
+  lastSavedBy   String?
+  lastSavedDate DateTime? @db.Timestamptz(3) // Timestamp when last saved
+
+  map  Map  @relation(fields: [mapId], references: [id])
+  tool Tool @relation(fields: [toolId], references: [id])
+
+  @@id([mapId, toolId])
+}
+
 enum UseType {
   BACKGROUND
   FOREGROUND
 }
 
-enum AuthStrategy {
-  LOCAL
-  AZURE_AD
-  GITHUB
+model LayerInstance {
+  id                String                @id @default(cuid())
+  layerId           String
+  mapId             Int?
+  groupId           String?
+  layer             Layer                 @relation(fields: [layerId], references: [id])
+  map               Map?                  @relation(fields: [mapId], references: [id])
+  group             Group?                @relation(fields: [groupId], references: [id])
+  usage             UseType?
+  restrictedToRoles RoleOnLayerInstance[]
+  infoClickActive   Boolean               @default(true)
+  visibleAtStart    Boolean               @default(false)
+  zIndex            Int                   @default(0)
+  options           Json                  @default("{}")
+
+  createdBy     String?
+  createdDate   DateTime? @db.Timestamptz(3) // Timestamp when created
+  lastSavedBy   String?
+  lastSavedDate DateTime? @db.Timestamptz(3) // Timestamp when last saved
+
+  @@index([layerId])
 }
 
-enum GroupType {
-  Layer
-  Search
+model GroupsOnMaps {
+  id            String         @id @default(cuid())
+  mapName       String // It relates to a map via its name
+  groupId       String // It relates to a group via its ID
+  map           Map            @relation(fields: [mapName], references: [name])
+  group         Group          @relation(fields: [groupId], references: [id])
+  parentGroupId String? // This particular GroupOnMap can have a parent GroupOnMap
+  parent        GroupsOnMaps?  @relation("GroupOnGroups", fields: [parentGroupId], references: [id]) // The optional parent record
+  groups        GroupsOnMaps[] @relation("GroupOnGroups") // The optional list of children records
+
+  usage    UseType // It may be used as a background or a foreground group
+  name     String // It has a title, shown to the user
+  toggled  Boolean
+  expanded Boolean
+
+  /// Per-placement info panel (title/description/owner/url/urlOpenData/visible),
+  /// e.g. legacy infogrouptitle/infogrouptext/infogroupowner/infogroupurl/
+  /// infogroupurltext/infogroupopendatalink/infogroupvisible. Kept per-placement
+  /// (not on Group) to match `name` above, which also overrides Group.name per map.
+  metadataId String?   @unique
+  metadata   Metadata? @relation(fields: [metadataId], references: [id])
+
+  createdBy     String?
+  createdDate   DateTime? @db.Timestamptz(3) // Timestamp when created
+  lastSavedBy   String?
+  lastSavedDate DateTime? @db.Timestamptz(3) // Timestamp when last saved
+}
+
+/// A folder scoped to one map that groups documents.
+model DocumentFolder {
+  id            Int        @id @default(autoincrement())
+  /// URL-safe slug derived from title at creation time. Immutable.
+  name          String
+  /// Human-readable display name.
+  title         String
+  mapName       String
+  createdBy     String?
+  createdDate   DateTime?  @db.Timestamptz(3)
+  lastSavedBy   String?
+  lastSavedDate DateTime?  @db.Timestamptz(3)
+  map           Map        @relation(fields: [mapName], references: [name], onDelete: Cascade)
+  documents     Document[]
+
+  @@unique([mapName, name])
+}
+
+/// A document belonging to a map and folder. Content is stored as JSON.
+model Document {
+  id            Int            @id @default(autoincrement())
+  /// URL-safe slug derived from title at creation time. Immutable.
+  name          String
+  /// Human-readable display name.
+  title         String
+  /// Chapter tree content: { chapters: [...] }
+  content       Json           @default("{\"chapters\":[]}")
+  mapName       String
+  folderId      Int
+  createdBy     String?
+  createdDate   DateTime?      @db.Timestamptz(3)
+  lastSavedBy   String?
+  lastSavedDate DateTime?      @db.Timestamptz(3)
+  map           Map            @relation(fields: [mapName], references: [name], onDelete: Cascade)
+  folder        DocumentFolder @relation(fields: [folderId], references: [id], onDelete: Restrict)
+
+  @@unique([mapName, folderId, name])
+}
+
+model RoleOnMap {
+  mapId  Int
+  roleId String
+  map    Map    @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([mapId, roleId])
+}
+
+model RoleOnTool {
+  toolId Int
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  tool   Tool   @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@id([toolId, roleId])
+}
+
+model RoleOnLayer {
+  layerId String
+  roleId  String
+  layer   Layer  @relation(fields: [layerId], references: [id], onDelete: Cascade)
+  role    Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([layerId, roleId])
+}
+
+model RoleOnLayerInstance {
+  layerInstanceId String
+  roleId          String
+  role            Role          @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  layerInstance   LayerInstance @relation(fields: [layerInstanceId], references: [id], onDelete: Cascade)
+
+  @@id([layerInstanceId, roleId])
+}
+
+model RoleOnGroup {
+  groupId String
+  roleId  String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  role    Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, roleId])
 }

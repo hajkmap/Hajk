@@ -27,39 +27,12 @@ const prisma = new PrismaClient({
 
 const DEFAULT_PROJECTION_CODE = "EPSG:3006";
 
-// Known plugin types available in the client. Each Tool instance references
-// one of these. Types found in map configs but missing here are upserted
-// with the type name as title.
-const KNOWN_TOOL_TYPES = [
-  { type: "anchor", title: "Dela" },
-  { type: "bookmarks", title: "Bokmärken" },
-  { type: "buffer", title: "Buffra" },
-  { type: "collector", title: "Tyck till" },
-  { type: "coordinates", title: "Visa koordinat" },
-  { type: "documenthandler", title: "Dokumenthanterare" },
-  { type: "edit", title: "Redigera" },
-  { type: "externalLinks", title: "Externa länkar" },
-  { type: "fmeserver", title: "FME-server" },
-  { type: "infoclick", title: "Infoklick" },
-  { type: "infodialog", title: "Infodialog" },
-  { type: "information", title: "Om kartan" },
-  { type: "layercomparer", title: "Lagerjämförare" },
-  { type: "layerswitcher", title: "Lagerhanterare" },
-  { type: "location", title: "Positionera" },
-  { type: "measure", title: "Mät" },
-  { type: "measurer", title: "Mät" },
-  { type: "preset", title: "Snabbval" },
-  { type: "print", title: "Utskrift" },
-  { type: "routing", title: "Navigation" },
-  { type: "search", title: "Sök" },
-  { type: "sketch", title: "Rita" },
-  { type: "streetview", title: "Gatuvy" },
-  { type: "timeslider", title: "Tidslinje" },
-];
+// Shared timestamp for every row this script creates — a seed run happens
+// "now" for audit purposes, there's no real per-row creation time to track.
+const SEED_TIMESTAMP = new Date();
 
-const jsonToDisplayLayerId = new Map();
-const jsonToSearchLayerId = new Map();
-const jsonToEditingLayerId = new Map();
+// Maps a legacy layers.json id to the Prisma Layer id it was seeded as.
+const jsonToLayerId = new Map();
 
 const generateRandomName = () => {
   const adjectives = [
@@ -182,14 +155,6 @@ async function readMapConfigAndPopulateMap(file) {
   console.log("Creating tools…");
   const toolsToConnectToMap = [];
   for await (const t of mapConfig.tools) {
-    // Make sure the tool type exists — map configs may contain types
-    // missing from KNOWN_TOOL_TYPES.
-    await prisma.toolType.upsert({
-      where: { type: t.type },
-      update: {},
-      create: { type: t.type, title: t.type },
-    });
-
     const toolOptions = t.options ?? {};
     if (t.type === "layerswitcher") {
       const groupCount = Array.isArray(toolOptions.groups)
@@ -208,6 +173,8 @@ async function readMapConfigAndPopulateMap(file) {
         type: t.type,
         title: toolOptions.title ?? null,
         options: toolOptions,
+        createdDate: SEED_TIMESTAMP,
+        lastSavedDate: SEED_TIMESTAMP,
       },
     });
 
@@ -218,20 +185,18 @@ async function readMapConfigAndPopulateMap(file) {
       "tool"
     );
 
-    // Connect tool to map — target is intentionally null (unplaced).
-    // Placement is managed via the admin UI, not seeded.
-    toolsToConnectToMap.push({
-      toolId: tool.id,
-      mapName: file,
-      index: t.index,
-      active: toolOptions.active !== false,
-    });
+    // Connect tool to map — target is intentionally left unset (unplaced).
+    // Placement is managed via the admin UI, not seeded. mapId is filled in
+    // below, once the map itself has been created.
+    toolsToConnectToMap.push({ toolId: tool.id, index: t.index });
   }
 
   // Finally we can create the map
   console.log("Creating map…");
   const mapProjectionCode =
-    mapConfig.map?.projection || projectionsToConnect[0]?.code || DEFAULT_PROJECTION_CODE;
+    mapConfig.map?.projection ||
+    projectionsToConnect[0]?.code ||
+    DEFAULT_PROJECTION_CODE;
   const mapProjection = await prisma.projection.findUnique({
     where: { code: mapProjectionCode },
   });
@@ -242,25 +207,29 @@ async function readMapConfigAndPopulateMap(file) {
       ...(mapProjection
         ? { projection: { connect: { id: mapProjection.id } } }
         : {}),
-      projections: {
-        connect: projectionsToConnect,
-      },
-      // Tools and layers can't be connected here like projections because
-      // they use explicit m-n relations (ToolsOnMaps, LayerInstance).
-      // They are connected in the steps below.
+      createdDate: SEED_TIMESTAMP,
+      lastSavedDate: SEED_TIMESTAMP,
     },
   });
 
   // Now that the map is created, we can create and connect roles that should have access to the map.
   // The "roles" (defined as groups in the .json-files) are set on the layerSwitcher...
-  const layerswitcherTool = mapConfig.tools.find((t) => t.type === "layerswitcher");
+  const layerswitcherTool = mapConfig.tools.find(
+    (t) => t.type === "layerswitcher"
+  );
   const visibleForGroups = layerswitcherTool?.options?.visibleForGroups || [];
 
   // Add potential role restrictions on the map
   await updateRolesFromVisibleForGroups(visibleForGroups, createdMap.id, "map");
 
-  const connectedTools = await prisma.toolsOnMaps.createMany({
-    data: toolsToConnectToMap,
+  const connectedTools = await prisma.toolInstance.createMany({
+    data: toolsToConnectToMap.map((t) => ({
+      toolId: t.toolId,
+      mapId: createdMap.id,
+      index: t.index,
+      createdDate: SEED_TIMESTAMP,
+      lastSavedDate: SEED_TIMESTAMP,
+    })),
   });
   console.log(`Connected ${connectedTools.count} tools to map ${file}`);
 
@@ -284,6 +253,10 @@ const extractServiceTypeFromKey = (key) => {
   }
 };
 
+// Decides which extra fields (beyond the common core) get populated on the
+// unified Layer row below — a straight port of the pre-unification
+// DisplayLayer/SearchLayer/EditingLayer split, now writing into one table
+// (with kind-specific config folded into `options`) instead of three.
 const LAYER_KIND_BY_JSON_KEY = {
   wmslayers: "display",
   wmtslayers: "display",
@@ -292,13 +265,6 @@ const LAYER_KIND_BY_JSON_KEY = {
   wfslayers: "search",
   wfstlayers: "editing",
 };
-
-function mapJsonLayerIdToPrisma(jsonLayerId, jsonKey) {
-  const kind = LAYER_KIND_BY_JSON_KEY[jsonKey];
-  if (kind === "search") return jsonToSearchLayerId.get(jsonLayerId);
-  if (kind === "editing") return jsonToEditingLayerId.get(jsonLayerId);
-  return jsonToDisplayLayerId.get(jsonLayerId);
-}
 
 async function readAndPopulateLayers() {
   try {
@@ -343,10 +309,18 @@ async function readAndPopulateLayers() {
       await prisma.service.create({
         data: {
           ...service,
-          metadata: { create: { owner: owner, created: new Date() } },
+          metadata: {
+            create: {
+              owner: owner,
+              createdDate: SEED_TIMESTAMP,
+              lastSavedDate: SEED_TIMESTAMP,
+            },
+          },
           projection: {
             connect: { code: projection || DEFAULT_PROJECTION_CODE },
           },
+          createdDate: SEED_TIMESTAMP,
+          lastSavedDate: SEED_TIMESTAMP,
         },
       });
     }
@@ -385,158 +359,141 @@ async function readAndPopulateLayers() {
             ? [layer.layer]
             : [];
 
-        if (layerKind === "search") {
-          const createdLayer = await prisma.searchLayer.create({
-            data: {
-              name: layer.caption,
-              internalName: layer.internalLayerName || generateRandomName(),
-              selectedLayers,
-              active: Boolean(
-                layer.searchUrl ||
-                (Array.isArray(layer.searchFields) &&
-                  layer.searchFields.length > 0)
-              ),
-              url: layer.searchUrl,
-              searchFields:
-                layer.searchFields ||
-                (typeof layer.searchPropertyName === "string"
-                  ? layer.searchPropertyName.split(",")
-                  : layer.searchPropertyName || []),
-              primaryDisplayFields:
-                layer.displayFields ||
-                (typeof layer.searchDisplayName === "string"
-                  ? layer.searchDisplayName.split(",")
-                  : layer.searchDisplayName || []),
-              secondaryDisplayFields:
-                typeof layer.secondaryLabelFields === "string"
-                  ? layer.secondaryLabelFields.split(",")
-                  : layer.secondaryLabelFields || [],
-              shortDisplayFields:
-                typeof layer.searchShortDisplayName === "string"
-                  ? layer.searchShortDisplayName.split(",")
-                  : layer.searchShortDisplayName || [],
-              outputFormat: layer.outputFormat || undefined,
-              geometryField: layer.geometryField || layer.searchGeometryField,
-              infobox: layer.infobox,
-              aliasDict: layer.aliasDict,
-              zIndex: layer.zIndex ?? 0,
-              service: { connect: { id: service.id } },
-              metadata: {
-                create: {
-                  title: layer.infoTitle,
-                  description: layer.infoText,
-                  url: layer.infoUrl,
-                  urlTitle: layer.infoUrlText,
-                  owner: layer.infoOwner,
-                  created: new Date(),
-                },
-              },
-              options: {},
-            },
-          });
-          jsonToSearchLayerId.set(layer.id, createdLayer.id);
-        } else if (layerKind === "editing") {
-          const createdLayer = await prisma.editingLayer.create({
-            data: {
-              name: layer.caption,
-              internalName: layer.internalLayerName || generateRandomName(),
-              selectedLayers,
-              geometryField: layer.geometryField || layer.searchGeometryField,
-              service: { connect: { id: service.id } },
-              options: {
-                editPoint: layer.editPoint,
-                editMultiPoint: layer.editMultiPoint,
-                editLine: layer.editLine,
-                editMultiLine: layer.editMultiLine,
-                editPolygon: layer.editPolygon,
-                editMultiPolygon: layer.editMultiPolygon,
-                allowMultiGeometries: layer.allowMultipleGeometries,
-                editableFields: layer.editableFields,
-                nonEditableFields: layer.nonEditableFields,
-              },
-            },
-          });
-          jsonToEditingLayerId.set(layer.id, createdLayer.id);
-        } else {
-          const options = {
-            useCustomDpiList: layer.useCustomDpiList,
-            customDpiList: layer.customDpiList,
-          };
+        // `active`/`metadata` stay undefined unless the branch below sets
+        // them — Layer.active defaults to false, and editing-kind layers
+        // never get a Metadata row (mirrors the pre-unification behavior).
+        let active;
+        let metadata;
+        const options = {};
 
-          const createdLayer = await prisma.displayLayer.create({
-            data: {
-              name: layer.caption,
-              internalName: layer.internalLayerName || generateRandomName(),
-              selectedLayers,
-              legendUrl: layer.legend,
-              legendIconUrl: layer.legendIcon,
-              opacity: layer.opacity,
-              minZoom: layer.minZoom,
-              maxZoom: layer.maxZoom,
-              minMaxZoomAlertOnToggleOnly: layer.minMaxZoomAlertOnToggleOnly,
-              customRatio: layer.customRatio,
-              timeSliderVisible: layer.timeSliderVisible,
-              timeSliderStart: layer.timeSliderStart,
-              timeSliderEnd: layer.timeSliderEnd,
-              singleTile: layer.singleTile,
-              tiled: layer.tiled,
-              hidpi: layer.hidpi,
-              style: layer.style,
-              hideExpandArrow: layer.hideExpandArrow,
-              zIndex: layer.zIndex ?? 0,
-              service: { connect: { id: service.id } },
-              metadata: {
-                create: {
-                  title: layer.infoTitle,
-                  description: layer.infoText,
-                  url: layer.infoUrl,
-                  urlTitle: layer.infoUrlText,
-                  owner: layer.infoOwner,
-                  created: new Date(),
-                },
-              },
-              infoClickSettings: {
-                create: {
-                  format: layer.infoFormat,
-                  sortProperty: layer.infoClickSortProperty,
-                  sortMethod: layer.infoClickSortType,
-                  sortDescending: layer.infoClickSortDesc,
-                },
-              },
-              options,
-            },
-          });
-          jsonToDisplayLayerId.set(layer.id, createdLayer.id);
+        if (layerKind === "search") {
+          active = Boolean(
+            layer.searchUrl ||
+              (Array.isArray(layer.searchFields) &&
+                layer.searchFields.length > 0)
+          );
+          // Shared with "editing" — not namespaced under options.search.
+          options.geometryField =
+            layer.geometryField || layer.searchGeometryField;
+          options.search = {
+            url: layer.searchUrl,
+            searchFields:
+              layer.searchFields ||
+              (typeof layer.searchPropertyName === "string"
+                ? layer.searchPropertyName.split(",")
+                : layer.searchPropertyName || []),
+            primaryDisplayFields:
+              layer.displayFields ||
+              (typeof layer.searchDisplayName === "string"
+                ? layer.searchDisplayName.split(",")
+                : layer.searchDisplayName || []),
+            secondaryDisplayFields:
+              typeof layer.secondaryLabelFields === "string"
+                ? layer.secondaryLabelFields.split(",")
+                : layer.secondaryLabelFields || [],
+            shortDisplayFields:
+              typeof layer.searchShortDisplayName === "string"
+                ? layer.searchShortDisplayName.split(",")
+                : layer.searchShortDisplayName || [],
+            outputFormat: layer.outputFormat || "GML3",
+            aliasDict: layer.aliasDict,
+            infobox: layer.infobox,
+          };
+          metadata = {
+            title: layer.infoTitle,
+            description: layer.infoText,
+            url: layer.infoUrl,
+            urlTitle: layer.infoUrlText,
+            owner: layer.infoOwner,
+            urlOpenData: layer.infoOpenDataLink,
+            visible: Boolean(layer.infoVisible),
+            createdDate: SEED_TIMESTAMP,
+            lastSavedDate: SEED_TIMESTAMP,
+          };
+        } else if (layerKind === "editing") {
+          options.geometryField =
+            layer.geometryField || layer.searchGeometryField;
+          options.editPoint = layer.editPoint;
+          options.editMultiPoint = layer.editMultiPoint;
+          options.editLine = layer.editLine;
+          options.editMultiLine = layer.editMultiLine;
+          options.editPolygon = layer.editPolygon;
+          options.editMultiPolygon = layer.editMultiPolygon;
+          options.allowMultipleGeometries = layer.allowMultipleGeometries;
+          options.editableFields = layer.editableFields;
+          options.nonEditableFields = layer.nonEditableFields;
+        } else {
+          // display
+          options.legend = layer.legend;
+          options.legendIcon = layer.legendIcon;
+          options.opacity = layer.opacity;
+          options.minZoom = layer.minZoom;
+          options.maxZoom = layer.maxZoom;
+          options.minMaxZoomAlertOnToggleOnly =
+            layer.minMaxZoomAlertOnToggleOnly;
+          options.customRatio = layer.customRatio;
+          options.timeSliderVisible = layer.timeSliderVisible;
+          options.timeSliderStart = layer.timeSliderStart;
+          options.timeSliderEnd = layer.timeSliderEnd;
+          options.singleTile = layer.singleTile;
+          options.tiled = layer.tiled;
+          options.hidpi = layer.hidpi;
+          options.style = layer.style;
+          options.hideExpandArrow = layer.hideExpandArrow;
+          options.useCustomDpiList = layer.useCustomDpiList;
+          options.customDpiList = layer.customDpiList;
+          // Verbatim per-sublayer array (caption/legend/infobox/style/
+          // queryable) — a WMS entry can carry more than one sublayer, so
+          // this isn't flattened into a single column.
+          options.layersInfo = layer.layersInfo;
+          options.infoClick = {
+            format: layer.infoFormat,
+            sortProperty: layer.infoClickSortProperty,
+            sortMethod: layer.infoClickSortType,
+            sortDescending: layer.infoClickSortDesc,
+          };
+          metadata = {
+            title: layer.infoTitle,
+            description: layer.infoText,
+            url: layer.infoUrl,
+            urlTitle: layer.infoUrlText,
+            owner: layer.infoOwner,
+            urlOpenData: layer.infoOpenDataLink,
+            visible: Boolean(layer.infoVisible),
+            createdDate: SEED_TIMESTAMP,
+            lastSavedDate: SEED_TIMESTAMP,
+          };
         }
+
+        const createdLayer = await prisma.layer.create({
+          data: {
+            name: layer.caption,
+            internalName: layer.internalLayerName || generateRandomName(),
+            selectedLayers,
+            zIndex: layer.zIndex ?? 0,
+            ...(active !== undefined ? { active } : {}),
+            service: { connect: { id: service.id } },
+            ...(metadata ? { metadata: { create: metadata } } : {}),
+            options,
+            createdDate: SEED_TIMESTAMP,
+            lastSavedDate: SEED_TIMESTAMP,
+          },
+        });
+
+        jsonToLayerId.set(layer.id, createdLayer.id);
       }
 
-      const countByKind = {
-        display: await prisma.displayLayer.count({
-          where: { service: { type } },
-        }),
-        search: await prisma.searchLayer.count({
-          where: { service: { type } },
-        }),
-        editing: await prisma.editingLayer.count({
-          where: { service: { type } },
-        }),
-      };
-
       console.log(
-        `Created ${countByKind[layerKind] ?? 0} ${type} ${layerKind} layers`
+        `Created ${cleanedLayers.length} ${type} (${layerKind}) layer(s)`
       );
 
       for await (const layer of cleanedLayers) {
-        const prismaId = mapJsonLayerIdToPrisma(layer.id, key);
+        const prismaId = jsonToLayerId.get(layer.id);
         if (!prismaId) continue;
         await updateRolesFromVisibleForGroups(
           layer.visibleForGroups || [],
           prismaId,
-          layerKind === "search"
-            ? "searchLayer"
-            : layerKind === "editing"
-              ? "editingLayer"
-              : "displayLayer"
+          "layer"
         );
       }
     }
@@ -553,70 +510,6 @@ function layerInstancePlacementFromOptions(options = {}) {
     visibleAtStart: Boolean(visibleAtStart),
     options: rest,
   };
-}
-
-/**
- * Search/editing layers from layers.json are global (not listed in map group trees).
- * Create a LayerInstance per map so usage APIs and legacy export can resolve them via
- * searchLayerId / editingLayerId like displayLayerId.
- */
-async function populateSearchAndEditingLayerInstances() {
-  const maps = await prisma.map.findMany({ select: { id: true, name: true } });
-  if (maps.length === 0) {
-    console.log("No maps — skipping search/editing LayerInstance seeding");
-    return;
-  }
-
-  let searchInstanceCount = 0;
-  let editingInstanceCount = 0;
-
-  for (const searchLayerId of jsonToSearchLayerId.values()) {
-    const searchLayer = await prisma.searchLayer.findUnique({
-      where: { id: searchLayerId },
-      select: { zIndex: true },
-    });
-
-    for (const map of maps) {
-      const existing = await prisma.layerInstance.findFirst({
-        where: { searchLayerId, mapId: map.id },
-      });
-      if (existing) continue;
-
-      await prisma.layerInstance.create({
-        data: {
-          searchLayerId,
-          mapId: map.id,
-          infoClickActive: false,
-          zIndex: searchLayer?.zIndex ?? 0,
-        },
-      });
-      searchInstanceCount++;
-    }
-  }
-
-  for (const editingLayerId of jsonToEditingLayerId.values()) {
-    for (const map of maps) {
-      const existing = await prisma.layerInstance.findFirst({
-        where: { editingLayerId, mapId: map.id },
-      });
-      if (existing) continue;
-
-      await prisma.layerInstance.create({
-        data: {
-          editingLayerId,
-          mapId: map.id,
-          infoClickActive: false,
-        },
-      });
-      editingInstanceCount++;
-    }
-  }
-
-  if (searchInstanceCount > 0 || editingInstanceCount > 0) {
-    console.log(
-      `Created ${searchInstanceCount} search and ${editingInstanceCount} editing LayerInstances across ${maps.length} map(s)`
-    );
-  }
 }
 
 function groupHasInfoDocument(group) {
@@ -639,6 +532,9 @@ function metadataFromGroupInfo(group) {
     url: group.infogroupurl || null,
     urlTitle: group.infogroupurltext || null,
     urlOpenData: group.infogroupopendatalink || null,
+    visible: Boolean(group.infogroupvisible),
+    createdDate: SEED_TIMESTAMP,
+    lastSavedDate: SEED_TIMESTAMP,
   };
 }
 
@@ -695,20 +591,14 @@ async function populateMapLayerStructure(mapName) {
 
   // Helper: invoked recursively and extract any
   // layers and groups within the given group.
-  // `index` preserves sibling order from the map JSON groups array.
-  const extractGroup = (group, parentId = null, index = 0) => {
+  // Note: sibling order within a group isn't persisted — GroupsOnMaps has no
+  // sort-index column (a pre-existing schema gap, not addressed here).
+  const extractGroup = (group, parentId = null) => {
     // First let's handle the group's layers
     extractLayersFromGroup(group);
 
     // Next, let's handle the group itself
-    const {
-      id: groupId,
-      name,
-      toggled,
-      expanded,
-      exclusiveGroup,
-      visibleForGroups,
-    } = group;
+    const { id: groupId, name, toggled, expanded, visibleForGroups } = group;
 
     // This is a plain, flat group object - similar to layers.json
     groupsToInsert.push({
@@ -730,9 +620,6 @@ async function populateMapLayerStructure(mapName) {
       name,
       toggled: Boolean(toggled),
       expanded: Boolean(expanded),
-      exclusiveGroup: Boolean(exclusiveGroup),
-      infoDocument: Boolean(group.infogroupvisible),
-      index,
       // Metadata is created below when the group has info-document fields
       _infoMetadata: groupHasInfoDocument(group)
         ? metadataFromGroupInfo(group)
@@ -742,9 +629,7 @@ async function populateMapLayerStructure(mapName) {
     groupsOnMap.push(groupsOnMapObject);
 
     // Finally, recursively call on any other groups that might be in this group
-    (group.groups || []).forEach((g, childIndex) =>
-      extractGroup(g, newUUID, childIndex)
-    );
+    (group.groups || []).forEach((g) => extractGroup(g, newUUID));
   };
 
   // Helper: called by extractGroup. Grabs all layers
@@ -769,25 +654,27 @@ async function populateMapLayerStructure(mapName) {
     return layerIds;
   };
 
-  // Next, go on with groups, recursively — index preserves sibling order
-  (groups || []).forEach((g, index) => extractGroup(g, null, index));
+  // Next, go on with groups, recursively
+  (groups || []).forEach((g) => extractGroup(g, null));
 
   // Now we have all arrays ready. One more thing left is to
   // check for consistency: our map config may refer to layerIds
   // that did not exist in layers.json (hence they won't exist in
-  // the display layer tables either). If we'd try to connect such a layer
+  // the Layer table either). If we'd try to connect such a layer
   // to a map or group, we'd get a foreign key error. So let's wash the
   // layers so only valid entries remain.
-  const displayLayersInDB = await prisma.displayLayer.findMany({
+  //
+  // Note: `l.layerId` here is already a real Layer id, not a raw layers.json
+  // id — remapLayerswitcherToolOptionsLayerIds() rewrote Tool.options (which
+  // this function reads from) before we got here, so no jsonToLayerId lookup
+  // is needed at this point.
+  const layersInDB = await prisma.layer.findMany({
     select: { id: true },
   });
 
-  const displayLayerIdsInDB = displayLayersInDB.map((l) => l.id);
+  const layerIdsInDB = layersInDB.map((l) => l.id);
 
-  const removeUnknownLayers = (l) => {
-    const prismaId = jsonToDisplayLayerId.get(l.layerId);
-    return prismaId && displayLayerIdsInDB.includes(prismaId);
-  };
+  const removeUnknownLayers = (l) => layerIdsInDB.includes(l.layerId);
 
   const validLayersOnMaps = layersOnMaps.filter(removeUnknownLayers);
   const validLayersOnGroups = layersOnGroups.filter(removeUnknownLayers);
@@ -796,7 +683,12 @@ async function populateMapLayerStructure(mapName) {
 
   // Populates the Group model (the imaginative "groups.json")
   await prisma.group.createMany({
-    data: groupsToInsert.map((g) => ({ id: g.id, name: g.name })),
+    data: groupsToInsert.map((g) => ({
+      id: g.id,
+      name: g.name,
+      createdDate: SEED_TIMESTAMP,
+      lastSavedDate: SEED_TIMESTAMP,
+    })),
     skipDuplicates: true, // We assume - for now! - that same ID means same group, so there's no need to watch out for conflicts
   });
 
@@ -817,6 +709,8 @@ async function populateMapLayerStructure(mapName) {
       data: {
         ...groupsOnMapData,
         metadataId,
+        createdDate: SEED_TIMESTAMP,
+        lastSavedDate: SEED_TIMESTAMP,
       },
     });
   }
@@ -825,13 +719,15 @@ async function populateMapLayerStructure(mapName) {
     const placement = layerInstancePlacementFromOptions(layer.options);
     const layerInstance = await prisma.layerInstance.create({
       data: {
-        displayLayerId: jsonToDisplayLayerId.get(layer.layerId),
+        layerId: layer.layerId,
         mapId: layer.mapId || undefined,
         groupId: layer.groupId || undefined,
         usage: layer.usage,
         zIndex: placement.zIndex,
         visibleAtStart: placement.visibleAtStart,
         options: placement.options,
+        createdDate: SEED_TIMESTAMP,
+        lastSavedDate: SEED_TIMESTAMP,
       },
     });
 
@@ -888,6 +784,8 @@ async function createBaseRoles() {
     await prisma.role.create({
       data: {
         ...role,
+        createdDate: SEED_TIMESTAMP,
+        lastSavedDate: SEED_TIMESTAMP,
       },
     });
   }
@@ -902,7 +800,13 @@ async function updateRolesFromVisibleForGroups(
     const role = await prisma.role.upsert({
       where: { code: group },
       update: {},
-      create: { code: group, title: group, description: group },
+      create: {
+        code: group,
+        title: group,
+        description: group,
+        createdDate: SEED_TIMESTAMP,
+        lastSavedDate: SEED_TIMESTAMP,
+      },
     });
 
     switch (entityType) {
@@ -922,26 +826,10 @@ async function updateRolesFromVisibleForGroups(
           },
         });
         break;
-      case "displayLayer":
-        await prisma.roleOnDisplayLayer.create({
+      case "layer":
+        await prisma.roleOnLayer.create({
           data: {
-            displayLayer: { connect: { id: entityId } },
-            role: { connect: { id: role.id } },
-          },
-        });
-        break;
-      case "searchLayer":
-        await prisma.roleOnSearchLayer.create({
-          data: {
-            searchLayer: { connect: { id: entityId } },
-            role: { connect: { id: role.id } },
-          },
-        });
-        break;
-      case "editingLayer":
-        await prisma.roleOnEditingLayer.create({
-          data: {
-            editingLayer: { connect: { id: entityId } },
+            layer: { connect: { id: entityId } },
             role: { connect: { id: role.id } },
           },
         });
@@ -976,7 +864,7 @@ async function updateRolesFromVisibleForGroups(
 function slugify(title) {
   const base = title
     .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9_]+/g, "-")
     .replace(/^-+|-+$/g, "")
@@ -995,8 +883,10 @@ function uniqueSlug(base, existingSet) {
  * Seeds DocumentFolder + Document rows from legacy App_Data/documents/*.json files.
  * Legacy documents can be at root level or inside a single subfolder level.
  * Since documents now require a folder, root-level docs are placed in a
- * default "General" folder for each documenthandler tool.
- * Documents are now owned by a DocumentHandler Tool instance (toolId), not a map.
+ * default "General" folder for each map.
+ * Documents are owned by a Map (mapName), resolved via which map has a
+ * documenthandler tool — the doc's own optional "map" field picks a specific
+ * one when present, falling back to the first map found otherwise.
  */
 async function seedDocuments() {
   const docsDir = path.join(process.cwd(), "App_Data", "documents");
@@ -1005,72 +895,72 @@ async function seedDocuments() {
   try {
     entries = await fs.promises.readdir(docsDir, { withFileTypes: true });
   } catch {
-    console.log("No App_Data/documents directory found — skipping document seed.");
+    console.log(
+      "No App_Data/documents directory found — skipping document seed."
+    );
     return;
   }
 
-  // Collect all documenthandler tools from the DB, keyed by their map(s).
-  // We resolve a tool for each document by the doc's optional "map" field,
-  // then fall back to the first documenthandler tool found.
-  const dhTools = await prisma.tool.findMany({
-    where: { type: "documenthandler", deletedAt: null },
-    include: { maps: { select: { mapName: true } } },
+  // Collect all maps that have a documenthandler tool instance.
+  const dhToolInstances = await prisma.toolInstance.findMany({
+    where: { tool: { type: "documenthandler", deletedAt: null } },
+    select: { map: { select: { name: true } } },
   });
 
-  if (dhTools.length === 0) {
-    console.log("No documenthandler tools in DB — skipping document seed.");
+  if (dhToolInstances.length === 0) {
+    console.log(
+      "No documenthandler tool instances in DB — skipping document seed."
+    );
     return;
   }
 
-  // Build a lookup: mapName -> first documenthandler toolId for that map
-  const toolByMapName = new Map();
-  for (const tool of dhTools) {
-    for (const tom of tool.maps) {
-      if (!toolByMapName.has(tom.mapName)) {
-        toolByMapName.set(tom.mapName, tool.id);
-      }
-    }
-  }
-  const firstToolId = dhTools[0].id;
+  const mapNamesWithDocHandler = new Set(
+    dhToolInstances.map((ti) => ti.map.name)
+  );
+  const firstMapName = dhToolInstances[0].map.name;
 
-  // Helper: determine which tool to assign a document to.
-  // Use the doc's "map" field to find the map's documenthandler tool; fallback to the first tool.
-  function resolveToolId(docMapField) {
-    if (docMapField && toolByMapName.has(docMapField)) return toolByMapName.get(docMapField);
-    return firstToolId;
+  // Helper: determine which map to assign a document to.
+  // Use the doc's "map" field when it names a map that has a
+  // documenthandler tool; fallback to the first such map.
+  function resolveMapName(docMapField) {
+    if (docMapField && mapNamesWithDocHandler.has(docMapField))
+      return docMapField;
+    return firstMapName;
   }
 
-  // We'll track slugs per (toolId, folderId) to ensure uniqueness
-  const folderSlugsByTool = new Map(); // toolId -> Set<slug>
+  // We'll track slugs per (mapName, folderId) to ensure uniqueness
+  const folderSlugsByMap = new Map(); // mapName -> Set<slug>
   const docSlugsByFolder = new Map(); // folderId -> Set<slug>
 
-  // Helper: get or create a folder for a tool
-  async function getOrCreateFolder(toolId, folderTitle) {
-    if (!folderSlugsByTool.has(toolId)) {
-      folderSlugsByTool.set(toolId, new Set());
+  // Helper: get or create a folder for a map
+  async function getOrCreateFolder(mapName, folderTitle) {
+    if (!folderSlugsByMap.has(mapName)) {
+      folderSlugsByMap.set(mapName, new Set());
     }
-    const existingSlugs = folderSlugsByTool.get(toolId);
+    const existingSlugs = folderSlugsByMap.get(mapName);
     const folderSlug = uniqueSlug(slugify(folderTitle), existingSlugs);
     existingSlugs.add(folderSlug);
 
     const folder = await prisma.documentFolder.upsert({
-      where: { toolId_name: { toolId, name: folderSlug } },
+      where: { mapName_name: { mapName, name: folderSlug } },
       update: {},
       create: {
         name: folderSlug,
         title: folderTitle,
-        toolId,
-        createdDate: new Date(),
-        lastSavedDate: new Date(),
+        mapName,
+        createdDate: SEED_TIMESTAMP,
+        lastSavedDate: SEED_TIMESTAMP,
       },
     });
-    console.log(`  → Folder "${folderTitle}" (${folderSlug}) in tool #${toolId}`);
+    console.log(
+      `  → Folder "${folderTitle}" (${folderSlug}) on map "${mapName}"`
+    );
     docSlugsByFolder.set(folder.id, new Set());
     return folder;
   }
 
   // Helper: create a document inside a folder
-  async function createDocument(toolId, folderId, docTitle, content) {
+  async function createDocument(mapName, folderId, docTitle, content) {
     if (!docSlugsByFolder.has(folderId)) {
       docSlugsByFolder.set(folderId, new Set());
     }
@@ -1083,10 +973,10 @@ async function seedDocuments() {
         name: docSlug,
         title: docTitle,
         content,
-        toolId,
+        mapName,
         folderId,
-        createdDate: new Date(),
-        lastSavedDate: new Date(),
+        createdDate: SEED_TIMESTAMP,
+        lastSavedDate: SEED_TIMESTAMP,
       },
     });
   }
@@ -1099,8 +989,8 @@ async function seedDocuments() {
   );
 
   if (rootJsonFiles.length > 0) {
-    // Group root docs by their resolved toolId so each tool gets one "General" folder
-    const rootDocsByTool = new Map();
+    // Group root docs by their resolved mapName so each map gets one "General" folder
+    const rootDocsByMap = new Map();
     for (const entry of rootJsonFiles) {
       const filePath = path.join(docsDir, entry.name);
       const text = await fs.promises.readFile(filePath, "utf-8");
@@ -1111,17 +1001,17 @@ async function seedDocuments() {
         console.warn(`  Skipping invalid JSON: ${entry.name}`);
         continue;
       }
-      const toolId = resolveToolId(doc.map);
-      if (!rootDocsByTool.has(toolId)) rootDocsByTool.set(toolId, []);
-      rootDocsByTool.get(toolId).push({ entry, doc });
+      const mapName = resolveMapName(doc.map);
+      if (!rootDocsByMap.has(mapName)) rootDocsByMap.set(mapName, []);
+      rootDocsByMap.get(mapName).push({ entry, doc });
     }
 
-    for (const [toolId, items] of rootDocsByTool) {
-      const generalFolder = await getOrCreateFolder(toolId, "General");
+    for (const [mapName, items] of rootDocsByMap) {
+      const generalFolder = await getOrCreateFolder(mapName, "General");
       for (const { entry, doc } of items) {
         const docTitle = doc.title || entry.name.replace(".json", "");
         const content = { chapters: doc.chapters ?? [] };
-        await createDocument(toolId, generalFolder.id, docTitle, content);
+        await createDocument(mapName, generalFolder.id, docTitle, content);
         console.log(`    • "${docTitle}" → General`);
         totalDocs++;
       }
@@ -1140,8 +1030,8 @@ async function seedDocuments() {
     );
     if (subJsonFiles.length === 0) continue;
 
-    // Group by tool
-    const docsByTool = new Map();
+    // Group by map
+    const docsByMap = new Map();
     for (const entry of subJsonFiles) {
       const filePath = path.join(subDirPath, entry.name);
       const text = await fs.promises.readFile(filePath, "utf-8");
@@ -1152,17 +1042,17 @@ async function seedDocuments() {
         console.warn(`  Skipping invalid JSON: ${subDir.name}/${entry.name}`);
         continue;
       }
-      const toolId = resolveToolId(doc.map);
-      if (!docsByTool.has(toolId)) docsByTool.set(toolId, []);
-      docsByTool.get(toolId).push({ entry, doc });
+      const mapName = resolveMapName(doc.map);
+      if (!docsByMap.has(mapName)) docsByMap.set(mapName, []);
+      docsByMap.get(mapName).push({ entry, doc });
     }
 
-    for (const [toolId, items] of docsByTool) {
-      const folder = await getOrCreateFolder(toolId, subDir.name);
+    for (const [mapName, items] of docsByMap) {
+      const folder = await getOrCreateFolder(mapName, subDir.name);
       for (const { entry, doc } of items) {
         const docTitle = doc.title || entry.name.replace(".json", "");
         const content = { chapters: doc.chapters ?? [] };
-        await createDocument(toolId, folder.id, docTitle, content);
+        await createDocument(mapName, folder.id, docTitle, content);
         console.log(`    • "${docTitle}" → ${subDir.name}`);
         totalDocs++;
       }
@@ -1174,14 +1064,6 @@ async function seedDocuments() {
   } else {
     console.log("No legacy documents found to seed.");
   }
-}
-
-async function createToolTypes() {
-  const created = await prisma.toolType.createMany({
-    data: KNOWN_TOOL_TYPES,
-    skipDuplicates: true,
-  });
-  console.log(`Created ${created.count} tool types`);
 }
 
 function remapLayerIdInLayerswitcherOptions(options, idMap) {
@@ -1240,8 +1122,8 @@ function remapLayerIdInLayerswitcherOptions(options, idMap) {
 }
 
 /**
- * After DisplayLayer rows exist, rewrite layerswitcher Tool.options so layer
- * ids match Prisma DisplayLayer ids (catalog / Kartlager lookups).
+ * After Layer rows exist, rewrite layerswitcher Tool.options so layer ids
+ * match Prisma Layer ids (catalog / Kartlager lookups).
  */
 async function remapLayerswitcherToolOptionsLayerIds() {
   const tools = await prisma.tool.findMany({
@@ -1253,7 +1135,7 @@ async function remapLayerswitcherToolOptionsLayerIds() {
   for (const tool of tools) {
     const remapped = remapLayerIdInLayerswitcherOptions(
       tool.options,
-      jsonToDisplayLayerId
+      jsonToLayerId
     );
     await prisma.tool.update({
       where: { id: tool.id },
@@ -1264,27 +1146,23 @@ async function remapLayerswitcherToolOptionsLayerIds() {
 
   if (updated > 0) {
     console.log(
-      `Remapped layer ids in ${updated} layerswitcher Tool.options to DisplayLayer ids`
+      `Remapped layer ids in ${updated} layerswitcher Tool.options to Layer ids`
     );
   }
 }
 
 async function main() {
-  // The known plugin types — Tool instances reference these via FK.
-  await createToolTypes();
   // Get all available map-config files...
   const mapConfigs = await getAvailableMaps();
   // ... and add the map configurations to the database.
   for (const mapConfig of mapConfigs) {
     await readMapConfigAndPopulateMap(mapConfig);
   }
-  // Get all layers from layers.json and insert them into the layer tables.
+  // Get all layers from layers.json and insert them into the Layer table.
   await readAndPopulateLayers();
-  // Rewrite layerswitcher Tool.options layer ids to Prisma DisplayLayer ids
+  // Rewrite layerswitcher Tool.options layer ids to Prisma Layer ids
   // before building GroupsOnMaps / LayerInstances from those options.
   await remapLayerswitcherToolOptionsLayerIds();
-  // Search/editing layers are global in layers.json — attach them to every map via LayerInstance.
-  await populateSearchAndEditingLayerInstances();
   // Finally we extract the layer switcher config from all maps and add all groups etc. with their connections to the database.
   // We're gonna want to keep crucial information such as the map layer structure separated from specific plugins such as the layer switcher.
   await populateLayerStructure();
@@ -1301,13 +1179,15 @@ async function main() {
   const existingInstances = await prisma.layerInstance.count();
   if (existingInstances === 0) {
     const firstMap = await prisma.map.findFirst();
-    const firstLayers = await prisma.displayLayer.findMany({ take: 3 });
+    const firstLayers = await prisma.layer.findMany({ take: 3 });
     if (firstMap && firstLayers.length > 0) {
       await prisma.layerInstance.createMany({
         data: firstLayers.map((layer) => ({
-          displayLayerId: layer.id,
+          layerId: layer.id,
           mapId: firstMap.id,
           usage: "FOREGROUND",
+          createdDate: SEED_TIMESTAMP,
+          lastSavedDate: SEED_TIMESTAMP,
         })),
       });
       console.log(
