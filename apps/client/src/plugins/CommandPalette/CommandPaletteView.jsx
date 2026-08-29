@@ -538,6 +538,8 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       {open && (
         <Popover
           open
+          disableRestoreFocus
+          disableEnforceFocus
           anchorEl={anchorEl}
           onClose={closePalette}
           anchorOrigin={{ horizontal: "center", vertical: "top" }}
