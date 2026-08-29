@@ -23,8 +23,8 @@ class PropFilters {
     } else {
       value = this.properties[key];
 
-      if (typeof value === "boolean") {
-        // We must convert to string to avoid boolean comparisons
+      if (typeof value === "boolean" || typeof value === "number") {
+        // We must convert to string to avoid boolean or numeric comparisons
         // Everything should be stringified
         value = String(value);
       }
@@ -362,6 +362,29 @@ filters.add("multiplyBy", function (value, multiplier) {
     throw new Error("Arguments should be numbers");
   }
   return value * multiplier;
+});
+
+/*
+  map
+  Example:
+  {'1'|map('0:No,1:Yes')}
+  outputs: Yes
+*/
+filters.add("map", function (value, mappingStr) {
+  if (!mappingStr) {
+    throw new Error("A mapping string is required");
+  }
+  const mapping = mappingStr.split(",").reduce((acc, pair) => {
+    // Use indexOf to split on the first ":" only, allowing ":" in values (e.g. URLs)
+    const separatorIndex = pair.indexOf(":");
+    if (separatorIndex > -1) {
+      const k = pair.substring(0, separatorIndex).trim();
+      const v = pair.substring(separatorIndex + 1).trim();
+      acc[k] = v;
+    }
+    return acc;
+  }, {});
+  return Object.hasOwn(mapping, String(value)) ? mapping[String(value)] : value;
 });
 
 /*
