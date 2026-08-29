@@ -10,6 +10,7 @@ import {
   Box,
   Divider,
   InputAdornment,
+  Checkbox,
 } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CloseIcon from "@mui/icons-material/Close";
@@ -22,6 +23,8 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 import Crop54Icon from "@mui/icons-material/Crop54";
 import SearchOffIcon from "@mui/icons-material/SearchOff";
+import LayersIcon from "@mui/icons-material/Layers";
+import { setOLSubLayers } from "../../utils/groupLayers";
 
 const MAX_RECENT = 5;
 
@@ -42,6 +45,13 @@ function getCommands(appModel) {
       title: "Öppna verktyg",
       description: "Visa alla tillgängliga verktyg",
       icon: <LaunchIcon />,
+      kind: "command",
+    },
+    {
+      type: "__showLayers",
+      title: "Lager",
+      description: "Visa och hantera kartlager",
+      icon: <LayersIcon />,
       kind: "command",
     },
     ...getSearchCommands(appModel),
@@ -185,6 +195,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [allTools, setAllTools] = useState([]);
   const [viewMode, setViewMode] = useState("commands");
+  const [layers, setLayers] = useState([]);
   const inputRef = useRef(null);
   const listRef = useRef(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -235,7 +246,79 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     return commands.filter((cmd) => matchesQuery(cmd, q));
   })();
 
-  // Build a list of the items we want to display
+  // Build layer list
+  const buildLayerList = useCallback(() => {
+    if (!appModel?.getMap) return [];
+    return appModel
+      .getMap()
+      .getAllLayers()
+      .filter(
+        (l) => l.get("layerType") !== "system" && l.get("layerType") !== "base"
+      )
+      .map((l) => ({
+        id: l.get("name"),
+        caption: l.get("caption") || l.get("name"),
+        visible: l.getVisible(),
+        layerType: l.get("layerType"),
+      }))
+      .sort((a, b) => a.caption.localeCompare(b.caption, "sv"));
+  }, [appModel]);
+
+  useEffect(() => {
+    if (viewMode !== "layers" || !appModel?.getMap) return;
+
+    const map = appModel.getMap();
+    const allLayers = map.getAllLayers();
+
+    // we need to subscribe to layer changes
+    const handleChange = () => setLayers(buildLayerList());
+    allLayers.forEach((l) => l.on("change:visible", handleChange));
+
+    // initial load
+    handleChange();
+
+    return () => {
+      allLayers.forEach((l) => l.un("change:visible", handleChange));
+    };
+  }, [viewMode, appModel, buildLayerList]);
+
+  const filteredLayers = useMemo(() => {
+    if (!query.trim()) return layers;
+    const q = query.toLowerCase();
+    return layers.filter(
+      (l) =>
+        l.caption.toLowerCase().includes(q) || l.id.toLowerCase().includes(q)
+    );
+  }, [layers, query]);
+
+  const toggleLayer = useCallback(
+    (layerId) => {
+      if (!appModel?.getMap) return;
+      const map = appModel.getMap();
+      const layer = map.getAllLayers().find((l) => l.get("name") === layerId);
+      if (!layer) return;
+
+      const isVisible = layer.getVisible();
+      const allSubLayers = layer.get("allSubLayers");
+
+      if (allSubLayers) {
+        if (isVisible) {
+          layer.set("subLayers", []);
+          setOLSubLayers(layer, []);
+          layer.setVisible(false);
+        } else {
+          layer.set("subLayers", allSubLayers);
+          setOLSubLayers(layer, allSubLayers);
+          layer.setVisible(true);
+        }
+      } else {
+        layer.setVisible(!isVisible);
+      }
+    },
+    [appModel]
+  );
+
+  // items to display in the list
   const displayItems = useMemo(() => {
     const items = [];
 
@@ -243,8 +326,23 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       for (const cmd of filteredCommands) {
         items.push({ ...cmd, section: "commands" });
       }
+    } else if (viewMode === "layers") {
+      // layers
+      if (!query.trim()) {
+        items.push({ ...BACK_COMMAND, section: "back" });
+      }
+      for (const layer of filteredLayers) {
+        items.push({
+          type: `__layer:${layer.id}`,
+          title: layer.caption,
+          description: "",
+          icon: null,
+          kind: "layer",
+          layer,
+        });
+      }
     } else {
-      // Plugins, show back first, then recent plugins and lastly all plugins
+      // plugins
       if (!query.trim()) {
         items.push({ ...BACK_COMMAND, section: "back" });
       }
@@ -266,6 +364,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     filteredCommands,
     filteredTools,
     filteredRecent,
+    filteredLayers,
     recentTools,
     query,
   ]);
@@ -275,7 +374,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     setSelectedIndex(0);
   }, []);
 
-  // Scroll selected item into view
+  // go to the selected item when selection changes
   useEffect(() => {
     if (!listRef.current) return;
     const items = listRef.current.querySelectorAll("[data-command-item]");
@@ -284,7 +383,6 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     }
   }, [selectedIndex]);
 
-  // Load the tools when the palette opens
   const openPalette = useCallback(() => {
     setAllTools(buildToolList(appModel));
     setOpen(true);
@@ -308,10 +406,22 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         setSelectedIndex(0);
         return;
       }
+      if (type === "__showLayers") {
+        setViewMode("layers");
+        setQuery("");
+        setSelectedIndex(0);
+        return;
+      }
       if (type === "__back") {
         setViewMode("commands");
         setQuery("");
         setSelectedIndex(0);
+        return;
+      }
+      // if we are in the layers we dont want toggle to close the palette
+      if (type.startsWith("__layer:")) {
+        const layerId = type.slice(8);
+        toggleLayer(layerId);
         return;
       }
       closePalette();
@@ -348,10 +458,9 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         }
       }
     },
-    [globalObserver, closePalette, appModel]
+    [globalObserver, closePalette, appModel, toggleLayer]
   );
 
-  // listener for Ctrl+K or Cmd+K
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -391,7 +500,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           break;
         case "Escape":
           e.preventDefault();
-          if (viewMode === "plugins") {
+          if (viewMode === "plugins" || viewMode === "layers") {
             setViewMode("commands");
             setQuery("");
             setSelectedIndex(0);
@@ -423,13 +532,13 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
   );
 
   const listContent = [];
-  let runningIndex = 0;
+  let itemIndex = 0;
 
   if (viewMode === "commands") {
     // Commands
     if (filteredCommands.length > 0) {
       for (const cmd of filteredCommands) {
-        const isSelected = runningIndex === selectedIndex;
+        const isSelected = itemIndex === selectedIndex;
         listContent.push(
           <ListItemButton
             key={cmd.type}
@@ -455,7 +564,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             {kindLabel("command")}
           </ListItemButton>
         );
-        runningIndex++;
+        itemIndex++;
       }
     }
 
@@ -468,10 +577,10 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         </Box>
       );
     }
-  } else {
-    // Plugins
+  } else if (viewMode === "layers") {
+    // Layers view
     if (!query.trim()) {
-      const isBackSelected = runningIndex === selectedIndex;
+      const isBackSelected = itemIndex === selectedIndex;
       listContent.push(
         <ListItemButton
           key={BACK_COMMAND.type}
@@ -494,7 +603,83 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           />
         </ListItemButton>
       );
-      runningIndex++;
+      itemIndex++;
+      listContent.push(<Divider key="back-divider" />);
+    }
+
+    if (filteredLayers.length > 0) {
+      for (const layer of filteredLayers) {
+        const isSelected = itemIndex === selectedIndex;
+        listContent.push(
+          <ListItemButton
+            key={layer.id}
+            data-command-item
+            selected={isSelected}
+            onClick={() => toggleLayer(layer.id)}
+            sx={{
+              py: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              <Checkbox checked={layer.visible} size="small" sx={{ p: 0 }} />
+            </ListItemIcon>
+            <ListItemText
+              primary={layer.caption}
+              slotProps={{
+                primary: { variant: "body2", noWrap: true },
+              }}
+            />
+            <Typography
+              variant="caption"
+              sx={{ opacity: 0.5, ml: "auto", pl: 1, flexShrink: 0 }}
+            >
+              {layer.layerType === "base" ? "Bakgrund" : "Lager"}
+            </Typography>
+          </ListItemButton>
+        );
+        itemIndex++;
+      }
+    }
+
+    if (displayItems.length === 0) {
+      listContent.push(
+        <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
+          <Typography variant="body2" sx={{ opacity: 0.5 }}>
+            Inga lager hittades
+          </Typography>
+        </Box>
+      );
+    }
+  } else {
+    // Plugins
+    if (!query.trim()) {
+      const isBackSelected = itemIndex === selectedIndex;
+      listContent.push(
+        <ListItemButton
+          key={BACK_COMMAND.type}
+          data-command-item
+          selected={isBackSelected}
+          onClick={() => selectItem(BACK_COMMAND.type)}
+          sx={{
+            py: 0.5,
+            "&.Mui-selected": {
+              bgcolor: "action.hover",
+            },
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 36 }}>{BACK_COMMAND.icon}</ListItemIcon>
+          <ListItemText
+            primary={BACK_COMMAND.title}
+            slotProps={{
+              primary: { variant: "body2", noWrap: true },
+            }}
+          />
+        </ListItemButton>
+      );
+      itemIndex++;
       listContent.push(<Divider key="back-divider" />);
     }
 
@@ -514,7 +699,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         );
       }
       for (const tool of recentToShow) {
-        const isSelected = runningIndex === selectedIndex;
+        const isSelected = itemIndex === selectedIndex;
         listContent.push(
           <ListItemButton
             key={tool.type}
@@ -540,7 +725,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             {kindLabel("plugin")}
           </ListItemButton>
         );
-        runningIndex++;
+        itemIndex++;
       }
       listContent.push(<Divider key="recent-divider" />);
     }
@@ -564,7 +749,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         );
       }
       for (const tool of allToolsToShow) {
-        const isSelected = runningIndex === selectedIndex;
+        const isSelected = itemIndex === selectedIndex;
         listContent.push(
           <ListItemButton
             key={tool.type}
@@ -590,7 +775,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             {kindLabel("plugin")}
           </ListItemButton>
         );
-        runningIndex++;
+        itemIndex++;
       }
     }
 
