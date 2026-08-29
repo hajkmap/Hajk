@@ -17,6 +17,11 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import LaunchIcon from "@mui/icons-material/Launch";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EditIcon from "@mui/icons-material/Edit";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import TouchAppIcon from "@mui/icons-material/TouchApp";
+import Crop54Icon from "@mui/icons-material/Crop54";
+import SearchOffIcon from "@mui/icons-material/SearchOff";
 
 const MAX_RECENT = 5;
 
@@ -29,7 +34,7 @@ function getCurrentThemeMode() {
 }
 
 // Initial commands to display
-function getCommands() {
+function getCommands(appModel) {
   const isDark = getCurrentThemeMode() === "dark";
   return [
     {
@@ -39,6 +44,7 @@ function getCommands() {
       icon: <LaunchIcon />,
       kind: "command",
     },
+    ...getSearchCommands(appModel),
     {
       type: "__toggleTheme",
       title: isDark ? "Växla till ljust tema" : "Växla till mörkt tema",
@@ -61,6 +67,58 @@ function getCommands() {
       kind: "command",
     },
   ];
+}
+
+function getSearchCommands(appModel) {
+  const searchConfig =
+    appModel?.config?.mapConfig?.tools?.find((t) => t.type === "search")
+      ?.options || {};
+
+  const commands = [];
+  if (searchConfig.enablePolygonSearch !== false) {
+    commands.push({
+      type: "__searchPolygon",
+      title: "Sök med polygon",
+      description: "Rita en polygon för att söka inom området",
+      icon: <EditIcon />,
+      kind: "command",
+    });
+  }
+  if (searchConfig.enableRadiusSearch !== false) {
+    commands.push({
+      type: "__searchRadius",
+      title: "Sök med radie",
+      description: "Rita en cirkel för att söka inom radien",
+      icon: <RadioButtonUncheckedIcon />,
+      kind: "command",
+    });
+  }
+  if (searchConfig.enableSelectSearch !== false) {
+    commands.push({
+      type: "__searchSelect",
+      title: "Sök med objekt",
+      description: "Välj objekt i kartan för att söka",
+      icon: <TouchAppIcon />,
+      kind: "command",
+    });
+  }
+  if (searchConfig.enableExtentSearch !== false) {
+    commands.push({
+      type: "__searchExtent",
+      title: "Sök inom vyn",
+      description: "Sök i den aktuella kartan",
+      icon: <Crop54Icon />,
+      kind: "command",
+    });
+  }
+  commands.push({
+    type: "__clearSearch",
+    title: "Rensa sökning",
+    description: "Rensa sökning och fokusera sökfältet",
+    icon: <SearchOffIcon />,
+    kind: "command",
+  });
+  return commands;
 }
 
 const BACK_COMMAND = {
@@ -171,7 +229,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
   }, [recentTools, query]);
 
   const filteredCommands = (() => {
-    const commands = getCommands();
+    const commands = getCommands(appModel);
     if (!query.trim()) return commands;
     const q = query.toLowerCase();
     return commands.filter((cmd) => matchesQuery(cmd, q));
@@ -265,6 +323,24 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         });
       } else if (type === "__hideAllLayers") {
         appModel.clear();
+      } else if (type === "__searchPolygon") {
+        globalObserver.publish("search.spatialSearchActivated", {
+          type: "Polygon",
+        });
+      } else if (type === "__searchRadius") {
+        globalObserver.publish("search.spatialSearchActivated", {
+          type: "Circle",
+        });
+      } else if (type === "__searchSelect") {
+        globalObserver.publish("search.spatialSearchActivated", {
+          type: "Select",
+        });
+      } else if (type === "__searchExtent") {
+        globalObserver.publish("search.spatialSearchActivated", {
+          type: "Extent",
+        });
+      } else if (type === "__clearSearch") {
+        globalObserver.publish("search.clearSearch");
       } else {
         globalObserver.publish(`${type}.showWindow`);
         if (type === "search") {
