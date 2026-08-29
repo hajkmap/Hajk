@@ -535,71 +535,73 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         ref={(el) => setAnchorEl(el)}
         sx={{ position: "fixed", top: 0, left: "50%", zIndex: 0 }}
       />
-      <Popover
-        open
-        anchorEl={anchorEl}
-        onClose={closePalette}
-        anchorOrigin={{ horizontal: "center", vertical: "top" }}
-        transformOrigin={{ horizontal: "center", vertical: "top" }}
-        slotProps={{
-          paper: {
-            sx: {
-              width: 380,
-              maxHeight: 320,
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              backgroundImage: "unset",
-            },
-          },
-        }}
-      >
-        <TextField
-          // eslint-disable-next-line jsx-a11y/no-autofocus
-          autoFocus
-          fullWidth
-          variant="outlined"
-          placeholder=""
-          value={query}
-          onChange={handleQueryChange}
-          onKeyDown={handleInputKeyDown}
-          inputRef={inputRef}
+      {open && (
+        <Popover
+          open
+          anchorEl={anchorEl}
+          onClose={closePalette}
+          anchorOrigin={{ horizontal: "center", vertical: "top" }}
+          transformOrigin={{ horizontal: "center", vertical: "top" }}
           slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <ArrowForwardIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            },
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: 0,
-              "&.Mui-focused fieldset": {
-                borderWidth: 0,
+            paper: {
+              sx: {
+                width: 380,
+                maxHeight: 320,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                backgroundImage: "unset",
               },
             },
-            "& .MuiInputBase-root": {
-              height: 36,
-            },
-            "& .MuiInputBase-input": {
-              py: "7px",
-            },
-          }}
-        />
-        <List
-          ref={listRef}
-          dense
-          disablePadding
-          sx={{
-            overflow: "auto",
-            flex: 1,
           }}
         >
-          {listContent}
-        </List>
-      </Popover>
+          <TextField
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
+            fullWidth
+            variant="outlined"
+            placeholder=""
+            value={query}
+            onChange={handleQueryChange}
+            onKeyDown={handleInputKeyDown}
+            inputRef={inputRef}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <ArrowForwardIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              },
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 0,
+                "&.Mui-focused fieldset": {
+                  borderWidth: 0,
+                },
+              },
+              "& .MuiInputBase-root": {
+                height: 36,
+              },
+              "& .MuiInputBase-input": {
+                py: "7px",
+              },
+            }}
+          />
+          <List
+            ref={listRef}
+            dense
+            disablePadding
+            sx={{
+              overflow: "auto",
+              flex: 1,
+            }}
+          >
+            {listContent}
+          </List>
+        </Popover>
+      )}
     </>
   );
 }
