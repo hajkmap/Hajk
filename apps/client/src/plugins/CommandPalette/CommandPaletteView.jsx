@@ -11,7 +11,7 @@ import {
   Divider,
   InputAdornment,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
@@ -529,11 +529,6 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     }
   }
 
-  const placeholder =
-    viewMode === "commands"
-      ? "Sök kommando... (Ctrl+K)"
-      : "Sök verktyg... (Esc för att gå tillbaka)";
-
   return (
     <>
       <Box
@@ -551,7 +546,6 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             sx: {
               width: 380,
               maxHeight: 320,
-              mt: 1,
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
@@ -565,7 +559,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           autoFocus
           fullWidth
           variant="outlined"
-          placeholder={placeholder}
+          placeholder=""
           value={query}
           onChange={handleQueryChange}
           onKeyDown={handleInputKeyDown}
@@ -574,7 +568,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
+                  <ArrowForwardIcon fontSize="small" />
                 </InputAdornment>
               ),
             },
@@ -582,6 +576,9 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: 0,
+              "&.Mui-focused fieldset": {
+                borderWidth: 0,
+              },
             },
             "& .MuiInputBase-root": {
               height: 36,
