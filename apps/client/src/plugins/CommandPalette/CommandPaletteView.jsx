@@ -26,6 +26,7 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 import Crop54Icon from "@mui/icons-material/Crop54";
 import SearchOffIcon from "@mui/icons-material/SearchOff";
+import SearchIcon from "@mui/icons-material/Search";
 import LayersIcon from "@mui/icons-material/Layers";
 import WallpaperIcon from "@mui/icons-material/Wallpaper";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
@@ -469,6 +470,17 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           });
         }
       }
+      // Always offer a way to hand the typed text off to the real Search
+      // tool, at the very bottom, regardless of what else matched.
+      if (query.trim()) {
+        items.push({
+          type: "__searchInSearchTool",
+          title: `Sök efter "${query.trim()}" i sökverktyget`,
+          description: "",
+          icon: <SearchIcon />,
+          kind: "search",
+        });
+      }
     } else if (viewMode === "layers") {
       // layers
       if (!query.trim()) {
@@ -662,6 +674,12 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         });
       } else if (type === "__clearSearch") {
         globalObserver.publish("search.clearSearch");
+      } else if (type === "__searchInSearchTool") {
+        // `query` still holds the pre-close value here — closePalette()'s
+        // setQuery("") above only affects the *next* render, not this
+        // closure — so this is the text the user actually typed.
+        globalObserver.publish("search.setSearchPhrase", query.trim());
+        globalObserver.publish("search.focusInput");
       } else {
         globalObserver.publish(`${type}.showWindow`);
         if (type === "search") {
@@ -676,6 +694,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       toggleLayer,
       switchBackgroundLayer,
       presetList,
+      query,
     ]
   );
 
@@ -895,14 +914,37 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       }
     }
 
-    if (filteredCommands.length === 0 && !showTopLevelLayerMatches) {
+    // Always offer a way to hand the typed text off to the real Search
+    // tool, at the very bottom, regardless of what else matched.
+    const searchFallbackQuery = query.trim();
+    if (searchFallbackQuery) {
+      if (filteredCommands.length > 0 || showTopLevelLayerMatches) {
+        listContent.push(<Divider key="search-fallback-divider" />);
+      }
+      const isSelected = itemIndex === selectedIndex;
       listContent.push(
-        <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
-          <Typography variant="body2" sx={{ opacity: 0.5 }}>
-            Inga kommandon hittades
-          </Typography>
-        </Box>
+        <ListItemButton
+          key="search-fallback"
+          data-command-item
+          selected={isSelected}
+          onClick={() => selectItem("__searchInSearchTool")}
+          sx={{
+            py: 0.5,
+            "&.Mui-selected": {
+              bgcolor: "action.hover",
+            },
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 36 }}>
+            <SearchIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText
+            primary={`Sök efter "${searchFallbackQuery}" i sökverktyget`}
+            slotProps={{ primary: { variant: "body2", noWrap: true } }}
+          />
+        </ListItemButton>
       );
+      itemIndex++;
     }
   } else if (viewMode === "layers") {
     // Layers view
