@@ -11,7 +11,10 @@ import {
   Divider,
   InputAdornment,
   Checkbox,
+  Chip,
 } from "@mui/material";
+import { useTheme, alpha } from "@mui/material/styles";
+import { isMobile } from "../../utils/IsMobile";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
@@ -27,6 +30,9 @@ import LayersIcon from "@mui/icons-material/Layers";
 import { setOLSubLayers } from "../../utils/groupLayers";
 
 const MAX_RECENT = 5;
+
+const IS_MAC = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+const SHORTCUT_LABEL = IS_MAC ? "⌘K" : "Ctrl+K";
 
 function getCurrentThemeMode() {
   const stored = window.localStorage.getItem("userPreferredColorScheme");
@@ -190,6 +196,7 @@ function matchesQuery(item, q) {
 }
 
 export default function CommandPaletteView({ globalObserver, appModel }) {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -515,7 +522,36 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     [displayItems, selectedIndex, selectItem, closePalette, viewMode]
   );
 
-  if (!open) return null;
+  if (!open) {
+    if (isMobile) return null;
+    return (
+      <Chip
+        label={SHORTCUT_LABEL}
+        size="small"
+        variant="outlined"
+        onClick={openPalette}
+        sx={{
+          position: "fixed",
+          top: 8,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 2,
+          bgcolor: alpha(theme.palette.background.paper, 0.6),
+          backdropFilter: "blur(4px)",
+          border: `1px solid ${theme.palette.divider}`,
+          color: theme.palette.text.secondary,
+          fontWeight: 500,
+          letterSpacing: 0.3,
+          opacity: 0.7,
+          transition: "opacity 0.15s ease",
+          "&:hover": {
+            opacity: 1,
+            bgcolor: alpha(theme.palette.background.paper, 0.85),
+          },
+        }}
+      />
+    );
+  }
 
   const kindLabel = (kind) => (
     <Typography
