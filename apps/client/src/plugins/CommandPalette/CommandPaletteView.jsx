@@ -29,6 +29,7 @@ import SearchOffIcon from "@mui/icons-material/SearchOff";
 import LayersIcon from "@mui/icons-material/Layers";
 import WallpaperIcon from "@mui/icons-material/Wallpaper";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import FolderSpecialIcon from "@mui/icons-material/FolderSpecial";
 import { setOLSubLayers } from "../../utils/groupLayers";
 import { isValidLayerId } from "../../utils/Validator";
 
@@ -46,9 +47,15 @@ function getCurrentThemeMode() {
     : "light";
 }
 
+function getPresetConfig(appModel) {
+  return appModel?.config?.mapConfig?.tools?.find((t) => t.type === "preset")
+    ?.options;
+}
+
 // Initial commands to display
 function getCommands(appModel) {
   const isDark = getCurrentThemeMode() === "dark";
+  const presetConfig = getPresetConfig(appModel);
   return [
     {
       type: "__openTools",
@@ -71,6 +78,17 @@ function getCommands(appModel) {
       icon: <WallpaperIcon />,
       kind: "command",
     },
+    ...(presetConfig?.presetList?.length > 0
+      ? [
+          {
+            type: "__showPresets",
+            title: "Snabbval",
+            description: "Snabbval till fördefinierade platser och lager",
+            icon: <FolderSpecialIcon />,
+            kind: "command",
+          },
+        ]
+      : []),
     ...getSearchCommands(appModel),
     {
       type: "__toggleTheme",
@@ -357,6 +375,17 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     );
   }, [backgroundLayers, query]);
 
+  const presetList = useMemo(
+    () => getPresetConfig(appModel)?.presetList || [],
+    [appModel]
+  );
+
+  const filteredPresets = useMemo(() => {
+    if (!query.trim()) return presetList;
+    const q = query.toLowerCase();
+    return presetList.filter((p) => p.name.toLowerCase().includes(q));
+  }, [presetList, query]);
+
   const toggleLayer = useCallback(
     (layerId) => {
       if (!appModel?.getMap) return;
@@ -470,6 +499,21 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           layer,
         });
       }
+    } else if (viewMode === "presets") {
+      // preset links
+      if (!query.trim()) {
+        items.push({ ...BACK_COMMAND, section: "back" });
+      }
+      filteredPresets.forEach((preset) => {
+        const index = presetList.indexOf(preset);
+        items.push({
+          type: `__preset:${index}`,
+          title: preset.name,
+          description: "",
+          icon: null,
+          kind: "preset",
+        });
+      });
     } else {
       // plugins
       if (!query.trim()) {
@@ -495,6 +539,8 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     filteredRecent,
     filteredLayers,
     filteredBackgrounds,
+    filteredPresets,
+    presetList,
     recentTools,
     query,
   ]);
@@ -548,6 +594,12 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         setSelectedIndex(0);
         return;
       }
+      if (type === "__showPresets") {
+        setViewMode("presets");
+        setQuery("");
+        setSelectedIndex(0);
+        return;
+      }
       if (type === "__moreLayers") {
         // Jump into the full "Lager" view, keeping the current search term
         // so the rest of the matches are immediately visible.
@@ -572,6 +624,15 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       if (type.startsWith("__background:")) {
         const layerId = type.slice(13);
         switchBackgroundLayer(layerId);
+        return;
+      }
+      // Presets are a one-shot navigation action, so close the palette and
+      // hand off entirely to PresetLinks (via globalObserver) — it owns the
+      // link parsing, fly-to, layer-swap confirmation and error handling.
+      if (type.startsWith("__preset:")) {
+        const index = Number(type.slice(9));
+        closePalette();
+        globalObserver.publish("preset.selectPreset", presetList[index]);
         return;
       }
       closePalette();
@@ -608,7 +669,14 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         }
       }
     },
-    [globalObserver, closePalette, appModel, toggleLayer, switchBackgroundLayer]
+    [
+      globalObserver,
+      closePalette,
+      appModel,
+      toggleLayer,
+      switchBackgroundLayer,
+      presetList,
+    ]
   );
 
   useEffect(() => {
@@ -653,7 +721,8 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           if (
             viewMode === "plugins" ||
             viewMode === "layers" ||
-            viewMode === "backgrounds"
+            viewMode === "backgrounds" ||
+            viewMode === "presets"
           ) {
             setViewMode("commands");
             setQuery("");
@@ -981,6 +1050,74 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
           <Typography variant="body2" sx={{ opacity: 0.5 }}>
             Inga bakgrundslager hittades
+          </Typography>
+        </Box>
+      );
+    }
+  } else if (viewMode === "presets") {
+    // Preset links view
+    if (!query.trim()) {
+      const isBackSelected = itemIndex === selectedIndex;
+      listContent.push(
+        <ListItemButton
+          key={BACK_COMMAND.type}
+          data-command-item
+          selected={isBackSelected}
+          onClick={() => selectItem(BACK_COMMAND.type)}
+          sx={{
+            py: 0.5,
+            "&.Mui-selected": {
+              bgcolor: "action.hover",
+            },
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 36 }}>{BACK_COMMAND.icon}</ListItemIcon>
+          <ListItemText
+            primary={BACK_COMMAND.title}
+            slotProps={{
+              primary: { variant: "body2", noWrap: true },
+            }}
+          />
+        </ListItemButton>
+      );
+      itemIndex++;
+      listContent.push(<Divider key="back-divider" />);
+    }
+
+    if (filteredPresets.length > 0) {
+      for (const preset of filteredPresets) {
+        const index = presetList.indexOf(preset);
+        const isSelected = itemIndex === selectedIndex;
+        listContent.push(
+          <ListItemButton
+            key={`preset-${index}`}
+            data-command-item
+            selected={isSelected}
+            onClick={() => selectItem(`__preset:${index}`)}
+            sx={{
+              py: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <ListItemText
+              primary={preset.name}
+              slotProps={{
+                primary: { variant: "body2", noWrap: true },
+              }}
+            />
+          </ListItemButton>
+        );
+        itemIndex++;
+      }
+    }
+
+    if (displayItems.length === 0) {
+      listContent.push(
+        <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
+          <Typography variant="body2" sx={{ opacity: 0.5 }}>
+            Inga snabbval hittades
           </Typography>
         </Box>
       );
