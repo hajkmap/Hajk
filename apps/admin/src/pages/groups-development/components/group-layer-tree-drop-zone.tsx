@@ -22,6 +22,8 @@ interface GroupLayerTreeDropZoneProps {
   onMoveZoneDrop?: (item: MoveZoneItem) => void;
   canAcceptMoveZoneItem?: (item: MoveZoneItem) => boolean;
   onTreeDropToRoot?: (nodeId: GroupLayerTreeNode["id"]) => void;
+  /** Defaults to groups only (Kartlager). Bakgrund passes layers. */
+  canAcceptTreeItemToRoot?: (node: GroupLayerTreeNode) => boolean;
 }
 
 export default function GroupLayerTreeDropZone({
@@ -34,6 +36,7 @@ export default function GroupLayerTreeDropZone({
   onMoveZoneDrop,
   canAcceptMoveZoneItem = () => true,
   onTreeDropToRoot,
+  canAcceptTreeItemToRoot = (node) => node.data?.kind === "group",
 }: GroupLayerTreeDropZoneProps) {
   const [{ isOver, canDrop }, dropRef] = useDrop(
     () => ({
@@ -48,7 +51,7 @@ export default function GroupLayerTreeDropZone({
           return (
             onTreeDropToRoot != null &&
             node?.id != null &&
-            node.data?.kind === "group"
+            canAcceptTreeItemToRoot(node)
           );
         }
         if (type === MOVE_ZONE_DRAG_TYPE) {
@@ -86,6 +89,7 @@ export default function GroupLayerTreeDropZone({
     [
       canAcceptCatalogItem,
       canAcceptMoveZoneItem,
+      canAcceptTreeItemToRoot,
       onCatalogDrop,
       onMoveZoneDrop,
       onTreeDropToRoot,

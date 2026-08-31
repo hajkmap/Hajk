@@ -21,12 +21,14 @@ const StyledAppBar = styled(AppBar)(() => ({
   zIndex: 1,
 }));
 
-type PreviewTab = "layers" | "background" | "drawOrder";
+export type LayerSwitcherPreviewTab = "layers" | "background" | "drawOrder";
 
 interface LayerSwitcherPreviewProps {
   children: React.ReactNode;
   search: string;
   onSearchChange: (value: string) => void;
+  activeTab?: LayerSwitcherPreviewTab;
+  onActiveTabChange?: (value: LayerSwitcherPreviewTab) => void;
   showFilter?: boolean;
   showQuickAccess?: boolean;
   showDrawOrderView?: boolean;
@@ -38,6 +40,8 @@ export default function LayerSwitcherPreview({
   children,
   search,
   onSearchChange,
+  activeTab: controlledActiveTab,
+  onActiveTabChange,
   showFilter = true,
   showQuickAccess = false,
   showDrawOrderView = true,
@@ -45,7 +49,16 @@ export default function LayerSwitcherPreview({
   enableUserQuickAccessFavorites = false,
 }: LayerSwitcherPreviewProps) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<PreviewTab>("layers");
+  const [uncontrolledActiveTab, setUncontrolledActiveTab] =
+    useState<LayerSwitcherPreviewTab>("layers");
+  const activeTab = controlledActiveTab ?? uncontrolledActiveTab;
+
+  const setActiveTab = (value: LayerSwitcherPreviewTab) => {
+    onActiveTabChange?.(value);
+    if (controlledActiveTab === undefined) {
+      setUncontrolledActiveTab(value);
+    }
+  };
 
   return (
     <Box
@@ -85,7 +98,7 @@ export default function LayerSwitcherPreview({
       <StyledAppBar position="relative" color="default" elevation={0}>
         <Tabs
           value={activeTab}
-          onChange={(_, value) => setActiveTab(value as PreviewTab)}
+          onChange={(_, value) => setActiveTab(value as LayerSwitcherPreviewTab)}
           variant="fullWidth"
           textColor="inherit"
         >
@@ -97,7 +110,9 @@ export default function LayerSwitcherPreview({
         </Tabs>
       </StyledAppBar>
 
-      {activeTab === "layers" ? (
+      {activeTab === "layers" ||
+      activeTab === "background" ||
+      activeTab === "drawOrder" ? (
         <>
           {showFilter ? (
             <TextField
@@ -121,7 +136,7 @@ export default function LayerSwitcherPreview({
             />
           ) : null}
 
-          {showQuickAccess ? (
+          {activeTab === "layers" && showQuickAccess ? (
             <Box
               sx={{
                 px: 2,

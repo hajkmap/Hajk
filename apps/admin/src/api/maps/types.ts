@@ -32,6 +32,8 @@ export interface MapLayer extends Layer {
   groupId: string | null;
   /** Placement on map (from LayerInstance), when loaded via GET /maps/:name/layers. */
   visibleAtStart?: boolean;
+  /** Direct map placement usage — BACKGROUND layers become layerswitcher baselayers. */
+  usage?: "BACKGROUND" | "FOREGROUND";
 }
 
 export interface MapGroup {
@@ -100,6 +102,51 @@ export interface MapContentApiResponse {
 export interface MapContentPlacement {
   layers: MapLayerPlacement[];
   groups: MapGroupPlacement[];
+}
+
+/** Nested Kartlager group (catalog layer ids) for layerswitcher admin API. */
+export interface MapLayerSwitcherLayerRef {
+  id: string;
+  drawOrder?: number;
+  visibleAtStart?: boolean;
+  infobox?: string;
+}
+
+export interface MapLayerSwitcherGroup {
+  id: string;
+  type?: string;
+  name: string;
+  toggled?: boolean;
+  expanded?: boolean;
+  exclusiveGroup?: boolean;
+  parent?: string;
+  infogroupvisible?: boolean;
+  infogrouptitle?: string;
+  infogrouptext?: string;
+  infogroupurl?: string;
+  infogroupurltext?: string;
+  infogroupopendatalink?: string;
+  infogroupowner?: string;
+  layers?: MapLayerSwitcherLayerRef[];
+  groups?: MapLayerSwitcherGroup[];
+}
+
+export interface MapLayerSwitcherBaselayer {
+  layerId: string;
+  visibleAtStart?: boolean;
+  infoClickActive?: boolean;
+  zIndex?: number;
+  infobox?: string;
+}
+
+export interface MapLayerSwitcherState {
+  groups: MapLayerSwitcherGroup[];
+  baselayers: MapLayerSwitcherBaselayer[];
+}
+
+export interface MapLayerSwitcherPlacement {
+  groups: MapLayerSwitcherGroup[];
+  baselayers: MapLayerSwitcherBaselayer[];
 }
 
 export interface ProjectionsApiResponse {

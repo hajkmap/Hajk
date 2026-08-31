@@ -56,6 +56,14 @@ interface GroupLayerCatalogProps {
   layers: Layer[];
   placedGroupIds: Set<string>;
   placedLayerIds: Set<string>;
+  /** Layer catalog ids marked active on the map (Lager tab). */
+  activeLayerIds?: Set<string> | null;
+  /** Layer catalog ids marked BACKGROUND on the map (Lager tab). */
+  backgroundLayerIds?: Set<string> | null;
+  /** Restrict catalog to background layers and hide the Groups tab. */
+  backgroundMode?: boolean;
+  /** Ritordning: layers are already in the preview list — hide catalog drag UI. */
+  drawOrderMode?: boolean;
   groupDisplaySettings: Record<string, GroupDisplaySettings>;
   onGroupDisplaySettingsChange: (
     groupId: string,
@@ -71,6 +79,7 @@ interface CatalogRowProps {
   onEdit?: () => void;
   onDelete?: () => void;
   disableActions?: boolean;
+  disableDrag?: boolean;
 }
 
 function CatalogRow({
@@ -78,6 +87,7 @@ function CatalogRow({
   onEdit,
   onDelete,
   disableActions,
+  disableDrag = false,
 }: CatalogRowProps) {
   const { t } = useTranslation();
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
@@ -86,11 +96,12 @@ function CatalogRow({
     () => ({
       type: CATALOG_DRAG_TYPE,
       item,
+      canDrag: !disableDrag,
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
     }),
-    [item],
+    [disableDrag, item],
   );
 
   return (
@@ -120,14 +131,20 @@ function CatalogRow({
             gap: 1,
             flex: 1,
             minHeight: 24,
-            cursor: "grab",
+            cursor: disableDrag ? "default" : "grab",
             opacity: isDragging ? 0.5 : 1,
             "&:active": {
-              cursor: "grabbing",
+              cursor: disableDrag ? "default" : "grabbing",
             },
           }}
         >
-          <DragIndicator sx={{ color: "text.secondary", flexShrink: 0 }} />
+          <DragIndicator
+            sx={{
+              color: "text.secondary",
+              flexShrink: 0,
+              visibility: disableDrag ? "hidden" : "visible",
+            }}
+          />
           {isGroup ? (
             <FolderIcon fontSize="small" color="primary" />
           ) : (
@@ -182,6 +199,10 @@ export default function GroupLayerCatalog({
   layers,
   placedGroupIds,
   placedLayerIds,
+  activeLayerIds = null,
+  backgroundLayerIds = null,
+  backgroundMode = false,
+  drawOrderMode = false,
   groupDisplaySettings,
   onGroupDisplaySettingsChange,
   onGroupDisplaySettingsRemove,
@@ -196,6 +217,7 @@ export default function GroupLayerCatalog({
     useDeleteGroup();
 
   const [activeTab, setActiveTab] = useState<CatalogTab>("groups");
+  const catalogTab = backgroundMode ? "layers" : activeTab;
   const [search, setSearch] = useState("");
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
@@ -230,7 +252,25 @@ export default function GroupLayerCatalog({
 
   const availableLayers = useMemo(() => {
     const items = layers
-      .filter((layer) => !placedLayerIds.has(layer.id))
+      .filter((layer) => {
+        if ((layer.layerKind ?? "display") !== "display") {
+          return false;
+        }
+        // Only layers activated on the Lager tab are eligible.
+        if (activeLayerIds != null && !activeLayerIds.has(layer.id)) {
+          return false;
+        }
+        const isBackground = backgroundLayerIds?.has(layer.id) ?? false;
+        if (backgroundMode) {
+          // Bakgrund tab: active BACKGROUND layers not yet placed in the list.
+          return isBackground && !placedLayerIds.has(layer.id);
+        }
+        // Kartlager: active FOREGROUND only — never BACKGROUND.
+        if (isBackground) {
+          return false;
+        }
+        return !placedLayerIds.has(layer.id);
+      })
       .map((layer) => ({
         kind: "layer" as const,
         id: layer.id,
@@ -244,14 +284,23 @@ export default function GroupLayerCatalog({
     return items.filter((item) =>
       item.name.toLowerCase().includes(normalizedSearch),
     );
-  }, [layers, normalizedSearch, placedLayerIds]);
+  }, [
+    activeLayerIds,
+    backgroundLayerIds,
+    backgroundMode,
+    layers,
+    normalizedSearch,
+    placedLayerIds,
+  ]);
 
-  const activeItems = activeTab === "groups" ? catalogGroups : availableLayers;
+  const activeItems = catalogTab === "groups" ? catalogGroups : availableLayers;
 
   const emptyMessage =
-    activeTab === "groups"
+    catalogTab === "groups"
       ? t("groupsDevelopment.noGroupsMatchSearch")
-      : "No unplaced layers match your search.";
+      : backgroundMode
+        ? t("groupsDevelopment.noBackgroundLayers")
+        : "No unplaced layers match your search.";
 
   const formInitialValues =
     formMode === "edit" && editingGroup
@@ -386,6 +435,17 @@ export default function GroupLayerCatalog({
           overflow: "hidden",
         }}
       >
+        {drawOrderMode ? (
+          <Box sx={{ p: 2 }}>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              {t("common.drawOrder")}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t("map.drawOrderCatalogHelp")}
+            </Typography>
+          </Box>
+        ) : (
+        <>
         <Box sx={{ p: 2, borderBottom: "1px solid", borderColor: "divider" }}>
           <Box
             sx={{
@@ -399,15 +459,17 @@ export default function GroupLayerCatalog({
             <Typography variant="subtitle1">
               {t("common.groupsDevelopment")}
             </Typography>
-            <Button
-              size="small"
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleOpenCreateDialog}
-              sx={{ flexShrink: 0 }}
-            >
-              {t("common.add")}
-            </Button>
+            {!backgroundMode ? (
+              <Button
+                size="small"
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleOpenCreateDialog}
+                sx={{ flexShrink: 0 }}
+              >
+                {t("common.add")}
+              </Button>
+            ) : null}
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             {t("groupsDragAndDropDescription")}
@@ -420,8 +482,12 @@ export default function GroupLayerCatalog({
             placeholder={t("common.search")}
           />
           <Tabs
-            value={activeTab}
-            onChange={(_, value) => setActiveTab(value as CatalogTab)}
+            value={catalogTab}
+            onChange={(_, value) => {
+              if (!backgroundMode) {
+                setActiveTab(value as CatalogTab);
+              }
+            }}
             sx={{
               mt: 1.5,
               minHeight: 36,
@@ -442,12 +508,14 @@ export default function GroupLayerCatalog({
               },
             }}
           >
-            <Tab
-              icon={<FolderIcon />}
-              iconPosition="start"
-              value="groups"
-              label={`${t("common.layerGroups")} (${catalogGroups.length})`}
-            />
+            {!backgroundMode ? (
+              <Tab
+                icon={<FolderIcon />}
+                iconPosition="start"
+                value="groups"
+                label={`${t("common.layerGroups")} (${catalogGroups.length})`}
+              />
+            ) : null}
             <Tab
               icon={<LayersIcon />}
               iconPosition="start"
@@ -494,6 +562,8 @@ export default function GroupLayerCatalog({
             ))
           )}
         </List>
+        </>
+        )}
       </Paper>
 
       <GroupFormDialog
@@ -507,7 +577,9 @@ export default function GroupLayerCatalog({
           setFormDialogOpen(false);
           setEditingGroup(null);
         }}
-        onSubmit={handleFormSubmit}
+        onSubmit={(values) => {
+          void handleFormSubmit(values);
+        }}
         isSubmitting={isCreatingGroup || isUpdatingGroup}
       />
 
@@ -551,7 +623,9 @@ export default function GroupLayerCatalog({
           <Button
             color="error"
             variant="contained"
-            onClick={handleConfirmDelete}
+            onClick={() => {
+              void handleConfirmDelete();
+            }}
             disabled={!isDeleteConfirmNameMatching || isDeletingGroup}
           >
             {t("groups.deleteGroupButton")}

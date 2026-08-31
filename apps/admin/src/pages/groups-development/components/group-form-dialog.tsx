@@ -9,14 +9,11 @@ import {
   FormControlLabel,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import useAppStateStore from "../../../store/use-app-state-store";
-import {
-  DEFAULT_GROUP_DISPLAY_SETTINGS,
-  type GroupFormValues,
-} from "../types";
+import { DEFAULT_GROUP_DISPLAY_SETTINGS, type GroupFormValues } from "../types";
 
 interface GroupFormDialogProps {
   open: boolean;
@@ -27,35 +24,32 @@ interface GroupFormDialogProps {
   isSubmitting?: boolean;
 }
 
-export default function GroupFormDialog({
-  open,
+function createDefaultValues(): GroupFormValues {
+  return {
+    name: "",
+    ...DEFAULT_GROUP_DISPLAY_SETTINGS,
+  };
+}
+
+interface GroupFormDialogBodyProps {
+  mode: "create" | "edit";
+  initialValues?: GroupFormValues;
+  onClose: () => void;
+  onSubmit: (values: GroupFormValues) => void;
+  isSubmitting: boolean;
+}
+
+function GroupFormDialogBody({
   mode,
   initialValues,
   onClose,
   onSubmit,
-  isSubmitting = false,
-}: GroupFormDialogProps) {
+  isSubmitting,
+}: GroupFormDialogBodyProps) {
   const { t } = useTranslation();
-  const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
   const [values, setValues] = useState<GroupFormValues>(
-    initialValues ?? {
-      name: "",
-      ...DEFAULT_GROUP_DISPLAY_SETTINGS,
-    },
+    initialValues ?? createDefaultValues(),
   );
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    setValues(
-      initialValues ?? {
-        name: "",
-        ...DEFAULT_GROUP_DISPLAY_SETTINGS,
-      },
-    );
-  }, [initialValues, open]);
 
   const updateMetadata = (
     field: keyof GroupFormValues["metadata"],
@@ -83,19 +77,7 @@ export default function GroupFormDialog({
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      slotprops={{
-        paper:{
-          sx: {
-            backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
-          },
-        }
-      }}
-    >
+    <>
       <DialogTitle>
         {mode === "create"
           ? t("groups.dialog.title")
@@ -214,7 +196,9 @@ export default function GroupFormDialog({
             <TextField
               label={t("layers.metadata.urlTitle")}
               value={values.metadata.urlTitle}
-              onChange={(event) => updateMetadata("urlTitle", event.target.value)}
+              onChange={(event) =>
+                updateMetadata("urlTitle", event.target.value)
+              }
               fullWidth
               size="small"
             />
@@ -249,6 +233,49 @@ export default function GroupFormDialog({
           {mode === "create" ? t("common.add") : t("common.dialog.okBtn")}
         </Button>
       </DialogActions>
+    </>
+  );
+}
+
+export default function GroupFormDialog({
+  open,
+  mode,
+  initialValues,
+  onClose,
+  onSubmit,
+  isSubmitting = false,
+}: GroupFormDialogProps) {
+  const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
+
+  const formKey =
+    mode === "edit" && initialValues
+      ? JSON.stringify(initialValues)
+      : "create";
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: {
+            backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
+          },
+        },
+      }}
+    >
+      {open ? (
+        <GroupFormDialogBody
+          key={formKey}
+          mode={mode}
+          initialValues={initialValues}
+          onClose={onClose}
+          onSubmit={onSubmit}
+          isSubmitting={isSubmitting}
+        />
+      ) : null}
     </Dialog>
   );
 }

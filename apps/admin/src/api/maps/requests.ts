@@ -10,6 +10,8 @@ import type {
   MapGroupPlacement,
   MapContentPlacement,
   MapContentApiResponse,
+  MapLayerSwitcherState,
+  MapLayerSwitcherPlacement,
   MapMutation,
   ToolOnMap,
 } from "./types";
@@ -240,11 +242,20 @@ export const updateMapTools = async (
  */
 export const updateMapLayers = async (
   mapName: string,
-  layers: MapLayerPlacement[]
+  layers: MapLayerPlacement[],
+  options?: { replaceBackground?: boolean; replaceForeground?: boolean },
 ): Promise<void> => {
   const internalApiClient = getApiClient();
   try {
-    await internalApiClient.put(`/maps/${mapName}/layers`, { layers });
+    await internalApiClient.put(`/maps/${mapName}/layers`, {
+      layers,
+      ...(options?.replaceBackground != null
+        ? { replaceBackground: options.replaceBackground }
+        : {}),
+      ...(options?.replaceForeground != null
+        ? { replaceForeground: options.replaceForeground }
+        : {}),
+    });
   } catch (error) {
     const axiosError = error as InternalApiError;
     if (axiosError.response) {
@@ -299,6 +310,54 @@ export const updateMapContent = async (
     } else {
       throw new Error(`Failed to update map content.`);
     }
+  }
+};
+
+/**
+ * Loads Kartlager + Bakgrund admin state (`GET /maps/:mapName/layerswitcher`).
+ */
+export const getMapLayerSwitcher = async (
+  mapName: string,
+): Promise<MapLayerSwitcherState> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.get<MapLayerSwitcherState>(
+      `/maps/${mapName}/layerswitcher`,
+    );
+    return {
+      groups: response.data?.groups ?? [],
+      baselayers: response.data?.baselayers ?? [],
+    };
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to fetch map layerswitcher. ErrorId: ${axiosError.response.data.errorId}.`,
+      );
+    }
+    throw new Error("Failed to fetch map layerswitcher.");
+  }
+};
+
+/**
+ * Atomically replaces Kartlager + Bakgrund
+ * (`PUT /maps/:mapName/layerswitcher`).
+ */
+export const updateMapLayerSwitcher = async (
+  mapName: string,
+  content: MapLayerSwitcherPlacement,
+): Promise<void> => {
+  const internalApiClient = getApiClient();
+  try {
+    await internalApiClient.put(`/maps/${mapName}/layerswitcher`, content);
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to update map layerswitcher. ErrorId: ${axiosError.response.data.errorId}.`,
+      );
+    }
+    throw new Error("Failed to update map layerswitcher.");
   }
 };
 

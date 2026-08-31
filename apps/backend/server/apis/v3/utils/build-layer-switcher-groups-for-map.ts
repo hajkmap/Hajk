@@ -34,6 +34,7 @@ export interface ClientLayerSwitcherGroupNode {
   name: string;
   toggled: boolean;
   expanded: boolean;
+  exclusiveGroup: boolean;
   parent: string;
   infogroupvisible: boolean;
   infogrouptitle: string;
@@ -102,7 +103,10 @@ function getLayerKey(instance: LayerInstanceRow): string | null {
   );
 }
 
-function toClientLayerRef(instance: LayerInstanceRow): ClientLayerSwitcherLayerRef {
+function toClientLayerRef(
+  instance: LayerInstanceRow,
+  layerIdMode: "instance" | "catalog" = "instance",
+): ClientLayerSwitcherLayerRef {
   const options =
     instance.options &&
     typeof instance.options === "object" &&
@@ -113,8 +117,12 @@ function toClientLayerRef(instance: LayerInstanceRow): ClientLayerSwitcherLayerR
   const infobox =
     typeof options.infobox === "string" ? options.infobox : "";
 
+  const catalogId = getLayerKey(instance);
+  const id =
+    layerIdMode === "catalog" && catalogId ? catalogId : instance.id;
+
   return {
-    id: instance.id,
+    id,
     drawOrder: instance.zIndex,
     visibleAtStart: instance.visibleAtStart,
     infobox,
@@ -236,6 +244,7 @@ function buildInternalGroupNode(
       name: node.name,
       toggled: true,
       expanded: false,
+      exclusiveGroup: false,
       parent: parentGroupId,
       layers: [],
       groups: [],
@@ -256,6 +265,7 @@ function buildInternalGroupNode(
       name,
       toggled: true,
       expanded: false,
+      exclusiveGroup: false,
       parent: parentGroupId,
       layers: [],
       groups: node.children?.length
@@ -300,6 +310,7 @@ function buildInternalGroupNode(
     name,
     toggled: true,
     expanded: false,
+    exclusiveGroup: false,
     parent: parentGroupId,
     layers,
     groups,
@@ -352,6 +363,7 @@ function buildPlacementNode(
       name: placement.name,
       toggled: placement.toggled,
       expanded: placement.expanded,
+      exclusiveGroup: Boolean(placement.exclusiveGroup),
       parent: parentGroupId,
       layers: [],
       groups: [],
@@ -405,6 +417,7 @@ function buildPlacementNode(
     name: placement.name,
     toggled: placement.toggled,
     expanded: placement.expanded,
+    exclusiveGroup: Boolean(placement.exclusiveGroup),
     parent: parentGroupId,
     layers,
     groups: mergeGroupChildrenAtLevel(internalGroups, mapChildGroups),
@@ -487,5 +500,104 @@ export async function buildLayerSwitcherBaselayersForMap(
     orderBy: { zIndex: "asc" },
   });
 
-  return instances.map(toClientLayerRef);
+  return instances.map((instance) => toClientLayerRef(instance));
+}
+
+/**
+ * Admin-facing layerswitcher state uses catalog layer ids (for writes).
+ */
+export async function buildLayerSwitcherAdminStateForMap(mapName: string) {
+  const [groups, backgroundInstances] = await Promise.all([
+    buildLayerSwitcherGroupsForMap(mapName),
+    prisma.layerInstance.findMany({
+      where: {
+        AND: [
+          { map: { name: mapName } },
+          { usage: UseType.BACKGROUND },
+          activeLayerInstanceWhere,
+        ],
+      },
+      include: layerInstanceIncludeAll,
+      orderBy: { zIndex: "asc" },
+    }),
+  ]);
+
+  const instanceIdToCatalogId = new Map<string, string>();
+  const groupIds = collectGroupIdsFromClientGroups(groups);
+  if (groupIds.length > 0) {
+    const groupInstances = await prisma.layerInstance.findMany({
+      where: {
+        AND: [{ groupId: { in: groupIds } }, activeLayerInstanceWhere],
+      },
+      include: layerInstanceIncludeAll,
+    });
+    for (const instance of groupInstances) {
+      const catalogId = getLayerKey(instance);
+      if (catalogId) {
+        instanceIdToCatalogId.set(instance.id, catalogId);
+      }
+    }
+  }
+
+  return {
+    groups: remapClientGroupsToCatalogIds(groups, instanceIdToCatalogId),
+    baselayers: backgroundInstances
+      .map((instance) => {
+        const layerId = getLayerKey(instance);
+        if (!layerId) {
+          return null;
+        }
+        return {
+          layerId,
+          visibleAtStart: instance.visibleAtStart,
+          zIndex: instance.zIndex,
+          infoClickActive: instance.infoClickActive,
+          infobox: (() => {
+            const options =
+              instance.options &&
+              typeof instance.options === "object" &&
+              !Array.isArray(instance.options)
+                ? (instance.options as Record<string, unknown>)
+                : {};
+            return typeof options.infobox === "string" ? options.infobox : "";
+          })(),
+        };
+      })
+      .filter(
+        (entry): entry is NonNullable<typeof entry> => entry !== null,
+      ),
+  };
+}
+
+function collectGroupIdsFromClientGroups(
+  groups: ClientLayerSwitcherGroupNode[],
+): string[] {
+  const ids: string[] = [];
+  const walk = (nodes: ClientLayerSwitcherGroupNode[]) => {
+    for (const group of nodes) {
+      ids.push(group.id);
+      if (group.groups.length) {
+        walk(group.groups);
+      }
+    }
+  };
+  walk(groups);
+  return ids;
+}
+
+function remapClientGroupsToCatalogIds(
+  groups: ClientLayerSwitcherGroupNode[],
+  instanceIdToCatalogId: Map<string, string>,
+): ClientLayerSwitcherGroupNode[] {
+  return groups.map((group) => ({
+    ...group,
+    layers: group.layers.map((layer) => ({
+      ...layer,
+      id: instanceIdToCatalogId.get(layer.id) ?? layer.id,
+    })),
+    groups: remapClientGroupsToCatalogIds(
+      group.groups,
+      instanceIdToCatalogId,
+    ),
+  }));
 }

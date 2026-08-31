@@ -1,19 +1,29 @@
 import { useEffect, useState, type RefObject } from "react";
 import { Box } from "@mui/material";
+import LayersIcon from "@mui/icons-material/Layers";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 import type { TreeItems } from "dnd-kit-sortable-tree";
 
 import { SettingsPageTabs } from "../../../components/settings-page-tabs";
 import { TreeItemData } from "../../../components/layerswitcher-dnd";
 import type { ToolOnMap } from "../../../api/maps";
+import type { LayerKind } from "../../../api/layers";
 import type { Tool } from "../../../api/tools";
 import type { KartlagerDraft } from "../../groups-development/types";
 import GroupLayerTree from "../../groups-development/components/group-layer-tree";
 import { findActiveLayerswitcher } from "../../groups-development/utils/active-layerswitcher";
 import MapGroupPlacementPanel from "./map-group-placement-panel";
 import MapDrawOrderPanel from "./map-draw-order-panel";
+import MapLayersPanel, {
+  type MapLayerActivationRow,
+} from "./map-layers-panel";
 
 const CONTENT_SUB_TABS = [
+  {
+    key: "layers" as const,
+    labelKey: "maps.contentTab.layers",
+    icon: <LayersIcon />,
+  },
   // {
   //   key: "placement" as const,
   //   labelKey: "maps.contentTab.placement",
@@ -34,6 +44,7 @@ const CONTENT_SUB_TABS = [
 interface MapCatalogLayer {
   id: string;
   name: string;
+  layerKind?: LayerKind;
 }
 
 interface MapCatalogGroup {
@@ -46,6 +57,8 @@ interface MapCatalogGroup {
 interface MapContentPanelProps {
   catalogLayers: MapCatalogLayer[];
   catalogGroups: MapCatalogGroup[];
+  layerActivationRows: MapLayerActivationRow[];
+  onLayerActivationRowsChange: (rows: MapLayerActivationRow[]) => void;
   placementItems: TreeItems<TreeItemData>;
   onPlacementItemsChange: (items: TreeItems<TreeItemData>) => void;
   drawOrderItems: TreeItems<TreeItemData>;
@@ -58,8 +71,12 @@ interface MapContentPanelProps {
   mapTools?: ToolOnMap[];
   catalogTools?: Tool[];
   activeToolIds?: Set<number>;
+  /** DB Kartlager + Bakgrund state (catalog layer ids). */
+  layerSwitcherState?: KartlagerDraft | null;
   kartlagerDraft?: KartlagerDraft | null;
   onKartlagerDraftChange?: (draft: KartlagerDraft | null) => void;
+  /** Bumped when Lager checkboxes are reverted to the last committed state. */
+  layerActivationResetKey?: number;
   /** Called when the Grupper (under utveckling) sub-tab is active. */
   onGroupsDevelopmentActiveChange?: (active: boolean) => void;
   /** Host element for Kartlager Flyttzon (FormActionPanel sidebar). */
@@ -69,6 +86,8 @@ interface MapContentPanelProps {
 export default function MapContentPanel({
   catalogLayers,
   catalogGroups,
+  layerActivationRows,
+  onLayerActivationRowsChange,
   placementItems,
   onPlacementItemsChange,
   drawOrderItems,
@@ -78,14 +97,16 @@ export default function MapContentPanel({
   mapTools,
   catalogTools,
   activeToolIds,
+  layerSwitcherState,
   kartlagerDraft = null,
   onKartlagerDraftChange,
+  layerActivationResetKey = 0,
   onGroupsDevelopmentActiveChange,
   moveZoneHostRef,
 }: MapContentPanelProps) {
   const [contentSubTab, setContentSubTab] = useState<
-    "placement" | "drawOrder" | "groupsDevelopment"
-  >("groupsDevelopment");
+    "layers" | "placement" | "drawOrder" | "groupsDevelopment"
+  >("layers");
   const [moveZoneHostEl, setMoveZoneHostEl] = useState<HTMLElement | null>(
     null,
   );
@@ -128,6 +149,13 @@ export default function MapContentPanel({
         tabs={[...CONTENT_SUB_TABS]}
       />
 
+      {contentSubTab === "layers" ? (
+        <MapLayersPanel
+          rows={layerActivationRows}
+          onRowsChange={onLayerActivationRowsChange}
+        />
+      ) : null}
+
       {contentSubTab === "placement" ? (
         <MapGroupPlacementPanel
           catalogGroups={catalogGroups}
@@ -152,8 +180,11 @@ export default function MapContentPanel({
           mapTools={mapTools}
           catalogTools={catalogTools}
           activeToolIds={activeToolIds}
+          layerSwitcherState={layerSwitcherState}
+          layerActivationRows={layerActivationRows}
           pendingDraft={kartlagerDraft}
           onKartlagerDraftChange={onKartlagerDraftChange}
+          layerActivationResetKey={layerActivationResetKey}
           moveZoneHostEl={showKartlagerEditor ? moveZoneHostEl : null}
         />
       </Box>

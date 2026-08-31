@@ -65,10 +65,38 @@ class MapsController {
   }
 
   async updateMapLayers(req: Request, res: Response) {
-    const { layers } = req.body as {
+    const { layers, replaceBackground, replaceForeground } = req.body as {
       layers: Parameters<typeof MapService.updateMapLayers>[1];
+      replaceBackground?: boolean;
+      replaceForeground?: boolean;
     };
-    await MapService.updateMapLayers(req.params.mapName, layers ?? []);
+    await MapService.updateMapLayers(req.params.mapName, layers ?? [], {
+      replaceBackground,
+      replaceForeground,
+    });
+    res.status(HttpStatusCodes.NO_CONTENT).send();
+  }
+
+  async getMapLayerSwitcher(req: Request, res: Response) {
+    const state = await MapService.getMapLayerSwitcher(req.params.mapName);
+    res.status(HttpStatusCodes.OK).json(state);
+  }
+
+  async updateMapLayerSwitcher(req: Request, res: Response) {
+    const { groups, baselayers } = req.body as {
+      groups: Parameters<typeof MapService.updateMapLayerSwitcher>[1]["groups"];
+      baselayers: Parameters<
+        typeof MapService.updateMapLayerSwitcher
+      >[1]["baselayers"];
+    };
+    await MapService.updateMapLayerSwitcher(
+      req.params.mapName,
+      {
+        groups: groups ?? [],
+        baselayers: baselayers ?? [],
+      },
+      req.user?.id,
+    );
     res.status(HttpStatusCodes.NO_CONTENT).send();
   }
 

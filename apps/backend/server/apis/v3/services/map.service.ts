@@ -8,6 +8,7 @@ import HttpStatusCodes from "../../../common/http-status-codes.ts";
 import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
 import { getUserRoles } from "../../../common/auth/get-user-roles.ts";
 import { isAuthActive } from "../../../common/auth/is-auth-active.ts";
+import { assertExactlyOneLayerParent } from "../utils/assert-exactly-one-layer-parent.ts";
 import {
   activeLayerInstancesForMapWhere,
   activeLayerInstancesForMapsWhere,
@@ -15,6 +16,11 @@ import {
   resolveLayerPlacementById,
 } from "../utils/layer-instance.ts";
 import { toolsOnMapsOptionsForTarget } from "../utils/tool-placement.ts";
+import { buildLayerSwitcherAdminStateForMap } from "../utils/build-layer-switcher-groups-for-map.ts";
+import {
+  flattenLayerSwitcherGroupsForWrite,
+  type LayerSwitcherWriteGroup,
+} from "../utils/flatten-layer-switcher-for-map-write.ts";
 
 const logger = log4js.getLogger("service.v3.map");
 
@@ -39,6 +45,23 @@ interface MapLayerInput {
   visibleAtStart?: boolean;
   infoClickActive?: boolean;
   zIndex?: number;
+  /** Stored on LayerInstance.options.infobox (client baselayer shape). */
+  infobox?: string;
+}
+
+/** Options for replacing direct map LayerInstances by usage. */
+interface ReplaceDirectMapLayersOptions {
+  /**
+   * When true, BACKGROUND instances are replaced even if the payload has none
+   * (used to clear all baselayers). When omitted, BACKGROUND is replaced only
+   * if the payload includes at least one BACKGROUND entry.
+   */
+  replaceBackground?: boolean;
+  /**
+   * When true, FOREGROUND instances are replaced even if the payload has none.
+   * Use with replaceBackground when an admin UI manages the full map-direct set.
+   */
+  replaceForeground?: boolean;
 }
 
 interface MapGroupInput {
@@ -49,7 +72,17 @@ interface MapGroupInput {
   name?: string;
   toggled?: boolean;
   expanded?: boolean;
+  exclusiveGroup?: boolean;
+  infoDocument?: boolean;
   index?: number;
+  metadata?: {
+    title?: string;
+    description?: string;
+    owner?: string;
+    url?: string;
+    urlTitle?: string;
+    urlOpenData?: string;
+  } | null;
 }
 
 async function resolveProjectionConnect(code?: string) {
@@ -122,6 +155,13 @@ function mergeOptionsWithProjection(
   };
 }
 
+/** Prisma read JsonValue (includes null) → write InputJsonValue. */
+function toInputJsonValue(
+  value: Prisma.JsonValue,
+): Prisma.InputJsonValue | typeof Prisma.JsonNull {
+  return value === null ? Prisma.JsonNull : (value as Prisma.InputJsonValue);
+}
+
 class MapService {
   constructor() {
     logger.debug("Initiating Map Service");
@@ -187,16 +227,10 @@ class MapService {
 
     for (const instance of instances) {
       if (instance.map?.name) {
-        counts.set(
-          instance.map.name,
-          (counts.get(instance.map.name) ?? 0) + 1
-        );
+        counts.set(instance.map.name, (counts.get(instance.map.name) ?? 0) + 1);
       }
       for (const placement of instance.group?.maps ?? []) {
-        counts.set(
-          placement.mapName,
-          (counts.get(placement.mapName) ?? 0) + 1
-        );
+        counts.set(placement.mapName, (counts.get(placement.mapName) ?? 0) + 1);
       }
     }
 
@@ -367,15 +401,28 @@ class MapService {
           zIndex: instance.zIndex,
           visibleAtStart: instance.visibleAtStart,
           infoClickActive: instance.infoClickActive,
+          usage: instance.usage ?? UseType.FOREGROUND,
         };
         if (instance.displayLayer) {
-          return { ...instance.displayLayer, ...source, layerKind: "display" as const };
+          return {
+            ...instance.displayLayer,
+            ...source,
+            layerKind: "display" as const,
+          };
         }
         if (instance.searchLayer) {
-          return { ...instance.searchLayer, ...source, layerKind: "search" as const };
+          return {
+            ...instance.searchLayer,
+            ...source,
+            layerKind: "search" as const,
+          };
         }
         if (instance.editingLayer) {
-          return { ...instance.editingLayer, ...source, layerKind: "editing" as const };
+          return {
+            ...instance.editingLayer,
+            ...source,
+            layerKind: "editing" as const,
+          };
         }
         return null;
       })
@@ -447,17 +494,21 @@ class MapService {
    * Replaces the map's directly-attached layers (LayerInstance rows with
    * `mapId`). Layers placed inside groups are untouched. Order is stored in
    * `zIndex` (falls back to array position).
+   *
+   * FOREGROUND (and unset usage) rows are replaced when the payload includes
+   * FOREGROUND entries, or when it contains no BACKGROUND entries (draw-order
+   * / Kartinnehåll). BACKGROUND rows are replaced only when the payload
+   * includes BACKGROUND entries or `replaceBackground` is true — so FOREGROUND
+   * saves cannot wipe baselayers, and BACKGROUND-only saves cannot wipe
+   * FOREGROUND draw-order layers.
    */
-  async updateMapLayers(mapName: string, layers: MapLayerInput[]) {
+  async updateMapLayers(
+    mapName: string,
+    layers: MapLayerInput[],
+    options?: ReplaceDirectMapLayersOptions
+  ) {
     const map = await this.requireMapByName(mapName);
-    const layerData = await this.buildDirectMapLayerRows(map.id, layers);
-
-    await prisma.$transaction(async (tx) => {
-      await tx.layerInstance.deleteMany({ where: { mapId: map.id } });
-      if (layerData.length > 0) {
-        await tx.layerInstance.createMany({ data: layerData });
-      }
-    });
+    await this.replaceDirectMapLayers(map.id, layers, options);
   }
 
   /**
@@ -472,20 +523,21 @@ class MapService {
 
   /**
    * Replaces direct map layers and group placements in one transaction
-   * (admin Kartinnehåll save).
+   * (admin Kartinnehåll save). BACKGROUND map instances are preserved unless
+   * the layers payload explicitly includes BACKGROUND entries.
    */
   async updateMapContent(
     mapName: string,
-    content: { layers: MapLayerInput[]; groups: MapGroupInput[] },
+    content: { layers: MapLayerInput[]; groups: MapGroupInput[] }
   ) {
     const map = await this.requireMapByName(mapName);
-    const layerData = await this.buildDirectMapLayerRows(map.id, content.layers);
     await this.validateMapGroupPlacements(content.groups);
     await prisma.$transaction(async (tx) => {
-      await tx.layerInstance.deleteMany({ where: { mapId: map.id } });
-      if (layerData.length > 0) {
-        await tx.layerInstance.createMany({ data: layerData });
-      }
+      await this.replaceDirectMapLayersInTransaction(
+        tx,
+        map.id,
+        content.layers
+      );
       await this.replaceMapGroupsInTransaction(tx, mapName, content.groups);
     });
   }
@@ -498,9 +550,368 @@ class MapService {
     return { layers, groups };
   }
 
-  private async buildDirectMapLayerRows(
+  async getMapLayerSwitcher(mapName: string) {
+    await this.requireMapByName(mapName);
+    return buildLayerSwitcherAdminStateForMap(mapName);
+  }
+
+  /**
+   * Atomically replaces Kartlager hierarchy (GroupsOnMaps + per-group
+   * LayerInstances) and Bakgrund (map BACKGROUND LayerInstances).
+   * Does not touch FOREGROUND map-direct LayerInstances (draw-order).
+   */
+  async updateMapLayerSwitcher(
+    mapName: string,
+    content: {
+      groups: LayerSwitcherWriteGroup[];
+      baselayers: MapLayerInput[];
+    },
+    userId?: string
+  ) {
+    const map = await this.requireMapByName(mapName);
+    const { placements, groupLayers } = flattenLayerSwitcherGroupsForWrite(
+      content.groups ?? []
+    );
+
+    const groupIds = Array.from(new Set(placements.map((p) => p.groupId)));
+    if (groupIds.length > 0) {
+      const groupRecords = await prisma.group.findMany({
+        where: { id: { in: groupIds } },
+        select: { id: true, name: true, type: true },
+      });
+      const knownIds = new Set(groupRecords.map((g) => g.id));
+      for (const groupId of groupIds) {
+        if (!knownIds.has(groupId)) {
+          throw new HajkError(
+            HttpStatusCodes.BAD_REQUEST,
+            `Unknown group id: ${groupId}`,
+            HajkStatusCodes.INVALID_REQUEST_BODY
+          );
+        }
+      }
+    }
+
+    const mapGroupInputs: MapGroupInput[] = placements.map((placement) => ({
+      id: placement.id,
+      groupId: placement.groupId,
+      parentGroupId: placement.parentGroupId,
+      usage: placement.usage,
+      name: placement.name,
+      toggled: placement.toggled,
+      expanded: placement.expanded,
+      exclusiveGroup: placement.exclusiveGroup,
+      infoDocument: placement.infoDocument,
+      index: placement.index,
+      metadata: placement.metadata,
+    }));
+
+    const backgroundLayers: MapLayerInput[] = (content.baselayers ?? []).map(
+      (layer, index) => ({
+        layerId: layer.layerId,
+        usage: UseType.BACKGROUND,
+        visibleAtStart: layer.visibleAtStart ?? false,
+        infoClickActive: layer.infoClickActive ?? true,
+        zIndex: layer.zIndex ?? index,
+        infobox: layer.infobox ?? "",
+      })
+    );
+
+    await prisma.$transaction(async (tx) => {
+      await this.replaceMapGroupsInTransaction(tx, mapName, mapGroupInputs);
+
+      for (const entry of groupLayers) {
+        const layerCreates: Prisma.LayerInstanceCreateManyInput[] = [];
+        for (const [index, layer] of entry.layers.entries()) {
+          const resolved = await resolveLayerPlacementById(layer.layerId);
+          if (!resolved.ok) {
+            throw new HajkError(
+              HttpStatusCodes.BAD_REQUEST,
+              resolved.reason === "deleted"
+                ? `Layer "${layer.layerId}" is deleted and cannot be placed in a group`
+                : `Unknown layer id: ${layer.layerId}`,
+              resolved.reason === "deleted"
+                ? HajkStatusCodes.INVALID_REQUEST_BODY
+                : HajkStatusCodes.UNKNOWN_LAYER_ID
+            );
+          }
+          const kind = resolved.kind;
+          layerCreates.push({
+            mapId: map.id,
+            groupId: entry.groupId,
+            usage: UseType.FOREGROUND,
+            visibleAtStart: layer.visibleAtStart,
+            zIndex: layer.zIndex ?? index,
+            infoClickActive: true,
+            options: layer.options as Prisma.InputJsonValue,
+            displayLayerId: kind === "display" ? layer.layerId : undefined,
+            searchLayerId: kind === "search" ? layer.layerId : undefined,
+            editingLayerId: kind === "editing" ? layer.layerId : undefined,
+          });
+          assertExactlyOneLayerParent(layerCreates[layerCreates.length - 1]);
+        }
+
+        await tx.layerInstance.deleteMany({
+          where: { groupId: entry.groupId },
+        });
+        if (layerCreates.length > 0) {
+          await tx.layerInstance.createMany({ data: layerCreates });
+        }
+        await tx.group.update({
+          where: { id: entry.groupId },
+          data: {
+            lastSavedBy: userId,
+            lastSavedDate: new Date(),
+          },
+        });
+      }
+
+      await this.replaceDirectMapLayersInTransaction(
+        tx,
+        map.id,
+        backgroundLayers,
+        { replaceBackground: true }
+      );
+    });
+
+    await this.syncLayerSwitcherContentInToolOptions(
+      mapName,
+      content.groups ?? [],
+      backgroundLayers,
+    );
+  }
+
+  /**
+   * Mirror Kartlager groups + Bakgrund into the map's layerswitcher Tool.options
+   * (legacy map JSON shape: groups[].layers[].drawOrder, baselayers[]).
+   */
+  private async syncLayerSwitcherContentInToolOptions(
+    mapName: string,
+    groups: LayerSwitcherWriteGroup[],
+    baselayers: MapLayerInput[],
+  ) {
+    const entry = await prisma.toolsOnMaps.findFirst({
+      where: {
+        mapName,
+        active: true,
+        tool: { type: "layerswitcher", deletedAt: null },
+      },
+      select: {
+        toolId: true,
+        tool: { select: { options: true } },
+      },
+    });
+
+    if (!entry) {
+      return;
+    }
+
+    const groupsForOptions = this.toLayerSwitcherToolOptionGroups(groups);
+
+    const baselayersForOptions = baselayers.map((layer, index) => ({
+      id: layer.layerId,
+      drawOrder: layer.zIndex ?? index,
+      visibleAtStart: layer.visibleAtStart ?? false,
+      infobox: layer.infobox ?? "",
+    }));
+
+    const currentOptions =
+      entry.tool.options &&
+      typeof entry.tool.options === "object" &&
+      !Array.isArray(entry.tool.options)
+        ? (entry.tool.options as Record<string, unknown>)
+        : {};
+
+    await prisma.tool.update({
+      where: { id: entry.toolId },
+      data: {
+        options: {
+          ...currentOptions,
+          groups: groupsForOptions,
+          baselayers: baselayersForOptions,
+        } as Prisma.InputJsonValue,
+        lastSavedDate: new Date(),
+      },
+    });
+  }
+
+  /** Nested groups for Tool.options — preserve drawOrder on each layer ref. */
+  private toLayerSwitcherToolOptionGroups(
+    groups: LayerSwitcherWriteGroup[],
+  ): Prisma.InputJsonObject[] {
+    return groups.map((group) => ({
+      id: group.id,
+      type: "group",
+      name: group.name ?? "",
+      toggled: Boolean(group.toggled),
+      expanded: Boolean(group.expanded),
+      exclusiveGroup: Boolean(group.exclusiveGroup),
+      infogroupvisible: Boolean(group.infogroupvisible),
+      infogrouptitle: group.infogrouptitle ?? "",
+      infogrouptext: group.infogrouptext ?? "",
+      infogroupurl: group.infogroupurl ?? "",
+      infogroupurltext: group.infogroupurltext ?? "",
+      infogroupopendatalink: group.infogroupopendatalink ?? "",
+      infogroupowner: group.infogroupowner ?? "",
+      layers: (group.layers ?? []).map((layer) => ({
+        id: layer.id,
+        drawOrder: layer.drawOrder ?? 1000,
+        visibleAtStart: Boolean(layer.visibleAtStart),
+        infobox: layer.infobox ?? "",
+      })),
+      groups: this.toLayerSwitcherToolOptionGroups(group.groups ?? []),
+    }));
+  }
+
+  private async replaceDirectMapLayers(
     mapId: number,
     layers: MapLayerInput[],
+    options?: ReplaceDirectMapLayersOptions
+  ) {
+    await prisma.$transaction(async (tx) => {
+      await this.replaceDirectMapLayersInTransaction(
+        tx,
+        mapId,
+        layers,
+        options
+      );
+    });
+  }
+
+  private async replaceDirectMapLayersInTransaction(
+    tx: Prisma.TransactionClient,
+    mapId: number,
+    layers: MapLayerInput[],
+    options?: ReplaceDirectMapLayersOptions
+  ) {
+    const foreground = layers.filter(
+      (layer) => (layer.usage ?? UseType.FOREGROUND) !== UseType.BACKGROUND
+    );
+    const background = layers.filter(
+      (layer) => layer.usage === UseType.BACKGROUND
+    );
+    const hasForegroundInPayload = foreground.length > 0;
+    const hasBackgroundInPayload = background.length > 0;
+    const replaceBackground =
+      options?.replaceBackground === true || hasBackgroundInPayload;
+    const replaceForeground =
+      options?.replaceForeground === true ||
+      hasForegroundInPayload ||
+      (!replaceBackground && !hasBackgroundInPayload);
+
+    const toCreate: Prisma.LayerInstanceCreateManyInput[] = [];
+    if (replaceForeground) {
+      const mapRecord = await tx.map.findUnique({
+        where: { id: mapId },
+        select: { name: true },
+      });
+      const mapGroupIds =
+        mapRecord != null
+          ? [
+              ...new Set(
+                (
+                  await tx.groupsOnMaps.findMany({
+                    where: { mapName: mapRecord.name },
+                    select: { groupId: true },
+                  })
+                ).map((row) => row.groupId)
+              ),
+            ]
+          : [];
+
+      const activeCatalogIds = new Set(layers.map((layer) => layer.layerId));
+      const activeCatalogIdList = [...activeCatalogIds];
+
+      const catalogStillActiveFilter = (): Prisma.LayerInstanceWhereInput => {
+        if (activeCatalogIds.size === 0) {
+          return {};
+        }
+        return {
+          OR: [
+            { displayLayerId: { in: activeCatalogIdList } },
+            { searchLayerId: { in: activeCatalogIdList } },
+            { editingLayerId: { in: activeCatalogIdList } },
+          ],
+        };
+      };
+
+      // Remove every placement on this map for catalog layers that are no longer active
+      // (map-direct, group-linked with mapId, and legacy group-only rows).
+      if (activeCatalogIds.size === 0) {
+        await tx.layerInstance.deleteMany({ where: { mapId } });
+        if (mapGroupIds.length > 0) {
+          await tx.layerInstance.deleteMany({
+            where: { groupId: { in: mapGroupIds } },
+          });
+        }
+      } else {
+        await tx.layerInstance.deleteMany({
+          where: {
+            mapId,
+            NOT: catalogStillActiveFilter(),
+          },
+        });
+        if (mapGroupIds.length > 0) {
+          await tx.layerInstance.deleteMany({
+            where: {
+              groupId: { in: mapGroupIds },
+              NOT: catalogStillActiveFilter(),
+            },
+          });
+        }
+      }
+
+      // Replace map-direct FOREGROUND rows (group placements are left intact).
+      await tx.layerInstance.deleteMany({
+        where: {
+          mapId,
+          groupId: null,
+          OR: [{ usage: UseType.FOREGROUND }, { usage: null }],
+        },
+      });
+
+      const groupPlacedCatalogIds = new Set<string>();
+      if (mapGroupIds.length > 0) {
+        const remainingGroupInstances = await tx.layerInstance.findMany({
+          where: { groupId: { in: mapGroupIds } },
+          select: {
+            displayLayerId: true,
+            searchLayerId: true,
+            editingLayerId: true,
+          },
+        });
+        for (const instance of remainingGroupInstances) {
+          const catalogId =
+            instance.displayLayerId ??
+            instance.searchLayerId ??
+            instance.editingLayerId;
+          if (catalogId) {
+            groupPlacedCatalogIds.add(catalogId);
+          }
+        }
+      }
+
+      const foregroundWithoutGroup = foreground.filter(
+        (layer) => !groupPlacedCatalogIds.has(layer.layerId)
+      );
+      toCreate.push(
+        ...(await this.buildDirectMapLayerRows(mapId, foregroundWithoutGroup))
+      );
+    }
+    if (replaceBackground) {
+      await tx.layerInstance.deleteMany({
+        where: { mapId, groupId: null, usage: UseType.BACKGROUND },
+      });
+      toCreate.push(...(await this.buildDirectMapLayerRows(mapId, background)));
+    }
+
+    if (toCreate.length > 0) {
+      await tx.layerInstance.createMany({ data: toCreate });
+    }
+  }
+
+  private async buildDirectMapLayerRows(
+    mapId: number,
+    layers: MapLayerInput[]
   ): Promise<Prisma.LayerInstanceCreateManyInput[]> {
     const data: Prisma.LayerInstanceCreateManyInput[] = [];
     for (const [index, layer] of layers.entries()) {
@@ -513,11 +924,11 @@ class MapService {
             : `Unknown layer id: ${layer.layerId}`,
           resolved.reason === "deleted"
             ? HajkStatusCodes.INVALID_REQUEST_BODY
-            : HajkStatusCodes.UNKNOWN_LAYER_ID,
+            : HajkStatusCodes.UNKNOWN_LAYER_ID
         );
       }
       const kind = resolved.kind;
-      data.push({
+      const row = {
         mapId,
         displayLayerId: kind === "display" ? layer.layerId : undefined,
         searchLayerId: kind === "search" ? layer.layerId : undefined,
@@ -526,7 +937,13 @@ class MapService {
         visibleAtStart: layer.visibleAtStart ?? false,
         infoClickActive: layer.infoClickActive ?? true,
         zIndex: layer.zIndex ?? index,
-      });
+        options:
+          layer.infobox != null
+            ? toInputJsonValue({ infobox: layer.infobox })
+            : undefined,
+      };
+      assertExactlyOneLayerParent(row);
+      data.push(row);
     }
     return data;
   }
@@ -546,7 +963,7 @@ class MapService {
         throw new HajkError(
           HttpStatusCodes.BAD_REQUEST,
           `Unknown group id: ${group.groupId}`,
-          HajkStatusCodes.INVALID_REQUEST_BODY,
+          HajkStatusCodes.INVALID_REQUEST_BODY
         );
       }
     }
@@ -572,7 +989,7 @@ class MapService {
     tx: Prisma.TransactionClient,
     mapName: string,
     groups: MapGroupInput[],
-    nameById?: Map<string, string>,
+    nameById?: Map<string, string>
   ) {
     const names =
       nameById ??
@@ -584,7 +1001,7 @@ class MapService {
             },
             select: { id: true, name: true },
           })
-        ).map((g) => [g.id, g.name]),
+        ).map((g) => [g.id, g.name])
       );
 
     await tx.groupsOnMaps.deleteMany({ where: { mapName } });
@@ -594,18 +1011,33 @@ class MapService {
 
     while (pending.length > 0) {
       const batch = pending.filter(
-        (entry) => !entry.parentGroupId || createdIds.has(entry.parentGroupId),
+        (entry) => !entry.parentGroupId || createdIds.has(entry.parentGroupId)
       );
 
       if (batch.length === 0) {
         throw new HajkError(
           HttpStatusCodes.BAD_REQUEST,
           "Invalid groups-on-maps parent references.",
-          HajkStatusCodes.INVALID_REQUEST_BODY,
+          HajkStatusCodes.INVALID_REQUEST_BODY
         );
       }
 
       for (const entry of batch) {
+        let metadataId: string | undefined;
+        if (entry.metadata) {
+          const createdMetadata = await tx.metadata.create({
+            data: {
+              title: entry.metadata.title ?? "",
+              description: entry.metadata.description ?? "",
+              owner: entry.metadata.owner ?? "",
+              url: entry.metadata.url ?? "",
+              urlTitle: entry.metadata.urlTitle ?? "",
+              urlOpenData: entry.metadata.urlOpenData ?? "",
+            },
+          });
+          metadataId = createdMetadata.id;
+        }
+
         const created = await tx.groupsOnMaps.create({
           data: {
             ...(entry.id ? { id: entry.id } : {}),
@@ -616,6 +1048,9 @@ class MapService {
             name: entry.name ?? names.get(entry.groupId) ?? "",
             toggled: entry.toggled ?? false,
             expanded: entry.expanded ?? false,
+            exclusiveGroup: entry.exclusiveGroup ?? false,
+            infoDocument: entry.infoDocument ?? false,
+            ...(metadataId ? { metadataId } : {}),
             index: entry.index ?? 0,
           },
         });
@@ -633,7 +1068,9 @@ class MapService {
 
   async createMap(data: MapWriteInput, userId?: string) {
     const name =
-      typeof data.name === "string" ? data.name.trim() : String(data.name ?? "");
+      typeof data.name === "string"
+        ? data.name.trim()
+        : String(data.name ?? "");
     if (!name) {
       throw new HajkError(
         HttpStatusCodes.BAD_REQUEST,
@@ -825,7 +1262,7 @@ class MapService {
           data: {
             name,
             locked: source.locked,
-            options: source.options,
+            options: toInputJsonValue(source.options),
             createdBy: userId,
             createdDate: new Date(),
             ...(source.projectionId
@@ -860,63 +1297,147 @@ class MapService {
               active: tool.active,
               index: tool.index,
               target: tool.target,
-              options: tool.options,
+              options: toInputJsonValue(tool.options),
             })),
           });
         }
 
         if (includeGroups) {
-        const uniqueGroupIds = [
-          ...new Set(source.groups.map((entry) => entry.groupId)),
-        ];
-        const groupIdMap = new Map<string, string>();
+          const uniqueGroupIds = [
+            ...new Set(source.groups.map((entry) => entry.groupId)),
+          ];
+          const groupIdMap = new Map<string, string>();
 
-        for (const oldGroupId of uniqueGroupIds) {
-          const group = await tx.group.findUnique({
-            where: { id: oldGroupId },
-            include: {
-              layers: { include: { restrictedToRoles: true } },
-              restrictedToRoles: true,
-            },
-          });
-
-          if (!group) {
-            continue;
-          }
-
-          const newGroup = await tx.group.create({
-            data: {
-              locked: group.locked,
-              name: group.name,
-              internalName: group.internalName,
-              type: group.type,
-              createdBy: userId,
-              createdDate: new Date(),
-            },
-          });
-          groupIdMap.set(oldGroupId, newGroup.id);
-
-          if (group.restrictedToRoles.length > 0) {
-            await tx.roleOnGroup.createMany({
-              data: group.restrictedToRoles.map((role) => ({
-                groupId: newGroup.id,
-                roleId: role.roleId,
-              })),
+          for (const oldGroupId of uniqueGroupIds) {
+            const group = await tx.group.findUnique({
+              where: { id: oldGroupId },
+              include: {
+                layers: { include: { restrictedToRoles: true } },
+                restrictedToRoles: true,
+              },
             });
+
+            if (!group) {
+              continue;
+            }
+
+            const newGroup = await tx.group.create({
+              data: {
+                locked: group.locked,
+                name: group.name,
+                internalName: group.internalName,
+                type: group.type,
+                createdBy: userId,
+                createdDate: new Date(),
+              },
+            });
+            groupIdMap.set(oldGroupId, newGroup.id);
+
+            if (group.restrictedToRoles.length > 0) {
+              await tx.roleOnGroup.createMany({
+                data: group.restrictedToRoles.map((role) => ({
+                  groupId: newGroup.id,
+                  roleId: role.roleId,
+                })),
+              });
+            }
+
+            for (const layer of group.layers) {
+              const createdLayer = await tx.layerInstance.create({
+                data: {
+                  displayLayerId: layer.displayLayerId,
+                  searchLayerId: layer.searchLayerId,
+                  editingLayerId: layer.editingLayerId,
+                  mapId: newMap.id,
+                  groupId: newGroup.id,
+                  usage: layer.usage,
+                  infoClickActive: layer.infoClickActive,
+                  visibleAtStart: layer.visibleAtStart,
+                  zIndex: layer.zIndex,
+                  options: toInputJsonValue(layer.options),
+                },
+              });
+
+              if (layer.restrictedToRoles.length > 0) {
+                await tx.roleOnLayerInstance.createMany({
+                  data: layer.restrictedToRoles.map((role) => ({
+                    layerInstanceId: createdLayer.id,
+                    roleId: role.roleId,
+                  })),
+                });
+              }
+            }
           }
 
-          for (const layer of group.layers) {
+          const groupsOnMapsIdMap = new Map<string, string>();
+          const pendingGroupsOnMaps = [...source.groups];
+
+          while (pendingGroupsOnMaps.length > 0) {
+            const batch = pendingGroupsOnMaps.filter(
+              (entry) =>
+                !entry.parentGroupId ||
+                groupsOnMapsIdMap.has(entry.parentGroupId)
+            );
+
+            if (batch.length === 0) {
+              throw new HajkError(
+                HttpStatusCodes.BAD_REQUEST,
+                "Invalid groups-on-maps parent references in source map.",
+                HajkStatusCodes.INVALID_REQUEST_BODY
+              );
+            }
+
+            for (const entry of batch) {
+              const newGroupOnMapId = randomUUID();
+              const mappedGroupId = groupIdMap.get(entry.groupId);
+
+              if (!mappedGroupId) {
+                throw new HajkError(
+                  HttpStatusCodes.BAD_REQUEST,
+                  `Group "${entry.groupId}" referenced by map "${sourceMapName}" could not be duplicated.`,
+                  HajkStatusCodes.INVALID_REQUEST_BODY
+                );
+              }
+
+              await tx.groupsOnMaps.create({
+                data: {
+                  id: newGroupOnMapId,
+                  mapName: name,
+                  groupId: mappedGroupId,
+                  parentGroupId: entry.parentGroupId
+                    ? (groupsOnMapsIdMap.get(entry.parentGroupId) ?? null)
+                    : null,
+                  usage: entry.usage,
+                  name: entry.name,
+                  toggled: entry.toggled,
+                  expanded: entry.expanded,
+                },
+              });
+              groupsOnMapsIdMap.set(entry.id, newGroupOnMapId);
+            }
+
+            for (const entry of batch) {
+              const index = pendingGroupsOnMaps.indexOf(entry);
+              if (index !== -1) {
+                pendingGroupsOnMaps.splice(index, 1);
+              }
+            }
+          }
+        }
+
+        if (includeLayers) {
+          for (const layer of source.layers) {
             const createdLayer = await tx.layerInstance.create({
               data: {
                 displayLayerId: layer.displayLayerId,
                 searchLayerId: layer.searchLayerId,
                 editingLayerId: layer.editingLayerId,
-                groupId: newGroup.id,
+                mapId: newMap.id,
                 usage: layer.usage,
                 infoClickActive: layer.infoClickActive,
                 visibleAtStart: layer.visibleAtStart,
                 zIndex: layer.zIndex,
-                options: layer.options,
+                options: toInputJsonValue(layer.options),
               },
             });
 
@@ -931,89 +1452,6 @@ class MapService {
           }
         }
 
-        const groupsOnMapsIdMap = new Map<string, string>();
-        const pendingGroupsOnMaps = [...source.groups];
-
-        while (pendingGroupsOnMaps.length > 0) {
-          const batch = pendingGroupsOnMaps.filter(
-            (entry) =>
-              !entry.parentGroupId ||
-              groupsOnMapsIdMap.has(entry.parentGroupId)
-          );
-
-          if (batch.length === 0) {
-            throw new HajkError(
-              HttpStatusCodes.BAD_REQUEST,
-              "Invalid groups-on-maps parent references in source map.",
-              HajkStatusCodes.INVALID_REQUEST_BODY
-            );
-          }
-
-          for (const entry of batch) {
-            const newGroupOnMapId = randomUUID();
-            const mappedGroupId = groupIdMap.get(entry.groupId);
-
-            if (!mappedGroupId) {
-              throw new HajkError(
-                HttpStatusCodes.BAD_REQUEST,
-                `Group "${entry.groupId}" referenced by map "${sourceMapName}" could not be duplicated.`,
-                HajkStatusCodes.INVALID_REQUEST_BODY
-              );
-            }
-
-            await tx.groupsOnMaps.create({
-              data: {
-                id: newGroupOnMapId,
-                mapName: name,
-                groupId: mappedGroupId,
-                parentGroupId: entry.parentGroupId
-                  ? (groupsOnMapsIdMap.get(entry.parentGroupId) ?? null)
-                  : null,
-                usage: entry.usage,
-                name: entry.name,
-                toggled: entry.toggled,
-                expanded: entry.expanded,
-              },
-            });
-            groupsOnMapsIdMap.set(entry.id, newGroupOnMapId);
-          }
-
-          for (const entry of batch) {
-            const index = pendingGroupsOnMaps.indexOf(entry);
-            if (index !== -1) {
-              pendingGroupsOnMaps.splice(index, 1);
-            }
-          }
-        }
-        }
-
-        if (includeLayers) {
-        for (const layer of source.layers) {
-          const createdLayer = await tx.layerInstance.create({
-            data: {
-              displayLayerId: layer.displayLayerId,
-              searchLayerId: layer.searchLayerId,
-              editingLayerId: layer.editingLayerId,
-              mapId: newMap.id,
-              usage: layer.usage,
-              infoClickActive: layer.infoClickActive,
-              visibleAtStart: layer.visibleAtStart,
-              zIndex: layer.zIndex,
-              options: layer.options,
-            },
-          });
-
-          if (layer.restrictedToRoles.length > 0) {
-            await tx.roleOnLayerInstance.createMany({
-              data: layer.restrictedToRoles.map((role) => ({
-                layerInstanceId: createdLayer.id,
-                roleId: role.roleId,
-              })),
-            });
-          }
-        }
-        }
-
         // Documents now belong to Tool instances, not maps.
         // When tools are shared via ToolsOnMaps (above), their documents
         // are automatically available on the duplicated map. No copy needed.
@@ -1026,7 +1464,7 @@ class MapService {
               owner: theme.owner,
               description: theme.description,
               keywords: theme.keywords,
-              data: theme.data,
+              data: toInputJsonValue(theme.data),
               createdBy: userId,
               createdDate: new Date(),
               lastSavedBy: userId,

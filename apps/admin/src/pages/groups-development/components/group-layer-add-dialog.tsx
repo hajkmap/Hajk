@@ -35,6 +35,10 @@ interface GroupLayerAddDialogProps {
   layers: Layer[];
   placedGroupIds: Set<string>;
   placedLayerIds: Set<string>;
+  /** Background baselayer ids — excluded from the Kartlager add list. */
+  backgroundLayerIds?: Set<string>;
+  /** Only these layer ids may be added (Lager-tab active FOREGROUND). */
+  activeForegroundLayerIds?: Set<string> | null;
   excludeGroupSourceId?: string;
   allowLayers?: boolean;
 }
@@ -48,6 +52,8 @@ export default function GroupLayerAddDialog({
   layers,
   placedGroupIds,
   placedLayerIds,
+  backgroundLayerIds,
+  activeForegroundLayerIds = null,
   excludeGroupSourceId,
   allowLayers = true,
 }: GroupLayerAddDialogProps) {
@@ -68,11 +74,22 @@ export default function GroupLayerAddDialog({
     return layers
       .filter(
         (layer) =>
+          (layer.layerKind ?? "display") === "display" &&
+          !backgroundLayerIds?.has(layer.id) &&
+          (activeForegroundLayerIds == null ||
+            activeForegroundLayerIds.has(layer.id)) &&
           !placedLayerIds.has(layer.id) &&
           layer.name.toLowerCase().includes(normalizedSearch),
       )
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [allowLayers, layers, normalizedSearch, placedLayerIds]);
+  }, [
+    activeForegroundLayerIds,
+    allowLayers,
+    backgroundLayerIds,
+    layers,
+    normalizedSearch,
+    placedLayerIds,
+  ]);
 
   const availableGroups = useMemo(() => {
     return groups

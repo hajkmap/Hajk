@@ -17,10 +17,10 @@ import type { Tool } from "../../../api/tools";
 import { getUpdateGroupErrorMessage } from "../../groups/utils/group-errors";
 import type {
   CatalogDragItem,
+  ClientLayerSwitcherGroup,
   GroupDisplaySettings,
   GroupFormValues,
   GroupLayerTreeNode,
-  KartlagerDraft,
   LayerDisplaySettings,
   LayerFormValues,
   MoveZoneItem,
@@ -34,13 +34,19 @@ import {
 } from "../types";
 import { toDisplaySettings, toFormValues } from "../utils/group-form";
 import {
-  buildLayerswitcherOptionsWithGroups,
   clientGroupsToLayerSwitcherTree,
   getClientGroupsFromToolOptions,
   hydrateDisplaySettingsFromClientGroups,
+  layerSwitcherDraftComparableSignature,
   nodeModelsToClientGroups,
   serializeClientGroupsJson,
 } from "../utils/client-groups";
+import BackgroundLayersPanel from "./background-layers-panel";
+import DrawOrderPanel from "./draw-order-panel";
+import {
+  buildDrawOrderIds,
+  drawOrdersFromTopToBottom,
+} from "../utils/draw-order";
 import {
   applyDropOnLayerRedirect,
   applySiblingOrderFromFlatTree,
@@ -68,7 +74,9 @@ import LayerFormDialog from "./layer-form-dialog";
 import GroupLayerTreeDropZone from "./group-layer-tree-drop-zone";
 import GroupLayerTreeNodeView from "./group-layer-tree-node";
 import KartlagerMoveZone from "./kartlager-move-zone";
-import LayerSwitcherPreview from "./layer-switcher-preview";
+import LayerSwitcherPreview, {
+  type LayerSwitcherPreviewTab,
+} from "./layer-switcher-preview";
 import { createPortal } from "react-dom";
 
 interface AddDialogTarget {
@@ -78,7 +86,16 @@ interface AddDialogTarget {
   allowLayers: boolean;
 }
 
-export type { KartlagerDraft };
+/** Local draft/state shape — avoids circular type resolution issues. */
+export interface KartlagerDraft {
+  groups: ReturnType<typeof nodeModelsToClientGroups>;
+  baselayers: {
+    layerId: string;
+    visibleAtStart?: boolean;
+    zIndex?: number;
+    infobox?: string;
+  }[];
+}
 
 interface GroupLayerTreeProps {
   /** Map tools for the current map (includes layerswitcher Tool.options). */
@@ -87,10 +104,25 @@ interface GroupLayerTreeProps {
   catalogTools?: Tool[];
   /** Draft/server set of active tool ids — used to pick the active layerswitcher. */
   activeToolIds?: Set<number>;
-  /** Unsaved Kartlager options held by the map settings page (survives tab unmount). */
+  /** DB Kartlager + Bakgrund state (catalog layer ids). */
+  layerSwitcherState?: KartlagerDraft | null;
+  /**
+   * Layers activated on the Lager tab. Kartlager list shows active FOREGROUND
+   * layers; Bakgrund list shows active BACKGROUND layers.
+   */
+  layerActivationRows?: {
+    layerId: string;
+    active: boolean;
+    isBackground: boolean;
+    /** Search/editing are activated on Lager but never appear in Lagerordning. */
+    layerKind?: "display" | "search" | "editing";
+  }[];
+  /** Unsaved Kartlager/Bakgrund draft held by the map settings page. */
   pendingDraft?: KartlagerDraft | null;
-  /** Raised when Kartlager differs from the loaded layerswitcher options.groups. */
+  /** Raised when Kartlager/Bakgrund differs from the loaded DB state. */
   onKartlagerDraftChange?: (draft: KartlagerDraft | null) => void;
+  /** Bumped when Lager checkboxes are reverted to the last committed state. */
+  layerActivationResetKey?: number;
   /** DOM host in FormActionPanel sidebar for the Flyttzon portal. */
   moveZoneHostEl?: HTMLElement | null;
 }
@@ -99,8 +131,11 @@ export default function GroupLayerTree({
   mapTools,
   catalogTools,
   activeToolIds,
+  layerSwitcherState = null,
+  layerActivationRows,
   pendingDraft = null,
   onKartlagerDraftChange,
+  layerActivationResetKey = 0,
   moveZoneHostEl = null,
 }: GroupLayerTreeProps) {
   const { t } = useTranslation();
@@ -129,12 +164,27 @@ export default function GroupLayerTree({
     name: string;
   } | null>(null);
   const [moveZoneItems, setMoveZoneItems] = useState<MoveZoneItem[]>([]);
+  const [previewTab, setPreviewTab] =
+    useState<LayerSwitcherPreviewTab>("layers");
+  const [backgroundOrderedIds, setBackgroundOrderedIds] = useState<string[]>(
+    [],
+  );
+  const [drawOrderOrderedIds, setDrawOrderOrderedIds] = useState<string[]>([]);
   const baselineGroupsJsonRef = useRef<string>("");
-  const loadedLayerswitcherKeyRef = useRef<string | null>(null);
+  const baselineBaselayersJsonRef = useRef<string>("");
+  /** Top→bottom layer ids at last hydrate; used for Ritordning dirty checks. */
+  const baselineDrawOrderIdsRef = useRef<string>("");
+  const loadedLayerSwitcherKeyRef = useRef<string | null>(null);
   const pendingDraftRef = useRef(pendingDraft);
-  pendingDraftRef.current = pendingDraft;
   const onKartlagerDraftChangeRef = useRef(onKartlagerDraftChange);
-  onKartlagerDraftChangeRef.current = onKartlagerDraftChange;
+
+  useEffect(() => {
+    pendingDraftRef.current = pendingDraft;
+  }, [pendingDraft]);
+
+  useEffect(() => {
+    onKartlagerDraftChangeRef.current = onKartlagerDraftChange;
+  }, [onKartlagerDraftChange]);
 
   const { data: groups = [], isLoading: groupsLoading } = useGroups();
   const { data: layers = [], isLoading: layersLoading } = useLayers();
@@ -155,12 +205,187 @@ export default function GroupLayerTree({
     };
   }, [activeLayerswitcher]);
 
-  const activeLayerswitcherGroupsJson = useMemo(
+  const activeLayerIds = useMemo(() => {
+    if (!layerActivationRows) {
+      return null;
+    }
+    return new Set(
+      layerActivationRows
+        .filter(
+          (row) =>
+            row.active && (row.layerKind ?? "display") === "display",
+        )
+        .map((row) => row.layerId),
+    );
+  }, [layerActivationRows]);
+
+  const mapBackgroundLayerIds = useMemo(() => {
+    if (!layerActivationRows) {
+      return new Set<string>();
+    }
+    return new Set(
+      layerActivationRows
+        .filter(
+          (row) =>
+            row.active &&
+            row.isBackground &&
+            (row.layerKind ?? "display") === "display",
+        )
+        .map((row) => row.layerId),
+    );
+  }, [layerActivationRows]);
+
+  const activationBackgroundOrder = useMemo(() => {
+    if (!layerActivationRows) {
+      return null;
+    }
+    return layerActivationRows
+      .filter(
+        (row) =>
+          row.active &&
+          row.isBackground &&
+          (row.layerKind ?? "display") === "display",
+      )
+      .map((row) => row.layerId);
+  }, [layerActivationRows]);
+
+  const effectiveBackgroundOrderedIds = useMemo(() => {
+    // Only layers explicitly placed in the Bakgrund tree. Newly Bakgrund-checked
+    // layers stay in the left catalog until the user drops them here.
+    if (activationBackgroundOrder == null) {
+      return backgroundOrderedIds;
+    }
+    const backgroundIdSet = new Set(activationBackgroundOrder);
+    return backgroundOrderedIds.filter((id) => backgroundIdSet.has(id));
+  }, [activationBackgroundOrder, backgroundOrderedIds]);
+
+  const prevActiveDisplayLayerIdsRef = useRef<Set<string> | null>(null);
+
+  useEffect(() => {
+    if (activeLayerIds == null || loadedLayerSwitcherKeyRef.current == null) {
+      prevActiveDisplayLayerIdsRef.current = activeLayerIds;
+      return;
+    }
+
+    const previous = prevActiveDisplayLayerIdsRef.current;
+    prevActiveDisplayLayerIdsRef.current = activeLayerIds;
+
+    if (previous == null) {
+      return;
+    }
+
+    const deactivated = [...previous].filter((id) => !activeLayerIds.has(id));
+    if (deactivated.length === 0) {
+      return;
+    }
+
+    const deactivatedSet = new Set(deactivated);
+
+    setTreeData((current) => {
+      const next = current.filter((node) => {
+        if (node.data?.kind !== "layer") {
+          return true;
+        }
+        return !deactivatedSet.has(node.data.sourceId);
+      });
+      return next.length === current.length ? current : next;
+    });
+  }, [activeLayerIds]);
+
+  useEffect(() => {
+    prevActiveDisplayLayerIdsRef.current = null;
+  }, [layerActivationResetKey]);
+
+  const activeForegroundLayerIds = useMemo(() => {
+    if (activeLayerIds == null) {
+      return null;
+    }
+    return new Set(
+      [...activeLayerIds].filter((id) => !mapBackgroundLayerIds.has(id)),
+    );
+  }, [activeLayerIds, mapBackgroundLayerIds]);
+
+  const backgroundMode = previewTab === "background";
+  const drawOrderMode = previewTab === "drawOrder";
+
+  const drawOrderLayers = useMemo(() => {
+    const placedLayerIds = collectPlacedSourceIds(treeData).layerIds;
+    return layers
+      .filter((layer) => (layer.layerKind ?? "display") === "display")
+      .filter((layer) => {
+        // Draw order is stored on groups[].layers[] — only Kartlager layers.
+        if (!placedLayerIds.has(layer.id)) {
+          return false;
+        }
+        if (mapBackgroundLayerIds.has(layer.id)) {
+          return false;
+        }
+        if (activeLayerIds != null && !activeLayerIds.has(layer.id)) {
+          return false;
+        }
+        return true;
+      })
+      .map((layer) => ({ id: layer.id, name: layer.name }));
+  }, [activeLayerIds, layers, mapBackgroundLayerIds, treeData]);
+
+  const drawOrderLayersKey = useMemo(
     () =>
-      JSON.stringify(
-        getClientGroupsFromToolOptions(activeLayerswitcherOptions),
-      ),
-    [activeLayerswitcherOptions],
+      drawOrderLayers
+        .map((layer) => layer.id)
+        .sort()
+        .join("|"),
+    [drawOrderLayers],
+  );
+
+  // Preserve user order; append newly eligible layers alphabetically.
+  const effectiveDrawOrderOrderedIds = useMemo(() => {
+    void drawOrderLayersKey;
+    const eligibleIds = new Set(drawOrderLayers.map((layer) => layer.id));
+    const kept = drawOrderOrderedIds.filter((id) => eligibleIds.has(id));
+    const keptSet = new Set(kept);
+    const added = drawOrderLayers
+      .filter((layer) => !keptSet.has(layer.id))
+      .slice()
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+      )
+      .map((layer) => layer.id);
+    return [...kept, ...added];
+  }, [drawOrderLayers, drawOrderLayersKey, drawOrderOrderedIds]);
+
+  const handleDrawOrderIdsChange = useCallback((ids: string[]) => {
+    setDrawOrderOrderedIds(ids);
+    const orders = drawOrdersFromTopToBottom(ids);
+    setLayerDisplaySettings((current) => {
+      const next = { ...current };
+      for (const [layerId, drawOrder] of Object.entries(orders)) {
+        next[layerId] = {
+          ...(next[layerId] ?? DEFAULT_LAYER_DISPLAY_SETTINGS),
+          drawOrder,
+        };
+      }
+      return next;
+    });
+  }, []);
+
+  const serverGroupsFromState = useMemo(
+    () => layerSwitcherState?.groups ?? [],
+    [layerSwitcherState?.groups],
+  );
+  const serverBaselayersFromState = useMemo(
+    () => layerSwitcherState?.baselayers ?? [],
+    [layerSwitcherState?.baselayers],
+  );
+
+  const serverGroupsJson = useMemo(
+    () => JSON.stringify(serverGroupsFromState),
+    [serverGroupsFromState],
+  );
+
+  const serverBaselayersJson = useMemo(
+    () =>
+      JSON.stringify(serverBaselayersFromState.map((entry) => entry.layerId)),
+    [serverBaselayersFromState],
   );
 
   const layerNames = useMemo(() => {
@@ -179,25 +404,28 @@ export default function GroupLayerTree({
     return map;
   }, [groups]);
 
-  // Load Kartlager tree from the active layerswitcher Tool.options.groups
+  // Load Kartlager tree + Bakgrund from DB layerswitcher state (not Tool.options).
+  /* eslint-disable react-hooks/set-state-in-effect -- hydrate local editor state from server/draft */
   useEffect(() => {
-    if (!activeLayerswitcher || !activeLayerswitcherOptions) {
-      loadedLayerswitcherKeyRef.current = null;
+    if (!activeLayerswitcher) {
+      loadedLayerSwitcherKeyRef.current = null;
       baselineGroupsJsonRef.current = "";
+      baselineBaselayersJsonRef.current = "";
       setTreeData([]);
       setVisibleIds(new Set());
       setGroupDisplaySettings({});
       setLayerDisplaySettings({});
+      setBackgroundOrderedIds([]);
+      setDrawOrderOrderedIds([]);
+      baselineDrawOrderIdsRef.current = "";
       setMoveZoneItems([]);
       onKartlagerDraftChangeRef.current?.(null);
       return;
     }
 
-    const loadKey = `${activeLayerswitcher.toolId}:${activeLayerswitcherGroupsJson}`;
+    const loadKey = `${serverGroupsJson}|${serverBaselayersJson}|${layerActivationResetKey}`;
 
-    // Same tool options: only refresh layer labels from the catalog, keep local edits.
-    // Group names stay as stored in options.groups (Kartlager source of truth).
-    if (loadKey === loadedLayerswitcherKeyRef.current) {
+    if (loadKey === loadedLayerSwitcherKeyRef.current) {
       setTreeData((current) => {
         let changed = false;
         const next = current.map((node) => {
@@ -216,9 +444,65 @@ export default function GroupLayerTree({
       return;
     }
 
-    const serverGroups = getClientGroupsFromToolOptions(
-      activeLayerswitcherOptions,
-    );
+    const serverGroupsFromDb = serverGroupsFromState;
+    // Short dual-read fallback while a map still only has Tool.options.groups.
+    const serverGroups =
+      serverGroupsFromDb.length > 0
+        ? serverGroupsFromDb
+        : getClientGroupsFromToolOptions(activeLayerswitcherOptions);
+    const toolBaselayers: {
+      layerId: string;
+      visibleAtStart: boolean;
+      infobox: string;
+    }[] = [];
+    if (
+      activeLayerswitcherOptions &&
+      Array.isArray(activeLayerswitcherOptions.baselayers)
+    ) {
+      for (const entry of activeLayerswitcherOptions.baselayers) {
+        if (typeof entry === "string" || typeof entry === "number") {
+          toolBaselayers.push({
+            layerId: String(entry),
+            visibleAtStart: false,
+            infobox: "",
+          });
+          continue;
+        }
+        if (
+          entry &&
+          typeof entry === "object" &&
+          "id" in entry &&
+          (entry as { id?: unknown }).id != null
+        ) {
+          const record = entry as {
+            id: unknown;
+            visibleAtStart?: unknown;
+            infobox?: unknown;
+          };
+          toolBaselayers.push({
+            layerId: String(record.id),
+            visibleAtStart: record.visibleAtStart === true,
+            infobox: typeof record.infobox === "string" ? record.infobox : "",
+          });
+        }
+      }
+    }
+
+    const serverBaselayers: {
+      layerId: string;
+      visibleAtStart?: boolean;
+      infobox?: string;
+    }[] =
+      serverBaselayersFromState.length > 0
+        ? serverBaselayersFromState.map((entry) => ({
+            layerId: entry.layerId,
+            visibleAtStart: entry.visibleAtStart,
+            infobox:
+              "infobox" in entry && typeof entry.infobox === "string"
+                ? entry.infobox
+                : "",
+          }))
+        : toolBaselayers;
     const serverIntermediate = clientGroupsToLayerSwitcherTree(serverGroups);
     const serverNodes = applySiblingOrderFromFlatTree(
       layerSwitcherTreeToNodeModels(
@@ -229,22 +513,40 @@ export default function GroupLayerTree({
       ),
     );
     const serverHydrated = hydrateDisplaySettingsFromClientGroups(serverGroups);
+    const serverBaselayerSettings: Record<string, LayerDisplaySettings> = {};
+    for (const entry of serverBaselayers) {
+      serverBaselayerSettings[entry.layerId] = {
+        layerVisibleAtStart: entry.visibleAtStart ?? false,
+        layerInfoBox: entry.infobox ?? "",
+      };
+    }
 
-    // Compare dirty state against the same serializer used on save.
     baselineGroupsJsonRef.current = serializeClientGroupsJson(
       serverNodes,
       serverHydrated.groupDisplaySettings,
-      serverHydrated.layerDisplaySettings,
+      {
+        ...serverHydrated.layerDisplaySettings,
+        ...serverBaselayerSettings,
+      },
+    );
+    baselineBaselayersJsonRef.current = JSON.stringify(
+      serverBaselayers.map((entry) => ({
+        layerId: entry.layerId,
+        visibleAtStart: entry.visibleAtStart ?? false,
+        infobox: entry.infobox ?? "",
+      })),
     );
 
     const pending = pendingDraftRef.current;
-    const restoringDraft = pending?.toolId === activeLayerswitcher.toolId;
-    const optionsToLoad = restoringDraft
-      ? pending.options
-      : activeLayerswitcherOptions;
+    const restoringDraft = pending != null;
+    const groupsToLoad = restoringDraft
+      ? pending.groups
+      : serverGroups;
+    const baselayersToLoad = restoringDraft
+      ? pending.baselayers
+      : serverBaselayers;
 
-    const clientGroups = getClientGroupsFromToolOptions(optionsToLoad);
-    const intermediate = clientGroupsToLayerSwitcherTree(clientGroups);
+    const intermediate = clientGroupsToLayerSwitcherTree(groupsToLoad);
     const nodes = applySiblingOrderFromFlatTree(
       layerSwitcherTreeToNodeModels(
         intermediate,
@@ -253,64 +555,167 @@ export default function GroupLayerTree({
         layerNames,
       ),
     );
-    const hydrated = hydrateDisplaySettingsFromClientGroups(clientGroups);
+    const hydrated = hydrateDisplaySettingsFromClientGroups(groupsToLoad);
+    const baselayerSettings: Record<string, LayerDisplaySettings> = {};
+    for (const entry of baselayersToLoad) {
+      baselayerSettings[entry.layerId] = {
+        layerVisibleAtStart: entry.visibleAtStart ?? false,
+        layerInfoBox:
+          "infobox" in entry && typeof entry.infobox === "string"
+            ? entry.infobox
+            : "",
+      };
+    }
 
-    loadedLayerswitcherKeyRef.current = loadKey;
+    loadedLayerSwitcherKeyRef.current = loadKey;
     setTreeData(nodes);
     setVisibleIds(hydrated.visibleIds);
     setGroupDisplaySettings(hydrated.groupDisplaySettings);
-    setLayerDisplaySettings(hydrated.layerDisplaySettings);
+    setLayerDisplaySettings({
+      ...hydrated.layerDisplaySettings,
+      ...baselayerSettings,
+    });
+    setBackgroundOrderedIds(baselayersToLoad.map((entry) => entry.layerId));
+    const placedLayerIds = collectPlacedSourceIds(nodes).layerIds;
+    const drawOrderLayersForLoad = [...placedLayerIds]
+      .filter((id) => layerNames.has(id))
+      .map((id) => ({
+        id,
+        name: layerNames.get(id) ?? id,
+      }));
+    const drawOrderById: Record<string, number | undefined> = {};
+    for (const layer of drawOrderLayersForLoad) {
+      drawOrderById[layer.id] =
+        hydrated.layerDisplaySettings[layer.id]?.drawOrder;
+    }
+    setDrawOrderOrderedIds(
+      buildDrawOrderIds(drawOrderLayersForLoad, drawOrderById),
+    );
+    baselineDrawOrderIdsRef.current = buildDrawOrderIds(
+      drawOrderLayersForLoad,
+      drawOrderById,
+    ).join("|");
     setMoveZoneItems([]);
   }, [
     activeLayerswitcher,
     activeLayerswitcherOptions,
-    activeLayerswitcherGroupsJson,
     groupNames,
     layerNames,
+    serverBaselayersFromState,
+    serverBaselayersJson,
+    serverGroupsFromState,
+    serverGroupsJson,
+    layerActivationResetKey,
   ]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
-  // Notify parent when Kartlager edits differ from the loaded Tool.options.groups
+  // Notify parent when Kartlager / Bakgrund / Ritordning edits differ from DB baseline
   useEffect(() => {
-    if (!activeLayerswitcher || !activeLayerswitcherOptions) {
+    if (!activeLayerswitcher) {
       onKartlagerDraftChangeRef.current?.(null);
       return;
+    }
+
+    // Keep groups[].layers[].drawOrder aligned with the Ritordning list whenever
+    // that list differs from the hydrated baseline (enables Spara on reorder).
+    const drawOrderSig = drawOrderOrderedIds.join("|");
+    const settingsForGroups = { ...layerDisplaySettings };
+    if (
+      drawOrderSig !== baselineDrawOrderIdsRef.current &&
+      effectiveDrawOrderOrderedIds.length > 0
+    ) {
+      const orders = drawOrdersFromTopToBottom(effectiveDrawOrderOrderedIds);
+      for (const [layerId, drawOrder] of Object.entries(orders)) {
+        settingsForGroups[layerId] = {
+          ...(settingsForGroups[layerId] ?? DEFAULT_LAYER_DISPLAY_SETTINGS),
+          drawOrder,
+        };
+      }
     }
 
     const groupsPayload = nodeModelsToClientGroups(
       treeData,
       groupDisplaySettings,
-      layerDisplaySettings,
-    );
-    const groupsJson = serializeClientGroupsJson(
-      treeData,
-      groupDisplaySettings,
-      layerDisplaySettings,
+      settingsForGroups,
     );
 
-    if (groupsJson === baselineGroupsJsonRef.current) {
+    const baselayersPayload = effectiveBackgroundOrderedIds.map(
+      (layerId, index) => ({
+        layerId,
+        zIndex: index,
+        visibleAtStart:
+          layerDisplaySettings[layerId]?.layerVisibleAtStart ?? false,
+        infobox: layerDisplaySettings[layerId]?.layerInfoBox ?? "",
+      }),
+    );
+
+    const currentSignature = layerSwitcherDraftComparableSignature(
+      { groups: groupsPayload, baselayers: baselayersPayload },
+      activeLayerIds,
+    );
+
+    let baselineGroups: ClientLayerSwitcherGroup[] = [];
+    try {
+      baselineGroups = JSON.parse(
+        baselineGroupsJsonRef.current || "[]",
+      ) as ClientLayerSwitcherGroup[];
+    } catch {
+      baselineGroups = [];
+    }
+
+    let baselineBaselayers: {
+      layerId: string;
+      visibleAtStart?: boolean;
+      infobox?: string;
+    }[] = [];
+    try {
+      baselineBaselayers = JSON.parse(
+        baselineBaselayersJsonRef.current || "[]",
+      ) as {
+        layerId: string;
+        visibleAtStart?: boolean;
+        infobox?: string;
+      }[];
+    } catch {
+      baselineBaselayers = [];
+    }
+
+    const baselineSignature = layerSwitcherDraftComparableSignature(
+      {
+        groups: baselineGroups,
+        baselayers: baselineBaselayers,
+      },
+      activeLayerIds,
+    );
+
+    if (currentSignature === baselineSignature) {
       onKartlagerDraftChangeRef.current?.(null);
       return;
     }
 
     onKartlagerDraftChangeRef.current?.({
-      toolId: activeLayerswitcher.toolId,
-      options: buildLayerswitcherOptionsWithGroups(
-        activeLayerswitcherOptions,
-        groupsPayload,
-      ),
+      groups: groupsPayload,
+      baselayers: baselayersPayload,
     });
   }, [
     treeData,
     groupDisplaySettings,
     layerDisplaySettings,
+    effectiveBackgroundOrderedIds,
+    effectiveDrawOrderOrderedIds,
+    drawOrderOrderedIds,
+    activeLayerIds,
     activeLayerswitcher,
-    activeLayerswitcherOptions,
   ]);
 
   const placedIds = useMemo(() => {
     const fromTree = collectPlacedSourceIds(treeData);
     const groupIds = new Set(fromTree.groupIds);
     const layerIds = new Set(fromTree.layerIds);
+
+    for (const layerId of effectiveBackgroundOrderedIds) {
+      layerIds.add(layerId);
+    }
 
     for (const item of moveZoneItems) {
       for (const node of item.nodes) {
@@ -323,7 +728,7 @@ export default function GroupLayerTree({
     }
 
     return { groupIds, layerIds };
-  }, [treeData, moveZoneItems]);
+  }, [effectiveBackgroundOrderedIds, treeData, moveZoneItems]);
   const visibleNodeIds = useMemo(() => {
     if (!search.trim()) {
       return null;
@@ -447,6 +852,9 @@ export default function GroupLayerTree({
       const itemType = options.monitor.getItemType();
 
       if (itemType === CATALOG_DRAG_TYPE) {
+        if (backgroundMode) {
+          return;
+        }
         addCatalogItem(options.monitor.getItem() as CatalogDragItem, {
           dropTargetId: options.dropTargetId,
           dropTarget: options.dropTarget,
@@ -489,7 +897,7 @@ export default function GroupLayerTree({
 
       setTreeData(applySiblingOrderFromFlatTree(updatedTree));
     },
-    [addCatalogItem],
+    [addCatalogItem, backgroundMode],
   );
 
   const handleDropToMoveZone = useCallback(
@@ -870,6 +1278,10 @@ export default function GroupLayerTree({
           layers={layers}
           placedGroupIds={placedIds.groupIds}
           placedLayerIds={placedIds.layerIds}
+          activeLayerIds={activeLayerIds}
+          backgroundLayerIds={mapBackgroundLayerIds}
+          backgroundMode={backgroundMode}
+          drawOrderMode={drawOrderMode}
           groupDisplaySettings={groupDisplaySettings}
           onGroupDisplaySettingsChange={(groupId, settings) => {
             setGroupDisplaySettings((current) => ({
@@ -889,6 +1301,8 @@ export default function GroupLayerTree({
         <LayerSwitcherPreview
           search={search}
           onSearchChange={setSearch}
+          activeTab={previewTab}
+          onActiveTabChange={setPreviewTab}
           showFilter={previewOptions.showFilter}
           showQuickAccess={previewOptions.showQuickAccess}
           showDrawOrderView={previewOptions.showDrawOrderView}
@@ -903,6 +1317,29 @@ export default function GroupLayerTree({
                 {t("common.loading")}
               </Typography>
             </Box>
+          ) : drawOrderMode ? (
+            <DrawOrderPanel
+              layers={drawOrderLayers}
+              orderedIds={effectiveDrawOrderOrderedIds}
+              onOrderedIdsChange={handleDrawOrderIdsChange}
+              search={search}
+            />
+          ) : backgroundMode ? (
+            <BackgroundLayersPanel
+              layers={layers
+                .filter((layer) => (layer.layerKind ?? "display") === "display")
+                .map((layer) => ({ id: layer.id, name: layer.name }))}
+              orderedIds={effectiveBackgroundOrderedIds}
+              onOrderedIdsChange={setBackgroundOrderedIds}
+              layerDisplaySettings={layerDisplaySettings}
+              onLayerDisplaySettingsChange={(layerId, settings) => {
+                setLayerDisplaySettings((current) => ({
+                  ...current,
+                  [layerId]: settings,
+                }));
+              }}
+              search={search}
+            />
           ) : visibleNodeIds?.size === 0 ? (
             <Box sx={{ p: 2 }}>
               <Typography variant="body2" color="text.secondary">
@@ -1004,6 +1441,8 @@ export default function GroupLayerTree({
           layers={layers}
           placedGroupIds={placedIds.groupIds}
           placedLayerIds={placedIds.layerIds}
+          backgroundLayerIds={mapBackgroundLayerIds}
+          activeForegroundLayerIds={activeForegroundLayerIds}
           excludeGroupSourceId={addDialogTarget?.excludeGroupSourceId}
           allowLayers={addDialogTarget?.allowLayers ?? true}
         />
@@ -1018,7 +1457,9 @@ export default function GroupLayerTree({
             }
             setEditDialogTarget(null);
           }}
-          onSubmit={handleTreeGroupFormSubmit}
+          onSubmit={(values) => {
+            void handleTreeGroupFormSubmit(values);
+          }}
           isSubmitting={isUpdatingGroup}
         />
 
