@@ -30,7 +30,6 @@ export default function LayerSwitcherRenderer({
 }: LayerSwitcherRendererProps) {
   const { t } = useTranslation();
   const options = tool?.options;
-  console.log("tool", tool);
   const { control: localControl, reset } = useForm<FieldValues>({
     mode: "onChange",
     reValidateMode: "onChange",

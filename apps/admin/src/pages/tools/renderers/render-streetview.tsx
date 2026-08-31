@@ -12,9 +12,12 @@ interface StreetViewRendererProps {
   control?: Control<FieldValues>;
 }
 
-export default function StreetViewRenderer({ tool }: StreetViewRendererProps) {
+export default function StreetViewRenderer({
+  tool,
+  control: parentControl,
+}: StreetViewRendererProps) {
   const { t } = useTranslation();
-  const { control } = useForm<FieldValues>({
+  const { control: localControl } = useForm<FieldValues>({
     defaultValues: {
       type: tool?.type ?? "streetview",
       ...(tool?.options
@@ -24,6 +27,10 @@ export default function StreetViewRenderer({ tool }: StreetViewRendererProps) {
         : {}),
     },
   });
+
+  // Use the parent form's control when provided (keeps these fields in the
+  // page's single save flow); otherwise fall back to a local, standalone form.
+  const control = parentControl ?? localControl;
 
   return (
     <>
@@ -73,11 +80,30 @@ export default function StreetViewRenderer({ tool }: StreetViewRendererProps) {
           {/* Tillträde */}
           <FormFieldRow>
             <Controller
-              name="options.access"
+              name="options.visibleForGroups"
               control={control}
-              defaultValue={tool?.options?.access ?? ""}
+              defaultValue={
+                Array.isArray(tool?.options?.visibleForGroups)
+                  ? (tool.options.visibleForGroups as string[]).join(",")
+                  : ""
+              }
               render={({ field }) => (
-                <TextField label={t("tools.access")} fullWidth {...field} />
+                <TextField
+                  label={t("tools.visibleForGroups")}
+                  fullWidth
+                  value={
+                    Array.isArray(field.value)
+                      ? (field.value as string[]).join(",")
+                      : ((field.value as string) ?? "")
+                  }
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value
+                        ? e.target.value.split(",").map((s) => s.trim())
+                        : [],
+                    )
+                  }
+                />
               )}
             />
           </FormFieldRow>

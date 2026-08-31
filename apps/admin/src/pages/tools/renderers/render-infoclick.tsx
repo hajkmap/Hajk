@@ -12,23 +12,25 @@ import FormFieldGrid, {
   FormFieldRow,
 } from "../../../components/form-components/form-field-grid";
 import FormAccordion from "../../../components/form-components/form-accordion";
-import FormContainer from "../../../components/form-components/form-container";
 import { useTranslation } from "react-i18next";
 import { Control, Controller, FieldValues, useForm } from "react-hook-form";
-import { SketchPicker } from "react-color";
+import { SketchPicker, type RGBColor } from "react-color";
 import { Tool } from "../../../api/tools";
 
-function optionValueToFormString(value: unknown): string {
-  if (value == null) return "";
+const DEFAULT_STROKE_COLOR: RGBColor = { r: 200, g: 0, b: 0, a: 0.7 };
+const DEFAULT_FILL_COLOR: RGBColor = { r: 255, g: 0, b: 0, a: 0.1 };
+
+function toRgbColor(value: unknown, fallback: RGBColor): RGBColor {
   if (
-    typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "boolean" ||
-    typeof value === "bigint"
+    value &&
+    typeof value === "object" &&
+    "r" in value &&
+    "g" in value &&
+    "b" in value
   ) {
-    return String(value);
+    return value as RGBColor;
   }
-  return "";
+  return fallback;
 }
 
 interface InfoClickRendererProps {
@@ -36,53 +38,43 @@ interface InfoClickRendererProps {
   control?: Control<FieldValues>;
 }
 
-export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
+export default function InfoClickRenderer({
+  tool,
+  control: parentControl,
+}: InfoClickRendererProps) {
   const { t } = useTranslation();
-  const { control } = useForm<FieldValues>({
+  const anchor = Array.isArray(tool?.options?.anchor)
+    ? (tool.options.anchor as [number, number])
+    : [0.5, 1];
+
+  const { control: localControl } = useForm<FieldValues>({
     defaultValues: {
-      type: tool?.type ?? "",
+      type: tool?.type ?? "infoclick",
       ...(tool?.options
         ? Object.fromEntries(
-            Object.entries(tool.options).map(([k, v]) => [
-              `options.${k}`,
-              optionValueToFormString(v),
-            ]),
+            Object.entries(tool.options).map(([k, v]) => [`options.${k}`, v]),
           )
         : {}),
+      "options.anchor.0": anchor[0],
+      "options.anchor.1": anchor[1],
     },
-    mode: "onChange",
-    reValidateMode: "onChange",
   });
 
+  // Use the parent form's control when provided (keeps these fields in the
+  // page's single save flow); otherwise fall back to a local, standalone form.
+  const control = parentControl ?? localControl;
+
   return (
-    <FormContainer>
+    <>
       <FormPanel title={t("common.information")}>
         <FormFieldGrid>
           <FormFieldRow>
             <Controller
-              name="options.displayName"
+              name="options.title"
               control={control}
               defaultValue={tool?.options?.title ?? ""}
               render={({ field }) => (
-                <TextField
-                  label={t("tools.title")}
-                  fullWidth
-                  {...field}
-                />
-              )}
-            />
-          </FormFieldRow>
-          <FormFieldRow>
-            <Controller
-              name="options.customTitleForMap"
-              control={control}
-              defaultValue={tool?.options?.customTitleForMap ?? ""}
-              render={({ field }) => (
-                <TextField
-                  label={t("tools.customTitleForMap")}
-                  fullWidth
-                  {...field}
-                />
+                <TextField label={t("tools.title")} fullWidth {...field} />
               )}
             />
           </FormFieldRow>
@@ -113,7 +105,12 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
                   fullWidth
                   multiline
                   rows={4}
-                  {...field}
+                  value={
+                    typeof field.value === "string" && field.value
+                      ? atob(field.value)
+                      : ""
+                  }
+                  onChange={(e) => field.onChange(btoa(e.target.value))}
                 />
               )}
             />
@@ -136,6 +133,35 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
               )}
             />
           </FormFieldRow>
+          <FormFieldRow>
+            <Controller
+              name="options.visibleForGroups"
+              control={control}
+              defaultValue={
+                Array.isArray(tool?.options?.visibleForGroups)
+                  ? (tool.options.visibleForGroups as string[]).join(",")
+                  : ""
+              }
+              render={({ field }) => (
+                <TextField
+                  label={t("tools.visibleForGroups")}
+                  fullWidth
+                  value={
+                    Array.isArray(field.value)
+                      ? (field.value as string[]).join(",")
+                      : ((field.value as string) ?? "")
+                  }
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value
+                        ? e.target.value.split(",").map((s) => s.trim())
+                        : [],
+                    )
+                  }
+                />
+              )}
+            />
+          </FormFieldRow>
         </FormFieldGrid>
       </FormPanel>
 
@@ -143,19 +169,9 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
         <FormFieldGrid>
           <FormFieldRow>
             <Controller
-              name="options.access"
+              name="options.allowDangerousHtml"
               control={control}
-              defaultValue={tool?.options?.description ?? ""}
-              render={({ field }) => (
-                <TextField label={t("tools.access")} fullWidth {...field} />
-              )}
-            />
-          </FormFieldRow>
-          <FormFieldRow>
-            <Controller
-              name="options.allowHtml"
-              control={control}
-              defaultValue={Boolean(tool?.options?.allowHtml ?? "")}
+              defaultValue={tool?.options?.allowDangerousHtml ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={
@@ -171,9 +187,9 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="options.useNewInfoClick"
+              name="options.useNewInfoclick"
               control={control}
-              defaultValue={Boolean(tool?.options?.useNewInfoClick ?? "")}
+              defaultValue={Boolean(tool?.options?.useNewInfoclick)}
               render={({ field }) => (
                 <FormControlLabel
                   control={
@@ -189,9 +205,9 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="options.allowMoreCharacters"
+              name="options.useNewPlaceholderMatching"
               control={control}
-              defaultValue={Boolean(tool?.options?.allowMoreCharacters ?? "")}
+              defaultValue={Boolean(tool?.options?.useNewPlaceholderMatching)}
               render={({ field }) => (
                 <FormControlLabel
                   control={
@@ -207,9 +223,9 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="options.markFeatures"
+              name="options.useLevel1FeatureHighlight"
               control={control}
-              defaultValue={Boolean(tool?.options?.markFeatures ?? "")}
+              defaultValue={Boolean(tool?.options?.useLevel1FeatureHighlight)}
               render={({ field }) => (
                 <FormControlLabel
                   control={
@@ -225,9 +241,9 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="options.urlVerificationActive"
+              name="options.transformLinkUri"
               control={control}
-              defaultValue={!!tool?.options?.urlVerificationActive}
+              defaultValue={tool?.options?.transformLinkUri ?? true}
               render={({ field }) => (
                 <FormControlLabel
                   control={
@@ -248,23 +264,22 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
         <FormFieldGrid>
           <FormFieldRow>
             <FormControl fullWidth>
-              <InputLabel id="linkColor" shrink>
-                {t("tools.linkColor")}
+              <InputLabel id="linksColor" shrink>
+                {t("tools.linksColor")}
               </InputLabel>
               <Controller
-                name="options.linkColor"
+                name="options.linksColor"
                 control={control}
+                defaultValue={tool?.options?.linksColor ?? "primary"}
                 render={({ field }) => (
                   <Select
-                    labelId="linkColor"
-                    label={t("tools.linkColor")}
-                    defaultValue="1"
-                    displayEmpty
+                    labelId="linksColor"
+                    label={t("tools.linksColor")}
                     {...field}
                   >
-                    <MenuItem value={"1"}>Primary</MenuItem>
-                    <MenuItem value={"2"}>Secondary</MenuItem>
-                    <MenuItem value={"3"}>Inherit</MenuItem>
+                    <MenuItem value="primary">Primary</MenuItem>
+                    <MenuItem value="secondary">Secondary</MenuItem>
+                    <MenuItem value="inherit">Inherit</MenuItem>
                   </Select>
                 )}
               />
@@ -272,23 +287,22 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
           </FormFieldRow>
           <FormFieldRow>
             <FormControl fullWidth>
-              <InputLabel id="underlined" shrink>
-                {t("tools.underlined")}
+              <InputLabel id="linksUnderline" shrink>
+                {t("tools.linksUnderline")}
               </InputLabel>
               <Controller
-                name="options.underlined"
+                name="options.linksUnderline"
                 control={control}
+                defaultValue={tool?.options?.linksUnderline ?? "always"}
                 render={({ field }) => (
                   <Select
-                    labelId="underlined"
-                    label={t("tools.underlined")}
-                    defaultValue="1"
-                    displayEmpty
+                    labelId="linksUnderline"
+                    label={t("tools.linksUnderline")}
                     {...field}
                   >
-                    <MenuItem value={"1"}>Always</MenuItem>
-                    <MenuItem value={"2"}>Hover</MenuItem>
-                    <MenuItem value={"3"}>No</MenuItem>
+                    <MenuItem value="always">Always</MenuItem>
+                    <MenuItem value="hover">Hover</MenuItem>
+                    <MenuItem value="no">No</MenuItem>
                   </Select>
                 )}
               />
@@ -301,9 +315,9 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
         <FormFieldGrid>
           <FormFieldRow>
             <Controller
-              name="options.imageUrl"
+              name="options.src"
               control={control}
-              defaultValue={tool?.options?.imageUrl ?? ""}
+              defaultValue={tool?.options?.src ?? ""}
               render={({ field }) => (
                 <TextField label={t("tools.imageUrl")} fullWidth {...field} />
               )}
@@ -312,12 +326,12 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
 
           <FormFieldRow>
             <Controller
-              name="options.iconOffsetX"
+              name="options.anchor.0"
               control={control}
-              defaultValue={tool?.options?.iconOffsetX ?? ""}
+              defaultValue={anchor[0]}
               render={({ field }) => (
                 <TextField
-                  label={t("tools.iconOffsetX")}
+                  label={t("tools.iconAnchorX")}
                   fullWidth
                   type="number"
                   {...field}
@@ -328,12 +342,12 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
 
           <FormFieldRow>
             <Controller
-              name="options.iconOffsetY"
+              name="options.anchor.1"
               control={control}
-              defaultValue={tool?.options?.iconOffsetY ?? ""}
+              defaultValue={anchor[1]}
               render={({ field }) => (
                 <TextField
-                  label={t("tools.iconOffsetY")}
+                  label={t("tools.iconAnchorY")}
                   fullWidth
                   type="number"
                   {...field}
@@ -344,9 +358,9 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
 
           <FormFieldRow>
             <Controller
-              name="options.iconScale"
+              name="options.scale"
               control={control}
-              defaultValue={tool?.options?.iconScale ?? ""}
+              defaultValue={tool?.options?.scale ?? 0.15}
               render={({ field }) => (
                 <TextField
                   label={t("tools.iconScale")}
@@ -360,12 +374,12 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
 
           <FormFieldRow>
             <Controller
-              name="options.borderWidth"
+              name="options.strokeWidth"
               control={control}
-              defaultValue={tool?.options?.borderWidth ?? ""}
+              defaultValue={tool?.options?.strokeWidth ?? 4}
               render={({ field }) => (
                 <TextField
-                  label={t("tools.borderWidthPx")}
+                  label={t("tools.strokeWidth")}
                   fullWidth
                   type="number"
                   {...field}
@@ -376,19 +390,20 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
 
           <FormFieldRow>
             <FormControl fullWidth>
-              <InputLabel id="borderColor" shrink>
-                {t("tools.borderColor")}
+              <InputLabel id="strokeColor" shrink>
+                {t("tools.strokeColor")}
               </InputLabel>
               <Controller
-                name="options.borderColor"
+                name="options.strokeColor"
                 control={control}
+                defaultValue={toRgbColor(
+                  tool?.options?.strokeColor,
+                  DEFAULT_STROKE_COLOR,
+                )}
                 render={({ field }) => (
                   <SketchPicker
-                    width="300px"
-                    color={
-                      typeof field.value === "string" ? field.value : "#000000"
-                    }
-                    onChange={(color) => field.onChange(color.hex)}
+                    color={toRgbColor(field.value, DEFAULT_STROKE_COLOR)}
+                    onChangeComplete={(color) => field.onChange(color.rgb)}
                   />
                 )}
               />
@@ -403,13 +418,14 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
               <Controller
                 name="options.fillColor"
                 control={control}
+                defaultValue={toRgbColor(
+                  tool?.options?.fillColor,
+                  DEFAULT_FILL_COLOR,
+                )}
                 render={({ field }) => (
                   <SketchPicker
-                    width="300px"
-                    color={
-                      typeof field.value === "string" ? field.value : "#000000"
-                    }
-                    onChange={(color) => field.onChange(color.hex)}
+                    color={toRgbColor(field.value, DEFAULT_FILL_COLOR)}
+                    onChangeComplete={(color) => field.onChange(color.rgb)}
                   />
                 )}
               />
@@ -417,6 +433,6 @@ export default function InfoClickRenderer({ tool }: InfoClickRendererProps) {
           </FormFieldRow>
         </FormFieldGrid>
       </FormAccordion>
-    </FormContainer>
+    </>
   );
 }

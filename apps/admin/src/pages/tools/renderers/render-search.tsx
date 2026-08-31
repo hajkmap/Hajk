@@ -33,6 +33,7 @@ export default function SearchRenderer({
   useEffect(() => {
     if (tool && !parentControl) {
       reset({
+        options: {
         searchInfoText: tool.options?.searchInfoText ?? "",
         maxHitsPerDataset: tool.options?.maxHitsPerDataset ?? 1000,
         autoSearchDelay: tool.options?.autoSearchDelay ?? 500,
@@ -88,6 +89,7 @@ export default function SearchRenderer({
           tool.options?.activeResultMarkedFillColor ?? "",
         activeResultMarkedFrameColor:
           tool.options?.activeResultMarkedFrameColor ?? "",
+        },
       });
     }
   }, [tool, reset, parentControl]);
@@ -99,7 +101,7 @@ export default function SearchRenderer({
           {/* Infotext */}
           <FormFieldRow>
             <Controller
-              name="searchInfoText"
+              name="options.searchInfoText"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -115,7 +117,7 @@ export default function SearchRenderer({
           {/* Max hits */}
           <FormFieldRow>
             <Controller
-              name="maxHitsPerDataset"
+              name="options.maxHitsPerDataset"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -131,7 +133,7 @@ export default function SearchRenderer({
           {/* Delay */}
           <FormFieldRow>
             <Controller
-              name="autoSearchDelay"
+              name="options.autoSearchDelay"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -147,7 +149,7 @@ export default function SearchRenderer({
           {/* Checkboxes */}
           <FormFieldRow>
             <Controller
-              name="showInfoWhenExceeded"
+              name="options.showInfoWhenExceeded"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -160,7 +162,7 @@ export default function SearchRenderer({
 
           <FormFieldRow>
             <Controller
-              name="disableAutocomplete"
+              name="options.disableAutocomplete"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -172,7 +174,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="disableAutoCombinations"
+              name="options.disableAutoCombinations"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -184,7 +186,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="wildcardBeforeSearch"
+              name="options.wildcardBeforeSearch"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -196,7 +198,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="autofocusSearch"
+              name="options.autofocusSearch"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -214,7 +216,7 @@ export default function SearchRenderer({
           {/* Spatial search checkboxes */}
           <FormFieldRow>
             <Controller
-              name="enablePolygonSearch"
+              name="options.enablePolygonSearch"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -227,7 +229,7 @@ export default function SearchRenderer({
 
           <FormFieldRow>
             <Controller
-              name="enableRadiusSearch"
+              name="options.enableRadiusSearch"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -240,7 +242,7 @@ export default function SearchRenderer({
 
           <FormFieldRow>
             <Controller
-              name="enableAreaSearch"
+              name="options.enableAreaSearch"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -253,7 +255,7 @@ export default function SearchRenderer({
 
           <FormFieldRow>
             <Controller
-              name="searchWithinView"
+              name="options.searchWithinView"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -271,7 +273,7 @@ export default function SearchRenderer({
                 {t("tools.strokeColor")}
               </InputLabel>
               <Controller
-                name="strokeColor"
+                name="options.strokeColor"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -291,7 +293,7 @@ export default function SearchRenderer({
                 {t("tools.strokeOpacity")}
               </InputLabel>
               <Controller
-                name="strokeOpacity"
+                name="options.strokeOpacity"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -312,7 +314,7 @@ export default function SearchRenderer({
         <FormFieldGrid>
           <FormFieldRow>
             <Controller
-              name="searchVisibleLayers"
+              name="options.searchVisibleLayers"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -324,7 +326,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="preSelected"
+              name="options.preSelected"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -336,7 +338,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="wildcardBefore"
+              name="options.wildcardBefore"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -348,7 +350,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="wildcardAfter"
+              name="options.wildcardAfter"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -360,7 +362,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="caseSensitive"
+              name="options.caseSensitive"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -372,7 +374,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="requireFullObject"
+              name="options.requireFullObject"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -384,7 +386,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="showResultLabel"
+              name="options.showResultLabel"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -405,7 +407,7 @@ export default function SearchRenderer({
         <FormFieldGrid>
           <FormFieldRow>
             <Controller
-              name="autoShowAllResultsOnMap"
+              name="options.autoShowAllResultsOnMap"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -419,7 +421,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="allowResultFiltering"
+              name="options.allowResultFiltering"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -433,7 +435,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="allowResultSorting"
+              name="options.allowResultSorting"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -447,7 +449,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="allowQuickClearSelection"
+              name="options.allowQuickClearSelection"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -461,7 +463,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="allowDownloadResults"
+              name="options.allowDownloadResults"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -475,7 +477,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="showPreviewOnHover"
+              name="options.showPreviewOnHover"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -489,7 +491,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="collectSelectedResults"
+              name="options.collectSelectedResults"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -503,7 +505,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="showPrevNextButtons"
+              name="options.showPrevNextButtons"
               control={control}
               render={({ field }) => (
                 <FormControlLabel
@@ -517,7 +519,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="maxZoomLevel"
+              name="options.maxZoomLevel"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -540,7 +542,7 @@ export default function SearchRenderer({
           {/* Hit icon */}
           <FormFieldRow>
             <Controller
-              name="hitIcon"
+              name="options.hitIcon"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -555,7 +557,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="iconDisplacementX"
+              name="options.iconDisplacementX"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -570,7 +572,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="iconDisplacementY"
+              name="options.iconDisplacementY"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -585,7 +587,7 @@ export default function SearchRenderer({
           </FormFieldRow>
           <FormFieldRow>
             <Controller
-              name="iconScale"
+              name="options.iconScale"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -609,7 +611,7 @@ export default function SearchRenderer({
                 {t("tools.search.standardResultsMarkedFillColor")}
               </InputLabel>
               <Controller
-                name="standardResultsMarkedFillColor"
+                name="options.standardResultsMarkedFillColor"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -629,7 +631,7 @@ export default function SearchRenderer({
                 {t("tools.search.standardResultsMarkedFrameColor")}
               </InputLabel>
               <Controller
-                name="standardResultsMarkedFrameColor"
+                name="options.standardResultsMarkedFrameColor"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -654,7 +656,7 @@ export default function SearchRenderer({
                 {t("tools.search.markedResultsTextFillColor")}
               </InputLabel>
               <Controller
-                name="markedResultsTextFillColor"
+                name="options.markedResultsTextFillColor"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -674,7 +676,7 @@ export default function SearchRenderer({
                 {t("tools.search.markedResultsTextFrameColor")}
               </InputLabel>
               <Controller
-                name="markedResultsTextFrameColor"
+                name="options.markedResultsTextFrameColor"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -694,7 +696,7 @@ export default function SearchRenderer({
                 {t("tools.search.markedResultsMarkedFillColor")}
               </InputLabel>
               <Controller
-                name="markedResultsMarkedFillColor"
+                name="options.markedResultsMarkedFillColor"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -714,7 +716,7 @@ export default function SearchRenderer({
                 {t("tools.search.markedResultsMarkedFrameColor")}
               </InputLabel>
               <Controller
-                name="markedResultsMarkedFrameColor"
+                name="options.markedResultsMarkedFrameColor"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -739,7 +741,7 @@ export default function SearchRenderer({
                 {t("tools.search.activeResultTextFillColor")}
               </InputLabel>
               <Controller
-                name="activeResultTextFillColor"
+                name="options.activeResultTextFillColor"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -759,7 +761,7 @@ export default function SearchRenderer({
                 {t("tools.search.activeResultTextFrameColor")}
               </InputLabel>
               <Controller
-                name="activeResultTextFrameColor"
+                name="options.activeResultTextFrameColor"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -779,7 +781,7 @@ export default function SearchRenderer({
                 {t("tools.search.activeResultMarkedFillColor")}
               </InputLabel>
               <Controller
-                name="activeResultMarkedFillColor"
+                name="options.activeResultMarkedFillColor"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker
@@ -799,7 +801,7 @@ export default function SearchRenderer({
                 {t("tools.search.activeResultMarkedFrameColor")}
               </InputLabel>
               <Controller
-                name="activeResultMarkedFrameColor"
+                name="options.activeResultMarkedFrameColor"
                 control={control}
                 render={({ field }) => (
                   <SketchPicker

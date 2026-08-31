@@ -25,10 +25,13 @@ interface PrintToolRendererProps {
   control?: Control<FieldValues>;
 }
 
-export default function PrintToolRenderer({ tool }: PrintToolRendererProps) {
+export default function PrintToolRenderer({
+  tool,
+  control: parentControl,
+}: PrintToolRendererProps) {
   const { t } = useTranslation();
 
-  const { control } = useForm<FieldValues>({
+  const { control: localControl } = useForm<FieldValues>({
     defaultValues: {
       type: tool?.type ?? "print",
       ...(tool?.options
@@ -38,6 +41,10 @@ export default function PrintToolRenderer({ tool }: PrintToolRendererProps) {
         : {}),
     },
   });
+
+  // Use the parent form's control when provided (keeps these fields in the
+  // page's single save flow); otherwise fall back to a local, standalone form.
+  const control = parentControl ?? localControl;
 
   return (
     <>
