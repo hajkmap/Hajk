@@ -27,7 +27,10 @@ import TouchAppIcon from "@mui/icons-material/TouchApp";
 import Crop54Icon from "@mui/icons-material/Crop54";
 import SearchOffIcon from "@mui/icons-material/SearchOff";
 import LayersIcon from "@mui/icons-material/Layers";
+import WallpaperIcon from "@mui/icons-material/Wallpaper";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import { setOLSubLayers } from "../../utils/groupLayers";
+import { isValidLayerId } from "../../utils/Validator";
 
 const MAX_RECENT = 5;
 
@@ -58,6 +61,13 @@ function getCommands(appModel) {
       title: "Lager",
       description: "Visa och hantera kartlager",
       icon: <LayersIcon />,
+      kind: "command",
+    },
+    {
+      type: "__showBackgrounds",
+      title: "Byt bakgrundslager",
+      description: "Välj kartans bakgrundslager",
+      icon: <WallpaperIcon />,
       kind: "command",
     },
     ...getSearchCommands(appModel),
@@ -203,6 +213,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
   const [allTools, setAllTools] = useState([]);
   const [viewMode, setViewMode] = useState("commands");
   const [layers, setLayers] = useState([]);
+  const [backgroundLayers, setBackgroundLayers] = useState([]);
   const inputRef = useRef(null);
   const listRef = useRef(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -298,6 +309,50 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     );
   }, [layers, query]);
 
+  // Build background layer list
+  const buildBackgroundList = useCallback(() => {
+    if (!appModel?.getMap) return [];
+    return appModel
+      .getMap()
+      .getAllLayers()
+      .filter(
+        (l) => l.get("layerType") === "base" && isValidLayerId(l.get("name"))
+      )
+      .map((l) => ({
+        id: l.get("name"),
+        caption: l.get("caption") || l.get("name"),
+        visible: l.getVisible(),
+      }));
+  }, [appModel]);
+
+  useEffect(() => {
+    if (viewMode !== "backgrounds" || !appModel?.getMap) return;
+
+    const map = appModel.getMap();
+    const baseLayers = map
+      .getAllLayers()
+      .filter((l) => l.get("layerType") === "base");
+
+    const handleChange = () => setBackgroundLayers(buildBackgroundList());
+    baseLayers.forEach((l) => l.on("change:visible", handleChange));
+
+    // initial load
+    handleChange();
+
+    return () => {
+      baseLayers.forEach((l) => l.un("change:visible", handleChange));
+    };
+  }, [viewMode, appModel, buildBackgroundList]);
+
+  const filteredBackgrounds = useMemo(() => {
+    if (!query.trim()) return backgroundLayers;
+    const q = query.toLowerCase();
+    return backgroundLayers.filter(
+      (l) =>
+        l.caption.toLowerCase().includes(q) || l.id.toLowerCase().includes(q)
+    );
+  }, [backgroundLayers, query]);
+
   const toggleLayer = useCallback(
     (layerId) => {
       if (!appModel?.getMap) return;
@@ -325,6 +380,25 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     [appModel]
   );
 
+  const switchBackgroundLayer = useCallback(
+    (layerId) => {
+      if (!appModel?.getMap) return;
+      appModel
+        .getMap()
+        .getAllLayers()
+        .filter((l) => l.get("layerType") === "base")
+        .forEach((l) => l.setVisible(l.get("name") === layerId));
+
+      const mapEl = document.getElementById("map");
+      if (mapEl) {
+        mapEl.style.backgroundColor = layerId === "-2" ? "#000" : "#fff";
+      }
+
+      globalObserver.publish("layerswitcher.backgroundLayerChanged", layerId);
+    },
+    [appModel, globalObserver]
+  );
+
   // items to display in the list
   const displayItems = useMemo(() => {
     const items = [];
@@ -345,6 +419,21 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           description: "",
           icon: null,
           kind: "layer",
+          layer,
+        });
+      }
+    } else if (viewMode === "backgrounds") {
+      // background layers
+      if (!query.trim()) {
+        items.push({ ...BACK_COMMAND, section: "back" });
+      }
+      for (const layer of filteredBackgrounds) {
+        items.push({
+          type: `__background:${layer.id}`,
+          title: layer.caption,
+          description: "",
+          icon: null,
+          kind: "background",
           layer,
         });
       }
@@ -372,6 +461,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     filteredTools,
     filteredRecent,
     filteredLayers,
+    filteredBackgrounds,
     recentTools,
     query,
   ]);
@@ -419,6 +509,12 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         setSelectedIndex(0);
         return;
       }
+      if (type === "__showBackgrounds") {
+        setViewMode("backgrounds");
+        setQuery("");
+        setSelectedIndex(0);
+        return;
+      }
       if (type === "__back") {
         setViewMode("commands");
         setQuery("");
@@ -429,6 +525,13 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       if (type.startsWith("__layer:")) {
         const layerId = type.slice(8);
         toggleLayer(layerId);
+        return;
+      }
+      // switching background shouldn't close the palette either, so the
+      // user can preview a few backgrounds before going back
+      if (type.startsWith("__background:")) {
+        const layerId = type.slice(13);
+        switchBackgroundLayer(layerId);
         return;
       }
       closePalette();
@@ -465,7 +568,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         }
       }
     },
-    [globalObserver, closePalette, appModel, toggleLayer]
+    [globalObserver, closePalette, appModel, toggleLayer, switchBackgroundLayer]
   );
 
   useEffect(() => {
@@ -507,7 +610,11 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           break;
         case "Escape":
           e.preventDefault();
-          if (viewMode === "plugins" || viewMode === "layers") {
+          if (
+            viewMode === "plugins" ||
+            viewMode === "layers" ||
+            viewMode === "backgrounds"
+          ) {
             setViewMode("commands");
             setQuery("");
             setSelectedIndex(0);
@@ -685,6 +792,80 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
           <Typography variant="body2" sx={{ opacity: 0.5 }}>
             Inga lager hittades
+          </Typography>
+        </Box>
+      );
+    }
+  } else if (viewMode === "backgrounds") {
+    // Background layers view
+    if (!query.trim()) {
+      const isBackSelected = itemIndex === selectedIndex;
+      listContent.push(
+        <ListItemButton
+          key={BACK_COMMAND.type}
+          data-command-item
+          selected={isBackSelected}
+          onClick={() => selectItem(BACK_COMMAND.type)}
+          sx={{
+            py: 0.5,
+            "&.Mui-selected": {
+              bgcolor: "action.hover",
+            },
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 36 }}>{BACK_COMMAND.icon}</ListItemIcon>
+          <ListItemText
+            primary={BACK_COMMAND.title}
+            slotProps={{
+              primary: { variant: "body2", noWrap: true },
+            }}
+          />
+        </ListItemButton>
+      );
+      itemIndex++;
+      listContent.push(<Divider key="back-divider" />);
+    }
+
+    if (filteredBackgrounds.length > 0) {
+      for (const layer of filteredBackgrounds) {
+        const isSelected = itemIndex === selectedIndex;
+        listContent.push(
+          <ListItemButton
+            key={layer.id}
+            data-command-item
+            selected={isSelected}
+            onClick={() => switchBackgroundLayer(layer.id)}
+            sx={{
+              py: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              {layer.visible ? (
+                <RadioButtonCheckedIcon fontSize="small" color="primary" />
+              ) : (
+                <RadioButtonUncheckedIcon fontSize="small" />
+              )}
+            </ListItemIcon>
+            <ListItemText
+              primary={layer.caption}
+              slotProps={{
+                primary: { variant: "body2", noWrap: true },
+              }}
+            />
+          </ListItemButton>
+        );
+        itemIndex++;
+      }
+    }
+
+    if (displayItems.length === 0) {
+      listContent.push(
+        <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
+          <Typography variant="body2" sx={{ opacity: 0.5 }}>
+            Inga bakgrundslager hittades
           </Typography>
         </Box>
       );
