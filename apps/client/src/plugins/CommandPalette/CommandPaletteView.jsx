@@ -33,6 +33,7 @@ import { setOLSubLayers } from "../../utils/groupLayers";
 import { isValidLayerId } from "../../utils/Validator";
 
 const MAX_RECENT = 5;
+const TOP_LEVEL_LAYER_MATCH_LIMIT = 5;
 
 const IS_MAC = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const SHORTCUT_LABEL = IS_MAC ? "⌘K" : "Ctrl+K";
@@ -283,7 +284,10 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
   }, [appModel]);
 
   useEffect(() => {
-    if (viewMode !== "layers" || !appModel?.getMap) return;
+    // Keep the layer list live for as long as the palette is open, not just
+    // while browsing the "Lager" view — the top-level view also needs fresh
+    // data to match layer names directly.
+    if (!open || !appModel?.getMap) return;
 
     const map = appModel.getMap();
     const allLayers = map.getAllLayers();
@@ -298,7 +302,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     return () => {
       allLayers.forEach((l) => l.un("change:visible", handleChange));
     };
-  }, [viewMode, appModel, buildLayerList]);
+  }, [open, appModel, buildLayerList]);
 
   const filteredLayers = useMemo(() => {
     if (!query.trim()) return layers;
@@ -407,6 +411,35 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       for (const cmd of filteredCommands) {
         items.push({ ...cmd, section: "commands" });
       }
+      // Match layer names directly from the top level too, so toggling a
+      // layer doesn't require entering the "Lager" view first.
+      if (query.trim() && filteredLayers.length > 0) {
+        const topLevelLayerMatches = filteredLayers.slice(
+          0,
+          TOP_LEVEL_LAYER_MATCH_LIMIT
+        );
+        for (const layer of topLevelLayerMatches) {
+          items.push({
+            type: `__layer:${layer.id}`,
+            title: layer.caption,
+            description: "",
+            icon: null,
+            kind: "layer",
+            layer,
+            section: "layers",
+          });
+        }
+        if (filteredLayers.length > TOP_LEVEL_LAYER_MATCH_LIMIT) {
+          items.push({
+            type: "__moreLayers",
+            title: `Visa alla ${filteredLayers.length} lager`,
+            description: "",
+            icon: <LayersIcon />,
+            kind: "command",
+            section: "layers-more",
+          });
+        }
+      }
     } else if (viewMode === "layers") {
       // layers
       if (!query.trim()) {
@@ -512,6 +545,13 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       if (type === "__showBackgrounds") {
         setViewMode("backgrounds");
         setQuery("");
+        setSelectedIndex(0);
+        return;
+      }
+      if (type === "__moreLayers") {
+        // Jump into the full "Lager" view, keeping the current search term
+        // so the rest of the matches are immediately visible.
+        setViewMode("layers");
         setSelectedIndex(0);
         return;
       }
@@ -711,7 +751,82 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       }
     }
 
-    if (filteredCommands.length === 0) {
+    // Layer name matches, shown directly at the top level so toggling a
+    // layer doesn't require entering the "Lager" view first.
+    const showTopLevelLayerMatches = query.trim() && filteredLayers.length > 0;
+    if (showTopLevelLayerMatches) {
+      listContent.push(
+        <Box key="layers-header" sx={{ px: 2, pt: 1, pb: 0.5 }}>
+          <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 500 }}>
+            Lager
+          </Typography>
+        </Box>
+      );
+
+      const topLevelLayerMatches = filteredLayers.slice(
+        0,
+        TOP_LEVEL_LAYER_MATCH_LIMIT
+      );
+      for (const layer of topLevelLayerMatches) {
+        const isSelected = itemIndex === selectedIndex;
+        listContent.push(
+          <ListItemButton
+            key={`top-layer-${layer.id}`}
+            data-command-item
+            selected={isSelected}
+            onClick={() => toggleLayer(layer.id)}
+            sx={{
+              py: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              <Checkbox checked={layer.visible} size="small" sx={{ p: 0 }} />
+            </ListItemIcon>
+            <ListItemText
+              primary={layer.caption}
+              slotProps={{
+                primary: { variant: "body2", noWrap: true },
+              }}
+            />
+          </ListItemButton>
+        );
+        itemIndex++;
+      }
+
+      if (filteredLayers.length > TOP_LEVEL_LAYER_MATCH_LIMIT) {
+        const isMoreSelected = itemIndex === selectedIndex;
+        listContent.push(
+          <ListItemButton
+            key="more-layers"
+            data-command-item
+            selected={isMoreSelected}
+            onClick={() => selectItem("__moreLayers")}
+            sx={{
+              py: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              <LayersIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText
+              primary={`Visa alla ${filteredLayers.length} lager`}
+              slotProps={{
+                primary: { variant: "body2", noWrap: true },
+              }}
+            />
+          </ListItemButton>
+        );
+        itemIndex++;
+      }
+    }
+
+    if (filteredCommands.length === 0 && !showTopLevelLayerMatches) {
       listContent.push(
         <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
           <Typography variant="body2" sx={{ opacity: 0.5 }}>
