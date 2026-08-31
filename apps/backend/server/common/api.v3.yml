@@ -246,6 +246,12 @@ paths:
                         description: Draw order for direct map placement (ascending; higher = drawn on top). Emitted as drawOrder in client layersConfig.
                     required:
                       - layerId
+                replaceBackground:
+                  type: boolean
+                  description: When true, replace BACKGROUND instances even if layers has none
+                replaceForeground:
+                  type: boolean
+                  description: When true, replace FOREGROUND instances even if layers has none
       responses:
         204:
           description: Map layers updated
@@ -319,6 +325,86 @@ paths:
       responses:
         204:
           description: Map content updated
+        400:
+          description: Invalid request
+        404:
+          description: Map not found
+  /maps/{mapName}/layerswitcher:
+    get:
+      tags:
+        - Admin only
+      parameters:
+        - name: mapName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Kartlager groups and Bakgrund baselayers (catalog layer ids)
+        404:
+          description: Map not found
+    put:
+      tags:
+        - Admin only
+      parameters:
+        - name: mapName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Atomically replaces Kartlager (GroupsOnMaps + group LayerInstances) and Bakgrund (BACKGROUND map LayerInstances)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                groups:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      layers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                      groups:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: true
+                    required:
+                      - id
+                baselayers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      layerId:
+                        type: string
+                      visibleAtStart:
+                        type: boolean
+                      infoClickActive:
+                        type: boolean
+                      zIndex:
+                        type: integer
+                        minimum: 0
+                    required:
+                      - layerId
+      responses:
+        204:
+          description: Map layerswitcher updated
         400:
           description: Invalid request
         404:

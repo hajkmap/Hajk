@@ -64,6 +64,10 @@ export const MapLayersUpdateSchema = z.object({
       })
     )
     .default([]),
+  /** When true, replace BACKGROUND even if `layers` has no BACKGROUND entries. */
+  replaceBackground: z.boolean().optional(),
+  /** When true, replace FOREGROUND even if `layers` has no FOREGROUND entries. */
+  replaceForeground: z.boolean().optional(),
 });
 
 export const MapGroupsUpdateSchema = z.object({
@@ -77,7 +81,20 @@ export const MapGroupsUpdateSchema = z.object({
         name: z.string().optional(),
         toggled: z.boolean().optional(),
         expanded: z.boolean().optional(),
+        exclusiveGroup: z.boolean().optional(),
+        infoDocument: z.boolean().optional(),
         index: z.number().int().min(0).optional(),
+        metadata: z
+          .object({
+            title: z.string().optional(),
+            description: z.string().optional(),
+            owner: z.string().optional(),
+            url: z.string().optional(),
+            urlTitle: z.string().optional(),
+            urlOpenData: z.string().optional(),
+          })
+          .nullable()
+          .optional(),
       })
     )
     .default([]),
@@ -87,6 +104,66 @@ export const MapGroupsUpdateSchema = z.object({
 export const MapContentUpdateSchema = z.object({
   layers: MapLayersUpdateSchema.shape.layers,
   groups: MapGroupsUpdateSchema.shape.groups,
+});
+
+const LayerSwitcherLayerRefSchema = z.object({
+  id: z.string().min(1),
+  drawOrder: z.number().optional(),
+  visibleAtStart: z.boolean().optional(),
+  infobox: z.string().optional(),
+});
+
+type LayerSwitcherGroupWrite = {
+  id: string;
+  name?: string;
+  toggled?: boolean;
+  expanded?: boolean;
+  exclusiveGroup?: boolean;
+  infogroupvisible?: boolean;
+  infogrouptitle?: string;
+  infogrouptext?: string;
+  infogroupurl?: string;
+  infogroupurltext?: string;
+  infogroupopendatalink?: string;
+  infogroupowner?: string;
+  layers?: z.infer<typeof LayerSwitcherLayerRefSchema>[];
+  groups?: LayerSwitcherGroupWrite[];
+};
+
+const LayerSwitcherGroupSchema: z.ZodType<LayerSwitcherGroupWrite> = z.lazy(
+  () =>
+    z.object({
+      id: z.string().min(1),
+      name: z.string().optional(),
+      toggled: z.boolean().optional(),
+      expanded: z.boolean().optional(),
+      exclusiveGroup: z.boolean().optional(),
+      infogroupvisible: z.boolean().optional(),
+      infogrouptitle: z.string().optional(),
+      infogrouptext: z.string().optional(),
+      infogroupurl: z.string().optional(),
+      infogroupurltext: z.string().optional(),
+      infogroupopendatalink: z.string().optional(),
+      infogroupowner: z.string().optional(),
+      layers: z.array(LayerSwitcherLayerRefSchema).optional(),
+      groups: z.array(LayerSwitcherGroupSchema).optional(),
+    }),
+);
+
+/** Atomic Kartlager + Bakgrund replace (GroupsOnMaps + BACKGROUND instances). */
+export const MapLayerSwitcherUpdateSchema = z.object({
+  groups: z.array(LayerSwitcherGroupSchema).default([]),
+  baselayers: z
+    .array(
+      z.object({
+        layerId: z.string().min(1, "Layer id is required"),
+        visibleAtStart: z.boolean().optional(),
+        infoClickActive: z.boolean().optional(),
+        zIndex: z.number().int().min(0).optional(),
+        infobox: z.string().optional(),
+      }),
+    )
+    .default([]),
 });
 
 export const ProjectionUpdateSchema = z.object({
@@ -105,3 +182,6 @@ export type ProjectionUpdateInput = z.infer<typeof ProjectionUpdateSchema>;
 export type MapLayersUpdateInput = z.infer<typeof MapLayersUpdateSchema>;
 export type MapGroupsUpdateInput = z.infer<typeof MapGroupsUpdateSchema>;
 export type MapContentUpdateInput = z.infer<typeof MapContentUpdateSchema>;
+export type MapLayerSwitcherUpdateInput = z.infer<
+  typeof MapLayerSwitcherUpdateSchema
+>;

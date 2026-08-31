@@ -9,6 +9,7 @@ import {
   MapLayersUpdateSchema,
   MapGroupsUpdateSchema,
   MapContentUpdateSchema,
+  MapLayerSwitcherUpdateSchema,
 } from "../../schemas/map.schemas.ts";
 
 export default express
@@ -30,6 +31,7 @@ export default express
   .get("/:mapName/groups", MapsController.getGroupsForMap)
   .get("/:mapName/layers", MapsController.getLayersForMap)
   .get("/:mapName/content", MapsController.getMapContent)
+  .get("/:mapName/layerswitcher", MapsController.getMapLayerSwitcher)
   .get("/:mapName/projections", MapsController.getProjectionsForMap)
   .get("/:mapName/tools", MapsController.getToolsForMap)
   .put("/:mapName/tools", MapsController.updateMapTools)
@@ -47,5 +49,10 @@ export default express
     "/:mapName/content",
     validatePayload(MapContentUpdateSchema),
     MapsController.updateMapContent
+  )
+  .put(
+    "/:mapName/layerswitcher",
+    validatePayload(MapLayerSwitcherUpdateSchema),
+    MapsController.updateMapLayerSwitcher
   )
   .use("/:mapName/themes", themesRouter);

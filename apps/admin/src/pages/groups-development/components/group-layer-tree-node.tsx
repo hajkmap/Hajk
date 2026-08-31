@@ -201,8 +201,8 @@ export default function GroupLayerTreeNodeView({
                 slotProps={{
                   primary: {
                     variant: "body1",
-                    fontWeight: rowIsActive ? "bold" : "inherit",
                     sx: {
+                      fontWeight: rowIsActive ? "bold" : "inherit",
                       pr: 5,
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -332,8 +332,8 @@ export default function GroupLayerTreeNodeView({
                 slotProps={{
                   primary: {
                     variant: "body1",
-                    fontWeight: rowIsActive ? "bold" : "inherit",
                     sx: {
+                      fontWeight: rowIsActive ? "bold" : "inherit",
                       pr: 5,
                       overflow: "hidden",
                       textOverflow: "ellipsis",

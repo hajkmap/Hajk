@@ -9,7 +9,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -25,25 +25,23 @@ interface LayerFormDialogProps {
   onSubmit: (values: LayerFormValues) => void;
 }
 
-export default function LayerFormDialog({
-  open,
+interface LayerFormDialogBodyProps {
+  layerName: string;
+  initialValues?: LayerFormValues;
+  onClose: () => void;
+  onSubmit: (values: LayerFormValues) => void;
+}
+
+function LayerFormDialogBody({
   layerName,
   initialValues,
   onClose,
   onSubmit,
-}: LayerFormDialogProps) {
+}: LayerFormDialogBodyProps) {
   const { t } = useTranslation();
   const [values, setValues] = useState<LayerFormValues>(
     initialValues ?? DEFAULT_LAYER_DISPLAY_SETTINGS,
   );
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    setValues(initialValues ?? DEFAULT_LAYER_DISPLAY_SETTINGS);
-  }, [initialValues, open]);
 
   const handleSubmit = () => {
     onSubmit({
@@ -53,7 +51,7 @@ export default function LayerFormDialog({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <>
       <DialogTitle>{t("groupsDevelopment.editLayer")}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -96,6 +94,32 @@ export default function LayerFormDialog({
           {t("common.dialog.okBtn")}
         </Button>
       </DialogActions>
+    </>
+  );
+}
+
+export default function LayerFormDialog({
+  open,
+  layerName,
+  initialValues,
+  onClose,
+  onSubmit,
+}: LayerFormDialogProps) {
+  const formKey = initialValues
+    ? `${layerName}-${JSON.stringify(initialValues)}`
+    : layerName;
+
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      {open ? (
+        <LayerFormDialogBody
+          key={formKey}
+          layerName={layerName}
+          initialValues={initialValues}
+          onClose={onClose}
+          onSubmit={onSubmit}
+        />
+      ) : null}
     </Dialog>
   );
 }

@@ -94,8 +94,43 @@ export interface LayerFormValues {
   layerInfoBox: string;
 }
 
-/** Unsaved layerswitcher Tool.options payload from Kartlager edits. */
-export interface KartlagerDraft {
-  toolId: number;
-  options: Record<string, unknown>;
+/** Nested group shape for Kartlager / layerswitcher (catalog layer ids). */
+export interface ClientLayerSwitcherLayerRef {
+  id: string;
+  drawOrder?: number;
+  visibleAtStart?: boolean;
+  infobox?: string;
 }
+
+export interface ClientLayerSwitcherGroup {
+  id: string;
+  type?: string;
+  name: string;
+  toggled?: boolean;
+  expanded?: boolean;
+  exclusiveGroup?: boolean;
+  parent?: string;
+  infogroupvisible?: boolean;
+  infogrouptitle?: string;
+  infogrouptext?: string;
+  infogroupurl?: string;
+  infogroupurltext?: string;
+  infogroupopendatalink?: string;
+  infogroupowner?: string;
+  layers?: ClientLayerSwitcherLayerRef[];
+  groups?: ClientLayerSwitcherGroup[];
+}
+
+/** Unsaved Kartlager + Bakgrund state (GroupsOnMaps / BACKGROUND instances). */
+export interface LayerSwitcherDraft {
+  groups: ClientLayerSwitcherGroup[];
+  baselayers: {
+    layerId: string;
+    visibleAtStart?: boolean;
+    zIndex?: number;
+    infobox?: string;
+  }[];
+}
+
+/** @deprecated Use LayerSwitcherDraft */
+export type KartlagerDraft = LayerSwitcherDraft;

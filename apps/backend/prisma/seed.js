@@ -556,6 +556,17 @@ function layerInstancePlacementFromOptions(options = {}) {
 }
 
 /**
+ * Resolve a layers.json id or an already-remapped DisplayLayer id to the
+ * Prisma DisplayLayer primary key.
+ */
+function resolveDisplayLayerId(jsonOrPrismaId) {
+  if (jsonOrPrismaId == null || jsonOrPrismaId === "") {
+    return null;
+  }
+  return jsonToDisplayLayerId.get(jsonOrPrismaId) ?? jsonOrPrismaId;
+}
+
+/**
  * Search/editing layers from layers.json are global (not listed in map group trees).
  * Create a LayerInstance per map so usage APIs and legacy export can resolve them via
  * searchLayerId / editingLayerId like displayLayerId.
@@ -754,9 +765,10 @@ async function populateMapLayerStructure(mapName) {
     (group.layers || []).forEach((l) => {
       const { id: layerId, ...rest } = l;
 
-      // Prepare object to insert into layersOnGroups
+      // One LayerInstance per placement: mapId (default map) + parent groupId.
       layersOnGroups.push({
         layerId: layerId,
+        mapId: map.id,
         groupId: group.id,
         usage: "FOREGROUND",
         options: rest,
@@ -779,14 +791,14 @@ async function populateMapLayerStructure(mapName) {
   // to a map or group, we'd get a foreign key error. So let's wash the
   // layers so only valid entries remain.
   const displayLayersInDB = await prisma.displayLayer.findMany({
-    select: { id: true },
+    select: { id: true, zIndex: true },
   });
 
-  const displayLayerIdsInDB = displayLayersInDB.map((l) => l.id);
+  const displayLayerIdsInDB = new Set(displayLayersInDB.map((l) => l.id));
 
   const removeUnknownLayers = (l) => {
-    const prismaId = jsonToDisplayLayerId.get(l.layerId);
-    return prismaId && displayLayerIdsInDB.includes(prismaId);
+    const prismaId = resolveDisplayLayerId(l.layerId);
+    return prismaId != null && displayLayerIdsInDB.has(prismaId);
   };
 
   const validLayersOnMaps = layersOnMaps.filter(removeUnknownLayers);
@@ -820,12 +832,17 @@ async function populateMapLayerStructure(mapName) {
       },
     });
   }
-  // Connect valid layer instances (i.e. those layers that are used in maps (background) or groups (foreground))
+  // Connect valid layer instances once per placement:
+  // - baselayers → mapId + BACKGROUND (no group)
+  // - tree layers → mapId + parent groupId + FOREGROUND
+  // Never create a second map-only row for the same display layer.
+  const seededDisplayLayerIds = new Set();
   for await (const layer of validLayers) {
+    const displayLayerId = resolveDisplayLayerId(layer.layerId);
     const placement = layerInstancePlacementFromOptions(layer.options);
     const layerInstance = await prisma.layerInstance.create({
       data: {
-        displayLayerId: jsonToDisplayLayerId.get(layer.layerId),
+        displayLayerId,
         mapId: layer.mapId || undefined,
         groupId: layer.groupId || undefined,
         usage: layer.usage,
@@ -834,6 +851,10 @@ async function populateMapLayerStructure(mapName) {
         options: placement.options,
       },
     });
+
+    if (displayLayerId) {
+      seededDisplayLayerIds.add(displayLayerId);
+    }
 
     const visibleForGroups = layer.options.visibleForGroups || [];
 
@@ -844,6 +865,31 @@ async function populateMapLayerStructure(mapName) {
       "layerInstance"
     );
   }
+
+  // Catalog display layers not referenced in baselayers/groups still get a
+  // map-direct FOREGROUND instance so they show as active on the Lager tab.
+  let activatedForegroundCount = 0;
+  for (const [index, displayLayer] of displayLayersInDB.entries()) {
+    if (seededDisplayLayerIds.has(displayLayer.id)) {
+      continue;
+    }
+
+    await prisma.layerInstance.create({
+      data: {
+        displayLayerId: displayLayer.id,
+        mapId: map.id,
+        usage: "FOREGROUND",
+        zIndex: displayLayer.zIndex ?? index,
+        visibleAtStart: false,
+      },
+    });
+    activatedForegroundCount += 1;
+  }
+
+  console.log(
+    `Map "${mapName}": ${validLayersOnMaps.length} BACKGROUND, ${validLayersOnGroups.length} group (with mapId), ${activatedForegroundCount} map-only FOREGROUND LayerInstances`
+  );
+
   // Add potential role restrictions on the layer groups
   for await (const group of groupsToInsert) {
     await updateRolesFromVisibleForGroups(
@@ -1240,6 +1286,107 @@ function remapLayerIdInLayerswitcherOptions(options, idMap) {
 }
 
 /**
+ * Assign sequential drawOrder indexes on layerswitcher Tool.options groups
+ * layers (alphabetically by DisplayLayer name; bottom of list = 1, top = N).
+ * Runs after id remapping and before GroupsOnMaps / LayerInstance population
+ * so LayerInstance.zIndex picks up the same values.
+ */
+async function assignLayerswitcherDrawOrderIndexes() {
+  const displayLayers = await prisma.displayLayer.findMany({
+    select: { id: true, name: true },
+  });
+  const nameById = new Map(displayLayers.map((layer) => [layer.id, layer.name]));
+
+  const tools = await prisma.tool.findMany({
+    where: { type: "layerswitcher" },
+    select: { id: true, options: true },
+  });
+
+  let updated = 0;
+
+  for (const tool of tools) {
+    if (
+      !tool.options ||
+      typeof tool.options !== "object" ||
+      Array.isArray(tool.options)
+    ) {
+      continue;
+    }
+
+    const options = tool.options;
+    if (!Array.isArray(options.groups)) {
+      continue;
+    }
+
+    const layerIds = [];
+    const seen = new Set();
+    const collect = (groups) => {
+      for (const group of groups || []) {
+        for (const layer of group.layers || []) {
+          const id = layer?.id;
+          if (id == null || id === "" || seen.has(id)) {
+            continue;
+          }
+          seen.add(id);
+          layerIds.push(String(id));
+        }
+        collect(group.groups);
+      }
+    };
+    collect(options.groups);
+
+    if (layerIds.length === 0) {
+      continue;
+    }
+
+    layerIds.sort((a, b) => {
+      const nameA = nameById.get(a) ?? a;
+      const nameB = nameById.get(b) ?? b;
+      return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
+    });
+
+    // Top of alphabetic list = highest drawOrder; bottom = 1.
+    const total = layerIds.length;
+    const drawOrderById = new Map(
+      layerIds.map((id, index) => [id, total - index]),
+    );
+
+    const applyDrawOrders = (groups) =>
+      (groups || []).map((group) => ({
+        ...group,
+        layers: (group.layers || []).map((layer) => {
+          const id = layer?.id != null ? String(layer.id) : null;
+          if (id == null || !drawOrderById.has(id)) {
+            return layer;
+          }
+          return {
+            ...layer,
+            drawOrder: drawOrderById.get(id),
+          };
+        }),
+        groups: applyDrawOrders(group.groups),
+      }));
+
+    await prisma.tool.update({
+      where: { id: tool.id },
+      data: {
+        options: {
+          ...options,
+          groups: applyDrawOrders(options.groups),
+        },
+      },
+    });
+    updated += 1;
+  }
+
+  if (updated > 0) {
+    console.log(
+      `Assigned alphabetic drawOrder indexes (bottom = 1) on ${updated} layerswitcher Tool.options`,
+    );
+  }
+}
+
+/**
  * After DisplayLayer rows exist, rewrite layerswitcher Tool.options so layer
  * ids match Prisma DisplayLayer ids (catalog / Kartlager lookups).
  */
@@ -1283,6 +1430,9 @@ async function main() {
   // Rewrite layerswitcher Tool.options layer ids to Prisma DisplayLayer ids
   // before building GroupsOnMaps / LayerInstances from those options.
   await remapLayerswitcherToolOptionsLayerIds();
+  // Assign sequential drawOrder (bottom = 1, alphabetic) on groups[].layers[]
+  // so LayerInstance.zIndex and Tool.options stay aligned for Ritordning.
+  await assignLayerswitcherDrawOrderIndexes();
   // Search/editing layers are global in layers.json — attach them to every map via LayerInstance.
   await populateSearchAndEditingLayerInstances();
   // Finally we extract the layer switcher config from all maps and add all groups etc. with their connections to the database.

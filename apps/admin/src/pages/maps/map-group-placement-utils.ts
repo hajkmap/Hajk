@@ -46,12 +46,31 @@ function flattenPlacementRows(rows: MapGroup[]): MapGroup[] {
   return result;
 }
 
-/** Direct map layers as a flat list (mapId set, outside groups). */
+/** Direct map FOREGROUND layers as a flat list (draw-order / Kartinnehåll). */
 export function buildMapLayerTree(
   layers: MapLayer[],
 ): TreeItems<TreeItemData> {
   return layers
     .filter((layer) => layer.mapId != null)
+    .filter((layer) => (layer.usage ?? "FOREGROUND") !== "BACKGROUND")
+    .slice()
+    .sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0))
+    .map((layer) => ({
+      id: `layer${ID_DELIMITER}${layer.id}`,
+      name: layer.name,
+      type: "layer" as const,
+      canHaveChildren: false,
+      visibleAtStart: layer.visibleAtStart ?? false,
+    }));
+}
+
+/** Map-direct BACKGROUND LayerInstances (layerswitcher baselayers). */
+export function buildBackgroundLayerTree(
+  layers: MapLayer[],
+): TreeItems<TreeItemData> {
+  return layers
+    .filter((layer) => layer.mapId != null)
+    .filter((layer) => layer.usage === "BACKGROUND")
     .slice()
     .sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0))
     .map((layer) => ({
@@ -87,6 +106,7 @@ export function buildServerMapContentItems(
 
 export function mapLayerTreeToPayload(
   items: TreeItems<TreeItemData>,
+  usage: "BACKGROUND" | "FOREGROUND" = "FOREGROUND",
 ): MapLayerPlacement[] {
   // zIndex is 0-based ascending; backend stores on LayerInstance and emits as
   // drawOrder in client layersConfig (higher index = drawn on top).
@@ -94,6 +114,7 @@ export function mapLayerTreeToPayload(
     .filter((node) => node.type === "layer")
     .map((node, index) => ({
       layerId: entityIdFromItemId(node.id),
+      usage,
       zIndex: index,
       visibleAtStart: node.visibleAtStart ?? false,
     }));
@@ -320,6 +341,37 @@ export function mapPlacementSignature(items: TreeItems<TreeItemData>): string {
         expanded: item.expanded ?? false,
       };
     }),
+  );
+}
+
+/** Drop inactive catalog layers before comparing placement/draw-order dirty state. */
+export function pruneContentTreeToActiveLayers(
+  items: TreeItems<TreeItemData>,
+  activeLayerIds: ReadonlySet<string>,
+): TreeItems<TreeItemData> {
+  return items.filter((item) => {
+    if (item.type !== "layer") {
+      return true;
+    }
+    return activeLayerIds.has(entityIdFromItemId(item.id));
+  });
+}
+
+export function mapPlacementSignatureForActiveLayers(
+  items: TreeItems<TreeItemData>,
+  activeLayerIds: ReadonlySet<string>,
+): string {
+  return mapPlacementSignature(
+    pruneContentTreeToActiveLayers(items, activeLayerIds),
+  );
+}
+
+export function mapLayerDrawOrderSignatureForActiveLayers(
+  items: TreeItems<TreeItemData>,
+  activeLayerIds: ReadonlySet<string>,
+): string {
+  return mapLayerDrawOrderSignature(
+    pruneContentTreeToActiveLayers(items, activeLayerIds),
   );
 }
 

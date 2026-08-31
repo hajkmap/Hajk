@@ -16,6 +16,8 @@ import {
   updateMapLayers,
   updateMapGroups,
   updateMapContent,
+  getMapLayerSwitcher,
+  updateMapLayerSwitcher,
   createMap,
   deleteMap,
   duplicateMap,
@@ -29,6 +31,8 @@ import type {
   MapLayerPlacement,
   MapGroupPlacement,
   MapContentPlacement,
+  MapLayerSwitcherPlacement,
+  MapLayerSwitcherState,
   MapMutation,
   ToolOnMap,
 } from "./types";
@@ -178,16 +182,27 @@ export const useUpdateMapLayers = () => {
     mutationFn: ({
       mapName,
       layers,
+      replaceBackground,
+      replaceForeground,
     }: {
       mapName: string;
       layers: MapLayerPlacement[];
-    }) => updateMapLayers(mapName, layers),
+      replaceBackground?: boolean;
+      replaceForeground?: boolean;
+    }) =>
+      updateMapLayers(mapName, layers, {
+        replaceBackground,
+        replaceForeground,
+      }),
     onSuccess: (_, { mapName }) => {
       void queryClient.invalidateQueries({
         queryKey: ["layersByMap", mapName],
       });
       void queryClient.invalidateQueries({
         queryKey: ["mapContent", mapName],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["mapLayerSwitcher", mapName],
       });
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
     },
@@ -236,6 +251,45 @@ export const useUpdateMapContent = () => {
       void queryClient.invalidateQueries({
         queryKey: ["groupsByMap", mapName],
       });
+      void queryClient.invalidateQueries({ queryKey: ["maps"] });
+    },
+  });
+};
+
+export const useMapLayerSwitcher = (
+  mapName: string,
+): UseQueryResult<MapLayerSwitcherState> => {
+  return useQuery({
+    queryKey: ["mapLayerSwitcher", mapName],
+    queryFn: () => getMapLayerSwitcher(mapName),
+    enabled: Boolean(mapName),
+  });
+};
+
+export const useUpdateMapLayerSwitcher = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      mapName,
+      content,
+    }: {
+      mapName: string;
+      content: MapLayerSwitcherPlacement;
+    }) => updateMapLayerSwitcher(mapName, content),
+    onSuccess: (_, { mapName }) => {
+      void queryClient.invalidateQueries({
+        queryKey: ["mapLayerSwitcher", mapName],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["mapContent", mapName],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["layersByMap", mapName],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["groupsByMap", mapName],
+      });
+      void queryClient.invalidateQueries({ queryKey: ["groups"] });
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
     },
   });
