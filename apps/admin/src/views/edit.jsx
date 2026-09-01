@@ -41,6 +41,7 @@ const defaultState = {
   internalLayerName: "",
   url: "",
   uri: "",
+  serverType: "",
   projection: "",
   geometryField: "",
   idField: "",
@@ -135,6 +136,7 @@ class Edit extends Component {
       internalLayerName: layer.internalLayerName || layer.caption,
       url: layer.url,
       uri: layer.uri,
+      serverType: layer.serverType || "",
       projection: layer.projection || "EPSG:3006",
       geometryField: layer.geometryField || "",
       idField: layer.idField || "",
@@ -656,6 +658,7 @@ class Edit extends Component {
         internalLayerName: this.getValue("internalLayerName"),
         url: this.getValue("url"),
         uri: this.getValue("uri"),
+        serverType: this.state.serverType || "",
         layers: this.getValue("layers"),
         projection: this.getValue("projection"),
         geometryField: this.getValue("geometryField"),
@@ -1293,6 +1296,29 @@ class Edit extends Component {
                     );
                   }}
                   className={this.getValidationClass("uri")}
+                />
+              </div>
+              <div>
+                <label>Servertyp</label>
+                <select
+                  ref="input_serverType"
+                  value={this.state.serverType}
+                  className="control-fixed-width"
+                  onChange={(e) => {
+                    this.setState({ serverType: e.target.value });
+                  }}
+                >
+                  <option value="">Auto (identifiera via URL)</option>
+                  <option value="geoserver">GeoServer</option>
+                  <option value="qgis">QGIS Server</option>
+                  <option value="arcgis">ArcGIS Server</option>
+                  <option value="mapserver">MapServer</option>
+                </select>
+                <i
+                  style={{ marginLeft: "4px" }}
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Styr hur objekt-ID:n formateras när ändringar sparas. QGIS Server använder okvalificerade ID:n, övriga servertyper standardens kvalificerade format. Vid Auto antas QGIS Server om URL:en innehåller 'qgis'."
                 />
               </div>
               <div className="separator">Tillgängliga lager</div>

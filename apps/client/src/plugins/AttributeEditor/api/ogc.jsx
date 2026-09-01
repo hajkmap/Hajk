@@ -614,9 +614,12 @@ function formatFeatureId(featureId, layer) {
     return idStr;
   }
 
-  // QGIS Server uses plain (unqualified) feature IDs
-  const isQgis =
-    layer.serverType === "qgis" || layer.url?.toLowerCase().includes("qgis");
+  // QGIS Server uses plain (unqualified) feature IDs. An explicit serverType
+  // on the layer config takes precedence; the URL substring check is only a
+  // fallback for configs where no serverType is set.
+  const isQgis = layer.serverType
+    ? layer.serverType === "qgis"
+    : Boolean(layer.url?.toLowerCase().includes("qgis"));
 
   if (isQgis) {
     return idStr;
