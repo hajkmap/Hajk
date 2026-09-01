@@ -51,7 +51,11 @@ export function usePagination(items, options = {}) {
 
   const showPagination = totalRows > 10;
 
-  // Ensure current page is valid when rowsPerPage or totalRows changes
+  // Ensure current page is valid when rowsPerPage or totalRows changes.
+  // Rewriting this clamp to the render-phase adjustment pattern (per
+  // react-hooks/set-state-in-effect) is mapped for the follow-up cleanup
+  // PR — suppressed rather than hot-patched in the feature PR.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isShowingAll) {
       if (currentPage !== 0) setCurrentPage(0);
@@ -62,6 +66,7 @@ export function usePagination(items, options = {}) {
       setCurrentPage(Math.max(0, Math.min(currentPage, maxPage)));
     }
   }, [rowsPerPage, totalRows, currentPage, totalPages, isShowingAll]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Persist rowsPerPage to localStorage when it changes
   useEffect(() => {

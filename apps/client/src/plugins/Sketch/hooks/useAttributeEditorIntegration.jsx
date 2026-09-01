@@ -75,8 +75,8 @@ function getFeatureCoordinates(feature) {
       return geometry.getCoordinates();
     case "MultiLineString":
       return geometry.getCoordinates().flat();
-    case "MultiPolygon":
-      let coords = [];
+    case "MultiPolygon": {
+      const coords = [];
       geometry.getCoordinates().forEach((polygon) => {
         polygon.forEach((ring) => {
           ring.forEach((coord) => {
@@ -85,6 +85,7 @@ function getFeatureCoordinates(feature) {
         });
       });
       return coords;
+    }
     default:
       // Polygon
       return geometry.getCoordinates()[0];
@@ -545,7 +546,9 @@ const useAttributeEditorIntegration = ({
       for (const [, { select, translate, modify }] of reg.entries()) {
         try {
           select.setActive(shouldBeActive);
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         try {
           translate.setActive(
             pluginShown &&
@@ -553,12 +556,16 @@ const useAttributeEditorIntegration = ({
               translate.__allowTranslate &&
               translateEnabled
           );
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         try {
           modify.setActive(
             pluginShown && inEditWithNodes && modify.__allowModify
           );
-        } catch {}
+        } catch {
+          /* ignore */
+        }
 
         // Note: EDIT_ACTIVE is handled by syncOlSelection(), not here.
         // This keeps the logic in one place and avoids redundant layer refreshes.
@@ -737,7 +744,9 @@ const useAttributeEditorIntegration = ({
           if (!multi) {
             try {
               fc.clear();
-            } catch {}
+            } catch {
+              /* ignore */
+            }
             // Set EDIT_ACTIVE before adding to fc so the style function sees correct value
             // EDIT_ACTIVE controls node VISIBILITY (only when plugin shown AND in EDIT mode)
             // modifyEnabled controls whether nodes can be MODIFIED (via Modify interaction)
@@ -870,25 +879,39 @@ const useAttributeEditorIntegration = ({
       const cleanup = () => {
         try {
           tr.un("translatestart", onTranslateStart);
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         try {
           tr.un("translateend", onTranslateEnd);
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         try {
           mod.un("modifystart", onModifyStart);
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         try {
           mod.un("modifyend", onModifyEnd);
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         try {
           map.removeInteraction(sel);
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         try {
           map.removeInteraction(tr);
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         try {
           map.removeInteraction(mod);
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         // Note: Do NOT clear beforeGeomRef here - it's a persistent ref
         // that needs to survive effect re-runs for undo to work correctly
       };
@@ -1006,7 +1029,11 @@ const useAttributeEditorIntegration = ({
     });
 
     const offRotateCmd = editBus.on("sketch:ae-rotate", (ev) => {
-      const { degrees = 0, clockwise = true, continuous = false } = ev.detail || {};
+      const {
+        degrees = 0,
+        clockwise = true,
+        continuous = false,
+      } = ev.detail || {};
       const feats = getAeSelected();
       if (!feats.length) return;
 
@@ -1096,13 +1123,19 @@ const useAttributeEditorIntegration = ({
         for (const { select, translate, modify } of reg.values()) {
           try {
             select.setActive(false);
-          } catch {}
+          } catch {
+            /* ignore */
+          }
           try {
             translate.setActive(false);
-          } catch {}
+          } catch {
+            /* ignore */
+          }
           try {
             modify.setActive(false);
-          } catch {}
+          } catch {
+            /* ignore */
+          }
         }
       } else {
         // Reactivate all interactions according to UI state
@@ -1139,13 +1172,19 @@ const useAttributeEditorIntegration = ({
       for (const { select, translate, modify } of reg.values()) {
         try {
           select.setActive(false);
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         try {
           translate.setActive(false);
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         try {
           modify.setActive(false);
-        } catch {}
+        } catch {
+          /* ignore */
+        }
       }
 
       // Temporarily disable all map interactions to prevent interference
@@ -1476,7 +1515,9 @@ const useAttributeEditorIntegration = ({
       arr.forEach((lyr) =>
         attachForLayer(lyr, { select: true, translate: true, modify: true })
       );
-    } catch {}
+    } catch {
+      /* ignore */
+    }
 
     const onLayerAdd = (e) => {
       const lyr = e.element || e.layer || e.target;
@@ -1498,7 +1539,9 @@ const useAttributeEditorIntegration = ({
       if (rec) {
         try {
           rec.cleanup();
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         reg.delete(lyr);
       }
     };
@@ -1572,47 +1615,73 @@ const useAttributeEditorIntegration = ({
     return () => {
       try {
         offDeletedIds();
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       try {
         offAttribSelectIds();
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       try {
         layers.un?.("remove", onLayerRemove);
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       try {
         offAttach();
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       try {
         offTranslateCmd();
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       try {
         offRotateCmd();
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       try {
         offFocus();
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       try {
         offDisable();
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       try {
         offSplitStart();
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       try {
         offSplitMulti();
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       try {
         offMergeFeatures();
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       // End an in-progress split via its own cleanup (removes the keydown
       // listener and the snap helper key too — plain removeInteraction
       // leaked both when the split had not received its first click, since
       // OL only fires drawabort for a started sketch) and tell AE.
       try {
         splitCleanupRef.current?.(true);
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       try {
         layers.un?.("add", onLayerAdd);
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       // Clear EDIT_ACTIVE from all features when cleaning up
       // This ensures nodes don't stay visible after Sketch is closed
       for (const [layer] of reg.entries()) {
@@ -1626,16 +1695,22 @@ const useAttributeEditorIntegration = ({
               }
             });
           }
-        } catch {}
+        } catch {
+          /* ignore */
+        }
       }
       for (const { cleanup } of reg.values()) {
         try {
           cleanup();
-        } catch {}
+        } catch {
+          /* ignore */
+        }
       }
       try {
         map.un("singleclick", onDeleteClick);
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       reg.clear();
     };
   }, [

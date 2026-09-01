@@ -47,6 +47,10 @@ const FormListItem = ({
           : null;
 
   return (
+    // Pointer convenience target: keyboard users reach and select form rows
+    // through the form's own prev/next navigation controls, so a tab stop
+    // per row would only duplicate that path.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       ref={(el) => {
         if ((selected || isFocused) && selectedRowRefs) {

@@ -24,11 +24,7 @@ import Information from "../components/Information";
 import FeatureTitleEditor from "../components/FeatureTitleEditor";
 import FeatureStyleEditor from "../components/featureStyle/FeatureStyleEditor";
 
-const ModifyNodeToggler = ({
-  modifyEnabled,
-  setModifyEnabled,
-  disabled = false,
-}) => {
+const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
   return (
     <Paper style={{ padding: 8, marginTop: 8 }}>
       <Grid

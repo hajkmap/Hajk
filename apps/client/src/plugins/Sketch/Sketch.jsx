@@ -535,7 +535,7 @@ const Sketch = (props) => {
     // Clear guides whenever we change activity or draw type
     try {
       angleSnapping.clearSnapGuides();
-    } catch (error) {
+    } catch {
       // Ignore errors when cleaning up
     }
   }, [activityId, activeDrawType, angleSnapping]);

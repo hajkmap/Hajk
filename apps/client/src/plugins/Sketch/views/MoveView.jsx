@@ -190,6 +190,11 @@ const FeatureRotateSelector = (props) => {
     });
 
     if (continuous) {
+      // Upstream pattern: rotationTimeout is a component-scope `let` shared
+      // by the press-and-hold handlers. Converting it to a ref is mapped for
+      // the follow-up cleanup PR — suppressed rather than refactoring
+      // upstream code inside this feature PR.
+      // eslint-disable-next-line react-hooks/immutability
       rotationTimeout = setTimeout(() => {
         handleRotationClick(clockwise, true);
       }, 60);
