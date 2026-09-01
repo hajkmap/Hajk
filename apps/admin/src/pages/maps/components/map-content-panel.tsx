@@ -77,6 +77,8 @@ interface MapContentPanelProps {
   onKartlagerDraftChange?: (draft: KartlagerDraft | null) => void;
   /** Bumped when Lager checkboxes are reverted to the last committed state. */
   layerActivationResetKey?: number;
+  /** Lager tab rows synced from server — required before Lagerordning dirty checks. */
+  menuSynced?: boolean;
   /** Called when the Grupper (under utveckling) sub-tab is active. */
   onGroupsDevelopmentActiveChange?: (active: boolean) => void;
   /** Host element for Kartlager Flyttzon (FormActionPanel sidebar). */
@@ -101,6 +103,7 @@ export default function MapContentPanel({
   kartlagerDraft = null,
   onKartlagerDraftChange,
   layerActivationResetKey = 0,
+  menuSynced = false,
   onGroupsDevelopmentActiveChange,
   moveZoneHostRef,
 }: MapContentPanelProps) {
@@ -185,6 +188,7 @@ export default function MapContentPanel({
           pendingDraft={kartlagerDraft}
           onKartlagerDraftChange={onKartlagerDraftChange}
           layerActivationResetKey={layerActivationResetKey}
+          menuSynced={menuSynced}
           moveZoneHostEl={showKartlagerEditor ? moveZoneHostEl : null}
         />
       </Box>

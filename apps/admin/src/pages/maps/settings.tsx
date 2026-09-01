@@ -567,7 +567,7 @@ export default function MapSettings() {
   const [kartlagerDraft, setKartlagerDraft] = useState<KartlagerDraft | null>(
     null,
   );
-  const kartlagerDirty = kartlagerDraft != null && !layerActivationDirtyRaw;
+  const kartlagerDirty = kartlagerDraft != null && menuSynced;
   const kartlagerMapNameRef = useRef(mapName);
   const [kartlagerMoveZoneVisible, setKartlagerMoveZoneVisible] =
     useState(false);
@@ -1268,6 +1268,7 @@ export default function MapSettings() {
               kartlagerDraft={kartlagerDraft}
               onKartlagerDraftChange={handleKartlagerDraftChange}
               layerActivationResetKey={layerActivationResetKey}
+              menuSynced={menuSynced}
               onGroupsDevelopmentActiveChange={
                 handleGroupsDevelopmentActiveChange
               }

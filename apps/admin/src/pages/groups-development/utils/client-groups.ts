@@ -241,16 +241,22 @@ export function pruneLayerSwitcherDraftToActiveLayers(
   };
 }
 
+export interface LayerSwitcherComparableDraft {
+  groups: ClientLayerSwitcherGroup[];
+  baselayers: {
+    layerId: string;
+    visibleAtStart?: boolean;
+    infobox?: string;
+  }[];
+  /** Bakgrund list order (top → bottom). */
+  baselayerOrder?: string[];
+  /** Ritordning list order (top → bottom). */
+  drawOrderSequence?: string[];
+}
+
 /** Stable JSON for Kartlager dirty checks; inactive Lager layers are ignored. */
 export function layerSwitcherDraftComparableSignature(
-  draft: {
-    groups: ClientLayerSwitcherGroup[];
-    baselayers: {
-      layerId: string;
-      visibleAtStart?: boolean;
-      infobox?: string;
-    }[];
-  },
+  draft: LayerSwitcherComparableDraft,
   activeLayerIds?: ReadonlySet<string> | null,
 ): string {
   const comparable =
@@ -283,13 +289,28 @@ export function layerSwitcherDraftComparableSignature(
       groups: normalizeGroups(group.groups ?? []),
     }));
 
+  const baselayerOrderSource =
+    draft.baselayerOrder ??
+    comparable.baselayers.map((entry) => entry.layerId);
+  const baselayerOrder =
+    activeLayerIds != null
+      ? baselayerOrderSource.filter((id) => activeLayerIds.has(id))
+      : baselayerOrderSource;
+
+  const drawOrderSequence =
+    activeLayerIds != null
+      ? (draft.drawOrderSequence ?? []).filter((id) => activeLayerIds.has(id))
+      : (draft.drawOrderSequence ?? []);
+
   return JSON.stringify({
     groups: normalizeGroups(comparable.groups),
+    baselayerOrder,
     baselayers: comparable.baselayers.map((entry) => ({
       layerId: entry.layerId,
       visibleAtStart: entry.visibleAtStart ?? false,
       infobox: entry.infobox ?? "",
     })),
+    drawOrderSequence,
   });
 }
 
