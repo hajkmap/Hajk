@@ -37,6 +37,7 @@ import {
   useLayerSwitcherDispatch,
 } from "../LayerSwitcherProvider";
 import LocalStorageHelper from "../../../utils/LocalStorageHelper";
+import { BACKGROUND_LAYER_IDS } from "../../../constants/backgroundLayers";
 import LsIconButton from "./LsIconButton";
 
 function QuickAccessPresets({
@@ -182,10 +183,10 @@ function QuickAccessPresets({
         globalObserver.publish("layerswitcher.backgroundLayerChanged", l.id);
         // And set background color to map
         switch (l.id) {
-          case "-2":
+          case BACKGROUND_LAYER_IDS.BLACK:
             document.getElementById("map").style.backgroundColor = "#000";
             break;
-          case "-1":
+          case BACKGROUND_LAYER_IDS.WHITE:
           default:
             document.getElementById("map").style.backgroundColor = "#FFF";
             break;
@@ -278,10 +279,10 @@ function QuickAccessPresets({
       } else if (layer.id < 0) {
         // A fake maplayer is in the package
         switch (layer.id) {
-          case "-2":
+          case BACKGROUND_LAYER_IDS.BLACK:
             backgroundLayerName = "Svart";
             break;
-          case "-1":
+          case BACKGROUND_LAYER_IDS.WHITE:
           default:
             backgroundLayerName = "Vit";
             break;

@@ -5,6 +5,7 @@ import WFSVectorLayer from "../layers/VectorLayer";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style";
+import { BACKGROUND_LAYER_IDS } from "../../constants/backgroundLayers";
 
 export function addMapLayer(appModel, layer) {
   const configMapper = new ConfigMapper(appModel.config.appConfig.proxy);
@@ -166,28 +167,34 @@ function applyBackgroundLayerVisibilityFromParams(
 ) {
   // Check if the layerParams contains -1 (white background) and handle set it to visible on load
   if (
-    layersFromParams.includes("-1") &&
+    layersFromParams.includes(BACKGROUND_LAYER_IDS.WHITE) &&
     layerSwitcherConf?.options?.backgroundSwitcherWhite
   ) {
-    const whiteLayer = map.getAllLayers().find((l) => l.get("name") === "-1");
+    const whiteLayer = map
+      .getAllLayers()
+      .find((l) => l.get("name") === BACKGROUND_LAYER_IDS.WHITE);
     whiteLayer.setVisible(true);
   }
 
   // Check if the layerParams contains -2 (black background) and handle set it to visible on load
   if (
-    layersFromParams.includes("-2") &&
+    layersFromParams.includes(BACKGROUND_LAYER_IDS.BLACK) &&
     layerSwitcherConf?.options?.backgroundSwitcherBlack
   ) {
-    const blackLayer = map.getAllLayers().find((l) => l.get("name") === "-2");
+    const blackLayer = map
+      .getAllLayers()
+      .find((l) => l.get("name") === BACKGROUND_LAYER_IDS.BLACK);
     blackLayer.setVisible(true);
   }
 
   // Check if the layerParams contains -3 (osm-layer) and handle set it to visible on load
   if (
-    layersFromParams.includes("-3") &&
+    layersFromParams.includes(BACKGROUND_LAYER_IDS.OSM) &&
     layerSwitcherConf?.options?.enableOSM
   ) {
-    const osmLayer = map.getAllLayers().find((l) => l.get("name") === "-3");
+    const osmLayer = map
+      .getAllLayers()
+      .find((l) => l.get("name") === BACKGROUND_LAYER_IDS.OSM);
     if (osmLayer === undefined) {
       console.warn(`Cannot find the OSM layer`);
     } else {

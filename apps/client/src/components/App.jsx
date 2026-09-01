@@ -488,6 +488,7 @@ class App extends React.PureComponent {
       .createMap()
       .addSearchModel()
       .addLayers()
+      .addLayerControl() // Layer control must be added after the layers
       .addAnchorModel() // Anchor model must be added after the layers
       .loadPlugins(this.props.activeTools);
 
@@ -562,6 +563,7 @@ class App extends React.PureComponent {
     window.hajkPublicApi = {
       ...window.hajkPublicApi,
       olMap: this.appModel.map,
+      layerControl: this.appModel.layerControl,
       dirtyLayers: {},
     };
 

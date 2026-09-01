@@ -5,6 +5,7 @@ import { saveAs } from "file-saver";
 import FavoritePackageOptions from "./FavoritePackageOptions";
 import ConfirmationDialog from "../../../../components/ConfirmationDialog";
 import BaseDialog from "components/Dialog/BaseDialog";
+import { BACKGROUND_LAYER_IDS } from "../../../../constants/backgroundLayers";
 
 import {
   Button,
@@ -121,10 +122,10 @@ function FavoritesList({
       } else if (layer.id < 0) {
         // A fake maplayer is in the package
         switch (layer.id) {
-          case "-2":
+          case BACKGROUND_LAYER_IDS.BLACK:
             backgroundLayerName = "Svart";
             break;
-          case "-1":
+          case BACKGROUND_LAYER_IDS.WHITE:
           default:
             backgroundLayerName = "Vit";
             break;
@@ -246,7 +247,6 @@ function FavoritesList({
               e.stopPropagation();
               handleEditFavorite();
             }}
-            autoFocus
           >
             Spara
           </Button>

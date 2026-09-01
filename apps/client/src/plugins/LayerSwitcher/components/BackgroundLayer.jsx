@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import BackgroundLayerItem from "./BackgroundLayerItem";
+import { BACKGROUND_LAYER_IDS } from "../../../constants/backgroundLayers";
 
 export default function BackgroundLayer({
   layer,
@@ -34,15 +35,15 @@ export default function BackgroundLayer({
       if (layer.isFakeMapLayer) {
         switch (name) {
           // Openstreetmap
-          case "-3":
+          case BACKGROUND_LAYER_IDS.OSM:
             document.getElementById("map").style.backgroundColor = "#FFF";
             break;
           // Black only background
-          case "-2":
+          case BACKGROUND_LAYER_IDS.BLACK:
             document.getElementById("map").style.backgroundColor = "#000";
             break;
           // White only background
-          case "-1":
+          case BACKGROUND_LAYER_IDS.WHITE:
             document.getElementById("map").style.backgroundColor = "#FFF";
             break;
           default:
