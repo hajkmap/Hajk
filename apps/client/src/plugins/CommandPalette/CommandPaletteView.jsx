@@ -31,7 +31,6 @@ import LayersIcon from "@mui/icons-material/Layers";
 import WallpaperIcon from "@mui/icons-material/Wallpaper";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import FolderSpecialIcon from "@mui/icons-material/FolderSpecial";
-import { setOLSubLayers } from "../../utils/groupLayers";
 import { isValidLayerId } from "../../utils/Validator";
 
 const MAX_RECENT = 5;
@@ -387,52 +386,6 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     return presetList.filter((p) => p.name.toLowerCase().includes(q));
   }, [presetList, query]);
 
-  const toggleLayer = useCallback(
-    (layerId) => {
-      if (!appModel?.getMap) return;
-      const map = appModel.getMap();
-      const layer = map.getAllLayers().find((l) => l.get("name") === layerId);
-      if (!layer) return;
-
-      const isVisible = layer.getVisible();
-      const allSubLayers = layer.get("allSubLayers");
-
-      if (allSubLayers) {
-        if (isVisible) {
-          layer.set("subLayers", []);
-          setOLSubLayers(layer, []);
-          layer.setVisible(false);
-        } else {
-          layer.set("subLayers", allSubLayers);
-          setOLSubLayers(layer, allSubLayers);
-          layer.setVisible(true);
-        }
-      } else {
-        layer.setVisible(!isVisible);
-      }
-    },
-    [appModel]
-  );
-
-  const switchBackgroundLayer = useCallback(
-    (layerId) => {
-      if (!appModel?.getMap) return;
-      appModel
-        .getMap()
-        .getAllLayers()
-        .filter((l) => l.get("layerType") === "base")
-        .forEach((l) => l.setVisible(l.get("name") === layerId));
-
-      const mapEl = document.getElementById("map");
-      if (mapEl) {
-        mapEl.style.backgroundColor = layerId === "-2" ? "#000" : "#fff";
-      }
-
-      globalObserver.publish("layerswitcher.backgroundLayerChanged", layerId);
-    },
-    [appModel, globalObserver]
-  );
-
   // items to display in the list
   const displayItems = useMemo(() => {
     const items = [];
@@ -628,14 +581,19 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       // if we are in the layers we dont want toggle to close the palette
       if (type.startsWith("__layer:")) {
         const layerId = type.slice(8);
-        toggleLayer(layerId);
+        globalObserver.publish("layerswitcher.toggleLayer", { layerId });
         return;
       }
       // switching background shouldn't close the palette either, so the
       // user can preview a few backgrounds before going back
       if (type.startsWith("__background:")) {
         const layerId = type.slice(13);
-        switchBackgroundLayer(layerId);
+        globalObserver.publish("layerswitcher.setBackgroundLayer", layerId);
+        globalObserver.publish("layerswitcher.backgroundLayerChanged", layerId);
+        const mapEl = document.getElementById("map");
+        if (mapEl) {
+          mapEl.style.backgroundColor = layerId === "-2" ? "#000" : "#fff";
+        }
         return;
       }
       // Presets are a one-shot navigation action, so close the palette and
@@ -687,15 +645,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         }
       }
     },
-    [
-      globalObserver,
-      closePalette,
-      appModel,
-      toggleLayer,
-      switchBackgroundLayer,
-      presetList,
-      query,
-    ]
+    [globalObserver, closePalette, appModel, presetList, query]
   );
 
   useEffect(() => {
@@ -862,7 +812,11 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             key={`top-layer-${layer.id}`}
             data-command-item
             selected={isSelected}
-            onClick={() => toggleLayer(layer.id)}
+            onClick={() =>
+              globalObserver.publish("layerswitcher.toggleLayer", {
+                layerId: layer.id,
+              })
+            }
             sx={{
               py: 0.5,
               "&.Mui-selected": {
@@ -984,7 +938,11 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             key={layer.id}
             data-command-item
             selected={isSelected}
-            onClick={() => toggleLayer(layer.id)}
+            onClick={() =>
+              globalObserver.publish("layerswitcher.toggleLayer", {
+                layerId: layer.id,
+              })
+            }
             sx={{
               py: 0.5,
               "&.Mui-selected": {
@@ -1060,7 +1018,16 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             key={layer.id}
             data-command-item
             selected={isSelected}
-            onClick={() => switchBackgroundLayer(layer.id)}
+            onClick={() => {
+              globalObserver.publish(
+                "layerswitcher.setBackgroundLayer",
+                layer.id
+              );
+              globalObserver.publish(
+                "layerswitcher.backgroundLayerChanged",
+                layer.id
+              );
+            }}
             sx={{
               py: 0.5,
               "&.Mui-selected": {
