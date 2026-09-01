@@ -229,6 +229,13 @@ class ConfigServiceV2 {
       }
     }
 
+    // Grab layers from AttributeEditor
+    const attributeEditorOptions = mapConfig.tools.find(
+      (t) => t.type === "AttributeEditor"
+    )?.options;
+    const attributeEditorLayerIds =
+      attributeEditorOptions?.activeServices?.map((as) => as.id) || [];
+
     // Ensure that the WFST layer that is used by the Collector plugin is added too.
     // This one differs a bit from the previous washes as there is no need to map
     // an Array: the `serviceId` is just a string as Collector only supports one
@@ -243,6 +250,7 @@ class ConfigServiceV2 {
       ...layerIds,
       ...searchLayerIds,
       ...editLayerIds,
+      ...attributeEditorLayerIds,
       ...(collectorToolsServiceId ? [collectorToolsServiceId] : []), // Conditional spread to avoid undefined inside the Set
     ]);
 
@@ -551,7 +559,30 @@ class ConfigServiceV2 {
       mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
     }
 
-    // Part 5: Wash FME-server products
+    // Part 5: Wash AttributeEditor services
+    const attributeEditorIndexInTools = mapConfig.tools.findIndex(
+      (t) => t.type === "AttributeEditor"
+    );
+
+    if (attributeEditorIndexInTools !== -1) {
+      let { activeServices } =
+        mapConfig.tools[attributeEditorIndexInTools].options;
+      if (Array.isArray(activeServices)) {
+        activeServices = await asyncFilter(
+          activeServices,
+          async (service) =>
+            await this.filterByGroupVisibility(
+              service.visibleForGroups,
+              user,
+              `AttributeEditor service "${service.id}"`
+            )
+        );
+        mapConfig.tools[attributeEditorIndexInTools].options.activeServices =
+          activeServices;
+      }
+    }
+
+    // Part 6: Wash FME-server products
     const fmeServerIndexInTools = mapConfig.tools.findIndex(
       (t) => t.type === "fmeServer"
     );

@@ -3,16 +3,27 @@ import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Icon, Stroke, Style, Circle, Fill, Text } from "ol/style";
-import { Circle as CircleGeometry, LineString } from "ol/geom";
+import {
+  Circle as CircleGeometry,
+  LineString,
+  Polygon,
+  MultiPoint,
+  MultiLineString,
+  MultiPolygon,
+  Point,
+} from "ol/geom";
 import { fromCircle } from "ol/geom/Polygon";
-import { MultiPoint, Point } from "ol/geom";
 import Overlay from "ol/Overlay";
 import GeoJSON from "ol/format/GeoJSON";
 import transformTranslate from "@turf/transform-translate";
 import { getArea as getExtentArea, getCenter, getWidth } from "ol/extent";
 import { Feature } from "ol";
 import { handleClick } from "./Click";
-import { noModifierKeys, platformModifierKeyOnly } from "ol/events/condition";
+import {
+  noModifierKeys,
+  platformModifierKeyOnly,
+  altKeyOnly,
+} from "ol/events/condition";
 import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
 import { getArea, getLength } from "ol/sphere";
 
@@ -91,6 +102,16 @@ class DrawModel {
   #circleInteractionActive;
   #selectInteractionActive;
   #lastZIndex;
+  #fixedLengthEnabled = false;
+  #fixedLength = 1000;
+  #fixedAngle = 0;
+  #activeSketch = null;
+  #mapClickListener = null;
+  #activeDrawMethod = null;
+  #customHandleDrawAbort = null;
+  #multiDrawModeActive = false;
+  #multiDrawFeature = null;
+  #multiDrawGeometryType = null;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -468,6 +489,7 @@ class DrawModel {
   #getFeatureZIndex = (feature) => {
     let styles = feature.getStyle();
     let zIndex = 0;
+
     if (styles) {
       styles = Array.isArray(styles) ? styles : [styles];
       styles.forEach((style) => {
@@ -746,6 +768,12 @@ class DrawModel {
         // GetCoordinates returns an array with the coordinates for points,
         // so we have to wrap that array in an array before returning.
         return [geometry.getCoordinates()];
+      case "MultiPoint":
+        // GetCoordinates returns an array of coordinate arrays for MultiPoints.
+        return geometry.getCoordinates();
+      case "MultiLineString":
+        // Flatten all LineString coordinates into a single array.
+        return geometry.getCoordinates().flat();
       case "MultiPolygon": {
         // We'll need to flatten the data from MultiPolygon. It's the coordinates we want.
         let coords = [];
@@ -1214,6 +1242,7 @@ class DrawModel {
     drawnFeatures.forEach((feature) => {
       // Get the current style.
       const featureStyle = feature.getStyle();
+
       // Get an updated text-style (which depends on the #measurementSettings).
       const textStyle = this.#getFeatureTextStyle(feature);
       // Set the updated text-style on the base-style.
@@ -1355,8 +1384,15 @@ class DrawModel {
     feature.set("USER_DRAWN", true);
     feature.set("DRAW_METHOD", this.#drawInteraction?.get("DRAW_METHOD"));
     feature.set("TEXT_SETTINGS", this.#textStyleSettings);
-    // And set a nice style on the feature to be added.
-    feature.setStyle(this.#getFeatureStyle(feature));
+
+    // Handle multi-draw mode: merge geometries instead of adding separate features
+    if (this.#multiDrawModeActive) {
+      this.#handleMultiDrawFeature(feature);
+    } else {
+      // And set a nice style on the feature to be added.
+      feature.setStyle(this.#getFeatureStyle(feature));
+    }
+
     // Make sure to remove the event-listener for the pointer-moves.
     // (We don't want the pointer to keep updating while we're not drawing).
     this.#map.un("pointermove", this.#handlePointerMove);
@@ -1380,7 +1416,8 @@ class DrawModel {
   // the style to make sure the svg gets the correct color.
   #refreshArrowStyle = (f) => {
     try {
-      const strokeStyle = f.getStyle()[0].getStroke();
+      const style = f.getStyle();
+      const strokeStyle = style[0].getStroke();
       f.setStyle(
         this.#getArrowStyle(f, {
           strokeStyle: {
@@ -1467,6 +1504,10 @@ class DrawModel {
     }
     if (this.#circleInteractionActive) {
       this.#disableCircleInteraction();
+    }
+    // Check if fixed length mode is active (indicated by map click listener)
+    if (this.#mapClickListener) {
+      return this.#disableFixedLengthMode();
     }
     // If there isn't an active draw interaction currently, we just return.
     if (!this.#drawInteraction) return;
@@ -1623,7 +1664,10 @@ class DrawModel {
     this.#disableModifyInteraction();
     // We have to make sure to set a field so that the handlers responsible for deleting
     // all active interactions knows that there is an edit-interaction to delete.
-    this.#modifyInteraction = new Modify({ source: this.#drawSource });
+    this.#modifyInteraction = new Modify({
+      source: this.#drawSource,
+      deleteCondition: altKeyOnly,
+    });
     // We're gonna need a handler that can update the feature-style when
     // the modification is completed.
     this.#modifyInteraction.on("modifyend", this.#handleModifyEnd);
@@ -1734,6 +1778,169 @@ class DrawModel {
     if (this.#translateInteraction) {
       this.#map.removeInteraction(this.#translateInteraction);
       this.#translateInteraction = null;
+    }
+  };
+
+  // Enables fixed length drawing mode - listens for map clicks directly
+  // instead of using Draw interaction (to avoid rubber band effect)
+  #enableFixedLengthMode = (drawMethod, settings) => {
+    // Store the draw method for later use
+    this.#activeDrawMethod = drawMethod;
+
+    // Add clickLock to avoid featureInfo etc.
+    this.#map.clickLock.add("coreDrawModel");
+
+    // Add snap-helper for snap functionality
+    this.#map.snapHelper.add("coreDrawModel");
+
+    // Start snap tracking for visual feedback on hover
+    this.#map.snapHelper.startSnapTracking();
+
+    // Store custom handlers from settings
+    this.#customHandleDrawStart = settings.handleDrawStart;
+    this.#customHandleDrawEnd = settings.handleDrawEnd;
+    this.#customHandleDrawAbort = settings.handleDrawAbort;
+
+    // Listen for map clicks to set start point
+    this.#mapClickListener = this.#handleFixedLengthMapClick.bind(this);
+    this.#map.on("singleclick", this.#mapClickListener);
+
+    // Note: We no longer set custom cursor here - the snap tracking overlay
+    // provides the visual indicator (red dot that follows mouse and snaps)
+  };
+
+  // Disables fixed length drawing mode
+  #disableFixedLengthMode = () => {
+    // Remove map click listener
+    if (this.#mapClickListener) {
+      this.#map.un("singleclick", this.#mapClickListener);
+      this.#mapClickListener = null;
+    }
+
+    // Clear active sketch
+    if (this.#activeSketch) {
+      this.#drawSource.removeFeature(this.#activeSketch);
+      this.#activeSketch = null;
+      // Tell the initiator the sketch was aborted (same as finishDraws'
+      // too-few-points branch does) — without this, SketchView's
+      // drawingActive stayed true when fixed-length mode was toggled off
+      // mid-sketch, leaving the segment buttons active but no-op.
+      if (this.#customHandleDrawAbort) {
+        this.#customHandleDrawAbort();
+      }
+    }
+
+    // Stop snap tracking and remove snap helper
+    this.#map.snapHelper.stopSnapTracking();
+    this.#map.clickLock.delete("coreDrawModel");
+    this.#map.snapHelper.delete("coreDrawModel");
+
+    // Clear draw method
+    this.#activeDrawMethod = null;
+  };
+
+  // Handles map click in fixed length mode - creates the initial feature
+  #handleFixedLengthMapClick = (event) => {
+    // Use snapped coordinate from tracking, or fall back to click coordinate
+    const snapped = this.#map.snapHelper?.getSnappedCoordinate?.();
+    const coordinate = snapped ?? event.coordinate;
+
+    // If we don't have an active sketch yet, create one
+    if (!this.#activeSketch) {
+      // Create geometry based on draw method
+      let geometry;
+      if (this.#activeDrawMethod === "LineString") {
+        geometry = new LineString([coordinate]);
+      } else if (this.#activeDrawMethod === "Polygon") {
+        geometry = new Polygon([[coordinate]]);
+      }
+
+      // Create the feature
+      this.#activeSketch = new Feature({ geometry });
+
+      // Add to source so it's visible (as a sketch/preview)
+      this.#drawSource.addFeature(this.#activeSketch);
+
+      // Apply draw style (temporary style while drawing)
+      this.#activeSketch.setStyle(this.#getDrawStyle());
+
+      // Publish drawStart event
+      if (this.#customHandleDrawStart) {
+        this.#customHandleDrawStart({ feature: this.#activeSketch });
+      }
+
+      // Stop snap tracking - the red dot should disappear after start point is set
+      this.#map.snapHelper.stopSnapTracking();
+    }
+  };
+
+  // Public method to add a segment with fixed length and angle
+  addFixedLengthSegment = () => {
+    if (!this.#activeSketch || !this.#fixedLengthEnabled) {
+      return;
+    }
+
+    const geometry = this.#activeSketch.getGeometry();
+    let coordinates;
+
+    // Get current coordinates
+    if (geometry instanceof LineString) {
+      coordinates = geometry.getCoordinates();
+    } else if (geometry instanceof Polygon) {
+      // For polygon, get the outer ring coordinates
+      coordinates = geometry.getCoordinates()[0];
+    } else {
+      return;
+    }
+
+    if (coordinates.length === 0) {
+      return;
+    }
+
+    // Get the last coordinate (starting point for new segment)
+    const lastCoord = coordinates[coordinates.length - 1];
+
+    // Create a temporary point feature for Turf
+    const startPoint = new Feature({
+      geometry: new Point(lastCoord),
+    });
+
+    // Convert to GeoJSON
+    const gjPoint = this.#geoJSONParser.writeFeatureObject(startPoint);
+
+    // Calculate end point using transformTranslate
+    // fixedLength is in meters, convert to kilometers for Turf
+    const endGjPoint = transformTranslate(
+      gjPoint,
+      this.#fixedLength / 1000,
+      this.#fixedAngle
+    );
+
+    // Extract the new coordinate
+    const endCoord = this.#geoJSONParser
+      .readGeometry(endGjPoint.geometry)
+      .getCoordinates();
+
+    // Add the new coordinate to the geometry
+    if (geometry instanceof LineString) {
+      coordinates.push(endCoord);
+      geometry.setCoordinates(coordinates);
+    } else if (geometry instanceof Polygon) {
+      coordinates.push(endCoord);
+      geometry.setCoordinates([coordinates]);
+    }
+
+    // Update the feature style to reflect the new geometry
+    this.#activeSketch.setStyle(this.#getDrawStyle());
+  };
+
+  // Updates fixed length settings (called when user changes inputs)
+  updateFixedLengthSettings = (length, angle) => {
+    if (length !== undefined) {
+      this.#fixedLength = length;
+    }
+    if (angle !== undefined) {
+      this.#fixedAngle = angle;
     }
   };
 
@@ -1891,10 +2098,21 @@ class DrawModel {
   };
 
   // Toggles the draw-interaction on and off if it is currently on.
-  // This refresh makes sure new settings are applied.
+  // This refresh makes sure new settings are applied while preserving custom handlers.
   #refreshDrawInteraction = () => {
     if (this.#drawInteraction) {
-      this.toggleDrawInteraction(this.#drawInteraction.get("DRAW_METHOD"));
+      // Preserve the custom handlers when refreshing the interaction
+      const settings = {
+        handleDrawStart: this.#customHandleDrawStart,
+        handleDrawEnd: this.#customHandleDrawEnd,
+        handlePointerMove: this.#customHandlePointerMove,
+        handleAddFeature: this.#customHandleAddFeature,
+        fixedLengthEnabled: this.#fixedLengthEnabled,
+      };
+      this.toggleDrawInteraction(
+        this.#drawInteraction.get("DRAW_METHOD"),
+        settings
+      );
     }
   };
 
@@ -2212,8 +2430,13 @@ class DrawModel {
   // Moves the features currently selected via the Move-interaction.
   // The features are moved the supplied length (in meters) in the supplied
   // direction (in degrees, where north is 0 and east is 90 and so on).
-  translateSelectedFeatures = (length, angle) => {
-    this.#selectInteraction.getFeatures().forEach((f) => {
+  translateSelectedFeatures = (length, angle, opts = {}) => {
+    const selected = opts.features
+      ? Array.isArray(opts.features)
+        ? opts.features
+        : (opts.features.getArray?.() ?? [])
+      : (this.#selectInteraction.getFeatures().getArray?.() ?? []);
+    selected.forEach((f) => {
       try {
         // Since geoJSON cannot handle OL's circle-geometries, we'll have to check
         // if we're dealing with a circle before creating the geoJSON-feature...
@@ -2250,13 +2473,15 @@ class DrawModel {
   };
 
   // Rotate the currently selected features
-  rotateSelectedFeatures = (degrees, clockwise) => {
+  rotateSelectedFeatures = (degrees, clockwise, opts = {}) => {
     // Handle both CW and CCW rotation
     degrees = clockwise ? -degrees : degrees;
-
-    this.#selectInteraction
-      .getFeatures()
-      .getArray()
+    const selected = opts.features
+      ? Array.isArray(opts.features)
+        ? opts.features
+        : (opts.features.getArray?.() ?? [])
+      : (this.#selectInteraction.getFeatures().getArray?.() ?? []);
+    selected
       .filter((f) => {
         return ROTATABLE_DRAW_TYPES.indexOf(f.get("DRAW_METHOD")) > -1;
       })
@@ -2279,15 +2504,26 @@ class DrawModel {
   #createDuplicateFeature = (feature) => {
     // First we'll clone the supplied feature.
     const duplicate = feature.clone();
+
+    // Get the feature's style
+    const featureStyle = feature.getStyle();
+
+    // Skip style cloning for features with custom style functions
+    // The cloned feature will inherit the function reference, which is appropriate
+    if (typeof featureStyle === "function") {
+      duplicate.setStyle(featureStyle);
+      return duplicate;
+    }
+
     // Then we'll have to clone the style (so that the feature-styles are not connected).
     // We only want the first style-object from the style array (since the rest are highlight-styles).
     // The above applied to all features except for Arrows, which aren't highlighted.
     const style =
       feature.get("DRAW_METHOD") === "Arrow"
-        ? feature.getStyle().map((style) => style.clone())
-        : Array.isArray(feature.getStyle())
-          ? feature.getStyle()[0].clone()
-          : feature.getStyle().clone();
+        ? featureStyle.map((style) => style.clone())
+        : Array.isArray(featureStyle)
+          ? featureStyle[0].clone()
+          : featureStyle.clone();
     // Then we'll apply the cloned-style.
     duplicate.setStyle(style);
     // Finally we'll return the cloned feature.
@@ -2424,6 +2660,22 @@ class DrawModel {
     if (drawMethod === "Circle") {
       this.#enableCircleInteraction();
     }
+
+    // Extract fixed length enabled setting from settings object
+    this.#fixedLengthEnabled = settings.fixedLengthEnabled || false;
+    // Note: fixedLength and fixedAngle are NOT extracted from settings here
+    // They are updated via updateFixedLengthSettings() when user changes them
+
+    // Check if we should use fixed length mode instead of normal Draw interaction
+    if (
+      this.#fixedLengthEnabled &&
+      (drawMethod === "LineString" || drawMethod === "Polygon")
+    ) {
+      // For fixed length mode, we DON'T use Draw interaction
+      // Instead, we listen for map clicks directly
+      return this.#enableFixedLengthMode(drawMethod, settings);
+    }
+
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
     const type = this.#getDrawInteractionType(drawMethod);
@@ -2456,7 +2708,78 @@ class DrawModel {
 
   // Finishes the currently active draw interaction.
   finishDraw = () => {
-    if (this.#drawInteraction) {
+    // Handle fixed length mode
+    if (this.#activeSketch && this.#fixedLengthEnabled) {
+      const geometry = this.#activeSketch.getGeometry();
+      let coordinates;
+
+      // Get current coordinates
+      if (geometry instanceof LineString) {
+        coordinates = geometry.getCoordinates();
+      } else if (geometry instanceof Polygon) {
+        coordinates = geometry.getCoordinates()[0];
+      }
+
+      // Only finalize if we have at least 2 points for LineString or 3 for Polygon
+      const minPoints = geometry instanceof Polygon ? 3 : 2;
+      if (coordinates && coordinates.length >= minPoints) {
+        // For Polygon, close the ring if needed
+        if (geometry instanceof Polygon) {
+          // Check if first and last coordinates are the same
+          const first = coordinates[0];
+          const last = coordinates[coordinates.length - 1];
+          if (first[0] !== last[0] || first[1] !== last[1]) {
+            coordinates.push(first);
+            geometry.setCoordinates([coordinates]);
+          }
+        }
+
+        // Remove feature from source temporarily
+        this.#drawSource.removeFeature(this.#activeSketch);
+
+        // Apply final properties (same as #handleDrawEnd)
+        this.#activeSketch.set("USER_DRAWN", true);
+        this.#activeSketch.set("DRAW_METHOD", this.#activeDrawMethod);
+        this.#activeSketch.set("TEXT_SETTINGS", this.#textStyleSettings);
+
+        // Re-add feature to source - this triggers addfeature event
+        this.#drawSource.addFeature(this.#activeSketch);
+
+        // Handle multi-draw mode: merge geometries instead of adding separate features
+        if (this.#multiDrawModeActive) {
+          this.#handleMultiDrawFeature(this.#activeSketch);
+        } else {
+          // Apply the final feature style (not draw style)
+          this.#activeSketch.setStyle(
+            this.#getFeatureStyle(this.#activeSketch)
+          );
+        }
+
+        // Trigger drawEnd handler
+        if (this.#customHandleDrawEnd) {
+          this.#customHandleDrawEnd({ feature: this.#activeSketch });
+        }
+
+        // Clear the active sketch so we can start a new one
+        this.#activeSketch = null;
+
+        // Start snap tracking again - red dot indicates ready for new start point
+        this.#map.snapHelper.startSnapTracking();
+      } else {
+        // Not enough points - abort the drawing
+        this.#drawSource.removeFeature(this.#activeSketch);
+        this.#activeSketch = null;
+
+        // Trigger drawAbort handler so UI updates correctly
+        if (this.#customHandleDrawAbort) {
+          this.#customHandleDrawAbort();
+        }
+
+        // Start snap tracking again - red dot indicates ready for new start point
+        this.#map.snapHelper.startSnapTracking();
+      }
+    } else if (this.#drawInteraction) {
+      // Normal draw interaction
       this.#drawInteraction.finishDrawing();
     }
   };
@@ -2674,6 +2997,327 @@ class DrawModel {
   // Get:er returning circle radius
   getCircleRadius = () => {
     return this.#circleRadius;
+  };
+
+  // SECTION: Multi-draw mode
+  // Allows users to draw multiple geometries that are merged into
+  // a single Multi-geometry (MultiPoint, MultiLineString, MultiPolygon)
+
+  // Private method to handle a feature drawn in multi-draw mode
+  #handleMultiDrawFeature = (feature) => {
+    const geometry = feature.getGeometry();
+    const geometryType = geometry.getType();
+
+    // Only allow Point, LineString, and Polygon in multi-draw mode
+    if (!["Point", "LineString", "Polygon"].includes(geometryType)) {
+      console.warn(`Multi-draw mode does not support ${geometryType}`);
+      feature.setStyle(this.#getFeatureStyle(feature));
+      return;
+    }
+
+    // Check if we're trying to mix geometry types
+    if (
+      this.#multiDrawGeometryType &&
+      this.#multiDrawGeometryType !== geometryType
+    ) {
+      console.warn(
+        `Cannot mix geometry types in multi-draw mode. Expected ${this.#multiDrawGeometryType}, got ${geometryType}`
+      );
+      // Remove the incompatible feature
+      setTimeout(() => {
+        this.#drawSource.removeFeature(feature);
+      }, 0);
+      return;
+    }
+
+    if (!this.#multiDrawFeature) {
+      // First feature in multi-draw mode - convert to multi-geometry
+      this.#multiDrawGeometryType = geometryType;
+      this.#convertToMultiGeometry(feature);
+      this.#multiDrawFeature = feature;
+      feature.setStyle(this.#getFeatureStyle(feature));
+    } else {
+      // Subsequent features - merge into existing multi-feature
+      this.#mergeIntoMultiFeature(feature);
+    }
+  };
+
+  // Convert a single geometry feature to a multi-geometry feature
+  #convertToMultiGeometry = (feature) => {
+    const geometry = feature.getGeometry();
+    const geometryType = geometry.getType();
+
+    let multiGeometry;
+    switch (geometryType) {
+      case "Point":
+        multiGeometry = new MultiPoint([geometry.getCoordinates()]);
+        break;
+      case "LineString":
+        multiGeometry = new MultiLineString([geometry.getCoordinates()]);
+        break;
+      case "Polygon":
+        multiGeometry = new MultiPolygon([geometry.getCoordinates()]);
+        break;
+      default:
+        return; // Should not happen due to earlier check
+    }
+
+    feature.setGeometry(multiGeometry);
+    // Update DRAW_METHOD to reflect multi-type
+    feature.set("DRAW_METHOD", `Multi${geometryType}`);
+  };
+
+  // Merge a new feature's geometry into the existing multi-draw feature
+  #mergeIntoMultiFeature = (feature) => {
+    const newGeometry = feature.getGeometry();
+    const multiGeometry = this.#multiDrawFeature.getGeometry();
+    const multiType = multiGeometry.getType();
+
+    // Get existing coordinates and add new ones
+    const existingCoords = multiGeometry.getCoordinates();
+    let newCoords;
+
+    switch (multiType) {
+      case "MultiPoint":
+        newCoords = [...existingCoords, newGeometry.getCoordinates()];
+        multiGeometry.setCoordinates(newCoords);
+        break;
+      case "MultiLineString":
+        newCoords = [...existingCoords, newGeometry.getCoordinates()];
+        multiGeometry.setCoordinates(newCoords);
+        break;
+      case "MultiPolygon":
+        newCoords = [...existingCoords, newGeometry.getCoordinates()];
+        multiGeometry.setCoordinates(newCoords);
+        break;
+      default:
+        console.warn(`Unexpected multi-geometry type: ${multiType}`);
+        return;
+    }
+
+    // Update style on the multi-feature to refresh measurements etc.
+    this.#multiDrawFeature.setStyle(
+      this.#getFeatureStyle(this.#multiDrawFeature)
+    );
+
+    // Remove the individual feature that was just drawn
+    // Use setTimeout to avoid issues with OL's internal feature handling
+    setTimeout(() => {
+      this.#drawSource.removeFeature(feature);
+    }, 0);
+  };
+
+  // Enable or disable multi-draw mode
+  setMultiDrawMode = (active) => {
+    if (active === this.#multiDrawModeActive) {
+      return;
+    }
+
+    this.#multiDrawModeActive = active;
+
+    if (!active) {
+      // When disabling, finalize any ongoing multi-draw
+      this.finishMultiDraw();
+    }
+  };
+
+  // Get current multi-draw mode state
+  getMultiDrawMode = () => {
+    return this.#multiDrawModeActive;
+  };
+
+  // Finish multi-draw mode and return the completed feature
+  finishMultiDraw = () => {
+    const completedFeature = this.#multiDrawFeature;
+
+    // Reset multi-draw state
+    this.#multiDrawFeature = null;
+    this.#multiDrawGeometryType = null;
+
+    // Publish information about the completed multi-feature
+    if (completedFeature) {
+      this.#publishInformation({
+        subject: "drawModel.multiDrawCompleted",
+        payLoad: completedFeature,
+      });
+    }
+
+    return completedFeature;
+  };
+
+  // Get the current multi-draw feature (if any)
+  getMultiDrawFeature = () => {
+    return this.#multiDrawFeature;
+  };
+
+  // Get the number of parts in the current multi-draw feature
+  getMultiDrawPartCount = () => {
+    if (!this.#multiDrawFeature) {
+      return 0;
+    }
+    const geometry = this.#multiDrawFeature.getGeometry();
+    const coords = geometry.getCoordinates();
+    return coords.length;
+  };
+
+  // SECTION: Split and Merge operations for multi-features
+
+  /**
+   * Splits a multi-feature into individual features.
+   * @param {Feature} feature - The multi-feature to split (MultiPoint, MultiLineString, or MultiPolygon)
+   * @returns {Feature[]} Array of individual features, or empty array if not a multi-feature
+   */
+  splitMultiFeature = (feature) => {
+    if (!feature) return [];
+
+    const geometry = feature.getGeometry();
+    const geometryType = geometry.getType();
+
+    // Only handle multi-geometries
+    if (
+      !["MultiPoint", "MultiLineString", "MultiPolygon"].includes(geometryType)
+    ) {
+      return [];
+    }
+
+    const coordinates = geometry.getCoordinates();
+    const newFeatures = [];
+
+    // Copy properties from original feature (except geometry)
+    const properties = feature.getProperties();
+    delete properties.geometry;
+
+    coordinates.forEach((coords) => {
+      let newGeometry;
+      switch (geometryType) {
+        case "MultiPoint":
+          newGeometry = new Point(coords);
+          break;
+        case "MultiLineString":
+          newGeometry = new LineString(coords);
+          break;
+        case "MultiPolygon":
+          newGeometry = new Polygon(coords);
+          break;
+        default:
+          return;
+      }
+
+      const newFeature = new Feature({
+        geometry: newGeometry,
+        ...properties,
+      });
+
+      // Update DRAW_METHOD to reflect single geometry type
+      const singleType = geometryType.replace("Multi", "");
+      newFeature.set("DRAW_METHOD", singleType);
+
+      newFeatures.push(newFeature);
+    });
+
+    return newFeatures;
+  };
+
+  /**
+   * Merges multiple features of the same type into a single multi-feature.
+   * @param {Feature[]} features - Array of features to merge (must be same geometry type)
+   * @returns {Feature|null} The merged multi-feature, or null if merge is not possible
+   */
+  mergeFeatures = (features) => {
+    if (!features || features.length < 2) return null;
+
+    // Get geometry types and validate they're all the same
+    const geometryTypes = features.map((f) => f.getGeometry().getType());
+    const uniqueTypes = [...new Set(geometryTypes)];
+
+    if (uniqueTypes.length !== 1) {
+      console.warn("Cannot merge features of different geometry types");
+      return null;
+    }
+
+    const geometryType = uniqueTypes[0];
+
+    // Only handle Point, LineString, and Polygon (convert to Multi variants)
+    if (!["Point", "LineString", "Polygon"].includes(geometryType)) {
+      // If already multi-geometries, we could merge them but that's more complex
+      console.warn("Can only merge Point, LineString, or Polygon features");
+      return null;
+    }
+
+    // Collect all coordinates
+    const allCoordinates = features.map((f) =>
+      f.getGeometry().getCoordinates()
+    );
+
+    // Create the multi-geometry
+    let multiGeometry;
+    switch (geometryType) {
+      case "Point":
+        multiGeometry = new MultiPoint(allCoordinates);
+        break;
+      case "LineString":
+        multiGeometry = new MultiLineString(allCoordinates);
+        break;
+      case "Polygon":
+        multiGeometry = new MultiPolygon(allCoordinates);
+        break;
+      default:
+        return null;
+    }
+
+    // Use properties from the first feature as base (except geometry)
+    const baseProperties = features[0].getProperties();
+    delete baseProperties.geometry;
+
+    const mergedFeature = new Feature({
+      geometry: multiGeometry,
+      ...baseProperties,
+    });
+
+    // Update DRAW_METHOD to reflect multi-type
+    mergedFeature.set("DRAW_METHOD", `Multi${geometryType}`);
+
+    return mergedFeature;
+  };
+
+  /**
+   * Checks if a feature is a multi-feature (has multiple parts).
+   * @param {Feature} feature - The feature to check
+   * @returns {boolean} True if the feature is a multi-feature with more than one part
+   */
+  isMultiFeature = (feature) => {
+    if (!feature) return false;
+    const geometry = feature.getGeometry();
+    const geometryType = geometry.getType();
+
+    if (
+      !["MultiPoint", "MultiLineString", "MultiPolygon"].includes(geometryType)
+    ) {
+      return false;
+    }
+
+    // Check if it actually has multiple parts
+    const coordinates = geometry.getCoordinates();
+    return coordinates.length > 1;
+  };
+
+  /**
+   * Gets the number of parts in a multi-feature.
+   * @param {Feature} feature - The feature to check
+   * @returns {number} Number of parts (0 if not a multi-feature)
+   */
+  getMultiFeaturePartCount = (feature) => {
+    if (!feature) return 0;
+    const geometry = feature.getGeometry();
+    const geometryType = geometry.getType();
+
+    if (
+      !["MultiPoint", "MultiLineString", "MultiPolygon"].includes(geometryType)
+    ) {
+      return 0;
+    }
+
+    return geometry.getCoordinates().length;
   };
 }
 export default DrawModel;

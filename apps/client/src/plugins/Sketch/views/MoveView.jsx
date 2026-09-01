@@ -15,6 +15,7 @@ import RotateRightIcon from "@mui/icons-material/RotateRight";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import Information from "../components/Information";
 import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
+import { editBus } from "../../../buses/editBus";
 
 const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
   return (
@@ -75,6 +76,7 @@ const FeatureMoveSelector = (props) => {
       props.movementLength,
       props.movementAngle
     );
+    editBus.emit("sketch:ae-translate", { distance: length, angleDeg: angle });
     // Then we'll update the last-moves-state.
     props.setLastMoves([...props.lastMoves, { length, angle }]);
   };
@@ -86,6 +88,10 @@ const FeatureMoveSelector = (props) => {
     const moves = [...props.lastMoves];
     const { length, angle } = moves.pop();
     props.drawModel.translateSelectedFeatures(length, angle - 180);
+    editBus.emit("sketch:ae-translate", {
+      distance: length,
+      angleDeg: angle - 180,
+    });
     props.setLastMoves(moves);
   };
 
@@ -136,6 +142,9 @@ const FeatureMoveSelector = (props) => {
               fullWidth
               size="small"
               onClick={handleUndoClick}
+              // Symmetric with "Flytta" (which is never uiDisabled): in AE
+              // mode uiDisabled is always true, which left the user able to
+              // move features but never undo the move.
               disabled={props.lastMoves.length === 0}
             >
               Ångra
@@ -171,7 +180,21 @@ const FeatureRotateSelector = (props) => {
   // Handle both single click rotation and continuous rotation
   const handleRotationClick = (clockwise = true, continuous = false) => {
     props.drawModel.rotateSelectedFeatures(props.rotationDegrees, clockwise);
+
+    editBus.emit("sketch:ae-rotate", {
+      degrees: props.rotationDegrees,
+      clockwise,
+      // Continuous rotation ticks every 60 ms — the flag lets the undo
+      // bookkeeping coalesce the whole press-and-hold into ONE entry.
+      continuous,
+    });
+
     if (continuous) {
+      // Upstream pattern: rotationTimeout is a component-scope `let` shared
+      // by the press-and-hold handlers. Converting it to a ref is mapped for
+      // the follow-up cleanup PR — suppressed rather than refactoring
+      // upstream code inside this feature PR.
+      // eslint-disable-next-line react-hooks/immutability
       rotationTimeout = setTimeout(() => {
         handleRotationClick(clockwise, true);
       }, 60);
@@ -283,8 +306,13 @@ const MoveView = (props) => {
   // Keep track of degrees for rotation tool.
   const [rotationDegrees, setRotationDegrees] = React.useState(15);
   // Let's destruct some props
-  const { drawModel, moveFeatures, translateEnabled, setTranslateEnabled } =
-    props;
+  const {
+    drawModel,
+    moveFeatures,
+    translateEnabled,
+    setTranslateEnabled,
+    uiDisabled = false,
+  } = props;
 
   // Let's use an effect that can reset the last moves when the current
   // feature/features selected for movement changes.
@@ -326,6 +354,7 @@ const MoveView = (props) => {
               setMovementLength={setMovementLength}
               movementAngle={movementAngle}
               setMovementAngle={setMovementAngle}
+              uiDisabled={uiDisabled}
             />
             <FeatureRotateSelector
               disabled={rotationIsDisabled()}

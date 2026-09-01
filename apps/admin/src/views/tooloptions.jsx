@@ -27,6 +27,7 @@ import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 import TimeSlider from "./tools/timeslider.jsx";
 // import GeosuiteExport from "./tools/geosuiteExport.jsx";
 import ExternalLinks from "./tools/externalLink.jsx";
+import AttributeEditor from "./tools/attributeeditor.jsx";
 
 var defaultState = {
   activeTool: "",
@@ -121,6 +122,8 @@ class ToolOptions extends Component {
         return <TimeSlider parent={this} model={this.props.model} />;
       case "documenthandler":
         return <MenuEditor parent={this} model={this.props.model} />;
+      case "AttributeEditor":
+        return <AttributeEditor parent={this} model={this.props.model} />;
       // case "geosuiteexport":
       //   return <GeosuiteExport parent={this} model={this.props.model} />;
       default:
@@ -184,6 +187,7 @@ class ToolOptions extends Component {
       preset: "Snabbval",
       search: "Sök",
       timeslider: "Tidslinje",
+      AttributeEditor: "Attributredigeraren",
       collector: "Tyck till",
       print: "Utskrift",
       coordinates: "Visa koordinat",

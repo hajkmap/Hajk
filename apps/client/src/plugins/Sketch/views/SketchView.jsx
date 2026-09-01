@@ -2,6 +2,7 @@
 import React from "react";
 import { Grid } from "@mui/material";
 // Constants
+import { useTheme } from "@mui/material/styles";
 import {
   PLUGIN_MARGIN,
   MAX_REMOVED_FEATURES,
@@ -9,6 +10,7 @@ import {
 } from "../constants";
 // Components
 import ActivityMenu from "../components/ActivityMenu";
+import ConfirmServiceSwitchWithDrawings from "../../../components/ConfirmServiceSwitchWithDrawings";
 // Views
 import AddView from "./AddView";
 import SaveView from "./SaveView";
@@ -17,6 +19,7 @@ import DeleteView from "./DeleteView";
 import MoveView from "./MoveView";
 import EditView from "./EditView";
 import SettingsView from "./SettingsView";
+import OGCView from "./OGCView";
 // Hooks
 import useCookieStatus from "../../../hooks/useCookieStatus";
 import useUpdateEffect from "../../../hooks/useUpdateEffect";
@@ -25,6 +28,8 @@ import useUpdateEffect from "../../../hooks/useUpdateEffect";
 import { useSnackbar } from "notistack";
 import { Vector as VectorSource } from "ol/source";
 import { Vector as VectorLayer } from "ol/layer";
+//Bus
+import { editBus } from "../../../buses/editBus";
 
 // Beware! In the view we only use kml and gpx, even if the actual file type might be application/vnd.google-earth.kml+xml or application/gpx+xml etc.
 const FILE_TYPES = {
@@ -34,6 +39,14 @@ const FILE_TYPES = {
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
+  const theme = useTheme();
+  const [hasUnsaved, setHasUnsaved] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const unsavedRef = React.useRef({
+    hasUnsaved: false,
+    summary: { adds: 0, edits: 0, deletes: 0 },
+  });
+
   // We want to render the ActivityMenu on the same side as the plugin
   // is rendered (left or right). Let's grab the prop stating where it is rendered!
   const pluginPosition = props.options?.position ?? "left";
@@ -47,6 +60,8 @@ const SketchView = (props) => {
   const { activityId, setActivityId } = props;
   // We're gonna need to keep track of the current plugin-shown-state and the toggle-buffer-button.
   const { pluginShown, setToggleBufferBtn, toggleBufferBtn } = props;
+  // We're gonna need to keep track of the allowed geometry types
+  const { allowedGeometryTypes } = props;
 
   // We're gonna need some snackbar functions so that we can prompt the user with information.
   const { closeSnackbar, enqueueSnackbar } = useSnackbar();
@@ -62,6 +77,10 @@ const SketchView = (props) => {
   const [textStyle, setTextStyle] = React.useState(
     model.getTextStyleSettings()
   );
+
+  const [ogcSource, setOgcSource] = React.useState("Ingen");
+  const [serviceList, setServiceList] = React.useState([]);
+
   // We want to keep track of the last removed features so that the user can restore
   // features that they potentially removed by mistake.
   const [removedFeatures, setRemovedFeatures] = React.useState(
@@ -73,6 +92,36 @@ const SketchView = (props) => {
   const [uploadedFiles, setUploadedFiles] = React.useState([]);
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
+
+  const [drawingsWarningDialog, setDrawingsWarningDialog] = React.useState({
+    open: false,
+    targetService: null,
+    drawingCount: 0,
+  });
+
+  const getDrawnFeaturesCount = React.useCallback(() => {
+    // Find sketch layer
+    const layers = props.map.getLayers().getArray?.() || [];
+    const sketchLayer =
+      layers.find((lyr) => lyr?.get?.("name") === "pluginSketch") || null;
+    const source = sketchLayer?.getSource?.();
+    const features = source?.getFeatures?.() || [];
+    const visibleFeatures = features.filter((f) => f.get("HIDDEN") !== true);
+    return visibleFeatures.length;
+  }, [props.map]);
+
+  React.useEffect(() => {
+    const offList = editBus.on("edit:service-list-loaded", (ev) => {
+      const { serviceList } = ev.detail || {};
+      if (serviceList) {
+        setServiceList(serviceList);
+      }
+    });
+
+    return () => {
+      offList();
+    };
+  }, []);
 
   // Checks that every entry in the array of uploaded files still
   // has some features in the map. If it doesn't, the entry is removed.
@@ -212,6 +261,19 @@ const SketchView = (props) => {
     functionalCookiesOk && model.setStoredDrawStyleSettings(drawStyle);
   }, [drawStyle, functionalCookiesOk, model]);
 
+  // This effect resets settings when switching between normal Sketch and AttributeEditor mode
+  React.useEffect(() => {
+    if (ogcSource === "Ingen") {
+      // Switching back to normal Sketch mode from AttributeEditor mode
+      // Reset fixed length drawing to avoid the red cursor dot in normal mode
+      props.setFixedLengthEnabled?.(false);
+    } else {
+      // Switching to AttributeEditor mode (ogcSource is a layer)
+      // Reset draw style to default since user cannot control style in AttributeEditor mode
+      setDrawStyle(model.getDrawStyleSettings());
+    }
+  }, [ogcSource, props, model]);
+
   // This effect makes sure to save the text-style-settings to the LS when it
   // changes. (Only if functional cookies are allowed obviously).
   React.useEffect(() => {
@@ -331,6 +393,237 @@ const SketchView = (props) => {
       }));
     }
   }, [activityId, pluginShown, memoizedSetToggleBufferBtn, activeDrawType]);
+
+  React.useEffect(() => {
+    const offUnsaved = editBus.on("edit:unsaved-state", (ev) => {
+      const { hasUnsaved, summary } = ev.detail || {};
+      setHasUnsaved(!!hasUnsaved);
+      unsavedRef.current = {
+        hasUnsaved: !!hasUnsaved,
+        summary: summary || { adds: 0, edits: 0, deletes: 0 },
+      };
+    });
+
+    // Lock parts of the UI while AttributeEditor runs a save transaction
+    // (emitted from commitTableEdits; "finished" always fires via finally).
+    const offSaveStart = editBus.on("edit:saving-started", () => {
+      setIsSaving(true);
+    });
+    const offSaveEnd = editBus.on("edit:saving-finished", () => {
+      setIsSaving(false);
+    });
+
+    return () => {
+      offUnsaved();
+      offSaveStart();
+      offSaveEnd();
+    };
+  }, []);
+
+  const uiDisabled = isSaving || (ogcSource && ogcSource !== "Ingen");
+
+  const handleOgcSourceChange = React.useCallback(
+    (newOgcSourceTitle) => {
+      if (isSaving) return;
+
+      const selectedService = serviceList.find(
+        (s) => (s.title || s.id) === newOgcSourceTitle
+      );
+      const serviceId = selectedService?.id || null;
+
+      // Check if user is trying to select a service (not "Ingen")
+      const isSelectingService = newOgcSourceTitle !== "Ingen";
+
+      // If user selects a service AND there are drawn objects, show warning
+      if (isSelectingService && ogcSource === "Ingen") {
+        const drawingCount = getDrawnFeaturesCount();
+
+        if (drawingCount > 0) {
+          // Show warning dialog instead of switching directly
+          setDrawingsWarningDialog({
+            open: true,
+            targetService: { title: newOgcSourceTitle, id: serviceId },
+            drawingCount: drawingCount,
+          });
+          return; // Cancel the switch until user confirms
+        }
+      }
+
+      // Logic for unsaved changes in AttributeEditor
+      if (hasUnsaved) {
+        editBus.emit("edit:service-switch-requested", {
+          source: "sketch",
+          targetLabel: newOgcSourceTitle,
+          targetId: serviceId,
+        });
+        return;
+      }
+
+      // Continue with switch
+      props.setPluginSettings(
+        newOgcSourceTitle === "Ingen"
+          ? { title: "Rita", color: theme.palette.primary.main }
+          : {
+              title: `Redigerar ${newOgcSourceTitle}`,
+              color: theme.palette.warning.main,
+            }
+      );
+
+      if (newOgcSourceTitle === "Ingen") {
+        editBus.emit("edit:service-cleared", { source: "sketch" });
+      } else {
+        editBus.emit("edit:service-selected", {
+          source: "sketch",
+          id: serviceId,
+          layerId: selectedService?.layers?.[0]?.id || "",
+          title: `Redigerar ${newOgcSourceTitle}`,
+          color: theme.palette.warning.main,
+        });
+
+        // Open AttributeEditor plugin window when a service is selected
+        globalObserver.publish("attributeeditor.showWindow", {
+          hideOtherPluginWindows: false, // Keep Sketch window open
+          runCallback: true,
+        });
+      }
+      setOgcSource(newOgcSourceTitle);
+    },
+    [
+      isSaving,
+      serviceList,
+      ogcSource,
+      getDrawnFeaturesCount,
+      hasUnsaved,
+      props,
+      globalObserver,
+      theme.palette.primary.main,
+      theme.palette.warning.main,
+    ]
+  );
+
+  // Add callback to handle user's choice in dialog
+  const handleConfirmServiceSwitchWithDrawings = React.useCallback(() => {
+    const { targetService } = drawingsWarningDialog;
+
+    if (!targetService) return;
+
+    // Close dialog
+    setDrawingsWarningDialog({
+      open: false,
+      targetService: null,
+      drawingCount: 0,
+    });
+
+    // Continue with switch
+    props.setPluginSettings({
+      title: `Redigerar ${targetService.title}`,
+      color: theme.palette.warning.main,
+    });
+
+    editBus.emit("edit:service-selected", {
+      source: "sketch",
+      id: targetService.id,
+      // Same "Redigerar"-prefixed title as the normal (non-dialog) switch
+      // path — AE sets its window title straight from this event.
+      title: `Redigerar ${targetService.title}`,
+      color: theme.palette.warning.main,
+    });
+
+    setOgcSource(targetService.title);
+
+    // Open AttributeEditor plugin window when a service is selected
+    globalObserver.publish("attributeeditor.showWindow", {
+      hideOtherPluginWindows: false, // Keep Sketch window open
+      runCallback: true,
+    });
+
+    // Show notification to user
+    enqueueSnackbar(
+      `Redigeringsbart lager valt. ${drawingsWarningDialog.drawingCount} ritade objekt finns kvar i kartan.`,
+      { variant: "info" }
+    );
+  }, [
+    drawingsWarningDialog,
+    props,
+    enqueueSnackbar,
+    globalObserver,
+    theme.palette.warning.main,
+  ]);
+
+  const handleClearDrawingsAndSwitch = React.useCallback(() => {
+    const { targetService } = drawingsWarningDialog;
+
+    if (!targetService) return;
+
+    // Remove all drawn objects - use the same method as DeleteView
+    drawModel.removeDrawnFeatures(); // Changed from removeAllFeatures()
+
+    // Close dialog
+    setDrawingsWarningDialog({
+      open: false,
+      targetService: null,
+      drawingCount: 0,
+    });
+
+    // Continue with switch
+    props.setPluginSettings({
+      title: `Redigerar ${targetService.title}`,
+      color: theme.palette.warning.main,
+    });
+
+    editBus.emit("edit:service-selected", {
+      source: "sketch",
+      id: targetService.id,
+      // Same "Redigerar"-prefixed title as the normal (non-dialog) switch
+      // path — AE sets its window title straight from this event.
+      title: `Redigerar ${targetService.title}`,
+      color: theme.palette.warning.main,
+    });
+
+    setOgcSource(targetService.title);
+
+    // Open AttributeEditor plugin window when a service is selected
+    globalObserver.publish("attributeeditor.showWindow", {
+      hideOtherPluginWindows: false, // Keep Sketch window open
+      runCallback: true,
+    });
+
+    // Show confirmation
+    enqueueSnackbar("Ritade objekt borttagna. Redigeringsbart lager valt.", {
+      variant: "success",
+    });
+  }, [
+    drawingsWarningDialog,
+    drawModel,
+    props,
+    enqueueSnackbar,
+    globalObserver,
+    theme.palette.warning.main,
+  ]);
+
+  React.useEffect(() => {
+    const offSel = editBus.on("edit:service-selected", (ev) => {
+      const { title, source } = ev.detail || {};
+      if (source === "sketch") return;
+      const raw =
+        typeof title === "string" && title.startsWith("Redigerar ")
+          ? title.replace(/^Redigerar\s+/, "")
+          : title;
+      if (raw) setOgcSource(raw);
+    });
+
+    const offClr = editBus.on("edit:service-cleared", (ev) => {
+      const { source } = ev.detail || {};
+      if (source === "sketch") return;
+      setOgcSource("Ingen");
+    });
+
+    return () => {
+      offSel();
+      offClr();
+    };
+  }, []);
+
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
   const renderCurrentView = () => {
@@ -356,6 +649,18 @@ const SketchView = (props) => {
             highlightLayer={highlightLayer}
             toggleBufferBtn={toggleBufferBtn}
             setToggleBufferBtn={setToggleBufferBtn}
+            uiDisabled={uiDisabled}
+            allowedGeometryTypes={allowedGeometryTypes}
+            allowMultiGeom={props.allowMultiGeom}
+            ogcSource={ogcSource}
+            fixedLengthEnabled={props.fixedLengthEnabled}
+            setFixedLengthEnabled={props.setFixedLengthEnabled}
+            fixedLength={props.fixedLength}
+            setFixedLength={props.setFixedLength}
+            fixedAngle={props.fixedAngle}
+            setFixedAngle={props.setFixedAngle}
+            multiDrawEnabled={props.multiDrawEnabled}
+            setMultiDrawEnabled={props.setMultiDrawEnabled}
           />
         );
       case "DELETE":
@@ -367,6 +672,7 @@ const SketchView = (props) => {
             removedFeatures={removedFeatures}
             globalObserver={globalObserver}
             functionalCookiesOk={functionalCookiesOk}
+            uiDisabled={uiDisabled}
           />
         );
       case "EDIT":
@@ -380,6 +686,7 @@ const SketchView = (props) => {
             setModifyEnabled={props.setModifyEnabled}
             setBufferState={setBufferState}
             bufferState={bufferState}
+            uiDisabled={uiDisabled}
           />
         );
       case "MOVE":
@@ -391,6 +698,7 @@ const SketchView = (props) => {
             translateEnabled={props.translateEnabled}
             setTranslateEnabled={props.setTranslateEnabled}
             moveFeatures={props.moveFeatures}
+            uiDisabled={uiDisabled}
           />
         );
       case "SAVE":
@@ -401,6 +709,7 @@ const SketchView = (props) => {
             drawModel={drawModel}
             globalObserver={globalObserver}
             functionalCookiesOk={functionalCookiesOk}
+            uiDisabled={uiDisabled}
           />
         );
       case "UPLOAD":
@@ -413,6 +722,7 @@ const SketchView = (props) => {
             gpxModel={gpxModel}
             uploadedFiles={uploadedFiles}
             setUploadedFiles={setUploadedFiles}
+            uiDisabled={uiDisabled}
           />
         );
       case "SETTINGS":
@@ -423,6 +733,23 @@ const SketchView = (props) => {
             functionalCookiesOk={functionalCookiesOk}
             measurementSettings={props.measurementSettings}
             setMeasurementSettings={props.setMeasurementSettings}
+            showKinkMarkers={props.showKinkMarkers}
+            setShowKinkMarkers={props.setShowKinkMarkers}
+            globalObserver={globalObserver}
+            map={props.map}
+            ogcSource={ogcSource}
+            handleOgcSourceChange={handleOgcSourceChange}
+          />
+        );
+      case "OGC":
+        return (
+          <OGCView
+            uiDisabled={isSaving}
+            id={activityId}
+            model={model}
+            ogcSource={ogcSource}
+            handleOgcSourceChange={handleOgcSourceChange}
+            serviceList={serviceList}
             globalObserver={globalObserver}
           />
         );
@@ -476,9 +803,28 @@ const SketchView = (props) => {
   // conflict with other user interactions. Therefore, we're rendering either
   // all the way to the left (if the plugin is rendered on the left part of the
   // screen), otherwise, we render it all the way to the right.
-  return pluginPosition === "left"
-    ? renderBaseWindowLeft()
-    : renderBaseWindowRight();
+  return (
+    <>
+      {pluginPosition === "left"
+        ? renderBaseWindowLeft()
+        : renderBaseWindowRight()}
+
+      <ConfirmServiceSwitchWithDrawings
+        open={drawingsWarningDialog.open}
+        onClose={() =>
+          setDrawingsWarningDialog({
+            open: false,
+            targetService: null,
+            drawingCount: 0,
+          })
+        }
+        onConfirm={handleConfirmServiceSwitchWithDrawings}
+        onClearDrawings={handleClearDrawingsAndSwitch}
+        drawingCount={drawingsWarningDialog.drawingCount}
+        targetServiceName={drawingsWarningDialog.targetService?.title || ""}
+      />
+    </>
+  );
 };
 
 export default SketchView;

@@ -861,6 +861,20 @@
       "index": 16
     },
     {
+      "type": "AttributeEditor",
+      "index": 100,
+      "options": {
+        "zoomLevel": 6,
+        "target": "left",
+        "position": "right",
+        "winheight": "600",
+        "winwidth": "1082",
+        "instruction": "",
+        "visibleForGroups": [],
+        "activeServices": []
+      }
+    },
+    {
       "type": "buffer",
       "options": {
         "target": "toolbar",
