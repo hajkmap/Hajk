@@ -22,6 +22,8 @@ import {
   useTheme,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import type { GridRenderCellParams } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -99,6 +101,9 @@ interface CellNumberInputProps {
   disabled: boolean;
   allowEmpty?: boolean;
   allowNegative?: boolean;
+  showSteppers?: boolean;
+  stepUpLabel?: string;
+  stepDownLabel?: string;
   onCommit: (next: number | undefined) => void;
   onPendingChange: (
     nextValue: number | undefined,
@@ -137,6 +142,9 @@ const CellNumberInput = memo(function CellNumberInput({
   disabled,
   allowEmpty = true,
   allowNegative = false,
+  showSteppers = false,
+  stepUpLabel,
+  stepDownLabel,
   onCommit,
   onPendingChange,
   onRegisterFlush,
@@ -204,6 +212,21 @@ const CellNumberInput = memo(function CellNumberInput({
     onCommitRef.current(next);
   }, []);
 
+  const applyDelta = useCallback((delta: number) => {
+    if (disabled) {
+      return;
+    }
+    const current =
+      parseIntegerInput(inputRef.current?.value ?? localValueRef.current) ?? 0;
+    const next = current + delta;
+    const nextRaw = String(next);
+    localValueRef.current = nextRaw;
+    if (inputRef.current) {
+      inputRef.current.value = nextRaw;
+    }
+    onPendingChangeRef.current(next, valueRef.current);
+  }, [disabled]);
+
   useEffect(() => {
     const flush = flushCommit;
     onRegisterFlushRef.current(flush);
@@ -214,44 +237,102 @@ const CellNumberInput = memo(function CellNumberInput({
   }, [flushCommit]);
 
   return (
-    <TextField
-      size="small"
-      type="text"
-      fullWidth
-      sx={CELL_FIELD_SX}
-      disabled={disabled}
-      defaultValue={value != null ? String(value) : ""}
-      placeholder={placeholder}
-      inputRef={inputRef}
-      slotProps={{
-        htmlInput: {
-          inputMode: "numeric",
-          pattern: allowNegative ? "-?[0-9]*" : "[0-9]*",
-        },
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.25,
+        width: "100%",
+        minWidth: 0,
       }}
-      onClick={(event) => event.stopPropagation()}
-      onInput={(event) => event.stopPropagation()}
-      onChange={(event) => {
-        event.stopPropagation();
-        const next = event.target.value;
-        if (!isValidIntegerDraft(next, allowNegative)) {
-          event.target.value = localValueRef.current;
-          return;
-        }
-        localValueRef.current = next;
-        const parsed = parseIntegerInput(next);
-        const nextValue =
-          parsed === undefined && !allowEmptyRef.current ? 0 : parsed;
-        onPendingChangeRef.current(nextValue, valueRef.current);
-      }}
-      onBlur={flushCommit}
-      onKeyDown={(event) => {
-        event.stopPropagation();
-        if (event.key === "Enter") {
-          flushCommit();
-        }
-      }}
-    />
+    >
+      <TextField
+        size="small"
+        type="text"
+        fullWidth
+        sx={CELL_FIELD_SX}
+        disabled={disabled}
+        defaultValue={value != null ? String(value) : ""}
+        placeholder={placeholder}
+        inputRef={inputRef}
+        slotProps={{
+          htmlInput: {
+            inputMode: "numeric",
+            pattern: allowNegative ? "-?[0-9]*" : "[0-9]*",
+          },
+        }}
+        onClick={(event) => event.stopPropagation()}
+        onInput={(event) => event.stopPropagation()}
+        onChange={(event) => {
+          event.stopPropagation();
+          const next = event.target.value;
+          if (!isValidIntegerDraft(next, allowNegative)) {
+            event.target.value = localValueRef.current;
+            return;
+          }
+          localValueRef.current = next;
+          const parsed = parseIntegerInput(next);
+          const nextValue =
+            parsed === undefined && !allowEmptyRef.current ? 0 : parsed;
+          onPendingChangeRef.current(nextValue, valueRef.current);
+        }}
+        onBlur={flushCommit}
+        onKeyDown={(event) => {
+          event.stopPropagation();
+          if (event.key === "ArrowUp") {
+            event.preventDefault();
+            applyDelta(1);
+            return;
+          }
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            applyDelta(-1);
+            return;
+          }
+          if (event.key === "Enter") {
+            flushCommit();
+          }
+        }}
+      />
+      {showSteppers ? (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            flexShrink: 0,
+          }}
+        >
+          <IconButton
+            size="small"
+            disabled={disabled}
+            aria-label={stepUpLabel}
+            title={stepUpLabel}
+            sx={{ p: 0.125, width: 20, height: 18 }}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={(event) => {
+              event.stopPropagation();
+              applyDelta(1);
+            }}
+          >
+            <ArrowUpwardIcon sx={{ fontSize: 14 }} />
+          </IconButton>
+          <IconButton
+            size="small"
+            disabled={disabled}
+            aria-label={stepDownLabel}
+            title={stepDownLabel}
+            sx={{ p: 0.125, width: 20, height: 18 }}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={(event) => {
+              event.stopPropagation();
+              applyDelta(-1);
+            }}
+          >
+            <ArrowDownwardIcon sx={{ fontSize: 14 }} />
+          </IconButton>
+        </Box>
+      ) : null}
+    </Box>
   );
 });
 
@@ -311,6 +392,8 @@ interface IndexNumberInputProps {
   toolId: number;
   value?: number;
   disabled: boolean;
+  stepUpLabel: string;
+  stepDownLabel: string;
   onCommit: (toolId: number, index: number) => void;
   onPendingChange: (
     toolId: number,
@@ -325,6 +408,8 @@ const IndexNumberInput = memo(function IndexNumberInput({
   toolId,
   value,
   disabled,
+  stepUpLabel,
+  stepDownLabel,
   onCommit,
   onPendingChange,
   onRegisterFlush,
@@ -346,6 +431,9 @@ const IndexNumberInput = memo(function IndexNumberInput({
       disabled={disabled}
       allowEmpty={false}
       allowNegative
+      showSteppers
+      stepUpLabel={stepUpLabel}
+      stepDownLabel={stepDownLabel}
       onCommit={handleCommit}
       onPendingChange={handlePendingChange}
       onRegisterFlush={onRegisterFlush}
@@ -868,14 +956,20 @@ function MapToolsList({
       },
       {
         field: "index",
-        width: 100,
-        minWidth: 100,
+        width: 128,
+        minWidth: 128,
         headerName: t("maps.toolsOrder"),
         align: "center" as const,
         headerAlign: "center" as const,
-        sortable: false,
+        sortable: true,
         filterable: false,
         disableColumnMenu: true,
+        sortComparator: (a: number | null, b: number | null) => {
+          if (a == null && b == null) return 0;
+          if (a == null) return 1;
+          if (b == null) return -1;
+          return a - b;
+        },
         renderCell: (params: GridRenderCellParams<MapToolGridRow>) => {
           if (!fieldsForToolType(params.row.type).index) {
             return <NotApplicableCell />;
@@ -886,6 +980,8 @@ function MapToolsList({
               toolId={params.row.toolId}
               value={params.row.index ?? undefined}
               disabled={!params.row.active && params.row.index == null}
+              stepUpLabel={t("common.moveUp")}
+              stepDownLabel={t("common.moveDown")}
               onCommit={onIndexChange}
               onPendingChange={setPendingIndexState}
               onRegisterFlush={registerFlush}
