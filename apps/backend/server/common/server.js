@@ -482,7 +482,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           }
           if (v.forwardValidatedUser) {
             l.info(
-              `Proxy "${context}": will forward only the validated AD user identity in ${userHeader} (unvalidated identity headers are stripped).`
+              `Proxy "${context}": will forward only the validated AD user identity in the configured trusted user header (unvalidated identity headers are stripped).`
             );
           }
 
