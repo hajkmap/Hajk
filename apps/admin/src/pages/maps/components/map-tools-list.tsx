@@ -93,6 +93,168 @@ const MAP_TOOLS_GRID_SX = {
   },
 };
 
+interface CellNumberInputProps {
+  value?: number;
+  placeholder?: string;
+  disabled: boolean;
+  allowEmpty?: boolean;
+  allowNegative?: boolean;
+  onCommit: (next: number | undefined) => void;
+  onPendingChange: (
+    nextValue: number | undefined,
+    committedValue: number | undefined,
+  ) => void;
+  onRegisterFlush: (flush: () => void) => void;
+  onUnregisterFlush: (flush: () => void) => void;
+}
+
+function parseIntegerInput(raw: string): number | undefined {
+  const parsed = Number.parseInt(raw, 10);
+  return raw === "" || raw === "-" || Number.isNaN(parsed) ? undefined : parsed;
+}
+
+function isValidIntegerDraft(next: string, allowNegative: boolean): boolean {
+  if (next === "") return true;
+  if (allowNegative && next === "-") return true;
+  return allowNegative ? /^-?\d+$/.test(next) : /^\d+$/.test(next);
+}
+
+function notifyPendingDirtyAfterPaint(
+  notify: ((pending: boolean) => void) | undefined,
+  pending: boolean,
+) {
+  if (!notify) {
+    return;
+  }
+  window.setTimeout(() => {
+    notify(pending);
+  }, 0);
+}
+
+const CellNumberInput = memo(function CellNumberInput({
+  value,
+  placeholder,
+  disabled,
+  allowEmpty = true,
+  allowNegative = false,
+  onCommit,
+  onPendingChange,
+  onRegisterFlush,
+  onUnregisterFlush,
+}: CellNumberInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const localValueRef = useRef(value != null ? String(value) : "");
+  const valueRef = useRef(value);
+  const onCommitRef = useRef(onCommit);
+  const onPendingChangeRef = useRef(onPendingChange);
+  const allowEmptyRef = useRef(allowEmpty);
+  const onRegisterFlushRef = useRef(onRegisterFlush);
+  const onUnregisterFlushRef = useRef(onUnregisterFlush);
+
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  useEffect(() => {
+    onCommitRef.current = onCommit;
+  }, [onCommit]);
+
+  useEffect(() => {
+    onPendingChangeRef.current = onPendingChange;
+  }, [onPendingChange]);
+
+  useEffect(() => {
+    allowEmptyRef.current = allowEmpty;
+  }, [allowEmpty]);
+
+  useEffect(() => {
+    onRegisterFlushRef.current = onRegisterFlush;
+  }, [onRegisterFlush]);
+
+  useEffect(() => {
+    onUnregisterFlushRef.current = onUnregisterFlush;
+  }, [onUnregisterFlush]);
+
+  useEffect(() => {
+    const committed = value != null ? String(value) : "";
+    const input = inputRef.current;
+    if (!input || document.activeElement === input) {
+      return;
+    }
+    if (input.value !== committed) {
+      input.value = committed;
+      localValueRef.current = committed;
+    }
+  }, [value]);
+
+  const flushCommit = useCallback(() => {
+    const raw = inputRef.current?.value ?? localValueRef.current;
+    let next = parseIntegerInput(raw);
+    if (next === undefined && !allowEmptyRef.current) {
+      next = 0;
+      localValueRef.current = "0";
+      if (inputRef.current) {
+        inputRef.current.value = "0";
+      }
+    }
+    onPendingChangeRef.current(next, next);
+    if (next === valueRef.current) {
+      return;
+    }
+    onCommitRef.current(next);
+  }, []);
+
+  useEffect(() => {
+    const flush = flushCommit;
+    onRegisterFlushRef.current(flush);
+    return () => {
+      flush();
+      onUnregisterFlushRef.current(flush);
+    };
+  }, [flushCommit]);
+
+  return (
+    <TextField
+      size="small"
+      type="text"
+      fullWidth
+      sx={CELL_FIELD_SX}
+      disabled={disabled}
+      defaultValue={value != null ? String(value) : ""}
+      placeholder={placeholder}
+      inputRef={inputRef}
+      slotProps={{
+        htmlInput: {
+          inputMode: "numeric",
+          pattern: allowNegative ? "-?[0-9]*" : "[0-9]*",
+        },
+      }}
+      onClick={(event) => event.stopPropagation()}
+      onInput={(event) => event.stopPropagation()}
+      onChange={(event) => {
+        event.stopPropagation();
+        const next = event.target.value;
+        if (!isValidIntegerDraft(next, allowNegative)) {
+          event.target.value = localValueRef.current;
+          return;
+        }
+        localValueRef.current = next;
+        const parsed = parseIntegerInput(next);
+        const nextValue =
+          parsed === undefined && !allowEmptyRef.current ? 0 : parsed;
+        onPendingChangeRef.current(nextValue, valueRef.current);
+      }}
+      onBlur={flushCommit}
+      onKeyDown={(event) => {
+        event.stopPropagation();
+        if (event.key === "Enter") {
+          flushCommit();
+        }
+      }}
+    />
+  );
+});
+
 interface WindowSizeNumberInputProps {
   toolId: number;
   value?: number;
@@ -121,81 +283,73 @@ const WindowSizeNumberInput = memo(function WindowSizeNumberInput({
   onRegisterFlush,
   onUnregisterFlush,
 }: WindowSizeNumberInputProps) {
-  const [localValue, setLocalValue] = useState(
-    value != null ? String(value) : "",
+  const handleCommit = useCallback(
+    (next: number | undefined) => onCommit(toolId, { [dimension]: next }),
+    [dimension, onCommit, toolId],
   );
-  const localValueRef = useRef(localValue);
-  const valueRef = useRef(value);
-  const onCommitRef = useRef(onCommit);
-
-  useEffect(() => {
-    localValueRef.current = localValue;
-  }, [localValue]);
-
-  useEffect(() => {
-    valueRef.current = value;
-  }, [value]);
-
-  useEffect(() => {
-    onCommitRef.current = onCommit;
-  }, [onCommit]);
-
-  const flushCommit = useCallback(() => {
-    const raw = localValueRef.current;
-    const parsed = Number.parseInt(raw, 10);
-    const next = raw === "" || Number.isNaN(parsed) ? undefined : parsed;
-    onPendingChange(toolId, dimension, next, next);
-    if (next === valueRef.current) {
-      return;
-    }
-    onCommitRef.current(toolId, { [dimension]: next });
-  }, [toolId, dimension, onPendingChange]);
-
-  useEffect(() => {
-    const currentRaw = localValueRef.current;
-    const currentParsed = Number.parseInt(currentRaw, 10);
-    const currentValue =
-      currentRaw === "" || Number.isNaN(currentParsed) ? undefined : currentParsed;
-    onPendingChange(toolId, dimension, currentValue, value);
-  }, [toolId, dimension, value, onPendingChange]);
-
-  useEffect(() => {
-    onRegisterFlush(flushCommit);
-    return () => {
-      flushCommit();
-      onUnregisterFlush(flushCommit);
-    };
-  }, [flushCommit, onRegisterFlush, onUnregisterFlush]);
+  const handlePendingChange = useCallback(
+    (nextValue: number | undefined, committedValue: number | undefined) =>
+      onPendingChange(toolId, dimension, nextValue, committedValue),
+    [dimension, onPendingChange, toolId],
+  );
 
   return (
-    <TextField
-      size="small"
-      type="text"
-      fullWidth
-      sx={CELL_FIELD_SX}
-      disabled={disabled}
-      value={localValue}
+    <CellNumberInput
+      value={value}
       placeholder={placeholder}
-      slotProps={{
-        htmlInput: { inputMode: "numeric", pattern: "[0-9]*" },
-      }}
-      onClick={(event) => event.stopPropagation()}
-      onChange={(event) => {
-        const next = event.target.value;
-        if (next === "" || /^\d+$/.test(next)) {
-          const parsed = Number.parseInt(next, 10);
-          const nextValue =
-            next === "" || Number.isNaN(parsed) ? undefined : parsed;
-          onPendingChange(toolId, dimension, nextValue, valueRef.current);
-          setLocalValue(next);
-        }
-      }}
-      onBlur={flushCommit}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") {
-          flushCommit();
-        }
-      }}
+      disabled={disabled}
+      allowEmpty
+      onCommit={handleCommit}
+      onPendingChange={handlePendingChange}
+      onRegisterFlush={onRegisterFlush}
+      onUnregisterFlush={onUnregisterFlush}
+    />
+  );
+});
+
+interface IndexNumberInputProps {
+  toolId: number;
+  value?: number;
+  disabled: boolean;
+  onCommit: (toolId: number, index: number) => void;
+  onPendingChange: (
+    toolId: number,
+    nextValue: number | undefined,
+    committedValue: number | undefined,
+  ) => void;
+  onRegisterFlush: (flush: () => void) => void;
+  onUnregisterFlush: (flush: () => void) => void;
+}
+
+const IndexNumberInput = memo(function IndexNumberInput({
+  toolId,
+  value,
+  disabled,
+  onCommit,
+  onPendingChange,
+  onRegisterFlush,
+  onUnregisterFlush,
+}: IndexNumberInputProps) {
+  const handleCommit = useCallback(
+    (next: number | undefined) => onCommit(toolId, next ?? 0),
+    [onCommit, toolId],
+  );
+  const handlePendingChange = useCallback(
+    (nextValue: number | undefined, committedValue: number | undefined) =>
+      onPendingChange(toolId, nextValue, committedValue),
+    [onPendingChange, toolId],
+  );
+
+  return (
+    <CellNumberInput
+      value={value}
+      disabled={disabled}
+      allowEmpty={false}
+      allowNegative
+      onCommit={handleCommit}
+      onPendingChange={handlePendingChange}
+      onRegisterFlush={onRegisterFlush}
+      onUnregisterFlush={onUnregisterFlush}
     />
   );
 });
@@ -222,6 +376,7 @@ interface MapToolsListProps {
   activeToolIds: Set<number>;
   windowPositions: Record<number, ToolWindowPosition>;
   windowSizes: Record<number, ToolWindowSize>;
+  indexes: Record<number, number>;
   onToggleActive: (toolId: number, active: boolean) => void;
   onTargetChange: (toolId: number, target: ToolZone | null) => void;
   onWindowPositionChange: (
@@ -229,21 +384,24 @@ interface MapToolsListProps {
     position: ToolWindowPosition,
   ) => void;
   onWindowSizeChange: (toolId: number, size: Partial<ToolWindowSize>) => void;
+  onIndexChange: (toolId: number, index: number) => void;
   flushPendingEditsRef?: MutableRefObject<(() => void) | null>;
   onPendingWindowSizeDirtyChange?: (pending: boolean) => void;
 }
 
-export default function MapToolsList({
+function MapToolsList({
   catalogTools,
   mapTools,
   toolZones,
   activeToolIds,
   windowPositions,
   windowSizes,
+  indexes,
   onToggleActive,
   onTargetChange,
   onWindowPositionChange,
   onWindowSizeChange,
+  onIndexChange,
   flushPendingEditsRef,
   onPendingWindowSizeDirtyChange,
 }: MapToolsListProps) {
@@ -252,10 +410,15 @@ export default function MapToolsList({
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
-  const [placementFilter, setPlacementFilter] = useState<ToolZone | "" | "unplaced">("");
+  const [placementFilter, setPlacementFilter] = useState<
+    ToolZone | "" | "unplaced"
+  >("");
   const flushCallbacksRef = useRef(new Set<() => void>());
   const pendingFieldsRef = useRef(new Set<string>());
-  const pendingWindowSizesRef = useRef(new Map<number, Partial<ToolWindowSize>>());
+  const pendingWindowSizesRef = useRef(
+    new Map<number, Partial<ToolWindowSize>>(),
+  );
+  const pendingIndexesRef = useRef(new Map<number, number>());
 
   const registerFlush = useCallback((flush: () => void) => {
     flushCallbacksRef.current.add(flush);
@@ -298,11 +461,42 @@ export default function MapToolsList({
         }
       }
 
-      if (
-        onPendingWindowSizeDirtyChange &&
-        (previousSize === 0) !== (pendingFields.size === 0)
-      ) {
-        onPendingWindowSizeDirtyChange(pendingFields.size > 0);
+      if ((previousSize === 0) !== (pendingFields.size === 0)) {
+        notifyPendingDirtyAfterPaint(
+          onPendingWindowSizeDirtyChange,
+          pendingFields.size > 0,
+        );
+      }
+    },
+    [onPendingWindowSizeDirtyChange],
+  );
+
+  const setPendingIndexState = useCallback(
+    (
+      toolId: number,
+      nextValue: number | undefined,
+      committedValue: number | undefined,
+    ) => {
+      const key = `${toolId}:index`;
+      const pendingFields = pendingFieldsRef.current;
+      const pendingIndexes = pendingIndexesRef.current;
+      const previousSize = pendingFields.size;
+      const resolvedNext = nextValue ?? 0;
+      const hasPendingChange = resolvedNext !== (committedValue ?? 0);
+
+      if (hasPendingChange) {
+        pendingFields.add(key);
+        pendingIndexes.set(toolId, resolvedNext);
+      } else {
+        pendingFields.delete(key);
+        pendingIndexes.delete(toolId);
+      }
+
+      if ((previousSize === 0) !== (pendingFields.size === 0)) {
+        notifyPendingDirtyAfterPaint(
+          onPendingWindowSizeDirtyChange,
+          pendingFields.size > 0,
+        );
       }
     },
     [onPendingWindowSizeDirtyChange],
@@ -310,7 +504,9 @@ export default function MapToolsList({
 
   const flushPendingWindowSizes = useCallback(() => {
     const pendingWindowSizes = [...pendingWindowSizesRef.current.entries()];
+    const pendingIndexes = [...pendingIndexesRef.current.entries()];
     pendingWindowSizesRef.current.clear();
+    pendingIndexesRef.current.clear();
     pendingFieldsRef.current.clear();
     onPendingWindowSizeDirtyChange?.(false);
 
@@ -320,7 +516,11 @@ export default function MapToolsList({
       }
       onWindowSizeChange(toolId, size);
     });
-  }, [onPendingWindowSizeDirtyChange, onWindowSizeChange]);
+
+    pendingIndexes.forEach(([toolId, index]) => {
+      onIndexChange(toolId, index);
+    });
+  }, [onIndexChange, onPendingWindowSizeDirtyChange, onWindowSizeChange]);
 
   useEffect(() => {
     if (!flushPendingEditsRef) {
@@ -440,7 +640,7 @@ export default function MapToolsList({
           active,
           target: zone ? zoneKeyToTarget(zone) : ("" as const),
           windowPosition: windowPositions[toolId] ?? "right",
-          index: onMap?.index ?? null,
+          index: indexes[toolId] ?? onMap?.index ?? null,
         };
       });
   }, [
@@ -452,6 +652,7 @@ export default function MapToolsList({
     activeToolIds,
     toolZones,
     windowPositions,
+    indexes,
   ]);
 
   const columns = useMemo(
@@ -472,7 +673,7 @@ export default function MapToolsList({
         field: "active",
         width: 76,
         minWidth: 76,
-        headerName: t("maps.toolsActive"),
+        headerName: t("tools.active"),
         align: "center" as const,
         headerAlign: "center" as const,
         sortable: false,
@@ -482,7 +683,7 @@ export default function MapToolsList({
           <Switch
             size="small"
             checked={params.row.active}
-            aria-label={t("maps.toolsActive")}
+            aria-label={t("tools.active")}
             onClick={(event) => event.stopPropagation()}
             onChange={(event) => {
               handleToggleActive(params.row.toolId, event.target.checked);
@@ -572,10 +773,7 @@ export default function MapToolsList({
                 value={params.row.windowPosition}
                 renderValue={() => positionLabel}
                 onChange={(event) => {
-                  onWindowPositionChange(
-                    params.row.toolId,
-                    event.target.value,
-                  );
+                  onWindowPositionChange(params.row.toolId, event.target.value);
                 }}
               >
                 {WINDOW_PLACEMENT_OPTIONS.map((option) => (
@@ -670,16 +868,30 @@ export default function MapToolsList({
       },
       {
         field: "index",
-        width: 80,
-        minWidth: 80,
+        width: 100,
+        minWidth: 100,
         headerName: t("maps.toolsOrder"),
         align: "center" as const,
         headerAlign: "center" as const,
+        sortable: false,
+        filterable: false,
+        disableColumnMenu: true,
         renderCell: (params: GridRenderCellParams<MapToolGridRow>) => {
           if (!fieldsForToolType(params.row.type).index) {
             return <NotApplicableCell />;
           }
-          return params.row.index ?? "—";
+
+          return (
+            <IndexNumberInput
+              toolId={params.row.toolId}
+              value={params.row.index ?? undefined}
+              disabled={!params.row.active && params.row.index == null}
+              onCommit={onIndexChange}
+              onPendingChange={setPendingIndexState}
+              onRegisterFlush={registerFlush}
+              onUnregisterFlush={unregisterFlush}
+            />
+          );
         },
       },
       {
@@ -712,7 +924,9 @@ export default function MapToolsList({
       onTargetChange,
       onWindowPositionChange,
       onWindowSizeChange,
+      onIndexChange,
       setPendingFieldState,
+      setPendingIndexState,
       registerFlush,
       unregisterFlush,
     ],
@@ -794,3 +1008,5 @@ export default function MapToolsList({
     </Box>
   );
 }
+
+export default memo(MapToolsList);

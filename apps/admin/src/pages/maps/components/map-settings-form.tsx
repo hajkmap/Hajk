@@ -12,7 +12,12 @@ import {
   Chip,
   OutlinedInput,
 } from "@mui/material";
-import { Control, Controller, FieldValues, UseFormRegister } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  FieldValues,
+  UseFormRegister,
+} from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import FormPanel from "../../../components/form-components/form-panel";
 import FormFieldGrid, {
@@ -161,7 +166,7 @@ export default function MapSettingsForm({
       {showMapSection && (
         <>
           <SearchablePanel
-            panelTitleKeywords={settingsSearchLabels("map.generalSettings")}
+            panelTitleKeywords={settingsSearchLabels("common.general")}
             keywords={[
               ...settingsSearchLabels("map.name", "map.locked"),
               "name",
@@ -171,7 +176,7 @@ export default function MapSettingsForm({
             allValues={searchValues}
             searchTerm={settingsSearchTerm}
           >
-            <FormPanel title={t("map.generalSettings")}>
+            <FormPanel title={t("common.general")}>
               <FormFieldGrid>
                 <SettingsSearchField
                   labelKeys={["map.name"]}
@@ -277,10 +282,7 @@ export default function MapSettingsForm({
                               (projection) => projection.value === value,
                             );
                             return (
-                              <MenuItem
-                                key={value}
-                                value={opt?.value ?? value}
-                              >
+                              <MenuItem key={value} value={opt?.value ?? value}>
                                 {opt?.title ?? value}
                               </MenuItem>
                             );
@@ -334,7 +336,11 @@ export default function MapSettingsForm({
                                   }}
                                 >
                                   {value.map((code) => (
-                                    <Chip key={code} label={code} size="small" />
+                                    <Chip
+                                      key={code}
+                                      label={code}
+                                      size="small"
+                                    />
                                   ))}
                                 </Box>
                               )}

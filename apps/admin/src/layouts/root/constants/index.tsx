@@ -20,7 +20,7 @@ export const SIDEBAR_MINI_WIDTH = 58;
 export const SIDEBAR_MENU = [
   {
     to: "",
-    titleKey: "navBar.general",
+    titleKey: "common.general",
     collapsible: true,
     icon: <DashboardIcon />,
     subItems: [

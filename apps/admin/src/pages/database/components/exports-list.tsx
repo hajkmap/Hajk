@@ -141,9 +141,7 @@ export default function DatabaseExportsList() {
                   <TableCell>{t("database.exports.table.type")}</TableCell>
                   <TableCell>{t("database.exports.table.size")}</TableCell>
                   <TableCell>{t("database.exports.table.created")}</TableCell>
-                  <TableCell align="right">
-                    {t("database.exports.table.actions")}
-                  </TableCell>
+                  <TableCell align="right">{t("common.actions")}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

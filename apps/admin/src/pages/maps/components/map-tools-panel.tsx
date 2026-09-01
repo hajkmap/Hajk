@@ -36,6 +36,7 @@ interface MapToolsPanelProps {
   activeToolIds: Set<number>;
   windowPositions: Record<number, ToolWindowPosition>;
   windowSizes: Record<number, ToolWindowSize>;
+  indexes: Record<number, number>;
   onUpdateToolZone: (
     zone: keyof ToolZones,
     items: TreeItems<TreeItemData>,
@@ -50,6 +51,7 @@ interface MapToolsPanelProps {
     toolId: number,
     size: Partial<ToolWindowSize>,
   ) => void;
+  onToolIndexChange: (toolId: number, index: number) => void;
   flushPendingEditsRef?: MutableRefObject<(() => void) | null>;
   onPendingWindowSizeDirtyChange?: (pending: boolean) => void;
   backgroundImage?: string;
@@ -62,11 +64,13 @@ export default function MapToolsPanel({
   activeToolIds,
   windowPositions,
   windowSizes,
+  indexes,
   onUpdateToolZone,
   onToggleToolActive,
   onToolTargetChange,
   onToolWindowPositionChange,
   onToolWindowSizeChange,
+  onToolIndexChange,
   flushPendingEditsRef,
   onPendingWindowSizeDirtyChange,
   backgroundImage,
@@ -103,10 +107,12 @@ export default function MapToolsPanel({
           activeToolIds={activeToolIds}
           windowPositions={windowPositions}
           windowSizes={windowSizes}
+          indexes={indexes}
           onToggleActive={onToggleToolActive}
           onTargetChange={onToolTargetChange}
           onWindowPositionChange={onToolWindowPositionChange}
           onWindowSizeChange={onToolWindowSizeChange}
+          onIndexChange={onToolIndexChange}
           flushPendingEditsRef={flushPendingEditsRef}
           onPendingWindowSizeDirtyChange={onPendingWindowSizeDirtyChange}
         />

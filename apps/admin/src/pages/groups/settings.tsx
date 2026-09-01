@@ -51,13 +51,19 @@ import DialogWrapper from "../../components/flexible-dialog";
 import FormContainer from "../../components/form-components/form-container";
 import FormPanel from "../../components/form-components/form-panel";
 import UsedInMapsPanel from "../../components/used-in-maps-panel";
-import FormFieldGrid, { FormFieldRow } from "../../components/form-components/form-field-grid";
+import FormFieldGrid, {
+  FormFieldRow,
+} from "../../components/form-components/form-field-grid";
 import {
   FieldLabelAbove,
   InlineLabelWithHelp,
   SelectWithHelp,
 } from "../../components/form-components/field-label-with-help";
-import { getDeleteGroupErrorMessage, getUpdateGroupErrorMessage, applyGroupFormValidationErrors } from "./utils/group-errors";
+import {
+  getDeleteGroupErrorMessage,
+  getUpdateGroupErrorMessage,
+  applyGroupFormValidationErrors,
+} from "./utils/group-errors";
 import { groupCompositionKey } from "./utils/group-composition";
 import { stripEditingGroupFromTree } from "./utils/layer-switcher-tree";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
@@ -102,10 +108,7 @@ function GroupSettings() {
   const groupLayers = groupLayersData?.layers ?? EMPTY_GROUP_LAYERS;
   const savedLayerSwitcherTree = useMemo(
     () =>
-      stripEditingGroupFromTree(
-        groupLayersData?.layerSwitcherTree,
-        groupId,
-      ),
+      stripEditingGroupFromTree(groupLayersData?.layerSwitcherTree, groupId),
     [groupLayersData?.layerSwitcherTree, groupId],
   );
   const maps = mapsData ?? EMPTY_MAPS;
@@ -206,7 +209,12 @@ function GroupSettings() {
     setIsCompositionDirty(false);
     setCompositionLayers(initialComposition);
     setCompositionTree(savedLayerSwitcherTree ?? []);
-  }, [initialCompositionKey, savedLayerSwitcherTreeKey, initialComposition, savedLayerSwitcherTree]);
+  }, [
+    initialCompositionKey,
+    savedLayerSwitcherTreeKey,
+    initialComposition,
+    savedLayerSwitcherTree,
+  ]);
 
   const handleExternalSubmit = () => {
     if (formRef.current) {
@@ -432,8 +440,7 @@ function GroupSettings() {
                     })}
                     error={!!errors.name}
                     helperText={
-                      (errors.name as { message?: string } | undefined)
-                        ?.message
+                      (errors.name as { message?: string } | undefined)?.message
                     }
                   />
                 </FormFieldRow>

@@ -159,6 +159,7 @@ interface ToolsDraft {
   activeToolIds: Set<number>;
   windowPositions: Record<number, ToolWindowPosition>;
   windowSizes: Record<number, ToolWindowSize>;
+  indexes: Record<number, number>;
   inactiveTargets: Record<number, ToolZone>;
 }
 
@@ -622,6 +623,11 @@ export default function MapSettings() {
       ? toolsDraft.windowSizes
       : (serverToolsDraftState?.windowSizes ?? {});
 
+  const indexes =
+    toolsDraft != null && toolsDraft.mapName === mapName
+      ? toolsDraft.indexes
+      : (serverToolsDraftState?.indexes ?? {});
+
   const toolTypesById = useMemo(
     () => buildToolTypesById(catalogTools ?? [], mapTools ?? []),
     [catalogTools, mapTools],
@@ -640,6 +646,7 @@ export default function MapSettings() {
         toolsDraft.windowSizes,
         toolsDraft.inactiveTargets,
         toolTypesById,
+        toolsDraft.indexes,
       )
     );
   }, [toolsDraft, mapName, mapTools, toolTypesById]);
@@ -654,6 +661,7 @@ export default function MapSettings() {
         activeToolIds: new Set<number>(serverToolsDraftState?.activeToolIds ?? []),
         windowPositions: { ...(serverToolsDraftState?.windowPositions ?? {}) },
         windowSizes: { ...(serverToolsDraftState?.windowSizes ?? {}) },
+        indexes: { ...(serverToolsDraftState?.indexes ?? {}) },
         inactiveTargets: { ...(serverToolsDraftState?.inactiveTargets ?? {}) },
       };
     },
@@ -694,6 +702,7 @@ export default function MapSettings() {
         let nextZones = base.zones;
         const nextWindowPositions = { ...base.windowPositions };
         const nextWindowSizes = { ...base.windowSizes };
+        const nextIndexes = { ...base.indexes };
         const nextInactiveTargets = { ...base.inactiveTargets };
 
         const deactivateTool = (id: number) => {
@@ -724,6 +733,7 @@ export default function MapSettings() {
           if (!nextWindowPositions[toolId]) {
             nextWindowPositions[toolId] = "right";
           }
+          nextIndexes[toolId] ??= 0;
           // Restore the placement remembered from when it was disabled.
           const remembered = nextInactiveTargets[toolId];
           if (remembered) {
@@ -745,6 +755,7 @@ export default function MapSettings() {
           activeToolIds: nextActiveToolIds,
           windowPositions: nextWindowPositions,
           windowSizes: nextWindowSizes,
+          indexes: nextIndexes,
           inactiveTargets: nextInactiveTargets,
         };
       });
@@ -769,6 +780,7 @@ export default function MapSettings() {
           activeToolIds: new Set(base.activeToolIds),
           windowPositions: { ...base.windowPositions },
           windowSizes: { ...base.windowSizes },
+          indexes: { ...base.indexes },
           inactiveTargets: { ...base.inactiveTargets },
         };
       });
@@ -791,6 +803,7 @@ export default function MapSettings() {
             [toolId]: position,
           },
           windowSizes: { ...base.windowSizes },
+          indexes: { ...base.indexes },
           inactiveTargets: { ...base.inactiveTargets },
         };
       });
@@ -824,6 +837,34 @@ export default function MapSettings() {
         windowSizes: {
           ...base.windowSizes,
           [toolId]: nextSize,
+        },
+        indexes: { ...base.indexes },
+        inactiveTargets: { ...base.inactiveTargets },
+      });
+    },
+    [mapName, resolveToolsDraft, applyToolsDraft],
+  );
+
+  const setToolIndex = useCallback(
+    (toolId: number, index: number) => {
+      const base = resolveToolsDraft(toolsDraftRef.current);
+      if (
+        !base.activeToolIds.has(toolId) &&
+        base.indexes[toolId] == null
+      ) {
+        return;
+      }
+      if (base.indexes[toolId] === index) return;
+
+      applyToolsDraft({
+        mapName: mapName ?? "",
+        zones: base.zones,
+        activeToolIds: new Set(base.activeToolIds),
+        windowPositions: { ...base.windowPositions },
+        windowSizes: { ...base.windowSizes },
+        indexes: {
+          ...base.indexes,
+          [toolId]: index,
         },
         inactiveTargets: { ...base.inactiveTargets },
       });
@@ -902,6 +943,7 @@ export default function MapSettings() {
             currentToolsDraft.windowSizes,
             currentToolsDraft.inactiveTargets,
             toolTypesById,
+            currentToolsDraft.indexes,
           );
 
       // Persist placements first (keyed by the current name) so a simultaneous
@@ -915,6 +957,7 @@ export default function MapSettings() {
           currentToolsDraft.inactiveTargets,
           mapTools ?? [],
           toolTypesById,
+          currentToolsDraft.indexes,
         );
         await updateMapTools({
           mapName: map.name,
@@ -1240,11 +1283,13 @@ export default function MapSettings() {
             activeToolIds={activeToolIds}
             windowPositions={windowPositions}
             windowSizes={windowSizes}
+            indexes={indexes}
             onUpdateToolZone={updateToolZone}
             onToggleToolActive={toggleToolActive}
             onToolTargetChange={setToolTarget}
             onToolWindowPositionChange={setToolWindowPosition}
             onToolWindowSizeChange={setToolWindowSize}
+            onToolIndexChange={setToolIndex}
             flushPendingEditsRef={flushMapToolEditsRef}
             onPendingWindowSizeDirtyChange={setHasPendingWindowSizeInput}
             backgroundImage={backgroundImage}

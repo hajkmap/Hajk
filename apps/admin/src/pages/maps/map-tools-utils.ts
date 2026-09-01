@@ -44,6 +44,7 @@ export interface MapToolsDraftState {
   activeToolIds: Set<number>;
   windowPositions: Record<number, ToolWindowPosition>;
   windowSizes: Record<number, ToolWindowSize>;
+  indexes: Record<number, number>;
   inactiveTargets: Record<number, ToolZone>;
 }
 
@@ -82,12 +83,6 @@ function resolveToolType(
   return (
     mapToolsById.get(toolId)?.tool.type ?? toolTypesById.get(toolId) ?? ""
   );
-}
-
-function extractToolIdFromItemId(itemId: string | number): number | null {
-  const parts = String(itemId).split(ID_DELIMITER);
-  const toolId = Number(parts[parts.length - 1]);
-  return Number.isNaN(toolId) ? null : toolId;
 }
 
 function parseOptionNumber(value: unknown): number | undefined {
@@ -137,11 +132,13 @@ export function buildToolsDraftState(
   const activeToolIds = new Set<number>();
   const windowPositions: Record<number, ToolWindowPosition> = {};
   const windowSizes: Record<number, ToolWindowSize> = {};
+  const indexes: Record<number, number> = {};
   const inactiveTargets: Record<number, ToolZone> = {};
 
   for (const tool of mapTools) {
     windowPositions[tool.toolId] = getMapToolWindowPosition(tool);
     windowSizes[tool.toolId] = getMapToolWindowSize(tool);
+    indexes[tool.toolId] = tool.index;
 
     if (!isMapToolActive(tool)) {
       const zone = resolveToolZone(tool);
@@ -152,7 +149,13 @@ export function buildToolsDraftState(
     activeToolIds.add(tool.toolId);
   }
 
-  return { activeToolIds, windowPositions, windowSizes, inactiveTargets };
+  return {
+    activeToolIds,
+    windowPositions,
+    windowSizes,
+    indexes,
+    inactiveTargets,
+  };
 }
 
 export function findToolZoneForId(
@@ -459,6 +462,7 @@ export function zonesToToolsPayload(
   inactiveTargets: Record<number, ToolZone>,
   mapTools: ToolOnMap[],
   toolTypesById: Map<number, string> = new Map(),
+  indexes: Record<number, number> = {},
 ): MapToolPayloadEntry[] {
   const mapToolsById = new Map(mapTools.map((tool) => [tool.toolId, tool]));
   const allToolIds = new Set<number>([
@@ -468,8 +472,6 @@ export function zonesToToolsPayload(
   ]);
 
   const result: MapToolPayloadEntry[] = [];
-  let unplacedIndex = 0;
-  let inactiveIndex = 0;
 
   for (const toolId of [...allToolIds].sort((a, b) => a - b)) {
     const existing = mapToolsById.get(toolId);
@@ -483,34 +485,21 @@ export function zonesToToolsPayload(
     );
 
     let target: string | null = null;
-    let index: number;
-
-    if (fields.index) {
+    if (fields.target) {
       if (isActive) {
-        if (fields.target) {
-          const zone = findToolZoneForId(zones, toolId);
-          target = zone ? ZONE_TO_TARGET[zone] : null;
-          if (zone) {
-            index = zones[zone].findIndex(
-              (item) => extractToolIdFromItemId(item.id) === toolId,
-            );
-          } else {
-            index = existing?.index ?? unplacedIndex++;
-          }
-        } else {
-          index = existing?.index ?? unplacedIndex++;
-        }
+        const zone = findToolZoneForId(zones, toolId);
+        target = zone ? ZONE_TO_TARGET[zone] : null;
       } else {
-        target = fields.target
-          ? inactiveTargets[toolId] != null
+        target =
+          inactiveTargets[toolId] != null
             ? inactiveTargets[toolId]
-            : (existing?.target ?? null)
-          : null;
-        index = existing?.index ?? inactiveIndex++;
+            : (existing?.target ?? null);
       }
-    } else {
-      index = existing?.index ?? 0;
     }
+
+    const index = fields.index
+      ? (indexes[toolId] ?? existing?.index ?? 0)
+      : (existing?.index ?? 0);
 
     result.push({
       toolId,
@@ -546,6 +535,7 @@ export function toolsDraftSignature(
   windowSizes: Record<number, ToolWindowSize>,
   inactiveTargets: Record<number, ToolZone>,
   toolTypesById: Map<number, string> = new Map(),
+  indexes: Record<number, number> = {},
 ): string {
   const relevantIds = new Set<number>([
     ...activeToolIds,
@@ -553,6 +543,7 @@ export function toolsDraftSignature(
   ]);
   const positions: Record<number, ToolWindowPosition> = {};
   const sizes: Record<number, ToolWindowSize> = {};
+  const indexEntries: Record<number, number> = {};
   const filteredInactive = Object.entries(inactiveTargets)
     .map(([id, target]) => [Number(id), target] as [number, ToolZone])
     .filter(([id]) => getMapToolFieldConfig(toolTypesById.get(id) ?? "").target)
@@ -580,17 +571,29 @@ export function toolsDraftSignature(
       }
     });
 
+  Object.entries(indexes)
+    .map(([id, value]) => [Number(id), value] as [number, number])
+    .filter(([id]) =>
+      getMapToolFieldConfig(toolTypesById.get(id) ?? "").index,
+    )
+    .sort((a, b) => a[0] - b[0])
+    .forEach(([id, value]) => {
+      indexEntries[id] = value;
+    });
+
   const zoneLayout = JSON.parse(toolZonesSignature(zones)) as Record<
     ToolZoneKey,
     number[]
   >;
-  if (toolTypesById.size > 0) {
-    (Object.keys(zoneLayout) as ToolZoneKey[]).forEach((zone) => {
+  (Object.keys(zoneLayout) as ToolZoneKey[]).forEach((zone) => {
+    if (toolTypesById.size > 0) {
       zoneLayout[zone] = zoneLayout[zone].filter((toolId) =>
         getMapToolFieldConfig(toolTypesById.get(toolId) ?? "").target,
       );
-    });
-  }
+    }
+    // Placement tab only persists zone membership (target), not order.
+    zoneLayout[zone].sort((a, b) => a - b);
+  });
 
   return JSON.stringify({
     zones: zoneLayout,
@@ -598,6 +601,7 @@ export function toolsDraftSignature(
     inactive: filteredInactive,
     windowPositions: positions,
     windowSizes: sizes,
+    indexes: indexEntries,
   });
 }
 
@@ -606,8 +610,13 @@ export function serverToolsSignature(
   toolTypesById: Map<number, string> = new Map(),
 ): string {
   const zones = mapToolsToZones(mapTools);
-  const { activeToolIds, windowPositions, windowSizes, inactiveTargets } =
-    buildToolsDraftState(mapTools);
+  const {
+    activeToolIds,
+    windowPositions,
+    windowSizes,
+    inactiveTargets,
+    indexes,
+  } = buildToolsDraftState(mapTools);
   const types =
     toolTypesById.size > 0
       ? toolTypesById
@@ -619,10 +628,11 @@ export function serverToolsSignature(
     windowSizes,
     inactiveTargets,
     types,
+    indexes,
   );
 }
 
-/** Stable signature for zone layout (which tools sit in which zone, and in what order). */
+/** Stable signature for zone layout (which tools sit in which zone). */
 export function toolZonesSignature(zones: ToolZones): string {
   const layout: Record<ToolZoneKey, number[]> = {
     drawer: [],

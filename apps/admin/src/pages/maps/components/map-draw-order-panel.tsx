@@ -119,10 +119,7 @@ export default function MapDrawOrderPanel({
     return map;
   }, [layerIds]);
 
-  const drawOrderLayerIds = useMemo(
-    () => new Set(layerIds),
-    [layerIds],
-  );
+  const drawOrderLayerIds = useMemo(() => new Set(layerIds), [layerIds]);
 
   const moveZoneLayerIdSet = useMemo(
     () => new Set(moveZoneLayerIds),
@@ -291,7 +288,7 @@ export default function MapDrawOrderPanel({
                 overflow: "hidden",
               }}
             >
-              <Typography variant="subtitle1" fontWeight={600}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                 {t("map.drawOrderLayersSource")}
               </Typography>
               <Typography
@@ -399,9 +396,11 @@ export default function MapDrawOrderPanel({
                 overflow: "hidden",
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              >
                 <LayersIcon color="primary" fontSize="small" />
-                <Typography variant="subtitle1" fontWeight={600}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                   {t("map.drawOrder")}
                 </Typography>
               </Box>
