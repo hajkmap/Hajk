@@ -21,6 +21,7 @@ var defaultState = {
   index: 0,
   target: "toolbar",
   visibleAtStart: false,
+  showFollowLocation: false,
   visibleForGroups: [],
 };
 
@@ -45,6 +46,7 @@ class ToolOptions extends Component {
         width: tool.options.width,
         height: tool.options.height,
         visibleAtStart: tool.options.visibleAtStart,
+        showFollowLocation: tool.options.showFollowLocation,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
@@ -109,9 +111,10 @@ class ToolOptions extends Component {
         width: this.state.width,
         height: this.state.height,
         visibleAtStart: this.state.visibleAtStart,
+        showFollowLocation: this.state.showFollowLocation,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
-          String.prototype.trim
+          String.prototype.trim,
         ),
       },
     };
@@ -126,7 +129,7 @@ class ToolOptions extends Component {
             alert: true,
             alertMessage: "Uppdateringen lyckades",
           });
-        }
+        },
       );
     }
 
@@ -335,6 +338,21 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
+          <div className="long-label">
+            <input
+              id="showFollowLocation"
+              name="showFollowLocation"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.showFollowLocation}
+            />
+            &nbsp;
+            <label htmlFor="showFollowLocation">
+              Visa "Följ min position" när positionering används som en widget.
+            </label>
           </div>
           {this.renderVisibleForGroups()}
         </form>

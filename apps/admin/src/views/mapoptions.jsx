@@ -220,8 +220,15 @@ class MapOptions extends Component {
   }
 
   getValue(fieldName) {
-    var input = this.refs["input_" + fieldName],
-      value = input ? input.value : "";
+    var input = this.refs["input_" + fieldName];
+
+    // Some fields (e.g. mapSelectorStyle) are only rendered when a parent
+    // option is enabled. Fall back to state so save() does not throw.
+    if (!input) {
+      return this.state[fieldName] !== undefined ? this.state[fieldName] : "";
+    }
+
+    var value = input.value;
 
     if (input.type === "checkbox") {
       value = input.checked;

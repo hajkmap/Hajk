@@ -29,9 +29,9 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-openapi-validator": "^5.6.2",
-    "fast-xml-parser": "^5.8.0",
-    "helmet": "^8.2.0",
-    "http-proxy-middleware": "^4.1.0",
+    "fast-xml-parser": "^5.11.0",
+    "helmet": "^8.3.0",
+    "http-proxy-middleware": "^4.2.0",
     "log4js": "^6.9.1",
     "write-excel-file": "^4.1.1"
   },
@@ -40,10 +40,10 @@
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-n": "^17",
-    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-prettier": "^5.5.6",
     "globals": "^17",
     "nodemon": "^3.1.14",
-    "prettier": "^3.8.3",
+    "prettier": "^3.9.6",
     "shx": "^0.4.0"
   },
   "author": "Jacob Wodzyński <jacob.wodzynski@halmstad.se> (https://github.com/hajkmap)"

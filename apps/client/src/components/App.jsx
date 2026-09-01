@@ -682,8 +682,8 @@ class App extends React.PureComponent {
           // the Search component listens to.
           // TODO: Also handle sources change, the s parameter
           if (
-            mergedParams.get("q") !==
-              this.appModel.searchModel.lastSearchPhrase &&
+            mergedParams.get("q")?.replace(/"/g, "") !==
+              this.appModel.searchModel.lastSearchPhrase?.replace(/"/g, "") &&
             mergedParams.get("q") !== null
           ) {
             this.globalObserver.publish(
@@ -1294,6 +1294,7 @@ class App extends React.PureComponent {
                   alignItems: "center",
                   gap: 1,
                   ml: this.showDrawerButtons() ? 0 : "auto",
+                  minWidth: 0,
                 }}
               >
                 {showMapSwitcher &&

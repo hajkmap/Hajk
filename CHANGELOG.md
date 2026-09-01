@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: LayerComparer - The Spy can now be resized and the transparency can be changed [#1812](https://github.com/hajkmap/Hajk/issues/1812)
 - Client: LayerSwitcher - A group can now be set to be `exclusive`, meaning that its layers will be rendered as radio buttons and just one layer will be allowed to be visible at a given time. [#1848](https://github.com/hajkmap/Hajk/pull/1848)
 - Admin: You can now configure CQL filters for WMS layers directly in the admin interface [#1818](https://github.com/hajkmap/Hajk/issues/1818)
+- Client + Admin: WMTS layers now support the `rotateMap` setting ("Uppåt i kartan är"), previously only available for WMS layers, for forcing map rotation when used as a base layer.
 - Client: Better WMTS Support [#1795](https://github.com/hajkmap/Hajk/issues/1795)
 - Client: LayerSwitcher - it is possible to add an additional style to WMS layers that contains feature labels. A button in the LayerSwitcher allows user to control labels' visibility for such a layer. [#1816](https://github.com/hajkmap/Hajk/issues/1816)
 - Client + Admin: DocumentHandler — Added support for embedding external content via iframes, such as Microsoft Power BI reports, directly in documents.
@@ -41,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: New CQL filter UI, PR [#1756](https://github.com/hajkmap/Hajk/pull/1756).
 - Client: TypeScript is now supported, see [#1824.](https://github.com/hajkmap/Hajk/pull/1824)
 - Client: Upgraded MUI packages to v9. Completed the migration steps not covered by the codemods — Autocomplete `renderInput` now reads `params.slotProps` (fixes a startup crash in the search bar), `PopperComponent`/`PaperComponent` moved to `slots`, Dialog `PaperComponent`/`PaperProps`/`BackdropProps`/`onBackdropClick` and Tooltip `TransitionProps` moved to `slots`/`slotProps`, remaining `InputProps` on TextField moved to `slotProps.input`, `SpeedDialAction` tooltip props moved to `slotProps.tooltip`, and CSS props inside `ListItemText` Typography slots moved into `sx` (silences DOM prop warnings and restores layer-name truncation).
+- Client: Location plugin now has an optional follow location toggle. Enabling it will re-center the map on user's location when location changes. [#1875](https://github.com/hajkmap/Hajk/issues/1875)
 
 ### Fixed
 
@@ -65,6 +67,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: Search - User's limit of search sources (made in search settings) was not respected in Safari. [#1852](https://github.com/hajkmap/Hajk/issues/1852).
 - Client: Crashes when activating Snap-enabled tools (e.g. PropertyChecker) with nested GeometryCollection features in the map. [#1860](https://github.com/hajkmap/Hajk/issues/1860).
 - Client: MapSwitcher can now be configured to show as a larger dropdown element next to the search box (in addition to the traditional Control button). [#1858](https://github.com/hajkmap/Hajk/issues/1858).
+- Admin: Map options can now be saved even when the map selector option is unchecked. [#1858](https://github.com/hajkmap/Hajk/issues/1858).
+- Client: Prevent search bar from overflowing on certain mobile screens. [#1877](https://github.com/hajkmap/Hajk/issues/1877)
+- Client: Location - The red flashing ring rendered around the blue geolocation dot does not move along when user moves, even during an ongoing flash animation.
+- Client: Location - Added a auto-rotate toggle that will rotate the map so that user's current heading direction always points up.
+- Client: Search - `"` in search phrase could lead to endless re-searches when `enableAppStateInHash` was active. Closes [#1880](https://github.com/hajkmap/Hajk/issues/1880).
 
 ## [4.3.0] 2026-04-20
 
