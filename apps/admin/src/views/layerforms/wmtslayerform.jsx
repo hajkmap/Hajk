@@ -66,6 +66,7 @@ const defaultState = {
   sizes: "",
   tileSize: "",
   crossOrigin: "",
+  rotateMap: "n",
   layerType: "WMTS",
   attribution: "",
   infoVisible: false,
@@ -319,6 +320,7 @@ class WMTSLayerForm extends Component {
       sizes: this.getValue("sizes"),
       tileSize: this.getValue("tileSize"),
       crossOrigin: this.getValue("crossOrigin"),
+      rotateMap: this.getValue("rotateMap"),
       attribution: this.getValue("attribution"),
       infoVisible: this.getValue("infoVisible"),
       infoTitle: this.getValue("infoTitle"),
@@ -906,6 +908,22 @@ class WMTSLayerForm extends Component {
             <option value="">Ej satt</option>
             <option value="anonymous">anonymous</option>
             <option value="use-credentials">use-credentials</option>
+          </select>
+        </div>
+        <div>
+          <label>Uppåt i kartan är:</label>
+          <select
+            className="control-fixed-width"
+            ref="input_rotateMap"
+            value={this.state.rotateMap}
+            onChange={(e) => {
+              this.setState({ rotateMap: e.target.value });
+            }}
+          >
+            <option value="n">Norr</option>
+            <option value="e">Öst</option>
+            <option value="s">Syd</option>
+            <option value="w">Väst</option>
           </select>
         </div>
         <div className="separator">Metadata</div>

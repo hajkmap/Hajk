@@ -373,6 +373,7 @@ class Manager extends Component {
           sizes: layer.sizes
             ? layer.sizes.map((s) => s.join(" ")).join("; ")
             : "",
+          rotateMap: layer.rotateMap || "n",
           tileSize:
             layer.tileSize != null
               ? Array.isArray(layer.tileSize)
