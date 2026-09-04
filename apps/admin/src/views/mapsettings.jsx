@@ -803,17 +803,13 @@ class Menu extends Component {
    */
   getLayerNameFromIdForDisplay(id) {
     var layer = this.props.model.get("layers").find((layer) => layer.id === id);
-    let ret = "";
     if (layer) {
-      if (layer.internalLayerName?.length > 0) {
-        ret = layer.internalLayerName;
-      } else {
-        ret = layer.caption;
-      }
+      return `${layer.internalLayerName || layer.caption} (${layer.type}) ${layer?.layers.length > 1 ? `(${layer.layers.length} underlager)` : ""}`;
+    
     } else {
-      ret = `---[layer id ${id} not found]---`;
+      return `---[layer id ${id} not found]---`;
     }
-    return ret;
+    
   }
 
   /**
@@ -1277,7 +1273,7 @@ class Menu extends Component {
 
       switch (layer.type) {
         case "WMS":
-          displayType = "";
+          displayType = "(WMS)";
           break;
         case "WMTS":
           displayType = "(WMTS)";
@@ -1292,6 +1288,7 @@ class Menu extends Component {
           break;
       }
 
+
       return (
         <li
           className="layer-item"
@@ -1301,10 +1298,15 @@ class Menu extends Component {
           <span className={cls} />
           &nbsp;
           <span className="main-box">
-            {layer.internalLayerName?.length > 0
-              ? layer.internalLayerName
-              : layer.caption}{" "}
-            {displayType}
+            {layer.internalLayerName || layer.caption}
+            <span className="layer-extra-info">
+              &nbsp;{displayType}
+              {layer?.layers?.length > 1 && (
+                <span className="sub-layers">
+                  &nbsp;({layer.layers.length} underlager)
+                </span>
+              )}
+            </span>
           </span>
         </li>
       );
