@@ -461,11 +461,16 @@ var manager = Model.extend({
     var xmlParser = new X2JS({
       attributePrefix: "_",
       arrayAccessFormPaths: [
+        "Capabilities.OperationsMetadata.Operation",
         "Capabilities.Contents.Layer",
         "Capabilities.Contents.Layer.TileMatrixSetLink",
+        "Capabilities.Contents.Layer.TileMatrixSetLink.TileMatrixSetLimits.TileMatrixLimits",
         "Capabilities.Contents.Layer.ResourceURL",
         "Capabilities.Contents.Layer.Style",
+        "Capabilities.Contents.Layer.Style.LegendURL",
         "Capabilities.Contents.Layer.Format",
+        "Capabilities.Contents.Layer.Dimension",
+        "Capabilities.Contents.Layer.Dimension.Value",
         "Capabilities.Contents.TileMatrixSet",
         "Capabilities.Contents.TileMatrixSet.TileMatrix",
       ],

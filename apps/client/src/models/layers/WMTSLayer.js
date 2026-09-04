@@ -6,13 +6,15 @@ import { overrideLayerSourceParams } from "../../utils/FetchWrapper";
 
 var wmtsLayerProperties = {
   url: "",
-  requestEncoding: "",
+  // Note: OpenLayers defaults to "KVP" when requestEncoding is undefined. Hajk has
+  // always ended up in the REST code path (the value never reached the source), so
+  // "REST" is the safe default for configs saved before requestEncoding was wired up.
+  requestEncoding: "REST",
   projection: "EPSG:3006",
   layer: "",
   opacity: 1,
   matrixSet: "3006",
   style: "",
-  axisMode: "natural",
   origins: [[-1200000, 8500000]],
   resolutions: [4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
   matrixIds: [
@@ -90,13 +92,20 @@ class WMTSLayer {
         ? { origins: parsedOrigins }
         : { origin: parsedOrigins[0] };
 
+    // "KVP_TEMPLATE" is a Hajk-only encoding: a KVP query string where TileMatrix,
+    // TileRow and TileCol are given as {placeholders}. OpenLayers handles that with
+    // its REST substitution, so translate before handing the value over.
+    const requestEncoding =
+      config.requestEncoding === "KVP_TEMPLATE"
+        ? "REST"
+        : config.requestEncoding;
+
     const sourceConfig = {
       attributions: config.attribution,
       format: config.imageFormat || "image/png",
       wrapX: false,
-      requestEncoding: config.requestEncoding,
+      requestEncoding,
       url: config.url,
-      axisMode: config.axisMode,
       layer: config.layer,
       zDirection: -1,
       matrixSet: config.matrixSet,
@@ -110,6 +119,13 @@ class WMTSLayer {
         tileSize: config.tileSize || undefined,
       }),
     };
+
+    // Dimensions are substituted into both KVP params and REST templates, e.g. the
+    // {FORMAT_OPTIONS} placeholder GeoServer's GWC puts in its ResourceURLs. Without
+    // this, OpenLayers renders such a placeholder as the string "undefined".
+    if (config.dimensions && Object.keys(config.dimensions).length > 0) {
+      sourceConfig.dimensions = config.dimensions;
+    }
 
     // Only set crossOrigin when explicitly configured. Some WMTS servers
     // do not return CORS headers, and forcing crossOrigin can cause requests

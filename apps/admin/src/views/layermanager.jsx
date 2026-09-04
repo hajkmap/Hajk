@@ -364,6 +364,11 @@ class Manager extends Component {
           style: layer.style,
           requestEncoding: layer.requestEncoding || "",
           imageFormat: layer.imageFormat,
+          dimensions: layer.dimensions
+            ? Object.keys(layer.dimensions)
+                .map((key) => key + "=" + layer.dimensions[key])
+                .join("; ")
+            : "",
           projection: layer.projection,
           origins: layer.origins
             ? layer.origins.map((o) => o.join(" ")).join("; ")
@@ -395,6 +400,7 @@ class Manager extends Component {
           minZoom: layer.minZoom,
           maxZoom: layer.maxZoom,
         });
+        this.refs["WMTSLayerForm"].validate();
       }, 0);
     }
   }
