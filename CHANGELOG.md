@@ -75,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: Location - The red flashing ring rendered around the blue geolocation dot does not move along when user moves, even during an ongoing flash animation.
 - Client: Location - Added a auto-rotate toggle that will rotate the map so that user's current heading direction always points up.
 - Client: Search - `"` in search phrase could lead to endless re-searches when `enableAppStateInHash` was active. Closes [#1880](https://github.com/hajkmap/Hajk/issues/1880).
+- Backend: Send more info if parsing a JSON config fails. Closes [#1883](https://github.com/hajkmap/Hajk/issues/1883).
 
 ## [4.3.0] 2026-04-20
 

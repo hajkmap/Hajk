@@ -11,6 +11,16 @@
 export default function handleStandardResponse(res, data, successStatus = 200) {
   // If we encountered a error…
   if (data.error) {
+    // Check if it's ConfigParseError. If so, send a 500 Internal Server Error
+    // along with structured info about which config file failed to parse.
+    if (data.error.name === "ConfigParseError") {
+      res.status(500).json({
+        error: data.error.message,
+        config: data.error.configName,
+      });
+      return;
+    }
+
     // Check if it's AccessError. If so, send a 403 Forbidden.
     // If error.code is ENOENT, send a 404 Not Found.
     // Otherwise, send a generic status 500.
