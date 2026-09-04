@@ -804,7 +804,7 @@ class Menu extends Component {
   getLayerNameFromIdForDisplay(id) {
     var layer = this.props.model.get("layers").find((layer) => layer.id === id);
     if (layer) {
-      return `${layer.internalLayerName || layer.caption} (${layer.type}) ${layer?.layers.length > 1 ? `(${layer.layers.length} underlager)` : ""}`;
+      return `${layer.internalLayerName || layer.caption} (${layer.type}) ${layer?.layers?.length > 1 ? `(${layer.layers.length} underlager)` : ""}`;
     
     } else {
       return `---[layer id ${id} not found]---`;
