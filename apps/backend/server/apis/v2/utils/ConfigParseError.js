@@ -12,7 +12,6 @@ export class ConfigParseError extends Error {
   constructor(message, configName, options) {
     super(message, options);
     this.configName = configName;
-    this.statusCode = 500;
   }
 
   get name() {

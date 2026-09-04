@@ -14,14 +14,14 @@ This is a monorepo with three independent apps — no root-level workspace tooli
 
 ### Tech Stack at a Glance
 
-|           | Backend                 | Client              | Admin                 |
-| --------- | ----------------------- | ------------------- | --------------------- |
-| Framework | Express 5               | React 19            | React 16 (legacy)     |
-| Build     | ES modules (no bundler) | Vite 7              | Create React App 3    |
-| UI        | —                       | MUI v7              | MUI v4 + Ant Design 4 |
-| Maps      | —                       | OpenLayers 10       | OpenLayers 5          |
-| Language  | JavaScript (ESM)        | TypeScript (strict) | JavaScript            |
-| Linting   | ESLint 9 + Prettier     | ESLint 9 + Prettier | Prettier only         |
+| | Backend | Client | Admin |
+| --- | --- | --- | --- |
+| Framework | Express 5 | React 19 | React 16 (legacy) |
+| Build | ES modules (no bundler) | Vite 7 | Create React App 3 |
+| UI | — | MUI v7 | MUI v4 + Ant Design 4 |
+| Maps | — | OpenLayers 10 | OpenLayers 5 |
+| Language | JavaScript (ESM) | TypeScript (strict) | JavaScript |
+| Linting | ESLint 9 + Prettier | ESLint 9 + Prettier | Prettier only |
 
 ### Critical Configuration Files
 
@@ -100,7 +100,6 @@ cd apps/admin && npm run build
   - Client UI consumes: `/api/v2/`
   - Admin UI consumes: `/api/v2/mapconfig/` for admin operations
   - ActiveDirectory auth (when enabled) affects `/config` vs `/mapconfig` responses
-  - API Error Handling: The backend uses `handleStandardResponse` to standardize API outputs. Custom errors should extend `Error` and define a `statusCode` property to control the HTTP response.
 
 ### Noteworthy Quirks
 

@@ -7,11 +7,6 @@
  * @extends {Error}
  */
 export default class FmeServerError extends Error {
-  constructor(message, options) {
-    super(message, options);
-    this.statusCode = 502;
-  }
-
   get name() {
     return "FmeServerError";
   }

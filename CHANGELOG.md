@@ -37,7 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Backend: Upgraded `write-excel-file` from 3.x to 4.x.
 - Backend: Enhance detailed request logger with structured output and file logging configuration [#1836](https://github.com/hajkmap/Hajk/pull/1836)
 - Backend: Bumped the [API Explorer](https://github.com/swagger-api/swagger-ui) to v5.32.6.
-- Backend: Refactored `handleStandardResponse` and custom error classes to standardize API error outputs as JSON and move status code logic into the error classes.
 - Client: AppModel refactored — split the 1444-line class into 8 focused modules under `appModel/` (urlParamsMerger, configTranslator, backgroundLayers, clickBindings, mapFactory, layerLoader, layerVisibility, pluginManager). No behavior change; all public methods preserved. [#1826](https://github.com/hajkmap/Hajk/pull/1826)
 - Client: New Mobile UI etc, see [#1778](https://github.com/hajkmap/Hajk/issues/1778).
 - Client: New CQL filter UI, PR [#1756](https://github.com/hajkmap/Hajk/pull/1756).
