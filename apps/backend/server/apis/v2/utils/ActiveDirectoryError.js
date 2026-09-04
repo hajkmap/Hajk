@@ -7,6 +7,11 @@
  * @extends {Error}
  */
 export default class ActiveDirectoryError extends Error {
+  constructor(message, options) {
+    super(message, options);
+    this.statusCode = 500;
+  }
+
   get name() {
     return "ActiveDirectoryError";
   }
