@@ -10,27 +10,25 @@
  */
 export default function handleStandardResponse(res, data, successStatus = 200) {
   // If we encountered a error…
-  if (data.error) {
-    // Check if it's ConfigParseError. If so, send a 500 Internal Server Error
-    // along with structured info about which config file failed to parse.
-    if (data.error.name === "ConfigParseError") {
-      res.status(500).json({
-        error: data.error.message,
-        config: data.error.configName,
-      });
-      return;
+  if (data?.error) {
+    const error = data.error;
+
+    // 1. Determine Status Code
+    // Priority: Explicit statusCode property -> Node.js ENOENT (404) -> Default (500)
+    let status = error.statusCode || 500;
+    if (error.code === "ENOENT") {
+      status = 404;
     }
 
-    // Check if it's AccessError. If so, send a 403 Forbidden.
-    // If error.code is ENOENT, send a 404 Not Found.
-    // Otherwise, send a generic status 500.
-    let status = 500;
-    if (data.error.code === "ENOENT") {
-      status = 404;
-    } else if (data.error.name === "AccessError") {
-      status = 403;
-    }
-    res.status(status).send(data.error.toString());
+    // 2. Standardize Error Payload
+    // Always return a JSON object with 'error' and optional 'details'
+    const errorPayload = {
+      error: error.message || error.toString(),
+      ...(error.details && { details: error.details }),
+      ...(error.configName && { config: error.configName }),
+    };
+
+    return res.status(status).json(errorPayload);
   }
   // If there's no error, send the response
   else {
