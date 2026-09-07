@@ -33,6 +33,7 @@ var wmtsLayerProperties = {
     "12",
   ],
   attribution: "",
+  highDpiVariants: [],
 };
 
 const normalizeLegend = (legend, fallbackDescription) => {
@@ -74,16 +75,27 @@ class WMTSLayer {
 
     this.proxyUrl = proxyUrl;
 
-    const parsedOrigins = (config.origins || []).map((o) =>
+    // A server may publish parallel "highDpi" TileMatrixSets (e.g. GeoServer/GWC's
+    // "xN" gridsets) with denser resolutions for retina-class screens. Pick the
+    // highest tier whose minPixelRatio the current screen satisfies; a tier is
+    // self-contained (its own matrixSet/origins/resolutions/matrixIds/sizes/tileSize),
+    // never mixed with the standard grid.
+    const pixelRatio = window.devicePixelRatio || 1;
+    const highDpiVariant = (config.highDpiVariants || [])
+      .filter((v) => v && v.matrixSet && v.minPixelRatio <= pixelRatio)
+      .sort((a, b) => b.minPixelRatio - a.minPixelRatio)[0];
+    const activeGrid = highDpiVariant || config;
+
+    const parsedOrigins = (activeGrid.origins || []).map((o) =>
       o.map((v) => Number(v))
     );
 
-    let resolutions = config.resolutions.map((r) => Number(r));
+    let resolutions = activeGrid.resolutions.map((r) => Number(r));
     let sizes =
-      Array.isArray(config.sizes) && config.sizes.length > 0
-        ? config.sizes
+      Array.isArray(activeGrid.sizes) && activeGrid.sizes.length > 0
+        ? activeGrid.sizes
         : undefined;
-    let matrixIds = config.matrixIds;
+    let matrixIds = activeGrid.matrixIds;
 
     // If there are multiple origins, use the origins array.
     // Otherwise, use the first origin as the origin.
@@ -108,7 +120,7 @@ class WMTSLayer {
       url: config.url,
       layer: config.layer,
       zDirection: -1,
-      matrixSet: config.matrixSet,
+      matrixSet: activeGrid.matrixSet,
       style: config.style,
       projection: config.projection,
       tileGrid: new WMTSTileGrid({
@@ -116,15 +128,20 @@ class WMTSLayer {
         resolutions,
         matrixIds,
         sizes,
-        tileSize: config.tileSize || undefined,
+        tileSize: activeGrid.tileSize || undefined,
       }),
     };
 
     // Dimensions are substituted into both KVP params and REST templates, e.g. the
     // {FORMAT_OPTIONS} placeholder GeoServer's GWC puts in its ResourceURLs. Without
-    // this, OpenLayers renders such a placeholder as the string "undefined".
-    if (config.dimensions && Object.keys(config.dimensions).length > 0) {
-      sourceConfig.dimensions = config.dimensions;
+    // this, OpenLayers renders such a placeholder as the string "undefined". A high-dpi
+    // tier only needs to override the keys that differ (e.g. FORMAT_OPTIONS=dpi:180).
+    const dimensions = {
+      ...config.dimensions,
+      ...highDpiVariant?.dimensions,
+    };
+    if (Object.keys(dimensions).length > 0) {
+      sourceConfig.dimensions = dimensions;
     }
 
     // Only set crossOrigin when explicitly configured. Some WMTS servers
