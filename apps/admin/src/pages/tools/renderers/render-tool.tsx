@@ -1,19 +1,40 @@
-import InfoClickRenderer from "./render-infoclick";
-import PrintRenderer from "./render-print";
-import AnchorRenderer from "./render-anchor";
-import SketchRenderer from "./render-sketch";
-import MeasurerRenderer from "./render-measurer";
-import StreetViewRenderer from "./render-streetview";
-import SearchRenderer from "./render-search";
-import LayerSwitcherRenderer from "./render-layerswitcher";
+import InfoClickRenderer, { infoclickDefaults } from "./render-infoclick";
+import PrintRenderer, { printDefaults } from "./render-print";
+import AnchorRenderer, { anchorDefaults } from "./render-anchor";
+import SketchRenderer, { sketchDefaults } from "./render-sketch";
+import MeasurerRenderer, { measurerDefaults } from "./render-measurer";
+import StreetViewRenderer, { streetviewDefaults } from "./render-streetview";
+import SearchRenderer, { searchDefaults } from "./render-search";
+import LayerSwitcherRenderer, {
+  layerswitcherDefaults,
+} from "./render-layerswitcher";
 import DocumentHandlerRenderer from "./render-documenthandler";
-import LocationRenderer from "./render-location";
-import BookmarksRenderer from "./render-bookmarks";
+import LocationRenderer, { locationDefaults } from "./render-location";
+import BookmarksRenderer, { bookmarksDefaults } from "./render-bookmarks";
 // import RoutingRenderer from "./renderers/RoutingRenderer";
 // import PresetRenderer from "./renderers/PresetRenderer";
 import React from "react";
 import { Control, FieldValues, UseFormSetValue } from "react-hook-form";
 import { Tool } from "../../../api/tools";
+
+// Per-type option defaults, used by settings.tsx as the isDirty baseline.
+// documenthandler isn't here yet — its fields don't use the `options.*` naming.
+const toolOptionDefaults: Record<string, Record<string, unknown>> = {
+  print: printDefaults,
+  infoclick: infoclickDefaults,
+  anchor: anchorDefaults,
+  sketch: sketchDefaults,
+  measurer: measurerDefaults,
+  streetview: streetviewDefaults,
+  search: searchDefaults,
+  layerswitcher: layerswitcherDefaults,
+  location: locationDefaults,
+  bookmarks: bookmarksDefaults,
+};
+
+export const getToolOptionDefaults = (
+  type: string | undefined,
+): Record<string, unknown> => (type ? toolOptionDefaults[type] : undefined) ?? {};
 
 interface ToolRendererProps {
   tool: Tool;

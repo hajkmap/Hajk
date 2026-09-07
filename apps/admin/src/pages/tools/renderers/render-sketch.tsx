@@ -8,6 +8,13 @@ import FormFieldGrid, {
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
 
+// Matches Sketch.jsx's own fallback. Used as the isDirty baseline in settings.tsx.
+export const sketchDefaults: Record<string, unknown> = {
+  visibleAtStart: false,
+  instruction: "",
+  visibleForGroups: [],
+};
+
 interface SketchRendererProps {
   tool: Tool;
   control?: Control<FieldValues>;
@@ -22,11 +29,7 @@ export default function SketchRenderer({
   const { control: localControl } = useForm<FieldValues>({
     defaultValues: {
       type: tool?.type ?? "sketch",
-      ...(tool?.options
-        ? Object.fromEntries(
-            Object.entries(tool.options).map(([k, v]) => [`options.${k}`, v]),
-          )
-        : {}),
+      options: { ...sketchDefaults, ...tool?.options },
     },
   });
 

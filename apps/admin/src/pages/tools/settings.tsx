@@ -10,7 +10,7 @@ import FormActionPanel from "../../components/form-action-panel";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 import { useRef, useEffect } from "react";
 import { toast } from "react-toastify";
-import RenderTool from "./renderers/render-tool";
+import RenderTool, { getToolOptionDefaults } from "./renderers/render-tool";
 import UsedInMapsPanel from "../../components/used-in-maps-panel";
 import { useForm, FieldValues } from "react-hook-form";
 
@@ -38,7 +38,10 @@ export default function ToolSettings() {
   // Reset form with tool data when it loads
   useEffect(() => {
     if (tool) {
-      const options = tool.options ?? {};
+      // Fill in defaults for any field missing from saved options (e.g. a
+      // freshly created tool) so the isDirty baseline isn't `undefined` for
+      // fields a widget will write a concrete value to on first touch.
+      const options = { ...getToolOptionDefaults(tool.type), ...tool.options };
       const optionsTitle =
         typeof options.title === "string" && options.title
           ? options.title

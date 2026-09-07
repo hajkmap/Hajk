@@ -13,6 +13,54 @@ import { useTranslation } from "react-i18next";
 import { SketchPicker } from "react-color";
 import { Tool } from "../../../api/tools";
 
+// Used as the isDirty baseline in settings.tsx.
+export const searchDefaults: Record<string, unknown> = {
+  searchInfoText: "",
+  maxHitsPerDataset: 1000,
+  autoSearchDelay: 500,
+  showInfoWhenExceeded: false,
+  disableAutocomplete: false,
+  disableAutoCombinations: false,
+  wildcardBeforeSearch: false,
+  autofocusSearch: false,
+  enablePolygonSearch: true,
+  enableRadiusSearch: true,
+  enableAreaSearch: true,
+  searchWithinView: false,
+  searchVisibleLayers: true,
+  wildcardBefore: true,
+  wildcardAfter: true,
+  caseSensitive: true,
+  requireFullObject: true,
+  showResultLabel: true,
+  preSelected: true,
+  autoShowAllResultsOnMap: false,
+  allowResultFiltering: false,
+  allowResultSorting: false,
+  allowQuickClearSelection: false,
+  allowDownloadResults: false,
+  showPreviewOnHover: false,
+  collectSelectedResults: false,
+  showPrevNextButtons: false,
+  maxZoomLevel: -1,
+  hitIcon: "",
+  iconDisplacementX: 0,
+  iconDisplacementY: 0,
+  iconScale: 1,
+  strokeColor: "",
+  strokeOpacity: "",
+  standardResultsMarkedFillColor: "",
+  standardResultsMarkedFrameColor: "",
+  markedResultsTextFillColor: "",
+  markedResultsTextFrameColor: "",
+  markedResultsMarkedFillColor: "",
+  markedResultsMarkedFrameColor: "",
+  activeResultTextFillColor: "",
+  activeResultTextFrameColor: "",
+  activeResultMarkedFillColor: "",
+  activeResultMarkedFrameColor: "",
+};
+
 interface SearchRendererProps {
   tool: Tool;
   control?: Control<FieldValues>;
@@ -35,65 +83,7 @@ export default function SearchRenderer({
   useEffect(() => {
     if (tool && !parentControl) {
       reset({
-        options: {
-          searchInfoText: tool.options?.searchInfoText ?? "",
-          maxHitsPerDataset: tool.options?.maxHitsPerDataset ?? 1000,
-          autoSearchDelay: tool.options?.autoSearchDelay ?? 500,
-          showInfoWhenExceeded: tool.options?.showInfoWhenExceeded ?? false,
-          disableAutocomplete: tool.options?.disableAutocomplete ?? false,
-          disableAutoCombinations:
-            tool.options?.disableAutoCombinations ?? false,
-          wildcardBeforeSearch: tool.options?.wildcardBeforeSearch ?? false,
-          autofocusSearch: tool.options?.autofocusSearch ?? false,
-          enablePolygonSearch: tool.options?.enablePolygonSearch ?? true,
-          enableRadiusSearch: tool.options?.enableRadiusSearch ?? true,
-          enableAreaSearch: tool.options?.enableAreaSearch ?? true,
-          searchWithinView: tool.options?.searchWithinView ?? false,
-          searchVisibleLayers: tool.options?.searchVisibleLayers ?? true,
-          wildcardBefore: tool.options?.wildcardBefore ?? true,
-          wildcardAfter: tool.options?.wildcardAfter ?? true,
-          caseSensitive: tool.options?.caseSensitive ?? true,
-          requireFullObject: tool.options?.requireFullObject ?? true,
-          showResultLabel: tool.options?.showResultLabel ?? true,
-          preSelected: tool.options?.preSelected ?? true,
-          autoShowAllResultsOnMap:
-            tool.options?.autoShowAllResultsOnMap ?? false,
-          allowResultFiltering: tool.options?.allowResultFiltering ?? false,
-          allowResultSorting: tool.options?.allowResultSorting ?? false,
-          allowQuickClearSelection:
-            tool.options?.allowQuickClearSelection ?? false,
-          allowDownloadResults: tool.options?.allowDownloadResults ?? false,
-          showPreviewOnHover: tool.options?.showPreviewOnHover ?? false,
-          collectSelectedResults: tool.options?.collectSelectedResults ?? false,
-          showPrevNextButtons: tool.options?.showPrevNextButtons ?? false,
-          maxZoomLevel: tool.options?.maxZoomLevel ?? -1,
-          hitIcon: tool.options?.hitIcon ?? "",
-          iconDisplacementX: tool.options?.iconDisplacementX ?? 0,
-          iconDisplacementY: tool.options?.iconDisplacementY ?? 0,
-          iconScale: tool.options?.iconScale ?? 1,
-          strokeColor: tool.options?.strokeColor ?? "",
-          strokeOpacity: tool.options?.strokeOpacity ?? "",
-          standardResultsMarkedFillColor:
-            tool.options?.standardResultsMarkedFillColor ?? "",
-          standardResultsMarkedFrameColor:
-            tool.options?.standardResultsMarkedFrameColor ?? "",
-          markedResultsTextFillColor:
-            tool.options?.markedResultsTextFillColor ?? "",
-          markedResultsTextFrameColor:
-            tool.options?.markedResultsTextFrameColor ?? "",
-          markedResultsMarkedFillColor:
-            tool.options?.markedResultsMarkedFillColor ?? "",
-          markedResultsMarkedFrameColor:
-            tool.options?.markedResultsMarkedFrameColor ?? "",
-          activeResultTextFillColor:
-            tool.options?.activeResultTextFillColor ?? "",
-          activeResultTextFrameColor:
-            tool.options?.activeResultTextFrameColor ?? "",
-          activeResultMarkedFillColor:
-            tool.options?.activeResultMarkedFillColor ?? "",
-          activeResultMarkedFrameColor:
-            tool.options?.activeResultMarkedFrameColor ?? "",
-        },
+        options: { ...searchDefaults, ...tool.options },
       });
     }
   }, [tool, reset, parentControl]);

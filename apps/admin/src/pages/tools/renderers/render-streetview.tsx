@@ -7,6 +7,14 @@ import FormAccordion from "../../../components/form-components/form-accordion";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
 
+// Used as the isDirty baseline in settings.tsx.
+export const streetviewDefaults: Record<string, unknown> = {
+  visibleAtStart: false,
+  instruction: "",
+  visibleForGroups: [],
+  apiKey: "",
+};
+
 interface StreetViewRendererProps {
   tool: Tool;
   control?: Control<FieldValues>;
@@ -20,11 +28,7 @@ export default function StreetViewRenderer({
   const { control: localControl } = useForm<FieldValues>({
     defaultValues: {
       type: tool?.type ?? "streetview",
-      ...(tool?.options
-        ? Object.fromEntries(
-            Object.entries(tool.options).map(([k, v]) => [`options.${k}`, v]),
-          )
-        : {}),
+      options: { ...streetviewDefaults, ...tool?.options },
     },
   });
 

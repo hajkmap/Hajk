@@ -8,6 +8,13 @@ import FormAccordion from "../../../components/form-components/form-accordion";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
 
+// Used as the isDirty baseline in settings.tsx.
+export const bookmarksDefaults: Record<string, unknown> = {
+  visibleAtStart: false,
+  instruction: "",
+  visibleForGroups: [],
+};
+
 interface BookmarksRendererProps {
   tool: Tool;
   control?: Control<FieldValues>;
@@ -32,11 +39,7 @@ export default function BookmarksRenderer({
     if (tool && !parentControl) {
       reset({
         type: tool.type ?? "",
-        options: {
-          visibleAtStart: tool.options?.visibleAtStart ?? false,
-          instruction: tool.options?.instruction ?? "",
-          visibleForGroups: tool.options?.visibleForGroups ?? [],
-        },
+        options: { ...bookmarksDefaults, ...tool.options },
       });
     }
   }, [tool, reset, parentControl]);

@@ -8,6 +8,14 @@ import FormAccordion from "../../../components/form-components/form-accordion";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
 
+// Matches AnchorView.jsx's own fallbacks. Used as the isDirty baseline in settings.tsx.
+export const anchorDefaults: Record<string, unknown> = {
+  visibleAtStart: false,
+  allowCreatingCleanUrls: true,
+  instruction: "",
+  visibleForGroups: [],
+};
+
 interface AnchorToolRendererProps {
   tool: Tool;
   control?: Control<FieldValues>;
@@ -32,12 +40,7 @@ export default function AnchorToolRenderer({
     if (tool && !parentControl) {
       reset({
         type: tool.type ?? "",
-        options: {
-          visibleAtStart: tool.options?.visibleAtStart ?? false,
-          allowCreatingCleanUrls: tool.options?.allowCreatingCleanUrls ?? false,
-          instruction: tool.options?.instruction ?? "",
-          visibleForGroups: tool.options?.visibleForGroups ?? [],
-        },
+        options: { ...anchorDefaults, ...tool.options },
       });
     }
   }, [tool, reset, parentControl]);

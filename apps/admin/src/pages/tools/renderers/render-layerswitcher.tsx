@@ -19,6 +19,38 @@ const getOption = <T,>(
   return options[key] as T;
 };
 
+// Used as the isDirty baseline in settings.tsx.
+export const layerswitcherDefaults: Record<string, unknown> = {
+  title: "",
+  description: "",
+  visibleAtStart: false,
+  visibleAtStartMobile: false,
+  showBreadcrumbs: false,
+  showDrawOrderView: false,
+  showFilter: false,
+  showQuickAccess: false,
+  legendForceTransparency: false,
+  legendTryHiDPI: false,
+  enableTransparencySlider: true,
+  cqlFilterVisible: false,
+  enableSystemLayersSwitch: false,
+  lockDrawOrderBaselayer: false,
+  drawOrderViewInfoText: "",
+  enableQuickAccessPresets: false,
+  quickAccessTopicsInfoText: "",
+  enableUserQuickAccessFavorites: false,
+  userQuickAccessFavoritesInfoText: "",
+  dropdownThemeMaps: false,
+  themeMapHeaderCaption: "",
+  minMaxZoomAlertOnToggleOnly: false,
+  backgroundSwitcherBlack: true,
+  backgroundSwitcherWhite: true,
+  enableOSM: false,
+  OSMVisibleAtStart: false,
+  renderSpecialBackgroundsAtBottom: false,
+  instruction: "",
+};
+
 interface LayerSwitcherRendererProps {
   tool: Tool;
   control?: Control<FieldValues>;
@@ -41,97 +73,12 @@ export default function LayerSwitcherRenderer({
       reset({
         type: tool.type ?? "",
         options: {
+          ...layerswitcherDefaults,
+          ...options,
           title:
             getOption(options, "title", "") ||
             (typeof tool.title === "string" ? tool.title : "") ||
             "",
-          description: getOption(options, "description", ""),
-          visibleAtStart: getOption(options, "visibleAtStart", false),
-          visibleAtStartMobile: getOption(
-            options,
-            "visibleAtStartMobile",
-            false,
-          ),
-          showBreadcrumbs: getOption(options, "showBreadcrumbs", false),
-          showDrawOrderView: getOption(options, "showDrawOrderView", false),
-          showFilter: getOption(options, "showFilter", false),
-          showQuickAccess: getOption(options, "showQuickAccess", false),
-          legendForceTransparency: getOption(
-            options,
-            "legendForceTransparency",
-            false,
-          ),
-          legendTryHiDPI: getOption(options, "legendTryHiDPI", false),
-          enableTransparencySlider: getOption(
-            options,
-            "enableTransparencySlider",
-            true,
-          ),
-          cqlFilterVisible: getOption(options, "cqlFilterVisible", false),
-          enableSystemLayersSwitch: getOption(
-            options,
-            "enableSystemLayersSwitch",
-            false,
-          ),
-          lockDrawOrderBaselayer: getOption(
-            options,
-            "lockDrawOrderBaselayer",
-            false,
-          ),
-          drawOrderViewInfoText: getOption(
-            options,
-            "drawOrderViewInfoText",
-            "",
-          ),
-          enableQuickAccessPresets: getOption(
-            options,
-            "enableQuickAccessPresets",
-            false,
-          ),
-          quickAccessTopicsInfoText: getOption(
-            options,
-            "quickAccessTopicsInfoText",
-            "",
-          ),
-          enableUserQuickAccessFavorites: getOption(
-            options,
-            "enableUserQuickAccessFavorites",
-            false,
-          ),
-          userQuickAccessFavoritesInfoText: getOption(
-            options,
-            "userQuickAccessFavoritesInfoText",
-            "",
-          ),
-          dropdownThemeMaps: getOption(options, "dropdownThemeMaps", false),
-          themeMapHeaderCaption: getOption(
-            options,
-            "themeMapHeaderCaption",
-            "",
-          ),
-          minMaxZoomAlertOnToggleOnly: getOption(
-            options,
-            "minMaxZoomAlertOnToggleOnly",
-            false,
-          ),
-          backgroundSwitcherBlack: getOption(
-            options,
-            "backgroundSwitcherBlack",
-            true,
-          ),
-          backgroundSwitcherWhite: getOption(
-            options,
-            "backgroundSwitcherWhite",
-            true,
-          ),
-          enableOSM: getOption(options, "enableOSM", false),
-          OSMVisibleAtStart: getOption(options, "OSMVisibleAtStart", false),
-          renderSpecialBackgroundsAtBottom: getOption(
-            options,
-            "renderSpecialBackgroundsAtBottom",
-            false,
-          ),
-          instruction: getOption(options, "instruction", ""),
         },
       });
     }

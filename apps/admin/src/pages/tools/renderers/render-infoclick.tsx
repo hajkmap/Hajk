@@ -33,6 +33,29 @@ function toRgbColor(value: unknown, fallback: RGBColor): RGBColor {
   return fallback;
 }
 
+// Matches the client's own fallbacks (FeaturePropsParsing.jsx, MapClickModel.js,
+// customComponentsForReactMarkdown.jsx). Used as the isDirty baseline in settings.tsx.
+export const infoclickDefaults: Record<string, unknown> = {
+  title: "",
+  description: "",
+  instruction: "",
+  visibleAtStart: false,
+  visibleForGroups: [],
+  allowDangerousHtml: true,
+  useNewInfoclick: false,
+  useNewPlaceholderMatching: false,
+  useLevel1FeatureHighlight: false,
+  transformLinkUri: true,
+  linksColor: "primary",
+  linksUnderline: "always",
+  src: "",
+  anchor: [0.5, 1],
+  scale: 0.15,
+  strokeWidth: 4,
+  strokeColor: { r: 200, g: 0, b: 0, a: 0.7 },
+  fillColor: { r: 255, g: 0, b: 0, a: 0.1 },
+};
+
 interface InfoClickRendererProps {
   tool: Tool;
   control?: Control<FieldValues>;
@@ -43,20 +66,16 @@ export default function InfoClickRenderer({
   control: parentControl,
 }: InfoClickRendererProps) {
   const { t } = useTranslation();
-  const anchor = Array.isArray(tool?.options?.anchor)
-    ? (tool.options.anchor as [number, number])
+  const mergedOptions = { ...infoclickDefaults, ...tool?.options };
+  const anchor = Array.isArray(mergedOptions.anchor)
+    ? (mergedOptions.anchor as [number, number])
     : [0.5, 1];
 
   const { control: localControl } = useForm<FieldValues>({
     defaultValues: {
       type: tool?.type ?? "infoclick",
-      ...(tool?.options
-        ? Object.fromEntries(
-            Object.entries(tool.options).map(([k, v]) => [`options.${k}`, v]),
-          )
-        : {}),
-      "options.anchor.0": anchor[0],
-      "options.anchor.1": anchor[1],
+      // Nested `anchor` serves the `options.anchor.0` / `.1` controllers directly.
+      options: { ...mergedOptions, anchor },
     },
   });
 
