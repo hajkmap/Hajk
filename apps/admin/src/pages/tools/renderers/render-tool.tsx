@@ -7,8 +7,8 @@ import StreetViewRenderer from "./render-streetview";
 import SearchRenderer from "./render-search";
 import LayerSwitcherRenderer from "./render-layerswitcher";
 import DocumentHandlerRenderer from "./render-documenthandler";
+import LocationRenderer from "./render-location";
 // import RoutingRenderer from "./renderers/RoutingRenderer";
-// import LocationRenderer from "./renderers/LocationRenderer";
 // import PresetRenderer from "./renderers/PresetRenderer";
 import React from "react";
 import { Control, FieldValues, UseFormSetValue } from "react-hook-form";
@@ -32,8 +32,8 @@ const toolRenderers: Record<string, React.ComponentType<ToolRendererProps>> = {
     LayerSwitcherRenderer as React.ComponentType<ToolRendererProps>,
   documenthandler:
     DocumentHandlerRenderer as React.ComponentType<ToolRendererProps>,
+  location: LocationRenderer as React.ComponentType<ToolRendererProps>,
   // routing: RoutingRenderer,
-  // location: LocationRenderer,
   // preset: PresetRenderer,
 };
 
