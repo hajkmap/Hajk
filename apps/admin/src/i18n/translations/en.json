@@ -1029,6 +1029,7 @@
       "strokeWidth": "Marker border width (px)",
       "strokeColor": "Marker border color",
       "fillColor": "Marker fill color",
+      "settings": "Settings",
       "generalSettings": "General settings",
       "documenthandler": {
         "drawerButtonTitle": "Drawer button title",

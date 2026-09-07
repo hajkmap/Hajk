@@ -8,6 +8,7 @@ import SearchRenderer from "./render-search";
 import LayerSwitcherRenderer from "./render-layerswitcher";
 import DocumentHandlerRenderer from "./render-documenthandler";
 import LocationRenderer from "./render-location";
+import BookmarksRenderer from "./render-bookmarks";
 // import RoutingRenderer from "./renderers/RoutingRenderer";
 // import PresetRenderer from "./renderers/PresetRenderer";
 import React from "react";
@@ -33,6 +34,7 @@ const toolRenderers: Record<string, React.ComponentType<ToolRendererProps>> = {
   documenthandler:
     DocumentHandlerRenderer as React.ComponentType<ToolRendererProps>,
   location: LocationRenderer as React.ComponentType<ToolRendererProps>,
+  bookmarks: BookmarksRenderer as React.ComponentType<ToolRendererProps>,
   // routing: RoutingRenderer,
   // preset: PresetRenderer,
 };

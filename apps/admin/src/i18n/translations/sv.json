@@ -962,6 +962,7 @@
       "strokeWidth": "Bredd på markeringens ram (px)",
       "strokeColor": "Färg på markeringens ram",
       "fillColor": "Färg på markeringens fyllnad",
+      "settings": "Inställningar",
       "generalSettings": "Allmänna inställningar",
       "search": {
         "infoText": "Infotext i sökfältet",

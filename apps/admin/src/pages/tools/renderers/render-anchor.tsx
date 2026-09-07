@@ -88,7 +88,7 @@ export default function AnchorToolRenderer({
               control={control}
               render={({ field }) => (
                 <TextField
-                  label={t("tools.instructionText")}
+                  label={t("tools.instruction")}
                   fullWidth
                   multiline
                   rows={3}

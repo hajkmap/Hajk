@@ -64,7 +64,7 @@ export default function SketchRenderer({
               defaultValue={tool?.options?.instruction ?? ""}
               render={({ field }) => (
                 <TextField
-                  label={t("tools.instructionText")}
+                  label={t("tools.instruction")}
                   fullWidth
                   multiline
                   rows={4}

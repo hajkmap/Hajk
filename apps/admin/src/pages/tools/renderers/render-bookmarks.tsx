@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { TextField, FormControlLabel, Checkbox } from "@mui/material";
-import { Control, Controller, FieldValues, useForm } from "react-hook-form";
+import { Controller, useForm, FieldValues, Control } from "react-hook-form";
 import FormFieldGrid, {
   FormFieldRow,
 } from "../../../components/form-components/form-field-grid";
@@ -7,44 +8,47 @@ import FormAccordion from "../../../components/form-components/form-accordion";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
 
-interface StreetViewRendererProps {
+interface BookmarksRendererProps {
   tool: Tool;
   control?: Control<FieldValues>;
 }
 
-export default function StreetViewRenderer({
+export default function BookmarksRenderer({
   tool,
   control: parentControl,
-}: StreetViewRendererProps) {
+}: BookmarksRendererProps) {
   const { t } = useTranslation();
-  const { control: localControl } = useForm<FieldValues>({
-    defaultValues: {
-      type: tool?.type ?? "streetview",
-      ...(tool?.options
-        ? Object.fromEntries(
-            Object.entries(tool.options).map(([k, v]) => [`options.${k}`, v]),
-          )
-        : {}),
-    },
+
+  const { control: localControl, reset } = useForm<FieldValues>({
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
-  // Use the parent form's control when provided (keeps these fields in the
-  // page's single save flow); otherwise fall back to a local, standalone form.
+  // Use parent control if provided, otherwise use local
   const control = parentControl ?? localControl;
+
+  // Reset form with tool data when it loads (only for local control)
+  useEffect(() => {
+    if (tool && !parentControl) {
+      reset({
+        type: tool.type ?? "",
+        options: {
+          visibleAtStart: tool.options?.visibleAtStart ?? false,
+          instruction: tool.options?.instruction ?? "",
+          visibleForGroups: tool.options?.visibleForGroups ?? [],
+        },
+      });
+    }
+  }, [tool, reset, parentControl]);
 
   return (
     <>
-      {/* ─────────────────────────────────────────────
-          OTHER SETTINGS
-      ───────────────────────────────────────────── */}
-      <FormAccordion title={t("tools.generalSettings")} defaultExpanded>
+      <FormAccordion title={t("tools.settings")} defaultExpanded>
         <FormFieldGrid>
-          {/* Synlig vid start */}
           <FormFieldRow>
             <Controller
               name="options.visibleAtStart"
               control={control}
-              defaultValue={Boolean(tool?.options?.visibleAtStart)}
               render={({ field }) => (
                 <FormControlLabel
                   control={
@@ -59,43 +63,32 @@ export default function StreetViewRenderer({
             />
           </FormFieldRow>
 
-          {/* Instruktion */}
           <FormFieldRow>
             <Controller
               name="options.instruction"
               control={control}
-              defaultValue={tool?.options?.instruction ?? ""}
               render={({ field }) => (
                 <TextField
                   label={t("tools.instruction")}
                   fullWidth
                   multiline
-                  rows={4}
-                  {...field}
+                  rows={3}
+                  value={field.value ? atob(field.value as string) : ""}
+                  onChange={(e) => field.onChange(btoa(e.target.value))}
                 />
               )}
             />
           </FormFieldRow>
 
-          {/* Tillträde */}
           <FormFieldRow>
             <Controller
               name="options.visibleForGroups"
               control={control}
-              defaultValue={
-                Array.isArray(tool?.options?.visibleForGroups)
-                  ? (tool.options.visibleForGroups as string[]).join(",")
-                  : ""
-              }
               render={({ field }) => (
                 <TextField
                   label={t("tools.visibleForGroups")}
                   fullWidth
-                  value={
-                    Array.isArray(field.value)
-                      ? (field.value as string[]).join(",")
-                      : ((field.value as string) ?? "")
-                  }
+                  value={((field.value as string[]) ?? []).join(",")}
                   onChange={(e) =>
                     field.onChange(
                       e.target.value
@@ -104,18 +97,6 @@ export default function StreetViewRenderer({
                     )
                   }
                 />
-              )}
-            />
-          </FormFieldRow>
-
-          {/* API-nyckel */}
-          <FormFieldRow>
-            <Controller
-              name="options.apiKey"
-              control={control}
-              defaultValue={tool?.options?.apiKey ?? ""}
-              render={({ field }) => (
-                <TextField label={t("tools.apiKey")} fullWidth {...field} />
               )}
             />
           </FormFieldRow>
