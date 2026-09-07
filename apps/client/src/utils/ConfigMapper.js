@@ -279,6 +279,7 @@ export default class ConfigMapper {
         matrixIds: args.matrixIds,
         sizes: args.sizes,
         tileSize: args.tileSize,
+        highDpiVariants: args.highDpiVariants || [],
         attribution: args.attribution,
         legend: args.legend,
         legendIcon: args.legendIcon,
