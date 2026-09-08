@@ -170,6 +170,35 @@ function escapeRegExp(str) {
   return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+// Mirrors highDpiTileFactor() in Client's models/layers/WMTSLayer.js, purely so the
+// admin can see whether a configured tier will actually sharpen anything. A tier whose
+// tiles are the same size as the base grid's gets its density from the tier threshold
+// instead; a factor of 1 means the tier renders identically to the standard grid.
+function highDpiTileFactor(row, baseTileSize) {
+  var toPair = (value) => {
+    var parsed = parseTileSize(value);
+    if (parsed === undefined) return null;
+    return Array.isArray(parsed) ? parsed : [parsed, parsed];
+  };
+
+  // Without the tier's own rutstorlek there is nothing to compare against.
+  var variant = toPair(row.tileSize);
+  if (!variant) return 1;
+
+  var base = toPair(baseTileSize) || [256, 256];
+
+  var widthFactor = variant[0] / base[0];
+  if (widthFactor !== variant[1] / base[1]) return 1;
+
+  var factor = widthFactor > 1 ? widthFactor : Number(row.minPixelRatio);
+  if (!isFinite(factor) || factor <= 1) return 1;
+
+  return Number.isInteger(variant[0] / factor) &&
+    Number.isInteger(variant[1] / factor)
+    ? factor
+    : 1;
+}
+
 function blankHighDpiVariant(defaultDimensions) {
   return {
     minPixelRatio: "",
@@ -1484,7 +1513,13 @@ class WMTSLayerForm extends Component {
             Konfigurera först standardmatrisen (Matrisuppsättning) ovan. Om
             servern erbjuder hög-DPI-varianter (t.ex. med suffix &quot;x2&quot;,
             &quot;x3&quot;) upptäcks de automatiskt nedan och kan läggas till
-            med ett klick.
+            med ett klick. Det är nivåns rutstorlek i förhållande till
+            standardmatrisens som avgör hur skarpt lagret ritas: dubbelt så
+            stora rutor (t.ex. 512 mot 256) ger dubbel pixeltäthet. Har nivån
+            samma rutstorlek som standardmatrisen används min. pixelratio
+            istället. Observera att om hög-DPI-nivån har färre matrisnivåer än
+            standardmatrisen så ritas den innersta inzoomningen med vanlig
+            skärpa.
           </i>
         </div>
         {this.state.detectedHighDpiCandidates.length > 0 ? (
@@ -1604,6 +1639,16 @@ class WMTSLayerForm extends Component {
                   this.updateHighDpiVariant(i, { tileSize: e.target.value })
                 }
               />
+            </div>
+            <div>
+              <label />
+              <i>
+                {highDpiTileFactor(row, this.state.tileSize) > 1
+                  ? "Ger " +
+                    highDpiTileFactor(row, this.state.tileSize) +
+                    "x pixeltäthet."
+                  : "Ger ingen ökad pixeltäthet – nivån ritas som standardmatrisen."}
+              </i>
             </div>
             <div>
               <label>Dimensioner</label>
