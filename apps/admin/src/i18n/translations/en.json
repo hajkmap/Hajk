@@ -1031,6 +1031,13 @@
       "fillColor": "Marker fill color",
       "settings": "Settings",
       "generalSettings": "General settings",
+      "information": {
+        "title": "Tooltip text on the info button",
+        "headerText": "Dialog header",
+        "text": "Dialog text",
+        "buttonText": "Close button text",
+        "showInfoOnce": "Show only once at start"
+      },
       "documenthandler": {
         "drawerButtonTitle": "Drawer button title",
         "drawerTitle": "Drawer title",

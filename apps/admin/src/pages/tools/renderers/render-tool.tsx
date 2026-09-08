@@ -12,6 +12,9 @@ import DocumentHandlerRenderer from "./render-documenthandler";
 import LocationRenderer, { locationDefaults } from "./render-location";
 import BookmarksRenderer, { bookmarksDefaults } from "./render-bookmarks";
 import RoutingRenderer, { routingDefaults } from "./render-routing";
+import InformationRenderer, {
+  informationDefaults,
+} from "./render-information";
 // import PresetRenderer from "./renderers/PresetRenderer";
 import React from "react";
 import { Control, FieldValues, UseFormSetValue } from "react-hook-form";
@@ -31,6 +34,7 @@ const toolOptionDefaults: Record<string, Record<string, unknown>> = {
   location: locationDefaults,
   bookmarks: bookmarksDefaults,
   routing: routingDefaults,
+  information: informationDefaults,
 };
 
 export const getToolOptionDefaults = (
@@ -58,6 +62,7 @@ const toolRenderers: Record<string, React.ComponentType<ToolRendererProps>> = {
   location: LocationRenderer as React.ComponentType<ToolRendererProps>,
   bookmarks: BookmarksRenderer as React.ComponentType<ToolRendererProps>,
   routing: RoutingRenderer as React.ComponentType<ToolRendererProps>,
+  information: InformationRenderer as React.ComponentType<ToolRendererProps>,
   // preset: PresetRenderer,
 };
 

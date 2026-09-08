@@ -964,6 +964,13 @@
       "fillColor": "Färg på markeringens fyllnad",
       "settings": "Inställningar",
       "generalSettings": "Allmänna inställningar",
+      "information": {
+        "title": "Text vid mouse-over på informationsknappen",
+        "headerText": "Rubrik i inforutan",
+        "text": "Text i inforutan",
+        "buttonText": "Text i inforutans stängningsknapp",
+        "showInfoOnce": "Visa vid start endast en gång"
+      },
       "search": {
         "infoText": "Infotext i sökfältet",
         "infoTextPlaceholder": "Ange informationstext...",
