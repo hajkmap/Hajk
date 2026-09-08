@@ -1,6 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { useTheme } from "@mui/material/styles";
 import Observer from "react-event-observer";
 import EditIcon from "@mui/icons-material/Edit";
+
+// Bus
+import { editBus } from "../../buses/editBus";
 
 // Helpers
 import LocalStorageHelper from "../../utils/LocalStorageHelper";
@@ -14,12 +18,15 @@ import SketchModel from "./models/SketchModel";
 import DrawModel from "../../models/DrawModel";
 import KmlModel from "../../models/KmlModel";
 import GpxModel from "../../models/GpxModel";
+import AngleSnapping from "../Measurer/AngleSnapping";
 
 // Constants
 import { STORAGE_KEY, DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 
 // Hooks
 import useCookieStatus from "../../hooks/useCookieStatus";
+import useAttributeEditorIntegration from "./hooks/useAttributeEditorIntegration";
+import useGeometryValidation from "./hooks/useGeometryValidation";
 
 // Returns the measurement-settings-object from LS if it exists, otherwise it returns
 // the default measurement-settings. The LS might be empty since the user might have chosen
@@ -30,6 +37,8 @@ const getMeasurementSettings = () => {
 };
 
 const Sketch = (props) => {
+  const theme = useTheme();
+  const lastEditFeatureRef = React.useRef(null);
   // We're gonna need to keep track of the current chosen activity. ("ADD", "REMOVE", etc).
   const [activityId, setActivityId] = React.useState("ADD");
   // We're gonna need to keep track of the currently active draw-type. ("Polygon", "Rectangle", etc).
@@ -50,6 +59,10 @@ const Sketch = (props) => {
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
   );
+  // Allowed geometry types when in AttributeEditor-mode
+  const [allowedGeometryTypes, setAllowedGeometryTypes] = React.useState(null);
+  // Whether the current edit service allows multi-geometries
+  const [allowMultiGeom, setAllowMultiGeom] = React.useState(false);
 
   // A toggle-button that allows the user to toggle between turn off & choose-drawn-object to buffer in the new buffer sketch accordion.
   const [toggleBufferBtn, setToggleBufferBtn] = React.useState({
@@ -58,14 +71,60 @@ const Sketch = (props) => {
     app: props.app, // Reference to the app object passed as a prop
   });
 
+  // State for fixed-length drawing mode (AttributeEditor mode)
+  const [fixedLengthEnabled, setFixedLengthEnabled] = React.useState(false);
+  const [fixedLength, setFixedLength] = React.useState(1000); // Default 1000 meters
+  const [fixedAngle, setFixedAngle] = React.useState(0); // Default 0 degrees (North)
+
+  // State for multi-draw mode (drawing multiple geometries into a single Multi-geometry)
+  const [multiDrawEnabled, setMultiDrawEnabled] = React.useState(false);
+
   // We have to keep track of some measurement-settings
   const [measurementSettings, setMeasurementSettings] = React.useState(
     getMeasurementSettings()
   );
+  // Keep track of whether to show kink markers
+  const [showKinkMarkers, setShowKinkMarkers] = React.useState(() => {
+    const saved = LocalStorageHelper.get(STORAGE_KEY);
+    return saved?.showKinkMarkers ?? true;
+  });
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(props.app.globalObserver);
   // The local observer will handle the communication between models and views.
   const [localObserver] = React.useState(() => Observer());
+
+  const prevActivityRef = React.useRef(activityId);
+  // Track if AttributeEditor has an active editable layer
+  const attributeEditorActiveRef = React.useRef(false);
+
+  React.useEffect(() => {
+    const prev = prevActivityRef.current;
+    if (prev === "EDIT" && activityId !== "EDIT") {
+      setEditFeature(null);
+      setMoveFeatures([]);
+    }
+    prevActivityRef.current = activityId;
+  }, [activityId]);
+
+  // Save showKinkMarkers to localStorage when it changes
+  React.useEffect(() => {
+    if (functionalCookiesOk) {
+      LocalStorageHelper.set(STORAGE_KEY, {
+        ...LocalStorageHelper.get(STORAGE_KEY),
+        showKinkMarkers: showKinkMarkers,
+      });
+    }
+  }, [showKinkMarkers, functionalCookiesOk]);
+
+  // Load showKinkMarkers from localStorage when cookie status changes
+  React.useEffect(() => {
+    if (functionalCookiesOk) {
+      const saved = LocalStorageHelper.get(STORAGE_KEY);
+      setShowKinkMarkers(saved?.showKinkMarkers ?? true);
+    } else {
+      setShowKinkMarkers(true);
+    }
+  }, [functionalCookiesOk]);
 
   // We're also gonna need a drawModel to handle all draw functionality
   const [drawModel] = React.useState(
@@ -77,6 +136,11 @@ const Sketch = (props) => {
         measurementSettings: measurementSettings,
       })
   );
+
+  // We need angle snapping functionality (perpendicular to lines/polygon sides)
+  const angleSnapping = useMemo(() => {
+    return new AngleSnapping(drawModel, props.map);
+  }, [drawModel, props.map]);
 
   // We need a model used to interact with the map etc. We want to
   // keep the view free from direct interactions.
@@ -116,11 +180,145 @@ const Sketch = (props) => {
       })
   );
 
+  // TODO: Refine!!!
+  const [pluginSettings, setPluginSettings] = React.useState({
+    title: "Rita",
+    color: "4a90e2",
+  });
+
+  React.useEffect(() => {
+    const offSel = editBus.on("edit:service-selected", (ev) => {
+      const { id } = ev.detail || {};
+
+      if (!id) {
+        setAllowedGeometryTypes(null);
+        attributeEditorActiveRef.current = false;
+        return;
+      }
+
+      // Mark that AttributeEditor is active with an editable layer.
+      // (The schema itself arrives via attrib:schema-loaded, emitted by
+      // AttributeEditor's own edit:service-selected handler.)
+      attributeEditorActiveRef.current = true;
+    });
+
+    const offSchema = editBus.on("attrib:schema-loaded", (ev) => {
+      const { schema } = ev.detail || {};
+      if (!schema) return;
+
+      // Mapping from backend flags to Sketch draw types
+      const allowed = [];
+
+      // Punkt → Point
+      if (schema.editPoint || schema.editMultiPoint) {
+        allowed.push("Point");
+      }
+
+      // Polygon → Polygon, Rectangle, Square, Select
+      if (schema.editPolygon || schema.editMultiPolygon) {
+        allowed.push("Polygon", "Rectangle", "Square", "Select");
+      }
+
+      // Linje → LineString
+      if (schema.editLine || schema.editMultiLine) {
+        allowed.push("LineString");
+      }
+
+      setAllowedGeometryTypes(allowed.length > 0 ? allowed : null);
+      setAllowMultiGeom(schema.allowMultiGeom === true);
+    });
+
+    // NOTE: no source filter here — unlike pluginSettings (which
+    // handleOgcSourceChange resets locally), this state has no other reset
+    // path, so choosing "Ingen" in Sketch's own dropdown (source "sketch")
+    // must also clear the geometry restrictions and the AE-active flag.
+    const offClr = editBus.on("edit:service-cleared", () => {
+      setAllowedGeometryTypes(null);
+      setAllowMultiGeom(false);
+      attributeEditorActiveRef.current = false;
+      // Leaving the editing context returns the draw modes to neutral —
+      // the switches were set for the edited layer's workflow. The values
+      // (length/angle) are kept as user preferences; only the modes reset.
+      // Turning multi-draw off finishes a pending multi-feature properly
+      // via the multiDrawEnabled effect (no parts are discarded).
+      setMultiDrawEnabled(false);
+      setFixedLengthEnabled(false);
+    });
+
+    return () => {
+      offSel();
+      offSchema();
+      offClr();
+    };
+  }, []);
+
+  React.useEffect(() => {
+    // Only run logic when there are geometry type restrictions (redigerbart lager selected)
+    if (!allowedGeometryTypes || allowedGeometryTypes.length === 0) {
+      // No restrictions - user can freely select any draw type
+      return;
+    }
+
+    // When there are restrictions, ensure the current draw type is allowed
+    if (!allowedGeometryTypes.includes(activeDrawType)) {
+      setActiveDrawType(allowedGeometryTypes[0]);
+    }
+  }, [allowedGeometryTypes, activeDrawType, setActiveDrawType]);
+
+  React.useEffect(() => {
+    const offSel = editBus.on("edit:service-selected", (ev) => {
+      const { title, color, source } = ev.detail || {};
+      if (source === "sketch") return;
+      setPluginSettings((ps) => ({
+        ...ps,
+        title: title ?? ps.title,
+        color: color ?? ps.color,
+      }));
+    });
+
+    const offClr = editBus.on("edit:service-cleared", (ev) => {
+      const { source } = ev.detail || {};
+      if (source === "sketch") return;
+      setPluginSettings((ps) => ({
+        ...ps,
+        title: "Rita",
+        color: theme.palette.primary.main,
+      }));
+    });
+
+    return () => {
+      offSel();
+      offClr();
+    };
+  }, [theme.palette.primary.main]);
+
+  // Use custom hooks for AttributeEditor integration and geometry validation
+  useAttributeEditorIntegration({
+    map: props.map,
+    drawModel,
+    localObserver,
+    activityId,
+    modifyEnabled,
+    translateEnabled,
+    pluginShown,
+    attributeEditorActiveRef,
+    measurementSettings,
+  });
+
+  useGeometryValidation({
+    map: props.map,
+    allowedGeometryTypes,
+    activityId,
+    showKinkMarkers,
+  });
+
   // This functions handles events from the draw-model that are sent
   // when we are in edit-mode and the map is clicked. A feature might be sent
   // in the payload, but if the user clicked the map where no drawn feature exists,
   // null is sent.
   const handleModifyMapClick = React.useCallback((clickedFeature) => {
+    if (lastEditFeatureRef.current === clickedFeature) return;
+    lastEditFeatureRef.current = clickedFeature;
     setEditFeature(clickedFeature);
   }, []);
 
@@ -130,6 +328,37 @@ const Sketch = (props) => {
   const handleMoveFeatureSelected = React.useCallback((selectedFeatures) => {
     setMoveFeatures(selectedFeatures);
   }, []);
+
+  // Handle draw start event to enable angle snapping and publish to localObserver
+  const handleDrawStart = React.useCallback(
+    (e) => {
+      angleSnapping.handleDrawStartEvent(e, props.map, drawModel);
+      localObserver.publish("sketch:drawStart");
+    },
+    [angleSnapping, props.map, drawModel, localObserver]
+  );
+
+  // Handle draw end event to publish to localObserver
+  // Clear DrawModel's style so AE's styleFn takes over (needed for fixed-length mode)
+  const handleDrawEnd = React.useCallback(
+    (e) => {
+      const feature = e?.feature;
+      if (
+        feature &&
+        attributeEditorActiveRef.current &&
+        !drawModel.getMultiDrawMode()
+      ) {
+        feature.setStyle(null);
+      }
+      localObserver.publish("sketch:drawEnd");
+    },
+    [localObserver, drawModel]
+  );
+
+  // Handle draw abort event to publish to localObserver
+  const handleDrawAbort = React.useCallback(() => {
+    localObserver.publish("sketch:drawAbort");
+  }, [localObserver]);
 
   // This effect makes sure to subscribe (and un-subscribe) to all observer-events
   // we are interested in in this view.
@@ -154,7 +383,14 @@ const Sketch = (props) => {
     // Otherwise, we make sure to toggle the draw-interaction to the correct one.
     switch (activityId) {
       case "ADD":
-        return drawModel.toggleDrawInteraction(activeDrawType);
+        return drawModel.toggleDrawInteraction(activeDrawType, {
+          handleDrawStart: handleDrawStart,
+          handleDrawEnd: handleDrawEnd,
+          handleDrawAbort: handleDrawAbort,
+          fixedLengthEnabled: fixedLengthEnabled,
+          // Note: fixedLength and fixedAngle are NOT passed here
+          // They are updated via a separate useEffect that calls updateFixedLengthSettings
+        });
       case "DELETE":
         return drawModel.toggleDrawInteraction("Delete");
       case "EDIT":
@@ -164,7 +400,86 @@ const Sketch = (props) => {
       default:
         return drawModel.toggleDrawInteraction("");
     }
-  }, [activeDrawType, activityId, drawModel, pluginShown, toggleBufferBtn]);
+  }, [
+    activeDrawType,
+    activityId,
+    drawModel,
+    pluginShown,
+    toggleBufferBtn,
+    handleDrawStart,
+    handleDrawEnd,
+    handleDrawAbort,
+    fixedLengthEnabled,
+    // Note: fixedLength and fixedAngle are NOT in this dependency array
+    // because they are updated separately via updateFixedLengthSettings effect below.
+    // This allows users to change length/angle mid-drawing without restarting.
+  ]);
+
+  // Separate effect to update fixed length/angle settings in DrawModel
+  // This allows user to change direction between segments without restarting drawing
+  React.useEffect(() => {
+    drawModel.updateFixedLengthSettings(fixedLength, fixedAngle);
+  }, [drawModel, fixedLength, fixedAngle]);
+
+  // Effect to sync multi-draw mode with DrawModel
+  React.useEffect(() => {
+    if (!multiDrawEnabled) {
+      // Toggling the switch off FINISHES any pending multi-feature instead
+      // of silently discarding the drawn parts (mirrors the activity-change
+      // effect below): the parts become a completed feature that syncs to
+      // AttributeEditor and can be deleted if unwanted — discarding them
+      // here was unrecoverable data loss without any confirmation.
+      if (drawModel.getMultiDrawMode() && drawModel.getMultiDrawFeature()) {
+        const completedFeature = drawModel.finishMultiDraw();
+        drawModel.setMultiDrawMode(false);
+        if (completedFeature) {
+          const source = drawModel.getCurrentVectorSource();
+          if (source) {
+            // Re-add the feature to trigger AE sync (if in AE mode)
+            source.removeFeature(completedFeature);
+            source.addFeature(completedFeature);
+          }
+        }
+      } else {
+        drawModel.setMultiDrawMode(false);
+      }
+    } else {
+      drawModel.setMultiDrawMode(true);
+    }
+  }, [drawModel, multiDrawEnabled]);
+
+  // Reset multi-draw mode when activity or draw type changes
+  // Also properly finish any active multi-draw and sync to AttributeEditor.
+  // The type change must be tracked explicitly: a switch WITHIN the drawable
+  // types (e.g. Polygon -> LineString) passed the includes() check and left
+  // multi-draw running, silently discarding the drawn parts of the old type.
+  const prevMultiDrawTypeRef = React.useRef(activeDrawType);
+  React.useEffect(() => {
+    const typeChanged = prevMultiDrawTypeRef.current !== activeDrawType;
+    prevMultiDrawTypeRef.current = activeDrawType;
+
+    if (
+      activityId !== "ADD" ||
+      !["Point", "LineString", "Polygon"].includes(activeDrawType) ||
+      typeChanged
+    ) {
+      // If multi-draw is active, finish it properly before disabling
+      if (drawModel.getMultiDrawMode()) {
+        const completedFeature = drawModel.finishMultiDraw();
+        drawModel.setMultiDrawMode(false);
+
+        // Re-add the feature to trigger AE sync (if in AE mode)
+        if (completedFeature) {
+          const source = drawModel.getCurrentVectorSource();
+          if (source) {
+            source.removeFeature(completedFeature);
+            source.addFeature(completedFeature);
+          }
+        }
+      }
+      setMultiDrawEnabled(false);
+    }
+  }, [activityId, activeDrawType, drawModel]);
 
   // This effect makes sure to reset the edit- and move-feature if the window is closed,
   // or if the user changes activity. (We don't want to keep the features selected
@@ -173,6 +488,57 @@ const Sketch = (props) => {
     setEditFeature(null);
     setMoveFeatures([]);
   }, [activityId, pluginShown]);
+
+  // Make sure angle snapping is active when the plugin is shown
+  React.useEffect(() => {
+    angleSnapping.setActive(pluginShown);
+    if (!pluginShown) {
+      angleSnapping.clearSnapGuides();
+    }
+  }, [angleSnapping, pluginShown]);
+
+  // Prevent measurement guides from being treated as user-drawn features
+  // This effect listens for features being added and immediately marks guides as non-user-drawn
+  React.useEffect(() => {
+    const source = drawModel?.getCurrentVectorSource?.();
+    if (!source) return;
+
+    const handleFeatureAdd = (event) => {
+      const feature = event?.feature;
+      if (feature && feature.get("USER_MEASUREMENT_GUIDE")) {
+        // Measurement guides should not sync to AttributeEditor
+        feature.set("USER_DRAWN", false, true); // silent = true
+        feature.set("SKETCH_ATTRIBUTEEDITOR", false, true); // Explicitly prevent AttributeEditor sync
+      } else if (
+        feature &&
+        feature.get("USER_DRAWN") &&
+        attributeEditorActiveRef.current &&
+        !drawModel.getMultiDrawMode() // Don't mark during multi-draw - wait until finished
+      ) {
+        // Mark user-drawn features for AttributeEditor sync when active.
+        // This DELIBERATELY includes KML/GPX imports (they carry USER_DRAWN
+        // too): importing external geometries into the active editing layer
+        // as new draft features is a supported workflow.
+        feature.set("SKETCH_ATTRIBUTEEDITOR", true, true);
+      }
+    };
+
+    source.on("addfeature", handleFeatureAdd);
+
+    return () => {
+      source.un("addfeature", handleFeatureAdd);
+    };
+  }, [drawModel]);
+
+  // Clear snap guides when activity or draw type changes
+  React.useEffect(() => {
+    // Clear guides whenever we change activity or draw type
+    try {
+      angleSnapping.clearSnapGuides();
+    } catch {
+      // Ignore errors when cleaning up
+    }
+  }, [activityId, activeDrawType, angleSnapping]);
 
   // An effect that makes sure to set the modify-interaction in the model
   // when the modify-state changes.
@@ -201,6 +567,8 @@ const Sketch = (props) => {
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowHide = () => {
+    angleSnapping.setActive(false);
+    angleSnapping.clearSnapGuides();
     setPluginShown(false);
     setToggleBufferBtn({ ...toggleBufferBtn, toggle: false });
   };
@@ -208,6 +576,7 @@ const Sketch = (props) => {
   // We're gonna need to catch if the user opens the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowShow = () => {
+    angleSnapping.setActive(true);
     setPluginShown(true);
     setToggleBufferBtn({ ...toggleBufferBtn, toggle: true });
   };
@@ -220,12 +589,14 @@ const Sketch = (props) => {
       type="Sketch"
       custom={{
         icon: <EditIcon />,
-        title: "Rita",
+        title: pluginSettings.title,
+        color: pluginSettings.color,
         description: "Skapa dina helt egna geometrier!",
         height: "dynamic",
         width: 350,
         onWindowHide: onWindowHide,
         onWindowShow: onWindowShow,
+        persistent: true,
       }}
     >
       <SketchView
@@ -248,9 +619,23 @@ const Sketch = (props) => {
         moveFeatures={moveFeatures}
         measurementSettings={measurementSettings}
         setMeasurementSettings={setMeasurementSettings}
+        showKinkMarkers={showKinkMarkers}
+        setShowKinkMarkers={setShowKinkMarkers}
         pluginShown={pluginShown}
         toggleBufferBtn={toggleBufferBtn}
         setToggleBufferBtn={setToggleBufferBtn}
+        setPluginSettings={setPluginSettings}
+        map={props.map}
+        allowedGeometryTypes={allowedGeometryTypes}
+        allowMultiGeom={allowMultiGeom}
+        fixedLengthEnabled={fixedLengthEnabled}
+        setFixedLengthEnabled={setFixedLengthEnabled}
+        fixedLength={fixedLength}
+        setFixedLength={setFixedLength}
+        fixedAngle={fixedAngle}
+        setFixedAngle={setFixedAngle}
+        multiDrawEnabled={multiDrawEnabled}
+        setMultiDrawEnabled={setMultiDrawEnabled}
       />
     </BaseWindowPlugin>
   );

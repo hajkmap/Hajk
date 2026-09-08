@@ -7,6 +7,7 @@ export const PLUGINS_TO_IGNORE_IN_HASH_APP_STATE = ["anchor", "print"];
 // PLEASE NOTE THAT THIS LIST IS CASE SENSITIVE, NAMES MUST CORRESPOND EXACTLY TO DIRECTORY NAMES.
 export const AVAILABLE_TOOLS = [
   "Anchor",
+  "AttributeEditor",
   "Bookmarks",
   "Buffer",
   "Collector",
