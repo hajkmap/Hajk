@@ -1038,6 +1038,13 @@
         "buttonText": "Close button text",
         "showInfoOnce": "Show only once at start"
       },
+      "preset": {
+        "presetList": "Preset list",
+        "addPreset": "Add preset",
+        "presetName": "Name",
+        "presetUrl": "Url",
+        "presetUrlPlaceholder": "E.g. ?m=map_1&x=147325&y=6398754&z=4&l=10"
+      },
       "documenthandler": {
         "drawerButtonTitle": "Drawer button title",
         "drawerTitle": "Drawer title",

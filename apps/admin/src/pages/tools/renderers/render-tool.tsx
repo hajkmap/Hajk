@@ -15,7 +15,7 @@ import RoutingRenderer, { routingDefaults } from "./render-routing";
 import InformationRenderer, {
   informationDefaults,
 } from "./render-information";
-// import PresetRenderer from "./renderers/PresetRenderer";
+import PresetRenderer, { presetDefaults } from "./render-preset";
 import React from "react";
 import { Control, FieldValues, UseFormSetValue } from "react-hook-form";
 import { Tool } from "../../../api/tools";
@@ -35,6 +35,7 @@ const toolOptionDefaults: Record<string, Record<string, unknown>> = {
   bookmarks: bookmarksDefaults,
   routing: routingDefaults,
   information: informationDefaults,
+  preset: presetDefaults,
 };
 
 export const getToolOptionDefaults = (
@@ -63,7 +64,7 @@ const toolRenderers: Record<string, React.ComponentType<ToolRendererProps>> = {
   bookmarks: BookmarksRenderer as React.ComponentType<ToolRendererProps>,
   routing: RoutingRenderer as React.ComponentType<ToolRendererProps>,
   information: InformationRenderer as React.ComponentType<ToolRendererProps>,
-  // preset: PresetRenderer,
+  preset: PresetRenderer as React.ComponentType<ToolRendererProps>,
 };
 
 interface RenderToolProps {

@@ -971,6 +971,13 @@
         "buttonText": "Text i inforutans stängningsknapp",
         "showInfoOnce": "Visa vid start endast en gång"
       },
+      "preset": {
+        "presetList": "Lista över snabbval",
+        "addPreset": "Lägg till snabbval",
+        "presetName": "Namn",
+        "presetUrl": "Url",
+        "presetUrlPlaceholder": "T.ex. ?m=map_1&x=147325&y=6398754&z=4&l=10"
+      },
       "search": {
         "infoText": "Infotext i sökfältet",
         "infoTextPlaceholder": "Ange informationstext...",
