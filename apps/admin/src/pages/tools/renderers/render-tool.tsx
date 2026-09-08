@@ -11,7 +11,7 @@ import LayerSwitcherRenderer, {
 import DocumentHandlerRenderer from "./render-documenthandler";
 import LocationRenderer, { locationDefaults } from "./render-location";
 import BookmarksRenderer, { bookmarksDefaults } from "./render-bookmarks";
-// import RoutingRenderer from "./renderers/RoutingRenderer";
+import RoutingRenderer, { routingDefaults } from "./render-routing";
 // import PresetRenderer from "./renderers/PresetRenderer";
 import React from "react";
 import { Control, FieldValues, UseFormSetValue } from "react-hook-form";
@@ -30,6 +30,7 @@ const toolOptionDefaults: Record<string, Record<string, unknown>> = {
   layerswitcher: layerswitcherDefaults,
   location: locationDefaults,
   bookmarks: bookmarksDefaults,
+  routing: routingDefaults,
 };
 
 export const getToolOptionDefaults = (
@@ -56,7 +57,7 @@ const toolRenderers: Record<string, React.ComponentType<ToolRendererProps>> = {
     DocumentHandlerRenderer as React.ComponentType<ToolRendererProps>,
   location: LocationRenderer as React.ComponentType<ToolRendererProps>,
   bookmarks: BookmarksRenderer as React.ComponentType<ToolRendererProps>,
-  // routing: RoutingRenderer,
+  routing: RoutingRenderer as React.ComponentType<ToolRendererProps>,
   // preset: PresetRenderer,
 };
 
