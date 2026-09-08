@@ -1031,6 +1031,7 @@
       "fillColor": "Marker fill color",
       "settings": "Settings",
       "generalSettings": "General settings",
+      "apiKey": "API key",
       "information": {
         "title": "Tooltip text on the info button",
         "headerText": "Dialog header",
@@ -1040,7 +1041,6 @@
       },
       "preset": {
         "presetList": "Preset list",
-        "addPreset": "Add preset",
         "presetName": "Name",
         "presetUrl": "Url",
         "presetUrlPlaceholder": "E.g. ?m=map_1&x=147325&y=6398754&z=4&l=10"

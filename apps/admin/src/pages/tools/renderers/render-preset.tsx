@@ -115,6 +115,7 @@ export default function PresetRenderer({
                 <Controller
                   name={`options.presetList.${index}.name`}
                   control={control}
+                  defaultValue=""
                   render={({ field }) => (
                     <TextField
                       label={t("tools.preset.presetName")}
@@ -126,6 +127,7 @@ export default function PresetRenderer({
                 <Controller
                   name={`options.presetList.${index}.presetUrl`}
                   control={control}
+                  defaultValue=""
                   render={({ field }) => (
                     <TextField
                       label={t("tools.preset.presetUrl")}

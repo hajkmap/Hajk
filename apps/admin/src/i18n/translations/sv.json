@@ -964,6 +964,7 @@
       "fillColor": "Färg på markeringens fyllnad",
       "settings": "Inställningar",
       "generalSettings": "Allmänna inställningar",
+      "apiKey": "API-nyckel",
       "information": {
         "title": "Text vid mouse-over på informationsknappen",
         "headerText": "Rubrik i inforutan",
@@ -973,7 +974,6 @@
       },
       "preset": {
         "presetList": "Lista över snabbval",
-        "addPreset": "Lägg till snabbval",
         "presetName": "Namn",
         "presetUrl": "Url",
         "presetUrlPlaceholder": "T.ex. ?m=map_1&x=147325&y=6398754&z=4&l=10"
