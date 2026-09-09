@@ -6,16 +6,21 @@ import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import {
   AppBar,
   Box,
+  Button,
   IconButton,
   InputAdornment,
   Tab,
   Tabs,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import DialogWrapper from "../../../components/flexible-dialog";
+import MapThemesTab from "../../maps/components/map-themes-tab";
 
 const StyledAppBar = styled(AppBar)(() => ({
   zIndex: 1,
@@ -27,6 +32,8 @@ interface LayerSwitcherPreviewProps {
   children: React.ReactNode;
   search: string;
   onSearchChange: (value: string) => void;
+  /** Map name used to load/save themes from the presets button. */
+  mapName?: string;
   activeTab?: LayerSwitcherPreviewTab;
   onActiveTabChange?: (value: LayerSwitcherPreviewTab) => void;
   showFilter?: boolean;
@@ -40,17 +47,18 @@ export default function LayerSwitcherPreview({
   children,
   search,
   onSearchChange,
+  mapName,
   activeTab: controlledActiveTab,
   onActiveTabChange,
   showFilter = true,
   showQuickAccess = false,
   showDrawOrderView = true,
-  enableQuickAccessPresets = false,
   enableUserQuickAccessFavorites = false,
 }: LayerSwitcherPreviewProps) {
   const { t } = useTranslation();
   const [uncontrolledActiveTab, setUncontrolledActiveTab] =
     useState<LayerSwitcherPreviewTab>("layers");
+  const [themesDialogOpen, setThemesDialogOpen] = useState(false);
   const activeTab = controlledActiveTab ?? uncontrolledActiveTab;
 
   const setActiveTab = (value: LayerSwitcherPreviewTab) => {
@@ -59,6 +67,19 @@ export default function LayerSwitcherPreview({
       setUncontrolledActiveTab(value);
     }
   };
+
+  const themesButton =
+    mapName != null && mapName !== "" ? (
+      <Tooltip title={t("common.themes")}>
+        <IconButton
+          size="small"
+          aria-label={t("common.themes")}
+          onClick={() => setThemesDialogOpen(true)}
+        >
+          <FolderOpenOutlinedIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    ) : null;
 
   return (
     <Box
@@ -115,25 +136,36 @@ export default function LayerSwitcherPreview({
       activeTab === "drawOrder" ? (
         <>
           {showFilter ? (
-            <TextField
-              size="small"
-              value={search}
-              onChange={(event) => onSearchChange(event.target.value)}
-              placeholder={t("common.search-layers")}
-              variant="standard"
-              fullWidth
-              sx={{ px: 2, pt: 1.25, pb: 1 }}
-              slotProps={{
-                input: {
-                  disableUnderline: true,
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" color="action" />
-                    </InputAdornment>
-                  ),
-                },
+            <Box
+              sx={{
+                px: 2,
+                pt: 1.25,
+                pb: 1,
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
               }}
-            />
+            >
+              <TextField
+                size="small"
+                value={search}
+                onChange={(event) => onSearchChange(event.target.value)}
+                placeholder={t("common.search-layers")}
+                variant="standard"
+                fullWidth
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon fontSize="small" color="action" />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+              {!showQuickAccess && activeTab === "layers" ? themesButton : null}
+            </Box>
           ) : null}
 
           {activeTab === "layers" && showQuickAccess ? (
@@ -165,11 +197,7 @@ export default function LayerSwitcherPreview({
               </Box>
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
-                {enableQuickAccessPresets ? (
-                  <IconButton size="small" disabled>
-                    <FolderOpenOutlinedIcon fontSize="small" />
-                  </IconButton>
-                ) : null}
+                {themesButton}
                 {enableUserQuickAccessFavorites ? (
                   <IconButton size="small" disabled>
                     <PersonOutlineOutlinedIcon fontSize="small" />
@@ -179,6 +207,16 @@ export default function LayerSwitcherPreview({
                   <MoreVertIcon fontSize="small" />
                 </IconButton>
               </Box>
+            </Box>
+          ) : null}
+
+          {/* Themes access when filter is hidden but quick access is off */}
+          {!showFilter &&
+          !showQuickAccess &&
+          activeTab === "layers" &&
+          themesButton ? (
+            <Box sx={{ px: 2, py: 0.5, display: "flex", justifyContent: "flex-end" }}>
+              {themesButton}
             </Box>
           ) : null}
 
@@ -228,6 +266,21 @@ export default function LayerSwitcherPreview({
           </Typography>
         </Box>
       )}
+
+      <DialogWrapper
+        open={themesDialogOpen && mapName != null && mapName !== ""}
+        title={t("common.themes")}
+        onClose={() => setThemesDialogOpen(false)}
+        fullWidth
+        maxWidth="lg"
+        actions={
+          <Button onClick={() => setThemesDialogOpen(false)} color="primary">
+            {t("common.dialog.closeBtn")}
+          </Button>
+        }
+      >
+        {mapName ? <MapThemesTab mapName={mapName} /> : null}
+      </DialogWrapper>
     </Box>
   );
 }

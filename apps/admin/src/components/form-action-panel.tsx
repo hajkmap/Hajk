@@ -80,8 +80,8 @@ const FormActionPanel: React.FC<FormActionProps> = ({
           border: "1px solid",
           borderColor: "grey.300",
           borderRadius: 3,
-          width: 240,
-          maxWidth: 240,
+          width: 200,
+          maxWidth: 200,
           top: "100px",
           position: "sticky",
         }}

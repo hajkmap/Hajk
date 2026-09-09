@@ -451,124 +451,144 @@ export default function GroupLayerCatalog({
             </Typography>
           </Box>
         ) : (
-        <>
-        <Box sx={{ p: 2, borderBottom: "1px solid", borderColor: "divider" }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 1,
-              mb: 1,
-            }}
-          >
-            <Typography variant="subtitle1">
-              {t("common.groupsDevelopment")}
-            </Typography>
-            {!backgroundMode ? (
-              <Button
-                size="small"
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleOpenCreateDialog}
-                sx={{ flexShrink: 0 }}
+          <>
+            <Box
+              sx={{ p: 2, borderBottom: "1px solid", borderColor: "divider" }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 1,
+                  mb: 1,
+                }}
               >
-                {t("common.add")}
-              </Button>
-            ) : null}
-          </Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {t("groupsDragAndDropDescription")}
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder={t("common.search")}
-          />
-          <Tabs
-            value={catalogTab}
-            onChange={(_, value) => {
-              if (!backgroundMode) {
-                setActiveTab(value as CatalogTab);
-              }
-            }}
-            sx={{
-              mt: 1.5,
-              minHeight: 36,
-              "& .MuiTabs-indicator": {
-                height: 2,
-              },
-              "& .MuiTab-root": {
-                minHeight: 36,
-                py: 0.5,
-                px: 1,
-                minWidth: 0,
-                fontSize: "0.8125rem",
-                gap: 0.5,
-              },
-              "& .MuiTab-icon": {
-                fontSize: "1rem",
-                marginBottom: "0 !important",
-              },
-            }}
-          >
-            {!backgroundMode ? (
-              <Tab
-                icon={<FolderIcon />}
-                iconPosition="start"
-                value="groups"
-                label={`${t("common.layerGroups")} (${catalogGroups.length})`}
+                <Typography variant="subtitle1">
+                  {t("common.groupsDevelopment")}
+                </Typography>
+                {!backgroundMode ? (
+                  <Button
+                    size="small"
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={handleOpenCreateDialog}
+                    sx={{ flexShrink: 0 }}
+                  >
+                    {t("common.add")}
+                  </Button>
+                ) : null}
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {t("groupsDragAndDropDescription")}
+              </Typography>
+              <TextField
+                fullWidth
+                size="small"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder={t("common.search")}
               />
-            ) : null}
-            <Tab
-              icon={<LayersIcon />}
-              iconPosition="start"
-              value="layers"
-              label={`${t("common.layers")} (${availableLayers.length})`}
-            />
-          </Tabs>
-        </Box>
+              <Tabs
+                value={catalogTab}
+                variant="fullWidth"
+                onChange={(_, value) => {
+                  if (!backgroundMode) {
+                    setActiveTab(value as CatalogTab);
+                  }
+                }}
+                sx={{
+                  mt: 1.5,
+                  minHeight: 36,
+                  width: "100%",
+                  "& .MuiTabs-flexContainer": {
+                    width: "100%",
+                  },
+                  "& .MuiTabs-scroller": {
+                    overflow: "hidden !important",
+                  },
+                  "& .MuiTabs-indicator": {
+                    height: 2,
+                  },
+                  "& .MuiTab-root": {
+                    minHeight: 36,
+                    py: 0.5,
+                    px: 0.5,
+                    minWidth: 0,
+                    maxWidth: "none",
+                    flex: 1,
+                    fontSize: "0.8125rem",
+                    gap: 0.5,
+                    textTransform: "none",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                  },
+                  "& .MuiTab-iconWrapper": {
+                    marginRight: "4px !important",
+                    marginBottom: "0 !important",
+                  },
+                  "& .MuiTab-icon": {
+                    fontSize: "1rem",
+                    marginBottom: "0 !important",
+                  },
+                }}
+              >
+                {!backgroundMode ? (
+                  <Tab
+                    icon={<FolderIcon fontSize="inherit" />}
+                    iconPosition="start"
+                    value="groups"
+                    label={`${t("common.layerGroups")} (${catalogGroups.length})`}
+                  />
+                ) : null}
+                <Tab
+                  icon={<LayersIcon fontSize="inherit" />}
+                  iconPosition="start"
+                  value="layers"
+                  label={`${t("common.layers")} (${availableLayers.length})`}
+                />
+              </Tabs>
+            </Box>
 
-        <List
-          dense
-          sx={{
-            flex: 1,
-            overflow: "auto",
-            p: 2,
-            m: 0,
-          }}
-        >
-          {activeItems.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              {emptyMessage}
-            </Typography>
-          ) : (
-            activeItems.map((item) => (
-              <CatalogRow
-                key={`${item.kind}:${item.id}`}
-                item={item}
-                onEdit={
-                  item.kind === "group"
-                    ? () => handleOpenEditDialog(item.id)
-                    : undefined
-                }
-                onDelete={
-                  item.kind === "group"
-                    ? () => handleOpenDeleteDialog(item.id)
-                    : undefined
-                }
-                disableActions={
-                  item.kind === "group"
-                    ? layerGroups.find((group) => group.id === item.id)?.locked
-                    : false
-                }
-              />
-            ))
-          )}
-        </List>
-        </>
+            <List
+              dense
+              sx={{
+                flex: 1,
+                overflow: "auto",
+                p: 2,
+                m: 0,
+              }}
+            >
+              {activeItems.length === 0 ? (
+                <Typography variant="body2" color="text.secondary">
+                  {emptyMessage}
+                </Typography>
+              ) : (
+                activeItems.map((item) => (
+                  <CatalogRow
+                    key={`${item.kind}:${item.id}`}
+                    item={item}
+                    onEdit={
+                      item.kind === "group"
+                        ? () => handleOpenEditDialog(item.id)
+                        : undefined
+                    }
+                    onDelete={
+                      item.kind === "group"
+                        ? () => handleOpenDeleteDialog(item.id)
+                        : undefined
+                    }
+                    disableActions={
+                      item.kind === "group"
+                        ? layerGroups.find((group) => group.id === item.id)
+                            ?.locked
+                        : false
+                    }
+                  />
+                ))
+              )}
+            </List>
+          </>
         )}
       </Paper>
 

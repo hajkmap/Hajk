@@ -45,6 +45,12 @@ export default function GroupLayerTreeDropZone({
         item: CatalogDragItem | MoveZoneItem | GroupLayerTreeNode,
         monitor,
       ) => {
+        // Only the empty padding of this zone (not nested tree rows).
+        // Prevents same-position drops on a row from being stolen and
+        // appended to the bottom of Kartlager.
+        if (!monitor.isOver({ shallow: true })) {
+          return false;
+        }
         const type = monitor.getItemType();
         if (type === TREE_ITEM_TYPE) {
           const node = item as GroupLayerTreeNode;
@@ -63,7 +69,7 @@ export default function GroupLayerTreeDropZone({
         item: CatalogDragItem | MoveZoneItem | GroupLayerTreeNode,
         monitor,
       ) => {
-        if (monitor.didDrop()) {
+        if (monitor.didDrop() || !monitor.isOver({ shallow: true })) {
           return;
         }
         const type = monitor.getItemType();

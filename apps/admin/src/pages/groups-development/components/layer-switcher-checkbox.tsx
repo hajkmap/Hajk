@@ -43,13 +43,12 @@ export default function LayerSwitcherCheckbox({
             position: "absolute",
             top: "50%",
             left: "50%",
-            transition: "transform 200ms ease, opacity 200ms ease",
             lineHeight: 0,
             transform: "translate(-50%, -50%) scale(0)",
             opacity: 0,
           },
           toggleState !== "unchecked" && {
-            transform: "translate(-50%, -50%) scale(1.05)",
+            transform: "translate(-50%, -50%) scale(1)",
             opacity: toggleState === "semichecked" ? 0.45 : 1,
           },
         ]}

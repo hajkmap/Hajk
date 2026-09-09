@@ -27,6 +27,7 @@ const CONTENT_SUB_TABS = [
 ];
 
 interface MapContentPanelProps {
+  mapName?: string;
   layerActivationRows: MapLayerActivationRow[];
   onLayerActivationRowsChange: (rows: MapLayerActivationRow[]) => void;
   mapTools?: ToolOnMap[];
@@ -47,6 +48,7 @@ interface MapContentPanelProps {
 }
 
 export default function MapContentPanel({
+  mapName,
   layerActivationRows,
   onLayerActivationRowsChange,
   mapTools,
@@ -115,6 +117,7 @@ export default function MapContentPanel({
       {/* Keep mounted (hidden) so Flyttzon / Kartlager draft state survives sub-tab switches. */}
       <Box sx={{ display: isGroupsDevelopment ? "block" : "none" }}>
         <GroupLayerTree
+          mapName={mapName}
           mapTools={mapTools}
           catalogTools={catalogTools}
           activeToolIds={activeToolIds}

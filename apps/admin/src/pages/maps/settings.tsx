@@ -25,7 +25,6 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import MapIcon from "@mui/icons-material/Map";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 import PaletteIcon from "@mui/icons-material/Palette";
-import StyleIcon from "@mui/icons-material/Style";
 import CookieIcon from "@mui/icons-material/Cookie";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 
@@ -58,7 +57,6 @@ import FormContainer from "../../components/form-components/form-container";
 import MapSettingsForm, {
   type MapSettingsSection,
 } from "./components/map-settings-form";
-import MapThemesTab from "./components/map-themes-tab";
 import MapContentPanel from "./components/map-content-panel";
 import {
   buildMapLayerActivationRows,
@@ -100,7 +98,6 @@ const MAP_PAGE_TABS = [
   { key: "settings", labelKey: "common.settings", icon: <SettingsIcon /> },
   { key: "menu", labelKey: "maps.tab.mapContent", icon: <LayersIcon /> },
   { key: "tools", labelKey: "common.tools", icon: <BuildIcon /> },
-  { key: "themes", labelKey: "common.themes", icon: <StyleIcon /> },
 ] as const;
 
 const MAP_SETTINGS_SECTIONS: {
@@ -169,8 +166,7 @@ export default function MapSettings() {
   const activeTab = (searchParams.get("tab") ?? "settings") as
     | "menu"
     | "settings"
-    | "tools"
-    | "themes";
+    | "tools";
   const setActiveTab = (tab: string) =>
     setSearchParams(
       (prev) => {
@@ -242,8 +238,10 @@ export default function MapSettings() {
   const [layerActivationRows, setLayerActivationRows] = useState<
     MapLayerActivationRow[]
   >([]);
-  const [layerActivationCommittedSignature, setLayerActivationCommittedSignature] =
-    useState("");
+  const [
+    layerActivationCommittedSignature,
+    setLayerActivationCommittedSignature,
+  ] = useState("");
   const layerActivationWasDirtyRef = useRef(false);
   const layerActivationRowsRef = useRef(layerActivationRows);
   const layerActivationCommittedSignatureRef = useRef(
@@ -371,11 +369,7 @@ export default function MapSettings() {
       }
       setLayerActivationRows(rows);
     },
-    [
-      layerActivationCommittedSignature,
-      menuSynced,
-      serverLayerActivationRows,
-    ],
+    [layerActivationCommittedSignature, menuSynced, serverLayerActivationRows],
   );
 
   const contentDirty = menuSynced && contentDirtyRaw;
@@ -412,12 +406,9 @@ export default function MapSettings() {
     [],
   );
 
-  const handleGroupsDevelopmentActiveChange = useCallback(
-    (active: boolean) => {
-      setKartlagerMoveZoneVisible(active);
-    },
-    [],
-  );
+  const handleGroupsDevelopmentActiveChange = useCallback((active: boolean) => {
+    setKartlagerMoveZoneVisible(active);
+  }, []);
 
   useEffect(() => {
     toolsDraftRef.current = toolsDraft;
@@ -483,7 +474,9 @@ export default function MapSettings() {
       return {
         mapName: mapName ?? "",
         zones: serverToolZones ?? EMPTY_TOOL_ZONES,
-        activeToolIds: new Set<number>(serverToolsDraftState?.activeToolIds ?? []),
+        activeToolIds: new Set<number>(
+          serverToolsDraftState?.activeToolIds ?? [],
+        ),
         windowPositions: { ...(serverToolsDraftState?.windowPositions ?? {}) },
         windowSizes: { ...(serverToolsDraftState?.windowSizes ?? {}) },
         indexes: { ...(serverToolsDraftState?.indexes ?? {}) },
@@ -495,7 +488,9 @@ export default function MapSettings() {
 
   const resolveToolName = useCallback(
     (toolId: number) => {
-      const catalogTool = catalogTools?.find((tool) => Number(tool.id) === toolId);
+      const catalogTool = catalogTools?.find(
+        (tool) => Number(tool.id) === toolId,
+      );
       if (catalogTool) return getCatalogToolDisplayName(catalogTool);
 
       const mapTool = mapTools?.find((tool) => tool.toolId === toolId);
@@ -660,10 +655,7 @@ export default function MapSettings() {
   const setToolIndex = useCallback(
     (toolId: number, index: number) => {
       const base = resolveToolsDraft(toolsDraftRef.current);
-      if (
-        !base.activeToolIds.has(toolId) &&
-        base.indexes[toolId] == null
-      ) {
+      if (!base.activeToolIds.has(toolId) && base.indexes[toolId] == null) {
         return;
       }
       if (base.indexes[toolId] === index) return;
@@ -781,9 +773,11 @@ export default function MapSettings() {
 
       if (contentDirty && layerActivationDirtyRaw) {
         const baselayerIds = new Set(
-          (kartlagerDraft?.baselayers ?? layerSwitcherState?.baselayers ?? []).map(
-            (entry) => entry.layerId,
-          ),
+          (
+            kartlagerDraft?.baselayers ??
+            layerSwitcherState?.baselayers ??
+            []
+          ).map((entry) => entry.layerId),
         );
         await updateMapLayers({
           mapName: map.name,
@@ -961,11 +955,21 @@ export default function MapSettings() {
         }
         warning={
           <Box sx={{ mt: 1 }}>
-            {map.locked ? (
-              <Alert severity="info">{t("maps.deleteLockedWarning")}</Alert>
-            ) : (
-              <Alert severity="warning">{t("maps.deleteMapWarning")}</Alert>
-            )}
+            <Alert
+              severity={map.locked ? "info" : "warning"}
+              sx={{
+                alignItems: "flex-start",
+                "& .MuiAlert-message": {
+                  fontSize: "0.8rem",
+                  lineHeight: 1.4,
+                  overflowWrap: "anywhere",
+                },
+              }}
+            >
+              {map.locked
+                ? t("maps.deleteLockedWarning")
+                : t("maps.deleteMapWarning")}
+            </Alert>
             <Button
               variant="outlined"
               color="error"
@@ -1047,6 +1051,7 @@ export default function MapSettings() {
             </Alert>
           ) : (
             <MapContentPanel
+              mapName={mapName}
               layerActivationRows={layerActivationRows}
               onLayerActivationRowsChange={handleLayerActivationRowsChange}
               mapTools={mapTools}
@@ -1081,10 +1086,6 @@ export default function MapSettings() {
             flushPendingEditsRef={flushMapToolEditsRef}
             onPendingWindowSizeDirtyChange={setHasPendingWindowSizeInput}
           />
-        )}
-
-        {activeTab === "themes" && mapName && (
-          <MapThemesTab mapName={mapName} />
         )}
       </FormActionPanel>
       <DialogWrapper

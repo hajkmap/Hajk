@@ -33,6 +33,8 @@ interface GroupLayerTreeNodeProps {
   treeData: GroupLayerTreeNode[];
   visibleIds: Set<string>;
   groupDisplaySettings: Record<string, GroupDisplaySettings>;
+  isSubtreeHovered?: boolean;
+  onHoverSubtree?: (nodeId: GroupLayerTreeNode["id"]) => void;
   onToggleLayerVisibility: (nodeId: GroupLayerTreeNode["id"]) => void;
   onToggleGroupVisibility: (nodeId: GroupLayerTreeNode["id"]) => void;
   onAddToGroup?: (nodeId: GroupLayerTreeNode["id"]) => void;
@@ -47,6 +49,8 @@ export default function GroupLayerTreeNodeView({
   treeData,
   visibleIds,
   groupDisplaySettings,
+  isSubtreeHovered = false,
+  onHoverSubtree,
   onToggleLayerVisibility,
   onToggleGroupVisibility,
   onAddToGroup,
@@ -82,9 +86,12 @@ export default function GroupLayerTreeNodeView({
 
   return (
     <Box
+      onMouseEnter={() => {
+        onHoverSubtree?.(node.id);
+      }}
       sx={{
         opacity: isDragging ? 0.45 : 1,
-        pl: isGroup ? `${depth * 20}px` : `${31 + depth * 20}px`,
+        bgcolor: isSubtreeHovered ? "action.hover" : "transparent",
       }}
     >
       <Box
@@ -92,6 +99,7 @@ export default function GroupLayerTreeNodeView({
           position: "relative",
           display: "flex",
           alignItems: "flex-start",
+          pl: isGroup ? `${depth * 20}px` : `${31 + depth * 20}px`,
         }}
       >
         <Box
@@ -123,6 +131,9 @@ export default function GroupLayerTreeNodeView({
               cursor: isDragging ? "grabbing" : "grab",
               borderBottom: (theme) =>
                 `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+              "&:hover": {
+                backgroundColor: "transparent",
+              },
               "& .ls-arrow": {
                 transform: isOpen ? "rotate(90deg)" : "none",
               },
@@ -135,6 +146,7 @@ export default function GroupLayerTreeNodeView({
           >
             <IconButton
               size="small"
+              disableRipple
               onMouseDown={(event) => {
                 event.stopPropagation();
               }}
@@ -292,6 +304,9 @@ export default function GroupLayerTreeNodeView({
               pl: "2px",
               position: "relative",
               cursor: isDragging ? "grabbing" : "grab",
+              "&:hover": {
+                backgroundColor: "transparent",
+              },
             }}
           >
             <Box

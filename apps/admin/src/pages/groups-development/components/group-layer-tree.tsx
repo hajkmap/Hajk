@@ -56,12 +56,14 @@ import {
   collectPlacedSourceIds,
   createTreeNodeFromCatalogItem,
   extractSubtreeForMoveZone,
+  getDescendantIds,
   getNextSiblingOrder,
   insertCatalogItemIntoTree,
   insertMoveZoneSubtreeIntoTree,
   isValidLayerParentId,
   layerSwitcherTreeToNodeModels,
   removeTreeNodeWithDescendants,
+  sortSiblingNodes,
 } from "../utils/tree-model";
 import { filterTreeBySearch } from "../utils/tree-filter";
 import { findActiveLayerswitcher } from "../utils/active-layerswitcher";
@@ -244,6 +246,8 @@ interface GroupLayerTreeProps {
   catalogTools?: Tool[];
   /** Draft/server set of active tool ids — used to pick the active layerswitcher. */
   activeToolIds?: Set<number>;
+  /** Map name — used for themes dialog save/load. */
+  mapName?: string;
   /** DB Kartlager + Bakgrund state (catalog layer ids). */
   layerSwitcherState?: KartlagerDraft | null;
   /**
@@ -273,6 +277,7 @@ export default function GroupLayerTree({
   mapTools,
   catalogTools,
   activeToolIds,
+  mapName,
   layerSwitcherState = null,
   layerActivationRows,
   pendingDraft = null,
@@ -307,6 +312,9 @@ export default function GroupLayerTree({
     name: string;
   } | null>(null);
   const [moveZoneItems, setMoveZoneItems] = useState<MoveZoneItem[]>([]);
+  const [hoveredSubtreeRootId, setHoveredSubtreeRootId] = useState<
+    GroupLayerTreeNode["id"] | null
+  >(null);
   const [previewTab, setPreviewTab] =
     useState<LayerSwitcherPreviewTab>("layers");
   const [backgroundOrderedIds, setBackgroundOrderedIds] = useState<string[]>(
@@ -1278,6 +1286,35 @@ export default function GroupLayerTree({
   }, [layerEditDialogTarget, layerDisplaySettings]);
 
   const isLoading = groupsLoading || layersLoading;
+
+  const hoveredSubtreeIds = useMemo(() => {
+    if (hoveredSubtreeRootId == null) {
+      return null;
+    }
+    const ids = new Set<string>([String(hoveredSubtreeRootId)]);
+    const hoveredNode = treeData.find(
+      (entry) => entry.id === hoveredSubtreeRootId,
+    );
+    // Groups highlight their whole subtree; layers highlight only themselves.
+    if (hoveredNode?.data?.kind === "group") {
+      for (const id of getDescendantIds(treeData, hoveredSubtreeRootId)) {
+        ids.add(String(id));
+      }
+    }
+    return ids;
+  }, [hoveredSubtreeRootId, treeData]);
+
+  const handleKartlagerNodeHover = useCallback(
+    (nodeId: GroupLayerTreeNode["id"]) => {
+      setHoveredSubtreeRootId(nodeId);
+    },
+    [],
+  );
+
+  const handleKartlagerTreeMouseLeave = useCallback(() => {
+    setHoveredSubtreeRootId(null);
+  }, []);
+
   const previewOptions = useMemo(
     () => ({
       showFilter: Boolean(activeLayerswitcherOptions?.showFilter),
@@ -1301,6 +1338,23 @@ export default function GroupLayerTree({
           return current;
         }
 
+        const rootSiblings = current
+          .filter((entry) => entry.parent === GROUP_LAYER_TREE_ROOT_ID)
+          .slice()
+          .sort(sortSiblingNodes);
+        const alreadyAtRoot = node.parent === GROUP_LAYER_TREE_ROOT_ID;
+        const alreadyLast =
+          alreadyAtRoot &&
+          rootSiblings.length > 0 &&
+          rootSiblings[rootSiblings.length - 1]?.id === node.id;
+
+        // Dropping in the empty area below the list moves the group to the end.
+        // No-op when it is already the last root sibling (avoids same-position
+        // drops that miss the tree target from reshuffling needlessly).
+        if (alreadyLast) {
+          return current;
+        }
+
         const remaining = current.filter((entry) => entry.id !== nodeId);
         return applySiblingOrderFromFlatTree([
           ...remaining,
@@ -1308,6 +1362,11 @@ export default function GroupLayerTree({
         ]);
       });
     },
+    [],
+  );
+
+  const canAcceptTreeItemToRoot = useCallback(
+    (node: GroupLayerTreeNode) => node.data?.kind === "group",
     [],
   );
 
@@ -1328,7 +1387,7 @@ export default function GroupLayerTree({
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            lg: "minmax(280px, 360px) minmax(0, 1fr)",
+            lg: "minmax(240px, 300px) minmax(0, 1fr)",
           },
           gap: 3,
           alignItems: "stretch",
@@ -1366,6 +1425,7 @@ export default function GroupLayerTree({
         <LayerSwitcherPreview
           search={search}
           onSearchChange={setSearch}
+          mapName={mapName}
           activeTab={previewTab}
           onActiveTabChange={setPreviewTab}
           showFilter={previewOptions.showFilter}
@@ -1421,6 +1481,7 @@ export default function GroupLayerTree({
               onMoveZoneDrop={handleMoveZoneDropToRoot}
               canAcceptMoveZoneItem={canAcceptMoveZoneDropToRoot}
               onTreeDropToRoot={handleDropTreeItemToRoot}
+              canAcceptTreeItemToRoot={canAcceptTreeItemToRoot}
             />
           ) : (
             <GroupLayerTreeDropZone
@@ -1429,8 +1490,9 @@ export default function GroupLayerTree({
               onMoveZoneDrop={handleMoveZoneDropToRoot}
               canAcceptMoveZoneItem={canAcceptMoveZoneDropToRoot}
               onTreeDropToRoot={handleDropTreeItemToRoot}
+              canAcceptTreeItemToRoot={canAcceptTreeItemToRoot}
             >
-              <Box sx={{ pb: "8px" }}>
+              <Box sx={{ pb: "8px" }} onMouseLeave={handleKartlagerTreeMouseLeave}>
                 <Tree<GroupLayerTreeNode["data"]>
                   tree={treeData}
                   rootId={GROUP_LAYER_TREE_ROOT_ID}
@@ -1481,6 +1543,10 @@ export default function GroupLayerTree({
                         treeData={treeData}
                         visibleIds={visibleIds}
                         groupDisplaySettings={groupDisplaySettings}
+                        isSubtreeHovered={
+                          hoveredSubtreeIds?.has(String(node.id)) ?? false
+                        }
+                        onHoverSubtree={handleKartlagerNodeHover}
                         onToggleLayerVisibility={handleToggleLayerVisibility}
                         onToggleGroupVisibility={handleToggleGroupVisibility}
                         onAddToGroup={handleOpenAddDialog}
