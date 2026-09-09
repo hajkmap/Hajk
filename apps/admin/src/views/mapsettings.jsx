@@ -489,6 +489,7 @@ class Menu extends Component {
       enableOSMVector: false,
       OSMVectorVisibleAtStart: false,
       osmVectorStyleUrl: "",
+      osmVectorRenderMode: "vector",
       showBreadcrumbs: false,
       showDrawOrderView: false,
       showFilter: false,
@@ -573,6 +574,9 @@ class Menu extends Component {
             this.state.OSMVectorVisibleAtStart,
           osmVectorStyleUrl:
             existingConfig.osmVectorStyleUrl ?? this.state.osmVectorStyleUrl,
+          osmVectorRenderMode:
+            existingConfig.osmVectorRenderMode ??
+            this.state.osmVectorRenderMode,
           showBreadcrumbs:
             existingConfig.showBreadcrumbs ?? this.state.showBreadcrumbs,
           showDrawOrderView:
@@ -840,6 +844,7 @@ class Menu extends Component {
       enableOSMVector: this.state.enableOSMVector,
       OSMVectorVisibleAtStart: this.state.OSMVectorVisibleAtStart,
       osmVectorStyleUrl: this.state.osmVectorStyleUrl,
+      osmVectorRenderMode: this.state.osmVectorRenderMode,
       showBreadcrumbs: this.state.showBreadcrumbs,
       showDrawOrderView: this.state.showDrawOrderView,
       showFilter: this.state.showFilter,
@@ -2681,6 +2686,27 @@ class Menu extends Component {
                   onChange={this.handleInputChange}
                   value={this.state.osmVectorStyleUrl}
                 />
+              </div>
+              <div>
+                <label htmlFor="osmVectorRenderMode">
+                  Rendering av OpenStreetMap (vektor){" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="'Vektor' ritar allt som vektorer och håller stilens ordning på lagren, vilket ger skarpast resultat men kan vara tyngre för detaljrika stilar. 'Hybrid' cachar polygoner och linjer som bilder per bricka, vilket kan prestera bättre men kan bli suddigt vid zoomanimationer."
+                  />
+                </label>
+                <br />
+                <select
+                  id="osmVectorRenderMode"
+                  name="osmVectorRenderMode"
+                  className="control-fixed-width"
+                  onChange={this.handleInputChange}
+                  value={this.state.osmVectorRenderMode}
+                >
+                  <option value="vector">Vektor</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
               </div>
               <div>
                 <input

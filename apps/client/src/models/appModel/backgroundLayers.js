@@ -138,12 +138,17 @@ export function createOSMVectorLayer(appModel) {
     layerSwitcherConf?.options?.osmVectorStyleUrl ||
     DEFAULT_OSM_VECTOR_STYLE_URL;
 
+  const renderMode =
+    layerSwitcherConf?.options?.osmVectorRenderMode || "vector";
+
   const osmVectorLayer = new VectorTileLayer({
     declutter: true,
-    // Render everything as vectors (not scaled images), so the layer stays
-    // sharp on high-DPI displays instead of relying on server-provided @2x tiles,
-    // which the plain OSM raster tile server doesn't offer.
-    renderMode: "vector",
+    // "vector": everything drawn as vectors, stays sharp through zoom/rotate
+    // animations and preserves the style's real paint order. "hybrid":
+    // polygons/lines are cached to a bitmap per tile (cheaper on dense
+    // styles, but can blur during zoom animations). Admin-configurable
+    // since the best choice depends on the chosen style and target hardware.
+    renderMode: renderMode,
     visible: visibleAtStart,
     zIndex: -1,
     layerType: "base",
