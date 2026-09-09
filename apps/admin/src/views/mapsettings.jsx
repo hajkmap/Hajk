@@ -486,6 +486,9 @@ class Menu extends Component {
       backgroundSwitcherWhite: true,
       enableOSM: false,
       OSMVisibleAtStart: false,
+      enableOSMVector: false,
+      OSMVectorVisibleAtStart: false,
+      osmVectorStyleUrl: "",
       showBreadcrumbs: false,
       showDrawOrderView: false,
       showFilter: false,
@@ -563,6 +566,13 @@ class Menu extends Component {
           enableOSM: existingConfig.enableOSM ?? this.state.enableOSM,
           OSMVisibleAtStart:
             existingConfig.OSMVisibleAtStart ?? this.state.OSMVisibleAtStart,
+          enableOSMVector:
+            existingConfig.enableOSMVector ?? this.state.enableOSMVector,
+          OSMVectorVisibleAtStart:
+            existingConfig.OSMVectorVisibleAtStart ??
+            this.state.OSMVectorVisibleAtStart,
+          osmVectorStyleUrl:
+            existingConfig.osmVectorStyleUrl ?? this.state.osmVectorStyleUrl,
           showBreadcrumbs:
             existingConfig.showBreadcrumbs ?? this.state.showBreadcrumbs,
           showDrawOrderView:
@@ -827,6 +837,9 @@ class Menu extends Component {
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,
       OSMVisibleAtStart: this.state.OSMVisibleAtStart,
+      enableOSMVector: this.state.enableOSMVector,
+      OSMVectorVisibleAtStart: this.state.OSMVectorVisibleAtStart,
+      osmVectorStyleUrl: this.state.osmVectorStyleUrl,
       showBreadcrumbs: this.state.showBreadcrumbs,
       showDrawOrderView: this.state.showDrawOrderView,
       showFilter: this.state.showFilter,
@@ -2632,6 +2645,45 @@ class Menu extends Component {
               </div>
               <div>
                 <input
+                  id="enableOSMVector"
+                  name="enableOSMVector"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.enableOSMVector}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="enableOSMVector">
+                  OpenStreetMap (vektor tiles - high DPI)
+                </label>
+              </div>
+              <div>
+                <input
+                  id="OSMVectorVisibleAtStart"
+                  name="OSMVectorVisibleAtStart"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.OSMVectorVisibleAtStart}
+                />
+                &nbsp;
+                <label htmlFor="OSMVectorVisibleAtStart">
+                  Ladda kartan med OpenStreetMap (vektor) synligt vid start
+                </label>
+              </div>
+              <div>
+                <label htmlFor="osmVectorStyleUrl">
+                  URL till vektorstil (lämna tomt för att använda OpenFreeMap)
+                </label>
+                <br />
+                <input
+                  id="osmVectorStyleUrl"
+                  name="osmVectorStyleUrl"
+                  type="text"
+                  onChange={this.handleInputChange}
+                  value={this.state.osmVectorStyleUrl}
+                />
+              </div>
+              <div>
+                <input
                   id="renderSpecialBackgroundsAtBottom"
                   name="renderSpecialBackgroundsAtBottom"
                   type="checkbox"
@@ -2640,7 +2692,8 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label htmlFor="renderSpecialBackgroundsAtBottom">
-                  Visa lagren "Vit", "Svart" och "OSM" längst ner i listan.
+                  Visa lagren "Vit", "Svart" och "OSM" (raster och vektor)
+                  längst ner i listan.
                 </label>
               </div>
               <div className="separator">Justera lagerhanteraren</div>
