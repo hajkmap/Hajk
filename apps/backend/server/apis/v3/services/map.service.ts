@@ -157,7 +157,7 @@ function mergeOptionsWithProjection(
 
 /** Prisma read JsonValue (includes null) → write InputJsonValue. */
 function toInputJsonValue(
-  value: Prisma.JsonValue,
+  value: Prisma.JsonValue
 ): Prisma.InputJsonValue | typeof Prisma.JsonNull {
   return value === null ? Prisma.JsonNull : (value as Prisma.InputJsonValue);
 }
@@ -203,8 +203,6 @@ class MapService {
   /**
    * Counts active layer instances linked to each map — both directly (`mapId`)
    * and via groups placed on the map. Matches the filter used by getLayersForMap.
-   * Each instance is counted at most once per map (instances with both mapId and
-   * groupId must not be double-counted).
    */
   private async countLayersByMapNames(mapNames: string[]) {
     const counts = new Map(mapNames.map((name) => [name, 0]));
@@ -228,20 +226,11 @@ class MapService {
     });
 
     for (const instance of instances) {
-      const mapsForInstance = new Set<string>();
-
-      if (instance.map?.name && counts.has(instance.map.name)) {
-        mapsForInstance.add(instance.map.name);
+      if (instance.map?.name) {
+        counts.set(instance.map.name, (counts.get(instance.map.name) ?? 0) + 1);
       }
-
       for (const placement of instance.group?.maps ?? []) {
-        if (counts.has(placement.mapName)) {
-          mapsForInstance.add(placement.mapName);
-        }
-      }
-
-      for (const mapName of mapsForInstance) {
-        counts.set(mapName, (counts.get(mapName) ?? 0) + 1);
+        counts.set(placement.mapName, (counts.get(placement.mapName) ?? 0) + 1);
       }
     }
 
@@ -687,7 +676,7 @@ class MapService {
     await this.syncLayerSwitcherContentInToolOptions(
       mapName,
       content.groups ?? [],
-      backgroundLayers,
+      backgroundLayers
     );
   }
 
@@ -698,7 +687,7 @@ class MapService {
   private async syncLayerSwitcherContentInToolOptions(
     mapName: string,
     groups: LayerSwitcherWriteGroup[],
-    baselayers: MapLayerInput[],
+    baselayers: MapLayerInput[]
   ) {
     const entry = await prisma.toolsOnMaps.findFirst({
       where: {
@@ -747,7 +736,7 @@ class MapService {
 
   /** Nested groups for Tool.options — preserve drawOrder on each layer ref. */
   private toLayerSwitcherToolOptionGroups(
-    groups: LayerSwitcherWriteGroup[],
+    groups: LayerSwitcherWriteGroup[]
   ): Prisma.InputJsonObject[] {
     return groups.map((group) => ({
       id: group.id,
@@ -1325,7 +1314,9 @@ class MapService {
             where: { id: { in: uniqueGroupIds } },
             select: { id: true },
           });
-          const knownGroupIds = new Set(existingGroups.map((group) => group.id));
+          const knownGroupIds = new Set(
+            existingGroups.map((group) => group.id)
+          );
 
           for (const groupId of uniqueGroupIds) {
             if (!knownGroupIds.has(groupId)) {
