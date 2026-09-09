@@ -1,15 +1,22 @@
 import type { TreeItem } from "dnd-kit-sortable-tree";
 import type { ToolOnMap, ToolWindowPosition, ToolZone } from "../../api/maps";
 import type { Tool } from "../../api/tools";
-import type { TreeItemData } from "../../components/layerswitcher-dnd";
-import { ID_DELIMITER } from "../../components/layerswitcher-dnd";
 import { getMapToolFieldConfig, type MapToolFieldConfig } from "./map-tool-field-config";
 
+const ID_DELIMITER = "::";
+
+/** Minimal tree-item shape used for tool zone membership (not DnD UI). */
+export interface ToolZoneItemData {
+  type: "tool";
+  name: string;
+  canHaveChildren?: boolean;
+}
+
 export interface ToolZones {
-  drawer: TreeItem<TreeItemData>[];
-  widgetLeft: TreeItem<TreeItemData>[];
-  widgetRight: TreeItem<TreeItemData>[];
-  control: TreeItem<TreeItemData>[];
+  drawer: TreeItem<ToolZoneItemData>[];
+  widgetLeft: TreeItem<ToolZoneItemData>[];
+  widgetRight: TreeItem<ToolZoneItemData>[];
+  control: TreeItem<ToolZoneItemData>[];
 }
 
 export const EMPTY_TOOL_ZONES: ToolZones = {
@@ -267,12 +274,7 @@ export function resolveToolZone(tool: ToolOnMap): ToolZoneKey | null {
   return null;
 }
 
-export function isHiddenMapTool(tool: ToolOnMap): boolean {
-  if (tool.target) return false;
-  return legacyOptionsTarget(tool) === "hidden";
-}
-
-function toZoneItem(tool: ToolOnMap): TreeItem<TreeItemData> {
+function toZoneItem(tool: ToolOnMap): TreeItem<ToolZoneItemData> {
   return {
     id: `tool${ID_DELIMITER}${tool.toolId}`,
     name: getToolDisplayName(tool),
@@ -311,126 +313,6 @@ export function mapToolsToZones(mapTools: ToolOnMap[]): ToolZones {
   });
 
   return zones;
-}
-
-export function collectPlacedToolIds(zones: ToolZones): Set<number> {
-  const ids = new Set<number>();
-  (Object.keys(zones) as ToolZoneKey[]).forEach((zone) => {
-    zones[zone].forEach((item) => {
-      const parts = String(item.id).split(ID_DELIMITER);
-      const toolId = Number(parts[parts.length - 1]);
-      if (!Number.isNaN(toolId)) ids.add(toolId);
-    });
-  });
-  return ids;
-}
-
-/** Map tools that are on the map but not assigned to a placement zone. */
-export function getUnplacedMapTools(
-  mapTools: ToolOnMap[],
-  zones: ToolZones,
-): ToolOnMap[] {
-  const placedIds = collectPlacedToolIds(zones);
-
-  return mapTools
-    .filter((tool) => !isHiddenMapTool(tool) && !placedIds.has(tool.toolId))
-    .slice()
-    .sort((a, b) => a.index - b.index);
-}
-
-export function unplacedMapToolsToSourceItems(
-  mapTools: ToolOnMap[],
-  zones: ToolZones,
-): { id: string; name: string }[] {
-  return getUnplacedMapTools(mapTools, zones).map((tool) => ({
-    id: String(tool.toolId),
-    name: getToolDisplayName(tool),
-  }));
-}
-
-/** Active tools not placed in a zone — shown in the placement DnD source list. */
-export function unplacedActiveToolsToSourceItems(
-  catalogTools: Tool[],
-  mapTools: ToolOnMap[],
-  zones: ToolZones,
-  activeToolIds: Set<number>,
-): { id: string; name: string }[] {
-  const placedIds = collectPlacedToolIds(zones);
-  const catalogById = new Map(
-    catalogTools.map((tool) => [Number(tool.id), tool]),
-  );
-  const mapToolsById = new Map(mapTools.map((tool) => [tool.toolId, tool]));
-
-  return [...activeToolIds]
-    .filter((toolId) => !placedIds.has(toolId))
-    .map((toolId) => {
-      const catalogTool = catalogById.get(toolId);
-      const mapTool = mapToolsById.get(toolId);
-      const name = catalogTool
-        ? getCatalogToolDisplayName(catalogTool)
-        : mapTool
-          ? getToolDisplayName(mapTool)
-          : String(toolId);
-
-      return { id: String(toolId), name };
-    })
-    .sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
-    );
-}
-
-/** All catalog tools not yet placed in a zone — available to drag onto the map. */
-export function catalogToolsToSourceItems(
-  catalogTools: Tool[],
-  zones: ToolZones,
-): { id: string; name: string }[] {
-  const placedIds = collectPlacedToolIds(zones);
-
-  return catalogTools
-    .filter((tool) => !placedIds.has(Number(tool.id)))
-    .slice()
-    .sort((a, b) =>
-      getCatalogToolDisplayName(a).localeCompare(
-        getCatalogToolDisplayName(b),
-        undefined,
-        { sensitivity: "base" },
-      ),
-    )
-    .map((tool) => ({
-      id: tool.id,
-      name: getCatalogToolDisplayName(tool),
-    }));
-}
-
-export type ToolPlacementLabelKey =
-  | "maps.toolPlacement.drawer"
-  | "maps.toolPlacement.widgetLeft"
-  | "maps.toolPlacement.widgetRight"
-  | "maps.toolPlacement.controlButton"
-  | "maps.toolPlacement.unplaced"
-  | "maps.toolPlacement.hidden"
-  | "maps.toolPlacement.notOnMap";
-
-export function getToolPlacementLabelKey(
-  tool: ToolOnMap,
-): ToolPlacementLabelKey {
-  if (isHiddenMapTool(tool)) {
-    return "maps.toolPlacement.hidden";
-  }
-
-  const zone = resolveToolZone(tool);
-  switch (zone) {
-    case "drawer":
-      return "maps.toolPlacement.drawer";
-    case "widgetLeft":
-      return "maps.toolPlacement.widgetLeft";
-    case "widgetRight":
-      return "maps.toolPlacement.widgetRight";
-    case "control":
-      return "maps.toolPlacement.controlButton";
-    default:
-      return "maps.toolPlacement.unplaced";
-  }
 }
 
 function buildToolPayloadOptions(

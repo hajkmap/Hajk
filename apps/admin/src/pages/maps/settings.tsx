@@ -35,7 +35,6 @@ import {
   useMapByName,
   useUpdateMap,
   useUpdateMapTools,
-  useUpdateMapContent,
   useUpdateMapLayers,
   useUpdateMapLayerSwitcher,
   useMapLayerSwitcher,
@@ -44,7 +43,7 @@ import {
   useToolsByMapName,
   useMapContentByName,
 } from "../../api/maps";
-import type { MapContentApiResponse, MapGroup, MapLayer } from "../../api/maps";
+import type { MapContentApiResponse, MapLayer } from "../../api/maps";
 import { getMapContentByName } from "../../api/maps";
 import DialogWrapper from "../../components/flexible-dialog";
 import {
@@ -68,24 +67,8 @@ import {
   type MapLayerActivationRow,
 } from "./components/map-layers-panel";
 import { pruneLayerSwitcherDraftToActiveLayers } from "../groups-development/utils/client-groups";
-import {
-  buildMapLayerTree,
-  buildServerMapContentItems,
-  entityIdFromItemId,
-  mapLayerDrawOrderSignatureForActiveLayers,
-  mapPlacementSignatureForActiveLayers,
-  mapContentToPayloads,
-  mapLayerTreeToPayload,
-  syncLayerDrawOrderWithPlacement,
-  syncPlacementVisibleAtStartFromDrawOrder,
-  addLayerToPlacementIfMissing,
-  insertLayerInDrawOrder,
-  removeLayerFromDrawOrderTree,
-} from "./map-group-placement-utils";
-import { TreeItemData } from "../../components/layerswitcher-dnd";
 import { useTools } from "../../api/tools";
 import type { KartlagerDraft } from "../groups-development/types";
-import { useGroups } from "../../api/groups";
 import { useLayers } from "../../api/layers";
 import type { ToolWindowPosition, ToolZone } from "../../api/maps";
 import MapToolsPanel from "./components/map-tools-panel";
@@ -110,7 +93,6 @@ import {
 } from "./map-tools-utils";
 import { useProjections } from "../../api/services";
 import useAppStateStore from "../../store/use-app-state-store";
-import { TreeItems } from "dnd-kit-sortable-tree";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 
@@ -173,7 +155,6 @@ export default function MapSettings() {
   const { data: map, isLoading, isError } = useMapByName(mapName ?? "");
   const { mutateAsync: updateMap, status: updateStatus } = useUpdateMap();
   const { mutateAsync: updateMapTools } = useUpdateMapTools();
-  const { mutateAsync: updateMapContent } = useUpdateMapContent();
   const { mutateAsync: updateMapLayers } = useUpdateMapLayers();
   const { mutateAsync: updateMapLayerSwitcher } = useUpdateMapLayerSwitcher();
   const { mutateAsync: deleteMap, isPending: isDeletingMap } = useDeleteMap();
@@ -226,7 +207,6 @@ export default function MapSettings() {
   const showSettingsSearchUi =
     activeTab === "settings" && settingsSection === "search";
   const settingsSearchTerm = showSettingsSearchUi ? settingsSearchQuery : "";
-  const { data: groups = [] } = useGroups();
   const { data: layers = [], isFetched: layersFetched } = useLayers();
   const catalogLayers = useMemo(
     () =>
@@ -237,17 +217,6 @@ export default function MapSettings() {
       })),
     [layers],
   );
-  const catalogGroups = useMemo(
-    () =>
-      groups.map((group) => ({
-        id: group.id,
-        name: group.name,
-        layerCount: group.layerCount ?? 0,
-        nestedGroupCount: group.nestedGroupCount ?? 0,
-        nestingLevel: group.nestingLevel ?? 1,
-      })),
-    [groups],
-  );
   const { data: mapTools } = useToolsByMapName(mapName ?? "");
   const { data: catalogTools } = useTools();
   const {
@@ -256,7 +225,6 @@ export default function MapSettings() {
     isLoading: mapContentLoading,
   } = useMapContentByName(mapName ?? "");
   const mapLayers = mapContent?.layers;
-  const mapGroups = mapContent?.groups;
   const { data: projections } = useProjections();
   const { defaultCoordinates } = useAppStateStore.getState();
 
@@ -271,13 +239,6 @@ export default function MapSettings() {
     [projections],
   );
 
-  // Drop zone state for map content (direct layers + group placements).
-  const [mapContentDZ, setMapContentDZ] = useState<TreeItems<TreeItemData>>(
-    [],
-  );
-  const [mapLayerDrawOrderDZ, setMapLayerDrawOrderDZ] = useState<
-    TreeItems<TreeItemData>
-  >([]);
   const [layerActivationRows, setLayerActivationRows] = useState<
     MapLayerActivationRow[]
   >([]);
@@ -293,111 +254,25 @@ export default function MapSettings() {
     layerActivationCommittedSignature;
   const [layerActivationResetKey, setLayerActivationResetKey] = useState(0);
   const [menuSynced, setMenuSynced] = useState(false);
-
-  const buildEnrichedServerMapContentItems = useCallback(
-    (layers: MapLayer[], groups: MapGroup[]): TreeItems<TreeItemData> => {
-      const items = buildServerMapContentItems(layers, groups);
-      const catalogById = new Map(
-        catalogGroups.map((group) => [group.id, group]),
-      );
-
-      return items.map((node) => {
-        if (node.type !== "group") return node;
-        const groupId = entityIdFromItemId(node.id);
-        const catalog = catalogById.get(groupId);
-        return {
-          ...node,
-          layerCount: catalog?.layerCount,
-          nestedGroupCount: catalog?.nestedGroupCount,
-        };
-      });
-    },
-    [catalogGroups],
+  const [kartlagerDraft, setKartlagerDraft] = useState<KartlagerDraft | null>(
+    null,
   );
 
   const applyMenuStateFromServer = useCallback(
-    (layers: MapLayer[], groups: MapGroup[]) => {
+    (layers: MapLayer[]) => {
       const activationRows = buildMapLayerActivationRows(catalogLayers, layers);
-      setMapContentDZ(buildEnrichedServerMapContentItems(layers, groups));
-      setMapLayerDrawOrderDZ(buildMapLayerTree(layers));
       setLayerActivationRows(activationRows);
       setLayerActivationCommittedSignature(
         mapLayerActivationSignature(activationRows),
       );
     },
-    [buildEnrichedServerMapContentItems, catalogLayers],
-  );
-
-  const serverMapContentItems = useMemo<TreeItems<TreeItemData>>(
-    () =>
-      buildEnrichedServerMapContentItems(mapLayers ?? [], mapGroups ?? []),
-    [buildEnrichedServerMapContentItems, mapLayers, mapGroups],
-  );
-
-  const serverLayerDrawOrderItems = useMemo<TreeItems<TreeItemData>>(
-    () => buildMapLayerTree(mapLayers ?? []),
-    [mapLayers],
+    [catalogLayers],
   );
 
   const serverLayerActivationRows = useMemo(
     () => buildMapLayerActivationRows(catalogLayers, mapLayers ?? []),
     [catalogLayers, mapLayers],
   );
-
-  const activeCatalogLayerIds = useMemo(
-    () =>
-      new Set(
-        layerActivationRows
-          .filter((row) => row.active)
-          .map((row) => row.layerId),
-      ),
-    [layerActivationRows],
-  );
-
-  const placementDirtyRaw = useMemo(() => {
-    if (!mapName || mapLayers === undefined || mapGroups === undefined) {
-      return false;
-    }
-    return (
-      mapPlacementSignatureForActiveLayers(
-        mapContentDZ,
-        activeCatalogLayerIds,
-      ) !==
-      mapPlacementSignatureForActiveLayers(
-        serverMapContentItems,
-        activeCatalogLayerIds,
-      )
-    );
-  }, [
-    activeCatalogLayerIds,
-    mapContentDZ,
-    serverMapContentItems,
-    mapName,
-    mapLayers,
-    mapGroups,
-  ]);
-
-  const drawOrderDirtyRaw = useMemo(() => {
-    if (!mapName || mapLayers === undefined) {
-      return false;
-    }
-    return (
-      mapLayerDrawOrderSignatureForActiveLayers(
-        mapLayerDrawOrderDZ,
-        activeCatalogLayerIds,
-      ) !==
-      mapLayerDrawOrderSignatureForActiveLayers(
-        serverLayerDrawOrderItems,
-        activeCatalogLayerIds,
-      )
-    );
-  }, [
-    activeCatalogLayerIds,
-    mapLayerDrawOrderDZ,
-    serverLayerDrawOrderItems,
-    mapName,
-    mapLayers,
-  ]);
 
   const layerActivationDirtyRaw = useMemo(() => {
     if (!mapName || mapLayers === undefined || !layersFetched || !menuSynced) {
@@ -416,8 +291,7 @@ export default function MapSettings() {
     menuSynced,
   ]);
 
-  const contentDirtyRaw =
-    placementDirtyRaw || drawOrderDirtyRaw || layerActivationDirtyRaw;
+  const contentDirtyRaw = layerActivationDirtyRaw;
 
   useEffect(() => {
     setMenuSynced(false);
@@ -426,16 +300,11 @@ export default function MapSettings() {
   }, [mapName]);
 
   useEffect(() => {
-    if (
-      !mapName ||
-      mapLayers === undefined ||
-      mapGroups === undefined ||
-      !layersFetched
-    ) {
+    if (!mapName || mapLayers === undefined || !layersFetched) {
       return;
     }
     if (!menuSynced) {
-      applyMenuStateFromServer(mapLayers, mapGroups);
+      applyMenuStateFromServer(mapLayers);
       setMenuSynced(true);
       return;
     }
@@ -454,24 +323,19 @@ export default function MapSettings() {
       localActivationSignature === committedSignature;
 
     // After Lager save, local rows reflect the commit but refetched server rows
-    // can lag one render — refresh placement/draw only until server catches up.
+    // can lag one render — wait until server catches up before re-applying.
     if (
       localMatchesCommitted &&
       serverActivationSignature !== committedSignature
     ) {
-      setMapContentDZ(serverMapContentItems);
-      setMapLayerDrawOrderDZ(serverLayerDrawOrderItems);
       return;
     }
 
-    applyMenuStateFromServer(mapLayers, mapGroups);
+    applyMenuStateFromServer(mapLayers);
   }, [
     mapName,
     mapLayers,
-    mapGroups,
     layersFetched,
-    serverMapContentItems,
-    serverLayerDrawOrderItems,
     serverLayerActivationRows,
     menuSynced,
     contentDirtyRaw,
@@ -514,42 +378,6 @@ export default function MapSettings() {
     ],
   );
 
-  const handleMapContentChange = useCallback(
-    (items: TreeItems<TreeItemData>) => {
-      setMapContentDZ(items);
-      setMapLayerDrawOrderDZ((prev) =>
-        syncLayerDrawOrderWithPlacement(items, prev),
-      );
-    },
-    [],
-  );
-
-  const handleMapDrawOrderChange = useCallback(
-    (items: TreeItems<TreeItemData>) => {
-      setMapLayerDrawOrderDZ(items);
-      setMapContentDZ((prev) =>
-        syncPlacementVisibleAtStartFromDrawOrder(prev, items),
-      );
-    },
-    [],
-  );
-
-  const handleInsertLayerToDrawOrder = useCallback(
-    (layer: { id: string; name: string }, insertIndex: number) => {
-      setMapContentDZ((prev) => addLayerToPlacementIfMissing(prev, layer));
-      setMapLayerDrawOrderDZ((prev) =>
-        insertLayerInDrawOrder(prev, layer, insertIndex),
-      );
-    },
-    [],
-  );
-
-  const handleRemoveLayerFromDrawOrder = useCallback((layerId: string) => {
-    setMapLayerDrawOrderDZ((prev) =>
-      removeLayerFromDrawOrderTree(prev, layerId),
-    );
-  }, []);
-
   const contentDirty = menuSynced && contentDirtyRaw;
   const serverToolZones = useMemo(
     () => (mapTools ? mapToolsToZones(mapTools) : null),
@@ -564,9 +392,6 @@ export default function MapSettings() {
   const flushMapToolEditsRef = useRef<(() => void) | null>(null);
   const [hasPendingWindowSizeInput, setHasPendingWindowSizeInput] =
     useState(false);
-  const [kartlagerDraft, setKartlagerDraft] = useState<KartlagerDraft | null>(
-    null,
-  );
   const kartlagerDirty = kartlagerDraft != null && menuSynced;
   const kartlagerMapNameRef = useRef(mapName);
   const [kartlagerMoveZoneVisible, setKartlagerMoveZoneVisible] =
@@ -679,19 +504,6 @@ export default function MapSettings() {
       return String(toolId);
     },
     [catalogTools, mapTools],
-  );
-
-  const updateToolZone = useCallback(
-    (zone: keyof ToolZones, items: TreeItems<TreeItemData>) => {
-      setToolsDraft((prev) => {
-        const base = resolveToolsDraft(prev);
-        return {
-          ...base,
-          zones: { ...base.zones, [zone]: items },
-        };
-      });
-    },
-    [resolveToolsDraft],
   );
 
   const toggleToolActive = useCallback(
@@ -872,8 +684,6 @@ export default function MapSettings() {
     [mapName, resolveToolsDraft, applyToolsDraft],
   );
 
-  const backgroundImage = "/mapbackground.png";
-
   const mapFormBaseline = useMemo(
     () => (map ? buildMapSettingsFormValues(map) : null),
     [map],
@@ -1007,24 +817,10 @@ export default function MapSettings() {
             queryFn: () => getMapContentByName(map.name),
           },
         );
-        applyMenuStateFromServer(contentData.layers, contentData.groups);
+        applyMenuStateFromServer(contentData.layers);
         setLayerActivationResetKey((key) => key + 1);
         await queryClient.refetchQueries({
           queryKey: ["mapLayerSwitcher", map.name],
-        });
-        didSave = true;
-      }
-
-      if (contentDirty && placementDirtyRaw) {
-        await updateMapContent({
-          mapName: map.name,
-          content: mapContentToPayloads(mapContentDZ, mapLayerDrawOrderDZ),
-        });
-        didSave = true;
-      } else if (contentDirty && drawOrderDirtyRaw) {
-        await updateMapLayers({
-          mapName: map.name,
-          layers: mapLayerTreeToPayload(mapLayerDrawOrderDZ),
         });
         didSave = true;
       }
@@ -1251,16 +1047,8 @@ export default function MapSettings() {
             </Alert>
           ) : (
             <MapContentPanel
-              catalogLayers={catalogLayers}
-              catalogGroups={catalogGroups}
               layerActivationRows={layerActivationRows}
               onLayerActivationRowsChange={handleLayerActivationRowsChange}
-              placementItems={mapContentDZ}
-              onPlacementItemsChange={handleMapContentChange}
-              drawOrderItems={mapLayerDrawOrderDZ}
-              onDrawOrderItemsChange={handleMapDrawOrderChange}
-              onInsertLayerToDrawOrder={handleInsertLayerToDrawOrder}
-              onRemoveLayerFromDrawOrder={handleRemoveLayerFromDrawOrder}
               mapTools={mapTools}
               catalogTools={catalogTools}
               activeToolIds={activeToolIds}
@@ -1285,7 +1073,6 @@ export default function MapSettings() {
             windowPositions={windowPositions}
             windowSizes={windowSizes}
             indexes={indexes}
-            onUpdateToolZone={updateToolZone}
             onToggleToolActive={toggleToolActive}
             onToolTargetChange={setToolTarget}
             onToolWindowPositionChange={setToolWindowPosition}
@@ -1293,7 +1080,6 @@ export default function MapSettings() {
             onToolIndexChange={setToolIndex}
             flushPendingEditsRef={flushMapToolEditsRef}
             onPendingWindowSizeDirtyChange={setHasPendingWindowSizeInput}
-            backgroundImage={backgroundImage}
           />
         )}
 

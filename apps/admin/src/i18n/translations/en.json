@@ -247,7 +247,7 @@
     "maps.duplicate.dialog.sourceMap": "Duplicating from \"{{name}}\". Enter a unique name for the new map.",
     "maps.duplicate.includeRelations": "Include from source map",
     "maps.duplicate.includeLayers": "Layers",
-    "maps.duplicate.includeGroups": "Layer groups",
+    "maps.duplicate.includeGroups": "Layer group placements (reuses existing groups)",
     "maps.duplicate.includeTools": "Tools",
     "maps.themes.listTitle": "Themes",
     "maps.themes.filterPlaceholder": "Filter themes",

@@ -2,18 +2,13 @@ import { useEffect, useState, type RefObject } from "react";
 import { Box } from "@mui/material";
 import LayersIcon from "@mui/icons-material/Layers";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
-import type { TreeItems } from "dnd-kit-sortable-tree";
 
 import { SettingsPageTabs } from "../../../components/settings-page-tabs";
-import { TreeItemData } from "../../../components/layerswitcher-dnd";
 import type { ToolOnMap } from "../../../api/maps";
-import type { LayerKind } from "../../../api/layers";
 import type { Tool } from "../../../api/tools";
 import type { KartlagerDraft } from "../../groups-development/types";
 import GroupLayerTree from "../../groups-development/components/group-layer-tree";
 import { findActiveLayerswitcher } from "../../groups-development/utils/active-layerswitcher";
-import MapGroupPlacementPanel from "./map-group-placement-panel";
-import MapDrawOrderPanel from "./map-draw-order-panel";
 import MapLayersPanel, {
   type MapLayerActivationRow,
 } from "./map-layers-panel";
@@ -24,16 +19,6 @@ const CONTENT_SUB_TABS = [
     labelKey: "maps.contentTab.layers",
     icon: <LayersIcon />,
   },
-  // {
-  //   key: "placement" as const,
-  //   labelKey: "maps.contentTab.placement",
-  //   icon: <TouchAppIcon />,
-  // },
-  // {
-  //   key: "drawOrder" as const,
-  //   labelKey: "maps.contentTab.drawOrder",
-  //   icon: <SortIcon />,
-  // },
   {
     key: "groupsDevelopment" as const,
     labelKey: "maps.contentTab.placement",
@@ -41,33 +26,9 @@ const CONTENT_SUB_TABS = [
   },
 ];
 
-interface MapCatalogLayer {
-  id: string;
-  name: string;
-  layerKind?: LayerKind;
-}
-
-interface MapCatalogGroup {
-  id: string;
-  name: string;
-  layerCount?: number;
-  nestedGroupCount?: number;
-}
-
 interface MapContentPanelProps {
-  catalogLayers: MapCatalogLayer[];
-  catalogGroups: MapCatalogGroup[];
   layerActivationRows: MapLayerActivationRow[];
   onLayerActivationRowsChange: (rows: MapLayerActivationRow[]) => void;
-  placementItems: TreeItems<TreeItemData>;
-  onPlacementItemsChange: (items: TreeItems<TreeItemData>) => void;
-  drawOrderItems: TreeItems<TreeItemData>;
-  onDrawOrderItemsChange: (items: TreeItems<TreeItemData>) => void;
-  onInsertLayerToDrawOrder: (
-    layer: MapCatalogLayer,
-    insertIndex: number,
-  ) => void;
-  onRemoveLayerFromDrawOrder: (layerId: string) => void;
   mapTools?: ToolOnMap[];
   catalogTools?: Tool[];
   activeToolIds?: Set<number>;
@@ -86,16 +47,8 @@ interface MapContentPanelProps {
 }
 
 export default function MapContentPanel({
-  catalogLayers,
-  catalogGroups,
   layerActivationRows,
   onLayerActivationRowsChange,
-  placementItems,
-  onPlacementItemsChange,
-  drawOrderItems,
-  onDrawOrderItemsChange,
-  onInsertLayerToDrawOrder,
-  onRemoveLayerFromDrawOrder,
   mapTools,
   catalogTools,
   activeToolIds,
@@ -108,7 +61,7 @@ export default function MapContentPanel({
   moveZoneHostRef,
 }: MapContentPanelProps) {
   const [contentSubTab, setContentSubTab] = useState<
-    "layers" | "placement" | "drawOrder" | "groupsDevelopment"
+    "layers" | "groupsDevelopment"
   >("layers");
   const [moveZoneHostEl, setMoveZoneHostEl] = useState<HTMLElement | null>(
     null,
@@ -156,24 +109,6 @@ export default function MapContentPanel({
         <MapLayersPanel
           rows={layerActivationRows}
           onRowsChange={onLayerActivationRowsChange}
-        />
-      ) : null}
-
-      {contentSubTab === "placement" ? (
-        <MapGroupPlacementPanel
-          catalogGroups={catalogGroups}
-          items={placementItems}
-          onItemsChange={onPlacementItemsChange}
-        />
-      ) : null}
-
-      {contentSubTab === "drawOrder" ? (
-        <MapDrawOrderPanel
-          catalogLayers={catalogLayers}
-          items={drawOrderItems}
-          onItemsChange={onDrawOrderItemsChange}
-          onInsertLayer={onInsertLayerToDrawOrder}
-          onRemoveLayer={onRemoveLayerFromDrawOrder}
         />
       ) : null}
 

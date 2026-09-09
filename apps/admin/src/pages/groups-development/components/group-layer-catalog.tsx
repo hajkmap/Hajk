@@ -35,7 +35,6 @@ import {
 } from "../../../api/groups";
 import type { Layer } from "../../../api/layers";
 import useAppStateStore from "../../../store/use-app-state-store";
-import { DND_ITEM_TITLE_SX } from "../../../components/layerswitcher-dnd/utils";
 import {
   getCreateGroupErrorMessage,
   getDeleteGroupErrorMessage,
@@ -154,7 +153,14 @@ function CatalogRow({
             variant="body2"
             title={item.name}
             sx={{
-              ...DND_ITEM_TITLE_SX,
+              flex: 1,
+              minWidth: 0,
+              overflow: "hidden",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              wordBreak: "break-word",
+              lineHeight: 1.25,
               fontWeight: isGroup ? 600 : 400,
               color: isGroup ? "primary.main" : "text.primary",
             }}

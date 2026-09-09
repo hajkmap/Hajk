@@ -203,6 +203,8 @@ class MapService {
   /**
    * Counts active layer instances linked to each map — both directly (`mapId`)
    * and via groups placed on the map. Matches the filter used by getLayersForMap.
+   * Each instance is counted at most once per map (instances with both mapId and
+   * groupId must not be double-counted).
    */
   private async countLayersByMapNames(mapNames: string[]) {
     const counts = new Map(mapNames.map((name) => [name, 0]));
@@ -226,11 +228,20 @@ class MapService {
     });
 
     for (const instance of instances) {
-      if (instance.map?.name) {
-        counts.set(instance.map.name, (counts.get(instance.map.name) ?? 0) + 1);
+      const mapsForInstance = new Set<string>();
+
+      if (instance.map?.name && counts.has(instance.map.name)) {
+        mapsForInstance.add(instance.map.name);
       }
+
       for (const placement of instance.group?.maps ?? []) {
-        counts.set(placement.mapName, (counts.get(placement.mapName) ?? 0) + 1);
+        if (counts.has(placement.mapName)) {
+          mapsForInstance.add(placement.mapName);
+        }
+      }
+
+      for (const mapName of mapsForInstance) {
+        counts.set(mapName, (counts.get(mapName) ?? 0) + 1);
       }
     }
 
@@ -1243,7 +1254,7 @@ class MapService {
         restrictedToRoles: true,
         tools: true,
         layers: { include: { restrictedToRoles: true } },
-        groups: true,
+        groups: { include: { metadata: true } },
         themes: true,
       },
     });
@@ -1302,70 +1313,27 @@ class MapService {
           });
         }
 
-        if (includeGroups) {
+        if (includeGroups && source.groups.length > 0) {
+          // Groups are a shared catalog. Map duplicate only copies the
+          // GroupsOnMaps placement tree and reuses the same group ids —
+          // never creates new Group rows (that produced same-name duplicates
+          // on the Groups page).
           const uniqueGroupIds = [
             ...new Set(source.groups.map((entry) => entry.groupId)),
           ];
-          const groupIdMap = new Map<string, string>();
+          const existingGroups = await tx.group.findMany({
+            where: { id: { in: uniqueGroupIds } },
+            select: { id: true },
+          });
+          const knownGroupIds = new Set(existingGroups.map((group) => group.id));
 
-          for (const oldGroupId of uniqueGroupIds) {
-            const group = await tx.group.findUnique({
-              where: { id: oldGroupId },
-              include: {
-                layers: { include: { restrictedToRoles: true } },
-                restrictedToRoles: true,
-              },
-            });
-
-            if (!group) {
-              continue;
-            }
-
-            const newGroup = await tx.group.create({
-              data: {
-                locked: group.locked,
-                name: group.name,
-                internalName: group.internalName,
-                type: group.type,
-                createdBy: userId,
-                createdDate: new Date(),
-              },
-            });
-            groupIdMap.set(oldGroupId, newGroup.id);
-
-            if (group.restrictedToRoles.length > 0) {
-              await tx.roleOnGroup.createMany({
-                data: group.restrictedToRoles.map((role) => ({
-                  groupId: newGroup.id,
-                  roleId: role.roleId,
-                })),
-              });
-            }
-
-            for (const layer of group.layers) {
-              const createdLayer = await tx.layerInstance.create({
-                data: {
-                  displayLayerId: layer.displayLayerId,
-                  searchLayerId: layer.searchLayerId,
-                  editingLayerId: layer.editingLayerId,
-                  mapId: newMap.id,
-                  groupId: newGroup.id,
-                  usage: layer.usage,
-                  infoClickActive: layer.infoClickActive,
-                  visibleAtStart: layer.visibleAtStart,
-                  zIndex: layer.zIndex,
-                  options: toInputJsonValue(layer.options),
-                },
-              });
-
-              if (layer.restrictedToRoles.length > 0) {
-                await tx.roleOnLayerInstance.createMany({
-                  data: layer.restrictedToRoles.map((role) => ({
-                    layerInstanceId: createdLayer.id,
-                    roleId: role.roleId,
-                  })),
-                });
-              }
+          for (const groupId of uniqueGroupIds) {
+            if (!knownGroupIds.has(groupId)) {
+              throw new HajkError(
+                HttpStatusCodes.BAD_REQUEST,
+                `Group "${groupId}" referenced by map "${sourceMapName}" could not be duplicated.`,
+                HajkStatusCodes.INVALID_REQUEST_BODY
+              );
             }
           }
 
@@ -1389,21 +1357,27 @@ class MapService {
 
             for (const entry of batch) {
               const newGroupOnMapId = randomUUID();
-              const mappedGroupId = groupIdMap.get(entry.groupId);
+              let metadataId: string | undefined;
 
-              if (!mappedGroupId) {
-                throw new HajkError(
-                  HttpStatusCodes.BAD_REQUEST,
-                  `Group "${entry.groupId}" referenced by map "${sourceMapName}" could not be duplicated.`,
-                  HajkStatusCodes.INVALID_REQUEST_BODY
-                );
+              if (entry.metadata) {
+                const createdMetadata = await tx.metadata.create({
+                  data: {
+                    title: entry.metadata.title ?? "",
+                    description: entry.metadata.description ?? "",
+                    owner: entry.metadata.owner ?? "",
+                    url: entry.metadata.url ?? "",
+                    urlTitle: entry.metadata.urlTitle ?? "",
+                    urlOpenData: entry.metadata.urlOpenData ?? "",
+                  },
+                });
+                metadataId = createdMetadata.id;
               }
 
               await tx.groupsOnMaps.create({
                 data: {
                   id: newGroupOnMapId,
                   mapName: name,
-                  groupId: mappedGroupId,
+                  groupId: entry.groupId,
                   parentGroupId: entry.parentGroupId
                     ? (groupsOnMapsIdMap.get(entry.parentGroupId) ?? null)
                     : null,
@@ -1411,6 +1385,12 @@ class MapService {
                   name: entry.name,
                   toggled: entry.toggled,
                   expanded: entry.expanded,
+                  exclusiveGroup: entry.exclusiveGroup,
+                  infoDocument: entry.infoDocument,
+                  index: entry.index,
+                  layerVisibleAtStart: entry.layerVisibleAtStart,
+                  layerInfoBox: entry.layerInfoBox,
+                  ...(metadataId ? { metadataId } : {}),
                 },
               });
               groupsOnMapsIdMap.set(entry.id, newGroupOnMapId);
@@ -1426,7 +1406,13 @@ class MapService {
         }
 
         if (includeLayers) {
+          // Group composition LayerInstances are owned by the shared Group —
+          // only copy map-direct placements onto the new map.
           for (const layer of source.layers) {
+            if (layer.groupId) {
+              continue;
+            }
+
             const createdLayer = await tx.layerInstance.create({
               data: {
                 displayLayerId: layer.displayLayerId,
