@@ -125,7 +125,6 @@ export default function GroupLayerTreeNodeView({
                 `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
               "& .ls-arrow": {
                 transform: isOpen ? "rotate(90deg)" : "none",
-                transition: "transform 300ms ease",
               },
               "&:hover .ls-arrow": {
                 transform: isOpen

@@ -5,7 +5,14 @@ import {
   type DropOptions,
 } from "@minoru/react-dnd-treeview";
 import { Box, Typography, useTheme } from "@mui/material";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { DndProvider } from "react-dnd";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -41,9 +48,7 @@ import {
 } from "../utils/client-groups";
 import BackgroundLayersPanel from "./background-layers-panel";
 import DrawOrderPanel from "./draw-order-panel";
-import {
-  buildDrawOrderIds,
-} from "../utils/draw-order";
+import { buildDrawOrderIds } from "../utils/draw-order";
 import {
   applyDropOnLayerRedirect,
   applySiblingOrderFromFlatTree,
@@ -217,11 +222,13 @@ function buildLayerSwitcherEditorSnapshot(input: {
   const signature = layerSwitcherDraftComparableSignature(
     {
       groups: draft.groups,
-      baselayers: draft.baselayers.map(({ layerId, visibleAtStart, infobox }) => ({
-        layerId,
-        visibleAtStart,
-        infobox,
-      })),
+      baselayers: draft.baselayers.map(
+        ({ layerId, visibleAtStart, infobox }) => ({
+          layerId,
+          visibleAtStart,
+          infobox,
+        }),
+      ),
       baselayerOrder: effectiveBackgroundOrderedIds,
       drawOrderSequence: effectiveDrawOrderOrderedIds,
     },
@@ -362,8 +369,7 @@ export default function GroupLayerTree({
     return new Set(
       layerActivationRows
         .filter(
-          (row) =>
-            row.active && (row.layerKind ?? "display") === "display",
+          (row) => row.active && (row.layerKind ?? "display") === "display",
         )
         .map((row) => row.layerId),
     );
@@ -481,11 +487,7 @@ export default function GroupLayerTree({
     }
 
     onKartlagerDraftChangeRef.current?.(layerSwitcherEditorSnapshot.draft);
-  }, [
-    activeLayerswitcher,
-    layerSwitcherEditorSnapshot,
-    menuSynced,
-  ]);
+  }, [activeLayerswitcher, layerSwitcherEditorSnapshot, menuSynced]);
 
   const prevActiveDisplayLayerIdsRef = useRef<Set<string> | null>(null);
 
@@ -662,9 +664,7 @@ export default function GroupLayerTree({
 
     const pending = pendingDraftRef.current;
     const restoringDraft = pending != null;
-    const groupsToLoad = restoringDraft
-      ? pending.groups
-      : serverGroups;
+    const groupsToLoad = restoringDraft ? pending.groups : serverGroups;
     const baselayersToLoad = restoringDraft
       ? pending.baselayers
       : serverBaselayers;
@@ -694,7 +694,9 @@ export default function GroupLayerTree({
       ...hydrated.layerDisplaySettings,
       ...baselayerSettings,
     };
-    const loadedBackgroundOrder = baselayersToLoad.map((entry) => entry.layerId);
+    const loadedBackgroundOrder = baselayersToLoad.map(
+      (entry) => entry.layerId,
+    );
     const drawOrderLayerRows = buildDrawOrderLayerRows(
       nodes,
       layerNames,
@@ -1037,7 +1039,10 @@ export default function GroupLayerTree({
     (nodeId: GroupLayerTreeNode["id"]) => {
       const groupKey = normalizeVisibleId(nodeId);
       const nextVisible = !visibleIds.has(groupKey);
-      const descendantLayerNodeIds = getDescendantLayerNodeIds(treeData, nodeId);
+      const descendantLayerNodeIds = getDescendantLayerNodeIds(
+        treeData,
+        nodeId,
+      );
 
       setVisibleIds((current) =>
         toggleGroupVisibility(treeData, current, nodeId),
@@ -1050,7 +1055,8 @@ export default function GroupLayerTree({
             continue;
           }
           next[layerNode.data.sourceId] = {
-            ...(next[layerNode.data.sourceId] ?? DEFAULT_LAYER_DISPLAY_SETTINGS),
+            ...(next[layerNode.data.sourceId] ??
+              DEFAULT_LAYER_DISPLAY_SETTINGS),
             layerVisibleAtStart: nextVisible,
           };
         }
@@ -1430,7 +1436,6 @@ export default function GroupLayerTree({
                   rootId={GROUP_LAYER_TREE_ROOT_ID}
                   extraAcceptTypes={[CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE]}
                   initialOpen
-                  enableAnimateExpand
                   sort={false}
                   insertDroppableFirst={false}
                   dropTargetOffset={12}
