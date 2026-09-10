@@ -53,6 +53,7 @@ export default function LayerSwitcherPreview({
   showFilter = true,
   showQuickAccess = false,
   showDrawOrderView = true,
+  enableQuickAccessPresets = false,
   enableUserQuickAccessFavorites = false,
 }: LayerSwitcherPreviewProps) {
   const { t } = useTranslation();
@@ -69,7 +70,7 @@ export default function LayerSwitcherPreview({
   };
 
   const themesButton =
-    mapName != null && mapName !== "" ? (
+    enableQuickAccessPresets && mapName != null && mapName !== "" ? (
       <Tooltip title={t("common.themes")}>
         <IconButton
           size="small"
@@ -164,7 +165,6 @@ export default function LayerSwitcherPreview({
                   },
                 }}
               />
-              {!showQuickAccess && activeTab === "layers" ? themesButton : null}
             </Box>
           ) : null}
 
@@ -207,16 +207,6 @@ export default function LayerSwitcherPreview({
                   <MoreVertIcon fontSize="small" />
                 </IconButton>
               </Box>
-            </Box>
-          ) : null}
-
-          {/* Themes access when filter is hidden but quick access is off */}
-          {!showFilter &&
-          !showQuickAccess &&
-          activeTab === "layers" &&
-          themesButton ? (
-            <Box sx={{ px: 2, py: 0.5, display: "flex", justifyContent: "flex-end" }}>
-              {themesButton}
             </Box>
           ) : null}
 

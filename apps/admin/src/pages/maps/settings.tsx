@@ -17,6 +17,8 @@ import {
   Alert,
   Typography,
   CircularProgress,
+  IconButton,
+  useMediaQuery,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LayersIcon from "@mui/icons-material/Layers";
@@ -27,6 +29,8 @@ import TouchAppIcon from "@mui/icons-material/TouchApp";
 import PaletteIcon from "@mui/icons-material/Palette";
 import CookieIcon from "@mui/icons-material/Cookie";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import { FieldValues, useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
@@ -156,7 +160,9 @@ export default function MapSettings() {
   const { mutateAsync: updateMapLayerSwitcher } = useUpdateMapLayerSwitcher();
   const { mutateAsync: deleteMap, isPending: isDeletingMap } = useDeleteMap();
   const { data: layerSwitcherState } = useMapLayerSwitcher(mapName ?? "");
-  const { palette } = useTheme();
+  const { palette, breakpoints } = useTheme();
+  const isCompactSidebar = useMediaQuery(breakpoints.down("xl"));
+  const [deleteWarningExpanded, setDeleteWarningExpanded] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -391,6 +397,12 @@ export default function MapSettings() {
   const [kartlagerMoveZoneVisible, setKartlagerMoveZoneVisible] =
     useState(false);
   const kartlagerMoveZoneHostRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!kartlagerMoveZoneVisible) {
+      setDeleteWarningExpanded(false);
+    }
+  }, [kartlagerMoveZoneVisible]);
 
   if (kartlagerMapNameRef.current !== mapName) {
     kartlagerMapNameRef.current = mapName;
@@ -955,21 +967,65 @@ export default function MapSettings() {
         }
         warning={
           <Box sx={{ mt: 1 }}>
-            <Alert
-              severity={map.locked ? "info" : "warning"}
-              sx={{
-                alignItems: "flex-start",
-                "& .MuiAlert-message": {
-                  fontSize: "0.8rem",
-                  lineHeight: 1.4,
-                  overflowWrap: "anywhere",
-                },
-              }}
-            >
-              {map.locked
-                ? t("maps.deleteLockedWarning")
-                : t("maps.deleteMapWarning")}
-            </Alert>
+            {kartlagerMoveZoneVisible && isCompactSidebar ? (
+              <Box>
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                  <IconButton
+                    size="small"
+                    color={map.locked ? "info" : "warning"}
+                    aria-label={
+                      map.locked
+                        ? t("maps.deleteLockedWarning")
+                        : t("maps.deleteMapWarning")
+                    }
+                    aria-expanded={deleteWarningExpanded}
+                    onClick={() => {
+                      setDeleteWarningExpanded((open) => !open);
+                    }}
+                  >
+                    {map.locked ? (
+                      <InfoOutlinedIcon fontSize="small" />
+                    ) : (
+                      <WarningAmberIcon fontSize="small" />
+                    )}
+                  </IconButton>
+                </Box>
+                {deleteWarningExpanded ? (
+                  <Alert
+                    severity={map.locked ? "info" : "warning"}
+                    sx={{
+                      mt: 1,
+                      alignItems: "flex-start",
+                      "& .MuiAlert-message": {
+                        fontSize: "0.8rem",
+                        lineHeight: 1.4,
+                        overflowWrap: "anywhere",
+                      },
+                    }}
+                  >
+                    {map.locked
+                      ? t("maps.deleteLockedWarning")
+                      : t("maps.deleteMapWarning")}
+                  </Alert>
+                ) : null}
+              </Box>
+            ) : (
+              <Alert
+                severity={map.locked ? "info" : "warning"}
+                sx={{
+                  alignItems: "flex-start",
+                  "& .MuiAlert-message": {
+                    fontSize: "0.8rem",
+                    lineHeight: 1.4,
+                    overflowWrap: "anywhere",
+                  },
+                }}
+              >
+                {map.locked
+                  ? t("maps.deleteLockedWarning")
+                  : t("maps.deleteMapWarning")}
+              </Alert>
+            )}
             <Button
               variant="outlined"
               color="error"

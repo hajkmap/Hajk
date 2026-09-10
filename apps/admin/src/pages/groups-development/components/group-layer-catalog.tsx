@@ -458,8 +458,8 @@ export default function GroupLayerCatalog({
               <Box
                 sx={{
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignItems: "stretch",
                   gap: 1,
                   mb: 1,
                 }}
@@ -473,7 +473,7 @@ export default function GroupLayerCatalog({
                     variant="contained"
                     startIcon={<AddIcon />}
                     onClick={handleOpenCreateDialog}
-                    sx={{ flexShrink: 0 }}
+                    sx={{ alignSelf: "stretch" }}
                   >
                     {t("common.add")}
                   </Button>
@@ -491,6 +491,7 @@ export default function GroupLayerCatalog({
               />
               <Tabs
                 value={catalogTab}
+                orientation="vertical"
                 variant="fullWidth"
                 onChange={(_, value) => {
                   if (!backgroundMode) {
@@ -499,32 +500,34 @@ export default function GroupLayerCatalog({
                 }}
                 sx={{
                   mt: 1.5,
-                  minHeight: 36,
+                  minHeight: 0,
                   width: "100%",
                   "& .MuiTabs-flexContainer": {
                     width: "100%",
-                  },
-                  "& .MuiTabs-scroller": {
-                    overflow: "hidden !important",
+                    gap: 0.25,
                   },
                   "& .MuiTabs-indicator": {
-                    height: 2,
+                    left: 0,
+                    right: "auto",
+                    width: 2,
                   },
                   "& .MuiTab-root": {
                     minHeight: 36,
                     py: 0.5,
-                    px: 0.5,
+                    px: 1,
                     minWidth: 0,
                     maxWidth: "none",
-                    flex: 1,
+                    width: "100%",
+                    justifyContent: "flex-start",
                     fontSize: "0.8125rem",
                     gap: 0.5,
                     textTransform: "none",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
+                    whiteSpace: "normal",
+                    textAlign: "left",
+                    lineHeight: 1.25,
                   },
                   "& .MuiTab-iconWrapper": {
-                    marginRight: "4px !important",
+                    marginRight: "6px !important",
                     marginBottom: "0 !important",
                   },
                   "& .MuiTab-icon": {

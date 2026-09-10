@@ -1387,9 +1387,10 @@ export default function GroupLayerTree({
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            lg: "minmax(240px, 300px) minmax(0, 1fr)",
+            lg: "minmax(200px, 240px) minmax(0, 1fr)",
+            xl: "minmax(220px, 280px) minmax(0, 1fr)",
           },
-          gap: 3,
+          gap: { xs: 2, lg: 3 },
           alignItems: "stretch",
           minHeight: {
             xs: "clamp(360px, calc(100vh - 260px), 640px)",

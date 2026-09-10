@@ -28,7 +28,6 @@ import {
   useUpdateTheme,
 } from "../../../api/themes";
 import DialogWrapper from "../../../components/flexible-dialog";
-import { SquareSpinnerComponent } from "../../../components/progress/square-progress";
 
 function validateImportedThemeJson(json: unknown): json is ImportedThemeJson {
   if (!json || typeof json !== "object" || Array.isArray(json)) {
@@ -89,7 +88,7 @@ export default function MapThemesTab({ mapName }: MapThemesTabProps) {
   const { palette } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: themes = [], isLoading } = useThemes(mapName);
+  const { data: themes = [] } = useThemes(mapName);
   const { mutateAsync: createTheme, isPending: isCreating } =
     useCreateTheme(mapName);
   const { mutateAsync: updateTheme, isPending: isUpdating } =
@@ -283,10 +282,6 @@ export default function MapThemesTab({ mapName }: MapThemesTabProps) {
       );
     }
   };
-
-  if (isLoading) {
-    return <SquareSpinnerComponent />;
-  }
 
   return (
     <>
