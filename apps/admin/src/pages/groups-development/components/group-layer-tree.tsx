@@ -54,6 +54,7 @@ import {
   applySiblingOrderFromFlatTree,
   canDropGroupLayerNode,
   collectPlacedSourceIds,
+  createLayerTreeNode,
   createTreeNodeFromCatalogItem,
   extractSubtreeForMoveZone,
   getDescendantIds,
@@ -62,6 +63,7 @@ import {
   insertMoveZoneSubtreeIntoTree,
   isValidLayerParentId,
   layerSwitcherTreeToNodeModels,
+  parseTreeNodeSourceId,
   removeTreeNodeWithDescendants,
   sortSiblingNodes,
 } from "../utils/tree-model";
@@ -143,18 +145,47 @@ function buildDrawOrderLayerRows(
 function resolveEffectiveDrawOrderOrderedIds(
   drawOrderOrderedIds: string[],
   drawOrderLayers: { id: string; name: string }[],
+  parkedIds: ReadonlySet<string> = new Set(),
 ): string[] {
-  const eligibleIds = new Set(drawOrderLayers.map((layer) => layer.id));
+  const eligibleIds = new Set(
+    drawOrderLayers
+      .map((layer) => layer.id)
+      .filter((id) => !parkedIds.has(id)),
+  );
   const kept = drawOrderOrderedIds.filter((id) => eligibleIds.has(id));
   const keptSet = new Set(kept);
   const added = drawOrderLayers
-    .filter((layer) => !keptSet.has(layer.id))
+    .filter((layer) => eligibleIds.has(layer.id) && !keptSet.has(layer.id))
     .slice()
     .sort((a, b) =>
       a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
     )
     .map((layer) => layer.id);
   return [...kept, ...added];
+}
+
+function insertDrawOrderIdAt(
+  orderedIds: string[],
+  layerId: string,
+  insertIndex?: number,
+): string[] {
+  const next = orderedIds.filter((id) => id !== layerId);
+  const index =
+    insertIndex == null
+      ? next.length
+      : Math.max(0, Math.min(insertIndex, next.length));
+  next.splice(index, 0, layerId);
+  return next;
+}
+
+function isLayerStillInKartlagerTree(
+  tree: GroupLayerTreeNode[],
+  layerId: string,
+): boolean {
+  return tree.some(
+    (node) =>
+      node.data?.kind === "layer" && node.data.sourceId === layerId,
+  );
 }
 
 function applyDrawOrderToLayerDisplaySettings(
@@ -188,6 +219,7 @@ function buildLayerSwitcherEditorSnapshot(input: {
   activeLayerIds: ReadonlySet<string> | null;
   mapBackgroundLayerIds: ReadonlySet<string>;
   layerNames: Map<string, string>;
+  drawOrderParkedIds?: ReadonlySet<string>;
 }): { draft: KartlagerDraft; signature: string } {
   const effectiveBackgroundOrderedIds = resolveEffectiveBackgroundOrderedIds(
     input.backgroundOrderedIds,
@@ -202,6 +234,7 @@ function buildLayerSwitcherEditorSnapshot(input: {
   const effectiveDrawOrderOrderedIds = resolveEffectiveDrawOrderOrderedIds(
     input.drawOrderOrderedIds,
     drawOrderLayers,
+    input.drawOrderParkedIds,
   );
   const settingsForGroups = applyDrawOrderToLayerDisplaySettings(
     input.layerDisplaySettings,
@@ -442,18 +475,62 @@ export default function GroupLayerTree({
     [drawOrderLayers],
   );
 
+  // Layers parked in Flyttzon from Ritordning stay in Kartlager but leave the
+  // draw-order list until dropped back. Derive from move zone + tree presence.
+  const drawOrderParkedIds = useMemo(() => {
+    const parked = new Set<string>();
+    for (const item of moveZoneItems) {
+      if (item.kind !== "layer") {
+        continue;
+      }
+      if (isLayerStillInKartlagerTree(treeData, item.sourceId)) {
+        parked.add(item.sourceId);
+      }
+    }
+    return parked;
+  }, [moveZoneItems, treeData]);
+
   // Preserve user order; append newly eligible layers alphabetically.
   const effectiveDrawOrderOrderedIds = useMemo(() => {
     void drawOrderLayersKey;
     return resolveEffectiveDrawOrderOrderedIds(
       drawOrderOrderedIds,
       drawOrderLayers,
+      drawOrderParkedIds,
     );
-  }, [drawOrderLayers, drawOrderLayersKey, drawOrderOrderedIds]);
+  }, [
+    drawOrderLayers,
+    drawOrderLayersKey,
+    drawOrderOrderedIds,
+    drawOrderParkedIds,
+  ]);
 
   const handleDrawOrderIdsChange = useCallback((ids: string[]) => {
     setDrawOrderOrderedIds(ids);
   }, []);
+
+  const canAcceptMoveZoneDropToDrawOrder = useCallback(
+    (item: MoveZoneItem) =>
+      item.kind === "layer" &&
+      isLayerStillInKartlagerTree(treeData, item.sourceId),
+    [treeData],
+  );
+
+  const handleMoveZoneDropToDrawOrder = useCallback(
+    (item: MoveZoneItem, insertIndex?: number) => {
+      if (!canAcceptMoveZoneDropToDrawOrder(item)) {
+        return;
+      }
+
+      setDrawOrderOrderedIds((current) =>
+        insertDrawOrderIdAt(current, item.sourceId, insertIndex),
+      );
+      setMoveZoneItems((current) =>
+        current.filter((entry) => entry.key !== item.key),
+      );
+    },
+    [canAcceptMoveZoneDropToDrawOrder],
+  );
 
   const layerSwitcherEditorSnapshot = useMemo(
     () =>
@@ -467,6 +544,7 @@ export default function GroupLayerTree({
         activeLayerIds,
         mapBackgroundLayerIds,
         layerNames,
+        drawOrderParkedIds,
       }),
     [
       treeData,
@@ -478,6 +556,7 @@ export default function GroupLayerTree({
       activeLayerIds,
       mapBackgroundLayerIds,
       layerNames,
+      drawOrderParkedIds,
     ],
   );
 
@@ -874,21 +953,31 @@ export default function GroupLayerTree({
     [],
   );
 
-  const handleMoveZoneDropToRoot = useCallback((moveItem: MoveZoneItem) => {
-    if (moveItem.kind === "layer") {
-      return;
-    }
+  const handleMoveZoneDropToRoot = useCallback(
+    (moveItem: MoveZoneItem) => {
+      if (moveItem.kind === "layer") {
+        // Draw-order parking keeps the layer in Kartlager — consuming from
+        // Flyttzon only clears the park slot (layer reappears in Ritordning).
+        if (isLayerStillInKartlagerTree(treeData, moveItem.sourceId)) {
+          setMoveZoneItems((current) =>
+            current.filter((entry) => entry.key !== moveItem.key),
+          );
+        }
+        return;
+      }
 
-    setTreeData((current) => {
-      const next = insertMoveZoneSubtreeIntoTree(current, moveItem.nodes, {
-        dropTargetId: GROUP_LAYER_TREE_ROOT_ID,
+      setTreeData((current) => {
+        const next = insertMoveZoneSubtreeIntoTree(current, moveItem.nodes, {
+          dropTargetId: GROUP_LAYER_TREE_ROOT_ID,
+        });
+        return next ?? current;
       });
-      return next ?? current;
-    });
-    setMoveZoneItems((current) =>
-      current.filter((entry) => entry.key !== moveItem.key),
-    );
-  }, []);
+      setMoveZoneItems((current) =>
+        current.filter((entry) => entry.key !== moveItem.key),
+      );
+    },
+    [treeData],
+  );
 
   const canAcceptMoveZoneDropToRoot = useCallback(
     (item: MoveZoneItem) => item.kind === "group",
@@ -916,6 +1005,15 @@ export default function GroupLayerTree({
 
       if (itemType === MOVE_ZONE_DRAG_TYPE) {
         const moveItem = options.monitor.getItem() as MoveZoneItem;
+        if (
+          moveItem.kind === "layer" &&
+          isLayerStillInKartlagerTree(treeData, moveItem.sourceId)
+        ) {
+          setMoveZoneItems((current) =>
+            current.filter((entry) => entry.key !== moveItem.key),
+          );
+          return;
+        }
         setTreeData((current) => {
           const next = insertMoveZoneSubtreeIntoTree(current, moveItem.nodes, {
             dropTargetId: options.dropTargetId,
@@ -948,11 +1046,45 @@ export default function GroupLayerTree({
 
       setTreeData(applySiblingOrderFromFlatTree(updatedTree));
     },
-    [addCatalogItem, backgroundMode],
+    [addCatalogItem, backgroundMode, treeData],
   );
 
   const handleDropToMoveZone = useCallback(
     (nodeId: GroupLayerTreeNode["id"]) => {
+      // Ritordning: park in Flyttzon without removing from Kartlager so the
+      // layer can be dropped back into the draw-order list.
+      if (drawOrderMode) {
+        const layerId = parseTreeNodeSourceId(nodeId);
+        if (!layerId || !isLayerStillInKartlagerTree(treeData, layerId)) {
+          return;
+        }
+        if (!effectiveDrawOrderOrderedIds.includes(layerId)) {
+          return;
+        }
+        if (
+          moveZoneItems.some(
+            (item) => item.kind === "layer" && item.sourceId === layerId,
+          )
+        ) {
+          return;
+        }
+
+        const name = layerNames.get(layerId) ?? layerId;
+        const moveItem: MoveZoneItem = {
+          key: `drawOrder:${layerId}:${Date.now()}`,
+          kind: "layer",
+          sourceId: layerId,
+          name,
+          nodes: [
+            createLayerTreeNode(layerId, name, GROUP_LAYER_TREE_ROOT_ID, 0),
+          ],
+        };
+
+        setDrawOrderOrderedIds((ids) => ids.filter((id) => id !== layerId));
+        setMoveZoneItems((items) => [...items, moveItem]);
+        return;
+      }
+
       const extracted = extractSubtreeForMoveZone(treeData, nodeId);
       if (!extracted) {
         return;
@@ -983,7 +1115,13 @@ export default function GroupLayerTree({
         return next;
       });
     },
-    [treeData],
+    [
+      drawOrderMode,
+      effectiveDrawOrderOrderedIds,
+      layerNames,
+      moveZoneItems,
+      treeData,
+    ],
   );
 
   const canAcceptCatalogDropToMoveZone = useCallback(
@@ -1448,7 +1586,8 @@ export default function GroupLayerTree({
               layers={drawOrderLayers}
               orderedIds={effectiveDrawOrderOrderedIds}
               onOrderedIdsChange={handleDrawOrderIdsChange}
-              search={search}
+              onMoveZoneDrop={handleMoveZoneDropToDrawOrder}
+              canAcceptMoveZoneItem={canAcceptMoveZoneDropToDrawOrder}
             />
           ) : backgroundMode ? (
             <BackgroundLayersPanel

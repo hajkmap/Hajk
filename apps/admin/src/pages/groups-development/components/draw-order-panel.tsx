@@ -1,21 +1,26 @@
-import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
-import LayersIcon from "@mui/icons-material/Layers";
+import {
+  ArrowDownward as ArrowDownwardIcon,
+  ArrowUpward as ArrowUpwardIcon,
+  DragIndicatorOutlined as DragIndicatorOutlinedIcon,
+  Layers as LayersIcon,
+} from "@mui/icons-material";
 import {
   Box,
+  IconButton,
   ListItemButton,
+  ListItemSecondaryAction,
   ListItemText,
-  Typography,
 } from "@mui/material";
 import {
   Tree,
   type DropOptions,
   type RenderParams,
 } from "@minoru/react-dnd-treeview";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { GroupLayerTreeNode } from "../types";
-import { GROUP_LAYER_TREE_ROOT_ID } from "../types";
+import type { GroupLayerTreeNode, MoveZoneItem } from "../types";
+import { GROUP_LAYER_TREE_ROOT_ID, MOVE_ZONE_DRAG_TYPE } from "../types";
 import {
   applyDropOnLayerRedirect,
   applySiblingOrderFromFlatTree,
@@ -34,13 +39,30 @@ interface DrawOrderPanelProps {
   /** Top → bottom catalog ids. Bottom gets drawOrder 1. */
   orderedIds: string[];
   onOrderedIdsChange: (ids: string[]) => void;
-  search?: string;
+  onMoveZoneDrop?: (item: MoveZoneItem, insertIndex?: number) => void;
+  canAcceptMoveZoneItem?: (item: MoveZoneItem) => boolean;
 }
 
 function orderedIdsFromTree(tree: GroupLayerTreeNode[]): string[] {
   return applySiblingOrderFromFlatTree(tree)
     .filter((node) => node.parent === GROUP_LAYER_TREE_ROOT_ID)
     .map((node) => parseTreeNodeSourceId(node.id));
+}
+
+function moveOrderedId(
+  orderedIds: string[],
+  layerId: string,
+  delta: -1 | 1,
+): string[] {
+  const index = orderedIds.indexOf(layerId);
+  const nextIndex = index + delta;
+  if (index < 0 || nextIndex < 0 || nextIndex >= orderedIds.length) {
+    return orderedIds;
+  }
+  const next = orderedIds.slice();
+  const [moved] = next.splice(index, 1);
+  next.splice(nextIndex, 0, moved);
+  return next;
 }
 
 function canDropDrawOrderNode(
@@ -50,16 +72,36 @@ function canDropDrawOrderNode(
     dropTargetId?: GroupLayerTreeNode["id"];
     dragSource?: GroupLayerTreeNode;
     dropTarget?: GroupLayerTreeNode;
+    monitor?: {
+      getItemType: () => string | symbol | null;
+      getItem: () => unknown;
+    };
   },
 ): boolean {
-  const { dragSourceId, dropTargetId, dragSource, dropTarget } = options;
+  const { dragSourceId, dropTargetId, dragSource, dropTarget, monitor } =
+    options;
 
-  if (dropTargetId == null || dragSourceId == null) {
+  if (dropTargetId == null) {
     return false;
   }
 
-  const source =
-    dragSource ?? tree.find((node) => node.id === dragSourceId);
+  const itemType = monitor?.getItemType();
+  if (itemType === MOVE_ZONE_DRAG_TYPE) {
+    const item = monitor?.getItem() as MoveZoneItem | undefined;
+    return item?.kind === "layer";
+  }
+
+  if (dragSourceId == null) {
+    return false;
+  }
+
+  // Same-position / self drops must not be accepted — otherwise the outer
+  // root zone may steal the drop and append the layer at the bottom.
+  if (dragSourceId === dropTargetId) {
+    return false;
+  }
+
+  const source = dragSource ?? tree.find((node) => node.id === dragSourceId);
   if (source?.data?.kind !== "layer") {
     return false;
   }
@@ -68,8 +110,7 @@ function canDropDrawOrderNode(
     return true;
   }
 
-  const target =
-    dropTarget ?? tree.find((node) => node.id === dropTargetId);
+  const target = dropTarget ?? tree.find((node) => node.id === dropTargetId);
   return target?.data?.kind === "layer";
 }
 
@@ -77,11 +118,22 @@ function DrawOrderTreeNode({
   node,
   options,
   drawOrder,
+  canMoveUp,
+  canMoveDown,
+  isHighlighted,
+  onMoveUp,
+  onMoveDown,
 }: {
   node: GroupLayerTreeNode;
   options: RenderParams;
   drawOrder: number;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  isHighlighted: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }) {
+  const { t } = useTranslation();
   const { isDragging } = options;
 
   return (
@@ -89,6 +141,8 @@ function DrawOrderTreeNode({
       sx={{
         opacity: isDragging ? 0.45 : 1,
         pl: "11px",
+        bgcolor: isHighlighted ? "action.selected" : "transparent",
+        borderRadius: isHighlighted ? 1 : 0,
       }}
     >
       <Box
@@ -122,6 +176,9 @@ function DrawOrderTreeNode({
             pl: "2px",
             position: "relative",
             cursor: isDragging ? "grabbing" : "grab",
+            "&:hover": {
+              backgroundColor: "transparent",
+            },
           }}
         >
           <Box
@@ -130,7 +187,7 @@ function DrawOrderTreeNode({
               alignItems: "flex-start",
               width: "100%",
               py: 0.25,
-              pr: 1,
+              pr: 6,
               borderBottom: (theme) =>
                 `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
             }}
@@ -165,6 +222,66 @@ function DrawOrderTreeNode({
               }}
             />
           </Box>
+
+          <ListItemSecondaryAction
+            sx={{
+              right: 4,
+              top: "50%",
+              transform: "translateY(-50%)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <IconButton
+              size="small"
+              disableRipple
+              disabled={!canMoveUp || isDragging}
+              aria-label={t("common.moveUp")}
+              title={t("common.moveUp")}
+              sx={{
+                p: 0.125,
+                width: 22,
+                height: 18,
+                "&:hover": { backgroundColor: "transparent" },
+              }}
+              onMouseDown={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                onMoveUp();
+              }}
+            >
+              <ArrowUpwardIcon sx={{ fontSize: 14 }} />
+            </IconButton>
+            <IconButton
+              size="small"
+              disableRipple
+              disabled={!canMoveDown || isDragging}
+              aria-label={t("common.moveDown")}
+              title={t("common.moveDown")}
+              sx={{
+                p: 0.125,
+                width: 22,
+                height: 18,
+                "&:hover": { backgroundColor: "transparent" },
+              }}
+              onMouseDown={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                onMoveDown();
+              }}
+            >
+              <ArrowDownwardIcon sx={{ fontSize: 14 }} />
+            </IconButton>
+          </ListItemSecondaryAction>
         </ListItemButton>
       </Box>
     </Box>
@@ -175,9 +292,13 @@ export default function DrawOrderPanel({
   layers,
   orderedIds,
   onOrderedIdsChange,
-  search = "",
+  onMoveZoneDrop,
+  canAcceptMoveZoneItem = () => false,
 }: DrawOrderPanelProps) {
   const { t } = useTranslation();
+  const [highlightedLayerId, setHighlightedLayerId] = useState<string | null>(
+    null,
+  );
   const byId = useMemo(
     () => new Map(layers.map((layer) => [layer.id, layer])),
     [layers],
@@ -212,22 +333,28 @@ export default function DrawOrderPanel({
     return map;
   }, [orderedIds]);
 
-  const visibleNodeIds = useMemo(() => {
-    const normalized = search.trim().toLowerCase();
-    if (!normalized) {
-      return null;
-    }
-    return new Set(
-      treeData
-        .filter((node) => node.text.toLowerCase().includes(normalized))
-        .map((node) => String(node.id)),
-    );
-  }, [search, treeData]);
+  const handleMoveLayer = useCallback(
+    (layerId: string, delta: -1 | 1) => {
+      const next = moveOrderedId(orderedIds, layerId, delta);
+      if (next === orderedIds) {
+        return;
+      }
+      setHighlightedLayerId(layerId);
+      onOrderedIdsChange(next);
+    },
+    [onOrderedIdsChange, orderedIds],
+  );
 
   const handleTreeDropToRoot = useCallback(
     (nodeId: GroupLayerTreeNode["id"]) => {
       const layerId = parseTreeNodeSourceId(nodeId);
-      if (!orderedIds.includes(layerId)) {
+      const index = orderedIds.indexOf(layerId);
+      if (index < 0) {
+        return;
+      }
+      // Already last — keep position. Same-position drops that miss the tree
+      // target would otherwise append and look like an index change.
+      if (index === orderedIds.length - 1) {
         return;
       }
       onOrderedIdsChange([
@@ -239,8 +366,40 @@ export default function DrawOrderPanel({
   );
 
   const canAcceptTreeItemToRoot = useCallback(
-    (node: GroupLayerTreeNode) => node.data?.kind === "layer",
-    [],
+    (node: GroupLayerTreeNode) => {
+      if (node.data?.kind !== "layer") {
+        return false;
+      }
+      const layerId = parseTreeNodeSourceId(node.id);
+      const index = orderedIds.indexOf(layerId);
+      // Do not accept already-last layers on the empty bottom zone.
+      return index >= 0 && index < orderedIds.length - 1;
+    },
+    [orderedIds],
+  );
+
+  const resolveMoveZoneInsertIndex = useCallback(
+    (options: DropOptions<GroupLayerTreeNode["data"]>) => {
+      if (
+        options.dropTargetId == null ||
+        options.dropTargetId === GROUP_LAYER_TREE_ROOT_ID
+      ) {
+        return options.relativeIndex ?? orderedIds.length;
+      }
+
+      const targetLayerId = parseTreeNodeSourceId(options.dropTargetId);
+      const targetIndex = orderedIds.indexOf(targetLayerId);
+      if (targetIndex < 0) {
+        return options.relativeIndex ?? orderedIds.length;
+      }
+
+      if (options.relativeIndex != null) {
+        return options.relativeIndex;
+      }
+
+      return targetIndex;
+    },
+    [orderedIds],
   );
 
   const handleDrop = useCallback(
@@ -248,36 +407,69 @@ export default function DrawOrderPanel({
       newTree: GroupLayerTreeNode[],
       options: DropOptions<GroupLayerTreeNode["data"]>,
     ) => {
+      const itemType = options.monitor.getItemType();
+
+      if (itemType === MOVE_ZONE_DRAG_TYPE) {
+        const moveItem = options.monitor.getItem() as MoveZoneItem;
+        if (!canAcceptMoveZoneItem(moveItem)) {
+          return;
+        }
+        onMoveZoneDrop?.(moveItem, resolveMoveZoneInsertIndex(options));
+        return;
+      }
+
+      if (
+        options.dragSourceId != null &&
+        options.dragSourceId === options.dropTargetId
+      ) {
+        return;
+      }
+
       const updatedTree = applyDropOnLayerRedirect(newTree, {
         dragSourceId: options.dragSourceId,
         dropTargetId: options.dropTargetId,
         dropTarget: options.dropTarget,
       });
 
-      onOrderedIdsChange(
-        orderedIdsFromTree(applySiblingOrderFromFlatTree(updatedTree)),
+      const nextIds = orderedIdsFromTree(
+        applySiblingOrderFromFlatTree(updatedTree),
       );
+      const orderUnchanged =
+        nextIds.length === orderedIds.length &&
+        nextIds.every((id, index) => id === orderedIds[index]);
+      if (orderUnchanged) {
+        return;
+      }
+
+      onOrderedIdsChange(nextIds);
     },
-    [onOrderedIdsChange],
+    [
+      canAcceptMoveZoneItem,
+      onMoveZoneDrop,
+      onOrderedIdsChange,
+      orderedIds,
+      resolveMoveZoneInsertIndex,
+    ],
+  );
+
+  const handleMoveZoneDropToRoot = useCallback(
+    (item: MoveZoneItem) => {
+      onMoveZoneDrop?.(item, orderedIds.length);
+    },
+    [onMoveZoneDrop, orderedIds.length],
   );
 
   if (orderedIds.length === 0) {
     return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant="body2" color="text.secondary" align="center">
-          {t("map.drawOrderHelp")}
-        </Typography>
-      </Box>
-    );
-  }
-
-  if (visibleNodeIds?.size === 0) {
-    return (
-      <Box sx={{ p: 2 }}>
-        <Typography variant="body2" color="text.secondary">
-          {t("map.drawOrderNoSearchResults")}
-        </Typography>
-      </Box>
+      <GroupLayerTreeDropZone
+        emptyLabel={t("map.drawOrderHelp")}
+        onCatalogDrop={() => undefined}
+        canAcceptCatalogItem={() => false}
+        onMoveZoneDrop={handleMoveZoneDropToRoot}
+        canAcceptMoveZoneItem={canAcceptMoveZoneItem}
+        onTreeDropToRoot={() => undefined}
+        canAcceptTreeItemToRoot={() => false}
+      />
     );
   }
 
@@ -285,6 +477,8 @@ export default function DrawOrderPanel({
     <GroupLayerTreeDropZone
       onCatalogDrop={() => undefined}
       canAcceptCatalogItem={() => false}
+      onMoveZoneDrop={handleMoveZoneDropToRoot}
+      canAcceptMoveZoneItem={canAcceptMoveZoneItem}
       onTreeDropToRoot={handleTreeDropToRoot}
       canAcceptTreeItemToRoot={canAcceptTreeItemToRoot}
     >
@@ -300,11 +494,20 @@ export default function DrawOrderPanel({
         <Tree<GroupLayerTreeNode["data"]>
           tree={treeData}
           rootId={GROUP_LAYER_TREE_ROOT_ID}
+          extraAcceptTypes={[MOVE_ZONE_DRAG_TYPE]}
           initialOpen
           sort={false}
           insertDroppableFirst={false}
           dropTargetOffset={12}
-          canDrop={(tree, options) => canDropDrawOrderNode(tree, options)}
+          canDrop={(tree, options) => {
+            const itemType = options.monitor?.getItemType();
+            if (itemType === MOVE_ZONE_DRAG_TYPE) {
+              return canAcceptMoveZoneItem(
+                options.monitor.getItem() as MoveZoneItem,
+              );
+            }
+            return canDropDrawOrderNode(tree, options);
+          }}
           onDrop={handleDrop}
           placeholderRender={(_node, { depth }) => (
             <Box
@@ -329,24 +532,22 @@ export default function DrawOrderPanel({
             dropTarget: "group-layer-tree-drop-target",
             draggingSource: "group-layer-tree-dragging",
           }}
-          render={(node, options) => (
-            <Box
-              sx={{
-                display:
-                  visibleNodeIds && !visibleNodeIds.has(String(node.id))
-                    ? "none"
-                    : "block",
-              }}
-            >
+          render={(node, options) => {
+            const layerId = parseTreeNodeSourceId(node.id);
+            const index = orderedIds.indexOf(layerId);
+            return (
               <DrawOrderTreeNode
                 node={node}
                 options={options}
-                drawOrder={
-                  drawOrderById.get(parseTreeNodeSourceId(node.id)) ?? 1
-                }
+                drawOrder={drawOrderById.get(layerId) ?? 1}
+                canMoveUp={index > 0}
+                canMoveDown={index >= 0 && index < orderedIds.length - 1}
+                isHighlighted={highlightedLayerId === layerId}
+                onMoveUp={() => handleMoveLayer(layerId, -1)}
+                onMoveDown={() => handleMoveLayer(layerId, 1)}
               />
-            </Box>
-          )}
+            );
+          }}
         />
       </Box>
     </GroupLayerTreeDropZone>

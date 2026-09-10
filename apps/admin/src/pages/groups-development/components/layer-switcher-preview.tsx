@@ -136,7 +136,7 @@ export default function LayerSwitcherPreview({
       activeTab === "background" ||
       activeTab === "drawOrder" ? (
         <>
-          {showFilter ? (
+          {showFilter && activeTab !== "drawOrder" ? (
             <Box
               sx={{
                 px: 2,
