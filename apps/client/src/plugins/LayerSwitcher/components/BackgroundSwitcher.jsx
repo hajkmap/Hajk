@@ -2,8 +2,12 @@ import { useEffect, useState, useCallback } from "react";
 import { isValidLayerId } from "../../../utils/Validator";
 import BackgroundLayerItem from "./BackgroundLayerItem";
 import Box from "@mui/material/Box";
-
+import { BACKGROUND_LAYER_IDS } from "../../../constants/backgroundLayers";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
+
+// The special/non-server background layer ids, used to reorder them to the
+// bottom of the background list.
+const SPECIAL_BACKGROUND_LAYER_IDS = Object.values(BACKGROUND_LAYER_IDS);
 
 const BackgroundSwitcher = ({
   display,
@@ -17,15 +21,37 @@ const BackgroundSwitcher = ({
 
   const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
+  // Sets the bg color of the map element to match the selected background.
+  // Declared before the effects below so they can call it and list it as a
+  // dependency without a use-before-declaration issue.
+  const handleMapBackgroundColor = useCallback((selectedId) => {
+    switch (selectedId) {
+      // Our white option
+      case BACKGROUND_LAYER_IDS.WHITE:
+        document.getElementById("map").style.backgroundColor = "#fff";
+        break;
+      // Our black option
+      case BACKGROUND_LAYER_IDS.BLACK:
+        document.getElementById("map").style.backgroundColor = "#000";
+        break;
+      // Our default option for other background layers, default to white.
+      default:
+        document.getElementById("map").style.backgroundColor = "#fff";
+        break;
+    }
+  }, []);
+
   useEffect(() => {
     const backgroundVisibleFromStart = layers.find((layer) => layer.visible);
     // Check that the background visible from start exists and not undefined
     // if b/w or osm is uncheked in admin and a user still tries to load it then do nothing
     if (backgroundVisibleFromStart) {
+      // Syncs the initial radio selection from the layers' load-time visibility.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedLayerId(backgroundVisibleFromStart.name);
       handleMapBackgroundColor(backgroundVisibleFromStart.name);
     }
-  }, [layers]);
+  }, [layers, handleMapBackgroundColor]);
 
   useEffect(() => {
     // Ensure that BackgroundSwitcher correctly selects visible layer,
@@ -46,30 +72,15 @@ const BackgroundSwitcher = ({
           return;
         }
 
-        // If we got this far, we have a background layer that just
-        // became visible. Let's notify the radio buttons by setting state!
-        setSelectedLayerId(layer.get("name"));
+        // If we got this far, we have a background layer that just became
+        // visible. Notify the radio buttons by setting state, and repaint the
+        // map background so toggles from outside the LayerSwitcher (URL hash,
+        // LayerControlModel, other plugins) get the white/black fill too.
+        setSelectedLayerId(name);
+        handleMapBackgroundColor(name);
       }
     );
-  }, [globalObserver, layers]);
-
-  const handleMapBackgroundColor = (selectedId) => {
-    // Handle setting the bg color of the map element
-    switch (selectedId) {
-      // Our white option
-      case "-1":
-        document.getElementById("map").style.backgroundColor = "#fff";
-        break;
-      // Our black option
-      case "-2":
-        document.getElementById("map").style.backgroundColor = "#000";
-        break;
-      // Our default option for other background layers, default to white.
-      default:
-        document.getElementById("map").style.backgroundColor = "#fff";
-        break;
-    }
-  };
+  }, [globalObserver, layers, handleMapBackgroundColor]);
 
   /**
    * @summary Hides previously selected background and shows current selection.
@@ -88,7 +99,7 @@ const BackgroundSwitcher = ({
 
       layerSwitcherDispatch.setBackgroundLayer(newSelectedId);
     },
-    [globalObserver, layerSwitcherDispatch]
+    [globalObserver, layerSwitcherDispatch, handleMapBackgroundColor]
   );
 
   // TODO This filter should be moved to the core application.
@@ -105,7 +116,7 @@ const BackgroundSwitcher = ({
   // If the static layers b/w and osm should be shown last in the bg-layer list
   // reorder the array to accomodate that.
   if (renderSpecialBackgroundsAtBottom) {
-    const staticLayersRange = ["-1", "-2", "-3"];
+    const staticLayersRange = SPECIAL_BACKGROUND_LAYER_IDS;
     const staticLayersToMove = layersToShow.filter((layer) =>
       staticLayersRange.includes(layer.name)
     );

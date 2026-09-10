@@ -4,6 +4,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { mapDirectionToAngle } from "../../utils/mapDirectionToAngle";
 import { easeOut } from "ol/easing";
+import { BACKGROUND_LAYER_IDS } from "../../constants/backgroundLayers";
 
 export function createWhiteLayer(appModel) {
   // Creates a empty vectorlayer to let the url handle them like other layers. BackgroundSwitcher then
@@ -14,7 +15,7 @@ export function createWhiteLayer(appModel) {
     zIndex: -1,
     layerType: "base",
     rotateMap: "n",
-    name: "-1",
+    name: BACKGROUND_LAYER_IDS.WHITE,
     caption: "Vit",
     layerInfo: {
       caption: "Vit",
@@ -39,7 +40,7 @@ export function createBlackLayer(appModel) {
     zIndex: -1,
     layerType: "base",
     rotateMap: "n",
-    name: "-2",
+    name: BACKGROUND_LAYER_IDS.BLACK,
     caption: "Svart",
     layerInfo: {
       caption: "Svart",
@@ -76,7 +77,7 @@ export function createOSMLayer(appModel) {
     zIndex: -1,
     layerType: "base",
     rotateMap: "n", // OpenStreetMap should be rotated to North
-    name: "-3",
+    name: BACKGROUND_LAYER_IDS.OSM,
     caption: "OpenStreetMap",
     layerInfo: {
       infoText:
