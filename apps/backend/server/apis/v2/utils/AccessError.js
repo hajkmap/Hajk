@@ -10,6 +10,7 @@
 export class AccessError extends Error {
   constructor(message, options) {
     super(message, options);
+    this.statusCode = 403;
   }
 
   get name() {
