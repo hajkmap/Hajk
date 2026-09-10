@@ -1335,7 +1335,7 @@
     "constrainResolution": false,
     "logo": "/logoLight.png",
     "geoserverLegendOptions": "",
-    "mapselector": false,
+    "mapselector": true,
     "mapcleaner": true,
     "showUserAvatar": false,
     "drawerVisible": false,
@@ -1380,6 +1380,7 @@
     "drawerButtonIcon": "MapIcon",
     "showCookieNotice": true,
     "showCookieNoticeButton": true,
-    "cookieUse3dPart": false
+    "cookieUse3dPart": false,
+    "mapSelectorStyle": "dropdown"
   }
 }
