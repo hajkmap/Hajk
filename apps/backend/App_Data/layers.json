@@ -10,7 +10,9 @@
       "content": "",
       "legend": "",
       "projection": "EPSG:3006",
-      "layers": ["stadskarta_nedtonad"],
+      "layers": [
+        "stadskarta_nedtonad"
+      ],
       "layersInfo": [
         {
           "id": "stadskarta_nedtonad",
@@ -54,7 +56,9 @@
       "content": "",
       "legend": "",
       "projection": "EPSG:3006",
-      "layers": ["orto"],
+      "layers": [
+        "orto"
+      ],
       "layersInfo": [
         {
           "id": "orto",
@@ -99,7 +103,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["hajk_medlem"],
+      "layers": [
+        "hajk_medlem"
+      ],
       "layersInfo": [
         {
           "id": "hajk_medlem",
@@ -152,7 +158,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["befolkning_1km_2023"],
+      "layers": [
+        "befolkning_1km_2023"
+      ],
       "layersInfo": [
         {
           "id": "befolkning_1km_2023",
@@ -237,7 +245,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["befolkning_1km_2022"],
+      "layers": [
+        "befolkning_1km_2022"
+      ],
       "layersInfo": [
         {
           "id": "befolkning_1km_2022",
@@ -322,7 +332,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["PS.ProtectedSites.Helcom"],
+      "layers": [
+        "PS.ProtectedSites.Helcom"
+      ],
       "layersInfo": [
         {
           "id": "PS.ProtectedSites.Helcom",
@@ -420,7 +432,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["PS.ProtectedSites.Bio"],
+      "layers": [
+        "PS.ProtectedSites.Bio"
+      ],
       "layersInfo": [
         {
           "id": "PS.ProtectedSites.Bio",
@@ -518,7 +532,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["PS.ProtectedSites.Ramsar"],
+      "layers": [
+        "PS.ProtectedSites.Ramsar"
+      ],
       "layersInfo": [
         {
           "id": "PS.ProtectedSites.Ramsar",
@@ -616,7 +632,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["PS.ProtectedSites.Ospar"],
+      "layers": [
+        "PS.ProtectedSites.Ospar"
+      ],
       "layersInfo": [
         {
           "id": "PS.ProtectedSites.Ospar",
@@ -714,7 +732,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["PS.ProtectedSites.WorldHeritage"],
+      "layers": [
+        "PS.ProtectedSites.WorldHeritage"
+      ],
       "layersInfo": [
         {
           "id": "PS.ProtectedSites.WorldHeritage",
@@ -812,7 +832,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["SD.ArtersUtbredning.2013"],
+      "layers": [
+        "SD.ArtersUtbredning.2013"
+      ],
       "layersInfo": [
         {
           "id": "SD.ArtersUtbredning.2013",
@@ -896,7 +918,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["SD.ArtersUtbredning.2019"],
+      "layers": [
+        "SD.ArtersUtbredning.2019"
+      ],
       "layersInfo": [
         {
           "id": "SD.ArtersUtbredning.2019",
@@ -980,7 +1004,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["US.EnvironmentalManagementFacility.WaterTreatmentPlants"],
+      "layers": [
+        "US.EnvironmentalManagementFacility.WaterTreatmentPlants"
+      ],
       "layersInfo": [
         {
           "id": "US.EnvironmentalManagementFacility.WaterTreatmentPlants",
@@ -1064,7 +1090,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["US.EnvironmentalManagementFacility.DischargePoints"],
+      "layers": [
+        "US.EnvironmentalManagementFacility.DischargePoints"
+      ],
       "layersInfo": [
         {
           "id": "US.EnvironmentalManagementFacility.DischargePoints",
@@ -1148,7 +1176,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["AM.sensitiveArea"],
+      "layers": [
+        "AM.sensitiveArea"
+      ],
       "layersInfo": [
         {
           "id": "AM.sensitiveArea",
@@ -1232,7 +1262,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["BU.Building"],
+      "layers": [
+        "BU.Building"
+      ],
       "layersInfo": [
         {
           "id": "BU.Building",
@@ -1316,7 +1348,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["BU.Building"],
+      "layers": [
+        "BU.Building"
+      ],
       "layersInfo": [
         {
           "id": "BU.Building",
@@ -1400,7 +1434,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["PS.ProtectedSite"],
+      "layers": [
+        "PS.ProtectedSite"
+      ],
       "layersInfo": [
         {
           "id": "PS.ProtectedSite",
@@ -1484,7 +1520,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["PS.ProtectedSite"],
+      "layers": [
+        "PS.ProtectedSite"
+      ],
       "layersInfo": [
         {
           "id": "PS.ProtectedSite",
@@ -1568,7 +1606,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["PS.ProtectedSite"],
+      "layers": [
+        "PS.ProtectedSite"
+      ],
       "layersInfo": [
         {
           "id": "PS.ProtectedSite",
@@ -1652,7 +1692,9 @@
       "legend": "",
       "legendIcon": "",
       "projection": "EPSG:3006",
-      "layers": ["befolkning_1km_2021"],
+      "layers": [
+        "befolkning_1km_2021"
+      ],
       "layersInfo": [
         {
           "id": "befolkning_1km_2021",
@@ -2073,6 +2115,148 @@
       "rotateMap": "n",
       "hideExpandArrow": false,
       "zIndex": null
+    },
+    {
+      "id": "gebco0",
+      "caption": "GEBCO Bathymetry & Relief (Global)",
+      "internalLayerName": "",
+      "url": "https://wms.gebco.net/mapserv",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1789021936464",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3857",
+      "layers": [
+        "GEBCO_LATEST"
+      ],
+      "layersInfo": [
+        {
+          "id": "GEBCO_LATEST",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": false,
+          "infoclickIcon": "",
+          "styles": []
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": false,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/png",
+      "serverType": "mapserver",
+      "attribution": "GEBCO Compilation Group",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Global bathymetric and topographic shaded-relief grid from the GEBCO Compilation Group (15 arc-second resolution), covering the entire planet including the ocean floor.",
+      "infoUrl": "https://www.gebco.net/",
+      "infoUrlText": "GEBCO",
+      "infoOpenDataLink": "",
+      "infoOwner": "GEBCO Compilation Group / Seabed 2030",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.1.1",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
+    },
+    {
+      "id": "gibsbm",
+      "caption": "NASA Blue Marble (Global Satellite Imagery)",
+      "internalLayerName": "",
+      "url": "https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi",
+      "customGetMapUrl": "",
+      "owner": "",
+      "date": "1789021936465",
+      "content": "",
+      "legend": "",
+      "legendIcon": "",
+      "projection": "EPSG:3857",
+      "layers": [
+        "BlueMarble_NextGeneration"
+      ],
+      "layersInfo": [
+        {
+          "id": "BlueMarble_NextGeneration",
+          "caption": "",
+          "legend": "",
+          "legendIcon": "",
+          "infobox": "",
+          "style": "",
+          "queryable": false,
+          "infoclickIcon": "",
+          "styles": []
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": true,
+      "showAttributeTableButton": false,
+      "opacity": 1,
+      "maxZoom": -1,
+      "minZoom": -1,
+      "minMaxZoomAlertOnToggleOnly": false,
+      "singleTile": false,
+      "hidpi": false,
+      "useCustomDpiList": false,
+      "customDpiList": [],
+      "customRatio": 0,
+      "imageFormat": "image/jpeg",
+      "serverType": "geoserver",
+      "attribution": "NASA EOSDIS GIBS",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "secondaryLabelFields": "",
+      "searchShortDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": true,
+      "infoTitle": "",
+      "infoText": "Whole-Earth true-color satellite composite imagery (Blue Marble Next Generation) from NASA's Global Imagery Browse Services (GIBS).",
+      "infoUrl": "https://worldview.earthdata.nasa.gov/",
+      "infoUrlText": "NASA Worldview",
+      "infoOpenDataLink": "",
+      "infoOwner": "NASA EOSDIS",
+      "timeSliderVisible": false,
+      "timeSliderStart": "",
+      "timeSliderEnd": "",
+      "version": "1.1.1",
+      "infoFormat": "application/json",
+      "infoClickSortProperty": "",
+      "infoClickSortDesc": true,
+      "infoClickSortType": "string",
+      "rotateMap": "n",
+      "hideExpandArrow": false,
+      "zIndex": null
     }
   ],
   "wfslayers": [
@@ -2080,11 +2264,17 @@
       "id": "4",
       "caption": "Adresser Göteborg",
       "url": "https://opengeodata.goteborg.se/services/adresser/wfs/v1",
-      "layers": ["adresser.wfs.v1:adresser"],
-      "searchFields": ["adress"],
+      "layers": [
+        "adresser.wfs.v1:adresser"
+      ],
+      "searchFields": [
+        "adress"
+      ],
       "infobox": "**Adress:** {adress}  ",
       "aliasDict": "",
-      "displayFields": ["adress"],
+      "displayFields": [
+        "adress"
+      ],
       "geometryField": "geom",
       "outputFormat": "GML2",
       "infoVisible": false,

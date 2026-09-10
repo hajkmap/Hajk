@@ -194,6 +194,21 @@ function applyBackgroundLayerVisibilityFromParams(
       osmLayer.setVisible(true);
     }
   }
+
+  // Check if the layerParams contains -4 (osm-vector-layer) and handle set it to visible on load
+  if (
+    layersFromParams.includes("-4") &&
+    layerSwitcherConf?.options?.enableOSMVector
+  ) {
+    const osmVectorLayer = map
+      .getAllLayers()
+      .find((l) => l.get("name") === "-4");
+    if (osmVectorLayer === undefined) {
+      console.warn(`Cannot find the OSM vector layer`);
+    } else {
+      osmVectorLayer.setVisible(true);
+    }
+  }
 }
 
 export function addLayers(appModel) {

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Client + Admin: LayerSwitcher - Added an optional vector-tile based OpenStreetMap background layer (`enableOSMVector`), rendered from OpenFreeMap by default. Unlike the existing raster OSM layer, it stays sharp on high-DPI displays since it isn't limited by a fixed-resolution tile server. Admins can point `osmVectorStyleUrl` at a different style instead of the public OpenFreeMap instance — note that in the MapLibre style spec the style JSON also declares its own tile source, so this overrides where tiles are fetched from too, not just the visual style. The tile layer's `renderMode` ("vector" or "hybrid") is also admin-configurable, since the best tradeoff between sharpness and performance depends on the chosen style and target hardware. PR [#1887](https://github.com/hajkmap/Hajk/pull/1887)
 - Client + Admin: LayerSwitcher - Added a new admin setting "Visa teckenförklaring direkt" that forces the legend to be expanded by default in the layer details view, so users don't have to click the legend button. [#1838](https://github.com/hajkmap/Hajk/issues/1838)
 - Client + Admin: DocumentHandler - Added a "Direct Print" setting that prints the currently active document directly without showing the document selection dialog [#1773](https://github.com/hajkmap/Hajk/issues/1773)
 - Client: Infoclick - Functionality to hide links that point to non-existing resources [#1804](https://github.com/hajkmap/Hajk/issues/1804)
@@ -44,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: TypeScript is now supported, see [#1824.](https://github.com/hajkmap/Hajk/pull/1824)
 - Client: Upgraded MUI packages to v9. Completed the migration steps not covered by the codemods — Autocomplete `renderInput` now reads `params.slotProps` (fixes a startup crash in the search bar), `PopperComponent`/`PaperComponent` moved to `slots`, Dialog `PaperComponent`/`PaperProps`/`BackdropProps`/`onBackdropClick` and Tooltip `TransitionProps` moved to `slots`/`slotProps`, remaining `InputProps` on TextField moved to `slotProps.input`, `SpeedDialAction` tooltip props moved to `slotProps.tooltip`, and CSS props inside `ListItemText` Typography slots moved into `sx` (silences DOM prop warnings and restores layer-name truncation).
 - Client: Location plugin now has an optional follow location toggle. Enabling it will re-center the map on user's location when location changes. [#1875](https://github.com/hajkmap/Hajk/issues/1875)
+- Client: Added a second example config, `map_3857.json`, showcasing the new OSM vector tile layer as well as a couple of global open WMSes.
 
 ### Fixed
 
@@ -78,6 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: Location - Added a auto-rotate toggle that will rotate the map so that user's current heading direction always points up.
 - Client: Search - `"` in search phrase could lead to endless re-searches when `enableAppStateInHash` was active. Closes [#1880](https://github.com/hajkmap/Hajk/issues/1880).
 - Backend: Send more info if parsing a JSON config fails. Closes [#1883](https://github.com/hajkmap/Hajk/issues/1883).
+- Admin: Fixed a long-standing bug where changing between different map configs could lead to boolean values being reset to app state's last known value instead of the true default value.
 
 ## [4.3.0] 2026-04-20
 
