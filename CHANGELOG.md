@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Client: PropertyChecker got a substantial overhaul, including changing the format requirements for the underlying WMS layer. See [#1761](https://github.com/hajkmap/Hajk/issues/1761) as well as the tool's updated [README.md](https://github.com/hajkmap/Hajk/blob/f1bdbb77aff736df0675dc1e65234ec8be9ed3aa/apps/client/src/plugins/PropertyChecker/readme.md).
 - Client: InfoDialog - because this plugin now internally uses the LocalStorageHelper, existing settings already stored in user's LocalStorage under the old key will not be respected. In practice this means user will (once again) see any dialog where `visibleAtStart` and `showOnlyOnce` are set to `true`. This will happen once only. After this render, the `alreadyShown` value is written using the LocalStorageHelper and is respected in future renders.
+- Client: Fixed an issue where WMS feature parsing missed reprojection for GeoJSON and GML responses. See [#1889](https://github.com/hajkmap/Hajk/issues/1889) for description. _Note: this isn't breaking per-se, but given the sensitive nature of this change, it must be tested rigorously._
 
 ### Added
 

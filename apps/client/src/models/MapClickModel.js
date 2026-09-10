@@ -174,19 +174,25 @@ export default class MapClickModel {
             case "application/geojson":
             case "application/json": {
               olFeatures = parseGeoJsonFeatures(
-                await response.value.requestResponse.json()
+                await response.value.requestResponse.json(),
+                response.value.layer.getSource().getProjection(),
+                response.value.viewProjection
               );
               break;
             }
             case "text/xml": {
               olFeatures = parseWmsGetFeatureInfoXml(
-                await response.value.requestResponse.text()
+                await response.value.requestResponse.text(),
+                response.value.layer.getSource().getProjection(),
+                response.value.viewProjection
               );
               break;
             }
             case "application/vnd.ogc.gml": {
               olFeatures = parseGMLFeatures(
-                await response.value.requestResponse.text()
+                await response.value.requestResponse.text(),
+                response.value.layer.getSource().getProjection(),
+                response.value.viewProjection
               );
               break;
             }
