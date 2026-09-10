@@ -45,13 +45,13 @@
             "parent": "-1",
             "layers": [
               {
-                "id": "gebco01",
+                "id": "gebco0",
                 "drawOrder": 1000,
                 "visibleAtStart": false,
                 "infobox": ""
               },
               {
-                "id": "gibsbm1",
+                "id": "gibsbm",
                 "drawOrder": 1000,
                 "visibleAtStart": false,
                 "infobox": ""

@@ -2117,7 +2117,7 @@
       "zIndex": null
     },
     {
-      "id": "gebco01",
+      "id": "gebco0",
       "caption": "GEBCO Bathymetry & Relief (Global)",
       "internalLayerName": "",
       "url": "https://wms.gebco.net/mapserv",
@@ -2188,7 +2188,7 @@
       "zIndex": null
     },
     {
-      "id": "gibsbm1",
+      "id": "gibsbm",
       "caption": "NASA Blue Marble (Global Satellite Imagery)",
       "internalLayerName": "",
       "url": "https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi",
