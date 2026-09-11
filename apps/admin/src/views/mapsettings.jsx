@@ -37,6 +37,35 @@ var defaultState = {
   denyAction: () => {},
 };
 
+const defaultLayerMenuOptions = {
+  visibleAtStart: true,
+  visibleAtStartMobile: false,
+  backgroundSwitcherBlack: true,
+  backgroundSwitcherWhite: true,
+  enableOSM: false,
+  OSMVisibleAtStart: false,
+  enableOSMVector: false,
+  OSMVectorVisibleAtStart: false,
+  osmVectorStyleUrl: "",
+  osmVectorRenderMode: "vector",
+  showBreadcrumbs: false,
+  showDrawOrderView: false,
+  showFilter: false,
+  showQuickAccess: false,
+  legendForceTransparency: false,
+  legendTryHiDPI: false,
+  enableSystemLayersSwitch: false,
+  lockDrawOrderBaselayer: false,
+  enableQuickAccessPresets: false,
+  enableUserQuickAccessFavorites: false,
+  enableTransparencySlider: true,
+  dropdownThemeMaps: false,
+  minMaxZoomAlertOnToggleOnly: false,
+  cqlFilterVisible: false,
+  showLegendByDefault: false,
+  renderSpecialBackgroundsAtBottom: false,
+};
+
 const ColorButtonRed = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(red[500]),
@@ -480,31 +509,14 @@ class Menu extends Component {
       addedLayers: [],
       maps: [],
       active: true,
-      visibleAtStart: true,
-      visibleAtStartMobile: false,
-      backgroundSwitcherBlack: true,
-      backgroundSwitcherWhite: true,
-      enableOSM: false,
-      OSMVisibleAtStart: false,
-      showBreadcrumbs: false,
-      showDrawOrderView: false,
-      showFilter: false,
-      showQuickAccess: false,
-      legendForceTransparency: false,
-      legendTryHiDPI: false,
-      enableSystemLayersSwitch: false,
-      lockDrawOrderBaselayer: false,
+      ...defaultLayerMenuOptions,
       drawOrderViewInfoText:
         "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
-      enableQuickAccessPresets: false,
       quickAccessTopicsInfoText:
         "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
-      enableUserQuickAccessFavorites: false,
       userQuickAccessFavoritesInfoText:
         "Här kan du hantera och redigera dina sparade favoriter.",
-      enableTransparencySlider: true,
       instruction: "",
-      dropdownThemeMaps: false,
       themeMapHeaderCaption: "Temakartor",
       visibleForGroups: [],
       adList: null,
@@ -517,12 +529,8 @@ class Menu extends Component {
       quickAccessPresets: [],
       importedLayers: [],
       importedMetadata: {},
-      minMaxZoomAlertOnToggleOnly: false,
       keywords: [],
       keywordInput: "",
-      cqlFilterVisible: false,
-      showLegendByDefault: false,
-      renderSpecialBackgroundsAtBottom: false,
     };
     this.titleRef = React.createRef();
     this.authorRef = React.createRef();
@@ -550,58 +558,79 @@ class Menu extends Component {
           reset: false,
           active: existingConfig.active,
           visibleAtStart:
-            existingConfig.visibleAtStart ?? this.state.visibleAtStart,
+            existingConfig.visibleAtStart ??
+            defaultLayerMenuOptions.visibleAtStart,
           visibleAtStartMobile:
             existingConfig.visibleAtStartMobile ??
-            this.state.visibleAtStartMobile,
+            defaultLayerMenuOptions.visibleAtStartMobile,
           backgroundSwitcherBlack:
             existingConfig.backgroundSwitcherBlack ??
-            this.state.backgroundSwitcherBlack,
+            defaultLayerMenuOptions.backgroundSwitcherBlack,
           backgroundSwitcherWhite:
             existingConfig.backgroundSwitcherWhite ??
-            this.state.backgroundSwitcherWhite,
-          enableOSM: existingConfig.enableOSM ?? this.state.enableOSM,
+            defaultLayerMenuOptions.backgroundSwitcherWhite,
+          enableOSM:
+            existingConfig.enableOSM ?? defaultLayerMenuOptions.enableOSM,
           OSMVisibleAtStart:
-            existingConfig.OSMVisibleAtStart ?? this.state.OSMVisibleAtStart,
+            existingConfig.OSMVisibleAtStart ??
+            defaultLayerMenuOptions.OSMVisibleAtStart,
+          enableOSMVector:
+            existingConfig.enableOSMVector ??
+            defaultLayerMenuOptions.enableOSMVector,
+          OSMVectorVisibleAtStart:
+            existingConfig.OSMVectorVisibleAtStart ??
+            defaultLayerMenuOptions.OSMVectorVisibleAtStart,
+          osmVectorStyleUrl:
+            existingConfig.osmVectorStyleUrl ??
+            defaultLayerMenuOptions.osmVectorStyleUrl,
+          osmVectorRenderMode:
+            existingConfig.osmVectorRenderMode ??
+            defaultLayerMenuOptions.osmVectorRenderMode,
           showBreadcrumbs:
-            existingConfig.showBreadcrumbs ?? this.state.showBreadcrumbs,
+            existingConfig.showBreadcrumbs ??
+            defaultLayerMenuOptions.showBreadcrumbs,
           showDrawOrderView:
-            existingConfig.showDrawOrderView ?? this.state.showDrawOrderView,
-          showFilter: existingConfig.showFilter ?? this.state.showFilter,
+            existingConfig.showDrawOrderView ??
+            defaultLayerMenuOptions.showDrawOrderView,
+          showFilter:
+            existingConfig.showFilter ?? defaultLayerMenuOptions.showFilter,
           showQuickAccess:
-            existingConfig.showQuickAccess ?? this.state.showQuickAccess,
+            existingConfig.showQuickAccess ??
+            defaultLayerMenuOptions.showQuickAccess,
           legendForceTransparency:
             existingConfig.legendForceTransparency ??
-            this.state.legendForceTransparency,
+            defaultLayerMenuOptions.legendForceTransparency,
           legendTryHiDPI:
-            existingConfig.legendTryHiDPI ?? this.state.legendTryHiDPI,
+            existingConfig.legendTryHiDPI ??
+            defaultLayerMenuOptions.legendTryHiDPI,
           enableSystemLayersSwitch:
             existingConfig.enableSystemLayersSwitch ??
-            this.state.enableSystemLayersSwitch,
+            defaultLayerMenuOptions.enableSystemLayersSwitch,
           lockDrawOrderBaselayer:
             existingConfig.lockDrawOrderBaselayer ??
-            this.state.lockDrawOrderBaselayer,
+            defaultLayerMenuOptions.lockDrawOrderBaselayer,
           drawOrderViewInfoText:
             existingConfig.drawOrderViewInfoText ||
             "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
           enableQuickAccessPresets:
             existingConfig.enableQuickAccessPresets ??
-            this.state.enableQuickAccessPresets,
+            defaultLayerMenuOptions.enableQuickAccessPresets,
           quickAccessTopicsInfoText:
             existingConfig.quickAccessTopicsInfoText ||
             "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
           enableUserQuickAccessFavorites:
             existingConfig.enableUserQuickAccessFavorites ??
-            this.state.enableUserQuickAccessFavorites,
+            defaultLayerMenuOptions.enableUserQuickAccessFavorites,
           userQuickAccessFavoritesInfoText:
             existingConfig.userQuickAccessFavoritesInfoText ||
             "Här kan du hantera och redigera dina sparade favoriter.",
           enableTransparencySlider:
             existingConfig.enableTransparencySlider ??
-            this.state.enableTransparencySlider,
+            defaultLayerMenuOptions.enableTransparencySlider,
           instruction: existingConfig.instruction,
           dropdownThemeMaps:
-            existingConfig.dropdownThemeMaps ?? this.state.dropdownThemeMaps,
+            existingConfig.dropdownThemeMaps ??
+            defaultLayerMenuOptions.dropdownThemeMaps,
           themeMapHeaderCaption: existingConfig.themeMapHeaderCaption,
           visibleForGroups: existingConfig.visibleForGroups
             ? existingConfig.visibleForGroups
@@ -615,14 +644,16 @@ class Menu extends Component {
           quickAccessPresets: existingConfig.quickAccessPresets || [],
           minMaxZoomAlertOnToggleOnly:
             existingConfig.minMaxZoomAlertOnToggleOnly ??
-            this.state.minMaxZoomAlertOnToggleOnly,
+            defaultLayerMenuOptions.minMaxZoomAlertOnToggleOnly,
           cqlFilterVisible:
-            existingConfig.cqlFilterVisible ?? this.state.cqlFilterVisible,
+            existingConfig.cqlFilterVisible ??
+            defaultLayerMenuOptions.cqlFilterVisible,
           showLegendByDefault:
-            existingConfig.showLegendByDefault ?? this.state.showLegendByDefault,
+            existingConfig.showLegendByDefault ??
+            defaultLayerMenuOptions.showLegendByDefault,
           renderSpecialBackgroundsAtBottom:
             existingConfig.renderSpecialBackgroundsAtBottom ??
-            this.state.renderSpecialBackgroundsAtBottom,
+            defaultLayerMenuOptions.renderSpecialBackgroundsAtBottom,
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -805,11 +836,11 @@ class Menu extends Component {
     var layer = this.props.model.get("layers").find((layer) => layer.id === id);
     if (layer) {
       return `${layer.internalLayerName || layer.caption} (${layer.type}) ${layer?.layers?.length > 1 ? `(${layer.layers.length} underlager)` : ""}`;
-    
+
     } else {
       return `---[layer id ${id} not found]---`;
     }
-    
+
   }
 
   /**
@@ -827,6 +858,10 @@ class Menu extends Component {
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,
       OSMVisibleAtStart: this.state.OSMVisibleAtStart,
+      enableOSMVector: this.state.enableOSMVector,
+      OSMVectorVisibleAtStart: this.state.OSMVectorVisibleAtStart,
+      osmVectorStyleUrl: this.state.osmVectorStyleUrl,
+      osmVectorRenderMode: this.state.osmVectorRenderMode,
       showBreadcrumbs: this.state.showBreadcrumbs,
       showDrawOrderView: this.state.showDrawOrderView,
       showFilter: this.state.showFilter,
@@ -2632,6 +2667,66 @@ class Menu extends Component {
               </div>
               <div>
                 <input
+                  id="enableOSMVector"
+                  name="enableOSMVector"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.enableOSMVector}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="enableOSMVector">
+                  OpenStreetMap (vektor tiles - high DPI)
+                </label>
+              </div>
+              <div>
+                <input
+                  id="OSMVectorVisibleAtStart"
+                  name="OSMVectorVisibleAtStart"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.OSMVectorVisibleAtStart}
+                />
+                &nbsp;
+                <label htmlFor="OSMVectorVisibleAtStart">
+                  Ladda kartan med OpenStreetMap (vektor) synligt vid start
+                </label>
+              </div>
+              <div>
+                <label htmlFor="osmVectorStyleUrl">
+                  URL till vektorstil (lämna tomt för att använda OpenFreeMap)
+                </label>
+                <br />
+                <input
+                  id="osmVectorStyleUrl"
+                  name="osmVectorStyleUrl"
+                  type="text"
+                  onChange={this.handleInputChange}
+                  value={this.state.osmVectorStyleUrl}
+                />
+              </div>
+              <div>
+                <label htmlFor="osmVectorRenderMode">
+                  Rendering av OpenStreetMap (vektor){" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="'Vektor' ritar allt som vektorer och håller stilens ordning på lagren, vilket ger skarpast resultat men kan vara tyngre för detaljrika stilar. 'Hybrid' cachar polygoner och linjer som bilder per bricka, vilket kan prestera bättre men kan bli suddigt vid zoomanimationer."
+                  />
+                </label>
+                <br />
+                <select
+                  id="osmVectorRenderMode"
+                  name="osmVectorRenderMode"
+                  className="control-fixed-width"
+                  onChange={this.handleInputChange}
+                  value={this.state.osmVectorRenderMode}
+                >
+                  <option value="vector">Vektor</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
+              </div>
+              <div>
+                <input
                   id="renderSpecialBackgroundsAtBottom"
                   name="renderSpecialBackgroundsAtBottom"
                   type="checkbox"
@@ -2640,7 +2735,8 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label htmlFor="renderSpecialBackgroundsAtBottom">
-                  Visa lagren "Vit", "Svart" och "OSM" längst ner i listan.
+                  Visa lagren "Vit", "Svart" och "OSM" (raster och vektor)
+                  längst ner i listan.
                 </label>
               </div>
               <div className="separator">Justera lagerhanteraren</div>
