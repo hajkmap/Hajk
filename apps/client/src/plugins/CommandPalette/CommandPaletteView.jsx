@@ -89,7 +89,17 @@ function getCommands(appModel) {
           },
         ]
       : []),
-    ...getSearchCommands(appModel),
+    ...(getSearchCommands(appModel).length > 0
+      ? [
+          {
+            type: "__showSearchCommands",
+            title: "Sök...",
+            description: "Visa sökalternativ",
+            icon: <SearchIcon />,
+            kind: "command",
+          },
+        ]
+      : []),
     {
       type: "__toggleTheme",
       title: isDark ? "Växla till ljust tema" : "Växla till mörkt tema",
@@ -282,6 +292,14 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     const q = query.toLowerCase();
     return commands.filter((cmd) => matchesQuery(cmd, q));
   })();
+
+  const searchCommands = useMemo(() => getSearchCommands(appModel), [appModel]);
+
+  const filteredSearchCommands = useMemo(() => {
+    if (!query.trim()) return searchCommands;
+    const q = query.toLowerCase();
+    return searchCommands.filter((cmd) => matchesQuery(cmd, q));
+  }, [searchCommands, query]);
 
   // Build layer list
   const buildLayerList = useCallback(() => {
@@ -479,6 +497,14 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           kind: "preset",
         });
       });
+    } else if (viewMode === "search") {
+      // search commands
+      if (!query.trim()) {
+        items.push({ ...BACK_COMMAND, section: "back" });
+      }
+      for (const cmd of filteredSearchCommands) {
+        items.push({ ...cmd, section: "search" });
+      }
     } else {
       // plugins
       if (!query.trim()) {
@@ -505,6 +531,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     filteredLayers,
     filteredBackgrounds,
     filteredPresets,
+    filteredSearchCommands,
     presetList,
     recentTools,
     query,
@@ -561,6 +588,12 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       }
       if (type === "__showPresets") {
         setViewMode("presets");
+        setQuery("");
+        setSelectedIndex(0);
+        return;
+      }
+      if (type === "__showSearchCommands") {
+        setViewMode("search");
         setQuery("");
         setSelectedIndex(0);
         return;
@@ -691,7 +724,8 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             viewMode === "plugins" ||
             viewMode === "layers" ||
             viewMode === "backgrounds" ||
-            viewMode === "presets"
+            viewMode === "presets" ||
+            viewMode === "search"
           ) {
             setViewMode("commands");
             setQuery("");
@@ -1127,6 +1161,76 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
           <Typography variant="body2" sx={{ opacity: 0.5 }}>
             Inga snabbval hittades
+          </Typography>
+        </Box>
+      );
+    }
+  } else if (viewMode === "search") {
+    // Search commands view
+    if (!query.trim()) {
+      const isBackSelected = itemIndex === selectedIndex;
+      listContent.push(
+        <ListItemButton
+          key={BACK_COMMAND.type}
+          data-command-item
+          selected={isBackSelected}
+          onClick={() => selectItem(BACK_COMMAND.type)}
+          sx={{
+            py: 0.5,
+            "&.Mui-selected": {
+              bgcolor: "action.hover",
+            },
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 36 }}>{BACK_COMMAND.icon}</ListItemIcon>
+          <ListItemText
+            primary={BACK_COMMAND.title}
+            slotProps={{
+              primary: { variant: "body2", noWrap: true },
+            }}
+          />
+        </ListItemButton>
+      );
+      itemIndex++;
+      listContent.push(<Divider key="back-divider" />);
+    }
+
+    if (filteredSearchCommands.length > 0) {
+      for (const cmd of filteredSearchCommands) {
+        const isSelected = itemIndex === selectedIndex;
+        listContent.push(
+          <ListItemButton
+            key={cmd.type}
+            data-command-item
+            selected={isSelected}
+            onClick={() => selectItem(cmd.type)}
+            sx={{
+              py: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            {cmd.icon && (
+              <ListItemIcon sx={{ minWidth: 36 }}>{cmd.icon}</ListItemIcon>
+            )}
+            <ListItemText
+              primary={cmd.title}
+              slotProps={{
+                primary: { variant: "body2", noWrap: true },
+              }}
+            />
+          </ListItemButton>
+        );
+        itemIndex++;
+      }
+    }
+
+    if (displayItems.length === 0) {
+      listContent.push(
+        <Box key="empty" sx={{ px: 2, py: 3, textAlign: "center" }}>
+          <Typography variant="body2" sx={{ opacity: 0.5 }}>
+            Inga sökkommandon hittades
           </Typography>
         </Box>
       );
