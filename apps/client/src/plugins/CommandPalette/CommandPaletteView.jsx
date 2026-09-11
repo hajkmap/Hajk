@@ -36,6 +36,7 @@ import { isValidLayerId } from "../../utils/Validator";
 const MAX_RECENT = 5;
 const TOP_LEVEL_LAYER_MATCH_LIMIT = 5;
 const TOP_LEVEL_PLUGIN_MATCH_LIMIT = 5;
+const TOP_LEVEL_PRESET_MATCH_LIMIT = 5;
 
 const IS_MAC = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const SHORTCUT_LABEL = IS_MAC ? "⌘K" : "Ctrl+K";
@@ -463,6 +464,35 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           });
         }
       }
+      // Match preset names directly from the top level too, so following a
+      // preset link doesn't require entering the "Snabbval" view first.
+      if (query.trim() && filteredPresets.length > 0) {
+        const topLevelPresetMatches = filteredPresets.slice(
+          0,
+          TOP_LEVEL_PRESET_MATCH_LIMIT
+        );
+        for (const preset of topLevelPresetMatches) {
+          const index = presetList.indexOf(preset);
+          items.push({
+            type: `__preset:${index}`,
+            title: preset.name,
+            description: "",
+            icon: null,
+            kind: "preset",
+            section: "presets",
+          });
+        }
+        if (filteredPresets.length > TOP_LEVEL_PRESET_MATCH_LIMIT) {
+          items.push({
+            type: "__morePresets",
+            title: `Visa alla ${filteredPresets.length} snabbval`,
+            description: "",
+            icon: <FolderSpecialIcon />,
+            kind: "command",
+            section: "presets-more",
+          });
+        }
+      }
       // Always offer a way to hand the typed text off to the real Search
       // tool, at the very bottom, regardless of what else matched.
       if (query.trim()) {
@@ -631,6 +661,13 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         // Jump into the full "Öppna verktyg" view, keeping the current
         // search term so the rest of the matches are immediately visible.
         setViewMode("plugins");
+        setSelectedIndex(0);
+        return;
+      }
+      if (type === "__morePresets") {
+        // Jump into the full "Snabbval" view, keeping the current search
+        // term so the rest of the matches are immediately visible.
+        setViewMode("presets");
         setSelectedIndex(0);
         return;
       }
@@ -1006,6 +1043,80 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       }
     }
 
+    // Preset matches, shown directly at the top level so following a
+    // preset link doesn't require entering the "Snabbval" view first.
+    const showTopLevelPresetMatches =
+      query.trim() && filteredPresets.length > 0;
+    if (showTopLevelPresetMatches) {
+      listContent.push(
+        <Box key="presets-header" sx={{ px: 2, pt: 1, pb: 0.5 }}>
+          <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 500 }}>
+            Snabbval
+          </Typography>
+        </Box>
+      );
+
+      const topLevelPresetMatches = filteredPresets.slice(
+        0,
+        TOP_LEVEL_PRESET_MATCH_LIMIT
+      );
+      for (const preset of topLevelPresetMatches) {
+        const index = presetList.indexOf(preset);
+        const isSelected = itemIndex === selectedIndex;
+        listContent.push(
+          <ListItemButton
+            key={`top-preset-${index}`}
+            data-command-item
+            selected={isSelected}
+            onClick={() => selectItem(`__preset:${index}`)}
+            sx={{
+              py: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <ListItemText
+              primary={preset.name}
+              slotProps={{
+                primary: { variant: "body2", noWrap: true },
+              }}
+            />
+          </ListItemButton>
+        );
+        itemIndex++;
+      }
+
+      if (filteredPresets.length > TOP_LEVEL_PRESET_MATCH_LIMIT) {
+        const isMoreSelected = itemIndex === selectedIndex;
+        listContent.push(
+          <ListItemButton
+            key="more-presets"
+            data-command-item
+            selected={isMoreSelected}
+            onClick={() => selectItem("__morePresets")}
+            sx={{
+              py: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              <FolderSpecialIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText
+              primary={`Visa alla ${filteredPresets.length} snabbval`}
+              slotProps={{
+                primary: { variant: "body2", noWrap: true },
+              }}
+            />
+          </ListItemButton>
+        );
+        itemIndex++;
+      }
+    }
+
     // Always offer a way to hand the typed text off to the real Search
     // tool, at the very bottom, regardless of what else matched.
     const searchFallbackQuery = query.trim();
@@ -1013,7 +1124,8 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       if (
         filteredCommands.length > 0 ||
         showTopLevelPluginMatches ||
-        showTopLevelLayerMatches
+        showTopLevelLayerMatches ||
+        showTopLevelPresetMatches
       ) {
         listContent.push(<Divider key="search-fallback-divider" />);
       }
