@@ -37,6 +37,7 @@ const MAX_RECENT = 5;
 const TOP_LEVEL_LAYER_MATCH_LIMIT = 5;
 const TOP_LEVEL_PLUGIN_MATCH_LIMIT = 5;
 const TOP_LEVEL_PRESET_MATCH_LIMIT = 5;
+const TOP_LEVEL_BACKGROUND_MATCH_LIMIT = 5;
 
 const IS_MAC = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const SHORTCUT_LABEL = IS_MAC ? "⌘K" : "Ctrl+K";
@@ -368,7 +369,11 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
   }, [appModel]);
 
   useEffect(() => {
-    if (viewMode !== "backgrounds" || !appModel?.getMap) return;
+    // Keep the background layer list live for as long as the palette is
+    // open, not just while browsing the "Byt bakgrundslager" view — the
+    // top-level view also needs fresh data to match background names
+    // directly.
+    if (!open || !appModel?.getMap) return;
 
     const map = appModel.getMap();
     const baseLayers = map
@@ -384,7 +389,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     return () => {
       baseLayers.forEach((l) => l.un("change:visible", handleChange));
     };
-  }, [viewMode, appModel, buildBackgroundList]);
+  }, [open, appModel, buildBackgroundList]);
 
   const filteredBackgrounds = useMemo(() => {
     if (!query.trim()) return backgroundLayers;
@@ -461,6 +466,36 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             icon: <LayersIcon />,
             kind: "command",
             section: "layers-more",
+          });
+        }
+      }
+      // Match background layer names directly from the top level too, so
+      // switching a background doesn't require entering the "Byt
+      // bakgrundslager" view first.
+      if (query.trim() && filteredBackgrounds.length > 0) {
+        const topLevelBackgroundMatches = filteredBackgrounds.slice(
+          0,
+          TOP_LEVEL_BACKGROUND_MATCH_LIMIT
+        );
+        for (const layer of topLevelBackgroundMatches) {
+          items.push({
+            type: `__background:${layer.id}`,
+            title: layer.caption,
+            description: "",
+            icon: null,
+            kind: "background",
+            layer,
+            section: "backgrounds",
+          });
+        }
+        if (filteredBackgrounds.length > TOP_LEVEL_BACKGROUND_MATCH_LIMIT) {
+          items.push({
+            type: "__moreBackgrounds",
+            title: `Visa alla ${filteredBackgrounds.length} bakgrundslager`,
+            description: "",
+            icon: <WallpaperIcon />,
+            kind: "command",
+            section: "backgrounds-more",
           });
         }
       }
@@ -668,6 +703,13 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         // Jump into the full "Snabbval" view, keeping the current search
         // term so the rest of the matches are immediately visible.
         setViewMode("presets");
+        setSelectedIndex(0);
+        return;
+      }
+      if (type === "__moreBackgrounds") {
+        // Jump into the full "Byt bakgrundslager" view, keeping the current
+        // search term so the rest of the matches are immediately visible.
+        setViewMode("backgrounds");
         setSelectedIndex(0);
         return;
       }
@@ -1043,6 +1085,96 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       }
     }
 
+    // Background layer matches, shown directly at the top level so
+    // switching a background doesn't require entering the "Byt
+    // bakgrundslager" view first.
+    const showTopLevelBackgroundMatches =
+      query.trim() && filteredBackgrounds.length > 0;
+    if (showTopLevelBackgroundMatches) {
+      listContent.push(
+        <Box key="backgrounds-header" sx={{ px: 2, pt: 1, pb: 0.5 }}>
+          <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 500 }}>
+            Bakgrundslager
+          </Typography>
+        </Box>
+      );
+
+      const topLevelBackgroundMatches = filteredBackgrounds.slice(
+        0,
+        TOP_LEVEL_BACKGROUND_MATCH_LIMIT
+      );
+      for (const layer of topLevelBackgroundMatches) {
+        const isSelected = itemIndex === selectedIndex;
+        listContent.push(
+          <ListItemButton
+            key={`top-background-${layer.id}`}
+            data-command-item
+            selected={isSelected}
+            onClick={() => {
+              globalObserver.publish(
+                "layerswitcher.setBackgroundLayer",
+                layer.id
+              );
+              globalObserver.publish(
+                "layerswitcher.backgroundLayerChanged",
+                layer.id
+              );
+            }}
+            sx={{
+              py: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              {layer.visible ? (
+                <RadioButtonCheckedIcon fontSize="small" color="primary" />
+              ) : (
+                <RadioButtonUncheckedIcon fontSize="small" />
+              )}
+            </ListItemIcon>
+            <ListItemText
+              primary={layer.caption}
+              slotProps={{
+                primary: { variant: "body2", noWrap: true },
+              }}
+            />
+          </ListItemButton>
+        );
+        itemIndex++;
+      }
+
+      if (filteredBackgrounds.length > TOP_LEVEL_BACKGROUND_MATCH_LIMIT) {
+        const isMoreSelected = itemIndex === selectedIndex;
+        listContent.push(
+          <ListItemButton
+            key="more-backgrounds"
+            data-command-item
+            selected={isMoreSelected}
+            onClick={() => selectItem("__moreBackgrounds")}
+            sx={{
+              py: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              <WallpaperIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText
+              primary={`Visa alla ${filteredBackgrounds.length} bakgrundslager`}
+              slotProps={{
+                primary: { variant: "body2", noWrap: true },
+              }}
+            />
+          </ListItemButton>
+        );
+        itemIndex++;
+      }
+    }
+
     // Preset matches, shown directly at the top level so following a
     // preset link doesn't require entering the "Snabbval" view first.
     const showTopLevelPresetMatches =
@@ -1125,6 +1257,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         filteredCommands.length > 0 ||
         showTopLevelPluginMatches ||
         showTopLevelLayerMatches ||
+        showTopLevelBackgroundMatches ||
         showTopLevelPresetMatches
       ) {
         listContent.push(<Divider key="search-fallback-divider" />);
