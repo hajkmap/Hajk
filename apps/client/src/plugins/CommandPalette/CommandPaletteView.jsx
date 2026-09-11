@@ -42,6 +42,20 @@ const TOP_LEVEL_BACKGROUND_MATCH_LIMIT = 5;
 const IS_MAC = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const SHORTCUT_LABEL = IS_MAC ? "⌘K" : "Ctrl+K";
 
+const SELECTABLE_ITEM_SX = {
+  py: 0.5,
+  "&.Mui-selected": {
+    bgcolor: "action.hover",
+  },
+};
+
+const MORE_MATCHES_VIEW_MODE = {
+  __morePlugins: "plugins",
+  __moreLayers: "layers",
+  __moreBackgrounds: "backgrounds",
+  __morePresets: "presets",
+};
+
 function getCurrentThemeMode() {
   const stored = window.localStorage.getItem("userPreferredColorScheme");
   if (stored === "light" || stored === "dark") return stored;
@@ -411,6 +425,304 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     return presetList.filter((p) => p.name.toLowerCase().includes(q));
   }, [presetList, query]);
 
+  const openPalette = useCallback(() => {
+    setAllTools(buildToolList(appModel));
+    setOpen(true);
+    setQuery("");
+    setSelectedIndex(0);
+    setViewMode("commands");
+  }, [appModel]);
+
+  const closePalette = useCallback(() => {
+    setOpen(false);
+    setQuery("");
+    setSelectedIndex(0);
+    setViewMode("commands");
+  }, []);
+
+  const selectItem = useCallback(
+    (type) => {
+      if (type === "__openTools") {
+        setViewMode("plugins");
+        setQuery("");
+        setSelectedIndex(0);
+        return;
+      }
+      if (type === "__showLayers") {
+        setViewMode("layers");
+        setQuery("");
+        setSelectedIndex(0);
+        return;
+      }
+      if (type === "__showBackgrounds") {
+        setViewMode("backgrounds");
+        setQuery("");
+        setSelectedIndex(0);
+        return;
+      }
+      if (type === "__showPresets") {
+        setViewMode("presets");
+        setQuery("");
+        setSelectedIndex(0);
+        return;
+      }
+      if (type === "__showSearchCommands") {
+        setViewMode("search");
+        setQuery("");
+        setSelectedIndex(0);
+        return;
+      }
+      if (type in MORE_MATCHES_VIEW_MODE) {
+        // Jump into the matching full view, keeping the current search term
+        // so the rest of the matches are immediately visible.
+        setViewMode(MORE_MATCHES_VIEW_MODE[type]);
+        setSelectedIndex(0);
+        return;
+      }
+      if (type === "__back") {
+        setViewMode("commands");
+        setQuery("");
+        setSelectedIndex(0);
+        return;
+      }
+      // if we are in the layers we dont want toggle to close the palette
+      if (type.startsWith("__layer:")) {
+        const layerId = type.slice(8);
+        globalObserver.publish("layerswitcher.toggleLayer", { layerId });
+        return;
+      }
+      // switching background shouldn't close the palette either, so the
+      // user can preview a few backgrounds before going back
+      if (type.startsWith("__background:")) {
+        const layerId = type.slice(13);
+        globalObserver.publish("layerswitcher.setBackgroundLayer", layerId);
+        globalObserver.publish("layerswitcher.backgroundLayerChanged", layerId);
+        const mapEl = document.getElementById("map");
+        if (mapEl) {
+          mapEl.style.backgroundColor = layerId === "-2" ? "#000" : "#fff";
+        }
+        return;
+      }
+      // Presets are a one-shot navigation action, so close the palette and
+      // hand off entirely to PresetLinks (via globalObserver) — it owns the
+      // link parsing, fly-to, layer-swap confirmation and error handling.
+      if (type.startsWith("__preset:")) {
+        const index = Number(type.slice(9));
+        closePalette();
+        globalObserver.publish("preset.selectPreset", presetList[index]);
+        return;
+      }
+      closePalette();
+      if (type === "__toggleTheme") {
+        globalObserver.publish("core.toggleTheme");
+      } else if (type === "__closeAllWindows") {
+        appModel.getPlugins().forEach((plugin) => {
+          globalObserver.publish(`${plugin.type}.closeWindow`);
+        });
+      } else if (type === "__hideAllLayers") {
+        appModel.clear();
+      } else if (type === "__searchPolygon") {
+        globalObserver.publish("search.spatialSearchActivated", {
+          type: "Polygon",
+        });
+      } else if (type === "__searchRadius") {
+        globalObserver.publish("search.spatialSearchActivated", {
+          type: "Circle",
+        });
+      } else if (type === "__searchSelect") {
+        globalObserver.publish("search.spatialSearchActivated", {
+          type: "Select",
+        });
+      } else if (type === "__searchExtent") {
+        globalObserver.publish("search.spatialSearchActivated", {
+          type: "Extent",
+        });
+      } else if (type === "__clearSearch") {
+        globalObserver.publish("search.clearSearch");
+      } else if (type === "__searchInSearchTool") {
+        // `query` still holds the pre-close value here — closePalette()'s
+        // setQuery("") above only affects the *next* render, not this
+        // closure — so this is the text the user actually typed.
+        globalObserver.publish("search.setSearchPhrase", query.trim());
+        globalObserver.publish("search.focusInput");
+      } else {
+        globalObserver.publish(`${type}.showWindow`);
+        if (type === "search") {
+          globalObserver.publish("search.focusInput");
+        }
+      }
+    },
+    [globalObserver, closePalette, appModel, presetList, query]
+  );
+
+  // Declarative config for the four result types that surface directly at
+  // the top level of the "commands" view once the user starts typing —
+  // tools/plugins, layers, background layers and presets. Each group knows
+  // how to turn a matched entry into a keyboard-nav display item and how to
+  // render its row, so both `displayItems` and the JSX list below can loop
+  // over the same source instead of repeating near-identical blocks.
+  const topLevelMatchGroups = useMemo(
+    () => [
+      {
+        key: "plugins",
+        header: "Verktyg",
+        list: filteredTools,
+        limit: TOP_LEVEL_PLUGIN_MATCH_LIMIT,
+        moreType: "__morePlugins",
+        moreIcon: <LaunchIcon fontSize="small" />,
+        moreTitle: (n) => `Visa alla ${n} verktyg`,
+        toDisplayItem: (tool) => ({ ...tool, section: "plugins" }),
+        renderRow: (tool, isSelected) => (
+          <ListItemButton
+            key={`top-plugin-${tool.type}`}
+            data-command-item
+            selected={isSelected}
+            onClick={() => selectItem(tool.type)}
+            sx={SELECTABLE_ITEM_SX}
+          >
+            {tool.icon && (
+              <ListItemIcon sx={{ minWidth: 36 }}>{tool.icon}</ListItemIcon>
+            )}
+            <ListItemText
+              primary={tool.title}
+              slotProps={{ primary: { variant: "body2", noWrap: true } }}
+            />
+          </ListItemButton>
+        ),
+      },
+      {
+        key: "layers",
+        header: "Lager",
+        list: filteredLayers,
+        limit: TOP_LEVEL_LAYER_MATCH_LIMIT,
+        moreType: "__moreLayers",
+        moreIcon: <LayersIcon fontSize="small" />,
+        moreTitle: (n) => `Visa alla ${n} lager`,
+        toDisplayItem: (layer) => ({
+          type: `__layer:${layer.id}`,
+          title: layer.caption,
+          description: "",
+          icon: null,
+          kind: "layer",
+          layer,
+          section: "layers",
+        }),
+        renderRow: (layer, isSelected) => (
+          <ListItemButton
+            key={`top-layer-${layer.id}`}
+            data-command-item
+            selected={isSelected}
+            onClick={() =>
+              globalObserver.publish("layerswitcher.toggleLayer", {
+                layerId: layer.id,
+              })
+            }
+            sx={SELECTABLE_ITEM_SX}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              <Checkbox checked={layer.visible} size="small" sx={{ p: 0 }} />
+            </ListItemIcon>
+            <ListItemText
+              primary={layer.caption}
+              slotProps={{ primary: { variant: "body2", noWrap: true } }}
+            />
+          </ListItemButton>
+        ),
+      },
+      {
+        key: "backgrounds",
+        header: "Bakgrundslager",
+        list: filteredBackgrounds,
+        limit: TOP_LEVEL_BACKGROUND_MATCH_LIMIT,
+        moreType: "__moreBackgrounds",
+        moreIcon: <WallpaperIcon fontSize="small" />,
+        moreTitle: (n) => `Visa alla ${n} bakgrundslager`,
+        toDisplayItem: (layer) => ({
+          type: `__background:${layer.id}`,
+          title: layer.caption,
+          description: "",
+          icon: null,
+          kind: "background",
+          layer,
+          section: "backgrounds",
+        }),
+        renderRow: (layer, isSelected) => (
+          <ListItemButton
+            key={`top-background-${layer.id}`}
+            data-command-item
+            selected={isSelected}
+            onClick={() => {
+              globalObserver.publish(
+                "layerswitcher.setBackgroundLayer",
+                layer.id
+              );
+              globalObserver.publish(
+                "layerswitcher.backgroundLayerChanged",
+                layer.id
+              );
+            }}
+            sx={SELECTABLE_ITEM_SX}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              {layer.visible ? (
+                <RadioButtonCheckedIcon fontSize="small" color="primary" />
+              ) : (
+                <RadioButtonUncheckedIcon fontSize="small" />
+              )}
+            </ListItemIcon>
+            <ListItemText
+              primary={layer.caption}
+              slotProps={{ primary: { variant: "body2", noWrap: true } }}
+            />
+          </ListItemButton>
+        ),
+      },
+      {
+        key: "presets",
+        header: "Snabbval",
+        list: filteredPresets,
+        limit: TOP_LEVEL_PRESET_MATCH_LIMIT,
+        moreType: "__morePresets",
+        moreIcon: <FolderSpecialIcon fontSize="small" />,
+        moreTitle: (n) => `Visa alla ${n} snabbval`,
+        toDisplayItem: (preset) => ({
+          type: `__preset:${presetList.indexOf(preset)}`,
+          title: preset.name,
+          description: "",
+          icon: null,
+          kind: "preset",
+          section: "presets",
+        }),
+        renderRow: (preset, isSelected) => {
+          const index = presetList.indexOf(preset);
+          return (
+            <ListItemButton
+              key={`top-preset-${index}`}
+              data-command-item
+              selected={isSelected}
+              onClick={() => selectItem(`__preset:${index}`)}
+              sx={SELECTABLE_ITEM_SX}
+            >
+              <ListItemText
+                primary={preset.name}
+                slotProps={{ primary: { variant: "body2", noWrap: true } }}
+              />
+            </ListItemButton>
+          );
+        },
+      },
+    ],
+    [
+      filteredTools,
+      filteredLayers,
+      filteredBackgrounds,
+      filteredPresets,
+      presetList,
+      selectItem,
+      globalObserver,
+    ]
+  );
+
   // items to display in the list
   const displayItems = useMemo(() => {
     const items = [];
@@ -419,113 +731,25 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       for (const cmd of filteredCommands) {
         items.push({ ...cmd, section: "commands" });
       }
-      // Match plugin/tool names directly from the top level too, so opening
-      // a tool doesn't require entering the "Öppna verktyg" view first.
-      if (query.trim() && filteredTools.length > 0) {
-        const topLevelPluginMatches = filteredTools.slice(
-          0,
-          TOP_LEVEL_PLUGIN_MATCH_LIMIT
-        );
-        for (const tool of topLevelPluginMatches) {
-          items.push({ ...tool, section: "plugins" });
-        }
-        if (filteredTools.length > TOP_LEVEL_PLUGIN_MATCH_LIMIT) {
-          items.push({
-            type: "__morePlugins",
-            title: `Visa alla ${filteredTools.length} verktyg`,
-            description: "",
-            icon: <LaunchIcon />,
-            kind: "command",
-            section: "plugins-more",
-          });
-        }
-      }
-      // Match layer names directly from the top level too, so toggling a
-      // layer doesn't require entering the "Lager" view first.
-      if (query.trim() && filteredLayers.length > 0) {
-        const topLevelLayerMatches = filteredLayers.slice(
-          0,
-          TOP_LEVEL_LAYER_MATCH_LIMIT
-        );
-        for (const layer of topLevelLayerMatches) {
-          items.push({
-            type: `__layer:${layer.id}`,
-            title: layer.caption,
-            description: "",
-            icon: null,
-            kind: "layer",
-            layer,
-            section: "layers",
-          });
-        }
-        if (filteredLayers.length > TOP_LEVEL_LAYER_MATCH_LIMIT) {
-          items.push({
-            type: "__moreLayers",
-            title: `Visa alla ${filteredLayers.length} lager`,
-            description: "",
-            icon: <LayersIcon />,
-            kind: "command",
-            section: "layers-more",
-          });
-        }
-      }
-      // Match background layer names directly from the top level too, so
-      // switching a background doesn't require entering the "Byt
-      // bakgrundslager" view first.
-      if (query.trim() && filteredBackgrounds.length > 0) {
-        const topLevelBackgroundMatches = filteredBackgrounds.slice(
-          0,
-          TOP_LEVEL_BACKGROUND_MATCH_LIMIT
-        );
-        for (const layer of topLevelBackgroundMatches) {
-          items.push({
-            type: `__background:${layer.id}`,
-            title: layer.caption,
-            description: "",
-            icon: null,
-            kind: "background",
-            layer,
-            section: "backgrounds",
-          });
-        }
-        if (filteredBackgrounds.length > TOP_LEVEL_BACKGROUND_MATCH_LIMIT) {
-          items.push({
-            type: "__moreBackgrounds",
-            title: `Visa alla ${filteredBackgrounds.length} bakgrundslager`,
-            description: "",
-            icon: <WallpaperIcon />,
-            kind: "command",
-            section: "backgrounds-more",
-          });
-        }
-      }
-      // Match preset names directly from the top level too, so following a
-      // preset link doesn't require entering the "Snabbval" view first.
-      if (query.trim() && filteredPresets.length > 0) {
-        const topLevelPresetMatches = filteredPresets.slice(
-          0,
-          TOP_LEVEL_PRESET_MATCH_LIMIT
-        );
-        for (const preset of topLevelPresetMatches) {
-          const index = presetList.indexOf(preset);
-          items.push({
-            type: `__preset:${index}`,
-            title: preset.name,
-            description: "",
-            icon: null,
-            kind: "preset",
-            section: "presets",
-          });
-        }
-        if (filteredPresets.length > TOP_LEVEL_PRESET_MATCH_LIMIT) {
-          items.push({
-            type: "__morePresets",
-            title: `Visa alla ${filteredPresets.length} snabbval`,
-            description: "",
-            icon: <FolderSpecialIcon />,
-            kind: "command",
-            section: "presets-more",
-          });
+      // Match tools, layers, background layers and presets directly from
+      // the top level too, so acting on one doesn't require entering its
+      // full view first.
+      if (query.trim()) {
+        for (const group of topLevelMatchGroups) {
+          if (group.list.length === 0) continue;
+          for (const entry of group.list.slice(0, group.limit)) {
+            items.push(group.toDisplayItem(entry));
+          }
+          if (group.list.length > group.limit) {
+            items.push({
+              type: group.moreType,
+              title: group.moreTitle(group.list.length),
+              description: "",
+              icon: group.moreIcon,
+              kind: "command",
+              section: `${group.key}-more`,
+            });
+          }
         }
       }
       // Always offer a way to hand the typed text off to the real Search
@@ -619,6 +843,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     filteredBackgrounds,
     filteredPresets,
     filteredSearchCommands,
+    topLevelMatchGroups,
     presetList,
     recentTools,
     query,
@@ -637,157 +862,6 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       items[selectedIndex].scrollIntoView({ block: "nearest" });
     }
   }, [selectedIndex]);
-
-  const openPalette = useCallback(() => {
-    setAllTools(buildToolList(appModel));
-    setOpen(true);
-    setQuery("");
-    setSelectedIndex(0);
-    setViewMode("commands");
-  }, [appModel]);
-
-  const closePalette = useCallback(() => {
-    setOpen(false);
-    setQuery("");
-    setSelectedIndex(0);
-    setViewMode("commands");
-  }, []);
-
-  const selectItem = useCallback(
-    (type) => {
-      if (type === "__openTools") {
-        setViewMode("plugins");
-        setQuery("");
-        setSelectedIndex(0);
-        return;
-      }
-      if (type === "__showLayers") {
-        setViewMode("layers");
-        setQuery("");
-        setSelectedIndex(0);
-        return;
-      }
-      if (type === "__showBackgrounds") {
-        setViewMode("backgrounds");
-        setQuery("");
-        setSelectedIndex(0);
-        return;
-      }
-      if (type === "__showPresets") {
-        setViewMode("presets");
-        setQuery("");
-        setSelectedIndex(0);
-        return;
-      }
-      if (type === "__showSearchCommands") {
-        setViewMode("search");
-        setQuery("");
-        setSelectedIndex(0);
-        return;
-      }
-      if (type === "__moreLayers") {
-        // Jump into the full "Lager" view, keeping the current search term
-        // so the rest of the matches are immediately visible.
-        setViewMode("layers");
-        setSelectedIndex(0);
-        return;
-      }
-      if (type === "__morePlugins") {
-        // Jump into the full "Öppna verktyg" view, keeping the current
-        // search term so the rest of the matches are immediately visible.
-        setViewMode("plugins");
-        setSelectedIndex(0);
-        return;
-      }
-      if (type === "__morePresets") {
-        // Jump into the full "Snabbval" view, keeping the current search
-        // term so the rest of the matches are immediately visible.
-        setViewMode("presets");
-        setSelectedIndex(0);
-        return;
-      }
-      if (type === "__moreBackgrounds") {
-        // Jump into the full "Byt bakgrundslager" view, keeping the current
-        // search term so the rest of the matches are immediately visible.
-        setViewMode("backgrounds");
-        setSelectedIndex(0);
-        return;
-      }
-      if (type === "__back") {
-        setViewMode("commands");
-        setQuery("");
-        setSelectedIndex(0);
-        return;
-      }
-      // if we are in the layers we dont want toggle to close the palette
-      if (type.startsWith("__layer:")) {
-        const layerId = type.slice(8);
-        globalObserver.publish("layerswitcher.toggleLayer", { layerId });
-        return;
-      }
-      // switching background shouldn't close the palette either, so the
-      // user can preview a few backgrounds before going back
-      if (type.startsWith("__background:")) {
-        const layerId = type.slice(13);
-        globalObserver.publish("layerswitcher.setBackgroundLayer", layerId);
-        globalObserver.publish("layerswitcher.backgroundLayerChanged", layerId);
-        const mapEl = document.getElementById("map");
-        if (mapEl) {
-          mapEl.style.backgroundColor = layerId === "-2" ? "#000" : "#fff";
-        }
-        return;
-      }
-      // Presets are a one-shot navigation action, so close the palette and
-      // hand off entirely to PresetLinks (via globalObserver) — it owns the
-      // link parsing, fly-to, layer-swap confirmation and error handling.
-      if (type.startsWith("__preset:")) {
-        const index = Number(type.slice(9));
-        closePalette();
-        globalObserver.publish("preset.selectPreset", presetList[index]);
-        return;
-      }
-      closePalette();
-      if (type === "__toggleTheme") {
-        globalObserver.publish("core.toggleTheme");
-      } else if (type === "__closeAllWindows") {
-        appModel.getPlugins().forEach((plugin) => {
-          globalObserver.publish(`${plugin.type}.closeWindow`);
-        });
-      } else if (type === "__hideAllLayers") {
-        appModel.clear();
-      } else if (type === "__searchPolygon") {
-        globalObserver.publish("search.spatialSearchActivated", {
-          type: "Polygon",
-        });
-      } else if (type === "__searchRadius") {
-        globalObserver.publish("search.spatialSearchActivated", {
-          type: "Circle",
-        });
-      } else if (type === "__searchSelect") {
-        globalObserver.publish("search.spatialSearchActivated", {
-          type: "Select",
-        });
-      } else if (type === "__searchExtent") {
-        globalObserver.publish("search.spatialSearchActivated", {
-          type: "Extent",
-        });
-      } else if (type === "__clearSearch") {
-        globalObserver.publish("search.clearSearch");
-      } else if (type === "__searchInSearchTool") {
-        // `query` still holds the pre-close value here — closePalette()'s
-        // setQuery("") above only affects the *next* render, not this
-        // closure — so this is the text the user actually typed.
-        globalObserver.publish("search.setSearchPhrase", query.trim());
-        globalObserver.publish("search.focusInput");
-      } else {
-        globalObserver.publish(`${type}.showWindow`);
-        if (type === "search") {
-          globalObserver.publish("search.focusInput");
-        }
-      }
-    },
-    [globalObserver, closePalette, appModel, presetList, query]
-  );
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -894,6 +968,33 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     </Typography>
   );
 
+  // Shared markup for the four top-level match groups (see
+  // `topLevelMatchGroups`): the section header and the "Visa alla N …" row,
+  // which are identical across groups apart from the label/icon/target.
+  const renderTopLevelGroupHeader = (key, label) => (
+    <Box key={`${key}-header`} sx={{ px: 2, pt: 1, pb: 0.5 }}>
+      <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 500 }}>
+        {label}
+      </Typography>
+    </Box>
+  );
+
+  const renderMoreMatchRow = ({ key, icon, title, moreType, isSelected }) => (
+    <ListItemButton
+      key={key}
+      data-command-item
+      selected={isSelected}
+      onClick={() => selectItem(moreType)}
+      sx={SELECTABLE_ITEM_SX}
+    >
+      <ListItemIcon sx={{ minWidth: 36 }}>{icon}</ListItemIcon>
+      <ListItemText
+        primary={title}
+        slotProps={{ primary: { variant: "body2", noWrap: true } }}
+      />
+    </ListItemButton>
+  );
+
   const listContent = [];
   let itemIndex = 0;
 
@@ -908,12 +1009,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             data-command-item
             selected={isSelected}
             onClick={() => selectItem(cmd.type)}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
+            sx={SELECTABLE_ITEM_SX}
           >
             {cmd.icon && (
               <ListItemIcon sx={{ minWidth: 36 }}>{cmd.icon}</ListItemIcon>
@@ -931,321 +1027,35 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       }
     }
 
-    // Plugin/tool matches, shown directly at the top level so opening a
-    // tool doesn't require entering the "Öppna verktyg" view first.
-    const showTopLevelPluginMatches = query.trim() && filteredTools.length > 0;
-    if (showTopLevelPluginMatches) {
-      listContent.push(
-        <Box key="plugins-header" sx={{ px: 2, pt: 1, pb: 0.5 }}>
-          <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 500 }}>
-            Verktyg
-          </Typography>
-        </Box>
-      );
+    // Tool, layer, background and preset matches, shown directly at the top
+    // level so acting on one doesn't require entering its full view first.
+    const shownMatchGroups = [];
+    if (query.trim()) {
+      for (const group of topLevelMatchGroups) {
+        if (group.list.length === 0) continue;
+        shownMatchGroups.push(group);
+        listContent.push(renderTopLevelGroupHeader(group.key, group.header));
 
-      const topLevelPluginMatches = filteredTools.slice(
-        0,
-        TOP_LEVEL_PLUGIN_MATCH_LIMIT
-      );
-      for (const tool of topLevelPluginMatches) {
-        const isSelected = itemIndex === selectedIndex;
-        listContent.push(
-          <ListItemButton
-            key={`top-plugin-${tool.type}`}
-            data-command-item
-            selected={isSelected}
-            onClick={() => selectItem(tool.type)}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
-          >
-            {tool.icon && (
-              <ListItemIcon sx={{ minWidth: 36 }}>{tool.icon}</ListItemIcon>
-            )}
-            <ListItemText
-              primary={tool.title}
-              slotProps={{
-                primary: { variant: "body2", noWrap: true },
-              }}
-            />
-          </ListItemButton>
-        );
-        itemIndex++;
-      }
+        const matches = group.list.slice(0, group.limit);
+        for (const entry of matches) {
+          const isSelected = itemIndex === selectedIndex;
+          listContent.push(group.renderRow(entry, isSelected));
+          itemIndex++;
+        }
 
-      if (filteredTools.length > TOP_LEVEL_PLUGIN_MATCH_LIMIT) {
-        const isMoreSelected = itemIndex === selectedIndex;
-        listContent.push(
-          <ListItemButton
-            key="more-plugins"
-            data-command-item
-            selected={isMoreSelected}
-            onClick={() => selectItem("__morePlugins")}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 36 }}>
-              <LaunchIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary={`Visa alla ${filteredTools.length} verktyg`}
-              slotProps={{
-                primary: { variant: "body2", noWrap: true },
-              }}
-            />
-          </ListItemButton>
-        );
-        itemIndex++;
-      }
-    }
-
-    // Layer name matches, shown directly at the top level so toggling a
-    // layer doesn't require entering the "Lager" view first.
-    const showTopLevelLayerMatches = query.trim() && filteredLayers.length > 0;
-    if (showTopLevelLayerMatches) {
-      listContent.push(
-        <Box key="layers-header" sx={{ px: 2, pt: 1, pb: 0.5 }}>
-          <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 500 }}>
-            Lager
-          </Typography>
-        </Box>
-      );
-
-      const topLevelLayerMatches = filteredLayers.slice(
-        0,
-        TOP_LEVEL_LAYER_MATCH_LIMIT
-      );
-      for (const layer of topLevelLayerMatches) {
-        const isSelected = itemIndex === selectedIndex;
-        listContent.push(
-          <ListItemButton
-            key={`top-layer-${layer.id}`}
-            data-command-item
-            selected={isSelected}
-            onClick={() =>
-              globalObserver.publish("layerswitcher.toggleLayer", {
-                layerId: layer.id,
-              })
-            }
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 36 }}>
-              <Checkbox checked={layer.visible} size="small" sx={{ p: 0 }} />
-            </ListItemIcon>
-            <ListItemText
-              primary={layer.caption}
-              slotProps={{
-                primary: { variant: "body2", noWrap: true },
-              }}
-            />
-          </ListItemButton>
-        );
-        itemIndex++;
-      }
-
-      if (filteredLayers.length > TOP_LEVEL_LAYER_MATCH_LIMIT) {
-        const isMoreSelected = itemIndex === selectedIndex;
-        listContent.push(
-          <ListItemButton
-            key="more-layers"
-            data-command-item
-            selected={isMoreSelected}
-            onClick={() => selectItem("__moreLayers")}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 36 }}>
-              <LayersIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary={`Visa alla ${filteredLayers.length} lager`}
-              slotProps={{
-                primary: { variant: "body2", noWrap: true },
-              }}
-            />
-          </ListItemButton>
-        );
-        itemIndex++;
-      }
-    }
-
-    // Background layer matches, shown directly at the top level so
-    // switching a background doesn't require entering the "Byt
-    // bakgrundslager" view first.
-    const showTopLevelBackgroundMatches =
-      query.trim() && filteredBackgrounds.length > 0;
-    if (showTopLevelBackgroundMatches) {
-      listContent.push(
-        <Box key="backgrounds-header" sx={{ px: 2, pt: 1, pb: 0.5 }}>
-          <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 500 }}>
-            Bakgrundslager
-          </Typography>
-        </Box>
-      );
-
-      const topLevelBackgroundMatches = filteredBackgrounds.slice(
-        0,
-        TOP_LEVEL_BACKGROUND_MATCH_LIMIT
-      );
-      for (const layer of topLevelBackgroundMatches) {
-        const isSelected = itemIndex === selectedIndex;
-        listContent.push(
-          <ListItemButton
-            key={`top-background-${layer.id}`}
-            data-command-item
-            selected={isSelected}
-            onClick={() => {
-              globalObserver.publish(
-                "layerswitcher.setBackgroundLayer",
-                layer.id
-              );
-              globalObserver.publish(
-                "layerswitcher.backgroundLayerChanged",
-                layer.id
-              );
-            }}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 36 }}>
-              {layer.visible ? (
-                <RadioButtonCheckedIcon fontSize="small" color="primary" />
-              ) : (
-                <RadioButtonUncheckedIcon fontSize="small" />
-              )}
-            </ListItemIcon>
-            <ListItemText
-              primary={layer.caption}
-              slotProps={{
-                primary: { variant: "body2", noWrap: true },
-              }}
-            />
-          </ListItemButton>
-        );
-        itemIndex++;
-      }
-
-      if (filteredBackgrounds.length > TOP_LEVEL_BACKGROUND_MATCH_LIMIT) {
-        const isMoreSelected = itemIndex === selectedIndex;
-        listContent.push(
-          <ListItemButton
-            key="more-backgrounds"
-            data-command-item
-            selected={isMoreSelected}
-            onClick={() => selectItem("__moreBackgrounds")}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 36 }}>
-              <WallpaperIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary={`Visa alla ${filteredBackgrounds.length} bakgrundslager`}
-              slotProps={{
-                primary: { variant: "body2", noWrap: true },
-              }}
-            />
-          </ListItemButton>
-        );
-        itemIndex++;
-      }
-    }
-
-    // Preset matches, shown directly at the top level so following a
-    // preset link doesn't require entering the "Snabbval" view first.
-    const showTopLevelPresetMatches =
-      query.trim() && filteredPresets.length > 0;
-    if (showTopLevelPresetMatches) {
-      listContent.push(
-        <Box key="presets-header" sx={{ px: 2, pt: 1, pb: 0.5 }}>
-          <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 500 }}>
-            Snabbval
-          </Typography>
-        </Box>
-      );
-
-      const topLevelPresetMatches = filteredPresets.slice(
-        0,
-        TOP_LEVEL_PRESET_MATCH_LIMIT
-      );
-      for (const preset of topLevelPresetMatches) {
-        const index = presetList.indexOf(preset);
-        const isSelected = itemIndex === selectedIndex;
-        listContent.push(
-          <ListItemButton
-            key={`top-preset-${index}`}
-            data-command-item
-            selected={isSelected}
-            onClick={() => selectItem(`__preset:${index}`)}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
-          >
-            <ListItemText
-              primary={preset.name}
-              slotProps={{
-                primary: { variant: "body2", noWrap: true },
-              }}
-            />
-          </ListItemButton>
-        );
-        itemIndex++;
-      }
-
-      if (filteredPresets.length > TOP_LEVEL_PRESET_MATCH_LIMIT) {
-        const isMoreSelected = itemIndex === selectedIndex;
-        listContent.push(
-          <ListItemButton
-            key="more-presets"
-            data-command-item
-            selected={isMoreSelected}
-            onClick={() => selectItem("__morePresets")}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 36 }}>
-              <FolderSpecialIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary={`Visa alla ${filteredPresets.length} snabbval`}
-              slotProps={{
-                primary: { variant: "body2", noWrap: true },
-              }}
-            />
-          </ListItemButton>
-        );
-        itemIndex++;
+        if (group.list.length > group.limit) {
+          const isMoreSelected = itemIndex === selectedIndex;
+          listContent.push(
+            renderMoreMatchRow({
+              key: `more-${group.key}`,
+              icon: group.moreIcon,
+              title: group.moreTitle(group.list.length),
+              moreType: group.moreType,
+              isSelected: isMoreSelected,
+            })
+          );
+          itemIndex++;
+        }
       }
     }
 
@@ -1253,13 +1063,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     // tool, at the very bottom, regardless of what else matched.
     const searchFallbackQuery = query.trim();
     if (searchFallbackQuery) {
-      if (
-        filteredCommands.length > 0 ||
-        showTopLevelPluginMatches ||
-        showTopLevelLayerMatches ||
-        showTopLevelBackgroundMatches ||
-        showTopLevelPresetMatches
-      ) {
+      if (filteredCommands.length > 0 || shownMatchGroups.length > 0) {
         listContent.push(<Divider key="search-fallback-divider" />);
       }
       const isSelected = itemIndex === selectedIndex;
@@ -1269,12 +1073,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           data-command-item
           selected={isSelected}
           onClick={() => selectItem("__searchInSearchTool")}
-          sx={{
-            py: 0.5,
-            "&.Mui-selected": {
-              bgcolor: "action.hover",
-            },
-          }}
+          sx={SELECTABLE_ITEM_SX}
         >
           <ListItemIcon sx={{ minWidth: 36 }}>
             <SearchIcon fontSize="small" />
@@ -1297,12 +1096,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           data-command-item
           selected={isBackSelected}
           onClick={() => selectItem(BACK_COMMAND.type)}
-          sx={{
-            py: 0.5,
-            "&.Mui-selected": {
-              bgcolor: "action.hover",
-            },
-          }}
+          sx={SELECTABLE_ITEM_SX}
         >
           <ListItemIcon sx={{ minWidth: 36 }}>{BACK_COMMAND.icon}</ListItemIcon>
           <ListItemText
@@ -1330,12 +1124,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
                 layerId: layer.id,
               })
             }
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
+            sx={SELECTABLE_ITEM_SX}
           >
             <ListItemIcon sx={{ minWidth: 36 }}>
               <Checkbox checked={layer.visible} size="small" sx={{ p: 0 }} />
@@ -1377,12 +1166,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           data-command-item
           selected={isBackSelected}
           onClick={() => selectItem(BACK_COMMAND.type)}
-          sx={{
-            py: 0.5,
-            "&.Mui-selected": {
-              bgcolor: "action.hover",
-            },
-          }}
+          sx={SELECTABLE_ITEM_SX}
         >
           <ListItemIcon sx={{ minWidth: 36 }}>{BACK_COMMAND.icon}</ListItemIcon>
           <ListItemText
@@ -1415,12 +1199,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
                 layer.id
               );
             }}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
+            sx={SELECTABLE_ITEM_SX}
           >
             <ListItemIcon sx={{ minWidth: 36 }}>
               {layer.visible ? (
@@ -1460,12 +1239,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           data-command-item
           selected={isBackSelected}
           onClick={() => selectItem(BACK_COMMAND.type)}
-          sx={{
-            py: 0.5,
-            "&.Mui-selected": {
-              bgcolor: "action.hover",
-            },
-          }}
+          sx={SELECTABLE_ITEM_SX}
         >
           <ListItemIcon sx={{ minWidth: 36 }}>{BACK_COMMAND.icon}</ListItemIcon>
           <ListItemText
@@ -1490,12 +1264,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             data-command-item
             selected={isSelected}
             onClick={() => selectItem(`__preset:${index}`)}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
+            sx={SELECTABLE_ITEM_SX}
           >
             <ListItemText
               primary={preset.name}
@@ -1528,12 +1297,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           data-command-item
           selected={isBackSelected}
           onClick={() => selectItem(BACK_COMMAND.type)}
-          sx={{
-            py: 0.5,
-            "&.Mui-selected": {
-              bgcolor: "action.hover",
-            },
-          }}
+          sx={SELECTABLE_ITEM_SX}
         >
           <ListItemIcon sx={{ minWidth: 36 }}>{BACK_COMMAND.icon}</ListItemIcon>
           <ListItemText
@@ -1557,12 +1321,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             data-command-item
             selected={isSelected}
             onClick={() => selectItem(cmd.type)}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
+            sx={SELECTABLE_ITEM_SX}
           >
             {cmd.icon && (
               <ListItemIcon sx={{ minWidth: 36 }}>{cmd.icon}</ListItemIcon>
@@ -1598,12 +1357,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           data-command-item
           selected={isBackSelected}
           onClick={() => selectItem(BACK_COMMAND.type)}
-          sx={{
-            py: 0.5,
-            "&.Mui-selected": {
-              bgcolor: "action.hover",
-            },
-          }}
+          sx={SELECTABLE_ITEM_SX}
         >
           <ListItemIcon sx={{ minWidth: 36 }}>{BACK_COMMAND.icon}</ListItemIcon>
           <ListItemText
@@ -1641,12 +1395,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             data-command-item
             selected={isSelected}
             onClick={() => selectItem(tool.type)}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
+            sx={SELECTABLE_ITEM_SX}
           >
             {tool.icon && (
               <ListItemIcon sx={{ minWidth: 36 }}>{tool.icon}</ListItemIcon>
@@ -1691,12 +1440,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
             data-command-item
             selected={isSelected}
             onClick={() => selectItem(tool.type)}
-            sx={{
-              py: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "action.hover",
-              },
-            }}
+            sx={SELECTABLE_ITEM_SX}
           >
             {tool.icon && (
               <ListItemIcon sx={{ minWidth: 36 }}>{tool.icon}</ListItemIcon>
