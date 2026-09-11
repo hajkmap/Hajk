@@ -35,6 +35,7 @@ import { isValidLayerId } from "../../utils/Validator";
 
 const MAX_RECENT = 5;
 const TOP_LEVEL_LAYER_MATCH_LIMIT = 5;
+const TOP_LEVEL_PLUGIN_MATCH_LIMIT = 5;
 
 const IS_MAC = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const SHORTCUT_LABEL = IS_MAC ? "⌘K" : "Ctrl+K";
@@ -412,6 +413,27 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       for (const cmd of filteredCommands) {
         items.push({ ...cmd, section: "commands" });
       }
+      // Match plugin/tool names directly from the top level too, so opening
+      // a tool doesn't require entering the "Öppna verktyg" view first.
+      if (query.trim() && filteredTools.length > 0) {
+        const topLevelPluginMatches = filteredTools.slice(
+          0,
+          TOP_LEVEL_PLUGIN_MATCH_LIMIT
+        );
+        for (const tool of topLevelPluginMatches) {
+          items.push({ ...tool, section: "plugins" });
+        }
+        if (filteredTools.length > TOP_LEVEL_PLUGIN_MATCH_LIMIT) {
+          items.push({
+            type: "__morePlugins",
+            title: `Visa alla ${filteredTools.length} verktyg`,
+            description: "",
+            icon: <LaunchIcon />,
+            kind: "command",
+            section: "plugins-more",
+          });
+        }
+      }
       // Match layer names directly from the top level too, so toggling a
       // layer doesn't require entering the "Lager" view first.
       if (query.trim() && filteredLayers.length > 0) {
@@ -602,6 +624,13 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
         // Jump into the full "Lager" view, keeping the current search term
         // so the rest of the matches are immediately visible.
         setViewMode("layers");
+        setSelectedIndex(0);
+        return;
+      }
+      if (type === "__morePlugins") {
+        // Jump into the full "Öppna verktyg" view, keeping the current
+        // search term so the rest of the matches are immediately visible.
+        setViewMode("plugins");
         setSelectedIndex(0);
         return;
       }
@@ -823,6 +852,81 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       }
     }
 
+    // Plugin/tool matches, shown directly at the top level so opening a
+    // tool doesn't require entering the "Öppna verktyg" view first.
+    const showTopLevelPluginMatches = query.trim() && filteredTools.length > 0;
+    if (showTopLevelPluginMatches) {
+      listContent.push(
+        <Box key="plugins-header" sx={{ px: 2, pt: 1, pb: 0.5 }}>
+          <Typography variant="caption" sx={{ opacity: 0.6, fontWeight: 500 }}>
+            Verktyg
+          </Typography>
+        </Box>
+      );
+
+      const topLevelPluginMatches = filteredTools.slice(
+        0,
+        TOP_LEVEL_PLUGIN_MATCH_LIMIT
+      );
+      for (const tool of topLevelPluginMatches) {
+        const isSelected = itemIndex === selectedIndex;
+        listContent.push(
+          <ListItemButton
+            key={`top-plugin-${tool.type}`}
+            data-command-item
+            selected={isSelected}
+            onClick={() => selectItem(tool.type)}
+            sx={{
+              py: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            {tool.icon && (
+              <ListItemIcon sx={{ minWidth: 36 }}>{tool.icon}</ListItemIcon>
+            )}
+            <ListItemText
+              primary={tool.title}
+              slotProps={{
+                primary: { variant: "body2", noWrap: true },
+              }}
+            />
+          </ListItemButton>
+        );
+        itemIndex++;
+      }
+
+      if (filteredTools.length > TOP_LEVEL_PLUGIN_MATCH_LIMIT) {
+        const isMoreSelected = itemIndex === selectedIndex;
+        listContent.push(
+          <ListItemButton
+            key="more-plugins"
+            data-command-item
+            selected={isMoreSelected}
+            onClick={() => selectItem("__morePlugins")}
+            sx={{
+              py: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              <LaunchIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText
+              primary={`Visa alla ${filteredTools.length} verktyg`}
+              slotProps={{
+                primary: { variant: "body2", noWrap: true },
+              }}
+            />
+          </ListItemButton>
+        );
+        itemIndex++;
+      }
+    }
+
     // Layer name matches, shown directly at the top level so toggling a
     // layer doesn't require entering the "Lager" view first.
     const showTopLevelLayerMatches = query.trim() && filteredLayers.length > 0;
@@ -906,7 +1010,11 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     // tool, at the very bottom, regardless of what else matched.
     const searchFallbackQuery = query.trim();
     if (searchFallbackQuery) {
-      if (filteredCommands.length > 0 || showTopLevelLayerMatches) {
+      if (
+        filteredCommands.length > 0 ||
+        showTopLevelPluginMatches ||
+        showTopLevelLayerMatches
+      ) {
         listContent.push(<Divider key="search-fallback-divider" />);
       }
       const isSelected = itemIndex === selectedIndex;
