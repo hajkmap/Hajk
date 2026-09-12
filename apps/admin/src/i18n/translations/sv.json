@@ -980,6 +980,18 @@
         "presetUrl": "Url",
         "presetUrlPlaceholder": "T.ex. ?m=map_1&x=147325&y=6398754&z=4&l=10"
       },
+      "coordinates": {
+        "thousandSeparator": "Formattera nummer (1000 -> 1 000)",
+        "showFieldsOnStart": "Visa projektionsfälten från start",
+        "transformationsList": "Koordinatsystem",
+        "transformationCode": "SRS-kod",
+        "transformationPrecision": "Precision (antal decimaler)",
+        "transformationDefault": "Standard",
+        "transformationHint": "Beskrivning",
+        "transformationXTitle": "X-etikett",
+        "transformationYTitle": "Y-etikett",
+        "transformationInverseAxis": "Inverterad"
+      },
       "search": {
         "infoText": "Infotext i sökfältet",
         "infoTextPlaceholder": "Ange informationstext...",

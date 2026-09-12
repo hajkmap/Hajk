@@ -1047,6 +1047,18 @@
         "presetUrl": "Url",
         "presetUrlPlaceholder": "E.g. ?m=map_1&x=147325&y=6398754&z=4&l=10"
       },
+      "coordinates": {
+        "thousandSeparator": "Format numbers (1000 -> 1 000)",
+        "showFieldsOnStart": "Show projection fields on start",
+        "transformationsList": "Coordinate systems",
+        "transformationCode": "SRS code",
+        "transformationPrecision": "Precision (decimal places)",
+        "transformationDefault": "Default",
+        "transformationHint": "Description",
+        "transformationXTitle": "X label",
+        "transformationYTitle": "Y label",
+        "transformationInverseAxis": "Inverse axis"
+      },
       "documenthandler": {
         "drawerButtonTitle": "Drawer button title",
         "drawerTitle": "Drawer title",
