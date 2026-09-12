@@ -165,6 +165,21 @@ class Search extends React.PureComponent {
       });
     });
 
+    // Command palette needs access to focus the input.
+    this.globalObserver.subscribe("search.focusInput", () => {
+      const input = document.getElementById("searchInputField");
+      input?.focus();
+    });
+
+    // Command palette needs access to clear the search and focus the input.
+    this.globalObserver.subscribe("search.clearSearch", () => {
+      this.handleOnClear();
+      setTimeout(() => {
+        const input = document.getElementById("searchInputField");
+        input?.focus();
+      }, 50);
+    });
+
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(

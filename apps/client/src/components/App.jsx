@@ -717,6 +717,11 @@ class App extends React.PureComponent {
       });
     });
 
+    // Commandpalette needs to be able to toggle the theme
+    this.globalObserver.subscribe("core.toggleTheme", () => {
+      this.props.toggleMUITheme();
+    });
+
     this.globalObserver.subscribe("core.hideDrawer", () => {
       // If Drawer is currently permanent,
       // flip the permanent toggle. Please note that
