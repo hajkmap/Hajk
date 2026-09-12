@@ -64,6 +64,13 @@ function getCurrentThemeMode() {
     : "light";
 }
 
+function isSearchConfigured(appModel) {
+  return (
+    appModel?.config?.mapConfig?.tools?.some((t) => t.type === "search") ??
+    false
+  );
+}
+
 function getPresetConfig(appModel) {
   return appModel?.config?.mapConfig?.tools?.find((t) => t.type === "preset")
     ?.options;
@@ -142,6 +149,8 @@ function getCommands(appModel) {
 }
 
 function getSearchCommands(appModel) {
+  if (!isSearchConfigured(appModel)) return [];
+
   const searchConfig =
     appModel?.config?.mapConfig?.tools?.find((t) => t.type === "search")
       ?.options || {};
@@ -752,9 +761,9 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           }
         }
       }
-      // Always offer a way to hand the typed text off to the real Search
-      // tool, at the very bottom, regardless of what else matched.
-      if (query.trim()) {
+      // Offer a way to hand the typed text off to the real Search tool,
+      // at the very bottom, but only if the search plugin is configured.
+      if (query.trim() && isSearchConfigured(appModel)) {
         items.push({
           type: "__searchInSearchTool",
           title: `Sök efter "${query.trim()}" i sökverktyget`,
@@ -847,6 +856,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
     presetList,
     recentTools,
     query,
+    appModel,
   ]);
 
   const handleQueryChange = useCallback((e) => {
@@ -1059,10 +1069,10 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
       }
     }
 
-    // Always offer a way to hand the typed text off to the real Search
-    // tool, at the very bottom, regardless of what else matched.
+    // Offer a way to hand the typed text off to the real Search tool,
+    // at the very bottom, but only if the search plugin is configured.
     const searchFallbackQuery = query.trim();
-    if (searchFallbackQuery) {
+    if (searchFallbackQuery && isSearchConfigured(appModel)) {
       if (filteredCommands.length > 0 || shownMatchGroups.length > 0) {
         listContent.push(<Divider key="search-fallback-divider" />);
       }
