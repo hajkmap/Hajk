@@ -3,12 +3,34 @@ import { Component } from "react";
 import $ from "jquery";
 
 // X2JS keeps namespace-prefixed elements (e.g. ows:Title) as objects
-// { __text: "value", __prefix: "ows" } instead of plain strings.
+// { __text: "value", __prefix: "ows" } instead of plain strings. An empty prefixed
+// element such as <ows:Identifier/> yields { __prefix: "ows" } with no __text at all,
+// which is legal in WMTS - GeoServer uses it for the empty default style.
 function textValue(val) {
   if (val == null) return "";
   if (typeof val === "string") return val;
-  if (typeof val === "object" && val.__text != null) return String(val.__text);
+  if (typeof val === "object") {
+    return val.__text != null ? String(val.__text) : "";
+  }
   return String(val);
+}
+
+// X2JS keeps the namespace prefix on attribute names (unlike element names, where
+// the local name is used), so xlink:href ends up as "_xlink:href".
+function attrValue(obj) {
+  if (!obj) return "";
+  for (var i = 1; i < arguments.length; i++) {
+    var v = obj["_" + arguments[i]];
+    if (v != null) return String(v);
+  }
+  return "";
+}
+
+// X2JS only produces arrays for the paths listed in arrayAccessFormPaths, and even
+// those are absent when the element is missing altogether.
+function toArray(val) {
+  if (val == null) return [];
+  return Array.isArray(val) ? val : [val];
 }
 
 // Normalize CRS identifiers to "EPSG:CODE" format for OpenLayers.
@@ -21,6 +43,173 @@ function crsToEpsg(crs) {
   var uri = s.match(/\/def\/crs\/(\w+)\/\w+\/(\w+)/);
   if (uri) return uri[1] + ":" + uri[2];
   return s;
+}
+
+// "FORMAT_OPTIONS=dpi:90; TIME=2020" <-> { FORMAT_OPTIONS: "dpi:90", TIME: "2020" }
+function parseDimensions(str) {
+  var result = {};
+  String(str || "")
+    .split(";")
+    .forEach((part) => {
+      var eq = part.indexOf("=");
+      if (eq < 1) return;
+      var key = part.slice(0, eq).trim();
+      var value = part.slice(eq + 1).trim();
+      if (key !== "") result[key] = value;
+    });
+  return result;
+}
+
+function stringifyDimensions(obj) {
+  if (!obj) return "";
+  return Object.keys(obj)
+    .map((key) => key + "=" + obj[key])
+    .join("; ");
+}
+
+// "62307.13 6917750.0; 62307.13 6910582.0" <-> [[62307.13, 6910582.0], ...]
+// Kept as free functions (not methods) so they can process both the base
+// matrixSet fields and every highDpiVariants row identically.
+function parseOrigins(value) {
+  return String(value || "")
+    .split(";")
+    .map((pair) => pair.trim().split(/[\s,]+/))
+    .filter((pair) => pair.length === 2 && pair[0] !== "");
+}
+
+function parseResolutions(value) {
+  return String(value || "").split(",");
+}
+
+function parseMatrixIds(value) {
+  return String(value || "").split(",");
+}
+
+function parseSizes(value) {
+  var result = String(value || "")
+    .split(";")
+    .map((pair) => pair.trim().split(/\s+/).map(Number))
+    .filter((pair) => pair.length === 2 && !isNaN(pair[0]) && !isNaN(pair[1]));
+  return result.length === 0 ? undefined : result;
+}
+
+function parseTileSize(value) {
+  var parts = String(value || "")
+    .trim()
+    .split(/\s+/)
+    .map(Number);
+  if (parts.length === 1 && !isNaN(parts[0]) && parts[0] > 0) {
+    return parts[0];
+  } else if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+    return parts;
+  }
+  return undefined;
+}
+
+// Stringify counterparts, used to hydrate saved highDpiVariants (raw arrays/numbers
+// from layers.json) back into editable text, instead of relying on
+// Array.prototype.toString() the way the base fields currently do.
+function stringifyOrigins(origins) {
+  return (origins || [])
+    .map((pair) => (Array.isArray(pair) ? pair.join(" ") : String(pair)))
+    .join("; ");
+}
+
+function stringifyList(list) {
+  return (list || []).join(",");
+}
+
+function stringifySizes(sizes) {
+  return (sizes || [])
+    .map((pair) => (Array.isArray(pair) ? pair.join(" ") : String(pair)))
+    .join("; ");
+}
+
+function stringifyTileSize(tileSize) {
+  if (tileSize === undefined || tileSize === null || tileSize === "") {
+    return "";
+  }
+  return Array.isArray(tileSize) ? tileSize.join(" ") : String(tileSize);
+}
+
+// GeoServer/GWC's "xN" gridset convention scales the rendered DPI proportionally to
+// the tier (dpi:90 at x1 -> dpi:180 at x2 -> dpi:270 at x3, ...), matching the fixed
+// 90/180/270 list already used for WMS in WMSLayer.jsx's customDpiList. Multiply the
+// base dpi:* value by minPixelRatio, but only use the result if GetCapabilities'
+// Dimension/Value list for that key actually advertises it - otherwise leave the
+// value as-is (same as before) rather than guess at something the server never
+// confirmed it serves. Non-dpi dimension keys/values are passed through unchanged.
+function deriveHighDpiDimensions(
+  baseDimensionsStr,
+  minPixelRatio,
+  availableDimensions
+) {
+  var base = parseDimensions(baseDimensionsStr);
+  var result = {};
+  Object.keys(base).forEach((key) => {
+    var value = base[key];
+    var match = /^dpi:(\d+(?:\.\d+)?)$/i.exec(value);
+    if (match) {
+      var scaled = Number(match[1]) * minPixelRatio;
+      var candidate =
+        "dpi:" + (Number.isInteger(scaled) ? scaled : scaled.toFixed(1));
+      var dimensionDef = (availableDimensions || []).find((d) => d.id === key);
+      if (dimensionDef && dimensionDef.values.indexOf(candidate) > -1) {
+        result[key] = candidate;
+        return;
+      }
+    }
+    result[key] = value;
+  });
+  return stringifyDimensions(result);
+}
+
+// Escapes regex metacharacters in a matrixSet name before it's spliced into a
+// RegExp, e.g. "EPSG:3008" contains ":" which is harmless but "." or "+" would not be.
+function escapeRegExp(str) {
+  return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Mirrors highDpiTileFactor() in Client's models/layers/WMTSLayer.js, purely so the
+// admin can see whether a configured tier will actually sharpen anything. A tier whose
+// tiles are the same size as the base grid's gets its density from the tier threshold
+// instead; a factor of 1 means the tier renders identically to the standard grid.
+function highDpiTileFactor(row, baseTileSize) {
+  var toPair = (value) => {
+    var parsed = parseTileSize(value);
+    if (parsed === undefined) return null;
+    return Array.isArray(parsed) ? parsed : [parsed, parsed];
+  };
+
+  // Without the tier's own rutstorlek there is nothing to compare against.
+  var variant = toPair(row.tileSize);
+  if (!variant) return 1;
+
+  var base = toPair(baseTileSize) || [256, 256];
+
+  var widthFactor = variant[0] / base[0];
+  if (widthFactor !== variant[1] / base[1]) return 1;
+
+  var factor = widthFactor > 1 ? widthFactor : Number(row.minPixelRatio);
+  if (!isFinite(factor) || factor <= 1) return 1;
+
+  return Number.isInteger(variant[0] / factor) &&
+    Number.isInteger(variant[1] / factor)
+    ? factor
+    : 1;
+}
+
+function blankHighDpiVariant(defaultDimensions) {
+  return {
+    minPixelRatio: "",
+    matrixSet: "",
+    origins: "",
+    resolutions: "",
+    matrixIds: "",
+    sizes: "",
+    tileSize: "",
+    dimensions: defaultDimensions || "",
+  };
 }
 
 const defaultState = {
@@ -36,13 +225,12 @@ const defaultState = {
   legendIcon: "",
   url: "",
   capabilitiesUrl: "",
-  queryable: true,
-  drawOrder: 1,
   layer: "",
   matrixSet: "",
-  style: "default",
+  style: "",
   requestEncoding: "REST",
   imageFormat: "",
+  dimensions: "",
   selectedResource: "",
   projection: "EPSG:3006",
   origins: "-1200000 8500000",
@@ -65,6 +253,8 @@ const defaultState = {
   ],
   sizes: "",
   tileSize: "",
+  highDpiVariants: [],
+  detectedHighDpiCandidates: [],
   crossOrigin: "",
   rotateMap: "n",
   layerType: "WMTS",
@@ -86,7 +276,17 @@ const defaultState = {
   wmtsTileMatrixSets: [],
   availableMatrixSets: [],
   availableResources: [],
+  availableStyles: [],
+  availableDimensions: [],
+  matrixSetLimits: {},
+  getTileBaseUrl: "",
+  allowedGetTileEncodings: [],
+  urlWarning: "",
 };
+
+// Fallback when a server advertises no <Style> at all for a layer. WMTS requires a
+// style identifier in both KVP and REST requests, and "default" is the conventional one.
+const FALLBACK_STYLE = { id: "default", isDefault: true, legendUrl: "" };
 
 /**
  *
@@ -133,42 +333,95 @@ class WMTSLayerForm extends Component {
     return this.props.model
       .getAllWMTSCapabilities(this.state.capabilitiesUrl)
       .then((capabilities) => {
-        var layers = capabilities.Contents?.Layer || [];
-        var tileMatrixSets = capabilities.Contents?.TileMatrixSet || [];
+        var layers = toArray(capabilities.Contents?.Layer);
+        var tileMatrixSets = toArray(capabilities.Contents?.TileMatrixSet);
 
-        if (!Array.isArray(layers)) {
-          layers = [layers];
-        }
-        if (!Array.isArray(tileMatrixSets)) {
-          tileMatrixSets = [tileMatrixSets];
-        }
-
-        return { capabilities, layers, tileMatrixSets };
+        return {
+          capabilities,
+          layers,
+          tileMatrixSets,
+          ...this.deriveServiceOptions(capabilities),
+        };
       });
   }
 
+  // Service-wide info from OperationsMetadata: where GetTile lives and which request
+  // encodings the server actually advertises for it.
+  deriveServiceOptions(capabilities) {
+    var operations = toArray(capabilities.OperationsMetadata?.Operation);
+    var getTile = operations.find((o) => o._name === "GetTile");
+    var gets = toArray(getTile?.DCP?.HTTP?.Get);
+
+    var getTileBaseUrl = "";
+    var allowedGetTileEncodings = [];
+
+    gets.forEach((get) => {
+      var href = attrValue(get, "xlink:href", "href");
+      if (href && !getTileBaseUrl) {
+        getTileBaseUrl = href.replace(/\?$/, "");
+      }
+      toArray(get.Constraint)
+        .filter((c) => c._name === "GetEncoding")
+        .forEach((c) => {
+          toArray(c.AllowedValues?.Value).forEach((v) => {
+            var value = textValue(v).toUpperCase();
+            if (value && allowedGetTileEncodings.indexOf(value) === -1) {
+              allowedGetTileEncodings.push(value);
+            }
+          });
+        });
+    });
+
+    // Fall back to the capabilities URL without its query string.
+    if (!getTileBaseUrl) {
+      getTileBaseUrl = String(this.state.capabilitiesUrl || "").split("?")[0];
+    }
+
+    return { getTileBaseUrl, allowedGetTileEncodings };
+  }
+
   deriveLayerOptions(layers, layerIdentifier) {
+    var empty = {
+      availableMatrixSets: [],
+      availableResources: [],
+      availableStyles: [],
+      availableDimensions: [],
+      matrixSetLimits: {},
+      title: "",
+      abstract: "",
+    };
+
     var selectedLayer = layers.find(
-      (l) => textValue(l.Identifier) === layerIdentifier,
+      (l) => textValue(l.Identifier) === layerIdentifier
     );
     if (!selectedLayer) {
-      return { availableMatrixSets: [], availableResources: [] };
+      return empty;
     }
 
-    var links = selectedLayer.TileMatrixSetLink || [];
-    if (!Array.isArray(links)) {
-      links = [links];
-    }
+    var links = toArray(selectedLayer.TileMatrixSetLink);
     var availableMatrixSets = links.map((link) =>
-      textValue(link.TileMatrixSet),
+      textValue(link.TileMatrixSet)
     );
 
-    var resources = selectedLayer.ResourceURL || [];
-    if (!Array.isArray(resources)) {
-      resources = [resources];
-    }
+    // Per-matrix-set tile limits, keyed by matrix set name and then by TileMatrix
+    // identifier. Keying by identifier (not array position) matters, since the
+    // resulting sizes must line up with the matrixIds taken from the TileMatrixSet.
+    var matrixSetLimits = {};
+    links.forEach((link) => {
+      var name = textValue(link.TileMatrixSet);
+      var limits = toArray(link.TileMatrixSetLimits?.TileMatrixLimits);
+      if (!name || limits.length === 0) return;
+      matrixSetLimits[name] = {};
+      limits.forEach((limit) => {
+        matrixSetLimits[name][textValue(limit.TileMatrix)] = {
+          maxTileCol: Number(textValue(limit.MaxTileCol)),
+          maxTileRow: Number(textValue(limit.MaxTileRow)),
+        };
+      });
+    });
+
     var availableResources = [];
-    resources
+    toArray(selectedLayer.ResourceURL)
       .filter((r) => r._resourceType === "tile")
       .forEach((r) => {
         var format = textValue(r._format);
@@ -181,17 +434,268 @@ class WMTSLayerForm extends Component {
       });
 
     if (availableResources.length === 0) {
-      var formats = selectedLayer.Format || [];
-      if (!Array.isArray(formats)) {
-        formats = [formats];
-      }
-      availableResources = formats.map((f) => ({
+      availableResources = toArray(selectedLayer.Format).map((f) => ({
         format: textValue(f),
         template: "",
       }));
     }
 
-    return { availableMatrixSets, availableResources };
+    var availableStyles = toArray(selectedLayer.Style).map((s) => ({
+      // An empty <ows:Identifier/> is legal and yields "" here.
+      id: textValue(s.Identifier),
+      isDefault: s._isDefault === "true",
+      legendUrl: attrValue(toArray(s.LegendURL)[0], "xlink:href", "href"),
+    }));
+    if (availableStyles.length === 0) {
+      availableStyles = [FALLBACK_STYLE];
+    }
+
+    var availableDimensions = toArray(selectedLayer.Dimension).map((d) => ({
+      id: textValue(d.Identifier),
+      defaultValue: textValue(d.Default),
+      values: toArray(d.Value).map(textValue),
+    }));
+
+    return {
+      availableMatrixSets,
+      availableResources,
+      availableStyles,
+      availableDimensions,
+      matrixSetLimits,
+      title: textValue(selectedLayer.Title),
+      abstract: textValue(selectedLayer.Abstract),
+    };
+  }
+
+  // Full grid geometry (origins/matrixIds/resolutions/sizes/tileSize, plus the CRS)
+  // for one TileMatrixSet, derived from its own <TileMatrixSet> definition and,
+  // where available, this layer's TileMatrixSetLimits for that set. Shared by the
+  // base matrixSet field and every highDpiVariants row - a "highDpi" set (e.g.
+  // GeoServer/GWC's "EPSG:3008x2") is just another TileMatrixSet with its own
+  // resolutions/tile counts, derived the exact same way.
+  deriveMatrixSetGeometry(matrixSetName) {
+    var fullSet = this.state.wmtsTileMatrixSets.find(
+      (tms) => textValue(tms.Identifier) === matrixSetName
+    );
+    if (!fullSet) return {};
+
+    var geometry = {
+      projection: crsToEpsg(textValue(fullSet.SupportedCRS)),
+    };
+
+    var matrices = toArray(fullSet.TileMatrix);
+    if (matrices.length === 0) return geometry;
+
+    // WMTS may report TopLeftCorner in CRS axis order.
+    // Swap only when the first value is positive.
+    geometry.origins = matrices
+      .map((m) => {
+        var parts = textValue(m.TopLeftCorner).trim().split(/\s+/);
+        if (parts.length !== 2) {
+          return textValue(m.TopLeftCorner).trim();
+        }
+        var firstValue = Number(parts[0]);
+        return !Number.isNaN(firstValue) && firstValue > 0
+          ? parts[1] + " " + parts[0]
+          : parts[0] + " " + parts[1];
+      })
+      .filter(Boolean)
+      .join("; ");
+
+    geometry.matrixIds = matrices.map((m) => textValue(m.Identifier)).join(",");
+
+    geometry.resolutions = matrices
+      .map((m) => Number(textValue(m.ScaleDenominator)) * 0.00028)
+      .join(",");
+
+    // Prefer the selected layer's TileMatrixSetLimits over the full matrix
+    // dimensions, so we don't request tiles outside the layer's data extent.
+    var limits = this.state.matrixSetLimits[matrixSetName] || {};
+    geometry.sizes = matrices
+      .map((m) => {
+        var limit = limits[textValue(m.Identifier)];
+        if (limit) {
+          return limit.maxTileCol + 1 + " " + (limit.maxTileRow + 1);
+        }
+        return textValue(m.MatrixWidth) + " " + textValue(m.MatrixHeight);
+      })
+      .filter((s) => s.trim() !== "")
+      .join("; ");
+
+    var tw = textValue(matrices[0].TileWidth);
+    var th = textValue(matrices[0].TileHeight);
+    if (tw && th) {
+      geometry.tileSize = tw === th ? tw : tw + " " + th;
+    }
+
+    return geometry;
+  }
+
+  // GeoServer/GWC convention: a "highDpi" TileMatrixSet is named "<base>x<N>", e.g.
+  // base "EPSG:3008" -> "EPSG:3008x2". Since availableMatrixSets already lists every
+  // TileMatrixSetLink advertised for the selected layer, we can offer these as
+  // one-click additions instead of requiring the admin to hunt for them manually.
+  refreshDetectedHighDpiCandidates(baseMatrixSet) {
+    if (!baseMatrixSet) {
+      this.setState({ detectedHighDpiCandidates: [] });
+      return;
+    }
+    var pattern = new RegExp("^" + escapeRegExp(baseMatrixSet) + "x(\\d+)$");
+    var configured = this.state.highDpiVariants.map((row) => row.matrixSet);
+    var candidates = this.state.availableMatrixSets
+      .map((name) => {
+        var match = name.match(pattern);
+        return match
+          ? { matrixSet: name, minPixelRatio: Number(match[1]) }
+          : null;
+      })
+      .filter((c) => c && configured.indexOf(c.matrixSet) === -1);
+    this.setState({ detectedHighDpiCandidates: candidates });
+  }
+
+  addDetectedHighDpiVariant(candidate) {
+    var geometry = this.deriveMatrixSetGeometry(candidate.matrixSet);
+    var row = {
+      minPixelRatio: String(candidate.minPixelRatio),
+      matrixSet: candidate.matrixSet,
+      origins: geometry.origins || "",
+      resolutions: geometry.resolutions || "",
+      matrixIds: geometry.matrixIds || "",
+      sizes: geometry.sizes || "",
+      tileSize: geometry.tileSize || "",
+      dimensions: deriveHighDpiDimensions(
+        this.state.dimensions,
+        candidate.minPixelRatio,
+        this.state.availableDimensions
+      ),
+    };
+    this.setState((prev) => ({
+      highDpiVariants: [...prev.highDpiVariants, row],
+      detectedHighDpiCandidates: prev.detectedHighDpiCandidates.filter(
+        (c) => c.matrixSet !== candidate.matrixSet
+      ),
+    }));
+  }
+
+  addManualHighDpiVariant() {
+    this.setState((prev) => ({
+      highDpiVariants: [
+        ...prev.highDpiVariants,
+        blankHighDpiVariant(prev.dimensions),
+      ],
+    }));
+  }
+
+  updateHighDpiVariant(index, patch) {
+    this.setState((prev) => ({
+      highDpiVariants: prev.highDpiVariants.map((row, i) =>
+        i === index ? { ...row, ...patch } : row
+      ),
+    }));
+  }
+
+  removeHighDpiVariant(index) {
+    this.setState((prev) => {
+      var removed = prev.highDpiVariants[index];
+      var remaining = prev.highDpiVariants.filter((_, i) => i !== index);
+      var candidates = prev.detectedHighDpiCandidates.slice();
+      var match =
+        removed && removed.matrixSet && removed.matrixSet.match(/x(\d+)$/);
+      if (
+        match &&
+        removed.matrixSet ===
+          prev.matrixSet + "x" + match[1] /* was auto-detectable */
+      ) {
+        candidates.push({
+          matrixSet: removed.matrixSet,
+          minPixelRatio: Number(match[1]),
+        });
+      }
+      return {
+        highDpiVariants: remaining,
+        detectedHighDpiCandidates: candidates,
+      };
+    });
+  }
+
+  // REST when the server hands us a tile template, otherwise the KVP flavour it
+  // advertises. Beats the previously hardcoded "REST".
+  defaultRequestEncoding(options) {
+    var hasTemplate = (options.availableResources || []).some(
+      (r) => r.template
+    );
+    if (hasTemplate) return "REST";
+    return this.state.allowedGetTileEncodings.indexOf("KVP") > -1
+      ? "KVP_TEMPLATE"
+      : "KVP";
+  }
+
+  // A KVP GetTile query string where the per-tile parameters are left as
+  // {placeholders}. OpenLayers substitutes {Layer}, {Style} and {TileMatrixSet} when
+  // the source is built and the rest per tile. FORMAT has to be literal - OL does not
+  // expose it to the template.
+  buildKvpTemplateUrl(overrides) {
+    var s = { ...this.state, ...overrides };
+    if (!s.getTileBaseUrl) return s.url;
+
+    var params = [
+      "SERVICE=WMTS",
+      "REQUEST=GetTile",
+      "VERSION=1.0.0",
+      "LAYER={Layer}",
+      "STYLE={Style}",
+      "FORMAT=" + (s.imageFormat || "image/png"),
+      "TILEMATRIXSET={TileMatrixSet}",
+      "TILEMATRIX={TileMatrix}",
+      "TILEROW={TileRow}",
+      "TILECOL={TileCol}",
+    ];
+
+    var dimensions = parseDimensions(s.dimensions);
+    Object.keys(dimensions).forEach((key) => {
+      params.push(key + "={" + key + "}");
+    });
+
+    return s.getTileBaseUrl + "?" + params.join("&");
+  }
+
+  // The Url field is derived from the encoding, but stays hand-editable afterwards.
+  urlForRequestEncoding(requestEncoding, overrides) {
+    var s = { ...this.state, ...overrides };
+    if (requestEncoding === "KVP_TEMPLATE") {
+      return this.buildKvpTemplateUrl(overrides);
+    }
+    if (requestEncoding === "KVP") {
+      return s.getTileBaseUrl || s.url;
+    }
+    var resource = s.availableResources[Number(s.selectedResource)];
+    return resource && resource.template ? resource.template : s.url;
+  }
+
+  // Applies a state patch and re-derives the Url when the current encoding generates
+  // it. Other encodings keep whatever is in the field, so hand edits survive.
+  refreshGeneratedUrl(patch) {
+    var next = { ...patch };
+    var encoding = next.requestEncoding || this.state.requestEncoding;
+    if (encoding === "KVP_TEMPLATE") {
+      next.url = this.buildKvpTemplateUrl(next);
+    }
+    var url = next.url !== undefined ? next.url : this.state.url;
+    next.urlWarning = this.urlWarningFor(url, encoding);
+    this.setState(next, () => this.validateField("url"));
+  }
+
+  // Non-blocking hint: REST and KVP_TEMPLATE need {TileMatrix} in the URL, plain KVP
+  // must not have it (OpenLayers appends those parameters itself).
+  urlWarningFor(url, requestEncoding) {
+    var hasPlaceholders = /\{TileMatrix\}/i.test(url || "");
+    if (requestEncoding === "KVP" && hasPlaceholders) {
+      return "Url innehåller {TileMatrix} men encoding är KVP. OpenLayers lägger själv till dessa parametrar.";
+    }
+    if (requestEncoding !== "KVP" && !hasPlaceholders) {
+      return "Url saknar {TileMatrix}/{TileRow}/{TileCol} som krävs för vald encoding.";
+    }
+    return "";
   }
 
   loadWMTSCapabilities(e) {
@@ -202,20 +706,27 @@ class WMTSLayerForm extends Component {
     this.setState({ load: true });
 
     this.fetchCapabilities()
-      .then(({ capabilities, layers, tileMatrixSets }) => {
+      .then((result) => {
         this.setState({
           load: false,
-          wmtsCapabilities: capabilities,
-          wmtsLayers: layers,
-          wmtsTileMatrixSets: tileMatrixSets,
+          wmtsCapabilities: result.capabilities,
+          wmtsLayers: result.layers,
+          wmtsTileMatrixSets: result.tileMatrixSets,
+          getTileBaseUrl: result.getTileBaseUrl,
+          allowedGetTileEncodings: result.allowedGetTileEncodings,
           layer: "",
           matrixSet: "",
           selectedResource: "",
           requestEncoding: "REST",
           imageFormat: "",
+          dimensions: "",
           url: "",
+          urlWarning: "",
           availableMatrixSets: [],
           availableResources: [],
+          availableStyles: [],
+          availableDimensions: [],
+          matrixSetLimits: {},
         });
       })
       .catch((err) => {
@@ -236,37 +747,82 @@ class WMTSLayerForm extends Component {
   }
 
   loadLayerState(savedState) {
-    this.setState({ ...savedState, load: true });
+    var highDpiVariants = (savedState.highDpiVariants || []).map((v) => ({
+      minPixelRatio: v.minPixelRatio != null ? String(v.minPixelRatio) : "",
+      matrixSet: v.matrixSet || "",
+      origins: stringifyOrigins(v.origins),
+      resolutions: stringifyList(v.resolutions),
+      matrixIds: stringifyList(v.matrixIds),
+      sizes: stringifySizes(v.sizes),
+      tileSize: stringifyTileSize(v.tileSize),
+      dimensions: stringifyDimensions(v.dimensions),
+    }));
+
+    this.setState({ ...savedState, highDpiVariants, load: true });
 
     this.fetchCapabilities()
-      .then(({ capabilities, layers, tileMatrixSets }) => {
-        var options = this.deriveLayerOptions(layers, savedState.layer);
+      .then((result) => {
+        // title/abstract are only used to prefill a *new* layer, never in edit mode.
+        var { title, abstract, ...options } = this.deriveLayerOptions(
+          result.layers,
+          savedState.layer
+        );
         var selectedResourceIndex = options.availableResources.findIndex(
           (resource) =>
             resource.format === savedState.imageFormat &&
-            resource.template === savedState.url,
+            resource.template === savedState.url
         );
-        var inferredRequestEncoding =
-          /\{TileMatrix\}|\{TileRow\}|\{TileCol\}/i.test(savedState.url || "")
-            ? "REST"
-            : "KVP";
 
-        this.setState({
-          load: false,
-          wmtsCapabilities: capabilities,
-          wmtsLayers: layers,
-          wmtsTileMatrixSets: tileMatrixSets,
-          selectedResource:
-            selectedResourceIndex >= 0 ? String(selectedResourceIndex) : "",
-          requestEncoding:
-            savedState.requestEncoding || inferredRequestEncoding,
-          ...options,
-        });
+        var url = savedState.url || "";
+        var hasPlaceholders = /\{TileMatrix\}|\{TileRow\}|\{TileCol\}/i.test(
+          url
+        );
+        var inferredRequestEncoding = !hasPlaceholders
+          ? "KVP"
+          : /[?&]SERVICE=WMTS/i.test(url)
+          ? "KVP_TEMPLATE"
+          : "REST";
+        var requestEncoding =
+          savedState.requestEncoding || inferredRequestEncoding;
+
+        this.setState(
+          {
+            load: false,
+            wmtsCapabilities: result.capabilities,
+            wmtsLayers: result.layers,
+            wmtsTileMatrixSets: result.tileMatrixSets,
+            getTileBaseUrl: result.getTileBaseUrl,
+            allowedGetTileEncodings: result.allowedGetTileEncodings,
+            selectedResource:
+              selectedResourceIndex >= 0 ? String(selectedResourceIndex) : "",
+            requestEncoding,
+            urlWarning: this.urlWarningFor(url, requestEncoding),
+            ...options,
+          },
+          () => this.refreshDetectedHighDpiCandidates(savedState.matrixSet)
+        );
       })
       .catch((err) => {
         console.error("WMTS GetCapabilities failed:", err);
         this.setState({ load: false });
       });
+  }
+
+  // Attribution built from the service-level metadata, so the field isn't left empty.
+  deriveAttribution() {
+    var capabilities = this.state.wmtsCapabilities;
+    if (!capabilities) return "";
+
+    var parts = [];
+    var provider = textValue(capabilities.ServiceProvider?.ProviderName);
+    if (provider) parts.push(provider);
+    var constraints = textValue(
+      capabilities.ServiceIdentification?.AccessConstraints
+    );
+    if (constraints && constraints.toUpperCase() !== "NONE") {
+      parts.push(constraints);
+    }
+    return parts.join(" – ");
   }
 
   onLayerChange(identifier) {
@@ -277,23 +833,64 @@ class WMTSLayerForm extends Component {
         selectedResource: "",
         requestEncoding: "REST",
         imageFormat: "",
+        dimensions: "",
         url: "",
+        urlWarning: "",
         availableMatrixSets: [],
         availableResources: [],
+        availableStyles: [],
+        availableDimensions: [],
+        matrixSetLimits: {},
+        highDpiVariants: [],
+        detectedHighDpiCandidates: [],
       });
       return;
     }
 
-    var options = this.deriveLayerOptions(this.state.wmtsLayers, identifier);
+    var { title, abstract, ...options } = this.deriveLayerOptions(
+      this.state.wmtsLayers,
+      identifier
+    );
 
-    this.setState({
+    var defaultStyle =
+      options.availableStyles.find((s) => s.isDefault) ||
+      options.availableStyles[0];
+    var resource = options.availableResources[0];
+    var defaultDimensions = {};
+    options.availableDimensions.forEach((d) => {
+      if (d.id && d.defaultValue) defaultDimensions[d.id] = d.defaultValue;
+    });
+
+    var next = {
+      ...options,
       layer: identifier,
       matrixSet: "",
-      selectedResource: "",
-      requestEncoding: "REST",
-      imageFormat: "",
-      url: "",
-      ...options,
+      selectedResource: resource ? "0" : "",
+      imageFormat: resource ? resource.format : "",
+      dimensions: stringifyDimensions(defaultDimensions),
+      style: defaultStyle ? defaultStyle.id : "",
+      highDpiVariants: [],
+      detectedHighDpiCandidates: [],
+    };
+    next.requestEncoding = this.defaultRequestEncoding(options);
+    next.url = this.urlForRequestEncoding(next.requestEncoding, next);
+    next.urlWarning = this.urlWarningFor(next.url, next.requestEncoding);
+
+    // Prefill metadata from the capabilities document, but never overwrite something
+    // the user has already filled in.
+    if (!this.state.caption && title) next.caption = title;
+    if (!this.state.infoText && abstract) next.infoText = abstract;
+    if (!this.state.legend && defaultStyle && defaultStyle.legendUrl) {
+      next.legend = defaultStyle.legendUrl;
+    }
+    if (!this.state.attribution) {
+      var attribution = this.deriveAttribution();
+      if (attribution) next.attribution = attribution;
+    }
+
+    this.setState(next, () => {
+      this.validateField("caption");
+      this.validateField("url");
     });
   }
 
@@ -313,12 +910,14 @@ class WMTSLayerForm extends Component {
       style: this.getValue("style"),
       requestEncoding: this.getValue("requestEncoding"),
       imageFormat: this.getValue("imageFormat"),
+      dimensions: this.getValue("dimensions"),
       projection: this.getValue("projection"),
       origins: this.getValue("origins"),
       resolutions: this.getValue("resolutions"),
       matrixIds: this.getValue("matrixIds"),
       sizes: this.getValue("sizes"),
       tileSize: this.getValue("tileSize"),
+      highDpiVariants: this.getHighDpiVariantsValue(),
       crossOrigin: this.getValue("crossOrigin"),
       rotateMap: this.getValue("rotateMap"),
       attribution: this.getValue("attribution"),
@@ -342,10 +941,6 @@ class WMTSLayerForm extends Component {
       return new Date().getTime().toString();
     }
 
-    function format_layers(layers) {
-      return layers.map((layer) => layer);
-    }
-
     var input = this.refs["input_" + fieldName],
       value = input ? input.value : "";
 
@@ -356,45 +951,49 @@ class WMTSLayerForm extends Component {
     }
 
     if (fieldName === "date") value = create_date();
-    if (fieldName === "layers") value = format_layers(this.state.addedLayers);
-    if (fieldName === "singleTile") value = input.checked;
-    if (fieldName === "imageFormat") value = input.value;
-    if (fieldName === "queryable") value = input.checked;
-    if (fieldName === "tiled") value = input.checked;
-    if (fieldName === "searchFields") value = value.split(",");
-    if (fieldName === "displayFields") value = value.split(",");
-    if (fieldName === "origins")
-      value = value
-        .split(";")
-        .map((pair) => pair.trim().split(/[\s,]+/))
-        .filter((pair) => pair.length === 2 && pair[0] !== "");
-    if (fieldName === "resolutions") value = value.split(",");
-    if (fieldName === "matrixIds") value = value.split(",");
-    if (fieldName === "sizes") {
-      value = value
-        .split(";")
-        .map((pair) => pair.trim().split(/\s+/).map(Number))
-        .filter(
-          (pair) => pair.length === 2 && !isNaN(pair[0]) && !isNaN(pair[1]),
-        );
-      if (value.length === 0) value = undefined;
+    if (fieldName === "dimensions") {
+      value = parseDimensions(value);
+      if (Object.keys(value).length === 0) value = undefined;
     }
-    if (fieldName === "tileSize") {
-      var parts = value.trim().split(/\s+/).map(Number);
-      if (parts.length === 1 && !isNaN(parts[0]) && parts[0] > 0) {
-        value = parts[0];
-      } else if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-        value = parts;
-      } else {
-        value = undefined;
-      }
-    }
+    if (fieldName === "origins") value = parseOrigins(value);
+    if (fieldName === "resolutions") value = parseResolutions(value);
+    if (fieldName === "matrixIds") value = parseMatrixIds(value);
+    if (fieldName === "sizes") value = parseSizes(value);
+    if (fieldName === "tileSize") value = parseTileSize(value);
     if (fieldName === "crossOrigin")
       value = value.trim() === "" ? undefined : value;
     if (fieldName === "infoVisible") value = input.checked;
     if (fieldName === "timeSliderVisible") value = input.checked;
 
     return value;
+  }
+
+  // highDpiVariants rows are plain controlled state (no this.refs), so they're
+  // parsed directly here rather than through getValue().
+  getHighDpiVariantsValue() {
+    return this.state.highDpiVariants
+      .map((row) => ({
+        minPixelRatio: Number(row.minPixelRatio) || 0,
+        matrixSet: (row.matrixSet || "").trim(),
+        origins: parseOrigins(row.origins),
+        resolutions: parseResolutions(row.resolutions),
+        matrixIds: parseMatrixIds(row.matrixIds),
+        sizes: parseSizes(row.sizes),
+        tileSize: parseTileSize(row.tileSize),
+        dimensions: parseDimensions(row.dimensions),
+      }))
+      .filter((v) => this.isValidHighDpiVariant(v));
+  }
+
+  isValidHighDpiVariant(v) {
+    var nonEmptyList = (list) => !(list.length === 1 && list[0] === "");
+    return (
+      !!v.matrixSet &&
+      v.minPixelRatio > 0 &&
+      v.origins.length > 0 &&
+      nonEmptyList(v.resolutions) &&
+      nonEmptyList(v.matrixIds)
+    );
   }
 
   validate() {
@@ -404,6 +1003,7 @@ class WMTSLayerForm extends Component {
       "caption",
       "layer",
       "matrixSet",
+      "imageFormat",
       "projection",
       "origins",
       "resolutions",
@@ -417,6 +1017,20 @@ class WMTSLayerForm extends Component {
         errors.push(field);
       }
     });
+
+    var hasIncompleteHighDpiVariant = this.state.highDpiVariants.some(
+      (row) =>
+        !this.isValidHighDpiVariant({
+          minPixelRatio: Number(row.minPixelRatio) || 0,
+          matrixSet: (row.matrixSet || "").trim(),
+          origins: parseOrigins(row.origins),
+          resolutions: parseResolutions(row.resolutions),
+          matrixIds: parseMatrixIds(row.matrixIds),
+        })
+    );
+    if (hasIncompleteHighDpiVariant) {
+      errors.push("highDpiVariants");
+    }
 
     this.setState({
       validationErrors: errors,
@@ -458,6 +1072,7 @@ class WMTSLayerForm extends Component {
       case "caption":
       case "layer":
       case "matrixSet":
+      case "imageFormat":
       case "projection":
         if (value === "") {
           valid = false;
@@ -482,7 +1097,7 @@ class WMTSLayerForm extends Component {
       } else {
         this.setState({
           validationErrors: this.state.validationErrors.filter(
-            (v) => v !== fieldName,
+            (v) => v !== fieldName
           ),
         });
       }
@@ -509,6 +1124,18 @@ class WMTSLayerForm extends Component {
       ? "tooltip-timeSlider"
       : "hidden";
 
+    // The style dropdown is driven by GetCapabilities, but a saved layer may carry a
+    // style the current capabilities no longer advertise. Keep it selectable so that
+    // merely opening the layer doesn't silently rewrite it.
+    const styleOptions = this.state.availableStyles.some(
+      (s) => s.id === this.state.style
+    )
+      ? this.state.availableStyles
+      : [
+          { id: this.state.style, isDefault: false },
+          ...this.state.availableStyles,
+        ];
+
     return (
       <fieldset>
         <legend>WMTS-lager</legend>
@@ -522,7 +1149,7 @@ class WMTSLayerForm extends Component {
             className={this.getValidationClass("capabilitiesUrl")}
             onChange={(e) => {
               this.setState({ capabilitiesUrl: e.target.value }, () =>
-                this.validateField("capabilitiesUrl"),
+                this.validateField("capabilitiesUrl")
               );
             }}
           />
@@ -564,7 +1191,7 @@ class WMTSLayerForm extends Component {
             className={this.getValidationClass("caption")}
             onChange={(e) => {
               this.setState({ caption: e.target.value }, () =>
-                this.validateField("caption"),
+                this.validateField("caption")
               );
             }}
           />
@@ -650,7 +1277,7 @@ class WMTSLayerForm extends Component {
             onChange={(e) => {
               const v = e.target.value;
               this.setState({ maxZoom: v }, () =>
-                this.validateField("maxZoom"),
+                this.validateField("maxZoom")
               );
             }}
           />
@@ -664,66 +1291,14 @@ class WMTSLayerForm extends Component {
             className={this.getValidationClass("matrixSet")}
             onChange={(e) => {
               const v = e.target.value;
-              var stateUpdate = { matrixSet: v };
-              if (v) {
-                var fullSet = this.state.wmtsTileMatrixSets.find(
-                  (tms) => textValue(tms.Identifier) === v,
-                );
-                if (fullSet) {
-                  var projection = crsToEpsg(textValue(fullSet.SupportedCRS));
-                  if (projection) {
-                    stateUpdate.projection = projection;
-                  }
-                  var matrices = fullSet.TileMatrix || [];
-                  if (!Array.isArray(matrices)) {
-                    matrices = [matrices];
-                  }
-                  if (matrices.length > 0) {
-                    // WMTS may report TopLeftCorner in CRS axis order.
-                    // Swap only when the first value is positive.
-                    stateUpdate.origins = matrices
-                      .map((m) => {
-                        var parts = textValue(m.TopLeftCorner)
-                          .trim()
-                          .split(/\s+/);
-                        if (parts.length !== 2) {
-                          return textValue(m.TopLeftCorner).trim();
-                        }
-                        var firstValue = Number(parts[0]);
-                        return !Number.isNaN(firstValue) && firstValue > 0
-                          ? parts[1] + " " + parts[0]
-                          : parts[0] + " " + parts[1];
-                      })
-                      .filter(Boolean)
-                      .join("; ");
-                    stateUpdate.matrixIds = matrices
-                      .map((m) => textValue(m.Identifier))
-                      .join(",");
-                    stateUpdate.resolutions = matrices
-                      .map(
-                        (m) => Number(textValue(m.ScaleDenominator)) * 0.00028,
-                      )
-                      .join(",");
-                    stateUpdate.sizes = matrices
-                      .map(
-                        (m) =>
-                          textValue(m.MatrixWidth) +
-                          " " +
-                          textValue(m.MatrixHeight),
-                      )
-                      .filter((s) => s.trim() !== "")
-                      .join("; ");
-                    var tw = textValue(matrices[0].TileWidth);
-                    var th = textValue(matrices[0].TileHeight);
-                    if (tw && th) {
-                      stateUpdate.tileSize = tw === th ? tw : tw + " " + th;
-                    }
-                  }
-                }
-              }
-              this.setState(stateUpdate, () =>
-                this.validateField("matrixSet", v),
-              );
+              var stateUpdate = {
+                matrixSet: v,
+                ...(v ? this.deriveMatrixSetGeometry(v) : {}),
+              };
+              this.setState(stateUpdate, () => {
+                this.validateField("matrixSet", v);
+                this.refreshDetectedHighDpiCandidates(v);
+              });
             }}
           >
             <option value="">Välj matrisuppsättning...</option>
@@ -742,16 +1317,23 @@ class WMTSLayerForm extends Component {
             style={{ width: "400px" }}
             onChange={(e) => {
               const selectedResource = e.target.value;
-              const selectedIndex = Number(selectedResource);
-              const resource = this.state.availableResources[selectedIndex];
-              const imageFormat = resource ? resource.format : "";
-              const url = resource ? resource.template : "";
-              const requestEncoding =
-                resource && resource.template ? "REST" : "KVP";
-              this.setState(
-                { selectedResource, imageFormat, requestEncoding, url },
-                () => this.validateField("url"),
-              );
+              const resource =
+                this.state.availableResources[Number(selectedResource)];
+              const patch = {
+                selectedResource,
+                imageFormat: resource ? resource.format : "",
+              };
+              // A REST encoding is only meaningful while the selected resource
+              // actually carries a template - fall back to a KVP flavour if not.
+              var encoding = this.state.requestEncoding;
+              if (encoding === "REST" && !(resource && resource.template)) {
+                encoding = this.defaultRequestEncoding(this.state);
+                patch.requestEncoding = encoding;
+              }
+              if (encoding === "REST") {
+                patch.url = resource.template;
+              }
+              this.refreshGeneratedUrl(patch);
             }}
           >
             <option value="">Välj resource...</option>
@@ -763,13 +1345,33 @@ class WMTSLayerForm extends Component {
           </select>
         </div>
         <div>
-          <label>Format (imageFormat)</label>
+          <label>Format (imageFormat)*</label>
           <input
             type="text"
             ref="input_imageFormat"
             value={this.state.imageFormat}
+            className={this.getValidationClass("imageFormat")}
             onChange={(e) => {
-              this.setState({ imageFormat: e.target.value });
+              const v = e.target.value;
+              this.refreshGeneratedUrl({ imageFormat: v });
+              this.validateField("imageFormat", v);
+            }}
+          />
+        </div>
+        <div>
+          <label>
+            Dimensioner{" "}
+            <abbr title="Extra WMTS-dimensioner som skickas med varje anrop, på formatet NYCKEL=VÄRDE; NYCKEL2=VÄRDE2. Fylls i automatiskt från GetCapabilities. GeoServer/GWC annonserar t ex FORMAT_OPTIONS=dpi:90, vilken krävs för att serverns egna REST-mallar ska fungera.">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="text"
+            ref="input_dimensions"
+            placeholder="FORMAT_OPTIONS=dpi:90"
+            value={this.state.dimensions}
+            onChange={(e) => {
+              this.refreshGeneratedUrl({ dimensions: e.target.value });
             }}
           />
         </div>
@@ -777,13 +1379,21 @@ class WMTSLayerForm extends Component {
           <label>Request encoding</label>
           <select
             ref="input_requestEncoding"
+            style={{ width: "400px" }}
             value={this.state.requestEncoding}
             onChange={(e) => {
-              this.setState({ requestEncoding: e.target.value });
+              const requestEncoding = e.target.value;
+              this.refreshGeneratedUrl({
+                requestEncoding,
+                url: this.urlForRequestEncoding(requestEncoding, {
+                  requestEncoding,
+                }),
+              });
             }}
           >
-            <option value="REST">REST</option>
-            <option value="KVP">KVP</option>
+            <option value="REST">REST (mall från ResourceURL)</option>
+            <option value="KVP">KVP (OpenLayers bygger anropet)</option>
+            <option value="KVP_TEMPLATE">KVP (URL-mall)</option>
           </select>
         </div>
         <div>
@@ -793,12 +1403,25 @@ class WMTSLayerForm extends Component {
             ref="input_url"
             value={this.state.url}
             className={this.getValidationClass("url")}
+            style={{ width: "400px" }}
             onChange={(e) => {
               const v = e.target.value;
-              this.setState({ url: v }, () => this.validateField("url", v));
+              this.setState(
+                {
+                  url: v,
+                  urlWarning: this.urlWarningFor(v, this.state.requestEncoding),
+                },
+                () => this.validateField("url", v)
+              );
             }}
           />
         </div>
+        {this.state.urlWarning ? (
+          <div>
+            <label />
+            <i>{this.state.urlWarning}</i>
+          </div>
+        ) : null}
         <div>
           <label>Projektion (projection)*</label>
           <input
@@ -807,7 +1430,7 @@ class WMTSLayerForm extends Component {
             onChange={(e) => {
               const v = e.target.value;
               this.setState({ projection: v }, () =>
-                this.validateField("projection", v),
+                this.validateField("projection", v)
               );
             }}
             value={this.state.projection}
@@ -822,7 +1445,7 @@ class WMTSLayerForm extends Component {
             onChange={(e) => {
               const v = e.target.value;
               this.setState({ origins: v }, () =>
-                this.validateField("origins", v),
+                this.validateField("origins", v)
               );
             }}
             value={this.state.origins}
@@ -837,7 +1460,7 @@ class WMTSLayerForm extends Component {
             onChange={(e) => {
               const v = e.target.value;
               this.setState({ resolutions: v }, () =>
-                this.validateField("resolutions", v),
+                this.validateField("resolutions", v)
               );
             }}
             value={this.state.resolutions}
@@ -852,7 +1475,7 @@ class WMTSLayerForm extends Component {
             onChange={(e) => {
               const v = e.target.value;
               this.setState({ matrixIds: v }, () =>
-                this.validateField("matrixIds", v),
+                this.validateField("matrixIds", v)
               );
             }}
             value={this.state.matrixIds}
@@ -883,18 +1506,216 @@ class WMTSLayerForm extends Component {
             value={this.state.tileSize}
           />
         </div>
+        <div className="separator">Hög-DPI-nivåer (valfritt)</div>
+        <div>
+          <label />
+          <i>
+            Konfigurera först standardmatrisen (Matrisuppsättning) ovan. Om
+            servern erbjuder hög-DPI-varianter (t.ex. med suffix &quot;x2&quot;,
+            &quot;x3&quot;) upptäcks de automatiskt nedan och kan läggas till
+            med ett klick. Det är nivåns rutstorlek i förhållande till
+            standardmatrisens som avgör hur skarpt lagret ritas: dubbelt så
+            stora rutor (t.ex. 512 mot 256) ger dubbel pixeltäthet. Har nivån
+            samma rutstorlek som standardmatrisen används min. pixelratio
+            istället. Observera att om hög-DPI-nivån har färre matrisnivåer än
+            standardmatrisen så ritas den innersta inzoomningen med vanlig
+            skärpa.
+          </i>
+        </div>
+        {this.state.detectedHighDpiCandidates.length > 0 ? (
+          <div>
+            <label>Upptäckta nivåer</label>
+            <div>
+              {this.state.detectedHighDpiCandidates.map((c, i) => (
+                <div key={i}>
+                  {c.matrixSet + " (x" + c.minPixelRatio + ")"}{" "}
+                  <span
+                    onClick={() => this.addDetectedHighDpiVariant(c)}
+                    className="btn btn-default"
+                  >
+                    Lägg till
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        {this.state.highDpiVariants.map((row, i) => (
+          <div
+            key={i}
+            style={{
+              border: "1px solid #ccc",
+              padding: "8px",
+              marginBottom: "8px",
+            }}
+          >
+            <div>
+              <label>Min. pixelratio</label>
+              <input
+                type="number"
+                step="1"
+                min="1"
+                value={row.minPixelRatio}
+                onChange={(e) =>
+                  this.updateHighDpiVariant(i, {
+                    minPixelRatio: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div>
+              <label>Matrisuppsättning</label>
+              <select
+                value={row.matrixSet}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  const geometry = this.deriveMatrixSetGeometry(v);
+                  this.updateHighDpiVariant(i, {
+                    matrixSet: v,
+                    origins: geometry.origins || "",
+                    resolutions: geometry.resolutions || "",
+                    matrixIds: geometry.matrixIds || "",
+                    sizes: geometry.sizes || "",
+                    tileSize: geometry.tileSize || "",
+                  });
+                }}
+              >
+                <option value="">Välj matrisuppsättning...</option>
+                {this.state.availableMatrixSets.map((name, j) => (
+                  <option key={j} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label>Startkoordinater</label>
+              <input
+                type="text"
+                value={row.origins}
+                onChange={(e) =>
+                  this.updateHighDpiVariant(i, { origins: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label>Upplösningar</label>
+              <input
+                type="text"
+                value={row.resolutions}
+                onChange={(e) =>
+                  this.updateHighDpiVariant(i, {
+                    resolutions: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div>
+              <label>Matrisnivåer</label>
+              <input
+                type="text"
+                value={row.matrixIds}
+                onChange={(e) =>
+                  this.updateHighDpiVariant(i, { matrixIds: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label>Storlekar</label>
+              <input
+                type="text"
+                value={row.sizes}
+                onChange={(e) =>
+                  this.updateHighDpiVariant(i, { sizes: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label>Rutstorlek</label>
+              <input
+                type="text"
+                value={row.tileSize}
+                onChange={(e) =>
+                  this.updateHighDpiVariant(i, { tileSize: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label />
+              <i>
+                {highDpiTileFactor(row, this.state.tileSize) > 1
+                  ? "Ger " +
+                    highDpiTileFactor(row, this.state.tileSize) +
+                    "x pixeltäthet."
+                  : "Ger ingen ökad pixeltäthet – nivån ritas som standardmatrisen."}
+              </i>
+            </div>
+            <div>
+              <label>Dimensioner</label>
+              <input
+                type="text"
+                placeholder="FORMAT_OPTIONS=dpi:180"
+                value={row.dimensions}
+                onChange={(e) =>
+                  this.updateHighDpiVariant(i, { dimensions: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label />
+              <span
+                onClick={() => this.removeHighDpiVariant(i)}
+                className="btn btn-default"
+              >
+                Ta bort nivå
+              </span>
+            </div>
+          </div>
+        ))}
+        <div>
+          <label />
+          <span
+            onClick={() => this.addManualHighDpiVariant()}
+            className="btn btn-default"
+          >
+            Lägg till nivå manuellt
+          </span>
+        </div>
+        {this.state.validationErrors.indexOf("highDpiVariants") > -1 ? (
+          <div>
+            <label />
+            <i>
+              Alla hög-DPI-nivåer måste ha matrisuppsättning, min. pixelratio,
+              startkoordinater, upplösningar och matrisnivåer ifyllda.
+            </i>
+          </div>
+        ) : null}
         <div>
           <label>Stilsättning</label>
-          <input
-            type="text"
+          <select
             ref="input_style"
-            onChange={(e) => {
-              const v = e.target.value;
-              this.setState({ style: v }, () => this.validateField("style", v));
-            }}
             value={this.state.style}
             className={this.getValidationClass("style")}
-          />
+            style={{ width: "400px" }}
+            onChange={(e) => {
+              const v = e.target.value;
+              const selected = this.state.availableStyles.find(
+                (s) => s.id === v
+              );
+              const patch = { style: v };
+              if (!this.state.legend && selected && selected.legendUrl) {
+                patch.legend = selected.legendUrl;
+              }
+              this.refreshGeneratedUrl(patch);
+            }}
+          >
+            {styleOptions.map((s, i) => (
+              <option key={i} value={s.id}>
+                {(s.id === "" ? "(tom)" : s.id) +
+                  (s.isDefault ? " (standard)" : "")}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label>Cross origin</label>
@@ -952,7 +1773,7 @@ class WMTSLayerForm extends Component {
             onChange={(e) => {
               const v = e.target.value;
               this.setState({ attribution: e.target.value }, () =>
-                this.validateField("attribution", v),
+                this.validateField("attribution", v)
               );
             }}
             value={this.state.attribution}
@@ -981,7 +1802,7 @@ class WMTSLayerForm extends Component {
               onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoTitle: v }, () =>
-                  this.validateField("infoTitle", v),
+                  this.validateField("infoTitle", v)
                 );
               }}
               value={this.state.infoTitle}
@@ -996,7 +1817,7 @@ class WMTSLayerForm extends Component {
               onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoText: v }, () =>
-                  this.validateField("infoText", v),
+                  this.validateField("infoText", v)
                 );
               }}
               value={this.state.infoText}
@@ -1011,7 +1832,7 @@ class WMTSLayerForm extends Component {
               onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoUrl: v }, () =>
-                  this.validateField("infoUrl", v),
+                  this.validateField("infoUrl", v)
                 );
               }}
               value={this.state.infoUrl}
@@ -1026,7 +1847,7 @@ class WMTSLayerForm extends Component {
               onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoUrlText: v }, () =>
-                  this.validateField("infoUrlText", v),
+                  this.validateField("infoUrlText", v)
                 );
               }}
               value={this.state.infoUrlText}
@@ -1041,7 +1862,7 @@ class WMTSLayerForm extends Component {
               onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoOpenDataLink: v }, () =>
-                  this.validateField("infoOpenDataLink", v),
+                  this.validateField("infoOpenDataLink", v)
                 );
               }}
               value={this.state.infoOpenDataLink}
@@ -1056,7 +1877,7 @@ class WMTSLayerForm extends Component {
               onChange={(e) => {
                 const v = e.target.value;
                 this.setState({ infoOwner: v }, () =>
-                  this.validateField("infoOwner", v),
+                  this.validateField("infoOwner", v)
                 );
               }}
               value={this.state.infoOwner}

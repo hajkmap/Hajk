@@ -11,6 +11,7 @@ export const AVAILABLE_TOOLS = [
   "Bookmarks",
   "Buffer",
   "Collector",
+  "CommandPalette",
   "Coordinates",
   "DocumentHandler",
   "Dummy",

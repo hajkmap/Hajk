@@ -512,6 +512,32 @@ const LayerSwitcherProvider = ({
     createDispatch(map, staticLayerConfigMap, layerTreeData)
   );
 
+  // Add listeners for toggling layers and backgroundlayers via globalobserver.
+  useEffect(() => {
+    const toggleLayerListener = globalObserver.subscribe(
+      "layerswitcher.toggleLayer",
+      ({ layerId }) => {
+        const olLayer = map
+          .getAllLayers()
+          .find((l) => l.get("name") === layerId);
+        if (!olLayer) return;
+        dispatcher.current.setLayerVisibility(layerId, !olLayer.getVisible());
+      }
+    );
+
+    const setBackgroundLayerListener = globalObserver.subscribe(
+      "layerswitcher.setBackgroundLayer",
+      (layerId) => {
+        dispatcher.current.setBackgroundLayer(layerId);
+      }
+    );
+
+    return () => {
+      toggleLayerListener.unsubscribe();
+      setBackgroundLayerListener.unsubscribe();
+    };
+  }, [globalObserver, map]);
+
   return (
     <LayerSwitcherDispatchContext.Provider value={dispatcher.current}>
       <MapZoomProvider map={map}>
