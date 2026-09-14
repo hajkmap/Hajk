@@ -6,7 +6,7 @@ import TouchAppIcon from "@mui/icons-material/TouchApp";
 import { SettingsPageTabs } from "../../../components/settings-page-tabs";
 import type { ToolOnMap } from "../../../api/maps";
 import type { Tool } from "../../../api/tools";
-import type { KartlagerDraft } from "../../groups-development/types";
+import type { LayerSwitcherDraft } from "../../groups-development/types";
 import GroupLayerTree from "../../groups-development/components/group-layer-tree";
 import { findActiveLayerswitcher } from "../../groups-development/utils/active-layerswitcher";
 import MapLayersPanel, { type MapLayerActivationRow } from "./map-layers-panel";
@@ -31,17 +31,17 @@ interface MapContentPanelProps {
   mapTools?: ToolOnMap[];
   catalogTools?: Tool[];
   activeToolIds?: Set<number>;
-  /** DB Kartlager + Bakgrund state (catalog layer ids). */
-  layerSwitcherState?: KartlagerDraft | null;
-  kartlagerDraft?: KartlagerDraft | null;
-  onKartlagerDraftChange?: (draft: KartlagerDraft | null) => void;
-  /** Bumped when Lager checkboxes are reverted to the last committed state. */
+  /** DB map-layers + background state (catalog layer ids). */
+  layerSwitcherState?: LayerSwitcherDraft | null;
+  layerSwitcherDraft?: LayerSwitcherDraft | null;
+  onLayerSwitcherDraftChange?: (draft: LayerSwitcherDraft | null) => void;
+  /** Bumped when Layers checkboxes are reverted to the last committed state. */
   layerActivationResetKey?: number;
-  /** Lager tab rows synced from server — required before Lagerordning dirty checks. */
+  /** Layers tab rows synced from server — required before map-layers dirty checks. */
   menuSynced?: boolean;
-  /** Called when the Grupper (under utveckling) sub-tab is active. */
+  /** Called when the groups-development sub-tab is active. */
   onGroupsDevelopmentActiveChange?: (active: boolean) => void;
-  /** Host element for Kartlager Flyttzon (FormActionPanel sidebar). */
+  /** Host element for the map-layers move zone (FormActionPanel sidebar). */
   moveZoneHostRef?: RefObject<HTMLDivElement | null>;
 }
 
@@ -53,8 +53,8 @@ export default function MapContentPanel({
   catalogTools,
   activeToolIds,
   layerSwitcherState,
-  kartlagerDraft = null,
-  onKartlagerDraftChange,
+  layerSwitcherDraft = null,
+  onLayerSwitcherDraftChange,
   layerActivationResetKey = 0,
   menuSynced = false,
   onGroupsDevelopmentActiveChange,
@@ -70,17 +70,17 @@ export default function MapContentPanel({
   const isGroupsDevelopment = contentSubTab === "groupsDevelopment";
   const hasActiveLayerswitcher =
     findActiveLayerswitcher(mapTools, activeToolIds, catalogTools) != null;
-  const showKartlagerEditor = isGroupsDevelopment && hasActiveLayerswitcher;
+  const showMapLayersEditor = isGroupsDevelopment && hasActiveLayerswitcher;
 
   useEffect(() => {
-    onGroupsDevelopmentActiveChange?.(showKartlagerEditor);
+    onGroupsDevelopmentActiveChange?.(showMapLayersEditor);
     return () => {
       onGroupsDevelopmentActiveChange?.(false);
     };
-  }, [showKartlagerEditor, onGroupsDevelopmentActiveChange]);
+  }, [showMapLayersEditor, onGroupsDevelopmentActiveChange]);
 
   useEffect(() => {
-    if (!showKartlagerEditor || !moveZoneHostRef) {
+    if (!showMapLayersEditor || !moveZoneHostRef) {
       setMoveZoneHostEl(null);
       return;
     }
@@ -94,7 +94,7 @@ export default function MapContentPanel({
     return () => {
       window.cancelAnimationFrame(frame);
     };
-  }, [showKartlagerEditor, moveZoneHostRef]);
+  }, [showMapLayersEditor, moveZoneHostRef]);
 
   return (
     <Box>
@@ -112,7 +112,7 @@ export default function MapContentPanel({
         />
       ) : null}
 
-      {/* Keep mounted (hidden) so Flyttzon / Kartlager draft state survives sub-tab switches. */}
+      {/* Keep mounted (hidden) so move-zone / map-layers draft state survives sub-tab switches. */}
       <Box sx={{ display: isGroupsDevelopment ? "block" : "none" }}>
         <GroupLayerTree
           mapName={mapName}
@@ -121,11 +121,11 @@ export default function MapContentPanel({
           activeToolIds={activeToolIds}
           layerSwitcherState={layerSwitcherState}
           layerActivationRows={layerActivationRows}
-          pendingDraft={kartlagerDraft}
-          onKartlagerDraftChange={onKartlagerDraftChange}
+          pendingDraft={layerSwitcherDraft}
+          onLayerSwitcherDraftChange={onLayerSwitcherDraftChange}
           layerActivationResetKey={layerActivationResetKey}
           menuSynced={menuSynced}
-          moveZoneHostEl={showKartlagerEditor ? moveZoneHostEl : null}
+          moveZoneHostEl={showMapLayersEditor ? moveZoneHostEl : null}
         />
       </Box>
     </Box>

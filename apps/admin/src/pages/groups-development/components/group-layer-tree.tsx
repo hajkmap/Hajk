@@ -80,7 +80,7 @@ import LayerSwitcherPreview, {
   type LayerSwitcherPreviewTab,
 } from "./layer-switcher-preview";
 
-export type { LayerSwitcherDraft as KartlagerDraft } from "../types";
+export type { LayerSwitcherDraft } from "../types";
 
 /** Local rebind for click-place hook output (see useMapLayersClickPlace call). */
 interface MapLayersClickPlaceBindings {
@@ -118,7 +118,7 @@ export default function GroupLayerTree({
   layerSwitcherState = null,
   layerActivationRows,
   pendingDraft = null,
-  onKartlagerDraftChange,
+  onLayerSwitcherDraftChange,
   layerActivationResetKey = 0,
   menuSynced = false,
   moveZoneHostEl = null,
@@ -161,15 +161,15 @@ export default function GroupLayerTree({
   const baselineReadyRef = useRef(false);
   const loadedLayerSwitcherKeyRef = useRef<string | null>(null);
   const pendingDraftRef = useRef(pendingDraft);
-  const onKartlagerDraftChangeRef = useRef(onKartlagerDraftChange);
+  const onLayerSwitcherDraftChangeRef = useRef(onLayerSwitcherDraftChange);
 
   useEffect(() => {
     pendingDraftRef.current = pendingDraft;
   }, [pendingDraft]);
 
   useEffect(() => {
-    onKartlagerDraftChangeRef.current = onKartlagerDraftChange;
-  }, [onKartlagerDraftChange]);
+    onLayerSwitcherDraftChangeRef.current = onLayerSwitcherDraftChange;
+  }, [onLayerSwitcherDraftChange]);
 
   const { data: groups = [], isLoading: groupsLoading } = useGroups();
   const { data: layers = [], isLoading: layersLoading } = useLayers();
@@ -342,18 +342,18 @@ export default function GroupLayerTree({
 
   useLayoutEffect(() => {
     if (!activeLayerswitcher || !menuSynced || !baselineReadyRef.current) {
-      onKartlagerDraftChangeRef.current?.(null);
+      onLayerSwitcherDraftChangeRef.current?.(null);
       return;
     }
 
     if (
       layerSwitcherEditorSnapshot.signature === baselineSignatureRef.current
     ) {
-      onKartlagerDraftChangeRef.current?.(null);
+      onLayerSwitcherDraftChangeRef.current?.(null);
       return;
     }
 
-    onKartlagerDraftChangeRef.current?.(layerSwitcherEditorSnapshot.draft);
+    onLayerSwitcherDraftChangeRef.current?.(layerSwitcherEditorSnapshot.draft);
   }, [activeLayerswitcher, layerSwitcherEditorSnapshot, menuSynced]);
 
   const prevActiveDisplayLayerIdsRef = useRef<Set<string> | null>(null);
@@ -491,7 +491,7 @@ export default function GroupLayerTree({
       setBackgroundOrderedIds([]);
       setDrawOrderOrderedIds([]);
       setMoveZoneItems([]);
-      onKartlagerDraftChangeRef.current?.(null);
+      onLayerSwitcherDraftChangeRef.current?.(null);
       return;
     }
 
@@ -1157,7 +1157,7 @@ export default function GroupLayerTree({
               ) : null}
               {treeData.length === 0 ? (
                 <GroupLayerTreeDropZone
-                  emptyLabel={t("groupsDevelopment.emptyKartlager")}
+                  emptyLabel={t("groupsDevelopment.emptyMapLayers")}
                   emptyActionLabel={t("common.addToGroup")}
                   onEmptyAction={handleOpenRootAddDialog}
                   onCatalogDrop={handleCatalogDropToRoot}

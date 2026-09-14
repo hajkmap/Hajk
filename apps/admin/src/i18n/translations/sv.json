@@ -797,7 +797,7 @@
     "groupsDevelopment.editGroup": "Redigera grupp",
     "groupsDevelopment.editLayer": "Redigera lager",
     "groupsDevelopment.emptyGroup": "Tom grupp",
-    "groupsDevelopment.emptyKartlager": "Dra en grupp hit för att börja, lägg sedan till lager i grupper.",
+    "groupsDevelopment.emptyMapLayers": "Dra en grupp hit för att börja, lägg sedan till lager i grupper.",
     "groupsDevelopment.noActiveLayerswitcher": "Aktivera en lagerhanterare under fliken Verktyg för att redigera dess lagerhierarki här.",
     "groupsDevelopment.layerInfoBox": "Infobox",
     "groupsDevelopment.exclusiveGroup": "Exklusiv grupp",

@@ -13,8 +13,6 @@ import { collectPlacedSourceIds } from "./tree-model";
 
 /** Draft shape for the map-layers editor (alias of LayerSwitcherDraft). */
 export type MapLayersDraft = LayerSwitcherDraft;
-/** @deprecated Use MapLayersDraft */
-export type KartlagerDraft = MapLayersDraft;
 
 export function resolveEffectiveBackgroundOrderedIds(
   backgroundOrderedIds: string[],
@@ -95,9 +93,6 @@ export function isLayerStillInMapLayersTree(
     (node) => node.data?.kind === "layer" && node.data.sourceId === layerId,
   );
 }
-
-/** @deprecated Use isLayerStillInMapLayersTree */
-export const isLayerStillInKartlagerTree = isLayerStillInMapLayersTree;
 
 export function applyDrawOrderToLayerDisplaySettings(
   layerDisplaySettings: Record<string, LayerDisplaySettings>,

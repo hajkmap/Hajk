@@ -161,8 +161,5 @@ export interface LayerSwitcherDraft {
   }[];
 }
 
-/** @deprecated Use LayerSwitcherDraft or MapLayersDraft */
-export type KartlagerDraft = LayerSwitcherDraft;
-
 /** Alias used by the map-layers editor draft plumbing. */
 export type MapLayersDraft = LayerSwitcherDraft;

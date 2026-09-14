@@ -5,7 +5,7 @@ import type {
   LayerSwitcherDraft,
 } from "../types";
 
-export type { LayerSwitcherDraft as KartlagerDraft, LayerSwitcherDraft };
+export type { LayerSwitcherDraft };
 
 export interface AddDialogTarget {
   parentId: GroupLayerTreeNode["parent"];
@@ -26,23 +26,23 @@ export interface GroupLayerTreeProps {
   /** DB map-layers + background state (catalog layer ids). */
   layerSwitcherState?: LayerSwitcherDraft | null;
   /**
-   * Layers activated on the Lager tab. Map-layers list shows active FOREGROUND
+   * Layers activated on the Layers tab. Map-layers list shows active FOREGROUND
    * layers; background list shows active BACKGROUND layers.
    */
   layerActivationRows?: {
     layerId: string;
     active: boolean;
     isBackground: boolean;
-    /** Search/editing are activated on Lager but never appear in Lagerordning. */
+    /** Search/editing are activated on Layers but never appear in map-layers order. */
     layerKind?: "display" | "search" | "editing";
   }[];
   /** Unsaved map-layers / background draft held by the map settings page. */
   pendingDraft?: LayerSwitcherDraft | null;
   /** Raised when map-layers / background differs from the loaded DB state. */
-  onKartlagerDraftChange?: (draft: LayerSwitcherDraft | null) => void;
-  /** Bumped when Lager checkboxes are reverted to the last committed state. */
+  onLayerSwitcherDraftChange?: (draft: LayerSwitcherDraft | null) => void;
+  /** Bumped when Layers checkboxes are reverted to the last committed state. */
   layerActivationResetKey?: number;
-  /** Lager tab rows have been synced from the server — required for dirty checks. */
+  /** Layers tab rows have been synced from the server — required for dirty checks. */
   menuSynced?: boolean;
   /** DOM host in FormActionPanel sidebar for the move-zone portal. */
   moveZoneHostEl?: HTMLElement | null;

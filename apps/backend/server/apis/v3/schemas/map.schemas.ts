@@ -113,7 +113,7 @@ const LayerSwitcherLayerRefSchema = z.object({
   infobox: z.string().optional(),
 });
 
-type LayerSwitcherGroupWrite = {
+interface LayerSwitcherGroupWrite {
   id: string;
   name?: string;
   toggled?: boolean;
@@ -128,11 +128,11 @@ type LayerSwitcherGroupWrite = {
   infogroupowner?: string;
   layers?: z.infer<typeof LayerSwitcherLayerRefSchema>[];
   groups?: LayerSwitcherGroupWrite[];
-  layerSwitcherTree?: Array<
+  layerSwitcherTree?: (
     | { type: "layer"; id: string }
     | { type: "group"; id: string }
-  >;
-};
+  )[];
+}
 
 const LayerSwitcherSiblingOrderEntrySchema = z.discriminatedUnion("type", [
   z.object({
@@ -165,7 +165,7 @@ const LayerSwitcherGroupSchema: z.ZodType<LayerSwitcherGroupWrite> = z.lazy(
       layerSwitcherTree: z
         .array(LayerSwitcherSiblingOrderEntrySchema)
         .optional(),
-    }),
+    })
 );
 
 /** Atomic Kartlager + Bakgrund replace (GroupsOnMaps + BACKGROUND instances). */
@@ -179,7 +179,7 @@ export const MapLayerSwitcherUpdateSchema = z.object({
         infoClickActive: z.boolean().optional(),
         zIndex: z.number().int().min(0).optional(),
         infobox: z.string().optional(),
-      }),
+      })
     )
     .default([]),
 });

@@ -798,7 +798,7 @@
     "groupsDevelopment.editGroup": "Edit group",
     "groupsDevelopment.editLayer": "Edit layer",
     "groupsDevelopment.emptyGroup": "Empty group",
-    "groupsDevelopment.emptyKartlager": "Drag a group here to start, then add layers inside groups.",
+    "groupsDevelopment.emptyMapLayers": "Drag a group here to start, then add layers inside groups.",
     "groupsDevelopment.noActiveLayerswitcher": "Activate a Layer switcher tool on the Tools tab to edit its layer hierarchy here.",
     "groupsDevelopment.layerInfoBox": "Info box",
     "groupsDevelopment.exclusiveGroup": "Exclusive group",
