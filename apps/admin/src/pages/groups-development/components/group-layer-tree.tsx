@@ -278,7 +278,7 @@ export default function GroupLayerTree({
     [drawOrderLayers],
   );
 
-  // Layers parked in Flyttzon from Ritordning stay in Kartlager but leave the
+  // Layers parked in Move Zone from Draworder stay in Maplayers but leave the
   // draw-order list until dropped back. Derive from move zone + tree presence.
   const drawOrderParkedIds = useMemo(() => {
     const parked = new Set<string>();
@@ -477,7 +477,7 @@ export default function GroupLayerTree({
     [serverBaselayersFromState],
   );
 
-  // Load Kartlager tree + Bakgrund from DB layerswitcher state (not Tool.options).
+  // Load Maplayers tree + Background from DB layerswitcher state (not Tool.options).
   /* eslint-disable react-hooks/set-state-in-effect -- hydrate local editor state from server/draft */
   useEffect(() => {
     if (!activeLayerswitcher) {

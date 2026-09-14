@@ -89,7 +89,7 @@ export function clientGroupsToLayerSwitcherTree(
 }
 
 /**
- * Serialize Kartlager flat tree + display settings back to nested
+ * Serialize Maplayers flat tree + display settings back to nested
  * layerswitcher groups (catalog layer ids for admin writes).
  */
 export function nodeModelsToClientGroups(
@@ -133,8 +133,7 @@ export function nodeModelsToClientGroups(
 
     const layerSwitcherTree = childSiblings
       .filter(
-        (child) =>
-          child.data?.kind === "layer" || child.data?.kind === "group",
+        (child) => child.data?.kind === "layer" || child.data?.kind === "group",
       )
       .map((child) =>
         child.data!.kind === "layer"
@@ -237,14 +236,16 @@ export function getClientGroupsFromToolOptions(
   return options.groups as ClientLayerSwitcherGroup[];
 }
 
-/** Remove catalog layers from an unsaved Kartlager/Bakgrund draft (e.g. on Lager deactivate). */
-export function removeLayersFromLayerSwitcherDraft(
+/** Remove catalog layers from an unsaved Map-and-background draft (e.g. on Lager deactivate). */
+export function removeLayersFromLayerSwitcherDraft<
+  TBaselayer extends { layerId: string },
+>(
   draft: {
     groups: ClientLayerSwitcherGroup[];
-    baselayers: { layerId: string }[];
+    baselayers: TBaselayer[];
   },
   layerIds: ReadonlySet<string>,
-): { groups: ClientLayerSwitcherGroup[]; baselayers: { layerId: string }[] } {
+): { groups: ClientLayerSwitcherGroup[]; baselayers: TBaselayer[] } {
   if (layerIds.size === 0) {
     return draft;
   }
@@ -263,8 +264,7 @@ export function removeLayersFromLayerSwitcherDraft(
           .map((layer) => layer.id),
       );
       const layerSwitcherTree = (group.layerSwitcherTree ?? []).filter(
-        (entry) =>
-          entry.type === "group" || !removedLayerIds.has(entry.id),
+        (entry) => entry.type === "group" || !removedLayerIds.has(entry.id),
       );
       return {
         ...group,
@@ -284,13 +284,15 @@ export function removeLayersFromLayerSwitcherDraft(
 }
 
 /** Keep only layers that remain active on the Lager tab. */
-export function pruneLayerSwitcherDraftToActiveLayers(
+export function pruneLayerSwitcherDraftToActiveLayers<
+  TBaselayer extends { layerId: string },
+>(
   draft: {
     groups: ClientLayerSwitcherGroup[];
-    baselayers: { layerId: string }[];
+    baselayers: TBaselayer[];
   },
   activeLayerIds: ReadonlySet<string>,
-): { groups: ClientLayerSwitcherGroup[]; baselayers: { layerId: string }[] } {
+): { groups: ClientLayerSwitcherGroup[]; baselayers: TBaselayer[] } {
   const stripGroups = (
     groups: ClientLayerSwitcherGroup[],
   ): ClientLayerSwitcherGroup[] =>
@@ -300,8 +302,7 @@ export function pruneLayerSwitcherDraftToActiveLayers(
       );
       const nestedGroups = stripGroups(group.groups ?? []);
       const layerSwitcherTree = (group.layerSwitcherTree ?? []).filter(
-        (entry) =>
-          entry.type === "group" || activeLayerIds.has(entry.id),
+        (entry) => entry.type === "group" || activeLayerIds.has(entry.id),
       );
       return {
         ...group,
@@ -333,7 +334,7 @@ export interface LayerSwitcherComparableDraft {
   drawOrderSequence?: string[];
 }
 
-/** Stable JSON for Kartlager dirty checks; inactive Lager layers are ignored. */
+/** Stable JSON for Maplayers dirty checks; inactive Lager layers are ignored. */
 export function layerSwitcherDraftComparableSignature(
   draft: LayerSwitcherComparableDraft,
   activeLayerIds?: ReadonlySet<string> | null,
@@ -431,7 +432,7 @@ export function buildLayerswitcherOptionsWithGroups(
   };
 }
 
-/** Stable JSON used to detect Kartlager dirty state (same shape as save payload). */
+/** Stable JSON used to detect Maplayers dirty state (same shape as save payload). */
 export function serializeClientGroupsJson(
   tree: GroupLayerTreeNode[],
   groupDisplaySettings: Record<string, GroupDisplaySettings>,

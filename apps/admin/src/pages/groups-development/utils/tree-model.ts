@@ -300,7 +300,7 @@ export function getDescendantIds(
 }
 
 /**
- * Extract a node + descendants from the Kartlager tree for the Flyttzon.
+ * Extract a node + descendants from the Map layer tree for the Flyttzon.
  * Root of the extracted subtree is re-parented to GROUP_LAYER_TREE_ROOT_ID.
  */
 export function extractSubtreeForMoveZone(
@@ -545,8 +545,8 @@ export function canDropGroupLayerNode(
 export function layerSwitcherTreeToNodeModels(
   nodes: LayerSwitcherTreeNode[],
   parent: GroupLayerTreeNode["parent"] = GROUP_LAYER_TREE_ROOT_ID,
-  groupNames: Map<string, string> = new Map(),
-  layerNames: Map<string, string> = new Map(),
+  groupNames = new Map<string, string>(),
+  layerNames = new Map<string, string>(),
 ): GroupLayerTreeNode[] {
   const result: GroupLayerTreeNode[] = [];
 
@@ -566,7 +566,7 @@ export function layerSwitcherTreeToNodeModels(
 
     const groupNode = createGroupTreeNode(
       node.id,
-      node.name || groupNames.get(node.id) || node.id,
+      node.name ?? groupNames.get(node.id) ?? node.id,
       parent,
       index,
     );

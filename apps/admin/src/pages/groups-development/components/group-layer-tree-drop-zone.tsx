@@ -23,7 +23,7 @@ interface GroupLayerTreeDropZoneProps {
   onMoveZoneDrop?: (item: MoveZoneItem) => void;
   canAcceptMoveZoneItem?: (item: MoveZoneItem) => boolean;
   onTreeDropToRoot?: (nodeId: GroupLayerTreeNode["id"]) => void;
-  /** Defaults to groups only (Kartlager). Bakgrund passes layers. */
+  /** Defaults to groups only (Maplayers). Bakgrund passes layers. */
   canAcceptTreeItemToRoot?: (node: GroupLayerTreeNode) => boolean;
   /** Click-and-drop: place the held item on the root / empty padding. */
   onClickPlace?: () => void;
@@ -54,7 +54,7 @@ export default function GroupLayerTreeDropZone({
       ) => {
         // Only the empty padding of this zone (not nested tree rows).
         // Prevents same-position drops on a row from being stolen and
-        // appended to the bottom of Kartlager.
+        // appended to the bottom of Maplayers.
         if (!monitor.isOver({ shallow: true })) {
           return false;
         }

@@ -126,7 +126,7 @@ export function useMapLayersTreeDnd({
   const handleMoveZoneDropToRoot = useCallback(
     (moveItem: MoveZoneItem) => {
       if (moveItem.kind === "layer") {
-        // Draw-order parking keeps the layer in Kartlager — consuming from
+        // Draw-order parking keeps the layer in Maplayers — consuming from
         // Flyttzon only clears the park slot (layer reappears in Ritordning).
         if (isLayerStillInMapLayersTree(treeData, moveItem.sourceId)) {
           setMoveZoneItems((current) =>
@@ -155,10 +155,7 @@ export function useMapLayersTreeDnd({
   );
 
   const handleDrop = useCallback(
-    (
-      _newTree: GroupLayerTreeNode[],
-      options: MapLayersTreeDropOptions,
-    ) => {
+    (_newTree: GroupLayerTreeNode[], options: MapLayersTreeDropOptions) => {
       const itemType = options.monitor.getItemType();
 
       if (itemType === CATALOG_DRAG_TYPE) {

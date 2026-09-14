@@ -315,10 +315,10 @@ export default function GroupLayerCatalog({
         }
         const isBackground = backgroundLayerIds?.has(layer.id) ?? false;
         if (backgroundMode) {
-          // Bakgrund tab: active BACKGROUND layers not yet placed in the list.
+          // Background tab: active BACKGROUND layers not yet placed in the list.
           return isBackground && !placedLayerIds.has(layer.id);
         }
-        // Kartlager: active FOREGROUND only — never BACKGROUND.
+        // Maplayers: active FOREGROUND only — never BACKGROUND.
         if (isBackground) {
           return false;
         }

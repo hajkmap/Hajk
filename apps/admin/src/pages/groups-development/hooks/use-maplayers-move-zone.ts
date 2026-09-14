@@ -71,7 +71,7 @@ export function useMapLayersMoveZone({
 
   const handleDropToMoveZone = useCallback(
     (nodeId: GroupLayerTreeNode["id"]) => {
-      // Ritordning: park in Flyttzon without removing from Kartlager so the
+      // Draworder: park in Move Zone without removing from Maplayers so the
       // layer can be dropped back into the draw-order list.
       if (drawOrderMode) {
         const layerId = parseTreeNodeSourceId(nodeId);

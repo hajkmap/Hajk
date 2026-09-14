@@ -35,7 +35,7 @@ interface GroupLayerAddDialogProps {
   layers: Layer[];
   placedGroupIds: Set<string>;
   placedLayerIds: Set<string>;
-  /** Background baselayer ids — excluded from the Kartlager add list. */
+  /** Background baselayer ids — excluded from the Maplayer add list. */
   backgroundLayerIds?: Set<string>;
   /** Only these layer ids may be added (Lager-tab active FOREGROUND). */
   activeForegroundLayerIds?: Set<string> | null;

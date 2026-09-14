@@ -23,7 +23,7 @@ export interface GroupLayerTreeNode {
 
 export const CATALOG_DRAG_TYPE = "GROUP_LAYER_CATALOG_ITEM";
 
-/** Drag type for items parked in the Kartlager Flyttzon. */
+/** Drag type for items parked in the Maplayers Move Zone. */
 export const MOVE_ZONE_DRAG_TYPE = "GROUP_LAYER_MOVE_ZONE_ITEM";
 
 /** How the user places items into the map-layers tree. */
@@ -115,7 +115,7 @@ export interface LayerFormValues {
   layerInfoBox: string;
 }
 
-/** Nested group shape for Kartlager / layerswitcher (catalog layer ids). */
+/** Nested group shape for Maplayers / layerswitcher (catalog layer ids). */
 export interface ClientLayerSwitcherLayerRef {
   id: string;
   drawOrder?: number;
@@ -144,13 +144,13 @@ export interface ClientLayerSwitcherGroup {
    * Interleaved Lagerordning sibling order (layers + nested groups).
    * Admin/API only — tools.options still uses layers[] + groups[].
    */
-  layerSwitcherTree?: Array<
+  layerSwitcherTree?: (
     | { type: "layer"; id: string }
     | { type: "group"; id: string }
-  >;
+  )[];
 }
 
-/** Unsaved Kartlager + Bakgrund state (GroupsOnMaps / BACKGROUND instances). */
+/** Unsaved Maplayers + Background state (GroupsOnMaps / BACKGROUND instances). */
 export interface LayerSwitcherDraft {
   groups: ClientLayerSwitcherGroup[];
   baselayers: {

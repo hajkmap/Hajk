@@ -68,7 +68,7 @@ export function filterTreeSelectionRoots(
 }
 
 /**
- * Move an existing Kartlager node via click-and-drop onto another node.
+ * Move an existing Maplayers node via click-and-drop onto another node.
  * Group targets receive the item as first child (index 0); layer targets get
  * it as the next sibling (same parent).
  */
