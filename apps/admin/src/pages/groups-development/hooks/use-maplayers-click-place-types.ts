@@ -33,6 +33,11 @@ export interface UseMapLayersClickPlaceResult {
     additive: boolean,
   ) => void;
   handleClickPlaceToRoot: () => void;
+  handleClickPlaceToRootStart: () => void;
+  handleClickPlaceRootEdgeHover: (
+    edge: "start" | "end" | null,
+  ) => void;
+  handleClickPlaceRootEndHover: (hovering: boolean) => void;
   handleClickPlaceToMoveZone: () => void;
   handleMoveZoneClickPick: (item: MoveZoneItem, additive: boolean) => void;
   clickPickCount: number;
@@ -47,7 +52,8 @@ export interface UseMapLayersClickPlaceResult {
   handleMapLayersNodeHover: (nodeId: GroupLayerTreeNode["id"]) => void;
   handleMapLayersTreeMouseLeave: () => void;
   clickPlaceIndicator: {
-    afterNodeId: string;
+    nodeId: string;
     lineDepth: number;
+    position: "before" | "after";
   } | null;
 }

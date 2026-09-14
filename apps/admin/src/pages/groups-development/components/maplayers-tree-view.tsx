@@ -60,7 +60,15 @@ interface MapLayersTreeViewProps {
     string,
     "only" | "start" | "middle" | "end"
   > | null;
-  clickPlaceIndicator: { afterNodeId: string; lineDepth: number } | null;
+  clickPlaceIndicator: {
+    nodeId: string;
+    lineDepth: number;
+    position: "before" | "after";
+  } | null;
+  /** When true, show a hit strip above the first root row for root-start place. */
+  canClickPlaceToRoot?: boolean;
+  onClickPlaceRootStart?: () => void;
+  onHoverRootEdge?: (edge: "start" | "end" | null) => void;
   onChangeOpen: (openIds: Set<string>) => void;
   onDrop: (
     newTree: GroupLayerTreeNode[],
@@ -92,6 +100,9 @@ export default forwardRef<MapLayersTreeHandle, MapLayersTreeViewProps>(
       hoveredSubtreeIds,
       clickPickEdgeById,
       clickPlaceIndicator,
+      canClickPlaceToRoot = false,
+      onClickPlaceRootStart,
+      onHoverRootEdge,
       onChangeOpen,
       onDrop,
       onTreeMouseLeave,
@@ -174,6 +185,25 @@ export default forwardRef<MapLayersTreeHandle, MapLayersTreeViewProps>(
 
   return (
     <Box sx={{ pb: "8px" }} onMouseLeave={handleTreeMouseLeave}>
+      {clickMode && !clickPickIsNull && canClickPlaceToRoot ? (
+        <Box
+          onMouseEnter={() => {
+            onHoverRootEdge?.("start");
+          }}
+          onMouseLeave={() => {
+            onHoverRootEdge?.(null);
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            onClickPlaceRootStart?.();
+          }}
+          sx={{
+            height: 14,
+            cursor: "pointer",
+            flexShrink: 0,
+          }}
+        />
+      ) : null}
       <Tree<GroupLayerNodeData>
         ref={treeRef}
         tree={treeData}
@@ -241,9 +271,14 @@ export default forwardRef<MapLayersTreeHandle, MapLayersTreeViewProps>(
               clickMode={clickMode}
               clickPickEdge={clickPickEdgeById?.get(String(node.id)) ?? null}
               clickPlaceLineDepth={
-                clickPlaceIndicator?.afterNodeId === String(node.id)
+                clickPlaceIndicator?.nodeId === String(node.id)
                   ? clickPlaceIndicator.lineDepth
                   : null
+              }
+              clickPlaceLinePosition={
+                clickPlaceIndicator?.nodeId === String(node.id)
+                  ? clickPlaceIndicator.position
+                  : "after"
               }
               onClickInteract={onTreeClickInteract}
               onHoverSubtree={handleHoverSubtree}

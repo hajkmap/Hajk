@@ -7,31 +7,211 @@ import {
   sortSiblingNodes,
 } from "./tree-model";
 
+export interface ClickPlaceDestination {
+  parentId: GroupLayerTreeNode["id"];
+  index: number;
+  /** True when nesting into the hovered group (vs placing as a sibling after it). */
+  nestsIntoGroup: boolean;
+}
+
+function isGroupOpen(
+  groupId: GroupLayerTreeNode["id"],
+  openNodeIds: Set<string> | null | undefined,
+): boolean {
+  // null = Tree still on initialOpen (treat as expanded).
+  return openNodeIds == null || openNodeIds.has(String(groupId));
+}
+
+/** Root start click-place (above first root sibling). */
+export type ClickPlaceRootEdge = "start" | "end";
+
 /**
- * Click-and-place insert position: into a group as first child (index 0),
- * or after a layer.
+ * Destination for placing at the tree root edge (before first / after last).
  */
-export function resolveClickPlaceInsertIndex(
+export function resolveClickPlaceRootDestination(
+  tree: GroupLayerTreeNode[],
+  edge: ClickPlaceRootEdge,
+): ClickPlaceDestination {
+  const rootCount = tree.filter(
+    (node) => node.parent === GROUP_LAYER_TREE_ROOT_ID,
+  ).length;
+  return {
+    parentId: GROUP_LAYER_TREE_ROOT_ID,
+    index: edge === "start" ? 0 : rootCount,
+    nestsIntoGroup: false,
+  };
+}
+
+/**
+ * One bottom-edge drop slot: deepest (inside last group) → shallowest (root).
+ * Lines are rendered in stacked hit strips under the tree, not on group headers.
+ */
+export interface ClickPlaceEndLevel {
+  parentId: GroupLayerTreeNode["id"];
+  index: number;
+  lineDepth: number;
+}
+
+function getVisibleSortedChildren(
+  tree: GroupLayerTreeNode[],
+  parentId: GroupLayerTreeNode["parent"],
+  visibleNodeIds?: Set<string> | null,
+): GroupLayerTreeNode[] {
+  return tree
+    .filter((node) => node.parent === parentId)
+    .slice()
+    .sort(sortSiblingNodes)
+    .filter((node) => !visibleNodeIds || visibleNodeIds.has(String(node.id)));
+}
+
+/**
+ * Last visible node in depth-first order (dives into expanded groups).
+ */
+export function getLastVisibleTreeNode(
+  tree: GroupLayerTreeNode[],
+  openNodeIds?: Set<string> | null,
+  visibleNodeIds?: Set<string> | null,
+): GroupLayerTreeNode | null {
+  const walk = (
+    parentId: GroupLayerTreeNode["parent"],
+  ): GroupLayerTreeNode | null => {
+    const children = getVisibleSortedChildren(tree, parentId, visibleNodeIds);
+    if (children.length === 0) {
+      return null;
+    }
+    const last = children[children.length - 1];
+    if (
+      last &&
+      last.data?.kind === "group" &&
+      isGroupOpen(last.id, openNodeIds)
+    ) {
+      return walk(last.id) ?? last;
+    }
+    return last ?? null;
+  };
+  return walk(GROUP_LAYER_TREE_ROOT_ID);
+}
+
+export function resolveClickPlaceEndLevels(
+  tree: GroupLayerTreeNode[],
+  openNodeIds?: Set<string> | null,
+  visibleNodeIds?: Set<string> | null,
+): ClickPlaceEndLevel[] {
+  const last = getLastVisibleTreeNode(tree, openNodeIds, visibleNodeIds);
+  if (!last) {
+    return [
+      {
+        parentId: GROUP_LAYER_TREE_ROOT_ID,
+        index: 0,
+        lineDepth: 0,
+      },
+    ];
+  }
+
+  const levels: ClickPlaceEndLevel[] = [];
+  let node: GroupLayerTreeNode = last;
+
+  while (true) {
+    const parentId = node.parent ?? GROUP_LAYER_TREE_ROOT_ID;
+    const siblings = tree
+      .filter((entry) => entry.parent === parentId)
+      .slice()
+      .sort(sortSiblingNodes);
+    const nodeIndex = siblings.findIndex(
+      (entry) => String(entry.id) === String(node.id),
+    );
+    levels.push({
+      parentId,
+      index: nodeIndex < 0 ? siblings.length : nodeIndex + 1,
+      lineDepth: getTreeNodeDepth(tree, node.id),
+    });
+
+    if (parentId === GROUP_LAYER_TREE_ROOT_ID) {
+      break;
+    }
+    const parent = tree.find((entry) => String(entry.id) === String(parentId));
+    if (!parent) {
+      break;
+    }
+    node = parent;
+  }
+
+  return levels;
+}
+
+/** Groups may live under root; layers must live under a group. */
+export function isValidClickPlaceParentId(
+  tree: GroupLayerTreeNode[],
+  parentId: GroupLayerTreeNode["id"],
+  kind: "group" | "layer",
+): boolean {
+  if (kind === "layer") {
+    return isValidLayerParentId(tree, parentId);
+  }
+  if (parentId === GROUP_LAYER_TREE_ROOT_ID) {
+    return true;
+  }
+  return isGroupNode(tree.find((node) => String(node.id) === String(parentId)));
+}
+
+/**
+ * Click-and-place destination for a hovered tree node.
+ *
+ * - Layer target → insert after it under its parent group.
+ * - Expanded group → nest as first child.
+ * - Collapsed group → insert after it as a sibling (including at root).
+ */
+export function resolveClickPlaceDestination(
   tree: GroupLayerTreeNode[],
   targetId: GroupLayerTreeNode["id"],
-): number | undefined {
+  openNodeIds?: Set<string> | null,
+): ClickPlaceDestination | null {
   const target = tree.find((node) => node.id === targetId);
   if (!target?.data) {
-    return undefined;
+    return null;
   }
-  if (target.data.kind === "group") {
-    return 0;
+
+  if (target.data.kind === "layer") {
+    const parentId = target.parent ?? GROUP_LAYER_TREE_ROOT_ID;
+    if (parentId === GROUP_LAYER_TREE_ROOT_ID) {
+      return null;
+    }
+    const siblings = tree
+      .filter((node) => node.parent === parentId)
+      .slice()
+      .sort(sortSiblingNodes);
+    const targetIndex = siblings.findIndex((node) => node.id === target.id);
+    return {
+      parentId,
+      index: targetIndex < 0 ? siblings.length : targetIndex + 1,
+      nestsIntoGroup: false,
+    };
   }
-  if (target.data.kind !== "layer") {
-    return undefined;
+
+  if (target.data.kind !== "group") {
+    return null;
   }
-  const parentId = target.parent ?? GROUP_LAYER_TREE_ROOT_ID;
+
+  const targetParent = target.parent ?? GROUP_LAYER_TREE_ROOT_ID;
+  if (isGroupOpen(target.id, openNodeIds)) {
+    return {
+      parentId: target.id,
+      index: 0,
+      nestsIntoGroup: true,
+    };
+  }
+
+  // Collapsed group: place after it under the same parent (root or nested).
   const siblings = tree
-    .filter((node) => node.parent === parentId)
+    .filter((node) => node.parent === targetParent)
     .slice()
     .sort(sortSiblingNodes);
   const targetIndex = siblings.findIndex((node) => node.id === target.id);
-  return targetIndex < 0 ? siblings.length : targetIndex + 1;
+  return {
+    parentId: targetParent,
+    index: targetIndex < 0 ? siblings.length : targetIndex + 1,
+    nestsIntoGroup: false,
+  };
 }
 
 export function getTreeNodeDepth(
@@ -69,32 +249,29 @@ export function filterTreeSelectionRoots(
 
 /**
  * Move an existing Maplayers node via click-and-drop onto another node.
- * Group targets receive the item as first child (index 0); layer targets get
- * it as the next sibling (same parent).
  */
 export function moveTreeNodeToClickTarget(
   tree: GroupLayerTreeNode[],
   sourceId: GroupLayerTreeNode["id"],
   targetId: GroupLayerTreeNode["id"],
+  openNodeIds?: Set<string> | null,
 ): GroupLayerTreeNode[] | null {
-  return moveTreeNodesToClickTarget(tree, [sourceId], targetId);
+  return moveTreeNodesToClickTarget(tree, [sourceId], targetId, openNodeIds);
 }
 
 /**
- * Move multiple nodes onto a click-place target, preserving `sourceIds` order
- * (first id becomes the topmost / earliest after the target).
+ * Whether moving `sourceIds` into `destination` is allowed (and would change order).
  */
-export function canMoveTreeNodesToClickTarget(
+export function canMoveTreeNodesToDestination(
   tree: GroupLayerTreeNode[],
   sourceIds: GroupLayerTreeNode["id"][],
-  targetId: GroupLayerTreeNode["id"],
+  destination: ClickPlaceDestination,
+  options?: {
+    /** When placing onto a node, reject self / descendant targets. */
+    targetId?: GroupLayerTreeNode["id"];
+  },
 ): boolean {
   if (sourceIds.length === 0) {
-    return false;
-  }
-
-  const target = tree.find((node) => node.id === targetId);
-  if (!target?.data) {
     return false;
   }
 
@@ -110,19 +287,23 @@ export function canMoveTreeNodesToClickTarget(
   }
   const movingIds: GroupLayerTreeNode["id"][] = [];
   const seen = new Set<string>();
+  const targetId = options?.targetId;
   for (const sourceId of sourceIds) {
     const key = String(sourceId);
     if (seen.has(key)) {
       continue;
     }
-    if (String(sourceId) === String(targetId)) {
+    if (targetId != null && String(sourceId) === String(targetId)) {
       return false;
     }
     const source = tree.find((node) => node.id === sourceId);
     if (!source?.data) {
       continue;
     }
-    if (getDescendantIds(tree, sourceId, childrenByParent).has(targetId)) {
+    if (
+      targetId != null &&
+      getDescendantIds(tree, sourceId, childrenByParent).has(targetId)
+    ) {
       return false;
     }
     seen.add(key);
@@ -133,16 +314,11 @@ export function canMoveTreeNodesToClickTarget(
     return false;
   }
 
-  let parentId: GroupLayerTreeNode["parent"];
-  if (target.data.kind === "group") {
-    parentId = target.id;
-    for (const sourceId of movingIds) {
-      if (getDescendantIds(tree, sourceId, childrenByParent).has(parentId)) {
-        return false;
-      }
+  const parentId = destination.parentId;
+  for (const sourceId of movingIds) {
+    if (getDescendantIds(tree, sourceId, childrenByParent).has(parentId)) {
+      return false;
     }
-  } else {
-    parentId = target.parent ?? GROUP_LAYER_TREE_ROOT_ID;
   }
 
   for (const sourceId of movingIds) {
@@ -150,14 +326,7 @@ export function canMoveTreeNodesToClickTarget(
     if (!source?.data) {
       return false;
     }
-    if (source.data.kind === "layer" && !isValidLayerParentId(tree, parentId)) {
-      return false;
-    }
-    if (
-      source.data.kind === "group" &&
-      parentId !== GROUP_LAYER_TREE_ROOT_ID &&
-      !isGroupNode(tree.find((node) => String(node.id) === String(parentId)))
-    ) {
+    if (!isValidClickPlaceParentId(tree, parentId, source.data.kind)) {
       return false;
     }
   }
@@ -168,14 +337,7 @@ export function canMoveTreeNodesToClickTarget(
     .slice()
     .sort(sortSiblingNodes);
   const rest = destSiblings.filter((node) => !movingIdSet.has(String(node.id)));
-
-  let insertAt: number;
-  if (target.data.kind === "group") {
-    insertAt = 0;
-  } else {
-    const targetIndex = rest.findIndex((node) => node.id === target.id);
-    insertAt = targetIndex < 0 ? rest.length : targetIndex + 1;
-  }
+  const insertAt = Math.max(0, Math.min(destination.index, rest.length));
 
   const nextSiblingIds = [
     ...rest.slice(0, insertAt).map((node) => node.id),
@@ -195,20 +357,40 @@ export function canMoveTreeNodesToClickTarget(
 }
 
 /**
- * Move multiple nodes onto a click-place target, preserving `sourceIds` order
- * (first id becomes the topmost / earliest after the target).
+ * Whether the click-place destination for a hovered node is allowed.
  */
-export function moveTreeNodesToClickTarget(
+export function canMoveTreeNodesToClickTarget(
   tree: GroupLayerTreeNode[],
   sourceIds: GroupLayerTreeNode["id"][],
   targetId: GroupLayerTreeNode["id"],
-): GroupLayerTreeNode[] | null {
-  if (!canMoveTreeNodesToClickTarget(tree, sourceIds, targetId)) {
-    return null;
+  openNodeIds?: Set<string> | null,
+): boolean {
+  const destination = resolveClickPlaceDestination(tree, targetId, openNodeIds);
+  if (!destination) {
+    return false;
   }
-
   const target = tree.find((node) => node.id === targetId);
   if (!target?.data) {
+    return false;
+  }
+  return canMoveTreeNodesToDestination(tree, sourceIds, destination, {
+    targetId,
+  });
+}
+
+/**
+ * Move multiple nodes onto a click-place target, preserving `sourceIds` order
+ * (first id becomes the topmost / earliest after the target).
+ */
+export function moveTreeNodesToDestination(
+  tree: GroupLayerTreeNode[],
+  sourceIds: GroupLayerTreeNode["id"][],
+  destination: ClickPlaceDestination,
+  options?: {
+    targetId?: GroupLayerTreeNode["id"];
+  },
+): GroupLayerTreeNode[] | null {
+  if (!canMoveTreeNodesToDestination(tree, sourceIds, destination, options)) {
     return null;
   }
 
@@ -227,25 +409,14 @@ export function moveTreeNodesToClickTarget(
     movingIds.push(sourceId);
   }
 
-  const parentId =
-    target.data.kind === "group"
-      ? target.id
-      : (target.parent ?? GROUP_LAYER_TREE_ROOT_ID);
-
+  const parentId = destination.parentId;
   const movingIdSet = new Set(movingIds.map((id) => String(id)));
   const destSiblings = tree
     .filter((node) => node.parent === parentId)
     .slice()
     .sort(sortSiblingNodes);
   const rest = destSiblings.filter((node) => !movingIdSet.has(String(node.id)));
-
-  let insertAt: number;
-  if (target.data.kind === "group") {
-    insertAt = 0;
-  } else {
-    const targetIndex = rest.findIndex((node) => node.id === target.id);
-    insertAt = targetIndex < 0 ? rest.length : targetIndex + 1;
-  }
+  const insertAt = Math.max(0, Math.min(destination.index, rest.length));
 
   const movingNodes: GroupLayerTreeNode[] = [];
   for (const sourceId of movingIds) {
@@ -296,4 +467,23 @@ export function moveTreeNodesToClickTarget(
   }
 
   return result;
+}
+
+/**
+ * Move multiple nodes onto a click-place target, preserving `sourceIds` order
+ * (first id becomes the topmost / earliest after the target).
+ */
+export function moveTreeNodesToClickTarget(
+  tree: GroupLayerTreeNode[],
+  sourceIds: GroupLayerTreeNode["id"][],
+  targetId: GroupLayerTreeNode["id"],
+  openNodeIds?: Set<string> | null,
+): GroupLayerTreeNode[] | null {
+  const destination = resolveClickPlaceDestination(tree, targetId, openNodeIds);
+  if (!destination) {
+    return null;
+  }
+  return moveTreeNodesToDestination(tree, sourceIds, destination, {
+    targetId,
+  });
 }

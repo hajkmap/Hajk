@@ -1,9 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type {
   CatalogDragItem,
@@ -17,14 +12,18 @@ import {
   filterTreeSelectionRoots,
   getTreeNodeDepth,
   canMoveTreeNodesToClickTarget,
+  isValidClickPlaceParentId,
   moveTreeNodesToClickTarget,
-  resolveClickPlaceInsertIndex,
+  moveTreeNodesToDestination,
+  resolveClickPlaceDestination,
+  resolveClickPlaceRootDestination,
+  type ClickPlaceDestination,
+  type ClickPlaceRootEdge,
 } from "../utils/click-place";
 import { isLayerStillInMapLayersTree } from "../utils/maplayers-editor";
 import {
   applyMapLayersSiblingOrder,
   buildChildrenByParentId,
-  canPlaceLayerAt,
   createTreeNodeFromCatalogItem,
   extractSubtreeForMoveZone,
   getDescendantIds,
@@ -32,7 +31,6 @@ import {
   insertMoveZoneSubtreeIntoTree,
   sortSiblingNodes,
 } from "../utils/tree-model";
-import { moveTreeNodeWithIndex } from "../utils/move-tree-node";
 import type {
   UseMapLayersClickPlaceParams,
   UseMapLayersClickPlaceResult,
@@ -60,6 +58,9 @@ export function useMapLayersClickPlace({
   const [hoveredSubtreeRootId, setHoveredSubtreeRootId] = useState<
     GroupLayerTreeNode["id"] | null
   >(null);
+  const [rootEdgeHover, setRootEdgeHover] = useState<ClickPlaceRootEdge | null>(
+    null,
+  );
 
   const clickMode =
     interactionMode === "click" && !backgroundMode && !drawOrderMode;
@@ -154,14 +155,21 @@ export function useMapLayersClickPlace({
       }
 
       if (clickPick.source === "catalog") {
+        const destination = resolveClickPlaceDestination(
+          treeData,
+          targetId,
+          openNodeIds,
+        );
+        if (!destination) {
+          return false;
+        }
         let next = treeData;
         let placed = false;
         // Insert in reverse at the same index so the first clicked item ends on top.
-        const relativeIndex = resolveClickPlaceInsertIndex(next, targetId);
         for (const item of [...clickPick.items].reverse()) {
           const inserted = insertCatalogItemIntoTree(next, item, {
-            dropTargetId: targetId,
-            relativeIndex,
+            dropTargetId: destination.parentId,
+            relativeIndex: destination.index,
           });
           if (inserted) {
             next = inserted;
@@ -177,10 +185,17 @@ export function useMapLayersClickPlace({
       }
 
       if (clickPick.source === "moveZone") {
+        const destination = resolveClickPlaceDestination(
+          treeData,
+          targetId,
+          openNodeIds,
+        );
+        if (!destination) {
+          return false;
+        }
         let next = treeData;
         let nextMoveZone = moveZoneItems;
         let placed = false;
-        const relativeIndex = resolveClickPlaceInsertIndex(next, targetId);
         for (const item of [...clickPick.items].reverse()) {
           if (
             item.kind === "layer" &&
@@ -193,8 +208,8 @@ export function useMapLayersClickPlace({
             continue;
           }
           const inserted = insertMoveZoneSubtreeIntoTree(next, item.nodes, {
-            dropTargetId: targetId,
-            relativeIndex,
+            dropTargetId: destination.parentId,
+            relativeIndex: destination.index,
           });
           if (inserted) {
             next = inserted;
@@ -231,7 +246,12 @@ export function useMapLayersClickPlace({
         }
       }
 
-      const next = moveTreeNodesToClickTarget(treeData, rootIds, targetId);
+      const next = moveTreeNodesToClickTarget(
+        treeData,
+        rootIds,
+        targetId,
+        openNodeIds,
+      );
       if (!next) {
         return false;
       }
@@ -239,7 +259,14 @@ export function useMapLayersClickPlace({
       setClickPick(null);
       return true;
     },
-    [clickPick, moveZoneItems, setMoveZoneItems, setTreeData, treeData],
+    [
+      clickPick,
+      moveZoneItems,
+      openNodeIds,
+      setMoveZoneItems,
+      setTreeData,
+      treeData,
+    ],
   );
 
   const handleTreeClickInteract = useCallback(
@@ -300,100 +327,140 @@ export function useMapLayersClickPlace({
     [clickMode, clickPick, placeClickPickOnTreeTarget, treeData],
   );
 
-  const handleClickPlaceToRoot = useCallback(() => {
-    if (clickPick == null) {
-      return;
-    }
-
-    if (clickPick.source === "catalog") {
-      const groups = clickPick.items.filter((item) => item.kind === "group");
-      if (groups.length === 0) {
-        return;
+  const placeClickPickAtDestination = useCallback(
+    (destination: ClickPlaceDestination) => {
+      if (clickPick == null) {
+        return false;
       }
-      setTreeData((current) => {
-        let next = current;
-        for (const item of groups) {
-          next =
-            insertCatalogItemIntoTree(next, item, {
-              dropTargetId: GROUP_LAYER_TREE_ROOT_ID,
-            }) ?? next;
-        }
-        return next;
-      });
-      setClickPick(null);
-      return;
-    }
 
-    if (clickPick.source === "moveZone") {
-      let next = treeData;
-      let nextMoveZone = moveZoneItems;
-      let placed = false;
-      for (const item of clickPick.items) {
-        if (item.kind === "layer") {
-          if (isLayerStillInMapLayersTree(next, item.sourceId)) {
+      if (clickPick.source === "catalog") {
+        const canPlace = clickPick.items.every((item) =>
+          isValidClickPlaceParentId(treeData, destination.parentId, item.kind),
+        );
+        if (!canPlace) {
+          return false;
+        }
+        let next = treeData;
+        let placed = false;
+        for (const item of [...clickPick.items].reverse()) {
+          const inserted = insertCatalogItemIntoTree(next, item, {
+            dropTargetId: destination.parentId,
+            relativeIndex: destination.index,
+          });
+          if (inserted) {
+            next = inserted;
+            placed = true;
+          }
+        }
+        if (!placed) {
+          return false;
+        }
+        setTreeData(applyMapLayersSiblingOrder(next));
+        setClickPick(null);
+        setRootEdgeHover(null);
+        return true;
+      }
+
+      if (clickPick.source === "moveZone") {
+        const canPlace = clickPick.items.every((item) => {
+          if (
+            item.kind === "layer" &&
+            isLayerStillInMapLayersTree(treeData, item.sourceId)
+          ) {
+            return false;
+          }
+          return isValidClickPlaceParentId(
+            treeData,
+            destination.parentId,
+            item.kind,
+          );
+        });
+        if (!canPlace) {
+          return false;
+        }
+        let next = treeData;
+        let nextMoveZone = moveZoneItems;
+        let placed = false;
+        for (const item of [...clickPick.items].reverse()) {
+          if (
+            item.kind === "layer" &&
+            isLayerStillInMapLayersTree(next, item.sourceId)
+          ) {
+            nextMoveZone = nextMoveZone.filter(
+              (entry) => entry.key !== item.key,
+            );
+            placed = true;
+            continue;
+          }
+          const inserted = insertMoveZoneSubtreeIntoTree(next, item.nodes, {
+            dropTargetId: destination.parentId,
+            relativeIndex: destination.index,
+          });
+          if (inserted) {
+            next = inserted;
             nextMoveZone = nextMoveZone.filter(
               (entry) => entry.key !== item.key,
             );
             placed = true;
           }
-          continue;
         }
-        const inserted = insertMoveZoneSubtreeIntoTree(next, item.nodes, {
-          dropTargetId: GROUP_LAYER_TREE_ROOT_ID,
-        });
-        if (inserted) {
-          next = inserted;
-          nextMoveZone = nextMoveZone.filter((entry) => entry.key !== item.key);
-          placed = true;
+        if (!placed) {
+          return false;
         }
+        setTreeData(applyMapLayersSiblingOrder(next));
+        setMoveZoneItems(nextMoveZone);
+        setClickPick(null);
+        setRootEdgeHover(null);
+        return true;
       }
-      if (!placed) {
-        return;
-      }
-      setTreeData(applyMapLayersSiblingOrder(next));
-      setMoveZoneItems(nextMoveZone);
-      setClickPick(null);
-      return;
-    }
 
-    const rootIds = filterTreeSelectionRoots(
-      treeData,
-      clickPick.nodes.map((node) => node.nodeId),
-    ).filter((nodeId) => {
-      const source = treeData.find((node) => node.id === nodeId);
-      return source?.data?.kind === "group";
-    });
-    if (rootIds.length === 0) {
-      return;
-    }
-
-    let next = treeData;
-    let placed = false;
-    for (const nodeId of rootIds) {
-      const source = next.find((node) => node.id === nodeId);
-      if (!source || source.parent === GROUP_LAYER_TREE_ROOT_ID) {
-        continue;
-      }
-      const rootChildCount = next.filter(
-        (node) => node.parent === GROUP_LAYER_TREE_ROOT_ID,
-      ).length;
-      next = applyMapLayersSiblingOrder(
-        moveTreeNodeWithIndex(
-          next,
-          nodeId,
-          GROUP_LAYER_TREE_ROOT_ID,
-          rootChildCount,
+      const orderedNodeIds = clickPick.nodes.map((node) => node.nodeId);
+      const rootIdSet = new Set(
+        filterTreeSelectionRoots(treeData, orderedNodeIds).map((id) =>
+          String(id),
         ),
       );
-      placed = true;
-    }
-    if (!placed) {
+      const rootIds = orderedNodeIds.filter((id) => rootIdSet.has(String(id)));
+      const next = moveTreeNodesToDestination(treeData, rootIds, destination);
+      if (!next) {
+        return false;
+      }
+      setTreeData(applyMapLayersSiblingOrder(next));
       setClickPick(null);
-      return;
+      setRootEdgeHover(null);
+      return true;
+    },
+    [clickPick, moveZoneItems, setMoveZoneItems, setTreeData, treeData],
+  );
+
+  const handleClickPlaceToRootStart = useCallback(() => {
+    placeClickPickAtDestination(
+      resolveClickPlaceRootDestination(treeData, "start"),
+    );
+  }, [placeClickPickAtDestination, treeData]);
+
+  const handleClickPlaceToRoot = useCallback(() => {
+    placeClickPickAtDestination(
+      resolveClickPlaceRootDestination(treeData, "end"),
+    );
+  }, [placeClickPickAtDestination, treeData]);
+
+  const handleClickPlaceRootEdgeHover = useCallback(
+    (edge: ClickPlaceRootEdge | null) => {
+      setRootEdgeHover(edge === "start" ? "start" : null);
+      if (edge === "start") {
+        setHoveredSubtreeRootId(null);
+      }
+    },
+    [],
+  );
+
+  const handleClickPlaceRootEndHover = useCallback((hovering: boolean) => {
+    if (hovering) {
+      setRootEdgeHover(null);
+      setHoveredSubtreeRootId(null);
     }
-    setTreeData(next);
-    setClickPick(null);
-  }, [clickPick, moveZoneItems, setMoveZoneItems, setTreeData, treeData]);
+  }, []);
 
   const handleClickPlaceToMoveZone = useCallback(() => {
     if (clickPick == null) {
@@ -549,24 +616,27 @@ export function useMapLayersClickPlace({
   }, [clickPickedRootIds, treeData]);
 
   const canClickPlaceToRoot = useMemo(() => {
-    if (!clickMode || clickPick == null) {
+    if (clickPick == null) {
       return false;
     }
     if (clickPick.source === "catalog") {
-      return clickPick.items.some((item) => item.kind === "group");
+      return clickPick.items.every((item) => item.kind === "group");
     }
     if (clickPick.source === "moveZone") {
-      return clickPick.items.some(
-        (item) =>
-          item.kind === "group" ||
-          isLayerStillInMapLayersTree(treeData, item.sourceId),
-      );
+      return clickPick.items.every((item) => item.kind === "group");
     }
-    return clickPick.nodes.some((entry) => {
-      const node = treeData.find((n) => n.id === entry.nodeId);
+    const rootIds = filterTreeSelectionRoots(
+      treeData,
+      clickPick.nodes.map((node) => node.nodeId),
+    );
+    if (rootIds.length === 0) {
+      return false;
+    }
+    return rootIds.every((id) => {
+      const node = treeData.find((entry) => entry.id === id);
       return node?.data?.kind === "group";
     });
-  }, [clickMode, clickPick, treeData]);
+  }, [clickPick, treeData]);
 
   const clickPickEdgeById = useMemo(() => {
     if (clickPickedRootIds == null || clickPickedSubtreeIds == null) {
@@ -650,6 +720,7 @@ export function useMapLayersClickPlace({
 
   const handleMapLayersNodeHover = useCallback(
     (nodeId: GroupLayerTreeNode["id"]) => {
+      setRootEdgeHover(null);
       setHoveredSubtreeRootId((current) =>
         current === nodeId ? current : nodeId,
       );
@@ -659,6 +730,7 @@ export function useMapLayersClickPlace({
 
   const handleMapLayersTreeMouseLeave = useCallback(() => {
     setHoveredSubtreeRootId(null);
+    // Keep root-end hover when the pointer moves into drop-zone padding.
   }, []);
 
   const canClickPlaceOnTarget = useCallback(
@@ -672,15 +744,28 @@ export function useMapLayersClickPlace({
       }
 
       if (clickPick.source === "catalog") {
-        return clickPick.items.some((item) => {
-          if (item.kind === "layer") {
-            return canPlaceLayerAt(treeData, targetId, target);
-          }
-          return true;
-        });
+        const destination = resolveClickPlaceDestination(
+          treeData,
+          targetId,
+          openNodeIds,
+        );
+        if (!destination) {
+          return false;
+        }
+        return clickPick.items.some((item) =>
+          isValidClickPlaceParentId(treeData, destination.parentId, item.kind),
+        );
       }
 
       if (clickPick.source === "moveZone") {
+        const destination = resolveClickPlaceDestination(
+          treeData,
+          targetId,
+          openNodeIds,
+        );
+        if (!destination) {
+          return false;
+        }
         return clickPick.items.some((item) => {
           if (
             item.kind === "layer" &&
@@ -688,10 +773,11 @@ export function useMapLayersClickPlace({
           ) {
             return false;
           }
-          if (item.kind === "layer") {
-            return canPlaceLayerAt(treeData, targetId, target);
-          }
-          return true;
+          return isValidClickPlaceParentId(
+            treeData,
+            destination.parentId,
+            item.kind,
+          );
         });
       }
 
@@ -708,43 +794,83 @@ export function useMapLayersClickPlace({
           return false;
         }
       }
-      return canMoveTreeNodesToClickTarget(treeData, rootIds, targetId);
+      return canMoveTreeNodesToClickTarget(
+        treeData,
+        rootIds,
+        targetId,
+        openNodeIds,
+      );
     },
-    [clickPick, treeData],
+    [clickPick, openNodeIds, treeData],
   );
+
+  const rootEdgeNodes = useMemo(() => {
+    const roots = treeData
+      .filter((node) => node.parent === GROUP_LAYER_TREE_ROOT_ID)
+      .slice()
+      .sort(sortSiblingNodes)
+      .filter((node) => !visibleNodeIds || visibleNodeIds.has(String(node.id)));
+    return {
+      firstId: roots[0] != null ? String(roots[0].id) : null,
+    };
+  }, [treeData, visibleNodeIds]);
 
   /** Blue drop line + optional group highlight while holding a click-pick. */
   const clickPlaceIndicator = useMemo(() => {
+    if (!clickMode || clickPick == null) {
+      return null;
+    }
+
     if (
-      !clickMode ||
-      clickPick == null ||
+      rootEdgeHover === "start" &&
+      canClickPlaceToRoot &&
+      rootEdgeNodes.firstId != null
+    ) {
+      return {
+        nodeId: rootEdgeNodes.firstId,
+        lineDepth: 0,
+        position: "before" as const,
+      };
+    }
+
+    if (
       hoveredSubtreeRootId == null ||
       !canClickPlaceOnTarget(hoveredSubtreeRootId)
     ) {
       return null;
     }
 
-    const target = treeData.find((node) => node.id === hoveredSubtreeRootId);
-    if (!target?.data) {
+    const destination = resolveClickPlaceDestination(
+      treeData,
+      hoveredSubtreeRootId,
+      openNodeIds,
+    );
+    if (!destination) {
       return null;
     }
 
-    if (target.data.kind === "group") {
+    if (destination.nestsIntoGroup) {
       return {
-        afterNodeId: String(target.id),
-        lineDepth: getTreeNodeDepth(treeData, target.id) + 1,
+        nodeId: String(hoveredSubtreeRootId),
+        lineDepth: getTreeNodeDepth(treeData, hoveredSubtreeRootId) + 1,
+        position: "after" as const,
       };
     }
 
     return {
-      afterNodeId: String(target.id),
-      lineDepth: getTreeNodeDepth(treeData, target.id),
+      nodeId: String(hoveredSubtreeRootId),
+      lineDepth: getTreeNodeDepth(treeData, hoveredSubtreeRootId),
+      position: "after" as const,
     };
   }, [
     canClickPlaceOnTarget,
+    canClickPlaceToRoot,
     clickMode,
     clickPick,
     hoveredSubtreeRootId,
+    openNodeIds,
+    rootEdgeHover,
+    rootEdgeNodes.firstId,
     treeData,
   ]);
 
@@ -758,6 +884,9 @@ export function useMapLayersClickPlace({
     handleCatalogClickPick,
     handleTreeClickInteract,
     handleClickPlaceToRoot,
+    handleClickPlaceToRootStart,
+    handleClickPlaceRootEdgeHover,
+    handleClickPlaceRootEndHover,
     handleClickPlaceToMoveZone,
     handleMoveZoneClickPick,
     clickPickCount,

@@ -39,8 +39,9 @@ interface GroupLayerTreeNodeProps {
   clickMode?: boolean;
   /** Position of this row in the continuous click-pick highlight frame. */
   clickPickEdge?: "only" | "start" | "middle" | "end" | null;
-  /** Show drop line under this row at the given tree depth (null = hidden). */
+  /** Show drop line before/after this row at the given tree depth (null = hidden). */
   clickPlaceLineDepth?: number | null;
+  clickPlaceLinePosition?: "before" | "after";
   onClickInteract?: (
     nodeId: GroupLayerTreeNode["id"],
     additive: boolean,
@@ -64,6 +65,7 @@ function GroupLayerTreeNodeView({
   clickMode = false,
   clickPickEdge = null,
   clickPlaceLineDepth = null,
+  clickPlaceLinePosition = "after",
   onClickInteract,
   onHoverSubtree,
   onToggleLayerVisibility,
@@ -152,6 +154,19 @@ function GroupLayerTreeNodeView({
         boxSizing: "border-box",
       }}
     >
+      {clickPlaceLineDepth != null && clickPlaceLinePosition === "before" ? (
+        <Box
+          aria-hidden
+          sx={{
+            height: 2,
+            ml: `${clickPlaceLineDepth * 20 + 28}px`,
+            mr: 1,
+            my: 0.125,
+            bgcolor: "primary.main",
+            borderRadius: 1,
+          }}
+        />
+      ) : null}
       <Box
         sx={{
           position: "relative",
@@ -474,7 +489,7 @@ function GroupLayerTreeNodeView({
           </ListItemButton>
         )}
       </Box>
-      {clickPlaceLineDepth != null ? (
+      {clickPlaceLineDepth != null && clickPlaceLinePosition === "after" ? (
         <Box
           aria-hidden
           sx={{
@@ -504,6 +519,7 @@ function areNodePropsEqual(
     prev.clickMode === next.clickMode &&
     prev.clickPickEdge === next.clickPickEdge &&
     prev.clickPlaceLineDepth === next.clickPlaceLineDepth &&
+    prev.clickPlaceLinePosition === next.clickPlaceLinePosition &&
     prev.options.depth === next.options.depth &&
     prev.options.isOpen === next.options.isOpen &&
     prev.options.isDragging === next.options.isDragging &&

@@ -101,6 +101,11 @@ interface MapLayersClickPlaceBindings {
     additive: boolean,
   ) => void;
   handleClickPlaceToRoot: () => void;
+  handleClickPlaceToRootStart: () => void;
+  handleClickPlaceRootEdgeHover: (
+    edge: "start" | "end" | null,
+  ) => void;
+  handleClickPlaceRootEndHover: (hovering: boolean) => void;
   handleClickPlaceToMoveZone: () => void;
   handleMoveZoneClickPick: (item: MoveZoneItem, additive: boolean) => void;
   clickPickCount: number;
@@ -111,8 +116,9 @@ interface MapLayersClickPlaceBindings {
   handleMapLayersNodeHover: (nodeId: GroupLayerTreeNode["id"]) => void;
   handleMapLayersTreeMouseLeave: () => void;
   clickPlaceIndicator: {
-    afterNodeId: string;
+    nodeId: string;
     lineDepth: number;
+    position: "before" | "after";
   } | null;
 }
 
@@ -444,6 +450,9 @@ export default function GroupLayerTree({
     handleCatalogClickPick,
     handleTreeClickInteract,
     handleClickPlaceToRoot,
+    handleClickPlaceToRootStart,
+    handleClickPlaceRootEdgeHover,
+    handleClickPlaceRootEndHover,
     handleClickPlaceToMoveZone,
     handleMoveZoneClickPick,
     clickPickCount,
@@ -1193,6 +1202,7 @@ export default function GroupLayerTree({
                   canAcceptTreeItemToRoot={canAcceptTreeItemToRoot}
                   clickPlaceActive={canClickPlaceToRoot}
                   onClickPlace={handleClickPlaceToRoot}
+                  onClickPlaceHoverChange={handleClickPlaceRootEndHover}
                 />
               ) : (
                 <GroupLayerTreeDropZone
@@ -1204,6 +1214,7 @@ export default function GroupLayerTree({
                   canAcceptTreeItemToRoot={canAcceptTreeItemToRoot}
                   clickPlaceActive={canClickPlaceToRoot}
                   onClickPlace={handleClickPlaceToRoot}
+                  onClickPlaceHoverChange={handleClickPlaceRootEndHover}
                 >
                   <MapLayersTreeView
                     ref={mapLayersTreeRef}
@@ -1216,6 +1227,9 @@ export default function GroupLayerTree({
                     hoveredSubtreeIds={hoveredSubtreeIds}
                     clickPickEdgeById={clickPickEdgeById}
                     clickPlaceIndicator={clickPlaceIndicator}
+                    canClickPlaceToRoot={canClickPlaceToRoot}
+                    onClickPlaceRootStart={handleClickPlaceToRootStart}
+                    onHoverRootEdge={handleClickPlaceRootEdgeHover}
                     onChangeOpen={setOpenNodeIds}
                     onDrop={handleDrop}
                     onTreeMouseLeave={handleMapLayersTreeMouseLeave}
