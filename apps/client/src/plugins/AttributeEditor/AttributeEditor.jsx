@@ -906,6 +906,8 @@ function AttributeEditor(props) {
         const src = new VectorSource({ features });
         const lyr = new VectorLayer({
           source: src,
+          layerType: "system",
+          ignoreInFeatureInfo: true,
           style: new Style({
             image: new CircleStyle({
               radius: 6,
