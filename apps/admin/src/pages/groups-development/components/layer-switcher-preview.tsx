@@ -3,6 +3,8 @@ import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
+import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import {
   AppBar,
   Box,
@@ -41,6 +43,10 @@ interface LayerSwitcherPreviewProps {
   showDrawOrderView?: boolean;
   enableQuickAccessPresets?: boolean;
   enableUserQuickAccessFavorites?: boolean;
+  /** Toolbar toggle state for expand/collapse all (not derived from individual groups). */
+  allGroupsExpanded?: boolean;
+  /** Toggle expand/collapse for all groups in the map-layers tree. */
+  onToggleAllGroups?: () => void;
 }
 
 export default function LayerSwitcherPreview({
@@ -55,6 +61,8 @@ export default function LayerSwitcherPreview({
   showDrawOrderView = true,
   enableQuickAccessPresets = false,
   enableUserQuickAccessFavorites = false,
+  allGroupsExpanded = true,
+  onToggleAllGroups,
 }: LayerSwitcherPreviewProps) {
   const { t } = useTranslation();
   const [uncontrolledActiveTab, setUncontrolledActiveTab] =
@@ -68,6 +76,29 @@ export default function LayerSwitcherPreview({
       setUncontrolledActiveTab(value);
     }
   };
+
+  const showTreeExpandControl =
+    activeTab === "layers" && onToggleAllGroups != null;
+
+  const expandCollapseLabel = allGroupsExpanded
+    ? t("groupsDevelopment.collapseAllGroups")
+    : t("groupsDevelopment.expandAllGroups");
+
+  const expandCollapseButton = showTreeExpandControl ? (
+    <Tooltip title={expandCollapseLabel}>
+      <IconButton
+        size="small"
+        aria-label={expandCollapseLabel}
+        onClick={onToggleAllGroups}
+      >
+        {allGroupsExpanded ? (
+          <UnfoldLessIcon fontSize="small" />
+        ) : (
+          <UnfoldMoreIcon fontSize="small" />
+        )}
+      </IconButton>
+    </Tooltip>
+  ) : null;
 
   const themesButton =
     enableQuickAccessPresets && mapName != null && mapName !== "" ? (
@@ -165,6 +196,20 @@ export default function LayerSwitcherPreview({
                   },
                 }}
               />
+              {expandCollapseButton}
+            </Box>
+          ) : expandCollapseButton ? (
+            <Box
+              sx={{
+                px: 2,
+                pt: 1.25,
+                pb: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+              }}
+            >
+              {expandCollapseButton}
             </Box>
           ) : null}
 

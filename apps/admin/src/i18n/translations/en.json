@@ -822,6 +822,8 @@
     "groupsDevelopment.clickDropHolding": "Holding “{{name}}”. Click a target in Kartlager (or Flyttzon) to place it.",
     "groupsDevelopment.clickDropHoldingMany": "Holding {{count}} items. Click a target in Kartlager (or Flyttzon) to place them.",
     "groupsDevelopment.quickAccessTitle": "Quick access",
+    "groupsDevelopment.expandAllGroups": "Expand all groups",
+    "groupsDevelopment.collapseAllGroups": "Collapse all groups",
     "groupsDragAndDropDescription": "Drag groups or layers into the tree. Groups can be nested inside other groups. Press Alt to switch to click-and-place.",
     "tools.searchTitle": "Search tools...",
     "database.title": "Database Management",

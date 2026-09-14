@@ -821,6 +821,8 @@
     "groupsDevelopment.clickDropHolding": "Håller “{{name}}”. Klicka på en plats i Kartlager (eller Flyttzon) för att placera.",
     "groupsDevelopment.clickDropHoldingMany": "Håller {{count}} objekt. Klicka på en plats i Kartlager (eller Flyttzon) för att placera dem.",
     "groupsDevelopment.quickAccessTitle": "Snabbåtkomst",
+    "groupsDevelopment.expandAllGroups": "Expandera alla grupper",
+    "groupsDevelopment.collapseAllGroups": "Kollapsa alla grupper",
     "groupsDragAndDropDescription": "Dra grupper eller lager till trädet. Grupper kan placeras inuti andra grupper. Tryck Alt för att växla till klicka-och-placera.",
     "tools.searchTitle": "Sök bland verktyg...",
     "database.title": "Databashantering",

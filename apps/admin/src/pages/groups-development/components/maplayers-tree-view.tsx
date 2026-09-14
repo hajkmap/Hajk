@@ -3,10 +3,14 @@ import {
   MultiBackend,
   getBackendOptions,
 } from "@minoru/react-dnd-treeview";
+import type { TreeMethods } from "@minoru/react-dnd-treeview";
 import { Box } from "@mui/material";
 import {
+  forwardRef,
   useCallback,
+  useImperativeHandle,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -36,6 +40,11 @@ export function MapLayersDndProvider({ children }: { children: ReactNode }) {
       {children}
     </DndProvider>
   );
+}
+
+export interface MapLayersTreeHandle {
+  expandAll: () => void;
+  collapseAll: () => void;
 }
 
 interface MapLayersTreeViewProps {
@@ -71,33 +80,51 @@ interface MapLayersTreeViewProps {
   onEditLayerSettings: (nodeId: GroupLayerTreeNode["id"]) => void;
 }
 
-export default function MapLayersTreeView({
-  treeData,
-  visibleIds,
-  visibleNodeIds,
-  groupDisplaySettings,
-  clickMode,
-  clickPickIsNull,
-  hoveredSubtreeIds,
-  clickPickEdgeById,
-  clickPlaceIndicator,
-  onChangeOpen,
-  onDrop,
-  onTreeMouseLeave,
-  onTreeClickInteract,
-  onHoverSubtree,
-  onToggleLayerVisibility,
-  onToggleGroupVisibility,
-  onAddToGroup,
-  onRemoveFromTree,
-  onEditGroupMetadata,
-  onEditLayerSettings,
-}: MapLayersTreeViewProps) {
+export default forwardRef<MapLayersTreeHandle, MapLayersTreeViewProps>(
+  function MapLayersTreeView(
+    {
+      treeData,
+      visibleIds,
+      visibleNodeIds,
+      groupDisplaySettings,
+      clickMode,
+      clickPickIsNull,
+      hoveredSubtreeIds,
+      clickPickEdgeById,
+      clickPlaceIndicator,
+      onChangeOpen,
+      onDrop,
+      onTreeMouseLeave,
+      onTreeClickInteract,
+      onHoverSubtree,
+      onToggleLayerVisibility,
+      onToggleGroupVisibility,
+      onAddToGroup,
+      onRemoveFromTree,
+      onEditGroupMetadata,
+      onEditLayerSettings,
+    },
+    ref,
+  ) {
   // Keep browse-mode hover local so GroupLayerTree (catalog, dialogs, etc.)
   // does not re-render on every mouseenter.
+  const treeRef = useRef<TreeMethods>(null);
   const [browseHoveredRootId, setBrowseHoveredRootId] = useState<
     GroupLayerTreeNode["id"] | null
   >(null);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      expandAll: () => {
+        treeRef.current?.openAll();
+      },
+      collapseAll: () => {
+        treeRef.current?.closeAll();
+      },
+    }),
+    [],
+  );
 
   const browseHoveredSubtreeIds = useMemo(() => {
     if (!clickPickIsNull || browseHoveredRootId == null) {
@@ -148,6 +175,7 @@ export default function MapLayersTreeView({
   return (
     <Box sx={{ pb: "8px" }} onMouseLeave={handleTreeMouseLeave}>
       <Tree<GroupLayerNodeData>
+        ref={treeRef}
         tree={treeData}
         rootId={GROUP_LAYER_TREE_ROOT_ID}
         extraAcceptTypes={[CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE]}
@@ -231,4 +259,5 @@ export default function MapLayersTreeView({
       />
     </Box>
   );
-}
+  },
+);

@@ -82,6 +82,12 @@ import LayerSwitcherPreview, {
 
 export type { LayerSwitcherDraft } from "../types";
 
+/** Local handle for expand/collapse-all (avoids poisoned import typing). */
+interface MapLayersTreeExpandHandle {
+  expandAll: () => void;
+  collapseAll: () => void;
+}
+
 /** Local rebind for click-place hook output (see useMapLayersClickPlace call). */
 interface MapLayersClickPlaceBindings {
   clickPick: MapLayersClickPick | null;
@@ -162,6 +168,7 @@ export default function GroupLayerTree({
   const loadedLayerSwitcherKeyRef = useRef<string | null>(null);
   const pendingDraftRef = useRef(pendingDraft);
   const onLayerSwitcherDraftChangeRef = useRef(onLayerSwitcherDraftChange);
+  const mapLayersTreeRef = useRef<MapLayersTreeExpandHandle | null>(null);
 
   useEffect(() => {
     pendingDraftRef.current = pendingDraft;
@@ -456,6 +463,18 @@ export default function GroupLayerTree({
     },
     [clearClickPickAndResetToDrag],
   );
+
+  const [treeGroupsFullyExpanded, setTreeGroupsFullyExpanded] = useState(true);
+
+  const handleToggleAllGroups = useCallback(() => {
+    if (treeGroupsFullyExpanded) {
+      mapLayersTreeRef.current?.collapseAll();
+      setTreeGroupsFullyExpanded(false);
+    } else {
+      mapLayersTreeRef.current?.expandAll();
+      setTreeGroupsFullyExpanded(true);
+    }
+  }, [treeGroupsFullyExpanded]);
 
   const serverGroupsFromState = useMemo(
     () => layerSwitcherState?.groups ?? [],
@@ -1082,6 +1101,12 @@ export default function GroupLayerTree({
           enableUserQuickAccessFavorites={
             previewOptions.enableUserQuickAccessFavorites
           }
+          allGroupsExpanded={treeGroupsFullyExpanded}
+          onToggleAllGroups={
+            !backgroundMode && !drawOrderMode
+              ? handleToggleAllGroups
+              : undefined
+          }
         >
           {isLoading ? (
             <Box sx={{ p: 2 }}>
@@ -1181,6 +1206,7 @@ export default function GroupLayerTree({
                   onClickPlace={handleClickPlaceToRoot}
                 >
                   <MapLayersTreeView
+                    ref={mapLayersTreeRef}
                     treeData={treeData}
                     visibleIds={visibleIds}
                     visibleNodeIds={visibleNodeIds}
