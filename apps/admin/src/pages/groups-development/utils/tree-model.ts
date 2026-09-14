@@ -1,11 +1,17 @@
 import type { LayerSwitcherTreeNode } from "../../../api/groups/types";
-import { mutateTreeWithIndex } from "@minoru/react-dnd-treeview";
-import type { CatalogDragItem, GroupLayerTreeNode, MoveZoneItem } from "../types";
+import type {
+  CatalogDragItem,
+  GroupLayerTreeNode,
+  MoveZoneItem,
+} from "../types";
 import {
   CATALOG_DRAG_TYPE,
   GROUP_LAYER_TREE_ROOT_ID,
   MOVE_ZONE_DRAG_TYPE,
 } from "../types";
+import { moveTreeNodeWithIndex } from "./move-tree-node";
+
+export { moveTreeNodeWithIndex } from "./move-tree-node";
 
 const GROUP_ID_PREFIX = "group:";
 const LAYER_ID_PREFIX = "layer:";
@@ -68,9 +74,11 @@ export function getNextSiblingOrder(
   tree: GroupLayerTreeNode[],
   parentId: GroupLayerTreeNode["parent"],
 ): number {
-  return tree
-    .filter((node) => node.parent === parentId)
-    .reduce((max, node) => Math.max(max, node.data?.order ?? 0), -1) + 1;
+  return (
+    tree
+      .filter((node) => node.parent === parentId)
+      .reduce((max, node) => Math.max(max, node.data?.order ?? 0), -1) + 1
+  );
 }
 
 export function sortSiblingNodes<T extends GroupLayerTreeNode>(
@@ -109,6 +117,43 @@ export function applySiblingOrderFromFlatTree(
   });
 }
 
+/**
+ * Rebuild the flat list depth-first so Tree `sort={false}` matches
+ * `data.order` — same sequence we serialize for save/load.
+ */
+export function rebuildFlatTreeDepthFirst(
+  tree: GroupLayerTreeNode[],
+  parentId: GroupLayerTreeNode["parent"] = GROUP_LAYER_TREE_ROOT_ID,
+): GroupLayerTreeNode[] {
+  const childrenByParent = buildChildrenByParentId(tree);
+  const result: GroupLayerTreeNode[] = [];
+
+  const walk = (parent: GroupLayerTreeNode["parent"]) => {
+    const children = (childrenByParent.get(String(parent)) ?? [])
+      .slice()
+      .sort(sortSiblingNodes);
+    for (const child of children) {
+      result.push(child);
+      if (child.data?.kind === "group" || child.droppable) {
+        walk(child.id);
+      }
+    }
+  };
+
+  walk(parentId);
+  return result;
+}
+
+/**
+ * Restamp sibling `data.order` from flat encounter order and rebuild the
+ * flat tree. Layers and nested groups may be interleaved freely.
+ */
+export function applyMapLayersSiblingOrder(
+  tree: GroupLayerTreeNode[],
+): GroupLayerTreeNode[] {
+  return rebuildFlatTreeDepthFirst(applySiblingOrderFromFlatTree(tree));
+}
+
 export function resolveCatalogInsertTarget(
   tree: GroupLayerTreeNode[],
   dropTargetId: GroupLayerTreeNode["id"],
@@ -120,7 +165,9 @@ export function resolveCatalogInsertTarget(
   if (target?.data?.kind === "layer" && dropTargetId === target.id) {
     const parentId = target.parent ?? GROUP_LAYER_TREE_ROOT_ID;
     const siblings = tree.filter((node) => node.parent === parentId);
-    const targetSiblingIndex = siblings.findIndex((node) => node.id === target.id);
+    const targetSiblingIndex = siblings.findIndex(
+      (node) => node.id === target.id,
+    );
 
     return {
       parentId,
@@ -168,14 +215,14 @@ export function insertCatalogItemIntoTree(
     return null;
   }
 
-  const next = mutateTreeWithIndex(
+  const next = moveTreeNodeWithIndex(
     [...tree, newNode],
     newNode.id,
     parentId,
     index,
-  ) as GroupLayerTreeNode[];
+  );
 
-  return applySiblingOrderFromFlatTree(next);
+  return applyMapLayersSiblingOrder(next);
 }
 
 export function collectTreeNodeIds(tree: GroupLayerTreeNode[]): Set<string> {
@@ -204,21 +251,45 @@ export function collectPlacedSourceIds(tree: GroupLayerTreeNode[]): {
   return { groupIds, layerIds };
 }
 
+export function buildChildrenByParentId(
+  tree: GroupLayerTreeNode[],
+): Map<string, GroupLayerTreeNode[]> {
+  const childrenByParent = new Map<string, GroupLayerTreeNode[]>();
+  for (const node of tree) {
+    const key = String(node.parent);
+    const siblings = childrenByParent.get(key);
+    if (siblings) {
+      siblings.push(node);
+    } else {
+      childrenByParent.set(key, [node]);
+    }
+  }
+  return childrenByParent;
+}
+
 export function getDescendantIds(
   tree: GroupLayerTreeNode[],
   nodeId: GroupLayerTreeNode["id"],
+  childrenByParent = buildChildrenByParentId(tree),
 ): Set<GroupLayerTreeNode["id"]> {
   const descendants = new Set<GroupLayerTreeNode["id"]>();
   const queue: GroupLayerTreeNode["id"][] = [nodeId];
+  let head = 0;
 
-  while (queue.length > 0) {
-    const current = queue.shift();
+  while (head < queue.length) {
+    const current = queue[head];
+    head += 1;
     if (current == null) {
       continue;
     }
 
-    for (const node of tree) {
-      if (node.parent === current && !descendants.has(node.id)) {
+    const children = childrenByParent.get(String(current));
+    if (!children) {
+      continue;
+    }
+
+    for (const node of children) {
+      if (!descendants.has(node.id)) {
         descendants.add(node.id);
         queue.push(node.id);
       }
@@ -235,7 +306,10 @@ export function getDescendantIds(
 export function extractSubtreeForMoveZone(
   tree: GroupLayerTreeNode[],
   nodeId: GroupLayerTreeNode["id"],
-): { remainingTree: GroupLayerTreeNode[]; subtree: GroupLayerTreeNode[] } | null {
+): {
+  remainingTree: GroupLayerTreeNode[];
+  subtree: GroupLayerTreeNode[];
+} | null {
   const root = tree.find((node) => node.id === nodeId);
   if (!root?.data) {
     return null;
@@ -258,8 +332,8 @@ export function extractSubtreeForMoveZone(
   const remainingTree = tree.filter((node) => !idsToExtract.has(node.id));
 
   return {
-    remainingTree: applySiblingOrderFromFlatTree(remainingTree),
-    subtree: applySiblingOrderFromFlatTree(subtree),
+    remainingTree: applyMapLayersSiblingOrder(remainingTree),
+    subtree: applyMapLayersSiblingOrder(subtree),
   };
 }
 
@@ -268,7 +342,10 @@ export function removeTreeNodeWithDescendants(
   nodeId: GroupLayerTreeNode["id"],
 ): GroupLayerTreeNode[] {
   const descendants = getDescendantIds(tree, nodeId);
-  const idsToRemove = new Set<GroupLayerTreeNode["id"]>([nodeId, ...descendants]);
+  const idsToRemove = new Set<GroupLayerTreeNode["id"]>([
+    nodeId,
+    ...descendants,
+  ]);
 
   return tree.filter((node) => !idsToRemove.has(node.id));
 }
@@ -316,9 +393,7 @@ export function insertMoveZoneSubtreeIntoTree(
     relativeIndex?: number;
   },
 ): GroupLayerTreeNode[] | null {
-  const root = subtree.find(
-    (node) => node.parent === GROUP_LAYER_TREE_ROOT_ID,
-  );
+  const root = subtree.find((node) => node.parent === GROUP_LAYER_TREE_ROOT_ID);
   if (!root?.data) {
     return null;
   }
@@ -349,15 +424,15 @@ export function insertMoveZoneSubtreeIntoTree(
   const remappedRoot = { ...root, parent: parentId };
   const descendants = subtree.filter((node) => node.id !== root.id);
 
-  let next = mutateTreeWithIndex(
+  let next = moveTreeNodeWithIndex(
     [...tree, remappedRoot],
     remappedRoot.id,
     parentId,
     index,
-  ) as GroupLayerTreeNode[];
+  );
 
   next = [...next, ...descendants];
-  return applySiblingOrderFromFlatTree(next);
+  return applyMapLayersSiblingOrder(next);
 }
 
 export function canPlaceLayerAt(
@@ -390,10 +465,18 @@ export function applyDropOnLayerRedirect(
   }
 
   const resolvedParent = resolveDropParentId(tree, dropTargetId, target);
+  const siblings = tree
+    .filter(
+      (node) => node.parent === resolvedParent && node.id !== dragSourceId,
+    )
+    .slice()
+    .sort(sortSiblingNodes);
+  const targetIndex = siblings.findIndex((node) => node.id === target.id);
+  // Ignore library relativeIndex when the drop target is a layer — it often
+  // means "index 0 under the layer" rather than sibling position.
+  const index = targetIndex < 0 ? siblings.length : targetIndex + 1;
 
-  return tree.map((node) =>
-    node.id === dragSourceId ? { ...node, parent: resolvedParent } : node,
-  );
+  return moveTreeNodeWithIndex(tree, dragSourceId, resolvedParent, index);
 }
 
 export function canDropGroupLayerNode(

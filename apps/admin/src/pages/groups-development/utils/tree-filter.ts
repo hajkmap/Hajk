@@ -19,7 +19,7 @@ export function filterTreeBySearch(
 
     matchingIds.add(node.id);
 
-    let parentId = node.parent;
+    let parentId: GroupLayerTreeNode["parent"] | undefined = node.parent;
     while (parentId != null && parentId !== GROUP_LAYER_TREE_ROOT_ID) {
       matchingIds.add(parentId);
       const parentNode = tree.find((candidate) => candidate.id === parentId);

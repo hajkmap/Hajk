@@ -35,5 +35,59 @@ describe("flattenLayerSwitcherGroupsForWrite", () => {
     assert.equal(rootLayers.layers[0].layerId, "l1");
     assert.equal(rootLayers.layers[0].zIndex, 2);
     assert.equal(rootLayers.layers[0].visibleAtStart, true);
+    assert.deepEqual(rootLayers.layerSwitcherTree, [
+      { type: "layer", id: "l1" },
+      { type: "group", id: "g2" },
+    ]);
+
+    const childLayers = groupLayers.find((entry) => entry.groupId === "g2");
+    assert.ok(childLayers);
+    assert.deepEqual(childLayers.layerSwitcherTree, [{ type: "layer", id: "l2" }]);
+  });
+
+  it("keeps layers[] sibling order in layerSwitcherTree independent of drawOrder", () => {
+    const { groupLayers } = flattenLayerSwitcherGroupsForWrite([
+      {
+        id: "g1",
+        name: "Root",
+        layers: [
+          { id: "l-high-draw", drawOrder: 20 },
+          { id: "l-low-draw", drawOrder: 5 },
+        ],
+      },
+    ]);
+
+    const root = groupLayers.find((entry) => entry.groupId === "g1");
+    assert.ok(root);
+    assert.deepEqual(root.layerSwitcherTree, [
+      { type: "layer", id: "l-high-draw" },
+      { type: "layer", id: "l-low-draw" },
+    ]);
+    assert.equal(root.layers[0].zIndex, 20);
+    assert.equal(root.layers[1].zIndex, 5);
+  });
+
+  it("persists interleaved layerSwitcherTree when provided", () => {
+    const { groupLayers } = flattenLayerSwitcherGroupsForWrite([
+      {
+        id: "g1",
+        name: "Root",
+        layers: [{ id: "l1" }, { id: "l2" }],
+        groups: [{ id: "g2", name: "Child", layers: [] }],
+        layerSwitcherTree: [
+          { type: "layer", id: "l1" },
+          { type: "group", id: "g2" },
+          { type: "layer", id: "l2" },
+        ],
+      },
+    ]);
+
+    const root = groupLayers.find((entry) => entry.groupId === "g1");
+    assert.ok(root);
+    assert.deepEqual(root.layerSwitcherTree, [
+      { type: "layer", id: "l1" },
+      { type: "group", id: "g2" },
+      { type: "layer", id: "l2" },
+    ]);
   });
 });

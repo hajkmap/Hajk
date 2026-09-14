@@ -9,9 +9,7 @@ import type { Tool } from "../../../api/tools";
 import type { KartlagerDraft } from "../../groups-development/types";
 import GroupLayerTree from "../../groups-development/components/group-layer-tree";
 import { findActiveLayerswitcher } from "../../groups-development/utils/active-layerswitcher";
-import MapLayersPanel, {
-  type MapLayerActivationRow,
-} from "./map-layers-panel";
+import MapLayersPanel, { type MapLayerActivationRow } from "./map-layers-panel";
 
 const CONTENT_SUB_TABS = [
   {

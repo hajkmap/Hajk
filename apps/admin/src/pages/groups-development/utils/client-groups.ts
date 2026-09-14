@@ -23,26 +23,67 @@ export type { ClientLayerSwitcherGroup, ClientLayerSwitcherLayerRef };
 /**
  * Convert nested client `options.groups` into the flat-children
  * `LayerSwitcherTreeNode` shape used by `layerSwitcherTreeToNodeModels`.
- * Sibling order: layers first, then nested groups (matches map_1.json layout).
+ * Prefers interleaved `layerSwitcherTree` when present; otherwise layers then groups.
  */
 export function clientGroupsToLayerSwitcherTree(
   groups: ClientLayerSwitcherGroup[],
 ): LayerSwitcherTreeNode[] {
   return groups.map((group) => {
-    const layerChildren: LayerSwitcherTreeNode[] = (group.layers ?? []).map(
-      (layer) => ({
-        type: "layer",
-        id: layer.id,
-      }),
+    const layerNodesById = new Map(
+      (group.layers ?? []).map((layer) => [
+        layer.id,
+        { type: "layer" as const, id: layer.id },
+      ]),
+    );
+    const nestedGroupsById = new Map(
+      (group.groups ?? []).map((nested) => [nested.id, nested]),
     );
 
-    const groupChildren = clientGroupsToLayerSwitcherTree(group.groups ?? []);
+    let children: LayerSwitcherTreeNode[];
+    if (group.layerSwitcherTree && group.layerSwitcherTree.length > 0) {
+      children = [];
+      const usedLayers = new Set<string>();
+      const usedGroups = new Set<string>();
+      for (const entry of group.layerSwitcherTree) {
+        if (entry.type === "layer") {
+          const layerNode = layerNodesById.get(entry.id);
+          if (layerNode && !usedLayers.has(entry.id)) {
+            children.push(layerNode);
+            usedLayers.add(entry.id);
+          }
+          continue;
+        }
+        const nested = nestedGroupsById.get(entry.id);
+        if (nested && !usedGroups.has(entry.id)) {
+          children.push(...clientGroupsToLayerSwitcherTree([nested]));
+          usedGroups.add(entry.id);
+        }
+      }
+      for (const [id, layerNode] of layerNodesById) {
+        if (!usedLayers.has(id)) {
+          children.push(layerNode);
+        }
+      }
+      for (const [id, nested] of nestedGroupsById) {
+        if (!usedGroups.has(id)) {
+          children.push(...clientGroupsToLayerSwitcherTree([nested]));
+        }
+      }
+    } else {
+      children = [
+        ...(group.layers ?? []).map((layer) => ({
+          type: "layer" as const,
+          id: layer.id,
+        })),
+        ...clientGroupsToLayerSwitcherTree(group.groups ?? []),
+      ];
+    }
 
     return {
       type: "group" as const,
       id: group.id,
       name: group.name,
-      children: [...layerChildren, ...groupChildren],
+      children,
     };
   });
 }
@@ -62,42 +103,48 @@ export function nodeModelsToClientGroups(
     .slice()
     .sort(sortSiblingNodes);
 
-  const result: ClientLayerSwitcherGroup[] = [];
+  const groupNodes = siblings.filter((node) => node.data?.kind === "group");
 
-  for (const node of siblings) {
-    if (node.data?.kind !== "group") {
-      continue;
-    }
-
-    const sourceId = node.data.sourceId;
+  return groupNodes.map((node) => {
+    const sourceId = node.data!.sourceId;
     const settings =
       groupDisplaySettings[sourceId] ?? DEFAULT_GROUP_DISPLAY_SETTINGS;
-    const children = tree
+
+    const childSiblings = tree
       .filter((child) => child.parent === node.id)
       .slice()
       .sort(sortSiblingNodes);
+    const childLayers = childSiblings.filter(
+      (child) => child.data?.kind === "layer",
+    );
 
-    const layers: ClientLayerSwitcherLayerRef[] = [];
-    for (const child of children) {
-      if (child.data?.kind !== "layer") {
-        continue;
-      }
-
+    const layers: ClientLayerSwitcherLayerRef[] = childLayers.map((child) => {
       const layerSettings =
-        layerDisplaySettings[child.data.sourceId] ??
+        layerDisplaySettings[child.data!.sourceId] ??
         DEFAULT_LAYER_DISPLAY_SETTINGS;
 
-      layers.push({
-        id: child.data.sourceId,
+      return {
+        id: child.data!.sourceId,
         drawOrder: layerSettings.drawOrder ?? 1000,
         visibleAtStart: layerSettings.layerVisibleAtStart,
         infobox: layerSettings.layerInfoBox,
-      });
-    }
+      };
+    });
 
-    result.push({
+    const layerSwitcherTree = childSiblings
+      .filter(
+        (child) =>
+          child.data?.kind === "layer" || child.data?.kind === "group",
+      )
+      .map((child) =>
+        child.data!.kind === "layer"
+          ? { type: "layer" as const, id: child.data!.sourceId }
+          : { type: "group" as const, id: child.data!.sourceId },
+      );
+
+    return {
       id: sourceId,
-      type: "group",
+      type: "group" as const,
       name: node.text,
       toggled: settings.toggled,
       expanded: settings.expanded,
@@ -120,10 +167,9 @@ export function nodeModelsToClientGroups(
         layerDisplaySettings,
         node.id,
       ),
-    });
-  }
-
-  return result;
+      layerSwitcherTree,
+    };
+  });
 }
 
 export function hydrateDisplaySettingsFromClientGroups(
@@ -193,7 +239,10 @@ export function getClientGroupsFromToolOptions(
 
 /** Remove catalog layers from an unsaved Kartlager/Bakgrund draft (e.g. on Lager deactivate). */
 export function removeLayersFromLayerSwitcherDraft(
-  draft: { groups: ClientLayerSwitcherGroup[]; baselayers: { layerId: string }[] },
+  draft: {
+    groups: ClientLayerSwitcherGroup[];
+    baselayers: { layerId: string }[];
+  },
   layerIds: ReadonlySet<string>,
 ): { groups: ClientLayerSwitcherGroup[]; baselayers: { layerId: string }[] } {
   if (layerIds.size === 0) {
@@ -203,11 +252,28 @@ export function removeLayersFromLayerSwitcherDraft(
   const stripGroups = (
     groups: ClientLayerSwitcherGroup[],
   ): ClientLayerSwitcherGroup[] =>
-    groups.map((group) => ({
-      ...group,
-      layers: (group.layers ?? []).filter((layer) => !layerIds.has(layer.id)),
-      groups: stripGroups(group.groups ?? []),
-    }));
+    groups.map((group) => {
+      const layers = (group.layers ?? []).filter(
+        (layer) => !layerIds.has(layer.id),
+      );
+      const nestedGroups = stripGroups(group.groups ?? []);
+      const removedLayerIds = new Set(
+        (group.layers ?? [])
+          .filter((layer) => layerIds.has(layer.id))
+          .map((layer) => layer.id),
+      );
+      const layerSwitcherTree = (group.layerSwitcherTree ?? []).filter(
+        (entry) =>
+          entry.type === "group" || !removedLayerIds.has(entry.id),
+      );
+      return {
+        ...group,
+        layers,
+        groups: nestedGroups,
+        layerSwitcherTree:
+          layerSwitcherTree.length > 0 ? layerSwitcherTree : undefined,
+      };
+    });
 
   return {
     groups: stripGroups(draft.groups),
@@ -219,19 +285,32 @@ export function removeLayersFromLayerSwitcherDraft(
 
 /** Keep only layers that remain active on the Lager tab. */
 export function pruneLayerSwitcherDraftToActiveLayers(
-  draft: { groups: ClientLayerSwitcherGroup[]; baselayers: { layerId: string }[] },
+  draft: {
+    groups: ClientLayerSwitcherGroup[];
+    baselayers: { layerId: string }[];
+  },
   activeLayerIds: ReadonlySet<string>,
 ): { groups: ClientLayerSwitcherGroup[]; baselayers: { layerId: string }[] } {
   const stripGroups = (
     groups: ClientLayerSwitcherGroup[],
   ): ClientLayerSwitcherGroup[] =>
-    groups.map((group) => ({
-      ...group,
-      layers: (group.layers ?? []).filter((layer) =>
+    groups.map((group) => {
+      const layers = (group.layers ?? []).filter((layer) =>
         activeLayerIds.has(layer.id),
-      ),
-      groups: stripGroups(group.groups ?? []),
-    }));
+      );
+      const nestedGroups = stripGroups(group.groups ?? []);
+      const layerSwitcherTree = (group.layerSwitcherTree ?? []).filter(
+        (entry) =>
+          entry.type === "group" || activeLayerIds.has(entry.id),
+      );
+      return {
+        ...group,
+        layers,
+        groups: nestedGroups,
+        layerSwitcherTree:
+          layerSwitcherTree.length > 0 ? layerSwitcherTree : undefined,
+      };
+    });
 
   return {
     groups: stripGroups(draft.groups),
@@ -264,9 +343,7 @@ export function layerSwitcherDraftComparableSignature(
       ? pruneLayerSwitcherDraftToActiveLayers(draft, activeLayerIds)
       : draft;
 
-  const normalizeGroups = (
-    groups: ClientLayerSwitcherGroup[],
-  ): unknown[] =>
+  const normalizeGroups = (groups: ClientLayerSwitcherGroup[]): unknown[] =>
     groups.map((group) => ({
       id: group.id,
       name: group.name ?? "",
@@ -287,11 +364,14 @@ export function layerSwitcherDraftComparableSignature(
         infobox: layer.infobox ?? "",
       })),
       groups: normalizeGroups(group.groups ?? []),
+      layerSwitcherTree: (group.layerSwitcherTree ?? []).map((entry) => ({
+        type: entry.type,
+        id: entry.id,
+      })),
     }));
 
   const baselayerOrderSource =
-    draft.baselayerOrder ??
-    comparable.baselayers.map((entry) => entry.layerId);
+    draft.baselayerOrder ?? comparable.baselayers.map((entry) => entry.layerId);
   const baselayerOrder =
     activeLayerIds != null
       ? baselayerOrderSource.filter((id) => activeLayerIds.has(id))
@@ -358,10 +438,6 @@ export function serializeClientGroupsJson(
   layerDisplaySettings: Record<string, LayerDisplaySettings>,
 ): string {
   return JSON.stringify(
-    nodeModelsToClientGroups(
-      tree,
-      groupDisplaySettings,
-      layerDisplaySettings,
-    ),
+    nodeModelsToClientGroups(tree, groupDisplaySettings, layerDisplaySettings),
   );
 }

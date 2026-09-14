@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box, Button, Typography } from "@mui/material";
 import { ItemTypes } from "@minoru/react-dnd-treeview";
 import { useDrop } from "react-dnd";
@@ -24,6 +25,9 @@ interface GroupLayerTreeDropZoneProps {
   onTreeDropToRoot?: (nodeId: GroupLayerTreeNode["id"]) => void;
   /** Defaults to groups only (Kartlager). Bakgrund passes layers. */
   canAcceptTreeItemToRoot?: (node: GroupLayerTreeNode) => boolean;
+  /** Click-and-drop: place the held item on the root / empty padding. */
+  onClickPlace?: () => void;
+  clickPlaceActive?: boolean;
 }
 
 export default function GroupLayerTreeDropZone({
@@ -37,7 +41,10 @@ export default function GroupLayerTreeDropZone({
   canAcceptMoveZoneItem = () => true,
   onTreeDropToRoot,
   canAcceptTreeItemToRoot = (node) => node.data?.kind === "group",
+  onClickPlace,
+  clickPlaceActive = false,
 }: GroupLayerTreeDropZoneProps) {
+  const [clickPlaceHover, setClickPlaceHover] = useState(false);
   const [{ isOver, canDrop }, dropRef] = useDrop(
     () => ({
       accept: [CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE, TREE_ITEM_TYPE],
@@ -115,6 +122,25 @@ export default function GroupLayerTreeDropZone({
         ref={(node) => {
           dropRef(node as HTMLDivElement | null);
         }}
+        onClick={(event) => {
+          if (!clickPlaceActive || onClickPlace == null) {
+            return;
+          }
+          // Only the padding / empty area — not nested tree rows.
+          if (event.target !== event.currentTarget) {
+            return;
+          }
+          onClickPlace();
+        }}
+        onMouseMove={(event) => {
+          if (!clickPlaceActive) {
+            return;
+          }
+          setClickPlaceHover(event.target === event.currentTarget);
+        }}
+        onMouseLeave={() => {
+          setClickPlaceHover(false);
+        }}
         sx={{
           flex: 1,
           minHeight: 240,
@@ -122,10 +148,17 @@ export default function GroupLayerTreeDropZone({
           display: "flex",
           flexDirection: "column",
           borderRadius: 1,
-          backgroundColor: isOver && canDrop ? "action.hover" : "transparent",
-          outline: isOver && canDrop ? "2px dashed" : "none",
+          backgroundColor:
+            (isOver && canDrop) || (clickPlaceActive && clickPlaceHover)
+              ? "action.hover"
+              : "transparent",
+          outline:
+            (isOver && canDrop) || (clickPlaceActive && clickPlaceHover)
+              ? "2px dashed"
+              : "none",
           outlineColor: "primary.main",
           outlineOffset: -4,
+          cursor: clickPlaceActive ? "pointer" : undefined,
         }}
       >
         {emptyLabel ? (

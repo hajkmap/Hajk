@@ -635,6 +635,22 @@ class MapService {
             );
           }
           const kind = resolved.kind;
+          const baseOptions =
+            layer.options &&
+            typeof layer.options === "object" &&
+            !Array.isArray(layer.options)
+              ? { ...layer.options }
+              : {};
+          // Persist Lagerordning sibling order on the first instance (same
+          // pattern as groups.service). Without this, GET rebuilds layers[]
+          // sorted by zIndex/drawOrder and the tree jumps after save.
+          const options =
+            index === 0 && entry.layerSwitcherTree.length > 0
+              ? {
+                  ...baseOptions,
+                  layerSwitcherTree: entry.layerSwitcherTree,
+                }
+              : baseOptions;
           layerCreates.push({
             mapId: map.id,
             groupId: entry.groupId,
@@ -642,7 +658,7 @@ class MapService {
             visibleAtStart: layer.visibleAtStart,
             zIndex: layer.zIndex ?? index,
             infoClickActive: true,
-            options: layer.options as Prisma.InputJsonValue,
+            options: options as Prisma.InputJsonValue,
             displayLayerId: kind === "display" ? layer.layerId : undefined,
             searchLayerId: kind === "search" ? layer.layerId : undefined,
             editingLayerId: kind === "editing" ? layer.layerId : undefined,

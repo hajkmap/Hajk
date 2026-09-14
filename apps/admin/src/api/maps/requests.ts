@@ -15,10 +15,7 @@ import type {
   MapMutation,
   ToolOnMap,
 } from "./types";
-import {
-  buildCreateMapPayload,
-  type MapCreateInput,
-} from "./map-create-types";
+import { buildCreateMapPayload, type MapCreateInput } from "./map-create-types";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 
 /**
@@ -53,7 +50,7 @@ export const getMaps = async (): Promise<MapRecord[]> => {
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch maps. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch maps. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch maps.`);
@@ -74,7 +71,7 @@ export const getMapByName = async (mapName: string): Promise<MapRecord> => {
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch map. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch map. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch map.`);
@@ -83,12 +80,12 @@ export const getMapByName = async (mapName: string): Promise<MapRecord> => {
 };
 
 export const getGroupsByMapName = async (
-  mapName: string
+  mapName: string,
 ): Promise<MapGroup[]> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<MapGroupsApiResponse>(
-      `/maps/${mapName}/groups`
+      `/maps/${mapName}/groups`,
     );
     if (!response.data) {
       throw new Error("No groups data found");
@@ -99,7 +96,7 @@ export const getGroupsByMapName = async (
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch groups. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch groups. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch groups.`);
@@ -108,12 +105,12 @@ export const getGroupsByMapName = async (
 };
 
 export const getLayersByMapName = async (
-  mapName: string
+  mapName: string,
 ): Promise<MapLayer[]> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<MapLayersApiResponse>(
-      `/maps/${mapName}/layers`
+      `/maps/${mapName}/layers`,
     );
     if (!response.data) {
       throw new Error("No layers data found");
@@ -124,7 +121,7 @@ export const getLayersByMapName = async (
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch layers. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch layers. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch layers.`);
@@ -133,12 +130,12 @@ export const getLayersByMapName = async (
 };
 
 export const getMapContentByName = async (
-  mapName: string
+  mapName: string,
 ): Promise<MapContentApiResponse> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<MapContentApiResponse>(
-      `/maps/${mapName}/content`
+      `/maps/${mapName}/content`,
     );
     if (!response.data) {
       throw new Error("No map content data found");
@@ -149,7 +146,7 @@ export const getMapContentByName = async (
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch map content. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch map content. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch map content.`);
@@ -158,12 +155,12 @@ export const getMapContentByName = async (
 };
 
 export const getProjectionsByMapName = async (
-  mapName: string
+  mapName: string,
 ): Promise<ProjectionsApiResponse> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<ProjectionsApiResponse>(
-      `/maps/${mapName}/projections`
+      `/maps/${mapName}/projections`,
     );
     if (!response.data) {
       throw new Error("No projections data found");
@@ -174,7 +171,7 @@ export const getProjectionsByMapName = async (
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch projections. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch projections. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch projections.`);
@@ -183,7 +180,7 @@ export const getProjectionsByMapName = async (
 };
 
 export const getToolsByMapName = async (
-  mapName: string
+  mapName: string,
 ): Promise<ToolOnMap[]> => {
   const internalApiClient = getApiClient();
   try {
@@ -203,7 +200,7 @@ export const getToolsByMapName = async (
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to fetch tools. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to fetch tools. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to fetch tools.`);
@@ -228,7 +225,7 @@ export const updateMapTools = async (
     const axiosError = error as InternalApiError;
     if (axiosError.response) {
       throw new Error(
-        `Failed to update map tools. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to update map tools. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to update map tools.`);
@@ -260,7 +257,7 @@ export const updateMapLayers = async (
     const axiosError = error as InternalApiError;
     if (axiosError.response) {
       throw new Error(
-        `Failed to update map layers. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to update map layers. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to update map layers.`);
@@ -273,7 +270,7 @@ export const setMapLayers = updateMapLayers;
 
 export const updateMapGroups = async (
   mapName: string,
-  groups: MapGroupPlacement[]
+  groups: MapGroupPlacement[],
 ): Promise<void> => {
   const internalApiClient = getApiClient();
   try {
@@ -282,7 +279,7 @@ export const updateMapGroups = async (
     const axiosError = error as InternalApiError;
     if (axiosError.response) {
       throw new Error(
-        `Failed to update map groups. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to update map groups. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to update map groups.`);
@@ -296,7 +293,7 @@ export const updateMapGroups = async (
  */
 export const updateMapContent = async (
   mapName: string,
-  content: MapContentPlacement
+  content: MapContentPlacement,
 ): Promise<void> => {
   const internalApiClient = getApiClient();
   try {
@@ -305,7 +302,7 @@ export const updateMapContent = async (
     const axiosError = error as InternalApiError;
     if (axiosError.response) {
       throw new Error(
-        `Failed to update map content. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to update map content. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to update map content.`);
@@ -385,7 +382,7 @@ export const createMap = async (newMap: MapCreateInput): Promise<MapRecord> => {
 
 export const updateMap = async (
   mapName: string,
-  data: Partial<MapMutation>
+  data: Partial<MapMutation>,
 ): Promise<void> => {
   const internalApiClient = getApiClient();
   try {
@@ -395,7 +392,7 @@ export const updateMap = async (
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to update map. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to update map. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to update map.`);
@@ -412,7 +409,7 @@ export const deleteMap = async (mapName: string): Promise<void> => {
 
     if (axiosError.response) {
       throw new Error(
-        `Failed to delete map. ErrorId: ${axiosError.response.data.errorId}.`
+        `Failed to delete map. ErrorId: ${axiosError.response.data.errorId}.`,
       );
     } else {
       throw new Error(`Failed to delete map.`);
@@ -446,7 +443,7 @@ export const duplicateMap = async ({
         includeLayers,
         includeGroups,
         includeTools,
-      }
+      },
     );
     if (!response.data) {
       throw new Error("No map data found");

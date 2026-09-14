@@ -31,11 +31,15 @@ import { sortSiblingNodes } from "../utils/tree-model";
 const TREE_ITEM_TYPE =
   (ItemTypes as { TREE_ITEM?: string | symbol }).TREE_ITEM ?? "TREE_ITEM";
 
-interface KartlagerMoveZoneProps {
+interface MapLayersMoveZoneProps {
   items: MoveZoneItem[];
   onDropFromTree: (nodeId: GroupLayerTreeNode["id"]) => void;
   onDropFromCatalog: (item: CatalogDragItem) => void;
   canAcceptCatalogItem?: (item: CatalogDragItem) => boolean;
+  clickMode?: boolean;
+  pickedItemKeys?: string[];
+  onClickPlace?: () => void;
+  onItemClickPick?: (item: MoveZoneItem, additive: boolean) => void;
 }
 
 function summarizeMoveZoneSubtree(nodes: GroupLayerTreeNode[]): {
@@ -126,20 +130,27 @@ function MoveZoneContentTree({
 function MoveZoneItemRow({
   item,
   onShowContents,
+  clickMode = false,
+  isClickPicked = false,
+  onClickPick,
 }: {
   item: MoveZoneItem;
   onShowContents: (item: MoveZoneItem) => void;
+  clickMode?: boolean;
+  isClickPicked?: boolean;
+  onClickPick?: (additive: boolean) => void;
 }) {
   const { t } = useTranslation();
   const [{ isDragging }, dragRef] = useDrag(
     () => ({
       type: MOVE_ZONE_DRAG_TYPE,
       item,
+      canDrag: !clickMode,
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
     }),
-    [item],
+    [clickMode, item],
   );
 
   const canInspect = item.kind === "group";
@@ -149,14 +160,20 @@ function MoveZoneItemRow({
       ref={(node) => {
         dragRef(node);
       }}
+      onClick={(event) => {
+        if (clickMode) {
+          event.stopPropagation();
+          onClickPick?.(event.ctrlKey || event.metaKey);
+        }
+      }}
       sx={{
-        cursor: "grab",
+        cursor: clickMode ? "pointer" : "grab",
         px: 0.75,
         py: 0.75,
         border: "1px solid",
-        borderColor: "warning.light",
+        borderColor: isClickPicked ? "primary.main" : "warning.light",
         borderRadius: 1.5,
-        bgcolor: "action.hover",
+        bgcolor: isClickPicked ? "action.selected" : "action.hover",
         opacity: isDragging ? 0.4 : 1,
         display: "flex",
         alignItems: "flex-start",
@@ -164,7 +181,9 @@ function MoveZoneItemRow({
         width: "100%",
         minWidth: 0,
         boxSizing: "border-box",
-        "&:active": { cursor: "grabbing" },
+        outline: isClickPicked ? "2px solid" : "none",
+        outlineColor: "primary.main",
+        "&:active": { cursor: clickMode ? "pointer" : "grabbing" },
       }}
     >
       <DragIndicatorIcon
@@ -241,12 +260,16 @@ function MoveZoneContentsDialogBody({ item }: { item: MoveZoneItem }) {
   );
 }
 
-export default function KartlagerMoveZone({
+export default function MapLayersMoveZone({
   items,
   onDropFromTree,
   onDropFromCatalog,
   canAcceptCatalogItem = () => true,
-}: KartlagerMoveZoneProps) {
+  clickMode = false,
+  pickedItemKeys = [],
+  onClickPlace,
+  onItemClickPick,
+}: MapLayersMoveZoneProps) {
   const { t } = useTranslation();
   const [inspectItem, setInspectItem] = useState<MoveZoneItem | null>(null);
 
@@ -254,6 +277,9 @@ export default function KartlagerMoveZone({
     () => ({
       accept: [TREE_ITEM_TYPE, CATALOG_DRAG_TYPE],
       canDrop: (item: GroupLayerTreeNode | CatalogDragItem, monitor) => {
+        if (clickMode) {
+          return false;
+        }
         if (monitor.getItemType() === CATALOG_DRAG_TYPE) {
           return canAcceptCatalogItem(item as CatalogDragItem);
         }
@@ -281,16 +307,21 @@ export default function KartlagerMoveZone({
         canDrop: monitor.canDrop(),
       }),
     }),
-    [canAcceptCatalogItem, onDropFromCatalog, onDropFromTree],
+    [canAcceptCatalogItem, clickMode, onDropFromCatalog, onDropFromTree],
   );
 
-  const highlight = isOver && canDrop;
+  const highlight = (isOver && canDrop) || (clickMode && onClickPlace != null);
 
   return (
     <>
       <Box
         ref={(node) => {
           dropRef(node as HTMLDivElement | null);
+        }}
+        onClick={() => {
+          if (clickMode && onClickPlace != null) {
+            onClickPlace();
+          }
         }}
         sx={{
           width: "100%",
@@ -304,6 +335,7 @@ export default function KartlagerMoveZone({
           borderColor: highlight ? "primary.main" : "divider",
           borderRadius: 2,
           bgcolor: highlight ? "action.selected" : "background.default",
+          cursor: clickMode && onClickPlace != null ? "pointer" : undefined,
         }}
       >
         <Typography
@@ -347,6 +379,9 @@ export default function KartlagerMoveZone({
               <MoveZoneItemRow
                 key={item.key}
                 item={item}
+                clickMode={clickMode}
+                isClickPicked={pickedItemKeys.includes(item.key)}
+                onClickPick={(additive) => onItemClickPick?.(item, additive)}
                 onShowContents={setInspectItem}
               />
             ))}

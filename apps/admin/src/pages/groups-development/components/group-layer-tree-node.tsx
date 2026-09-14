@@ -1,3 +1,5 @@
+import type { MouseEvent } from "react";
+import { memo } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
@@ -34,6 +36,15 @@ interface GroupLayerTreeNodeProps {
   visibleIds: Set<string>;
   groupDisplaySettings: Record<string, GroupDisplaySettings>;
   isSubtreeHovered?: boolean;
+  clickMode?: boolean;
+  /** Position of this row in the continuous click-pick highlight frame. */
+  clickPickEdge?: "only" | "start" | "middle" | "end" | null;
+  /** Show drop line under this row at the given tree depth (null = hidden). */
+  clickPlaceLineDepth?: number | null;
+  onClickInteract?: (
+    nodeId: GroupLayerTreeNode["id"],
+    additive: boolean,
+  ) => void;
   onHoverSubtree?: (nodeId: GroupLayerTreeNode["id"]) => void;
   onToggleLayerVisibility: (nodeId: GroupLayerTreeNode["id"]) => void;
   onToggleGroupVisibility: (nodeId: GroupLayerTreeNode["id"]) => void;
@@ -43,13 +54,17 @@ interface GroupLayerTreeNodeProps {
   onEditLayerSettings?: (nodeId: GroupLayerTreeNode["id"]) => void;
 }
 
-export default function GroupLayerTreeNodeView({
+function GroupLayerTreeNodeView({
   node,
   options,
   treeData,
   visibleIds,
   groupDisplaySettings,
   isSubtreeHovered = false,
+  clickMode = false,
+  clickPickEdge = null,
+  clickPlaceLineDepth = null,
+  onClickInteract,
   onHoverSubtree,
   onToggleLayerVisibility,
   onToggleGroupVisibility,
@@ -84,6 +99,28 @@ export default function GroupLayerTreeNodeView({
         DEFAULT_GROUP_DISPLAY_SETTINGS.toggled)
       : true);
 
+  const rowCursor = clickMode ? "pointer" : isDragging ? "grabbing" : "grab";
+
+  const isClickPicked = clickPickEdge != null;
+  const suppressRowDivider =
+    clickPickEdge === "start" || clickPickEdge === "middle";
+
+  const handleRowClick = (event: MouseEvent) => {
+    if (clickMode) {
+      onClickInteract?.(node.id, event.ctrlKey || event.metaKey);
+      return;
+    }
+    if (isGroup) {
+      onToggle();
+    }
+  };
+
+  const frameBorder = (edge: boolean) =>
+    edge
+      ? (theme: { palette: { primary: { main: string } } }) =>
+          `2px solid ${theme.palette.primary.main}`
+      : "none";
+
   return (
     <Box
       onMouseEnter={() => {
@@ -91,7 +128,28 @@ export default function GroupLayerTreeNodeView({
       }}
       sx={{
         opacity: isDragging ? 0.45 : 1,
-        bgcolor: isSubtreeHovered ? "action.hover" : "transparent",
+        bgcolor: isSubtreeHovered
+          ? "action.hover"
+          : isClickPicked
+            ? "action.selected"
+            : "transparent",
+        borderLeft: frameBorder(isClickPicked),
+        borderRight: frameBorder(isClickPicked),
+        borderTop: frameBorder(
+          clickPickEdge === "start" || clickPickEdge === "only",
+        ),
+        borderBottom: frameBorder(
+          clickPickEdge === "end" || clickPickEdge === "only",
+        ),
+        borderTopLeftRadius:
+          clickPickEdge === "start" || clickPickEdge === "only" ? 4 : 0,
+        borderTopRightRadius:
+          clickPickEdge === "start" || clickPickEdge === "only" ? 4 : 0,
+        borderBottomLeftRadius:
+          clickPickEdge === "end" || clickPickEdge === "only" ? 4 : 0,
+        borderBottomRightRadius:
+          clickPickEdge === "end" || clickPickEdge === "only" ? 4 : 0,
+        boxSizing: "border-box",
       }}
     >
       <Box
@@ -111,7 +169,7 @@ export default function GroupLayerTreeNodeView({
             pt: "7px",
             flexShrink: 0,
             color: "action.active",
-            cursor: isDragging ? "grabbing" : "grab",
+            cursor: rowCursor,
           }}
         >
           <DragIndicatorOutlinedIcon fontSize="small" />
@@ -120,7 +178,7 @@ export default function GroupLayerTreeNodeView({
         {isGroup ? (
           <ListItemButton
             disableTouchRipple
-            onClick={onToggle}
+            onClick={handleRowClick}
             dense
             sx={{
               flex: 1,
@@ -128,9 +186,11 @@ export default function GroupLayerTreeNodeView({
               p: 0,
               pl: "2px",
               position: "relative",
-              cursor: isDragging ? "grabbing" : "grab",
+              cursor: rowCursor,
               borderBottom: (theme) =>
-                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+                suppressRowDivider
+                  ? "none"
+                  : `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
               "&:hover": {
                 backgroundColor: "transparent",
               },
@@ -298,12 +358,13 @@ export default function GroupLayerTreeNodeView({
           <ListItemButton
             disableTouchRipple
             dense
+            onClick={handleRowClick}
             sx={{
               flex: 1,
               p: 0,
               pl: "2px",
               position: "relative",
-              cursor: isDragging ? "grabbing" : "grab",
+              cursor: rowCursor,
               "&:hover": {
                 backgroundColor: "transparent",
               },
@@ -317,7 +378,9 @@ export default function GroupLayerTreeNodeView({
                 py: 0.25,
                 pr: 1,
                 borderBottom: (theme) =>
-                  `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+                  suppressRowDivider
+                    ? "none"
+                    : `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
               }}
             >
               <LayerSwitcherCheckbox
@@ -411,6 +474,48 @@ export default function GroupLayerTreeNodeView({
           </ListItemButton>
         )}
       </Box>
+      {clickPlaceLineDepth != null ? (
+        <Box
+          aria-hidden
+          sx={{
+            height: 2,
+            ml: `${clickPlaceLineDepth * 20 + 28}px`,
+            mr: 1,
+            my: 0.125,
+            bgcolor: "primary.main",
+            borderRadius: 1,
+          }}
+        />
+      ) : null}
     </Box>
   );
 }
+
+function areNodePropsEqual(
+  prev: GroupLayerTreeNodeProps,
+  next: GroupLayerTreeNodeProps,
+): boolean {
+  return (
+    prev.node === next.node &&
+    prev.treeData === next.treeData &&
+    prev.visibleIds === next.visibleIds &&
+    prev.groupDisplaySettings === next.groupDisplaySettings &&
+    prev.isSubtreeHovered === next.isSubtreeHovered &&
+    prev.clickMode === next.clickMode &&
+    prev.clickPickEdge === next.clickPickEdge &&
+    prev.clickPlaceLineDepth === next.clickPlaceLineDepth &&
+    prev.options.depth === next.options.depth &&
+    prev.options.isOpen === next.options.isOpen &&
+    prev.options.isDragging === next.options.isDragging &&
+    prev.onHoverSubtree === next.onHoverSubtree &&
+    prev.onClickInteract === next.onClickInteract &&
+    prev.onToggleLayerVisibility === next.onToggleLayerVisibility &&
+    prev.onToggleGroupVisibility === next.onToggleGroupVisibility &&
+    prev.onAddToGroup === next.onAddToGroup &&
+    prev.onRemoveFromTree === next.onRemoveFromTree &&
+    prev.onEditGroupMetadata === next.onEditGroupMetadata &&
+    prev.onEditLayerSettings === next.onEditLayerSettings
+  );
+}
+
+export default memo(GroupLayerTreeNodeView, areNodePropsEqual);

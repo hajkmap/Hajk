@@ -4,6 +4,7 @@ import FolderIcon from "@mui/icons-material/Folder";
 import LayersIcon from "@mui/icons-material/Layers";
 import { DragIndicator } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
+import AdsClickIcon from "@mui/icons-material/AdsClick";
 import {
   Box,
   Button,
@@ -18,6 +19,9 @@ import {
   Tab,
   Tabs,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -45,6 +49,8 @@ import {
   type CatalogDragItem,
   type GroupDisplaySettings,
   type GroupFormValues,
+  type MapLayersClickPick,
+  type MapLayersInteractionMode,
 } from "../types";
 import { CATALOG_DRAG_TYPE } from "../types";
 import { toDisplaySettings, toFormValues } from "../utils/group-form";
@@ -63,6 +69,11 @@ interface GroupLayerCatalogProps {
   backgroundMode?: boolean;
   /** Ritordning: layers are already in the preview list — hide catalog drag UI. */
   drawOrderMode?: boolean;
+  /** Effective click-and-place (toggle button and/or Alt key). */
+  clickModeActive?: boolean;
+  onInteractionModeChange?: (mode: MapLayersInteractionMode) => void;
+  clickPick?: MapLayersClickPick | null;
+  onCatalogClickPick?: (item: CatalogDragItem, additive: boolean) => void;
   groupDisplaySettings: Record<string, GroupDisplaySettings>;
   onGroupDisplaySettingsChange: (
     groupId: string,
@@ -79,6 +90,9 @@ interface CatalogRowProps {
   onDelete?: () => void;
   disableActions?: boolean;
   disableDrag?: boolean;
+  clickMode?: boolean;
+  isClickPicked?: boolean;
+  onClickPick?: (additive: boolean) => void;
 }
 
 function CatalogRow({
@@ -87,6 +101,9 @@ function CatalogRow({
   onDelete,
   disableActions,
   disableDrag = false,
+  clickMode = false,
+  isClickPicked = false,
+  onClickPick,
 }: CatalogRowProps) {
   const { t } = useTranslation();
   const isDarkMode = useAppStateStore((s) => s.themeMode === "dark");
@@ -95,12 +112,12 @@ function CatalogRow({
     () => ({
       type: CATALOG_DRAG_TYPE,
       item,
-      canDrag: !disableDrag,
+      canDrag: !disableDrag && !clickMode,
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
     }),
-    [disableDrag, item],
+    [clickMode, disableDrag, item],
   );
 
   return (
@@ -116,13 +133,24 @@ function CatalogRow({
           py: 1,
           backgroundColor: isDarkMode ? "grey.900" : "background.paper",
           border: "1px solid",
-          borderColor: isDarkMode ? "grey.800" : "divider",
+          borderColor: isClickPicked
+            ? "primary.main"
+            : isDarkMode
+              ? "grey.800"
+              : "divider",
           borderRadius: 2,
+          outline: isClickPicked ? "2px solid" : "none",
+          outlineColor: "primary.main",
         }}
       >
         <Box
           ref={(node) => {
             drag(node as HTMLDivElement | null);
+          }}
+          onClick={(event) => {
+            if (clickMode && !disableDrag) {
+              onClickPick?.(event.ctrlKey || event.metaKey);
+            }
           }}
           sx={{
             display: "flex",
@@ -130,20 +158,35 @@ function CatalogRow({
             gap: 1,
             flex: 1,
             minHeight: 24,
-            cursor: disableDrag ? "default" : "grab",
+            cursor: disableDrag ? "default" : clickMode ? "pointer" : "grab",
             opacity: isDragging ? 0.5 : 1,
             "&:active": {
-              cursor: disableDrag ? "default" : "grabbing",
+              cursor: disableDrag
+                ? "default"
+                : clickMode
+                  ? "pointer"
+                  : "grabbing",
             },
           }}
         >
-          <DragIndicator
-            sx={{
-              color: "text.secondary",
-              flexShrink: 0,
-              visibility: disableDrag ? "hidden" : "visible",
-            }}
-          />
+          {clickMode ? (
+            <AdsClickIcon
+              sx={{
+                color: isClickPicked ? "primary.main" : "text.secondary",
+                flexShrink: 0,
+                visibility: disableDrag ? "hidden" : "visible",
+                fontSize: 18,
+              }}
+            />
+          ) : (
+            <DragIndicator
+              sx={{
+                color: "text.secondary",
+                flexShrink: 0,
+                visibility: disableDrag ? "hidden" : "visible",
+              }}
+            />
+          )}
           {isGroup ? (
             <FolderIcon fontSize="small" color="primary" />
           ) : (
@@ -209,6 +252,10 @@ export default function GroupLayerCatalog({
   backgroundLayerIds = null,
   backgroundMode = false,
   drawOrderMode = false,
+  clickModeActive = false,
+  onInteractionModeChange,
+  clickPick = null,
+  onCatalogClickPick,
   groupDisplaySettings,
   onGroupDisplaySettingsChange,
   onGroupDisplaySettingsRemove,
@@ -468,19 +515,69 @@ export default function GroupLayerCatalog({
                   {t("common.groupsDevelopment")}
                 </Typography>
                 {!backgroundMode ? (
-                  <Button
-                    size="small"
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={handleOpenCreateDialog}
-                    sx={{ alignSelf: "stretch" }}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      width: "100%",
+                    }}
                   >
-                    {t("common.add")}
-                  </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      startIcon={<AddIcon />}
+                      onClick={handleOpenCreateDialog}
+                      sx={{ flex: 1 }}
+                    >
+                      {t("common.add")}
+                    </Button>
+                    {onInteractionModeChange ? (
+                      <ToggleButtonGroup
+                        exclusive
+                        size="small"
+                        value={clickModeActive ? "click" : "drag"}
+                        onChange={(
+                          _,
+                          value: MapLayersInteractionMode | null,
+                        ) => {
+                          if (value != null) {
+                            onInteractionModeChange(value);
+                          }
+                        }}
+                        aria-label={t("groupsDevelopment.interactionMode")}
+                      >
+                        <ToggleButton
+                          value="drag"
+                          aria-label={t("groupsDevelopment.interactionDrag")}
+                        >
+                          <Tooltip
+                            title={t("groupsDevelopment.interactionDrag")}
+                          >
+                            <DragIndicator fontSize="small" />
+                          </Tooltip>
+                        </ToggleButton>
+                        <ToggleButton
+                          value="click"
+                          aria-label={t(
+                            "groupsDevelopment.interactionClickAlt",
+                          )}
+                        >
+                          <Tooltip
+                            title={t("groupsDevelopment.interactionClickAlt")}
+                          >
+                            <AdsClickIcon fontSize="small" />
+                          </Tooltip>
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                    ) : null}
+                  </Box>
                 ) : null}
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {t("groupsDragAndDropDescription")}
+                {clickModeActive
+                  ? t("groupsDevelopment.clickDropDescription")
+                  : t("groupsDragAndDropDescription")}
               </Typography>
               <TextField
                 fullWidth
@@ -571,6 +668,17 @@ export default function GroupLayerCatalog({
                   <CatalogRow
                     key={`${item.kind}:${item.id}`}
                     item={item}
+                    clickMode={clickModeActive}
+                    isClickPicked={
+                      clickPick?.source === "catalog" &&
+                      clickPick.items.some(
+                        (entry) =>
+                          entry.kind === item.kind && entry.id === item.id,
+                      )
+                    }
+                    onClickPick={(additive) =>
+                      onCatalogClickPick?.(item, additive)
+                    }
                     onEdit={
                       item.kind === "group"
                         ? () => handleOpenEditDialog(item.id)

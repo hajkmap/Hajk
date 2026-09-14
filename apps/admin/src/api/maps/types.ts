@@ -129,6 +129,11 @@ export interface MapLayerSwitcherGroup {
   infogroupowner?: string;
   layers?: MapLayerSwitcherLayerRef[];
   groups?: MapLayerSwitcherGroup[];
+  /** Interleaved sibling order for admin round-trip (not tools.options). */
+  layerSwitcherTree?: Array<
+    | { type: "layer"; id: string }
+    | { type: "group"; id: string }
+  >;
 }
 
 export interface MapLayerSwitcherBaselayer {

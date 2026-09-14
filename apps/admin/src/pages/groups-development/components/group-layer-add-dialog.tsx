@@ -16,7 +16,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { Group } from "../../../api/groups";
@@ -65,6 +65,7 @@ export default function GroupLayerAddDialog({
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
 
   const normalizedSearch = search.trim().toLowerCase();
+  const visibleTab: AddDialogTab = allowLayers ? activeTab : "groups";
 
   const availableLayers = useMemo(() => {
     if (!allowLayers) {
@@ -101,12 +102,6 @@ export default function GroupLayerAddDialog({
       )
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [excludeGroupSourceId, groups, normalizedSearch, placedGroupIds]);
-
-  useEffect(() => {
-    if (!allowLayers) {
-      setActiveTab("groups");
-    }
-  }, [allowLayers, open]);
 
   const resetState = () => {
     setActiveTab("groups");
@@ -171,7 +166,7 @@ export default function GroupLayerAddDialog({
 
   const selectedCount = selectedLayers.size + selectedGroups.size;
   const activeItems =
-    activeTab === "groups" ? availableGroups : availableLayers;
+    visibleTab === "groups" ? availableGroups : availableLayers;
 
   return (
     <Dialog
@@ -179,9 +174,9 @@ export default function GroupLayerAddDialog({
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
-      slotprops={{
-        paper:{
-        sx: {
+      slotProps={{
+        paper: {
+          sx: {
             backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
           },
         },
@@ -201,7 +196,7 @@ export default function GroupLayerAddDialog({
           sx={{ mb: 1.5 }}
         />
         <Tabs
-          value={activeTab}
+          value={visibleTab}
           onChange={(_, value) => setActiveTab(value as AddDialogTab)}
           sx={{
             minHeight: 36,
@@ -243,7 +238,7 @@ export default function GroupLayerAddDialog({
         <Box sx={{ maxHeight: 400, overflowY: "auto" }}>
           {activeItems.length > 0 ? (
             <List dense>
-              {activeTab === "groups"
+              {visibleTab === "groups"
                 ? availableGroups.map((group) => (
                     <ListItem key={group.id} disablePadding>
                       <FormControlLabel

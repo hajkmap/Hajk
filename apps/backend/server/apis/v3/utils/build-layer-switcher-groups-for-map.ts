@@ -17,8 +17,8 @@ export type LayerSwitcherTreeNode =
   | {
       type: "group";
       id: string;
-      name: string;
-      children: LayerSwitcherTreeNode[];
+      name?: string;
+      children?: LayerSwitcherTreeNode[];
     };
 
 export interface ClientLayerSwitcherLayerRef {
@@ -45,6 +45,11 @@ export interface ClientLayerSwitcherGroupNode {
   infogroupowner: string;
   layers: ClientLayerSwitcherLayerRef[];
   groups: ClientLayerSwitcherGroupNode[];
+  /** Interleaved sibling order for admin round-trip. */
+  layerSwitcherTree?: Array<
+    | { type: "layer"; id: string }
+    | { type: "group"; id: string }
+  >;
 }
 
 type LayerInstanceRow = Prisma.LayerInstanceGetPayload<{
@@ -183,6 +188,42 @@ function buildGroupCompositionMap(
   return compositions;
 }
 
+function shallowSiblingOrder(
+  tree: LayerSwitcherTreeNode[] | undefined,
+  layers: ClientLayerSwitcherLayerRef[],
+  groups: ClientLayerSwitcherGroupNode[],
+): Array<{ type: "layer"; id: string } | { type: "group"; id: string }> {
+  if (!tree?.length) {
+    return [
+      ...layers.map((layer) => ({ type: "layer" as const, id: layer.id })),
+      ...groups.map((group) => ({ type: "group" as const, id: group.id })),
+    ];
+  }
+
+  const order: Array<
+    { type: "layer"; id: string } | { type: "group"; id: string }
+  > = [];
+  const usedGroups = new Set<string>();
+
+  for (const node of tree) {
+    if (node.type === "layer") {
+      order.push({ type: "layer", id: node.id });
+    } else {
+      order.push({ type: "group", id: node.id });
+      usedGroups.add(node.id);
+    }
+  }
+
+  // Legacy trees were layers-only — append nested groups after layers.
+  for (const group of groups) {
+    if (!usedGroups.has(group.id)) {
+      order.push({ type: "group", id: group.id });
+    }
+  }
+
+  return order;
+}
+
 function buildFromTree(
   nodes: LayerSwitcherTreeNode[],
   composition: GroupComposition,
@@ -241,7 +282,7 @@ function buildInternalGroupNode(
     return {
       id: node.id,
       type: "group",
-      name: node.name,
+      name: node.name ?? node.id,
       toggled: true,
       expanded: false,
       exclusiveGroup: false,
@@ -289,7 +330,7 @@ function buildInternalGroupNode(
     };
   }
 
-  const { layers, groups } = composition.layerSwitcherTree?.length
+  const built = composition.layerSwitcherTree?.length
     ? buildFromTree(
         composition.layerSwitcherTree,
         composition,
@@ -312,8 +353,13 @@ function buildInternalGroupNode(
     expanded: false,
     exclusiveGroup: false,
     parent: parentGroupId,
-    layers,
-    groups,
+    layers: built.layers,
+    groups: built.groups,
+    layerSwitcherTree: shallowSiblingOrder(
+      composition.layerSwitcherTree,
+      built.layers,
+      built.groups,
+    ),
     ...INFOGROUP_DEFAULTS,
   };
 }
@@ -322,20 +368,26 @@ function mergeGroupChildrenAtLevel(
   internal: ClientLayerSwitcherGroupNode[],
   mapPlaced: ClientLayerSwitcherGroupNode[]
 ): ClientLayerSwitcherGroupNode[] {
-  const byId = new Map<string, ClientLayerSwitcherGroupNode>();
-
-  for (const group of internal) {
-    byId.set(group.id, group);
+  // GroupsOnMaps.index owns nested group order; keep that sequence on read.
+  if (mapPlaced.length === 0) {
+    return internal;
   }
 
+  const internalById = new Map(
+    internal.map((group) => [group.id, group] as const),
+  );
+  const result: ClientLayerSwitcherGroupNode[] = [];
+  const seen = new Set<string>();
+
   for (const group of mapPlaced) {
-    const existing = byId.get(group.id);
+    seen.add(group.id);
+    const existing = internalById.get(group.id);
     if (!existing) {
-      byId.set(group.id, group);
+      result.push(group);
       continue;
     }
 
-    byId.set(group.id, {
+    result.push({
       ...existing,
       ...group,
       layers: group.layers.length > 0 ? group.layers : existing.layers,
@@ -343,7 +395,13 @@ function mergeGroupChildrenAtLevel(
     });
   }
 
-  return Array.from(byId.values());
+  for (const group of internal) {
+    if (!seen.has(group.id)) {
+      result.push(group);
+    }
+  }
+
+  return result;
 }
 
 function buildPlacementNode(
@@ -378,7 +436,7 @@ function buildPlacementNode(
   );
   const visitedGroupIds = new Set<string>([placement.groupId]);
 
-  const { layers, groups: internalGroups } = composition?.layerSwitcherTree
+  const built = composition?.layerSwitcherTree
     ?.length
     ? buildFromTree(
         composition.layerSwitcherTree,
@@ -411,6 +469,8 @@ function buildPlacementNode(
     )
   );
 
+  const mergedGroups = mergeGroupChildrenAtLevel(built.groups, mapChildGroups);
+
   return {
     id: placement.groupId,
     type: "group",
@@ -419,8 +479,13 @@ function buildPlacementNode(
     expanded: placement.expanded,
     exclusiveGroup: Boolean(placement.exclusiveGroup),
     parent: parentGroupId,
-    layers,
-    groups: mergeGroupChildrenAtLevel(internalGroups, mapChildGroups),
+    layers: built.layers,
+    groups: mergedGroups,
+    layerSwitcherTree: shallowSiblingOrder(
+      composition?.layerSwitcherTree,
+      built.layers,
+      mergedGroups,
+    ),
     ...infoGroupFieldsFromPlacement(placement),
   };
 }
@@ -598,6 +663,14 @@ function remapClientGroupsToCatalogIds(
     groups: remapClientGroupsToCatalogIds(
       group.groups,
       instanceIdToCatalogId,
+    ),
+    layerSwitcherTree: (group.layerSwitcherTree ?? []).map((entry) =>
+      entry.type === "layer"
+        ? {
+            type: "layer" as const,
+            id: instanceIdToCatalogId.get(entry.id) ?? entry.id,
+          }
+        : entry,
     ),
   }));
 }

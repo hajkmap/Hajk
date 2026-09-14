@@ -1,5 +1,3 @@
-import type { NodeModel } from "@minoru/react-dnd-treeview";
-
 export const GROUP_LAYER_TREE_ROOT_ID = "root";
 
 export type GroupLayerNodeKind = "group" | "layer";
@@ -10,12 +8,26 @@ export interface GroupLayerNodeData {
   order?: number;
 }
 
-export type GroupLayerTreeNode = NodeModel<GroupLayerNodeData>;
+/**
+ * Flat tree node for the map-layers editor.
+ * Kept independent of @minoru/react-dnd-treeview so UI hooks and Tree JSX
+ * can be type-checked in separate modules without collapsing to `error`.
+ */
+export interface GroupLayerTreeNode {
+  id: string | number;
+  parent: string | number;
+  text: string;
+  droppable?: boolean;
+  data?: GroupLayerNodeData;
+}
 
 export const CATALOG_DRAG_TYPE = "GROUP_LAYER_CATALOG_ITEM";
 
 /** Drag type for items parked in the Kartlager Flyttzon. */
 export const MOVE_ZONE_DRAG_TYPE = "GROUP_LAYER_MOVE_ZONE_ITEM";
+
+/** How the user places items into the map-layers tree. */
+export type MapLayersInteractionMode = "drag" | "click";
 
 export interface CatalogDragItem {
   kind: GroupLayerNodeKind;
@@ -23,7 +35,7 @@ export interface CatalogDragItem {
   name: string;
 }
 
-/** A group or layer (with subtree) temporarily lifted out of Kartlager. */
+/** A group or layer (with subtree) temporarily lifted out of the map-layers tree. */
 export interface MoveZoneItem {
   /** Stable key for React lists / drag identity. */
   key: string;
@@ -33,6 +45,15 @@ export interface MoveZoneItem {
   /** Flat subtree; root node has parent === GROUP_LAYER_TREE_ROOT_ID. */
   nodes: GroupLayerTreeNode[];
 }
+
+/** Items currently held in click-and-drop mode (supports multi-select via Ctrl). */
+export type MapLayersClickPick =
+  | { source: "catalog"; items: CatalogDragItem[] }
+  | {
+      source: "tree";
+      nodes: { nodeId: GroupLayerTreeNode["id"]; name: string }[];
+    }
+  | { source: "moveZone"; items: MoveZoneItem[] };
 
 export interface GroupMetadataSettings {
   title: string;
@@ -119,6 +140,14 @@ export interface ClientLayerSwitcherGroup {
   infogroupowner?: string;
   layers?: ClientLayerSwitcherLayerRef[];
   groups?: ClientLayerSwitcherGroup[];
+  /**
+   * Interleaved Lagerordning sibling order (layers + nested groups).
+   * Admin/API only — tools.options still uses layers[] + groups[].
+   */
+  layerSwitcherTree?: Array<
+    | { type: "layer"; id: string }
+    | { type: "group"; id: string }
+  >;
 }
 
 /** Unsaved Kartlager + Bakgrund state (GroupsOnMaps / BACKGROUND instances). */
@@ -132,5 +161,8 @@ export interface LayerSwitcherDraft {
   }[];
 }
 
-/** @deprecated Use LayerSwitcherDraft */
+/** @deprecated Use LayerSwitcherDraft or MapLayersDraft */
 export type KartlagerDraft = LayerSwitcherDraft;
+
+/** Alias used by the map-layers editor draft plumbing. */
+export type MapLayersDraft = LayerSwitcherDraft;

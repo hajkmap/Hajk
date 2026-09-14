@@ -1,10 +1,4 @@
-import {
-  Tree,
-  MultiBackend,
-  getBackendOptions,
-  type DropOptions,
-} from "@minoru/react-dnd-treeview";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
 import {
   useCallback,
   useEffect,
@@ -12,15 +6,15 @@ import {
   useMemo,
   useRef,
   useState,
+  type Dispatch,
+  type SetStateAction,
 } from "react";
-import { DndProvider } from "react-dnd";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import { createPortal } from "react-dom";
 
 import { useGroups, useUpdateGroup } from "../../../api/groups";
 import { useLayers } from "../../../api/layers";
-import type { ToolOnMap } from "../../../api/maps";
-import type { Tool } from "../../../api/tools";
 import { getUpdateGroupErrorMessage } from "../../groups/utils/group-errors";
 import type {
   CatalogDragItem,
@@ -29,43 +23,29 @@ import type {
   GroupLayerTreeNode,
   LayerDisplaySettings,
   LayerFormValues,
+  MapLayersClickPick,
+  MapLayersInteractionMode,
   MoveZoneItem,
 } from "../types";
 import {
-  CATALOG_DRAG_TYPE,
   DEFAULT_GROUP_DISPLAY_SETTINGS,
   DEFAULT_LAYER_DISPLAY_SETTINGS,
   GROUP_LAYER_TREE_ROOT_ID,
-  MOVE_ZONE_DRAG_TYPE,
 } from "../types";
 import { toDisplaySettings, toFormValues } from "../utils/group-form";
 import {
   clientGroupsToLayerSwitcherTree,
   getClientGroupsFromToolOptions,
   hydrateDisplaySettingsFromClientGroups,
-  layerSwitcherDraftComparableSignature,
-  nodeModelsToClientGroups,
 } from "../utils/client-groups";
 import BackgroundLayersPanel from "./background-layers-panel";
 import DrawOrderPanel from "./draw-order-panel";
 import { buildDrawOrderIds } from "../utils/draw-order";
 import {
-  applyDropOnLayerRedirect,
-  applySiblingOrderFromFlatTree,
-  canDropGroupLayerNode,
+  applyMapLayersSiblingOrder,
   collectPlacedSourceIds,
-  createLayerTreeNode,
-  createTreeNodeFromCatalogItem,
-  extractSubtreeForMoveZone,
-  getDescendantIds,
-  getNextSiblingOrder,
-  insertCatalogItemIntoTree,
-  insertMoveZoneSubtreeIntoTree,
-  isValidLayerParentId,
   layerSwitcherTreeToNodeModels,
-  parseTreeNodeSourceId,
   removeTreeNodeWithDescendants,
-  sortSiblingNodes,
 } from "../utils/tree-model";
 import { filterTreeBySearch } from "../utils/tree-filter";
 import { findActiveLayerswitcher } from "../utils/active-layerswitcher";
@@ -75,235 +55,59 @@ import {
   toggleGroupVisibility,
   toggleLayerVisibility,
 } from "../utils/tree-visibility";
+import {
+  buildDrawOrderLayerRows,
+  buildLayerSwitcherEditorSnapshot,
+  isLayerStillInMapLayersTree,
+  resolveEffectiveBackgroundOrderedIds,
+  resolveEffectiveDrawOrderOrderedIds,
+} from "../utils/maplayers-editor";
+import { useMapLayersClickPlace } from "../hooks/use-maplayers-click-place";
+import { useMapLayersMoveZone } from "../hooks/use-maplayers-move-zone";
+import { useMapLayersTreeDnd } from "../hooks/use-maplayers-tree-dnd";
+import type {
+  AddDialogTarget,
+  GroupLayerTreeProps,
+} from "./group-layer-tree-types";
 import GroupLayerAddDialog from "./group-layer-add-dialog";
 import GroupLayerCatalog from "./group-layer-catalog";
 import GroupFormDialog from "./group-form-dialog";
 import LayerFormDialog from "./layer-form-dialog";
 import GroupLayerTreeDropZone from "./group-layer-tree-drop-zone";
-import GroupLayerTreeNodeView from "./group-layer-tree-node";
-import KartlagerMoveZone from "./kartlager-move-zone";
+import MapLayersMoveZone from "./maplayers-move-zone";
+import MapLayersTreeView, { MapLayersDndProvider } from "./maplayers-tree-view";
 import LayerSwitcherPreview, {
   type LayerSwitcherPreviewTab,
 } from "./layer-switcher-preview";
-import { createPortal } from "react-dom";
 
-interface AddDialogTarget {
-  parentId: GroupLayerTreeNode["parent"];
-  parentName: string;
-  excludeGroupSourceId?: string;
-  allowLayers: boolean;
-}
+export type { LayerSwitcherDraft as KartlagerDraft } from "../types";
 
-/** Local draft/state shape — avoids circular type resolution issues. */
-export interface KartlagerDraft {
-  groups: ReturnType<typeof nodeModelsToClientGroups>;
-  baselayers: {
-    layerId: string;
-    visibleAtStart?: boolean;
-    zIndex?: number;
-    infobox?: string;
-  }[];
-}
-
-function resolveEffectiveBackgroundOrderedIds(
-  backgroundOrderedIds: string[],
-  activationBackgroundOrder: string[] | null,
-): string[] {
-  if (activationBackgroundOrder == null) {
-    return backgroundOrderedIds;
-  }
-  const backgroundIdSet = new Set(activationBackgroundOrder);
-  return backgroundOrderedIds.filter((id) => backgroundIdSet.has(id));
-}
-
-function buildDrawOrderLayerRows(
-  treeData: GroupLayerTreeNode[],
-  layerNames: Map<string, string>,
-  activeLayerIds: ReadonlySet<string> | null,
-  mapBackgroundLayerIds: ReadonlySet<string>,
-): { id: string; name: string }[] {
-  const placedLayerIds = collectPlacedSourceIds(treeData).layerIds;
-  return [...placedLayerIds]
-    .filter((id) => {
-      if (!layerNames.has(id)) {
-        return false;
-      }
-      if (mapBackgroundLayerIds.has(id)) {
-        return false;
-      }
-      if (activeLayerIds != null && !activeLayerIds.has(id)) {
-        return false;
-      }
-      return true;
-    })
-    .map((id) => ({
-      id,
-      name: layerNames.get(id) ?? id,
-    }));
-}
-
-function resolveEffectiveDrawOrderOrderedIds(
-  drawOrderOrderedIds: string[],
-  drawOrderLayers: { id: string; name: string }[],
-  parkedIds: ReadonlySet<string> = new Set(),
-): string[] {
-  const eligibleIds = new Set(
-    drawOrderLayers
-      .map((layer) => layer.id)
-      .filter((id) => !parkedIds.has(id)),
-  );
-  const kept = drawOrderOrderedIds.filter((id) => eligibleIds.has(id));
-  const keptSet = new Set(kept);
-  const added = drawOrderLayers
-    .filter((layer) => eligibleIds.has(layer.id) && !keptSet.has(layer.id))
-    .slice()
-    .sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
-    )
-    .map((layer) => layer.id);
-  return [...kept, ...added];
-}
-
-function insertDrawOrderIdAt(
-  orderedIds: string[],
-  layerId: string,
-  insertIndex?: number,
-): string[] {
-  const next = orderedIds.filter((id) => id !== layerId);
-  const index =
-    insertIndex == null
-      ? next.length
-      : Math.max(0, Math.min(insertIndex, next.length));
-  next.splice(index, 0, layerId);
-  return next;
-}
-
-function isLayerStillInKartlagerTree(
-  tree: GroupLayerTreeNode[],
-  layerId: string,
-): boolean {
-  return tree.some(
-    (node) =>
-      node.data?.kind === "layer" && node.data.sourceId === layerId,
-  );
-}
-
-function applyDrawOrderToLayerDisplaySettings(
-  layerDisplaySettings: Record<string, LayerDisplaySettings>,
-  orderedIdsTopToBottom: string[],
-): Record<string, LayerDisplaySettings> {
-  if (orderedIdsTopToBottom.length === 0) {
-    return layerDisplaySettings;
-  }
-
-  const next: Record<string, LayerDisplaySettings> = {
-    ...layerDisplaySettings,
-  };
-  const total = orderedIdsTopToBottom.length;
-  orderedIdsTopToBottom.forEach((layerId, index) => {
-    next[layerId] = {
-      ...(next[layerId] ?? DEFAULT_LAYER_DISPLAY_SETTINGS),
-      drawOrder: total - index,
-    };
-  });
-  return next;
-}
-
-function buildLayerSwitcherEditorSnapshot(input: {
-  treeData: GroupLayerTreeNode[];
-  groupDisplaySettings: Record<string, GroupDisplaySettings>;
-  layerDisplaySettings: Record<string, LayerDisplaySettings>;
-  backgroundOrderedIds: string[];
-  drawOrderOrderedIds: string[];
-  activationBackgroundOrder: string[] | null;
-  activeLayerIds: ReadonlySet<string> | null;
-  mapBackgroundLayerIds: ReadonlySet<string>;
-  layerNames: Map<string, string>;
-  drawOrderParkedIds?: ReadonlySet<string>;
-}): { draft: KartlagerDraft; signature: string } {
-  const effectiveBackgroundOrderedIds = resolveEffectiveBackgroundOrderedIds(
-    input.backgroundOrderedIds,
-    input.activationBackgroundOrder,
-  );
-  const drawOrderLayers = buildDrawOrderLayerRows(
-    input.treeData,
-    input.layerNames,
-    input.activeLayerIds,
-    input.mapBackgroundLayerIds,
-  );
-  const effectiveDrawOrderOrderedIds = resolveEffectiveDrawOrderOrderedIds(
-    input.drawOrderOrderedIds,
-    drawOrderLayers,
-    input.drawOrderParkedIds,
-  );
-  const settingsForGroups = applyDrawOrderToLayerDisplaySettings(
-    input.layerDisplaySettings,
-    effectiveDrawOrderOrderedIds,
-  );
-  const draft: KartlagerDraft = {
-    groups: nodeModelsToClientGroups(
-      input.treeData,
-      input.groupDisplaySettings,
-      settingsForGroups,
-    ),
-    baselayers: effectiveBackgroundOrderedIds.map((layerId, index) => ({
-      layerId,
-      zIndex: index,
-      visibleAtStart:
-        input.layerDisplaySettings[layerId]?.layerVisibleAtStart ?? false,
-      infobox: input.layerDisplaySettings[layerId]?.layerInfoBox ?? "",
-    })),
-  };
-  const signature = layerSwitcherDraftComparableSignature(
-    {
-      groups: draft.groups,
-      baselayers: draft.baselayers.map(
-        ({ layerId, visibleAtStart, infobox }) => ({
-          layerId,
-          visibleAtStart,
-          infobox,
-        }),
-      ),
-      baselayerOrder: effectiveBackgroundOrderedIds,
-      drawOrderSequence: effectiveDrawOrderOrderedIds,
-    },
-    input.activeLayerIds,
-  );
-  return { draft, signature };
-}
-
-interface GroupLayerTreeProps {
-  /** Map tools for the current map (includes layerswitcher Tool.options). */
-  mapTools?: ToolOnMap[];
-  /** Catalog tools — used when a layerswitcher is activated but not yet on the map. */
-  catalogTools?: Tool[];
-  /** Draft/server set of active tool ids — used to pick the active layerswitcher. */
-  activeToolIds?: Set<number>;
-  /** Map name — used for themes dialog save/load. */
-  mapName?: string;
-  /** DB Kartlager + Bakgrund state (catalog layer ids). */
-  layerSwitcherState?: KartlagerDraft | null;
-  /**
-   * Layers activated on the Lager tab. Kartlager list shows active FOREGROUND
-   * layers; Bakgrund list shows active BACKGROUND layers.
-   */
-  layerActivationRows?: {
-    layerId: string;
-    active: boolean;
-    isBackground: boolean;
-    /** Search/editing are activated on Lager but never appear in Lagerordning. */
-    layerKind?: "display" | "search" | "editing";
-  }[];
-  /** Unsaved Kartlager/Bakgrund draft held by the map settings page. */
-  pendingDraft?: KartlagerDraft | null;
-  /** Raised when Kartlager/Bakgrund differs from the loaded DB state. */
-  onKartlagerDraftChange?: (draft: KartlagerDraft | null) => void;
-  /** Bumped when Lager checkboxes are reverted to the last committed state. */
-  layerActivationResetKey?: number;
-  /** Lager tab rows have been synced from the server — required for dirty checks. */
-  menuSynced?: boolean;
-  /** DOM host in FormActionPanel sidebar for the Flyttzon portal. */
-  moveZoneHostEl?: HTMLElement | null;
+/** Local rebind for click-place hook output (see useMapLayersClickPlace call). */
+interface MapLayersClickPlaceBindings {
+  clickPick: MapLayersClickPick | null;
+  setClickPick: Dispatch<SetStateAction<MapLayersClickPick | null>>;
+  clickMode: boolean;
+  handleInteractionModeChange: (mode: MapLayersInteractionMode) => void;
+  clearClickPickAndResetToDrag: () => void;
+  handleCatalogClickPick: (item: CatalogDragItem, additive: boolean) => void;
+  handleTreeClickInteract: (
+    nodeId: GroupLayerTreeNode["id"],
+    additive: boolean,
+  ) => void;
+  handleClickPlaceToRoot: () => void;
+  handleClickPlaceToMoveZone: () => void;
+  handleMoveZoneClickPick: (item: MoveZoneItem, additive: boolean) => void;
+  clickPickCount: number;
+  clickPickLabel: string | null;
+  canClickPlaceToRoot: boolean;
+  clickPickEdgeById: Map<string, "only" | "start" | "middle" | "end"> | null;
+  hoveredSubtreeIds: Set<string> | null;
+  handleMapLayersNodeHover: (nodeId: GroupLayerTreeNode["id"]) => void;
+  handleMapLayersTreeMouseLeave: () => void;
+  clickPlaceIndicator: {
+    afterNodeId: string;
+    lineDepth: number;
+  } | null;
 }
 
 export default function GroupLayerTree({
@@ -345,11 +149,10 @@ export default function GroupLayerTree({
     name: string;
   } | null>(null);
   const [moveZoneItems, setMoveZoneItems] = useState<MoveZoneItem[]>([]);
-  const [hoveredSubtreeRootId, setHoveredSubtreeRootId] = useState<
-    GroupLayerTreeNode["id"] | null
-  >(null);
   const [previewTab, setPreviewTab] =
     useState<LayerSwitcherPreviewTab>("layers");
+  /** null = Tree has not reported opens yet (treat as all open with initialOpen). */
+  const [openNodeIds, setOpenNodeIds] = useState<Set<string> | null>(null);
   const [backgroundOrderedIds, setBackgroundOrderedIds] = useState<string[]>(
     [],
   );
@@ -483,7 +286,7 @@ export default function GroupLayerTree({
       if (item.kind !== "layer") {
         continue;
       }
-      if (isLayerStillInKartlagerTree(treeData, item.sourceId)) {
+      if (isLayerStillInMapLayersTree(treeData, item.sourceId)) {
         parked.add(item.sourceId);
       }
     }
@@ -508,29 +311,6 @@ export default function GroupLayerTree({
   const handleDrawOrderIdsChange = useCallback((ids: string[]) => {
     setDrawOrderOrderedIds(ids);
   }, []);
-
-  const canAcceptMoveZoneDropToDrawOrder = useCallback(
-    (item: MoveZoneItem) =>
-      item.kind === "layer" &&
-      isLayerStillInKartlagerTree(treeData, item.sourceId),
-    [treeData],
-  );
-
-  const handleMoveZoneDropToDrawOrder = useCallback(
-    (item: MoveZoneItem, insertIndex?: number) => {
-      if (!canAcceptMoveZoneDropToDrawOrder(item)) {
-        return;
-      }
-
-      setDrawOrderOrderedIds((current) =>
-        insertDrawOrderIdAt(current, item.sourceId, insertIndex),
-      );
-      setMoveZoneItems((current) =>
-        current.filter((entry) => entry.key !== item.key),
-      );
-    },
-    [canAcceptMoveZoneDropToDrawOrder],
-  );
 
   const layerSwitcherEditorSnapshot = useMemo(
     () =>
@@ -624,6 +404,58 @@ export default function GroupLayerTree({
 
   const backgroundMode = previewTab === "background";
   const drawOrderMode = previewTab === "drawOrder";
+
+  const visibleNodeIds = useMemo(() => {
+    if (!search.trim()) {
+      return null;
+    }
+
+    return new Set(
+      filterTreeBySearch(treeData, search).map((node) => String(node.id)),
+    );
+  }, [search, treeData]);
+
+  // Hook return collapses to `error` under type-aware ESLint in this file
+  // (large DnD/Tree import graph). Re-bind through local types from `../types`.
+  const clickPlace = useMapLayersClickPlace({
+    treeData,
+    setTreeData,
+    moveZoneItems,
+    setMoveZoneItems,
+    setVisibleIds,
+    backgroundMode,
+    drawOrderMode,
+    openNodeIds,
+    visibleNodeIds,
+  }) as unknown as MapLayersClickPlaceBindings;
+  const {
+    clickPick,
+    setClickPick,
+    clickMode,
+    handleInteractionModeChange,
+    clearClickPickAndResetToDrag,
+    handleCatalogClickPick,
+    handleTreeClickInteract,
+    handleClickPlaceToRoot,
+    handleClickPlaceToMoveZone,
+    handleMoveZoneClickPick,
+    clickPickCount,
+    clickPickLabel,
+    canClickPlaceToRoot,
+    clickPickEdgeById,
+    hoveredSubtreeIds,
+    handleMapLayersNodeHover,
+    handleMapLayersTreeMouseLeave,
+    clickPlaceIndicator,
+  } = clickPlace;
+
+  const handlePreviewTabChange = useCallback(
+    (tab: LayerSwitcherPreviewTab) => {
+      setPreviewTab(tab);
+      clearClickPickAndResetToDrag();
+    },
+    [clearClickPickAndResetToDrag],
+  );
 
   const serverGroupsFromState = useMemo(
     () => layerSwitcherState?.groups ?? [],
@@ -757,7 +589,7 @@ export default function GroupLayerTree({
       : serverBaselayers;
 
     const intermediate = clientGroupsToLayerSwitcherTree(groupsToLoad);
-    const nodes = applySiblingOrderFromFlatTree(
+    const nodes = applyMapLayersSiblingOrder(
       layerSwitcherTreeToNodeModels(
         intermediate,
         GROUP_LAYER_TREE_ROOT_ID,
@@ -859,305 +691,41 @@ export default function GroupLayerTree({
 
     return { groupIds, layerIds };
   }, [effectiveBackgroundOrderedIds, treeData, moveZoneItems]);
-  const visibleNodeIds = useMemo(() => {
-    if (!search.trim()) {
-      return null;
-    }
 
-    return new Set(
-      filterTreeBySearch(treeData, search).map((node) => String(node.id)),
-    );
-  }, [search, treeData]);
+  const {
+    canAcceptMoveZoneDropToDrawOrder,
+    handleMoveZoneDropToDrawOrder,
+    handleDropToMoveZone,
+    canAcceptCatalogDropToMoveZone,
+    handleDropCatalogToMoveZone,
+  } = useMapLayersMoveZone({
+    treeData,
+    setTreeData,
+    moveZoneItems,
+    setMoveZoneItems,
+    setVisibleIds,
+    setDrawOrderOrderedIds,
+    drawOrderMode,
+    effectiveDrawOrderOrderedIds,
+    layerNames,
+    placedIds,
+  });
 
-  const addCatalogItemsToParent = useCallback(
-    (
-      catalogItems: CatalogDragItem[],
-      parentId: GroupLayerTreeNode["parent"],
-    ) => {
-      if (catalogItems.length === 0) {
-        return;
-      }
-
-      setTreeData((current) => {
-        let next = current;
-
-        for (const catalogItem of catalogItems) {
-          const order = getNextSiblingOrder(next, parentId);
-          const newNode = createTreeNodeFromCatalogItem(
-            catalogItem,
-            parentId,
-            order,
-          );
-
-          if (next.some((node) => node.id === newNode.id)) {
-            continue;
-          }
-
-          if (
-            catalogItem.kind === "layer" &&
-            !isValidLayerParentId(next, parentId)
-          ) {
-            continue;
-          }
-
-          next = [...next, newNode];
-        }
-
-        return applySiblingOrderFromFlatTree(next);
-      });
-    },
-    [],
-  );
-
-  const addCatalogItem = useCallback(
-    (
-      catalogItem: CatalogDragItem,
-      dropOptions: {
-        dropTargetId: GroupLayerTreeNode["id"];
-        dropTarget?: GroupLayerTreeNode;
-        relativeIndex?: number;
-      },
-    ) => {
-      setTreeData((current) => {
-        const next = insertCatalogItemIntoTree(
-          current,
-          catalogItem,
-          dropOptions,
-        );
-
-        if (!next) {
-          return current;
-        }
-
-        return next;
-      });
-    },
-    [],
-  );
-
-  const handleCatalogDropToRoot = useCallback(
-    (catalogItem: CatalogDragItem) => {
-      if (catalogItem.kind === "layer") {
-        return;
-      }
-
-      addCatalogItem(catalogItem, {
-        dropTargetId: GROUP_LAYER_TREE_ROOT_ID,
-      });
-    },
-    [addCatalogItem],
-  );
-
-  const canAcceptCatalogDropToRoot = useCallback(
-    (item: CatalogDragItem) => item.kind === "group",
-    [],
-  );
-
-  const handleMoveZoneDropToRoot = useCallback(
-    (moveItem: MoveZoneItem) => {
-      if (moveItem.kind === "layer") {
-        // Draw-order parking keeps the layer in Kartlager — consuming from
-        // Flyttzon only clears the park slot (layer reappears in Ritordning).
-        if (isLayerStillInKartlagerTree(treeData, moveItem.sourceId)) {
-          setMoveZoneItems((current) =>
-            current.filter((entry) => entry.key !== moveItem.key),
-          );
-        }
-        return;
-      }
-
-      setTreeData((current) => {
-        const next = insertMoveZoneSubtreeIntoTree(current, moveItem.nodes, {
-          dropTargetId: GROUP_LAYER_TREE_ROOT_ID,
-        });
-        return next ?? current;
-      });
-      setMoveZoneItems((current) =>
-        current.filter((entry) => entry.key !== moveItem.key),
-      );
-    },
-    [treeData],
-  );
-
-  const canAcceptMoveZoneDropToRoot = useCallback(
-    (item: MoveZoneItem) => item.kind === "group",
-    [],
-  );
-
-  const handleDrop = useCallback(
-    (
-      newTree: GroupLayerTreeNode[],
-      options: DropOptions<GroupLayerTreeNode["data"]>,
-    ) => {
-      const itemType = options.monitor.getItemType();
-
-      if (itemType === CATALOG_DRAG_TYPE) {
-        if (backgroundMode) {
-          return;
-        }
-        addCatalogItem(options.monitor.getItem() as CatalogDragItem, {
-          dropTargetId: options.dropTargetId,
-          dropTarget: options.dropTarget,
-          relativeIndex: options.relativeIndex,
-        });
-        return;
-      }
-
-      if (itemType === MOVE_ZONE_DRAG_TYPE) {
-        const moveItem = options.monitor.getItem() as MoveZoneItem;
-        if (
-          moveItem.kind === "layer" &&
-          isLayerStillInKartlagerTree(treeData, moveItem.sourceId)
-        ) {
-          setMoveZoneItems((current) =>
-            current.filter((entry) => entry.key !== moveItem.key),
-          );
-          return;
-        }
-        setTreeData((current) => {
-          const next = insertMoveZoneSubtreeIntoTree(current, moveItem.nodes, {
-            dropTargetId: options.dropTargetId,
-            dropTarget: options.dropTarget,
-            relativeIndex: options.relativeIndex,
-          });
-          return next ?? current;
-        });
-        setMoveZoneItems((current) =>
-          current.filter((entry) => entry.key !== moveItem.key),
-        );
-        return;
-      }
-
-      const updatedTree = applyDropOnLayerRedirect(newTree, {
-        dragSourceId: options.dragSourceId,
-        dropTargetId: options.dropTargetId,
-        dropTarget: options.dropTarget,
-      });
-
-      const movedNode = updatedTree.find(
-        (node) => node.id === options.dragSourceId,
-      );
-      if (
-        movedNode?.data?.kind === "layer" &&
-        !isValidLayerParentId(updatedTree, movedNode.parent)
-      ) {
-        return;
-      }
-
-      setTreeData(applySiblingOrderFromFlatTree(updatedTree));
-    },
-    [addCatalogItem, backgroundMode, treeData],
-  );
-
-  const handleDropToMoveZone = useCallback(
-    (nodeId: GroupLayerTreeNode["id"]) => {
-      // Ritordning: park in Flyttzon without removing from Kartlager so the
-      // layer can be dropped back into the draw-order list.
-      if (drawOrderMode) {
-        const layerId = parseTreeNodeSourceId(nodeId);
-        if (!layerId || !isLayerStillInKartlagerTree(treeData, layerId)) {
-          return;
-        }
-        if (!effectiveDrawOrderOrderedIds.includes(layerId)) {
-          return;
-        }
-        if (
-          moveZoneItems.some(
-            (item) => item.kind === "layer" && item.sourceId === layerId,
-          )
-        ) {
-          return;
-        }
-
-        const name = layerNames.get(layerId) ?? layerId;
-        const moveItem: MoveZoneItem = {
-          key: `drawOrder:${layerId}:${Date.now()}`,
-          kind: "layer",
-          sourceId: layerId,
-          name,
-          nodes: [
-            createLayerTreeNode(layerId, name, GROUP_LAYER_TREE_ROOT_ID, 0),
-          ],
-        };
-
-        setDrawOrderOrderedIds((ids) => ids.filter((id) => id !== layerId));
-        setMoveZoneItems((items) => [...items, moveItem]);
-        return;
-      }
-
-      const extracted = extractSubtreeForMoveZone(treeData, nodeId);
-      if (!extracted) {
-        return;
-      }
-
-      const root = extracted.subtree.find(
-        (node) => node.parent === GROUP_LAYER_TREE_ROOT_ID,
-      );
-      if (!root?.data) {
-        return;
-      }
-
-      const moveItem: MoveZoneItem = {
-        key: `${root.data.kind}:${root.data.sourceId}:${Date.now()}`,
-        kind: root.data.kind,
-        sourceId: root.data.sourceId,
-        name: root.text,
-        nodes: extracted.subtree,
-      };
-
-      setTreeData(extracted.remainingTree);
-      setMoveZoneItems((items) => [...items, moveItem]);
-      setVisibleIds((visible) => {
-        const next = new Set(visible);
-        for (const node of extracted.subtree) {
-          next.delete(String(node.id));
-        }
-        return next;
-      });
-    },
-    [
-      drawOrderMode,
-      effectiveDrawOrderOrderedIds,
-      layerNames,
-      moveZoneItems,
-      treeData,
-    ],
-  );
-
-  const canAcceptCatalogDropToMoveZone = useCallback(
-    (item: CatalogDragItem) => {
-      if (item.kind === "group") {
-        return !placedIds.groupIds.has(item.id);
-      }
-      return !placedIds.layerIds.has(item.id);
-    },
-    [placedIds],
-  );
-
-  const handleDropCatalogToMoveZone = useCallback(
-    (catalogItem: CatalogDragItem) => {
-      if (!canAcceptCatalogDropToMoveZone(catalogItem)) {
-        return;
-      }
-
-      const node = createTreeNodeFromCatalogItem(
-        catalogItem,
-        GROUP_LAYER_TREE_ROOT_ID,
-        0,
-      );
-
-      const moveItem: MoveZoneItem = {
-        key: `${catalogItem.kind}:${catalogItem.id}:${Date.now()}`,
-        kind: catalogItem.kind,
-        sourceId: catalogItem.id,
-        name: catalogItem.name,
-        nodes: [node],
-      };
-
-      setMoveZoneItems((items) => [...items, moveItem]);
-    },
-    [canAcceptCatalogDropToMoveZone],
-  );
+  const {
+    addCatalogItemsToParent,
+    handleCatalogDropToRoot,
+    canAcceptCatalogDropToRoot,
+    handleMoveZoneDropToRoot,
+    canAcceptMoveZoneDropToRoot,
+    handleDrop,
+    handleDropTreeItemToRoot,
+    canAcceptTreeItemToRoot,
+  } = useMapLayersTreeDnd({
+    treeData,
+    setTreeData,
+    setMoveZoneItems,
+    backgroundMode,
+  });
 
   const handleToggleLayerVisibility = useCallback(
     (nodeId: GroupLayerTreeNode["id"]) => {
@@ -1278,7 +846,7 @@ export default function GroupLayerTree({
           return next;
         });
 
-        return updatedTree;
+        return applyMapLayersSiblingOrder(updatedTree);
       });
     },
     [],
@@ -1425,34 +993,6 @@ export default function GroupLayerTree({
 
   const isLoading = groupsLoading || layersLoading;
 
-  const hoveredSubtreeIds = useMemo(() => {
-    if (hoveredSubtreeRootId == null) {
-      return null;
-    }
-    const ids = new Set<string>([String(hoveredSubtreeRootId)]);
-    const hoveredNode = treeData.find(
-      (entry) => entry.id === hoveredSubtreeRootId,
-    );
-    // Groups highlight their whole subtree; layers highlight only themselves.
-    if (hoveredNode?.data?.kind === "group") {
-      for (const id of getDescendantIds(treeData, hoveredSubtreeRootId)) {
-        ids.add(String(id));
-      }
-    }
-    return ids;
-  }, [hoveredSubtreeRootId, treeData]);
-
-  const handleKartlagerNodeHover = useCallback(
-    (nodeId: GroupLayerTreeNode["id"]) => {
-      setHoveredSubtreeRootId(nodeId);
-    },
-    [],
-  );
-
-  const handleKartlagerTreeMouseLeave = useCallback(() => {
-    setHoveredSubtreeRootId(null);
-  }, []);
-
   const previewOptions = useMemo(
     () => ({
       showFilter: Boolean(activeLayerswitcherOptions?.showFilter),
@@ -1468,46 +1008,6 @@ export default function GroupLayerTree({
     [activeLayerswitcherOptions],
   );
 
-  const handleDropTreeItemToRoot = useCallback(
-    (nodeId: GroupLayerTreeNode["id"]) => {
-      setTreeData((current) => {
-        const node = current.find((entry) => entry.id === nodeId);
-        if (!node || node.data?.kind !== "group") {
-          return current;
-        }
-
-        const rootSiblings = current
-          .filter((entry) => entry.parent === GROUP_LAYER_TREE_ROOT_ID)
-          .slice()
-          .sort(sortSiblingNodes);
-        const alreadyAtRoot = node.parent === GROUP_LAYER_TREE_ROOT_ID;
-        const alreadyLast =
-          alreadyAtRoot &&
-          rootSiblings.length > 0 &&
-          rootSiblings[rootSiblings.length - 1]?.id === node.id;
-
-        // Dropping in the empty area below the list moves the group to the end.
-        // No-op when it is already the last root sibling (avoids same-position
-        // drops that miss the tree target from reshuffling needlessly).
-        if (alreadyLast) {
-          return current;
-        }
-
-        const remaining = current.filter((entry) => entry.id !== nodeId);
-        return applySiblingOrderFromFlatTree([
-          ...remaining,
-          { ...node, parent: GROUP_LAYER_TREE_ROOT_ID },
-        ]);
-      });
-    },
-    [],
-  );
-
-  const canAcceptTreeItemToRoot = useCallback(
-    (node: GroupLayerTreeNode) => node.data?.kind === "group",
-    [],
-  );
-
   if (!activeLayerswitcher) {
     return (
       <Box sx={{ p: 2 }}>
@@ -1519,7 +1019,7 @@ export default function GroupLayerTree({
   }
 
   return (
-    <DndProvider backend={MultiBackend} options={getBackendOptions()}>
+    <MapLayersDndProvider>
       <Box
         sx={{
           display: "grid",
@@ -1545,6 +1045,14 @@ export default function GroupLayerTree({
           backgroundLayerIds={mapBackgroundLayerIds}
           backgroundMode={backgroundMode}
           drawOrderMode={drawOrderMode}
+          clickModeActive={clickMode}
+          onInteractionModeChange={
+            backgroundMode || drawOrderMode
+              ? undefined
+              : handleInteractionModeChange
+          }
+          clickPick={clickPick}
+          onCatalogClickPick={handleCatalogClickPick}
           groupDisplaySettings={groupDisplaySettings}
           onGroupDisplaySettingsChange={(groupId, settings) => {
             setGroupDisplaySettings((current) => ({
@@ -1566,7 +1074,7 @@ export default function GroupLayerTree({
           onSearchChange={setSearch}
           mapName={mapName}
           activeTab={previewTab}
-          onActiveTabChange={setPreviewTab}
+          onActiveTabChange={handlePreviewTabChange}
           showFilter={previewOptions.showFilter}
           showQuickAccess={previewOptions.showQuickAccess}
           showDrawOrderView={previewOptions.showDrawOrderView}
@@ -1611,94 +1119,92 @@ export default function GroupLayerTree({
                 {t("map.drawOrderNoSearchResults")}
               </Typography>
             </Box>
-          ) : treeData.length === 0 ? (
-            <GroupLayerTreeDropZone
-              emptyLabel={t("groupsDevelopment.emptyKartlager")}
-              emptyActionLabel={t("common.addToGroup")}
-              onEmptyAction={handleOpenRootAddDialog}
-              onCatalogDrop={handleCatalogDropToRoot}
-              canAcceptCatalogItem={canAcceptCatalogDropToRoot}
-              onMoveZoneDrop={handleMoveZoneDropToRoot}
-              canAcceptMoveZoneItem={canAcceptMoveZoneDropToRoot}
-              onTreeDropToRoot={handleDropTreeItemToRoot}
-              canAcceptTreeItemToRoot={canAcceptTreeItemToRoot}
-            />
           ) : (
-            <GroupLayerTreeDropZone
-              onCatalogDrop={handleCatalogDropToRoot}
-              canAcceptCatalogItem={canAcceptCatalogDropToRoot}
-              onMoveZoneDrop={handleMoveZoneDropToRoot}
-              canAcceptMoveZoneItem={canAcceptMoveZoneDropToRoot}
-              onTreeDropToRoot={handleDropTreeItemToRoot}
-              canAcceptTreeItemToRoot={canAcceptTreeItemToRoot}
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+              }}
             >
-              <Box sx={{ pb: "8px" }} onMouseLeave={handleKartlagerTreeMouseLeave}>
-                <Tree<GroupLayerTreeNode["data"]>
-                  tree={treeData}
-                  rootId={GROUP_LAYER_TREE_ROOT_ID}
-                  extraAcceptTypes={[CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE]}
-                  initialOpen
-                  sort={false}
-                  insertDroppableFirst={false}
-                  dropTargetOffset={12}
-                  canDrop={(tree, options) =>
-                    canDropGroupLayerNode(tree, options)
-                  }
-                  onDrop={handleDrop}
-                  placeholderRender={(_node, { depth }) => (
-                    <Box
-                      sx={{
-                        height: 2,
-                        ml: `${depth * 20}px`,
-                        mr: 1,
-                        bgcolor: "primary.main",
-                        borderRadius: 1,
-                      }}
-                    />
-                  )}
-                  rootProps={{
-                    style: {
-                      flex: "0 0 auto",
-                      minHeight: 0,
-                    },
+              {clickMode && clickPickCount > 0 ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    px: 1.5,
+                    py: 1,
+                    borderBottom: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "action.selected",
                   }}
-                  classes={{
-                    root: "group-layer-tree-root",
-                    listItem: "group-layer-tree-item",
-                    dropTarget: "group-layer-tree-drop-target",
-                    draggingSource: "group-layer-tree-dragging",
-                  }}
-                  render={(node, options) => (
-                    <Box
-                      sx={{
-                        display:
-                          visibleNodeIds && !visibleNodeIds.has(String(node.id))
-                            ? "none"
-                            : "block",
-                      }}
-                    >
-                      <GroupLayerTreeNodeView
-                        node={node}
-                        options={options}
-                        treeData={treeData}
-                        visibleIds={visibleIds}
-                        groupDisplaySettings={groupDisplaySettings}
-                        isSubtreeHovered={
-                          hoveredSubtreeIds?.has(String(node.id)) ?? false
-                        }
-                        onHoverSubtree={handleKartlagerNodeHover}
-                        onToggleLayerVisibility={handleToggleLayerVisibility}
-                        onToggleGroupVisibility={handleToggleGroupVisibility}
-                        onAddToGroup={handleOpenAddDialog}
-                        onRemoveFromTree={handleRemoveFromTree}
-                        onEditGroupMetadata={handleOpenEditDialog}
-                        onEditLayerSettings={handleOpenLayerEditDialog}
-                      />
-                    </Box>
-                  )}
+                >
+                  <Typography variant="body2" sx={{ flex: 1, minWidth: 0 }}>
+                    {clickPickCount === 1
+                      ? t("groupsDevelopment.clickDropHolding", {
+                          name: clickPickLabel,
+                        })
+                      : t("groupsDevelopment.clickDropHoldingMany", {
+                          count: clickPickCount,
+                        })}
+                  </Typography>
+                  <Button size="small" onClick={() => setClickPick(null)}>
+                    {t("common.cancel")}
+                  </Button>
+                </Box>
+              ) : null}
+              {treeData.length === 0 ? (
+                <GroupLayerTreeDropZone
+                  emptyLabel={t("groupsDevelopment.emptyKartlager")}
+                  emptyActionLabel={t("common.addToGroup")}
+                  onEmptyAction={handleOpenRootAddDialog}
+                  onCatalogDrop={handleCatalogDropToRoot}
+                  canAcceptCatalogItem={canAcceptCatalogDropToRoot}
+                  onMoveZoneDrop={handleMoveZoneDropToRoot}
+                  canAcceptMoveZoneItem={canAcceptMoveZoneDropToRoot}
+                  onTreeDropToRoot={handleDropTreeItemToRoot}
+                  canAcceptTreeItemToRoot={canAcceptTreeItemToRoot}
+                  clickPlaceActive={canClickPlaceToRoot}
+                  onClickPlace={handleClickPlaceToRoot}
                 />
-              </Box>
-            </GroupLayerTreeDropZone>
+              ) : (
+                <GroupLayerTreeDropZone
+                  onCatalogDrop={handleCatalogDropToRoot}
+                  canAcceptCatalogItem={canAcceptCatalogDropToRoot}
+                  onMoveZoneDrop={handleMoveZoneDropToRoot}
+                  canAcceptMoveZoneItem={canAcceptMoveZoneDropToRoot}
+                  onTreeDropToRoot={handleDropTreeItemToRoot}
+                  canAcceptTreeItemToRoot={canAcceptTreeItemToRoot}
+                  clickPlaceActive={canClickPlaceToRoot}
+                  onClickPlace={handleClickPlaceToRoot}
+                >
+                  <MapLayersTreeView
+                    treeData={treeData}
+                    visibleIds={visibleIds}
+                    visibleNodeIds={visibleNodeIds}
+                    groupDisplaySettings={groupDisplaySettings}
+                    clickMode={clickMode}
+                    clickPickIsNull={clickPick == null}
+                    hoveredSubtreeIds={hoveredSubtreeIds}
+                    clickPickEdgeById={clickPickEdgeById}
+                    clickPlaceIndicator={clickPlaceIndicator}
+                    onChangeOpen={setOpenNodeIds}
+                    onDrop={handleDrop}
+                    onTreeMouseLeave={handleMapLayersTreeMouseLeave}
+                    onTreeClickInteract={handleTreeClickInteract}
+                    onHoverSubtree={handleMapLayersNodeHover}
+                    onToggleLayerVisibility={handleToggleLayerVisibility}
+                    onToggleGroupVisibility={handleToggleGroupVisibility}
+                    onAddToGroup={handleOpenAddDialog}
+                    onRemoveFromTree={handleRemoveFromTree}
+                    onEditGroupMetadata={handleOpenEditDialog}
+                    onEditLayerSettings={handleOpenLayerEditDialog}
+                  />
+                </GroupLayerTreeDropZone>
+              )}
+            </Box>
           )}
         </LayerSwitcherPreview>
 
@@ -1744,15 +1250,29 @@ export default function GroupLayerTree({
 
       {moveZoneHostEl
         ? createPortal(
-            <KartlagerMoveZone
+            <MapLayersMoveZone
               items={moveZoneItems}
               onDropFromTree={handleDropToMoveZone}
               onDropFromCatalog={handleDropCatalogToMoveZone}
               canAcceptCatalogItem={canAcceptCatalogDropToMoveZone}
+              clickMode={clickMode}
+              pickedItemKeys={
+                clickPick?.source === "moveZone"
+                  ? clickPick.items.map((item) => item.key)
+                  : []
+              }
+              onClickPlace={
+                clickMode &&
+                clickPick != null &&
+                clickPick.source !== "moveZone"
+                  ? handleClickPlaceToMoveZone
+                  : undefined
+              }
+              onItemClickPick={clickMode ? handleMoveZoneClickPick : undefined}
             />,
             moveZoneHostEl,
           )
         : null}
-    </DndProvider>
+    </MapLayersDndProvider>
   );
 }

@@ -128,7 +128,22 @@ type LayerSwitcherGroupWrite = {
   infogroupowner?: string;
   layers?: z.infer<typeof LayerSwitcherLayerRefSchema>[];
   groups?: LayerSwitcherGroupWrite[];
+  layerSwitcherTree?: Array<
+    | { type: "layer"; id: string }
+    | { type: "group"; id: string }
+  >;
 };
+
+const LayerSwitcherSiblingOrderEntrySchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("layer"),
+    id: z.string().min(1),
+  }),
+  z.object({
+    type: z.literal("group"),
+    id: z.string().min(1),
+  }),
+]);
 
 const LayerSwitcherGroupSchema: z.ZodType<LayerSwitcherGroupWrite> = z.lazy(
   () =>
@@ -147,6 +162,9 @@ const LayerSwitcherGroupSchema: z.ZodType<LayerSwitcherGroupWrite> = z.lazy(
       infogroupowner: z.string().optional(),
       layers: z.array(LayerSwitcherLayerRefSchema).optional(),
       groups: z.array(LayerSwitcherGroupSchema).optional(),
+      layerSwitcherTree: z
+        .array(LayerSwitcherSiblingOrderEntrySchema)
+        .optional(),
     }),
 );
 

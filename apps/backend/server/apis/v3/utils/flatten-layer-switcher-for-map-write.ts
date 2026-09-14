@@ -24,6 +24,11 @@ export interface LayerSwitcherWriteGroup {
   infogroupowner?: string;
   layers?: LayerSwitcherWriteLayerRef[];
   groups?: LayerSwitcherWriteGroup[];
+  /** Interleaved Lagerordning sibling order (layers + nested group ids). */
+  layerSwitcherTree?: Array<
+    | { type: "layer"; id: string }
+    | { type: "group"; id: string }
+  >;
 }
 
 export interface FlattenedGroupsOnMapsRow {
@@ -56,6 +61,14 @@ export interface FlattenedGroupLayers {
     zIndex: number;
     options: { infobox?: string };
   }[];
+  /**
+   * Interleaved Lagerordning sibling order (layers + nested groups).
+   * Stored on the first LayerInstance so GET can rebuild free order.
+   */
+  layerSwitcherTree: Array<
+    | { type: "layer"; id: string }
+    | { type: "group"; id: string }
+  >;
 }
 
 function hasInfoDocument(group: LayerSwitcherWriteGroup): boolean {
@@ -81,7 +94,7 @@ export function flattenLayerSwitcherGroupsForWrite(
   groupLayers: FlattenedGroupLayers[];
 } {
   const placements: FlattenedGroupsOnMapsRow[] = [];
-  const layersByGroupId = new Map<string, FlattenedGroupLayers["layers"]>();
+  const layersByGroupId = new Map<string, FlattenedGroupLayers>();
 
   const walk = (
     nodes: LayerSwitcherWriteGroup[],
@@ -117,11 +130,33 @@ export function flattenLayerSwitcherGroupsForWrite(
         layerId: layer.id,
         usage: UseType.FOREGROUND as typeof UseType.FOREGROUND,
         visibleAtStart: Boolean(layer.visibleAtStart),
+        // zIndex remains ritordning (drawOrder), not Lagerordning list index.
         zIndex: layer.drawOrder ?? layerIndex,
         options: layer.infobox ? { infobox: layer.infobox } : {},
       }));
+      const layerSwitcherTree =
+        group.layerSwitcherTree && group.layerSwitcherTree.length > 0
+          ? group.layerSwitcherTree.map((entry) =>
+              entry.type === "layer"
+                ? { type: "layer" as const, id: entry.id }
+                : { type: "group" as const, id: entry.id },
+            )
+          : [
+              ...(group.layers ?? []).map((layer) => ({
+                type: "layer" as const,
+                id: layer.id,
+              })),
+              ...(group.groups ?? []).map((nested) => ({
+                type: "group" as const,
+                id: nested.id,
+              })),
+            ];
       // Last occurrence wins if the same group appears more than once.
-      layersByGroupId.set(group.id, layerRows);
+      layersByGroupId.set(group.id, {
+        groupId: group.id,
+        layers: layerRows,
+        layerSwitcherTree,
+      });
 
       if (group.groups?.length) {
         walk(group.groups, placementId);
@@ -133,8 +168,6 @@ export function flattenLayerSwitcherGroupsForWrite(
 
   return {
     placements,
-    groupLayers: Array.from(layersByGroupId.entries()).map(
-      ([groupId, layers]) => ({ groupId, layers }),
-    ),
+    groupLayers: Array.from(layersByGroupId.values()),
   };
 }

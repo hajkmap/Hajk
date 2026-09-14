@@ -35,15 +35,32 @@ export function getDescendantGroupNodeIds(
   nodeId: GroupLayerTreeNode["id"],
 ): GroupLayerTreeNode["id"][] {
   const groupIds: GroupLayerTreeNode["id"][] = [nodeId];
-  const queue: GroupLayerTreeNode["id"][] = [nodeId];
+  const childrenByParent = new Map<string, GroupLayerTreeNode[]>();
+  for (const node of tree) {
+    const key = String(node.parent);
+    const siblings = childrenByParent.get(key);
+    if (siblings) {
+      siblings.push(node);
+    } else {
+      childrenByParent.set(key, [node]);
+    }
+  }
 
-  while (queue.length > 0) {
-    const currentId = queue.shift();
+  const queue: GroupLayerTreeNode["id"][] = [nodeId];
+  let head = 0;
+  while (head < queue.length) {
+    const currentId = queue[head];
+    head += 1;
     if (currentId == null) {
       continue;
     }
 
-    for (const child of tree.filter((node) => node.parent === currentId)) {
+    const children = childrenByParent.get(String(currentId));
+    if (!children) {
+      continue;
+    }
+
+    for (const child of children) {
       if (child.data?.kind === "group") {
         groupIds.push(child.id);
         queue.push(child.id);
@@ -93,18 +110,35 @@ export function getDescendantLayerNodeIds(
   nodeId: GroupLayerTreeNode["id"],
 ): GroupLayerTreeNode["id"][] {
   const layerIds: GroupLayerTreeNode["id"][] = [];
-  const queue: GroupLayerTreeNode["id"][] = [nodeId];
+  const childrenByParent = new Map<string, GroupLayerTreeNode[]>();
+  for (const node of tree) {
+    const key = String(node.parent);
+    const siblings = childrenByParent.get(key);
+    if (siblings) {
+      siblings.push(node);
+    } else {
+      childrenByParent.set(key, [node]);
+    }
+  }
 
-  while (queue.length > 0) {
-    const currentId = queue.shift();
+  const queue: GroupLayerTreeNode["id"][] = [nodeId];
+  let head = 0;
+  while (head < queue.length) {
+    const currentId = queue[head];
+    head += 1;
     if (currentId == null) {
       continue;
     }
 
-    for (const child of tree.filter((node) => node.parent === currentId)) {
+    const children = childrenByParent.get(String(currentId));
+    if (!children) {
+      continue;
+    }
+
+    for (const child of children) {
       if (child.data?.kind === "layer") {
         layerIds.push(child.id);
-      } else {
+      } else if (child.data?.kind === "group") {
         queue.push(child.id);
       }
     }
