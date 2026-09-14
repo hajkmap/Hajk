@@ -5,6 +5,9 @@ import log4js from "log4js";
 // Create a logger for admin events, those will be saved in a separate log file.
 const ael = log4js.getLogger("adminEvent.v2");
 
+// General logger for this controller, used e.g. for diagnostics.
+const logger = log4js.getLogger("settings.controller.v2");
+
 export class Controller {
   putSettingsToMapFile(req, res) {
     SettingsService.updateMapFile(req.query.mapFile, req.body, req.url).then(
@@ -41,6 +44,24 @@ export class Controller {
   }
 
   putLayerOfType(req, res) {
+    // Diagnostic: Express's JSON body parser only parses the body when the
+    // request looks like it has one, i.e. when a Content-Length or a
+    // Transfer-Encoding header is present (see type-is' hasBody()). If a
+    // reverse proxy forwards the request without either header, the parser is
+    // skipped and req.body becomes undefined, resulting in an otherwise cryptic
+    // 500. Log the relevant headers so this can be diagnosed at the proxy.
+    if (req.body === undefined || typeof req.body !== "object") {
+      logger.warn(
+        "%s /settings/%s received a body that was not parsed as JSON. Content-Type=%o, Content-Length=%o, Transfer-Encoding=%o, typeof body=%s. This is usually caused by a reverse proxy forwarding the request without a Content-Length (or Transfer-Encoding) header.",
+        req.method,
+        req.params.type,
+        req.headers["content-type"],
+        req.headers["content-length"],
+        req.headers["transfer-encoding"],
+        typeof req.body
+      );
+    }
+
     SettingsService.createOrUpdateLayer(req.params.type, req.body).then(
       (data) => {
         // Can't use handleStandardResponse here because we need to

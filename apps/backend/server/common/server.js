@@ -198,7 +198,14 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
 
     // We have to make sure to add the json-parsers etc. after the proxies has been initiated.
     // If they are added before, eventual payload trough the proxies will not be handled correctly.
-    this.setupProxies().then(() => {
+    //
+    // We expose this work as a promise (this.setupComplete) so that router() can await it
+    // before mounting the API routers. This guarantees the body parsers are registered
+    // BEFORE the API routers. Without it, the parser registration (which is delayed by the
+    // async setupProxies() — especially when proxies are active and dynamically imported)
+    // could lose a race against the (also async) route mounting, leaving req.body undefined
+    // for any request with a body.
+    this.setupComplete = this.setupProxies().then(() => {
       app.use(Express.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
       app.use(
         Express.urlencoded({
@@ -550,8 +557,15 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     }
   }
 
-  router(routes) {
-    routes(app);
+  async router(routes) {
+    // Wait until the proxies and body parsers have been registered before we
+    // mount the API routers. Both this.setupComplete and routes() register
+    // middleware asynchronously; awaiting here guarantees the body parsers come
+    // first in the middleware chain, so req.body is populated by the time a
+    // route handler runs. (Previously these two async chains raced, which could
+    // leave req.body undefined when proxies were active — see settings.service.js.)
+    await this.setupComplete;
+    await routes(app);
     app.use(errorHandler);
     return this;
   }

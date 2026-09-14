@@ -56,6 +56,19 @@ class SettingsService {
 
   async createOrUpdateLayer(type, newLayer) {
     try {
+      // Sanity check on the incoming body. Express's JSON body parser only runs
+      // when the request looks like it has a body (a Content-Length or
+      // Transfer-Encoding header). If a reverse proxy forwards the request
+      // without either header, the parser is silently skipped and req.body ends
+      // up undefined. Without this guard the code below would throw a cryptic
+      // "Cannot read properties of undefined (reading 'id')", which surfaces as
+      // a bare 500 with no stack and nothing in the logs.
+      if (newLayer === undefined || typeof newLayer !== "object") {
+        throw new Error(
+          "Request body was empty or not parsed as JSON. Ensure the request reaches the server with the 'application/json' Content-Type and a Content-Length (or Transfer-Encoding) header."
+        );
+      }
+
       // Will hold HTTP status (201 for created, 200 for updated layers),
       // see https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.6
       let status = null;

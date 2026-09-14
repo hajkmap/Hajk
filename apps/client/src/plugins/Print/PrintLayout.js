@@ -93,7 +93,7 @@ export async function buildLayout(
         lineWidth: 5.5 * model.margin,
         closePath: false,
       });
-      // Top edge
+      // Top edge — extra height for title/subtitle in the top margin.
       elements.push({
         type: "strokePath",
         points: [
@@ -101,7 +101,7 @@ export async function buildLayout(
           { x: 0, y: pageHeight },
         ],
         color: { r: 1, g: 1, b: 1 },
-        lineWidth: 16 * model.margin,
+        lineWidth: 20 * model.margin,
         closePath: false,
       });
       // Left edge
@@ -271,49 +271,74 @@ export async function buildLayout(
     );
   }
 
+  // Half page width — keeps title/subtitle clear of corner elements.
+  const maxTextWidth = pageWidth * 0.5;
+
   // 7. Map title
+  const titleSize = 28;
+  const subtitleGap = 22; // Space between last title line and subtitle.
+  let titleVerticalMargin;
+  let subtitleFallbackVerticalMargin;
+  if (options.useTextIconsInMargin) {
+    titleVerticalMargin = model.margin + 45;
+    subtitleFallbackVerticalMargin = model.margin + 60;
+  } else if (options.useMargin) {
+    titleVerticalMargin = 60;
+    subtitleFallbackVerticalMargin = 70;
+  } else {
+    titleVerticalMargin = 40;
+    subtitleFallbackVerticalMargin = 50;
+  }
+
+  // Last title baseline, or fallback position when there is no title.
+  let titleBaselineAnchor =
+    pageHeight - subtitleFallbackVerticalMargin + subtitleGap;
+
   if (options.mapTitle.trim().length > 0) {
-    const verticalMargin = options.useTextIconsInMargin
-      ? model.margin + 35
-      : 50;
-    const position = model.getCenterAlignedPositions(
+    const titleTopY = pageHeight - titleVerticalMargin;
+    const titleLineHeight = titleSize * 1.3; // Room for Å/Ä/Ö rings above each line.
+    const titleLines = model.wrapTextToLines(
       options.mapTitle,
-      28,
-      verticalMargin,
-      pageWidth,
-      pageHeight
+      titleSize,
+      maxTextWidth
     );
-    elements.push({
-      type: "text",
-      text: options.mapTitle,
-      x: position.x,
-      y: position.y,
-      size: 28,
-      fontStyle: "normal",
-      color: model.textColor,
+    titleLines.forEach((line, i) => {
+      elements.push({
+        type: "text",
+        text: line,
+        x: model.getCenteredX(line, titleSize, pageWidth),
+        y: titleTopY - i * titleLineHeight,
+        size: titleSize,
+        fontStyle: "normal",
+        color: model.textColor,
+        maxWidth: maxTextWidth, // Avoid PDF renderer re-wrap at 200pt default.
+      });
     });
+    titleBaselineAnchor = titleTopY - (titleLines.length - 1) * titleLineHeight;
   }
 
   // 8. Print comment
+  const subtitleSize = 11;
+
   if (options.printComment.trim().length > 0) {
-    const verticalMargin = options.useTextIconsInMargin
-      ? model.margin + 50
-      : 60;
-    const position = model.getCenterAlignedPositions(
+    const subtitleLineHeight = subtitleSize * 1.3;
+    const subtitleTopY = titleBaselineAnchor - subtitleGap;
+    const subtitleLines = model.wrapTextToLines(
       options.printComment,
-      11,
-      verticalMargin,
-      pageWidth,
-      pageHeight
+      subtitleSize,
+      maxTextWidth
     );
-    elements.push({
-      type: "text",
-      text: options.printComment,
-      x: position.x,
-      y: position.y - 5,
-      size: 11,
-      fontStyle: "normal",
-      color: model.textColor,
+    subtitleLines.forEach((line, i) => {
+      elements.push({
+        type: "text",
+        text: line,
+        x: model.getCenteredX(line, subtitleSize, pageWidth),
+        y: subtitleTopY - i * subtitleLineHeight,
+        size: subtitleSize,
+        fontStyle: "normal",
+        color: model.textColor,
+        maxWidth: maxTextWidth, // Avoid PDF renderer re-wrap at 200pt default.
+      });
     });
   }
 

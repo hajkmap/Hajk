@@ -105,7 +105,7 @@ const BackgroundSwitcher = ({
   // If the static layers b/w and osm should be shown last in the bg-layer list
   // reorder the array to accomodate that.
   if (renderSpecialBackgroundsAtBottom) {
-    const staticLayersRange = ["-1", "-2", "-3"];
+    const staticLayersRange = ["-1", "-2", "-3", "-4"];
     const staticLayersToMove = layersToShow.filter((layer) =>
       staticLayersRange.includes(layer.name)
     );

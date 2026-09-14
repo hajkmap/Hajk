@@ -7,6 +7,7 @@ import ad from "./activedirectory.service.js";
 import asyncFilter from "../utils/asyncFilter.js";
 import getAnalyticsOptionsFromDotEnv from "../utils/getAnalyticsOptionsFromDotEnv.js";
 import { AccessError } from "../utils/AccessError.js";
+import { ConfigParseError } from "../utils/ConfigParseError.js";
 
 const logger = log4js.getLogger("service.config.v2");
 
@@ -67,7 +68,17 @@ class ConfigServiceV2 {
         `${safeMap}.json`
       );
       const text = await fs.promises.readFile(pathToFile, "utf-8");
-      const json = await JSON.parse(text);
+
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (parseError) {
+        throw new ConfigParseError(
+          `Failed to parse map configuration "${safeMap}.json": ${parseError.message}`,
+          safeMap,
+          { cause: parseError }
+        );
+      }
 
       // Ensure that we print the correct API version to output
       json.version = 2.1;
@@ -583,7 +594,17 @@ class ConfigServiceV2 {
     try {
       const pathToFile = path.join(process.cwd(), "App_Data", `layers.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
-      const json = await JSON.parse(text);
+
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (parseError) {
+        throw new ConfigParseError(
+          `Failed to parse layers configuration "layers.json": ${parseError.message}`,
+          "layers",
+          { cause: parseError }
+        );
+      }
 
       if (text.error) throw text.error;
       if (json.error) throw json.error;

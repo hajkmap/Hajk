@@ -22,9 +22,9 @@ const StyledHeader = styled("header")(({ theme }) => ({
         mode: "minimized",
       },
       style: {
-        padding: {
-          padding: theme.spacing(0),
-        },
+        padding: `0 ${theme.spacing(2)}`,
+        borderBottom: "none",
+        minHeight: 50,
       },
     },
   ],

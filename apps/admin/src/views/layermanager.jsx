@@ -364,6 +364,11 @@ class Manager extends Component {
           style: layer.style,
           requestEncoding: layer.requestEncoding || "",
           imageFormat: layer.imageFormat,
+          dimensions: layer.dimensions
+            ? Object.keys(layer.dimensions)
+                .map((key) => key + "=" + layer.dimensions[key])
+                .join("; ")
+            : "",
           projection: layer.projection,
           origins: layer.origins
             ? layer.origins.map((o) => o.join(" ")).join("; ")
@@ -373,6 +378,7 @@ class Manager extends Component {
           sizes: layer.sizes
             ? layer.sizes.map((s) => s.join(" ")).join("; ")
             : "",
+          rotateMap: layer.rotateMap || "n",
           tileSize:
             layer.tileSize != null
               ? Array.isArray(layer.tileSize)
@@ -394,6 +400,7 @@ class Manager extends Component {
           minZoom: layer.minZoom,
           maxZoom: layer.maxZoom,
         });
+        this.refs["WMTSLayerForm"].validate();
       }, 0);
     }
   }
@@ -529,7 +536,7 @@ class Manager extends Component {
       var displayType = "";
       switch (layer.type) {
         case "WMS":
-          displayType = "";
+          displayType = "(WMS)";
           break;
         case "WMTS":
           displayType = "(WMTS)";
@@ -551,9 +558,9 @@ class Manager extends Component {
               {layer.internalLayerName?.length > 0
                 ? layer.internalLayerName
                 : layer.caption}{" "}
-              {displayType}
+              
             </span>
-            <span style={{ fontSize: "x-small" }}>{layer.id}</span>
+            <span style={{ fontSize: "x-small" }}>{displayType} ID: {layer.id}</span>
           </div>
           <div className="options-box">
             <i
