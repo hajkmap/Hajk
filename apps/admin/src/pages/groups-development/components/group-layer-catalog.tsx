@@ -19,8 +19,6 @@ import {
   Tab,
   Tabs,
   TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Tooltip,
   Typography,
   useTheme,
@@ -533,43 +531,30 @@ export default function GroupLayerCatalog({
                       {t("common.add")}
                     </Button>
                     {onInteractionModeChange ? (
-                      <ToggleButtonGroup
-                        exclusive
-                        size="small"
-                        value={clickModeActive ? "click" : "drag"}
-                        onChange={(
-                          _,
-                          value: MapLayersInteractionMode | null,
-                        ) => {
-                          if (value != null) {
-                            onInteractionModeChange(value);
-                          }
-                        }}
-                        aria-label={t("groupsDevelopment.interactionMode")}
+                      <Tooltip
+                        title={
+                          clickModeActive
+                            ? t("groupsDevelopment.interactionDrag")
+                            : t("groupsDevelopment.interactionClickAlt")
+                        }
                       >
-                        <ToggleButton
-                          value="drag"
-                          aria-label={t("groupsDevelopment.interactionDrag")}
+                        <IconButton
+                          size="small"
+                          aria-label={t("groupsDevelopment.interactionMode")}
+                          aria-pressed={clickModeActive}
+                          onClick={() => {
+                            onInteractionModeChange(
+                              clickModeActive ? "drag" : "click",
+                            );
+                          }}
                         >
-                          <Tooltip
-                            title={t("groupsDevelopment.interactionDrag")}
-                          >
-                            <DragIndicator fontSize="small" />
-                          </Tooltip>
-                        </ToggleButton>
-                        <ToggleButton
-                          value="click"
-                          aria-label={t(
-                            "groupsDevelopment.interactionClickAlt",
-                          )}
-                        >
-                          <Tooltip
-                            title={t("groupsDevelopment.interactionClickAlt")}
-                          >
+                          {clickModeActive ? (
                             <AdsClickIcon fontSize="small" />
-                          </Tooltip>
-                        </ToggleButton>
-                      </ToggleButtonGroup>
+                          ) : (
+                            <DragIndicator fontSize="small" />
+                          )}
+                        </IconButton>
+                      </Tooltip>
                     ) : null}
                   </Box>
                 ) : null}
