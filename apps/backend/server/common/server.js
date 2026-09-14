@@ -352,14 +352,43 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     // Prepare a logger
     const l = log4js.getLogger("hajk.proxy");
     try {
+      // Suffixes used for per-proxy settings — these are NOT proxy targets.
+      const credentialSuffixes = [
+        "_USER",
+        "_PASSWORD",
+        "_STRIP_AUTH",
+        "_FORWARD_VALIDATED_USER",
+      ];
+
       // Convert the settings from DOTENV to a nice Array of Objects.
+      // Skip entries that are credential keys (e.g. PROXY_GEOSERVER_USER).
       const proxyMap = Object.entries(process.env)
-        .filter(([k]) => k.startsWith("PROXY_"))
+        .filter(
+          ([k]) =>
+            k.startsWith("PROXY_") &&
+            !credentialSuffixes.some((s) => k.endsWith(s))
+        )
         .map(([k, v]) => {
-          // Get rid of the leading "PROXY_" and convert to lower case
-          k = k.replace("PROXY_", "").toLowerCase();
-          return { context: k, target: v };
+          // Original key without "PROXY_" prefix, e.g. "GEOSERVER"
+          const rawName = k.replace("PROXY_", "");
+          return {
+            context: rawName.toLowerCase(),
+            target: v,
+            // Look up optional per-proxy settings using same naming convention
+            user: process.env[`PROXY_${rawName}_USER`] || "",
+            password: process.env[`PROXY_${rawName}_PASSWORD`] || "",
+            stripAuth: process.env[`PROXY_${rawName}_STRIP_AUTH`] === "true",
+            forwardValidatedUser:
+              process.env[`PROXY_${rawName}_FORWARD_VALIDATED_USER`] === "true",
+          };
         });
+
+      // AD header names (same as the rest of Hajk uses)
+      const userHeader = process.env.AD_TRUSTED_HEADER || "X-Control-Header";
+      const groupHeader =
+        process.env.AD_TRUSTED_GROUP_HEADER || "X-Control-Group-Header";
+      const emailHeader =
+        process.env.AD_TRUSTED_EMAIL_HEADER || "X-Control-Email-Header";
 
       // Iterate enabled API versions and expose one proxy endpoint
       // for each version.
@@ -430,8 +459,87 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
               },
             }),
           };
+
+          // --- Per-proxy auth/identity handling ---------------------------
+          // Implemented as a plain Express middleware that runs BEFORE the
+          // proxy and mutates req.headers (which http-proxy always copies to
+          // the outgoing request). It must NOT live in http-proxy's proxyReq
+          // event: that event is skipped entirely for requests carrying an
+          // "Expect: 100-continue" header, which would let a client bypass
+          // header stripping/overwriting (identity spoofing) and silently
+          // disable the auth injection.
+          //
+          // NOTE on credentials: they are injected for EVERY request through
+          // this endpoint — Hajk performs no per-user authorization here. Any
+          // rights the service account has upstream (e.g. WFS-T writes) are
+          // available to anyone who can reach this backend, unless the
+          // upstream service authorizes each request per user (e.g. via the
+          // forwarded AD headers).
+          if (v.user && v.password) {
+            l.warn(
+              `Proxy "${context}": Basic auth enabled. The service account's credentials are injected for ALL requests through /api/v${apiVersion}/proxy/${context}. Do NOT grant this account write permissions (e.g. WFS-T) unless the upstream service authorizes requests per user, e.g. via the forwarded AD headers. Consider also setting PROXY_<NAME>_FORWARD_VALIDATED_USER=true so only validated identities are forwarded. See the generic proxy section in .env.example.`
+            );
+          }
+          if (v.forwardValidatedUser) {
+            l.info(
+              `Proxy "${context}": will forward only the validated AD user identity in the configured trusted user header (unvalidated identity headers are stripped).`
+            );
+          }
+
+          const basicCredentials =
+            v.user && v.password
+              ? Buffer.from(`${v.user}:${v.password}`).toString("base64")
+              : null;
+          // Node lower-cases all incoming header names in req.headers
+          const userHeaderLc = userHeader.toLowerCase();
+          const groupHeaderLc = groupHeader.toLowerCase();
+          const emailHeaderLc = emailHeader.toLowerCase();
+
+          const identityMiddleware = (req, res, next) => {
+            if (basicCredentials) {
+              // Basic auth for the service account
+              req.headers["authorization"] = `Basic ${basicCredentials}`;
+            } else if (v.stripAuth) {
+              // Strip any incoming Authorization header (e.g. Kerberos/
+              // Negotiate tokens from Windows Auth) so the upstream service
+              // doesn't reject the request.
+              delete req.headers["authorization"];
+            }
+
+            // With PROXY_<NAME>_FORWARD_VALIDATED_USER, only forward the
+            // identity that extractUserContext has already accepted
+            // (trusted-IP check + header normalization — NOTE: no AD
+            // existence lookup is performed) instead of passing incoming AD
+            // headers through as-is — otherwise a client that reaches this
+            // backend directly (bypassing the reverse proxy that normally
+            // sets the headers) could spoof any user identity upstream.
+            if (v.forwardValidatedUser) {
+              const validatedUser = res?.locals?.authUser;
+              if (validatedUser) {
+                req.headers[userHeaderLc] = validatedUser;
+              } else {
+                // No validated user (AD inactive, or header absent) — make
+                // sure no unvalidated identity reaches the upstream service.
+                // The e-mail header is an identity signal in Hajk's
+                // header-based AD flow too, so it is stripped as well.
+                delete req.headers[userHeaderLc];
+                delete req.headers[groupHeaderLc];
+                delete req.headers[emailHeaderLc];
+              }
+            }
+
+            next();
+          };
+
+          // NOTE: identityMiddleware runs as Express middleware, which only
+          // sees regular HTTP requests. If a proxy config ever enables
+          // WebSockets (ws: true), upgrade requests bypass Express entirely
+          // and would reach the target with the client's original headers —
+          // unstripped and unauthenticated. Do not add ws support here
+          // without moving the header sanitation into the upgrade path too.
           app.use(
             `/api/v${apiVersion}/proxy/${context}`,
+            identityMiddleware,
             createProxyMiddleware(options)
           );
         });

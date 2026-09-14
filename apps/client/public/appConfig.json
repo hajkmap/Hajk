@@ -3,6 +3,7 @@
   "defaultMap": "map_1",
   "availableTools": [
     "Anchor",
+    "AttributeEditor",
     "Bookmarks",
     "Buffer",
     "Coordinates",

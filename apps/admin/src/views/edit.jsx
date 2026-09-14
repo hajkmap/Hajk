@@ -41,14 +41,18 @@ const defaultState = {
   internalLayerName: "",
   url: "",
   uri: "",
+  serverType: "",
   projection: "",
   geometryField: "",
+  idField: "",
   point: false,
   multipoint: false,
   linestring: false,
   multilinestring: false,
   polygon: false,
   multipolygon: false,
+  allowMultiGeom: false,
+  forceZ: false,
   layerProperties: [],
   alert: false,
   corfirm: false,
@@ -132,8 +136,10 @@ class Edit extends Component {
       internalLayerName: layer.internalLayerName || layer.caption,
       url: layer.url,
       uri: layer.uri,
+      serverType: layer.serverType || "",
       projection: layer.projection || "EPSG:3006",
       geometryField: layer.geometryField || "",
+      idField: layer.idField || "",
       addedLayers: [],
       point: layer.editPoint,
       multipoint: layer.editMultiPoint,
@@ -141,6 +147,8 @@ class Edit extends Component {
       multilinestring: layer.editMultiLine,
       polygon: layer.editPolygon,
       multipolygon: layer.editMultiPolygon,
+      allowMultiGeom: layer.allowMultiGeom || false,
+      forceZ: layer.forceZ || false,
     });
 
     setTimeout(() => {
@@ -217,7 +225,7 @@ class Edit extends Component {
       {
         addedLayers: [checkedLayer],
       },
-      () => this.validateField("layers")
+      () => this.validateField("layers"),
     );
   }
   /**
@@ -276,7 +284,7 @@ class Edit extends Component {
       } else {
         this.setState({
           validationErrors: this.state.validationErrors.filter(
-            (v) => v !== fieldName
+            (v) => v !== fieldName,
           ),
         });
       }
@@ -441,7 +449,7 @@ class Edit extends Component {
           layerProperties: properties,
           layerPropertiesName: layerName,
         });
-      }
+      },
     );
   }
   /**
@@ -491,7 +499,7 @@ class Edit extends Component {
       if (field.dataType === "string") {
         if (field.value && typeof field.value !== "string") {
           errors.push(
-            field.name + " is not a string. Was " + typeof field.value
+            field.name + " is not a string. Was " + typeof field.value,
           );
         }
       } else if (field.dataType === "date") {
@@ -501,7 +509,7 @@ class Edit extends Component {
             d.getDate();
           } catch (error) {
             errors.push(
-              field.name + " is not a valid date. Was " + field.value
+              field.name + " is not a valid date. Was " + field.value,
             );
           }
         }
@@ -512,32 +520,32 @@ class Edit extends Component {
             d.getDate();
           } catch (error) {
             errors.push(
-              field.name + " is not a valid date time. Was " + field.value
+              field.name + " is not a valid date time. Was " + field.value,
             );
           }
         }
       } else if (field.dataType === "int") {
         if (field.value && isNaN(parseInt(field.value))) {
           errors.push(
-            field.name + " is not a integer. Value was " + field.value
+            field.name + " is not a integer. Value was " + field.value,
           );
         } else if (field.localType === "Positiva heltal") {
           if (field.value && parseInt(field.value) <= 0) {
             errors.push(
-              field.name + " is not a positive number. Was " + field.value
+              field.name + " is not a positive number. Was " + field.value,
             );
           }
         }
       } else if (field.dataType === "number") {
         if (field.value && isNaN(parseFloat(field.value))) {
           errors.push(
-            field.name + " is not a number. Value was " + field.value
+            field.name + " is not a number. Value was " + field.value,
           );
         }
       } else if (field.dataType === "boolean") {
         if (field.value && field.value !== "ja" && field.value !== "nej") {
           errors.push(
-            field.name + " is not a ja or nej. Value was " + field.value
+            field.name + " is not a ja or nej. Value was " + field.value,
           );
         }
       }
@@ -550,7 +558,7 @@ class Edit extends Component {
           errors.push(
             field.name +
               " default value is not a string. Was " +
-              typeof field.defaultValue
+              typeof field.defaultValue,
           );
         }
       } else if (field.dataType === "date") {
@@ -562,7 +570,7 @@ class Edit extends Component {
             errors.push(
               field.name +
                 " default value is not a valid date. Was " +
-                field.defaultValue
+                field.defaultValue,
             );
           }
         }
@@ -575,7 +583,7 @@ class Edit extends Component {
             errors.push(
               field.name +
                 " default value is not a valid date time. Was " +
-                field.defaultValue
+                field.defaultValue,
             );
           }
         }
@@ -584,14 +592,14 @@ class Edit extends Component {
           errors.push(
             field.name +
               " default value is not a integer. Value was " +
-              field.defaultValue
+              field.defaultValue,
           );
         } else if (field.localType === "Positiva heltal") {
           if (field.defaultValue && parseInt(field.defaultValue) <= 0) {
             errors.push(
               field.name +
                 " default value is not a positive number. Was " +
-                field.defaultValue
+                field.defaultValue,
             );
           }
         }
@@ -600,7 +608,7 @@ class Edit extends Component {
           errors.push(
             field.name +
               " default value is not a number. Value was " +
-              field.defaultValue
+              field.defaultValue,
           );
         }
       } else if (field.dataType === "boolean") {
@@ -650,9 +658,11 @@ class Edit extends Component {
         internalLayerName: this.getValue("internalLayerName"),
         url: this.getValue("url"),
         uri: this.getValue("uri"),
+        serverType: this.state.serverType || "",
         layers: this.getValue("layers"),
         projection: this.getValue("projection"),
         geometryField: this.getValue("geometryField"),
+        idField: this.state.idField || "",
         editableFields: this.getValue("editableFields"),
         nonEditableFields: this.getNonEditableFields(),
         editPoint: this.getValue("point"),
@@ -661,6 +671,8 @@ class Edit extends Component {
         editMultiPolygon: this.getValue("multipolygon"),
         editLine: this.getValue("linestring"),
         editMultiLine: this.getValue("multilinestring"),
+        allowMultiGeom: this.state.allowMultiGeom,
+        forceZ: this.state.forceZ,
       };
 
       this.modifyBooleans(layer);
@@ -1039,6 +1051,16 @@ class Edit extends Component {
               }}
             />
           </td>
+          <td>
+            <input
+              type="radio"
+              name="idField"
+              checked={this.state.idField === property.name}
+              onChange={() => {
+                this.setState({ idField: property.name });
+              }}
+            />
+          </td>
           <td>{property.name}</td>
           <td>{aliasEditor(property.localType, property.alias)}</td>
           <td>{descriptionEditor(property.localType, property.description)}</td>
@@ -1058,6 +1080,7 @@ class Edit extends Component {
           <tr>
             <th>Redigerbar</th>
             <th>Dold</th>
+            <th>ID (valfritt)</th>
             <th>Namn</th>
             <th>Alias</th>
             <th>Beskrivning</th>
@@ -1067,7 +1090,31 @@ class Edit extends Component {
             <th>Standardvärde</th>
           </tr>
         </thead>
-        <tbody>{rows}</tbody>
+        <tbody>
+          <tr key="auto-id-row" style={{ backgroundColor: "#f5f5f5" }}>
+            <td></td>
+            <td></td>
+            <td>
+              <input
+                type="radio"
+                name="idField"
+                checked={this.state.idField === ""}
+                onChange={() => {
+                  this.setState({ idField: "" });
+                }}
+              />
+            </td>
+            <td>
+              <em>(Auto)</em>
+            </td>
+            <td colSpan="6">
+              <em style={{ color: "#666" }}>
+                Automatisk identifiering via WFS - fungerar i de flesta fall
+              </em>
+            </td>
+          </tr>
+          {rows}
+        </tbody>
       </table>
     );
   }
@@ -1219,7 +1266,7 @@ class Edit extends Component {
                       {
                         url: v,
                       },
-                      () => this.validateField("url")
+                      () => this.validateField("url"),
                     );
                   }}
                   className={this.getValidationClass("url")}
@@ -1245,10 +1292,33 @@ class Edit extends Component {
                       {
                         uri: v,
                       },
-                      () => this.validateField("uri")
+                      () => this.validateField("uri"),
                     );
                   }}
                   className={this.getValidationClass("uri")}
+                />
+              </div>
+              <div>
+                <label>Servertyp</label>
+                <select
+                  ref="input_serverType"
+                  value={this.state.serverType}
+                  className="control-fixed-width"
+                  onChange={(e) => {
+                    this.setState({ serverType: e.target.value });
+                  }}
+                >
+                  <option value="">Auto (identifiera via URL)</option>
+                  <option value="geoserver">GeoServer</option>
+                  <option value="qgis">QGIS Server</option>
+                  <option value="arcgis">ArcGIS Server</option>
+                  <option value="mapserver">MapServer</option>
+                </select>
+                <i
+                  style={{ marginLeft: "4px" }}
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Styr hur objekt-ID:n formateras när ändringar sparas. QGIS Server använder okvalificerade ID:n, övriga servertyper standardens kvalificerade format. Vid Auto antas QGIS Server om URL:en innehåller 'qgis'."
                 />
               </div>
               <div className="separator">Tillgängliga lager</div>
@@ -1280,7 +1350,7 @@ class Edit extends Component {
                       {
                         caption: v,
                       },
-                      () => this.validateField("caption")
+                      () => this.validateField("caption"),
                     );
                   }}
                   className={this.getValidationClass("caption")}
@@ -1303,13 +1373,13 @@ class Edit extends Component {
                 {this.renderProjections()}
               </div>
               <div>
-                <div style={{display: "inline-block", width: "160px"}}>
-                  <label style={{width: "auto"}}>Geometrifält</label>
+                <div style={{ display: "inline-block", width: "160px" }}>
+                  <label style={{ width: "auto" }}>Geometrifält</label>
                   <i
-                  style={{marginLeft: "4px"}}
-                  className="fa fa-question-circle"
-                  data-toggle="tooltip"
-                  title="Geometrifält som används om fältet inte kan hämtas genom WFS-tjänsten. Om inställningen saknas så kommer 'geom' att användas."
+                    style={{ marginLeft: "4px" }}
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Geometrifält som används om fältet inte kan hämtas genom WFS-tjänsten. Om inställningen saknas så kommer 'geom' att användas."
                   />
                 </div>
                 <input
@@ -1317,10 +1387,10 @@ class Edit extends Component {
                   ref="input_geometryField"
                   value={this.state.geometryField || ""}
                   onChange={(e) => {
-                    this.setState({geometryField: e.target.value});
+                    this.setState({ geometryField: e.target.value });
                     this.validateField("geometryField");
-                  }}>
-                </input>
+                  }}
+                ></input>
               </div>
               <div>
                 <label>Geometrityper</label>
@@ -1333,7 +1403,7 @@ class Edit extends Component {
                         newSt["multipoint"] = false;
                       }
                       this.setState(newSt, () =>
-                        this.validateField("point", true)
+                        this.validateField("point", true),
                       );
                     }}
                     ref="input_point"
@@ -1351,7 +1421,7 @@ class Edit extends Component {
                         newSt["point"] = false;
                       }
                       this.setState(newSt, () =>
-                        this.validateField("multipoint", true)
+                        this.validateField("multipoint", true),
                       );
                     }}
                     ref="input_multipoint"
@@ -1369,7 +1439,7 @@ class Edit extends Component {
                         newSt["multilinestring"] = false;
                       }
                       this.setState(newSt, () =>
-                        this.validateField("linestring", true)
+                        this.validateField("linestring", true),
                       );
                     }}
                     ref="input_linestring"
@@ -1387,7 +1457,7 @@ class Edit extends Component {
                         newSt["linestring"] = false;
                       }
                       this.setState(newSt, () =>
-                        this.validateField("multilinestring", true)
+                        this.validateField("multilinestring", true),
                       );
                     }}
                     ref="input_multilinestring"
@@ -1405,7 +1475,7 @@ class Edit extends Component {
                         newSt["multipolygon"] = false;
                       }
                       this.setState(newSt, () =>
-                        this.validateField("polygon", true)
+                        this.validateField("polygon", true),
                       );
                     }}
                     ref="input_polygon"
@@ -1423,7 +1493,7 @@ class Edit extends Component {
                         newSt["polygon"] = false;
                       }
                       this.setState(newSt, () =>
-                        this.validateField("multipolygon", true)
+                        this.validateField("multipolygon", true),
                       );
                     }}
                     ref="input_multipolygon"
@@ -1432,6 +1502,47 @@ class Edit extends Component {
                     type="checkbox"
                   />
                   <label htmlFor="multipolygon">&nbsp;Multiytor</label>
+                  <br />
+                  <br />
+                  <input
+                    checked={this.state.allowMultiGeom}
+                    onChange={(e) => {
+                      this.setState({ allowMultiGeom: e.target.checked });
+                    }}
+                    ref="input_allowMultiGeom"
+                    name="allowMultiGeom"
+                    id="allowMultiGeom"
+                    type="checkbox"
+                  />
+                  <label htmlFor="allowMultiGeom">
+                    &nbsp;Tillåt multigeometrier
+                  </label>
+                  <i
+                    style={{ marginLeft: "4px" }}
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Aktiverar multi-ritningsläget i rita-verktyget när redigeringslager är aktivt. Användaren kan då rita flera separata geometrier som slås ihop till ett gemensamt objekt (t.ex. MultiPolygon, MultiPoint)."
+                  />
+                  <br />
+                  <br />
+                  <input
+                    checked={this.state.forceZ}
+                    onChange={(e) => {
+                      this.setState({ forceZ: e.target.checked });
+                    }}
+                    name="forceZ"
+                    id="forceZ"
+                    type="checkbox"
+                  />
+                  <label htmlFor="forceZ">&nbsp;Lagret har 3D-geometri (Z)</label>
+                  <i
+                    style={{ marginLeft: "4px" }}
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Aktivera för lager med 3D-geometri (t.ex. PointZ, PolygonZ) när servern inte automatiskt kan detektera Z-dimensionen, exempelvis GeoServer med tomma tabeller."
+                  />
+                  <br />
+                  <br />
                 </div>
               </div>
               <div>
