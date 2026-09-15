@@ -2,6 +2,34 @@ import Snap from "ol/interaction/Snap";
 
 const DISABLE_KEY = "space";
 
+/**
+ * Drop-in replacement for OpenLayers' built-in `GeometryCollection` segmenter.
+ *
+ * The built-in version (ol/interaction/Snap.js) recurses into sub-geometries
+ * by calling the sub-segmenter as a bare function (`segmenter(geom, proj)`),
+ * losing the `this` binding. That's harmless for leaf geometries, but when a
+ * GeometryCollection is nested inside another GeometryCollection the inner
+ * invocation runs with `this === undefined` and crashes on
+ * `this[geometry.getType()]` ("can't access property … this is undefined").
+ *
+ * Such nested collections can arrive from e.g. the Search tool's result
+ * features. Since SnapHelper adds a Snap interaction to *every* visible vector
+ * source, a single bad feature would otherwise crash the whole app. We pass
+ * this fixed segmenter via Snap's public `segmenters` option, which is merged
+ * over the defaults, and call sub-segmenters with the correct `this`.
+ */
+function geometryCollectionSegmenter(geometry, projection) {
+  const segments = [];
+  const geometries = geometry.getGeometriesArray();
+  for (let i = 0; i < geometries.length; ++i) {
+    const segmenter = this[geometries[i].getType()];
+    if (segmenter) {
+      segments.push(segmenter.call(this, geometries[i], projection));
+    }
+  }
+  return segments.flat();
+}
+
 export default class SnapHelper {
   constructor(app) {
     this.map = app.map;
@@ -139,6 +167,10 @@ export default class SnapHelper {
     vectorSources.forEach((source) => {
       const snap = new Snap({
         source,
+        // Override the built-in GeometryCollection segmenter, which crashes on
+        // nested GeometryCollections (e.g. from Search results). See the
+        // geometryCollectionSegmenter doc comment above.
+        segmenters: { GeometryCollection: geometryCollectionSegmenter },
       });
       this.map.addInteraction(snap);
 

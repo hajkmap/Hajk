@@ -14,7 +14,7 @@ Also, this will be the last release in the 3.x branch.
 
 ## 4.0
 
-_Update: 4.0 has been release on Apr 4th 2025. See [release notes](https://github.com/hajkmap/Hajk/releases/tag/v4.0.0)._
+_Update: 4.0 has been released on Apr 4th 2025. See [release notes](https://github.com/hajkmap/Hajk/releases/tag/v4.0.0)._
 
 This release marks the removal of the .NET backend, leaving NodeJS as the sole official backend solution.
 
@@ -22,19 +22,21 @@ In addition, Client UI sees significant updates to the Layer Switcher tool as we
 
 ## 4.1
 
-_Update: 4.1 has been release on Jun 18th 2025. See [release notes](https://github.com/hajkmap/Hajk/releases/tag/v4.1.0)._
+_Update: 4.1 has been released on Jun 18th 2025. See [release notes](https://github.com/hajkmap/Hajk/releases/tag/v4.1.0)._
 
 This is primarily a fix release that addresses some of the issues related to the rewrite of LayerSwitcher as seen in 4.0.
 
 ## 4.2
 
-_Update: 4.2 has been release on Jan 23rd 2026. See [release notes](https://github.com/hajkmap/Hajk/releases/tag/v4.2.0)._
+_Update: 4.2 has been released on Jan 23rd 2026. See [release notes](https://github.com/hajkmap/Hajk/releases/tag/v4.2.0)._
 
 This release includes a major upgrade of our UI library, MUI, to version 7.
 
 Also, an overhaul of the Introduction Guide and the Anchor tool is included in this release.
 
 ## 4.3
+
+_Update: 4.3 has been released on Apr 17th 2026. See [release notes](https://github.com/hajkmap/Hajk/releases/tag/v4.3.0)._
 
 Client is migrated to Vite, leaving the CRA behind.
 
@@ -45,7 +47,7 @@ Two of the most important findings from CodeQL are fixed in Backend:
 - Uncontrolled data used in path expression (https://github.com/hajkmap/Hajk/security/code-scanning/53)
 - Missing rate limiting (https://github.com/hajkmap/Hajk/security/code-scanning/8)
 
-Mobile UI etc:
+New mobile UI & more:
 
 - This release will introduce a new Mobile UI for Client, aimed at improving usability and responsiveness on smaller screens.
 - A key improvement for mobile devices is that the map will remain visible while using plugins such as Measurer, Sketch, and InfoClick.

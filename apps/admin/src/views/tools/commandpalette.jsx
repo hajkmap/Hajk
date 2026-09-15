@@ -18,21 +18,15 @@ const ColorButtonBlue = withStyles((theme) => ({
 var defaultState = {
   validationErrors: [],
   active: false,
-  index: 0,
-  target: "toolbar",
-  visibleAtStart: false,
-  showFollowLocation: false,
+  index: 99,
   visibleForGroups: [],
 };
 
 class ToolOptions extends Component {
-  /**
-   *
-   */
   constructor() {
     super();
     this.state = defaultState;
-    this.type = "location";
+    this.type = "commandpalette";
   }
 
   componentDidMount() {
@@ -41,12 +35,6 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
-        target: tool.options.target || "toolbar",
-        position: tool.options.position,
-        width: tool.options.width,
-        height: tool.options.height,
-        visibleAtStart: tool.options.visibleAtStart,
-        showFollowLocation: tool.options.showFollowLocation,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
@@ -57,10 +45,6 @@ class ToolOptions extends Component {
       });
     }
   }
-
-  /**
-   *
-   */
 
   handleInputChange(event) {
     const target = event.target;
@@ -84,7 +68,7 @@ class ToolOptions extends Component {
     this.props.model.get("toolConfig").push(tool);
   }
 
-  remove(tool) {
+  remove() {
     this.props.model.set({
       toolConfig: this.props.model
         .get("toolConfig")
@@ -106,15 +90,11 @@ class ToolOptions extends Component {
       type: this.type,
       index: this.state.index,
       options: {
-        target: this.state.target,
-        position: this.state.position,
-        width: this.state.width,
-        height: this.state.height,
-        visibleAtStart: this.state.visibleAtStart,
-        showFollowLocation: this.state.showFollowLocation,
+        target: "hidden",
+        visibleAtStart: false,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
-          String.prototype.trim,
+          String.prototype.trim
         ),
       },
     };
@@ -129,7 +109,7 @@ class ToolOptions extends Component {
             alert: true,
             alertMessage: "Uppdateringen lyckades",
           });
-        },
+        }
       );
     }
 
@@ -161,8 +141,7 @@ class ToolOptions extends Component {
   }
 
   handleAuthGrpsChange(event) {
-    const target = event.target;
-    const value = target.value;
+    const value = event.target.value;
     let groups = [];
 
     try {
@@ -197,9 +176,6 @@ class ToolOptions extends Component {
     }
   }
 
-  /**
-   *
-   */
   render() {
     return (
       <div>
@@ -230,7 +206,7 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
-          <div className="separator">Fönsterinställningar</div>
+          <div className="separator">Allmänt</div>
           <div>
             <label htmlFor="index">Sorteringsordning</label>
             <input
@@ -245,114 +221,9 @@ class ToolOptions extends Component {
               value={this.state.index}
             />
           </div>
-          <div>
-            <label htmlFor="target">Verktygsplacering</label>
-            <select
-              id="target"
-              name="target"
-              className="control-fixed-width"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.target}
-            >
-              <option value="toolbar">Drawer</option>
-              <option value="left">Widget left</option>
-              <option value="right">Widget right</option>
-              <option value="control">Control button</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="position">
-              Fönsterplacering{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
-              />
-            </label>
-            <select
-              id="position"
-              name="position"
-              className="control-fixed-width"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.position}
-            >
-              <option value="left">Left</option>
-              <option value="right">Right</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="width">
-              Fönsterbredd{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Bredd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda standardbredd."
-              />
-            </label>
-            <input
-              id="width"
-              name="width"
-              type="number"
-              min="0"
-              className="control-fixed-width"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.width}
-            />
-          </div>
-          <div>
-            <label htmlFor="height">
-              Fönsterhöjd{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Höjd i pixlar på verktygets fönster. Anges antingen numeriskt (pixlar), 'dynamic' för att automatiskt anpassa höjden efter innehållet eller 'auto' att använda maximal höjd."
-              />
-            </label>
-            <input
-              id="height"
-              name="height"
-              type="text"
-              className="control-fixed-width"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.height}
-            />
-          </div>
-          <div className="separator">Övriga inställningar</div>
-          <div>
-            <input
-              id="visibleAtStart"
-              name="visibleAtStart"
-              type="checkbox"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.visibleAtStart}
-            />
-            &nbsp;
-            <label htmlFor="visibleAtStart">Synlig vid start</label>
-          </div>
-          <div className="long-label">
-            <input
-              id="showFollowLocation"
-              name="showFollowLocation"
-              type="checkbox"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.showFollowLocation}
-            />
-            &nbsp;
-            <label htmlFor="showFollowLocation">
-              Visa "Följ min position" när positionering används som en widget.
-            </label>
+          <div style={{ marginTop: 10, padding: 10, background: "#f5f5f5", borderRadius: 4 }}>
+            Kommandopanelen öppnas med <strong>Ctrl+K</strong> (eller <strong>Cmd+K</strong> på Mac).
+            Den tillåter snabb sökning och start av verktyg.
           </div>
           {this.renderVisibleForGroups()}
         </form>
