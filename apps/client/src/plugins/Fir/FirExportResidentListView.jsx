@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect, useRef } from "react";
 import { IconExcel } from "./FirIcons";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
@@ -62,8 +62,21 @@ const StyledFormControlLabel = styled(FormControlLabel)(({ _theme }) => ({
   fontWeight: "400",
 }));
 
-class FirExportResidentListView extends React.PureComponent {
-  state = {
+function FirExportResidentListView({
+  results,
+  model,
+  localObserver,
+  type,
+  closeSnackbar,
+  enqueueSnackbar,
+}) {
+  const snackBarRef = useRef(null);
+  const fnsRef = useRef({});
+
+  const _type = type ?? "fir"; // kir or fir
+  const options = model.app.plugins[_type].options;
+
+  const [state, setStateRaw] = useState(() => ({
     accordionExpanded: false,
     chAge: false,
     chBirthdate: false,
@@ -74,54 +87,38 @@ class FirExportResidentListView extends React.PureComponent {
     loading: false,
     downloadUrl: null,
     results: [],
+  }));
+  const stateRef = useRef(state);
+  const [, setTick] = useState(0);
+
+  const setState = (patch) => {
+    stateRef.current = { ...stateRef.current, ...patch };
+    setStateRaw(stateRef.current);
   };
 
-  static propTypes = {
-    results: PropTypes.array.isRequired,
-    model: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired,
-    type: PropTypes.string,
+  const forceUpdate = () => {
+    setTick((tick) => tick + 1);
   };
 
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.type = this.props.type ?? "fir"; // kir or fir
-    this.localObserver = this.props.localObserver;
-    this.options = this.model.app.plugins[this.type].options;
-
-    this.localObserver.subscribe(`${this.type}.results.filtered`, (list) => {
-      this.setState({ results: [...list] });
-      this.forceUpdate();
-    });
-  }
-
-  componentDidMount() {
-    if (this.type === "kir") {
-      // Kir only have one item in accordion, expand it automatically.
-      this.setState({ accordionExpanded: true });
-    }
-  }
-
-  getGeometryFilters(features) {
+  const getGeometryFilters = (features) => {
     let filters = [];
     features.forEach((feature) => {
       filters.push(
         intersectsFilter(
-          this.options.wfsRealEstateLayer.geometryField,
+          options.wfsRealEstateLayer.geometryField,
           feature.getGeometry()
         )
       );
     });
 
     return filters.length === 0 ? null : filters;
-  }
+  };
 
-  getFiltersForStringAndGeometrySearch(params) {
+  const getFiltersForStringAndGeometrySearch = (params) => {
     let rootFilter = null;
 
     if (params.features.length > 0) {
-      rootFilter = this.getGeometryFilters(params.features);
+      rootFilter = getGeometryFilters(params.features);
     }
 
     if (rootFilter && rootFilter.length >= 2) {
@@ -132,32 +129,32 @@ class FirExportResidentListView extends React.PureComponent {
     }
 
     return rootFilter;
-  }
+  };
 
-  getFeatureRequestObject(params) {
-    let rootFilter = this.getFiltersForStringAndGeometrySearch(params);
+  const getFeatureRequestObject = (params) => {
+    let rootFilter = getFiltersForStringAndGeometrySearch(params);
 
     return {
-      srsName: this.model.config.srsName,
+      srsName: model.config.srsName,
       featureNS: "https://www.opengis.net",
       outputFormat: "application/json",
-      maxFeatures: this.options.maxFeatures,
+      maxFeatures: options.maxFeatures,
       featureTypes: [params.featureType],
       filter: rootFilter,
     };
-  }
+  };
 
-  getRequestXml(params) {
-    const featureRequestObject = this.getFeatureRequestObject(params);
+  const getRequestXml = (params) => {
+    const featureRequestObject = getFeatureRequestObject(params);
     const featureRequest = new WFS().writeGetFeature(featureRequestObject);
     return new XMLSerializer().serializeToString(featureRequest);
-  }
+  };
 
-  getResidentExportData = (features) => {
-    const mappings = this.options.residentList.mappings;
+  const getResidentExportData = (features) => {
+    const mappings = options.residentList.mappings;
 
     features = features.filter((feature) => {
-      return feature.get(mappings.ageFieldName) >= this.state.age || 0;
+      return feature.get(mappings.ageFieldName) >= stateRef.current.age || 0;
     });
 
     let columns = [];
@@ -165,17 +162,17 @@ class FirExportResidentListView extends React.PureComponent {
 
     // create columns
 
-    if (this.state.chAdjustToReal) {
+    if (stateRef.current.chAdjustToReal) {
       columns.push(" ");
     }
 
-    if (this.state.chSsn === true) {
+    if (stateRef.current.chSsn === true) {
       columns.push(mappings.ssnDisplayName);
     }
 
     columns.push(mappings.nameDisplayName);
 
-    if (this.state.chAdjustToReal) {
+    if (stateRef.current.chAdjustToReal) {
       columns.push("I egenskap av");
       columns.push("  ");
     }
@@ -184,15 +181,15 @@ class FirExportResidentListView extends React.PureComponent {
     columns.push(mappings.postalCodeDisplayName);
     columns.push(mappings.cityDisplayName);
 
-    if (this.state.chAge) {
+    if (stateRef.current.chAge) {
       columns.push(mappings.ageDisplayName);
     }
 
-    if (this.state.chBirthdate) {
+    if (stateRef.current.chBirthdate) {
       columns.push(mappings.birthDateDisplayName);
     }
 
-    if (this.state.chGender) {
+    if (stateRef.current.chGender) {
       columns.push(mappings.genderDisplayName);
     }
 
@@ -205,17 +202,17 @@ class FirExportResidentListView extends React.PureComponent {
     features.forEach((f) => {
       let row = [];
 
-      if (this.state.chAdjustToReal) {
+      if (stateRef.current.chAdjustToReal) {
         row.push(" ");
       }
 
-      if (this.state.chSsn === true) {
-        row.push(this.formatSSN(getValue(f, mappings.ssnFieldName)));
+      if (stateRef.current.chSsn === true) {
+        row.push(formatSSN(getValue(f, mappings.ssnFieldName)));
       }
 
       row.push(getValue(f, mappings.nameFieldName));
 
-      if (this.state.chAdjustToReal) {
+      if (stateRef.current.chAdjustToReal) {
         row.push("Boende");
         row.push("  ");
       }
@@ -224,17 +221,15 @@ class FirExportResidentListView extends React.PureComponent {
       row.push(getValue(f, mappings.postalCodeFieldName));
       row.push(getValue(f, mappings.cityFieldName));
 
-      if (this.state.chAge) {
+      if (stateRef.current.chAge) {
         row.push(getValue(f, mappings.ageFieldName));
       }
 
-      if (this.state.chBirthdate) {
-        row.push(
-          this.formatBirthDate(getValue(f, mappings.birthDateFieldName))
-        );
+      if (stateRef.current.chBirthdate) {
+        row.push(formatBirthDate(getValue(f, mappings.birthDateFieldName)));
       }
 
-      if (this.state.chGender) {
+      if (stateRef.current.chGender) {
         row.push(getValue(f, mappings.genderFieldName));
       }
 
@@ -249,13 +244,13 @@ class FirExportResidentListView extends React.PureComponent {
     return objectToSend;
   };
 
-  sendResidentData = (features) => {
-    const data = this.getResidentExportData(features);
+  const sendResidentData = (features) => {
+    const data = getResidentExportData(features);
 
     let searchParams = new URLSearchParams();
     searchParams.append("json", JSON.stringify(data));
 
-    hfetch(this.options.residentList.excelExportUrl, {
+    hfetch(options.residentList.excelExportUrl, {
       method: "post",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -268,15 +263,15 @@ class FirExportResidentListView extends React.PureComponent {
       })
       .then((text) => {
         if (text) {
-          this.setState({ loading: false });
-          this.setState({ downloadUrl: text });
+          setState({ loading: false });
+          setState({ downloadUrl: text });
         }
       })
       .catch((_err, _a) => {
-        this.setState({ loading: false });
-        this.setState({ downloadUrl: null });
-        this.props.closeSnackbar(this.snackBar);
-        this.snackBar = this.props.enqueueSnackbar(
+        setState({ loading: false });
+        setState({ downloadUrl: null });
+        closeSnackbar(snackBarRef.current);
+        snackBarRef.current = enqueueSnackbar(
           "Ett fel inträffade vid exporten av boendeförteckningen.",
           {
             variant: "error",
@@ -285,16 +280,16 @@ class FirExportResidentListView extends React.PureComponent {
       });
   };
 
-  getResidentData = () => {
-    let searchType = this.model.getWfsById(this.options.residentList.id);
+  const getResidentData = () => {
+    let searchType = model.getWfsById(options.residentList.id);
     let params = {
       featureType: searchType.layers[0],
       url: searchType.url,
       searchProp: searchType.geometryField,
-      features: this.props.results,
+      features: results,
     };
 
-    const requestXml = this.getRequestXml(params);
+    const requestXml = getRequestXml(params);
 
     hfetch(params.url, {
       method: "POST",
@@ -305,11 +300,11 @@ class FirExportResidentListView extends React.PureComponent {
       })
       .then((data) => {
         if (data.features?.length > 0) {
-          this.sendResidentData(new GeoJSON().readFeatures(data));
+          sendResidentData(new GeoJSON().readFeatures(data));
         } else {
-          this.setState({ loading: false });
-          this.props.closeSnackbar(this.snackBar);
-          this.snackBar = this.props.enqueueSnackbar(
+          setState({ loading: false });
+          closeSnackbar(snackBarRef.current);
+          snackBarRef.current = enqueueSnackbar(
             "Kunde ej hitta några boende att exportera.",
             {
               variant: "warning",
@@ -318,9 +313,9 @@ class FirExportResidentListView extends React.PureComponent {
         }
       })
       .catch((_err) => {
-        this.setState({ loading: false });
-        this.props.closeSnackbar(this.snackBar);
-        this.snackBar = this.props.enqueueSnackbar(
+        setState({ loading: false });
+        closeSnackbar(snackBarRef.current);
+        snackBarRef.current = enqueueSnackbar(
           "Ett fel inträffade vid exporten.",
           {
             variant: "error",
@@ -329,202 +324,223 @@ class FirExportResidentListView extends React.PureComponent {
       });
   };
 
-  handleSendClick = () => {
-    this.setState({ loading: true });
-    this.setState({ downloadUrl: null });
+  const handleSendClick = () => {
+    setState({ loading: true });
+    setState({ downloadUrl: null });
     // detach
     setTimeout(() => {
-      if (this.props.type === "kir") {
+      if (type === "kir") {
         // In KIR we already have the data so we just send it.
-        this.sendResidentData(this.state.results);
+        sendResidentData(stateRef.current.results);
       } else {
-        this.getResidentData();
+        getResidentData();
       }
     }, 25);
   };
 
-  ExcelLogo() {
+  fnsRef.current = {
+    handleResultsFiltered: (list) => {
+      setState({ results: [...list] });
+      forceUpdate();
+    },
+  };
+
+  useEffect(() => {
+    localObserver.subscribe(`${_type}.results.filtered`, (list) => {
+      fnsRef.current.handleResultsFiltered(list);
+    });
+
+    if (_type === "kir") {
+      // Kir only have one item in accordion, expand it automatically.
+      setState({ accordionExpanded: true });
+    }
+  }, [localObserver, fnsRef, _type]);
+
+  const ExcelLogo = () => {
     return (
       <img src={IconExcel()} alt="" style={{ width: "24px", height: "auto" }} />
     );
-  }
+  };
 
-  formatSSN = (ssn) => {
+  const formatSSN = (ssn) => {
     ssn = "" + ssn;
     let _ssn = ssn.substring(0, ssn.length - 4);
     _ssn += "-" + ssn.substr(ssn.length - 4, 4);
     return _ssn;
   };
 
-  formatBirthDate = (birthDate) => {
+  const formatBirthDate = (birthDate) => {
     return birthDate.substring(0, birthDate.length - 4);
   };
 
-  render() {
-    return (
-      <>
-        <Accordion
-          disabled={
-            this.props.results.length === 0 || !this.options.residentList
-          }
-          expanded={
-            this.state.accordionExpanded &&
-            this.props.results.length > 0 &&
-            this.options.residentList !== null
-          }
-          onChange={() => {
-            this.setState({
-              accordionExpanded: !this.state.accordionExpanded,
-            });
-          }}
-        >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <TypographyHeading>Boendeförteckning</TypographyHeading>
-          </AccordionSummary>
-          <AccordionDetails style={{ display: "block" }}>
-            <div>
-              <div>Inkludera:</div>
-              <CheckboxGroupContainer>
-                <FormControl fullWidth={true}>
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.chAdjustToReal}
-                        onChange={(e) => {
-                          this.setState({ chAdjustToReal: e.target.checked });
-                        }}
-                        color="primary"
-                      />
+  return (
+    <>
+      <Accordion
+        disabled={results.length === 0 || !options.residentList}
+        expanded={
+          state.accordionExpanded &&
+          results.length > 0 &&
+          options.residentList !== null
+        }
+        onChange={() => {
+          setState({
+            accordionExpanded: !state.accordionExpanded,
+          });
+        }}
+      >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <TypographyHeading>Boendeförteckning</TypographyHeading>
+        </AccordionSummary>
+        <AccordionDetails style={{ display: "block" }}>
+          <div>
+            <div>Inkludera:</div>
+            <CheckboxGroupContainer>
+              <FormControl fullWidth={true}>
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.chAdjustToReal}
+                      onChange={(e) => {
+                        setState({ chAdjustToReal: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Anpassa till fastighetsförteckning"
+                />
+              </FormControl>
+              <FormControl fullWidth={true}>
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.chAge}
+                      onChange={(e) => {
+                        setState({ chAge: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Ålder"
+                />
+              </FormControl>
+              <FormControl fullWidth={true}>
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.chBirthdate}
+                      onChange={(e) => {
+                        setState({ chBirthdate: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Födelsedatum"
+                />
+              </FormControl>
+              <FormControl fullWidth={true}>
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.chSsn}
+                      onChange={(e) => {
+                        setState({ chSsn: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Personnummer"
+                />
+              </FormControl>
+              <FormControl fullWidth={true}>
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.chGender}
+                      onChange={(e) => {
+                        setState({ chGender: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Kön"
+                />
+              </FormControl>
+              <ContainerTopPadded>
+                <StyledTextField
+                  label="Ange lägsta ålder"
+                  value={state.age}
+                  onChange={(e) => {
+                    let v = parseInt(e.target.value);
+                    if (isNaN(v)) {
+                      v = 0;
                     }
-                    label="Anpassa till fastighetsförteckning"
-                  />
-                </FormControl>
-                <FormControl fullWidth={true}>
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.chAge}
-                        onChange={(e) => {
-                          this.setState({ chAge: e.target.checked });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Ålder"
-                  />
-                </FormControl>
-                <FormControl fullWidth={true}>
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.chBirthdate}
-                        onChange={(e) => {
-                          this.setState({ chBirthdate: e.target.checked });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Födelsedatum"
-                  />
-                </FormControl>
-                <FormControl fullWidth={true}>
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.chSsn}
-                        onChange={(e) => {
-                          this.setState({ chSsn: e.target.checked });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Personnummer"
-                  />
-                </FormControl>
-                <FormControl fullWidth={true}>
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.chGender}
-                        onChange={(e) => {
-                          this.setState({ chGender: e.target.checked });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Kön"
-                  />
-                </FormControl>
-                <ContainerTopPadded>
-                  <StyledTextField
-                    label="Ange lägsta ålder"
-                    value={this.state.age}
-                    onChange={(e) => {
-                      let v = parseInt(e.target.value);
-                      if (isNaN(v)) {
-                        v = 0;
-                      }
 
-                      this.setState({ age: v });
-                    }}
-                    onFocus={(_e) => {
-                      if (this.state.age === 0) {
-                        this.setState({ age: "" });
-                      }
-                    }}
-                    onBlur={(_e) => {
-                      if (this.state.age === "") {
-                        this.setState({ age: 0 });
-                      }
-                    }}
-                    size="small"
-                    slotProps={{
-                      input: {
-                        endAdornment: (
-                          <InputAdornment position="end">år</InputAdornment>
-                        ),
-                      },
-                    }}
-                    variant="outlined"
-                  />
-                </ContainerTopPadded>
-              </CheckboxGroupContainer>
-              <div>
+                    setState({ age: v });
+                  }}
+                  onFocus={(_e) => {
+                    if (stateRef.current.age === 0) {
+                      setState({ age: "" });
+                    }
+                  }}
+                  onBlur={(_e) => {
+                    if (stateRef.current.age === "") {
+                      setState({ age: 0 });
+                    }
+                  }}
+                  size="small"
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">år</InputAdornment>
+                      ),
+                    },
+                  }}
+                  variant="outlined"
+                />
+              </ContainerTopPadded>
+            </CheckboxGroupContainer>
+            <div>
+              <Button
+                fullWidth={true}
+                variant="outlined"
+                color="primary"
+                startIcon={<ExcelLogo />}
+                onClick={handleSendClick}
+                disabled={state.loading}
+                sx={{ opacity: state.loading ? 0.3 : 1.0 }}
+              >
+                Skapa boendeförteckning
+                {state.loading && <CircularProgressButton size={24} />}
+              </Button>
+            </div>
+            <Collapse in={state.downloadUrl !== null}>
+              <DownloadContainer>
                 <Button
                   fullWidth={true}
                   variant="outlined"
                   color="primary"
-                  startIcon={<this.ExcelLogo />}
-                  onClick={this.handleSendClick}
-                  disabled={this.state.loading}
-                  sx={{ opacity: this.state.loading ? 0.3 : 1.0 }}
+                  title={"Ladda ner: \n" + state.downloadUrl}
+                  startIcon={<DownloadIcon />}
+                  onClick={() => {
+                    document.location.href = state.downloadUrl;
+                  }}
                 >
-                  Skapa boendeförteckning
-                  {this.state.loading && <CircularProgressButton size={24} />}
+                  Ladda ner fil
                 </Button>
-              </div>
-              <Collapse in={this.state.downloadUrl !== null}>
-                <DownloadContainer>
-                  <Button
-                    fullWidth={true}
-                    variant="outlined"
-                    color="primary"
-                    title={"Ladda ner: \n" + this.state.downloadUrl}
-                    startIcon={<DownloadIcon />}
-                    onClick={() => {
-                      document.location.href = this.state.downloadUrl;
-                    }}
-                  >
-                    Ladda ner fil
-                  </Button>
-                </DownloadContainer>
-              </Collapse>
-            </div>
-          </AccordionDetails>
-        </Accordion>
-      </>
-    );
-  }
+              </DownloadContainer>
+            </Collapse>
+          </div>
+        </AccordionDetails>
+      </Accordion>
+    </>
+  );
 }
+
+FirExportResidentListView.propTypes = {
+  results: PropTypes.array.isRequired,
+  model: PropTypes.object.isRequired,
+  localObserver: PropTypes.object.isRequired,
+  type: PropTypes.string,
+};
 
 export default withSnackbar(FirExportResidentListView);

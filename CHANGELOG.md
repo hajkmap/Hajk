@@ -35,8 +35,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client + Admin: WMTS - Added support for high-DPI (retina) tiles. A layer can now declare one or more `highDpiVariants` — alternate TileMatrixSets, such as GeoServer/GWC's `xN` gridsets, each with its own resolutions/origins/sizes/dimensions — and Client automatically requests the highest tier whose `minPixelRatio` the viewer's screen (`devicePixelRatio`) satisfies, falling back to the standard grid otherwise. In Admin, once the standard `matrixSet` is set, any `<matrixSet>xN` sibling GetCapabilities advertises is auto-detected and can be added with one click; this also derives the correct `dpi:N` `FORMAT_OPTIONS` value for that tier (scaled from the base dimension and cross-checked against the server's advertised `Dimension`/`Value` list) rather than leaving the admin to copy and fix it by hand. A manual add-a-tier fallback covers servers whose high-DPI gridsets don't follow the `xN` naming convention. Builds on the GetCapabilities-driven WMTS form and ConfigMapper plumbing from [commit](https://github.com/hajkmap/Hajk/commit/3a018b0ae5cfdecff881def62e1e9e5ae1af9a97), and pairs with the layer-type-at-a-glance improvements to the layer/map admin views from [commit](https://github.com/hajkmap/Hajk/commit/078e211820c7f05fe6e44bcdbef9138d94be1acf) (see also its hotfix in [commit](https://github.com/hajkmap/Hajk/commit/bb6180dffbea881556fabf150861c59186ee0b5b)).
 - Client: PropertyChecker - Added a `q_pc` URL parameter that programmatically triggers a property check from a property name or address. It reuses an existing WFS search source (configured via `propertyNameLookupWfsLayerId` and the optional `addressLookupWfsLayerId`) to resolve the value to a geometry, pans the map there, and is written back to the URL hash on map click so results are shareable. Closes [#1827](https://github.com/hajkmap/Hajk/issues/1827).
 
+### Fixed
+
+- Client: FIR - Fixed a crash when activating "add by map click" if `wmsRealEstateLayer` is missing from the map config.
+
 ### Changed
 
+- Client: FIR/KIR - Converted class components to hooks and extracted shared code. Also fixed KIR's delete button expanding the row.
 - Backend: Upgraded `write-excel-file` from 3.x to 4.x.
 - Backend: Enhance detailed request logger with structured output and file logging configuration [#1836](https://github.com/hajkmap/Hajk/pull/1836)
 - Backend: Bumped the [API Explorer](https://github.com/swagger-api/swagger-ui) to v5.32.6.
