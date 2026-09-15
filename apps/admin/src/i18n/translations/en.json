@@ -1055,6 +1055,12 @@
         "presetUrl": "Url",
         "presetUrlPlaceholder": "E.g. ?m=map_1&x=147325&y=6398754&z=4&l=10"
       },
+      "externalLinks": {
+        "linkList": "Links",
+        "linkName": "Name",
+        "linkUrl": "Url",
+        "linkUrlPlaceholder": "E.g. https://maps.google.com/?q={y|EPSG:4326|4},{x|EPSG:4326|4}"
+      },
       "coordinates": {
         "thousandSeparator": "Format numbers (1000 -> 1 000)",
         "showFieldsOnStart": "Show projection fields on start",

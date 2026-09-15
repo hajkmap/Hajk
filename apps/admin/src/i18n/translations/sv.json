@@ -988,6 +988,12 @@
         "presetUrl": "Url",
         "presetUrlPlaceholder": "T.ex. ?m=map_1&x=147325&y=6398754&z=4&l=10"
       },
+      "externalLinks": {
+        "linkList": "Länkar",
+        "linkName": "Namn",
+        "linkUrl": "Url",
+        "linkUrlPlaceholder": "T.ex. https://maps.google.com/?q={y|EPSG:4326|4},{x|EPSG:4326|4}"
+      },
       "coordinates": {
         "thousandSeparator": "Formattera nummer (1000 -> 1 000)",
         "showFieldsOnStart": "Visa projektionsfälten från start",
