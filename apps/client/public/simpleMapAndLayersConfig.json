@@ -544,6 +544,15 @@
         "index": 13
       },
       {
+        "type": "commandpalette",
+        "options": {
+          "target": "control",
+          "position": "right",
+          "visibleForGroups": []
+        },
+        "index": 99
+      },
+      {
         "type": "preset",
         "options": {
           "presetList": [
