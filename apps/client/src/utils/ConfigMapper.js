@@ -258,9 +258,14 @@ export default class ConfigMapper {
         maxZoom: args.maxZoom,
         minZoom: args.minZoom,
         imageFormat: args.imageFormat || args.format || "image/png",
-        crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
+        // A layer-level crossOrigin (set in Admin) wins over the map-level default.
+        crossOrigin:
+          args.crossOrigin ??
+          (properties.mapConfig.map.crossOrigin || "anonymous"),
         wrapX: false,
         url: args.url,
+        requestEncoding: args.requestEncoding,
+        dimensions: args.dimensions,
         layer: args.layer,
         matrixSet: args.matrixSet,
         style: args.style,
@@ -274,6 +279,7 @@ export default class ConfigMapper {
         matrixIds: args.matrixIds,
         sizes: args.sizes,
         tileSize: args.tileSize,
+        highDpiVariants: args.highDpiVariants || [],
         attribution: args.attribution,
         legend: args.legend,
         legendIcon: args.legendIcon,
