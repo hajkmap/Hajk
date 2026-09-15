@@ -20,6 +20,7 @@ import CoordinatesRenderer, {
   coordinatesDefaults,
 } from "./render-coordinates";
 import BufferRenderer, { bufferDefaults } from "./render-buffer";
+import FmeServerRenderer, { fmeserverDefaults } from "./render-fmeserver";
 import ExternalLinksRenderer, {
   externalLinksDefaults,
 } from "./render-externallinks";
@@ -45,6 +46,7 @@ const toolOptionDefaults: Record<string, Record<string, unknown>> = {
   preset: presetDefaults,
   coordinates: coordinatesDefaults,
   buffer: bufferDefaults,
+  fmeserver: fmeserverDefaults,
   externalLinks: externalLinksDefaults,
 };
 
@@ -77,6 +79,7 @@ const toolRenderers: Record<string, React.ComponentType<ToolRendererProps>> = {
   preset: PresetRenderer as React.ComponentType<ToolRendererProps>,
   coordinates: CoordinatesRenderer as React.ComponentType<ToolRendererProps>,
   buffer: BufferRenderer as React.ComponentType<ToolRendererProps>,
+  fmeserver: FmeServerRenderer as React.ComponentType<ToolRendererProps>,
   externalLinks:
     ExternalLinksRenderer as React.ComponentType<ToolRendererProps>,
 };

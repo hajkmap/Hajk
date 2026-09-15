@@ -994,6 +994,23 @@
         "linkUrl": "Url",
         "linkUrlPlaceholder": "T.ex. https://maps.google.com/?q={y|EPSG:4326|4},{x|EPSG:4326|4}"
       },
+      "fmeserver": {
+        "groupDisplayName": "Visningsnamn för grupp",
+        "drawFillColor": "Fyllnadsfärg för ritverktyg",
+        "drawStrokeColor": "Kantfärg för ritverktyg",
+        "productGroups": "Produktgrupper",
+        "productsList": "Produkter",
+        "productGroup": "Grupp",
+        "productName": "Namn",
+        "productRepository": "Repository",
+        "productWorkspace": "Workspace",
+        "productGeoAttribute": "Geometri-attribut",
+        "productInfoUrl": "Informationslänk",
+        "productPromptForEmail": "Fråga efter e-postadress",
+        "productMaxArea": "Max area (m²)",
+        "productGroupMissing": "Gruppen finns inte bland produktgrupperna — produkten visas inte i kartan",
+        "addProductGroupsFirst": "Lägg till produktgrupper ovan först"
+      },
       "coordinates": {
         "thousandSeparator": "Formattera nummer (1000 -> 1 000)",
         "showFieldsOnStart": "Visa projektionsfälten från start",

@@ -1061,6 +1061,23 @@
         "linkUrl": "Url",
         "linkUrlPlaceholder": "E.g. https://maps.google.com/?q={y|EPSG:4326|4},{x|EPSG:4326|4}"
       },
+      "fmeserver": {
+        "groupDisplayName": "Group display name",
+        "drawFillColor": "Draw tool fill color",
+        "drawStrokeColor": "Draw tool stroke color",
+        "productGroups": "Product groups",
+        "productsList": "Products",
+        "productGroup": "Group",
+        "productName": "Name",
+        "productRepository": "Repository",
+        "productWorkspace": "Workspace",
+        "productGeoAttribute": "Geometry attribute",
+        "productInfoUrl": "Info link",
+        "productPromptForEmail": "Prompt for email",
+        "productMaxArea": "Max area (m²)",
+        "productGroupMissing": "Group is not among the product groups — the product won't show in the map",
+        "addProductGroupsFirst": "Add product groups above first"
+      },
       "coordinates": {
         "thousandSeparator": "Format numbers (1000 -> 1 000)",
         "showFieldsOnStart": "Show projection fields on start",
