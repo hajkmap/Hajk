@@ -11,7 +11,9 @@ import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style";
 class LocationModel {
   #tracking = false;
   #following = false;
+  #autoRotate = false;
   #positionReceived = false;
+  #lastHeading = null;
 
   constructor(props) {
     this.map = props.map;
@@ -98,6 +100,12 @@ class LocationModel {
       coordinates ? new Point(coordinates) : null
     );
 
+    // Also update the accuracy feature's geometry to stay centered on the current position
+    // This ensures the red ring stays centered on the blue dot as the user moves
+    if (coordinates) {
+      this.accuracyFeature.setGeometry(new Point(coordinates));
+    }
+
     this.#positionReceived = true;
 
     // If we've got new coordinates, make sure to hide the loading indicator
@@ -124,6 +132,120 @@ class LocationModel {
     if (active === this.#following) return;
     this.#following = active;
     this.centerOnUpdate = active;
+  };
+
+  toggleAutoRotate = (active) => {
+    if (active === this.#autoRotate) return;
+    this.#autoRotate = active;
+    if (active) {
+      this.#requestCompass();
+    } else {
+      this.#removeCompassListeners();
+      // Reset to north-up when auto-rotate is turned off
+      this.map.getView().setRotation(0);
+    }
+  };
+
+  // Geolocation's own `heading` property only updates from consecutive GPS
+  // fixes while the device is physically moving, so it's useless for
+  // rotating the map while the user is standing still. Instead we read the
+  // device's orientation sensors directly, the same way a compass would.
+  #applyHeading = (heading = 0) => {
+    // Don't fight an ongoing view animation, e.g. the initial zoom-to-location.
+    if (this.map.getView().getAnimating()) return;
+
+    // Heading is in degrees, clockwise from north. Convert to radians and
+    // negate it, otherwise the map rotates in the opposite direction.
+    this.map.getView().setRotation(-(heading / 180) * Math.PI);
+  };
+
+  #handleAbsoluteOrientation = (e) => {
+    if (
+      !e.absolute ||
+      e.alpha === null ||
+      e.beta === null ||
+      e.gamma === null
+    ) {
+      return;
+    }
+
+    // Determine heading
+    let heading = -(e.alpha + (e.beta * e.gamma) / 90);
+    heading -= Math.floor(heading / 360) * 360; // Wrap into range [0, 360)
+
+    if (heading !== this.#lastHeading) {
+      this.#lastHeading = heading;
+      this.#applyHeading(heading);
+    }
+  };
+
+  #handleWebkitOrientation = (e) => {
+    // Non-standard, but it's the only way to get an absolute compass
+    // heading directly on iOS/Safari.
+    const heading = e.webkitCompassHeading;
+
+    if (heading !== null && !isNaN(heading) && heading !== this.#lastHeading) {
+      this.#lastHeading = heading;
+      this.#applyHeading(heading);
+    }
+  };
+
+  #addCompassListeners = () => {
+    if ("ondeviceorientationabsolute" in window) {
+      window.addEventListener(
+        "deviceorientationabsolute",
+        this.#handleAbsoluteOrientation
+      );
+    } else {
+      window.addEventListener(
+        "deviceorientation",
+        this.#handleWebkitOrientation
+      );
+    }
+  };
+
+  #removeCompassListeners = () => {
+    window.removeEventListener(
+      "deviceorientationabsolute",
+      this.#handleAbsoluteOrientation
+    );
+    window.removeEventListener(
+      "deviceorientation",
+      this.#handleWebkitOrientation
+    );
+  };
+
+  // Devices that implement the Permission API (iOS 13+) require an explicit
+  // permission request, which must happen synchronously in response to a
+  // user gesture (i.e. the click that toggled the auto-rotate switch).
+  #requestCompass = () => {
+    if (!window.DeviceOrientationEvent) {
+      console.warn(
+        "[LocationModel] DeviceOrientation API not available, can't auto-rotate map."
+      );
+      return;
+    }
+
+    if (typeof DeviceOrientationEvent.requestPermission === "function") {
+      DeviceOrientationEvent.requestPermission()
+        .then((response) => {
+          if (response === "granted") {
+            this.#addCompassListeners();
+          } else {
+            console.error(
+              "[LocationModel] Permission for DeviceOrientationEvent was not granted."
+            );
+          }
+        })
+        .catch((error) => {
+          console.error(
+            "[LocationModel] Failed to request DeviceOrientationEvent permission.",
+            error
+          );
+        });
+    } else {
+      this.#addCompassListeners();
+    }
   };
 
   toggleTracking = (active) => {
@@ -198,7 +320,13 @@ class LocationModel {
       });
 
       vectorContext.setStyle(style);
-      vectorContext.drawGeometry(flashGeom);
+      // Read the feature's geometry fresh on every frame (rather than a
+      // one-time clone) so the ring follows the position if it moves
+      // while the animation is still running.
+      const geometry = feature.getGeometry();
+      if (geometry) {
+        vectorContext.drawGeometry(geometry);
+      }
 
       // This ensure that the listener for postrender will be triggered
       this.map.render();
@@ -207,8 +335,6 @@ class LocationModel {
     // Setup the animation
     const duration = 3000;
     const start = Date.now();
-    // Prepare the feature that will get animated
-    const flashGeom = feature.getGeometry().clone();
     // Save the listener key so we can unsubscribe when animation is done
     const listenerKey = this.layer.on("postrender", animate);
     // We need to force render, otherwise postrender won't run the first time.
@@ -223,6 +349,8 @@ class LocationModel {
     this.toggleTracking(false);
     // Also disable follow, the default state is turned off.
     this.disableFollow(true);
+    // Also disable auto-rotate, the default state is turned off.
+    this.disableAutoRotate(true);
   }
 
   enableFollow() {
@@ -231,6 +359,14 @@ class LocationModel {
 
   disableFollow() {
     this.toggleFollow(false);
+  }
+
+  enableAutoRotate() {
+    this.toggleAutoRotate(true);
+  }
+
+  disableAutoRotate() {
+    this.toggleAutoRotate(false);
   }
 }
 
