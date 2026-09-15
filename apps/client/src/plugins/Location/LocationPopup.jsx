@@ -4,6 +4,7 @@ import { isMobile } from "../../utils/IsMobile";
 
 const LocationPopup = forwardRef(function LocationPopup({ model }, ref) {
   const [localFollow, setLocalFollow] = useState(false);
+  const [localAutoRotate, setLocalAutoRotate] = useState(false);
 
   const handleToggle = () => {
     // Return if model is missing from props.
@@ -14,6 +15,17 @@ const LocationPopup = forwardRef(function LocationPopup({ model }, ref) {
 
     // And update the follow in the model
     !localFollow ? model.enableFollow() : model.disableFollow();
+  };
+
+  const handleAutoRotateToggle = () => {
+    // Return if model is missing from props.
+    if (!model) return;
+
+    // Invert and set our current auto-rotate state
+    setLocalAutoRotate(!localAutoRotate);
+
+    // And update auto-rotate in the model
+    !localAutoRotate ? model.enableAutoRotate() : model.disableAutoRotate();
   };
 
   return (
@@ -37,6 +49,13 @@ const LocationPopup = forwardRef(function LocationPopup({ model }, ref) {
         checked={localFollow}
         onChange={handleToggle}
         value="follow"
+        color="primary"
+      />
+      <span>Rotera automatiskt</span>
+      <Switch
+        checked={localAutoRotate}
+        onChange={handleAutoRotateToggle}
+        value="autoRotate"
         color="primary"
       />
     </Paper>
