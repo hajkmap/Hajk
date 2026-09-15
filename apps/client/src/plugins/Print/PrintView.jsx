@@ -101,7 +101,6 @@ class PrintView extends React.PureComponent {
     super(props);
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
-    this.dims = this.props.dims;
 
     // Add the preview layer to map (it doesn't contain any features yet!)
     this.model.addPreviewLayer();

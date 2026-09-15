@@ -14,9 +14,12 @@
  * Colors are plain { r, g, b } objects in the 0–1 normalized range.
  */
 
+import { createLayoutContext } from "./layout/context";
+
 /**
  * Build the complete layout for a print page.
- * @param {import("./PrintModel").default} model - PrintModel instance (provides helpers and configuration)
+ * @param {import("./PrintModel").default} model - PrintModel instance. Only used
+ * to create a per-build layout context; no model state is read or written after that.
  * @param {string} mapDataUrl - data URL of the rendered map canvas
  * @param {Object} options - print options
  * @param {number} pageWidth - page width in PDF points
@@ -34,12 +37,16 @@ export async function buildLayout(
   scaleResolution,
   windowUrl
 ) {
+  // Snapshot everything we need from the model into an explicit context.
+  // All layout work below operates on this context only.
+  const ctx = createLayoutContext(model);
+
   const elements = [];
   const pdfBottomRightTexts = [];
 
   // Load the bold font since the browser has not loaded it yet. We need it to be loaded before measuring it using the canvas.
   await document.fonts.load(
-    `700 ${model.textFontSize}px Roboto, roboto, sans-serif`
+    `700 ${ctx.textFontSize}px Roboto, roboto, sans-serif`
   );
 
   // 1. Map image (full page background)
@@ -53,7 +60,7 @@ export async function buildLayout(
   });
 
   // 2. Margins
-  if (model.margin > 0) {
+  if (ctx.margin > 0) {
     if (!options.useTextIconsInMargin) {
       // Single uniform margin around all edges
       elements.push({
@@ -66,7 +73,7 @@ export async function buildLayout(
           { x: 0, y: 0 },
         ],
         color: { r: 1, g: 1, b: 1 },
-        lineWidth: 5.5 * model.margin,
+        lineWidth: 5.5 * ctx.margin,
         closePath: true,
       });
     } else {
@@ -79,7 +86,7 @@ export async function buildLayout(
           { x: pageWidth, y: 0 },
         ],
         color: { r: 1, g: 1, b: 1 },
-        lineWidth: 16 * model.margin,
+        lineWidth: 16 * ctx.margin,
         closePath: false,
       });
       // Right edge
@@ -90,7 +97,7 @@ export async function buildLayout(
           { x: pageWidth, y: pageHeight },
         ],
         color: { r: 1, g: 1, b: 1 },
-        lineWidth: 5.5 * model.margin,
+        lineWidth: 5.5 * ctx.margin,
         closePath: false,
       });
       // Top edge — extra height for title/subtitle in the top margin.
@@ -101,7 +108,7 @@ export async function buildLayout(
           { x: 0, y: pageHeight },
         ],
         color: { r: 1, g: 1, b: 1 },
-        lineWidth: 20 * model.margin,
+        lineWidth: 20 * ctx.margin,
         closePath: false,
       });
       // Left edge
@@ -112,32 +119,32 @@ export async function buildLayout(
           { x: 0, y: 0 },
         ],
         color: { r: 1, g: 1, b: 1 },
-        lineWidth: 5.5 * model.margin,
+        lineWidth: 5.5 * ctx.margin,
         closePath: false,
       });
     }
   }
 
   // 3. QR Code
-  if (options.includeQrCode && model.mapConfig.enableAppStateInHash) {
+  if (options.includeQrCode && ctx.enableAppStateInHash) {
     try {
-      const qrCode = await model.generateQR(windowUrl, 20);
+      const qrCode = await ctx.generateQR(windowUrl, 20);
       let qrWidth = qrCode.width;
       let qrHeight = qrCode.height;
 
       // Same height clamping as logo/north arrow — see comment in section 4.
       if (
-        model.textIconsMargin === 0 &&
+        ctx.textIconsMargin === 0 &&
         options.qrCodePlacement.startsWith("top")
       ) {
-        const maxHeight = 5.25 * model.margin;
+        const maxHeight = 5.25 * ctx.margin;
         if (qrHeight > maxHeight) {
           qrWidth *= maxHeight / qrHeight;
           qrHeight = maxHeight;
         }
       }
 
-      const qrCodePlacement = model.getPlacement(
+      const qrCodePlacement = ctx.getPlacement(
         options.qrCodePlacement,
         qrWidth,
         qrHeight,
@@ -154,7 +161,7 @@ export async function buildLayout(
         height: qrHeight,
       });
     } catch (error) {
-      model.localObserver.publish("error-loading-image", {
+      ctx.localObserver.publish("error-loading-image", {
         error,
         type: "QR-koden",
       });
@@ -162,31 +169,31 @@ export async function buildLayout(
   }
 
   // 4. Logo
-  if (options.includeLogo && model.logoUrl.trim().length >= 5) {
+  if (options.includeLogo && ctx.logoUrl.trim().length >= 5) {
     try {
       let {
         data: logoData,
         width: logoWidth,
         height: logoHeight,
-      } = await model.getImageForPdfFromUrl(model.logoUrl, model.logoMaxWidth);
+      } = await ctx.getImageForPdfFromUrl(ctx.logoUrl, ctx.logoMaxWidth);
 
       // In margin mode (textIconsMargin === 0), the top/bottom white border has
-      // lineWidth = 16 * model.margin, so its inner edge is 8 * model.margin from
-      // the page edge. Elements are placed with their top at 2.75 * model.margin
-      // from the page top (via getPlacement), leaving only (8 - 2.75) * model.margin
+      // lineWidth = 16 * ctx.margin, so its inner edge is 8 * ctx.margin from
+      // the page edge. Elements are placed with their top at 2.75 * ctx.margin
+      // from the page top (via getPlacement), leaving only (8 - 2.75) * ctx.margin
       // pts of space before the map boundary. Clamp height to fit within that space.
       if (
-        model.textIconsMargin === 0 &&
+        ctx.textIconsMargin === 0 &&
         options.logoPlacement.startsWith("top")
       ) {
-        const maxHeight = 5.25 * model.margin;
+        const maxHeight = 5.25 * ctx.margin;
         if (logoHeight > maxHeight) {
           logoWidth *= maxHeight / logoHeight;
           logoHeight = maxHeight;
         }
       }
 
-      const logoPlacement = model.getPlacement(
+      const logoPlacement = ctx.getPlacement(
         options.logoPlacement,
         logoWidth,
         logoHeight,
@@ -202,7 +209,7 @@ export async function buildLayout(
         height: logoHeight,
       });
     } catch (error) {
-      model.localObserver.publish("error-loading-image", {
+      ctx.localObserver.publish("error-loading-image", {
         error,
         type: "Logotypbilden",
       });
@@ -210,30 +217,30 @@ export async function buildLayout(
   }
 
   // 5. North Arrow
-  if (options.includeNorthArrow && model.northArrowUrl.trim().length >= 5) {
+  if (options.includeNorthArrow && ctx.northArrowUrl.trim().length >= 5) {
     try {
       let {
         data: arrowData,
         width: arrowWidth,
         height: arrowHeight,
-      } = await model.getImageForPdfFromUrl(
-        model.northArrowUrl,
-        model.northArrowMaxWidth
+      } = await ctx.getImageForPdfFromUrl(
+        ctx.northArrowUrl,
+        ctx.northArrowMaxWidth
       );
 
       // Same height clamping as logo — see comment above.
       if (
-        model.textIconsMargin === 0 &&
+        ctx.textIconsMargin === 0 &&
         options.northArrowPlacement.startsWith("top")
       ) {
-        const maxHeight = 5.25 * model.margin;
+        const maxHeight = 5.25 * ctx.margin;
         if (arrowHeight > maxHeight) {
           arrowWidth *= maxHeight / arrowHeight;
           arrowHeight = maxHeight;
         }
       }
 
-      const arrowPlacement = model.getPlacement(
+      const arrowPlacement = ctx.getPlacement(
         options.northArrowPlacement,
         arrowWidth,
         arrowHeight,
@@ -249,7 +256,7 @@ export async function buildLayout(
         height: arrowHeight,
       });
     } catch (error) {
-      model.localObserver.publish("error-loading-image", {
+      ctx.localObserver.publish("error-loading-image", {
         error,
         type: "Norrpilen",
       });
@@ -259,7 +266,7 @@ export async function buildLayout(
   // 6. Scale bar
   if (options.includeScaleBar) {
     buildScaleBarElements(
-      model,
+      ctx,
       elements,
       { r: 0, g: 0, b: 0 },
       options.scale,
@@ -280,8 +287,8 @@ export async function buildLayout(
   let titleVerticalMargin;
   let subtitleFallbackVerticalMargin;
   if (options.useTextIconsInMargin) {
-    titleVerticalMargin = model.margin + 45;
-    subtitleFallbackVerticalMargin = model.margin + 60;
+    titleVerticalMargin = ctx.margin + 45;
+    subtitleFallbackVerticalMargin = ctx.margin + 60;
   } else if (options.useMargin) {
     titleVerticalMargin = 60;
     subtitleFallbackVerticalMargin = 70;
@@ -297,7 +304,7 @@ export async function buildLayout(
   if (options.mapTitle.trim().length > 0) {
     const titleTopY = pageHeight - titleVerticalMargin;
     const titleLineHeight = titleSize * 1.3; // Room for Å/Ä/Ö rings above each line.
-    const titleLines = model.wrapTextToLines(
+    const titleLines = ctx.wrapTextToLines(
       options.mapTitle,
       titleSize,
       maxTextWidth
@@ -306,11 +313,11 @@ export async function buildLayout(
       elements.push({
         type: "text",
         text: line,
-        x: model.getCenteredX(line, titleSize, pageWidth),
+        x: ctx.getCenteredX(line, titleSize, pageWidth),
         y: titleTopY - i * titleLineHeight,
         size: titleSize,
         fontStyle: "normal",
-        color: model.textColor,
+        color: ctx.textColor,
         maxWidth: maxTextWidth, // Avoid PDF renderer re-wrap at 200pt default.
       });
     });
@@ -323,7 +330,7 @@ export async function buildLayout(
   if (options.printComment.trim().length > 0) {
     const subtitleLineHeight = subtitleSize * 1.3;
     const subtitleTopY = titleBaselineAnchor - subtitleGap;
-    const subtitleLines = model.wrapTextToLines(
+    const subtitleLines = ctx.wrapTextToLines(
       options.printComment,
       subtitleSize,
       maxTextWidth
@@ -332,11 +339,11 @@ export async function buildLayout(
       elements.push({
         type: "text",
         text: line,
-        x: model.getCenteredX(line, subtitleSize, pageWidth),
+        x: ctx.getCenteredX(line, subtitleSize, pageWidth),
         y: subtitleTopY - i * subtitleLineHeight,
         size: subtitleSize,
         fontStyle: "normal",
-        color: model.textColor,
+        color: ctx.textColor,
         maxWidth: maxTextWidth, // Avoid PDF renderer re-wrap at 200pt default.
       });
     });
@@ -345,15 +352,15 @@ export async function buildLayout(
   // For PNG, the right-edge x margin mirrors the PDF textEdgeMargin: align with the
   // map's right boundary (2.75 * margin) plus padding when not in margin mode.
   const pngXMargin =
-    model.margin > 0 && model.textIconsMargin === 0
-      ? 2.75 * model.margin
-      : 2.75 * model.margin + 10;
+    ctx.margin > 0 && ctx.textIconsMargin === 0
+      ? 2.75 * ctx.margin
+      : 2.75 * ctx.margin + 10;
 
   // lineHeight drives the y-stacking: each successive line is one lineHeight higher.
   // Texts sit near the bottom page edge, naturally inside the white margin area.
-  const pngLineHeight = model.getTextHeight(
-    model.date || model.copyright || model.disclaimer,
-    model.textFontSize
+  const pngLineHeight = ctx.getTextHeight(
+    ctx.date || ctx.copyright || ctx.disclaimer,
+    ctx.textFontSize
   );
 
   // We have to keep track of the number of lines we are adding to the page to correctly calculate the y-position for each line.
@@ -362,120 +369,120 @@ export async function buildLayout(
   let numberOfLinesAdded = options.useTextIconsInMargin ? -1 : 0;
 
   // 9. Date text
-  if (model.date.length > 0) {
+  if (ctx.date.length > 0) {
     numberOfLinesAdded++;
-    const dateText = model.date.replace(
+    const dateText = ctx.date.replace(
       "{date}",
       new Date().toLocaleDateString()
     );
-    if (model.saveAsType === "PDF") {
+    if (ctx.saveAsType === "PDF") {
       pdfBottomRightTexts.push(dateText);
     } else {
-      const position = model.getRightAlignedPositions(
+      const position = ctx.getRightAlignedPositions(
         dateText,
-        model.textFontSize,
+        ctx.textFontSize,
         pngXMargin,
         0,
         pageWidth,
         options,
-        model.textFontWeight
+        ctx.textFontWeight
       );
       elements.push({
         type: "text",
         text: dateText,
         x: position.x,
-        y: 2.75 * model.margin + pngLineHeight * numberOfLinesAdded,
-        size: model.textFontSize,
-        fontStyle: model.textFontWeight,
-        color: model.textColor,
+        y: 2.75 * ctx.margin + pngLineHeight * numberOfLinesAdded,
+        size: ctx.textFontSize,
+        fontStyle: ctx.textFontWeight,
+        color: ctx.textColor,
       });
     }
   }
 
   // 10. Copyright text
-  if (model.copyright.length > 0) {
+  if (ctx.copyright.length > 0) {
     numberOfLinesAdded++;
-    if (model.saveAsType === "PDF") {
-      pdfBottomRightTexts.push(model.copyright);
+    if (ctx.saveAsType === "PDF") {
+      pdfBottomRightTexts.push(ctx.copyright);
     } else {
-      const position = model.getRightAlignedPositions(
-        model.copyright,
-        model.textFontSize,
+      const position = ctx.getRightAlignedPositions(
+        ctx.copyright,
+        ctx.textFontSize,
         pngXMargin,
         0,
         pageWidth,
         options,
-        model.textFontWeight
+        ctx.textFontWeight
       );
       elements.push({
         type: "text",
-        text: model.copyright,
+        text: ctx.copyright,
         x: position.x,
-        y: 2.75 * model.margin + pngLineHeight * numberOfLinesAdded,
-        size: model.textFontSize,
-        fontStyle: model.textFontWeight,
-        color: model.textColor,
+        y: 2.75 * ctx.margin + pngLineHeight * numberOfLinesAdded,
+        size: ctx.textFontSize,
+        fontStyle: ctx.textFontWeight,
+        color: ctx.textColor,
       });
     }
   }
 
   // 11. Disclaimer text
-  if (model.disclaimer.length > 0) {
-    if (model.saveAsType === "PDF") {
-      pdfBottomRightTexts.push(model.disclaimer);
+  if (ctx.disclaimer.length > 0) {
+    if (ctx.saveAsType === "PDF") {
+      pdfBottomRightTexts.push(ctx.disclaimer);
     } else {
       // The disclaimer text might contain multiple lines separated by newlines.
       // Let's add each line individually and bump the y-position for each line.
       // The reverse is used to start from the bottom of the page and work our way up.
-      const disclaimerTextLines = model.disclaimer.split("\n").reverse();
+      const disclaimerTextLines = ctx.disclaimer.split("\n").reverse();
 
       disclaimerTextLines.forEach((line) => {
         numberOfLinesAdded++;
-        const position = model.getRightAlignedPositions(
+        const position = ctx.getRightAlignedPositions(
           line,
-          model.textFontSize,
+          ctx.textFontSize,
           pngXMargin,
           0,
           pageWidth,
           options,
-          model.textFontWeight
+          ctx.textFontWeight
         );
         elements.push({
           type: "text",
           text: line,
           x: position.x,
-          y: 2.75 * model.margin + pngLineHeight * numberOfLinesAdded,
-          size: model.textFontSize,
-          fontStyle: model.textFontWeight,
-          color: model.textColor,
+          y: 2.75 * ctx.margin + pngLineHeight * numberOfLinesAdded,
+          size: ctx.textFontSize,
+          fontStyle: ctx.textFontWeight,
+          color: ctx.textColor,
         });
       });
     }
   }
 
   // If we are printing a PNG we combine the strings as one element, PNG strings is allready handled separatly.
-  if (model.saveAsType === "PDF") {
+  if (ctx.saveAsType === "PDF") {
     // Now combine Copyrigth/Disclaimer/Date to one text and align them to the right.
 
     // Value set in the text for multiline purposes when building the text in PrintLayout.
     // This is required for aligning text in libpdf, upside: we know the width, downside: text longer than 400 points will wrap.
     // Set as 400 points as approx half of a landscape a4 page.
     const maxWidthBeforeWrap = pageWidth;
-    // Align the text's right edge with the map's right boundary (2.75 * model.margin from page edge).
+    // Align the text's right edge with the map's right boundary (2.75 * ctx.margin from page edge).
     // When textIconsMargin=0 (icons in margin mode), use exactly 2.75 * margin so the text
     // right-aligns with the map edge. Otherwise add 10 pts of extra inward padding.
     const textEdgeMargin =
-      model.margin > 0 && model.textIconsMargin === 0
-        ? 2.75 * model.margin
-        : 2.75 * model.margin + 10;
-    const position = model.getRightAlignedPositions(
+      ctx.margin > 0 && ctx.textIconsMargin === 0
+        ? 2.75 * ctx.margin
+        : 2.75 * ctx.margin + 10;
+    const position = ctx.getRightAlignedPositions(
       pdfBottomRightTexts,
-      model.textFontSize,
+      ctx.textFontSize,
       textEdgeMargin,
       textEdgeMargin,
       pageWidth,
       options,
-      model.textFontWeight,
+      ctx.textFontWeight,
       maxWidthBeforeWrap
     );
 
@@ -484,9 +491,9 @@ export async function buildLayout(
       text: pdfBottomRightTexts.reverse().join("\n"),
       x: position.x,
       y: position.y,
-      size: model.textFontSize,
-      fontStyle: model.textFontWeight,
-      color: model.textColor,
+      size: ctx.textFontSize,
+      fontStyle: ctx.textFontWeight,
+      color: ctx.textColor,
       alignment: "right",
       maxWidth: maxWidthBeforeWrap,
     });
@@ -515,10 +522,10 @@ export async function buildLayout(
  * The scale bar consists of two text labels (the length text and the "Skala: 1:X..." text),
  * along with all the divider lines and optional divider numbers.
  *
- * We also have to set `model.scaleText` here since `getPlacement` relies on it when calculating
+ * We also have to set `ctx.scaleText` here since `getPlacement` relies on it when calculating
  * the position (specifically for the "bottomRight" case where the text width matters).
  *
- * @param {import("./PrintModel").default} model - PrintModel instance
+ * @param {Object} ctx - Per-build layout context.
  * @param {Array} elements - The array of layout elements
  * @param {Object} color - The color of the scale bar.
  * @param {number} scale - The current scale.
@@ -530,7 +537,7 @@ export async function buildLayout(
  * @returns {void}
  */
 function buildScaleBarElements(
-  model,
+  ctx,
   elements,
   color,
   scale,
@@ -552,7 +559,7 @@ function buildScaleBarElements(
   //    at the final value we can actually position on the page.
 
   // 1. Get the length that the scalebar should represent
-  const scaleBarLengthInMeters = model.getFittingScaleBarLength(scale);
+  const scaleBarLengthInMeters = ctx.getFittingScaleBarLength(scale);
 
   // 2. Convert those meters to inches for the scale
   const scaleBarLengthInInches = scaleBarLengthInMeters / scale / mPerInch;
@@ -563,14 +570,14 @@ function buildScaleBarElements(
   // The height of the scale bar, could be configurable later but for now it's a constant.
   const scaleBarHeight = 6;
 
-  model.scaleText = `Skala: ${model.getUserFriendlyScale(
+  ctx.scaleText = `Skala: ${ctx.getUserFriendlyScale(
     scale
   )} (vid ${format.toUpperCase()} ${
     orientation === "landscape" ? "liggande" : "stående"
   })`;
 
   // Determine the position of the scale bar on the page.
-  const scaleBarPosition = model.getPlacement(
+  const scaleBarPosition = ctx.getPlacement(
     scaleBarPlacement,
     scaleBarLengthInPoints,
     scaleBarHeight,
@@ -580,7 +587,7 @@ function buildScaleBarElements(
   );
 
   // Length text (e.g. "500 m")
-  const lengthText = model.getLengthText(scaleBarLengthInMeters);
+  const lengthText = ctx.getLengthText(scaleBarLengthInMeters);
   elements.push({
     type: "text",
     text: lengthText,
@@ -594,7 +601,7 @@ function buildScaleBarElements(
   // Scale text (e.g. "Skala: 1:5 000 (vid A4 liggande)")
   elements.push({
     type: "text",
-    text: model.scaleText,
+    text: ctx.scaleText,
     x: scaleBarPosition.x,
     y: scaleBarPosition.y + 20,
     size: 10,
@@ -606,7 +613,7 @@ function buildScaleBarElements(
   // Please note that it will mutate the `elements` array directly, just
   // as the rest of this function does.
   buildDividerLines(
-    model,
+    ctx,
     elements,
     scaleBarPosition,
     scaleBarLengthInPoints,
@@ -618,9 +625,9 @@ function buildScaleBarElements(
   // current scale is one of the admin-configured scales. Why? Because the numbers are
   // derived from that configuration, and if the scale isn't in there, the labels wouldn't
   // line up with the tick marks — which would be more confusing than having no labels at all.
-  if (model.scaleBarLengths[scale]) {
+  if (ctx.scaleBarLengths[scale]) {
     buildDividerTexts(
-      model,
+      ctx,
       elements,
       scaleBarPosition,
       scaleBarLengthInPoints,
@@ -639,7 +646,7 @@ function buildScaleBarElements(
  * Without this extra calculation, the bar would look like it was missing some lines. And
  * if we'd always add the lines, the bar would look way too crowded.
  *
- * @param {import("./PrintModel").default} model - PrintModel instance
+ * @param {Object} ctx - Per-build layout context.
  * @param {Array} elements - The array of layout elements.
  * @param {Object} scaleBarPosition - The position of the scale bar.
  * @param {number} scaleBarLength - The length of the scale bar.
@@ -648,7 +655,7 @@ function buildScaleBarElements(
  * @returns {void}
  */
 function buildDividerLines(
-  model,
+  ctx,
   elements,
   scaleBarPosition,
   scaleBarLength,
@@ -688,7 +695,7 @@ function buildDividerLines(
     thickness: 1,
   });
 
-  const { divLinesArray } = model.getDivLinesArrayAndDivider(
+  const { divLinesArray } = ctx.getDivLinesArrayAndDivider(
     scaleBarLengthMeters,
     scaleBarLength
   );
@@ -733,7 +740,7 @@ function buildDividerLines(
  * Builds the text labels for the scale bar divider lines.
  * This one is invoked from the buildScaleBarElements function.
  *
- * @param {import("./PrintModel").default} model - PrintModel instance
+ * @param {Object} ctx - Per-build layout context.
  * @param {Array} elements - The array of layout elements.
  * @param {Object} scaleBarPosition - The position of the scale bar.
  * @param {number} scaleBarLength - The length of the scale bar.
@@ -742,7 +749,7 @@ function buildDividerLines(
  * @returns {void}
  */
 function buildDividerTexts(
-  model,
+  ctx,
   elements,
   scaleBarPosition,
   scaleBarLength,
@@ -765,7 +772,7 @@ function buildDividerTexts(
       ? (scaleBarLengthMeters / 1000).toString()
       : scaleBarLengthMeters;
 
-  const { divLinesArray, divider } = model.getDivLinesArrayAndDivider(
+  const { divLinesArray, divider } = ctx.getDivLinesArrayAndDivider(
     scaleBarLengthMeters,
     scaleBarLength
   );
