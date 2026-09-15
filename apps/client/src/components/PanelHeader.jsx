@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import propTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
@@ -22,9 +22,9 @@ const StyledHeader = styled("header")(({ theme }) => ({
         mode: "minimized",
       },
       style: {
-        padding: {
-          padding: theme.spacing(0),
-        },
+        padding: `0 ${theme.spacing(2)}`,
+        borderBottom: "none",
+        minHeight: 50,
       },
     },
   ],
@@ -74,7 +74,12 @@ class PanelHeader extends Component {
         <Typography component="h1" variant="button" align="left" noWrap={true}>
           {this.props.title}
         </Typography>
-        <Box display="flex" component="nav">
+        <Box
+          component="nav"
+          sx={{
+            display: "flex",
+          }}
+        >
           {this.shouldRenderCustomHeaderButtons() &&
             this.renderCustomHeaderButtons()}
           {mode !== "maximized" && // If window isn't in fit screen mode currently…

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
@@ -12,7 +12,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   width: "115px",
 }));
 
-const ToolbarDiv = styled("div")(({ theme }) => ({
+const ToolbarDiv = styled("div")(({ _theme }) => ({
   margin: "5px",
 }));
 

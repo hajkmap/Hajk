@@ -43,7 +43,12 @@ class TextArea extends React.PureComponent {
           }}
         >
           <StyledDivider sx={{ backgroundColor: dividerColor }} />
-          <Grid justifyContent="center" container>
+          <Grid
+            container
+            sx={{
+              justifyContent: "center",
+            }}
+          >
             <GridTypographyContainer component="blockquote" size={12}>
               {textAreaContentArray}
             </GridTypographyContainer>

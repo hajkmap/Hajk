@@ -1,4 +1,3 @@
-import React from "react";
 import { Alert, AlertTitle, Box, Button } from "@mui/material";
 
 export default function Error({

@@ -1,19 +1,19 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import { styled } from "@mui/material/styles";
 import Popper from "@mui/material/Popper";
 import Paper from "@mui/material/Paper";
 import PanelHeader from "./PanelHeader";
 
-const StyledPopper = styled(Popper)(({ theme }) => ({
+const StyledPopper = styled(Popper)(({ _theme }) => ({
   zIndex: 4,
 }));
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
+const StyledPaper = styled(Paper)(({ _theme }) => ({
   maxWidth: "400px",
   background: "white",
 }));
 
-const ChildrenContainer = styled("div")(({ theme }) => ({
+const ChildrenContainer = styled("div")(({ _theme }) => ({
   padding: "15px",
   overflow: "auto",
 }));
@@ -32,13 +32,13 @@ class PopPanel extends Component {
 
   // TODO: Implement. Add propTypes.
 
-  close = (e) => {
+  close = (_e) => {
     const { onClose } = this.props;
     if (onClose) onClose();
   };
   componentDidMount() {
     if (this.props.globalObserver) {
-      this.props.globalObserver.subscribe("core.toolbarExpanded", (open) => {
+      this.props.globalObserver.subscribe("core.toolbarExpanded", (_open) => {
         this.setState(
           {
             placement: "right",

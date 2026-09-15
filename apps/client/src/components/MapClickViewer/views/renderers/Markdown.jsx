@@ -37,7 +37,7 @@ const Markdown = (props) => {
       .then((MarkdownComponent) => {
         setReactComponent(MarkdownComponent);
       })
-      .catch((error) => {
+      .catch((_error) => {
         setReactComponent(null);
       });
   }, [feature, featureCollection, featurePropsParsing]);

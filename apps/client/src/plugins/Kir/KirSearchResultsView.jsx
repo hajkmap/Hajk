@@ -33,11 +33,11 @@ const LoaderContainer = styled("div")(({ theme }) => ({
   },
 }));
 
-const TypographyHeading = styled(Typography)(({ theme }) => ({
+const TypographyHeading = styled(Typography)(({ _theme }) => ({
   fontWeight: 500,
 }));
 
-const StyledBadge = styled(Badge)(({ theme }) => ({
+const StyledBadge = styled(Badge)(({ _theme }) => ({
   "& span": {
     left: "auto",
     right: "-31px",
@@ -77,7 +77,7 @@ const DivPaddedBottom = styled("div")(({ theme }) => ({
   paddingBottom: theme.spacing(1),
 }));
 
-const ExtendedAccordionSummary = styled("div")(({ theme }) => ({
+const ExtendedAccordionSummary = styled("div")(({ _theme }) => ({
   display: "flex",
   width: "100%",
 

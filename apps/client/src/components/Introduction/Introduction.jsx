@@ -403,7 +403,7 @@ class Introduction extends React.PureComponent {
     step,
     menuSelector,
     buttonSelector,
-    delay = Introduction.CONSTANTS.MENU_TRANSITION_DELAY
+    _delay = Introduction.CONSTANTS.MENU_TRANSITION_DELAY
   ) => {
     if (step?.element === menuSelector) {
       const menuButton = document.querySelector(buttonSelector);

@@ -133,6 +133,23 @@ Anyway, the featured returned from the layer is required to have at least these 
         "enableCheckLayerReport": true, // Allow generating reports for the "Check Layer" tab?
         "enableDigitalPlansReport": true, // Allow generating reports for the "Digital Plans" tab?
 
+        /* Check Layer tab extras */
+        "showToggleAllCheckLayers": false, // Show a "Tänd/Släck alla träffar" button that toggles all hit layers' visibility at once. Default: false.
+
+        /* q_pc URL param support — lets external systems deep-link directly into PropertyChecker results.
+         * Usage: append ?q_pc=EXEMPLET+1%3A1 (or #q_pc=...) to the URL.
+         * The value is first looked up by property name via an existing WFS search source (propertyNameLookupWfsLayerId).
+         * If no result is found and address lookup is configured, the value is tried against the address search source.
+         * The map is panned/zoomed to the resolved geometry and the normal PropertyChecker search pipeline is triggered.
+         * The q_pc param is also written back to the URL hash when the user clicks on the map, making all results shareable.
+         *
+         * The two settings below reference EXISTING WFS search sources configured in the Search tool — give the `id` of
+         * the source (the same id as in layers.json). PropertyChecker reuses the app's SearchModel, so the WFS proxy,
+         * projection handling and output-format parsing all come for free. Matching uses that source's configured
+         * `searchFields` (exact, case-insensitive) — tune precision by configuring `searchFields` on the source itself. */
+        "propertyNameLookupWfsLayerId": "985", // Id of the WFS search source used to resolve a property name to geometry. Required for q_pc to work.
+        "addressLookupWfsLayerId": "339", // (Optional) Id of the WFS search source used for address-based fallback lookup.
+
         /* Generic Hajk plugin settings */
         "visibleAtStart": true,
         "target": "right",

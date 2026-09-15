@@ -37,7 +37,7 @@ class TimeSliderSettings extends React.PureComponent {
               errorType = layer.layerError;
             });
           return (
-            <ListItem key={index} sx={(theme) => ({})} disabled={!visible}>
+            <ListItem key={index} sx={(_theme) => ({})} disabled={!visible}>
               {error && (
                 <HajkToolTip
                   key={`tt_${index}`}
@@ -64,7 +64,9 @@ class TimeSliderSettings extends React.PureComponent {
                       this.setState({ time: new Date() });
                     }}
                     name="checkedA"
-                    inputProps={{ "aria-label": "secondary checkbox" }}
+                    slotProps={{
+                      input: { "aria-label": "secondary checkbox" },
+                    }}
                   />
                 </HajkToolTip>
               </ListItemSecondaryAction>

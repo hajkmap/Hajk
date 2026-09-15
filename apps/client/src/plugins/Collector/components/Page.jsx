@@ -44,7 +44,7 @@ class Page extends Component {
   }
 
   getError(field) {
-    return this.formErrors.hasOwnProperty(field.name) ? (
+    return Object.hasOwn(this.formErrors, field.name) ? (
       <div>{this.formErrors[field.name]}</div>
     ) : null;
   }
@@ -226,7 +226,7 @@ class Page extends Component {
             {this.getError(field)}
           </>
         );
-      case "flerval":
+      case "flerval": {
         let defaultValues = [];
         if (typeof field.defaultValue === "string") {
           defaultValues = field.defaultValue.split(",");
@@ -272,7 +272,8 @@ class Page extends Component {
             </FormControl>
           </div>
         );
-      case "lista":
+      }
+      case "lista": {
         let options = [];
         if (Array.isArray(field.values)) {
           options = field.values.map((val, i) => (
@@ -315,6 +316,7 @@ class Page extends Component {
             </FormControl>
           </div>
         );
+      }
       case null:
         return <span>{value}</span>;
       default:
@@ -491,7 +493,7 @@ class Page extends Component {
           this.saveError();
         }
       },
-      (error) => {
+      (_error) => {
         this.saveError();
       }
     );

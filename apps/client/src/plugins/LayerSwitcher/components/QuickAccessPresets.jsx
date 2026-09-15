@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useSnackbar } from "notistack";
 
@@ -174,7 +174,7 @@ function QuickAccessPresets({
           // Set visibility
           layer.set("visible", l.visible);
         } else {
-          layer.set("visible", l.visible);
+          layerSwitcherDispatch.setLayerVisibility(l.id, l.visible);
         }
       } else if (l.id < 0) {
         // A fake maplayer is in the package
@@ -238,7 +238,7 @@ function QuickAccessPresets({
       .filter((l) => l.get("visible") === true)
       .forEach((l) => {
         if (l.get("layerType") === "group") {
-          globalObserver.publish("layerswitcher.hideLayer", l);
+          layerSwitcherDispatch.setLayerVisibility(l.get("name"), false);
         } else if (l.get("layerType") !== "system") {
           l.set("visible", false);
         }
@@ -488,13 +488,18 @@ function QuickAccessPresets({
             }),
           })}
         >
-          <Stack direction="row" alignItems="center">
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: "center",
+            }}
+          >
             <HajkToolTip
               open={tooltipOpen}
               onClose={handleClose}
               onOpen={handleOpen}
               title="Tillbaka"
-              TransitionProps={{ timeout: 0 }}
+              slotProps={{ transition: { timeout: 0 } }}
             >
               <LsIconButton
                 id="quick-access-back-button"
@@ -592,13 +597,17 @@ function QuickAccessPresets({
                       secondary={l.author}
                       slotProps={{
                         primary: {
-                          pr: 5,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          sx: {
+                            pr: 5,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          },
                         },
                         secondary: {
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          sx: {
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          },
                         },
                       }}
                     />

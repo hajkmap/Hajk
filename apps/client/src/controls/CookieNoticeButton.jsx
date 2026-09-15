@@ -1,4 +1,3 @@
-import React from "react";
 import CookieIcon from "@mui/icons-material/Cookie";
 
 import ControlButton from "components/ControlButton";

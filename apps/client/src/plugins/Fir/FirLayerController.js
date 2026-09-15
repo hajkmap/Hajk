@@ -439,7 +439,7 @@ class FirLayerController {
     }
   };
 
-  handleClearSearch = (data) => {
+  handleClearSearch = (_data) => {
     this.clearBeforeSearch();
     this.model.layers.draw.getSource().clear();
     this.model.layers.buffer.getSource().clear();

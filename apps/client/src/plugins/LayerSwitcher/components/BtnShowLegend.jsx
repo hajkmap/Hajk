@@ -1,4 +1,3 @@
-import React from "react";
 import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 import HajkToolTip from "components/HajkToolTip";
 import LsIconButton from "./LsIconButton";

@@ -383,7 +383,7 @@ class GpxModel {
         status: "SUCCESS",
         error: null,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         status: "FAILED",
         error: "Could not save the GPX-file. File-saver Error.",

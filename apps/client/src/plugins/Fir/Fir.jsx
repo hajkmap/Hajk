@@ -8,8 +8,6 @@ import FirView from "./FirView";
 import FirLayerController from "./FirLayerController";
 import FirImport from "./FirImport";
 
-import FirWfsService from "./FirWfsService";
-
 class Fir extends React.PureComponent {
   state = {
     title: "FIR",

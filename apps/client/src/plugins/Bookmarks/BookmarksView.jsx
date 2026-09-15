@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlined";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -131,7 +131,7 @@ const BookmarksView = (props) => {
     setBookmarks(props.model.bookmarks);
   }, [props.model.bookmarks]);
 
-  const addBookmark = (e) => {
+  const addBookmark = (_e) => {
     if (name.trim() === "") {
       return;
     }

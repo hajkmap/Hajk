@@ -69,7 +69,7 @@ class LocalStorageHelper {
           key // …whatever exists in local storage for the specified key
         ],
       };
-    } catch (error) {
+    } catch (_error) {
       // If parsing failed, return defaults
       return defaults;
     }
@@ -91,7 +91,7 @@ class LocalStorageHelper {
 
       const mapSettings = JSON.parse(window.localStorage.getItem(mapName));
       return this.getValueFromPath(mapSettings, key) || defaults;
-    } catch (error) {
+    } catch (_error) {
       // If parsing failed, return defaults
       return defaults;
     }
@@ -123,5 +123,4 @@ class LocalStorageHelper {
 }
 
 // Export singleton instance
-/* eslint import/no-anonymous-default-export: [2, {"allowNew": true}] */
 export default new LocalStorageHelper();

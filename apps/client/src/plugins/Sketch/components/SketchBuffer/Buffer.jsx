@@ -1,4 +1,3 @@
-import React from "react";
 import BufferView from "./BufferView";
 import BufferModel from "./BufferModel";
 

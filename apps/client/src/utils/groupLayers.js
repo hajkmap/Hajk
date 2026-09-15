@@ -22,8 +22,11 @@ export const setOLSubLayers = (olLayer, visibleSubLayersArray) => {
       // and maintain the order from layersInfo (it's crucial that the order
       // of STYLES corresponds exactly to the order of LAYERS!)
       STYLES: Object.entries(olLayer.layersInfo)
-        .filter((k) => visibleSubLayersArray.indexOf(k[0]) !== -1)
-        .map((l) => l[1].style)
+        .filter(([k]) => visibleSubLayersArray.indexOf(k) !== -1)
+        .map(([name, info]) => {
+          const labeled = olLayer.get("labeledSubLayers");
+          return labeled?.has(name) ? `${name}_labels` : (info.style || "");
+        })
         .join(","),
       CQL_FILTER: layerInfo?.params?.CQL_FILTER || null,
     });

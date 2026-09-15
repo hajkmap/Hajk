@@ -54,6 +54,12 @@ export interface PropertyCheckerOptions {
   digitalPlanDescriptionAttribute: string;
   /** Ordered list of second-level use-types for digital plan reports */
   digitalPlansLayerSecondLevelOrder: string[];
+  /** Show a button to toggle all hit layers on/off at once (default: false) */
+  showToggleAllCheckLayers?: boolean;
+  /** Id of an existing WFS search source (Search tool) used to resolve a property name to geometry for the q_pc URL param */
+  propertyNameLookupWfsLayerId?: string;
+  /** Id of an existing WFS search source used to resolve a free-text address when property-name lookup returns no results */
+  addressLookupWfsLayerId?: string;
   [key: string]: unknown;
 }
 
@@ -131,6 +137,11 @@ export interface GetFeatureInfoPayload {
 export interface NoFeaturesPayload {
   amountOfProperties: number;
   amountOfDigitalPlans: number;
+}
+
+/** Published when a q_pc deep-link value could not be resolved to a property/address. */
+export interface QPcLookupFailedPayload {
+  query: string;
 }
 
 // ---- Shared helper types ----

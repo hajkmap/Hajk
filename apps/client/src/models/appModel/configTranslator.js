@@ -46,8 +46,8 @@ export function overrideGlobalEditConfig(editTool, wfstlayers) {
 
 function setDocumentTitleFromConfig(mapConfig) {
   if (
-    mapConfig.hasOwnProperty("map") &&
-    mapConfig.map.hasOwnProperty("title")
+    Object.hasOwn(mapConfig, "map") &&
+    Object.hasOwn(mapConfig.map, "title")
   ) {
     document.title = mapConfig.map.title; // TODO: add opt-out in admin to cancel this override behaviour.
   }

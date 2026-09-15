@@ -153,7 +153,6 @@ function Announcement({ announcements = [], currentMap }) {
         // to each other (because of the flexbox), unless they have a common parent element like this.
         <div>
           <ReactMarkdown
-            children={f.text} // Our MD, as a text string
             rehypePlugins={[rehypeRaw]}
             components={{
               ...customComponentsForReactMarkdown,
@@ -181,7 +180,9 @@ function Announcement({ announcements = [], currentMap }) {
                 ) : null;
               },
             }}
-          />
+          >
+            {f.text}
+          </ReactMarkdown>
         </div>,
         {
           variant: f?.type || "default", // Allowed variants are "default", "info", "warning", "success" and "error"

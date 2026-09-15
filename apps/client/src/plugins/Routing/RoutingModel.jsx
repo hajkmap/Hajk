@@ -54,7 +54,8 @@ class RouteModel {
   setTravelMode = async (travelModeKey) => {
     const ready = await this.ensureGoogleMapsApi();
     if (!ready) return;
-    this.travelMode = this.googleMapsApi.DirectionsTravelMode.hasOwnProperty(
+    this.travelMode = Object.hasOwn(
+      this.googleMapsApi.DirectionsTravelMode,
       travelModeKey
     )
       ? this.googleMapsApi.DirectionsTravelMode[travelModeKey]

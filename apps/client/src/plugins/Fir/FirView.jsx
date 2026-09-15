@@ -10,13 +10,13 @@ import AppBar from "@mui/material/AppBar";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 
-const DivRoot = styled("div")(({ theme }) => ({
+const DivRoot = styled("div")(({ _theme }) => ({
   display: "flex",
   flexDirection: "column",
   height: "100%",
 }));
 
-const StickyAppBar = styled(AppBar)(({ theme }) => ({
+const StickyAppBar = styled(AppBar)(({ _theme }) => ({
   top: 0,
 }));
 

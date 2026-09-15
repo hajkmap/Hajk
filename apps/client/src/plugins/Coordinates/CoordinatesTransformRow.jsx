@@ -9,7 +9,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { styled } from "@mui/material/styles";
 import HajkToolTip from "components/HajkToolTip";
 
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
+const StyledIconButton = styled(IconButton)(({ _theme }) => ({
   justifyContent: "flex-end",
   padding: "8px",
   "& svg": {
@@ -120,7 +120,7 @@ class CoordinatesTransformRow extends React.PureComponent {
           variant: "info",
         });
       })
-      .catch((error) => {
+      .catch((_error) => {
         this.props.enqueueSnackbar("Kopiering misslyckades", {
           variant: "error",
         });
@@ -285,12 +285,20 @@ class CoordinatesTransformRow extends React.PureComponent {
 
     if (this.model.showFieldsOnStart || this.state.wasModified) {
       return (
-        <Grid container columnSpacing={2} padding={0}>
+        <Grid
+          container
+          columnSpacing={2}
+          sx={{
+            padding: 0,
+          }}
+        >
           <Grid
-            alignSelf={"end"}
             size={{
               xs: 10,
               md: 8,
+            }}
+            sx={{
+              alignSelf: "end",
             }}
           >
             <Typography variant="body2" style={{ fontWeight: 600 }}>
@@ -304,10 +312,12 @@ class CoordinatesTransformRow extends React.PureComponent {
           </Grid>
           <Grid
             container
-            justifyContent={"end"}
             size={{
               xs: 2,
               md: 4,
+            }}
+            sx={{
+              justifyContent: "end",
             }}
           >
             <HajkToolTip title="Kopiera till urklipp">

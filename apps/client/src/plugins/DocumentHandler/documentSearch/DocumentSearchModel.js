@@ -161,7 +161,7 @@ export default class DocumentSearchModel {
   };
 
   getDocumentHandlerResults = (searchString) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       if (searchString === "") {
         resolve({ featureCollections: [], errors: [] });
       }

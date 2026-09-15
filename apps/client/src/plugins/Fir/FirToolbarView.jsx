@@ -21,7 +21,7 @@ const ContainerTopDoublePadded = styled("div")(({ theme }) => ({
   paddingTop: theme.spacing(4),
 }));
 
-const StyledButtonGroup = styled(ButtonGroup)(({ theme }) => ({
+const StyledButtonGroup = styled(ButtonGroup)(({ _theme }) => ({
   width: "100%",
   overflow: "hidden",
   whiteSpace: "nowrap",
@@ -60,12 +60,12 @@ const FileInputContainer = styled("div")(({ theme }) => ({
   },
 }));
 
-const FileInput = styled("input")(({ theme }) => ({
+const FileInput = styled("input")(({ _theme }) => ({
   visibility: "hidden",
   position: "absolute",
 }));
 
-const SvgImg = styled("img")(({ theme }) => ({
+const SvgImg = styled("img")(({ _theme }) => ({
   height: "24px",
   width: "24px",
 }));
@@ -148,7 +148,7 @@ class FirToolbarView extends React.PureComponent {
 
   handleDeleteClick = (e) => {
     var first = true;
-    this.model.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => {
+    this.model.map.forEachFeatureAtPixel(e.pixel, (feature, _layer) => {
       // Handles both drawn features and buffer features. Remove them at the same time as they are linked.
 
       const type = feature.get(`${this.prefix}_type`);
@@ -410,12 +410,12 @@ class FirToolbarView extends React.PureComponent {
                   }
                 );
               }}
-              onFocus={(e) => {
+              onFocus={(_e) => {
                 if (this.state.buffer === 0) {
                   this.setState({ buffer: "" });
                 }
               }}
-              onBlur={(e) => {
+              onBlur={(_e) => {
                 if (this.state.buffer === "") {
                   this.setState({ buffer: 0 });
                 }

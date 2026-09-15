@@ -144,7 +144,7 @@ function toKmlString(str, type) {
         str += "</Polygon>";
       });
       break;
-    case "multiLine":
+    case "multiLine": {
       str = str.replace(/^MULTILINESTRING\(/, "").replace(/\)$/, "");
       str = str.replace(/^MULTILINESTRING Z\(/, "").replace(/\)$/, "");
       let lines = str.split("),");
@@ -155,6 +155,7 @@ function toKmlString(str, type) {
         str += `<LineString><coordinates>${line}</coordinates></LineString>`;
       });
       break;
+    }
     default:
       break;
   }

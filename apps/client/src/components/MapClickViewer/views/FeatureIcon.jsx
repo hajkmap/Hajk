@@ -1,5 +1,3 @@
-import React from "react";
-
 import { SvgIcon, Icon } from "@mui/material";
 
 import DefaultIcon from "@mui/icons-material/MapTwoTone";

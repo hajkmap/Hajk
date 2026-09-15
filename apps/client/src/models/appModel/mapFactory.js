@@ -12,31 +12,31 @@ function buildInteractionsOptions(configMap) {
   // will fallback to defaults from OL. (The entire interactionsOptions object, as well as all its properties are optional
   // according to OL documentation, so there's no need to set stuff that won't be needed.)
   return {
-    ...(configMap.hasOwnProperty("altShiftDragRotate") && {
+    ...(Object.hasOwn(configMap, "altShiftDragRotate") && {
       altShiftDragRotate: configMap.altShiftDragRotate,
     }),
-    ...(configMap.hasOwnProperty("onFocusOnly") && {
+    ...(Object.hasOwn(configMap, "onFocusOnly") && {
       onFocusOnly: configMap.onFocusOnly,
     }),
-    ...(configMap.hasOwnProperty("doubleClickZoom") && {
+    ...(Object.hasOwn(configMap, "doubleClickZoom") && {
       doubleClickZoom: configMap.doubleClickZoom,
     }),
-    ...(configMap.hasOwnProperty("keyboard") && {
+    ...(Object.hasOwn(configMap, "keyboard") && {
       keyboard: configMap.keyboard,
     }),
-    ...(configMap.hasOwnProperty("mouseWheelZoom") && {
+    ...(Object.hasOwn(configMap, "mouseWheelZoom") && {
       mouseWheelZoom: configMap.mouseWheelZoom,
     }),
-    ...(configMap.hasOwnProperty("shiftDragZoom") && {
+    ...(Object.hasOwn(configMap, "shiftDragZoom") && {
       shiftDragZoom: configMap.shiftDragZoom,
     }),
-    ...(configMap.hasOwnProperty("dragPan") && {
+    ...(Object.hasOwn(configMap, "dragPan") && {
       dragPan: configMap.dragPan,
     }),
-    ...(configMap.hasOwnProperty("pinchRotate") && {
+    ...(Object.hasOwn(configMap, "pinchRotate") && {
       pinchRotate: configMap.pinchRotate,
     }),
-    ...(configMap.hasOwnProperty("pinchZoom") && {
+    ...(Object.hasOwn(configMap, "pinchZoom") && {
       pinchZoom: configMap.pinchZoom,
     }),
     ...(!Number.isNaN(Number.parseInt(configMap.zoomDelta)) && {

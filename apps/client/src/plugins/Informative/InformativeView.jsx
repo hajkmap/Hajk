@@ -29,26 +29,26 @@ const IconButtonButton = styled(IconButton)(({ theme }) => ({
   margin: theme.spacing(1),
 }));
 
-const DivChapter = styled("div")(({ theme }) => ({}));
-const DivTocChapter = styled("div")(({ theme }) => ({
+const DivChapter = styled("div")(({ _theme }) => ({}));
+const DivTocChapter = styled("div")(({ _theme }) => ({
   display: "flex",
   cursor: "pointer",
 }));
 
-const DivTocChapters = styled("div")(({ theme }) => ({
+const DivTocChapters = styled("div")(({ _theme }) => ({
   marginLeft: "10px",
 }));
 
-const DivTocChapterExpander = styled("div")(({ theme }) => ({
+const DivTocChapterExpander = styled("div")(({ _theme }) => ({
   width: "30px",
   height: "30px",
 }));
 
-const DivTocChapterHeader = styled("div")(({ theme }) => ({
+const DivTocChapterHeader = styled("div")(({ _theme }) => ({
   textDecoration: "underline",
 }));
 
-const DivMarkup = styled("div")(({ theme }) => ({
+const DivMarkup = styled("div")(({ _theme }) => ({
   "& h1": {
     lineHeight: "normal",
   },
@@ -86,21 +86,21 @@ const ArrowDownwardIcon = styled(ArrowDownward)(({ theme }) => ({
   marginRight: theme.spacing(1),
 }));
 
-const DivToc = styled("div")(({ theme }) => ({
+const DivToc = styled("div")(({ _theme }) => ({
   marginBottom: "10px",
 }));
 
-const DivTocHeader = styled("div")(({ theme }) => ({
+const DivTocHeader = styled("div")(({ _theme }) => ({
   display: "flex",
   alignItems: "center",
 }));
 
-const DivTocContainer = styled("div")(({ theme }) => ({
+const DivTocContainer = styled("div")(({ _theme }) => ({
   borderBottom: "1px solid #ccc",
   padding: "10px 0",
 }));
 
-const LinearProgressLoader = styled(LinearProgress)(({ theme }) => ({
+const LinearProgressLoader = styled(LinearProgress)(({ _theme }) => ({
   opacity: 1,
   transition: "opacity 2s ease-in",
 }));
@@ -119,7 +119,7 @@ const DivLegendItem = styled("div")(({ theme }) => ({
   textAlign: "center",
 }));
 
-const DivContent = styled("div")(({ theme }) => ({
+const DivContent = styled("div")(({ _theme }) => ({
   userSelect: "text",
   cursor: "auto",
   "& img": {
@@ -130,7 +130,7 @@ const DivContent = styled("div")(({ theme }) => ({
   },
 }));
 
-const DivLayers = styled("div")(({ theme }) => ({
+const DivLayers = styled("div")(({ _theme }) => ({
   marginTop: "10px",
 }));
 
@@ -208,7 +208,7 @@ class Informative extends React.PureComponent {
     }
   }
 
-  displayMap = (layers, mapSettings) => (e) => {
+  displayMap = (layers, mapSettings) => (_e) => {
     this.props.parent.informativeModel.displayMap(layers, mapSettings);
     if (window.innerWidth < 600) {
       this.props.app.globalObserver.publish("core.minimizeWindow");

@@ -1,4 +1,3 @@
-import React from "react";
 import DialogContentText from "@mui/material/DialogContentText";
 
 export default function LegacyNonMarkdownRenderer(props) {

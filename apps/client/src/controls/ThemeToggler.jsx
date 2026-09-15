@@ -1,4 +1,3 @@
-import React from "react";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 
 import ControlButton from "components/ControlButton";

@@ -160,7 +160,7 @@ export default class DocumentHandlerModel {
 
   getAllChapterInfo() {
     if (this.chapterInfo.length === 0) {
-      this.allDocuments.forEach((document) => {
+      this.allDocuments.forEach((document, _index) => {
         document.chapters.forEach((mainChapter) => {
           this.setChapterInfo(
             mainChapter,

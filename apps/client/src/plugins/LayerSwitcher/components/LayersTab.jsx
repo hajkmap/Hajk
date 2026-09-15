@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 import { ListItemText } from "@mui/material";
 
@@ -177,10 +177,8 @@ const LayersTab = ({
           primary="Inga resultat"
           slotProps={{
             primary: {
-              pr: 5,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
               variant: "body1",
+              sx: { pr: 5, overflow: "hidden", textOverflow: "ellipsis" },
             },
           }}
         />

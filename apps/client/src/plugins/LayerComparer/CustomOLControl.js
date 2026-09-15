@@ -150,7 +150,9 @@ export default class OlSideBySideControl extends Control {
     try {
       this.#container.removeChild(this.#divider);
       this.#container.removeChild(this.#range);
-    } catch (error) {}
+    } catch (_error) {
+      // DOM elements may already be removed; ignore
+    }
   }
 
   open() {

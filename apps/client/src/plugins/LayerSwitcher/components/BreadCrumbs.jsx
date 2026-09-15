@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import BreadCrumb from "./BreadCrumb";
 import { styled } from "@mui/material/styles";
 import { useTheme } from "@mui/material";
@@ -197,9 +197,12 @@ class BreadCrumbs extends Component {
             {layers.length > 0 ? (
               <Grid
                 container
-                justifyContent="center"
-                sx={{ marginTop: 1, marginBottom: 1 }}
                 size={12}
+                sx={{
+                  justifyContent: "center",
+                  marginTop: 1,
+                  marginBottom: 1,
+                }}
               >
                 <Button variant="contained" onClick={this.clear}>
                   Ta bort allt innehåll

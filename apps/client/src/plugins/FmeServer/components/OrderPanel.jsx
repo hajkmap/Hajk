@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid, TextField, Typography } from "@mui/material";
 import { LinearProgress } from "@mui/material";
 import InformationWrapper from "./InformationWrapper";

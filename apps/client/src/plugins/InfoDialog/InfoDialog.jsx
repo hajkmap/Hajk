@@ -1,4 +1,3 @@
-import React from "react";
 import DialogWindowPlugin from "../DialogWindowPlugin";
 import DefaultIcon from "@mui/icons-material/InfoTwoTone";
 

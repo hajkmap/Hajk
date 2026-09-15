@@ -39,7 +39,7 @@ import { functionalOk as functionalCookieOk } from "./Cookie";
 export default class Analytics {
   constructor(config, globalObserver) {
     switch (config?.type) {
-      case "plausible":
+      case "plausible": {
         const { domain, apiHost, trackLocalhost } = config.options;
 
         // Setup the minimal Plausible tracker
@@ -78,7 +78,8 @@ export default class Analytics {
           }
         );
         break;
-      case "matomo":
+      }
+      case "matomo": {
         let { siteId, trackerUrl, cookieLess } = config.options;
 
         // If we're not in cookieless mode and functional cookies aren't allowed, do nothing.
@@ -149,6 +150,7 @@ export default class Analytics {
           }
         );
         break;
+      }
 
       default:
         break;

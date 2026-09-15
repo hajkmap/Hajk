@@ -14,7 +14,7 @@ export function mergeConfigWithValuesFromParams(
 ) {
   // clean is used to strip the UI of all elements so we get a super clean viewport back, without any plugins
   const clean =
-    Boolean(paramsAsPlainObject.hasOwnProperty("clean")) &&
+    Boolean(Object.hasOwn(paramsAsPlainObject, "clean")) &&
     paramsAsPlainObject.clean !== "false" &&
     paramsAsPlainObject.clean !== "0";
 
@@ -30,7 +30,7 @@ export function mergeConfigWithValuesFromParams(
   if (typeof paramsAsPlainObject.gl === "string") {
     try {
       appModel.groupLayersFromParams = JSON.parse(paramsAsPlainObject.gl);
-    } catch (error) {
+    } catch (_error) {
       console.error(
         "Couldn't parse the group layers parameter. Attempted with this value:",
         paramsAsPlainObject.gl

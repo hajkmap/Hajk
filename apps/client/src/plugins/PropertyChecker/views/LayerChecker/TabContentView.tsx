@@ -22,6 +22,25 @@ function TabContentView({
 }: LayerCheckerTabContentViewProps) {
   const [reportDialogVisible, setReportDialogVisible] = useState(false);
   const { showTooltips } = usePropertyCheckerContext();
+  const [allVisible, setAllVisible] = useState(() =>
+    features.features
+      .map((f) =>
+        olMap.getAllLayers().find((l) => l.get("name") === f.get("id"))
+      )
+      .filter(Boolean)
+      .every((l) => l!.getVisible())
+  );
+
+  const handleToggleAll = () => {
+    const next = !allVisible;
+    setAllVisible(next);
+    features.features
+      .map((f) =>
+        olMap.getAllLayers().find((l) => l.get("name") === f.get("id"))
+      )
+      .filter(Boolean)
+      .forEach((l) => l!.setVisible(next));
+  };
 
   const handleShowReportDialog = (propertyName: string) => {
     setCurrentPropertyName(propertyName);
@@ -75,6 +94,27 @@ function TabContentView({
             </span>
           </HajkToolTip>
         </>
+      )}
+      {options.showToggleAllCheckLayers && (
+        <HajkToolTip
+          title={
+            showTooltips
+              ? allVisible
+                ? "Släck alla träffar i kartan"
+                : "Tänd alla träffar i kartan"
+              : ""
+          }
+        >
+          <Button
+            fullWidth
+            variant="outlined"
+            size="small"
+            sx={{ mb: 1 }}
+            onClick={handleToggleAll}
+          >
+            {allVisible ? "Släck alla träffar" : "Tänd alla träffar"}
+          </Button>
+        </HajkToolTip>
       )}
       <Box sx={{ mt: options.enableCheckLayerReport ? 1 : 0 }}>
         {features.features

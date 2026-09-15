@@ -37,7 +37,7 @@ class PrintList extends React.Component {
     }, []);
   };
 
-  renderMenuItem = (item, id) => {
+  renderMenuItem = (item, _id) => {
     if (item.menuItemIds && item.menuItemIds.length > 0) {
       return this.getMenuItemType(item, "submenu");
     } else if (item.document) {

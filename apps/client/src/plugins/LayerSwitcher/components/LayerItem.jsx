@@ -23,6 +23,7 @@ import BtnLayerWarning from "./BtnLayerWarning";
 import BtnShowLegend from "./BtnShowLegend";
 import BtnToggleLayerLabel from "./BtnToggleLayerLabel";
 import LsCheckBox from "./LsCheckBox";
+import LsRadioButton from "./LsRadioButton";
 
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
@@ -100,6 +101,7 @@ function LayerItem({
   subLayersSection,
   isGroupLayerQuickAccess,
   isLayerQuickAccess,
+  isExclusive,
 }) {
   // WmsLayer load status, shows warning icon if !ok
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
@@ -131,6 +133,7 @@ function LayerItem({
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const applyLabelStyle = useCallback(() => {
     if (!olLayer) return;
+    if (olLayer.get("allSubLayers")?.length > 1) return; // Multi-sublayer group layers handle labels per-sublayer
 
     const source = olLayer.getSource?.();
     if (!source || typeof source.updateParams !== "function") return;
@@ -150,7 +153,7 @@ function LayerItem({
       LAYERS: layerName,
       STYLES: isActive ? `${layerName}_labels` : baseStyle,
     });
-  }, [olLayer, layerId]);
+  }, [olLayer]);
 
   const toggleLabelLayer = (e) => {
     e.stopPropagation();
@@ -388,16 +391,26 @@ function LayerItem({
               borderBottom: (theme) => renderBorder(theme),
             }}
           >
-            {toggleable && (
-              <LsCheckBox
-                id={
-                  !isLayerQuickAccess && !isGroupLayerQuickAccess
-                    ? "toggle-layer-item"
-                    : undefined
-                }
-                toggleState={toggleState}
-              />
-            )}
+            {toggleable &&
+              (isExclusive ? (
+                <LsRadioButton
+                  id={
+                    !isLayerQuickAccess && !isGroupLayerQuickAccess
+                      ? "toggle-layer-item"
+                      : undefined
+                  }
+                  toggleState={toggleState}
+                />
+              ) : (
+                <LsCheckBox
+                  id={
+                    !isLayerQuickAccess && !isGroupLayerQuickAccess
+                      ? "toggle-layer-item"
+                      : undefined
+                  }
+                  toggleState={toggleState}
+                />
+              ))}
             <LayerLegendIcon
               legendIcon={legendIcon}
               layerType={layerType}
@@ -407,13 +420,17 @@ function LayerItem({
             />
             <ListItemText
               primary={layerCaption}
+              sx={{ alignSelf: "center" }}
               slotProps={{
                 primary: {
-                  pr: 5,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
                   variant: "body1",
-                  fontWeight: layerIsToggled && !draggable ? "bold" : "inherit",
+                  sx: {
+                    pr: 5,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    fontWeight:
+                      layerIsToggled && !draggable ? "bold" : "inherit",
+                  },
                 },
               }}
             />
@@ -426,12 +443,15 @@ function LayerItem({
               }}
             >
               {renderStatusIcon()}
-              {layerInfo?.hasLabelStyle && (
-                <BtnToggleLayerLabel
-                  active={showingLabelLayer}
-                  onClick={toggleLabelLayer}
-                />
-              )}
+              {!(allSubLayers?.length > 1) &&
+                (layerInfo?.hasLabelStyle ||
+                  layerInfo?.layersInfo?.[allSubLayers?.[0]]
+                    ?.hasLabelStyle) && (
+                  <BtnToggleLayerLabel
+                    active={showingLabelLayer}
+                    onClick={toggleLabelLayer}
+                  />
+                )}
               {!toggleable && !draggable ? (
                 <LsIconButton size="small">
                   <HajkToolTip title="Bakgrundskartan ligger låst längst ner i ritordningen">

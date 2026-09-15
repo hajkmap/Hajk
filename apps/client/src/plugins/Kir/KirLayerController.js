@@ -217,13 +217,13 @@ class KirLayerController {
     }
   };
 
-  handleClearSearch = (data) => {
+  handleClearSearch = (_data) => {
     this.clearBeforeSearch();
     this.model.layers.draw.getSource().clear();
     this.model.layers.buffer.getSource().clear();
   };
 
-  bufferFeatures = (options) => {
+  bufferFeatures = (_options) => {
     if (!this.bufferValue) {
       this.getLayer("buffer").getSource().clear();
       return;

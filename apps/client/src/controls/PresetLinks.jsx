@@ -40,6 +40,13 @@ class Preset extends React.PureComponent {
     this.location = null;
     this.zoom = null;
     this.layers = null;
+
+    // Allows other parts of the app (e.g. the Command Palette) to trigger a
+    // preset selection without duplicating this control's link-parsing,
+    // fly-to and layer-toggle logic.
+    this.globalObserver.subscribe("preset.selectPreset", (item) => {
+      this.handleItemClick(null, item);
+    });
   }
 
   // Show dropdown menu, anchored to the element clicked
@@ -211,7 +218,7 @@ class Preset extends React.PureComponent {
     // If config for Control isn't found, or if the config doesn't contain any presets, quit.
     if (
       this.config === undefined ||
-      (this.config.hasOwnProperty("options") &&
+      (Object.hasOwn(this.config, "options") &&
         this.config.options.presetList.length < 1)
     ) {
       return null;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import withSnackbar from "components/WithSnackbar";
 import LsIconButton from "./LsIconButton";
 
@@ -156,7 +156,7 @@ const QuickAccessView = ({
               slotProps={{
                 primary: {
                   variant: "body1",
-                  fontWeight: hasVisibleLayers ? "bold" : "inherit",
+                  sx: { fontWeight: hasVisibleLayers ? "bold" : "inherit" },
                 },
               }}
             />

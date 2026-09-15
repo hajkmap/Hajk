@@ -1,4 +1,3 @@
-import React from "react";
 import { Paper, Typography } from "@mui/material";
 
 // A simple component showing the supplied text in a wrapper

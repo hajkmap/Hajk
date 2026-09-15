@@ -11,7 +11,7 @@ import ControlButton from "components/ControlButton";
  */
 class MapResetter extends React.PureComponent {
   // TODO: Also reset layers to default visibility!
-  handleClick = (e) => {
+  handleClick = (_e) => {
     const { map } = this.props;
     if (map !== undefined) {
       const view = map.getView();

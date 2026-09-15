@@ -628,7 +628,13 @@ class SearchResultsContainer extends React.PureComponent {
       return null;
     } else {
       return (
-        <Grid container align="center" justifyContent="flex-end">
+        <Grid
+          container
+          align="center"
+          sx={{
+            justifyContent: "flex-end",
+          }}
+        >
           <Grow in={this.state.showTools} timeout={800}>
             <Grid sx={!this.state.showTools ? { display: "none" } : null}>
               {this.searchResultTools.map((tool, index) => {
@@ -958,16 +964,20 @@ class SearchResultsContainer extends React.PureComponent {
     return (
       <Grid
         container
-        justifyContent="space-between"
-        alignItems="center"
         wrap="nowrap"
         size={12}
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
         <Grid
           container
           wrap="nowrap"
-          alignItems="center"
           size={this.state.showTools ? 5 : 11}
+          sx={{
+            alignItems: "center",
+          }}
         >
           <HajkToolTip
             title={
@@ -988,8 +998,10 @@ class SearchResultsContainer extends React.PureComponent {
         </Grid>
         <Grid
           container
-          justifyContent="flex-end"
           size={this.state.showTools ? 7 : 1}
+          sx={{
+            justifyContent: "flex-end",
+          }}
         >
           {this.renderSearchResultListTools()}
         </Grid>

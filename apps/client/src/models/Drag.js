@@ -46,7 +46,7 @@ class Drag extends Pointer {
 
   isDraggable(layer) {
     return layer
-      ? this.acceptedLayers.hasOwnProperty(layer.getProperties().name) ||
+      ? Object.hasOwn(this.acceptedLayers, layer.getProperties().name) ||
           layer.dragLocked === false
       : true;
   }
@@ -98,7 +98,7 @@ class Drag extends Pointer {
   handleMoveEvent(evt) {
     if (this.cursor_) {
       var map = evt.map,
-        feature = map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+        feature = map.forEachFeatureAtPixel(evt.pixel, (feature, _layer) => {
           return feature;
         }),
         element = evt.map.getTargetElement();
@@ -115,7 +115,7 @@ class Drag extends Pointer {
     }
   }
 
-  handleUpEvent(evt) {
+  handleUpEvent(_evt) {
     this.coordinate_ = null;
     this.feature_ = null;
     return false;

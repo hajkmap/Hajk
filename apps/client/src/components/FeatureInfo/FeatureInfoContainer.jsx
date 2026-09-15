@@ -91,10 +91,12 @@ class FeatureInfoContainer extends React.PureComponent {
     const { features } = this.props;
     return (
       <Grid
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ backgroundColor: "primary.main" }}
         container
+        sx={{
+          alignItems: "center",
+          justifyContent: "space-between",
+          backgroundColor: "primary.main",
+        }}
       >
         <TogglerButtonRightContainer>
           <Button
@@ -132,7 +134,7 @@ class FeatureInfoContainer extends React.PureComponent {
     );
   };
 
-  getFeaturesAsDefaultTable(data, caption) {
+  getFeaturesAsDefaultTable(data, _caption) {
     // We can't use "i" for coloring every second row, as some rows
     // will be removed (Objects are not printed), so there's a need
     // for a separate counter of rows that actually get printed.
@@ -239,10 +241,12 @@ class FeatureInfoContainer extends React.PureComponent {
         )}
         <Grid
           className="hajk-featureinfo-content"
-          justifyContent="center"
-          alignContent={featureInfoLoaded ? "flex-start" : "center"}
-          sx={{ flex: "auto" }}
           container
+          sx={{
+            justifyContent: "center",
+            alignContent: featureInfoLoaded ? "flex-start" : "center",
+            flex: "auto",
+          }}
         >
           {featureInfoLoaded ? (
             this.renderFeatureInformation()

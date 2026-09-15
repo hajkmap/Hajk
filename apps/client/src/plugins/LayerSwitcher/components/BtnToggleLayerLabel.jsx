@@ -1,4 +1,4 @@
-import LabelOutlinedIcon from "@mui/icons-material/LabelImportantOutline";
+import LabelOutlinedIcon from "@mui/icons-material/LabelImportantOutlined";
 import LabelIcon from "@mui/icons-material/LabelImportant";
 import LsIconButton from "./LsIconButton";
 import HajkToolTip from "components/HajkToolTip";

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import { styled } from "@mui/material/styles";
 import Page from "./Page";
 import Typography from "@mui/material/Typography";

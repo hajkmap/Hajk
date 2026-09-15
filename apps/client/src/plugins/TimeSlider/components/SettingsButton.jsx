@@ -1,4 +1,3 @@
-import React from "react";
 import { Badge, Button } from "@mui/material";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import HajkToolTip from "components/HajkToolTip";

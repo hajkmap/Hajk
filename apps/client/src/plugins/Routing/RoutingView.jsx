@@ -138,7 +138,7 @@ class RoutingView extends React.PureComponent {
 
   handleClickOnEndSelection = () => {
     if (this.state.endSelectionInProgress !== true) {
-      this.setState({ endSelectionInProgress: true }, (e) => {
+      this.setState({ endSelectionInProgress: true }, (_e) => {
         this.selectEndSnackbar = this.props.enqueueSnackbar(
           "Klicka i kartan för att välja din destination.",
           { variant: "info", persist: true }

@@ -1,6 +1,5 @@
 import Draw from "ol/interaction/Draw";
 import DoubleClickZoom from "ol/interaction/DoubleClickZoom";
-import { Fill, Stroke, Style } from "ol/style";
 import { Vector as VectorSource } from "ol/source";
 import { Vector as VectorLayer } from "ol/layer";
 import { intersects, within } from "ol/format/filter";
@@ -22,7 +21,6 @@ class GeosuiteExportModel {
   #vector;
   #draw;
   #source;
-  #style;
   #doubleClick;
   #wfsParser;
 
@@ -51,16 +49,6 @@ class GeosuiteExportModel {
       name: "pluginGeoSuite",
       caption: "GeoSuite layer",
     });
-    this.#style = new Style({
-      fill: new Fill({
-        color: "rgba(255, 255, 255, 0.3)",
-      }),
-      stroke: new Stroke({
-        color: "rgba(0, 0, 0, 0.5)",
-        width: 3,
-      }),
-    });
-
     // Set configuration from defaults and option overrides, if any
     this.#config = {
       projects: {
@@ -138,12 +126,12 @@ class GeosuiteExportModel {
     this.#localObserver.publish("window-closed");
   };
 
-  handleDrawStart = (e) => {
+  handleDrawStart = (_e) => {
     //When the user starts drawing a feature, remove any existing feature. We only want one shape.
     this.clearMapFeatures();
   };
 
-  handleDrawEnd = (e) => {
+  handleDrawEnd = (_e) => {
     this.#localObserver.publish("area-selection-complete");
   };
 
@@ -711,6 +699,7 @@ class GeosuiteExportModel {
         const blob = hfetch(fileLink).then((r) => r.blob());
 
         let fileNameToUse = filePath;
+        // eslint-disable-next-line no-constant-condition
         for (let n = 1; true; n++) {
           let found = usedFileNames.indexOf(fileNameToUse);
           if (found === -1) break;
@@ -743,7 +732,7 @@ class GeosuiteExportModel {
         );
         this.#localObserver.publish("document-save-done");
       })
-      .catch((error) => {
+      .catch((_error) => {
         this.#localObserver.publish("document-save-failed");
       });
   };

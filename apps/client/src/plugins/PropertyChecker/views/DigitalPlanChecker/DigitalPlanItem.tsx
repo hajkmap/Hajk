@@ -101,8 +101,10 @@ const DigitalPlanItem = ({
           {regulationCaptionAsElement.length > 0 && (
             <Typography
               variant="caption"
-              color="text.secondary"
               component="div"
+              sx={{
+                color: "text.secondary",
+              }}
             >
               {regulationCaptionAsElement}
             </Typography>

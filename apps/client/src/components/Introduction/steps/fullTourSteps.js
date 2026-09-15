@@ -5,8 +5,8 @@ const getInitialSteps = (
   drawerButtonTitle,
   documenthandlerDrawerButtonTitle,
   documenthandler,
-  activeDrawerContent,
-  isDrawerPermanent
+  _activeDrawerContent,
+  _isDrawerPermanent
 ) => {
   const steps = [
     {

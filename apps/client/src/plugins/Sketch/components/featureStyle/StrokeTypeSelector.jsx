@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid, MenuItem, Paper } from "@mui/material";
 import { TextField, Typography } from "@mui/material";
 import { STROKE_TYPES } from "../../constants";

@@ -19,7 +19,13 @@ import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
 const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
   return (
     <Paper sx={{ p: 1, mt: 1 }}>
-      <Grid container justifyContent="space-between" alignItems="center">
+      <Grid
+        container
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography variant="body2">Tillåt fri förflyttning</Typography>
         <HajkToolTip
           title={
@@ -85,7 +91,13 @@ const FeatureMoveSelector = (props) => {
 
   return (
     <Paper sx={{ p: 1, mt: 1 }}>
-      <Grid container justifyContent="center" alignItems="center">
+      <Grid
+        container
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <Grid sx={{ mb: 2 }} size={12}>
           <Typography variant="body2" align="center">
             Fast förflyttning
@@ -194,7 +206,13 @@ const FeatureRotateSelector = (props) => {
         pointerEvents: props.disabled ? "none" : "auto",
       }}
     >
-      <Grid container justifyContent="center" alignItems="center">
+      <Grid
+        container
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <Grid sx={{ mb: 1 }} size={12}>
           <Typography variant="body2" align="center">
             Rotera

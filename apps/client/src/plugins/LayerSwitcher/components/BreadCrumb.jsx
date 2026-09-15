@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
@@ -64,7 +64,7 @@ class BreadCrumb extends Component {
     this.props.layer.un("change:opacity", this.setHidden);
   }
 
-  setLayerOpacity = (layer) => (event) => {
+  setLayerOpacity = (layer) => (_event) => {
     this.setState(
       {
         hidden: !this.state.hidden,
@@ -75,7 +75,7 @@ class BreadCrumb extends Component {
     );
   };
 
-  setLayerVisibility = (layer) => (event) => {
+  setLayerVisibility = (layer) => (_event) => {
     if (layer.get("visible")) {
       layer.setOpacity(1);
       this.props.app.globalObserver.publish("layerswitcher.hideLayer", layer);

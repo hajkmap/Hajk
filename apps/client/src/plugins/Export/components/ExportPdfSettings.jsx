@@ -218,7 +218,7 @@ class ExportPdfSettings extends React.PureComponent {
     }
   }
 
-  exportPDF = (e) => {
+  exportPDF = (_e) => {
     this.setState({
       url: false,
       loading: true,
