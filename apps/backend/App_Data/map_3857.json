@@ -1,0 +1,486 @@
+{
+  "projections": [
+    {
+      "code": "EPSG:3857",
+      "definition": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs",
+      "extent": [
+        -20037508.34,
+        -20037508.34,
+        20037508.34,
+        20037508.34
+      ],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3857",
+      "definition": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs",
+      "extent": [
+        -20037508.34,
+        -20037508.34,
+        20037508.34,
+        20037508.34
+      ],
+      "units": null
+    }
+  ],
+  "tools": [
+    {
+      "type": "layerswitcher",
+      "options": {
+        "groups": [
+          {
+            "id": "b1e5f9b0-0f1a-4b1c-9c2e-3a7d5e6f8a01",
+            "type": "group",
+            "name": "Exempellager (globala, öppna källor)",
+            "toggled": false,
+            "expanded": true,
+            "exclusive": false,
+            "infogroupvisible": false,
+            "infogrouptitle": "",
+            "infogrouptext": "",
+            "infogroupurl": "",
+            "infogroupurltext": "",
+            "infogroupopendatalink": "",
+            "infogroupowner": "",
+            "parent": "-1",
+            "layers": [
+              {
+                "id": "gebco0",
+                "drawOrder": 1000,
+                "visibleAtStart": false,
+                "infobox": ""
+              },
+              {
+                "id": "gibsbm",
+                "drawOrder": 1000,
+                "visibleAtStart": false,
+                "infobox": ""
+              }
+            ],
+            "groups": []
+          }
+        ],
+        "baselayers": [],
+        "quickAccessPresets": [],
+        "active": true,
+        "visibleAtStart": false,
+        "visibleAtStartMobile": false,
+        "backgroundSwitcherBlack": true,
+        "backgroundSwitcherWhite": true,
+        "enableOSM": true,
+        "OSMVisibleAtStart": false,
+        "enableOSMVector": true,
+        "OSMVectorVisibleAtStart": true,
+        "osmVectorStyleUrl": "",
+        "osmVectorRenderMode": "hybrid",
+        "showBreadcrumbs": true,
+        "showDrawOrderView": true,
+        "showFilter": true,
+        "showQuickAccess": true,
+        "legendForceTransparency": false,
+        "legendTryHiDPI": false,
+        "enableSystemLayersSwitch": true,
+        "lockDrawOrderBaselayer": true,
+        "drawOrderViewInfoText": "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
+        "enableQuickAccessPresets": true,
+        "quickAccessTopicsInfoText": "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
+        "enableUserQuickAccessFavorites": true,
+        "userQuickAccessFavoritesInfoText": "Här kan du hantera och redigera dina sparade favoriter. Observera att favoriter endast sparas tillfälligt.",
+        "enableTransparencySlider": true,
+        "instruction": "",
+        "minMaxZoomAlertOnToggleOnly": false,
+        "cqlFilterVisible": false,
+        "showLegendByDefault": false,
+        "renderSpecialBackgroundsAtBottom": true,
+        "dropdownThemeMaps": true,
+        "themeMapHeaderCaption": "Exempel EPSG:3857",
+        "visibleForGroups": [],
+        "target": "left",
+        "position": "left",
+        "width": "",
+        "height": "",
+        "title": "Lagerhanterare",
+        "description": "Välj vad du vill visa i kartan."
+      },
+      "index": 1
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "height": "dynamic",
+        "anchor": [
+          0.5,
+          1
+        ],
+        "scale": 0.15,
+        "strokeColor": {
+          "r": 200,
+          "b": 0,
+          "g": 0,
+          "a": 0.7
+        },
+        "strokeWidth": 4,
+        "fillColor": {
+          "r": 255,
+          "b": 0,
+          "g": 0,
+          "a": 0.1
+        },
+        "allowDangerousHtml": true,
+        "useNewInfoclick": false,
+        "useNewPlaceholderMatching": false,
+        "useLevel1FeatureHighlight": false,
+        "transformLinkUri": true,
+        "visibleForGroups": []
+      },
+      "index": 2
+    },
+    {
+      "type": "sketch",
+      "options": {
+        "target": "left",
+        "position": "left",
+        "visibleForGroups": []
+      },
+      "index": 3
+    },
+    {
+      "type": "streetview",
+      "options": {
+        "target": "control",
+        "position": "right",
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 5
+    },
+    {
+      "type": "anchor",
+      "options": {
+        "target": "control",
+        "position": "right",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 7
+    },
+    {
+      "type": "search",
+      "options": {
+        "layers": [
+          {
+            "id": "4",
+            "visibleForGroups": []
+          }
+        ],
+        "visibleForGroups": [],
+        "maxResultsPerDataset": 100,
+        "anchor": [
+          "",
+          ""
+        ],
+        "scale": "",
+        "markerImg": "",
+        "delayBeforeAutoSearch": 300,
+        "searchBarPlaceholder": "Sök...",
+        "autocompleteWildcardAtStart": false,
+        "enablePolygonSearch": true,
+        "enableRadiusSearch": true,
+        "enableSelectSearch": true,
+        "enableExtentSearch": true,
+        "enableResultsFiltering": true,
+        "enableResultsSorting": true,
+        "enableResultsSelectionClearing": true,
+        "enableResultsDownloading": true,
+        "enableFeaturePreview": true,
+        "enableLabelOnHighlight": true,
+        "enableSelectedFeaturesCollection": true,
+        "showResultFeaturesInMap": true,
+        "enableFeatureToggler": true,
+        "drawFillColor": "rgba(255,255,255,0.07)",
+        "drawStrokeColor": "rgba(74,74,74,0.5)",
+        "displayFillColor": "rgba(74,144,226,0.15)",
+        "displayStrokeColor": "rgba(74,144,226,0.4)",
+        "selectionTextStroke": "rgba(255,255,255,1)",
+        "selectionTextFill": "rgba(63,122,190,1)",
+        "selectionFillColor": "rgba(74,144,226,0.7)",
+        "selectionStrokeColor": "rgba(74,144,226,0.8)",
+        "highlightTextStroke": "rgba(255,255,255,1)",
+        "highlightTextFill": "rgba(214,143,28,1)",
+        "highlightFillColor": "rgba(245,166,35,0.7)",
+        "highlightStrokeColor": "rgba(245,166,35,0.8)"
+      },
+      "index": 11
+    },
+    {
+      "type": "routing",
+      "options": {
+        "target": "toolbar",
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 12
+    },
+    {
+      "type": "location",
+      "options": {
+        "target": "control",
+        "position": "right",
+        "visibleForGroups": []
+      },
+      "index": 13
+    },
+    {
+      "type": "preset",
+      "options": {
+        "presetList": [],
+        "visibleForGroups": []
+      },
+      "index": 14
+    },
+    {
+      "type": "coordinates",
+      "options": {
+        "target": "toolbar",
+        "position": "right",
+        "instruction": "",
+        "transformations": [
+          {
+            "code": "EPSG:3857",
+            "default": true,
+            "hint": "Web Mercator",
+            "title": "Web Mercator",
+            "xtitle": "Easting",
+            "ytitle": "Northing",
+            "inverseAxis": false
+          },
+          {
+            "code": "EPSG:4326",
+            "default": false,
+            "hint": "WGS84",
+            "title": "WGS84",
+            "xtitle": "Longitude",
+            "ytitle": "Latitude",
+            "inverseAxis": false
+          }
+        ],
+        "visibleForGroups": []
+      },
+      "index": 15
+    },
+    {
+      "type": "bookmarks",
+      "options": {
+        "target": "control",
+        "position": "right",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 16
+    },
+    {
+      "type": "buffer",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "varbergVer": false,
+        "geoserverUrl": "",
+        "notFeatureLayers": [],
+        "visibleForGroups": []
+      },
+      "index": 17
+    },
+    {
+      "type": "print",
+      "options": {
+        "target": "left",
+        "position": "left",
+        "copyright": "",
+        "disclaimer": "",
+        "date": "Utskriftsdatum: {date}",
+        "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000, 800000, 1000000, 5000000, 10000000",
+        "scaleMeters": "10, 10, 20, 40, 60, 100, 100, 300, 600, 2000, 4000, 8000, 10000, 160000",
+        "logo": "/logoLight.png",
+        "logoMaxWidth": 40,
+        "northArrowMaxWidth": 10,
+        "dpis": "72, 150, 300",
+        "paperFormats": "A2, A3, A4",
+        "northArrow": "/north_arrow.png",
+        "useMargin": false,
+        "useTextIconsInMargin": false,
+        "mapTextColor": "#000000",
+        "instruction": "",
+        "visibleAtStart": false,
+        "visibleForGroups": [],
+        "includeLogo": true,
+        "logoPlacement": "topRight",
+        "includeQrCode": false,
+        "qrCodePlacement": "topRight",
+        "includeScaleBar": true,
+        "scaleBarPlacement": "bottomLeft",
+        "includeNorthArrow": true,
+        "northArrowPlacement": "topLeft",
+        "includeImageBorder": false,
+        "useCustomTileLoaders": true,
+        "maxTileSize": 4096
+      },
+      "index": 5
+    },
+    {
+      "type": "documenthandler",
+      "index": 0,
+      "options": {
+        "title": "Visa informationsruta",
+        "target": "hidden",
+        "showScrollButtonLimit": 400,
+        "dynamicImportUrls": {
+          "iconFonts": "https://fonts.googleapis.com/icon?family=Material+Icons",
+          "customFont": "https://fonts.googleapis.com/css?family=Open+Sans"
+        },
+        "iconLibraryLink": "https://material.io/resources/icons/?style=baseline",
+        "customThemeUrl": "/documentHandlerTheme.json",
+        "width": 600,
+        "height": "90vh",
+        "searchImplemented": true,
+        "enablePrint": true,
+        "closePanelOnMapLinkOpen": false,
+        "displayLoadingOnMapLinkOpen": false,
+        "documentOnStart": "",
+        "drawerTitle": "",
+        "drawerButtonTitle": "Meny",
+        "tableOfContents": {
+          "active": false,
+          "expanded": false,
+          "chapterLevelsToShow": 2,
+          "title": "Innehållsförteckning"
+        },
+        "defaultDocumentColorSettings": {
+          "textAreaBackgroundColor": "#ccc",
+          "textAreaDividerColor": "#6A0DAD"
+        },
+        "menuConfig": {
+          "menu": []
+        }
+      }
+    },
+    {
+      "type": "layercomparer",
+      "index": 2,
+      "options": {
+        "target": "left",
+        "showNonBaseLayersInSelect": false,
+        "instruction": "",
+        "visibleAtStart": false,
+        "visibleForGroups": [],
+        "chosenLayers": [],
+        "selectChosenLayers": true
+      }
+    },
+    {
+      "type": "measurer",
+      "index": 4,
+      "options": {
+        "target": "left",
+        "position": "left",
+        "visibleAtStart": false,
+        "icons": ""
+      }
+    }
+  ],
+  "map": {
+    "target": "map",
+    "center": [
+      0,
+      0
+    ],
+    "title": "Hajk - EPSG:3857 world example",
+    "projection": "EPSG:3857",
+    "zoom": 2,
+    "maxZoom": 18,
+    "minZoom": 0,
+    "resolutions": [
+      156543.03392804097,
+      78271.51696402048,
+      39135.75848201024,
+      19567.87924100512,
+      9783.93962050256,
+      4891.96981025128,
+      2445.98490512564,
+      1222.99245256282,
+      611.49622628141,
+      305.748113140705,
+      152.8740565703525,
+      76.43702828517625,
+      38.21851414258813,
+      19.109257071294063,
+      9.554628535647032,
+      4.777314267823516,
+      2.388657133911758,
+      1.194328566955879,
+      0.5971642834779395
+    ],
+    "origin": [
+      -20037508.34,
+      20037508.34
+    ],
+    "extent": [
+      -20037508.34,
+      -20037508.34,
+      20037508.34,
+      20037508.34
+    ],
+    "constrainOnlyCenter": false,
+    "constrainResolution": false,
+    "logo": "/logoLight.png",
+    "geoserverLegendOptions": "",
+    "mapselector": true,
+    "mapcleaner": true,
+    "showUserAvatar": false,
+    "drawerVisible": false,
+    "drawerPermanent": false,
+    "drawerVisibleMobile": false,
+    "activeDrawerOnStart": "plugins",
+    "showThemeToggler": true,
+    "colors": {
+      "primaryColor": "#1976d2",
+      "secondaryColor": "#ffa000",
+      "preferredColorScheme": "user"
+    },
+    "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+    "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
+    "crossOrigin": "anonymous",
+    "showRecentlyUsedPlugins": true,
+    "logoLight": "logoLight.png",
+    "logoDark": "logoDark.png",
+    "extraPrintResolutions": [],
+    "constrainResolutionMobile": false,
+    "enableDownloadLink": false,
+    "enableAppStateInHash": true,
+    "confirmOnWindowClose": true,
+    "altShiftDragRotate": true,
+    "onFocusOnly": false,
+    "doubleClickZoom": true,
+    "keyboard": true,
+    "mouseWheelZoom": true,
+    "shiftDragZoom": true,
+    "dragPan": true,
+    "pinchRotate": true,
+    "pinchZoom": true,
+    "zoomDelta": null,
+    "zoomDuration": null,
+    "mapresetter": false,
+    "introductionEnabled": false,
+    "introductionShowControlButton": false,
+    "introductionSteps": [],
+    "drawerStatic": false,
+    "drawerTitle": "Kartverktyg",
+    "drawerButtonTitle": "Kartverktyg",
+    "drawerButtonIcon": "MapIcon",
+    "showCookieNotice": true,
+    "showCookieNoticeButton": true,
+    "cookieUse3dPart": false,
+    "mapSelectorStyle": "dropdown"
+  }
+}
