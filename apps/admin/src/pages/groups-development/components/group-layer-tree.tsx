@@ -1074,11 +1074,6 @@ export default function GroupLayerTree({
           backgroundMode={backgroundMode}
           drawOrderMode={drawOrderMode}
           clickModeActive={clickMode}
-          onInteractionModeChange={
-            backgroundMode || drawOrderMode
-              ? undefined
-              : handleInteractionModeChange
-          }
           clickPick={clickPick}
           onCatalogClickPick={handleCatalogClickPick}
           groupDisplaySettings={groupDisplaySettings}
@@ -1296,6 +1291,11 @@ export default function GroupLayerTree({
               onDropFromCatalog={handleDropCatalogToMoveZone}
               canAcceptCatalogItem={canAcceptCatalogDropToMoveZone}
               clickMode={clickMode}
+              onInteractionModeChange={
+                backgroundMode || drawOrderMode
+                  ? undefined
+                  : handleInteractionModeChange
+              }
               pickedItemKeys={
                 clickPick?.source === "moveZone"
                   ? clickPick.items.map((item) => item.key)

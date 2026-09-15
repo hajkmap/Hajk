@@ -255,8 +255,8 @@ export default function GroupLayerTreeDropZone({
           }}
           sx={{
             flex: 1,
-            // Always keep a tiny hit strip under the list (grows with free space).
-            minHeight: "2px",
+            minHeight: clickPlaceActive ? 6 : "2px",
+            pt: clickPlaceActive ? "4px" : 0,
             cursor: clickPlaceActive ? "pointer" : undefined,
           }}
         />

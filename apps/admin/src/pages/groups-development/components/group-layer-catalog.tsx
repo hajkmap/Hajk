@@ -1,6 +1,7 @@
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import FolderIcon from "@mui/icons-material/Folder";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LayersIcon from "@mui/icons-material/Layers";
 import { DragIndicator } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
@@ -48,7 +49,6 @@ import {
   type GroupDisplaySettings,
   type GroupFormValues,
   type MapLayersClickPick,
-  type MapLayersInteractionMode,
 } from "../types";
 import { CATALOG_DRAG_TYPE } from "../types";
 import { toDisplaySettings, toFormValues } from "../utils/group-form";
@@ -67,9 +67,8 @@ interface GroupLayerCatalogProps {
   backgroundMode?: boolean;
   /** Ritordning: layers are already in the preview list — hide catalog drag UI. */
   drawOrderMode?: boolean;
-  /** Effective click-and-place (toggle button and/or Alt key). */
+  /** Effective click-and-place mode. */
   clickModeActive?: boolean;
-  onInteractionModeChange?: (mode: MapLayersInteractionMode) => void;
   clickPick?: MapLayersClickPick | null;
   onCatalogClickPick?: (item: CatalogDragItem, additive: boolean) => void;
   groupDisplaySettings: Record<string, GroupDisplaySettings>;
@@ -251,7 +250,6 @@ export default function GroupLayerCatalog({
   backgroundMode = false,
   drawOrderMode = false,
   clickModeActive = false,
-  onInteractionModeChange,
   clickPick = null,
   onCatalogClickPick,
   groupDisplaySettings,
@@ -509,9 +507,36 @@ export default function GroupLayerCatalog({
                   mb: 1,
                 }}
               >
-                <Typography variant="subtitle1">
-                  {t("common.groupsDevelopment")}
-                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 1,
+                  }}
+                >
+                  <Typography variant="subtitle1">
+                    {t("common.groupsDevelopment")}
+                  </Typography>
+                  <Tooltip
+                    title={
+                      clickModeActive
+                        ? t("groupsDevelopment.clickDropDescription")
+                        : t("groupsDragAndDropDescription")
+                    }
+                  >
+                    <IconButton
+                      size="small"
+                      aria-label={
+                        clickModeActive
+                          ? t("groupsDevelopment.clickDropDescription")
+                          : t("groupsDragAndDropDescription")
+                      }
+                    >
+                      <InfoOutlinedIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
                 {!backgroundMode ? (
                   <Box
                     sx={{
@@ -530,40 +555,9 @@ export default function GroupLayerCatalog({
                     >
                       {t("common.add")}
                     </Button>
-                    {onInteractionModeChange ? (
-                      <Tooltip
-                        title={
-                          clickModeActive
-                            ? t("groupsDevelopment.interactionDrag")
-                            : t("groupsDevelopment.interactionClickAlt")
-                        }
-                      >
-                        <IconButton
-                          size="small"
-                          aria-label={t("groupsDevelopment.interactionMode")}
-                          aria-pressed={clickModeActive}
-                          onClick={() => {
-                            onInteractionModeChange(
-                              clickModeActive ? "drag" : "click",
-                            );
-                          }}
-                        >
-                          {clickModeActive ? (
-                            <AdsClickIcon fontSize="small" />
-                          ) : (
-                            <DragIndicator fontSize="small" />
-                          )}
-                        </IconButton>
-                      </Tooltip>
-                    ) : null}
                   </Box>
                 ) : null}
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {clickModeActive
-                  ? t("groupsDevelopment.clickDropDescription")
-                  : t("groupsDragAndDropDescription")}
-              </Typography>
               <TextField
                 fullWidth
                 size="small"

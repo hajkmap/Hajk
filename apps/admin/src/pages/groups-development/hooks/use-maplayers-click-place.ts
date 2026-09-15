@@ -66,32 +66,6 @@ export function useMapLayersClickPlace({
     interactionMode === "click" && !backgroundMode && !drawOrderMode;
 
   useEffect(() => {
-    if (backgroundMode || drawOrderMode) {
-      return;
-    }
-
-    const isAltKey = (event: KeyboardEvent) =>
-      event.key === "Alt" ||
-      event.code === "AltLeft" ||
-      event.code === "AltRight";
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (!isAltKey(event) || event.repeat) {
-        return;
-      }
-      // Keep Alt from focusing the browser menu while placing layers.
-      event.preventDefault();
-      setClickPick(null);
-      setInteractionMode((current) => (current === "click" ? "drag" : "click"));
-    };
-
-    window.addEventListener("keydown", onKeyDown, true);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown, true);
-    };
-  }, [backgroundMode, drawOrderMode]);
-
-  useEffect(() => {
     if (!clickMode || clickPick == null) {
       return;
     }

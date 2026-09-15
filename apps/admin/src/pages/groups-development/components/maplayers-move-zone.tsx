@@ -1,3 +1,4 @@
+import AdsClickIcon from "@mui/icons-material/AdsClick";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import FolderIcon from "@mui/icons-material/Folder";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -19,6 +20,7 @@ import DialogWrapper from "../../../components/flexible-dialog";
 import type {
   CatalogDragItem,
   GroupLayerTreeNode,
+  MapLayersInteractionMode,
   MoveZoneItem,
 } from "../types";
 import {
@@ -37,6 +39,7 @@ interface MapLayersMoveZoneProps {
   onDropFromCatalog: (item: CatalogDragItem) => void;
   canAcceptCatalogItem?: (item: CatalogDragItem) => boolean;
   clickMode?: boolean;
+  onInteractionModeChange?: (mode: MapLayersInteractionMode) => void;
   pickedItemKeys?: string[];
   onClickPlace?: () => void;
   onItemClickPick?: (item: MoveZoneItem, additive: boolean) => void;
@@ -266,6 +269,7 @@ export default function MapLayersMoveZone({
   onDropFromCatalog,
   canAcceptCatalogItem = () => true,
   clickMode = false,
+  onInteractionModeChange,
   pickedItemKeys = [],
   onClickPlace,
   onItemClickPick,
@@ -338,12 +342,51 @@ export default function MapLayersMoveZone({
           cursor: clickMode && onClickPlace != null ? "pointer" : undefined,
         }}
       >
-        <Typography
-          variant="subtitle2"
-          sx={{ mb: 0.25, textAlign: "center", fontWeight: 600 }}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 0.5,
+            mb: 0.25,
+            minHeight: 32,
+          }}
         >
-          {t("map.drawOrderMoveZone")}
-        </Typography>
+          <Typography
+            variant="subtitle2"
+            sx={{ fontWeight: 600, textAlign: "center" }}
+          >
+            {t("map.drawOrderMoveZone")}
+          </Typography>
+          {onInteractionModeChange ? (
+            <Tooltip
+              title={
+                clickMode
+                  ? t("groupsDevelopment.interactionDrag")
+                  : t("groupsDevelopment.interactionClick")
+              }
+            >
+              <IconButton
+                size="small"
+                aria-label={t("groupsDevelopment.interactionMode")}
+                aria-pressed={clickMode}
+                onMouseDown={(event) => {
+                  event.stopPropagation();
+                }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onInteractionModeChange(clickMode ? "drag" : "click");
+                }}
+              >
+                {clickMode ? (
+                  <DragIndicatorIcon fontSize="small" />
+                ) : (
+                  <AdsClickIcon fontSize="small" />
+                )}
+              </IconButton>
+            </Tooltip>
+          ) : null}
+        </Box>
 
         {items.length === 0 ? (
           <Box
