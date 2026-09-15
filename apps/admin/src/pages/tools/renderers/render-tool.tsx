@@ -19,6 +19,7 @@ import PresetRenderer, { presetDefaults } from "./render-preset";
 import CoordinatesRenderer, {
   coordinatesDefaults,
 } from "./render-coordinates";
+import BufferRenderer, { bufferDefaults } from "./render-buffer";
 import React from "react";
 import { Control, FieldValues, UseFormSetValue } from "react-hook-form";
 import { Tool } from "../../../api/tools";
@@ -40,6 +41,7 @@ const toolOptionDefaults: Record<string, Record<string, unknown>> = {
   information: informationDefaults,
   preset: presetDefaults,
   coordinates: coordinatesDefaults,
+  buffer: bufferDefaults,
 };
 
 export const getToolOptionDefaults = (
@@ -70,6 +72,7 @@ const toolRenderers: Record<string, React.ComponentType<ToolRendererProps>> = {
   information: InformationRenderer as React.ComponentType<ToolRendererProps>,
   preset: PresetRenderer as React.ComponentType<ToolRendererProps>,
   coordinates: CoordinatesRenderer as React.ComponentType<ToolRendererProps>,
+  buffer: BufferRenderer as React.ComponentType<ToolRendererProps>,
 };
 
 interface RenderToolProps {
