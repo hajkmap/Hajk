@@ -18,7 +18,6 @@ import {
   Typography,
   CircularProgress,
   IconButton,
-  useMediaQuery,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LayersIcon from "@mui/icons-material/Layers";
@@ -161,8 +160,7 @@ export default function MapSettings() {
   const { mutateAsync: updateMapLayerSwitcher } = useUpdateMapLayerSwitcher();
   const { mutateAsync: deleteMap, isPending: isDeletingMap } = useDeleteMap();
   const { data: layerSwitcherState } = useMapLayerSwitcher(mapName ?? "");
-  const { palette, breakpoints } = useTheme();
-  const isCompactSidebar = useMediaQuery(breakpoints.down("xl"));
+  const { palette } = useTheme();
   const [deleteWarningExpanded, setDeleteWarningExpanded] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
@@ -253,9 +251,8 @@ export default function MapSettings() {
   const [layerActivationResetKey, setLayerActivationResetKey] = useState(0);
   const [menuSynced, setMenuSynced] = useState(false);
   const [menuSyncedMapName, setMenuSyncedMapName] = useState(mapName);
-  const [layerSwitcherDraft, setLayerSwitcherDraft] = useState<LayerSwitcherDraft | null>(
-    null,
-  );
+  const [layerSwitcherDraft, setLayerSwitcherDraft] =
+    useState<LayerSwitcherDraft | null>(null);
 
   const applyMenuStateFromServer = useCallback(
     (layers: MapLayer[]) => {
@@ -321,9 +318,8 @@ export default function MapSettings() {
     const serverActivationSignature = mapLayerActivationSignature(
       serverLayerActivationRows,
     );
-    const localActivationSignature = mapLayerActivationSignature(
-      layerActivationRows,
-    );
+    const localActivationSignature =
+      mapLayerActivationSignature(layerActivationRows);
     const localMatchesCommitted =
       localActivationSignature === layerActivationCommittedSignature;
 
@@ -961,7 +957,7 @@ export default function MapSettings() {
         }
         warning={
           <Box sx={{ mt: 1 }}>
-            {mapLayersMoveZoneVisible && isCompactSidebar ? (
+            {mapLayersMoveZoneVisible ? (
               <Box>
                 <Box sx={{ display: "flex", justifyContent: "center" }}>
                   <IconButton
