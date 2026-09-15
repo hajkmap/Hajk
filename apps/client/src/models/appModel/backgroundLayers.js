@@ -154,7 +154,7 @@ export function createOSMVectorLayer(appModel) {
     zIndex: -1,
     layerType: "base",
     rotateMap: "n", // OpenStreetMap should be rotated to North
-    name: "-4", // Let's follow the precedent of the other "special" background layers
+    name: BACKGROUND_LAYER_IDS.OSM_VECTOR,
     caption: "OpenStreetMap (vektor)",
     layerInfo: {
       infoText:

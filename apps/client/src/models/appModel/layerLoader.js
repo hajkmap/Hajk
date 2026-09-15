@@ -204,12 +204,12 @@ function applyBackgroundLayerVisibilityFromParams(
 
   // Check if the layerParams contains -4 (osm-vector-layer) and handle set it to visible on load
   if (
-    layersFromParams.includes("-4") &&
+    layersFromParams.includes(BACKGROUND_LAYER_IDS.OSM_VECTOR) &&
     layerSwitcherConf?.options?.enableOSMVector
   ) {
     const osmVectorLayer = map
       .getAllLayers()
-      .find((l) => l.get("name") === "-4");
+      .find((l) => l.get("name") === BACKGROUND_LAYER_IDS.OSM_VECTOR);
     if (osmVectorLayer === undefined) {
       console.warn(`Cannot find the OSM vector layer`);
     } else {

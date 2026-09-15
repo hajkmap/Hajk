@@ -10,4 +10,5 @@ export const BACKGROUND_LAYER_IDS = {
   WHITE: "-1",
   BLACK: "-2",
   OSM: "-3",
+  OSM_VECTOR: "-4",
 };

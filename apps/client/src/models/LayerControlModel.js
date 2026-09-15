@@ -18,8 +18,9 @@ import { BACKGROUND_LAYER_IDS } from "../constants/backgroundLayers";
  * 1. Base/background layers have only partial support. See `showLayer`/`hideLayer`
  *    `"base"` handling below (notably hide does not auto-select another bg).
  * 2. The built-in "special" background layers (white `"-1"`, black `"-2"`, OSM
- *    `"-3"`) ARE real OpenLayers layers and CAN be toggled through this API (see
- *    `showBackgroundWhite`/`showBackgroundBlack`/`showBackgroundOSM` for named
+ *    `"-3"`, OSM vector `"-4"`) ARE real OpenLayers layers and CAN be toggled
+ *    through this API (see `showBackgroundWhite`/`showBackgroundBlack`/
+ *    `showBackgroundOSM`/`showBackgroundOSMVector` for named
  *    shortcuts). The white/black ones render via
  *    the `div#map` background color rather than tiles; that repaint is performed
  *    by the BackgroundSwitcher when it observes the visibility change.
@@ -103,6 +104,7 @@ const arraysEqual = (a = [], b = []) => {
  * lc.showBackgroundWhite();                        // built-in white background
  * lc.showBackgroundBlack();                        // built-in black background
  * lc.showBackgroundOSM();                          // built-in OSM background
+ * lc.showBackgroundOSMVector();                    // built-in OSM vector background
  *
  * // Sublayers of a WMS group layer (the nested checkboxes)
  * lc.showSubLayer("groupId", "subId");
@@ -124,6 +126,60 @@ const arraysEqual = (a = [], b = []) => {
  * const off = lc.subscribe("id", () => {});        // -> unsubscribe fn
  * lc.getVisibilitySnapshot("id");                  // -> boolean (stable)
  * lc.getLayerStateSnapshot("id");                  // -> cached state object
+ *
+ * ============================================================================
+ * EXAMPLE — a checkbox that follows the layer, whoever toggled it
+ * ============================================================================
+ *
+ * The point of subscribing instead of keeping your own `useState` is that the
+ * checkbox stays correct when something *else* changes the layer: the
+ * LayerSwitcher, a URL hash/permalink on load, another plugin, or a direct
+ * `lc.toggleLayer("id")` from the console.
+ *
+ * In React, use the hooks — `useLayerVisibility` already handles subscribe,
+ * snapshot and cleanup via `useSyncExternalStore`:
+ *
+ *   import Checkbox from "@mui/material/Checkbox";
+ *   import FormControlLabel from "@mui/material/FormControlLabel";
+ *   import { useLayerVisibility } from "../../hooks/useLayerVisibility";
+ *
+ *   const LayerCheckbox = ({ layerControl, layerId, label }) => {
+ *     const visible = useLayerVisibility(layerControl, layerId);
+ *     return (
+ *       <FormControlLabel
+ *         label={label}
+ *         control={
+ *           <Checkbox
+ *             checked={visible}
+ *             onChange={(e) =>
+ *               layerControl.setLayerVisibility(layerId, e.target.checked)
+ *             }
+ *           />
+ *         }
+ *       />
+ *     );
+ *   };
+ *
+ * `layerId` may also be a tree-group folder id or a `"groupId:subId"` sublayer
+ * address, so the same component works for those too. For a WMS group layer
+ * that can be partially checked, use `useLayerState` instead and drive MUI's
+ * `indeterminate` from it:
+ *
+ *   const { visible, state } = useLayerState(layerControl, folderId);
+ *   <Checkbox checked={visible} indeterminate={state === "some"} ... />
+ *
+ * Outside React (embedders, vanilla JS), subscribe directly and remember to
+ * call the returned unsubscribe function when the element goes away:
+ *
+ *   const lc = window.hajkPublicApi.layerControl;
+ *   const input = document.querySelector("#my-layer-toggle");
+ *   const sync = () => (input.checked = lc.getVisibilitySnapshot("id"));
+ *   sync();                                        // initial state
+ *   const off = lc.subscribe("id", sync);          // keep in sync from now on
+ *   input.addEventListener("change", () =>
+ *     lc.setLayerVisibility("id", input.checked)
+ *   );
+ *   // later: off();
  */
 class LayerControlModel {
   #map;
@@ -428,8 +484,9 @@ class LayerControlModel {
    * Show a background (base) layer by id, e.g. a configured server background.
    * Warns and does nothing if the id is not a `layerType === "base"` layer, so
    * callers can't accidentally route a normal/group layer through here. For the
-   * three built-in special backgrounds there are also the named shortcuts
-   * `showBackgroundWhite`/`showBackgroundBlack`/`showBackgroundOSM`.
+   * built-in special backgrounds there are also the named shortcuts
+   * `showBackgroundWhite`/`showBackgroundBlack`/`showBackgroundOSM`/
+   * `showBackgroundOSMVector`.
    * @param {string} id
    */
   showBackground(id) {
@@ -475,6 +532,14 @@ class LayerControlModel {
    */
   showBackgroundOSM() {
     this.showLayer(BACKGROUND_LAYER_IDS.OSM);
+  }
+
+  /**
+   * Convenience shortcut for the built-in OpenStreetMap vector background layer
+   * (magic id `-4`). See `showBackgroundWhite` for details.
+   */
+  showBackgroundOSMVector() {
+    this.showLayer(BACKGROUND_LAYER_IDS.OSM_VECTOR);
   }
 
   /**
