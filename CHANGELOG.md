@@ -37,13 +37,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Client: FIR - Fixed a crash in FIR when activating "add by map click" if the map configuration lacks the `wmsRealEstateLayer`. The plugin now works without it (search-area tools degrade gracefully).
+- Client: FIR - Fixed a crash when activating "add by map click" if `wmsRealEstateLayer` is missing from the map config.
 
 ### Changed
 
-- Client: FIR/KIR - Tab layout and search-error snackbar handling extracted into a shared view shell used by both plugins. KIR drops a stray prop on its tab panels; no user-facing changes.
-- Client: FIR/KIR - Search results views now share one common core component (state machine, pagination, list rendering, observer wiring). KIR result rows aligned with FIR's markup, which also fixes that clicking a row's delete button could simultaneously expand/mark the row.
-- Client: FIR/KIR - All class components converted to functional components with hooks, and first step of code deduplication between the plugins: KirModel now extends a shared base model from the FIR plugin, and KIR search results render using FIR's result item view. No user-facing behavior changes.
+- Client: FIR/KIR - Converted class components to hooks and extracted shared code. Also fixed KIR's delete button expanding the row.
 - Backend: Upgraded `write-excel-file` from 3.x to 4.x.
 - Backend: Enhance detailed request logger with structured output and file logging configuration [#1836](https://github.com/hajkmap/Hajk/pull/1836)
 - Backend: Bumped the [API Explorer](https://github.com/swagger-api/swagger-ui) to v5.32.6.
