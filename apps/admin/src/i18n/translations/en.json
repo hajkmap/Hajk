@@ -801,7 +801,7 @@
     "groupsDevelopment.emptyMapLayers": "Drag a group here to start, then add layers inside groups.",
     "groupsDevelopment.noActiveLayerswitcher": "Activate a Layer switcher tool on the Tools tab to edit its layer hierarchy here.",
     "groupsDevelopment.layerInfoBox": "Info box",
-    "groupsDevelopment.exclusiveGroup": "Exclusive group",
+    "groupsDevelopment.exclusive": "Exclusive group",
     "groupsDevelopment.infoDocument": "Info document",
     "groupsDevelopment.noGroupsMatchSearch": "No layer groups match your search.",
     "groupsDevelopment.noBackgroundLayers": "No active background layers. Activate and mark layers as Background on the Layers tab first.",

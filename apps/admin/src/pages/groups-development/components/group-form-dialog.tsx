@@ -102,7 +102,8 @@ function GroupFormDialogBody({
         <FormControlLabel
           control={
             <Checkbox
-              checked={values.toggled}
+              checked={values.exclusive ? false : values.toggled}
+              disabled={values.exclusive}
               onChange={(event) =>
                 setValues((current) => ({
                   ...current,
@@ -130,16 +131,17 @@ function GroupFormDialogBody({
         <FormControlLabel
           control={
             <Checkbox
-              checked={values.exclusiveGroup}
+              checked={values.exclusive}
               onChange={(event) =>
                 setValues((current) => ({
                   ...current,
-                  exclusiveGroup: event.target.checked,
+                  exclusive: event.target.checked,
+                  toggled: event.target.checked ? false : current.toggled,
                 }))
               }
             />
           }
-          label={t("groupsDevelopment.exclusiveGroup")}
+          label={t("groupsDevelopment.exclusive")}
         />
         <FormControlLabel
           control={

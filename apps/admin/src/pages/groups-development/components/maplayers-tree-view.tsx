@@ -50,6 +50,8 @@ export interface MapLayersTreeHandle {
 interface MapLayersTreeViewProps {
   treeData: GroupLayerTreeNode[];
   visibleIds: Set<string>;
+  /** Visual-only radio selection under exclusive parents (parentId → childId). */
+  exclusiveRadioPreviewByParent?: Record<string, string>;
   visibleNodeIds: Set<string> | null;
   groupDisplaySettings: Record<string, GroupDisplaySettings>;
   clickMode: boolean;
@@ -93,6 +95,7 @@ export default forwardRef<MapLayersTreeHandle, MapLayersTreeViewProps>(
     {
       treeData,
       visibleIds,
+      exclusiveRadioPreviewByParent = {},
       visibleNodeIds,
       groupDisplaySettings,
       clickMode,
@@ -263,6 +266,7 @@ export default forwardRef<MapLayersTreeHandle, MapLayersTreeViewProps>(
               options={options}
               treeData={treeData}
               visibleIds={visibleIds}
+              exclusiveRadioPreviewByParent={exclusiveRadioPreviewByParent}
               groupDisplaySettings={groupDisplaySettings}
               isSubtreeHovered={
                 clickPickIsNull &&

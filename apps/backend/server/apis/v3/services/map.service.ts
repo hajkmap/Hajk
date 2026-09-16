@@ -72,7 +72,7 @@ interface MapGroupInput {
   name?: string;
   toggled?: boolean;
   expanded?: boolean;
-  exclusiveGroup?: boolean;
+  exclusive?: boolean;
   infoDocument?: boolean;
   index?: number;
   metadata?: {
@@ -599,7 +599,7 @@ class MapService {
       name: placement.name,
       toggled: placement.toggled,
       expanded: placement.expanded,
-      exclusiveGroup: placement.exclusiveGroup,
+      exclusive: placement.exclusive,
       infoDocument: placement.infoDocument,
       index: placement.index,
       metadata: placement.metadata,
@@ -752,7 +752,8 @@ class MapService {
 
   /** Nested groups for Tool.options — preserve drawOrder on each layer ref. */
   private toLayerSwitcherToolOptionGroups(
-    groups: LayerSwitcherWriteGroup[]
+    groups: LayerSwitcherWriteGroup[],
+    parentId = "-1"
   ): Prisma.InputJsonObject[] {
     return groups.map((group) => ({
       id: group.id,
@@ -760,7 +761,8 @@ class MapService {
       name: group.name ?? "",
       toggled: Boolean(group.toggled),
       expanded: Boolean(group.expanded),
-      exclusiveGroup: Boolean(group.exclusiveGroup),
+      exclusive: Boolean(group.exclusive),
+      parent: group.parent ?? parentId,
       infogroupvisible: Boolean(group.infogroupvisible),
       infogrouptitle: group.infogrouptitle ?? "",
       infogrouptext: group.infogrouptext ?? "",
@@ -774,7 +776,10 @@ class MapService {
         visibleAtStart: Boolean(layer.visibleAtStart),
         infobox: layer.infobox ?? "",
       })),
-      groups: this.toLayerSwitcherToolOptionGroups(group.groups ?? []),
+      groups: this.toLayerSwitcherToolOptionGroups(
+        group.groups ?? [],
+        group.id
+      ),
     }));
   }
 
@@ -1064,7 +1069,7 @@ class MapService {
             name: entry.name ?? names.get(entry.groupId) ?? "",
             toggled: entry.toggled ?? false,
             expanded: entry.expanded ?? false,
-            exclusiveGroup: entry.exclusiveGroup ?? false,
+            exclusive: entry.exclusive ?? false,
             infoDocument: entry.infoDocument ?? false,
             ...(metadataId ? { metadataId } : {}),
             index: entry.index ?? 0,
@@ -1392,7 +1397,7 @@ class MapService {
                   name: entry.name,
                   toggled: entry.toggled,
                   expanded: entry.expanded,
-                  exclusiveGroup: entry.exclusiveGroup,
+                  exclusive: entry.exclusive,
                   infoDocument: entry.infoDocument,
                   index: entry.index,
                   layerVisibleAtStart: entry.layerVisibleAtStart,

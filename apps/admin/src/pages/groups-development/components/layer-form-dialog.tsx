@@ -21,6 +21,8 @@ interface LayerFormDialogProps {
   open: boolean;
   layerName: string;
   initialValues?: LayerFormValues;
+  /** Exclusive parent groups manage visibility via radio selection in Kartlager. */
+  disableVisibleAtStart?: boolean;
   onClose: () => void;
   onSubmit: (values: LayerFormValues) => void;
 }
@@ -28,6 +30,7 @@ interface LayerFormDialogProps {
 interface LayerFormDialogBodyProps {
   layerName: string;
   initialValues?: LayerFormValues;
+  disableVisibleAtStart?: boolean;
   onClose: () => void;
   onSubmit: (values: LayerFormValues) => void;
 }
@@ -35,6 +38,7 @@ interface LayerFormDialogBodyProps {
 function LayerFormDialogBody({
   layerName,
   initialValues,
+  disableVisibleAtStart = false,
   onClose,
   onSubmit,
 }: LayerFormDialogBodyProps) {
@@ -45,7 +49,9 @@ function LayerFormDialogBody({
 
   const handleSubmit = () => {
     onSubmit({
-      layerVisibleAtStart: values.layerVisibleAtStart,
+      layerVisibleAtStart: disableVisibleAtStart
+        ? (initialValues?.layerVisibleAtStart ?? false)
+        : values.layerVisibleAtStart,
       layerInfoBox: values.layerInfoBox.trim(),
     });
   };
@@ -61,7 +67,12 @@ function LayerFormDialogBody({
         <FormControlLabel
           control={
             <Checkbox
-              checked={values.layerVisibleAtStart}
+              checked={
+                disableVisibleAtStart
+                  ? (initialValues?.layerVisibleAtStart ?? false)
+                  : values.layerVisibleAtStart
+              }
+              disabled={disableVisibleAtStart}
               onChange={(event) => {
                 setValues((current) => ({
                   ...current,
@@ -102,11 +113,12 @@ export default function LayerFormDialog({
   open,
   layerName,
   initialValues,
+  disableVisibleAtStart = false,
   onClose,
   onSubmit,
 }: LayerFormDialogProps) {
   const formKey = initialValues
-    ? `${layerName}-${JSON.stringify(initialValues)}`
+    ? `${layerName}-${JSON.stringify(initialValues)}-${disableVisibleAtStart}`
     : layerName;
 
   return (
@@ -116,6 +128,7 @@ export default function LayerFormDialog({
           key={formKey}
           layerName={layerName}
           initialValues={initialValues}
+          disableVisibleAtStart={disableVisibleAtStart}
           onClose={onClose}
           onSubmit={onSubmit}
         />

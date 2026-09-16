@@ -118,7 +118,7 @@ export interface MapLayerSwitcherGroup {
   name: string;
   toggled?: boolean;
   expanded?: boolean;
-  exclusiveGroup?: boolean;
+  exclusive?: boolean;
   parent?: string;
   infogroupvisible?: boolean;
   infogrouptitle?: string;

@@ -34,7 +34,7 @@ export interface ClientLayerSwitcherGroupNode {
   name: string;
   toggled: boolean;
   expanded: boolean;
-  exclusiveGroup: boolean;
+  exclusive: boolean;
   parent: string;
   infogroupvisible: boolean;
   infogrouptitle: string;
@@ -46,10 +46,10 @@ export interface ClientLayerSwitcherGroupNode {
   layers: ClientLayerSwitcherLayerRef[];
   groups: ClientLayerSwitcherGroupNode[];
   /** Interleaved sibling order for admin round-trip. */
-  layerSwitcherTree?: Array<
+  layerSwitcherTree?: (
     | { type: "layer"; id: string }
     | { type: "group"; id: string }
-  >;
+  )[];
 }
 
 type LayerInstanceRow = Prisma.LayerInstanceGetPayload<{
@@ -110,7 +110,7 @@ function getLayerKey(instance: LayerInstanceRow): string | null {
 
 function toClientLayerRef(
   instance: LayerInstanceRow,
-  layerIdMode: "instance" | "catalog" = "instance",
+  layerIdMode: "instance" | "catalog" = "instance"
 ): ClientLayerSwitcherLayerRef {
   const options =
     instance.options &&
@@ -119,12 +119,10 @@ function toClientLayerRef(
       ? (instance.options as Record<string, unknown>)
       : {};
 
-  const infobox =
-    typeof options.infobox === "string" ? options.infobox : "";
+  const infobox = typeof options.infobox === "string" ? options.infobox : "";
 
   const catalogId = getLayerKey(instance);
-  const id =
-    layerIdMode === "catalog" && catalogId ? catalogId : instance.id;
+  const id = layerIdMode === "catalog" && catalogId ? catalogId : instance.id;
 
   return {
     id,
@@ -191,8 +189,8 @@ function buildGroupCompositionMap(
 function shallowSiblingOrder(
   tree: LayerSwitcherTreeNode[] | undefined,
   layers: ClientLayerSwitcherLayerRef[],
-  groups: ClientLayerSwitcherGroupNode[],
-): Array<{ type: "layer"; id: string } | { type: "group"; id: string }> {
+  groups: ClientLayerSwitcherGroupNode[]
+): ({ type: "layer"; id: string } | { type: "group"; id: string })[] {
   if (!tree?.length) {
     return [
       ...layers.map((layer) => ({ type: "layer" as const, id: layer.id })),
@@ -200,9 +198,10 @@ function shallowSiblingOrder(
     ];
   }
 
-  const order: Array<
-    { type: "layer"; id: string } | { type: "group"; id: string }
-  > = [];
+  const order: (
+    | { type: "layer"; id: string }
+    | { type: "group"; id: string }
+  )[] = [];
   const usedGroups = new Set<string>();
 
   for (const node of tree) {
@@ -235,7 +234,10 @@ function buildFromTree(
     parentGroupId: string
   ) => ClientLayerSwitcherGroupNode,
   visitedGroupIds: Set<string>
-): { layers: ClientLayerSwitcherLayerRef[]; groups: ClientLayerSwitcherGroupNode[] } {
+): {
+  layers: ClientLayerSwitcherLayerRef[];
+  groups: ClientLayerSwitcherGroupNode[];
+} {
   const layers: ClientLayerSwitcherLayerRef[] = [];
   const groups: ClientLayerSwitcherGroupNode[] = [];
 
@@ -285,7 +287,7 @@ function buildInternalGroupNode(
       name: node.name ?? node.id,
       toggled: true,
       expanded: false,
-      exclusiveGroup: false,
+      exclusive: false,
       parent: parentGroupId,
       layers: [],
       groups: [],
@@ -296,8 +298,7 @@ function buildInternalGroupNode(
   visitedGroupIds.add(node.id);
 
   const composition = compositions.get(node.id);
-  const name =
-    composition?.groupNames.get(node.id) ?? node.name ?? node.id;
+  const name = composition?.groupNames.get(node.id) ?? node.name ?? node.id;
 
   if (!composition) {
     return {
@@ -306,13 +307,15 @@ function buildInternalGroupNode(
       name,
       toggled: true,
       expanded: false,
-      exclusiveGroup: false,
+      exclusive: false,
       parent: parentGroupId,
       layers: [],
       groups: node.children?.length
         ? node.children
             .filter(
-              (child): child is Extract<LayerSwitcherTreeNode, { type: "group" }> =>
+              (
+                child
+              ): child is Extract<LayerSwitcherTreeNode, { type: "group" }> =>
                 child.type === "group"
             )
             .map((child) =>
@@ -351,14 +354,14 @@ function buildInternalGroupNode(
     name,
     toggled: true,
     expanded: false,
-    exclusiveGroup: false,
+    exclusive: false,
     parent: parentGroupId,
     layers: built.layers,
     groups: built.groups,
     layerSwitcherTree: shallowSiblingOrder(
       composition.layerSwitcherTree,
       built.layers,
-      built.groups,
+      built.groups
     ),
     ...INFOGROUP_DEFAULTS,
   };
@@ -374,7 +377,7 @@ function mergeGroupChildrenAtLevel(
   }
 
   const internalById = new Map(
-    internal.map((group) => [group.id, group] as const),
+    internal.map((group) => [group.id, group] as const)
   );
   const result: ClientLayerSwitcherGroupNode[] = [];
   const seen = new Set<string>();
@@ -421,7 +424,7 @@ function buildPlacementNode(
       name: placement.name,
       toggled: placement.toggled,
       expanded: placement.expanded,
-      exclusiveGroup: Boolean(placement.exclusiveGroup),
+      exclusive: Boolean(placement.exclusive),
       parent: parentGroupId,
       layers: [],
       groups: [],
@@ -431,13 +434,12 @@ function buildPlacementNode(
 
   visitedPlacementIds.add(placement.id);
   const composition = compositions.get(placement.groupId);
-  const childPlacements = (placementsByParentGomId.get(placement.id) ?? []).sort(
-    (a, b) => (a.index ?? 0) - (b.index ?? 0),
-  );
+  const childPlacements = (
+    placementsByParentGomId.get(placement.id) ?? []
+  ).sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
   const visitedGroupIds = new Set<string>([placement.groupId]);
 
-  const built = composition?.layerSwitcherTree
-    ?.length
+  const built = composition?.layerSwitcherTree?.length
     ? buildFromTree(
         composition.layerSwitcherTree,
         composition,
@@ -477,14 +479,14 @@ function buildPlacementNode(
     name: placement.name,
     toggled: placement.toggled,
     expanded: placement.expanded,
-    exclusiveGroup: Boolean(placement.exclusiveGroup),
+    exclusive: Boolean(placement.exclusive),
     parent: parentGroupId,
     layers: built.layers,
     groups: mergedGroups,
     layerSwitcherTree: shallowSiblingOrder(
       composition?.layerSwitcherTree,
       built.layers,
-      mergedGroups,
+      mergedGroups
     ),
     ...infoGroupFieldsFromPlacement(placement),
   };
@@ -508,7 +510,9 @@ export async function buildLayerSwitcherGroupsForMap(
     return [];
   }
 
-  const groupIds = [...new Set(placements.map((placement) => placement.groupId))];
+  const groupIds = [
+    ...new Set(placements.map((placement) => placement.groupId)),
+  ];
 
   const instances = await prisma.layerInstance.findMany({
     where: {
@@ -534,7 +538,7 @@ export async function buildLayerSwitcherGroupsForMap(
   }
 
   const roots = (placementsByParentGomId.get(null) ?? []).sort(
-    (a, b) => (a.index ?? 0) - (b.index ?? 0),
+    (a, b) => (a.index ?? 0) - (b.index ?? 0)
   );
 
   return roots.map((placement) =>
@@ -628,14 +632,12 @@ export async function buildLayerSwitcherAdminStateForMap(mapName: string) {
           })(),
         };
       })
-      .filter(
-        (entry): entry is NonNullable<typeof entry> => entry !== null,
-      ),
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null),
   };
 }
 
 function collectGroupIdsFromClientGroups(
-  groups: ClientLayerSwitcherGroupNode[],
+  groups: ClientLayerSwitcherGroupNode[]
 ): string[] {
   const ids: string[] = [];
   const walk = (nodes: ClientLayerSwitcherGroupNode[]) => {
@@ -652,7 +654,7 @@ function collectGroupIdsFromClientGroups(
 
 function remapClientGroupsToCatalogIds(
   groups: ClientLayerSwitcherGroupNode[],
-  instanceIdToCatalogId: Map<string, string>,
+  instanceIdToCatalogId: Map<string, string>
 ): ClientLayerSwitcherGroupNode[] {
   return groups.map((group) => ({
     ...group,
@@ -660,17 +662,14 @@ function remapClientGroupsToCatalogIds(
       ...layer,
       id: instanceIdToCatalogId.get(layer.id) ?? layer.id,
     })),
-    groups: remapClientGroupsToCatalogIds(
-      group.groups,
-      instanceIdToCatalogId,
-    ),
+    groups: remapClientGroupsToCatalogIds(group.groups, instanceIdToCatalogId),
     layerSwitcherTree: (group.layerSwitcherTree ?? []).map((entry) =>
       entry.type === "layer"
         ? {
             type: "layer" as const,
             id: instanceIdToCatalogId.get(entry.id) ?? entry.id,
           }
-        : entry,
+        : entry
     ),
   }));
 }

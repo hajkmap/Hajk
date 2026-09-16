@@ -30,6 +30,20 @@ export function toggleLayerVisibility(
   return next;
 }
 
+export function isParentGroupExclusive(
+  tree: GroupLayerTreeNode[],
+  nodeId: GroupLayerTreeNode["id"],
+  groupDisplaySettings: Record<string, { exclusive?: boolean }>,
+): boolean {
+  const node = tree.find((entry) => entry.id === nodeId);
+  const parent = tree.find((entry) => entry.id === node?.parent);
+  const parentSourceId =
+    parent?.data?.kind === "group" ? parent.data.sourceId : undefined;
+  return Boolean(
+    parentSourceId && groupDisplaySettings[parentSourceId]?.exclusive,
+  );
+}
+
 export function getDescendantGroupNodeIds(
   tree: GroupLayerTreeNode[],
   nodeId: GroupLayerTreeNode["id"],

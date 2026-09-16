@@ -51,7 +51,7 @@ import { filterTreeBySearch } from "../utils/tree-filter";
 import { findActiveLayerswitcher } from "../utils/active-layerswitcher";
 import {
   getDescendantLayerNodeIds,
-  normalizeVisibleId,
+  isParentGroupExclusive,
   toggleGroupVisibility,
   toggleLayerVisibility,
 } from "../utils/tree-visibility";
@@ -141,6 +141,9 @@ export default function GroupLayerTree({
     useUpdateGroup();
   const [treeData, setTreeData] = useState<GroupLayerTreeNode[]>([]);
   const [visibleIds, setVisibleIds] = useState<Set<string>>(() => new Set());
+  /** Visual-only radio selection under exclusive parents (not part of dirty/save). */
+  const [exclusiveRadioPreviewByParent, setExclusiveRadioPreviewByParent] =
+    useState<Record<string, string>>({});
   const [search, setSearch] = useState("");
   const [addDialogTarget, setAddDialogTarget] =
     useState<AddDialogTarget | null>(null);
@@ -677,6 +680,7 @@ export default function GroupLayerTree({
     loadedLayerSwitcherKeyRef.current = loadKey;
     setTreeData(nodes);
     setVisibleIds(hydrated.visibleIds);
+    setExclusiveRadioPreviewByParent({});
     setGroupDisplaySettings(hydrated.groupDisplaySettings);
     setLayerDisplaySettings(loadedLayerSettings);
     setBackgroundOrderedIds(loadedBackgroundOrder);
@@ -755,43 +759,14 @@ export default function GroupLayerTree({
     backgroundMode,
   });
 
-  const handleToggleLayerVisibility = useCallback(
-    (nodeId: GroupLayerTreeNode["id"]) => {
-      const node = treeData.find((entry) => entry.id === nodeId);
-      if (!node || node.data?.kind !== "layer") {
-        return;
-      }
-
-      const sourceId = node.data.sourceId;
-      const nextVisible = !visibleIds.has(String(nodeId));
-
-      setVisibleIds((current) => toggleLayerVisibility(current, nodeId));
-      setLayerDisplaySettings((current) => ({
-        ...current,
-        [sourceId]: {
-          ...(current[sourceId] ?? DEFAULT_LAYER_DISPLAY_SETTINGS),
-          layerVisibleAtStart: nextVisible,
-        },
-      }));
-    },
-    [treeData, visibleIds],
-  );
-
-  const handleToggleGroupVisibility = useCallback(
-    (nodeId: GroupLayerTreeNode["id"]) => {
-      const groupKey = normalizeVisibleId(nodeId);
-      const nextVisible = !visibleIds.has(groupKey);
-      const descendantLayerNodeIds = getDescendantLayerNodeIds(
-        treeData,
-        nodeId,
-      );
-
-      setVisibleIds((current) =>
-        toggleGroupVisibility(treeData, current, nodeId),
-      );
+  const syncLayerVisibleAtStartFromIds = useCallback(
+    (
+      nextVisibleIds: Set<string>,
+      layerNodeIds: Iterable<GroupLayerTreeNode["id"]>,
+    ) => {
       setLayerDisplaySettings((current) => {
         const next = { ...current };
-        for (const layerNodeId of descendantLayerNodeIds) {
+        for (const layerNodeId of layerNodeIds) {
           const layerNode = treeData.find((entry) => entry.id === layerNodeId);
           if (layerNode?.data?.kind !== "layer") {
             continue;
@@ -799,13 +774,74 @@ export default function GroupLayerTree({
           next[layerNode.data.sourceId] = {
             ...(next[layerNode.data.sourceId] ??
               DEFAULT_LAYER_DISPLAY_SETTINGS),
-            layerVisibleAtStart: nextVisible,
+            layerVisibleAtStart: nextVisibleIds.has(String(layerNodeId)),
           };
         }
         return next;
       });
     },
-    [treeData, visibleIds],
+    [treeData],
+  );
+
+  const handleToggleExclusiveRadioPreview = useCallback(
+    (nodeId: GroupLayerTreeNode["id"]) => {
+      const node = treeData.find((entry) => entry.id === nodeId);
+      if (!node || node.data?.kind !== "layer") {
+        return;
+      }
+      const parentKey = String(node.parent);
+      const childKey = String(nodeId);
+      setExclusiveRadioPreviewByParent((current) => {
+        if (current[parentKey] === childKey) {
+          const next = { ...current };
+          delete next[parentKey];
+          return next;
+        }
+        return { ...current, [parentKey]: childKey };
+      });
+    },
+    [treeData],
+  );
+
+  const handleToggleLayerVisibility = useCallback(
+    (nodeId: GroupLayerTreeNode["id"]) => {
+      const node = treeData.find((entry) => entry.id === nodeId);
+      if (!node || node.data?.kind !== "layer") {
+        return;
+      }
+
+      if (isParentGroupExclusive(treeData, nodeId, groupDisplaySettings)) {
+        handleToggleExclusiveRadioPreview(nodeId);
+        return;
+      }
+
+      const nextVisibleIds = toggleLayerVisibility(visibleIds, nodeId);
+      setVisibleIds(nextVisibleIds);
+      syncLayerVisibleAtStartFromIds(nextVisibleIds, [nodeId]);
+    },
+    [
+      groupDisplaySettings,
+      handleToggleExclusiveRadioPreview,
+      syncLayerVisibleAtStartFromIds,
+      treeData,
+      visibleIds,
+    ],
+  );
+
+  const handleToggleGroupVisibility = useCallback(
+    (nodeId: GroupLayerTreeNode["id"]) => {
+      const nextVisibleIds = toggleGroupVisibility(
+        treeData,
+        visibleIds,
+        nodeId,
+      );
+      setVisibleIds(nextVisibleIds);
+      syncLayerVisibleAtStartFromIds(
+        nextVisibleIds,
+        getDescendantLayerNodeIds(treeData, nodeId),
+      );
+    },
+    [syncLayerVisibleAtStartFromIds, treeData, visibleIds],
   );
 
   const handleOpenAddDialog = useCallback(
@@ -919,30 +955,45 @@ export default function GroupLayerTree({
       }
 
       const { sourceId, nodeId } = layerEditDialogTarget;
+      const parentExclusive = isParentGroupExclusive(
+        treeData,
+        nodeId,
+        groupDisplaySettings,
+      );
+      const layerVisibleAtStart = parentExclusive
+        ? (layerDisplaySettings[sourceId]?.layerVisibleAtStart ?? false)
+        : values.layerVisibleAtStart;
 
       setLayerDisplaySettings((current) => ({
         ...current,
         [sourceId]: {
           ...(current[sourceId] ?? DEFAULT_LAYER_DISPLAY_SETTINGS),
-          layerVisibleAtStart: values.layerVisibleAtStart,
+          layerVisibleAtStart,
           layerInfoBox: values.layerInfoBox,
         },
       }));
 
-      setVisibleIds((current) => {
-        const next = new Set(current);
-        const key = String(nodeId);
-        if (values.layerVisibleAtStart) {
-          next.add(key);
-        } else {
-          next.delete(key);
-        }
-        return next;
-      });
+      if (!parentExclusive) {
+        setVisibleIds((current) => {
+          const next = new Set(current);
+          const key = String(nodeId);
+          if (layerVisibleAtStart) {
+            next.add(key);
+          } else {
+            next.delete(key);
+          }
+          return next;
+        });
+      }
 
       setLayerEditDialogTarget(null);
     },
-    [layerEditDialogTarget],
+    [
+      groupDisplaySettings,
+      layerDisplaySettings,
+      layerEditDialogTarget,
+      treeData,
+    ],
   );
 
   const handleTreeGroupFormSubmit = useCallback(
@@ -951,7 +1002,10 @@ export default function GroupLayerTree({
         return;
       }
 
-      const displaySettings = toDisplaySettings(values);
+      const displaySettings = toDisplaySettings({
+        ...values,
+        toggled: values.exclusive ? false : values.toggled,
+      });
 
       try {
         const response = await updateGroup({
@@ -1018,6 +1072,17 @@ export default function GroupLayerTree({
       DEFAULT_LAYER_DISPLAY_SETTINGS
     );
   }, [layerEditDialogTarget, layerDisplaySettings]);
+
+  const layerEditVisibleAtStartDisabled = useMemo(() => {
+    if (!layerEditDialogTarget) {
+      return false;
+    }
+    return isParentGroupExclusive(
+      treeData,
+      layerEditDialogTarget.nodeId,
+      groupDisplaySettings,
+    );
+  }, [groupDisplaySettings, layerEditDialogTarget, treeData]);
 
   const isLoading = groupsLoading || layersLoading;
 
@@ -1215,6 +1280,9 @@ export default function GroupLayerTree({
                     ref={mapLayersTreeRef}
                     treeData={treeData}
                     visibleIds={visibleIds}
+                    exclusiveRadioPreviewByParent={
+                      exclusiveRadioPreviewByParent
+                    }
                     visibleNodeIds={visibleNodeIds}
                     groupDisplaySettings={groupDisplaySettings}
                     clickMode={clickMode}
@@ -1278,6 +1346,7 @@ export default function GroupLayerTree({
           open={layerEditDialogTarget != null}
           layerName={layerEditDialogTarget?.name ?? ""}
           initialValues={layerEditFormInitialValues}
+          disableVisibleAtStart={layerEditVisibleAtStartDisabled}
           onClose={() => setLayerEditDialogTarget(null)}
           onSubmit={handleLayerFormSubmit}
         />

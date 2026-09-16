@@ -81,7 +81,7 @@ export const MapGroupsUpdateSchema = z.object({
         name: z.string().optional(),
         toggled: z.boolean().optional(),
         expanded: z.boolean().optional(),
-        exclusiveGroup: z.boolean().optional(),
+        exclusive: z.boolean().optional(),
         infoDocument: z.boolean().optional(),
         index: z.number().int().min(0).optional(),
         metadata: z
@@ -118,7 +118,8 @@ interface LayerSwitcherGroupWrite {
   name?: string;
   toggled?: boolean;
   expanded?: boolean;
-  exclusiveGroup?: boolean;
+  exclusive?: boolean;
+  parent?: string;
   infogroupvisible?: boolean;
   infogrouptitle?: string;
   infogrouptext?: string;
@@ -152,7 +153,8 @@ const LayerSwitcherGroupSchema: z.ZodType<LayerSwitcherGroupWrite> = z.lazy(
       name: z.string().optional(),
       toggled: z.boolean().optional(),
       expanded: z.boolean().optional(),
-      exclusiveGroup: z.boolean().optional(),
+      exclusive: z.boolean().optional(),
+      parent: z.string().optional(),
       infogroupvisible: z.boolean().optional(),
       infogrouptitle: z.string().optional(),
       infogrouptext: z.string().optional(),

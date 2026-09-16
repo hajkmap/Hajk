@@ -717,9 +717,9 @@ async function populateMapLayerStructure(mapName) {
       name,
       toggled,
       expanded,
-      exclusiveGroup,
       visibleForGroups,
     } = group;
+    const exclusive = Boolean(group.exclusive);
 
     // This is a plain, flat group object - similar to layers.json
     groupsToInsert.push({
@@ -741,7 +741,7 @@ async function populateMapLayerStructure(mapName) {
       name,
       toggled: Boolean(toggled),
       expanded: Boolean(expanded),
-      exclusiveGroup: Boolean(exclusiveGroup),
+      exclusive: Boolean(exclusive),
       infoDocument: Boolean(group.infogroupvisible),
       index,
       // Metadata is created below when the group has info-document fields

@@ -9,7 +9,7 @@ export function toDisplaySettings(
   return {
     toggled: values.toggled,
     expanded: values.expanded,
-    exclusiveGroup: values.exclusiveGroup,
+    exclusive: values.exclusive,
     infoDocument: values.infoDocument,
     metadata: { ...values.metadata },
   };
@@ -23,7 +23,7 @@ export function toFormValues(
     name,
     toggled: settings.toggled,
     expanded: settings.expanded,
-    exclusiveGroup: settings.exclusiveGroup,
+    exclusive: settings.exclusive,
     infoDocument: settings.infoDocument,
     metadata: { ...settings.metadata },
   };

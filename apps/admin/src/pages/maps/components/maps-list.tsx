@@ -370,7 +370,6 @@ export default function MapsList({
                   headerName: t("common.layers"),
                   align: "center",
                   headerAlign: "center",
-                  valueGetter: (_value, row) => row.layerCount ?? 0,
                   renderHeader: () => (
                     <IconColumnHeader
                       label={t("common.layers")}

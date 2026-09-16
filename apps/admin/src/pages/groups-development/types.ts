@@ -67,7 +67,7 @@ export interface GroupMetadataSettings {
 export interface GroupDisplaySettings {
   toggled: boolean;
   expanded: boolean;
-  exclusiveGroup: boolean;
+  exclusive: boolean;
   infoDocument: boolean;
   metadata: GroupMetadataSettings;
 }
@@ -84,7 +84,7 @@ export const DEFAULT_GROUP_METADATA: GroupMetadataSettings = {
 export const DEFAULT_GROUP_DISPLAY_SETTINGS: GroupDisplaySettings = {
   toggled: false,
   expanded: false,
-  exclusiveGroup: false,
+  exclusive: false,
   infoDocument: false,
   metadata: DEFAULT_GROUP_METADATA,
 };
@@ -93,7 +93,7 @@ export interface GroupFormValues {
   name: string;
   toggled: boolean;
   expanded: boolean;
-  exclusiveGroup: boolean;
+  exclusive: boolean;
   infoDocument: boolean;
   metadata: GroupMetadataSettings;
 }
@@ -129,7 +129,7 @@ export interface ClientLayerSwitcherGroup {
   name: string;
   toggled?: boolean;
   expanded?: boolean;
-  exclusiveGroup?: boolean;
+  exclusive?: boolean;
   parent?: string;
   infogroupvisible?: boolean;
   infogrouptitle?: string;

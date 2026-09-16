@@ -1,5 +1,7 @@
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { Box, IconButton } from "@mui/material";
 
 export type LayerSwitcherToggleState =
@@ -10,15 +12,24 @@ export type LayerSwitcherToggleState =
 
 interface LayerSwitcherCheckboxProps {
   toggleState: LayerSwitcherToggleState;
+  /** Exclusive groups use radio-style controls for child items (visual only). */
+  variant?: "checkbox" | "radio";
   onClick?: (event: React.MouseEvent) => void;
   ariaLabel?: string;
 }
 
 export default function LayerSwitcherCheckbox({
   toggleState,
+  variant = "checkbox",
   onClick,
   ariaLabel,
 }: LayerSwitcherCheckboxProps) {
+  const isRadio = variant === "radio";
+  const OutlineIcon = isRadio
+    ? RadioButtonUncheckedIcon
+    : CheckBoxOutlineBlankIcon;
+  const CheckedIcon = isRadio ? RadioButtonCheckedIcon : CheckBoxIcon;
+
   return (
     <IconButton
       size="small"
@@ -36,7 +47,7 @@ export default function LayerSwitcherCheckbox({
         },
       }}
     >
-      <CheckBoxOutlineBlankIcon fontSize="small" />
+      <OutlineIcon fontSize="small" />
       <Box
         sx={[
           {
@@ -53,7 +64,7 @@ export default function LayerSwitcherCheckbox({
           },
         ]}
       >
-        <CheckBoxIcon
+        <CheckedIcon
           fontSize="small"
           sx={{
             ...(toggleState === "checkedWithWarning" && {

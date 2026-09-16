@@ -147,7 +147,7 @@ export function nodeModelsToClientGroups(
       name: node.text,
       toggled: settings.toggled,
       expanded: settings.expanded,
-      exclusiveGroup: settings.exclusiveGroup,
+      exclusive: settings.exclusive,
       parent:
         parentId === GROUP_LAYER_TREE_ROOT_ID
           ? "-1"
@@ -188,8 +188,7 @@ export function hydrateDisplaySettingsFromClientGroups(
         ...DEFAULT_GROUP_DISPLAY_SETTINGS,
         toggled: group.toggled ?? DEFAULT_GROUP_DISPLAY_SETTINGS.toggled,
         expanded: group.expanded ?? DEFAULT_GROUP_DISPLAY_SETTINGS.expanded,
-        exclusiveGroup:
-          group.exclusiveGroup ?? DEFAULT_GROUP_DISPLAY_SETTINGS.exclusiveGroup,
+        exclusive: group.exclusive ?? DEFAULT_GROUP_DISPLAY_SETTINGS.exclusive,
         infoDocument: Boolean(group.infogroupvisible),
         metadata: {
           ...DEFAULT_GROUP_METADATA,
@@ -350,7 +349,7 @@ export function layerSwitcherDraftComparableSignature(
       name: group.name ?? "",
       toggled: Boolean(group.toggled),
       expanded: Boolean(group.expanded),
-      exclusiveGroup: Boolean(group.exclusiveGroup),
+      exclusive: Boolean(group.exclusive),
       infogroupvisible: Boolean(group.infogroupvisible),
       infogrouptitle: group.infogrouptitle ?? "",
       infogrouptext: group.infogrouptext ?? "",

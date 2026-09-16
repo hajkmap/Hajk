@@ -14,7 +14,9 @@ export interface LayerSwitcherWriteGroup {
   name?: string;
   toggled?: boolean;
   expanded?: boolean;
-  exclusiveGroup?: boolean;
+  exclusive?: boolean;
+  /** Catalog parent group id, or "-1" for root placements. */
+  parent?: string;
   infogroupvisible?: boolean;
   infogrouptitle?: string;
   infogrouptext?: string;
@@ -24,11 +26,10 @@ export interface LayerSwitcherWriteGroup {
   infogroupowner?: string;
   layers?: LayerSwitcherWriteLayerRef[];
   groups?: LayerSwitcherWriteGroup[];
-  /** Interleaved Lagerordning sibling order (layers + nested group ids). */
-  layerSwitcherTree?: Array<
+  layerSwitcherTree?: (
     | { type: "layer"; id: string }
     | { type: "group"; id: string }
-  >;
+  )[];
 }
 
 export interface FlattenedGroupsOnMapsRow {
@@ -39,7 +40,7 @@ export interface FlattenedGroupsOnMapsRow {
   name: string;
   toggled: boolean;
   expanded: boolean;
-  exclusiveGroup: boolean;
+  exclusive: boolean;
   infoDocument: boolean;
   index: number;
   metadata: {
@@ -65,21 +66,21 @@ export interface FlattenedGroupLayers {
    * Interleaved Lagerordning sibling order (layers + nested groups).
    * Stored on the first LayerInstance so GET can rebuild free order.
    */
-  layerSwitcherTree: Array<
+  layerSwitcherTree: (
     | { type: "layer"; id: string }
     | { type: "group"; id: string }
-  >;
+  )[];
 }
 
 function hasInfoDocument(group: LayerSwitcherWriteGroup): boolean {
   return Boolean(
     group.infogroupvisible ||
-      group.infogrouptitle ||
-      group.infogrouptext ||
-      group.infogroupurl ||
-      group.infogroupurltext ||
-      group.infogroupopendatalink ||
-      group.infogroupowner,
+    group.infogrouptitle ||
+    group.infogrouptext ||
+    group.infogroupurl ||
+    group.infogroupurltext ||
+    group.infogroupopendatalink ||
+    group.infogroupowner
   );
 }
 
@@ -88,7 +89,7 @@ function hasInfoDocument(group: LayerSwitcherWriteGroup): boolean {
  * per-group LayerInstance payloads (catalog layer ids).
  */
 export function flattenLayerSwitcherGroupsForWrite(
-  groups: LayerSwitcherWriteGroup[],
+  groups: LayerSwitcherWriteGroup[]
 ): {
   placements: FlattenedGroupsOnMapsRow[];
   groupLayers: FlattenedGroupLayers[];
@@ -98,7 +99,7 @@ export function flattenLayerSwitcherGroupsForWrite(
 
   const walk = (
     nodes: LayerSwitcherWriteGroup[],
-    parentGroupId: string | null,
+    parentGroupId: string | null
   ) => {
     nodes.forEach((group, index) => {
       const placementId = randomUUID();
@@ -111,7 +112,7 @@ export function flattenLayerSwitcherGroupsForWrite(
         name: group.name ?? "",
         toggled: Boolean(group.toggled),
         expanded: Boolean(group.expanded),
-        exclusiveGroup: Boolean(group.exclusiveGroup),
+        exclusive: Boolean(group.exclusive),
         infoDocument,
         index,
         metadata: hasInfoDocument(group)
@@ -139,7 +140,7 @@ export function flattenLayerSwitcherGroupsForWrite(
           ? group.layerSwitcherTree.map((entry) =>
               entry.type === "layer"
                 ? { type: "layer" as const, id: entry.id }
-                : { type: "group" as const, id: entry.id },
+                : { type: "group" as const, id: entry.id }
             )
           : [
               ...(group.layers ?? []).map((layer) => ({

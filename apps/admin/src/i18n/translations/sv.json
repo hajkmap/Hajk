@@ -800,7 +800,7 @@
     "groupsDevelopment.emptyMapLayers": "Dra en grupp hit för att börja, lägg sedan till lager i grupper.",
     "groupsDevelopment.noActiveLayerswitcher": "Aktivera en lagerhanterare under fliken Verktyg för att redigera dess lagerhierarki här.",
     "groupsDevelopment.layerInfoBox": "Infobox",
-    "groupsDevelopment.exclusiveGroup": "Exklusiv grupp",
+    "groupsDevelopment.exclusive": "Exklusiv grupp",
     "groupsDevelopment.infoDocument": "Infodokument",
     "groupsDevelopment.noGroupsMatchSearch": "Inga lagergrupper matchar din sökning.",
     "groupsDevelopment.noBackgroundLayers": "Inga aktiva bakgrundslager. Aktivera och markera lager som Bakgrund under fliken Lager först.",

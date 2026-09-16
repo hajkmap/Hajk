@@ -27,6 +27,7 @@ import {
   getGroupToggleState,
   isGroupActive,
   isLayerVisible,
+  isParentGroupExclusive,
 } from "../utils/tree-visibility";
 
 interface GroupLayerTreeNodeProps {
@@ -34,6 +35,8 @@ interface GroupLayerTreeNodeProps {
   options: RenderParams;
   treeData: GroupLayerTreeNode[];
   visibleIds: Set<string>;
+  /** Visual-only radio selection under exclusive parents (parentId → childId). */
+  exclusiveRadioPreviewByParent?: Record<string, string>;
   groupDisplaySettings: Record<string, GroupDisplaySettings>;
   isSubtreeHovered?: boolean;
   clickMode?: boolean;
@@ -60,6 +63,7 @@ function GroupLayerTreeNodeView({
   options,
   treeData,
   visibleIds,
+  exclusiveRadioPreviewByParent = {},
   groupDisplaySettings,
   isSubtreeHovered = false,
   clickMode = false,
@@ -79,14 +83,27 @@ function GroupLayerTreeNodeView({
   const { depth, isOpen, onToggle, isDragging } = options;
   const isGroup = node.data?.kind === "group";
   const isVisible = isLayerVisible(visibleIds, node.id);
+  const parentIsExclusive = isParentGroupExclusive(
+    treeData,
+    node.id,
+    groupDisplaySettings,
+  );
+  const useExclusiveRadio = !isGroup && parentIsExclusive;
+  const radioPreviewChecked =
+    useExclusiveRadio &&
+    exclusiveRadioPreviewByParent[String(node.parent)] === String(node.id);
 
   const groupToggleState: LayerSwitcherToggleState = isGroup
     ? getGroupToggleState(treeData, node.id, visibleIds)
     : "unchecked";
 
-  const layerToggleState: LayerSwitcherToggleState = isVisible
-    ? "checked"
-    : "unchecked";
+  const layerToggleState: LayerSwitcherToggleState = useExclusiveRadio
+    ? radioPreviewChecked
+      ? "checked"
+      : "unchecked"
+    : isVisible
+      ? "checked"
+      : "unchecked";
 
   const rowIsActive = isGroup
     ? isGroupActive(treeData, node.id, visibleIds)
@@ -94,12 +111,20 @@ function GroupLayerTreeNodeView({
 
   const groupHasChildren =
     isGroup && treeData.some((entry) => entry.parent === node.id);
+  const isExclusiveGroup =
+    isGroup &&
+    Boolean(
+      node.data?.sourceId &&
+        groupDisplaySettings[node.data.sourceId]?.exclusive,
+    );
   const showGroupToggle =
-    !isGroup ||
+    isGroup &&
+    !isExclusiveGroup &&
     (node.data?.sourceId
       ? (groupDisplaySettings[node.data.sourceId]?.toggled ??
         DEFAULT_GROUP_DISPLAY_SETTINGS.toggled)
       : true);
+  const toggleVariant = useExclusiveRadio ? "radio" : "checkbox";
 
   const rowCursor = clickMode ? "pointer" : isDragging ? "grabbing" : "grab";
 
@@ -257,6 +282,7 @@ function GroupLayerTreeNodeView({
               {showGroupToggle ? (
                 <LayerSwitcherCheckbox
                   toggleState={groupToggleState}
+                  variant={toggleVariant}
                   ariaLabel={`Toggle all layers in ${node.text}`}
                   onClick={(event) => {
                     event.preventDefault();
@@ -400,6 +426,7 @@ function GroupLayerTreeNodeView({
             >
               <LayerSwitcherCheckbox
                 toggleState={layerToggleState}
+                variant={toggleVariant}
                 ariaLabel={`Toggle ${node.text}`}
                 onClick={(event) => {
                   event.preventDefault();
@@ -514,6 +541,8 @@ function areNodePropsEqual(
     prev.node === next.node &&
     prev.treeData === next.treeData &&
     prev.visibleIds === next.visibleIds &&
+    prev.exclusiveRadioPreviewByParent ===
+      next.exclusiveRadioPreviewByParent &&
     prev.groupDisplaySettings === next.groupDisplaySettings &&
     prev.isSubtreeHovered === next.isSubtreeHovered &&
     prev.clickMode === next.clickMode &&
