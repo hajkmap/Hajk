@@ -14,10 +14,11 @@
   "type": "module",
   "exports": null,
   "scripts": {
-    "start": "node --env-file=.env --experimental-transform-types dist/index.ts",
+    "postinstall": "prisma generate",
+    "start": "tsx server/index.ts",
     "start:prod": "node --env-file=.env --experimental-transform-types index.ts",
     "build": "shx rm -rf dist && shx cp -r server dist",
-    "dev": "nodemon --exec node --env-file=.env --ext ts --watch server --experimental-transform-types server/index.ts",
+    "dev": "tsx watch --watch-path=server --env-file=.env server/index.ts",
     "dev:unwatch": "node --env-file=.env --experimental-transform-types server/index.ts",
     "dev:debug": "node --env-file=.env --inspect --watch-path=./server --experimental-transform-types server/index.ts",
     "reset:db": "prisma generate && prisma db push --force-reset && prisma db seed",
@@ -72,6 +73,7 @@
     "prettier": "^3.9.6",
     "prisma": "^7.8.0",
     "shx": "^0.4.0",
+    "tsx": "^4.23.13",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.60.0"
   },
