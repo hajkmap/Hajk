@@ -15,12 +15,10 @@
   "exports": null,
   "scripts": {
     "postinstall": "prisma generate",
-    "start": "tsx server/index.ts",
-    "start:prod": "node --env-file=.env --experimental-transform-types index.ts",
-    "build": "shx rm -rf dist && shx cp -r server dist",
+    "start": "tsx --env-file-if-exists=.env server/index.ts",
+    "build": "tsc",
     "dev": "tsx watch --watch-path=server --env-file=.env server/index.ts",
-    "dev:unwatch": "node --env-file=.env --experimental-transform-types server/index.ts",
-    "dev:debug": "node --env-file=.env --inspect --watch-path=./server --experimental-transform-types server/index.ts",
+    "dev:debug": "tsx --inspect --watch-path=./server --env-file=.env server/index.ts",
     "reset:db": "prisma generate && prisma db push --force-reset && prisma db seed",
     "lint": "eslint ./server",
     "lint:fix": "eslint --fix server"
@@ -45,6 +43,7 @@
     "log4js": "^6.9.1",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "tsx": "^4.23.13",
     "write-excel-file": "^3.0.8",
     "ws": "^8.21.0",
     "zod": "^4.4.3"
@@ -72,8 +71,6 @@
     "nodemon": "^3.1.14",
     "prettier": "^3.9.6",
     "prisma": "^7.8.0",
-    "shx": "^0.4.0",
-    "tsx": "^4.23.13",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.60.0"
   },

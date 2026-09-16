@@ -5,7 +5,6 @@ FROM node:24-alpine AS buildimage
 WORKDIR /tmp/build/backend
 COPY /apps/backend ./
 RUN npm ci
-RUN npm run compile
 
 # Note: Before building Client, we will want to grab the current GIT
 # commit hash. So we must copy the .git directory first.
@@ -53,10 +52,12 @@ WORKDIR /usr/app
 
 # Copy NPM package files from Backend
 COPY /apps/backend/package*.json ./
-RUN npm ci --production
+RUN npm ci --omit=dev --ignore-scripts
 
-# Move the built Backend into app's root at /usr/app
-COPY --from=buildimage /tmp/build/backend/dist ./
+# Move the backend source and the already-generated Prisma client into app's root at /usr/app
+COPY --from=buildimage /tmp/build/backend/server ./server
+COPY --from=buildimage /tmp/build/backend/node_modules/.prisma ./node_modules/.prisma
+COPY --from=buildimage /tmp/build/backend/node_modules/@prisma/client ./node_modules/@prisma/client
 
 # Copy some more necessary files. There's a great chance that 
 # they'll be mounted when running anyway, but if someone forgets
@@ -74,4 +75,4 @@ COPY --from=buildimage /tmp/build/admin/build ./static/admin
 # --- FINAL ASSEMBLY END --- #
 
 # Go!
-CMD ["node", "index.js"]
+CMD ["npm", "run", "start"]

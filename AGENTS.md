@@ -64,8 +64,8 @@ This is a monorepo with three independent apps — no root-level workspace tooli
 ### Build Commands
 
 ```bash
-# Backend: compile to dist/
-cd apps/backend && npm run compile && npm start
+# Backend: type-check, then run (executes TypeScript directly via tsx, no build output)
+cd apps/backend && npm run build && npm start
 
 # Client: build to build/
 cd apps/client && npm run build
