@@ -36,36 +36,6 @@ var wmtsLayerProperties = {
   highDpiVariants: [],
 };
 
-const normalizeLegend = (legend, fallbackDescription) => {
-  if (!legend) {
-    return [];
-  }
-
-  const entries = Array.isArray(legend) ? legend : [legend];
-
-  return entries
-    .map((entry) => {
-      if (typeof entry === "string") {
-        return {
-          url: entry,
-          description: fallbackDescription || "",
-        };
-      }
-
-      const url = entry?.url || entry?.Url;
-      if (!url) {
-        return null;
-      }
-
-      return {
-        ...entry,
-        url,
-        description: entry?.description || fallbackDescription || "",
-      };
-    })
-    .filter(Boolean);
-};
-
 // OpenLayers' own default, used when a grid doesn't state a tile size at all.
 const DEFAULT_TILE_SIZE = 256;
 
