@@ -341,7 +341,7 @@ class MapViewModel {
         features: features,
         totalArea: totalArea,
       });
-    } catch (error) {
+    } catch (_error) {
       // If we've error:ed we have to let the view know
       this.#localObserver.publish("map.featureAdded", {
         error: true,

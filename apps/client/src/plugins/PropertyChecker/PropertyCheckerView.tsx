@@ -35,6 +35,7 @@ import type {
   GroupedDigitalPlanFeatures,
   GetFeatureInfoPayload,
   NoFeaturesPayload,
+  QPcLookupFailedPayload,
   ControlledLayer,
 } from "./types";
 
@@ -71,6 +72,12 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
   // Keep visibility state for the dialog that we'll show to the user
   // when user clicks on the Clear button.
   const [clearDialogVisible, setClearDialogVisible] = useState(false);
+
+  // Holds the q_pc value that failed to resolve to a property/address, so we
+  // can show a dismissible warning telling the user to pick a property manually.
+  const [qPcLookupFailedQuery, setQPcLookupFailedQuery] = useState<
+    string | null
+  >(null);
 
   const handleShowConfirmationDialog = () => {
     setClearDialogVisible(true);
@@ -119,6 +126,14 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
     }: GetFeatureInfoPayload) => {
       setGroupedFeatures(groupedFeatures);
       setDigitalPlanFeatures(digitalPlanFeatures);
+      // A successful result supersedes any earlier q_pc lookup failure.
+      setQPcLookupFailedQuery(null);
+    };
+
+    // Triggered when a q_pc deep-link value could not be resolved to a
+    // property nor an address. We show a persistent, dismissible warning.
+    const handleQPcLookupFailed = ({ query }: QPcLookupFailedPayload) => {
+      setQPcLookupFailedQuery(query);
     };
 
     // Sometimes we won't get a result for the clicked point, but we still want
@@ -154,6 +169,7 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
       handleNewGetFeatureInfoFeatures
     );
     localObserver.subscribe("noFeaturesInResult", handleNoFeaturesInResult);
+    localObserver.subscribe("qPcLookupFailed", handleQPcLookupFailed);
     return () => {
       // Unsubscriptions.
       localObserver.unsubscribe("drawModel.featureAdded", handleFeatureAdded);
@@ -162,6 +178,7 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
         handleNewGetFeatureInfoFeatures
       );
       localObserver.unsubscribe("noFeaturesInResult", handleNoFeaturesInResult);
+      localObserver.unsubscribe("qPcLookupFailed", handleQPcLookupFailed);
     };
   }, [
     drawModel,
@@ -214,6 +231,17 @@ function PropertyCheckerView(props: PropertyCheckerViewProps) {
         <Alert severity="warning" sx={{ mb: 2 }}>
           Verktyget är felinställt: varken lagerflik eller planflik är
           aktiverad. Kontakta systemadministratören.
+        </Alert>
+      )}
+      {qPcLookupFailedQuery !== null && (
+        <Alert
+          severity="warning"
+          sx={{ mb: 2 }}
+          onClose={() => setQPcLookupFailedQuery(null)}
+        >
+          Den angivna texten ”{qPcLookupFailedQuery}” matchade inte unikt någon
+          befintlig fastighet eller adress. Använd verktyget manuellt genom att
+          välja en fastighet i kartan.
         </Alert>
       )}
       {(enableCheckLayerTab

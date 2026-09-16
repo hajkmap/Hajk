@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, memo } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 
 import { Box, Collapse, IconButton } from "@mui/material";
 
@@ -10,6 +10,7 @@ import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRig
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 import { getIsMobile } from "../LayerSwitcherUtils";
+import { setOLSubLayers } from "../../../utils/groupLayers";
 
 /* A grouplayer is a layer configured with multiple layers in admin, NOT a group in layerswitcher */
 
@@ -26,10 +27,11 @@ function GroupLayer({
 }) {
   const { layerIsToggled, visibleSubLayers } = layerState;
 
-  const { layerId, layerMinZoom, layerMaxZoom, layerInfo, allSubLayers } =
+  const { layerId, layerMinZoom, layerMaxZoom, layerInfo, allSubLayers, olLayer } =
     layerConfig;
 
   const [showSublayers, setShowSublayers] = useState(false);
+  const [labeledSubLayers, setLabeledSubLayers] = useState(new Set());
   const wasLoadedFromFavorites = useRef(false);
 
   const layerSwitcherDispatch = useLayerSwitcherDispatch();
@@ -106,6 +108,23 @@ function GroupLayer({
       setSubLayerHidden(subLayer);
     } else {
       setSubLayerVisible(subLayer);
+    }
+  };
+
+  const toggleSubLayerLabel = (subLayerName) => {
+    const newLabeled = new Set(labeledSubLayers);
+    if (newLabeled.has(subLayerName)) {
+      newLabeled.delete(subLayerName);
+    } else {
+      newLabeled.add(subLayerName);
+    }
+    setLabeledSubLayers(newLabeled);
+    if (olLayer) {
+      olLayer.set("labeledSubLayers", newLabeled);
+      const currentVisible = olLayer.get("subLayers") || [];
+      if (currentVisible.length > 0) {
+        setOLSubLayers(olLayer, currentVisible);
+      }
     }
   };
 
@@ -230,6 +249,11 @@ function GroupLayer({
                 visible={visibleSubLayers.some((s) => s === subLayer)}
                 toggleSubLayer={toggleSubLayer}
                 zoomVisible={layerIsVisibleAtZoom}
+                hasLabelStyle={
+                  layerInfo?.layersInfo?.[subLayer]?.hasLabelStyle ?? false
+                }
+                labelActive={labeledSubLayers.has(subLayer)}
+                onToggleLabel={toggleSubLayerLabel}
               ></SubLayerItem>
             ))}
           </Box>

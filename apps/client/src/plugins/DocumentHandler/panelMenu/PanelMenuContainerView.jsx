@@ -85,6 +85,8 @@ class PanelMenuView extends React.PureComponent {
     this.#setDocument(documentName, headerIdentifier);
     this.#setItemStateProperties(itemClicked.id).then(() => {
       this.#scrollToMenuItem(itemClicked.itemRef.current.offsetTop);
+      this.#handleExternalLinkClicked(itemClicked.id);
+      this.#handleShowMapLayersFromPanelMenu(itemClicked.id);
     });
   };
 

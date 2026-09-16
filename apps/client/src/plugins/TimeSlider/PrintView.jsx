@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
@@ -151,8 +151,11 @@ export default function PrintView(props) {
   return (
     <Grid
       container
-      justifyContent="center"
-      sx={{ width: "100%", height: "100%" }}
+      sx={{
+        justifyContent: "center",
+        width: "100%",
+        height: "100%",
+      }}
     >
       <PrintInformationPanel
         message={`Vid utskrift så kommer en bild skapas för varje "steg" i tidslinjen. Nuvarande inställningar kommer resultera i ${numImages} bilder.`}

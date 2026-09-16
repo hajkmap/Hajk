@@ -6,10 +6,10 @@ class Progress extends React.PureComponent {
   render() {
     return (
       <Grid
-        alignItems="center"
-        justifyContent="center"
         container
         sx={{
+          alignItems: "center",
+          justifyContent: "center",
           height: "100%",
         }}
       >

@@ -7,5 +7,14 @@
  * @extends {Error}
  */
 export default class ActiveDirectoryError extends Error {
-  readonly name = "ActiveDirectoryError";
+  public statusCode: number;
+
+  constructor(message?: string, options?: ErrorOptions) {
+    super(message, options);
+    this.statusCode = 500;
+  }
+
+  public override get name(): string {
+    return "ActiveDirectoryError";
+  }
 }

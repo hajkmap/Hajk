@@ -65,7 +65,7 @@ class AdvancedOptions extends React.PureComponent {
     this.setState({ anchorEl: e.currentTarget });
   };
 
-  hideColorPicker = (e) => {
+  hideColorPicker = (_e) => {
     this.setState({ anchorEl: null });
   };
 

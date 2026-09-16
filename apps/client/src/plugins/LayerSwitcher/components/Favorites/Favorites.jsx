@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useSnackbar } from "notistack";
 import useCookieStatus from "hooks/useCookieStatus";
@@ -146,7 +146,7 @@ function Favorites({
           // Set visibility
           layer.set("visible", l.visible);
         } else {
-          layer.set("visible", l.visible);
+          layerSwitcherDispatch.setLayerVisibility(l.id, l.visible);
         }
       } else if (l.id < 0) {
         // A fake maplayer is in the package
@@ -206,7 +206,7 @@ function Favorites({
       .filter((l) => l.get("visible") === true)
       .forEach((l) => {
         if (l.get("layerType") === "group") {
-          globalObserver.publish("layerswitcher.hideLayer", l);
+          layerSwitcherDispatch.setLayerVisibility(l.get("name"), false);
         } else if (l.get("layerType") !== "system") {
           l.set("visible", false);
         }

@@ -24,11 +24,11 @@ import {
 } from "ol/format/filter";
 import { hfetch } from "../../utils/FetchWrapper";
 
-const TypographyHeading = styled(Typography)(({ theme }) => ({
+const TypographyHeading = styled(Typography)(({ _theme }) => ({
   fontWeight: 500,
 }));
 
-const StyledCheckbox = styled(Checkbox)(({ theme }) => ({
+const StyledCheckbox = styled(Checkbox)(({ _theme }) => ({
   paddingTop: "0.25rem",
   paddingBottom: "0.25rem",
 }));
@@ -41,7 +41,7 @@ const ContainerTopPadded = styled("div")(({ theme }) => ({
   paddingTop: theme.spacing(2),
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const StyledTextField = styled(TextField)(({ _theme }) => ({
   width: "50%",
 }));
 
@@ -49,7 +49,7 @@ const DownloadContainer = styled("div")(({ theme }) => ({
   paddingTop: theme.spacing(2),
 }));
 
-const CircularProgressButton = styled(CircularProgress)(({ theme }) => ({
+const CircularProgressButton = styled(CircularProgress)(({ _theme }) => ({
   position: "absolute",
   top: "50%",
   left: "50%",
@@ -57,7 +57,7 @@ const CircularProgressButton = styled(CircularProgress)(({ theme }) => ({
   marginLeft: -12,
 }));
 
-const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
+const StyledFormControlLabel = styled(FormControlLabel)(({ _theme }) => ({
   fontSize: "0.875rem",
   fontWeight: "400",
 }));
@@ -272,7 +272,7 @@ class FirExportResidentListView extends React.PureComponent {
           this.setState({ downloadUrl: text });
         }
       })
-      .catch((err, a) => {
+      .catch((_err, _a) => {
         this.setState({ loading: false });
         this.setState({ downloadUrl: null });
         this.props.closeSnackbar(this.snackBar);
@@ -317,7 +317,7 @@ class FirExportResidentListView extends React.PureComponent {
           );
         }
       })
-      .catch((err) => {
+      .catch((_err) => {
         this.setState({ loading: false });
         this.props.closeSnackbar(this.snackBar);
         this.snackBar = this.props.enqueueSnackbar(
@@ -467,21 +467,23 @@ class FirExportResidentListView extends React.PureComponent {
 
                       this.setState({ age: v });
                     }}
-                    onFocus={(e) => {
+                    onFocus={(_e) => {
                       if (this.state.age === 0) {
                         this.setState({ age: "" });
                       }
                     }}
-                    onBlur={(e) => {
+                    onBlur={(_e) => {
                       if (this.state.age === "") {
                         this.setState({ age: 0 });
                       }
                     }}
                     size="small"
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">år</InputAdornment>
-                      ),
+                    slotProps={{
+                      input: {
+                        endAdornment: (
+                          <InputAdornment position="end">år</InputAdornment>
+                        ),
+                      },
                     }}
                     variant="outlined"
                   />

@@ -1,5 +1,3 @@
-import * as React from "react";
-
 import { Box, Button, List, Typography } from "@mui/material";
 
 import CallMadeIcon from "@mui/icons-material/CallMade";
@@ -87,9 +85,9 @@ export default function LayerItemInfo({ layer, app, chapters }) {
   };
 
   return (
-    <>
+    <Box id="layer-item-details-info">
       {hasInfo() ? (
-        <Box id="layer-item-details-info">
+        <>
           {/* Infotext */}
           {layerInfo.infoText && (
             <>
@@ -122,12 +120,10 @@ export default function LayerItemInfo({ layer, app, chapters }) {
             />
           )}
           {renderChapterLinks()}
-        </Box>
+        </>
       ) : (
-        <Typography id="layer-item-details-info">
-          Ingen information tillgänglig
-        </Typography>
+        <Typography variant="body2">Ingen information tillgänglig</Typography>
       )}
-    </>
+    </Box>
   );
 }

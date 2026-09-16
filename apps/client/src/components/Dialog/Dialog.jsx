@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import gfm from "remark-gfm";
@@ -17,9 +17,6 @@ import LegacyNonMarkdownRenderer from "./LegacyNonMarkdownRenderer";
 import { customComponentsForReactMarkdown } from "../../utils/customComponentsForReactMarkdown";
 
 export default function ResponsiveDialog(props) {
-  const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
-
   const {
     children,
     onAbort,
@@ -82,8 +79,9 @@ export default function ResponsiveDialog(props) {
             remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
             rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
             components={customComponentsForReactMarkdown} // Custom renderers for components, see definition in components
-            children={text} // Our MD, as a text string
-          />
+          >
+            {text}
+          </ReactMarkdown>
         )}
 
         {prompt && (

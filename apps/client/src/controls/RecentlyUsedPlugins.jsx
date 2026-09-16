@@ -1,4 +1,3 @@
-import * as React from "react";
 import { useEffect, useState } from "react";
 import { SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
 
@@ -75,8 +74,12 @@ export default function RecentlyUsedPlugins({
               // …and hide the SpeedDial.
               setOpen(false);
             }}
-            tooltipOpen // This makes tooltips sticky - disable or make an option perhaps
-            tooltipTitle={action.title}
+            slotProps={{
+              tooltip: {
+                open: true, // This makes tooltips sticky - disable or make an option perhaps
+                title: action.title,
+              },
+            }}
           />
         ))}
       </SpeedDial>

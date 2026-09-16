@@ -2,7 +2,7 @@ import React from "react";
 import { Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
-const DivBreadCrumContainer = styled("div")(({ theme }) => ({
+const DivBreadCrumContainer = styled("div")(({ _theme }) => ({
   display: "inline-block",
   padding: "3px",
   cursor: "pointer",
@@ -37,7 +37,7 @@ class BreadCrumbs extends React.PureComponent {
     return crums.reverse();
   }
 
-  onCrumClick = (chapter) => (event) => {
+  onCrumClick = (chapter) => (_event) => {
     this.props.observer.publish("changeChapter", chapter);
   };
 

@@ -165,6 +165,21 @@ class Search extends React.PureComponent {
       });
     });
 
+    // Command palette needs access to focus the input.
+    this.globalObserver.subscribe("search.focusInput", () => {
+      const input = document.getElementById("searchInputField");
+      input?.focus();
+    });
+
+    // Command palette needs access to clear the search and focus the input.
+    this.globalObserver.subscribe("search.clearSearch", () => {
+      this.handleOnClear();
+      setTimeout(() => {
+        const input = document.getElementById("searchInputField");
+        input?.focus();
+      }, 50);
+    });
+
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(
@@ -342,11 +357,10 @@ class Search extends React.PureComponent {
   handlePotentialSearchFromParams = (q, s) => {
     // Check so that we have a searchString in the url (q)
     if (q !== undefined && q.length > 0) {
-      // Initializing sources to an empty array
-      // (The model will search in all sources if searchSources is set to [])
-      let sources = [];
-      // If source parameter is set in url (s)
-      // Get the sources corresponding to the ids
+      // Default to preserving the current source filter.
+      let sources = this.state.searchSources;
+      // If source parameter is set in url (s), override the filter
+      // with the sources corresponding to the ids.
       if (s !== undefined && s.length > 0) {
         const sourceIds = s.split(",");
         sources = this.getSourcesByIds(sourceIds);
@@ -374,7 +388,7 @@ class Search extends React.PureComponent {
     this.localObserver.publish("clearMapView");
   };
 
-  handleSearchInput = (event, value, reason) => {
+  handleSearchInput = (event, value, _reason) => {
     const searchString = (value?.autocompleteEntry || value || "")?.trim();
 
     if (searchString !== "") {
@@ -928,7 +942,7 @@ class Search extends React.PureComponent {
     // It may seem small with 1 character, but we must allow users to force
     // a search. Please note that this will not be invoked for autocomplete
     // searches (they still need to be at least 3 characters to start searching).
-    // This will however allow for search terms such as "K4*", which can well
+    // This will however allow for search terms such as "K4*", which can well
     // be a valid prefix for some attribute value, and users must be able to
     // search for that.
     // However, >=1 means that we don't allow completely empty searches.

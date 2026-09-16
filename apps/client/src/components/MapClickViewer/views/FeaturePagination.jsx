@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   Alert,
@@ -117,7 +117,12 @@ const FeaturePagination = (props) => {
         </Collapse>
       )}
       <Divider />
-      <Stack spacing={2} alignItems="center">
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "center",
+        }}
+      >
         <Pagination
           count={sumPages}
           page={page}

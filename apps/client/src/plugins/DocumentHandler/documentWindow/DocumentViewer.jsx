@@ -118,7 +118,7 @@ class DocumentViewer extends React.PureComponent {
     window.getSelection().addRange(range);
   };
 
-  toggleCollapse = (e) => {
+  toggleCollapse = (_e) => {
     this.setState({
       expandedTableOfContents: !this.state.expandedTableOfContents,
     });

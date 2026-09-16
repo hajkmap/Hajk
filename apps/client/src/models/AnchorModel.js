@@ -5,11 +5,13 @@ import { debounce } from "../utils/debounce";
 class AnchorModel {
   #app;
   #cqlFilters;
+  #currentQPc;
   #map;
 
   constructor(settings) {
     this.#app = settings.app;
     this.#cqlFilters = {};
+    this.#currentQPc = null;
     this.#map = settings.map;
 
     this.#app.globalObserver.subscribe("core.appLoaded", () => {
@@ -33,7 +35,19 @@ class AnchorModel {
       }
     );
 
-    // C: A plugin based on BaseWindowPlugin changes visibility
+    // C: PropertyChecker resolves a property (map click or q_pc param)
+    this.#app.globalObserver.subscribe(
+      "propertychecker.propertySelected",
+      async ({ propertyName }) => {
+        this.#currentQPc = propertyName ?? null;
+        this.#app.globalObserver.publish("core.mapUpdated", {
+          url: await this.getAnchor(),
+          source: "propertyChecker",
+        });
+      }
+    );
+
+    // D: A plugin based on BaseWindowPlugin changes visibility
     this.#app.globalObserver.subscribe(
       "core.pluginVisibilityChanged",
       async () => {
@@ -44,7 +58,7 @@ class AnchorModel {
       }
     );
 
-    // D: A layer's visibility changes
+    // E: A layer's visibility changes
     this.#map
       .getLayers()
       .getArray()
@@ -71,7 +85,7 @@ class AnchorModel {
           });
         });
 
-        // E: Update anchor when label layer state changes
+        // F: Update anchor when label layer state changes
         layer.on("change:useLabelStyle", async (_event) => {
           this.#app.globalObserver.publish("core.mapUpdated", {
             url: await this.getAnchor(),
@@ -235,6 +249,9 @@ class AnchorModel {
 
     // Only add 'q' if it isn't empty
     q.length > 0 && url.searchParams.append("q", q);
+
+    // Only add 'q_pc' if PropertyChecker has an active property
+    this.#currentQPc && url.searchParams.append("q_pc", this.#currentQPc);
 
     // Occasionally we may want to prevent hash update, but it's off by default
     if (

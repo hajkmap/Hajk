@@ -5,6 +5,9 @@ import {
   parseWmsGetFeatureInfoXml,
 } from "utils/wmsFeatureParsers";
 
+import OlPoint from "ol/geom/Point";
+import { getCenter } from "ol/extent";
+
 import OlFeature from "ol/Feature";
 import type Feature from "ol/Feature";
 import type { Geometry } from "ol/geom";
@@ -32,6 +35,31 @@ interface WmsSource extends Source {
   ): string | undefined;
 }
 
+/** A single search source as exposed by the app's SearchModel. */
+interface SearchSource {
+  id: string;
+  [key: string]: unknown;
+}
+
+/** A single feature collection returned by SearchModel.getResults(). */
+interface SearchFeatureCollection {
+  value?: { features?: Feature<Geometry>[] };
+}
+
+/**
+ * Minimal slice of the app's SearchModel (plain JS, no .d.ts) that we rely on
+ * to resolve a q_pc string to a geometry via an existing WFS search source.
+ */
+interface SearchModelLike {
+  getSources(): SearchSource[];
+  getSearchOptions(): Record<string, unknown>;
+  getResults(
+    searchString: string,
+    searchSources?: SearchSource[],
+    searchOptions?: Record<string, unknown>
+  ): Promise<{ featureCollections: SearchFeatureCollection[] }>;
+}
+
 export default class PropertyCheckerModel {
   #app: HajkApp;
   #checkLayerPropertyAttribute: string;
@@ -49,6 +77,8 @@ export default class PropertyCheckerModel {
   #map: OlMap;
   #viewResolution: number | undefined;
   #viewProjection: ProjectionLike;
+  #propertyNameLookupWfsLayerId: string | undefined;
+  #addressLookupWfsLayerId: string | undefined;
 
   constructor(settings: PropertyCheckerModelSettings) {
     // Set some private fields
@@ -69,6 +99,8 @@ export default class PropertyCheckerModel {
     this.#map = settings.map;
     this.#viewResolution = this.#map.getView().getResolution();
     this.#viewProjection = this.#map.getView().getProjection();
+    this.#propertyNameLookupWfsLayerId = settings.propertyNameLookupWfsLayerId;
+    this.#addressLookupWfsLayerId = settings.addressLookupWfsLayerId;
 
     this.#initSubscriptions(); // Initiate listeners on observer(s)
 
@@ -187,6 +219,109 @@ export default class PropertyCheckerModel {
       "drawModel.featureAdded",
       this.#handleFeatureAdded
     );
+    this.#app.globalObserver.subscribe("core.appLoaded", this.#handleQPcParam);
+  };
+
+  /**
+   * Resolves a free-text value (property name or address) to a geometry by
+   * reusing the app's SearchModel against an existing WFS search source.
+   * The lookup is exact (no wildcards, case-insensitive) and returns the first
+   * matching feature's geometry, already reprojected to the view projection.
+   */
+  #lookupGeometryViaSearchSource = async (
+    searchModel: SearchModelLike,
+    sourceId: string,
+    value: string
+  ): Promise<Geometry | undefined> => {
+    const source = searchModel.getSources().find((s) => s.id === sourceId);
+    if (!source) {
+      console.warn(
+        `PropertyChecker: q_pc lookup source id "${sourceId}" is not among the configured search sources.`
+      );
+      return undefined;
+    }
+
+    try {
+      // Spread the model's default options so required fields (e.g.
+      // `featuresToFilter`) are always present, then override for an exact,
+      // case-insensitive, single-result lookup.
+      const { featureCollections } = await searchModel.getResults(
+        value,
+        [source],
+        {
+          ...searchModel.getSearchOptions(),
+          matchCase: false,
+          wildcardAtStart: false,
+          wildcardAtEnd: false,
+          maxResultsPerDataset: 1,
+          initiator: "propertychecker",
+        }
+      );
+      return featureCollections?.[0]?.value?.features?.[0]?.getGeometry();
+    } catch (e) {
+      console.warn("PropertyChecker: q_pc search source lookup failed:", e);
+      return undefined;
+    }
+  };
+
+  #handleQPcParam = async (): Promise<void> => {
+    const qPc = (
+      this.#app.config.initialURLParams as URLSearchParams | undefined
+    )?.get("q_pc");
+    if (!qPc) return;
+
+    const searchModel = this.#app.searchModel as SearchModelLike | undefined;
+    if (!searchModel) {
+      console.warn(
+        "PropertyChecker: q_pc URL param is set but no SearchModel is available (is the Search tool configured?)."
+      );
+      return;
+    }
+
+    if (!this.#propertyNameLookupWfsLayerId) {
+      console.warn(
+        "PropertyChecker: q_pc URL param is set but propertyNameLookupWfsLayerId is not configured."
+      );
+      return;
+    }
+
+    // Step A: property name lookup (primary)
+    let geometry = await this.#lookupGeometryViaSearchSource(
+      searchModel,
+      this.#propertyNameLookupWfsLayerId,
+      qPc
+    );
+
+    // Step B: address lookup (fallback)
+    if (!geometry && this.#addressLookupWfsLayerId) {
+      geometry = await this.#lookupGeometryViaSearchSource(
+        searchModel,
+        this.#addressLookupWfsLayerId,
+        qPc
+      );
+    }
+
+    if (!geometry) {
+      console.warn(`PropertyChecker: q_pc="${qPc}" returned no results.`);
+      // Inform the user (via the view) that the deep-link value could not be
+      // resolved, so they can fall back to picking a property in the map.
+      this.#localObserver.publish("qPcLookupFailed", { query: qPc });
+      return;
+    }
+
+    // Pan/zoom map to geometry extent
+    const extent = geometry.getExtent();
+    this.#map
+      .getView()
+      .fit(extent, { duration: 1000, padding: [50, 50, 50, 50] });
+
+    // Compute centroid from extent and inject a synthetic point feature,
+    // reusing the regular map-click pipeline.
+    const centroid = getCenter(extent);
+    const syntheticFeature = new OlFeature({
+      geometry: new OlPoint(centroid),
+    });
+    await this.#handleFeatureAdded(syntheticFeature);
   };
 
   #groupFeaturesByAttributeName = (
@@ -399,10 +534,19 @@ export default class PropertyCheckerModel {
         groupedFeatures: groupedCheckLayerFeatures,
         digitalPlanFeatures: groupedDigitalPlanFeaturesWithGroupedUseType,
       });
+      const propertyName = this.#enableCheckLayerTab
+        ? (Object.keys(groupedCheckLayerFeatures)[0] ?? null)
+        : null;
+      this.#app.globalObserver.publish("propertychecker.propertySelected", {
+        propertyName,
+      });
     } else {
       this.#localObserver.publish("noFeaturesInResult", {
         amountOfProperties,
         amountOfDigitalPlans,
+      });
+      this.#app.globalObserver.publish("propertychecker.propertySelected", {
+        propertyName: null,
       });
     }
   };

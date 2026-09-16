@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   DndContext,
   TouchSensor,
@@ -41,7 +41,7 @@ const reorder = (list, startIndex, endIndex) => {
   return result;
 };
 
-function DrawOrder({ display, app, map, localObserver, options }) {
+function DrawOrder({ display, app, map, _localObserver, options }) {
   // Configurable input sensors for the draworder list
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -115,7 +115,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
       // Subscribe to the layerVisibilityChanged event when display sets to true
       visibilityChangedSubscription = app.globalObserver.subscribe(
         "core.layerVisibilityChanged",
-        (l) => {
+        (_l) => {
           // Update list of layers
           setSortedLayers(getSortedLayers());
         }
@@ -327,7 +327,12 @@ function DrawOrder({ display, app, map, localObserver, options }) {
           }),
         })}
       >
-        <Stack direction="row" alignItems="center">
+        <Stack
+          direction="row"
+          sx={{
+            alignItems: "center",
+          }}
+        >
           {options.enableSystemLayersSwitch && (
             <FormGroup id="draw-order-switch">
               <FormControlLabel

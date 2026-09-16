@@ -160,7 +160,7 @@ export default class DocumentHandlerModel {
 
   getAllChapterInfo() {
     if (this.chapterInfo.length === 0) {
-      this.allDocuments.forEach((document) => {
+      this.allDocuments.forEach((document, _index) => {
         document.chapters.forEach((mainChapter) => {
           this.setChapterInfo(
             mainChapter,
@@ -239,9 +239,9 @@ export default class DocumentHandlerModel {
 
   async fetchJsonDocument(folder = "", title) {
     try {
-      const documentHandlerId = this.options?.documentHandlerId;
-      const folderPath = folder ? `/${folder}` : "";
-      const url = `${this.mapServiceUrl}/api/v3/tools/${documentHandlerId}/documenthandler/load${folderPath}/${title}`;
+      const url = `${this.mapServiceUrl}/informative/load${
+        folder && `/${folder}`
+      }/${title}`;
 
       const response = await hfetch(url);
       const text = await response.text();
@@ -253,9 +253,6 @@ export default class DocumentHandlerModel {
       }
 
       const document = await JSON.parse(text);
-
-      // Backend loadDocumentForClient returns { title, chapters } directly (no content wrapper)
-
       this.internalId = 0;
       document.chapters.forEach((chapter) => {
         this.setParentChapter(chapter, undefined);

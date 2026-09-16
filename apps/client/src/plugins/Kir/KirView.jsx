@@ -8,13 +8,13 @@ import KirSearchView from "./KirSearchView";
 import KirExportView from "./KirExportView";
 import KirSearchResultsView from "./KirSearchResultsView";
 
-const KirContainer = styled("div")(({ theme }) => ({
+const KirContainer = styled("div")(({ _theme }) => ({
   display: "flex",
   flexDirection: "column",
   height: "100%",
 }));
 
-const StickyAppBar = styled(AppBar)(({ theme }) => ({
+const StickyAppBar = styled(AppBar)(({ _theme }) => ({
   top: 0,
 }));
 

@@ -56,7 +56,7 @@ const GridTableOfContents = styled(Grid)(({ theme }) => ({
   paddingBottom: theme.spacing(1),
 }));
 
-const CollapseCollapseContainer = styled(Collapse)(({ theme }) => ({
+const CollapseCollapseContainer = styled(Collapse)(({ _theme }) => ({
   width: "100%",
 }));
 

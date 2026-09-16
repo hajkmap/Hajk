@@ -404,22 +404,6 @@ class KmlModel {
     });
   };
 
-  // Extracts the coordinates for the
-  #getFeaturePointPosition = (featureGeometry) => {
-    // First we have to get the geometry type, since we only
-    // want to extract the coordinates when we're dealing with a point.
-    const geometryType = featureGeometry.getType();
-    // If we're not dealing with a point, return.
-    if (geometryType !== "Point") return null;
-    // Otherwise we get the coordinates
-    const coordinates = featureGeometry.getCoordinates();
-    // And return them formatted...
-    return {
-      n: coordinates[1],
-      e: coordinates[0],
-    };
-  };
-
   // Prepares the supplied features for injection in the map.
   // Includes translating and styling of the features.
   #prepareForMapInjection = (features) => {
@@ -599,7 +583,7 @@ class KmlModel {
         status: "SUCCESS",
         error: null,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         status: "FAILED",
         error: "Could not save the KML-file. File-saver Error.",

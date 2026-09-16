@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { IconButton, InputAdornment, TextField, Divider } from "@mui/material";
 
@@ -50,7 +50,7 @@ const LayerListFilter = ({
               updateTooltip(event.target.value);
             }
           }}
-          onBlur={(event) => {
+          onBlur={(_event) => {
             updateTooltip("");
           }}
           onKeyDown={(event) => {

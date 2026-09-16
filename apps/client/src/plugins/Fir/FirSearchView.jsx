@@ -20,12 +20,12 @@ import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
 import FirToolbarView from "./FirToolbarView";
 
-const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
+const StyledFormControlLabel = styled(FormControlLabel)(({ _theme }) => ({
   fontSize: "0.875rem",
   fontWeight: "400",
 }));
 
-const TypographyHeading = styled(Typography)(({ theme }) => ({
+const TypographyHeading = styled(Typography)(({ _theme }) => ({
   fontWeight: 500,
 }));
 
@@ -37,7 +37,7 @@ const StyledFormControl2 = styled(FormControl)(({ theme }) => ({
   marginBottom: theme.spacing(1),
 }));
 
-const StyledCheckbox = styled(Checkbox)(({ theme }) => ({
+const StyledCheckbox = styled(Checkbox)(({ _theme }) => ({
   paddingTop: "0.25rem",
   paddingBottom: "0.25rem",
 }));
@@ -50,7 +50,7 @@ const ContainerTopPadded = styled("div")(({ theme }) => ({
   paddingTop: theme.spacing(2),
 }));
 
-const CircularProgressButton = styled(CircularProgress)(({ theme }) => ({
+const CircularProgressButton = styled(CircularProgress)(({ _theme }) => ({
   position: "absolute",
   top: "50%",
   left: "50%",
@@ -206,7 +206,7 @@ class FirSearchView extends React.PureComponent {
                     .filter((item) => {
                       return item.visibleInDropDown !== false;
                     })
-                    .map((item, index) => (
+                    .map((item, _index) => (
                       <MenuItem
                         key={`fir-searchType-${item.id}`}
                         value={item.id}

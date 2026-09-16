@@ -339,7 +339,7 @@ class EditModel {
     var features;
     try {
       features = format.readFeatures(data);
-    } catch (e) {
+    } catch (_e) {
       alert("Fel: data kan inte läsas in. Kontrollera koordinatsystem.");
     }
 
@@ -360,7 +360,7 @@ class EditModel {
 
     this.vectorSource.addFeatures(features);
     this.vectorSource.getFeatures().forEach((feature) => {
-      feature.on("propertychange", (e) => {
+      feature.on("propertychange", (_e) => {
         if (feature.modification === "removed") {
           return;
         }
@@ -369,7 +369,7 @@ class EditModel {
         }
         feature.modification = "updated";
       });
-      feature.on("change", (e) => {
+      feature.on("change", (_e) => {
         if (feature.modification === "removed") {
           return;
         }

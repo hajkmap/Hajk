@@ -26,7 +26,7 @@ import { useEffect, useState } from "react";
 import HajkToolTip from "components/HajkToolTip";
 import SelectFeaturesDialog from "utils/SelectFeaturesDialog";
 
-const SvgImg = styled("img")(({ theme }) => ({
+const SvgImg = styled("img")(({ _theme }) => ({
   height: "24px",
   width: "24px",
 }));
@@ -156,8 +156,21 @@ function MeasurerView(props) {
 
   return (
     <>
-      <Grid container spacing={1} alignItems="flex-start">
-        <Grid size={12} display="flex" alignItems="center" gap={1}>
+      <Grid
+        container
+        spacing={1}
+        sx={{
+          alignItems: "flex-start",
+        }}
+      >
+        <Grid
+          size={12}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           <StyledToggleButtonGroup
             exclusive
             value={drawType}
@@ -245,6 +258,7 @@ function MeasurerView(props) {
       <SelectFeaturesDialog
         localObserver={props.localObserver}
         drawModel={drawModel}
+        dialogTitle="Välj de objekt du vill mäta"
       />
     </>
   );

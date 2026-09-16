@@ -21,10 +21,10 @@ import {
 const convertRGBAtoString = (color) => {
   if (
     typeof color === "object" &&
-    color.hasOwnProperty("r") &&
-    color.hasOwnProperty("g") &&
-    color.hasOwnProperty("b") &&
-    color.hasOwnProperty("a")
+    Object.hasOwn(color, "r") &&
+    Object.hasOwn(color, "g") &&
+    Object.hasOwn(color, "b") &&
+    Object.hasOwn(color, "a")
   ) {
     return `rgba(${color.r},${color.g},${color.b},${color.a})`;
   } else {
@@ -174,19 +174,25 @@ export default class MapClickModel {
             case "application/geojson":
             case "application/json": {
               olFeatures = parseGeoJsonFeatures(
-                await response.value.requestResponse.json()
+                await response.value.requestResponse.json(),
+                response.value.layer.getSource().getProjection(),
+                response.value.viewProjection
               );
               break;
             }
             case "text/xml": {
               olFeatures = parseWmsGetFeatureInfoXml(
-                await response.value.requestResponse.text()
+                await response.value.requestResponse.text(),
+                response.value.layer.getSource().getProjection(),
+                response.value.viewProjection
               );
               break;
             }
             case "application/vnd.ogc.gml": {
               olFeatures = parseGMLFeatures(
-                await response.value.requestResponse.text()
+                await response.value.requestResponse.text(),
+                response.value.layer.getSource().getProjection(),
+                response.value.viewProjection
               );
               break;
             }

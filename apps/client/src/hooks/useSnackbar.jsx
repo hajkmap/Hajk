@@ -92,6 +92,7 @@ const useSnackbar = () => {
         if ([ADD, ADD_ONLY].includes(type)) {
           return { ...prevItems, [key]: caption };
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { [key]: _, ...rest } = prevItems;
         return rest;
       });

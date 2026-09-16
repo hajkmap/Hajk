@@ -127,9 +127,10 @@ export default class FeatureStyle {
           fill: new Fill({
             color: settings.textFillColor,
           }),
-          text: (type = "selection"
-            ? feature.featureTitle
-            : feature.shortFeatureTitle),
+          text:
+            type === "selection"
+              ? feature.featureTitle
+              : feature.shortFeatureTitle,
           overflow: true,
           stroke: new Stroke({
             color: settings.textStrokeColor,

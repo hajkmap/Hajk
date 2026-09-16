@@ -12,7 +12,6 @@ import "@fontsource/material-icons";
 import "ol/ol.css";
 import "./custom-ol.css";
 
-import React from "react";
 import { createRoot } from "react-dom/client";
 import StartupError from "./components/Errors/StartupError";
 import HajkThemeProvider from "./components/HajkThemeProvider";

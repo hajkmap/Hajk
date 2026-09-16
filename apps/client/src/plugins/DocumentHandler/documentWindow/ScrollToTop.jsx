@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Fab } from "@mui/material";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import { darken } from "@mui/material/styles";

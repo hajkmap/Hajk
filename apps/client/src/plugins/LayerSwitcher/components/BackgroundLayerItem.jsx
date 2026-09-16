@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, memo } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 
 // Material UI components
 import {
@@ -134,11 +134,13 @@ function BackgroundLayerItem({
             primary={name}
             slotProps={{
               primary: {
-                pr: 5,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
                 variant: "body1",
-                fontWeight: "inherit",
+                sx: {
+                  pr: 5,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  fontWeight: "inherit",
+                },
               },
             }}
           />

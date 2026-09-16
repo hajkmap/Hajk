@@ -80,7 +80,7 @@ export default class FirImport {
     }
 
     if (type === "LineString") {
-      coordinates.forEach((c, i) => {
+      coordinates.forEach((c, _i) => {
         let pairs = [];
         c.forEach((digit) => {
           if (digit !== 0) {
@@ -93,7 +93,7 @@ export default class FirImport {
     } else if (type === "Polygon") {
       coordinates.forEach((polygon, i) => {
         newCoordinates[i] = [];
-        polygon.forEach((vertex, j) => {
+        polygon.forEach((vertex, _j) => {
           let pairs = [];
           vertex.forEach((digit) => {
             if (digit !== 0) {

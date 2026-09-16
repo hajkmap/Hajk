@@ -259,7 +259,7 @@ class Window extends React.PureComponent {
    */
   areBreadcrumbsActivated() {
     return this.props.layerswitcherConfig &&
-      this.props.layerswitcherConfig.hasOwnProperty("options")
+      Object.hasOwn(this.props.layerswitcherConfig, "options")
       ? this.props.layerswitcherConfig.options.showBreadcrumbs
       : false;
   }
@@ -325,7 +325,7 @@ class Window extends React.PureComponent {
     );
   }
 
-  close = (e) => {
+  close = (_e) => {
     const { onClose, globalObserver, title } = this.props;
     this.latestWidth = this.rnd.current.getSelfElement().clientWidth;
     if (onClose) onClose();
@@ -533,7 +533,7 @@ class Window extends React.PureComponent {
     return (
       <StyledRnd
         className="hajk-window"
-        onMouseDown={(e) => {
+        onMouseDown={(_e) => {
           this.bringToFront();
         }}
         onMouseOver={(e) => e.stopPropagation()} // If this bubbles, we'll have Tooltip show up even when we're only on Window. FIXME: Not needed when we change the rendering order.
@@ -541,7 +541,7 @@ class Window extends React.PureComponent {
         style={{
           display: open ? "block" : "none",
         }}
-        onDragStop={(e, d) => {
+        onDragStop={(_e, _d) => {
           const rect = this.rnd.current.getSelfElement().getClientRects()[0];
           if (rect) {
             this.left = rect.left;
@@ -550,7 +550,7 @@ class Window extends React.PureComponent {
               window.innerWidth - (this.left + parseFloat(this.width));
           }
         }}
-        onResizeStop={(e, direction, ref, delta, position) => {
+        onResizeStop={(_e, _direction, ref, _delta, _position) => {
           this.width = ref.style.width;
           if (this.state.mode !== "minimized") {
             this.height = ref.style.height;

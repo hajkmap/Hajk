@@ -14,7 +14,7 @@ class AlertView extends React.PureComponent {
     parent: propTypes.object.isRequired,
   };
 
-  handleClose = (e) => {
+  handleClose = (_e) => {
     this.props.parent.setState({
       alert: false,
     });

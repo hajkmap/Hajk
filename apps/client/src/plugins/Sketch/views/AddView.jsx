@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid, Typography } from "@mui/material";
 
 import DrawTypeSelector from "../components/DrawTypeSelector";
@@ -53,7 +52,7 @@ const AddView = (props) => {
       <SelectFeaturesDialog
         localObserver={localObserver}
         drawModel={drawModel}
-        model={model}
+        dialogTitle="Välj de objekt du vill kopiera"
       />
     </Grid>
   );

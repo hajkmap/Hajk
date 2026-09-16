@@ -1,4 +1,4 @@
-import React, {
+import {
   useEffect,
   createContext,
   useContext,
@@ -395,6 +395,7 @@ const buildLayerTree = (groups, olLayerMap) =>
       groupIsToggable: group.toggled,
       defaultExpanded: group.expanded,
       parent: group.parent,
+      exclusive: group.exclusive,
     };
   });
 
@@ -510,6 +511,32 @@ const LayerSwitcherProvider = ({
   const dispatcher = useRef(
     createDispatch(map, staticLayerConfigMap, layerTreeData)
   );
+
+  // Add listeners for toggling layers and backgroundlayers via globalobserver.
+  useEffect(() => {
+    const toggleLayerListener = globalObserver.subscribe(
+      "layerswitcher.toggleLayer",
+      ({ layerId }) => {
+        const olLayer = map
+          .getAllLayers()
+          .find((l) => l.get("name") === layerId);
+        if (!olLayer) return;
+        dispatcher.current.setLayerVisibility(layerId, !olLayer.getVisible());
+      }
+    );
+
+    const setBackgroundLayerListener = globalObserver.subscribe(
+      "layerswitcher.setBackgroundLayer",
+      (layerId) => {
+        dispatcher.current.setBackgroundLayer(layerId);
+      }
+    );
+
+    return () => {
+      toggleLayerListener.unsubscribe();
+      setBackgroundLayerListener.unsubscribe();
+    };
+  }, [globalObserver, map]);
 
   return (
     <LayerSwitcherDispatchContext.Provider value={dispatcher.current}>

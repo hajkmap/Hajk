@@ -148,7 +148,7 @@ class InformativeModel {
       });
       callback(data.chapters);
       this.chapters = data.chapters;
-    } catch (err) {
+    } catch (_err) {
       this.localObserver.publish("showSnackbar", {
         message:
           "Laddning av Informative-pluginet misslyckades. Pluginet verkar vara felaktigt konfigurerat. Var god kontakta systemadministratören.",

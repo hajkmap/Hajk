@@ -124,7 +124,7 @@ class ExternalLinks extends React.PureComponent {
     // If config for Control isn't found, or if the config doesn't contain anything, quit.
     if (
       !this.config ||
-      (this.config.hasOwnProperty("options") &&
+      (Object.hasOwn(this.config, "options") &&
         this.config.options.list.length === 0)
     ) {
       return null;

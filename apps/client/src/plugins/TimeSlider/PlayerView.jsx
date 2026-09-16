@@ -1,4 +1,3 @@
-import React from "react";
 import { Button, Grid, Slider } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -69,9 +68,11 @@ export default function PlayerView(props) {
       <Grid
         container
         direction="row"
-        justifyContent="center"
-        alignItems="center"
         spacing={2}
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
         <Grid align="center" size={2}>
           <HajkToolTip title="Återställ tidslinjen">
@@ -148,9 +149,12 @@ export default function PlayerView(props) {
   ) : (
     <Grid
       container
-      alignItems="center"
-      justifyContent="center"
-      sx={{ width: "100%", height: "100%" }}
+      sx={{
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        height: "100%",
+      }}
     >
       <Grid>
         <SettingsButton

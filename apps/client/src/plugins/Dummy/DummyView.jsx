@@ -1,5 +1,5 @@
 // Make sure to only import the hooks you intend to use
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { styled } from "@mui/material/styles";
 import { Box, Button, Typography } from "@mui/material";

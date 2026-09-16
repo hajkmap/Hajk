@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { easeOut } from "ol/easing";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import ControlButton from "components/ControlButton";

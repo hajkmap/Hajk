@@ -1,4 +1,3 @@
-import React from "react";
 import { styled } from "@mui/material/styles";
 import { Grid, Typography } from "@mui/material";
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
@@ -28,7 +27,13 @@ const FeatureBufferAccordion = (props) => {
         title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}
       >
         <StyledAccordionSummary>
-          <Grid container justifyContent="space-between" alignItems="center">
+          <Grid
+            container
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <Typography variant="button">{props.title}</Typography>
           </Grid>
         </StyledAccordionSummary>

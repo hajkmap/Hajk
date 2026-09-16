@@ -1,4 +1,3 @@
-import React from "react";
 import { styled } from "@mui/material";
 import { Button, IconButton, Zoom } from "@mui/material";
 import { Grid, Typography, Paper } from "@mui/material";
@@ -50,7 +49,13 @@ const RemovedFeatureItem = ({ onRestoreClick, title }) => {
   return (
     <Zoom in appear>
       <StyledPaper>
-        <Grid container justifyContent="space-between" alignItems="center">
+        <Grid
+          container
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Typography variant="button">{title}</Typography>
           <HajkToolTip title="Klicka för att återställa ritobjektet.">
             <IconButton size="small" onClick={onRestoreClick}>

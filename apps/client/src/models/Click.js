@@ -140,7 +140,7 @@ function readJsonFeatures(jsonData, layerProjection, viewProjection) {
   // However, if it's empty (QGIS Server), we must tell the parser which projection
   // should be used for the features and which projection our View is in.
   const parserOptions = jsonData.crs
-    ? {}
+    ? { featureProjection: viewProjection }
     : {
         dataProjection: layerProjection,
         featureProjection: viewProjection,
@@ -184,7 +184,12 @@ function getFeaturesFromJson(response, jsonData) {
 
 function getFeaturesFromGml(response, text) {
   const wmsGetFeatureInfo = new WMSGetFeatureInfo();
-  let features = wmsGetFeatureInfo.readFeatures(text);
+  const layerProjection = response.layer.getSource().getProjection();
+  const viewProjection = response.viewProjection;
+  let features = wmsGetFeatureInfo.readFeatures(text, {
+    dataProjection: layerProjection,
+    featureProjection: viewProjection,
+  });
   if (features && features.length > 0) {
     features = features.map((f) => {
       f.layer = response.layer;
@@ -369,7 +374,7 @@ export function handleClick(evt, map, callback) {
                       ...experimentalParseEsriWmsRawXml(response.value, text)
                     );
                   })
-                  .catch((err) => {
+                  .catch((_err) => {
                     console.error(
                       "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
                     );
@@ -386,7 +391,7 @@ export function handleClick(evt, map, callback) {
                       ...getFeaturesFromXmlOrGml(response.value, text)
                     );
                   })
-                  .catch((err) => {
+                  .catch((_err) => {
                     console.error(
                       "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
                     );

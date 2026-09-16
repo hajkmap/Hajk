@@ -31,11 +31,11 @@ class AttributeEditor extends React.Component {
         feature: feature,
       });
     });
-    props.editSource?.editableFields?.forEach((field, i) => {
+    props.editSource?.editableFields?.forEach((field, _i) => {
       field.initialRender = true;
     });
 
-    props.editSource?.nonEditableFields?.forEach((field, i) => {
+    props.editSource?.nonEditableFields?.forEach((field, _i) => {
       field.initialRender = true;
     });
   }
@@ -315,7 +315,7 @@ class AttributeEditor extends React.Component {
             variant="outlined"
             disabled={!editable}
             value={value}
-            error={this.formErrors.hasOwnProperty(field.name)}
+            error={Object.hasOwn(this.formErrors, field.name)}
             helperText={
               this.formErrors[field.name]?.length >= 0
                 ? this.formErrors[field.name]
@@ -338,7 +338,7 @@ class AttributeEditor extends React.Component {
             variant="outlined"
             disabled={!editable}
             value={value}
-            error={this.formErrors.hasOwnProperty(field.name)}
+            error={Object.hasOwn(this.formErrors, field.name)}
             helperText={
               this.formErrors[field.name]?.length >= 0
                 ? this.formErrors[field.name]
@@ -362,7 +362,7 @@ class AttributeEditor extends React.Component {
             variant="outlined"
             disabled={!editable}
             value={value}
-            error={this.formErrors.hasOwnProperty(field.name)}
+            error={Object.hasOwn(this.formErrors, field.name)}
             helperText={
               this.formErrors[field.name]?.length >= 0
                 ? this.formErrors[field.name]
@@ -391,7 +391,7 @@ class AttributeEditor extends React.Component {
             variant="outlined"
             disabled={!editable}
             value={value}
-            error={this.formErrors.hasOwnProperty(field.name)}
+            error={Object.hasOwn(this.formErrors, field.name)}
             helperText={
               this.formErrors[field.name]?.length >= 0
                 ? this.formErrors[field.name]
@@ -420,7 +420,7 @@ class AttributeEditor extends React.Component {
               margin="normal"
               variant="outlined"
               disabled={!editable}
-              error={this.formErrors.hasOwnProperty(field.name)}
+              error={Object.hasOwn(this.formErrors, field.name)}
               helperText={
                 this.formErrors[field.name]?.length >= 0
                   ? this.formErrors[field.name]
@@ -454,7 +454,7 @@ class AttributeEditor extends React.Component {
               variant="outlined"
               disabled={!editable}
               multiline
-              error={this.formErrors.hasOwnProperty(field.name)}
+              error={Object.hasOwn(this.formErrors, field.name)}
               helperText={
                 this.formErrors[field.name]?.length >= 0
                   ? this.formErrors[field.name]
@@ -476,7 +476,7 @@ class AttributeEditor extends React.Component {
             />
           </>
         );
-      case "flerval":
+      case "flerval": {
         let defaultValues = [];
         if (typeof field.defaultValue === "string") {
           defaultValues = field.defaultValue.split(",");
@@ -528,7 +528,8 @@ class AttributeEditor extends React.Component {
             <br />
           </>
         );
-      case "lista":
+      }
+      case "lista": {
         let options = null;
         if (Array.isArray(field.values)) {
           options = field.values.map((val, i) => (
@@ -561,6 +562,7 @@ class AttributeEditor extends React.Component {
             </FormControl>
           </>
         );
+      }
       case "boolean":
         return (
           <FormControlLabel

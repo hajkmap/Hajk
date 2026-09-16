@@ -38,7 +38,7 @@ const StyledAlert = styled(Alert)(({ theme }) => ({
   },
 }));
 
-const StyledButton = styled(Button)(({ theme }) => ({
+const StyledButton = styled(Button)(({ _theme }) => ({
   minHeight: { xs: "48px", sm: "36px" },
   height: "auto",
   whiteSpace: { xs: "normal", sm: "nowrap" },
@@ -117,7 +117,7 @@ class AnchorView extends React.PureComponent {
     );
   };
 
-  handleClickOnCopyToClipboard = (e) => {
+  handleClickOnCopyToClipboard = (_e) => {
     const input = document.getElementById("anchorUrl");
     input.select();
     document.execCommand("copy") &&
@@ -165,7 +165,7 @@ class AnchorView extends React.PureComponent {
           <StyledTextField
             fullWidth={true}
             id="anchorUrl"
-            InputProps={{ readOnly: true }}
+            slotProps={{ input: { readOnly: true } }}
             value={this.state.anchor}
             variant="outlined"
             size="small"
@@ -230,7 +230,12 @@ class AnchorView extends React.PureComponent {
         {appStateInHashEnabled && (
           <Grid>
             <Paper sx={{ p: 1, mt: 2 }}>
-              <Grid container justifyContent="center">
+              <Grid
+                container
+                sx={{
+                  justifyContent: "center",
+                }}
+              >
                 <Grid size={12}>
                   <Box
                     sx={{

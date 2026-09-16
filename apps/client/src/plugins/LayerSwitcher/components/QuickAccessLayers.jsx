@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import LayerItem from "./LayerItem";
 import BackgroundLayer from "./BackgroundLayer";

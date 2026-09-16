@@ -49,7 +49,7 @@ const StyledAccordionButton = styled(Button)({
 });
 
 const StyledAccordionSummary = styled(AccordionSummary)(
-  ({ expanded, dividercolor }) => ({
+  ({ _expanded, dividercolor }) => ({
     width: "100%",
     transition: "opacity 0.2s ease-in-out",
     justifyContent: "space-between",
@@ -862,7 +862,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     let mapLink = null;
     try {
       mapLink = decodeURIComponent(mapLinkOrg);
-    } catch (error) {
+    } catch (_error) {
       mapLink = mapLinkOrg;
     }
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { saveAs } from "file-saver";
 
@@ -310,14 +310,18 @@ function FavoritesList({
                     secondary={parseDate(favorite.metadata.savedAt)}
                     slotProps={{
                       primary: {
-                        pr: 5,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
+                        sx: {
+                          pr: 5,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        },
                       },
                       secondary: {
-                        pr: 5,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
+                        sx: {
+                          pr: 5,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        },
                       },
                     }}
                   />

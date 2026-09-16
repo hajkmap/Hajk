@@ -215,7 +215,7 @@ class SearchModel {
         r.source = searchSources[i];
         r.origin = "WFS";
         successfulResponses.push(r);
-      } else if ((r) => r.status === "rejected") {
+      } else if (r.status === "rejected") {
         r.source = searchSources[i];
         r.origin = "WFS";
         errors.push(r);

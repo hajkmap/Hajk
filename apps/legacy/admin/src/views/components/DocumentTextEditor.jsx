@@ -59,6 +59,8 @@ const ColorButtonGreen = withStyles((theme) => ({
   },
 }))(Button);
 
+const LINK_TYPES = ["urllink", "documentlink", "maplink", "hover"];
+
 export default class DocumentTextEditor extends React.Component {
   constructor(props) {
     super(props);
@@ -75,7 +77,6 @@ export default class DocumentTextEditor extends React.Component {
       imageList: this.props.imageList,
       videoList: this.props.videoList,
       audioList: this.props.audioList,
-      documents: this.props.documents,
       readOnly: false,
       onReadOnly: false,
       currentImage: "",
@@ -102,8 +103,16 @@ export default class DocumentTextEditor extends React.Component {
       console.log("---");
     };
     this.onChange = this._onChange.bind(this);
-    this.onURLChange = (e) =>
-      this.setState({ urlValue: this.sanitizeMediaUrl(e.target.value) });
+    // Document names / map links / hover text are identifiers or plain text,
+    // not media URLs — do not resolve them against the admin origin.
+    this.onURLChange = (e) => {
+      const value = e.target.value;
+      if (["documentlink", "maplink", "hover"].includes(this.state.urlType)) {
+        this.setState({ urlValue: value });
+        return;
+      }
+      this.setState({ urlValue: this.sanitizeMediaUrl(value) });
+    };
     this.onImageAltChange = (e) => this.setState({ imageAlt: e.target.value });
     this.onTitleChange = (e) => this.setState({ urlTitle: e.target.value });
     this.onTitleIdChange = (e) => this.setState({ urlTitleId: e.target.value });
@@ -641,12 +650,15 @@ export default class DocumentTextEditor extends React.Component {
     });
   }
   _promptForMedia(type) {
+    // urlValue is shared with the link dialog, where it holds a document name,
+    // map link or hover text. None of those are usable as a media source.
+    const carriedFromLinkInput = LINK_TYPES.includes(this.state.urlType);
     this.setState(
       {
         showURLInput: true,
         showLinkInput: false,
         showTextAreaInput: false,
-        urlValue: this.state.urlValue,
+        urlValue: carriedFromLinkInput ? "" : this.state.urlValue,
         imageAlt: this.state.imageAlt,
         urlType: type,
         mediaWidth: this.state.mediaWidth,
@@ -663,12 +675,23 @@ export default class DocumentTextEditor extends React.Component {
     );
   }
   _promptForLink(type) {
+    // The document <select> only fires onChange when the user changes it.
+    // Pre-select the first document so confirming with only a header id
+    // still saves a valid data-document.
+    let urlValue = this.state.urlValue;
+    if (type === "documentlink") {
+      const documents = Array.isArray(this.props.documents)
+        ? this.props.documents
+        : [];
+      urlValue = documents.includes(urlValue) ? urlValue : documents[0] || "";
+    }
+
     this.setState(
       {
         showURLInput: false,
         showLinkInput: true,
         showTextAreaInput: false,
-        urlValue: this.state.urlValue,
+        urlValue,
         imageAlt: this.state.imageAlt,
         urlType: type,
         urlTitle: "",
@@ -1135,7 +1158,11 @@ export default class DocumentTextEditor extends React.Component {
     // Return input field for default URL or documents
     if (type === "documentlink") {
       return (
-        <select onChange={this.onURLChange} ref="link">
+        <select
+          onChange={this.onURLChange}
+          ref="link"
+          value={this.state.urlValue || ""}
+        >
           {documents
             ? documents.map((document, i) => {
                 return (
@@ -1346,8 +1373,7 @@ export default class DocumentTextEditor extends React.Component {
   };
 
   render() {
-    const { editorState, imageList, videoList, audioList, documents } =
-      this.state;
+    const { editorState, imageList, videoList, audioList } = this.state;
     let editorContainer = styles.editor;
     let urlInput;
     if (this.state.showURLInput) {
@@ -1580,7 +1606,9 @@ export default class DocumentTextEditor extends React.Component {
               Markera den text som ska bli en länk
             </Typography>
           </Grid>
-          <Grid item>{this.getUrlInput(this.state.urlType, documents)}</Grid>
+          <Grid item>
+            {this.getUrlInput(this.state.urlType, this.props.documents)}
+          </Grid>
           <Grid item>{this.getUrlId(this.state.urlType)}</Grid>
           <Grid item>
             <ColorButtonGreen

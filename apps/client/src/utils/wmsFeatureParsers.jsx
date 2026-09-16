@@ -6,12 +6,19 @@ import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
 const geoJsonParser = new GeoJSON();
 const wmsGetFeatureInfoParser = new WMSGetFeatureInfo();
 
-export function parseGeoJsonFeatures(json) {
-  return geoJsonParser.readFeatures(json);
+export function parseGeoJsonFeatures(json, layerProjection, viewProjection) {
+  const options = { featureProjection: viewProjection };
+  if (!json.crs) {
+    options.dataProjection = layerProjection;
+  }
+  return geoJsonParser.readFeatures(json, options);
 }
 
-export function parseGMLFeatures(gml) {
-  return wmsGetFeatureInfoParser.readFeatures(gml);
+export function parseGMLFeatures(gml, layerProjection, viewProjection) {
+  return wmsGetFeatureInfoParser.readFeatures(gml, {
+    dataProjection: layerProjection,
+    featureProjection: viewProjection,
+  });
 }
 
 // Special implementation for parsing text/xml responses from Esri, see #1266
@@ -69,10 +76,17 @@ export function experimentalParseEsriWmsRawXml(xml) {
 }
 
 // Special implementation for parsing text/xml responses from Esri, see #1090.
-export function parseWmsGetFeatureInfoXml(xml) {
+export function parseWmsGetFeatureInfoXml(
+  xml,
+  layerProjection,
+  viewProjection
+) {
   // As this takes care of text/xml, we should try using the OL's built-in parser, see
   // https://openlayers.org/en/latest/apidoc/module-ol_format_WMSGetFeatureInfo-WMSGetFeatureInfo.html.
-  const parsedAsWmsFeatureInfo = wmsGetFeatureInfoParser.readFeatures(xml);
+  const parsedAsWmsFeatureInfo = wmsGetFeatureInfoParser.readFeatures(xml, {
+    dataProjection: layerProjection,
+    featureProjection: viewProjection,
+  });
 
   // If we've successfully parsed at least one feature using the official parser and
   // it looks as we have valid IDs on our feature, let's return.
@@ -175,7 +189,7 @@ function wmsRasterParser(featureCollection) {
               !Number.isNaN(Number(attribute.textContent)) // Don't allow parsing resulting in NaN
                 ? Number(attribute.textContent) // Use parsed value if conditions above were met, else…
                 : attribute.textContent; // …just user the text value
-          } catch (error) {
+          } catch (_error) {
             attrValue = attribute.textContent; // If parsing resulted in an error, just use the text value.
           }
           feature.set(attribute.localName, attrValue);

@@ -148,7 +148,7 @@ export default class Segment {
     }
   };
 
-  #handleSingleClick = (e) => {
+  #handleSingleClick = (_e) => {
     // Dont place a point until we have more than 2 coordinates in the LineString measurement.
     // Or 3 coordinates if we measure a Polygon.
     if (

@@ -1,4 +1,3 @@
-import React from "react";
 import { styled } from "@mui/material";
 import BaseDialog from "components/Dialog/BaseDialog";
 import {
@@ -11,7 +10,7 @@ import {
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 
-const StyledDialog = styled(BaseDialog)(({ theme }) => ({
+const StyledDialog = styled(BaseDialog)(({ _theme }) => ({
   "& .MuiDialog-paper": {
     width: "100%",
     maxWidth: 500,

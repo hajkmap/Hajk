@@ -77,7 +77,7 @@ export default class FeaturePropsParsing {
                 const match = child.match(/{(\d+)}/);
                 if (
                   match &&
-                  this.resolvedPromisesWithComponents.hasOwnProperty(match[1])
+                  Object.hasOwn(this.resolvedPromisesWithComponents, match[1])
                 ) {
                   // If matched, replace the placeholder with the corresponding component.
                   externalComponent =
@@ -111,7 +111,7 @@ export default class FeaturePropsParsing {
     if (jsonLike) {
       try {
         result = JSON.parse(str);
-      } catch (ex) {
+      } catch (_ex) {
         result = false;
       }
     } else {
@@ -323,7 +323,7 @@ export default class FeaturePropsParsing {
       // Invoking new URL will escape any special characters and ensure
       // that we provide a well-formatted URL to the MarkDown.
       href = new URL(href);
-    } catch (error) {
+    } catch (_error) {
       // If the URL creation failed for some reason (e.g. if a.href was empty,
       // or if it was a relative path), fall back to using the provided
       // string as-is, but remember to remove the leading and closing parentheses
@@ -378,7 +378,7 @@ export default class FeaturePropsParsing {
    * 1. The markdown is used as a template, anything between { and } gets replaced
    * with the real value from properties object, or is left empty.
    * 2. Next we apply conditional rendering, where conditions are between {{ and }} while
-   * content is between {{condition}} and {{/condition}}.
+   * content is between {{condition}} and {{/condition}}.
    * Currently, if-condition is the only one supported, but more might become available.
    * Depending on the condition value, replacing can occur within our markdown string.
    * 3. The final markdown string is passed to the ReactMarkdown component.
@@ -482,8 +482,9 @@ export default class FeaturePropsParsing {
           remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
           rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
           components={this.components} // Custom renderers for components, see definition in this.components
-          children={this.markdown} // Our MD, as a text string
-        />
+        >
+          {this.markdown}
+        </ReactMarkdown>
       );
     }
   };

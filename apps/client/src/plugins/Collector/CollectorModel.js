@@ -187,7 +187,7 @@ class CollectorModel {
     }
   }
 
-  getSelectStyle(feature) {
+  getSelectStyle(_feature) {
     return [
       new Style({
         stroke: new Stroke({
@@ -232,7 +232,7 @@ class CollectorModel {
     ];
   }
 
-  getVectorStyle(feature) {
+  getVectorStyle(_feature) {
     return [
       new Style({
         stroke: new Stroke({
@@ -253,7 +253,7 @@ class CollectorModel {
     ];
   }
 
-  getHiddenStyle(feature) {
+  getHiddenStyle(_feature) {
     return [
       new Style({
         stroke: new Stroke({

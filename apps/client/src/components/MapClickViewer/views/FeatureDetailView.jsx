@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import Breadcrumbs from "./Breadcrumbs";
 import FeaturePagination from "./FeaturePagination";

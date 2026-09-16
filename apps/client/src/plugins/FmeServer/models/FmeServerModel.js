@@ -81,7 +81,7 @@ class FmeServerModel {
           parameter.value ?? parameter.defaultValue ?? ""
         }`;
       case "LISTBOX":
-      case "LOOKUP_LISTBOX":
+      case "LOOKUP_LISTBOX": {
         // These should be array of strings...
         const selectedArray = parameter.value ?? parameter.defaultValue ?? [];
         // If the array is empty, we can return an empty string
@@ -91,10 +91,12 @@ class FmeServerModel {
         // Otherwise we concatenate a string with all selected values.
         const urlString = `${parameter.name}=${selectedArray.join(",")}`;
         return urlString;
-      case "RANGE_SLIDER":
+      }
+      case "RANGE_SLIDER": {
         // This one expects a number
         const { value } = this.getRangeSliderValueAndStep(parameter);
         return `${parameter.name}=${value}`;
+      }
       default:
         // Let's default to a string.
         return parameter.value ?? parameter.defaultValue ?? "";
@@ -172,10 +174,11 @@ class FmeServerModel {
       case "LOOKUP_LISTBOX":
         // These expect an array of strings
         return parameter.value ?? parameter.defaultValue ?? [];
-      case "RANGE_SLIDER":
+      case "RANGE_SLIDER": {
         // This one expects a number
         const { value } = this.getRangeSliderValueAndStep(parameter);
         return value;
+      }
       default:
         // Let's default to a string.
         return parameter.value ?? parameter.defaultValue ?? "";
@@ -267,7 +270,7 @@ class FmeServerModel {
       const response = await hfetch(url);
       const data = await response.json();
       return { error: false, parameters: data };
-    } catch (error) {
+    } catch (_error) {
       return { error: true, parameters: [] };
     }
   };
@@ -297,7 +300,7 @@ class FmeServerModel {
       });
       const data = await response.json();
       return { error: false, jobId: data.id ?? null };
-    } catch (error) {
+    } catch (_error) {
       return { error: true, jobId: null };
     }
   };
@@ -325,7 +328,7 @@ class FmeServerModel {
       });
       const data = await response.json();
       return { error: false, jobId: data?.serviceResponse?.jobID ?? null };
-    } catch (error) {
+    } catch (_error) {
       return { error: true, jobId: null };
     }
   };
@@ -343,7 +346,7 @@ class FmeServerModel {
       const response = await hfetch(url);
       const data = await response.json();
       return { error: false, status: data?.status ?? null };
-    } catch (error) {
+    } catch (_error) {
       return { error: true, status: null };
     }
   };

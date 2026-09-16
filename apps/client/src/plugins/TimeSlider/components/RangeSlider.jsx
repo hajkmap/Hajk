@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid, Slider, Typography } from "@mui/material";
 
 export default function RangeSlider(props) {

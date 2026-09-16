@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";

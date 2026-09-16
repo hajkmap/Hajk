@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -70,13 +70,18 @@ function GroupDetails({ display, groupDetails, app }) {
               }),
             })}
           >
-            <Stack direction="row" alignItems="center">
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: "center",
+              }}
+            >
               <HajkToolTip
                 open={tooltipOpen}
                 onClose={handleClose}
                 onOpen={handleOpen}
                 title="Tillbaka"
-                TransitionProps={{ timeout: 0 }}
+                slotProps={{ transition: { timeout: 0 } }}
               >
                 <LsIconButton onClick={handleBackButtonClick}>
                   <ArrowBackIcon />

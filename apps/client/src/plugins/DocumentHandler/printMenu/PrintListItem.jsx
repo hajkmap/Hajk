@@ -117,7 +117,7 @@ class PrintListItem extends React.PureComponent {
             <Checkbox
               color="primary"
               checked={chosenForPrint}
-              onChange={(e) => {
+              onChange={(_e) => {
                 this.props.handleTogglePrint(this.props.id);
               }}
               onClick={(e) => e.stopPropagation()}

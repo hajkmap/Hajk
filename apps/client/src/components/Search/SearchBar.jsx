@@ -159,7 +159,7 @@ class SearchBar extends React.PureComponent {
   };
 
   //Can't use string.prototype.matchAll because of Edge (Polyfill not working atm)
-  getMatches = (string, regex, index) => {
+  getMatches = (string, regex, _index) => {
     const matches = [];
     var match = regex.exec(string);
 
@@ -303,8 +303,7 @@ class SearchBar extends React.PureComponent {
         id="searchInputField"
         freeSolo
         size={"small"}
-        PopperComponent={(popperProps) => <CustomPopper {...popperProps} />}
-        PaperComponent={CustomPaper}
+        slots={{ popper: CustomPopper, paper: CustomPaper }}
         clearOnEscape
         disabled={
           searchActive === "extentSearch" ||
@@ -330,7 +329,6 @@ class SearchBar extends React.PureComponent {
               // there, which can become duplicated under some circumstances).
               <Grid
                 container
-                alignItems="center"
                 {...props}
                 key={props.id}
                 onClick={(e) => {
@@ -338,6 +336,12 @@ class SearchBar extends React.PureComponent {
                     props.onClick(e);
                   }
                 }}
+                sx={[
+                  {
+                    alignItems: "center",
+                  },
+                  ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
+                ]}
               >
                 <Grid size={1} key={`searchautocomplete-${index}`}>
                   {this.getOriginBasedIcon(option.origin)}
@@ -365,6 +369,17 @@ class SearchBar extends React.PureComponent {
           return option?.autocompleteEntry?.length > 0
             ? decodeCommas(option?.autocompleteEntry)
             : option;
+        }}
+        filterOptions={(options, state) => {
+          const cleanedInput = state.inputValue.replace(/"/g, "");
+          if (!cleanedInput) return options;
+          return options.filter((option) => {
+            const label =
+              option?.autocompleteEntry?.length > 0
+                ? decodeCommas(option.autocompleteEntry)
+                : option;
+            return label.toLowerCase().includes(cleanedInput.toLowerCase());
+          });
         }}
         options={autocompleteList}
         loading={loading}
@@ -418,6 +433,8 @@ class SearchBar extends React.PureComponent {
       : "Visa sökresultat i kartan";
 
     const placeholder = this.getPlaceholder();
+    // Autocomplete renderInput still passes InputProps (not slotProps) in MUI v9.
+    const inputSlotProps = params.InputProps ?? params.slotProps?.input ?? {};
     return (
       <TextField
         {...params}
@@ -426,8 +443,9 @@ class SearchBar extends React.PureComponent {
         autoFocus={this.props.options?.autofocusOnStart ?? false}
         onKeyDown={handleSearchBarKeyPress}
         slotProps={{
+          ...params.slotProps,
           input: {
-            ...params.InputProps,
+            ...inputSlotProps,
             ...disableUnderline,
             style: { margin: 0, ...(isMobile && { height: "46px" }) }, // TODO: Prevent hardcoding of height, really not urgent.
             notched: isMobile ? null : false,
@@ -437,7 +455,7 @@ class SearchBar extends React.PureComponent {
                 {loading ? (
                   <CircularProgress color="inherit" size={20} />
                 ) : null}
-                {params.InputProps.endAdornment}
+                {inputSlotProps.endAdornment}
                 {showFailedWFSMessage &&
                   this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
                 {!showSearchResults ? (
@@ -454,7 +472,7 @@ class SearchBar extends React.PureComponent {
                   <>
                     <HajkToolTip title={expandMessage}>
                       <IconButton
-                        onClick={(e) => {
+                        onClick={(_e) => {
                           toggleCollapseSearchResults();
                         }}
                         size="small"
@@ -469,7 +487,7 @@ class SearchBar extends React.PureComponent {
                     </HajkToolTip>
                     <HajkToolTip title={toggleResultsLayerVisibilityMessage}>
                       <IconButton
-                        onClick={(e) => {
+                        onClick={(_e) => {
                           this.toggleResultsLayerVisibility();
                         }}
                         size="small"
@@ -535,6 +553,7 @@ class SearchBar extends React.PureComponent {
         sx={{
           width: 400,
           height: (theme) => (renderElsewhere ? "auto" : theme.spacing(6)),
+          mr: isMobile ? 1 : 0,
         }}
       >
         <Grid>

@@ -8,7 +8,7 @@ const ContainerInfo = styled("div")(({ theme }) => ({
   padding: theme.spacing(2),
 }));
 
-const SpanNum = styled("span")(({ theme }) => ({
+const SpanNum = styled("span")(({ _theme }) => ({
   fontWeight: 500,
   fontSize: "1rem",
 }));

@@ -24,11 +24,11 @@ const GridAgeInputContainer = styled(Grid)(({ theme }) => ({
   },
 }));
 
-const TextFieldInput = styled(TextField)(({ theme }) => ({
+const TextFieldInput = styled(TextField)(({ _theme }) => ({
   marginTop: "-4px",
 }));
 
-const TypographyHeading = styled(Typography)(({ theme }) => ({
+const TypographyHeading = styled(Typography)(({ _theme }) => ({
   fontWeight: 500,
 }));
 
@@ -36,12 +36,12 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
   marginBottom: theme.spacing(3),
 }));
 
-const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
+const StyledFormControlLabel = styled(FormControlLabel)(({ _theme }) => ({
   fontSize: "0.875rem",
   fontWeight: "400",
 }));
 
-const StyledCheckbox = styled(Checkbox)(({ theme }) => ({
+const StyledCheckbox = styled(Checkbox)(({ _theme }) => ({
   paddingTop: "0.25rem",
   paddingBottom: "0.25rem",
 }));
@@ -58,7 +58,7 @@ const ContainerTopPadded = styled("div")(({ theme }) => ({
   paddingTop: theme.spacing(2),
 }));
 
-const CircularProgressButton = styled(CircularProgress)(({ theme }) => ({
+const CircularProgressButton = styled(CircularProgress)(({ _theme }) => ({
   position: "absolute",
   top: "50%",
   left: "50%",
@@ -66,7 +66,7 @@ const CircularProgressButton = styled(CircularProgress)(({ theme }) => ({
   marginLeft: -12,
 }));
 
-const StyledSlider = styled(Slider)(({ theme }) => ({
+const StyledSlider = styled(Slider)(({ _theme }) => ({
   marginLeft: "8px",
   width: "calc(100% - 16px)",
 }));
@@ -149,7 +149,7 @@ class KirSearchView extends React.PureComponent {
     });
   };
 
-  inputMinAgeChanged = (e, newValue) => {
+  inputMinAgeChanged = (e, _newValue) => {
     this.setState({
       ageValues: [
         e.target.value === "" ? 120 : parseInt(e.target.value),
@@ -158,7 +158,7 @@ class KirSearchView extends React.PureComponent {
     });
   };
 
-  inputMaxAgeChanged = (e, newValue) => {
+  inputMaxAgeChanged = (e, _newValue) => {
     this.setState({
       ageValues: [
         this.state.ageValues[0],
@@ -220,7 +220,13 @@ class KirSearchView extends React.PureComponent {
                 <TypographySubtitleShallow variant="subtitle2">
                   Inkludera kön:
                 </TypographySubtitleShallow>
-                <Grid container spacing={0} alignItems="center">
+                <Grid
+                  container
+                  spacing={0}
+                  sx={{
+                    alignItems: "center",
+                  }}
+                >
                   <StyledFormControlLabel
                     control={
                       <StyledCheckbox
@@ -253,7 +259,13 @@ class KirSearchView extends React.PureComponent {
               <TypographySubtitleShallow variant="subtitle2">
                 Ålder (från, till):
               </TypographySubtitleShallow>
-              <Grid container spacing={0} alignItems="center">
+              <Grid
+                container
+                spacing={0}
+                sx={{
+                  alignItems: "center",
+                }}
+              >
                 <Grid size={6}>
                   <StyledSlider
                     value={this.state.ageValues}

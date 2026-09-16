@@ -22,16 +22,16 @@ import { Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import FirStyles from "./FirStyles";
 
-const TypographyHeading = styled(Typography)(({ theme }) => ({
+const TypographyHeading = styled(Typography)(({ _theme }) => ({
   fontWeight: 500,
 }));
 
-const StyledRadio = styled(Radio)(({ theme }) => ({
+const StyledRadio = styled(Radio)(({ _theme }) => ({
   paddingTop: "0.25rem",
   paddingBottom: "0.25rem",
 }));
 
-const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
+const StyledFormControlLabel = styled(FormControlLabel)(({ _theme }) => ({
   fontSize: "0.875rem",
   fontWeight: "400",
 }));
@@ -54,7 +54,7 @@ const SliderContainer = styled("div")(({ theme }) => ({
   },
 }));
 
-const CircularProgressButton = styled(CircularProgress)(({ theme }) => ({
+const CircularProgressButton = styled(CircularProgress)(({ _theme }) => ({
   position: "absolute",
   top: "50%",
   left: "50%",
@@ -231,12 +231,12 @@ class FirSearchNeighborView extends React.PureComponent {
                       }
                       this.setState({ buffer: v });
                     }}
-                    onFocus={(e) => {
+                    onFocus={(_e) => {
                       if (this.state.buffer === 0) {
                         this.setState({ buffer: "" });
                       }
                     }}
-                    onBlur={(e) => {
+                    onBlur={(_e) => {
                       if (this.state.buffer === "") {
                         this.setState({ buffer: 0 });
                       }

@@ -184,7 +184,7 @@ class PluginManager {
           const toolOptions =
             toolConfig && toolConfig.options ? toolConfig.options : {};
 
-          const sortOrder = toolConfig.hasOwnProperty("index")
+          const sortOrder = Object.hasOwn(toolConfig, "index")
             ? Number(toolConfig.index)
             : 0;
 

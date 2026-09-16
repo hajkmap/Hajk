@@ -27,7 +27,13 @@ import FeatureStyleEditor from "../components/featureStyle/FeatureStyleEditor";
 const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
   return (
     <Paper style={{ padding: 8, marginTop: 8 }}>
-      <Grid container justifyContent="space-between" alignItems="center">
+      <Grid
+        container
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography variant="body2">Tillåt redigering av noder</Typography>
         <HajkToolTip
           title={
@@ -66,8 +72,10 @@ const EditView = (props) => {
     <Grid
       container
       direction="column"
-      justifyContent="space-between"
-      sx={{ height: "100%" }}
+      sx={{
+        justifyContent: "space-between",
+        height: "100%",
+      }}
     >
       <Grid container size={12}>
         <Grid size={12}>

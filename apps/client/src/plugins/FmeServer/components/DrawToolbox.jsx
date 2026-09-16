@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid, Paper } from "@mui/material";
 import ToggleButton from "@mui/material/ToggleButton";
 import EditIcon from "@mui/icons-material/Edit";
@@ -59,7 +58,13 @@ const DrawToolbox = (props) => {
   return (
     <Paper sx={{ marginTop: 1 }}>
       <Grid container>
-        <Grid container justifyContent="space-between" size={12}>
+        <Grid
+          container
+          size={12}
+          sx={{
+            justifyContent: "space-between",
+          }}
+        >
           {drawButtons.map((button, index) => {
             return renderToggleButton(button, index);
           })}

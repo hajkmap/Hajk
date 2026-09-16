@@ -20,7 +20,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useSnackbar } from "notistack";
 
-import ControlButton, { StyledControlButton } from "components/ControlButton";
+import { StyledControlButton } from "components/ControlButton";
 import HajkToolTip from "components/HajkToolTip";
 import DialogWindowPlugin from "../../plugins/DialogWindowPlugin";
 import SelectDropdown from "./SelectDropdown";
@@ -221,7 +221,7 @@ const LayerComparer = (props) => {
         spyRef.current?.remove();
         props.map.removeControl(sdsRef.current);
         props.map.removeControl(spyRef.current);
-      } catch (e) {
+      } catch (_e) {
         // Map may have been torn down already
       }
     };

@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid, Paper } from "@mui/material";
 import ToggleButton from "@mui/material/ToggleButton";
 import HajkToolTip from "components/HajkToolTip";
@@ -9,9 +8,10 @@ const ActivityMenu = (props) => {
   return (
     <Grid
       container
-      justifyContent={
-        props.pluginPosition === "right" ? "flex-end" : "flex-start"
-      }
+      sx={{
+        justifyContent:
+          props.pluginPosition === "right" ? "flex-end" : "flex-start",
+      }}
     >
       <Paper elevation={4}>
         {ACTIVITIES.map((activity, index) => {

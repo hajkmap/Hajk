@@ -117,7 +117,7 @@ class DocumentWindowBase extends React.PureComponent {
     return model ? true : false;
   };
 
-  componentDidUpdate = (prevProps, prevState) => {
+  componentDidUpdate = (prevProps, _prevState) => {
     const { localObserver } = this.props;
 
     if (prevProps.model !== this.props.model) {
