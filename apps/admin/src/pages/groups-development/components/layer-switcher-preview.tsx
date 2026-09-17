@@ -121,7 +121,11 @@ export default function LayerSwitcherPreview({
       className="ls-layers-tab-view"
       sx={{
         width: "100%",
-        height: "100%",
+        height: {
+          xs: "clamp(360px, calc(100vh - 260px), 640px)",
+          lg: "clamp(480px, calc(100vh - 220px), 1200px)",
+        },
+        minHeight: 0,
         display: "flex",
         flexDirection: "column",
         border: "1px solid",
@@ -137,6 +141,7 @@ export default function LayerSwitcherPreview({
           py: 1.5,
           borderBottom: "1px solid",
           borderColor: "divider",
+          flexShrink: 0,
         }}
       >
         <Typography
@@ -162,7 +167,12 @@ export default function LayerSwitcherPreview({
         ) : null}
       </Box>
 
-      <StyledAppBar position="relative" color="default" elevation={0}>
+      <StyledAppBar
+        position="relative"
+        color="default"
+        elevation={0}
+        sx={{ flexShrink: 0 }}
+      >
         <Tabs
           value={activeTab}
           onChange={(_, value) => setActiveTab(value as LayerSwitcherPreviewTab)}
@@ -180,7 +190,15 @@ export default function LayerSwitcherPreview({
       {activeTab === "layers" ||
       activeTab === "background" ||
       activeTab === "drawOrder" ? (
-        <>
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
           {showFilter && activeTab !== "drawOrder" ? (
             <Box
               sx={{
@@ -190,6 +208,7 @@ export default function LayerSwitcherPreview({
                 display: "flex",
                 alignItems: "center",
                 gap: 0.5,
+                flexShrink: 0,
               }}
             >
               <TextField
@@ -221,6 +240,7 @@ export default function LayerSwitcherPreview({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "flex-end",
+                flexShrink: 0,
               }}
             >
               {expandCollapseButton}
@@ -239,6 +259,7 @@ export default function LayerSwitcherPreview({
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: 1,
+                flexShrink: 0,
               }}
             >
               <Box
@@ -299,11 +320,12 @@ export default function LayerSwitcherPreview({
           >
             {children}
           </Box>
-        </>
+        </Box>
       ) : (
         <Box
           sx={{
             flex: 1,
+            minHeight: 0,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

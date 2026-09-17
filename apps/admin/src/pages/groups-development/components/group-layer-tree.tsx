@@ -1099,11 +1099,7 @@ export default function GroupLayerTree({
             xl: "minmax(220px, 280px) minmax(0, 1fr)",
           },
           gap: { xs: 2, lg: 3 },
-          alignItems: "stretch",
-          minHeight: {
-            xs: "clamp(360px, calc(100vh - 260px), 640px)",
-            lg: "clamp(480px, calc(100vh - 220px), 760px)",
-          },
+          alignItems: "start",
         }}
       >
         <GroupLayerCatalog

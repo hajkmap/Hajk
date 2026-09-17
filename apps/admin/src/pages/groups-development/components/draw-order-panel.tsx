@@ -486,7 +486,7 @@ export default function DrawOrderPanel({
         sx={{
           pb: "8px",
           flex: 1,
-          minHeight: 120,
+          minHeight: 0,
           display: "flex",
           flexDirection: "column",
         }}

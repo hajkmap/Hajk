@@ -475,7 +475,6 @@ export default function GroupLayerCatalog({
       <Paper
         elevation={0}
         sx={{
-          height: "100%",
           display: "flex",
           flexDirection: "column",
           border: "1px solid",

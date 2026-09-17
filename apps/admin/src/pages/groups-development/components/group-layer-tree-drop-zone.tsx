@@ -190,7 +190,7 @@ export default function GroupLayerTreeDropZone({
         }}
         sx={{
           flex: 1,
-          minHeight: 240,
+          minHeight: 0,
           position: "relative",
           display: "flex",
           flexDirection: "column",
