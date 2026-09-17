@@ -89,7 +89,7 @@
     "common.noLayersAvailable": "Inga lager tillgängliga",
     "common.noGroupsAvailable": "Inga grupper tillgängliga",
     "common.layerSwitcherHierarchyTree": "Lagerordningsträd",
-    "common.layerSwitcherHierarchyTreeDescription": "(kommer snart)",
+    "common.layerSwitcherHierarchyTreeDescription": "Aktiv lagerhanterare: {{name}}",
     "common.dragLayersAndGroups": "Dra lager och grupper här för att skapa en hierarki",
     "common.groupDropAction": "Placering vid grupp",
     "common.searchSettings": "Sök i inställningar",

@@ -31,8 +31,6 @@ interface MapContentPanelProps {
   mapTools?: ToolOnMap[];
   catalogTools?: Tool[];
   activeToolIds?: Set<number>;
-  /** DB map-layers + background state (catalog layer ids). */
-  layerSwitcherState?: LayerSwitcherDraft | null;
   layerSwitcherDraft?: LayerSwitcherDraft | null;
   onLayerSwitcherDraftChange?: (draft: LayerSwitcherDraft | null) => void;
   /** Bumped when Layers checkboxes are reverted to the last committed state. */
@@ -52,7 +50,6 @@ export default function MapContentPanel({
   mapTools,
   catalogTools,
   activeToolIds,
-  layerSwitcherState,
   layerSwitcherDraft = null,
   onLayerSwitcherDraftChange,
   layerActivationResetKey = 0,
@@ -119,7 +116,6 @@ export default function MapContentPanel({
           mapTools={mapTools}
           catalogTools={catalogTools}
           activeToolIds={activeToolIds}
-          layerSwitcherState={layerSwitcherState}
           layerActivationRows={layerActivationRows}
           pendingDraft={layerSwitcherDraft}
           onLayerSwitcherDraftChange={onLayerSwitcherDraftChange}

@@ -36,6 +36,8 @@ interface LayerSwitcherPreviewProps {
   onSearchChange: (value: string) => void;
   /** Map name used to load/save themes from the presets button. */
   mapName?: string;
+  /** Display name of the LayerSwitcher currently active on the Tools tab. */
+  activeLayerswitcherName?: string;
   activeTab?: LayerSwitcherPreviewTab;
   onActiveTabChange?: (value: LayerSwitcherPreviewTab) => void;
   showFilter?: boolean;
@@ -54,6 +56,7 @@ export default function LayerSwitcherPreview({
   search,
   onSearchChange,
   mapName,
+  activeLayerswitcherName,
   activeTab: controlledActiveTab,
   onActiveTabChange,
   showFilter = true,
@@ -146,6 +149,17 @@ export default function LayerSwitcherPreview({
         >
           {t("common.layerSwitcherHierarchyTree")}
         </Typography>
+        {activeLayerswitcherName ? (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: 0.5 }}
+          >
+            {t("common.layerSwitcherHierarchyTreeDescription", {
+              name: activeLayerswitcherName,
+            })}
+          </Typography>
+        ) : null}
       </Box>
 
       <StyledAppBar position="relative" color="default" elevation={0}>

@@ -57,9 +57,15 @@ const KNOWN_TOOL_TYPES = [
   { type: "timeslider", title: "Tidslinje" },
 ];
 
+// layerswitcher options hold map-specific groups/baselayers used when seeding
+// GroupsOnMaps / LayerInstances — keep one Tool instance per map for that type.
+const PER_MAP_TOOL_TYPES = new Set(["layerswitcher"]);
+
 const jsonToDisplayLayerId = new Map();
 const jsonToSearchLayerId = new Map();
 const jsonToEditingLayerId = new Map();
+/** Shared catalog tools keyed by type (created once, linked to many maps). */
+const seededToolsByType = new Map();
 
 const generateRandomName = () => {
   const adjectives = [
@@ -174,24 +180,25 @@ async function readMapConfigAndPopulateMap(file) {
     `Connected ${projectionsToConnect.length} projections to map ${file}`
   );
 
-  // Take care of tools. Right now we let each map have its own Tool.
-  // For layerswitcher, `options` is the full plugin config from the map JSON
-  // (e.g. App_Data/map_1.json → tools[type=layerswitcher].options), including
-  // nested groups/layers, baselayers, and UI flags. That JSON is the source of
-  // truth for the Kartlager tree stored on Tool.options.
+  // Tools are a shared catalog (ToolsOnMaps links them to maps), matching
+  // map-duplicate behaviour. Reuse by type across maps; layerswitcher stays
+  // per-map because its options carry that map's groups/baselayers.
   console.log("Creating tools…");
   const toolsToConnectToMap = [];
+  const toolIdsOnThisMap = new Set();
   for await (const t of mapConfig.tools) {
+    const toolType = t.type;
+
     // Make sure the tool type exists — map configs may contain types
     // missing from KNOWN_TOOL_TYPES.
     await prisma.toolType.upsert({
-      where: { type: t.type },
+      where: { type: toolType },
       update: {},
-      create: { type: t.type, title: t.type },
+      create: { type: toolType, title: toolType },
     });
 
     const toolOptions = t.options ?? {};
-    if (t.type === "layerswitcher") {
+    if (toolType === "layerswitcher") {
       const groupCount = Array.isArray(toolOptions.groups)
         ? toolOptions.groups.length
         : 0;
@@ -203,25 +210,46 @@ async function readMapConfigAndPopulateMap(file) {
       );
     }
 
-    const tool = await prisma.tool.create({
-      data: {
-        type: t.type,
-        title: toolOptions.title ?? null,
-        options: toolOptions,
-      },
-    });
+    const perMap = PER_MAP_TOOL_TYPES.has(toolType);
+    let toolId = !perMap ? seededToolsByType.get(toolType) : undefined;
 
-    // Add potential role restrictions on the tool
-    await updateRolesFromVisibleForGroups(
-      toolOptions.visibleForGroups || [],
-      tool.id,
-      "tool"
-    );
+    if (toolId == null) {
+      const tool = await prisma.tool.create({
+        data: {
+          type: toolType,
+          title: toolOptions.title ?? null,
+          options: toolOptions,
+        },
+      });
+      toolId = tool.id;
+
+      // Add potential role restrictions on the tool (only when first created)
+      await updateRolesFromVisibleForGroups(
+        toolOptions.visibleForGroups || [],
+        tool.id,
+        "tool"
+      );
+
+      if (!perMap) {
+        seededToolsByType.set(toolType, toolId);
+      }
+    } else {
+      console.log(`  Reusing existing ${toolType} tool #${toolId}`);
+    }
+
+    // Same shared tool must not be linked twice to one map (@@id mapName+toolId).
+    if (toolIdsOnThisMap.has(toolId)) {
+      console.log(
+        `  Skipping duplicate ${toolType} on map ${file} (already linked)`
+      );
+      continue;
+    }
+    toolIdsOnThisMap.add(toolId);
 
     // Connect tool to map — target is intentionally null (unplaced).
     // Placement is managed via the admin UI, not seeded.
     toolsToConnectToMap.push({
-      toolId: tool.id,
+      toolId,
       mapName: file,
       index: t.index,
       active: toolOptions.active !== false,

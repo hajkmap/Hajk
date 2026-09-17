@@ -91,7 +91,7 @@
     "common.noLayersAvailable": "No layers available",
     "common.noGroupsAvailable": "No groups available",
     "common.layerSwitcherHierarchyTree": "Layerswitcher hierarchy tree",
-    "common.layerSwitcherHierarchyTreeDescription": "(coming soon)",
+    "common.layerSwitcherHierarchyTreeDescription": "Active layer switcher: {{name}}",
     "common.dragLayersAndGroups": "Drag layers and groups here to create a hierarchy",
     "common.groupDropAction": "Placement at group",
     "common.groupDropQuestion": "How would you like to place \"{{dragged}}\" relative to \"{{target}}\"?",

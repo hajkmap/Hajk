@@ -23,8 +23,6 @@ export interface GroupLayerTreeProps {
   activeToolIds?: Set<number>;
   /** Map name — used for themes dialog save/load. */
   mapName?: string;
-  /** DB map-layers + background state (catalog layer ids). */
-  layerSwitcherState?: LayerSwitcherDraft | null;
   /**
    * Layers activated on the Layers tab. Map-layers list shows active FOREGROUND
    * layers; background list shows active BACKGROUND layers.

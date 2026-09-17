@@ -235,6 +235,55 @@ export function getClientGroupsFromToolOptions(
   return options.groups as ClientLayerSwitcherGroup[];
 }
 
+/** Baselayers from the active LayerSwitcher Tool.options (empty when absent). */
+export function getClientBaselayersFromToolOptions(
+  options: Record<string, unknown> | undefined | null,
+): {
+  layerId: string;
+  visibleAtStart: boolean;
+  infobox: string;
+}[] {
+  if (!options || !Array.isArray(options.baselayers)) {
+    return [];
+  }
+
+  const baselayers: {
+    layerId: string;
+    visibleAtStart: boolean;
+    infobox: string;
+  }[] = [];
+
+  for (const entry of options.baselayers) {
+    if (typeof entry === "string" || typeof entry === "number") {
+      baselayers.push({
+        layerId: String(entry),
+        visibleAtStart: false,
+        infobox: "",
+      });
+      continue;
+    }
+    if (
+      entry &&
+      typeof entry === "object" &&
+      "id" in entry &&
+      (entry as { id?: unknown }).id != null
+    ) {
+      const record = entry as {
+        id: unknown;
+        visibleAtStart?: unknown;
+        infobox?: unknown;
+      };
+      baselayers.push({
+        layerId: String(record.id),
+        visibleAtStart: record.visibleAtStart === true,
+        infobox: typeof record.infobox === "string" ? record.infobox : "",
+      });
+    }
+  }
+
+  return baselayers;
+}
+
 /** Remove catalog layers from an unsaved Map-and-background draft (e.g. on Lager deactivate). */
 export function removeLayersFromLayerSwitcherDraft<
   TBaselayer extends { layerId: string },

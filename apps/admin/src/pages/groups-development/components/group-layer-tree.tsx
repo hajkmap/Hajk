@@ -16,6 +16,10 @@ import { createPortal } from "react-dom";
 import { useGroups, useUpdateGroup } from "../../../api/groups";
 import { useLayers } from "../../../api/layers";
 import { getUpdateGroupErrorMessage } from "../../groups/utils/group-errors";
+import {
+  getCatalogToolDisplayName,
+  getToolDisplayName,
+} from "../../maps/map-tools-utils";
 import type {
   CatalogDragItem,
   GroupDisplaySettings,
@@ -35,6 +39,7 @@ import {
 import { toDisplaySettings, toFormValues } from "../utils/group-form";
 import {
   clientGroupsToLayerSwitcherTree,
+  getClientBaselayersFromToolOptions,
   getClientGroupsFromToolOptions,
   hydrateDisplaySettingsFromClientGroups,
 } from "../utils/client-groups";
@@ -127,7 +132,6 @@ export default function GroupLayerTree({
   catalogTools,
   activeToolIds,
   mapName,
-  layerSwitcherState = null,
   layerActivationRows,
   pendingDraft = null,
   onLayerSwitcherDraftChange,
@@ -175,6 +179,7 @@ export default function GroupLayerTree({
   const baselineSignatureRef = useRef<string>("");
   const baselineReadyRef = useRef(false);
   const loadedLayerSwitcherKeyRef = useRef<string | null>(null);
+  const loadedLayerswitcherToolIdRef = useRef<number | null>(null);
   const pendingDraftRef = useRef(pendingDraft);
   const onLayerSwitcherDraftChangeRef = useRef(onLayerSwitcherDraftChange);
   const mapLayersTreeRef = useRef<MapLayersTreeExpandHandle | null>(null);
@@ -221,6 +226,26 @@ export default function GroupLayerTree({
       ...(activeLayerswitcher.options ?? {}),
     };
   }, [activeLayerswitcher]);
+
+  const activeLayerswitcherName = useMemo(() => {
+    if (!activeLayerswitcher) {
+      return "";
+    }
+
+    const optionsTitle = activeLayerswitcherOptions?.title;
+    if (typeof optionsTitle === "string" && optionsTitle.trim()) {
+      return optionsTitle.trim();
+    }
+
+    const catalogTool = catalogTools?.find(
+      (tool) => Number(tool.id) === activeLayerswitcher.toolId,
+    );
+    if (catalogTool) {
+      return getCatalogToolDisplayName(catalogTool);
+    }
+
+    return getToolDisplayName(activeLayerswitcher);
+  }, [activeLayerswitcher, activeLayerswitcherOptions, catalogTools]);
 
   const activeLayerIds = useMemo(() => {
     if (!layerActivationRows) {
@@ -488,31 +513,33 @@ export default function GroupLayerTree({
     }
   }, [treeGroupsFullyExpanded]);
 
-  const serverGroupsFromState = useMemo(
-    () => layerSwitcherState?.groups ?? [],
-    [layerSwitcherState?.groups],
+  const toolGroupsFromOptions = useMemo(
+    () => getClientGroupsFromToolOptions(activeLayerswitcherOptions),
+    [activeLayerswitcherOptions],
   );
-  const serverBaselayersFromState = useMemo(
-    () => layerSwitcherState?.baselayers ?? [],
-    [layerSwitcherState?.baselayers],
-  );
-
-  const serverGroupsJson = useMemo(
-    () => JSON.stringify(serverGroupsFromState),
-    [serverGroupsFromState],
+  const toolBaselayersFromOptions = useMemo(
+    () => getClientBaselayersFromToolOptions(activeLayerswitcherOptions),
+    [activeLayerswitcherOptions],
   );
 
-  const serverBaselayersJson = useMemo(
+  const toolGroupsJson = useMemo(
+    () => JSON.stringify(toolGroupsFromOptions),
+    [toolGroupsFromOptions],
+  );
+
+  const toolBaselayersJson = useMemo(
     () =>
-      JSON.stringify(serverBaselayersFromState.map((entry) => entry.layerId)),
-    [serverBaselayersFromState],
+      JSON.stringify(toolBaselayersFromOptions.map((entry) => entry.layerId)),
+    [toolBaselayersFromOptions],
   );
 
-  // Load Maplayers tree + Background from DB layerswitcher state (not Tool.options).
-  /* eslint-disable react-hooks/set-state-in-effect -- hydrate local editor state from server/draft */
+  // Load Kartlager / Bakgrund / Ritordning from the *active* LayerSwitcher's
+  // Tool.options (not shared map DB state). An empty tool → empty tree.
+  /* eslint-disable react-hooks/set-state-in-effect -- hydrate local editor state from active tool/draft */
   useEffect(() => {
     if (!activeLayerswitcher) {
       loadedLayerSwitcherKeyRef.current = null;
+      loadedLayerswitcherToolIdRef.current = null;
       baselineSignatureRef.current = "";
       baselineReadyRef.current = false;
       setTreeData([]);
@@ -526,10 +553,19 @@ export default function GroupLayerTree({
       return;
     }
 
+    const activeToolId = activeLayerswitcher.toolId;
+    const switchedLayerswitcher =
+      loadedLayerswitcherToolIdRef.current !== activeToolId;
+    if (switchedLayerswitcher) {
+      loadedLayerswitcherToolIdRef.current = activeToolId;
+      // Drop unsaved edits from the previously active LayerSwitcher.
+      onLayerSwitcherDraftChangeRef.current?.(null);
+    }
+
     const activeLayerIdsKey = activeLayerIds
       ? [...activeLayerIds].sort().join("|")
       : "";
-    const loadKey = `${serverGroupsJson}|${serverBaselayersJson}|${layerActivationResetKey}|${activeLayerIdsKey}`;
+    const loadKey = `${activeToolId}|${toolGroupsJson}|${toolBaselayersJson}|${layerActivationResetKey}|${activeLayerIdsKey}`;
 
     if (loadKey === loadedLayerSwitcherKeyRef.current) {
       setTreeData((current) => {
@@ -552,72 +588,14 @@ export default function GroupLayerTree({
 
     baselineReadyRef.current = false;
 
-    const serverGroupsFromDb = serverGroupsFromState;
-    // Short dual-read fallback while a map still only has Tool.options.groups.
-    const serverGroups =
-      serverGroupsFromDb.length > 0
-        ? serverGroupsFromDb
-        : getClientGroupsFromToolOptions(activeLayerswitcherOptions);
-    const toolBaselayers: {
-      layerId: string;
-      visibleAtStart: boolean;
-      infobox: string;
-    }[] = [];
-    if (
-      activeLayerswitcherOptions &&
-      Array.isArray(activeLayerswitcherOptions.baselayers)
-    ) {
-      for (const entry of activeLayerswitcherOptions.baselayers) {
-        if (typeof entry === "string" || typeof entry === "number") {
-          toolBaselayers.push({
-            layerId: String(entry),
-            visibleAtStart: false,
-            infobox: "",
-          });
-          continue;
-        }
-        if (
-          entry &&
-          typeof entry === "object" &&
-          "id" in entry &&
-          (entry as { id?: unknown }).id != null
-        ) {
-          const record = entry as {
-            id: unknown;
-            visibleAtStart?: unknown;
-            infobox?: unknown;
-          };
-          toolBaselayers.push({
-            layerId: String(record.id),
-            visibleAtStart: record.visibleAtStart === true,
-            infobox: typeof record.infobox === "string" ? record.infobox : "",
-          });
-        }
-      }
-    }
-
-    const serverBaselayers: {
-      layerId: string;
-      visibleAtStart?: boolean;
-      infobox?: string;
-    }[] =
-      serverBaselayersFromState.length > 0
-        ? serverBaselayersFromState.map((entry) => ({
-            layerId: entry.layerId,
-            visibleAtStart: entry.visibleAtStart,
-            infobox:
-              "infobox" in entry && typeof entry.infobox === "string"
-                ? entry.infobox
-                : "",
-          }))
-        : toolBaselayers;
-
-    const pending = pendingDraftRef.current;
+    const pending = switchedLayerswitcher ? null : pendingDraftRef.current;
     const restoringDraft = pending != null;
-    const groupsToLoad = restoringDraft ? pending.groups : serverGroups;
+    const groupsToLoad = restoringDraft
+      ? pending.groups
+      : toolGroupsFromOptions;
     const baselayersToLoad = restoringDraft
       ? pending.baselayers
-      : serverBaselayers;
+      : toolBaselayersFromOptions;
 
     const intermediate = clientGroupsToLayerSwitcherTree(groupsToLoad);
     const nodes = applyMapLayersSiblingOrder(
@@ -687,18 +665,17 @@ export default function GroupLayerTree({
     setDrawOrderOrderedIds(loadedDrawOrderIds);
     setMoveZoneItems([]);
   }, [
-    activeLayerswitcher,
-    activeLayerswitcherOptions,
     activationBackgroundOrder,
     activeLayerIds,
+    activeLayerswitcher,
     groupNames,
+    layerActivationResetKey,
     layerNames,
     mapBackgroundLayerIds,
-    serverBaselayersFromState,
-    serverBaselayersJson,
-    serverGroupsFromState,
-    serverGroupsJson,
-    layerActivationResetKey,
+    toolBaselayersFromOptions,
+    toolBaselayersJson,
+    toolGroupsFromOptions,
+    toolGroupsJson,
   ]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -1161,6 +1138,7 @@ export default function GroupLayerTree({
           search={search}
           onSearchChange={setSearch}
           mapName={mapName}
+          activeLayerswitcherName={activeLayerswitcherName}
           activeTab={previewTab}
           onActiveTabChange={handlePreviewTabChange}
           showFilter={previewOptions.showFilter}

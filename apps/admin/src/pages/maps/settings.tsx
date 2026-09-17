@@ -1103,7 +1103,6 @@ export default function MapSettings() {
               mapTools={mapTools}
               catalogTools={catalogTools}
               activeToolIds={activeToolIds}
-              layerSwitcherState={layerSwitcherState}
               layerSwitcherDraft={layerSwitcherDraft}
               onLayerSwitcherDraftChange={handleLayerSwitcherDraftChange}
               layerActivationResetKey={layerActivationResetKey}
