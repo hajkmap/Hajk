@@ -1,10 +1,11 @@
 {
   "mapserviceBase": "",
-  "defaultMap": "map_1",
+  "defaultMap": "simpleMapAndLayersConfig",
   "availableTools": [
     "Anchor",
     "Bookmarks",
     "Buffer",
+    "CommandPalette",
     "Coordinates",
     "DocumentHandler",
     "Edit",
