@@ -291,6 +291,11 @@ export const useUpdateMapLayerSwitcher = () => {
       });
       void queryClient.invalidateQueries({ queryKey: ["groups"] });
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
+      // Kartlager hydrates from LayerSwitcher Tool.options — keep that cache in sync.
+      void queryClient.invalidateQueries({
+        queryKey: ["toolsByMap", mapName],
+      });
+      void queryClient.invalidateQueries({ queryKey: ["tools"] });
     },
   });
 };

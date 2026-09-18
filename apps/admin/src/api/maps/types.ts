@@ -107,6 +107,8 @@ export interface MapContentPlacement {
 /** Nested Kartlager group (catalog layer ids) for layerswitcher admin API. */
 export interface MapLayerSwitcherLayerRef {
   id: string;
+  /** Sibling position among mixed children (layers + nested groups). */
+  index?: number;
   drawOrder?: number;
   visibleAtStart?: boolean;
   infobox?: string;
@@ -116,6 +118,8 @@ export interface MapLayerSwitcherGroup {
   id: string;
   type?: string;
   name: string;
+  /** Sibling position among parent's mixed children (layers + nested groups). */
+  index?: number;
   toggled?: boolean;
   expanded?: boolean;
   exclusive?: boolean;
@@ -129,7 +133,7 @@ export interface MapLayerSwitcherGroup {
   infogroupowner?: string;
   layers?: MapLayerSwitcherLayerRef[];
   groups?: MapLayerSwitcherGroup[];
-  /** Interleaved sibling order for admin round-trip (not tools.options). */
+  /** @deprecated Prefer index on layers/groups. */
   layerSwitcherTree?: Array<
     | { type: "layer"; id: string }
     | { type: "group"; id: string }

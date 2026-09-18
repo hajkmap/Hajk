@@ -21,9 +21,56 @@ import {
 export type { ClientLayerSwitcherGroup, ClientLayerSwitcherLayerRef };
 
 /**
+ * Merge layers[] + groups[] into interleaved sibling order.
+ * Prefers explicit `index` on each entry; falls back to layers-then-groups.
+ */
+export function buildSiblingOrderFromLayersAndGroups(
+  layers: { id: string; index?: number }[],
+  groups: { id: string; index?: number }[],
+): { type: "layer" | "group"; id: string }[] {
+  const layerEntries = layers.map((layer, fallback) => ({
+    type: "layer" as const,
+    id: layer.id,
+    index: layer.index,
+    fallback,
+  }));
+  const groupEntries = groups.map((group, fallback) => ({
+    type: "group" as const,
+    id: group.id,
+    index: group.index,
+    fallback,
+  }));
+  const hasIndexed =
+    layerEntries.some((entry) => entry.index != null) ||
+    groupEntries.some((entry) => entry.index != null);
+
+  if (!hasIndexed) {
+    return [
+      ...layerEntries.map(({ type, id }) => ({ type, id })),
+      ...groupEntries.map(({ type, id }) => ({ type, id })),
+    ];
+  }
+
+  return [...layerEntries, ...groupEntries]
+    .sort((a, b) => {
+      const indexA = a.index ?? Number.MAX_SAFE_INTEGER;
+      const indexB = b.index ?? Number.MAX_SAFE_INTEGER;
+      if (indexA !== indexB) {
+        return indexA - indexB;
+      }
+      if (a.type !== b.type) {
+        return a.type === "layer" ? -1 : 1;
+      }
+      return a.fallback - b.fallback;
+    })
+    .map(({ type, id }) => ({ type, id }));
+}
+
+/**
  * Convert nested client `options.groups` into the flat-children
  * `LayerSwitcherTreeNode` shape used by `layerSwitcherTreeToNodeModels`.
- * Prefers interleaved `layerSwitcherTree` when present; otherwise layers then groups.
+ * Prefers interleaved `layerSwitcherTree` when present; otherwise merges by
+ * `index` on layers/groups (legacy: layers then groups).
  */
 export function clientGroupsToLayerSwitcherTree(
   groups: ClientLayerSwitcherGroup[],
@@ -70,13 +117,24 @@ export function clientGroupsToLayerSwitcherTree(
         }
       }
     } else {
-      children = [
-        ...(group.layers ?? []).map((layer) => ({
-          type: "layer" as const,
-          id: layer.id,
-        })),
-        ...clientGroupsToLayerSwitcherTree(group.groups ?? []),
-      ];
+      const order = buildSiblingOrderFromLayersAndGroups(
+        group.layers ?? [],
+        group.groups ?? [],
+      );
+      children = [];
+      for (const entry of order) {
+        if (entry.type === "layer") {
+          const layerNode = layerNodesById.get(entry.id);
+          if (layerNode) {
+            children.push(layerNode);
+          }
+          continue;
+        }
+        const nested = nestedGroupsById.get(entry.id);
+        if (nested) {
+          children.push(...clientGroupsToLayerSwitcherTree([nested]));
+        }
+      }
     }
 
     return {
@@ -91,6 +149,7 @@ export function clientGroupsToLayerSwitcherTree(
 /**
  * Serialize Maplayers flat tree + display settings back to nested
  * layerswitcher groups (catalog layer ids for admin writes).
+ * Sibling order is stored as `index` on each layer and nested group.
  */
 export function nodeModelsToClientGroups(
   tree: GroupLayerTreeNode[],
@@ -114,32 +173,45 @@ export function nodeModelsToClientGroups(
       .filter((child) => child.parent === node.id)
       .slice()
       .sort(sortSiblingNodes);
-    const childLayers = childSiblings.filter(
-      (child) => child.data?.kind === "layer",
+
+    const nestedBySourceId = new Map(
+      nodeModelsToClientGroups(
+        tree,
+        groupDisplaySettings,
+        layerDisplaySettings,
+        node.id,
+      ).map((nested) => [nested.id, nested]),
     );
 
-    const layers: ClientLayerSwitcherLayerRef[] = childLayers.map((child) => {
-      const layerSettings =
-        layerDisplaySettings[child.data!.sourceId] ??
-        DEFAULT_LAYER_DISPLAY_SETTINGS;
+    const layers: ClientLayerSwitcherLayerRef[] = [];
+    const nestedGroups: ClientLayerSwitcherGroup[] = [];
 
-      return {
-        id: child.data!.sourceId,
-        drawOrder: layerSettings.drawOrder ?? 1000,
-        visibleAtStart: layerSettings.layerVisibleAtStart,
-        infobox: layerSettings.layerInfoBox,
-      };
+    childSiblings.forEach((child, index) => {
+      if (child.data?.kind === "layer") {
+        const layerSettings =
+          layerDisplaySettings[child.data.sourceId] ??
+          DEFAULT_LAYER_DISPLAY_SETTINGS;
+        layers.push({
+          id: child.data.sourceId,
+          index,
+          drawOrder: layerSettings.drawOrder ?? 1000,
+          visibleAtStart: layerSettings.layerVisibleAtStart,
+          infobox: layerSettings.layerInfoBox,
+        });
+        return;
+      }
+      if (child.data?.kind !== "group") {
+        return;
+      }
+      const nested = nestedBySourceId.get(child.data.sourceId);
+      if (!nested) {
+        return;
+      }
+      nestedGroups.push({
+        ...nested,
+        index,
+      });
     });
-
-    const layerSwitcherTree = childSiblings
-      .filter(
-        (child) => child.data?.kind === "layer" || child.data?.kind === "group",
-      )
-      .map((child) =>
-        child.data!.kind === "layer"
-          ? { type: "layer" as const, id: child.data!.sourceId }
-          : { type: "group" as const, id: child.data!.sourceId },
-      );
 
     return {
       id: sourceId,
@@ -160,13 +232,7 @@ export function nodeModelsToClientGroups(
       infogroupopendatalink: settings.metadata.urlOpenData,
       infogroupowner: settings.metadata.owner,
       layers,
-      groups: nodeModelsToClientGroups(
-        tree,
-        groupDisplaySettings,
-        layerDisplaySettings,
-        node.id,
-      ),
-      layerSwitcherTree,
+      groups: nestedGroups,
     };
   });
 }
@@ -306,20 +372,11 @@ export function removeLayersFromLayerSwitcherDraft<
         (layer) => !layerIds.has(layer.id),
       );
       const nestedGroups = stripGroups(group.groups ?? []);
-      const removedLayerIds = new Set(
-        (group.layers ?? [])
-          .filter((layer) => layerIds.has(layer.id))
-          .map((layer) => layer.id),
-      );
-      const layerSwitcherTree = (group.layerSwitcherTree ?? []).filter(
-        (entry) => entry.type === "group" || !removedLayerIds.has(entry.id),
-      );
       return {
         ...group,
         layers,
         groups: nestedGroups,
-        layerSwitcherTree:
-          layerSwitcherTree.length > 0 ? layerSwitcherTree : undefined,
+        layerSwitcherTree: undefined,
       };
     });
 
@@ -349,15 +406,11 @@ export function pruneLayerSwitcherDraftToActiveLayers<
         activeLayerIds.has(layer.id),
       );
       const nestedGroups = stripGroups(group.groups ?? []);
-      const layerSwitcherTree = (group.layerSwitcherTree ?? []).filter(
-        (entry) => entry.type === "group" || activeLayerIds.has(entry.id),
-      );
       return {
         ...group,
         layers,
         groups: nestedGroups,
-        layerSwitcherTree:
-          layerSwitcherTree.length > 0 ? layerSwitcherTree : undefined,
+        layerSwitcherTree: undefined,
       };
     });
 
@@ -396,6 +449,7 @@ export function layerSwitcherDraftComparableSignature(
     groups.map((group) => ({
       id: group.id,
       name: group.name ?? "",
+      index: group.index ?? null,
       toggled: Boolean(group.toggled),
       expanded: Boolean(group.expanded),
       exclusive: Boolean(group.exclusive),
@@ -408,15 +462,12 @@ export function layerSwitcherDraftComparableSignature(
       infogroupowner: group.infogroupowner ?? "",
       layers: (group.layers ?? []).map((layer) => ({
         id: layer.id,
+        index: layer.index ?? null,
         drawOrder: layer.drawOrder ?? 1000,
         visibleAtStart: Boolean(layer.visibleAtStart),
         infobox: layer.infobox ?? "",
       })),
       groups: normalizeGroups(group.groups ?? []),
-      layerSwitcherTree: (group.layerSwitcherTree ?? []).map((entry) => ({
-        type: entry.type,
-        id: entry.id,
-      })),
     }));
 
   const baselayerOrderSource =

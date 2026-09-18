@@ -774,22 +774,9 @@ export default function MapSettings() {
       }
 
       if (contentDirty && layerActivationDirtyRaw) {
-        const baselayerIds = new Set(
-          (
-            layerSwitcherDraft?.baselayers ??
-            layerSwitcherState?.baselayers ??
-            []
-          ).map((entry) => entry.layerId),
+        const activationLayers = mapLayerActivationToPayload(
+          layerActivationRows,
         );
-        await updateMapLayers({
-          mapName: map.name,
-          layers: mapLayerActivationToPayload(
-            layerActivationRows,
-            baselayerIds,
-          ),
-          replaceBackground: true,
-          replaceForeground: true,
-        });
         const activeIds = new Set(
           layerActivationRows
             .filter((row) => row.active)
@@ -800,9 +787,36 @@ export default function MapSettings() {
             groups: [],
             baselayers: [],
           };
+        const backgroundActiveIds = new Set(
+          layerActivationRows
+            .filter(
+              (row) =>
+                row.active &&
+                row.isBackground &&
+                (row.layerKind ?? "display") === "display",
+            )
+            .map((row) => row.layerId),
+        );
+        // Bakgrund tree = already placed only. Newly BACKGROUND-toggled layers
+        // stay in the left catalog until dropped in.
+        const nextBaselayers = base.baselayers.filter((entry) =>
+          backgroundActiveIds.has(entry.layerId),
+        );
         await updateMapLayerSwitcher({
           mapName: map.name,
-          content: pruneLayerSwitcherDraftToActiveLayers(base, activeIds),
+          content: pruneLayerSwitcherDraftToActiveLayers(
+            { groups: base.groups, baselayers: nextBaselayers },
+            activeIds,
+          ),
+        });
+        // Re-apply Lager activation after layerswitcher write — that step replaces
+        // BACKGROUND instances from baselayers only and would otherwise untoggle
+        // active/background layers that are not yet in the Bakgrund tree.
+        await updateMapLayers({
+          mapName: map.name,
+          layers: activationLayers,
+          replaceBackground: true,
+          replaceForeground: true,
         });
         setLayerSwitcherDraft(null);
         layerActivationWasDirtyRef.current = false;
@@ -815,9 +829,17 @@ export default function MapSettings() {
         );
         applyMenuStateFromServer(contentData.layers);
         setLayerActivationResetKey((key) => key + 1);
-        await queryClient.refetchQueries({
-          queryKey: ["mapLayerSwitcher", map.name],
-        });
+        await Promise.all([
+          queryClient.refetchQueries({
+            queryKey: ["mapLayerSwitcher", map.name],
+          }),
+          queryClient.refetchQueries({
+            queryKey: ["toolsByMap", map.name],
+          }),
+          queryClient.refetchQueries({
+            queryKey: ["tools"],
+          }),
+        ]);
         didSave = true;
       }
 
@@ -828,6 +850,16 @@ export default function MapSettings() {
             groups: layerSwitcherDraft.groups,
             baselayers: layerSwitcherDraft.baselayers,
           },
+        });
+        // Preserve BACKGROUND activations that are catalog-only (not in Bakgrund tree).
+        const backgroundOnly = mapLayerActivationToPayload(
+          layerActivationRows,
+        ).filter((layer) => layer.usage === "BACKGROUND");
+        await updateMapLayers({
+          mapName: map.name,
+          layers: backgroundOnly,
+          replaceBackground: true,
+          replaceForeground: false,
         });
         setLayerSwitcherDraft(null);
         await Promise.all([

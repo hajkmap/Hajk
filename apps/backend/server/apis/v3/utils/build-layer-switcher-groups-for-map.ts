@@ -23,6 +23,7 @@ export type LayerSwitcherTreeNode =
 
 export interface ClientLayerSwitcherLayerRef {
   id: string;
+  index?: number;
   drawOrder: number;
   visibleAtStart: boolean;
   infobox: string;
@@ -32,6 +33,7 @@ export interface ClientLayerSwitcherGroupNode {
   id: string;
   type: "group";
   name: string;
+  index?: number;
   toggled: boolean;
   expanded: boolean;
   exclusive: boolean;
@@ -45,7 +47,7 @@ export interface ClientLayerSwitcherGroupNode {
   infogroupowner: string;
   layers: ClientLayerSwitcherLayerRef[];
   groups: ClientLayerSwitcherGroupNode[];
-  /** Interleaved sibling order for admin round-trip. */
+  /** @deprecated Prefer index on layers/groups. */
   layerSwitcherTree?: (
     | { type: "layer"; id: string }
     | { type: "group"; id: string }
@@ -221,6 +223,33 @@ function shallowSiblingOrder(
   }
 
   return order;
+}
+
+/** Stamp sibling `index` on layers/groups from layerSwitcherTree (or layers-then-groups). */
+function stampSiblingIndexes(
+  groups: ClientLayerSwitcherGroupNode[]
+): ClientLayerSwitcherGroupNode[] {
+  return groups.map((group) => {
+    const order = shallowSiblingOrder(
+      group.layerSwitcherTree,
+      group.layers,
+      group.groups
+    );
+    const indexById = new Map(order.map((entry, index) => [entry.id, index]));
+    return {
+      ...group,
+      layers: group.layers.map((layer) => ({
+        ...layer,
+        index: indexById.get(layer.id) ?? layer.index,
+      })),
+      groups: stampSiblingIndexes(
+        group.groups.map((nested) => ({
+          ...nested,
+          index: indexById.get(nested.id) ?? nested.index,
+        }))
+      ),
+    };
+  });
 }
 
 function buildFromTree(
@@ -541,13 +570,15 @@ export async function buildLayerSwitcherGroupsForMap(
     (a, b) => (a.index ?? 0) - (b.index ?? 0)
   );
 
-  return roots.map((placement) =>
-    buildPlacementNode(
-      placement,
-      "-1",
-      compositions,
-      placementsByParentGomId,
-      new Set<string>()
+  return stampSiblingIndexes(
+    roots.map((placement) =>
+      buildPlacementNode(
+        placement,
+        "-1",
+        compositions,
+        placementsByParentGomId,
+        new Set<string>()
+      )
     )
   );
 }
@@ -609,7 +640,9 @@ export async function buildLayerSwitcherAdminStateForMap(mapName: string) {
   }
 
   return {
-    groups: remapClientGroupsToCatalogIds(groups, instanceIdToCatalogId),
+    groups: stampSiblingIndexes(
+      remapClientGroupsToCatalogIds(groups, instanceIdToCatalogId)
+    ),
     baselayers: backgroundInstances
       .map((instance) => {
         const layerId = getLayerKey(instance);

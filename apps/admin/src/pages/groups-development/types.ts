@@ -36,6 +36,15 @@ export interface CatalogDragItem {
 }
 
 /** A group or layer (with subtree) temporarily lifted out of the map-layers tree. */
+export interface MoveZoneItemOrigin {
+  /** Parent in Kartlager before the item was lifted (or root). */
+  parentId: GroupLayerTreeNode["parent"];
+  /** Sibling index under that parent before the item was lifted. */
+  siblingIndex: number;
+  /** Index in Bakgrund / Ritordning ordered list when parked from those tabs. */
+  listIndex?: number;
+}
+
 export interface MoveZoneItem {
   /** Stable key for React lists / drag identity. */
   key: string;
@@ -44,6 +53,10 @@ export interface MoveZoneItem {
   name: string;
   /** Flat subtree; root node has parent === GROUP_LAYER_TREE_ROOT_ID. */
   nodes: GroupLayerTreeNode[];
+  /** Used to restore position when placing the item back from Flyttzon. */
+  origin?: MoveZoneItemOrigin;
+  /** Catalog drops were never placed in the tree. */
+  fromCatalog?: boolean;
 }
 
 /** Items currently held in click-and-drop mode (supports multi-select via Ctrl). */
@@ -118,6 +131,11 @@ export interface LayerFormValues {
 /** Nested group shape for Maplayers / layerswitcher (catalog layer ids). */
 export interface ClientLayerSwitcherLayerRef {
   id: string;
+  /**
+   * Sibling position among this group's mixed children (layers + nested groups).
+   * Used instead of a separate layerSwitcherTree in Tool.options.
+   */
+  index?: number;
   drawOrder?: number;
   visibleAtStart?: boolean;
   infobox?: string;
@@ -127,6 +145,8 @@ export interface ClientLayerSwitcherGroup {
   id: string;
   type?: string;
   name: string;
+  /** Sibling position among parent's mixed children (layers + nested groups). */
+  index?: number;
   toggled?: boolean;
   expanded?: boolean;
   exclusive?: boolean;
@@ -141,8 +161,7 @@ export interface ClientLayerSwitcherGroup {
   layers?: ClientLayerSwitcherLayerRef[];
   groups?: ClientLayerSwitcherGroup[];
   /**
-   * Interleaved Lagerordning sibling order (layers + nested groups).
-   * Admin/API only — tools.options still uses layers[] + groups[].
+   * @deprecated Prefer `index` on layers/groups. Kept for older map API payloads.
    */
   layerSwitcherTree?: (
     | { type: "layer"; id: string }

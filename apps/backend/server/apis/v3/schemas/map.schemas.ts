@@ -108,6 +108,7 @@ export const MapContentUpdateSchema = z.object({
 
 const LayerSwitcherLayerRefSchema = z.object({
   id: z.string().min(1),
+  index: z.number().optional(),
   drawOrder: z.number().optional(),
   visibleAtStart: z.boolean().optional(),
   infobox: z.string().optional(),
@@ -116,6 +117,7 @@ const LayerSwitcherLayerRefSchema = z.object({
 interface LayerSwitcherGroupWrite {
   id: string;
   name?: string;
+  index?: number;
   toggled?: boolean;
   expanded?: boolean;
   exclusive?: boolean;
@@ -151,6 +153,7 @@ const LayerSwitcherGroupSchema: z.ZodType<LayerSwitcherGroupWrite> = z.lazy(
     z.object({
       id: z.string().min(1),
       name: z.string().optional(),
+      index: z.number().optional(),
       toggled: z.boolean().optional(),
       expanded: z.boolean().optional(),
       exclusive: z.boolean().optional(),

@@ -21,6 +21,7 @@ import {
   type ClickPlaceRootEdge,
 } from "../utils/click-place";
 import { isLayerStillInMapLayersTree } from "../utils/maplayers-editor";
+import { captureTreeMoveZoneOrigin } from "../utils/move-zone-origin";
 import {
   applyMapLayersSiblingOrder,
   buildChildrenByParentId,
@@ -459,6 +460,7 @@ export function useMapLayersClickPlace({
             sourceId: catalogItem.id,
             name: catalogItem.name,
             nodes: [node],
+            fromCatalog: true,
           };
         },
       );
@@ -477,6 +479,7 @@ export function useMapLayersClickPlace({
     const stamp = Date.now();
 
     for (const [index, nodeId] of rootIds.entries()) {
+      const origin = captureTreeMoveZoneOrigin(nextTree, nodeId);
       const extracted = extractSubtreeForMoveZone(nextTree, nodeId);
       if (!extracted) {
         continue;
@@ -493,6 +496,7 @@ export function useMapLayersClickPlace({
         sourceId: root.data.sourceId,
         name: root.text,
         nodes: extracted.subtree,
+        origin,
       });
       for (const node of extracted.subtree) {
         removedIds.add(String(node.id));

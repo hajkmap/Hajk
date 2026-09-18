@@ -42,7 +42,15 @@ import {
   getClientBaselayersFromToolOptions,
   getClientGroupsFromToolOptions,
   hydrateDisplaySettingsFromClientGroups,
+  pruneLayerSwitcherDraftToActiveLayers,
 } from "../utils/client-groups";
+import {
+  createEmptyMoveZoneByTab,
+  loadMoveZoneByTabFromStorage,
+  pruneMoveZoneByTabAgainstPlaced,
+  saveMoveZoneByTabToStorage,
+  type MoveZoneByTab,
+} from "../utils/move-zone-storage";
 import BackgroundLayersPanel from "./background-layers-panel";
 import DrawOrderPanel from "./draw-order-panel";
 import { buildDrawOrderIds } from "../utils/draw-order";
@@ -167,7 +175,9 @@ export default function GroupLayerTree({
     sourceId: string;
     name: string;
   } | null>(null);
-  const [moveZoneItems, setMoveZoneItems] = useState<MoveZoneItem[]>([]);
+  const [moveZoneByTab, setMoveZoneByTab] = useState<MoveZoneByTab>(() =>
+    createEmptyMoveZoneByTab(),
+  );
   const [previewTab, setPreviewTab] =
     useState<LayerSwitcherPreviewTab>("layers");
   /** null = Tree has not reported opens yet (treat as all open with initialOpen). */
@@ -183,6 +193,23 @@ export default function GroupLayerTree({
   const pendingDraftRef = useRef(pendingDraft);
   const onLayerSwitcherDraftChangeRef = useRef(onLayerSwitcherDraftChange);
   const mapLayersTreeRef = useRef<MapLayersTreeExpandHandle | null>(null);
+  const moveZoneStorageKeyRef = useRef<string | null>(null);
+
+  const moveZoneItems = moveZoneByTab[previewTab];
+  const setMoveZoneItems = useCallback(
+    (updater: SetStateAction<MoveZoneItem[]>) => {
+      setMoveZoneByTab((current) => {
+        const previous = current[previewTab];
+        const next =
+          typeof updater === "function" ? updater(previous) : updater;
+        if (next === previous) {
+          return current;
+        }
+        return { ...current, [previewTab]: next };
+      });
+    },
+    [previewTab],
+  );
 
   useEffect(() => {
     pendingDraftRef.current = pendingDraft;
@@ -246,6 +273,22 @@ export default function GroupLayerTree({
 
     return getToolDisplayName(activeLayerswitcher);
   }, [activeLayerswitcher, activeLayerswitcherOptions, catalogTools]);
+
+  // Persist Flyttzon per map + active LayerSwitcher (survives tab switches).
+  useEffect(() => {
+    if (moveZoneStorageKeyRef.current == null || !activeLayerswitcher) {
+      return;
+    }
+    const expectedKey = `${mapName ?? ""}:${activeLayerswitcher.toolId}`;
+    if (moveZoneStorageKeyRef.current !== expectedKey) {
+      return;
+    }
+    saveMoveZoneByTabToStorage(
+      mapName,
+      activeLayerswitcher.toolId,
+      moveZoneByTab,
+    );
+  }, [activeLayerswitcher, mapName, moveZoneByTab]);
 
   const activeLayerIds = useMemo(() => {
     if (!layerActivationRows) {
@@ -320,10 +363,10 @@ export default function GroupLayerTree({
   );
 
   // Layers parked in Move Zone from Draworder stay in Maplayers but leave the
-  // draw-order list until dropped back. Derive from move zone + tree presence.
+  // draw-order list until dropped back. Derive from that tab's zone + tree.
   const drawOrderParkedIds = useMemo(() => {
     const parked = new Set<string>();
-    for (const item of moveZoneItems) {
+    for (const item of moveZoneByTab.drawOrder) {
       if (item.kind !== "layer") {
         continue;
       }
@@ -332,7 +375,7 @@ export default function GroupLayerTree({
       }
     }
     return parked;
-  }, [moveZoneItems, treeData]);
+  }, [moveZoneByTab.drawOrder, treeData]);
 
   // Preserve user order; append newly eligible layers alphabetically.
   const effectiveDrawOrderOrderedIds = useMemo(() => {
@@ -398,6 +441,7 @@ export default function GroupLayerTree({
   }, [activeLayerswitcher, layerSwitcherEditorSnapshot, menuSynced]);
 
   const prevActiveDisplayLayerIdsRef = useRef<Set<string> | null>(null);
+  const prevBackgroundLayerIdsRef = useRef<Set<string> | null>(null);
 
   useEffect(() => {
     if (activeLayerIds == null || loadedLayerSwitcherKeyRef.current == null) {
@@ -428,11 +472,115 @@ export default function GroupLayerTree({
       });
       return next.length === current.length ? current : next;
     });
+    setBackgroundOrderedIds((current) => {
+      const next = current.filter((id) => !deactivatedSet.has(id));
+      return next.length === current.length ? current : next;
+    });
+    setDrawOrderOrderedIds((current) => {
+      const next = current.filter((id) => !deactivatedSet.has(id));
+      return next.length === current.length ? current : next;
+    });
+    setMoveZoneByTab((current) => {
+      const strip = (items: MoveZoneItem[]) =>
+        items.filter(
+          (item) =>
+            !(item.kind === "layer" && deactivatedSet.has(item.sourceId)),
+        );
+      const next: MoveZoneByTab = {
+        layers: strip(current.layers),
+        background: strip(current.background),
+        drawOrder: strip(current.drawOrder),
+      };
+      if (
+        next.layers.length === current.layers.length &&
+        next.background.length === current.background.length &&
+        next.drawOrder.length === current.drawOrder.length
+      ) {
+        return current;
+      }
+      return next;
+    });
   }, [activeLayerIds]);
 
   useEffect(() => {
     prevActiveDisplayLayerIdsRef.current = null;
+    prevBackgroundLayerIdsRef.current = null;
   }, [layerActivationResetKey]);
+
+  // BACKGROUND toggle: stay in the left catalog until dragged into Bakgrund.
+  // Newly BACKGROUND layers leave Kartlager / Ritordning; untoggled leave Bakgrund.
+  useEffect(() => {
+    if (loadedLayerSwitcherKeyRef.current == null) {
+      prevBackgroundLayerIdsRef.current = mapBackgroundLayerIds;
+      return;
+    }
+
+    const previous = prevBackgroundLayerIdsRef.current;
+    prevBackgroundLayerIdsRef.current = mapBackgroundLayerIds;
+
+    if (previous == null) {
+      return;
+    }
+
+    const becameBackground = [...mapBackgroundLayerIds].filter(
+      (id) => !previous.has(id),
+    );
+    const leftBackground = [...previous].filter(
+      (id) => !mapBackgroundLayerIds.has(id),
+    );
+
+    if (becameBackground.length === 0 && leftBackground.length === 0) {
+      return;
+    }
+
+    const becameSet = new Set(becameBackground);
+    const leftSet = new Set(leftBackground);
+
+    if (becameSet.size > 0) {
+      setTreeData((current) => {
+        const next = current.filter((node) => {
+          if (node.data?.kind !== "layer") {
+            return true;
+          }
+          return !becameSet.has(node.data.sourceId);
+        });
+        return next.length === current.length ? current : next;
+      });
+      setDrawOrderOrderedIds((current) => {
+        const next = current.filter((id) => !becameSet.has(id));
+        return next.length === current.length ? current : next;
+      });
+    }
+
+    if (leftSet.size > 0) {
+      setBackgroundOrderedIds((current) => {
+        const next = current.filter((id) => mapBackgroundLayerIds.has(id));
+        return next.length === current.length ? current : next;
+      });
+    }
+
+    const removeFromZones = new Set([...becameSet, ...leftSet]);
+    setMoveZoneByTab((current) => {
+      const strip = (items: MoveZoneItem[]) =>
+        items.filter(
+          (item) =>
+            !(item.kind === "layer" && removeFromZones.has(item.sourceId)),
+        );
+      const next: MoveZoneByTab = {
+        layers: strip(current.layers),
+        background: strip(current.background),
+        drawOrder: strip(current.drawOrder),
+      };
+      if (
+        next.layers.length === current.layers.length &&
+        next.background.length === current.background.length &&
+        next.drawOrder.length === current.drawOrder.length
+      ) {
+        return current;
+      }
+      return next;
+    });
+  }, [mapBackgroundLayerIds]);
 
   const activeForegroundLayerIds = useMemo(() => {
     if (activeLayerIds == null) {
@@ -495,10 +643,13 @@ export default function GroupLayerTree({
 
   const handlePreviewTabChange = useCallback(
     (tab: LayerSwitcherPreviewTab) => {
+      if (tab === previewTab) {
+        return;
+      }
       setPreviewTab(tab);
       clearClickPickAndResetToDrag();
     },
-    [clearClickPickAndResetToDrag],
+    [clearClickPickAndResetToDrag, previewTab],
   );
 
   const [treeGroupsFullyExpanded, setTreeGroupsFullyExpanded] = useState(true);
@@ -540,6 +691,7 @@ export default function GroupLayerTree({
     if (!activeLayerswitcher) {
       loadedLayerSwitcherKeyRef.current = null;
       loadedLayerswitcherToolIdRef.current = null;
+      moveZoneStorageKeyRef.current = null;
       baselineSignatureRef.current = "";
       baselineReadyRef.current = false;
       setTreeData([]);
@@ -548,7 +700,7 @@ export default function GroupLayerTree({
       setLayerDisplaySettings({});
       setBackgroundOrderedIds([]);
       setDrawOrderOrderedIds([]);
-      setMoveZoneItems([]);
+      setMoveZoneByTab(createEmptyMoveZoneByTab());
       onLayerSwitcherDraftChangeRef.current?.(null);
       return;
     }
@@ -590,12 +742,33 @@ export default function GroupLayerTree({
 
     const pending = switchedLayerswitcher ? null : pendingDraftRef.current;
     const restoringDraft = pending != null;
-    const groupsToLoad = restoringDraft
+    const rawGroupsToLoad = restoringDraft
       ? pending.groups
       : toolGroupsFromOptions;
-    const baselayersToLoad = restoringDraft
-      ? pending.baselayers
-      : toolBaselayersFromOptions;
+    const normalizedBaselayers: {
+      layerId: string;
+      visibleAtStart: boolean;
+      infobox: string;
+    }[] = restoringDraft
+      ? pending.baselayers.map((entry) => ({
+          layerId: entry.layerId,
+          visibleAtStart: entry.visibleAtStart ?? false,
+          infobox: entry.infobox ?? "",
+        }))
+      : toolBaselayersFromOptions.map((entry) => ({
+          layerId: entry.layerId,
+          visibleAtStart: entry.visibleAtStart,
+          infobox: entry.infobox,
+        }));
+    const prunedLoad =
+      activeLayerIds != null
+        ? pruneLayerSwitcherDraftToActiveLayers(
+            { groups: rawGroupsToLoad, baselayers: normalizedBaselayers },
+            activeLayerIds,
+          )
+        : { groups: rawGroupsToLoad, baselayers: normalizedBaselayers };
+    const groupsToLoad = prunedLoad.groups;
+    const baselayersToLoad = prunedLoad.baselayers;
 
     const intermediate = clientGroupsToLayerSwitcherTree(groupsToLoad);
     const nodes = applyMapLayersSiblingOrder(
@@ -663,7 +836,25 @@ export default function GroupLayerTree({
     setLayerDisplaySettings(loadedLayerSettings);
     setBackgroundOrderedIds(loadedBackgroundOrder);
     setDrawOrderOrderedIds(loadedDrawOrderIds);
-    setMoveZoneItems([]);
+
+    const placedFromTree = collectPlacedSourceIds(nodes);
+    const storedZones = loadMoveZoneByTabFromStorage(
+      mapName,
+      activeLayerswitcher.toolId,
+    );
+    const prunedZones = pruneMoveZoneByTabAgainstPlaced(storedZones, {
+      treeLayerIds: placedFromTree.layerIds,
+      treeGroupIds: placedFromTree.groupIds,
+      backgroundIds: new Set(loadedBackgroundOrder),
+      drawOrderIds: new Set(loadedDrawOrderIds),
+    });
+    moveZoneStorageKeyRef.current = `${mapName ?? ""}:${activeLayerswitcher.toolId}`;
+    setMoveZoneByTab(prunedZones);
+    saveMoveZoneByTabToStorage(
+      mapName,
+      activeLayerswitcher.toolId,
+      prunedZones,
+    );
   }, [
     activationBackgroundOrder,
     activeLayerIds,
@@ -672,6 +863,7 @@ export default function GroupLayerTree({
     layerActivationResetKey,
     layerNames,
     mapBackgroundLayerIds,
+    mapName,
     toolBaselayersFromOptions,
     toolBaselayersJson,
     toolGroupsFromOptions,
@@ -704,6 +896,8 @@ export default function GroupLayerTree({
   const {
     canAcceptMoveZoneDropToDrawOrder,
     handleMoveZoneDropToDrawOrder,
+    canAcceptMoveZoneDropToBackground,
+    handleMoveZoneDropToBackground,
     handleDropToMoveZone,
     canAcceptCatalogDropToMoveZone,
     handleDropCatalogToMoveZone,
@@ -714,8 +908,11 @@ export default function GroupLayerTree({
     setMoveZoneItems,
     setVisibleIds,
     setDrawOrderOrderedIds,
+    setBackgroundOrderedIds,
     drawOrderMode,
+    backgroundMode,
     effectiveDrawOrderOrderedIds,
+    effectiveBackgroundOrderedIds,
     layerNames,
     placedIds,
   });
@@ -1180,6 +1377,8 @@ export default function GroupLayerTree({
                 }));
               }}
               search={search}
+              onMoveZoneDrop={handleMoveZoneDropToBackground}
+              canAcceptMoveZoneItem={canAcceptMoveZoneDropToBackground}
             />
           ) : visibleNodeIds?.size === 0 ? (
             <Box sx={{ p: 2 }}>

@@ -10,6 +10,7 @@ import {
   insertDrawOrderIdAt,
   isLayerStillInMapLayersTree,
 } from "../utils/maplayers-editor";
+import { captureTreeMoveZoneOrigin } from "../utils/move-zone-origin";
 import {
   createLayerTreeNode,
   createTreeNodeFromCatalogItem,
@@ -24,8 +25,11 @@ export interface UseMapLayersMoveZoneParams {
   setMoveZoneItems: Dispatch<SetStateAction<MoveZoneItem[]>>;
   setVisibleIds: Dispatch<SetStateAction<Set<string>>>;
   setDrawOrderOrderedIds: Dispatch<SetStateAction<string[]>>;
+  setBackgroundOrderedIds: Dispatch<SetStateAction<string[]>>;
   drawOrderMode: boolean;
+  backgroundMode: boolean;
   effectiveDrawOrderOrderedIds: string[];
+  effectiveBackgroundOrderedIds: string[];
   layerNames: Map<string, string>;
   placedIds: { groupIds: Set<string>; layerIds: Set<string> };
 }
@@ -37,8 +41,11 @@ export function useMapLayersMoveZone({
   setMoveZoneItems,
   setVisibleIds,
   setDrawOrderOrderedIds,
+  setBackgroundOrderedIds,
   drawOrderMode,
+  backgroundMode,
   effectiveDrawOrderOrderedIds,
+  effectiveBackgroundOrderedIds,
   layerNames,
   placedIds,
 }: UseMapLayersMoveZoneParams) {
@@ -69,10 +76,36 @@ export function useMapLayersMoveZone({
     ],
   );
 
+  const canAcceptMoveZoneDropToBackground = useCallback(
+    (item: MoveZoneItem) =>
+      item.kind === "layer" &&
+      !effectiveBackgroundOrderedIds.includes(item.sourceId),
+    [effectiveBackgroundOrderedIds],
+  );
+
+  const handleMoveZoneDropToBackground = useCallback(
+    (item: MoveZoneItem, insertIndex?: number) => {
+      if (!canAcceptMoveZoneDropToBackground(item)) {
+        return;
+      }
+
+      setBackgroundOrderedIds((current) =>
+        insertDrawOrderIdAt(current, item.sourceId, insertIndex),
+      );
+      setMoveZoneItems((current) =>
+        current.filter((entry) => entry.key !== item.key),
+      );
+    },
+    [
+      canAcceptMoveZoneDropToBackground,
+      setBackgroundOrderedIds,
+      setMoveZoneItems,
+    ],
+  );
+
   const handleDropToMoveZone = useCallback(
     (nodeId: GroupLayerTreeNode["id"]) => {
-      // Draworder: park in Move Zone without removing from Maplayers so the
-      // layer can be dropped back into the draw-order list.
+      // Ritordning: park without removing from Kartlager.
       if (drawOrderMode) {
         const layerId = parseTreeNodeSourceId(nodeId);
         if (!layerId || !isLayerStillInMapLayersTree(treeData, layerId)) {
@@ -89,6 +122,7 @@ export function useMapLayersMoveZone({
           return;
         }
 
+        const listIndex = effectiveDrawOrderOrderedIds.indexOf(layerId);
         const name = layerNames.get(layerId) ?? layerId;
         const moveItem: MoveZoneItem = {
           key: `drawOrder:${layerId}:${Date.now()}`,
@@ -98,6 +132,11 @@ export function useMapLayersMoveZone({
           nodes: [
             createLayerTreeNode(layerId, name, GROUP_LAYER_TREE_ROOT_ID, 0),
           ],
+          origin: {
+            parentId: GROUP_LAYER_TREE_ROOT_ID,
+            siblingIndex: 0,
+            listIndex: listIndex < 0 ? undefined : listIndex,
+          },
         };
 
         setDrawOrderOrderedIds((ids) => ids.filter((id) => id !== layerId));
@@ -105,6 +144,43 @@ export function useMapLayersMoveZone({
         return;
       }
 
+      // Bakgrund: park from the background list (not Kartlager tree).
+      if (backgroundMode) {
+        const layerId = parseTreeNodeSourceId(nodeId);
+        if (!layerId || !effectiveBackgroundOrderedIds.includes(layerId)) {
+          return;
+        }
+        if (
+          moveZoneItems.some(
+            (item) => item.kind === "layer" && item.sourceId === layerId,
+          )
+        ) {
+          return;
+        }
+
+        const listIndex = effectiveBackgroundOrderedIds.indexOf(layerId);
+        const name = layerNames.get(layerId) ?? layerId;
+        const moveItem: MoveZoneItem = {
+          key: `background:${layerId}:${Date.now()}`,
+          kind: "layer",
+          sourceId: layerId,
+          name,
+          nodes: [
+            createLayerTreeNode(layerId, name, GROUP_LAYER_TREE_ROOT_ID, 0),
+          ],
+          origin: {
+            parentId: GROUP_LAYER_TREE_ROOT_ID,
+            siblingIndex: 0,
+            listIndex: listIndex < 0 ? undefined : listIndex,
+          },
+        };
+
+        setBackgroundOrderedIds((ids) => ids.filter((id) => id !== layerId));
+        setMoveZoneItems((items) => [...items, moveItem]);
+        return;
+      }
+
+      const origin = captureTreeMoveZoneOrigin(treeData, nodeId);
       const extracted = extractSubtreeForMoveZone(treeData, nodeId);
       if (!extracted) {
         return;
@@ -123,6 +199,7 @@ export function useMapLayersMoveZone({
         sourceId: root.data.sourceId,
         name: root.text,
         nodes: extracted.subtree,
+        origin,
       };
 
       setTreeData(extracted.remainingTree);
@@ -136,10 +213,13 @@ export function useMapLayersMoveZone({
       });
     },
     [
+      backgroundMode,
       drawOrderMode,
+      effectiveBackgroundOrderedIds,
       effectiveDrawOrderOrderedIds,
       layerNames,
       moveZoneItems,
+      setBackgroundOrderedIds,
       setDrawOrderOrderedIds,
       setMoveZoneItems,
       setTreeData,
@@ -150,12 +230,15 @@ export function useMapLayersMoveZone({
 
   const canAcceptCatalogDropToMoveZone = useCallback(
     (item: CatalogDragItem) => {
+      if (backgroundMode || drawOrderMode) {
+        return false;
+      }
       if (item.kind === "group") {
         return !placedIds.groupIds.has(item.id);
       }
       return !placedIds.layerIds.has(item.id);
     },
-    [placedIds],
+    [backgroundMode, drawOrderMode, placedIds],
   );
 
   const handleDropCatalogToMoveZone = useCallback(
@@ -176,6 +259,7 @@ export function useMapLayersMoveZone({
         sourceId: catalogItem.id,
         name: catalogItem.name,
         nodes: [node],
+        fromCatalog: true,
       };
 
       setMoveZoneItems((items) => [...items, moveItem]);
@@ -186,6 +270,8 @@ export function useMapLayersMoveZone({
   return {
     canAcceptMoveZoneDropToDrawOrder,
     handleMoveZoneDropToDrawOrder,
+    canAcceptMoveZoneDropToBackground,
+    handleMoveZoneDropToBackground,
     handleDropToMoveZone,
     canAcceptCatalogDropToMoveZone,
     handleDropCatalogToMoveZone,

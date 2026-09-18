@@ -89,23 +89,11 @@ export function mapLayerActivationSignature(
 
 export function mapLayerActivationToPayload(
   rows: MapLayerActivationRow[],
-  /**
-   * When set, only these catalog ids become BACKGROUND instances (Lagerordning
-   * Bakgrund / baselayers list). Bakgrund-checked but not yet placed layers stay
-   * FOREGROUND until dropped into that list.
-   */
-  baselayerIds?: ReadonlySet<string>,
 ): MapLayerPlacement[] {
   const active = rows.filter((row) => row.active);
-  const background = active.filter((row) => {
-    if (!(supportsBackground(row.layerKind) && row.isBackground)) {
-      return false;
-    }
-    if (baselayerIds == null) {
-      return true;
-    }
-    return baselayerIds.has(row.layerId);
-  });
+  const background = active.filter(
+    (row) => supportsBackground(row.layerKind) && row.isBackground,
+  );
   const backgroundIdSet = new Set(background.map((row) => row.layerId));
   const foreground = active.filter((row) => !backgroundIdSet.has(row.layerId));
 

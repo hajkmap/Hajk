@@ -295,6 +295,49 @@ const createDispatch = (map, staticLayerConfig, staticLayerTree) => {
   };
 };
 
+/**
+ * Interleave layers[] and groups[] by optional sibling `index`.
+ * Legacy configs without index stay layers-then-groups.
+ */
+const mergeLayerAndGroupChildrenByIndex = (
+  layerSources,
+  layerNodes,
+  groupSources,
+  groupNodes
+) => {
+  const layerEntries = (layerSources ?? []).map((source, fallback) => ({
+    node: layerNodes?.[fallback],
+    index: source?.index,
+    type: "layer",
+    fallback,
+  }));
+  const groupEntries = (groupSources ?? []).map((source, fallback) => ({
+    node: groupNodes?.[fallback],
+    index: source?.index,
+    type: "group",
+    fallback,
+  }));
+  const hasIndexed =
+    layerEntries.some((entry) => entry.index != null) ||
+    groupEntries.some((entry) => entry.index != null);
+
+  const ordered = hasIndexed
+    ? [...layerEntries, ...groupEntries].sort((a, b) => {
+        const indexA = a.index ?? Number.MAX_SAFE_INTEGER;
+        const indexB = b.index ?? Number.MAX_SAFE_INTEGER;
+        if (indexA !== indexB) {
+          return indexA - indexB;
+        }
+        if (a.type !== b.type) {
+          return a.type === "layer" ? -1 : 1;
+        }
+        return a.fallback - b.fallback;
+      })
+    : [...layerEntries, ...groupEntries];
+
+  return ordered.map((entry) => entry.node).filter(Boolean);
+};
+
 const getLayerNodes = (groups, olLayerMap) =>
   groups?.flatMap((node) => {
     if (!node) {
@@ -303,7 +346,12 @@ const getLayerNodes = (groups, olLayerMap) =>
     const layers = getLayerNodes(node.layers, olLayerMap);
     const subgroups = getLayerNodes(node.groups, olLayerMap);
 
-    const children = [...(layers ?? []), ...(subgroups ?? [])];
+    const children = mergeLayerAndGroupChildrenByIndex(
+      node.layers,
+      layers,
+      node.groups,
+      subgroups
+    );
 
     const isGroup = !!(node.groups || node.layers);
 
@@ -385,7 +433,12 @@ const buildLayerTree = (groups, olLayerMap) =>
     const layers = buildLayerTree(group.layers, olLayerMap);
     const subgroups = buildLayerTree(group.groups, olLayerMap);
 
-    const children = [...(layers ?? []), ...(subgroups ?? [])];
+    const children = mergeLayerAndGroupChildrenByIndex(
+      group.layers,
+      layers,
+      group.groups,
+      subgroups
+    );
 
     return {
       id: group.id,

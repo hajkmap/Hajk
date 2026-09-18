@@ -19,6 +19,7 @@ import { toolsOnMapsOptionsForTarget } from "../utils/tool-placement.ts";
 import { buildLayerSwitcherAdminStateForMap } from "../utils/build-layer-switcher-groups-for-map.ts";
 import {
   flattenLayerSwitcherGroupsForWrite,
+  buildSiblingOrderFromLayersAndGroups,
   type LayerSwitcherWriteGroup,
 } from "../utils/flatten-layer-switcher-for-map-write.ts";
 
@@ -750,37 +751,64 @@ class MapService {
     });
   }
 
-  /** Nested groups for Tool.options — preserve drawOrder on each layer ref. */
+  /** Nested groups for Tool.options — sibling order via `index` on layers/groups. */
   private toLayerSwitcherToolOptionGroups(
     groups: LayerSwitcherWriteGroup[],
     parentId = "-1"
   ): Prisma.InputJsonObject[] {
-    return groups.map((group) => ({
-      id: group.id,
-      type: "group",
-      name: group.name ?? "",
-      toggled: Boolean(group.toggled),
-      expanded: Boolean(group.expanded),
-      exclusive: Boolean(group.exclusive),
-      parent: group.parent ?? parentId,
-      infogroupvisible: Boolean(group.infogroupvisible),
-      infogrouptitle: group.infogrouptitle ?? "",
-      infogrouptext: group.infogrouptext ?? "",
-      infogroupurl: group.infogroupurl ?? "",
-      infogroupurltext: group.infogroupurltext ?? "",
-      infogroupopendatalink: group.infogroupopendatalink ?? "",
-      infogroupowner: group.infogroupowner ?? "",
-      layers: (group.layers ?? []).map((layer) => ({
+    return groups.map((group) => {
+      const siblingOrder =
+        group.layerSwitcherTree && group.layerSwitcherTree.length > 0
+          ? group.layerSwitcherTree.map((entry) =>
+              entry.type === "layer"
+                ? { type: "layer" as const, id: entry.id }
+                : { type: "group" as const, id: entry.id }
+            )
+          : buildSiblingOrderFromLayersAndGroups(
+              group.layers ?? [],
+              group.groups ?? []
+            );
+      const indexById = new Map(
+        siblingOrder.map((entry, index) => [entry.id, index])
+      );
+
+      const layers = (group.layers ?? []).map((layer) => ({
         id: layer.id,
+        index: indexById.get(layer.id) ?? layer.index ?? 0,
         drawOrder: layer.drawOrder ?? 1000,
         visibleAtStart: Boolean(layer.visibleAtStart),
         infobox: layer.infobox ?? "",
-      })),
-      groups: this.toLayerSwitcherToolOptionGroups(
+      }));
+      const nestedGroups = this.toLayerSwitcherToolOptionGroups(
         group.groups ?? [],
         group.id
-      ),
-    }));
+      ).map((nested) => {
+        const nestedId = String(nested.id);
+        return {
+          ...nested,
+          index: indexById.get(nestedId) ?? nested.index ?? 0,
+        };
+      });
+
+      return {
+        id: group.id,
+        type: "group",
+        name: group.name ?? "",
+        toggled: Boolean(group.toggled),
+        expanded: Boolean(group.expanded),
+        exclusive: Boolean(group.exclusive),
+        parent: group.parent ?? parentId,
+        infogroupvisible: Boolean(group.infogroupvisible),
+        infogrouptitle: group.infogrouptitle ?? "",
+        infogrouptext: group.infogrouptext ?? "",
+        infogroupurl: group.infogroupurl ?? "",
+        infogroupurltext: group.infogroupurltext ?? "",
+        infogroupopendatalink: group.infogroupopendatalink ?? "",
+        infogroupowner: group.infogroupowner ?? "",
+        layers,
+        groups: nestedGroups,
+      };
+    });
   }
 
   private async replaceDirectMapLayers(

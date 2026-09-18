@@ -4,6 +4,8 @@ import { UseType } from "@prisma/client";
 /** Nested group shape accepted by PUT /maps/:mapName/layerswitcher. */
 export interface LayerSwitcherWriteLayerRef {
   id: string;
+  /** Sibling position among mixed children (layers + nested groups). */
+  index?: number;
   drawOrder?: number;
   visibleAtStart?: boolean;
   infobox?: string;
@@ -12,6 +14,8 @@ export interface LayerSwitcherWriteLayerRef {
 export interface LayerSwitcherWriteGroup {
   id: string;
   name?: string;
+  /** Sibling position among parent's mixed children (layers + nested groups). */
+  index?: number;
   toggled?: boolean;
   expanded?: boolean;
   exclusive?: boolean;
@@ -26,10 +30,54 @@ export interface LayerSwitcherWriteGroup {
   infogroupowner?: string;
   layers?: LayerSwitcherWriteLayerRef[];
   groups?: LayerSwitcherWriteGroup[];
+  /** @deprecated Prefer index on layers/groups. */
   layerSwitcherTree?: (
     | { type: "layer"; id: string }
     | { type: "group"; id: string }
   )[];
+}
+
+/** Merge layers[] + groups[] by `index`; legacy fallback is layers then groups. */
+export function buildSiblingOrderFromLayersAndGroups(
+  layers: { id: string; index?: number }[],
+  groups: { id: string; index?: number }[],
+): { type: "layer" | "group"; id: string }[] {
+  const layerEntries = layers.map((layer, fallback) => ({
+    type: "layer" as const,
+    id: layer.id,
+    index: layer.index,
+    fallback,
+  }));
+  const groupEntries = groups.map((group, fallback) => ({
+    type: "group" as const,
+    id: group.id,
+    index: group.index,
+    fallback,
+  }));
+  const hasIndexed =
+    layerEntries.some((entry) => entry.index != null) ||
+    groupEntries.some((entry) => entry.index != null);
+
+  if (!hasIndexed) {
+    return [
+      ...layerEntries.map(({ type, id }) => ({ type, id })),
+      ...groupEntries.map(({ type, id }) => ({ type, id })),
+    ];
+  }
+
+  return [...layerEntries, ...groupEntries]
+    .sort((a, b) => {
+      const indexA = a.index ?? Number.MAX_SAFE_INTEGER;
+      const indexB = b.index ?? Number.MAX_SAFE_INTEGER;
+      if (indexA !== indexB) {
+        return indexA - indexB;
+      }
+      if (a.type !== b.type) {
+        return a.type === "layer" ? -1 : 1;
+      }
+      return a.fallback - b.fallback;
+    })
+    .map(({ type, id }) => ({ type, id }));
 }
 
 export interface FlattenedGroupsOnMapsRow {
@@ -142,16 +190,10 @@ export function flattenLayerSwitcherGroupsForWrite(
                 ? { type: "layer" as const, id: entry.id }
                 : { type: "group" as const, id: entry.id }
             )
-          : [
-              ...(group.layers ?? []).map((layer) => ({
-                type: "layer" as const,
-                id: layer.id,
-              })),
-              ...(group.groups ?? []).map((nested) => ({
-                type: "group" as const,
-                id: nested.id,
-              })),
-            ];
+          : buildSiblingOrderFromLayersAndGroups(
+              group.layers ?? [],
+              group.groups ?? []
+            );
       // Last occurrence wins if the same group appears more than once.
       layersByGroupId.set(group.id, {
         groupId: group.id,

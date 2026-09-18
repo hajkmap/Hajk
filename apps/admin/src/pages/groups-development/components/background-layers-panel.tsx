@@ -24,11 +24,13 @@ import type {
   GroupLayerTreeNode,
   LayerDisplaySettings,
   LayerFormValues,
+  MoveZoneItem,
 } from "../types";
 import {
   CATALOG_DRAG_TYPE,
   DEFAULT_LAYER_DISPLAY_SETTINGS,
   GROUP_LAYER_TREE_ROOT_ID,
+  MOVE_ZONE_DRAG_TYPE,
 } from "../types";
 import {
   applyDropOnLayerRedirect,
@@ -56,6 +58,8 @@ interface BackgroundLayersPanelProps {
     settings: LayerDisplaySettings,
   ) => void;
   search?: string;
+  onMoveZoneDrop?: (item: MoveZoneItem, insertIndex?: number) => void;
+  canAcceptMoveZoneItem?: (item: MoveZoneItem) => boolean;
 }
 
 function orderedIdsFromTree(tree: GroupLayerTreeNode[]): string[] {
@@ -127,10 +131,18 @@ function canDropBackgroundLayerNode(
   }
 
   if (dragSourceId == null) {
-    if (monitor?.getItemType() !== CATALOG_DRAG_TYPE) {
+    const itemType = monitor?.getItemType();
+    if (itemType === MOVE_ZONE_DRAG_TYPE) {
+      const item = monitor?.getItem() as MoveZoneItem | undefined;
+      return (
+        item?.kind === "layer" &&
+        !tree.some((node) => node.data?.sourceId === item.sourceId)
+      );
+    }
+    if (itemType !== CATALOG_DRAG_TYPE) {
       return false;
     }
-    const item = monitor.getItem() as CatalogDragItem | undefined;
+    const item = monitor?.getItem() as CatalogDragItem | undefined;
     if (item?.kind !== "layer") {
       return false;
     }
@@ -305,6 +317,8 @@ export default function BackgroundLayersPanel({
   layerDisplaySettings,
   onLayerDisplaySettingsChange,
   search = "",
+  onMoveZoneDrop,
+  canAcceptMoveZoneItem = () => false,
 }: BackgroundLayersPanelProps) {
   const { t } = useTranslation();
   const [editTarget, setEditTarget] = useState<{
@@ -423,12 +437,45 @@ export default function BackgroundLayersPanel({
     [],
   );
 
+  const resolveMoveZoneInsertIndex = useCallback(
+    (options: DropOptions<GroupLayerTreeNode["data"]>) => {
+      if (
+        options.dropTargetId == null ||
+        options.dropTargetId === GROUP_LAYER_TREE_ROOT_ID
+      ) {
+        return options.relativeIndex ?? orderedIds.length;
+      }
+
+      const targetLayerId = parseTreeNodeSourceId(options.dropTargetId);
+      const targetIndex = orderedIds.indexOf(targetLayerId);
+      if (targetIndex < 0) {
+        return options.relativeIndex ?? orderedIds.length;
+      }
+
+      if (options.relativeIndex != null) {
+        return options.relativeIndex;
+      }
+
+      return targetIndex;
+    },
+    [orderedIds],
+  );
+
   const handleDrop = useCallback(
     (
       newTree: GroupLayerTreeNode[],
       options: DropOptions<GroupLayerTreeNode["data"]>,
     ) => {
       const itemType = options.monitor.getItemType();
+
+      if (itemType === MOVE_ZONE_DRAG_TYPE) {
+        const moveItem = options.monitor.getItem() as MoveZoneItem;
+        if (!canAcceptMoveZoneItem(moveItem)) {
+          return;
+        }
+        onMoveZoneDrop?.(moveItem, resolveMoveZoneInsertIndex(options));
+        return;
+      }
 
       if (itemType === CATALOG_DRAG_TYPE) {
         const catalogItem = options.monitor.getItem() as CatalogDragItem;
@@ -454,7 +501,20 @@ export default function BackgroundLayersPanel({
         orderedIdsFromTree(applySiblingOrderFromFlatTree(updatedTree)),
       );
     },
-    [onOrderedIdsChange, treeData],
+    [
+      canAcceptMoveZoneItem,
+      onMoveZoneDrop,
+      onOrderedIdsChange,
+      resolveMoveZoneInsertIndex,
+      treeData,
+    ],
+  );
+
+  const handleMoveZoneDropToRoot = useCallback(
+    (item: MoveZoneItem) => {
+      onMoveZoneDrop?.(item, orderedIds.length);
+    },
+    [onMoveZoneDrop, orderedIds.length],
   );
 
   if (orderedIds.length === 0) {
@@ -463,6 +523,8 @@ export default function BackgroundLayersPanel({
         emptyLabel={t("groupsDevelopment.emptyBackground")}
         onCatalogDrop={handleCatalogDropToRoot}
         canAcceptCatalogItem={canAcceptCatalogItem}
+        onMoveZoneDrop={handleMoveZoneDropToRoot}
+        canAcceptMoveZoneItem={canAcceptMoveZoneItem}
       />
     );
   }
@@ -482,6 +544,8 @@ export default function BackgroundLayersPanel({
       <GroupLayerTreeDropZone
         onCatalogDrop={handleCatalogDropToRoot}
         canAcceptCatalogItem={canAcceptCatalogItem}
+        onMoveZoneDrop={handleMoveZoneDropToRoot}
+        canAcceptMoveZoneItem={canAcceptMoveZoneItem}
         onTreeDropToRoot={handleTreeDropToRoot}
         canAcceptTreeItemToRoot={canAcceptTreeItemToRoot}
       >
@@ -497,14 +561,20 @@ export default function BackgroundLayersPanel({
           <Tree<GroupLayerTreeNode["data"]>
             tree={treeData}
             rootId={GROUP_LAYER_TREE_ROOT_ID}
-            extraAcceptTypes={[CATALOG_DRAG_TYPE]}
+            extraAcceptTypes={[CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE]}
             initialOpen
             sort={false}
             insertDroppableFirst={false}
             dropTargetOffset={12}
-            canDrop={(tree, options) =>
-              canDropBackgroundLayerNode(tree, options)
-            }
+            canDrop={(tree, options) => {
+              const itemType = options.monitor?.getItemType();
+              if (itemType === MOVE_ZONE_DRAG_TYPE) {
+                return canAcceptMoveZoneItem(
+                  options.monitor.getItem() as MoveZoneItem,
+                );
+              }
+              return canDropBackgroundLayerNode(tree, options);
+            }}
             onDrop={handleDrop}
             placeholderRender={(_node, { depth }) => (
               <Box
