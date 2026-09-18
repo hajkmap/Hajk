@@ -17,6 +17,7 @@ export const AVAILABLE_TOOLS = [
   "Edit",
   "Export",
   "Fir",
+  "FloodSimulator",
   "FmeServer",
   "GeosuiteExport",
   "InfoDialog",

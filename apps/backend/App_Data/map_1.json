@@ -1287,6 +1287,71 @@
         "visibleAtStart": false,
         "icons": ""
       }
+    },
+    {
+      "type": "floodsimulator",
+      "index": 20,
+      "options": {
+        "target": "toolbar",
+        "position": "left",
+        "visibleAtStart": false,
+        "title": "Översvämning",
+        "description": "Simulera en stigande vattennivå",
+        "elevationUrl": "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
+        "elevationEncoding": "terrarium",
+        "crossOrigin": "anonymous",
+        "tileSize": 256,
+        "minZoom": 0,
+        "maxZoom": 15,
+        "attributions": "Elevation data: Mapzen Terrain Tiles",
+        "minLevel": 0,
+        "maxLevel": 10,
+        "levelStep": 0.01,
+        "defaultLevel": 1,
+        "waterColor": "#86cbf9",
+        "deepWaterColor": "#8dabbf",
+        "depthColors": [
+          {
+            "maxDepth": 0.5,
+            "color": "#001C9A"
+          },
+          {
+            "maxDepth": 1.0,
+            "color": "#002BFF"
+          },
+          {
+            "maxDepth": 1.5,
+            "color": "#1E84FF"
+          },
+          {
+            "maxDepth": 2.0,
+            "color": "#4DB2FF"
+          },
+          {
+            "maxDepth": 2.5,
+            "color": "#8BEA69"
+          },
+          {
+            "maxDepth": 3.12,
+            "color": "#A8F59A"
+          },
+          {
+            "maxDepth": 3.5,
+            "color": "#D454DB"
+          },
+          {
+            "maxDepth": 4.0,
+            "color": "#E7A6EE"
+          }
+        ],
+        "layerOpacity": 0.6,
+        "enableDepthShading": true,
+        "maxShadingDepth": 5,
+        "animationDurationMs": 8000,
+        "showElevationReadout": true,
+        "minElevation": -100,
+        "maxElevation": 100
+      }
     }
   ],
   "map": {
