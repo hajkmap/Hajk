@@ -61,8 +61,6 @@ export interface FloodSimulatorOptions {
    * `""` to omit the attribute (overlay can still draw; readout will not).
    */
   crossOrigin?: ElevationCrossOrigin | "";
-  /** Projection of the elevation tiles. Defaults to the map view projection. */
-  elevationProjection?: string;
   tileSize?: number;
   /** Lowest terrain tile z that exists. Map zooms below this reuse that z. */
   minZoom?: number;
@@ -131,7 +129,6 @@ export interface FloodSimulatorResolvedOptions {
   elevationUrl: string;
   elevationEncoding: ElevationEncoding;
   crossOrigin: ElevationCrossOrigin;
-  elevationProjection: string;
   tileSize: number;
   minZoom: number;
   maxZoom: number;

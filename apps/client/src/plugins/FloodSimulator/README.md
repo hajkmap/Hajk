@@ -18,7 +18,7 @@ Tiles are loaded with `crossOrigin: "anonymous"` by default so the pointer reado
 
 ### Projection constraint
 
-`ol/source/ImageTile` **cannot reproject**. The tiles must already be in the map's view projection.
+`ol/source/ImageTile` **cannot reproject**. The plugin always uses the map view projection, so the tiles must already be in that CRS.
 
 The demo Terrarium tiles are `EPSG:3857`, which matches `map_1`. They will not line up on SWEREF99 / `EPSG:3006` / `EPSG:3008` maps; you need a Terrain-RGB or Terrarium XYZ pyramid in that same projection. On mismatch the plugin logs a console warning and shows an alert dialog instead of silently rendering garbage.
 
@@ -92,7 +92,6 @@ The plugin UI shows a legend for classed colors and hides the deep-water picker,
 | `elevationUrl`          | _(empty)_                         | Tile URL template (`{z}/{x}/{y}`). Overlay is not created until this is set                                                |
 | `elevationEncoding`     | `terrarium`                       | `terrarium` or `mapbox`                                                                                                    |
 | `crossOrigin`           | `anonymous`                       | CORS mode for elevation tiles (`anonymous`, `use-credentials`, or `null` to omit). Needed for the pointer readout          |
-| `elevationProjection`   | Map view CRS                      | CRS of the elevation tiles. WebGL cannot reproject                                                                         |
 | `tileSize`              | `256`                             | XYZ tile size                                                                                                              |
 | `minZoom`               | `0`                               | Lowest terrain `{z}` that exists. Lower Hajk zooms reuse these tiles                                                       |
 | `maxZoom`               | `15`                              | Highest terrain `{z}` that exists. Higher Hajk zooms reuse these tiles                                                     |
@@ -117,7 +116,7 @@ The plugin UI shows a legend for classed colors and hides the deep-water picker,
 | `minElevation`          | `-100`                            | Elevations at or below this are treated as nodata                                                                          |
 | `maxElevation`          | `100`                             | Elevations at or above this are treated as nodata                                                                          |
 
-There is currently no Admin UI editor for this tool; add the entry to the map config JSON by hand. Each admin tool view only reads and rewrites its own `type` entry, so a hand-added `floodsimulator` entry survives Admin saves. The overlay is a system layer, so it does not appear in LayerSwitcher.
+Configure the plugin from Admin → Kartor → Verktyg → Översvämning. The overlay is a system layer, so it does not appear in LayerSwitcher.
 
 ### Limited terrain pyramids
 

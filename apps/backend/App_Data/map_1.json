@@ -1313,35 +1313,35 @@
         "depthColors": [
           {
             "maxDepth": 0.5,
-            "color": "#001C9A"
+            "color": "#E7A6EE"
           },
           {
             "maxDepth": 1.0,
-            "color": "#002BFF"
-          },
-          {
-            "maxDepth": 1.5,
-            "color": "#1E84FF"
-          },
-          {
-            "maxDepth": 2.0,
-            "color": "#4DB2FF"
-          },
-          {
-            "maxDepth": 2.5,
-            "color": "#8BEA69"
-          },
-          {
-            "maxDepth": 3.12,
-            "color": "#A8F59A"
-          },
-          {
-            "maxDepth": 3.5,
             "color": "#D454DB"
           },
           {
+            "maxDepth": 1.5,
+            "color": "#A8F59A"
+          },
+          {
+            "maxDepth": 2.0,
+            "color": "#8BEA69"
+          },
+          {
+            "maxDepth": 2.5,
+            "color": "#4DB2FF"
+          },
+          {
+            "maxDepth": 3.12,
+            "color": "#1E84FF"
+          },
+          {
+            "maxDepth": 3.5,
+            "color": "#002BFF"
+          },
+          {
             "maxDepth": 4.0,
-            "color": "#E7A6EE"
+            "color": "#001C9A"
           }
         ],
         "layerOpacity": 0.6,

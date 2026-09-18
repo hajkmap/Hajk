@@ -267,10 +267,6 @@ export default class FloodSimulatorModel {
           : DEFAULT_OPTIONS.elevationUrl,
       elevationEncoding: resolveEncoding(settings.elevationEncoding),
       crossOrigin: resolveCrossOrigin(settings.crossOrigin),
-      elevationProjection:
-        settings.elevationProjection ??
-        mapTiles.projection ??
-        DEFAULT_OPTIONS.elevationProjection,
       tileSize: clampOption(
         settings.tileSize,
         DEFAULT_OPTIONS.tileSize,
@@ -315,7 +311,6 @@ export default class FloodSimulatorModel {
   #createSource(): SourceType | null {
     const {
       elevationUrl,
-      elevationProjection,
       crossOrigin,
       tileSize,
       minZoom,
@@ -355,7 +350,7 @@ export default class FloodSimulatorModel {
       wrapX: false,
       transition: 100,
       attributions,
-      projection: elevationProjection,
+      projection: this.#map.getView().getProjection(),
     }) as SourceType;
   }
 

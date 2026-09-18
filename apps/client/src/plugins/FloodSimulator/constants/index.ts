@@ -24,7 +24,6 @@ export const DEFAULT_OPTIONS: FloodSimulatorDefaultOptions = {
   elevationUrl: "",
   elevationEncoding: "terrarium",
   crossOrigin: "anonymous",
-  elevationProjection: "EPSG:3857",
   tileSize: 256,
   minZoom: 0,
   maxZoom: 15,
