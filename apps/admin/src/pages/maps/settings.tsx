@@ -67,7 +67,13 @@ import {
   mapLayerActivationToPayload,
   type MapLayerActivationRow,
 } from "./components/map-layers-panel";
-import { pruneLayerSwitcherDraftToActiveLayers } from "../groups-development/utils/client-groups";
+import {
+  applyLayerswitcherOptionsToActivationRows,
+  getClientBaselayersFromToolOptions,
+  getClientGroupsFromToolOptions,
+  pruneLayerSwitcherDraftToActiveLayers,
+} from "../groups-development/utils/client-groups";
+import { findActiveLayerswitcher } from "../groups-development/utils/active-layerswitcher";
 import { useTools } from "../../api/tools";
 import type { LayerSwitcherDraft } from "../groups-development/types";
 import { useLayers } from "../../api/layers";
@@ -568,8 +574,37 @@ export default function MapSettings() {
           inactiveTargets: nextInactiveTargets,
         };
       });
+
+      if (!active || toolTypesById.get(toolId) !== "layerswitcher") {
+        return;
+      }
+
+      const layerswitcher = findActiveLayerswitcher(
+        mapTools,
+        new Set([toolId]),
+        catalogTools,
+      );
+      if (!layerswitcher) {
+        return;
+      }
+
+      const options = {
+        ...(layerswitcher.tool.options ?? {}),
+        ...(layerswitcher.options ?? {}),
+      };
+      setLayerActivationRows((current) =>
+        applyLayerswitcherOptionsToActivationRows(current, options),
+      );
+      setLayerActivationResetKey((key) => key + 1);
     },
-    [mapName, resolveToolsDraft, resolveToolName, toolTypesById],
+    [
+      catalogTools,
+      mapName,
+      mapTools,
+      resolveToolsDraft,
+      resolveToolName,
+      toolTypesById,
+    ],
   );
 
   const setToolTarget = useCallback(
@@ -736,6 +771,32 @@ export default function MapSettings() {
 
       let didSave = false;
       const currentToolsDraft = toolsDraftRef.current;
+      const saveActiveToolIds =
+        currentToolsDraft?.mapName === map.name
+          ? currentToolsDraft.activeToolIds
+          : (serverToolsDraftState?.activeToolIds ?? new Set<number>());
+      const activeLayerswitcher = findActiveLayerswitcher(
+        mapTools,
+        saveActiveToolIds,
+        catalogTools,
+      );
+      const layerswitcherFromTool = activeLayerswitcher
+        ? {
+            groups: getClientGroupsFromToolOptions({
+              ...(activeLayerswitcher.tool.options ?? {}),
+              ...(activeLayerswitcher.options ?? {}),
+            }),
+            baselayers: getClientBaselayersFromToolOptions({
+              ...(activeLayerswitcher.tool.options ?? {}),
+              ...(activeLayerswitcher.options ?? {}),
+            }).map((entry, index) => ({
+              layerId: entry.layerId,
+              visibleAtStart: entry.visibleAtStart,
+              infobox: entry.infobox,
+              zIndex: index,
+            })),
+          }
+        : null;
       const shouldSaveTools =
         currentToolsDraft != null &&
         mapTools != null &&
@@ -783,6 +844,7 @@ export default function MapSettings() {
             .map((row) => row.layerId),
         );
         const base = layerSwitcherDraft ??
+          layerswitcherFromTool ??
           layerSwitcherState ?? {
             groups: [],
             baselayers: [],

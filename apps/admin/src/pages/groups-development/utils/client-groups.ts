@@ -301,6 +301,62 @@ export function getClientGroupsFromToolOptions(
   return options.groups as ClientLayerSwitcherGroup[];
 }
 
+/** Catalog layer ids nested under layerswitcher `options.groups`. */
+export function collectLayerIdsFromClientGroups(
+  groups: ClientLayerSwitcherGroup[],
+): Set<string> {
+  const ids = new Set<string>();
+  const walk = (nodes: ClientLayerSwitcherGroup[]) => {
+    for (const group of nodes) {
+      for (const layer of group.layers ?? []) {
+        ids.add(layer.id);
+      }
+      if (group.groups?.length) {
+        walk(group.groups);
+      }
+    }
+  };
+  walk(groups);
+  return ids;
+}
+
+/**
+ * Activate layers referenced by a LayerSwitcher tool: groups → Aktivt,
+ * baselayers → Aktivt + Bakgrund. Other BACKGROUND flags are cleared.
+ */
+export function applyLayerswitcherOptionsToActivationRows<
+  T extends {
+    layerId: string;
+    layerKind?: string;
+    active: boolean;
+    isBackground: boolean;
+  },
+>(
+  rows: T[],
+  options: Record<string, unknown> | undefined | null,
+): T[] {
+  const groupLayerIds = collectLayerIdsFromClientGroups(
+    getClientGroupsFromToolOptions(options),
+  );
+  const backgroundIds = new Set(
+    getClientBaselayersFromToolOptions(options).map((entry) => entry.layerId),
+  );
+
+  return rows.map((row) => {
+    const canBeBackground = (row.layerKind ?? "display") === "display";
+    const inBackground = canBeBackground && backgroundIds.has(row.layerId);
+    const inGroups = groupLayerIds.has(row.layerId);
+    if (!inBackground && !inGroups) {
+      return row.isBackground ? { ...row, isBackground: false } : row;
+    }
+    return {
+      ...row,
+      active: true,
+      isBackground: inBackground,
+    };
+  });
+}
+
 /** Baselayers from the active LayerSwitcher Tool.options (empty when absent). */
 export function getClientBaselayersFromToolOptions(
   options: Record<string, unknown> | undefined | null,
