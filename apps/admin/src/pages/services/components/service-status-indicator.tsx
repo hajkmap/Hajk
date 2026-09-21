@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import { CircularProgress, Tooltip } from "@mui/material";
+import { CircularProgress, IconButton, Tooltip } from "@mui/material";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import { SERVICE_STATUS } from "../../../api/services";
@@ -23,14 +23,41 @@ const tooltipSlotProps = {
 interface Props {
   status: SERVICE_STATUS;
   lastChecked?: string;
+  // Optional reason shown in the tooltip above the last-checked time.
+  message?: string;
+  // When given, the icon becomes a button that runs the check again.
+  onClick?: () => void;
 }
 
-export default function ServiceStatusIndicator({ status, lastChecked }: Props) {
+export default function ServiceStatusIndicator({
+  status,
+  lastChecked,
+  message,
+  onClick,
+}: Props) {
   const { t } = useTranslation();
 
   const checkedLabel = lastChecked
     ? `${t("services.status.lastChecked")}: ${new Date(lastChecked).toLocaleTimeString("sv-SE")}`
     : "";
+  const clickHint = onClick ? t("services.status.clickToRecheck") : "";
+  const tooltip =
+    message || checkedLabel || clickHint ? (
+      <>
+        {message && <div>{message}</div>}
+        {checkedLabel && <div>{checkedLabel}</div>}
+        {clickHint && <div>{clickHint}</div>}
+      </>
+    ) : (
+      ""
+    );
+
+  const icon =
+    status === SERVICE_STATUS.UNHEALTHY ? (
+      <WarningAmberIcon color="warning" />
+    ) : (
+      <CheckCircleOutlineIcon color="success" />
+    );
 
   return (
     <Grid
@@ -44,21 +71,23 @@ export default function ServiceStatusIndicator({ status, lastChecked }: Props) {
     >
       {status === SERVICE_STATUS.UNKNOWN ? (
         <CircularProgress size={20} />
-      ) : status === SERVICE_STATUS.UNHEALTHY ? (
-        <Tooltip
-          title={checkedLabel}
-          disableHoverListener={!checkedLabel}
-          slotProps={tooltipSlotProps}
-        >
-          <WarningAmberIcon color="warning" />
-        </Tooltip>
       ) : (
         <Tooltip
-          title={checkedLabel}
-          disableHoverListener={!checkedLabel}
+          title={tooltip}
+          disableHoverListener={!tooltip}
           slotProps={tooltipSlotProps}
         >
-          <CheckCircleOutlineIcon color="success" />
+          {onClick ? (
+            <IconButton
+              size="small"
+              onClick={onClick}
+              aria-label={t("services.status.recheck")}
+            >
+              {icon}
+            </IconButton>
+          ) : (
+            icon
+          )}
         </Tooltip>
       )}
     </Grid>

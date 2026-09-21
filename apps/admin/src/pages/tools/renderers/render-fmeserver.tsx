@@ -29,6 +29,11 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
+import { useFmeServerConnection } from "../../../api/fme-server";
+import {
+  FmeConnectionStatus,
+  FmeProductHealthIcon,
+} from "../components/fmeserver/fme-health";
 
 // Used as the isDirty baseline in settings.tsx. drawFillColor/drawStrokeColor
 // are plain CSS rgba() strings (MapViewModel.js), not {r,g,b,a} objects like
@@ -168,6 +173,11 @@ export default function FmeServerRenderer({
     });
     setNewP(EMPTY_NEW);
   };
+
+  // Fetched once here and passed down — a hook per product row would refetch
+  // every time a row is added.
+  const { data: fmeConnection } = useFmeServerConnection();
+  const fmeConnected = fmeConnection?.status === "ok";
 
   return (
     <>
@@ -331,6 +341,7 @@ export default function FmeServerRenderer({
 
       <FormPanel title={t("tools.fmeserver.productsList")}>
         <FormFieldGrid>
+          <FmeConnectionStatus />
           {fields.map((item, index) => (
             <Box
               key={item.id}
@@ -368,6 +379,11 @@ export default function FmeServerRenderer({
                       {...field}
                     />
                   )}
+                />
+                <FmeProductHealthIcon
+                  control={control}
+                  index={index}
+                  enabled={fmeConnected}
                 />
                 <IconButton
                   onClick={() => remove(index)}

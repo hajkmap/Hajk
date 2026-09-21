@@ -146,6 +146,8 @@
     "services.publishedLayers": "Published layers",
     "services.loadServicesFailed": "Failed to load services. Please try again later.",
     "services.status.lastChecked": "Last checked",
+    "services.status.recheck": "Check again",
+    "services.status.clickToRecheck": "Click to check again",
     "services.settings.dialog.title": "Edit url",
     "services.url.btnLabel": "Change url",
     "services.workspace": "Workspace",
@@ -1076,7 +1078,20 @@
         "productPromptForEmail": "Prompt for email",
         "productMaxArea": "Max area (m²)",
         "productGroupMissing": "Group is not among the product groups — the product won't show in the map",
-        "addProductGroupsFirst": "Add product groups above first"
+        "addProductGroupsFirst": "Add product groups above first",
+        "health": {
+          "label": "FME Server",
+          "ok": "The connection to FME Server works.",
+          "notConfigured": "FME Server is not configured in the backend. Set FME_SERVER_ACTIVE, FME_SERVER_BASE_URL and credentials in the backend's .env.",
+          "unreachable": "FME Server can't be reached. Check FME_SERVER_BASE_URL and that the server is running.",
+          "unauthorized": "FME Server rejected the login. Check FME_SERVER_USER and FME_SERVER_PASSWORD in the backend's .env.",
+          "unexpected": "FME Server responded unexpectedly (HTTP {{status}}). Check FME_SERVER_BASE_URL.",
+          "productOk": "Repository and workspace exist on FME Server.",
+          "productNotFound": "Repository or workspace doesn't exist on FME Server. Orders for this product will fail.",
+          "productGeoAttributeMissing": "The workspace has no parameter \"{{geoAttribute}}\", which the geometry attribute points to.",
+          "productError": "Couldn't check the product against FME Server.",
+          "productErrorStatus": "Couldn't check the product against FME Server (HTTP {{status}})."
+        }
       },
       "coordinates": {
         "thousandSeparator": "Format numbers (1000 -> 1 000)",

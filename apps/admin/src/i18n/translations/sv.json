@@ -145,6 +145,8 @@
     "services.publishedLayers": "Publicerade lager",
     "services.loadServicesFailed": "Kunde inte ladda tjänster. Försök igen senare.",
     "services.status.lastChecked": "Senast kontrollerad",
+    "services.status.recheck": "Kontrollera igen",
+    "services.status.clickToRecheck": "Klicka för att kontrollera igen",
     "services.settings.dialog.title": "Redigera url",
     "services.url.btnLabel": "Ändra url",
     "services.createServiceSuccess": "Tjänsten {{name}} skapades!",
@@ -1009,7 +1011,20 @@
         "productPromptForEmail": "Fråga efter e-postadress",
         "productMaxArea": "Max area (m²)",
         "productGroupMissing": "Gruppen finns inte bland produktgrupperna — produkten visas inte i kartan",
-        "addProductGroupsFirst": "Lägg till produktgrupper ovan först"
+        "addProductGroupsFirst": "Lägg till produktgrupper ovan först",
+        "health": {
+          "label": "FME-server",
+          "ok": "Anslutningen till FME-server fungerar.",
+          "notConfigured": "FME-server är inte konfigurerad i backend. Sätt FME_SERVER_ACTIVE, FME_SERVER_BASE_URL och inloggningsuppgifter i backendens .env.",
+          "unreachable": "FME-server går inte att nå. Kontrollera FME_SERVER_BASE_URL och att servern är igång.",
+          "unauthorized": "FME-server nekade inloggningen. Kontrollera FME_SERVER_USER och FME_SERVER_PASSWORD i backendens .env.",
+          "unexpected": "FME-server svarade oväntat (HTTP {{status}}). Kontrollera FME_SERVER_BASE_URL.",
+          "productOk": "Repository och workspace finns på FME-servern.",
+          "productNotFound": "Repository eller workspace finns inte på FME-servern. Beställningar av produkten kommer att misslyckas.",
+          "productGeoAttributeMissing": "Workspace saknar parametern \"{{geoAttribute}}\" som geometri-attributet pekar på.",
+          "productError": "Kunde inte kontrollera produkten mot FME-server.",
+          "productErrorStatus": "Kunde inte kontrollera produkten mot FME-server (HTTP {{status}})."
+        }
       },
       "coordinates": {
         "thousandSeparator": "Formattera nummer (1000 -> 1 000)",
