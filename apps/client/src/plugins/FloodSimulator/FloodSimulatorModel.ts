@@ -346,7 +346,8 @@ export default class FloodSimulatorModel {
       // fallback EPSG:3857 XYZ grid that OpenLayers builds without a tileGrid.
       ...(tileGrid ? {} : { minZoom, maxZoom }),
       interpolate: true,
-      crossOrigin,
+      // ImageTile's CrossOriginAttribute does not include null.
+      ...(crossOrigin != null ? { crossOrigin } : {}),
       wrapX: false,
       transition: 100,
       attributions,
