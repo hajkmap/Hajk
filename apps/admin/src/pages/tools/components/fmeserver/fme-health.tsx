@@ -8,6 +8,7 @@ import {
   FmeConnectionResult,
   FmeProductRef,
   FmeProductResult,
+  FmeWorkspaceResult,
   useFmeProductCheck,
   useFmeServerConnection,
   useRecheckFmeServer,
@@ -84,8 +85,24 @@ interface FmeProductHealthIconProps {
   enabled: boolean;
 }
 
-const asString = (value: unknown) =>
-  typeof value === "string" ? value.trim() : "";
+// Not trimmed: the check must use the value exactly as the client will, and
+// the client puts it straight into the URL.
+const asString = (value: unknown) => (typeof value === "string" ? value : "");
+
+// Mirrors FmeServerModel.noGeomAttributeSupplied in the client: an empty
+// geoAttribute or "none" means the product sends no geometry.
+const toProductResult = (
+  workspace: FmeWorkspaceResult,
+  geoAttribute: string,
+): FmeProductResult => {
+  if (workspace.status !== "ok") {
+    return { status: workspace.status, httpStatus: workspace.httpStatus };
+  }
+  const usesGeometry = geoAttribute !== "" && geoAttribute !== "none";
+  return usesGeometry && !(workspace.parameters ?? []).includes(geoAttribute)
+    ? { status: "geoAttributeMissing" }
+    : { status: "ok" };
+};
 
 // Checks that a product's repository/workspace exist and that geoAttribute is
 // one of the workspace's parameters. Clicking the icon re-runs the check.
@@ -103,7 +120,8 @@ export function FmeProductHealthIcon({
   const geoAttribute = asString(values.geoAttribute);
 
   // Debounce the row as one unit, so editing two fields quickly doesn't run
-  // a check with one new and one old value.
+  // a check with one new and one old value. Only repository and workspace are
+  // fetched; geoAttribute is checked against the workspace's parameters.
   const current = useMemo<FmeProductRef>(
     () => ({ repository, workspace, geoAttribute }),
     [repository, workspace, geoAttribute],
@@ -114,9 +132,10 @@ export function FmeProductHealthIcon({
 
   if (!enabled || !product.repository || !product.workspace) return null;
 
+  const result = data && toProductResult(data, product.geoAttribute);
   const message = (() => {
-    if (!data) return undefined;
-    switch (data.status) {
+    if (!result) return undefined;
+    switch (result.status) {
       case "ok":
         return t("tools.fmeserver.health.productOk");
       case "notFound":
@@ -126,9 +145,9 @@ export function FmeProductHealthIcon({
           geoAttribute: product.geoAttribute,
         });
       case "error":
-        return data.httpStatus
+        return result.httpStatus
           ? t("tools.fmeserver.health.productErrorStatus", {
-              status: data.httpStatus,
+              status: result.httpStatus,
             })
           : t("tools.fmeserver.health.productError");
     }
@@ -144,7 +163,7 @@ export function FmeProductHealthIcon({
       }}
     >
       <ServiceStatusIndicator
-        status={toIndicatorStatus(isFetching, data)}
+        status={toIndicatorStatus(isFetching, result)}
         message={message}
         onClick={() => void recheck(product)}
       />

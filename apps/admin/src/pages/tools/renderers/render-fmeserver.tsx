@@ -29,11 +29,18 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-import { useFmeServerConnection } from "../../../api/fme-server";
+import {
+  useFmeServerConnection,
+  useFmeSuggestions,
+} from "../../../api/fme-server";
 import {
   FmeConnectionStatus,
   FmeProductHealthIcon,
 } from "../components/fmeserver/fme-health";
+import {
+  FmeProductSourceFields,
+  FmeSuggestField,
+} from "../components/fmeserver/fme-product-fields";
 
 // Used as the isDirty baseline in settings.tsx. drawFillColor/drawStrokeColor
 // are plain CSS rgba() strings (MapViewModel.js), not {r,g,b,a} objects like
@@ -175,9 +182,15 @@ export default function FmeServerRenderer({
   };
 
   // Fetched once here and passed down — a hook per product row would refetch
-  // every time a row is added.
+  // every time a row is added. Its repository names feed the suggestions.
   const { data: fmeConnection } = useFmeServerConnection();
   const fmeConnected = fmeConnection?.status === "ok";
+  const fmeRepositories = fmeConnection?.repositories ?? [];
+  const newSuggestions = useFmeSuggestions(
+    fmeRepositories,
+    newP.repository,
+    newP.workspace,
+  );
 
   return (
     <>
@@ -392,44 +405,11 @@ export default function FmeServerRenderer({
                   <DeleteIcon />
                 </IconButton>
               </Stack>
-              <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                <Controller
-                  name={`options.products.${index}.repository`}
-                  control={control}
-                  defaultValue=""
-                  render={({ field }) => (
-                    <TextField
-                      label={t("tools.fmeserver.productRepository")}
-                      sx={{ flex: 1 }}
-                      {...field}
-                    />
-                  )}
-                />
-                <Controller
-                  name={`options.products.${index}.workspace`}
-                  control={control}
-                  defaultValue=""
-                  render={({ field }) => (
-                    <TextField
-                      label={t("tools.fmeserver.productWorkspace")}
-                      sx={{ flex: 1 }}
-                      {...field}
-                    />
-                  )}
-                />
-                <Controller
-                  name={`options.products.${index}.geoAttribute`}
-                  control={control}
-                  defaultValue=""
-                  render={({ field }) => (
-                    <TextField
-                      label={t("tools.fmeserver.productGeoAttribute")}
-                      sx={{ flex: 1 }}
-                      {...field}
-                    />
-                  )}
-                />
-              </Stack>
+              <FmeProductSourceFields
+                control={control}
+                index={index}
+                repositories={fmeRepositories}
+              />
               <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
                 <Controller
                   name={`options.products.${index}.infoUrl`}
@@ -506,29 +486,27 @@ export default function FmeServerRenderer({
               />
             </Stack>
             <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-              <TextField
+              <FmeSuggestField
                 label={t("tools.fmeserver.productRepository")}
                 value={newP.repository}
-                onChange={(e) =>
-                  setNewP({ ...newP, repository: e.target.value })
+                onChange={(repository) =>
+                  setNewP((p) => ({ ...p, repository }))
                 }
-                sx={{ flex: 1 }}
+                options={fmeRepositories}
               />
-              <TextField
+              <FmeSuggestField
                 label={t("tools.fmeserver.productWorkspace")}
                 value={newP.workspace}
-                onChange={(e) =>
-                  setNewP({ ...newP, workspace: e.target.value })
-                }
-                sx={{ flex: 1 }}
+                onChange={(workspace) => setNewP((p) => ({ ...p, workspace }))}
+                options={newSuggestions.workspaces}
               />
-              <TextField
+              <FmeSuggestField
                 label={t("tools.fmeserver.productGeoAttribute")}
                 value={newP.geoAttribute}
-                onChange={(e) =>
-                  setNewP({ ...newP, geoAttribute: e.target.value })
+                onChange={(geoAttribute) =>
+                  setNewP((p) => ({ ...p, geoAttribute }))
                 }
-                sx={{ flex: 1 }}
+                options={newSuggestions.parameters}
               />
             </Stack>
             <Stack direction="row" spacing={1} sx={{ mb: 1 }}>

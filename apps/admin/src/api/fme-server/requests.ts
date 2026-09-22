@@ -1,14 +1,14 @@
 import { getApiClient } from "../../lib/internal-api-client";
 import {
   FmeConnectionResult,
-  FmeProductRef,
-  FmeProductResult,
+  FmeWorkspaceRef,
+  FmeWorkspaceResult,
 } from "./types";
 
 /**
- * Health checks against FME-server, via the backend's /fmeproxy (which adds
- * the credentials from the backend's .env). Neither function throws: every
- * outcome is returned as a status.
+ * Requests to FME-server via the backend's /fmeproxy (which adds the
+ * credentials from the backend's .env). None of them throw: the checks return
+ * every outcome as a status, and the suggestion lists fall back to [].
  */
 
 const FME_REST = "/fmeproxy/fmerest/v3";
@@ -17,6 +17,9 @@ const FME_REST = "/fmeproxy/fmerest/v3";
 // configured) don't reach the client's error interceptor and log noise.
 const requestConfig = { timeout: 5000, validateStatus: () => true };
 
+// -1 means no limit, as in legacy admin.
+const ALL = { limit: -1, offset: -1 };
+
 const isHajkError = (data: unknown) =>
   typeof data === "object" && data !== null && "errorId" in data;
 
@@ -24,24 +27,31 @@ const isHajkError = (data: unknown) =>
 const isProxyFailure = (data: unknown) =>
   typeof data === "string" && data.startsWith("Request failed while proxying");
 
-// FME's repository listing: { items: [...], totalCount, ... }. A 200 with
-// anything else means FME_SERVER_BASE_URL points at something that isn't FME.
-const isRepositoryList = (data: unknown) =>
+// FME lists repositories and repository items as { items: [{ name, ... }] }.
+// A 200 with anything else means FME_SERVER_BASE_URL points at something that
+// isn't FME.
+const isItemList = (data: unknown): data is { items: unknown[] } =>
   typeof data === "object" &&
   data !== null &&
   Array.isArray((data as { items?: unknown }).items);
 
+const names = (list: unknown[]) =>
+  list
+    .map((entry) => (entry as { name?: unknown } | null)?.name)
+    .filter((name): name is string => typeof name === "string");
+
 export const checkFmeServerConnection =
   async (): Promise<FmeConnectionResult> => {
     try {
-      // repositories requires authentication, so bad credentials show up here.
+      // repositories requires authentication, so bad credentials show up
+      // here. Listing all of them also feeds the repository suggestions.
       const { status, data } = await getApiClient().get<unknown>(
         `${FME_REST}/repositories`,
-        { ...requestConfig, params: { limit: 1 } },
+        { ...requestConfig, params: ALL },
       );
       if (status >= 200 && status < 300) {
-        return isRepositoryList(data)
-          ? { status: "ok" }
+        return isItemList(data)
+          ? { status: "ok", repositories: names(data.items) }
           : { status: "unexpected", httpStatus: status };
       }
       if (status === 404 && isHajkError(data)) {
@@ -60,12 +70,29 @@ export const checkFmeServerConnection =
     }
   };
 
+// Workspace names in a repository, for the suggestions. Like legacy admin, it
+// lists every item in the repository.
+export const getFmeWorkspaces = async (
+  repository: string,
+): Promise<string[]> => {
+  try {
+    const { status, data } = await getApiClient().get<unknown>(
+      `${FME_REST}/repositories/${encodeURIComponent(repository)}/items`,
+      { ...requestConfig, params: ALL },
+    );
+    return status >= 200 && status < 300 && isItemList(data)
+      ? names(data.items)
+      : [];
+  } catch {
+    return [];
+  }
+};
+
 // Same URL the client builds when fetching a product's parameters.
-export const checkFmeProduct = async ({
+export const getFmeWorkspaceParameters = async ({
   repository,
   workspace,
-  geoAttribute,
-}: FmeProductRef): Promise<FmeProductResult> => {
+}: FmeWorkspaceRef): Promise<FmeWorkspaceResult> => {
   const url = `${FME_REST}/repositories/${encodeURIComponent(repository)}/items/${encodeURIComponent(workspace)}/parameters`;
   try {
     const { status, data } = await getApiClient().get<unknown>(
@@ -78,16 +105,7 @@ export const checkFmeProduct = async ({
     }
     // FME answers with the workspace's parameter list.
     if (!Array.isArray(data)) return { status: "error" };
-
-    // Mirrors FmeServerModel.noGeomAttributeSupplied in the client.
-    const usesGeometry = geoAttribute !== "" && geoAttribute !== "none";
-    if (usesGeometry) {
-      const names = data.map((p) => (p as { name?: unknown }).name);
-      if (!names.includes(geoAttribute)) {
-        return { status: "geoAttributeMissing" };
-      }
-    }
-    return { status: "ok" };
+    return { status: "ok", parameters: names(data) };
   } catch {
     return { status: "error" };
   }

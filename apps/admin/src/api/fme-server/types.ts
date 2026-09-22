@@ -10,6 +10,25 @@ export type FmeConnectionStatus =
 export interface FmeConnectionResult {
   status: FmeConnectionStatus;
   httpStatus?: number;
+  // Every repository's name when status is "ok"; feeds the suggestions.
+  repositories?: string[];
+}
+
+export interface FmeWorkspaceRef {
+  repository: string;
+  workspace: string;
+}
+
+export interface FmeProductRef extends FmeWorkspaceRef {
+  geoAttribute: string;
+}
+
+// Result of fetching a workspace's parameters.
+export interface FmeWorkspaceResult {
+  status: "ok" | "notFound" | "error"; // notFound: repository or workspace
+  httpStatus?: number;
+  // The parameter names when status is "ok".
+  parameters?: string[];
 }
 
 export type FmeProductStatus =
@@ -21,10 +40,4 @@ export type FmeProductStatus =
 export interface FmeProductResult {
   status: FmeProductStatus;
   httpStatus?: number;
-}
-
-export interface FmeProductRef {
-  repository: string;
-  workspace: string;
-  geoAttribute: string;
 }
