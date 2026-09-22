@@ -1306,8 +1306,8 @@ function MapToolsList({
       },
       {
         field: "index",
-        width: 128,
-        minWidth: 128,
+        width: 160,
+        minWidth: 160,
         headerName: t("maps.toolsOrder"),
         align: "center" as const,
         headerAlign: "center" as const,
