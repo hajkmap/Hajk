@@ -15,7 +15,14 @@ const FME_REST = "/fmeproxy/fmerest/v3";
 
 // Accept every status code so expected failures (404 when FME isn't
 // configured) don't reach the client's error interceptor and log noise.
-const requestConfig = { timeout: 5000, validateStatus: () => true };
+// No cookies: the proxy needs none, and FME's own "Access-Control-Allow-
+// Origin: *" comes through the proxy, which browsers reject for requests
+// made with credentials.
+const requestConfig = {
+  timeout: 5000,
+  validateStatus: () => true,
+  withCredentials: false,
+};
 
 // -1 means no limit, as in legacy admin.
 const ALL = { limit: -1, offset: -1 };
@@ -70,15 +77,16 @@ export const checkFmeServerConnection =
     }
   };
 
-// Workspace names in a repository, for the suggestions. Like legacy admin, it
-// lists every item in the repository.
+// Workspace names in a repository, for the suggestions. A repository can also
+// hold custom transformers, formats and templates; only workspaces can be
+// ordered, so those are filtered out (legacy admin listed everything).
 export const getFmeWorkspaces = async (
   repository: string,
 ): Promise<string[]> => {
   try {
     const { status, data } = await getApiClient().get<unknown>(
       `${FME_REST}/repositories/${encodeURIComponent(repository)}/items`,
-      { ...requestConfig, params: ALL },
+      { ...requestConfig, params: { ...ALL, type: "WORKSPACE" } },
     );
     return status >= 200 && status < 300 && isItemList(data)
       ? names(data.items)
