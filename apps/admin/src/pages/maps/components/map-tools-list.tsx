@@ -40,6 +40,7 @@ import type {
 import type { Tool } from "../../../api/tools";
 import StyledDataGrid from "../../../components/data-grid";
 import {
+  buildToolTypesById,
   findToolZoneForId,
   getCatalogToolDisplayName,
   getCatalogToolWindowSize,
@@ -47,6 +48,11 @@ import {
   type ToolZones,
   zoneKeyToTarget,
 } from "../map-tools-utils";
+import {
+  findNextAvailableToolIndex,
+  findToolPlacement,
+  getTakenIndexesForPlacement,
+} from "../tool-placement-indexes";
 import {
   getMapToolFieldConfig,
   type MapToolFieldConfig,
@@ -394,7 +400,10 @@ interface IndexNumberInputProps {
   disabled: boolean;
   stepUpLabel: string;
   stepDownLabel: string;
-  onCommit: (toolId: number, index: number) => void;
+  /** Indexes already used by sibling tools in the same placement. */
+  takenIndexes: Set<number>;
+  /** Return false to reject the value and revert the input. */
+  onCommit: (toolId: number, index: number) => boolean;
   onPendingChange: (
     toolId: number,
     nextValue: number | undefined,
@@ -410,35 +419,216 @@ const IndexNumberInput = memo(function IndexNumberInput({
   disabled,
   stepUpLabel,
   stepDownLabel,
+  takenIndexes,
   onCommit,
   onPendingChange,
   onRegisterFlush,
   onUnregisterFlush,
 }: IndexNumberInputProps) {
-  const handleCommit = useCallback(
-    (next: number | undefined) => onCommit(toolId, next ?? 0),
-    [onCommit, toolId],
-  );
-  const handlePendingChange = useCallback(
-    (nextValue: number | undefined, committedValue: number | undefined) =>
-      onPendingChange(toolId, nextValue, committedValue),
-    [onPendingChange, toolId],
+  const inputRef = useRef<HTMLInputElement>(null);
+  const localValueRef = useRef(value != null ? String(value) : "");
+  const valueRef = useRef(value);
+  const onCommitRef = useRef(onCommit);
+  const onPendingChangeRef = useRef(onPendingChange);
+  const takenIndexesRef = useRef(takenIndexes);
+  const onRegisterFlushRef = useRef(onRegisterFlush);
+  const onUnregisterFlushRef = useRef(onUnregisterFlush);
+
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  useEffect(() => {
+    onCommitRef.current = onCommit;
+  }, [onCommit]);
+
+  useEffect(() => {
+    onPendingChangeRef.current = onPendingChange;
+  }, [onPendingChange]);
+
+  useEffect(() => {
+    takenIndexesRef.current = takenIndexes;
+  }, [takenIndexes]);
+
+  useEffect(() => {
+    onRegisterFlushRef.current = onRegisterFlush;
+  }, [onRegisterFlush]);
+
+  useEffect(() => {
+    onUnregisterFlushRef.current = onUnregisterFlush;
+  }, [onUnregisterFlush]);
+
+  useEffect(() => {
+    const committed = value != null ? String(value) : "";
+    const input = inputRef.current;
+    if (!input || document.activeElement === input) {
+      return;
+    }
+    if (input.value !== committed) {
+      input.value = committed;
+      localValueRef.current = committed;
+    }
+  }, [value]);
+
+  const revertToCommitted = useCallback(() => {
+    const revert = valueRef.current != null ? String(valueRef.current) : "0";
+    localValueRef.current = revert;
+    if (inputRef.current) {
+      inputRef.current.value = revert;
+    }
+    onPendingChangeRef.current(
+      toolId,
+      valueRef.current ?? 0,
+      valueRef.current ?? 0,
+    );
+  }, [toolId]);
+
+  const flushCommit = useCallback(() => {
+    const raw = inputRef.current?.value ?? localValueRef.current;
+    let next = parseIntegerInput(raw);
+    if (next === undefined) {
+      next = 0;
+      localValueRef.current = "0";
+      if (inputRef.current) {
+        inputRef.current.value = "0";
+      }
+    }
+    if (next === valueRef.current) {
+      onPendingChangeRef.current(toolId, next, next);
+      return;
+    }
+    const accepted = onCommitRef.current(toolId, next);
+    if (!accepted) {
+      revertToCommitted();
+      return;
+    }
+    onPendingChangeRef.current(toolId, next, next);
+  }, [revertToCommitted, toolId]);
+
+  const applyDelta = useCallback(
+    (delta: 1 | -1) => {
+      if (disabled) {
+        return;
+      }
+      const current =
+        parseIntegerInput(inputRef.current?.value ?? localValueRef.current) ??
+        0;
+      const next = findNextAvailableToolIndex(
+        current + delta,
+        delta,
+        takenIndexesRef.current,
+      );
+      const nextRaw = String(next);
+      localValueRef.current = nextRaw;
+      if (inputRef.current) {
+        inputRef.current.value = nextRaw;
+      }
+      onPendingChangeRef.current(toolId, next, valueRef.current);
+    },
+    [disabled, toolId],
   );
 
+  useEffect(() => {
+    const flush = flushCommit;
+    onRegisterFlushRef.current(flush);
+    return () => {
+      flush();
+      onUnregisterFlushRef.current(flush);
+    };
+  }, [flushCommit]);
+
   return (
-    <CellNumberInput
-      value={value}
-      disabled={disabled}
-      allowEmpty={false}
-      allowNegative
-      showSteppers
-      stepUpLabel={stepUpLabel}
-      stepDownLabel={stepDownLabel}
-      onCommit={handleCommit}
-      onPendingChange={handlePendingChange}
-      onRegisterFlush={onRegisterFlush}
-      onUnregisterFlush={onUnregisterFlush}
-    />
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.25,
+        width: "100%",
+        minWidth: 0,
+      }}
+    >
+      <TextField
+        size="small"
+        type="text"
+        fullWidth
+        sx={CELL_FIELD_SX}
+        disabled={disabled}
+        defaultValue={value != null ? String(value) : ""}
+        inputRef={inputRef}
+        slotProps={{
+          htmlInput: {
+            inputMode: "numeric",
+            pattern: "-?[0-9]*",
+          },
+        }}
+        onClick={(event) => event.stopPropagation()}
+        onInput={(event) => event.stopPropagation()}
+        onChange={(event) => {
+          event.stopPropagation();
+          const next = event.target.value;
+          if (!isValidIntegerDraft(next, true)) {
+            event.target.value = localValueRef.current;
+            return;
+          }
+          localValueRef.current = next;
+          const parsed = parseIntegerInput(next);
+          onPendingChangeRef.current(toolId, parsed ?? 0, valueRef.current);
+        }}
+        onBlur={flushCommit}
+        onKeyDown={(event) => {
+          event.stopPropagation();
+          if (event.key === "ArrowUp") {
+            event.preventDefault();
+            applyDelta(1);
+            return;
+          }
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            applyDelta(-1);
+            return;
+          }
+          if (event.key === "Enter") {
+            flushCommit();
+          }
+        }}
+      />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flexShrink: 0,
+        }}
+      >
+        <IconButton
+          size="small"
+          disabled={disabled}
+          aria-label={stepUpLabel}
+          title={stepUpLabel}
+          sx={{ p: 0.125, width: 20, height: 18 }}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={(event) => {
+            event.stopPropagation();
+            applyDelta(1);
+          }}
+        >
+          <ArrowUpwardIcon sx={{ fontSize: 14 }} />
+        </IconButton>
+        <IconButton
+          size="small"
+          disabled={disabled}
+          aria-label={stepDownLabel}
+          title={stepDownLabel}
+          sx={{ p: 0.125, width: 20, height: 18 }}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={(event) => {
+            event.stopPropagation();
+            applyDelta(-1);
+          }}
+        >
+          <ArrowDownwardIcon sx={{ fontSize: 14 }} />
+        </IconButton>
+      </Box>
+    </Box>
   );
 });
 
@@ -590,11 +780,125 @@ function MapToolsList({
     [onPendingWindowSizeDirtyChange],
   );
 
+  const toolTypesById = useMemo(
+    () => buildToolTypesById(catalogTools, mapTools),
+    [catalogTools, mapTools],
+  );
+
+  const getTakenIndexesForTool = useCallback(
+    (toolId: number, placement?: ToolZone | "") => {
+      const resolvedPlacement =
+        placement ?? findToolPlacement(toolId, toolZones, activeToolIds);
+      const taken = getTakenIndexesForPlacement(
+        resolvedPlacement,
+        indexes,
+        toolZones,
+        activeToolIds,
+        toolTypesById,
+        toolId,
+        mapTools,
+      );
+
+      // Include in-progress index edits from other tools in the same placement.
+      for (const [pendingId, pendingIndex] of pendingIndexesRef.current) {
+        if (pendingId === toolId) continue;
+        if (
+          findToolPlacement(pendingId, toolZones, activeToolIds) ===
+          resolvedPlacement
+        ) {
+          taken.add(pendingIndex);
+        }
+      }
+
+      return taken;
+    },
+    [activeToolIds, indexes, mapTools, toolTypesById, toolZones],
+  );
+
+  const handleIndexChange = useCallback(
+    (toolId: number, index: number): boolean => {
+      const placement = findToolPlacement(toolId, toolZones, activeToolIds);
+      const taken = getTakenIndexesForTool(toolId, placement);
+      if (taken.has(index)) {
+        const placementLabel =
+          placement === ""
+            ? t("maps.toolPlacement.unplaced")
+            : t(`maps.toolPlacement.${placement}`);
+        toast.warning(
+          t("maps.toolsDuplicateIndexWarning", {
+            index,
+            placement: placementLabel,
+          }),
+          {
+            position: "bottom-left",
+            theme: theme.palette.mode,
+            hideProgressBar: true,
+          },
+        );
+        return false;
+      }
+
+      onIndexChange(toolId, index);
+      return true;
+    },
+    [
+      activeToolIds,
+      getTakenIndexesForTool,
+      onIndexChange,
+      t,
+      theme.palette.mode,
+      toolZones,
+    ],
+  );
+
+  const handleTargetChange = useCallback(
+    (toolId: number, target: ToolZone | null, rowIndex: number | null) => {
+      // Enforce unique order within every placement zone (drawer, widgetLeft,
+      // widgetRight, controlButton). Unplaced has no uniqueness rule.
+      if (target != null && TOOL_PLACEMENT_OPTIONS.includes(target)) {
+        const pendingIndex = pendingIndexesRef.current.get(toolId);
+        const currentIndex =
+          pendingIndex ??
+          indexes[toolId] ??
+          rowIndex ??
+          mapTools.find((tool) => tool.toolId === toolId)?.index ??
+          null;
+
+        if (currentIndex != null) {
+          const taken = getTakenIndexesForTool(toolId, target);
+          if (taken.has(currentIndex)) {
+            toast.warning(
+              t("maps.toolsPlacementIndexConflictWarning", {
+                index: currentIndex,
+                placement: t(`maps.toolPlacement.${target}`),
+              }),
+              {
+                position: "bottom-left",
+                theme: theme.palette.mode,
+                hideProgressBar: true,
+              },
+            );
+            return;
+          }
+        }
+      }
+
+      onTargetChange(toolId, target);
+    },
+    [
+      getTakenIndexesForTool,
+      indexes,
+      mapTools,
+      onTargetChange,
+      t,
+      theme.palette.mode,
+    ],
+  );
+
   const flushPendingWindowSizes = useCallback(() => {
     const pendingWindowSizes = [...pendingWindowSizesRef.current.entries()];
     const pendingIndexes = [...pendingIndexesRef.current.entries()];
     pendingWindowSizesRef.current.clear();
-    pendingIndexesRef.current.clear();
     pendingFieldsRef.current.clear();
     onPendingWindowSizeDirtyChange?.(false);
 
@@ -605,10 +909,55 @@ function MapToolsList({
       onWindowSizeChange(toolId, size);
     });
 
+    // Process index commits one-by-one so same-placement conflicts inside this
+    // batch are rejected (pending map still holds not-yet-processed siblings).
+    const acceptedInFlush = new Map<number, number>();
     pendingIndexes.forEach(([toolId, index]) => {
+      pendingIndexesRef.current.delete(toolId);
+
+      const placement = findToolPlacement(toolId, toolZones, activeToolIds);
+      const taken = getTakenIndexesForTool(toolId, placement);
+      for (const [acceptedId, acceptedIndex] of acceptedInFlush) {
+        if (
+          findToolPlacement(acceptedId, toolZones, activeToolIds) === placement
+        ) {
+          taken.add(acceptedIndex);
+        }
+      }
+
+      if (taken.has(index)) {
+        const placementLabel =
+          placement === ""
+            ? t("maps.toolPlacement.unplaced")
+            : t(`maps.toolPlacement.${placement}`);
+        toast.warning(
+          t("maps.toolsDuplicateIndexWarning", {
+            index,
+            placement: placementLabel,
+          }),
+          {
+            position: "bottom-left",
+            theme: theme.palette.mode,
+            hideProgressBar: true,
+          },
+        );
+        return;
+      }
+
+      acceptedInFlush.set(toolId, index);
       onIndexChange(toolId, index);
     });
-  }, [onIndexChange, onPendingWindowSizeDirtyChange, onWindowSizeChange]);
+    pendingIndexesRef.current.clear();
+  }, [
+    activeToolIds,
+    getTakenIndexesForTool,
+    onIndexChange,
+    onPendingWindowSizeDirtyChange,
+    onWindowSizeChange,
+    t,
+    theme.palette.mode,
+    toolZones,
+  ]);
 
   useEffect(() => {
     if (!flushPendingEditsRef) {
@@ -812,9 +1161,10 @@ function MapToolsList({
                 renderValue={() => placementLabel}
                 onChange={(event) => {
                   const value = event.target.value as ToolZone | "";
-                  onTargetChange(
+                  handleTargetChange(
                     params.row.toolId,
                     value === "" ? null : value,
+                    params.row.index,
                   );
                 }}
               >
@@ -980,9 +1330,13 @@ function MapToolsList({
               toolId={params.row.toolId}
               value={params.row.index ?? undefined}
               disabled={!params.row.active && params.row.index == null}
+              takenIndexes={getTakenIndexesForTool(
+                params.row.toolId,
+                params.row.target,
+              )}
               stepUpLabel={t("common.moveUp")}
               stepDownLabel={t("common.moveDown")}
-              onCommit={onIndexChange}
+              onCommit={handleIndexChange}
               onPendingChange={setPendingIndexState}
               onRegisterFlush={registerFlush}
               onUnregisterFlush={unregisterFlush}
@@ -1017,10 +1371,11 @@ function MapToolsList({
       catalogToolsById,
       windowSizes,
       handleToggleActive,
-      onTargetChange,
+      handleTargetChange,
       onWindowPositionChange,
       onWindowSizeChange,
-      onIndexChange,
+      handleIndexChange,
+      getTakenIndexesForTool,
       setPendingFieldState,
       setPendingIndexState,
       registerFlush,

@@ -410,6 +410,38 @@ export function toolsPayloadSignature(payload: MapToolPayloadEntry[]): string {
   );
 }
 
+/** True when the draft would persist a different tools payload than the server. */
+export function isToolsDraftDirty(
+  mapTools: ToolOnMap[],
+  draft: MapToolsDraftState & { zones: ToolZones },
+  toolTypesById: Map<number, string> = new Map(),
+): boolean {
+  const serverState = buildToolsDraftState(mapTools);
+  const serverPayload = zonesToToolsPayload(
+    mapToolsToZones(mapTools),
+    serverState.activeToolIds,
+    serverState.windowPositions,
+    serverState.windowSizes,
+    serverState.inactiveTargets,
+    mapTools,
+    toolTypesById,
+    serverState.indexes,
+  );
+  const draftPayload = zonesToToolsPayload(
+    draft.zones,
+    draft.activeToolIds,
+    draft.windowPositions,
+    draft.windowSizes,
+    draft.inactiveTargets,
+    mapTools,
+    toolTypesById,
+    draft.indexes,
+  );
+  return (
+    toolsPayloadSignature(serverPayload) !== toolsPayloadSignature(draftPayload)
+  );
+}
+
 export function toolsDraftSignature(
   zones: ToolZones,
   activeToolIds: Set<number>,

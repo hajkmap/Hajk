@@ -85,19 +85,24 @@ import {
   buildToolsDraftState,
   findToolZoneForId,
   getCatalogToolDisplayName,
+  getMapToolFieldConfig,
   getToolDisplayName,
+  isToolsDraftDirty,
   mapToolsToZones,
   moveToolToZone,
   removeToolFromZones,
-  serverToolsSignature,
   targetToZoneKey,
-  toolsDraftSignature,
   zoneKeyToTarget,
   zonesToToolsPayload,
   type MapToolsDraftState,
   type ToolWindowSize,
   type ToolZones,
 } from "./map-tools-utils";
+import {
+  findNextAvailableToolIndex,
+  findToolPlacement,
+  getTakenIndexesForPlacement,
+} from "./tool-placement-indexes";
 import { useProjections } from "../../api/services";
 import useAppStateStore from "../../store/use-app-state-store";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
@@ -461,18 +466,7 @@ export default function MapSettings() {
     if (toolsDraft == null || toolsDraft.mapName !== mapName || !mapTools) {
       return false;
     }
-    return (
-      serverToolsSignature(mapTools, toolTypesById) !==
-      toolsDraftSignature(
-        toolsDraft.zones,
-        toolsDraft.activeToolIds,
-        toolsDraft.windowPositions,
-        toolsDraft.windowSizes,
-        toolsDraft.inactiveTargets,
-        toolTypesById,
-        toolsDraft.indexes,
-      )
-    );
+    return isToolsDraftDirty(mapTools, toolsDraft, toolTypesById);
   }, [toolsDraft, mapName, mapTools, toolTypesById]);
 
   const resolveToolsDraft = useCallback(
@@ -519,6 +513,18 @@ export default function MapSettings() {
         const nextWindowSizes = { ...base.windowSizes };
         const nextIndexes = { ...base.indexes };
         const nextInactiveTargets = { ...base.inactiveTargets };
+        const mapToolIds = new Set(
+          (mapTools ?? []).map((tool) => tool.toolId),
+        );
+
+        const clearDraftOnlyToolMeta = (id: number) => {
+          // Tools never persisted on the map should leave no draft residue so
+          // toggling Active back to the server value clears Save dirty state.
+          if (mapToolIds.has(id) || nextInactiveTargets[id] != null) return;
+          delete nextWindowPositions[id];
+          delete nextWindowSizes[id];
+          delete nextIndexes[id];
+        };
 
         const deactivateTool = (id: number) => {
           nextActiveToolIds.delete(id);
@@ -529,6 +535,7 @@ export default function MapSettings() {
             delete nextInactiveTargets[id];
           }
           nextZones = removeToolFromZones(nextZones, id);
+          clearDraftOnlyToolMeta(id);
         };
 
         if (active) {
@@ -545,10 +552,13 @@ export default function MapSettings() {
           }
 
           nextActiveToolIds.add(toolId);
-          if (!nextWindowPositions[toolId]) {
+          const fields = getMapToolFieldConfig(toolType);
+          if (fields.windowPosition && !nextWindowPositions[toolId]) {
             nextWindowPositions[toolId] = "right";
           }
-          nextIndexes[toolId] ??= 0;
+          if (fields.index) {
+            nextIndexes[toolId] ??= 0;
+          }
           // Restore the placement remembered from when it was disabled.
           const remembered = nextInactiveTargets[toolId];
           if (remembered) {
@@ -559,6 +569,31 @@ export default function MapSettings() {
               targetToZoneKey(remembered),
             );
             delete nextInactiveTargets[toolId];
+          }
+
+          const placement = findToolPlacement(
+            toolId,
+            nextZones,
+            nextActiveToolIds,
+          );
+          const currentIndex = nextIndexes[toolId];
+          if (placement !== "" && currentIndex != null) {
+            const taken = getTakenIndexesForPlacement(
+              placement,
+              nextIndexes,
+              nextZones,
+              nextActiveToolIds,
+              toolTypesById,
+              toolId,
+              mapTools ?? [],
+            );
+            if (taken.has(currentIndex)) {
+              nextIndexes[toolId] = findNextAvailableToolIndex(
+                currentIndex,
+                1,
+                taken,
+              );
+            }
           }
         } else {
           deactivateTool(toolId);
@@ -613,6 +648,35 @@ export default function MapSettings() {
         const base = resolveToolsDraft(prev);
         if (!base.activeToolIds.has(toolId)) return prev;
 
+        const currentIndex =
+          base.indexes[toolId] ??
+          mapTools?.find((tool) => tool.toolId === toolId)?.index ??
+          null;
+
+        // Reject moves into any placement zone where this tool's order is
+        // already taken (drawer, widgetLeft, widgetRight, controlButton).
+        if (
+          target != null &&
+          currentIndex != null &&
+          (target === "drawer" ||
+            target === "widgetLeft" ||
+            target === "widgetRight" ||
+            target === "controlButton")
+        ) {
+          const taken = getTakenIndexesForPlacement(
+            target,
+            base.indexes,
+            base.zones,
+            base.activeToolIds,
+            toolTypesById,
+            toolId,
+            mapTools ?? [],
+          );
+          if (taken.has(currentIndex)) {
+            return prev;
+          }
+        }
+
         return {
           mapName: mapName ?? "",
           zones: moveToolToZone(
@@ -629,7 +693,7 @@ export default function MapSettings() {
         };
       });
     },
-    [mapName, resolveToolsDraft, resolveToolName],
+    [mapName, mapTools, resolveToolsDraft, resolveToolName, toolTypesById],
   );
 
   const setToolWindowPosition = useCallback(
@@ -697,6 +761,22 @@ export default function MapSettings() {
       }
       if (base.indexes[toolId] === index) return;
 
+      const placement = findToolPlacement(
+        toolId,
+        base.zones,
+        base.activeToolIds,
+      );
+      const taken = getTakenIndexesForPlacement(
+        placement,
+        base.indexes,
+        base.zones,
+        base.activeToolIds,
+        toolTypesById,
+        toolId,
+        mapTools ?? [],
+      );
+      if (taken.has(index)) return;
+
       applyToolsDraft({
         mapName: mapName ?? "",
         zones: base.zones,
@@ -710,7 +790,7 @@ export default function MapSettings() {
         inactiveTargets: { ...base.inactiveTargets },
       });
     },
-    [mapName, resolveToolsDraft, applyToolsDraft],
+    [mapName, mapTools, resolveToolsDraft, applyToolsDraft, toolTypesById],
   );
 
   const mapFormBaseline = useMemo(
@@ -800,16 +880,7 @@ export default function MapSettings() {
       const shouldSaveTools =
         currentToolsDraft != null &&
         mapTools != null &&
-        serverToolsSignature(mapTools, toolTypesById) !==
-          toolsDraftSignature(
-            currentToolsDraft.zones,
-            currentToolsDraft.activeToolIds,
-            currentToolsDraft.windowPositions,
-            currentToolsDraft.windowSizes,
-            currentToolsDraft.inactiveTargets,
-            toolTypesById,
-            currentToolsDraft.indexes,
-          );
+        isToolsDraftDirty(mapTools, currentToolsDraft, toolTypesById);
 
       // Persist placements first (keyed by the current name) so a simultaneous
       // rename doesn't target a no-longer-existing map name.

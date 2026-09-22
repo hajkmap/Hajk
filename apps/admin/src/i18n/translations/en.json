@@ -310,6 +310,8 @@
     "maps.toolsNoSearchResults": "No tools matched your search or filter.",
     "maps.toolsFilterByType": "Type",
     "maps.toolsDuplicateTypeWarning": "Only one tool of type \"{{type}}\" can be active at a time. \"{{deactivatedTool}}\" was deactivated because \"{{activatedTool}}\" was activated.",
+    "maps.toolsDuplicateIndexWarning": "Order {{index}} is already used by another tool in \"{{placement}}\". Choose a different order within this placement.",
+    "maps.toolsPlacementIndexConflictWarning": "Cannot move to \"{{placement}}\" because order {{index}} is already used there. Change the order first, or keep the current placement.",
     "maps.toolsOrder": "Order",
     "maps.toolsToolPlacement": "Tool placement",
     "maps.toolsWindowPlacement": "Window placement",

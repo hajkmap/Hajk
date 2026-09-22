@@ -309,6 +309,8 @@
     "maps.toolsNoSearchResults": "Inga verktyg matchade din sökning eller ditt filter.",
     "maps.toolsFilterByType": "Typ",
     "maps.toolsDuplicateTypeWarning": "Endast ett verktyg av typen \"{{type}}\" kan vara aktivt åt gången. \"{{deactivatedTool}}\" inaktiverades eftersom \"{{activatedTool}}\" aktiverades.",
+    "maps.toolsDuplicateIndexWarning": "Ordning {{index}} används redan av ett annat verktyg i \"{{placement}}\". Välj en annan ordning inom denna placering.",
+    "maps.toolsPlacementIndexConflictWarning": "Kan inte flytta till \"{{placement}}\" eftersom ordning {{index}} redan används där. Ändra ordningen först, eller behåll den nuvarande placeringen.",
     "maps.toolsOrder": "Ordning",
     "maps.toolsToolPlacement": "Verktygsplacering",
     "maps.toolsWindowPlacement": "Fönsterplacering",
