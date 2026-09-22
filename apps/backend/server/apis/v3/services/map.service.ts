@@ -185,9 +185,8 @@ class MapService {
       },
     });
 
-    // Layer count spans direct map layers and layers inherited via groups —
-    // Prisma `_count.layers` only covers direct `mapId` links, so we batch-count
-    // with the same filter as getLayersForMap.
+    // Layer count = unique active catalog layers on the map (Active checkboxes
+    // on the layers tab). Prisma `_count.layers` only covers direct `mapId` links.
     const layerCounts = await this.countLayersByMapNames(
       maps.map((entry) => entry.name)
     );
@@ -202,18 +201,24 @@ class MapService {
   }
 
   /**
-   * Counts active layer instances linked to each map — both directly (`mapId`)
-   * and via groups placed on the map. Matches the filter used by getLayersForMap.
+   * Counts catalog layers that would show as Active on the map layers tab —
+   * unique layer ids among active LayerInstances linked directly (`mapId`) or
+   * via a group placed on the map. Matches buildMapLayerActivationRows.
    */
   private async countLayersByMapNames(mapNames: string[]) {
-    const counts = new Map(mapNames.map((name) => [name, 0]));
+    const layerIdsByMap = new Map(
+      mapNames.map((name) => [name, new Set<string>()] as const),
+    );
     if (mapNames.length === 0) {
-      return counts;
+      return new Map(mapNames.map((name) => [name, 0]));
     }
 
     const instances = await prisma.layerInstance.findMany({
       where: activeLayerInstancesForMapsWhere(mapNames),
       select: {
+        displayLayerId: true,
+        searchLayerId: true,
+        editingLayerId: true,
         map: { select: { name: true } },
         group: {
           select: {
@@ -227,15 +232,23 @@ class MapService {
     });
 
     for (const instance of instances) {
+      const layerId =
+        instance.displayLayerId ??
+        instance.searchLayerId ??
+        instance.editingLayerId;
+      if (!layerId) continue;
+
       if (instance.map?.name) {
-        counts.set(instance.map.name, (counts.get(instance.map.name) ?? 0) + 1);
+        layerIdsByMap.get(instance.map.name)?.add(layerId);
       }
       for (const placement of instance.group?.maps ?? []) {
-        counts.set(placement.mapName, (counts.get(placement.mapName) ?? 0) + 1);
+        layerIdsByMap.get(placement.mapName)?.add(layerId);
       }
     }
 
-    return counts;
+    return new Map(
+      [...layerIdsByMap.entries()].map(([name, ids]) => [name, ids.size]),
+    );
   }
 
   async getMapNames() {

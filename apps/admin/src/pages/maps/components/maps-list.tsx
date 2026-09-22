@@ -322,7 +322,7 @@ export default function MapsList({
             <StyledDataGrid<MapRecord>
               storageKey="maps"
               customSx={{
-                height: "calc(100vh - 320px)",
+                height: "calc(100vh - 320px)", minHeight: 420,
                 ...ICON_COUNT_COLUMN_HEADER_SX,
               }}
               onRowClick={({ row }) => {
@@ -370,6 +370,7 @@ export default function MapsList({
                   headerName: t("common.layers"),
                   align: "center",
                   headerAlign: "center",
+                  valueGetter: (_value, row) => row.layerCount ?? 0,
                   renderHeader: () => (
                     <IconColumnHeader
                       label={t("common.layers")}
