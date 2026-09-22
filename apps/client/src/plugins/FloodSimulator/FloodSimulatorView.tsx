@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 
 import {
   ANIMATION_DURATION_MAX_S,
@@ -13,6 +13,7 @@ import type { FloodSimulatorViewProps } from "./types";
 import AnimationControls from "./views/AnimationControls";
 import DepthShadingSection from "./views/DepthShadingSection";
 import ElevationReadout from "./views/ElevationReadout";
+import MoreSettings from "./views/MoreSettings";
 import OpacityControl from "./views/OpacityControl";
 import SliderNumberField from "./views/SliderNumberField";
 
@@ -38,6 +39,15 @@ function FloodSimulatorView({
     depthColors,
   } = model.getOptions();
 
+  const [sliderMaxLevel, setSliderMaxLevel] = useState(maxLevel);
+  const [durationMaxSec, setDurationMaxSec] = useState(
+    ANIMATION_DURATION_MAX_S
+  );
+  const [opacity, setOpacity] = useState(layerOpacity);
+  const [depthShading, setDepthShading] = useState(enableDepthShading);
+  const [waterColor, setWaterColor] = useState(initialWaterColor);
+  const [deepWaterColor, setDeepWaterColor] = useState(initialDeepWaterColor);
+
   const {
     level,
     animating,
@@ -49,9 +59,10 @@ function FloodSimulatorView({
   } = useFloodLevelAnimation({
     model,
     minLevel,
-    maxLevel,
+    maxLevel: sliderMaxLevel,
     defaultLevel,
     animationDurationMs,
+    durationMaxSec,
   });
 
   const { readout, resetReadout } = useElevationReadout({
@@ -62,11 +73,6 @@ function FloodSimulatorView({
     minElevation,
     maxElevation,
   });
-
-  const [opacity, setOpacity] = useState(layerOpacity);
-  const [depthShading, setDepthShading] = useState(enableDepthShading);
-  const [waterColor, setWaterColor] = useState(initialWaterColor);
-  const [deepWaterColor, setDeepWaterColor] = useState(initialDeepWaterColor);
 
   useEffect(() => {
     onHideRef.current = () => {
@@ -81,75 +87,98 @@ function FloodSimulatorView({
   return (
     <Stack>
       {showElevationReadout && <ElevationReadout readout={readout} />}
-      <Stack spacing={{ xs: 1.25, sm: 2 }} sx={{ p: { xs: 2, sm: 2 } }}>
-        <SliderNumberField
-          id="flood-simulator-level-label"
-          label={UI_STRINGS.levelLabel}
-          inputAriaLabel={UI_STRINGS.levelAriaLabel}
-          value={level}
-          onChange={applyLevel}
-          min={minLevel}
-          max={maxLevel}
-          step={levelStep}
-          decimals={2}
-          unit="m"
-          inputMode="decimal"
-          onInteractStart={stopAnimation}
-          disableThumbTransition={animating}
-        />
-        <AnimationControls
-          animating={animating}
-          onReset={() => {
-            stopAnimation();
-            applyLevel(defaultLevel);
-          }}
-          onToggle={() => {
-            if (animating) {
+      <Box sx={{ position: "relative" }}>
+        <Box sx={{ position: "absolute", top: 6, right: 12, zIndex: 1 }}>
+          <MoreSettings
+            minLevel={minLevel}
+            maxLevel={sliderMaxLevel}
+            levelStep={levelStep}
+            onMaxLevelChange={(next) => {
               stopAnimation();
-            } else {
-              startAnimation();
-            }
-          }}
-        />
-        <SliderNumberField
-          id="flood-simulator-duration-label"
-          label={UI_STRINGS.animationDurationLabel}
-          inputAriaLabel={UI_STRINGS.durationAriaLabel}
-          value={durationSec}
-          onChange={setDurationSeconds}
-          min={ANIMATION_DURATION_MIN_S}
-          max={ANIMATION_DURATION_MAX_S}
-          step={1}
-          decimals={0}
-          unit="s"
-          inputMode="numeric"
-        />
-        <OpacityControl
-          opacity={opacity}
-          onChange={(next) => {
-            setOpacity(next);
-            model.setOpacity(next);
-          }}
-        />
-        <DepthShadingSection
-          depthShading={depthShading}
-          onDepthShadingChange={(checked) => {
-            setDepthShading(checked);
-            model.setDepthShading(checked);
-          }}
-          waterColor={waterColor}
-          onWaterColorChange={(hex) => {
-            setWaterColor(hex);
-            model.setWaterColor(hex);
-          }}
-          deepWaterColor={deepWaterColor}
-          onDeepWaterColorChange={(hex) => {
-            setDeepWaterColor(hex);
-            model.setDeepWaterColor(hex);
-          }}
-          depthColors={depthColors}
-        />
-      </Stack>
+              setSliderMaxLevel(next);
+              if (level > next) {
+                applyLevel(next);
+              }
+            }}
+            durationMaxSec={durationMaxSec}
+            onDurationMaxChange={(next) => {
+              setDurationMaxSec(next);
+              if (durationSec > next) {
+                setDurationSeconds(next);
+              }
+            }}
+          />
+        </Box>
+        <Stack spacing={{ xs: 1.25, sm: 2 }} sx={{ p: { xs: 2, sm: 2 } }}>
+          <SliderNumberField
+            id="flood-simulator-level-label"
+            label={UI_STRINGS.levelLabel}
+            inputAriaLabel={UI_STRINGS.levelAriaLabel}
+            value={level}
+            onChange={applyLevel}
+            min={minLevel}
+            max={sliderMaxLevel}
+            step={levelStep}
+            decimals={2}
+            unit="m"
+            inputMode="decimal"
+            onInteractStart={stopAnimation}
+            disableThumbTransition={animating}
+          />
+          <AnimationControls
+            animating={animating}
+            onReset={() => {
+              stopAnimation();
+              applyLevel(defaultLevel);
+            }}
+            onToggle={() => {
+              if (animating) {
+                stopAnimation();
+              } else {
+                startAnimation();
+              }
+            }}
+          />
+          <SliderNumberField
+            id="flood-simulator-duration-label"
+            label={UI_STRINGS.animationDurationLabel}
+            inputAriaLabel={UI_STRINGS.durationAriaLabel}
+            value={durationSec}
+            onChange={setDurationSeconds}
+            min={ANIMATION_DURATION_MIN_S}
+            max={durationMaxSec}
+            step={1}
+            decimals={0}
+            unit="s"
+            inputMode="numeric"
+          />
+          <OpacityControl
+            opacity={opacity}
+            onChange={(next) => {
+              setOpacity(next);
+              model.setOpacity(next);
+            }}
+          />
+          <DepthShadingSection
+            depthShading={depthShading}
+            onDepthShadingChange={(checked) => {
+              setDepthShading(checked);
+              model.setDepthShading(checked);
+            }}
+            waterColor={waterColor}
+            onWaterColorChange={(hex) => {
+              setWaterColor(hex);
+              model.setWaterColor(hex);
+            }}
+            deepWaterColor={deepWaterColor}
+            onDeepWaterColorChange={(hex) => {
+              setDeepWaterColor(hex);
+              model.setDeepWaterColor(hex);
+            }}
+            depthColors={depthColors}
+          />
+        </Stack>
+      </Box>
     </Stack>
   );
 }

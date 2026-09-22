@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type FloodSimulatorModel from "../FloodSimulatorModel";
-import {
-  ANIMATION_DURATION_MAX_S,
-  ANIMATION_DURATION_MIN_S,
-} from "../constants";
+import { ANIMATION_DURATION_MIN_S } from "../constants";
 import { clampNumber } from "../utils/format";
 
 interface UseFloodLevelAnimationOptions {
@@ -13,6 +10,7 @@ interface UseFloodLevelAnimationOptions {
   maxLevel: number;
   defaultLevel: number;
   animationDurationMs: number;
+  durationMaxSec: number;
 }
 
 export default function useFloodLevelAnimation({
@@ -21,6 +19,7 @@ export default function useFloodLevelAnimation({
   maxLevel,
   defaultLevel,
   animationDurationMs,
+  durationMaxSec,
 }: UseFloodLevelAnimationOptions) {
   const [level, setLevel] = useState(defaultLevel);
   const [animating, setAnimating] = useState(false);
@@ -28,7 +27,7 @@ export default function useFloodLevelAnimation({
     clampNumber(
       animationDurationMs / 1000,
       ANIMATION_DURATION_MIN_S,
-      ANIMATION_DURATION_MAX_S,
+      durationMaxSec,
       0
     )
   );
@@ -41,12 +40,12 @@ export default function useFloodLevelAnimation({
 
   const applyLevel = useCallback(
     (next: number) => {
-      const rounded = Number(next.toFixed(2));
+      const rounded = clampNumber(next, minLevel, maxLevel, 2);
       levelRef.current = rounded;
       setLevel(rounded);
       model.setLevel(rounded);
     },
-    [model]
+    [maxLevel, minLevel, model]
   );
 
   const stopAnimation = useCallback(() => {
@@ -93,25 +92,28 @@ export default function useFloodLevelAnimation({
     animationRef.current = requestAnimationFrame(tick);
   }, [applyLevel, maxLevel, minLevel]);
 
-  const setDurationSeconds = useCallback((seconds: number) => {
-    const next = clampNumber(
-      seconds,
-      ANIMATION_DURATION_MIN_S,
-      ANIMATION_DURATION_MAX_S,
-      0
-    );
-    const nextMs = next * 1000;
-    if (animationRef.current !== null) {
-      const now = performance.now();
-      const progress = Math.min(
-        1,
-        (now - animationStartedAtRef.current) / durationMsRef.current
+  const setDurationSeconds = useCallback(
+    (seconds: number) => {
+      const next = clampNumber(
+        seconds,
+        ANIMATION_DURATION_MIN_S,
+        durationMaxSec,
+        0
       );
-      animationStartedAtRef.current = now - progress * nextMs;
-    }
-    durationMsRef.current = nextMs;
-    setDurationSec(next);
-  }, []);
+      const nextMs = next * 1000;
+      if (animationRef.current !== null) {
+        const now = performance.now();
+        const progress = Math.min(
+          1,
+          (now - animationStartedAtRef.current) / durationMsRef.current
+        );
+        animationStartedAtRef.current = now - progress * nextMs;
+      }
+      durationMsRef.current = nextMs;
+      setDurationSec(next);
+    },
+    [durationMaxSec]
+  );
 
   useEffect(() => {
     return () => {

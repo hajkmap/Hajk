@@ -1,6 +1,5 @@
-import { Box, Slider, Typography } from "@mui/material";
-
 import { UI_STRINGS } from "../constants";
+import SliderNumberField from "./SliderNumberField";
 
 interface OpacityControlProps {
   opacity: number;
@@ -9,26 +8,21 @@ interface OpacityControlProps {
 
 function OpacityControl({ opacity, onChange }: OpacityControlProps) {
   return (
-    <Box>
-      <Typography gutterBottom id="flood-simulator-opacity-label">
-        {UI_STRINGS.opacityLabel}
-      </Typography>
-      <Box sx={{ px: 1 }}>
-        <Slider
-          aria-labelledby="flood-simulator-opacity-label"
-          max={100}
-          min={0}
-          onChange={(_, value) => {
-            onChange((value as number) / 100);
-          }}
-          size="small"
-          step={5}
-          value={Math.round(opacity * 100)}
-          valueLabelDisplay="auto"
-          valueLabelFormat={(value) => `${value} %`}
-        />
-      </Box>
-    </Box>
+    <SliderNumberField
+      id="flood-simulator-opacity-label"
+      label={UI_STRINGS.opacityLabel}
+      inputAriaLabel={UI_STRINGS.opacityAriaLabel}
+      value={Math.round(opacity * 100)}
+      onChange={(percent) => {
+        onChange(percent / 100);
+      }}
+      min={0}
+      max={100}
+      step={5}
+      decimals={0}
+      unit="%"
+      inputMode="numeric"
+    />
   );
 }
 

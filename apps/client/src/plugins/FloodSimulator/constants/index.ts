@@ -48,6 +48,12 @@ export const DEFAULT_OPTIONS: FloodSimulatorDefaultOptions = {
 export const ANIMATION_DURATION_MIN_S = 1;
 export const ANIMATION_DURATION_MAX_S = 30;
 
+/** Highest animation-duration max a user can pick in more settings. */
+export const ANIMATION_DURATION_MAX_LIMIT = 120;
+
+/** Highest water-level slider max a user can pick in more settings. */
+export const WATER_LEVEL_MAX_LIMIT = 100;
+
 export const FALLBACK_WATER_COLOR: [number, number, number, number] = [
   134, 203, 249, 1,
 ];
@@ -63,7 +69,15 @@ export const UI_STRINGS = {
   resetTooltip: "Återställ till startnivån",
   animationDurationLabel: "Animationstid (s)",
   durationAriaLabel: "Animationstid i sekunder",
+  moreSettings: "Fler inställningar",
+  moreSettingsTitle: "Fler inställningar",
+  maxLevelLabel: "Max vattennivå (m)",
+  maxLevelAriaLabel: "Maximal vattennivå i meter",
+  maxAnimationDurationLabel: "Maximal animationstid (s)",
+  maxAnimationDurationAriaLabel: "Maximal animationstid i sekunder",
+  close: "Stäng",
   opacityLabel: "Opacitet",
+  opacityAriaLabel: "Opacitet i procent",
   depthShadingLabel: "Visa vattendjup",
   waterColorLabel: "Vattenfärg",
   deepWaterColorLabel: "Djupvattenfärg",

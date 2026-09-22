@@ -102,7 +102,7 @@ The plugin UI shows a legend for classed colors and hides the deep-water picker,
 | `maxResolution`         | derived from `minMapZoom`         | OpenLayers layer `maxResolution` (exclusive). Set this directly if you prefer resolution units                             |
 | `maxResolutionSlack`    | `1`                               | Multiplier on the coarsest terrain resolution when deriving `maxResolution`. `1` uses the next coarser zoom                |
 | `attributions`          | _(empty)_                         | Shown in the map attribution control                                                                                       |
-| `minLevel` / `maxLevel` | `0` / `10`                        | Slider range, meters                                                                                                       |
+| `minLevel` / `maxLevel` | `0` / `10`                        | Slider range, meters. Max is also adjustable in the plugin under more settings (up to 100 m)                               |
 | `levelStep`             | `0.01`                            | Slider step, meters                                                                                                        |
 | `defaultLevel`          | `1`                               | Initial water level, meters                                                                                                |
 | `waterColor`            | `#86cbf9`                         | Flood fill color when depth shading is off. Also changeable from the plugin UI                                             |
@@ -111,7 +111,7 @@ The plugin UI shows a legend for classed colors and hides the deep-water picker,
 | `layerOpacity`          | `0.6`                             | Initial overlay opacity (`0`–`1`)                                                                                          |
 | `enableDepthShading`    | `false`                           | Start with depth shading on                                                                                                |
 | `maxShadingDepth`       | `5`                               | Depth (m) that maps to `deepWaterColor` on the linear ramp. Unused when `depthColors` has classes                          |
-| `animationDurationMs`   | `8000`                            | Initial play-button duration from min to max level. Adjustable in the UI (1–30 s)                                          |
+| `animationDurationMs`   | `8000`                            | Initial play-button duration from min to max level. Adjustable in the UI (1–30 s by default; max can be raised under more settings) |
 | `showElevationReadout`  | `true`                            | Pointer elevation / depth readout                                                                                          |
 | `minElevation`          | `-100`                            | Elevations at or below this are treated as nodata                                                                          |
 | `maxElevation`          | `100`                             | Elevations at or above this are treated as nodata                                                                          |
