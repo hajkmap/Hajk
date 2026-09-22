@@ -117,7 +117,7 @@ When `depthColors` has classes the UI shows a toggle between **Djupklasser** (th
 | `enableDepthShading`    | `false`                           | Start with depth shading on                                                                                                               |
 | `interpolate`           | `true`                            | Linear resampling of elevation tiles (smoother shoreline). `false` uses nearest-neighbour. Also changeable from the plugin UI             |
 | `smoothDepthColors`     | `true`                            | Start with **Mjuk övergång** on when Djupklasser is selected. The user can still toggle it                                                |
-| `maxShadingDepth`       | `10`                              | Depth (m) that maps to `deepWaterColor` on the linear ramp. The Färgskala slider starts here; its maximum follows the water-level slider max |
+| `maxShadingDepth`       | `5`                               | Depth (m) that maps to `deepWaterColor` on the linear ramp. The Färgskala slider starts here; its maximum follows the water-level slider max |
 | `animationDurationMs`   | `8000`                            | Initial play-button duration from min to max level. Adjustable in the UI (1–30 s by default; max can be raised under more settings)       |
 | `showElevationReadout`  | `true`                            | Pointer elevation / depth readout                                                                                                         |
 | `minElevation`          | `-100`                            | Elevations at or below this are treated as nodata                                                                                         |
