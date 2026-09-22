@@ -1,4 +1,11 @@
-import { Box, FormControlLabel, Stack, Switch } from "@mui/material";
+import {
+  Box,
+  FormControlLabel,
+  Stack,
+  Switch,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@mui/material";
 
 import { UI_STRINGS } from "../constants";
 import type { DepthColorStop } from "../types";
@@ -13,6 +20,8 @@ interface DepthShadingSectionProps {
   deepWaterColor: string;
   onDeepWaterColorChange: (hex: string) => void;
   depthColors: DepthColorStop[];
+  useDepthColors: boolean;
+  onUseDepthColorsChange: (enabled: boolean) => void;
 }
 
 function DepthShadingSection({
@@ -23,7 +32,10 @@ function DepthShadingSection({
   deepWaterColor,
   onDeepWaterColorChange,
   depthColors,
+  useDepthColors,
+  onUseDepthColorsChange,
 }: DepthShadingSectionProps) {
+  const showClasses = depthColors.length > 0 && useDepthColors;
   return (
     <Stack>
       <Stack
@@ -58,14 +70,38 @@ function DepthShadingSection({
             borderColor: "divider",
           }}
         >
-          {depthColors.length === 0 && (
-            <ColorField
-              color={deepWaterColor}
-              label={UI_STRINGS.deepWaterColorLabel}
-              onChange={onDeepWaterColorChange}
-            />
-          )}
-          {depthColors.length > 0 && <DepthColorLegend stops={depthColors} />}
+          <Stack spacing={1.5}>
+            {depthColors.length > 0 && (
+              <ToggleButtonGroup
+                aria-label={UI_STRINGS.depthColorModeLabel}
+                exclusive
+                fullWidth
+                onChange={(_, value) => {
+                  if (value !== null) {
+                    onUseDepthColorsChange(value === "classes");
+                  }
+                }}
+                size="small"
+                value={useDepthColors ? "classes" : "ramp"}
+              >
+                <ToggleButton value="classes">
+                  {UI_STRINGS.depthColorModeClasses}
+                </ToggleButton>
+                <ToggleButton value="ramp">
+                  {UI_STRINGS.depthColorModeRamp}
+                </ToggleButton>
+              </ToggleButtonGroup>
+            )}
+            {showClasses ? (
+              <DepthColorLegend stops={depthColors} />
+            ) : (
+              <ColorField
+                color={deepWaterColor}
+                label={UI_STRINGS.deepWaterColorLabel}
+                onChange={onDeepWaterColorChange}
+              />
+            )}
+          </Stack>
         </Box>
       )}
     </Stack>

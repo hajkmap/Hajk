@@ -84,6 +84,12 @@ export interface FloodSimulatorOptions {
    */
   elevationTileGrid?: ElevationTileGridOptions;
   /**
+   * Hide the overlay at this OpenLayers view zoom and below (no tile loads).
+   * Unset by default so a limited pyramid keeps showing water with its coarsest
+   * `{z}` when zoomed out. `1` hides zoom 0 and 1.
+   */
+  hideAtMinZoom?: number;
+  /**
    * Hide the overlay below this Hajk map zoom. Unset by default so a limited
    * pyramid keeps showing water with its coarsest `{z}` when zoomed out. Set
    * this (or `maxResolution`) only if that underzoom would request too many tiles.
@@ -109,8 +115,10 @@ export interface FloodSimulatorOptions {
   /** Deep-water end of the depth-shading ramp. Defaults to a darkened `waterColor`. */
   deepWaterColor?: string;
   /**
-   * Discrete depth classes used when depth shading is on.
-   * Empty, omitted or `null` keeps the linear `waterColor` → `deepWaterColor` ramp.
+   * Discrete depth classes used when depth shading is on. Classes are
+   * preselected when set, but the user can switch to the linear
+   * `waterColor` → `deepWaterColor` ramp in the UI.
+   * Empty, omitted or `null` keeps that ramp as the only coloring.
    */
   depthColors?: DepthColorStop[] | null;
   layerOpacity?: number;
@@ -134,6 +142,7 @@ export interface FloodSimulatorResolvedOptions {
   maxZoom: number;
   terrainZoomLookup: number[];
   elevationTileGrid: ElevationTileGridOptions;
+  hideAtMinZoom?: number;
   minMapZoom?: number;
   maxResolution?: number;
   maxResolutionSlack: number;

@@ -48,6 +48,7 @@ export default class FloodSimulatorModel {
   #generation = 0;
   #level: number;
   #depthShading: boolean;
+  #useDepthColors: boolean;
   #projectionWarningShown = false;
   #sourceErrorShown = false;
   #tileLoadErrors = 0;
@@ -60,9 +61,31 @@ export default class FloodSimulatorModel {
     this.#options = this.#resolveOptions(settings);
     this.#level = this.#options.defaultLevel;
     this.#depthShading = this.#options.enableDepthShading;
+    this.#useDepthColors = this.#options.depthColors.length > 0;
   }
 
   getOptions = (): FloodSimulatorResolvedOptions => this.#options;
+
+  isHiddenByZoom = (): boolean => {
+    const view = this.#map.getView();
+    const zoom = view.getZoom();
+    const resolution = view.getResolution();
+    if (zoom === undefined || resolution === undefined) {
+      return false;
+    }
+
+    const hideAtMinZoom = this.#options.hideAtMinZoom;
+    if (hideAtMinZoom !== undefined && zoom <= hideAtMinZoom) {
+      return true;
+    }
+
+    const maxResolution = this.#options.maxResolution;
+    if (maxResolution !== undefined && resolution >= maxResolution) {
+      return true;
+    }
+
+    return false;
+  };
 
   init = (): void => {
     const generation = ++this.#generation;
@@ -100,6 +123,11 @@ export default class FloodSimulatorModel {
   setDepthShading = (enabled: boolean): void => {
     this.#depthShading = enabled;
     this.#layer?.updateStyleVariables({ depthShading: enabled ? 1 : 0 });
+  };
+
+  setUseDepthColors = (enabled: boolean): void => {
+    this.#useDepthColors = enabled;
+    this.#layer?.updateStyleVariables({ useDepthColors: enabled ? 1 : 0 });
   };
 
   setWaterColor = (hex: string): void => {
@@ -259,6 +287,11 @@ export default class FloodSimulatorModel {
       maxResolutionSlack,
       resolutions: elevationTileGrid.resolutions,
     });
+    const hideAtMinZoom = clampOptionalMin(
+      settings.hideAtMinZoom,
+      0,
+      "hideAtMinZoom"
+    );
 
     return {
       elevationUrl:
@@ -277,6 +310,7 @@ export default class FloodSimulatorModel {
       maxZoom,
       terrainZoomLookup,
       elevationTileGrid,
+      hideAtMinZoom,
       minMapZoom,
       maxResolution,
       maxResolutionSlack,
@@ -345,6 +379,9 @@ export default class FloodSimulatorModel {
       // minZoom/maxZoom are unused when tileGrid is set; only applied in the
       // fallback EPSG:3857 XYZ grid that OpenLayers builds without a tileGrid.
       ...(tileGrid ? {} : { minZoom, maxZoom }),
+      // Terrarium / Terrain-RGB are encodings, not colors. Linear filtering
+      // averages RGB and wipes shallow flooding when the view is coarser
+      // than the tile.
       interpolate: true,
       // ImageTile's CrossOriginAttribute does not include null.
       ...(crossOrigin != null ? { crossOrigin } : {}),
@@ -369,6 +406,11 @@ export default class FloodSimulatorModel {
     } = {
       source,
       style: this.#createStyle(),
+      // OpenLayers' WebGL tile cache defaults to 512. A limited DEM viewed at
+      // minZoom can need more (a 40 km pyramid at 5.6 m is ~900 tiles). Extra
+      // representations are disposed at the end of the frame, so data tiles
+      // can vanish when zoomed out. Raising cacheSize to 2× that range (capped
+      // at 8192) would keep them, at a few hundred MB of GPU memory.
       opacity: this.#options.layerOpacity,
       zIndex: LAYER_Z_INDEX,
       visible: this.#visible,
@@ -379,6 +421,11 @@ export default class FloodSimulatorModel {
     };
     if (this.#options.maxResolution !== undefined) {
       options.maxResolution = this.#options.maxResolution;
+    }
+    if (this.#options.hideAtMinZoom !== undefined) {
+      // OpenLayers minZoom is exclusive (`zoom > minZoom`), so this hides the
+      // overlay at hideAtMinZoom and below and skips elevation tile loads.
+      options.minZoom = this.#options.hideAtMinZoom;
     }
     const clipExtent = parseExtent(this.#options.elevationTileGrid.extent);
     if (clipExtent) {
@@ -414,6 +461,7 @@ export default class FloodSimulatorModel {
         minElevation: this.#options.minElevation,
         maxElevation: this.#options.maxElevation,
         depthShading: this.#depthShading ? 1 : 0,
+        useDepthColors: this.#useDepthColors ? 1 : 0,
       },
       color: ["case", flooded, floodedColor, [0, 0, 0, 0]] as ExpressionValue,
     };
@@ -547,25 +595,49 @@ function decodeRgbElevation(
   return -10000 + (r * 256 * 256 + g * 256 + b) * 0.1;
 }
 
+/**
+ * Both depth colorings are compiled into the style. `useDepthColors` picks
+ * between them at draw time, so swapping does not rebuild the shader.
+ */
 function createShadedFloodColor(
   depth: ExpressionValue,
   options: FloodSimulatorResolvedOptions,
   waterColor: Rgba,
   deepColor: Rgba
 ): ExpressionValue {
-  const stops = options.depthColors;
-  if (stops.length === 0) {
-    return [
-      "interpolate",
-      ["linear"],
-      depth,
-      0,
-      waterColor,
-      options.maxShadingDepth,
-      deepColor,
-    ] as ExpressionValue;
+  const ramp = createDepthRampColor(depth, options, waterColor, deepColor);
+  if (options.depthColors.length === 0) {
+    return ramp;
   }
+  return [
+    "case",
+    ["==", ["var", "useDepthColors"], 1],
+    createDepthClassColor(depth, options.depthColors),
+    ramp,
+  ] as ExpressionValue;
+}
 
+function createDepthRampColor(
+  depth: ExpressionValue,
+  options: FloodSimulatorResolvedOptions,
+  waterColor: Rgba,
+  deepColor: Rgba
+): ExpressionValue {
+  return [
+    "interpolate",
+    ["linear"],
+    depth,
+    0,
+    waterColor,
+    options.maxShadingDepth,
+    deepColor,
+  ] as ExpressionValue;
+}
+
+function createDepthClassColor(
+  depth: ExpressionValue,
+  stops: DepthColorStop[]
+): ExpressionValue {
   if (stops.length === 1) {
     return hexToRgba(stops[0].color);
   }
@@ -682,6 +754,22 @@ function asFiniteNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value)
     ? value
     : undefined;
+}
+
+function clampOptionalMin(
+  value: unknown,
+  min: number,
+  name: string
+): number | undefined {
+  const numeric = asFiniteNumber(value);
+  if (numeric === undefined) {
+    return undefined;
+  }
+  if (numeric < min) {
+    console.warn(`FloodSimulator: ${name} (${numeric}) was clamped to ${min}.`);
+    return min;
+  }
+  return numeric;
 }
 
 function clampOption(

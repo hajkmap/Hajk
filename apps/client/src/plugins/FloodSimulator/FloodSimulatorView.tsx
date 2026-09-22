@@ -16,6 +16,7 @@ import ElevationReadout from "./views/ElevationReadout";
 import MoreSettings from "./views/MoreSettings";
 import OpacityControl from "./views/OpacityControl";
 import SliderNumberField from "./views/SliderNumberField";
+import ZoomHiddenNotice from "./views/ZoomHiddenNotice";
 
 function FloodSimulatorView({
   map,
@@ -47,6 +48,7 @@ function FloodSimulatorView({
   const [depthShading, setDepthShading] = useState(enableDepthShading);
   const [waterColor, setWaterColor] = useState(initialWaterColor);
   const [deepWaterColor, setDeepWaterColor] = useState(initialDeepWaterColor);
+  const [useDepthColors, setUseDepthColors] = useState(depthColors.length > 0);
 
   const {
     level,
@@ -110,6 +112,7 @@ function FloodSimulatorView({
           />
         </Box>
         <Stack spacing={{ xs: 1.25, sm: 2 }} sx={{ p: { xs: 2, sm: 2 } }}>
+          <ZoomHiddenNotice map={map} model={model} enabled={pluginShown} />
           <SliderNumberField
             id="flood-simulator-level-label"
             label={UI_STRINGS.levelLabel}
@@ -176,6 +179,11 @@ function FloodSimulatorView({
               model.setDeepWaterColor(hex);
             }}
             depthColors={depthColors}
+            useDepthColors={useDepthColors}
+            onUseDepthColorsChange={(enabled) => {
+              setUseDepthColors(enabled);
+              model.setUseDepthColors(enabled);
+            }}
           />
         </Stack>
       </Box>

@@ -82,6 +82,7 @@ const defaultState = {
   elevationTileGridResolutions: "",
   terrainZoomByMapZoomArray: "",
   terrainZoomByMapZoomBreakpoints: "",
+  hideAtMinZoom: "",
   minMapZoom: "",
   maxResolution: "",
   maxResolutionSlack: DEFAULT_OPTIONS.maxResolutionSlack,
@@ -272,6 +273,8 @@ class FloodSimulator extends Component {
         elevationTileGridExtent: formatNumberList(grid.extent),
         elevationTileGridResolutions: formatNumberList(grid.resolutions),
         ...loadTerrainZoomFields(options.terrainZoomByMapZoom),
+        hideAtMinZoom:
+          options.hideAtMinZoom == null ? "" : options.hideAtMinZoom,
         minMapZoom: options.minMapZoom == null ? "" : options.minMapZoom,
         maxResolution:
           options.maxResolution == null ? "" : options.maxResolution,
@@ -436,6 +439,11 @@ class FloodSimulator extends Component {
       options.terrainZoomByMapZoom = terrainZoomArray;
     } else if (terrainZoomBreakpoints) {
       options.terrainZoomByMapZoom = terrainZoomBreakpoints;
+    }
+
+    const hideAtMinZoom = parseOptionalNumber(this.state.hideAtMinZoom);
+    if (hideAtMinZoom !== undefined) {
+      options.hideAtMinZoom = hideAtMinZoom;
     }
 
     const minMapZoom = parseOptionalNumber(this.state.minMapZoom);
@@ -904,6 +912,24 @@ class FloodSimulator extends Component {
                 this.handleNumberInputChange(e);
               }}
               value={this.state.terrainZoomByMapZoomBreakpoints}
+            />
+          </div>
+          <div>
+            {this.renderHelpLabel(
+              "hideAtMinZoom",
+              "Dölj vid minsta kartzoom",
+              "Dölj överlägget och sluta begära rutor vid denna OpenLayers-zoom och lägre. Exempel: 1 döljer zoom 0 och 1. Lämna tomt så att vattnet fortfarande visas vid utzoomning."
+            )}
+            <input
+              id="hideAtMinZoom"
+              name="hideAtMinZoom"
+              type="text"
+              inputMode="numeric"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleNumberInputChange(e);
+              }}
+              value={this.state.hideAtMinZoom}
             />
           </div>
           <div>

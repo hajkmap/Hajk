@@ -31,8 +31,11 @@ interface SliderNumberFieldProps {
   max: number;
   step: number;
   decimals: number;
-  unit: string;
+  unit?: string;
   inputMode: "decimal" | "numeric";
+  /** Multiply the slider value for the text field (e.g. 0.01 so 60% shows as 0.60). */
+  inputScale?: number;
+  inputDecimals?: number;
   onInteractStart?: () => void;
   disableThumbTransition?: boolean;
 }
@@ -49,19 +52,37 @@ function SliderNumberField({
   decimals,
   unit,
   inputMode,
+  inputScale = 1,
+  inputDecimals,
   onInteractStart,
   disableThumbTransition,
 }: SliderNumberFieldProps) {
-  const [input, setInput] = useState(() => formatNumber(value, decimals));
+  const fieldDecimals = inputDecimals ?? decimals;
+  const inputMin = min * inputScale;
+  const inputMax = max * inputScale;
+  const inputStep =
+    inputScale === 1
+      ? step
+      : Number((10 ** -fieldDecimals).toFixed(fieldDecimals));
+  const inputValue = value * inputScale;
+
+  const [input, setInput] = useState(() =>
+    formatNumber(inputValue, fieldDecimals)
+  );
   const [focused, setFocused] = useState(false);
 
-  const commit = (raw: string) => {
+  const applyInputNumber = (next: number) => {
+    onInteractStart?.();
+    const clampedInput = clampNumber(next, inputMin, inputMax, fieldDecimals);
+    onChange(clampNumber(clampedInput / inputScale, min, max, decimals));
+  };
+
+  const commitFromInput = (raw: string) => {
     const next = parseDecimalInput(raw);
     if (!Number.isFinite(next)) {
       return;
     }
-    onInteractStart?.();
-    onChange(clampNumber(next, min, max, decimals));
+    applyInputNumber(next);
   };
 
   return (
@@ -93,15 +114,19 @@ function SliderNumberField({
             }
             value={value}
             valueLabelDisplay="auto"
-            valueLabelFormat={(sliderValue) =>
-              `${decimals === 0 ? sliderValue : sliderValue.toFixed(decimals)} ${unit}`
-            }
+            valueLabelFormat={(sliderValue) => {
+              const formatted =
+                decimals === 0
+                  ? String(sliderValue)
+                  : sliderValue.toFixed(decimals);
+              return unit ? `${formatted} ${unit}` : formatted;
+            }}
           />
         </Box>
         <TextField
           onBlur={() => {
             setFocused(false);
-            commit(input);
+            commitFromInput(input);
           }}
           onChange={(event) => {
             const raw = event.target.value;
@@ -113,16 +138,15 @@ function SliderNumberField({
             if (!Number.isFinite(next)) {
               return;
             }
-            onInteractStart?.();
-            onChange(clampNumber(next, min, max, decimals));
+            applyInputNumber(next);
           }}
           onFocus={() => {
-            setInput(formatNumber(value, decimals));
+            setInput(formatNumber(inputValue, fieldDecimals));
             setFocused(true);
           }}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
-              commit(input);
+              commitFromInput(input);
             }
           }}
           size="small"
@@ -130,13 +154,13 @@ function SliderNumberField({
             htmlInput: {
               "aria-label": inputAriaLabel,
               inputMode,
-              max,
-              min,
-              step,
+              max: inputMax,
+              min: inputMin,
+              step: inputStep,
             },
           }}
           sx={COMPACT_NUMBER_FIELD_SX}
-          value={focused ? input : formatNumber(value, decimals)}
+          value={focused ? input : formatNumber(inputValue, fieldDecimals)}
         />
       </Stack>
     </Box>

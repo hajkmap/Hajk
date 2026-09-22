@@ -17,7 +17,11 @@ export const DEFAULT_DESCRIPTION = "Simulera en stigande vattennivå";
 
 export type FloodSimulatorDefaultOptions = Omit<
   FloodSimulatorResolvedOptions,
-  "terrainZoomLookup" | "elevationTileGrid" | "minMapZoom" | "maxResolution"
+  | "terrainZoomLookup"
+  | "elevationTileGrid"
+  | "hideAtMinZoom"
+  | "minMapZoom"
+  | "maxResolution"
 >;
 
 export const DEFAULT_OPTIONS: FloodSimulatorDefaultOptions = {
@@ -77,15 +81,19 @@ export const UI_STRINGS = {
   maxAnimationDurationAriaLabel: "Maximal animationstid i sekunder",
   close: "Stäng",
   opacityLabel: "Opacitet",
-  opacityAriaLabel: "Opacitet i procent",
+  opacityAriaLabel: "Opacitet från 0 till 1",
   depthShadingLabel: "Visa vattendjup",
   waterColorLabel: "Vattenfärg",
   deepWaterColorLabel: "Djupvattenfärg",
   depthColorsLegend: "Djupklasser",
+  depthColorModeLabel: "Färgläge för vattendjup",
+  depthColorModeClasses: "Djupklasser",
+  depthColorModeRamp: "Färgskala",
   depthClassRange: (from: string, to: string) => `${from}–${to} m`,
   depthClassFrom: (from: string) => `> ${from} m`,
   readoutElevationLabel: "Markhöjd",
   readoutDepthLabel: "Vattendjup",
+  zoomInToSeeSimulation: "Zooma in för att se simuleringen",
   projectionAlert:
     "Höjdkällans projektion matchar inte kartans projektion. Översvämningslagret kan visas felaktigt.",
   noElevationUrl:
