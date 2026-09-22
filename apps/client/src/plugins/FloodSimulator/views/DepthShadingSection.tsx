@@ -11,8 +11,11 @@ import { UI_STRINGS } from "../constants";
 import type { DepthColorStop } from "../types";
 import ColorField from "./ColorField";
 import DepthColorLegend from "./DepthColorLegend";
+import SliderNumberField from "./SliderNumberField";
 
 interface DepthShadingSectionProps {
+  interpolate: boolean;
+  onInterpolateChange: (enabled: boolean) => void;
   depthShading: boolean;
   onDepthShadingChange: (enabled: boolean) => void;
   waterColor: string;
@@ -22,9 +25,19 @@ interface DepthShadingSectionProps {
   depthColors: DepthColorStop[];
   useDepthColors: boolean;
   onUseDepthColorsChange: (enabled: boolean) => void;
+  smoothDepthColors: boolean;
+  onSmoothDepthColorsChange: (enabled: boolean) => void;
+  isobaths: boolean;
+  onIsobathsChange: (enabled: boolean) => void;
+  maxShadingDepth: number;
+  onMaxShadingDepthChange: (depth: number) => void;
+  maxShadingDepthMax: number;
+  shadingDepthStep: number;
 }
 
 function DepthShadingSection({
+  interpolate,
+  onInterpolateChange,
   depthShading,
   onDepthShadingChange,
   waterColor,
@@ -34,14 +47,48 @@ function DepthShadingSection({
   depthColors,
   useDepthColors,
   onUseDepthColorsChange,
+  smoothDepthColors,
+  onSmoothDepthColorsChange,
+  isobaths,
+  onIsobathsChange,
+  maxShadingDepth,
+  onMaxShadingDepthChange,
+  maxShadingDepthMax,
+  shadingDepthStep,
 }: DepthShadingSectionProps) {
   const showClasses = depthColors.length > 0 && useDepthColors;
   return (
     <Stack>
-      <Stack
-        direction="row"
-        spacing={1}
-        sx={{ alignItems: "center", justifyContent: "space-between" }}
+      <FormControlLabel
+        control={
+          <Switch
+            checked={interpolate}
+            onChange={(_, checked) => {
+              onInterpolateChange(checked);
+            }}
+          />
+        }
+        label={UI_STRINGS.interpolateLabel}
+        sx={{ mr: 0 }}
+      />
+      <FormControlLabel
+        control={
+          <Switch
+            checked={smoothDepthColors}
+            onChange={(_, checked) => {
+              onSmoothDepthColorsChange(checked);
+            }}
+          />
+        }
+        label={UI_STRINGS.smoothDepthColorsLabel}
+        sx={{ mr: 0 }}
+      />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
       >
         <FormControlLabel
           control={
@@ -60,7 +107,7 @@ function DepthShadingSection({
           label={UI_STRINGS.waterColorLabel}
           onChange={onWaterColorChange}
         />
-      </Stack>
+      </Box>
       {depthShading && (
         <Box
           sx={{
@@ -93,13 +140,49 @@ function DepthShadingSection({
               </ToggleButtonGroup>
             )}
             {showClasses ? (
-              <DepthColorLegend stops={depthColors} />
-            ) : (
-              <ColorField
-                color={deepWaterColor}
-                label={UI_STRINGS.deepWaterColorLabel}
-                onChange={onDeepWaterColorChange}
+              <DepthColorLegend
+                headerAction={
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={isobaths}
+                        onChange={(_, checked) => {
+                          onIsobathsChange(checked);
+                        }}
+                      />
+                    }
+                    label={UI_STRINGS.isobathsLabel}
+                    labelPlacement="start"
+                  />
+                }
+                stops={depthColors}
               />
+            ) : (
+              <Stack spacing={1.5}>
+                <Box sx={{ pl: 0.5 }}>
+                  <ColorField
+                    color={deepWaterColor}
+                    label={UI_STRINGS.deepWaterColorLabel}
+                    onChange={onDeepWaterColorChange}
+                  />
+                </Box>
+                <SliderNumberField
+                  decimals={2}
+                  id="flood-simulator-max-shading-depth-label"
+                  inputAriaLabel={UI_STRINGS.maxShadingDepthAriaLabel}
+                  inputMode="decimal"
+                  label={UI_STRINGS.maxShadingDepthLabel}
+                  max={maxShadingDepthMax}
+                  min={Math.min(
+                    shadingDepthStep > 0 ? shadingDepthStep : 0.01,
+                    maxShadingDepthMax
+                  )}
+                  onChange={onMaxShadingDepthChange}
+                  step={shadingDepthStep > 0 ? shadingDepthStep : 0.01}
+                  unit="m"
+                  value={maxShadingDepth}
+                />
+              </Stack>
             )}
           </Stack>
         </Box>

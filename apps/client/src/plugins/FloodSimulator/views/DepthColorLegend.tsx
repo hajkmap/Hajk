@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { Box, Stack, Typography } from "@mui/material";
 
 import { UI_STRINGS } from "../constants";
@@ -5,14 +7,23 @@ import type { DepthColorStop } from "../types";
 
 interface DepthColorLegendProps {
   stops: DepthColorStop[];
+  headerAction?: ReactNode;
 }
 
-function DepthColorLegend({ stops }: DepthColorLegendProps) {
+function DepthColorLegend({ stops, headerAction }: DepthColorLegendProps) {
   return (
     <Box>
-      <Typography color="text.secondary" sx={{ mb: 0.75 }} variant="body2">
-        {UI_STRINGS.depthColorsLegend}
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 0.75,
+        }}
+      >
+        <Typography>{UI_STRINGS.depthColorsLegend}</Typography>
+        {headerAction}
+      </Box>
       <Stack spacing={0.5}>
         {depthColorLegendItems(stops).map((item) => (
           <Stack

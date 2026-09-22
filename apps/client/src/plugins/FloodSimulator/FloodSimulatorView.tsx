@@ -31,6 +31,8 @@ function FloodSimulatorView({
     defaultLevel,
     layerOpacity,
     enableDepthShading,
+    interpolate: defaultInterpolate,
+    smoothDepthColors: defaultSmoothDepthColors,
     animationDurationMs,
     showElevationReadout,
     minElevation,
@@ -38,17 +40,35 @@ function FloodSimulatorView({
     waterColor: initialWaterColor,
     deepWaterColor: initialDeepWaterColor,
     depthColors,
+    maxShadingDepth: initialMaxShadingDepth,
   } = model.getOptions();
 
+  const shadingDepthStep = levelStep > 0 ? levelStep : 0.01;
   const [sliderMaxLevel, setSliderMaxLevel] = useState(maxLevel);
   const [durationMaxSec, setDurationMaxSec] = useState(
     ANIMATION_DURATION_MAX_S
   );
   const [opacity, setOpacity] = useState(layerOpacity);
+  const [interpolate, setInterpolate] = useState(defaultInterpolate);
   const [depthShading, setDepthShading] = useState(enableDepthShading);
   const [waterColor, setWaterColor] = useState(initialWaterColor);
   const [deepWaterColor, setDeepWaterColor] = useState(initialDeepWaterColor);
   const [useDepthColors, setUseDepthColors] = useState(depthColors.length > 0);
+  const [smoothDepthColors, setSmoothDepthColors] = useState(
+    defaultSmoothDepthColors
+  );
+  const [isobaths, setIsobaths] = useState(false);
+  const [maxShadingDepth, setMaxShadingDepth] = useState(() => {
+    const next = clampShadingDepth(
+      initialMaxShadingDepth,
+      maxLevel,
+      shadingDepthStep
+    );
+    if (next !== initialMaxShadingDepth) {
+      model.setMaxShadingDepth(next);
+    }
+    return next;
+  });
 
   const {
     level,
@@ -100,6 +120,15 @@ function FloodSimulatorView({
               setSliderMaxLevel(next);
               if (level > next) {
                 applyLevel(next);
+              }
+              const nextShadingDepth = clampShadingDepth(
+                maxShadingDepth,
+                next,
+                shadingDepthStep
+              );
+              if (nextShadingDepth !== maxShadingDepth) {
+                setMaxShadingDepth(nextShadingDepth);
+                model.setMaxShadingDepth(nextShadingDepth);
               }
             }}
             durationMaxSec={durationMaxSec}
@@ -163,6 +192,11 @@ function FloodSimulatorView({
             }}
           />
           <DepthShadingSection
+            interpolate={interpolate}
+            onInterpolateChange={(checked) => {
+              setInterpolate(checked);
+              model.setInterpolate(checked);
+            }}
             depthShading={depthShading}
             onDepthShadingChange={(checked) => {
               setDepthShading(checked);
@@ -184,6 +218,23 @@ function FloodSimulatorView({
               setUseDepthColors(enabled);
               model.setUseDepthColors(enabled);
             }}
+            smoothDepthColors={smoothDepthColors}
+            onSmoothDepthColorsChange={(enabled) => {
+              setSmoothDepthColors(enabled);
+              model.setSmoothDepthColors(enabled);
+            }}
+            isobaths={isobaths}
+            onIsobathsChange={(enabled) => {
+              setIsobaths(enabled);
+              model.setIsobaths(enabled);
+            }}
+            maxShadingDepth={maxShadingDepth}
+            maxShadingDepthMax={sliderMaxLevel}
+            onMaxShadingDepthChange={(depth) => {
+              setMaxShadingDepth(depth);
+              model.setMaxShadingDepth(depth);
+            }}
+            shadingDepthStep={shadingDepthStep}
           />
         </Stack>
       </Box>
@@ -192,3 +243,8 @@ function FloodSimulatorView({
 }
 
 export default FloodSimulatorView;
+
+function clampShadingDepth(depth: number, max: number, step: number): number {
+  const min = Math.min(step, max);
+  return Math.min(max, Math.max(min, depth));
+}

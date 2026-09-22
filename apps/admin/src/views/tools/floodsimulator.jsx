@@ -39,6 +39,8 @@ const DEFAULT_OPTIONS = {
   deepWaterColor: "#283d4b",
   layerOpacity: 0.6,
   enableDepthShading: false,
+  interpolate: true,
+  smoothDepthColors: true,
   maxShadingDepth: 5,
   maxResolutionSlack: 1,
 };
@@ -75,6 +77,8 @@ const defaultState = {
   depthColors: [],
   layerOpacity: DEFAULT_OPTIONS.layerOpacity,
   enableDepthShading: DEFAULT_OPTIONS.enableDepthShading,
+  interpolate: DEFAULT_OPTIONS.interpolate,
+  smoothDepthColors: DEFAULT_OPTIONS.smoothDepthColors,
   maxShadingDepth: DEFAULT_OPTIONS.maxShadingDepth,
   elevationExtent: "",
   elevationTileGridOrigin: "",
@@ -266,6 +270,9 @@ class FloodSimulator extends Component {
         layerOpacity: options.layerOpacity ?? DEFAULT_OPTIONS.layerOpacity,
         enableDepthShading:
           options.enableDepthShading ?? DEFAULT_OPTIONS.enableDepthShading,
+        interpolate: options.interpolate ?? DEFAULT_OPTIONS.interpolate,
+        smoothDepthColors:
+          options.smoothDepthColors ?? DEFAULT_OPTIONS.smoothDepthColors,
         maxShadingDepth:
           options.maxShadingDepth ?? DEFAULT_OPTIONS.maxShadingDepth,
         elevationExtent: formatNumberList(options.elevationExtent),
@@ -394,6 +401,8 @@ class FloodSimulator extends Component {
         DEFAULT_OPTIONS.layerOpacity
       ),
       enableDepthShading: this.state.enableDepthShading,
+      interpolate: this.state.interpolate,
+      smoothDepthColors: this.state.smoothDepthColors,
       maxShadingDepth: parseNumberOrDefault(
         this.state.maxShadingDepth,
         DEFAULT_OPTIONS.maxShadingDepth
@@ -780,6 +789,23 @@ class FloodSimulator extends Component {
               }}
               value={this.state.tileSize}
             />
+          </div>
+          <div>
+            <input
+              id="interpolate"
+              name="interpolate"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.interpolate}
+            />
+            &nbsp;
+            {this.renderHelpLabel(
+              "interpolate",
+              "Interpolera höjdtiles",
+              "Startläge för linjär filtrering av höjdtiles (mjukare kanter). Av = närmaste granne. Användaren kan ändra det i verktyget."
+            )}
           </div>
           <div>
             <label htmlFor="attributions">Attribution</label>
@@ -1184,6 +1210,23 @@ class FloodSimulator extends Component {
             />
             &nbsp;
             <label htmlFor="enableDepthShading">Visa vattendjup</label>
+          </div>
+          <div>
+            <input
+              id="smoothDepthColors"
+              name="smoothDepthColors"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.smoothDepthColors}
+            />
+            &nbsp;
+            {this.renderHelpLabel(
+              "smoothDepthColors",
+              "Mjuk övergång",
+              "Startläge för mjuk övergång mellan djupklasser. Gäller när djupklasser är definierade; användaren kan ändra det i verktyget."
+            )}
           </div>
           <div>
             {this.renderHelpLabel(

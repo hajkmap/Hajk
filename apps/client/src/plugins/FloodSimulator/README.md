@@ -38,10 +38,12 @@ The `mapbox` encoding builds elevation as `R*6553.6 + G*25.6 + B*0.1`. On GPUs t
 
 With **Visa vattendjup** on, flooded pixels are colored by water depth (`level − elevation`):
 
-- **Linear ramp** (default when no classes are configured): `waterColor` at depth 0 to `deepWaterColor` at `maxShadingDepth`.
+- **Linear ramp** (default when no classes are configured): `waterColor` at depth 0 to `deepWaterColor` at `maxShadingDepth`. In **Färgskala**, a **Max djup** slider under **Djupvattenfärg** changes that depth. Its maximum is the same as the **Vattennivå** slider max.
 - **Classed colors**: set `depthColors` to `{ maxDepth, color }` stops. Each class is the previous bound (0 for the first) up to `maxDepth`; the last class also covers everything deeper. Empty array, omitted or `null` keeps the linear ramp.
+- **Smooth fade between classes**: **Mjuk övergång** (below **Interpolera**) keeps each class color through most of its range and blends only in a short band at the class boundary when **Djupklasser** is selected. The shoreline (depth 0) fades in over a similarly short band. On by default; the Admin option `smoothDepthColors` sets the initial state.
+- **Isobaths**: with **Djupklasser** selected and **Visa vattendjup** on, **Djupkurvor** darkens pixels whose depth is near a `depthColors` stop (`maxDepth`). Off by default; session-only. Hidden, including on the map, when **Visa vattendjup** is off. With **Mjuk övergång** the darkening is strongest on the contour and fades out over a short depth band; otherwise it is a hard stripe.
 
-When `depthColors` has classes the UI shows a toggle between **Djupklasser** (the classed colors, with a legend) and **Färgskala** (the linear ramp, with the deep-water picker). Classes are preselected. Both colorings are part of the same WebGL style, so switching does not reload tiles. Without `depthColors` there is no toggle — only the ramp.
+When `depthColors` has classes the UI shows a toggle between **Djupklasser** (the classed colors, with a legend) and **Färgskala** (the linear ramp, with the deep-water picker). Classes are preselected. **Interpolera** and **Mjuk övergång** sit above **Visa vattendjup**. **Djupkurvor** is shown only for **Djupklasser**. All three colorings and the contours are part of the same WebGL style, so switching does not reload tiles. Without `depthColors` there is no class/ramp toggle — only the ramp.
 
 ### Example configuration
 
@@ -76,6 +78,8 @@ When `depthColors` has classes the UI shows a toggle between **Djupklasser** (th
     ],
     "layerOpacity": 0.6,
     "enableDepthShading": true,
+    "interpolate": true,
+    "smoothDepthColors": true,
     "maxShadingDepth": 5,
     "animationDurationMs": 8000,
     "showElevationReadout": true,
@@ -111,7 +115,9 @@ When `depthColors` has classes the UI shows a toggle between **Djupklasser** (th
 | `depthColors`           | `[]`                              | Discrete depth classes (`{ maxDepth, color }`). Empty, omitted or `null` keeps the linear ramp. The user can switch to the ramp in the UI |
 | `layerOpacity`          | `0.6`                             | Initial overlay opacity (`0`–`1`)                                                                                                         |
 | `enableDepthShading`    | `false`                           | Start with depth shading on                                                                                                               |
-| `maxShadingDepth`       | `5`                               | Depth (m) that maps to `deepWaterColor` on the linear ramp                                                                                |
+| `interpolate`           | `true`                            | Linear resampling of elevation tiles (smoother shoreline). `false` uses nearest-neighbour. Also changeable from the plugin UI             |
+| `smoothDepthColors`     | `true`                            | Start with **Mjuk övergång** on when Djupklasser is selected. The user can still toggle it                                                |
+| `maxShadingDepth`       | `10`                              | Depth (m) that maps to `deepWaterColor` on the linear ramp. The Färgskala slider starts here; its maximum follows the water-level slider max |
 | `animationDurationMs`   | `8000`                            | Initial play-button duration from min to max level. Adjustable in the UI (1–30 s by default; max can be raised under more settings)       |
 | `showElevationReadout`  | `true`                            | Pointer elevation / depth readout                                                                                                         |
 | `minElevation`          | `-100`                            | Elevations at or below this are treated as nodata                                                                                         |

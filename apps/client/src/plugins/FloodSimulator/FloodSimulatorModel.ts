@@ -23,6 +23,10 @@ import type {
 import {
   DEFAULT_OPTIONS,
   FALLBACK_WATER_COLOR,
+  ISOBATH_SHADE,
+  ISOBATH_WIDTH_M,
+  SHORELINE_FADE_M,
+  SMOOTH_DEPTH_FADE_M,
   LAYER_NAME,
   LAYER_Z_INDEX,
   UI_STRINGS,
@@ -35,6 +39,7 @@ import {
   zoomRangeFromLookup,
   type MapTileConfig,
 } from "./elevationTileGrid";
+import { buildDepthFadeStops } from "./utils/depthColorFade";
 
 type Rgba = [number, number, number, number];
 
@@ -49,6 +54,8 @@ export default class FloodSimulatorModel {
   #level: number;
   #depthShading: boolean;
   #useDepthColors: boolean;
+  #smoothDepthColors: boolean;
+  #isobaths = false;
   #projectionWarningShown = false;
   #sourceErrorShown = false;
   #tileLoadErrors = 0;
@@ -62,6 +69,7 @@ export default class FloodSimulatorModel {
     this.#level = this.#options.defaultLevel;
     this.#depthShading = this.#options.enableDepthShading;
     this.#useDepthColors = this.#options.depthColors.length > 0;
+    this.#smoothDepthColors = this.#options.smoothDepthColors;
   }
 
   getOptions = (): FloodSimulatorResolvedOptions => this.#options;
@@ -120,6 +128,28 @@ export default class FloodSimulatorModel {
     this.#layer?.setOpacity(opacity);
   };
 
+  setInterpolate = (enabled: boolean): void => {
+    if (this.#options.interpolate === enabled) {
+      return;
+    }
+    this.#options.interpolate = enabled;
+    if (!this.#layer) {
+      return;
+    }
+    unByKey(this.#sourceListeners);
+    this.#sourceListeners = [];
+    const generation = ++this.#generation;
+    this.#sourceErrorShown = false;
+    this.#tileLoadErrors = 0;
+    const source = this.#createSource();
+    if (!source || generation !== this.#generation) {
+      return;
+    }
+    this.#source = source;
+    this.#layer.setSource(source);
+    this.#watchSource(source, generation);
+  };
+
   setDepthShading = (enabled: boolean): void => {
     this.#depthShading = enabled;
     this.#layer?.updateStyleVariables({ depthShading: enabled ? 1 : 0 });
@@ -130,14 +160,38 @@ export default class FloodSimulatorModel {
     this.#layer?.updateStyleVariables({ useDepthColors: enabled ? 1 : 0 });
   };
 
+  setSmoothDepthColors = (enabled: boolean): void => {
+    this.#smoothDepthColors = enabled;
+    this.#layer?.updateStyleVariables({ smoothDepthColors: enabled ? 1 : 0 });
+  };
+
+  setIsobaths = (enabled: boolean): void => {
+    this.#isobaths = enabled;
+    this.#layer?.updateStyleVariables({ isobaths: enabled ? 1 : 0 });
+  };
+
   setWaterColor = (hex: string): void => {
+    if (this.#options.waterColor === hex) {
+      return;
+    }
     this.#options.waterColor = hex;
-    this.#layer?.setStyle(this.#createStyle());
+    this.#layer?.updateStyleVariables(colorChannels(hex, "water"));
   };
 
   setDeepWaterColor = (hex: string): void => {
+    if (this.#options.deepWaterColor === hex) {
+      return;
+    }
     this.#options.deepWaterColor = hex;
-    this.#layer?.setStyle(this.#createStyle());
+    this.#layer?.updateStyleVariables(colorChannels(hex, "deep"));
+  };
+
+  setMaxShadingDepth = (depth: number): void => {
+    if (this.#options.maxShadingDepth === depth) {
+      return;
+    }
+    this.#options.maxShadingDepth = depth;
+    this.#layer?.updateStyleVariables({ maxShadingDepth: depth });
   };
 
   setVisible = (visible: boolean): void => {
@@ -325,6 +379,9 @@ export default class FloodSimulatorModel {
       layerOpacity: resolveLayerOpacity(settings.layerOpacity),
       enableDepthShading:
         settings.enableDepthShading ?? DEFAULT_OPTIONS.enableDepthShading,
+      interpolate: settings.interpolate ?? DEFAULT_OPTIONS.interpolate,
+      smoothDepthColors:
+        settings.smoothDepthColors ?? DEFAULT_OPTIONS.smoothDepthColors,
       maxShadingDepth: resolvePositive(
         settings.maxShadingDepth,
         DEFAULT_OPTIONS.maxShadingDepth,
@@ -352,6 +409,7 @@ export default class FloodSimulatorModel {
       attributions,
       terrainZoomLookup,
       elevationTileGrid,
+      interpolate,
     } = this.#options;
 
     if (!elevationUrl) {
@@ -379,10 +437,10 @@ export default class FloodSimulatorModel {
       // minZoom/maxZoom are unused when tileGrid is set; only applied in the
       // fallback EPSG:3857 XYZ grid that OpenLayers builds without a tileGrid.
       ...(tileGrid ? {} : { minZoom, maxZoom }),
-      // Terrarium / Terrain-RGB are encodings, not colors. Linear filtering
-      // averages RGB and wipes shallow flooding when the view is coarser
-      // than the tile.
-      interpolate: true,
+      // Linear resampling (default) smooths tile edges. Nearest-neighbour
+      // keeps Terrain-RGB / Terrarium encodings exact when the view is
+      // coarser than the tile.
+      interpolate,
       // ImageTile's CrossOriginAttribute does not include null.
       ...(crossOrigin != null ? { crossOrigin } : {}),
       wrapX: false,
@@ -437,15 +495,19 @@ export default class FloodSimulatorModel {
 
   #createStyle() {
     const elev = this.#getElevationExpression();
-    const waterColor = hexToRgba(this.#options.waterColor);
-    const deepColor = hexToRgba(this.#options.deepWaterColor);
+    const waterColor = styleColor("water");
+    const deepColor = styleColor("deep");
     const depth: ExpressionValue = ["-", ["var", "level"], elev];
-    const floodedColor: ExpressionValue = [
+    const shaded: ExpressionValue = [
       "case",
       ["==", ["var", "depthShading"], 1],
       createShadedFloodColor(depth, this.#options, waterColor, deepColor),
       waterColor,
     ];
+    const floodedColor = applyShorelineFade(
+      applyIsobaths(shaded, depth, this.#options.depthColors),
+      depth
+    );
 
     const flooded: ExpressionValue[] = [
       "all",
@@ -462,6 +524,11 @@ export default class FloodSimulatorModel {
         maxElevation: this.#options.maxElevation,
         depthShading: this.#depthShading ? 1 : 0,
         useDepthColors: this.#useDepthColors ? 1 : 0,
+        smoothDepthColors: this.#smoothDepthColors ? 1 : 0,
+        isobaths: this.#isobaths ? 1 : 0,
+        maxShadingDepth: this.#options.maxShadingDepth,
+        ...colorChannels(this.#options.waterColor, "water"),
+        ...colorChannels(this.#options.deepWaterColor, "deep"),
       },
       color: ["case", flooded, floodedColor, [0, 0, 0, 0]] as ExpressionValue,
     };
@@ -596,32 +663,37 @@ function decodeRgbElevation(
 }
 
 /**
- * Both depth colorings are compiled into the style. `useDepthColors` picks
- * between them at draw time, so swapping does not rebuild the shader.
+ * All depth colorings are compiled into the style. `useDepthColors` and
+ * `smoothDepthColors` pick between them at draw time, so swapping does not
+ * rebuild the shader.
  */
 function createShadedFloodColor(
   depth: ExpressionValue,
   options: FloodSimulatorResolvedOptions,
-  waterColor: Rgba,
-  deepColor: Rgba
+  waterColor: ExpressionValue,
+  deepColor: ExpressionValue
 ): ExpressionValue {
-  const ramp = createDepthRampColor(depth, options, waterColor, deepColor);
+  const ramp = createDepthRampColor(depth, waterColor, deepColor);
   if (options.depthColors.length === 0) {
     return ramp;
   }
   return [
     "case",
     ["==", ["var", "useDepthColors"], 1],
-    createDepthClassColor(depth, options.depthColors),
+    [
+      "case",
+      ["==", ["var", "smoothDepthColors"], 1],
+      createDepthStopRampColor(depth, options.depthColors),
+      createDepthClassColor(depth, options.depthColors),
+    ],
     ramp,
   ] as ExpressionValue;
 }
 
 function createDepthRampColor(
   depth: ExpressionValue,
-  options: FloodSimulatorResolvedOptions,
-  waterColor: Rgba,
-  deepColor: Rgba
+  waterColor: ExpressionValue,
+  deepColor: ExpressionValue
 ): ExpressionValue {
   return [
     "interpolate",
@@ -629,9 +701,21 @@ function createDepthRampColor(
     depth,
     0,
     waterColor,
-    options.maxShadingDepth,
+    ["var", "maxShadingDepth"],
     deepColor,
   ] as ExpressionValue;
+}
+
+/** Hold each class color, then blend over a short band at the boundary. */
+function createDepthStopRampColor(
+  depth: ExpressionValue,
+  stops: DepthColorStop[]
+): ExpressionValue {
+  const expr: ExpressionValue[] = ["interpolate", ["linear"], depth];
+  for (const stop of buildDepthFadeStops(stops, SMOOTH_DEPTH_FADE_M)) {
+    expr.push(stop.depth, hexToRgba(stop.color));
+  }
+  return expr as ExpressionValue;
 }
 
 function createDepthClassColor(
@@ -651,6 +735,136 @@ function createDepthClassColor(
   }
   expr.push(hexToRgba(stops[stops.length - 1].color));
   return expr as ExpressionValue;
+}
+
+/**
+ * Darken pixels whose depth is near a `depthColors` stop. Compiled into the
+ * style; `isobaths`, `depthShading`, and `useDepthColors` pick it at draw time. With
+ * `smoothDepthColors`, shade is strongest at the contour and fades out over
+ * `ISOBATH_WIDTH_M`; otherwise it is a hard stripe of that half-width.
+ */
+function applyIsobaths(
+  color: ExpressionValue,
+  depth: ExpressionValue,
+  stops: DepthColorStop[]
+): ExpressionValue {
+  if (stops.length === 0) {
+    return color;
+  }
+  const hardShade = Math.round(ISOBATH_SHADE * 255);
+  const hard: ExpressionValue = [
+    "case",
+    nearDepthColorStops(depth, stops),
+    ["*", color, ["color", hardShade, hardShade, hardShade, 1]],
+    color,
+  ];
+  const softShade = isobathShade(depth, stops);
+  const soft: ExpressionValue = [
+    "*",
+    color,
+    [
+      "color",
+      ["*", 255, softShade],
+      ["*", 255, softShade],
+      ["*", 255, softShade],
+      1,
+    ],
+  ];
+  return [
+    "case",
+    [
+      "all",
+      ["==", ["var", "isobaths"], 1],
+      ["==", ["var", "depthShading"], 1],
+      ["==", ["var", "useDepthColors"], 1],
+    ],
+    ["case", ["==", ["var", "smoothDepthColors"], 1], soft, hard],
+    color,
+  ] as ExpressionValue;
+}
+
+/**
+ * Fade the overlay in over a short depth band at the shoreline. Compiled into
+ * the style; `smoothDepthColors` picks it at draw time.
+ */
+function applyShorelineFade(
+  color: ExpressionValue,
+  depth: ExpressionValue
+): ExpressionValue {
+  const fadeAlpha: ExpressionValue = [
+    "interpolate",
+    ["linear"],
+    depth,
+    0,
+    0,
+    SHORELINE_FADE_M,
+    1,
+  ];
+  return [
+    "case",
+    ["==", ["var", "smoothDepthColors"], 1],
+    ["*", color, ["color", 255, 255, 255, fadeAlpha]],
+    color,
+  ] as ExpressionValue;
+}
+
+function isobathShade(
+  depth: ExpressionValue,
+  stops: DepthColorStop[]
+): ExpressionValue {
+  const shadeAt = (maxDepth: number): ExpressionValue =>
+    [
+      "interpolate",
+      ["linear"],
+      ["abs", ["-", depth, maxDepth]],
+      0,
+      ISOBATH_SHADE,
+      ISOBATH_WIDTH_M,
+      1,
+    ] as ExpressionValue;
+  if (stops.length === 1) {
+    return shadeAt(stops[0].maxDepth);
+  }
+  return [
+    "*",
+    ...stops.map((stop) => shadeAt(stop.maxDepth)),
+  ] as ExpressionValue;
+}
+
+function nearDepthColorStops(
+  depth: ExpressionValue,
+  stops: DepthColorStop[]
+): ExpressionValue {
+  const nearStop = (maxDepth: number): ExpressionValue =>
+    ["<", ["abs", ["-", depth, maxDepth]], ISOBATH_WIDTH_M] as ExpressionValue;
+  if (stops.length === 1) {
+    return nearStop(stops[0].maxDepth);
+  }
+  return [
+    "any",
+    ...stops.map((stop) => nearStop(stop.maxDepth)),
+  ] as ExpressionValue;
+}
+
+function styleColor(prefix: "water" | "deep"): ExpressionValue {
+  return [
+    "color",
+    ["var", `${prefix}R`],
+    ["var", `${prefix}G`],
+    ["var", `${prefix}B`],
+  ];
+}
+
+function colorChannels(
+  hex: string,
+  prefix: "water" | "deep"
+): Record<string, number> {
+  const [r, g, b] = hexToRgba(hex);
+  return {
+    [`${prefix}R`]: r,
+    [`${prefix}G`]: g,
+    [`${prefix}B`]: b,
+  };
 }
 
 function hexToRgba(hex: string): Rgba {

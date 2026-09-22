@@ -123,6 +123,18 @@ export interface FloodSimulatorOptions {
   depthColors?: DepthColorStop[] | null;
   layerOpacity?: number;
   enableDepthShading?: boolean;
+  /**
+   * Linear resampling of elevation tiles. Defaults to `true` (smoother
+   * shoreline). `false` uses nearest-neighbour, which keeps Terrain-RGB /
+   * Terrarium encodings exact when the view is coarser than the tile.
+   * The user can still toggle it in the plugin.
+   */
+  interpolate?: boolean;
+  /**
+   * Start with smooth fades between depth classes. Defaults to `true`.
+   * The user can still toggle it in the plugin.
+   */
+  smoothDepthColors?: boolean;
   maxShadingDepth?: number;
   animationDurationMs?: number;
   showElevationReadout?: boolean;
@@ -156,6 +168,8 @@ export interface FloodSimulatorResolvedOptions {
   depthColors: DepthColorStop[];
   layerOpacity: number;
   enableDepthShading: boolean;
+  interpolate: boolean;
+  smoothDepthColors: boolean;
   maxShadingDepth: number;
   animationDurationMs: number;
   showElevationReadout: boolean;

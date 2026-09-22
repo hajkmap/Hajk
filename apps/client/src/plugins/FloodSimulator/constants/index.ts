@@ -42,7 +42,9 @@ export const DEFAULT_OPTIONS: FloodSimulatorDefaultOptions = {
   depthColors: [],
   layerOpacity: 0.6,
   enableDepthShading: false,
-  maxShadingDepth: 5,
+  interpolate: true,
+  smoothDepthColors: true,
+  maxShadingDepth: 10,
   animationDurationMs: 8000,
   showElevationReadout: true,
   minElevation: -100,
@@ -57,6 +59,21 @@ export const ANIMATION_DURATION_MAX_LIMIT = 120;
 
 /** Highest water-level slider max a user can pick in more settings. */
 export const WATER_LEVEL_MAX_LIMIT = 100;
+
+/** Fade radius of each contour, in meters of depth. */
+export const ISOBATH_WIDTH_M = 0.06;
+
+/** RGB multiplier at the contour center (0–1). */
+export const ISOBATH_SHADE = 0.45;
+
+/** Blend width (m) at each class boundary when smooth depth colors are on. */
+export const SMOOTH_DEPTH_FADE_M = 0.06;
+
+/**
+ * Blend width (m) at the shoreline when smooth depth colors are on. A bit
+ * wider than class fades so the land/water edge softens without a hard rim.
+ */
+export const SHORELINE_FADE_M = 0.15;
 
 export const FALLBACK_WATER_COLOR: [number, number, number, number] = [
   134, 203, 249, 1,
@@ -82,13 +99,18 @@ export const UI_STRINGS = {
   close: "Stäng",
   opacityLabel: "Opacitet",
   opacityAriaLabel: "Opacitet från 0 till 1",
+  interpolateLabel: "Interpolera",
   depthShadingLabel: "Visa vattendjup",
   waterColorLabel: "Vattenfärg",
   deepWaterColorLabel: "Djupvattenfärg",
+  maxShadingDepthLabel: "Max djup (m)",
+  maxShadingDepthAriaLabel: "Maximalt djup för färgskalan i meter",
   depthColorsLegend: "Djupklasser",
   depthColorModeLabel: "Färgläge för vattendjup",
   depthColorModeClasses: "Djupklasser",
   depthColorModeRamp: "Färgskala",
+  smoothDepthColorsLabel: "Mjuk övergång",
+  isobathsLabel: "Djupkurvor",
   depthClassRange: (from: string, to: string) => `${from}–${to} m`,
   depthClassFrom: (from: string) => `> ${from} m`,
   readoutElevationLabel: "Markhöjd",
