@@ -32,6 +32,7 @@ export const createLayoutContext = (model) => {
   const ctx = {
     margin: model.margin,
     textIconsMargin: model.textIconsMargin,
+    includeImageBorder: model.includeImageBorder,
     saveAsType: model.saveAsType,
     textColor: model.textColor,
     textFontSize: model.textFontSize,

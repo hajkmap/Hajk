@@ -125,6 +125,51 @@ export async function buildLayout(
     }
   }
 
+  // 2b. Image border (admin: includeImageBorder). 0.5 mm stroke in the map
+  // text color, sitting on the inner edge of the white margin — or slightly
+  // inset from the page edge when there is no margin. Matches the pre-rewrite
+  // jsPDF `pdf.rect(..., "S")` behaviour.
+  if (ctx.includeImageBorder) {
+    let insetLeft;
+    let insetRight;
+    let insetBottom;
+    let insetTop;
+
+    if (ctx.margin > 0) {
+      // White strokes are centered on the page edge; inner map edge is half
+      // the stroke width. Uniform: 5.5 * margin. Text-in-margin: 16 / 20 / 5.5.
+      insetLeft = 2.75 * ctx.margin;
+      insetRight = 2.75 * ctx.margin;
+      if (options.useTextIconsInMargin) {
+        insetBottom = 8 * ctx.margin;
+        insetTop = 10 * ctx.margin;
+      } else {
+        insetBottom = insetLeft;
+        insetTop = insetLeft;
+      }
+    } else {
+      const inset = 0.3 * ctx.mmPerPoint;
+      insetLeft = inset;
+      insetRight = inset;
+      insetBottom = inset;
+      insetTop = inset;
+    }
+
+    elements.push({
+      type: "strokePath",
+      points: [
+        { x: insetLeft, y: insetBottom },
+        { x: pageWidth - insetRight, y: insetBottom },
+        { x: pageWidth - insetRight, y: pageHeight - insetTop },
+        { x: insetLeft, y: pageHeight - insetTop },
+        { x: insetLeft, y: insetBottom },
+      ],
+      color: ctx.textColor,
+      lineWidth: 0.5 * ctx.mmPerPoint,
+      closePath: true,
+    });
+  }
+
   // 3. QR Code
   if (options.includeQrCode && ctx.enableAppStateInHash) {
     try {

@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Client: Print - Restored the admin "include image border" frame around the map image, which was dropped in the libPDF rewrite.
 - Client: FIR - Fixed a crash when activating "add by map click" if `wmsRealEstateLayer` is missing from the map config.
 
 ### Changed
