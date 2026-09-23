@@ -6,30 +6,11 @@ import PrintView from "./PrintView";
 import Observer from "react-event-observer";
 import PrintIcon from "@mui/icons-material/Print";
 
+import { PAPER_DIMS_MM, normalizePrintOptions } from "./options/defaults";
+
 class Print extends React.PureComponent {
   // Paper dimensions: Array[width, height]
-  dims = {
-    a0: [1189, 841],
-    a1: [841, 594],
-    a2: [594, 420],
-    a3: [420, 297],
-    a4: [297, 210],
-    a5: [210, 148],
-  };
-
-  // Default DPIs, used if none supplied in options
-  dpis = [72, 150, 300];
-
-  // Default paperFormats a0-a5, used if none supplied in options
-  paperFormats = Object.keys(this.dims);
-
-  // Default scales, used if none supplied in options
-  scales = [
-    100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 200000,
-    500000,
-  ];
-
-  scaleMeters = [20, 40, 40, 100, 200, 200, 400, 600, 2000, 4000, 10000, 20000];
+  dims = PAPER_DIMS_MM;
 
   static propTypes = {
     app: PropTypes.object.isRequired,
@@ -40,105 +21,19 @@ class Print extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    // Prepare scales from admin options, fallback to default if needed
-    const propScales = props?.options?.scales;
-    if (Array.isArray(propScales)) {
-      props.options.scales = propScales;
-    } else if (
-      typeof propScales === "string" &&
-      propScales?.split(",").length > 1
-    ) {
-      props.options.scales = propScales.replace(/\s/g, "").split(",");
-    } else {
-      props.options.scales = this.scales;
-    }
-
-    // Prepare scaleMeters from admin options, fallback to default if needed
-    const propScaleMeters = props?.options?.scaleMeters;
-    if (Array.isArray(propScaleMeters)) {
-      props.options.scaleMeters = propScaleMeters;
-    } else if (
-      typeof propScaleMeters === "string" &&
-      propScaleMeters?.split(",").length > 1
-    ) {
-      props.options.scaleMeters = propScaleMeters.replace(/\s/g, "").split(",");
-    } else {
-      props.options.scaleMeters = this.scaleMeters;
-    }
-
-    // Prepare dpis from admin options, fallback to default if needed
-    const propDpis = props?.options?.dpis;
-    if (Array.isArray(propDpis)) {
-      props.options.dpis = propDpis;
-    } else if (
-      typeof propDpis === "string" &&
-      propDpis?.split(",").length > 1
-    ) {
-      props.options.dpis = propDpis
-        .replace(/\s/g, "")
-        .split(",")
-        .map((el) => {
-          return parseInt(el);
-        });
-    } else {
-      props.options.dpis = this.dpis;
-    }
-
-    // Prepare paperFormats from admin options, fallback to default if needed
-    const propPaperFormats = props?.options?.paperFormats;
-    if (Array.isArray(propPaperFormats)) {
-      props.options.paperFormats = propPaperFormats;
-    } else if (
-      typeof propPaperFormats === "string" &&
-      propPaperFormats?.split(",").length > 1
-    ) {
-      props.options.paperFormats = propPaperFormats
-        .replace(/\s/g, "")
-        .split(",")
-        .map((el) => {
-          return el.toLowerCase();
-        });
-    } else {
-      props.options.paperFormats = this.paperFormats;
-    }
-
-    // If no valid max logo width is supplied, use a hard-coded default
-    props.options.logoMaxWidth =
-      typeof props.options?.logoMaxWidth === "number"
-        ? props.options.logoMaxWidth
-        : 40;
-
-    props.options.northArrowMaxWidth =
-      typeof props.options?.northArrowMaxWidth === "number"
-        ? props.options.northArrowMaxWidth
-        : 10;
-
-    // If no path to north-arrow image is supplied, use fallback
-    props.options.northArrow = props.options.northArrow || "/north_arrow.png";
-
-    props.options.includeImageBorder =
-      typeof props.options?.includeImageBorder === "boolean"
-        ? props.options.includeImageBorder
-        : false;
-    props.options.allowLegendsInPdfOutput =
-      typeof props.options?.allowLegendsInPdfOutput === "boolean"
-        ? props.options.allowLegendsInPdfOutput
-        : false;
-    props.options.generateLegendsByDefault =
-      typeof props.options?.generateLegendsByDefault === "boolean"
-        ? props.options.generateLegendsByDefault
-        : false;
-
-    // Ensure we have a value for the crossOrigin parameter
-    props.options.crossOrigin =
-      props.app.config.mapConfig.map?.crossOrigin || "anonymous";
+    // Normalize admin-supplied options (scales, dpis, paper formats etc),
+    // falling back to defaults where needed. Returns a new object.
+    this.options = normalizePrintOptions(
+      props.options,
+      props.app.config.mapConfig.map
+    );
 
     this.localObserver = Observer();
 
     this.printModel = new PrintModel({
       localObserver: this.localObserver,
       map: props.map,
-      options: props.options,
+      options: this.options,
       dims: this.dims,
       proxy: props.app.config.proxy,
       mapConfig: props.app.config.mapConfig.map,
@@ -171,11 +66,10 @@ class Print extends React.PureComponent {
       >
         <PrintView
           model={this.printModel}
-          options={this.props.options}
+          options={this.options}
           localObserver={this.localObserver}
-          scales={this.props.options.scales}
-          visibleAtStart={this.props.options.visibleAtStart}
-          dims={this.dims}
+          scales={this.options.scales}
+          visibleAtStart={this.options.visibleAtStart}
           enableAppStateInHash={
             this.props.app.config.mapConfig.map.enableAppStateInHash
           }

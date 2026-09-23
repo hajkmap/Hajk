@@ -6,6 +6,7 @@
     "AttributeEditor",
     "Bookmarks",
     "Buffer",
+    "CommandPalette",
     "Coordinates",
     "DocumentHandler",
     "Edit",

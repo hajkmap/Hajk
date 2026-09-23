@@ -8,6 +8,7 @@ import FavoritesList from "./FavoritesList";
 import FavoritesOptions from "./FavoritesOptions";
 import FavoritesViewHeader from "./FavoritesViewHeader";
 import ConfirmationDialog from "components/ConfirmationDialog";
+import { BACKGROUND_LAYER_IDS } from "../../../../constants/backgroundLayers";
 import {
   QUICK_ACCESS_KEY,
   QUICK_ACCESS_LS_KEY,
@@ -25,6 +26,16 @@ import {
   Typography,
 } from "@mui/material";
 
+// Sort favorites by title and, for equal titles, by saved date (newest first)
+const sortFavorites = (favorites) =>
+  [...favorites].sort((a, b) => {
+    const titleComparison = a.metadata.title.localeCompare(b.metadata.title);
+    if (titleComparison === 0) {
+      return new Date(b.metadata.savedAt) - new Date(a.metadata.savedAt);
+    }
+    return titleComparison;
+  });
+
 function Favorites({
   handleFavoritesViewToggle,
   app,
@@ -41,7 +52,13 @@ function Favorites({
   const [saveFavoriteDialog, setSaveFavoriteDialog] = useState(false);
   const [loadDialog, setLoadDialog] = useState(false);
   const [selectedFavorite, setSelectedFavorite] = useState(null);
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState(() => {
+    // Initialize state from localstorage on component load
+    const currentLsSettings = LocalStorageHelper.get("layerswitcher");
+    return currentLsSettings.savedLayers?.length > 0
+      ? sortFavorites(currentLsSettings.savedLayers)
+      : [];
+  });
   const [missingLayersConfirmation, setMissingLayersConfirmation] =
     useState(null);
   const [toggleFavoritesView, setToggleFavoritesView] = useState(false);
@@ -50,13 +67,15 @@ function Favorites({
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
   const layerSwitcherDispatch = useLayerSwitcherDispatch();
 
+  const handleSetFavorites = (newFavorites) => {
+    setFavorites(sortFavorites(newFavorites));
+  };
+
   useEffect(() => {
-    // Set state from localstorage on component load
-    const currentLsSettings = LocalStorageHelper.get("layerswitcher");
-    if (currentLsSettings.savedLayers?.length > 0) {
-      handleSetFavorites(currentLsSettings.savedLayers);
-    }
-    // Set dom ready flag to true
+    // Set dom ready flag once mounted so the portal target
+    // (#layer-switcher-view-root) exists before we render into it. This
+    // intentional re-render-after-mount is why setState is called here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDomReady(true);
   }, []);
 
@@ -154,10 +173,10 @@ function Favorites({
         globalObserver.publish("layerswitcher.backgroundLayerChanged", l.id);
         // And set background color to map
         switch (l.id) {
-          case "-2":
+          case BACKGROUND_LAYER_IDS.BLACK:
             document.getElementById("map").style.backgroundColor = "#000";
             break;
-          case "-1":
+          case BACKGROUND_LAYER_IDS.WHITE:
           default:
             document.getElementById("map").style.backgroundColor = "#FFF";
             break;
@@ -285,13 +304,11 @@ function Favorites({
       // No "real" base layer is visible, so we need to check for a fake one (black or white).
       const currentBackgroundColor =
         document.getElementById("map").style.backgroundColor;
-      const WHITE_BACKROUND_LAYER_ID = "-1";
-      const BLACK_BACKROUND_LAYER_ID = "-2";
       layers.push({
         id:
           currentBackgroundColor === "rgb(0, 0, 0)"
-            ? BLACK_BACKROUND_LAYER_ID
-            : WHITE_BACKROUND_LAYER_ID,
+            ? BACKGROUND_LAYER_IDS.BLACK
+            : BACKGROUND_LAYER_IDS.WHITE,
         visible: true,
         subLayers: [],
         opacity: 1,
@@ -343,21 +360,6 @@ function Favorites({
       variant: "success",
       anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
-  };
-
-  const handleSetFavorites = (newFavorites) => {
-    // Sort favorites by title and saved date
-    const sortedFavorites = newFavorites.sort((a, b) => {
-      // Compare titles
-      const titleComparison = a.metadata.title.localeCompare(b.metadata.title);
-      // If titles are equal, compare saved dates
-      if (titleComparison === 0) {
-        return new Date(b.metadata.savedAt) - new Date(a.metadata.savedAt);
-      }
-      return titleComparison;
-    });
-    // And set to state
-    setFavorites(sortedFavorites);
   };
 
   // Handles edit favorite title and description
@@ -560,7 +562,6 @@ function Favorites({
               setSaveFavoriteDialog(!saveFavoriteDialog);
               handleSaveFavorite();
             }}
-            autoFocus
           >
             Spara
           </Button>

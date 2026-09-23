@@ -1,7 +1,6 @@
 import React from "react";
 import Grid from "@mui/material/Grid";
 import { styled } from "@mui/material/styles";
-import withSnackbar from "components/WithSnackbar";
 import {
   FormControl,
   FormHelperText,
@@ -27,27 +26,8 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
 
 class GeneralOptions extends React.PureComponent {
   state = {
-    anchorEl: null,
     useCustomScale: false,
   };
-
-  // Default colors for color picker used to set text color (used in map title, scale, etc)
-  mapTextAvailableColors = [
-    "#FFFFFF",
-    "#D0021B",
-    "#F5A623",
-    "#F8E71C",
-    "#8B572A",
-    "#7ED321",
-    "#417505",
-    "#9013FE",
-    "#4A90E2",
-    "#50E3C2",
-    "#B8E986",
-    "#000000",
-    "#4A4A4A",
-    "#9B9B9B",
-  ];
 
   // Handles interaction with the scale-selector. We cannot let the
   // parent handler (handleChange) take care of this on its own since
@@ -291,4 +271,4 @@ class GeneralOptions extends React.PureComponent {
   }
 }
 
-export default withSnackbar(GeneralOptions);
+export default GeneralOptions;

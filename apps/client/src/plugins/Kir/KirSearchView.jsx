@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
@@ -71,8 +71,12 @@ const StyledSlider = styled(Slider)(({ _theme }) => ({
   width: "calc(100% - 16px)",
 }));
 
-class KirSearchView extends React.PureComponent {
-  state = {
+function KirSearchView({ model, app, localObserver }) {
+  const inputMaxAge = useRef(null);
+  const inputMinAge = useRef(null);
+  const fnsRef = useRef({});
+
+  const [state, setStateRaw] = useState(() => ({
     searchText: "",
     searchPanelExpanded: true,
     neighborExpanded: false,
@@ -88,41 +92,17 @@ class KirSearchView extends React.PureComponent {
     maxAge: 120,
     minInputValue: 0,
     maxInputValue: 120,
+  }));
+  const stateRef = useRef(state);
+
+  const setState = (patch) => {
+    stateRef.current = { ...stateRef.current, ...patch };
+    setStateRaw(stateRef.current);
   };
 
-  static propTypes = {
-    model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired,
-  };
-
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
-
-    this.inputMaxAge = React.createRef();
-    this.inputMinAge = React.createRef();
-
-    this.initListeners();
-  }
-
-  initListeners() {
-    this.localObserver.subscribe("kir.search.started", () => {
-      this.setState({ loading: true });
-    });
-    this.localObserver.subscribe("kir.search.completed", () => {
-      this.setState({ loading: false });
-    });
-    this.localObserver.subscribe("kir.search.error", () => {
-      this.setState({ loading: false });
-    });
-  }
-
-  handleClearSearch = () => {
-    this.localObserver.publish("kir.search.clear", {});
-    this.setState({
+  const handleClearSearch = () => {
+    localObserver.publish("kir.search.clear", {});
+    setState({
       searchText: "",
       ageValues: [0, 120],
       genderMale: true,
@@ -131,133 +111,114 @@ class KirSearchView extends React.PureComponent {
     });
   };
 
-  handleSearch = () => {
+  const handleSearch = () => {
     let options = {
-      genderMale: this.state.genderMale || false,
-      genderFemale: this.state.genderFemale || false,
-      ageLower: this.state.ageValues[0],
-      ageUpper: this.state.ageValues[1],
+      genderMale: stateRef.current.genderMale || false,
+      genderFemale: stateRef.current.genderFemale || false,
+      ageLower: stateRef.current.ageValues[0],
+      ageUpper: stateRef.current.ageValues[1],
       zoomToLayer: true,
     };
 
-    this.localObserver.publish("kir.search.search", options);
+    localObserver.publish("kir.search.search", options);
   };
 
-  handleAgeChange = (e, newValues) => {
-    this.setState({
+  const handleAgeChange = (e, newValues) => {
+    setState({
       ageValues: newValues,
     });
   };
 
-  inputMinAgeChanged = (e, _newValue) => {
-    this.setState({
+  const inputMinAgeChanged = (e, _newValue) => {
+    setState({
       ageValues: [
         e.target.value === "" ? 120 : parseInt(e.target.value),
-        this.state.ageValues[1],
+        stateRef.current.ageValues[1],
       ],
     });
   };
 
-  inputMaxAgeChanged = (e, _newValue) => {
-    this.setState({
+  const inputMaxAgeChanged = (e, _newValue) => {
+    setState({
       ageValues: [
-        this.state.ageValues[0],
+        stateRef.current.ageValues[0],
         e.target.value === "" ? 120 : parseInt(e.target.value),
       ],
     });
   };
 
-  render() {
-    return (
-      <>
-        <Accordion
-          expanded={this.state.searchPanelExpanded}
-          onChange={() => {
-            this.setState({
-              searchPanelExpanded: !this.state.searchPanelExpanded,
-            });
-          }}
-        >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <TypographyHeading>Sök invånare</TypographyHeading>
-          </AccordionSummary>
-          <AccordionDetails style={{ display: "block" }}>
+  fnsRef.current = {
+    handleSearchStarted: () => {
+      setState({ loading: true });
+    },
+    handleSearchCompleted: () => {
+      setState({ loading: false });
+    },
+    handleSearchError: () => {
+      setState({ loading: false });
+    },
+  };
+
+  useEffect(() => {
+    localObserver.subscribe("kir.search.started", () => {
+      fnsRef.current.handleSearchStarted();
+    });
+    localObserver.subscribe("kir.search.completed", () => {
+      fnsRef.current.handleSearchCompleted();
+    });
+    localObserver.subscribe("kir.search.error", () => {
+      fnsRef.current.handleSearchError();
+    });
+  }, [localObserver, fnsRef]);
+
+  return (
+    <>
+      <Accordion
+        expanded={state.searchPanelExpanded}
+        onChange={() => {
+          setState({
+            searchPanelExpanded: !state.searchPanelExpanded,
+          });
+        }}
+      >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <TypographyHeading>Sök invånare</TypographyHeading>
+        </AccordionSummary>
+        <AccordionDetails style={{ display: "block" }}>
+          <StyledFormControl fullWidth={true}>
+            <KirToolbarView
+              prefix="kir"
+              model={model}
+              app={app}
+              localObserver={localObserver}
+            />
+          </StyledFormControl>
+
+          <div>
             <StyledFormControl fullWidth={true}>
-              <KirToolbarView
-                prefix="kir"
-                model={this.model}
-                app={this.props.app}
-                localObserver={this.localObserver}
+              <StyledFormControlLabel
+                // classes={{ label: classes.checkboxLabel }}
+                control={
+                  <StyledCheckbox
+                    checked={state.showSearchArea}
+                    onChange={(e) => {
+                      setState({ showSearchArea: e.target.checked });
+                      localObserver.publish("kir.layers.showSearchArea", {
+                        value: e.target.checked,
+                      });
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Visa buffer/sökområde"
               />
             </StyledFormControl>
+          </div>
 
-            <div>
-              <StyledFormControl fullWidth={true}>
-                <StyledFormControlLabel
-                  // classes={{ label: classes.checkboxLabel }}
-                  control={
-                    <StyledCheckbox
-                      checked={this.state.showSearchArea}
-                      onChange={(e) => {
-                        this.setState({ showSearchArea: e.target.checked });
-                        this.localObserver.publish(
-                          "kir.layers.showSearchArea",
-                          {
-                            value: e.target.checked,
-                          }
-                        );
-                      }}
-                      color="primary"
-                    />
-                  }
-                  label="Visa buffer/sökområde"
-                />
-              </StyledFormControl>
-            </div>
-
-            <div>
-              <FormControl fullWidth={true}>
-                <TypographySubtitleShallow variant="subtitle2">
-                  Inkludera kön:
-                </TypographySubtitleShallow>
-                <Grid
-                  container
-                  spacing={0}
-                  sx={{
-                    alignItems: "center",
-                  }}
-                >
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.genderMale}
-                        onChange={(e) => {
-                          this.setState({ genderMale: e.target.checked });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Man"
-                  />
-                  <StyledFormControlLabel
-                    control={
-                      <StyledCheckbox
-                        checked={this.state.genderFemale}
-                        onChange={(e) => {
-                          this.setState({ genderFemale: e.target.checked });
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Kvinna"
-                  />
-                </Grid>
-              </FormControl>
-            </div>
-
-            <ContainerTopPadded>
+          <div>
+            <FormControl fullWidth={true}>
               <TypographySubtitleShallow variant="subtitle2">
-                Ålder (från, till):
+                Inkludera kön:
               </TypographySubtitleShallow>
               <Grid
                 container
@@ -266,77 +227,121 @@ class KirSearchView extends React.PureComponent {
                   alignItems: "center",
                 }}
               >
-                <Grid size={6}>
-                  <StyledSlider
-                    value={this.state.ageValues}
-                    onChange={this.handleAgeChange}
-                    valueLabelDisplay="off"
-                    aria-labelledby="range-slider"
-                    step={1}
-                    min={0}
-                    max={this.state.maxAge}
-                  />
-                </Grid>
-                <GridAgeInputContainer size={3}>
-                  <TextFieldInput
-                    fullWidth
-                    size="small"
-                    value={this.state.ageValues[0]}
-                    onChange={this.inputMinAgeChanged}
-                    inputRef={this.inputMinAge}
-                    inputProps={{
-                      step: 1,
-                      min: 0,
-                      max: this.state.maxAge,
-                      type: "number",
-                    }}
-                  />
-                </GridAgeInputContainer>
-                <GridAgeInputContainer size={3}>
-                  <TextFieldInput
-                    fullWidth
-                    size="small"
-                    value={this.state.ageValues[1]}
-                    onChange={this.inputMaxAgeChanged}
-                    inputRef={this.inputMaxAge}
-                    inputProps={{
-                      step: 1,
-                      min: 0,
-                      max: this.state.maxAge,
-                      type: "number",
-                    }}
-                  />
-                </GridAgeInputContainer>
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.genderMale}
+                      onChange={(e) => {
+                        setState({ genderMale: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Man"
+                />
+                <StyledFormControlLabel
+                  control={
+                    <StyledCheckbox
+                      checked={state.genderFemale}
+                      onChange={(e) => {
+                        setState({ genderFemale: e.target.checked });
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Kvinna"
+                />
               </Grid>
-            </ContainerTopPadded>
+            </FormControl>
+          </div>
 
-            <ContainerTopPadded style={{ textAlign: "right" }}>
-              <ButtonClear
-                variant="outlined"
-                color="primary"
-                component="span"
-                size="small"
-                onClick={this.handleClearSearch}
-              >
-                Rensa
-              </ButtonClear>
-              <Button
-                variant="contained"
-                color="primary"
-                component="span"
-                size="small"
-                onClick={this.handleSearch}
-                disabled={this.state.loading}
-              >
-                Sök
-                {this.state.loading && <CircularProgressButton size={24} />}
-              </Button>
-            </ContainerTopPadded>
-          </AccordionDetails>
-        </Accordion>
-      </>
-    );
-  }
+          <ContainerTopPadded>
+            <TypographySubtitleShallow variant="subtitle2">
+              Ålder (från, till):
+            </TypographySubtitleShallow>
+            <Grid
+              container
+              spacing={0}
+              sx={{
+                alignItems: "center",
+              }}
+            >
+              <Grid size={6}>
+                <StyledSlider
+                  value={state.ageValues}
+                  onChange={handleAgeChange}
+                  valueLabelDisplay="off"
+                  aria-labelledby="range-slider"
+                  step={1}
+                  min={0}
+                  max={state.maxAge}
+                />
+              </Grid>
+              <GridAgeInputContainer size={3}>
+                <TextFieldInput
+                  fullWidth
+                  size="small"
+                  value={state.ageValues[0]}
+                  onChange={inputMinAgeChanged}
+                  inputRef={inputMinAge}
+                  inputProps={{
+                    step: 1,
+                    min: 0,
+                    max: state.maxAge,
+                    type: "number",
+                  }}
+                />
+              </GridAgeInputContainer>
+              <GridAgeInputContainer size={3}>
+                <TextFieldInput
+                  fullWidth
+                  size="small"
+                  value={state.ageValues[1]}
+                  onChange={inputMaxAgeChanged}
+                  inputRef={inputMaxAge}
+                  inputProps={{
+                    step: 1,
+                    min: 0,
+                    max: state.maxAge,
+                    type: "number",
+                  }}
+                />
+              </GridAgeInputContainer>
+            </Grid>
+          </ContainerTopPadded>
+
+          <ContainerTopPadded style={{ textAlign: "right" }}>
+            <ButtonClear
+              variant="outlined"
+              color="primary"
+              component="span"
+              size="small"
+              onClick={handleClearSearch}
+            >
+              Rensa
+            </ButtonClear>
+            <Button
+              variant="contained"
+              color="primary"
+              component="span"
+              size="small"
+              onClick={handleSearch}
+              disabled={state.loading}
+            >
+              Sök
+              {state.loading && <CircularProgressButton size={24} />}
+            </Button>
+          </ContainerTopPadded>
+        </AccordionDetails>
+      </Accordion>
+    </>
+  );
 }
+
+KirSearchView.propTypes = {
+  model: PropTypes.object.isRequired,
+  app: PropTypes.object.isRequired,
+  localObserver: PropTypes.object.isRequired,
+};
 
 export default KirSearchView;

@@ -94,6 +94,25 @@ cd apps/admin && npm run build
 - Keep components focused and modular — aim for under 200 lines
 - Use TypeScript interfaces for prop types (client)
 
+### Toggling Layers (Client)
+
+Use `LayerControlModel` (`apps/client/src/models/LayerControlModel.js`) for layer
+visibility changes etc instead of reinventing something new.
+
+- **Why**: it is the only place with the complete rules (WMS group sublayers, exclusive
+  backgrounds, exclusive tree groups, tree-group folders) and it keeps the LayerSwitcher,
+  URL hash and other plugins in sync. See its doc header for examples of every method.
+- **Exclusive groups are radio**: the model enforces `exclusive: true` tree groups —
+  showing a direct child (including via sublayer activation) auto-hides its siblings,
+  and `showGroup()` on an exclusive folder shows only the first child. Do not build
+  parallel radio logic in plugins; route through the model.
+- Access via `props.app.appModel.layerControl` (plugins) or
+  `window.hajkPublicApi.layerControl` (embedders, console).
+- In React, read state with the `useLayerVisibility`/`useLayerState` hooks rather than
+  local `useState`, so the UI follows toggles made elsewhere.
+- Ids are OpenLayers `name`s; a tree-group folder id or `"groupId:subId"` also works.
+  Import `BACKGROUND_LAYER_IDS` instead of hard-coding `"-1"`…`"-4"`.
+
 ### Common Integration Points
 
 - Backend API paths:
@@ -122,6 +141,7 @@ cd apps/admin && npm run build
 
 - `apps/client/src/` - Main client application code
 - `apps/client/src/plugins/` - Tool plugins (28+)
+- `apps/client/src/models/LayerControlModel.js` - Centralized layer visibility API (see above)
 - `apps/admin/src/` - Admin interface code
 - `apps/backend/server/` - Backend server implementation
 - `apps/backend/App_Data/*.json` - Map configuration files
