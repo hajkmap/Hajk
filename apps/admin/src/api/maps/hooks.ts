@@ -205,6 +205,8 @@ export const useUpdateMapLayers = () => {
         queryKey: ["mapLayerSwitcher", mapName],
       });
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
+      void queryClient.invalidateQueries({ queryKey: ["layerUsage"] });
+      void queryClient.invalidateQueries({ queryKey: ["layersUsageSummary"] });
     },
   });
 };
@@ -227,6 +229,8 @@ export const useUpdateMapGroups = () => {
       void queryClient.invalidateQueries({
         queryKey: ["mapContent", mapName],
       });
+      void queryClient.invalidateQueries({ queryKey: ["layerUsage"] });
+      void queryClient.invalidateQueries({ queryKey: ["layersUsageSummary"] });
     },
   });
 };
@@ -252,6 +256,8 @@ export const useUpdateMapContent = () => {
         queryKey: ["groupsByMap", mapName],
       });
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
+      void queryClient.invalidateQueries({ queryKey: ["layerUsage"] });
+      void queryClient.invalidateQueries({ queryKey: ["layersUsageSummary"] });
     },
   });
 };
@@ -291,6 +297,8 @@ export const useUpdateMapLayerSwitcher = () => {
       });
       void queryClient.invalidateQueries({ queryKey: ["groups"] });
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
+      void queryClient.invalidateQueries({ queryKey: ["layerUsage"] });
+      void queryClient.invalidateQueries({ queryKey: ["layersUsageSummary"] });
       // Kartlager hydrates from LayerSwitcher Tool.options — keep that cache in sync.
       void queryClient.invalidateQueries({
         queryKey: ["toolsByMap", mapName],

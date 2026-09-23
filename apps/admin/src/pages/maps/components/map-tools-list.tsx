@@ -643,6 +643,11 @@ interface MapToolGridRow {
   index: number | null;
 }
 
+/** Window/order fields require an active tool with a placement zone. */
+function areToolLayoutFieldsEnabled(row: MapToolGridRow): boolean {
+  return row.active && row.target !== "";
+}
+
 function fieldsForToolType(toolType: string): MapToolFieldConfig {
   return getMapToolFieldConfig(toolType);
 }
@@ -1204,7 +1209,7 @@ function MapToolsList({
               size="small"
               fullWidth
               sx={CELL_FIELD_SX}
-              disabled={!params.row.active}
+              disabled={!areToolLayoutFieldsEnabled(params.row)}
               onClick={(event) => event.stopPropagation()}
             >
               <Select
@@ -1254,7 +1259,7 @@ function MapToolsList({
                   ? String(defaultSize.width)
                   : undefined
               }
-              disabled={!params.row.active}
+              disabled={!areToolLayoutFieldsEnabled(params.row)}
               dimension="width"
               onCommit={onWindowSizeChange}
               onPendingChange={setPendingFieldState}
@@ -1294,7 +1299,7 @@ function MapToolsList({
                   ? String(defaultSize.height)
                   : undefined
               }
-              disabled={!params.row.active}
+              disabled={!areToolLayoutFieldsEnabled(params.row)}
               dimension="height"
               onCommit={onWindowSizeChange}
               onPendingChange={setPendingFieldState}
@@ -1329,7 +1334,7 @@ function MapToolsList({
             <IndexNumberInput
               toolId={params.row.toolId}
               value={params.row.index ?? undefined}
-              disabled={!params.row.active && params.row.index == null}
+              disabled={!areToolLayoutFieldsEnabled(params.row)}
               takenIndexes={getTakenIndexesForTool(
                 params.row.toolId,
                 params.row.target,

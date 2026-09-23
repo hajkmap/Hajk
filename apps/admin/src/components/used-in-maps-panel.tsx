@@ -22,6 +22,8 @@ interface UsedInMapsPanelProps {
   emptyMessage: string;
   showGroupColumn?: boolean;
   showUsageColumn?: boolean;
+  /** Map settings tab to open when clicking a map name. Defaults to tools. */
+  mapTab?: "settings" | "menu" | "tools";
 }
 
 export default function UsedInMapsPanel({
@@ -30,6 +32,7 @@ export default function UsedInMapsPanel({
   emptyMessage,
   showGroupColumn = false,
   showUsageColumn = false,
+  mapTab = "tools",
 }: UsedInMapsPanelProps) {
   const { t } = useTranslation();
   const { palette } = useTheme();
@@ -63,7 +66,7 @@ export default function UsedInMapsPanel({
               underline="hover"
               onClick={(event) => {
                 event.stopPropagation();
-                void navigate(`/maps/${params.row.mapId}?tab=tools`);
+                void navigate(`/maps/${params.row.mapId}?tab=${mapTab}`);
               }}
               color="inherit"
               sx={{ textAlign: "left" }}
@@ -95,7 +98,7 @@ export default function UsedInMapsPanel({
     }
 
     return cols;
-  }, [navigate, showGroupColumn, showUsageColumn, t]);
+  }, [mapTab, navigate, showGroupColumn, showUsageColumn, t]);
 
   const showSearch = isLoading || rows.length > 0;
 
