@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Client: Add centralized LayerControlModel API (showLayer/hideLayer/toggleLayer/isLayerVisible) for toggling layers by id, exposed on the AppModel and `window.hajkPublicApi`, plus `useLayerVisibility`/`useLayerState` React hooks.
 - Client + Admin: FloodSimulator — New tool that shows flooded land for a chosen water level. Elevation is read from Mapbox Terrain-RGB or Terrarium XYZ tiles, and every pixel at or below the selected level is drawn as water. The level can be dragged or animated without reloading tiles. Flooded areas can be shaded by depth (a smooth colour ramp or discrete depth classes), and the pointer can show elevation and water depth. This is a bathtub fill, not a flow model: inland basins with no path to the sea flood too. The elevation tiles must already be in the map projection. Configure the tool in Admin under Kartor → Verktyg → Översvämning; the overlay is only created when `elevationUrl` is set. [#1273](https://github.com/hajkmap/Hajk/issues/1273)
 - Client + Admin: LayerSwitcher - Added an optional vector-tile based OpenStreetMap background layer (`enableOSMVector`), rendered from OpenFreeMap by default. Unlike the existing raster OSM layer, it stays sharp on high-DPI displays since it isn't limited by a fixed-resolution tile server. Admins can point `osmVectorStyleUrl` at a different style instead of the public OpenFreeMap instance — note that in the MapLibre style spec the style JSON also declares its own tile source, so this overrides where tiles are fetched from too, not just the visual style. The tile layer's `renderMode` ("vector" or "hybrid") is also admin-configurable, since the best tradeoff between sharpness and performance depends on the chosen style and target hardware. PR [#1887](https://github.com/hajkmap/Hajk/pull/1887)
 - Client + Admin: LayerSwitcher - Added a new admin setting "Visa teckenförklaring direkt" that forces the legend to be expanded by default in the layer details view, so users don't have to click the legend button. [#1838](https://github.com/hajkmap/Hajk/issues/1838)
@@ -36,22 +37,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client + Admin: WMTS - Added support for high-DPI (retina) tiles. A layer can now declare one or more `highDpiVariants` — alternate TileMatrixSets, such as GeoServer/GWC's `xN` gridsets, each with its own resolutions/origins/sizes/dimensions — and Client automatically requests the highest tier whose `minPixelRatio` the viewer's screen (`devicePixelRatio`) satisfies, falling back to the standard grid otherwise. In Admin, once the standard `matrixSet` is set, any `<matrixSet>xN` sibling GetCapabilities advertises is auto-detected and can be added with one click; this also derives the correct `dpi:N` `FORMAT_OPTIONS` value for that tier (scaled from the base dimension and cross-checked against the server's advertised `Dimension`/`Value` list) rather than leaving the admin to copy and fix it by hand. A manual add-a-tier fallback covers servers whose high-DPI gridsets don't follow the `xN` naming convention. Builds on the GetCapabilities-driven WMTS form and ConfigMapper plumbing from [commit](https://github.com/hajkmap/Hajk/commit/3a018b0ae5cfdecff881def62e1e9e5ae1af9a97), and pairs with the layer-type-at-a-glance improvements to the layer/map admin views from [commit](https://github.com/hajkmap/Hajk/commit/078e211820c7f05fe6e44bcdbef9138d94be1acf) (see also its hotfix in [commit](https://github.com/hajkmap/Hajk/commit/bb6180dffbea881556fabf150861c59186ee0b5b)).
 - Client: PropertyChecker - Added a `q_pc` URL parameter that programmatically triggers a property check from a property name or address. It reuses an existing WFS search source (configured via `propertyNameLookupWfsLayerId` and the optional `addressLookupWfsLayerId`) to resolve the value to a geometry, pans the map there, and is written back to the URL hash on map click so results are shareable. Closes [#1827](https://github.com/hajkmap/Hajk/issues/1827).
 
+### Fixed
+
+- Client: Print - Restored the admin "include image border" frame around the map image, which was dropped in the libPDF rewrite.
+- Client: FIR - Fixed a crash when activating "add by map click" if `wmsRealEstateLayer` is missing from the map config.
+
 ### Changed
 
 - Client + Admin: Bumped `x2js` from 3.4.4 to 3.4.5
 - Client: Bumped Vite from 7.3.2 to 7.3.6.
 - Backend: Bumped ESLint from 9.39.2 to 9.39.5.
+- Client: FIR/KIR - Converted class components to hooks and extracted shared code. Also fixed KIR's delete button expanding the row.
 - Backend: Upgraded `write-excel-file` from 3.x to 4.x.
 - Backend: Enhance detailed request logger with structured output and file logging configuration [#1836](https://github.com/hajkmap/Hajk/pull/1836)
 - Backend: Bumped the [API Explorer](https://github.com/swagger-api/swagger-ui) to v5.32.6.
 - Backend: Refactored `handleStandardResponse` and custom error classes to standardize API error outputs as JSON and move status code logic into the error classes.
+- Client: Print plugin refactored — split PrintModel into modules under `options/`, `layout/`, `layers/`, and `utils/`; named pipeline steps and explicit layout context replace in-model mutation. No behavior change; public PrintModel API preserved.
 - Client: AppModel refactored — split the 1444-line class into 8 focused modules under `appModel/` (urlParamsMerger, configTranslator, backgroundLayers, clickBindings, mapFactory, layerLoader, layerVisibility, pluginManager). No behavior change; all public methods preserved. [#1826](https://github.com/hajkmap/Hajk/pull/1826)
+- Client: KmlModel and GpxModel unified — the near-identical import/export flows now live in a shared base class (`VectorImportModel`), with each model reduced to a format-specific profile and small overrides (KML keeps its style round-trip pipeline, GPX keeps its geometry filtering). No behavior change; all public methods preserved.
 - Client: New Mobile UI etc, see [#1778](https://github.com/hajkmap/Hajk/issues/1778).
 - Client: New CQL filter UI, PR [#1756](https://github.com/hajkmap/Hajk/pull/1756).
 - Client: TypeScript is now supported, see [#1824.](https://github.com/hajkmap/Hajk/pull/1824)
 - Client: Upgraded MUI packages to v9. Completed the migration steps not covered by the codemods — Autocomplete `renderInput` now reads `params.slotProps` (fixes a startup crash in the search bar), `PopperComponent`/`PaperComponent` moved to `slots`, Dialog `PaperComponent`/`PaperProps`/`BackdropProps`/`onBackdropClick` and Tooltip `TransitionProps` moved to `slots`/`slotProps`, remaining `InputProps` on TextField moved to `slotProps.input`, `SpeedDialAction` tooltip props moved to `slotProps.tooltip`, and CSS props inside `ListItemText` Typography slots moved into `sx` (silences DOM prop warnings and restores layer-name truncation).
 - Client: Location plugin now has an optional follow location toggle. Enabling it will re-center the map on user's location when location changes. [#1875](https://github.com/hajkmap/Hajk/issues/1875)
+- Client: Anchor plugin refactored from class to function components with hooks, replacing `document.execCommand("copy")` with the Clipboard API and the `withSnackbar` HOC with notistack's `useSnackbar`. The "Öppna länk" button is always shown, including when the Clipboard API is unavailable (e.g. insecure contexts). No other behavior change.
 - Client: Added a second example config, `map_3857.json`, showcasing the new OSM vector tile layer as well as a couple of global open WMSes.
+- Client: LayerControlModel now enforces exclusive-group (radio) semantics — showing a direct child (including Hajk group layers and sublayer activation) auto-hides its siblings, and showGroup() on an exclusive folder shows only the first child. [#1848](https://github.com/hajkmap/Hajk/pull/1848)
 
 ### Fixed
 

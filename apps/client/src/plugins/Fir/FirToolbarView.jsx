@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import { IconPolygon, IconRect, IconLine, IconPoint } from "./FirIcons";
@@ -70,8 +70,13 @@ const SvgImg = styled("img")(({ _theme }) => ({
   width: "24px",
 }));
 
-class FirToolbarView extends React.PureComponent {
-  state = {
+function FirToolbarView({ model, app, localObserver, prefix = "fir" }) {
+  const interactionRef = useRef(null);
+  const fnsRef = useRef({});
+
+  const [styles] = useState(() => new FirStyles(model));
+
+  const [state, setStateRaw] = useState(() => ({
     tools: {
       Polygon: { selected: false, drawTool: true },
       Rectangle: { selected: false, drawTool: true },
@@ -83,75 +88,131 @@ class FirToolbarView extends React.PureComponent {
     files: { list: [] },
     buffer: 0,
     numberOfObjects: 0,
+  }));
+  const stateRef = useRef(state);
+  const [, setTick] = useState(0);
+
+  const setState = (patch) => {
+    stateRef.current = { ...stateRef.current, ...patch };
+    setStateRaw(stateRef.current);
   };
 
-  static propTypes = {
-    model: PropTypes.object.isRequired,
-    prefix: PropTypes.string,
-    app: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired,
+  const forceUpdate = () => {
+    setTick((tick) => tick + 1);
   };
 
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
-    this.prefix = this.props.prefix || "fir";
-    this.styles = new FirStyles(this.model);
-    this.initListeners();
-  }
-
-  initListeners = () => {
-    this.localObserver.subscribe(`${this.prefix}.search.clear`, () => {
-      this.deactivateDraw();
-      this.setState({ files: { list: [] } });
-      this.deselectButtonItems();
-    });
-    this.model.layers.draw.getSource().on("addfeature", (e) => {
-      e.feature.setStyle(this.styles.getSelectionStyle());
-    });
-  };
-
-  updateNumberOfObjects = () => {
+  const updateNumberOfObjects = () => {
     setTimeout(() => {
       // TODO: create and listen to update event instead.
-      this.setState({
-        numberOfObjects: this.model.layers.draw.getSource().getFeatures()
-          .length,
+      setState({
+        numberOfObjects: model.layers.draw.getSource().getFeatures().length,
       });
-      this.forceUpdate();
+      forceUpdate();
     }, 100);
   };
 
-  handleToolbarClick(id) {
-    let o = { ...this.state.tools };
+  const handleToolbarClick = (id) => {
+    let o = { ...stateRef.current.tools };
 
     for (let type in o) {
       if (type === id) {
         o[type].selected = !o[type].selected;
 
         if (o[type].selected === true) {
-          this.activateTool(type);
+          activateTool(type);
         } else {
-          this.deactivateDraw();
+          deactivateDraw();
         }
       } else {
         o[type].selected = false;
       }
     }
 
-    this.setState({
+    setState({
       tools: o,
     });
-  }
+  };
 
-  handleDeleteClick = (e) => {
+  const handleDeleteClick = useCallback((e) => {
+    fnsRef.current.handleDeleteClick(e);
+  }, []);
+
+  const handleKeyDown = useCallback((e) => {
+    fnsRef.current.handleKeyDown(e);
+  }, []);
+
+  const activateTool = (type) => {
+    let tool = stateRef.current.tools[type];
+    let geometryFunction = null;
+
+    if (tool.drawTool === true) {
+      if (type === "Rectangle") {
+        type = "Circle";
+        geometryFunction = createBox();
+      }
+
+      deactivateDraw();
+
+      interactionRef.current = new Draw({
+        source: model.layers.draw.getSource(),
+        type: type,
+        geometryFunction: geometryFunction,
+        geometryName: type,
+        style: styles.getSelectionStyle(),
+      });
+      interactionRef.current.on("drawend", () => {
+        deactivateDraw();
+        deselectButtonItems();
+      });
+
+      activateDraw();
+    } else {
+      deactivateDraw();
+      if (type === "Delete") {
+        model.map.on("singleclick", handleDeleteClick);
+      }
+    }
+  };
+
+  const deactivateDraw = () => {
+    model.map.un("singleclick", handleDeleteClick);
+    if (interactionRef.current) {
+      interactionRef.current.abortDrawing();
+      model.map.removeInteraction(interactionRef.current);
+      model.map.clickLock.delete(`${prefix}-draw`);
+      window.removeEventListener("keydown", handleKeyDown);
+    }
+    updateNumberOfObjects();
+  };
+
+  const activateDraw = () => {
+    model.map.addInteraction(interactionRef.current);
+    model.map.clickLock.add(`${prefix}-draw`);
+    window.addEventListener("keydown", handleKeyDown);
+    updateNumberOfObjects();
+  };
+
+  const deselectButtonItems = () => {
+    let o = { ...stateRef.current.tools };
+    for (let type in o) {
+      o[type].selected = false;
+    }
+    setState({ tools: o });
+  };
+
+  const handleKeyDownLogic = (e) => {
+    if (e.keyCode === 27 /* escape */) {
+      deactivateDraw();
+      deselectButtonItems();
+    }
+  };
+
+  const handleDeleteClickLogic = (e) => {
     var first = true;
-    this.model.map.forEachFeatureAtPixel(e.pixel, (feature, _layer) => {
+    model.map.forEachFeatureAtPixel(e.pixel, (feature, _layer) => {
       // Handles both drawn features and buffer features. Remove them at the same time as they are linked.
 
-      const type = feature.get(`${this.prefix}_type`);
+      const type = feature.get(`${prefix}_type`);
       if (type && (type === "draw" || type === "buffer") && first) {
         let findFn = null;
 
@@ -165,9 +226,9 @@ class FirToolbarView extends React.PureComponent {
           };
         }
 
-        this.model.layers[type].getSource().removeFeature(feature);
+        model.layers[type].getSource().removeFeature(feature);
         const layerName = type === "draw" ? "buffer" : "draw";
-        let secondaryLayer = this.model.layers[layerName];
+        let secondaryLayer = model.layers[layerName];
         let secondaryFeature = secondaryLayer
           .getSource()
           .getFeatures()
@@ -177,88 +238,19 @@ class FirToolbarView extends React.PureComponent {
           secondaryLayer.getSource().removeFeature(secondaryFeature);
         }
 
-        this.deactivateDraw();
-        this.deselectButtonItems();
+        deactivateDraw();
+        deselectButtonItems();
       }
       first = false;
     });
-    this.updateNumberOfObjects();
+    updateNumberOfObjects();
   };
 
-  activateTool = (type) => {
-    let tool = this.state.tools[type];
-    let geometryFunction = null;
-
-    if (tool.drawTool === true) {
-      if (type === "Rectangle") {
-        type = "Circle";
-        geometryFunction = createBox();
-      }
-
-      this.deactivateDraw();
-
-      this.interaction = new Draw({
-        source: this.model.layers.draw.getSource(),
-        type: type,
-        geometryFunction: geometryFunction,
-        geometryName: type,
-        style: this.styles.getSelectionStyle(),
-      });
-      this.interaction.on("drawend", () => {
-        this.deactivateDraw();
-        this.deselectButtonItems();
-      });
-
-      this.activateDraw();
-    } else {
-      this.deactivateDraw();
-      if (type === "Delete") {
-        this.model.map.on("singleclick", this.handleDeleteClick);
-      }
-    }
-  };
-
-  deactivateDraw = () => {
-    this.model.map.un("singleclick", this.handleDeleteClick);
-    if (this.interaction) {
-      this.interaction.abortDrawing();
-      this.model.map.removeInteraction(this.interaction);
-      this.model.map.clickLock.delete(`${this.prefix}-draw`);
-      window.removeEventListener("keydown", this.handleKeyDown);
-    }
-    this.updateNumberOfObjects();
-  };
-
-  activateDraw = () => {
-    this.model.map.addInteraction(this.interaction);
-    this.model.map.clickLock.add(`${this.prefix}-draw`);
-    window.addEventListener("keydown", this.handleKeyDown);
-    this.updateNumberOfObjects();
-  };
-
-  deselectButtonItems = () => {
-    let o = { ...this.state.tools };
-    for (let type in o) {
-      o[type].selected = false;
-    }
-    this.setState({ tools: o });
-  };
-
-  handleKeyDown = (e) => {
-    if (e.keyCode === 27 /* escape */) {
-      this.deactivateDraw();
-      this.deselectButtonItems();
-    }
-  };
-
-  handleFileSelection = (e) => {
+  const handleFileSelection = (e) => {
     if (e && e.target) {
-      this.setState({ files: { list: e.target.files || [] } });
+      setState({ files: { list: e.target.files || [] } });
       if (e.target.files.length > 0) {
-        this.localObserver.publish(
-          `${this.prefix}.file.import`,
-          e.target.files[0]
-        );
+        localObserver.publish(`${prefix}.file.import`, e.target.files[0]);
         setTimeout(() => {
           e.target.value = "";
         }, 500);
@@ -266,175 +258,190 @@ class FirToolbarView extends React.PureComponent {
     }
   };
 
-  render() {
-    return (
-      <>
-        <div>
-          <Typography variant="subtitle2">Sökområde</Typography>
-          <StyledButtonGroup
-            variant="contained"
-            aria-label="outlined button group"
+  fnsRef.current = {
+    handleDeleteClick: handleDeleteClickLogic,
+    handleKeyDown: handleKeyDownLogic,
+    handleSearchClear: () => {
+      deactivateDraw();
+      setState({ files: { list: [] } });
+      deselectButtonItems();
+    },
+  };
+
+  useEffect(() => {
+    localObserver.subscribe(`${prefix}.search.clear`, () => {
+      fnsRef.current.handleSearchClear();
+    });
+    model.layers.draw.getSource().on("addfeature", (e) => {
+      e.feature.setStyle(styles.getSelectionStyle());
+    });
+  }, [localObserver, model, prefix, styles]);
+
+  return (
+    <>
+      <div>
+        <Typography variant="subtitle2">Sökområde</Typography>
+        <StyledButtonGroup
+          variant="contained"
+          aria-label="outlined button group"
+        >
+          <IconButton
+            title="Polygon"
+            on={"" + state.tools.Polygon.selected}
+            invert={"" + true}
+            color={state.tools.Polygon.selected ? "primary" : "secondary"}
+            onClick={() => {
+              handleToolbarClick("Polygon");
+            }}
           >
-            <IconButton
-              title="Polygon"
-              on={"" + this.state.tools.Polygon.selected}
-              invert={"" + true}
-              color={
-                this.state.tools.Polygon.selected ? "primary" : "secondary"
-              }
-              onClick={() => {
-                this.handleToolbarClick("Polygon");
-              }}
-            >
-              <SvgImg src={IconPolygon()} alt="" />
-            </IconButton>
-            <IconButton
-              title="Rektangel"
-              on={"" + this.state.tools.Rectangle.selected}
-              invert={"" + true}
-              color={
-                this.state.tools.Rectangle.selected ? "primary" : "secondary"
-              }
-              onClick={() => {
-                this.handleToolbarClick("Rectangle");
-              }}
-            >
-              <SvgImg src={IconRect()} alt="" />
-            </IconButton>
-            <IconButton
-              title="Linje"
-              on={"" + this.state.tools.LineString.selected}
-              invert={"" + true}
-              color={
-                this.state.tools.LineString.selected ? "primary" : "secondary"
-              }
-              onClick={() => {
-                this.handleToolbarClick("LineString");
-              }}
-            >
-              <SvgImg src={IconLine()} alt="" />
-            </IconButton>
-            <IconButton
-              title="Punkt"
-              on={"" + this.state.tools.Point.selected}
-              invert={"" + true}
-              color={this.state.tools.Point.selected ? "primary" : "secondary"}
-              onClick={() => {
-                this.handleToolbarClick("Point");
-              }}
-            >
-              <SvgImg src={IconPoint()} alt="" />
-            </IconButton>
-            <IconButton
-              title="Importera KLM-fil"
-              on={"" + this.state.tools.Import.selected}
-              invert={"" + false}
-              color={this.state.tools.Import.selected ? "primary" : "secondary"}
-              onClick={() => {
-                this.handleToolbarClick("Import");
-              }}
-            >
-              <InsertDriveFileIcon
-                style={{
-                  color: this.state.tools.Import.selected ? "#fff" : "#000",
-                }}
-              />
-            </IconButton>
-            <IconButton
-              title="Ta bort objekt"
-              on={"" + this.state.tools.Delete.selected}
-              invert={"" + false}
-              color={this.state.tools.Delete.selected ? "primary" : "secondary"}
-              onClick={() => {
-                this.handleToolbarClick("Delete");
-              }}
-            >
-              <DeleteIcon
-                style={{
-                  color: this.state.tools.Delete.selected ? "#fff" : "#000",
-                }}
-              />
-            </IconButton>
-          </StyledButtonGroup>
-          <Collapse in={this.state.tools.Import.selected === true}>
-            <ContainerTopPadded>
-              <Typography variant="subtitle2">Importera KML-fil</Typography>
-              <FileInputContainer>
-                <FileInput
-                  accept=".kml"
-                  id={`${this.prefix}FileInput`}
-                  type="file"
-                  onChange={this.handleFileSelection}
-                />
-                <label htmlFor={`${this.prefix}FileInput`}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    component="span"
-                    size="small"
-                  >
-                    Välj fil
-                  </Button>
-                </label>
-                <span className="filename">
-                  {this.state.files.list.length > 0
-                    ? this.state.files.list[0].name
-                    : "Ingen fil är vald"}
-                </span>
-              </FileInputContainer>
-            </ContainerTopPadded>
-          </Collapse>
-        </div>
-        <Collapse in={this.state.numberOfObjects > 0}>
-          <ContainerTopDoublePadded>
-            <TextField
-              fullWidth={true}
-              label="Lägg till buffer på sökområde"
-              value={this.state.buffer}
-              onKeyDown={(e) => {
-                return !isNaN(e.key);
-              }}
-              onChange={(e) => {
-                let v = parseInt(e.target.value);
-                if (isNaN(v)) {
-                  v = 0;
-                }
-
-                const bufferValue = parseInt(v);
-                this.setState({ buffer: bufferValue });
-
-                this.localObserver.publish(
-                  `${this.prefix}.layers.bufferValueChanged`,
-                  {
-                    value: bufferValue,
-                  }
-                );
-              }}
-              onFocus={(_e) => {
-                if (this.state.buffer === 0) {
-                  this.setState({ buffer: "" });
-                }
-              }}
-              onBlur={(_e) => {
-                if (this.state.buffer === "") {
-                  this.setState({ buffer: 0 });
-                }
-              }}
-              size="small"
-              variant="outlined"
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">meter</InputAdornment>
-                  ),
-                },
+            <SvgImg src={IconPolygon()} alt="" />
+          </IconButton>
+          <IconButton
+            title="Rektangel"
+            on={"" + state.tools.Rectangle.selected}
+            invert={"" + true}
+            color={state.tools.Rectangle.selected ? "primary" : "secondary"}
+            onClick={() => {
+              handleToolbarClick("Rectangle");
+            }}
+          >
+            <SvgImg src={IconRect()} alt="" />
+          </IconButton>
+          <IconButton
+            title="Linje"
+            on={"" + state.tools.LineString.selected}
+            invert={"" + true}
+            color={state.tools.LineString.selected ? "primary" : "secondary"}
+            onClick={() => {
+              handleToolbarClick("LineString");
+            }}
+          >
+            <SvgImg src={IconLine()} alt="" />
+          </IconButton>
+          <IconButton
+            title="Punkt"
+            on={"" + state.tools.Point.selected}
+            invert={"" + true}
+            color={state.tools.Point.selected ? "primary" : "secondary"}
+            onClick={() => {
+              handleToolbarClick("Point");
+            }}
+          >
+            <SvgImg src={IconPoint()} alt="" />
+          </IconButton>
+          <IconButton
+            title="Importera KLM-fil"
+            on={"" + state.tools.Import.selected}
+            invert={"" + false}
+            color={state.tools.Import.selected ? "primary" : "secondary"}
+            onClick={() => {
+              handleToolbarClick("Import");
+            }}
+          >
+            <InsertDriveFileIcon
+              style={{
+                color: state.tools.Import.selected ? "#fff" : "#000",
               }}
             />
-          </ContainerTopDoublePadded>
+          </IconButton>
+          <IconButton
+            title="Ta bort objekt"
+            on={"" + state.tools.Delete.selected}
+            invert={"" + false}
+            color={state.tools.Delete.selected ? "primary" : "secondary"}
+            onClick={() => {
+              handleToolbarClick("Delete");
+            }}
+          >
+            <DeleteIcon
+              style={{
+                color: state.tools.Delete.selected ? "#fff" : "#000",
+              }}
+            />
+          </IconButton>
+        </StyledButtonGroup>
+        <Collapse in={state.tools.Import.selected === true}>
+          <ContainerTopPadded>
+            <Typography variant="subtitle2">Importera KML-fil</Typography>
+            <FileInputContainer>
+              <FileInput
+                accept=".kml"
+                id={`${prefix}FileInput`}
+                type="file"
+                onChange={handleFileSelection}
+              />
+              <label htmlFor={`${prefix}FileInput`}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  component="span"
+                  size="small"
+                >
+                  Välj fil
+                </Button>
+              </label>
+              <span className="filename">
+                {state.files.list.length > 0
+                  ? state.files.list[0].name
+                  : "Ingen fil är vald"}
+              </span>
+            </FileInputContainer>
+          </ContainerTopPadded>
         </Collapse>
-      </>
-    );
-  }
+      </div>
+      <Collapse in={state.numberOfObjects > 0}>
+        <ContainerTopDoublePadded>
+          <TextField
+            fullWidth={true}
+            label="Lägg till buffer på sökområde"
+            value={state.buffer}
+            onKeyDown={(e) => {
+              return !isNaN(e.key);
+            }}
+            onChange={(e) => {
+              let v = parseInt(e.target.value);
+              if (isNaN(v)) {
+                v = 0;
+              }
+
+              const bufferValue = parseInt(v);
+              setState({ buffer: bufferValue });
+
+              localObserver.publish(`${prefix}.layers.bufferValueChanged`, {
+                value: bufferValue,
+              });
+            }}
+            onFocus={(_e) => {
+              if (stateRef.current.buffer === 0) {
+                setState({ buffer: "" });
+              }
+            }}
+            onBlur={(_e) => {
+              if (stateRef.current.buffer === "") {
+                setState({ buffer: 0 });
+              }
+            }}
+            size="small"
+            variant="outlined"
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">meter</InputAdornment>
+                ),
+              },
+            }}
+          />
+        </ContainerTopDoublePadded>
+      </Collapse>
+    </>
+  );
 }
+
+FirToolbarView.propTypes = {
+  model: PropTypes.object.isRequired,
+  prefix: PropTypes.string,
+  app: PropTypes.object.isRequired,
+  localObserver: PropTypes.object.isRequired,
+};
 
 export default FirToolbarView;
