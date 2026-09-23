@@ -391,7 +391,14 @@ export default function GroupsList({
           <Grid size={12}>
             <StyledDataGrid<Group>
               storageKey="groups"
-              customSx={{ height: "calc(100vh - 320px)", minHeight: 420 }}
+              customSx={{
+                height: "calc(100vh - 320px)",
+                minHeight: 420,
+                "& .MuiDataGrid-cell": {
+                  display: "flex",
+                  alignItems: "center",
+                },
+              }}
               onRowClick={({ row }) => {
                 const id: string = row.id;
                 if (id) {
@@ -423,6 +430,8 @@ export default function GroupsList({
                   flex: 0.2,
                   sortable: false,
                   filterable: false,
+                  align: "left",
+                  headerAlign: "left",
                   renderCell: (params: GridRenderCellParams<Group>) => (
                     <GroupCompositionIconsCell
                       layerCount={params.row.layerCount}

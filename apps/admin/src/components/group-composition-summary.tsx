@@ -112,11 +112,21 @@ export function GroupCompositionIconsCell({
   const { t } = useTranslation();
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        height: "100%",
+        width: "100%",
+        gap: 1.5,
+      }}
+    >
       <Tooltip title={t("groups.composition.layerCount", { count: layerCount })}>
         <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
           <LayersIcon fontSize="small" color="action" />
-          <Typography variant="body2">{layerCount}</Typography>
+          <Typography variant="body2" lineHeight={1}>
+            {layerCount}
+          </Typography>
         </Box>
       </Tooltip>
       <Tooltip
@@ -126,7 +136,9 @@ export function GroupCompositionIconsCell({
       >
         <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
           <FolderIcon fontSize="small" color="action" />
-          <Typography variant="body2">{nestedGroupCount}</Typography>
+          <Typography variant="body2" lineHeight={1}>
+            {nestedGroupCount}
+          </Typography>
         </Box>
       </Tooltip>
     </Box>

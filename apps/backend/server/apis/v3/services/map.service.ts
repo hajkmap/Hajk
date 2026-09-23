@@ -666,7 +666,10 @@ class MapService {
                 }
               : baseOptions;
           layerCreates.push({
-            mapId: map.id,
+            // Group composition is owned by the shared Group, not the map that
+            // last saved Kartlager. Stamping mapId here made deleteMap wipe
+            // Active layers on every other map reusing this group.
+            mapId: null,
             groupId: entry.groupId,
             usage: UseType.FOREGROUND,
             visibleAtStart: layer.visibleAtStart,
@@ -896,30 +899,34 @@ class MapService {
         };
       };
 
-      // Remove every placement on this map for catalog layers that are no longer active
-      // (map-direct, group-linked with mapId, and legacy group-only rows).
+      // Remove map-direct placements for catalog layers that are no longer active.
+      // Do not delete shared Group composition rows — those groups are reused by
+      // other maps (duplicate keeps the same group ids). Hybrid mapId+groupId
+      // stamps for inactive catalog layers are cleared instead of deleted.
       if (activeCatalogIds.size === 0) {
-        await tx.layerInstance.deleteMany({ where: { mapId } });
-        if (mapGroupIds.length > 0) {
-          await tx.layerInstance.deleteMany({
-            where: { groupId: { in: mapGroupIds } },
-          });
-        }
+        await tx.layerInstance.deleteMany({
+          where: { mapId, groupId: null },
+        });
+        await tx.layerInstance.updateMany({
+          where: { mapId, groupId: { not: null } },
+          data: { mapId: null },
+        });
       } else {
         await tx.layerInstance.deleteMany({
           where: {
             mapId,
+            groupId: null,
             NOT: catalogStillActiveFilter(),
           },
         });
-        if (mapGroupIds.length > 0) {
-          await tx.layerInstance.deleteMany({
-            where: {
-              groupId: { in: mapGroupIds },
-              NOT: catalogStillActiveFilter(),
-            },
-          });
-        }
+        await tx.layerInstance.updateMany({
+          where: {
+            mapId,
+            groupId: { not: null },
+            NOT: catalogStillActiveFilter(),
+          },
+          data: { mapId: null },
+        });
       }
 
       // Replace map-direct FOREGROUND rows (group placements are left intact).
@@ -1260,13 +1267,20 @@ class MapService {
       );
     }
 
-    // Remove the map together with its per-map placements. We only delete the
-    // join/placement rows (LayerInstance, ToolsOnMaps, GroupsOnMaps) — the
-    // shared underlying entities (display/search/editing layers, tools, groups,
-    // projections) are kept since they may be used by other maps. RoleOnMap,
-    // DocumentFolder and Document are removed via onDelete: Cascade.
+    // Remove the map together with its per-map placements only.
+    // Shared Group composition LayerInstances may historically carry this
+    // map's mapId (hybrid mapId+groupId rows) — clear that stamp instead of
+    // deleting them, so other maps that reuse the same groups keep their
+    // Active layers. Shared catalog entities (layers, tools, groups,
+    // projections) are kept. RoleOnMap / DocumentFolder / Document cascade.
     await prisma.$transaction([
-      prisma.layerInstance.deleteMany({ where: { mapId: map.id } }),
+      prisma.layerInstance.deleteMany({
+        where: { mapId: map.id, groupId: null },
+      }),
+      prisma.layerInstance.updateMany({
+        where: { mapId: map.id, groupId: { not: null } },
+        data: { mapId: null },
+      }),
       prisma.toolsOnMaps.deleteMany({ where: { mapName } }),
       prisma.groupsOnMaps.deleteMany({ where: { mapName } }),
       prisma.map.delete({ where: { id: map.id } }),
