@@ -100,8 +100,12 @@ Use `LayerControlModel` (`apps/client/src/models/LayerControlModel.js`) for laye
 visibility changes etc instead of reinventing something new.
 
 - **Why**: it is the only place with the complete rules (WMS group sublayers, exclusive
-  backgrounds, tree-group folders) and it keeps the LayerSwitcher, URL hash and other
-  plugins in sync. See its doc header for examples of every method.
+  backgrounds, exclusive tree groups, tree-group folders) and it keeps the LayerSwitcher,
+  URL hash and other plugins in sync. See its doc header for examples of every method.
+- **Exclusive groups are radio**: the model enforces `exclusive: true` tree groups —
+  showing a direct child (including via sublayer activation) auto-hides its siblings,
+  and `showGroup()` on an exclusive folder shows only the first child. Do not build
+  parallel radio logic in plugins; route through the model.
 - Access via `props.app.appModel.layerControl` (plugins) or
   `window.hajkPublicApi.layerControl` (embedders, console).
 - In React, read state with the `useLayerVisibility`/`useLayerState` hooks rather than

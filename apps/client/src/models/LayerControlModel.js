@@ -29,6 +29,14 @@ import { BACKGROUND_LAYER_IDS } from "../constants/backgroundLayers";
  *    listeners registered in the constructor are intentionally never torn down.
  *    There is no `dispose()`. If this ever becomes a per-map/disposable object,
  *    add teardown for those listeners.
+ * 4. Exclusive tree groups (`exclusive: true`, PR #1848) ARE enforced here:
+ *    showing any direct child — including via `showSubLayer`/`setSubLayers` —
+ *    auto-hides its siblings (see `showLayer`/`setSubLayers`), and `showGroup`
+ *    on an exclusive folder shows only the first direct child. Note that this
+ *    model is intentionally STRICTER than the LayerSwitcher UI: in the UI a
+ *    Hajk (WMS) group layer inside an exclusive group participates in the
+ *    radio logic only as a victim, never as an actor (see
+ *    `PLAN-layerswitcher-exclusive-ui.md` for the corresponding UI fix).
  */
 
 const findGroupInConfig = (groups, groupId) => {
@@ -66,6 +74,21 @@ const collectLayerIdsFromGroup = (group) => {
   return ids;
 };
 
+/**
+ * Direct layer children of a group only — no recursion into subgroups. This
+ * matches the LayerSwitcher UI's `directChildLayerIds`
+ * (LayerGroup.jsx): exclusivity applies to direct children of an exclusive
+ * group, while layers inside nested subgroups are unaffected.
+ */
+const getDirectLayerIdsFromGroup = (group) => {
+  if (!group) {
+    return [];
+  }
+  return (group.layers ?? [])
+    .map((l) => l?.id)
+    .filter((id) => id !== undefined);
+};
+
 const arraysEqual = (a = [], b = []) => {
   if (a === b) {
     return true;
@@ -99,12 +122,15 @@ const arraysEqual = (a = [], b = []) => {
  * lc.hideLayer("id");
  * lc.toggleLayer("id");
  * lc.setLayerVisibility("id", true);               // boolean form of show/hide
- * lc.layerIsVisible("id");                         // -> boolean
+ * lc.isLayerVisible("id");                         // -> boolean
  * lc.showBackground("baseId");                     // any base layer (warns if not base)
  * lc.showBackgroundWhite();                        // built-in white background
  * lc.showBackgroundBlack();                        // built-in black background
  * lc.showBackgroundOSM();                          // built-in OSM background
  * lc.showBackgroundOSMVector();                    // built-in OSM vector background
+ * // NOTE: isLayerVisible/isGroupVisible/isSubLayerVisible reflect the toggled
+ * // state (OpenLayers `getVisible()`), not zoom/extent-aware visibility
+ * // (OpenLayers `isVisible(view)`).
  *
  * // Sublayers of a WMS group layer (the nested checkboxes)
  * lc.showSubLayer("groupId", "subId");
@@ -112,7 +138,7 @@ const arraysEqual = (a = [], b = []) => {
  * lc.toggleSubLayer("groupId", "subId");
  * lc.setSubLayerVisibility("groupId", "subId", true);
  * lc.setSubLayers("groupId", ["subA", "subB"]);    // exact visible set
- * lc.subLayerIsVisible("groupId", "subId");        // -> boolean
+ * lc.isSubLayerVisible("groupId", "subId");        // -> boolean
  * // ...or via the single-layer API: lc.toggleLayer("groupId:subId")
  *
  * // LayerSwitcher tree-group folders (operate on every leaf layer)
@@ -120,7 +146,7 @@ const arraysEqual = (a = [], b = []) => {
  * lc.hideGroup("folderId");
  * lc.toggleGroup("folderId");
  * lc.setGroupVisibility("folderId", true);
- * lc.groupIsVisible("folderId");                   // -> boolean (all leaves visible)
+ * lc.isGroupVisible("folderId");                   // -> boolean (all leaves visible)
  *
  * // Reactive primitives (back the useLayerVisibility / useLayerState hooks)
  * const off = lc.subscribe("id", () => {});        // -> unsubscribe fn
@@ -235,7 +261,7 @@ class LayerControlModel {
 
   /**
    * Parse a composite `"groupId:subLayerId"` address so that the top-level
-   * `showLayer`/`hideLayer`/`toggleLayer`/`layerIsVisible` API can target a
+   * `showLayer`/`hideLayer`/`toggleLayer`/`isLayerVisible` API can target a
    * single sublayer of a WMS group layer (e.g.
    * `toggleLayer("70d0ft:trafiksamordning_linje_paborjad")`).
    *
@@ -296,23 +322,66 @@ class LayerControlModel {
   }
 
   /**
+   * Find the exclusive-group siblings of a layer id: if `id` is a **direct
+   * layer child** of a group with `exclusive === true`, return the group's
+   * OTHER direct layer children (filtered to ids that resolve to an actual
+   * OpenLayers layer — the LayerSwitcher drops non-resolving children too).
+   * Recurses into subgroups so nested exclusive groups are handled at their
+   * own level; leaves of non-exclusive subfolders are unaffected.
+   *
+   * Assumes a layer id appears in at most one group (a Hajk config
+   * invariant) — the first match wins. Returns `null` when `id` is not a
+   * direct child of any exclusive group.
+   * @param {string} id
+   * @returns {string[] | null}
+   */
+  #getExclusiveSiblings(id) {
+    const walk = (groups) => {
+      if (!Array.isArray(groups)) {
+        return null;
+      }
+      for (const group of groups) {
+        if (!group) {
+          continue;
+        }
+        const directIds = getDirectLayerIdsFromGroup(group);
+        if (group.exclusive === true && directIds.includes(id)) {
+          return directIds.filter(
+            (sibId) => sibId !== id && this.getLayer(sibId) !== undefined
+          );
+        }
+        const found = walk(group.groups);
+        if (found) {
+          return found;
+        }
+      }
+      return null;
+    };
+    return walk(this.#layerSwitcherConfig?.options?.groups);
+  }
+
+  /**
+   * Whether a layer, a LayerSwitcher tree-group folder, or a single sublayer is
+   * toggled visible. This reflects the toggled state — equivalent to
+   * OpenLayers' `getVisible()` — NOT zoom/extent-aware visibility (OpenLayers'
+   * `isVisible(view)`).
    * @param {string} id A layer id, a LayerSwitcher tree-group folder id, or a
    * `"groupId:subLayerId"` sublayer address.
    * @returns {boolean} For a layer: whether it is visible. For a group folder:
    * whether all of its leaf layers are visible. For a sublayer address: whether
    * that sublayer is visible.
    */
-  layerIsVisible(id) {
+  isLayerVisible(id) {
     const sub = this.#resolveSubLayerTarget(id);
     if (sub) {
-      return this.subLayerIsVisible(sub.groupId, sub.subLayerId);
+      return this.isSubLayerVisible(sub.groupId, sub.subLayerId);
     }
 
     const olLayer = this.getLayer(id);
     if (olLayer === undefined) {
       // Not a real layer — maybe a LayerSwitcher tree-group folder.
       if (this.#getGroupLayerIds(id) !== null) {
-        return this.groupIsVisible(id);
+        return this.isGroupVisible(id);
       }
       return false;
     }
@@ -324,6 +393,13 @@ class LayerControlModel {
    * LayerSwitcher tree-group folder instead of a real layer, this delegates to
    * `showGroup(id)`. A `"groupId:subLayerId"` address delegates to
    * `showSubLayer(groupId, subLayerId)`.
+   *
+   * If the layer is a direct child of an exclusive tree group
+   * (`exclusive: true`), this also hides all the group's other direct
+   * children (radio semantics), whether the layer is a regular layer or a
+   * Hajk (WMS) group layer. `toggleLayer`/`setLayerVisibility` inherit this
+   * via delegation; `hideLayer` does not touch siblings ("none visible" is a
+   * valid radio state).
    * @param {string} id
    * @param {{ subLayers?: string[], useLabelStyle?: boolean }} [options]
    */
@@ -345,6 +421,23 @@ class LayerControlModel {
         `Attempt to show layer with id ${id} failed: layer not found in current map`
       );
       return;
+    }
+
+    // Exclusive tree-group (radio) semantics: showing a direct child of an
+    // exclusive group hides all its other direct children, mirroring the
+    // LayerSwitcher UI's radio behavior. Applies to WMS group layers
+    // ("group") and regular layers. Base layers have their own exclusivity
+    // below, and system layers are refused anyway, so both are skipped.
+    // Hiding via hideLayer() per sibling is safe: hideLayer never calls
+    // showLayer, so this cannot recurse. Re-showing an already-visible layer
+    // is idempotent and repairs a broken invariant.
+    const exclusiveSiblings = this.#getExclusiveSiblings(id);
+    if (
+      exclusiveSiblings &&
+      olLayer.get("layerType") !== "base" &&
+      olLayer.get("layerType") !== "system"
+    ) {
+      exclusiveSiblings.forEach((sibId) => this.hideLayer(sibId));
     }
 
     switch (olLayer.get("layerType")) {
@@ -451,12 +544,12 @@ class LayerControlModel {
    * Toggle a layer's visibility by id. Also accepts a LayerSwitcher tree-group
    * folder id, or a `"groupId:subLayerId"` sublayer address (e.g.
    * `toggleLayer("70d0ft:trafiksamordning_linje_paborjad")`) — these route
-   * through `layerIsVisible` + `showLayer`/`hideLayer` automatically.
+   * through `isLayerVisible` + `showLayer`/`hideLayer` automatically.
    * @param {string} id
    * @param {{ subLayers?: string[], useLabelStyle?: boolean }} [options]
    */
   toggleLayer(id, options) {
-    if (this.layerIsVisible(id)) {
+    if (this.isLayerVisible(id)) {
       this.hideLayer(id);
     } else {
       this.showLayer(id, options);
@@ -545,6 +638,12 @@ class LayerControlModel {
   /**
    * Set the exact set of visible sublayers for a WMS group layer. The provided
    * ids are sorted to match the configured `allSubLayers` order.
+   *
+   * If the resulting set is non-empty (the parent becomes, or may become,
+   * visible) and the parent is a direct child of an exclusive tree group,
+   * this also hides the parent's exclusive siblings. An empty result (last
+   * sublayer removed, e.g. via `hideSubLayer`) leaves the siblings untouched.
+   * `showSubLayer`/`hideSubLayer` inherit this via delegation.
    * @param {string} id
    * @param {string[]} subLayerIds
    */
@@ -562,10 +661,20 @@ class LayerControlModel {
     const sorted = allSubLayers.filter((l) => wanted.has(l));
     olLayer.set("subLayers", sorted);
     setOLSubLayers(olLayer, sorted);
+    // Exclusive tree-group semantics: activating sublayers (the parent
+    // becomes, or may become, visible) hides the parent's exclusive
+    // siblings. When the result is empty (last sublayer removed via
+    // hideSubLayer) the parent is going invisible, so siblings are left
+    // alone — "none visible" is a valid state.
+    if (sorted.length > 0) {
+      this.#getExclusiveSiblings(id)?.forEach((sibId) => this.hideLayer(sibId));
+    }
   }
 
   /**
-   * Show a single sublayer of a WMS group layer.
+   * Show a single sublayer of a WMS group layer. If the parent is a direct
+   * child of an exclusive tree group, this also hides the parent's exclusive
+   * siblings (see `setSubLayers`).
    * @param {string} id
    * @param {string} subLayerId
    */
@@ -612,7 +721,7 @@ class LayerControlModel {
    * @param {string} subLayerId
    * @returns {boolean}
    */
-  subLayerIsVisible(id, subLayerId) {
+  isSubLayerVisible(id, subLayerId) {
     const olLayer = this.getLayer(id);
     if (olLayer === undefined || !olLayer.get("visible")) {
       return false;
@@ -630,7 +739,7 @@ class LayerControlModel {
    * @param {string} subLayerId
    */
   toggleSubLayer(id, subLayerId) {
-    if (this.subLayerIsVisible(id, subLayerId)) {
+    if (this.isSubLayerVisible(id, subLayerId)) {
       this.hideSubLayer(id, subLayerId);
     } else {
       this.showSubLayer(id, subLayerId);
@@ -654,20 +763,22 @@ class LayerControlModel {
 
   /**
    * Whether a LayerSwitcher tree-group folder is fully visible, i.e. every one
-   * of its leaf layers is visible. (Equivalent to `layerIsVisible(folderId)`.)
+   * of its leaf layers is visible. (Equivalent to `isLayerVisible(folderId)`.)
    * @param {string} groupId
    * @returns {boolean}
    */
-  groupIsVisible(groupId) {
+  isGroupVisible(groupId) {
     const ids = this.#getGroupLayerIds(groupId);
     if (ids === null || ids.length === 0) {
       return false;
     }
-    return ids.every((id) => this.layerIsVisible(id));
+    return ids.every((id) => this.isLayerVisible(id));
   }
 
   /**
-   * Show every leaf layer under a LayerSwitcher tree-group folder.
+   * Show every leaf layer under a LayerSwitcher tree-group folder. For an
+   * exclusive folder this has radio semantics: only the first direct child
+   * that resolves to an OL layer is shown (see `setGroupVisibility`).
    * @param {string} groupId
    */
   showGroup(groupId) {
@@ -688,11 +799,17 @@ class LayerControlModel {
    * @param {string} groupId
    */
   toggleGroup(groupId) {
-    this.setGroupVisibility(groupId, !this.groupIsVisible(groupId));
+    this.setGroupVisibility(groupId, !this.isGroupVisible(groupId));
   }
 
   /**
-   * Set visibility for every leaf layer under a LayerSwitcher tree-group folder.
+   * Set visibility for every leaf layer under a LayerSwitcher tree-group
+   * folder. For an exclusive folder (`exclusive: true`), `visible === true`
+   * shows only the FIRST direct child that resolves to an OL layer (radio
+   * semantics) instead of every leaf; if no direct child resolves, a warning
+   * is logged and nothing is shown. `visible === false` hides every leaf
+   * (recursively), which is valid for exclusive groups too. Non-exclusive
+   * groups are unchanged.
    * @param {string} groupId
    * @param {boolean} visible
    */
@@ -704,6 +821,35 @@ class LayerControlModel {
         `Attempt to set group visibility for ${groupId} failed: no layers found for group`
       );
       return;
+    }
+
+    // Exclusive groups have radio semantics: showing the folder shows only
+    // its first direct child that resolves to an OL layer (showLayer's
+    // sibling logic hides the rest). Non-resolving children are skipped —
+    // the LayerSwitcher drops those too. If NO direct child resolves, warn
+    // and bail out rather than falling through to the show-all loop below:
+    // #getGroupLayerIds collects leaves recursively, so a group whose only
+    // resolving leaves sit in nested subgroups would otherwise get them all
+    // shown, violating radio semantics. Hiding (visible === false) keeps
+    // the existing hide-all loop — "none selected" is a valid radio state.
+    if (visible) {
+      const group = findGroupInConfig(
+        this.#layerSwitcherConfig?.options?.groups,
+        groupId
+      );
+      if (group?.exclusive === true) {
+        const firstChild = getDirectLayerIdsFromGroup(group).find(
+          (childId) => this.getLayer(childId) !== undefined
+        );
+        if (firstChild === undefined) {
+          console.warn(
+            `Attempt to show group ${groupId} failed: no direct child layers found in current map`
+          );
+          return;
+        }
+        this.showLayer(firstChild);
+        return;
+      }
     }
 
     ids.forEach((id) => {
@@ -813,7 +959,7 @@ class LayerControlModel {
    * @returns {boolean}
    */
   getVisibilitySnapshot(id) {
-    return this.layerIsVisible(id);
+    return this.isLayerVisible(id);
   }
 
   /**
@@ -879,7 +1025,7 @@ class LayerControlModel {
   #getSubLayerStateSnapshot(cacheId, groupId, subLayerId) {
     const group = this.getLayer(groupId);
     const next = {
-      visible: this.subLayerIsVisible(groupId, subLayerId),
+      visible: this.isSubLayerVisible(groupId, subLayerId),
       visibleSubLayers: group?.get("visible")
         ? (group.get("subLayers") ?? [])
         : [],
@@ -908,7 +1054,7 @@ class LayerControlModel {
    */
   #getGroupStateSnapshot(id, leafIds) {
     const visibleLayers = leafIds.filter((leafId) =>
-      this.layerIsVisible(leafId)
+      this.isLayerVisible(leafId)
     );
     const count = visibleLayers.length;
     const total = leafIds.length;
