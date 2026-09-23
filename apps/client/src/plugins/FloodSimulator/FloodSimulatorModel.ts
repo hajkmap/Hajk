@@ -7,6 +7,7 @@ import type { EventsKey } from "ol/events";
 import type { Options as WebGLTileOptions } from "ol/layer/WebGLTile";
 import type { SourceType } from "ol/layer/WebGLTile";
 import type { Pixel } from "ol/pixel";
+import type { UrlLike } from "ol/source/ImageTile";
 import type OlMap from "ol/Map";
 import type { HajkApp } from "../../types/hajk";
 import type {
@@ -16,11 +17,16 @@ import type {
 } from "./types";
 
 import { LAYER_NAME, LAYER_Z_INDEX, UI_STRINGS } from "./constants";
-import { createElevationTileGrid, parseExtent } from "./elevationTileGrid";
+import {
+  createLookupTileGrid,
+  parseExtent,
+  type LookupTileGrid,
+} from "./elevationTileGrid";
 import { colorChannels } from "./utils/color";
 import { decodeElevationFromPixelData } from "./utils/elevation";
 import { createFloodLayerStyle } from "./utils/floodStyle";
 import { resolveFloodSimulatorOptions } from "./utils/resolveOptions";
+import { xyzUrl } from "./utils/xyzUrl";
 
 export default class FloodSimulatorModel {
   #app: HajkApp;
@@ -112,7 +118,10 @@ export default class FloodSimulatorModel {
       return;
     }
     this.#options.interpolate = enabled;
-    if (!this.#layer) {
+    // Nothing is torn down until a replacement source exists: if there is
+    // none (or no layer to swap it into), the current state is left intact.
+    const source = this.#createSource();
+    if (!source || !this.#layer) {
       return;
     }
     unByKey(this.#sourceListeners);
@@ -120,10 +129,6 @@ export default class FloodSimulatorModel {
     const generation = ++this.#generation;
     this.#sourceErrorShown = false;
     this.#tileLoadErrors = 0;
-    const source = this.#createSource();
-    if (!source || generation !== this.#generation) {
-      return;
-    }
     const previousSource = this.#source;
     this.#source = source;
     this.#layer.setSource(source);
@@ -230,26 +235,25 @@ export default class FloodSimulatorModel {
       return null;
     }
 
-    const tileGrid = createElevationTileGrid({
+    const lookupGrid = createLookupTileGrid({
+      lookup: terrainZoomLookup,
+      resolutions: elevationTileGrid.resolutions,
       origin: elevationTileGrid.origin,
       originExtent: elevationTileGrid.originExtent,
       extent: elevationTileGrid.extent,
-      resolutions: elevationTileGrid.resolutions,
       tileSize,
-      lookup: terrainZoomLookup,
     });
 
-    if (!tileGrid) {
+    if (!lookupGrid) {
       console.warn(UI_STRINGS.tileGridMissing);
     }
 
     return new ImageTile({
-      url: elevationUrl,
+      url: createElevationUrlGetter(elevationUrl, lookupGrid),
       tileSize,
-      tileGrid,
       // minZoom/maxZoom are unused when tileGrid is set; only applied in the
       // fallback EPSG:3857 XYZ grid that OpenLayers builds without a tileGrid.
-      ...(tileGrid ? {} : { minZoom, maxZoom }),
+      ...(lookupGrid ? { tileGrid: lookupGrid.grid } : { minZoom, maxZoom }),
       // Linear resampling (default) smooths tile edges. Nearest-neighbour
       // keeps Terrain-RGB / Terrarium encodings exact when the view is
       // coarser than the tile.
@@ -283,11 +287,6 @@ export default class FloodSimulatorModel {
         smoothDepthColors: this.#smoothDepthColors,
         isobaths: this.#isobaths,
       }),
-      // OpenLayers' WebGL tile cache defaults to 512. A limited DEM viewed at
-      // minZoom can need more (a 40 km pyramid at 5.6 m is ~900 tiles). Extra
-      // representations are disposed at the end of the frame, so data tiles
-      // can vanish when zoomed out. Raising cacheSize to 2× that range (capped
-      // at 8192) would keep them, at a few hundred MB of GPU memory.
       opacity: this.#options.layerOpacity,
       zIndex: LAYER_Z_INDEX,
       visible: this.#visible,
@@ -366,4 +365,24 @@ export default class FloodSimulatorModel {
     );
     this.#app.globalObserver.publish("core.alert", UI_STRINGS.projectionAlert);
   }
+}
+
+/**
+ * ImageTile has no `tileUrlFunction` option (it is not a `UrlTile`); its
+ * public `url` option accepts a getter. The tile grid zoom is a lookup
+ * index, not the terrain `{z}`, so the getter rewrites `{z}` to the mapped
+ * level. `options.maxY` (the grid's highest `{y}` at that zoom) is supplied
+ * by the source for `{-y}` templates. Without a lookup grid (fallback
+ * path) the plain template string is returned as-is.
+ */
+function createElevationUrlGetter(
+  elevationUrl: string,
+  lookupGrid: LookupTileGrid | undefined
+): UrlLike {
+  if (!lookupGrid) {
+    return elevationUrl;
+  }
+  const { levels } = lookupGrid;
+  return (z, x, y, options) =>
+    xyzUrl(elevationUrl, levels[z], x, y, options.maxY);
 }

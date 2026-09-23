@@ -9,6 +9,7 @@ interface UseFloodLevelAnimationOptions {
   minLevel: number;
   maxLevel: number;
   defaultLevel: number;
+  levelDecimals: number;
   animationDurationMs: number;
   durationMaxSec: number;
 }
@@ -18,6 +19,7 @@ export default function useFloodLevelAnimation({
   minLevel,
   maxLevel,
   defaultLevel,
+  levelDecimals,
   animationDurationMs,
   durationMaxSec,
 }: UseFloodLevelAnimationOptions) {
@@ -40,12 +42,12 @@ export default function useFloodLevelAnimation({
 
   const applyLevel = useCallback(
     (next: number) => {
-      const rounded = clampNumber(next, minLevel, maxLevel, 2);
+      const rounded = clampNumber(next, minLevel, maxLevel, levelDecimals);
       levelRef.current = rounded;
       setLevel(rounded);
       model.setLevel(rounded);
     },
-    [maxLevel, minLevel, model]
+    [levelDecimals, maxLevel, minLevel, model]
   );
 
   const stopAnimation = useCallback(() => {

@@ -10,6 +10,7 @@ import {
 import useElevationReadout from "./hooks/useElevationReadout";
 import useFloodLevelAnimation from "./hooks/useFloodLevelAnimation";
 import type { FloodSimulatorViewProps } from "./types";
+import { decimalsFromStep } from "./utils/format";
 import AnimationControls from "./views/AnimationControls";
 import DepthShadingSection from "./views/DepthShadingSection";
 import ElevationReadout from "./views/ElevationReadout";
@@ -44,6 +45,7 @@ function FloodSimulatorView({
   } = model.getOptions();
 
   const shadingDepthStep = levelStep > 0 ? levelStep : 0.01;
+  const levelDecimals = decimalsFromStep(levelStep);
   const [sliderMaxLevel, setSliderMaxLevel] = useState(maxLevel);
   const [durationMaxSec, setDurationMaxSec] = useState(
     ANIMATION_DURATION_MAX_S
@@ -83,6 +85,7 @@ function FloodSimulatorView({
     minLevel,
     maxLevel: sliderMaxLevel,
     defaultLevel,
+    levelDecimals,
     animationDurationMs,
     durationMaxSec,
   });
@@ -92,6 +95,7 @@ function FloodSimulatorView({
     model,
     enabled: pluginShown && showElevationReadout,
     level,
+    decimals: levelDecimals,
     minElevation,
     maxElevation,
   });
@@ -151,7 +155,7 @@ function FloodSimulatorView({
             min={minLevel}
             max={sliderMaxLevel}
             step={levelStep}
-            decimals={2}
+            decimals={levelDecimals}
             unit="m"
             inputMode="decimal"
             onInteractStart={stopAnimation}

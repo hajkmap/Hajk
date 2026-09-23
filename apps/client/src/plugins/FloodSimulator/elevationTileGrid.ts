@@ -1,9 +1,7 @@
 import TileGrid from "ol/tilegrid/TileGrid";
 
-import type { Options as TileGridOptions } from "ol/tilegrid/TileGrid";
 import type { Coordinate } from "ol/coordinate";
 import type { Extent } from "ol/extent";
-import type { NearestDirectionFunction } from "ol/array";
 import type { TerrainZoomByMapZoom } from "./types";
 
 export interface ElevationTileGridConfig {
@@ -17,38 +15,6 @@ export interface MapTileConfig {
   extent?: number[];
   resolutions?: number[];
   projection?: string;
-}
-
-/**
- * Tile grid that asks for terrain-pyramid Z values instead of the Hajk view zoom.
- * `{x}`/`{y}` are computed at the mapped Z, so overzoom / underzoom still lines up.
- *
- * Relies on OpenLayers calling `getZForResolution` *before* `getTileCoordForCoordAndZ`
- * / `getTileRangeForExtentAndZ`. The two call sites this is known to work with are:
- * - `ol/renderer/webgl/TileLayerBase.js` (render / enqueueTiles)
- * - `ol/renderer/webgl/TileLayer.js` `WebGLTileLayerRenderer.getData()`
- * That ordering is internal, not public API — an `ol` minor upgrade can break it.
- */
-class MappedTileGrid extends TileGrid {
-  #lookup: number[];
-
-  constructor(options: TileGridOptions, lookup: number[]) {
-    super(options);
-    this.#lookup = lookup;
-  }
-
-  getZForResolution(
-    resolution: number,
-    direction?: number | NearestDirectionFunction
-  ): number {
-    const mapZ = super.getZForResolution(resolution, direction);
-    const mapped = this.#lookup[mapZ];
-    if (Number.isFinite(mapped)) {
-      return mapped;
-    }
-    const last = this.#lookup[this.#lookup.length - 1];
-    return Number.isFinite(last) ? last : mapZ;
-  }
 }
 
 export function clamp(value: number, min: number, max: number): number {
@@ -151,17 +117,47 @@ export function parseExtent(value: unknown): Extent | undefined {
   return [minX, minY, maxX, maxY];
 }
 
-export function createElevationTileGrid(params: {
-  origin?: number[];
-  extent?: number[];
-  originExtent?: number[];
+export interface LookupTileGrid {
+  /** Tile grid whose zoom index `i` has resolution `resolutions[levels[i]]`. */
+  grid: TileGrid;
+  /** Terrain pyramid `{z}` for each grid zoom index (used in the tile URL). */
+  levels: number[];
+}
+
+/**
+ * Elevation tile grid with the map-zoom → terrain-level mapping encoded in the
+ * grid *data* instead of an overridden `getZForResolution` (which would rely on
+ * internal renderer call ordering).
+ *
+ * The grid has one zoom index per distinct terrain level, with the map
+ * resolution of that level. Whichever index the renderer's nearest-resolution
+ * match picks, it maps to a valid level: map resolutions are strictly
+ * decreasing, so a view resolution between two map zooms is nearest the level
+ * used at those zooms, and zooming past the pyramid edges reuses the coarsest
+ * / finest level — the same clamp the lookup describes.
+ *
+ * Grid zoom `i` tiles the extent exactly like pyramid level `levels[i]`
+ * (the plugin's documented invariant), so `{x}`/`{y}` carry over unchanged;
+ * only the URL `{z}` needs rewriting, which the source's url getter does.
+ */
+export function createLookupTileGrid(params: {
+  lookup?: number[];
   resolutions?: number[];
+  origin?: number[];
+  originExtent?: number[];
+  extent?: number[];
   tileSize: number;
-  lookup: number[];
-}): TileGrid | undefined {
-  const { origin, extent, originExtent, resolutions, tileSize, lookup } =
+}): LookupTileGrid | undefined {
+  const { lookup, resolutions, origin, extent, originExtent, tileSize } =
     params;
-  if (!isNumberArray(resolutions, 1)) {
+  if (!isNumberArray(resolutions, 1) || !isNumberArray(lookup, 1)) {
+    return undefined;
+  }
+  if (!lookup.every((level) => isValidLevel(level, resolutions.length))) {
+    return undefined;
+  }
+  const levels = distinctLevels(monotoneLookup(lookup));
+  if (levels.length === 0) {
     return undefined;
   }
 
@@ -170,15 +166,49 @@ export function createElevationTileGrid(params: {
     return undefined;
   }
 
-  return new MappedTileGrid(
-    {
+  return {
+    grid: new TileGrid({
       origin: xyzOrigin,
       extent: parseExtent(extent),
-      resolutions,
+      resolutions: levels.map((level) => resolutions[level]),
       tileSize,
-    },
-    lookup
-  );
+    }),
+    levels,
+  };
+}
+
+/**
+ * A pathological `terrainZoomByMapZoom` can map a finer terrain level to a
+ * lower map zoom than to a higher one. Such a lookup cannot be encoded as
+ * grid resolutions (they must be strictly descending), so it is replaced with
+ * the equivalent of the default `minZoom`/`maxZoom` clamping.
+ */
+function monotoneLookup(lookup: number[]): number[] {
+  for (let i = 1; i < lookup.length; i++) {
+    if (lookup[i] < lookup[i - 1]) {
+      console.warn(
+        "FloodSimulator: terrainZoomByMapZoom is not monotone (a finer terrain level is mapped to a lower map zoom than a higher one); using the minZoom/maxZoom clamp instead."
+      );
+      const min = Math.min(...lookup);
+      const max = Math.max(...lookup);
+      return lookup.map((_, z) => clamp(z, min, max));
+    }
+  }
+  return lookup;
+}
+
+function distinctLevels(lookup: number[]): number[] {
+  const levels: number[] = [];
+  for (const level of lookup) {
+    if (levels[levels.length - 1] !== level) {
+      levels.push(level);
+    }
+  }
+  return levels;
+}
+
+function isValidLevel(level: number, resolutionCount: number): boolean {
+  return Number.isInteger(level) && level >= 0 && level < resolutionCount;
 }
 
 /**

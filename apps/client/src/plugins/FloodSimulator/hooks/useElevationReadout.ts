@@ -11,6 +11,7 @@ interface UseElevationReadoutOptions {
   model: FloodSimulatorModel;
   enabled: boolean;
   level: number;
+  decimals: number;
   minElevation: number;
   maxElevation: number;
 }
@@ -20,6 +21,7 @@ export default function useElevationReadout({
   model,
   enabled,
   level,
+  decimals,
   minElevation,
   maxElevation,
 }: UseElevationReadoutOptions) {
@@ -51,7 +53,7 @@ export default function useElevationReadout({
         minElevation,
         maxElevation
       );
-      const key = readoutKey(next);
+      const key = readoutKey(next, decimals);
       if (key === lastReadoutKeyRef.current) {
         return;
       }
@@ -84,7 +86,7 @@ export default function useElevationReadout({
         pointerFrameRef.current = null;
       }
     };
-  }, [enabled, map, maxElevation, minElevation, model]);
+  }, [decimals, enabled, map, maxElevation, minElevation, model]);
 
   return { readout, resetReadout };
 }
@@ -105,9 +107,9 @@ function toReadout(
   return { kind: "value", elevation: sample.elevation, depth };
 }
 
-function readoutKey(readout: Readout): string {
+function readoutKey(readout: Readout, decimals: number): string {
   if (readout.kind !== "value") {
     return readout.kind;
   }
-  return `value:${readout.elevation.toFixed(2)}:${readout.depth.toFixed(2)}`;
+  return `value:${readout.elevation.toFixed(decimals)}:${readout.depth.toFixed(decimals)}`;
 }
