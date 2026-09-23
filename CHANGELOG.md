@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Client + Admin: Bumped `x2js` from 3.4.4 to 3.4.5
+- Client: Bumped Vite from 7.3.2 to 7.3.6.
+- Backend: Bumped ESLint from 9.39.2 to 9.39.5.
 - Backend: Upgraded `write-excel-file` from 3.x to 4.x.
 - Backend: Enhance detailed request logger with structured output and file logging configuration [#1836](https://github.com/hajkmap/Hajk/pull/1836)
 - Backend: Bumped the [API Explorer](https://github.com/swagger-api/swagger-ui) to v5.32.6.
