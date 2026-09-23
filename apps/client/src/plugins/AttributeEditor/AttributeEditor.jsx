@@ -909,6 +909,7 @@ function AttributeEditor(props) {
           layerType: "system",
           ignoreInFeatureInfo: true,
           zIndex: 5000,
+          caption: "AttributeEditor layer",
           style: new Style({
             image: new CircleStyle({
               radius: 6,
