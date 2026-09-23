@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Client: Add centralized LayerControlModel API (showLayer/hideLayer/toggleLayer/isLayerVisible) for toggling layers by id, exposed on the AppModel and `window.hajkPublicApi`, plus `useLayerVisibility`/`useLayerState` React hooks.
 - Client + Admin: LayerSwitcher - Added an optional vector-tile based OpenStreetMap background layer (`enableOSMVector`), rendered from OpenFreeMap by default. Unlike the existing raster OSM layer, it stays sharp on high-DPI displays since it isn't limited by a fixed-resolution tile server. Admins can point `osmVectorStyleUrl` at a different style instead of the public OpenFreeMap instance — note that in the MapLibre style spec the style JSON also declares its own tile source, so this overrides where tiles are fetched from too, not just the visual style. The tile layer's `renderMode` ("vector" or "hybrid") is also admin-configurable, since the best tradeoff between sharpness and performance depends on the chosen style and target hardware. PR [#1887](https://github.com/hajkmap/Hajk/pull/1887)
 - Client + Admin: LayerSwitcher - Added a new admin setting "Visa teckenförklaring direkt" that forces the legend to be expanded by default in the layer details view, so users don't have to click the legend button. [#1838](https://github.com/hajkmap/Hajk/issues/1838)
 - Client + Admin: DocumentHandler - Added a "Direct Print" setting that prints the currently active document directly without showing the document selection dialog [#1773](https://github.com/hajkmap/Hajk/issues/1773)
@@ -59,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: Location plugin now has an optional follow location toggle. Enabling it will re-center the map on user's location when location changes. [#1875](https://github.com/hajkmap/Hajk/issues/1875)
 - Client: Anchor plugin refactored from class to function components with hooks, replacing `document.execCommand("copy")` with the Clipboard API and the `withSnackbar` HOC with notistack's `useSnackbar`. The "Öppna länk" button is always shown, including when the Clipboard API is unavailable (e.g. insecure contexts). No other behavior change.
 - Client: Added a second example config, `map_3857.json`, showcasing the new OSM vector tile layer as well as a couple of global open WMSes.
+- Client: LayerControlModel now enforces exclusive-group (radio) semantics — showing a direct child (including Hajk group layers and sublayer activation) auto-hides its siblings, and showGroup() on an exclusive folder shows only the first child. [#1848](https://github.com/hajkmap/Hajk/pull/1848)
 
 ### Fixed
 

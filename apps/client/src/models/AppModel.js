@@ -1,6 +1,7 @@
 import AnchorModel from "./AnchorModel";
 import SearchModel from "./SearchModel";
 import WindowZModel from "./WindowZModel";
+import LayerControlModel from "./LayerControlModel";
 import { decorateConfig } from "./appModel/configTranslator";
 import { createMap } from "./appModel/mapFactory";
 import { addLayers, highlight, clear } from "./appModel/layerLoader";
@@ -36,6 +37,7 @@ class AppModel {
    */
   constructor(_settings) {
     this.map = undefined;
+    this.layerControl = undefined;
     this.activeTool = undefined;
     this.layersFromParams = [];
     this.groupLayersFromParams = [];
@@ -203,6 +205,18 @@ class AppModel {
 
   addLayers() {
     addLayers(this);
+    return this;
+  }
+
+  addLayerControl() {
+    const layerSwitcherConfig = this.config.mapConfig.tools.find(
+      (t) => t.type === "layerswitcher"
+    );
+    this.layerControl = new LayerControlModel({
+      map: this.map,
+      globalObserver: this.globalObserver,
+      layerSwitcherConfig,
+    });
     return this;
   }
 
