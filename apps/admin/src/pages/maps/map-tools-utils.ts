@@ -1,22 +1,22 @@
-import type { TreeItem } from "dnd-kit-sortable-tree";
 import type { ToolOnMap, ToolWindowPosition, ToolZone } from "../../api/maps";
 import type { Tool } from "../../api/tools";
 import { getMapToolFieldConfig, type MapToolFieldConfig } from "./map-tool-field-config";
 
 const ID_DELIMITER = "::";
 
-/** Minimal tree-item shape used for tool zone membership (not DnD UI). */
-export interface ToolZoneItemData {
+/** Tool membership in a placement zone (list only — no DnD tree). */
+export interface ToolZoneItem {
+  id: string;
   type: "tool";
   name: string;
   canHaveChildren?: boolean;
 }
 
 export interface ToolZones {
-  drawer: TreeItem<ToolZoneItemData>[];
-  widgetLeft: TreeItem<ToolZoneItemData>[];
-  widgetRight: TreeItem<ToolZoneItemData>[];
-  control: TreeItem<ToolZoneItemData>[];
+  drawer: ToolZoneItem[];
+  widgetLeft: ToolZoneItem[];
+  widgetRight: ToolZoneItem[];
+  control: ToolZoneItem[];
 }
 
 export const EMPTY_TOOL_ZONES: ToolZones = {
@@ -274,7 +274,7 @@ export function resolveToolZone(tool: ToolOnMap): ToolZoneKey | null {
   return null;
 }
 
-function toZoneItem(tool: ToolOnMap): TreeItem<ToolZoneItemData> {
+function toZoneItem(tool: ToolOnMap): ToolZoneItem {
   return {
     id: `tool${ID_DELIMITER}${tool.toolId}`,
     name: getToolDisplayName(tool),
