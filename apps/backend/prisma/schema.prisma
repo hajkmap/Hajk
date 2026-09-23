@@ -93,6 +93,7 @@ model Group {
   layers            LayerInstance[]
   maps              GroupsOnMaps[]
   restrictedToRoles RoleOnGroup[]
+  // Is mapId missing here?
 
   deletedAt     DateTime? @db.Timestamptz(3)
   createdBy     String?
