@@ -169,6 +169,8 @@ export default class AngleSnapping {
             stroke: segmentStroke,
           })
         );
+        // Mark as measurement guide so it's not treated as a user-drawn feature
+        segmentFeature.set("USER_MEASUREMENT_GUIDE", true);
 
         this.#drawModel.addFeature(segmentFeature);
 

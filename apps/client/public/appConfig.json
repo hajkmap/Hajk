@@ -3,6 +3,7 @@
   "defaultMap": "simpleMapAndLayersConfig",
   "availableTools": [
     "Anchor",
+    "AttributeEditor",
     "Bookmarks",
     "Buffer",
     "CommandPalette",

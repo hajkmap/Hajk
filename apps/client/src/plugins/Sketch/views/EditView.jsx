@@ -55,6 +55,7 @@ const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
 };
 
 const EditView = (props) => {
+  const { uiDisabled = false } = props;
   // We have to get some information about the current activity (view)
   const activity = props.model.getActivityFromId(props.id);
 
@@ -86,6 +87,7 @@ const EditView = (props) => {
             drawModel={props.drawModel}
             modifyEnabled={props.modifyEnabled}
             setModifyEnabled={props.setModifyEnabled}
+            disabled={uiDisabled}
           />
         </Grid>
         <Grid size={12}>
@@ -96,18 +98,33 @@ const EditView = (props) => {
             </Typography>
           ) : (
             <Grid size={12}>
-              <FeatureTitleEditor
-                feature={props.editFeature}
-                model={props.model}
-                drawModel={props.drawModel}
-              />
-              <FeatureStyleEditor
-                feature={props.editFeature}
-                model={props.model}
-                drawModel={props.drawModel}
-                bufferState={props.bufferState}
-                setBufferState={props.setBufferState}
-              />
+              {props.editFeature?.get?.("__ae_style_delegate") === true ? (
+                <Typography align="center" style={{ marginTop: 24 }}>
+                  Detta objekt hanteras av redigerbart lager.
+                </Typography>
+              ) : (
+                <div
+                  style={{
+                    pointerEvents: uiDisabled ? "none" : "auto",
+                    opacity: uiDisabled ? 0.5 : 1,
+                    transition: "opacity 0.2s ease",
+                  }}
+                >
+                  <FeatureTitleEditor
+                    feature={props.editFeature}
+                    model={props.model}
+                    drawModel={props.drawModel}
+                  />
+                  <FeatureStyleEditor
+                    feature={props.editFeature}
+                    model={props.model}
+                    drawModel={props.drawModel}
+                    bufferState={props.bufferState}
+                    setBufferState={props.setBufferState}
+                    disabled={uiDisabled}
+                  />
+                </div>
+              )}
             </Grid>
           )}
         </Grid>
@@ -116,18 +133,21 @@ const EditView = (props) => {
         <Grid container style={{ marginTop: 8 }} spacing={2}>
           <Grid size={7}>
             <HajkToolTip title="Klicka för att duplicera det markerade objektet.">
-              <Button
-                variant="contained"
-                fullWidth
-                startIcon={<ContentCopy />}
-                size="small"
-                onClick={() => {
-                  props.drawModel.duplicateFeature(props.editFeature);
-                  props.drawModel.reBindFeaturePropertyListener();
-                }}
-              >
-                Duplicera
-              </Button>
+              <span style={{ display: "inline-block", width: "100%" }}>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  startIcon={<ContentCopy />}
+                  size="small"
+                  disabled={uiDisabled}
+                  onClick={() => {
+                    props.drawModel.duplicateFeature(props.editFeature);
+                    props.drawModel.reBindFeaturePropertyListener();
+                  }}
+                >
+                  Duplicera
+                </Button>
+              </span>
             </HajkToolTip>
           </Grid>
           <Grid size={5}>
@@ -138,6 +158,7 @@ const EditView = (props) => {
               onClick={handleZIndexMenu}
               endIcon={<ArrowDropDown />}
               size="small"
+              disabled={uiDisabled}
             >
               Ordna
             </Button>
@@ -154,6 +175,7 @@ const EditView = (props) => {
               }}
             >
               <MenuItem
+                disabled={uiDisabled}
                 onClick={() => {
                   props.drawModel.moveFeatureZIndexToTop(props.editFeature);
                 }}
