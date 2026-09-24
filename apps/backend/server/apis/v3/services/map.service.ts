@@ -666,10 +666,8 @@ class MapService {
                 }
               : baseOptions;
           layerCreates.push({
-            // Group composition is owned by the shared Group, not the map that
-            // last saved Kartlager. Stamping mapId here made deleteMap wipe
-            // Active layers on every other map reusing this group.
-            mapId: null,
+            // Active layers keep their map. Tree placement also sets the parent group.
+            mapId: map.id,
             groupId: entry.groupId,
             usage: UseType.FOREGROUND,
             visibleAtStart: layer.visibleAtStart,
@@ -686,6 +684,21 @@ class MapService {
         await tx.layerInstance.deleteMany({
           where: { groupId: entry.groupId },
         });
+        
+        const placedLayerIds = entry.layers.map((layer) => layer.layerId);
+        if (placedLayerIds.length > 0) {
+          await tx.layerInstance.deleteMany({
+            where: {
+              mapId: map.id,
+              groupId: null,
+              OR: [
+                { displayLayerId: { in: placedLayerIds } },
+                { searchLayerId: { in: placedLayerIds } },
+                { editingLayerId: { in: placedLayerIds } },
+              ],
+            },
+          });
+        }
         if (layerCreates.length > 0) {
           await tx.layerInstance.createMany({ data: layerCreates });
         }
