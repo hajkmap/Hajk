@@ -6,11 +6,7 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-
-// Used as the isDirty baseline in settings.tsx.
-export const measurerDefaults: Record<string, unknown> = {
-  visibleAtStart: false,
-};
+import { measurerDefaults } from "./tool-option-defaults";
 
 interface MeasurerRendererProps {
   tool: Tool;

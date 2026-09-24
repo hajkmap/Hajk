@@ -7,13 +7,7 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-
-// Matches Sketch.jsx's own fallback. Used as the isDirty baseline in settings.tsx.
-export const sketchDefaults: Record<string, unknown> = {
-  visibleAtStart: false,
-  instruction: "",
-  visibleForGroups: [],
-};
+import { sketchDefaults } from "./tool-option-defaults";
 
 interface SketchRendererProps {
   tool: Tool;

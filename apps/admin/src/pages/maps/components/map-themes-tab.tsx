@@ -163,7 +163,15 @@ export default function MapThemesTab({ mapName }: MapThemesTabProps) {
     reader.readAsText(file, "UTF-8");
     reader.onload = (loadEvent) => {
       try {
-        const result = JSON.parse(String(loadEvent.target?.result ?? ""));
+        const raw = loadEvent.target?.result;
+        if (typeof raw !== "string") {
+          setImportedData(null);
+          setImportStatus(false);
+          setImportMessage(t("maps.themes.importInvalid"));
+          return;
+        }
+
+        const result: unknown = JSON.parse(raw);
         if (!validateImportedThemeJson(result)) {
           setImportedData(null);
           setImportStatus(false);
@@ -178,11 +186,21 @@ export default function MapThemesTab({ mapName }: MapThemesTabProps) {
         setImportStatus(true);
         setImportMessage(t("maps.themes.importValid"));
 
-        if (result.metadata?.title && !title.trim()) {
-          setTitle(String(result.metadata.title));
+        const metadataTitle = result.metadata?.title;
+        if (
+          typeof metadataTitle === "string" &&
+          metadataTitle &&
+          !title.trim()
+        ) {
+          setTitle(metadataTitle);
         }
-        if (result.metadata?.description && !description.trim()) {
-          setDescription(String(result.metadata.description));
+        const metadataDescription = result.metadata?.description;
+        if (
+          typeof metadataDescription === "string" &&
+          metadataDescription &&
+          !description.trim()
+        ) {
+          setDescription(metadataDescription);
         }
       } catch {
         setImportedData(null);

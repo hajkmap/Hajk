@@ -19,35 +19,7 @@ import { Control, Controller, FieldValues, useForm } from "react-hook-form";
 import { SketchPicker } from "react-color";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-
-// Matches PrintView.jsx's own fallbacks. Note includeNorthArrow is `false`
-// here, not `true` like old legacy admin — the client changed since then.
-// Used as the isDirty baseline in settings.tsx.
-export const printDefaults: Record<string, unknown> = {
-  visibleAtStart: false,
-  useCustomTileLoaders: true,
-  maxTileSize: 4096,
-  instruction: "",
-  copyright: "",
-  disclaimer: "",
-  date: "",
-  scales: "",
-  scaleMeters: "",
-  dpis: "",
-  paperFormats: "",
-  logo: "",
-  northArrow: "",
-  includeLogo: true,
-  includeNorthArrow: false,
-  includeScaleBar: true,
-  includeQrCode: false,
-  includeImageBorder: false,
-  logoPlacement: "topRight",
-  northArrowPlacement: "topLeft",
-  scaleBarPlacement: "bottomLeft",
-  qrCodePlacement: "topRight",
-  mapTextColor: "#000000",
-};
+import { printDefaults } from "./tool-option-defaults";
 
 interface PrintToolRendererProps {
   tool: Tool;

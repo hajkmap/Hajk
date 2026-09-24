@@ -6,16 +6,7 @@ import FormFieldGrid, {
 import FormAccordion from "../../../components/form-components/form-accordion";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-
-// Used as the isDirty baseline in settings.tsx. Client BufferModel.js takes
-// only {map, localObserver} — no options at all. The legacy varbergVer/
-// geoserverUrl/notFeatureLayers/geoserverNameToCategoryName fields are dead:
-// buffering is computed entirely client-side now, no geoserver round-trip.
-export const bufferDefaults: Record<string, unknown> = {
-  visibleAtStart: false,
-  instruction: "",
-  visibleForGroups: [],
-};
+import { bufferDefaults } from "./tool-option-defaults";
 
 interface BufferRendererProps {
   tool: Tool;

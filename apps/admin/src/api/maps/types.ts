@@ -134,10 +134,10 @@ export interface MapLayerSwitcherGroup {
   layers?: MapLayerSwitcherLayerRef[];
   groups?: MapLayerSwitcherGroup[];
   /** @deprecated Prefer index on layers/groups. */
-  layerSwitcherTree?: Array<
+  layerSwitcherTree?: (
     | { type: "layer"; id: string }
     | { type: "group"; id: string }
-  >;
+  )[];
 }
 
 export interface MapLayerSwitcherBaselayer {

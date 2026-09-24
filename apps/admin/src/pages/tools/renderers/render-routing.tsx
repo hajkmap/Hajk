@@ -6,14 +6,7 @@ import FormFieldGrid, {
 import FormAccordion from "../../../components/form-components/form-accordion";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-
-// Used as the isDirty baseline in settings.tsx.
-export const routingDefaults: Record<string, unknown> = {
-  visibleAtStart: false,
-  instruction: "",
-  visibleForGroups: [],
-  apiKey: "",
-};
+import { routingDefaults } from "./tool-option-defaults";
 
 interface RoutingRendererProps {
   tool: Tool;

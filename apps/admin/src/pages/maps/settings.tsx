@@ -66,7 +66,7 @@ import {
   mapLayerActivationSignature,
   mapLayerActivationToPayload,
   type MapLayerActivationRow,
-} from "./components/map-layers-panel";
+} from "./map-layer-activation";
 import {
   applyLayerswitcherOptionsToActivationRows,
   getClientBaselayersFromToolOptions,

@@ -6,12 +6,7 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-
-// Used as the isDirty baseline in settings.tsx.
-export const locationDefaults: Record<string, unknown> = {
-  visibleAtStart: false,
-  visibleForGroups: [],
-};
+import { locationDefaults } from "./tool-option-defaults";
 
 interface LocationRendererProps {
   tool: Tool;

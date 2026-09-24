@@ -44,7 +44,7 @@ import { useNavigate } from "react-router";
 import { SquareSpinnerComponent } from "../../../components/progress/square-progress";
 import DialogWrapper from "../../../components/flexible-dialog";
 import CreateButton from "../../../components/create-button";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
 import LayerKindBadge from "./layer-kind-badge";
 import { LayerCategory, normalizeLayerCategory } from "../layer-category";
@@ -341,14 +341,13 @@ export default function LayersList({
     handleSubmit,
     control,
     reset,
-    watch,
     formState: { errors },
   } = useForm<LayerCreateForm>({
     defaultValues: { name: "", serviceId: "" },
     mode: "onChange",
     reValidateMode: "onChange",
   });
-  const watchServiceId = watch("serviceId");
+  const watchServiceId = useWatch({ control, name: "serviceId" });
   const { mutateAsync: createLayer, isPending: isCreatingLayer } =
     useCreateLayer(watchServiceId);
   const [duplicateConfirm, setDuplicateConfirm] =

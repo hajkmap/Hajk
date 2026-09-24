@@ -4,7 +4,7 @@ import type { Theme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 
 /** Primary page tabs (Settings / Layers / …) — matches maps settings. */
-export const settingsPageTabsSx = {
+const settingsPageTabsSx = {
   mb: 2,
   "& .MuiTab-root": {
     color: (theme: Theme) =>
@@ -24,7 +24,7 @@ export const settingsPageTabsSx = {
 };
 
 /** Nested section tabs inside a settings page (maps settings sections, tool sub-tabs). */
-export const settingsSectionTabsSx = {
+ const settingsSectionTabsSx = {
   mb: 2,
   minHeight: 36,
   pl: 1,

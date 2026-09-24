@@ -78,8 +78,6 @@ const SERVICE_PAGE_TABS = [
   },
 ] as const;
 
-type ServiceSettingsTab = (typeof SERVICE_PAGE_TABS)[number]["key"];
-
 export default function ServiceSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const navigate = useNavigate();

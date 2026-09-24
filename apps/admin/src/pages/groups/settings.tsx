@@ -14,7 +14,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { Controller, FieldValues, useForm } from "react-hook-form";
+import { Controller, FieldValues, useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import Page from "../../layouts/root/components/page";
@@ -78,7 +78,6 @@ function GroupSettings() {
     handleSubmit,
     control,
     reset,
-    watch,
     setError,
     clearErrors,
     formState: { errors, isDirty },
@@ -87,8 +86,11 @@ function GroupSettings() {
     reValidateMode: "onChange",
   });
 
+  const watchedRoleIds = useWatch({ control, name: "roleIds" }) as
+    | string[]
+    | undefined;
   const selectedRoleIds =
-    (watch("roleIds") as string[] | undefined) ??
+    watchedRoleIds ??
     group?.restrictedToRoles?.map((role) => role.roleId) ??
     [];
   const isDeleteConfirmNameMatching =
@@ -375,11 +377,11 @@ function GroupSettings() {
                           onChange={(_, selected) =>
                             field.onChange(selected.map((role) => role.id))
                           }
-                          renderTags={(value, getTagProps) =>
+                          renderValue={(value, getItemProps) =>
                             value.map((option, index) => (
                               <Chip
                                 label={option.title || option.code}
-                                {...getTagProps({ index })}
+                                {...getItemProps({ index })}
                                 key={option.id}
                               />
                             ))
@@ -403,7 +405,11 @@ function GroupSettings() {
             </FormFieldGrid>
           </FormPanel>
           <UsedInMapsPanel
-            rows={maps.map((map) => ({ id: map.id, map: map.name }))}
+            rows={maps.map((map) => ({
+              id: String(map.id),
+              map: map.name,
+              mapId: map.id,
+            }))}
             isLoading={isLoadingMaps}
             emptyMessage={t("groups.usedInMapsNone")}
           />

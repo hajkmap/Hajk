@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   InputAdornment,
@@ -28,8 +28,8 @@ export default function FormColorPicker({
   placeholder,
   disabled,
 }: FormColorPickerProps) {
-  const [open, setOpen] = useState(false);
-  const swatchRef = useRef<HTMLDivElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const open = Boolean(anchorEl);
 
   return (
     <>
@@ -46,8 +46,10 @@ export default function FormColorPicker({
             startAdornment: (
               <InputAdornment position="start">
                 <Box
-                  ref={swatchRef}
-                  onClick={() => !disabled && setOpen((v) => !v)}
+                  onClick={(e) => {
+                    if (disabled) return;
+                    setAnchorEl(anchorEl ? null : e.currentTarget);
+                  }}
                   sx={{
                     width: 20,
                     height: 20,
@@ -65,13 +67,13 @@ export default function FormColorPicker({
       />
       <Popover
         open={open}
-        anchorEl={swatchRef.current}
+        anchorEl={anchorEl}
         onClose={() => {
           // Blur first so MUI's aria-hidden doesn't land on a focused descendant.
           if (document.activeElement instanceof HTMLElement) {
             document.activeElement.blur();
           }
-          setOpen(false);
+          setAnchorEl(null);
         }}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         transformOrigin={{ vertical: "top", horizontal: "left" }}

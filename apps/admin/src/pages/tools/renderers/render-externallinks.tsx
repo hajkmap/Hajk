@@ -14,14 +14,7 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-
-// ExternalLinks isn't a BaseWindowPlugin (client controls/ExternalLinks.jsx)
-// — no window placement, instruction tooltip, or visibleAtStart to configure.
-export const externalLinksDefaults: Record<string, unknown> = {
-  title: "Öppna koordinat i extern applikation", // client ExternalLinks.jsx:34 fallback
-  list: [],
-  visibleForGroups: [],
-};
+import { externalLinksDefaults } from "./tool-option-defaults";
 
 interface ExternalLinksRendererProps {
   tool: Tool;

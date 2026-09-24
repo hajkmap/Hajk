@@ -10,7 +10,8 @@ import FormActionPanel from "../../components/form-action-panel";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
 import { useRef, useEffect } from "react";
 import { toast } from "react-toastify";
-import RenderTool, { getToolOptionDefaults } from "./renderers/render-tool";
+import RenderTool from "./renderers/render-tool";
+import { getToolOptionDefaults } from "./renderers/tool-option-defaults";
 import UsedInMapsPanel from "../../components/used-in-maps-panel";
 import { useForm, FieldValues } from "react-hook-form";
 

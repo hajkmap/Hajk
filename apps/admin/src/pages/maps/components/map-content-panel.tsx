@@ -9,7 +9,8 @@ import type { Tool } from "../../../api/tools";
 import type { LayerSwitcherDraft } from "../../groups-development/types";
 import GroupLayerTree from "../../groups-development/components/group-layer-tree";
 import { findActiveLayerswitcher } from "../../groups-development/utils/active-layerswitcher";
-import MapLayersPanel, { type MapLayerActivationRow } from "./map-layers-panel";
+import MapLayersPanel from "./map-layers-panel";
+import type { MapLayerActivationRow } from "../map-layer-activation";
 
 const CONTENT_SUB_TABS = [
   {

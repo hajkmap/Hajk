@@ -23,20 +23,7 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-
-// Used as the isDirty baseline in settings.tsx. Matches CoordinatesModel.js's
-// own fallbacks (client MapClickModel is not involved here).
-export const coordinatesDefaults: Record<string, unknown> = {
-  visibleAtStart: false,
-  instruction: "",
-  visibleForGroups: [],
-  thousandSeparator: false,
-  showFieldsOnStart: false,
-  src: "marker.png",
-  anchor: [0.5, 1],
-  scale: 0.15,
-  transformations: [],
-};
+import { coordinatesDefaults } from "./tool-option-defaults";
 
 interface CoordinatesRendererProps {
   tool: Tool;

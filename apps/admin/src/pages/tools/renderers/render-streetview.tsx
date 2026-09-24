@@ -6,14 +6,7 @@ import FormFieldGrid, {
 import FormAccordion from "../../../components/form-components/form-accordion";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-
-// Used as the isDirty baseline in settings.tsx.
-export const streetviewDefaults: Record<string, unknown> = {
-  visibleAtStart: false,
-  instruction: "",
-  visibleForGroups: [],
-  apiKey: "",
-};
+import { streetviewDefaults } from "./tool-option-defaults";
 
 interface StreetViewRendererProps {
   tool: Tool;

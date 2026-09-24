@@ -343,7 +343,7 @@ export function zonesToToolsPayload(
   windowSizes: Record<number, ToolWindowSize>,
   inactiveTargets: Record<number, ToolZone>,
   mapTools: ToolOnMap[],
-  toolTypesById: Map<number, string> = new Map(),
+  toolTypesById: Map<number, string> = new Map<number, string>(),
   indexes: Record<number, number> = {},
 ): MapToolPayloadEntry[] {
   const mapToolsById = new Map(mapTools.map((tool) => [tool.toolId, tool]));
@@ -373,9 +373,7 @@ export function zonesToToolsPayload(
         target = zone ? ZONE_TO_TARGET[zone] : null;
       } else {
         target =
-          inactiveTargets[toolId] != null
-            ? inactiveTargets[toolId]
-            : (existing?.target ?? null);
+          inactiveTargets[toolId] ?? (existing?.target ?? null);
       }
     }
 
@@ -414,7 +412,7 @@ export function toolsPayloadSignature(payload: MapToolPayloadEntry[]): string {
 export function isToolsDraftDirty(
   mapTools: ToolOnMap[],
   draft: MapToolsDraftState & { zones: ToolZones },
-  toolTypesById: Map<number, string> = new Map(),
+  toolTypesById: Map<number, string> = new Map<number, string>(),
 ): boolean {
   const serverState = buildToolsDraftState(mapTools);
   const serverPayload = zonesToToolsPayload(
@@ -448,7 +446,7 @@ export function toolsDraftSignature(
   windowPositions: Record<number, ToolWindowPosition>,
   windowSizes: Record<number, ToolWindowSize>,
   inactiveTargets: Record<number, ToolZone>,
-  toolTypesById: Map<number, string> = new Map(),
+  toolTypesById: Map<number, string> = new Map<number, string>(),
   indexes: Record<number, number> = {},
 ): string {
   const relevantIds = new Set<number>([
@@ -521,7 +519,7 @@ export function toolsDraftSignature(
 
 export function serverToolsSignature(
   mapTools: ToolOnMap[],
-  toolTypesById: Map<number, string> = new Map(),
+  toolTypesById: Map<number, string> = new Map<number, string>(),
 ): string {
   const zones = mapToolsToZones(mapTools);
   const {

@@ -343,7 +343,7 @@ export default function MapsList({
                     const secondary =
                       title && description && title !== description
                         ? `${title} · ${description}`
-                        : title || description || undefined;
+                        : title ?? description ?? undefined;
 
                     return (
                       <ListItemText

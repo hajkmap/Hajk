@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
 import {
   Box,
@@ -136,18 +136,15 @@ function LayersGrid({
     [serviceTypeValue],
   );
 
-  useEffect(() => {
-    if (!selectableLayerCategories.includes(publishLayerKind)) {
-      setPublishLayerKind(selectableLayerCategories[0]);
-    }
-  }, [selectableLayerCategories, publishLayerKind]);
+  // Keep a valid selection when service type (and thus options) changes —
+  // derive during render instead of syncing in an effect.
+  const resolvedPublishLayerKind = selectableLayerCategories.includes(
+    publishLayerKind,
+  )
+    ? publishLayerKind
+    : selectableLayerCategories[0];
 
   const handleOpenPublishDialog = () => {
-    setPublishLayerKind((current) =>
-      selectableLayerCategories.includes(current)
-        ? current
-        : selectableLayerCategories[0],
-    );
     setOpen(true);
   };
 
@@ -175,7 +172,7 @@ function LayersGrid({
     layerName: string,
     options: { layerKind?: LayerCategory; force?: boolean } = {},
   ) => {
-    const layerKind = options.layerKind ?? publishLayerKind;
+    const layerKind = options.layerKind ?? resolvedPublishLayerKind;
     setCreatingLayerName(layerName);
     try {
       const response = await createLayer({
@@ -214,11 +211,11 @@ function LayersGrid({
   // same-kind publication already exists locally; otherwise lets the
   // backend be the source of truth (it may still 409 on race conditions).
   const handleAddClick = (layerName: string, pubs: PublicationsByKind) => {
-    const sameKind = pubs[publishLayerKind];
+    const sameKind = pubs[resolvedPublishLayerKind];
     if (sameKind.length > 0) {
       setDuplicateConfirm({
         layerName,
-        layerKind: publishLayerKind,
+        layerKind: resolvedPublishLayerKind,
         existing: sameKind,
       });
       return;
@@ -274,7 +271,7 @@ function LayersGrid({
         const chips = LAYER_CATEGORIES.filter(
           (kind) => pubs[kind].length > 0,
         ).map((kind) => {
-          const isSameKind = kind === publishLayerKind;
+          const isSameKind = kind === resolvedPublishLayerKind;
           return (
             <Chip
               key={kind}
@@ -320,7 +317,7 @@ function LayersGrid({
       renderCell: (params: GridRenderCellParams<CapabilityRow>) => {
         const layerName = params.row.layer;
         const pubs = params.row.publications;
-        const sameKindCount = pubs[publishLayerKind].length;
+        const sameKindCount = pubs[resolvedPublishLayerKind].length;
 
         return (
           <IconButton
@@ -514,7 +511,7 @@ function LayersGrid({
               sx={{ display: "flex", gap: 2, flex: 1, mt: 1, flexWrap: "wrap" }}
             >
               <LayerKindSelect
-                value={publishLayerKind}
+                value={resolvedPublishLayerKind}
                 onChange={setPublishLayerKind}
                 labelKey="layers.publishAs"
                 serviceType={serviceTypeValue}

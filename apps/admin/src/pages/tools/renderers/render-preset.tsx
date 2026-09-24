@@ -14,14 +14,7 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-
-// Preset isn't a BaseWindowPlugin (client PresetLinks.jsx) — no window
-// placement, instruction tooltip, or visibleAtStart to configure.
-export const presetDefaults: Record<string, unknown> = {
-  title: "Snabbval", // client PresetLinks.jsx:38 `this.options.title || "Snabbval"`
-  presetList: [],
-  visibleForGroups: [],
-};
+import { presetDefaults } from "./tool-option-defaults";
 
 interface PresetRendererProps {
   tool: Tool;

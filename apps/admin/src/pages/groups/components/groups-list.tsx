@@ -37,7 +37,7 @@ import type { Layer } from "../../../api/layers";
 import DialogWrapper from "../../../components/flexible-dialog";
 import CreateButton from "../../../components/create-button";
 import { SquareSpinnerComponent } from "../../../components/progress/square-progress";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
 import StyledDataGrid from "../../../components/data-grid";
 import {
@@ -185,7 +185,6 @@ export default function GroupsList({
     register,
     handleSubmit,
     control,
-    watch,
     setValue,
     formState: { errors },
     reset,
@@ -195,7 +194,7 @@ export default function GroupsList({
     reValidateMode: "onChange",
   });
 
-  const watchGroupType = watch("type");
+  const watchGroupType = useWatch({ control, name: "type" });
 
   useEffect(() => {
     setValue("layerIds", []);
@@ -350,11 +349,11 @@ export default function GroupsList({
                     onChange={(_, value) =>
                       field.onChange(value.map((layer) => layer.id))
                     }
-                    renderTags={(value, getTagProps) =>
+                    renderValue={(value, getItemProps) =>
                       value.map((option, index) => (
                         <Chip
                           label={option.name}
-                          {...getTagProps({ index })}
+                          {...getItemProps({ index })}
                           key={option.id}
                         />
                       ))

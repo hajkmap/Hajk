@@ -6,17 +6,7 @@ import FormFieldGrid, {
 } from "../../../components/form-components/form-field-grid";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-
-// Matches Information.jsx's own fallback for `title`. Used as the isDirty baseline in settings.tsx.
-export const informationDefaults: Record<string, unknown> = {
-  visibleAtStart: false,
-  showInfoOnce: false,
-  title: "Om kartan",
-  headerText: "Om kartan",
-  text: "Information om kartan",
-  buttonText: "Stäng",
-  visibleForGroups: [],
-};
+import { informationDefaults } from "./tool-option-defaults";
 
 interface InformationRendererProps {
   tool: Tool;

@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { Control, Controller, FieldValues, useForm } from "react-hook-form";
 import { SketchPicker, type RGBColor } from "react-color";
 import { Tool } from "../../../api/tools";
+import { infoclickDefaults } from "./tool-option-defaults";
 
 const DEFAULT_STROKE_COLOR: RGBColor = { r: 200, g: 0, b: 0, a: 0.7 };
 const DEFAULT_FILL_COLOR: RGBColor = { r: 255, g: 0, b: 0, a: 0.1 };
@@ -32,29 +33,6 @@ function toRgbColor(value: unknown, fallback: RGBColor): RGBColor {
   }
   return fallback;
 }
-
-// Matches the client's own fallbacks (FeaturePropsParsing.jsx, MapClickModel.js,
-// customComponentsForReactMarkdown.jsx). Used as the isDirty baseline in settings.tsx.
-export const infoclickDefaults: Record<string, unknown> = {
-  title: "",
-  description: "",
-  instruction: "",
-  visibleAtStart: false,
-  visibleForGroups: [],
-  allowDangerousHtml: true,
-  useNewInfoclick: false,
-  useNewPlaceholderMatching: false,
-  useLevel1FeatureHighlight: false,
-  transformLinkUri: true,
-  linksColor: "primary",
-  linksUnderline: "always",
-  src: "",
-  anchor: [0.5, 1],
-  scale: 0.15,
-  strokeWidth: 4,
-  strokeColor: { r: 200, g: 0, b: 0, a: 0.7 },
-  fillColor: { r: 255, g: 0, b: 0, a: 0.1 },
-};
 
 interface InfoClickRendererProps {
   tool: Tool;

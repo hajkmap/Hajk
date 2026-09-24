@@ -41,21 +41,7 @@ import {
   FmeProductSourceFields,
   FmeSuggestField,
 } from "../components/fmeserver/fme-product-fields";
-
-// Used as the isDirty baseline in settings.tsx. drawFillColor/drawStrokeColor
-// are plain CSS rgba() strings (MapViewModel.js), not {r,g,b,a} objects like
-// print/infoclick use. title/description are hardcoded in FmeServer.jsx's
-// `custom` prop, so — like streetview — they're not exposed here.
-export const fmeserverDefaults: Record<string, unknown> = {
-  visibleAtStart: false,
-  instruction: "",
-  visibleForGroups: [],
-  drawFillColor: "rgba(255,255,255,0.07)",
-  drawStrokeColor: "rgba(74,74,74,0.5)",
-  groupDisplayName: "Grupp",
-  productGroups: [],
-  products: [],
-};
+import { fmeserverDefaults } from "./tool-option-defaults";
 
 interface FmeServerRendererProps {
   tool: Tool;

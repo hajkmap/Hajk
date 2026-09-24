@@ -12,54 +12,7 @@ import InputLabel from "@mui/material/InputLabel";
 import { useTranslation } from "react-i18next";
 import { SketchPicker } from "react-color";
 import { Tool } from "../../../api/tools";
-
-// Used as the isDirty baseline in settings.tsx.
-export const searchDefaults: Record<string, unknown> = {
-  searchInfoText: "",
-  maxHitsPerDataset: 1000,
-  autoSearchDelay: 500,
-  showInfoWhenExceeded: false,
-  disableAutocomplete: false,
-  disableAutoCombinations: false,
-  wildcardBeforeSearch: false,
-  autofocusSearch: false,
-  enablePolygonSearch: true,
-  enableRadiusSearch: true,
-  enableAreaSearch: true,
-  searchWithinView: false,
-  searchVisibleLayers: true,
-  wildcardBefore: true,
-  wildcardAfter: true,
-  caseSensitive: true,
-  requireFullObject: true,
-  showResultLabel: true,
-  preSelected: true,
-  autoShowAllResultsOnMap: false,
-  allowResultFiltering: false,
-  allowResultSorting: false,
-  allowQuickClearSelection: false,
-  allowDownloadResults: false,
-  showPreviewOnHover: false,
-  collectSelectedResults: false,
-  showPrevNextButtons: false,
-  maxZoomLevel: -1,
-  hitIcon: "",
-  iconDisplacementX: 0,
-  iconDisplacementY: 0,
-  iconScale: 1,
-  strokeColor: "",
-  strokeOpacity: "",
-  standardResultsMarkedFillColor: "",
-  standardResultsMarkedFrameColor: "",
-  markedResultsTextFillColor: "",
-  markedResultsTextFrameColor: "",
-  markedResultsMarkedFillColor: "",
-  markedResultsMarkedFrameColor: "",
-  activeResultTextFillColor: "",
-  activeResultTextFrameColor: "",
-  activeResultMarkedFillColor: "",
-  activeResultMarkedFrameColor: "",
-};
+import { searchDefaults } from "./tool-option-defaults";
 
 interface SearchRendererProps {
   tool: Tool;

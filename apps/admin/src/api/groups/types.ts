@@ -98,12 +98,12 @@ export interface GroupRole {
   };
 }
 
-export type UpdateGroupVariables = {
+export interface UpdateGroupVariables {
   groupId: string;
   data: GroupUpdateInput;
-};
+}
 
-export type UpdateGroupLayersVariables = {
+export interface UpdateGroupLayersVariables {
   groupId: string;
   data: GroupLayersUpdateInput;
 };

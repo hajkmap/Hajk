@@ -7,14 +7,7 @@ import FormFieldGrid, {
 import FormAccordion from "../../../components/form-components/form-accordion";
 import { useTranslation } from "react-i18next";
 import { Tool } from "../../../api/tools";
-
-// Matches AnchorView.jsx's own fallbacks. Used as the isDirty baseline in settings.tsx.
-export const anchorDefaults: Record<string, unknown> = {
-  visibleAtStart: false,
-  allowCreatingCleanUrls: true,
-  instruction: "",
-  visibleForGroups: [],
-};
+import { anchorDefaults } from "./tool-option-defaults";
 
 interface AnchorToolRendererProps {
   tool: Tool;

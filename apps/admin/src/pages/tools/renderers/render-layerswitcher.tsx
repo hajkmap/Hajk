@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { Control, Controller, FieldValues, useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { Tool } from "../../../api/tools";
+import { layerswitcherDefaults } from "./tool-option-defaults";
 
 // Helper function to safely get option values
 const getOption = <T,>(
@@ -17,38 +18,6 @@ const getOption = <T,>(
 ): T => {
   if (!options || !(key in options)) return defaultValue;
   return options[key] as T;
-};
-
-// Used as the isDirty baseline in settings.tsx.
-export const layerswitcherDefaults: Record<string, unknown> = {
-  title: "",
-  description: "",
-  visibleAtStart: false,
-  visibleAtStartMobile: false,
-  showBreadcrumbs: false,
-  showDrawOrderView: false,
-  showFilter: false,
-  showQuickAccess: false,
-  legendForceTransparency: false,
-  legendTryHiDPI: false,
-  enableTransparencySlider: true,
-  cqlFilterVisible: false,
-  enableSystemLayersSwitch: false,
-  lockDrawOrderBaselayer: false,
-  drawOrderViewInfoText: "",
-  enableQuickAccessPresets: false,
-  quickAccessTopicsInfoText: "",
-  enableUserQuickAccessFavorites: false,
-  userQuickAccessFavoritesInfoText: "",
-  dropdownThemeMaps: false,
-  themeMapHeaderCaption: "",
-  minMaxZoomAlertOnToggleOnly: false,
-  backgroundSwitcherBlack: true,
-  backgroundSwitcherWhite: true,
-  enableOSM: false,
-  OSMVisibleAtStart: false,
-  renderSpecialBackgroundsAtBottom: false,
-  instruction: "",
 };
 
 interface LayerSwitcherRendererProps {
