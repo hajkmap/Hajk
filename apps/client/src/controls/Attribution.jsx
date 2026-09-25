@@ -18,7 +18,6 @@ const Root = styled("div")(({ theme }) => ({
       marginTop: "-1px",
       color: theme.palette.text.primary,
       background: "transparent",
-      transition: "background-color 120ms ease",
       "&:hover, &:focus, &:focus-visible": {
         outline: "none",
         boxShadow: "none",
@@ -62,7 +61,6 @@ const Root = styled("div")(({ theme }) => ({
     display: "inline-block",
     background: "transparent",
     color: theme.palette.text.primary,
-    transition: "background-color 120ms ease",
     "&:hover, &:focus, &:focus-visible": {
       outline: "none",
       color: theme.palette.text.primary,
