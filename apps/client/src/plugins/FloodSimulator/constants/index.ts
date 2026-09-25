@@ -1,0 +1,127 @@
+import type { FloodSimulatorResolvedOptions } from "../types";
+
+export const DEMO_TERRARIUM_URL =
+  "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
+
+export const LAYER_NAME = "pluginFloodSimulator";
+
+/**
+ * Above typical WMS/WMTS backgrounds, below Hajk system layers which start at
+ * 5000 (`DrawModel`, `MapClickModel` highlight). 1000 keeps the flood overlay
+ * on top of the map without covering draw / infoclick graphics.
+ */
+export const LAYER_Z_INDEX = 1000;
+
+export const DEFAULT_TITLE = "Översvämning";
+export const DEFAULT_DESCRIPTION = "Simulera en stigande vattennivå";
+
+export type FloodSimulatorDefaultOptions = Omit<
+  FloodSimulatorResolvedOptions,
+  | "terrainZoomLookup"
+  | "elevationTileGrid"
+  | "hideAtMinZoom"
+  | "minMapZoom"
+  | "maxResolution"
+>;
+
+export const DEFAULT_OPTIONS: FloodSimulatorDefaultOptions = {
+  elevationUrl: "",
+  elevationEncoding: "terrarium",
+  crossOrigin: "anonymous",
+  tileSize: 256,
+  minZoom: 0,
+  maxZoom: 15,
+  maxResolutionSlack: 1,
+  attributions: "",
+  minLevel: 0,
+  maxLevel: 10,
+  levelStep: 0.01,
+  defaultLevel: 1,
+  waterColor: "#86cbf9",
+  deepWaterColor: "#283d4b",
+  depthColors: [],
+  layerOpacity: 0.6,
+  enableDepthShading: false,
+  interpolate: true,
+  smoothDepthColors: true,
+  maxShadingDepth: 5,
+  animationDurationMs: 8000,
+  showElevationReadout: true,
+  minElevation: -100,
+  maxElevation: 100,
+};
+
+export const ANIMATION_DURATION_MIN_S = 1;
+export const ANIMATION_DURATION_MAX_S = 30;
+
+/** Highest animation-duration max a user can pick in more settings. */
+export const ANIMATION_DURATION_MAX_LIMIT = 120;
+
+/** Highest water-level slider max a user can pick in more settings. */
+export const WATER_LEVEL_MAX_LIMIT = 100;
+
+/** Fade radius of each contour, in meters of depth. */
+export const ISOBATH_WIDTH_M = 0.06;
+
+/** RGB multiplier at the contour center (0–1). */
+export const ISOBATH_SHADE = 0.45;
+
+/** Blend width (m) at each class boundary when smooth depth colors are on. */
+export const SMOOTH_DEPTH_FADE_M = 0.06;
+
+/**
+ * Blend width (m) at the shoreline when smooth depth colors are on. A bit
+ * wider than class fades so the land/water edge softens without a hard rim.
+ */
+export const SHORELINE_FADE_M = 0.15;
+
+export const FALLBACK_WATER_COLOR: [number, number, number, number] = [
+  134, 203, 249, 1,
+];
+
+export const UI_STRINGS = {
+  levelLabel: "Vattennivå (m)",
+  levelAriaLabel: "Vattennivå i meter",
+  animate: "Animera",
+  pause: "Pausa",
+  animateTooltip: "Animera nivån från lägsta till högsta",
+  pauseTooltip: "Pausa animeringen",
+  reset: "Återställ",
+  resetTooltip: "Återställ till startnivån",
+  animationDurationLabel: "Animationstid (s)",
+  durationAriaLabel: "Animationstid i sekunder",
+  moreSettings: "Fler inställningar",
+  moreSettingsTitle: "Maxvärden",
+  maxLevelLabel: "Max vattennivå (m)",
+  maxLevelAriaLabel: "Maximal vattennivå i meter",
+  maxAnimationDurationLabel: "Maximal animationstid (s)",
+  maxAnimationDurationAriaLabel: "Maximal animationstid i sekunder",
+  close: "Stäng",
+  opacityLabel: "Opacitet",
+  opacityAriaLabel: "Opacitet från 0 till 1",
+  interpolateLabel: "Interpolera",
+  depthShadingLabel: "Visa vattendjup",
+  waterColorLabel: "Vattenfärg",
+  deepWaterColorLabel: "Djupvattenfärg",
+  maxShadingDepthLabel: "Max djup (m)",
+  maxShadingDepthAriaLabel: "Maximalt djup för färgskalan i meter",
+  depthColorsLegend: "Djupklasser",
+  depthColorModeLabel: "Färgläge för vattendjup",
+  depthColorModeClasses: "Djupklasser",
+  depthColorModeRamp: "Färgskala",
+  smoothDepthColorsLabel: "Mjuk övergång",
+  isobathsLabel: "Djupkurvor",
+  depthClassRange: (from: string, to: string) => `${from}–${to} m`,
+  depthClassFrom: (from: string) => `> ${from} m`,
+  readoutElevationLabel: "Markhöjd",
+  readoutDepthLabel: "Vattendjup",
+  zoomInToSeeSimulation: "Zooma in för att se simuleringen",
+  projectionAlert:
+    "Höjdkällans projektion matchar inte kartans projektion. Översvämningslagret kan visas felaktigt.",
+  noElevationUrl:
+    "FloodSimulator: no elevation source configured. Set options.elevationUrl to a Terrain-RGB or Terrarium XYZ template. The overlay will not be created.",
+  tileGridMissing:
+    "FloodSimulator: could not build an elevation tile grid from the map origin/extent/resolutions. OpenLayers will use a default EPSG:3857 XYZ grid and terrainZoomByMapZoom will be ignored.",
+  noMapResolutions: (maxZoom: number) =>
+    `FloodSimulator: map view has no tile resolutions; using getMaxZoom() (${maxZoom}) to size the terrain zoom lookup. terrainZoomByMapZoom mapping may be wrong.`,
+} as const;
