@@ -17,7 +17,7 @@
     "postinstall": "prisma generate",
     "start": "tsx --env-file-if-exists=.env server/index.ts",
     "build": "tsc",
-    "dev": "tsx watch --watch-path=server --env-file=.env server/index.ts",
+    "dev": "tsx watch --include server --env-file=.env server/index.ts",
     "dev:debug": "tsx --inspect --watch-path=./server --env-file=.env server/index.ts",
     "reset:db": "prisma generate && prisma db push --force-reset && prisma db seed",
     "lint": "eslint ./server",
