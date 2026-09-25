@@ -269,7 +269,7 @@ export async function buildClientToolsForMap(mapName: string) {
     buildLayerSwitcherGroupsForMap(mapName),
     buildLayerSwitcherBaselayersForMap(mapName),
     prisma.theme.findMany({
-      where: { mapName },
+      where: { mapName, deletedAt: null },
       orderBy: { title: "asc" },
     }),
   ]);

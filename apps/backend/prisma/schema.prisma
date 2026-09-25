@@ -153,6 +153,7 @@ model Theme {
   createdDate   DateTime? @db.Timestamptz(3)
   lastSavedBy   String?
   lastSavedDate DateTime? @db.Timestamptz(3)
+  deletedAt     DateTime? @db.Timestamptz(3)
   map           Map       @relation(fields: [mapName], references: [name], onDelete: Cascade)
 
   @@index([mapName])

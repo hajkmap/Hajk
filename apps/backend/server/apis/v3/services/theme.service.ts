@@ -29,7 +29,9 @@ class ThemeService {
   }
 
   async #requireTheme(mapName: string, id: number) {
-    const theme = await prisma.theme.findFirst({ where: { id, mapName } });
+    const theme = await prisma.theme.findFirst({
+      where: { id, mapName, deletedAt: null },
+    });
     if (!theme) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
@@ -43,7 +45,7 @@ class ThemeService {
   async getThemes(mapName: string) {
     await this.#requireMap(mapName);
     return prisma.theme.findMany({
-      where: { mapName },
+      where: { mapName, deletedAt: null },
       orderBy: { title: "asc" },
     });
   }
@@ -97,7 +99,13 @@ class ThemeService {
 
   async deleteTheme(mapName: string, id: number) {
     await this.#requireTheme(mapName, id);
-    await prisma.theme.delete({ where: { id } });
+
+    const deletedAt = new Date();
+
+    await prisma.theme.updateMany({
+      where: { id, mapName, deletedAt: null },
+      data: { deletedAt, lastSavedDate: deletedAt },
+    });
   }
 }
 
