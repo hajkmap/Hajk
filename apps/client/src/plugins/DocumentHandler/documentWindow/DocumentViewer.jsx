@@ -71,10 +71,11 @@ class DocumentViewer extends React.PureComponent {
     const { localObserver } = this.props;
 
     localObserver.subscribe("scroll-to-chapter", async (chapter) => {
-      /*scrollIntoView is buggy without dirty fix - 
-      tried using react life cycle methods but is, for some reason, not working*/
+      /* Delay so the chapter ref exists after a document switch.
+         Scroll only #documentViewer — scrollIntoView also moves
+         ancestor windows (react-rnd transform) and misaligns the header. */
       await delay(100);
-      chapter.scrollRef.current.scrollIntoView();
+      this.scrollChapterIntoView(chapter);
     });
 
     localObserver.subscribe("scroll-to-top", () => {
@@ -100,6 +101,16 @@ class DocumentViewer extends React.PureComponent {
         expandedTableOfContents: expandedTocOnStart(this.props),
       });
     }
+  };
+
+  scrollChapterIntoView = (chapter) => {
+    const container = this.documentViewerRef.current;
+    const target = chapter?.scrollRef?.current;
+    if (!container || !target) return;
+    const delta =
+      target.getBoundingClientRect().top -
+      container.getBoundingClientRect().top;
+    container.scrollTop += delta;
   };
 
   scrollToTop = async () => {
