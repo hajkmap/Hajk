@@ -307,7 +307,7 @@ export default class DocumentHandlerModel {
 
   /**
    * @summary Dynamically adds a React referenceObject to each chapter in fetched document.
-   * it is used by scrollIntoView in the plugin to be able to scroll to a certain chapter/header
+   * Used by DocumentViewer to scroll a chapter/header into view inside #documentViewer.
    *
    * @memberof DocumentHandlerModel
    */

@@ -41,8 +41,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Client: LayerSwitcher - The "Visa endast Min/Max varningsruta vid klick" option (per layer and map-wide) is now respected, so the zoom-limit banner no longer appears when merely zooming. [#1898](https://github.com/hajkmap/Hajk/issues/1898)
+- Client: Attribution - The © control in the footer can be collapsed again, while still showing attribution text on load on desktop (collapsed on mobile). OpenLayers was hiding the toggle whenever any source on the map (typically a non-visible OSM background) had `attributionsCollapsible: false`. Clicks on the control were also blocked by the full-width breadcrumbs overlay. [#1896](https://github.com/hajkmap/Hajk/issues/1896)
 - Client: Print - Restored the admin "include image border" frame around the map image, which was dropped in the libPDF rewrite.
 - Client: FIR - Fixed a crash when activating "add by map click" if `wmsRealEstateLayer` is missing from the map config.
+- Client: DocumentHandler - TOC chapter jumps no longer misalign the window header.
 
 ### Changed
 

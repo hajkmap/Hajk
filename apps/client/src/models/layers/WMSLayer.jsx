@@ -123,6 +123,10 @@ class WMSLayer {
     );
     this.layer.set("hasLabelStyle", config.hasLabelStyle);
     this.layer.set("useLabelStyle", false);
+    this.layer.set(
+      "minMaxZoomAlertOnToggleOnly",
+      !!config.minMaxZoomAlertOnToggleOnly
+    );
     this.layer.getSource().set("url", config.url);
     this.type = "wms";
     this.bindHandlers();
