@@ -23,10 +23,17 @@ import "react-horizontal-scrolling-menu/dist/styles.css";
 // solution. It is not pretty, but if we move this to a separate file
 // we could use this HOC instead of the isMobile helper function in ../../utils/.
 // TODO: Move to some /hooks folder
+// eslint-disable-next-line react/display-name
 const withIsMobile = () => (WrappedComponent) => (props) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   return <WrappedComponent {...props} isMobile={isMobile} />;
+};
+
+const stopPortalBubble = (event) => {
+  // Portaled breadcrumbs are still React children of LayerSwitcher.
+  // Stop bubbling here so the drawer does not treat chip clicks as its own.
+  event.stopPropagation();
 };
 
 const MobileRoot = styled("div")(({ theme }) => ({
@@ -69,6 +76,15 @@ const BreadCrumbsContainer = styled("div")(() => ({
   right: 0,
   bottom: 0,
   zIndex: 2,
+  // This wrapper spans the full footer. Empty space must not steal
+  // clicks from the scale/attribution controls on the right.
+  pointerEvents: "none",
+  "& *": {
+    pointerEvents: "none",
+  },
+  "& .MuiPaper-root, & .MuiPaper-root *": {
+    pointerEvents: "auto",
+  },
 }));
 
 const MobileBreadCrumbWrapper = styled("div")(({ theme }) => ({
@@ -242,7 +258,7 @@ class BreadCrumbs extends Component {
       />
     ));
     return (
-      <BreadCrumbsContainer>
+      <BreadCrumbsContainer onPointerDown={stopPortalBubble}>
         <ScrollMenu
           alignCenter={false}
           onMouseDown={() => (event) =>
