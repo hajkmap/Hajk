@@ -28,6 +28,7 @@ import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 import TimeSlider from "./tools/timeslider.jsx";
 // import GeosuiteExport from "./tools/geosuiteExport.jsx";
 import ExternalLinks from "./tools/externalLink.jsx";
+import FloodSimulator from "./tools/floodsimulator.jsx";
 import AttributeEditor from "./tools/attributeeditor.jsx";
 
 var defaultState = {
@@ -123,6 +124,8 @@ class ToolOptions extends Component {
         return <Collector parent={this} model={this.props.model} />;
       case "timeslider":
         return <TimeSlider parent={this} model={this.props.model} />;
+      case "floodsimulator":
+        return <FloodSimulator parent={this} model={this.props.model} />;
       case "documenthandler":
         return <MenuEditor parent={this} model={this.props.model} />;
       case "AttributeEditor":
@@ -195,6 +198,7 @@ class ToolOptions extends Component {
       commandpalette: "Kommandopanel",
       print: "Utskrift",
       coordinates: "Visa koordinat",
+      floodsimulator: "Översvämning",
       // draw: "Rita och mäta",
       // export: "Utskrift",
       // informative: "Dokumenthanterare",

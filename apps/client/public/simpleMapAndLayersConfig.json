@@ -4,25 +4,45 @@
       {
         "code": "EPSG:3006",
         "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-        "extent": [181896.33, 6101648.07, 864416, 7689478.3],
+        "extent": [
+          181896.33,
+          6101648.07,
+          864416,
+          7689478.3
+        ],
         "units": null
       },
       {
         "code": "http://www.opengis.net/gml/srs/epsg.xml#3006",
         "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-        "extent": [181896.33, 6101648.07, 864416, 7689478.3],
+        "extent": [
+          181896.33,
+          6101648.07,
+          864416,
+          7689478.3
+        ],
         "units": null
       },
       {
         "code": "EPSG:3857",
         "definition": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs",
-        "extent": [-20037508.34, -20037508.34, 20037508.34, 20037508.34],
+        "extent": [
+          -20037508.34,
+          -20037508.34,
+          20037508.34,
+          20037508.34
+        ],
         "units": null
       },
       {
         "code": "http://www.opengis.net/gml/srs/epsg.xml#3857",
         "definition": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs",
-        "extent": [-20037508.34, -20037508.34, 20037508.34, 20037508.34],
+        "extent": [
+          -20037508.34,
+          -20037508.34,
+          20037508.34,
+          20037508.34
+        ],
         "units": null
       }
     ],
@@ -422,10 +442,80 @@
         "index": 1
       },
       {
+        "type": "floodsimulator",
+        "index": 20,
+        "options": {
+          "target": "toolbar",
+          "position": "left",
+          "visibleAtStart": false,
+          "title": "Översvämning",
+          "description": "Simulera en stigande vattennivå",
+          "elevationUrl": "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
+          "elevationEncoding": "terrarium",
+          "crossOrigin": "anonymous",
+          "tileSize": 256,
+          "minZoom": 0,
+          "maxZoom": 15,
+          "attributions": "Elevation data: Mapzen Terrain Tiles",
+          "minLevel": 0,
+          "maxLevel": 10,
+          "levelStep": 0.01,
+          "defaultLevel": 1,
+          "waterColor": "#86cbf9",
+          "deepWaterColor": "#8dabbf",
+          "depthColors": [
+            {
+              "maxDepth": 0.5,
+              "color": "#E7A6EE"
+            },
+            {
+              "maxDepth": 1.0,
+              "color": "#D454DB"
+            },
+            {
+              "maxDepth": 1.5,
+              "color": "#A8F59A"
+            },
+            {
+              "maxDepth": 2.0,
+              "color": "#8BEA69"
+            },
+            {
+              "maxDepth": 2.5,
+              "color": "#4DB2FF"
+            },
+            {
+              "maxDepth": 3.12,
+              "color": "#1E84FF"
+            },
+            {
+              "maxDepth": 3.5,
+              "color": "#002BFF"
+            },
+            {
+              "maxDepth": 4.0,
+              "color": "#001C9A"
+            }
+          ],
+          "layerOpacity": 0.6,
+          "enableDepthShading": true,
+          "interpolate": true,
+          "smoothDepthColors": true,
+          "maxShadingDepth": 5,
+          "animationDurationMs": 8000,
+          "showElevationReadout": true,
+          "minElevation": -100,
+          "maxElevation": 100
+        }
+      },
+      {
         "type": "infoclick",
         "options": {
           "height": "dynamic",
-          "anchor": [0.5, 1],
+          "anchor": [
+            0.5,
+            1
+          ],
           "scale": 0.15,
           "strokeColor": {
             "r": 200,
@@ -490,7 +580,10 @@
           ],
           "visibleForGroups": [],
           "maxResultsPerDataset": 100,
-          "anchor": ["", ""],
+          "anchor": [
+            "",
+            ""
+          ],
           "scale": "",
           "markerImg": "",
           "delayBeforeAutoSearch": 300,
@@ -809,22 +902,46 @@
     ],
     "map": {
       "target": "map",
-      "center": [1325000, 7900000],
+      "center": [
+        1325000,
+        7900000
+      ],
       "title": "Hajk - open source webGIS",
       "projection": "EPSG:3857",
       "zoom": 6,
       "maxZoom": 18,
       "minZoom": 0,
       "resolutions": [
-        156543.03392804097, 78271.51696402048, 39135.75848201024,
-        19567.87924100512, 9783.93962050256, 4891.96981025128, 2445.98490512564,
-        1222.99245256282, 611.49622628141, 305.748113140705, 152.8740565703525,
-        76.43702828517625, 38.21851414258813, 19.109257071294063,
-        9.554628535647032, 4.777314267823516, 2.388657133911758,
-        1.194328566955879, 0.5971642834779395
+        156543.03392804097,
+        78271.51696402048,
+        39135.75848201024,
+        19567.87924100512,
+        9783.93962050256,
+        4891.96981025128,
+        2445.98490512564,
+        1222.99245256282,
+        611.49622628141,
+        305.748113140705,
+        152.8740565703525,
+        76.43702828517625,
+        38.21851414258813,
+        19.109257071294063,
+        9.554628535647032,
+        4.777314267823516,
+        2.388657133911758,
+        1.194328566955879,
+        0.5971642834779395
       ],
-      "origin": [-20037508.34, 20037508.34],
-      "extent": [-20037508.34, -20037508.34, 20037508.34, 20037508.34],
+      "origin": [
+        -20037508.34,
+        20037508.34
+      ],
+      "extent": [
+        -20037508.34,
+        -20037508.34,
+        20037508.34,
+        20037508.34
+      ],
       "constrainOnlyCenter": false,
       "constrainResolution": false,
       "logo": "/logoLight.png",
@@ -890,7 +1007,9 @@
         "content": "",
         "legend": "",
         "projection": "EPSG:3006",
-        "layers": ["stadskarta_nedtonad"],
+        "layers": [
+          "stadskarta_nedtonad"
+        ],
         "layersInfo": [
           {
             "id": "stadskarta_nedtonad",
@@ -934,7 +1053,9 @@
         "content": "",
         "legend": "",
         "projection": "EPSG:3006",
-        "layers": ["orto"],
+        "layers": [
+          "orto"
+        ],
         "layersInfo": [
           {
             "id": "orto",
@@ -979,7 +1100,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["hajk_medlem"],
+        "layers": [
+          "hajk_medlem"
+        ],
         "layersInfo": [
           {
             "id": "hajk_medlem",
@@ -1032,7 +1155,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["PS.ProtectedSites.Helcom"],
+        "layers": [
+          "PS.ProtectedSites.Helcom"
+        ],
         "layersInfo": [
           {
             "id": "PS.ProtectedSites.Helcom",
@@ -1130,7 +1255,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["PS.ProtectedSites.Bio"],
+        "layers": [
+          "PS.ProtectedSites.Bio"
+        ],
         "layersInfo": [
           {
             "id": "PS.ProtectedSites.Bio",
@@ -1228,7 +1355,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["PS.ProtectedSites.Ramsar"],
+        "layers": [
+          "PS.ProtectedSites.Ramsar"
+        ],
         "layersInfo": [
           {
             "id": "PS.ProtectedSites.Ramsar",
@@ -1326,7 +1455,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["PS.ProtectedSites.Ospar"],
+        "layers": [
+          "PS.ProtectedSites.Ospar"
+        ],
         "layersInfo": [
           {
             "id": "PS.ProtectedSites.Ospar",
@@ -1424,7 +1555,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["PS.ProtectedSites.WorldHeritage"],
+        "layers": [
+          "PS.ProtectedSites.WorldHeritage"
+        ],
         "layersInfo": [
           {
             "id": "PS.ProtectedSites.WorldHeritage",
@@ -1522,7 +1655,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["SD.ArtersUtbredning.2013"],
+        "layers": [
+          "SD.ArtersUtbredning.2013"
+        ],
         "layersInfo": [
           {
             "id": "SD.ArtersUtbredning.2013",
@@ -1606,7 +1741,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["SD.ArtersUtbredning.2019"],
+        "layers": [
+          "SD.ArtersUtbredning.2019"
+        ],
         "layersInfo": [
           {
             "id": "SD.ArtersUtbredning.2019",
@@ -1690,7 +1827,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["US.EnvironmentalManagementFacility.WaterTreatmentPlants"],
+        "layers": [
+          "US.EnvironmentalManagementFacility.WaterTreatmentPlants"
+        ],
         "layersInfo": [
           {
             "id": "US.EnvironmentalManagementFacility.WaterTreatmentPlants",
@@ -1774,7 +1913,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["US.EnvironmentalManagementFacility.DischargePoints"],
+        "layers": [
+          "US.EnvironmentalManagementFacility.DischargePoints"
+        ],
         "layersInfo": [
           {
             "id": "US.EnvironmentalManagementFacility.DischargePoints",
@@ -1858,7 +1999,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["AM.sensitiveArea"],
+        "layers": [
+          "AM.sensitiveArea"
+        ],
         "layersInfo": [
           {
             "id": "AM.sensitiveArea",
@@ -1942,7 +2085,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["BU.Building"],
+        "layers": [
+          "BU.Building"
+        ],
         "layersInfo": [
           {
             "id": "BU.Building",
@@ -2026,7 +2171,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["BU.Building"],
+        "layers": [
+          "BU.Building"
+        ],
         "layersInfo": [
           {
             "id": "BU.Building",
@@ -2110,7 +2257,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["PS.ProtectedSite"],
+        "layers": [
+          "PS.ProtectedSite"
+        ],
         "layersInfo": [
           {
             "id": "PS.ProtectedSite",
@@ -2194,7 +2343,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["PS.ProtectedSite"],
+        "layers": [
+          "PS.ProtectedSite"
+        ],
         "layersInfo": [
           {
             "id": "PS.ProtectedSite",
@@ -2278,7 +2429,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3006",
-        "layers": ["PS.ProtectedSite"],
+        "layers": [
+          "PS.ProtectedSite"
+        ],
         "layersInfo": [
           {
             "id": "PS.ProtectedSite",
@@ -2711,7 +2864,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3857",
-        "layers": ["GEBCO_LATEST"],
+        "layers": [
+          "GEBCO_LATEST"
+        ],
         "layersInfo": [
           {
             "id": "GEBCO_LATEST",
@@ -2780,7 +2935,9 @@
         "legend": "",
         "legendIcon": "",
         "projection": "EPSG:3857",
-        "layers": ["BlueMarble_NextGeneration"],
+        "layers": [
+          "BlueMarble_NextGeneration"
+        ],
         "layersInfo": [
           {
             "id": "BlueMarble_NextGeneration",
@@ -2843,11 +3000,17 @@
         "id": "4",
         "caption": "Adresser Göteborg",
         "url": "https://opengeodata.goteborg.se/services/adresser/wfs/v1",
-        "layers": ["adresser.wfs.v1:adresser"],
-        "searchFields": ["adress"],
+        "layers": [
+          "adresser.wfs.v1:adresser"
+        ],
+        "searchFields": [
+          "adress"
+        ],
         "infobox": "**Adress:** {adress}  ",
         "aliasDict": "",
-        "displayFields": ["adress"],
+        "displayFields": [
+          "adress"
+        ],
         "geometryField": "geom",
         "outputFormat": "GML2",
         "infoVisible": false,
