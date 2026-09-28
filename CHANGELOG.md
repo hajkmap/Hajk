@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: Infoclick - Functionality to hide links that point to non-existing resources [#1804](https://github.com/hajkmap/Hajk/issues/1804)
 - Client: LayerComparer - Added the long-awaited spy glass mode [#1808](https://github.com/hajkmap/Hajk/issues/1808)
 - Client: LayerComparer - The Spy can now be resized and the transparency can be changed [#1812](https://github.com/hajkmap/Hajk/issues/1812)
+- Client + Admin: Dynamic labels - Admin can now select which WMS style to use as label style (useful when several layers share one style). Layers without a selected label style keep the old behaviour and request `<layer name>_labels`. [#1842](https://github.com/hajkmap/Hajk/issues/1842)
 - Client: LayerSwitcher - A group can now be set to be `exclusive`, meaning that its layers will be rendered as radio buttons and just one layer will be allowed to be visible at a given time. [#1848](https://github.com/hajkmap/Hajk/pull/1848)
 - Admin: You can now configure CQL filters for WMS layers directly in the admin interface [#1818](https://github.com/hajkmap/Hajk/issues/1818)
 - Client + Admin: WMTS layers now support the `rotateMap` setting ("Uppåt i kartan är"), previously only available for WMS layers, for forcing map rotation when used as a base layer.

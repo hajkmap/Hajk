@@ -6,6 +6,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style";
 import { BACKGROUND_LAYER_IDS } from "../../constants/backgroundLayers";
+import { getLabelStyleName } from "../../utils/labelStyle";
 
 export function addMapLayer(appModel, layer) {
   const configMapper = new ConfigMapper(appModel.config.appConfig.proxy);
@@ -51,7 +52,7 @@ export function addMapLayer(appModel, layer) {
 
         source.updateParams({
           ...params,
-          STYLES: `${layerName}_labels`,
+          STYLES: getLabelStyleName(olLayer.layersInfo, layerName),
         });
       }
       appModel.map.addLayer(layerItem.layer);

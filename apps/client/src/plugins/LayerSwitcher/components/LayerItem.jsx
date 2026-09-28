@@ -1,4 +1,4 @@
-import { useEffect, useState, memo, useCallback } from "react";
+import { useEffect, useState, memo } from "react";
 
 // Material UI components
 import {
@@ -28,6 +28,7 @@ import LsRadioButton from "./LsRadioButton";
 import { useMapZoom } from "../LayerSwitcherProvider";
 import { useLayerSwitcherDispatch } from "../LayerSwitcherProvider";
 import { getIsMobile } from "../LayerSwitcherUtils";
+import { getLabelStyleName } from "../../../utils/labelStyle";
 
 const getLayerToggleState = (isToggled, isSemiToggled, isVisibleAtZoom) => {
   if (!isToggled) {
@@ -87,6 +88,32 @@ const LayerLegendIcon = ({
   );
 };
 
+const applyLabelStyle = (olLayer) => {
+  if (!olLayer) return;
+  if (olLayer.get("allSubLayers")?.length > 1) return; // Multi-sublayer group layers handle labels per-sublayer
+
+  const source = olLayer.getSource?.();
+  if (!source || typeof source.updateParams !== "function") return;
+
+  const currentParams = source.getParams?.() || {};
+
+  // Get stored layer name
+  const layerName = olLayer.get("wmsLayerName") || currentParams.LAYERS;
+
+  if (!layerName) return;
+
+  const isActive = !!olLayer.get("useLabelStyle");
+  const baseStyle = olLayer.get("initialStyles") || "";
+
+  source.updateParams({
+    ...currentParams,
+    LAYERS: layerName,
+    STYLES: isActive
+      ? getLabelStyleName(olLayer.layersInfo, layerName)
+      : baseStyle,
+  });
+};
+
 function LayerItem({
   layerState,
   layerConfig,
@@ -130,31 +157,6 @@ function LayerItem({
 
   const legendIcon = layerInfo?.legendIcon || layerLegendIcon;
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const applyLabelStyle = useCallback(() => {
-    if (!olLayer) return;
-    if (olLayer.get("allSubLayers")?.length > 1) return; // Multi-sublayer group layers handle labels per-sublayer
-
-    const source = olLayer.getSource?.();
-    if (!source || typeof source.updateParams !== "function") return;
-
-    const currentParams = source.getParams?.() || {};
-
-    // Get stored layer name
-    const layerName = olLayer.get("wmsLayerName") || currentParams.LAYERS;
-
-    if (!layerName) return;
-
-    const isActive = !!olLayer.get("useLabelStyle");
-    const baseStyle = olLayer.get("initialStyles") || "";
-
-    source.updateParams({
-      ...currentParams,
-      LAYERS: layerName,
-      STYLES: isActive ? `${layerName}_labels` : baseStyle,
-    });
-  }, [olLayer]);
-
   const toggleLabelLayer = (e) => {
     e.stopPropagation();
     if (!olLayer) return;
@@ -185,7 +187,7 @@ function LayerItem({
     const update = () => {
       const active = !!olLayer.get("useLabelStyle");
       setShowingLabelLayer(active);
-      applyLabelStyle();
+      applyLabelStyle(olLayer);
     };
 
     // Initial sync on mount or layer change
@@ -197,7 +199,7 @@ function LayerItem({
     return () => {
       olLayer.un("change:useLabelStyle", update);
     };
-  }, [olLayer, layerId, applyLabelStyle]);
+  }, [olLayer, layerId]);
 
   // Apply label style when layer becomes visible (in case it was set while hidden)
   useEffect(() => {
@@ -206,7 +208,7 @@ function LayerItem({
 
     // Wait for OL state to be ready
     requestAnimationFrame(() => {
-      applyLabelStyle();
+      applyLabelStyle(olLayer);
     });
   }, [layerIsToggled, olLayer]);
 
