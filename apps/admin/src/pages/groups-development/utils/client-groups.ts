@@ -321,8 +321,9 @@ export function collectLayerIdsFromClientGroups(
 }
 
 /**
- * Activate layers referenced by a LayerSwitcher tool: groups → Aktivt,
- * baselayers → Aktivt + Bakgrund. Other BACKGROUND flags are cleared.
+ * Active layers follows the active LayerSwitcher's layerorder tree
+ * (`options.groups`). Baselayers are active + background. Anything not in that
+ * tree is unchecked.
  */
 export function applyLayerswitcherOptionsToActivationRows<
   T extends {
@@ -347,7 +348,10 @@ export function applyLayerswitcherOptionsToActivationRows<
     const inBackground = canBeBackground && backgroundIds.has(row.layerId);
     const inGroups = groupLayerIds.has(row.layerId);
     if (!inBackground && !inGroups) {
-      return row.isBackground ? { ...row, isBackground: false } : row;
+      if (!row.active && !row.isBackground) {
+        return row;
+      }
+      return { ...row, active: false, isBackground: false };
     }
     return {
       ...row,

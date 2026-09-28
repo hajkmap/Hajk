@@ -106,22 +106,16 @@ export const activeLayerInstanceWhere: Prisma.LayerInstanceWhereInput = {
 };
 
 /**
- * LayerInstance filter shared by getLayersForMap and map list layer counts —
- * active instances linked directly to the map or via a group placed on it.
+ * LayerInstance filter shared by getLayersForMap and map list layer counts.
+ * A layerswitcher tool and its layerorder tree are shared, but each map
+ * keeps its own instances (`mapId`). Group rows for another map must not
+ * count as active here.
  */
 export function activeLayerInstancesForMapWhere(
   mapName: string
 ): Prisma.LayerInstanceWhereInput {
   return {
-    AND: [
-      activeLayerInstanceWhere,
-      {
-        OR: [
-          { map: { name: mapName } },
-          { group: { maps: { some: { mapName } } } },
-        ],
-      },
-    ],
+    AND: [activeLayerInstanceWhere, { map: { name: mapName } }],
   };
 }
 
@@ -130,19 +124,7 @@ export function activeLayerInstancesForMapsWhere(
   mapNames: string[]
 ): Prisma.LayerInstanceWhereInput {
   return {
-    AND: [
-      activeLayerInstanceWhere,
-      {
-        OR: [
-          { map: { name: { in: mapNames } } },
-          {
-            group: {
-              maps: { some: { mapName: { in: mapNames } } },
-            },
-          },
-        ],
-      },
-    ],
+    AND: [activeLayerInstanceWhere, { map: { name: { in: mapNames } } }],
   };
 }
 

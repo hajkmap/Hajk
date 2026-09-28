@@ -71,7 +71,6 @@ import {
   applyLayerswitcherOptionsToActivationRows,
   getClientBaselayersFromToolOptions,
   getClientGroupsFromToolOptions,
-  pruneLayerSwitcherDraftToActiveLayers,
 } from "../groups-development/utils/client-groups";
 import { findActiveLayerswitcher } from "../groups-development/utils/active-layerswitcher";
 import { useTools } from "../../api/tools";
@@ -394,6 +393,9 @@ export default function MapSettings() {
   const [toolsDraft, setToolsDraft] = useState<ToolsDraft | null>(null);
   const toolsDraftRef = useRef<ToolsDraft | null>(null);
   const flushMapToolEditsRef = useRef<(() => void) | null>(null);
+  // Set when the active layerswitcher changes so Save writes that tool's tree
+  // and drops every other LayerInstance for this map.
+  const layerswitcherSwitchRef = useRef(false);
   const [hasPendingWindowSizeInput, setHasPendingWindowSizeInput] =
     useState(false);
   const layerSwitcherDirty = layerSwitcherDraft != null && menuSynced;
@@ -613,6 +615,10 @@ export default function MapSettings() {
       if (!active || toolTypesById.get(toolId) !== "layerswitcher") {
         return;
       }
+
+      // The previous tool's unsaved tree must not be saved onto the new one.
+      layerswitcherSwitchRef.current = true;
+      setLayerSwitcherDraft(null);
 
       const layerswitcher = findActiveLayerswitcher(
         mapTools,
@@ -905,55 +911,44 @@ export default function MapSettings() {
         didSave = true;
       }
 
-      if (contentDirty && layerActivationDirtyRaw) {
-        const activationLayers = mapLayerActivationToPayload(
-          layerActivationRows,
-        );
-        const activeIds = new Set(
-          layerActivationRows
-            .filter((row) => row.active)
-            .map((row) => row.layerId),
-        );
+      const switchedLayerswitcher =
+        layerswitcherSwitchRef.current && layerswitcherFromTool != null;
+      let didWriteLayerSwitcher = false;
+
+      if (switchedLayerswitcher || (contentDirty && layerActivationDirtyRaw)) {
+        // The draft is the tree just built in Lagerordningsträd. Activating a
+        // layerswitcher clears the previous tool's draft, so a draft here
+        // belongs to the current tool and must be saved. Falling back to the
+        // tool's stored options drops that first tree and the reload is empty.
         const base = layerSwitcherDraft ??
           layerswitcherFromTool ??
           layerSwitcherState ?? {
             groups: [],
             baselayers: [],
           };
-        const backgroundActiveIds = new Set(
-          layerActivationRows
-            .filter(
-              (row) =>
-                row.active &&
-                row.isBackground &&
-                (row.layerKind ?? "display") === "display",
-            )
-            .map((row) => row.layerId),
-        );
-        // Bakgrund tree = already placed only. Newly BACKGROUND-toggled layers
-        // stay in the left catalog until dropped in.
-        const nextBaselayers = base.baselayers.filter((entry) =>
-          backgroundActiveIds.has(entry.layerId),
-        );
+        layerswitcherSwitchRef.current = false;
         await updateMapLayerSwitcher({
           mapName: map.name,
-          content: pruneLayerSwitcherDraftToActiveLayers(
-            { groups: base.groups, baselayers: nextBaselayers },
-            activeIds,
-          ),
+          content: {
+            groups: base.groups,
+            baselayers: base.baselayers,
+          },
         });
-        // Re-apply Lager activation after layerswitcher write — that step replaces
-        // BACKGROUND instances from baselayers only and would otherwise untoggle
-        // active/background layers that are not yet in the Bakgrund tree.
+        // Checked Lager rows must still have an instance after the tree write,
+        // or the reload clears Active. Grouped rows are left as they are.
         await updateMapLayers({
           mapName: map.name,
-          layers: activationLayers,
+          layers: mapLayerActivationToPayload(layerActivationRows),
           replaceBackground: true,
           replaceForeground: true,
         });
         setLayerSwitcherDraft(null);
         layerActivationWasDirtyRef.current = false;
+        didWriteLayerSwitcher = true;
 
+        await queryClient.cancelQueries({
+          queryKey: ["mapContent", map.name],
+        });
         const contentData = await queryClient.fetchQuery<MapContentApiResponse>(
           {
             queryKey: ["mapContent", map.name],
@@ -976,7 +971,11 @@ export default function MapSettings() {
         didSave = true;
       }
 
-      if (layerSwitcherDraft && !layerActivationDirtyRaw) {
+      if (
+        !didWriteLayerSwitcher &&
+        layerSwitcherDraft &&
+        !layerActivationDirtyRaw
+      ) {
         await updateMapLayerSwitcher({
           mapName: map.name,
           content: {
@@ -984,15 +983,11 @@ export default function MapSettings() {
             baselayers: layerSwitcherDraft.baselayers,
           },
         });
-        // Preserve BACKGROUND activations that are catalog-only (not in Bakgrund tree).
-        const backgroundOnly = mapLayerActivationToPayload(
-          layerActivationRows,
-        ).filter((layer) => layer.usage === "BACKGROUND");
         await updateMapLayers({
           mapName: map.name,
-          layers: backgroundOnly,
+          layers: mapLayerActivationToPayload(layerActivationRows),
           replaceBackground: true,
-          replaceForeground: false,
+          replaceForeground: true,
         });
         setLayerSwitcherDraft(null);
         await Promise.all([

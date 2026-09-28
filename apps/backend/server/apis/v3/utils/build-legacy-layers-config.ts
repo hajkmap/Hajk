@@ -164,7 +164,8 @@ type EditingLayerWithRelations = Prisma.EditingLayerGetPayload<{
 const mapPlacementFilter = (
   mapName: string
 ): Prisma.LayerInstanceWhereInput => ({
-  OR: [{ map: { name: mapName } }, { group: { maps: { some: { mapName } } } }],
+  // Instances are per map, even when several maps share a layerswitcher group.
+  map: { name: mapName },
 });
 
 function appendSearchLayerToWfs(

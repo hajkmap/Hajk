@@ -202,8 +202,8 @@ class MapService {
 
   /**
    * Counts catalog layers that would show as Active on the map layers tab —
-   * unique layer ids among active LayerInstances linked directly (`mapId`) or
-   * via a group placed on the map. Matches buildMapLayerActivationRows.
+   * unique layer ids among LayerInstances stamped with that map. The
+   * layerswitcher tree is shared; instances are not.
    */
   private async countLayersByMapNames(mapNames: string[]) {
     const layerIdsByMap = new Map(
@@ -220,14 +220,6 @@ class MapService {
         searchLayerId: true,
         editingLayerId: true,
         map: { select: { name: true } },
-        group: {
-          select: {
-            maps: {
-              where: { mapName: { in: mapNames } },
-              select: { mapName: true },
-            },
-          },
-        },
       },
     });
 
@@ -236,14 +228,8 @@ class MapService {
         instance.displayLayerId ??
         instance.searchLayerId ??
         instance.editingLayerId;
-      if (!layerId) continue;
-
-      if (instance.map?.name) {
-        layerIdsByMap.get(instance.map.name)?.add(layerId);
-      }
-      for (const placement of instance.group?.maps ?? []) {
-        layerIdsByMap.get(placement.mapName)?.add(layerId);
-      }
+      if (!layerId || !instance.map?.name) continue;
+      layerIdsByMap.get(instance.map.name)?.add(layerId);
     }
 
     return new Map(
@@ -570,9 +556,10 @@ class MapService {
   }
 
   /**
-   * Atomically replaces Kartlager hierarchy (GroupsOnMaps + per-group
-   * LayerInstances) and Bakgrund (map BACKGROUND LayerInstances).
-   * Does not touch FOREGROUND map-direct LayerInstances (draw-order).
+   * Replaces this map's map layer placements and its own LayerInstances
+   * (group rows stamped with this mapId, plus background). The layerswitcher
+   * tool and its layerorder tree stay shared. Other maps' instances are
+   * left unchanged.
    */
   async updateMapLayerSwitcher(
     mapName: string,
@@ -633,9 +620,17 @@ class MapService {
     await prisma.$transaction(async (tx) => {
       await this.replaceMapGroupsInTransaction(tx, mapName, mapGroupInputs);
 
+      const placedCatalogIds = new Set<string>();
+
       for (const entry of groupLayers) {
         const layerCreates: Prisma.LayerInstanceCreateManyInput[] = [];
         for (const [index, layer] of entry.layers.entries()) {
+          // One instance per catalog layer on this map, even if the tree
+          // lists it under more than one group.
+          if (placedCatalogIds.has(layer.layerId)) {
+            continue;
+          }
+          placedCatalogIds.add(layer.layerId);
           const resolved = await resolveLayerPlacementById(layer.layerId);
           if (!resolved.ok) {
             throw new HajkError(
@@ -681,24 +676,20 @@ class MapService {
           assertExactlyOneLayerParent(layerCreates[layerCreates.length - 1]);
         }
 
+        // Same group and layerswitcher tree can be used on many maps.
+        // Only this map's instances are replaced. Drop every existing row for
+        // these catalog layers on this map so a previous group cannot leave
+        // a duplicate.
         await tx.layerInstance.deleteMany({
-          where: { groupId: entry.groupId },
+          where: { groupId: entry.groupId, mapId: map.id },
         });
-        
-        const placedLayerIds = entry.layers.map((layer) => layer.layerId);
-        if (placedLayerIds.length > 0) {
-          await tx.layerInstance.deleteMany({
-            where: {
-              mapId: map.id,
-              groupId: null,
-              OR: [
-                { displayLayerId: { in: placedLayerIds } },
-                { searchLayerId: { in: placedLayerIds } },
-                { editingLayerId: { in: placedLayerIds } },
-              ],
-            },
-          });
-        }
+
+        const placedLayerIds = layerCreates.flatMap((row) => {
+          const catalogId =
+            row.displayLayerId ?? row.searchLayerId ?? row.editingLayerId;
+          return catalogId ? [catalogId] : [];
+        });
+        await this.deleteMapInstancesByCatalogIds(tx, map.id, placedLayerIds);
         if (layerCreates.length > 0) {
           await tx.layerInstance.createMany({ data: layerCreates });
         }
@@ -711,12 +702,32 @@ class MapService {
         });
       }
 
+      const backgroundOnly = backgroundLayers.filter(
+        (layer) => !placedCatalogIds.has(layer.layerId)
+      );
+      await this.deleteMapInstancesByCatalogIds(
+        tx,
+        map.id,
+        backgroundOnly.map((layer) => layer.layerId)
+      );
       await this.replaceDirectMapLayersInTransaction(
         tx,
         map.id,
-        backgroundLayers,
+        backgroundOnly,
         { replaceBackground: true }
       );
+
+      const keptLayerIds = new Set<string>();
+      for (const entry of groupLayers) {
+        for (const layer of entry.layers) {
+          keptLayerIds.add(layer.layerId);
+        }
+      }
+      for (const layer of backgroundLayers) {
+        keptLayerIds.add(layer.layerId);
+      }
+      await this.deleteMapLayerInstancesExcept(tx, map.id, keptLayerIds);
+      await this.dedupeMapLayerInstances(tx, map.id);
     });
 
     await this.syncLayerSwitcherContentInToolOptions(
@@ -840,6 +851,110 @@ class MapService {
     });
   }
 
+  /** Deletes this map's instances for the given catalog layer ids, any group. */
+  private async deleteMapInstancesByCatalogIds(
+    tx: Prisma.TransactionClient,
+    mapId: number,
+    catalogIds: string[]
+  ) {
+    if (catalogIds.length === 0) {
+      return;
+    }
+    await tx.layerInstance.deleteMany({
+      where: {
+        mapId,
+        OR: [
+          { displayLayerId: { in: catalogIds } },
+          { searchLayerId: { in: catalogIds } },
+          { editingLayerId: { in: catalogIds } },
+        ],
+      },
+    });
+  }
+
+  /**
+   * One LayerInstance per catalog layer on a map. Keeps a grouped row when
+   * one exists, otherwise the first row.
+   */
+  private async dedupeMapLayerInstances(
+    tx: Prisma.TransactionClient,
+    mapId: number
+  ) {
+    const instances = await tx.layerInstance.findMany({
+      where: { mapId },
+      select: {
+        id: true,
+        displayLayerId: true,
+        searchLayerId: true,
+        editingLayerId: true,
+        groupId: true,
+      },
+    });
+    const byCatalogId = new Map<string, typeof instances>();
+    for (const instance of instances) {
+      const catalogId =
+        instance.displayLayerId ??
+        instance.searchLayerId ??
+        instance.editingLayerId;
+      if (!catalogId) {
+        continue;
+      }
+      const list = byCatalogId.get(catalogId) ?? [];
+      list.push(instance);
+      byCatalogId.set(catalogId, list);
+    }
+    const removeIds: string[] = [];
+    for (const list of byCatalogId.values()) {
+      if (list.length < 2) {
+        continue;
+      }
+      const keep = list.find((row) => row.groupId != null) ?? list[0];
+      for (const row of list) {
+        if (row.id !== keep.id) {
+          removeIds.push(row.id);
+        }
+      }
+    }
+    if (removeIds.length === 0) {
+      return;
+    }
+    await tx.layerInstance.deleteMany({
+      where: { id: { in: removeIds } },
+    });
+  }
+
+  /** Removes this map's LayerInstances whose catalog layer is not in `keptLayerIds`. */
+  private async deleteMapLayerInstancesExcept(
+    tx: Prisma.TransactionClient,
+    mapId: number,
+    keptLayerIds: Set<string>
+  ) {
+    const instances = await tx.layerInstance.findMany({
+      where: { mapId },
+      select: {
+        id: true,
+        displayLayerId: true,
+        searchLayerId: true,
+        editingLayerId: true,
+      },
+    });
+    const removeIds = instances
+      .filter((instance) => {
+        const catalogId =
+          instance.displayLayerId ??
+          instance.searchLayerId ??
+          instance.editingLayerId;
+        return catalogId == null || !keptLayerIds.has(catalogId);
+      })
+      .map((instance) => instance.id);
+    if (removeIds.length === 0) {
+      return;
+    }
+    await tx.layerInstance.deleteMany({
+      where: { id: { in: removeIds } },
+    });
+  }
+
   private async replaceDirectMapLayers(
     mapId: number,
     layers: MapLayerInput[],
@@ -912,33 +1027,17 @@ class MapService {
         };
       };
 
-      // Remove map-direct placements for catalog layers that are no longer active.
-      // Do not delete shared Group composition rows — those groups are reused by
-      // other maps (duplicate keeps the same group ids). Hybrid mapId+groupId
-      // stamps for inactive catalog layers are cleared instead of deleted.
+      // The active tree decides which LayerInstances belong to this map.
+      // Drop every instance stamped with this mapId whose catalog layer is
+      // no longer in that set, including ones placed in a group.
       if (activeCatalogIds.size === 0) {
-        await tx.layerInstance.deleteMany({
-          where: { mapId, groupId: null },
-        });
-        await tx.layerInstance.updateMany({
-          where: { mapId, groupId: { not: null } },
-          data: { mapId: null },
-        });
+        await tx.layerInstance.deleteMany({ where: { mapId } });
       } else {
         await tx.layerInstance.deleteMany({
           where: {
             mapId,
-            groupId: null,
             NOT: catalogStillActiveFilter(),
           },
-        });
-        await tx.layerInstance.updateMany({
-          where: {
-            mapId,
-            groupId: { not: null },
-            NOT: catalogStillActiveFilter(),
-          },
-          data: { mapId: null },
         });
       }
 
@@ -954,7 +1053,7 @@ class MapService {
       const groupPlacedCatalogIds = new Set<string>();
       if (mapGroupIds.length > 0) {
         const remainingGroupInstances = await tx.layerInstance.findMany({
-          where: { groupId: { in: mapGroupIds } },
+          where: { mapId, groupId: { in: mapGroupIds } },
           select: {
             displayLayerId: true,
             searchLayerId: true,
@@ -989,6 +1088,7 @@ class MapService {
     if (toCreate.length > 0) {
       await tx.layerInstance.createMany({ data: toCreate });
     }
+    await this.dedupeMapLayerInstances(tx, mapId);
   }
 
   private async buildDirectMapLayerRows(

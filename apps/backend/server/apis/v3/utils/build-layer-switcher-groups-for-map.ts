@@ -545,7 +545,11 @@ export async function buildLayerSwitcherGroupsForMap(
 
   const instances = await prisma.layerInstance.findMany({
     where: {
-      AND: [{ groupId: { in: groupIds } }, activeLayerInstanceWhere],
+      AND: [
+        { groupId: { in: groupIds } },
+        { map: { name: mapName } },
+        activeLayerInstanceWhere,
+      ],
     },
     include: layerInstanceIncludeAll,
     orderBy: { zIndex: "asc" },
@@ -627,7 +631,11 @@ export async function buildLayerSwitcherAdminStateForMap(mapName: string) {
   if (groupIds.length > 0) {
     const groupInstances = await prisma.layerInstance.findMany({
       where: {
-        AND: [{ groupId: { in: groupIds } }, activeLayerInstanceWhere],
+        AND: [
+          { groupId: { in: groupIds } },
+          { map: { name: mapName } },
+          activeLayerInstanceWhere,
+        ],
       },
       include: layerInstanceIncludeAll,
     });
