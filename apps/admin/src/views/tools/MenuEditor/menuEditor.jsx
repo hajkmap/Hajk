@@ -893,7 +893,7 @@ class ToolOptions extends Component {
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Hämta alla dokument som menyn refererar till i en enda request, istället för en request per dokument. Kräver att bakänden stödjer detta (API v2)."
+                title="Hämta alla dokument som menyn refererar till i en enda request, istället för en request per dokument. Kräver att backenden stödjer detta (API v2)."
               />
             </label>
           </div>
