@@ -8,15 +8,9 @@ import { preload } from "./apis/v2/services/informative/documentCache.js";
 // When INFORMATIVE_CACHE_PRELOAD=true the App_Data cache is warmed before the
 // server accepts any traffic; preload() never throws (bad files are logged
 // and skipped), so a broken file can never block startup.
-const preloadCache = () =>
-  process.env.INFORMATIVE_CACHE_PRELOAD === "true"
-    ? preload()
-    : Promise.resolve();
-
-export default new Server()
-  .router(routes)
-  .then(async (server) => {
-    await preloadCache();
-    return server;
-  })
-  .then((server) => server.listen(process.env.PORT));
+export default new Server().router(routes).then(async (server) => {
+  if (process.env.INFORMATIVE_CACHE_PRELOAD === "true") {
+    await preload();
+  }
+  return server.listen(process.env.PORT);
+});
