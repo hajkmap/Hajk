@@ -17,7 +17,7 @@
     "start": "node dist/index.js",
     "compile": "shx rm -rf dist && shx cp -r server dist",
     "dev": "nodemon server --config .nodemonrc.json",
-    "dev:debug": "nodemon server --config .nodemonrc.json --inspect",
+    "dev:debug": "nodemon --inspect server --config .nodemonrc.json",
     "lint": "eslint server",
     "lint:fix": "eslint --fix server"
   },
