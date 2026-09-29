@@ -337,6 +337,37 @@
       "options": {
         "groups": [
           {
+            "id": "b1e5f9b0-0f1a-4b1c-9c2e-3a7d5e6f8a01",
+            "type": "group",
+            "name": "Globala exempellager",
+            "toggled": false,
+            "expanded": true,
+            "exclusive": true,
+            "infogroupvisible": false,
+            "infogrouptitle": "",
+            "infogrouptext": "",
+            "infogroupurl": "",
+            "infogroupurltext": "",
+            "infogroupopendatalink": "",
+            "infogroupowner": "",
+            "parent": "-1",
+            "layers": [
+              {
+                "id": "gebco0",
+                "drawOrder": 1000,
+                "visibleAtStart": false,
+                "infobox": ""
+              },
+              {
+                "id": "gibsbm",
+                "drawOrder": 1000,
+                "visibleAtStart": false,
+                "infobox": ""
+              }
+            ],
+            "groups": []
+          },
+          {
             "id": "f1728430-c0b8-cbd2-0183-3d3e64124329",
             "type": "group",
             "name": "Naturvårdsverket",
@@ -774,18 +805,18 @@
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
         "enableOSM": true,
-        "OSMVisibleAtStart": true,
-        "enableOSMVector": false,
-        "OSMVectorVisibleAtStart": false,
+        "OSMVisibleAtStart": false,
+        "enableOSMVector": true,
+        "OSMVectorVisibleAtStart": true,
         "osmVectorStyleUrl": "",
-        "osmVectorRenderMode": "vector",
+        "osmVectorRenderMode": "hybrid",
         "showBreadcrumbs": true,
         "showDrawOrderView": true,
         "showFilter": true,
         "showQuickAccess": true,
+        "enableSystemLayersSwitch": true,
         "legendForceTransparency": false,
         "legendTryHiDPI": false,
-        "enableSystemLayersSwitch": true,
         "lockDrawOrderBaselayer": true,
         "drawOrderViewInfoText": "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
         "enableQuickAccessPresets": true,
@@ -811,6 +842,73 @@
       "index": 1
     },
     {
+      "type": "floodsimulator",
+      "index": 20,
+      "options": {
+        "target": "right",
+        "position": "left",
+        "visibleAtStart": false,
+        "title": "Översvämning",
+        "description": "Simulera en stigande vattennivå",
+        "elevationUrl": "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
+        "elevationEncoding": "terrarium",
+        "crossOrigin": "anonymous",
+        "tileSize": 256,
+        "minZoom": 0,
+        "maxZoom": 15,
+        "attributions": "Elevation data: Mapzen Terrain Tiles",
+        "minLevel": 0,
+        "maxLevel": 10,
+        "levelStep": 0.01,
+        "defaultLevel": 1,
+        "waterColor": "#86cbf9",
+        "deepWaterColor": "#8dabbf",
+        "depthColors": [
+          {
+            "maxDepth": 0.5,
+            "color": "#E7A6EE"
+          },
+          {
+            "maxDepth": 1.0,
+            "color": "#D454DB"
+          },
+          {
+            "maxDepth": 1.5,
+            "color": "#A8F59A"
+          },
+          {
+            "maxDepth": 2.0,
+            "color": "#8BEA69"
+          },
+          {
+            "maxDepth": 2.5,
+            "color": "#4DB2FF"
+          },
+          {
+            "maxDepth": 3.12,
+            "color": "#1E84FF"
+          },
+          {
+            "maxDepth": 3.5,
+            "color": "#002BFF"
+          },
+          {
+            "maxDepth": 4.0,
+            "color": "#001C9A"
+          }
+        ],
+        "layerOpacity": 0.6,
+        "enableDepthShading": true,
+        "interpolate": true,
+        "smoothDepthColors": true,
+        "maxShadingDepth": 5,
+        "animationDurationMs": 8000,
+        "showElevationReadout": true,
+        "minElevation": -100,
+        "maxElevation": 100
+      }
+    },
+    {
       "type": "infoclick",
       "options": {
         "height": "dynamic",
@@ -833,9 +931,9 @@
           "a": 0.1
         },
         "allowDangerousHtml": true,
-        "useNewInfoclick": false,
-        "useNewPlaceholderMatching": false,
-        "useLevel1FeatureHighlight": false,
+        "useNewInfoclick": true,
+        "useNewPlaceholderMatching": true,
+        "useLevel1FeatureHighlight": true,
         "transformLinkUri": true,
         "visibleForGroups": []
       },
@@ -939,36 +1037,37 @@
       "index": 13
     },
     {
+      "type": "commandpalette",
+      "options": {
+        "target": "control",
+        "position": "right",
+        "visibleForGroups": []
+      },
+      "index": 99
+    },
+    {
       "type": "preset",
       "options": {
         "presetList": [
           {
-            "name": "Halmstad",
-            "presetUrl": "?m=simpleMapConfig&x=368494.9197547268&y=6282312.7413127115&z=6.7339618545565125&l=1&f=%7B%7D&clean=false"
-          },
-          {
-            "name": "Alingsås",
-            "presetUrl": "?m=simpleMapConfig&x=354049.24452326825&y=6424217.248216377&z=7.903686478656474&l=1&f=%7B%7D&clean=false"
-          },
-          {
             "name": "Göteborg",
-            "presetUrl": "?m=simpleMapConfig&x=315850.5321760868&y=6398503.693206446&z=6.502756678859521&l=1&f=%7B%7D&clean=false"
+            "presetUrl": "x=1321139.1624138714&y=7912264.346665324&z=12"
           },
           {
-            "name": "Jönköping",
-            "presetUrl": "?m=simpleMapConfig&x=450214.34373580024&y=6403315.750951234&z=6.7931556775514546&l=1&f=%7B%7D&clean=false"
+            "name": "Halmstad",
+            "presetUrl": "x=1427601.0460239877&y=7695072.913788887&z=12"
           },
           {
-            "name": "Karlstad",
-            "presetUrl": "?m=simpleMapConfig&x=416370.6129169631&y=6583095.470395488&z=6.221222447365537&l=1&f=%7B%7D&clean=false"
+            "name": "Kungsbacka",
+            "presetUrl": "x=1323808.489763441&y=7850867.971644933&z=12"
           },
           {
-            "name": "Stockholm",
-            "presetUrl": "?m=simpleMapConfig&x=671675.4989296548&y=6570377.474044046&z=4.9236065968776375&l=1&f=%7B%7D&clean=false"
+            "name": "Varberg",
+            "presetUrl": "x=1357562.7727971568&y=7778074.126093438&z=12"
           },
           {
-            "name": "Umeå",
-            "presetUrl": "?m=simpleMapConfig&x=758454.9972847599&y=7084504.860998487&z=6.739288215480473&l=1&f=%7B%7D&clean=false"
+            "name": "Örebro",
+            "presetUrl": "x=1700469.5474212733&y=8243503.043603574&z=12"
           }
         ],
         "visibleForGroups": []
@@ -1055,8 +1154,8 @@
       "options": {
         "target": "left",
         "position": "left",
-        "copyright": "",
-        "disclaimer": "",
+        "copyright": "Hajk - öppen webbGIS-klient – https://github.com/hajkmap/Hajk",
+        "disclaimer": "Tänk på att gränserna i kartan inte alltid stämmer överens med verkligheten och de är inte juridiskt gällande.",
         "date": "Utskriftsdatum: {date}",
         "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000, 800000, 1000000, 5000000, 10000000",
         "scaleMeters": "10, 10, 20, 40, 60, 100, 100, 300, 600, 2000, 4000, 8000, 10000, 160000",
@@ -1069,6 +1168,8 @@
         "useMargin": false,
         "useTextIconsInMargin": false,
         "mapTextColor": "#000000",
+        "textFontWeight": "bold",
+        "textFontSize": 8,
         "instruction": "",
         "visibleAtStart": false,
         "visibleForGroups": [],
@@ -1290,73 +1391,6 @@
         "position": "left",
         "visibleAtStart": false,
         "icons": ""
-      }
-    },
-    {
-      "type": "floodsimulator",
-      "index": 20,
-      "options": {
-        "target": "toolbar",
-        "position": "left",
-        "visibleAtStart": false,
-        "title": "Översvämning",
-        "description": "Simulera en stigande vattennivå",
-        "elevationUrl": "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
-        "elevationEncoding": "terrarium",
-        "crossOrigin": "anonymous",
-        "tileSize": 256,
-        "minZoom": 0,
-        "maxZoom": 15,
-        "attributions": "Elevation data: Mapzen Terrain Tiles",
-        "minLevel": 0,
-        "maxLevel": 10,
-        "levelStep": 0.01,
-        "defaultLevel": 1,
-        "waterColor": "#86cbf9",
-        "deepWaterColor": "#8dabbf",
-        "depthColors": [
-          {
-            "maxDepth": 0.5,
-            "color": "#E7A6EE"
-          },
-          {
-            "maxDepth": 1.0,
-            "color": "#D454DB"
-          },
-          {
-            "maxDepth": 1.5,
-            "color": "#A8F59A"
-          },
-          {
-            "maxDepth": 2.0,
-            "color": "#8BEA69"
-          },
-          {
-            "maxDepth": 2.5,
-            "color": "#4DB2FF"
-          },
-          {
-            "maxDepth": 3.12,
-            "color": "#1E84FF"
-          },
-          {
-            "maxDepth": 3.5,
-            "color": "#002BFF"
-          },
-          {
-            "maxDepth": 4.0,
-            "color": "#001C9A"
-          }
-        ],
-        "layerOpacity": 0.6,
-        "enableDepthShading": true,
-        "interpolate": true,
-        "smoothDepthColors": true,
-        "maxShadingDepth": 5,
-        "animationDurationMs": 8000,
-        "showElevationReadout": true,
-        "minElevation": -100,
-        "maxElevation": 100
       }
     }
   ],

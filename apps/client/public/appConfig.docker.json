@@ -10,6 +10,7 @@
     "Coordinates",
     "DocumentHandler",
     "Edit",
+    "FloodSimulator",
     "FmeServer",
     "InfoDialog",
     "LayerComparer",
