@@ -81,7 +81,8 @@ function ensureWatcher() {
   const usePolling = process.env.INFORMATIVE_CACHE_POLLING === "true";
 
   try {
-    // Two watchers so files under App_Data/documents are only watched once:
+    // Two watchers: recursive on documents/, depth 0 on App_Data/*.json (skip Upload/, templates/).
+    // w2 ignores documents/ so those files are not watched twice.
     const w1 = chokidar.watch(docsDir, {
       ignoreInitial: true,
       usePolling,

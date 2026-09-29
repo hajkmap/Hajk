@@ -63,10 +63,12 @@ Reading up to thousands of documents from disk on every request is expensive, so
 
 | Flag | Default | Effect |
 | --- | --- | --- |
-| `INFORMATIVE_CACHE_POLLING` | `false` | When `true`, forces the chokidar watcher into polling mode (`usePolling: true`, 2s interval). Useful on systems with a low `fs.inotify.max_user_watches` limit. |
+| `INFORMATIVE_CACHE_POLLING` | `false` | When `true`, forces the chokidar watcher into polling mode (`usePolling: true`, 2s interval). Useful on Linux when inotify limits are too low (see below). |
 | `INFORMATIVE_CACHE_PRELOAD` | `false` | When `true`, warms the cache at startup (before the server starts listening) by reading every `App_Data/<map>.json` and `App_Data/documents/**` file once. Trades a slower boot for a fast first request. Per-file errors are logged and skipped — preload never blocks startup. |
 
 Both are documented in [`apps/backend/.env.example`](../../../../../apps/backend/.env.example).
+
+On Linux, chokidar uses inotify. If watches fail (`ENOSPC` / “file watchers reached”), either set `INFORMATIVE_CACHE_POLLING=true` or raise `fs.inotify.max_user_watches` (e.g. to `65536`).
 
 ## Enabling the feature
 
