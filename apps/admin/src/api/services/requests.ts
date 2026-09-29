@@ -526,8 +526,11 @@ export const checkServiceHealth = async (
 ) => {
   try {
     const healthUrl = `${service.url}?service=${service.type === SERVICE_TYPE.WFST ? "WFS" : service.type}&request=GetCapabilities`;
+    // Bypass the browser cache: a cached GetCapabilities answer would report
+    // the service as up even when it can't be reached.
     const response = await fetch(healthUrl, {
       method: "GET",
+      cache: "no-store",
       signal: AbortSignal.timeout(5000),
     });
     const status = response.ok
