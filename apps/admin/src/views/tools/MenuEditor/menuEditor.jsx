@@ -86,6 +86,7 @@ class ToolOptions extends Component {
     draggingEnabled: false,
     searchImplemented: true,
     enablePrint: true,
+    consolidateDocumentLoading: false,
     directPrint: false,
     pdfLinks: [{ name: "", link: "" }],
     closePanelOnMapLinkOpen: false,
@@ -200,6 +201,8 @@ class ToolOptions extends Component {
         draggingEnabled: tool.options.draggingEnabled || false,
         searchImplemented: tool.options.searchImplemented,
         enablePrint: tool.options.enablePrint,
+        consolidateDocumentLoading:
+          tool.options.consolidateDocumentLoading || false,
         directPrint: tool.options.directPrint || false,
         pdfLinks: tool.options.pdfLinks || [{ name: "", link: "" }],
         closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
@@ -296,6 +299,7 @@ class ToolOptions extends Component {
         height: this.state.height,
         searchImplemented: this.state.searchImplemented,
         enablePrint: this.state.enablePrint,
+        consolidateDocumentLoading: this.state.consolidateDocumentLoading,
         directPrint: this.state.directPrint,
         pdfLinks: this.state.pdfLinks,
         closePanelOnMapLinkOpen: this.state.closePanelOnMapLinkOpen,
@@ -872,6 +876,26 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="searchImplemented">Sökning aktiverad</label>
+          </div>
+          <div>
+            <input
+              id="consolidateDocumentLoading"
+              name="consolidateDocumentLoading"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.consolidateDocumentLoading}
+            />
+            &nbsp;
+            <label htmlFor="consolidateDocumentLoading">
+              Ladda alla dokument i en request{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Hämta alla dokument som menyn refererar till i en enda request, istället för en request per dokument. Kräver att bakänden stödjer detta (API v2)."
+              />
+            </label>
           </div>
           <div>
             <input

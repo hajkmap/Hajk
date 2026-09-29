@@ -104,39 +104,32 @@ export default class DocumentHandlerModel {
     return new Promise((resolve, reject) => {
       if (this.allDocuments.length > 0) {
         resolve(this.allDocuments);
+        return;
       }
 
-      const menuItemsWithDocumentConnection = this.flattenMenu(
-        this.settings.menu
-      ).filter((menuItem) => {
-        return menuItem.document;
-      });
-
-      Promise.all(
-        menuItemsWithDocumentConnection.map((menuItem) => {
-          return this.fetchJsonDocument(
-            menuItem.folder,
-            menuItem.document
-          ).then((doc) => {
-            if (!doc.title) {
-              console.warn(
-                `The document ${menuItem.document} is missing a title`
-              );
-            }
-
-            return {
-              ...doc,
-              documentColor:
-                typeof menuItem.color === "string"
-                  ? menuItem.color.trim()
-                  : menuItem.color,
-              documentFileName: menuItem.document,
-              documentTitle: doc.title,
-              menuItemId: menuItem.id,
-            };
+      if (this.options.consolidateDocumentLoading === true) {
+        this.fetchConsolidatedDocuments()
+          .then((documents) => {
+            resolve(documents);
+          })
+          .catch((err) => {
+            console.warn(
+              `Consolidated document loading failed (${
+                err instanceof Error ? err.message : err
+              }). Falling back to loading the documents one by one.`
+            );
+            this.loadDocumentsIndividually()
+              .then((documents) => {
+                resolve(documents);
+              })
+              .catch((fallbackErr) => {
+                reject(fallbackErr);
+              });
           });
-        })
-      )
+        return;
+      }
+
+      this.loadDocumentsIndividually()
         .then((documents) => {
           resolve(documents);
         })
@@ -144,6 +137,128 @@ export default class DocumentHandlerModel {
           reject(err);
         });
     });
+  }
+
+  loadDocumentsIndividually() {
+    const menuItemsWithDocumentConnection = this.flattenMenu(
+      this.settings.menu
+    ).filter((menuItem) => {
+      return menuItem.document;
+    });
+
+    return Promise.all(
+      menuItemsWithDocumentConnection.map((menuItem) => {
+        return this.fetchJsonDocument(menuItem.folder, menuItem.document).then(
+          (doc) => {
+            return this.decorateDocument(doc, menuItem, menuItem.document);
+          }
+        );
+      })
+    );
+  }
+
+  /**
+   * @summary Loads all documents of the active map in a single request.
+   * @description Used when the map's documenthandler tool has the option
+   * "consolidateDocumentLoading" enabled. The backend reads the map config
+   * and decides which documents to include in its response.
+   *
+   * @memberof DocumentHandlerModel
+   */
+  async fetchConsolidatedDocuments() {
+    const response = await hfetch(
+      `${this.mapServiceUrl}/informative/loadall/${this.app.config.activeMap}`
+    );
+    if (!response.ok) {
+      throw new Error(`Received status ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (!data || !Array.isArray(data.documents)) {
+      throw new Error(
+        "Unexpected response from the consolidated document endpoint"
+      );
+    }
+
+    // Find the menu item that each document was referenced from, so that we can
+    // attach the menu-item specific settings (color, menu item id, etc.) to it.
+    const menuItemsWithDocumentConnection = this.flattenMenu(
+      this.settings.menu
+    ).filter((menuItem) => {
+      return menuItem.document;
+    });
+
+    return data.documents.map((docEntry) => {
+      const menuItem =
+        menuItemsWithDocumentConnection.find(
+          (m) =>
+            (m.folder || "") === docEntry.folder && m.document === docEntry.name
+        ) || {};
+
+      // A document that failed to load comes back as `document: null` with a
+      // structured `error` object. Turn it into an "error document" so the rest
+      // of the plugin keeps working and the viewer can show the failure.
+      if (docEntry.document == null && docEntry.error) {
+        console.warn(
+          `Document "${docEntry.name}" failed to load: ` +
+            `[${docEntry.error.code}] ${docEntry.error.message}`
+        );
+        return this.decorateErrorDocument(menuItem, docEntry, docEntry.error);
+      }
+
+      return this.decorateDocument(docEntry.document, menuItem, docEntry.name);
+    });
+  }
+
+  /**
+   * @summary Builds the same document object shape as decorateDocument for a
+   * document that could not be loaded via consolidated loading, adding the
+   * server-provided error under `loadError`.
+   *
+   * @memberof DocumentHandlerModel
+   */
+  decorateErrorDocument(menuItem, docEntry, error) {
+    return {
+      title: docEntry.name,
+      chapters: [],
+      documentColor:
+        typeof menuItem.color === "string"
+          ? menuItem.color.trim()
+          : menuItem.color,
+      documentFileName: docEntry.name,
+      documentTitle: docEntry.name,
+      menuItemId: menuItem.id,
+      loadError: {
+        code: error.code,
+        message: error.message,
+      },
+    };
+  }
+
+  decorateDocument(doc, menuItem, documentFileName) {
+    if (!doc.title) {
+      console.warn(`The document ${documentFileName} is missing a title`);
+    }
+
+    this.internalId = 0;
+    (doc.chapters || []).forEach((chapter) => {
+      this.setParentChapter(chapter, undefined);
+      this.setInternalId(chapter);
+      this.setScrollReferences(chapter);
+      this.appendComponentsToChapter(chapter);
+      this.internalId = this.internalId + 1;
+    });
+
+    return {
+      ...doc,
+      documentColor:
+        typeof menuItem.color === "string"
+          ? menuItem.color.trim()
+          : menuItem.color,
+      documentFileName: documentFileName,
+      documentTitle: doc.title,
+      menuItemId: menuItem.id,
+    };
   }
 
   getDocuments(fileNames) {
@@ -253,14 +368,6 @@ export default class DocumentHandlerModel {
       }
 
       const document = await JSON.parse(text);
-      this.internalId = 0;
-      document.chapters.forEach((chapter) => {
-        this.setParentChapter(chapter, undefined);
-        this.setInternalId(chapter);
-        this.setScrollReferences(chapter);
-        this.appendComponentsToChapter(chapter);
-        this.internalId = this.internalId + 1;
-      });
 
       return document;
     } catch (err) {

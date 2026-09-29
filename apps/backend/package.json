@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "activedirectory2": "^2.2.0",
+    "chokidar": "^5.0.0",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

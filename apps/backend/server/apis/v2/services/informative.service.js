@@ -1,6 +1,10 @@
 import fs from "fs";
 import path from "path";
 import log4js from "log4js";
+import {
+  readFile as readFileCached,
+  ensureWatcher,
+} from "./informative/documentCache.js";
 const logger = log4js.getLogger("service.informative.v2");
 
 class InformativeService {
@@ -28,8 +32,8 @@ class InformativeService {
         file
       );
 
-      const text = await fs.promises.readFile(pathToFile, "utf-8");
-      const json = JSON.parse(text);
+      ensureWatcher();
+      const json = await readFileCached(pathToFile);
       return json;
     } catch (error) {
       logger.warn(
@@ -38,6 +42,150 @@ class InformativeService {
       logger.warn(error);
       return { error };
     }
+  }
+
+  /**
+   * @summary Gets all documents referenced by a map's documenthandler tool in one go.
+   * @description Used by the consolidated document loading feature: if the documenthandler
+   * tool of a map config has `consolidateDocumentLoading` enabled, the client will request
+   * all of its documents in a single request (via GET /informative/loadall/:map) instead of
+   * one request per document. This method reads the map config, extracts all documents that
+   * the documenthandler's menu references (deduplicated by folder+name) and returns them
+   * as an array of { folder, name, document } objects.
+   *
+   * A document that cannot be loaded does not fail the whole request: the entry is
+   * returned with `document: null` and an `error: { code, message }` object describing
+   * the problem, so the client can render the rest of the documents and show an
+   * error for the broken one.
+   *
+   * @param {*} map Name of the map config
+   * @returns {object} { documents: [{ folder, name, document, error? }] }
+   * @memberof InformativeService
+   */
+  async getAllDocumentsForMapConfig(map) {
+    // Only allow simple map names (file stem), like in config.service.js.
+    if (!/^[A-Za-z0-9_-]+$/.test(String(map).trim())) {
+      return {
+        error: { statusCode: 404, message: `Invalid map name "${map}".` },
+      };
+    }
+
+    let mapConfig;
+    try {
+      const pathToMapConfig = path.join(
+        process.cwd(),
+        "App_Data",
+        `${map}.json`
+      );
+      ensureWatcher();
+      mapConfig = await readFileCached(pathToMapConfig);
+    } catch (error) {
+      logger.warn(
+        `Error while reading map config "${map}". Sent 404 Not Found as response. Original error below.`
+      );
+      logger.warn(error);
+      return {
+        error: {
+          statusCode: 404,
+          message: `Could not find map config for "${map}".`,
+        },
+      };
+    }
+
+    const documentHandler = (mapConfig.tools || []).find(
+      (tool) => tool.type === "documenthandler"
+    );
+
+    if (
+      !documentHandler ||
+      documentHandler.options?.consolidateDocumentLoading !== true
+    ) {
+      return {
+        error: {
+          statusCode: 404,
+          message: `Consolidated document loading is not enabled for map "${map}".`,
+        },
+      };
+    }
+
+    // Flatten the (possibly nested) menu and keep only menu items that reference a document.
+    const flattenMenu = (menu = []) => {
+      return menu.reduce((flat, menuItem) => {
+        if (menuItem.menu && menuItem.menu.length > 0) {
+          flat = [...flat, ...flattenMenu(menuItem.menu)];
+        }
+        return [...flat, menuItem];
+      }, []);
+    };
+
+    const menuItemsWithDocument = flattenMenu(
+      documentHandler.options.menuConfig?.menu || []
+    ).filter((menuItem) => menuItem.document);
+
+    // Dedupe by folder+name, keep the first occurrence.
+    const seen = new Set();
+    const uniqueItems = menuItemsWithDocument.filter((menuItem) => {
+      const key = `${menuItem.folder || ""}/${menuItem.document}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    const documents = [];
+    for (const menuItem of uniqueItems) {
+      const folder = menuItem.folder || "";
+      const name = menuItem.document;
+      const result = await this.getByName(folder, name);
+      if (result && result.error) {
+        // One broken document must not take down the whole consolidated
+        // response: report it per-entry so the client can render the rest
+        // and show a specific error for this one.
+        logger.warn(
+          `Consolidated load for map "${map}": could not load document ` +
+            `"${folder && `${folder}/`}${name}".`
+        );
+        logger.warn(result.error);
+        documents.push({
+          folder,
+          name,
+          document: null,
+          error: this.buildDocumentLoadError(folder, name, result.error),
+        });
+      } else {
+        documents.push({ folder, name, document: result });
+      }
+    }
+
+    return { documents };
+  }
+
+  /**
+   * @summary Maps a raw load error for a single document to a small,
+   * structured error payload so the client can surface it without guessing.
+   *
+   * @param {string} folder Folder the document was referenced from ("" for root)
+   * @param {string} name Document file name (without ".json")
+   * @param {Error} error The raw error thrown while loading the document
+   * @returns {object} { code, message }
+   */
+  buildDocumentLoadError(folder, name, error) {
+    const pathLabel = (folder && `${folder}/`) + `${name}.json`;
+
+    if (error && error.code === "ENOENT") {
+      return {
+        code: "DOCUMENT_NOT_FOUND",
+        message: `Document "${pathLabel}" was not found.`,
+      };
+    }
+
+    // Missing code (e.g. a JSON parse failure or a permission error):
+    // keep the original detail but under a generic code.
+    return {
+      code: "DOCUMENT_LOAD_ERROR",
+      message:
+        (error && (error.message || error.toString())) ||
+        `Could not load document "${pathLabel}".`,
+    };
   }
 
   /**

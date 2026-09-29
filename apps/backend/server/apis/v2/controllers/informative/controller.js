@@ -1,4 +1,5 @@
 import InformativeService from "../../services/informative.service.js";
+import handleStandardResponse from "../../utils/handleStandardResponse.js";
 import log4js from "log4js";
 
 // Create a logger for admin events, those will be saved in a separate log file.
@@ -41,6 +42,14 @@ export class Controller {
         res.status(404).send(errorMessage);
       }
     });
+  }
+
+  loadAll(req, res) {
+    InformativeService.getAllDocumentsForMapConfig(req.params.map)
+      .then((r) => {
+        handleStandardResponse(res, r);
+      })
+      .catch((err) => handleStandardResponse(res, { error: err }));
   }
 
   saveByName(req, res) {
