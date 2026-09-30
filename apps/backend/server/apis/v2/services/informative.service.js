@@ -1,7 +1,27 @@
 import fs from "fs";
 import path from "path";
 import log4js from "log4js";
+import { assertSafeSegment, resolvePathUnder } from "../utils/safePath.js";
 const logger = log4js.getLogger("service.informative.v2");
+
+const documentsRoot = path.join(process.cwd(), "App_Data", "documents");
+
+/**
+ * @summary Safely build a path inside App_Data/documents.
+ * @description Each supplied name must be a single path segment (no separators,
+ * no "..") and the resulting path must stay inside the documents root. Empty
+ * (or undefined) folder means the documents root itself.
+ *
+ * @param {string} folder Optional folder name
+ * @param {string} [file] Optional file name, including extension
+ * @returns {string} Absolute path
+ */
+function getDocumentsPath(folder = "", file) {
+  const segments = [folder, file].filter((s) => s !== undefined && s !== "");
+  if (segments.length === 0) return documentsRoot;
+  segments.forEach(assertSafeSegment);
+  return resolvePathUnder(documentsRoot, ...segments);
+}
 
 class InformativeService {
   constructor() {
@@ -20,13 +40,7 @@ class InformativeService {
       file += ".json"; // Add file extension
 
       // Construct the path depending on whether a folder was provided
-      const pathToFile = path.join(
-        process.cwd(),
-        "App_Data",
-        "documents",
-        folder,
-        file
-      );
+      const pathToFile = getDocumentsPath(folder, file);
 
       const text = await fs.promises.readFile(pathToFile, "utf-8");
       const json = JSON.parse(text);
@@ -54,13 +68,7 @@ class InformativeService {
       documentName += ".json";
 
       // …and create a new path to that file.
-      const pathToFile = path.join(
-        process.cwd(),
-        "App_Data",
-        "documents",
-        folderName,
-        documentName
-      );
+      const pathToFile = getDocumentsPath(folderName, documentName);
 
       // Prepare the contents of our new documents file
       const json = {
@@ -96,14 +104,9 @@ class InformativeService {
         foldername: folderName, // Return
       };
       // …and create a new path to that folder.
-      const pathToFolder = path.join(
-        process.cwd(),
-        "App_Data",
-        "documents",
-        folderName
-      );
+      const pathToFolder = getDocumentsPath(folderName);
       if (!fs.existsSync(pathToFolder)) {
-        fs.promises.mkdir(pathToFolder);
+        await fs.promises.mkdir(pathToFolder);
         return folder;
       } else {
         return folder;
@@ -126,13 +129,7 @@ class InformativeService {
       file += ".json"; // Add file extension.
 
       // Prepare the path to our file.
-      const pathToFile = path.join(
-        process.cwd(),
-        "App_Data",
-        "documents",
-        folder,
-        file
-      );
+      const pathToFile = getDocumentsPath(folder, file);
 
       // Handle both string and object inputs
       let json;
@@ -168,13 +165,7 @@ class InformativeService {
       file += ".json";
 
       // Prepare the path to our file.
-      const pathToFile = path.join(
-        process.cwd(),
-        "App_Data",
-        "documents",
-        folder,
-        file
-      );
+      const pathToFile = getDocumentsPath(folder, file);
 
       // Attempt to delete the specified file
       await fs.promises.unlink(pathToFile);
@@ -195,7 +186,7 @@ class InformativeService {
    */
   async getAvailableDocuments(folder = "") {
     try {
-      const dir = path.join(process.cwd(), "App_Data", "documents", folder);
+      const dir = getDocumentsPath(folder);
       const dirContents = await fs.promises.readdir(dir, {
         withFileTypes: true,
       });

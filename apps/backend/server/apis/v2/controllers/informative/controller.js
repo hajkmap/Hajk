@@ -17,7 +17,7 @@ export class Controller {
             folderName && `${folderName}/`
           }${documentName}.json, and connected it to map ${mapName}.json.`
         );
-      } else res.status(500).send(r.error.message);
+      } else res.status(r.error.statusCode || 500).send(r.error.message);
     });
   }
 
@@ -27,7 +27,7 @@ export class Controller {
       if (r && !r.error) {
         res.status(200).send("Folder created");
         ael.info(`created a new folder, ${folderName}`);
-      } else res.status(500).send(r.error.message);
+      } else res.status(r.error.statusCode || 500).send(r.error.message);
     });
   }
 
@@ -36,6 +36,8 @@ export class Controller {
     InformativeService.getByName(folder, name).then((r) => {
       if (r && !r.error) {
         res.json(r);
+      } else if (r.error.statusCode === 400) {
+        res.status(400).send(r.error.message);
       } else {
         const errorMessage = `${folder && `${folder}/`}${name}`;
         res.status(404).send(errorMessage);
@@ -50,7 +52,7 @@ export class Controller {
         res.status(200).send("File saved");
         ael.info(`saved document ${folder && `${folder}/`}${name}.json`);
       } else {
-        res.status(500).send(r.error.message);
+        res.status(r.error.statusCode || 500).send(r.error.message);
       }
     });
   }
@@ -62,7 +64,7 @@ export class Controller {
         res.status(200).send("File deleted");
         ael.info(`deleted document ${folder && `${folder}/`}${name}.json`);
       } else {
-        res.status(500).send(r.error.message);
+        res.status(r.error.statusCode || 500).send(r.error.message);
       }
     });
   }
@@ -70,14 +72,14 @@ export class Controller {
   list(req, res) {
     InformativeService.getAvailableDocuments(req.params.folder).then((r) => {
       if (r && !r.error) res.json(r);
-      else res.status(500).send(r.error.message);
+      else res.status(r.error.statusCode || 500).send(r.error.message);
     });
   }
 
   folderlist(req, res) {
     InformativeService.getAvailableFolders().then((r) => {
       if (r && !r.error) res.json(r);
-      else res.status(500).send(r.error.message);
+      else res.status(r.error.statusCode || 500).send(r.error.message);
     });
   }
 }

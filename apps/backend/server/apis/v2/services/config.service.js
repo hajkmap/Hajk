@@ -8,6 +8,11 @@ import asyncFilter from "../utils/asyncFilter.js";
 import getAnalyticsOptionsFromDotEnv from "../utils/getAnalyticsOptionsFromDotEnv.js";
 import { AccessError } from "../utils/AccessError.js";
 import { ConfigParseError } from "../utils/ConfigParseError.js";
+import {
+  assertSafeSegment,
+  resolvePathUnder,
+  validateMapName,
+} from "../utils/safePath.js";
 
 const logger = log4js.getLogger("service.config.v2");
 
@@ -28,27 +33,6 @@ class ConfigServiceV2 {
   }
 
   /**
-   * Validate map configuration name before using it in filesystem paths.
-   *
-   * @param {string} map
-   * @returns {string}
-   */
-  #validateMapName(map) {
-    if (typeof map !== "string") {
-      throw new Error("Invalid map name.");
-    }
-
-    const normalizedMap = map.trim();
-
-    // Only allow simple map IDs (file stem), e.g. "default_map-1".
-    if (!/^[A-Za-z0-9_-]+$/.test(normalizedMap)) {
-      throw new Error("Invalid map name.");
-    }
-
-    return normalizedMap;
-  }
-
-  /**
    * @summary Get contents of a map configuration as JSON object, if AD is active
    * a check will be made to see if specified user has access to the map.
    *
@@ -61,7 +45,7 @@ class ConfigServiceV2 {
    */
   async getMapConfig(map, user, washContent = true) {
     try {
-      const safeMap = this.#validateMapName(map);
+      const safeMap = validateMapName(map);
       const pathToFile = path.join(
         process.cwd(),
         "App_Data",
@@ -1145,19 +1129,27 @@ class ConfigServiceV2 {
    */
   async duplicateMap(src, dest) {
     try {
+      const appDataRoot = path.join(process.cwd(), "App_Data");
       let srcPath = null;
 
-      if (src.endsWith(".template")) {
+      if (typeof src === "string" && src.endsWith(".template")) {
         // If src ends with ".template", don't add the .json file extension,
         // and look inside /templates directory.
-        srcPath = path.join(process.cwd(), "App_Data", "templates", src);
+        validateMapName(src.slice(0, -".template".length));
+        srcPath = resolvePathUnder(
+          path.join(appDataRoot, "templates"),
+          assertSafeSegment(src)
+        );
       } else {
         // Else it's a regular JSON file, add the extension and look in App_Data only
-        srcPath = path.join(process.cwd(), "App_Data", src + ".json");
+        srcPath = resolvePathUnder(appDataRoot, `${validateMapName(src)}.json`);
       }
 
       // Destination will always need the extension added
-      const destPath = path.join(process.cwd(), "App_Data", dest + ".json");
+      const destPath = resolvePathUnder(
+        appDataRoot,
+        `${validateMapName(dest)}.json`
+      );
 
       // Copy!
       await fs.promises.copyFile(srcPath, destPath);
@@ -1189,7 +1181,10 @@ class ConfigServiceV2 {
   async deleteMap(name) {
     try {
       // Prepare path
-      const filePath = path.join(process.cwd(), "App_Data", name + ".json");
+      const filePath = resolvePathUnder(
+        path.join(process.cwd(), "App_Data"),
+        `${validateMapName(name)}.json`
+      );
       await fs.promises.unlink(filePath);
       return {};
     } catch (error) {

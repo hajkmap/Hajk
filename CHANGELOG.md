@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Backend: Fixed path traversal in file operations of the informative (documents), mapconfig and settings endpoints (API v2). File and folder names from requests are now validated and resolved paths are confined to `App_Data` (or `App_Data/documents`); invalid names are rejected with HTTP 400. [Code scanning alert #93](https://github.com/hajkmap/Hajk/security/code-scanning/93)
 - Client: LayerSwitcher - The "Visa endast Min/Max varningsruta vid klick" option (per layer and map-wide) is now respected, so the zoom-limit banner no longer appears when merely zooming. [#1898](https://github.com/hajkmap/Hajk/issues/1898)
 - Client: Attribution - The © control in the footer can be collapsed again, while still showing attribution text on load on desktop (collapsed on mobile). OpenLayers was hiding the toggle whenever any source on the map (typically a non-visible OSM background) had `attributionsCollapsible: false`. Clicks on the control were also blocked by the full-width breadcrumbs overlay. [#1896](https://github.com/hajkmap/Hajk/issues/1896)
 - Client: Print - Restored the admin "include image border" frame around the map image, which was dropped in the libPDF rewrite.
