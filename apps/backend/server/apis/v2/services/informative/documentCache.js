@@ -96,11 +96,14 @@ function ensureWatcher() {
       ignored: (p) => p === docsDir || p.startsWith(docsDir + path.sep),
     });
 
-    for (const watcher of [w1, w2]) {
+    for (const [watcher, label] of [
+      [w1, `${docsDir} (recursive)`],
+      [w2, `${appDataRoot} (top level)`],
+    ]) {
       watcher
         .on("all", onWatcherEvent)
         .on("error", onWatcherError)
-        .on("ready", () => logger.debug("App_Data file watcher ready"));
+        .on("ready", () => logger.debug(`File watcher ready: ${label}`));
     }
 
     state.watcher = { w1, w2 };
