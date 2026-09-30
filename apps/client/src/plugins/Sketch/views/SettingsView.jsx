@@ -65,6 +65,7 @@ const SettingsView = (props) => {
     select2: true,
     select3: true,
     select4: true,
+    select5: true,
     // Add more keys for additional Selects if needed
   });
 
@@ -427,6 +428,45 @@ const SettingsView = (props) => {
                 }}
                 onFocus={() => handleFocus("select3", false)}
                 onBlur={() => handleFocus("select3", true)}
+              >
+                {MEASUREMENT_PRECISIONS.map((precision, index) => {
+                  return (
+                    <MenuItem value={precision.value} key={index}>
+                      {precision.name}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+          </HajkToolTip>
+          <HajkToolTip
+            title={
+              showHajkToolTips.select5
+                ? "Välj med vilken precision koordinaterna på punkter ska visas."
+                : ""
+            }
+          >
+            <FormControl size="small" style={{ marginTop: 16 }}>
+              <InputLabel
+                variant="outlined"
+                id="sketch-select-point-precision-label"
+              >
+                Mätprecision, punkter
+              </InputLabel>
+              <Select
+                id="sketch-select-point-precision"
+                labelId="sketch-select-point-precision-label"
+                value={measurementSettings.pointPrecision ?? 0}
+                label="Mätprecision, punkter"
+                variant="outlined"
+                onChange={(e) => {
+                  setMeasurementSettings((settings) => ({
+                    ...settings,
+                    pointPrecision: parseInt(e.target.value),
+                  }));
+                }}
+                onFocus={() => handleFocus("select5", false)}
+                onBlur={() => handleFocus("select5", true)}
               >
                 {MEASUREMENT_PRECISIONS.map((precision, index) => {
                   return (

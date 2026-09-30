@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  IconButton,
   Zoom,
 } from "@mui/material";
 
@@ -25,6 +26,8 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { useEffect, useState } from "react";
 import HajkToolTip from "components/HajkToolTip";
 import SelectFeaturesDialog from "utils/SelectFeaturesDialog";
+import SettingsIcon from "@mui/icons-material/Settings";
+import SettingsDialog from "./views/SettingsDialog";
 
 const SvgImg = styled("img")(({ _theme }) => ({
   height: "24px",
@@ -107,7 +110,6 @@ function HelpDialog(props) {
           onClick={() => {
             props.setShowHelp(false);
           }}
-          autoFocus
         >
           OK
         </Button>
@@ -123,10 +125,13 @@ function MeasurerView(props) {
     drawModel,
     segmentsEnabled,
     toggleSegmentsEnabled,
+    measurementSettings,
+    onUpdateMeasurementSettings,
   } = props;
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showSegmentButton, setShowSegmentButton] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
 
   const deleteAll = () => {
     setShowDeleteConfirmation(false);
@@ -226,7 +231,14 @@ function MeasurerView(props) {
             </Zoom>
           </HajkToolTip>
         </Grid>
-        <Grid size={12}>
+        <Grid
+          size={12}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           <HajkToolTip title="Rensa bort alla mätningar">
             <Button
               size="small"
@@ -238,6 +250,24 @@ function MeasurerView(props) {
             >
               Rensa
             </Button>
+          </HajkToolTip>
+          <HajkToolTip title="Inställningar — välj antal decimaler">
+            <IconButton
+              aria-expanded={showSettings}
+              aria-haspopup="dialog"
+              aria-label="Inställningar — välj antal decimaler"
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={() => {
+                setShowSettings(true);
+              }}
+              size="small"
+              sx={{
+                border: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              <SettingsIcon fontSize="small" />
+            </IconButton>
           </HajkToolTip>
         </Grid>
       </Grid>
@@ -255,6 +285,12 @@ function MeasurerView(props) {
         }}
       />
       <HelpDialog open={showHelp} setShowHelp={setShowHelp} />
+      <SettingsDialog
+        open={showSettings}
+        onClose={() => setShowSettings(false)}
+        measurementSettings={measurementSettings}
+        onChange={onUpdateMeasurementSettings}
+      />
       <SelectFeaturesDialog
         localObserver={props.localObserver}
         drawModel={drawModel}

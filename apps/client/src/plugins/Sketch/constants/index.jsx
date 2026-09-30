@@ -182,6 +182,7 @@ export const DEFAULT_MEASUREMENT_SETTINGS = {
   areaUnit: "AUTO",
   lengthUnit: "AUTO",
   precision: 0,
+  pointPrecision: 0,
 };
 
 export const SNAP_TOLERANCE_OPTIONS = [

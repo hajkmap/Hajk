@@ -272,6 +272,7 @@ class DrawModel {
       areaUnit: "AUTO",
       lengthUnit: "AUTO",
       precision: 0,
+      pointPrecision: 0,
     };
   };
 
@@ -799,10 +800,12 @@ class DrawModel {
     // Then we'll reduce the measurements down to a string that we can show.
     return measurements.reduce((acc, curr) => {
       switch (curr.type) {
-        case "COORDINATES":
-          return (acc += `N: ${Math.round(curr.value[1])} E: ${Math.round(
+        case "COORDINATES": {
+          const pointPrecision = this.#measurementSettings.pointPrecision ?? 0;
+          return (acc += `N: ${Number(curr.value[1]).toFixed(pointPrecision)} E: ${Number(
             curr.value[0]
-          )}`);
+          ).toFixed(pointPrecision)}`);
+        }
         case "AREA":
         case "PERIMETER":
         case "LENGTH":
