@@ -6,6 +6,7 @@ export default express
   .Router()
   .get("/load/:name", controller.getByName)
   .get("/load/:folder/:name", controller.getByName)
+  .get("/loadall/:map", controller.loadAll)
   .use(restrictAdmin) // All routes that follow are admin-only!
   .post("/create", controller.create)
   .put("/create", controller.create)

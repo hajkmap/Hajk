@@ -1,5 +1,6 @@
 import React from "react";
 import Typography from "@mui/material/Typography";
+import Alert from "@mui/material/Alert";
 import ImagePopupModal from "./ImagePopupModal";
 import { flattenChaptersTree } from "../utils/helpers";
 import { Box } from "@mui/material";
@@ -170,12 +171,32 @@ class Contents extends React.PureComponent {
     );
   };
 
+  renderLoadError = (loadError) => {
+    return (
+      <Alert severity="error" sx={{ marginBottom: 2 }}>
+        {loadError.message}
+        {loadError.code && (
+          <Typography
+            variant="body2"
+            sx={{ display: "block", mt: 0.5, opacity: 0.8 }}
+          >
+            {loadError.code}
+          </Typography>
+        )}
+      </Alert>
+    );
+  };
+
   render = () => {
-    if (this.props.activeDocument) {
+    const { activeDocument } = this.props;
+    if (activeDocument) {
       return (
         <Box style={{ display: "block", maxWidth: "100%" }}>
           {this.renderImageInModal()}
-          {this.renderChapters(this.props.activeDocument.chapters)}
+          {activeDocument.loadError
+            ? this.renderLoadError(activeDocument.loadError)
+            : null}
+          {this.renderChapters(activeDocument.chapters)}
         </Box>
       );
     } else {

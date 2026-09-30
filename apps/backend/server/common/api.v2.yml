@@ -123,6 +123,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /informative/loadall/{map}:
+    get:
+      tags:
+        - Client-accessible
+      summary: Load all documents of a map in a single request
+      description: >
+        Returns every document referenced by the map's DocumentHandler menu as one
+        JSON response, instead of one request per document. Only available when the
+        map config's documenthandler tool has "consolidateDocumentLoading" enabled;
+        otherwise a 404 error is returned.
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map config whose documents to load
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: All documents of the map, deduplicated by folder/name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoadAllDocumentsResponse"
+        400:
+          description: Invalid map name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: Map config missing, or consolidated loading is not enabled for the map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /informative/create:
     put:
       tags:
@@ -926,6 +962,43 @@ components:
                 type: array
                 items:
                   type: object
+    LoadAllDocumentsResponse:
+      type: object
+      description: >
+        The response of "Load all documents of a map". Each entry pairs a document
+        with the folder/name the menu item referenced it by. A document that could
+        not be loaded is still included, with "document" set to null and an
+        "error" object describing the failure, so one broken document never fails
+        the whole request.
+      properties:
+        documents:
+          type: array
+          items:
+            type: object
+            properties:
+              folder:
+                type: string
+                description: Subfolder the document lives in ("" for root documents)
+              name:
+                type: string
+                description: Document file name (without ".json")
+              document:
+                nullable: true
+                description: The document's contents, as served by /informative/load
+                allOf:
+                  - $ref: "#/components/schemas/DocumentBody"
+              error:
+                type: object
+                description: Present only when "document" is null. Describes why the document could not be loaded.
+                properties:
+                  code:
+                    type: string
+                    description: Stable machine-readable code, DOCUMENT_NOT_FOUND, INVALID_DOCUMENT_PATH or DOCUMENT_LOAD_ERROR
+                    example: DOCUMENT_NOT_FOUND
+                  message:
+                    type: string
+                    description: Human-readable explanation of the failure
+                    example: Document "examples/missing.json" was not found.
     DocumentsList:
       type: array
       items:
