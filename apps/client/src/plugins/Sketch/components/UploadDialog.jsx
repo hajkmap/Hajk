@@ -30,6 +30,8 @@ const StyledFileInput = styled(Box)(({ theme }) => ({
 const SUPPORTED_EXTENSIONS = {
   kml: "kml",
   gpx: "gpx",
+  geojson: "geojson",
+  json: "geojson",
 };
 
 const getFileTypeFromName = (fileName) => {
@@ -68,7 +70,7 @@ const UploadDialog = (props) => {
         }
         if (skippedFiles.length > 0) {
           enqueueSnackbar(
-            "Hajk stödjer endast .kml- och .gpx-filer. En eller flera filer ignorerades.",
+            "Hajk stödjer endast .kml-, .gpx- och .geojson-filer. En eller flera filer ignorerades.",
             { variant: "warning" }
           );
         }
@@ -89,7 +91,7 @@ const UploadDialog = (props) => {
         <StyledFileInput>
           <input
             type="file"
-            accept=".kml,.gpx"
+            accept=".kml,.gpx,.geojson,.json"
             onChange={handleFileChange}
             style={{ display: "none" }}
             id="file-upload"
@@ -101,7 +103,7 @@ const UploadDialog = (props) => {
             </Button>
           </label>
           <Typography variant="body1" sx={{ mt: 2 }}>
-            Välj en eller flera .kml eller .gpx-filer
+            Välj en eller flera .kml-, .gpx- eller .geojson-filer
           </Typography>
         </StyledFileInput>
       </DialogContent>
