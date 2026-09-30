@@ -65,13 +65,12 @@ export default class Segment {
       projection: this.#map.getView().getProjection(),
     });
 
+    const precision = this.#drawModel.getMeasurementSettings().precision ?? 0;
     let output;
     if (length > 1000) {
-      // Convert and format the length to 1 decimal rounded up if longer than 1 km
-      output = Math.round((length / 1000) * 10) / 10 + " km";
+      output = Number((length / 1000).toFixed(precision)) + " km";
     } else {
-      // Otherwise show meters with 1 decimal
-      output = Math.round(length * 100) / 100 + " m";
+      output = Number(length.toFixed(precision)) + " m";
     }
     return output;
   };
@@ -195,7 +194,7 @@ export default class Segment {
         // in a 0 measurement length.
         if (
           this.#currentCenter.length > 0 &&
-          this.#currentSegmentLength !== "0 m"
+          parseFloat(this.#currentSegmentLength) > 0
         ) {
           this.#createPoint();
         }
