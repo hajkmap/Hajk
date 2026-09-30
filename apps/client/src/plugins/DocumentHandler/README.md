@@ -36,7 +36,7 @@ The backend decides which documents to bundle: it reads the map config (`App_Dat
 ```
 
 - Documents referenced from multiple menu items are **deduplicated** by filepath (`folder` + `name`); each unique file is loaded once and the client matches that entry by folder+name.
-- A document that fails to load **does not fail the whole request**: the entry comes back with `document: null` and an `error: { code, message }` object (`DOCUMENT_NOT_FOUND` or `DOCUMENT_LOAD_ERROR`), and the client renders the rest while surfacing the failure for the broken one.
+- A document that fails to load **does not fail the whole request**: the entry comes back with `document: null` and an `error: { code, message }` object (`DOCUMENT_NOT_FOUND`, `INVALID_DOCUMENT_PATH` for folder/document names that would escape `App_Data/documents`, or `DOCUMENT_LOAD_ERROR`), and the client renders the rest while surfacing the failure for the broken one.
 - The endpoint is public (registered before admin restriction), same as the legacy `GET /informative/load/:name`.
 - Implemented for API **v2** only (v1 is legacy).
 

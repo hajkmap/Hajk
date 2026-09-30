@@ -5,7 +5,32 @@ import {
   readFile as readFileCached,
   ensureWatcher,
 } from "./informative/documentCache.js";
+import {
+  assertSafeSegment,
+  resolvePathUnder,
+  validateMapName,
+  InvalidPathError,
+} from "../utils/safePath.js";
 const logger = log4js.getLogger("service.informative.v2");
+
+const documentsRoot = path.join(process.cwd(), "App_Data", "documents");
+
+/**
+ * @summary Safely build a path inside App_Data/documents.
+ * @description Each supplied name must be a single path segment (no separators,
+ * no "..") and the resulting path must stay inside the documents root. Empty
+ * (or undefined) folder means the documents root itself.
+ *
+ * @param {string} folder Optional folder name
+ * @param {string} [file] Optional file name, including extension
+ * @returns {string} Absolute path
+ */
+function getDocumentsPath(folder = "", file) {
+  const segments = [folder, file].filter((s) => s !== undefined && s !== "");
+  if (segments.length === 0) return documentsRoot;
+  segments.forEach(assertSafeSegment);
+  return resolvePathUnder(documentsRoot, ...segments);
+}
 
 class InformativeService {
   constructor() {
@@ -24,13 +49,7 @@ class InformativeService {
       file += ".json"; // Add file extension
 
       // Construct the path depending on whether a folder was provided
-      const pathToFile = path.join(
-        process.cwd(),
-        "App_Data",
-        "documents",
-        folder,
-        file
-      );
+      const pathToFile = getDocumentsPath(folder, file);
 
       ensureWatcher();
       const json = await readFileCached(pathToFile);
@@ -63,20 +82,20 @@ class InformativeService {
    * @memberof InformativeService
    */
   async getAllDocumentsForMapConfig(map) {
-    // Only allow simple map names (file stem), like in config.service.js.
-    if (!/^[A-Za-z0-9_-]+$/.test(String(map).trim())) {
-      return {
-        error: { statusCode: 404, message: `Invalid map name "${map}".` },
-      };
+    // Invalid map names are a bad request (400), a valid but missing map is a 404.
+    let pathToMapConfig;
+    try {
+      const safeMap = validateMapName(map);
+      pathToMapConfig = resolvePathUnder(
+        path.join(process.cwd(), "App_Data"),
+        `${safeMap}.json`
+      );
+    } catch (error) {
+      return { error };
     }
 
     let mapConfig;
     try {
-      const pathToMapConfig = path.join(
-        process.cwd(),
-        "App_Data",
-        `${map}.json`
-      );
       ensureWatcher();
       mapConfig = await readFileCached(pathToMapConfig);
     } catch (error) {
@@ -171,6 +190,13 @@ class InformativeService {
   buildDocumentLoadError(folder, name, error) {
     const pathLabel = (folder && `${folder}/`) + `${name}.json`;
 
+    if (error instanceof InvalidPathError) {
+      return {
+        code: "INVALID_DOCUMENT_PATH",
+        message: `Document path "${pathLabel}" is not allowed.`,
+      };
+    }
+
     if (error && error.code === "ENOENT") {
       return {
         code: "DOCUMENT_NOT_FOUND",
@@ -202,13 +228,7 @@ class InformativeService {
       documentName += ".json";
 
       // …and create a new path to that file.
-      const pathToFile = path.join(
-        process.cwd(),
-        "App_Data",
-        "documents",
-        folderName,
-        documentName
-      );
+      const pathToFile = getDocumentsPath(folderName, documentName);
 
       // Prepare the contents of our new documents file
       const json = {
@@ -244,14 +264,9 @@ class InformativeService {
         foldername: folderName, // Return
       };
       // …and create a new path to that folder.
-      const pathToFolder = path.join(
-        process.cwd(),
-        "App_Data",
-        "documents",
-        folderName
-      );
+      const pathToFolder = getDocumentsPath(folderName);
       if (!fs.existsSync(pathToFolder)) {
-        fs.promises.mkdir(pathToFolder);
+        await fs.promises.mkdir(pathToFolder);
         return folder;
       } else {
         return folder;
@@ -274,13 +289,7 @@ class InformativeService {
       file += ".json"; // Add file extension.
 
       // Prepare the path to our file.
-      const pathToFile = path.join(
-        process.cwd(),
-        "App_Data",
-        "documents",
-        folder,
-        file
-      );
+      const pathToFile = getDocumentsPath(folder, file);
 
       // Handle both string and object inputs
       let json;
@@ -316,13 +325,7 @@ class InformativeService {
       file += ".json";
 
       // Prepare the path to our file.
-      const pathToFile = path.join(
-        process.cwd(),
-        "App_Data",
-        "documents",
-        folder,
-        file
-      );
+      const pathToFile = getDocumentsPath(folder, file);
 
       // Attempt to delete the specified file
       await fs.promises.unlink(pathToFile);
@@ -343,7 +346,7 @@ class InformativeService {
    */
   async getAvailableDocuments(folder = "") {
     try {
-      const dir = path.join(process.cwd(), "App_Data", "documents", folder);
+      const dir = getDocumentsPath(folder);
       const dirContents = await fs.promises.readdir(dir, {
         withFileTypes: true,
       });

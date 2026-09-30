@@ -147,8 +147,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LoadAllDocumentsResponse"
+        400:
+          description: Invalid map name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         404:
-          description: Invalid map name, map config missing, or consolidated loading is not enabled for the map
+          description: Map config missing, or consolidated loading is not enabled for the map
           content:
             application/json:
               schema:
@@ -987,7 +993,7 @@ components:
                 properties:
                   code:
                     type: string
-                    description: Stable machine-readable code, e.g. DOCUMENT_NOT_FOUND or DOCUMENT_LOAD_ERROR
+                    description: Stable machine-readable code, DOCUMENT_NOT_FOUND, INVALID_DOCUMENT_PATH or DOCUMENT_LOAD_ERROR
                     example: DOCUMENT_NOT_FOUND
                   message:
                     type: string
