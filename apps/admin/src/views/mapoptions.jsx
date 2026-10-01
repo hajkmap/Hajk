@@ -90,6 +90,7 @@ class MapOptions extends Component {
         defaultCookieNoticeMessage: config.defaultCookieNoticeMessage,
         defaultCookieNoticeUrl: config.defaultCookieNoticeUrl,
         crossOrigin: config.crossOrigin,
+        measurementMethod: config.measurementMethod || "planar",
         showCookieNotice:
           config.showCookieNotice !== undefined
             ? config.showCookieNotice
@@ -204,6 +205,8 @@ class MapOptions extends Component {
         ? mapConfig.defaultCookieNoticeUrl
         : "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
       crossOrigin: mapConfig.crossOrigin ? mapConfig.crossOrigin : "anonymous",
+      measurementMethod:
+        mapConfig.measurementMethod === "sphere" ? "sphere" : "planar",
       showCookieNotice:
         mapConfig.showCookieNotice !== undefined
           ? mapConfig.showCookieNotice
@@ -490,6 +493,8 @@ class MapOptions extends Component {
         );
         config.defaultCookieNoticeUrl = this.getValue("defaultCookieNoticeUrl");
         config.crossOrigin = this.getValue("crossOrigin");
+        config.measurementMethod =
+          this.getValue("measurementMethod") || "planar";
         config.showCookieNotice = this.getValue("showCookieNotice");
         config.showCookieNoticeButton = this.getValue("showCookieNoticeButton");
         config.cookieUse3dPart = this.getValue("cookieUse3dPart");
@@ -1312,6 +1317,28 @@ class MapOptions extends Component {
                   this.setState({ crossOrigin: e.target.value });
                 }}
               />
+            </div>
+            <div>
+              <label>
+                Mätmetod{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Plan (kartesisk) mäter i kartans koordinatsystem och stämmer med t.ex. QGIS för projicerade CRS. Sfärisk (ol/sphere) använder geodetiska beräkningar. Standard är plan om värdet saknas."
+                />
+              </label>
+              <select
+                id="input_measurementMethod"
+                ref="input_measurementMethod"
+                value={this.state.measurementMethod || "planar"}
+                onChange={(e) => {
+                  this.setState({ measurementMethod: e.target.value });
+                }}
+                className="control-fixed-width"
+              >
+                <option value="planar">Plan (kartesisk)</option>
+                <option value="sphere">Sfärisk (ol/sphere)</option>
+              </select>
             </div>
             <div className="separator">Extra kontroller i kartan</div>
             <div>
