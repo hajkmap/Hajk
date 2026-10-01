@@ -135,16 +135,16 @@ function sortAndMutateFeaturesArray(layer, features) {
 function readJsonFeatures(jsonData, layerProjection, viewProjection) {
   const parser = new GeoJSON();
 
-  // If the response from WMS service contains a CRS (GeoServer), the feature parser
-  // will use it be default to determine the features' projection.
-  // However, if it's empty (QGIS Server), we must tell the parser which projection
-  // should be used for the features and which projection our View is in.
-  const parserOptions = jsonData.crs
-    ? { featureProjection: viewProjection }
-    : {
-        dataProjection: layerProjection,
-        featureProjection: viewProjection,
-      };
+  // GeoServer puts the CRS on the FeatureCollection, not on each feature. Since we
+  // parse feature by feature, it must be read here and passed explicitly - otherwise
+  // the parser falls back to EPSG:4326 for every feature. If no CRS is present
+  // (QGIS Server), the layer's projection is used instead.
+  const parserOptions = {
+    dataProjection: jsonData.crs
+      ? parser.readProjection(jsonData)
+      : layerProjection,
+    featureProjection: viewProjection,
+  };
 
   const parsedFeatures = [];
   // jsonData will always be a featureCollection, hence we must map over all
