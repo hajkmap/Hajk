@@ -187,10 +187,16 @@ class VectorImportModel {
     const id = Math.random().toString(36).slice(2, 9);
     // Let's handle the onload-event and import the features!
     reader.onload = () => {
-      this.import(reader.result, {
+      const { status, error } = this.import(reader.result, {
         zoomToExtent: true,
         setProperties: { [this.#profile.idPropertyName]: id },
       });
+      if (status !== "SUCCESS") {
+        console.error(
+          `Could not import dropped ${this.#profile.displayName}-file "${file.name}": ${error}`
+        );
+        return;
+      }
       // We also want to publish an event on the observer so that we can update potential views.
       this.#observer &&
         this.#observer.publish(this.#profile.observerSubject, { id });
@@ -322,11 +328,15 @@ class VectorImportModel {
   };
 
   // Fits the map to the current extent of the source (with some padding).
+  // Small extents (e.g. a single point) would otherwise zoom in to the max, so
+  // the zoom is capped at 7 - unless the user is already zoomed in further, in
+  // which case we never zoom out just to show features that already fit.
   #fitMapToExtent = () => {
-    this.#map.getView().fit(this.#currentExtent, {
+    const view = this.#map.getView();
+    view.fit(this.#currentExtent, {
       size: this.#map.getSize(),
       padding: [20, 20, 20, 20],
-      maxZoom: 7,
+      maxZoom: Math.max(7, view.getZoom() ?? 7),
     });
   };
 

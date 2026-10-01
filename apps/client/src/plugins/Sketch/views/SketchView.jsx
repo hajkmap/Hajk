@@ -31,10 +31,11 @@ import { Vector as VectorLayer } from "ol/layer";
 //Bus
 import { editBus } from "../../../buses/editBus";
 
-// Beware! In the view we only use kml and gpx, even if the actual file type might be application/vnd.google-earth.kml+xml or application/gpx+xml etc.
+// Beware! In the view we only use kml, gpx and geojson, even if the actual file type might be application/vnd.google-earth.kml+xml, application/gpx+xml or application/geo+json etc.
 const FILE_TYPES = {
   KML: "kml",
   GPX: "gpx",
+  GEOJSON: "geojson",
 };
 
 // The SketchView is the main view for the Sketch-plugin.
@@ -50,8 +51,8 @@ const SketchView = (props) => {
   // We want to render the ActivityMenu on the same side as the plugin
   // is rendered (left or right). Let's grab the prop stating where it is rendered!
   const pluginPosition = props.options?.position ?? "left";
-  // We are going to be using the sketch-, kml-, and draw-model. Let's destruct them.
-  const { model, drawModel, kmlModel, gpxModel } = props;
+  // We are going to be using the sketch-, kml-, gpx-, geojson-, and draw-model. Let's destruct them.
+  const { model, drawModel, kmlModel, gpxModel, geoJsonModel } = props;
   // We are gonna need the local- and global-observer
   const { localObserver, globalObserver } = props;
   // The current draw-type is also required, along with it's set:er.
@@ -127,10 +128,16 @@ const SketchView = (props) => {
   // has some features in the map. If it doesn't, the entry is removed.
   const refreshUploadsList = React.useCallback(() => {
     const refreshedUploadsList = uploadedFiles.filter((file) => {
+      if (file.type === FILE_TYPES.GPX) {
+        return gpxModel.importedGpxStillHasFeatures(file.id);
+      }
+      if (file.type === FILE_TYPES.GEOJSON) {
+        return geoJsonModel.importedGeoJsonStillHasFeatures(file.id);
+      }
       return kmlModel.importedKmlStillHasFeatures(file.id);
     });
     setUploadedFiles(refreshedUploadsList);
-  }, [kmlModel, uploadedFiles]);
+  }, [kmlModel, gpxModel, geoJsonModel, uploadedFiles]);
 
   // Handler making sure to keep the removed features updated when a new feature is removed.
   const handleFeatureRemoved = React.useCallback(
@@ -221,7 +228,7 @@ const SketchView = (props) => {
     [model, removedFeatures]
   );
 
-  // Handles when a kml/gpx-file has been added to the map via the drag-and-drop
+  // Handles when a kml/gpx/geojson-file has been added to the map via the drag-and-drop
   // functionality. Makes sure to update the state containing the uploaded files.
   const handleFileImported = React.useCallback(
     (id, type) => {
@@ -319,12 +326,16 @@ const SketchView = (props) => {
     localObserver.subscribe("gpxModel.fileImported", ({ id }) =>
       handleFileImported(id, FILE_TYPES.GPX)
     );
+    localObserver.subscribe("geoJsonModel.fileImported", ({ id }) =>
+      handleFileImported(id, FILE_TYPES.GEOJSON)
+    );
     return () => {
       localObserver.unsubscribe("drawModel.featureRemoved");
       localObserver.unsubscribe("drawModel.featuresRemoved");
       localObserver.unsubscribe("drawModel.featureAdded");
       localObserver.unsubscribe("kmlModel.fileImported");
       localObserver.unsubscribe("gpxModel.fileImported");
+      localObserver.unsubscribe("geoJsonModel.fileImported");
     };
   }, [
     activityId,
@@ -720,6 +731,7 @@ const SketchView = (props) => {
             drawModel={drawModel}
             kmlModel={kmlModel}
             gpxModel={gpxModel}
+            geoJsonModel={geoJsonModel}
             uploadedFiles={uploadedFiles}
             setUploadedFiles={setUploadedFiles}
             uiDisabled={uiDisabled}

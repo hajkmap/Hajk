@@ -23,11 +23,23 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   borderLeft: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
 }));
 
-const ButtonPanel = ({ kmlModel, gpxModel, setDialogOpen, uiDisabled }) => {
+const IMPORT_ID_PROPERTY = {
+  kml: "KML_ID",
+  gpx: "GPX_ID",
+  geojson: "GEOJSON_ID",
+};
+
+const ButtonPanel = ({
+  kmlModel,
+  gpxModel,
+  geoJsonModel,
+  setDialogOpen,
+  uiDisabled,
+}) => {
   return (
     <Grid container spacing={1}>
       <Grid size={12}>
-        <HajkToolTip title="Klicka för att öppna en dialog där du kan välja en .kml eller .gpx-fil från din dator.">
+        <HajkToolTip title="Klicka för att öppna en dialog där du kan välja en .kml-, .gpx- eller .geojson-fil från din dator.">
           <Button
             fullWidth
             variant="contained"
@@ -64,6 +76,21 @@ const ButtonPanel = ({ kmlModel, gpxModel, setDialogOpen, uiDisabled }) => {
               disabled={uiDisabled}
             >
               Exportera till GPX
+            </Button>
+          </span>
+        </HajkToolTip>
+      </Grid>
+      <Grid size={12}>
+        <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .geojson-fil. GeoJSON stödjer alla typer av geometrier och bevarar stilar. Cirklar exporteras som polygoner.">
+          <span>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => geoJsonModel.export()}
+              startIcon={<SaveAltIcon />}
+              disabled={uiDisabled}
+            >
+              Exportera till GeoJSON
             </Button>
           </span>
         </HajkToolTip>
@@ -172,13 +199,28 @@ const UploadView = (props) => {
   // We're gonna need to keep track of if we should show the upload-dialog or not.
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
-  // Adds the supplied file (kml/gpx string) to the map and updates the list
+  // Adds the supplied file (kml/gpx/geojson string) to the map and updates the list
   // of added files.
   const handleUploadedFile = (file, fileName, fileType) => {
     // We're gonna need to generate an id that we can set on all the features
     // in each file. This id can then be used to find all features that belongs to
     // a file upload.
     const id = props.model.generateRandomString();
+    const importModel = {
+      kml: props.kmlModel,
+      gpx: props.gpxModel,
+      geojson: props.geoJsonModel,
+    }[fileType];
+    if (!importModel) {
+      throw new Error(`Unsupported file type: ${fileType}`);
+    }
+    const result = importModel.import(file, {
+      zoomToExtent: true,
+      setProperties: { [IMPORT_ID_PROPERTY[fileType]]: id },
+    });
+    if (result.status === "FAILED") {
+      throw result.error ?? new Error(`Failed to import ${fileName}`);
+    }
     // We're also gonna need to generate a date-time-string that can be shown in the list
     // of uploaded files.
     const dateTime = props.model.getDateTimeString({
@@ -197,18 +239,6 @@ const UploadView = (props) => {
         type: fileType,
       },
     ]);
-    // Then we can add the features to the map!
-    if (fileType === "kml") {
-      props.kmlModel.import(file, {
-        zoomToExtent: true,
-        setProperties: { KML_ID: id },
-      });
-    } else if (fileType === "gpx") {
-      props.gpxModel.import(file, {
-        zoomToExtent: true,
-        setProperties: { GPX_ID: id },
-      });
-    }
   };
 
   const onVisibilityChangeClick = (id, type) => {
@@ -218,21 +248,16 @@ const UploadView = (props) => {
       }
       return file;
     });
-    if (type === "kml") {
-      props.drawModel.toggleKmlFeaturesVisibility(id);
-    } else if (type === "gpx") {
-      props.drawModel.toggleGpxFeaturesVisibility(id);
-    }
+    props.drawModel.toggleImportedFeaturesVisibility(
+      IMPORT_ID_PROPERTY[type],
+      id
+    );
     props.setUploadedFiles(updatedFiles);
   };
 
   const onRemoveClick = (id, type) => {
     const updatedFiles = props.uploadedFiles.filter((file) => file.id !== id);
-    if (type === "kml") {
-      props.drawModel.removeKmlFeaturesById(id);
-    } else if (type === "gpx") {
-      props.drawModel.removeGpxFeaturesById(id);
-    }
+    props.drawModel.removeImportedFeaturesById(IMPORT_ID_PROPERTY[type], id);
     props.setUploadedFiles(updatedFiles);
   };
 
@@ -243,11 +268,10 @@ const UploadView = (props) => {
       }
       return file;
     });
-    if (type === "kml") {
-      props.drawModel.toggleKmlFeaturesTextVisibility(id);
-    } else if (type === "gpx") {
-      props.drawModel.toggleGpxFeaturesTextVisibility(id);
-    }
+    props.drawModel.toggleImportedFeaturesTextVisibility(
+      IMPORT_ID_PROPERTY[type],
+      id
+    );
     props.setUploadedFiles(updatedFiles);
   };
 
@@ -262,6 +286,7 @@ const UploadView = (props) => {
         <ButtonPanel
           kmlModel={props.kmlModel}
           gpxModel={props.gpxModel}
+          geoJsonModel={props.geoJsonModel}
           setDialogOpen={setDialogOpen}
           uiDisabled={props.uiDisabled}
         />
