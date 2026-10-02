@@ -131,6 +131,9 @@ export function createMap(appModel) {
     view: buildView(config.map),
   });
 
+  appModel.map.measurementMethod =
+    config.map.measurementMethod === "sphere" ? "sphere" : "planar";
+
   attachZoomEndEvent(appModel.map, appModel.globalObserver);
 
   attachClickLockAndSnap(appModel.map, appModel);
