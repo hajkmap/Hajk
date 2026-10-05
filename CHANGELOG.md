@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Client: Feature info property filters (`date`, `datetime`, `time`, `formatNumber`, `roundToDecimals`) and DrawModel measurement/point labels now pass the browser language list to locale formatters so Chrome/Edge respects the UI language instead of the OS locale.
 - Client: Measurer/Sketch - Select-from-map ("Välj på kartan") now measures MultiPolygon, MultiLineString and GeometryCollection without throwing, so the clone and labels show again. [#1911](https://github.com/hajkmap/Hajk/issues/1911)
 - Backend: Fixed path traversal in file operations of the informative (documents), mapconfig and settings endpoints (API v2). File and folder names from requests are now validated and resolved paths are confined to `App_Data` (or `App_Data/documents`); invalid names are rejected with HTTP 400. [Code scanning alert #93](https://github.com/hajkmap/Hajk/security/code-scanning/93)
 - Client: LayerSwitcher - The "Visa endast Min/Max varningsruta vid klick" option (per layer and map-wide) is now respected, so the zoom-limit banner no longer appears when merely zooming. [#1898](https://github.com/hajkmap/Hajk/issues/1898)

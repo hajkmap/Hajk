@@ -25,6 +25,7 @@ import {
   measureLength,
   measurePolygonPerimeter,
 } from "utils/measurement";
+import { getBrowserLocale } from "utils/locale";
 import {
   noModifierKeys,
   platformModifierKeyOnly,
@@ -807,9 +808,14 @@ class DrawModel {
       switch (curr.type) {
         case "COORDINATES": {
           const pointPrecision = this.#measurementSettings.pointPrecision ?? 0;
-          return (acc += `N: ${Number(curr.value[1]).toFixed(pointPrecision)} E: ${Number(
+          const formatCoord = (n) =>
+            Number(n).toLocaleString(getBrowserLocale(), {
+              minimumFractionDigits: pointPrecision,
+              maximumFractionDigits: pointPrecision,
+            });
+          return (acc += `N: ${formatCoord(curr.value[1])} E: ${formatCoord(
             curr.value[0]
-          ).toFixed(pointPrecision)}`);
+          )}`);
         }
         case "AREA":
         case "PERIMETER":
@@ -921,11 +927,11 @@ class DrawModel {
       case "PERIMETER":
         return `${Number(
           (featureMeasure / 1e3).toFixed(precision)
-        ).toLocaleString()} km`;
+        ).toLocaleString(getBrowserLocale())} km`;
       default:
         return `${Number(
           (featureMeasure / 1e6).toFixed(precision)
-        ).toLocaleString()} km²`;
+        ).toLocaleString(getBrowserLocale())} km²`;
     }
   };
 
@@ -941,7 +947,7 @@ class DrawModel {
       default:
         return `${Number(
           (featureMeasure / 1e4).toFixed(precision)
-        ).toLocaleString()} ha`;
+        ).toLocaleString(getBrowserLocale())} ha`;
     }
   };
 
@@ -953,13 +959,13 @@ class DrawModel {
     switch (type) {
       case "LENGTH":
       case "PERIMETER":
-        return `${Number(
-          featureMeasure.toFixed(precision)
-        ).toLocaleString()} m`;
+        return `${Number(featureMeasure.toFixed(precision)).toLocaleString(
+          getBrowserLocale()
+        )} m`;
       default:
-        return `${Number(
-          featureMeasure.toFixed(precision)
-        ).toLocaleString()} m²`;
+        return `${Number(featureMeasure.toFixed(precision)).toLocaleString(
+          getBrowserLocale()
+        )} m²`;
     }
   };
 

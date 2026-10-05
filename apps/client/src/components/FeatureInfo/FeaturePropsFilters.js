@@ -1,5 +1,6 @@
 import AppModel from "../../models/AppModel";
 import HajkTransformer from "../../utils/HajkTransformer";
+import { getBrowserLocale } from "../../utils/locale";
 
 class PropFilters {
   constructor() {
@@ -146,7 +147,7 @@ filters.add(
     // We need to double wrap for toLocaleString to work as toFixed returns a string.
     return parseFloat(
       parseFloat(value).toFixed(parseInt(numDecimals))
-    ).toLocaleString();
+    ).toLocaleString(getBrowserLocale());
   }
 );
 
@@ -284,7 +285,7 @@ filters.add("notEquals", function (value, test, falseValue, trueValue) {
 */
 filters.add("datetime", function (value) {
   const date = typeof value === "string" ? new Date(value) : value;
-  return date.toLocaleString();
+  return date.toLocaleString(getBrowserLocale());
 });
 
 /*
@@ -296,7 +297,7 @@ filters.add("datetime", function (value) {
 filters.add("date", function (value) {
   value = fixDate(value);
   const date = typeof value === "string" ? new Date(value) : value;
-  return date.toLocaleDateString();
+  return date.toLocaleDateString(getBrowserLocale());
 });
 
 /*
@@ -307,7 +308,7 @@ filters.add("date", function (value) {
 */
 filters.add("time", function (value) {
   const date = typeof value === "string" ? new Date(value) : value;
-  return date.toLocaleTimeString();
+  return date.toLocaleTimeString(getBrowserLocale());
 });
 
 /*
@@ -348,7 +349,7 @@ filters.add("formatNumber", function (value) {
   if (isNaN(value)) {
     throw new Error("Argument should be a number");
   }
-  return Number(value).toLocaleString();
+  return Number(value).toLocaleString(getBrowserLocale());
 });
 
 /*
