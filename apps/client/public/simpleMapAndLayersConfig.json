@@ -908,6 +908,7 @@
       ],
       "title": "Hajk - open source webGIS",
       "projection": "EPSG:3857",
+      "measurementMethod": "sphere",
       "zoom": 6,
       "maxZoom": 18,
       "minZoom": 0,

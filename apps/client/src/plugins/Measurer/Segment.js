@@ -1,7 +1,7 @@
 import { Style, Text } from "ol/style";
 import { Feature } from "ol";
 import { LineString, Point, Polygon } from "ol/geom";
-import { getLength } from "ol/sphere";
+import { measureLength } from "utils/measurement";
 
 export default class Segment {
   #enabled;
@@ -61,10 +61,7 @@ export default class Segment {
   };
 
   #formatLength = (line) => {
-    const length = getLength(line, {
-      projection: this.#map.getView().getProjection(),
-    });
-
+    const length = measureLength(line, this.#map);
     const precision = this.#drawModel.getMeasurementSettings().precision ?? 0;
     let output;
     if (length > 1000) {
