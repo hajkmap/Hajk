@@ -8,5 +8,5 @@ When creating a new plugin, there are some crucial steps to get going:
 
 - Make a copy of the plugin-template (The plugin template is still TODO, so copy the Dummy for now)
 - Set proper names on files and components
-- **Make sure to add the new plugin to `AVAILABLE_TOOLS` (in `apps/client/src/constants.js`) as well as to `availableTools` in `appConfig.json`.**
+- **Name the plugin folder and its entry file the same: `src/plugins/<Name>/<Name>.jsx` or `.tsx`. That file is treated as an available plugin automatically.** Also add it to `availableTools` in `appConfig.json` when that list is set.
 - Make sure to add some kind of basic configuration for your plugin to the tool in the your map configuration file.

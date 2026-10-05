@@ -58,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Client: Available plugins are derived from `src/plugins/<Name>/<Name>.jsx|tsx` (Search stays at `components/Search/Search.jsx|tsx`) instead of the hardcoded `AVAILABLE_TOOLS` list. Adding an entry file is enough for the build to treat that plugin as available; `appConfig.availableTools` still chooses which of those plugins to load. `Template`, which exists on disk, is now available too.
 - Client + Admin: Bumped `x2js` from 3.4.4 to 3.4.5
 - Client: Bumped Vite from 7.3.2 to 7.3.6.
 - Backend: Bumped ESLint from 9.39.2 to 9.39.5.

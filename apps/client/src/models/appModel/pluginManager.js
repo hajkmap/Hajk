@@ -1,5 +1,6 @@
 import Plugin from "../Plugin";
 import { isMobile } from "../../utils/IsMobile";
+import { getPluginLoader } from "./pluginRegistry";
 
 class PluginManager {
   constructor() {
@@ -144,27 +145,8 @@ class PluginManager {
   loadPlugins(appModel, plugins) {
     const promises = [];
 
-    // NOTE: glob paths below are relative to appModel/pluginManager.js, NOT AppModel.js.
-    // Each path has one extra "../" compared to the original AppModel.js version.
-    // First let's check what files exist in the expected paths
-    const availableFiles = import.meta.glob([
-      "../../components/Search/*.{js,jsx,ts,tsx}", // special case as it's not inside plugins/
-      "../../plugins/*/*.{js,jsx,ts,tsx}",
-    ]);
-
-    // Now loop the plugins array and…
     plugins.forEach((plugin) => {
-      // (Again, for our special case)
-      const dir = ["Search"].includes(plugin) ? "components" : "plugins";
-
-      // …determine the expected path (but we don't know the file extension yet!).
-      // Path prefix is relative to appModel/pluginManager.js — two levels up to reach src/
-      const basePath = `../../${dir}/${plugin}/${plugin}`;
-
-      // Our module loader _should_ be on the expected path + one of the possible
-      // file extensions.
-      const loader =
-        availableFiles[`${basePath}.tsx`] || availableFiles[`${basePath}.jsx`];
+      const loader = getPluginLoader(plugin);
 
       // We have to make sure that the loader is an actual function
       if (typeof loader !== "function") {

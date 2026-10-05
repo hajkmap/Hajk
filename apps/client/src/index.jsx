@@ -19,23 +19,23 @@ import { initHFetch, hfetch, initFetchWrapper } from "./utils/FetchWrapper";
 import LocalStorageHelper from "./utils/LocalStorageHelper";
 import { getMergedSearchAndHashParams } from "./utils/getMergedSearchAndHashParams";
 import { AccessError, NotFoundError } from "./utils/CustomErrors";
-import { AVAILABLE_TOOLS } from "./constants";
+import { AVAILABLE_PLUGINS } from "./models/appModel/pluginRegistry";
 
 function ensureActiveToolsAreValid(availableTools = []) {
   // First check if there's a valid array
   if (!Array.isArray(availableTools)) {
     console.warn(
-      'activeTools should be an array. Falling back to default tools, which will load all available tools. Please check your appConfig.json and configure activeTools as an array. Example: "activeTools": ["LayerSwitcher", "Search"]'
+      'availableTools should be an array. Falling back to default tools, which will load all available tools. Please check your appConfig.json and configure availableTools as an array. Example: "availableTools": ["LayerSwitcher", "Search"]'
     );
-    return AVAILABLE_TOOLS;
+    return AVAILABLE_PLUGINS;
   }
 
-  // Now let's see that whatever's in activeTools is actually valid, i.e.
-  // exists in the AVAILABLE_TOOLS list. If not, we log a warning and filter out the invalid tools.
+  // Now let's see that whatever's in availableTools is actually valid, i.e.
+  // exists in the AVAILABLE_PLUGINS list. If not, we log a warning and filter out the invalid tools.
   const validActiveTools = availableTools.filter((tool) => {
-    if (!AVAILABLE_TOOLS.includes(tool)) {
+    if (!AVAILABLE_PLUGINS.includes(tool)) {
       console.warn(
-        `Tool "${tool}" in activeTools is not a valid tool. Please check your appConfig.json and ensure all tools listed in activeTools are valid. Valid tools are: ${AVAILABLE_TOOLS.join(", ")}.`
+        `Tool "${tool}" in availableTools is not a valid tool. Please check your appConfig.json and ensure all tools listed in availableTools are valid. Valid tools are: ${AVAILABLE_PLUGINS.join(", ")}.`
       );
       return false;
     }
@@ -45,9 +45,9 @@ function ensureActiveToolsAreValid(availableTools = []) {
   // If after filtering out invalid tools, we end up with an empty array, we fall back to the default of loading all tools.
   if (validActiveTools.length === 0) {
     console.warn(
-      "No valid tools found in activeTools. Falling back to default tools, which will load all available tools."
+      "No valid tools found in availableTools. Falling back to default tools, which will load all available tools."
     );
-    return AVAILABLE_TOOLS;
+    return AVAILABLE_PLUGINS;
   }
 
   return validActiveTools;
