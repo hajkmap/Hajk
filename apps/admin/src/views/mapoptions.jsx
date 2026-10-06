@@ -91,8 +91,8 @@ class MapOptions extends Component {
         defaultCookieNoticeUrl: config.defaultCookieNoticeUrl,
         crossOrigin: config.crossOrigin,
         measurementMethod: config.measurementMethod || "planar",
-        measurementWfsWithoutSearchUrl:
-          config.measurementWfsWithoutSearchUrl ?? false,
+        measurementWfs: config.measurementWfs ?? false,
+        measurementWfsDeriveUrl: config.measurementWfsDeriveUrl ?? false,
         showCookieNotice:
           config.showCookieNotice !== undefined
             ? config.showCookieNotice
@@ -209,8 +209,8 @@ class MapOptions extends Component {
       crossOrigin: mapConfig.crossOrigin ? mapConfig.crossOrigin : "anonymous",
       measurementMethod:
         mapConfig.measurementMethod === "sphere" ? "sphere" : "planar",
-      measurementWfsWithoutSearchUrl:
-        mapConfig.measurementWfsWithoutSearchUrl ?? false,
+      measurementWfs: mapConfig.measurementWfs ?? false,
+      measurementWfsDeriveUrl: mapConfig.measurementWfsDeriveUrl ?? false,
       showCookieNotice:
         mapConfig.showCookieNotice !== undefined
           ? mapConfig.showCookieNotice
@@ -394,7 +394,8 @@ class MapOptions extends Component {
       case "dragPan":
       case "pinchRotate":
       case "pinchZoom":
-      case "measurementWfsWithoutSearchUrl":
+      case "measurementWfs":
+      case "measurementWfsDeriveUrl":
       case "mapselector":
       case "mapcleaner":
       case "mapresetter":
@@ -500,8 +501,9 @@ class MapOptions extends Component {
         config.crossOrigin = this.getValue("crossOrigin");
         config.measurementMethod =
           this.getValue("measurementMethod") || "planar";
-        config.measurementWfsWithoutSearchUrl = this.getValue(
-          "measurementWfsWithoutSearchUrl"
+        config.measurementWfs = this.getValue("measurementWfs");
+        config.measurementWfsDeriveUrl = this.getValue(
+          "measurementWfsDeriveUrl"
         );
         config.showCookieNotice = this.getValue("showCookieNotice");
         config.showCookieNoticeButton = this.getValue("showCookieNoticeButton");
@@ -1350,27 +1352,50 @@ class MapOptions extends Component {
             </div>
             <div>
               <input
-                id="input_measurementWfsWithoutSearchUrl"
+                id="input_measurementWfs"
                 type="checkbox"
-                ref="input_measurementWfsWithoutSearchUrl"
+                ref="input_measurementWfs"
                 onChange={(e) => {
                   this.setState({
-                    measurementWfsWithoutSearchUrl: e.target.checked,
+                    measurementWfs: e.target.checked,
                   });
                 }}
-                checked={this.state.measurementWfsWithoutSearchUrl}
+                checked={this.state.measurementWfs}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_measurementWfs">
+                Hämta full geometri via WFS vid 'Välj på kartan'
+                (GeoServer-lager med sök-URL, experimentell funktion){" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktivt hämtas hela geometrin via underlagrets sök-URL när man väljer på kartan i Mät eller Skiss. Gäller GeoServer-lager. Om WFS misslyckas används geometrin från GetFeatureInfo. (experimentell funktion)"
+                />
+              </label>
+            </div>
+            <div style={{ marginLeft: 24 }}>
+              <input
+                id="input_measurementWfsDeriveUrl"
+                type="checkbox"
+                ref="input_measurementWfsDeriveUrl"
+                disabled={!this.state.measurementWfs}
+                onChange={(e) => {
+                  this.setState({
+                    measurementWfsDeriveUrl: e.target.checked,
+                  });
+                }}
+                checked={this.state.measurementWfsDeriveUrl}
               />
               &nbsp;
               <label
                 className="long-label"
-                htmlFor="input_measurementWfsWithoutSearchUrl"
+                htmlFor="input_measurementWfsDeriveUrl"
               >
-                Försök hämta full geometri via WFS vid 'Välj på kartan' även när
-                sök-URL saknas (endast GeoServer, experimentell funktion){" "}
+                Även utan sök-URL, byt /wms mot /wfs (experimentell funktion){" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Underlagrets sök-URL används alltid när den är satt. Med det här alternativet på försöker lager utan sök-URL med WMS-adressen där /wms byts mot /wfs. Om WFS misslyckas används geometrin från GetFeatureInfo. (experimentell funktion)"
+                  title="Används bara när alternativet ovan är på. Lager utan sök-URL försöker med WMS-adressen där /wms byts mot /wfs. Om WFS misslyckas används geometrin från GetFeatureInfo. (experimentell funktion)"
                 />
               </label>
             </div>

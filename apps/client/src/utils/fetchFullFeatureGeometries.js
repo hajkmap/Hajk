@@ -107,6 +107,10 @@ function resolveWfsUrl(feature, map) {
   if (!isGeoServerFeature(feature)) {
     return null;
   }
+  // Experimental: may change or be removed without notice.
+  if (map?.measurementWfs !== true) {
+    return null;
+  }
   const typeName = getTypeName(feature);
   const sublayer = findSublayer(feature.layer, typeName);
   const searchUrl =
@@ -115,7 +119,7 @@ function resolveWfsUrl(feature, map) {
     return searchUrl;
   }
   // Experimental: deriving the WFS URL from the WMS URL is a guess.
-  if (map?.measurementWfsWithoutSearchUrl === true) {
+  if (map?.measurementWfsDeriveUrl === true) {
     return deriveWfsUrl(getWmsUrl(feature.layer));
   }
   return null;

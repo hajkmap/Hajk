@@ -134,8 +134,9 @@ export function createMap(appModel) {
   appModel.map.measurementMethod =
     config.map.measurementMethod === "sphere" ? "sphere" : "planar";
   // Experimental: may change or be removed without notice.
-  appModel.map.measurementWfsWithoutSearchUrl =
-    config.map.measurementWfsWithoutSearchUrl === true;
+  appModel.map.measurementWfs = config.map.measurementWfs === true;
+  appModel.map.measurementWfsDeriveUrl =
+    config.map.measurementWfsDeriveUrl === true;
 
   attachZoomEndEvent(appModel.map, appModel.globalObserver);
 
