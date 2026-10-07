@@ -1,13 +1,14 @@
 import * as express from "express";
 import controller from "./controller.js";
 import restrictAdmin from "../../middlewares/restrict.admin.js";
+import { adminLimiter } from "../../../../common/middlewares/rate.limiter.js";
 
 export default express
   .Router()
   .get("/load/:name", controller.getByName)
   .get("/load/:folder/:name", controller.getByName)
   .get("/loadall/:map", controller.loadAll)
-  .use(restrictAdmin) // All routes that follow are admin-only!
+  .use(adminLimiter, restrictAdmin) // All routes that follow are admin-only!
   .post("/create", controller.create)
   .put("/create", controller.create)
   .post("/createfolder", controller.createFolder)
