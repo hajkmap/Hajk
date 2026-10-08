@@ -30,6 +30,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-openapi-validator": "^5.6.2",
+    "express-rate-limit": "^8.7.1",
     "fast-xml-parser": "^5.11.0",
     "helmet": "^8.3.0",
     "http-proxy-middleware": "^4.2.0",
@@ -47,5 +48,8 @@
     "prettier": "^3.9.6",
     "shx": "^0.4.0"
   },
-  "author": "Jacob Wodzyński <jacob.wodzynski@halmstad.se> (https://github.com/hajkmap)"
+  "author": "Jacob Wodzyński <jacob.wodzynski@halmstad.se> (https://github.com/hajkmap)",
+  "allowScripts": {
+    "fsevents@2.3.3": true
+  }
 }
