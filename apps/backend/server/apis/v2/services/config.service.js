@@ -46,9 +46,8 @@ class ConfigServiceV2 {
   async getMapConfig(map, user, washContent = true) {
     try {
       const safeMap = validateMapName(map);
-      const pathToFile = path.join(
-        process.cwd(),
-        "App_Data",
+      const pathToFile = resolvePathUnder(
+        path.join(process.cwd(), "App_Data"),
         `${safeMap}.json`
       );
       const text = await fs.promises.readFile(pathToFile, "utf-8");
