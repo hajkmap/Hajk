@@ -77,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Client: Anchor plugin refactored from class to function components with hooks, replacing `document.execCommand("copy")` with the Clipboard API and the `withSnackbar` HOC with notistack's `useSnackbar`. The "Öppna länk" button is always shown, including when the Clipboard API is unavailable (e.g. insecure contexts). No other behavior change.
 - Client: Added a second example config, `map_3857.json`, showcasing the new OSM vector tile layer as well as a couple of global open WMSes.
 - Client: LayerControlModel now enforces exclusive-group (radio) semantics — showing a direct child (including Hajk group layers and sublayer activation) auto-hides its siblings, and showGroup() on an exclusive folder shows only the first child. [#1848](https://github.com/hajkmap/Hajk/pull/1848)
+- Backend: Actually remove the `/api/v1` files. The v1 API was officially removed (by removing `1` from `ALLOWED_APIS`) back in Hajk [3.14.0], released September 1, 2024. None of the files were loaded into the runtime ever since. So it's about time we actually get rid of these files.
 
 ### Fixed
 

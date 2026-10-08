@@ -341,7 +341,6 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
    * @description A proxy will be created for each of the active API versions.
    * @example If admin configures a key named PROXY_GEOSERVER and enables
    * version 1 and 2 of the API, the following endpoints will be made available:
-   * - /api/v1/proxy/geoserver
    * - /api/v2/proxy/geoserver
    * @issue https://github.com/hajkmap/Hajk/issues/824
    * @issue https://github.com/hajkmap/Hajk/issues/1309
