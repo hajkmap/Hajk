@@ -15,7 +15,10 @@ export class Controller {
         // Can't use handleStandardResponse here because we need to
         // output only data.mapConfig on success – not the entire data.
         if (data.error)
-          res.status(data.error.statusCode || 500).send(data.error.toString());
+          res
+            .status(data.error.statusCode || 500)
+            .type("text/plain")
+            .send(data.error.toString());
         else {
           // Send response
           res.status(200).json(data.mapConfig);
@@ -35,7 +38,10 @@ export class Controller {
       // Can't use handleStandardResponse here because we need to
       // output only data.mapConfig on success – not the entire data.
       if (data.error)
-        res.status(data.error.statusCode || 500).send(data.error.toString());
+        res
+          .status(data.error.statusCode || 500)
+          .type("text/plain")
+          .send(data.error.toString());
       else {
         // Send response
         res.sendStatus(data);
@@ -69,7 +75,10 @@ export class Controller {
         // Can't use handleStandardResponse here because we need to
         // output only data.newLayer on success – not the entire data.
         if (data.error)
-          res.status(data.error.statusCode || 500).send(data.error.toString());
+          res
+            .status(data.error.statusCode || 500)
+            .type("text/plain")
+            .send(data.error.toString());
         else {
           // r.status will be either 200 (layer updated) or 201 (layer created)
           res.status(data.status).json(data.newLayer);
