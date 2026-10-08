@@ -91,6 +91,8 @@ class MapOptions extends Component {
         defaultCookieNoticeUrl: config.defaultCookieNoticeUrl,
         crossOrigin: config.crossOrigin,
         measurementMethod: config.measurementMethod || "planar",
+        measurementWfs: config.measurementWfs ?? false,
+        measurementWfsDeriveUrl: config.measurementWfsDeriveUrl ?? false,
         showCookieNotice:
           config.showCookieNotice !== undefined
             ? config.showCookieNotice
@@ -207,6 +209,8 @@ class MapOptions extends Component {
       crossOrigin: mapConfig.crossOrigin ? mapConfig.crossOrigin : "anonymous",
       measurementMethod:
         mapConfig.measurementMethod === "sphere" ? "sphere" : "planar",
+      measurementWfs: mapConfig.measurementWfs ?? false,
+      measurementWfsDeriveUrl: mapConfig.measurementWfsDeriveUrl ?? false,
       showCookieNotice:
         mapConfig.showCookieNotice !== undefined
           ? mapConfig.showCookieNotice
@@ -390,6 +394,8 @@ class MapOptions extends Component {
       case "dragPan":
       case "pinchRotate":
       case "pinchZoom":
+      case "measurementWfs":
+      case "measurementWfsDeriveUrl":
       case "mapselector":
       case "mapcleaner":
       case "mapresetter":
@@ -495,6 +501,10 @@ class MapOptions extends Component {
         config.crossOrigin = this.getValue("crossOrigin");
         config.measurementMethod =
           this.getValue("measurementMethod") || "planar";
+        config.measurementWfs = this.getValue("measurementWfs");
+        config.measurementWfsDeriveUrl = this.getValue(
+          "measurementWfsDeriveUrl"
+        );
         config.showCookieNotice = this.getValue("showCookieNotice");
         config.showCookieNoticeButton = this.getValue("showCookieNoticeButton");
         config.cookieUse3dPart = this.getValue("cookieUse3dPart");
@@ -1339,6 +1349,55 @@ class MapOptions extends Component {
                 <option value="planar">Plan (kartesisk)</option>
                 <option value="sphere">Sfärisk (ol/sphere)</option>
               </select>
+            </div>
+            <div>
+              <input
+                id="input_measurementWfs"
+                type="checkbox"
+                ref="input_measurementWfs"
+                onChange={(e) => {
+                  this.setState({
+                    measurementWfs: e.target.checked,
+                  });
+                }}
+                checked={this.state.measurementWfs}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_measurementWfs">
+                Hämta full geometri via WFS vid 'Välj på kartan'
+                (GeoServer-lager med sök-URL, experimentell funktion){" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktivt hämtas hela geometrin via underlagrets sök-URL när man väljer på kartan i Mät eller Skiss. Gäller GeoServer-lager. Om WFS misslyckas används geometrin från GetFeatureInfo. (experimentell funktion)"
+                />
+              </label>
+            </div>
+            <div style={{ marginLeft: 24 }}>
+              <input
+                id="input_measurementWfsDeriveUrl"
+                type="checkbox"
+                ref="input_measurementWfsDeriveUrl"
+                disabled={!this.state.measurementWfs}
+                onChange={(e) => {
+                  this.setState({
+                    measurementWfsDeriveUrl: e.target.checked,
+                  });
+                }}
+                checked={this.state.measurementWfsDeriveUrl}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_measurementWfsDeriveUrl"
+              >
+                Även utan sök-URL, byt /wms mot /wfs (experimentell funktion){" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Används bara när alternativet ovan är på. Lager utan sök-URL försöker med WMS-adressen där /wms byts mot /wfs. Om WFS misslyckas används geometrin från GetFeatureInfo. (experimentell funktion)"
+                />
+              </label>
             </div>
             <div className="separator">Extra kontroller i kartan</div>
             <div>

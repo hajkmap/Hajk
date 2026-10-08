@@ -26,6 +26,7 @@ import {
   measurePolygonPerimeter,
 } from "utils/measurement";
 import { getBrowserLocale } from "utils/locale";
+import { fetchFullFeatureGeometries } from "utils/fetchFullFeatureGeometries";
 import {
   noModifierKeys,
   platformModifierKeyOnly,
@@ -2058,6 +2059,14 @@ class DrawModel {
       const featuresWithGeom = features.filter((feature) =>
         feature.getGeometry()
       );
+      // GeoServer features may carry a zoom-dependent GetFeatureInfo geometry.
+      // Replace it with the full WFS geometry when a lookup is possible.
+      // The helper keeps the GetFeatureInfo geometry if WFS fails.
+      await fetchFullFeatureGeometries(featuresWithGeom, this.#map);
+      // The user may have turned off select while the requests were pending.
+      if (!this.#selectInteractionActive) {
+        return;
+      }
       // If we've fetched exactly one feature, we can add it straight away...
       featuresWithGeom.length === 1 &&
         this.drawSelectedFeature(featuresWithGeom[0]);
