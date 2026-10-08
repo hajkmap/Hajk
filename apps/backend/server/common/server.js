@@ -18,6 +18,7 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 import detailedRequestLogger from "./middlewares/detailed.request.logger.js";
 import errorHandler from "./middlewares/error.handler.js";
 import extractUserContext from "./middlewares/extractUserContext.js";
+import { proxyLimiter } from "./middlewares/rate.limiter.js";
 
 const app = new Express();
 
@@ -294,7 +295,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         const { default: sokigoFBProxy } = await import(
           `../apis/v${v}/middlewares/sokigo.fb.proxy.js`
         );
-        app.use(`/api/v${v}/fbproxy`, sokigoFBProxy());
+        app.use(`/api/v${v}/fbproxy`, proxyLimiter, sokigoFBProxy());
         logger.info(
           "FB_SERVICE_ACTIVE is set to %o in .env. Enabling Sokigo FB Proxy for API V%s",
           process.env.FB_SERVICE_ACTIVE,
@@ -321,7 +322,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           `../apis/v${v}/middlewares/fme.server.proxy.js`
         );
 
-        app.use(`/api/v${v}/fmeproxy`, fmeServerProxy());
+        app.use(`/api/v${v}/fmeproxy`, proxyLimiter, fmeServerProxy());
         logger.info(
           "FME_SERVER_ACTIVE is set to %o in .env. Enabling FME-server proxy for API V%s",
           process.env.FME_SERVER_ACTIVE,
@@ -538,6 +539,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           // without moving the header sanitation into the upgrade path too.
           app.use(
             `/api/v${apiVersion}/proxy/${context}`,
+            proxyLimiter,
             identityMiddleware,
             createProxyMiddleware(options)
           );
