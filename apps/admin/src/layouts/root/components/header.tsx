@@ -11,20 +11,27 @@ import {
 import { useLayerById } from "../../../api/layers/hooks";
 import { useGroupById } from "../../../api/groups/hooks";
 import { useMaps } from "../../../api/maps/hooks";
+import { useTools } from "../../../api/tools/hooks";
 
 export default function Header() {
   const { t } = useTranslation();
   const { palette } = useTheme();
-  const { serviceId, layerId, groupId, mapId } = useParams();
+  const { serviceId, layerId, groupId, mapId, toolId } = useParams();
   const { data: service } = useServiceById(serviceId ?? "");
   const { data: layer } = useLayerById(layerId ?? "");
   const { data: group } = useGroupById(groupId ?? "");
   const { data: services } = useServices();
   const { data: maps } = useMaps();
+  const { data: tools } = useTools();
   const location = useLocation();
   const pathParts = location.pathname.split("/").filter(Boolean);
 
   const mapName = maps?.find((m) => m.id == mapId)?.name;
+  const tool = tools?.find((item) => String(item.id) === toolId);
+  const toolLabel =
+    typeof tool?.title === "string" && tool.title.trim()
+      ? tool.title.trim()
+      : tool?.type;
 
   useServicesHealthCheck(services ?? []);
 
@@ -60,10 +67,15 @@ export default function Header() {
               part === serviceId ||
               part === layerId ||
               part === groupId ||
-              part === mapId
+              part === mapId ||
+              part === toolId
             ) {
               displayName =
-                service?.name ?? layer?.name ?? group?.name ?? mapName;
+                service?.name ??
+                layer?.name ??
+                group?.name ??
+                mapName ??
+                toolLabel;
             } else {
               const translationKey = `common.${part.toLowerCase()}`;
               displayName = t(
