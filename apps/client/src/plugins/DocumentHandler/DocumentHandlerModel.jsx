@@ -359,17 +359,14 @@ export default class DocumentHandlerModel {
       }/${title}`;
 
       const response = await hfetch(url);
-      const text = await response.text();
 
-      if (text === "File not found") {
+      if (!response.ok) {
         throw new Error(
           `Could not find document with title ${title} in folder with documents`
         );
       }
 
-      const document = await JSON.parse(text);
-
-      return document;
+      return await response.json();
     } catch (err) {
       console.warn(
         `Kunde inte parsa JSON-dokumentet ${title}, kontrollera så att filen finns och är en .json-fil `

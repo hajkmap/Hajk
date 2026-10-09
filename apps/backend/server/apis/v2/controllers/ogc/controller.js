@@ -1,18 +1,18 @@
 import * as svc from "../../services/ogc.service.js";
+import handleStandardResponse from "../../utils/handleStandardResponse.js";
 import log4js from "log4js";
 
 const log = log4js.getLogger("ogc.v2");
 
 function handleError(e, res) {
-  if (e.name === "ValidationError")
-    return res.status(400).json({ error: e.message, details: e.details });
-  if (e.name === "NotFoundError")
-    return res.status(404).json({ error: e.message, details: e.details });
-  if (e.name === "UpstreamError")
-    return res.status(e.status || 502).json({ error: e.message });
+  const statusCode = e?.statusCode || 500;
+  if (statusCode < 500) return handleStandardResponse(res, { error: e });
 
+  // Server-side errors may carry internal details, so only send the message.
   log.error(e);
-  return res.status(500).json({ error: String(e?.message || e) });
+  return handleStandardResponse(res, {
+    error: { statusCode, message: String(e?.message || e) },
+  });
 }
 
 export class Controller {
@@ -24,7 +24,7 @@ export class Controller {
         fields: req.query.fields,
         user,
       });
-      res.json({ count: layers.length, layers });
+      handleStandardResponse(res, { count: layers.length, layers });
     } catch (e) {
       handleError(e, res);
     }
@@ -39,12 +39,11 @@ export class Controller {
         fields: req.query.fields,
         user,
       });
-      return res.json(layer);
+      handleStandardResponse(res, layer);
     } catch (e) {
       handleError(e, res);
     }
   }
-
 }
 
 export default new Controller();

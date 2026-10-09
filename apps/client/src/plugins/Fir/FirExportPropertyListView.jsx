@@ -106,9 +106,10 @@ function FirExportPropertyListView({
       },
       body: searchParams,
     })
-      .then((response) => {
-        // url just comes as a simple body response, get it.
-        return response ? response.text() : null;
+      .then(async (response) => {
+        if (!response) return null;
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return (await response.json()).url;
       })
       .then((text) => {
         if (text) {

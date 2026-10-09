@@ -380,7 +380,7 @@ class SettingsService {
    * @param {string} mapFile
    * @param {string} toolName
    * @param {object | object[]} incomingOptions
-   * @returns {object} mapConfig
+   * @returns {object} { status, created } where status is 201 (tool added) or 204 (tool updated)
    */
   async updateMapTool(mapFile, toolName, incomingOptions) {
     try {
@@ -424,7 +424,8 @@ class SettingsService {
 
       // Send HTTP 201 status code if we created the entry,
       // or 204 if we've updated an existing one.
-      return i === -1 ? 201 : 204;
+      const created = i === -1;
+      return { status: created ? 201 : 204, created };
     } catch (error) {
       return { error };
     }
