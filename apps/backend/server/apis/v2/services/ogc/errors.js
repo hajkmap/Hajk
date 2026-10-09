@@ -3,6 +3,7 @@ export class ServiceError extends Error {
     super(message);
     this.name = this.constructor.name;
     this.code = code;
+    this.statusCode = code;
     this.details = details;
     this.timestamp = new Date().toISOString();
   }
@@ -15,7 +16,7 @@ export class NotFoundError extends ServiceError {
 }
 
 export class UpstreamError extends ServiceError {
-  constructor(message, status, details) {
+  constructor(message, status = 502, details) {
     super(message, status, details);
     this.status = status;
   }
