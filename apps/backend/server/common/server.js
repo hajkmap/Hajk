@@ -12,6 +12,7 @@ import * as OpenApiValidator from "express-openapi-validator";
 
 import log4js from "./utils/hajkLogger.js";
 import { getCLFDate } from "./utils/get-clf-date.ts";
+import { getCorsOptions, getHelmetOptions } from "./utils/securityConfig.js";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
 
@@ -168,22 +169,10 @@ export default class ExpressServer {
     process.env.LOG_DETAILED_REQUEST_LOGGER === "true" &&
       app.use(detailedRequestLogger);
 
-    app.use(
-      helmet({
-        contentSecurityPolicy: false, // If active, we get errors loading inline <script>
-        crossOriginResourcePolicy: {
-          policy: "cross-origin",
-        },
-        frameguard: false, // If active, other pages can't embed our maps
-      })
-    );
-
-    app.use(
-      cors({
-        origin: "*",
-        optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-      })
-    );
+    // Security headers and CORS are configured in .env (CORS_*, CSP_*, HSTS_*).
+    // The defaults keep the API open to any origin and the maps embeddable.
+    app.use(helmet(getHelmetOptions()));
+    app.use(cors(getCorsOptions()));
 
     // Enable compression early so that responses that follow will get gziped
     if (process.env.ENABLE_GZIP_COMPRESSION !== "false") {
