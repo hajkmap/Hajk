@@ -71,6 +71,7 @@
     "@turf/line-split": "^7.3.2",
     "@turf/transform-translate": "^7.3.5",
     "@turf/union": "^7.3.5",
+    "altcha": "^3.3.0",
     "file-saver": "^2.0.5",
     "intro.js": "^7.2.0",
     "intro.js-react": "^1.0.0",

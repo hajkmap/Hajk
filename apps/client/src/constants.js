@@ -17,6 +17,7 @@ export const AVAILABLE_TOOLS = [
   "Dummy",
   "Edit",
   "Export",
+  "Feedback",
   "Fir",
   "FloodSimulator",
   "FmeServer",

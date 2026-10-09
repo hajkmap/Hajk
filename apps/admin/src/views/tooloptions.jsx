@@ -24,6 +24,7 @@ import Routing from "./tools/routing.jsx";
 import Collector from "./tools/collector.jsx";
 import Dummy from "./tools/dummy.jsx";
 import CommandPalette from "./tools/commandpalette.jsx";
+import Feedback from "./tools/feedback.jsx";
 import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 import TimeSlider from "./tools/timeslider.jsx";
 // import GeosuiteExport from "./tools/geosuiteExport.jsx";
@@ -104,6 +105,8 @@ class ToolOptions extends Component {
         return <Dummy parent={this} model={this.props.model} />;
       case "commandpalette":
         return <CommandPalette parent={this} model={this.props.model} />;
+      case "feedback":
+        return <Feedback parent={this} model={this.props.model} />;
       case "location":
         return <Location parent={this} model={this.props.model} />;
       case "search":
@@ -195,6 +198,7 @@ class ToolOptions extends Component {
       timeslider: "Tidslinje",
       AttributeEditor: "Attributredigeraren",
       collector: "Tyck till",
+      feedback: "Tyck till (feedback)",
       commandpalette: "Kommandopanel",
       print: "Utskrift",
       coordinates: "Visa koordinat",
