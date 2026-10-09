@@ -1,21 +1,49 @@
-import { Stroke, Style } from "ol/style";
+import { Circle as CircleStyle, Stroke, Style } from "ol/style";
 import { Feature } from "ol";
-import { LineString } from "ol/geom";
+import { LineString, Point } from "ol/geom";
+import VectorSource from "ol/source/Vector";
+import VectorLayer from "ol/layer/Vector";
+import { buffer, containsCoordinate } from "ol/extent";
 import { lineString as TurfLineString } from "@turf/helpers";
 import booleanPointOnLine from "@turf/boolean-point-on-line";
+import { getGeometryEdges, segmentIntersection } from "utils/geometryEdges";
 
 // Green guide strokes are 1px (rays) or 7px (the highlighted segment). A few
 // extra pixels lets a click land on the ray without requiring an exact hit.
 const GUIDE_HIT_TOLERANCE_PX = 8;
 
+// Upper bound on real edges tested against the rays, so dense WFS views
+// can't freeze the click that creates the guides.
+const MAX_INTERSECTION_EDGES = 20000;
+
+// Extra margin (in pixels) around the view when looking for ray crossings.
+const INTERSECTION_VIEW_BUFFER_PX = 50;
+
+// Only the crossings nearest the ray origin are useful as corners.
+const MAX_INTERSECTIONS_PER_RAY = 3;
+
+const intersectionStyle = new Style({
+  image: new CircleStyle({
+    radius: 4,
+    stroke: new Stroke({
+      color: "rgba(0, 200, 0, 0.9)",
+      width: 1.5,
+    }),
+  }),
+});
+
 export default class AngleSnapping {
   #snapGuides;
+  #intersectionFeatures;
   #angleSnappingIsActive;
   #allowedTypes;
   #anglesToGenerate;
 
   #drawModel;
   #map;
+  #guideSource;
+  #guideLayer;
+  #moveEndListenerActive;
 
   #sketchFeature;
   #sketchGeometry;
@@ -27,6 +55,8 @@ export default class AngleSnapping {
     this.#drawModel = drawModel;
     this.#map = map;
     this.#snapGuides = [];
+    this.#intersectionFeatures = [];
+    this.#moveEndListenerActive = false;
     this.#angleSnappingIsActive = false;
     // We can only create perpendicular snapping for these types.
     this.#allowedTypes = ["Polygon", "MultiPolygon", "LineString"];
@@ -38,7 +68,24 @@ export default class AngleSnapping {
     this.#sketchChangeListener = null;
     this.#lastCoordinateCount = 0;
     this.#replacingGuides = false;
+    this.#createGuideLayer();
   }
+
+  // Guides live in their own layer so they never compete with real features
+  // in the draw source. SnapHelper gives "low" snapPriority layers the
+  // weakest Snap, so real edges override the guides.
+  #createGuideLayer = () => {
+    this.#guideSource = new VectorSource({ wrapX: false });
+    this.#guideLayer = new VectorLayer({
+      source: this.#guideSource,
+      layerType: "system",
+      ignoreInFeatureInfo: true,
+      zIndex: 5001,
+      caption: "Angle snapping guides",
+    });
+    this.#guideLayer.set("snapPriority", "low");
+    this.#map.addLayer(this.#guideLayer);
+  };
 
   #handleKeyDownToggle = (e) => {
     this.#angleSnappingIsActive = e.ctrlKey === true || e.metaKey === true;
@@ -56,10 +103,32 @@ export default class AngleSnapping {
   };
 
   clearSnapGuides = () => {
+    this.#setMoveEndListener(false);
+    this.#clearIntersections();
     this.#snapGuides.forEach((guideFeature) => {
-      this.#drawModel.removeFeature(guideFeature);
+      this.#guideSource.removeFeature(guideFeature);
     });
     this.#snapGuides = [];
+  };
+
+  #clearIntersections = () => {
+    this.#intersectionFeatures.forEach((f) => {
+      this.#guideSource.removeFeature(f);
+    });
+    this.#intersectionFeatures = [];
+  };
+
+  #setMoveEndListener = (active) => {
+    if (active === this.#moveEndListenerActive) {
+      return;
+    }
+    this.#map[active ? "on" : "un"]("moveend", this.#handleMoveEnd);
+    this.#moveEndListenerActive = active;
+  };
+
+  // Crossings are only computed for the current view.
+  #handleMoveEnd = () => {
+    this.#updateIntersections();
   };
 
   // Called when a sketch is finished or aborted.
@@ -294,6 +363,117 @@ export default class AngleSnapping {
 
     this.#addRays(coord, clickedSegment, guides);
     this.#snapGuides = guides;
+    this.#updateIntersections();
+    this.#setMoveEndListener(true);
+  };
+
+  #getRays = () => {
+    return this.#snapGuides.filter((f) => f.get("ANGLE_SNAP_RAY") === true);
+  };
+
+  // Edges of real features (drawn or WFS) in the given extent, across all
+  // visible vector layers except the guides themselves.
+  #collectRealEdges = (extent) => {
+    const edges = [];
+    const layers = this.#map
+      .getAllLayers()
+      .filter(
+        (l) =>
+          l !== this.#guideLayer &&
+          l.getVisible() &&
+          typeof l.getSource?.()?.getFeatures === "function"
+      );
+    for (const layer of layers) {
+      if (edges.length >= MAX_INTERSECTION_EDGES) {
+        break;
+      }
+      layer.getSource().forEachFeatureInExtent(extent, (feature) => {
+        if (
+          feature.get("USER_MEASUREMENT_GUIDE") === true ||
+          feature.get("SNAP_IGNORE") === true
+        ) {
+          return;
+        }
+        const geometry = feature.getGeometry();
+        if (!geometry || geometry.getType() === "Point") {
+          return;
+        }
+        edges.push(...getGeometryEdges(geometry));
+        // Returning a truthy value stops forEachFeatureInExtent.
+        return edges.length >= MAX_INTERSECTION_EDGES;
+      });
+    }
+    return edges.slice(0, MAX_INTERSECTION_EDGES);
+  };
+
+  // Points where a ray crosses a real edge become guide points. In the guide
+  // Snap a point counts as a vertex, which beats an edge, so the cursor jumps
+  // to the crossing. The real Snap then keeps it since it is on its edge.
+  #updateIntersections = () => {
+    this.#clearIntersections();
+    const rays = this.#getRays();
+    const view = this.#map.getView();
+    const resolution = view.getResolution();
+    const size = this.#map.getSize();
+    if (rays.length === 0 || !resolution || !size) {
+      return;
+    }
+
+    const extent = buffer(
+      view.calculateExtent(size),
+      INTERSECTION_VIEW_BUFFER_PX * resolution
+    );
+    const edges = this.#collectRealEdges(extent);
+    if (edges.length === 0) {
+      return;
+    }
+
+    // Crossings closer than this are treated as the same point.
+    const tolerance = resolution * 0.5;
+    const seen = new Set();
+    const features = [];
+
+    for (const ray of rays) {
+      const [origin, end] = ray.getGeometry().getCoordinates();
+      const candidates = [];
+      for (const [edgeStart, edgeEnd] of edges) {
+        const point = segmentIntersection(origin, end, edgeStart, edgeEnd);
+        if (!point || !containsCoordinate(extent, point)) {
+          continue;
+        }
+        const distance = Math.hypot(point[0] - origin[0], point[1] - origin[1]);
+        if (distance >= tolerance) {
+          candidates.push({ point, distance });
+        }
+      }
+      candidates.sort((a, b) => a.distance - b.distance);
+
+      let kept = 0;
+      for (const { point } of candidates) {
+        if (kept >= MAX_INTERSECTIONS_PER_RAY) {
+          break;
+        }
+        const key = `${Math.round(point[0] / tolerance)}:${Math.round(
+          point[1] / tolerance
+        )}`;
+        if (seen.has(key)) {
+          continue;
+        }
+        seen.add(key);
+        kept++;
+
+        const feature = new Feature({ geometry: new Point(point) });
+        feature.setStyle(intersectionStyle);
+        feature.set("USER_MEASUREMENT_GUIDE", true);
+        feature.set("ANGLE_SNAP_INTERSECTION", true);
+        features.push(feature);
+      }
+    }
+
+    if (features.length > 0) {
+      this.#guideSource.addFeatures(features);
+      this.#intersectionFeatures = features;
+    }
   };
 
   #addOwnerHighlight = (clickedSegment, guides) => {
@@ -316,7 +496,7 @@ export default class AngleSnapping {
     // Mark as measurement guide so it's not treated as a user-drawn feature
     segmentFeature.set("USER_MEASUREMENT_GUIDE", true);
 
-    this.#drawModel.addFeature(segmentFeature);
+    this.#guideSource.addFeature(segmentFeature);
     guides.push(segmentFeature);
   };
 
@@ -352,7 +532,7 @@ export default class AngleSnapping {
       guides.push(feature);
       feature.set("USER_MEASUREMENT_GUIDE", true);
       feature.set("ANGLE_SNAP_RAY", true);
-      this.#drawModel.addFeature(feature);
+      this.#guideSource.addFeature(feature);
     });
   };
 

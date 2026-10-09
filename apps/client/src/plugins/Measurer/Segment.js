@@ -131,6 +131,8 @@ export default class Segment {
         f.set("DRAW_METHOD", "Text");
         f.set("USER_DRAWN", true);
         f.set("MEASUREMENT_ID", id);
+        // Labels sit on edge midpoints and must not steal the snap from the edge.
+        f.set("SNAP_IGNORE", true);
         // Assign the measured and formatted length of the segment
         f.set("USER_TEXT", this.#applyTextStyle(this.#currentSegmentLength));
         f.set("TEXT_SETTINGS", {

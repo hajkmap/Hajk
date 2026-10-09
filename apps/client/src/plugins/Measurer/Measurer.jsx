@@ -143,10 +143,6 @@ function Measurer(props) {
         return;
       }
       const feature = e.feature;
-      // Snap guides are not measurements.
-      if (feature.get("USER_MEASUREMENT_GUIDE")) {
-        return;
-      }
       const geom = feature.getGeometry();
       const type = geom.getType();
 
