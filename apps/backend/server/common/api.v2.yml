@@ -14,6 +14,8 @@ tags:
     description: Resources for working with the "Documents API", used mainly by the Informative plugin
   - name: Admin - ActiveDirectory
     description: Resources for working with ActiveDirectory
+  - name: Feedback
+    description: Feedback from users to admins. Posting is public (behind a captcha), reading and deleting is admin-only.
   - name: Sokigo FB Proxy
     description: Proxy specified in working with Sokigo's FB API
   - name: FME-server Proxy
@@ -849,6 +851,128 @@ paths:
         200:
           description: Layer deleted successfully
           content: {}
+  /feedback/challenge:
+    get:
+      tags: [Feedback]
+      summary: Get an ALTCHA challenge that must be solved before posting feedback
+      responses:
+        200:
+          description: An ALTCHA challenge, consumed by the altcha widget
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        404:
+          description: Feedback isn't enabled (FEEDBACK_ACTIVE in .env)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /feedback:
+    post:
+      tags: [Feedback]
+      summary: Post feedback
+      description: Rate limited per user (or IP), see RATE_LIMIT_FEEDBACK_* in .env.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackSubmission"
+      responses:
+        201:
+          description: Feedback saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+        400:
+          description: Invalid input, or the map doesn't have the Feedback tool
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: Missing, invalid, expired or already used captcha
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: Feedback isn't enabled (FEEDBACK_ACTIVE in .env)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        429:
+          description: Too many requests
+        507:
+          description: Not enough free disk space (FEEDBACK_MIN_FREE_DISK_MB in .env)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      tags: [Feedback]
+      summary: Get all stored feedback, newest first (admin-only)
+      parameters:
+        - in: query
+          name: since
+          description: Only return feedback newer than this ISO 8601 date/time
+          required: false
+          schema:
+            type: string
+            example: "2026-01-01T00:00:00Z"
+      responses:
+        200:
+          description: Stored feedback
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeedbackEntry"
+        400:
+          description: Invalid date in since
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: Access denied
+    delete:
+      tags: [Feedback]
+      summary: Delete all stored feedback (admin-only)
+      responses:
+        200:
+          description: Feedback deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deletedFiles:
+                    type: integer
+        403:
+          description: Access denied
+  /feedback/stats:
+    get:
+      tags: [Feedback]
+      summary: Get information about stored feedback, free disk space and limits (admin-only)
+      responses:
+        200:
+          description: Feedback statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackStats"
+        403:
+          description: Access denied
   /fir/realestateownerreport:
     post:
       tags:
@@ -895,6 +1019,96 @@ paths:
               $ref: "#/components/schemas/ExampleBody"
 components:
   schemas:
+    FeedbackSubmission:
+      type: object
+      required: [map, message, altcha]
+      properties:
+        map:
+          type: string
+          description: Name of the map configuration, which must have the Feedback tool
+          example: demo
+        message:
+          type: string
+          description: Plain text, max FEEDBACK_MAX_MESSAGE_LENGTH characters
+        altcha:
+          type: string
+          description: Base64 encoded payload from the solved ALTCHA challenge
+        context:
+          type: object
+          properties:
+            anchorUrl:
+              type: string
+              nullable: true
+              description: Link to the map as the user saw it
+            clientVersion:
+              type: string
+              nullable: true
+    FeedbackEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        map:
+          type: string
+        message:
+          type: string
+          description: Plain text. Escape it before displaying it as HTML or using it in a spreadsheet.
+        context:
+          type: object
+          properties:
+            anchorUrl:
+              type: string
+              nullable: true
+            clientVersion:
+              type: string
+              nullable: true
+            userAgent:
+              type: string
+              nullable: true
+        user:
+          type: string
+          description: Only present if FEEDBACK_STORE_AUTH_USER is true and the user was authenticated
+    FeedbackStats:
+      type: object
+      properties:
+        active:
+          type: boolean
+        entryCount:
+          type: integer
+        totalSize:
+          type: integer
+          description: Bytes
+        files:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              size:
+                type: integer
+              modified:
+                type: string
+                format: date-time
+        freeDiskSpace:
+          type: integer
+          nullable: true
+          description: Bytes
+        limits:
+          type: object
+          properties:
+            maxMessageLength:
+              type: integer
+            maxFileSize:
+              type: integer
+            maxFiles:
+              type: integer
+            minFreeDiskSpace:
+              type: integer
     Example:
       type: object
       properties:

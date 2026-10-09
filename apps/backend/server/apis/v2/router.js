@@ -7,6 +7,7 @@ import informativeRouter from "./controllers/informative/router.js";
 import adRouter from "./controllers/ad/router.js";
 import firRouter from "./controllers/fir/router.js";
 import ogcRouter from "./controllers/ogc/router.js";
+import feedbackRouter from "./controllers/feedback/router.js";
 import { globalLimiter } from "../../common/middlewares/rate.limiter.js";
 
 export default express
@@ -18,4 +19,5 @@ export default express
   .use("/settings", settingsRouter)
   .use("/ad", adRouter)
   .use("/fir", firRouter)
-  .use("/ogc", ogcRouter);
+  .use("/ogc", ogcRouter)
+  .use("/feedback", feedbackRouter);
