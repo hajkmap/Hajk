@@ -1,4 +1,5 @@
 import FirService from "../../services/fir.service.js";
+import handleStandardResponse from "../../utils/handleStandardResponse.js";
 import log4js from "log4js";
 
 // Create a logger for FIR calls.
@@ -7,22 +8,22 @@ export class Controller {
   getRealestateOwnerList(req, res) {
     FirService.getRealestateOwnerList(req, res)
       .then((result) => {
-        res.status(200).send(result.url);
+        handleStandardResponse(res, { url: result.url });
       })
       .catch((err) => {
         logger.error(err);
-        res.status(500).type("text/plain").send(err.toString());
+        handleStandardResponse(res, { error: err });
       });
   }
 
   getResidentList(req, res) {
     FirService.getResidentList(req, res)
       .then((result) => {
-        res.status(200).send(result.url);
+        handleStandardResponse(res, { url: result.url });
       })
       .catch((err) => {
         logger.error(err);
-        res.status(500).type("text/plain").send(err.toString());
+        handleStandardResponse(res, { error: err });
       });
   }
 }

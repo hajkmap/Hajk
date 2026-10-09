@@ -18,6 +18,7 @@ import SketchModel from "./models/SketchModel";
 import DrawModel from "../../models/DrawModel";
 import KmlModel from "../../models/KmlModel";
 import GpxModel from "../../models/GpxModel";
+import GeoJsonModel from "../../models/GeoJsonModel";
 import AngleSnapping from "../Measurer/AngleSnapping";
 
 // Constants
@@ -172,6 +173,18 @@ const Sketch = (props) => {
   const [gpxModel] = React.useState(
     () =>
       new GpxModel({
+        layerName: "pluginSketch",
+        map: props.map,
+        observer: localObserver,
+        drawModel: drawModel,
+        enableDragAndDrop: true,
+      })
+  );
+
+  // We'll also need a GeoJSON-model so that the user can import and export to/from .geojson.
+  const [geoJsonModel] = React.useState(
+    () =>
+      new GeoJsonModel({
         layerName: "pluginSketch",
         map: props.map,
         observer: localObserver,
@@ -518,7 +531,7 @@ const Sketch = (props) => {
         !drawModel.getMultiDrawMode() // Don't mark during multi-draw - wait until finished
       ) {
         // Mark user-drawn features for AttributeEditor sync when active.
-        // This DELIBERATELY includes KML/GPX imports (they carry USER_DRAWN
+        // This DELIBERATELY includes KML/GPX/GeoJSON imports (they carry USER_DRAWN
         // too): importing external geometries into the active editing layer
         // as new draft features is a supported workflow.
         feature.set("SKETCH_ATTRIBUTEEDITOR", true, true);
@@ -608,6 +621,7 @@ const Sketch = (props) => {
         drawModel={drawModel}
         kmlModel={kmlModel}
         gpxModel={gpxModel}
+        geoJsonModel={geoJsonModel}
         options={props.options}
         localObserver={localObserver}
         globalObserver={props.app.globalObserver}

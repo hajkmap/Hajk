@@ -26,6 +26,7 @@ import {
   measurePolygonPerimeter,
 } from "utils/measurement";
 import { getBrowserLocale } from "utils/locale";
+import { fetchFullFeatureGeometries } from "utils/fetchFullFeatureGeometries";
 import {
   noModifierKeys,
   platformModifierKeyOnly,
@@ -1278,13 +1279,19 @@ class DrawModel {
     drawnFeatures.forEach((feature) => {
       // Get the current style.
       const featureStyle = feature.getStyle();
+      const baseStyle = Array.isArray(featureStyle)
+        ? featureStyle[0]
+        : featureStyle;
+      // Features without an own Style (null, or a style function) cannot
+      // have their text-style patched.
+      if (!(baseStyle instanceof Style)) {
+        return;
+      }
 
       // Get an updated text-style (which depends on the #measurementSettings).
       const textStyle = this.#getFeatureTextStyle(feature);
       // Set the updated text-style on the base-style.
-      Array.isArray(featureStyle)
-        ? featureStyle[0].setText(textStyle)
-        : featureStyle.setText(textStyle);
+      baseStyle.setText(textStyle);
       // Then update the feature style.
       feature.setStyle(featureStyle);
     });
@@ -2052,6 +2059,14 @@ class DrawModel {
       const featuresWithGeom = features.filter((feature) =>
         feature.getGeometry()
       );
+      // GeoServer features may carry a zoom-dependent GetFeatureInfo geometry.
+      // Replace it with the full WFS geometry when a lookup is possible.
+      // The helper keeps the GetFeatureInfo geometry if WFS fails.
+      await fetchFullFeatureGeometries(featuresWithGeom, this.#map);
+      // The user may have turned off select while the requests were pending.
+      if (!this.#selectInteractionActive) {
+        return;
+      }
       // If we've fetched exactly one feature, we can add it straight away...
       featuresWithGeom.length === 1 &&
         this.drawSelectedFeature(featuresWithGeom[0]);
@@ -2308,6 +2323,10 @@ class DrawModel {
       // when adding a text-feature, normally an event would fire, allowing the user to enter
       // the text they want. Now we do not want that behavior).
       this.addFeature(f, { silent: true });
+      // Files without Hajk styling (e.g. GeoJSON from other tools) leave the
+      // feature without a style, which the style editor and text refresh
+      // rely on. Give those the current draw style.
+      !f.getStyle() && f.setStyle(this.#getFeatureStyle(f));
     });
     // Let's make sure to refresh all features text-style to make sure they are up-to-date
     this.#refreshFeaturesTextStyle();
@@ -2315,66 +2334,68 @@ class DrawModel {
     currentInteraction && this.toggleDrawInteraction(currentInteraction);
   };
 
-  // Toggles the hidden-property of all features connected to a kml-import
-  // with the supplied id.
-  toggleKmlFeaturesVisibility = (id) => {
+  // Toggles the hidden-property of all features connected to an import
+  // identified by the supplied property name and id (e.g. "KML_ID").
+  toggleImportedFeaturesVisibility = (idProperty, id) => {
     this.#drawSource.getFeatures().forEach((f) => {
-      if (f.get("KML_ID") === id) {
+      if (f.get(idProperty) === id) {
         const featureHidden = f.get("HIDDEN") ?? false;
         f.set("HIDDEN", !featureHidden);
         f.setStyle(this.#getFeatureStyle(f));
       }
     });
+  };
+
+  // Toggles the show-text-property of all features connected to an import
+  // identified by the supplied property name and id.
+  toggleImportedFeaturesTextVisibility = (idProperty, id) => {
+    this.#drawSource.getFeatures().forEach((f) => {
+      if (f.get(idProperty) === id) {
+        const featureTextShown = f.get("SHOW_TEXT") ?? true;
+        f.set("SHOW_TEXT", !featureTextShown);
+        f.setStyle(this.#getFeatureStyle(f));
+      }
+    });
+  };
+
+  // Removes all features connected to an import identified by the supplied
+  // property name and id.
+  removeImportedFeaturesById = (idProperty, id) => {
+    this.#drawSource
+      .getFeatures()
+      .filter((feature) => feature.get(idProperty) === id)
+      .forEach((feature) => {
+        this.#drawSource.removeFeature(feature);
+      });
+  };
+
+  // Toggles the hidden-property of all features connected to a kml-import
+  // with the supplied id.
+  toggleKmlFeaturesVisibility = (id) => {
+    this.toggleImportedFeaturesVisibility("KML_ID", id);
   };
 
   // Toggles the show-text-property of all features connected to a kml-import
   // with the supplied id.
   toggleKmlFeaturesTextVisibility = (id) => {
-    this.#drawSource.getFeatures().forEach((f) => {
-      if (f.get("KML_ID") === id) {
-        const featureTextShown = f.get("SHOW_TEXT") ?? true;
-        f.set("SHOW_TEXT", !featureTextShown);
-        f.setStyle(this.#getFeatureStyle(f));
-      }
-    });
+    this.toggleImportedFeaturesTextVisibility("KML_ID", id);
   };
 
   // Removes all features with the supplied kml-id.
   removeKmlFeaturesById = (id) => {
-    this.#drawSource.getFeatures().forEach((f) => {
-      if (f.get("KML_ID") === id) {
-        this.#drawSource.removeFeature(f);
-      }
-    });
+    this.removeImportedFeaturesById("KML_ID", id);
   };
 
   toggleGpxFeaturesVisibility = (id) => {
-    this.#drawSource.getFeatures().forEach((f) => {
-      if (f.get("GPX_ID") === id) {
-        const featureHidden = f.get("HIDDEN") ?? false;
-        f.set("HIDDEN", !featureHidden);
-        f.setStyle(this.#getFeatureStyle(f));
-      }
-    });
+    this.toggleImportedFeaturesVisibility("GPX_ID", id);
   };
 
   toggleGpxFeaturesTextVisibility = (id) => {
-    this.#drawSource.getFeatures().forEach((f) => {
-      if (f.get("GPX_ID") === id) {
-        const featureTextShown = f.get("SHOW_TEXT") ?? true;
-        f.set("SHOW_TEXT", !featureTextShown);
-        f.setStyle(this.#getFeatureStyle(f));
-      }
-    });
+    this.toggleImportedFeaturesTextVisibility("GPX_ID", id);
   };
 
   removeGpxFeaturesById = (id) => {
-    const features = this.#drawSource
-      .getFeatures()
-      .filter((feature) => feature.get("GPX_ID") === id);
-    features.forEach((feature) => {
-      this.#drawSource.removeFeature(feature);
-    });
+    this.removeImportedFeaturesById("GPX_ID", id);
   };
 
   addGpxFeatures = (features) => {

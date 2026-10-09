@@ -30,6 +30,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-openapi-validator": "^5.6.2",
+    "express-rate-limit": "^8.7.1",
     "fast-xml-parser": "^5.11.0",
     "helmet": "^8.3.0",
     "http-proxy-middleware": "^4.2.0",

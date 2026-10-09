@@ -12,19 +12,9 @@ export class Controller {
   putSettingsToMapFile(req, res) {
     SettingsService.updateMapFile(req.query.mapFile, req.body, req.url).then(
       (data) => {
-        // Can't use handleStandardResponse here because we need to
-        // output only data.mapConfig on success – not the entire data.
-        if (data.error)
-          res
-            .status(data.error.statusCode || 500)
-            .type("text/plain")
-            .send(data.error.toString());
-        else {
-          // Send response
-          res.status(200).json(data.mapConfig);
-          // Log admin action
-          ael.info(`saved map ${req.query.mapFile}`);
-        }
+        // On success, only data.mapConfig is sent – not the entire data.
+        handleStandardResponse(res, data.error ? data : data.mapConfig);
+        !data.error && ael.info(`saved map ${req.query.mapFile}`);
       }
     );
   }
@@ -35,19 +25,12 @@ export class Controller {
       req.params.tool,
       req.body
     ).then((data) => {
-      // Can't use handleStandardResponse here because we need to
-      // output only data.mapConfig on success – not the entire data.
-      if (data.error)
-        res
-          .status(data.error.statusCode || 500)
-          .type("text/plain")
-          .send(data.error.toString());
-      else {
-        // Send response
-        res.sendStatus(data);
-        // Log admin action
-        ael.info(`saved map ${req.query.mapFile}`);
-      }
+      // data.status is 201 (tool added) or 204 (tool updated, no body)
+      handleStandardResponse(res, data, data.status);
+      !data.error &&
+        ael.info(
+          `${data.created ? "added" : "updated"} tool ${req.params.tool} in map ${req.params.map}`
+        );
     });
   }
 
@@ -72,17 +55,14 @@ export class Controller {
 
     SettingsService.createOrUpdateLayer(req.params.type, req.body).then(
       (data) => {
-        // Can't use handleStandardResponse here because we need to
-        // output only data.newLayer on success – not the entire data.
-        if (data.error)
-          res
-            .status(data.error.statusCode || 500)
-            .type("text/plain")
-            .send(data.error.toString());
-        else {
-          // r.status will be either 200 (layer updated) or 201 (layer created)
-          res.status(data.status).json(data.newLayer);
-
+        // On success, only data.newLayer is sent – not the entire data.
+        // data.status will be either 200 (layer updated) or 201 (layer created).
+        handleStandardResponse(
+          res,
+          data.error ? data : data.newLayer,
+          data.status
+        );
+        if (!data.error) {
           ael.info(
             `${data.status === 201 ? "added" : "updated"} ${req.params.type} with id ${data.newLayer.id} ("${
               data.newLayer.caption
