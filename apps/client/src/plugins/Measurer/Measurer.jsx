@@ -174,6 +174,7 @@ function Measurer(props) {
 
   const handleDrawEnd = useCallback(
     (e) => {
+      angleSnapping.handleDrawEndEvent();
       angleSnapping.clearSnapGuides();
       if (!e.feature) return;
       const feature = e.feature;
@@ -319,6 +320,7 @@ function Measurer(props) {
 
   const onWindowHide = () => {
     restoreHoveredFeature();
+    angleSnapping.handleDrawEndEvent();
     angleSnapping.setActive(false);
     angleSnapping.clearSnapGuides();
     setPluginShown(false);

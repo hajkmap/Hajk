@@ -342,6 +342,7 @@ const Sketch = (props) => {
   // Clear DrawModel's style so AE's styleFn takes over (needed for fixed-length mode)
   const handleDrawEnd = React.useCallback(
     (e) => {
+      angleSnapping.handleDrawEndEvent();
       const feature = e?.feature;
       if (
         feature &&
@@ -352,13 +353,14 @@ const Sketch = (props) => {
       }
       localObserver.publish("sketch:drawEnd");
     },
-    [localObserver, drawModel]
+    [angleSnapping, localObserver, drawModel]
   );
 
   // Handle draw abort event to publish to localObserver
   const handleDrawAbort = React.useCallback(() => {
+    angleSnapping.handleDrawEndEvent();
     localObserver.publish("sketch:drawAbort");
-  }, [localObserver]);
+  }, [angleSnapping, localObserver]);
 
   // This effect makes sure to subscribe (and un-subscribe) to all observer-events
   // we are interested in in this view.
@@ -534,6 +536,7 @@ const Sketch = (props) => {
   React.useEffect(() => {
     // Clear guides whenever we change activity or draw type
     try {
+      angleSnapping.handleDrawEndEvent();
       angleSnapping.clearSnapGuides();
     } catch {
       // Ignore errors when cleaning up
@@ -567,6 +570,7 @@ const Sketch = (props) => {
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowHide = () => {
+    angleSnapping.handleDrawEndEvent();
     angleSnapping.setActive(false);
     angleSnapping.clearSnapGuides();
     setPluginShown(false);
