@@ -13,6 +13,7 @@ export default class Segment {
   #map;
   #currentFeatureSavedId;
   #currentPoint;
+  #sketchPoints;
 
   constructor(drawModel, map, enabled) {
     this.#enabled = enabled ?? false;
@@ -24,6 +25,7 @@ export default class Segment {
     this.#map = map;
     this.#currentFeatureSavedId = null;
     this.#currentPoint = null;
+    this.#sketchPoints = [];
   }
 
   setEnabled = (enabled) => {
@@ -140,6 +142,7 @@ export default class Segment {
         this.#currentPoint = f.clone();
         // Draw the point
         this.#drawModel.addFeature(f);
+        this.#sketchPoints.push(f);
       }
     }
   };
@@ -213,7 +216,18 @@ export default class Segment {
       }
     }
 
-    // Cleanup and reset
+    this.#resetSketchState();
+  };
+
+  // The sketch never becomes a measurement, so its segment labels have no
+  // parent to be removed with later.
+  handleDrawAbortEvent = () => {
+    this.#sketchPoints.forEach((f) => this.#drawModel.removeFeature(f));
+    this.#resetSketchState();
+  };
+
+  #resetSketchState = () => {
+    this.#sketchPoints = [];
     this.#currentCenter = null;
     this.#currentSegmentLength = null;
     this.#polygonFirstAndLast = [];

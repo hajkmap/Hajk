@@ -143,6 +143,10 @@ function Measurer(props) {
         return;
       }
       const feature = e.feature;
+      // Snap guides are not measurements.
+      if (feature.get("USER_MEASUREMENT_GUIDE")) {
+        return;
+      }
       const geom = feature.getGeometry();
       const type = geom.getType();
 
@@ -156,6 +160,7 @@ function Measurer(props) {
 
       if (remove) {
         drawModel.removeFeature(feature);
+        return;
       }
 
       // If the measurer creates a LineString or a polygon give it an ID so we can
@@ -175,7 +180,6 @@ function Measurer(props) {
   const handleDrawEnd = useCallback(
     (e) => {
       angleSnapping.handleDrawEndEvent();
-      angleSnapping.clearSnapGuides();
       if (!e.feature) return;
       const feature = e.feature;
       const type = feature.getGeometry().getType();
@@ -212,17 +216,29 @@ function Measurer(props) {
     [drawModel, map, angleSnapping, segments]
   );
 
+  const handleDrawAbort = useCallback(() => {
+    angleSnapping.handleDrawEndEvent();
+    segments.handleDrawAbortEvent();
+  }, [angleSnapping, segments]);
+
   const startInteractionWithDrawType = useCallback(
     (type) => {
       setDrawType(type);
       drawModel.toggleDrawInteraction(type, {
         handleDrawEnd: handleDrawEnd,
         handleDrawStart: handleDrawStart,
+        handleDrawAbort: handleDrawAbort,
         handleAddFeature: handleAddFeature,
         drawStyleSettings: { strokeStyle: { dash: null } },
       });
     },
-    [drawModel, handleAddFeature, handleDrawEnd, handleDrawStart]
+    [
+      drawModel,
+      handleAddFeature,
+      handleDrawAbort,
+      handleDrawEnd,
+      handleDrawStart,
+    ]
   );
 
   const handleDrawTypeChange = (e, value) => {

@@ -62,10 +62,10 @@ export default class AngleSnapping {
     this.#snapGuides = [];
   };
 
-  // Drop the sketch listener. Guides are left in place so the next shape can
-  // still snap from them; callers that want them gone also call clearSnapGuides.
+  // Called when a sketch is finished or aborted.
   handleDrawEndEvent = () => {
     this.#unbindSketchListener();
+    this.clearSnapGuides();
   };
 
   #unbindSketchListener = () => {
@@ -94,8 +94,8 @@ export default class AngleSnapping {
   };
 
   // LineString coordinates, or the outer ring while a polygon is being drawn.
-  // The last coordinate follows the cursor. The one before it is the vertex
-  // that was just committed.
+  // The last coordinate of a line follows the cursor. A polygon ring also
+  // repeats its first coordinate at the end.
   #getDrawnCoordinates = (geometry) => {
     const type = geometry.getType();
     if (type === "LineString") {
@@ -105,6 +105,25 @@ export default class AngleSnapping {
       return geometry.getCoordinates()[0] || [];
     }
     return [];
+  };
+
+  // The point the user just placed, or null when the geometry change is only
+  // the cursor moving or the polygon ring closing. Returns a copy so later
+  // cursor updates cannot move the guide origin.
+  #newlyCommittedVertex = (geometry) => {
+    const coords = this.#getDrawnCoordinates(geometry);
+    if (geometry.getType() === "Polygon") {
+      // [start, placed vertex, cursor, start] is the first ring that contains
+      // a vertex the user actually clicked.
+      if (coords.length < 4) {
+        return null;
+      }
+      return coords[coords.length - 3]?.slice() ?? null;
+    }
+    if (coords.length < 3) {
+      return null;
+    }
+    return coords[coords.length - 2]?.slice() ?? null;
   };
 
   #handleSketchGeometryChange = () => {
@@ -124,8 +143,7 @@ export default class AngleSnapping {
     if (count === this.#lastCoordinateCount) {
       return;
     }
-    // Copy so later cursor updates cannot move the guide origin.
-    const committed = coords[count - 2]?.slice();
+    const committed = this.#newlyCommittedVertex(this.#sketchGeometry);
     this.#lastCoordinateCount = count;
     if (!this.#angleSnappingIsActive || !committed) {
       return;
@@ -352,7 +370,7 @@ export default class AngleSnapping {
     }
 
     if (this.#angleSnappingIsActive) {
-      // Look up before clearing so a click on a leftover green guide can
+      // Look up before clearing so a click on an existing green guide can
       // start the next set of guides.
       const coord = this.#drawModel
         .getFeatureCoordinates(measureFeature)[0]
