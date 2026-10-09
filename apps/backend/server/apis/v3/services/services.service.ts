@@ -152,6 +152,7 @@ class ServicesService {
         name: true,
       },
       where: {
+        deletedAt: null,
         OR: [
           {
             layers: {

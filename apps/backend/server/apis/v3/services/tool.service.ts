@@ -42,6 +42,7 @@ class ToolService {
     const maps = await prisma.map.findMany({
       select: { name: true, id: true },
       where: {
+        deletedAt: null,
         tools: {
           some: {
             target: { not: null },

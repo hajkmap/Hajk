@@ -17,7 +17,9 @@ class ThemeService {
   }
 
   async #requireMap(mapName: string) {
-    const map = await prisma.map.findUnique({ where: { name: mapName } });
+    const map = await prisma.map.findFirst({
+      where: { name: mapName, deletedAt: null },
+    });
     if (!map) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,

@@ -321,7 +321,10 @@ class GroupsService {
         id: true,
         name: true,
       },
-      where: { groups: { some: { groupId: id } } },
+      where: {
+        deletedAt: null,
+        groups: { some: { groupId: id } },
+      },
     });
 
     return maps;

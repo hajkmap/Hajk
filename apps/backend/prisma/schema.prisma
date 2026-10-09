@@ -130,6 +130,7 @@ model Map {
   createdDate       DateTime?       @db.Timestamptz(3) // Timestamp when created
   lastSavedBy       String?
   lastSavedDate     DateTime?       @db.Timestamptz(3) // Timestamp when last saved
+  deletedAt         DateTime?       @db.Timestamptz(3)
   projection        Projection?     @relation("MapViewProjection", fields: [projectionId], references: [id])
   projections       Projection[]    @relation("MapProjections")
   tools             ToolsOnMaps[]

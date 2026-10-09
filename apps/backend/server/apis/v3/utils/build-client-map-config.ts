@@ -213,7 +213,7 @@ function mergeJsonObjects(
 
 export async function buildClientProjectionsForMap(mapName: string) {
   const map = await prisma.map.findFirst({
-    where: { name: mapName },
+    where: { name: mapName, deletedAt: null },
     include: { projections: true },
   });
 
@@ -231,7 +231,7 @@ export async function buildClientProjectionsForMap(mapName: string) {
 
 export async function buildClientMapForMap(mapName: string) {
   const map = await prisma.map.findFirst({
-    where: { name: mapName },
+    where: { name: mapName, deletedAt: null },
     include: { projection: true },
   });
 

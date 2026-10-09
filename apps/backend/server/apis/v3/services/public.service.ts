@@ -28,6 +28,7 @@ class PublicService {
 
   async #getAllMaps() {
     const maps = await prisma.map.findMany({
+      where: { deletedAt: null },
       // TODO: If isAuthActive, restrict to only include maps with current user's roles within `roles`.
       select: {
         name: true,
