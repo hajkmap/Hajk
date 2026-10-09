@@ -53,6 +53,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Client: Measurer/Sketch - Angle snapping can be repeated while Ctrl/Cmd is held. Clicking a green snap guide removes that guide and draws a new one from the clicked point.
+- Client: Measurer/Sketch - Angle snapping guides no longer pull the cursor off drawn edges: real features (drawn or WFS) always win over the green guides, segment labels are no longer snap targets, and points where a guide crosses an edge are shown and snappable. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
 - Backend: Error responses that include request data (informative documents, settings, and FIR) are now sent as `text/plain` instead of HTML. [Code scanning alert #75](https://github.com/hajkmap/Hajk/security/code-scanning/75), [#71](https://github.com/hajkmap/Hajk/security/code-scanning/71), [#70](https://github.com/hajkmap/Hajk/security/code-scanning/70), [#69](https://github.com/hajkmap/Hajk/security/code-scanning/69), [#68](https://github.com/hajkmap/Hajk/security/code-scanning/68), [#67](https://github.com/hajkmap/Hajk/security/code-scanning/67)
 - Client: Feature info property filters (`date`, `datetime`, `time`, `formatNumber`, `roundToDecimals`) and DrawModel measurement/point labels now pass the browser language list to locale formatters so Chrome/Edge respects the UI language instead of the OS locale.
 - Client: Measurer/Sketch - Select-from-map ("Välj på kartan") now measures MultiPolygon, MultiLineString and GeometryCollection without throwing, so the clone and labels show again. [#1911](https://github.com/hajkmap/Hajk/issues/1911)

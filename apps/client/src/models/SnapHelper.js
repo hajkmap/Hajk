@@ -4,6 +4,7 @@ import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 import VectorSource from "ol/source/Vector";
 import LocalStorageHelper from "../utils/LocalStorageHelper";
+import { getGeometryEdges, segmentIntersection } from "../utils/geometryEdges";
 
 const DISABLE_KEY = "space";
 const STORAGE_KEY = "sketch";
@@ -35,6 +36,19 @@ function geometryCollectionSegmenter(geometry, projection) {
     }
   }
   return segments.flat();
+}
+
+/**
+ * Snap that never targets features flagged `SNAP_IGNORE` (e.g. Measurer's
+ * segment labels, which sit on edge midpoints and would steal the snap).
+ */
+class FilteredSnap extends Snap {
+  addFeature(feature, register) {
+    if (feature.get("SNAP_IGNORE") === true) {
+      return;
+    }
+    super.addFeature(feature, register);
+  }
 }
 
 export default class SnapHelper {
@@ -213,7 +227,7 @@ export default class SnapHelper {
       }
 
       // Also check edges (lines between vertices) and midpoints
-      const edges = this.#getGeometryEdges(geometry);
+      const edges = getGeometryEdges(geometry);
       for (const [segStart, segEnd] of edges) {
         // Check closest point on edge
         const edgePoint = this.#closestPointOnSegment(
@@ -413,45 +427,6 @@ export default class SnapHelper {
   };
 
   /**
-   * @summary Extracts all line segments (edges) from a geometry.
-   * @param {ol.geom.Geometry} geometry
-   * @returns {Array<[number[], number[]]>} Array of line segments [start, end]
-   */
-  #getGeometryEdges = (geometry) => {
-    const type = geometry.getType();
-    const edges = [];
-
-    const addEdgesFromCoords = (coords) => {
-      for (let i = 0; i < coords.length - 1; i++) {
-        edges.push([coords[i], coords[i + 1]]);
-      }
-    };
-
-    switch (type) {
-      case "LineString":
-        addEdgesFromCoords(geometry.getCoordinates());
-        break;
-      case "Polygon":
-        geometry.getCoordinates().forEach((ring) => addEdgesFromCoords(ring));
-        break;
-      case "MultiLineString":
-        geometry.getCoordinates().forEach((line) => addEdgesFromCoords(line));
-        break;
-      case "MultiPolygon":
-        geometry
-          .getCoordinates()
-          .forEach((polygon) =>
-            polygon.forEach((ring) => addEdgesFromCoords(ring))
-          );
-        break;
-      default:
-        break;
-    }
-
-    return edges;
-  };
-
-  /**
    * @summary Finds the closest point on a line segment to a given point.
    * @param {number[]} point - The point [x, y]
    * @param {number[]} segStart - Start of segment [x, y]
@@ -490,7 +465,7 @@ export default class SnapHelper {
     const intersections = [];
     for (let i = 0; i < edges.length; i++) {
       for (let j = i + 1; j < edges.length; j++) {
-        const point = this.#segmentIntersection(
+        const point = segmentIntersection(
           edges[i][0],
           edges[i][1],
           edges[j][0],
@@ -502,36 +477,6 @@ export default class SnapHelper {
       }
     }
     return intersections;
-  };
-
-  /**
-   * @summary Computes the intersection point of two line segments, if any.
-   * @param {number[]} p1 - Start of segment 1
-   * @param {number[]} p2 - End of segment 1
-   * @param {number[]} p3 - Start of segment 2
-   * @param {number[]} p4 - End of segment 2
-   * @returns {number[]|null} The intersection point [x, y] or null
-   */
-  #segmentIntersection = (p1, p2, p3, p4) => {
-    const d1x = p2[0] - p1[0];
-    const d1y = p2[1] - p1[1];
-    const d2x = p4[0] - p3[0];
-    const d2y = p4[1] - p3[1];
-
-    const denom = d1x * d2y - d1y * d2x;
-
-    // Parallel or coincident segments
-    if (Math.abs(denom) < 1e-10) return null;
-
-    const t = ((p3[0] - p1[0]) * d2y - (p3[1] - p1[1]) * d2x) / denom;
-    const u = ((p3[0] - p1[0]) * d1y - (p3[1] - p1[1]) * d1x) / denom;
-
-    // Check that intersection lies within both segments
-    if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
-      return [p1[0] + t * d1x, p1[1] + t * d1y];
-    }
-
-    return null;
   };
 
   /**
@@ -604,16 +549,25 @@ export default class SnapHelper {
   };
 
   #addSnapToAllVectorSources = () => {
-    const vectorSources = this.map
+    const isLowPriority = (l) => l.get("snapPriority") === "low";
+    const vectorLayers = this.map
       .getAllLayers() // Get all layers (including nested in LayerGroups)
       .filter((l) => l.getVisible()) // and only currently visible.
-      .map((l) => l.getSource()) // Get each layer's source
-      .filter(this.#isVectorSource); // but only if it is a VectorSource (which we'll know by checking for "getFeatures").
+      .filter((l) => this.#isVectorSource(l.getSource())); // but only if it is a VectorSource (which we'll know by checking for "getFeatures").
+
+    // OpenLayers runs interactions from last-added to first-added, and every
+    // Snap rewrites the event coordinate, so the earliest-added Snap has the
+    // final say. Low-priority layers (e.g. angle snapping guides) are added
+    // last so that snapping to real features always overrides them.
+    const orderedLayers = [
+      ...vectorLayers.filter((l) => !isLowPriority(l)),
+      ...vectorLayers.filter(isLowPriority),
+    ];
 
     // Add the snap interaction for each found source
-    vectorSources.forEach((source) => {
-      const snap = new Snap({
-        source,
+    orderedLayers.forEach((layer) => {
+      const snap = new FilteredSnap({
+        source: layer.getSource(),
         pixelTolerance: this.pixelTolerance,
         // Override the built-in GeometryCollection segmenter, which crashes on
         // nested GeometryCollections (e.g. from Search results). See the
@@ -652,7 +606,14 @@ export default class SnapHelper {
    * @summary Creates a synthetic VectorSource with Point features at midpoints
    * and intersection points, updated on every pointermove. This makes these
    * snap targets available to OL's native Snap interaction in ALL draw modes.
+   *
+   * Currently unused: the call in #addSnapToAllVectorSources is disabled for
+   * performance reasons. Kept for possible future use.
+   * Measurer's AngleSnapping uses the same idea (synthetic snap points for
+   * ray/edge crossings) but only recomputes on click and moveend, never on
+   * pointermove, so it doesn't have the same performance problem.
    */
+  // eslint-disable-next-line no-unused-private-class-members
   #startAdvancedSnapping = () => {
     if (this.advancedSnapSource) return;
 
@@ -702,7 +663,7 @@ export default class SnapHelper {
           const geometry = feature.getGeometry();
           if (!geometry) return;
 
-          const edges = this.#getGeometryEdges(geometry);
+          const edges = getGeometryEdges(geometry);
           if (edges.length === 0) return;
 
           nearbyEdges.push(...edges);

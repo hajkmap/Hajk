@@ -156,6 +156,7 @@ function Measurer(props) {
 
       if (remove) {
         drawModel.removeFeature(feature);
+        return;
       }
 
       // If the measurer creates a LineString or a polygon give it an ID so we can
@@ -174,7 +175,7 @@ function Measurer(props) {
 
   const handleDrawEnd = useCallback(
     (e) => {
-      angleSnapping.clearSnapGuides();
+      angleSnapping.handleDrawEndEvent();
       if (!e.feature) return;
       const feature = e.feature;
       const type = feature.getGeometry().getType();
@@ -211,17 +212,29 @@ function Measurer(props) {
     [drawModel, map, angleSnapping, segments]
   );
 
+  const handleDrawAbort = useCallback(() => {
+    angleSnapping.handleDrawEndEvent();
+    segments.handleDrawAbortEvent();
+  }, [angleSnapping, segments]);
+
   const startInteractionWithDrawType = useCallback(
     (type) => {
       setDrawType(type);
       drawModel.toggleDrawInteraction(type, {
         handleDrawEnd: handleDrawEnd,
         handleDrawStart: handleDrawStart,
+        handleDrawAbort: handleDrawAbort,
         handleAddFeature: handleAddFeature,
         drawStyleSettings: { strokeStyle: { dash: null } },
       });
     },
-    [drawModel, handleAddFeature, handleDrawEnd, handleDrawStart]
+    [
+      drawModel,
+      handleAddFeature,
+      handleDrawAbort,
+      handleDrawEnd,
+      handleDrawStart,
+    ]
   );
 
   const handleDrawTypeChange = (e, value) => {
@@ -319,6 +332,7 @@ function Measurer(props) {
 
   const onWindowHide = () => {
     restoreHoveredFeature();
+    angleSnapping.handleDrawEndEvent();
     angleSnapping.setActive(false);
     angleSnapping.clearSnapGuides();
     setPluginShown(false);

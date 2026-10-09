@@ -113,6 +113,7 @@ class DrawModel {
   #fixedLength = 1000;
   #fixedAngle = 0;
   #activeSketch = null;
+  #drawSketch = null;
   #mapClickListener = null;
   #activeDrawMethod = null;
   #customHandleDrawAbort = null;
@@ -1372,11 +1373,14 @@ class DrawModel {
     this.#customHandleDrawEnd = settings.handleDrawEnd || null;
     this.#customHandlePointerMove = settings.handlePointerMove || null;
     this.#customHandleAddFeature = settings.handleAddFeature || null;
+    this.#customHandleDrawAbort = settings.handleDrawAbort || null;
     // Then we'll add the listeners if the corresponding handler exists
     this.#customHandleDrawStart &&
       this.#drawInteraction.on("drawstart", this.#customHandleDrawStart);
     this.#customHandleDrawEnd &&
       this.#drawInteraction.on("drawend", this.#customHandleDrawEnd);
+    this.#customHandleDrawAbort &&
+      this.#drawInteraction.on("drawabort", this.#customHandleDrawAbort);
     this.#customHandlePointerMove &&
       this.#map.on("pointermove", this.#customHandlePointerMove);
     this.#customHandleAddFeature &&
@@ -1391,13 +1395,16 @@ class DrawModel {
       this.#drawInteraction.un("drawstart", this.#customHandleDrawStart);
     this.#customHandleDrawEnd &&
       this.#drawInteraction.un("drawend", this.#customHandleDrawEnd);
+    this.#customHandleDrawAbort &&
+      this.#drawInteraction.un("drawabort", this.#customHandleDrawAbort);
     this.#customHandlePointerMove &&
-      this.#map.on("pointermove", this.#customHandlePointerMove);
+      this.#map.un("pointermove", this.#customHandlePointerMove);
     this.#customHandleAddFeature &&
       this.#drawSource.un("addfeature", this.#customHandleAddFeature);
     // Then we have to make sure to remove the reference to the handlers.
     this.#customHandleDrawStart = null;
     this.#customHandleDrawEnd = null;
+    this.#customHandleDrawAbort = null;
     this.#customHandlePointerMove = null;
     this.#customHandleAddFeature = null;
   };
@@ -1413,11 +1420,13 @@ class DrawModel {
     feature.on("change", this.#handleFeatureChange);
     // Finally, we'll make sure the feature being drawn has the correct style:
     feature.setStyle(this.#getDrawStyle());
+    this.#drawSketch = feature;
   };
 
   // This handler will make sure that the overlay will be removed
   // when the feature drawing is done.
   #handleDrawEnd = (e) => {
+    this.#drawSketch = null;
     // Let's make sure to reset the draw tooltip
     this.#resetDrawTooltip();
     const { feature } = e;
@@ -1476,7 +1485,29 @@ class DrawModel {
 
   // Cleans up if the drawing is aborted.
   #handleDrawAbort = () => {
+    this.#drawSketch = null;
     this.#resetDrawTooltip();
+    this.#map.un("pointermove", this.#handlePointerMove);
+  };
+
+  // Esc/Enter call finishDrawing(), which OpenLayers allows below the usual
+  // minimum, leaving a line with no length or a polygon with no area.
+  #sketchHasEnoughPoints = (feature) => {
+    const geometry = feature.getGeometry();
+    let placed;
+    let minPoints;
+    if (geometry instanceof LineString) {
+      // The last coordinate follows the cursor.
+      placed = geometry.getCoordinates().slice(0, -1);
+      minPoints = 2;
+    } else if (geometry instanceof Polygon) {
+      // The ring ends with the cursor and then repeats the first point.
+      placed = (geometry.getCoordinates()[0] || []).slice(0, -2);
+      minPoints = 3;
+    } else {
+      return true;
+    }
+    return new Set(placed.map((c) => `${c[0]},${c[1]}`)).size >= minPoints;
   };
 
   #resetDrawTooltip = () => {
@@ -1560,6 +1591,7 @@ class DrawModel {
     this.#removeEventListeners();
     // We're also making sure to set the private field to null
     this.#drawInteraction = null;
+    this.#drawSketch = null;
     // And remove the click-lock and the snap-helper
     this.#map.clickLock.delete("coreDrawModel");
     this.#map.snapHelper.delete("coreDrawModel");
@@ -2159,6 +2191,7 @@ class DrawModel {
       const settings = {
         handleDrawStart: this.#customHandleDrawStart,
         handleDrawEnd: this.#customHandleDrawEnd,
+        handleDrawAbort: this.#customHandleDrawAbort,
         handlePointerMove: this.#customHandlePointerMove,
         handleAddFeature: this.#customHandleAddFeature,
         fixedLengthEnabled: this.#fixedLengthEnabled,
@@ -2840,7 +2873,11 @@ class DrawModel {
       }
     } else if (this.#drawInteraction) {
       // Normal draw interaction
-      this.#drawInteraction.finishDrawing();
+      if (this.#drawSketch && !this.#sketchHasEnoughPoints(this.#drawSketch)) {
+        this.#drawInteraction.abortDrawing();
+      } else {
+        this.#drawInteraction.finishDrawing();
+      }
     }
   };
 
