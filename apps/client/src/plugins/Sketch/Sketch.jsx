@@ -594,6 +594,16 @@ const Sketch = (props) => {
     setToggleBufferBtn({ ...toggleBufferBtn, toggle: true });
   };
 
+  // The OGC activity (saving to an editable layer) gets its list of services
+  // from AttributeEditor, so it's only shown when AttributeEditor is loaded
+  // in the map with at least one service. The backend has already removed
+  // the services that the user isn't allowed to see.
+  const attributeEditorServices =
+    props.app.plugins?.attributeeditor?.options?.activeServices;
+  const showOgcActivity =
+    Array.isArray(attributeEditorServices) &&
+    attributeEditorServices.length > 0;
+
   // We're rendering the view in a BaseWindowPlugin, since this is a
   // "standard" plugin.
   return (
@@ -624,6 +634,7 @@ const Sketch = (props) => {
         activeDrawType={activeDrawType}
         activityId={activityId}
         setActivityId={setActivityId}
+        showOgcActivity={showOgcActivity}
         setActiveDrawType={setActiveDrawType}
         modifyEnabled={modifyEnabled}
         setModifyEnabled={setModifyEnabled}
