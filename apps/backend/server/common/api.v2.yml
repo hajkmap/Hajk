@@ -16,6 +16,8 @@ tags:
     description: Resources for working with ActiveDirectory
   - name: Feedback
     description: Feedback from users to admins. Posting is public (behind a captcha), reading and deleting is admin-only.
+  - name: Captcha
+    description: Captcha (ALTCHA proof-of-work) for public endpoints, such as posting feedback.
   - name: Sokigo FB Proxy
     description: Proxy specified in working with Sokigo's FB API
   - name: FME-server Proxy
@@ -851,10 +853,11 @@ paths:
         200:
           description: Layer deleted successfully
           content: {}
-  /feedback/challenge:
+  /captcha/challenge:
     get:
-      tags: [Feedback]
-      summary: Get an ALTCHA challenge that must be solved before posting feedback
+      tags: [Captcha]
+      summary: Get an ALTCHA challenge that must be solved before posting to a captcha protected endpoint
+      description: Each challenge can only be used once, and is never cached.
       responses:
         200:
           description: An ALTCHA challenge, consumed by the altcha widget
@@ -864,7 +867,7 @@ paths:
                 type: object
                 additionalProperties: true
         404:
-          description: Feedback isn't enabled (FEEDBACK_ACTIVE in .env)
+          description: No feature that needs a captcha is enabled (e.g. FEEDBACK_ACTIVE in .env)
           content:
             application/json:
               schema:
@@ -1021,7 +1024,7 @@ components:
   schemas:
     FeedbackSubmission:
       type: object
-      required: [map, message, altcha]
+      required: [map, message, captcha]
       properties:
         map:
           type: string
@@ -1030,9 +1033,9 @@ components:
         message:
           type: string
           description: Plain text, max FEEDBACK_MAX_MESSAGE_LENGTH characters
-        altcha:
+        captcha:
           type: string
-          description: Base64 encoded payload from the solved ALTCHA challenge
+          description: Base64 encoded payload from the solved ALTCHA challenge (see GET /captcha/challenge)
         context:
           type: object
           properties:

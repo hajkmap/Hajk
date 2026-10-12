@@ -8,7 +8,6 @@ import {
 
 export default express
   .Router()
-  .get("/challenge", controller.challenge)
   .post("/", feedbackLimiter, controller.submit)
   .use(adminLimiter, restrictAdmin) // All routes that follow are admin-only!
   .get("/", controller.list)

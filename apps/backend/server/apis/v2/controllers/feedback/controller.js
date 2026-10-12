@@ -20,14 +20,6 @@ function parseJsonBody(body) {
 }
 
 export class Controller {
-  challenge(req, res) {
-    FeedbackService.getChallenge().then((r) => {
-      // Each challenge may only be used once, so never cache them
-      res.set("Cache-Control", "no-store");
-      handleStandardResponse(res, r);
-    });
-  }
-
   submit(req, res) {
     const body = parseJsonBody(req.body);
     if (body.error) return handleStandardResponse(res, body);

@@ -14,16 +14,18 @@ interface AnchorModel {
 export default class FeedbackModel {
   #app: HajkApp;
   #baseUrl: string;
+  #challengeUrl: string;
 
   constructor(app: HajkApp) {
     this.#app = app;
     const appConfig = app.config.appConfig as { mapserviceBase: string };
     this.#baseUrl = `${appConfig.mapserviceBase}/feedback`;
+    this.#challengeUrl = `${appConfig.mapserviceBase}/captcha/challenge`;
   }
 
   /** URL that the ALTCHA widget fetches its challenge from */
   getChallengeUrl(): string {
-    return `${this.#baseUrl}/challenge`;
+    return this.#challengeUrl;
   }
 
   /** Link to the map as the user sees it right now, if it isn't too long */
@@ -39,13 +41,13 @@ export default class FeedbackModel {
 
   /**
    * @param message The user's feedback
-   * @param altcha Payload from the solved ALTCHA challenge
+   * @param captcha Payload from the solved ALTCHA challenge
    */
-  async submit(message: string, altcha: string): Promise<SubmitResult> {
+  async submit(message: string, captcha: string): Promise<SubmitResult> {
     const body = {
       map: this.#app.config.activeMap,
       message,
-      altcha,
+      captcha,
       context: {
         anchorUrl: await this.#getAnchorUrl(),
         clientVersion: import.meta.env.VITE_APP_GIT_HASH || null,

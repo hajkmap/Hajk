@@ -1,15 +1,9 @@
 import fs from "fs";
 import path from "path";
-import { createHmac, randomBytes, randomUUID } from "crypto";
+import { randomUUID } from "crypto";
 import log4js from "log4js";
-import {
-  CappedMap,
-  createChallenge,
-  randomInt,
-  verifySolution,
-} from "altcha-lib";
-import { deriveKey } from "altcha-lib/algorithms/pbkdf2";
 
+import CaptchaService, { CaptchaError } from "./captcha.service.js";
 import ConfigService from "./config.service.js";
 import {
   grabBoolean,
@@ -20,16 +14,6 @@ import { resolvePathUnder, validateMapName } from "../utils/safePath.js";
 const logger = log4js.getLogger("service.feedback.v2");
 
 const MB = 1024 * 1024;
-
-// Proof-of-work settings for the ALTCHA challenge. The cost is per attempt, and the
-// client needs ~counter attempts. That takes a second or two on one CPU core, and
-// the widget spreads the work over several.
-const ALTCHA_ALGORITHM = "PBKDF2/SHA-256";
-const ALTCHA_COST = 2_000;
-const ALTCHA_MIN_COUNTER = 2_500;
-const ALTCHA_MAX_COUNTER = 5_000;
-const ALTCHA_EXPIRES_MS = 20 * 60 * 1000; // Leave time to write the message
-const MAX_ALTCHA_PAYLOAD_LENGTH = 8192;
 
 const MAX_ANCHOR_URL_LENGTH = 2048;
 const MAX_CLIENT_VERSION_LENGTH = 64;
@@ -98,9 +82,6 @@ async function mapHasFeedbackTool(map, user) {
  */
 export class FeedbackService {
   #queue = Promise.resolve();
-  #usedChallenges = new CappedMap({ maxSize: 10_000 });
-  #signatureSecret;
-  #keySignatureSecret;
 
   /**
    * @param {object} [options] Overrides for the settings in .env, mostly useful for testing
@@ -122,26 +103,10 @@ export class FeedbackService {
       grabPositiveInt("FEEDBACK_MIN_FREE_DISK_MB", 500) * MB;
     this.dir = options.dir ?? path.join(process.cwd(), "App_Data", "feedback");
     this.mapHasFeedbackTool = options.mapHasFeedbackTool ?? mapHasFeedbackTool;
+    this.captcha = options.captcha ?? CaptchaService;
 
     const instanceId = process.env.HAJK_INSTANCE_ID?.trim();
     this.filePrefix = instanceId ? `feedback_${instanceId}` : "feedback";
-
-    let hmacKey = options.hmacKey ?? process.env.FEEDBACK_ALTCHA_HMAC_KEY;
-    if (!hmacKey) {
-      hmacKey = randomBytes(32).toString("hex");
-      if (this.active) {
-        logger.warn(
-          "FEEDBACK_ALTCHA_HMAC_KEY isn't set in .env, using a random key. Challenges will be invalidated on restart, and won't work if Hajk runs in several instances."
-        );
-      }
-    }
-    // Derive separate secrets for the challenge and key signatures from one key
-    this.#signatureSecret = createHmac("sha256", hmacKey)
-      .update("signature")
-      .digest("hex");
-    this.#keySignatureSecret = createHmac("sha256", hmacKey)
-      .update("key-signature")
-      .digest("hex");
 
     if (this.active) {
       logger.info(
@@ -163,71 +128,6 @@ export class FeedbackService {
   #assertActive() {
     if (!this.active) {
       throw new FeedbackError("Feedback is not enabled.", 404);
-    }
-  }
-
-  /**
-   * @summary Create a new ALTCHA challenge for the client to solve.
-   */
-  async getChallenge() {
-    try {
-      this.#assertActive();
-      return await createChallenge({
-        algorithm: ALTCHA_ALGORITHM,
-        cost: ALTCHA_COST,
-        counter: randomInt(ALTCHA_MIN_COUNTER, ALTCHA_MAX_COUNTER),
-        deriveKey,
-        expiresAt: new Date(Date.now() + ALTCHA_EXPIRES_MS),
-        hmacSignatureSecret: this.#signatureSecret,
-        hmacKeySignatureSecret: this.#keySignatureSecret,
-      });
-    } catch (error) {
-      return { error };
-    }
-  }
-
-  /**
-   * @summary Verify an ALTCHA payload (base64 encoded JSON), and make sure it's only used once.
-   * @throws {FeedbackError} If the payload is missing, invalid, expired or already used
-   */
-  async #verifyAltcha(altcha) {
-    if (
-      typeof altcha !== "string" ||
-      altcha.length === 0 ||
-      altcha.length > MAX_ALTCHA_PAYLOAD_LENGTH
-    ) {
-      throw new FeedbackError("Missing or invalid captcha.", 403);
-    }
-
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.from(altcha, "base64").toString("utf-8"));
-    } catch {
-      throw new FeedbackError("Missing or invalid captcha.", 403);
-    }
-    if (!payload?.challenge?.parameters || !payload?.solution) {
-      throw new FeedbackError("Missing or invalid captcha.", 403);
-    }
-
-    const result = await verifySolution({
-      challenge: payload.challenge,
-      solution: payload.solution,
-      deriveKey,
-      hmacSignatureSecret: this.#signatureSecret,
-      hmacKeySignatureSecret: this.#keySignatureSecret,
-    });
-    if (!result.verified) {
-      throw new FeedbackError(
-        result.expired ? "Captcha has expired." : "Invalid captcha.",
-        403
-      );
-    }
-
-    // The nonce is covered by the signature, so it identifies the challenge. Expired
-    // challenges are rejected above, so the map only needs to hold the recent ones.
-    const { nonce, expiresAt } = payload.challenge.parameters;
-    if (!this.#usedChallenges.setIfAbsent(nonce, expiresAt)) {
-      throw new FeedbackError("Captcha has already been used.", 403);
     }
   }
 
@@ -362,7 +262,7 @@ export class FeedbackService {
 
   /**
    * @summary Validate, verify and store one piece of feedback.
-   * @param {object} body Request body: { map, message, altcha, context: { anchorUrl, clientVersion } }
+   * @param {object} body Request body: { map, message, captcha, context: { anchorUrl, clientVersion } }
    * @param {string} [user] Authenticated user, if any
    * @param {string} [userAgent] The User-Agent request header
    * @returns {Promise<{id: string} | {error: Error}>}
@@ -371,7 +271,7 @@ export class FeedbackService {
     try {
       this.#assertActive();
       const entry = this.#createEntry(body, user, userAgent);
-      await this.#verifyAltcha(body.altcha);
+      await this.captcha.verify(body.captcha);
 
       if (!(await this.mapHasFeedbackTool(entry.map, user))) {
         throw new FeedbackError("Feedback is not enabled for this map.");
@@ -395,7 +295,7 @@ export class FeedbackService {
       logger.debug(`Saved feedback ${entry.id} for map ${entry.map}`);
       return { id: entry.id };
     } catch (error) {
-      if (!(error instanceof FeedbackError)) {
+      if (!(error instanceof FeedbackError || error instanceof CaptchaError)) {
         logger.error(`Failed to save feedback: ${error.message}`);
       }
       return { error };

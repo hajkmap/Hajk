@@ -6,6 +6,7 @@ import path from "path";
 import { solveChallenge } from "altcha-lib";
 import { deriveKey } from "altcha-lib/algorithms/pbkdf2";
 
+import { CaptchaService } from "../server/apis/v2/services/captcha.service.js";
 import {
   FeedbackService,
   cleanText,
@@ -19,7 +20,7 @@ const createService = (options = {}) =>
   new FeedbackService({
     active: true,
     dir,
-    hmacKey: "test-key",
+    captcha: new CaptchaService({ active: true, hmacKey: "test-key" }),
     maxFileSize: 1024 * 1024,
     maxFiles: 3,
     minFreeDisk: 1,
@@ -28,7 +29,7 @@ const createService = (options = {}) =>
   });
 
 const solve = async (service) => {
-  const challenge = await service.getChallenge();
+  const challenge = await service.captcha.getChallenge();
   const solution = await solveChallenge({ challenge, deriveKey });
   return Buffer.from(JSON.stringify({ challenge, solution })).toString(
     "base64"
@@ -67,7 +68,6 @@ describe("cleanText", () => {
 describe("FeedbackService", () => {
   test("rejects everything when not active", async () => {
     const service = createService({ active: false });
-    assert.equal((await service.getChallenge()).error.statusCode, 404);
     assert.equal((await service.submit({})).error.statusCode, 404);
   });
 
@@ -78,7 +78,7 @@ describe("FeedbackService", () => {
       {
         map: "demo",
         message: "<script>alert(1)</script> Fel i kartan",
-        altcha: await solve(service),
+        captcha: await solve(service),
         context: {
           anchorUrl: "https://example.com/?m=demo#x=1",
           clientVersion: "abc123",
@@ -109,7 +109,7 @@ describe("FeedbackService", () => {
     clearDir();
     const service = createService({ storeAuthUser: true });
     await service.submit(
-      { map: "demo", message: "Hej", altcha: await solve(service) },
+      { map: "demo", message: "Hej", captcha: await solve(service) },
       "someuser"
     );
     assert.equal((await service.getAll())[0].user, "someuser");
@@ -121,28 +121,30 @@ describe("FeedbackService", () => {
 
     assert.equal((await service.submit(body)).error.statusCode, 403);
     assert.equal(
-      (await service.submit({ ...body, altcha: "bm9wZQ==" })).error.statusCode,
+      (await service.submit({ ...body, captcha: "bm9wZQ==" })).error.statusCode,
       403
     );
 
     // Solved by someone with another key
-    const other = createService({ hmacKey: "other-key" });
+    const other = createService({
+      captcha: new CaptchaService({ active: true, hmacKey: "other-key" }),
+    });
     assert.equal(
-      (await service.submit({ ...body, altcha: await solve(other) })).error
+      (await service.submit({ ...body, captcha: await solve(other) })).error
         .statusCode,
       403
     );
 
-    const altcha = await solve(service);
-    assert.ok((await service.submit({ ...body, altcha })).id);
-    const reused = await service.submit({ ...body, altcha });
+    const captcha = await solve(service);
+    assert.ok((await service.submit({ ...body, captcha })).id);
+    const reused = await service.submit({ ...body, captcha });
     assert.equal(reused.error.statusCode, 403);
     assert.match(reused.error.message, /already been used/);
   });
 
   test("validates input before using up the captcha", async () => {
     const service = createService({ maxMessageLength: 10 });
-    const altcha = await solve(service);
+    const captcha = await solve(service);
     const cases = [
       { map: "../demo", message: "Hej" },
       { map: "demo", message: "   " },
@@ -152,12 +154,12 @@ describe("FeedbackService", () => {
       { map: "demo", message: "Hej", context: { clientVersion: "<b>" } },
     ];
     for (const body of cases) {
-      const result = await service.submit({ ...body, altcha });
+      const result = await service.submit({ ...body, captcha });
       assert.equal(result.error?.statusCode, 400, JSON.stringify(body));
     }
     // Still unused
     assert.ok(
-      (await service.submit({ map: "demo", message: "Hej", altcha })).id
+      (await service.submit({ map: "demo", message: "Hej", captcha })).id
     );
   });
 
@@ -166,7 +168,7 @@ describe("FeedbackService", () => {
     const result = await service.submit({
       map: "other",
       message: "Hej",
-      altcha: await solve(service),
+      captcha: await solve(service),
     });
     assert.equal(result.error.statusCode, 400);
   });
@@ -176,7 +178,7 @@ describe("FeedbackService", () => {
     const result = await service.submit({
       map: "demo",
       message: "Hej",
-      altcha: await solve(service),
+      captcha: await solve(service),
     });
     assert.equal(result.error.statusCode, 507);
   });
@@ -191,7 +193,7 @@ describe("FeedbackService", () => {
         {
           map: "demo",
           message: `Meddelande ${i}`,
-          altcha: await solve(service),
+          captcha: await solve(service),
         },
         undefined,
         "Mozilla/5.0"
@@ -224,7 +226,7 @@ describe("FeedbackService", () => {
     await service.submit({
       map: "demo",
       message: "Hej",
-      altcha: await solve(service),
+      captcha: await solve(service),
     });
     const result = await service.deleteAll();
     assert.ok(result.deletedFiles > 0);
