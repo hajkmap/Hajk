@@ -110,7 +110,11 @@ export default class ExpressServer {
           trustProxy = false;
           break;
         default:
-          trustProxy = process.env.EXPRESS_TRUST_PROXY;
+          // A plain integer means "number of hops" and must be passed as a
+          // Number. Express would otherwise treat it as an IP address.
+          trustProxy = /^\d+$/.test(process.env.EXPRESS_TRUST_PROXY)
+            ? Number(process.env.EXPRESS_TRUST_PROXY)
+            : process.env.EXPRESS_TRUST_PROXY;
           break;
       }
 
