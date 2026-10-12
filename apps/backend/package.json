@@ -19,10 +19,12 @@
     "dev": "nodemon server --config .nodemonrc.json",
     "dev:debug": "nodemon --inspect server --config .nodemonrc.json",
     "lint": "eslint server",
-    "lint:fix": "eslint --fix server"
+    "lint:fix": "eslint --fix server",
+    "test": "node --env-file=.env.example --test \"test/**/*.test.js\""
   },
   "dependencies": {
     "activedirectory2": "^2.2.0",
+    "altcha-lib": "^2.6.0",
     "chokidar": "^5.0.0",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",

@@ -1,6 +1,7 @@
-import { rateLimit } from "express-rate-limit";
+import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 
 import log4js from "../utils/hajkLogger.js";
+import { grabPositiveInt } from "../utils/dotEnvHelpers.js";
 
 const logger = log4js.getLogger("hajk.ratelimit");
 
@@ -10,24 +11,7 @@ const enabled = !["false", "0"].includes(
   process.env.RATE_LIMIT_ENABLED?.trim().toLowerCase()
 );
 
-/**
- * @summary Grab a positive integer from .env, with a fallback.
- * @param {string} name Name of the .env variable
- * @param {number} defaultValue Value to use if the variable is missing or invalid
- * @returns {number}
- */
-const grabPositiveInt = (name, defaultValue) => {
-  const value = Number.parseInt(process.env[name]);
-  if (Number.isInteger(value) && value > 0) return value;
-  if (process.env[name] !== undefined && process.env[name] !== "") {
-    logger.warn(
-      `Invalid value for ${name} in .env: "${process.env[name]}". Falling back to ${defaultValue}.`
-    );
-  }
-  return defaultValue;
-};
-
-const windowMs = grabPositiveInt("RATE_LIMIT_WINDOW_MS", 60_000);
+const defaultWindowMs = grabPositiveInt("RATE_LIMIT_WINDOW_MS", 60_000);
 
 /**
  * @summary Create a rate limiter for one tier, or a no-op middleware if rate limiting is disabled.
@@ -37,19 +21,32 @@ const windowMs = grabPositiveInt("RATE_LIMIT_WINDOW_MS", 60_000);
  * @param {string} tier Name of the tier, used in logs
  * @param {string} envName Name of the .env variable that holds the limit for this tier
  * @param {number} defaultLimit Requests allowed per window and IP if nothing is set in .env
+ * @param {object} [options]
+ * @param {string} [options.windowEnvName] Name of the .env variable that holds this tier's own window length
+ * @param {number} [options.defaultWindowMs] This tier's window length if nothing is set in .env
+ * @param {import("express-rate-limit").ValueDeterminingMiddleware<string>} [options.keyGenerator] Custom key, default is the IP
  * @returns {import("express").RequestHandler}
  */
-const createLimiter = (tier, envName, defaultLimit) => {
+const createLimiter = (
+  tier,
+  envName,
+  defaultLimit,
+  { windowEnvName, defaultWindowMs: tierWindowMs, keyGenerator } = {}
+) => {
   if (!enabled) return (req, res, next) => next();
 
   const limit = grabPositiveInt(envName, defaultLimit);
+  const windowMs = windowEnvName
+    ? grabPositiveInt(windowEnvName, tierWindowMs ?? defaultWindowMs)
+    : defaultWindowMs;
   logger.info(
-    `Rate limiting tier "${tier}": ${limit} requests per ${windowMs} ms and IP.`
+    `Rate limiting tier "${tier}": ${limit} requests per ${windowMs} ms and ${keyGenerator ? "user" : "IP"}.`
   );
 
   return rateLimit({
     windowMs,
     limit,
+    ...(keyGenerator && { keyGenerator }),
     standardHeaders: "draft-8",
     legacyHeaders: false,
     handler: (req, res, next, options) => {
@@ -86,4 +83,20 @@ export const proxyLimiter = createLimiter(
   "proxy",
   "RATE_LIMIT_PROXY_MAX",
   3000
+);
+
+// Applies to submissions of user feedback. Much stricter than the others, and counted
+// per authenticated user if there is one (else per IP).
+export const feedbackLimiter = createLimiter(
+  "feedback",
+  "RATE_LIMIT_FEEDBACK_MAX",
+  10,
+  {
+    windowEnvName: "RATE_LIMIT_FEEDBACK_WINDOW_MS",
+    defaultWindowMs: 3_600_000,
+    keyGenerator: (req, res) =>
+      res.locals.authUser
+        ? `user:${res.locals.authUser}`
+        : ipKeyGenerator(req.ip),
+  }
 );

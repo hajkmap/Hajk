@@ -1,6 +1,7 @@
 import helmet from "helmet";
 
 import log4js from "./hajkLogger.js";
+import { grabBoolean, grabList } from "./dotEnvHelpers.js";
 
 const logger = log4js.getLogger("hajk.security");
 
@@ -11,27 +12,6 @@ const logger = log4js.getLogger("hajk.security");
 // .env.example for a description of each setting.
 
 const CSP_MODES = ["off", "report-only", "enforce"];
-
-/**
- * @summary Grab a boolean from .env, with a fallback. Like
- * ExpressServer.grabDotEnvBoolean, but an empty value also gives the fallback.
- * @param {string} name Name of the .env variable
- * @param {boolean} defaultValue Value to use if the variable isn't set
- * @returns {boolean}
- */
-const grabBoolean = (name, defaultValue) => {
-  const value = process.env[name]?.trim();
-  if (!value) return defaultValue;
-  return value === "1" || value.toLowerCase() === "true";
-};
-
-/**
- * @summary Split a list from .env on commas and/or whitespace.
- * @param {string} name Name of the .env variable
- * @returns {string[]} Empty if the variable is missing
- */
-const grabList = (name) =>
-  (process.env[name] || "").split(/[\s,]+/).filter((v) => v.length > 0);
 
 /**
  * @summary Parse CSP_DIRECTIVES, e.g. "img-src 'self' data:; connect-src 'self' https:",
