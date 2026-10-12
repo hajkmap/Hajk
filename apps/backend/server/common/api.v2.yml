@@ -1197,10 +1197,14 @@ components:
                 type: string
                 description: Document file name (without ".json")
               document:
-                nullable: true
-                description: The document's contents, as served by /informative/load
-                allOf:
+                description: The document's contents, as served by /informative/load, or null if it could not be loaded
+                # OpenAPI 3.0 has no null type, and "nullable" doesn't reach into a $ref,
+                # hence the explicit null branch.
+                anyOf:
                   - $ref: "#/components/schemas/DocumentBody"
+                  - type: object
+                    nullable: true
+                    enum: [null]
               error:
                 type: object
                 description: Present only when "document" is null. Describes why the document could not be loaded.
