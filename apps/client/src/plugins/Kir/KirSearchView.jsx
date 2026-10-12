@@ -281,14 +281,16 @@ function KirSearchView({ model, app, localObserver }) {
                 <TextFieldInput
                   fullWidth
                   size="small"
+                  type="number"
                   value={state.ageValues[0]}
                   onChange={inputMinAgeChanged}
                   inputRef={inputMinAge}
-                  inputProps={{
-                    step: 1,
-                    min: 0,
-                    max: state.maxAge,
-                    type: "number",
+                  slotProps={{
+                    htmlInput: {
+                      step: 1,
+                      min: 0,
+                      max: state.maxAge,
+                    },
                   }}
                 />
               </GridAgeInputContainer>
@@ -296,14 +298,16 @@ function KirSearchView({ model, app, localObserver }) {
                 <TextFieldInput
                   fullWidth
                   size="small"
+                  type="number"
                   value={state.ageValues[1]}
                   onChange={inputMaxAgeChanged}
                   inputRef={inputMaxAge}
-                  inputProps={{
-                    step: 1,
-                    min: 0,
-                    max: state.maxAge,
-                    type: "number",
+                  slotProps={{
+                    htmlInput: {
+                      step: 1,
+                      min: 0,
+                      max: state.maxAge,
+                    },
                   }}
                 />
               </GridAgeInputContainer>
