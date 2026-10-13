@@ -191,6 +191,7 @@ class ServicesService {
     return await prisma.group.findMany({
       select: { id: true, name: true },
       where: {
+        deletedAt: null,
         layers: {
           some: {
             displayLayer: { serviceId: id, deletedAt: null },

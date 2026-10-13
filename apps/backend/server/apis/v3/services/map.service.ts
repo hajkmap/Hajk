@@ -328,7 +328,10 @@ class MapService {
         layers: {
           include: layerInstanceIncludeAll,
         },
-        groups: { include: { group: { include: { layers: true } } } },
+        groups: {
+          where: { group: { deletedAt: null } },
+          include: { group: { include: { layers: true } } },
+        },
       },
     });
 
@@ -377,6 +380,7 @@ class MapService {
     const allGroups = await prisma.groupsOnMaps.findMany({
       where: {
         mapName: mapName,
+        group: { deletedAt: null },
       },
       include: {
         group: {
@@ -586,7 +590,7 @@ class MapService {
     const groupIds = Array.from(new Set(placements.map((p) => p.groupId)));
     if (groupIds.length > 0) {
       const groupRecords = await prisma.group.findMany({
-        where: { id: { in: groupIds } },
+        where: { id: { in: groupIds }, deletedAt: null },
         select: { id: true, name: true, type: true },
       });
       const knownIds = new Set(groupRecords.map((g) => g.id));
@@ -1145,7 +1149,7 @@ class MapService {
       return;
     }
     const groupRecords = await prisma.group.findMany({
-      where: { id: { in: groupIds } },
+      where: { id: { in: groupIds }, deletedAt: null },
       select: { id: true },
     });
     const knownIds = new Set(groupRecords.map((g) => g.id));
@@ -1165,7 +1169,7 @@ class MapService {
     const groupRecords =
       groupIds.length > 0
         ? await prisma.group.findMany({
-            where: { id: { in: groupIds } },
+            where: { id: { in: groupIds }, deletedAt: null },
             select: { id: true, name: true },
           })
         : [];
@@ -1189,6 +1193,7 @@ class MapService {
           await tx.group.findMany({
             where: {
               id: { in: Array.from(new Set(groups.map((g) => g.groupId))) },
+              deletedAt: null,
             },
             select: { id: true, name: true },
           })
@@ -1458,7 +1463,10 @@ class MapService {
           where: activeLayerInstanceWhere,
           include: { restrictedToRoles: true },
         },
-        groups: { include: { metadata: true } },
+        groups: {
+          where: { group: { deletedAt: null } },
+          include: { metadata: true },
+        },
         themes: { where: { deletedAt: null } },
       },
     });
@@ -1526,7 +1534,7 @@ class MapService {
             ...new Set(source.groups.map((entry) => entry.groupId)),
           ];
           const existingGroups = await tx.group.findMany({
-            where: { id: { in: uniqueGroupIds } },
+            where: { id: { in: uniqueGroupIds }, deletedAt: null },
             select: { id: true },
           });
           const knownGroupIds = new Set(

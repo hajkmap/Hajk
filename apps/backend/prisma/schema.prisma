@@ -269,6 +269,7 @@ model Group {
   createdDate       DateTime?       @db.Timestamptz(3) // Timestamp when created
   lastSavedBy       String?
   lastSavedDate     DateTime?       @db.Timestamptz(3) // Timestamp when last saved
+  deletedAt         DateTime?       @db.Timestamptz(3)
   layers            LayerInstance[]
   maps              GroupsOnMaps[]
   restrictedToRoles RoleOnGroup[]
