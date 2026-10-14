@@ -489,8 +489,8 @@ export default function DesktopForm({
           separator resized with the arrow keys. jsx-a11y's default config
           does not model focusable separators, so it flags the listeners and
           tabIndex even though the element is fully keyboard-accessible. */}
-      {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions,
-          jsx-a11y/no-noninteractive-tabindex */}
+      {/* eslint-disable jsx-a11y-x/no-noninteractive-element-interactions,
+          jsx-a11y-x/no-noninteractive-tabindex */}
       <div
         role="separator"
         aria-orientation="vertical"
@@ -519,8 +519,8 @@ export default function DesktopForm({
         }}
         style={s.resizerGrip}
       />
-      {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions,
-          jsx-a11y/no-noninteractive-tabindex */}
+      {/* eslint-enable jsx-a11y-x/no-noninteractive-element-interactions,
+          jsx-a11y-x/no-noninteractive-tabindex */}
 
       {/* Right: Form */}
       <div style={s.pane} aria-label="Formulär">
