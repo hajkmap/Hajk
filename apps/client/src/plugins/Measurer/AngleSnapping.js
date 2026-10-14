@@ -284,7 +284,8 @@ export default class AngleSnapping {
   };
 
   // Real drawn features win over the green guides when both are under the cursor.
-  // Polygon drawing also keeps a LineString of the ring on the draw overlay.
+  // Vector-tile hits are RenderFeatures and are not snap targets. Polygon
+  // drawing also keeps a LineString of the ring on the draw overlay.
   // That helper is not the sketch feature, and the edge just placed usually
   // lies on a guide, so treating it as a real vector makes the next guides
   // follow the guide. Line drawing has no helper line. Overlay features are
