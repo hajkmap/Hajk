@@ -14,6 +14,21 @@ import {
   ListItemText,
 } from "@mui/material";
 
+// Feature ids are the usual row text. A feature with no id would otherwise
+// render a blank row, so fall back to the layer caption and geometry type.
+function featureChoiceLabel(feature) {
+  const id = feature.getId();
+  if (id != null && id !== "") {
+    return String(id);
+  }
+  const caption = feature.layer?.get?.("caption");
+  const geometryType = feature.getGeometry()?.getType?.();
+  if (caption && geometryType) {
+    return `${caption} (${geometryType})`;
+  }
+  return caption || geometryType || "";
+}
+
 export default function SelectFeaturesDialog({
   localObserver,
   drawModel,
@@ -149,7 +164,7 @@ export default function SelectFeaturesDialog({
                     disableRipple
                   />
                 </ListItemIcon>
-                <ListItemText primary={feature.getId()} />
+                <ListItemText primary={featureChoiceLabel(feature)} />
               </ListItemButton>
             </ListItem>
           ))}

@@ -212,8 +212,9 @@ export default class Segment {
     ) {
       // The geometry should have more than one coordinate to be removed, otherwise it probably wasnt added.
       // In the case of LineString and Polygon.
-      if (geometry.getCoordinates().length > 1) {
-        // Remove the segment point.
+      if (geometry.getCoordinates().length > 1 && this.#currentPoint) {
+        // Remove the segment point from the sketch that just finished.
+        // A line copied with "Välj på kartan" has no sketch point.
         this.#drawModel.removeFeature(this.#currentPoint);
       }
     }

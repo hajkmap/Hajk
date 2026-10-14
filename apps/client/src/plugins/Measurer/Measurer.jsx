@@ -313,6 +313,28 @@ function Measurer(props) {
     [drawType, currentHoverFeature, pluginShown, map]
   );
 
+  // "Välj på kartan" adds a copy without going through drawend. Finish it the
+  // same way a completed draw is finished so delete-hover can turn the stroke red.
+  React.useEffect(() => {
+    const finishSelectedMeasurement = (feature) => {
+      if (!feature || feature.get("USER_MEASUREMENT") === true) {
+        return;
+      }
+      handleDrawEnd({ feature });
+      handleAddFeature({ feature });
+    };
+    localObserver.subscribe(
+      "measure.drawModel.select.added",
+      finishSelectedMeasurement
+    );
+    return () => {
+      localObserver.unsubscribe(
+        "measure.drawModel.select.added",
+        finishSelectedMeasurement
+      );
+    };
+  }, [localObserver, handleDrawEnd, handleAddFeature]);
+
   React.useEffect(() => {
     map.on("pointermove", handlePointerMove);
 

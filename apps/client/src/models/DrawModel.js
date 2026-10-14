@@ -28,6 +28,7 @@ import {
 } from "utils/measurement";
 import { getBrowserLocale } from "utils/locale";
 import { fetchFullFeatureGeometries } from "utils/fetchFullFeatureGeometries";
+import { vectorFeaturesAtClick } from "utils/vectorFeatureAtClick";
 import {
   noModifierKeys,
   platformModifierKeyOnly,
@@ -2080,6 +2081,14 @@ class DrawModel {
         console.error(`Failed to style selected feature. Error: ${styleError}`);
       }
       this.#drawSource.addFeature(featureCopy);
+      // Measurer finishes the copy the same way a completed draw is finished
+      // (USER_MEASUREMENT, solid stroke) so delete-hover can turn it red.
+      // A separate subject from drawModel.featureAdded: Sketch listens to that
+      // and would open the text dialog for a selected text feature.
+      this.#publishInformation({
+        subject: "drawModel.select.added",
+        payLoad: featureCopy,
+      });
     } catch (error) {
       console.error(`Failed to add selected feature. Error: ${error}`);
     }
@@ -2087,12 +2096,21 @@ class DrawModel {
 
   #handleOnSelectClick = async (event) => {
     try {
-      // Try to fetch features from WMS-layers etc. (Also from all vector-layers).
+      // Read vector hits before GetFeatureInfo. handleClick only returns
+      // queryable vectors; this pass adds the other drawn layer-tree vectors.
+      const vectorHits = vectorFeaturesAtClick(
+        event.map,
+        event.pixel,
+        event.coordinate
+      );
+      // Try to fetch features from WMS-layers etc.
       const clickResult = await new Promise((resolve) =>
         handleClick(event, event.map, resolve)
       );
       // The response should contain an array of features
-      const { features } = clickResult;
+      const features = Array.isArray(clickResult?.features)
+        ? clickResult.features
+        : [];
       // Which might contain features without geometry. We have to make sure we remove those.
       const featuresWithGeom = features.filter((feature) =>
         feature.getGeometry()
@@ -2105,6 +2123,16 @@ class DrawModel {
       if (!this.#selectInteractionActive) {
         return;
       }
+      // A queryable vector is already in the click result. Keep that object
+      // and only append features handleClick was not allowed to return.
+      const seen = new Set(featuresWithGeom);
+      vectorHits.forEach((feature) => {
+        if (!feature.getGeometry() || seen.has(feature)) {
+          return;
+        }
+        seen.add(feature);
+        featuresWithGeom.push(feature);
+      });
       // If we've fetched exactly one feature, we can add it straight away...
       featuresWithGeom.length === 1 &&
         this.drawSelectedFeature(featuresWithGeom[0]);
