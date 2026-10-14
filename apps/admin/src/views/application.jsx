@@ -10,6 +10,7 @@ import Info from "../views/info.jsx";
 import Release from "../views/release.jsx";
 import Search from "../views/search.jsx";
 import DocumentEditor from "../views/documenteditor.jsx";
+import Feedback from "../views/feedback.jsx";
 
 import editModel from "../models/edit";
 import layerManagerModel from "../models/layermanager";
@@ -19,6 +20,7 @@ import infoModel from "../models/info";
 import releaseModel from "../models/release";
 import searchModel from "../models/search";
 import documentEditorModel from "../models/documenteditor";
+import feedbackModel from "../models/feedback";
 
 var defaultState = {
   alert: false,
@@ -134,6 +136,8 @@ class Application extends Component {
         return Search;
       case "documenthandler":
         return DocumentEditor;
+      case "feedback":
+        return Feedback;
       default:
         return null;
     }
@@ -157,6 +161,8 @@ class Application extends Component {
         return new searchModel();
       case "documenthandler":
         return new documentEditorModel();
+      case "feedback":
+        return new feedbackModel();
       default:
         return undefined;
     }

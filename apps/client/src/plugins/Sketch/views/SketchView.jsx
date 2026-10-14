@@ -63,6 +63,8 @@ const SketchView = (props) => {
   const { pluginShown, setToggleBufferBtn, toggleBufferBtn } = props;
   // We're gonna need to keep track of the allowed geometry types
   const { allowedGeometryTypes } = props;
+  // We're gonna need to know if the OGC activity should be shown in the menu
+  const { showOgcActivity } = props;
 
   // We're gonna need some snackbar functions so that we can prompt the user with information.
   const { closeSnackbar, enqueueSnackbar } = useSnackbar();
@@ -781,6 +783,7 @@ const SketchView = (props) => {
             pluginPosition={pluginPosition}
             activityId={activityId}
             setActivityId={setActivityId}
+            showOgcActivity={showOgcActivity}
           />
         </Grid>
         <Grid size={9}>{renderCurrentView()}</Grid>
@@ -805,6 +808,7 @@ const SketchView = (props) => {
             pluginPosition={pluginPosition}
             activityId={activityId}
             setActivityId={setActivityId}
+            showOgcActivity={showOgcActivity}
           />
         </Grid>
       </Grid>

@@ -98,6 +98,9 @@
     "url_create_folder": "http://localhost:3002/api/v2/informative/createfolder",
     "url_folder_list": "http://localhost:3002/api/v2/informative/folderlist"
   },
+  "feedback": {
+    "url": "http://localhost:3002/api/v2/feedback"
+  },
   "router": [
     {
       "name": "layermanager",
@@ -123,6 +126,10 @@
     {
       "name": "documenthandler",
       "title": "Dokumenthanterare 2.0"
+    },
+    {
+      "name": "feedback",
+      "title": "Feedback"
     }
   ]
 }

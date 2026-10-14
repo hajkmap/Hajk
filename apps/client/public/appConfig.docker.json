@@ -10,6 +10,7 @@
     "Coordinates",
     "DocumentHandler",
     "Edit",
+    "Feedback",
     "FloodSimulator",
     "FmeServer",
     "InfoDialog",
