@@ -13,6 +13,7 @@ import {
   Point,
 } from "ol/geom";
 import { fromCircle } from "ol/geom/Polygon";
+import RenderFeature, { toGeometry } from "ol/render/Feature";
 import Overlay from "ol/Overlay";
 import GeoJSON from "ol/format/GeoJSON";
 import transformTranslate from "@turf/transform-translate";
@@ -756,7 +757,12 @@ class DrawModel {
   // Returns an array of arrays with the coordinates of the supplied feature
   getFeatureCoordinates = (feature) => {
     // First, we have to extract the feature geometry
-    const geometry = feature.getGeometry();
+    let geometry = feature.getGeometry();
+    // Vector tiles (the OSM vector background, for example) hit-test as
+    // RenderFeature. It reports Polygon/LineString but has no getCoordinates().
+    if (geometry instanceof RenderFeature) {
+      geometry = toGeometry(geometry);
+    }
     // Then we'll have to extract the feature type, since we have to extract the
     // coordinates in different ways, depending on the geometry type.
     const geometryType = geometry.getType();

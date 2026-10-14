@@ -4,13 +4,15 @@ import { LineString, Point } from "ol/geom";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import { buffer, containsCoordinate } from "ol/extent";
-import { lineString as TurfLineString } from "@turf/helpers";
-import booleanPointOnLine from "@turf/boolean-point-on-line";
 import { getGeometryEdges, segmentIntersection } from "utils/geometryEdges";
 
 // Green guide strokes are 1px (rays) or 7px (the highlighted segment). A few
 // extra pixels lets a click land on the ray without requiring an exact hit.
 const GUIDE_HIT_TOLERANCE_PX = 8;
+
+// Same idea for a real edge. Vector-tile walls are not snapped onto, so the
+// click sits a few pixels off the geometry.
+const SEGMENT_HIT_TOLERANCE_PX = 8;
 
 // Upper bound on real edges tested against the rays, so dense WFS views
 // can't freeze the click that creates the guides.
@@ -76,9 +78,14 @@ export default class AngleSnapping {
   // weakest Snap, so real edges override the guides.
   #createGuideLayer = () => {
     this.#guideSource = new VectorSource({ wrapX: false });
+    // Measurer and Sketch each add a guide layer. The name has to be unique
+    // because LayerSwitcher uses it as a React key, and it has to contain
+    // "plugin" so these system layers skip the zoom-warning listener.
+    const owner = this.#drawModel.getCurrentLayerName();
     this.#guideLayer = new VectorLayer({
       source: this.#guideSource,
       layerType: "system",
+      name: `${owner}AngleSnappingGuides`,
       ignoreInFeatureInfo: true,
       zIndex: 5001,
       caption: "Angle snapping guides",
@@ -231,44 +238,38 @@ export default class AngleSnapping {
   };
 
   #lookForSegmentInFeature = (feature, coordinate) => {
-    let allCoordinates = this.#drawModel.getFeatureCoordinates(feature);
-
-    let i = 0;
-    let clickedSegment = null;
+    const allCoordinates = this.#drawModel.getFeatureCoordinates(feature);
+    if (!allCoordinates || allCoordinates.length < 2) {
+      return null;
+    }
 
     // If a geometry is too complex we might choke the browser....
     // We'll prevent this by limiting this functionality to more simple geometries.
     const maxSegmentsToCheck = 500; // 500 is still allot....
+    const limit = Math.min(allCoordinates.length - 1, maxSegmentsToCheck);
 
-    // Now it's time to look for the specific clicked segment of the feature we clicked.
-    // We'll use the segment later to get the relevant angle.
-    while (
-      !clickedSegment &&
-      i < allCoordinates.length - 1 &&
-      i <= maxSegmentsToCheck
-    ) {
+    // The closest edge within a few pixels. An exact map-unit test misses
+    // vector-tile walls, and a point inside a filled house must not match.
+    let clickedSegment = null;
+    let bestDistance = Infinity;
+    for (let i = 0; i < limit; i++) {
       const segment = [
         allCoordinates[i],
         allCoordinates[i + 1] || allCoordinates[0], // Handle broken MultiPolygons
       ];
-
-      // getClosestPoint did not work as expected so I used methods from turf
-      const foundClickedSegment = booleanPointOnLine(
-        coordinate,
-        new TurfLineString(segment),
-        {
-          ignoreEndVertices: false,
-          epsilon: 0.001, // I got no matches without a value here (hitTolerance/fuzziness)
-        }
-      );
-
-      if (foundClickedSegment) {
+      if (!segment[0] || !segment[1]) {
+        continue;
+      }
+      const distance = this.#distanceToSegmentPx(segment, coordinate);
+      if (distance <= SEGMENT_HIT_TOLERANCE_PX && distance < bestDistance) {
+        bestDistance = distance;
         clickedSegment = [segment[0].slice(), segment[1].slice()];
       }
-
-      i++;
     }
-    return clickedSegment;
+    if (!clickedSegment) {
+      return null;
+    }
+    return { segment: clickedSegment, distance: bestDistance };
   };
 
   #distanceToSegmentPx = (segment, coordinate) => {
@@ -283,37 +284,42 @@ export default class AngleSnapping {
   };
 
   // Real drawn features win over the green guides when both are under the cursor.
+  // Polygon drawing also keeps a LineString of the ring on the draw overlay.
+  // That helper is not the sketch feature, and the edge just placed usually
+  // lies on a guide, so treating it as a real vector makes the next guides
+  // follow the guide. Line drawing has no helper line. Overlay features are
+  // unmanaged and reported with a null layer.
   #findRealSegment = (measureFeature, coordinate) => {
     const px = this.#map.getPixelFromCoordinate(coordinate);
     if (!px) {
       return null;
     }
-    const clickedFeatures = this.#map
-      .getFeaturesAtPixel(px, {
-        hitTolerance: 0,
-      })
-      .filter((f) => {
-        const geometry = f.getGeometry();
-        if (!geometry || f === measureFeature) {
-          return false;
-        }
-        // Guides are resolved separately so a click on a green ray can chain.
-        if (f.get("USER_MEASUREMENT_GUIDE") === true) {
-          return false;
-        }
-        return this.#allowedTypes.includes(geometry.getType());
-      });
 
-    for (let i = 0; i < clickedFeatures.length; i++) {
-      const clickedSegment = this.#lookForSegmentInFeature(
-        clickedFeatures[i],
-        coordinate
-      );
-      if (clickedSegment) {
-        return clickedSegment;
-      }
-    }
-    return null;
+    let bestSegment = null;
+    let bestDistance = Infinity;
+    this.#map.forEachFeatureAtPixel(
+      px,
+      (feature, layer) => {
+        if (!layer || feature === measureFeature) {
+          return;
+        }
+        const geometry = feature.getGeometry();
+        if (
+          !geometry ||
+          feature.get("USER_MEASUREMENT_GUIDE") === true ||
+          !this.#allowedTypes.includes(geometry.getType())
+        ) {
+          return;
+        }
+        const match = this.#lookForSegmentInFeature(feature, coordinate);
+        if (match && match.distance < bestDistance) {
+          bestDistance = match.distance;
+          bestSegment = match.segment;
+        }
+      },
+      { hitTolerance: 0 }
+    );
+    return bestSegment;
   };
 
   // Pick the guide line closest to the click. Rays meet at the origin, so the
