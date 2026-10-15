@@ -38,16 +38,14 @@ const GroupInfoToggler = ({
   infogroupopendatalink = "",
   infogroupowner = "",
 }) => {
-  if (
-    !(
-      infogrouptitle ||
-      infogrouptext ||
-      infogroupurl ||
-      infogroupurltext ||
-      infogroupopendatalink ||
-      infogroupowner
-    )
-  ) {
+  if (!(
+    infogrouptitle ||
+    infogrouptext ||
+    infogroupurl ||
+    infogroupurltext ||
+    infogroupopendatalink ||
+    infogroupowner
+  )) {
     return null;
   }
   // If any of the above variables arent mising, render the show details button

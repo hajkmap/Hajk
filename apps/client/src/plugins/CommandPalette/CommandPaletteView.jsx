@@ -1508,7 +1508,7 @@ export default function CommandPaletteView({ globalObserver, appModel }) {
           }}
         >
           <TextField
-            // eslint-disable-next-line jsx-a11y/no-autofocus
+            // eslint-disable-next-line jsx-a11y-x/no-autofocus
             autoFocus
             fullWidth
             variant="outlined"

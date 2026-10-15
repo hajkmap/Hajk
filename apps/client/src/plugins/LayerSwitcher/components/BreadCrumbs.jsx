@@ -23,7 +23,7 @@ import "react-horizontal-scrolling-menu/dist/styles.css";
 // solution. It is not pretty, but if we move this to a separate file
 // we could use this HOC instead of the isMobile helper function in ../../utils/.
 // TODO: Move to some /hooks folder
-// eslint-disable-next-line react/display-name
+// eslint-disable-next-line @eslint-react/no-missing-component-display-name
 const withIsMobile = () => (WrappedComponent) => (props) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));

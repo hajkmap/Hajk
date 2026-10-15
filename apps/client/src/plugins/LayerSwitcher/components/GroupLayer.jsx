@@ -27,8 +27,14 @@ function GroupLayer({
 }) {
   const { layerIsToggled, visibleSubLayers } = layerState;
 
-  const { layerId, layerMinZoom, layerMaxZoom, layerInfo, allSubLayers, olLayer } =
-    layerConfig;
+  const {
+    layerId,
+    layerMinZoom,
+    layerMaxZoom,
+    layerInfo,
+    allSubLayers,
+    olLayer,
+  } = layerConfig;
 
   const [showSublayers, setShowSublayers] = useState(false);
   const [labeledSubLayers, setLabeledSubLayers] = useState(new Set());

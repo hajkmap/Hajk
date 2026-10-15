@@ -707,7 +707,7 @@ export default function TableMode(props) {
                               is the accessible control for the same action,
                               so a second keyboard/tab stop here would only
                               duplicate it. */}
-                          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+                          {/* eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions */}
                           <span
                             onClick={() => toggleSort(f.key)}
                             style={s.columnHeader}
@@ -815,7 +815,7 @@ export default function TableMode(props) {
                       {/* Pointer-only affordance for column resizing (drag
                           handle); column widths are cosmetic and all data
                           stays reachable without it. */}
-                      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+                      {/* eslint-disable-next-line jsx-a11y-x/no-static-element-interactions */}
                       <div
                         style={s.thResizer}
                         onMouseDown={(e) => {

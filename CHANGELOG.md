@@ -73,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Client + Admin: Bumped `x2js` from 3.4.4 to 3.4.5
 - Client: Bumped Vite from 7.3.2 to 7.3.6.
-- Backend: Bumped ESLint from 9.39.2 to 9.39.5.
+- Client + Backend: Upgraded to ESLint 10. In Client, `eslint-plugin-react` was replaced by [`@eslint-react/eslint-plugin`](https://www.npmjs.com/package/@eslint-react/eslint-plugin) and `eslint-plugin-jsx-a11y` by [`eslint-plugin-jsx-a11y-x`](https://www.npmjs.com/package/eslint-plugin-jsx-a11y-x), as neither of the old plugins supports ESLint 10. [#1846](https://github.com/hajkmap/Hajk/issues/1846)
 - Client: FIR/KIR - Converted class components to hooks and extracted shared code. Also fixed KIR's delete button expanding the row.
 - Backend: Upgraded `write-excel-file` from 3.x to 4.x.
 - Backend: Enhance detailed request logger with structured output and file logging configuration [#1836](https://github.com/hajkmap/Hajk/pull/1836)
