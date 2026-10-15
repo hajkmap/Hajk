@@ -13,6 +13,7 @@ import {
   Point,
 } from "ol/geom";
 import { fromCircle } from "ol/geom/Polygon";
+import RenderFeature from "ol/render/Feature";
 import Overlay from "ol/Overlay";
 import GeoJSON from "ol/format/GeoJSON";
 import transformTranslate from "@turf/transform-translate";
@@ -27,6 +28,7 @@ import {
 } from "utils/measurement";
 import { getBrowserLocale } from "utils/locale";
 import { fetchFullFeatureGeometries } from "utils/fetchFullFeatureGeometries";
+import { vectorFeaturesAtClick } from "utils/vectorFeatureAtClick";
 import {
   noModifierKeys,
   platformModifierKeyOnly,
@@ -113,6 +115,7 @@ class DrawModel {
   #fixedLength = 1000;
   #fixedAngle = 0;
   #activeSketch = null;
+  #drawSketch = null;
   #mapClickListener = null;
   #activeDrawMethod = null;
   #customHandleDrawAbort = null;
@@ -756,6 +759,13 @@ class DrawModel {
   getFeatureCoordinates = (feature) => {
     // First, we have to extract the feature geometry
     const geometry = feature.getGeometry();
+    // Vector tiles (the OSM vector background, for example) hit-test as
+    // RenderFeature. It reports Polygon/LineString but has no getCoordinates().
+    // Stop here. These are not measurement targets right now.
+    // Will maybe be a future feature
+    if (geometry instanceof RenderFeature) {
+      return [];
+    }
     // Then we'll have to extract the feature type, since we have to extract the
     // coordinates in different ways, depending on the geometry type.
     const geometryType = geometry.getType();
@@ -1372,11 +1382,14 @@ class DrawModel {
     this.#customHandleDrawEnd = settings.handleDrawEnd || null;
     this.#customHandlePointerMove = settings.handlePointerMove || null;
     this.#customHandleAddFeature = settings.handleAddFeature || null;
+    this.#customHandleDrawAbort = settings.handleDrawAbort || null;
     // Then we'll add the listeners if the corresponding handler exists
     this.#customHandleDrawStart &&
       this.#drawInteraction.on("drawstart", this.#customHandleDrawStart);
     this.#customHandleDrawEnd &&
       this.#drawInteraction.on("drawend", this.#customHandleDrawEnd);
+    this.#customHandleDrawAbort &&
+      this.#drawInteraction.on("drawabort", this.#customHandleDrawAbort);
     this.#customHandlePointerMove &&
       this.#map.on("pointermove", this.#customHandlePointerMove);
     this.#customHandleAddFeature &&
@@ -1391,13 +1404,16 @@ class DrawModel {
       this.#drawInteraction.un("drawstart", this.#customHandleDrawStart);
     this.#customHandleDrawEnd &&
       this.#drawInteraction.un("drawend", this.#customHandleDrawEnd);
+    this.#customHandleDrawAbort &&
+      this.#drawInteraction.un("drawabort", this.#customHandleDrawAbort);
     this.#customHandlePointerMove &&
-      this.#map.on("pointermove", this.#customHandlePointerMove);
+      this.#map.un("pointermove", this.#customHandlePointerMove);
     this.#customHandleAddFeature &&
       this.#drawSource.un("addfeature", this.#customHandleAddFeature);
     // Then we have to make sure to remove the reference to the handlers.
     this.#customHandleDrawStart = null;
     this.#customHandleDrawEnd = null;
+    this.#customHandleDrawAbort = null;
     this.#customHandlePointerMove = null;
     this.#customHandleAddFeature = null;
   };
@@ -1413,11 +1429,13 @@ class DrawModel {
     feature.on("change", this.#handleFeatureChange);
     // Finally, we'll make sure the feature being drawn has the correct style:
     feature.setStyle(this.#getDrawStyle());
+    this.#drawSketch = feature;
   };
 
   // This handler will make sure that the overlay will be removed
   // when the feature drawing is done.
   #handleDrawEnd = (e) => {
+    this.#drawSketch = null;
     // Let's make sure to reset the draw tooltip
     this.#resetDrawTooltip();
     const { feature } = e;
@@ -1476,7 +1494,29 @@ class DrawModel {
 
   // Cleans up if the drawing is aborted.
   #handleDrawAbort = () => {
+    this.#drawSketch = null;
     this.#resetDrawTooltip();
+    this.#map.un("pointermove", this.#handlePointerMove);
+  };
+
+  // Esc/Enter call finishDrawing(), which OpenLayers allows below the usual
+  // minimum, leaving a line with no length or a polygon with no area.
+  #sketchHasEnoughPoints = (feature) => {
+    const geometry = feature.getGeometry();
+    let placed;
+    let minPoints;
+    if (geometry instanceof LineString) {
+      // The last coordinate follows the cursor.
+      placed = geometry.getCoordinates().slice(0, -1);
+      minPoints = 2;
+    } else if (geometry instanceof Polygon) {
+      // The ring ends with the cursor and then repeats the first point.
+      placed = (geometry.getCoordinates()[0] || []).slice(0, -2);
+      minPoints = 3;
+    } else {
+      return true;
+    }
+    return new Set(placed.map((c) => `${c[0]},${c[1]}`)).size >= minPoints;
   };
 
   #resetDrawTooltip = () => {
@@ -1560,6 +1600,7 @@ class DrawModel {
     this.#removeEventListeners();
     // We're also making sure to set the private field to null
     this.#drawInteraction = null;
+    this.#drawSketch = null;
     // And remove the click-lock and the snap-helper
     this.#map.clickLock.delete("coreDrawModel");
     this.#map.snapHelper.delete("coreDrawModel");
@@ -2042,6 +2083,14 @@ class DrawModel {
         console.error(`Failed to style selected feature. Error: ${styleError}`);
       }
       this.#drawSource.addFeature(featureCopy);
+      // Measurer finishes the copy the same way a completed draw is finished
+      // (USER_MEASUREMENT, solid stroke) so delete-hover can turn it red.
+      // A separate subject from drawModel.featureAdded: Sketch listens to that
+      // and would open the text dialog for a selected text feature.
+      this.#publishInformation({
+        subject: "drawModel.select.added",
+        payLoad: featureCopy,
+      });
     } catch (error) {
       console.error(`Failed to add selected feature. Error: ${error}`);
     }
@@ -2049,12 +2098,21 @@ class DrawModel {
 
   #handleOnSelectClick = async (event) => {
     try {
-      // Try to fetch features from WMS-layers etc. (Also from all vector-layers).
+      // Read vector hits before GetFeatureInfo. handleClick only returns
+      // queryable vectors; this pass adds the other drawn layer-tree vectors.
+      const vectorHits = vectorFeaturesAtClick(
+        event.map,
+        event.pixel,
+        event.coordinate
+      );
+      // Try to fetch features from WMS-layers etc.
       const clickResult = await new Promise((resolve) =>
         handleClick(event, event.map, resolve)
       );
       // The response should contain an array of features
-      const { features } = clickResult;
+      const features = Array.isArray(clickResult?.features)
+        ? clickResult.features
+        : [];
       // Which might contain features without geometry. We have to make sure we remove those.
       const featuresWithGeom = features.filter((feature) =>
         feature.getGeometry()
@@ -2067,6 +2125,16 @@ class DrawModel {
       if (!this.#selectInteractionActive) {
         return;
       }
+      // A queryable vector is already in the click result. Keep that object
+      // and only append features handleClick was not allowed to return.
+      const seen = new Set(featuresWithGeom);
+      vectorHits.forEach((feature) => {
+        if (!feature.getGeometry() || seen.has(feature)) {
+          return;
+        }
+        seen.add(feature);
+        featuresWithGeom.push(feature);
+      });
       // If we've fetched exactly one feature, we can add it straight away...
       featuresWithGeom.length === 1 &&
         this.drawSelectedFeature(featuresWithGeom[0]);
@@ -2159,6 +2227,7 @@ class DrawModel {
       const settings = {
         handleDrawStart: this.#customHandleDrawStart,
         handleDrawEnd: this.#customHandleDrawEnd,
+        handleDrawAbort: this.#customHandleDrawAbort,
         handlePointerMove: this.#customHandlePointerMove,
         handleAddFeature: this.#customHandleAddFeature,
         fixedLengthEnabled: this.#fixedLengthEnabled,
@@ -2840,7 +2909,11 @@ class DrawModel {
       }
     } else if (this.#drawInteraction) {
       // Normal draw interaction
-      this.#drawInteraction.finishDrawing();
+      if (this.#drawSketch && !this.#sketchHasEnoughPoints(this.#drawSketch)) {
+        this.#drawInteraction.abortDrawing();
+      } else {
+        this.#drawInteraction.finishDrawing();
+      }
     }
   };
 

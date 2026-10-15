@@ -13,6 +13,7 @@ export default class Segment {
   #map;
   #currentFeatureSavedId;
   #currentPoint;
+  #sketchPoints;
 
   constructor(drawModel, map, enabled) {
     this.#enabled = enabled ?? false;
@@ -24,6 +25,7 @@ export default class Segment {
     this.#map = map;
     this.#currentFeatureSavedId = null;
     this.#currentPoint = null;
+    this.#sketchPoints = [];
   }
 
   setEnabled = (enabled) => {
@@ -129,6 +131,8 @@ export default class Segment {
         f.set("DRAW_METHOD", "Text");
         f.set("USER_DRAWN", true);
         f.set("MEASUREMENT_ID", id);
+        // Labels sit on edge midpoints and must not steal the snap from the edge.
+        f.set("SNAP_IGNORE", true);
         // Assign the measured and formatted length of the segment
         f.set("USER_TEXT", this.#applyTextStyle(this.#currentSegmentLength));
         f.set("TEXT_SETTINGS", {
@@ -140,6 +144,7 @@ export default class Segment {
         this.#currentPoint = f.clone();
         // Draw the point
         this.#drawModel.addFeature(f);
+        this.#sketchPoints.push(f);
       }
     }
   };
@@ -207,13 +212,25 @@ export default class Segment {
     ) {
       // The geometry should have more than one coordinate to be removed, otherwise it probably wasnt added.
       // In the case of LineString and Polygon.
-      if (geometry.getCoordinates().length > 1) {
-        // Remove the segment point.
+      if (geometry.getCoordinates().length > 1 && this.#currentPoint) {
+        // Remove the segment point from the sketch that just finished.
+        // A line copied with "Välj på kartan" has no sketch point.
         this.#drawModel.removeFeature(this.#currentPoint);
       }
     }
 
-    // Cleanup and reset
+    this.#resetSketchState();
+  };
+
+  // The sketch never becomes a measurement, so its segment labels have no
+  // parent to be removed with later.
+  handleDrawAbortEvent = () => {
+    this.#sketchPoints.forEach((f) => this.#drawModel.removeFeature(f));
+    this.#resetSketchState();
+  };
+
+  #resetSketchState = () => {
+    this.#sketchPoints = [];
     this.#currentCenter = null;
     this.#currentSegmentLength = null;
     this.#polygonFirstAndLast = [];
