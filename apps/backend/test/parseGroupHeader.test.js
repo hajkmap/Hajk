@@ -22,27 +22,22 @@ describe("parseGroupHeader", () => {
     assert.deepEqual(parseGroupHeader("a||b||c", "||"), ["a", "b", "c"]);
   });
 
-  test("ignores GeoServer-style role parameters", () => {
+  test("keeps whitespace and parentheses inside group names", () => {
     assert.deepEqual(
-      parseGroupHeader("role_a;role_b(pnr=123,nick=max);role_c", ";"),
-      ["role_a", "role_b", "role_c"]
+      parseGroupHeader("GIS Editors (Planning);Domain Users", ";"),
+      ["GIS Editors (Planning)", "Domain Users"]
     );
   });
 
-  test("does not split on delimiters inside parameters", () => {
-    assert.deepEqual(parseGroupHeader("role_a,role_b(pnr=123,nick=max),c"), [
-      "role_a",
-      "role_b",
-      "c",
-    ]);
+  test("does not treat parentheses as role parameters", () => {
+    assert.deepEqual(
+      parseGroupHeader("role_a;role_b(pnr=123,nick=max);role_c", ";"),
+      ["role_a", "role_b(pnr=123,nick=max)", "role_c"]
+    );
   });
 
   test("trims names and drops empty and duplicate groups", () => {
-    assert.deepEqual(parseGroupHeader(" a , ,b,,a, (x=1), c "), [
-      "a",
-      "b",
-      "c",
-    ]);
+    assert.deepEqual(parseGroupHeader(" a , ,b,,a, c "), ["a", "b", "c"]);
   });
 
   test("returns empty array for empty or missing input", () => {
@@ -50,15 +45,6 @@ describe("parseGroupHeader", () => {
     assert.deepEqual(parseGroupHeader(undefined), []);
     assert.deepEqual(parseGroupHeader(null), []);
     assert.deepEqual(parseGroupHeader(";;", ";"), []);
-  });
-
-  test("handles malformed parentheses leniently", () => {
-    // Unbalanced "(": the rest of the value is treated as parameters
-    assert.deepEqual(parseGroupHeader("a;b(x=1;c", ";"), ["a", "b"]);
-    // Stray ")" is ignored
-    assert.deepEqual(parseGroupHeader("a);b", ";"), ["a", "b"]);
-    // Text after a parameter list is not part of the name
-    assert.deepEqual(parseGroupHeader("a(x=1)junk;b", ";"), ["a", "b"]);
   });
 });
 
@@ -83,10 +69,12 @@ describe("getGroupDelimiter", () => {
   test("uses the configured delimiter", () => {
     process.env.AD_TRUSTED_GROUP_HEADER_DELIMITER = ";";
     assert.equal(getGroupDelimiter(), ";");
+    process.env.AD_TRUSTED_GROUP_HEADER_DELIMITER = ")";
+    assert.equal(getGroupDelimiter(), ")");
   });
 
-  test("falls back to comma for unusable values", () => {
-    for (const value of [" ", "(", ")", ";)"]) {
+  test("falls back to comma for whitespace-only values", () => {
+    for (const value of [" ", "  ", "\t"]) {
       process.env.AD_TRUSTED_GROUP_HEADER_DELIMITER = value;
       assert.equal(getGroupDelimiter(), ",");
     }
