@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import Page from "../../layouts/root/components/page";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
+import DeletedThemesList from "./components/deleted-themes-list";
 
 type DeletedTab =
   | "all"
@@ -27,6 +28,7 @@ const DELETED_TABS: { key: DeletedTab; labelKey: string }[] = [
 export default function DeletedItemsPage() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<DeletedTab>("all");
+  const showThemes = activeTab === "all" || activeTab === "themes";
 
   return (
     <Page title={t("deleted.title")}>
@@ -38,16 +40,20 @@ export default function DeletedItemsPage() {
           tabs={DELETED_TABS}
         />
 
-        <Box
-          sx={{
-            py: 6,
-            px: 2,
-            textAlign: "center",
-            color: "text.secondary",
-          }}
-        >
-          <Typography variant="body1">{t("deleted.empty")}</Typography>
-        </Box>
+        {showThemes ? (
+          <DeletedThemesList />
+        ) : (
+          <Box
+            sx={{
+              py: 6,
+              px: 2,
+              textAlign: "center",
+              color: "text.secondary",
+            }}
+          >
+            <Typography variant="body1">{t("deleted.empty")}</Typography>
+          </Box>
+        )}
       </Box>
     </Page>
   );

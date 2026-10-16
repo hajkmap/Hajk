@@ -7,9 +7,11 @@ import {
 import {
   getThemes,
   getTheme,
+  getDeletedThemes,
   createTheme,
   updateTheme,
   deleteTheme,
+  restoreTheme,
 } from "./requests";
 import type { Theme, ThemeCreateInput, ThemeUpdateInput } from "./types";
 
@@ -20,6 +22,13 @@ export const useThemes = (
     queryKey: ["themes", mapName],
     queryFn: () => getThemes(mapName!),
     enabled: !!mapName,
+  });
+};
+
+export const useDeletedThemes = (): UseQueryResult<Theme[]> => {
+  return useQuery({
+    queryKey: ["deletedThemes"],
+    queryFn: getDeletedThemes,
   });
 };
 
@@ -62,6 +71,20 @@ export const useDeleteTheme = (mapName: string) => {
     mutationFn: (id: number) => deleteTheme(mapName, id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["themes", mapName] });
+      void queryClient.invalidateQueries({ queryKey: ["deletedThemes"] });
+    },
+  });
+};
+
+export const useRestoreTheme = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => restoreTheme(id),
+    onSuccess: (theme) => {
+      void queryClient.invalidateQueries({ queryKey: ["deletedThemes"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["themes", theme.mapName],
+      });
     },
   });
 };

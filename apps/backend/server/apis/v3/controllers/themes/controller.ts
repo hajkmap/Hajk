@@ -57,6 +57,23 @@ class ThemesController {
     await ThemeService.deleteTheme(req.params.mapName, id);
     res.status(HttpStatusCodes.NO_CONTENT).send();
   }
+
+  async getDeletedThemes(_: Request, res: Response) {
+    const themes = await ThemeService.getDeletedThemes();
+    res.status(HttpStatusCodes.OK).json({ count: themes.length, themes });
+  }
+
+  async restoreTheme(req: Request, res: Response) {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ error: "Theme id must be a number." });
+      return;
+    }
+    const theme = await ThemeService.restoreTheme(id, req.user?.id);
+    res.status(HttpStatusCodes.OK).json(theme);
+  }
 }
 
 export default new ThemesController();
