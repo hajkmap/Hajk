@@ -115,6 +115,9 @@ visibility changes etc instead of reinventing something new.
 
 ### Common Integration Points
 
+- Plugin windows: `window.hajkPublicApi.pluginControl.show("anchor")` and
+  `.hide("anchor")` (also `props.app.pluginControl`, since `app` is the AppModel).
+  The name is the plugin type, lowercased. InfoDialog instances use `infodialog.<name>`.
 - Backend API paths:
   - Client UI consumes: `/api/v2/`
   - Admin UI consumes: `/api/v2/mapconfig/` for admin operations

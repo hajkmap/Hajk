@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Client: `window.hajkPublicApi.pluginControl` opens and closes plugin windows from the console or an embedder: `pluginControl.show("anchor")` and `pluginControl.hide("anchor")`. The name is the plugin type; InfoDialog instances use `infodialog.<name>`.
 - Client: Measurer/Sketch - Angle snapping can be repeated while Ctrl/Cmd is held. Clicking a green snap guide removes that guide and draws a new one from the clicked point. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
 - Client: Measurer/Sketch - Angle snapping guides no longer pull the cursor off drawn edges: real features (drawn or WFS) always win over the green guides, segment labels are no longer snap targets, and points where a guide crosses an edge are shown and snappable. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
 - Client: Measurer and Sketch can select real vector features (`ol/Feature`) from vector layers, including layers that are not queryable which was an annoying limitation. Vector-tile RenderFeatures are not included in this. [#1923](https://github.com/hajkmap/Hajk/issues/1923)

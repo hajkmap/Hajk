@@ -2,6 +2,7 @@ import AnchorModel from "./AnchorModel";
 import SearchModel from "./SearchModel";
 import WindowZModel from "./WindowZModel";
 import LayerControlModel from "./LayerControlModel";
+import PluginControlModel from "./PluginControlModel";
 import { decorateConfig } from "./appModel/configTranslator";
 import { createMap } from "./appModel/mapFactory";
 import { addLayers, highlight, clear } from "./appModel/layerLoader";
@@ -83,6 +84,7 @@ class AppModel {
       config.mapConfig.projections
     );
     this.globalObserver = globalObserver;
+    this.pluginControl = new PluginControlModel({ globalObserver });
     register(this.coordinateSystemLoader.getProj4());
     this.refreshMUITheme = refreshMUITheme;
     this.windowZModel.init(globalObserver);

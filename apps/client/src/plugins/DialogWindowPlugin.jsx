@@ -169,6 +169,12 @@ class DialogWindowPlugin extends React.PureComponent {
     });
   };
 
+  closeWindow = () => {
+    this.setState({
+      dialogOpen: false,
+    });
+  };
+
   renderDialog() {
     return createPortal(
       <Dialog
@@ -258,6 +264,7 @@ class DialogWindowPlugin extends React.PureComponent {
 
   render() {
     const { target } = this.opts;
+    console.log(target);
     return (
       // Don't render if "clean" query param is specified, otherwise go on
       this.props.app.config.mapConfig.map.clean !== true && (

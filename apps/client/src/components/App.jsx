@@ -564,6 +564,7 @@ class App extends React.PureComponent {
       ...window.hajkPublicApi,
       olMap: this.appModel.map,
       layerControl: this.appModel.layerControl,
+      pluginControl: this.appModel.pluginControl,
       dirtyLayers: {},
     };
 
