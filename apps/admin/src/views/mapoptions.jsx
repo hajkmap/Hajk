@@ -927,7 +927,7 @@ class MapOptions extends Component {
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Om aktivt används history.replaceState i stället för att sätta location.hash. Bakåtknappen lämnar då kartan (till exempel tillbaka till sidan användaren kom ifrån) i stället för att stega genom panoreringar, lagerväxlingar och öppnade verktyg. Kräver att liveuppdatering av hashparametrar är på."
+                  title="Om aktivt så uppdateras adressen i webbläsaren utan att varje ändring läggs till i historiken. Bakåtknappen går då tillbaka till föregående sida, till exempel den sida användaren kom ifrån. Annars backar den genom panoreringar, lagerväxlingar och öppnade verktyg. Kräver att liveuppdatering av hashparametrar är på."
                 />
               </label>
             </div>
