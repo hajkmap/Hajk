@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Admin + Client: Map setting `replaceAppStateInHash` (default off, and only used when `enableAppStateInHash` is on). When on, hash updates use `history.replaceState` so the browser Back button leaves the map instead of stepping through pans, layer toggles, and opened tools. Missing or any value other than `true` keeps assigning `location.hash`.
 - Client: Measurer/Sketch - Angle snapping can be repeated while Ctrl/Cmd is held. Clicking a green snap guide removes that guide and draws a new one from the clicked point. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
 - Client: Measurer/Sketch - Angle snapping guides no longer pull the cursor off drawn edges: real features (drawn or WFS) always win over the green guides, segment labels are no longer snap targets, and points where a guide crosses an edge are shown and snappable. [#1923](https://github.com/hajkmap/Hajk/issues/1923)
 - Client: Measurer and Sketch can select real vector features (`ol/Feature`) from vector layers, including layers that are not queryable which was an annoying limitation. Vector-tile RenderFeatures are not included in this. [#1923](https://github.com/hajkmap/Hajk/issues/1923)

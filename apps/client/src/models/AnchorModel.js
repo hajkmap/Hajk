@@ -263,7 +263,13 @@ class AnchorModel {
       // already exists in URL.
       const newHash = "#" + url.searchParams.toString();
       if (newHash !== window.location.hash) {
-        window.location.hash = newHash;
+        // Missing or any value other than true keeps the previous behavior:
+        // assigning location.hash pushes a browser history entry.
+        if (this.#app.config.mapConfig.map.replaceAppStateInHash === true) {
+          window.history.replaceState(null, "", newHash);
+        } else {
+          window.location.hash = newHash;
+        }
       }
     }
 
