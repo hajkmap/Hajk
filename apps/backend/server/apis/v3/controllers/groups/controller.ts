@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 
 import GroupsService from "../../services/groups.service.ts";
+import LayerTreeService from "../../services/layer-tree.service.ts";
 import HttpStatusCodes from "../../../../common/http-status-codes.ts";
 import { HajkError } from "../../../../common/classes.ts";
 import HajkStatusCodes from "../../../../common/hajk-status-codes.ts";
@@ -38,6 +39,27 @@ class GroupsController {
   getMapsByGroupId = asyncHandler(async (req: Request, res: Response) => {
     const maps = await GroupsService.getMapsByGroupId(req.params.id);
     res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
+  });
+
+  // POC (layer trees): which groups and maps each group and layer is placed in.
+  getPlacements = asyncHandler(async (_req: Request, res: Response) => {
+    const placements = await LayerTreeService.getPlacements();
+    res.status(HttpStatusCodes.OK).json(placements);
+  });
+
+  // POC (layer trees): the group's own content, with linked groups expanded.
+  getGroupTree = asyncHandler(async (req: Request, res: Response) => {
+    const tree = await LayerTreeService.getGroupTree(req.params.id);
+    res.status(HttpStatusCodes.OK).json(tree);
+  });
+
+  updateGroupTree = asyncHandler(async (req: Request, res: Response) => {
+    const tree = await LayerTreeService.updateGroupTree(
+      req.params.id,
+      req.body,
+      req.user?.id
+    );
+    res.status(HttpStatusCodes.OK).json(tree);
   });
 
   createGroup = asyncHandler(async (req: Request, res: Response) => {

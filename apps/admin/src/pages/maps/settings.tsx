@@ -106,6 +106,11 @@ import { useProjections } from "../../api/services";
 import useAppStateStore from "../../store/use-app-state-store";
 import { SettingsPageTabs } from "../../components/settings-page-tabs";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
+import {
+  isLayerTreeDraftFor,
+  useSaveLayerTree,
+  type LayerTreeDraft,
+} from "../../components/layer-tree-editor";
 
 const MAP_PAGE_TABS = [
   { key: "settings", labelKey: "common.settings", icon: <SettingsIcon /> },
@@ -263,6 +268,12 @@ export default function MapSettings() {
   const [menuSyncedMapName, setMenuSyncedMapName] = useState(mapName);
   const [layerSwitcherDraft, setLayerSwitcherDraft] =
     useState<LayerSwitcherDraft | null>(null);
+  // POC (layer trees): saved with the rest of the map, see handleUpdateMap.
+  const [layerTreeDraft, setLayerTreeDraft] = useState<LayerTreeDraft | null>(
+    null,
+  );
+  const { save: saveLayerTree } = useSaveLayerTree();
+  const layerTreeDirty = isLayerTreeDraftFor(layerTreeDraft, "map", mapName);
 
   const applyMenuStateFromServer = useCallback(
     (layers: MapLayer[]) => {
@@ -834,13 +845,15 @@ export default function MapSettings() {
       toolsDirty ||
       hasPendingWindowSizeInput ||
       contentDirty ||
-      layerSwitcherDirty,
+      layerSwitcherDirty ||
+      layerTreeDirty,
     [
       isDirty,
       toolsDirty,
       hasPendingWindowSizeInput,
       contentDirty,
       layerSwitcherDirty,
+      layerTreeDirty,
     ],
   );
 
@@ -1008,6 +1021,12 @@ export default function MapSettings() {
           data: payload,
         });
         setCommittedFormBaseline(formData);
+        didSave = true;
+      }
+
+      if (layerTreeDirty && layerTreeDraft) {
+        await saveLayerTree(layerTreeDraft);
+        setLayerTreeDraft(null);
         didSave = true;
       }
 
@@ -1271,6 +1290,8 @@ export default function MapSettings() {
                 handleGroupsDevelopmentActiveChange
               }
               moveZoneHostRef={mapLayersMoveZoneHostRef}
+              layerTreeDraft={layerTreeDraft}
+              onLayerTreeDraftChange={setLayerTreeDraft}
             />
           ))}
 

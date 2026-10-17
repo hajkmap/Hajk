@@ -9,6 +9,7 @@ import prisma from "../../../common/prisma.ts";
 // import { isAuthActive } from "../../../common/auth/is-auth-active.ts";
 import getAnalyticsOptionsFromDotEnv from "../utils/get-analytics-options-from-dotenv.ts";
 import { buildLegacyLayersConfigForMap } from "../utils/build-legacy-layers-config.ts";
+import { buildClientLayerTreeForMap } from "../utils/build-client-layer-tree.ts";
 import {
   buildClientMapForMap,
   buildClientProjectionsForMap,
@@ -58,9 +59,13 @@ class PublicService {
     // - mapConfig (with its own sub-properties)
     // - userSpecificMaps
 
+    // POC (layer trees): the map's layers come from its layer tree, built once
+    // for both the layer definitions and the layerswitcher.
+    const layerTree = await buildClientLayerTreeForMap(mapName);
+
     const [layersConfig, analytics, theMap, projections, tools, userSpecificMaps] =
       await Promise.all([
-        buildLegacyLayersConfigForMap(mapName),
+        buildLegacyLayersConfigForMap(mapName, layerTree.placements),
         Promise.resolve(
           ["plausible", "matomo"].includes(process.env.ANALYTICS_TYPE as string)
             ? getAnalyticsOptionsFromDotEnv()
@@ -68,7 +73,7 @@ class PublicService {
         ),
         buildClientMapForMap(mapName),
         buildClientProjectionsForMap(mapName),
-        buildClientToolsForMap(mapName),
+        buildClientToolsForMap(mapName, layerTree),
         this.#getAllMaps(),
       ]);
 

@@ -62,7 +62,7 @@ type GroupsOnMapsRow = Prisma.GroupsOnMapsGetPayload<{
   include: { group: true; metadata: true };
 }>;
 
-const INFOGROUP_DEFAULTS = {
+export const INFOGROUP_DEFAULTS = {
   infogroupvisible: false,
   infogrouptitle: "",
   infogrouptext: "",
@@ -72,7 +72,9 @@ const INFOGROUP_DEFAULTS = {
   infogroupowner: "",
 } as const;
 
-function infoGroupFieldsFromPlacement(placement: GroupsOnMapsRow) {
+export function infoGroupFieldsFromPlacement(
+  placement: Pick<GroupsOnMapsRow, "infoDocument" | "metadata">
+) {
   const metadata = placement.metadata;
   if (!placement.infoDocument && !metadata) {
     return { ...INFOGROUP_DEFAULTS };

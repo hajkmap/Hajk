@@ -121,22 +121,27 @@ model RoleOnGroup {
 }
 
 model Map {
-  id                Int             @id @default(autoincrement())
-  locked            Boolean         @default(false)
-  name              String          @unique
-  options           Json            @default("{}")
+  id                Int                 @id @default(autoincrement())
+  locked            Boolean             @default(false)
+  name              String              @unique
+  options           Json                @default("{}")
   projectionId      Int?
   createdBy         String?
-  createdDate       DateTime?       @db.Timestamptz(3) // Timestamp when created
+  createdDate       DateTime?           @db.Timestamptz(3) // Timestamp when created
   lastSavedBy       String?
-  lastSavedDate     DateTime?       @db.Timestamptz(3) // Timestamp when last saved
-  projection        Projection?     @relation("MapViewProjection", fields: [projectionId], references: [id])
-  projections       Projection[]    @relation("MapProjections")
+  lastSavedDate     DateTime?           @db.Timestamptz(3) // Timestamp when last saved
+  projection        Projection?         @relation("MapViewProjection", fields: [projectionId], references: [id])
+  projections       Projection[]        @relation("MapProjections")
   tools             ToolsOnMaps[]
   layers            LayerInstance[]
   groups            GroupsOnMaps[]
   restrictedToRoles RoleOnMap[]
   themes            Theme[]
+  /// POC (layer trees): top level of the map's layer tree.
+  treeItems         MapTreeItem[]
+  /// POC (layer trees): the map's exceptions to groups, and its draw order.
+  groupExceptions   MapGroupException[]
+  drawOrderItems    MapDrawOrderItem[]
 }
 
 /// Map theme preset for quick-access layer configurations.
@@ -259,18 +264,33 @@ model Projection {
 }
 
 model Group {
-  id                String          @id @default(cuid())
-  locked            Boolean         @default(false)
+  id                String              @id @default(cuid())
+  locked            Boolean             @default(false)
   name              String
   internalName      String?
-  type              GroupType       @default(Layer)
+  type              GroupType           @default(Layer)
   createdBy         String?
-  createdDate       DateTime?       @db.Timestamptz(3) // Timestamp when created
+  createdDate       DateTime?           @db.Timestamptz(3) // Timestamp when created
   lastSavedBy       String?
-  lastSavedDate     DateTime?       @db.Timestamptz(3) // Timestamp when last saved
+  lastSavedDate     DateTime?           @db.Timestamptz(3) // Timestamp when last saved
   layers            LayerInstance[]
   maps              GroupsOnMaps[]
   restrictedToRoles RoleOnGroup[]
+  /// POC (layer trees): the group's own content, in order.
+  items             GroupItem[]         @relation("GroupItems")
+  /// POC (layer trees): places where this group is linked into another group.
+  parentItems       GroupItem[]         @relation("GroupItemChild")
+  /// POC (layer trees): maps that have this group on their tree's top level.
+  mapTreeItems      MapTreeItem[]
+  /// POC (layer trees): what maps put in or hide in this group, and where
+  /// maps put this group in another one or hide it there.
+  mapExceptions     MapGroupException[] @relation("MapGroupExceptionGroup")
+  inMapExceptions   MapGroupException[] @relation("MapGroupExceptionChild")
+  /// POC (layer trees): what this group puts in the groups linked in its tree,
+  /// what other groups put in this one, and where this group is put that way.
+  nestedItems       GroupNestedItem[]   @relation("GroupNestedItemOwner")
+  nestedIn          GroupNestedItem[]   @relation("GroupNestedItemGroup")
+  nestedAs          GroupNestedItem[]   @relation("GroupNestedItemChild")
 }
 
 model Service {
@@ -379,6 +399,12 @@ model DisplayLayer {
   restrictedToRoles           RoleOnDisplayLayer[]
   instances                   LayerInstance[]
   options                     Json                 @default("{}")
+  /// POC (layer trees): groups and map trees this layer is placed in.
+  groupItems                  GroupItem[]
+  groupNestedItems            GroupNestedItem[]
+  mapTreeItems                MapTreeItem[]
+  mapGroupExceptions          MapGroupException[]
+  mapDrawOrderItems           MapDrawOrderItem[]
 
   @@index([serviceId])
 }
@@ -479,13 +505,110 @@ model GroupsOnMaps {
   name                String // It has a title, shown to the user
   toggled             Boolean
   expanded            Boolean
-  exclusive         Boolean   @default(false)
+  exclusive           Boolean   @default(false)
   infoDocument        Boolean   @default(false)
   metadataId          String?
   metadata            Metadata? @relation(fields: [metadataId], references: [id])
   index               Int       @default(0)
   layerVisibleAtStart Boolean   @default(false)
   layerInfoBox        String?
+}
+
+/// POC (layer trees): a group's content in order. Each row is either a layer
+/// or another group, linked by reference so changes to that group show up
+/// everywhere it is used. A group with child groups is a layer tree.
+model GroupItem {
+  id             String        @id @default(cuid())
+  groupId        String
+  index          Int           @default(0)
+  displayLayerId String?
+  childGroupId   String?
+  group          Group         @relation("GroupItems", fields: [groupId], references: [id], onDelete: Cascade)
+  displayLayer   DisplayLayer? @relation(fields: [displayLayerId], references: [id], onDelete: Cascade)
+  childGroup     Group?        @relation("GroupItemChild", fields: [childGroupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@index([childGroupId])
+}
+
+/// POC (layer trees): part of a group's own tree: a layer or a group it puts
+/// inside a group linked in its tree. The linked group itself stays as it is;
+/// the placement shows wherever the owner is used.
+model GroupNestedItem {
+  id             String        @id @default(cuid())
+  /// The group whose tree this belongs to.
+  ownerGroupId   String
+  /// The linked group the item is put in.
+  groupId        String
+  index          Int           @default(0)
+  displayLayerId String?
+  childGroupId   String?
+  /// The item it comes after ("layer:<id>" or "group:<id>"); null puts it
+  /// first. If that item is gone, it goes last.
+  afterKey       String?
+  owner          Group         @relation("GroupNestedItemOwner", fields: [ownerGroupId], references: [id], onDelete: Cascade)
+  group          Group         @relation("GroupNestedItemGroup", fields: [groupId], references: [id], onDelete: Cascade)
+  displayLayer   DisplayLayer? @relation(fields: [displayLayerId], references: [id], onDelete: Cascade)
+  childGroup     Group?        @relation("GroupNestedItemChild", fields: [childGroupId], references: [id], onDelete: Cascade)
+
+  @@index([ownerGroupId])
+  @@index([groupId])
+}
+
+/// POC (layer trees): the top level of a map's layer tree, in order. Each row
+/// is either a layer or a linked group. Kept apart from the layerswitcher tool.
+model MapTreeItem {
+  id             String        @id @default(cuid())
+  mapName        String
+  index          Int           @default(0)
+  displayLayerId String?
+  groupId        String?
+  map            Map           @relation(fields: [mapName], references: [name], onDelete: Cascade, onUpdate: Cascade)
+  displayLayer   DisplayLayer? @relation(fields: [displayLayerId], references: [id], onDelete: Cascade)
+  group          Group?        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([mapName])
+}
+
+/// POC (layer trees): a map's own exception to a group it shows. ADD puts a
+/// layer or a group in the group on this map only; HIDE leaves out something
+/// the group shows on this map. The group itself stays as it is.
+model MapGroupException {
+  id             String                @id @default(cuid())
+  mapName        String
+  groupId        String
+  kind           MapGroupExceptionKind
+  /// Order the exceptions are applied in (an ADD can come after another ADD).
+  index          Int                   @default(0)
+  displayLayerId String?
+  childGroupId   String?
+  /// ADD: the item it comes after ("layer:<id>" or "group:<id>"); null puts
+  /// it first. If that item is gone, it goes last.
+  afterKey       String?
+  map            Map                   @relation(fields: [mapName], references: [name], onDelete: Cascade, onUpdate: Cascade)
+  group          Group                 @relation("MapGroupExceptionGroup", fields: [groupId], references: [id], onDelete: Cascade)
+  displayLayer   DisplayLayer?         @relation(fields: [displayLayerId], references: [id], onDelete: Cascade)
+  childGroup     Group?                @relation("MapGroupExceptionChild", fields: [childGroupId], references: [id], onDelete: Cascade)
+
+  @@index([mapName])
+  @@index([groupId])
+}
+
+enum MapGroupExceptionKind {
+  ADD
+  HIDE
+}
+
+/// POC (layer trees): a map's draw order, top first, set apart from its tree.
+model MapDrawOrderItem {
+  id             String       @id @default(cuid())
+  mapName        String
+  displayLayerId String
+  index          Int
+  map            Map          @relation(fields: [mapName], references: [name], onDelete: Cascade, onUpdate: Cascade)
+  displayLayer   DisplayLayer @relation(fields: [displayLayerId], references: [id], onDelete: Cascade)
+
+  @@unique([mapName, displayLayerId])
 }
 
 enum ServiceType {

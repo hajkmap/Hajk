@@ -10,9 +10,12 @@ import {
 export default express
   .Router()
   .get("/", controller.getGroups)
+  .get("/placements", controller.getPlacements)
   .get("/:id", controller.getGroupById)
   .get("/:id/layers", controller.getLayersByGroupId)
   .get("/:id/maps", controller.getMapsByGroupId)
+  .get("/:id/tree", controller.getGroupTree)
+  .put("/:id/tree", controller.updateGroupTree)
   .post("/", validatePayload(GroupCreateSchema), controller.createGroup)
   .patch(
     "/:id/layers",

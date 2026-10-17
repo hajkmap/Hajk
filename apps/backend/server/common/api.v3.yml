@@ -409,6 +409,63 @@ paths:
           description: Invalid request
         404:
           description: Map not found
+  /maps/{mapName}/layer-tree:
+    get:
+      tags:
+        - Admin only
+      summary: "POC: the map's layer tree, apart from the layerswitcher tool"
+      parameters:
+        - name: mapName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Top-level linked groups, each expanded from its own content with the map's exceptions merged in (items added or hidden on this map), plus the background layers and the draw order
+        404:
+          description: Map not found
+    put:
+      tags:
+        - Admin only
+      summary: "POC: replaces the top level of the map's layer tree"
+      parameters:
+        - name: mapName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Ordered top-level groups (layers go in groups, since the client only shows layers inside groups). Groups are linked; their content is edited on the group. Optional, each written only when sent - exceptions (add a layer or a group to a group on this map only, or hide one of its own items), background and drawOrder.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                    properties:
+                      type:
+                        type: string
+                        enum: [layer, group]
+                      id:
+                        type: string
+                    required:
+                      - type
+                      - id
+              required:
+                - items
+      responses:
+        200:
+          description: The saved tree
+        400:
+          description: Invalid request
+        404:
+          description: Map not found
   /maps/{mapName}/groups:
     put:
       tags:
@@ -479,6 +536,14 @@ paths:
           description: Return the list of groups
         500:
           description: Internal server error
+  /groups/placements:
+    get:
+      tags:
+        - Admin only
+      summary: "POC: for every group and layer, the groups and maps it is placed in"
+      responses:
+        200:
+          description: Placements of groups and layers, keyed by id
   /groups/{groupId}:
     get:
       tags:
@@ -525,6 +590,100 @@ paths:
       responses:
         200:
           description: Return the layers that belong to the group
+        404:
+          description: Requested group was not found
+  /groups/{groupId}/tree:
+    get:
+      tags:
+        - Admin only
+      summary: "POC: the group's content as a tree, with linked groups expanded"
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: The group with its layers and linked child groups
+        404:
+          description: Requested group was not found
+    put:
+      tags:
+        - Admin only
+      summary: "POC: replaces the group's tree"
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Ordered items. Groups are only linked and sent without items; their content is edited on the group itself. A group sent with new set to true, a name and its items is created on save; its id is then a temporary id. Optional nested lists what the group (ownerId - the group itself or a new group's temporary id) puts inside the groups linked in its tree (groupId), each after the item named by after (null puts it first), without changing those groups. A placement can be a group made in the editor - new set to true, a name and its items - which is created on save.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                    properties:
+                      type:
+                        type: string
+                        enum: [layer, group]
+                      id:
+                        type: string
+                    required:
+                      - type
+                      - id
+                nested:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      ownerId:
+                        type: string
+                      groupId:
+                        type: string
+                      type:
+                        type: string
+                        enum: [layer, group]
+                      id:
+                        type: string
+                      after:
+                        type: object
+                        nullable: true
+                        properties:
+                          type:
+                            type: string
+                            enum: [layer, group]
+                          id:
+                            type: string
+                      new:
+                        type: boolean
+                      name:
+                        type: string
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: true
+                    required:
+                      - ownerId
+                      - groupId
+                      - type
+                      - id
+              required:
+                - items
+      responses:
+        200:
+          description: The saved tree
+        400:
+          description: Invalid request, for example a group placed inside itself, a linked group sent with items, or a nested item put in a group outside the owner's tree
         404:
           description: Requested group was not found
   /services:

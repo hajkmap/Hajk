@@ -50,6 +50,11 @@ import {
   applyGroupFormValidationErrors,
 } from "./utils/group-errors";
 import UnsavedChangesGuard from "../../components/unsaved-changes-guard";
+import LayerTreeEditor, {
+  isLayerTreeDraftFor,
+  useSaveLayerTree,
+  type LayerTreeDraft,
+} from "../../components/layer-tree-editor";
 
 const EMPTY_MAPS: Map[] = [];
 const EMPTY_ROLES: Role[] = [];
@@ -72,6 +77,12 @@ function GroupSettings() {
   const { palette } = useTheme();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
+  const [layerTreeDraft, setLayerTreeDraft] = useState<LayerTreeDraft | null>(
+    null,
+  );
+  const { save: saveLayerTree, isSaving: isSavingLayerTree } =
+    useSaveLayerTree();
+  const layerTreeDirty = isLayerTreeDraftFor(layerTreeDraft, "group", groupId);
 
   const {
     register,
@@ -112,9 +123,37 @@ function GroupSettings() {
     clearErrors();
   }, [group, reset, clearErrors]);
 
-  const handleExternalSubmit = () => {
-    if (formRef.current) {
-      formRef.current.requestSubmit();
+  /** Saves the layer tree when it has changes; tells why when it can't. */
+  const saveLayerTreeIfDirty = async () => {
+    if (!layerTreeDirty || !layerTreeDraft) return true;
+    try {
+      await saveLayerTree(layerTreeDraft);
+      setLayerTreeDraft(null);
+      return true;
+    } catch (error) {
+      toast.error(
+        `${t("layerTree.saveFailed")}: ${error instanceof Error ? error.message : ""}`,
+        {
+          position: "bottom-left",
+          theme: palette.mode,
+          hideProgressBar: true,
+        },
+      );
+      return false;
+    }
+  };
+
+  // One save button for the page: the form saves the layer tree after the
+  // group's fields, and without field changes only the tree is saved.
+  const handleExternalSubmit = async () => {
+    if (isDirty) {
+      formRef.current?.requestSubmit();
+    } else if (await saveLayerTreeIfDirty()) {
+      toast.success(t("groups.updateGroupSuccess", { name: group?.name }), {
+        position: "bottom-left",
+        theme: palette.mode,
+        hideProgressBar: true,
+      });
     }
   };
 
@@ -151,6 +190,7 @@ function GroupSettings() {
         },
         { keepDirty: false },
       );
+      await saveLayerTreeIfDirty();
     } catch (error) {
       console.error("Failed to update group:", error);
       applyGroupFormValidationErrors(error, setError);
@@ -229,14 +269,14 @@ function GroupSettings() {
       }
     >
       <FormActionPanel
-        updateStatus={updateStatus}
+        updateStatus={isSavingLayerTree ? "pending" : updateStatus}
         onUpdate={handleExternalSubmit}
         saveButtonText="Spara"
         createdBy={group?.createdBy}
         createdDate={group?.createdDate}
         lastSavedBy={group?.lastSavedBy}
         lastSavedDate={group?.lastSavedDate}
-        isDirty={isDirty}
+        isDirty={isDirty || layerTreeDirty}
         warning={
           <Box sx={{ mt: 1 }}>
             <Alert severity="warning">{t("groups.deleteGroupWarning")}</Alert>
@@ -316,6 +356,16 @@ function GroupSettings() {
               </FormFieldRow>
             </FormFieldGrid>
           </FormPanel>
+          {group.type !== GroupType.SEARCH ? (
+            <FormPanel title={t("layerTree.title")}>
+              <LayerTreeEditor
+                mode="group"
+                ownerId={group.id}
+                draft={layerTreeDraft}
+                onDraftChange={setLayerTreeDraft}
+              />
+            </FormPanel>
+          ) : null}
           <FormPanel title={t("groups.rolesAndLocking")}>
             <FormFieldGrid>
               <FormFieldRow>
@@ -477,7 +527,7 @@ function GroupSettings() {
           disabled={isDeletingGroup}
         />
       </DialogWrapper>
-      <UnsavedChangesGuard when={isDirty} />
+      <UnsavedChangesGuard when={isDirty || layerTreeDirty} />
     </Page>
   );
 }

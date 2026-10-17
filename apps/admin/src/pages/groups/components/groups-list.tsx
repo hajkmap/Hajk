@@ -47,6 +47,11 @@ import {
 import {
   GroupCompositionIconsCell,
 } from "../../../components/group-composition-summary";
+import {
+  LayerTreeItemTooltip,
+  useGroupContents,
+  useItemDetails,
+} from "../../../components/layer-tree-editor";
 
 interface GroupCreateForm {
   name: string;
@@ -72,6 +77,8 @@ export default function GroupsList({
   const navigate = useNavigate();
   const { data: groups, isLoading } = useGroups();
   const { data: layers = [] } = useLayers();
+  const getDetails = useItemDetails();
+  const getContents = useGroupContents();
   const { mutateAsync: createGroup, isPending: isCreatingGroup } =
     useCreateGroup();
   const { mutateAsync: removeGroup, isPending: isDeletingGroup } =
@@ -410,6 +417,15 @@ export default function GroupsList({
                   field: "name",
                   headerName: t("common.name"),
                   flex: 0.4,
+                  // POC (layer trees): point at a group to see where it belongs.
+                  renderCell: (params: GridRenderCellParams<Group>) => (
+                    <LayerTreeItemTooltip
+                      name={params.row.name}
+                      details={getDetails("group", params.row.id)}
+                    >
+                      <span>{params.row.name}</span>
+                    </LayerTreeItemTooltip>
+                  ),
                 },
                 {
                   field: "type",
@@ -431,12 +447,17 @@ export default function GroupsList({
                   filterable: false,
                   align: "left",
                   headerAlign: "left",
-                  renderCell: (params: GridRenderCellParams<Group>) => (
-                    <GroupCompositionIconsCell
-                      layerCount={params.row.layerCount}
-                      nestedGroupCount={params.row.nestedGroupCount}
-                    />
-                  ),
+                  // POC (layer trees): counted from the layer tree model, which
+                  // the layer tree editor saves to.
+                  renderCell: (params: GridRenderCellParams<Group>) => {
+                    const contents = getContents(params.row.id);
+                    return (
+                      <GroupCompositionIconsCell
+                        layerCount={contents.layers}
+                        nestedGroupCount={contents.groups}
+                      />
+                    );
+                  },
                 },
                 {
                   field: "internalName",

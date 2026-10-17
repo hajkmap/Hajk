@@ -1,9 +1,13 @@
 import { useEffect, useState, type RefObject } from "react";
 import { Box } from "@mui/material";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import LayersIcon from "@mui/icons-material/Layers";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 
 import { SettingsPageTabs } from "../../../components/settings-page-tabs";
+import LayerTreeEditor, {
+  type LayerTreeDraft,
+} from "../../../components/layer-tree-editor";
 import type { ToolOnMap } from "../../../api/maps";
 import type { Tool } from "../../../api/tools";
 import type { LayerSwitcherDraft } from "../../groups-development/types";
@@ -22,6 +26,11 @@ const CONTENT_SUB_TABS = [
     key: "groupsDevelopment" as const,
     labelKey: "maps.contentTab.placement",
     icon: <TouchAppIcon />,
+  },
+  {
+    key: "layerTree" as const,
+    labelKey: "layerTree.tab",
+    icon: <AccountTreeIcon />,
   },
 ];
 
@@ -42,6 +51,9 @@ interface MapContentPanelProps {
   onGroupsDevelopmentActiveChange?: (active: boolean) => void;
   /** Host element for the map-layers move zone (FormActionPanel sidebar). */
   moveZoneHostRef?: RefObject<HTMLDivElement | null>;
+  /** POC (layer trees): unsaved edits of the map's layer tree. */
+  layerTreeDraft?: LayerTreeDraft | null;
+  onLayerTreeDraftChange?: (draft: LayerTreeDraft | null) => void;
 }
 
 export default function MapContentPanel({
@@ -57,9 +69,11 @@ export default function MapContentPanel({
   menuSynced = false,
   onGroupsDevelopmentActiveChange,
   moveZoneHostRef,
+  layerTreeDraft = null,
+  onLayerTreeDraftChange,
 }: MapContentPanelProps) {
   const [contentSubTab, setContentSubTab] = useState<
-    "layers" | "groupsDevelopment"
+    "layers" | "groupsDevelopment" | "layerTree"
   >("layers");
   const [moveZoneHostEl, setMoveZoneHostEl] = useState<HTMLElement | null>(
     null,
@@ -125,6 +139,17 @@ export default function MapContentPanel({
           moveZoneHostEl={showMapLayersEditor ? moveZoneHostEl : null}
         />
       </Box>
+
+      {contentSubTab === "layerTree" && mapName && onLayerTreeDraftChange ? (
+        <Box sx={{ mt: 2 }}>
+          <LayerTreeEditor
+            mode="map"
+            ownerId={mapName}
+            draft={layerTreeDraft}
+            onDraftChange={onLayerTreeDraftChange}
+          />
+        </Box>
+      ) : null}
     </Box>
   );
 }

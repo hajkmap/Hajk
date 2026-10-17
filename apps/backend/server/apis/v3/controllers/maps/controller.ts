@@ -1,5 +1,6 @@
 import HttpStatusCodes from "../../../../common/http-status-codes.ts";
 import MapService from "../../services/map.service.ts";
+import LayerTreeService from "../../services/layer-tree.service.ts";
 
 import type { Request, Response } from "express";
 
@@ -98,6 +99,21 @@ class MapsController {
       req.user?.id,
     );
     res.status(HttpStatusCodes.NO_CONTENT).send();
+  }
+
+  // POC (layer trees): the map's own tree, apart from the layerswitcher tool.
+  async getMapLayerTree(req: Request, res: Response) {
+    const tree = await LayerTreeService.getMapTree(req.params.mapName);
+    res.status(HttpStatusCodes.OK).json(tree);
+  }
+
+  async updateMapLayerTree(req: Request, res: Response) {
+    const tree = await LayerTreeService.updateMapTree(
+      req.params.mapName,
+      req.body,
+      req.user?.id,
+    );
+    res.status(HttpStatusCodes.OK).json(tree);
   }
 
   async updateMapGroups(req: Request, res: Response) {

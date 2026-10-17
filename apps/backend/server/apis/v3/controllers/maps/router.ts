@@ -32,6 +32,8 @@ export default express
   .get("/:mapName/layers", MapsController.getLayersForMap)
   .get("/:mapName/content", MapsController.getMapContent)
   .get("/:mapName/layerswitcher", MapsController.getMapLayerSwitcher)
+  .get("/:mapName/layer-tree", MapsController.getMapLayerTree)
+  .put("/:mapName/layer-tree", MapsController.updateMapLayerTree)
   .get("/:mapName/projections", MapsController.getProjectionsForMap)
   .get("/:mapName/tools", MapsController.getToolsForMap)
   .put("/:mapName/tools", MapsController.updateMapTools)

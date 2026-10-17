@@ -1,0 +1,480 @@
+import {
+  Tree,
+  type DropOptions,
+  type NodeModel,
+} from "@minoru/react-dnd-treeview";
+import { Alert, Box, Paper, Typography, useTheme } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
+
+import { getGroupTree } from "../../api/layer-tree";
+import LayerTreeCatalog from "./layer-tree-catalog";
+import LayerTreeCatalogColumn from "./layer-tree-catalog-column";
+import {
+  asPlaced,
+  countLayers,
+  createAddedLayerNode,
+  createNewGroupNode,
+  descendantIds,
+  hiddenGroupsAbove,
+  insertNodes,
+  isMovable,
+  LAYER_TREE_CATALOG_DRAG_TYPE,
+  LAYER_TREE_ROOT_ID,
+  placedFrom,
+  placeProblem,
+  removeNode,
+  toFlatNodes,
+  toggleHidden,
+  type LayerTreeCatalogItem,
+  type LayerTreeEditorMode,
+  type LayerTreeFlatNode,
+  type LayerTreeNodeData,
+} from "./layer-tree-model";
+import LayerTreeNewGroupDialog from "./layer-tree-new-group-dialog";
+import LayerTreeRow from "./layer-tree-row";
+import LayerTreeToolbar from "./layer-tree-toolbar";
+import { useItemDetails, type LayerTreeItemDetails } from "./use-item-details";
+import { useOpenGroups } from "./use-open-groups";
+
+interface LayerTreePanelProps {
+  mode: LayerTreeEditorMode;
+  /** The group being edited, in group mode. */
+  rootGroupId?: string;
+  nodes: LayerTreeFlatNode[];
+  /** The group or map shown; another one starts with the default open groups. */
+  ownerKey: string;
+  isSaving: boolean;
+  onChange: (nodes: LayerTreeFlatNode[]) => void;
+}
+
+/** POC (layer trees): the catalog and the tree, for a group or a map. */
+export default function LayerTreePanel({
+  mode,
+  rootGroupId,
+  nodes,
+  ownerKey,
+  isSaving,
+  onChange,
+}: LayerTreePanelProps) {
+  const { t } = useTranslation();
+  const { palette } = useTheme();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const getDetails = useItemDetails();
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  // Where the "new group" dialog adds the group; null while it's closed.
+  const [newGroupParent, setNewGroupParent] = useState<string | null>(null);
+
+  // Inserting a catalog group waits for its content, so it reads the nodes
+  // as they are when the content arrives.
+  const nodesRef = useRef(nodes);
+  useEffect(() => {
+    nodesRef.current = nodes;
+  }, [nodes]);
+
+  const { expandableIds, openIds, setOpen, openNodes } = useOpenGroups(
+    ownerKey,
+    mode,
+    nodes,
+  );
+  const allExpanded =
+    expandableIds.length > 0 &&
+    expandableIds.every((id) => openIds.includes(id));
+
+  // Searching shows the matches and the groups they are in, opened. Dragging
+  // is off meanwhile, as hidden rows would throw off the drop positions.
+  const term = search.trim().toLowerCase();
+  const found = useMemo(() => {
+    if (!term) return null;
+    const byId = new Map(nodes.map((node) => [node.id, node]));
+    const visible = new Set<string>();
+    const ancestors = new Set<string>();
+    for (const node of nodes) {
+      if (!node.text.toLowerCase().includes(term)) continue;
+      visible.add(node.id);
+      for (
+        let parent = byId.get(node.parent);
+        parent;
+        parent = byId.get(parent.parent)
+      ) {
+        visible.add(parent.id);
+        ancestors.add(parent.id);
+      }
+    }
+    return { visible, ancestors: [...ancestors] };
+  }, [nodes, term]);
+  const shownOpenIds = useMemo(
+    () => (found ? [...new Set([...openIds, ...found.ancestors])] : openIds),
+    [found, openIds],
+  );
+  const canEdit = !isSaving && !found;
+
+  const layerCounts = useMemo(() => countLayers(nodes), [nodes]);
+  const topLevelKeys = useMemo(
+    () =>
+      new Set(
+        nodes
+          .filter((node) => node.parent === LAYER_TREE_ROOT_ID)
+          .map((node) => `${node.data.kind}:${node.data.sourceId}`),
+      ),
+    [nodes],
+  );
+
+  const commit = (next: LayerTreeFlatNode[]) => {
+    nodesRef.current = next;
+    setError(null);
+    onChange(next);
+  };
+
+  const insertItem = async (
+    item: LayerTreeCatalogItem,
+    parentId: string,
+    index?: number,
+  ) => {
+    let subtree: LayerTreeFlatNode[];
+    if (item.kind === "layer") {
+      // In a map, a layer dropped in a group is an addition on this map; in a
+      // group, one dropped in a linked group is this tree's own there.
+      subtree =
+        mode === "map"
+          ? [createAddedLayerNode(item, parentId)]
+          : toFlatNodes(
+              [{ type: "layer", id: item.id, name: item.name }],
+              parentId,
+              mode,
+            ).map((node) =>
+              asPlaced(node, nodesRef.current, mode, rootGroupId),
+            );
+    } else {
+      try {
+        const group = await queryClient.fetchQuery({
+          queryKey: ["layerTree", "group", item.id],
+          queryFn: () => getGroupTree(item.id),
+        });
+        const [root, ...content] = toFlatNodes([group], parentId, mode);
+        // Dropped in a group, it is the map's or this tree's own there.
+        subtree = [
+          asPlaced(root, nodesRef.current, mode, rootGroupId),
+          ...content,
+        ];
+      } catch (fetchError) {
+        setError(
+          fetchError instanceof Error
+            ? fetchError.message
+            : t("layerTree.loadFailed"),
+        );
+        return;
+      }
+    }
+
+    const current = nodesRef.current;
+    const problem = placeProblem({
+      nodes: current,
+      mode,
+      rootGroupId,
+      parentId,
+      kind: item.kind,
+      sourceId: item.id,
+      groupIds: subtree
+        .filter((node) => node.data.kind === "group")
+        .map((node) => node.data.sourceId),
+    });
+    if (problem) {
+      toast.warning(t(`layerTree.problem.${problem}`, { name: item.name }), {
+        position: "bottom-left",
+        theme: palette.mode,
+        hideProgressBar: true,
+      });
+      return;
+    }
+
+    commit(insertNodes(current, subtree, parentId, index));
+    // Show what came with a dropped group, and where a layer was added.
+    openNodes([
+      ...(parentId === LAYER_TREE_ROOT_ID ? [] : [parentId]),
+      ...subtree
+        .filter(
+          (node) =>
+            mode === "group" &&
+            node.data.kind === "group" &&
+            subtree.some((child) => child.parent === node.id),
+        )
+        .map((node) => node.id),
+    ]);
+  };
+
+  const addNewGroup = (name: string) => {
+    const parentId = newGroupParent ?? LAYER_TREE_ROOT_ID;
+    setNewGroupParent(null);
+    commit(
+      insertNodes(
+        nodesRef.current,
+        [
+          asPlaced(
+            createNewGroupNode(name, parentId),
+            nodesRef.current,
+            mode,
+            rootGroupId,
+          ),
+        ],
+        parentId,
+      ),
+    );
+    openNodes([parentId]);
+  };
+
+  // Linked groups' own content is locked; it is edited on each group. What
+  // this tree (or map) put in them is its own.
+  const byId = useMemo(
+    () => new Map(nodes.map((node) => [node.id, node])),
+    [nodes],
+  );
+  const movable = (node: LayerTreeFlatNode) =>
+    isMovable(node, byId.get(node.parent), mode, rootGroupId);
+  // In a map, everything under a hidden group is hidden with it.
+  const hiddenWith = useMemo(() => hiddenGroupsAbove(nodes), [nodes]);
+
+  const canDrop = (
+    _tree: NodeModel<LayerTreeNodeData>[],
+    options: DropOptions<LayerTreeNodeData>,
+  ) => {
+    if (!canEdit) return false;
+    const parentId = String(options.dropTargetId);
+    if (options.monitor.getItemType() === LAYER_TREE_CATALOG_DRAG_TYPE) {
+      const item = options.monitor.getItem() as LayerTreeCatalogItem;
+      return (
+        placeProblem({
+          nodes,
+          mode,
+          rootGroupId,
+          parentId,
+          kind: item.kind,
+          sourceId: item.id,
+        }) === null
+      );
+    }
+    const moving = nodes.find((node) => node.id === options.dragSourceId);
+    return (
+      moving !== undefined &&
+      movable(moving) &&
+      placeProblem({
+        nodes,
+        mode,
+        rootGroupId,
+        parentId,
+        kind: moving.data.kind,
+        sourceId: moving.data.sourceId,
+        movingId: moving.id,
+      }) === null
+    );
+  };
+
+  const handleDrop = (
+    newTree: NodeModel<LayerTreeNodeData>[],
+    options: DropOptions<LayerTreeNodeData>,
+  ) => {
+    if (options.monitor.getItemType() === LAYER_TREE_CATALOG_DRAG_TYPE) {
+      void insertItem(
+        options.monitor.getItem() as LayerTreeCatalogItem,
+        String(options.dropTargetId),
+        options.relativeIndex,
+      );
+      return;
+    }
+    // What was moved, and what it holds that is this tree's (or map's) own,
+    // is placed anew where it now lies: in a group an addition, on the top
+    // level a plain placement.
+    const moved = String(options.dragSourceId);
+    const own = new Set(
+      [moved, ...descendantIds(nodes, moved)].filter((id) => {
+        const node = byId.get(id);
+        return node !== undefined && movable(node);
+      }),
+    );
+    const next = newTree as LayerTreeFlatNode[];
+    commit(
+      next.map((node) =>
+        own.has(node.id) ? asPlaced(node, next, mode, rootGroupId) : node,
+      ),
+    );
+    // Show where it went, as when something is dropped from the catalog.
+    const target = String(options.dropTargetId);
+    if (target !== LAYER_TREE_ROOT_ID) openNodes([target]);
+  };
+
+  return (
+    <>
+      {/* Catalog on the left and tree on the right, as in Lagerordning. */}
+      <Box
+        sx={{
+          display: "grid",
+          gap: { xs: 2, lg: 3 },
+          gridTemplateColumns: {
+            xs: "1fr",
+            lg: "minmax(220px, 280px) minmax(0, 1fr)",
+          },
+          alignItems: "start",
+        }}
+      >
+        <LayerTreeCatalogColumn>
+          <LayerTreeCatalog
+            excludeGroupId={rootGroupId}
+            placedKeys={topLevelKeys}
+            // In a map a layer goes in a group, so it must be dragged there.
+            canAdd={(item) => mode === "group" || item.kind === "group"}
+            disabled={isSaving}
+            onAdd={(item) => void insertItem(item, LAYER_TREE_ROOT_ID)}
+          />
+        </LayerTreeCatalogColumn>
+        <Box>
+          {error ? (
+            <Alert
+              severity="error"
+              onClose={() => setError(null)}
+              sx={{ mb: 1 }}
+            >
+              {error}
+            </Alert>
+          ) : null}
+          <LayerTreeToolbar
+            onNewGroup={
+              mode === "group"
+                ? () => setNewGroupParent(LAYER_TREE_ROOT_ID)
+                : undefined
+            }
+            search={search}
+            onSearchChange={setSearch}
+            allExpanded={allExpanded}
+            canExpand={expandableIds.length > 0 && !found}
+            onToggleAll={() => setOpen(allExpanded ? [] : expandableIds)}
+            disabled={isSaving}
+          />
+          <Paper
+            variant="outlined"
+            sx={{
+              position: "relative",
+              "& ul": { listStyle: "none", m: 0, p: 0 },
+              "& .layer-tree-root": { minHeight: 160, pb: 3 },
+              "& .layer-tree-drop-target": { bgcolor: "action.hover" },
+            }}
+          >
+            {nodes.length === 0 || found?.visible.size === 0 ? (
+              <Typography
+                color="text.secondary"
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "grid",
+                  placeItems: "center",
+                  pointerEvents: "none",
+                }}
+              >
+                {t(found ? "layerTree.noMatches" : "layerTree.empty")}
+              </Typography>
+            ) : null}
+            <Tree<LayerTreeNodeData>
+              tree={nodes}
+              rootId={LAYER_TREE_ROOT_ID}
+              extraAcceptTypes={[LAYER_TREE_CATALOG_DRAG_TYPE]}
+              initialOpen={shownOpenIds}
+              onChangeOpen={(ids) => setOpen(ids.map(String))}
+              sort={false}
+              insertDroppableFirst={false}
+              enableAnimateExpand
+              dropTargetOffset={8}
+              canDrag={(node) =>
+                canEdit &&
+                node !== undefined &&
+                movable(node as LayerTreeFlatNode)
+              }
+              canDrop={canDrop}
+              onDrop={handleDrop}
+              classes={{
+                root: "layer-tree-root",
+                dropTarget: "layer-tree-drop-target",
+              }}
+              placeholderRender={(_, { depth }) => (
+                <Box
+                  sx={{
+                    height: 2,
+                    ml: `${depth * 24}px`,
+                    bgcolor: "primary.main",
+                    borderRadius: 1,
+                  }}
+                />
+              )}
+              render={(
+                node,
+                { depth, isOpen, hasChild, isDragging, onToggle },
+              ) => {
+                const flatNode = node as LayerTreeFlatNode;
+                const { kind, sourceId, isNew, added } = flatNode.data;
+                const topLevel = flatNode.parent === LAYER_TREE_ROOT_ID;
+                const editable = movable(flatNode);
+                const details: LayerTreeItemDetails = isNew
+                  ? { lines: [t("layerTree.newGroupHint")], context: "" }
+                  : getDetails(kind, sourceId);
+                return (
+                  <Box
+                    sx={{
+                      display:
+                        found && !found.visible.has(flatNode.id)
+                          ? "none"
+                          : "block",
+                    }}
+                  >
+                    <LayerTreeRow
+                      node={flatNode}
+                      details={details}
+                      depth={depth}
+                      isOpen={isOpen}
+                      hasChild={hasChild}
+                      isDragging={isDragging}
+                      fixed={!editable || !canEdit}
+                      locked={kind === "group" && !isNew && editable}
+                      from={editable ? undefined : placedFrom(flatNode, nodes)}
+                      misplaced={mode === "map" && kind === "layer" && topLevel}
+                      layerCount={layerCounts.get(flatNode.id)}
+                      onToggle={onToggle}
+                      onRemove={
+                        editable && !isSaving
+                          ? () => commit(removeNode(nodes, flatNode.id))
+                          : undefined
+                      }
+                      onEditGroup={
+                        kind === "group" && !isNew
+                          ? () => void navigate(`/groups/${sourceId}`)
+                          : undefined
+                      }
+                      onNewGroup={
+                        mode === "group" && flatNode.droppable && !isSaving
+                          ? () => setNewGroupParent(flatNode.id)
+                          : undefined
+                      }
+                      onToggleHidden={
+                        mode === "map" && !topLevel && !added && !isSaving
+                          ? () => commit(toggleHidden(nodes, flatNode.id))
+                          : undefined
+                      }
+                      hiddenWith={hiddenWith.get(flatNode.id)}
+                    />
+                  </Box>
+                );
+              }}
+            />
+          </Paper>
+        </Box>
+      </Box>
+      <LayerTreeNewGroupDialog
+        open={newGroupParent !== null}
+        onClose={() => setNewGroupParent(null)}
+        onAdd={addNewGroup}
+      />
+    </>
+  );
+}

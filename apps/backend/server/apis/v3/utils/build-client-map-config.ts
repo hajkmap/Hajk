@@ -2,10 +2,8 @@ import type { Prisma } from "@prisma/client";
 
 import prisma from "../../../common/prisma.ts";
 import { DEFAULT_MAP_OPTIONS } from "../../../common/defaults.ts";
-import {
-  buildLayerSwitcherBaselayersForMap,
-  buildLayerSwitcherGroupsForMap,
-} from "./build-layer-switcher-groups-for-map.ts";
+import type { ClientLayerTree } from "./build-client-layer-tree.ts";
+import { buildLayerSwitcherBaselayersForMap } from "./build-layer-switcher-groups-for-map.ts";
 import { legacyTargetForBackendZone } from "./tool-placement.ts";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -259,14 +257,21 @@ export async function buildClientMapForMap(mapName: string) {
   return deepMerge(DEFAULT_MAP_OPTIONS, translated);
 }
 
-export async function buildClientToolsForMap(mapName: string) {
-  const [toolsOnMap, groups, baselayers, themes] = await Promise.all([
+/**
+ * @param layerTree POC (layer trees): the map's layer tree in the client's
+ * layerswitcher format; it replaces the groups built from layer instances.
+ */
+export async function buildClientToolsForMap(
+  mapName: string,
+  layerTree: ClientLayerTree
+) {
+  const groups = layerTree.groups;
+  const [toolsOnMap, baselayers, themes] = await Promise.all([
     prisma.toolsOnMaps.findMany({
       where: { mapName, active: true },
       include: { tool: true },
       orderBy: { index: "asc" },
     }),
-    buildLayerSwitcherGroupsForMap(mapName),
     buildLayerSwitcherBaselayersForMap(mapName),
     prisma.theme.findMany({
       where: { mapName, deletedAt: null },
@@ -279,7 +284,13 @@ export async function buildClientToolsForMap(mapName: string) {
       theme.data && typeof theme.data === "object" && !Array.isArray(theme.data)
         ? (theme.data as Record<string, unknown>)
         : {};
-    const layers = Array.isArray(payload.layers) ? payload.layers : [];
+    // Themes saved before the layer tree point at layer instance ids.
+    const layers = (Array.isArray(payload.layers) ? payload.layers : []).map(
+      (entry) =>
+        isPlainObject(entry) && typeof entry.id === "string"
+          ? { ...entry, id: layerTree.translateLayerId(entry.id) }
+          : entry
+    );
     const metadata =
       payload.metadata &&
       typeof payload.metadata === "object" &&
@@ -298,45 +309,59 @@ export async function buildClientToolsForMap(mapName: string) {
     };
   });
 
-  return toolsOnMap.map((entry) => {
-    const mergedOptions = mergeJsonObjects(entry.tool.options, entry.options);
-    const legacyTarget = legacyTargetForBackendZone(entry.target);
-    const options =
-      legacyTarget != null
-        ? mergeJsonObjects(mergedOptions, { target: legacyTarget })
-        : mergedOptions;
+  const tools: { type: string; index: number; options: unknown }[] =
+    toolsOnMap.map((entry) => {
+      const mergedOptions = mergeJsonObjects(entry.tool.options, entry.options);
+      const legacyTarget = legacyTargetForBackendZone(entry.target);
+      const options =
+        legacyTarget != null
+          ? mergeJsonObjects(mergedOptions, { target: legacyTarget })
+          : mergedOptions;
 
-    if (entry.tool.type === "layerswitcher") {
+      if (entry.tool.type === "layerswitcher") {
+        return {
+          type: entry.tool.type,
+          index: entry.index,
+          options: {
+            ...options,
+            groups,
+            baselayers,
+            ...(quickAccessPresets.length > 0 ? { quickAccessPresets } : {}),
+          },
+        };
+      }
+
+      if (entry.tool.type === "documenthandler") {
+        return {
+          type: entry.tool.type,
+          index: entry.index,
+          options: {
+            ...mergedOptions,
+            // Expose the tool's own id so the client plugin can load documents
+            // directly from /api/v3/tools/:documentHandlerId/documenthandler/load/...
+            // without relying on the active map name.
+            documentHandlerId: entry.tool.id,
+          },
+        };
+      }
+
       return {
         type: entry.tool.type,
         index: entry.index,
-        options: {
-          ...options,
-          groups,
-          baselayers,
-          ...(quickAccessPresets.length > 0 ? { quickAccessPresets } : {}),
-        },
+        options,
       };
-    }
+    });
 
-    if (entry.tool.type === "documenthandler") {
-      return {
-        type: entry.tool.type,
-        index: entry.index,
-        options: {
-          ...mergedOptions,
-          // Expose the tool's own id so the client plugin can load documents
-          // directly from /api/v3/tools/:documentHandlerId/documenthandler/load/...
-          // without relying on the active map name.
-          documentHandlerId: entry.tool.id,
-        },
-      };
-    }
+  // POC (layer trees): a map without a layerswitcher still shows its layers.
+  // The client loads layers through the layerswitcher, which can run hidden
+  // (no button) with target "hidden".
+  if (!tools.some((tool) => tool.type === "layerswitcher")) {
+    tools.push({
+      type: "layerswitcher",
+      index: tools.length,
+      options: { target: "hidden", groups, baselayers },
+    });
+  }
 
-    return {
-      type: entry.tool.type,
-      index: entry.index,
-      options,
-    };
-  });
+  return tools;
 }
