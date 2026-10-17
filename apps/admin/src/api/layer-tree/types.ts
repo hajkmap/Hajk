@@ -1,4 +1,4 @@
-// POC (layer trees): a group's content is an ordered list of layers and linked
+// Layer trees: a group's content is an ordered list of layers and linked
 // child groups; a group with child groups is a layer tree. A map's tree is an
 // ordered top-level list of groups, apart from the layerswitcher tool, with
 // the map's own exceptions to them, its background and its draw order.

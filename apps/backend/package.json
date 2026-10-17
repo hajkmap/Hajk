@@ -20,7 +20,6 @@
     "dev": "tsx watch --include server --env-file=.env server/index.ts",
     "dev:debug": "tsx --inspect --watch-path=./server --env-file=.env server/index.ts",
     "reset:db": "prisma generate && prisma db push --force-reset && prisma db seed",
-    "poc:save-groups": "node --env-file=.env prisma/poc-layer-tree-import.js save-groups",
     "lint": "eslint ./server",
     "lint:fix": "eslint --fix server"
   },

@@ -13,7 +13,7 @@ import {
   type MapBackgroundLayer,
 } from "../../api/layer-tree";
 import { useLayers } from "../../api/layers";
-import { CATALOG_DRAG_TYPE } from "../../pages/groups-development/types";
+import { CATALOG_DRAG_TYPE } from "./lists/types";
 import LayerTreeBackground from "./layer-tree-background";
 import LayerTreeCatalog from "./layer-tree-catalog";
 import LayerTreeCatalogColumn from "./layer-tree-catalog-column";

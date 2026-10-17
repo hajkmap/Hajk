@@ -12,10 +12,7 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import {
-  DEFAULT_LAYER_DISPLAY_SETTINGS,
-  type LayerFormValues,
-} from "../types";
+import { DEFAULT_LAYER_DISPLAY_SETTINGS, type LayerFormValues } from "./types";
 
 interface LayerFormDialogProps {
   open: boolean;

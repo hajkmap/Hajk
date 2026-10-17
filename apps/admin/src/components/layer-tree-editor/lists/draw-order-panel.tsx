@@ -20,14 +20,14 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { GroupLayerTreeNode, MoveZoneItem } from "../types";
-import { GROUP_LAYER_TREE_ROOT_ID, MOVE_ZONE_DRAG_TYPE } from "../types";
+import type { GroupLayerTreeNode, MoveZoneItem } from "./types";
+import { GROUP_LAYER_TREE_ROOT_ID, MOVE_ZONE_DRAG_TYPE } from "./types";
 import {
   applyDropOnLayerRedirect,
   applySiblingOrderFromFlatTree,
   createLayerTreeNode,
   parseTreeNodeSourceId,
-} from "../utils/tree-model";
+} from "./tree-model";
 import GroupLayerTreeDropZone from "./group-layer-tree-drop-zone";
 
 interface DrawOrderLayerRow {

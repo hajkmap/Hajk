@@ -2,8 +2,6 @@ import {
   Group,
   GroupsApiResponse,
   GroupCreateInput,
-  GroupLayersApiResponse,
-  GroupLayersUpdateInput,
   GroupMapsApiResponse,
   GroupUpdateInput,
 } from "./types";
@@ -12,7 +10,7 @@ import { Map } from "../maps";
 import { generateRandomName } from "../generated/names";
 
 /**
- * API request functions for groups (GET/PATCH/DELETE /groups, nested layers/maps).
+ * API request functions for groups (GET/PATCH/DELETE /groups, the maps using them).
  * Create and update mutations return the full persisted {@link Group} entity from the API.
  */
 
@@ -54,31 +52,6 @@ export const getGroupById = async (groupId: string): Promise<Group> => {
       );
     } else {
       throw new Error("Failed to fetch group");
-    }
-  }
-};
-
-export const getLayersByGroupId = async (
-  groupId: string,
-): Promise<GroupLayersApiResponse> => {
-  const internalApiClient = getApiClient();
-  try {
-    const response = await internalApiClient.get<GroupLayersApiResponse>(
-      `/groups/${groupId}/layers`,
-    );
-    if (!response.data) {
-      throw new Error("No layers data found");
-    }
-    return response.data;
-  } catch (error) {
-    const axiosError = error as InternalApiError;
-
-    if (axiosError.response) {
-      throw new Error(
-        `Failed to fetch layers. ErrorId: ${axiosError.response.data.errorId}.`,
-      );
-    } else {
-      throw new Error("Failed to fetch layers");
     }
   }
 };
@@ -127,30 +100,6 @@ export const createGroup = async (
       throw axiosError;
     } else {
       throw new Error("Failed to create group");
-    }
-  }
-};
-
-export const updateGroupLayers = async (
-  groupId: string,
-  data: GroupLayersUpdateInput,
-): Promise<Group> => {
-  const internalApiClient = getApiClient();
-  try {
-    const response = await internalApiClient.patch<Group>(
-      `/groups/${groupId}/layers`,
-      data,
-    );
-    if (!response.data) {
-      throw new Error("No group data found");
-    }
-    return response.data;
-  } catch (error) {
-    const axiosError = error as InternalApiError;
-    if (axiosError.response) {
-      throw axiosError;
-    } else {
-      throw new Error("Failed to update group layers");
     }
   }
 };

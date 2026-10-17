@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import type { MapBackgroundLayer } from "../../api/layer-tree";
-import { CATALOG_DRAG_TYPE } from "../../pages/groups-development/types";
+import { CATALOG_DRAG_TYPE } from "./lists/types";
 import {
   isMovable,
   LAYER_TREE_CATALOG_DRAG_TYPE,

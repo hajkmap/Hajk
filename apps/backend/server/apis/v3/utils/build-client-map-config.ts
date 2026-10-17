@@ -1,9 +1,12 @@
-import type { Prisma } from "@prisma/client";
+import { UseType, type Prisma } from "@prisma/client";
 
 import prisma from "../../../common/prisma.ts";
 import { DEFAULT_MAP_OPTIONS } from "../../../common/defaults.ts";
-import type { ClientLayerTree } from "./build-client-layer-tree.ts";
-import { buildLayerSwitcherBaselayersForMap } from "./build-layer-switcher-groups-for-map.ts";
+import type {
+  ClientLayerSwitcherLayerRef,
+  ClientLayerTree,
+} from "./build-client-layer-tree.ts";
+import { activeLayerInstanceWhere } from "./layer-instance.ts";
 import { legacyTargetForBackendZone } from "./tool-placement.ts";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -257,9 +260,35 @@ export async function buildClientMapForMap(mapName: string) {
   return deepMerge(DEFAULT_MAP_OPTIONS, translated);
 }
 
+/** The map's background layers for the layerswitcher; ids are instance ids. */
+async function buildClientBaselayersForMap(
+  mapName: string
+): Promise<ClientLayerSwitcherLayerRef[]> {
+  const instances = await prisma.layerInstance.findMany({
+    where: {
+      AND: [
+        { map: { name: mapName } },
+        { usage: UseType.BACKGROUND },
+        activeLayerInstanceWhere,
+      ],
+    },
+    orderBy: { zIndex: "asc" },
+  });
+  return instances.map((instance) => ({
+    id: instance.id,
+    drawOrder: instance.zIndex,
+    visibleAtStart: instance.visibleAtStart,
+    infobox:
+      isPlainObject(instance.options) &&
+      typeof instance.options.infobox === "string"
+        ? instance.options.infobox
+        : "",
+  }));
+}
+
 /**
- * @param layerTree POC (layer trees): the map's layer tree in the client's
- * layerswitcher format; it replaces the groups built from layer instances.
+ * @param layerTree the map's layer tree in the client's layerswitcher format,
+ * in place of the groups stored in the layerswitcher tool's options.
  */
 export async function buildClientToolsForMap(
   mapName: string,
@@ -272,7 +301,7 @@ export async function buildClientToolsForMap(
       include: { tool: true },
       orderBy: { index: "asc" },
     }),
-    buildLayerSwitcherBaselayersForMap(mapName),
+    buildClientBaselayersForMap(mapName),
     prisma.theme.findMany({
       where: { mapName, deletedAt: null },
       orderBy: { title: "asc" },
@@ -284,13 +313,7 @@ export async function buildClientToolsForMap(
       theme.data && typeof theme.data === "object" && !Array.isArray(theme.data)
         ? (theme.data as Record<string, unknown>)
         : {};
-    // Themes saved before the layer tree point at layer instance ids.
-    const layers = (Array.isArray(payload.layers) ? payload.layers : []).map(
-      (entry) =>
-        isPlainObject(entry) && typeof entry.id === "string"
-          ? { ...entry, id: layerTree.translateLayerId(entry.id) }
-          : entry
-    );
+    const layers = Array.isArray(payload.layers) ? payload.layers : [];
     const metadata =
       payload.metadata &&
       typeof payload.metadata === "object" &&
@@ -352,7 +375,7 @@ export async function buildClientToolsForMap(
       };
     });
 
-  // POC (layer trees): a map without a layerswitcher still shows its layers.
+  // A map without a layerswitcher still shows its layers.
   // The client loads layers through the layerswitcher, which can run hidden
   // (no button) with target "hidden".
   if (!tools.some((tool) => tool.type === "layerswitcher")) {

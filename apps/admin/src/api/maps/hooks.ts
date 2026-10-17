@@ -7,17 +7,11 @@ import {
 import {
   getMaps,
   getMapByName,
-  getGroupsByMapName,
   getLayersByMapName,
-  getMapContentByName,
   getProjectionsByMapName,
   getToolsByMapName,
   updateMapTools,
   updateMapLayers,
-  updateMapGroups,
-  updateMapContent,
-  getMapLayerSwitcher,
-  updateMapLayerSwitcher,
   createMap,
   deleteMap,
   duplicateMap,
@@ -26,13 +20,8 @@ import {
 import type {
   Map as MapRecord,
   ProjectionsApiResponse,
-  MapGroup,
   MapLayer,
   MapLayerPlacement,
-  MapGroupPlacement,
-  MapContentPlacement,
-  MapLayerSwitcherPlacement,
-  MapLayerSwitcherState,
   MapMutation,
   ToolOnMap,
 } from "./types";
@@ -55,20 +44,8 @@ export const useMapByName = (mapName: string): UseQueryResult<MapRecord> => {
   });
 };
 
-// React Query hook to fetch groups by map name
-// This hook uses the `getGroupsByMapName` function from the `requests` module
-export const useGroupsByMapName = (
-  mapName: string
-): UseQueryResult<MapGroup[]> => {
-  return useQuery({
-    queryKey: ["groupsByMap", mapName],
-    queryFn: () => getGroupsByMapName(mapName),
-    enabled: Boolean(mapName),
-  });
-};
-
-// React Query hook to fetch layers by map name
-// This hook uses the `getLayersByMapName` function from the maps `requests` module
+// React Query hook to fetch the layers placed directly on a map: its
+// background layers and the search and editing layers it uses
 export const useLayersByMapName = (
   mapName: string
 ): UseQueryResult<MapLayer[]> => {
@@ -76,18 +53,6 @@ export const useLayersByMapName = (
     queryKey: ["layersByMap", mapName],
     queryFn: () => getLayersByMapName(mapName),
     enabled: Boolean(mapName),
-  });
-};
-
-export const useMapContentByName = (mapName: string) => {
-  return useQuery({
-    queryKey: ["mapContent", mapName],
-    queryFn: () => getMapContentByName(mapName),
-    enabled: Boolean(mapName),
-    select: (data) => ({
-      layers: data.layers,
-      groups: data.groups,
-    }),
   });
 };
 
@@ -175,135 +140,24 @@ export const useUpdateMapTools = () => {
   });
 };
 
-// React mutation to update the layers placed directly on a map
+// React mutation to update the search and editing layers a map uses
 export const useUpdateMapLayers = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
       mapName,
       layers,
-      replaceBackground,
-      replaceForeground,
     }: {
       mapName: string;
       layers: MapLayerPlacement[];
-      replaceBackground?: boolean;
-      replaceForeground?: boolean;
-    }) =>
-      updateMapLayers(mapName, layers, {
-        replaceBackground,
-        replaceForeground,
-      }),
+    }) => updateMapLayers(mapName, layers),
     onSuccess: (_, { mapName }) => {
       void queryClient.invalidateQueries({
         queryKey: ["layersByMap", mapName],
       });
-      void queryClient.invalidateQueries({
-        queryKey: ["mapContent", mapName],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ["mapLayerSwitcher", mapName],
-      });
       void queryClient.invalidateQueries({ queryKey: ["maps"] });
       void queryClient.invalidateQueries({ queryKey: ["layerUsage"] });
       void queryClient.invalidateQueries({ queryKey: ["layersUsageSummary"] });
-    },
-  });
-};
-
-// React mutation to update the group placements on a map
-export const useUpdateMapGroups = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      mapName,
-      groups,
-    }: {
-      mapName: string;
-      groups: MapGroupPlacement[];
-    }) => updateMapGroups(mapName, groups),
-    onSuccess: (_, { mapName }) => {
-      void queryClient.invalidateQueries({
-        queryKey: ["groupsByMap", mapName],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ["mapContent", mapName],
-      });
-      void queryClient.invalidateQueries({ queryKey: ["layerUsage"] });
-      void queryClient.invalidateQueries({ queryKey: ["layersUsageSummary"] });
-    },
-  });
-};
-
-export const useUpdateMapContent = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      mapName,
-      content,
-    }: {
-      mapName: string;
-      content: MapContentPlacement;
-    }) => updateMapContent(mapName, content),
-    onSuccess: (_, { mapName }) => {
-      void queryClient.invalidateQueries({
-        queryKey: ["mapContent", mapName],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ["layersByMap", mapName],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ["groupsByMap", mapName],
-      });
-      void queryClient.invalidateQueries({ queryKey: ["maps"] });
-      void queryClient.invalidateQueries({ queryKey: ["layerUsage"] });
-      void queryClient.invalidateQueries({ queryKey: ["layersUsageSummary"] });
-    },
-  });
-};
-
-export const useMapLayerSwitcher = (
-  mapName: string,
-): UseQueryResult<MapLayerSwitcherState> => {
-  return useQuery({
-    queryKey: ["mapLayerSwitcher", mapName],
-    queryFn: () => getMapLayerSwitcher(mapName),
-    enabled: Boolean(mapName),
-  });
-};
-
-export const useUpdateMapLayerSwitcher = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      mapName,
-      content,
-    }: {
-      mapName: string;
-      content: MapLayerSwitcherPlacement;
-    }) => updateMapLayerSwitcher(mapName, content),
-    onSuccess: (_, { mapName }) => {
-      void queryClient.invalidateQueries({
-        queryKey: ["mapLayerSwitcher", mapName],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ["mapContent", mapName],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ["layersByMap", mapName],
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ["groupsByMap", mapName],
-      });
-      void queryClient.invalidateQueries({ queryKey: ["groups"] });
-      void queryClient.invalidateQueries({ queryKey: ["maps"] });
-      void queryClient.invalidateQueries({ queryKey: ["layerUsage"] });
-      void queryClient.invalidateQueries({ queryKey: ["layersUsageSummary"] });
-      // Kartlager hydrates from LayerSwitcher Tool.options — keep that cache in sync.
-      void queryClient.invalidateQueries({
-        queryKey: ["toolsByMap", mapName],
-      });
-      void queryClient.invalidateQueries({ queryKey: ["tools"] });
     },
   });
 };

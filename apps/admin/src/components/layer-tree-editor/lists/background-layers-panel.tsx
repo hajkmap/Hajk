@@ -26,13 +26,13 @@ import type {
   LayerDisplaySettings,
   LayerFormValues,
   MoveZoneItem,
-} from "../types";
+} from "./types";
 import {
   CATALOG_DRAG_TYPE,
   DEFAULT_LAYER_DISPLAY_SETTINGS,
   GROUP_LAYER_TREE_ROOT_ID,
   MOVE_ZONE_DRAG_TYPE,
-} from "../types";
+} from "./types";
 import {
   applyDropOnLayerRedirect,
   applySiblingOrderFromFlatTree,
@@ -40,7 +40,7 @@ import {
   createTreeNodeFromCatalogItem,
   parseTreeNodeSourceId,
   resolveCatalogInsertTarget,
-} from "../utils/tree-model";
+} from "./tree-model";
 import GroupLayerTreeDropZone from "./group-layer-tree-drop-zone";
 import LayerFormDialog from "./layer-form-dialog";
 
@@ -152,8 +152,7 @@ function canDropBackgroundLayerNode(
     return !tree.some((node) => node.data?.sourceId === item.id);
   }
 
-  const source =
-    dragSource ?? tree.find((node) => node.id === dragSourceId);
+  const source = dragSource ?? tree.find((node) => node.id === dragSourceId);
   if (source?.data?.kind !== "layer") {
     return false;
   }
@@ -162,8 +161,7 @@ function canDropBackgroundLayerNode(
     return true;
   }
 
-  const target =
-    dropTarget ?? tree.find((node) => node.id === dropTargetId);
+  const target = dropTarget ?? tree.find((node) => node.id === dropTargetId);
   return target?.data?.kind === "layer";
 }
 

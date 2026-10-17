@@ -22,53 +22,21 @@ export interface Map {
 }
 
 /**
- * A layer attached to a map (GET /maps/:name/layers). `mapId` is set for
- * layers placed directly on the map; `groupId` is set for layers inherited
- * via a group on the map. `zIndex` on the response is the placement draw order
- * (`LayerInstance.zIndex`); higher values are drawn on top in layersConfig.
+ * A layer placed directly on a map (GET /maps/:name/layers): a background
+ * layer, or a search or editing layer the map uses. `zIndex` is its order.
  */
 export interface MapLayer extends Layer {
   mapId: number | null;
   groupId: string | null;
-  /** Placement on map (from LayerInstance), when loaded via GET /maps/:name/layers. */
   visibleAtStart?: boolean;
-  /** Direct map placement usage — BACKGROUND layers become layerswitcher baselayers. */
+  /** BACKGROUND layers become the layerswitcher's baselayers. */
   usage?: "BACKGROUND" | "FOREGROUND";
 }
 
-export interface MapGroup {
-  id: string;
-  mapName: string;
-  groupId: string;
-  parentGroupId: string | null;
-  usage: "BACKGROUND" | "FOREGROUND";
-  name: string;
-  toggled: boolean;
-  expanded: boolean;
-  index: number;
-  /** From linked Group — used to detect map-only section headings. */
-  internalName?: string | null;
-}
-
-/** Payload entry for PUT /maps/:name/layers. */
+/** Payload entry for PUT /maps/:name/layers: a search or editing layer. */
 export interface MapLayerPlacement {
   layerId: string;
-  usage?: "BACKGROUND" | "FOREGROUND";
-  visibleAtStart?: boolean;
-  infoClickActive?: boolean;
   zIndex?: number;
-}
-
-/** Payload entry for PUT /maps/:name/groups. */
-export interface MapGroupPlacement {
-  id?: string;
-  groupId: string;
-  parentGroupId?: string | null;
-  usage?: "BACKGROUND" | "FOREGROUND";
-  name?: string;
-  toggled?: boolean;
-  expanded?: boolean;
-  index?: number;
 }
 
 export interface Projection {
@@ -82,80 +50,9 @@ export interface MapsApiResponse {
   errorId: string;
 }
 
-export interface MapGroupsApiResponse {
-  groups: MapGroup[];
-  count: number;
-}
-
 export interface MapLayersApiResponse {
   layers: MapLayer[];
   count: number;
-}
-
-export interface MapContentApiResponse {
-  layers: MapLayer[];
-  groups: MapGroup[];
-  count: number;
-}
-
-/** Payload for PUT /maps/:name/content (atomic Kartinnehåll save). */
-export interface MapContentPlacement {
-  layers: MapLayerPlacement[];
-  groups: MapGroupPlacement[];
-}
-
-/** Nested Kartlager group (catalog layer ids) for layerswitcher admin API. */
-export interface MapLayerSwitcherLayerRef {
-  id: string;
-  /** Sibling position among mixed children (layers + nested groups). */
-  index?: number;
-  drawOrder?: number;
-  visibleAtStart?: boolean;
-  infobox?: string;
-}
-
-export interface MapLayerSwitcherGroup {
-  id: string;
-  type?: string;
-  name: string;
-  /** Sibling position among parent's mixed children (layers + nested groups). */
-  index?: number;
-  toggled?: boolean;
-  expanded?: boolean;
-  exclusive?: boolean;
-  parent?: string;
-  infogroupvisible?: boolean;
-  infogrouptitle?: string;
-  infogrouptext?: string;
-  infogroupurl?: string;
-  infogroupurltext?: string;
-  infogroupopendatalink?: string;
-  infogroupowner?: string;
-  layers?: MapLayerSwitcherLayerRef[];
-  groups?: MapLayerSwitcherGroup[];
-  /** @deprecated Prefer index on layers/groups. */
-  layerSwitcherTree?: (
-    | { type: "layer"; id: string }
-    | { type: "group"; id: string }
-  )[];
-}
-
-export interface MapLayerSwitcherBaselayer {
-  layerId: string;
-  visibleAtStart?: boolean;
-  infoClickActive?: boolean;
-  zIndex?: number;
-  infobox?: string;
-}
-
-export interface MapLayerSwitcherState {
-  groups: MapLayerSwitcherGroup[];
-  baselayers: MapLayerSwitcherBaselayer[];
-}
-
-export interface MapLayerSwitcherPlacement {
-  groups: MapLayerSwitcherGroup[];
-  baselayers: MapLayerSwitcherBaselayer[];
 }
 
 export interface ProjectionsApiResponse {

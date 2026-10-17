@@ -7,7 +7,7 @@ import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { useDrag, useDrop } from "react-dnd";
 import { useTranslation } from "react-i18next";
 
-import { CATALOG_DRAG_TYPE } from "../../pages/groups-development/types";
+import { CATALOG_DRAG_TYPE } from "./lists/types";
 import { LAYER_TREE_CATALOG_DRAG_TYPE } from "./layer-tree-model";
 import {
   MOVE_ZONE_DRAG_TYPE,

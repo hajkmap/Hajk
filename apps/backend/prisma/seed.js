@@ -2,12 +2,6 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import fs from "fs";
 import path from "path";
-import { randomUUID } from "crypto";
-import {
-  importLayerTrees,
-  importLayerTreeSettings,
-  importPocGroups,
-} from "./poc-layer-tree-import.js";
 
 if (!process.env.PG_CONNECTION_STRING) {
   throw new Error("PG_CONNECTION_STRING must be set before seeding.");
@@ -63,7 +57,7 @@ const KNOWN_TOOL_TYPES = [
 ];
 
 // layerswitcher options hold map-specific groups/baselayers used when seeding
-// GroupsOnMaps / LayerInstances — keep one Tool instance per map for that type.
+// the maps' layer trees — keep one Tool instance per map for that type.
 const PER_MAP_TOOL_TYPES = new Set(["layerswitcher"]);
 
 const jsonToDisplayLayerId = new Map();
@@ -663,37 +657,45 @@ async function populateSearchAndEditingLayerInstances() {
   }
 }
 
-function groupHasInfoDocument(group) {
-  return Boolean(
-    group.infogroupvisible ||
-      group.infogrouptitle ||
-      group.infogrouptext ||
-      group.infogroupurl ||
-      group.infogroupurltext ||
-      group.infogroupopendatalink ||
-      group.infogroupowner
-  );
+/** True when `from` can reach `to` by following child edges. */
+function reaches(childrenByGroup, from, to) {
+  const stack = [from];
+  const seen = new Set();
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (current === to) return true;
+    if (seen.has(current)) continue;
+    seen.add(current);
+    for (const child of childrenByGroup.get(current) ?? []) stack.push(child);
+  }
+  return false;
 }
 
-function metadataFromGroupInfo(group) {
-  return {
-    title: group.infogrouptitle || null,
-    description: group.infogrouptext || null,
-    owner: group.infogroupowner || null,
-    url: group.infogroupurl || null,
-    urlTitle: group.infogroupurltext || null,
-    urlOpenData: group.infogroupopendatalink || null,
-  };
-}
+/** Placements in sibling order, keeping the order they were read in for ties. */
+const bySiblingIndex = (placements) =>
+  [...placements].sort((a, b) => a.index - b.index);
 
-// Populates the database with the layer structure for the map corresponding to mapName.
-// Source: the layerswitcher Tool.options seeded from App_Data/<mapName>.json
-// (e.g. map_1.json tools[].options.groups / .baselayers).
-async function populateMapLayerStructure(mapName) {
-  const map = await prisma.map.findUnique({
-    where: { name: mapName },
+/**
+ * Fills the layer trees from each map's layerswitcher Tool.options
+ * (App_Data/<map>.json tools[].options.groups / .baselayers):
+ * - the groups (Group, with roles from visibleForGroups);
+ * - each group's own content (GroupItem): its layers, in order, then the
+ *   groups nested under it on every map where it is used. A group used on
+ *   several maps holds the layers it has on any of them;
+ * - each map's tree (MapTreeItem): its top-level groups. A group nested under
+ *   another on only some maps goes in it on those maps only (an ADD in
+ *   MapGroupException);
+ * - each map's settings for its groups and layers (MapGroupSetting,
+ *   MapLayerSetting), where they differ from the defaults;
+ * - each map's draw order (MapDrawOrderItem), from the layers' drawOrder;
+ * - each map's background layers (LayerInstance, BACKGROUND).
+ */
+async function populateLayerTrees() {
+  const maps = await prisma.map.findMany({
+    orderBy: { id: "asc" },
     select: {
       id: true,
+      name: true,
       tools: {
         where: { tool: { type: "layerswitcher" } },
         include: { tool: true },
@@ -701,248 +703,294 @@ async function populateMapLayerStructure(mapName) {
       },
     },
   });
-
-  const layerswitcherOnMap = map?.tools?.[0];
-  if (!layerswitcherOnMap?.tool?.options) {
-    console.log(
-      `No layerswitcher tool options for map "${mapName}" — skipping layer structure`
-    );
-    return;
-  }
-
-  const { baselayers = [], groups = [] } = layerswitcherOnMap.tool.options;
-  console.log(
-    `Populating layer structure for "${mapName}" from layerswitcher Tool.options (${groups.length} root groups, ${(baselayers || []).length} baselayers)`
+  const knownLayerIds = new Set(
+    (await prisma.displayLayer.findMany({ select: { id: true } })).map(
+      (layer) => layer.id
+    )
   );
+  // Map configs may refer to layers that layers.json doesn't have.
+  const layerIdOf = (ref) => {
+    const id = resolveDisplayLayerId(ref?.id);
+    return id != null && knownLayerIds.has(id) ? id : null;
+  };
 
-  // Imagine this is our "groups.json"…
-  const groupsToInsert = [];
-
-  // These arrays will hold the different relations between our entities
-  const layersOnMaps = [];
-  const layersOnGroups = [];
-  const groupsOnMap = [];
-
-  // Prepare background layers for insert by looping through everything
-  // in "baselayers" in current map's LayerSwitcher's options. The goal
-  // is to prepare an object that will be almost ready to use in Prisma's
-  // createMany() method.
-  (baselayers || []).forEach((bl) => {
-    const { id: layerId, ...rest } = bl;
-    layersOnMaps.push({
-      layerId: layerId,
-      mapId: map.id,
-      usage: "BACKGROUND",
-      options: rest,
-    });
-  });
-
-  // Helper: invoked recursively and extract any
-  // layers and groups within the given group.
-  // `index` preserves sibling order from the map JSON groups array.
-  const extractGroup = (group, parentId = null, index = 0) => {
-    // First let's handle the group's layers
-    extractLayersFromGroup(group);
-
-    // Next, let's handle the group itself
-    const {
-      id: groupId,
-      name,
-      toggled,
-      expanded,
-      visibleForGroups,
-    } = group;
-    const exclusive = Boolean(group.exclusive);
-
-    // This is a plain, flat group object - similar to layers.json
-    groupsToInsert.push({
-      id: groupId,
-      name: name,
-      visibleForGroups: visibleForGroups || [],
-    });
-
-    // Create a unique ID for this specific relation
-    const newUUID = randomUUID();
-
-    // This object will be used to describe this group's relations
-    const groupsOnMapObject = {
-      id: newUUID, // This specific group-map relations ID
-      groupId, // Refers to ID in Group model
-      parentGroupId: parentId,
-      mapName,
-      usage: "FOREGROUND",
-      name,
-      toggled: Boolean(toggled),
-      expanded: Boolean(expanded),
-      exclusive: Boolean(exclusive),
-      infoDocument: Boolean(group.infogroupvisible),
-      index,
-      // Metadata is created below when the group has info-document fields
-      _infoMetadata: groupHasInfoDocument(group)
-        ? metadataFromGroupInfo(group)
-        : null,
-    };
-
-    groupsOnMap.push(groupsOnMapObject);
-
-    // Finally, recursively call on any other groups that might be in this group
-    (group.groups || []).forEach((g, childIndex) =>
-      extractGroup(g, newUUID, childIndex)
+  // Read every map's layerswitcher: its groups wherever they lie (in the
+  // order read, so ties in sibling order keep it), its layers in them, its
+  // layers' draw order and its background layers.
+  const groups = new Map();
+  const layersOfGroup = new Map();
+  const placements = [];
+  const layerPlacements = [];
+  const drawOrderByMap = new Map();
+  const background = [];
+  for (const map of maps) {
+    const switcher = map.tools[0]?.tool?.options;
+    if (!switcher) {
+      console.log(
+        `No layerswitcher tool options for map "${map.name}" — skipping its layer tree`
+      );
+      continue;
+    }
+    const { baselayers = [], groups: roots = [] } = switcher;
+    console.log(
+      `Populating the layer tree for "${map.name}" from layerswitcher Tool.options (${roots.length} root groups, ${(baselayers || []).length} baselayers)`
     );
-  };
 
-  // Helper: called by extractGroup. Grabs all layers
-  // in the given group.
-  const extractLayersFromGroup = (group) => {
-    const layerIds = [];
-    (group.layers || []).forEach((l) => {
-      const { id: layerId, ...rest } = l;
-
-      // One LayerInstance per placement: mapId (default map) + parent groupId.
-      layersOnGroups.push({
-        layerId: layerId,
-        mapId: map.id,
-        groupId: group.id,
-        usage: "FOREGROUND",
-        options: rest,
-      });
-
-      layerIds.push(layerId);
-    });
-
-    // Return a list of ids that relate to a given group
-    return layerIds;
-  };
-
-  // Next, go on with groups, recursively — index preserves sibling order
-  (groups || []).forEach((g, index) => extractGroup(g, null, index));
-
-  // Now we have all arrays ready. One more thing left is to
-  // check for consistency: our map config may refer to layerIds
-  // that did not exist in layers.json (hence they won't exist in
-  // the display layer tables either). If we'd try to connect such a layer
-  // to a map or group, we'd get a foreign key error. So let's wash the
-  // layers so only valid entries remain.
-  const displayLayersInDB = await prisma.displayLayer.findMany({
-    select: { id: true, zIndex: true },
-  });
-
-  const displayLayerIdsInDB = new Set(displayLayersInDB.map((l) => l.id));
-
-  const removeUnknownLayers = (l) => {
-    const prismaId = resolveDisplayLayerId(l.layerId);
-    return prismaId != null && displayLayerIdsInDB.has(prismaId);
-  };
-
-  const validLayersOnMaps = layersOnMaps.filter(removeUnknownLayers);
-  const validLayersOnGroups = layersOnGroups.filter(removeUnknownLayers);
-
-  const validLayers = [...validLayersOnMaps, ...validLayersOnGroups];
-
-  // Populates the Group model (the imaginative "groups.json")
-  await prisma.group.createMany({
-    data: groupsToInsert.map((g) => ({ id: g.id, name: g.name })),
-    skipDuplicates: true, // We assume - for now! - that same ID means same group, so there's no need to watch out for conflicts
-  });
-
-  // Connect each of the inserted groups to map (and another group, where applicable).
-  // Create Metadata rows first when the map JSON has info-document fields.
-  for (const placement of groupsOnMap) {
-    const { _infoMetadata, ...groupsOnMapData } = placement;
-    let metadataId = null;
-
-    if (_infoMetadata) {
-      const metadata = await prisma.metadata.create({
-        data: _infoMetadata,
-      });
-      metadataId = metadata.id;
+    for (const ref of baselayers || []) {
+      const layerId = layerIdOf(ref);
+      if (!layerId) continue;
+      const options = { ...ref };
+      delete options.id;
+      background.push({ mapId: map.id, layerId, options });
     }
 
-    await prisma.groupsOnMaps.create({
-      data: {
-        ...groupsOnMapData,
-        metadataId,
-      },
-    });
+    const drawOrder = new Map();
+    drawOrderByMap.set(map.name, drawOrder);
+    const readGroup = (group, parentId, index) => {
+      if (!group?.id) return;
+      const known = groups.get(group.id);
+      groups.set(group.id, {
+        name: known?.name ?? group.name,
+        roles: [
+          ...new Set([...(known?.roles ?? []), ...(group.visibleForGroups || [])]),
+        ],
+      });
+      placements.push({ mapName: map.name, groupId: group.id, parentId, index, group });
+
+      const layerIds = layersOfGroup.get(group.id) ?? [];
+      layersOfGroup.set(group.id, layerIds);
+      for (const ref of group.layers || []) {
+        const layerId = layerIdOf(ref);
+        if (!layerId) continue;
+        if (!layerIds.includes(layerId)) layerIds.push(layerId);
+        layerPlacements.push({ mapName: map.name, groupId: group.id, layerId, ref });
+        const order = typeof ref.drawOrder === "number" ? ref.drawOrder : 0;
+        drawOrder.set(layerId, Math.max(drawOrder.get(layerId) ?? -Infinity, order));
+        if ((ref.visibleForGroups || []).length > 0) {
+          console.warn(
+            `Map "${map.name}": layer "${layerId}" in group "${group.id}" has visibleForGroups; roles per placement aren't imported (set them on the layer or the group).`
+          );
+        }
+      }
+      (group.groups || []).forEach((child, childIndex) =>
+        readGroup(child, group.id, childIndex)
+      );
+    };
+    roots.forEach((group, index) => readGroup(group, null, index));
   }
-  // Connect valid layer instances once per placement:
-  // - baselayers → mapId + BACKGROUND (no group)
-  // - tree layers → mapId + parent groupId + FOREGROUND
-  // Never create a second map-only row for the same display layer.
-  const seededDisplayLayerIds = new Set();
-  for await (const layer of validLayers) {
-    const displayLayerId = resolveDisplayLayerId(layer.layerId);
-    const placement = layerInstancePlacementFromOptions(layer.options);
-    const layerInstance = await prisma.layerInstance.create({
+
+  await prisma.group.createMany({
+    data: [...groups].map(([id, group]) => ({ id, name: group.name })),
+    skipDuplicates: true,
+  });
+  for (const [id, group] of groups) {
+    await updateRolesFromVisibleForGroups(group.roles, id, "group");
+  }
+
+  // Each group's content: its layers, then the groups nested under it on
+  // every map where it is used (never closing a loop).
+  const mapsOfGroup = new Map();
+  const nestedUnder = new Map();
+  for (const placement of bySiblingIndex(placements)) {
+    mapsOfGroup.set(placement.groupId, [
+      ...new Set([...(mapsOfGroup.get(placement.groupId) ?? []), placement.mapName]),
+    ]);
+    if (!placement.parentId) continue;
+    const children = nestedUnder.get(placement.parentId) ?? new Map();
+    children.set(placement.groupId, [
+      ...(children.get(placement.groupId) ?? []),
+      placement.mapName,
+    ]);
+    nestedUnder.set(placement.parentId, children);
+  }
+  const groupRows = [];
+  const childrenByGroup = new Map();
+  const lastItemKey = new Map();
+  for (const groupId of groups.keys()) {
+    let index = 0;
+    for (const layerId of layersOfGroup.get(groupId) ?? []) {
+      groupRows.push({ groupId, index: index++, displayLayerId: layerId });
+      lastItemKey.set(groupId, `layer:${layerId}`);
+    }
+    const usedOn = mapsOfGroup.get(groupId) ?? [];
+    for (const [childId, nestedOn] of nestedUnder.get(groupId) ?? []) {
+      if (childId === groupId) continue;
+      if (!usedOn.every((mapName) => nestedOn.includes(mapName))) continue;
+      if (reaches(childrenByGroup, childId, groupId)) continue;
+      childrenByGroup.set(groupId, [...(childrenByGroup.get(groupId) ?? []), childId]);
+      groupRows.push({ groupId, index: index++, childGroupId: childId });
+      lastItemKey.set(groupId, `group:${childId}`);
+    }
+  }
+
+  // Each map's tree, the groups it nests differently, its settings and its
+  // draw order.
+  const treeRows = [];
+  const exceptionRows = [];
+  const groupSettingRows = [];
+  const layerSettingRows = [];
+  const drawOrderRows = [];
+  for (const map of maps) {
+    const onMap = bySiblingIndex(
+      placements.filter((placement) => placement.mapName === map.name)
+    );
+    if (onMap.length === 0) continue;
+
+    const topLevel = [];
+    for (const placement of onMap) {
+      if (placement.parentId === null && !topLevel.includes(placement.groupId)) {
+        topLevel.push(placement.groupId);
+      }
+    }
+    topLevel.forEach((groupId, index) =>
+      treeRows.push({ mapName: map.name, index, groupId })
+    );
+
+    // A group nested under another on this map only goes in it on this map,
+    // after what that group already holds.
+    const edges = new Map(
+      [...childrenByGroup].map(([id, children]) => [id, [...children]])
+    );
+    const afterKey = new Map(lastItemKey);
+    let exceptionIndex = 0;
+    for (const { parentId, groupId: childId } of onMap) {
+      if (!parentId || (edges.get(parentId) ?? []).includes(childId)) continue;
+      if (reaches(edges, childId, parentId)) continue;
+      edges.set(parentId, [...(edges.get(parentId) ?? []), childId]);
+      exceptionRows.push({
+        mapName: map.name,
+        groupId: parentId,
+        kind: "ADD",
+        index: exceptionIndex++,
+        childGroupId: childId,
+        afterKey: afterKey.get(parentId) ?? null,
+      });
+      afterKey.set(parentId, `group:${childId}`);
+    }
+
+    // Settings, where they differ from the defaults; a group placed twice on
+    // the map takes its first placement's.
+    const seenGroups = new Set();
+    for (const { groupId, group } of onMap) {
+      if (seenGroups.has(groupId)) continue;
+      seenGroups.add(groupId);
+      const name = group.name?.trim() ?? "";
+      const row = {
+        mapName: map.name,
+        groupId,
+        name: name && name !== groups.get(groupId).name ? name : null,
+        toggled: Boolean(group.toggled),
+        expanded: Boolean(group.expanded),
+        exclusive: Boolean(group.exclusive),
+        infoGroupVisible: Boolean(group.infogroupvisible),
+        infoGroupTitle: group.infogrouptitle || "",
+        infoGroupText: group.infogrouptext || "",
+        infoGroupUrl: group.infogroupurl || "",
+        infoGroupUrlText: group.infogroupurltext || "",
+        infoGroupOpenDataLink: group.infogroupopendatalink || "",
+        infoGroupOwner: group.infogroupowner || "",
+      };
+      if (
+        row.name !== null ||
+        row.toggled ||
+        row.expanded ||
+        row.exclusive ||
+        row.infoGroupVisible ||
+        [
+          row.infoGroupTitle,
+          row.infoGroupText,
+          row.infoGroupUrl,
+          row.infoGroupUrlText,
+          row.infoGroupOpenDataLink,
+          row.infoGroupOwner,
+        ].some((value) => value !== "")
+      ) {
+        groupSettingRows.push(row);
+      }
+    }
+    const seenLayers = new Set();
+    const layerOrder = [];
+    for (const { mapName, groupId, layerId, ref } of layerPlacements) {
+      if (mapName !== map.name) continue;
+      if (!layerOrder.includes(layerId)) layerOrder.push(layerId);
+      const key = `${groupId}|${layerId}`;
+      if (seenLayers.has(key)) continue;
+      seenLayers.add(key);
+      const visibleAtStart = Boolean(ref.visibleAtStart);
+      const infobox = typeof ref.infobox === "string" ? ref.infobox : "";
+      if (!visibleAtStart && !infobox) continue;
+      layerSettingRows.push({
+        mapName: map.name,
+        groupId,
+        displayLayerId: layerId,
+        visibleAtStart,
+        infobox,
+      });
+    }
+
+    // Draw order, top first: the highest drawOrder on top.
+    const drawOrder = drawOrderByMap.get(map.name) ?? new Map();
+    layerOrder
+      .map((layerId, position) => ({ layerId, position }))
+      .sort(
+        (a, b) =>
+          (drawOrder.get(b.layerId) ?? 0) - (drawOrder.get(a.layerId) ?? 0) ||
+          a.position - b.position
+      )
+      .forEach(({ layerId }, index) =>
+        drawOrderRows.push({ mapName: map.name, displayLayerId: layerId, index })
+      );
+  }
+
+  if (groupRows.length > 0) await prisma.groupItem.createMany({ data: groupRows });
+  if (treeRows.length > 0) await prisma.mapTreeItem.createMany({ data: treeRows });
+  if (exceptionRows.length > 0) {
+    await prisma.mapGroupException.createMany({ data: exceptionRows });
+  }
+  if (groupSettingRows.length > 0) {
+    await prisma.mapGroupSetting.createMany({ data: groupSettingRows });
+  }
+  if (layerSettingRows.length > 0) {
+    await prisma.mapLayerSetting.createMany({ data: layerSettingRows });
+  }
+  if (drawOrderRows.length > 0) {
+    await prisma.mapDrawOrderItem.createMany({ data: drawOrderRows });
+  }
+
+  // From here on the trees are the maps' content: the layerswitcher tools
+  // keep their own settings, without a copy of the groups and baselayers.
+  for (const map of maps) {
+    const tool = map.tools[0]?.tool;
+    if (!tool?.options || typeof tool.options !== "object") continue;
+    const options = { ...tool.options };
+    delete options.groups;
+    delete options.baselayers;
+    await prisma.tool.update({ where: { id: tool.id }, data: { options } });
+  }
+
+  // Background layers, with their roles.
+  for (const { mapId, layerId, options } of background) {
+    const placement = layerInstancePlacementFromOptions(options);
+    const instance = await prisma.layerInstance.create({
       data: {
-        displayLayerId,
-        mapId: layer.mapId || undefined,
-        groupId: layer.groupId || undefined,
-        usage: layer.usage,
+        displayLayerId: layerId,
+        mapId,
+        usage: "BACKGROUND",
         zIndex: placement.zIndex,
         visibleAtStart: placement.visibleAtStart,
         options: placement.options,
       },
     });
-
-    if (displayLayerId) {
-      seededDisplayLayerIds.add(displayLayerId);
-    }
-
-    const visibleForGroups = layer.options.visibleForGroups || [];
-
-    // Add potential role restrictions on the layer instances
     await updateRolesFromVisibleForGroups(
-      visibleForGroups,
-      layerInstance.id,
+      options.visibleForGroups || [],
+      instance.id,
       "layerInstance"
     );
   }
 
-  // Catalog display layers not referenced in baselayers/groups still get a
-  // map-direct FOREGROUND instance so they show as active on the Lager tab.
-  let activatedForegroundCount = 0;
-  for (const [index, displayLayer] of displayLayersInDB.entries()) {
-    if (seededDisplayLayerIds.has(displayLayer.id)) {
-      continue;
-    }
-
-    await prisma.layerInstance.create({
-      data: {
-        displayLayerId: displayLayer.id,
-        mapId: map.id,
-        usage: "FOREGROUND",
-        zIndex: displayLayer.zIndex ?? index,
-        visibleAtStart: false,
-      },
-    });
-    activatedForegroundCount += 1;
-  }
-
   console.log(
-    `Map "${mapName}": ${validLayersOnMaps.length} BACKGROUND, ${validLayersOnGroups.length} group (with mapId), ${activatedForegroundCount} map-only FOREGROUND LayerInstances`
+    `Layer trees: ${groups.size} group(s) with ${groupRows.length} item(s), ${treeRows.length} map tree item(s), ${exceptionRows.length} group(s) nested on a map only, settings for ${groupSettingRows.length} group(s) and ${layerSettingRows.length} layer(s), ${drawOrderRows.length} draw order row(s), ${background.length} background layer(s).`
   );
-
-  // Add potential role restrictions on the layer groups
-  for await (const group of groupsToInsert) {
-    await updateRolesFromVisibleForGroups(
-      group.visibleForGroups || [],
-      group.id,
-      "group"
-    );
-  }
-}
-
-// Populates the database with the layer structure for all available maps currently in the database
-async function populateLayerStructure() {
-  const mapsFromDB = await prisma.map.findMany({ select: { name: true } });
-  const maps = mapsFromDB.map((m) => m.name);
-  const ro = [];
-  for await (const map of maps) {
-    const r = await populateMapLayerStructure(map);
-    ro.push(r);
-  }
-  return { ro };
 }
 
 async function createBaseRoles() {
@@ -1321,8 +1369,8 @@ function remapLayerIdInLayerswitcherOptions(options, idMap) {
 /**
  * Assign sequential drawOrder indexes on layerswitcher Tool.options groups
  * layers (alphabetically by DisplayLayer name; bottom of list = 1, top = N).
- * Runs after id remapping and before GroupsOnMaps / LayerInstance population
- * so LayerInstance.zIndex picks up the same values.
+ * Runs after id remapping and before the layer trees are populated, which
+ * take each map's draw order from these values.
  */
 async function assignLayerswitcherDrawOrderIndexes() {
   const displayLayers = await prisma.displayLayer.findMany({
@@ -1461,16 +1509,17 @@ async function main() {
   // Get all layers from layers.json and insert them into the layer tables.
   await readAndPopulateLayers();
   // Rewrite layerswitcher Tool.options layer ids to Prisma DisplayLayer ids
-  // before building GroupsOnMaps / LayerInstances from those options.
+  // before building the layer trees from those options.
   await remapLayerswitcherToolOptionsLayerIds();
-  // Assign sequential drawOrder (bottom = 1, alphabetic) on groups[].layers[]
-  // so LayerInstance.zIndex and Tool.options stay aligned for Ritordning.
+  // Assign sequential drawOrder (bottom = 1, alphabetic) on groups[].layers[];
+  // each map's draw order (Ritordning) is taken from it.
   await assignLayerswitcherDrawOrderIndexes();
   // Search/editing layers are global in layers.json — attach them to every map via LayerInstance.
   await populateSearchAndEditingLayerInstances();
-  // Finally we extract the layer switcher config from all maps and add all groups etc. with their connections to the database.
-  // We're gonna want to keep crucial information such as the map layer structure separated from specific plugins such as the layer switcher.
-  await populateLayerStructure();
+  // Finally the layer trees — the groups and their content, each map's tree
+  // with its settings and draw order, and its background layers — read from
+  // each map's layerswitcher config and kept apart from the tool from here on.
+  await populateLayerTrees();
 
   // Base roles (e.g. SUPERUSER, ADMIN) for map/layer/tool restrictions and future IdP group mapping.
   // Local users are not seeded: identities come from Keycloak or another external IdP.
@@ -1478,34 +1527,6 @@ async function main() {
 
   // Seed documents from App_Data/documents/ into DocumentFolder + Document tables.
   await seedDocuments();
-
-  // POC (layer trees): mirror groups and top-level map placements into
-  // GroupItem / MapTreeItem so the new tree editor starts with content, copy
-  // the maps' settings for them, then recreate the POC groups saved in
-  // prisma/poc-layer-tree-groups.json.
-  await importLayerTrees(prisma);
-  await importLayerTreeSettings(prisma);
-  await importPocGroups(prisma);
-
-  // Seed a few test LayerInstances so the "used in maps" feature has data to display.
-  // Only runs if there are no LayerInstances already (i.e. no App_Data map configs were found).
-  const existingInstances = await prisma.layerInstance.count();
-  if (existingInstances === 0) {
-    const firstMap = await prisma.map.findFirst();
-    const firstLayers = await prisma.displayLayer.findMany({ take: 3 });
-    if (firstMap && firstLayers.length > 0) {
-      await prisma.layerInstance.createMany({
-        data: firstLayers.map((layer) => ({
-          displayLayerId: layer.id,
-          mapId: firstMap.id,
-          usage: "FOREGROUND",
-        })),
-      });
-      console.log(
-        `Created ${firstLayers.length} test LayerInstances for map "${firstMap.name}"`
-      );
-    }
-  }
 }
 
 main()

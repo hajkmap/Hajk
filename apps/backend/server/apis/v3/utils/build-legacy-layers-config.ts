@@ -270,8 +270,8 @@ type DisplayLayerWithRelations = Prisma.DisplayLayerGetPayload<{
 }>;
 
 /**
- * Where a display layer is placed: a layer instance, or (POC, layer trees) a
- * layer in the map's layer tree. `id` is the layer's id in the client.
+ * Where a display layer is placed: a background layer instance, or a layer in
+ * the map's layer tree. `id` is the layer's id in the client.
  */
 export interface DisplayLayerPlacement {
   id: string;
@@ -282,12 +282,11 @@ export interface DisplayLayerPlacement {
 }
 
 /**
- * @param treePlacements POC (layer trees): the layers of the map's layer tree.
- * When given, they replace the map's foreground layer instances.
+ * @param treePlacements the layers of the map's layer tree, one per placement.
  */
 export async function buildLegacyLayersConfigForMap(
   mapName: string,
-  treePlacements?: DisplayLayerPlacement[]
+  treePlacements: DisplayLayerPlacement[]
 ): Promise<HajkLegacyLayersConfigDocument> {
   const instances = await prisma.layerInstance.findMany({
     where: {
@@ -375,7 +374,7 @@ export async function buildLegacyLayersConfigForMap(
     instances.length === 0 &&
     searchLayers.length === 0 &&
     editingLayers.length === 0 &&
-    !treePlacements?.length
+    treePlacements.length === 0
   ) {
     return emptyBuckets();
   }
@@ -393,15 +392,15 @@ export async function buildLegacyLayersConfigForMap(
       continue;
     }
 
-    // POC (layer trees): the map's own layers come from its layer tree;
-    // only its background layers still come from layer instances.
-    if (treePlacements && inst.usage !== UseType.BACKGROUND) {
+    // A map's display layers are its tree's; only its background layers
+    // are layer instances.
+    if (inst.usage !== UseType.BACKGROUND) {
       continue;
     }
     appendDisplayLayer(out, inst);
   }
 
-  for (const placement of treePlacements ?? []) {
+  for (const placement of treePlacements) {
     appendDisplayLayer(out, placement);
   }
 

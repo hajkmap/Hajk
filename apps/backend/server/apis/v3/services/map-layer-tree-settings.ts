@@ -6,8 +6,8 @@ import HttpStatusCodes from "../../../common/http-status-codes.ts";
 import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
 import type { LayerTreeNode } from "./layer-tree.service.ts";
 
-// POC (layer trees): a map's own settings for the groups and layers in its
-// tree, as Lagerordning set them per map. The map owns them: a group's
+// A map's own settings for the groups and layers in its tree (as the old
+// Lagerordning set them per map). The map owns them: a group's
 // settings are the same wherever the group shows on the map, a layer's are
 // per group it shows in. Only settings that differ from the defaults are
 // stored; the rest have the defaults.

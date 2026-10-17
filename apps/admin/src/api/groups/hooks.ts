@@ -8,20 +8,12 @@ import {
 import {
   getGroups,
   getGroupById,
-  getLayersByGroupId,
   getMapsByGroupId,
   createGroup,
   updateGroup,
-  updateGroupLayers,
   deleteGroup,
 } from "./requests";
-import {
-  Group,
-  GroupCreateInput,
-  GroupLayersApiResponse,
-  UpdateGroupLayersVariables,
-  UpdateGroupVariables,
-} from "./types";
+import { Group, GroupCreateInput, UpdateGroupVariables } from "./types";
 import { Map } from "../maps";
 
 export const useGroups = (): UseQueryResult<Group[]> => {
@@ -35,16 +27,6 @@ export const useGroupById = (groupId: string): UseQueryResult<Group> => {
   return useQuery({
     queryKey: ["groups", groupId],
     queryFn: () => getGroupById(groupId),
-    enabled: Boolean(groupId),
-  });
-};
-
-export const useLayersByGroupId = (
-  groupId: string,
-): UseQueryResult<GroupLayersApiResponse> => {
-  return useQuery({
-    queryKey: ["layersByGroupId", groupId],
-    queryFn: () => getLayersByGroupId(groupId),
     enabled: Boolean(groupId),
   });
 };
@@ -100,28 +82,6 @@ export const useUpdateGroup = (): UseMutationResult<
   });
 };
 
-export const useUpdateGroupLayers = (): UseMutationResult<
-  Group,
-  Error,
-  UpdateGroupLayersVariables
-> => {
-  const queryClient = useQueryClient();
-
-  return useMutation<Group, Error, UpdateGroupLayersVariables>({
-    mutationFn: ({ groupId, data }) => updateGroupLayers(groupId, data),
-    onSuccess: (data, { groupId }) => {
-      queryClient.setQueryData<Group>(["groups", groupId], data);
-      void queryClient.invalidateQueries({
-        queryKey: ["layersByGroupId", groupId],
-      });
-      void queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
-    },
-    onError: (error) => {
-      console.error(error);
-    },
-  });
-};
-
 export const useDeleteGroup = (): UseMutationResult<void, Error, string> => {
   const queryClient = useQueryClient();
 
@@ -130,7 +90,6 @@ export const useDeleteGroup = (): UseMutationResult<void, Error, string> => {
     onSuccess: (_, groupId) => {
       void queryClient.invalidateQueries({ queryKey: ["groups"] });
       queryClient.removeQueries({ queryKey: ["groups", groupId] });
-      queryClient.removeQueries({ queryKey: ["layersByGroupId", groupId] });
       queryClient.removeQueries({ queryKey: ["mapsByGroupId", groupId] });
     },
     onError: (error) => {

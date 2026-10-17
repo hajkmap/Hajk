@@ -2,11 +2,11 @@ import { Paper } from "@mui/material";
 import { useMemo } from "react";
 
 import type { MapBackgroundLayer } from "../../api/layer-tree";
-import BackgroundLayersPanel from "../../pages/groups-development/components/background-layers-panel";
+import BackgroundLayersPanel from "./lists/background-layers-panel";
 import {
   DEFAULT_LAYER_DISPLAY_SETTINGS,
   type LayerDisplaySettings,
-} from "../../pages/groups-development/types";
+} from "./lists/types";
 
 /** What a move zone item is to the panel: its key and what it is. */
 interface MoveZoneDropItem {

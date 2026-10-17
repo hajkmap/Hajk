@@ -1,6 +1,5 @@
 import { Prisma, UseType, type User } from "@prisma/client";
 import log4js from "log4js";
-import { randomUUID } from "node:crypto";
 
 import prisma from "../../../common/prisma.ts";
 import { HajkError } from "../../../common/classes.ts";
@@ -17,12 +16,7 @@ import {
   resolveLayerPlacementById,
 } from "../utils/layer-instance.ts";
 import { toolsOnMapsOptionsForTarget } from "../utils/tool-placement.ts";
-import { buildLayerSwitcherAdminStateForMap } from "../utils/build-layer-switcher-groups-for-map.ts";
-import {
-  flattenLayerSwitcherGroupsForWrite,
-  buildSiblingOrderFromLayersAndGroups,
-  type LayerSwitcherWriteGroup,
-} from "../utils/flatten-layer-switcher-for-map-write.ts";
+import LayerTreeService from "./layer-tree.service.ts";
 
 const logger = log4js.getLogger("service.v3.map");
 
@@ -41,50 +35,10 @@ interface MapWriteInput {
   projections?: { code?: string }[];
 }
 
+/** A search or editing layer the map uses, in the order sent. */
 interface MapLayerInput {
   layerId: string;
-  usage?: UseType;
-  visibleAtStart?: boolean;
-  infoClickActive?: boolean;
   zIndex?: number;
-  /** Stored on LayerInstance.options.infobox (client baselayer shape). */
-  infobox?: string;
-}
-
-/** Options for replacing direct map LayerInstances by usage. */
-interface ReplaceDirectMapLayersOptions {
-  /**
-   * When true, BACKGROUND instances are replaced even if the payload has none
-   * (used to clear all baselayers). When omitted, BACKGROUND is replaced only
-   * if the payload includes at least one BACKGROUND entry.
-   */
-  replaceBackground?: boolean;
-  /**
-   * When true, FOREGROUND instances are replaced even if the payload has none.
-   * Use with replaceBackground when an admin UI manages the full map-direct set.
-   */
-  replaceForeground?: boolean;
-}
-
-interface MapGroupInput {
-  id?: string;
-  groupId: string;
-  parentGroupId?: string | null;
-  usage?: UseType;
-  name?: string;
-  toggled?: boolean;
-  expanded?: boolean;
-  exclusive?: boolean;
-  infoDocument?: boolean;
-  index?: number;
-  metadata?: {
-    title?: string;
-    description?: string;
-    owner?: string;
-    url?: string;
-    urlTitle?: string;
-    urlOpenData?: string;
-  } | null;
 }
 
 async function resolveProjectionConnect(code?: string) {
@@ -177,7 +131,6 @@ class MapService {
         projection: true,
         _count: {
           select: {
-            groups: true,
             tools: {
               where: ACTIVE_TOOLS_ON_MAP_WHERE,
             },
@@ -187,44 +140,48 @@ class MapService {
       },
     });
 
-    // Layer count = unique active catalog layers on the map (Active checkboxes
-    // on the layers tab). Prisma `_count.layers` only covers direct `mapId` links.
-    const layerCounts = await this.countLayersByMapNames(
-      maps.map((entry) => entry.name)
-    );
+    const [contents, layerCounts] = await Promise.all([
+      LayerTreeService.getMapContents(),
+      this.countLayersByMapNames(maps.map((entry) => entry.name)),
+    ]);
 
     return maps.map(({ _count, ...map }) => ({
       ...map,
       layerCount: layerCounts.get(map.name) ?? 0,
-      groupCount: _count.groups,
+      groupCount: contents.get(map.name)?.groups.size ?? 0,
       toolCount: _count.tools,
       projectionCount: _count.projections,
     }));
   }
 
   /**
-   * Counts catalog layers that would show as Active on the map layers tab —
-   * unique layer ids among LayerInstances stamped with that map. The
-   * layerswitcher tree is shared; instances are not.
+   * Counts the layers each map uses: those its tree shows, its background
+   * layers, and the search and editing layers it uses — each once.
    */
   private async countLayersByMapNames(mapNames: string[]) {
-    const layerIdsByMap = new Map(
-      mapNames.map((name) => [name, new Set<string>()] as const),
-    );
     if (mapNames.length === 0) {
-      return new Map(mapNames.map((name) => [name, 0]));
+      return new Map<string, number>();
     }
 
-    const instances = await prisma.layerInstance.findMany({
-      where: activeLayerInstancesForMapsWhere(mapNames),
-      select: {
-        displayLayerId: true,
-        searchLayerId: true,
-        editingLayerId: true,
-        map: { select: { name: true } },
-      },
-    });
+    const [contents, instances] = await Promise.all([
+      LayerTreeService.getMapContents(),
+      prisma.layerInstance.findMany({
+        where: activeLayerInstancesForMapsWhere(mapNames),
+        select: {
+          displayLayerId: true,
+          searchLayerId: true,
+          editingLayerId: true,
+          map: { select: { name: true } },
+        },
+      }),
+    ]);
 
+    const layerIdsByMap = new Map(
+      mapNames.map(
+        (name) =>
+          [name, new Set<string>(contents.get(name)?.layers.keys())] as const
+      )
+    );
     for (const instance of instances) {
       const layerId =
         instance.displayLayerId ??
@@ -235,7 +192,7 @@ class MapService {
     }
 
     return new Map(
-      [...layerIdsByMap.entries()].map(([name, ids]) => [name, ids.size]),
+      [...layerIdsByMap.entries()].map(([name, ids]) => [name, ids.size])
     );
   }
 
@@ -328,10 +285,6 @@ class MapService {
         layers: {
           include: layerInstanceIncludeAll,
         },
-        groups: {
-          where: { group: { deletedAt: null } },
-          include: { group: { include: { layers: true } } },
-        },
       },
     });
 
@@ -371,30 +324,9 @@ class MapService {
   }
 
   /**
-   * Get all groups for a map, including nested groups. Note that the
-   * tree structure is flattened into a single list of groups.
-   * @param mapName - The name of the map.
-   * @returns - A flat list of groups connected to the map.
+   * The layers placed directly on the map: its background layers and the
+   * search and editing layers it uses.
    */
-  async getGroupsForMap(mapName: string) {
-    const allGroups = await prisma.groupsOnMaps.findMany({
-      where: {
-        mapName: mapName,
-        group: { deletedAt: null },
-      },
-      include: {
-        group: {
-          select: { internalName: true },
-        },
-      },
-    });
-
-    return allGroups.map(({ group, ...placement }) => ({
-      ...placement,
-      internalName: group.internalName,
-    }));
-  }
-
   async getLayersForMap(mapName: string) {
     const instances = await prisma.layerInstance.findMany({
       where: activeLayerInstancesForMapWhere(mapName),
@@ -404,8 +336,6 @@ class MapService {
 
     return instances
       .map((instance) => {
-        // Source info lets the admin tell map-direct layers (mapId set) apart
-        // from layers inherited via a group (groupId set).
         const source = {
           mapId: instance.mapId,
           groupId: instance.groupId,
@@ -504,611 +434,17 @@ class MapService {
   }
 
   /**
-   * Replaces the map's directly-attached layers (LayerInstance rows with
-   * `mapId`). Layers placed inside groups are untouched. Order is stored in
-   * `zIndex` (falls back to array position).
-   *
-   * FOREGROUND (and unset usage) rows are replaced when the payload includes
-   * FOREGROUND entries, or when it contains no BACKGROUND entries (draw-order
-   * / Kartinnehåll). BACKGROUND rows are replaced only when the payload
-   * includes BACKGROUND entries or `replaceBackground` is true — so FOREGROUND
-   * saves cannot wipe baselayers, and BACKGROUND-only saves cannot wipe
-   * FOREGROUND draw-order layers.
+   * Replaces the search and editing layers the map uses, in the order sent.
+   * Layers it keeps keep their instance (and id). Its display layers are its
+   * tree and its background, saved with the tree (PUT /maps/:mapName/layer-tree).
    */
-  async updateMapLayers(
-    mapName: string,
-    layers: MapLayerInput[],
-    options?: ReplaceDirectMapLayersOptions
-  ) {
+  async updateMapLayers(mapName: string, layers: MapLayerInput[]) {
     const map = await this.requireMapByName(mapName);
-    await this.replaceDirectMapLayers(map.id, layers, options);
-  }
-
-  /**
-   * Replaces the map's group placements (GroupsOnMaps). Supports nesting via
-   * `parentGroupId`; entries referenced as a parent must carry an explicit
-   * `id`. Missing names default to the group's own name.
-   */
-  async updateMapGroups(mapName: string, groups: MapGroupInput[]) {
-    await this.requireMapByName(mapName);
-    await this.replaceMapGroups(mapName, groups);
-  }
-
-  /**
-   * Replaces direct map layers and group placements in one transaction
-   * (admin Kartinnehåll save). BACKGROUND map instances are preserved unless
-   * the layers payload explicitly includes BACKGROUND entries.
-   */
-  async updateMapContent(
-    mapName: string,
-    content: { layers: MapLayerInput[]; groups: MapGroupInput[] }
-  ) {
-    const map = await this.requireMapByName(mapName);
-    await this.validateMapGroupPlacements(content.groups);
-    await prisma.$transaction(async (tx) => {
-      await this.replaceDirectMapLayersInTransaction(
-        tx,
-        map.id,
-        content.layers
-      );
-      await this.replaceMapGroupsInTransaction(tx, mapName, content.groups);
-    });
-  }
-
-  async getMapContent(mapName: string) {
-    const [layers, groups] = await Promise.all([
-      this.getLayersForMap(mapName),
-      this.getGroupsForMap(mapName),
-    ]);
-    return { layers, groups };
-  }
-
-  async getMapLayerSwitcher(mapName: string) {
-    await this.requireMapByName(mapName);
-    return buildLayerSwitcherAdminStateForMap(mapName);
-  }
-
-  /**
-   * Replaces this map's map layer placements and its own LayerInstances
-   * (group rows stamped with this mapId, plus background). The layerswitcher
-   * tool and its layerorder tree stay shared. Other maps' instances are
-   * left unchanged.
-   */
-  async updateMapLayerSwitcher(
-    mapName: string,
-    content: {
-      groups: LayerSwitcherWriteGroup[];
-      baselayers: MapLayerInput[];
-    },
-    userId?: string
-  ) {
-    const map = await this.requireMapByName(mapName);
-    const { placements, groupLayers } = flattenLayerSwitcherGroupsForWrite(
-      content.groups ?? []
-    );
-
-    const groupIds = Array.from(new Set(placements.map((p) => p.groupId)));
-    if (groupIds.length > 0) {
-      const groupRecords = await prisma.group.findMany({
-        where: { id: { in: groupIds }, deletedAt: null },
-        select: { id: true, name: true, type: true },
-      });
-      const knownIds = new Set(groupRecords.map((g) => g.id));
-      for (const groupId of groupIds) {
-        if (!knownIds.has(groupId)) {
-          throw new HajkError(
-            HttpStatusCodes.BAD_REQUEST,
-            `Unknown group id: ${groupId}`,
-            HajkStatusCodes.INVALID_REQUEST_BODY
-          );
-        }
-      }
-    }
-
-    const mapGroupInputs: MapGroupInput[] = placements.map((placement) => ({
-      id: placement.id,
-      groupId: placement.groupId,
-      parentGroupId: placement.parentGroupId,
-      usage: placement.usage,
-      name: placement.name,
-      toggled: placement.toggled,
-      expanded: placement.expanded,
-      exclusive: placement.exclusive,
-      infoDocument: placement.infoDocument,
-      index: placement.index,
-      metadata: placement.metadata,
-    }));
-
-    const backgroundLayers: MapLayerInput[] = (content.baselayers ?? []).map(
-      (layer, index) => ({
-        layerId: layer.layerId,
-        usage: UseType.BACKGROUND,
-        visibleAtStart: layer.visibleAtStart ?? false,
-        infoClickActive: layer.infoClickActive ?? true,
-        zIndex: layer.zIndex ?? index,
-        infobox: layer.infobox ?? "",
-      })
-    );
-
-    await prisma.$transaction(async (tx) => {
-      await this.replaceMapGroupsInTransaction(tx, mapName, mapGroupInputs);
-
-      const placedCatalogIds = new Set<string>();
-
-      for (const entry of groupLayers) {
-        const layerCreates: Prisma.LayerInstanceCreateManyInput[] = [];
-        for (const [index, layer] of entry.layers.entries()) {
-          // One instance per catalog layer on this map, even if the tree
-          // lists it under more than one group.
-          if (placedCatalogIds.has(layer.layerId)) {
-            continue;
-          }
-          placedCatalogIds.add(layer.layerId);
-          const resolved = await resolveLayerPlacementById(layer.layerId);
-          if (!resolved.ok) {
-            throw new HajkError(
-              HttpStatusCodes.BAD_REQUEST,
-              resolved.reason === "deleted"
-                ? `Layer "${layer.layerId}" is deleted and cannot be placed in a group`
-                : `Unknown layer id: ${layer.layerId}`,
-              resolved.reason === "deleted"
-                ? HajkStatusCodes.INVALID_REQUEST_BODY
-                : HajkStatusCodes.UNKNOWN_LAYER_ID
-            );
-          }
-          const kind = resolved.kind;
-          const baseOptions =
-            layer.options &&
-            typeof layer.options === "object" &&
-            !Array.isArray(layer.options)
-              ? { ...layer.options }
-              : {};
-          // Persist Lagerordning sibling order on the first instance (same
-          // pattern as groups.service). Without this, GET rebuilds layers[]
-          // sorted by zIndex/drawOrder and the tree jumps after save.
-          const options =
-            index === 0 && entry.layerSwitcherTree.length > 0
-              ? {
-                  ...baseOptions,
-                  layerSwitcherTree: entry.layerSwitcherTree,
-                }
-              : baseOptions;
-          layerCreates.push({
-            // Active layers keep their map. Tree placement also sets the parent group.
-            mapId: map.id,
-            groupId: entry.groupId,
-            usage: UseType.FOREGROUND,
-            visibleAtStart: layer.visibleAtStart,
-            zIndex: layer.zIndex ?? index,
-            infoClickActive: true,
-            options: options as Prisma.InputJsonValue,
-            displayLayerId: kind === "display" ? layer.layerId : undefined,
-            searchLayerId: kind === "search" ? layer.layerId : undefined,
-            editingLayerId: kind === "editing" ? layer.layerId : undefined,
-          });
-          assertExactlyOneLayerParent(layerCreates[layerCreates.length - 1]);
-        }
-
-        // Same group and layerswitcher tree can be used on many maps.
-        // Only this map's instances are replaced. Drop every existing row for
-        // these catalog layers on this map so a previous group cannot leave
-        // a duplicate.
-        await tx.layerInstance.deleteMany({
-          where: { groupId: entry.groupId, mapId: map.id },
-        });
-
-        const placedLayerIds = layerCreates.flatMap((row) => {
-          const catalogId =
-            row.displayLayerId ?? row.searchLayerId ?? row.editingLayerId;
-          return catalogId ? [catalogId] : [];
-        });
-        await this.deleteMapInstancesByCatalogIds(tx, map.id, placedLayerIds);
-        if (layerCreates.length > 0) {
-          await tx.layerInstance.createMany({ data: layerCreates });
-        }
-        await tx.group.update({
-          where: { id: entry.groupId },
-          data: {
-            lastSavedBy: userId,
-            lastSavedDate: new Date(),
-          },
-        });
-      }
-
-      const backgroundOnly = backgroundLayers.filter(
-        (layer) => !placedCatalogIds.has(layer.layerId)
-      );
-      await this.deleteMapInstancesByCatalogIds(
-        tx,
-        map.id,
-        backgroundOnly.map((layer) => layer.layerId)
-      );
-      await this.replaceDirectMapLayersInTransaction(
-        tx,
-        map.id,
-        backgroundOnly,
-        { replaceBackground: true }
-      );
-
-      const keptLayerIds = new Set<string>();
-      for (const entry of groupLayers) {
-        for (const layer of entry.layers) {
-          keptLayerIds.add(layer.layerId);
-        }
-      }
-      for (const layer of backgroundLayers) {
-        keptLayerIds.add(layer.layerId);
-      }
-      await this.deleteMapLayerInstancesExcept(tx, map.id, keptLayerIds);
-      await this.dedupeMapLayerInstances(tx, map.id);
-    });
-
-    await this.syncLayerSwitcherContentInToolOptions(
-      mapName,
-      content.groups ?? [],
-      backgroundLayers
-    );
-  }
-
-  /**
-   * Mirror Kartlager groups + Bakgrund into the map's layerswitcher Tool.options
-   * (legacy map JSON shape: groups[].layers[].drawOrder, baselayers[]).
-   */
-  private async syncLayerSwitcherContentInToolOptions(
-    mapName: string,
-    groups: LayerSwitcherWriteGroup[],
-    baselayers: MapLayerInput[]
-  ) {
-    const entry = await prisma.toolsOnMaps.findFirst({
-      where: {
-        mapName,
-        active: true,
-        tool: { type: "layerswitcher", deletedAt: null },
-      },
-      select: {
-        toolId: true,
-        tool: { select: { options: true } },
-      },
-    });
-
-    if (!entry) {
-      return;
-    }
-
-    const groupsForOptions = this.toLayerSwitcherToolOptionGroups(groups);
-
-    const baselayersForOptions = baselayers.map((layer, index) => ({
-      id: layer.layerId,
-      drawOrder: layer.zIndex ?? index,
-      visibleAtStart: layer.visibleAtStart ?? false,
-      infobox: layer.infobox ?? "",
-    }));
-
-    const currentOptions =
-      entry.tool.options &&
-      typeof entry.tool.options === "object" &&
-      !Array.isArray(entry.tool.options)
-        ? (entry.tool.options as Record<string, unknown>)
-        : {};
-
-    await prisma.tool.update({
-      where: { id: entry.toolId },
-      data: {
-        options: {
-          ...currentOptions,
-          groups: groupsForOptions,
-          baselayers: baselayersForOptions,
-        } as Prisma.InputJsonValue,
-        lastSavedDate: new Date(),
-      },
-    });
-  }
-
-  /** Nested groups for Tool.options — sibling order via `index` on layers/groups. */
-  private toLayerSwitcherToolOptionGroups(
-    groups: LayerSwitcherWriteGroup[],
-    parentId = "-1"
-  ): Prisma.InputJsonObject[] {
-    return groups.map((group) => {
-      const siblingOrder =
-        group.layerSwitcherTree && group.layerSwitcherTree.length > 0
-          ? group.layerSwitcherTree.map((entry) =>
-              entry.type === "layer"
-                ? { type: "layer" as const, id: entry.id }
-                : { type: "group" as const, id: entry.id }
-            )
-          : buildSiblingOrderFromLayersAndGroups(
-              group.layers ?? [],
-              group.groups ?? []
-            );
-      const indexById = new Map(
-        siblingOrder.map((entry, index) => [entry.id, index])
-      );
-
-      const layers = (group.layers ?? []).map((layer) => ({
-        id: layer.id,
-        index: indexById.get(layer.id) ?? layer.index ?? 0,
-        drawOrder: layer.drawOrder ?? 1000,
-        visibleAtStart: Boolean(layer.visibleAtStart),
-        infobox: layer.infobox ?? "",
-      }));
-      const nestedGroups = this.toLayerSwitcherToolOptionGroups(
-        group.groups ?? [],
-        group.id
-      ).map((nested) => {
-        const nestedId = String(nested.id);
-        return {
-          ...nested,
-          index: indexById.get(nestedId) ?? nested.index ?? 0,
-        };
-      });
-
-      return {
-        id: group.id,
-        type: "group",
-        name: group.name ?? "",
-        toggled: Boolean(group.toggled),
-        expanded: Boolean(group.expanded),
-        exclusive: Boolean(group.exclusive),
-        parent: group.parent ?? parentId,
-        infogroupvisible: Boolean(group.infogroupvisible),
-        infogrouptitle: group.infogrouptitle ?? "",
-        infogrouptext: group.infogrouptext ?? "",
-        infogroupurl: group.infogroupurl ?? "",
-        infogroupurltext: group.infogroupurltext ?? "",
-        infogroupopendatalink: group.infogroupopendatalink ?? "",
-        infogroupowner: group.infogroupowner ?? "",
-        layers,
-        groups: nestedGroups,
-      };
-    });
-  }
-
-  /** Deletes this map's instances for the given catalog layer ids, any group. */
-  private async deleteMapInstancesByCatalogIds(
-    tx: Prisma.TransactionClient,
-    mapId: number,
-    catalogIds: string[]
-  ) {
-    if (catalogIds.length === 0) {
-      return;
-    }
-    await tx.layerInstance.deleteMany({
-      where: {
-        mapId,
-        OR: [
-          { displayLayerId: { in: catalogIds } },
-          { searchLayerId: { in: catalogIds } },
-          { editingLayerId: { in: catalogIds } },
-        ],
-      },
-    });
-  }
-
-  /**
-   * One LayerInstance per catalog layer on a map. Keeps a grouped row when
-   * one exists, otherwise the first row.
-   */
-  private async dedupeMapLayerInstances(
-    tx: Prisma.TransactionClient,
-    mapId: number
-  ) {
-    const instances = await tx.layerInstance.findMany({
-      where: { mapId },
-      select: {
-        id: true,
-        displayLayerId: true,
-        searchLayerId: true,
-        editingLayerId: true,
-        groupId: true,
-      },
-    });
-    const byCatalogId = new Map<string, typeof instances>();
-    for (const instance of instances) {
-      const catalogId =
-        instance.displayLayerId ??
-        instance.searchLayerId ??
-        instance.editingLayerId;
-      if (!catalogId) {
-        continue;
-      }
-      const list = byCatalogId.get(catalogId) ?? [];
-      list.push(instance);
-      byCatalogId.set(catalogId, list);
-    }
-    const removeIds: string[] = [];
-    for (const list of byCatalogId.values()) {
-      if (list.length < 2) {
-        continue;
-      }
-      const keep = list.find((row) => row.groupId != null) ?? list[0];
-      for (const row of list) {
-        if (row.id !== keep.id) {
-          removeIds.push(row.id);
-        }
-      }
-    }
-    if (removeIds.length === 0) {
-      return;
-    }
-    await tx.layerInstance.deleteMany({
-      where: { id: { in: removeIds } },
-    });
-  }
-
-  /** Removes this map's LayerInstances whose catalog layer is not in `keptLayerIds`. */
-  private async deleteMapLayerInstancesExcept(
-    tx: Prisma.TransactionClient,
-    mapId: number,
-    keptLayerIds: Set<string>
-  ) {
-    const instances = await tx.layerInstance.findMany({
-      where: { mapId },
-      select: {
-        id: true,
-        displayLayerId: true,
-        searchLayerId: true,
-        editingLayerId: true,
-      },
-    });
-    const removeIds = instances
-      .filter((instance) => {
-        const catalogId =
-          instance.displayLayerId ??
-          instance.searchLayerId ??
-          instance.editingLayerId;
-        return catalogId == null || !keptLayerIds.has(catalogId);
-      })
-      .map((instance) => instance.id);
-    if (removeIds.length === 0) {
-      return;
-    }
-    await tx.layerInstance.deleteMany({
-      where: { id: { in: removeIds } },
-    });
-  }
-
-  private async replaceDirectMapLayers(
-    mapId: number,
-    layers: MapLayerInput[],
-    options?: ReplaceDirectMapLayersOptions
-  ) {
-    await prisma.$transaction(async (tx) => {
-      await this.replaceDirectMapLayersInTransaction(
-        tx,
-        mapId,
-        layers,
-        options
-      );
-    });
-  }
-
-  private async replaceDirectMapLayersInTransaction(
-    tx: Prisma.TransactionClient,
-    mapId: number,
-    layers: MapLayerInput[],
-    options?: ReplaceDirectMapLayersOptions
-  ) {
-    const foreground = layers.filter(
-      (layer) => (layer.usage ?? UseType.FOREGROUND) !== UseType.BACKGROUND
-    );
-    const background = layers.filter(
-      (layer) => layer.usage === UseType.BACKGROUND
-    );
-    const hasForegroundInPayload = foreground.length > 0;
-    const hasBackgroundInPayload = background.length > 0;
-    const replaceBackground =
-      options?.replaceBackground === true || hasBackgroundInPayload;
-    const replaceForeground =
-      options?.replaceForeground === true ||
-      hasForegroundInPayload ||
-      (!replaceBackground && !hasBackgroundInPayload);
-
-    const toCreate: Prisma.LayerInstanceCreateManyInput[] = [];
-    if (replaceForeground) {
-      const mapRecord = await tx.map.findUnique({
-        where: { id: mapId },
-        select: { name: true },
-      });
-      const mapGroupIds =
-        mapRecord != null
-          ? [
-              ...new Set(
-                (
-                  await tx.groupsOnMaps.findMany({
-                    where: { mapName: mapRecord.name },
-                    select: { groupId: true },
-                  })
-                ).map((row) => row.groupId)
-              ),
-            ]
-          : [];
-
-      const activeCatalogIds = new Set(layers.map((layer) => layer.layerId));
-      const activeCatalogIdList = [...activeCatalogIds];
-
-      const catalogStillActiveFilter = (): Prisma.LayerInstanceWhereInput => {
-        if (activeCatalogIds.size === 0) {
-          return {};
-        }
-        return {
-          OR: [
-            { displayLayerId: { in: activeCatalogIdList } },
-            { searchLayerId: { in: activeCatalogIdList } },
-            { editingLayerId: { in: activeCatalogIdList } },
-          ],
-        };
-      };
-
-      // The active tree decides which LayerInstances belong to this map.
-      // Drop every instance stamped with this mapId whose catalog layer is
-      // no longer in that set, including ones placed in a group.
-      if (activeCatalogIds.size === 0) {
-        await tx.layerInstance.deleteMany({ where: { mapId } });
-      } else {
-        await tx.layerInstance.deleteMany({
-          where: {
-            mapId,
-            NOT: catalogStillActiveFilter(),
-          },
-        });
-      }
-
-      // Replace map-direct FOREGROUND rows (group placements are left intact).
-      await tx.layerInstance.deleteMany({
-        where: {
-          mapId,
-          groupId: null,
-          OR: [{ usage: UseType.FOREGROUND }, { usage: null }],
-        },
-      });
-
-      const groupPlacedCatalogIds = new Set<string>();
-      if (mapGroupIds.length > 0) {
-        const remainingGroupInstances = await tx.layerInstance.findMany({
-          where: { mapId, groupId: { in: mapGroupIds } },
-          select: {
-            displayLayerId: true,
-            searchLayerId: true,
-            editingLayerId: true,
-          },
-        });
-        for (const instance of remainingGroupInstances) {
-          const catalogId =
-            instance.displayLayerId ??
-            instance.searchLayerId ??
-            instance.editingLayerId;
-          if (catalogId) {
-            groupPlacedCatalogIds.add(catalogId);
-          }
-        }
-      }
-
-      const foregroundWithoutGroup = foreground.filter(
-        (layer) => !groupPlacedCatalogIds.has(layer.layerId)
-      );
-      toCreate.push(
-        ...(await this.buildDirectMapLayerRows(mapId, foregroundWithoutGroup))
-      );
-    }
-    if (replaceBackground) {
-      await tx.layerInstance.deleteMany({
-        where: { mapId, groupId: null, usage: UseType.BACKGROUND },
-      });
-      toCreate.push(...(await this.buildDirectMapLayerRows(mapId, background)));
-    }
-
-    if (toCreate.length > 0) {
-      await tx.layerInstance.createMany({ data: toCreate });
-    }
-    await this.dedupeMapLayerInstances(tx, mapId);
-  }
-
-  private async buildDirectMapLayerRows(
-    mapId: number,
-    layers: MapLayerInput[]
-  ): Promise<Prisma.LayerInstanceCreateManyInput[]> {
-    const data: Prisma.LayerInstanceCreateManyInput[] = [];
+    const wanted: {
+      layerId: string;
+      kind: "search" | "editing";
+      zIndex: number;
+    }[] = [];
     for (const [index, layer] of layers.entries()) {
       const resolved = await resolveLayerPlacementById(layer.layerId);
       if (!resolved.ok) {
@@ -1122,144 +458,67 @@ class MapService {
             : HajkStatusCodes.UNKNOWN_LAYER_ID
         );
       }
-      const kind = resolved.kind;
-      const row = {
-        mapId,
-        displayLayerId: kind === "display" ? layer.layerId : undefined,
-        searchLayerId: kind === "search" ? layer.layerId : undefined,
-        editingLayerId: kind === "editing" ? layer.layerId : undefined,
-        usage: layer.usage ?? UseType.FOREGROUND,
-        visibleAtStart: layer.visibleAtStart ?? false,
-        infoClickActive: layer.infoClickActive ?? true,
+      if (resolved.kind === "display") {
+        throw new HajkError(
+          HttpStatusCodes.BAD_REQUEST,
+          `Layer "${layer.layerId}" is a display layer: a map's display layers are in its layer tree and background`,
+          HajkStatusCodes.INVALID_REQUEST_BODY
+        );
+      }
+      wanted.push({
+        layerId: layer.layerId,
+        kind: resolved.kind,
         zIndex: layer.zIndex ?? index,
-        options:
-          layer.infobox != null
-            ? toInputJsonValue({ infobox: layer.infobox })
-            : undefined,
-      };
-      assertExactlyOneLayerParent(row);
-      data.push(row);
+      });
     }
-    return data;
-  }
 
-  private async validateMapGroupPlacements(groups: MapGroupInput[]) {
-    const groupIds = Array.from(new Set(groups.map((g) => g.groupId)));
-    if (groupIds.length === 0) {
-      return;
-    }
-    const groupRecords = await prisma.group.findMany({
-      where: { id: { in: groupIds }, deletedAt: null },
-      select: { id: true },
-    });
-    const knownIds = new Set(groupRecords.map((g) => g.id));
-    for (const group of groups) {
-      if (!knownIds.has(group.groupId)) {
-        throw new HajkError(
-          HttpStatusCodes.BAD_REQUEST,
-          `Unknown group id: ${group.groupId}`,
-          HajkStatusCodes.INVALID_REQUEST_BODY
-        );
-      }
-    }
-  }
-
-  private async replaceMapGroups(mapName: string, groups: MapGroupInput[]) {
-    const groupIds = Array.from(new Set(groups.map((g) => g.groupId)));
-    const groupRecords =
-      groupIds.length > 0
-        ? await prisma.group.findMany({
-            where: { id: { in: groupIds }, deletedAt: null },
-            select: { id: true, name: true },
-          })
-        : [];
-    const nameById = new Map(groupRecords.map((g) => [g.id, g.name]));
-    await this.validateMapGroupPlacements(groups);
     await prisma.$transaction(async (tx) => {
-      await this.replaceMapGroupsInTransaction(tx, mapName, groups, nameById);
-    });
-  }
-
-  private async replaceMapGroupsInTransaction(
-    tx: Prisma.TransactionClient,
-    mapName: string,
-    groups: MapGroupInput[],
-    nameById?: Map<string, string>
-  ) {
-    const names =
-      nameById ??
-      new Map(
-        (
-          await tx.group.findMany({
-            where: {
-              id: { in: Array.from(new Set(groups.map((g) => g.groupId))) },
-              deletedAt: null,
-            },
-            select: { id: true, name: true },
-          })
-        ).map((g) => [g.id, g.name])
-      );
-
-    await tx.groupsOnMaps.deleteMany({ where: { mapName } });
-
-    const pending = [...groups];
-    const createdIds = new Set<string>();
-
-    while (pending.length > 0) {
-      const batch = pending.filter(
-        (entry) => !entry.parentGroupId || createdIds.has(entry.parentGroupId)
-      );
-
-      if (batch.length === 0) {
-        throw new HajkError(
-          HttpStatusCodes.BAD_REQUEST,
-          "Invalid groups-on-maps parent references.",
-          HajkStatusCodes.INVALID_REQUEST_BODY
-        );
+      const existing = await tx.layerInstance.findMany({
+        where: { mapId: map.id, displayLayerId: null },
+        select: { id: true, searchLayerId: true, editingLayerId: true },
+      });
+      const instanceOf = new Map<string, string>();
+      for (const instance of existing) {
+        const layerId = instance.searchLayerId ?? instance.editingLayerId;
+        if (layerId && !instanceOf.has(layerId)) {
+          instanceOf.set(layerId, instance.id);
+        }
       }
-
-      for (const entry of batch) {
-        let metadataId: string | undefined;
-        if (entry.metadata) {
-          const createdMetadata = await tx.metadata.create({
-            data: {
-              title: entry.metadata.title ?? "",
-              description: entry.metadata.description ?? "",
-              owner: entry.metadata.owner ?? "",
-              url: entry.metadata.url ?? "",
-              urlTitle: entry.metadata.urlTitle ?? "",
-              urlOpenData: entry.metadata.urlOpenData ?? "",
-            },
+      const kept = new Set<string>();
+      const created: Prisma.LayerInstanceCreateManyInput[] = [];
+      for (const layer of wanted) {
+        const id = instanceOf.get(layer.layerId);
+        if (id && !kept.has(id)) {
+          kept.add(id);
+          await tx.layerInstance.update({
+            where: { id },
+            data: { zIndex: layer.zIndex },
           });
-          metadataId = createdMetadata.id;
+          continue;
         }
-
-        const created = await tx.groupsOnMaps.create({
-          data: {
-            ...(entry.id ? { id: entry.id } : {}),
-            mapName,
-            groupId: entry.groupId,
-            parentGroupId: entry.parentGroupId ?? null,
-            usage: entry.usage ?? UseType.FOREGROUND,
-            name: entry.name ?? names.get(entry.groupId) ?? "",
-            toggled: entry.toggled ?? false,
-            expanded: entry.expanded ?? false,
-            exclusive: entry.exclusive ?? false,
-            infoDocument: entry.infoDocument ?? false,
-            ...(metadataId ? { metadataId } : {}),
-            index: entry.index ?? 0,
+        const row = {
+          mapId: map.id,
+          searchLayerId: layer.kind === "search" ? layer.layerId : undefined,
+          editingLayerId: layer.kind === "editing" ? layer.layerId : undefined,
+          infoClickActive: false,
+          zIndex: layer.zIndex,
+        };
+        assertExactlyOneLayerParent(row);
+        created.push(row);
+      }
+      await tx.layerInstance.deleteMany({
+        where: {
+          id: {
+            in: existing
+              .map((instance) => instance.id)
+              .filter((id) => !kept.has(id)),
           },
-        });
-        createdIds.add(created.id);
+        },
+      });
+      if (created.length > 0) {
+        await tx.layerInstance.createMany({ data: created });
       }
-
-      for (const entry of batch) {
-        const index = pending.indexOf(entry);
-        if (index !== -1) {
-          pending.splice(index, 1);
-        }
-      }
-    }
+    });
   }
 
   async createMap(data: MapWriteInput, userId?: string) {
@@ -1398,24 +657,20 @@ class MapService {
       );
     }
 
-    // Remove the map together with its per-map placements only.
-    // Shared Group composition LayerInstances may historically carry this
-    // map's mapId (hybrid mapId+groupId rows) — clear that stamp instead of
-    // deleting them, so other maps that reuse the same groups keep their
-    // Active layers. Shared catalog entities (layers, tools, groups,
+    // Remove the map together with what belongs to it: its layer instances,
+    // its tree with its exceptions, settings and draw order, and its tool
+    // placements. Shared catalog entities (layers, tools, groups,
     // projections) are kept. RoleOnMap / DocumentFolder / Document cascade.
     const deletedAt = new Date();
 
     await prisma.$transaction([
-      prisma.layerInstance.deleteMany({
-        where: { mapId: map.id, groupId: null },
-      }),
-      prisma.layerInstance.updateMany({
-        where: { mapId: map.id, groupId: { not: null } },
-        data: { mapId: null },
-      }),
+      prisma.layerInstance.deleteMany({ where: { mapId: map.id } }),
+      prisma.mapTreeItem.deleteMany({ where: { mapName } }),
+      prisma.mapGroupException.deleteMany({ where: { mapName } }),
+      prisma.mapDrawOrderItem.deleteMany({ where: { mapName } }),
+      prisma.mapGroupSetting.deleteMany({ where: { mapName } }),
+      prisma.mapLayerSetting.deleteMany({ where: { mapName } }),
       prisma.toolsOnMaps.deleteMany({ where: { mapName } }),
-      prisma.groupsOnMaps.deleteMany({ where: { mapName } }),
       prisma.roleOnMap.deleteMany({ where: { mapId: map.id } }),
       prisma.theme.updateMany({
         where: { mapName, deletedAt: null },
@@ -1463,10 +718,11 @@ class MapService {
           where: activeLayerInstanceWhere,
           include: { restrictedToRoles: true },
         },
-        groups: {
-          where: { group: { deletedAt: null } },
-          include: { metadata: true },
-        },
+        treeItems: true,
+        groupExceptions: true,
+        drawOrderItems: true,
+        groupSettings: true,
+        layerSettings: true,
         themes: { where: { deletedAt: null } },
       },
     });
@@ -1525,108 +781,51 @@ class MapService {
           });
         }
 
-        if (includeGroups && source.groups.length > 0) {
-          // Groups are a shared catalog. Map duplicate only copies the
-          // GroupsOnMaps placement tree and reuses the same group ids —
-          // never creates new Group rows (that produced same-name duplicates
-          // on the Groups page).
-          const uniqueGroupIds = [
-            ...new Set(source.groups.map((entry) => entry.groupId)),
-          ];
-          const existingGroups = await tx.group.findMany({
-            where: { id: { in: uniqueGroupIds }, deletedAt: null },
-            select: { id: true },
-          });
-          const knownGroupIds = new Set(
-            existingGroups.map((group) => group.id)
-          );
-
-          for (const groupId of uniqueGroupIds) {
-            if (!knownGroupIds.has(groupId)) {
-              throw new HajkError(
-                HttpStatusCodes.BAD_REQUEST,
-                `Group "${groupId}" referenced by map "${sourceMapName}" could not be duplicated.`,
-                HajkStatusCodes.INVALID_REQUEST_BODY
-              );
-            }
-          }
-
-          const groupsOnMapsIdMap = new Map<string, string>();
-          const pendingGroupsOnMaps = [...source.groups];
-
-          while (pendingGroupsOnMaps.length > 0) {
-            const batch = pendingGroupsOnMaps.filter(
-              (entry) =>
-                !entry.parentGroupId ||
-                groupsOnMapsIdMap.has(entry.parentGroupId)
+        if (includeGroups) {
+          // The map's tree (groups are a shared catalog, linked by id), its
+          // exceptions to the groups, its settings for them and its draw
+          // order.
+          const forNewMap = <Row extends { id: string; mapName: string }>(
+            rows: Row[]
+          ) =>
+            rows.map(
+              (row) =>
+                Object.fromEntries(
+                  Object.entries({ ...row, mapName: name }).filter(
+                    ([key]) => key !== "id"
+                  )
+                ) as Omit<Row, "id">
             );
-
-            if (batch.length === 0) {
-              throw new HajkError(
-                HttpStatusCodes.BAD_REQUEST,
-                "Invalid groups-on-maps parent references in source map.",
-                HajkStatusCodes.INVALID_REQUEST_BODY
-              );
-            }
-
-            for (const entry of batch) {
-              const newGroupOnMapId = randomUUID();
-              let metadataId: string | undefined;
-
-              if (entry.metadata) {
-                const createdMetadata = await tx.metadata.create({
-                  data: {
-                    title: entry.metadata.title ?? "",
-                    description: entry.metadata.description ?? "",
-                    owner: entry.metadata.owner ?? "",
-                    url: entry.metadata.url ?? "",
-                    urlTitle: entry.metadata.urlTitle ?? "",
-                    urlOpenData: entry.metadata.urlOpenData ?? "",
-                  },
-                });
-                metadataId = createdMetadata.id;
-              }
-
-              await tx.groupsOnMaps.create({
-                data: {
-                  id: newGroupOnMapId,
-                  mapName: name,
-                  groupId: entry.groupId,
-                  parentGroupId: entry.parentGroupId
-                    ? (groupsOnMapsIdMap.get(entry.parentGroupId) ?? null)
-                    : null,
-                  usage: entry.usage,
-                  name: entry.name,
-                  toggled: entry.toggled,
-                  expanded: entry.expanded,
-                  exclusive: entry.exclusive,
-                  infoDocument: entry.infoDocument,
-                  index: entry.index,
-                  layerVisibleAtStart: entry.layerVisibleAtStart,
-                  layerInfoBox: entry.layerInfoBox,
-                  ...(metadataId ? { metadataId } : {}),
-                },
-              });
-              groupsOnMapsIdMap.set(entry.id, newGroupOnMapId);
-            }
-
-            for (const entry of batch) {
-              const index = pendingGroupsOnMaps.indexOf(entry);
-              if (index !== -1) {
-                pendingGroupsOnMaps.splice(index, 1);
-              }
-            }
+          if (source.treeItems.length > 0) {
+            await tx.mapTreeItem.createMany({
+              data: forNewMap(source.treeItems),
+            });
+          }
+          if (source.groupExceptions.length > 0) {
+            await tx.mapGroupException.createMany({
+              data: forNewMap(source.groupExceptions),
+            });
+          }
+          if (source.drawOrderItems.length > 0) {
+            await tx.mapDrawOrderItem.createMany({
+              data: forNewMap(source.drawOrderItems),
+            });
+          }
+          if (source.groupSettings.length > 0) {
+            await tx.mapGroupSetting.createMany({
+              data: forNewMap(source.groupSettings),
+            });
+          }
+          if (source.layerSettings.length > 0) {
+            await tx.mapLayerSetting.createMany({
+              data: forNewMap(source.layerSettings),
+            });
           }
         }
 
         if (includeLayers) {
-          // Group composition LayerInstances are owned by the shared Group —
-          // only copy map-direct placements onto the new map.
+          // Its background layers, and the search and editing layers it uses.
           for (const layer of source.layers) {
-            if (layer.groupId) {
-              continue;
-            }
-
             const createdLayer = await tx.layerInstance.create({
               data: {
                 displayLayerId: layer.displayLayerId,

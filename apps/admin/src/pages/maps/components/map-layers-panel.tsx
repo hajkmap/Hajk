@@ -13,10 +13,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import LayerKindBadge from "../../layers/components/layer-kind-badge";
-import {
-  supportsBackground,
-  type MapLayerActivationRow,
-} from "../map-layer-activation";
+import type { MapLayerActivationRow } from "../map-layer-activation";
 
 interface MapLayersPanelProps {
   rows: MapLayerActivationRow[];
@@ -42,21 +39,9 @@ export default function MapLayersPanel({
     visibleRows.length > 0 && visibleRows.every((row) => row.active);
   const someVisibleActive = visibleRows.some((row) => row.active);
 
-  const updateRow = (
-    layerId: string,
-    patch: Partial<Pick<MapLayerActivationRow, "active" | "isBackground">>,
-  ) => {
+  const updateRow = (layerId: string, active: boolean) => {
     onRowsChange(
-      rows.map((row) => {
-        if (row.layerId !== layerId) {
-          return row;
-        }
-        const next = { ...row, ...patch };
-        if (!supportsBackground(next.layerKind)) {
-          next.isBackground = false;
-        }
-        return next;
-      }),
+      rows.map((row) => (row.layerId === layerId ? { ...row, active } : row)),
     );
   };
 
@@ -138,7 +123,6 @@ export default function MapLayersPanel({
               />
             </ListItem>
             {visibleRows.map((row) => {
-              const showBackground = supportsBackground(row.layerKind);
               return (
                 <ListItem
                   key={row.layerId}
@@ -166,34 +150,18 @@ export default function MapLayersPanel({
                   </Typography>
                   <LayerKindBadge layerKind={row.layerKind} />
                   <FormControlLabel
-                    sx={{ mr: showBackground ? 1 : 0, ml: 0 }}
+                    sx={{ mr: 0, ml: 0 }}
                     control={
                       <Checkbox
                         size="small"
                         checked={row.active}
                         onChange={(_, checked) =>
-                          updateRow(row.layerId, { active: checked })
+                          updateRow(row.layerId, checked)
                         }
                       />
                     }
                     label={t("maps.layersTab.active")}
                   />
-                  {showBackground ? (
-                    <FormControlLabel
-                      sx={{ mr: 0 }}
-                      control={
-                        <Checkbox
-                          size="small"
-                          checked={row.active && row.isBackground}
-                          disabled={!row.active}
-                          onChange={(_, checked) =>
-                            updateRow(row.layerId, { isBackground: checked })
-                          }
-                        />
-                      }
-                      label={t("common.usage.BACKGROUND")}
-                    />
-                  ) : null}
                 </ListItem>
               );
             })}

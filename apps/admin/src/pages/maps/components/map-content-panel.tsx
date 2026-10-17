@@ -10,13 +10,12 @@ import LayerTreeEditor, {
 } from "../../../components/layer-tree-editor";
 import type { ToolOnMap } from "../../../api/maps";
 import type { Tool } from "../../../api/tools";
-import type { LayerSwitcherDraft } from "../../groups-development/types";
 import MapLayersPanel from "./map-layers-panel";
 import type { MapLayerActivationRow } from "../map-layer-activation";
 
-// Lagerordning is the map's layer tree (MapTreeItem and the map's exceptions
-// and settings), apart from the layerswitcher tool. The old editor in
-// groups-development is no longer shown.
+// "Lager" holds the search and editing layers the map uses. Lagerordning is
+// the map's layer tree (MapTreeItem and the map's exceptions and settings),
+// its background and its draw order, apart from the layerswitcher tool.
 const CONTENT_SUB_TABS = [
   {
     key: "layers" as const,
@@ -39,16 +38,8 @@ interface MapContentPanelProps {
   catalogTools?: Tool[];
   /** The tools turned on in the tools tab, saved or not. */
   activeToolIds?: Set<number>;
-  /** @deprecated Used by the old Lagerordning editor, no longer shown. */
-  layerSwitcherDraft?: LayerSwitcherDraft | null;
-  /** @deprecated Used by the old Lagerordning editor, no longer shown. */
-  onLayerSwitcherDraftChange?: (draft: LayerSwitcherDraft | null) => void;
-  /** @deprecated Used by the old Lagerordning editor, no longer shown. */
-  layerActivationResetKey?: number;
-  /** @deprecated Used by the old Lagerordning editor, no longer shown. */
-  menuSynced?: boolean;
-  /** Called when the Lagerordning sub-tab is active. */
-  onGroupsDevelopmentActiveChange?: (active: boolean) => void;
+  /** Called when the Lagerordning sub-tab opens or closes. */
+  onLayerTreeOpenChange?: (open: boolean) => void;
   /** Host element for the map-layers move zone (FormActionPanel sidebar). */
   moveZoneHostRef?: RefObject<HTMLDivElement | null>;
   /** Unsaved edits of the map's layer tree. */
@@ -63,7 +54,7 @@ export default function MapContentPanel({
   mapTools,
   catalogTools,
   activeToolIds,
-  onGroupsDevelopmentActiveChange,
+  onLayerTreeOpenChange,
   moveZoneHostRef,
   layerTreeDraft = null,
   onLayerTreeDraftChange,
@@ -81,9 +72,9 @@ export default function MapContentPanel({
   const treeOpen = contentSubTab === "layerTree";
   const [moveZoneHost, setMoveZoneHost] = useState<HTMLElement | null>(null);
   useEffect(() => {
-    onGroupsDevelopmentActiveChange?.(treeOpen);
-    return () => onGroupsDevelopmentActiveChange?.(false);
-  }, [treeOpen, onGroupsDevelopmentActiveChange]);
+    onLayerTreeOpenChange?.(treeOpen);
+    return () => onLayerTreeOpenChange?.(false);
+  }, [treeOpen, onLayerTreeOpenChange]);
   useEffect(() => {
     if (!treeOpen || !moveZoneHostRef) return;
     let frame = 0;

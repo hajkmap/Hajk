@@ -134,16 +134,16 @@ model Map {
   projection        Projection?         @relation("MapViewProjection", fields: [projectionId], references: [id])
   projections       Projection[]        @relation("MapProjections")
   tools             ToolsOnMaps[]
+  /// Background layers, and the search and editing layers the map uses.
   layers            LayerInstance[]
-  groups            GroupsOnMaps[]
   restrictedToRoles RoleOnMap[]
   themes            Theme[]
-  /// POC (layer trees): top level of the map's layer tree.
+  /// Top level of the map's layer tree.
   treeItems         MapTreeItem[]
-  /// POC (layer trees): the map's exceptions to groups, and its draw order.
+  /// The map's exceptions to groups, and its draw order.
   groupExceptions   MapGroupException[]
   drawOrderItems    MapDrawOrderItem[]
-  /// POC (layer trees): the map's settings for the groups and layers in its tree.
+  /// The map's settings for the groups and layers in its tree.
   groupSettings     MapGroupSetting[]
   layerSettings     MapLayerSetting[]
 }
@@ -278,25 +278,25 @@ model Group {
   lastSavedBy       String?
   lastSavedDate     DateTime?           @db.Timestamptz(3) // Timestamp when last saved
   deletedAt         DateTime?           @db.Timestamptz(3)
+  /// A search group's layers. A layer group's content is in `items`.
   layers            LayerInstance[]
-  maps              GroupsOnMaps[]
   restrictedToRoles RoleOnGroup[]
-  /// POC (layer trees): the group's own content, in order.
+  /// The group's own content, in order.
   items             GroupItem[]         @relation("GroupItems")
-  /// POC (layer trees): places where this group is linked into another group.
+  /// Places where this group is linked into another group.
   parentItems       GroupItem[]         @relation("GroupItemChild")
-  /// POC (layer trees): maps that have this group on their tree's top level.
+  /// Maps that have this group on their tree's top level.
   mapTreeItems      MapTreeItem[]
-  /// POC (layer trees): what maps put in or hide in this group, and where
-  /// maps put this group in another one or hide it there.
+  /// What maps put in or hide in this group, and where maps put this group
+  /// in another one or hide it there.
   mapExceptions     MapGroupException[] @relation("MapGroupExceptionGroup")
   inMapExceptions   MapGroupException[] @relation("MapGroupExceptionChild")
-  /// POC (layer trees): what this group puts in the groups linked in its tree,
-  /// what other groups put in this one, and where this group is put that way.
+  /// What this group puts in the groups linked in its tree, what other groups
+  /// put in this one, and where this group is put that way.
   nestedItems       GroupNestedItem[]   @relation("GroupNestedItemOwner")
   nestedIn          GroupNestedItem[]   @relation("GroupNestedItemGroup")
   nestedAs          GroupNestedItem[]   @relation("GroupNestedItemChild")
-  /// POC (layer trees): maps' settings for this group and for the layers in it.
+  /// Maps' settings for this group and for the layers in it.
   mapSettings       MapGroupSetting[]
   mapLayerSettings  MapLayerSetting[]
 }
@@ -344,8 +344,6 @@ model Metadata {
   service      Service?
   displayLayer DisplayLayer?
   searchLayer  SearchLayer?
-
-  groupsOnMaps GroupsOnMaps[]
 }
 
 model InfoClickSettings {
@@ -407,7 +405,7 @@ model DisplayLayer {
   restrictedToRoles           RoleOnDisplayLayer[]
   instances                   LayerInstance[]
   options                     Json                 @default("{}")
-  /// POC (layer trees): groups and map trees this layer is placed in.
+  /// Groups and map trees this layer is placed in.
   groupItems                  GroupItem[]
   groupNestedItems            GroupNestedItem[]
   mapTreeItems                MapTreeItem[]
@@ -476,6 +474,10 @@ model EditingLayer {
   @@index([serviceId])
 }
 
+/// A layer placed directly on a map: a background layer (BACKGROUND), or a
+/// search or editing layer the map uses; or a search layer in a search group
+/// (groupId). Display layers in a map's foreground come from its layer tree
+/// (MapTreeItem, GroupItem and the map's exceptions), not from here.
 model LayerInstance {
   id                String                @id @default(cuid())
   displayLayerId    String?
@@ -500,30 +502,7 @@ model LayerInstance {
   @@index([editingLayerId])
 }
 
-model GroupsOnMaps {
-  id            String         @id @default(cuid())
-  mapName       String // It relates to a map via its name
-  groupId       String // It relates to a group via its ID
-  map           Map            @relation(fields: [mapName], references: [name])
-  group         Group          @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  parentGroupId String? // This particular GroupOnMap can have a parent GroupOnMap
-  parent        GroupsOnMaps?  @relation("GroupOnGroups", fields: [parentGroupId], references: [id], onDelete: Cascade) // The optional parent record
-  groups        GroupsOnMaps[] @relation("GroupOnGroups") // The optional list of children records
-
-  usage               UseType // It may be used as a background or a foreground group
-  name                String // It has a title, shown to the user
-  toggled             Boolean
-  expanded            Boolean
-  exclusive           Boolean   @default(false)
-  infoDocument        Boolean   @default(false)
-  metadataId          String?
-  metadata            Metadata? @relation(fields: [metadataId], references: [id])
-  index               Int       @default(0)
-  layerVisibleAtStart Boolean   @default(false)
-  layerInfoBox        String?
-}
-
-/// POC (layer trees): a group's content in order. Each row is either a layer
+/// A group's content in order. Each row is either a layer
 /// or another group, linked by reference so changes to that group show up
 /// everywhere it is used. A group with child groups is a layer tree.
 model GroupItem {
@@ -540,7 +519,7 @@ model GroupItem {
   @@index([childGroupId])
 }
 
-/// POC (layer trees): part of a group's own tree: a layer or a group it puts
+/// Part of a group's own tree: a layer or a group it puts
 /// inside a group linked in its tree. The linked group itself stays as it is;
 /// the placement shows wherever the owner is used.
 model GroupNestedItem {
@@ -564,7 +543,7 @@ model GroupNestedItem {
   @@index([groupId])
 }
 
-/// POC (layer trees): the top level of a map's layer tree, in order. Each row
+/// The top level of a map's layer tree, in order. Each row
 /// is either a layer or a linked group. Kept apart from the layerswitcher tool.
 model MapTreeItem {
   id             String        @id @default(cuid())
@@ -579,7 +558,7 @@ model MapTreeItem {
   @@index([mapName])
 }
 
-/// POC (layer trees): a map's own exception to a group it shows. ADD puts a
+/// A map's own exception to a group it shows. ADD puts a
 /// layer or a group in the group on this map only; HIDE leaves out something
 /// the group shows on this map. The group itself stays as it is.
 model MapGroupException {
@@ -608,7 +587,7 @@ enum MapGroupExceptionKind {
   HIDE
 }
 
-/// POC (layer trees): a map's draw order, top first, set apart from its tree.
+/// A map's draw order, top first, set apart from its tree.
 model MapDrawOrderItem {
   id             String       @id @default(cuid())
   mapName        String
@@ -620,7 +599,7 @@ model MapDrawOrderItem {
   @@unique([mapName, displayLayerId])
 }
 
-/// POC (layer trees): a map's own settings for a group in its tree, the same
+/// A map's own settings for a group in its tree, the same
 /// wherever the group shows on the map. Only settings that differ from the
 /// defaults are stored; without a row the defaults apply.
 model MapGroupSetting {
@@ -645,7 +624,7 @@ model MapGroupSetting {
   @@unique([mapName, groupId])
 }
 
-/// POC (layer trees): a map's own settings for a layer in a group of its tree.
+/// A map's own settings for a layer in a group of its tree.
 /// Only settings that differ from the defaults are stored.
 model MapLayerSetting {
   id             String       @id @default(cuid())

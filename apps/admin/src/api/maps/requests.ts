@@ -2,16 +2,9 @@ import type {
   Map as MapRecord,
   MapsApiResponse,
   ProjectionsApiResponse,
-  MapGroup,
-  MapGroupsApiResponse,
   MapLayer,
   MapLayersApiResponse,
   MapLayerPlacement,
-  MapGroupPlacement,
-  MapContentPlacement,
-  MapContentApiResponse,
-  MapLayerSwitcherState,
-  MapLayerSwitcherPlacement,
   MapMutation,
   ToolOnMap,
 } from "./types";
@@ -24,9 +17,9 @@ import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
  *
  * - The `getMaps` function retrieves a list of all maps.
  * - The `getMapByName` function fetches details of a specific map by its name.
- * - The `getLayersByMapName` function retrieves all layers linked to a given map name.
+ * - The `getLayersByMapName` function retrieves the layers placed directly on a map
+ *   (its background layers and the search and editing layers it uses).
  * - The `getToolsByMapName` function fetches all tools linked to a given map name.
- * - The `getGroupsByMapName` function fetches all groups linked to a given map name.
  * - The `getProjectionsByMapName` function fetches the projections linked to a given map name.
  * - The `createMap` function creates a new map.
  * - The `updateMap` function updates a map.
@@ -79,31 +72,6 @@ export const getMapByName = async (mapName: string): Promise<MapRecord> => {
   }
 };
 
-export const getGroupsByMapName = async (
-  mapName: string,
-): Promise<MapGroup[]> => {
-  const internalApiClient = getApiClient();
-  try {
-    const response = await internalApiClient.get<MapGroupsApiResponse>(
-      `/maps/${mapName}/groups`,
-    );
-    if (!response.data) {
-      throw new Error("No groups data found");
-    }
-    return response.data.groups;
-  } catch (error) {
-    const axiosError = error as InternalApiError;
-
-    if (axiosError.response) {
-      throw new Error(
-        `Failed to fetch groups. ErrorId: ${axiosError.response.data.errorId}.`,
-      );
-    } else {
-      throw new Error(`Failed to fetch groups.`);
-    }
-  }
-};
-
 export const getLayersByMapName = async (
   mapName: string,
 ): Promise<MapLayer[]> => {
@@ -125,31 +93,6 @@ export const getLayersByMapName = async (
       );
     } else {
       throw new Error(`Failed to fetch layers.`);
-    }
-  }
-};
-
-export const getMapContentByName = async (
-  mapName: string,
-): Promise<MapContentApiResponse> => {
-  const internalApiClient = getApiClient();
-  try {
-    const response = await internalApiClient.get<MapContentApiResponse>(
-      `/maps/${mapName}/content`,
-    );
-    if (!response.data) {
-      throw new Error("No map content data found");
-    }
-    return response.data;
-  } catch (error) {
-    const axiosError = error as InternalApiError;
-
-    if (axiosError.response) {
-      throw new Error(
-        `Failed to fetch map content. ErrorId: ${axiosError.response.data.errorId}.`,
-      );
-    } else {
-      throw new Error(`Failed to fetch map content.`);
     }
   }
 };
@@ -234,25 +177,17 @@ export const updateMapTools = async (
 };
 
 /**
- * Replaces layers placed directly on a map (`PUT /maps/:mapName/layers`).
- * Alias: `setMapLayers`.
+ * Replaces the search and editing layers a map uses
+ * (`PUT /maps/:mapName/layers`). Its display layers are its layer tree and
+ * background, saved with the tree. Alias: `setMapLayers`.
  */
 export const updateMapLayers = async (
   mapName: string,
   layers: MapLayerPlacement[],
-  options?: { replaceBackground?: boolean; replaceForeground?: boolean },
 ): Promise<void> => {
   const internalApiClient = getApiClient();
   try {
-    await internalApiClient.put(`/maps/${mapName}/layers`, {
-      layers,
-      ...(options?.replaceBackground != null
-        ? { replaceBackground: options.replaceBackground }
-        : {}),
-      ...(options?.replaceForeground != null
-        ? { replaceForeground: options.replaceForeground }
-        : {}),
-    });
+    await internalApiClient.put(`/maps/${mapName}/layers`, { layers });
   } catch (error) {
     const axiosError = error as InternalApiError;
     if (axiosError.response) {
@@ -267,96 +202,6 @@ export const updateMapLayers = async (
 
 /** @alias updateMapLayers */
 export const setMapLayers = updateMapLayers;
-
-export const updateMapGroups = async (
-  mapName: string,
-  groups: MapGroupPlacement[],
-): Promise<void> => {
-  const internalApiClient = getApiClient();
-  try {
-    await internalApiClient.put(`/maps/${mapName}/groups`, { groups });
-  } catch (error) {
-    const axiosError = error as InternalApiError;
-    if (axiosError.response) {
-      throw new Error(
-        `Failed to update map groups. ErrorId: ${axiosError.response.data.errorId}.`,
-      );
-    } else {
-      throw new Error(`Failed to update map groups.`);
-    }
-  }
-};
-
-/**
- * Atomically replaces direct map layers and group placements
- * (`PUT /maps/:mapName/content`).
- */
-export const updateMapContent = async (
-  mapName: string,
-  content: MapContentPlacement,
-): Promise<void> => {
-  const internalApiClient = getApiClient();
-  try {
-    await internalApiClient.put(`/maps/${mapName}/content`, content);
-  } catch (error) {
-    const axiosError = error as InternalApiError;
-    if (axiosError.response) {
-      throw new Error(
-        `Failed to update map content. ErrorId: ${axiosError.response.data.errorId}.`,
-      );
-    } else {
-      throw new Error(`Failed to update map content.`);
-    }
-  }
-};
-
-/**
- * Loads Kartlager + Bakgrund admin state (`GET /maps/:mapName/layerswitcher`).
- */
-export const getMapLayerSwitcher = async (
-  mapName: string,
-): Promise<MapLayerSwitcherState> => {
-  const internalApiClient = getApiClient();
-  try {
-    const response = await internalApiClient.get<MapLayerSwitcherState>(
-      `/maps/${mapName}/layerswitcher`,
-    );
-    return {
-      groups: response.data?.groups ?? [],
-      baselayers: response.data?.baselayers ?? [],
-    };
-  } catch (error) {
-    const axiosError = error as InternalApiError;
-    if (axiosError.response) {
-      throw new Error(
-        `Failed to fetch map layerswitcher. ErrorId: ${axiosError.response.data.errorId}.`,
-      );
-    }
-    throw new Error("Failed to fetch map layerswitcher.");
-  }
-};
-
-/**
- * Atomically replaces Kartlager + Bakgrund
- * (`PUT /maps/:mapName/layerswitcher`).
- */
-export const updateMapLayerSwitcher = async (
-  mapName: string,
-  content: MapLayerSwitcherPlacement,
-): Promise<void> => {
-  const internalApiClient = getApiClient();
-  try {
-    await internalApiClient.put(`/maps/${mapName}/layerswitcher`, content);
-  } catch (error) {
-    const axiosError = error as InternalApiError;
-    if (axiosError.response) {
-      throw new Error(
-        `Failed to update map layerswitcher. ErrorId: ${axiosError.response.data.errorId}.`,
-      );
-    }
-    throw new Error("Failed to update map layerswitcher.");
-  }
-};
 
 /**
  * Creates a map via backend `POST /maps`.

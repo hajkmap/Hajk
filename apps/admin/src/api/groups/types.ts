@@ -1,4 +1,3 @@
-import type { Layer } from "../layers";
 import type { Map } from "../maps";
 
 export interface Group {
@@ -37,55 +36,21 @@ export interface GroupCreateInput {
   name: string;
   internalName?: string;
   type: GroupType;
+  /** The layers it starts with: in a layer group's tree, or a search group's. */
   layers?: GroupLayerCreateInput[];
-  layerSwitcherTree?: LayerSwitcherTreeNode[];
 }
 
+/** A group's own fields; a layer group's content is saved with its tree. */
 export interface GroupUpdateInput {
   name?: string;
   internalName?: string;
   type?: GroupType;
   locked?: boolean;
-  layers?: GroupLayerCreateInput[];
-  layerSwitcherTree?: LayerSwitcherTreeNode[];
   restrictedToRoles?: GroupRoleUpdateInput[];
 }
 
-export interface GroupLayersUpdateInput {
-  layers: GroupLayerCreateInput[];
-  layerSwitcherTree?: LayerSwitcherTreeNode[];
-}
-
-export type LayerSwitcherTreeNode =
-  | { type: "layer"; id: string }
-  | {
-      type: "group";
-      id: string;
-      name: string;
-      children: LayerSwitcherTreeNode[];
-    };
-
 export interface GroupLayerCreateInput {
   layerId: string;
-  usage: "BACKGROUND" | "FOREGROUND";
-  zIndex?: number;
-  visibleAtStart?: boolean;
-  options?: Record<string, unknown>;
-}
-
-/** Layer row returned from GET /groups/:id/layers (includes group placement). */
-export interface GroupLayer extends Layer {
-  drawOrder?: number;
-  visibleAtStart?: boolean;
-  placementOptions?: Record<string, unknown>;
-}
-
-export interface GroupLayersApiResponse {
-  layers: GroupLayer[];
-  layerSwitcherTree?: LayerSwitcherTreeNode[];
-  count?: number;
-  error?: string;
-  errorId?: string;
 }
 
 export interface GroupRole {
@@ -102,11 +67,6 @@ export interface UpdateGroupVariables {
   groupId: string;
   data: GroupUpdateInput;
 }
-
-export interface UpdateGroupLayersVariables {
-  groupId: string;
-  data: GroupLayersUpdateInput;
-};
 
 export interface GroupRoleUpdateInput {
   roleId: string;

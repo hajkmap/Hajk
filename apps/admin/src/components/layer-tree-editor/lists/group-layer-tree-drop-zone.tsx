@@ -7,8 +7,8 @@ import type {
   CatalogDragItem,
   GroupLayerTreeNode,
   MoveZoneItem,
-} from "../types";
-import { CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE } from "../types";
+} from "./types";
+import { CATALOG_DRAG_TYPE, MOVE_ZONE_DRAG_TYPE } from "./types";
 
 const TREE_ITEM_TYPE =
   (ItemTypes as { TREE_ITEM?: string | symbol }).TREE_ITEM ?? "TREE_ITEM";

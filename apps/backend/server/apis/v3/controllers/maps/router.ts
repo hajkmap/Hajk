@@ -7,9 +7,6 @@ import {
   MapDuplicateSchema,
   MapUpdateSchema,
   MapLayersUpdateSchema,
-  MapGroupsUpdateSchema,
-  MapContentUpdateSchema,
-  MapLayerSwitcherUpdateSchema,
 } from "../../schemas/map.schemas.ts";
 
 export default express
@@ -28,10 +25,7 @@ export default express
     MapsController.duplicateMap
   )
   .get("/:mapName", MapsController.getMapByName)
-  .get("/:mapName/groups", MapsController.getGroupsForMap)
   .get("/:mapName/layers", MapsController.getLayersForMap)
-  .get("/:mapName/content", MapsController.getMapContent)
-  .get("/:mapName/layerswitcher", MapsController.getMapLayerSwitcher)
   .get("/:mapName/layer-tree", MapsController.getMapLayerTree)
   .put("/:mapName/layer-tree", MapsController.updateMapLayerTree)
   .get("/:mapName/projections", MapsController.getProjectionsForMap)
@@ -41,20 +35,5 @@ export default express
     "/:mapName/layers",
     validatePayload(MapLayersUpdateSchema),
     MapsController.updateMapLayers
-  )
-  .put(
-    "/:mapName/groups",
-    validatePayload(MapGroupsUpdateSchema),
-    MapsController.updateMapGroups
-  )
-  .put(
-    "/:mapName/content",
-    validatePayload(MapContentUpdateSchema),
-    MapsController.updateMapContent
-  )
-  .put(
-    "/:mapName/layerswitcher",
-    validatePayload(MapLayerSwitcherUpdateSchema),
-    MapsController.updateMapLayerSwitcher
   )
   .use("/:mapName/themes", themesRouter);

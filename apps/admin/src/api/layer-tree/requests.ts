@@ -8,7 +8,7 @@ import {
 } from "./types";
 
 /**
- * POC (layer trees): GET/PUT /groups/:groupId/tree,
+ * Layer trees: GET/PUT /groups/:groupId/tree,
  * GET/PUT /maps/:mapName/layer-tree and GET /groups/placements.
  */
 

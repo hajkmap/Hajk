@@ -1,4 +1,4 @@
-import type { GroupLayerTreeNode } from "../types";
+import type { GroupLayerTreeNode } from "./types";
 
 /**
  * Move a node to `dropTargetId` as parent, placing it at sibling `index`.
@@ -42,9 +42,7 @@ export function moveTreeNodeWithIndex(
         }
       : { ...node, parent: dropTargetId },
   );
-  const destSiblingIds = new Set(
-    destSiblings.map((node) => String(node.id)),
-  );
+  const destSiblingIds = new Set(destSiblings.map((node) => String(node.id)));
 
   const result: GroupLayerTreeNode[] = [];
   let siblingsInserted = false;

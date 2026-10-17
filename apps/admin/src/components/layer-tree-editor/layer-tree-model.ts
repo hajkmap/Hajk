@@ -8,7 +8,7 @@ import type {
 } from "../../api/layer-tree";
 import type { LayerTreeSettings } from "./layer-tree-settings";
 
-// POC (layer trees): the editor works on a flat node list, as
+// The editor works on a flat node list, as
 // @minoru/react-dnd-treeview wants it. Siblings keep their order from the
 // array (the tree runs with sort={false}).
 

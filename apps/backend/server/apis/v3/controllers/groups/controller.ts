@@ -26,28 +26,18 @@ class GroupsController {
     res.status(HttpStatusCodes.OK).json(group);
   });
 
-  getLayersByGroupId = asyncHandler(async (req: Request, res: Response) => {
-    const { layers, layerSwitcherTree } =
-      await GroupsService.getLayersByGroupId(req.params.id);
-    res.status(HttpStatusCodes.OK).json({
-      count: layers.length,
-      layers,
-      layerSwitcherTree,
-    });
-  });
-
   getMapsByGroupId = asyncHandler(async (req: Request, res: Response) => {
     const maps = await GroupsService.getMapsByGroupId(req.params.id);
     res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
   });
 
-  // POC (layer trees): which groups and maps each group and layer is placed in.
+  // Which groups and maps each group and layer is placed in.
   getPlacements = asyncHandler(async (_req: Request, res: Response) => {
     const placements = await LayerTreeService.getPlacements();
     res.status(HttpStatusCodes.OK).json(placements);
   });
 
-  // POC (layer trees): the group's own content, with linked groups expanded.
+  // The group's own content, with linked groups expanded.
   getGroupTree = asyncHandler(async (req: Request, res: Response) => {
     const tree = await LayerTreeService.getGroupTree(req.params.id);
     res.status(HttpStatusCodes.OK).json(tree);
@@ -65,15 +55,6 @@ class GroupsController {
   createGroup = asyncHandler(async (req: Request, res: Response) => {
     const group = await GroupsService.createGroup(req.body, req.user?.id);
     res.status(HttpStatusCodes.CREATED).json(group);
-  });
-
-  updateGroupLayers = asyncHandler(async (req: Request, res: Response) => {
-    const group = await GroupsService.updateGroupLayers(
-      req.params.id,
-      req.body,
-      req.user?.id
-    );
-    res.status(HttpStatusCodes.OK).json(group);
   });
 
   updateGroup = asyncHandler(async (req: Request, res: Response) => {

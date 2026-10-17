@@ -19,22 +19,9 @@ class MapsController {
     res.status(HttpStatusCodes.OK).json(mapConfig);
   }
 
-  async getGroupsForMap(req: Request, res: Response) {
-    const groups = await MapService.getGroupsForMap(req.params.mapName);
-    res.status(HttpStatusCodes.OK).json({ count: groups.length, groups });
-  }
-
   async getLayersForMap(req: Request, res: Response) {
     const layers = await MapService.getLayersForMap(req.params.mapName);
     res.status(HttpStatusCodes.OK).json({ count: layers.length, layers });
-  }
-
-  async getMapContent(req: Request, res: Response) {
-    const content = await MapService.getMapContent(req.params.mapName);
-    res.status(HttpStatusCodes.OK).json({
-      count: content.layers.length + content.groups.length,
-      ...content,
-    });
   }
 
   async getProjectionsForMap(req: Request, res: Response) {
@@ -66,42 +53,14 @@ class MapsController {
   }
 
   async updateMapLayers(req: Request, res: Response) {
-    const { layers, replaceBackground, replaceForeground } = req.body as {
+    const { layers } = req.body as {
       layers: Parameters<typeof MapService.updateMapLayers>[1];
-      replaceBackground?: boolean;
-      replaceForeground?: boolean;
     };
-    await MapService.updateMapLayers(req.params.mapName, layers ?? [], {
-      replaceBackground,
-      replaceForeground,
-    });
+    await MapService.updateMapLayers(req.params.mapName, layers ?? []);
     res.status(HttpStatusCodes.NO_CONTENT).send();
   }
 
-  async getMapLayerSwitcher(req: Request, res: Response) {
-    const state = await MapService.getMapLayerSwitcher(req.params.mapName);
-    res.status(HttpStatusCodes.OK).json(state);
-  }
-
-  async updateMapLayerSwitcher(req: Request, res: Response) {
-    const { groups, baselayers } = req.body as {
-      groups: Parameters<typeof MapService.updateMapLayerSwitcher>[1]["groups"];
-      baselayers: Parameters<
-        typeof MapService.updateMapLayerSwitcher
-      >[1]["baselayers"];
-    };
-    await MapService.updateMapLayerSwitcher(
-      req.params.mapName,
-      {
-        groups: groups ?? [],
-        baselayers: baselayers ?? [],
-      },
-      req.user?.id,
-    );
-    res.status(HttpStatusCodes.NO_CONTENT).send();
-  }
-
-  // POC (layer trees): the map's own tree, apart from the layerswitcher tool.
+  // The map's own tree, apart from the layerswitcher tool.
   async getMapLayerTree(req: Request, res: Response) {
     const tree = await LayerTreeService.getMapTree(req.params.mapName);
     res.status(HttpStatusCodes.OK).json(tree);
@@ -114,26 +73,6 @@ class MapsController {
       req.user?.id,
     );
     res.status(HttpStatusCodes.OK).json(tree);
-  }
-
-  async updateMapGroups(req: Request, res: Response) {
-    const { groups } = req.body as {
-      groups: Parameters<typeof MapService.updateMapGroups>[1];
-    };
-    await MapService.updateMapGroups(req.params.mapName, groups ?? []);
-    res.status(HttpStatusCodes.NO_CONTENT).send();
-  }
-
-  async updateMapContent(req: Request, res: Response) {
-    const { layers, groups } = req.body as {
-      layers: Parameters<typeof MapService.updateMapContent>[1]["layers"];
-      groups: Parameters<typeof MapService.updateMapContent>[1]["groups"];
-    };
-    await MapService.updateMapContent(req.params.mapName, {
-      layers: layers ?? [],
-      groups: groups ?? [],
-    });
-    res.status(HttpStatusCodes.NO_CONTENT).send();
   }
 
   async createMap(req: Request, res: Response) {

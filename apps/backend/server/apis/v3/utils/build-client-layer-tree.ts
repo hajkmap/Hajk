@@ -12,19 +12,44 @@ import {
   type MapGroupSettings,
   type MapLayerSettings,
 } from "../services/map-layer-tree-settings.ts";
-import type {
-  ClientLayerSwitcherGroupNode,
-  ClientLayerSwitcherLayerRef,
-} from "./build-layer-switcher-groups-for-map.ts";
 import type { DisplayLayerPlacement } from "./build-legacy-layers-config.ts";
 
 const logger = log4js.getLogger("util.build-client-layer-tree");
 
-// POC (layer trees): the client still reads the classic layerswitcher format
-// (groups holding layer refs, layer definitions in layersConfig). This builds
-// it from the map's layer tree (MapTreeItem → GroupItem) and the map's
-// settings for it, instead of from layer instances, so the client needs no
-// changes.
+// The client reads the classic layerswitcher format (groups holding layer
+// refs, layer definitions in layersConfig). This builds it from the map's
+// layer tree (MapTreeItem → GroupItem, with the map's exceptions) and the
+// map's settings for it, so the client needs no changes.
+
+/** A layer in a group of the client's layerswitcher, or a background layer. */
+export interface ClientLayerSwitcherLayerRef {
+  id: string;
+  index?: number;
+  drawOrder: number;
+  visibleAtStart: boolean;
+  infobox: string;
+}
+
+/** A group of the client's layerswitcher (as in App_Data map configs). */
+export interface ClientLayerSwitcherGroupNode {
+  id: string;
+  type: "group";
+  name: string;
+  index?: number;
+  toggled: boolean;
+  expanded: boolean;
+  exclusive: boolean;
+  parent: string;
+  infogroupvisible: boolean;
+  infogrouptitle: string;
+  infogrouptext: string;
+  infogroupurl: string;
+  infogroupurltext: string;
+  infogroupopendatalink: string;
+  infogroupowner: string;
+  layers: ClientLayerSwitcherLayerRef[];
+  groups: ClientLayerSwitcherGroupNode[];
+}
 
 /** Parent id the client expects for groups at the top of the tree. */
 const ROOT_PARENT = "-1";
@@ -38,17 +63,11 @@ export interface ClientLayerTree {
   groups: ClientLayerSwitcherGroupNode[];
   /** One per layer placement; ids match the layer refs in `groups`. */
   placements: DisplayLayerPlacement[];
-  /**
-   * Translates an old layer instance id (e.g. in a saved theme) to the id the
-   * same layer has in the client now. Other ids are returned as they are.
-   */
-  translateLayerId: (id: string) => string;
 }
 
 const EMPTY_TREE: ClientLayerTree = {
   groups: [],
   placements: [],
-  translateLayerId: (id) => id,
 };
 
 /** The client's info group fields for a group. */
@@ -89,22 +108,11 @@ export async function buildClientLayerTreeForMap(
     ])
   );
 
-  const [instanceRows, background] = await Promise.all([
-    // The old layer instances, so saved themes that use their ids still find
-    // their layers (see translateLayerId).
-    prisma.layerInstance.findMany({
-      where: {
-        map: { name: mapName },
-        displayLayerId: { not: null },
-        OR: [{ usage: null }, { usage: UseType.FOREGROUND }],
-      },
-      select: { id: true, groupId: true, displayLayerId: true },
-    }),
-    prisma.layerInstance.aggregate({
-      where: { map: { name: mapName }, usage: UseType.BACKGROUND },
-      _max: { zIndex: true },
-    }),
-  ]);
+  // The tree's layers are drawn above the background.
+  const background = await prisma.layerInstance.aggregate({
+    where: { map: { name: mapName }, usage: UseType.BACKGROUND },
+    _max: { zIndex: true },
+  });
 
   // Layer definitions for every layer in the tree (deleted ones are left out).
   const layerIds = new Set<string>();
@@ -154,7 +162,6 @@ export async function buildClientLayerTreeForMap(
     placement: DisplayLayerPlacement;
     layerId: string;
   }[] = [];
-  const firstIdByPlacement = new Map<string, string>();
 
   const toClientGroup = (
     node: GroupNode,
@@ -204,11 +211,6 @@ export async function buildClientLayerTreeForMap(
         },
         layerId: child.id,
       });
-      const key = `${node.id}|${child.id}`;
-      if (!firstIdByPlacement.has(key)) firstIdByPlacement.set(key, id);
-      if (!firstIdByPlacement.has(`|${child.id}`)) {
-        firstIdByPlacement.set(`|${child.id}`, id);
-      }
     });
 
     const group = groupSettings.get(node.id) ?? DEFAULT_GROUP_SETTINGS;
@@ -250,24 +252,8 @@ export async function buildClientLayerTreeForMap(
     entry.placement.zIndex = entry.ref.drawOrder;
   }
 
-  const instancePlacement = new Map(
-    instanceRows.map((row) => [
-      row.id,
-      `${row.groupId ?? ""}|${row.displayLayerId}`,
-    ])
-  );
-
   return {
     groups,
     placements: ordered.map(({ placement }) => placement),
-    translateLayerId: (id) => {
-      const key = instancePlacement.get(id);
-      if (!key) return id;
-      return (
-        firstIdByPlacement.get(key) ??
-        firstIdByPlacement.get(`|${key.split("|")[1]}`) ??
-        id
-      );
-    },
   };
 }

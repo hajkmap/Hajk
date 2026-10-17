@@ -1,6 +1,6 @@
 import { ItemTypes } from "@minoru/react-dnd-treeview";
 
-import { MOVE_ZONE_DRAG_TYPE } from "../../pages/groups-development/types";
+import { MOVE_ZONE_DRAG_TYPE } from "./lists/types";
 import {
   nodePathKeys,
   type LayerTreeFlatNode,

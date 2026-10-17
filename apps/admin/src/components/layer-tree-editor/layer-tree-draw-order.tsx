@@ -1,7 +1,7 @@
 import { Paper } from "@mui/material";
 import { useMemo } from "react";
 
-import DrawOrderPanel from "../../pages/groups-development/components/draw-order-panel";
+import DrawOrderPanel from "./lists/draw-order-panel";
 import { completeDrawOrder } from "./layer-tree-model";
 
 /** What a move zone item is to the panel: its key and what it is. */

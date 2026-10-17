@@ -1,16 +1,20 @@
 import type { MapLayer, MapLayerPlacement } from "../../api/maps";
 import type { LayerKind } from "../../api/layers";
 
+/**
+ * A search or editing layer in the map's "Lager" list. The map's display
+ * layers are its layer tree and background, edited under Lagerordning.
+ */
 export interface MapLayerActivationRow {
   layerId: string;
   name: string;
   layerKind: LayerKind;
   active: boolean;
-  isBackground: boolean;
 }
 
-export function supportsBackground(layerKind: LayerKind): boolean {
-  return layerKind === "display";
+/** Layers the "Lager" list holds: those not placed through the layer tree. */
+export function isActivatedLayerKind(layerKind: LayerKind): boolean {
+  return layerKind === "search" || layerKind === "editing";
 }
 
 export function buildMapLayerActivationRows(
@@ -21,35 +25,19 @@ export function buildMapLayerActivationRows(
   }[],
   mapLayers: MapLayer[],
 ): MapLayerActivationRow[] {
-  const instancesByCatalogId = new Map<string, MapLayer[]>();
-  for (const layer of mapLayers) {
-    const list = instancesByCatalogId.get(layer.id) ?? [];
-    list.push(layer);
-    instancesByCatalogId.set(layer.id, list);
-  }
+  const onMap = new Set(mapLayers.map((layer) => layer.id));
 
   return catalogLayers
-    .slice()
+    .filter((layer) => isActivatedLayerKind(layer.layerKind ?? "display"))
     .sort((a, b) =>
       a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
     )
-    .map((layer) => {
-      const layerKind = layer.layerKind ?? "display";
-      const instances = instancesByCatalogId.get(layer.id) ?? [];
-      const canBeBackground = supportsBackground(layerKind);
-      const directBackground = instances.find(
-        (instance) =>
-          instance.mapId != null && instance.usage === "BACKGROUND",
-      );
-      return {
-        layerId: layer.id,
-        name: layer.name,
-        layerKind,
-        // Active when placed on the map directly or via a group on the map.
-        active: instances.length > 0,
-        isBackground: canBeBackground && directBackground != null,
-      };
-    });
+    .map((layer) => ({
+      layerId: layer.id,
+      name: layer.name,
+      layerKind: layer.layerKind ?? "display",
+      active: onMap.has(layer.id),
+    }));
 }
 
 export function mapLayerActivationSignature(
@@ -58,39 +46,15 @@ export function mapLayerActivationSignature(
   return JSON.stringify(
     rows
       .filter((row) => row.active)
-      .map((row) => ({
-        layerId: row.layerId,
-        usage:
-          supportsBackground(row.layerKind) && row.isBackground
-            ? "BACKGROUND"
-            : "FOREGROUND",
-      }))
-      .sort((a, b) => a.layerId.localeCompare(b.layerId)),
+      .map((row) => row.layerId)
+      .sort(),
   );
 }
 
 export function mapLayerActivationToPayload(
   rows: MapLayerActivationRow[],
 ): MapLayerPlacement[] {
-  const active = rows.filter((row) => row.active);
-  const background = active.filter(
-    (row) => supportsBackground(row.layerKind) && row.isBackground,
-  );
-  const backgroundIdSet = new Set(background.map((row) => row.layerId));
-  const foreground = active.filter((row) => !backgroundIdSet.has(row.layerId));
-
-  return [
-    ...foreground.map((row, index) => ({
-      layerId: row.layerId,
-      usage: "FOREGROUND" as const,
-      zIndex: index,
-      visibleAtStart: false,
-    })),
-    ...background.map((row, index) => ({
-      layerId: row.layerId,
-      usage: "BACKGROUND" as const,
-      zIndex: index,
-      visibleAtStart: false,
-    })),
-  ];
+  return rows
+    .filter((row) => row.active)
+    .map((row, index) => ({ layerId: row.layerId, zIndex: index }));
 }

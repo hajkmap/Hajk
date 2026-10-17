@@ -31,7 +31,7 @@ import {
 
 const logger = log4js.getLogger("service.v3.layer-tree");
 
-// POC (layer trees). A group's content is an ordered list of layers and linked
+// Layer trees. A group's content is an ordered list of layers and linked
 // child groups (GroupItem); a group with child groups is a layer tree. Its
 // tree also holds what it puts inside the groups linked in it, on its own
 // (GroupNestedItem), so a group can nest linked groups in each other without
@@ -83,6 +83,14 @@ export interface LayerTreeMapExceptions {
   mapName: string;
   added: number;
   hidden: number;
+}
+
+/** What a map shows in its tree. */
+export interface MapContent {
+  /** The groups shown, each once. */
+  groups: Set<string>;
+  /** Each layer shown, with the groups it shows in. */
+  layers: Map<string, Set<string>>;
 }
 
 export interface MapLayerTree {
@@ -312,7 +320,7 @@ function assertNoDuplicates(owner: string, nodes: LayerTreeWriteNode[]) {
 
 class LayerTreeService {
   constructor() {
-    logger.debug("Initiating Layer Tree Service (POC)");
+    logger.debug("Initiating Layer Tree Service");
   }
 
   private async requireMap(mapName: string) {
@@ -685,13 +693,55 @@ class LayerTreeService {
    */
   async getMapTree(mapName: string): Promise<MapLayerTree> {
     const map = await this.requireMap(mapName);
+    const items = await this.getMapItems(map.name);
+    const [settings, background, drawOrder] = await Promise.all([
+      readSettings(map.name),
+      readBackground(map.name),
+      effectiveDrawOrder(map.name, items),
+    ]);
+    return { mapName: map.name, items, settings, background, drawOrder };
+  }
+
+  /**
+   * What every map shows in its tree, with its exceptions applied and what it
+   * hides left out: for the lists of where groups and layers are used.
+   */
+  async getMapContents(): Promise<Map<string, MapContent>> {
+    const maps = await prisma.map.findMany({
+      where: { deletedAt: null },
+      orderBy: { name: "asc" },
+      select: { name: true },
+    });
+    const contents = new Map<string, MapContent>();
+    for (const { name } of maps) {
+      const content: MapContent = { groups: new Set(), layers: new Map() };
+      const walk = (nodes: LayerTreeNode[], parentId: string) => {
+        for (const node of nodes) {
+          if (node.hidden) continue;
+          if (node.type === "layer") {
+            const groups = content.layers.get(node.id) ?? new Set<string>();
+            content.layers.set(node.id, groups.add(parentId));
+          } else if (!node.cycle) {
+            content.groups.add(node.id);
+            walk(node.items, node.id);
+          }
+        }
+      };
+      walk(await this.getMapItems(name), "");
+      contents.set(name, content);
+    }
+    return contents;
+  }
+
+  /** The map's tree with its exceptions merged in. */
+  private async getMapItems(mapName: string): Promise<LayerTreeNode[]> {
     const [rows, exceptions] = await Promise.all([
       prisma.mapTreeItem.findMany({
-        where: { mapName: map.name },
+        where: { mapName },
         orderBy: { index: "asc" },
         select: { displayLayerId: true, groupId: true },
       }),
-      loadExceptions(map.name),
+      loadExceptions(mapName),
     ]);
     const refs: ItemRef[] = rows.map((row) => ({
       displayLayerId: row.displayLayerId,
@@ -702,13 +752,7 @@ class LayerTreeService {
       refs.flatMap((ref) => (ref.displayLayerId ? [ref.displayLayerId] : [])),
       exceptions
     );
-    const items = this.toNodes(refs, context, []);
-    const [settings, background, drawOrder] = await Promise.all([
-      readSettings(map.name),
-      readBackground(map.name),
-      effectiveDrawOrder(map.name, items),
-    ]);
-    return { mapName: map.name, items, settings, background, drawOrder };
+    return this.toNodes(refs, context, []);
   }
 
   /**

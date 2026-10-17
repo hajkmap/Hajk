@@ -84,7 +84,7 @@ interface LayerTreePanelProps {
   history?: LayerTreeHistoryControls;
 }
 
-/** POC (layer trees): the catalog and the tree, for a group or a map. */
+/** The catalog and the tree, for a group or a map. */
 export default function LayerTreePanel({
   mode,
   rootGroupId,

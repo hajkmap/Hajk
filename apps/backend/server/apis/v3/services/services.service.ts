@@ -9,6 +9,7 @@ import {
   capabilityModeForServiceType,
   fetchRemoteCapabilityLayerNames,
 } from "../utils/remote-service-capabilities.ts";
+import LayerTreeService from "./layer-tree.service.ts";
 
 const logger = log4js.getLogger("service.v3.layer");
 const DEFAULT_PROJECTION_CODE = "EPSG:3006";
@@ -145,54 +146,51 @@ class ServicesService {
 
   // Get all maps that use a layer or a group that uses a layer
   // that belongs to the service
+  /** The maps that use the service's display layers: in their tree or as background. */
   async getMapsByServiceId(id: string) {
-    const maps = await prisma.map.findMany({
-      select: {
-        id: true,
-        name: true,
-      },
-      where: {
-        deletedAt: null,
-        OR: [
-          {
-            layers: {
-              some: {
-                displayLayer: {
-                  serviceId: id,
-                  deletedAt: null,
-                },
-              },
-            },
-          },
-          {
-            groups: {
-              some: {
-                group: {
-                  layers: {
-                    some: {
-                      displayLayer: {
-                        serviceId: id,
-                        deletedAt: null,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        ],
-      },
+    const layers = await prisma.displayLayer.findMany({
+      where: SERVICE_LAYER_WHERE(id),
+      select: { id: true },
     });
+    const layerIds = new Set(layers.map((layer) => layer.id));
+    if (layerIds.size === 0) {
+      return [];
+    }
 
-    return maps;
+    const [contents, background] = await Promise.all([
+      LayerTreeService.getMapContents(),
+      prisma.layerInstance.findMany({
+        where: {
+          displayLayerId: { in: [...layerIds] },
+          map: { deletedAt: null },
+        },
+        select: { map: { select: { name: true } } },
+      }),
+    ]);
+    const mapNames = new Set<string>();
+    for (const [mapName, content] of contents) {
+      if ([...content.layers.keys()].some((layerId) => layerIds.has(layerId))) {
+        mapNames.add(mapName);
+      }
+    }
+    for (const row of background) {
+      if (row.map) mapNames.add(row.map.name);
+    }
+
+    return await prisma.map.findMany({
+      select: { id: true, name: true },
+      where: { deletedAt: null, name: { in: [...mapNames] } },
+      orderBy: { name: "asc" },
+    });
   }
 
+  /** The groups that hold the service's display layers in their own content. */
   async getGroupsByServiceId(id: string) {
     return await prisma.group.findMany({
       select: { id: true, name: true },
       where: {
         deletedAt: null,
-        layers: {
+        items: {
           some: {
             displayLayer: { serviceId: id, deletedAt: null },
           },

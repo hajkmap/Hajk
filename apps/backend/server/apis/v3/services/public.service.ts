@@ -60,7 +60,7 @@ class PublicService {
     // - mapConfig (with its own sub-properties)
     // - userSpecificMaps
 
-    // POC (layer trees): the map's layers come from its layer tree, built once
+    // The map's layers come from its layer tree, built once
     // for both the layer definitions and the layerswitcher.
     const layerTree = await buildClientLayerTreeForMap(mapName);
 

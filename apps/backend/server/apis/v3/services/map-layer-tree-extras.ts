@@ -12,7 +12,7 @@ import {
   type MapTreeSettings,
 } from "./map-layer-tree-settings.ts";
 
-// POC (layer trees): what a map has besides its tree of groups. Exceptions to
+// What a map has besides its tree of groups. Exceptions to
 // the groups it shows (a layer or group put in a group on this map only, or
 // one of a group's own layers or groups hidden), its settings for the groups
 // and layers in it, its background layers and its draw order. The additions
@@ -329,7 +329,7 @@ function infoboxOf(options: Prisma.JsonValue): string {
     : "";
 }
 
-/** The map's background layers, in order (the same rows Lagerordning edits). */
+/** The map's background layers, in order. */
 export async function readBackground(
   mapName: string
 ): Promise<MapBackgroundLayer[]> {
@@ -357,9 +357,8 @@ export async function readBackground(
 }
 
 /**
- * The draw order, top first. A saved order is used where there is one;
- * otherwise the old one (layer instances' zIndex, set in Lagerordning).
- * Layers with neither go on top, in tree order.
+ * The draw order, top first: the map's saved order, with the layers not in it
+ * on top, in tree order.
  */
 export async function effectiveDrawOrder(
   mapName: string,
@@ -372,34 +371,9 @@ export async function effectiveDrawOrder(
     orderBy: { index: "asc" },
     select: { displayLayerId: true },
   });
-
-  let ordered: string[];
-  if (saved.length > 0) {
-    ordered = saved
-      .map((row) => row.displayLayerId)
-      .filter((id) => shownSet.has(id));
-  } else {
-    const instances = await prisma.layerInstance.findMany({
-      where: {
-        map: { name: mapName },
-        displayLayerId: { in: shown },
-        OR: [{ usage: null }, { usage: UseType.FOREGROUND }],
-      },
-      select: { displayLayerId: true, zIndex: true },
-    });
-    const zIndex = new Map<string, number>();
-    for (const row of instances) {
-      if (!row.displayLayerId) continue;
-      zIndex.set(
-        row.displayLayerId,
-        Math.max(zIndex.get(row.displayLayerId) ?? -Infinity, row.zIndex)
-      );
-    }
-    ordered = shown
-      .filter((id) => zIndex.has(id))
-      .sort((a, b) => (zIndex.get(b) ?? 0) - (zIndex.get(a) ?? 0));
-  }
-
+  const ordered = saved
+    .map((row) => row.displayLayerId)
+    .filter((id) => shownSet.has(id));
   const placed = new Set(ordered);
   return [...shown.filter((id) => !placed.has(id)), ...ordered];
 }

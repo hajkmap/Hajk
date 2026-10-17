@@ -222,10 +222,7 @@ export default function GroupsList({
         name: groupData.name,
         internalName: groupData.internalName,
         type: groupData.type as GroupType,
-        layers: groupData.layerIds.map((layerId) => ({
-          layerId,
-          usage: "FOREGROUND",
-        })),
+        layers: groupData.layerIds.map((layerId) => ({ layerId })),
       };
       const response = await createGroup(payload);
       toast.success(t("groups.createGroupSuccess", { name: response.name }), {
@@ -417,7 +414,7 @@ export default function GroupsList({
                   field: "name",
                   headerName: t("common.name"),
                   flex: 0.4,
-                  // POC (layer trees): point at a group to see where it belongs.
+                  // Point at a group to see where it belongs.
                   renderCell: (params: GridRenderCellParams<Group>) => (
                     <LayerTreeItemTooltip
                       name={params.row.name}
@@ -447,8 +444,8 @@ export default function GroupsList({
                   filterable: false,
                   align: "left",
                   headerAlign: "left",
-                  // POC (layer trees): counted from the layer tree model, which
-                  // the layer tree editor saves to.
+                  // Counted from the groups' trees, which the layer tree editor
+                  // saves to.
                   renderCell: (params: GridRenderCellParams<Group>) => {
                     const contents = getContents(params.row.id);
                     return (

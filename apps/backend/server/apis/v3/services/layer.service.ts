@@ -1,4 +1,4 @@
-import { Prisma, ServiceType } from "@prisma/client";
+import { Prisma, ServiceType, UseType } from "@prisma/client";
 import log4js from "log4js";
 
 import prisma from "../../../common/prisma.ts";
@@ -15,6 +15,7 @@ import {
   fetchRemoteCapabilityLayerNames,
 } from "../utils/remote-service-capabilities.ts";
 import { activeLayerInstanceWhere } from "../utils/layer-instance.ts";
+import LayerTreeService from "./layer-tree.service.ts";
 
 const logger = log4js.getLogger("service.v3.layer");
 
@@ -708,46 +709,43 @@ class LayerService {
     });
   }
 
+  /**
+   * For each layer, the maps that use it: in their tree, as a background
+   * layer, or as a search or editing layer.
+   */
   async getUsageSummary(): Promise<
     Record<string, { mapCount: number; mapNames: string[] }>
   > {
-    const instances = await prisma.layerInstance.findMany({
-      where: activeLayerInstanceWhere,
-      select: {
-        displayLayerId: true,
-        searchLayerId: true,
-        editingLayerId: true,
-        map: { select: { name: true } },
-        group: {
-          select: {
-            maps: { select: { mapName: true } },
-          },
+    const [contents, instances] = await Promise.all([
+      LayerTreeService.getMapContents(),
+      prisma.layerInstance.findMany({
+        where: {
+          AND: [activeLayerInstanceWhere, { map: { deletedAt: null } }],
         },
-      },
-    });
+        select: {
+          displayLayerId: true,
+          searchLayerId: true,
+          editingLayerId: true,
+          map: { select: { name: true } },
+        },
+      }),
+    ]);
 
     const mapNamesByLayerId = new Map<string, Set<string>>();
-
+    const add = (layerId: string, mapName: string) =>
+      mapNamesByLayerId.set(
+        layerId,
+        (mapNamesByLayerId.get(layerId) ?? new Set<string>()).add(mapName)
+      );
+    for (const [mapName, content] of contents) {
+      for (const layerId of content.layers.keys()) add(layerId, mapName);
+    }
     for (const instance of instances) {
       const layerId =
         instance.displayLayerId ??
         instance.searchLayerId ??
         instance.editingLayerId;
-      if (!layerId) continue;
-
-      const mapNames = mapNamesByLayerId.get(layerId) ?? new Set<string>();
-
-      if (instance.map?.name) {
-        mapNames.add(instance.map.name);
-      }
-
-      for (const groupMap of instance.group?.maps ?? []) {
-        if (groupMap.mapName) {
-          mapNames.add(groupMap.mapName);
-        }
-      }
-
-      mapNamesByLayerId.set(layerId, mapNames);
+      if (layerId && instance.map?.name) add(layerId, instance.map.name);
     }
 
     const summary: Record<string, { mapCount: number; mapNames: string[] }> =
@@ -763,42 +761,89 @@ class LayerService {
     return summary;
   }
 
+  /**
+   * Where a layer is used: for each group that holds it, the maps whose tree
+   * shows it there; and each map it is placed on directly (in its tree's top
+   * level, as a background layer, or as a search or editing layer).
+   */
   async getUsageByLayerId(id: string) {
     const kind = await resolveLayerKind(id);
-    const usageSelect = {
-      id: true,
-      displayLayerId: true,
-      searchLayerId: true,
-      editingLayerId: true,
-      usage: true,
-      map: { select: { id: true, name: true } },
-      group: {
-        select: {
-          id: true,
-          name: true,
-          maps: { select: { mapName: true } },
-        },
+    const instanceWhere: Prisma.LayerInstanceWhereInput =
+      kind === "search"
+        ? { searchLayerId: id, searchLayer: { deletedAt: null } }
+        : kind === "editing"
+          ? { editingLayerId: id, editingLayer: { deletedAt: null } }
+          : { displayLayerId: id, displayLayer: { deletedAt: null } };
+    const instances = await prisma.layerInstance.findMany({
+      where: { ...instanceWhere, map: { deletedAt: null } },
+      select: {
+        id: true,
+        usage: true,
+        map: { select: { id: true, name: true } },
       },
-    } as const;
-
-    if (kind === "search") {
-      return await prisma.layerInstance.findMany({
-        where: { searchLayerId: id, searchLayer: { deletedAt: null } },
-        select: usageSelect,
-      });
-    }
-
-    if (kind === "editing") {
-      return await prisma.layerInstance.findMany({
-        where: { editingLayerId: id, editingLayer: { deletedAt: null } },
-        select: usageSelect,
-      });
-    }
-
-    return await prisma.layerInstance.findMany({
-      where: { displayLayerId: id, displayLayer: { deletedAt: null } },
-      select: usageSelect,
     });
+    const usage = instances.map((instance) => ({
+      id: instance.id,
+      usage: instance.usage ?? UseType.FOREGROUND,
+      map: instance.map,
+      group: null as {
+        id: string;
+        name: string;
+        maps: { mapName: string }[];
+      } | null,
+    }));
+    if (kind === "search" || kind === "editing") {
+      return usage;
+    }
+
+    const [contents, owners] = await Promise.all([
+      LayerTreeService.getMapContents(),
+      prisma.groupItem.findMany({
+        where: { displayLayerId: id, group: { deletedAt: null } },
+        select: { groupId: true },
+      }),
+    ]);
+    const mapsByGroup = new Map<string, string[]>(
+      owners.map((owner) => [owner.groupId, []])
+    );
+    const topLevelMaps: string[] = [];
+    for (const [mapName, content] of contents) {
+      for (const groupId of content.layers.get(id) ?? []) {
+        if (groupId === "") topLevelMaps.push(mapName);
+        else mapsByGroup.set(groupId, [...(mapsByGroup.get(groupId) ?? []), mapName]);
+      }
+    }
+    const [groups, maps] = await Promise.all([
+      prisma.group.findMany({
+        where: { id: { in: [...mapsByGroup.keys()] }, deletedAt: null },
+        orderBy: { name: "asc" },
+        select: { id: true, name: true },
+      }),
+      prisma.map.findMany({
+        where: { name: { in: topLevelMaps }, deletedAt: null },
+        select: { id: true, name: true },
+      }),
+    ]);
+    return [
+      ...groups.map((group) => ({
+        id: `group:${group.id}`,
+        usage: UseType.FOREGROUND,
+        map: null,
+        group: {
+          ...group,
+          maps: (mapsByGroup.get(group.id) ?? []).map((mapName) => ({
+            mapName,
+          })),
+        },
+      })),
+      ...maps.map((map) => ({
+        id: `map:${map.name}`,
+        usage: UseType.FOREGROUND,
+        map,
+        group: null,
+      })),
+      ...usage,
+    ];
   }
 
   async getRoleOnLayerByLayerId(layerId: string) {

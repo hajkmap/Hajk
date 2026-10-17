@@ -206,7 +206,7 @@ paths:
             type: string
       responses:
         200:
-          description: Layers on the map (direct placements and via groups)
+          description: Layers placed directly on the map — its background layers and the search and editing layers it uses
         404:
           description: Map not found
     put:
@@ -220,7 +220,10 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Layers placed directly on the map (replaces existing set)
+        description: >-
+          The search and editing layers the map uses, in order (replaces the
+          existing set; layers kept keep their instance). The map's display
+          layers are its layer tree and background (PUT /maps/{mapName}/layer-tree).
         content:
           application/json:
             schema:
@@ -233,25 +236,11 @@ paths:
                     properties:
                       layerId:
                         type: string
-                      usage:
-                        type: string
-                        enum: [BACKGROUND, FOREGROUND]
-                      visibleAtStart:
-                        type: boolean
-                      infoClickActive:
-                        type: boolean
                       zIndex:
                         type: integer
                         minimum: 0
-                        description: Draw order for direct map placement (ascending; higher = drawn on top). Emitted as drawOrder in client layersConfig.
                     required:
                       - layerId
-                replaceBackground:
-                  type: boolean
-                  description: When true, replace BACKGROUND instances even if layers has none
-                replaceForeground:
-                  type: boolean
-                  description: When true, replace FOREGROUND instances even if layers has none
       responses:
         204:
           description: Map layers updated
@@ -263,157 +252,11 @@ paths:
                 $ref: "#/components/schemas/Error"
         404:
           description: Map not found
-  /maps/{mapName}/content:
-    get:
-      tags:
-        - Admin only
-      parameters:
-        - name: mapName
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Direct map layers and group placements (combined Kartinnehåll load)
-        404:
-          description: Map not found
-    put:
-      tags:
-        - Admin only
-      parameters:
-        - name: mapName
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: Atomically replaces direct map layers (zIndex draw order) and group placements
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                layers:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      layerId:
-                        type: string
-                      zIndex:
-                        type: integer
-                        minimum: 0
-                      visibleAtStart:
-                        type: boolean
-                    required:
-                      - layerId
-                groups:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      groupId:
-                        type: string
-                      index:
-                        type: integer
-                    required:
-                      - groupId
-              required:
-                - layers
-                - groups
-      responses:
-        204:
-          description: Map content updated
-        400:
-          description: Invalid request
-        404:
-          description: Map not found
-  /maps/{mapName}/layerswitcher:
-    get:
-      tags:
-        - Admin only
-      parameters:
-        - name: mapName
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Kartlager groups and Bakgrund baselayers (catalog layer ids)
-        404:
-          description: Map not found
-    put:
-      tags:
-        - Admin only
-      parameters:
-        - name: mapName
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: Atomically replaces Kartlager (GroupsOnMaps + group LayerInstances) and Bakgrund (BACKGROUND map LayerInstances)
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                groups:
-                  type: array
-                  items:
-                    type: object
-                    additionalProperties: true
-                    properties:
-                      id:
-                        type: string
-                      name:
-                        type: string
-                      layers:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                          required:
-                            - id
-                      groups:
-                        type: array
-                        items:
-                          type: object
-                          additionalProperties: true
-                    required:
-                      - id
-                baselayers:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      layerId:
-                        type: string
-                      visibleAtStart:
-                        type: boolean
-                      infoClickActive:
-                        type: boolean
-                      zIndex:
-                        type: integer
-                        minimum: 0
-                    required:
-                      - layerId
-      responses:
-        204:
-          description: Map layerswitcher updated
-        400:
-          description: Invalid request
-        404:
-          description: Map not found
   /maps/{mapName}/layer-tree:
     get:
       tags:
         - Admin only
-      summary: "POC: the map's layer tree, apart from the layerswitcher tool"
+      summary: "The map's layer tree, apart from the layerswitcher tool"
       parameters:
         - name: mapName
           in: path
@@ -428,7 +271,7 @@ paths:
     put:
       tags:
         - Admin only
-      summary: "POC: replaces the top level of the map's layer tree"
+      summary: "Replaces the top level of the map's layer tree"
       parameters:
         - name: mapName
           in: path
@@ -521,58 +364,6 @@ paths:
           description: Invalid request
         404:
           description: Map not found
-  /maps/{mapName}/groups:
-    put:
-      tags:
-        - Admin only
-      parameters:
-        - name: mapName
-          in: path
-          description: Name of the map
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: Group placements on the map (replaces existing set)
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                groups:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      groupId:
-                        type: string
-                      parentGroupId:
-                        type: string
-                        nullable: true
-                      usage:
-                        type: string
-                        enum: [BACKGROUND, FOREGROUND]
-                      name:
-                        type: string
-                      toggled:
-                        type: boolean
-                      expanded:
-                        type: boolean
-                    required:
-                      - groupId
-      responses:
-        204:
-          description: Map groups updated
-        400:
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        404:
-          description: Map not found
   /layers:
     get:
       tags:
@@ -595,7 +386,7 @@ paths:
     get:
       tags:
         - Admin only
-      summary: "POC: for every group and layer, the groups and maps it is placed in"
+      summary: "For every group and layer, the groups and maps it is placed in"
       responses:
         200:
           description: Placements of groups and layers, keyed by id
@@ -631,27 +422,11 @@ paths:
           description: Return the maps that use the group
         404:
           description: Requested group was not found
-  /groups/{groupId}/layers:
-    get:
-      tags:
-        - Client-accessible
-      parameters:
-        - name: groupId
-          in: path
-          description: ID of the group to be fetched
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Return the layers that belong to the group
-        404:
-          description: Requested group was not found
   /groups/{groupId}/tree:
     get:
       tags:
         - Admin only
-      summary: "POC: the group's content as a tree, with linked groups expanded"
+      summary: "The group's content as a tree, with linked groups expanded"
       parameters:
         - name: groupId
           in: path
@@ -666,7 +441,7 @@ paths:
     put:
       tags:
         - Admin only
-      summary: "POC: replaces the group's tree"
+      summary: "Replaces the group's tree"
       parameters:
         - name: groupId
           in: path

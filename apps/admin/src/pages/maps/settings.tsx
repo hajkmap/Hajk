@@ -38,15 +38,13 @@ import {
   useUpdateMap,
   useUpdateMapTools,
   useUpdateMapLayers,
-  useUpdateMapLayerSwitcher,
-  useMapLayerSwitcher,
   useDeleteMap,
   useMaps,
   useToolsByMapName,
-  useMapContentByName,
+  useLayersByMapName,
 } from "../../api/maps";
-import type { MapContentApiResponse, MapLayer } from "../../api/maps";
-import { getMapContentByName } from "../../api/maps";
+import type { MapLayer } from "../../api/maps";
+import { getLayersByMapName } from "../../api/maps";
 import DialogWrapper from "../../components/flexible-dialog";
 import {
   buildMapSettingsFormValues,
@@ -67,14 +65,7 @@ import {
   mapLayerActivationToPayload,
   type MapLayerActivationRow,
 } from "./map-layer-activation";
-import {
-  applyLayerswitcherOptionsToActivationRows,
-  getClientBaselayersFromToolOptions,
-  getClientGroupsFromToolOptions,
-} from "../groups-development/utils/client-groups";
-import { findActiveLayerswitcher } from "../groups-development/utils/active-layerswitcher";
 import { useTools } from "../../api/tools";
-import type { LayerSwitcherDraft } from "../groups-development/types";
 import { useLayers } from "../../api/layers";
 import type { ToolWindowPosition, ToolZone } from "../../api/maps";
 import MapToolsPanel from "./components/map-tools-panel";
@@ -172,9 +163,7 @@ export default function MapSettings() {
   const { mutateAsync: updateMap, status: updateStatus } = useUpdateMap();
   const { mutateAsync: updateMapTools } = useUpdateMapTools();
   const { mutateAsync: updateMapLayers } = useUpdateMapLayers();
-  const { mutateAsync: updateMapLayerSwitcher } = useUpdateMapLayerSwitcher();
   const { mutateAsync: deleteMap, isPending: isDeletingMap } = useDeleteMap();
-  const { data: layerSwitcherState } = useMapLayerSwitcher(mapName ?? "");
   const { palette } = useTheme();
   const [deleteWarningExpanded, setDeleteWarningExpanded] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -235,12 +224,13 @@ export default function MapSettings() {
   );
   const { data: mapTools } = useToolsByMapName(mapName ?? "");
   const { data: catalogTools } = useTools();
+  // The search and editing layers the map uses ("Lager"); its display layers
+  // are its layer tree and background (Lagerordning).
   const {
-    data: mapContent,
+    data: mapLayers,
     isError: mapContentError,
     isLoading: mapContentLoading,
-  } = useMapContentByName(mapName ?? "");
-  const mapLayers = mapContent?.layers;
+  } = useLayersByMapName(mapName ?? "");
   const { data: projections } = useProjections();
   const { defaultCoordinates } = useAppStateStore.getState();
 
@@ -263,12 +253,9 @@ export default function MapSettings() {
     setLayerActivationCommittedSignature,
   ] = useState("");
   const layerActivationWasDirtyRef = useRef(false);
-  const [layerActivationResetKey, setLayerActivationResetKey] = useState(0);
   const [menuSynced, setMenuSynced] = useState(false);
   const [menuSyncedMapName, setMenuSyncedMapName] = useState(mapName);
-  const [layerSwitcherDraft, setLayerSwitcherDraft] =
-    useState<LayerSwitcherDraft | null>(null);
-  // POC (layer trees): saved with the rest of the map, see handleUpdateMap.
+  // The map's layer tree, saved with the rest of the map (see handleUpdateMap).
   const [layerTreeDraft, setLayerTreeDraft] = useState<LayerTreeDraft | null>(
     null,
   );
@@ -369,8 +356,6 @@ export default function MapSettings() {
       return;
     }
     layerActivationWasDirtyRef.current = false;
-    setLayerSwitcherDraft(null);
-    setLayerActivationResetKey((key) => key + 1);
   }, [layerActivationDirtyRaw]);
 
   const handleLayerActivationRowsChange = useCallback(
@@ -383,8 +368,6 @@ export default function MapSettings() {
       ) {
         setLayerActivationRows(serverLayerActivationRows);
         layerActivationWasDirtyRef.current = false;
-        setLayerSwitcherDraft(null);
-        setLayerActivationResetKey((key) => key + 1);
         return;
       }
       setLayerActivationRows(rows);
@@ -404,32 +387,14 @@ export default function MapSettings() {
   const [toolsDraft, setToolsDraft] = useState<ToolsDraft | null>(null);
   const toolsDraftRef = useRef<ToolsDraft | null>(null);
   const flushMapToolEditsRef = useRef<(() => void) | null>(null);
-  // Set when the active layerswitcher changes so Save writes that tool's tree
-  // and drops every other LayerInstance for this map.
-  const layerswitcherSwitchRef = useRef(false);
   const [hasPendingWindowSizeInput, setHasPendingWindowSizeInput] =
     useState(false);
-  const layerSwitcherDirty = layerSwitcherDraft != null && menuSynced;
-  const layerSwitcherMapNameRef = useRef(mapName);
   const [mapLayersMoveZoneVisible, setMapLayersMoveZoneVisible] =
     useState(false);
   const mapLayersMoveZoneHostRef = useRef<HTMLDivElement | null>(null);
 
-  if (layerSwitcherMapNameRef.current !== mapName) {
-    layerSwitcherMapNameRef.current = mapName;
-    if (layerSwitcherDraft != null) {
-      setLayerSwitcherDraft(null);
-    }
-  }
-
-  const handleLayerSwitcherDraftChange = useCallback(
-    (draft: LayerSwitcherDraft | null) => {
-      setLayerSwitcherDraft(draft);
-    },
-    [],
-  );
-
-  const handleGroupsDevelopmentActiveChange = useCallback((active: boolean) => {
+  // With Lagerordning open, the move zone has its place by the save button.
+  const handleLayerTreeOpenChange = useCallback((active: boolean) => {
     setMapLayersMoveZoneVisible(active);
     if (!active) {
       setDeleteWarningExpanded(false);
@@ -622,35 +587,8 @@ export default function MapSettings() {
           inactiveTargets: nextInactiveTargets,
         };
       });
-
-      if (!active || toolTypesById.get(toolId) !== "layerswitcher") {
-        return;
-      }
-
-      // The previous tool's unsaved tree must not be saved onto the new one.
-      layerswitcherSwitchRef.current = true;
-      setLayerSwitcherDraft(null);
-
-      const layerswitcher = findActiveLayerswitcher(
-        mapTools,
-        new Set([toolId]),
-        catalogTools,
-      );
-      if (!layerswitcher) {
-        return;
-      }
-
-      const options = {
-        ...(layerswitcher.tool.options ?? {}),
-        ...(layerswitcher.options ?? {}),
-      };
-      setLayerActivationRows((current) =>
-        applyLayerswitcherOptionsToActivationRows(current, options),
-      );
-      setLayerActivationResetKey((key) => key + 1);
     },
     [
-      catalogTools,
       mapName,
       mapTools,
       resolveToolsDraft,
@@ -845,14 +783,12 @@ export default function MapSettings() {
       toolsDirty ||
       hasPendingWindowSizeInput ||
       contentDirty ||
-      layerSwitcherDirty ||
       layerTreeDirty,
     [
       isDirty,
       toolsDirty,
       hasPendingWindowSizeInput,
       contentDirty,
-      layerSwitcherDirty,
       layerTreeDirty,
     ],
   );
@@ -870,32 +806,6 @@ export default function MapSettings() {
 
       let didSave = false;
       const currentToolsDraft = toolsDraftRef.current;
-      const saveActiveToolIds =
-        currentToolsDraft?.mapName === map.name
-          ? currentToolsDraft.activeToolIds
-          : (serverToolsDraftState?.activeToolIds ?? new Set<number>());
-      const activeLayerswitcher = findActiveLayerswitcher(
-        mapTools,
-        saveActiveToolIds,
-        catalogTools,
-      );
-      const layerswitcherFromTool = activeLayerswitcher
-        ? {
-            groups: getClientGroupsFromToolOptions({
-              ...(activeLayerswitcher.tool.options ?? {}),
-              ...(activeLayerswitcher.options ?? {}),
-            }),
-            baselayers: getClientBaselayersFromToolOptions({
-              ...(activeLayerswitcher.tool.options ?? {}),
-              ...(activeLayerswitcher.options ?? {}),
-            }).map((entry, index) => ({
-              layerId: entry.layerId,
-              visibleAtStart: entry.visibleAtStart,
-              infobox: entry.infobox,
-              zIndex: index,
-            })),
-          }
-        : null;
       const shouldSaveTools =
         currentToolsDraft != null &&
         mapTools != null &&
@@ -924,93 +834,21 @@ export default function MapSettings() {
         didSave = true;
       }
 
-      const switchedLayerswitcher =
-        layerswitcherSwitchRef.current && layerswitcherFromTool != null;
-      let didWriteLayerSwitcher = false;
-
-      if (switchedLayerswitcher || (contentDirty && layerActivationDirtyRaw)) {
-        // The draft is the tree just built in Lagerordningsträd. Activating a
-        // layerswitcher clears the previous tool's draft, so a draft here
-        // belongs to the current tool and must be saved. Falling back to the
-        // tool's stored options drops that first tree and the reload is empty.
-        const base = layerSwitcherDraft ??
-          layerswitcherFromTool ??
-          layerSwitcherState ?? {
-            groups: [],
-            baselayers: [],
-          };
-        layerswitcherSwitchRef.current = false;
-        await updateMapLayerSwitcher({
-          mapName: map.name,
-          content: {
-            groups: base.groups,
-            baselayers: base.baselayers,
-          },
-        });
-        // Checked Lager rows must still have an instance after the tree write,
-        // or the reload clears Active. Grouped rows are left as they are.
+      // "Lager": the search and editing layers the map uses.
+      if (contentDirty && layerActivationDirtyRaw) {
         await updateMapLayers({
           mapName: map.name,
           layers: mapLayerActivationToPayload(layerActivationRows),
-          replaceBackground: true,
-          replaceForeground: true,
         });
-        setLayerSwitcherDraft(null);
         layerActivationWasDirtyRef.current = false;
-        didWriteLayerSwitcher = true;
-
         await queryClient.cancelQueries({
-          queryKey: ["mapContent", map.name],
+          queryKey: ["layersByMap", map.name],
         });
-        const contentData = await queryClient.fetchQuery<MapContentApiResponse>(
-          {
-            queryKey: ["mapContent", map.name],
-            queryFn: () => getMapContentByName(map.name),
-          },
-        );
-        applyMenuStateFromServer(contentData.layers);
-        setLayerActivationResetKey((key) => key + 1);
-        await Promise.all([
-          queryClient.refetchQueries({
-            queryKey: ["mapLayerSwitcher", map.name],
-          }),
-          queryClient.refetchQueries({
-            queryKey: ["toolsByMap", map.name],
-          }),
-          queryClient.refetchQueries({
-            queryKey: ["tools"],
-          }),
-        ]);
-        didSave = true;
-      }
-
-      if (
-        !didWriteLayerSwitcher &&
-        layerSwitcherDraft &&
-        !layerActivationDirtyRaw
-      ) {
-        await updateMapLayerSwitcher({
-          mapName: map.name,
-          content: {
-            groups: layerSwitcherDraft.groups,
-            baselayers: layerSwitcherDraft.baselayers,
-          },
+        const savedLayers = await queryClient.fetchQuery<MapLayer[]>({
+          queryKey: ["layersByMap", map.name],
+          queryFn: () => getLayersByMapName(map.name),
         });
-        await updateMapLayers({
-          mapName: map.name,
-          layers: mapLayerActivationToPayload(layerActivationRows),
-          replaceBackground: true,
-          replaceForeground: true,
-        });
-        setLayerSwitcherDraft(null);
-        await Promise.all([
-          queryClient.refetchQueries({
-            queryKey: ["mapContent", map.name],
-          }),
-          queryClient.refetchQueries({
-            queryKey: ["mapLayerSwitcher", map.name],
-          }),
-        ]);
+        applyMenuStateFromServer(savedLayers);
         didSave = true;
       }
 
@@ -1268,7 +1106,7 @@ export default function MapSettings() {
 
         {activeTab === "menu" &&
           (mapContentLoading ||
-          (mapContent === undefined && !mapContentError) ? (
+          (mapLayers === undefined && !mapContentError) ? (
             <SquareSpinnerComponent />
           ) : mapContentError ? (
             <Alert severity="error" sx={{ mt: 2 }}>
@@ -1282,13 +1120,7 @@ export default function MapSettings() {
               mapTools={mapTools}
               catalogTools={catalogTools}
               activeToolIds={activeToolIds}
-              layerSwitcherDraft={layerSwitcherDraft}
-              onLayerSwitcherDraftChange={handleLayerSwitcherDraftChange}
-              layerActivationResetKey={layerActivationResetKey}
-              menuSynced={menuSynced}
-              onGroupsDevelopmentActiveChange={
-                handleGroupsDevelopmentActiveChange
-              }
+              onLayerTreeOpenChange={handleLayerTreeOpenChange}
               moveZoneHostRef={mapLayersMoveZoneHostRef}
               layerTreeDraft={layerTreeDraft}
               onLayerTreeDraftChange={setLayerTreeDraft}

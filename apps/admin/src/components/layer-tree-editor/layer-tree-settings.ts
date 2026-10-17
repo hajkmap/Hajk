@@ -11,8 +11,8 @@ import {
   type LayerTreeFlatNode,
 } from "./layer-tree-model";
 
-// POC (layer trees): the map's settings for the groups and layers in its
-// tree, as in Lagerordning. A group's settings are the same wherever it shows
+// The map's settings for the groups and layers in its tree (as the old
+// Lagerordning had them). A group's settings are the same wherever it shows
 // on the map; a layer's are per group it shows in. Only settings that differ
 // from the defaults are kept and saved.
 
