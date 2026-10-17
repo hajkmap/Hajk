@@ -6,10 +6,15 @@ import LayerTreeService, {
   type LayerTreeNode,
 } from "../services/layer-tree.service.ts";
 import {
-  INFOGROUP_DEFAULTS,
-  infoGroupFieldsFromPlacement,
-  type ClientLayerSwitcherGroupNode,
-  type ClientLayerSwitcherLayerRef,
+  DEFAULT_GROUP_SETTINGS,
+  DEFAULT_LAYER_SETTINGS,
+  layerSettingsKey,
+  type MapGroupSettings,
+  type MapLayerSettings,
+} from "../services/map-layer-tree-settings.ts";
+import type {
+  ClientLayerSwitcherGroupNode,
+  ClientLayerSwitcherLayerRef,
 } from "./build-layer-switcher-groups-for-map.ts";
 import type { DisplayLayerPlacement } from "./build-legacy-layers-config.ts";
 
@@ -17,17 +22,15 @@ const logger = log4js.getLogger("util.build-client-layer-tree");
 
 // POC (layer trees): the client still reads the classic layerswitcher format
 // (groups holding layer refs, layer definitions in layersConfig). This builds
-// it from the map's layer tree (MapTreeItem → GroupItem) instead of from layer
-// instances, so the client needs no changes.
+// it from the map's layer tree (MapTreeItem → GroupItem) and the map's
+// settings for it, instead of from layer instances, so the client needs no
+// changes.
 
 /** Parent id the client expects for groups at the top of the tree. */
 const ROOT_PARENT = "-1";
 
 /** Joins an id with its group's client id for a second placement on a map. */
 const OCCURRENCE_SEPARATOR = "~";
-
-/** Used where the map has no old group settings (as for groups without placements today). */
-const GROUP_DEFAULTS = { toggled: true, expanded: false, exclusive: false };
 
 type GroupNode = Extract<LayerTreeNode, { type: "group" }>;
 
@@ -48,74 +51,60 @@ const EMPTY_TREE: ClientLayerTree = {
   translateLayerId: (id) => id,
 };
 
-function infoboxOf(options: unknown): string {
-  return options &&
-    typeof options === "object" &&
-    !Array.isArray(options) &&
-    typeof (options as Record<string, unknown>).infobox === "string"
-    ? ((options as Record<string, unknown>).infobox as string)
-    : "";
+/** The client's info group fields for a group. */
+function infoGroupFields({ infoGroup }: Omit<MapGroupSettings, "groupId">) {
+  return {
+    infogroupvisible: infoGroup.visible,
+    infogrouptitle: infoGroup.title,
+    infogrouptext: infoGroup.text,
+    infogroupurl: infoGroup.url,
+    infogroupurltext: infoGroup.urlText,
+    infogroupopendatalink: infoGroup.openDataLink,
+    infogroupowner: infoGroup.owner,
+  };
 }
 
 export async function buildClientLayerTreeForMap(
   mapName: string
 ): Promise<ClientLayerTree> {
-  const map = await prisma.map.findUnique({
-    where: { name: mapName },
+  const map = await prisma.map.findFirst({
+    where: { name: mapName, deletedAt: null },
     select: { name: true },
   });
   if (!map) {
     return EMPTY_TREE;
   }
 
-  // The tree comes with the map's exceptions merged in, and its draw order.
-  const { items, drawOrder } = await LayerTreeService.getMapTree(mapName);
+  // The tree comes with the map's exceptions merged in, its settings for the
+  // groups and layers in it, and its draw order.
+  const { items, settings, drawOrder } =
+    await LayerTreeService.getMapTree(mapName);
+  const groupSettings = new Map<string, MapGroupSettings>(
+    settings.groups.map((group) => [group.groupId, group])
+  );
+  const layerSettings = new Map<string, MapLayerSettings>(
+    settings.layers.map((layer) => [
+      layerSettingsKey(layer.groupId, layer.layerId),
+      layer,
+    ])
+  );
 
-  // The old per-map settings, used where they exist; defaults otherwise.
-  const [groupRows, instanceRows, background] = await Promise.all([
-    prisma.groupsOnMaps.findMany({
-      where: { mapName },
-      include: { metadata: true },
-    }),
+  const [instanceRows, background] = await Promise.all([
+    // The old layer instances, so saved themes that use their ids still find
+    // their layers (see translateLayerId).
     prisma.layerInstance.findMany({
       where: {
         map: { name: mapName },
         displayLayerId: { not: null },
         OR: [{ usage: null }, { usage: UseType.FOREGROUND }],
       },
-      select: {
-        id: true,
-        groupId: true,
-        displayLayerId: true,
-        visibleAtStart: true,
-        infoClickActive: true,
-        options: true,
-      },
+      select: { id: true, groupId: true, displayLayerId: true },
     }),
     prisma.layerInstance.aggregate({
       where: { map: { name: mapName }, usage: UseType.BACKGROUND },
       _max: { zIndex: true },
     }),
   ]);
-
-  const groupSettings = new Map<string, (typeof groupRows)[number]>();
-  for (const row of groupRows) {
-    const earlier = groupSettings.get(row.groupId);
-    if (
-      !earlier ||
-      (earlier.usage !== UseType.FOREGROUND && row.usage === UseType.FOREGROUND)
-    ) {
-      groupSettings.set(row.groupId, row);
-    }
-  }
-  const layerSettings = new Map<string, (typeof instanceRows)[number]>();
-  for (const row of instanceRows) {
-    const key = `${row.groupId ?? ""}|${row.displayLayerId}`;
-    if (!layerSettings.has(key)) layerSettings.set(key, row);
-    if (!layerSettings.has(`|${row.displayLayerId}`)) {
-      layerSettings.set(`|${row.displayLayerId}`, row);
-    }
-  }
 
   // Layer definitions for every layer in the tree (deleted ones are left out).
   const layerIds = new Set<string>();
@@ -192,16 +181,16 @@ export async function buildClientLayerTreeForMap(
       }
       const displayLayer = displayLayers.get(child.id);
       if (!displayLayer) return;
-      const old =
-        layerSettings.get(`${node.id}|${child.id}`) ??
-        layerSettings.get(`|${child.id}`);
+      const layer =
+        layerSettings.get(layerSettingsKey(node.id, child.id)) ??
+        DEFAULT_LAYER_SETTINGS;
       const id = clientId(child.id, groupClientId);
       const ref: ClientLayerSwitcherLayerRef = {
         id,
         index: childIndex,
         drawOrder: 0,
-        visibleAtStart: old?.visibleAtStart ?? false,
-        infobox: infoboxOf(old?.options),
+        visibleAtStart: layer.visibleAtStart,
+        infobox: layer.infobox,
       };
       layers.push(ref);
       ordered.push({
@@ -210,7 +199,7 @@ export async function buildClientLayerTreeForMap(
           id,
           zIndex: 0,
           visibleAtStart: ref.visibleAtStart,
-          infoClickActive: old?.infoClickActive ?? true,
+          infoClickActive: true,
           displayLayer,
         },
         layerId: child.id,
@@ -222,21 +211,19 @@ export async function buildClientLayerTreeForMap(
       }
     });
 
-    const settings = groupSettings.get(node.id);
+    const group = groupSettings.get(node.id) ?? DEFAULT_GROUP_SETTINGS;
     return {
       id: groupClientId,
       type: "group",
-      name: node.name,
+      name: group.name ?? node.name,
       index,
-      toggled: settings?.toggled ?? GROUP_DEFAULTS.toggled,
-      expanded: settings?.expanded ?? GROUP_DEFAULTS.expanded,
-      exclusive: settings?.exclusive ?? GROUP_DEFAULTS.exclusive,
+      toggled: group.toggled,
+      expanded: group.expanded,
+      exclusive: group.exclusive,
       parent: parentClientId,
       layers,
       groups,
-      ...(settings
-        ? infoGroupFieldsFromPlacement(settings)
-        : INFOGROUP_DEFAULTS),
+      ...infoGroupFields(group),
     };
   };
 

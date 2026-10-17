@@ -422,7 +422,7 @@ paths:
             type: string
       responses:
         200:
-          description: Top-level linked groups, each expanded from its own content with the map's exceptions merged in (items added or hidden on this map), plus the background layers and the draw order
+          description: Top-level linked groups, each expanded from its own content with the map's exceptions merged in (items added or hidden on this map), plus the map's settings for its groups and layers (only those that differ from the defaults), the background layers and the draw order
         404:
           description: Map not found
     put:
@@ -436,7 +436,7 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Ordered top-level groups (layers go in groups, since the client only shows layers inside groups). Groups are linked; their content is edited on the group. Optional, each written only when sent - exceptions (add a layer or a group to a group on this map only, or hide one of its own items), background and drawOrder.
+        description: Ordered top-level groups (layers go in groups, since the client only shows layers inside groups). Groups are linked; their content is edited on the group. Optional, each written only when sent - exceptions (add a layer or a group to a group on this map only, or hide one of its own items), settings, background and drawOrder.
         required: true
         content:
           application/json:
@@ -457,6 +457,61 @@ paths:
                     required:
                       - type
                       - id
+                settings:
+                  type: object
+                  description: The map's settings for the groups and layers in its tree; replaces all of them. A group's settings are the same wherever it shows on the map, a layer's are per group it shows in. Missing fields get the defaults (false, empty text, name null for the group's own name); only settings that differ from them are stored.
+                  properties:
+                    groups:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          groupId:
+                            type: string
+                          name:
+                            type: string
+                            nullable: true
+                          toggled:
+                            type: boolean
+                          expanded:
+                            type: boolean
+                          exclusive:
+                            type: boolean
+                          infoGroup:
+                            type: object
+                            properties:
+                              visible:
+                                type: boolean
+                              title:
+                                type: string
+                              text:
+                                type: string
+                              url:
+                                type: string
+                              urlText:
+                                type: string
+                              openDataLink:
+                                type: string
+                              owner:
+                                type: string
+                        required:
+                          - groupId
+                    layers:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          groupId:
+                            type: string
+                          layerId:
+                            type: string
+                          visibleAtStart:
+                            type: boolean
+                          infobox:
+                            type: string
+                        required:
+                          - groupId
+                          - layerId
               required:
                 - items
       responses:

@@ -5,12 +5,19 @@ import { HajkError } from "../../../common/classes.ts";
 import HttpStatusCodes from "../../../common/http-status-codes.ts";
 import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
 import type { LayerTreeNode } from "./layer-tree.service.ts";
+import {
+  parseSettings,
+  validateSettings,
+  writeSettings,
+  type MapTreeSettings,
+} from "./map-layer-tree-settings.ts";
 
 // POC (layer trees): what a map has besides its tree of groups. Exceptions to
 // the groups it shows (a layer or group put in a group on this map only, or
-// one of a group's own layers or groups hidden), its background layers and
-// its draw order. The additions work the same for what a group puts in the
-// groups linked in its tree (see applyAdded).
+// one of a group's own layers or groups hidden), its settings for the groups
+// and layers in it, its background layers and its draw order. The additions
+// work the same for what a group puts in the groups linked in its tree (see
+// applyAdded).
 
 export type ItemType = "layer" | "group";
 
@@ -49,6 +56,7 @@ export interface MapBackgroundInput {
 
 export interface MapTreeExtrasInput {
   exceptions?: MapGroupExceptionInput[];
+  settings?: MapTreeSettings;
   background?: MapBackgroundInput[];
   /** Layer ids, top first. */
   drawOrder?: string[];
@@ -120,6 +128,10 @@ export function parseMapTreeExtras(body: unknown): MapTreeExtrasInput {
       }
       return { groupId, kind, type, id, after: parsedAfter };
     });
+  }
+
+  if (raw.settings !== undefined) {
+    extras.settings = parseSettings(raw.settings);
   }
 
   if (raw.background !== undefined) {
@@ -396,7 +408,8 @@ export async function effectiveDrawOrder(
  * Checks the extras against the map's tree as it will be shown (`shown`,
  * built with the exceptions in): nothing may end up inside itself, an
  * exception must be about a group on the map and about what that group shows
- * there, and every layer must exist.
+ * there, settings must be about groups and layers on the map, and every
+ * layer must exist.
  */
 export async function validateMapTreeExtras(
   extras: MapTreeExtrasInput,
@@ -450,6 +463,10 @@ export async function validateMapTreeExtras(
     }
   }
 
+  if (extras.settings) {
+    validateSettings(extras.settings, shown, nameOf);
+  }
+
   if (layerIds.size === 0) return;
   const found = new Set(
     (
@@ -495,6 +512,10 @@ export async function writeMapTreeExtras(
         })),
       });
     }
+  }
+
+  if (extras.settings) {
+    await writeSettings(tx, map.name, extras.settings);
   }
 
   if (extras.background) {

@@ -221,6 +221,121 @@ export async function importLayerTrees(prisma) {
   );
 }
 
+/**
+ * Copies each map's settings for its groups and layers from Lagerordning
+ * (GroupsOnMaps and the map's layer instances) to MapGroupSetting and
+ * MapLayerSetting, for maps that have none yet. Only settings that differ
+ * from the defaults are stored, and a group's name only where the map names
+ * it differently than the group. Where a group sits on a map twice, its first
+ * placement's settings count.
+ */
+export async function importLayerTreeSettings(prisma) {
+  const [maps, groups] = await Promise.all([
+    prisma.map.findMany({
+      select: {
+        id: true,
+        name: true,
+        _count: { select: { groupSettings: true, layerSettings: true } },
+      },
+    }),
+    prisma.group.findMany({ select: { id: true, name: true } }),
+  ]);
+  const ownName = new Map(groups.map((group) => [group.id, group.name]));
+
+  const groupRows = [];
+  const layerRows = [];
+  for (const map of maps) {
+    if (map._count.groupSettings + map._count.layerSettings > 0) continue;
+
+    const placements = await prisma.groupsOnMaps.findMany({
+      where: { mapName: map.name, usage: "FOREGROUND" },
+      orderBy: { index: "asc" },
+      include: { metadata: true },
+    });
+    const seenGroups = new Set();
+    for (const placement of placements) {
+      if (seenGroups.has(placement.groupId)) continue;
+      seenGroups.add(placement.groupId);
+      const name = placement.name?.trim() ?? "";
+      const metadata = placement.metadata;
+      const row = {
+        mapName: map.name,
+        groupId: placement.groupId,
+        name: name && name !== ownName.get(placement.groupId) ? name : null,
+        toggled: placement.toggled,
+        expanded: placement.expanded,
+        exclusive: placement.exclusive,
+        infoGroupVisible: placement.infoDocument,
+        infoGroupTitle: metadata?.title ?? "",
+        infoGroupText: metadata?.description ?? "",
+        infoGroupUrl: metadata?.url ?? "",
+        infoGroupUrlText: metadata?.urlTitle ?? "",
+        infoGroupOpenDataLink: metadata?.urlOpenData ?? "",
+        infoGroupOwner: metadata?.owner ?? "",
+      };
+      const differs =
+        row.name !== null ||
+        row.toggled ||
+        row.expanded ||
+        row.exclusive ||
+        row.infoGroupVisible ||
+        [
+          row.infoGroupTitle,
+          row.infoGroupText,
+          row.infoGroupUrl,
+          row.infoGroupUrlText,
+          row.infoGroupOpenDataLink,
+          row.infoGroupOwner,
+        ].some((value) => value !== "");
+      if (differs) groupRows.push(row);
+    }
+
+    const instances = await prisma.layerInstance.findMany({
+      where: {
+        mapId: map.id,
+        groupId: { not: null },
+        displayLayerId: { not: null },
+        displayLayer: { deletedAt: null },
+        OR: [{ usage: null }, { usage: "FOREGROUND" }],
+      },
+      select: {
+        groupId: true,
+        displayLayerId: true,
+        visibleAtStart: true,
+        options: true,
+      },
+    });
+    const seenLayers = new Set();
+    for (const instance of instances) {
+      const key = `${instance.groupId}|${instance.displayLayerId}`;
+      if (seenLayers.has(key)) continue;
+      seenLayers.add(key);
+      const infobox =
+        typeof instance.options?.infobox === "string"
+          ? instance.options.infobox
+          : "";
+      if (!instance.visibleAtStart && !infobox) continue;
+      layerRows.push({
+        mapName: map.name,
+        groupId: instance.groupId,
+        displayLayerId: instance.displayLayerId,
+        visibleAtStart: instance.visibleAtStart,
+        infobox,
+      });
+    }
+  }
+
+  if (groupRows.length > 0) {
+    await prisma.mapGroupSetting.createMany({ data: groupRows });
+  }
+  if (layerRows.length > 0) {
+    await prisma.mapLayerSetting.createMany({ data: layerRows });
+  }
+  console.log(
+    `POC layer trees: settings for ${groupRows.length} group(s) and ${layerRows.length} layer(s) copied from Lagerordning.`
+  );
+}
+
 const sameList = (a, b) =>
   a.length === b.length && a.every((value, index) => value === b[index]);
 
@@ -484,6 +599,7 @@ if (
       await savePocGroups(prisma);
     } else {
       await importLayerTrees(prisma);
+      await importLayerTreeSettings(prisma);
       await importPocGroups(prisma);
     }
   } finally {

@@ -24,6 +24,10 @@ import {
   type ItemType,
   type MapBackgroundLayer,
 } from "./map-layer-tree-extras.ts";
+import {
+  readSettings,
+  type MapTreeSettings,
+} from "./map-layer-tree-settings.ts";
 
 const logger = log4js.getLogger("service.v3.layer-tree");
 
@@ -85,6 +89,8 @@ export interface MapLayerTree {
   mapName: string;
   /** With the map's exceptions merged in (see `added` and `hidden`). */
   items: LayerTreeNode[];
+  /** The map's settings for the groups and layers in its tree. */
+  settings: MapTreeSettings;
   background: MapBackgroundLayer[];
   /** Layer ids, top first. */
   drawOrder: string[];
@@ -310,7 +316,9 @@ class LayerTreeService {
   }
 
   private async requireMap(mapName: string) {
-    const map = await prisma.map.findUnique({ where: { name: mapName } });
+    const map = await prisma.map.findFirst({
+      where: { name: mapName, deletedAt: null },
+    });
     if (map === null) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
@@ -351,8 +359,9 @@ class LayerTreeService {
     let frontier = [...new Set([...rootGroupIds, ...addedGroupIds])];
     for (let depth = 0; frontier.length > 0 && depth <= MAX_DEPTH; depth++) {
       const [groupRows, itemRows, nestedRows] = await Promise.all([
+        // Deleted groups are left out of every tree, with their content.
         prisma.group.findMany({
-          where: { id: { in: frontier } },
+          where: { id: { in: frontier }, deletedAt: null },
           select: { id: true, name: true },
         }),
         prisma.groupItem.findMany({
@@ -422,11 +431,11 @@ class LayerTreeService {
         select: { id: true, name: true },
       }),
       prisma.groupItem.findMany({
-        where: { childGroupId: { in: groupIds } },
+        where: { childGroupId: { in: groupIds }, group: { deletedAt: null } },
         select: { groupId: true, childGroupId: true },
       }),
       prisma.mapTreeItem.findMany({
-        where: { groupId: { in: groupIds } },
+        where: { groupId: { in: groupIds }, map: { deletedAt: null } },
         select: { mapName: true, groupId: true },
       }),
     ]);
@@ -541,7 +550,7 @@ class LayerTreeService {
   private async assertExist(groupIds: Set<string>, layerIds: Set<string>) {
     const [groups, layers] = await Promise.all([
       prisma.group.findMany({
-        where: { id: { in: [...groupIds] } },
+        where: { id: { in: [...groupIds] }, deletedAt: null },
         select: { id: true },
       }),
       prisma.displayLayer.findMany({
@@ -582,7 +591,10 @@ class LayerTreeService {
 
     // So whoever edits the group sees which maps deviate from it.
     const exceptions = await prisma.mapGroupException.findMany({
-      where: { groupId: { in: [...context.groups.keys()] } },
+      where: {
+        groupId: { in: [...context.groups.keys()] },
+        map: { deletedAt: null },
+      },
       select: { mapName: true, kind: true },
     });
     const byMap = new Map<string, LayerTreeMapExceptions>();
@@ -605,13 +617,21 @@ class LayerTreeService {
    * Lets the admin tell apart items that share a name.
    */
   async getPlacements(): Promise<LayerTreePlacements> {
-    // Deleted layers are left out, as in the trees.
-    const notDeleted = {
+    // Deleted layers, groups and maps are left out, as in the trees.
+    const layerNotDeleted = {
       OR: [{ displayLayerId: null }, { displayLayer: { deletedAt: null } }],
     };
     const [groupItems, mapItems] = await Promise.all([
       prisma.groupItem.findMany({
-        where: notDeleted,
+        where: {
+          group: { deletedAt: null },
+          AND: [
+            layerNotDeleted,
+            {
+              OR: [{ childGroupId: null }, { childGroup: { deletedAt: null } }],
+            },
+          ],
+        },
         select: {
           displayLayerId: true,
           childGroupId: true,
@@ -619,7 +639,13 @@ class LayerTreeService {
         },
       }),
       prisma.mapTreeItem.findMany({
-        where: notDeleted,
+        where: {
+          map: { deletedAt: null },
+          AND: [
+            layerNotDeleted,
+            { OR: [{ groupId: null }, { group: { deletedAt: null } }] },
+          ],
+        },
         select: { mapName: true, displayLayerId: true, groupId: true },
       }),
     ]);
@@ -654,8 +680,8 @@ class LayerTreeService {
   }
 
   /**
-   * The map's tree with its exceptions merged in, its background layers and
-   * its draw order.
+   * The map's tree with its exceptions merged in, its settings for the groups
+   * and layers in it, its background layers and its draw order.
    */
   async getMapTree(mapName: string): Promise<MapLayerTree> {
     const map = await this.requireMap(mapName);
@@ -677,11 +703,12 @@ class LayerTreeService {
       exceptions
     );
     const items = this.toNodes(refs, context, []);
-    const [background, drawOrder] = await Promise.all([
+    const [settings, background, drawOrder] = await Promise.all([
+      readSettings(map.name),
       readBackground(map.name),
       effectiveDrawOrder(map.name, items),
     ]);
-    return { mapName: map.name, items, background, drawOrder };
+    return { mapName: map.name, items, settings, background, drawOrder };
   }
 
   /**
@@ -692,8 +719,8 @@ class LayerTreeService {
    * created if the save fails.
    */
   async updateGroupTree(groupId: string, body: unknown, userId?: string) {
-    const root = await prisma.group.findUnique({
-      where: { id: groupId },
+    const root = await prisma.group.findFirst({
+      where: { id: groupId, deletedAt: null },
       select: { id: true },
     });
     if (!root) {
@@ -948,24 +975,30 @@ class LayerTreeService {
     }
     await this.assertExist(groupIds, layerIds);
 
-    // Exceptions, background and draw order are written only when sent.
+    // Exceptions, settings, background and draw order are written only when
+    // sent.
     const extras = parseMapTreeExtras(body);
     let shown: LayerTreeNode[] = [];
     let context: TreeContext | undefined;
-    if (extras.exceptions?.length) {
-      await this.assertExist(
-        new Set(
-          extras.exceptions
-            .filter((exception) => exception.type === "group")
-            .map((exception) => exception.id)
-        ),
-        new Set()
-      );
-      // The map's tree as it will be shown, with the groups it puts in others.
+    if (extras.exceptions?.length || extras.settings) {
+      if (extras.exceptions?.length) {
+        await this.assertExist(
+          new Set(
+            extras.exceptions
+              .filter((exception) => exception.type === "group")
+              .map((exception) => exception.id)
+          ),
+          new Set()
+        );
+      }
+      // The map's tree as it will be shown, with the groups it puts in others
+      // (the stored exceptions, unless new ones are sent).
       context = await this.loadContext(
         [...groupIds],
         [],
-        exceptionsByGroup(extras.exceptions)
+        extras.exceptions
+          ? exceptionsByGroup(extras.exceptions)
+          : await loadExceptions(map.name)
       );
       shown = this.toNodes(
         [...groupIds].map((id) => ({ displayLayerId: null, childGroupId: id })),

@@ -143,6 +143,9 @@ model Map {
   /// POC (layer trees): the map's exceptions to groups, and its draw order.
   groupExceptions   MapGroupException[]
   drawOrderItems    MapDrawOrderItem[]
+  /// POC (layer trees): the map's settings for the groups and layers in its tree.
+  groupSettings     MapGroupSetting[]
+  layerSettings     MapLayerSetting[]
 }
 
 /// Map theme preset for quick-access layer configurations.
@@ -293,6 +296,9 @@ model Group {
   nestedItems       GroupNestedItem[]   @relation("GroupNestedItemOwner")
   nestedIn          GroupNestedItem[]   @relation("GroupNestedItemGroup")
   nestedAs          GroupNestedItem[]   @relation("GroupNestedItemChild")
+  /// POC (layer trees): maps' settings for this group and for the layers in it.
+  mapSettings       MapGroupSetting[]
+  mapLayerSettings  MapLayerSetting[]
 }
 
 model Service {
@@ -407,6 +413,7 @@ model DisplayLayer {
   mapTreeItems                MapTreeItem[]
   mapGroupExceptions          MapGroupException[]
   mapDrawOrderItems           MapDrawOrderItem[]
+  mapLayerSettings            MapLayerSetting[]
 
   @@index([serviceId])
 }
@@ -611,6 +618,48 @@ model MapDrawOrderItem {
   displayLayer   DisplayLayer @relation(fields: [displayLayerId], references: [id], onDelete: Cascade)
 
   @@unique([mapName, displayLayerId])
+}
+
+/// POC (layer trees): a map's own settings for a group in its tree, the same
+/// wherever the group shows on the map. Only settings that differ from the
+/// defaults are stored; without a row the defaults apply.
+model MapGroupSetting {
+  id                    String  @id @default(cuid())
+  mapName               String
+  groupId               String
+  /// The group's name on this map; null shows the group's own name.
+  name                  String?
+  toggled               Boolean @default(false)
+  expanded              Boolean @default(false)
+  exclusive             Boolean @default(false)
+  infoGroupVisible      Boolean @default(false)
+  infoGroupTitle        String  @default("")
+  infoGroupText         String  @default("")
+  infoGroupUrl          String  @default("")
+  infoGroupUrlText      String  @default("")
+  infoGroupOpenDataLink String  @default("")
+  infoGroupOwner        String  @default("")
+  map                   Map     @relation(fields: [mapName], references: [name], onDelete: Cascade, onUpdate: Cascade)
+  group                 Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([mapName, groupId])
+}
+
+/// POC (layer trees): a map's own settings for a layer in a group of its tree.
+/// Only settings that differ from the defaults are stored.
+model MapLayerSetting {
+  id             String       @id @default(cuid())
+  mapName        String
+  /// The group the layer shows in.
+  groupId        String
+  displayLayerId String
+  visibleAtStart Boolean      @default(false)
+  infobox        String       @default("")
+  map            Map          @relation(fields: [mapName], references: [name], onDelete: Cascade, onUpdate: Cascade)
+  group          Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  displayLayer   DisplayLayer @relation(fields: [displayLayerId], references: [id], onDelete: Cascade)
+
+  @@unique([mapName, groupId, displayLayerId])
 }
 
 enum ServiceType {

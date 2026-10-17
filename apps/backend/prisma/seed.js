@@ -3,7 +3,11 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import fs from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
-import { importLayerTrees, importPocGroups } from "./poc-layer-tree-import.js";
+import {
+  importLayerTrees,
+  importLayerTreeSettings,
+  importPocGroups,
+} from "./poc-layer-tree-import.js";
 
 if (!process.env.PG_CONNECTION_STRING) {
   throw new Error("PG_CONNECTION_STRING must be set before seeding.");
@@ -1476,9 +1480,11 @@ async function main() {
   await seedDocuments();
 
   // POC (layer trees): mirror groups and top-level map placements into
-  // GroupItem / MapTreeItem so the new tree editor starts with content, then
-  // recreate the POC groups saved in prisma/poc-layer-tree-groups.json.
+  // GroupItem / MapTreeItem so the new tree editor starts with content, copy
+  // the maps' settings for them, then recreate the POC groups saved in
+  // prisma/poc-layer-tree-groups.json.
   await importLayerTrees(prisma);
+  await importLayerTreeSettings(prisma);
   await importPocGroups(prisma);
 
   // Seed a few test LayerInstances so the "used in maps" feature has data to display.
